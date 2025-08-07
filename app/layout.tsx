@@ -7,6 +7,7 @@ const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
   : "http://localhost:3000";
 
+//TODO: update metadata
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
   title: "Next.js and Supabase Starter Kit",
@@ -19,6 +20,7 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
+//TODO: check <head> tags
 export default function RootLayout({
   children,
 }: Readonly<{

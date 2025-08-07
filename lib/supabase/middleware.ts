@@ -39,7 +39,7 @@ export async function updateSession(request: NextRequest) {
   );
 
   //! Do not run code between createServerClient and
-  // supabase.auth.getClaims(). A simple mistake could make it very hard to debug
+  //! supabase.auth.getClaims(). A simple mistake could make it very hard to debug
   // issues with users being randomly logged out.
 
   //! IMPORTANT: If you remove getClaims() and you use server-side rendering
@@ -60,7 +60,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   //! IMPORTANT: You *must* return the supabaseResponse object as it is.
-  //TODO If you're creating a new response object with NextResponse.next() make sure to:
+  //? If you're creating a new response object with NextResponse.next() make sure to:
   // 1. Pass the request in it, like so:
   //    const myNewResponse = NextResponse.next({ request })
   // 2. Copy over the cookies, like so:
