@@ -4,31 +4,31 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 0 0% 98%;
     --foreground: 0 0% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 0 0% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
+    --primary: 348 75% 44%;
     --primary-foreground: 0 0% 98%;
     --secondary: 0 0% 96.1%;
     --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
+    --muted: 0 5% 94%;
     --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
+    --accent: 348 75% 49%;
     --accent-foreground: 0 0% 9%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 89.8%;
     --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
+    --ring: 348 75% 44%;
+    --chart-1: 348 75% 44%;
+    --chart-2: 348 55% 34%;
+    --chart-3: 348 35% 24%;
+    --chart-4: 20 75% 44%;
+    --chart-5: 340 75% 44%;
+    --radius: 0.75rem;
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -37,24 +37,24 @@
     --card-foreground: 0 0% 98%;
     --popover: 0 0% 3.9%;
     --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
+    --primary: 348 75% 49%;
+    --primary-foreground: 0 0% 98%;
     --secondary: 0 0% 14.9%;
     --secondary-foreground: 0 0% 98%;
     --muted: 0 0% 14.9%;
     --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
+    --accent: 348 75% 54%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 14.9%;
     --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --ring: 348 75% 49%;
+    --chart-1: 348 75% 49%;
+    --chart-2: 348 55% 39%;
+    --chart-3: 348 35% 29%;
+    --chart-4: 20 75% 49%;
+    --chart-5: 340 75% 49%;
   }
 }
 
@@ -65,4 +65,780 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+@layer components {
+  .hero-gradient {
+    background: linear-gradient(135deg, 
+      #c41e3a 0%, 
+      #a01729 50%, 
+      #c41e3a 100%);
+  }
+  
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+  }
+  
+  .text-gradient {
+    background: linear-gradient(135deg, 
+      #c41e3a, 
+      #a01729);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .brand-red {
+    color: #c41e3a;
+  }
+
+  .brand-red-bg {
+    background-color: #c41e3a;
+  }
+
+  .brand-red-light {
+    color: #d63851;
+  }
+
+  .brand-red-dark {
+    color: #a01729;
+  }
+
+  .brand-black {
+    color: #090103;
+  }
+
+  .brand-black-bg {
+    background-color: #090103;
+  }
+/* intégralement utilisé */
+  /* Liquid Glass Effect */
+  .liquid-glass {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .liquid-glass::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent
+    );
+    transition: left 0.8s ease;
+  }
+
+  .liquid-glass:hover::before {
+    left: 100%;
+  }
+
+  .dark .liquid-glass {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  .dark .liquid-glass::before {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.05),
+      transparent
+    );
+  }
+
+  /* Liquid Glass Header - ÉTAT SCROLLÉ AVEC BORDURE CONTRÔLÉE */
+  .liquid-glass-header {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    /* SUPPRESSION de border-bottom pour éviter la ligne blanche */
+    box-shadow: 
+      0 4px 24px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    position: relative;
+  }
+
+  /* Effet hover pour header transparent - SANS BORDURE */
+  .header-transparent:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    /* PAS de border-bottom */
+    box-shadow: 
+      0 4px 24px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark .liquid-glass-header {
+    background: rgba(0, 0, 0, 0.4);
+    /* SUPPRESSION de border-bottom pour dark mode aussi */
+    box-shadow: 
+      0 4px 24px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  /* Dark mode hover pour header transparent - SANS BORDURE */
+  .dark .header-transparent:hover {
+    background: rgba(0, 0, 0, 0.3) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    /* PAS de border-bottom */
+    box-shadow: 
+      0 4px 24px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  /* Liquid Glass Mobile Menu */
+  .liquid-glass-mobile {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 
+      0 12px 40px rgba(0, 0, 0, 0.15),
+      inset 0 2px 0 rgba(255, 255, 255, 0.3),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  .dark .liquid-glass-mobile {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 
+      0 12px 40px rgba(0, 0, 0, 0.5),
+      inset 0 2px 0 rgba(255, 255, 255, 0.15),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  /* Navigation Link Hover Effect - OPTIMISÉ POUR TOUS LES ÉTATS */
+  .nav-link-glass {
+    position: relative;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  /* Effet hover de base - SANS BLUR pour éviter de masquer le texte */
+  .nav-link-glass::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 0.5rem;
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: -1;
+  }
+
+  .nav-link-glass:hover::before {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+
+  /* Hover pour header scrollé - CONTRASTE OPTIMAL */
+  .header-scrolled .nav-link-glass:hover::before {
+    background: hsl(0 65% 50% / 0.1);
+    box-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.05),
+      inset 0 1px 0 rgba(0, 0, 0, 0.05);
+  }
+
+  /* Hover pour header transparent - CONTRASTE BLANC */
+  .nav-link-glass:hover {
+    color: white !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    transform: translateY(-1px);
+  }
+
+  /* Hover pour header scrollé - CONTRASTE ROUGE */
+  .header-scrolled .nav-link-glass:hover {
+    color: #c41e3a !important;
+    text-shadow: none;
+    font-weight: 600;
+  }
+
+  /* Dark mode adjustments */
+  .dark .nav-link-glass::before {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .dark .nav-link-glass:hover::before {
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  .dark .header-scrolled .nav-link-glass:hover::before {
+    background: #c41e3a15;
+  }
+
+  .dark .header-scrolled .nav-link-glass:hover {
+    color: #d63851 !important;
+  }
+
+  /* Ripple Effect - AMÉLIORÉ */
+  .ripple-effect {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ripple-effect::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+    pointer-events: none;
+  }
+
+  .ripple-effect:active::after {
+    width: 200px;
+    height: 200px;
+  }
+
+  /* Mobile menu hover - CONTRASTE PARFAIT */
+  .liquid-glass-mobile .nav-link-glass:hover {
+    background: #c41e3a1a !important;
+    color: #c41e3a !important;
+    font-weight: 600;
+    transform: translateX(4px);
+    border-left: 3px solid #c41e3a;
+  }
+
+  .dark .liquid-glass-mobile .nav-link-glass:hover {
+    background: #d6385115 !important;
+    color: #d63851 !important;
+    border-left-color: #d63851;
+  }
+
+  /* Active state - CONTRASTE MAXIMUM */
+  .nav-link-glass.active {
+    background: #c41e3a26;
+    color: #c41e3a !important;
+    font-weight: 700;
+    border: 1px solid #c41e3a4d;
+  }
+
+  .dark .nav-link-glass.active {
+    background: #d6385133;
+    color: #d63851 !important;
+    border-color: #d6385166;
+  }
+
+  /* SOLUTION DÉFINITIVE : Liquid Glass Button avec BORDURE CSS NATIVE */
+  .liquid-glass-black {
+    position: relative;
+    overflow: hidden;
+    /* DIMENSIONS FIXES ABSOLUES - AUCUN CHANGEMENT POSSIBLE */
+    box-sizing: border-box !important;
+    min-height: 44px !important;
+    padding: 0.75rem 1.5rem !important;
+    /* BORDURE CSS NATIVE - STABLE ET SANS CONFLIT */
+    border: 2px solid #090103 !important;
+    border-radius: 0.5rem !important;
+    /* Background noir avec transparence pour effet glass */
+    background: linear-gradient(135deg, 
+      #090103 0%, 
+      #150408 50%, 
+      #090103 100%) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    /* Texte blanc contrasté - FORCÉ */
+    color: rgba(255, 255, 255, 0.95) !important;
+    font-weight: 600 !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    /* OMBRES SANS BORDURE SIMULÉE */
+    box-shadow: 
+      0 4px 20px rgba(0, 0, 0, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.2) !important;
+    /* TRANSITION ULTRA-STABILISÉE */
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+    /* STABILISATION GPU MAXIMALE */
+    transform: translateZ(0) !important;
+    will-change: transform, box-shadow, background !important;
+    /* Alignement parfait */
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    /* ISOLATION POUR PSEUDO-ÉLÉMENTS */
+    isolation: isolate;
+    /* SUPPRESSION DE TOUT OUTLINE */
+    outline: none !important;
+  }
+
+  /* Effet shimmer noir - SANS CONFLIT */
+  .liquid-glass-black::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.15),
+      transparent
+    );
+    transition: left 0.8s ease;
+    transform: translateZ(0);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* HOVER ROUGE EN LIGHT MODE - DIMENSIONS IDENTIQUES */
+  .liquid-glass-black:hover {
+    /* Light mode: devient rouge au hover */
+    background: linear-gradient(135deg, 
+      #c41e3a 0%, 
+      #b01b33 50%, 
+      #c41e3a 100%) !important;
+    /* BORDURE IDENTIQUE - AUCUN CHANGEMENT */
+    border: 2px solid #090103 !important;
+    /* TEXTE BLANC FORCÉ AU HOVER */
+    color: rgba(255, 255, 255, 1) !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6) !important;
+    /* TRANSFORMATION STABILISÉE - MÊMES DIMENSIONS */
+    transform: translateY(-2px) translateZ(0) !important;
+    /* BOX-SHADOW MODIFIÉ SANS BORDURE */
+    box-shadow: 
+      0 6px 24px #c41e3a66,
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      inset 0 -1px 0 #c41e3a4d !important;
+  }
+
+  .liquid-glass-black:hover::before {
+    left: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
+  }
+
+  /* ACTIVE STATE ROUGE - DIMENSIONS FIXES */
+  .liquid-glass-black:active {
+    transform: translateY(-1px) translateZ(0) !important;
+    color: rgba(255, 255, 255, 1) !important;
+    /* BORDURE IDENTIQUE */
+    border: 2px solid #090103 !important;
+    /* BOX-SHADOW SANS BORDURE */
+    box-shadow: 
+      0 4px 16px #c41e3a80,
+      inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+    transition: all 0.1s ease !important;
+  }
+
+  /* Dark mode pour liquid glass noir - DIMENSIONS FIXES */
+  .dark .liquid-glass-black {
+    background: linear-gradient(135deg, 
+      #c41e3a26 0%, 
+      #c41e3a1f 50%, 
+      #c41e3a26 100%) !important;
+    /* BORDURE ROUGE EN DARK MODE */
+    border: 2px solid #c41e3a4d !important;
+    color: #d63851 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    /* BOX-SHADOW SANS BORDURE EN DARK MODE */
+    box-shadow: 
+      0 4px 20px #c41e3a33,
+      inset 0 1px 0 rgba(255, 255, 255, 0.15),
+      inset 0 -1px 0 #c41e3a26 !important;
+  }
+
+  .dark .liquid-glass-black::before {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      #c41e3a26,
+      transparent
+    );
+  }
+
+  .dark .liquid-glass-black:hover {
+    background: linear-gradient(135deg, 
+      #d6385133 0%, 
+      #c41e3a2e 50%, 
+      #d6385133 100%) !important;
+    /* BORDURE IDENTIQUE EN DARK MODE */
+    border: 2px solid #c41e3a4d !important;
+    color: #c41e3a !important;
+    transform: translateY(-2px) translateZ(0) !important;
+    /* BOX-SHADOW SANS BORDURE */
+    box-shadow: 
+      0 6px 24px #c41e3a4d,
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      inset 0 -1px 0 #d6385133 !important;
+  }
+
+  .dark .liquid-glass-black:active {
+    /* BORDURE IDENTIQUE */
+    border: 2px solid #c41e3a4d !important;
+    /* BOX-SHADOW SANS BORDURE */
+    box-shadow: 
+      0 4px 16px #c41e3a66,
+      inset 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  /* NOUVEAU : Cartes NOIRES pour section actualités en light mode */
+  .news-card-dark {
+    /* En light mode: fond noir selon spécifications */
+    background: linear-gradient(135deg, 
+      #1a0408 0%, 
+      #2a0c10 50%, 
+      #1a0408 100%);
+    border: 1px solid #1a040820;
+    color: white;
+    box-shadow: 
+      0 4px 20px rgba(26, 4, 8, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  /* Dark mode: garde le style normal */
+  .dark .news-card-dark {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    box-shadow: none;
+    color: hsl(var(--card-foreground));
+  }
+
+  /* Hover effect pour cartes noires */
+  .news-card-dark:hover {
+    background: linear-gradient(135deg, 
+      #2a0c10 0%, 
+      #3a1018 50%, 
+      #2a0c10 100%);
+    box-shadow: 
+      0 8px 32px rgba(26, 4, 8, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transform: translateY(-4px);
+  }
+
+  .dark .news-card-dark:hover {
+    background: hsl(var(--card));
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Texte des cartes noires en light mode */
+  .news-card-dark .card-title {
+    color: white !important;
+  }
+
+  .news-card-dark .card-text {
+    color: rgba(255, 255, 255, 0.8) !important;
+  }
+
+  .news-card-dark .card-date {
+    color: rgba(255, 255, 255, 0.6) !important;
+  }
+
+  /* Dark mode: couleurs normales */
+  .dark .news-card-dark .card-title,
+  .dark .news-card-dark .card-text,
+  .dark .news-card-dark .card-date {
+    color: inherit !important;
+  }
+}
+  /* NOUVEAU : Cartes NOIRES pour spectacles en light mode */
+  .shows-card-dark {
+    /* En light mode: fond noir selon spécifications */
+    background: linear-gradient(135deg, 
+      #090103 0%, 
+      #150408 50%, 
+      #090103 100%);
+    border: 1px solid #09010320;
+    color: white;
+    box-shadow: 
+      0 4px 20px rgba(9, 1, 3, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  /* Dark mode: garde le style normal */
+  .dark .shows-card-dark {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    box-shadow: none;
+    color: hsl(var(--card-foreground));
+  }
+
+  /* Hover effect pour cartes spectacles noires */
+  .shows-card-dark:hover {
+    background: linear-gradient(135deg, 
+      #150408 0%, 
+      #200610 50%, 
+      #150408 100%);
+    box-shadow: 
+      0 8px 32px rgba(9, 1, 3, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transform: translateY(-4px);
+  }
+
+  .dark .shows-card-dark:hover {
+    background: hsl(var(--card));
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Texte des cartes spectacles noires en light mode */
+  .shows-card-dark .card-title {
+    color: white !important;
+  }
+
+  .shows-card-dark .card-text {
+    color: rgba(255, 255, 255, 0.8) !important;
+  }
+
+  .shows-card-dark .card-date {
+    color: rgba(255, 255, 255, 0.6) !important;
+  }
+
+  .shows-card-dark .card-meta {
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+
+  /* Dark mode: couleurs normales */
+  .dark .shows-card-dark .card-title,
+  .dark .shows-card-dark .card-text,
+  .dark .shows-card-dark .card-date,
+  .dark .shows-card-dark .card-meta {
+    color: inherit !important;
+  }
+
+  /* Boutons adaptés pour cartes noires */
+  .shows-card-dark .btn-primary {
+    background: linear-gradient(135deg, #c41e3a 0%, #b01b33 50%, #c41e3a 100%) !important;
+    border: 1px solid #c41e3a !important;
+    color: white !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  .shows-card-dark .btn-primary:hover {
+    background: linear-gradient(135deg, #d63851 0%, #c41e3a 50%, #d63851 100%) !important;
+    box-shadow: 0 4px 16px rgba(196, 30, 58, 0.4);
+    transform: translateY(-1px);
+  }
+
+  .shows-card-dark .btn-outline {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(10px);
+  }
+
+  .shows-card-dark .btn-outline:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
+    color: white !important;
+    transform: translateY(-1px);
+  }
+
+  /* Dark mode: boutons normaux */
+  .dark .shows-card-dark .btn-primary,
+  .dark .shows-card-dark .btn-outline {
+    background: revert !important;
+    border: revert !important;
+    color: revert !important;
+    text-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .dark .shows-card-dark .btn-primary:hover,
+  .dark .shows-card-dark .btn-outline:hover {
+    background: revert !important;
+    border-color: revert !important;
+    color: revert !important;
+    box-shadow: revert !important;
+    transform: revert !important;
+  }
+
+/* Animations */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(2rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+/* Scroll smooth */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Logo styling - STABILISÉ */
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  /* Suppression de toute animation flottante */
+  transform: none !important;
+  animation: none !important;
+}
+
+.logo-image {
+  height: 2.5rem;
+  width: 2.5rem;
+  object-fit: contain;
+  filter: brightness(0.9) contrast(1.3) saturate(1.1);
+  /* Ajout du border radius */
+  border-radius: 0.5rem;
+  /* Stabilisation complète */
+  transform: none !important;
+  animation: none !important;
+  /* Ombre subtile pour donner de la profondeur */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  /* Transition douce pour les changements d'état */
+  transition: filter 0.3s ease, box-shadow 0.3s ease;
+}
+
+.logo-text {
+  font-weight: 700;
+  font-size: 1.25rem;
+  line-height: 1.2;
+  color: #c41e3a;
+  letter-spacing: -0.025em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  /* Stabilisation du texte */
+  transform: none !important;
+  animation: none !important;
+}
+
+/* Dark mode adjustments */
+.dark .logo-image {
+  filter: brightness(1.2) contrast(1.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark .logo-text {
+  color: #d63851;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Header logo specific styling - SANS ANIMATION */
+.header-scrolled .logo-container {
+  /* Pas d'animation flottante même quand scrollé */
+  transform: none !important;
+  animation: none !important;
+}
+
+.header-scrolled .logo-image {
+  filter: brightness(0.8) contrast(1.4) saturate(1.2);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+}
+
+.header-scrolled .logo-text {
+  color: #a01729;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.dark .header-scrolled .logo-image {
+  filter: brightness(1.3) contrast(1.2);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.4);
+}
+
+.dark .header-scrolled .logo-text {
+  color: #e04a63;
+}
+
+/* Hover effect subtil pour le logo */
+.logo-container:hover .logo-image {
+  filter: brightness(1.1) contrast(1.2) saturate(1.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.dark .logo-container:hover .logo-image {
+  filter: brightness(1.3) contrast(1.1) saturate(1.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+@media (max-width: 640px) {
+  .logo-image {
+    height: 2rem;
+    width: 2rem;
+  }
+  .logo-text {
+    font-size: 1.125rem;
+  }
+}
+
+/* Card improvements for better contrast */
+.card {
+  background: hsl(0 0% 100%);
+  border: 1px solid hsl(0 5% 92%);
+}
+
+.dark .card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+}
+
+/* Muted sections with subtle tint - ADAPTÉ AU NOUVEAU BACKGROUND */
+.bg-muted\/30 {
+  /* En light mode, utilise une teinte plus douce qui s'harmonise avec #fef7f8 */
+  background: linear-gradient(135deg, 
+    #fdf4f5 0%, 
+    #fcf1f2 50%, 
+    #fdf4f5 100%);
+}
+
+.dark .bg-muted\/30 {
+  background: hsl(var(--muted) / 0.3);
 }
