@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { Header } from "@/components/layout/header";
+import { Footer } from '@/components/layout/footer';
 import { EnvVarWarning } from "@/components/env-var-warning";
 import { AuthButton } from "@/components/auth-button";
 import { hasEnvVars } from "@/lib/utils";
@@ -43,6 +44,7 @@ export default function RootLayout({
             <Header authContent={!hasEnvVars ? <EnvVarWarning /> : <AuthButton />} />
             {children}
           </div>
+          <Footer />
         </ThemeProvider>
       </body>
     </html>

@@ -68,6 +68,7 @@
 }
 
 @layer components {
+  /* Hero h1 */
   .hero-gradient {
     background: linear-gradient(135deg, 
       #c41e3a 0%, 

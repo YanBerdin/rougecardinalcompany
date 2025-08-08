@@ -61,11 +61,11 @@ function CompagnieContent() {
     <div className="pt-16">
       {/* Hero Section */}
       <section className="py-20 hero-gradient text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fade-in-up">
+        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="max-sm:text-4xl text-5xl md:text-6xl xl:text-7xl font-bold mb-6 animate-fade-in-up">
             La Compagnie Rouge-Cardinal
           </h1>
-          <p className="text-xl md:text-2xl opacity-90 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <p className="max-sm:text-lg text-xl md:text-2xl opacity-90 animate-fade-in" style={{ animationDelay: '0.2s' }}>
             15 ans de passion pour les arts de la scène
           </p>
         </div>
@@ -73,27 +73,27 @@ function CompagnieContent() {
 
       {/* Histoire */}
       <section className="py-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
             <div className="animate-fade-in-up">
-              <h2 className="text-3xl font-bold mb-6">Notre Histoire</h2>
-              <p className="text-lg text-muted-foreground mb-4 leading-relaxed">
+              <h2 className="text-2xl xl:text-3xl font-bold mb-6">Notre Histoire</h2>
+              <p className="text-lg xl:text-xl text-muted-foreground mb-4 leading-relaxed">
                 Fondée en 2008 par un collectif de jeunes diplômés des grandes écoles théâtrales françaises, 
                 la compagnie Rouge-Cardinal est née d'une envie commune : créer un théâtre qui parle à notre époque 
                 tout en puisant dans la richesse du patrimoine dramatique.
               </p>
-              <p className="text-lg text-muted-foreground mb-4 leading-relaxed">
+              <p className="text-lg xl:text-xl text-muted-foreground mb-4 leading-relaxed">
                 Le nom "Rouge-Cardinal" évoque à la fois la passion qui nous anime et la noblesse de notre art. 
                 Comme le cardinal, oiseau au plumage éclatant, nous cherchons à apporter couleur et vie sur scène.
               </p>
-              <p className="text-lg text-muted-foreground leading-relaxed">
+              <p className="text-lg xl:text-xl text-muted-foreground leading-relaxed">
                 Depuis nos débuts, nous avons créé plus de 50 spectacles, tourné dans toute la France et à l'étranger, 
                 et remporté plusieurs prix prestigieux pour nos créations originales.
               </p>
             </div>
-            <div className="animate-fade-in">
+            <div className="animate-fade-in max-md:p-2">
               <div
-                className="aspect-[4/5] rounded-2xl bg-cover bg-center shadow-2xl"
+                className="aspect-[8/5] rounded-2xl bg-cover bg-center shadow-2xl"
                 style={{
                   backgroundImage: 'url(https://images.pexels.com/photos/3184421/pexels-photo-3184421.jpeg?auto=compress&cs=tinysrgb&w=800)'
                 }}
@@ -105,7 +105,7 @@ function CompagnieContent() {
             <div className="flex items-start space-x-4">
               <Quote className="h-8 w-8 text-primary flex-shrink-0 mt-1" />
               <div>
-                <blockquote className="text-xl italic text-muted-foreground mb-4">
+                <blockquote className="text-lg xl:text-xl italic text-muted-foreground mb-4">
                   "Le théâtre doit être un miroir de l'âme humaine, un lieu où l'émotion et la réflexion se rencontrent 
                   pour créer du sens et du lien entre les êtres."
                 </blockquote>
@@ -118,9 +118,9 @@ function CompagnieContent() {
 
       {/* Valeurs */}
       <section className="py-20 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Nos Valeurs</h2>
+            <h2 className="max-sm:text-2xl text-3xl font-bold mb-4">Nos Valeurs</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Les principes qui guident notre travail artistique et notre vision du théâtre
             </p>
@@ -144,7 +144,7 @@ function CompagnieContent() {
 
       {/* Équipe */}
       <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold mb-4">Notre Équipe</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -174,7 +174,7 @@ function CompagnieContent() {
 
       {/* Mission - MAINTENANT ROUGE COMME "RESTEZ INFORMÉ" */}
       <section className="py-20 hero-gradient">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold mb-6 text-white">Notre Mission</h2>
           <p className="text-xl text-white/90 mb-8 leading-relaxed">
             Créer des spectacles qui émeuvent, questionnent et rassemblent les publics autour de l'art vivant. 
