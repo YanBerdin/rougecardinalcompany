@@ -10,6 +10,7 @@ import { hasEnvVars } from "@/lib/utils";
 import { AboutPreview } from '@/components/sections/about-preview';
 import { Hero } from '@/components/sections/hero';
 import { FeaturedNews } from '@/components/sections/featured-news';
+import { UpcomingShows } from '@/components/sections/upcoming-shows';
 
 export default function Home() {
   return (
@@ -17,6 +18,7 @@ export default function Home() {
       <Hero />
       <FeaturedNews />
       <AboutPreview />
+      <UpcomingShows />
       <div className="flex-1 w-full flex flex-col gap-20 items-center">
         <div className="flex-1 flex flex-col gap-20 max-w-5xl p-5">
           <main className="flex-1 flex flex-col gap-6 px-4">

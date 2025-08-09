@@ -24,7 +24,7 @@ export function Hero() {
       cta: "Découvrir le spectacle"
     },
     {
-      title: "Saison 2024-2025",
+      title: "Saison 2025-2026",
       subtitle: "Une programmation exceptionnelle",
       description: "Quatre créations inédites vous attendent cette saison, mêlant tradition et modernité.",
       image: "https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg?auto=compress&cs=tinysrgb&w=1200",
