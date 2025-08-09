@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function AboutSkeleton() {
   return (
     <section className="py-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Content skeleton */}
           <div className="space-y-6">

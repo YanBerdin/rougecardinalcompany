@@ -15,6 +15,7 @@ const stats = [
 export function AboutPreview() {
   const [isLoading, setIsLoading] = useState(true);
 
+  // Simulate loading //TODO Remove
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
