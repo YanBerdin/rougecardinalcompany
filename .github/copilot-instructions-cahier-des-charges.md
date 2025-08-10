@@ -95,7 +95,7 @@ Association à but non lucratif dédiée à la création et à la diffusion de p
 
 - Dev local (localhost + Supabase CLI)  
 - Staging (preview Vercel)  
-- Prod (rougecardinal.fr)
+- Prod (rouge-cardinal.fr)
 
 ### 4.2. Exigences non-fonctionnelles
 
