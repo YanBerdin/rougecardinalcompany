@@ -28,10 +28,12 @@ Rouge Cardinal Company est un site web pour une compagnie de théâtre professio
 ### Fonctionnalités Clés
 
 1. Site vitrine responsive
-2. Système de réservation
-3. Gestion de contenu
-4. Authentification utilisateur
-5. Administration des spectacles et du contenu de chaque page/section
+2. Espace presse professionnel
+3. Médiathèque avec médias HD
+4. Gestion de contenu via back-office
+5. Export calendrier des événements
+6. Authentification administrateur
+7. Administration des spectacles et du contenu de chaque page/section
 
 ## Contraintes et Standards
 

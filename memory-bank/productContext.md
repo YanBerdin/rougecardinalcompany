@@ -11,15 +11,15 @@ Rouge Cardinal Company est une plateforme web moderne pour une compagnie de thé
    - Découverte des spectacles
    - Communication des actualités
 
-2. **Gestion des Réservations**
-   - Simplification du processus de réservation
-   - Réduction des erreurs de booking
-   - Suivi en temps réel des disponibilités
+2. **Valorisation du Contenu**
+   - Présentation professionnelle des productions
+   - Médiathèque organisée et accessible
+   - Mise en avant des partenaires et mécènes
 
 3. **Engagement du Public**
    - Communication directe avec le public
    - Partage du processus créatif
-   - Fidélisation des spectateurs
+   - Export du calendrier des événements
 
 ## Personas
 
@@ -55,22 +55,22 @@ Rouge Cardinal Company est une plateforme web moderne pour une compagnie de thé
 
 ## Parcours Utilisateur
 
-### Réservation de Spectacle
+### Découverte des Spectacles
 
-1. Découverte du spectacle
-2. Consultation des détails
-3. Sélection de la date
-4. Choix des places
-5. Paiement
-6. Confirmation par email
+1. Accès à la section Spectacles
+2. Consultation des fiches détaillées
+3. Visionnage des médias (photos, vidéos)
+4. Export de l'événement au calendrier
+5. Accès au lien billetterie externe
+6. Partage sur les réseaux sociaux
 
-### Consultation d'Actualités
+### Espace Presse Professionnel
 
-1. Accès au blog
-2. Filtrage par catégorie
-3. Lecture des articles
-4. Partage sur les réseaux
-5. Inscription à la newsletter
+1. Accès à l'espace presse
+2. Consultation des communiqués
+3. Téléchargement des dossiers de presse
+4. Accès à la médiathèque HD
+5. Contact via formulaire dédié
 
 ## Objectifs d'Expérience Utilisateur
 
@@ -113,23 +113,26 @@ Rouge Cardinal Company est une plateforme web moderne pour une compagnie de thé
 
 ## Roadmap Produit
 
-### Phase 1: Foundation (Actuel)
+### Phase 1: Site Vitrine (Actuel)
 
-- Site vitrine complet
-- Blog/Actualités
-- Base de données spectacles
+- Homepage et présentation de la compagnie
+- Section spectacles et productions
+- Espace presse professionnel
+- Intégration des partenaires et mécènes
 
-### Phase 2: Réservation
+### Phase 2: Gestion de Contenu
 
-- Système de réservation
-- Paiement en ligne
-- Gestion des places
+- Back-office sécurisé
+- Médiathèque professionnelle
+- Gestion des événements
+- Export calendrier (iCal)
 
-### Phase 3: Engagement
+### Phase 3: Optimisation et Analytics
 
-- Espace membre
-- Newsletter
-- Système de reviews
+- SEO et meta-tags dynamiques
+- Google Analytics / Matomo
+- Monitoring des performances
+- Documentation technique
 
 ## Contraintes Produit
 
@@ -174,7 +177,3 @@ Rouge Cardinal Company est une plateforme web moderne pour une compagnie de thé
 ## Mise à Jour
 
 Ce document doit être revu et mis à jour régulièrement pour refléter l'évolution des besoins utilisateurs et des objectifs du produit.
-
-<!-- MB:EPICS_SYNC:BEGIN -->
-(ce bloc est généré depuis memory-bank/epics/epics-map.yaml)
-<!-- MB:EPICS_SYNC:END -->

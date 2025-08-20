@@ -29,7 +29,8 @@
 - [x] Footer
 - [ ] Page des spectacles
 - [ ] Page Agenda
-- [ ] Page Presse
+- [ ] Espace Presse
+- [ ] Médiathèque professionnelle
 
 ### Intégration Backend
 
@@ -46,12 +47,12 @@
 - À faire: Filtres et recherche
 - À faire: Pagination
 
-### Système de Blog
+### Espace Presse
 
 - En cours: Structure de base
-- À faire: Éditeur de contenu
+- À faire: Médiathèque professionnelle
 - À faire: Catégorisation
-- À faire: Recherche
+- À faire: Système de téléchargement
 
 ## Problèmes Connus
 
