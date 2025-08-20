@@ -150,7 +150,3 @@ export function ComponentName() {
 2. Tests automatisés (à implémenter)
 3. Review des pull requests
 4. Déploiement automatique sur Vercel
-
-<!-- MB:EPICS_SYNC:BEGIN -->
-(ce bloc est généré depuis memory-bank/epics/epics-map.yaml)
-<!-- MB:EPICS_SYNC:END -->

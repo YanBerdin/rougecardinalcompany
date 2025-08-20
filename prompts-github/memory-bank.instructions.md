@@ -156,29 +156,6 @@ When the **update memory bank** command is triggered:
    - Read `epics-map.yaml` and, for each epic, load its associated detail file.
    - Build the desired Markdown output (tables, lists, mappings, etc.) from this data.
 
-3. **Injection rules**:  
-   - Locate the markers in target files:
-     ```
-     <!-- MB:EPICS_SYNC:BEGIN -->
-     ...
-     <!-- MB:EPICS_SYNC:END -->
-     ```
-   - Replace **only** the content between these markers with the generated output.
-   - Do **not** modify any content outside these markers.
-
-4. **File targets**:  
-   - Typical targets include `memory-bank/productContext.md`, `memory-bank/systemPatterns.md`, `memory-bank/techContext.md`, or any other file containing the markers above.
-
-5. **Preservation**:  
-   - If a target file does not contain the markers, skip it.
-   - Never overwrite or delete manual content outside the markers.
-
-6. **Version control**:  
-   - Commit changes to a separate branch or as a distinct commit for review.
-   - Ensure diffs are clear so the user can validate the update before merging.
-
-This ensures that epic updates are idempotent, reproducible, and never overwrite unrelated manual edits.
-
 ## Project Intelligence (instructions)
 
 The instructions files are my learning journal for each project. It captures important patterns, preferences, and project intelligence that help me work more effectively. As I work with you and the project, I'll discover and document key insights that aren't obvious from the code alone.

@@ -79,7 +79,3 @@ Phase 3: Optimisation et Analytics (À venir)
 - Google Analytics / Matomo
 - Monitoring des performances
 - Documentation technique
-
-<!-- MB:EPICS_SYNC:BEGIN -->
-(ce bloc est généré depuis memory-bank/epics/epics-map.yaml)
-<!-- MB:EPICS_SYNC:END -->
