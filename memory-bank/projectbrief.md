@@ -31,7 +31,7 @@ Rouge Cardinal Company est un site web pour une compagnie de théâtre professio
 2. Système de réservation
 3. Gestion de contenu
 4. Authentification utilisateur
-5. Administration des spectacles et du contenu de chaque section
+5. Administration des spectacles et du contenu de chaque page/section
 
 ## Contraintes et Standards
 
@@ -77,3 +77,7 @@ Phase 3: Optimisation et Analytics (À venir)
 - Google Analytics / Matomo
 - Monitoring des performances
 - Documentation technique
+
+<!-- MB:EPICS_SYNC:BEGIN -->
+(ce bloc est généré depuis memory-bank/epics/epics-map.yaml)
+<!-- MB:EPICS_SYNC:END -->

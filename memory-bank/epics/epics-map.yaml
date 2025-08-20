@@ -1,0 +1,31 @@
+version: 1
+generated_from: supabase_schemas@/lib/supabase/schemas
+epics:
+  - id: 14.1
+    title: Page d’Accueil
+    description: Composants et sections de la page d'accueil.
+    detailFile: memory-bank/epics/details/14.1-page-accueil(Home).md
+  - id: 14.2
+    title: Présentation de la compagnie
+    description: Pages et contenus présentant l'identité, la mission et l'équipe.
+    detailFile: memory-bank/epics/details/14.2-page-presentation-companie.md
+  - id: 14.3
+    title: Page Nos Spectacles (événements)
+    description: Liste, fiches et gestion des événements.
+    detailFile: memory-bank/epics/details/14.3-page-spectacles-(événements).md
+  - id: 14.4
+    title: Page Agenda
+    description: Calendrier interactif, filtres, billetterie et newsletter.
+    detailFile: memory-bank/epics/details/14.4-page-agenda.md
+  - id: 14.5
+    title: Page Presse
+    description: Communiqués, revues de presse et médiathèque.
+    detailFile: memory-bank/epics/details/14.5-page-presse.md
+  - id: 14.6
+    title: Contact & Newsletter
+    description: Formulaire de contact et gestion des abonnements newsletter.
+    detailFile: memory-bank/epics/details/14.6-contact-newsletter.md
+  - id: 14.7
+    title: Back-office Avancé
+    description: Authentification, dashboard, CRUD, rôles, logs, alertes et toggles d’affichage.
+    detailFile: memory-bank/epics/details/14.7-back‑office.md

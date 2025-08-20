@@ -236,3 +236,9 @@ export interface Plugin {
 ## Mise à Jour des Patterns
 
 Ces patterns sont mis à jour au fur et à mesure que le projet évolue. Chaque nouveau pattern significatif doit être documenté ici pour maintenir la cohérence du code.
+
+## Cartographie Épiques ↔ Schéma SQL
+
+<!-- MB:EPICS_SYNC:BEGIN -->
+(ce bloc est généré depuis memory-bank/epics/epics-map.yaml, avec tables, RLS, triggers)
+<!-- MB:EPICS_SYNC:END -->

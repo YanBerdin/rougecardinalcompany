@@ -174,3 +174,7 @@ Rouge Cardinal Company est une plateforme web moderne pour une compagnie de thé
 ## Mise à Jour
 
 Ce document doit être revu et mis à jour régulièrement pour refléter l'évolution des besoins utilisateurs et des objectifs du produit.
+
+<!-- MB:EPICS_SYNC:BEGIN -->
+(ce bloc est généré depuis memory-bank/epics/epics-map.yaml)
+<!-- MB:EPICS_SYNC:END -->

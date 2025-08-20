@@ -1070,6 +1070,96 @@ Pour garantir la sécurité du site et éviter les failles les plus courantes (I
 | Accueil-06 | Visiteur | Voir mentions légales, RGPD et plan du site | Conformité juridique |
 | Accueil-07 | Visiteur | Voir les partenaires de la compagnie. | Promouvoir et remercier les partenaires |
 
+#### Epic : Page d’Accueil (Home page)
+
+##### "Bannière dynamique"
+
+**As a** visiteur  
+**I want** voir logo + menu responsive  
+**So that** je navigue facilement
+
+*Acceptance Criteria:*
+
+- [ ] Affichage logo et menu au chargement  
+- [ ] Menu cliquable et accessible mobile
+
+---
+
+##### "Animation immersive"
+
+**As a** visiteur  
+**I want** une animation fluide non bloquante  
+**So that** l’accueil soit impactant
+
+*Acceptance Criteria:*
+
+- [ ] Démarrage auto sans freeze  
+- [ ] Compatibilité navigateurs principaux
+
+---
+
+##### "Fil d’actualités"
+
+**As a** visiteur  
+**I want** voir les dernières actus  
+**So that** je reste informé
+
+*Acceptance Criteria:*
+
+- [ ] Tri antéchronologique  
+- [ ] Chaque actus = titre + date + lien détail
+
+---
+
+##### "Présentation courte"
+
+**As a** visiteur  
+**I want** un texte mission clair  
+**So that** je sache à quoi sert la compagnie
+
+*Acceptance Criteria:*
+
+- [ ] Administrable via back-office  
+- [ ] Affichage responsive
+
+---
+
+##### "Liens réseaux sociaux"
+
+**As a** visiteur  
+**I want** accéder aux réseaux officiels  
+**So that** je suive l’actualité
+
+*Acceptance Criteria:*
+
+- [ ] Icônes cliquables, nouvel onglet  
+- [ ] Logos officiels
+
+---
+
+##### "Footer légal"
+
+**As a** visiteur  
+**I want** consulter mentions légales, RGPD, plan du site  
+**So that** je sois informé
+
+*Acceptance Criteria:*
+
+- [ ] Liens visibles et fonctionnels
+
+---
+
+##### "Section partenaires"
+
+**As a** visiteur  
+**I want** voir logos partenaires  
+**So that** je les découvre
+
+*Acceptance Criteria:*
+
+- [ ] Filtrage partenaires actifs  
+- [ ] Lien vers leur site
+
 ### 14.2. PAge présentation de la compagnie
 
 | ID | En tant que | Je veux | Afin de |
@@ -1077,6 +1167,66 @@ Pour garantir la sécurité du site et éviter les failles les plus courantes (I
 | Presentation-01 | Visiteur | Lire la page "La compagnie" avec histoire, mission, équipe | Comprendre l'identité et les valeurs |
 | Presentation-02 | Admin | Modifier le contenu de présentation via le back-office | Maintenir les informations à jour |
 | Presentation-03 | Admin | Gérer les membres de l'équipe (CRUD) | Présenter l'équipe actuelle |
+
+#### Epic : Présentation de la compagnie
+
+##### "Lire la présentation complète"
+
+**As a** visiteur  
+**I want** lire la page "La compagnie" avec histoire, mission, équipe  
+**So that** je comprenne l'identité et les valeurs
+
+*Acceptance Criteria:*
+
+- [ ] GIVEN : que je suis sur la page "La compagnie"  
+- [ ] WHEN : j’affiche la page  
+- [ ] THEN : l’histoire, la mission et la présentation de l’équipe sont visibles  
+- [ ] AND : la mise en page est responsive et accessible
+
+---
+
+##### "Modifier le contenu de présentation"
+
+**As an** admin  
+**I want** modifier le contenu via le back-office  
+**So that** je maintienne les informations à jour
+
+*Acceptance Criteria:*
+
+- [ ] Connexion admin requise  
+- [ ] Sauvegarde en base avec confirmation  
+- [ ] Mise à jour immédiate sur le site  
+- [ ] Journalisation des modifications
+
+---
+
+##### "Gérer les membres de l'équipe"
+
+**As an** admin  
+**I want** CRUD complet des membres d’équipe  
+**So that** je présente la composition actuelle
+
+*Acceptance Criteria:*
+
+- [ ] Ajout avec photo, nom, rôle  
+- [ ] Modification des infos existantes  
+- [ ] Suppression effective  
+- [ ] Tri personnalisable
+
+##### "Toggle affichage sections À la une et Partenaires"
+
+**As an** admin  
+**I want** disposer dans le back‑office d’un interrupteur (toggle) pour afficher ou masquer la section "À la une" et la section "Partenaires"  
+**So that** je contrôle leur présence sur le site sans les supprimer du contenu
+
+*Acceptance Criteria:*
+
+- [ ] GIVEN : que je suis connecté en admin  
+- [ ] WHEN : j’accède à la gestion de la présentation dans le back‑office  
+- [ ] THEN : deux toggles distincts sont visibles : un pour "À la une", un pour "Partenaires"  
+- [ ] AND : chaque toggle permet d’activer ou désactiver l’affichage sur le site public  
+- [ ] AND : l’état du toggle est sauvegardé en base et appliqué en front immédiatement  
+- [ ] AND : la modification est tracée dans le journal d’audit
 
 ### 14.3. Page Nos Spectacles (événements)
 
@@ -1088,6 +1238,97 @@ Pour garantir la sécurité du site et éviter les failles les plus courantes (I
 | Spectacles-04 | Visiteur | Cliquer sur "Voir l'agenda" depuis une fiche | Accéder aux dates |
 | Spectacles-05 | Admin | Gérer CRUD des événements (médias, date, lieux, description)  | Maintenir la base à jour |
 | Spectacles-06 | Admin | Voir l'historique des modifications | Traçabilité des changements |
+
+#### Epic : Page Nos Spectacles (événements)
+
+##### "Voir les événements à l'affiche"
+
+**As a** visiteur  
+**I want** voir la liste des événements "À l'affiche" avec image et titre  
+**So that** je découvre les événements en cours
+
+*Acceptance Criteria:*
+
+- [ ] GIVEN : que des événements "À l'affiche" existent en base  
+- [ ] WHEN : j’accède à la page "Nos Spectacles"  
+- [ ] THEN : la liste affiche chaque événement avec son image et son titre  
+- [ ] AND : l’ordre est chronologique ou selon priorité définie  
+- [ ] AND : l’affichage est responsive
+
+---
+
+##### "Consulter la fiche complète d'un événement"
+
+**As a** visiteur  
+**I want** consulter la fiche complète d’un événement  
+**So that** je décide de cliquer vers le lien de réservation
+
+*Acceptance Criteria:*
+
+- [ ] GIVEN : que je clique sur un événement dans la liste  
+- [ ] WHEN : la fiche s’ouvre  
+- [ ] THEN : elle affiche image, titre, description, lieu, dates, horaires, tarifs  
+- [ ] AND : un bouton ou lien mène vers la réservation externe si disponible
+
+---
+
+##### "Parcourir les événements avec filtres avancés"
+
+**As a** visiteur  
+**I want** filtrer les événements par critères avancés (date, lieu, type, statut)  
+**So that** j’explore facilement l’historique ou les en cours
+
+*Acceptance Criteria:*
+
+- [ ] GIVEN : que des filtres sont disponibles  
+- [ ] WHEN : je sélectionne un ou plusieurs filtres  
+- [ ] THEN : la liste est mise à jour instantanément avec les résultats correspondants  
+- [ ] AND : possibilité de réinitialiser les filtres
+
+---
+
+##### "Lien vers l'agenda depuis une fiche"
+
+**As a** visiteur  
+**I want** cliquer sur "Voir l'agenda" depuis la fiche d’un événement  
+**So that** j’accède aux dates correspondantes
+
+*Acceptance Criteria:*
+
+- [ ] GIVEN : que la fiche événement affiche un bouton "Voir l'agenda"  
+- [ ] WHEN : je clique dessus  
+- [ ] THEN : je suis redirigé vers l’agenda filtré sur cet événement
+
+---
+
+##### "CRUD des événements"
+
+**As an** admin  
+**I want** créer, lire, mettre à jour et supprimer des événements avec médias, date, lieux, description  
+**So that** je maintienne la base à jour
+
+*Acceptance Criteria:*
+
+- [ ] Formulaire complet avec champs : titre, description, images, date(s), lieu, statut "À l'affiche"/archivé  
+- [ ] Upload images avec prévisualisation  
+- [ ] Validation des champs obligatoires  
+- [ ] Suppression avec confirmation  
+- [ ] Changements sauvegardés et visibles immédiatement
+
+---
+
+##### "Voir l'historique des modifications"
+
+**As an** admin  
+**I want** consulter l’historique des modifications des événements  
+**So that** je garde une traçabilité des changements
+
+*Acceptance Criteria:*
+
+- [ ] Liste horodatée des modifications (création, édition, suppression)  
+- [ ] Indication de l’utilisateur ayant effectué l’action  
+- [ ] Détail des champs modifiés  
+- [ ] Export possible en CSV/PDF
 
 ### 14.4. Page Agenda
 
@@ -1102,6 +1343,127 @@ Pour garantir la sécurité du site et éviter les failles les plus courantes (I
 | Agenda-07 | Visiteur | Voir CTA d'abonnement à la newsletter | Recevoir la newsletter |
 | Agenda-08 | Admin| Toggle dans BackOffice pour afficher ou non la section "Abonnement Newsletter" sur Page Agenda | Pouvoir mettre en avant ou pas la Newsletter |
 
+#### Epic : Page Agenda
+
+##### "Voir un calendrier interactif responsive"
+
+**As a** visiteur  
+**I want** voir un calendrier interactif responsive  
+**So that** je planifie ma venue
+
+*Acceptance Criteria:*
+
+- [ ] GIVEN : que je suis sur la page Agenda  
+- [ ] WHEN : le calendrier se charge  
+- [ ] THEN : il est affiché en format desktop et mobile de façon responsive  
+- [ ] AND : je peux naviguer par mois/semaine/jour  
+- [ ] AND : les événements sont visibles dans les cases correspondantes avec titre court
+
+---
+
+##### "Filtrer par type d'événement"
+
+**As a** visiteur  
+**I want** filtrer le calendrier par type d’événement (ex : concert, spectacle, exposition)  
+**So that** j’accède plus rapidement à l’info qui m’intéresse
+
+*Acceptance Criteria:*
+
+- [ ] Liste de filtres accessible et claire  
+- [ ] Sélection d’un ou plusieurs types d’événement met à jour l’affichage du calendrier instantanément  
+- [ ] Bouton "Réinitialiser" pour revenir à l’affichage complet
+
+---
+
+##### "Télécharger un fichier .ics"
+
+**As a** visiteur  
+**I want** télécharger un fichier .ics pour un événement  
+**So that** je l’ajoute facilement à mon propre calendrier
+
+*Acceptance Criteria:*
+
+- [ ] Sur chaque événement : bouton ou lien "Ajouter à mon calendrier"  
+- [ ] Clic sur le bouton télécharge un fichier .ics compatible (Google, Outlook, Apple Calendar)  
+- [ ] Le fichier contient au minimum : titre, date/heure, lieu, description courte, lien vers billetterie
+
+---
+
+##### "Accéder aux liens billetterie externes"
+
+**As a** visiteur  
+**I want** accéder depuis l’agenda aux liens de billetterie  
+**So that** j’achète mes billets rapidement
+
+*Acceptance Criteria:*
+
+- [ ] GIVEN : qu’un lien billetterie est configuré pour un événement  
+- [ ] WHEN : je clique sur "Billetterie"  
+- [ ] THEN : je suis redirigé vers le site externe dans un nouvel onglet  
+- [ ] AND : si aucun lien n’est disponible, le bouton est désactivé ou absent
+
+---
+
+##### "CRUD des événements via BackOffice"
+
+**As an** admin  
+**I want** gérer la création, lecture, mise à jour, suppression des événements (médias, date, lieux, description)  
+**So that** je maintienne l’agenda à jour
+
+*Acceptance Criteria:*
+
+- [ ] Formulaire avec champs : titre, description, images, dates/horaires, lieu, type, statut  
+- [ ] Upload d’images avec prévisualisation  
+- [ ] Validation des champs requis  
+- [ ] Suppression avec confirmation  
+- [ ] Sauvegarde avec retour visuel de succès/échec
+
+---
+
+##### "CRUD des liens billetterie via BackOffice"
+
+**As an** admin  
+**I want** gérer les liens billetterie pour chaque événement  
+**So that** ils soient accessibles aux visiteurs
+
+*Acceptance Criteria:*
+
+- [ ] Champ dédié au lien billetterie dans la fiche événement  
+- [ ] Vérification de format d’URL  
+- [ ] Possibilité d’ajouter, modifier ou supprimer le lien  
+- [ ] Sauvegarde et mise à jour immédiate côté front
+
+---
+
+##### "Voir CTA abonnement newsletter"
+
+**As a** visiteur  
+**I want** voir un appel à l’action pour m’abonner à la newsletter  
+**So that** je reste informé des prochains événements
+
+*Acceptance Criteria:*
+
+- [ ] Bloc CTA visible sur la page Agenda (titre, texte court, champ email, bouton)  
+- [ ] Formulaire envoie l’email vers le service newsletter configuré  
+- [ ] Message de confirmation après inscription réussie
+
+---
+
+##### "Toggle affichage CTA newsletter dans BackOffice"
+
+**As an** admin  
+**I want** activer ou désactiver l’affichage de la section "Abonnement Newsletter"  
+**So that** je choisis de la mettre en avant ou non
+
+*Acceptance Criteria:*
+
+- [ ] Interrupteur (toggle) disponible dans BackOffice, section Paramètres Agenda  
+- [ ] WHEN : le toggle est activé  
+- [ ] THEN : la section newsletter apparaît côté front  
+- [ ] WHEN : il est désactivé  
+- [ ] THEN : la section n’est pas affichée  
+- [ ] Changement visible immédiatement sans redéploiement
+
 ### 14.5. Page Presse
 
 | ID | En tant que | Je veux | Afin de |
@@ -1111,6 +1473,84 @@ Pour garantir la sécurité du site et éviter les failles les plus courantes (I
 | Presse-03 | Visiteur | Accéder à la médiathèque HD | Illustrer mes articles |
 | Presse-04 | Admin | Gérer CRUD des communiqués et revues | Centraliser gestion presse |
 | Presse-05 | Admin | Uploader et organiser la médiathèque | Organisation des ressources |
+
+#### Epic : Page Presse
+
+##### "Télécharger les communiqués de presse (PDF)"
+
+**As a** visiteur  
+**I want** télécharger les communiqués de presse au format PDF  
+**So that** j'accède aux documents officiels
+
+*Acceptance Criteria:*
+
+- [ ] GIVEN : qu'un ou plusieurs communiqués sont disponibles  
+- [ ] WHEN : j'affiche la page Presse  
+- [ ] THEN : chaque communiqué apparaît avec son titre, date, résumé  
+- [ ] AND : un bouton "Télécharger" déclenche le téléchargement direct du PDF  
+- [ ] AND : le lien ouvre le fichier dans un nouvel onglet si configuré ainsi
+
+---
+
+##### "Parcourir revues de presse"
+
+**As a** visiteur  
+**I want** voir la revue de presse (articles, vidéos)  
+**So that** je découvre les retombées médiatiques
+
+*Acceptance Criteria:*
+
+- [ ] Liste claire avec vignette, titre, média/source, date de publication  
+- [ ] Les articles cliquables ouvrent le lien externe dans un nouvel onglet  
+- [ ] Les vidéos intégrées peuvent être lues directement sur la page (si autorisé)  
+- [ ] Filtre ou tri possible (par date, type de média)
+
+---
+
+##### "Accéder à la médiathèque HD"
+
+**As a** visiteur  
+**I want** accéder à une médiathèque HD  
+**So that** j'utilise des visuels officiels pour illustrer mes articles
+
+*Acceptance Criteria:*
+
+- [ ] Accès clair via bouton ou lien depuis la page Presse  
+- [ ] Galerie HD avec aperçu + option de téléchargement en taille originale  
+- [ ] Mention des droits d’utilisation et crédits photo  
+- [ ] Classement ou filtres par événement / thématique
+
+---
+
+##### "CRUD communiqués et revues"
+
+**As an** admin  
+**I want** créer, lire, mettre à jour, supprimer les communiqués et revues de presse  
+**So that** je centralise la gestion presse
+
+*Acceptance Criteria:*
+
+- [ ] Formulaire d’édition avec champs : titre, date, résumé, lien/URL ou fichier PDF, type (communiqué/revue)  
+- [ ] Validation des champs requis  
+- [ ] Upload de PDF avec contrôle de format et taille  
+- [ ] Suppression avec confirmation  
+- [ ] Changements visibles immédiatement côté front
+
+---
+
+##### "Uploader et organiser la médiathèque"
+
+**As an** admin  
+**I want** uploader et organiser la médiathèque HD  
+**So that** je structure les ressources
+
+*Acceptance Criteria:*
+
+- [ ] Upload d’images HD (JPG, PNG) avec prévisualisation  
+- [ ] Classement par catégories / tags (ex : événement, type de média)  
+- [ ] Édition des métadonnées (titre, description, crédits, droits)  
+- [ ] Suppression avec confirmation  
+- [ ] Réorganisation possible par glisser-déposer
 
 ### 14.6. Page Contact & Newsletter
 
@@ -1123,6 +1563,140 @@ Pour garantir la sécurité du site et éviter les failles les plus courantes (I
 | Newsletter-02 | Abonné | Me désinscrire facilement | Exercer mon droit |
 | Newsletter-03 | Admin | Exporter liste des abonnés (CSV) | Gérer campagnes email |
 | Newsletter-04 | Admin | Voir statistiques d'abonnement | Mesurer l'engagement |
+
+#### Epic : Contact & Newsletter
+
+##### "Formulaire de contact sécurisé"
+
+**As a** visiteur  
+**I want** remplir un formulaire sécurisé  
+**So that** je puisse poser une question ou faire une demande à l'équipe
+
+*Acceptance Criteria:*
+
+- [ ] GIVEN : que je suis sur la page Contact  
+- [ ] WHEN : j'affiche le formulaire  
+- [ ] THEN : je vois les champs obligatoires : prénom, nom, email, téléphone (optionnel), motif, sujet, message, case RGPD  
+- [ ] AND : un captcha anti‑spam est présent et fonctionnel  
+- [ ] AND : le bouton d’envoi est désactivé tant que tous les champs obligatoires ne sont pas valides  
+- [ ] AND : les données sont transmises en HTTPS
+
+---
+
+##### "Accusé de réception automatique"
+
+**As a** visiteur  
+**I want** recevoir un accusé de réception automatique après envoi du formulaire  
+**So that** je sois certain que ma demande a été prise en compte
+
+*Acceptance Criteria:*
+
+- [ ] GIVEN : que j’ai soumis un formulaire valide  
+- [ ] WHEN : l’envoi est confirmé côté serveur  
+- [ ] THEN : un email automatique est envoyé à l’adresse indiquée, reprenant les informations soumises et les délais de réponse estimés
+
+---
+
+##### "Consulter et traiter les messages reçus"
+
+**As an** admin  
+**I want** consulter et traiter les messages reçus via le formulaire  
+**So that** je gère efficacement les demandes
+
+*Acceptance Criteria:*
+
+- [ ] Interface back‑office listant les messages avec tri et filtres (date, motif, statut)  
+- [ ] Possibilité de marquer un message comme traité / en cours / en attente  
+- [ ] Consultation du détail complet d’un message  
+- [ ] Journalisation de l’ouverture et de l’état
+
+---
+
+##### "Coordonnées visibles sur la page"
+
+**As a** visiteur  
+**I want** voir les coordonnées de la compagnie (email, téléphone, adresse, horaires, contacts spécialisés)  
+**So that** je puisse contacter directement la bonne personne
+
+*Acceptance Criteria:*
+
+- [ ] Affichage dans une section dédiée avec icônes correspondantes  
+- [ ] Email et téléphone cliquables (mailto: / tel:)  
+- [ ] Mise à jour dynamique si les données changent côté back‑office
+
+---
+
+##### "CRUD Coordonnées"
+
+**As an** admin  
+**I want** ajouter / modifier / supprimer les coordonnées affichées sur la page Contact  
+**So that** elles restent à jour
+
+*Acceptance Criteria:*
+
+- [ ] Formulaire back‑office complet avec champs : Nom de la compagnie, adresse, email, téléphone, horaires, contacts spécialisés (email presse)
+- [ ] Validation des champs obligatoires  
+- [ ] Suppression avec confirmation  
+- [ ] Historisation dans `audit_logs`  
+- [ ] Changement visible immédiatement côté front
+
+---
+
+##### "Inscription newsletter avec double opt‑in"
+
+**As a** visiteur  
+**I want** m’inscrire avec mon email via le formulaire newsletter  
+**So that** je reçoive les actualités de la compagnie
+
+*Acceptance Criteria:*
+
+- [ ] GIVEN : que je suis sur la page Contact ou un autre emplacement intégrant le module newsletter  
+- [ ] WHEN : je saisis mon email et clique sur "S'abonner"  
+- [ ] THEN : un email de confirmation est envoyé (double opt‑in RGPD)  
+- [ ] AND : l’abonnement n’est effectif qu’après clic sur le lien de confirmation  
+- [ ] AND : un lien de désinscription est présent dans chaque envoi
+
+---
+
+##### "Désinscription newsletter"
+
+**As an** abonné  
+**I want** me désinscrire facilement  
+**So that** j’exerce mon droit de retrait
+
+*Acceptance Criteria:*
+
+- [ ] Lien de désinscription unique présent dans chaque email  
+- [ ] Confirmation de désinscription affichée côté front  
+- [ ] Email supprimé ou marqué comme "désinscrit" en base de données
+
+---
+
+##### "Exporter la liste des abonnés"
+
+**As an** admin  
+**I want** exporter la liste des abonnés au format CSV  
+**So that** je puisse gérer mes campagnes email dans un outil externe
+
+*Acceptance Criteria:*
+
+- [ ] Bouton "Exporter CSV" dans le back‑office newsletter  
+- [ ] Fichier CSV contenant : email, date d’inscription, statut (actif/désinscrit)  
+- [ ] Export limité aux administrateurs
+
+---
+
+##### "Voir statistiques d’abonnement"
+
+**As an** admin  
+**I want** consulter les statistiques d’abonnement newsletter  
+**So that** je mesure l’engagement
+
+*Acceptance Criteria:*
+
+- [ ] Graphiques et chiffres clés (abonnés actifs, nouveaux abonnés, désinscriptions)  
+- [ ] Filtre par période  
+- [ ] Données actualisées en temps réel ou via rafraîchissement manuel
 
 ### 14.7. Back-office Avancé
 
@@ -1139,6 +1713,170 @@ Pour garantir la sécurité du site et éviter les failles les plus courantes (I
 | BO-09 | Administrateur| Choisir d'afficher ou non la section "A la Une" sur Page d'Accueil | Pouvoir mettre en avant ou pas les prochains évènements |
 | BO-10 | Administrateur| Choisir d'afficher ou non la section "Nos partenaires" sur la Page d'Accueil.| Pouvoir mettre en avant ou pas les partenaires. |
 | BO-11 | Administrateur| Toggle pour afficher ou non la section "Abonnement Newsletter" sur Page Agenda | Pouvoir mettre en avant ou pas la Newsletter |
+
+#### Epic : Back‑office
+
+##### "Authentification sécurisée"
+
+**As an** administrateur  
+**I want** me connecter avec une authentification sécurisée  
+**So that** je sécurise l'accès au back‑office
+
+*Acceptance Criteria:*
+
+- [ ] Page de login avec champs identifiant et mot de passe  
+- [ ] Mots de passe chiffrés en base  
+- [ ] Support de l’authentification à deux facteurs (2FA)  
+- [ ] Message d’erreur clair en cas d’échec  
+- [ ] Déconnexion automatique après période d’inactivité configurable  
+
+---
+
+##### "Dashboard avec statistiques"
+
+**As an** administrateur  
+**I want** voir un dashboard avec statistiques  
+**So that** j’ai une vue d’ensemble de l’activité
+
+*Acceptance Criteria:*
+
+- [ ] Indicateurs clés : nombre d’événements à venir, réservations, nouveaux médias, dernières connexions  
+- [ ] Graphiques interactifs (barres, lignes, camembert)  
+- [ ] Données actualisées en temps réel ou via refresh manuel  
+- [ ] Filtrage des statistiques par période  
+
+---
+
+##### "CRUD Spectacles, événements, presse"
+
+**As an** éditeur  
+**I want** gérer Spectacles, événements et presse via interface intuitive  
+**So that** je travaille en autonomie
+
+*Acceptance Criteria:*
+
+- [ ] Interface unifiée avec recherche et filtres  
+- [ ] Formulaire clair avec champs spécifiques selon type de contenu  
+- [ ] Validation côté front et back  
+- [ ] Aperçu avant publication  
+- [ ] Historique des modifications accessible
+
+---
+
+##### "Gestion médias avec prévisualisation"
+
+**As an** éditeur  
+**I want** uploader et gérer les médias avec prévisualisation  
+**So that** je garde une organisation claire
+
+*Acceptance Criteria:*
+
+- [ ] Drag‑and‑drop pour upload  
+- [ ] Miniatures générées automatiquement  
+- [ ] Affichage des métadonnées (taille, format, date d’upload)  
+- [ ] Classement par dossier ou tags  
+- [ ] Suppression ou remplacement facile d’un média
+
+---
+
+##### "Gestion des rôles utilisateurs"
+
+**As an** administrateur  
+**I want** gérer les rôles admin/éditeur  
+**So that** je contrôle les accès
+
+*Acceptance Criteria:*
+
+- [ ] Liste des utilisateurs avec rôle et statut actif/inactif  
+- [ ] Modification des rôles à tout moment  
+- [ ] Attribution de permissions spécifiques par rôle  
+- [ ] Journalisation des changements de rôle
+
+---
+
+##### "Logs d’audit détaillés"
+
+**As an** administrateur  
+**I want** consulter les logs d’audit détaillés  
+**So that** je garde la traçabilité des actions
+
+*Acceptance Criteria:*
+
+- [ ] Liste horodatée des actions (login, création, modification, suppression)  
+- [ ] Filtre par utilisateur, type d’action, période  
+- [ ] Export CSV/PDF  
+- [ ] Conservation des logs selon politique définie
+
+---
+
+##### "Alertes de sécurité"
+
+**As an** administrateur  
+**I want** recevoir des alertes de sécurité  
+**So that** je surveille l’intégrité du système
+
+*Acceptance Criteria:*
+
+- [ ] Notifications par email ou tableau de bord en cas de tentatives suspectes  
+- [ ] Journalisation de l’alerte dans les logs  
+- [ ] Configuration du type d’événement déclencheur
+
+---
+
+##### "Interface responsive"
+
+**As a** utilisateur  
+**I want** bénéficier d'une interface responsive  
+**So that** je puisse gérer le back‑office depuis tout appareil
+
+*Acceptance Criteria:*
+
+- [ ] Affichage adapté aux mobiles, tablettes et desktops  
+- [ ] Menus et formulaires utilisables au tactile  
+- [ ] Performances optimisées sur tous formats
+
+---
+
+##### "Toggle section À la Une"
+
+**As an** administrateur  
+**I want** activer/désactiver la section "À la Une" sur la page d’accueil  
+**So that** je décide de mettre en avant ou non les prochains événements
+
+*Acceptance Criteria:*
+
+- [ ] Toggle dans paramètres du back‑office  
+- [ ] Activation = section affichée sur page d’accueil  
+- [ ] Désactivation = section masquée  
+- [ ] Modification visible immédiatement
+
+---
+
+##### "Toggle section Nos partenaires"
+
+**As an** administrateur  
+**I want** activer/désactiver la section "Nos partenaires" sur la page d’accueil  
+**So that** je choisis de la mettre en avant ou non
+
+*Acceptance Criteria:*
+
+- [ ] Toggle disponible dans les paramètres du back‑office  
+- [ ] Effet immédiat côté front  
+- [ ] Historique des changements
+
+---
+
+##### "Toggle section Abonnement Newsletter (Page Agenda)"
+
+**As an** administrateur  
+**I want** activer/désactiver la section newsletter sur la page Agenda  
+**So that** je contrôle sa visibilité
+
+*Acceptance Criteria:*
+
+- [ ] Toggle distinct pour la section newsletter  
+- [ ] Effet immédiat côté front  
+- [ ] Cohérence avec *Agenda‑08*
 
 ---
 
