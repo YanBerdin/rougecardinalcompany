@@ -16,26 +16,84 @@ Ce projet est un site web Next.js (TypeScript, React 19, Supabase, Tailwind CSS)
 - /
   - app/
     - auth/
+      - confirm/
+      - error/
+      - forgot-password/
+      - login/
+      - sign-up/
+      - sign-up-success/
+      - update-password/
     - protected/
+      - layout.tsx
+      - page.tsx
     - compagnie/
+      - client-page.tsx
+      - layout.tsx
+      - page.tsx
     - layout.tsx
     - page.tsx
     - globals.css
   - components/
     - ui/
+      - badge.tsx
+      - button.tsx
+      - card.tsx
+      - checkbox.tsx
+      - dropdown-menu.tsx
+      - input.tsx
+      - label.tsx
+      - skeleton.tsx
     - sections/
+      - about-preview.tsx
+      - featured-news.tsx
+      - hero.tsx
+      - upcoming-shows.tsx
     - layout/
+      - footer.tsx
+      - header.tsx
     - tutorial/
+      - code-block.tsx
+      - connect-supabase-steps.tsx
+      - fetch-data-steps.tsx
+      - sign-up-user-steps.tsx
+      - tutorial-step.tsx
     - skeletons/
+      - ShowsSkeleton.tsx
+      - about-skeleton.tsx
+      - hero-skeleton.tsx
+      - news-skeleton.tsx
+      - page-skeleton.tsx
     - ...
   - lib/
     - supabase/
       - client.ts
+      - middleware.ts
+      - schemas/
+        - 00_extensions.sql
+        - 01_tables_core.sql
+        - 02_tables_joins.sql
+        - 03_functions_triggers.sql
+        - 04_indexes_fulltext.sql
+        - 05_rls_policies.sql
+        - 06_comments_and_metadata.sql
+        - 07_seed.sql
       - server.ts
     - utils.ts
   - memory-bank/
     - activeContext.md
+    - architecture/
+      - Project_Architecture_Blueprint.md
+      - Project_Folders_Structure_Blueprint.md
     - epics/
+      - epics-map.yaml
+      - details/
+        - 14.1-page-accueil(Home).md
+        - 14.2-page-presentation-companie.md
+        - 14.3-page-spectacles-(événements).md
+        - 14.4-page-agenda.md
+        - 14.5-page-presse.md
+        - 14.6-contact-newsletter.md
+        - 14.7-back‑office.md
     - productContext.md
     - progress.md
     - projectbrief.md
