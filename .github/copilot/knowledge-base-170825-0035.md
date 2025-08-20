@@ -1740,7 +1740,7 @@ Pour garantir la sécurité du site et éviter les failles les plus courantes (I
 
 *Acceptance Criteria:*
 
-- [ ] Indicateurs clés : nombre d’événements à venir, réservations, nouveaux médias, dernières connexions  
+- [ ] Indicateurs clés : nombre d’événements à venir, nouveaux médias, dernières connexions  
 - [ ] Graphiques interactifs (barres, lignes, camembert)  
 - [ ] Données actualisées en temps réel ou via refresh manuel  
 - [ ] Filtrage des statistiques par période  

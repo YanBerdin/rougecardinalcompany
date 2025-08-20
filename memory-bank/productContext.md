@@ -99,10 +99,9 @@ Rouge Cardinal Company est une plateforme web moderne pour une compagnie de thé
 
 ### Métriques Clés
 
-1. Taux de conversion des réservations
-2. Temps moyen sur le site
-3. Taux de rebond
-4. Engagement sur le blog
+1. Temps moyen sur le site
+2. Taux de rebond
+3. Engagement sur le blog
 
 ### Objectifs Qualitatifs
 

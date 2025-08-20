@@ -13,6 +13,8 @@
 - [TASK006] Médiathèque professionnelle (photos HD, vidéos)
 - [TASK007] Tests automatisés et monitoring
 - [TASK008] Configuration des redirections vers billetterie externe
+- [TASK009] Gestion des partenaires et mécènes
+- [TASK010] Mise en place des toggles d'affichage dans le back-office
 
 ## Terminé
 
