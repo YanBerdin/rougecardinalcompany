@@ -40,6 +40,9 @@ Priority context directories to scan:
 - `/components`: Reusable UI components
 - `/lib/supabase`: Supabase integration code
 - `/memory-bank`: Project documentation and context
+- `/.github/.copilot/`: Copilot-specific configuration and instruction files
+
+Additional context available via MCP GitHub and MCP Supabase
 
 ## Codebase Scanning Instructions
 
@@ -145,6 +148,16 @@ When context files don't provide specific guidance:
 - Apply proper error handling for database operations
 - Use TypeScript types for database entities
 - Validate data before sending to Supabase
+
+### MCP GitHub Guidelines
+- Use to directly access repository files, issues, pull requests, and discussions without manual copy-paste.
+- Leverage MCP GitHub to retrieve information documented in `.github/copilot` and architecture files.
+- Always review and validate retrieved data before generating code.
+
+### MCP Supabase Guidelines
+- Use to query the database, inspect the schema, or apply migrations directly from Copilot.
+- Strictly respect Row Level Security (RLS) policies and server-side validations.
+- Prefer secure, predefined queries over free-form SQL in prompts.
 
 ### Tailwind CSS Guidelines
 - Use the established color palette and design tokens
