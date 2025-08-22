@@ -10,3 +10,13 @@ export interface NewsItem {
 export interface NewsListProps {
   news: NewsItem[];
 }
+
+export interface StatItem {
+  icon: React.ElementType;
+  value: string;
+  label: string;
+}
+
+export interface AboutProps {
+  stats: StatItem[];
+}

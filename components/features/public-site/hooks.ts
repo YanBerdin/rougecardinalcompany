@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { NewsItem } from './types';
+import { Users, Heart, Award } from 'lucide-react';
+import { NewsItem, StatItem } from './types';
 
 // Données mockées (à remplacer par un appel API Supabase dans le futur)
 const newsData: NewsItem[] = [
@@ -63,6 +64,42 @@ export function useNews() {
 
   return {
     news,
+    isLoading
+  };
+}
+
+// Données statistiques pour la section À propos
+const aboutStats: StatItem[] = [
+  { icon: Users, value: '15+', label: 'Années d\'expérience' },
+  { icon: Heart, value: '50+', label: 'Spectacles créés' },
+  { icon: Award, value: '8', label: 'Prix obtenus' },
+];
+
+export function useAbout() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState<StatItem[]>([]);
+
+  useEffect(() => {
+    const fetchAboutData = async () => {
+      try {
+        // Simuler un appel API avec un délai
+        await new Promise(resolve => setTimeout(resolve, 1200));
+        
+        // Dans un cas réel, on pourrait récupérer ces données depuis Supabase
+        setStats(aboutStats);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des données", error);
+        setStats([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAboutData();
+  }, []);
+
+  return {
+    stats,
     isLoading
   };
 }
