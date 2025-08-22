@@ -1,6 +1,6 @@
 'use client';
 
-export function PageSkeleton() {
+export function SpectaclesSkeleton() {
   return (
     <div className="pt-16">
       {/* Hero Section Skeleton */}

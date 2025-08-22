@@ -62,7 +62,7 @@ Ce projet est un site web Next.js (TypeScript, React 19, Supabase, Tailwind CSS)
       - about-skeleton.tsx
       - hero-skeleton.tsx
       - news-skeleton.tsx
-      - page-skeleton.tsx
+      - spectacles-skeleton.tsx
     - ...
   - lib/
     - supabase/

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Users, Heart, Award, Target, Quote } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { PageSkeleton } from '@/components/skeletons/page-skeleton';
+import { SpectaclesSkeleton } from '@/components/skeletons/spectacles-skeleton';
 
 const values = [
   {
@@ -204,7 +204,7 @@ export default function CompagnieClientPage() {
   }, []);
 
   if (isLoading) {
-    return <PageSkeleton />;
+    return <SpectaclesSkeleton />;
   }
 
   return <CompagnieContent />;
