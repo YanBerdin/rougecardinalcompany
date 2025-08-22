@@ -35,7 +35,7 @@ alwaysApply: false
 - For references to foreign tables, use the singular of the table name with the `_id` suffix. For example `user_id` to reference the `users` table
 - Always use lowercase except in cases involving acronyms or when readability would be enhanced by an exception.
 
-#### Examples:
+### Examples
 
 ```sql
 create table books (
@@ -46,14 +46,12 @@ create table books (
 comment on table books is 'A list of all the books in the library.';
 ```
 
-
 ## Queries
 
 - When the query is shorter keep it on just a few lines. As it gets larger start adding newlines for readability
 - Add spaces for readability.
 
 Smaller queries:
-
 
 ```sql
 select *
@@ -78,7 +76,6 @@ where
 and
   status = 'employed';
 ```
-
 
 ### Joins and Subqueries
 
@@ -106,7 +103,6 @@ select count(*) as total_employees
 from employees
 where end_date is null;
 ```
-
 
 ## Complex queries and CTEs
 

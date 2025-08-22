@@ -1,7 +1,7 @@
 ---
 description: APPLY TypeScript best practices WHEN writing TS code
 globs: **/*.ts, **/*/.tsx
-alwaysApply: false
+alwaysApply: true
 ---
 
 Strict Types:

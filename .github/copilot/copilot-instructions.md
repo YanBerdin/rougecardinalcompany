@@ -40,7 +40,7 @@ Priority context directories to scan:
 - `/components`: Reusable UI components
 - `/lib/supabase`: Supabase integration code
 - `/memory-bank`: Project documentation and context
-- `/.github/.copilot/`: Copilot-specific configuration and instruction files
+- `/.github/copilot/`: Copilot-specific configuration and instruction files
 
 Additional context available via MCP GitHub and MCP Supabase
 
