@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Users, Heart, Award } from 'lucide-react';
-import { NewsItem, StatItem } from './types';
+import { NewsItem, StatItem, Show } from './types';
 
 // Données mockées (à remplacer par un appel API Supabase dans le futur)
 const newsData: NewsItem[] = [
@@ -100,6 +100,76 @@ export function useAbout() {
 
   return {
     stats,
+    isLoading
+  };
+}
+
+// Données mockées pour les spectacles
+const showsData: Show[] = [
+  {
+    id: 1,
+    title: "Les Murmures du Temps",
+    description: "Un voyage poétique à travers les âges, où passé et présent se rencontrent dans un dialogue bouleversant.",
+    date: "2025-08-15",
+    time: "20h30",
+    venue: "Théâtre de la Ville",
+    location: "Paris",
+    image: "https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=600",
+    status: "Bientôt complet",
+    genre: "Drame contemporain"
+  },
+  {
+    id: 2,
+    title: "Fragments d'Éternité",
+    description: "Une création originale qui explore les liens invisibles qui nous unissent, entre rire et larmes.",
+    date: "2025-09-28",
+    time: "19h00",
+    venue: "Théâtre des Abbesses",
+    location: "Paris",
+    image: "https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=600",
+    status: "Première",
+    genre: "Création originale"
+  },
+  {
+    id: 3,
+    title: "La Danse des Ombres",
+    description: "Adaptation moderne d'un classique, revisité avec audace et sensibilité par notre équipe artistique.",
+    date: "2025-08-12",
+    time: "20h00",
+    venue: "Centre Culturel",
+    location: "Lyon",
+    image: "https://images.pexels.com/photos/3184340/pexels-photo-3184340.jpeg?auto=compress&cs=tinysrgb&w=600",
+    status: "Tournée",
+    genre: "Classique revisité"
+  }
+];
+
+export function useShows() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [shows, setShows] = useState<Show[]>([]);
+
+  useEffect(() => {
+    const fetchShows = async () => {
+      try {
+        // Simuler un appel API avec un délai
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        // Dans un cas réel, on pourrait récupérer ces données depuis Supabase
+        // et appliquer des filtres (spectacles à venir, etc.)
+        setShows(showsData);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des spectacles", error);
+        setShows([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchShows();
+  }, []);
+
+  return {
+    shows,
     isLoading
   };
 }

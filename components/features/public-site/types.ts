@@ -20,3 +20,20 @@ export interface StatItem {
 export interface AboutProps {
   stats: StatItem[];
 }
+
+export interface Show {
+  id: number;
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  venue: string;
+  location: string;
+  image: string;
+  status: string;
+  genre: string;
+}
+
+export interface ShowsListProps {
+  shows: Show[];
+}
