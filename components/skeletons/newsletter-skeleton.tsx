@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function NewsletterSkeleton() {
     return (
         <section className="py-20 hero-gradient">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 <div className="space-y-8">
                     {/* Icon skeleton */}
                     <Skeleton className="h-12 w-12 mx-auto bg-white/20" />

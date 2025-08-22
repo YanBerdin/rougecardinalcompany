@@ -7,6 +7,7 @@ export function ContactPageContainer() {
     const {
         isSubmitted,
         isLoading,
+        isInitialLoading,
         newsletterEmail,
         isNewsletterSubscribed,
         formData,
@@ -22,6 +23,7 @@ export function ContactPageContainer() {
         <ContactPageView
             isSubmitted={isSubmitted}
             isLoading={isLoading}
+            isInitialLoading={isInitialLoading}
             isNewsletterSubscribed={isNewsletterSubscribed}
             newsletterEmail={newsletterEmail}
             formData={formData}

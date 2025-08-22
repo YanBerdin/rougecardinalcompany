@@ -8,7 +8,7 @@ import { ShowsListProps } from './types';
 export function ShowsList({ shows }: ShowsListProps) {
   return (
     <section className="py-20 bg-muted/30">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold mb-4">Prochains Spectacles</h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">

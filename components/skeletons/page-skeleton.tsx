@@ -5,7 +5,7 @@ export function PageSkeleton() {
     <div className="pt-16">
       {/* Hero Section Skeleton */}
       <section className="py-20 hero-gradient">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="h-16 bg-white/20 animate-pulse rounded mb-6 max-w-2xl mx-auto" />
           <div className="h-8 bg-white/20 animate-pulse rounded max-w-xl mx-auto" />
         </div>

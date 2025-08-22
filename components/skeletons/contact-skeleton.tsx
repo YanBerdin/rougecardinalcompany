@@ -3,7 +3,7 @@
 export function ContactSkeleton() {
     return (
         <section className="py-20">
-            <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-12">
                     <div className="h-8 bg-muted animate-pulse rounded mb-4 max-w-md mx-auto" />
                     <div className="h-5 bg-muted animate-pulse rounded max-w-xs mx-auto" />

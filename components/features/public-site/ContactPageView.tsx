@@ -10,9 +10,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ContactSkeleton } from '@/components/skeletons/contact-skeleton';
 import { ContactPageProps } from './contact-types';
 
+
 export function ContactPageView({
     isSubmitted,
     isLoading,
+    isInitialLoading,
     isNewsletterSubscribed,
     newsletterEmail,
     formData,
@@ -23,6 +25,11 @@ export function ContactPageView({
     onInputChange,
     onNewsletterEmailChange
 }: ContactPageProps) {
+
+
+    if (isInitialLoading) {
+        return <ContactSkeleton />;
+    }
 
     if (isSubmitted) {
         return (
@@ -61,7 +68,7 @@ export function ContactPageView({
             </section>
 
             <div className="py-20">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
                         {/* Formulaire de contact */}
                         <div className="lg:col-span-2">

@@ -25,6 +25,7 @@ export interface ContactInfo {
 export interface ContactPageProps {
   isSubmitted: boolean;
   isLoading: boolean;
+  isInitialLoading: boolean;
   isNewsletterSubscribed: boolean;
   newsletterEmail: string;
   formData: ContactFormData;

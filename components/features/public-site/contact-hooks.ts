@@ -12,9 +12,12 @@ export const contactReasons: ContactReason[] = [
   { value: "other", label: "Autre" }
 ];
 
+import { useEffect } from 'react';
+
 export function useContact() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [isNewsletterSubscribed, setIsNewsletterSubscribed] = useState(false);
   const [formData, setFormData] = useState<ContactFormData>({
@@ -27,6 +30,13 @@ export function useContact() {
     message: '',
     consent: false
   });
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsInitialLoading(false);
+    }, 600);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,6 +98,7 @@ export function useContact() {
   return {
     isSubmitted,
     isLoading,
+    isInitialLoading,
     newsletterEmail,
     isNewsletterSubscribed,
     formData,

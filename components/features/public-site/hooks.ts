@@ -40,7 +40,7 @@ export function useNews() {
     const fetchNews = async () => {
       try {
         // Simuler un appel API avec un délai
-        await new Promise(resolve => setTimeout(resolve, 800));
+        await new Promise(resolve => setTimeout(resolve, 800)); //TODO: remove
         
         // Filtrer les actualités des 30 derniers jours
         const featuredNews = newsData.filter(item => {
@@ -83,7 +83,7 @@ export function useAbout() {
     const fetchAboutData = async () => {
       try {
         // Simuler un appel API avec un délai
-        await new Promise(resolve => setTimeout(resolve, 1200));
+        await new Promise(resolve => setTimeout(resolve, 1200)); //TODO: remove
         
         // Dans un cas réel, on pourrait récupérer ces données depuis Supabase
         setStats(aboutStats);
@@ -152,7 +152,7 @@ export function useShows() {
     const fetchShows = async () => {
       try {
         // Simuler un appel API avec un délai
-        await new Promise(resolve => setTimeout(resolve, 800));
+        await new Promise(resolve => setTimeout(resolve, 800)); //TODO: remove
         
         // Dans un cas réel, on pourrait récupérer ces données depuis Supabase
         // et appliquer des filtres (spectacles à venir, etc.)
@@ -206,7 +206,7 @@ export function useHero() {
     const fetchHeroData = async () => {
       try {
         // Simuler un appel API avec un délai
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise(resolve => setTimeout(resolve, 1500)); //TODO: remove
         
         // Dans un cas réel, on pourrait récupérer ces données depuis Supabase
         setSlides(heroSlides);
@@ -339,7 +339,7 @@ export function useNewsletter() {
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
-  useEffect(() => {
+  useEffect(() => { //TODO: remove 
     const timer = setTimeout(() => {
       setIsInitialLoading(false);
     }, 600);
@@ -357,7 +357,7 @@ export function useNewsletter() {
 
     try {
       // Simuler un appel API pour l'inscription à la newsletter
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1000)); //TODO: remove
       
       // Dans un cas réel, nous enverrions les données à Supabase ou une autre API
       setIsSubscribed(true);
@@ -435,11 +435,11 @@ export function usePartners() {
   const [isLoading, setIsLoading] = useState(true);
   const [partners, setPartners] = useState<Partner[]>([]);
 
-  useEffect(() => {
+  useEffect(() => { 
     const fetchPartners = async () => {
       try {
         // Simuler un appel API avec un délai
-        await new Promise(resolve => setTimeout(resolve, 600));
+        await new Promise(resolve => setTimeout(resolve, 600)); //TODO: remove
         
         // Dans un cas réel, nous récupérerions ces données depuis Supabase
         setPartners(partnersData);
