@@ -59,6 +59,52 @@ When context files don't provide specific guidance:
 4. When conflicting patterns exist, prioritize patterns in newer files or files with higher test coverage
 5. Never introduce patterns not found in the existing codebase
 
+## Architecture Guidelines
+
+### Feature-Based Organization
+
+**Structure Requirements**:
+
+- Organize components by business feature in `components/features/`
+- Each feature contains: smart components, dumb components, hooks, types
+- Identified features: `auth`, `content`, `public-site`, `admin`
+
+**Smart/Dumb Component Pattern**:
+
+**Smart Components (Containers)**:
+
+- Server Components by default for data fetching and server-side logic
+- Client Components with `'use client'` directive when interactivity is required
+- Handle data management, business logic, state, API calls
+- Use suffix `Container` or business name (e.g., `AuthProvider`)
+- Orchestrate dumb components
+
+**Dumb Components (Presentational)**:
+
+- Pure display based on props with strict TypeScript interfaces
+- Reusable across features, no direct API calls
+- Can be Server or Client Components based on context
+
+**Feature Structure**:
+```
+components/
+  features/
+    [feature]/
+      [Feature]Container.tsx    # Smart component
+      [Component].tsx           # Dumb components  
+      types.ts                  # Feature-specific types
+      hooks.ts                  # Custom hooks
+  ui/                          # Reusable dumb components
+  layout/                      # Layout components
+```
+
+**Data Flow**:
+
+1. Smart component → fetch data (server) or hooks (client)
+2. Smart component → pass props to dumb components
+3. Dumb component → trigger callbacks to smart component
+4. Smart component → handle callbacks and state updates
+
 ## Code Quality Standards
 
 ### Maintainability
@@ -132,6 +178,28 @@ When context files don't provide specific guidance:
 - Avoid any type unless absolutely necessary
 - Use proper type guards
 - Use functional programming patterns with TypeScript features
+- Create feature-specific types in dedicated types.ts files
+
+**Type Definition Pattern**:
+Always define types with Zod for validation and type safety:
+
+```typescript
+import { z } from "zod";
+
+export const CourseSchema = z.object({
+  id: z.string(),
+  title: z.string().min(1).max(100),
+  slug: z.string(),
+});
+
+export type Course = z.infer<typeof CourseSchema>;
+```
+
+This pattern provides:
+- Runtime validation for API inputs/outputs
+- Automatic TypeScript type generation
+- Consistent validation across features
+- Better error handling and user feedback
 
 ### React Guidelines
 - Use functional components with hooks
@@ -139,7 +207,8 @@ When context files don't provide specific guidance:
 - Use controlled components for forms
 - Implement proper error boundaries
 - Use context API appropriately for global state
-- Keep components pure when possible
+- Keep dumb components pure when possible
+- Place custom hooks in feature hooks.ts files or lib/hooks/
 
 ### Supabase Guidelines
 - Use the patterns established in lib/supabase
@@ -174,6 +243,47 @@ When context files don't provide specific guidance:
 - Match logging patterns from existing code
 - Use the same approach to configuration as seen in the codebase
 - Implement consistent loading states and error states
+- Respect feature boundaries when creating cross-feature dependencies
+- Keep shared utilities in lib/ and shared UI components in components/ui/
+
+## Feature-Specific Component Examples
+
+### Creating New Components
+
+**Smart Component Example**:
+
+```tsx
+// Server Smart Component
+export async function ContentContainer() {
+  const articles = await fetchArticles() // Server-side data fetching
+  return <ArticleList articles={articles} />
+}
+
+// Client Smart Component  
+'use client'
+export function InteractiveContentContainer() {
+  const { data, loading } = useContent() // Client-side hook
+  return <ContentEditor data={data} loading={loading} />
+}
+```
+
+**Dumb Component Example**:
+
+```tsx
+interface ArticleListProps {
+  articles: Article[]
+}
+
+export function ArticleList({ articles }: ArticleListProps) {
+  return (
+    <div className="space-y-4">
+      {articles.map(article => (
+        <ArticleCard key={article.id} article={article} />
+      ))}
+    </div>
+  )
+}
+```
 
 ## Project-Specific Guidance
 
@@ -183,6 +293,13 @@ This project is a website for a theater company with these key features:
 - Authentication for admin users
 - Content management capabilities
 - Press resources and media library
+
+**Feature Organization**:
+
+- `public-site`: Hero, shows display, company information
+- `admin`: Dashboard, content management interface
+- `content`: Article management, media handling
+- `auth`: Login, authentication guards
 
 The project focuses on:
 - Professional presentation of the company
