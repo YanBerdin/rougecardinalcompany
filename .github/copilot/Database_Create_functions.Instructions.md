@@ -1,5 +1,4 @@
 ---
-# Specify the following for VS-Code / Claude rules
 description: Guidelines for writing Supabase database functions
 alwaysApply: false
 ---

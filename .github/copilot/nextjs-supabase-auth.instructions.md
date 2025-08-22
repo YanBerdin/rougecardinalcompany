@@ -1,5 +1,4 @@
 ---
-# Specify the following for Copilot rules
 description: Guidelines for writing Next.js apps with Supabase Auth
 alwaysApply: false
 ---

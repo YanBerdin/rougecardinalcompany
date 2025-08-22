@@ -1,5 +1,4 @@
 ---
-# Specify the following for Vs-Code / Claude rules
 description: Guidelines for writing Postgres SQL
 alwaysApply: false
 ---

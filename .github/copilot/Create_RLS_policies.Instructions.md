@@ -1,5 +1,5 @@
 ---
-# Specify the following for VS-Code / Claude rules
+# Specify the following for Copilot
 description: Guidelines for writing Postgres Row Level Security policies
 alwaysApply: false
 ---

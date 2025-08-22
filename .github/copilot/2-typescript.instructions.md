@@ -1,6 +1,6 @@
 ---
 description: APPLY TypeScript best practices WHEN writing TS code
-globs: **/*.ts, **/*/.tsx
+applyTo: **/*.ts, **/*/.tsx
 alwaysApply: true
 ---
 

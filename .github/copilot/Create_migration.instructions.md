@@ -1,5 +1,5 @@
 ---
-# Specify the following for Cursor rules
+# Specify the following for Copilot rules
 description: Guidelines for writing Postgres migrations
 alwaysApply: false
 ---
