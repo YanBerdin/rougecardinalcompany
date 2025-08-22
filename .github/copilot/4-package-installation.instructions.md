@@ -1,4 +1,3 @@
----
 description: APPLY package installation rules WHEN installation new package
 alwaysApply: false
 ---

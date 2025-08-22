@@ -1,4 +1,3 @@
----
 description: APPLY Clean Code principles WHENEVER writing code
 alwaysApply: true
 ---

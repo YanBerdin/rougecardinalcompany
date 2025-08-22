@@ -1,4 +1,3 @@
----
 description: Guidelines for writing Next.js apps with Supabase Auth
 alwaysApply: false
 ---

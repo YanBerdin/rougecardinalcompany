@@ -1,5 +1,3 @@
----
-# Specify the following for Copilot rules
 description: Coding rules for Supabase Edge Functions
 alwaysApply: false
 ---

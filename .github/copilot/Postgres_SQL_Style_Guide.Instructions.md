@@ -1,4 +1,3 @@
----
 description: Guidelines for writing Postgres SQL
 alwaysApply: false
 ---

@@ -1,4 +1,3 @@
----
 description: APPLY TypeScript best practices WHEN writing TS code
 applyTo: **/*.ts, **/*/.tsx
 alwaysApply: true
