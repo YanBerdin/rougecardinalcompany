@@ -58,3 +58,17 @@ export interface HeroProps {
   onTouchMove: (e: React.TouchEvent | React.MouseEvent) => void;
   onTouchEnd: () => void;
 }
+
+export interface NewsletterFormProps {
+  email: string;
+  isLoading: boolean;
+  isSubscribed: boolean;
+  onEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onSubmit: (e: React.FormEvent) => void;
+}
+
+export interface NewsletterProps {
+  isSubscribed: boolean;
+  isInitialLoading: boolean;
+  children?: React.ReactNode;
+}
