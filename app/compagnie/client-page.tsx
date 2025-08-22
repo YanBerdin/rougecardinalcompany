@@ -78,16 +78,16 @@ function CompagnieContent() {
             <div className="animate-fade-in-up">
               <h2 className="text-2xl xl:text-3xl font-bold mb-6">Notre Histoire</h2>
               <p className="text-lg xl:text-xl text-muted-foreground mb-4 leading-relaxed">
-                Fondée en 2008 par un collectif de jeunes diplômés des grandes écoles théâtrales françaises, 
-                la compagnie Rouge-Cardinal est née d'une envie commune : créer un théâtre qui parle à notre époque 
+                Fondée en 2008 par un collectif de jeunes diplômés des grandes écoles théâtrales françaises,
+                la compagnie Rouge-Cardinal est née d'une envie commune : créer un théâtre qui parle à notre époque
                 tout en puisant dans la richesse du patrimoine dramatique.
               </p>
               <p className="text-lg xl:text-xl text-muted-foreground mb-4 leading-relaxed">
-                Le nom "Rouge-Cardinal" évoque à la fois la passion qui nous anime et la noblesse de notre art. 
+                Le nom "Rouge-Cardinal" évoque à la fois la passion qui nous anime et la noblesse de notre art.
                 Comme le cardinal, oiseau au plumage éclatant, nous cherchons à apporter couleur et vie sur scène.
               </p>
               <p className="text-lg xl:text-xl text-muted-foreground leading-relaxed">
-                Depuis nos débuts, nous avons créé plus de 50 spectacles, tourné dans toute la France et à l'étranger, 
+                Depuis nos débuts, nous avons créé plus de 50 spectacles, tourné dans toute la France et à l'étranger,
                 et remporté plusieurs prix prestigieux pour nos créations originales.
               </p>
             </div>
@@ -106,7 +106,7 @@ function CompagnieContent() {
               <Quote className="h-8 w-8 text-primary flex-shrink-0 mt-1" />
               <div>
                 <blockquote className="text-lg xl:text-xl italic text-muted-foreground mb-4">
-                  "Le théâtre doit être un miroir de l'âme humaine, un lieu où l'émotion et la réflexion se rencontrent 
+                  "Le théâtre doit être un miroir de l'âme humaine, un lieu où l'émotion et la réflexion se rencontrent
                   pour créer du sens et du lien entre les êtres."
                 </blockquote>
                 <cite className="text-primary font-semibold">Marie Dubois, Directrice artistique</cite>
@@ -177,13 +177,13 @@ function CompagnieContent() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold mb-6 text-white">Notre Mission</h2>
           <p className="text-xl text-white/90 mb-8 leading-relaxed">
-            Créer des spectacles qui émeuvent, questionnent et rassemblent les publics autour de l'art vivant. 
-            Nous nous attachons à rendre le théâtre accessible à tous, en développant des projets artistiques 
+            Créer des spectacles qui émeuvent, questionnent et rassemblent les publics autour de l'art vivant.
+            Nous nous attachons à rendre le théâtre accessible à tous, en développant des projets artistiques
             de qualité qui résonnent avec les enjeux de notre société.
           </p>
           <p className="text-lg text-white/80 leading-relaxed">
-            Notre engagement va au-delà de la simple représentation : nous menons des actions culturelles 
-            en milieu scolaire, participons à des festivals, et soutenons la création contemporaine par 
+            Notre engagement va au-delà de la simple représentation : nous menons des actions culturelles
+            en milieu scolaire, participons à des festivals, et soutenons la création contemporaine par
             des résidences d'artistes et des collaborations avec de jeunes talents.
           </p>
         </div>
