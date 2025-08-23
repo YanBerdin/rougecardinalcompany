@@ -4,7 +4,7 @@ import { Mail, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { NewsletterSkeleton } from '@/components/skeletons/newsletter-skeleton';
-import { NewsletterFormProps, NewsletterProps } from './types';
+import { NewsletterFormProps, NewsletterViewProps } from './types';
 
 // Composant de formulaire d'inscription
 export function NewsletterForm({
@@ -55,7 +55,7 @@ function SubscriptionSuccess() {
 }
 
 // Composant principal Newsletter (Dumb)
-export function Newsletter({ isSubscribed, isInitialLoading, children }: NewsletterProps) {
+export function NewsletterView({ isSubscribed, isInitialLoading, children }: NewsletterViewProps) {
     if (isInitialLoading) {
         return <NewsletterSkeleton />;
     }

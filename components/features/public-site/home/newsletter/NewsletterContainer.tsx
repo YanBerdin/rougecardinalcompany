@@ -1,6 +1,6 @@
 "use client";
 
-import { Newsletter as NewsletterComponent, NewsletterForm } from './Newsletter';
+import { NewsletterView, NewsletterForm } from './NewsletterView';
 import { useNewsletter } from './hooks';
 
 export function NewsletterContainer() {
@@ -14,7 +14,14 @@ export function NewsletterContainer() {
     } = useNewsletter();
 
     return (
-        <NewsletterComponent isSubscribed={isSubscribed} isInitialLoading={isInitialLoading}>
+        <NewsletterView
+            isSubscribed={isSubscribed}
+            isInitialLoading={isInitialLoading}
+            email={email}
+            isLoading={isLoading}
+            onEmailChange={handleEmailChange}
+            onSubmit={handleSubmit}
+        >
             {!isSubscribed && !isInitialLoading && (
                 <NewsletterForm
                     email={email}
@@ -24,6 +31,6 @@ export function NewsletterContainer() {
                     onSubmit={handleSubmit}
                 />
             )}
-        </NewsletterComponent>
+        </NewsletterView>
     );
 }

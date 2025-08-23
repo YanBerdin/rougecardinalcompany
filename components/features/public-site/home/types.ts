@@ -1,3 +1,4 @@
+/*
 export interface NewsItem {
   id: number;
   title: string;
@@ -86,3 +87,4 @@ export interface PartnersListProps {
   partners: Partner[];
   isLoading: boolean;
 }
+  */
