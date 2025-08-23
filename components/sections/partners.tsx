@@ -1,6 +1,6 @@
 "use client";
 
-import { PartnersContainer } from '@/components/features/public-site/PartnersContainer';
+import { PartnersContainer } from '@/components/features/public-site/home/PartnersContainer';
 
 /**
  * @deprecated Ce composant sera supprimé dans une future version.

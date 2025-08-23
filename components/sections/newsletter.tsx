@@ -1,6 +1,6 @@
 "use client";
 
-import { NewsletterContainer } from '@/components/features/public-site/NewsletterContainer';
+import { NewsletterContainer } from '@/components/features/public-site/home/NewsletterContainer';
 
 /**
  * @deprecated Ce composant sera supprimé dans une future version.

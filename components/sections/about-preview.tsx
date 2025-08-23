@@ -1,4 +1,4 @@
-import { AboutContainer } from '@/components/features/public-site/AboutContainer';
+import { AboutContainer } from '@/components/features/public-site/home/AboutContainer';
 
 /**
  * @deprecated Ce composant a été refactorisé selon l'architecture Feature-Based.

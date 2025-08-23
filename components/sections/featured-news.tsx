@@ -1,4 +1,4 @@
-import { NewsContainer } from '@/components/features/public-site/NewsContainer';
+import { NewsContainer } from '@/components/features/public-site/home/NewsContainer';
 
 /**
  * @deprecated Ce composant a été refactorisé selon l'architecture Feature-Based.
