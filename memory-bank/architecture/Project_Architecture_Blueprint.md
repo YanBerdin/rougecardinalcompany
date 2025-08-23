@@ -520,7 +520,7 @@ export async function createClient() {
 
 Le pattern Container/View est utilisé systématiquement pour séparer la logique de la présentation :
 
-**Container (Smart Component)**
+#### **Container (Smart Component)**
 
 ```typescript
 // components/features/public-site/home/hero/HeroContainer.tsx
@@ -559,7 +559,7 @@ export function HeroContainer() {
 }
 ```
 
-**View (Dumb Component)**
+#### **View (Dumb Component)**
 
 ```typescript
 // components/features/public-site/home/hero/HeroView.tsx
@@ -1448,7 +1448,7 @@ Pour maintenir la cohérence architecturale, le projet utilise plusieurs outils 
 
 #### Linting et Formatage Automatisé
 
-```json
+```tsx
 // eslint.config.mjs
 import process from "node:process";
 import nextPlugin from "@next/eslint-plugin-next";
@@ -1595,7 +1595,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
 Chaque dossier clé contient un fichier README.md expliquant son but et son organisation :
 
-```markdown
+```md
 # Components UI
 
 Ce dossier contient les composants UI réutilisables de l'application.
@@ -1754,7 +1754,7 @@ Pour maintenir la cohérence, les développeurs doivent suivre ces templates pou
 
 #### Template de Feature
 
-```text
+```bash
 components/features/[domaine]/[feature]/
 ├── index.ts                  # Point d'entrée exportant le Container
 ├── [Feature]Container.tsx    # Smart component avec logique
