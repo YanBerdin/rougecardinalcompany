@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import SpectaclesClientPage from './client-page';
+import { SpectaclesContainer } from '@/components/features/public-site/spectacles/SpectaclesContainer';
 
 export const metadata: Metadata = {
     title: 'Spectacles | Rouge-Cardinal',
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function SpectaclesPage() {
-    return <SpectaclesClientPage />;
+    return <SpectaclesContainer />;
 }
