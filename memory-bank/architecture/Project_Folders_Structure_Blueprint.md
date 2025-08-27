@@ -1,315 +1,235 @@
 # Project Folders Structure Blueprint
 
-> Généré automatiquement le 24 août 2025
+## 1. Initial Auto-detection Phase
 
-## 1. Vue d'ensemble structurale
+- **Detected project type:** Next.js 15 (React 19, TypeScript, App Router)
+- **Monorepo:** No (single-app structure)
+- **Frontend:** Yes (Next.js/React)
+- **Backend:** Supabase (external, not in repo)
+- **Microservices:** No
 
-- **Type de projet détecté** : Next.js 15 (React 19, TypeScript, App Router)
-- **Organisation principale** : Par fonctionnalité (Feature-Based), avec séparation Smart/Dumb Components
-- **Principes architecturaux** :
-  - Architecture modulaire avec séparation claire des responsabilités
-  - Pattern Container/View (Smart/Dumb Components) pour les features
-  - Chaque feature possède sa propre structure (types, hooks, Container, View)
-  - Composants UI partagés isolés des features spécifiques
-  - Documentation structurée (Memory Bank) pour préserver le contexte projet
-- **Patterns récurrents** :
-  - `HeroContainer.tsx` → logique métier, gestion d'état (Smart)
-  - `HeroView.tsx` → présentation pure (Dumb)
-  - `hooks.ts` → logique réutilisable, gestion d'état
-  - `types.ts` → interfaces et types TypeScript
-  - `index.ts` → points d'entrée/exports
-- **Rationnel** : L'architecture Feature-Based avec Smart/Dumb Components favorise :
-  - Testabilité (séparation UI/logique)
-  - Maintenabilité (responsabilités uniques)
-  - Évolutivité (modification isolée des features)
-  - Cohérence (patterns récurrents)
+**Technology signatures found:**
 
-## 2. Visualisation de la structure
+- `next.config.ts`, `package.json` (Next.js, React, TypeScript)
+- `supabase/` (Supabase integration)
+- `tailwind.config.ts`, `postcss.config.mjs` (Tailwind CSS)
+- `memory-bank/` (custom documentation)
+
+---
+
+## 2. Structural Overview
+
+- **Organization:** Feature-based, modular, Smart/Dumb (Container/View) pattern
+- **Main principles:**
+  - Clear separation of concerns (features, UI, utils, docs)
+  - Each feature is isolated with its own types, hooks, Container, View
+  - Shared UI components are decoupled from features
+  - Documentation is versioned and structured (memory-bank)
+- **Repeating patterns:**
+  - `FeatureContainer.tsx` (logic, state)
+  - `FeatureView.tsx` (presentation)
+  - `hooks.ts`, `types.ts`, `index.ts` in each feature/section
+- **Rationale:**
+  - Testability, maintainability, scalability, and consistency
+
+---
+
+## 3. Directory Visualization (Markdown List, depth 3)
 
 ```bash
-/ (racine)
-├── app/                              # Next.js App Router
-│   ├── auth/                         # Authentification
-│   │   ├── confirm/
-│   │   ├── error/
-│   │   ├── forgot-password/
-│   │   ├── login/
-│   │   ├── sign-up/
-│   │   ├── sign-up-success/
-│   │   └── update-password/
-│   ├── protected/                    # Zone protégée
-│   ├── compagnie/                    # Page Compagnie
-│   │   ├── client-page.tsx
-│   │   ├── layout.tsx
-│   │   └── page.tsx
-│   ├── page.tsx                      # Page d'accueil
-│   └── layout.tsx                    # Layout global
+/ (root)
+├── app/
+│   ├── agenda/             # Agenda/calendrier des événements
+│   ├── contact/            # Page de contact
+│   ├── presse/             # Espace presse (articles, communiqués)
+│   ├── spectacles/         # Page spectacles (listing, détails)
+│   ├── test-connection/    # Test de connexion Supabase/API
+│   ├── auth/            # Authentification (login, signup)
+│   ├── protected/       # Routes protégées (authentification requise)
+│   ├── compagnie/       # Page de la compagnie (présentation, équipe)
+│   ├── page.tsx         # Page principale
+│   └── layout.tsx       # Layout principal
 ├── components/
-│   ├── features/                     # Organisation par feature
-│   │   └── public-site/              # Site public
-│   │       ├── home/                 # Sections de la page d'accueil
-│   │       │   ├── about/            # Pattern Smart/Dumb pour About
+│   ├── features/        # Composants spécifiques aux fonctionnalités
+│   │   └── public-site/ 
+│   │       ├── home/
+│   │       │   ├── about/            # Sections de la page d'accueil
 │   │       │   │   ├── AboutContainer.tsx
 │   │       │   │   ├── AboutView.tsx
 │   │       │   │   ├── hooks.ts
 │   │       │   │   ├── types.ts
 │   │       │   │   └── index.ts
-│   │       │   ├── hero/             # Pattern Smart/Dumb pour Hero
-│   │       │   ├── news/             # Pattern Smart/Dumb pour News
-│   │       │   ├── shows/            # Pattern Smart/Dumb pour Shows
-│   │       │   ├── newsletter/       # Pattern Smart/Dumb pour Newsletter
-│   │       │   ├── partners/         # Pattern Smart/Dumb pour Partners
-│   │       │   └── index.ts          # Export des Containers
-│   │       ├── agenda/               # Feature Agenda
-│   │       ├── compagnie/            # Feature Compagnie
-│   │       ├── spectacles/           # Feature Spectacles
-│   │       └── presse/               # Feature Presse
-│   ├── ui/                           # Composants UI partagés
-│   │   ├── badge.tsx
-│   │   ├── button.tsx
-│   │   ├── card.tsx
+│   │       │   ├── news/             # Sections de la page d'accueil
+│   │       │   ├── shows/            # Sections de la page d'accueil
+│   │       │   ├── newsletter/       # Sections de la page d'accueil
+│   │       │   ├── partners/         # Sections de la page d'accueil
+│   │       │   ├── types/            # Types spécifiques à la page d'accueil
+│   │       │   └── index.ts          
+│   │       ├── agenda/
+│   │       ├── compagnie/
+│   │       │   │   ├── CompagnieContainer.tsx
+│   │       │   │   ├── CompagnieView.tsx
+│   │       │   │   ├── hooks.ts
+│   │       │   │   ├── types.ts
+│   │       │   │   └── index.ts
+│   │       ├── spectacles/
+│   │       └── presse/
+│   ├── layout/
+│   │   ├── Header.tsx
+│   │   ├── Footer.tsx
 │   │   └── ...
-│   ├── skeletons/                    # États de chargement
+│   ├── skeletons/
 │   │   ├── hero-skeleton.tsx
 │   │   ├── news-skeleton.tsx
 │   │   └── ...
-│   └── tutorial/                     # Composants tutoriel/démo
-├── lib/                              # Code utilitaire et intégrations
-│   ├── supabase/                     # Configuration Supabase
-│   │   ├── client.ts
-│   │   ├── middleware.ts
-│   │   ├── server.ts
-│   │   └── schemas/                  # Schémas SQL
-│   └── utils.ts                      # Utilitaires globaux
-├── memory-bank/                      # Documentation structurée
-│   ├── architecture/                 # Blueprints d'architecture
-│   ├── epics/                        # Épopées de développement
-│   └── tasks/                        # Tâches spécifiques
-├── doc/                              # Documentation technique
-├── public/                           # Assets statiques
-├── prompts-github/                   # Prompts pour GitHub Copilot
-├── [Fichiers-de-configuration]       # Configuration du projet
+│   ├── tutorial/
+│   └── ui/                # Composants d'interface utilisateur partagés
+├── lib/
+│   ├── supabase/
+│   │   ├── schemas/       # Schémas de la base de données Supabase
+│   │   ├── client.ts      # Client Supabase
+│   │   ├── middleware.ts  # Middleware Supabase
+│   │   └──  server.ts     # Serveur Supabase
+│   └── utils.tsx 
+├── memory-bank/           # Documentation structurée
+│   ├── architecture/
+│   ├── epics/
+│   └── tasks/
+├── doc/
+├── public/
+├── prompts-github/
+└── [config-files]
 ```
-
-## 3. Analyse des dossiers clés
-
-- **app/** : Point d'entrée Next.js App Router, structure orientée route.
-  - Chaque sous-dossier correspond à une route (URL).
-  - Les fichiers `page.tsx` définissent les composants de page.
-  - Les fichiers `layout.tsx` définissent les layouts partagés.
-  - La séparation client/serveur est gérée via les directives `"use client"`.
-
-- **components/features/** : Organisation principale par feature.
-  - Le pattern `/home/{section}/` montre la décomposition d'une page en sections distinctes.
-  - Chaque feature (home, agenda, compagnie, etc.) a sa propre structure.
-  - Le pattern Smart/Dumb (Container/View) est systématiquement appliqué.
-  - Chaque feature contient ses propres types, hooks, Container et View.
-
-- **components/ui/** : Composants UI réutilisables.
-  - Composants atomiques et moléculaires.
-  - Utilisation de shadcn/ui (basé sur Radix UI).
-  - Indépendants des features spécifiques.
-
-- **lib/** : Code utilitaire et intégrations.
-  - Configuration Supabase pour l'authentification et les données.
-  - Utilitaires partagés à travers l'application.
-
-- **memory-bank/** : Documentation structurée.
-  - Contexte produit, architecture, tâches, épics.
-  - Permet de comprendre le "pourquoi" derrière les décisions.
-
-## 4. Patterns de placement de fichiers
-
-- **Composants Smart (Container)** :
-  - Emplacement : `components/features/{feature}/{section}/{Section}Container.tsx`
-  - Responsabilités : Logique métier, gestion d'état, récupération de données, gestion d'événements
-  - Exemple : `HeroContainer.tsx` gère les données et callbacks pour le carousel
-
-- **Composants Dumb (View)** :
-  - Emplacement : `components/features/{feature}/{section}/{Section}View.tsx`
-  - Responsabilités : Présentation pure, rendu UI basé sur les props
-  - Exemple : `HeroView.tsx` reçoit les slides et callbacks du Container
-
-- **Types** :
-  - Emplacement : `components/features/{feature}/{section}/types.ts`
-  - Contenu : Interfaces TypeScript pour les données et props des composants
-  - Exemple : `HeroSlide`, `HeroProps`
-
-- **Hooks** :
-  - Emplacement : `components/features/{feature}/{section}/hooks.ts`
-  - Contenu : Hooks React pour la logique réutilisable et la gestion d'état
-  - Exemple : `useHero` pour la gestion du carousel
-
-- **UI partagée** :
-  - Emplacement : `components/ui/`
-  - Contenu : Composants génériques indépendants du domaine
-  - Exemple : Button, Card, Badge
-
-- **Pages** :
-  - Emplacement : `app/{route}/page.tsx`
-  - Contenu : Assemblage des containers de features
-  - Exemple : `app/page.tsx` importe tous les containers de la home
-
-## 5. Conventions de nommage et d'organisation
-
-- **Fichiers composants** :
-  - PascalCase pour les composants React (`HeroView.tsx`, `NewsletterContainer.tsx`)
-  - Suffixes explicites : `Container` (Smart), `View` (Dumb)
-  - Fichiers annexes : `hooks.ts`, `types.ts`, `index.ts`
-
-- **Dossiers** :
-  - camelCase pour les features et sections (`home`, `newsletter`)
-  - kebab-case pour les routes dans `app/` (`sign-up`)
-
-- **Exports/Imports** :
-  - Exports nommés privilégiés
-  - Re-exports via `index.ts` pour simplifier les imports
-  - Alias d'import `@/` pour les imports absolus
-
-- **Organisation interne** :
-  - Isolation des features
-  - Partage horizontal (UI, utils) vs. vertical (features)
-  - Évitement des dépendances circulaires
-
-## 6. Workflow de navigation et développement
-
-- **Création d'une nouvelle feature** :
-  1. Créer un dossier `components/features/public-site/{feature}/`
-  2. Créer la structure type/hook/Container/View
-  3. Créer un index.ts pour exporter les composants
-  4. Créer la page dans `app/{feature}/page.tsx`
-
-- **Extension d'une feature existante** :
-  1. Ajouter de nouveaux types dans `types.ts`
-  2. Étendre les hooks dans `hooks.ts`
-  3. Mettre à jour les composants Container et View
-
-- **Ajout d'un composant UI partagé** :
-  1. Créer le composant dans `components/ui/`
-  2. S'assurer qu'il est indépendant des features
-  3. L'importer dans les composants View qui en ont besoin
-
-- **Ajout d'une page** :
-  1. Créer un dossier `app/{route}/`
-  2. Ajouter `page.tsx` et éventuellement `layout.tsx`
-  3. Importer les Containers des features nécessaires
-
-## 7. Build et Output
-
-- **Configuration de build** :
-  - `next.config.ts` : Configuration Next.js
-  - `tsconfig.json` : Configuration TypeScript
-  - `tailwind.config.ts` : Configuration Tailwind CSS
-  - `postcss.config.mjs` : Configuration PostCSS
-  - `eslint.config.mjs` : Configuration ESLint
-
-- **Commandes de build** :
-  - Développement : `next dev --turbopack`
-  - Production : `next build`
-  - Serveur de production : `next start`
-  - Linting : `next lint`
-
-- **Output** :
-  - `.next/` : Output de build (non versionné)
-  - `public/` : Assets statiques déployés
-
-- **Environnement** :
-  - Variables d'environnement dans `.env.local`
-  - Configuration Supabase spécifique à l'environnement
-
-## 8. Technology-Specific Organization
-
-- **Next.js** :
-  - App Router pour les routes et layouts
-  - Server Components par défaut, Client Components avec `"use client"`
-  - Séparation claire client/serveur
-  - Optimisations automatiques d'images, polices, etc.
-
-- **React** :
-  - React 19 avec Hooks (useEffect, useState, useRef, useCallback)
-  - Pattern Container/View (Smart/Dumb)
-  - Context API pour état global potentiel
-
-- **TypeScript** :
-  - Types stricts pour toutes les props et données
-  - Interfaces dédiées par feature
-  - Alias d'import pour navigation simplifiée
-
-- **Tailwind CSS** :
-  - Utilitaires CSS directement dans les composants
-  - Configuration étendue dans `tailwind.config.ts`
-  - Composants UI construits sur cette base
-
-- **Supabase** :
-  - Configuration client/serveur dans `lib/supabase/`
-  - Schémas SQL pour la structure de la base de données
-  - Middleware pour l'authentification
-
-## 9. Extension et Évolution
-
-- **Ajout de nouvelles fonctionnalités** :
-  - Suivre le pattern Container/View existant
-  - Créer une structure complète dans `components/features/`
-  - Intégrer dans les pages via les Containers
-
-- **Scalabilité** :
-  - Granularité fine des features
-  - Isolation claire des responsabilités
-  - Pattern d'export/import cohérent
-
-- **Refactoring** :
-  - Possibilité de déplacer une feature complète sans affecter les autres
-  - Évolution du design system dans `components/ui/`
-  - Documentation des changements dans `memory-bank/`
-
-## 10. Templates de Structure
-
-### Nouvelle Feature
-
-```bash
-components/features/public-site/{feature}/
-├── {Feature}Container.tsx       # Smart component avec logique
-├── {Feature}View.tsx            # Dumb component pour UI
-├── hooks.ts                     # Custom hooks pour la feature
-├── types.ts                     # TypeScript interfaces/types
-└── index.ts                     # Exports
-```
-
-### Nouvelle Section de Home
-
-```bash
-components/features/public-site/home/{section}/
-├── {Section}Container.tsx       # Smart component avec logique
-├── {Section}View.tsx            # Dumb component pour UI
-├── hooks.ts                     # Custom hooks pour la section
-├── types.ts                     # TypeScript interfaces/types
-└── index.ts                     # Exports
-```
-
-### Nouvelle Page
-
-```bash
-app/{route}/
-├── page.tsx                     # Composant de page (Server Component)
-├── layout.tsx                   # Layout spécifique (optionnel)
-└── client-page.tsx              # Client Component si nécessaire
-```
-
-## 11. Enforcement et Documentation
-
-- **Validation de structure** :
-  - ESLint pour valider les patterns d'import/export
-  - Revues de code pour maintenir la cohérence
-
-- **Documentation** :
-  - Blueprints d'architecture dans `memory-bank/architecture/`
-  - Documentation technique dans `doc/`
-  - Contexte produit et épics dans `memory-bank/`
-
-- **Évolution** :
-  - Mise à jour du blueprint à chaque évolution significative
-  - Traçabilité des décisions architecturales
 
 ---
 
-> Ce blueprint a été généré le 24 août 2025 et reflète l'état actuel de l'architecture. Il doit être mis à jour à chaque évolution significative de la structure du projet.
+## 4. Key Directory Analysis
+
+- **app/**: Next.js App Router, route-based structure. Each subfolder = route. `page.tsx` = page component, `layout.tsx` = shared layout. Client/server split via "use client".
+  - **admin/** : Interface d’administration (gestion du contenu, accès restreint)
+  - **agenda/** : Page agenda/calendrier des événements
+  - **contact/** : Page de contact (formulaire, infos)
+  - **presse/** : Espace presse (articles, communiqués)
+  - **spectacles/** : Page dédiée aux spectacles (listing, détails)
+  - **test-connection/** : Page de test de connexion (vérification Supabase/API)
+- **components/features/**: Feature-based, each feature/section has its own folder with Container/View, hooks, types, index. Smart/Dumb enforced everywhere.
+- **components/ui/**: Shared UI components (atomic/molecular), no business logic, reusable across features.
+- **lib/**: Utilities and integrations (Supabase config, global utils).
+- **memory-bank/**: Structured documentation (architecture, epics, tasks, context, rationale).
+- **doc/**: Technical documentation (API, architecture, etc).
+- **public/**: Static assets (images, icons, etc).
+- **prompts-github/**: Copilot prompt blueprints for automation.
+
+---
+
+## 5. File Placement Patterns
+
+- **Smart Components (Container):** `components/features/{feature}/{section}/{Section}Container.tsx` (logic, state, data fetching)
+- **Dumb Components (View):** `components/features/{feature}/{section}/{Section}View.tsx` (pure UI, props only)
+- **Types:** `components/features/{feature}/{section}/types.ts` (TypeScript interfaces/types)
+- **Hooks:** `components/features/{feature}/{section}/hooks.ts` (custom hooks for state/data logic)
+- **UI Shared:** `components/ui/` (generic, domain-agnostic components)
+- **Pages:** `app/{route}/page.tsx` (page assembly, imports Containers)
+
+---
+
+## 6. Naming and Organization Conventions
+
+- **Files:** PascalCase for React components, explicit suffixes (`Container`, `View`), utility files in camelCase or kebab-case as needed.
+- **Folders:** camelCase for features/sections, kebab-case for routes in `app/`.
+- **Exports/Imports:** Named exports, re-exports via `index.ts`, absolute imports with `@/` alias.
+- **Internal organization:** Features are isolated, horizontal sharing (UI, utils) vs. vertical (features), circular dependencies avoided.
+
+---
+
+## 7. Navigation and Development Workflow
+
+- **Add new feature:**
+  1. Create `components/features/public-site/{feature}/`
+  2. Add `types.ts`, `hooks.ts`, `{Feature}Container.tsx`, `{Feature}View.tsx`, `index.ts`
+  3. Add page in `app/{feature}/page.tsx`
+- **Extend feature:**
+  1. Add types/hooks as needed
+  2. Update Container/View
+- **Add shared UI component:**
+  1. Create in `components/ui/`
+  2. Ensure domain-agnostic
+  3. Import in View as needed
+- **Add page:**
+  1. Create `app/{route}/`
+  2. Add `page.tsx`, `layout.tsx` if needed
+  3. Import Containers
+
+---
+
+## 8. Build and Output Organization
+
+- **Build config:** `next.config.ts`, `tsconfig.json`, `tailwind.config.ts`, `postcss.config.mjs`, `eslint.config.mjs`
+- **Build commands:** `next dev --turbopack`, `next build`, `next start`, `next lint`
+- **Output:** `.next/` (build output, not versioned), `public/` (static assets)
+- **Environment:** `.env.local` for env vars, Supabase config per env
+
+---
+
+## 9. Technology-Specific Organization
+
+- **Next.js:** App Router, Server/Client Components, route/layout structure, image/font optimization
+- **React:** Hooks, Container/View, Context API
+- **TypeScript:** Strict types, per-feature interfaces, import aliases
+- **Tailwind CSS:** Utility-first, config in `tailwind.config.ts`, UI built on Tailwind
+- **Supabase:** Client/server config in `lib/supabase/`, SQL schemas, auth middleware
+
+---
+
+## 10. Extension and Evolution
+
+- **Extension points:** Add new features/components by following existing patterns (Container/View, types, hooks, index)
+- **Scalability:** Fine-grained features, clear isolation, consistent import/export
+- **Refactoring:** Features can be moved/renamed without breaking others, design system evolves in `components/ui/`, changes documented in `memory-bank/`
+
+---
+
+## 11. Structure Templates
+
+### New Feature
+
+```bash
+components/features/public-site/{feature}/
+├── {Feature}Container.tsx
+├── {Feature}View.tsx
+├── hooks.ts
+├── types.ts
+└── index.ts
+```
+
+### New Home Section
+
+```bash
+components/features/public-site/home/{section}/
+├── {Section}Container.tsx
+├── {Section}View.tsx
+├── hooks.ts
+├── types.ts
+└── index.ts
+```
+
+### New Page
+
+```bash
+app/{route}/
+├── page.tsx
+├── layout.tsx
+└── client-page.tsx
+```
+
+---
+
+## 12. Structure Enforcement
+
+- **Validation:** ESLint for import/export patterns, code review for consistency
+- **Documentation:** Architecture blueprints in `memory-bank/architecture/`, technical docs in `doc/`, product context/epics in `memory-bank/`
+- **Evolution:** Blueprint updated on every significant change, architectural decisions tracked
+
+---
+
+> This blueprint was generated on August 27, 2025 and reflects the current state of the architecture. Update it after every significant structural change.

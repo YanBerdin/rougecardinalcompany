@@ -1,5 +1,7 @@
 "use client"
 
+//! ---------------- Warning -----------------//
+//TODO: Delete before production 
 import { useState, useEffect } from "react"
 import { createClient } from '@/lib/supabase/client'
 import { Button } from "@/components/ui/button"
