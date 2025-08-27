@@ -637,317 +637,399 @@ create index if not exists idx_articles_titre_trgm on public.articles_presse usi
 alter table public.profiles enable row level security;
 
 -- allow anyone to read public profiles
-drop policy if exists profiles_select_public on public.profiles;
-create policy profiles_select_public on public.profiles
-  for select
-  to anon, authenticated
-  using ( true );
+drop policy if exists "Profiles are viewable by everyone" on public.profiles;
+create policy "Profiles are viewable by everyone"
+on public.profiles
+for select
+to anon, authenticated
+using ( true );
 
 -- allow authenticated users to insert their own profile (must set user_id = auth.uid())
-drop policy if exists profiles_insert_authenticated on public.profiles;
-create policy profiles_insert_authenticated on public.profiles
-  for insert
-  to authenticated
-  with check ( (select auth.uid()) = user_id );
+drop policy if exists "Users can insert their own profile" on public.profiles;
+create policy "Users can insert their own profile"
+on public.profiles
+for insert
+to authenticated
+with check ( (select auth.uid()) = user_id );
 
 -- allow owners to update/delete their profile
-drop policy if exists profiles_update_owner on public.profiles;
-create policy profiles_update_owner on public.profiles
-  for update
-  to authenticated
-  using ( (select auth.uid()) = user_id )
-  with check ( (select auth.uid()) = user_id );
+drop policy if exists "Users can update their own profile" on public.profiles;
+create policy "Users can update their own profile"
+on public.profiles
+for update
+to authenticated
+using ( (select auth.uid()) = user_id )
+with check ( (select auth.uid()) = user_id );
 
-drop policy if exists profiles_delete_owner on public.profiles;
-create policy profiles_delete_owner on public.profiles
-  for delete
-  to authenticated
-  using ( (select auth.uid()) = user_id );
+drop policy if exists "Users can delete their own profile" on public.profiles;
+create policy "Users can delete their own profile"
+on public.profiles
+for delete
+to authenticated
+using ( (select auth.uid()) = user_id );
 
 
 -- ---- medias ----
 alter table public.medias enable row level security;
 
 -- anyone can read medias
-drop policy if exists medias_select_all on public.medias;
-create policy medias_select_all on public.medias
-  for select
-  to anon, authenticated
-  using ( true );
+drop policy if exists "Medias are viewable by everyone" on public.medias;
+create policy "Medias are viewable by everyone"
+on public.medias
+for select
+to anon, authenticated
+using ( true );
 
 -- authenticated users can insert medias (uploader recorded on client or via function)
-drop policy if exists medias_insert_authenticated on public.medias;
-create policy medias_insert_authenticated on public.medias
-  for insert
-  to authenticated
-  with check ( (select auth.uid()) is not null );
+drop policy if exists "Authenticated users can insert medias" on public.medias;
+create policy "Authenticated users can insert medias"
+on public.medias
+for insert
+to authenticated
+with check ( (select auth.uid()) is not null );
 
 -- uploader or admin can update
-drop policy if exists medias_update_uploader_or_admin on public.medias;
-create policy medias_update_uploader_or_admin on public.medias
-  for update
-  to authenticated
-  using ( uploaded_by = auth.uid() or public.is_admin() )
-  with check ( uploaded_by = auth.uid() or public.is_admin() );
+drop policy if exists "Uploaders or admins can update medias" on public.medias;
+create policy "Uploaders or admins can update medias"
+on public.medias
+for update
+to authenticated
+using ( uploaded_by = (select auth.uid()) or public.is_admin() )
+with check ( uploaded_by = (select auth.uid()) or public.is_admin() );
 
 -- uploader or admin can delete
-drop policy if exists medias_delete_uploader_or_admin on public.medias;
-create policy medias_delete_uploader_or_admin on public.medias
-  for delete
-  to authenticated
-  using ( uploaded_by = auth.uid() or public.is_admin() );
+drop policy if exists "Uploaders or admins can delete medias" on public.medias;
+create policy "Uploaders or admins can delete medias"
+on public.medias
+for delete
+to authenticated
+using ( uploaded_by = (select auth.uid()) or public.is_admin() );
 
 
 -- ---- spectacles ----
 alter table public.spectacles enable row level security;
 
 -- allow public reading only for spectacles flagged public=true
-drop policy if exists spectacles_select_public on public.spectacles;
-create policy spectacles_select_public on public.spectacles
-  for select
-  to anon, authenticated
-  using ( public = true );
+drop policy if exists "Public spectacles are viewable by everyone" on public.spectacles;
+create policy "Public spectacles are viewable by everyone"
+on public.spectacles
+for select
+to anon, authenticated
+using ( public = true );
 
 -- authenticated users can create spectacles (additional server-side checks recommended)
-drop policy if exists spectacles_insert_authenticated on public.spectacles;
-create policy spectacles_insert_authenticated on public.spectacles
-  for insert
-  to authenticated
-  with check ( (select auth.uid()) is not null );
+drop policy if exists "Authenticated users can create spectacles" on public.spectacles;
+create policy "Authenticated users can create spectacles"
+on public.spectacles
+for insert
+to authenticated
+with check ( (select auth.uid()) is not null );
 
 -- owner (created_by) or admin can update/delete
-drop policy if exists spectacles_update_owner_or_admin on public.spectacles;
-create policy spectacles_update_owner_or_admin on public.spectacles
-  for update
-  to authenticated
-  using ( (created_by = auth.uid()) or public.is_admin() )
-  with check ( (created_by = auth.uid()) or public.is_admin() );
+drop policy if exists "Owners or admins can update spectacles" on public.spectacles;
+create policy "Owners or admins can update spectacles"
+on public.spectacles
+for update
+to authenticated
+using ( (created_by = (select auth.uid())) or public.is_admin() )
+with check ( (created_by = (select auth.uid())) or public.is_admin() );
 
-drop policy if exists spectacles_delete_owner_or_admin on public.spectacles;
-create policy spectacles_delete_owner_or_admin on public.spectacles
-  for delete
-  to authenticated
-  using ( (created_by = auth.uid()) or public.is_admin() );
+drop policy if exists "Owners or admins can delete spectacles" on public.spectacles;
+create policy "Owners or admins can delete spectacles"
+on public.spectacles
+for delete
+to authenticated
+using ( (created_by = (select auth.uid())) or public.is_admin() );
 
 
 -- ---- evenements ----
 alter table public.evenements enable row level security;
 
 -- public can read events
-drop policy if exists evenements_select_public on public.evenements;
-create policy evenements_select_public on public.evenements
-  for select
-  to anon, authenticated
-  using ( true );
+drop policy if exists "Events are viewable by everyone" on public.evenements;
+create policy "Events are viewable by everyone"
+on public.evenements
+for select
+to anon, authenticated
+using ( true );
 
 -- creation reserved to admin or creators via server functions
-drop policy if exists evenements_insert_admin on public.evenements;
-create policy evenements_insert_admin on public.evenements
-  for insert
-  to authenticated
-  with check ( public.is_admin() );
+drop policy if exists "Admins can create events" on public.evenements;
+create policy "Admins can create events"
+on public.evenements
+for insert
+to authenticated
+with check ( public.is_admin() );
 
 -- update/delete reserved to admin
-drop policy if exists evenements_update_admin on public.evenements;
-create policy evenements_update_admin on public.evenements
-  for update
-  to authenticated
-  using ( public.is_admin() )
-  with check ( public.is_admin() );
+drop policy if exists "Admins can update events" on public.evenements;
+create policy "Admins can update events"
+on public.evenements
+for update
+to authenticated
+using ( public.is_admin() )
+with check ( public.is_admin() );
 
-drop policy if exists evenements_delete_admin on public.evenements;
-create policy evenements_delete_admin on public.evenements
-  for delete
-  to authenticated
-  using ( public.is_admin() );
+drop policy if exists "Admins can delete events" on public.evenements;
+create policy "Admins can delete events"
+on public.evenements
+for delete
+to authenticated
+using ( public.is_admin() );
 
 
 -- ---- membres_equipe ----
 alter table public.membres_equipe enable row level security;
 
-drop policy if exists membres_select_public on public.membres_equipe;
-create policy membres_select_public on public.membres_equipe
-  for select
-  to anon, authenticated
-  using ( active = true );
+drop policy if exists "Active team members are viewable by everyone" on public.membres_equipe;
+create policy "Active team members are viewable by everyone"
+on public.membres_equipe
+for select
+to anon, authenticated
+using ( active = true );
 
 -- admin-only modifications
-drop policy if exists membres_insert_admin on public.membres_equipe;
-create policy membres_insert_admin on public.membres_equipe
-  for insert
-  to authenticated
-  with check ( public.is_admin() );
+drop policy if exists "Admins can create team members" on public.membres_equipe;
+create policy "Admins can create team members"
+on public.membres_equipe
+for insert
+to authenticated
+with check ( public.is_admin() );
 
-drop policy if exists membres_update_admin on public.membres_equipe;
-create policy membres_update_admin on public.membres_equipe
-  for update
-  to authenticated
-  using ( public.is_admin() )
-  with check ( public.is_admin() );
+drop policy if exists "Admins can update team members" on public.membres_equipe;
+create policy "Admins can update team members"
+on public.membres_equipe
+for update
+to authenticated
+using ( public.is_admin() )
+with check ( public.is_admin() );
 
-drop policy if exists membres_delete_admin on public.membres_equipe;
-create policy membres_delete_admin on public.membres_equipe
-  for delete
-  to authenticated
-  using ( public.is_admin() );
+drop policy if exists "Admins can delete team members" on public.membres_equipe;
+create policy "Admins can delete team members"
+on public.membres_equipe
+for delete
+to authenticated
+using ( public.is_admin() );
 
 
 -- ---- lieux ----
 alter table public.lieux enable row level security;
 
-drop policy if exists lieux_select_public on public.lieux;
-create policy lieux_select_public on public.lieux
-  for select
-  to anon, authenticated
-  using ( true );
+drop policy if exists "Venues are viewable by everyone" on public.lieux;
+create policy "Venues are viewable by everyone"
+on public.lieux
+for select
+to anon, authenticated
+using ( true );
 
 -- admin-only create/update/delete for lieux
-drop policy if exists lieux_insert_admin on public.lieux;
-create policy lieux_insert_admin on public.lieux
-  for insert
-  to authenticated
-  with check ( public.is_admin() );
+drop policy if exists "Admins can create venues" on public.lieux;
+create policy "Admins can create venues"
+on public.lieux
+for insert
+to authenticated
+with check ( public.is_admin() );
 
-drop policy if exists lieux_update_admin on public.lieux;
-create policy lieux_update_admin on public.lieux
-  for update
-  to authenticated
-  using ( public.is_admin() )
-  with check ( public.is_admin() );
+drop policy if exists "Admins can update venues" on public.lieux;
+create policy "Admins can update venues"
+on public.lieux
+for update
+to authenticated
+using ( public.is_admin() )
+with check ( public.is_admin() );
 
-drop policy if exists lieux_delete_admin on public.lieux;
-create policy lieux_delete_admin on public.lieux
-  for delete
-  to authenticated
-  using ( public.is_admin() );
+drop policy if exists "Admins can delete venues" on public.lieux;
+create policy "Admins can delete venues"
+on public.lieux
+for delete
+to authenticated
+using ( public.is_admin() );
 
 
 -- ---- articles_presse ----
 alter table public.articles_presse enable row level security;
 
 -- public read for published articles (published_at not null and <= now())
-drop policy if exists articles_select_published on public.articles_presse;
-create policy articles_select_published on public.articles_presse
-  for select
-  to anon, authenticated
-  using ( published_at is not null and published_at <= now() );
+drop policy if exists "Published articles are viewable by everyone" on public.articles_presse;
+create policy "Published articles are viewable by everyone"
+on public.articles_presse
+for select
+to anon, authenticated
+using ( published_at is not null and published_at <= now() );
 
 -- insert by admin only
-drop policy if exists articles_insert_admin on public.articles_presse;
-create policy articles_insert_admin on public.articles_presse
-  for insert
-  to authenticated
-  with check ( public.is_admin() );
+drop policy if exists "Admins can create articles" on public.articles_presse;
+create policy "Admins can create articles"
+on public.articles_presse
+for insert
+to authenticated
+with check ( public.is_admin() );
 
 -- update/delete by admin only
-drop policy if exists articles_update_admin on public.articles_presse;
-create policy articles_update_admin on public.articles_presse
-  for update
-  to authenticated
-  using ( public.is_admin() )
-  with check ( public.is_admin() );
+drop policy if exists "Admins can update articles" on public.articles_presse;
+create policy "Admins can update articles"
+on public.articles_presse
+for update
+to authenticated
+using ( public.is_admin() )
+with check ( public.is_admin() );
 
-drop policy if exists articles_delete_admin on public.articles_presse;
-create policy articles_delete_admin on public.articles_presse
-  for delete
-  to authenticated
-  using ( public.is_admin() );
+drop policy if exists "Admins can delete articles" on public.articles_presse;
+create policy "Admins can delete articles"
+on public.articles_presse
+for delete
+to authenticated
+using ( public.is_admin() );
 
 
 -- ---- join tables (modify restricted to admin) ----
 alter table public.spectacles_membres_equipe enable row level security;
-drop policy if exists spectacles_membres_select on public.spectacles_membres_equipe;
-create policy spectacles_membres_select on public.spectacles_membres_equipe
-  for select
-  to anon, authenticated
-  using ( true );
+drop policy if exists "Spectacle member relations are viewable by everyone" on public.spectacles_membres_equipe;
+create policy "Spectacle member relations are viewable by everyone"
+on public.spectacles_membres_equipe
+for select
+to anon, authenticated
+using ( true );
 
-drop policy if exists spectacles_membres_modify_admin on public.spectacles_membres_equipe;
-create policy spectacles_membres_modify_admin on public.spectacles_membres_equipe
-  for insert, update, delete
-  to authenticated
-  using ( public.is_admin() )
-  with check ( public.is_admin() );
+drop policy if exists "Admins can create spectacle member relations" on public.spectacles_membres_equipe;
+create policy "Admins can create spectacle member relations"
+on public.spectacles_membres_equipe
+for insert
+to authenticated
+with check ( public.is_admin() );
+
+drop policy if exists "Admins can update spectacle member relations" on public.spectacles_membres_equipe;
+create policy "Admins can update spectacle member relations"
+on public.spectacles_membres_equipe
+for update
+to authenticated
+using ( public.is_admin() )
+with check ( public.is_admin() );
+
+drop policy if exists "Admins can delete spectacle member relations" on public.spectacles_membres_equipe;
+create policy "Admins can delete spectacle member relations"
+on public.spectacles_membres_equipe
+for delete
+to authenticated
+using ( public.is_admin() );
 
 alter table public.spectacles_medias enable row level security;
-drop policy if exists spectacles_medias_select on public.spectacles_medias;
-create policy spectacles_medias_select on public.spectacles_medias
-  for select
-  to anon, authenticated
-  using ( true );
+drop policy if exists "Spectacle media relations are viewable by everyone" on public.spectacles_medias;
+create policy "Spectacle media relations are viewable by everyone"
+on public.spectacles_medias
+for select
+to anon, authenticated
+using ( true );
 
-drop policy if exists spectacles_medias_modify_admin on public.spectacles_medias;
-create policy spectacles_medias_modify_admin on public.spectacles_medias
-  for insert, update, delete
-  to authenticated
-  using ( public.is_admin() )
-  with check ( public.is_admin() );
+drop policy if exists "Admins can create spectacle media relations" on public.spectacles_medias;
+create policy "Admins can create spectacle media relations"
+on public.spectacles_medias
+for insert
+to authenticated
+with check ( public.is_admin() );
+
+drop policy if exists "Admins can update spectacle media relations" on public.spectacles_medias;
+create policy "Admins can update spectacle media relations"
+on public.spectacles_medias
+for update
+to authenticated
+using ( public.is_admin() )
+with check ( public.is_admin() );
+
+drop policy if exists "Admins can delete spectacle media relations" on public.spectacles_medias;
+create policy "Admins can delete spectacle media relations"
+on public.spectacles_medias
+for delete
+to authenticated
+using ( public.is_admin() );
 
 alter table public.articles_medias enable row level security;
-drop policy if exists articles_medias_select on public.articles_medias;
-create policy articles_medias_select on public.articles_medias
-  for select
-  to anon, authenticated
-  using ( true );
+drop policy if exists "Article media relations are viewable by everyone" on public.articles_medias;
+create policy "Article media relations are viewable by everyone"
+on public.articles_medias
+for select
+to anon, authenticated
+using ( true );
 
-drop policy if exists articles_medias_modify_admin on public.articles_medias;
-create policy articles_medias_modify_admin on public.articles_medias
-  for insert, update, delete
-  to authenticated
-  using ( public.is_admin() )
-  with check ( public.is_admin() );
+drop policy if exists "Admins can create article media relations" on public.articles_medias;
+create policy "Admins can create article media relations"
+on public.articles_medias
+for insert
+to authenticated
+with check ( public.is_admin() );
+
+drop policy if exists "Admins can update article media relations" on public.articles_medias;
+create policy "Admins can update article media relations"
+on public.articles_medias
+for update
+to authenticated
+using ( public.is_admin() )
+with check ( public.is_admin() );
+
+drop policy if exists "Admins can delete article media relations" on public.articles_medias;
+create policy "Admins can delete article media relations"
+on public.articles_medias
+for delete
+to authenticated
+using ( public.is_admin() );
 
 
 -- ---- abonnés_newsletter ----
 alter table public.abonnes_newsletter enable row level security;
 
 -- allow inserts for subscriptions (anon too)
-drop policy if exists abonnes_insert_any on public.abonnes_newsletter;
-create policy abonnes_insert_any on public.abonnes_newsletter
-  for insert
-  to anon, authenticated
-  with check ( email is not null );
+drop policy if exists "Anyone can subscribe to newsletter" on public.abonnes_newsletter;
+create policy "Anyone can subscribe to newsletter"
+on public.abonnes_newsletter
+for insert
+to anon, authenticated
+with check ( email is not null );
 
 -- select allowed only for authenticated/admins via profiles
-drop policy if exists abonnes_select_service_or_admin on public.abonnes_newsletter;
-create policy abonnes_select_service_or_admin on public.abonnes_newsletter
-  for select
-  to authenticated
-  using ( public.is_admin() );
+drop policy if exists "Admins can view newsletter subscribers" on public.abonnes_newsletter;
+create policy "Admins can view newsletter subscribers"
+on public.abonnes_newsletter
+for select
+to authenticated
+using ( public.is_admin() );
 
 -- delete allowed only for admins
-drop policy if exists abonnes_delete_service_or_admin on public.abonnes_newsletter;
-create policy abonnes_delete_service_or_admin on public.abonnes_newsletter
-  for delete
-  to authenticated
-  using ( public.is_admin() );
+drop policy if exists "Admins can delete newsletter subscribers" on public.abonnes_newsletter;
+create policy "Admins can delete newsletter subscribers"
+on public.abonnes_newsletter
+for delete
+to authenticated
+using ( public.is_admin() );
 
 
 -- ---- configurations_site ----
 alter table public.configurations_site enable row level security;
 
-drop policy if exists configurations_site_select_service on public.configurations_site;
-create policy configurations_site_select_service on public.configurations_site
-  for select
-  to authenticated
-  using ( public.is_admin() );
+drop policy if exists "Admins can view site configurations" on public.configurations_site;
+create policy "Admins can view site configurations"
+on public.configurations_site
+for select
+to authenticated
+using ( public.is_admin() );
 
-drop policy if exists configurations_site_update_service on public.configurations_site;
-create policy configurations_site_update_service on public.configurations_site
-  for update
-  to authenticated
-  using ( public.is_admin() )
-  with check ( public.is_admin() );
+drop policy if exists "Admins can update site configurations" on public.configurations_site;
+create policy "Admins can update site configurations"
+on public.configurations_site
+for update
+to authenticated
+using ( public.is_admin() )
+with check ( public.is_admin() );
 
 
 -- ---- logs_audit ----
 alter table public.logs_audit enable row level security;
 
-drop policy if exists logs_audit_select_service on public.logs_audit;
-create policy logs_audit_select_service on public.logs_audit
-  for select
-  to authenticated
-  using ( public.is_admin() );
+drop policy if exists "Admins can view audit logs" on public.logs_audit;
+create policy "Admins can view audit logs"
+on public.logs_audit
+for select
+to authenticated
+using ( public.is_admin() );
 
 -- add comments on tables and columns to follow the style guide
 
@@ -2601,25 +2683,70 @@ with check ( (select p.role from public.profiles p where p.user_id = (select aut
 alter table public.cache_keys enable row level security;
 
 -- Accès restreint aux admins uniquement
-drop policy if exists "Admins can manage cache keys" on public.cache_keys;
-create policy "Admins can manage cache keys"
+drop policy if exists "Admins can select cache keys" on public.cache_keys;
+create policy "Admins can select cache keys"
 on public.cache_keys
-for all
+for select
+to authenticated
+using ( (select p.role from public.profiles p where p.user_id = (select auth.uid())) = 'admin' );
+
+drop policy if exists "Admins can insert cache keys" on public.cache_keys;
+create policy "Admins can insert cache keys"
+on public.cache_keys
+for insert
+to authenticated
+with check ( (select p.role from public.profiles p where p.user_id = (select auth.uid())) = 'admin' );
+
+drop policy if exists "Admins can update cache keys" on public.cache_keys;
+create policy "Admins can update cache keys"
+on public.cache_keys
+for update
 to authenticated
 using ( (select p.role from public.profiles p where p.user_id = (select auth.uid())) = 'admin' )
 with check ( (select p.role from public.profiles p where p.user_id = (select auth.uid())) = 'admin' );
 
+drop policy if exists "Admins can delete cache keys" on public.cache_keys;
+create policy "Admins can delete cache keys"
+on public.cache_keys
+for delete
+to authenticated
+using ( (select p.role from public.profiles p where p.user_id = (select auth.uid())) = 'admin' );
+
 -- ---- user_preferences ----
 alter table public.user_preferences enable row level security;
 
--- Utilisateurs peuvent lire/modifier leurs propres préférences
-drop policy if exists "Users can manage their own preferences" on public.user_preferences;
-create policy "Users can manage their own preferences"
+-- Utilisateurs peuvent lire leurs propres préférences
+drop policy if exists "Users can select their own preferences" on public.user_preferences;
+create policy "Users can select their own preferences"
 on public.user_preferences
-for all
+for select
+to authenticated
+using ( (select auth.uid()) = user_id );
+
+-- Utilisateurs peuvent créer leurs propres préférences
+drop policy if exists "Users can insert their own preferences" on public.user_preferences;
+create policy "Users can insert their own preferences"
+on public.user_preferences
+for insert
+to authenticated
+with check ( (select auth.uid()) = user_id );
+
+-- Utilisateurs peuvent modifier leurs propres préférences
+drop policy if exists "Users can update their own preferences" on public.user_preferences;
+create policy "Users can update their own preferences"
+on public.user_preferences
+for update
 to authenticated
 using ( (select auth.uid()) = user_id )
 with check ( (select auth.uid()) = user_id );
+
+-- Utilisateurs peuvent supprimer leurs propres préférences
+drop policy if exists "Users can delete their own preferences" on public.user_preferences;
+create policy "Users can delete their own preferences"
+on public.user_preferences
+for delete
+to authenticated
+using ( (select auth.uid()) = user_id );
 
 -- Admins peuvent voir toutes les préférences
 drop policy if exists "Admins can view all preferences" on public.user_preferences;
