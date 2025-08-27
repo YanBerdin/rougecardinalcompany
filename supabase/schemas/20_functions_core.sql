@@ -116,3 +116,21 @@ $$;
 
 comment on function public.to_tsvector_french(text) is 
 'Helper function for French full-text search vector generation. Marked IMMUTABLE because same input always produces same output, enabling PostgreSQL query optimization and index usage.';
+
+-- Fonction de test de connexion Supabase
+create or replace function public.get_current_timestamp()
+returns timestamptz
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  return now();
+end;
+$$;
+
+comment on function public.get_current_timestamp() is 
+'Function to test Supabase connection. Uses SECURITY DEFINER to ensure it always works regardless of user permissions. Used for health checks and connectivity testing from client applications.';
+
+-- Grant execute permission to anonymous users
+grant execute on function public.get_current_timestamp() to anon;
