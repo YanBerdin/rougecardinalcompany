@@ -1,3 +1,19 @@
+-- ============================================================================
+-- SCHEMA DÉCLARATIF ROUGE CARDINAL COMPANY
+-- ============================================================================
+-- 
+-- Ce fichier définit l'état souhaité de la base de données selon les principes
+-- du Declarative Database Schema Management de Supabase.
+--
+-- INSTRUCTIONS IMPORTANTES :
+-- 1. Ce fichier représente l'état final désiré de la base de données
+-- 2. Toute modification doit être faite dans ce fichier, PAS dans migrations/
+-- 3. Génération des migrations via : supabase db diff -f <migration_name>
+-- 4. Les opérations DML (INSERT/UPDATE/DELETE) doivent être gérées séparément
+--
+-- Voir : .github/copilot/Declarative_Database_Schema.Instructions.md
+-- ============================================================================
+
 -- Fonction pour créer automatiquement un profil lors de l'inscription
 create or replace function public.handle_new_user()
 returns trigger
@@ -171,30 +187,27 @@ create trigger on_auth_user_updated
   for each row execute function public.handle_user_update();
 
 -- Migration ponctuelle : Synchronisation des profils existants
--- Cette opération de données peut rester en migration car c'est une opération ponctuelle
+-- EXTRACTED: Cette opération DML a été déplacée vers une migration dédiée
+-- car les opérations de données ne sont pas capturées par le schema diff.
+-- Voir: Declarative_Database_Schema.Instructions.md - section "Known caveats"
 
-insert into public.profiles (user_id, display_name, role)
-select 
-  u.id as user_id,
-  coalesce(
-    u.raw_user_meta_data ->> 'display_name',
-    concat_ws(' ', 
-      u.raw_user_meta_data ->> 'first_name', 
-      u.raw_user_meta_data ->> 'last_name'
-    ),
-    u.email
-  ) as display_name,
-  case 
-    when u.raw_user_meta_data ->> 'role' in ('user', 'editor', 'admin') 
-    then u.raw_user_meta_data ->> 'role'
-    else 'user'
-  end as role
-from auth.users as u 
-left join public.profiles as p on p.user_id = u.id 
-where p.user_id is null;
+-- Migration créée : supabase/migrations/sync_existing_profiles.sql
+-- Pour exécuter cette migration après application du schéma :
+-- 1. Appliquer d'abord le schéma déclaratif via : supabase db diff -f apply_declarative_schema
+-- 2. Puis exécuter la migration de données : supabase db push
+-- 3. Ou exécuter manuellement : psql -f supabase/migrations/sync_existing_profiles.sql
+
+-- ============================================================================
+-- SECTION 1: EXTENSIONS
+-- ============================================================================
 
 create extension if not exists "pgcrypto"; -- optional: provides gen_random_uuid() if you still need UUIDs
 create extension if not exists pg_trgm;   -- optional: trigram indexes for fuzzy search
+
+-- ============================================================================
+-- SECTION 2: TABLES PRINCIPALES
+-- ============================================================================
+-- Ordre d'exécution respecté pour les dépendances (foreign keys)
 
 -- core tables: profiles, medias, membres_equipe, lieux, spectacles, evenements, articles_presse,
 -- abonnes_newsletter, messages_contact, configurations_site, logs_audit
@@ -358,6 +371,10 @@ create table public.logs_audit (
   created_at timestamptz default now() not null
 );
 
+-- ============================================================================
+-- SECTION 3: TABLES DE LIAISON (Many-to-Many)
+-- ============================================================================
+
 -- join tables many-to-many
 
 -- spectacles <-> membres_equipe
@@ -386,6 +403,10 @@ create table public.articles_medias (
   ordre smallint default 0,
   primary key (article_id, media_id)
 );
+
+-- ============================================================================
+-- SECTION 4: FONCTIONS ET TRIGGERS
+-- ============================================================================
 
 -- helper functions and triggers
 
@@ -576,6 +597,10 @@ BEGIN
 END;
 $$;
 
+-- ============================================================================
+-- SECTION 5: INDEX ET OPTIMISATIONS
+-- ============================================================================
+
 -- indexes and fulltext
 
 -- evenements date index
@@ -626,6 +651,10 @@ create index if not exists idx_articles_published_at on public.articles_presse (
 -- trigram indexes for fuzzy title search
 create index if not exists idx_spectacles_titre_trgm on public.spectacles using gin (titre gin_trgm_ops);
 create index if not exists idx_articles_titre_trgm on public.articles_presse using gin (titre gin_trgm_ops);
+
+-- ============================================================================
+-- SECTION 6: ROW LEVEL SECURITY (RLS) POLICIES
+-- ============================================================================
 
 -- row level security policies. strict best-practice implementation for Supabase.
 -- Notes:
@@ -3163,4 +3192,20 @@ begin
   raise notice 'Pour les tests de performance, analysez les plans d''exécution ci-dessus.';
 end;
 $$;
+
+-- ============================================================================
+-- FIN DU SCHEMA DÉCLARATIF ROUGE CARDINAL COMPANY
+-- ============================================================================
+-- 
+-- PROCHAINES ÉTAPES POUR APPLIQUER CE SCHÉMA :
+-- 
+-- 1. Arrêter l'environnement local : supabase stop
+-- 2. Générer les migrations : supabase db diff -f apply_declarative_schema
+-- 3. Vérifier le fichier de migration généré avant application
+-- 4. Appliquer les migrations : supabase db push
+-- 
+-- RAPPEL : Toute modification future de ce schéma doit être suivie par
+-- une nouvelle génération de migration avec supabase db diff
+-- 
+-- ============================================================================
 
