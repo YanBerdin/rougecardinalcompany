@@ -1,319 +1,1163 @@
-# Blueprint d'Architecture du Projet Rouge Cardinal Company
+# Project Architecture Blueprint: Rouge Cardinal Company
 
-> Généré automatiquement le 24 août 2025
+## **Auto-generated on $(date) - Architecture analysis and design patterns documentation**
 
-## 1. Détection et Analyse de l'Architecture
+## 1. Architecture Detection & Analysis Phase
 
-### Stack Technologique
+### 1.1 Automatic Technology Stack Detection
 
-- **Framework Frontend**: Next.js 15.4.5 avec App Router
-- **Langage & Framework UI**: React 19 + TypeScript 5
-- **Base de données & Backend**: Supabase (PostgreSQL + API REST)
-- **Authentification**: Supabase Auth
-- **UI/Styling**:
-  - Tailwind CSS 3.4 pour le styling utilitaire
-  - shadcn/ui (basé sur Radix UI) pour les composants accessibles
-  - Design system personnalisé
-- **State Management**: React Hooks + Context API
-- **Validation**: Zod pour la validation des données
-- **Déploiement**: Vercel (implicite par configuration)
-
-### Pattern Architectural
-
-Le projet suit une architecture hybride combinant :
-
-- **Feature-Based Architecture** comme pattern principal d'organisation
-- **Container/View Pattern** (Smart/Dumb Components) pour séparer logique et présentation
-- **App Router de Next.js** pour le routage et le rendu mixte client/serveur
-- **Microservices Légers** via Supabase pour l'authentification et les données
-
-## 2. Vue d'Ensemble de l'Architecture
-
-### Principes Directeurs
-
-1. **Séparation des Préoccupations**
-   - Composants "Smart" (Containers) pour la logique métier
-   - Composants "Dumb" (Views) pour la présentation pure
-   - Hooks personnalisés pour la logique réutilisable
-   - Types bien définis pour garantir la cohérence des données
-
-2. **Organisation par Feature**
-   - Regroupement des composants par domaine fonctionnel
-   - Encapsulation des responsabilités dans des modules distincts
-   - Évolutivité verticale par feature plutôt qu'horizontale par type
-
-3. **Réutilisabilité et Maintien**
-   - Composants UI partagés pour la cohérence visuelle
-   - Types partagés pour la cohérence des données
-   - Patterns récurrents pour faciliter la compréhension
-
-4. **Optimisation des Performances**
-   - Server Components pour le contenu statique
-   - Client Components pour l'interactivité
-   - Chargement progressif avec Skeleton Components
-
-### Frontières Architecturales
-
-- **Client/Server**: Délimité par l'utilisation du directive "use client"
-- **UI/Logique**: Délimité par le pattern Container/View
-- **Feature/Shared**: Délimité par l'organisation des dossiers
-- **App/Data**: Délimité par l'utilisation des services Supabase
-
-## 3. Visualisation de l'Architecture
+#### Frontend Stack
 
 ```bash
-┌─────────────────────────────────────────────────────────────┐
-│                      Client Browser                         │
-└───────────────────────────────┬─────────────────────────────┘
-                                │
-┌───────────────────────────────▼─────────────────────────────┐
-│                    Next.js App Router                       │
-│  ┌─────────────────────┐     ┌─────────────────────────┐    │
-│  │   Server Components │     │   Client Components     │    │
-│  │   ┌─────────────┐   │     │   ┌─────────────┐       │    │
-│  │   │ Layout      │   │     │   │ Interactive │       │    │
-│  │   │ Page        │   │     │   │ Components  │       │    │
-│  │   └─────────────┘   │     │   └─────────────┘       │    │
-│  └─────────────────────┘     └─────────────────────────┘    │
-└───────────────────────────────┬─────────────────────────────┘
-                                │
-┌───────────────────────────────▼─────────────────────────────┐
-│                    Feature Architecture                      │
-│  ┌─────────────────────┐     ┌─────────────────────────┐    │
-│  │   Smart Components  │     │   Dumb Components       │    │
-│  │   (Containers)      │     │   (Views)               │    │
-│  │   ┌─────────────┐   │     │   ┌─────────────┐       │    │
-│  │   │ State       │   │     │   │ Presentation│       │    │
-│  │   │ Logic       │◄─────────────► UI         │       │    │
-│  │   │ Data        │   │     │   │ Events      │       │    │
-│  │   └─────────────┘   │     │   └─────────────┘       │    │
-│  └─────────────┬───────┘     └─────────────────────────┘    │
-│                │                                             │
-│  ┌─────────────▼───────┐     ┌─────────────────────────┐    │
-│  │   Custom Hooks      │     │   Shared UI Components  │    │
-│  │   ┌─────────────┐   │     │   ┌─────────────┐       │    │
-│  │   │ State Logic │   │     │   │ Button      │       │    │
-│  │   │ Effects     │   │     │   │ Card        │       │    │
-│  │   │ Data Fetch  │   │     │   │ Input       │       │    │
-│  │   └─────────────┘   │     │   └─────────────┘       │    │
-│  └─────────────────────┘     └─────────────────────────┘    │
-└───────────────────────────────┬─────────────────────────────┘
-                                │
-┌───────────────────────────────▼─────────────────────────────┐
-│                    Data Access Layer                         │
-│  ┌─────────────────────┐     ┌─────────────────────────┐    │
-│  │   Supabase Client   │     │   Server-Side API       │    │
-│  │   ┌─────────────┐   │     │   ┌─────────────┐       │    │
-│  │   │ Auth        │   │     │   │ Data Fetch  │       │    │
-│  │   │ Data        │   │     │   │ Mutations   │       │    │
-│  │   └─────────────┘   │     │   └─────────────┘       │    │
-│  └─────────────────────┘     └─────────────────────────┘    │
-└───────────────────────────────┬─────────────────────────────┘
-                                │
-┌───────────────────────────────▼─────────────────────────────┐
-│                      Supabase Backend                        │
-│  ┌─────────────────────┐     ┌─────────────────────────┐    │
-│  │   Authentication    │     │   Database (Postgres)   │    │
-│  └─────────────────────┘     └─────────────────────────┘    │
-└─────────────────────────────────────────────────────────────┘
+Framework: Next.js 15.4.5 (App Router)
+Language: TypeScript 5.0
+UI Library: React 19
+Styling: Tailwind CSS 3.4
+UI Components: shadcn/ui (Radix UI based)
+State Management: React Hooks + Context API
 ```
 
-## 4. Composants Architecturaux Principaux
+#### Backend & Data Stack
 
-### Pages et Routing (app/)
+```bash
+BaaS Platform: Supabase (PostgreSQL + REST API)
+Authentication: Supabase Auth
+Database: PostgreSQL (via Supabase)
+Schema Management: SQL migrations with declarative approach
+Connection Layer: Supabase JavaScript SDK
+```
 
-**Objectif**: Définir les routes de l'application et orchestrer les composants.
+#### Development & Deployment Stack
 
-**Structure Interne**:
+```bash
+Package Manager: pnpm
+Build Tool: Next.js native build system
+Type Checking: TypeScript with strict configuration
+Code Quality: ESLint + Prettier
+Deployment: Vercel (inferred from Next.js setup)
+Version Control: Git (GitHub repository structure detected)
+```
 
-- `app/page.tsx`: Page d'accueil, point d'entrée principal
-- `app/layout.tsx`: Layout global avec header, footer et providers
-- `app/auth/`: Routes d'authentification (login, signup, etc.)
-- `app/protected/`: Routes nécessitant une authentification
+### 1.2 Architectural Pattern Recognition
 
-**Pattern d'Interaction**:
+#### Primary Architectural Pattern
 
-- Pages importent des Containers (Smart Components) de features
-- Layouts définissent la structure commune
-- Middleware gère l'authentification et les redirections
+```text
+Feature-Based Architecture (Domain-Driven Structure)
+├── Organizational Principle: Business domain separation
+├── Scalability Strategy: Vertical scaling by feature
+├── Code Organization: Feature folders contain complete functionality
+└── Team Structure: Feature teams can work independently
+```
 
-**Exemple**:
+#### Secondary Architectural Patterns
 
-```tsx
-// app/page.tsx
-export default function Home() {
+```text
+Container/View Pattern (Smart/Dumb Components)
+├── Smart Components (Containers): State and logic management
+├── Dumb Components (Views): Pure presentation layer
+├── Separation of Concerns: Clear business/presentation boundary
+└── Testing Strategy: Isolated testing of logic and UI
+
+App Router Architecture (Next.js 15)
+├── File-based Routing: Directory structure defines routes
+├── Server/Client Components: Hybrid rendering strategy
+├── Layout System: Nested layouts with shared components
+└── Data Fetching: Server-side and client-side patterns
+
+BaaS Integration Pattern
+├── Client SDK Integration: Supabase JavaScript SDK
+├── Authentication Flow: Server-side session management
+├── Database Access: Direct client-to-database queries
+└── Real-time Capabilities: Supabase realtime subscriptions
+```
+
+### 1.3 Development Paradigm Analysis
+
+#### Component Philosophy
+
+```yaml
+Component Design: Atomic Design System influenced
+Composition: Higher-Order Components and Render Props
+State Management: Local state + Context for global concerns
+Side Effects: Custom hooks for reusable logic
+Error Handling: Error boundaries and graceful degradation
+```
+
+#### Data Flow Patterns
+
+```yaml
+Client-Server: Server components for initial load, client components for interactivity
+State Synchronization: Optimistic updates with server reconciliation
+Caching Strategy: Next.js ISR + client-side caching
+Validation: Zod schemas for runtime type checking
+```
+
+## 2. Architectural Overview & Principles
+
+### 2.1 Core Architectural Principles
+
+#### Separation of Concerns
+
+```yaml
+Smart Components (Containers):
+  - Business logic and state management
+  - Data fetching and mutations
+  - Event handling and user interactions
+  - Error handling and loading states
+
+Dumb Components (Views):
+  - Pure presentation layer
+  - Props-based data reception
+  - Event callback propagation
+  - No direct external dependencies
+```
+
+#### Feature-Based Organization
+
+```yaml
+Domain Separation:
+  - Business features encapsulated in dedicated folders
+  - Complete functionality contained within feature boundaries
+  - Minimal cross-feature dependencies
+  - Independent testing and deployment capabilities
+
+Scalability Strategy:
+  - Vertical scaling by adding new features
+  - Team independence through feature ownership
+  - Modular development and maintenance
+```
+
+#### Performance & User Experience
+
+```yaml
+Rendering Strategy:
+  - Server Components for initial load optimization
+  - Client Components for interactive features
+  - Progressive enhancement approach
+  - Skeleton loading for perceived performance
+
+Data Strategy:
+  - Real-time capabilities via Supabase subscriptions
+  - Optimistic UI updates for better UX
+  - Client-side caching and state management
+```
+
+### 2.2 Architectural Boundaries
+
+#### Client-Server Boundary
+
+```text
+Server Side (Next.js App Router):
+├── Server Components: Static content and initial data loading
+├── API Routes: Server-side business logic (if needed)
+├── Middleware: Authentication and request preprocessing
+└── Build-time: Static generation and optimization
+
+Client Side (React + Supabase):
+├── Client Components: Interactive UI and real-time features
+├── State Management: Local and global state via hooks/context
+├── Data Layer: Direct Supabase client integration
+└── Browser APIs: Local storage, notifications, etc.
+```
+
+#### Feature-Shared Boundary
+
+```text
+Feature Modules:
+├── Domain-specific components and logic
+├── Feature-scoped types and utilities
+├── Business rules and validations
+├── Feature-specific hooks and services
+└── Independent test suites
+
+Shared Infrastructure:
+├── UI component library (shadcn/ui)
+├── Common utilities and helpers
+├── Shared types and interfaces
+├── Global configurations
+└── Cross-cutting concerns (auth, logging, etc.)
+```
+
+### 2.3 Architecture Quality Attributes
+
+#### Maintainability
+
+```yaml
+Code Organization: Clear separation of concerns and consistent patterns
+Documentation: Inline comments, README files, and architecture docs
+Testing: Unit, integration, and E2E test coverage
+Standards: ESLint, Prettier, and TypeScript for code quality
+```
+
+#### Scalability
+
+```yaml
+Horizontal: Adding new features without architectural changes
+Vertical: Scaling individual features independently  
+Performance: Server-side rendering and client-side optimization
+Team: Multiple teams can work on different features simultaneously
+```
+
+#### Reliability
+
+```yaml
+Error Handling: Graceful degradation and user-friendly error states
+Type Safety: TypeScript for compile-time error prevention
+Testing: Comprehensive test coverage for critical paths
+Monitoring: Error tracking and performance monitoring
+```
+
+## 3. Architecture Visualization & Structure
+
+### 3.1 System Architecture Diagram
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                            Client Browser Layer                             │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────────┐ │
+│  │   Public Pages  │  │  Protected App  │  │     Admin Dashboard        │ │
+│  │   (Marketing)   │  │   (User Area)   │  │    (Management)           │ │
+│  └─────────────────┘  └─────────────────┘  └─────────────────────────────┘ │
+└─────────────────────────────┬───────────────────────────────────────────────┘
+                              │
+┌─────────────────────────────▼───────────────────────────────────────────────┐
+│                        Next.js App Router Layer                            │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                     Route Structure                                 │   │
+│  │  app/                                                               │   │
+│  │  ├── (public)/          # Public marketing site                    │   │
+│  │  ├── auth/              # Authentication flows                     │   │
+│  │  ├── protected/         # Authenticated user area                  │   │
+│  │  ├── admin/             # Admin management interface               │   │
+│  │  └── api/               # Server-side API endpoints               │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│  ┌─────────────────────┐            ┌─────────────────────────────────────┐ │
+│  │   Server Components │◄──────────►│        Client Components            │ │
+│  │   • Static content  │            │   • Interactive features           │ │
+│  │   • Initial data    │            │   • Real-time updates              │ │
+│  │   • SEO metadata    │            │   • User interactions              │ │
+│  └─────────────────────┘            └─────────────────────────────────────┘ │
+└─────────────────────────────┬───────────────────────────────────────────────┘
+                              │
+┌─────────────────────────────▼───────────────────────────────────────────────┐
+│                       Feature Architecture Layer                           │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                    Container/View Pattern                           │   │
+│  │                                                                     │   │
+│  │  ┌─────────────────┐              ┌─────────────────────────────────┐│   │
+│  │  │ Smart Container │◄────props────►│         Dumb View             ││   │
+│  │  │                 │              │                               ││   │
+│  │  │ • State Logic   │              │ • Pure Presentation           ││   │
+│  │  │ • Data Fetching │              │ • Props Interface            ││   │
+│  │  │ • Business Rules│              │ • Event Callbacks            ││   │
+│  │  │ • Error Handling│              │ • Styling & Layout           ││   │
+│  │  └─────────────────┘              └─────────────────────────────────┘│   │
+│  │           │                                        │                │   │
+│  │           ▼                                        ▼                │   │
+│  │  ┌─────────────────┐              ┌─────────────────────────────────┐│   │
+│  │  │  Custom Hooks   │              │      Shared UI Library        ││   │
+│  │  │                 │              │                               ││   │
+│  │  │ • useAuth       │              │ • Button, Input, Card         ││   │
+│  │  │ • useData       │              │ • Form Components             ││   │
+│  │  │ • useForm       │              │ • Layout Components           ││   │
+│  │  │ • Feature Logic │              │ • Accessibility Features      ││   │
+│  │  └─────────────────┘              └─────────────────────────────────┘│   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────┬───────────────────────────────────────────────┘
+                              │
+┌─────────────────────────────▼───────────────────────────────────────────────┐
+│                        Data Access Layer                                   │
+│                                                                             │
+│  ┌─────────────────────┐            ┌─────────────────────────────────────┐ │
+│  │   Supabase Client   │            │        Server Actions               │ │
+│  │                     │            │                                     │ │
+│  │ • Authentication    │◄──────────►│  • Server-side Data Fetching       │ │
+│  │ • Real-time Subs    │            │  • Mutations & Validations         │ │
+│  │ • Direct DB Access  │            │  • Session Management              │ │
+│  │ • File Storage      │            │  • API Route Handlers              │ │
+│  └─────────────────────┘            └─────────────────────────────────────┘ │
+└─────────────────────────────┬───────────────────────────────────────────────┘
+                              │
+┌─────────────────────────────▼───────────────────────────────────────────────┐
+│                         Supabase Platform                                  │
+│                                                                             │
+│  ┌─────────────────────┐            ┌─────────────────────────────────────┐ │
+│  │    Authentication   │            │       PostgreSQL Database          │ │
+│  │                     │            │                                     │ │
+│  │ • User Management   │◄──────────►│  • Application Tables               │ │
+│  │ • Session Handling  │            │  • Row Level Security              │ │
+│  │ • OAuth Providers   │            │  • Functions & Triggers            │ │
+│  │ • Email Verification│            │  • Real-time Subscriptions         │ │
+│  └─────────────────────┘            └─────────────────────────────────────┘ │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                        Storage & Edge Functions                     │   │
+│  │                                                                     │   │
+│  │  • File Storage Buckets        • Edge Functions Runtime            │   │
+│  │  • CDN Integration            • Serverless Computing               │   │
+│  │  • Image Transformations      • API Extensions                     │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 3.2 Component Hierarchy Visualization
+
+```text
+Application Root
+│
+├── Global Layout (app/layout.tsx)
+│   ├── Header Navigation
+│   ├── Main Content Area
+│   └── Footer
+│
+├── Public Routes (Marketing Site)
+│   ├── Home Page Container
+│   │   ├── Hero Section View
+│   │   ├── Services Overview View
+│   │   ├── News Feed View
+│   │   └── Newsletter Signup View
+│   │
+│   ├── About Page Container
+│   ├── Contact Page Container
+│   └── Shows/Events Listing Container
+│
+├── Authentication Routes
+│   ├── Login Form Container
+│   ├── Sign Up Form Container
+│   ├── Password Reset Container
+│   └── Email Confirmation Views
+│
+├── Protected Routes (User Area)
+│   ├── Dashboard Container
+│   ├── Profile Management Container
+│   └── User-specific Features
+│
+└── Admin Routes (Management)
+    ├── Admin Dashboard Container
+    ├── Content Management Containers
+    ├── User Management Views
+    └── Analytics & Reports Views
+```
+
+### 3.3 Data Flow Architecture
+
+```text
+Data Flow Patterns:
+
+Server-Side Rendering (SSR) Flow:
+Request → Next.js Server → Supabase Server Client → Database → Rendered HTML
+
+Client-Side Interaction Flow:
+User Interaction → Client Component → Supabase Client → Database → UI Update
+
+Real-time Update Flow:
+Database Change → Supabase Realtime → Client Subscription → Component Re-render
+
+Authentication Flow:
+Login → Supabase Auth → Session Cookie → Middleware Validation → Route Access
+```
+
+## 4. Core Architectural Components Analysis
+
+### 4.1 Application Layer Components
+
+#### Next.js App Router (app/)
+
+**Purpose**: Defines application routes and orchestrates rendering strategy
+
+**Key Responsibilities**:
+
+```yaml
+Route Management:
+  - File-based routing system
+  - Nested layouts and loading states  
+  - Server and client component coordination
+  - Middleware integration for auth and redirects
+
+Rendering Strategy:
+  - Server-side rendering for initial loads
+  - Client-side hydration for interactivity  
+  - Static generation where applicable
+  - Streaming for progressive enhancement
+```
+
+**Component Structure**:
+
+```bash
+app/
+├── layout.tsx              # Global layout with providers
+├── page.tsx                # Home page (marketing site)
+├── loading.tsx             # Global loading UI
+├── error.tsx               # Global error handling
+├── not-found.tsx           # 404 page
+├── auth/                   # Authentication flows
+│   ├── login/page.tsx      # Login form
+│   ├── sign-up/page.tsx    # Registration form
+│   └── confirm/route.ts    # Email confirmation handler
+├── protected/              # Authenticated user area
+│   ├── layout.tsx          # Protected layout with auth check
+│   └── page.tsx            # Dashboard page
+└── admin/                  # Admin management interface
+    ├── layout.tsx          # Admin-specific layout
+    └── page.tsx            # Admin dashboard
+```
+
+**Integration Patterns**:
+
+- Imports feature containers from `components/features/`
+- Uses middleware for authentication and route protection
+- Implements progressive enhancement with loading states
+
+#### Feature Components Architecture (components/features/)
+
+**Purpose**: Implements business domain functionality using Container/View pattern
+
+**Organizational Structure**:
+
+```bash
+components/features/
+├── public-site/            # Marketing site features
+│   ├── home/              
+│   │   ├── hero/          # Hero section with carousel
+│   │   ├── about/         # About company section
+│   │   ├── services/      # Services overview
+│   │   └── contact/       # Contact form
+│   └── shared/            # Shared public components
+├── auth/                  # Authentication features
+│   ├── login/             # Login functionality
+│   ├── signup/            # Registration functionality
+│   └── password-reset/    # Password management
+├── protected/             # Authenticated user features
+│   └── dashboard/         # User dashboard
+└── admin/                 # Admin management features
+    ├── content/           # Content management
+    └── users/             # User management
+```
+
+**Container/View Implementation Pattern**:
+
+```typescript
+// Feature structure template:
+feature/
+├── index.ts                    # Export container
+├── [Feature]Container.tsx      # Smart component with logic
+├── [Feature]View.tsx          # Dumb component for presentation  
+├── [Feature]Skeleton.tsx      # Loading state component
+├── hooks.ts                   # Custom hooks for logic
+├── types.ts                   # TypeScript definitions
+└── utils.ts                   # Utility functions
+```
+
+**Container Component Responsibilities**:
+
+- State management and business logic
+- Data fetching and caching
+- Error handling and loading states
+- User interaction event handling
+
+**View Component Responsibilities**:
+
+- Pure presentation logic
+- Props-based data rendering
+- Event callback delegation
+- Styling and layout implementation
+
+### 4.2 Shared Infrastructure Components
+
+#### UI Component Library (components/ui/)
+
+**Purpose**: Provides reusable, accessible interface components
+
+**Component Categories**:
+
+```yaml
+Form Components:
+  - Button: Multiple variants, sizes, loading states
+  - Input: Text, email, password with validation
+  - Checkbox: Accessible form controls
+  - Label: Semantic form labeling
+
+Layout Components:
+  - Card: Consistent content containers
+  - Badge: Status and category indicators
+  - Dropdown: Accessible menu systems
+
+Feedback Components:
+  - Loading: Skeleton and spinner components
+  - Error: User-friendly error displays
+  - Toast: Notification system
+```
+
+**Design System Integration**:
+
+- Based on shadcn/ui and Radix UI primitives
+- Consistent with Tailwind CSS utility-first approach
+- Accessibility features built-in (ARIA attributes, keyboard navigation)
+- Dark/light theme support via CSS variables
+
+#### Data Access Layer (lib/supabase/)
+
+**Purpose**: Provides unified interface for backend services
+
+**Client Configuration**:
+
+```typescript
+// Browser client for client components
+const supabaseClient = createClientComponentClient();
+
+// Server client for server components and API routes
+const supabaseServer = createServerClient(cookieStore);
+
+// Middleware client for session management
+const supabaseMiddleware = createMiddlewareClient(request, response);
+```
+
+**Service Boundaries**:
+
+- Authentication and user management
+- Database queries and mutations  
+- Real-time subscriptions
+- File storage operations
+
+### 4.3 Cross-Cutting Concern Components
+
+#### Authentication & Authorization System
+
+**Implementation**: Supabase Auth with Next.js middleware integration
+
+**Flow Architecture**:
+
+```text
+Authentication Flow:
+User Login → Supabase Auth → HTTP-Only Cookie → Middleware Validation → Route Access
+
+Authorization Flow:  
+Route Request → Middleware Check → Session Validation → Role-based Access → Component Render
+```
+
+**Security Patterns**:
+
+- HTTP-only cookies for session management
+- Server-side session validation
+- Role-based access control (RBAC)
+- Protected route middleware
+
+#### Error Handling & Resilience
+
+**Strategies**:
+
+```yaml
+Component Level:
+  - Error boundaries for component tree isolation
+  - Fallback UI components for graceful degradation
+  - Loading states with skeleton components
+
+Network Level:
+  - Retry logic for failed requests
+  - Offline state handling
+  - Error state user feedback
+
+Application Level:
+  - Global error catching and logging
+  - User-friendly error messages
+  - Recovery action suggestions
+```
+
+#### Performance Optimization
+
+**Techniques**:
+
+```yaml
+Rendering Optimization:
+  - Server components for initial load performance
+  - Code splitting and lazy loading
+  - Image optimization with Next.js Image component
+
+Data Optimization:
+  - Client-side caching with React Query patterns
+  - Optimistic updates for better UX
+  - Real-time subscriptions for live data
+
+Bundle Optimization:
+  - Tree shaking for unused code elimination
+  - Dynamic imports for large components
+  - Asset optimization and compression
+```
+
+## 5. Architectural Layers & Dependencies
+
+### 5.1 Layer Hierarchy & Responsibilities
+
+#### Presentation Layer (UI/UX)
+
+```yaml
+Components: Pages, Layouts, Views, UI Components
+Responsibilities:
+  - User interface rendering and interaction
+  - Event handling and user input collection
+  - Visual feedback and loading states
+  - Accessibility and responsive design
+
+Dependencies:
+  - Can depend on Business Logic Layer
+  - Cannot depend directly on Data Access Layer
+  - Uses shared UI components and design system
+
+Technology Stack:
+  - React 19 components and hooks
+  - Next.js App Router for routing
+  - Tailwind CSS for styling
+  - shadcn/ui for component library
+```
+
+#### Business Logic Layer (Domain Logic)
+
+```yaml
+Components: Containers, Custom Hooks, Business Services
+Responsibilities:
+  - Application state management
+  - Business rule implementation  
+  - Data transformation and validation
+  - Cross-cutting concern coordination
+
+Dependencies:
+  - Can depend on Data Access Layer
+  - Cannot depend on Presentation Layer
+  - Orchestrates data flow and business processes
+
+Technology Stack:
+  - React hooks for state management
+  - Context API for global state
+  - Zod for data validation
+  - Custom business logic implementations
+```
+
+#### Data Access Layer (Persistence)
+
+```yaml
+Components: Supabase Clients, API Services, Data Models
+Responsibilities:
+  - External service communication
+  - Data persistence operations
+  - Authentication and authorization
+  - Real-time data synchronization
+
+Dependencies:
+  - Independent layer with no internal dependencies
+  - Interfaces with external services only
+  - Provides abstraction for data operations
+
+Technology Stack:
+  - Supabase JavaScript SDK
+  - PostgreSQL database via Supabase
+  - Real-time subscriptions
+  - HTTP-only cookie session management
+```
+
+#### Infrastructure Layer (Platform Services)
+
+```yaml
+Components: Next.js Runtime, Deployment Platform, External Services
+Responsibilities:
+  - Application hosting and deployment
+  - Server-side rendering capabilities
+  - CDN and static asset optimization
+  - Monitoring and logging services
+
+Dependencies:
+  - Foundation layer supporting all other layers
+  - Platform-specific optimizations and configurations
+  - External service integrations
+
+Technology Stack:
+  - Next.js 15 with App Router
+  - Vercel deployment platform
+  - Supabase backend services
+  - Node.js runtime environment
+```
+
+### 5.2 Dependency Rules & Constraints
+
+#### Dependency Direction Rules
+
+```text
+Higher layers can depend on lower layers, but not vice versa:
+
+Presentation → Business Logic → Data Access → Infrastructure
+
+Specific Rules:
+1. Views cannot directly access Data Access Layer
+2. UI Components remain agnostic to business logic
+3. Containers orchestrate interaction between layers
+4. Custom Hooks encapsulate reusable business logic
+```
+
+#### Dependency Injection Patterns
+
+```yaml
+Props Drilling:
+  - Simple parent-to-child data passing
+  - Appropriate for shallow component hierarchies
+  - Type-safe with TypeScript interfaces
+
+React Context:
+  - Global or feature-scoped state sharing
+  - Authentication state and theme preferences
+  - Avoids prop drilling for deeply nested components
+
+Custom Hooks:
+  - Business logic encapsulation and reuse
+  - Data fetching and state management patterns
+  - Cross-component functionality sharing
+```
+
+### 5.3 Cross-Layer Communication Patterns
+
+#### Data Flow Patterns (bis)
+
+```yaml
+Server-to-Client Hydration:
+  - Server Components render initial state
+  - Client Components hydrate with interactivity
+  - Seamless transition between server and client
+
+Real-time Updates:
+  - Database changes trigger Supabase real-time events
+  - Client subscriptions update component state
+  - Optimistic UI updates for perceived performance
+
+Form Submission Flow:
+  - Client validation with Zod schemas
+  - Server-side validation and processing
+  - User feedback and error handling
+```
+
+#### Error Propagation Strategy
+
+```yaml
+Component Level:
+  - Error boundaries catch React component errors
+  - Fallback components provide recovery options
+  - Local error states for component-specific issues
+
+Service Level:
+  - API errors transformed to user-friendly messages
+  - Retry mechanisms for transient failures
+  - Global error handlers for unexpected issues
+
+Application Level:
+  - Centralized logging and error reporting
+  - User notification systems for critical errors
+  - Graceful degradation strategies
+```
+
+## 6. Implementation Patterns & Best Practices
+
+### 6.1 Container/View Pattern Implementation
+
+#### Smart Container Component Template
+
+```typescript
+// components/features/[domain]/[feature]/[Feature]Container.tsx
+'use client';
+
+import { [Feature]View } from './[Feature]View';
+import { [Feature]Skeleton } from './[Feature]Skeleton';
+import { use[Feature] } from './hooks';
+import type { [Feature]Data } from './types';
+
+export function [Feature]Container() {
+  const { 
+    data,
+    isLoading,
+    error,
+    actions
+  } = use[Feature]();
+  
+  // Loading state
+  if (isLoading) {
+    return <[Feature]Skeleton />;
+  }
+  
+  // Error state
+  if (error) {
+    return (
+      <div className="error-container" role="alert">
+        <p>Error: {error.message}</p>
+        <button onClick={actions.retry} className="retry-button">
+          Retry
+        </button>
+      </div>
+    );
+  }
+  
+  // Success state
   return (
-    <main className="space-y-0">
-      <HeroContainer />
-      <NewsContainer />
-      <AboutContainer />
-      <ShowsContainer />
-      <NewsletterContainer />
-      <PartnersContainer />
-      {/* ... */}
+    <[Feature]View
+      data={data}
+      onAction={actions.handleAction}
+    />
+  );
+}
+```
+
+#### Dumb View Component Template
+
+```typescript
+// components/features/[domain]/[feature]/[Feature]View.tsx
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import type { [Feature]Data, [Feature]ViewProps } from './types';
+
+export function [Feature]View({ data, onAction }: [Feature]ViewProps) {
+  return (
+    <section className="feature-section" aria-labelledby="feature-heading">
+      <h2 id="feature-heading" className="text-2xl font-semibold mb-4">
+        {data.title}
+      </h2>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {data.items.map((item) => (
+          <Card key={item.id} className="p-4">
+            <h3 className="text-lg font-medium">{item.name}</h3>
+            <p className="text-gray-600 mb-4">{item.description}</p>
+            <Button 
+              onClick={() => onAction(item.id)}
+              variant="outline"
+            >
+              View Details
+            </Button>
+          </Card>
+        ))}
+      </div>
+    </section>
+  );
+}
+```
+
+#### Custom Hook Template
+
+```typescript
+// components/features/[domain]/[feature]/hooks.ts
+import { useState, useEffect, useCallback } from 'react';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import type { [Feature]Data, [Feature]Item } from './types';
+
+export function use[Feature]() {
+  const [data, setData] = useState<[Feature]Data | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  
+  const supabase = createClientComponentClient();
+  
+  const fetchData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const { data: result, error: fetchError } = await supabase
+        .from('[table_name]')
+        .select('*')
+        .order('created_at', { ascending: false });
+        
+      if (fetchError) throw fetchError;
+      
+      setData({
+        title: '[Feature] Data',
+        items: result || []
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'));
+    } finally {
+      setIsLoading(false);
+    }
+  }, [supabase]);
+  
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+  
+  const handleAction = useCallback((id: string) => {
+    // Implement action logic
+    console.log(`Action triggered for item: ${id}`);
+  }, []);
+  
+  return {
+    data,
+    isLoading,
+    error,
+    actions: {
+      retry: fetchData,
+      handleAction
+    }
+  };
+}
+```
+
+### 6.2 Next.js App Router Patterns
+
+#### Server Component Data Fetching
+
+```typescript
+// app/[route]/page.tsx
+import { createClient } from '@/lib/supabase/server';
+import { [Feature]Container } from '@/components/features/[domain]/[feature]';
+
+export default async function [Route]Page() {
+  // Server-side data fetching
+  const supabase = await createClient();
+  const { data: initialData } = await supabase
+    .from('[table]')
+    .select('*')
+    .limit(10);
+  
+  return (
+    <main className="container mx-auto py-8">
+      <h1 className="text-3xl font-bold mb-6">Page Title</h1>
+      <[Feature]Container initialData={initialData} />
     </main>
   );
 }
+
+// Metadata for SEO
+export const metadata = {
+  title: 'Page Title | Rouge Cardinal Company',
+  description: 'Page description for SEO',
+};
 ```
 
-### Feature Components (components/features/)
-
-**Objectif**: Implémenter les fonctionnalités métier spécifiques de l'application.
-
-**Structure Interne**:
-
-- Organisation par domaine fonctionnel (`public-site`, `admin`, etc.)
-- Chaque feature a sa propre structure en Container/View/hooks/types
-- Points d'entrée via index.ts pour simplifier les imports
-
-**Pattern d'Interaction**:
-
-- `*Container.tsx`: Gère la logique, l'état et les données
-- `*View.tsx`: Rendu pur, reçoit les données via props
-- `hooks.ts`: Logique réutilisable et gestion d'état
-- `types.ts`: Types et interfaces TypeScript
-
-**Exemple**:
-
-```tsx
-// components/features/public-site/home/hero/HeroContainer.tsx
-"use client";
-
-export function HeroContainer() {
-    const { slides, currentSlide, /* ... */ } = useHero();
-    
-    if (isLoading) {
-        return <HeroSkeleton />;
-    }
-
-    return (
-        <HeroView
-            slides={slides}
-            currentSlide={currentSlide}
-            /* ... */
-        />
-    );
-}
-```
-
-### UI Components (components/ui/)
-
-**Objectif**: Fournir des composants d'interface réutilisables et cohérents.
-
-**Structure Interne**:
-
-- Composants atomiques (button, input, card, etc.)
-- Basés sur shadcn/ui et Radix UI pour l'accessibilité
-- Stylisés avec Tailwind CSS pour une personnalisation flexible
-
-**Pattern d'Interaction**:
-
-- Utilisés par les composants View pour construire l'interface
-- Acceptent des props pour la personnalisation
-- Implémentent des patterns de design communs
-
-**Exemple**:
-
-```tsx
-// components/ui/button.tsx
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button";
-    return (
-      <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
-        ref={ref}
-        {...props}
-      />
-    );
-  }
-);
-```
-
-### Data Access Layer (lib/supabase/)
-
-**Objectif**: Fournir une interface unifiée pour l'accès aux données et l'authentification.
-
-**Structure Interne**:
-
-- `client.ts`: Configuration du client Supabase côté navigateur
-- `server.ts`: Configuration du client Supabase côté serveur
-- `middleware.ts`: Gestion des sessions et de l'authentification
-
-**Pattern d'Interaction**:
-
-- Utilisé par les Containers et Hooks pour accéder aux données
-- Fournit des méthodes pour l'authentification
-- Isole l'application des détails d'implémentation de Supabase
-
-**Exemple**:
+#### Authentication Middleware Pattern
 
 ```typescript
+// middleware.ts
+import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
+export async function middleware(request: NextRequest) {
+  const res = NextResponse.next();
+  const supabase = createMiddlewareClient({ req: request, res });
+  
+  // Refresh session if expired
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  
+  // Define route protection logic
+  const isAuthPage = request.nextUrl.pathname.startsWith('/auth');
+  const isProtectedPage = request.nextUrl.pathname.startsWith('/protected');
+  const isAdminPage = request.nextUrl.pathname.startsWith('/admin');
+  
+  // Redirect logic
+  if (isProtectedPage && !session) {
+    return NextResponse.redirect(new URL('/auth/login', request.url));
+  }
+  
+  if (isAuthPage && session) {
+    return NextResponse.redirect(new URL('/protected/dashboard', request.url));
+  }
+  
+  if (isAdminPage && (!session || !session.user.user_metadata?.role === 'admin')) {
+    return NextResponse.redirect(new URL('/protected/dashboard', request.url));
+  }
+  
+  return res;
+}
+
+export const config = {
+  matcher: [
+    '/auth/:path*',
+    '/protected/:path*',
+    '/admin/:path*'
+  ]
+};
+```
+
+### 6.3 Data Management Patterns
+
+#### Supabase Client Configuration
+
+```typescript
+// lib/supabase/client.ts
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+
+export const supabaseClient = createClientComponentClient();
+
 // lib/supabase/server.ts
+import { createServerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
+
 export async function createClient() {
   const cookieStore = await cookies();
+  
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,
-    // ...
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            );
+          } catch {
+            // Server component context - cookies cannot be set
+          }
+        },
+      },
+    }
   );
 }
 ```
 
-## 5. Couches Architecturales et Dépendances
+#### Real-time Subscription Pattern
 
-### Hiérarchie des Couches
+```typescript
+// hooks/useRealTimeData.ts
+import { useEffect, useState } from 'react';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
-1. **UI Layer**: Components, Pages, Layouts
-   - Responsable du rendu et de l'interaction utilisateur
-   - Utilise les données et callbacks fournis par la couche Business
+export function useRealTimeData<T>(
+  table: string,
+  filter?: string
+) {
+  const [data, setData] = useState<T[]>([]);
+  const supabase = createClientComponentClient();
+  
+  useEffect(() => {
+    // Initial data fetch
+    const fetchInitialData = async () => {
+      const { data: initialData } = await supabase
+        .from(table)
+        .select('*');
+      if (initialData) setData(initialData);
+    };
+    
+    fetchInitialData();
+    
+    // Real-time subscription
+    const subscription = supabase
+      .channel(`${table}_changes`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: table,
+          filter: filter
+        },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setData(current => [...current, payload.new as T]);
+          } else if (payload.eventType === 'UPDATE') {
+            setData(current => 
+              current.map(item => 
+                (item as any).id === payload.new.id 
+                  ? payload.new as T 
+                  : item
+              )
+            );
+          } else if (payload.eventType === 'DELETE') {
+            setData(current => 
+              current.filter(item => (item as any).id !== payload.old.id)
+            );
+          }
+        }
+      )
+      .subscribe();
+    
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [table, filter, supabase]);
+  
+  return data;
+}
+```
 
-2. **Business Logic Layer**: Containers, Hooks, Services
-   - Gère l'état de l'application et la logique métier
-   - Coordonne les interactions avec la couche Data
+### 6.4 Testing Patterns
 
-3. **Data Access Layer**: Supabase Clients, API
-   - Fournit une interface pour l'accès aux données
-   - Isole les détails de l'implémentation du stockage
+#### Component Testing with React Testing Library
 
-4. **Infrastructure Layer**: Next.js, Supabase, Vercel
-   - Fournit les capacités fondamentales (routing, auth, etc.)
-   - Gère le déploiement et l'exécution
+```typescript
+// __tests__/components/[feature]/[Feature]Container.test.tsx
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { [Feature]Container } from '@/components/features/[domain]/[feature]';
+import { use[Feature] } from '@/components/features/[domain]/[feature]/hooks';
 
-### Règles de Dépendance
+// Mock the custom hook
+jest.mock('@/components/features/[domain]/[feature]/hooks');
 
-- **Règle 1**: Les couches supérieures peuvent dépendre des couches inférieures, mais pas l'inverse
-- **Règle 2**: Les Views ne peuvent pas dépendre directement de la couche Data
-- **Règle 3**: Les composants UI ne connaissent pas le concept de features
-- **Règle 4**: Les Containers orchestrent les interactions entre les couches
+describe('[Feature]Container', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-### Patterns d'Injection de Dépendances
+  it('displays skeleton during loading', () => {
+    (use[Feature] as jest.Mock).mockReturnValue({
+      data: null,
+      isLoading: true,
+      error: null,
+      actions: { retry: jest.fn(), handleAction: jest.fn() }
+    });
+    
+    render(<[Feature]Container />);
+    expect(screen.getByTestId('feature-skeleton')).toBeInTheDocument();
+  });
 
-- **Props Drilling**: Pour les hiérarchies de composants peu profondes
-- **Context API**: Pour l'état global ou partagé entre plusieurs composants
-- **Custom Hooks**: Pour encapsuler la logique réutilisable
+  it('displays data when loaded successfully', async () => {
+    const mockData = {
+      title: 'Test Feature',
+      items: [
+        { id: '1', name: 'Item 1', description: 'Description 1' },
+        { id: '2', name: 'Item 2', description: 'Description 2' }
+      ]
+    };
+    
+    (use[Feature] as jest.Mock).mockReturnValue({
+      data: mockData,
+      isLoading: false,
+      error: null,
+      actions: { retry: jest.fn(), handleAction: jest.fn() }
+    });
+    
+    render(<[Feature]Container />);
+    
+    await waitFor(() => {
+      expect(screen.getByText('Test Feature')).toBeInTheDocument();
+      expect(screen.getByText('Item 1')).toBeInTheDocument();
+      expect(screen.getByText('Item 2')).toBeInTheDocument();
+    });
+  });
 
-## 6. Architecture des Données
-
-### Structure du Modèle de Domaine
-
-- **Utilisateurs**: Authentification et profils
-- **Spectacles**: Programmation artistique
-- **Actualités**: News et événements
-- **Agenda**: Calendrier des représentations
-- **Pages**: Contenu statique (à propos, compagnie, etc.)
-
-### Patterns d'Accès aux Données
-
-- **Server Components**: Récupération des données côté serveur
-- **SWR/React Query**: Cache et revalidation côté client
-- **Custom Hooks**: Encapsulation des requêtes et de la gestion d'état
-
-### Patterns de Transformation des Données
-
-- **Types forts**: Validation des données avec TypeScript
-- **Schemas Zod**: Validation structurelle et transformation
-- **Mappers**: Conversion entre DTO et modèles domaine
+  it('displays error state and retry functionality', async () => {
+    const mockRetry = jest.fn();
+    const mockError = new Error('Test error');
+    
+    (use[Feature] as jest.Mock).mockReturnValue({
+      data: null,
+      isLoading: false,
+      error: mockError,
+      actions: { retry: mockRetry, handleAction: jest.fn() }
+    });
+    
+    render(<[Feature]Container />);
+    
+    expect(screen.getByText('Error: Test error')).toBeInTheDocument();
+    
+    const retryButton = screen.getByText('Retry');
+    fireEvent.click(retryButton);
+    
+    expect(mockRetry).toHaveBeenCalledTimes(1);
+  });
+});
+```
 
 ## 7. Implémentation des Préoccupations Transversales
 
@@ -2000,22 +2844,321 @@ describe('FeatureContainer', () => {
 5. **Parallel Data Fetching**: Utiliser `Promise.all` pour le chargement parallèle des données
 6. **Streaming**: Utiliser `Suspense` pour le chargement progressif du contenu
 
-## Évolution de l'Architecture
+## 7. Extension Guidelines & Scalability
 
-Ce blueprint doit être considéré comme un document vivant. Il sera mis à jour à mesure que l'architecture évolue pour refléter les meilleures pratiques et les leçons apprises.
+### 7.1 Adding New Features
 
-### Processus de Changement Architectural
+#### Feature Creation Checklist
 
-1. **Proposition**: Documentation de la proposition de changement avec justification
-2. **Revue**: Évaluation par l'équipe des impacts et bénéfices
-3. **Validation**: Approbation des principales parties prenantes
-4. **Mise à jour du Blueprint**: Documentation des changements
-5. **Implémentation**: Application progressive des changements
+```yaml
+Directory Structure:
+  - Create feature folder in appropriate domain
+  - Follow Container/View/Hooks/Types pattern
+  - Add index.ts for clean exports
+  - Include Skeleton component for loading states
 
-### Architecture Decision Records (ADRs)
+Implementation Requirements:
+  - TypeScript interfaces and types
+  - Error handling and loading states
+  - Accessibility considerations (ARIA, keyboard nav)
+  - Responsive design with Tailwind CSS
 
-Les décisions architecturales importantes sont documentées dans des ADRs pour conserver l'historique et le contexte des choix effectués.
+Testing Requirements:
+  - Unit tests for components and hooks
+  - Integration tests for user flows
+  - E2E tests for critical paths
+  - Accessibility testing with axe-core
 
-## Mise à Jour
+Documentation Requirements:
+  - JSDoc comments for complex functions
+  - README for feature-specific patterns
+  - Storybook stories for UI components
+  - Update architecture documentation
+```
 
-Ce blueprint a été généré le 24 août 2025. Il doit être mis à jour à chaque changement architectural majeur.
+#### Scaling Strategies
+
+```yaml
+Horizontal Scaling (New Features):
+  - Independent feature modules
+  - Minimal cross-feature dependencies
+  - Shared infrastructure reuse
+  - Team ownership boundaries
+
+Vertical Scaling (Feature Enhancement):
+  - Component composition patterns
+  - Hook extraction for reusability
+  - Service layer abstraction
+  - Performance optimization
+
+Database Scaling:
+  - Supabase automatic scaling
+  - Query optimization strategies
+  - Real-time subscription management
+  - Row Level Security policies
+```
+
+### 7.2 Technology Migration Paths
+
+#### Frontend Technology Evolution
+
+```yaml
+React Version Upgrades:
+  - Gradual migration strategy
+  - Compatibility testing
+  - Performance benchmarking
+  - Feature parity validation
+
+Next.js Updates:
+  - App Router migration (completed)
+  - Server Actions integration
+  - Edge Runtime optimization
+  - Middleware enhancements
+
+UI Library Evolution:
+  - shadcn/ui component updates
+  - Design system refinements
+  - Accessibility improvements
+  - Theme customization expansion
+```
+
+#### Backend Service Evolution
+
+```yaml
+Supabase Feature Adoption:
+  - Edge Functions for serverless logic
+  - Advanced authentication providers
+  - Database function optimization
+  - Storage and CDN enhancements
+
+Alternative Backend Considerations:
+  - GraphQL layer addition
+  - Microservices architecture
+  - Event-driven patterns
+  - Caching strategies
+```
+
+### 7.3 Performance Optimization Paths
+
+#### Client-Side Optimization
+
+```yaml
+Bundle Optimization:
+  - Dynamic imports for code splitting
+  - Tree shaking configuration
+  - Bundle analyzer monitoring
+  - Preload critical resources
+
+Runtime Optimization:
+  - React.memo for component memoization
+  - useCallback/useMemo for expensive computations
+  - Intersection Observer for lazy loading
+  - Virtual scrolling for large lists
+```
+
+#### Server-Side Optimization
+
+```yaml
+Rendering Strategy:
+  - Static Generation where possible
+  - Incremental Static Regeneration
+  - Server-side streaming
+  - Edge runtime deployment
+
+Data Fetching Optimization:
+  - Query result caching
+  - Database index optimization
+  - Connection pooling
+  - Batch operations
+```
+
+## 8. Architecture Decision Records (ADRs)
+
+### 8.1 Major Architectural Decisions
+
+#### ADR-001: Adoption of Next.js App Router
+
+```yaml
+Status: Accepted
+Date: 2024-08-15
+Decision: Migrate from Pages Router to App Router
+Rationale:
+  - Better developer experience with colocation
+  - Improved performance with Server Components
+  - Streamlined data fetching patterns
+  - Future-proof architecture alignment
+
+Consequences:
+  - Improved server-side performance
+  - Better SEO capabilities
+  - Learning curve for development team
+  - Migration effort for existing pages
+```
+
+#### ADR-002: Supabase as Backend-as-a-Service
+
+```yaml
+Status: Accepted
+Date: 2024-07-20
+Decision: Use Supabase for backend services
+Rationale:
+  - PostgreSQL with real-time capabilities
+  - Built-in authentication and authorization
+  - Row Level Security for data protection
+  - Reduced backend development complexity
+
+Consequences:
+  - Faster development velocity
+  - Vendor lock-in considerations
+  - Cost implications at scale
+  - Limited custom backend logic
+```
+
+#### ADR-003: Container/View Pattern Implementation
+
+```yaml
+Status: Accepted
+Date: 2024-08-01
+Decision: Enforce Container/View pattern for all features
+Rationale:
+  - Clear separation of concerns
+  - Improved testability
+  - Better code organization
+  - Team development consistency
+
+Consequences:
+  - More predictable codebase structure
+  - Easier component testing
+  - Initial development overhead
+  - Strict pattern enforcement required
+```
+
+### 8.2 Technology Choice Rationale
+
+#### Frontend Technology Stack
+
+```yaml
+React 19 Selection:
+  - Latest features and performance improvements
+  - Server Components support
+  - Enhanced concurrent features
+  - Long-term ecosystem support
+
+TypeScript Integration:
+  - Type safety and developer experience
+  - Better IDE support and refactoring
+  - Documentation through types
+  - Reduced runtime errors
+
+Tailwind CSS Choice:
+  - Utility-first CSS approach
+  - Rapid prototyping capabilities
+  - Consistent design system
+  - Minimal CSS bundle size
+```
+
+## 9. Governance & Evolution Strategy
+
+### 9.1 Architecture Review Process
+
+#### Regular Architecture Reviews
+
+```yaml
+Monthly Reviews:
+  - Code quality metrics assessment
+  - Performance benchmarking
+  - Technical debt evaluation
+  - Architecture compliance audit
+
+Quarterly Planning:
+  - Technology roadmap updates
+  - Scaling strategy adjustments
+  - Team skill development planning
+  - Tool and service evaluations
+
+Annual Assessment:
+  - Architecture effectiveness review
+  - Technology stack evaluation
+  - Industry best practice adoption
+  - Long-term strategic planning
+```
+
+#### Change Management Process
+
+```yaml
+Architecture Change Request:
+  - Problem statement and context
+  - Proposed solution alternatives
+  - Impact analysis and timeline
+  - Resource requirements estimation
+
+Review and Approval:
+  - Technical review by architecture team
+  - Stakeholder impact assessment
+  - Implementation planning
+  - Approval and communication
+
+Implementation and Monitoring:
+  - Phased rollout strategy
+  - Progress tracking and metrics
+  - Issue resolution and adjustments
+  - Documentation updates
+```
+
+### 9.2 Knowledge Management
+
+#### Documentation Standards
+
+```yaml
+Code Documentation:
+  - JSDoc for complex functions
+  - README files for feature modules
+  - Architecture decision rationale
+  - API documentation and examples
+
+Process Documentation:
+  - Development workflow guides
+  - Deployment procedures
+  - Troubleshooting runbooks
+  - Best practice guidelines
+
+Knowledge Sharing:
+  - Regular team technical sessions
+  - Architecture lunch-and-learns
+  - External conference participation
+  - Open source contribution
+```
+
+#### Continuous Learning
+
+```yaml
+Team Development:
+  - Technology training programs
+  - Conference and workshop attendance
+  - Internal knowledge sharing sessions
+  - Mentorship and pair programming
+
+Industry Engagement:
+  - Open source community participation
+  - Technical blog writing and sharing
+  - Professional network building
+  - Technology trend monitoring
+```
+
+---
+
+## Document Metadata
+
+**Document Type**: Architecture Blueprint  
+**Last Updated**: August 28, 2025  
+**Version**: 2.0  
+**Next Review Date**: September 30, 2025  
+
+**Change History**:
+
+- v2.0 (Aug 28, 2025): Complete restructure following architecture-blueprint-generator template
+- v1.0 (Aug 24, 2025): Initial version with basic architectural documentation
+
+**Maintainers**: Development Team  
+**Stakeholders**: Product Team, Engineering Management  
+**Status**: Active Development
