@@ -83,7 +83,14 @@ export const useSpectaclesData = () => {
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 
                 // Mise à jour des données (à terme, ce sera un appel API réel)
-                setCurrentShows(currentShowsData);
+                setCurrentShows(
+                    currentShowsData.map(show => ({
+                        ...show,
+                        public: true,
+                        created_at: show.premiere,
+                        updated_at: show.premiere,
+                    }))
+                );
                 setArchivedShows(archivedShowsData);
             } catch (error) {
                 console.error("Erreur lors du chargement des spectacles:", error);

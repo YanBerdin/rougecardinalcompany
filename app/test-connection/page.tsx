@@ -13,23 +13,65 @@ import { SupabaseClient } from '@supabase/supabase-js'
 import { CheckCircle2, XCircle, RefreshCw, Database } from "lucide-react"
 
 // Types pour les données de test
-interface Spectacle {
-  id: string
-  titre: string
-  description: string
-  date_creation: string
-  statut: string
-  duree: number
-  categorie: string
+// Mapping Membre (SQL) -> TeamMember (UI)
+import type { TeamMember } from '@/components/features/public-site/compagnie/types'
+import type { CurrentShow, ArchivedShow } from '@/components/features/public-site/spectacles/types'
+
+function mapMembreToTeamMember(membre: Membre): TeamMember {
+  return {
+    name: membre.nom,
+    role: membre.role,
+    bio: membre.description,
+    image: membre.photo_url || "", // ou une fonction pour récupérer l’URL à partir de photo_media_id
+  }
 }
 
+function mapSpectacleFromDb(dbSpectacle: Spectacle): CurrentShow | ArchivedShow {
+  return {
+    id: dbSpectacle.id,
+    title: dbSpectacle.titre,
+    slug: dbSpectacle.slug,
+    description: dbSpectacle.description ?? "",
+    genre: (dbSpectacle as any).genre ?? "",
+    duration: dbSpectacle.duree_minutes ?? "",
+    cast: (dbSpectacle as any).cast ?? 0,
+    premiere: (dbSpectacle as any).premiere ?? "",
+    public: dbSpectacle.public ?? false,
+    created_by: dbSpectacle.created_by,
+    created_at: dbSpectacle.created_at,
+    updated_at: dbSpectacle.updated_at,
+    image: (dbSpectacle as any).image ?? "",
+    status: (dbSpectacle as any).status ?? "",
+    awards: (dbSpectacle as any).awards ?? [],
+    year: (dbSpectacle as any).year ?? "",
+  }
+}
+
+interface Spectacle {
+  id: number;
+  titre: string;
+  slug?: string;
+  description?: string ;
+  duree_minutes?: string;
+  public?: boolean;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+
 interface Membre {
-  id: string
+  id: number
   nom: string
-  prenom: string
   role: string
-  biographie: string
-  photo_url: string
+  description: string
+  photo_media_id?: number
+  ordre: number
+  active: boolean
+  created_at: string
+  updated_at: string
+  // Optionnel : si tu ajoutes l'URL de la photo côté client
+  photo_url?: string
 }
 
 interface Actualite {
@@ -43,11 +85,13 @@ interface Actualite {
 
 export default function TestConnectionPage() {
   const [connectionStatus, setConnectionStatus] = useState<"loading" | "success" | "error" | "tables-missing">("loading")
-  const [spectacles, setSpectacles] = useState<Spectacle[]>([])
+  const [spectacles, setSpectacles] = useState<(Spectacle | CurrentShow | ArchivedShow)[]>([])
   const [membres, setMembres] = useState<Membre[]>([])
   const [actualites, setActualites] = useState<Actualite[]>([])
   const [errorMessage, setErrorMessage] = useState("")
   const [isLoading, setIsLoading] = useState(true)
+  const [connectionDetails, setConnectionDetails] = useState<{ method?: string; error?: string } | null>(null)
+  const [connectionTestSuccess, setConnectionTestSuccess] = useState<boolean | null>(null)
 
   const supabase = createClient()
 
@@ -56,36 +100,36 @@ export default function TestConnectionPage() {
     try {
       // Méthode 1: Utiliser la fonction RPC personnalisée
       const { error: rpcError } = await client.rpc('get_current_timestamp')
-      
+
       if (!rpcError) {
         return { connected: true }
       }
-      
+
       // Méthode 2: Si la RPC échoue, essayer avec health check
       const { error: healthError } = await client.from('pg_stat_statements').select('query').limit(1)
-      
+
       if (!healthError || (healthError && healthError.message.includes("permission denied"))) {
         // Si nous obtenons une erreur de permission, cela signifie que la connexion fonctionne
         // mais l'utilisateur n'a pas accès à cette table (ce qui est normal)
         return { connected: true }
       }
-      
+
       // Méthode 3: Dernière tentative avec le système d'authentification
       const { error: authError } = await client.auth.getSession()
-      
+
       if (!authError) {
         return { connected: true }
       }
-      
+
       // Si toutes les méthodes échouent, retourner l'erreur la plus pertinente
-      return { 
-        connected: false, 
-        error: rpcError?.message || healthError?.message || authError?.message 
+      return {
+        connected: false,
+        error: rpcError?.message || healthError?.message || authError?.message
       }
     } catch (error) {
-      return { 
-        connected: false, 
-        error: error instanceof Error ? error.message : "Erreur inconnue" 
+      return {
+        connected: false,
+        error: error instanceof Error ? error.message : "Erreur inconnue"
       }
     }
   }
@@ -134,7 +178,8 @@ export default function TestConnectionPage() {
     try {
       // Test de connexion fiable
       const connectionTest = await checkSupabaseConnection(supabase)
-      
+      setConnectionDetails({ error: connectionTest.error })
+      setConnectionTestSuccess(connectionTest.connected)
       if (!connectionTest.connected) {
         throw new Error(connectionTest.error || "Impossible de se connecter à Supabase")
       }
@@ -158,12 +203,12 @@ export default function TestConnectionPage() {
 
         // Si la connexion fonctionne et que les tables existent, récupérer les données
         const [spectaclesData, membresData, actualitesData] = await Promise.all([
-          getSpectacles(), 
-          getMembres(), 
+          getSpectacles(),
+          getMembres(),
           getActualites()
         ])
 
-        setSpectacles(spectaclesData)
+        setSpectacles(spectaclesData.map(mapSpectacleFromDb))
         setMembres(membresData)
         setActualites(actualitesData)
         setConnectionStatus("success")
@@ -233,6 +278,11 @@ export default function TestConnectionPage() {
             <AlertTitle className="text-green-600">Connexion réussie</AlertTitle>
             <AlertDescription>
               La connexion à Supabase fonctionne correctement. Les données ont été récupérées avec succès.
+              {connectionDetails && connectionDetails.error && (
+                <div className="mt-2 text-sm text-muted-foreground">
+                  <span className="font-medium">Détail technique :</span> {connectionDetails.error}
+                </div>
+              )}
             </AlertDescription>
           </Alert>
         )}
@@ -243,9 +293,15 @@ export default function TestConnectionPage() {
             <AlertTitle className="text-amber-600">Tables manquantes</AlertTitle>
             <AlertDescription className="space-y-4">
               <p>
-                La connexion à Supabase fonctionne, mais les tables nécessaires n&apos;ont pas été créées. Vous devez
-                exécuter le script SQL pour créer les tables et insérer les données initiales.
+                {connectionTestSuccess === true
+                  ? "La connexion à Supabase fonctionne, mais les tables nécessaires n'ont pas été créées ou sont inaccessibles."
+                  : "La connexion à Supabase n'a pas pu être établie. Veuillez vérifier la configuration."}
               </p>
+              {connectionDetails && connectionDetails.error && (
+                <div className="mt-2 text-sm text-muted-foreground">
+                  <span className="font-medium">Détail technique :</span> {connectionDetails.error}
+                </div>
+              )}
               <ol className="list-decimal pl-5 space-y-2">
                 <li>
                   Connectez-vous à votre{" "}
@@ -268,7 +324,7 @@ export default function TestConnectionPage() {
               <div className="bg-muted p-4 rounded-md mt-4">
                 <p className="font-medium mb-2">Besoin du script SQL ?</p>
                 <p>
-                  Si vous n&apos;avez pas le script SQL, consultez le dossier /lib/supabase/schemas/ du projet ou 
+                  Si vous n&apos;avez pas le script SQL, consultez le dossier /lib/supabase/schemas/ du projet ou
                   demandez à le recevoir à nouveau.
                 </p>
               </div>
@@ -281,10 +337,23 @@ export default function TestConnectionPage() {
             <XCircle className="h-4 w-4 text-red-600" />
             <AlertTitle className="font-medium text-red-600">Erreur de connexion</AlertTitle>
             <AlertDescription className="space-y-4">
-              <p>
-                {errorMessage ||
-                  "Une erreur est survenue lors de la connexion à Supabase. Veuillez vérifier vos identifiants."}
-              </p>
+                {connectionTestSuccess === true ? (
+                  <>
+                    <div className="mb-2 p-2 rounded bg-green-600 text-white font-bold border border-green-800 shadow">
+                      La connexion à Supabase fonctionne
+                    </div>
+                    <div className="mb-2 p-2 rounded bg-red-600 text-white font-bold border border-red-800 shadow">
+                      Une erreur est survenue lors de l'accès aux tables ou aux données.
+                    </div>
+                  </>
+                ) : (
+                  <p>{errorMessage || "Une erreur est survenue lors de la connexion à Supabase. Veuillez vérifier vos identifiants."}</p>
+                )}
+              {connectionDetails && connectionDetails.error && (
+                <div className="mt-2 text-sm text-muted-foreground">
+                  <span className="font-medium">Détail technique :</span> {connectionDetails.error}
+                </div>
+              )}
               <div className="bg-muted p-4 rounded-md mt-4">
                 <p className="font-medium mb-2">Vérifiez les points suivants :</p>
                 <ul className="list-disc pl-5 space-y-1">
@@ -294,6 +363,7 @@ export default function TestConnectionPage() {
                   </li>
                   <li>Votre projet Supabase est actif et accessible</li>
                   <li>Vous n&apos;avez pas de restrictions réseau qui bloquent les connexions à Supabase</li>
+                    <li>Vérifiez que les tables nécessaires existent bien dans votre base de données Supabase</li>
                 </ul>
               </div>
             </AlertDescription>
@@ -313,27 +383,34 @@ export default function TestConnectionPage() {
                 {spectacles.map((spectacle) => (
                   <Card key={spectacle.id}>
                     <CardHeader>
-                      <CardTitle>{spectacle.titre}</CardTitle>
-                      <CardDescription>{spectacle.categorie}</CardDescription>
+                      <CardTitle>{'title' in spectacle ? spectacle.title : spectacle.titre}</CardTitle>
+                      <CardDescription>{'slug' in spectacle ? spectacle.slug : ""}</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2">
                         <div>
-                          <span className="font-medium">Statut:</span> {spectacle.statut}
+                          <span className="font-medium">Public:</span> {spectacle.public ? "Oui" : "Non"}
                         </div>
                         <div>
-                          <span className="font-medium">Date:</span> {
-                            new Date(spectacle.date_creation).toLocaleDateString("fr-FR", {
-                              day: "numeric",
-                              month: "long",
-                              year: "numeric",
-                            })
+                          <span className="font-medium">Date création:</span> {
+                            spectacle.created_at
+                              ? new Date(spectacle.created_at).toLocaleDateString("fr-FR", {
+                                  day: "numeric",
+                                  month: "long",
+                                  year: "numeric",
+                                })
+                              : "-"
                           }
                         </div>
                         <div>
-                          <span className="font-medium">Durée:</span> {spectacle.duree} min
+                          <span className="font-medium">Durée:</span> 
+                          {"duree_minutes" in spectacle && spectacle.duree_minutes
+                            ? spectacle.duree_minutes + " min"
+                            : "duration" in spectacle && spectacle.duration
+                              ? spectacle.duration
+                              : "-"}
                         </div>
-                        <p className="text-sm text-muted-foreground mt-2">{spectacle.description}</p>
+                        <p className="text-sm text-muted-foreground mt-2">{spectacle.description || ""}</p>
                       </div>
                     </CardContent>
                   </Card>
@@ -343,28 +420,31 @@ export default function TestConnectionPage() {
 
             <TabsContent value="membres">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {membres.map((membre) => (
-                  <Card key={membre.id}>
-                    <CardHeader>
-                      <CardTitle>{membre.prenom} {membre.nom}</CardTitle>
-                      <CardDescription>{membre.role}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        {membre.photo_url && (
-                          <div className="mb-3">
-                            <img 
-                              src={membre.photo_url} 
-                              alt={`${membre.prenom} ${membre.nom}`} 
-                              className="w-full h-40 object-cover rounded-md"
-                            />
-                          </div>
-                        )}
-                        <p className="text-sm text-muted-foreground">{membre.biographie}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                {membres.map((membre) => {
+                  const uiMembre = mapMembreToTeamMember(membre);
+                  return (
+                    <Card key={membre.id}>
+                      <CardHeader>
+                        <CardTitle>{uiMembre.name}</CardTitle>
+                        <CardDescription>{uiMembre.role}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          {uiMembre.image && (
+                            <div className="mb-3">
+                              <img
+                                src={uiMembre.image}
+                                alt={uiMembre.name}
+                                className="w-full h-40 object-cover rounded-md"
+                              />
+                            </div>
+                          )}
+                          <p className="text-sm text-muted-foreground">{uiMembre.bio}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             </TabsContent>
 
