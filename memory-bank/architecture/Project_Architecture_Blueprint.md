@@ -215,91 +215,91 @@ Monitoring: Error tracking and performance monitoring
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                            Client Browser Layer                             │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────────┐ │
-│  │   Public Pages  │  │  Protected App  │  │     Admin Dashboard        │ │
-│  │   (Marketing)   │  │   (User Area)   │  │    (Management)           │ │
-│  └─────────────────┘  └─────────────────┘  └─────────────────────────────┘ │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────────┐  │
+│  │   Public Pages  │  │  Protected App  │  │     Admin Dashboard         │  │
+│  │   (Marketing)   │  │   (User Area)   │  │    (Management)             │  │
+│  └─────────────────┘  └─────────────────┘  └─────────────────────────────┘  │
 └─────────────────────────────┬───────────────────────────────────────────────┘
                               │
 ┌─────────────────────────────▼───────────────────────────────────────────────┐
-│                        Next.js App Router Layer                            │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │                     Route Structure                                 │   │
-│  │  app/                                                               │   │
-│  │  ├── (public)/          # Public marketing site                    │   │
-│  │  ├── auth/              # Authentication flows                     │   │
-│  │  ├── protected/         # Authenticated user area                  │   │
-│  │  ├── admin/             # Admin management interface               │   │
-│  │  └── api/               # Server-side API endpoints               │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
+│                        Next.js App Router Layer                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │                     Route Structure                                 │    │
+│  │  app/                                                               │    │
+│  │  ├── (public)/          # Public marketing site                     │    │
+│  │  ├── auth/              # Authentication flows                      │    │
+│  │  ├── protected/         # Authenticated user area                   │    │
+│  │  ├── admin/             # Admin management interface                │    │
+│  │  └── api/               # Server-side API endpoints                 │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
 │                                                                             │
 │  ┌─────────────────────┐            ┌─────────────────────────────────────┐ │
 │  │   Server Components │◄──────────►│        Client Components            │ │
-│  │   • Static content  │            │   • Interactive features           │ │
-│  │   • Initial data    │            │   • Real-time updates              │ │
-│  │   • SEO metadata    │            │   • User interactions              │ │
+│  │   • Static content  │            │   • Interactive features            │ │
+│  │   • Initial data    │            │   • Real-time updates               │ │
+│  │   • SEO metadata    │            │   • User interactions               │ │
 │  └─────────────────────┘            └─────────────────────────────────────┘ │
 └─────────────────────────────┬───────────────────────────────────────────────┘
                               │
 ┌─────────────────────────────▼───────────────────────────────────────────────┐
-│                       Feature Architecture Layer                           │
 │                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │                    Container/View Pattern                           │   │
-│  │                                                                     │   │
+│                       Feature Architecture Layer                            │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │                    Container/View Pattern                            │   │
+│  │                                                                      │   │
 │  │  ┌─────────────────┐              ┌─────────────────────────────────┐│   │
-│  │  │ Smart Container │◄────props────►│         Dumb View             ││   │
-│  │  │                 │              │                               ││   │
-│  │  │ • State Logic   │              │ • Pure Presentation           ││   │
-│  │  │ • Data Fetching │              │ • Props Interface            ││   │
-│  │  │ • Business Rules│              │ • Event Callbacks            ││   │
-│  │  │ • Error Handling│              │ • Styling & Layout           ││   │
+│  │  │ Smart Container │◄────props────►│         Dumb View              ││   │
+│  │  │                 │              │                                 ││   │
+│  │  │ • State Logic   │              │ • Pure Presentation             ││   │
+│  │  │ • Data Fetching │              │ • Props Interface               ││   │
+│  │  │ • Business Rules│              │ • Event Callbacks               ││   │
+│  │  │ • Error Handling│              │ • Styling & Layout              ││   │
 │  │  └─────────────────┘              └─────────────────────────────────┘│   │
-│  │           │                                        │                │   │
-│  │           ▼                                        ▼                │   │
+│  │           │                                        │                 │   │
+│  │           ▼                                        ▼                 │   │
 │  │  ┌─────────────────┐              ┌─────────────────────────────────┐│   │
-│  │  │  Custom Hooks   │              │      Shared UI Library        ││   │
-│  │  │                 │              │                               ││   │
-│  │  │ • useAuth       │              │ • Button, Input, Card         ││   │
-│  │  │ • useData       │              │ • Form Components             ││   │
-│  │  │ • useForm       │              │ • Layout Components           ││   │
-│  │  │ • Feature Logic │              │ • Accessibility Features      ││   │
+│  │  │  Custom Hooks   │              │      Shared UI Library          ││   │
+│  │  │                 │              │                                 ││   │
+│  │  │ • useAuth       │              │ • Button, Input, Card           ││   │
+│  │  │ • useData       │              │ • Form Components               ││   │
+│  │  │ • useForm       │              │ • Layout Components             ││   │
+│  │  │ • Feature Logic │              │ • Accessibility Features        ││   │
 │  │  └─────────────────┘              └─────────────────────────────────┘│   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
 └─────────────────────────────┬───────────────────────────────────────────────┘
                               │
 ┌─────────────────────────────▼───────────────────────────────────────────────┐
-│                        Data Access Layer                                   │
+│                        Data Access Layer                                    │
 │                                                                             │
 │  ┌─────────────────────┐            ┌─────────────────────────────────────┐ │
 │  │   Supabase Client   │            │        Server Actions               │ │
 │  │                     │            │                                     │ │
-│  │ • Authentication    │◄──────────►│  • Server-side Data Fetching       │ │
-│  │ • Real-time Subs    │            │  • Mutations & Validations         │ │
-│  │ • Direct DB Access  │            │  • Session Management              │ │
-│  │ • File Storage      │            │  • API Route Handlers              │ │
+│  │ • Authentication    │◄──────────►│  • Server-side Data Fetching        │ │
+│  │ • Real-time Subs    │            │  • Mutations & Validations          │ │
+│  │ • Direct DB Access  │            │  • Session Management               │ │
+│  │ • File Storage      │            │  • API Route Handlers               │ │
 │  └─────────────────────┘            └─────────────────────────────────────┘ │
 └─────────────────────────────┬───────────────────────────────────────────────┘
                               │
 ┌─────────────────────────────▼───────────────────────────────────────────────┐
-│                         Supabase Platform                                  │
+│                         Supabase Platform                                   │
 │                                                                             │
 │  ┌─────────────────────┐            ┌─────────────────────────────────────┐ │
-│  │    Authentication   │            │       PostgreSQL Database          │ │
+│  │    Authentication   │            │       PostgreSQL Database           │ │
 │  │                     │            │                                     │ │
 │  │ • User Management   │◄──────────►│  • Application Tables               │ │
-│  │ • Session Handling  │            │  • Row Level Security              │ │
-│  │ • OAuth Providers   │            │  • Functions & Triggers            │ │
-│  │ • Email Verification│            │  • Real-time Subscriptions         │ │
+│  │ • Session Handling  │            │  • Row Level Security               │ │
+│  │ • OAuth Providers   │            │  • Functions & Triggers             │ │
+│  │ • Email Verification│            │  • Real-time Subscriptions          │ │
 │  └─────────────────────┘            └─────────────────────────────────────┘ │
 │                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │                        Storage & Edge Functions                     │   │
-│  │                                                                     │   │
-│  │  • File Storage Buckets        • Edge Functions Runtime            │   │
-│  │  • CDN Integration            • Serverless Computing               │   │
-│  │  • Image Transformations      • API Extensions                     │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │                        Storage & Edge Functions                     │    │
+│  │                                                                     │    │
+│  │  • File Storage Buckets        • Edge Functions Runtime             │    │
+│  │  • CDN Integration            • Serverless Computing                │    │
+│  │  • Image Transformations      • API Extensions                      │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
