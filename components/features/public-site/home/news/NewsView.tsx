@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { NewsViewProps } from './types';
 
+// Composant pour afficher les actualités "À la Une"
 export function NewsView({ news }: NewsViewProps) {
     if (news.length === 0) {
         return null;
@@ -43,13 +44,14 @@ export function NewsView({ news }: NewsViewProps) {
                                         day: 'numeric'
                                     })}
                                 </div>
+
                                 <h3 className="text-xl font-semibold mb-3 hover:text-primary transition-colors card-title">
                                     <Link href={`/actualites/${item.id}`}>
                                         {item.title}
                                     </Link>
                                 </h3>
                                 <p className="leading-relaxed card-text">
-                                    {item.excerpt}
+                                    {item.short_description}
                                 </p>
                             </CardContent>
 

@@ -281,7 +281,7 @@ create table public.spectacles (
   titre text not null,
   slug text,
   description text,
-  duree_minutes integer,
+  duration_minutes integer,
   public boolean default true,
   created_by uuid null,
   created_at timestamptz default now() not null,
@@ -1896,7 +1896,7 @@ begin
         titre = version_record.content_snapshot ->> 'titre',
         slug = version_record.content_snapshot ->> 'slug',
         description = version_record.content_snapshot ->> 'description',
-        duree_minutes = (version_record.content_snapshot ->> 'duree_minutes')::integer,
+        duration_minutes = (version_record.content_snapshot ->> 'duration_minutes')::integer,
         public = (version_record.content_snapshot ->> 'public')::boolean,
         updated_at = now()
       where id = version_record.entity_id;

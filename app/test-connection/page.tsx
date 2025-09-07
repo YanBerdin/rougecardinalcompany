@@ -33,7 +33,7 @@ function mapSpectacleFromDb(dbSpectacle: Spectacle): CurrentShow | ArchivedShow 
     slug: dbSpectacle.slug,
     description: dbSpectacle.description ?? "",
     genre: (dbSpectacle as any).genre ?? "",
-    duration: dbSpectacle.duree_minutes ?? "",
+    duration_minutes: dbSpectacle.duration_minutes ?? "",
     cast: (dbSpectacle as any).cast ?? 0,
     premiere: (dbSpectacle as any).premiere ?? "",
     public: dbSpectacle.public ?? false,
@@ -43,7 +43,9 @@ function mapSpectacleFromDb(dbSpectacle: Spectacle): CurrentShow | ArchivedShow 
     image: (dbSpectacle as any).image ?? "",
     status: (dbSpectacle as any).status ?? "",
     awards: (dbSpectacle as any).awards ?? [],
-    year: (dbSpectacle as any).year ?? "",
+    // year: (dbSpectacle as any).premiere
+    //   ? String(new Date((dbSpectacle as any).premiere).getFullYear())
+    //   : ((dbSpectacle as any).year ?? ""),
   }
 }
 
@@ -51,8 +53,9 @@ interface Spectacle {
   id: number;
   titre: string;
   slug?: string;
-  description?: string ;
-  duree_minutes?: string;
+  description?: string;
+  duration_minutes?: string;
+  premiere?: string;
   public?: boolean;
   created_by?: string;
   created_at: string;
@@ -337,18 +340,18 @@ export default function TestConnectionPage() {
             <XCircle className="h-4 w-4 text-red-600" />
             <AlertTitle className="font-medium text-red-600">Erreur de connexion</AlertTitle>
             <AlertDescription className="space-y-4">
-                {connectionTestSuccess === true ? (
-                  <>
-                    <div className="mb-2 p-2 rounded bg-green-600 text-white font-bold border border-green-800 shadow">
-                      La connexion à Supabase fonctionne
-                    </div>
-                    <div className="mb-2 p-2 rounded bg-red-600 text-white font-bold border border-red-800 shadow">
-                      Une erreur est survenue lors de l'accès aux tables ou aux données.
-                    </div>
-                  </>
-                ) : (
-                  <p>{errorMessage || "Une erreur est survenue lors de la connexion à Supabase. Veuillez vérifier vos identifiants."}</p>
-                )}
+              {connectionTestSuccess === true ? (
+                <>
+                  <div className="mb-2 p-2 rounded bg-green-600 text-white font-bold border border-green-800 shadow">
+                    La connexion à Supabase fonctionne
+                  </div>
+                  <div className="mb-2 p-2 rounded bg-red-600 text-white font-bold border border-red-800 shadow">
+                    Une erreur est survenue lors de l'accès aux tables ou aux données.
+                  </div>
+                </>
+              ) : (
+                <p>{errorMessage || "Une erreur est survenue lors de la connexion à Supabase. Veuillez vérifier vos identifiants."}</p>
+              )}
               {connectionDetails && connectionDetails.error && (
                 <div className="mt-2 text-sm text-muted-foreground">
                   <span className="font-medium">Détail technique :</span> {connectionDetails.error}
@@ -363,7 +366,7 @@ export default function TestConnectionPage() {
                   </li>
                   <li>Votre projet Supabase est actif et accessible</li>
                   <li>Vous n&apos;avez pas de restrictions réseau qui bloquent les connexions à Supabase</li>
-                    <li>Vérifiez que les tables nécessaires existent bien dans votre base de données Supabase</li>
+                  <li>Vérifiez que les tables nécessaires existent bien dans votre base de données Supabase</li>
                 </ul>
               </div>
             </AlertDescription>
@@ -395,20 +398,23 @@ export default function TestConnectionPage() {
                           <span className="font-medium">Date création:</span> {
                             spectacle.created_at
                               ? new Date(spectacle.created_at).toLocaleDateString("fr-FR", {
-                                  day: "numeric",
-                                  month: "long",
-                                  year: "numeric",
-                                })
+                                day: "numeric",
+                                month: "long",
+                                year: "numeric",
+                              })
                               : "-"
                           }
                         </div>
                         <div>
-                          <span className="font-medium">Durée:</span> 
-                          {"duree_minutes" in spectacle && spectacle.duree_minutes
-                            ? spectacle.duree_minutes + " min"
-                            : "duration" in spectacle && spectacle.duration
-                              ? spectacle.duration
+                          <span className="font-medium">Durée:</span>
+                          {"duration_minutes" in spectacle && spectacle.duration_minutes
+                            ? spectacle.duration_minutes + " min"
+                            : "duration" in spectacle && spectacle.duration_minutes
+                              ? spectacle.duration_minutes
                               : "-"}
+                        </div>
+                        <div>
+                          <span className="font-medium">Année:</span> {spectacle.premiere ? new Date(spectacle.premiere).getFullYear() : "-"}
                         </div>
                         <p className="text-sm text-muted-foreground mt-2">{spectacle.description || ""}</p>
                       </div>

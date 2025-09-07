@@ -1,7 +1,7 @@
 export interface Show {
   id: number;
   title: string;
-  shortDescription: string;
+  short_description: string;
   image: string;
   slug: string;
   dates?: string[];

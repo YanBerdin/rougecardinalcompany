@@ -67,6 +67,7 @@ export function SpectaclesView({ currentShows, archivedShows, loading = false }:
                                                 <span className="text-sm text-primary font-medium card-meta">{show.genre}</span>
                                                 <span className="text-sm card-date">
                                                     Première : {new Date(show.premiere).toLocaleDateString('fr-FR')}
+                                                    <span className="ml-2 text-xs text-muted-foreground">Année : {show.premiere ? new Date(show.premiere).getFullYear() : "-"}</span>
                                                 </span>
                                             </div>
 
@@ -83,7 +84,7 @@ export function SpectaclesView({ currentShows, archivedShows, loading = false }:
                                             <div className="grid grid-cols-2 gap-4 text-sm mb-6 card-meta">
                                                 <div className="flex items-center">
                                                     <Clock className="h-4 w-4 mr-2 text-primary" />
-                                                    {show.duration}
+                                                    {show.duration_minutes}
                                                 </div>
                                                 <div className="flex items-center">
                                                     <Users className="h-4 w-4 mr-2 text-primary" />
@@ -141,7 +142,7 @@ export function SpectaclesView({ currentShows, archivedShows, loading = false }:
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                                     <div className="absolute top-4 left-4">
                                         <Badge variant="secondary">
-                                            {show.year}
+                                            {show.premiere ? new Date(show.premiere).getFullYear() : "-"}
                                         </Badge>
                                     </div>
                                     {show.awards.length > 0 && (

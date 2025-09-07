@@ -346,7 +346,7 @@ create table public.spectacles (
   titre text not null,
   slug text,
   description text,
-  duree_minutes integer,
+  duration_minutes integer,
   public boolean default true,
   created_by uuid null,
   created_at timestamptz default now() not null,

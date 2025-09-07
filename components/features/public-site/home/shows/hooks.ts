@@ -8,7 +8,7 @@ const showsData: Show[] = [
   {
     id: 1,
     title: "Les Murmures du Temps",
-    shortDescription: "Un voyage poétique à travers les âges, où passé et présent se rencontrent dans un dialogue bouleversant.",
+    short_description: "Un voyage poétique à travers les âges, où passé et présent se rencontrent dans un dialogue bouleversant.",
     image: "https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=600",
     slug: "les-murmures-du-temps",
     dates: ["2025-08-15", "2025-08-16", "2025-08-17"]
@@ -16,7 +16,7 @@ const showsData: Show[] = [
   {
     id: 2,
     title: "Fragments d'Éternité",
-    shortDescription: "Une création originale qui explore les liens invisibles qui nous unissent, entre rire et larmes.",
+    short_description: "Une création originale qui explore les liens invisibles qui nous unissent, entre rire et larmes.",
     image: "https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=600",
     slug: "fragments-eternite",
     dates: ["2025-09-28", "2025-09-29", "2025-09-30"]
@@ -24,7 +24,7 @@ const showsData: Show[] = [
   {
     id: 3,
     title: "La Danse des Ombres",
-    shortDescription: "Adaptation moderne d'un classique, revisité avec audace et sensibilité par notre équipe artistique.",
+    short_description: "Adaptation moderne d'un classique, revisité avec audace et sensibilité par notre équipe artistique.",
     image: "https://images.pexels.com/photos/3184340/pexels-photo-3184340.jpeg?auto=compress&cs=tinysrgb&w=600",
     slug: "la-danse-des-ombres",
     dates: ["2025-08-12", "2025-08-13", "2025-08-14"]

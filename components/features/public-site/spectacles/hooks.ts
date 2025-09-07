@@ -8,7 +8,7 @@ const currentShowsData = [
         title: "Les Murmures du Temps",
         description: "Un voyage poétique à travers les âges, où passé et présent se rencontrent dans un dialogue bouleversant. Cette création originale explore les liens invisibles qui nous unissent à travers le temps.",
         genre: "Drame contemporain",
-        duration: "1h30",
+        duration_minutes: "1h30",
         cast: 4,
         premiere: "2023-10-15",
         image: "https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=600",
@@ -20,7 +20,7 @@ const currentShowsData = [
         title: "Fragments d'Éternité",
         description: "Une création originale qui explore les liens invisibles qui nous unissent, entre rire et larmes. Un spectacle touchant sur la condition humaine et nos quêtes de sens.",
         genre: "Création originale",
-        duration: "1h45",
+        duration_minutes: "1h45",
         cast: 6,
         premiere: "2024-01-12",
         image: "https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=600",
@@ -36,7 +36,7 @@ const archivedShowsData = [
         title: "La Danse des Ombres",
         description: "Adaptation moderne d'un classique, revisité avec audace et sensibilité par notre équipe artistique.",
         genre: "Classique revisité",
-        year: "2023",
+        premiere: "2023-05-10",
         image: "https://images.pexels.com/photos/3184340/pexels-photo-3184340.jpeg?auto=compress&cs=tinysrgb&w=600",
         awards: ["Prix du Public - Festival d'Avignon"]
     },
@@ -45,7 +45,7 @@ const archivedShowsData = [
         title: "Échos de Liberté",
         description: "Un spectacle engagé sur les droits humains et la liberté d'expression dans le monde contemporain.",
         genre: "Théâtre documentaire",
-        year: "2022",
+        premiere: "2022-03-18",
         image: "https://images.pexels.com/photos/3184421/pexels-photo-3184421.jpeg?auto=compress&cs=tinysrgb&w=600",
         awards: ["Mention spéciale - Théâtre et Société"]
     },
@@ -54,7 +54,7 @@ const archivedShowsData = [
         title: "Rêves d'Enfance",
         description: "Un spectacle familial poétique qui ravive la magie de l'enfance chez petits et grands.",
         genre: "Tout public",
-        year: "2021",
+        premiere: "2021-11-02",
         image: "https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=600",
         awards: []
     },
@@ -63,7 +63,7 @@ const archivedShowsData = [
         title: "Solitudes Partagées",
         description: "Une réflexion intimiste sur la solitude moderne et les moyens de créer du lien dans notre société.",
         genre: "Drame psychologique",
-        year: "2020",
+        premiere: "2020-09-25",
         image: "https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg?auto=compress&cs=tinysrgb&w=600",
         awards: ["Prix de la Critique"]
     }
@@ -81,7 +81,7 @@ export const useSpectaclesData = () => {
             try {
                 // Temps de chargement simulé
                 await new Promise(resolve => setTimeout(resolve, 1000));
-                
+
                 // Mise à jour des données (à terme, ce sera un appel API réel)
                 setCurrentShows(
                     currentShowsData.map(show => ({
@@ -89,9 +89,15 @@ export const useSpectaclesData = () => {
                         public: true,
                         created_at: show.premiere,
                         updated_at: show.premiere,
+                        year: show.premiere ? new Date(show.premiere).getFullYear() : undefined,
                     }))
                 );
-                setArchivedShows(archivedShowsData);
+                setArchivedShows(
+                    archivedShowsData.map(show => ({
+                        ...show,
+                        year: show.premiere ? String(new Date(show.premiere).getFullYear()) : undefined
+                    }))
+                );
             } catch (error) {
                 console.error("Erreur lors du chargement des spectacles:", error);
             } finally {

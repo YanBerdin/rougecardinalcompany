@@ -2,7 +2,7 @@
 export interface NewsItem {
   id: number;
   title: string;
-  excerpt: string;
+  short_description: string;
   date: string;
   image: string;
   category: string;

@@ -37,7 +37,7 @@ export function ShowsView({ shows }: ShowsViewProps) {
                                     </Link>
                                 </h3>
                                 <p className="mb-4 text-sm leading-relaxed card-text">
-                                    {show.shortDescription}
+                                    {show.short_description}
                                 </p>
 
                                 {show.dates && show.dates.length > 0 && (
