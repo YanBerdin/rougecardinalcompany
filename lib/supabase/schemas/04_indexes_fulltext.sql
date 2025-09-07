@@ -48,4 +48,4 @@ create index if not exists idx_articles_published_at on public.articles_presse (
 
 -- trigram indexes for fuzzy title search
 create index if not exists idx_spectacles_titre_trgm on public.spectacles using gin (titre gin_trgm_ops);
-create index if not exists idx_articles_titre_trgm on public.articles_presse using gin (titre gin_trgm_ops);
+create index if not exists idx_articles_title_trgm on public.articles_presse using gin (titre gin_trgm_ops);

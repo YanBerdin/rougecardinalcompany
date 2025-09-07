@@ -14,4 +14,4 @@ create index if not exists idx_evenements_recurrence_end_date on public.evenemen
 
 -- Index trigram pour recherche fuzzy
 create index if not exists idx_spectacles_title_trgm on public.spectacles using gin (title gin_trgm_ops);
-create index if not exists idx_articles_titre_trgm on public.articles_presse using gin (title gin_trgm_ops);
+create index if not exists idx_articles_title_trgm on public.articles_presse using gin (title gin_trgm_ops);
