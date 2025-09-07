@@ -29,7 +29,7 @@ function mapMembreToTeamMember(membre: Membre): TeamMember {
 function mapSpectacleFromDb(dbSpectacle: Spectacle): CurrentShow | ArchivedShow {
   return {
     id: dbSpectacle.id,
-    title: dbSpectacle.titre,
+    title: dbSpectacle.title,
     slug: dbSpectacle.slug,
     description: dbSpectacle.description ?? "",
     genre: (dbSpectacle as any).genre ?? "",
@@ -51,7 +51,7 @@ function mapSpectacleFromDb(dbSpectacle: Spectacle): CurrentShow | ArchivedShow 
 
 interface Spectacle {
   id: number;
-  titre: string;
+  title: string;
   slug?: string;
   description?: string;
   duration_minutes?: string;
@@ -79,7 +79,7 @@ interface Membre {
 
 interface Actualite {
   id: string
-  titre: string
+  title: string
   contenu: string
   date_publication: string
   categorie: string
@@ -88,7 +88,7 @@ interface Actualite {
 
 export default function TestConnectionPage() {
   const [connectionStatus, setConnectionStatus] = useState<"loading" | "success" | "error" | "tables-missing">("loading")
-  const [spectacles, setSpectacles] = useState<(Spectacle | CurrentShow | ArchivedShow)[]>([])
+  const [spectacles, setSpectacles] = useState<Array<Spectacle | CurrentShow | ArchivedShow>>([])
   const [membres, setMembres] = useState<Membre[]>([])
   const [actualites, setActualites] = useState<Actualite[]>([])
   const [errorMessage, setErrorMessage] = useState("")
@@ -386,7 +386,7 @@ export default function TestConnectionPage() {
                 {spectacles.map((spectacle) => (
                   <Card key={spectacle.id}>
                     <CardHeader>
-                      <CardTitle>{'title' in spectacle ? spectacle.title : spectacle.titre}</CardTitle>
+                      <CardTitle>{spectacle.title}</CardTitle>
                       <CardDescription>{'slug' in spectacle ? spectacle.slug : ""}</CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -459,7 +459,7 @@ export default function TestConnectionPage() {
                 {actualites.map((actualite) => (
                   <Card key={actualite.id}>
                     <CardHeader>
-                      <CardTitle>{actualite.titre}</CardTitle>
+                      <CardTitle>{actualite.title}</CardTitle>
                       <CardDescription>
                         {new Date(actualite.date_publication).toLocaleDateString("fr-FR", {
                           day: "numeric",

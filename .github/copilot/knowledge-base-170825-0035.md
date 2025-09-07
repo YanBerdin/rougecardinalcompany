@@ -343,7 +343,7 @@ create table public.lieux (
 ```sql
 create table public.spectacles (
   id bigint generated always as identity primary key,
-  titre text not null,
+  title text not null,
   slug text,
   description text,
   duration_minutes integer,
@@ -382,7 +382,7 @@ create table public.evenements (
 ```sql
 create table public.articles_presse (
   id bigint generated always as identity primary key,
-  titre text not null,
+  title text not null,
   slug text,
   chapo text,
   contenu text,
@@ -734,7 +734,7 @@ returns trigger
 language plpgsql
 as $$
 begin
-  new.search_vector := to_tsvector('french', coalesce(new.titre,'') || ' ' || coalesce(new.description,''));
+  new.search_vector := to_tsvector('french', coalesce(new.title,'') || ' ' || coalesce(new.description,''));
   return new;
 end;
 $$;
@@ -748,7 +748,7 @@ returns trigger
 language plpgsql
 as $$
 begin
-  new.search_vector := to_tsvector('french', coalesce(new.titre,'') || ' ' || coalesce(new.chapo,'') || ' ' || coalesce(new.contenu,''));
+  new.search_vector := to_tsvector('french', coalesce(new.title,'') || ' ' || coalesce(new.chapo,'') || ' ' || coalesce(new.contenu,''));
   return new;
 end;
 $$;
@@ -871,10 +871,10 @@ create index if not exists idx_medias_storage_path on public.medias (storage_pat
 create index if not exists idx_profiles_user_id on public.profiles (user_id);
 ```
 
-- Index `idx_spectacles_titre` on `spectacles`
+- Index `idx_spectacles_title` on `spectacles`
 
 ```sql
-create index if not exists idx_spectacles_titre on public.spectacles (titre);
+create index if not exists idx_spectacles_title on public.spectacles (title);
 ```
 
 - Index `idx_articles_published_at` on `articles_presse`
@@ -883,16 +883,16 @@ create index if not exists idx_spectacles_titre on public.spectacles (titre);
 create index if not exists idx_articles_published_at on public.articles_presse (published_at);
 ```
 
-- Index `idx_spectacles_titre_trgm` on `spectacles`
+- Index `idx_spectacles_title_trgm` on `spectacles`
 
 ```sql
-create index if not exists idx_spectacles_titre_trgm on public.spectacles using gin (titre gin_trgm_ops);
+create index if not exists idx_spectacles_title_trgm on public.spectacles using gin (title gin_trgm_ops);
 ```
 
-- Index `idx_articles_titre_trgm` on `articles_presse`
+- Index `idx_articles_title_trgm` on `articles_presse`
 
 ```sql
-create index if not exists idx_articles_titre_trgm on public.articles_presse using gin (titre gin_trgm_ops);
+create index if not exists idx_articles_title_trgm on public.articles_presse using gin (title gin_trgm_ops);
 ```
 
 - Index `idx_partners_slug` on `partners`

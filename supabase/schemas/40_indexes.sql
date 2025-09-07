@@ -4,7 +4,7 @@
 -- Index de base
 create index if not exists idx_medias_storage_path on public.medias (storage_path);
 create index if not exists idx_profiles_user_id on public.profiles (user_id);
-create index if not exists idx_spectacles_titre on public.spectacles (titre);
+create index if not exists idx_spectacles_title on public.spectacles (title);
 create index if not exists idx_articles_published_at on public.articles_presse (published_at);
 
 -- Index date pour événements
@@ -13,5 +13,5 @@ create index if not exists idx_evenements_parent_event_id on public.evenements (
 create index if not exists idx_evenements_recurrence_end_date on public.evenements (recurrence_end_date);
 
 -- Index trigram pour recherche fuzzy
-create index if not exists idx_spectacles_titre_trgm on public.spectacles using gin (titre gin_trgm_ops);
-create index if not exists idx_articles_titre_trgm on public.articles_presse using gin (titre gin_trgm_ops);
+create index if not exists idx_spectacles_title_trgm on public.spectacles using gin (title gin_trgm_ops);
+create index if not exists idx_articles_titre_trgm on public.articles_presse using gin (title gin_trgm_ops);

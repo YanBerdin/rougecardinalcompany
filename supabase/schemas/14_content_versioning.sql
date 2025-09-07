@@ -50,8 +50,8 @@ begin
   from public.content_versions
   where entity_type = p_entity_type and entity_id = p_entity_id;
   
-  -- Extraire un titre du snapshot si possible pour le résumé auto
-  extracted_title := p_content_snapshot->>'titre';
+  -- Extraire un title du snapshot si possible pour le résumé auto
+  extracted_title := p_content_snapshot->>'title';
   if extracted_title is null then
     extracted_title := p_content_snapshot->>'name';
   end if;
@@ -109,17 +109,17 @@ begin
   -- Déterminer le type de changement
   if tg_op = 'INSERT' then
     change_type_value := 'create';
-    change_summary_text := 'Création du spectacle: ' || NEW.titre;
+    change_summary_text := 'Création du spectacle: ' || NEW.title;
   else
     if OLD.published_at is null and NEW.published_at is not null then
       change_type_value := 'publish';
-      change_summary_text := 'Publication du spectacle: ' || NEW.titre;
+      change_summary_text := 'Publication du spectacle: ' || NEW.title;
     elsif OLD.published_at is not null and NEW.published_at is null then
       change_type_value := 'unpublish';
-      change_summary_text := 'Dépublication du spectacle: ' || NEW.titre;
+      change_summary_text := 'Dépublication du spectacle: ' || NEW.title;
     else
       change_type_value := 'update';
-      change_summary_text := 'Mise à jour du spectacle: ' || NEW.titre;
+      change_summary_text := 'Mise à jour du spectacle: ' || NEW.title;
     end if;
   end if;
   
@@ -149,17 +149,17 @@ declare
 begin
   if tg_op = 'INSERT' then
     change_type_value := 'create';
-    change_summary_text := 'Création de l''article: ' || NEW.titre;
+    change_summary_text := 'Création de l''article: ' || NEW.title;
   else
     if OLD.published_at is null and NEW.published_at is not null then
       change_type_value := 'publish';
-      change_summary_text := 'Publication de l''article: ' || NEW.titre;
+      change_summary_text := 'Publication de l''article: ' || NEW.title;
     elsif OLD.published_at is not null and NEW.published_at is null then
       change_type_value := 'unpublish';
-      change_summary_text := 'Dépublication de l''article: ' || NEW.titre;
+      change_summary_text := 'Dépublication de l''article: ' || NEW.title;
     else
       change_type_value := 'update';
-      change_summary_text := 'Mise à jour de l''article: ' || NEW.titre;
+      change_summary_text := 'Mise à jour de l''article: ' || NEW.title;
     end if;
   end if;
   
@@ -238,7 +238,7 @@ begin
   if version_record.entity_type = 'spectacle' then
     update public.spectacles
     set 
-      titre = version_record.content_snapshot->>'titre',
+      title = version_record.content_snapshot->>'title',
       description = version_record.content_snapshot->>'description',
       published_at = (version_record.content_snapshot->>'published_at')::timestamptz,
       public = (version_record.content_snapshot->>'public')::boolean,
@@ -251,7 +251,7 @@ begin
   elsif version_record.entity_type = 'article_presse' then
     update public.articles_presse
     set 
-      titre = version_record.content_snapshot->>'titre',
+      title = version_record.content_snapshot->>'title',
       chapo = version_record.content_snapshot->>'chapo',
       contenu = version_record.content_snapshot->>'contenu',
       published_at = (version_record.content_snapshot->>'published_at')::timestamptz,

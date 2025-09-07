@@ -4,7 +4,7 @@
 drop table if exists public.articles_presse cascade;
 create table public.articles_presse (
   id bigint generated always as identity primary key,
-  titre text not null,
+  title text not null,
   slug text,
   chapo text,
   contenu text,

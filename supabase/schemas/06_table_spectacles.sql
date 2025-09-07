@@ -4,7 +4,7 @@
 drop table if exists public.spectacles cascade;
 create table public.spectacles (
   id bigint generated always as identity primary key,
-  titre text not null,
+  title text not null,
   slug text,
   status text,
   description text,

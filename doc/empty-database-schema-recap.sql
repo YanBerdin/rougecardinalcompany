@@ -645,12 +645,12 @@ $$;
 -- regular indexes
 create index if not exists idx_medias_storage_path on public.medias (storage_path);
 create index if not exists idx_profiles_user_id on public.profiles (user_id);
-create index if not exists idx_spectacles_titre on public.spectacles (titre);
+create index if not exists idx_spectacles_title on public.spectacles (title);
 create index if not exists idx_articles_published_at on public.articles_presse (published_at);
 
 -- trigram indexes for fuzzy title search
-create index if not exists idx_spectacles_titre_trgm on public.spectacles using gin (titre gin_trgm_ops);
-create index if not exists idx_articles_titre_trgm on public.articles_presse using gin (titre gin_trgm_ops);
+create index if not exists idx_spectacles_title_trgm on public.spectacles using gin (title gin_trgm_ops);
+create index if not exists idx_articles_title_trgm on public.articles_presse using gin (title gin_trgm_ops);
 
 -- ============================================================================
 -- SECTION 6: ROW LEVEL SECURITY (RLS) POLICIES

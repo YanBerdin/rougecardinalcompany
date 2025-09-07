@@ -111,10 +111,10 @@ set search_path = ''
 as $$
 begin
   if NEW.slug is null or NEW.slug = '' then
-    if TG_TABLE_NAME = 'spectacles' and NEW.titre is not null then
-      NEW.slug := public.generate_slug(NEW.titre);
-    elsif TG_TABLE_NAME = 'articles_presse' and NEW.titre is not null then
-      NEW.slug := public.generate_slug(NEW.titre);
+    if TG_TABLE_NAME = 'spectacles' and NEW.title is not null then
+      NEW.slug := public.generate_slug(NEW.title);
+    elsif TG_TABLE_NAME = 'articles_presse' and NEW.title is not null then
+      NEW.slug := public.generate_slug(NEW.title);
     elsif TG_TABLE_NAME = 'categories' and NEW.name is not null then
       NEW.slug := public.generate_slug(NEW.name);
     elsif TG_TABLE_NAME = 'tags' and NEW.name is not null then
