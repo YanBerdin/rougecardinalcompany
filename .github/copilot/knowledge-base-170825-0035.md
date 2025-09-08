@@ -276,9 +276,10 @@ create table public.profiles (
   updated_at timestamptz default now() not null,
   constraint profiles_userid_unique unique (user_id)
 );
-```
 
-- Comment: user profiles linked to auth.users; contains display info and role metadata
+comment on table public.profiles is 'user profiles linked to auth.users; contains display info and role metadata';
+comment on column public.profiles.user_id is 'references auth.users.id managed by Supabase';
+```
 
 #### Table: `medias`
 
@@ -295,13 +296,15 @@ create table public.medias (
   created_at timestamptz default now() not null,
   updated_at timestamptz default now() not null
 );
-```
 
-- Comment: media storage metadata (paths, filenames, mime, size)
+comment on table public.medias is 'media storage metadata (paths, filenames, mime, size)';
+comment on column public.medias.storage_path is 'storage provider path (bucket/key)';
+```
 
 #### Table: `membres_equipe`
 
 ```sql
+drop table if exists public.membres_equipe cascade;
 create table public.membres_equipe (
   id bigint generated always as identity primary key,
   nom text not null,
@@ -313,9 +316,9 @@ create table public.membres_equipe (
   created_at timestamptz default now() not null,
   updated_at timestamptz default now() not null
 );
-```
 
-- Comment: members of the team (artists, staff)
+comment on table public.membres_equipe is 'members of the team (artists, staff)';
+```
 
 #### Table: `lieux`
 
@@ -334,9 +337,9 @@ create table public.lieux (
   created_at timestamptz default now() not null,
   updated_at timestamptz default now() not null
 );
-```
 
-- Comment: physical venues where events can be scheduled
+comment on table public.lieux is 'physical venues where events can be scheduled';
+```
 
 #### Table: `spectacles`
 
@@ -345,17 +348,24 @@ create table public.spectacles (
   id bigint generated always as identity primary key,
   title text not null,
   slug text,
+  status text,
   description text,
+  short_description text,
+  genre text,
   duration_minutes integer,
+  cast integer,
+  premiere timestamptz null,
+  image text,
   public boolean default true,
+  awards text,
   created_by uuid null,
   created_at timestamptz default now() not null,
   updated_at timestamptz default now() not null,
   search_vector tsvector
 );
-```
 
-- Comment: shows/performances (base entity)
+comment on table public.spectacles is 'shows/performances (base entity)';
+```
 
 #### Table: `evenements`
 
@@ -370,12 +380,18 @@ create table public.evenements (
   price_cents integer null,
   status text default 'scheduled',
   metadata jsonb default '{}'::jsonb,
+  recurrence_rule text,
+  recurrence_end_date timestamptz,
+  parent_event_id bigint references public.evenements(id) on delete cascade,
   created_at timestamptz default now() not null,
   updated_at timestamptz default now() not null
 );
-```
 
-- Comment: scheduled occurrences of spectacles with date and venue
+comment on table public.evenements is 'scheduled occurrences of spectacles with date and venue';
+comment on column public.evenements.recurrence_rule is 'Règle de récurrence au format RRULE (RFC 5545)';
+comment on column public.evenements.recurrence_end_date is 'Date de fin de la récurrence';
+comment on column public.evenements.parent_event_id is 'Référence vers l''événement parent pour les occurrences générées';
+```
 
 #### Table: `articles_presse`
 
@@ -393,9 +409,9 @@ create table public.articles_presse (
   updated_at timestamptz default now() not null,
   search_vector tsvector
 );
-```
 
-- Comment: press articles referencing shows or company news
+comment on table public.articles_presse is 'press articles referencing shows or company news';
+```
 
 #### Table: `abonnes_newsletter`
 
@@ -410,9 +426,8 @@ create table public.abonnes_newsletter (
   metadata jsonb default '{}'::jsonb,
   created_at timestamptz default now() not null
 );
+alter table public.abonnes_newsletter add constraint abonnes_email_unique unique (email);
 ```
-
-- Comment: newsletter subscribers
 
 #### Table: `messages_contact`
 
@@ -428,8 +443,6 @@ create table public.messages_contact (
   created_at timestamptz default now() not null
 );
 ```
-
-- Comment: contact form messages received from website
 
 #### Table: `configurations_site`
 
@@ -458,9 +471,12 @@ create table public.logs_audit (
   user_agent text null,
   created_at timestamptz default now() not null
 );
-```
 
-- Comment: audit log for create/update/delete operations on tracked tables
+comment on table public.abonnes_newsletter is 'newsletter subscribers';
+comment on table public.messages_contact is 'contact form messages received from website';
+comment on table public.configurations_site is 'key-value store for site-wide configuration';
+comment on table public.logs_audit is 'audit log for create/update/delete operations on tracked tables';
+```
 
 #### Table: `spectacles_membres_equipe`
 
