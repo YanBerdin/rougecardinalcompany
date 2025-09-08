@@ -15,7 +15,6 @@ create table public.spectacles (
   premiere timestamptz null,
   image text,
   public boolean default true,
-  status text,
   awards text,
   created_by uuid null,
   created_at timestamptz default now() not null,

@@ -44,6 +44,11 @@ create table public.seo_redirects (
   updated_at timestamptz default now() not null
 );
 
+-- Ajouter une validation pour les redirections :
+alter table public.seo_redirects 
+add constraint check_different_paths 
+check (old_path != new_path);
+
 comment on table public.seo_redirects is 'Redirections SEO pour maintenir le référencement lors de changements d''URL';
 comment on column public.seo_redirects.redirect_type is 'Code de redirection HTTP : 301 (permanent), 302 (temporaire)';
 comment on column public.seo_redirects.hit_count is 'Nombre de fois que la redirection a été utilisée';

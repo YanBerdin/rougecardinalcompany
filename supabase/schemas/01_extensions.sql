@@ -2,4 +2,5 @@
 -- Ordre: 01 - Exécuté en premier pour définir les extensions nécessaires
 
 create extension if not exists "pgcrypto"; -- Génération UUID optionnelle
-create extension if not exists pg_trgm;   -- Index trigram pour recherche fuzzy
+create extension if not exists "unaccent"; -- Pour generate_slug()
+create extension if not exists "pg_trgm";   -- Index trigram pour recherche fuzzy
