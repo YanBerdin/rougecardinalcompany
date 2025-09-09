@@ -404,10 +404,12 @@ comment on column public.evenements.parent_event_id is 'Référence vers l''év�
 create table public.articles_presse (
   id bigint generated always as identity primary key,
   title text not null,
+  author text,
+  type text,
   slug text,
   chapo text,
-  contenu text,
-  source_nom text,
+  excerpt text,
+  source_publication text,
   source_url text,
   published_at timestamptz,
   created_at timestamptz default now() not null,
@@ -1131,7 +1133,7 @@ returns trigger
 language plpgsql
 as $$
 begin
-  new.search_vector := to_tsvector('french', coalesce(new.title,'') || ' ' || coalesce(new.chapo,'') || ' ' || coalesce(new.contenu,''));
+  new.search_vector := to_tsvector('french', coalesce(new.title,'') || ' ' || coalesce(new.chapo,'') || ' ' || coalesce(new.excerpt,''));
   return new;
 end;
 $$;

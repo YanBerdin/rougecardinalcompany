@@ -49,6 +49,7 @@ function mapSpectacleFromDb(dbSpectacle: Spectacle): CurrentShow | ArchivedShow 
   }
 }
 
+// Types pour les données de test
 interface Spectacle {
   id: number;
   title: string;
@@ -77,7 +78,7 @@ interface Membre {
   photo_url?: string
 }
 
-interface Actualite {
+interface Actualite { //TODO == mediaArticlesData
   id: string
   title: string
   contenu: string

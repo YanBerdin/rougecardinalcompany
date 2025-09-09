@@ -15,12 +15,12 @@ export const PressReleaseSchema = z.object({
 export const MediaArticleSchema = z.object({
   id: z.number(),
   title: z.string(),
-  publication: z.string(),
-  date: z.string(),
   author: z.string(),
   type: z.enum(["Article", "Critique", "Interview", "Portrait"]),
-  url: z.string(),
   excerpt: z.string(),
+  source_publication: z.string(),
+  source_url: z.string(),
+  published_at: z.string(),
 });
 
 // Schéma pour les éléments du kit média

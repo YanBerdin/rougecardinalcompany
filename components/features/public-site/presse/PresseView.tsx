@@ -144,10 +144,10 @@ export function PresseView({
                                                     {article.type}
                                                 </Badge>
                                                 <span className="text-sm text-primary font-medium">
-                                                    {article.publication}
+                                                    {article.source_publication}
                                                 </span>
                                                 <span className="text-sm text-muted-foreground">
-                                                    {new Date(article.date).toLocaleDateString("fr-FR")}
+                                                    {new Date(article.published_at).toLocaleDateString("fr-FR")}
                                                 </span>
                                             </div>
 
@@ -167,7 +167,7 @@ export function PresseView({
                                         <div className="flex items-center justify-center lg:justify-end">
                                             <Button variant="outline" asChild>
                                                 <a
-                                                    href={article.url}
+                                                    href={article.source_url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                 >

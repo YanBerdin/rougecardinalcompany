@@ -252,8 +252,13 @@ begin
     update public.articles_presse
     set 
       title = version_record.content_snapshot->>'title',
+      author = version_record.content_snapshot->>'author',
+      type = version_record.content_snapshot->>'type',
+      slug = version_record.content_snapshot->>'slug',
       chapo = version_record.content_snapshot->>'chapo',
-      contenu = version_record.content_snapshot->>'contenu',
+      excerpt = version_record.content_snapshot->>'excerpt',
+      source_publication = version_record.content_snapshot->>'source_publication',
+      source_url = version_record.content_snapshot->>'source_url',
       published_at = (version_record.content_snapshot->>'published_at')::timestamptz,
       updated_at = now()
       -- Autres champs à restaurer

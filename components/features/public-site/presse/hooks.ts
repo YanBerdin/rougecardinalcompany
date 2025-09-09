@@ -5,7 +5,7 @@ import { Image as ImageIcon, FileText, Video } from "lucide-react";
 import { PressRelease, MediaArticle, MediaKitItem } from "./types";
 import { PresseSkeleton } from "@/components/skeletons/presse-skeleton";
 
-// Données simulées des communiqués de presse
+// Communiqués de presse
 // === newsData
 const pressReleasesData = [
   {
@@ -37,55 +37,55 @@ const pressReleasesData = [
   },
 ];
 
-// Données simulées des articles médias
+// Revue de Presse (d'articles médias)
 const mediaArticlesData = [
   {
     id: 1,
     title: "Une compagnie qui marie tradition et modernité",
-    publication: "Le Figaro",
-    date: "2024-01-20",
+    source_publication: "Le Figaro",
+    published_at: "2024-01-20",
     author: "Marie Lecomte",
     type: "Article" as const,
-    url: "https://lefigaro.fr/...",
+    source_url: "https://lefigaro.fr/...",
     excerpt:
       "Rouge-Cardinal réussit le pari audacieux de rendre les classiques accessibles à un public contemporain...",
   },
   {
     id: 2,
     title: "Les Murmures du Temps : un spectacle bouleversant",
-    publication: "Télérama",
-    date: "2024-01-18",
+    source_publication: "Télérama",
+    published_at: "2024-01-18",
     author: "Jean-Michel Ribes",
     type: "Critique" as const,
-    url: "https://telerama.fr/...",
+    source_url: "https://telerama.fr/...",
     excerpt:
       "Rarement une création aura su toucher avec autant de justesse les cordes sensibles du spectateur...",
   },
   {
     id: 3,
     title: "Interview vidéo - Marie Dubois",
-    publication: "France Culture",
-    date: "2024-01-12",
+    source_publication: "France Culture",
+    published_at: "2024-01-12",
     author: "Laure Adler",
     type: "Interview" as const,
-    url: "https://franceculture.fr/...",
+    source_url: "https://franceculture.fr/...",
     excerpt:
       "La directrice artistique de Rouge-Cardinal nous parle de sa vision du théâtre contemporain...",
   },
   {
     id: 4,
     title: "Portrait d'une compagnie engagée",
-    publication: "Les Inrockuptibles",
-    date: "2024-01-08",
+    source_publication: "Les Inrockuptibles",
+    published_at: "2024-01-08",
     author: "Sophie Grassin",
     type: "Portrait" as const,
-    url: "https://lesinrocks.com/...",
+    source_url: "https://lesinrocks.com/...",
     excerpt:
       "Depuis 15 ans, Rouge-Cardinal développe un théâtre exigeant et accessible, miroir de notre époque...",
   },
 ];
 
-// Données simulées du kit média
+// Kit média téléchargeable
 const mediaKitData = [
   {
     type: "Photos haute définition",
@@ -110,9 +110,6 @@ const mediaKitData = [
   },
 ];
 
-/**
- * Hook personnalisé pour gérer les données et l'état de chargement de la page Presse
- */
 export function usePresse() {
   const [loading, setLoading] = useState(true);
   const [pressReleases, setPressReleases] = useState<PressRelease[]>([]);
@@ -120,13 +117,12 @@ export function usePresse() {
   const [mediaKit, setMediaKit] = useState<MediaKitItem[]>([]);
 
   useEffect(() => {
-    // Simulation d'un appel API
+    // Simulation d'un appel API //TODO: remove
     const fetchData = async () => {
       try {
-        // Simule une latence réseau
+        // Simule une latence réseau //TODO: remove
         await new Promise((resolve) => setTimeout(resolve, 2000));
         
-        // Dans un cas réel, ces données viendraient d'un appel API
         setPressReleases(pressReleasesData);
         setMediaArticles(mediaArticlesData);
         setMediaKit(mediaKitData);
