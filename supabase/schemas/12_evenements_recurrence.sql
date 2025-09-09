@@ -56,3 +56,45 @@ comment on function public.validate_rrule(text) is
 alter table public.evenements 
 add constraint check_valid_rrule 
 check (recurrence_rule is null or public.validate_rrule(recurrence_rule));
+
+-- Row Level Security pour events_recurrence (si la table existe)
+-- Note: Cette section assume l'existence d'une table events_recurrence séparée
+-- Si cette table n'existe pas, ces politiques peuvent être supprimées
+do $$
+begin
+  if exists (select 1 from information_schema.tables where table_schema = 'public' and table_name = 'events_recurrence') then
+    -- Activer RLS sur events_recurrence
+    execute 'alter table public.events_recurrence enable row level security';
+
+    -- Tout le monde peut voir les récurrences des événements publics
+    execute 'drop policy if exists "Event recurrences are viewable by everyone" on public.events_recurrence';
+    execute 'create policy "Event recurrences are viewable by everyone"
+    on public.events_recurrence
+    for select
+    to anon, authenticated
+    using ( true )';
+
+    -- Seuls les admins peuvent gérer les récurrences
+    execute 'drop policy if exists "Admins can create event recurrences" on public.events_recurrence';
+    execute 'create policy "Admins can create event recurrences"
+    on public.events_recurrence
+    for insert
+    to authenticated
+    with check ( (select public.is_admin()) )';
+
+    execute 'drop policy if exists "Admins can update event recurrences" on public.events_recurrence';
+    execute 'create policy "Admins can update event recurrences"
+    on public.events_recurrence
+    for update
+    to authenticated
+    using ( (select public.is_admin()) )
+    with check ( (select public.is_admin()) )';
+
+    execute 'drop policy if exists "Admins can delete event recurrences" on public.events_recurrence';
+    execute 'create policy "Admins can delete event recurrences"
+    on public.events_recurrence
+    for delete
+    to authenticated
+    using ( (select public.is_admin()) )';
+  end if;
+end $$;

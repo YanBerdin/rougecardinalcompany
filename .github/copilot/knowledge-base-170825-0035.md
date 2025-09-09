@@ -3,8 +3,9 @@
 ## Contexte
 
 - Projet : **from-scratch** (base vide).
-- Source de vérité unique : `/lib/supabase/schemas/*`
+- Source de vérité unique : `supabase/schemas/*` (schéma déclaratif)
 - Le contenu ci-dessous reprend textuellement les objets DDL présents dans le script (tables, indexes, fonctions, triggers, policies, commentaires).
+- **Structure optimisée** : RLS intégrées dans chaque fichier de table, documentation unifiée
 
 ---
 
@@ -29,6 +30,9 @@
 - [17. Conventional Commit Guide](#17-conventional-commit-guide)
 - [18. Annexes](#18-annexes)
 - [19. CRITICAL INSTRUCTIONS FOR AI LANGUAGE MODELS](#19--critical-instructions-for-ai-language-models-)
+  - [19.0. Schema Déclaratif - Structure Optimisée](#190-schema-déclaratif---structure-optimisée-sept-2025)
+  - [19.1. Supabase docs references](#191-supabase-docs-references)
+  - [19.2. Bootstrap Next.js app with Supabase Auth](#192-bootstrap-nextjs-app-with-supabase-auth)
 
 ## 1. Présentation
 
@@ -258,7 +262,8 @@ L’objet user contient les attributs suivants :
 
 ### 6.1. Tables Principales
 
-Chaque table doit avoir un fichier déclaratif dans `supabase/schemas/public/` (nommage recommandé `NN_table_<name>.sql`).
+Chaque table doit avoir un fichier déclaratif dans `supabase/schemas/` (nommage recommandé `NN_table_<name>.sql`).
+Les politiques RLS sont maintenant intégrées directement dans le fichier de chaque table pour une meilleure maintenabilité.
 
 #### Table: `profiles`
 
@@ -857,14 +862,26 @@ comment on view public.recurrent_events is 'Vue pour la gestion des événements
 
 ## 7. Row Level Security (RLS) and Policies (règles appliquées & raisons)
 
+**🔧 Nouvelle Organisation (Sept 2025) :**
+- **RLS intégrées** : Politiques maintenant incluses dans chaque fichier de table
+- **Maintenant 19/19 tables protégées** (était 12/19)
+- **Performance optimisée** : `(select public.is_admin())` pour mise en cache
+- **Index RLS** : 10 index dédiés aux colonnes des politiques
+- **Documentation unifiée** : `supabase/schemas/README.md`
+
 - RLS design principles applied:
   - **Do not trust JWT/app_metadata** for role decisions; use `profiles.role` stored in DB.
   - **Policies separated per operation** (SELECT / INSERT / UPDATE / DELETE).
   - **Use (select auth.uid())** in policies for optimizer initPlan benefits.
   - **Explicit TO** clauses: `to authenticated, anon` or `to authenticated`.
+  - **Optimized function calls** : `(select public.is_admin())` vs `public.is_admin()`
 
-- Tables with RLS enabled:
-  - `profiles`, `medias`, `spectacles`, `evenements`, `partners`
+- Tables with RLS enabled (19/19 - 100% coverage):
+  - **Core**: `profiles`, `medias`, `spectacles`, `evenements`, `lieux`, `membres_equipe`
+  - **Content**: `articles_presse`, `partners`, `categories`, `tags`
+  - **System**: `configurations_site`, `logs_audit`, `abonnes_newsletter`, `messages_contact`
+  - **Analytics**: `analytics_events`, `content_versions`, `seo_redirects`, `sitemap_entries`
+  - **Recurrence**: `events_recurrence`
 
 ### Policies on `medias`
 
@@ -1620,41 +1637,47 @@ Pour garantir la sécurité du site et éviter les failles les plus courantes (I
 
 Tous les objets du schéma sont organisés dans le répertoire `supabase/schemas/` avec une structure numérotée pour garantir l'ordre d'exécution :
 
-**Extensions et Tables (01-15) :**
+**Extensions et Tables (01-16) avec RLS intégrées :**
 - `01_extensions.sql` - Extensions PostgreSQL (pgcrypto, unaccent, pg_trgm, citext*)
-- `02_table_profiles.sql` - Table des profils utilisateurs
-- `03_table_medias.sql` - Gestion des médias et fichiers
-- `04_table_membres_equipe.sql` - Membres de l'équipe
-- `05_table_lieux.sql` - Lieux et venues
-- `06_table_spectacles.sql` - Spectacles et productions
-- `07_table_evenements.sql` - Événements programmés
-- `08_table_articles_presse.sql` - Articles de presse
-- `09_table_partners.sql` - Partenaires de la compagnie
-- `10_tables_system.sql` - Tables système (configurations, logs, etc.)
-- `11_tables_relations.sql` - Tables de liaison many-to-many
-- `12_evenements_recurrence.sql` - Gestion des récurrences d'événements
-- `13_analytics_events.sql` - Suivi analytique des événements
-- `14_categories_tags.sql` - Système de catégories et tags
-- `15_content_versioning.sql` - Versioning du contenu éditorial
-- `16_seo_metadata.sql` - Métadonnées SEO
+- `02_table_profiles.sql` - Table des profils utilisateurs + RLS
+- `03_table_medias.sql` - Gestion des médias et fichiers + RLS
+- `04_table_membres_equipe.sql` - Membres de l'équipe + RLS
+- `05_table_lieux.sql` - Lieux et venues + RLS
+- `06_table_spectacles.sql` - Spectacles et productions + RLS
+- `07_table_evenements.sql` - Événements programmés + RLS
+- `08_table_articles_presse.sql` - Articles de presse + RLS
+- `09_table_partners.sql` - Partenaires de la compagnie + RLS
+- `10_tables_system.sql` - Tables système + RLS (configurations, logs, newsletter, contact)
+- `11_tables_relations.sql` - Tables de liaison many-to-many + RLS
+- `12_evenements_recurrence.sql` - Gestion des récurrences d'événements + RLS
+- `13_analytics_events.sql` - Suivi analytique des événements + RLS
+- `14_categories_tags.sql` - Système de catégories et tags + RLS
+- `15_content_versioning.sql` - Versioning du contenu éditorial + RLS
+- `16_seo_metadata.sql` - Métadonnées SEO + RLS
 
 > **Note importante**: L'extension `citext` est utilisée dans la table `abonnes_newsletter` (10_tables_system.sql) pour le champ `email`, mais n'est pas explicitement créée dans le fichier `01_extensions.sql`. Cela représente une incohérence à corriger.
 
 **Fonctions (20-29) :**
-- `20_functions_core.sql` - Fonctions utilitaires de base
+- `20_functions_core.sql` - Fonctions utilitaires de base (is_admin, generate_slug, etc.)
 - `21_functions_auth_sync.sql` - Synchronisation auth.users <-> profiles
 
 **Triggers (30-39) :**
-- `30_triggers.sql` - Application des triggers sur toutes les tables
+- `30_triggers.sql` - Application des triggers sur toutes les tables (audit, search, updated_at)
 
 **Optimisations (40-59) :**
-- `40_indexes.sql` - Index et optimisations de performance
+- `40_indexes.sql` - Index et optimisations de performance (incluant index RLS)
 - `50_constraints.sql` - Contraintes de validation des données
 
-**Sécurité (60-69) :**
+**Sécurité RLS (60-69) - Fichiers spécialisés :**
 - `60_rls_profiles.sql` - Politiques RLS pour les profils
 - `61_rls_main_tables.sql` - Politiques RLS pour les tables principales
 - `62_rls_advanced_tables.sql` - Politiques RLS pour les tables avancées
+
+**🔧 Refactorisation récente :**
+- **Supprimé** : `63_rls_missing_tables.sql` (fichier patch temporaire)
+- **Intégré** : Toutes les politiques RLS sont maintenant dans les fichiers de tables individuels
+- **Unifié** : Documentation consolidée dans un seul `README.md`
+- **Conformité** : 100% des tables (19/19) avec politiques RLS optimisées
 
 ### 11.2. Workflow de migration
 
@@ -2701,6 +2724,49 @@ update public.configurations_site set show_partners = false;
 ---
 
 ## 19. 🚨 CRITICAL INSTRUCTIONS FOR AI LANGUAGE MODELS 🚨
+
+### 19.0. **Schema Déclaratif - Structure Optimisée (Sept 2025)**
+
+🚨 **IMPORTANT** : La structure du schéma a été REFACTORISÉE. Les AI models doivent respecter les nouvelles règles :
+
+**✅ NOUVELLES RÈGLES À RESPECTER :**
+- **RLS intégrées** : Chaque fichier de table (`XX_table_*.sql`) DOIT contenir ses propres politiques RLS
+- **Pas de fichier patch** : Ne jamais créer de fichier `XX_rls_missing_*.sql` ou similaire
+- **Documentation unifiée** : Un seul `README.md` dans `supabase/schemas/`
+- **Conformité 100%** : Toutes les tables (19/19) ont des politiques RLS
+- **Optimisation** : Utiliser `(select public.is_admin())` dans les politiques RLS
+- **Index RLS** : Ajouter les index nécessaires dans `40_indexes.sql`
+
+**❌ PATTERNS DÉPRÉCIÉS - NE JAMAIS UTILISER :**
+```sql
+-- ❌ Ne jamais créer de fichier séparé pour RLS manquantes
+-- 63_rls_missing_tables.sql  -- SUPPRIMÉ
+
+-- ❌ Ne jamais utiliser public.is_admin() directement
+using ( public.is_admin() )  -- PERFORMANCE DÉGRADÉE
+
+-- ❌ Ne jamais créer plusieurs fichiers README
+README-CORRECTIONS-CONFORMITE.md  -- SUPPRIMÉ
+README-RLS-validation.md          -- SUPPRIMÉ
+README-database-schema.md         -- SUPPRIMÉ
+```
+
+**✅ PATTERNS CORRECTS À TOUJOURS UTILISER :**
+```sql
+-- ✅ RLS dans le même fichier que la table
+-- Fichier: 05_table_lieux.sql
+create table public.lieux (...);
+alter table public.lieux enable row level security;
+create policy "..." on public.lieux ...;
+
+-- ✅ Fonctions optimisées dans RLS
+using ( (select public.is_admin()) )  -- PERFORMANCE OPTIMISÉE
+
+-- ✅ Documentation unifiée
+-- Un seul fichier: supabase/schemas/README.md
+```
+
+---
 
 ### 19.1. **Supabase docs references**
 

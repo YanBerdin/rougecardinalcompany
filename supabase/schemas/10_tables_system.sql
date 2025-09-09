@@ -55,3 +55,176 @@ comment on table public.abonnes_newsletter is 'newsletter subscribers';
 comment on table public.messages_contact is 'contact form messages received from website';
 comment on table public.configurations_site is 'key-value store for site-wide configuration';
 comment on table public.logs_audit is 'audit log for create/update/delete operations on tracked tables';
+
+-- ===== ROW LEVEL SECURITY =====
+
+-- ---- ABONNES NEWSLETTER ----
+alter table public.abonnes_newsletter enable row level security;
+
+-- Seuls les admins peuvent voir les abonnés
+drop policy if exists "Admins can view newsletter subscribers" on public.abonnes_newsletter;
+create policy "Admins can view newsletter subscribers"
+on public.abonnes_newsletter
+for select
+to authenticated
+using ( (select public.is_admin()) );
+
+-- Tout le monde peut s'abonner à la newsletter
+drop policy if exists "Anyone can subscribe to newsletter" on public.abonnes_newsletter;
+create policy "Anyone can subscribe to newsletter"
+on public.abonnes_newsletter
+for insert
+to anon, authenticated
+with check ( true );
+
+-- Seuls les admins peuvent modifier les abonnements
+drop policy if exists "Admins can update newsletter subscriptions" on public.abonnes_newsletter;
+create policy "Admins can update newsletter subscriptions"
+on public.abonnes_newsletter
+for update
+to authenticated
+using ( (select public.is_admin()) )
+with check ( (select public.is_admin()) );
+
+-- Les abonnés peuvent se désabonner ou les admins peuvent supprimer
+drop policy if exists "Subscribers can unsubscribe or admins can delete" on public.abonnes_newsletter;
+create policy "Subscribers can unsubscribe or admins can delete"
+on public.abonnes_newsletter
+for delete
+to anon, authenticated
+using ( 
+  -- Les admins peuvent tout supprimer
+  (select public.is_admin()) 
+  -- Ou l'utilisateur peut se désabonner via email (à implementer côté app)
+);
+
+-- ---- MESSAGES CONTACT ----
+alter table public.messages_contact enable row level security;
+
+-- Seuls les admins peuvent voir les messages de contact
+drop policy if exists "Admins can view contact messages" on public.messages_contact;
+create policy "Admins can view contact messages"
+on public.messages_contact
+for select
+to authenticated
+using ( (select public.is_admin()) );
+
+-- Tout le monde peut envoyer un message de contact
+drop policy if exists "Anyone can send contact messages" on public.messages_contact;
+create policy "Anyone can send contact messages"
+on public.messages_contact
+for insert
+to anon, authenticated
+with check ( true );
+
+-- Seuls les admins peuvent modifier les messages
+drop policy if exists "Admins can update contact messages" on public.messages_contact;
+create policy "Admins can update contact messages"
+on public.messages_contact
+for update
+to authenticated
+using ( (select public.is_admin()) )
+with check ( (select public.is_admin()) );
+
+-- Seuls les admins peuvent supprimer les messages
+drop policy if exists "Admins can delete contact messages" on public.messages_contact;
+create policy "Admins can delete contact messages"
+on public.messages_contact
+for delete
+to authenticated
+using ( (select public.is_admin()) );
+
+-- ---- CONFIGURATIONS SITE ----
+alter table public.configurations_site enable row level security;
+
+-- Tout le monde peut voir les configurations publiques (selon convention de nommage)
+drop policy if exists "Public site configurations are viewable by everyone" on public.configurations_site;
+create policy "Public site configurations are viewable by everyone"
+on public.configurations_site
+for select
+to anon, authenticated
+using ( 
+  -- Seules les configs dont la clé commence par 'public:' sont visibles pour tous
+  key like 'public:%'
+  -- Ou si l'utilisateur est admin, il peut voir toutes les configs
+  or (select public.is_admin())
+);
+
+-- Seuls les admins peuvent gérer les configurations
+drop policy if exists "Admins can create site configurations" on public.configurations_site;
+create policy "Admins can create site configurations"
+on public.configurations_site
+for insert
+to authenticated
+with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can update site configurations" on public.configurations_site;
+create policy "Admins can update site configurations"
+on public.configurations_site
+for update
+to authenticated
+using ( (select public.is_admin()) )
+with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can delete site configurations" on public.configurations_site;
+create policy "Admins can delete site configurations"
+on public.configurations_site
+for delete
+to authenticated
+using ( (select public.is_admin()) );
+
+-- ---- LOGS AUDIT ----
+alter table public.logs_audit enable row level security;
+
+-- Seuls les admins peuvent voir les logs d'audit
+drop policy if exists "Admins can view audit logs" on public.logs_audit;
+create policy "Admins can view audit logs"
+on public.logs_audit
+for select
+to authenticated
+using ( (select public.is_admin()) );
+
+-- Le système peut insérer des logs (via triggers)
+drop policy if exists "System can insert audit logs" on public.logs_audit;
+create policy "System can insert audit logs"
+on public.logs_audit
+for insert
+to anon, authenticated
+with check ( true );
+
+-- Seuls les super-admins peuvent modifier/supprimer les logs (rare)
+drop policy if exists "Super admins can update audit logs" on public.logs_audit;
+create policy "Super admins can update audit logs"
+on public.logs_audit
+for update
+to authenticated
+using ( 
+  (select public.is_admin()) 
+  and exists (
+    select 1 from public.profiles p 
+    where p.user_id = (select auth.uid()) 
+    and p.role = 'super_admin'
+  )
+)
+with check ( 
+  (select public.is_admin()) 
+  and exists (
+    select 1 from public.profiles p 
+    where p.user_id = (select auth.uid()) 
+    and p.role = 'super_admin'
+  )
+);
+
+drop policy if exists "Super admins can delete audit logs" on public.logs_audit;
+create policy "Super admins can delete audit logs"
+on public.logs_audit
+for delete
+to authenticated
+using ( 
+  (select public.is_admin()) 
+  and exists (
+    select 1 from public.profiles p 
+    where p.user_id = (select auth.uid()) 
+    and p.role = 'super_admin'
+  )
+);
