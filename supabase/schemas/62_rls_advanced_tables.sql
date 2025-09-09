@@ -10,7 +10,7 @@ create policy "Admins can view analytics events"
 on public.analytics_events
 for select
 to authenticated
-using ( public.is_admin() );
+using ( (select (select public.is_admin())) );
 
 -- Tout le monde peut insérer des événements analytiques
 drop policy if exists "Anyone can insert analytics events" on public.analytics_events;
@@ -26,15 +26,15 @@ create policy "Admins can update analytics events"
 on public.analytics_events
 for update
 to authenticated
-using ( public.is_admin() )
-with check ( public.is_admin() );
+using ( (select (select public.is_admin())) )
+with check ( (select (select public.is_admin())) );
 
 drop policy if exists "Admins can delete analytics events" on public.analytics_events;
 create policy "Admins can delete analytics events"
 on public.analytics_events
 for delete
 to authenticated
-using ( public.is_admin() );
+using ( (select (select public.is_admin())) );
 
 -- ---- CATEGORIES ----
 alter table public.categories enable row level security;
@@ -53,7 +53,7 @@ create policy "Admins can view all categories"
 on public.categories
 for select
 to authenticated
-using ( public.is_admin() );
+using ( (select (select public.is_admin())) );
 
 -- Seuls les admins peuvent gérer les catégories
 drop policy if exists "Admins can create categories" on public.categories;
@@ -61,22 +61,22 @@ create policy "Admins can create categories"
 on public.categories
 for insert
 to authenticated
-with check ( public.is_admin() );
+with check ( (select (select public.is_admin())) );
 
 drop policy if exists "Admins can update categories" on public.categories;
 create policy "Admins can update categories"
 on public.categories
 for update
 to authenticated
-using ( public.is_admin() )
-with check ( public.is_admin() );
+using ( (select (select public.is_admin())) )
+with check ( (select (select public.is_admin())) );
 
 drop policy if exists "Admins can delete categories" on public.categories;
 create policy "Admins can delete categories"
 on public.categories
 for delete
 to authenticated
-using ( public.is_admin() );
+using ( (select (select public.is_admin())) );
 
 -- ---- TAGS ----
 alter table public.tags enable row level security;
@@ -95,22 +95,22 @@ create policy "Admins can create tags"
 on public.tags
 for insert
 to authenticated
-with check ( public.is_admin() );
+with check ( (select public.is_admin()) );
 
 drop policy if exists "Admins can update tags" on public.tags;
 create policy "Admins can update tags"
 on public.tags
 for update
 to authenticated
-using ( public.is_admin() )
-with check ( public.is_admin() );
+using ( (select public.is_admin()) )
+with check ( (select public.is_admin()) );
 
 drop policy if exists "Admins can delete tags" on public.tags;
 create policy "Admins can delete tags"
 on public.tags
 for delete
 to authenticated
-using ( public.is_admin() );
+using ( (select public.is_admin()) );
 
 -- ---- TABLES DE RELATIONS (TAGS/CATEGORIES) ----
 -- spectacles_categories
@@ -127,8 +127,8 @@ create policy "Admins can manage spectacle categories"
 on public.spectacles_categories
 for all
 to authenticated
-using ( public.is_admin() )
-with check ( public.is_admin() );
+using ( (select public.is_admin()) )
+with check ( (select public.is_admin()) );
 
 -- spectacles_tags
 alter table public.spectacles_tags enable row level security;
@@ -144,8 +144,8 @@ create policy "Admins can manage spectacle tags"
 on public.spectacles_tags
 for all
 to authenticated
-using ( public.is_admin() )
-with check ( public.is_admin() );
+using ( (select public.is_admin()) )
+with check ( (select public.is_admin()) );
 
 -- articles_categories
 alter table public.articles_categories enable row level security;
@@ -161,8 +161,8 @@ create policy "Admins can manage article categories"
 on public.articles_categories
 for all
 to authenticated
-using ( public.is_admin() )
-with check ( public.is_admin() );
+using ( (select public.is_admin()) )
+with check ( (select public.is_admin()) );
 
 -- articles_tags
 alter table public.articles_tags enable row level security;
@@ -178,8 +178,8 @@ create policy "Admins can manage article tags"
 on public.articles_tags
 for all
 to authenticated
-using ( public.is_admin() )
-with check ( public.is_admin() );
+using ( (select public.is_admin()) )
+with check ( (select public.is_admin()) );
 
 -- ---- CONTENT VERSIONS ----
 alter table public.content_versions enable row level security;
@@ -190,7 +190,7 @@ create policy "Admins can view content versions"
 on public.content_versions
 for select
 to authenticated
-using ( public.is_admin() );
+using ( (select public.is_admin()) );
 
 -- Les utilisateurs authentifiés peuvent créer des versions (via triggers)
 drop policy if exists "Authenticated users can create content versions" on public.content_versions;
@@ -206,15 +206,15 @@ create policy "Admins can manage content versions"
 on public.content_versions
 for update
 to authenticated
-using ( public.is_admin() )
-with check ( public.is_admin() );
+using ( (select public.is_admin()) )
+with check ( (select public.is_admin()) );
 
 drop policy if exists "Admins can delete content versions" on public.content_versions;
 create policy "Admins can delete content versions"
 on public.content_versions
 for delete
 to authenticated
-using ( public.is_admin() );
+using ( (select public.is_admin()) );
 
 -- ---- SEO REDIRECTS ----
 alter table public.seo_redirects enable row level security;
@@ -225,15 +225,15 @@ create policy "Admins can view SEO redirects"
 on public.seo_redirects
 for select
 to authenticated
-using ( public.is_admin() );
+using ( (select public.is_admin()) );
 
 drop policy if exists "Admins can manage SEO redirects" on public.seo_redirects;
 create policy "Admins can manage SEO redirects"
 on public.seo_redirects
 for all
 to authenticated
-using ( public.is_admin() )
-with check ( public.is_admin() );
+using ( (select public.is_admin()) )
+with check ( (select public.is_admin()) );
 
 -- ---- SITEMAP ENTRIES ----
 alter table public.sitemap_entries enable row level security;
@@ -252,5 +252,5 @@ create policy "Admins can manage sitemap entries"
 on public.sitemap_entries
 for all
 to authenticated
-using ( public.is_admin() )
-with check ( public.is_admin() );
+using ( (select public.is_admin()) )
+with check ( (select public.is_admin()) );

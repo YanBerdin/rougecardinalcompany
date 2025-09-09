@@ -15,3 +15,12 @@ create index if not exists idx_evenements_recurrence_end_date on public.evenemen
 -- Index trigram pour recherche fuzzy
 create index if not exists idx_spectacles_title_trgm on public.spectacles using gin (title gin_trgm_ops);
 create index if not exists idx_articles_title_trgm on public.articles_presse using gin (title gin_trgm_ops);
+
+-- Index pour optimiser les politiques RLS
+create index if not exists idx_medias_uploaded_by on public.medias (uploaded_by);
+create index if not exists idx_spectacles_created_by on public.spectacles (created_by);
+create index if not exists idx_spectacles_public on public.spectacles (public) where public = true;
+create index if not exists idx_partners_is_active on public.partners (is_active) where is_active = true;
+create index if not exists idx_categories_is_active on public.categories (is_active) where is_active = true;
+create index if not exists idx_profiles_role on public.profiles (role);
+create index if not exists idx_configurations_site_key_pattern on public.configurations_site (key) where key like 'public:%';

@@ -23,15 +23,15 @@ create policy "Uploaders or admins can update medias"
 on public.medias
 for update
 to authenticated
-using ( uploaded_by = (select auth.uid()) or public.is_admin() )
-with check ( uploaded_by = (select auth.uid()) or public.is_admin() );
+using ( uploaded_by = (select auth.uid()) or (select public.is_admin()) )
+with check ( uploaded_by = (select auth.uid()) or (select public.is_admin()) );
 
 drop policy if exists "Uploaders or admins can delete medias" on public.medias;
 create policy "Uploaders or admins can delete medias"
 on public.medias
 for delete
 to authenticated
-using ( uploaded_by = (select auth.uid()) or public.is_admin() );
+using ( uploaded_by = (select auth.uid()) or (select public.is_admin()) );
 
 -- ---- SPECTACLES ----
 alter table public.spectacles enable row level security;
@@ -55,15 +55,15 @@ create policy "Owners or admins can update spectacles"
 on public.spectacles
 for update
 to authenticated
-using ( (created_by = (select auth.uid())) or public.is_admin() )
-with check ( (created_by = (select auth.uid())) or public.is_admin() );
+using ( (created_by = (select auth.uid())) or (select public.is_admin()) )
+with check ( (created_by = (select auth.uid())) or (select public.is_admin()) );
 
 drop policy if exists "Owners or admins can delete spectacles" on public.spectacles;
 create policy "Owners or admins can delete spectacles"
 on public.spectacles
 for delete
 to authenticated
-using ( (created_by = (select auth.uid())) or public.is_admin() );
+using ( (created_by = (select auth.uid())) or (select public.is_admin()) );
 
 -- ---- EVENEMENTS ----
 alter table public.evenements enable row level security;
@@ -80,22 +80,22 @@ create policy "Admins can create events"
 on public.evenements
 for insert
 to authenticated
-with check ( public.is_admin() );
+with check ( (select public.is_admin()) );
 
 drop policy if exists "Admins can update events" on public.evenements;
 create policy "Admins can update events"
 on public.evenements
 for update
 to authenticated
-using ( public.is_admin() )
-with check ( public.is_admin() );
+using ( (select public.is_admin()) )
+with check ( (select public.is_admin()) );
 
 drop policy if exists "Admins can delete events" on public.evenements;
 create policy "Admins can delete events"
 on public.evenements
 for delete
 to authenticated
-using ( public.is_admin() );
+using ( (select public.is_admin()) );
 
 -- ---- PARTNERS ----
 alter table public.partners enable row level security;
@@ -112,26 +112,26 @@ create policy "Admins can view all partners"
 on public.partners
 for select
 to authenticated
-using ( public.is_admin() );
+using ( (select public.is_admin()) );
 
 drop policy if exists "Admins can create partners" on public.partners;
 create policy "Admins can create partners"
 on public.partners
 for insert
 to authenticated
-with check ( public.is_admin() );
+with check ( (select public.is_admin()) );
 
 drop policy if exists "Admins can update partners" on public.partners;
 create policy "Admins can update partners"
 on public.partners
 for update
 to authenticated
-using ( public.is_admin() )
-with check ( public.is_admin() );
+using ( (select public.is_admin()) )
+with check ( (select public.is_admin()) );
 
 drop policy if exists "Admins can delete partners" on public.partners;
 create policy "Admins can delete partners"
 on public.partners
 for delete
 to authenticated
-using ( public.is_admin() );
+using ( (select public.is_admin()) );

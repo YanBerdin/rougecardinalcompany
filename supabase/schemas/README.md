@@ -23,13 +23,14 @@ supabase/schemas/
 ├── 06_table_spectacles.sql        # Table des spectacles
 ├── 07_table_evenements.sql        # Table des événements
 ├── 08_table_articles_presse.sql   # Table articles presse
-├── 09_tables_system.sql           # Tables système (config, logs, etc.)
-├── 10_tables_relations.sql        # Tables de liaison many-to-many
-├── 11_evenements_recurrence.sql   # Gestion de récurrence événements
-├── 12_analytics_events.sql        # Table analytics événements
-├── 13_categories_tags.sql         # Système de catégories et tags
-├── 14_content_versioning.sql      # Système de versioning du contenu
-├── 15_seo_metadata.sql            # Métadonnées SEO et redirections
+├── 09_table_partners.sql          # Table des partenaires
+├── 10_tables_system.sql           # Tables système (config, logs, etc.)
+├── 11_tables_relations.sql        # Tables de liaison many-to-many
+├── 12_evenements_recurrence.sql   # Gestion de récurrence événements
+├── 13_analytics_events.sql        # Table analytics événements
+├── 14_categories_tags.sql         # Système de catégories et tags
+├── 15_content_versioning.sql      # Système de versioning du contenu
+├── 16_seo_metadata.sql            # Métadonnées SEO et redirections
 ├── 20_functions_core.sql          # Fonctions utilitaires de base
 ├── 21_functions_auth_sync.sql     # Fonctions sync auth.users
 ├── 30_triggers.sql                # Déclencheurs
@@ -38,6 +39,7 @@ supabase/schemas/
 ├── 60_rls_profiles.sql            # Politiques RLS pour profils
 ├── 61_rls_main_tables.sql         # Politiques RLS tables principales
 ├── 62_rls_advanced_tables.sql     # Politiques RLS tables avancées
+├── 63_rls_missing_tables.sql      # Politiques RLS tables manquantes
 └── README.md                      # Cette documentation
 ```
 

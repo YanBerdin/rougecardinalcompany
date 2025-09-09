@@ -1828,7 +1828,7 @@ Tous les objets du schéma sont organisés dans le répertoire `supabase/schemas
 - [ ] Filtrage partenaires actifs  
 - [ ] Lien vers leur site
 
-### 14.2. PAge présentation de la compagnie
+### 14.2. Page présentation de la compagnie
 
 | ID | En tant que | Je veux | Afin de |
 |----|-------------|---------|---------|
@@ -2600,6 +2600,7 @@ Tous les objets du schéma sont organisés dans le répertoire `supabase/schemas
 ## 17. Conventional Commit Guide
 
 <https://github.com/YanBerdin/conventional-commit-cheatsheet/blob/main/README.md?plain=1>
+
 
 ### 17.1. 🚀 Basic Structure
 
