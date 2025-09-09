@@ -96,3 +96,42 @@ on public.evenements
 for delete
 to authenticated
 using ( public.is_admin() );
+
+-- ---- PARTNERS ----
+alter table public.partners enable row level security;
+
+drop policy if exists "Public partners are viewable by anyone" on public.partners;
+create policy "Public partners are viewable by anyone"
+on public.partners
+for select
+to authenticated, anon
+using ( is_active = true );
+
+drop policy if exists "Admins can view all partners" on public.partners;
+create policy "Admins can view all partners"
+on public.partners
+for select
+to authenticated
+using ( public.is_admin() );
+
+drop policy if exists "Admins can create partners" on public.partners;
+create policy "Admins can create partners"
+on public.partners
+for insert
+to authenticated
+with check ( public.is_admin() );
+
+drop policy if exists "Admins can update partners" on public.partners;
+create policy "Admins can update partners"
+on public.partners
+for update
+to authenticated
+using ( public.is_admin() )
+with check ( public.is_admin() );
+
+drop policy if exists "Admins can delete partners" on public.partners;
+create policy "Admins can delete partners"
+on public.partners
+for delete
+to authenticated
+using ( public.is_admin() );

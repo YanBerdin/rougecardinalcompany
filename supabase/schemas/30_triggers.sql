@@ -25,7 +25,7 @@ BEGIN
   FOR tbl IN SELECT unnest(array[
     'public.profiles', 'public.medias', 'public.membres_equipe', 'public.lieux',
     'public.spectacles', 'public.evenements', 'public.articles_presse', 
-    'public.abonnes_newsletter', 'public.messages_contact', 'public.configurations_site'
+    'public.partners', 'public.abonnes_newsletter', 'public.messages_contact', 'public.configurations_site'
   ])
   LOOP
     EXECUTE format('drop trigger if exists trg_update_updated_at on %s;', tbl);
@@ -43,7 +43,7 @@ DECLARE
   audit_tables text[] := array[
     'public.profiles', 'public.medias', 'public.membres_equipe', 'public.lieux',
     'public.spectacles', 'public.evenements', 'public.articles_presse', 
-    'public.abonnes_newsletter', 'public.messages_contact', 'public.configurations_site'
+    'public.partners', 'public.abonnes_newsletter', 'public.messages_contact', 'public.configurations_site'
   ];
   tbl text;
 BEGIN

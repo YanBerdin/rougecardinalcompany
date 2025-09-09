@@ -514,23 +514,151 @@ create table public.articles_medias (
 #### Table: `partners`
 
 ```sql
-create table if not exists public.partners (
+create table public.partners (
   id bigint generated always as identity primary key,
   name text not null,
-  slug text,
   description text,
-  url text,
+  website_url text,
   logo_media_id bigint references public.medias(id) on delete set null,
   is_active boolean not null default true,
-  featured boolean not null default false,
   display_order integer not null default 0,
-  created_by uuid,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  created_by uuid references auth.users(id) on delete set null,
+  created_at timestamptz default now() not null,
+  updated_at timestamptz default now() not null
 );
+
+-- Index pour l'ordre d'affichage et le statut actif
+create index idx_partners_active_order on public.partners(is_active, display_order) where is_active = true;
+create index idx_partners_created_by on public.partners(created_by);
+
+-- Contraintes de validation
+alter table public.partners 
+add constraint check_website_url_format 
+check (website_url is null or website_url ~* '^https?://.*$');
+
+alter table public.partners 
+add constraint check_display_order_positive 
+check (display_order >= 0);
+
+comment on table public.partners is 'Liste des partenaires (nom, logo, url, visibilité, ordre d''affichage)';
+comment on column public.partners.name is 'Nom du partenaire (obligatoire)';
+comment on column public.partners.description is 'Description courte du partenaire (optionnel)';
+comment on column public.partners.website_url is 'URL du site web du partenaire (format http/https)';
+comment on column public.partners.logo_media_id is 'Référence vers le logo dans la table medias';
+comment on column public.partners.is_active is 'Partenaire actif (affiché sur le site)';
+comment on column public.partners.display_order is 'Ordre d''affichage (0 = premier)';
+comment on column public.partners.created_by is 'Utilisateur ayant créé le partenaire';
 ```
 
-- Comment: Liste des partenaires (nom, logo, url, visibilité, ordre d'affichage).
+#### Table: `categories`
+
+```sql
+create table public.categories (
+  id bigint generated always as identity primary key,
+  name text not null,
+  slug text not null,
+  description text,
+  parent_id bigint references public.categories(id) on delete restrict,
+  color text check (color ~ '^#[0-9A-Fa-f]{6}$'),
+  icon text,
+  display_order integer not null default 0,
+  is_active boolean not null default true,
+  created_at timestamptz default now() not null,
+  created_by uuid references auth.users(id) on delete set null,
+  updated_at timestamptz default now() not null
+);
+
+comment on table public.categories is 'Catégories hiérarchiques pour organiser les contenus';
+comment on column public.categories.parent_id is 'Référence vers la catégorie parent pour hiérarchie';
+comment on column public.categories.color is 'Code couleur hex (#RRGGBB) pour l''affichage';
+comment on column public.categories.display_order is 'Ordre d''affichage dans l''interface';
+```
+
+#### Table: `tags`
+
+```sql
+create table public.tags (
+  id bigint generated always as identity primary key,
+  name text not null,
+  slug text not null,
+  description text,
+  usage_count integer not null default 0,
+  is_featured boolean not null default false,
+  created_at timestamptz default now() not null,
+  created_by uuid references auth.users(id) on delete set null,
+  updated_at timestamptz default now() not null
+);
+
+comment on table public.tags is 'Tags pour étiquetage flexible des contenus';
+comment on column public.tags.usage_count is 'Nombre d''utilisations du tag (mis à jour par triggers)';
+comment on column public.tags.is_featured is 'Tag mis en avant dans l''interface';
+```
+
+#### Table: `content_versions`
+
+```sql
+create table public.content_versions (
+  id bigint generated always as identity primary key,
+  entity_type text not null, -- 'spectacle', 'article_presse', etc.
+  entity_id bigint not null,
+  version_number integer not null,
+  content_snapshot jsonb not null,
+  change_summary text,
+  change_type text not null, -- 'create', 'update', 'publish', 'unpublish', 'restore'
+  created_at timestamptz default now() not null,
+  created_by uuid references auth.users(id) on delete set null,
+  constraint content_versions_entity_version_unique unique (entity_type, entity_id, version_number)
+);
+
+comment on table public.content_versions is 'Historique des versions pour tous les contenus éditoriaux';
+comment on column public.content_versions.entity_type is 'Type d''entité : spectacle, article_presse, membre_equipe, etc.';
+comment on column public.content_versions.content_snapshot is 'Snapshot JSON complet des données au moment de la version';
+comment on column public.content_versions.change_summary is 'Résumé des modifications apportées';
+comment on column public.content_versions.change_type is 'Type de modification : create, update, publish, unpublish, restore';
+```
+
+#### Table: `seo_redirects`
+
+```sql
+create table public.seo_redirects (
+  id bigint generated always as identity primary key,
+  old_path text not null,
+  new_path text not null,
+  redirect_type integer not null default 301,
+  is_active boolean not null default true,
+  hit_count integer not null default 0,
+  last_hit_at timestamptz,
+  created_at timestamptz default now() not null,
+  created_by uuid references auth.users(id) on delete set null,
+  updated_at timestamptz default now() not null,
+  constraint check_different_paths check (old_path != new_path)
+);
+
+comment on table public.seo_redirects is 'Redirections SEO pour maintenir le référencement lors de changements d''URL';
+comment on column public.seo_redirects.redirect_type is 'Code de redirection HTTP : 301 (permanent), 302 (temporaire)';
+comment on column public.seo_redirects.hit_count is 'Nombre de fois que la redirection a été utilisée';
+```
+
+#### Table: `sitemap_entries`
+
+```sql
+create table public.sitemap_entries (
+  id bigint generated always as identity primary key,
+  url text not null,
+  entity_type text,
+  entity_id bigint,
+  last_modified timestamptz not null default now(),
+  change_frequency text check (change_frequency in ('always', 'hourly', 'daily', 'weekly', 'monthly', 'yearly', 'never')),
+  priority decimal(3,2) check (priority >= 0.0 and priority <= 1.0),
+  is_indexed boolean not null default true,
+  created_at timestamptz default now() not null,
+  updated_at timestamptz default now() not null
+);
+
+comment on table public.sitemap_entries is 'Entrées du sitemap XML généré dynamiquement';
+comment on column public.sitemap_entries.priority is 'Priorité SEO de 0.0 à 1.0';
+comment on column public.sitemap_entries.change_frequency is 'Fréquence de mise à jour pour les crawlers';
+```
 
 ### 6.2. Relations et Contraintes
 
@@ -541,12 +669,189 @@ create table if not exists public.partners (
 
 #### Relations / Contraintes (FK)
 
+**Tables principales :**
+- `profiles.user_id` → `auth.users(id)` avec contrainte UNIQUE
+- `profiles.avatar_media_id` → `public.medias(id)` ON DELETE SET NULL
+- `medias.uploaded_by` → `auth.users(id)` ON DELETE SET NULL
+- `membres_equipe.photo_media_id` → `public.medias(id)` ON DELETE SET NULL
+- `spectacles.created_by` → `auth.users(id)` ON DELETE SET NULL
+- `evenements.spectacle_id` → `public.spectacles(id)` ON DELETE CASCADE
+- `evenements.lieu_id` → `public.lieux(id)` ON DELETE SET NULL
+- `evenements.parent_event_id` → `public.evenements(id)` ON DELETE CASCADE
 - `partners.logo_media_id` → `public.medias(id)` ON DELETE SET NULL
-- Various existing relations in schema (extracted):
-  - FK references found: medias, spectacles, lieux, membres_equipe, articles_presse
-- Ensure `profiles.user_id` is UNIQUE and indexed to allow efficient policy subqueries:
-  - `alter table public.profiles add constraint profiles_userid_unique unique(user_id);`
-  - `create index idx_profiles_user_id on public.profiles(user_id);`
+- `partners.created_by` → `auth.users(id)` ON DELETE SET NULL
+
+**Tables de relations :**
+- `spectacles_membres_equipe` : relation many-to-many entre `spectacles` et `membres_equipe`
+- `spectacles_medias` : relation many-to-many entre `spectacles` et `medias` avec ordre
+- `articles_medias` : relation many-to-many entre `articles_presse` et `medias` avec ordre
+- `spectacles_categories` : relation many-to-many entre `spectacles` et `categories`
+- `spectacles_tags` : relation many-to-many entre `spectacles` et `tags`
+- `articles_categories` : relation many-to-many entre `articles_presse` et `categories`
+- `articles_tags` : relation many-to-many entre `articles_presse` et `tags`
+
+**Index importants :**
+- `idx_profiles_user_id` sur `profiles(user_id)` pour les politiques RLS
+- `idx_partners_active_order` sur `partners(is_active, display_order)` pour affichage des partenaires actifs
+- `idx_partners_created_by` sur `partners(created_by)` pour les requêtes d'ownership
+- `idx_evenements_date_debut` sur `evenements(date_debut)` pour le tri chronologique
+- `idx_evenements_parent_event_id` sur `evenements(parent_event_id)` pour les récurrences
+- `idx_categories_parent_id`, `idx_categories_slug`, `idx_categories_display_order` sur `categories`
+- `idx_tags_slug`, `idx_tags_usage_count`, `idx_tags_is_featured` sur `tags`
+- `idx_content_versions_entity`, `idx_content_versions_created_at` sur `content_versions`
+- `idx_seo_redirects_old_path`, `idx_seo_redirects_active` sur `seo_redirects`
+- `idx_sitemap_entries_indexed`, `idx_sitemap_entries_last_modified` sur `sitemap_entries`
+- `idx_spectacles_search` sur `spectacles(search_vector)` pour recherche plein texte
+- `idx_articles_search` sur `articles_presse(search_vector)` pour recherche plein texte
+- `idx_spectacles_title_trgm` et `idx_articles_title_trgm` pour recherche fuzzy avec pg_trgm
+
+---
+
+### 6.3. Vues et Rapports
+
+Le système inclut plusieurs vues pour faciliter l'accès aux données et générer des rapports.
+
+#### Vue: `categories_hierarchy`
+
+```sql
+create or replace view public.categories_hierarchy as
+with recursive category_tree as (
+  -- Catégories racines
+  select 
+    id,
+    name,
+    slug,
+    parent_id,
+    0 as level,
+    array[id] as path,
+    name as full_path
+  from public.categories
+  where parent_id is null and is_active = true
+  
+  union all
+  
+  -- Catégories enfants
+  select 
+    c.id,
+    c.name,
+    c.slug,
+    c.parent_id,
+    ct.level + 1 as level,
+    ct.path || c.id as path,
+    ct.full_path || ' > ' || c.name as full_path
+  from public.categories c
+  join category_tree ct on c.parent_id = ct.id
+  where c.is_active = true
+)
+select 
+  id,
+  name,
+  slug,
+  parent_id,
+  level,
+  path,
+  full_path
+from category_tree
+order by path;
+
+comment on view public.categories_hierarchy is 'Vue hiérarchique des catégories avec niveaux et chemins complets';
+```
+
+#### Vue: `popular_tags`
+
+```sql
+create or replace view public.popular_tags as
+select 
+  id,
+  name,
+  slug,
+  usage_count,
+  is_featured,
+  created_at
+from public.tags 
+where usage_count > 0
+order by is_featured desc, usage_count desc, name asc;
+
+comment on view public.popular_tags is 'Tags les plus utilisés, avec mise en avant des tags featured';
+```
+
+#### Vue: `popular_pages`
+
+```sql
+create or replace view public.popular_pages as
+select 
+  page_path,
+  entity_type,
+  entity_id,
+  count(*) as view_count,
+  min(created_at) as first_view,
+  max(created_at) as last_view
+from public.analytics_events
+where event_type = 'page_view'
+group by page_path, entity_type, entity_id
+order by view_count desc;
+
+comment on view public.popular_pages is 'Pages les plus consultées selon les événements analytics';
+```
+
+#### Vue: `recent_analytics_events`
+
+```sql
+create or replace view public.recent_analytics_events as
+select 
+  ae.id,
+  ae.event_type,
+  ae.created_at,
+  ae.page_path,
+  ae.entity_type,
+  ae.entity_id,
+  case 
+    when ae.entity_type = 'spectacle' then (select title from public.spectacles where id = ae.entity_id)
+    when ae.entity_type = 'article' then (select title from public.articles_presse where id = ae.entity_id)
+    else null
+  end as entity_name,
+  ae.properties,
+  p.display_name as user_name,
+  ae.session_id
+from public.analytics_events ae
+left join public.profiles p on ae.user_id = p.user_id
+order by ae.created_at desc
+limit 100;
+
+comment on view public.recent_analytics_events is 'Événements analytics récents avec informations contextuelles';
+```
+
+#### Vue: `recurrent_events`
+
+```sql
+create or replace view public.recurrent_events as
+select
+  e.id,
+  e.spectacle_id,
+  s.title as spectacle_title,
+  e.lieu_id,
+  l.nom as lieu_nom,
+  e.date_debut,
+  e.recurrence_rule,
+  e.recurrence_end_date,
+  count(o.id) as occurrence_count,
+  min(o.date_debut) as first_occurrence,
+  max(o.date_debut) as last_occurrence
+from
+  public.evenements e
+  join public.spectacles s on e.spectacle_id = s.id
+  left join public.lieux l on e.lieu_id = l.id
+  left join public.evenements o on o.parent_event_id = e.id
+where
+  e.recurrence_rule is not null
+  and e.parent_event_id is null
+group by
+  e.id, e.spectacle_id, s.title, e.lieu_id, l.nom, e.date_debut, e.recurrence_rule, e.recurrence_end_date
+order by
+  e.date_debut desc;
+
+comment on view public.recurrent_events is 'Vue pour la gestion des événements récurrents avec comptage des occurrences générées';
+```
 
 ---
 
@@ -559,57 +864,99 @@ create table if not exists public.partners (
   - **Explicit TO** clauses: `to authenticated, anon` or `to authenticated`.
 
 - Tables with RLS enabled:
-  - `partners`
+  - `profiles`, `medias`, `spectacles`, `evenements`, `partners`
 
-### Policy on `partners` — "Public partners are viewable by anyone"
+### Policies on `medias`
 
 ```sql
+-- Public read access
+create policy "Medias are viewable by everyone"
+on public.medias for select to anon, authenticated using ( true );
+
+-- Authenticated users can upload
+create policy "Authenticated users can insert medias"
+on public.medias for insert to authenticated
+with check ( (select auth.uid()) is not null );
+
+-- Uploaders or admins can update/delete
+create policy "Uploaders or admins can update medias"
+on public.medias for update to authenticated
+using ( uploaded_by = (select auth.uid()) or public.is_admin() )
+with check ( uploaded_by = (select auth.uid()) or public.is_admin() );
+
+create policy "Uploaders or admins can delete medias"
+on public.medias for delete to authenticated
+using ( uploaded_by = (select auth.uid()) or public.is_admin() );
+```
+
+### Policies on `spectacles`
+
+```sql
+-- Public spectacles viewable by all
+create policy "Public spectacles are viewable by everyone"
+on public.spectacles for select to anon, authenticated
+using ( public = true );
+
+-- Authenticated users can create
+create policy "Authenticated users can create spectacles"
+on public.spectacles for insert to authenticated
+with check ( (select auth.uid()) is not null );
+
+-- Owners or admins can update/delete
+create policy "Owners or admins can update spectacles"
+on public.spectacles for update to authenticated
+using ( (created_by = (select auth.uid())) or public.is_admin() )
+with check ( (created_by = (select auth.uid())) or public.is_admin() );
+
+create policy "Owners or admins can delete spectacles"
+on public.spectacles for delete to authenticated
+using ( (created_by = (select auth.uid())) or public.is_admin() );
+```
+
+### Policies on `evenements`
+
+```sql
+-- Events are public read
+create policy "Events are viewable by everyone"
+on public.evenements for select to anon, authenticated using ( true );
+
+-- Only admins can manage events
+create policy "Admins can create events"
+on public.evenements for insert to authenticated with check ( public.is_admin() );
+
+create policy "Admins can update events"
+on public.evenements for update to authenticated
+using ( public.is_admin() ) with check ( public.is_admin() );
+
+create policy "Admins can delete events"
+on public.evenements for delete to authenticated using ( public.is_admin() );
+```
+
+### Policies on `partners`
+
+```sql
+-- Public partners viewable by all
 create policy "Public partners are viewable by anyone"
-on public.partners
-for select
-to authenticated, anon
-using ( is_active is true );
-```
+on public.partners for select to authenticated, anon
+using ( is_active = true );
 
-### Policy on `partners` — "Admins can view all partners"
-
-```sql
+-- Admins can view all (including inactive)
 create policy "Admins can view all partners"
-on public.partners
-for select
-to authenticated
-using ( (select p.role from public.profiles p where p.user_id = (select auth.uid())) = 'admin' );
-```
+on public.partners for select to authenticated
+using ( public.is_admin() );
 
-### Policy on `partners` — "Authenticated can insert partners"
+-- Only admins can manage partners
+create policy "Admins can create partners"
+on public.partners for insert to authenticated
+with check ( public.is_admin() );
 
-```sql
-create policy "Authenticated can insert partners"
-on public.partners
-for insert
-to authenticated
-with check ( (select auth.uid()) = created_by or (select p.role from public.profiles p where p.user_id = (select auth.uid())) = 'admin' );
-```
+create policy "Admins can update partners"
+on public.partners for update to authenticated
+using ( public.is_admin() ) with check ( public.is_admin() );
 
-### Policy on `partners` — "Owners or admins can update partners"
-
-```sql
-create policy "Owners or admins can update partners"
-on public.partners
-for update
-to authenticated
-using ( (select auth.uid()) = created_by or (select p.role from public.profiles p where p.user_id = (select auth.uid())) = 'admin' )
-with check ( (select auth.uid()) = created_by or (select p.role from public.profiles p where p.user_id = (select auth.uid())) = 'admin' );
-```
-
-### Policy on `partners` — "Owners or admins can delete partners"
-
-```sql
-create policy "Owners or admins can delete partners"
-on public.partners
-for delete
-to authenticated
-using ( (select auth.uid()) = created_by or (select p.role from public.profiles p where p.user_id = (select auth.uid())) = 'admin' );
+create policy "Admins can delete partners"
+on public.partners for delete to authenticated
+using ( public.is_admin() );
 ```
 
 ---
@@ -623,10 +970,13 @@ using ( (select auth.uid()) = created_by or (select p.role from public.profiles 
   - `set search_path = ''` to avoid schema resolution issues.
   - Fully-qualified references (e.g., `public.to_tsvector_french(...)`).
 - Examples from schema:
-  - `public.partners_set_created_by()` — sets `created_by` to `(select auth.uid())::uuid` on insert.
-  - `public.partners_protect_created_by()` — prevent updating `created_by` on update.
-  - `public.medias_set_uploaded_by()`, `public.medias_protect_uploaded_by()` — same pattern for medias.
-  - `public.audit_trigger()` — inserts rows into `public.logs_audit` with parsed IP/user-agent, uses `TG_OP` / `TG_TABLE_NAME`.
+  - `public.is_admin()` — checks if current user has admin role using profiles table.
+  - `public.update_updated_at_column()` — generic trigger function to update updated_at timestamp.
+  - `public.audit_trigger()` — logs all DML operations with user context and metadata.
+  - `public.to_tsvector_french(text)` — helper for French full-text search vector generation.
+  - `public.handle_new_user()` — creates profile automatically when user registers.
+  - `public.handle_user_deletion()` — removes profile when user is deleted.
+  - `public.handle_user_update()` — updates profile when user metadata changes.
 
 #### Function: `public.is_admin`
 
@@ -770,39 +1120,253 @@ end;
 $$;
 ```
 
-#### Function: `public.partners_set_created_by`
+#### Function: `public.handle_new_user`
 
 ```sql
-create or replace function public.partners_set_created_by()
+create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
-security invoker
+security definer
 set search_path = ''
 as $$
+declare
+  profile_display_name text;
+  profile_role text;
 begin
-  if (select auth.uid()) is not null then
-    new.created_by := (select auth.uid())::uuid;
+  -- Validation de l'entrée
+  if new.id is null then
+    raise exception 'User ID cannot be null';
   end if;
-  new.created_at := coalesce(new.created_at, now());
-  new.updated_at := now();
+
+  -- Construction sécurisée du display_name
+  profile_display_name := coalesce(
+    new.raw_user_meta_data->>'display_name',
+    concat_ws(' ', 
+      new.raw_user_meta_data->>'first_name', 
+      new.raw_user_meta_data->>'last_name'
+    ),
+    new.email,
+    'Utilisateur'
+  );
+
+  -- Validation et assignation du rôle
+  profile_role := case 
+    when new.raw_user_meta_data->>'role' in ('user', 'editor', 'admin') 
+    then new.raw_user_meta_data->>'role'
+    else 'user'
+  end;
+
+  -- Insertion avec gestion d'erreur
+  begin
+    insert into public.profiles (user_id, display_name, role)
+    values (new.id, profile_display_name, profile_role);
+  exception 
+    when unique_violation then
+      raise warning 'Profile already exists for user %', new.id;
+    when others then
+      raise warning 'Failed to create profile for user %: %', new.id, sqlerrm;
+  end;
+
   return new;
 end;
 $$;
 ```
 
-#### Function: `public.partners_protect_created_by`
+#### Function: `public.handle_user_deletion`
 
 ```sql
-create or replace function public.partners_protect_created_by()
+create or replace function public.handle_user_deletion()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if old.id is null then
+    raise warning 'Cannot delete profile: user ID is null';
+    return old;
+  end if;
+
+  begin
+    delete from public.profiles where user_id = old.id;
+    raise notice 'Profile deleted for user %', old.id;
+  exception when others then
+    raise warning 'Failed to delete profile for user %: %', old.id, sqlerrm;
+  end;
+
+  return old;
+end;
+$$;
+```
+
+#### Function: `public.handle_user_update`
+
+```sql
+create or replace function public.handle_user_update()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  new_display_name text;
+  new_role text;
+begin
+  -- Vérification des changements pertinents
+  if old.raw_user_meta_data is not distinct from new.raw_user_meta_data 
+     and old.email is not distinct from new.email then
+    return new;
+  end if;
+
+  -- Construction du nouveau display_name
+  new_display_name := coalesce(
+    new.raw_user_meta_data->>'display_name',
+    concat_ws(' ', 
+      new.raw_user_meta_data->>'first_name', 
+      new.raw_user_meta_data->>'last_name'
+    ),
+    new.email,
+    'Utilisateur'
+  );
+
+  -- Validation du nouveau rôle
+  new_role := case 
+    when new.raw_user_meta_data->>'role' in ('user', 'editor', 'admin') 
+    then new.raw_user_meta_data->>'role'
+    else coalesce((select role from public.profiles where user_id = new.id), 'user')
+  end;
+
+  begin
+    update public.profiles
+    set 
+      display_name = new_display_name,
+      role = new_role,
+      updated_at = now()
+    where user_id = new.id;
+
+    if not found then
+      raise warning 'No profile found to update for user %', new.id;
+    end if;
+
+  exception when others then
+    raise warning 'Failed to update profile for user %: %', new.id, sqlerrm;
+  end;
+  
+  return new;
+end;
+$$;
+```
+
+#### Function: `public.update_tag_usage_count`
+
+```sql
+create or replace function public.update_tag_usage_count()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  tag_id_to_update bigint;
+begin
+  if TG_OP = 'INSERT' then
+    tag_id_to_update := NEW.tag_id;
+    update public.tags set usage_count = usage_count + 1 where id = tag_id_to_update;
+  elsif TG_OP = 'DELETE' then
+    tag_id_to_update := OLD.tag_id;
+    update public.tags set usage_count = greatest(0, usage_count - 1) where id = tag_id_to_update;
+  end if;
+  return null;
+end;
+$$;
+```
+
+#### Function: `public.create_content_version`
+
+```sql
+create or replace function public.create_content_version(
+  p_entity_type text,
+  p_entity_id bigint,
+  p_content_snapshot jsonb,
+  p_change_summary text default null,
+  p_change_type text default 'update'
+)
+returns bigint
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  next_version integer;
+  version_id bigint;
+begin
+  -- Calculer le prochain numéro de version
+  select coalesce(max(version_number), 0) + 1
+  into next_version
+  from public.content_versions
+  where entity_type = p_entity_type and entity_id = p_entity_id;
+  
+  -- Insérer la nouvelle version
+  insert into public.content_versions (
+    entity_type, entity_id, version_number, content_snapshot,
+    change_summary, change_type, created_by
+  ) values (
+    p_entity_type, p_entity_id, next_version, p_content_snapshot,
+    coalesce(p_change_summary, 'Modification'), p_change_type, (select auth.uid())
+  ) returning id into version_id;
+  
+  return version_id;
+end;
+$$;
+```
+
+#### Function: `public.generate_slug`
+
+```sql
+create or replace function public.generate_slug(input_text text)
+returns text
+language plpgsql
+immutable
+security invoker
+set search_path = ''
+as $$
+declare
+  normalized_text text;
+begin
+  if input_text is null then return null; end if;
+  
+  normalized_text := lower(input_text);
+  normalized_text := unaccent(normalized_text);
+  normalized_text := regexp_replace(normalized_text, '[^a-z0-9]+', '-', 'g');
+  normalized_text := regexp_replace(normalized_text, '^-+|-+$', '', 'g');
+  
+  return normalized_text;
+end;
+$$;
+```
+
+#### Function: `public.set_slug_if_empty`
+
+```sql
+create or replace function public.set_slug_if_empty()
 returns trigger
 language plpgsql
 security invoker
 set search_path = ''
 as $$
 begin
-  new.created_by := old.created_by;
-  new.updated_at := now();
-  return new;
+  if NEW.slug is null or NEW.slug = '' then
+    if TG_TABLE_NAME = 'spectacles' and NEW.title is not null then
+      NEW.slug := public.generate_slug(NEW.title);
+    elsif TG_TABLE_NAME = 'articles_presse' and NEW.title is not null then
+      NEW.slug := public.generate_slug(NEW.title);
+    elsif TG_TABLE_NAME = 'categories' and NEW.name is not null then
+      NEW.slug := public.generate_slug(NEW.name);
+    elsif TG_TABLE_NAME = 'tags' and NEW.name is not null then
+      NEW.slug := public.generate_slug(NEW.name);
+    end if;
+  end if;
+  return NEW;
 end;
 $$;
 ```
@@ -811,58 +1375,108 @@ $$;
 
 ### 8.2. Triggers
 
-```sql
-drop trigger if exists trg_spectacles_search_vector on public.spectacles;
-```
+#### Triggers de synchronisation auth.users <-> profiles
 
 ```sql
+-- Création automatique de profil lors de l'inscription
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_user();
+
+-- Suppression du profil lors de la suppression d'un utilisateur
+create trigger on_auth_user_deleted
+  after delete on auth.users
+  for each row execute function public.handle_user_deletion();
+
+-- Mise à jour du profil lors de la mise à jour d'un utilisateur
+create trigger on_auth_user_updated
+  after update on auth.users
+  for each row execute function public.handle_user_update();
+```
+
+#### Triggers de recherche full-text
+
+```sql
+-- Trigger pour spectacles
 create trigger trg_spectacles_search_vector
 before insert or update on public.spectacles
 for each row execute function public.spectacles_search_vector_trigger();
-```
 
-```sql
-drop trigger if exists trg_articles_search_vector on public.articles_presse;
-```
-
-```sql
+-- Trigger pour articles de presse
 create trigger trg_articles_search_vector
 before insert or update on public.articles_presse
 for each row execute function public.articles_search_vector_trigger();
 ```
 
+#### Triggers automatiques (updated_at et audit)
+
+Les triggers suivants sont appliqués automatiquement à toutes les tables principales :
+
+**Tables concernées :**
+- `public.profiles`, `public.medias`, `public.membres_equipe`, `public.lieux`
+- `public.spectacles`, `public.evenements`, `public.articles_presse`
+- `public.partners`, `public.abonnes_newsletter`, `public.messages_contact`, `public.configurations_site`
+
+**Triggers updated_at :**
 ```sql
+-- Appliqué automatiquement via boucle DO sur toutes les tables
 create trigger trg_update_updated_at
-      before update on %s
-      for each row
-      execute function public.update_updated_at_column();
+  before update on [table_name]
+  for each row execute function public.update_updated_at_column();
 ```
 
+**Triggers d'audit :**
 ```sql
+-- Appliqué automatiquement via boucle DO sur toutes les tables
 create trigger trg_audit
-      after insert or update or delete on %s
-      for each row
-      execute function public.audit_trigger();
+  after insert or update or delete on [table_name]
+  for each row execute function public.audit_trigger();
 ```
 
+#### Triggers spécialisés
+
+**Triggers pour les tags (compteur d'usage) :**
 ```sql
-drop trigger if exists trg_partners_set_created_by on public.partners;
+-- Maintien automatique du usage_count pour les tags
+create trigger trg_spectacles_tags_usage_count
+  after insert or delete on public.spectacles_tags
+  for each row execute function public.update_tag_usage_count();
+
+create trigger trg_articles_tags_usage_count
+  after insert or delete on public.articles_tags
+  for each row execute function public.update_tag_usage_count();
 ```
 
+**Triggers pour les slugs automatiques :**
 ```sql
-create trigger trg_partners_set_created_by
-before insert on public.partners
-for each row execute function public.partners_set_created_by();
+-- Génération automatique des slugs si non fournis
+create trigger trg_spectacles_slug
+  before insert or update on public.spectacles
+  for each row execute function public.set_slug_if_empty();
+
+create trigger trg_articles_slug
+  before insert or update on public.articles_presse
+  for each row execute function public.set_slug_if_empty();
+
+create trigger trg_categories_slug
+  before insert or update on public.categories
+  for each row execute function public.set_slug_if_empty();
+
+create trigger trg_tags_slug
+  before insert or update on public.tags
+  for each row execute function public.set_slug_if_empty();
 ```
 
+**Triggers de versioning :**
 ```sql
-drop trigger if exists trg_partners_protect_created_by on public.partners;
-```
+-- Historique automatique des versions pour le contenu éditorial
+create trigger trg_spectacles_versioning
+  after insert or update on public.spectacles
+  for each row execute function public.spectacles_versioning_trigger();
 
-```sql
-create trigger trg_partners_protect_created_by
-before update on public.partners
-for each row execute function public.partners_protect_created_by();
+create trigger trg_articles_versioning
+  after insert or update on public.articles_presse
+  for each row execute function public.articles_versioning_trigger();
 ```
 
 ### 8.3. Column comments
@@ -911,22 +1525,34 @@ create index if not exists idx_spectacles_title_trgm on public.spectacles using 
 create index if not exists idx_articles_title_trgm on public.articles_presse using gin (title gin_trgm_ops);
 ```
 
-- Index `idx_partners_slug` on `partners`
+- Index `idx_evenements_date_debut` on `evenements`
 
 ```sql
-create unique index if not exists idx_partners_slug on public.partners (slug);
+create index if not exists idx_evenements_date_debut on public.evenements (date_debut);
 ```
 
-- Index `idx_partners_is_active` on `partners`
+- Index `idx_evenements_parent_event_id` on `evenements`
 
 ```sql
-create index if not exists idx_partners_is_active on public.partners (is_active);
+create index if not exists idx_evenements_parent_event_id on public.evenements (parent_event_id);
 ```
 
-- Index `idx_partners_display_order` on `partners`
+- Index `idx_evenements_recurrence_end_date` on `evenements`
 
 ```sql
-create index if not exists idx_partners_display_order on public.partners (display_order);
+create index if not exists idx_evenements_recurrence_end_date on public.evenements (recurrence_end_date);
+```
+
+- Index `idx_partners_active_order` on `partners`
+
+```sql
+create index idx_partners_active_order on public.partners(is_active, display_order) where is_active = true;
+```
+
+- Index `idx_partners_created_by` on `partners`
+
+```sql
+create index idx_partners_created_by on public.partners(created_by);
 ```
 
 ### 9.2. Monitoring
@@ -965,20 +1591,15 @@ Pour garantir la sécurité du site et éviter les failles les plus courantes (I
 
 ### 10.2. Remarques de sécurité / opérationnelles
 
-- Préférer `profiles.role` pour décisions de sécurité au lieu de `auth.jwt()` (app_metadata), afin d'éviter les tokens obsolètes.
-- Assurez-vous que `profiles.user_id` est unique et indexé.
-- Vérifier que les extensions `citext` et `unaccent` sont installées si nécessaire.
-- Pour les conversions de `serial` -> `identity`, planifier fenêtre de maintenance si tables contiennent des données volumineuses.
-- Documenter les propriétaires (owners) des functions `SECURITY DEFINER` si elles existent, et limiter leurs droits.
+- **Rôles stockés en base** : Préférer `profiles.role` pour les décisions de sécurité au lieu de `auth.jwt()` (app_metadata), afin d'éviter les problèmes liés aux tokens JWT obsolètes.
+- **Service role** : Le rôle `service_role` contourne les politiques RLS — assurez-vous que les secrets sont protégés et que le code serveur n'utilise ce rôle que lorsque c'est nécessaire.
+- **Extensions PostgreSQL** : Vérifier que les extensions `citext` et `unaccent` sont correctement installées si vous utilisez des fonctionnalités comme la recherche insensible à la casse ou les emails.
+- **Confidentialité des médias** : Utiliser le drapeau `medias.is_public` combiné aux politiques RLS et aux triggers pour garantir que seuls les propriétaires et administrateurs peuvent accéder aux médias privés.
+- **Contraintes d'indexation** : Assurez-vous que `profiles.user_id` est unique et correctement indexé pour les performances et l'intégrité des données.
+- **Maintenance planifiée** : Pour les conversions de `serial` -> `identity`, planifier une fenêtre de maintenance si les tables contiennent des données volumineuses.
+- **Sécurité des fonctions** : Documenter les propriétaires (owners) des fonctions `SECURITY DEFINER` si elles existent, et limiter leurs droits d'accès au strict nécessaire.
 
-### 10.3. Security considerations & rationale
-
-- **Use DB-stored roles** (`profiles.role`) for authorization decisions to avoid stale JWT issues.
-- **service_role** bypasses RLS — ensure secrets are protected and server code uses service_role only when necessary.
-- **Ensure citext/unaccent** extensions exist if using case-insensitive email or search features.
-- **Media privacy**: `medias.is_public` flag + RLS policies + trigger enforcement for uploaded_by.
-
-### 10.4. Conformité RGPD
+### 10.3. Conformité RGPD
 
 - Consentement explicite pour newsletter
 - Droit à l'oubli complet
@@ -995,53 +1616,84 @@ Pour garantir la sécurité du site et éviter les failles les plus courantes (I
 
 ## 11. Migration & Declarative schema (Supabase workflow)
 
-- All schema objects must be declared in `supabase/schemas/public/` files (one entity per file recommended).
-- Run `supabase db diff -f <init_schema_name>` to generate migrationsn local env (after `supabase stop` local Supabase per the official workflow).
-- Avoid DML in schema files; use migrations for seeding if necessary.
-- Apply migration to staging, run full test suite (RLS, triggers, performance).
-- Prepare CI job to apply migrations on merges to main (with manual approval for prod).
+### 11.1. Organisation du schéma déclaratif
 
-1. Placer `supabase/schemas/public/` dans la racine du repo, commit.
-   - Fichiers concernés (exemples) :
-     - 00_profiles_fix.sql
-     - 01_table_partners.sql
-     - 02_alter_configurations_site.sql
-     - 20_function_partners_set_created_by.sql
-     - 21_function_partners_protect_created_by.sql
-     - 30_trigger_partners.sql
-     - 40_policy_partners.sql
-     - autres fichiers déjà présents pour tables/fonctions/triggers
+Tous les objets du schéma sont organisés dans le répertoire `supabase/schemas/` avec une structure numérotée pour garantir l'ordre d'exécution :
 
-2. Stopper l'environnement Supabase local :
+**Extensions et Tables (01-15) :**
+- `01_extensions.sql` - Extensions PostgreSQL (pgcrypto, unaccent, pg_trgm, citext*)
+- `02_table_profiles.sql` - Table des profils utilisateurs
+- `03_table_medias.sql` - Gestion des médias et fichiers
+- `04_table_membres_equipe.sql` - Membres de l'équipe
+- `05_table_lieux.sql` - Lieux et venues
+- `06_table_spectacles.sql` - Spectacles et productions
+- `07_table_evenements.sql` - Événements programmés
+- `08_table_articles_presse.sql` - Articles de presse
+- `09_table_partners.sql` - Partenaires de la compagnie
+- `10_tables_system.sql` - Tables système (configurations, logs, etc.)
+- `11_tables_relations.sql` - Tables de liaison many-to-many
+- `12_evenements_recurrence.sql` - Gestion des récurrences d'événements
+- `13_analytics_events.sql` - Suivi analytique des événements
+- `14_categories_tags.sql` - Système de catégories et tags
+- `15_content_versioning.sql` - Versioning du contenu éditorial
+- `16_seo_metadata.sql` - Métadonnées SEO
 
+> **Note importante**: L'extension `citext` est utilisée dans la table `abonnes_newsletter` (10_tables_system.sql) pour le champ `email`, mais n'est pas explicitement créée dans le fichier `01_extensions.sql`. Cela représente une incohérence à corriger.
+
+**Fonctions (20-29) :**
+- `20_functions_core.sql` - Fonctions utilitaires de base
+- `21_functions_auth_sync.sql` - Synchronisation auth.users <-> profiles
+
+**Triggers (30-39) :**
+- `30_triggers.sql` - Application des triggers sur toutes les tables
+
+**Optimisations (40-59) :**
+- `40_indexes.sql` - Index et optimisations de performance
+- `50_constraints.sql` - Contraintes de validation des données
+
+**Sécurité (60-69) :**
+- `60_rls_profiles.sql` - Politiques RLS pour les profils
+- `61_rls_main_tables.sql` - Politiques RLS pour les tables principales
+- `62_rls_advanced_tables.sql` - Politiques RLS pour les tables avancées
+
+### 11.2. Workflow de migration
+
+1. **Développement local :**
    ```bash
+   # Arrêter l'instance locale
    supabase stop
-   ```
-
-3. Générer la migration déclarative :
-
-   ```bash
-   supabase db diff -f init_schema_or_update
-   ```
-
-   - Inspecter le fichier de migration généré dans `supabase/migrations/`.
-   - Vérifier qu'il ne contient pas de DML non volontaire.
-   - Corriger si besoin, puis commit.
-
-4. Démarrer Supabase localement :
-
-   ```bash
+   
+   # Générer la migration depuis le schéma déclaratif
+   supabase db diff -f migration_name
+   
+   # Redémarrer et appliquer
    supabase start
    ```
 
-5. Tests en staging (exécuter les requêtes d'exemple incluses dans le cahier) :
-   - RLS (anon/auth/admin) pour partners et medias
-   - Triggers pour medias (uploaded_by) et partners (created_by)
-   - Audit triggers (inserts/updates/deletes) -> verify logs in `public.logs_audit`
+2. **Validation staging :**
+   - Appliquer la migration sur l'environnement de staging
+   - Exécuter la suite de tests complète (RLS, triggers, performance)
+   - Vérifier l'intégrité des données
 
-6. CI/CD :
-   - Ajouter job GitHub Actions pour exécuter les migrations sur staging et prod.
-   - Protéger `service_role` keys ; ne pas les exposer client-side.
+3. **Déploiement production :**
+   - Job CI/CD automatique avec approbation manuelle
+   - Application des migrations via `supabase db push`
+   - Monitoring post-déploiement
+
+### 11.3. Bonnes pratiques
+
+- **Un objet par fichier** : chaque table, fonction, trigger dans son propre fichier
+- **Nommage cohérent** : `NN_type_name.sql` (ex: `09_table_partners.sql`)
+- **Ordre d'exécution** : numérotation garantit les dépendances (tables → fonctions → triggers → RLS)
+- **Pas de DML** : seules les définitions DDL dans les fichiers de schéma
+- **Idempotence** : utiliser `drop ... if exists` et `create or replace`
+- **Documentation** : commentaires sur toutes les tables et colonnes importantes
+
+### 11.4. Gestion des secrets
+
+- Protéger les clés `service_role` (ne jamais exposer côté client)
+- Utiliser `anon` et `authenticated` roles pour l'accès public/authentifié
+- Fonctions `SECURITY DEFINER` uniquement quand nécessaire et bien documentées
 
 ## 12. Tests recommandés (staging scripts à exécuter)
 
