@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { NewsItem } from './types';
 
-// Données mockées (à remplacer par un appel API Supabase dans le futur)
-const newsData: NewsItem[] = [
+// Données mockées des communiqués de presse
+// === pressReleasesData
+const newsData: NewsItem[] = [ 
   {
     id: 1,
     title: "Nomination aux Molières 2024",

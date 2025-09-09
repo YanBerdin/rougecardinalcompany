@@ -19,7 +19,7 @@ create table public.evenements (
   updated_at timestamptz default now() not null
 );
 
-comment on table public.evenements is 'scheduled occurrences of spectacles with date and venue';
+comment on table public.evenements is 'Séances programmées de spectacles, avec date et lieu';
 comment on column public.evenements.recurrence_rule is 'Règle de récurrence au format RRULE (RFC 5545)';
 comment on column public.evenements.recurrence_end_date is 'Date de fin de la récurrence';
 comment on column public.evenements.parent_event_id is 'Référence vers l''événement parent pour les occurrences générées';
