@@ -476,6 +476,38 @@ create table public.communiques_presse (
 comment on table public.communiques_presse is 'Communiqués de presse professionnels téléchargeables pour l''espace presse';
 ```
 
+#### Table: `contacts_presse`
+
+**Description** : Base de données des contacts journalistes et médias
+
+```sql
+create table public.contacts_presse (
+  id bigint generated always as identity primary key,
+  nom text not null,
+  prenom text,
+  fonction text, -- Ex: "Journaliste culture", "Rédacteur en chef"
+  media text not null, -- Nom du média/journal
+  email text not null,
+  telephone text,
+  adresse text,
+  ville text,
+  specialites text[], -- Ex: ['théâtre', 'danse', 'musique']
+  notes text, -- Notes internes
+  actif boolean default true,
+  derniere_interaction timestamptz,
+  
+  created_by uuid references auth.users(id) on delete set null,
+  created_at timestamptz default now() not null,
+  updated_at timestamptz default now() not null,
+  
+  constraint contacts_presse_email_unique unique (email)
+);
+
+comment on table public.contacts_presse is 'Base de données des contacts presse et journalistes';
+comment on column public.contacts_presse.specialites is 'Domaines de spécialisation du journaliste';
+comment on column public.contacts_presse.notes is 'Notes internes sur les interactions passées';
+```
+
 #### Table: `abonnes_newsletter`
 
 ```sql
@@ -674,7 +706,7 @@ create table public.content_versions (
 );
 
 comment on table public.content_versions is 'Historique des versions pour tous les contenus éditoriaux';
-comment on column public.content_versions.entity_type is 'Type d''entité : spectacle, article_presse, membre_equipe, etc.';
+comment on column public.content_versions.entity_type is 'Type d''entité : spectacle, article_presse, communique_presse, membre_equipe, etc.';
 comment on column public.content_versions.content_snapshot is 'Snapshot JSON complet des données au moment de la version';
 comment on column public.content_versions.change_summary is 'Résumé des modifications apportées';
 comment on column public.content_versions.change_type is 'Type de modification : create, update, publish, unpublish, restore';
@@ -936,7 +968,7 @@ comment on view public.recurrent_events is 'Vue pour la gestion des événements
 
 - Tables with RLS enabled (20/20 - 100% coverage):
   - **Core**: `profiles`, `medias`, `spectacles`, `evenements`, `lieux`, `membres_equipe`
-  - **Content**: `articles_presse`, `communiques_presse`, `partners`, `categories`, `tags`
+  - **Content**: `articles_presse`, `communiques_presse`, `contacts_presse`, `partners`, `categories`, `tags`
   - **System**: `configurations_site`, `logs_audit`, `abonnes_newsletter`, `messages_contact`
   - **Analytics**: `analytics_events`, `content_versions`, `seo_redirects`, `sitemap_entries`
   - **Recurrence**: `events_recurrence`
@@ -1032,6 +1064,46 @@ using ( public.is_admin() ) with check ( public.is_admin() );
 create policy "Admins can delete partners"
 on public.partners for delete to authenticated
 using ( public.is_admin() );
+```
+
+### Policies on `communiques_presse`
+
+```sql
+-- Public press releases viewable by all
+create policy "Public press releases are viewable by everyone"
+on public.communiques_presse for select to anon, authenticated
+using ( public = true );
+
+-- Admins can view all press releases
+create policy "Admins can view all press releases"
+on public.communiques_presse for select to authenticated
+using ( public.is_admin() );
+
+-- Only admins can manage press releases
+create policy "Admins can create press releases"
+on public.communiques_presse for insert to authenticated
+with check ( public.is_admin() );
+
+create policy "Admins can update press releases"
+on public.communiques_presse for update to authenticated
+using ( public.is_admin() ) with check ( public.is_admin() );
+
+create policy "Admins can delete press releases"
+on public.communiques_presse for delete to authenticated
+using ( public.is_admin() );
+```
+
+### Policies on `contacts_presse`
+
+```sql
+-- Press contacts are admin-only (confidential database)
+create policy "Admins can view press contacts"
+on public.contacts_presse for select to authenticated
+using ( public.is_admin() );
+
+create policy "Admins can manage press contacts"
+on public.contacts_presse for all to authenticated
+using ( public.is_admin() ) with check ( public.is_admin() );
 ```
 
 ---
@@ -1704,6 +1776,7 @@ Tous les objets du schéma sont organisés dans le répertoire `supabase/schemas
 - `06_table_spectacles.sql` - Spectacles et productions + RLS
 - `07_table_evenements.sql` - Événements programmés + RLS
 - `08_table_articles_presse.sql` - Articles de presse + RLS
+- `08b_communiques_presse.sql` - Communiqués presse + contacts presse + RLS
 - `09_table_partners.sql` - Partenaires de la compagnie + RLS
 - `10_tables_system.sql` - Tables système + RLS (configurations, logs, newsletter, contact)
 - `11_tables_relations.sql` - Tables de liaison many-to-many + RLS
@@ -1735,7 +1808,7 @@ Tous les objets du schéma sont organisés dans le répertoire `supabase/schemas
 - **Supprimé** : `63_rls_missing_tables.sql` (fichier patch temporaire)
 - **Intégré** : Toutes les politiques RLS sont maintenant dans les fichiers de tables individuels
 - **Unifié** : Documentation consolidée dans un seul `README.md`
-- **Conformité** : 100% des tables (19/19) avec politiques RLS optimisées
+- **Conformité** : 100% des tables (20/20) avec politiques RLS optimisées
 
 ### 11.2. Workflow de migration
 
@@ -2851,6 +2924,17 @@ ORDER BY ordre_affichage ASC, date_publication DESC;
 SELECT * FROM articles_presse 
 WHERE published_at IS NOT NULL AND published_at <= NOW()
 ORDER BY published_at DESC;
+```
+
+**Versioning automatique étendu :**
+```sql
+-- Historique complet des modifications
+SELECT * FROM content_versions 
+WHERE entity_type IN ('spectacle', 'article_presse', 'communique_presse')
+ORDER BY created_at DESC;
+
+-- Restauration d'une version antérieure
+SELECT public.restore_content_version(version_id, 'Restauration suite à erreur');
 ```
 
 **Architecture TypeScript :**

@@ -15,7 +15,7 @@ create table public.content_versions (
 );
 
 comment on table public.content_versions is 'Historique des versions pour tous les contenus éditoriaux';
-comment on column public.content_versions.entity_type is 'Type d''entité : spectacle, article_presse, membre_equipe, etc.';
+comment on column public.content_versions.entity_type is 'Type d''entité : spectacle, article_presse, communique_presse, membre_equipe, etc.';
 comment on column public.content_versions.content_snapshot is 'Snapshot JSON complet des données au moment de la version';
 comment on column public.content_versions.change_summary is 'Résumé des modifications apportées';
 comment on column public.content_versions.change_type is 'Type de modification : create, update, publish, unpublish, restore';
@@ -176,6 +176,46 @@ begin
 end;
 $$;
 
+-- Trigger function pour les communiqués de presse
+create or replace function public.communiques_versioning_trigger()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  change_summary_text text;
+  change_type_value text;
+begin
+  if tg_op = 'INSERT' then
+    change_type_value := 'create';
+    change_summary_text := 'Création du communiqué: ' || NEW.title;
+  else
+    if OLD.public = false and NEW.public = true then
+      change_type_value := 'publish';
+      change_summary_text := 'Publication du communiqué: ' || NEW.title;
+    elsif OLD.public = true and NEW.public = false then
+      change_type_value := 'unpublish';
+      change_summary_text := 'Dépublication du communiqué: ' || NEW.title;
+    else
+      change_type_value := 'update';
+      change_summary_text := 'Mise à jour du communiqué: ' || NEW.title;
+    end if;
+  end if;
+  
+  -- Créer la version
+  perform public.create_content_version(
+    'communique_presse',
+    NEW.id,
+    to_jsonb(NEW),
+    change_summary_text,
+    change_type_value
+  );
+  
+  return NEW;
+end;
+$$;
+
 -- Appliquer les triggers de versioning
 drop trigger if exists trg_spectacles_versioning on public.spectacles;
 create trigger trg_spectacles_versioning
@@ -186,6 +226,11 @@ drop trigger if exists trg_articles_versioning on public.articles_presse;
 create trigger trg_articles_versioning
   after insert or update on public.articles_presse
   for each row execute function public.articles_versioning_trigger();
+
+drop trigger if exists trg_communiques_versioning on public.communiques_presse;
+create trigger trg_communiques_versioning
+  after insert or update on public.communiques_presse
+  for each row execute function public.communiques_versioning_trigger();
 
 -- Vue pour consulter facilement l'historique d'une entité
 create or replace view public.content_versions_detailed as
@@ -262,6 +307,21 @@ begin
       published_at = (version_record.content_snapshot->>'published_at')::timestamptz,
       updated_at = now()
       -- Autres champs à restaurer
+    where id = version_record.entity_id;
+    
+    restore_success := found;
+    
+  elsif version_record.entity_type = 'communique_presse' then
+    update public.communiques_presse
+    set 
+      title = version_record.content_snapshot->>'title',
+      description = version_record.content_snapshot->>'description',
+      date_publication = (version_record.content_snapshot->>'date_publication')::date,
+      public = (version_record.content_snapshot->>'public')::boolean,
+      ordre_affichage = (version_record.content_snapshot->>'ordre_affichage')::integer,
+      file_size_bytes = (version_record.content_snapshot->>'file_size_bytes')::bigint,
+      updated_at = now()
+      -- Note: document_pdf_media_id et relations non restaurés pour éviter incohérences
     where id = version_record.entity_id;
     
     restore_success := found;

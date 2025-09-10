@@ -19,7 +19,7 @@ Ce dossier contient le schéma déclaratif de la base de données selon les inst
 
 | Instruction | Statut | Détail |
 |-------------|--------|--------|
-| **RLS Policies** | ✅ 100% | 19/19 tables protégées |
+| **RLS Policies** | ✅ 100% | 20/20 tables protégées |
 | **Functions** | ✅ 100% | SECURITY INVOKER, search_path défini |
 | **SQL Style** | ✅ 100% | Lowercase, snake_case, commentaires |
 | **Schema Structure** | ✅ 100% | Ordre lexicographique respecté |
@@ -38,6 +38,7 @@ supabase/schemas/
 ├── 06_table_spectacles.sql        # Table des spectacles + RLS
 ├── 07_table_evenements.sql        # Table des événements + RLS
 ├── 08_table_articles_presse.sql   # Table articles presse + RLS
+├── 08b_communiques_presse.sql     # Table communiqués presse + RLS + contacts presse
 ├── 09_table_partners.sql          # Table des partenaires + RLS
 ├── 10_tables_system.sql           # Tables système + RLS (config, logs, newsletter, contact)
 ├── 11_tables_relations.sql        # Tables de liaison many-to-many + RLS
@@ -61,7 +62,7 @@ supabase/schemas/
 
 ## � Sécurité RLS - Validation Complète
 
-### Tables avec Protection RLS (19/19) ✅
+### Tables avec Protection RLS (20/20) ✅
 
 | Table | Lecture | Écriture | Particularités |
 |-------|---------|----------|----------------|
@@ -73,6 +74,8 @@ supabase/schemas/
 | **membres_equipe** | Publique | Admin uniquement | Équipe publique |
 | **partners** | Si actif | Admin uniquement | Partenaires visibles |
 | **articles_presse** | Publique | Admin uniquement | Articles publics |
+| **communiques_presse** | Si public=true | Admin uniquement | Communiqués officiels |
+| **contacts_presse** | Admin uniquement | Admin uniquement | Base presse confidentielle |
 | **categories** | Si active | Admin uniquement | Catégories publiques |
 | **tags** | Publique | Admin uniquement | Tags publics |
 | **analytics_events** | Admin uniquement | Insertion libre | Tracking anonyme |
@@ -193,9 +196,9 @@ supabase migration new update_existing_data
 
 | Métrique | Valeur | Statut |
 |----------|--------|--------|
-| **Tables avec RLS** | 19/19 (100%) | ✅ |
-| **Politiques Optimisées** | 45+ (100%) | ✅ |
-| **Index RLS** | 10 stratégiques | ✅ |
+| **Tables avec RLS** | 20/20 (100%) | ✅ |
+| **Politiques Optimisées** | 50+ (100%) | ✅ |
+| **Index RLS** | 12 stratégiques | ✅ |
 | **Fonctions Sécurisées** | 8/8 (100%) | ✅ |
 | **Conformité Instructions** | 100% | ✅ |
 | **Tests de Sécurité** | En attente | 🟡 |

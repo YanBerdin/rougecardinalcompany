@@ -19,6 +19,25 @@ create index if not exists idx_articles_title_trgm on public.articles_presse usi
 -- Index pour optimiser les politiques RLS
 create index if not exists idx_medias_uploaded_by on public.medias (uploaded_by);
 create index if not exists idx_spectacles_created_by on public.spectacles (created_by);
+
+-- ===== INDEX COMMUNIQUES PRESSE =====
+
+-- Index pour communiqués de presse
+create index if not exists idx_communiques_presse_date_publication on public.communiques_presse(date_publication desc);
+create index if not exists idx_communiques_presse_public on public.communiques_presse(public) where public = true;
+create index if not exists idx_communiques_presse_ordre on public.communiques_presse(ordre_affichage, date_publication desc);
+create index if not exists idx_communiques_presse_spectacle_id on public.communiques_presse(spectacle_id);
+create index if not exists idx_communiques_presse_created_by on public.communiques_presse(created_by);
+
+-- Index pour contacts presse
+create index if not exists idx_contacts_presse_media on public.contacts_presse(media);
+create index if not exists idx_contacts_presse_actif on public.contacts_presse(actif) where actif = true;
+create index if not exists idx_contacts_presse_specialites on public.contacts_presse using gin (specialites);
+
+-- Recherche full-text sur titre et description (harmonisé avec articles_presse)
+create index if not exists idx_communiques_presse_search on public.communiques_presse using gin (
+  to_tsvector('french', coalesce(title, '') || ' ' || coalesce(description, ''))
+);
 create index if not exists idx_spectacles_public on public.spectacles (public) where public = true;
 create index if not exists idx_partners_is_active on public.partners (is_active) where is_active = true;
 create index if not exists idx_categories_is_active on public.categories (is_active) where is_active = true;

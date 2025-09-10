@@ -27,3 +27,126 @@ create table public.articles_medias (
   ordre smallint default 0,
   primary key (article_id, media_id)
 );
+
+-- ===== TABLES DE RELATIONS COMMUNIQUES PRESSE =====
+
+-- Liaison communiqués <-> catégories (utilise la table categories existante)
+drop table if exists public.communiques_categories cascade;
+create table public.communiques_categories (
+  communique_id bigint not null references public.communiques_presse(id) on delete cascade,
+  category_id bigint not null references public.categories(id) on delete cascade,
+  primary key (communique_id, category_id)
+);
+
+-- Liaison communiqués <-> tags (utilise la table tags existante)
+drop table if exists public.communiques_tags cascade;
+create table public.communiques_tags (
+  communique_id bigint not null references public.communiques_presse(id) on delete cascade,
+  tag_id bigint not null references public.tags(id) on delete cascade,
+  primary key (communique_id, tag_id)
+);
+
+-- ===== ROW LEVEL SECURITY POUR TABLES DE RELATIONS =====
+
+-- Spectacles membres équipe relations
+alter table public.spectacles_membres_equipe enable row level security;
+
+drop policy if exists "Spectacle member relations are viewable by everyone" on public.spectacles_membres_equipe;
+create policy "Spectacle member relations are viewable by everyone"
+on public.spectacles_membres_equipe
+for select
+to anon, authenticated
+using ( true );
+
+drop policy if exists "Admins can manage spectacle member relations" on public.spectacles_membres_equipe;
+create policy "Admins can manage spectacle member relations"
+on public.spectacles_membres_equipe
+for all
+to authenticated
+using ( (select public.is_admin()) )
+with check ( (select public.is_admin()) );
+
+-- Spectacles medias relations
+alter table public.spectacles_medias enable row level security;
+
+drop policy if exists "Spectacle media relations are viewable by everyone" on public.spectacles_medias;
+create policy "Spectacle media relations are viewable by everyone"
+on public.spectacles_medias
+for select
+to anon, authenticated
+using ( true );
+
+drop policy if exists "Admins can manage spectacle media relations" on public.spectacles_medias;
+create policy "Admins can manage spectacle media relations"
+on public.spectacles_medias
+for all
+to authenticated
+using ( (select public.is_admin()) )
+with check ( (select public.is_admin()) );
+
+-- Articles medias relations
+alter table public.articles_medias enable row level security;
+
+drop policy if exists "Article media relations are viewable by everyone" on public.articles_medias;
+create policy "Article media relations are viewable by everyone"
+on public.articles_medias
+for select
+to anon, authenticated
+using ( true );
+
+drop policy if exists "Admins can manage article media relations" on public.articles_medias;
+create policy "Admins can manage article media relations"
+on public.articles_medias
+for all
+to authenticated
+using ( (select public.is_admin()) )
+with check ( (select public.is_admin()) );
+
+-- ---- COMMUNIQUES RELATIONS ----
+-- communiques_categories
+alter table public.communiques_categories enable row level security;
+
+drop policy if exists "Press release categories follow parent visibility" on public.communiques_categories;
+create policy "Press release categories follow parent visibility"
+on public.communiques_categories
+for select
+to anon, authenticated
+using ( 
+  exists (
+    select 1 from public.communiques_presse cp 
+    where cp.id = communique_id 
+    and (cp.public = true or (select public.is_admin()))
+  )
+);
+
+drop policy if exists "Admins can manage press release categories" on public.communiques_categories;
+create policy "Admins can manage press release categories"
+on public.communiques_categories
+for all
+to authenticated
+using ( (select public.is_admin()) )
+with check ( (select public.is_admin()) );
+
+-- communiques_tags
+alter table public.communiques_tags enable row level security;
+
+drop policy if exists "Press release tags follow parent visibility" on public.communiques_tags;
+create policy "Press release tags follow parent visibility"
+on public.communiques_tags
+for select
+to anon, authenticated
+using ( 
+  exists (
+    select 1 from public.communiques_presse cp 
+    where cp.id = communique_id 
+    and (cp.public = true or (select public.is_admin()))
+  )
+);
+
+drop policy if exists "Admins can manage press release tags" on public.communiques_tags;
+create policy "Admins can manage press release tags"
+on public.communiques_tags
+for all
+to authenticated
+using ( (select public.is_admin()) )
+with check ( (select public.is_admin()) );

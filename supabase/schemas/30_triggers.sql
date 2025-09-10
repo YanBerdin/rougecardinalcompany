@@ -25,7 +25,8 @@ BEGIN
   FOR tbl IN SELECT unnest(array[
     'public.profiles', 'public.medias', 'public.membres_equipe', 'public.lieux',
     'public.spectacles', 'public.evenements', 'public.articles_presse', 
-    'public.partners', 'public.abonnes_newsletter', 'public.messages_contact', 'public.configurations_site'
+    'public.partners', 'public.abonnes_newsletter', 'public.messages_contact', 'public.configurations_site',
+    'public.communiques_presse', 'public.contacts_presse'
   ])
   LOOP
     EXECUTE format('drop trigger if exists trg_update_updated_at on %s;', tbl);
@@ -43,7 +44,8 @@ DECLARE
   audit_tables text[] := array[
     'public.profiles', 'public.medias', 'public.membres_equipe', 'public.lieux',
     'public.spectacles', 'public.evenements', 'public.articles_presse', 
-    'public.partners', 'public.abonnes_newsletter', 'public.messages_contact', 'public.configurations_site'
+    'public.partners', 'public.abonnes_newsletter', 'public.messages_contact', 'public.configurations_site',
+    'public.communiques_presse', 'public.contacts_presse'
   ];
   tbl text;
 BEGIN
@@ -57,3 +59,17 @@ BEGIN
   END LOOP;
 END;
 $$;
+
+-- ===== TRIGGERS SPÉCIALISÉS =====
+
+-- Triggers pour slug auto-généré
+drop trigger if exists trg_communiques_slug on public.communiques_presse;
+create trigger trg_communiques_slug
+  before insert or update on public.communiques_presse
+  for each row execute function public.set_slug_if_empty();
+
+-- Triggers pour usage count des tags
+drop trigger if exists trg_communiques_tags_usage_count on public.communiques_tags;
+create trigger trg_communiques_tags_usage_count
+  after insert or delete on public.communiques_tags
+  for each row execute function public.update_tag_usage_count();
