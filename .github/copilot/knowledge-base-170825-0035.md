@@ -458,6 +458,13 @@ create table public.communiques_presse (
   -- Document PDF principal  
   document_pdf_media_id bigint not null references public.medias(id) on delete restrict,
   
+  -- Image d'illustration pour présentation visuelle
+  image_media_id bigint references public.medias(id) on delete set null, -- Référence vers médias pour image
+  image_url text, -- URL d'image externe ou alternative
+  
+  -- Catégorie pour organisation du kit presse
+  category text, -- Catégorie libre (ex: "Nouveau spectacle", "Prix et récompenses", "Tournée")
+  
   -- Relations avec autres entités
   spectacle_id bigint references public.spectacles(id) on delete set null,
   evenement_id bigint references public.evenements(id) on delete set null,
@@ -473,7 +480,7 @@ create table public.communiques_presse (
   updated_at timestamptz default now() not null
 );
 
-comment on table public.communiques_presse is 'Communiqués de presse professionnels téléchargeables pour l''espace presse';
+comment on table public.communiques_presse is 'Communiqués de presse professionnels téléchargeables pour l''espace presse avec images et catégories';
 ```
 
 #### Table: `contacts_presse`
@@ -2944,8 +2951,11 @@ interface PressRelease {        // communiques_presse
   id: number;
   title: string;
   description: string;
+  category?: string;            // Catégorie du communiqué
   fileUrl: string;              // PDF téléchargeable
   fileSize: string;
+  imageUrl?: string;            // Image d'illustration
+  imageFileUrl?: string;        // URL fichier image depuis medias
 }
 
 interface MediaArticle {        // articles_presse  

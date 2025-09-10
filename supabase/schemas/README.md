@@ -74,7 +74,7 @@ supabase/schemas/
 | **membres_equipe** | Publique | Admin uniquement | Équipe publique |
 | **partners** | Si actif | Admin uniquement | Partenaires visibles |
 | **articles_presse** | Publique | Admin uniquement | Articles publics |
-| **communiques_presse** | Si public=true | Admin uniquement | Communiqués officiels |
+| **communiques_presse** | Si public=true | Admin uniquement | Communiqués avec images/catégories |
 | **contacts_presse** | Admin uniquement | Admin uniquement | Base presse confidentielle |
 | **categories** | Si active | Admin uniquement | Catégories publiques |
 | **tags** | Publique | Admin uniquement | Tags publics |

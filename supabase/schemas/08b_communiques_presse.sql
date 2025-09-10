@@ -12,6 +12,13 @@ create table public.communiques_presse (
   -- Document PDF principal  
   document_pdf_media_id bigint not null references public.medias(id) on delete restrict,
   
+  -- Image de présentation et liens
+  image_media_id bigint references public.medias(id) on delete set null, -- Image de couverture/illustration
+  image_url text, -- URL externe vers une image (alternative ou complément)
+  
+  -- Catégorisation
+  category text, -- Catégorie du communiqué (ex: "Création", "Tournée", "Presse", "Institutionnel")
+  
   -- Relations avec autres entités (optionnel)
   spectacle_id bigint references public.spectacles(id) on delete set null,
   evenement_id bigint references public.evenements(id) on delete set null,
@@ -35,6 +42,9 @@ comment on table public.communiques_presse is 'Communiqués de presse profession
 comment on column public.communiques_presse.title is 'Titre du communiqué (harmonisé avec articles_presse)';
 comment on column public.communiques_presse.description is 'Description/résumé affiché dans la liste et kit média';
 comment on column public.communiques_presse.document_pdf_media_id is 'Référence obligatoire vers le PDF dans la table medias';
+comment on column public.communiques_presse.image_media_id is 'Image de couverture/illustration du communiqué';
+comment on column public.communiques_presse.image_url is 'URL externe vers une image (alternative ou complément à image_media_id)';
+comment on column public.communiques_presse.category is 'Catégorie du communiqué (ex: Création, Tournée, Presse, Institutionnel)';
 comment on column public.communiques_presse.ordre_affichage is 'Ordre d''affichage personnalisé dans le kit média (0 = premier)';
 comment on column public.communiques_presse.file_size_bytes is 'Taille du fichier pour affichage utilisateur (ex: "312 KB")';
 
@@ -140,6 +150,7 @@ select
   cp.description,
   cp.date_publication,
   cp.ordre_affichage,
+  cp.category,
   cp.spectacle_id,
   cp.evenement_id,
   -- Informations du PDF pour kit média
@@ -157,6 +168,11 @@ select
   m.storage_path as pdf_path,
   -- URL public pour téléchargement (via Supabase Storage)
   concat('/storage/v1/object/public/', m.storage_path) as file_url,
+  -- Informations image d'illustration
+  cp.image_url,
+  im.filename as image_filename,
+  im.storage_path as image_path,
+  concat('/storage/v1/object/public/', im.storage_path) as image_file_url,
   -- Informations contextuelles
   s.title as spectacle_titre,
   e.date_debut as evenement_date,
@@ -166,6 +182,7 @@ select
   array_agg(distinct t.name) filter (where t.name is not null) as tags
 from public.communiques_presse cp
 inner join public.medias m on cp.document_pdf_media_id = m.id
+left join public.medias im on cp.image_media_id = im.id
 left join public.spectacles s on cp.spectacle_id = s.id
 left join public.evenements e on cp.evenement_id = e.id
 left join public.lieux l on e.lieu_id = l.id
@@ -174,11 +191,13 @@ left join public.categories c on cc.category_id = c.id and c.is_active = true
 left join public.communiques_tags ct on cp.id = ct.communique_id
 left join public.tags t on ct.tag_id = t.id
 where cp.public = true
-group by cp.id, m.filename, m.size_bytes, m.storage_path, s.title, e.date_debut, l.nom
+group by cp.id, cp.category, m.filename, m.size_bytes, m.storage_path, 
+         im.filename, im.storage_path, cp.image_url,
+         s.title, e.date_debut, l.nom
 order by cp.ordre_affichage asc, cp.date_publication desc;
 
 comment on view public.communiques_presse_public is 
-'Vue publique optimisée pour l''espace presse professionnel avec URLs de téléchargement et tailles formatées';
+'Vue publique optimisée pour l''espace presse professionnel avec URLs de téléchargement, images et catégories';
 
 -- Vue dashboard admin pour gestion
 create or replace view public.communiques_presse_dashboard as
@@ -190,9 +209,13 @@ select
   cp.date_publication,
   cp.public,
   cp.ordre_affichage,
+  cp.category,
   -- PDF info
   m.filename as pdf_filename,
   round(coalesce(cp.file_size_bytes, m.size_bytes) / 1024.0, 2) as pdf_size_kb,
+  -- Image info
+  cp.image_url,
+  im.filename as image_filename,
   -- Relations
   s.title as spectacle_titre,
   e.date_debut as evenement_date,
@@ -205,100 +228,15 @@ select
   count(ct.tag_id) as nb_tags
 from public.communiques_presse cp
 inner join public.medias m on cp.document_pdf_media_id = m.id
+left join public.medias im on cp.image_media_id = im.id
 left join public.spectacles s on cp.spectacle_id = s.id
 left join public.evenements e on cp.evenement_id = e.id
 left join public.profiles p on cp.created_by = p.user_id
 left join public.communiques_categories cc on cp.id = cc.communique_id
 left join public.communiques_tags ct on cp.id = ct.communique_id
-group by cp.id, m.filename, m.size_bytes, s.title, e.date_debut, p.display_name
+group by cp.id, cp.category, m.filename, m.size_bytes, im.filename, cp.image_url,
+         s.title, e.date_debut, p.display_name
 order by cp.created_at desc;
 
 comment on view public.communiques_presse_dashboard is 
-'Vue dashboard admin pour la gestion des communiqués avec statistiques';
-
--- ===== VUES UTILITAIRES =====
-
--- Vue pour affichage public des communiqués (espace presse professionnel)
-create or replace view public.communiques_presse_public as
-select 
-  cp.id,
-  cp.title,
-  cp.slug,
-  cp.description,
-  cp.date_publication,
-  cp.ordre_affichage,
-  cp.spectacle_id,
-  cp.evenement_id,
-  -- Informations du PDF pour kit média
-  m.filename as pdf_filename,
-  cp.file_size_bytes,
-  case 
-    when cp.file_size_bytes is not null then 
-      case 
-        when cp.file_size_bytes < 1024 then cp.file_size_bytes::text || ' B'
-        when cp.file_size_bytes < 1048576 then round(cp.file_size_bytes / 1024.0, 1)::text || ' KB'
-        else round(cp.file_size_bytes / 1048576.0, 1)::text || ' MB'
-      end
-    else m.size_bytes::text
-  end as file_size_display,
-  m.storage_path as pdf_path,
-  -- URL public pour téléchargement (via Supabase Storage)
-  concat('/storage/v1/object/public/', m.storage_path) as file_url,
-  -- Informations contextuelles
-  s.title as spectacle_titre,
-  e.date_debut as evenement_date,
-  l.nom as lieu_nom,
-  -- Catégories et tags
-  array_agg(distinct c.name) filter (where c.name is not null) as categories,
-  array_agg(distinct t.name) filter (where t.name is not null) as tags
-from public.communiques_presse cp
-inner join public.medias m on cp.document_pdf_media_id = m.id
-left join public.spectacles s on cp.spectacle_id = s.id
-left join public.evenements e on cp.evenement_id = e.id
-left join public.lieux l on e.lieu_id = l.id
-left join public.communiques_categories cc on cp.id = cc.communique_id
-left join public.categories c on cc.category_id = c.id and c.is_active = true
-left join public.communiques_tags ct on cp.id = ct.communique_id
-left join public.tags t on ct.tag_id = t.id
-where cp.public = true
-group by cp.id, m.filename, m.size_bytes, m.storage_path, s.title, e.date_debut, l.nom
-order by cp.ordre_affichage asc, cp.date_publication desc;
-
-comment on view public.communiques_presse_public is 
-'Vue publique optimisée pour l''espace presse professionnel avec URLs de téléchargement et tailles formatées';
-
--- Vue dashboard admin pour gestion
-create or replace view public.communiques_presse_dashboard as
-select 
-  cp.id,
-  cp.title,
-  cp.slug,
-  cp.description,
-  cp.date_publication,
-  cp.public,
-  cp.ordre_affichage,
-  -- PDF info
-  m.filename as pdf_filename,
-  round(coalesce(cp.file_size_bytes, m.size_bytes) / 1024.0, 2) as pdf_size_kb,
-  -- Relations
-  s.title as spectacle_titre,
-  e.date_debut as evenement_date,
-  -- Meta
-  p.display_name as createur,
-  cp.created_at,
-  cp.updated_at,
-  -- Stats
-  count(cc.category_id) as nb_categories,
-  count(ct.tag_id) as nb_tags
-from public.communiques_presse cp
-inner join public.medias m on cp.document_pdf_media_id = m.id
-left join public.spectacles s on cp.spectacle_id = s.id
-left join public.evenements e on cp.evenement_id = e.id
-left join public.profiles p on cp.created_by = p.user_id
-left join public.communiques_categories cc on cp.id = cc.communique_id
-left join public.communiques_tags ct on cp.id = ct.communique_id
-group by cp.id, m.filename, m.size_bytes, s.title, e.date_debut, p.display_name
-order by cp.created_at desc;
-
-comment on view public.communiques_presse_dashboard is 
-'Vue dashboard admin pour la gestion des communiqués avec statistiques';
+'Vue dashboard admin pour la gestion des communiqués avec statistiques et gestion des images';
