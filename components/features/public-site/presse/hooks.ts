@@ -37,15 +37,15 @@ const pressReleasesData = [
   },
 ];
 
-// Revue de Presse (d'articles médias)
+// Revue de Presse (Table articles_presse)
 const mediaArticlesData = [
   {
     id: 1,
     title: "Une compagnie qui marie tradition et modernité",
-    source_publication: "Le Figaro",
-    published_at: "2024-01-20",
     author: "Marie Lecomte",
     type: "Article" as const,
+    source_publication: "Le Figaro",
+    published_at: "2024-01-20",
     source_url: "https://lefigaro.fr/...",
     excerpt:
       "Rouge-Cardinal réussit le pari audacieux de rendre les classiques accessibles à un public contemporain...",
@@ -53,10 +53,10 @@ const mediaArticlesData = [
   {
     id: 2,
     title: "Les Murmures du Temps : un spectacle bouleversant",
-    source_publication: "Télérama",
-    published_at: "2024-01-18",
     author: "Jean-Michel Ribes",
     type: "Critique" as const,
+    source_publication: "Télérama",
+    published_at: "2024-01-18",
     source_url: "https://telerama.fr/...",
     excerpt:
       "Rarement une création aura su toucher avec autant de justesse les cordes sensibles du spectateur...",
@@ -64,10 +64,10 @@ const mediaArticlesData = [
   {
     id: 3,
     title: "Interview vidéo - Marie Dubois",
-    source_publication: "France Culture",
-    published_at: "2024-01-12",
     author: "Laure Adler",
     type: "Interview" as const,
+    source_publication: "France Culture",
+    published_at: "2024-01-12",
     source_url: "https://franceculture.fr/...",
     excerpt:
       "La directrice artistique de Rouge-Cardinal nous parle de sa vision du théâtre contemporain...",
@@ -75,10 +75,10 @@ const mediaArticlesData = [
   {
     id: 4,
     title: "Portrait d'une compagnie engagée",
-    source_publication: "Les Inrockuptibles",
-    published_at: "2024-01-08",
     author: "Sophie Grassin",
     type: "Portrait" as const,
+    source_publication: "Les Inrockuptibles",
+    published_at: "2024-01-08",
     source_url: "https://lesinrocks.com/...",
     excerpt:
       "Depuis 15 ans, Rouge-Cardinal développe un théâtre exigeant et accessible, miroir de notre époque...",
@@ -122,7 +122,7 @@ export function usePresse() {
       try {
         // Simule une latence réseau //TODO: remove
         await new Promise((resolve) => setTimeout(resolve, 2000));
-        
+
         setPressReleases(pressReleasesData);
         setMediaArticles(mediaArticlesData);
         setMediaKit(mediaKitData);

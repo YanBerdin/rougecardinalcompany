@@ -31,8 +31,9 @@
 - [18. Annexes](#18-annexes)
 - [19. CRITICAL INSTRUCTIONS FOR AI LANGUAGE MODELS](#19--critical-instructions-for-ai-language-models-)
   - [19.0. Schema Déclaratif - Structure Optimisée](#190-schema-déclaratif---structure-optimisée-sept-2025)
-  - [19.1. Supabase docs references](#191-supabase-docs-references)
-  - [19.2. Bootstrap Next.js app with Supabase Auth](#192-bootstrap-nextjs-app-with-supabase-auth)
+  - [19.1. Distinction Presse - Architecture Métier](#191-distinction-presse---architecture-métier-critique)
+  - [19.2. Supabase docs references](#192-supabase-docs-references)
+  - [19.3. Bootstrap Next.js app with Supabase Auth](#193-bootstrap-nextjs-app-with-supabase-auth)
 
 ## 1. Présentation
 
@@ -81,11 +82,25 @@ Soutenue par des subventions et mécénats.
 1. Présenter la compagnie et son identité  
 2. Mettre en avant spectacles et expositions (actuels et passés)  
 3. Gérer un agenda interactif d'événements  
-4. Centraliser la presse (communiqués, revues)  
+4. **Centraliser la presse** (communiqués émis PAR la compagnie + revues ÉCRITES SUR la compagnie)  
 5. Permettre une mise à jour autonome via un back-office sécurisé  
 6. Optimiser le SEO et préparer Google Ad Grants
 7. Gérer la newsletter et les contacts
-8. Fournir un espace presse professionnel
+8. **Fournir un espace presse professionnel** avec kit média et ressources téléchargeables
+
+### 4.1. Distinction Presse - Architecture Métier
+
+**📰 Communiqués de presse (`communiques_presse`)** :
+- Documents PDF **émis PAR** la compagnie 
+- Annonces officielles, nouvelles créations, tournées
+- Kit média professionnel pour journalistes
+- URL de téléchargement direct, taille fichier affichée
+
+**📄 Articles de presse (`articles_presse`)** :  
+- Articles **ÉCRITS SUR** la compagnie par les médias
+- Critiques, interviews, portraits dans la presse
+- Liens externes vers sources originales
+- Revue de presse et retombées médiatiques
 
 ---
 
@@ -145,6 +160,12 @@ Soutenue par des subventions et mécénats.
 - **Billetterie** : lien vers plateforme externe, download billet  
 - **Fichier .ics** : export calendrier pour ajout personnel  
 - **Médiathèque** : photos HD, vidéos, documents presse
+- **Espace Presse Professionnel** :
+  - Kit média avec communiqués PDF téléchargeables
+  - Contact presse dédié avec accréditations 
+  - Médiathèque HD avec droits d'utilisation
+  - Revue de presse (articles externes)
+  - Base de données contacts journalistes (admin)
 
 ---
 
@@ -400,6 +421,8 @@ comment on column public.evenements.parent_event_id is 'Référence vers l''év�
 
 #### Table: `articles_presse`
 
+**Description** : Articles écrits sur la compagnie par les médias externes
+
 ```sql
 create table public.articles_presse (
   id bigint generated always as identity primary key,
@@ -418,6 +441,39 @@ create table public.articles_presse (
 );
 
 comment on table public.articles_presse is 'press articles referencing shows or company news';
+```
+
+#### Table: `communiques_presse`
+
+**Description** : Communiqués de presse officiels émis par la compagnie (documents PDF)
+
+```sql
+create table public.communiques_presse (
+  id bigint generated always as identity primary key,
+  title text not null, -- Harmonisé avec articles_presse
+  slug text,
+  description text, -- Description/résumé pour kit média
+  date_publication date not null,
+  
+  -- Document PDF principal  
+  document_pdf_media_id bigint not null references public.medias(id) on delete restrict,
+  
+  -- Relations avec autres entités
+  spectacle_id bigint references public.spectacles(id) on delete set null,
+  evenement_id bigint references public.evenements(id) on delete set null,
+  
+  -- Métadonnées pour espace presse professionnel
+  ordre_affichage integer default 0, -- Pour tri dans kit média
+  public boolean default true,
+  file_size_bytes bigint, -- Taille fichier pour affichage
+  
+  -- Gestion standard
+  created_by uuid references auth.users(id) on delete set null,
+  created_at timestamptz default now() not null,
+  updated_at timestamptz default now() not null
+);
+
+comment on table public.communiques_presse is 'Communiqués de presse professionnels téléchargeables pour l''espace presse';
 ```
 
 #### Table: `abonnes_newsletter`
@@ -866,7 +922,7 @@ comment on view public.recurrent_events is 'Vue pour la gestion des événements
 
 **🔧 Nouvelle Organisation (Sept 2025) :**
 - **RLS intégrées** : Politiques maintenant incluses dans chaque fichier de table
-- **Maintenant 19/19 tables protégées** (était 12/19)
+- **Maintenant 20/20 tables protégées** (incluant communiques_presse)
 - **Performance optimisée** : `(select public.is_admin())` pour mise en cache
 - **Index RLS** : 10 index dédiés aux colonnes des politiques
 - **Documentation unifiée** : `supabase/schemas/README.md`
@@ -878,9 +934,9 @@ comment on view public.recurrent_events is 'Vue pour la gestion des événements
   - **Explicit TO** clauses: `to authenticated, anon` or `to authenticated`.
   - **Optimized function calls** : `(select public.is_admin())` vs `public.is_admin()`
 
-- Tables with RLS enabled (19/19 - 100% coverage):
+- Tables with RLS enabled (20/20 - 100% coverage):
   - **Core**: `profiles`, `medias`, `spectacles`, `evenements`, `lieux`, `membres_equipe`
-  - **Content**: `articles_presse`, `partners`, `categories`, `tags`
+  - **Content**: `articles_presse`, `communiques_presse`, `partners`, `categories`, `tags`
   - **System**: `configurations_site`, `logs_audit`, `abonnes_newsletter`, `messages_contact`
   - **Analytics**: `analytics_events`, `content_versions`, `seo_redirects`, `sitemap_entries`
   - **Recurrence**: `events_recurrence`
@@ -2770,7 +2826,55 @@ using ( (select public.is_admin()) )  -- PERFORMANCE OPTIMISÉE
 
 ---
 
-### 19.1. **Supabase docs references**
+### 19.1. **Distinction Presse - Architecture Métier Critique**
+
+**❌ ERREUR COMMUNE :**
+```sql
+-- NE PAS confondre ces deux entités distinctes
+SELECT * FROM articles_presse; -- Articles ÉCRITS SUR la compagnie
+SELECT * FROM communiques_presse; -- Documents PDF ÉMIS PAR la compagnie
+```
+
+**✅ USAGE CORRECT :**
+
+**Pour afficher les communiqués de presse (Kit Média) :**
+```sql
+-- Vue optimisée avec URLs de téléchargement
+SELECT * FROM communiques_presse_public 
+WHERE public = true 
+ORDER BY ordre_affichage ASC, date_publication DESC;
+```
+
+**Pour afficher la revue de presse (Articles externes) :**
+```sql
+-- Articles publiés par les médias
+SELECT * FROM articles_presse 
+WHERE published_at IS NOT NULL AND published_at <= NOW()
+ORDER BY published_at DESC;
+```
+
+**Architecture TypeScript :**
+```typescript
+// Types distincts pour l'espace presse
+interface PressRelease {        // communiques_presse
+  id: number;
+  title: string;
+  description: string;
+  fileUrl: string;              // PDF téléchargeable
+  fileSize: string;
+}
+
+interface MediaArticle {        // articles_presse  
+  id: number;
+  title: string;
+  author: string;
+  source_publication: string;
+  source_url: string;           // Lien externe
+  excerpt: string;
+}
+```
+
+### 19.2. **Supabase docs references**
 
 - Row Level Security : <https://supabase.com/docs/guides/database/postgres/row-level-security>
 - Declarative schema : <https://supabase.com/docs/guides/local-development#declarative-schema>
@@ -2779,7 +2883,7 @@ using ( (select public.is_admin()) )  -- PERFORMANCE OPTIMISÉE
 
 ---
 
-### 19.2. Bootstrap Next.js app with Supabase Auth
+### 19.3. Bootstrap Next.js app with Supabase Auth
 
 #### Overview of implementing Supabase Auth SSR
 
