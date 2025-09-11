@@ -287,6 +287,7 @@ begin
       description = version_record.content_snapshot->>'description',
       published_at = (version_record.content_snapshot->>'published_at')::timestamptz,
       public = (version_record.content_snapshot->>'public')::boolean,
+      image_url = version_record.content_snapshot->>'image_url',
       updated_at = now()
       -- Autres champs à restaurer
     where id = version_record.entity_id;
