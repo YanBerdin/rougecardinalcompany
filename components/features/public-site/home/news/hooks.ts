@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { NewsItem } from './types';
 
 // Données mockées des communiqués de presse
-// === pressReleasesData
+// == pressReleasesData
+// == 08b_communiques_presse.sql
 const newsData: NewsItem[] = [ 
   {
     id: 1,

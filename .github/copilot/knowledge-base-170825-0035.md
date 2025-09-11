@@ -12,28 +12,80 @@
 ## Table des matières
 
 - [1. Présentation](#1-présentation)
+  - [1.1. Coordonnées](#11-coordonnées)
+  - [1.2. Description de l'établissement](#12-description-de-létablissement)
+  - [1.3. Contexte et objectifs](#13-contexte-et-objectifs)
+  - [1.4. Références](#14-références)
 - [2. Public cible](#2-public-cible)
 - [3. Objectifs fonctionnels](#3-objectifs-fonctionnels)
+  - [3.1. Distinction Presse - Architecture Métier](#31-distinction-presse---architecture-métier)
 - [4. Architecture technique & choix technologiques](#4-architecture-technique--choix-technologiques)
+  - [4.0. Architectural Approach](#40-architectural-approach)
+  - [4.1. Environnements](#41-environnements)
+  - [4.2. Exigences non-fonctionnelles](#42-exigences-non-fonctionnelles)
+  - [4.3. UI et Design](#43-ui-et-design)
+  - [4.4. Capacités de billetterie & médias](#44-capacités-de-billetterie--médias)
 - [5. Architecture Backend Détaillée](#5-architecture-backend-détaillée)
+  - [5.1. Authentification et Autorisation](#51-authentification-et-autorisation)
+  - [5.2. Gestion de Contenu (CMS)](#52-gestion-de-contenu-cms)
+  - [5.3. Gestion des Médias](#53-gestion-des-médias)
+  - [5.4. Communication](#54-communication)
+  - [5.5. SEO et Référencement](#55-seo-et-référencement)
 - [6. Structure de Base de Données](#6-structure-de-base-de-données)
+  - [6.1. Tables Principales](#61-tables-principales)
+  - [6.2. Relations et Contraintes](#62-relations-et-contraintes)
+  - [6.3. Vues et Rapports](#63-vues-et-rapports)
 - [7. Row Level Security (RLS) and Policies (règles appliquées & raisons)](#7-row-level-security-rls-and-policies-règles-appliquées--raisons)
 - [8. Functions & Triggers (sécurité et bonnes pratiques)](#8-functions--triggers-sécurité-et-bonnes-pratiques)
+  - [8.1. Functions](#81-functions)
+  - [8.2. Triggers](#82-triggers)
+  - [8.3. Column comments](#83-column-comments)
 - [9. Indexes & Performance & Monitoring](#9-indexes--performance--monitoring)
+  - [9.1. Indexes](#91-indexes)
+  - [9.2. Monitoring](#92-monitoring)
 - [10. Sécurité et Conformité](#10-sécurité-et-conformité)
+  - [10.1. Sécurité Technique](#101-sécurité-technique)
+  - [10.2. Remarques de sécurité / opérationnelles](#102-remarques-de-sécurité--opérationnelles)
+  - [10.3. Conformité RGPD](#103-conformité-rgpd)
 - [11. Migration & Declarative schema (Supabase workflow)](#11-migration--declarative-schema-supabase-workflow)
+  - [11.1. Organisation du schéma déclaratif](#111-organisation-du-schéma-déclaratif)
+  - [11.2. Workflow de migration](#112-workflow-de-migration)
+  - [11.3. Bonnes pratiques](#113-bonnes-pratiques)
+  - [11.4. Gestion des secrets](#114-gestion-des-secrets)
 - [12. Tests recommandés (staging scripts à exécuter)](#12-tests-recommandés-staging-scripts-à-exécuter)
 - [13. API et Intégrations](#13-api-et-intégrations)
+  - [13.1. API REST](#131-api-rest)
+  - [13.2. Intégrations Externes](#132-intégrations-externes)
 - [14. User Stories Complètes](#14-user-stories-complètes)
+  - [14.1. Page d'Accueil](#141-page-daccueil)
+  - [14.2. Page présentation de la compagnie](#142-page-présentation-de-la-compagnie)
+  - [14.3. Page Nos Spectacles (événements)](#143-page-nos-spectacles-événements)
+  - [14.4. Page Agenda](#144-page-agenda)
+  - [14.5. Page Presse](#145-page-presse)
+  - [14.6. Page Contact & Newsletter](#146-page-contact--newsletter)
+  - [14.7. Back-office Avancé](#147-back-office-avancé)
 - [15. Livrables et Formation](#15-livrables-et-formation)
+  - [15.1. Livrables Techniques](#151-livrables-techniques)
+  - [15.2. Livrables Utilisateur](#152-livrables-utilisateur)
 - [16. Critères d'Acceptance](#16-critères-dacceptance)
+  - [16.1. Performance](#161-performance)
+  - [16.2. Sécurité](#162-sécurité)
+  - [16.3. Fonctionnel](#163-fonctionnel)
+  - [16.4. Technique](#164-technique)
 - [17. Conventional Commit Guide](#17-conventional-commit-guide)
+  - [17.1. 🚀 Basic Structure](#171--basic-structure)
+  - [17.2. 📋 Types of Commit](#172--types-of-commit)
+  - [17.3. Additional Commit Types](#173-additional-commit-types)
 - [18. Annexes](#18-annexes)
 - [19. CRITICAL INSTRUCTIONS FOR AI LANGUAGE MODELS](#19--critical-instructions-for-ai-language-models-)
-  - [19.0. Schema Déclaratif - Structure Optimisée](#190-schema-déclaratif---structure-optimisée-sept-2025)
-  - [19.1. Distinction Presse - Architecture Métier](#191-distinction-presse---architecture-métier-critique)
-  - [19.2. Supabase docs references](#192-supabase-docs-references)
-  - [19.3. Bootstrap Next.js app with Supabase Auth](#193-bootstrap-nextjs-app-with-supabase-auth)
+  - [19.1. Schema Déclaratif - Structure Optimisée](#191-schema-déclaratif---structure-optimisée-sept-2025)
+  - [19.2. Distinction Presse - Architecture Métier Critique](#192-distinction-presse---architecture-métier-critique)
+  - [19.3. Supabase docs references](#193-supabase-docs-references)
+  - [19.4. Bootstrap Next.js app with Supabase Auth](#194-bootstrap-nextjs-app-with-supabase-auth)
+  - [19.5. Database: Declarative Database Schema](#195-database-declarative-database-schema)
+  - [19.6. Database: Create RLS policies](#196-database-create-rls-policies)
+  - [19.7. Database: Create functions](#197-database-create-functions)
+  - [19.8. Database: Postgres SQL Style Guide](#198-database-postgres-sql-style-guide)
 
 ## 1. Présentation
 
@@ -88,7 +140,7 @@ Soutenue par des subventions et mécénats.
 7. Gérer la newsletter et les contacts
 8. **Fournir un espace presse professionnel** avec kit média et ressources téléchargeables
 
-### 4.1. Distinction Presse - Architecture Métier
+### 3.1. Distinction Presse - Architecture Métier
 
 **📰 Communiqués de presse (`communiques_presse`)** :
 - Documents PDF **émis PAR** la compagnie 
@@ -1641,7 +1693,7 @@ create trigger trg_articles_versioning
 
 ## 9. Indexes & Performance & Monitoring
 
-### 9.1 Indexes
+### 9.1. Indexes
 
 - Index `idx_medias_storage_path` on `medias`
 
@@ -2863,7 +2915,7 @@ update public.configurations_site set show_partners = false;
 
 ## 19. 🚨 CRITICAL INSTRUCTIONS FOR AI LANGUAGE MODELS 🚨
 
-### 19.0. **Schema Déclaratif - Structure Optimisée (Sept 2025)**
+### 19.1. **Schema Déclaratif - Structure Optimisée (Sept 2025)**
 
 🚨 **IMPORTANT** : La structure du schéma a été REFACTORISÉE. Les AI models doivent respecter les nouvelles règles :
 
@@ -2906,7 +2958,7 @@ using ( (select public.is_admin()) )  -- PERFORMANCE OPTIMISÉE
 
 ---
 
-### 19.1. **Distinction Presse - Architecture Métier Critique**
+### 19.2. **Distinction Presse - Architecture Métier Critique**
 
 **❌ ERREUR COMMUNE :**
 ```sql
@@ -2968,7 +3020,7 @@ interface MediaArticle {        // articles_presse
 }
 ```
 
-### 19.2. **Supabase docs references**
+### 19.3. **Supabase docs references**
 
 - Row Level Security : <https://supabase.com/docs/guides/database/postgres/row-level-security>
 - Declarative schema : <https://supabase.com/docs/guides/local-development#declarative-schema>
@@ -2977,7 +3029,7 @@ interface MediaArticle {        // articles_presse
 
 ---
 
-### 19.3. Bootstrap Next.js app with Supabase Auth
+### 19.4. Bootstrap Next.js app with Supabase Auth
 
 #### Overview of implementing Supabase Auth SSR
 
@@ -3208,7 +3260,7 @@ Remember: There are NO EXCEPTIONS to these rules.
 
 ---
 
-### 19.3. Database: Declarative Database Schema
+### 19.5. Database: Declarative Database Schema
 
 Mandatory Instructions for Supabase Declarative Schema Management
 
@@ -3287,7 +3339,7 @@ If you need to use any of the entities below, remember to add them through versi
 
 **Non-compliance with these instructions may lead to inconsistent database states and is strictly prohibited.**
 
-### 19.4. Database: Create RLS policies
+### 19.6. Database: Create RLS policies
 
 You're a Supabase Postgres expert in writing row level security policies. Your purpose is to generate a policy with the constraints given by the user. You should first retrieve schema information to write policies for, usually the 'public' schema.
 
@@ -3531,7 +3583,7 @@ using ( (select auth.uid()) = user_id );
 
 This prevents the policy `( (select auth.uid()) = user_id )` from running for any `anon` users, since the execution stops at the `to authenticated` step.
 
-### 19.5. Database: Create functions
+### 19.7. Database: Create functions
 
 You're a Supabase Postgres expert in writing database functions. Generate **high-quality PostgreSQL functions** that adhere to the following best practices:
 
@@ -3662,7 +3714,7 @@ as $$
 $$;
 ```
 
-### 19.6. Database: Postgres SQL Style Guide
+### 19.8. Database: Postgres SQL Style Guide
 
 #### General
 

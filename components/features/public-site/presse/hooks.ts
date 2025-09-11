@@ -6,7 +6,8 @@ import { PressRelease, MediaArticle, MediaKitItem } from "./types";
 import { PresseSkeleton } from "@/components/skeletons/presse-skeleton";
 
 // Communiqués de presse
-// === newsData
+// == newsData
+// == 08b_communiques_presse.sql
 const pressReleasesData = [
   {
     id: 1,
