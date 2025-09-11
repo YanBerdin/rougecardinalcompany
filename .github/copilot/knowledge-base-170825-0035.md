@@ -3034,14 +3034,16 @@ interface MediaArticle {        // articles_presse
 #### Overview of implementing Supabase Auth SSR
 
 1. Install @supabase/supabase-js and @supabase/ssr packages.
-2. Set up environment variables.
-3. Write two utility functions with `createClient` functions to create a browser client and a server client.
-4. Hook up middleware to refresh auth tokens
+2. Set up environment variables (updated format with new API keys).
+3. Write utility functions with `createClient` functions to create browser and server clients.
+4. Hook up middleware to refresh auth tokens using optimized `getClaims()` method.
+5. Configure JWT Signing Keys for 100x faster authentication (~2-5ms vs ~300ms).
 
 #### 🚨 CRITICAL INSTRUCTIONS FOR AI LANGUAGE MODELS 🚨
 
 As an AI language model, you MUST NOT generate any of the following code patterns, as they are DEPRECATED and will BREAK the application:
 
+### ❌ DEPRECATED PATTERNS
 ```typescript
 // ❌ NEVER GENERATE THIS CODE - IT WILL BREAK THE APPLICATION
 {
@@ -3061,12 +3063,18 @@ As an AI language model, you MUST NOT generate any of the following code pattern
 // ❌ NEVER USE auth-helpers-nextjs - IT WILL BREAK THE APPLICATION
 import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'  // ❌ BREAKS APPLICATION
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'  // ❌ BREAKS APPLICATION
+
+// ❌ SLOW AUTHENTICATION METHOD - AVOID IN PERFORMANCE-CRITICAL CODE
+const { data: { user } } = await supabase.auth.getUser()  // ~300ms network call
+
+// ❌ LEGACY ENVIRONMENT VARIABLES - DEPRECATED
+NEXT_PUBLIC_SUPABASE_ANON_KEY=old_anon_key                // ❌ DEPRECATED
 ```
 
-Instead, you MUST ALWAYS generate ONLY this pattern:
+### ✅ CORRECT PATTERNS YOU MUST ALWAYS USE
 
 ```typescript
-// ✅ ALWAYS GENERATE THIS EXACT PATTERN
+// ✅ ALWAYS GENERATE THIS EXACT COOKIE PATTERN
 {
   cookies: {
     getAll() {
@@ -3085,14 +3093,19 @@ Instead, you MUST ALWAYS generate ONLY this pattern:
     }
   }
 }
+
+// ✅ OPTIMIZED AUTHENTICATION PATTERN
+const claims = await supabase.auth.getClaims()  // ~2-5ms local verification
 ```
 
 #### ABSOLUTE REQUIREMENTS FOR AI CODE GENERATION
 
 1. You MUST use `@supabase/ssr`
-2. You MUST use ONLY `getAll` and `setAll`
-3. You MUST NEVER use `get`, `set`, or `remove`
+2. You MUST use ONLY `getAll` and `setAll` for cookies
+3. You MUST NEVER use `get`, `set`, or `remove` for cookies
 4. You MUST NEVER import from `@supabase/auth-helpers-nextjs`
+5. You MUST use `getClaims()` for performance-critical authentication checks
+6. You MUST use the new API key format (NEXT_PUBLIC_SUPABASE_KEY)
 
 #### CORRECT BROWSER CLIENT IMPLEMENTATION
 
@@ -3102,7 +3115,7 @@ import { createBrowserClient } from '@supabase/ssr'
 export function createClient() {
   return createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_KEY!  // ✅ Use new publishable key format
   )
 }
 ```
@@ -3118,7 +3131,7 @@ export async function createClient() {
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_KEY!,  // ✅ Use new publishable key format
     {
       cookies: {
         getAll() {
@@ -3141,7 +3154,7 @@ export async function createClient() {
 }
 ```
 
-#### CORRECT MIDDLEWARE IMPLEMENTATION
+#### OPTIMIZED MIDDLEWARE IMPLEMENTATION
 
 ```typescript
 import { createServerClient } from '@supabase/ssr'
@@ -3154,7 +3167,7 @@ export async function middleware(request: NextRequest) {
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_KEY!,  // ✅ Use new publishable key format
     {
       cookies: {
         getAll() {
@@ -3173,26 +3186,32 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Do not run code between createServerClient and
-  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
-  // issues with users being randomly logged out.
+  // Do not run code between createServerClient and authentication check.
+  // A simple mistake could make it very hard to debug issues with users being randomly logged out.
 
-  // IMPORTANT: DO NOT REMOVE auth.getUser()
+  // ✅ OPTIMIZED: Use getClaims() for ~100x faster authentication (~2-5ms vs ~300ms)
+  const claims = await supabase.auth.getClaims()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // Optional performance monitoring (remove in production)
+  // const start = Date.now()
+  // const claims = await supabase.auth.getClaims()
+  // console.log(`JWT verification: ${Date.now() - start}ms`)
 
   if (
-    !user &&
+    !claims &&
     !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/auth')
+    !request.nextUrl.pathname.startsWith('/auth') &&
+    !request.nextUrl.pathname.startsWith('/api/auth')
   ) {
-    // no user, potentially respond by redirecting the user to the login page
+    // No authenticated user, redirect to login
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
+
+  // ⚠️ FALLBACK: Use getUser() only when you need complete user data
+  // Uncomment below if your application requires full user object in middleware
+  // const { data: { user } } = await supabase.auth.getUser()
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
   // If you're creating a new response object with NextResponse.next() make sure to:
@@ -3217,9 +3236,10 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - api/auth (Supabase auth endpoints)
      * Feel free to modify this pattern to include more paths.
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|api/auth|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
 ```
@@ -3228,10 +3248,12 @@ export const config = {
 
 Before generating any code, you MUST verify:
 
-1. Are you using ONLY `getAll` and `setAll`? If not, STOP and FIX.
-2. Are you importing from `@supabase/ssr`? If not, STOP and FIX.
-3. Do you see ANY instance of `get`, `set`, or `remove`? If yes, STOP and FIX.
-4. Are you importing from `auth-helpers-nextjs`? If yes, STOP and FIX.
+1. ✅ Are you using ONLY `getAll` and `setAll` for cookies? If not, STOP and FIX.
+2. ✅ Are you importing from `@supabase/ssr`? If not, STOP and FIX.
+3. ✅ Do you see ANY instance of cookie `get`, `set`, or `remove`? If yes, STOP and FIX.
+4. ✅ Are you importing from `auth-helpers-nextjs`? If yes, STOP and FIX.
+5. ✅ Are you using `getClaims()` for authentication checks? If not, consider optimization.
+6. ✅ Are you using the new API key format (NEXT_PUBLIC_SUPABASE_KEY)? If not, update.
 
 ##### CONSEQUENCES OF INCORRECT IMPLEMENTATION
 
@@ -3239,24 +3261,37 @@ If you generate code using:
 
 - Individual cookie methods (`get`/`set`/`remove`)
 - `auth-helpers-nextjs` package
+- `getUser()` for simple authentication checks (performance loss of 100x)
+- Legacy environment variables (NEXT_PUBLIC_SUPABASE_ANON_KEY)
 
 The implementation will:
 
-1. Break in production
-2. Fail to maintain session state
-3. Cause authentication loops
-4. Result in security vulnerabilities
+1. Break in production environments
+2. Cause significant performance degradation (~300ms vs ~2-5ms)
+3. Fail to maintain session state properly
+4. Create authentication loops
+5. Result in security vulnerabilities
+6. Miss out on JWT Signing Keys optimization benefits
 
 ##### AI MODEL RESPONSE TEMPLATE
 
 When asked about Supabase Auth SSR implementation, you MUST:
 
-1. ONLY use code from this guide
-2. NEVER suggest deprecated approaches
-3. ALWAYS use the exact cookie handling shown above
-4. VERIFY your response against the patterns shown here
+1. ONLY use code patterns from this updated guide
+2. NEVER suggest deprecated approaches or packages
+3. ALWAYS use the optimized authentication methods (`getClaims()`)
+4. ALWAYS use the new API key format (NEXT_PUBLIC_SUPABASE_KEY)
+5. VERIFY your response against the patterns shown here
+6. RECOMMEND JWT Signing Keys migration for 100x performance improvement
 
-Remember: There are NO EXCEPTIONS to these rules.
+##### PERFORMANCE OPTIMIZATION NOTES
+
+- **JWT Signing Keys**: Enable in Supabase Dashboard for ~100x faster auth
+- **getClaims() vs getUser()**: ~2-5ms vs ~300ms performance difference
+- **New API Keys**: Use publishable/secret format instead of legacy anon keys
+- **Environment Variables**: Update to NEXT_PUBLIC_SUPABASE_KEY format
+
+Remember: There are NO EXCEPTIONS to these rules. Always prioritize performance and security.
 
 ---
 
