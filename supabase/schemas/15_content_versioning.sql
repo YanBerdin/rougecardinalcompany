@@ -321,10 +321,9 @@ begin
       public = (version_record.content_snapshot->>'public')::boolean,
       ordre_affichage = (version_record.content_snapshot->>'ordre_affichage')::integer,
       file_size_bytes = (version_record.content_snapshot->>'file_size_bytes')::bigint,
-      category = version_record.content_snapshot->>'category',
       image_url = version_record.content_snapshot->>'image_url',
       updated_at = now()
-      -- Note: document_pdf_media_id, image_media_id et relations non restaurés pour éviter incohérences
+      -- Note: Relations many-to-many (medias, categories, tags) non restaurées pour éviter incohérences
     where id = version_record.entity_id;
     
     restore_success := found;

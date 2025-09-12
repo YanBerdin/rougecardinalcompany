@@ -443,7 +443,7 @@ create table public.spectacles (
 );
 
 comment on table public.spectacles is 'shows/performances (base entity)';
-comment on column public.spectacles.image_url is 'URL externe vers une image (alternative ou complément à image_media_id)';
+comment on column public.spectacles.image_url is 'URL externe vers une image (alternative aux médias stockés via spectacles_medias)';
 ```
 
 #### Table: `evenements`
@@ -509,14 +509,14 @@ create table public.communiques_presse (
   date_publication date not null,
   
   -- Document PDF principal  
-  document_pdf_media_id bigint not null references public.medias(id) on delete restrict,
+- **communiques_presse** : Communiqués de presse professionnels (PDF téléchargeables)
+  - Relations : spectacles, evenements via foreign keys
+  - Médias : Utilise `communiques_medias` (ordre -1 = PDF principal, 0+ = images)
+  - Catégorisation : `communiques_categories` (many-to-many)
+  - Tags : `communiques_tags` (many-to-many)
   
-  -- Image d'illustration pour présentation visuelle
-  image_media_id bigint references public.medias(id) on delete set null, -- Référence vers médias pour image
-  image_url text, -- URL d'image externe ou alternative
-  
-  -- Catégorie pour organisation du kit presse
-  category text, -- Catégorie libre (ex: "Nouveau spectacle", "Prix et récompenses", "Tournée")
+  -- Image externe (URLs)
+  image_url text, -- URL d'image externe (alternative aux médias stockés via communiques_medias)
   
   -- Relations avec autres entités
   spectacle_id bigint references public.spectacles(id) on delete set null,
@@ -665,6 +665,19 @@ create table public.articles_medias (
   primary key (article_id, media_id)
 );
 ```
+
+#### Table: `communiques_medias`
+
+```sql
+create table public.communiques_medias (
+  communique_id bigint not null references public.communiques_presse(id) on delete cascade,
+  media_id bigint not null references public.medias(id) on delete cascade,
+  ordre smallint default 0, -- Convention : -1 = PDF principal, 0+ = images/autres médias
+  primary key (communique_id, media_id)
+);
+```
+
+- **Convention d'ordre** : `-1` = PDF principal obligatoire, `0` = image principale, `1+` = médias secondaires
 
 #### Table: `partners`
 
@@ -840,6 +853,7 @@ comment on column public.sitemap_entries.change_frequency is 'Fréquence de mise
 - `spectacles_membres_equipe` : relation many-to-many entre `spectacles` et `membres_equipe`
 - `spectacles_medias` : relation many-to-many entre `spectacles` et `medias` avec ordre
 - `articles_medias` : relation many-to-many entre `articles_presse` et `medias` avec ordre
+- `communiques_medias` : relation many-to-many entre `communiques_presse` et `medias` avec ordre spécial (-1 = PDF principal)
 - `spectacles_categories` : relation many-to-many entre `spectacles` et `categories`
 - `spectacles_tags` : relation many-to-many entre `spectacles` et `tags`
 - `articles_categories` : relation many-to-many entre `articles_presse` et `categories`

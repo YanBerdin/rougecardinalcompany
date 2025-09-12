@@ -34,6 +34,9 @@ create index if not exists idx_contacts_presse_media on public.contacts_presse(m
 create index if not exists idx_contacts_presse_actif on public.contacts_presse(actif) where actif = true;
 create index if not exists idx_contacts_presse_specialites on public.contacts_presse using gin (specialites);
 
+-- Index pour relations communiqués-medias
+create index if not exists idx_communiques_medias_ordre on public.communiques_medias(communique_id, ordre);
+
 -- Recherche full-text sur titre et description (harmonisé avec articles_presse)
 create index if not exists idx_communiques_presse_search on public.communiques_presse using gin (
   to_tsvector('french', coalesce(title, '') || ' ' || coalesce(description, ''))

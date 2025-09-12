@@ -9,15 +9,8 @@ create table public.communiques_presse (
   description text, -- Résumé/description (cohérent avec types TS)
   date_publication date not null,
   
-  -- Document PDF principal  
-  document_pdf_media_id bigint not null references public.medias(id) on delete restrict,
-  
-  -- Image de présentation et liens
-  image_media_id bigint references public.medias(id) on delete set null, -- Image de couverture/illustration
-  image_url text, -- URL externe vers une image (alternative ou complément)
-  
-  -- Catégorisation
-  category text, -- Catégorie du communiqué (ex: "Création", "Tournée", "Presse", "Institutionnel")
+  -- Image externe (URLs)
+  image_url text, -- URL externe vers une image (alternative aux médias stockés)
   
   -- Relations avec autres entités (optionnel)
   spectacle_id bigint references public.spectacles(id) on delete set null,
@@ -41,10 +34,7 @@ create table public.communiques_presse (
 comment on table public.communiques_presse is 'Communiqués de presse professionnels téléchargeables pour l''espace presse';
 comment on column public.communiques_presse.title is 'Titre du communiqué (harmonisé avec articles_presse)';
 comment on column public.communiques_presse.description is 'Description/résumé affiché dans la liste et kit média';
-comment on column public.communiques_presse.document_pdf_media_id is 'Référence obligatoire vers le PDF dans la table medias';
-comment on column public.communiques_presse.image_media_id is 'Image de couverture/illustration du communiqué';
-comment on column public.communiques_presse.image_url is 'URL externe vers une image (alternative ou complément à image_media_id)';
-comment on column public.communiques_presse.category is 'Catégorie du communiqué (ex: Création, Tournée, Presse, Institutionnel)';
+comment on column public.communiques_presse.image_url is 'URL externe vers une image (alternative aux médias stockés)';
 comment on column public.communiques_presse.ordre_affichage is 'Ordre d''affichage personnalisé dans le kit média (0 = premier)';
 comment on column public.communiques_presse.file_size_bytes is 'Taille du fichier pour affichage utilisateur (ex: "312 KB")';
 
@@ -150,11 +140,10 @@ select
   cp.description,
   cp.date_publication,
   cp.ordre_affichage,
-  cp.category,
   cp.spectacle_id,
   cp.evenement_id,
-  -- Informations du PDF pour kit média
-  m.filename as pdf_filename,
+  -- Informations du PDF principal (ordre = -1)
+  pdf_m.filename as pdf_filename,
   cp.file_size_bytes,
   case 
     when cp.file_size_bytes is not null then 
@@ -163,13 +152,14 @@ select
         when cp.file_size_bytes < 1048576 then round(cp.file_size_bytes / 1024.0, 1)::text || ' KB'
         else round(cp.file_size_bytes / 1048576.0, 1)::text || ' MB'
       end
-    else m.size_bytes::text
+    else pdf_m.size_bytes::text
   end as file_size_display,
-  m.storage_path as pdf_path,
+  pdf_m.storage_path as pdf_path,
   -- URL public pour téléchargement (via Supabase Storage)
-  concat('/storage/v1/object/public/', m.storage_path) as file_url,
+  concat('/storage/v1/object/public/', pdf_m.storage_path) as file_url,
   -- Informations image d'illustration
   cp.image_url,
+  cm.ordre as image_ordre,
   im.filename as image_filename,
   im.storage_path as image_path,
   concat('/storage/v1/object/public/', im.storage_path) as image_file_url,
@@ -181,8 +171,10 @@ select
   array_agg(distinct c.name) filter (where c.name is not null) as categories,
   array_agg(distinct t.name) filter (where t.name is not null) as tags
 from public.communiques_presse cp
-inner join public.medias m on cp.document_pdf_media_id = m.id
-left join public.medias im on cp.image_media_id = im.id
+left join public.communiques_medias pdf_cm on cp.id = pdf_cm.communique_id and pdf_cm.ordre = -1 -- PDF principal
+left join public.medias pdf_m on pdf_cm.media_id = pdf_m.id
+left join public.communiques_medias cm on cp.id = cm.communique_id and cm.ordre = 0 -- Image principale
+left join public.medias im on cm.media_id = im.id
 left join public.spectacles s on cp.spectacle_id = s.id
 left join public.evenements e on cp.evenement_id = e.id
 left join public.lieux l on e.lieu_id = l.id
@@ -191,8 +183,8 @@ left join public.categories c on cc.category_id = c.id and c.is_active = true
 left join public.communiques_tags ct on cp.id = ct.communique_id
 left join public.tags t on ct.tag_id = t.id
 where cp.public = true
-group by cp.id, cp.category, m.filename, m.size_bytes, m.storage_path, 
-         im.filename, im.storage_path, cp.image_url,
+group by cp.id, pdf_m.filename, pdf_m.size_bytes, pdf_m.storage_path, 
+         cm.ordre, im.filename, im.storage_path, cp.image_url,
          s.title, e.date_debut, l.nom
 order by cp.ordre_affichage asc, cp.date_publication desc;
 
@@ -209,10 +201,9 @@ select
   cp.date_publication,
   cp.public,
   cp.ordre_affichage,
-  cp.category,
   -- PDF info
-  m.filename as pdf_filename,
-  round(coalesce(cp.file_size_bytes, m.size_bytes) / 1024.0, 2) as pdf_size_kb,
+  pdf_m.filename as pdf_filename,
+  round(coalesce(cp.file_size_bytes, pdf_m.size_bytes) / 1024.0, 2) as pdf_size_kb,
   -- Image info
   cp.image_url,
   im.filename as image_filename,
@@ -227,14 +218,16 @@ select
   count(cc.category_id) as nb_categories,
   count(ct.tag_id) as nb_tags
 from public.communiques_presse cp
-inner join public.medias m on cp.document_pdf_media_id = m.id
-left join public.medias im on cp.image_media_id = im.id
+left join public.communiques_medias pdf_cm on cp.id = pdf_cm.communique_id and pdf_cm.ordre = -1 -- PDF principal
+left join public.medias pdf_m on pdf_cm.media_id = pdf_m.id
+left join public.communiques_medias cm on cp.id = cm.communique_id and cm.ordre = 0 -- Image principale
+left join public.medias im on cm.media_id = im.id
 left join public.spectacles s on cp.spectacle_id = s.id
 left join public.evenements e on cp.evenement_id = e.id
 left join public.profiles p on cp.created_by = p.user_id
 left join public.communiques_categories cc on cp.id = cc.communique_id
 left join public.communiques_tags ct on cp.id = ct.communique_id
-group by cp.id, cp.category, m.filename, m.size_bytes, im.filename, cp.image_url,
+group by cp.id, pdf_m.filename, pdf_m.size_bytes, im.filename, cp.image_url,
          s.title, e.date_debut, p.display_name
 order by cp.created_at desc;
 

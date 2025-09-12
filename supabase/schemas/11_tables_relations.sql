@@ -46,6 +46,18 @@ create table public.communiques_tags (
   primary key (communique_id, tag_id)
 );
 
+-- Liaison communiqués <-> medias (nutilise la table médias existante)
+drop table if exists public.communiques_medias cascade;
+create table public.communiques_medias (
+  communique_id bigint not null references public.communiques_presse(id) on delete cascade,
+  media_id bigint not null references public.medias(id) on delete cascade,
+  ordre smallint default 0, -- Ordre d'affichage. Convention : -1 = PDF principal, 0+ = images/autres médias
+  primary key (communique_id, media_id)
+);
+
+comment on table public.communiques_medias is 'Relation many-to-many entre communiqués et médias. Ordre -1 pour le PDF principal obligatoire.';
+comment on column public.communiques_medias.ordre is 'Ordre d''affichage : -1 = PDF principal, 0 = image principale, 1+ = médias secondaires';
+
 -- ===== ROW LEVEL SECURITY POUR TABLES DE RELATIONS =====
 
 -- Spectacles membres équipe relations
@@ -97,6 +109,30 @@ using ( true );
 drop policy if exists "Admins can manage article media relations" on public.articles_medias;
 create policy "Admins can manage article media relations"
 on public.articles_medias
+for all
+to authenticated
+using ( (select public.is_admin()) )
+with check ( (select public.is_admin()) );
+
+-- Communiques medias relations
+alter table public.communiques_medias enable row level security;
+
+drop policy if exists "Press release media relations follow parent visibility" on public.communiques_medias;
+create policy "Press release media relations follow parent visibility"
+on public.communiques_medias
+for select
+to anon, authenticated
+using ( 
+  exists (
+    select 1 from public.communiques_presse cp 
+    where cp.id = communique_id 
+    and (cp.public = true or (select public.is_admin()))
+  )
+);
+
+drop policy if exists "Admins can manage press release media relations" on public.communiques_medias;
+create policy "Admins can manage press release media relations"
+on public.communiques_medias
 for all
 to authenticated
 using ( (select public.is_admin()) )
