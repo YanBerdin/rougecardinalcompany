@@ -25,7 +25,7 @@ export function useContact() {
     lastName: '',
     email: '',
     phone: '',
-    subject: '',
+    subject: '', //TODO redondant avec reason
     reason: '',
     message: '',
     consent: false
@@ -43,10 +43,10 @@ export function useContact() {
     setIsLoading(true);
 
     try {
-      // Simuler un appel API
+      // Simuler un appel API (skeleton testing)
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Dans un cas réel, on enverrait les données à une API (Supabase, etc.)
+
+      // Envoyer les données à une API (Supabase, etc.)
       setIsSubmitted(true);
     } catch (error) {
       console.error("Erreur lors de l'envoi du formulaire", error);
@@ -62,8 +62,8 @@ export function useContact() {
     try {
       // Simuler un appel API
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Dans un cas réel, on enverrait les données à une API
+
+      // todo Envoie des données à une API
       setIsNewsletterSubscribed(true);
       setNewsletterEmail('');
     } catch (error) {
@@ -88,7 +88,7 @@ export function useContact() {
       lastName: '',
       email: '',
       phone: '',
-      subject: '',
+      subject: '', //TODO redondant avec reason
       reason: '',
       message: '',
       consent: false

@@ -3,6 +3,7 @@ import { Users, Heart, Award, Target } from 'lucide-react';
 import { Value, TeamMember } from './types';
 
 // Mock des valeurs de la compagnie
+//  table_compagnie
 const valuesData: Value[] = [
   {
     icon: Heart,
@@ -33,7 +34,8 @@ const teamData: TeamMember[] = [
     name: 'Marie Dubois',
     role: 'Directrice artistique',
     bio: 'Formée au Conservatoire National, Marie dirige la compagnie depuis sa création avec une vision moderne du théâtre classique.',
-    image: 'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=300'
+    image: 'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=300', // photo_media_id
+    // image_url: 'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=300',
   },
   {
     name: 'Jean Martin',
@@ -55,7 +57,7 @@ const teamData: TeamMember[] = [
   }
 ];
 
-// Hook personnalisé pour récupérer les données de la compagnie
+// Hook pour récupérer les données de la compagnie
 //TODO useFetchCompagnieData
 export const useCompagnieData = () => {
   const [values, setValues] = useState<Value[]>([]);
@@ -63,13 +65,11 @@ export const useCompagnieData = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulation d'un appel API avec un délai
+    // Simulation appel API (skeleton testing)
     const fetchData = async () => {
       try {
-        // Temps de chargement simulé
         await new Promise(resolve => setTimeout(resolve, 1200));
         
-        // Mise à jour des données (à terme, ce sera un appel API réel)
         setValues(valuesData);
         setTeam(teamData);
       } catch (error) {

@@ -13,7 +13,7 @@ create table public.spectacles (
   duration_minutes integer,
   cast integer,
   premiere timestamptz null,
-  image_url text, -- URL externe vers une image (alternative ou complément)
+  image_url text, -- URL externe vers une image alternative)
   public boolean default true,
   awards text,
   created_by uuid null,

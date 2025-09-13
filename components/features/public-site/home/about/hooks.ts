@@ -5,6 +5,7 @@ import { Users, Heart, Award } from 'lucide-react';
 import { StatItem } from './types';
 
 // Données statistiques pour la section À propos
+// table_compagnie
 const aboutStats: StatItem[] = [
   { icon: Users, value: '15+', label: 'Années d\'expérience' },
   { icon: Heart, value: '50+', label: 'Spectacles créés' },
@@ -21,7 +22,7 @@ export function useAbout() {
         // Simuler un appel API avec un délai
         await new Promise(resolve => setTimeout(resolve, 1200)); //TODO: remove
         
-        // Dans un cas réel, on pourrait récupérer ces données depuis Supabase
+        // Récupérer ces données depuis Supabase
         setStats(aboutStats);
       } catch (error) {
         console.error("Erreur lors de la récupération des données", error);

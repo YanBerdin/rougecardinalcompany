@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { CurrentShow, ArchivedShow } from './types';
 
 // Mock des spectacles actuels
-// == 06_table_spectacles
+// 06_table_spectacles
+// spectacles_medias → many-2-many
 const currentShowsData = [
     {
         id: 1,
@@ -12,7 +13,8 @@ const currentShowsData = [
         duration_minutes: "1h30",
         cast: 4,
         premiere: "2023-10-15",
-        image: "https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=600",
+        image: "https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=600", // (spectacles_medias)
+        image_url: "https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=600",
         status: "En tournée",
         awards: ["Nominé aux Molières 2024"]
     },
@@ -85,7 +87,7 @@ export const useSpectaclesData = () => {
                 // Temps de chargement simulé
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
-                // Mise à jour des données (à terme, ce sera un appel API réel)
+                // Mise à jour des données (todo appel API)
                 setCurrentShows(
                     currentShowsData.map(show => ({
                         ...show,

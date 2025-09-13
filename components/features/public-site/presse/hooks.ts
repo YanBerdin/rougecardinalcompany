@@ -5,9 +5,9 @@ import { Image as ImageIcon, FileText, Video } from "lucide-react";
 import { PressRelease, MediaArticle, MediaKitItem } from "./types";
 import { PresseSkeleton } from "@/components/skeletons/presse-skeleton";
 
-// Communiqués de presse
-// == newsData
-// == 08b_table__communiques_presse.sql
+// Communiqués de presse pressReleasesData[]== newsData[]
+// 08b_table__communiques_presse.sql
+// communiques_medias → many-2-many
 const pressReleasesData = [
   {
     id: 1,
@@ -15,8 +15,8 @@ const pressReleasesData = [
     date: "2024-01-15",
     description:
       "La compagnie Rouge-Cardinal nominée dans la catégorie Meilleur Spectacle d'Auteur Contemporain.",
-    fileUrl: "/docs/cp-molieres-2024.pdf",
-    fileSize: "245 KB",
+    fileUrl: "/docs/cp-molieres-2024.pdf", // storage_path (communiques_medias)
+    fileSize: "245 KB", // size_bytes (communiques_medias)
   },
   {
     id: 2,
@@ -38,7 +38,7 @@ const pressReleasesData = [
   },
 ];
 
-// Revue de Presse (Table articles_presse)
+// Revue de Presse (08b_table_articles_presse)
 const mediaArticlesData = [
   {
     id: 1,
@@ -118,7 +118,7 @@ export function usePresse() {
   const [mediaKit, setMediaKit] = useState<MediaKitItem[]>([]);
 
   useEffect(() => {
-    // Simulation d'un appel API //TODO: remove
+    // Simulation d'un appel API (skeleton testing) //TODO: remove
     const fetchData = async () => {
       try {
         // Simule une latence réseau //TODO: remove

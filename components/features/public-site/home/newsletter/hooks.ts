@@ -8,6 +8,7 @@ export function useNewsletter() {
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
+  // Simulation appel API (skeleton testing)
   useEffect(() => { //TODO: remove 
     const timer = setTimeout(() => {
       setIsInitialLoading(false);
@@ -25,10 +26,10 @@ export function useNewsletter() {
     setIsLoading(true);
 
     try {
-      // Simuler un appel API pour l'inscription à la newsletter
+      // Simuler appel API pour inscription à newsletter
       await new Promise(resolve => setTimeout(resolve, 1000)); //TODO: remove
       
-      // Dans un cas réel, nous enverrions les données à Supabase ou une autre API
+      // Envoyerles données à Supabase ou une autre API
       setIsSubscribed(true);
       setEmail('');
     } catch (error) {

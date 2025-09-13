@@ -6,7 +6,7 @@ create table public.communiques_presse (
   id bigint generated always as identity primary key,
   title text not null, -- Harmonisé avec articles_presse
   slug text,
-  description text, -- Résumé/description (cohérent avec types TS)
+  description text, -- Résumé/description 
   date_publication date not null,
   
   -- Image externe (URLs)

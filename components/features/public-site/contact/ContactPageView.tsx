@@ -152,7 +152,7 @@ export function ContactPageView({
                                                 </SelectContent>
                                             </Select>
                                         </div>
-
+                                        {/*
                                         <div>
                                             <label htmlFor="subject" className="block text-sm font-medium mb-2">
                                                 Sujet *
@@ -164,7 +164,7 @@ export function ContactPageView({
                                                 onChange={(e) => onInputChange('subject', e.target.value)}
                                             />
                                         </div>
-
+                                        */}
                                         <div>
                                             <label htmlFor="message" className="block text-sm font-medium mb-2">
                                                 Message *
