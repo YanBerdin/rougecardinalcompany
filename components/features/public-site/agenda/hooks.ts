@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Event, EventType } from './types';
 
-// Données des événements (à terme, ces données seront issues d'une API)
+// Mock des événements 
+// == 07_table_evenements
 const eventsData: Event[] = [
     {
         id: 1,
@@ -9,7 +10,7 @@ const eventsData: Event[] = [
         date: "2024-02-15",
         time: "20h30",
         venue: "Théâtre de la Ville",
-        address: "2 Place du Châtelet, 75004 Paris",
+        address: "2 Place du Châtelet, 75004 Paris", // adress + zip_code + city
         type: "Spectacle",
         status: "Bientôt complet",
         ticketUrl: "https://billetterie.theatredelaville.com",
@@ -94,13 +95,13 @@ export const useAgendaData = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Simulation d'un appel API avec un délai
-        const fetchData = async () => {
+        // Simulation appel API avec un délai (skeleton)
+        const fetchData = async () => {//TODO: remove
             try {
                 // Temps de chargement simulé
                 await new Promise(resolve => setTimeout(resolve, 1200));
                 
-                // Mise à jour des données (à terme, ce sera un appel API réel)
+                // Mise à jour des données (à terme, appel API)
                 setEvents(eventsData);
                 setEventTypes(eventTypesData);
             } catch (error) {

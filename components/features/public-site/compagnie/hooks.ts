@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Users, Heart, Award, Target } from 'lucide-react';
 import { Value, TeamMember } from './types';
 
-// Données des valeurs de la compagnie
+// Mock des valeurs de la compagnie
 const valuesData: Value[] = [
   {
     icon: Heart,
@@ -26,7 +26,8 @@ const valuesData: Value[] = [
   }
 ];
 
-// Données des membres de l'équipe
+// Mock des membres de l'équipe
+// 04_table_membres_equipe
 const teamData: TeamMember[] = [
   {
     name: 'Marie Dubois',
@@ -55,6 +56,7 @@ const teamData: TeamMember[] = [
 ];
 
 // Hook personnalisé pour récupérer les données de la compagnie
+//TODO useFetchCompagnieData
 export const useCompagnieData = () => {
   const [values, setValues] = useState<Value[]>([]);
   const [team, setTeam] = useState<TeamMember[]>([]);

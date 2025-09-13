@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Show } from './types';
 
 // Données mockées pour les spectacles
+// 06_table_spectacles
 const showsData: Show[] = [
   {
     id: 1,

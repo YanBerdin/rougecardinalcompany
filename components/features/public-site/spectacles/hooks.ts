@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { CurrentShow, ArchivedShow } from './types';
 
-// Données des spectacles actuels (à terme, ces données seront issues d'une API)
+// Mock des spectacles actuels
+// == 06_table_spectacles
 const currentShowsData = [
     {
         id: 1,
@@ -29,7 +30,8 @@ const currentShowsData = [
     }
 ];
 
-// Données des spectacles archivés (à terme, ces données seront issues d'une API)
+// Mock des spectacles archivés
+// 06_table_spectacles
 const archivedShowsData = [
     {
         id: 3,
@@ -69,7 +71,8 @@ const archivedShowsData = [
     }
 ];
 
-// Hook personnalisé pour récupérer les données des spectacles
+// Hook personnalisé pour fetch les données des spectacles
+//TODO refactor useFetchSpectaclesData
 export const useSpectaclesData = () => {
     const [currentShows, setCurrentShows] = useState<CurrentShow[]>([]);
     const [archivedShows, setArchivedShows] = useState<ArchivedShow[]>([]);

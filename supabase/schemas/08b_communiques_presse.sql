@@ -183,13 +183,17 @@ left join public.categories c on cc.category_id = c.id and c.is_active = true
 left join public.communiques_tags ct on cp.id = ct.communique_id
 left join public.tags t on ct.tag_id = t.id
 where cp.public = true
+  and exists ( -- S'assurer que le communiqué a un PDF principal
+    select 1 from public.communiques_medias pdf_check 
+    where pdf_check.communique_id = cp.id and pdf_check.ordre = -1
+  )
 group by cp.id, pdf_m.filename, pdf_m.size_bytes, pdf_m.storage_path, 
          cm.ordre, im.filename, im.storage_path, cp.image_url,
          s.title, e.date_debut, l.nom
 order by cp.ordre_affichage asc, cp.date_publication desc;
 
 comment on view public.communiques_presse_public is 
-'Vue publique optimisée pour l''espace presse professionnel avec URLs de téléchargement, images et catégories';
+'Vue publique optimisée pour l''espace presse professionnel avec URLs de téléchargement, images et catégories. Exclut les communiqués sans PDF principal.';
 
 -- Vue dashboard admin pour gestion
 create or replace view public.communiques_presse_dashboard as

@@ -38,7 +38,7 @@ supabase/schemas/
 ├── 06_table_spectacles.sql        # Table des spectacles + RLS
 ├── 07_table_evenements.sql        # Table des événements + RLS
 ├── 08_table_articles_presse.sql   # Table articles presse + RLS
-├── 08b_communiques_presse.sql     # Table communiqués presse + RLS + contacts presse
+├── 08b_table__communiques_presse.sql     # Table communiqués presse + RLS + contacts presse
 ├── 09_table_partners.sql          # Table des partenaires + RLS
 ├── 10_tables_system.sql           # Tables système + RLS (config, logs, newsletter, contact)
 ├── 11_tables_relations.sql        # Tables de liaison many-to-many + RLS
@@ -51,7 +51,7 @@ supabase/schemas/
 ├── 21_functions_auth_sync.sql     # Fonctions sync auth.users
 ├── 30_triggers.sql                # Déclencheurs (audit, search, update_at)
 ├── 40_indexes.sql                 # Index et optimisations RLS
-├── 50_constraints.sql             # Contraintes et validations
+├── 50_constraints.sql             # Contraintes et validations (PDF obligatoire, formats URL)
 ├── 60_rls_profiles.sql            # Politiques RLS pour profils
 ├── 61_rls_main_tables.sql         # Politiques RLS tables principales
 ├── 62_rls_advanced_tables.sql     # Politiques RLS tables avancées

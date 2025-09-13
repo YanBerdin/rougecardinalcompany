@@ -55,8 +55,8 @@ create table public.communiques_medias (
   primary key (communique_id, media_id)
 );
 
-comment on table public.communiques_medias is 'Relation many-to-many entre communiqués et médias. Ordre -1 pour le PDF principal obligatoire.';
-comment on column public.communiques_medias.ordre is 'Ordre d''affichage : -1 = PDF principal, 0 = image principale, 1+ = médias secondaires';
+comment on table public.communiques_medias is 'Relation many-to-many entre communiqués et médias. Ordre -1 pour le PDF principal obligatoire. CONTRAINTE : Chaque communiqué doit avoir exactement un PDF principal (ordre = -1).';
+comment on column public.communiques_medias.ordre is 'Ordre d''affichage : -1 = PDF principal (obligatoire et unique), 0 = image principale, 1+ = médias secondaires';
 
 -- ===== ROW LEVEL SECURITY POUR TABLES DE RELATIONS =====
 

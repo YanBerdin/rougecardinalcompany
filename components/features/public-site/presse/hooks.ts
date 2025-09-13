@@ -7,7 +7,7 @@ import { PresseSkeleton } from "@/components/skeletons/presse-skeleton";
 
 // Communiqués de presse
 // == newsData
-// == 08b_communiques_presse.sql
+// == 08b_table__communiques_presse.sql
 const pressReleasesData = [
   {
     id: 1,

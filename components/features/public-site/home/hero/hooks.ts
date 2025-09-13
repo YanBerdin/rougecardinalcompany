@@ -3,7 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { HeroSlide } from './types';
 
-// Données mockées pour le hero
+// Mock pour le slide de la page d'accueil
+//TODO créer table pour les CTA du slide De Page d'accueil
+//TODO refactor heroSlideCta[]
 const heroSlides: HeroSlide[] = [
   {
     title: "L'Art de Raconter",
@@ -34,10 +36,9 @@ export function useHero() {
   useEffect(() => {
     const fetchHeroData = async () => {
       try {
-        // Simuler un appel API avec un délai
+        // Simuler un appel API avec délai => skeleton
         await new Promise(resolve => setTimeout(resolve, 1500)); //TODO: remove
         
-        // Dans un cas réel, on pourrait récupérer ces données depuis Supabase
         setSlides(heroSlides);
       } catch (error) {
         console.error("Erreur lors de la récupération des données du hero", error);

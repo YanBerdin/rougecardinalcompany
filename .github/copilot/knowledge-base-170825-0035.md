@@ -678,6 +678,12 @@ create table public.communiques_medias (
 ```
 
 - **Convention d'ordre** : `-1` = PDF principal obligatoire, `0` = image principale, `1+` = médias secondaires
+- **Contraintes d'intégrité** : 
+  - Chaque communiqué doit avoir **exactement un PDF principal** (ordre = -1)
+  - Trigger `check_communique_has_pdf()` empêche la suppression du dernier PDF principal
+  - Trigger empêche les doublons de PDF principal
+  - Contrainte CHECK réserve l'ordre -1 aux PDFs uniquement
+  - Fonction `validate_communique_creation()` pour validation applicative
 
 #### Table: `partners`
 
@@ -873,6 +879,23 @@ comment on column public.sitemap_entries.change_frequency is 'Fréquence de mise
 - `idx_spectacles_search` sur `spectacles(search_vector)` pour recherche plein texte
 - `idx_articles_search` sur `articles_presse(search_vector)` pour recherche plein texte
 - `idx_spectacles_title_trgm` et `idx_articles_title_trgm` pour recherche fuzzy avec pg_trgm
+
+#### Contraintes d'intégrité métier
+
+**Contraintes de validation des communiqués de presse :**
+- Chaque communiqué de presse doit avoir un document PDF principal (ordre = -1)
+- Contrainte appliquée via trigger `check_communique_has_pdf()` sur les opérations CRUD
+- Validation automatique lors de la création/modification des relations `communiques_medias`
+
+**Contraintes de format :**
+- URLs des partenaires : format http/https validé par expression régulière
+- Ordre d'affichage : valeurs positives uniquement
+- Adresses email : format validé dans les profils utilisateurs
+
+**Contraintes métier spécifiques :**
+- Les médias de type PDF avec ordre -1 sont automatiquement marqués comme "principal"
+- Les événements récurrents maintiennent une hiérarchie cohérente (parent/enfant)
+- Les catégories respectent la hiérarchie avec validation des références circulaires
 
 ---
 
@@ -1850,7 +1873,7 @@ Tous les objets du schéma sont organisés dans le répertoire `supabase/schemas
 - `06_table_spectacles.sql` - Spectacles et productions + RLS
 - `07_table_evenements.sql` - Événements programmés + RLS
 - `08_table_articles_presse.sql` - Articles de presse + RLS
-- `08b_communiques_presse.sql` - Communiqués presse + contacts presse + RLS
+- `08b_table__communiques_presse.sql` - Communiqués presse + contacts presse + RLS
 - `09_table_partners.sql` - Partenaires de la compagnie + RLS
 - `10_tables_system.sql` - Tables système + RLS (configurations, logs, newsletter, contact)
 - `11_tables_relations.sql` - Tables de liaison many-to-many + RLS
