@@ -61,6 +61,7 @@ export function useContact() {
 
     try {
       // Simuler un appel API
+      // https://supabase.com/docs/reference/javascript/db-abortsignal
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       // todo Envoie des données à une API

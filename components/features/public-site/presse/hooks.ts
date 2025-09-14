@@ -87,13 +87,15 @@ const mediaArticlesData = [
 ];
 
 // Kit média téléchargeable
+// TODO: 08b_table_kit_media
+//  kit_media → many-2-many kit_media_medias
 const mediaKitData = [
   {
     type: "Photos haute définition",
     description: "Portraits de l'équipe et photos de spectacles",
     icon: ImageIcon,
-    fileSize: "45 MB",
-    fileUrl: "/media/photos-hd.zip",
+    fileSize: "45 MB", //? size_bytes (kit_media_medias) => calc() ?
+    fileUrl: "/media/photos-hd.zip", //? storage_path (kit_media_medias)
   },
   {
     type: "Dossier de presse complet",
@@ -117,6 +119,7 @@ export function usePresse() {
   const [mediaArticles, setMediaArticles] = useState<MediaArticle[]>([]);
   const [mediaKit, setMediaKit] = useState<MediaKitItem[]>([]);
 
+  // https://supabase.com/docs/reference/javascript/db-abortsignal
   useEffect(() => {
     // Simulation d'un appel API (skeleton testing) //TODO: remove
     const fetchData = async () => {

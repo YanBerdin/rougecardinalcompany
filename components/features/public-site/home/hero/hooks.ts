@@ -34,6 +34,7 @@ export function useHero() {
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    // https://supabase.com/docs/reference/javascript/db-abortsignal
     const fetchHeroData = async () => {
       try {
         // Simuler un appel API avec délai => skeleton

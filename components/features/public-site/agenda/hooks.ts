@@ -96,6 +96,7 @@ export const useAgendaData = () => {
 
     useEffect(() => {
         // Simulation appel API avec un délai (skeleton)
+        // https://supabase.com/docs/reference/javascript/db-abortsignal
         const fetchData = async () => {//TODO: remove
             try {
                 // Temps de chargement simulé

@@ -75,13 +75,15 @@ const archivedShowsData = [
 
 // Hook personnalisé pour fetch les données des spectacles
 //TODO refactor useFetchSpectaclesData
+// https://supabase.com/docs/reference/javascript/db-abortsignal
 export const useSpectaclesData = () => {
     const [currentShows, setCurrentShows] = useState<CurrentShow[]>([]);
     const [archivedShows, setArchivedShows] = useState<ArchivedShow[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Simulation d'un appel API avec un délai
+        // Simulation d'un appel API avec un délai (skeleton testing) //TODO: remove
+        // https://supabase.com/docs/reference/javascript/db-abortsignal
         const fetchData = async () => {
             try {
                 // Temps de chargement simulé

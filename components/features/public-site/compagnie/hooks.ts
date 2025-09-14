@@ -66,6 +66,7 @@ export const useCompagnieData = () => {
 
   useEffect(() => {
     // Simulation appel API (skeleton testing)
+    // https://supabase.com/docs/reference/javascript/db-abortsignal
     const fetchData = async () => {
       try {
         await new Promise(resolve => setTimeout(resolve, 1200));

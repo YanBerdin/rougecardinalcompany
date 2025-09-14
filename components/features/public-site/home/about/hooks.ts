@@ -17,6 +17,7 @@ export function useAbout() {
   const [stats, setStats] = useState<StatItem[]>([]);
 
   useEffect(() => {
+    //https://supabase.com/docs/reference/javascript/db-abortsignal
     const fetchAboutData = async () => {
       try {
         // Simuler un appel API avec un délai
