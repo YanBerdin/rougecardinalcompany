@@ -12,6 +12,12 @@ create index if not exists idx_evenements_date_debut on public.evenements (date_
 create index if not exists idx_evenements_parent_event_id on public.evenements (parent_event_id);
 create index if not exists idx_evenements_recurrence_end_date on public.evenements (recurrence_end_date);
 
+-- Index pour nouveaux champs événements
+create index if not exists idx_evenements_start_time on public.evenements (start_time);
+create index if not exists idx_evenements_type_array on public.evenements using gin (type_array);
+create index if not exists idx_evenements_spectacle_date on public.evenements (spectacle_id, date_debut);
+create index if not exists idx_evenements_date_time on public.evenements (date_debut, start_time) where start_time is not null;
+
 -- Index trigram pour recherche fuzzy
 create index if not exists idx_spectacles_title_trgm on public.spectacles using gin (title gin_trgm_ops);
 create index if not exists idx_articles_title_trgm on public.articles_presse using gin (title gin_trgm_ops);

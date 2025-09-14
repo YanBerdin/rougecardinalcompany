@@ -462,6 +462,14 @@ create table public.evenements (
   recurrence_rule text,
   recurrence_end_date timestamptz,
   parent_event_id bigint references public.evenements(id) on delete cascade,
+  
+  -- Nouveaux champs pour billeterie et horaires détaillés
+  ticket_url text, -- URL vers la billetterie externe
+  image_url text, -- URL d'image pour l'événement spécifique
+  start_time time, -- Heure de début (complément à date_debut)
+  end_time time, -- Heure de fin (complément à date_fin ou durée)
+  type_array text[] default '{}', -- Tableau des types d'événements (spectacle, atelier, rencontre, etc.)
+  
   created_at timestamptz default now() not null,
   updated_at timestamptz default now() not null
 );
@@ -470,7 +478,24 @@ comment on table public.evenements is 'Séances programmées de spectacles, avec
 comment on column public.evenements.recurrence_rule is 'Règle de récurrence au format RRULE (RFC 5545)';
 comment on column public.evenements.recurrence_end_date is 'Date de fin de la récurrence';
 comment on column public.evenements.parent_event_id is 'Référence vers l''événement parent pour les occurrences générées';
+comment on column public.evenements.ticket_url is 'URL vers la billetterie externe ou système de réservation';
+comment on column public.evenements.image_url is 'URL d''image spécifique à cet événement (complément aux médias du spectacle)';
+comment on column public.evenements.start_time is 'Heure de début précise (complément à date_debut pour horaires)';
+comment on column public.evenements.end_time is 'Heure de fin précise (complément à date_fin ou calcul de durée)';
+comment on column public.evenements.type_array is 'Tableau des types d''événements : spectacle, première, atelier, rencontre, etc.';
 ```
+
+**Nouveaux champs 2025** :
+- `ticket_url` : Lien direct vers la billetterie ou système de réservation 
+- `image_url` : Image spécifique à l'événement (en plus des médias du spectacle)
+- `start_time` / `end_time` : Horaires précis pour compléter les dates
+- `type_array` : Types d'événements multiples (spectacle, première, atelier, rencontre, conférence, masterclass, etc.)
+
+**Contraintes de validation** :
+- Format URL validé pour `ticket_url` et `image_url`
+- `start_time` ≤ `end_time` quand les deux sont définis
+- Types d'événements limités à une liste prédéfinie
+- Support du versioning automatique pour traçabilité des modifications
 
 #### Table: `articles_presse`
 
@@ -871,6 +896,10 @@ comment on column public.sitemap_entries.change_frequency is 'Fréquence de mise
 - `idx_partners_created_by` sur `partners(created_by)` pour les requêtes d'ownership
 - `idx_evenements_date_debut` sur `evenements(date_debut)` pour le tri chronologique
 - `idx_evenements_parent_event_id` sur `evenements(parent_event_id)` pour les récurrences
+- `idx_evenements_start_time` sur `evenements(start_time)` pour tri par horaires
+- `idx_evenements_type_array` sur `evenements(type_array)` avec GIN pour requêtes sur types
+- `idx_evenements_spectacle_date` sur `evenements(spectacle_id, date_debut)` pour filtres combinés
+- `idx_evenements_date_time` sur `evenements(date_debut, start_time)` pour tri chronologique précis
 - `idx_categories_parent_id`, `idx_categories_slug`, `idx_categories_display_order` sur `categories`
 - `idx_tags_slug`, `idx_tags_usage_count`, `idx_tags_is_featured` sur `tags`
 - `idx_content_versions_entity`, `idx_content_versions_created_at` sur `content_versions`
@@ -889,12 +918,15 @@ comment on column public.sitemap_entries.change_frequency is 'Fréquence de mise
 
 **Contraintes de format :**
 - URLs des partenaires : format http/https validé par expression régulière
+- URLs des événements (ticket_url, image_url) : format http/https validé par expression régulière
 - Ordre d'affichage : valeurs positives uniquement
 - Adresses email : format validé dans les profils utilisateurs
+- Horaires événements : start_time ≤ end_time quand les deux sont définis
 
 **Contraintes métier spécifiques :**
 - Les médias de type PDF avec ordre -1 sont automatiquement marqués comme "principal"
 - Les événements récurrents maintiennent une hiérarchie cohérente (parent/enfant)
+- Types d'événements limités à une liste prédéfinie (spectacle, première, atelier, rencontre, conférence, etc.)
 - Les catégories respectent la hiérarchie avec validation des références circulaires
 
 ---
@@ -1721,6 +1753,14 @@ create trigger trg_spectacles_versioning
 create trigger trg_articles_versioning
   after insert or update on public.articles_presse
   for each row execute function public.articles_versioning_trigger();
+
+create trigger trg_communiques_versioning
+  after insert or update on public.communiques_presse
+  for each row execute function public.communiques_versioning_trigger();
+
+create trigger trg_evenements_versioning
+  after insert or update on public.evenements
+  for each row execute function public.evenements_versioning_trigger();
 ```
 
 ### 8.3. Column comments

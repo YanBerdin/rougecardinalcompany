@@ -216,6 +216,49 @@ begin
 end;
 $$;
 
+-- Trigger function pour les événements
+create or replace function public.evenements_versioning_trigger()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  change_summary_text text;
+  change_type_value text;
+  spectacle_title text;
+begin
+  -- Récupérer le titre du spectacle pour le résumé
+  select title into spectacle_title 
+  from public.spectacles 
+  where id = NEW.spectacle_id;
+  
+  if tg_op = 'INSERT' then
+    change_type_value := 'create';
+    change_summary_text := 'Création d''événement pour: ' || coalesce(spectacle_title, 'Spectacle #' || NEW.spectacle_id);
+  else
+    if OLD.status != NEW.status then
+      change_type_value := 'update';
+      change_summary_text := 'Changement de statut (' || OLD.status || ' → ' || NEW.status || ') pour: ' || coalesce(spectacle_title, 'Spectacle #' || NEW.spectacle_id);
+    else
+      change_type_value := 'update';
+      change_summary_text := 'Mise à jour d''événement pour: ' || coalesce(spectacle_title, 'Spectacle #' || NEW.spectacle_id);
+    end if;
+  end if;
+  
+  -- Créer la version
+  perform public.create_content_version(
+    'evenement',
+    NEW.id,
+    to_jsonb(NEW),
+    change_summary_text,
+    change_type_value
+  );
+  
+  return NEW;
+end;
+$$;
+
 -- Appliquer les triggers de versioning
 drop trigger if exists trg_spectacles_versioning on public.spectacles;
 create trigger trg_spectacles_versioning
@@ -231,6 +274,11 @@ drop trigger if exists trg_communiques_versioning on public.communiques_presse;
 create trigger trg_communiques_versioning
   after insert or update on public.communiques_presse
   for each row execute function public.communiques_versioning_trigger();
+
+drop trigger if exists trg_evenements_versioning on public.evenements;
+create trigger trg_evenements_versioning
+  after insert or update on public.evenements
+  for each row execute function public.evenements_versioning_trigger();
 
 -- Vue pour consulter facilement l'historique d'une entité
 create or replace view public.content_versions_detailed as
@@ -324,6 +372,30 @@ begin
       image_url = version_record.content_snapshot->>'image_url',
       updated_at = now()
       -- Note: Relations many-to-many (medias, categories, tags) non restaurées pour éviter incohérences
+    where id = version_record.entity_id;
+    
+    restore_success := found;
+    
+  elsif version_record.entity_type = 'evenement' then
+    update public.evenements
+    set 
+      spectacle_id = (version_record.content_snapshot->>'spectacle_id')::bigint,
+      lieu_id = (version_record.content_snapshot->>'lieu_id')::bigint,
+      date_debut = (version_record.content_snapshot->>'date_debut')::timestamptz,
+      date_fin = (version_record.content_snapshot->>'date_fin')::timestamptz,
+      capacity = (version_record.content_snapshot->>'capacity')::integer,
+      price_cents = (version_record.content_snapshot->>'price_cents')::integer,
+      status = version_record.content_snapshot->>'status',
+      ticket_url = version_record.content_snapshot->>'ticket_url',
+      image_url = version_record.content_snapshot->>'image_url',
+      start_time = (version_record.content_snapshot->>'start_time')::time,
+      end_time = (version_record.content_snapshot->>'end_time')::time,
+      type_array = array(select jsonb_array_elements_text(version_record.content_snapshot->'type_array')),
+      metadata = version_record.content_snapshot->'metadata',
+      recurrence_rule = version_record.content_snapshot->>'recurrence_rule',
+      recurrence_end_date = (version_record.content_snapshot->>'recurrence_end_date')::timestamptz,
+      parent_event_id = (version_record.content_snapshot->>'parent_event_id')::bigint,
+      updated_at = now()
     where id = version_record.entity_id;
     
     restore_success := found;

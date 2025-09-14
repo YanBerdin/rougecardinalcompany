@@ -43,6 +43,47 @@ alter table public.evenements
 add constraint if not exists check_no_self_parent 
 check (parent_event_id != id or parent_event_id is null);
 
+-- ===== CONTRAINTES POUR EVENEMENTS - NOUVEAUX CHAMPS =====
+
+-- Contraintes de validation pour ticket_url (format URL)
+alter table public.evenements 
+add constraint if not exists check_ticket_url_format 
+check (ticket_url is null or ticket_url ~* '^https?://.*$');
+
+-- Contraintes de validation pour image_url (format URL)
+alter table public.evenements 
+add constraint if not exists check_image_url_format 
+check (image_url is null or image_url ~* '^https?://.*$');
+
+-- Contrainte pour s'assurer que start_time <= end_time quand les deux sont définis
+alter table public.evenements 
+add constraint if not exists check_start_end_time_order 
+check (start_time is null or end_time is null or start_time <= end_time);
+
+-- Contrainte pour valider les types d'événements
+alter table public.evenements 
+add constraint if not exists check_valid_event_types 
+check (
+  type_array is null or 
+  array_length(type_array, 1) is null or
+  (
+    array_length(type_array, 1) > 0 and
+    not exists (
+      select 1 from unnest(type_array) as t(type)
+      where t.type not in (
+        'spectacle', 'première', 'premiere', 'atelier', 'workshop',
+        'rencontre', 'conference', 'masterclass', 'répétition', 'repetition',
+        'audition', 'casting', 'formation', 'residency', 'résidence'
+      )
+    )
+  )
+);
+
+comment on constraint check_ticket_url_format on public.evenements is 'URL de billetterie doit être au format http/https';
+comment on constraint check_image_url_format on public.evenements is 'URL d''image doit être au format http/https';
+comment on constraint check_start_end_time_order on public.evenements is 'L''heure de début doit être antérieure à l''heure de fin';
+comment on constraint check_valid_event_types on public.evenements is 'Types d''événements limités à une liste prédéfinie';
+
 -- ===== CONTRAINTES POUR COMMUNIQUES DE PRESSE =====
 
 -- Fonction pour vérifier qu'un communiqué a un PDF principal

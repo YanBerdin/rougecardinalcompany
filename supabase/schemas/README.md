@@ -36,7 +36,7 @@ supabase/schemas/
 ├── 04_table_membres_equipe.sql    # Table membres équipe + RLS
 ├── 05_table_lieux.sql             # Table des lieux + RLS
 ├── 06_table_spectacles.sql        # Table des spectacles + RLS
-├── 07_table_evenements.sql        # Table des événements + RLS
+├── 07_table_evenements.sql        # Table des événements + RLS (billeterie, horaires, types)
 ├── 08_table_articles_presse.sql   # Table articles presse + RLS
 ├── 08b_table__communiques_presse.sql     # Table communiqués presse + RLS + contacts presse
 ├── 09_table_partners.sql          # Table des partenaires + RLS
@@ -45,13 +45,13 @@ supabase/schemas/
 ├── 12_evenements_recurrence.sql   # Gestion de récurrence événements + RLS
 ├── 13_analytics_events.sql        # Table analytics événements + RLS
 ├── 14_categories_tags.sql         # Système de catégories et tags + RLS
-├── 15_content_versioning.sql      # Système de versioning du contenu + RLS
+├── 15_content_versioning.sql      # Système de versioning du contenu + RLS (spectacles, articles, communiqués, événements)
 ├── 16_seo_metadata.sql            # Métadonnées SEO et redirections + RLS
 ├── 20_functions_core.sql          # Fonctions utilitaires (is_admin, generate_slug, etc.)
 ├── 21_functions_auth_sync.sql     # Fonctions sync auth.users
 ├── 30_triggers.sql                # Déclencheurs (audit, search, update_at)
 ├── 40_indexes.sql                 # Index et optimisations RLS
-├── 50_constraints.sql             # Contraintes et validations (PDF obligatoire, formats URL)
+├── 50_constraints.sql             # Contraintes et validations (PDF obligatoire, formats URL, types événements)
 ├── 60_rls_profiles.sql            # Politiques RLS pour profils
 ├── 61_rls_main_tables.sql         # Politiques RLS tables principales
 ├── 62_rls_advanced_tables.sql     # Politiques RLS tables avancées
