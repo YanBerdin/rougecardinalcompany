@@ -275,12 +275,12 @@ Le schéma déclaratif Rouge Cardinal Company est **production-ready** avec :
 ### Vue Administration Membres
 
 La vue `public.membres_equipe_admin` expose:
-- Métadonnées membres (`nom`, `role`, `ordre`, `active`)
+- Métadonnées membres (`name`, `role`, `ordre`, `active`)
 - Informations versioning: `last_version_number`, `last_change_type`, `last_version_created_at`, `total_versions`
 
 Usage côté API / dashboard:
 ```sql
-select * from public.membres_equipe_admin order by ordre, nom;
+select * from public.membres_equipe_admin order by ordre, name;
 ```
 
 ### Contrainte image_url stricte

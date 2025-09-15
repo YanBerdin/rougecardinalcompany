@@ -385,7 +385,7 @@ comment on column public.medias.storage_path is 'storage provider path (bucket/k
 drop table if exists public.membres_equipe cascade;
 create table public.membres_equipe (
   id bigint generated always as identity primary key,
-  nom text not null,
+  name text not null,
   role text,
   description text,
   image_url text, -- URL d'image externe optionnelle (complément à photo_media_id)
@@ -406,7 +406,7 @@ comment on column public.membres_equipe.image_url is 'URL externe de l''image du
 
 **Versioning & Restauration:**
 - Entité couverte par trigger `trg_membres_equipe_versioning` (création + update).
-- Support de restauration via `restore_content_version()` (branche `membre_equipe` ajoutée) réappliquant: `nom, role, description, image_url, photo_media_id, ordre, active`.
+- Support de restauration via `restore_content_version()` (branche `membre_equipe` ajoutée) réappliquant: `name, role, description, image_url, photo_media_id, ordre, active` (fallback legacy ancien snapshot `nom` pris en charge).
 - Une version supplémentaire `change_type = 'restore'` est créée après une restauration réussie.
 
 **Vue d'administration (nouvelle):**
@@ -414,7 +414,7 @@ comment on column public.membres_equipe.image_url is 'URL externe de l''image du
 create or replace view public.membres_equipe_admin as
 select 
   m.id,
-  m.nom,
+  m.name,
   m.role,
   m.description,
   m.image_url,

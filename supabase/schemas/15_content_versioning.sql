@@ -229,10 +229,10 @@ declare
 begin
   if tg_op = 'INSERT' then
     change_type_value := 'create';
-    change_summary_text := 'Création membre équipe: ' || coalesce(NEW.nom, '');
+  change_summary_text := 'Création membre équipe: ' || coalesce(NEW.name, '');
   else
     change_type_value := 'update';
-    change_summary_text := 'Mise à jour membre équipe: ' || coalesce(NEW.nom, '');
+  change_summary_text := 'Mise à jour membre équipe: ' || coalesce(NEW.name, '');
   end if;
 
   perform public.create_content_version(
@@ -474,7 +474,7 @@ begin
   elsif version_record.entity_type = 'membre_equipe' then
     update public.membres_equipe
     set 
-      nom = version_record.content_snapshot->>'nom',
+      name = coalesce(version_record.content_snapshot->>'name', version_record.content_snapshot->>'nom'),
       role = version_record.content_snapshot->>'role',
       description = version_record.content_snapshot->>'description',
       image_url = version_record.content_snapshot->>'image_url',

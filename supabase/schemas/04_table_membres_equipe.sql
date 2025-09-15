@@ -4,7 +4,7 @@
 drop table if exists public.membres_equipe cascade;
 create table public.membres_equipe (
   id bigint generated always as identity primary key,
-  nom text not null,
+  name text not null,
   role text,
   description text,
   image_url text, -- URL d'image externe optionnelle (complément à photo_media_id)
@@ -56,7 +56,7 @@ using ( (select public.is_admin()) );
 create or replace view public.membres_equipe_admin as
 select 
   m.id,
-  m.nom,
+  m.name,
   m.role,
   m.description,
   m.image_url,
