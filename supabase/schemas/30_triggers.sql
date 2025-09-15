@@ -62,6 +62,12 @@ $$;
 
 -- ===== TRIGGERS SPÉCIALISÉS =====
 
+-- Trigger consentement messages_contact (horodatage consent_at)
+drop trigger if exists trg_messages_contact_consent on public.messages_contact;
+create trigger trg_messages_contact_consent
+  before insert or update on public.messages_contact
+  for each row execute function public.set_messages_contact_consent_timestamp();
+
 -- Triggers pour slug auto-généré
 drop trigger if exists trg_communiques_slug on public.communiques_presse;
 create trigger trg_communiques_slug

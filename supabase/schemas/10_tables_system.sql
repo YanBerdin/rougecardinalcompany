@@ -19,14 +19,32 @@ alter table public.abonnes_newsletter add constraint abonnes_email_unique unique
 drop table if exists public.messages_contact cascade;
 create table public.messages_contact (
   id bigint generated always as identity primary key,
-  nom text,
-  email text,
-  sujet text,
-  message text,
-  processed boolean default false,
+  firstname text,
+  lastname text,
+  email text not null,
+  phone text, -- téléphone volontaire
+  reason text not null, -- booking|partenariat|presse|education|technique|autre (valeurs FR normalisées)
+  message text not null,
+  consent boolean default false, -- consentement RGPD (newsletter ou réponse)
+  consent_at timestamptz null, -- timestamp auto quand consent passe à true
+  status text default 'nouveau' not null, -- nouveau|en_cours|traite|archive|spam
+  processed boolean generated always as (status in ('traite','archive')) stored, -- compat legacy (dérivé)
   processed_at timestamptz null,
+  spam_score numeric(5,2), -- score heuristique (optionnel)
+  metadata jsonb default '{}'::jsonb, -- données supplémentaires (ip, user_agent)
+  contact_presse_id bigint null references public.contacts_presse(id) on delete set null, -- association manuelle via back-office
   created_at timestamptz default now() not null
 );
+
+comment on table public.messages_contact is 'Messages issus du formulaire de contact (public). Ne stocke que les soumissions entrantes.';
+comment on column public.messages_contact.firstname is 'Prénom saisi dans le formulaire de contact.';
+comment on column public.messages_contact.lastname is 'Nom de famille saisi dans le formulaire de contact.';
+comment on column public.messages_contact.reason is 'Motif du contact (booking|partenariat|presse|education|technique|autre) en français.';
+comment on column public.messages_contact.consent is 'Indique si l''utilisateur a donné son consentement explicite.';
+comment on column public.messages_contact.consent_at is 'Horodatage du consentement enregistré automatiquement.';
+comment on column public.messages_contact.status is 'Workflow de traitement: nouveau|en_cours|traite|archive|spam';
+comment on column public.messages_contact.processed is 'Champ dérivé: true si status final (traite, archive).';
+comment on column public.messages_contact.contact_presse_id is 'Lien optionnel vers un contact presse existant (association manuelle back-office).';
 
 -- Site configuration
 drop table if exists public.configurations_site cascade;
@@ -133,6 +151,26 @@ on public.messages_contact
 for delete
 to authenticated
 using ( (select public.is_admin()) );
+
+-- Validation applicative basique via contraintes CHECK (enum text simulé)
+do $$
+begin
+  -- reason check
+  if exists (select 1 from pg_constraint where conname = 'messages_contact_reason_check') then
+    alter table public.messages_contact drop constraint messages_contact_reason_check;
+  end if;
+  alter table public.messages_contact add constraint messages_contact_reason_check
+    check (reason in ('booking','partenariat','presse','education','technique','autre'));
+
+  -- status check
+  if exists (select 1 from pg_constraint where conname = 'messages_contact_status_check') then
+    alter table public.messages_contact drop constraint messages_contact_status_check;
+  end if;
+  alter table public.messages_contact add constraint messages_contact_status_check
+    check (status in ('nouveau','en_cours','traite','archive','spam'));
+exception when others then
+  raise notice 'Could not apply messages_contact checks: %', sqlerrm;
+end;$$ language plpgsql;
 
 -- ---- CONFIGURATIONS SITE ----
 alter table public.configurations_site enable row level security;

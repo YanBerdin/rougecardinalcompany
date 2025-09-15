@@ -134,3 +134,22 @@ comment on function public.get_current_timestamp() is
 
 -- Grant execute permission to anonymous users
 grant execute on function public.get_current_timestamp() to anon;
+
+-- Fonction pour horodater le consentement sur messages_contact
+create or replace function public.set_messages_contact_consent_timestamp()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+begin
+  if (tg_op = 'INSERT' and new.consent = true and new.consent_at is null) then
+    new.consent_at := now();
+  elsif (tg_op = 'UPDATE' and new.consent = true and (old.consent is distinct from new.consent) and new.consent_at is null) then
+    new.consent_at := now();
+  end if;
+  return new;
+end;
+$$;
+
+comment on function public.set_messages_contact_consent_timestamp() is 'Définit consent_at lors de la première activation de consent pour messages_contact.';

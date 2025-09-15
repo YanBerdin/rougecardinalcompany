@@ -52,3 +52,9 @@ create index if not exists idx_partners_is_active on public.partners (is_active)
 create index if not exists idx_categories_is_active on public.categories (is_active) where is_active = true;
 create index if not exists idx_profiles_role on public.profiles (role);
 create index if not exists idx_configurations_site_key_pattern on public.configurations_site (key) where key like 'public:%';
+
+-- ===== INDEX MESSAGES CONTACT =====
+create index if not exists idx_messages_contact_reason on public.messages_contact(reason);
+create index if not exists idx_messages_contact_status on public.messages_contact(status);
+create index if not exists idx_messages_contact_created_at on public.messages_contact(created_at desc);
+create index if not exists idx_messages_contact_contact_presse on public.messages_contact(contact_presse_id) where contact_presse_id is not null;

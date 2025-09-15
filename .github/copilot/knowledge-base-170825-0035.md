@@ -660,14 +660,36 @@ alter table public.abonnes_newsletter add constraint abonnes_email_unique unique
 ```sql
 create table public.messages_contact (
   id bigint generated always as identity primary key,
-  nom text,
-  email text,
-  sujet text,
-  message text,
-  processed boolean default false,
+  firstname text,
+  lastname text,
+  email text not null,
+  phone text,
+  reason text not null,
+  message text not null,
+  consent boolean default false,
+  consent_at timestamptz null,
+  status text default 'nouveau' not null,
+  processed boolean generated always as (status in ('traite','archive')) stored,
   processed_at timestamptz null,
+  spam_score numeric(5,2),
+  metadata jsonb default '{}'::jsonb,
+  contact_presse_id bigint null references public.contacts_presse(id) on delete set null,
   created_at timestamptz default now() not null
 );
+
+-- Contraintes simulant des enums
+alter table public.messages_contact add constraint messages_contact_reason_check
+  check (reason in ('booking','partenariat','presse','education','technique','autre'));
+alter table public.messages_contact add constraint messages_contact_status_check
+  check (status in ('nouveau','en_cours','traite','archive','spam'));
+
+comment on column public.messages_contact.firstname is 'Prénom saisi dans le formulaire de contact.';
+comment on column public.messages_contact.lastname is 'Nom de famille saisi dans le formulaire de contact.';
+comment on column public.messages_contact.reason is 'Motif du contact (booking|partenariat|presse|education|technique|autre) en français.';
+comment on column public.messages_contact.consent is 'Indique si l''utilisateur a donné son consentement explicite.';
+comment on column public.messages_contact.consent_at is 'Horodatage du consentement.';
+comment on column public.messages_contact.status is 'Workflow: nouveau|en_cours|traite|archive|spam';
+comment on column public.messages_contact.contact_presse_id is 'Lien manuel vers un contact presse existant.';
 ```
 
 #### Table: `configurations_site`
