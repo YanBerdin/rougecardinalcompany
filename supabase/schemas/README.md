@@ -83,7 +83,7 @@ supabase/schemas/
 | **seo_redirects** | Admin uniquement | Admin uniquement | SEO interne |
 | **sitemap_entries** | Si indexé | Admin uniquement | Sitemap public |
 | **abonnes_newsletter** | Admin uniquement | Inscription libre | Protection RGPD |
-| **messages_contact** | Admin uniquement | Envoi libre | Contact public |
+| **messages_contact** | Admin uniquement | Envoi libre | Contact public + vue admin |
 | **configurations_site** | Si public:* | Admin uniquement | Config mixte |
 | **logs_audit** | Admin uniquement | Système auto | Audit sécurisé |
 | **events_recurrence** | Publique | Admin uniquement | Récurrence publique |
@@ -199,6 +199,7 @@ supabase migration new update_existing_data
 | **Tables avec RLS** | 20/20 (100%) | ✅ |
 | **Politiques Optimisées** | 50+ (100%) | ✅ |
 | **Index RLS** | 12 stratégiques | ✅ |
+| **Index RLS** | 14 stratégiques | ✅ |
 | **Fonctions Sécurisées** | 8/8 (100%) | ✅ |
 | **Conformité Instructions** | 100% | ✅ |
 | **Tests de Sécurité** | En attente | 🟡 |
@@ -289,6 +290,25 @@ La contrainte `membres_equipe_image_url_format` impose un format:
 Objectif: garantir que les URLs pointent vers des ressources images (fallback si aucune media interne).
 
 ### Restauration d'une Version
+### Vue Administration Messages Contact
+
+La vue `public.messages_contact_admin` fournit un accès consolidé pour le back-office :
+- Champs bruts + dérivés: `age`, `processing_latency`, `full_name`
+- Association éventuelle au contact presse (`contact_presse_nom`, `media`, `role`)
+- Filtrage rapide possible via index partiels (`status in ('nouveau','en_cours')`, `consent = true`)
+
+Exemple usage:
+```sql
+select id, created_at, age, reason, status, processing_latency
+from public.messages_contact_admin
+order by created_at desc
+limit 50;
+```
+
+Indices ajoutés pour optimiser:
+- `idx_messages_contact_status_actifs` (statuts actifs)
+- `idx_messages_contact_consent_true` (extractions consentement)
+
 
 Exemple restauration d'un membre:
 ```sql

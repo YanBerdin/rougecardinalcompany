@@ -58,3 +58,7 @@ create index if not exists idx_messages_contact_reason on public.messages_contac
 create index if not exists idx_messages_contact_status on public.messages_contact(status);
 create index if not exists idx_messages_contact_created_at on public.messages_contact(created_at desc);
 create index if not exists idx_messages_contact_contact_presse on public.messages_contact(contact_presse_id) where contact_presse_id is not null;
+-- Index partiel pour filtrage rapide des messages actifs (non terminés) dans dashboard
+create index if not exists idx_messages_contact_status_actifs on public.messages_contact(status) where status in ('nouveau','en_cours');
+-- Index partiel pour recherche des messages avec consentement explicite (ex: export ciblé)
+create index if not exists idx_messages_contact_consent_true on public.messages_contact(id) where consent = true;

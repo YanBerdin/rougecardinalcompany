@@ -46,6 +46,37 @@ comment on column public.messages_contact.status is 'Workflow de traitement: nou
 comment on column public.messages_contact.processed is 'Champ dérivé: true si status final (traite, archive).';
 comment on column public.messages_contact.contact_presse_id is 'Lien optionnel vers un contact presse existant (association manuelle back-office).';
 
+-- Vue d'administration pour le suivi et le tri des messages de contact
+drop view if exists public.messages_contact_admin cascade;
+create view public.messages_contact_admin as
+select
+  mc.id,
+  mc.created_at,
+  now() - mc.created_at as age,
+  mc.firstname,
+  mc.lastname,
+  trim(coalesce(mc.firstname,'') || ' ' || coalesce(mc.lastname,'')) as full_name,
+  mc.email,
+  mc.phone,
+  mc.reason,
+  mc.message,
+  mc.status,
+  mc.processed,
+  mc.processed_at,
+  case when mc.processed_at is not null then mc.processed_at - mc.created_at end as processing_latency,
+  mc.consent,
+  mc.consent_at,
+  mc.spam_score,
+  mc.metadata,
+  mc.contact_presse_id,
+  cp.nom as contact_presse_nom,
+  cp.media as contact_presse_media,
+  cp.role as contact_presse_role
+from public.messages_contact mc
+left join public.contacts_presse cp on cp.id = mc.contact_presse_id;
+
+comment on view public.messages_contact_admin is 'Vue d\'administration pour gestion workflow des messages de contact (latences, association presse).';
+
 -- Site configuration
 drop table if exists public.configurations_site cascade;
 create table public.configurations_site (
