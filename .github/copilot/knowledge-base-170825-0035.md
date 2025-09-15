@@ -1981,6 +1981,33 @@ Pour garantir la sécurité du site et éviter les failles les plus courantes (I
 - Fonctionnalités pour droits d'accès, rectification, suppression.
 - Procédure de notification en cas de violation (alerte utilisateurs & CNIL).
 
+#### 10.3.1. Politique de rétention – Abonnés Newsletter
+
+Objectif: Minimiser la conservation des données des abonnés inactifs tout en permettant une gestion simple du cycle de vie.
+
+Hypothèses actuelles:
+- Faible volume d'abonnés
+- Pas de campagnes marketing récurrentes programmées
+- Pas de besoin de « suppression list » persistante complexe
+
+Stratégie retenue (phase actuelle):
+1. À l'inscription: stockage de l'email (`citext`), `subscribed=true`, `subscribed_at=now()`.
+2. Désinscription (action utilisateur) : mise à `subscribed=false`, `unsubscribed_at=now()`.
+3. Purge périodique simple : suppression définitive des lignes désinscrites après une période de rétention courte (ex: 90 jours) OU suppression immédiate si conformité stricte privilégiée.
+4. Droit à l'oubli explicite : suppression immédiate sans attendre la fenêtre de rétention.
+
+Option future (non implémentée) : pseudonymisation différée (`email_hash`) si le volume augmente ou si l'on souhaite empêcher ré-import involontaire.
+
+Tâche SQL de purge (exécution mensuelle) — variante rétention 90 jours :
+```sql
+delete from public.abonnes_newsletter
+where subscribed = false
+  and unsubscribed_at < now() - interval '90 days';
+```
+
+Justification RGPD : limitation de durée, minimisation et suppression rapide des données inactives ou non nécessaires.
+
+
 ---
 
 ## 11. Migration & Declarative schema (Supabase workflow)

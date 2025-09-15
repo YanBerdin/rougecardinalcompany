@@ -82,7 +82,7 @@ supabase/schemas/
 | **content_versions** | Admin uniquement | Système + admin | Versioning automatique |
 | **seo_redirects** | Admin uniquement | Admin uniquement | SEO interne |
 | **sitemap_entries** | Si indexé | Admin uniquement | Sitemap public |
-| **abonnes_newsletter** | Admin uniquement | Inscription libre | Protection RGPD |
+| **abonnes_newsletter** | Admin uniquement | Inscription libre | Protection RGPD (email seul, rétention ≤90j) |
 | **messages_contact** | Admin uniquement | Envoi libre | Contact public + vue admin |
 | **configurations_site** | Si public:* | Admin uniquement | Config mixte |
 | **logs_audit** | Admin uniquement | Système auto | Audit sécurisé |
@@ -331,3 +331,27 @@ Limitations (générales):
 - Les blobs média ne sont pas re-validés (seule la référence est restaurée).
 
 ---
+
+## 🔒 Politique de Rétention Newsletter
+
+Objectif: Minimiser la conservation des emails désinscrits.
+
+Stratégie actuelle (faible volume, pas de campagnes récurrentes):
+- Donnée stockée: uniquement `email` (+ métadonnées techniques optionnelles)
+- Désinscription: `subscribed=false`, `unsubscribed_at=now()`
+- Purge recommandée: suppression définitive après 90 jours OU immédiate sur demande explicite (droit à l'oubli)
+- Pas de liste de suppression hashée à ce stade (complexité non justifiée)
+
+Tâche de purge SQL (exécution mensuelle):
+```sql
+delete from public.abonnes_newsletter
+where subscribed = false
+	and unsubscribed_at < now() - interval '90 days';
+```
+
+Escalade future possible:
+- Ajout champ `email_hash` (SHA256) si besoin d'empêcher ré-import involontaire
+- Journalisation anonymisée des désinscriptions (non nécessaire aujourd'hui)
+
+Référence détaillée: section RGPD interne 10.3.1 (knowledge-base).
+
