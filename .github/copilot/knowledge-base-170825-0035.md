@@ -645,7 +645,6 @@ comment on column public.contacts_presse.notes is 'Notes internes sur les intera
 create table public.abonnes_newsletter (
   id bigint generated always as identity primary key,
   email citext not null,
-  nom text,
   subscribed boolean default true,
   subscribed_at timestamptz default now(),
   unsubscribed_at timestamptz null,
@@ -653,6 +652,8 @@ create table public.abonnes_newsletter (
   created_at timestamptz default now() not null
 );
 alter table public.abonnes_newsletter add constraint abonnes_email_unique unique (email);
+
+-- Note (2025-09): suppression du champ `nom` pour appliquer la minimisation RGPD (pas d'usage métier immédiat / personnalisation différée).
 ```
 
 #### Table: `messages_contact`

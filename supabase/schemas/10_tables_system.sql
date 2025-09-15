@@ -6,7 +6,6 @@ drop table if exists public.abonnes_newsletter cascade;
 create table public.abonnes_newsletter (
   id bigint generated always as identity primary key,
   email citext not null,
-  nom text,
   subscribed boolean default true,
   subscribed_at timestamptz default now(),
   unsubscribed_at timestamptz null,
