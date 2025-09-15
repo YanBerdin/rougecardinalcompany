@@ -398,6 +398,50 @@ create table public.membres_equipe (
 
 comment on table public.membres_equipe is 'Members of the team (artists, staff). image_url permet d''utiliser une image externe sans media uploadé.';
 comment on column public.membres_equipe.image_url is 'URL externe de l''image du membre (fallback si aucun media stocké)';
+
+**Contraintes & Validation (ajout 2025-09):**
+- Contrainte `membres_equipe_image_url_format` renforcée: URL http/https terminant par une extension image autorisée `(jpg|jpeg|png|webp|gif|avif|svg)` avec query/hash optionnels.
+- Usage: garantit que `image_url` pointe vers une ressource image exploitable côté front (optimisation UX / préchargement).
+- Fallback logique: priorité d'affichage = `photo_media_id` (si présent) sinon `image_url`.
+
+**Versioning & Restauration:**
+- Entité couverte par trigger `trg_membres_equipe_versioning` (création + update).
+- Support de restauration via `restore_content_version()` (branche `membre_equipe` ajoutée) réappliquant: `nom, role, description, image_url, photo_media_id, ordre, active`.
+- Une version supplémentaire `change_type = 'restore'` est créée après une restauration réussie.
+
+**Vue d'administration (nouvelle):**
+```sql
+create or replace view public.membres_equipe_admin as
+select 
+  m.id,
+  m.nom,
+  m.role,
+  m.description,
+  m.image_url,
+  m.photo_media_id,
+  m.ordre,
+  m.active,
+  m.created_at,
+  m.updated_at,
+  cv.version_number as last_version_number,
+  cv.change_type as last_change_type,
+  cv.created_at as last_version_created_at,
+  vcount.total_versions
+from public.membres_equipe m
+left join lateral (
+  select version_number, change_type, created_at
+  from public.content_versions
+  where entity_type = 'membre_equipe' and entity_id = m.id
+  order by version_number desc
+  limit 1
+) cv on true
+left join lateral (
+  select count(*)::integer as total_versions
+  from public.content_versions
+  where entity_type = 'membre_equipe' and entity_id = m.id
+) vcount on true;
+```
+But: fournir directement au back-office la dernière version et le nombre total de révisions sans jointure supplémentaire.
 ```
 
 #### Table: `lieux`
@@ -816,6 +860,22 @@ comment on column public.content_versions.entity_type is 'Type d''entité : spec
 comment on column public.content_versions.content_snapshot is 'Snapshot JSON complet des données au moment de la version';
 comment on column public.content_versions.change_summary is 'Résumé des modifications apportées';
 comment on column public.content_versions.change_type is 'Type de modification : create, update, publish, unpublish, restore';
+
+**Couverture Versioning & Restauration (état actuel)**
+
+| entity_type | Triggers | Types de change_type générés | Restauration supportée | Notes |
+|-------------|----------|-------------------------------|------------------------|-------|
+| spectacle | INSERT/UPDATE | create, update, publish, unpublish, restore | Oui | publish/unpublish basé sur `published_at` |
+| article_presse | INSERT/UPDATE | create, update, publish, unpublish, restore | Oui | Semantique similaire spectacles |
+| communique_presse | INSERT/UPDATE | create, update, publish, unpublish, restore | Oui | Flag `public` contrôle publish state |
+| evenement | INSERT/UPDATE | create, update, restore | Oui | Statut variations agrégées sous `update` |
+| membre_equipe | INSERT/UPDATE | create, update, restore | Oui | Ajout 2025-09 (image_url + vue admin) |
+
+Règles générales:
+- Chaque opération crée un snapshot JSON complet facilitant rollback partiel.
+- Les relations many-to-many (ex: spectacles_membres_equipe) ne sont pas restaurées automatiquement pour éviter des incohérences.
+- Une restauration réinsère une version supplémentaire marquée `restore` (traçabilité).
+- Les index `idx_content_versions_entity`, `idx_content_versions_created_at` optimisent les requêtes back-office.
 ```
 
 #### Table: `seo_redirects`
