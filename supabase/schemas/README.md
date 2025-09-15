@@ -45,7 +45,7 @@ supabase/schemas/
 ├── 12_evenements_recurrence.sql   # Gestion de récurrence événements + RLS
 ├── 13_analytics_events.sql        # Table analytics événements + RLS
 ├── 14_categories_tags.sql         # Système de catégories et tags + RLS
-├── 15_content_versioning.sql      # Système de versioning du contenu + RLS (spectacles, articles, communiqués, événements)
+├── 15_content_versioning.sql      # Système de versioning du contenu + RLS (spectacles, articles, communiqués, événements, membres)
 ├── 16_seo_metadata.sql            # Métadonnées SEO et redirections + RLS
 ├── 20_functions_core.sql          # Fonctions utilitaires (is_admin, generate_slug, etc.)
 ├── 21_functions_auth_sync.sql     # Fonctions sync auth.users
@@ -255,3 +255,59 @@ Le schéma déclaratif Rouge Cardinal Company est **production-ready** avec :
 - ✅ **Conformité totale** - Respect des meilleures pratiques
 
 **Status final :** 🎉 **VALIDÉ POUR PRODUCTION** 🎉
+
+---
+
+## 🔁 Restauration de Contenu & Versioning Étendu
+
+### Couverture Versioning
+
+| Entité | Triggers Versioning | Restauration Supportée | Notes |
+|--------|---------------------|-------------------------|-------|
+| spectacles | Oui | Oui | publish/unpublish détecté |
+| articles_presse | Oui | Oui | publish/unpublish via published_at |
+| communiques_presse | Oui | Oui | Flag `public` |
+| evenements | Oui | Oui | Changements de statut loggés |
+| membres_equipe | Oui | Oui | Ajout récent (image_url + restoration) |
+
+### Vue Administration Membres
+
+La vue `public.membres_equipe_admin` expose:
+- Métadonnées membres (`nom`, `role`, `ordre`, `active`)
+- Informations versioning: `last_version_number`, `last_change_type`, `last_version_created_at`, `total_versions`
+
+Usage côté API / dashboard:
+```sql
+select * from public.membres_equipe_admin order by ordre, nom;
+```
+
+### Contrainte image_url stricte
+
+La contrainte `membres_equipe_image_url_format` impose un format:
+`^https?://...\.(jpg|jpeg|png|webp|gif|avif|svg)(?...)?$`
+
+Objectif: garantir que les URLs pointent vers des ressources images (fallback si aucune media interne).
+
+### Restauration d'une Version
+
+Exemple restauration d'un membre:
+```sql
+-- Trouver versions
+select id, version_number, change_type, change_summary
+from public.content_versions
+where entity_type = 'membre_equipe' and entity_id = 42
+order by version_number desc;
+
+-- Restaurer
+select public.restore_content_version(<version_id>);
+```
+
+Effets:
+- Mise à jour des champs métier
+- Création d'une nouvelle version `change_type = 'restore'`
+
+Limitations (générales):
+- Les relations many-to-many ne sont pas restaurées automatiquement.
+- Les blobs média ne sont pas re-validés (seule la référence est restaurée).
+
+---

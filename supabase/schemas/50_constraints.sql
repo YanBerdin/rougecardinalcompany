@@ -87,9 +87,15 @@ comment on constraint check_valid_event_types on public.evenements is 'Types d''
 -- ===== CONTRAINTES POUR MEMBRES EQUIPE =====
 
 -- Contrainte de validation pour membres_equipe.image_url (format URL http/https)
+-- Mise à jour: renforcement pattern pour extensions d'images courantes (jpg|jpeg|png|webp|gif|avif|svg)
 alter table public.membres_equipe 
-add constraint if not exists membres_equipe_image_url_format 
-check (image_url is null or image_url ~* '^https?://.*$');
+drop constraint if exists membres_equipe_image_url_format;
+alter table public.membres_equipe 
+add constraint membres_equipe_image_url_format 
+check (
+  image_url is null or 
+  image_url ~* '^https?://[A-Za-z0-9._~:/?#%\-@!$&''()*+,;=]+\.(jpg|jpeg|png|webp|gif|avif|svg)(\?.*)?(#.*)?$'
+);
 
 comment on constraint membres_equipe_image_url_format on public.membres_equipe is 'URL d''image externe doit être au format http/https';
 
