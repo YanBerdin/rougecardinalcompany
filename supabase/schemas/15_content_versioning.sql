@@ -435,6 +435,20 @@ begin
     where id = version_record.entity_id;
     
     restore_success := found;
+  elsif version_record.entity_type = 'membre_equipe' then
+    update public.membres_equipe
+    set 
+      nom = version_record.content_snapshot->>'nom',
+      role = version_record.content_snapshot->>'role',
+      description = version_record.content_snapshot->>'description',
+      image_url = version_record.content_snapshot->>'image_url',
+      photo_media_id = (version_record.content_snapshot->>'photo_media_id')::bigint,
+      ordre = (version_record.content_snapshot->>'ordre')::smallint,
+      active = (version_record.content_snapshot->>'active')::boolean,
+      updated_at = now()
+    where id = version_record.entity_id;
+
+    restore_success := found;
   end if;
   
   -- Si restauration réussie, créer une nouvelle version pour tracer l'opération

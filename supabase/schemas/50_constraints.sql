@@ -84,6 +84,15 @@ comment on constraint check_image_url_format on public.evenements is 'URL d''ima
 comment on constraint check_start_end_time_order on public.evenements is 'L''heure de début doit être antérieure à l''heure de fin';
 comment on constraint check_valid_event_types on public.evenements is 'Types d''événements limités à une liste prédéfinie';
 
+-- ===== CONTRAINTES POUR MEMBRES EQUIPE =====
+
+-- Contrainte de validation pour membres_equipe.image_url (format URL http/https)
+alter table public.membres_equipe 
+add constraint if not exists membres_equipe_image_url_format 
+check (image_url is null or image_url ~* '^https?://.*$');
+
+comment on constraint membres_equipe_image_url_format on public.membres_equipe is 'URL d''image externe doit être au format http/https';
+
 -- ===== CONTRAINTES POUR COMMUNIQUES DE PRESSE =====
 
 -- Fonction pour vérifier qu'un communiqué a un PDF principal
