@@ -316,6 +316,42 @@ create trigger trg_evenements_versioning
   after insert or update on public.evenements
   for each row execute function public.evenements_versioning_trigger();
 
+-- Trigger function pour les partenaires
+create or replace function public.partners_versioning_trigger()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  change_summary_text text;
+  change_type_value text;
+begin
+  if tg_op = 'INSERT' then
+    change_type_value := 'create';
+    change_summary_text := 'Création partenaire: ' || coalesce(NEW.name, '');
+  else
+    change_type_value := 'update';
+    change_summary_text := 'Mise à jour partenaire: ' || coalesce(NEW.name, '');
+  end if;
+
+  perform public.create_content_version(
+    'partner',
+    NEW.id,
+    to_jsonb(NEW),
+    change_summary_text,
+    change_type_value
+  );
+
+  return NEW;
+end;
+$$;
+
+drop trigger if exists trg_partners_versioning on public.partners;
+create trigger trg_partners_versioning
+  after insert or update on public.partners
+  for each row execute function public.partners_versioning_trigger();
+
 -- Vue pour consulter facilement l'historique d'une entité
 create or replace view public.content_versions_detailed as
 select 
@@ -445,6 +481,20 @@ begin
       photo_media_id = (version_record.content_snapshot->>'photo_media_id')::bigint,
       ordre = (version_record.content_snapshot->>'ordre')::smallint,
       active = (version_record.content_snapshot->>'active')::boolean,
+      updated_at = now()
+    where id = version_record.entity_id;
+
+    restore_success := found;
+  elsif version_record.entity_type = 'partner' then
+    update public.partners
+    set
+      name = version_record.content_snapshot->>'name',
+      description = version_record.content_snapshot->>'description',
+      website_url = version_record.content_snapshot->>'website_url',
+      logo_url = version_record.content_snapshot->>'logo_url',
+      logo_media_id = (version_record.content_snapshot->>'logo_media_id')::bigint,
+      is_active = (version_record.content_snapshot->>'is_active')::boolean,
+      display_order = (version_record.content_snapshot->>'display_order')::integer,
       updated_at = now()
     where id = version_record.entity_id;
 

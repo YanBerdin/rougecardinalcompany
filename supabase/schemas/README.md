@@ -270,6 +270,7 @@ Le schéma déclaratif Rouge Cardinal Company est **production-ready** avec :
 | communiques_presse | Oui | Oui | Flag `public` |
 | evenements | Oui | Oui | Changements de statut loggés |
 | membres_equipe | Oui | Oui | Ajout récent (image_url + restoration) |
+| partners | Oui | Oui | Nouveau (logo_url, logo_media_id) |
 
 ### Vue Administration Membres
 
@@ -329,6 +330,19 @@ Effets:
 Limitations (générales):
 - Les relations many-to-many ne sont pas restaurées automatiquement.
 - Les blobs média ne sont pas re-validés (seule la référence est restaurée).
+
+### Vue Administration Partenaires
+
+La vue `public.partners_admin` expose:
+- Données partenaires: `name`, `website_url`, `logo_url`, `logo_media_id`, `is_active`, `display_order`
+- Métadonnées versioning: `last_version_number`, `last_change_type`, `last_version_created_at`
+
+Exemple usage:
+```sql
+select id, name, is_active, last_version_number, last_change_type
+from public.partners_admin
+order by display_order, name;
+```
 
 ---
 

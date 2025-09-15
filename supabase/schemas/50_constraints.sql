@@ -99,6 +99,20 @@ check (
 
 comment on constraint membres_equipe_image_url_format on public.membres_equipe is 'URL d''image externe doit être au format http/https';
 
+-- ===== CONTRAINTES POUR PARTNERS =====
+
+-- Contrainte format URL simple pour logo_url (externe) avec extensions images fréquentes facultatives
+alter table public.partners 
+drop constraint if exists partners_logo_url_format;
+alter table public.partners 
+add constraint partners_logo_url_format
+check (
+  logo_url is null or 
+  logo_url ~* '^https?://[A-Za-z0-9._~:/?#%\-@!$&''()*+,;=]+'
+);
+
+comment on constraint partners_logo_url_format on public.partners is 'URL externe du logo doit être http/https';
+
 -- ===== CONTRAINTES POUR COMMUNIQUES DE PRESSE =====
 
 -- Fonction pour vérifier qu'un communiqué a un PDF principal
