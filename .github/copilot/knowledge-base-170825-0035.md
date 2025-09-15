@@ -388,6 +388,7 @@ create table public.membres_equipe (
   nom text not null,
   role text,
   description text,
+  image_url text, -- URL d'image externe optionnelle (complément à photo_media_id)
   photo_media_id bigint null references public.medias(id) on delete set null,
   ordre smallint default 0,
   active boolean default true,
@@ -395,7 +396,8 @@ create table public.membres_equipe (
   updated_at timestamptz default now() not null
 );
 
-comment on table public.membres_equipe is 'members of the team (artists, staff)';
+comment on table public.membres_equipe is 'Members of the team (artists, staff). image_url permet d''utiliser une image externe sans media uploadé.';
+comment on column public.membres_equipe.image_url is 'URL externe de l''image du membre (fallback si aucun media stocké)';
 ```
 
 #### Table: `lieux`

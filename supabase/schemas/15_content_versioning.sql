@@ -216,6 +216,37 @@ begin
 end;
 $$;
 
+-- Trigger function pour les membres de l'équipe
+create or replace function public.membres_equipe_versioning_trigger()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  change_summary_text text;
+  change_type_value text;
+begin
+  if tg_op = 'INSERT' then
+    change_type_value := 'create';
+    change_summary_text := 'Création membre équipe: ' || coalesce(NEW.nom, '');
+  else
+    change_type_value := 'update';
+    change_summary_text := 'Mise à jour membre équipe: ' || coalesce(NEW.nom, '');
+  end if;
+
+  perform public.create_content_version(
+    'membre_equipe',
+    NEW.id,
+    to_jsonb(NEW),
+    change_summary_text,
+    change_type_value
+  );
+
+  return NEW;
+end;
+$$;
+
 -- Trigger function pour les événements
 create or replace function public.evenements_versioning_trigger()
 returns trigger
@@ -274,6 +305,11 @@ drop trigger if exists trg_communiques_versioning on public.communiques_presse;
 create trigger trg_communiques_versioning
   after insert or update on public.communiques_presse
   for each row execute function public.communiques_versioning_trigger();
+
+drop trigger if exists trg_membres_equipe_versioning on public.membres_equipe;
+create trigger trg_membres_equipe_versioning
+  after insert or update on public.membres_equipe
+  for each row execute function public.membres_equipe_versioning_trigger();
 
 drop trigger if exists trg_evenements_versioning on public.evenements;
 create trigger trg_evenements_versioning
