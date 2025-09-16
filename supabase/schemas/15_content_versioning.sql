@@ -352,6 +352,78 @@ create trigger trg_partners_versioning
   after insert or update on public.partners
   for each row execute function public.partners_versioning_trigger();
 
+-- Trigger function pour les valeurs de la compagnie
+create or replace function public.compagnie_values_versioning_trigger()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  change_summary_text text;
+  change_type_value text;
+begin
+  if tg_op = 'INSERT' then
+    change_type_value := 'create';
+    change_summary_text := 'Création valeur compagnie: ' || coalesce(NEW.title, '');
+  else
+    change_type_value := 'update';
+    change_summary_text := 'Mise à jour valeur compagnie: ' || coalesce(NEW.title, '');
+  end if;
+
+  perform public.create_content_version(
+    'compagnie_value',
+    NEW.id,
+    to_jsonb(NEW),
+    change_summary_text,
+    change_type_value
+  );
+
+  return NEW;
+end;
+$$;
+
+drop trigger if exists trg_compagnie_values_versioning on public.compagnie_values;
+create trigger trg_compagnie_values_versioning
+  after insert or update on public.compagnie_values
+  for each row execute function public.compagnie_values_versioning_trigger();
+
+-- Trigger function pour les statistiques de la compagnie
+create or replace function public.compagnie_stats_versioning_trigger()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  change_summary_text text;
+  change_type_value text;
+begin
+  if tg_op = 'INSERT' then
+    change_type_value := 'create';
+    change_summary_text := 'Création statistique compagnie: ' || coalesce(NEW.label, '');
+  else
+    change_type_value := 'update';
+    change_summary_text := 'Mise à jour statistique compagnie: ' || coalesce(NEW.label, '');
+  end if;
+
+  perform public.create_content_version(
+    'compagnie_stat',
+    NEW.id,
+    to_jsonb(NEW),
+    change_summary_text,
+    change_type_value
+  );
+
+  return NEW;
+end;
+$$;
+
+drop trigger if exists trg_compagnie_stats_versioning on public.compagnie_stats;
+create trigger trg_compagnie_stats_versioning
+  after insert or update on public.compagnie_stats
+  for each row execute function public.compagnie_stats_versioning_trigger();
+
 -- Vue pour consulter facilement l'historique d'une entité
 create or replace view public.content_versions_detailed as
 select 
@@ -495,6 +567,30 @@ begin
       logo_media_id = (version_record.content_snapshot->>'logo_media_id')::bigint,
       is_active = (version_record.content_snapshot->>'is_active')::boolean,
       display_order = (version_record.content_snapshot->>'display_order')::integer,
+      updated_at = now()
+    where id = version_record.entity_id;
+
+    restore_success := found;
+  elsif version_record.entity_type = 'compagnie_value' then
+    update public.compagnie_values
+    set
+      key = version_record.content_snapshot->>'key',
+      title = version_record.content_snapshot->>'title',
+      description = version_record.content_snapshot->>'description',
+      position = (version_record.content_snapshot->>'position')::smallint,
+      active = (version_record.content_snapshot->>'active')::boolean,
+      updated_at = now()
+    where id = version_record.entity_id;
+
+    restore_success := found;
+  elsif version_record.entity_type = 'compagnie_stat' then
+    update public.compagnie_stats
+    set
+      key = version_record.content_snapshot->>'key',
+      label = version_record.content_snapshot->>'label',
+      value = version_record.content_snapshot->>'value',
+      position = (version_record.content_snapshot->>'position')::smallint,
+      active = (version_record.content_snapshot->>'active')::boolean,
       updated_at = now()
     where id = version_record.entity_id;
 

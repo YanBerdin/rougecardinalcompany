@@ -19,7 +19,7 @@ Ce dossier contient le schéma déclaratif de la base de données selon les inst
 
 | Instruction | Statut | Détail |
 |-------------|--------|--------|
-| **RLS Policies** | ✅ 100% | 20/20 tables protégées |
+| **RLS Policies** | ✅ 100% | 22/22 tables protégées |
 | **Functions** | ✅ 100% | SECURITY INVOKER, search_path défini |
 | **SQL Style** | ✅ 100% | Lowercase, snake_case, commentaires |
 | **Schema Structure** | ✅ 100% | Ordre lexicographique respecté |
@@ -37,6 +37,7 @@ supabase/schemas/
 ├── 05_table_lieux.sql             # Table des lieux + RLS
 ├── 06_table_spectacles.sql        # Table des spectacles + RLS
 ├── 07_table_evenements.sql        # Table des événements + RLS (billeterie, horaires, types)
+├── 07b_table_compagnie_content.sql # Contenu institutionnel (valeurs & stats) + RLS
 ├── 08_table_articles_presse.sql   # Table articles presse + RLS
 ├── 08b_table__communiques_presse.sql     # Table communiqués presse + RLS + contacts presse
 ├── 09_table_partners.sql          # Table des partenaires + RLS
@@ -45,7 +46,7 @@ supabase/schemas/
 ├── 12_evenements_recurrence.sql   # Gestion de récurrence événements + RLS
 ├── 13_analytics_events.sql        # Table analytics événements + RLS
 ├── 14_categories_tags.sql         # Système de catégories et tags + RLS
-├── 15_content_versioning.sql      # Système de versioning du contenu + RLS (spectacles, articles, communiqués, événements, membres)
+├── 15_content_versioning.sql      # Système de versioning du contenu + RLS (spectacles, articles, communiqués, événements, membres, partners, valeurs, stats)
 ├── 16_seo_metadata.sql            # Métadonnées SEO et redirections + RLS
 ├── 20_functions_core.sql          # Fonctions utilitaires (is_admin, generate_slug, etc.)
 ├── 21_functions_auth_sync.sql     # Fonctions sync auth.users
@@ -62,7 +63,7 @@ supabase/schemas/
 
 ## � Sécurité RLS - Validation Complète
 
-### Tables avec Protection RLS (20/20) ✅
+### Tables avec Protection RLS (22/22) ✅
 
 | Table | Lecture | Écriture | Particularités |
 |-------|---------|----------|----------------|
@@ -87,6 +88,8 @@ supabase/schemas/
 | **configurations_site** | Si public:* | Admin uniquement | Config mixte |
 | **logs_audit** | Admin uniquement | Système auto | Audit sécurisé |
 | **events_recurrence** | Publique | Admin uniquement | Récurrence publique |
+| **compagnie_values** | Publique | Admin uniquement | Valeurs institutionnelles |
+| **compagnie_stats** | Publique | Admin uniquement | Statistiques institutionnelles |
 
 ### Optimisations Performance ⚡
 
@@ -269,8 +272,10 @@ Le schéma déclaratif Rouge Cardinal Company est **production-ready** avec :
 | articles_presse | Oui | Oui | publish/unpublish via published_at |
 | communiques_presse | Oui | Oui | Flag `public` |
 | evenements | Oui | Oui | Changements de statut loggés |
-| membres_equipe | Oui | Oui | Ajout récent (image_url + restoration) |
-| partners | Oui | Oui | Nouveau (logo_url, logo_media_id) |
+| membres_equipe | Oui | Oui | Fallback legacy nom -> name dans restore |
+| partners | Oui | Oui | logo_url + ordre affichage |
+| compagnie_values | Oui | Oui | Contenu institutionnel (title, description, position) |
+| compagnie_stats | Oui | Oui | Statistiques institutionnelles (label, value, position) |
 
 ### Vue Administration Membres
 

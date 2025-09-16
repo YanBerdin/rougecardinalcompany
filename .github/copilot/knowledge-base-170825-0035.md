@@ -444,6 +444,78 @@ left join lateral (
 But: fournir directement au back-office la dernière version et le nombre total de révisions sans jointure supplémentaire.
 ```
 
+#### Table: `compagnie_values`
+
+```sql
+drop table if exists public.compagnie_values cascade;
+create table public.compagnie_values (
+  id bigint generated always as identity primary key,
+  key text not null unique,
+  title text not null,
+  description text not null,
+  position smallint not null default 0,
+  active boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+comment on table public.compagnie_values is 'Valeurs institutionnelles (icon géré côté front).';
+comment on column public.compagnie_values.key is 'Identifiant stable utilisé pour mapping icône côté frontend.';
+
+create index if not exists idx_compagnie_values_active_order on public.compagnie_values(active, position) where active = true;
+
+alter table public.compagnie_values enable row level security;
+
+drop policy if exists "Compagnie values are viewable by everyone" on public.compagnie_values;
+create policy "Compagnie values are viewable by everyone"
+  on public.compagnie_values for select
+  to anon, authenticated
+  using ( true );
+
+drop policy if exists "Admins can manage compagnie values" on public.compagnie_values;
+create policy "Admins can manage compagnie values"
+  on public.compagnie_values for all
+  to authenticated
+  using ( (select public.is_admin()) )
+  with check ( (select public.is_admin()) );
+```
+
+#### Table: `compagnie_stats`
+
+```sql
+drop table if exists public.compagnie_stats cascade;
+create table public.compagnie_stats (
+  id bigint generated always as identity primary key,
+  key text not null unique,
+  label text not null,
+  value text not null,
+  position smallint not null default 0,
+  active boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+comment on table public.compagnie_stats is 'Statistiques / chiffres clés institutionnels (icon géré côté front).';
+comment on column public.compagnie_stats.key is 'Identifiant stable pour mapping icône côté frontend.';
+
+create index if not exists idx_compagnie_stats_active_order on public.compagnie_stats(active, position) where active = true;
+
+alter table public.compagnie_stats enable row level security;
+
+drop policy if exists "Compagnie stats are viewable by everyone" on public.compagnie_stats;
+create policy "Compagnie stats are viewable by everyone"
+  on public.compagnie_stats for select
+  to anon, authenticated
+  using ( true );
+
+drop policy if exists "Admins can manage compagnie stats" on public.compagnie_stats;
+create policy "Admins can manage compagnie stats"
+  on public.compagnie_stats for all
+  to authenticated
+  using ( (select public.is_admin()) )
+  with check ( (select public.is_admin()) );
+```
+
 #### Table: `lieux`
 
 ```sql
@@ -919,10 +991,13 @@ comment on column public.content_versions.change_type is 'Type de modification :
 | entity_type | Triggers | Types de change_type générés | Restauration supportée | Notes |
 |-------------|----------|-------------------------------|------------------------|-------|
 | spectacle | INSERT/UPDATE | create, update, publish, unpublish, restore | Oui | publish/unpublish basé sur `published_at` |
-| article_presse | INSERT/UPDATE | create, update, publish, unpublish, restore | Oui | Semantique similaire spectacles |
+| article_presse | INSERT/UPDATE | create, update, publish, unpublish, restore | Oui | Sémantique similaire spectacles |
 | communique_presse | INSERT/UPDATE | create, update, publish, unpublish, restore | Oui | Flag `public` contrôle publish state |
 | evenement | INSERT/UPDATE | create, update, restore | Oui | Statut variations agrégées sous `update` |
-| membre_equipe | INSERT/UPDATE | create, update, restore | Oui | Ajout 2025-09 (image_url + vue admin) |
+| membre_equipe | INSERT/UPDATE | create, update, restore | Oui | Fallback legacy nom -> name |
+| partner | INSERT/UPDATE | create, update, restore | Oui | logo_url, ordre affichage versionnés |
+| compagnie_value | INSERT/UPDATE | create, update, restore | Oui | Contenu institutionnel (title, description, position) |
+| compagnie_stat | INSERT/UPDATE | create, update, restore | Oui | Statistiques institutionnelles (label, value, position) |
 
 Règles générales:
 - Chaque opération crée un snapshot JSON complet facilitant rollback partiel.
