@@ -2370,6 +2370,9 @@ Tous les objets du schéma sont organisés dans le répertoire `supabase/schemas
 | Accueil-05 | Visiteur | Accéder aux liens des réseaux sociaux | Engagement social |
 | Accueil-06 | Visiteur | Voir mentions légales, RGPD et plan du site | Conformité juridique |
 | Accueil-07 | Visiteur | Voir les partenaires de la compagnie. | Promouvoir et remercier les partenaires |
+| Accueil-08 | Administrateur | Choisir d'afficher ou non la section "À la Une" sur Page d'Accueil | Pouvoir mettre en avant ou pas les prochains évènements |
+| Accueil-09 | Administrateur | Choisir d'afficher ou non la section "Nos partenaires" sur la Page d'Accueil | Pouvoir mettre en avant ou pas les partenaires |
+| Accueil-10 | Administrateur | Choisir d'afficher ou non la section "Newsletter" sur Page d'Accueil | Pouvoir mettre en avant ou pas les prochains évènements |
 
 #### Epic : Page d’Accueil (Home page)
 
@@ -2641,7 +2644,7 @@ Tous les objets du schéma sont organisés dans le répertoire `supabase/schemas
 | Agenda-04 | Visiteur | Accéder aux liens billetterie externes | Acheter mes billets |
 | Agenda-05 | Admin | Gérer CRUD des événements (médias, date, lieux, description) via BackOffice | Mise à jour autonome |
 | Agenda-06 | Admin | Gérer CRUD des liens de billeterie via BackOffice | Mise à jour autonome |
-| Agenda-07 | Visiteur | Voir CTA d'abonnement à la newsletter | Recevoir la newsletter |
+| Agenda-07 | Visiteur | Voir CTA de la section d'abonnement à la newsletter | Recevoir la newsletter |
 | Agenda-08 | Admin| Toggle dans BackOffice pour afficher ou non la section "Abonnement Newsletter" sur Page Agenda | Pouvoir mettre en avant ou pas la Newsletter |
 
 #### Epic : Page Agenda
@@ -2864,6 +2867,7 @@ Tous les objets du schéma sont organisés dans le répertoire `supabase/schemas
 | Newsletter-02 | Abonné | Me désinscrire facilement | Exercer mon droit |
 | Newsletter-03 | Admin | Exporter liste des abonnés (CSV) | Gérer campagnes email |
 | Newsletter-04 | Admin | Voir statistiques d'abonnement | Mesurer l'engagement |
+| Newsletter-05 | Admin | Toggle dans BackOffice pour afficher ou non la section "Abonnement Newsletter" sur Page Contact | Pouvoir mettre en avant ou pas la Newsletter |
 
 #### Epic : Contact & Newsletter
 
@@ -2999,6 +3003,24 @@ Tous les objets du schéma sont organisés dans le répertoire `supabase/schemas
 - [ ] Filtre par période  
 - [ ] Données actualisées en temps réel ou via rafraîchissement manuel
 
+---
+
+##### "Toggle affichage CTA newsletter (Page Contact)"
+
+**As an** admin  
+**I want** activer/désactiver l’affichage de la section "Abonnement Newsletter" sur la page Contact  
+**So that** je choisis de la mettre en avant ou non
+
+*Acceptance Criteria:*
+
+- [ ] Interrupteur (toggle) disponible dans BackOffice, section Paramètres Contact  
+- [ ] WHEN : le toggle est activé  
+- [ ] THEN : la section newsletter apparaît côté front sur la page Contact  
+- [ ] WHEN : il est désactivé  
+- [ ] THEN : la section n’est pas affichée  
+- [ ] Changement visible immédiatement sans redéploiement  
+- [ ] Journalisation dans `logs_audit`
+
 ### 14.7. Back-office Avancé
 
 | ID | En tant que | Je veux | Afin de |
@@ -3013,7 +3035,7 @@ Tous les objets du schéma sont organisés dans le répertoire `supabase/schemas
 | BO-08 | Utilisateur | Bénéficier d'une interface responsive | Mobilité |
 | BO-09 | Administrateur| Choisir d'afficher ou non la section "A la Une" sur Page d'Accueil | Pouvoir mettre en avant ou pas les prochains évènements |
 | BO-10 | Administrateur| Choisir d'afficher ou non la section "Nos partenaires" sur la Page d'Accueil.| Pouvoir mettre en avant ou pas les partenaires. |
-| BO-11 | Administrateur| Toggle pour afficher ou non la section "Abonnement Newsletter" sur Page Agenda | Pouvoir mettre en avant ou pas la Newsletter |
+| BO-11 | Administrateur| Toggle pour afficher ou non la section "Abonnement Newsletter" sur les Pages Agenda et Accueil et Contact | Pouvoir mettre en avant ou pas la Newsletter |
 
 #### Epic : Back‑office
 
@@ -3167,17 +3189,19 @@ Tous les objets du schéma sont organisés dans le répertoire `supabase/schemas
 
 ---
 
-##### "Toggle section Abonnement Newsletter (Page Agenda)"
+##### "Toggle section Abonnement Newsletter (Pages Agenda, Accueil et Contact)"
 
 **As an** administrateur  
-**I want** activer/désactiver la section newsletter sur la page Agenda  
-**So that** je contrôle sa visibilité
+**I want** activer/désactiver la section newsletter sur les pages Agenda, Accueil et Contact  
+**So that** je contrôle sa visibilité de façon centralisée
 
 *Acceptance Criteria:*
 
-- [ ] Toggle distinct pour la section newsletter  
-- [ ] Effet immédiat côté front  
-- [ ] Cohérence avec *Agenda‑08*
+- [ ] Toggle disponible dans le BackOffice pour les pages (Agenda, Accueil, Contact)  
+- [ ] Effet immédiat côté front sur les pages concernées  
+- [ ] Cohérence avec les user stories: *Agenda‑08*, *Accueil‑10*, *Newsletter‑05*  
+- [ ] État persisté en base (configurations) et appliqué sans redéploiement  
+- [ ] Journalisation des changements dans `logs_audit`
 
 ---
 

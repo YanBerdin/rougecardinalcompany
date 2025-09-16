@@ -21,11 +21,11 @@ create table public.home_hero_slides (
   updated_at timestamptz not null default now()
 );
 
-comment on table public.home_hero_slides is 'Slides hero page d\'accueil (carousel) avec CTA et planification optionnelle.';
+comment on table public.home_hero_slides is 'Slides hero page d accueil (carousel) avec CTA et planification optionnelle.';
 comment on column public.home_hero_slides.slug is 'Identifiant stable pour ciblage et tracking.';
 comment on column public.home_hero_slides.image_media_id is 'Référence media interne (prioritaire sur image_url).';
-comment on column public.home_hero_slides.starts_at is 'Date/heure de début d\'affichage (NULL = immédiat).';
-comment on column public.home_hero_slides.ends_at is 'Date/heure de fin d\'affichage (NULL = illimité).';
+comment on column public.home_hero_slides.starts_at is 'Date/heure de début d affichage (NULL = immédiat).';
+comment on column public.home_hero_slides.ends_at is 'Date/heure de fin d affichage (NULL = illimité).';
 
 -- Index
 create index if not exists idx_home_hero_slides_active_order on public.home_hero_slides(active, position) where active = true;
