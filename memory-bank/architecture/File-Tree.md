@@ -1,16 +1,15 @@
 # File Tree: rougecardinalcompany
 
-Generated on: 8/29/2025, 4:16:43 AM
+Generated on: 9/17/2025, 12:20:37 AM
 Root path: `/home/yandev/projets/rougecardinalcompany`
 
-```json
+```
 ├── 📁 .git/ 🚫 (auto-hidden)
 ├── 📁 .github/
 │   ├── 📁 copilot/
 │   │   ├── 📝 1-clean-code.instructions.md
 │   │   ├── 📝 2-typescript.instructions.md
 │   │   ├── 📝 4-package-installation.instructions.md
-│   │   ├── 📝 Bootstrap_Next.js_app_with_Supabase_Auth.md
 │   │   ├── 📝 Create_RLS_policies.Instructions.md
 │   │   ├── 📝 Create_migration.instructions.md
 │   │   ├── 📝 Database_Create_functions.Instructions.md
@@ -21,9 +20,9 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   │   ├── 📝 edge-functions.instructions.md
 │   │   ├── 📝 knowledge-base-170825-0035.md
 │   │   ├── 📝 memory-bank.instructions.md
-│   │   ├── 📝 nextjs-supabase-auth.instructions.md
+│   │   ├── 📝 nextjs-supabase-auth-2025.instructions.md
 │   │   ├── 📝 nextjs.instructions.md
-│   │   ├── 📝 nextjs15-backend.instructions.md
+│   │   ├── 📝 nextjs15-backend-with-supabase.instructions.md
 │   │   └── 📝 security-and-owasp.instructions.md
 │   └── 📁 workflows/
 ├── 📁 .next/ 🚫 (auto-hidden)
@@ -76,6 +75,8 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   │       │   ├── 📄 index.ts
 │   │       │   └── 📄 types.ts
 │   │       ├── 📁 compagnie/
+│   │       │   ├── 📁 data/
+│   │       │   │   └── 📄 presentation.ts
 │   │       │   ├── 📄 CompagnieContainer.tsx
 │   │       │   ├── 📄 CompagnieView.tsx
 │   │       │   ├── 📄 hooks.ts
@@ -180,11 +181,23 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   ├── 📄 theme-switcher.tsx
 │   └── 📄 update-password-form.tsx
 ├── 📁 doc/
+│   ├── 📁 schemas/
+│   │   ├── 🗄️ 00_extensions.sql
+│   │   ├── 🗄️ 01_tables_core.sql
+│   │   ├── 🗄️ 02_tables_joins.sql
+│   │   ├── 🗄️ 03_functions_triggers.sql
+│   │   ├── 🗄️ 04_indexes_fulltext.sql
+│   │   ├── 🗄️ 05_rls_policies.sql
+│   │   ├── 🗄️ 06_comments_and_metadata.sql
+│   │   └── 🗄️ 07_seed.sql
+│   ├── 📝 File-Tree.md
 │   ├── 📝 Project_Architecture_Blueprint.md
 │   ├── 📝 Project_Folders_Structure_Blueprint(24-08-25).md
 │   ├── 📝 conventional-commit-cheatsheet.md
 │   ├── 🗄️ empty-database-schema-recap.sql
 │   ├── 📝 mcp-context-flow.md
+│   ├── 📝 nextjs-supabase-auth.instructions.md
+│   ├── 📝 nextjs15-backend.instructions.md
 │   ├── 📝 regles_copilot.md
 │   └── 📝 visuel-blueprintGenerator.md
 ├── 📁 doc-perso/
@@ -212,22 +225,49 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   ├── 📝 1-naming-conventions.instructions.md
 │   ├── 📝 2-typescript-naming-conventions.md
 │   ├── 📝 Project_Folders_Structure_Blueprint.md
+│   ├── 📝 README-CORRECTIONS-CONFORMITE.md
 │   ├── 📝 cahier-des-charges.md
+│   ├── 📝 discuss-archive.md
+│   ├── 📝 many-to-many.md
 │   ├── 📝 progress.md
 │   ├── 📝 update-node-18to-22.md
 │   ├── 📝 updated_copilot_instructions(4).md
 │   └── 📝 updated_copilot_instructions.md
 ├── 📁 lib/
 │   ├── 📁 supabase/
+│   │   ├── 📁 migrations/
+│   │   │   ├── 📝 README-migrations.md
+│   │   │   └── 🗄️ sync_existing_profiles.sql
 │   │   ├── 📁 schemas/
-│   │   │   ├── 🗄️ 00_extensions.sql
-│   │   │   ├── 🗄️ 01_tables_core.sql
-│   │   │   ├── 🗄️ 02_tables_joins.sql
-│   │   │   ├── 🗄️ 03_functions_triggers.sql
-│   │   │   ├── 🗄️ 04_indexes_fulltext.sql
-│   │   │   ├── 🗄️ 05_rls_policies.sql
-│   │   │   ├── 🗄️ 06_comments_and_metadata.sql
-│   │   │   └── 🗄️ 07_seed.sql
+│   │   │   ├── 🗄️ 01_extensions.sql
+│   │   │   ├── 🗄️ 02_table_profiles.sql
+│   │   │   ├── 🗄️ 03_table_medias.sql
+│   │   │   ├── 🗄️ 04_table_membres_equipe.sql
+│   │   │   ├── 🗄️ 05_table_lieux.sql
+│   │   │   ├── 🗄️ 06_table_spectacles.sql
+│   │   │   ├── 🗄️ 07_table_evenements.sql
+│   │   │   ├── 🗄️ 07b_table_compagnie_content.sql
+│   │   │   ├── 🗄️ 07c_table_compagnie_presentation.sql
+│   │   │   ├── 🗄️ 07d_table_home_hero.sql
+│   │   │   ├── 🗄️ 08_table_articles_presse.sql
+│   │   │   ├── 🗄️ 08b_communiques_presse.sql
+│   │   │   ├── 🗄️ 09_table_partners.sql
+│   │   │   ├── 🗄️ 10_tables_system.sql
+│   │   │   ├── 🗄️ 11_tables_relations.sql
+│   │   │   ├── 🗄️ 12_evenements_recurrence.sql
+│   │   │   ├── 🗄️ 13_analytics_events.sql
+│   │   │   ├── 🗄️ 14_categories_tags.sql
+│   │   │   ├── 🗄️ 15_content_versioning.sql
+│   │   │   ├── 🗄️ 16_seo_metadata.sql
+│   │   │   ├── 🗄️ 20_functions_core.sql
+│   │   │   ├── 🗄️ 21_functions_auth_sync.sql
+│   │   │   ├── 🗄️ 30_triggers.sql
+│   │   │   ├── 🗄️ 40_indexes.sql
+│   │   │   ├── 🗄️ 50_constraints.sql
+│   │   │   ├── 🗄️ 60_rls_profiles.sql
+│   │   │   ├── 🗄️ 61_rls_main_tables.sql
+│   │   │   ├── 🗄️ 62_rls_advanced_tables.sql
+│   │   │   └── 📖 README.md
 │   │   ├── 📄 client.ts
 │   │   ├── 📄 middleware.ts
 │   │   └── 📄 server.ts
@@ -264,38 +304,6 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 ├── 📁 public/
 │   └── 🖼️ logo-florian.png
 ├── 📁 scripts/
-├── 📁 supabase/
-│   ├── 📁 migrations/
-│   │   ├── 📖 README.md
-│   │   └── 🗄️ sync_existing_profiles.sql
-│   ├── 📁 schemas/
-│   │   ├── 🗄️ 01_extensions.sql
-│   │   ├── 🗄️ 02_table_profiles.sql
-│   │   ├── 🗄️ 03_table_medias.sql
-│   │   ├── 🗄️ 04_table_membres_equipe.sql
-│   │   ├── 🗄️ 05_table_lieux.sql
-│   │   ├── 🗄️ 06_table_spectacles.sql
-│   │   ├── 🗄️ 07_table_evenements.sql
-│   │   ├── 🗄️ 08_table_articles_presse.sql
-│   │   ├── 🗄️ 09_tables_system.sql
-│   │   ├── 🗄️ 10_tables_relations.sql
-│   │   ├── 🗄️ 11_evenements_recurrence.sql
-│   │   ├── 🗄️ 12_analytics_events.sql
-│   │   ├── 🗄️ 13_categories_tags.sql
-│   │   ├── 🗄️ 14_content_versioning.sql
-│   │   ├── 🗄️ 15_seo_metadata.sql
-│   │   ├── 🗄️ 20_functions_core.sql
-│   │   ├── 🗄️ 21_functions_auth_sync.sql
-│   │   ├── 🗄️ 30_triggers.sql
-│   │   ├── 🗄️ 40_indexes.sql
-│   │   ├── 🗄️ 50_constraints.sql
-│   │   ├── 🗄️ 60_rls_profiles.sql
-│   │   ├── 🗄️ 61_rls_main_tables.sql
-│   │   ├── 🗄️ 62_rls_advanced_tables.sql
-│   │   ├── 📖 README.md
-│   │   └── 🗄️ empty-database-schema-recap.sql
-│   ├── 📝 README-database-schema.md
-│   └── 📝 README-migrations.md
 ├── 🔒 .env 🚫 (auto-hidden)
 ├── 📄 .env.example
 ├── 🚫 .gitignore
@@ -303,7 +311,7 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 ├── 📄 components.json
 ├── 📄 eslint.config.mjs
 ├── 📄 middleware.ts
-├── 🔒 next-env.d.ts 🚫 (auto-hidden)
+├── 📄 next-env.d.ts 🚫 (auto-hidden)
 ├── 📄 next.config.ts
 ├── 📄 package.json
 ├── ⚙️ pnpm-lock.yaml
@@ -313,5 +321,4 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 ```
 
 ---
-
-Generated by FileTree Pro Extension
+*Generated by FileTree Pro Extension*

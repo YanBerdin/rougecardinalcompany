@@ -8,7 +8,9 @@
 - [x] Mise en place de l'architecture de base
 - [x] Intégration de Supabase
 - [x] Configuration du design system
-- [ ] Développement des fonctionnalités principales
+- [x] Schéma déclaratif consolidé (RLS 24/24)
+- [x] Harmonisation knowledge‑base + epics avec le schéma
+- [ ] Développement des fonctionnalités principales (intégrations front restantes)
 - [ ] Tests et optimisation
 - [ ] Déploiement en production
 
@@ -24,61 +26,37 @@
 ### Pages et Composants
 
 - [x] Page d'accueil
-- [x] Section Hero
+- [x] Section Hero (structure)
 - [x] Section À propos
 - [x] Footer
-- [ ] Page des spectacles
-- [ ] Page Agenda
-- [ ] Espace Presse
+- [x] Page Agenda
+- [x] Espace Presse
 - [ ] Médiathèque professionnelle
 
 ### Intégration Backend
 
 - [x] Configuration Supabase
 - [x] Authentification de base
+- [x] RLS sur 100% des tables (24/24)
+- [x] Versioning contenu (valeurs, stats, sections présentation)
+- [x] Tables ajoutées: `compagnie_values`, `compagnie_stats`, `compagnie_presentation_sections`, `home_hero_slides`
 - [ ] Gestion des données spectacles
 
 ## Fonctionnalités en Cours
 
-### Section Spectacles
+### Intégrations Front prioritaires
 
-- En cours: Développement des composants UI
-- À faire: Intégration avec Supabase
-- À faire: Filtres et recherche
-- À faire: Pagination
-
-### Espace Presse
-
-- En cours: Structure de base
-- À faire: Médiathèque professionnelle
-- À faire: Catégorisation
-- À faire: Système de téléchargement
+- En cours: `home_hero_slides` (fenêtre de visibilité)
+- À faire: Intégration `compagnie_stats` dans l’UI
+- À faire: Seeds initiaux (valeurs, stats, sections, hero)
 
 ## Problèmes Connus
 
-### Bugs Actifs
+### Risques / Points ouverts
 
-1. **Navigation Mobile**
-   - Description: Menu ne se ferme pas correctement
-   - Priorité: Moyenne
-   - Status: En investigation
-
-2. **Performance Images**
-   - Description: Chargement lent sur mobile
-   - Priorité: Haute
-   - Status: Solution identifiée
-
-### Optimisations Nécessaires
-
-1. **Temps de Chargement**
-   - Optimisation des images
-   - Réduction du bundle size
-   - Implementation du lazy loading
-
-2. **Accessibilité**
-   - Amélioration des contrastes
-   - Support clavier
-   - Labels ARIA
+1. Synchronisation des fenêtres de visibilité (hero) avec le cache ISR
+2. Cohérence des toggles Back‑office ↔ pages publiques (Agenda/Accueil/Contact)
+3. Données de démo à prévoir pour prévisualisation
 
 ## Tests
 
@@ -116,24 +94,24 @@
 
 ### Court Terme
 
-1. Finaliser la section spectacles
-2. Finaliser la section Agenda
-3. Finaliser la section Presse
-4. Optimiser les performances
+1. Implémenter fetching/rendu `home_hero_slides`
+2. Intégrer `compagnie_stats` dans l’UI
+3. Rédiger et exécuter les scripts de seed
+4. Valider les toggles Back‑office (Agenda/Accueil/Contact)
 
 ### Moyen Terme
 
-1. BackOffice
-2. Tests automatisés
-3. Analytics
+1. Back‑office avancé (CRUD et toggles centralisés)
+2. Option: versioning pour `home_hero_slides`
+3. Tests automatisés et analytics
 
 ## Métriques
 
 ### Performance
 
-- First Contentful Paint: 1.2s
-- Time to Interactive: 2.5s
-- Lighthouse Score: 85
+- First Contentful Paint: 1.2s (local)
+- Time to Interactive: 2.5s (local)
+- Lighthouse Score: 85 (à améliorer)
 
 ### Utilisation
 
@@ -142,6 +120,12 @@
 - Conversions: À mesurer
 
 ## Journal des Mises à Jour
+
+### 17 Septembre 2025
+
+- Harmonisation epics/user‑stories (14.1/14.6/14.7) incluant toggles Newsletter/Partenaires/À la Une
+- Mise à jour `supabase/schemas/README.md` (arbre, versioning étendu, métriques RLS 24/24)
+- Ajout des tables et RLS: `compagnie_values`, `compagnie_stats`, `compagnie_presentation_sections`, `home_hero_slides`
 
 ### 20 Août 2025
 
@@ -164,5 +148,5 @@
 
 ## Dernière Mise à Jour
 
-**Date**: 20 août 2025
+**Date**: 17 septembre 2025
 **Par**: GitHub Copilot

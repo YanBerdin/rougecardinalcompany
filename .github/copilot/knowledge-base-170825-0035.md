@@ -164,10 +164,11 @@ Soutenue par des subventions et mécénats.
 | **Backend**           | Supabase (PostgreSQL + Auth + API + Storage)     |
 | **Back-office**       | Next.js Admin + Supabase Auth & RLS              |
 | **Hébergement**       | Vercel (CI/CD, CDN, SSL)                         |
-| **Cache**             | Redis (requêtes fréquentes)                      |
+| **Cache**             | cache natif de Next.js + TanStack ou Redis (si nécessaire)                      |
+| **Validation**        | Zod (schémas de validation)                      |
 | **Stockage**          | Supabase Storage (images, PDF, vidéos)           |
-| **Domaine**           | <www.compagnie-ougecardinal.fr> (à configurer)            |
-| **Analytics**         | Google Analytics / Matomo                        |
+| **Domaine**           | <www.compagnie-rougecardinal.fr> (à configurer)            |
+| **Analytics**         | Google Analytics / A déterminer                        |
 | **Email**             | Service externe (Resend)           |
 
 ### 4.0. Architectural Approach

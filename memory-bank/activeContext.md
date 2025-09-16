@@ -2,86 +2,81 @@
 
 ## État Actuel du Projet
 
-### Phase en Cours
+### Phase en cours
 
-Nous sommes actuellement dans la Phase 1 : Site Vitrine
+Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation (knowledge‑base, epics) harmonisée avec le schéma.
 
-### Composants Terminés
+### Avancées récentes
 
-- Layout principal avec header et footer
-- Page d'accueil avec hero section
-- Section "À propos" de la compagnie
-- Composants UI de base avec shadcn/ui
+- Schéma Supabase consolidé avec RLS sur toutes les tables (24/24)
+- Versioning de contenu étendu (valeurs, statistiques, sections de présentation)
+- Nouvelles tables: `compagnie_values`, `compagnie_stats`, `compagnie_presentation_sections`, `home_hero_slides`
+- Harmonisation des user‑stories/epics (toggles Newsletter/Partenaires/À la Une) et mise à jour du README des schémas
 
-### En Cours de Développement
+### En cours / à intégrer côté front
 
-- Section des spectacles et productions
-- Espace presse professionnel avec médiathèque
-- Back-office sécurisé avec Supabase Auth
-- Intégration des partenaires et mécènes
-- Export du calendrier des événements
+- Récupération et affichage des `home_hero_slides` (fenêtre de visibilité)
+- Utilisation de `compagnie_stats` dans l’UI
+- Seed initial des données (valeurs, stats, sections présentation, hero slides)
 
 ## Focus Actuel
 
-### Priorités Immédiates
+### Priorités immédiates
 
-1. Finaliser la section spectacles et productions avec médias HD
-2. Mettre en place l'espace presse professionnel
-3. Configurer les redirections vers la billetterie externe
-4. Optimiser le référencement (SEO) et les meta-tags
-5. Configurer l'export du calendrier (iCal)
+1. Implémenter les hooks/data fetching pour `home_hero_slides`
+2. Intégrer `compagnie_stats` dans les composants de la page Compagnie/Accueil
+3. Écrire les scripts de seed (SQL/TS) pour les nouvelles tables
+4. Vérifier l’UX Back‑office autour des toggles (Agenda, Accueil, Contact)
 
-### Problèmes à Résoudre
+### Problèmes / risques
 
-- Optimisation des images de spectacles
-- Amélioration du responsive design
-- Mise en place des tests unitaires
-- Performance de la médiathèque
+- Synchronisation des dates de visibilité du hero et du cache ISR
+- Cohérence des états de toggles entre back‑office et pages publiques
+- Données initiales insuffisantes pour prévisualiser toutes les sections
 
 ## Décisions Récentes
 
-### Architecture
+### Architecture & données
 
-1. Utilisation de Server Components par défaut
-2. "use client" uniquement pour les composants interactifs
-3. Gestion d'état avec React Context pour les données globales
+- RLS 100% coverage (24/24) confirmé et documenté
+- Stratégie de versioning via `content_versions` et triggers appliquée à plusieurs entités clés
+- `home_hero_slides`: RLS publique (lecture fenêtre) + admin CRUD; versioning futur (option)
 
-### UI/UX
+### Documentation
 
-1. Design system basé sur shadcn/ui
-2. Thème personnalisé avec variables Tailwind
-3. Animations légères pour l'engagement utilisateur
+- Knowledge‑base et epics synchronisés (14.1, 14.6, 14.7)
+- README schémas mis à jour (arbre des fichiers, métriques, versioning étendu)
 
 ## Prochaines Étapes
 
-### Court Terme (1-2 semaines)
+### Court terme (1 semaines)
 
-1. Compléter la section spectacles
-2. Mettre en place le blog
-3. Optimiser les performances
+1. Intégrer `home_hero_slides` côté front
+2. Intégrer `compagnie_stats` dans l’UI
+3. Rédiger/Exécuter seeds initiaux
 
-### Moyen Terme (1-2 mois)
+### Moyen terme (2 semaines)
 
-1. Back-office sécurisé pour l'administration des contenus
-2. Système de monitoring des performances
-3. Tests automatisés et documentation technique
-4. Intégration Google Analytics / Matomo
+1. Back‑office avancé (toggles centralisés, CRUD étendus)
+2. Intégration du systeme d'emailing (inscription, newsletter, contacts)
+3. Option: versioning pour `home_hero_slides`
+4. Tests automatisés (unitaires/intégration) et monitoring
 
 ## Notes Techniques
 
-### Optimisations en Cours
+### Optimisations prévues
 
-- Mise en cache des requêtes Supabase
-- Lazy loading des composants lourds
-- Optimisation des images
+- Utiliser `@supabase/ssr` pour le fetching côté serveur
+- Appliquer filtrage de fenêtre de visibilité côté requête pour le hero
+- Ajuster les revalidations ISR en fonction des toggles/hero
 
-### Points d'Attention
+### Points d’attention
 
-1. Maintenir la cohérence du design system
-2. Documenter les nouveaux composants
-3. Suivre les bonnes pratiques Next.js
+1. Cohérence IDs/renvois (Accueil‑10, Agenda‑08, Newsletter‑05)
+2. Garder la parité docs ⇄ schéma
+3. Ne pas exposer d’API non protégée hors RLS
 
 ## Dernière Mise à Jour
 
-**Date**: 20 août 2025
+**Date**: 17 septembre 2025  
 **Par**: GitHub Copilot

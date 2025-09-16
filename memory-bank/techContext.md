@@ -9,7 +9,7 @@
 - **UI Framework**:
   - Tailwind CSS pour le styling
   - shadcn/ui pour les composants
-- **State Management**: React Hooks + Context API
+- **State Management**: React Hooks + Context API ou Redux (si nécessaire)
 
 ### Backend
 

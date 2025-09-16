@@ -15,6 +15,10 @@
 - [TASK008] Configuration des redirections vers billetterie externe
 - [TASK009] Gestion des partenaires et mécènes
 - [TASK010] Mise en place des toggles d'affichage dans le back-office
+- [TASK011] Intégration `home_hero_slides` (fetch + rendu + fenêtre visibilité)
+- [TASK012] Intégration UI des `compagnie_stats` (accueil/compagnie)
+- [TASK013] Écriture et exécution des scripts de seed (valeurs, stats, sections, hero)
+- [TASK014] Back‑office: centralisation et validation des toggles (Agenda/Accueil/Contact)
 
 ## Terminé
 
