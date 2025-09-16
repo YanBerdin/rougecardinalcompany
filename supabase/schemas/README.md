@@ -39,15 +39,16 @@ supabase/schemas/
 ├── 07_table_evenements.sql        # Table des événements + RLS (billeterie, horaires, types)
 ├── 07b_table_compagnie_content.sql # Contenu institutionnel (valeurs & stats) + RLS
 ├── 07c_table_compagnie_presentation.sql # Sections présentation compagnie + RLS
+├── 07d_table_home_hero.sql        # Slides hero page d'accueil + RLS
 ├── 08_table_articles_presse.sql   # Table articles presse + RLS
-├── 08b_table__communiques_presse.sql     # Table communiqués presse + RLS + contacts presse
+├── 08b_communiques_presse.sql     # Table communiqués presse + RLS + contacts presse
 ├── 09_table_partners.sql          # Table des partenaires + RLS
 ├── 10_tables_system.sql           # Tables système + RLS (config, logs, newsletter, contact)
 ├── 11_tables_relations.sql        # Tables de liaison many-to-many + RLS
 ├── 12_evenements_recurrence.sql   # Gestion de récurrence événements + RLS
 ├── 13_analytics_events.sql        # Table analytics événements + RLS
 ├── 14_categories_tags.sql         # Système de catégories et tags + RLS
-├── 15_content_versioning.sql      # Système de versioning du contenu + RLS (spectacles, articles, communiqués, événements, membres, partners, valeurs, stats)
+├── 15_content_versioning.sql      # Système de versioning du contenu + RLS (spectacles, articles, communiqués, événements, membres, partners, valeurs, stats, sections présentation)
 ├── 16_seo_metadata.sql            # Métadonnées SEO et redirections + RLS
 ├── 20_functions_core.sql          # Fonctions utilitaires (is_admin, generate_slug, etc.)
 ├── 21_functions_auth_sync.sql     # Fonctions sync auth.users
