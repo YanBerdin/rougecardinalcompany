@@ -17,7 +17,7 @@ export const compagniePresentation:
 // 07c_table_compagnie_presentation
 PresentationSection[] = [
   {
-    id: 'hero',
+    id: 'hero', // slug en bdd
     kind: 'hero',
     title: 'La Compagnie Rouge-Cardinal',
     subtitle: '15 ans de passion pour les arts de la scène'

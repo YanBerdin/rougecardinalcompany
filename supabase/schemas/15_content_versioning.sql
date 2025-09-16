@@ -642,6 +642,7 @@ begin
       quote_text = version_record.content_snapshot->>'quote_text',
       quote_author = version_record.content_snapshot->>'quote_author',
       image_url = version_record.content_snapshot->>'image_url',
+      image_media_id = (version_record.content_snapshot->>'image_media_id')::bigint,
       position = (version_record.content_snapshot->>'position')::smallint,
       active = (version_record.content_snapshot->>'active')::boolean,
       updated_at = now()

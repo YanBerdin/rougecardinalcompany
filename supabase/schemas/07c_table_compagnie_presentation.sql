@@ -14,7 +14,8 @@ create table public.compagnie_presentation_sections (
   content text[],      -- liste de paragraphes (history, mission, custom)
   quote_text text,     -- utilisé si kind = quote
   quote_author text,   -- auteur citation
-  image_url text,      -- image illustrative optionnelle
+  image_url text,      -- image illustrative optionnelle (fallback)
+  image_media_id bigint null references public.medias(id) on delete set null, -- media stocké prioritaire
   position smallint not null default 0, -- ordre général sur la page
   active boolean not null default true,
   created_at timestamptz not null default now(),
@@ -27,6 +28,7 @@ comment on column public.compagnie_presentation_sections.kind is 'Type de sectio
 comment on column public.compagnie_presentation_sections.content is 'Liste ordonnée de paragraphes (NULL si non pertinent).';
 comment on column public.compagnie_presentation_sections.quote_text is 'Texte de la citation si kind = quote.';
 comment on column public.compagnie_presentation_sections.position is 'Ordre global croissant d affichage.';
+comment on column public.compagnie_presentation_sections.image_media_id is 'Référence vers un media (prioritaire sur image_url).';
 
 -- Index
 create index if not exists idx_compagnie_presentation_sections_active_order on public.compagnie_presentation_sections(active, position) where active = true;
@@ -62,6 +64,7 @@ select
   s.quote_text,
   s.quote_author,
   s.image_url,
+  s.image_media_id,
   s.position,
   s.active,
   s.created_at,

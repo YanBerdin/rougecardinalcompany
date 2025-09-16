@@ -19,7 +19,7 @@ Ce dossier contient le schéma déclaratif de la base de données selon les inst
 
 | Instruction | Statut | Détail |
 |-------------|--------|--------|
-| **RLS Policies** | ✅ 100% | 23/23 tables protégées |
+| **RLS Policies** | ✅ 100% | 24/24 tables protégées |
 | **Functions** | ✅ 100% | SECURITY INVOKER, search_path défini |
 | **SQL Style** | ✅ 100% | Lowercase, snake_case, commentaires |
 | **Schema Structure** | ✅ 100% | Ordre lexicographique respecté |
@@ -64,7 +64,7 @@ supabase/schemas/
 
 ## � Sécurité RLS - Validation Complète
 
-### Tables avec Protection RLS (23/23) ✅
+### Tables avec Protection RLS (24/24) ✅
 
 | Table | Lecture | Écriture | Particularités |
 |-------|---------|----------|----------------|
@@ -92,6 +92,7 @@ supabase/schemas/
 | **compagnie_values** | Publique | Admin uniquement | Valeurs institutionnelles |
 | **compagnie_stats** | Publique | Admin uniquement | Statistiques institutionnelles |
 | **compagnie_presentation_sections** | Publique | Admin uniquement | Sections modulaires page présentation |
+| **home_hero_slides** | Publique (fenêtre active) | Admin uniquement | Slides hero page d'accueil |
 
 ### Optimisations Performance ⚡
 

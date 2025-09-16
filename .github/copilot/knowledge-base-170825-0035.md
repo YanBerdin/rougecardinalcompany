@@ -530,6 +530,7 @@ create table public.compagnie_presentation_sections (
   quote_text text,
   quote_author text,
   image_url text,
+  image_media_id bigint null references public.medias(id) on delete set null,
   position smallint not null default 0,
   active boolean not null default true,
   created_at timestamptz not null default now(),
@@ -542,6 +543,7 @@ comment on column public.compagnie_presentation_sections.kind is 'Type de sectio
 comment on column public.compagnie_presentation_sections.content is 'Liste ordonnée de paragraphes (NULL si non pertinent).';
 comment on column public.compagnie_presentation_sections.quote_text is 'Texte de la citation si kind = quote.';
 comment on column public.compagnie_presentation_sections.position is 'Ordre global croissant d''affichage.';
+comment on column public.compagnie_presentation_sections.image_media_id is 'Référence media interne prioritaire sur image_url.';
 
 create index if not exists idx_compagnie_presentation_sections_active_order on public.compagnie_presentation_sections(active, position) where active = true;
 create index if not exists idx_compagnie_presentation_sections_kind on public.compagnie_presentation_sections(kind);
@@ -581,10 +583,61 @@ const { data } = await supabase
 - Enum souple (TEXT + CHECK) permettant ajout via migration déclarative simple.
 - Pas de versioning initial (optionnel à ajouter si contenu très mouvant / besoin d'historique).
 
-**Évolution possible**:
-- Ajouter versioning (entity_type = 'presentation_section').
-- Internationalisation: table fille `compagnie_presentation_sections_i18n` avec `(section_id, locale, title, content[])`.
-- Media interne: remplacer `image_url` par `image_media_id` (FK vers `medias`).
+**Évolution possible (certaines déjà implémentées)**:
+- Versioning: AJOUTÉ (entity_type = 'compagnie_presentation_section').
+- Internationalisation potentielle via table fille `compagnie_presentation_sections_i18n` avec `(section_id, locale, title, content[])`.
+- Media interne: AJOUTÉ `image_media_id` (fallback `image_url`).
+
+#### Table: `home_hero_slides`
+
+```sql
+drop table if exists public.home_hero_slides cascade;
+create table public.home_hero_slides (
+  id bigint generated always as identity primary key,
+  slug text not null unique,
+  title text not null,
+  subtitle text,
+  description text,
+  image_url text,
+  image_media_id bigint null references public.medias(id) on delete set null,
+  cta_label text,
+  cta_url text,
+  position smallint not null default 0,
+  active boolean not null default true,
+  starts_at timestamptz,
+  ends_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+comment on table public.home_hero_slides is 'Slides hero page d''accueil (carousel) avec CTA et planification optionnelle.';
+comment on column public.home_hero_slides.slug is 'Identifiant stable pour ciblage et tracking.';
+comment on column public.home_hero_slides.image_media_id is 'Référence media interne (prioritaire sur image_url).';
+comment on column public.home_hero_slides.starts_at is 'Date/heure de début d''affichage (NULL = immédiat).';
+comment on column public.home_hero_slides.ends_at is 'Date/heure de fin d''affichage (NULL = illimité).';
+
+create index if not exists idx_home_hero_slides_active_order on public.home_hero_slides(active, position) where active = true;
+create index if not exists idx_home_hero_slides_schedule on public.home_hero_slides(starts_at, ends_at) where active = true;
+
+alter table public.home_hero_slides enable row level security;
+
+drop policy if exists "Home hero slides are viewable by everyone" on public.home_hero_slides;
+create policy "Home hero slides are viewable by everyone"
+  on public.home_hero_slides for select
+  to anon, authenticated
+  using (
+    active = true
+    and (starts_at is null or starts_at <= now())
+    and (ends_at is null or ends_at >= now())
+  );
+
+drop policy if exists "Admins can manage home hero slides" on public.home_hero_slides;
+create policy "Admins can manage home hero slides"
+  on public.home_hero_slides for all
+  to authenticated
+  using ((select public.is_admin()))
+  with check ((select public.is_admin()));
+```
 
 
 #### Table: `lieux`
