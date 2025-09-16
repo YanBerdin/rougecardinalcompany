@@ -203,10 +203,9 @@ supabase migration new update_existing_data
 
 | Métrique | Valeur | Statut |
 |----------|--------|--------|
-| **Tables avec RLS** | 20/20 (100%) | ✅ |
+| **Tables avec RLS** | 24/24 (100%) | ✅ |
 | **Politiques Optimisées** | 50+ (100%) | ✅ |
-| **Index RLS** | 12 stratégiques | ✅ |
-| **Index RLS** | 14 stratégiques | ✅ |
+| **Index RLS** | 10 stratégiques | ✅ |
 | **Fonctions Sécurisées** | 8/8 (100%) | ✅ |
 | **Conformité Instructions** | 100% | ✅ |
 | **Tests de Sécurité** | En attente | 🟡 |
