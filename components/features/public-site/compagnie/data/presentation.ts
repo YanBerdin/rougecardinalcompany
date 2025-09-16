@@ -13,7 +13,9 @@ export const PresentationSectionSchema = z.object({
 
 export type PresentationSection = z.infer<typeof PresentationSectionSchema>;
 
-export const compagniePresentation: PresentationSection[] = [
+export const compagniePresentation: 
+// 07c_table_compagnie_presentation
+PresentationSection[] = [
   {
     id: 'hero',
     kind: 'hero',

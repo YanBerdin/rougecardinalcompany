@@ -26,7 +26,7 @@ comment on column public.compagnie_presentation_sections.slug is 'Identifiant st
 comment on column public.compagnie_presentation_sections.kind is 'Type de section (enum contrôlé côté DB).';
 comment on column public.compagnie_presentation_sections.content is 'Liste ordonnée de paragraphes (NULL si non pertinent).';
 comment on column public.compagnie_presentation_sections.quote_text is 'Texte de la citation si kind = quote.';
-comment on column public.compagnie_presentation_sections.position is 'Ordre global croissant d\'affichage.';
+comment on column public.compagnie_presentation_sections.position is 'Ordre global croissant d affichage.';
 
 -- Index
 create index if not exists idx_compagnie_presentation_sections_active_order on public.compagnie_presentation_sections(active, position) where active = true;

@@ -3,7 +3,7 @@ import { Users, Heart, Award, Target } from 'lucide-react';
 import { Value, TeamMember } from './types';
 
 // Mock des valeurs de la compagnie
-//  table_compagnie
+//07b_table_compagnie_content
 const valuesData: Value[] = [
   {
     icon: Heart,

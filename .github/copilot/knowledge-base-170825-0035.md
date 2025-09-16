@@ -396,13 +396,14 @@ create table public.membres_equipe (
   updated_at timestamptz default now() not null
 );
 
-comment on table public.membres_equipe is 'Members of the team (artists, staff). image_url permet d''utiliser une image externe sans media uploadé.';
-comment on column public.membres_equipe.image_url is 'URL externe de l''image du membre (fallback si aucun media stocké)';
+comment on table public.membres_equipe is 'Members of the team (artists, staff). image_url permet d utiliser une image externe sans media uploadé.';
+comment on column public.membres_equipe.image_url is 'URL externe de l image du membre (fallback si aucun media stocké)';
+```
 
 **Contraintes & Validation (ajout 2025-09):**
 - Contrainte `membres_equipe_image_url_format` renforcée: URL http/https terminant par une extension image autorisée `(jpg|jpeg|png|webp|gif|avif|svg)` avec query/hash optionnels.
 - Usage: garantit que `image_url` pointe vers une ressource image exploitable côté front (optimisation UX / préchargement).
-- Fallback logique: priorité d'affichage = `photo_media_id` (si présent) sinon `image_url`.
+- Fallback logique: priorité d affichage = `photo_media_id` (si présent) sinon `image_url`.
 
 **Versioning & Restauration:**
 - Entité couverte par trigger `trg_membres_equipe_versioning` (création + update).
@@ -442,7 +443,6 @@ left join lateral (
 ) vcount on true;
 ```
 But: fournir directement au back-office la dernière version et le nombre total de révisions sans jointure supplémentaire.
-```
 
 #### Table: `compagnie_values`
 
@@ -514,6 +514,7 @@ create policy "Admins can manage compagnie stats"
   to authenticated
   using ( (select public.is_admin()) )
   with check ( (select public.is_admin()) );
+```
 
 #### Table: `compagnie_presentation_sections`
 
@@ -584,7 +585,7 @@ const { data } = await supabase
 - Ajouter versioning (entity_type = 'presentation_section').
 - Internationalisation: table fille `compagnie_presentation_sections_i18n` avec `(section_id, locale, title, content[])`.
 - Media interne: remplacer `image_url` par `image_media_id` (FK vers `medias`).
-```
+
 
 #### Table: `lieux`
 
@@ -1055,6 +1056,7 @@ comment on column public.content_versions.entity_type is 'Type d''entité : spec
 comment on column public.content_versions.content_snapshot is 'Snapshot JSON complet des données au moment de la version';
 comment on column public.content_versions.change_summary is 'Résumé des modifications apportées';
 comment on column public.content_versions.change_type is 'Type de modification : create, update, publish, unpublish, restore';
+```
 
 **Couverture Versioning & Restauration (état actuel)**
 
@@ -1075,7 +1077,6 @@ Règles générales:
 - Les relations many-to-many (ex: spectacles_membres_equipe) ne sont pas restaurées automatiquement pour éviter des incohérences.
 - Une restauration réinsère une version supplémentaire marquée `restore` (traçabilité).
 - Les index `idx_content_versions_entity`, `idx_content_versions_created_at` optimisent les requêtes back-office.
-```
 
 #### Table: `seo_redirects`
 
