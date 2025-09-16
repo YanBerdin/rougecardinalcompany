@@ -514,6 +514,76 @@ create policy "Admins can manage compagnie stats"
   to authenticated
   using ( (select public.is_admin()) )
   with check ( (select public.is_admin()) );
+
+#### Table: `compagnie_presentation_sections`
+
+```sql
+drop table if exists public.compagnie_presentation_sections cascade;
+create table public.compagnie_presentation_sections (
+  id bigint generated always as identity primary key,
+  slug text not null unique,
+  kind text not null check (kind in ('hero','history','quote','values','team','mission','custom')),
+  title text,
+  subtitle text,
+  content text[],
+  quote_text text,
+  quote_author text,
+  image_url text,
+  position smallint not null default 0,
+  active boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+comment on table public.compagnie_presentation_sections is 'Sections dynamiques de la page présentation compagnie (hero, history, mission, values placeholder, team placeholder, quotes, custom).';
+comment on column public.compagnie_presentation_sections.slug is 'Identifiant stable référencé par le frontend.';
+comment on column public.compagnie_presentation_sections.kind is 'Type de section (enum contrôlé côté DB).';
+comment on column public.compagnie_presentation_sections.content is 'Liste ordonnée de paragraphes (NULL si non pertinent).';
+comment on column public.compagnie_presentation_sections.quote_text is 'Texte de la citation si kind = quote.';
+comment on column public.compagnie_presentation_sections.position is 'Ordre global croissant d''affichage.';
+
+create index if not exists idx_compagnie_presentation_sections_active_order on public.compagnie_presentation_sections(active, position) where active = true;
+create index if not exists idx_compagnie_presentation_sections_kind on public.compagnie_presentation_sections(kind);
+
+alter table public.compagnie_presentation_sections enable row level security;
+
+drop policy if exists "Compagnie presentation sections are viewable by everyone" on public.compagnie_presentation_sections;
+create policy "Compagnie presentation sections are viewable by everyone"
+  on public.compagnie_presentation_sections for select
+  to anon, authenticated
+  using ( true );
+
+drop policy if exists "Admins can manage compagnie presentation sections" on public.compagnie_presentation_sections;
+create policy "Admins can manage compagnie presentation sections"
+  on public.compagnie_presentation_sections for all
+  to authenticated
+  using ( (select public.is_admin()) )
+  with check ( (select public.is_admin()) );
+```
+
+**Objectif & Usage**:
+- Modélise les blocs éditoriaux dynamiques de la page présentation.
+- Permet d'activer/désactiver et réordonner sans redeployer.
+- Champs spécifiques par type (quote_text / quote_author) tout en gardant un modèle unique.
+
+**Consommation Frontend (exemple)**:
+```ts
+const { data } = await supabase
+  .from('compagnie_presentation_sections')
+  .select('slug, kind, title, subtitle, content, quote_text, quote_author, image_url')
+  .eq('active', true)
+  .order('position', { ascending: true });
+```
+
+**Décisions de conception**:
+- Pas de table séparée pour citations pour réduire la fragmentation.
+- Enum souple (TEXT + CHECK) permettant ajout via migration déclarative simple.
+- Pas de versioning initial (optionnel à ajouter si contenu très mouvant / besoin d'historique).
+
+**Évolution possible**:
+- Ajouter versioning (entity_type = 'presentation_section').
+- Internationalisation: table fille `compagnie_presentation_sections_i18n` avec `(section_id, locale, title, content[])`.
+- Media interne: remplacer `image_url` par `image_media_id` (FK vers `medias`).
 ```
 
 #### Table: `lieux`
@@ -998,6 +1068,7 @@ comment on column public.content_versions.change_type is 'Type de modification :
 | partner | INSERT/UPDATE | create, update, restore | Oui | logo_url, ordre affichage versionnés |
 | compagnie_value | INSERT/UPDATE | create, update, restore | Oui | Contenu institutionnel (title, description, position) |
 | compagnie_stat | INSERT/UPDATE | create, update, restore | Oui | Statistiques institutionnelles (label, value, position) |
+| compagnie_presentation_section | INSERT/UPDATE | create, update, restore | Oui | Sections page présentation (slug, kind, contenu) |
 
 Règles générales:
 - Chaque opération crée un snapshot JSON complet facilitant rollback partiel.

@@ -424,6 +424,42 @@ create trigger trg_compagnie_stats_versioning
   after insert or update on public.compagnie_stats
   for each row execute function public.compagnie_stats_versioning_trigger();
 
+-- Trigger function pour les sections de présentation compagnie
+create or replace function public.compagnie_presentation_sections_versioning_trigger()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  change_summary_text text;
+  change_type_value text;
+begin
+  if tg_op = 'INSERT' then
+    change_type_value := 'create';
+    change_summary_text := 'Création section présentation: ' || coalesce(NEW.slug, '');
+  else
+    change_type_value := 'update';
+    change_summary_text := 'Mise à jour section présentation: ' || coalesce(NEW.slug, '');
+  end if;
+
+  perform public.create_content_version(
+    'compagnie_presentation_section',
+    NEW.id,
+    to_jsonb(NEW),
+    change_summary_text,
+    change_type_value
+  );
+
+  return NEW;
+end;
+$$;
+
+drop trigger if exists trg_compagnie_presentation_sections_versioning on public.compagnie_presentation_sections;
+create trigger trg_compagnie_presentation_sections_versioning
+  after insert or update on public.compagnie_presentation_sections
+  for each row execute function public.compagnie_presentation_sections_versioning_trigger();
+
 -- Vue pour consulter facilement l'historique d'une entité
 create or replace view public.content_versions_detailed as
 select 
@@ -589,6 +625,23 @@ begin
       key = version_record.content_snapshot->>'key',
       label = version_record.content_snapshot->>'label',
       value = version_record.content_snapshot->>'value',
+      position = (version_record.content_snapshot->>'position')::smallint,
+      active = (version_record.content_snapshot->>'active')::boolean,
+      updated_at = now()
+    where id = version_record.entity_id;
+
+    restore_success := found;
+  elsif version_record.entity_type = 'compagnie_presentation_section' then
+    update public.compagnie_presentation_sections
+    set
+      slug = version_record.content_snapshot->>'slug',
+      kind = version_record.content_snapshot->>'kind',
+      title = version_record.content_snapshot->>'title',
+      subtitle = version_record.content_snapshot->>'subtitle',
+      content = case when version_record.content_snapshot ? 'content' then array(select jsonb_array_elements_text(version_record.content_snapshot->'content')) else null end,
+      quote_text = version_record.content_snapshot->>'quote_text',
+      quote_author = version_record.content_snapshot->>'quote_author',
+      image_url = version_record.content_snapshot->>'image_url',
       position = (version_record.content_snapshot->>'position')::smallint,
       active = (version_record.content_snapshot->>'active')::boolean,
       updated_at = now()

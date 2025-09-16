@@ -19,7 +19,7 @@ Ce dossier contient le schéma déclaratif de la base de données selon les inst
 
 | Instruction | Statut | Détail |
 |-------------|--------|--------|
-| **RLS Policies** | ✅ 100% | 22/22 tables protégées |
+| **RLS Policies** | ✅ 100% | 23/23 tables protégées |
 | **Functions** | ✅ 100% | SECURITY INVOKER, search_path défini |
 | **SQL Style** | ✅ 100% | Lowercase, snake_case, commentaires |
 | **Schema Structure** | ✅ 100% | Ordre lexicographique respecté |
@@ -38,6 +38,7 @@ supabase/schemas/
 ├── 06_table_spectacles.sql        # Table des spectacles + RLS
 ├── 07_table_evenements.sql        # Table des événements + RLS (billeterie, horaires, types)
 ├── 07b_table_compagnie_content.sql # Contenu institutionnel (valeurs & stats) + RLS
+├── 07c_table_compagnie_presentation.sql # Sections présentation compagnie + RLS
 ├── 08_table_articles_presse.sql   # Table articles presse + RLS
 ├── 08b_table__communiques_presse.sql     # Table communiqués presse + RLS + contacts presse
 ├── 09_table_partners.sql          # Table des partenaires + RLS
@@ -63,7 +64,7 @@ supabase/schemas/
 
 ## � Sécurité RLS - Validation Complète
 
-### Tables avec Protection RLS (22/22) ✅
+### Tables avec Protection RLS (23/23) ✅
 
 | Table | Lecture | Écriture | Particularités |
 |-------|---------|----------|----------------|
@@ -90,6 +91,7 @@ supabase/schemas/
 | **events_recurrence** | Publique | Admin uniquement | Récurrence publique |
 | **compagnie_values** | Publique | Admin uniquement | Valeurs institutionnelles |
 | **compagnie_stats** | Publique | Admin uniquement | Statistiques institutionnelles |
+| **compagnie_presentation_sections** | Publique | Admin uniquement | Sections modulaires page présentation |
 
 ### Optimisations Performance ⚡
 
@@ -276,6 +278,7 @@ Le schéma déclaratif Rouge Cardinal Company est **production-ready** avec :
 | partners | Oui | Oui | logo_url + ordre affichage |
 | compagnie_values | Oui | Oui | Contenu institutionnel (title, description, position) |
 | compagnie_stats | Oui | Oui | Statistiques institutionnelles (label, value, position) |
+| compagnie_presentation_sections | Oui | Oui | Sections modulaires (slug, kind, contenu) |
 
 ### Vue Administration Membres
 
