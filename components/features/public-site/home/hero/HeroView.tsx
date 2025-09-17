@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ArrowRight, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { HeroProps } from './types';
+import { HeroSkeleton } from '@/components/skeletons/hero-skeleton';
 
 export function HeroView({
     slides,
@@ -17,6 +18,9 @@ export function HeroView({
     onTouchMove,
     onTouchEnd
 }: HeroProps) {
+    if (!slides || slides.length === 0) { 
+        return null; 
+    }
     return (
         <section
             className="relative h-screen flex items-center justify-center overflow-hidden select-none"
@@ -58,7 +62,7 @@ export function HeroView({
 
                     <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                         <Button size="lg" className="bg-primary hover:bg-primary/90" asChild>
-                            <Link href="/spectacles">
+                            <Link href={slides[currentSlide].ctaUrl || '/spectacles'}>
                                 {slides[currentSlide].cta}
                                 <ArrowRight className="ml-2 h-5 w-5" />
                             </Link>

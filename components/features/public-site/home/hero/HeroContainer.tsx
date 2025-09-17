@@ -1,40 +1,18 @@
-"use client";
+import { fetchActiveHomeHeroSlides } from '@/lib/dal/home';
+import { HeroClient } from './HeroClient';
+import { HeroSlide } from './types';
 
-import { useHero } from './hooks';
-import { HeroView } from './HeroView';
-import { HeroSkeleton } from '@/components/skeletons/hero-skeleton';
+export async function HeroContainer() {
+    const records = await fetchActiveHomeHeroSlides();
 
-export function HeroContainer() {
-    const {
-        slides,
-        currentSlide,
-        isAutoPlaying,
-        isLoading,
-        nextSlide,
-        prevSlide,
-        goToSlide,
-        pauseAutoPlay,
-        handleTouchStart,
-        handleTouchMove,
-        handleTouchEnd
-    } = useHero();
+    const slides: HeroSlide[] = (records ?? []).map(r => ({
+        title: r.title,
+        subtitle: r.subtitle ?? '',
+        description: r.description ?? '',
+        image: r.image_url ?? '',
+        cta: r.cta_label ?? '',
+        ctaUrl: r.cta_url ?? '#'
+    }));
 
-    if (isLoading) {
-        return <HeroSkeleton />;
-    }
-
-    return (
-        <HeroView
-            slides={slides}
-            currentSlide={currentSlide}
-            isAutoPlaying={isAutoPlaying}
-            onPrevSlide={prevSlide}
-            onNextSlide={nextSlide}
-            onGoToSlide={goToSlide}
-            onPauseAutoPlay={pauseAutoPlay}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-        />
-    );
+    return <HeroClient initialSlides={slides} />
 }
