@@ -328,7 +328,7 @@ export default function TestConnectionPage() {
               <div className="bg-muted p-4 rounded-md mt-4">
                 <p className="font-medium mb-2">Besoin du script SQL ?</p>
                 <p>
-                  Si vous n&apos;avez pas le script SQL, consultez le dossier /lib/supabase/schemas/ du projet ou
+                  Si vous n&apos;avez pas le script SQL, consultez le dossier /supabase/schemas/ du projet ou
                   demandez à le recevoir à nouveau.
                 </p>
               </div>

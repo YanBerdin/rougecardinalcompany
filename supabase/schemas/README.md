@@ -180,7 +180,7 @@ supabase migration new update_existing_data
 
 ## 🔄 Workflow de Modification
 
-### Pour ajouter/modifier une entité :
+### Pour ajouter/modifier une entité
 
 1. **📝 Éditer** le fichier `.sql` correspondant dans `schemas/`
 2. **🔍 Valider** la syntaxe et conformité
@@ -189,7 +189,7 @@ supabase migration new update_existing_data
 5. **🚀 Appliquer** : `supabase db push`
 6. **🧪 Tester** les nouvelles fonctionnalités
 
-### Pour une nouvelle table :
+### Pour une nouvelle table
 
 1. **📋 Créer** le fichier `XX_table_nom.sql`
 2. **🏗️ Définir** la structure de table
@@ -303,7 +303,8 @@ La contrainte `membres_equipe_image_url_format` impose un format:
 
 Objectif: garantir que les URLs pointent vers des ressources images (fallback si aucune media interne).
 
-### Restauration d'une Version
+## Restauration d'une Version
+
 ### Vue Administration Messages Contact
 
 La vue `public.messages_contact_admin` fournit un accès consolidé pour le back-office :
@@ -325,7 +326,6 @@ Indices ajoutés pour optimiser:
 
 - `idx_messages_contact_status_actifs` (statuts actifs)
 - `idx_messages_contact_consent_true` (extractions consentement)
-
 
 Exemple restauration d'un membre:
 
@@ -383,7 +383,7 @@ Tâche de purge SQL (exécution mensuelle):
 ```sql
 delete from public.abonnes_newsletter
 where subscribed = false
-	and unsubscribed_at < now() - interval '90 days';
+ and unsubscribed_at < now() - interval '90 days';
 ```
 
 Escalade future possible:
