@@ -1,7 +1,7 @@
 "use server";
 
 import 'server-only';
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/supabase/server';
 
 export type HomeHeroSlideRecord = {
   title: string;

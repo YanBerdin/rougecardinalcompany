@@ -3,7 +3,7 @@
 //! ---------------- Warning -----------------//
 //TODO: Delete before production 
 import { useState, useEffect } from "react"
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '@/supabase/client'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
