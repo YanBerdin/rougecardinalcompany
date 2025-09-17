@@ -1,8 +1,8 @@
 ---
-applyTo: '**'
+applyTo: "**"
 ---
 
-# Next.js Best Practices for LLMs (2025)
+# Next.js 15. Best Practices (2025)
 
 Last updated: September 2025
 
@@ -31,9 +31,12 @@ This document summarizes the latest, authoritative best practices for building, 
 
 ## 2.1. Server and Client Component Integration (App Router)
 
-**Never use `next/dynamic` with `{ ssr: false }` inside a Server Component.** This is not supported and will cause a build/runtime error.
+> [!CAUTION]
+>**Never use `next/dynamic` with `{ ssr: false }` inside a Server Component.** This is not supported and will cause a build/runtime error.
 
-**Correct Approach:**
+> [!TIP]
+>**Correct Approach:**
+
 - If you need to use a Client Component (e.g., a component that uses hooks, browser APIs, or client-only libraries) inside a Server Component, you must:
   1. Move all client-only logic/UI into a dedicated Client Component (with `'use client'` at the top).
   2. Import and use that Client Component directly in the Server Component (no need for `next/dynamic`).
@@ -43,7 +46,7 @@ This document summarizes the latest, authoritative best practices for building, 
 
 ```tsx
 // Server Component
-import DashboardNavbar from '@/components/DashboardNavbar';
+import DashboardNavbar from "@/components/DashboardNavbar";
 
 export default async function DashboardPage() {
   // ...server logic...
@@ -57,6 +60,7 @@ export default async function DashboardPage() {
 ```
 
 **Why:**
+
 - Server Components cannot use client-only features or dynamic imports with SSR disabled.
 - Client Components can be rendered inside Server Components, but not the other way around.
 
@@ -115,7 +119,8 @@ Always move client-only UI into a Client Component and import it directly in you
 
 ### 5.1. Data Fetching Approaches
 
-Choose **ONE** approach and avoid mixing them for consistency and security auditing:
+> [!NOTE]
+> Choose **ONE** approach and avoid mixing them for consistency and security auditing:
 
 1. **External HTTP APIs** - for existing large applications and organizations
 2. **Data Access Layer (DAL)** - **RECOMMENDED** for new projects
@@ -127,82 +132,83 @@ Create a dedicated Data Access Layer for new projects:
 
 ```typescript
 // lib/data/dal.ts
-import 'server-only' // MANDATORY - prevents client-side execution
-import { cache } from 'react'
-import { cookies } from 'next/headers'
+import "server-only"; // MANDATORY - prevents client-side execution
+import { cache } from "react";
+import { cookies } from "next/headers";
 
 // Cached helper methods for consistent data access
 export const getCurrentUser = cache(async () => {
-  const token = cookies().get('AUTH_TOKEN')
-  const decodedToken = await decryptAndValidate(token)
-  
+  const token = cookies().get("AUTH_TOKEN");
+  const decodedToken = await decryptAndValidate(token);
+
   // Don't include secret tokens or private information as public fields
   // Use classes to avoid accidentally passing the whole object to the client
-  return new User(decodedToken.id)
-})
+  return new User(decodedToken.id);
+});
 
 // Authorization helper functions
 function canSeeUsername(viewer: User) {
-  return true // Public info for now, but can change
+  return true; // Public info for now, but can change
 }
 
 function canSeePhoneNumber(viewer: User, team: string) {
-  return viewer.isAdmin || team === viewer.team
+  return viewer.isAdmin || team === viewer.team;
 }
 
 export async function getProfileDTO(slug: string) {
   // Use database API that supports safe templating of queries
-  const [rows] = await sql`SELECT * FROM user WHERE slug = ${slug}`
-  const userData = rows[0]
-  const currentUser = await getCurrentUser()
-  
+  const [rows] = await sql`SELECT * FROM user WHERE slug = ${slug}`;
+  const userData = rows[0];
+  const currentUser = await getCurrentUser();
+
   // Only return data relevant for this query and not everything
   // Follow API minimization principles
   return {
     username: canSeeUsername(currentUser) ? userData.username : null,
     phonenumber: canSeePhoneNumber(currentUser, userData.team)
-      ? userData.phonenumber 
+      ? userData.phonenumber
       : null,
-  }
+  };
 }
 ```
 
 **DAL Requirements:**
+
 - Only run on the server (`import 'server-only'`)
 - Perform authorization checks
 - Return safe, minimal Data Transfer Objects (DTOs)
 - Only the DAL should access `process.env` secrets
 
 ### 5.3. Component-Level Data Access (Prototypes Only)
+> [!WARNING]
+> ⚠️ **WARNING**: Only for prototypes and learning. High risk of data exposure.
 
-⚠️ **WARNING**: Only for prototypes and learning. High risk of data exposure.
-
-```typescript
+```js
 // ❌ BAD: Exposes all userData fields to client
 export async function Page({ params: { slug } }) {
-  const [rows] = await sql`SELECT * FROM user WHERE slug = ${slug}`
-  const userData = rows[0]
-  
+  const [rows] = await sql`SELECT * FROM user WHERE slug = ${slug}`;
+  const userData = rows[0];
+
   // EXPOSED: This exposes all fields to the client
-  return <Profile user={userData} />
+  return <Profile user={userData} />;
 }
 
 // ✅ GOOD: Sanitize data before passing to Client Component
 export async function getUser(slug: string) {
-  const [rows] = await sql`SELECT * FROM user WHERE slug = ${slug}`
-  const user = rows[0]
-  
+  const [rows] = await sql`SELECT * FROM user WHERE slug = ${slug}`;
+  const user = rows[0];
+
   // Return only the public fields
   return {
     name: user.name,
     avatar: user.avatar,
     // Never include: email, password, tokens, etc.
-  }
+  };
 }
 
 export default async function Page({ params: { slug } }) {
-  const publicProfile = await getUser(slug)
-  return <Profile user={publicProfile} />
+  const publicProfile = await getUser(slug);
+  return <Profile user={publicProfile} />;
 }
 ```
 
@@ -211,28 +217,32 @@ export default async function Page({ params: { slug } }) {
 ### 5.4. Server-Client Data Flow Security
 
 **Server Components:**
+
 - Run only on the server
 - Can safely access environment variables, secrets, databases, and internal APIs
 
 **Client Components:**
+
 - Run on server during pre-rendering AND in browser
 - Must follow browser security assumptions
 - Must not access privileged data or server-only modules
 
-**Data Sanitization Pattern:**
-```typescript
+> [!CAUTION]
+> **Data Sanitization Pattern:**
+
+```ts
 // ❌ AVOID: Broad type interfaces
 interface BadProfileProps {
-  user: User // Contains everything from database
+  user: User; // Contains everything from database
 }
 
 // ✅ PREFER: Minimal, specific interfaces
 interface ProfileProps {
   user: {
-    name: string
-    avatar?: string
+    name: string;
+    avatar?: string;
     // Only what's needed for rendering
-  }
+  };
 }
 ```
 
@@ -246,15 +256,16 @@ pnpm add server-only
 
 ```typescript
 // At the top of every DAL module
-import 'server-only'
+import "server-only";
 
 export async function getSecretData() {
-  const apiKey = process.env.SECRET_API_KEY // Safe - will error if used client-side
+  const apiKey = process.env.SECRET_API_KEY; // Safe - will error if used client-side
   // ...proprietary business logic...
 }
 ```
 
 **Benefits:**
+
 - Build error if module imported in client environment
 - Protects proprietary code and business logic
 - Prevents accidental exposure of secrets
@@ -262,67 +273,74 @@ export async function getSecretData() {
 ### 5.6. React Taint APIs (Experimental)
 
 Enable in `next.config.js`:
-```javascript
+
+```js
 module.exports = {
   experimental: {
     taint: true,
   },
-}
+};
 ```
 
-Use to prevent accidental data exposure:
+> [!CAUTION]
+> Use to prevent accidental data exposure:
+
 ```typescript
-import { experimental_taintObjectReference, experimental_taintUniqueValue } from 'react'
+import {
+  experimental_taintObjectReference,
+  experimental_taintUniqueValue,
+} from "react";
 
 // Taint sensitive objects or values
-experimental_taintObjectReference('sensitive user data', sensitiveUserObject)
-experimental_taintUniqueValue('API key leaked', process.env.API_KEY)
+experimental_taintObjectReference("sensitive user data", sensitiveUserObject);
+experimental_taintUniqueValue("API key leaked", process.env.API_KEY);
 ```
 
 ## 6. Server Actions Security
 
 ### 6.1. Built-in Security Features
 
-- **Secure Action IDs**: Encrypted, non-deterministic IDs (regenerated every 14 days)
-- **Dead Code Elimination**: Unused Server Actions removed from client bundle
-- **POST Method Only**: Prevents CSRF vulnerabilities
-- **Origin Verification**: Compares Origin and Host headers
+> [!IMPORTANT]
+> - **Secure Action IDs**: Encrypted, non-deterministic IDs (regenerated every 14 days)
+> - **Dead Code Elimination**: Unused Server Actions removed from client bundle
+> - **POST Method Only**: Prevents CSRF vulnerabilities
+> - **Origin Verification**: Compares Origin and Host headers
 
 ### 6.2. Server Action Security Pattern
 
-```typescript
-'use server'
-import { auth } from './lib/auth'
-import { z } from 'zod'
+```ts
+"use server";
+import { auth } from "./lib/auth";
+import { z } from "zod";
 
 export async function secureUpdateAction(formData: FormData) {
   // 1. ALWAYS validate client input
   const schema = z.object({
     name: z.string().min(1).max(100),
-    email: z.string().email()
-  })
-  
+    email: z.string().email(),
+  });
+
   const result = schema.safeParse({
-    name: formData.get('name'),
-    email: formData.get('email')
-  })
-  
+    name: formData.get("name"),
+    email: formData.get("email"),
+  });
+
   if (!result.success) {
-    throw new Error('Invalid input')
+    throw new Error("Invalid input");
   }
-  
+
   // 2. ALWAYS verify authorization
-  const { user } = await auth()
+  const { user } = await auth();
   if (!user) {
-    throw new Error('You must be signed in to perform this action')
+    throw new Error("You must be signed in to perform this action");
   }
-  
+
   if (!canUpdateUser(user, result.data)) {
-    throw new Error('Unauthorized')
+    throw new Error("Unauthorized");
   }
-  
+
   // 3. Perform secure operation
-  return await updateUserInDatabase(user.id, result.data)
+  return await updateUserInDatabase(user.id, result.data);
 }
 ```
 
@@ -331,32 +349,34 @@ export async function secureUpdateAction(formData: FormData) {
 ```typescript
 // ❌ NEVER trust client data directly
 export default async function Page({ searchParams }) {
-  const isAdmin = searchParams.get('isAdmin')
-  if (isAdmin === 'true') {
-    return <AdminPanel /> // Vulnerable!
+  const isAdmin = searchParams.get("isAdmin");
+  if (isAdmin === "true") {
+    return <AdminPanel />; // Vulnerable!
   }
 }
 
 // ✅ ALWAYS re-verify server-side
 export default async function Page() {
-  const token = cookies().get('AUTH_TOKEN')
-  const isAdmin = await verifyAdmin(token)
+  const token = cookies().get("AUTH_TOKEN");
+  const isAdmin = await verifyAdmin(token);
   if (isAdmin) {
-    return <AdminPanel />
+    return <AdminPanel />;
   }
 }
 ```
 
-**Validate ALL client inputs:**
-- Form data
-- URL parameters
-- Headers
-- searchParams
-- Cookies (re-verify, don't just trust)
+> [!IMPORTANT]
+> **Validate ALL client inputs:**
+>- Form data
+>- URL parameters
+>- Headers
+>- searchParams
+>- Cookies (re-verify, don't just trust)
 
 ### 6.4. Avoiding Side Effects During Rendering
 
-```typescript
+```js
+
 // ❌ BAD: Mutation during rendering
 export default async function Page({ searchParams }) {
   if (searchParams.get('logout')) {
@@ -380,25 +400,27 @@ export default function Page() {
 }
 ```
 
-**Rule**: Mutations should NEVER be side effects during rendering. Always use Server Actions.
+> [!WARNING]
+>**Rule**: Mutations should NEVER be side effects during rendering. Always use Server Actions.
 
 ### 6.5. Advanced Server Actions Configuration
 
 For complex deployments:
 
-```javascript
+```js
 // next.config.js
 module.exports = {
   experimental: {
     serverActions: {
       // For reverse proxies or multi-layered backends
-      allowedOrigins: ['my-proxy.com', '*.my-proxy.com'],
+      allowedOrigins: ["my-proxy.com", "*.my-proxy.com"],
     },
   },
-}
+};
 ```
 
 For multi-server deployments:
+
 ```bash
 # Consistent encryption across server instances
 NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=your-aes-gcm-encrypted-key
@@ -441,19 +463,19 @@ When auditing a Next.js project:
 
 ### From Component-Level to DAL
 
-```typescript
+```js
 // Before: Direct database access in component
 export async function UserPage({ params }) {
-  const [rows] = await sql`SELECT * FROM users WHERE id = ${params.id}`
-  return <UserProfile user={rows[0]} />
+  const [rows] = await sql`SELECT * FROM users WHERE id = ${params.id}`;
+  return <UserProfile user={rows[0]} />;
 }
 
 // After: Using DAL
-import { getUserProfileDTO } from '@/lib/data/users'
+import { getUserProfileDTO } from "@/lib/data/users";
 
 export async function UserPage({ params }) {
-  const userProfile = await getUserProfileDTO(params.id)
-  return <UserProfile user={userProfile} />
+  const userProfile = await getUserProfileDTO(params.id);
+  return <UserProfile user={userProfile} />;
 }
 ```
 
@@ -461,32 +483,32 @@ export async function UserPage({ params }) {
 
 ```typescript
 // Before: Insecure action
-'use server'
+"use server";
 export async function updateUser(formData) {
-  const name = formData.get('name')
-  await sql`UPDATE users SET name = ${name}`
+  const name = formData.get("name");
+  await sql`UPDATE users SET name = ${name}`;
 }
 
 // After: Secure action
-'use server'
-import { z } from 'zod'
-import { auth } from '@/lib/auth'
+("use server");
+import { z } from "zod";
+import { auth } from "@/lib/auth";
 
 export async function updateUser(formData) {
   // Validation
   const schema = z.object({
-    name: z.string().min(1).max(100)
-  })
+    name: z.string().min(1).max(100),
+  });
   const { name } = schema.parse({
-    name: formData.get('name')
-  })
-  
+    name: formData.get("name"),
+  });
+
   // Authorization
-  const { user } = await auth()
-  if (!user) throw new Error('Unauthorized')
-  
+  const { user } = await auth();
+  if (!user) throw new Error("Unauthorized");
+
   // Secure operation
-  await sql`UPDATE users SET name = ${name} WHERE id = ${user.id}`
+  await sql`UPDATE users SET name = ${name} WHERE id = ${user.id}`;
 }
 ```
 
@@ -500,4 +522,3 @@ Do not create example/demo files (like ModalExample.tsx) in the main codebase un
 - Use the following tools to fetch and search documentation if they are available:
   - `resolve_library_id` to resolve the package/library name in the docs.
   - `get_library_docs` for up to date documentation.
-  

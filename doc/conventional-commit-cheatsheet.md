@@ -25,7 +25,7 @@ git commit -m "feat(auth): add Google login feature"
 1. **Make Changes**: Modify your files as needed.
 
 2. **Stage Your Changes**: Add your modified files to the staging area.
-    git add <file>
+    git add [filename]
     Or to add all changed files at once:
     git add .
 
@@ -35,7 +35,7 @@ git commit -m "feat(auth): add Google login feature"
 4. **Push the Changes**: Push your commits to the remote repository.
     git push
     Or if you are pushing to a specific branch:
-    git push origin <branch-name>
+    git push origin [branch-name]
 
 ## 🚀 Basic Structure
 
@@ -79,7 +79,7 @@ Each commit message follows this structure:
 10. **perf**: Code changes that improve performance
    Example: `perf(api): optimize database queries for faster responses`
 
-11. **env**: Changes related to environment setup or configuration 
+11. **env**: Changes related to environment setup or configuration
     Example: `env(docker): update Dockerfile for staging environment`
 
 12. **sec**: Security fixes or improvements
@@ -89,7 +89,7 @@ Each commit message follows this structure:
     Example: `config: update .eslint rules for stricter code checks`
 
 14. **api**: Updates to API contracts or integrations
-    Example: `api(user): add new endpoint for user profile updates` 
+    Example: `api(user): add new endpoint for user profile updates`
 
 ## Additional Commit Types
 

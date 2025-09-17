@@ -1,5 +1,22 @@
 # GitHub Copilot Instructions pour Rouge Cardinal Company
 
+## Next.js 15 Best Practices
+
+Pour toute génération ou modification de code Next.js, appliquer systématiquement les standards et patterns définis dans :
+-  `.github/copilot/nextjs.instructions.md`
+-  `.github/copilot/nextjs15-backend-with-supabase.instructions.md`
+-  `.github/copilot/nextjs-supabase-auth-2025.instructions.md`
+
+Ces fichiers contiennent :
+- Structure de projet recommandée (App Router, feature folders, colocation)
+- Différenciation Server/Client Components
+- Patterns de Data Access Layer (DAL) et sécurité
+- Validation, tests, accessibilité, documentation
+- Exemples de composants Smart/Dumb
+- Règles de migration et audit sécurité
+
+Copilot doit toujours prioriser ces instructions pour Next.js 15+ et vérifier la cohérence avec le code existant.
+
 ## Priority Guidelines
 
 When generating code for this repository:
