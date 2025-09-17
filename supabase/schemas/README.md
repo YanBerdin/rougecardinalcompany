@@ -180,7 +180,7 @@ supabase migration new update_existing_data
 
 ## 🔄 Workflow de Modification
 
-### Pour ajouter/modifier une entité :
+### Pour ajouter/modifier une entité
 
 1. **📝 Éditer** le fichier `.sql` correspondant dans `schemas/`
 2. **🔍 Valider** la syntaxe et conformité
@@ -189,7 +189,7 @@ supabase migration new update_existing_data
 5. **🚀 Appliquer** : `supabase db push`
 6. **🧪 Tester** les nouvelles fonctionnalités
 
-### Pour une nouvelle table :
+### Pour une nouvelle table
 
 1. **📋 Créer** le fichier `XX_table_nom.sql`
 2. **🏗️ Définir** la structure de table
@@ -240,12 +240,14 @@ SELECT * FROM pg_policies WHERE tablename = 'spectacles';
 ## �📚 Références
 
 ### Documentation Interne
+
 - `.github/copilot/Declarative_Database_Schema.Instructions.md` - Instructions déclaratives
 - `.github/copilot/Create_RLS_policies.Instructions.md` - Guide RLS
 - `.github/copilot/Database_Create_functions.Instructions.md` - Guide fonctions
 - `.github/copilot/Postgres_SQL_Style_Guide.Instructions.md` - Style SQL
 
 ### Documentation Externe
+
 - [Supabase Schema Management](https://supabase.com/docs/guides/cli/local-development)
 - [PostgreSQL RLS](https://www.postgresql.org/docs/current/ddl-rowsecurity.html)
 - [RFC 5545 RRULE](https://datatracker.ietf.org/doc/html/rfc5545) - Récurrence événements
@@ -284,10 +286,12 @@ Le schéma déclaratif Rouge Cardinal Company est **production-ready** avec :
 ### Vue Administration Membres
 
 La vue `public.membres_equipe_admin` expose:
+
 - Métadonnées membres (`name`, `role`, `ordre`, `active`)
 - Informations versioning: `last_version_number`, `last_change_type`, `last_version_created_at`, `total_versions`
 
 Usage côté API / dashboard:
+
 ```sql
 select * from public.membres_equipe_admin order by ordre, name;
 ```
@@ -300,14 +304,17 @@ La contrainte `membres_equipe_image_url_format` impose un format:
 Objectif: garantir que les URLs pointent vers des ressources images (fallback si aucune media interne).
 
 ### Restauration d'une Version
+
 ### Vue Administration Messages Contact
 
 La vue `public.messages_contact_admin` fournit un accès consolidé pour le back-office :
+
 - Champs bruts + dérivés: `age`, `processing_latency`, `full_name`
 - Association éventuelle au contact presse (`contact_presse_nom`, `media`, `role`)
 - Filtrage rapide possible via index partiels (`status in ('nouveau','en_cours')`, `consent = true`)
 
 Exemple usage:
+
 ```sql
 select id, created_at, age, reason, status, processing_latency
 from public.messages_contact_admin
@@ -316,11 +323,12 @@ limit 50;
 ```
 
 Indices ajoutés pour optimiser:
+
 - `idx_messages_contact_status_actifs` (statuts actifs)
 - `idx_messages_contact_consent_true` (extractions consentement)
 
-
 Exemple restauration d'un membre:
+
 ```sql
 -- Trouver versions
 select id, version_number, change_type, change_summary
@@ -333,20 +341,24 @@ select public.restore_content_version(<version_id>);
 ```
 
 Effets:
+
 - Mise à jour des champs métier
 - Création d'une nouvelle version `change_type = 'restore'`
 
 Limitations (générales):
+
 - Les relations many-to-many ne sont pas restaurées automatiquement.
 - Les blobs média ne sont pas re-validés (seule la référence est restaurée).
 
 ### Vue Administration Partenaires
 
 La vue `public.partners_admin` expose:
+
 - Données partenaires: `name`, `website_url`, `logo_url`, `logo_media_id`, `is_active`, `display_order`
 - Métadonnées versioning: `last_version_number`, `last_change_type`, `last_version_created_at`
 
 Exemple usage:
+
 ```sql
 select id, name, is_active, last_version_number, last_change_type
 from public.partners_admin
@@ -360,21 +372,23 @@ order by display_order, name;
 Objectif: Minimiser la conservation des emails désinscrits.
 
 Stratégie actuelle (faible volume, pas de campagnes récurrentes):
+
 - Donnée stockée: uniquement `email` (+ métadonnées techniques optionnelles)
 - Désinscription: `subscribed=false`, `unsubscribed_at=now()`
 - Purge recommandée: suppression définitive après 90 jours OU immédiate sur demande explicite (droit à l'oubli)
 - Pas de liste de suppression hashée à ce stade (complexité non justifiée)
 
 Tâche de purge SQL (exécution mensuelle):
+
 ```sql
 delete from public.abonnes_newsletter
 where subscribed = false
-	and unsubscribed_at < now() - interval '90 days';
+ and unsubscribed_at < now() - interval '90 days';
 ```
 
 Escalade future possible:
+
 - Ajout champ `email_hash` (SHA256) si besoin d'empêcher ré-import involontaire
 - Journalisation anonymisée des désinscriptions (non nécessaire aujourd'hui)
 
 Référence détaillée: section RGPD interne 10.3.1 (knowledge-base).
-

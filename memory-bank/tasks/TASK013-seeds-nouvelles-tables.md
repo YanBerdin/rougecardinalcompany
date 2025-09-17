@@ -5,14 +5,17 @@
 **Updated:** 17 septembre 2025
 
 ## Original Request
+
 Créer des scripts de seed (SQL/TS) pour remplir les tables: `compagnie_values`, `compagnie_stats`, `compagnie_presentation_sections`, `home_hero_slides`.
 
 ## Thought Process
+
 - Prévoir des jeux de données réalistes pour la démo.
 - Respecter RLS via rôles appropriés ou désactivation contrôlée dans seed.
 - Documenter la commande d’exécution.
 
 ## Implementation Plan
+
 - Fichier SQL ou script TS par table avec insertion d’entrées.
 - Idem: images placeholders et dates de visibilité cohérentes.
 - Ajout d’un README seed avec commandes `pnpm`.
@@ -22,6 +25,7 @@ Créer des scripts de seed (SQL/TS) pour remplir les tables: `compagnie_values`,
 **Overall Status:** Not Started - 0%
 
 ### Subtasks
+
 | ID | Description | Status | Updated | Notes |
 |----|-------------|--------|---------|-------|
 | 3.1 | Seed `compagnie_values` | Not Started | 17-09-2025 | |
@@ -31,5 +35,7 @@ Créer des scripts de seed (SQL/TS) pour remplir les tables: `compagnie_values`,
 | 3.5 | README/commandes d’exécution | Not Started | 17-09-2025 | |
 
 ## Progress Log
+
 ### 17 septembre 2025
+
 - Tâche créée. Plan et sous-tâches définis.

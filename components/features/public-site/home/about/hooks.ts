@@ -22,7 +22,7 @@ export function useAbout() {
       try {
         // Simuler un appel API avec un délai
         await new Promise(resolve => setTimeout(resolve, 1200)); //TODO: remove
-        
+
         // Récupérer ces données depuis Supabase
         setStats(aboutStats);
       } catch (error) {

@@ -4,9 +4,9 @@ applyTo: '**'
 
 # Next.js Best Practices for LLMs (2025)
 
-_Last updated: July 2025_
+Last updated: September 2025
 
-This document summarizes the latest, authoritative best practices for building, structuring, and maintaining Next.js applications. It is intended for use by LLMs and developers to ensure code quality, maintainability, and scalability.
+This document summarizes the latest, authoritative best practices for building, structuring, and maintaining Next.js applications. It is intended for use by LLMs and developers to ensure code quality, maintainability, security, and scalability.
 
 ---
 
@@ -111,7 +111,300 @@ Always move client-only UI into a Client Component and import it directly in you
 - **Error Handling:** Return appropriate HTTP status codes and error messages.
 - **Authentication:** Protect sensitive routes using middleware or server-side session checks.
 
-## 5. General Best Practices
+## 5. Data Security & Access Patterns
+
+### 5.1. Data Fetching Approaches
+
+Choose **ONE** approach and avoid mixing them for consistency and security auditing:
+
+1. **External HTTP APIs** - for existing large applications and organizations
+2. **Data Access Layer (DAL)** - **RECOMMENDED** for new projects
+3. **Component-Level Data Access** - for prototypes and learning only
+
+### 5.2. Data Access Layer (DAL) - RECOMMENDED
+
+Create a dedicated Data Access Layer for new projects:
+
+```typescript
+// lib/data/dal.ts
+import 'server-only' // MANDATORY - prevents client-side execution
+import { cache } from 'react'
+import { cookies } from 'next/headers'
+
+// Cached helper methods for consistent data access
+export const getCurrentUser = cache(async () => {
+  const token = cookies().get('AUTH_TOKEN')
+  const decodedToken = await decryptAndValidate(token)
+  
+  // Don't include secret tokens or private information as public fields
+  // Use classes to avoid accidentally passing the whole object to the client
+  return new User(decodedToken.id)
+})
+
+// Authorization helper functions
+function canSeeUsername(viewer: User) {
+  return true // Public info for now, but can change
+}
+
+function canSeePhoneNumber(viewer: User, team: string) {
+  return viewer.isAdmin || team === viewer.team
+}
+
+export async function getProfileDTO(slug: string) {
+  // Use database API that supports safe templating of queries
+  const [rows] = await sql`SELECT * FROM user WHERE slug = ${slug}`
+  const userData = rows[0]
+  const currentUser = await getCurrentUser()
+  
+  // Only return data relevant for this query and not everything
+  // Follow API minimization principles
+  return {
+    username: canSeeUsername(currentUser) ? userData.username : null,
+    phonenumber: canSeePhoneNumber(currentUser, userData.team)
+      ? userData.phonenumber 
+      : null,
+  }
+}
+```
+
+**DAL Requirements:**
+- Only run on the server (`import 'server-only'`)
+- Perform authorization checks
+- Return safe, minimal Data Transfer Objects (DTOs)
+- Only the DAL should access `process.env` secrets
+
+### 5.3. Component-Level Data Access (Prototypes Only)
+
+⚠️ **WARNING**: Only for prototypes and learning. High risk of data exposure.
+
+```typescript
+// ❌ BAD: Exposes all userData fields to client
+export async function Page({ params: { slug } }) {
+  const [rows] = await sql`SELECT * FROM user WHERE slug = ${slug}`
+  const userData = rows[0]
+  
+  // EXPOSED: This exposes all fields to the client
+  return <Profile user={userData} />
+}
+
+// ✅ GOOD: Sanitize data before passing to Client Component
+export async function getUser(slug: string) {
+  const [rows] = await sql`SELECT * FROM user WHERE slug = ${slug}`
+  const user = rows[0]
+  
+  // Return only the public fields
+  return {
+    name: user.name,
+    avatar: user.avatar,
+    // Never include: email, password, tokens, etc.
+  }
+}
+
+export default async function Page({ params: { slug } }) {
+  const publicProfile = await getUser(slug)
+  return <Profile user={publicProfile} />
+}
+```
+
+**Migration Rule**: Always migrate to DAL when moving to production.
+
+### 5.4. Server-Client Data Flow Security
+
+**Server Components:**
+- Run only on the server
+- Can safely access environment variables, secrets, databases, and internal APIs
+
+**Client Components:**
+- Run on server during pre-rendering AND in browser
+- Must follow browser security assumptions
+- Must not access privileged data or server-only modules
+
+**Data Sanitization Pattern:**
+```typescript
+// ❌ AVOID: Broad type interfaces
+interface BadProfileProps {
+  user: User // Contains everything from database
+}
+
+// ✅ PREFER: Minimal, specific interfaces
+interface ProfileProps {
+  user: {
+    name: string
+    avatar?: string
+    // Only what's needed for rendering
+  }
+}
+```
+
+### 5.5. Preventing Server-Only Code Execution on Client
+
+**Always use `server-only` package:**
+
+```bash
+pnpm add server-only
+```
+
+```typescript
+// At the top of every DAL module
+import 'server-only'
+
+export async function getSecretData() {
+  const apiKey = process.env.SECRET_API_KEY // Safe - will error if used client-side
+  // ...proprietary business logic...
+}
+```
+
+**Benefits:**
+- Build error if module imported in client environment
+- Protects proprietary code and business logic
+- Prevents accidental exposure of secrets
+
+### 5.6. React Taint APIs (Experimental)
+
+Enable in `next.config.js`:
+```javascript
+module.exports = {
+  experimental: {
+    taint: true,
+  },
+}
+```
+
+Use to prevent accidental data exposure:
+```typescript
+import { experimental_taintObjectReference, experimental_taintUniqueValue } from 'react'
+
+// Taint sensitive objects or values
+experimental_taintObjectReference('sensitive user data', sensitiveUserObject)
+experimental_taintUniqueValue('API key leaked', process.env.API_KEY)
+```
+
+## 6. Server Actions Security
+
+### 6.1. Built-in Security Features
+
+- **Secure Action IDs**: Encrypted, non-deterministic IDs (regenerated every 14 days)
+- **Dead Code Elimination**: Unused Server Actions removed from client bundle
+- **POST Method Only**: Prevents CSRF vulnerabilities
+- **Origin Verification**: Compares Origin and Host headers
+
+### 6.2. Server Action Security Pattern
+
+```typescript
+'use server'
+import { auth } from './lib/auth'
+import { z } from 'zod'
+
+export async function secureUpdateAction(formData: FormData) {
+  // 1. ALWAYS validate client input
+  const schema = z.object({
+    name: z.string().min(1).max(100),
+    email: z.string().email()
+  })
+  
+  const result = schema.safeParse({
+    name: formData.get('name'),
+    email: formData.get('email')
+  })
+  
+  if (!result.success) {
+    throw new Error('Invalid input')
+  }
+  
+  // 2. ALWAYS verify authorization
+  const { user } = await auth()
+  if (!user) {
+    throw new Error('You must be signed in to perform this action')
+  }
+  
+  if (!canUpdateUser(user, result.data)) {
+    throw new Error('Unauthorized')
+  }
+  
+  // 3. Perform secure operation
+  return await updateUserInDatabase(user.id, result.data)
+}
+```
+
+### 6.3. Input Validation Rules
+
+```typescript
+// ❌ NEVER trust client data directly
+export default async function Page({ searchParams }) {
+  const isAdmin = searchParams.get('isAdmin')
+  if (isAdmin === 'true') {
+    return <AdminPanel /> // Vulnerable!
+  }
+}
+
+// ✅ ALWAYS re-verify server-side
+export default async function Page() {
+  const token = cookies().get('AUTH_TOKEN')
+  const isAdmin = await verifyAdmin(token)
+  if (isAdmin) {
+    return <AdminPanel />
+  }
+}
+```
+
+**Validate ALL client inputs:**
+- Form data
+- URL parameters
+- Headers
+- searchParams
+- Cookies (re-verify, don't just trust)
+
+### 6.4. Avoiding Side Effects During Rendering
+
+```typescript
+// ❌ BAD: Mutation during rendering
+export default async function Page({ searchParams }) {
+  if (searchParams.get('logout')) {
+    cookies().delete('AUTH_TOKEN') // Side effect - dangerous!
+  }
+  return <UserProfile />
+}
+
+// ✅ GOOD: Use Server Actions for mutations
+import { logout } from './actions'
+
+export default function Page() {
+  return (
+    <>
+      <UserProfile />
+      <form action={logout}>
+        <button type="submit">Logout</button>
+      </form>
+    </>
+  )
+}
+```
+
+**Rule**: Mutations should NEVER be side effects during rendering. Always use Server Actions.
+
+### 6.5. Advanced Server Actions Configuration
+
+For complex deployments:
+
+```javascript
+// next.config.js
+module.exports = {
+  experimental: {
+    serverActions: {
+      // For reverse proxies or multi-layered backends
+      allowedOrigins: ['my-proxy.com', '*.my-proxy.com'],
+    },
+  },
+}
+```
+
+For multi-server deployments:
+```bash
+# Consistent encryption across server instances
+NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=your-aes-gcm-encrypted-key
+```
+
+## 7. General Best Practices
 
 - **TypeScript:** Use TypeScript for all code. Enable `strict` mode in `tsconfig.json`.
 - **ESLint & Prettier:** Enforce code style and linting. Use the official Next.js ESLint config.
@@ -126,16 +419,85 @@ Always move client-only UI into a Client Component and import it directly in you
   - Sanitize all user input.
   - Use HTTPS in production.
   - Set secure HTTP headers.
+  - Follow Data Access Layer patterns for new projects.
+  - Always use `'server-only'` for sensitive modules.
+  - Validate and authorize all Server Actions.
 - **Documentation:**
   - Write clear README and code comments.
   - Document public APIs and components.
+
+## 8. Security Audit Checklist
+
+When auditing a Next.js project:
+
+- **Data Access Layer**: Is there an established DAL practice? Are database packages and environment variables only imported in the DAL?
+- **"use client" files**: Do component props expect private data? Are type signatures overly broad?
+- **"use server" files**: Are action arguments validated? Is the user re-authorized inside each action?
+- **Dynamic routes** (`/[param]/`): Are params validated as user input?
+- **middleware.tsx and route.tsx**: These have significant power - audit thoroughly
+- **Regular security testing**: Perform penetration testing and vulnerability scanning
+
+## 9. Migration Guidelines
+
+### From Component-Level to DAL
+
+```typescript
+// Before: Direct database access in component
+export async function UserPage({ params }) {
+  const [rows] = await sql`SELECT * FROM users WHERE id = ${params.id}`
+  return <UserProfile user={rows[0]} />
+}
+
+// After: Using DAL
+import { getUserProfileDTO } from '@/lib/data/users'
+
+export async function UserPage({ params }) {
+  const userProfile = await getUserProfileDTO(params.id)
+  return <UserProfile user={userProfile} />
+}
+```
+
+### Adding Security to Existing Actions
+
+```typescript
+// Before: Insecure action
+'use server'
+export async function updateUser(formData) {
+  const name = formData.get('name')
+  await sql`UPDATE users SET name = ${name}`
+}
+
+// After: Secure action
+'use server'
+import { z } from 'zod'
+import { auth } from '@/lib/auth'
+
+export async function updateUser(formData) {
+  // Validation
+  const schema = z.object({
+    name: z.string().min(1).max(100)
+  })
+  const { name } = schema.parse({
+    name: formData.get('name')
+  })
+  
+  // Authorization
+  const { user } = await auth()
+  if (!user) throw new Error('Unauthorized')
+  
+  // Secure operation
+  await sql`UPDATE users SET name = ${name} WHERE id = ${user.id}`
+}
+```
 
 # Avoid Unnecessary Example Files
 
 Do not create example/demo files (like ModalExample.tsx) in the main codebase unless the user specifically requests a live example, Storybook story, or explicit documentation component. Keep the repository clean and production-focused by default.
 
 # Always use the latest documentation and guides
+
 - For every nextjs related request, begin by searching for the most current nextjs documentation, guides, and examples.
 - Use the following tools to fetch and search documentation if they are available:
   - `resolve_library_id` to resolve the package/library name in the docs.
   - `get_library_docs` for up to date documentation.
+  

@@ -143,12 +143,14 @@ Soutenue par des subventions et mécénats.
 ### 3.1. Distinction Presse - Architecture Métier
 
 **📰 Communiqués de presse (`communiques_presse`)** :
-- Documents PDF **émis PAR** la compagnie 
+
+- Documents PDF **émis PAR** la compagnie
 - Annonces officielles, nouvelles créations, tournées
 - Kit média professionnel pour journalistes
 - URL de téléchargement direct, taille fichier affichée
 
 **📄 Articles de presse (`articles_presse`)** :  
+
 - Articles **ÉCRITS SUR** la compagnie par les médias
 - Critiques, interviews, portraits dans la presse
 - Liens externes vers sources originales
@@ -215,7 +217,7 @@ Soutenue par des subventions et mécénats.
 - **Médiathèque** : photos HD, vidéos, documents presse
 - **Espace Presse Professionnel** :
   - Kit média avec communiqués PDF téléchargeables
-  - Contact presse dédié avec accréditations 
+  - Contact presse dédié avec accréditations
   - Médiathèque HD avec droits d'utilisation
   - Revue de presse (articles externes)
   - Base de données contacts journalistes (admin)
@@ -402,16 +404,19 @@ comment on column public.membres_equipe.image_url is 'URL externe de l image du 
 ```
 
 **Contraintes & Validation (ajout 2025-09):**
+
 - Contrainte `membres_equipe_image_url_format` renforcée: URL http/https terminant par une extension image autorisée `(jpg|jpeg|png|webp|gif|avif|svg)` avec query/hash optionnels.
 - Usage: garantit que `image_url` pointe vers une ressource image exploitable côté front (optimisation UX / préchargement).
 - Fallback logique: priorité d affichage = `photo_media_id` (si présent) sinon `image_url`.
 
 **Versioning & Restauration:**
+
 - Entité couverte par trigger `trg_membres_equipe_versioning` (création + update).
 - Support de restauration via `restore_content_version()` (branche `membre_equipe` ajoutée) réappliquant: `name, role, description, image_url, photo_media_id, ordre, active` (fallback legacy ancien snapshot `nom` pris en charge).
 - Une version supplémentaire `change_type = 'restore'` est créée après une restauration réussie.
 
 **Vue d'administration (nouvelle):**
+
 ```sql
 create or replace view public.membres_equipe_admin as
 select 
@@ -443,6 +448,7 @@ left join lateral (
   where entity_type = 'membre_equipe' and entity_id = m.id
 ) vcount on true;
 ```
+
 But: fournir directement au back-office la dernière version et le nombre total de révisions sans jointure supplémentaire.
 
 #### Table: `compagnie_values`
@@ -566,11 +572,13 @@ create policy "Admins can manage compagnie presentation sections"
 ```
 
 **Objectif & Usage**:
+
 - Modélise les blocs éditoriaux dynamiques de la page présentation.
 - Permet d'activer/désactiver et réordonner sans redeployer.
 - Champs spécifiques par type (quote_text / quote_author) tout en gardant un modèle unique.
 
 **Consommation Frontend (exemple)**:
+
 ```ts
 const { data } = await supabase
   .from('compagnie_presentation_sections')
@@ -580,11 +588,13 @@ const { data } = await supabase
 ```
 
 **Décisions de conception**:
+
 - Pas de table séparée pour citations pour réduire la fragmentation.
 - Enum souple (TEXT + CHECK) permettant ajout via migration déclarative simple.
 - Pas de versioning initial (optionnel à ajouter si contenu très mouvant / besoin d'historique).
 
 **Évolution possible (certaines déjà implémentées)**:
+
 - Versioning: AJOUTÉ (entity_type = 'compagnie_presentation_section').
 - Internationalisation potentielle via table fille `compagnie_presentation_sections_i18n` avec `(section_id, locale, title, content[])`.
 - Media interne: AJOUTÉ `image_media_id` (fallback `image_url`).
@@ -639,7 +649,6 @@ create policy "Admins can manage home hero slides"
   using ((select public.is_admin()))
   with check ((select public.is_admin()));
 ```
-
 
 #### Table: `lieux`
 
@@ -729,12 +738,14 @@ comment on column public.evenements.type_array is 'Tableau des types d''événem
 ```
 
 **Nouveaux champs 2025** :
-- `ticket_url` : Lien direct vers la billetterie ou système de réservation 
+
+- `ticket_url` : Lien direct vers la billetterie ou système de réservation
 - `image_url` : Image spécifique à l'événement (en plus des médias du spectacle)
 - `start_time` / `end_time` : Horaires précis pour compléter les dates
 - `type_array` : Types d'événements multiples (spectacle, première, atelier, rencontre, conférence, masterclass, etc.)
 
 **Contraintes de validation** :
+
 - Format URL validé pour `ticket_url` et `image_url`
 - `start_time` ≤ `end_time` quand les deux sont définis
 - Types d'événements limités à une liste prédéfinie
@@ -969,7 +980,7 @@ create table public.communiques_medias (
 ```
 
 - **Convention d'ordre** : `-1` = PDF principal obligatoire, `0` = image principale, `1+` = médias secondaires
-- **Contraintes d'intégrité** : 
+- **Contraintes d'intégrité** :
   - Chaque communiqué doit avoir **exactement un PDF principal** (ordre = -1)
   - Trigger `check_communique_has_pdf()` empêche la suppression du dernier PDF principal
   - Trigger empêche les doublons de PDF principal
@@ -1112,7 +1123,7 @@ comment on column public.content_versions.change_summary is 'Résumé des modifi
 comment on column public.content_versions.change_type is 'Type de modification : create, update, publish, unpublish, restore';
 ```
 
-**Couverture Versioning & Restauration (état actuel)**
+##### Couverture Versioning & Restauration (état actuel)
 
 | entity_type | Triggers | Types de change_type générés | Restauration supportée | Notes |
 |-------------|----------|-------------------------------|------------------------|-------|
@@ -1127,6 +1138,7 @@ comment on column public.content_versions.change_type is 'Type de modification :
 | compagnie_presentation_section | INSERT/UPDATE | create, update, restore | Oui | Sections page présentation (slug, kind, contenu) |
 
 Règles générales:
+
 - Chaque opération crée un snapshot JSON complet facilitant rollback partiel.
 - Les relations many-to-many (ex: spectacles_membres_equipe) ne sont pas restaurées automatiquement pour éviter des incohérences.
 - Une restauration réinsère une version supplémentaire marquée `restore` (traçabilité).
@@ -1185,6 +1197,7 @@ comment on column public.sitemap_entries.change_frequency is 'Fréquence de mise
 #### Relations / Contraintes (FK)
 
 **Tables principales :**
+
 - `profiles.user_id` → `auth.users(id)` avec contrainte UNIQUE
 - `profiles.avatar_media_id` → `public.medias(id)` ON DELETE SET NULL
 - `medias.uploaded_by` → `auth.users(id)` ON DELETE SET NULL
@@ -1197,6 +1210,7 @@ comment on column public.sitemap_entries.change_frequency is 'Fréquence de mise
 - `partners.created_by` → `auth.users(id)` ON DELETE SET NULL
 
 **Tables de relations :**
+
 - `spectacles_membres_equipe` : relation many-to-many entre `spectacles` et `membres_equipe`
 - `spectacles_medias` : relation many-to-many entre `spectacles` et `medias` avec ordre
 - `articles_medias` : relation many-to-many entre `articles_presse` et `medias` avec ordre
@@ -1207,6 +1221,7 @@ comment on column public.sitemap_entries.change_frequency is 'Fréquence de mise
 - `articles_tags` : relation many-to-many entre `articles_presse` et `tags`
 
 **Index importants :**
+
 - `idx_profiles_user_id` sur `profiles(user_id)` pour les politiques RLS
 - `idx_partners_active_order` sur `partners(is_active, display_order)` pour affichage des partenaires actifs
 - `idx_partners_created_by` sur `partners(created_by)` pour les requêtes d'ownership
@@ -1228,11 +1243,13 @@ comment on column public.sitemap_entries.change_frequency is 'Fréquence de mise
 #### Contraintes d'intégrité métier
 
 **Contraintes de validation des communiqués de presse :**
+
 - Chaque communiqué de presse doit avoir un document PDF principal (ordre = -1)
 - Contrainte appliquée via trigger `check_communique_has_pdf()` sur les opérations CRUD
 - Validation automatique lors de la création/modification des relations `communiques_medias`
 
 **Contraintes de format :**
+
 - URLs des partenaires : format http/https validé par expression régulière
 - URLs des événements (ticket_url, image_url) : format http/https validé par expression régulière
 - Ordre d'affichage : valeurs positives uniquement
@@ -1240,6 +1257,7 @@ comment on column public.sitemap_entries.change_frequency is 'Fréquence de mise
 - Horaires événements : start_time ≤ end_time quand les deux sont définis
 
 **Contraintes métier spécifiques :**
+
 - Les médias de type PDF avec ordre -1 sont automatiquement marqués comme "principal"
 - Les événements récurrents maintiennent une hiérarchie cohérente (parent/enfant)
 - Types d'événements limités à une liste prédéfinie (spectacle, première, atelier, rencontre, conférence, etc.)
@@ -1398,6 +1416,7 @@ comment on view public.recurrent_events is 'Vue pour la gestion des événements
 ## 7. Row Level Security (RLS) and Policies (règles appliquées & raisons)
 
 **🔧 Nouvelle Organisation (Sept 2025) :**
+
 - **RLS intégrées** : Politiques maintenant incluses dans chaque fichier de table
 - **Maintenant 20/20 tables protégées** (incluant communiques_presse)
 - **Performance optimisée** : `(select public.is_admin())` pour mise en cache
@@ -2005,11 +2024,13 @@ for each row execute function public.articles_search_vector_trigger();
 Les triggers suivants sont appliqués automatiquement à toutes les tables principales :
 
 **Tables concernées :**
+
 - `public.profiles`, `public.medias`, `public.membres_equipe`, `public.lieux`
 - `public.spectacles`, `public.evenements`, `public.articles_presse`
 - `public.partners`, `public.abonnes_newsletter`, `public.messages_contact`, `public.configurations_site`
 
 **Triggers updated_at :**
+
 ```sql
 -- Appliqué automatiquement via boucle DO sur toutes les tables
 create trigger trg_update_updated_at
@@ -2018,6 +2039,7 @@ create trigger trg_update_updated_at
 ```
 
 **Triggers d'audit :**
+
 ```sql
 -- Appliqué automatiquement via boucle DO sur toutes les tables
 create trigger trg_audit
@@ -2028,6 +2050,7 @@ create trigger trg_audit
 #### Triggers spécialisés
 
 **Triggers pour les tags (compteur d'usage) :**
+
 ```sql
 -- Maintien automatique du usage_count pour les tags
 create trigger trg_spectacles_tags_usage_count
@@ -2040,6 +2063,7 @@ create trigger trg_articles_tags_usage_count
 ```
 
 **Triggers pour les slugs automatiques :**
+
 ```sql
 -- Génération automatique des slugs si non fournis
 create trigger trg_spectacles_slug
@@ -2060,6 +2084,7 @@ create trigger trg_tags_slug
 ```
 
 **Triggers de versioning :**
+
 ```sql
 -- Historique automatique des versions pour le contenu éditorial
 create trigger trg_spectacles_versioning
@@ -2217,11 +2242,13 @@ Pour garantir la sécurité du site et éviter les failles les plus courantes (I
 Objectif: Minimiser la conservation des données des abonnés inactifs tout en permettant une gestion simple du cycle de vie.
 
 Hypothèses actuelles:
+
 - Faible volume d'abonnés
 - Pas de campagnes marketing récurrentes programmées
 - Pas de besoin de « suppression list » persistante complexe
 
 Stratégie retenue (phase actuelle):
+
 1. À l'inscription: stockage de l'email (`citext`), `subscribed=true`, `subscribed_at=now()`.
 2. Désinscription (action utilisateur) : mise à `subscribed=false`, `unsubscribed_at=now()`.
 3. Purge périodique simple : suppression définitive des lignes désinscrites après une période de rétention courte (ex: 90 jours) OU suppression immédiate si conformité stricte privilégiée.
@@ -2230,6 +2257,7 @@ Stratégie retenue (phase actuelle):
 Option future (non implémentée) : pseudonymisation différée (`email_hash`) si le volume augmente ou si l'on souhaite empêcher ré-import involontaire.
 
 Tâche SQL de purge (exécution mensuelle) — variante rétention 90 jours :
+
 ```sql
 delete from public.abonnes_newsletter
 where subscribed = false
@@ -2237,7 +2265,6 @@ where subscribed = false
 ```
 
 Justification RGPD : limitation de durée, minimisation et suppression rapide des données inactives ou non nécessaires.
-
 
 ---
 
@@ -2248,6 +2275,7 @@ Justification RGPD : limitation de durée, minimisation et suppression rapide de
 Tous les objets du schéma sont organisés dans le répertoire `supabase/schemas/` avec une structure numérotée pour garantir l'ordre d'exécution :
 
 **Extensions et Tables (01-16) avec RLS intégrées :**
+
 - `01_extensions.sql` - Extensions PostgreSQL (pgcrypto, unaccent, pg_trgm, citext*)
 - `02_table_profiles.sql` - Table des profils utilisateurs + RLS
 - `03_table_medias.sql` - Gestion des médias et fichiers + RLS
@@ -2269,22 +2297,27 @@ Tous les objets du schéma sont organisés dans le répertoire `supabase/schemas
 > **Note importante**: L'extension `citext` est utilisée dans la table `abonnes_newsletter` (10_tables_system.sql) pour le champ `email`, mais n'est pas explicitement créée dans le fichier `01_extensions.sql`. Cela représente une incohérence à corriger.
 
 **Fonctions (20-29) :**
+
 - `20_functions_core.sql` - Fonctions utilitaires de base (is_admin, generate_slug, etc.)
 - `21_functions_auth_sync.sql` - Synchronisation auth.users <-> profiles
 
 **Triggers (30-39) :**
+
 - `30_triggers.sql` - Application des triggers sur toutes les tables (audit, search, updated_at)
 
 **Optimisations (40-59) :**
+
 - `40_indexes.sql` - Index et optimisations de performance (incluant index RLS)
 - `50_constraints.sql` - Contraintes de validation des données
 
 **Sécurité RLS (60-69) - Fichiers spécialisés :**
+
 - `60_rls_profiles.sql` - Politiques RLS pour les profils
 - `61_rls_main_tables.sql` - Politiques RLS pour les tables principales
 - `62_rls_advanced_tables.sql` - Politiques RLS pour les tables avancées
 
 **🔧 Refactorisation récente :**
+
 - **Supprimé** : `63_rls_missing_tables.sql` (fichier patch temporaire)
 - **Intégré** : Toutes les politiques RLS sont maintenant dans les fichiers de tables individuels
 - **Unifié** : Documentation consolidée dans un seul `README.md`
@@ -2293,6 +2326,7 @@ Tous les objets du schéma sont organisés dans le répertoire `supabase/schemas
 ### 11.2. Workflow de migration
 
 1. **Développement local :**
+
    ```bash
    # Arrêter l'instance locale
    supabase stop
@@ -3259,7 +3293,6 @@ Tous les objets du schéma sont organisés dans le répertoire `supabase/schemas
 
 <https://github.com/YanBerdin/conventional-commit-cheatsheet/blob/main/README.md?plain=1>
 
-
 ### 17.1. 🚀 Basic Structure
 
 Each commit message follows this structure:
@@ -3365,6 +3398,7 @@ update public.configurations_site set show_partners = false;
 🚨 **IMPORTANT** : La structure du schéma a été REFACTORISÉE. Les AI models doivent respecter les nouvelles règles :
 
 **✅ NOUVELLES RÈGLES À RESPECTER :**
+
 - **RLS intégrées** : Chaque fichier de table (`XX_table_*.sql`) DOIT contenir ses propres politiques RLS
 - **Pas de fichier patch** : Ne jamais créer de fichier `XX_rls_missing_*.sql` ou similaire
 - **Documentation unifiée** : Un seul `README.md` dans `supabase/schemas/`
@@ -3373,6 +3407,7 @@ update public.configurations_site set show_partners = false;
 - **Index RLS** : Ajouter les index nécessaires dans `40_indexes.sql`
 
 **❌ PATTERNS DÉPRÉCIÉS - NE JAMAIS UTILISER :**
+
 ```sql
 -- ❌ Ne jamais créer de fichier séparé pour RLS manquantes
 -- 63_rls_missing_tables.sql  -- SUPPRIMÉ
@@ -3387,6 +3422,7 @@ README-database-schema.md         -- SUPPRIMÉ
 ```
 
 **✅ PATTERNS CORRECTS À TOUJOURS UTILISER :**
+
 ```sql
 -- ✅ RLS dans le même fichier que la table
 -- Fichier: 05_table_lieux.sql
@@ -3406,6 +3442,7 @@ using ( (select public.is_admin()) )  -- PERFORMANCE OPTIMISÉE
 ### 19.2. **Distinction Presse - Architecture Métier Critique**
 
 **❌ ERREUR COMMUNE :**
+
 ```sql
 -- NE PAS confondre ces deux entités distinctes
 SELECT * FROM articles_presse; -- Articles ÉCRITS SUR la compagnie
@@ -3415,6 +3452,7 @@ SELECT * FROM communiques_presse; -- Documents PDF ÉMIS PAR la compagnie
 **✅ USAGE CORRECT :**
 
 **Pour afficher les communiqués de presse (Kit Média) :**
+
 ```sql
 -- Vue optimisée avec URLs de téléchargement
 SELECT * FROM communiques_presse_public 
@@ -3423,6 +3461,7 @@ ORDER BY ordre_affichage ASC, date_publication DESC;
 ```
 
 **Pour afficher la revue de presse (Articles externes) :**
+
 ```sql
 -- Articles publiés par les médias
 SELECT * FROM articles_presse 
@@ -3431,6 +3470,7 @@ ORDER BY published_at DESC;
 ```
 
 **Versioning automatique étendu :**
+
 ```sql
 -- Historique complet des modifications
 SELECT * FROM content_versions 
@@ -3442,6 +3482,7 @@ SELECT public.restore_content_version(version_id, 'Restauration suite à erreur'
 ```
 
 **Architecture TypeScript :**
+
 ```typescript
 // Types distincts pour l'espace presse
 interface PressRelease {        // communiques_presse
@@ -3489,6 +3530,7 @@ interface MediaArticle {        // articles_presse
 As an AI language model, you MUST NOT generate any of the following code patterns, as they are DEPRECATED and will BREAK the application:
 
 ### ❌ DEPRECATED PATTERNS
+
 ```typescript
 // ❌ NEVER GENERATE THIS CODE - IT WILL BREAK THE APPLICATION
 {
