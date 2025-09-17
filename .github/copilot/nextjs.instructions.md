@@ -179,6 +179,22 @@ export async function getProfileDTO(slug: string) {
 - Return safe, minimal Data Transfer Objects (DTOs)
 - Only the DAL should access `process.env` secrets
 
+### 5.2.1. Reads policy (No Server Actions for reads)
+
+- Do not use Server Actions for data reads. Server Actions issue POSTs, are not cached, and serialize execution (hurting parallelism).
+- Perform reads in Server Components (GET) and leverage `Suspense` to stream UI; keep mutations as Server Actions or API routes.
+- Always centralize auth inside the DAL (e.g., `requireUser()` within each read), not only at page-level.
+
+### 5.2.2. Cache invalidation after mutations
+
+- Use `revalidatePath('/route')` or `revalidateTag('tag')` inside mutation Server Actions to invalidate server cache.
+- Prefer route‑segment revalidation aligned with affected data. Keep ISR settings consistent with DAL usage.
+
+### 5.2.3. Layouts pitfalls (static rendering)
+
+- Avoid fetching server data in root/layouts to preserve static rendering of children routes.
+- If session is needed in a navbar, make the navbar a Client Component and fetch session client‑side to keep siblings static when possible.
+
 ### 5.3. Component-Level Data Access (Prototypes Only)
 > [!WARNING]
 > ⚠️ **WARNING**: Only for prototypes and learning. High risk of data exposure.
@@ -269,6 +285,11 @@ export async function getSecretData() {
 - Build error if module imported in client environment
 - Protects proprietary code and business logic
 - Prevents accidental exposure of secrets
+
+### 5.7. Concurrency and request semantics
+
+- Reads via Server Actions become POST and are not cached; they may block mutations queued after long reads.
+- Reads from Server Components (GET) enable better caching and parallelism; use `Suspense` to stream while data loads.
 
 ### 5.6. React Taint APIs (Experimental)
 
@@ -402,6 +423,10 @@ export default function Page() {
 
 > [!WARNING]
 >**Rule**: Mutations should NEVER be side effects during rendering. Always use Server Actions.
+
+### 6.6. Scope of Server Actions
+
+- Reserve Server Actions for mutations and non‑idempotent operations. Keep data reads in Server Components/DAL to preserve GET semantics and caching.
 
 ### 6.5. Advanced Server Actions Configuration
 
