@@ -42,7 +42,7 @@ Version Control: Git (GitHub repository structure detected)
 
 #### Primary Architectural Pattern
 
-```text
+```bash
 Feature-Based Architecture (Domain-Driven Structure)
 ├── Organizational Principle: Business domain separation
 ├── Scalability Strategy: Vertical scaling by feature
@@ -52,7 +52,7 @@ Feature-Based Architecture (Domain-Driven Structure)
 
 #### Secondary Architectural Patterns
 
-```text
+```bash
 Container/View Pattern (Smart/Dumb Components)
 ├── Smart Components (Containers): State and logic management
 ├── Dumb Components (Views): Pure presentation layer
@@ -147,7 +147,7 @@ Data Strategy:
 
 #### Client-Server Boundary
 
-```text
+```bash
 Server Side (Next.js App Router):
 ├── Server Components: Static content and initial data loading
 ├── API Routes: Server-side business logic (if needed)
@@ -163,7 +163,7 @@ Client Side (React + Supabase):
 
 #### Feature-Shared Boundary
 
-```text
+```bash
 Feature Modules:
 ├── Domain-specific components and logic
 ├── Feature-scoped types and utilities
@@ -212,7 +212,7 @@ Monitoring: Error tracking and performance monitoring
 
 ### 3.1 System Architecture Diagram
 
-```text
+```bash
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                            Client Browser Layer                             │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────────┐  │
@@ -305,7 +305,7 @@ Monitoring: Error tracking and performance monitoring
 
 ### 3.2 Component Hierarchy Visualization
 
-```text
+```bash
 Application Root
 │
 ├── Global Layout (app/layout.tsx)
@@ -344,7 +344,7 @@ Application Root
 
 ### 3.3 Data Flow Architecture
 
-```text
+```bash
 Data Flow Patterns:
 
 Server-Side Rendering (SSR) Flow:
@@ -530,7 +530,7 @@ const supabaseMiddleware = createMiddlewareClient(request, response);
 
 **Flow Architecture**:
 
-```text
+```bash
 Authentication Flow:
 User Login → Supabase Auth → HTTP-Only Cookie → Middleware Validation → Route Access
 
@@ -683,7 +683,7 @@ Technology Stack:
 
 #### Dependency Direction Rules
 
-```text
+```bash
 Higher layers can depend on lower layers, but not vice versa:
 
 Presentation → Business Logic → Data Access → Infrastructure
@@ -1212,7 +1212,7 @@ describe('[Feature]Container', () => {
 
 - **App Router**: Utilisation du nouveau système de routage basé sur les dossiers
 
-  ```text
+  ```bash
   app/
     page.tsx            # Route: /
     layout.tsx          # Layout partagé
