@@ -1415,6 +1415,8 @@ Finished supabase db diff on branch master.
 WARNING: The diff tool is not foolproof, so you may need to manually rearrange and modify the generated migration.
 Run supabase db reset to verify that the new migration does not generate errors.
 2025/09/18 02:48:49 HTTP GET: https://api.github.com/repos/supabase/cli/releases/latest
+
+
 yandev@LAPTOP-CE57E7VI:~/projets/rougecardinalcompany$ pnpm dlx supabase db reset --no-confirm --debug
 Usage:
   supabase db reset [flags]
@@ -1471,4 +1473,8 @@ service_role key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZ
 
 ```bash
 ####################################################################################
+
+yandev@LAPTOP-CE57E7VI:~/projets/rougecardinalcompany$ pnpm dlx supabase stop
+Stopped supabase local development setup.
+Local data are backed up to docker volume. Use docker to show them: docker volume ls --filter label=com.supabase.cli.project=rougecardinalcompany
 

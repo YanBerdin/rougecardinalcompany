@@ -37,5 +37,5 @@ Ce dossier contient les migrations spécifiques qui doivent être exécutées ma
 ## Voir Aussi
 
 - `.github/copilot/Declarative_Database_Schema.Instructions.md` - Instructions pour le schéma déclaratif
-- `supabase/schemas/` - **NOUVEAU : Schéma déclaratif correctement structuré en fichiers séparés**
-- `doc/empty-database-schema-recap.sql` - **OBSOLÈTE : Ancien fichier monolithique supprimé**
+- `supabase/schemas/` - **Schéma déclaratif structuré en fichiers séparés**
+- `supabase/migrations/` - Migrations manuelles à exécuter après le schéma déclaratif

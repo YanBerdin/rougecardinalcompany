@@ -4,8 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { HeroSlide } from './types';
 
 // Mock pour le slide de la page d'accueil
-//TODO créer table pour les CTA du slide De Page d'accueil
-//TODO refactor heroSlideCta[]
+// 07d_table_home_hero.sql
 const heroSlides: HeroSlide[] = [
   {
     title: "L'Art de Raconter",

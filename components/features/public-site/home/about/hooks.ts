@@ -5,7 +5,7 @@ import { Users, Heart, Award } from 'lucide-react';
 import { StatItem } from './types';
 
 // Données statistiques pour la section À propos
-// table_compagnie
+// 07b_table_compagnie_content.sql
 const aboutStats: StatItem[] = [
   { icon: Users, value: '15+', label: 'Années d\'expérience' },
   { icon: Heart, value: '50+', label: 'Spectacles créés' },
