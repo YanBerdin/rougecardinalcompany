@@ -70,11 +70,11 @@ select
   mc.contact_presse_id,
   cp.nom as contact_presse_nom,
   cp.media as contact_presse_media,
-  cp.role as contact_presse_role
+    cp.fonction as contact_presse_role
 from public.messages_contact mc
 left join public.contacts_presse cp on cp.id = mc.contact_presse_id;
 
-comment on view public.messages_contact_admin is 'Vue pour l administration pour gestion workflow des messages de contact (latences, association presse).';
+comment on view public.messages_contact_admin is 'Vue pour l administration: suivi des messages, latences, association presse.';
 
 -- Site configuration
 drop table if exists public.configurations_site cascade;

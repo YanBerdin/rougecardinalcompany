@@ -48,6 +48,22 @@ create index idx_tags_slug on public.tags(slug);
 create index idx_tags_usage_count on public.tags(usage_count desc);
 create index idx_tags_is_featured on public.tags(is_featured);
 
+-- Relations many-to-many : communiqués <-> catégories
+drop table if exists public.communiques_categories cascade;
+create table public.communiques_categories (
+  communique_id bigint not null references public.communiques_presse(id) on delete cascade,
+  category_id bigint not null references public.categories(id) on delete cascade,
+  primary key (communique_id, category_id)
+);
+
+-- Relations many-to-many : communiqués <-> tags
+drop table if exists public.communiques_tags cascade;
+create table public.communiques_tags (
+  communique_id bigint not null references public.communiques_presse(id) on delete cascade,
+  tag_id bigint not null references public.tags(id) on delete cascade,
+  primary key (communique_id, tag_id)
+);
+
 -- Relations many-to-many : spectacles <-> categories
 drop table if exists public.spectacles_categories cascade;
 create table public.spectacles_categories (
@@ -122,6 +138,53 @@ drop trigger if exists trg_articles_tags_usage_count on public.articles_tags;
 create trigger trg_articles_tags_usage_count
   after insert or delete on public.articles_tags
   for each row execute function public.update_tag_usage_count();
+
+-- RLS policies for communiqués relations
+alter table public.communiques_categories enable row level security;
+
+drop policy if exists "Press release categories follow parent visibility" on public.communiques_categories;
+create policy "Press release categories follow parent visibility"
+on public.communiques_categories
+for select
+to anon, authenticated
+using (
+  exists (
+    select 1 from public.communiques_presse cp
+    where cp.id = communique_id
+    and (cp.public = true or (select public.is_admin()))
+  )
+);
+
+drop policy if exists "Admins can manage press release categories" on public.communiques_categories;
+create policy "Admins can manage press release categories"
+on public.communiques_categories
+for all
+to authenticated
+using ( (select public.is_admin()) )
+with check ( (select public.is_admin()) );
+
+alter table public.communiques_tags enable row level security;
+
+drop policy if exists "Press release tags follow parent visibility" on public.communiques_tags;
+create policy "Press release tags follow parent visibility"
+on public.communiques_tags
+for select
+to anon, authenticated
+using (
+  exists (
+    select 1 from public.communiques_presse cp
+    where cp.id = communique_id
+    and (cp.public = true or (select public.is_admin()))
+  )
+);
+
+drop policy if exists "Admins can manage press release tags" on public.communiques_tags;
+create policy "Admins can manage press release tags"
+on public.communiques_tags
+for all
+to authenticated
+using ( (select public.is_admin()) )
+with check ( (select public.is_admin()) );
 
 -- Vue pour naviguer dans les catégories avec hiérarchie
 create or replace view public.categories_hierarchy as

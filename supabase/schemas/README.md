@@ -31,6 +31,7 @@ Ce dossier contient le schéma déclaratif de la base de données selon les inst
 ```bash
 supabase/schemas/
 ├── 01_extensions.sql              # Extensions PostgreSQL (pgcrypto, pg_trgm)
+├── 02b_functions_core.sql         # Fonctions cœur précoces (is_admin, helpers, immutable…)
 ├── 02_table_profiles.sql          # Table des profils + RLS
 ├── 03_table_medias.sql            # Table des médias + RLS
 ├── 04_table_membres_equipe.sql    # Table membres équipe + RLS
@@ -50,16 +51,40 @@ supabase/schemas/
 ├── 14_categories_tags.sql         # Système de catégories et tags + RLS
 ├── 15_content_versioning.sql      # Système de versioning du contenu + RLS (spectacles, articles, communiqués, événements, membres, partners, valeurs, stats, sections présentation)
 ├── 16_seo_metadata.sql            # Métadonnées SEO et redirections + RLS
-├── 20_functions_core.sql          # Fonctions utilitaires (is_admin, generate_slug, etc.)
+├── 20_functions_core.sql          # (Shim) — déplacées en 02b_functions_core.sql
 ├── 21_functions_auth_sync.sql     # Fonctions sync auth.users
 ├── 30_triggers.sql                # Déclencheurs (audit, search, update_at)
 ├── 40_indexes.sql                 # Index et optimisations RLS
+├── 41_views_admin_content_versions.sql # Vues tardives: admin contenu/versioning
+├── 41_views_communiques.sql       # Vues tardives: communiqués (public + dashboard)
 ├── 50_constraints.sql             # Contraintes et validations (PDF obligatoire, formats URL, types événements)
 ├── 60_rls_profiles.sql            # Politiques RLS pour profils
 ├── 61_rls_main_tables.sql         # Politiques RLS tables principales
 ├── 62_rls_advanced_tables.sql     # Politiques RLS tables avancées
 └── README.md                      # Cette documentation
 ```
+
+Note RLS: les nouvelles tables co‑localisent leurs politiques (dans le même fichier que la table). Des fichiers RLS globaux (60–62) restent en place pour les tables historiques; convergence vers un modèle 100% co‑localisé en cours.
+
+---
+
+## 🆕 Mises à jour récentes (sept. 2025)
+
+- Renommage `spectacles.cast` → `spectacles.casting` (évite collision et clarifie le sens).
+- Fonction `public.validate_rrule(text)` (IMMUTABLE) ajoutée avant la contrainte `check_valid_rrule` pour la récurrence des événements; correction d’ordre dans la migration générée.
+- Vues dépendantes déplacées en fin de chaîne (`41_*`) pour respecter les dépendances.
+- Contraintes/Triggers durcis: suppression des `IF NOT EXISTS` non supportés dans certaines contraintes, remplacement d’un `CHECK` complexe par inclusion de tableau, suppression d’un `WHEN` sur trigger au profit de logique dans la fonction.
+- `home_hero_slides`: table + RLS avec fenêtre d’activation (index partiels sur `active`/planning).
+
+Pour rappel, la migration générée est `supabase/migrations/20250918004849_apply_declarative_schema.sql` (patchée pour l’ordre `validate_rrule()` → `check_valid_rrule`).
+
+---
+
+## 🧪 Seeds de données (migrations DML)
+
+- Les seeds ne font pas partie du schéma déclaratif. Créer une migration dédiée pour initialiser, par exemple, `home_hero_slides` via upsert par `slug`.
+- Exemple de création: `supabase migration new seed_home_hero_slides`
+- Appliquer ensuite via `supabase db push`.
 
 ---
 

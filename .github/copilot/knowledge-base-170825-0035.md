@@ -650,6 +650,11 @@ create policy "Admins can manage home hero slides"
   with check ((select public.is_admin()));
 ```
 
+Notes:
+
+- Politiques RLS co‑localisées dans le fichier de table: lecture publique si `active` et fenêtre temporelle valide; gestion admin via `public.is_admin()`.
+- Dépend des médias via `image_media_id` (prioritaire sur `image_url`).
+
 #### Table: `lieux`
 
 ```sql
@@ -683,7 +688,7 @@ create table public.spectacles (
   short_description text,
   genre text,
   duration_minutes integer,
-  cast integer,
+  casting integer,
   premiere timestamptz null,
   image_url text,
   public boolean default true,
@@ -696,6 +701,7 @@ create table public.spectacles (
 
 comment on table public.spectacles is 'shows/performances (base entity)';
 comment on column public.spectacles.image_url is 'URL externe vers une image (alternative aux médias stockés via spectacles_medias)';
+comment on column public.spectacles.casting is 'Nombre d''interprètes au plateau (anciennement cast)';
 ```
 
 #### Table: `evenements`
@@ -750,6 +756,16 @@ comment on column public.evenements.type_array is 'Tableau des types d''événem
 - `start_time` ≤ `end_time` quand les deux sont définis
 - Types d'événements limités à une liste prédéfinie
 - Support du versioning automatique pour traçabilité des modifications
+
+Validation RRULE et ordre d’exécution:
+
+- La fonction `public.validate_rrule(text)` est IMMUTABLE et définie avant l’ajout de la contrainte `check_valid_rrule` pour permettre son utilisation dans un `CHECK`.
+- Si vous régénérez une migration, vérifiez que la définition de la fonction précède bien la contrainte; sinon, ajustez l’ordre dans la migration.
+
+Organisation déclarative avancée:
+
+- Fonctions cœur précoces: `02b_functions_core.sql`.
+- Vues à dépendances croisées repoussées en fin: `41_views_admin_content_versions.sql`, `41_views_communiques.sql`.
 
 #### Table: `articles_presse`
 

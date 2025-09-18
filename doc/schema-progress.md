@@ -979,8 +979,6 @@ comment on table public.membres_equipe is 'Members of the team (artists, staff).
 ```bash
 ################################################################################
 
-yandev@LAPTOP-CE57E7VI:~/projets/rougecardinalcompany$ 
-
 yandev@LAPTOP-CE57E7VI:~/projets/rougecardinalcompany$ pnpm dlx supabase db diff -f apply_declarative_schema --debug
 Using project host: supabase.co
 Supabase CLI 2.40.7
@@ -1289,6 +1287,9 @@ comment on table public.membres_equipe is "Members of the team (artists, staff).
                                           ^
 ```
 
+```bash
+####################################################################################
+
 ERROR: relation "public.communiques_medias" does not exist (SQLSTATE 42P01)
 At statement: 29
 -- ===== VUES UTILITAIRES =====
@@ -1335,6 +1336,138 @@ select
 from public.communiques_presse cp
 left join public.communiques_medias pdf_cm on cp.id = pdf_cm.communique_id and pdf_cm.ordre = -1 -- PDF principal
       ^
+
+```bash
+####################################################################################
+
+"refactor(schema): stabilize declarative schema order, fix SQL quoting, move views; rename reserved column
+
+- Add 02b_functions_core.sql defining public.is_admin() and core helpers right after profiles; neutralize 20_functions_core.sql to avoid redefinitions
+- Fix SQL comment quoting (use single quotes + escaping) in 04_table_membres_equipe.sql and 10_tables_system.sql
+- Move admin views referencing public.content_versions into 41_views_admin_content_versions.sql (created after the versioning table)
+- Move press-release views from 08b_communiques_presse.sql to 41_views_communiques.sql (created after relations like public.communiques_medias).
+- Rename reserved column public.spectacles.cast to casting in 06_table_spectacles.sql, and document the field purpose
+- Ensure creation order resolves missing relation errors (content_versions, communiques_medias) by deferring dependent views to 41_* files.
+- BREAKING CHANGE: column public.spectacles.cast renamed to casting. Update queries, views, and application code accordingly"
+
+```
+
+```bash
+####################################################################################
+
+ERROR: relation "public.categories" does not exist (SQLSTATE 42P01)                        
+At statement: 7                                                                            
+create table public.communiques_categories (                                               
+  communique_id bigint not null references public.communiques_presse(id) on delete cascade,
+  category_id bigint not null references public.categories(id) on delete cascade,          
+  primary key (communique_id, category_id)                                                 
+)
+
+# pnpm dlx supabase db diff -f apply_declarative_schema --debug
+
+ERROR: syntax error at or near "not" (SQLSTATE 42601)
+At statement: 2                                      
+-- Contrainte anti-récursion pour événements         
+alter table public.evenements                        
+add constraint if not exists check_no_self_parent
+
+# pnpm dlx supabase db diff -f apply_declarative_schema --debug
+
+ERROR: cannot use subquery in check constraint (SQLSTATE 0A000)              
+At statement: 11                                                             
+alter table public.evenements                                                
+add constraint check_valid_event_types                                       
+check (                                                                      
+  type_array is null or                                                      
+  array_length(type_array, 1) is null or                                     
+  (                                                                          
+    array_length(type_array, 1) > 0 and                                      
+    not exists (                                                             
+      select 1 from unnest(type_array) as t(type)                            
+      where t.type not in (                                                  
+        'spectacle', 'première', 'premiere', 'atelier', 'workshop',          
+        'rencontre', 'conference', 'masterclass', 'répétition', 'repetition',
+        'audition', 'casting', 'formation', 'residency', 'résidence'         
+      )                                                                      
+    )                                                                        
+  )                                                                          
+)
+
+# pnpm dlx supabase db diff -f apply_declarative_schema --debug
+
+ERROR: DELETE trigger's WHEN condition cannot reference NEW values (SQLSTATE 42P17)
+At statement: 24                                                                   
+create trigger trg_check_communique_pdf                                            
+  before insert or update or delete on public.communiques_medias                   
+  for each row                                                                     
+  when (NEW.ordre = -1 or OLD.ordre = -1 or (NEW is null and OLD.ordre = -1))
+
+```
+
+```bash
+####################################################################################
+# pnpm dlx supabase db diff -f apply_declarative_schema --debug
+
+
+Status: Downloaded newer image for public.ecr.aws/supabase/migra:3.0.1663481299
+Finished supabase db diff on branch master.
+
+WARNING: The diff tool is not foolproof, so you may need to manually rearrange and modify the generated migration.
+Run supabase db reset to verify that the new migration does not generate errors.
+2025/09/18 02:48:49 HTTP GET: https://api.github.com/repos/supabase/cli/releases/latest
+yandev@LAPTOP-CE57E7VI:~/projets/rougecardinalcompany$ pnpm dlx supabase db reset --no-confirm --debug
+Usage:
+  supabase db reset [flags]
+
+Flags:
+      --db-url string    Resets the database specified by the connection string (must be percent-encoded).
+  -h, --help             help for reset
+      --last uint        Reset up to the last n migration versions.
+      --linked           Resets the linked project with local migrations.
+      --local            Resets the local database with local migrations. (default true)
+      --no-seed          Skip running the seed script after reset.
+      --version string   Reset up to the specified version.
+
+Global Flags:
+      --create-ticket                                  create a support ticket for any CLI error
+      --debug                                          output debug logs to stderr
+      --dns-resolver [ native | https ]                lookup domain names using the specified resolver (default native)
+      --experimental                                   enable experimental features
+      --network-id string                              use the specified docker network instead of a generated one
+  -o, --output [ env | pretty | json | toml | yaml ]   output format of status variables (default pretty)
+      --profile string                                 use a specific profile for connecting to Supabase API (default "supabase")
+      --workdir string                                 path to a Supabase project directory
+      --yes                                            answer yes to all prompts
+
+unknown flag: --no-confirm
+Try rerunning the command with --debug to troubleshoot the error.
+yandev@LAPTOP-CE57E7VI:~/projets/rougecardinalcompany$ pnpm dlx supabase db reset --local --no-seed --debug --yes
+Using project host: supabase.co
+Supabase CLI 2.40.7
+supabase start is not running.
+```
+
+```bash
+####################################################################################
+# pnpm dlx supabase db diff -f apply_declarative_schema --debug
+pnpm dlx supabase start --debug
+
+
+Started supabase local development setup.
+
+         API URL: http://127.0.0.1:54321
+     GraphQL URL: http://127.0.0.1:54321/graphql/v1
+  S3 Storage URL: http://127.0.0.1:54321/storage/v1/s3
+          DB URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+      Studio URL: http://127.0.0.1:54323
+    Inbucket URL: http://127.0.0.1:54324
+      JWT secret: super-secret-jwt-token-with-at-least-32-characters-long
+        anon key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
+service_role key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU
+   S3 Access Key: 625729a08b95bf1b7ff351a663f3a23c
+   S3 Secret Key: 850181e4652dd023b7a98c58ae0d2d34bd487ee0cc3254a
+
+```
 
 ```bash
 ####################################################################################
