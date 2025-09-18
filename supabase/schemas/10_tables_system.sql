@@ -74,7 +74,7 @@ select
 from public.messages_contact mc
 left join public.contacts_presse cp on cp.id = mc.contact_presse_id;
 
-comment on view public.messages_contact_admin is "Vue pour l'administration pour gestion workflow des messages de contact (latences, association presse).";
+comment on view public.messages_contact_admin is 'Vue pour l administration pour gestion workflow des messages de contact (latences, association presse).';
 
 -- Site configuration
 drop table if exists public.configurations_site cascade;

@@ -40,31 +40,4 @@ comment on column public.partners.is_active is 'Partenaire actif (affiché sur l
 comment on column public.partners.display_order is 'Ordre d''affichage (0 = premier)';
 comment on column public.partners.created_by is 'Utilisateur ayant créé le partenaire';
 
--- Vue d'administration consolidée partenaires (avec dernière version)
-drop view if exists public.partners_admin cascade;
-create view public.partners_admin as
-select
-  p.id,
-  p.name,
-  p.description,
-  p.website_url,
-  p.logo_url,
-  p.logo_media_id,
-  p.is_active,
-  p.display_order,
-  p.created_by,
-  p.created_at,
-  p.updated_at,
-  lv.version_number as last_version_number,
-  lv.change_type as last_change_type,
-  lv.created_at as last_version_created_at
-from public.partners p
-left join lateral (
-  select version_number, change_type, created_at
-  from public.content_versions cv
-  where cv.entity_type = 'partner' and cv.entity_id = p.id
-  order by version_number desc
-  limit 1
-) lv on true;
-
-comment on view public.partners_admin is 'Vue administration partenaires incluant métadonnées versioning';
+-- Vue partenaires_admin déplacée dans 41_views_admin_content_versions.sql (dépend de content_versions)

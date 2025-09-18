@@ -15,8 +15,8 @@ create table public.membres_equipe (
   updated_at timestamptz default now() not null
 );
 
-comment on table public.membres_equipe is 'Members of the team (artists, staff). image_url permet d\'utiliser une image externe sans media uploadé.';
-comment on column public.membres_equipe.image_url is 'URL externe de l\'image du membre (fallback si aucun media stocké)';
+comment on table public.membres_equipe is 'Members of the team (artists, staff). image_url permet d utiliser une image externe sans media uploadé.';
+comment on column public.membres_equipe.image_url is 'URL externe de l image du membre (fallback si aucun media stocké)';
 
 -- Row Level Security
 alter table public.membres_equipe enable row level security;
@@ -52,35 +52,4 @@ for delete
 to authenticated
 using ( (select public.is_admin()) );
 
--- Vue admin enrichie avec info versioning (dernière version + compte)
-create or replace view public.membres_equipe_admin as
-select 
-  m.id,
-  m.name,
-  m.role,
-  m.description,
-  m.image_url,
-  m.photo_media_id,
-  m.ordre,
-  m.active,
-  m.created_at,
-  m.updated_at,
-  cv.version_number as last_version_number,
-  cv.change_type as last_change_type,
-  cv.created_at as last_version_created_at,
-  vcount.total_versions
-from public.membres_equipe m
-left join lateral (
-  select version_number, change_type, created_at
-  from public.content_versions
-  where entity_type = 'membre_equipe' and entity_id = m.id
-  order by version_number desc
-  limit 1
-) cv on true
-left join lateral (
-  select count(*)::integer as total_versions
-  from public.content_versions
-  where entity_type = 'membre_equipe' and entity_id = m.id
-) vcount on true;
-
-comment on view public.membres_equipe_admin is 'Vue d\'administration des membres avec métadonnées de versioning (dernière version et total).';
+-- Vue admin déplacée dans 41_views_admin_content_versions.sql (dépend de content_versions)

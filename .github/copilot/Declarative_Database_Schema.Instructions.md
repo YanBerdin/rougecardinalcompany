@@ -18,6 +18,7 @@ Mandatory Instructions for Supabase Declarative Schema Management
 ## 3. **Migration Generation**
 
 - Before generating migrations, **stop the local Supabase development environment**
+
   ```bash
   supabase stop
   ```

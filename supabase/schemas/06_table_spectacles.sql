@@ -11,7 +11,7 @@ create table public.spectacles (
   short_description text,
   genre text,
   duration_minutes integer,
-  cast integer,
+  casting integer,
   premiere timestamptz null,
   image_url text, -- URL externe vers une image alternative)
   public boolean default true,
@@ -23,4 +23,5 @@ create table public.spectacles (
 );
 
 comment on table public.spectacles is 'shows/performances (base entity)';
+comment on column public.spectacles.casting is 'Nombre d  interprètes au plateau (anciennement `cast`)';
 comment on column public.spectacles.image_url is 'URL externe vers une image (alternative ou complément à image_media_id)';

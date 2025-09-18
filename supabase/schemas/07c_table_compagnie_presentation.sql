@@ -52,40 +52,5 @@ create policy "Admins can manage compagnie presentation sections"
   using ( (select public.is_admin()) )
   with check ( (select public.is_admin()) );
 
--- Vue admin pour exposer métadonnées versioning (ajoutée quand triggers actifs)
-create or replace view public.compagnie_presentation_sections_admin as
-select
-  s.id,
-  s.slug,
-  s.kind,
-  s.title,
-  s.subtitle,
-  s.content,
-  s.quote_text,
-  s.quote_author,
-  s.image_url,
-  s.image_media_id,
-  s.position,
-  s.active,
-  s.created_at,
-  s.updated_at,
-  cv.version_number as last_version_number,
-  cv.change_type as last_change_type,
-  cv.created_at as last_version_created_at,
-  vcount.total_versions
-from public.compagnie_presentation_sections s
-left join lateral (
-  select version_number, change_type, created_at
-  from public.content_versions
-  where entity_type = 'compagnie_presentation_section' and entity_id = s.id
-  order by version_number desc
-  limit 1
-) cv on true
-left join lateral (
-  select count(*)::integer as total_versions
-  from public.content_versions
-  where entity_type = 'compagnie_presentation_section' and entity_id = s.id
-) vcount on true;
-
-comment on view public.compagnie_presentation_sections_admin is 'Vue administration sections présentation avec métadonnées de versioning.';
+-- Vue admin déplacée dans 41_views_admin_content_versions.sql (dépend de content_versions)
 
