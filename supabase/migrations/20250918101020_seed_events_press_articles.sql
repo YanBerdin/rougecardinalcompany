@@ -19,7 +19,7 @@ with data(slug, date_debut, date_fin, start_time, end_time, capacity, price_cent
   values
     ('romeo-et-juliette', timestamptz '2025-12-01 19:30:00+00', timestamptz '2025-12-01 21:30:00+00', time '19:30', time '21:30', 350, 2800, 'scheduled', 'https://tickets.example.com/rj-2025-12-01', 'https://images.pexels.com/photos/167636/pexels-photo-167636.jpeg', array['spectacle','premiere']::text[]),
     ('romeo-et-juliette', timestamptz '2025-12-02 20:30:00+00', timestamptz '2025-12-02 22:30:00+00', time '20:30', time '22:30', 350, 2800, 'scheduled', 'https://tickets.example.com/rj-2025-12-02', 'https://images.pexels.com/photos/167636/pexels-photo-167636.jpeg', array['spectacle']::text[]),
-    ('la-tempete',        timestamptz '2026-03-01 20:00:00+00', timestamptz '2026-03-01 21:50:00+00', time '20:00', time '21:50', 500, 3200, 'scheduled', 'https://tickets.example.com/tempete-2026-03-01', 'https://images.pexels.com/photos/158163/clouds-cloudporn-weather-lookup-158163.jpeg', array['spectacle','tournee']::text[]),
+  ('la-tempete',        timestamptz '2026-03-01 20:00:00+00', timestamptz '2026-03-01 21:50:00+00', time '20:00', time '21:50', 500, 3200, 'scheduled', 'https://tickets.example.com/tempete-2026-03-01', 'https://images.pexels.com/photos/158163/clouds-cloudporn-weather-lookup-158163.jpeg', array['spectacle']::text[]),
     ('le-misanthrope',    timestamptz '2025-10-05 19:00:00+00', timestamptz '2025-10-05 20:45:00+00', time '19:00', time '20:45', 280, 2400, 'scheduled', 'https://tickets.example.com/misanthrope-2025-10-05', 'https://images.pexels.com/photos/167092/pexels-photo-167092.jpeg', array['spectacle']::text[])
 ), s as (
   select sp.id as spectacle_id, d.*
@@ -86,21 +86,20 @@ when not matched then insert (
 );
 
 -- =====================================
--- 3) mediaarticlesdata[]: seed public.articles_presse
 -- clé de correspondance: slug
 -- =====================================
 merge into public.articles_presse as a
 using (
   values
-    ('critique-romeo-juliette-telerama', 'Réinvention ardente de Roméo et Juliette', 'Télérama', 'https://www.telerama.fr/sortir/critique-romeo-juliette', 'telerama', 'critique', 'Camille Martin', 'Un spectacle incandescent porté par une troupe vibrante.', 'Une lecture contemporaine qui assume ses audaces, sans trahir l’émotion originelle.', timestamptz '2025-12-02 08:00:00+00'),
-    ('la-tempete-lemonde-chronique', 'La Tempête, entre sortilèges et douceur', 'Le Monde', 'https://www.lemonde.fr/culture/article/2026/03/02/la-tempete', 'le_monde', 'chronique', 'Hugo Bernard', 'Une proposition visuelle puissante, servie par une direction d’acteurs précise.', 'Le plateau devient carte des vents, les corps dessinent l’orage.', timestamptz '2026-03-02 07:30:00+00'),
-    ('misanthrope-liberation-entretien', 'Entretien: la franchise de Molière aujourd’hui', 'Libération', 'https://www.liberation.fr/culture/theatre/misanthrope', 'liberation', 'entretien', 'Julie Rey', 'Un dialogue sur la misanthropie contemporaine et ses ambiguïtés.', 'Entre satire et tendresse, la mise à nu des relations.', timestamptz '2025-10-06 10:15:00+00')
-) as s(slug, title, source_publication, source_url, type, "type", author, chapo, excerpt, published_at)
+    ('critique-romeo-juliette-telerama', 'Réinvention ardente de Roméo et Juliette', 'Télérama', 'https://www.telerama.fr/sortir/critique-romeo-juliette', 'critique', 'Camille Martin', 'Un spectacle incandescent porté par une troupe vibrante.', 'Une lecture contemporaine qui assume ses audaces, sans trahir l’émotion originelle.', timestamptz '2025-12-02 08:00:00+00'),
+    ('la-tempete-lemonde-chronique', 'La Tempête, entre sortilèges et douceur', 'Le Monde', 'https://www.lemonde.fr/culture/article/2026/03/02/la-tempete', 'chronique', 'Hugo Bernard', 'Une proposition visuelle puissante, servie par une direction d’acteurs précise.', 'Le plateau devient carte des vents, les corps dessinent l’orage.', timestamptz '2026-03-02 07:30:00+00'),
+    ('misanthrope-liberation-entretien', 'Entretien: la franchise de Molière aujourd’hui', 'Libération', 'https://www.liberation.fr/culture/theatre/misanthrope', 'entretien', 'Julie Rey', 'Un dialogue sur la misanthropie contemporaine et ses ambiguïtés.', 'Entre satire et tendresse, la mise à nu des relations.', timestamptz '2025-10-06 10:15:00+00')
+) as s(slug, title, source_publication, source_url, type, author, chapo, excerpt, published_at)
 on a.slug = s.slug
 when matched then update set
   title = s.title,
   author = s.author,
-  type = s."type",
+  type = s.type,
   chapo = s.chapo,
   excerpt = s.excerpt,
   source_publication = s.source_publication,
@@ -110,5 +109,5 @@ when matched then update set
 when not matched then insert (
   title, author, type, slug, chapo, excerpt, source_publication, source_url, published_at, created_at, updated_at
 ) values (
-  s.title, s.author, s."type", s.slug, s.chapo, s.excerpt, s.source_publication, s.source_url, s.published_at, now(), now()
+  s.title, s.author, s.type, s.slug, s.chapo, s.excerpt, s.source_publication, s.source_url, s.published_at, now(), now()
 );
