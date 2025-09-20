@@ -28,3 +28,59 @@ export async function fetchCompanyStats() {
 
   return data ?? [];
 }
+
+export type HomeAboutContentDTO = {
+  title: string;
+  intro1: string;
+  intro2: string;
+  imageUrl: string;
+  missionTitle: string;
+  missionText: string;
+};
+
+/**
+ * Récupère le contenu "About" de la page d'accueil à partir des sections de présentation compagnie.
+ * Stratégie: prend la première section active `kind = 'history'` pour le titre + 2 paragraphes,
+ * et la première section active `kind = 'mission'` pour le bloc mission. Image: history.image_url ou mission.image_url.
+ */
+export async function fetchHomeAboutContent(): Promise<HomeAboutContentDTO> {
+  const supabase = await createClient();
+
+  const historyPromise = supabase
+    .from('compagnie_presentation_sections')
+    .select('title, content, image_url')
+    .eq('active', true)
+    .eq('kind', 'history')
+    .order('position', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  const missionPromise = supabase
+    .from('compagnie_presentation_sections')
+    .select('title, content, image_url')
+    .eq('active', true)
+    .eq('kind', 'mission')
+    .order('position', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  const [historyRes, missionRes] = await Promise.all([historyPromise, missionPromise]);
+
+  const history = historyRes.data as { title?: string; content?: string[]; image_url?: string } | null;
+  const mission = missionRes.data as { title?: string; content?: string[]; image_url?: string } | null;
+
+  return {
+    title: history?.title ?? 'La Passion du Théâtre depuis 2008',
+    intro1:
+      history?.content?.[0] ??
+      "Née de la rencontre de professionnels passionnés, la compagnie Rouge-Cardinal s'attache à créer des spectacles qui interrogent notre époque tout en célébrant la beauté de l'art théâtral.",
+    intro2:
+      history?.content?.[1] ??
+      "Notre démarche artistique privilégie l'humain, l'émotion authentique et la recherche constante d'une vérité scénique qui touche et transforme.",
+    imageUrl: history?.image_url || mission?.image_url || 'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=800',
+    missionTitle: mission?.title ?? 'Notre Mission',
+    missionText:
+      (Array.isArray(mission?.content) && mission?.content?.length ? mission?.content?.[0] : undefined) ??
+      "Créer des spectacles qui émeuvent, questionnent et rassemblent les publics autour de l'art vivant.",
+  };
+}
