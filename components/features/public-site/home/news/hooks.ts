@@ -1,3 +1,21 @@
+/**
+ * [DEPRECATED MOCK]
+ * Ce hook mock simulait les actualités. Il est désormais remplacé par
+ * un Server Component + DAL Supabase dans `NewsContainer`.
+ * Conservé à titre documentaire — NE PLUS UTILISER.
+ */
+// "use client";
+// import { useState, useEffect } from 'react';
+// import { NewsItem } from './types';
+// const newsData: NewsItem[] = [ /* mock data retirée */ ];
+// export function useNews() {
+//   const [isLoading, setIsLoading] = useState(true);
+//   const [news, setNews] = useState<NewsItem[]>([]);
+//   useEffect(() => { /* simulation retirée */ }, []);
+//   return { news, isLoading };
+// }
+
+/*
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -68,3 +86,4 @@ export function useNews() {
     isLoading
   };
 }
+*/

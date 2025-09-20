@@ -1,3 +1,21 @@
+/**
+ * [DEPRECATED MOCK]
+ * Ce hook mock simulait les partenaires. Il est remplacé par
+ * un Server Component + DAL Supabase dans `PartnersContainer`.
+ * Conservé à titre documentaire — NE PLUS UTILISER.
+ */
+// "use client";
+// import { useState, useEffect } from 'react';
+// import { Partner } from './types';
+// const partnersData = [ /* mock data retirée */ ];
+// export function usePartners() {
+//   const [isLoading, setIsLoading] = useState(true);
+//   const [partners, setPartners] = useState<Partner[]>([]);
+//   useEffect(() => { /* simulation retirée */ }, []);
+//   return { partners, isLoading };
+// }
+/*
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -83,3 +101,4 @@ export function usePartners() {
     isLoading
   };
 }
+*/

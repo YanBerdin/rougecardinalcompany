@@ -13,20 +13,20 @@ Ce dossier contient les migrations spécifiques qui doivent être exécutées ma
 
 ## Ordre d'Exécution Recommandé
 
-1. **Appliquer le schéma déclaratif :**
+### 1. **Appliquer le schéma déclaratif :**
 
-   ```bash
+```bash
    supabase stop
    supabase db diff -f apply_declarative_schema
    supabase db push
-   ```
+```
 
-2. **Exécuter les migrations de données :**
+### 2. **Exécuter les migrations de données :**
 
-   ```bash
+```bash
    # Synchronisation des profils existants
    psql -h localhost -p 54322 -d postgres -U postgres -f supabase/migrations/sync_existing_profiles.sql
-   ```
+```
 
 ## Notes Importantes
 

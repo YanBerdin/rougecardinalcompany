@@ -69,7 +69,7 @@ export const useCompagnieData = () => {
     // https://supabase.com/docs/reference/javascript/db-abortsignal
     const fetchData = async () => {
       try {
-        await new Promise(resolve => setTimeout(resolve, 1200));
+        await new Promise(resolve => setTimeout(resolve, 1200)); //TODO: remove
         
         setValues(valuesData);
         setTeam(teamData);

@@ -44,7 +44,7 @@ export function useContact() {
 
     try {
       // Simuler un appel API (skeleton testing)
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise(resolve => setTimeout(resolve, 1500)); //TODO: remove
 
       // Envoyer les données à une API (Supabase, etc.)
       setIsSubmitted(true);

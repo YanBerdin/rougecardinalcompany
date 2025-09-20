@@ -1,17 +1,22 @@
-"use client";
-
-import { useNews } from './hooks';
+import { fetchFeaturedPressReleases } from '@/lib/dal/news';
 import { NewsView } from './NewsView';
-import { NewsSkeleton } from '@/components/skeletons/news-skeleton';
+import type { NewsItem } from './types';
 
-export function NewsContainer() {
-    const { news, isLoading } = useNews();
+export async function NewsContainer() {
+    // TODO: remove - artificial delay to visualize Suspense skeletons
+    await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    if (isLoading) {
-        return <NewsSkeleton />;
-    }
+    const rows = await fetchFeaturedPressReleases(3);
 
-    // Si pas d'actualités à la une, ne pas afficher la section
+    const news: NewsItem[] = rows.map((r) => ({
+        id: r.id,
+        title: r.title,
+        short_description: r.description ?? '',
+        date: r.date_publication,
+        image: r.image_url ?? '',
+        category: 'Presse',
+    }));
+
     if (news.length === 0) {
         return null;
     }

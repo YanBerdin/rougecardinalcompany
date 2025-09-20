@@ -82,12 +82,11 @@ export const useSpectaclesData = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Simulation d'un appel API avec un délai (skeleton testing) //TODO: remove
         // https://supabase.com/docs/reference/javascript/db-abortsignal
         const fetchData = async () => {
             try {
-                // Temps de chargement simulé
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                // Simulation d'un appel API avec un délai (skeleton testing)
+                await new Promise(resolve => setTimeout(resolve, 1000)); //TODO: remove
 
                 // Mise à jour des données (todo appel API)
                 setCurrentShows(

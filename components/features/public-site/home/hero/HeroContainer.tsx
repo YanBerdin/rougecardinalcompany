@@ -3,6 +3,9 @@ import { HeroClient } from './HeroClient';
 import { HeroSlide } from './types';
 
 export async function HeroContainer() {
+    // TODO: remove - artificial delay to visualize Suspense skeletons
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    
     const records = await fetchActiveHomeHeroSlides();
 
     const slides: HeroSlide[] = (records ?? []).map(r => ({
