@@ -1,7 +1,7 @@
 -- Tables de contenu institutionnel compagnie (valeurs & statistiques)
 -- Ordre: 07b - Après spectacles (pour garder regroupement logique), avant articles
 
--- Valeurs de la compagnie (correspond à Value[] côté front)
+-- Valeurs de la compagnie (correspond à Value[] côté front Page "La Compagnie")
 -- Champ icon non stocké (déterminé en front via mapping titre/clé)
 
 drop table if exists public.compagnie_values cascade;
@@ -20,7 +20,7 @@ comment on table public.compagnie_values is 'Valeurs institutionnelles (icon gé
 comment on column public.compagnie_values.key is 'Identifiant stable utilisé pour mapping icône côté frontend.';
 comment on column public.compagnie_values.position is 'Ordre affichage (croissant).';
 
--- Statistiques / chiffres clés (correspond à StatItem[] côté front)
+-- Statistiques / chiffres clés (correspond à StatItem[] côté front Page "Acceuil")
 -- Champ icon non stocké
 
 drop table if exists public.compagnie_stats cascade;

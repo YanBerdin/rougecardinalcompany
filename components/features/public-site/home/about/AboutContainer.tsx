@@ -1,6 +1,6 @@
 import { fetchCompanyStats } from '@/lib/dal/about';
 import { AboutView } from './AboutView';
-import type { StatItem } from './types';
+import type { StatItem, AboutContent } from './types';
 import { Users, Heart, Award } from 'lucide-react';
 
 const iconByKey: Record<string, React.ElementType> = {
@@ -19,5 +19,20 @@ export async function AboutContainer() {
         value: r.value,
         label: r.label,
     }));
-    return <AboutView stats={stats} />;
+
+    // Mock de contenu À propos (à remplacer par DAL)
+    const content: AboutContent = {
+        title: 'La Passion du Théâtre depuis 2008',
+        intro1:
+            "Née de la rencontre de professionnels passionnés, la compagnie Rouge-Cardinal s'attache à créer des spectacles qui interrogent notre époque tout en célébrant la beauté de l'art théâtral.",
+        intro2:
+            "Notre démarche artistique privilégie l'humain, l'émotion authentique et la recherche constante d'une vérité scénique qui touche et transforme.",
+        imageUrl:
+            'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=800',
+        missionTitle: 'Notre Mission',
+        missionText:
+            "Créer des spectacles qui émeuvent, questionnent et rassemblent les publics autour de l'art vivant.",
+    };
+
+    return <AboutView stats={stats} content={content} />;
 }
