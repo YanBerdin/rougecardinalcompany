@@ -1,6 +1,6 @@
 -- Table des sections de présentation de la compagnie
 -- Ordre: 07c - après 07b (valeurs & stats), avant articles
--- Représente les entrées du tableau PresentationSection[] côté frontend
+-- Représente les entrées du tableau PresentationSection[] côté frontend (Page 'La Compagnie' /compagnie)
 -- Objectif: rendre administrable la structure et le contenu éditorial modulable (hero, history, quote, values, team, mission, custom)
 
 -- Suppression recréation déclarative

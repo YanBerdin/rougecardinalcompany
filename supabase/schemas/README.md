@@ -1,7 +1,5 @@
 # 📊 Schéma Déclaratif Rouge Cardinal Company
 
-> **Statut :** ✅ **Conforme 100% - Prêt pour Production**
-
 Ce dossier contient le schéma déclaratif de la base de données selon les instructions **Declarative Database Schema Management** de Supabase.
 
 ---
@@ -145,46 +143,38 @@ Pour rappel, la migration générée est `supabase/migrations/20250918004849_app
 
 ### 1. Appliquer le Schéma Déclaratif
 
+Selon votre gestionnaire de paquets :
+
+Avec pnpm
+
 ```bash
 # Arrêter l'environnement local
 pnpm dlx supabase stop
 
-# Générer les migrations depuis le schéma déclaratif
-supabase db diff -f apply_declarative_schema
+# Générer les tables (migrations) depuis le schéma déclaratif
+pnpm dlx supabase db diff -f apply_declarative_schema
 
 # Vérifier la migration générée dans supabase/migrations/
 ls -la supabase/migrations/
 
 # Appliquer les migrations
 pnpm dlx supabase db push
+
+# Réinitialiser la base locale (optionnel, utile pour tests) et rejoue les migrations
+pnpm dlx supabase db reset --yes --db-url "postgresql://postgres:postgres@127.0.0.1:54322/postgres?sslmode=disable"
 ```
 
 ### 2. Validation Post-Déploiement
 
-Avec npm
-
 ```bash
-# Tester les politiques RLS
-npm run test:rls
+# Vérifier les politiques RLS
+pnpm dlx supabase db diff -f check_rls
 
 # Vérifier les performances
-npm run test:performance
+pnpm dlx supabase db diff -f check_performance
 
 # Test complet du schéma
-npm run test:schema
-```
-
-Avec pnpm
-
-```bash
-# Tester les politiques RLS
-pnpm dlx npm run test:rls
-
-# Vérifier les performances
-pnpm dlx npm run test:performance
-
-# Test complet du schéma
-pnpm dlx npm run test:schema
+pnpm dlx supabase db diff -f check_schema
 ```
 
 ### 3. Migrations de Données Séparées
@@ -276,11 +266,13 @@ SELECT * FROM public.spectacles; -- Doit respecter RLS
 
 -- Voir les politiques actives
 SELECT * FROM pg_policies WHERE tablename = 'spectacles';
+
+-- Vérifier les colonnes d'une table
+select * from information_schema.columns where table_schema='public' and table_name='home_about_content';
+
+-- Vérifier les index
+SELECT * FROM pg_indexes WHERE tablename = 'spectacles';
 ```
-
----
-
-## �📚 Références
 
 ### Documentation Interne
 

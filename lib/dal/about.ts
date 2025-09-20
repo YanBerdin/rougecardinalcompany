@@ -29,6 +29,10 @@ export async function fetchCompanyStats() {
   return data ?? [];
 }
 
+// Contenu "About" de la page d'accueil à partir de public.home_about_content
+// 07e_table_home_about.sql
+// TODO: migrer seed.sql, admin UI, et DAL vers cette nouvelle table dédiée
+
 export type HomeAboutContentDTO = {
   title: string;
   intro1: string;
@@ -38,10 +42,22 @@ export type HomeAboutContentDTO = {
   missionText: string;
 };
 
+const DEFAULT_ABOUT: HomeAboutContentDTO = {
+  title: 'La Passion du Théâtre depuis 2008',
+  intro1:
+    "Née de la rencontre de professionnels passionnés, la compagnie Rouge-Cardinal s'attache à créer des spectacles qui interrogent notre époque tout en célébrant la beauté de l'art théâtral.",
+  intro2:
+    "Notre démarche artistique privilégie l'humain, l'émotion authentique et la recherche constante d'une vérité scénique qui touche et transforme.",
+  imageUrl:
+    'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=800',
+  missionTitle: 'Notre Mission',
+  missionText:
+    "Créer des spectacles qui émeuvent, questionnent et rassemblent les publics autour de l'art vivant.",
+};
+
 /**
- * Récupère le contenu "About" de la page d'accueil à partir des sections de présentation compagnie.
- * Stratégie: prend la première section active `kind = 'history'` pour le titre + 2 paragraphes,
- * et la première section active `kind = 'mission'` pour le bloc mission. Image: history.image_url ou mission.image_url.
+ * Récupère le contenu "About" de la page d'accueil depuis `public.home_about_content` uniquement.
+ * Si aucune ligne active n'est trouvée, retourne des valeurs par défaut contrôlées.
  */
 export async function fetchHomeAboutContent(): Promise<HomeAboutContentDTO> {
   const supabase = await createClient();
@@ -62,7 +78,8 @@ export async function fetchHomeAboutContent(): Promise<HomeAboutContentDTO> {
     }
   };
 
-  // 1) Tente de lire depuis la nouvelle table dédiée `home_about_content`
+  // Table dédiée `home_about_content`
+  // 07e_table_home_about.sql
   try {
     const { data: aboutRow, error: aboutErr } = await supabase
       .from('home_about_content')
@@ -91,82 +108,18 @@ export async function fetchHomeAboutContent(): Promise<HomeAboutContentDTO> {
       }
 
       return {
-        title: aboutRow.title ?? 'La Passion du Théâtre depuis 2008',
-        intro1:
-          aboutRow.intro1 ??
-          "Née de la rencontre de professionnels passionnés, la compagnie Rouge-Cardinal s'attache à créer des spectacles qui interrogent notre époque tout en célébrant la beauté de l'art théâtral.",
-        intro2:
-          aboutRow.intro2 ??
-          "Notre démarche artistique privilégie l'humain, l'émotion authentique et la recherche constante d'une vérité scénique qui touche et transforme.",
-        imageUrl:
-          mediaPublicUrl ||
-          aboutRow.image_url ||
-          'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=800',
-        missionTitle: aboutRow.mission_title ?? 'Notre Mission',
-        missionText:
-          aboutRow.mission_text ??
-          "Créer des spectacles qui émeuvent, questionnent et rassemblent les publics autour de l'art vivant.",
+        title: aboutRow.title ?? DEFAULT_ABOUT.title,
+        intro1: aboutRow.intro1 ?? DEFAULT_ABOUT.intro1,
+        intro2: aboutRow.intro2 ?? DEFAULT_ABOUT.intro2,
+        imageUrl: mediaPublicUrl || aboutRow.image_url || DEFAULT_ABOUT.imageUrl,
+        missionTitle: aboutRow.mission_title ?? DEFAULT_ABOUT.missionTitle,
+        missionText: aboutRow.mission_text ?? DEFAULT_ABOUT.missionText,
       };
     }
   } catch (e) {
     console.warn('fetchHomeAboutContent(home_about_content) unexpected error', e);
   }
 
-  // 2) Fallback: lecture depuis les sections de présentation existantes
-  const historyPromise = supabase
-    .from('compagnie_presentation_sections')
-    .select('title, content, image_url, image_media_id')
-    .eq('active', true)
-    .eq('kind', 'history')
-    .order('position', { ascending: true })
-    .limit(1)
-    .maybeSingle();
-
-  const missionPromise = supabase
-    .from('compagnie_presentation_sections')
-    .select('title, content, image_url, image_media_id')
-    .eq('active', true)
-    .eq('kind', 'mission')
-    .order('position', { ascending: true })
-    .limit(1)
-    .maybeSingle();
-
-  const [historyRes, missionRes] = await Promise.all([historyPromise, missionPromise]);
-
-  const history = historyRes.data as { title?: string; content?: string[]; image_url?: string; image_media_id?: number | null } | null;
-  const mission = missionRes.data as { title?: string; content?: string[]; image_url?: string; image_media_id?: number | null } | null;
-
-  // Récupère le storage_path du média si présent (history prioritaire, sinon mission)
-  let mediaPublicUrl: string | null = null;
-  const mediaId = history?.image_media_id || mission?.image_media_id;
-  if (mediaId) {
-    const { data: mediaRow, error: mediaErr } = await supabase
-      .from('medias')
-      .select('storage_path')
-      .eq('id', mediaId)
-      .maybeSingle();
-    if (mediaErr) {
-      console.warn('fetchHomeAboutContent medias error', mediaErr);
-    }
-    mediaPublicUrl = resolvePublicUrl(mediaRow?.storage_path as string | undefined);
-  }
-
-  return {
-    title: history?.title ?? 'La Passion du Théâtre depuis 2008',
-    intro1:
-      history?.content?.[0] ??
-      "Née de la rencontre de professionnels passionnés, la compagnie Rouge-Cardinal s'attache à créer des spectacles qui interrogent notre époque tout en célébrant la beauté de l'art théâtral.",
-    intro2:
-      history?.content?.[1] ??
-      "Notre démarche artistique privilégie l'humain, l'émotion authentique et la recherche constante d'une vérité scénique qui touche et transforme.",
-    imageUrl:
-      mediaPublicUrl ||
-      history?.image_url ||
-      mission?.image_url ||
-      'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=800',
-    missionTitle: mission?.title ?? 'Notre Mission',
-    missionText:
-      (Array.isArray(mission?.content) && mission?.content?.length ? mission?.content?.[0] : undefined) ??
-      "Créer des spectacles qui émeuvent, questionnent et rassemblent les publics autour de l'art vivant.",
-  };
+  // Aucune donnée disponible dans `home_about_content`: valeurs par défaut
+  return DEFAULT_ABOUT;
 }

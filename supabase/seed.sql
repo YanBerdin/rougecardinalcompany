@@ -14,12 +14,12 @@ insert into public.home_about_content (
 )
 select
   'default',
-  'Qui sommes-nous ?',
-  'La Compagnie Rouge Cardinal est dédiée à la création, la transmission et la diffusion de spectacles vivants.',
-  'Nous réunissons artistes et publics autour d’œuvres exigeantes et accessibles, ancrées dans le territoire et ouvertes sur le monde.',
-  '/opengraph-image.png',
+  'La Passion du Théâtre depuis 2008',
+  'Née de la rencontre de professionnels passionnés, la compagnie Rouge-Cardinal s''attache à créer des spectacles qui interrogent notre époque tout en célébrant la beauté de l''art théâtral.',
+  'Notre démarche artistique privilégie l''humain, l''émotion authentique et la recherche constante d''une vérité scénique qui touche et transforme.',
+  'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=800',
   'Notre mission',
-  'Créer des formes artistiques qui mettent l’humain au cœur, et rendre la culture vivante et partagée.',
+  'Créer des spectacles qui émeuvent, questionnent et rassemblent les publics autour de l''art vivant.',
   1,
   true
 where not exists (
