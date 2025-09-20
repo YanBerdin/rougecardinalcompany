@@ -147,7 +147,7 @@ Pour rappel, la migration générée est `supabase/migrations/20250918004849_app
 
 ```bash
 # Arrêter l'environnement local
-supabase stop
+pnpm dlx supabase stop
 
 # Générer les migrations depuis le schéma déclaratif
 supabase db diff -f apply_declarative_schema
@@ -156,10 +156,12 @@ supabase db diff -f apply_declarative_schema
 ls -la supabase/migrations/
 
 # Appliquer les migrations
-supabase db push
+pnpm dlx supabase db push
 ```
 
 ### 2. Validation Post-Déploiement
+
+Avec npm
 
 ```bash
 # Tester les politiques RLS
@@ -170,6 +172,19 @@ npm run test:performance
 
 # Test complet du schéma
 npm run test:schema
+```
+
+Avec pnpm
+
+```bash
+# Tester les politiques RLS
+pnpm dlx npm run test:rls
+
+# Vérifier les performances
+pnpm dlx npm run test:performance
+
+# Test complet du schéma
+pnpm dlx npm run test:schema
 ```
 
 ### 3. Migrations de Données Séparées

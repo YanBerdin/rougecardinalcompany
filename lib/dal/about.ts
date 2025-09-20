@@ -46,6 +46,73 @@ export type HomeAboutContentDTO = {
 export async function fetchHomeAboutContent(): Promise<HomeAboutContentDTO> {
   const supabase = await createClient();
 
+  // Helper: transforme storage_path ("bucket/key") en URL publique via Supabase Storage
+  const resolvePublicUrl = (storagePath?: string | null): string | null => {
+    if (!storagePath) return null;
+    const firstSlash = storagePath.indexOf('/');
+    if (firstSlash <= 0 || firstSlash === storagePath.length - 1) return null;
+    const bucket = storagePath.slice(0, firstSlash);
+    const key = storagePath.slice(firstSlash + 1);
+    try {
+      const { data } = supabase.storage.from(bucket).getPublicUrl(key);
+      return data?.publicUrl ?? null;
+    } catch (e) {
+      console.warn('resolvePublicUrl error', e);
+      return null;
+    }
+  };
+
+  // 1) Tente de lire depuis la nouvelle table dédiée `home_about_content`
+  try {
+    const { data: aboutRow, error: aboutErr } = await supabase
+      .from('home_about_content')
+      .select('title,intro1,intro2,image_url,image_media_id,mission_title,mission_text')
+      .eq('active', true)
+      .order('position', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (aboutErr) {
+      console.warn('fetchHomeAboutContent(home_about_content) error', aboutErr);
+    }
+
+    if (aboutRow) {
+      let mediaPublicUrl: string | null = null;
+      if (aboutRow.image_media_id) {
+        const { data: mediaRow, error: mediaErr } = await supabase
+          .from('medias')
+          .select('storage_path')
+          .eq('id', aboutRow.image_media_id)
+          .maybeSingle();
+        if (mediaErr) {
+          console.warn('fetchHomeAboutContent medias error', mediaErr);
+        }
+        mediaPublicUrl = resolvePublicUrl(mediaRow?.storage_path as string | undefined);
+      }
+
+      return {
+        title: aboutRow.title ?? 'La Passion du Théâtre depuis 2008',
+        intro1:
+          aboutRow.intro1 ??
+          "Née de la rencontre de professionnels passionnés, la compagnie Rouge-Cardinal s'attache à créer des spectacles qui interrogent notre époque tout en célébrant la beauté de l'art théâtral.",
+        intro2:
+          aboutRow.intro2 ??
+          "Notre démarche artistique privilégie l'humain, l'émotion authentique et la recherche constante d'une vérité scénique qui touche et transforme.",
+        imageUrl:
+          mediaPublicUrl ||
+          aboutRow.image_url ||
+          'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=800',
+        missionTitle: aboutRow.mission_title ?? 'Notre Mission',
+        missionText:
+          aboutRow.mission_text ??
+          "Créer des spectacles qui émeuvent, questionnent et rassemblent les publics autour de l'art vivant.",
+      };
+    }
+  } catch (e) {
+    console.warn('fetchHomeAboutContent(home_about_content) unexpected error', e);
+  }
+
+  // 2) Fallback: lecture depuis les sections de présentation existantes
   const historyPromise = supabase
     .from('compagnie_presentation_sections')
     .select('title, content, image_url, image_media_id')
@@ -68,22 +135,6 @@ export async function fetchHomeAboutContent(): Promise<HomeAboutContentDTO> {
 
   const history = historyRes.data as { title?: string; content?: string[]; image_url?: string; image_media_id?: number | null } | null;
   const mission = missionRes.data as { title?: string; content?: string[]; image_url?: string; image_media_id?: number | null } | null;
-
-  // Helper: transforme storage_path ("bucket/key") en URL publique via Supabase Storage
-  const resolvePublicUrl = (storagePath?: string | null): string | null => {
-    if (!storagePath) return null;
-    const firstSlash = storagePath.indexOf('/');
-    if (firstSlash <= 0 || firstSlash === storagePath.length - 1) return null;
-    const bucket = storagePath.slice(0, firstSlash);
-    const key = storagePath.slice(firstSlash + 1);
-    try {
-      const { data } = supabase.storage.from(bucket).getPublicUrl(key);
-      return data?.publicUrl ?? null;
-    } catch (e) {
-      console.warn('resolvePublicUrl error', e);
-      return null;
-    }
-  };
 
   // Récupère le storage_path du média si présent (history prioritaire, sinon mission)
   let mediaPublicUrl: string | null = null;
