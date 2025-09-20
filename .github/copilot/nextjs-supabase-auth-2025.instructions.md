@@ -238,7 +238,7 @@ export const config = {
 
 ```typescript
 // ✅ RECOMMENDED: Use getClaims() for authentication checks
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/supabase/server'
 import { redirect } from 'next/navigation'
 
 export default async function ProtectedPage() {

@@ -1,5 +1,5 @@
 version: 1
-generated_from: supabase_schemas@/lib/supabase/schemas
+generated_from: supabase_schemas@/supabase/schemas
 epics:
   - id: 14.1
     title: Page d’Accueil

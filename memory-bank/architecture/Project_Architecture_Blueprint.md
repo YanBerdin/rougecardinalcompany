@@ -903,7 +903,7 @@ export function use[Feature]() {
 
 ```typescript
 // app/[route]/page.tsx
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/supabase/server';
 import { [Feature]Container } from '@/components/features/[domain]/[feature]';
 
 export default async function [Route]Page() {
@@ -1793,10 +1793,10 @@ Isolation des tests des dépendances externes :
 ```typescript
 // __tests__/services/data.test.ts
 import { fetchShowData } from '@/services/data';
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/supabase/server';
 
 // Mock de Supabase
-jest.mock('@/lib/supabase/server', () => ({
+jest.mock('@/supabase/server', () => ({
   createClient: jest.fn(),
 }));
 

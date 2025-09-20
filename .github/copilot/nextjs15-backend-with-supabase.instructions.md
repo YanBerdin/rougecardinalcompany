@@ -58,7 +58,7 @@ export default async function AdminLayout() {
 
 // In middleware.ts for route protection (OPTIMIZED VERSION)
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/middleware";
+import { createClient } from "@/supabase/middleware";
 
 export async function middleware(request) {
   const supabase = createClient(request);
@@ -137,7 +137,7 @@ SUPABASE_SERVICE_ROLE_KEY=your_new_secret_key
 
 ### Supabase Client Configuration
 ```tsx
-// lib/supabase/server.ts
+// supabase/server.ts
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
@@ -167,7 +167,7 @@ export async function createClient() {
   )
 }
 
-// lib/supabase/middleware.ts
+// supabase/middleware.ts
 import { createServerClient } from '@supabase/ssr'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -206,7 +206,7 @@ export function createClient(request: NextRequest) {
 ### High-Performance Authentication with getClaims()
 ```tsx
 // ✅ OPTIMIZED: Server Component for protected pages
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/supabase/server";
 import { redirect } from "next/navigation";
 
 export default async function AdminDashboard() {
@@ -293,7 +293,7 @@ export async function GET(request: Request) {
 ```tsx
 // Layout with optimized theme detection
 import { cookies } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/supabase/server";
 
 export default async function RootLayout({ children }) {
   const cookieStore = await cookies();
@@ -322,7 +322,7 @@ export default async function RootLayout({ children }) {
 ```tsx
 // Server Component for analytics with auth context
 import { headers } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/supabase/server";
 
 export default async function ShowPage({ params }) {
   const headersList = await headers();

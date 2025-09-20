@@ -37,7 +37,7 @@ export function ClientComponent({ initialData }) {
 ```typescript
 // lib/dal/news.ts
 import 'server-only';
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/supabase/server';
 
 export async function fetchFeaturedPressReleases(limit = 3) {
   const supabase = await createClient();
