@@ -41,6 +41,7 @@ supabase/schemas/
 ├── 07b_table_compagnie_content.sql # Contenu institutionnel (valeurs & stats) + RLS
 ├── 07c_table_compagnie_presentation.sql # Sections présentation compagnie + RLS
 ├── 07d_table_home_hero.sql        # Slides hero page d'accueil + RLS
+├── 07e_table_home_about.sql       # Bloc About de la Home (title/intro/mission) + RLS
 ├── 08_table_articles_presse.sql   # Table articles presse + RLS
 ├── 08b_communiques_presse.sql     # Table communiqués presse + RLS + contacts presse
 ├── 09_table_partners.sql          # Table des partenaires + RLS
@@ -75,6 +76,7 @@ Note RLS: les nouvelles tables co‑localisent leurs politiques (dans le même f
 - Vues dépendantes déplacées en fin de chaîne (`41_*`) pour respecter les dépendances.
 - Contraintes/Triggers durcis: suppression des `IF NOT EXISTS` non supportés dans certaines contraintes, remplacement d’un `CHECK` complexe par inclusion de tableau, suppression d’un `WHEN` sur trigger au profit de logique dans la fonction.
 - `home_hero_slides`: table + RLS avec fenêtre d’activation (index partiels sur `active`/planning).
+- `home_about_content`: nouvelle table pour le bloc « À propos » de la Home (title/intro/mission) avec RLS (lecture publique, écriture admin), index partiel `(active, position)` et intégration aux triggers `updated_at` + `audit`. Colonne `image_media_id` ajoutée (prioritaire sur `image_url`).
 
 Pour rappel, la migration générée est `supabase/migrations/20250918004849_apply_declarative_schema.sql` (patchée pour l’ordre `validate_rrule()` → `check_valid_rrule`).
 
@@ -115,6 +117,7 @@ Pour rappel, la migration générée est `supabase/migrations/20250918004849_app
 | **configurations_site** | Si public:* | Admin uniquement | Config mixte |
 | **logs_audit** | Admin uniquement | Système auto | Audit sécurisé |
 | **events_recurrence** | Publique | Admin uniquement | Récurrence publique |
+| **home_about_content** | Publique | Admin uniquement | Bloc About de la Home |
 | **compagnie_values** | Publique | Admin uniquement | Valeurs institutionnelles |
 | **compagnie_stats** | Publique | Admin uniquement | Statistiques institutionnelles |
 | **compagnie_presentation_sections** | Publique | Admin uniquement | Sections modulaires page présentation |

@@ -26,7 +26,7 @@ BEGIN
     'public.profiles', 'public.medias', 'public.membres_equipe', 'public.lieux',
     'public.spectacles', 'public.evenements', 'public.articles_presse', 
     'public.partners', 'public.abonnes_newsletter', 'public.messages_contact', 'public.configurations_site',
-    'public.communiques_presse', 'public.contacts_presse'
+    'public.communiques_presse', 'public.contacts_presse', 'public.home_about_content'
   ])
   LOOP
     EXECUTE format('drop trigger if exists trg_update_updated_at on %s;', tbl);
@@ -45,7 +45,7 @@ DECLARE
     'public.profiles', 'public.medias', 'public.membres_equipe', 'public.lieux',
     'public.spectacles', 'public.evenements', 'public.articles_presse', 
     'public.partners', 'public.abonnes_newsletter', 'public.messages_contact', 'public.configurations_site',
-    'public.communiques_presse', 'public.contacts_presse'
+    'public.communiques_presse', 'public.contacts_presse', 'public.home_about_content'
   ];
   tbl text;
 BEGIN
