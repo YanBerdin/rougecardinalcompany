@@ -222,6 +222,21 @@ Soutenue par des subventions et mécénats.
   - Revue de presse (articles externes)
   - Base de données contacts journalistes (admin)
 
+### 4.5. Frontend Data Access Pattern
+
+Principes (septembre 2025):
+
+- Accès aux données via un Data Access Layer côté serveur (`lib/dal/*`), modules marqués `server-only`.
+- Composants Server par défaut pour les lectures; composants Client uniquement pour l’interactivité (formulaires, contrôles).
+- Sections de la page d’accueil enveloppées dans `React.Suspense` avec des skeletons dédiés pour un rendu progressif.
+- Anciennes sources mock conservées sous forme de commentaires avec en‑tête `[DEPRECATED MOCK]` le temps du basculement complet.
+- RLS: lecture publique autorisée par policies; gestion/écriture réservée aux admins via `public.is_admin()`.
+
+Application concrète:
+
+- Accueil: Hero, News/Communiqués, À propos (stats), Spectacles (avec dates), Partenaires consomment Supabase via la DAL.
+- Délais artificiels temporaires utilisés pendant la validation UX pour visualiser les skeletons; à retirer avant mise en production.
+
 ---
 
 ## 5. Architecture Backend Détaillée

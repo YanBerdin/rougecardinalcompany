@@ -10,7 +10,7 @@
 - [x] Configuration du design system
 - [x] Schéma déclaratif consolidé (RLS 24/24)
 - [x] Harmonisation knowledge‑base + epics avec le schéma
-- [ ] Développement des fonctionnalités principales (intégrations front restantes)
+- [~] Développement des fonctionnalités principales (intégrations front restantes)
 - [ ] Tests et optimisation
 - [ ] Déploiement en production
 
@@ -26,8 +26,8 @@
 ### Pages et Composants
 
 - [x] Page d'accueil
-- [x] Section Hero (structure)
-- [x] Section À propos
+- [x] Section Hero (DAL + Server Components + Suspense)
+- [x] Section À propos (stats via DAL)
 - [x] Footer
 - [x] Page Agenda
 - [x] Espace Presse
@@ -40,15 +40,15 @@
 - [x] RLS sur 100% des tables (24/24)
 - [x] Versioning contenu (valeurs, stats, sections présentation)
 - [x] Tables ajoutées: `compagnie_values`, `compagnie_stats`, `compagnie_presentation_sections`, `home_hero_slides`
-- [ ] Gestion des données spectacles
+- [~] Gestion des données spectacles (accueil: listes + dates)
 
 ## Fonctionnalités en Cours
 
 ### Intégrations Front prioritaires
 
-- En cours: `home_hero_slides` (fenêtre de visibilité)
-- À faire: Intégration `compagnie_stats` dans l’UI
-- À faire: Seeds initiaux (valeurs, stats, sections, hero)
+- En cours: Agenda/Événements (DAL + containers + UI)
+- À faire: Stratégie de seeds cloud (sécurisée) et synchronisation
+- Option: Modélisation `partners.type` si besoin UI
 
 ## Problèmes Connus
 
@@ -57,6 +57,7 @@
 1. Synchronisation des fenêtres de visibilité (hero) avec le cache ISR
 2. Cohérence des toggles Back‑office ↔ pages publiques (Agenda/Accueil/Contact)
 3. Données de démo à prévoir pour prévisualisation
+4. PostgREST cache: penser à redémarrer le stack en cas de mismatch pendant seeds
 
 ## Tests
 
@@ -94,10 +95,10 @@
 
 ### Court Terme
 
-1. Implémenter fetching/rendu `home_hero_slides`
-2. Intégrer `compagnie_stats` dans l’UI
-3. Rédiger et exécuter les scripts de seed
-4. Valider les toggles Back‑office (Agenda/Accueil/Contact)
+1. Implémenter Agenda/Événements (DAL + containers + Suspense)
+2. Définir la stratégie seeds en environnement cloud (idempotent + safe)
+3. Valider les toggles Back‑office (Agenda/Accueil/Contact)
+4. Affiner mapping partenaires (type/tiers) si requis par le design
 
 ### Moyen Terme
 
@@ -120,6 +121,14 @@
 - Conversions: À mesurer
 
 ## Journal des Mises à Jour
+
+### 20 Septembre 2025
+
+- Migration frontend: Data Access Layer (lib/dal/*) côté serveur + Server Components
+- Accueil: Hero, News, À propos (stats), Spectacles (avec dates), Partenaires branchés sur Supabase
+- UX: Sections d’accueil enveloppées dans React Suspense avec skeletons (délais artificiels temporaires pour visualisation)
+- Dépréciation: anciens hooks mocks conservés en commentaires avec en-têtes [DEPRECATED MOCK]
+- Documentation: début de mise à jour knowledge‑base + memory‑bank (patterns, tech context, tasks)
 
 ### 17 Septembre 2025
 
@@ -148,5 +157,5 @@
 
 ## Dernière Mise à Jour
 
-**Date**: 17 septembre 2025
+**Date**: 20 septembre 2025
 **Par**: GitHub Copilot

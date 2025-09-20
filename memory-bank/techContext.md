@@ -15,7 +15,7 @@
 
 - **Base de données**: Supabase (PostgreSQL)
 - **Authentification**: Supabase Auth
-- **API**: Server Components + Supabase Client
+- **API**: Server Components + DAL `lib/dal/*` (server-only) via Supabase Client
 
 ### Déploiement
 
@@ -46,17 +46,16 @@
 ### Configuration Supabase
 
 ```typescript
-// lib/supabase/server.ts
+// lib/supabase/server.ts (extrait)
+import { cookies } from 'next/headers';
+import { createServerClient } from '@supabase/ssr';
+
 export async function createClient() {
   const cookieStore = await cookies();
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,
-    {
-      cookies: {
-        // Configuration des cookies pour l'authentification
-      }
-    }
+    { cookies: { get: cookieStore.get, set: cookieStore.set, remove: cookieStore.delete } }
   );
 }
 ```
@@ -77,7 +76,7 @@ export const config = {
 ### Production
 
 - next: 15.4.5
-- react: ^18
+- react: ^19
 - @supabase/ssr: latest
 - tailwindcss: ^3
 - shadcn/ui: latest
@@ -135,8 +134,8 @@ export function ComponentName() {
 ### Optimisations
 
 - Images optimisées via Next/Image
-- Route pré-rendering où possible
-- Lazy loading des composants lourds
+- Server Components par défaut pour l’accès données (pas de surcoût hydratation)
+- React Suspense pour loading states contrôlés (skeletons)
 
 ### Monitoring
 

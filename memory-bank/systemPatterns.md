@@ -32,6 +32,55 @@ export function ClientComponent({ initialData }) {
 }
 ```
 
+### Pattern DAL (Data Access Layer) côté serveur
+
+```typescript
+// lib/dal/news.ts
+import 'server-only';
+import { createClient } from '@/lib/supabase/server';
+
+export async function fetchFeaturedPressReleases(limit = 3) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('communiques_presse')
+    .select('id, title, slug, description, date_publication, image_url')
+    .eq('public', true)
+    .order('date_publication', { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return data ?? [];
+}
+```
+
+Principes:
+
+1. Modules `lib/dal/*` marqués `server-only` et sans code client.
+2. Les pages/composants serveur appellent la DAL directement; les composants client reçoivent des props sérialisables.
+3. Les requêtes respectent les RLS (lecture publique) et délèguent la logique métier au SQL quand pertinent.
+
+### Pattern Suspense + Skeletons
+
+```tsx
+import { Suspense } from 'react';
+import { NewsSkeleton } from './NewsSkeleton';
+import NewsContainer from './NewsContainer';
+
+export function NewsSection() {
+  return (
+    <Suspense fallback={<NewsSkeleton />}>
+      {/* Server Component */}
+      <NewsContainer />
+    </Suspense>
+  );
+}
+```
+
+Conseils:
+
+- Les « containers » serveur peuvent inclure un délai artificiel temporaire pour valider l’UX des skeletons.
+- Retirer les délais avant prod; garder Suspense pour les vrais temps réseau.
+- Toujours retourner `null` si aucune donnée n’est disponible pour éviter un rendu vide cassé.
+
 ### Pattern de Gestion d'État
 
 1. **Local State**: useState pour l'état des composants
@@ -44,23 +93,16 @@ export function ClientComponent({ initialData }) {
 
 ```typescript
 // Pattern de service Supabase
-export class SpectaclesService {
-  static async getAll() {
-    const supabase = await createClient();
-    return supabase
-      .from('spectacles')
-      .select('*')
-      .order('date', { ascending: true });
-  }
-
-  static async getById(id: string) {
-    const supabase = await createClient();
-    return supabase
-      .from('spectacles')
-      .select('*')
-      .eq('id', id)
-      .single();
-  }
+export async function fetchFeaturedShows(limit = 3) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('spectacles')
+    .select('id, title, slug, image_url')
+    .eq('public', true)
+    .order('updated_at', { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return data ?? [];
 }
 ```
 
