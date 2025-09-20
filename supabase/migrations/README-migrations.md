@@ -24,8 +24,8 @@ Ce dossier contient les migrations spécifiques qui doivent être exécutées ma
 ### 2. **Exécuter les migrations de données :**
 
 ```bash
-   # Synchronisation des profils existants
-   psql -h localhost -p 54322 -d postgres -U postgres -f supabase/migrations/sync_existing_profiles.sql
+# Réinitialiser la base locale (optionnel, utile pour tests) et rejoue les migrations
+pnpm dlx supabase db reset --yes --db-url "postgresql://postgres:postgres@127.0.0.1:54322/postgres?sslmode=disable"
 ```
 
 ## Notes Importantes
