@@ -79,12 +79,18 @@ interface Membre {
 }
 
 interface Actualite { //TODO == mediaArticlesData
-  id: string
-  title: string
-  contenu: string
-  date_publication: string
-  categorie: string
-  image_url: string
+  id: number;
+  title: string;
+  author: string;
+  slug: string | null;
+  type: string | null;
+  chapo: string | null;
+  excerpt: string | null;
+  source_publication: string | null;
+  source_url: string | null;
+  published_at : string | null;
+  created_at : string | null;
+  updated_at :  string | null;
 }
 
 export default function TestConnectionPage() {
@@ -143,7 +149,7 @@ export default function TestConnectionPage() {
     const { data, error } = await supabase
       .from('spectacles')
       .select('*')
-      .order('date_creation', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(6)
 
     if (error) throw error
@@ -155,7 +161,7 @@ export default function TestConnectionPage() {
     const { data, error } = await supabase
       .from('membres_equipe')
       .select('*')
-      .order('nom')
+      .order('name')
       .limit(6)
 
     if (error) throw error
@@ -165,9 +171,9 @@ export default function TestConnectionPage() {
   // Fonction pour récupérer les actualités
   const getActualites = async () => {
     const { data, error } = await supabase
-      .from('actualites')
+      .from('articles_presse')
       .select('*')
-      .order('date_publication', { ascending: false })
+      .order('author', { ascending: false })
       .limit(6)
 
     if (error) throw error
@@ -462,20 +468,26 @@ export default function TestConnectionPage() {
                     <CardHeader>
                       <CardTitle>{actualite.title}</CardTitle>
                       <CardDescription>
-                        {new Date(actualite.date_publication).toLocaleDateString("fr-FR", {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        })}
+                        {actualite.published_at
+                          ? new Date(actualite.published_at).toLocaleDateString("fr-FR", {
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            })
+                          : "-"}
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div>
                         <span className="inline-block px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary mb-2">
-                          {actualite.categorie}
+                          {actualite.type}
                         </span>
                       </div>
-                      <p className="text-sm text-muted-foreground">{actualite.contenu.substring(0, 150)}...</p>
+                      <p className="text-sm text-muted-foreground">
+                        {actualite.excerpt
+                          ? actualite.excerpt.substring(0, 150) + "..."
+                          : ""}
+                      </p>
                     </CardContent>
                   </Card>
                 ))}
