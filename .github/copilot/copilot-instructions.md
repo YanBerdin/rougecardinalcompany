@@ -55,7 +55,7 @@ Priority context directories to scan:
 
 - `/app`: Next.js App Router structure
 - `/components`: Reusable UI components
-- `/lib/supabase`: Supabase integration code
+- `/supabase`: Supabase integration code
 - `/memory-bank`: Project documentation and context
 - `/.github/copilot/`: Copilot-specific configuration and instruction files
 
@@ -575,7 +575,7 @@ This pattern provides:
 - Place custom hooks in feature hooks.ts files or lib/hooks/
 
 ### Supabase Guidelines
-- Use the patterns established in lib/supabase
+- Use the patterns established in supabase/
 - Follow the Server Component pattern for data fetching
 - Use Row Level Security (RLS) policies
 - Apply proper error handling for database operations

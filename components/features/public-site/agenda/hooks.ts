@@ -1,3 +1,14 @@
+/**
+ * [DEPRECATED MOCK] — Agenda hooks (mocks)
+ *
+ * Cette implémentation client avec données simulées a été remplacée par
+ * une lecture via DAL côté serveur (Supabase) + Server Components.
+ *
+ * Conservée à titre documentaire pendant la période de transition.
+ * TODO: supprimer quand l’Agenda sera entièrement validé en prod.
+ */
+
+/*
 import { useState, useEffect } from 'react';
 import { Event, EventType } from './types';
 
@@ -164,3 +175,5 @@ export const useAgendaData = () => {
         loading
     };
 };
+*/
+

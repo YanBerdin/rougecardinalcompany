@@ -1,28 +1,12 @@
-"use client";
+import { fetchEventTypes, fetchUpcomingEvents } from '@/lib/dal/agenda';
+import AgendaClientContainer from './AgendaClientContainer';
 
-import { useAgendaData } from './hooks';
-import { AgendaView } from './AgendaView';
+export default async function AgendaContainer() {
+    await new Promise((r) => setTimeout(r, 1500)); // TODO: remove artificial delay
+    const [events, eventTypes] = await Promise.all([
+        fetchUpcomingEvents(12),
+        fetchEventTypes(),
+    ]);
 
-export function AgendaContainer() {
-    // Utilisation du hook personnalisé pour récupérer les données et la logique
-    const {
-        events,
-        eventTypes,
-        filterType,
-        setFilterType,
-        generateCalendarFile,
-        loading
-    } = useAgendaData();
-
-    // Rendu du composant de présentation avec les données récupérées
-    return (
-        <AgendaView
-            events={events}
-            eventTypes={eventTypes}
-            filterType={filterType}
-            setFilterType={setFilterType}
-            generateCalendarFile={generateCalendarFile}
-            loading={loading}
-        />
-    );
+    return <AgendaClientContainer events={events} eventTypes={eventTypes} />;
 }
