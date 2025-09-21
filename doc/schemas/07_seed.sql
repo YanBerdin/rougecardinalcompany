@@ -1,4 +1,0 @@
--- 07_seed.sql (optional / commented)
--- seeds and sample values are optional; keep them out of declarative schema if possible.
--- example:
--- insert into public.configurations_site (key, value) values ('site:metadata', '{"title":"Rouge Cardinal"}'::jsonb);

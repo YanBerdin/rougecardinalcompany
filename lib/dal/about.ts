@@ -31,7 +31,6 @@ export async function fetchCompanyStats() {
 
 // Contenu "About" de la page d'accueil à partir de public.home_about_content
 // 07e_table_home_about.sql
-// TODO: migrer seed.sql, admin UI, et DAL vers cette nouvelle table dédiée
 
 export type HomeAboutContentDTO = {
   title: string;
