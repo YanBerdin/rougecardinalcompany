@@ -74,7 +74,7 @@ Note RLS: les nouvelles tables co‑localisent leurs politiques (dans le même f
 - Vues dépendantes déplacées en fin de chaîne (`41_*`) pour respecter les dépendances.
 - Contraintes/Triggers durcis: suppression des `IF NOT EXISTS` non supportés dans certaines contraintes, remplacement d’un `CHECK` complexe par inclusion de tableau, suppression d’un `WHEN` sur trigger au profit de logique dans la fonction.
 - `home_hero_slides`: table + RLS avec fenêtre d’activation (index partiels sur `active`/planning).
-- `home_about_content`: nouvelle table pour le bloc « À propos » de la Home (title/intro/mission) avec RLS (lecture publique, écriture admin), index partiel `(active, position)` et intégration aux triggers `updated_at` + `audit`. Colonne `image_media_id` ajoutée (prioritaire sur `image_url`).
+- `home_about_content`: nouvelle table pour le bloc « À propos » de la Home (title/intro/mission) avec RLS (lecture publique, écriture admin), index partiel `(active, position)` et intégration aux triggers `updated_at` + `audit`. Colonne `image_media_id` ajoutée (prioritaire sur `image_url`). La DAL lit exclusivement cette table (aucun fallback sur `compagnie_presentation_sections`).
 
 Pour rappel, la migration générée est `supabase/migrations/20250918004849_apply_declarative_schema.sql` (patchée pour l’ordre `validate_rrule()` → `check_valid_rrule`).
 
@@ -82,9 +82,10 @@ Pour rappel, la migration générée est `supabase/migrations/20250918004849_app
 
 ## 🧪 Seeds de données (migrations DML)
 
-- Les seeds ne font pas partie du schéma déclaratif. Créer une migration dédiée pour initialiser, par exemple, `home_hero_slides` via upsert par `slug`.
+- Les seeds ne font pas partie du schéma déclaratif. Chaque seed est un fichier migration horodaté dans `supabase/migrations/` (ex: `20250921113000_seed_home_about_content.sql`).
+- Préférer des seeds idempotents (MERGE/UPSERT, `where not exists`) pour permettre la ré‑exécution locale.
 - Exemple de création: `supabase migration new seed_home_hero_slides`
-- Appliquer ensuite via `supabase db push`.
+- Appliquer via `supabase db push` ou rejouer un fichier précis avec `psql -f`.
 
 ---
 

@@ -52,6 +52,7 @@
   - [11.2. Workflow de migration](#112-workflow-de-migration)
   - [11.3. Bonnes pratiques](#113-bonnes-pratiques)
   - [11.4. Gestion des secrets](#114-gestion-des-secrets)
+  - [11.5. Seeds horodatés & Source de vérité Home About](#115-seeds-horodatés--source-de-vérité-home-about)
 - [12. Tests recommandés (staging scripts à exécuter)](#12-tests-recommandés-staging-scripts-à-exécuter)
 - [13. API et Intégrations](#13-api-et-intégrations)
   - [13.1. API REST](#131-api-rest)
@@ -2442,6 +2443,14 @@ Tous les objets du schéma sont organisés dans le répertoire `supabase/schemas
 - Protéger les clés `service_role` (ne jamais exposer côté client)
 - Utiliser `anon` et `authenticated` roles pour l'accès public/authentifié
 - Fonctions `SECURITY DEFINER` uniquement quand nécessaire et bien documentées
+
+### 11.5. Seeds horodatés & Source de vérité Home About
+
+- Les seeds DML sont versionnés sous forme de fichiers de migration horodatés dans `supabase/migrations/` (ex: `20250921113000_seed_home_about_content.sql`).
+- Le contenu « À propos » de la page d'accueil est stocké dans `public.home_about_content` et consommé exclusivement par la DAL front (`lib/dal/about.ts`).
+- Il n'existe plus de fallback vers `public.compagnie_presentation_sections` pour la Home — la table `home_about_content` est la source unique de vérité.
+- Une migration idempotente peuple `public.compagnie_presentation_sections` depuis la source typée côté code: `20250921110000_seed_compagnie_presentation_sections.sql`.
+- Préférer des seeds idempotents (UPSERT/MERGE, `where not exists`) pour permettre une ré‑exécution locale sans effets de bord.
 
 ## 12. Tests recommandés (staging scripts à exécuter)
 
