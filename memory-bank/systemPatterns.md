@@ -35,7 +35,7 @@ export function ClientComponent({ initialData }) {
 ### Pattern DAL (Data Access Layer) côté serveur
 
 ```typescript
-// lib/dal/news.ts
+// lib/dal/home-news.ts
 import 'server-only';
 import { createClient } from '@/supabase/server';
 

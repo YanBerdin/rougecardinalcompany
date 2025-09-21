@@ -1,4 +1,4 @@
-import { fetchFeaturedPressReleases } from '@/lib/dal/news';
+import { fetchFeaturedPressReleases } from '@/lib/dal/home-news';
 import { NewsView } from './NewsView';
 import type { NewsItem } from './types';
 

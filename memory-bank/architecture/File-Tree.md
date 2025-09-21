@@ -183,16 +183,6 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   ├── 📄 sign-up-form.tsx
 │   ├── 📄 theme-switcher.tsx
 │   └── 📄 update-password-form.tsx
-├── 📁 doc/
-│   ├── 📁 schemas/
-│   │   ├── 🗄️ 00_extensions.sql
-│   │   ├── 🗄️ 01_tables_core.sql
-│   │   ├── 🗄️ 02_tables_joins.sql
-│   │   ├── 🗄️ 03_functions_triggers.sql
-│   │   ├── 🗄️ 04_indexes_fulltext.sql
-│   │   ├── 🗄️ 05_rls_policies.sql
-│   │   ├── 🗄️ 06_comments_and_metadata.sql
-│   │   └── 🗄️ 07_seed.sql
 │   ├── 🗄️ 20250917_seed_home_hero_slides.sql
 │   ├── 📝 Project_Architecture_Blueprint.md
 │   ├── 📝 Project_Folders_Structure_Blueprint(24-08-25).md
@@ -205,27 +195,6 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   ├── 📝 regles_copilot.md
 │   └── 📝 visuel-blueprintGenerator.md
 ├── 📁 doc-perso/
-│   ├── 📁 conversation Coplilot/
-│   │   ├── 📝 conversation.md
-│   │   └── 📝 discuss-archive.md
-│   ├── 📁 prompts-custom-claude/
-│   │   └── 📝 feature_based_prompt.md
-│   ├── 📁 prompts-custom-copilot-pc/
-│   │   └── 📝 0-clean-architecture-nextjs.md
-│   ├── 📝 1-naming-conventions.instructions.md
-│   ├── 📝 2-typescript-naming-conventions.md
-│   ├── 📝 CLI-Supabase-Local.md
-│   ├── 📝 Project_Folders_Structure_Blueprint.md
-│   ├── 📝 README-CORRECTIONS-CONFORMITE.md
-│   ├── 📝 cahier-des-charges.md
-│   ├── 📝 docker-install.md
-│   ├── 📝 many-to-many.md
-│   ├── 📝 nextjs.instructions.md
-│   ├── 📝 progress.md
-│   ├── 📝 terminal-schema-progress.md
-│   ├── 📝 update-node-18to-22.md
-│   ├── 📝 updated_copilot_instructions(4).md
-│   └── 📝 updated_copilot_instructions.md
 ├── 📁 lib/
 │   ├── 📁 dal/
 │   │   ├── 📄 about.ts

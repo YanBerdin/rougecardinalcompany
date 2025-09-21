@@ -1,4 +1,4 @@
-import { fetchActivePartners } from '@/lib/dal/partners';
+import { fetchActivePartners } from '@/lib/dal/home-partners';
 import { PartnersView } from './PartnersView';
 import type { Partner } from './types';
 

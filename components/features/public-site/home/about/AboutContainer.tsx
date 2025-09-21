@@ -1,4 +1,4 @@
-import { fetchCompanyStats, fetchHomeAboutContent } from '@/lib/dal/about';
+import { fetchCompanyStats, fetchHomeAboutContent } from '@/lib/dal/home-about';
 import { AboutView } from './AboutView';
 import type { StatItem, AboutContent } from './types';
 import { Users, Heart, Award } from 'lucide-react';

@@ -1,4 +1,4 @@
-import { fetchActiveHomeHeroSlides } from '@/lib/dal/home';
+import { fetchActiveHomeHeroSlides } from '@/lib/dal/home-hero';
 import { HeroClient } from './HeroClient';
 import { HeroSlide } from './types';
 

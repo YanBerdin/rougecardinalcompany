@@ -1,4 +1,4 @@
-import { fetchFeaturedShows } from '@/lib/dal/shows';
+import { fetchFeaturedShows } from '@/lib/dal/home-shows';
 import { ShowsView } from './ShowsView';
 import type { Show } from './types';
 

@@ -2447,8 +2447,8 @@ Tous les objets du schéma sont organisés dans le répertoire `supabase/schemas
 ### 11.5. Seeds horodatés & Source de vérité Home About
 
 - Les seeds DML sont versionnés sous forme de fichiers de migration horodatés dans `supabase/migrations/` (ex: `20250921113000_seed_home_about_content.sql`).
-- Le contenu « À propos » de la page d'accueil est stocké dans `public.home_about_content` et consommé exclusivement par la DAL front (`lib/dal/about.ts`).
-- Il n'existe plus de fallback vers `public.compagnie_presentation_sections` pour la Home — la table `home_about_content` est la source unique de vérité.
+- Le contenu « À propos » de la page d'accueil est stocké dans `public.home_about_content` et consommé exclusivement par la DAL front (`lib/dal/home-about.ts`).
+- Pour la Home — la table `home_about_content` est la source unique de vérité.
 - Une migration idempotente peuple `public.compagnie_presentation_sections` depuis la source typée côté code: `20250921110000_seed_compagnie_presentation_sections.sql`.
 - Préférer des seeds idempotents (UPSERT/MERGE, `where not exists`) pour permettre une ré‑exécution locale sans effets de bord.
 

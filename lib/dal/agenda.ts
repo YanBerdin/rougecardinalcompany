@@ -32,6 +32,8 @@ function toISODateString(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
+// Mock eventsData: Event[]
+// 07_table_evenements.sql
 export async function fetchUpcomingEvents(limit = 10): Promise<AgendaEventDTO[]> {
   const supabase = await createClient();
 
@@ -73,6 +75,9 @@ export async function fetchUpcomingEvents(limit = 10): Promise<AgendaEventDTO[]>
   });
 }
 
+// Mock eventTypesData: EventType[]
+// Derived from distinct type_array values in evenements
+// 07_table_evenements.sql > 
 export async function fetchEventTypes(): Promise<{ value: string; label: string }[]> {
   const supabase = await createClient();
   // Aggregate distinct types from type_array; fallback to defaults

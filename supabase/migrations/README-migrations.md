@@ -42,7 +42,6 @@ pnpm dlx supabase db push
 
 Exécuter une migration DML précise:
 
-
 ```bash
 Supabase local
 psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres?sslmode=disable" \
