@@ -1,9 +1,19 @@
+// [DEPRECATED MOCK]
+// Cette implémentation client (useCompagnieData) est obsolète. Les données
+// de la page « La Compagnie » (sections de présentation, valeurs, équipe)
+// sont désormais chargées côté serveur via la DAL:
+// - `lib/dal/compagnie-presentation.ts` → sections (public.compagnie_presentation_sections)
+// - `lib/dal/compagnie.ts` → valeurs (public.compagnie_values) & équipe (public.membres_equipe)
+// Le container serveur `CompagnieContainer` orchestre les appels et passe
+// des props propres à `CompagnieView`. Ne plus utiliser ce hook.
+
+/*
 import { useState, useEffect } from 'react';
 import { Users, Heart, Award, Target } from 'lucide-react';
 import { Value, TeamMember } from './types';
 
 // Mock des valeurs de la compagnie
-//07b_table_compagnie_content
+//07b_table_compagnie_content > table public.compagnie_values
 const valuesData: Value[] = [
   {
     icon: Heart,
@@ -28,7 +38,7 @@ const valuesData: Value[] = [
 ];
 
 // Mock des membres de l'équipe
-// 04_table_membres_equipe
+// 04_table_membres_equipe > table public.membres_equipe
 const teamData: TeamMember[] = [
   {
     name: 'Marie Dubois',
@@ -89,3 +99,4 @@ export const useCompagnieData = () => {
     loading
   };
 };
+*/

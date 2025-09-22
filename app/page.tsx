@@ -17,7 +17,7 @@ import {
 import { HeroSkeleton } from '@/components/skeletons/hero-skeleton';
 import { NewsSkeleton } from '@/components/skeletons/news-skeleton';
 import { AboutSkeleton } from '@/components/skeletons/about-skeleton';
-import { ShowsSkeleton } from '@/components/skeletons/ShowsSkeleton';
+import { ShowsSkeleton } from '@/components/skeletons/shows-skeleton';
 import { PartnersSkeleton } from '@/components/skeletons/partners-skeleton';
 import { NewsletterSkeleton } from '@/components/skeletons/newsletter-skeleton';
 

@@ -1,4 +1,9 @@
-import { z } from 'zod';
+// [DEPRECATED FALLBACK] Cette source locale est conservée uniquement comme fallback
+// temporaire et comme référence du contenu initial. Les sections de présentation
+// sont désormais chargées depuis la BDD via `public.compagnie_presentation_sections`
+// et la DAL `lib/dal/compagnie-presentation.ts`. Ne plus importer directement ce fichier
+// dans les vues. Préférez `fetchCompagniePresentationSections()`.
+/*import { z } from 'zod';
 
 export const PresentationSectionSchema = z.object({
   id: z.string(),
@@ -13,8 +18,8 @@ export const PresentationSectionSchema = z.object({
 
 export type PresentationSection = z.infer<typeof PresentationSectionSchema>;
 
-export const compagniePresentation: 
-// 07c_table_compagnie_presentation
+export const compagniePresentationFallback: 
+// 07c_table_compagnie_presentation > table public.compagnie_presentation_sections
 PresentationSection[] = [
   {
     id: 'hero', // slug en bdd
@@ -53,3 +58,4 @@ PresentationSection[] = [
     ]
   }
 ];
+*/

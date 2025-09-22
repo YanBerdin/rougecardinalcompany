@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PresentationSectionSchema as DalPresentationSectionSchema } from "@/lib/dal/compagnie-presentation";
 
 // Schéma pour les valeurs de la compagnie
 export const ValueSchema = z.object({
@@ -19,8 +20,12 @@ export const TeamMemberSchema = z.object({
 export type Value = z.infer<typeof ValueSchema>;
 export type TeamMember = z.infer<typeof TeamMemberSchema>;
 
+// Sections de présentation (structuration de la page)
+export type PresentationSection = z.infer<typeof DalPresentationSectionSchema>;
+
 // Props pour le composant CompagnieView
 export interface CompagnieViewProps {
+  sections: PresentationSection[];
   values: Value[];
   team: TeamMember[];
   loading?: boolean;

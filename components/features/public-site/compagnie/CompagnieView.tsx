@@ -1,19 +1,16 @@
-"use client";
-
 import { Quote } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { CompagnieViewProps } from './types';
 import { CompagnieSkeleton } from '@/components/skeletons/compagnie-skeleton';
-import { compagniePresentation } from './data/presentation';
 
-export function CompagnieView({ values, team, loading = false }: CompagnieViewProps) {
+export function CompagnieView({ sections, values, team, loading = false }: CompagnieViewProps) {
     if (loading) {
         return <CompagnieSkeleton />;
     }
 
     return (
         <div className="pt-16">
-            {compagniePresentation.map((section) => {
+            {sections.map((section) => {
                 if (section.kind === 'hero') {
                     return (
                         <section key={section.id} className="py-20 hero-gradient text-white">

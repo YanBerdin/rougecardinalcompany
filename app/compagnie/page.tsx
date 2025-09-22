@@ -1,5 +1,7 @@
 import { Metadata } from 'next';
+import { Suspense } from 'react';
 import { CompagnieContainer } from '@/components/features/public-site/compagnie/CompagnieContainer';
+import { CompagnieSkeleton } from '@/components/skeletons/compagnie-skeleton';
 
 export const metadata: Metadata = {
   title: 'Notre Compagnie | Rouge-Cardinal',
@@ -7,5 +9,11 @@ export const metadata: Metadata = {
 };
 
 export default function CompagniePage() {
-  return <CompagnieContainer />;
+  return (
+    <Suspense fallback={<CompagnieSkeleton />}>
+      {/* Server Component */}
+      {/* TODO: retirer les délais artificiels une fois l'UX validée */}
+      <CompagnieContainer />
+    </Suspense>
+  );
 }

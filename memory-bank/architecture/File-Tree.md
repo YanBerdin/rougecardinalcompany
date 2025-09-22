@@ -1,35 +1,21 @@
 # File Tree: rougecardinalcompany
 
-Generated on: 9/17/2025, 12:20:37 AM
+Generated on: 23/09/2025, 00:00:00 AM
 Root path: `/home/yandev/projets/rougecardinalcompany`
 
 ```bash
 ├── 📁 .git/ 🚫 (auto-hidden)
 ├── 📁 .github/
 │   ├── 📁 copilot/
-│   │   ├── 📝 1-clean-code.instructions.md
-│   │   ├── 📝 2-typescript.instructions.md
-│   │   ├── 📝 4-package-installation.instructions.md
-│   │   ├── 📝 Create_RLS_policies.Instructions.md
-│   │   ├── 📝 Create_migration.instructions.md
-│   │   ├── 📝 Database_Create_functions.Instructions.md
-│   │   ├── 📝 Declarative_Database_Schema.Instructions.md
-│   │   ├── 📝 Postgres_SQL_Style_Guide.Instructions.md
-│   │   ├── 📝 a11y.instructions.md
-│   │   ├── 📝 copilot-instructions.md
-│   │   ├── 📝 edge-functions.instructions.md
-│   │   ├── 📝 knowledge-base-170825-0035.md
-│   │   ├── 📝 memory-bank.instructions.md
-│   │   ├── 📝 nextjs-supabase-auth-2025.instructions.md
-│   │   ├── 📝 nextjs.instructions.md
-│   │   ├── 📝 nextjs15-backend-with-supabase.instructions.md
-│   │   └── 📝 security-and-owasp.instructions.md
 │   └── 📁 workflows/
 ├── 📁 .next/ 🚫 (auto-hidden)
 ├── 📁 .vscode/ 🚫 (auto-hidden)
 ├── 📁 app/
 │   ├── 📁 agenda/
 │   │   └── 📄 page.tsx
+│   ├── 📁 api/
+│   │   └── 📁 newsletter/
+│   │       └── 📄 route.ts
 │   ├── 📁 auth/
 │   │   ├── 📁 confirm/
 │   │   │   └── 📄 route.ts
@@ -69,6 +55,7 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   ├── 📁 features/
 │   │   └── 📁 public-site/
 │   │       ├── 📁 agenda/
+│   │       │   ├── 📄 AgendaClientContainer.tsx
 │   │       │   ├── 📄 AgendaContainer.tsx
 │   │       │   ├── 📄 AgendaView.tsx
 │   │       │   ├── 📄 hooks.ts
@@ -94,8 +81,6 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   │       │   │   ├── 📄 hooks.ts
 │   │       │   │   ├── 📄 index.ts
 │   │       │   │   └── 📄 types.ts
-│   │       │   ├── 📁 agenda/
-│   │       │   │   └── 📄 AgendaContainer.tsx
 │   │       │   ├── 📁 hero/
 │   │       │   │   ├── 📄 HeroClient.tsx
 │   │       │   │   ├── 📄 HeroContainer.tsx
@@ -110,6 +95,7 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   │       │   │   ├── 📄 index.ts
 │   │       │   │   └── 📄 types.ts
 │   │       │   ├── 📁 newsletter/
+│   │       │   │   ├── 📄 NewsletterClientContainer.tsx
 │   │       │   │   ├── 📄 NewsletterContainer.tsx
 │   │       │   │   ├── 📄 NewsletterView.tsx
 │   │       │   │   ├── 📄 hooks.ts
@@ -144,7 +130,6 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   │   ├── 📄 footer.tsx
 │   │   └── 📄 header.tsx
 │   ├── 📁 skeletons/
-│   │   ├── 📄 ShowsSkeleton.tsx
 │   │   ├── 📄 about-skeleton.tsx
 │   │   ├── 📄 agenda-skeleton.tsx
 │   │   ├── 📄 compagnie-skeleton.tsx
@@ -154,13 +139,9 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   │   ├── 📄 newsletter-skeleton.tsx
 │   │   ├── 📄 partners-skeleton.tsx
 │   │   ├── 📄 presse-skeleton.tsx
+│   │   ├── 📄 shows-skeleton.tsx
 │   │   └── 📄 spectacles-skeleton.tsx
 │   ├── 📁 tutorial/
-│   │   ├── 📄 code-block.tsx
-│   │   ├── 📄 connect-supabase-steps.tsx
-│   │   ├── 📄 fetch-data-steps.tsx
-│   │   ├── 📄 sign-up-user-steps.tsx
-│   │   └── 📄 tutorial-step.tsx
 │   ├── 📁 ui/
 │   │   ├── 📄 alert.tsx
 │   │   ├── 📄 badge.tsx
@@ -183,26 +164,20 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   ├── 📄 sign-up-form.tsx
 │   ├── 📄 theme-switcher.tsx
 │   └── 📄 update-password-form.tsx
-│   ├── 🗄️ 20250917_seed_home_hero_slides.sql
-│   ├── 📝 Project_Architecture_Blueprint.md
-│   ├── 📝 Project_Folders_Structure_Blueprint(24-08-25).md
-│   ├── 📝 conventional-commit-cheatsheet.md
-│   ├── 🗄️ empty-database-schema-recap.sql
-│   ├── 📝 feature.Instructions.md
-│   ├── 📝 mcp-context-flow.md
-│   ├── 📝 nextjs-supabase-auth.instructions.md
-│   ├── 📝 nextjs15-backend.instructions.md
-│   ├── 📝 regles_copilot.md
-│   └── 📝 visuel-blueprintGenerator.md
+├── 📁 doc/
 ├── 📁 doc-perso/
 ├── 📁 lib/
 │   ├── 📁 dal/
-│   │   ├── 📄 about.ts
-│   │   ├── 📄 events.ts
-│   │   ├── 📄 home.ts
-│   │   ├── 📄 news.ts
-│   │   ├── 📄 partners.ts
-│   │   └── 📄 shows.ts
+│   │   ├── 📄 agenda.ts
+│   │   ├── 📄 compagnie.ts
+│   │   ├── 📄 home-about.ts
+│   │   ├── 📄 home-hero.ts
+│   │   ├── 📄 home-news.ts
+│   │   ├── 📄 home-newsletter.ts
+│   │   ├── 📄 home-partners.ts
+│   │   └── 📄 home-shows.ts
+│   ├── 📁 hooks/
+│   │   └── 📄 useNewsletterSubscribe.ts
 │   └── 📄 utils.ts
 ├── 📁 memory-bank/
 │   ├── 📁 architecture/
@@ -233,11 +208,6 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   └── 📝 techContext.md
 ├── 📁 node_modules/ 🚫 (auto-hidden)
 ├── 📁 prompts-github/
-│   ├── 📝 architecture-blueprint-generator.prompt.md
-│   ├── 📝 conventional-commit.prompt.md
-│   ├── 📝 copilot-instructions-blueprint-generator.prompt.md
-│   ├── 📝 copilot-thought-logging.instructions.md
-│   └── 📝 folder-structure-blueprint-generator.prompt.md
 ├── 📁 public/
 │   └── 🖼️ logo-florian.png
 ├── 📁 scripts/
@@ -253,6 +223,9 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   │   ├── 🗄️ 20250918095610_seed_compagnie_values.sql
 │   │   ├── 🗄️ 20250918101020_seed_events_press_articles.sql
 │   │   ├── 🗄️ 20250918102240_seed_team_and_presentation.sql
+│   │   ├── 🗄️ 20250921110000_seed_compagnie_presentation_sections.sql
+│   │   ├── 🗄️ 20250921112000_add_home_about_content.sql
+│   │   ├── 🗄️ 20250921113000_seed_home_about_content.sql
 │   │   ├── 📝 README-migrations.md
 │   │   └── 🗄️ sync_existing_profiles.sql
 │   ├── 📁 schemas/
@@ -267,6 +240,7 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   │   ├── 🗄️ 07b_table_compagnie_content.sql
 │   │   ├── 🗄️ 07c_table_compagnie_presentation.sql
 │   │   ├── 🗄️ 07d_table_home_hero.sql
+│   │   ├── 🗄️ 07e_table_home_about.sql
 │   │   ├── 🗄️ 08_table_articles_presse.sql
 │   │   ├── 🗄️ 08b_communiques_presse.sql
 │   │   ├── 🗄️ 09_table_partners.sql
