@@ -3,6 +3,7 @@
 import "server-only";
 import { z } from "zod";
 import { createClient } from "@/supabase/server";
+import { compagniePresentationFallback } from "@/components/features/public-site/compagnie/data/presentation";
 
 export const PresentationSectionSchema = z.object({
   id: z.string(),
@@ -68,10 +69,14 @@ export async function fetchCompagniePresentationSections(): Promise<Presentation
 
   if (error) {
     console.error("fetchCompagniePresentationSections error", error);
-    return [];
+    // Fallback automatique si la lecture échoue
+    return compagniePresentationFallback as unknown as PresentationSection[];
   }
 
-  if (!data) return [];
+  if (!data || data.length === 0) {
+    // Fallback automatique si la table est vide
+    return compagniePresentationFallback as unknown as PresentationSection[];
+  }
 
   const sections = (data as SectionRecord[]).map(mapRecordToSection);
 
