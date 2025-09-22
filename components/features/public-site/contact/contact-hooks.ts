@@ -13,13 +13,23 @@ export const contactReasons: ContactReason[] = [
 ];
 
 import { useEffect } from 'react';
+import { useNewsletterSubscription } from '@/lib/hooks/useNewsletterSubscribe';
 
+// supabase/schemas/10_tables_system.sql
+// table public.abonnes_newsletter
 export function useContact() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const [newsletterEmail, setNewsletterEmail] = useState('');
-  const [isNewsletterSubscribed, setIsNewsletterSubscribed] = useState(false);
+  // Newsletter (mutualisé via hook partagé)
+  const {
+    email: newsletterEmail,
+    isSubscribed: isNewsletterSubscribed,
+    isLoading: isNewsletterLoading,
+    errorMessage: newsletterError,
+    handleEmailChange: handleNewsletterEmailChange,
+    handleSubmit: handleNewsletterSubmit,
+  } = useNewsletterSubscription({ source: 'contact' });
   const [formData, setFormData] = useState<ContactFormData>({
     firstName: '',
     lastName: '',
@@ -55,32 +65,13 @@ export function useContact() {
     }
   };
 
-  const handleNewsletterSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      // Simuler un appel API
-      // https://supabase.com/docs/reference/javascript/db-abortsignal
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // todo Envoie des données à une API
-      setIsNewsletterSubscribed(true);
-      setNewsletterEmail('');
-    } catch (error) {
-      console.error("Erreur lors de l'inscription à la newsletter", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // NB: on conserve `handleNewsletterSubmit` et `handleNewsletterEmailChange` exposés via le hook partagé
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleNewsletterEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewsletterEmail(e.target.value);
-  };
+  // handlers newsletter déjà fournis via useNewsletterSubscription
 
   const resetForm = () => {
     setIsSubmitted(false);
@@ -98,10 +89,11 @@ export function useContact() {
 
   return {
     isSubmitted,
-    isLoading,
+    isLoading: isLoading || isNewsletterLoading,
     isInitialLoading,
     newsletterEmail,
     isNewsletterSubscribed,
+    newsletterError,
     formData,
     contactReasons,
     handleSubmit,

@@ -19,6 +19,7 @@ import { NewsSkeleton } from '@/components/skeletons/news-skeleton';
 import { AboutSkeleton } from '@/components/skeletons/about-skeleton';
 import { ShowsSkeleton } from '@/components/skeletons/ShowsSkeleton';
 import { PartnersSkeleton } from '@/components/skeletons/partners-skeleton';
+import { NewsletterSkeleton } from '@/components/skeletons/newsletter-skeleton';
 
 export default function Home() {
   return (
@@ -35,7 +36,9 @@ export default function Home() {
       <Suspense fallback={<ShowsSkeleton />}>
         <ShowsContainer />
       </Suspense>
-      <NewsletterContainer />
+      <Suspense fallback={<NewsletterSkeleton />}>
+        <NewsletterContainer />
+      </Suspense>
       <Suspense fallback={<PartnersSkeleton />}>
         <PartnersContainer />
       </Suspense>

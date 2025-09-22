@@ -53,11 +53,11 @@ Before generating code, scan the codebase to identify:
 
 Priority context directories to scan:
 
+- `/memory-bank`: Project documentation and context
+- `/.github/copilot/`: Copilot-specific configuration and instruction files
 - `/app`: Next.js App Router structure
 - `/components`: Reusable UI components
 - `/supabase`: Supabase integration code
-- `/memory-bank`: Project documentation and context
-- `/.github/copilot/`: Copilot-specific configuration and instruction files
 
 Additional context available via MCP GitHub and MCP Supabase
 

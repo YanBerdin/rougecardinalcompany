@@ -28,6 +28,7 @@ export interface ContactPageProps {
   isInitialLoading: boolean;
   isNewsletterSubscribed: boolean;
   newsletterEmail: string;
+  newsletterError?: string | null;
   formData: ContactFormData;
   contactReasons: ContactReason[];
   onFormSubmit: (e: React.FormEvent) => void;

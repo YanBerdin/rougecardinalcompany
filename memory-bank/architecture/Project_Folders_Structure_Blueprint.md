@@ -85,12 +85,14 @@
 │   ├── tutorial/
 │   └── ui/                # Composants d'interface utilisateur partagés
 ├── lib/
+│   ├── dal/               # Data Access Layer (server-only)
+│   ├── hooks/             # Hooks partagés (client)
 │   ├── supabase/
 │   │   ├── schemas/       # Schémas de la base de données Supabase
 │   │   ├── client.ts      # Client Supabase
 │   │   ├── middleware.ts  # Middleware Supabase
 │   │   └──  server.ts     # Serveur Supabase
-│   └── utils.tsx 
+│   └── utils.ts 
 ├── memory-bank/           # Documentation structurée
 │   ├── architecture/
 │   ├── epics/
@@ -115,6 +117,8 @@
 - **components/features/**: Feature-based, each feature/section has its own folder with Container/View, hooks, types, index. Smart/Dumb enforced everywhere.
 - **components/ui/**: Shared UI components (atomic/molecular), no business logic, reusable across features.
 - **lib/**: Utilities and integrations (Supabase config, global utils).
+  - `lib/dal/*`: modules server‑only pour l'accès aux données (Next.js Server Components)
+  - `lib/hooks/*`: hooks partagés côté client (ex: `useNewsletterSubscribe.ts`)
 - **memory-bank/**: Structured documentation (architecture, epics, tasks, context, rationale).
 - **doc/**: Technical documentation (API, architecture, etc).
 - **public/**: Static assets (images, icons, etc).

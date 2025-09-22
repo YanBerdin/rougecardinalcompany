@@ -122,6 +122,14 @@
 
 ## Journal des Mises à Jour
 
+### 22 Septembre 2025
+
+- Newsletter: unification derrière une API route `app/api/newsletter/route.ts` (POST validé Zod, upsert `onConflict: 'email'`, metadata `{ consent, source }`)
+- Hook partagé: `lib/hooks/useNewsletterSubscribe.ts` utilisé par Home et Contact; gestion unifiée des erreurs/chargement/succès
+- DAL: `lib/dal/home-newsletter.ts` pour gating via `configurations_site` (Zod + valeurs par défaut)
+- UI: Home/Contact affichent `errorMessage` explicite; Suspense 1500 ms pour la section Home Newsletter pendant validation UX (à retirer avant prod)
+- Nettoyage: suppression des bannières `[DEPRECATED MOCK]`; renommage en `useNewsletterSubscription`; factorisation de `contact-hooks` vers le hook partagé
+
 ### 20 Septembre 2025
 
 - Migration frontend: Data Access Layer (lib/dal/*) côté serveur + Server Components

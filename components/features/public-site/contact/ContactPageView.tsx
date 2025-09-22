@@ -17,6 +17,7 @@ export function ContactPageView({
     isInitialLoading,
     isNewsletterSubscribed,
     newsletterEmail,
+    newsletterError,
     formData,
     contactReasons,
     onFormSubmit,
@@ -337,6 +338,9 @@ export function ContactPageView({
                                             <Button type="submit" className="w-full" disabled={isLoading}>
                                                 {isLoading ? 'Inscription...' : 'S\'abonner'}
                                             </Button>
+                                            {newsletterError && (
+                                                <p className="text-sm text-red-600">{newsletterError}</p>
+                                            )}
                                             <p className="text-xs text-muted-foreground">
                                                 Pas de spam. Désinscription facile.
                                             </p>

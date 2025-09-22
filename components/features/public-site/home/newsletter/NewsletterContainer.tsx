@@ -1,36 +1,13 @@
-"use client";
+import { NewsletterSettings, fetchNewsletterSettings } from '@/lib/dal/home-newsletter';
+import { NewsletterClientContainer } from './NewsletterClientContainer';
 
-import { NewsletterView, NewsletterForm } from './NewsletterView';
-import { useNewsletter } from './hooks';
+export async function NewsletterContainer() {
+    // TODO: remove - artificial delay to visualize Suspense skeletons
+    await new Promise((resolve) => setTimeout(resolve, 1500));
 
-export function NewsletterContainer() {
-    const {
-        email,
-        isSubscribed,
-        isLoading,
-        isInitialLoading,
-        handleEmailChange,
-        handleSubmit
-    } = useNewsletter();
+    const settings: NewsletterSettings = await fetchNewsletterSettings();
+    if (!settings.enabled) return null;
 
-    return (
-        <NewsletterView
-            isSubscribed={isSubscribed}
-            isInitialLoading={isInitialLoading}
-            email={email}
-            isLoading={isLoading}
-            onEmailChange={handleEmailChange}
-            onSubmit={handleSubmit}
-        >
-            {!isSubscribed && !isInitialLoading && (
-                <NewsletterForm
-                    email={email}
-                    isLoading={isLoading}
-                    isSubscribed={isSubscribed}
-                    onEmailChange={handleEmailChange}
-                    onSubmit={handleSubmit}
-                />
-            )}
-        </NewsletterView>
-    );
+    return <NewsletterClientContainer />;
 }
+

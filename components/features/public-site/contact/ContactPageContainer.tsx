@@ -10,6 +10,7 @@ export function ContactPageContainer() {
         isInitialLoading,
         newsletterEmail,
         isNewsletterSubscribed,
+        newsletterError,
         formData,
         contactReasons,
         handleSubmit,
@@ -26,6 +27,7 @@ export function ContactPageContainer() {
             isInitialLoading={isInitialLoading}
             isNewsletterSubscribed={isNewsletterSubscribed}
             newsletterEmail={newsletterEmail}
+            newsletterError={newsletterError}
             formData={formData}
             contactReasons={contactReasons}
             onFormSubmit={handleSubmit}

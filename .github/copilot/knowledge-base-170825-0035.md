@@ -340,6 +340,31 @@ L’objet user contient les attributs suivants :
 - Statistiques d'abonnement
 - Droit à l'oubli
 
+Mise en œuvre (frontend/backend unifiés):
+
+- API unique: `app/api/newsletter/route.ts`
+  - POST valide le corps `{ email, consent?, source? }` (Zod)
+  - Upsert idempotent dans `public.abonnes_newsletter` avec `onConflict: 'email'`
+  - Stocke des métadonnées `{ consent, source }` en JSONB
+  - Renvoie `{ status: 'subscribed' }` si succès
+
+- Hook partagé: `lib/hooks/useNewsletterSubscribe.ts`
+  - `useNewsletterSubscription({ source?: string })` gère l'état du formulaire (`email`, `isSubscribed`, `isLoading`, `errorMessage`)
+  - Appelle `POST /api/newsletter` et unifie la gestion d'erreurs pour l'UI
+  - Réutilisé à la Home et sur la page Contact
+
+- DAL serveur (gating): `lib/dal/home-newsletter.ts`
+  - Module `server-only` lisant `configurations_site` clé `public:home:newsletter`
+  - Validation Zod + valeurs par défaut; les containers serveur retournent `null` si désactivé
+
+- Patterns UI: Server Container + Client Container + View
+  - La section Newsletter de la Home est enveloppée dans `React.Suspense` avec un skeleton dédié (délai artificiel 1500 ms pendant la phase UX; à retirer avant prod)
+
+Sécurité/RLS:
+
+- Table `public.abonnes_newsletter`: insert autorisé pour le rôle `anon` (abonnement public); lecture et gestion réservées aux admins via `public.is_admin()`
+- Rate limiting et honeypot recommandés côté API avant passage en production
+
 ### 5.5. SEO et Référencement
 
 - **Technique** : sitemap.xml automatique, meta-tags dynamiques

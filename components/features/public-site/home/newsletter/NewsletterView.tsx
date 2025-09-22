@@ -10,6 +10,7 @@ import { NewsletterFormProps, NewsletterViewProps } from './types';
 export function NewsletterForm({
     email,
     isLoading,
+    errorMessage,
     onEmailChange,
     onSubmit
 }: NewsletterFormProps) {
@@ -32,6 +33,9 @@ export function NewsletterForm({
                     {isLoading ? 'Inscription...' : 'S\'inscrire'}
                 </Button>
             </div>
+            {errorMessage && (
+                <p className="text-red-200 text-sm mt-3">{errorMessage}</p>
+            )}
             <p className="text-white/70 text-sm mt-4">
                 Nous respectons votre vie privée. Pas de spam, désinscription facile.
             </p>
@@ -55,7 +59,7 @@ function SubscriptionSuccess() {
 }
 
 // Composant principal Newsletter (Dumb)
-export function NewsletterView({ isSubscribed, isInitialLoading, children }: NewsletterViewProps) {
+export function NewsletterView({ isSubscribed, isInitialLoading, errorMessage, children }: NewsletterViewProps) {
     if (isInitialLoading) {
         return <NewsletterSkeleton />;
     }
@@ -75,6 +79,9 @@ export function NewsletterView({ isSubscribed, isInitialLoading, children }: New
                             Inscrivez-vous à notre newsletter pour recevoir nos actualités,
                             invitations aux premières et offres exclusives.
                         </p>
+                        {errorMessage && (
+                            <p className="text-red-200 text-sm mb-4">{errorMessage}</p>
+                        )}
                         {children}
                     </div>
                 )}

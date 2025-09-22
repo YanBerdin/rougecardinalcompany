@@ -280,3 +280,38 @@ export interface Plugin {
 Ces patterns sont mis à jour au fur et à mesure que le projet évolue. Chaque nouveau pattern significatif doit être documenté ici pour maintenir la cohérence du code.
 
 ## Cartographie Épiques ↔ Schéma SQL
+
+## Pattern Newsletter Unifiée
+
+Objectif: unifier l'inscription newsletter derrière une API unique, factoriser la logique client via un hook partagé et contrôler l'affichage via un réglage DAL côté serveur.
+
+Composants clés:
+
+1. API route `app/api/newsletter/route.ts`
+  - Méthode POST, corps validé par Zod `{ email, consent?, source? }`.
+  - Upsert idempotent sur `public.abonnes_newsletter` avec `onConflict: 'email'`.
+  - Stocke `metadata` JSON: `{ consent, source }`.
+  - Retourne `{ status: 'subscribed' }` en succès, erreurs typées sinon.
+
+2. Hook partagé `lib/hooks/useNewsletterSubscribe.ts`
+  - Signature: `useNewsletterSubscription({ source?: string })`.
+  - Gère `email`, `isSubscribed`, `isLoading`, `errorMessage` et handlers `handleEmailChange`, `handleSubmit`.
+  - Appelle `POST /api/newsletter`; surface d'erreur unifiée pour l'UI.
+
+3. Gating via DAL `lib/dal/home-newsletter.ts`
+  - Marqué `server-only`.
+  - Lit `configurations_site` clé `public:home:newsletter`.
+  - Valide via Zod et applique des valeurs par défaut (fallback sûrs).
+  - Les containers serveur retournent `null` si désactivé.
+
+4. Server/Client split + Suspense
+  - Server Container: `NewsletterContainer.tsx` appelle la DAL et rend le Client seulement si activé.
+  - Client Container: consomme le hook partagé et passe l'état/handlers à la View.
+  - Envelopper dans `<Suspense fallback={<NewsletterSkeleton />}>` avec délai artificiel (1500 ms) temporaire pour valider l'UX; à retirer avant prod.
+
+Principes:
+
+- Aucune duplication entre Home et Contact: tous les formulaires postent vers la même API et réutilisent le même hook.
+- RLS: insert anonyme autorisé sur `abonnes_newsletter` uniquement; lecture/gestion réservées aux admins.
+- UI: affiche les messages d'erreur (`errorMessage`) et l'état de succès; neutralise les délais artificiels avant production.
+
