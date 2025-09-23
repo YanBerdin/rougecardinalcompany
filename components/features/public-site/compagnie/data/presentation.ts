@@ -3,8 +3,9 @@
 // sont désormais chargées depuis la BDD via `public.compagnie_presentation_sections`
 // et la DAL `lib/dal/compagnie-presentation.ts`. Ne plus importer directement ce fichier
 // dans les vues. Préférez `fetchCompagniePresentationSections()`.
-/*import { z } from 'zod';
 
+//import { z } from 'zod';
+/*
 export const PresentationSectionSchema = z.object({
   id: z.string(),
   kind: z.enum(['hero','history','quote','values','team','mission','custom']),
@@ -17,6 +18,9 @@ export const PresentationSectionSchema = z.object({
 });
 
 export type PresentationSection = z.infer<typeof PresentationSectionSchema>;
+*/
+
+import { PresentationSection } from "../types";
 
 export const compagniePresentationFallback: 
 // 07c_table_compagnie_presentation > table public.compagnie_presentation_sections
@@ -58,4 +62,3 @@ PresentationSection[] = [
     ]
   }
 ];
-*/

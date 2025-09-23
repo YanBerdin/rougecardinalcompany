@@ -315,3 +315,39 @@ Principes:
 - RLS: insert anonyme autorisé sur `abonnes_newsletter` uniquement; lecture/gestion réservées aux admins.
 - UI: affiche les messages d'erreur (`errorMessage`) et l'état de succès; neutralise les délais artificiels avant production.
 
+## Pattern Page éditoriale (DAL + Fallback + Suspense)
+
+Objectif: structurer une page éditoriale 100% Server Components en lisant les contenus via une DAL server-only, en enveloppant l’affichage avec Suspense + skeleton, et en garantissant un contenu de secours en cas d’absence de données en base (fallback automatique).
+
+Composants clés (exemple « La Compagnie »):
+
+1. DAL server-only
+   - `lib/dal/compagnie.ts` → valeurs institutionnelles, membres d’équipe (RLS lecture publique).
+   - `lib/dal/compagnie-presentation.ts` → sections éditoriales dynamiques depuis `public.compagnie_presentation_sections` (triées par `position`, `active = true`).
+   - Validation Zod des enregistrements, mapping des champs spécifiques (`quote_text`, `quote_author` → bloc citation), et retour de types sérialisables.
+
+2. Conteneur serveur (orchestration)
+   - `components/features/public-site/compagnie/CompagnieContainer.tsx` (Server Component async): agrège les fetchs DAL en parallèle (`Promise.all`), peut inclure un délai artificiel temporaire (1500 ms) pour valider les skeletons durant le design/UX.
+   - Passe des props propres à la View (sections, valeurs, équipe) — aucun état client ici.
+
+3. View présentielle (dumb component)
+   - `components/features/public-site/compagnie/CompagnieView.tsx`: rend les sections/valeurs/équipe à partir de props; aucun accès direct à la DAL.
+
+4. Suspense + Skeleton
+   - `app/compagnie/page.tsx` enveloppe `<CompagnieContainer />` dans `<Suspense fallback={<CompagnieSkeleton />}>`.
+   - Conserver Suspense en prod; supprimer les délais artificiels.
+
+5. Fallback automatique (robustesse)
+   - Dans `lib/dal/compagnie-presentation.ts`: si la requête échoue ou retourne 0 lignes, retourner un contenu local de secours `compagniePresentationFallback` (ancien mock renommé et marqué « [DEPRECATED FALLBACK] »).
+   - But: éviter les pages vides en environnement vierge ou lors d’un incident ponctuel; tracer l’erreur côté logs si pertinent.
+
+6. Dépréciation des mocks
+   - Les anciens hooks/données mocks sont conservés de façon transitoire avec en-tête `[DEPRECATED MOCK]` et ne doivent plus être importés directement. Toute lecture passe par la DAL côté serveur.
+
+Principes:
+
+- Serveur par défaut pour la lecture; aucune logique de fetching dans les composants client.
+- Zod au plus près des frontières de données (DAL) pour sécuriser l’UI.
+- Idempotence/robustesse: fallback local strictement limité à l’affichage public.
+- Respect RLS: politiques SELECT publiques sur les tables éditoriales; mutations uniquement via back‑office.
+

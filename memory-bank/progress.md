@@ -122,6 +122,14 @@
 
 ## Journal des Mises à Jour
 
+### 23 Septembre 2025
+
+- Compagnie: migration complète vers DAL server-only pour valeurs et équipe (`lib/dal/compagnie.ts`).
+- Compagnie: sections éditoriales branchées sur `public.compagnie_presentation_sections` via `lib/dal/compagnie-presentation.ts` (Zod + mapping quotes).
+- Page `app/compagnie/page.tsx`: enveloppée dans `<Suspense>` avec `CompagnieSkeleton`; délai artificiel 1500 ms dans le conteneur pour validation UX (à retirer avant prod).
+- Fallback automatique: si la table des sections est vide ou en erreur, retour du contenu local `compagniePresentationFallback` [DEPRECATED FALLBACK] pour éviter une page vide.
+- Dépréciation: anciens hooks/données mocks de la Compagnie annotés `[DEPRECATED MOCK]` et non utilisés par le rendu.
+
 ### 22 Septembre 2025
 
 - Newsletter: unification derrière une API route `app/api/newsletter/route.ts` (POST validé Zod, upsert `onConflict: 'email'`, metadata `{ consent, source }`)

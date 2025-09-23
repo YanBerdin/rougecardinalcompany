@@ -26,9 +26,9 @@
   - Shared UI components are decoupled from features
   - Documentation is versioned and structured (memory-bank)
 - **Repeating patterns:**
-  - `FeatureContainer.tsx` (logic, state)
-  - `FeatureView.tsx` (presentation)
-  - `hooks.ts`, `types.ts`, `index.ts` in each feature/section
+  - `FeatureContainer.tsx` (logic, state; Server Component par défaut)
+  - `FeatureView.tsx` (presentation, dumb component)
+  - `hooks.ts`, `types.ts`, `index.ts` in each feature/section (éviter hooks côté client pour la lecture; privilégier DAL)
 - **Rationale:**
   - Testability, maintainability, scalability, and consistency
 
@@ -67,9 +67,9 @@
 │   │       │   └── index.ts          
 │   │       ├── agenda/
 │   │       ├── compagnie/
-│   │       │   │   ├── CompagnieContainer.tsx
-│   │       │   │   ├── CompagnieView.tsx
-│   │       │   │   ├── hooks.ts
+│   │       │   │   ├── CompagnieContainer.tsx     # Server Component (async)
+│   │       │   │   ├── CompagnieView.tsx          # Presentational-only
+│   │       │   │   ├── hooks.ts                   # [DEPRECATED MOCK] (transitoire)
 │   │       │   │   ├── types.ts
 │   │       │   │   └── index.ts
 │   │       ├── spectacles/
@@ -81,11 +81,14 @@
 │   ├── skeletons/
 │   │   ├── hero-skeleton.tsx
 │   │   ├── news-skeleton.tsx
+│   │   ├── shows-skeleton.tsx
 │   │   └── ...
 │   ├── tutorial/
 │   └── ui/                # Composants d'interface utilisateur partagés
 ├── lib/
 │   ├── dal/               # Data Access Layer (server-only)
+│   │   ├── compagnie.ts               # valeurs + équipe (lecture publique)
+│   │   ├── compagnie-presentation.ts  # sections éditoriales + fallback
 │   ├── hooks/             # Hooks partagés (client)
 │   ├── supabase/
 │   │   ├── schemas/       # Schémas de la base de données Supabase
@@ -114,11 +117,11 @@
   - **presse/** : Espace presse (articles, communiqués)
   - **spectacles/** : Page dédiée aux spectacles (listing, détails)
   - **test-connection/** : Page de test de connexion (vérification Supabase/API)
-- **components/features/**: Feature-based, each feature/section has its own folder with Container/View, hooks, types, index. Smart/Dumb enforced everywhere.
+- **components/features/**: Feature-based, chaque fonctionnalité/section a son dossier avec Container/View, hooks, types, index. Smart/Dumb appliqué; lecture via DAL côté serveur.
 - **components/ui/**: Shared UI components (atomic/molecular), no business logic, reusable across features.
 - **lib/**: Utilities and integrations (Supabase config, global utils).
-  - `lib/dal/*`: modules server‑only pour l'accès aux données (Next.js Server Components)
-  - `lib/hooks/*`: hooks partagés côté client (ex: `useNewsletterSubscribe.ts`)
+  - `lib/dal/*`: modules server‑only pour l'accès aux données (Next.js Server Components). Exemples: `compagnie.ts`, `compagnie-presentation.ts` (incluant fallback automatique).
+  - `lib/hooks/*`: hooks partagés côté client (ex: `useNewsletterSubscribe.ts`). Éviter les hooks pour la lecture publique; préférer DAL.
 - **memory-bank/**: Structured documentation (architecture, epics, tasks, context, rationale).
 - **doc/**: Technical documentation (API, architecture, etc).
 - **public/**: Static assets (images, icons, etc).
@@ -128,7 +131,7 @@
 
 ## 5. File Placement Patterns
 
-- **Smart Components (Container):** `components/features/{feature}/{section}/{Section}Container.tsx` (logic, state, data fetching)
+- **Smart Components (Container):** `components/features/{feature}/{section}/{Section}Container.tsx` (logic, state, data fetching; par défaut Server Component)
 - **Dumb Components (View):** `components/features/{feature}/{section}/{Section}View.tsx` (pure UI, props only)
 - **Types:** `components/features/{feature}/{section}/types.ts` (TypeScript interfaces/types)
 - **Hooks:** `components/features/{feature}/{section}/hooks.ts` (custom hooks for state/data logic)
@@ -139,7 +142,7 @@
 
 ## 6. Naming and Organization Conventions
 
-- **Files:** PascalCase for React components, explicit suffixes (`Container`, `View`), utility files in camelCase or kebab-case as needed.
+- **Files:** PascalCase pour composants React, suffixes explicites (`Container`, `View`), fichiers utilitaires en camelCase/kebab-case. Les skeletons suivent le format `{section}-skeleton.tsx`.
 - **Folders:** camelCase for features/sections, kebab-case for routes in `app/`.
 - **Exports/Imports:** Named exports, re-exports via `index.ts`, absolute imports with `@/` alias.
 - **Internal organization:** Features are isolated, horizontal sharing (UI, utils) vs. vertical (features), circular dependencies avoided.

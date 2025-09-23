@@ -2666,6 +2666,14 @@ Tous les objets du schéma sont organisés dans le répertoire `supabase/schemas
 - [ ] Suppression effective  
 - [ ] Tri personnalisable
 
+Note de mise en œuvre (Sept 2025):
+
+- Frontend suit le pattern « Page éditoriale (DAL + Fallback + Suspense) »:
+  - Lecture via DAL server-only: `lib/dal/compagnie.ts` (valeurs, équipe) et `lib/dal/compagnie-presentation.ts` (sections dynamiques).
+  - Page `app/compagnie/page.tsx` enveloppée dans `React.Suspense` avec skeleton dédié; conteneur serveur asynchrone orchestre les appels.
+  - Fallback automatique aux données locales `compagniePresentationFallback` si la table des sections est vide/erreur (robustesse en environnement vierge).
+  - Les anciens hooks mocks sont explicitement marqués `[DEPRECATED MOCK]` et ne sont plus utilisés.
+
 ##### "Toggle affichage sections À la une et Partenaires"
 
 **As an** admin  

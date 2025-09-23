@@ -1,6 +1,6 @@
 # File Tree: rougecardinalcompany
 
-Generated on: 23/09/2025, 00:00:00 AM
+Generated on: 23/09/2025, 12:00:00 PM
 Root path: `/home/yandev/projets/rougecardinalcompany`
 
 ```bash
@@ -54,13 +54,6 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 ├── 📁 components/
 │   ├── 📁 features/
 │   │   └── 📁 public-site/
-│   │       ├── 📁 agenda/
-│   │       │   ├── 📄 AgendaClientContainer.tsx
-│   │       │   ├── 📄 AgendaContainer.tsx
-│   │       │   ├── 📄 AgendaView.tsx
-│   │       │   ├── 📄 hooks.ts
-│   │       │   ├── 📄 index.ts
-│   │       │   └── 📄 types.ts
 │   │       ├── 📁 compagnie/
 │   │       │   ├── 📁 data/
 │   │       │   │   └── 📄 presentation.ts
@@ -69,81 +62,8 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   │       │   ├── 📄 hooks.ts
 │   │       │   ├── 📄 index.ts
 │   │       │   └── 📄 types.ts
-│   │       ├── 📁 contact/
-│   │       │   ├── 📄 ContactPageContainer.tsx
-│   │       │   ├── 📄 ContactPageView.tsx
-│   │       │   ├── 📄 contact-hooks.ts
-│   │       │   └── 📄 contact-types.ts
-│   │       ├── 📁 home/
-│   │       │   ├── 📁 about/
-│   │       │   │   ├── 📄 AboutContainer.tsx
-│   │       │   │   ├── 📄 AboutView.tsx
-│   │       │   │   ├── 📄 hooks.ts
-│   │       │   │   ├── 📄 index.ts
-│   │       │   │   └── 📄 types.ts
-│   │       │   ├── 📁 hero/
-│   │       │   │   ├── 📄 HeroClient.tsx
-│   │       │   │   ├── 📄 HeroContainer.tsx
-│   │       │   │   ├── 📄 HeroView.tsx
-│   │       │   │   ├── 📄 hooks.ts
-│   │       │   │   ├── 📄 index.ts
-│   │       │   │   └── 📄 types.ts
-│   │       │   ├── 📁 news/
-│   │       │   │   ├── 📄 NewsContainer.tsx
-│   │       │   │   ├── 📄 NewsView.tsx
-│   │       │   │   ├── 📄 hooks.ts
-│   │       │   │   ├── 📄 index.ts
-│   │       │   │   └── 📄 types.ts
-│   │       │   ├── 📁 newsletter/
-│   │       │   │   ├── 📄 NewsletterClientContainer.tsx
-│   │       │   │   ├── 📄 NewsletterContainer.tsx
-│   │       │   │   ├── 📄 NewsletterView.tsx
-│   │       │   │   ├── 📄 hooks.ts
-│   │       │   │   ├── 📄 index.ts
-│   │       │   │   └── 📄 types.ts
-│   │       │   ├── 📁 partners/
-│   │       │   │   ├── 📄 PartnersContainer.tsx
-│   │       │   │   ├── 📄 PartnersView.tsx
-│   │       │   │   ├── 📄 hooks.ts
-│   │       │   │   ├── 📄 index.ts
-│   │       │   │   └── 📄 types.ts
-│   │       │   ├── 📁 shows/
-│   │       │   │   ├── 📄 ShowsContainer.tsx
-│   │       │   │   ├── 📄 ShowsView.tsx
-│   │       │   │   ├── 📄 hooks.ts
-│   │       │   │   ├── 📄 index.ts
-│   │       │   │   └── 📄 types.ts
-│   │       │   ├── 📄 index.ts
-│   │       │   └── 📄 types.ts
-│   │       ├── 📁 presse/
-│   │       │   ├── 📄 PresseContainer.tsx
-│   │       │   ├── 📄 PresseView.tsx
-│   │       │   ├── 📄 hooks.ts
-│   │       │   └── 📄 types.ts
-│   │       └── 📁 spectacles/
-│   │           ├── 📄 SpectaclesContainer.tsx
-│   │           ├── 📄 SpectaclesView.tsx
-│   │           ├── 📄 hooks.ts
-│   │           ├── 📄 index.ts
-│   │           └── 📄 types.ts
-│   ├── 📁 layout/
-│   │   ├── 📄 footer.tsx
-│   │   └── 📄 header.tsx
-│   ├── 📁 skeletons/
-│   │   ├── 📄 about-skeleton.tsx
-│   │   ├── 📄 agenda-skeleton.tsx
-│   │   ├── 📄 compagnie-skeleton.tsx
-│   │   ├── 📄 contact-skeleton.tsx
-│   │   ├── 📄 hero-skeleton.tsx
-│   │   ├── 📄 news-skeleton.tsx
-│   │   ├── 📄 newsletter-skeleton.tsx
-│   │   ├── 📄 partners-skeleton.tsx
-│   │   ├── 📄 presse-skeleton.tsx
-│   │   ├── 📄 shows-skeleton.tsx
-│   │   └── 📄 spectacles-skeleton.tsx
-│   ├── 📁 tutorial/
+│   │       └── 📁 tutorial/
 │   ├── 📁 ui/
-│   │   ├── 📄 alert.tsx
 │   │   ├── 📄 badge.tsx
 │   │   ├── 📄 button.tsx
 │   │   ├── 📄 card.tsx
@@ -151,17 +71,17 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   │   ├── 📄 dropdown-menu.tsx
 │   │   ├── 📄 input.tsx
 │   │   ├── 📄 label.tsx
-│   │   ├── 📄 select.tsx
-│   │   ├── 📄 skeleton.tsx
-│   │   ├── 📄 tabs.tsx
-│   │   └── 📄 textarea.tsx
-│   ├── 📄 auth-button.tsx
+│   │   └── 📄 dropdown-menu.tsx
+│   ├──  auth-button.tsx
 │   ├── 📄 deploy-button.tsx
 │   ├── 📄 env-var-warning.tsx
 │   ├── 📄 forgot-password-form.tsx
+│   ├── 📄 hero.tsx
 │   ├── 📄 login-form.tsx
 │   ├── 📄 logout-button.tsx
+│   ├── 📄 next-logo.tsx
 │   ├── 📄 sign-up-form.tsx
+│   ├── 📄 supabase-logo.tsx
 │   ├── 📄 theme-switcher.tsx
 │   └── 📄 update-password-form.tsx
 ├── 📁 doc/
@@ -170,6 +90,7 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   ├── 📁 dal/
 │   │   ├── 📄 agenda.ts
 │   │   ├── 📄 compagnie.ts
+│   │   ├── 📄 compagnie-presentation.ts
 │   │   ├── 📄 home-about.ts
 │   │   ├── 📄 home-hero.ts
 │   │   ├── 📄 home-news.ts
