@@ -2,6 +2,21 @@ import { Quote } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { CompagnieViewProps } from './types';
 import { CompagnieSkeleton } from '@/components/skeletons/compagnie-skeleton';
+import * as LucideIcons from 'lucide-react';
+// Whitelist locale des icônes Lucide utilisées
+import { Star, Heart, Award, Users, Globe, Shield, Rocket, Book, Briefcase } from 'lucide-react';
+
+const LucideIconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+    Star,
+    Heart,
+    Award,
+    Users,
+    Globe,
+    Shield,
+    Rocket,
+    Book,
+    Briefcase,
+};
 
 export function CompagnieView({ sections, values, team, loading = false }: CompagnieViewProps) {
     if (loading) {
@@ -92,17 +107,20 @@ export function CompagnieView({ sections, values, team, loading = false }: Compa
                                     )}
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                                    {values.map((value, index) => (
-                                        <Card key={index} className="text-center card-hover animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
-                                            <CardContent className="p-6">
-                                                <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-lg mb-4">
-                                                    <value.icon className="h-8 w-8 text-primary" />
-                                                </div>
-                                                <h3 className="text-xl font-semibold mb-3">{value.title}</h3>
-                                                <p className="text-muted-foreground">{value.description}</p>
-                                            </CardContent>
-                                        </Card>
-                                    ))}
+                                    {values.map((value, index) => {
+                                        const Icon = LucideIconMap[value.icon] ?? Star;
+                                        return (
+                                            <Card key={index} className="text-center card-hover animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
+                                                <CardContent className="p-6">
+                                                    <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-lg mb-4">
+                                                        <Icon className="h-8 w-8 text-primary" />
+                                                    </div>
+                                                    <h3 className="text-xl font-semibold mb-3">{value.title}</h3>
+                                                    <p className="text-muted-foreground">{value.description}</p>
+                                                </CardContent>
+                                            </Card>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         </section>
