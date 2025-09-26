@@ -24,16 +24,16 @@ export async function SpectaclesContainer() {
             title: s.title,
             slug: s.slug ?? undefined,
             description: s.short_description ?? '',
-            genre: 'Création', // TODO: map real genre when available in schema
-            duration_minutes: '—', // TODO: map real duration when available in schema
-            cast: 0, // TODO: map real cast size when available
+            genre: s.genre ?? '—',
+            duration_minutes: s.duration_minutes != null ? `${s.duration_minutes} min` : '—',
+            cast: s.casting ?? 0,
             premiere: s.premiere ?? '',
             public: s.public,
             created_at: s.premiere ?? '',
             updated_at: s.premiere ?? '',
             image: s.image_url ?? '/opengraph-image.png',
-            status: 'En tournée', // TODO: map real status when available
-            awards: [], // TODO: join awards when available
+            status: s.status ?? '—',
+            awards: s.awards ?? [],
         }));
 
     const archivedShows = spectacles
@@ -44,10 +44,10 @@ export async function SpectaclesContainer() {
             title: s.title,
             slug: s.slug ?? undefined,
             description: s.short_description ?? '',
-            genre: 'Création',
+            genre: s.genre ?? '—',
             premiere: s.premiere ?? undefined,
             image: s.image_url ?? '/opengraph-image.png',
-            awards: [],
+            awards: s.awards ?? [],
         }));
 
     return (

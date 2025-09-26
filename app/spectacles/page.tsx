@@ -1,5 +1,7 @@
 import { Metadata } from 'next';
 import { SpectaclesContainer } from '@/components/features/public-site/spectacles/SpectaclesContainer';
+import { Suspense } from 'react';
+import { SpectaclesSkeleton } from '@/components/skeletons/spectacles-skeleton';
 
 export const metadata: Metadata = {
     title: 'Spectacles | Rouge-Cardinal',
@@ -7,5 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default function SpectaclesPage() {
-    return <SpectaclesContainer />;
+    return (
+        <Suspense fallback={<SpectaclesSkeleton />}>
+            <SpectaclesContainer />
+        </Suspense>
+    );
 }

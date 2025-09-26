@@ -1,6 +1,6 @@
 # File Tree: rougecardinalcompany
 
-Generated on: 23/09/2025, 12:00:00 PM
+Generated on: 26/09/2025, 05:00:00 PM
 Root path: `/home/yandev/projets/rougecardinalcompany`
 
 ```bash
@@ -91,6 +91,7 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   │   ├── 📄 agenda.ts
 │   │   ├── 📄 compagnie.ts
 │   │   ├── 📄 compagnie-presentation.ts
+│   │   ├── 📄 spectacles.ts
 │   │   ├── 📄 home-about.ts
 │   │   ├── 📄 home-hero.ts
 │   │   ├── 📄 home-news.ts
@@ -142,7 +143,16 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   │   ├── 🗄️ 20250918031500_seed_home_hero_slides.sql
 │   │   ├── 🗄️ 20250918094530_seed_core_content.sql
 │   │   ├── 🗄️ 20250918095610_seed_compagnie_values.sql
+│   │       ├── 📁 spectacles/
+│   │       │   ├── 📄 SpectaclesContainer.tsx
+│   │       │   ├── 📄 SpectaclesView.tsx
+│   │       │   ├── 📄 hooks.ts
+│   │       │   ├── 📄 types.ts
+│   │       │   └── 📄 index.ts
 │   │   ├── 🗄️ 20250918101020_seed_events_press_articles.sql
+│   ├── 📁 skeletons/
+│   │   ├── 📄 spectacles-skeleton.tsx
+│   │   └── 📄 compagnie-skeleton.tsx
 │   │   ├── 🗄️ 20250918102240_seed_team_and_presentation.sql
 │   │   ├── 🗄️ 20250921110000_seed_compagnie_presentation_sections.sql
 │   │   ├── 🗄️ 20250921112000_add_home_about_content.sql

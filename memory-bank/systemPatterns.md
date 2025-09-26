@@ -351,3 +351,27 @@ Principes:
 - Idempotence/robustesse: fallback local strictement limité à l’affichage public.
 - Respect RLS: politiques SELECT publiques sur les tables éditoriales; mutations uniquement via back‑office.
 
+## Pattern Page Spectacles (DAL + Suspense + dépréciation hooks)
+
+Objectif: afficher la liste des spectacles à partir de la BDD en lecture serveur, en suivant le même pattern que les autres pages publiques (Server Container, DAL, Suspense/Skeleton), et en dépréciant les anciens hooks clients de mock.
+
+Composants clés:
+
+1. DAL server-only
+  - `lib/dal/spectacles.ts` → lit `public.spectacles` (id, title, slug, short_description, image_url, premiere, public). Retourne un tableau typed; logge les erreurs et fallback vide.
+
+2. Conteneur serveur
+  - `components/features/public-site/spectacles/SpectaclesContainer.tsx` (async Server Component): ajoute un délai artificiel (≈1200 ms) pour valider les skeletons (TODO: remove), récupère les spectacles via DAL, mappe vers les props de `SpectaclesView` et split courant/archives en attendant une logique métier plus fine.
+
+3. View présentielle (Client)
+  - `components/features/public-site/spectacles/SpectaclesView.tsx` (client) rend l’UI; affiche `<SpectaclesSkeleton />` si `loading`.
+
+4. Suspense + Skeleton
+  - La page `app/spectacles/page.tsx` peut envelopper le container dans `<Suspense fallback={<SpectaclesSkeleton />}>` pour du streaming progressif.
+
+5. Dépréciation des hooks mocks
+  - `components/features/public-site/spectacles/hooks.ts` → marqué `[DEPRECATED MOCK]`. L’export est retiré du barrel file; toute lecture passe par la DAL côté serveur.
+
+Notes:
+- TODO remapper `genre`, `duration_minutes`, `cast`, `status`, `awards` selon le schéma réel lorsqu’ils seront disponibles (actuellement valeurs par défaut documentées dans le container).
+

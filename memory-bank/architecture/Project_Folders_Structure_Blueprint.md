@@ -73,6 +73,11 @@
 │   │       │   │   ├── types.ts
 │   │       │   │   └── index.ts
 │   │       ├── spectacles/
+│   │       │   ├── SpectaclesContainer.tsx     # Server Component (async, DAL)
+│   │       │   ├── SpectaclesView.tsx          # Client View (présentation)
+│   │       │   ├── hooks.ts                    # [DEPRECATED MOCK]
+│   │       │   ├── types.ts
+│   │       │   └── index.ts
 │   │       └── presse/
 │   ├── layout/
 │   │   ├── Header.tsx
@@ -89,6 +94,7 @@
 │   ├── dal/               # Data Access Layer (server-only)
 │   │   ├── compagnie.ts               # valeurs + équipe (lecture publique)
 │   │   ├── compagnie-presentation.ts  # sections éditoriales + fallback
+│   │   ├── spectacles.ts              # lecture table spectacles (listing)
 │   ├── hooks/             # Hooks partagés (client)
 │   ├── supabase/
 │   │   ├── schemas/       # Schémas de la base de données Supabase

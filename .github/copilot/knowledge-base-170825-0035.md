@@ -733,7 +733,7 @@ create table public.spectacles (
   premiere timestamptz null,
   image_url text,
   public boolean default true,
-  awards text,
+  awards text[],
   created_by uuid null,
   created_at timestamptz default now() not null,
   updated_at timestamptz default now() not null,
@@ -2690,6 +2690,18 @@ Note de mise en œuvre (Sept 2025):
 - [ ] AND : la modification est tracée dans le journal d’audit
 
 ### 14.3. Page Nos Spectacles (événements)
+
+Mise en œuvre (sept. 2025) — Pattern « Page Spectacles (DAL + Suspense + dépréciation hooks) »:
+
+- Lecture via DAL server-only: `lib/dal/spectacles.ts` (colonnes sélectionnées: id, title, slug, short_description, image_url, premiere, public). Retourne tableau typé; erreurs loggées et fallback tableau vide.
+- Conteneur serveur: `components/features/public-site/spectacles/SpectaclesContainer.tsx` (async). Délai artificiel court pour valider les skeletons (≈1200 ms) — TODO: supprimer avant prod. Mapping vers props de `SpectaclesView` et split courant/archives temporaire.
+- View client: `components/features/public-site/spectacles/SpectaclesView.tsx` rend l'UI; affiche `SpectaclesSkeleton` si `loading`.
+- Suspense + Skeleton: `app/spectacles/page.tsx` enveloppe le container dans `<Suspense fallback={<SpectaclesSkeleton />}>` pour streaming progressif.
+- Dépréciation des hooks mocks: `components/features/public-site/spectacles/hooks.ts` marqué `[DEPRECATED MOCK]`; export retiré du barrel.
+
+Notes:
+- Champs à remapper ultérieurement selon schéma réel: `genre`, `duration_minutes`, `cast`, `status`, `awards` (pour l’instant valeurs par défaut documentées).
+- Possibilité de joindre `evenements` pour les dates à l’affiche (voir pattern Home Shows) dans une itération suivante.
 
 | ID | En tant que | Je veux | Afin de |
 |----|-------------|---------|---------|

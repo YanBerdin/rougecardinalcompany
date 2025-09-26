@@ -15,7 +15,7 @@ create table public.spectacles (
   premiere timestamptz null,
   image_url text, -- URL externe vers une image alternative)
   public boolean default true,
-  awards text,
+  awards text[],
   created_by uuid null,
   created_at timestamptz default now() not null,
   updated_at timestamptz default now() not null,
