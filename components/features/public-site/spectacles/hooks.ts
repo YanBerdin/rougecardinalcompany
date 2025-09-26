@@ -1,3 +1,9 @@
+// [DEPRECATED MOCK]
+// Ce hook était utilisé pour simuler les données des spectacles côté client.
+// Il est remplacé par un DAL server-only (Supabase) et un container serveur avec Suspense/Skeleton.
+// Conserver temporairement pour référence pendant la migration complète.
+
+/*
 import { useState, useEffect } from 'react';
 import { CurrentShow, ArchivedShow } from './types';
 
@@ -120,3 +126,4 @@ export const useSpectaclesData = () => {
         loading
     };
 };
+*/
