@@ -230,7 +230,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 ```
 
-### Data Access Layer (lib/supabase/)
+### Data Access Layer (lib/dal/)
 
 **Objectif**: Fournir une interface unifiée pour l'accès aux données et l'authentification.
 
@@ -249,7 +249,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 **Exemple**:
 
 ```typescript
-// lib/supabase/server.ts
+// supabase/server.ts
 export async function createClient() {
   const cookieStore = await cookies();
   return createServerClient(
@@ -949,10 +949,10 @@ Isolation des tests des dépendances externes :
 ```typescript
 // __tests__/services/data.test.ts
 import { fetchShowData } from '@/services/data';
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@//supabase/server';
 
 // Mock de Supabase
-jest.mock('@/lib/supabase/server', () => ({
+jest.mock('@/supabase/server', () => ({
   createClient: jest.fn(),
 }));
 

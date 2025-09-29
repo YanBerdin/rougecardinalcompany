@@ -46,7 +46,7 @@
 ### Configuration Supabase
 
 ```typescript
-// lib/supabase/server.ts (extrait)
+// supabase/server.ts (extrait)
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
 

@@ -190,7 +190,7 @@
 - **React:** Hooks, Container/View, Context API
 - **TypeScript:** Strict types, per-feature interfaces, import aliases
 - **Tailwind CSS:** Utility-first, config in `tailwind.config.ts`, UI built on Tailwind
-- **Supabase:** Client/server config in `lib/supabase/`, SQL schemas, auth middleware
+- **Supabase:** Client/server config in `supabase/`, SQL schemas, auth middleware
 
 ---
 

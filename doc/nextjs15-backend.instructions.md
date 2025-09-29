@@ -124,7 +124,7 @@ export async function logout() {
 ```tsx
 // Server Component for protected pages
 import { cookies } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/supabase/server";
 
 export default async function AdminDashboard() {
   const supabase = createClient();

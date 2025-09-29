@@ -498,7 +498,7 @@ Feedback Components:
 - Accessibility features built-in (ARIA attributes, keyboard navigation)
 - Dark/light theme support via CSS variables
 
-#### Data Access Layer (lib/supabase/)
+#### Data Access Layer (lib/dal/)
 
 **Purpose**: Provides unified interface for backend services
 
@@ -981,12 +981,12 @@ export const config = {
 #### Supabase Client Configuration
 
 ```typescript
-// lib/supabase/client.ts
+// supabase/client.ts
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 export const supabaseClient = createClientComponentClient();
 
-// lib/supabase/server.ts
+// supabase/server.ts
 import { createServerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 

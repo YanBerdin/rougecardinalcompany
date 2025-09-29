@@ -241,7 +241,7 @@
   - Composants UI construits sur cette base
 
 - **Supabase** :
-  - Configuration client/serveur dans `lib/supabase/`
+  - Configuration client/serveur dans `supabase/`
   - Schémas SQL pour la structure de la base de données
   - Middleware pour l'authentification
 
