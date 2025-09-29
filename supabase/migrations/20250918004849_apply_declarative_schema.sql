@@ -454,7 +454,7 @@ create table "public"."spectacles" (
     "premiere" timestamp with time zone,
     "image_url" text,
     "public" boolean default true,
-    "awards" text,
+  "awards" text[],
     "created_by" uuid,
     "created_at" timestamp with time zone not null default now(),
     "updated_at" timestamp with time zone not null default now(),
