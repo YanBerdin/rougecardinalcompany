@@ -97,7 +97,9 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   │   ├── 📄 home-news.ts
 │   │   ├── 📄 home-newsletter.ts
 │   │   ├── 📄 home-partners.ts
-│   │   └── 📄 home-shows.ts
+│   │   ├── 📄 home-shows.ts
+│   │   ├── 📄 contact.ts         # DAL server-only (messages_contact insert)
+│   │   └── 📄 presse.ts          # DAL server-only (articles/communiqués/kit média)
 │   ├── 📁 hooks/
 │   │   └── 📄 useNewsletterSubscribe.ts
 │   └── 📄 utils.ts

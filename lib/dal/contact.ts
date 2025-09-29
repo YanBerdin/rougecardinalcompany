@@ -29,7 +29,6 @@ export async function createContactMessage(input: ContactMessageInput) {
     reason: input.reason,
     message: input.message,
     consent: input.consent,
-    consent_at: input.consent ? new Date().toISOString() : null,
     metadata: {},
   } as const;
 

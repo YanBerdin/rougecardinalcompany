@@ -1,3 +1,6 @@
+// [DEPRECATED MOCK]
+// Ce module n'est plus utilisé. La page Presse lit désormais via DAL côté serveur.
+/*
 "use client";
 
 import { useEffect, useState } from "react";
@@ -152,3 +155,4 @@ export function usePresse() {
     mediaKit,
   };
 }
+*/

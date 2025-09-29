@@ -16,7 +16,6 @@ export async function CompagnieContainer() {
         <CompagnieView
             sections={sections}
             values={values.map(v => ({
-                icon: undefined,
                 title: v.title,
                 description: v.description,
             }))}

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { LucideIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 // Schéma pour les communiqués de presse
 export const PressReleaseSchema = z.object({
@@ -24,10 +24,13 @@ export const MediaArticleSchema = z.object({
 });
 
 // Schéma pour les éléments du kit média
+// Icône acceptée: composant React (Lucide) avec props 'className' facultative
+export type IconComponent = LucideIcon;
+
 export const MediaKitItemSchema = z.object({
   type: z.string(),
   description: z.string(),
-  icon: z.any(), // LucideIcon
+  // Pas d'icône dans les données runtime (vient de l'UI)
   fileSize: z.string(),
   fileUrl: z.string(),
 });
@@ -35,7 +38,7 @@ export const MediaKitItemSchema = z.object({
 // Types inférés des schémas
 export type PressRelease = z.infer<typeof PressReleaseSchema>;
 export type MediaArticle = z.infer<typeof MediaArticleSchema>;
-export type MediaKitItem = z.infer<typeof MediaKitItemSchema>;
+export type MediaKitItem = z.infer<typeof MediaKitItemSchema> & { icon?: IconComponent };
 
 // Props pour le composant PresseView
 export interface PresseViewProps {

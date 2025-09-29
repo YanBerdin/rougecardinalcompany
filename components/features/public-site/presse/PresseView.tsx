@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, ExternalLink } from "lucide-react";
+import { Download, ExternalLink, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -195,7 +195,9 @@ export function PresseView({
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {mediaKit.map((item, index) => (
+                        {mediaKit.map((item, index) => {
+                            const Icon = item.icon ?? FileText;
+                            return (
                             <Card
                                 key={index}
                                 className={`card-hover animate-fade-in-up text-center`}
@@ -203,7 +205,7 @@ export function PresseView({
                             >
                                 <CardContent className="p-6">
                                     <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-lg mb-4">
-                                        <item.icon className="h-8 w-8 text-primary" />
+                                        <Icon className="h-8 w-8 text-primary" />
                                     </div>
 
                                     <h3 className="text-xl font-semibold mb-3">{item.type}</h3>
@@ -222,7 +224,8 @@ export function PresseView({
                                     </Button>
                                 </CardContent>
                             </Card>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
             </section>

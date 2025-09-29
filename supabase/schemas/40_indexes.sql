@@ -6,6 +6,10 @@ create index if not exists idx_medias_storage_path on public.medias (storage_pat
 create index if not exists idx_profiles_user_id on public.profiles (user_id);
 create index if not exists idx_spectacles_title on public.spectacles (title);
 create index if not exists idx_articles_published_at on public.articles_presse (published_at);
+-- Index partiel pour optimiser les lectures publiques (articles publiés uniquement)
+create index if not exists idx_articles_published_at_public 
+	on public.articles_presse (published_at desc)
+	where published_at is not null;
 
 -- Index date pour événements
 create index if not exists idx_evenements_date_debut on public.evenements (date_debut);
@@ -45,7 +49,7 @@ create index if not exists idx_communiques_medias_ordre on public.communiques_me
 
 -- Recherche full-text sur titre et description (harmonisé avec articles_presse)
 create index if not exists idx_communiques_presse_search on public.communiques_presse using gin (
-  to_tsvector('french', coalesce(title, '') || ' ' || coalesce(description, ''))
+	to_tsvector('french', coalesce(title, '') || ' ' || coalesce(description, ''))
 );
 create index if not exists idx_spectacles_public on public.spectacles (public) where public = true;
 create index if not exists idx_partners_is_active on public.partners (is_active) where is_active = true;

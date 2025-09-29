@@ -76,6 +76,8 @@ Note RLS: les nouvelles tables co‑localisent leurs politiques (dans le même f
 - `home_hero_slides`: table + RLS avec fenêtre d’activation (index partiels sur `active`/planning).
 - `home_about_content`: nouvelle table pour le bloc « À propos » de la Home (title/intro/mission) avec RLS (lecture publique, écriture admin), index partiel `(active, position)` et intégration aux triggers `updated_at` + `audit`. Colonne `image_media_id` ajoutée (prioritaire sur `image_url`). La DAL lit exclusivement cette table (aucun fallback sur `compagnie_presentation_sections`).
 
+- `articles_presse`: activation RLS co‑localisée dans `08_table_articles_presse.sql` avec lecture publique des articles publiés (`published_at is not null`) et gestion admin (insert/update/delete). Ajout d’un index partiel `idx_articles_published_at_public` pour optimiser les sélections publiques.
+
 Pour rappel, la migration générée est `supabase/migrations/20250918004849_apply_declarative_schema.sql` (patchée pour l’ordre `validate_rrule()` → `check_valid_rrule`).
 
 ---

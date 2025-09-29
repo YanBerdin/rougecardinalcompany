@@ -1,6 +1,4 @@
-"use client";
-
-import { ContactPageContainer } from '@/components/features/public-site/contact/ContactPageContainer';
+import ContactPageContainer  from '@/components/features/public-site/contact/ContactPageContainer';
 
 /**
  * @deprecated Ce composant sera supprimé dans une future version.

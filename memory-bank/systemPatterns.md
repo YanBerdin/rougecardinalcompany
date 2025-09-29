@@ -184,13 +184,33 @@ export async function middleware(req: NextRequest) {
 ### Pattern de Protection des Données
 
 ```sql
--- Politique RLS Supabase type
+-- Politique RLS Supabase type (exemples)
 create policy "Accès public aux spectacles"
   on spectacles
   for select
-  to anon
-  using (published = true);
+  to anon, authenticated
+  using (public = true);
+
+-- Lecture publique des articles de presse publiés (RLS co-localisé dans 08_table_articles_presse.sql)
+create policy "Public press articles are viewable by everyone"
+  on articles_presse
+  for select
+  to anon, authenticated
+  using (published_at is not null);
+
+-- Gestion admin
+create policy "Admins can update press articles"
+  on articles_presse
+  for update
+  to authenticated
+  using ((select public.is_admin()))
+  with check ((select public.is_admin()));
 ```
+
+Optimisations RLS recommandées:
+
+- Appeler les fonctions dans les policies via `(select ...)` pour initPlan.
+- Index partiels alignés sur les filtres RLS (ex: `published_at is not null` sur `articles_presse`).
 
 ## Patterns de Performance
 

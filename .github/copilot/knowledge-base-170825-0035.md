@@ -1,3 +1,34 @@
+# Knowledge Base – Rouge Cardinal Company
+
+## Entrées récentes (sept. 2025)
+
+- feat(contact): wire contact page to DAL with server action; deprecate client hook and add Suspense/Skeleton
+  - Add server-only DAL (lib/dal/contact.ts) with Zod validation and Supabase insert into messages_contact
+  - Add server action submitContactAction with artificial delay (TODO remove)
+  - Refactor ContactPageContainer to Server Component with Suspense + ContactServerGate
+  - Make ContactPageView a client component owning local state; uses server action + shared newsletter hook
+  - Deprecate contact-hooks and simplify contact-types (remove view prop interface)
+
+- sec(rls): replace broad 'FOR ALL' policies with granular insert/update/delete
+  - compagnie_presentation_sections, home_hero_slides, home_about_content
+  - relation tables (spectacles_*/articles_*/communiques_*)
+  - categories/tags relations, SEO redirects, sitemap entries
+  - contacts_presse; explicit update policy for content_versions
+  - Guidelines: avoid FOR ALL; use USING/WITH CHECK with public.is_admin().
+
+- fix(db): align bootstrap migration with declarative schema (spectacles.awards text[])
+  - Change awards column to text[] in 20250918004849_apply_declarative_schema.sql to match 06_table_spectacles.sql
+
+- chore(db): remove redundant home_about_content DDL migration and dedupe RLS in relations file
+  - Drop 20250921112000_add_home_about_content.sql (table lives in declarative schema 07e_table_home_about.sql)
+  - Clean duplicated communiques_medias RLS block in 11_tables_relations.sql
+
+- feat(presse): refactor Presse feature to server-only DAL + Suspense/Skeleton; deprecate client mock
+  - Add lib/dal/presse.ts with fetchPressReleases(), fetchMediaArticles(), fetchMediaKit() via view communiques_presse_public
+  - Convert PresseContainer to Server Component with PresseServerGate and artificial delay (TODO remove)
+  - Remove any usage; strict types with Zod; icon optional with fallback in View
+  - RLS: articles_presse co‑localized policies in 08_table_articles_presse.sql (public select on published_at not null; admin-only write)
+  - Performance: add partial index idx_articles_published_at_public for public reads
 # knowledge-base — Cahier des charges – Création de site internet  **Compagnie de Théâtre « Rouge Cardinal »**
 
 ## Contexte

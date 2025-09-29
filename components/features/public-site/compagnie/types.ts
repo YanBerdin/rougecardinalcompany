@@ -3,7 +3,6 @@ import { PresentationSectionSchema as DalPresentationSectionSchema } from "@/lib
 
 // Schéma pour les valeurs de la compagnie
 export const ValueSchema = z.object({
-  icon: z.string(), // Type Lucide icon ex: "Star", "Heart"
   title: z.string(),
   description: z.string(),
 });

@@ -29,6 +29,7 @@
   - `FeatureContainer.tsx` (logic, state; Server Component par défaut)
   - `FeatureView.tsx` (presentation, dumb component)
   - `hooks.ts`, `types.ts`, `index.ts` in each feature/section (éviter hooks côté client pour la lecture; privilégier DAL)
+  - DAL server-only sous `lib/dal/*` (ex: `contact.ts` pour `messages_contact`, `presse.ts` pour articles/communiqués)
 - **Rationale:**
   - Testability, maintainability, scalability, and consistency
 
@@ -127,6 +128,7 @@
 - **components/ui/**: Shared UI components (atomic/molecular), no business logic, reusable across features.
 - **lib/**: Utilities and integrations (Supabase config, global utils).
   - `lib/dal/*`: modules server‑only pour l'accès aux données (Next.js Server Components). Exemples: `compagnie.ts`, `compagnie-presentation.ts` (incluant fallback automatique).
+    - Nouveaux: `contact.ts` (insert contrôlé avec Zod + Server Action), `presse.ts` (lectures `articles_presse`/`communiques_presse` + vue kit média)
   - `lib/hooks/*`: hooks partagés côté client (ex: `useNewsletterSubscribe.ts`). Éviter les hooks pour la lecture publique; préférer DAL.
 - **memory-bank/**: Structured documentation (architecture, epics, tasks, context, rationale).
 - **doc/**: Technical documentation (API, architecture, etc).
