@@ -155,13 +155,28 @@ using (
   )
 );
 
-drop policy if exists "Admins can manage press release categories" on public.communiques_categories;
-create policy "Admins can manage press release categories"
+-- Gestion admin (politiques granulaires)
+drop policy if exists "Admins can insert press release categories" on public.communiques_categories;
+create policy "Admins can insert press release categories"
 on public.communiques_categories
-for all
+for insert
+to authenticated
+with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can update press release categories" on public.communiques_categories;
+create policy "Admins can update press release categories"
+on public.communiques_categories
+for update
 to authenticated
 using ( (select public.is_admin()) )
 with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can delete press release categories" on public.communiques_categories;
+create policy "Admins can delete press release categories"
+on public.communiques_categories
+for delete
+to authenticated
+using ( (select public.is_admin()) );
 
 alter table public.communiques_tags enable row level security;
 
@@ -178,13 +193,28 @@ using (
   )
 );
 
-drop policy if exists "Admins can manage press release tags" on public.communiques_tags;
-create policy "Admins can manage press release tags"
+-- Gestion admin (politiques granulaires)
+drop policy if exists "Admins can insert press release tags" on public.communiques_tags;
+create policy "Admins can insert press release tags"
 on public.communiques_tags
-for all
+for insert
+to authenticated
+with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can update press release tags" on public.communiques_tags;
+create policy "Admins can update press release tags"
+on public.communiques_tags
+for update
 to authenticated
 using ( (select public.is_admin()) )
 with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can delete press release tags" on public.communiques_tags;
+create policy "Admins can delete press release tags"
+on public.communiques_tags
+for delete
+to authenticated
+using ( (select public.is_admin()) );
 
 -- Vue pour naviguer dans les catégories avec hiérarchie
 create or replace view public.categories_hierarchy as

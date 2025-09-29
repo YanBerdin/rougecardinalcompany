@@ -37,10 +37,22 @@ create policy "Home about content is viewable by everyone"
   to anon, authenticated
   using ( true );
 
--- Écriture réservée admin
- drop policy if exists "Admins can manage home about content" on public.home_about_content;
-create policy "Admins can manage home about content"
-  on public.home_about_content for all
+-- Écriture réservée admin (politiques granulaires)
+drop policy if exists "Admins can insert home about content" on public.home_about_content;
+create policy "Admins can insert home about content"
+  on public.home_about_content for insert
+  to authenticated
+  with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can update home about content" on public.home_about_content;
+create policy "Admins can update home about content"
+  on public.home_about_content for update
   to authenticated
   using ( (select public.is_admin()) )
   with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can delete home about content" on public.home_about_content;
+create policy "Admins can delete home about content"
+  on public.home_about_content for delete
+  to authenticated
+  using ( (select public.is_admin()) );

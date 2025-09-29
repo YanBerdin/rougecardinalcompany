@@ -122,13 +122,28 @@ for select
 to anon, authenticated
 using ( true );
 
-drop policy if exists "Admins can manage spectacle categories" on public.spectacles_categories;
-create policy "Admins can manage spectacle categories"
+-- Gestion admin (politiques granulaires)
+drop policy if exists "Admins can insert spectacle categories" on public.spectacles_categories;
+create policy "Admins can insert spectacle categories"
 on public.spectacles_categories
-for all
+for insert
+to authenticated
+with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can update spectacle categories" on public.spectacles_categories;
+create policy "Admins can update spectacle categories"
+on public.spectacles_categories
+for update
 to authenticated
 using ( (select public.is_admin()) )
 with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can delete spectacle categories" on public.spectacles_categories;
+create policy "Admins can delete spectacle categories"
+on public.spectacles_categories
+for delete
+to authenticated
+using ( (select public.is_admin()) );
 
 -- spectacles_tags
 alter table public.spectacles_tags enable row level security;
@@ -139,13 +154,28 @@ for select
 to anon, authenticated
 using ( true );
 
-drop policy if exists "Admins can manage spectacle tags" on public.spectacles_tags;
-create policy "Admins can manage spectacle tags"
+-- Gestion admin (politiques granulaires)
+drop policy if exists "Admins can insert spectacle tags" on public.spectacles_tags;
+create policy "Admins can insert spectacle tags"
 on public.spectacles_tags
-for all
+for insert
+to authenticated
+with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can update spectacle tags" on public.spectacles_tags;
+create policy "Admins can update spectacle tags"
+on public.spectacles_tags
+for update
 to authenticated
 using ( (select public.is_admin()) )
 with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can delete spectacle tags" on public.spectacles_tags;
+create policy "Admins can delete spectacle tags"
+on public.spectacles_tags
+for delete
+to authenticated
+using ( (select public.is_admin()) );
 
 -- articles_categories
 alter table public.articles_categories enable row level security;
@@ -156,13 +186,28 @@ for select
 to anon, authenticated
 using ( true );
 
-drop policy if exists "Admins can manage article categories" on public.articles_categories;
-create policy "Admins can manage article categories"
+-- Gestion admin (politiques granulaires)
+drop policy if exists "Admins can insert article categories" on public.articles_categories;
+create policy "Admins can insert article categories"
 on public.articles_categories
-for all
+for insert
+to authenticated
+with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can update article categories" on public.articles_categories;
+create policy "Admins can update article categories"
+on public.articles_categories
+for update
 to authenticated
 using ( (select public.is_admin()) )
 with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can delete article categories" on public.articles_categories;
+create policy "Admins can delete article categories"
+on public.articles_categories
+for delete
+to authenticated
+using ( (select public.is_admin()) );
 
 -- articles_tags
 alter table public.articles_tags enable row level security;
@@ -173,13 +218,28 @@ for select
 to anon, authenticated
 using ( true );
 
-drop policy if exists "Admins can manage article tags" on public.articles_tags;
-create policy "Admins can manage article tags"
+-- Gestion admin (politiques granulaires)
+drop policy if exists "Admins can insert article tags" on public.articles_tags;
+create policy "Admins can insert article tags"
 on public.articles_tags
-for all
+for insert
+to authenticated
+with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can update article tags" on public.articles_tags;
+create policy "Admins can update article tags"
+on public.articles_tags
+for update
 to authenticated
 using ( (select public.is_admin()) )
 with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can delete article tags" on public.articles_tags;
+create policy "Admins can delete article tags"
+on public.articles_tags
+for delete
+to authenticated
+using ( (select public.is_admin()) );
 
 -- ---- CONTENT VERSIONS ----
 alter table public.content_versions enable row level security;
@@ -201,8 +261,8 @@ to authenticated
 with check ( (select auth.uid()) is not null );
 
 -- Seuls les admins peuvent modifier/supprimer des versions
-drop policy if exists "Admins can manage content versions" on public.content_versions;
-create policy "Admins can manage content versions"
+drop policy if exists "Admins can update content versions" on public.content_versions;
+create policy "Admins can update content versions"
 on public.content_versions
 for update
 to authenticated
@@ -227,13 +287,28 @@ for select
 to authenticated
 using ( (select public.is_admin()) );
 
-drop policy if exists "Admins can manage SEO redirects" on public.seo_redirects;
-create policy "Admins can manage SEO redirects"
+-- Gestion admin (politiques granulaires)
+drop policy if exists "Admins can insert SEO redirects" on public.seo_redirects;
+create policy "Admins can insert SEO redirects"
 on public.seo_redirects
-for all
+for insert
+to authenticated
+with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can update SEO redirects" on public.seo_redirects;
+create policy "Admins can update SEO redirects"
+on public.seo_redirects
+for update
 to authenticated
 using ( (select public.is_admin()) )
 with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can delete SEO redirects" on public.seo_redirects;
+create policy "Admins can delete SEO redirects"
+on public.seo_redirects
+for delete
+to authenticated
+using ( (select public.is_admin()) );
 
 -- ---- SITEMAP ENTRIES ----
 alter table public.sitemap_entries enable row level security;
@@ -247,10 +322,25 @@ to anon, authenticated
 using ( is_indexed = true );
 
 -- Seuls les admins peuvent gérer le sitemap
-drop policy if exists "Admins can manage sitemap entries" on public.sitemap_entries;
-create policy "Admins can manage sitemap entries"
+-- Gestion admin (politiques granulaires)
+drop policy if exists "Admins can insert sitemap entries" on public.sitemap_entries;
+create policy "Admins can insert sitemap entries"
 on public.sitemap_entries
-for all
+for insert
+to authenticated
+with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can update sitemap entries" on public.sitemap_entries;
+create policy "Admins can update sitemap entries"
+on public.sitemap_entries
+for update
 to authenticated
 using ( (select public.is_admin()) )
 with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can delete sitemap entries" on public.sitemap_entries;
+create policy "Admins can delete sitemap entries"
+on public.sitemap_entries
+for delete
+to authenticated
+using ( (select public.is_admin()) );

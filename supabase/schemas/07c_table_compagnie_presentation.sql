@@ -45,12 +45,25 @@ create policy "Compagnie presentation sections are viewable by everyone"
   using ( true );
 
 -- Écriture réservée admin
- drop policy if exists "Admins can manage compagnie presentation sections" on public.compagnie_presentation_sections;
-create policy "Admins can manage compagnie presentation sections"
-  on public.compagnie_presentation_sections for all
+-- Gestion admin (politiques granulaires)
+drop policy if exists "Admins can insert compagnie presentation sections" on public.compagnie_presentation_sections;
+create policy "Admins can insert compagnie presentation sections"
+  on public.compagnie_presentation_sections for insert
+  to authenticated
+  with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can update compagnie presentation sections" on public.compagnie_presentation_sections;
+create policy "Admins can update compagnie presentation sections"
+  on public.compagnie_presentation_sections for update
   to authenticated
   using ( (select public.is_admin()) )
   with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can delete compagnie presentation sections" on public.compagnie_presentation_sections;
+create policy "Admins can delete compagnie presentation sections"
+  on public.compagnie_presentation_sections for delete
+  to authenticated
+  using ( (select public.is_admin()) );
 
 -- Vue admin déplacée dans 41_views_admin_content_versions.sql (dépend de content_versions)
 

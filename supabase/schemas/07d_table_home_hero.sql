@@ -46,9 +46,22 @@ create policy "Home hero slides are viewable by everyone"
   );
 
 -- Gestion admin
-drop policy if exists "Admins can manage home hero slides" on public.home_hero_slides;
-create policy "Admins can manage home hero slides"
-  on public.home_hero_slides for all
+-- Gestion admin (politiques granulaires)
+drop policy if exists "Admins can insert home hero slides" on public.home_hero_slides;
+create policy "Admins can insert home hero slides"
+  on public.home_hero_slides for insert
+  to authenticated
+  with check ((select public.is_admin()));
+
+drop policy if exists "Admins can update home hero slides" on public.home_hero_slides;
+create policy "Admins can update home hero slides"
+  on public.home_hero_slides for update
   to authenticated
   using ((select public.is_admin()))
   with check ((select public.is_admin()));
+
+drop policy if exists "Admins can delete home hero slides" on public.home_hero_slides;
+create policy "Admins can delete home hero slides"
+  on public.home_hero_slides for delete
+  to authenticated
+  using ((select public.is_admin()));

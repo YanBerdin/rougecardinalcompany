@@ -54,13 +54,28 @@ for select
 to anon, authenticated
 using ( true );
 
-drop policy if exists "Admins can manage spectacle member relations" on public.spectacles_membres_equipe;
-create policy "Admins can manage spectacle member relations"
+-- Gestion admin (politiques granulaires)
+drop policy if exists "Admins can insert spectacle member relations" on public.spectacles_membres_equipe;
+create policy "Admins can insert spectacle member relations"
 on public.spectacles_membres_equipe
-for all
+for insert
+to authenticated
+with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can update spectacle member relations" on public.spectacles_membres_equipe;
+create policy "Admins can update spectacle member relations"
+on public.spectacles_membres_equipe
+for update
 to authenticated
 using ( (select public.is_admin()) )
 with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can delete spectacle member relations" on public.spectacles_membres_equipe;
+create policy "Admins can delete spectacle member relations"
+on public.spectacles_membres_equipe
+for delete
+to authenticated
+using ( (select public.is_admin()) );
 
 -- Spectacles medias relations
 alter table public.spectacles_medias enable row level security;
@@ -72,13 +87,28 @@ for select
 to anon, authenticated
 using ( true );
 
-drop policy if exists "Admins can manage spectacle media relations" on public.spectacles_medias;
-create policy "Admins can manage spectacle media relations"
+-- Gestion admin (politiques granulaires)
+drop policy if exists "Admins can insert spectacle media relations" on public.spectacles_medias;
+create policy "Admins can insert spectacle media relations"
 on public.spectacles_medias
-for all
+for insert
+to authenticated
+with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can update spectacle media relations" on public.spectacles_medias;
+create policy "Admins can update spectacle media relations"
+on public.spectacles_medias
+for update
 to authenticated
 using ( (select public.is_admin()) )
 with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can delete spectacle media relations" on public.spectacles_medias;
+create policy "Admins can delete spectacle media relations"
+on public.spectacles_medias
+for delete
+to authenticated
+using ( (select public.is_admin()) );
 
 -- Articles medias relations
 alter table public.articles_medias enable row level security;
@@ -90,13 +120,28 @@ for select
 to anon, authenticated
 using ( true );
 
-drop policy if exists "Admins can manage article media relations" on public.articles_medias;
-create policy "Admins can manage article media relations"
+-- Gestion admin (politiques granulaires)
+drop policy if exists "Admins can insert article media relations" on public.articles_medias;
+create policy "Admins can insert article media relations"
 on public.articles_medias
-for all
+for insert
+to authenticated
+with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can update article media relations" on public.articles_medias;
+create policy "Admins can update article media relations"
+on public.articles_medias
+for update
 to authenticated
 using ( (select public.is_admin()) )
 with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can delete article media relations" on public.articles_medias;
+create policy "Admins can delete article media relations"
+on public.articles_medias
+for delete
+to authenticated
+using ( (select public.is_admin()) );
 
 -- Communiques medias relations (RLS)
 alter table public.communiques_medias enable row level security;
@@ -114,10 +159,25 @@ using (
   )
 );
 
-drop policy if exists "Admins can manage press release media relations" on public.communiques_medias;
-create policy "Admins can manage press release media relations"
+-- Gestion admin (politiques granulaires)
+drop policy if exists "Admins can insert press release media relations" on public.communiques_medias;
+create policy "Admins can insert press release media relations"
 on public.communiques_medias
-for all
+for insert
+to authenticated
+with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can update press release media relations" on public.communiques_medias;
+create policy "Admins can update press release media relations"
+on public.communiques_medias
+for update
 to authenticated
 using ( (select public.is_admin()) )
 with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can delete press release media relations" on public.communiques_medias;
+create policy "Admins can delete press release media relations"
+on public.communiques_medias
+for delete
+to authenticated
+using ( (select public.is_admin()) );

@@ -121,13 +121,28 @@ for select
 to authenticated
 using ( (select public.is_admin()) );
 
-drop policy if exists "Admins can manage press contacts" on public.contacts_presse;
-create policy "Admins can manage press contacts"
+-- Politiques granulaires pour la gestion
+drop policy if exists "Admins can create press contacts" on public.contacts_presse;
+create policy "Admins can create press contacts"
 on public.contacts_presse
-for all
+for insert
+to authenticated
+with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can update press contacts" on public.contacts_presse;
+create policy "Admins can update press contacts"
+on public.contacts_presse
+for update
 to authenticated
 using ( (select public.is_admin()) )
 with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can delete press contacts" on public.contacts_presse;
+create policy "Admins can delete press contacts"
+on public.contacts_presse
+for delete
+to authenticated
+using ( (select public.is_admin()) );
 
 -- ===== VUES UTILITAIRES =====
 -- Vues déplacées dans 41_views_communiques.sql (dépendent des tables de relations)
