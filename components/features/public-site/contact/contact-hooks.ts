@@ -1,3 +1,7 @@
+// DEPRECATED: This hook has been replaced by a Server Action + client view state pattern.
+// Keep this file for backward compatibility if imported elsewhere; prefer using ContactPageView directly.
+
+/*
 "use client";
 
 import { useState } from 'react';
@@ -103,3 +107,4 @@ export function useContact() {
     resetForm
   };
 }
+*/

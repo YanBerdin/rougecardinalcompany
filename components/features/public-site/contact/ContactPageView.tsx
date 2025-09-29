@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from 'react';
 import { Mail, Phone, MapPin, Send, CheckCircle, Clock, Users, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,24 +9,82 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ContactSkeleton } from '@/components/skeletons/contact-skeleton';
-import { ContactPageProps } from './contact-types';
+import { useNewsletterSubscription } from '@/lib/hooks/useNewsletterSubscribe';
+import { submitContactAction } from './actions';
+import type { ContactFormData, ContactReason } from './contact-types';
 
+const CONTACT_REASONS: ContactReason[] = [
+    { value: "booking", label: "Réservation / Billetterie" },
+    { value: "partenariat", label: "Partenariat / Mécénat" },
+    { value: "presse", label: "Demande presse" },
+    { value: "education", label: "Action culturelle / Éducation" },
+    { value: "technique", label: "Question technique" },
+    { value: "autre", label: "Autre" }
+];
 
-export function ContactPageView({
-    isSubmitted,
-    isLoading,
-    isInitialLoading,
-    isNewsletterSubscribed,
-    newsletterEmail,
-    newsletterError,
-    formData,
-    contactReasons,
-    onFormSubmit,
-    onNewsletterSubmit,
-    onResetForm,
-    onInputChange,
-    onNewsletterEmailChange
-}: ContactPageProps) {
+export function ContactPageView() {
+        const [isSubmitted, setIsSubmitted] = useState(false);
+        const [isLoading, setIsLoading] = useState(false);
+        const [isInitialLoading, setIsInitialLoading] = useState(true);
+        const [formData, setFormData] = useState<ContactFormData>({
+            firstName: '',
+            lastName: '',
+            email: '',
+            phone: '',
+            subject: '', // TODO redundant with reason
+            reason: '',
+            message: '',
+            consent: false,
+        });
+
+        const {
+            email: newsletterEmail,
+            isSubscribed: isNewsletterSubscribed,
+            isLoading: isNewsletterLoading,
+            errorMessage: newsletterError,
+            handleEmailChange: onNewsletterEmailChange,
+            handleSubmit: onNewsletterSubmit,
+        } = useNewsletterSubscription({ source: 'contact' });
+
+        useEffect(() => {
+            const t = setTimeout(() => setIsInitialLoading(false), 600); // artificial delay (TODO: remove)
+            return () => clearTimeout(t);
+        }, []);
+
+        const onInputChange = (field: string, value: string | boolean) => {
+            setFormData(prev => ({ ...prev, [field]: value }));
+        };
+
+        const onResetForm = () => {
+            setIsSubmitted(false);
+            setFormData({ firstName: '', lastName: '', email: '', phone: '', subject: '', reason: '', message: '', consent: false });
+        };
+
+        const onFormSubmit = async (e: React.FormEvent) => {
+            e.preventDefault();
+            setIsLoading(true);
+            try {
+                const fd = new FormData();
+                fd.set('firstName', formData.firstName);
+                fd.set('lastName', formData.lastName);
+                fd.set('email', formData.email);
+                fd.set('phone', formData.phone);
+                fd.set('reason', formData.reason || 'autre');
+                fd.set('message', formData.message);
+                fd.set('consent', String(formData.consent));
+
+                const res = await submitContactAction(fd);
+                if (res?.ok) {
+                    setIsSubmitted(true);
+                } else {
+                    console.error('Form submission error', res);
+                }
+            } catch (err) {
+                console.error('Unexpected error submitting contact form', err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
 
 
     if (isInitialLoading) {
@@ -145,7 +204,7 @@ export function ContactPageView({
                                                     <SelectValue placeholder="Sélectionnez un motif" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    {contactReasons.map(reason => (
+                                                    {CONTACT_REASONS.map(reason => (
                                                         <SelectItem key={reason.value} value={reason.value}>
                                                             {reason.label}
                                                         </SelectItem>
@@ -196,7 +255,7 @@ export function ContactPageView({
                                         <Button
                                             type="submit"
                                             className="w-full"
-                                            disabled={isLoading || !formData.consent}
+                                            disabled={isLoading || isNewsletterLoading || !formData.consent}
                                         >
                                             {isLoading ? (
                                                 <>

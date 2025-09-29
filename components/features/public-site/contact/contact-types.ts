@@ -1,5 +1,3 @@
-import { LucideIcon } from 'lucide-react';
-
 export interface ContactFormData {
   firstName: string;
   lastName: string;
@@ -16,24 +14,4 @@ export interface ContactReason {
   label: string;
 }
 
-export interface ContactInfo {
-  icon: LucideIcon;
-  title: string;
-  content: React.ReactNode;
-}
-
-export interface ContactPageProps {
-  isSubmitted: boolean;
-  isLoading: boolean;
-  isInitialLoading: boolean;
-  isNewsletterSubscribed: boolean;
-  newsletterEmail: string;
-  newsletterError?: string | null;
-  formData: ContactFormData;
-  contactReasons: ContactReason[];
-  onFormSubmit: (e: React.FormEvent) => void;
-  onNewsletterSubmit: (e: React.FormEvent) => void;
-  onResetForm: () => void;
-  onInputChange: (field: string, value: string | boolean) => void;
-  onNewsletterEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}
+// Note: ContactInfo and view prop interface removed; the view owns its internal state.

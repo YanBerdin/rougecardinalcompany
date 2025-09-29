@@ -1,40 +1,12 @@
-"use client";
+import { Suspense } from 'react';
+import ContactServerGate from './ContactServerGate';
+import { ContactSkeleton } from '@/components/skeletons/contact-skeleton';
 
-import { ContactPageView } from './ContactPageView';
-import { useContact } from './contact-hooks';
-
-export function ContactPageContainer() {
-    const {
-        isSubmitted,
-        isLoading,
-        isInitialLoading,
-        newsletterEmail,
-        isNewsletterSubscribed,
-        newsletterError,
-        formData,
-        contactReasons,
-        handleSubmit,
-        handleNewsletterSubmit,
-        handleInputChange,
-        handleNewsletterEmailChange,
-        resetForm
-    } = useContact();
-
+// Server container wrapping the client view, data is minimal and static here
+export default async function ContactPageContainer() {
     return (
-        <ContactPageView
-            isSubmitted={isSubmitted}
-            isLoading={isLoading}
-            isInitialLoading={isInitialLoading}
-            isNewsletterSubscribed={isNewsletterSubscribed}
-            newsletterEmail={newsletterEmail}
-            newsletterError={newsletterError}
-            formData={formData}
-            contactReasons={contactReasons}
-            onFormSubmit={handleSubmit}
-            onNewsletterSubmit={handleNewsletterSubmit}
-            onResetForm={resetForm}
-            onInputChange={handleInputChange}
-            onNewsletterEmailChange={handleNewsletterEmailChange}
-        />
+        <Suspense fallback={<ContactSkeleton />}> 
+            <ContactServerGate />
+        </Suspense>
     );
 }
