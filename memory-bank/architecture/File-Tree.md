@@ -155,7 +155,6 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   │   └── 📄 compagnie-skeleton.tsx
 │   │   ├── 🗄️ 20250918102240_seed_team_and_presentation.sql
 │   │   ├── 🗄️ 20250921110000_seed_compagnie_presentation_sections.sql
-│   │   ├── 🗄️ 20250921112000_add_home_about_content.sql
 │   │   ├── 🗄️ 20250921113000_seed_home_about_content.sql
 │   │   ├── 📝 README-migrations.md
 │   │   └── 🗄️ sync_existing_profiles.sql
