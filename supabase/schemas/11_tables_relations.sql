@@ -98,32 +98,7 @@ to authenticated
 using ( (select public.is_admin()) )
 with check ( (select public.is_admin()) );
 
--- Communiques medias relations
-alter table public.communiques_medias enable row level security;
-
-drop policy if exists "Press release media relations follow parent visibility" on public.communiques_medias;
-create policy "Press release media relations follow parent visibility"
-on public.communiques_medias
-for select
-to anon, authenticated
-using ( 
-  exists (
-    select 1 from public.communiques_presse cp 
-    where cp.id = communique_id 
-    and (cp.public = true or (select public.is_admin()))
-  )
-);
-
-drop policy if exists "Admins can manage press release media relations" on public.communiques_medias;
-create policy "Admins can manage press release media relations"
-on public.communiques_medias
-for all
-to authenticated
-using ( (select public.is_admin()) )
-with check ( (select public.is_admin()) );
-
--- ---- COMMUNIQUES RELATIONS ----
--- RLS pour communiques_medias
+-- Communiques medias relations (RLS)
 alter table public.communiques_medias enable row level security;
 
 drop policy if exists "Press release media relations follow parent visibility" on public.communiques_medias;
