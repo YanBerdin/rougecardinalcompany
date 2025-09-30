@@ -3,8 +3,8 @@ import type { MediaKitItem } from "./types";
 import { fetchMediaArticles, fetchPressReleases, fetchMediaKit } from "@/lib/dal/presse";
 
 export default async function PresseServerGate() {
-  // Délai artificiel pour tester le skeleton // TODO: remove
-  await new Promise((r) => setTimeout(r, 800));
+  // TODO: remove Délai artificiel pour tester le skeleton
+  await new Promise((r) => setTimeout(r, 1500));
 
   const [pressReleases, mediaArticles, mediaKitRows] = await Promise.all([
     fetchPressReleases(),

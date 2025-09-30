@@ -5,7 +5,8 @@ import { z } from "zod";
 import { createClient } from "@/supabase/server";
 import { compagniePresentationFallback } from "@/components/features/public-site/compagnie/data/presentation";
 
-export const PresentationSectionSchema = z.object({
+// Schema défini dans le scope local pour éviter les exports non-async
+const PresentationSectionSchema = z.object({
   id: z.string(),
   kind: z.enum(["hero", "history", "quote", "values", "team", "mission", "custom"]),
   title: z.string().optional(),

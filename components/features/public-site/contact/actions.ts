@@ -36,8 +36,8 @@ export async function submitContactAction(formData: FormData) {
     return { ok: false, error: "Invalid input", issues: parsed.error.format() } as const;
   }
 
-  //TODO: Artificial delay for skeleton testing 
-  await new Promise((r) => setTimeout(r, 800));
+  //TODO: Remove Artificial delay for skeleton testing 
+  await new Promise((r) => setTimeout(r, 1500));
 
   await createContactMessage(parsed.data as ContactMessageInput);
   return { ok: true } as const;
