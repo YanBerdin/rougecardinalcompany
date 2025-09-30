@@ -42,7 +42,7 @@ values
     5,
     '2023-05-10T20:30:00+02:00',
     'https://images.pexels.com/photos/3184340/pexels-photo-3184340.jpeg?auto=compress&cs=tinysrgb&w=1200',
-    false,
+    true,
     ARRAY['Prix du Public - Festival d''Avignon']
   ),
   (
@@ -56,7 +56,7 @@ values
     4,
     '2022-03-18T20:30:00+01:00',
     'https://images.pexels.com/photos/3184421/pexels-photo-3184421.jpeg?auto=compress&cs=tinysrgb&w=1200',
-    false,
+    true,
     ARRAY['Mention spéciale - Théâtre et Société']
   ),
   (
@@ -70,7 +70,7 @@ values
     3,
     '2021-11-02T19:00:00+01:00',
     'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=1200',
-    false,
+    true,
     null
   ),
   (
@@ -84,8 +84,106 @@ values
     2,
     '2020-09-25T20:00:00+02:00',
     'https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg?auto=compress&cs=tinysrgb&w=1200',
-    false,
+    true,
     ARRAY['Prix de la Critique']
+  ),
+  (
+    'Mémoires de Guerre',
+    'memoires-de-guerre',
+    'archive',
+    'Un témoignage bouleversant sur les survivants de guerre et la transmission de la mémoire.',
+    'Témoignage sur la mémoire de guerre.',
+    'Théâtre historique',
+    120,
+    6,
+    '2019-11-11T20:30:00+01:00',
+    'https://images.pexels.com/photos/3184396/pexels-photo-3184396.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    true,
+    ARRAY['Grand Prix du Jury - Festival de Nancy']
+  ),
+  (
+    'Les Voix du Silence',
+    'les-voix-du-silence',
+    'archive',
+    'Spectacle inclusif donnant la parole aux personnes sourdes et malentendantes.',
+    'Spectacle inclusif sur la surdité.',
+    'Théâtre social',
+    85,
+    5,
+    '2019-06-15T20:00:00+02:00',
+    'https://images.pexels.com/photos/3184327/pexels-photo-3184327.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    true,
+    ARRAY['Prix de l''Innovation Sociale']
+  ),
+  (
+    'Nuit Blanche à Paris',
+    'nuit-blanche-a-paris',
+    'archive',
+    'Une comédie romantique pleine de rebondissements dans les rues de la capitale.',
+    'Comédie romantique parisienne.',
+    'Comédie',
+    95,
+    4,
+    '2018-12-20T20:30:00+01:00',
+    'https://images.pexels.com/photos/3184354/pexels-photo-3184354.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    true,
+    null
+  ),
+  (
+    'L''Appel de la Forêt',
+    'l-appel-de-la-foret',
+    'archive',
+    'Adaptation théâtrale du chef-d''œuvre de Jack London, entre aventure et introspection.',
+    'Adaptation de Jack London.',
+    'Aventure dramatique',
+    105,
+    3,
+    '2018-03-22T20:00:00+01:00',
+    'https://images.pexels.com/photos/3184372/pexels-photo-3184372.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    true,
+    ARRAY['Coup de Cœur du Public']
+  ),
+  (
+    'Portraits de Famille',
+    'portraits-de-famille',
+    'archive',
+    'Une chronique familiale touchante sur trois générations de femmes.',
+    'Chronique familiale sur trois générations.',
+    'Drame familial',
+    115,
+    7,
+    '2017-10-05T20:30:00+02:00',
+    'https://images.pexels.com/photos/3184387/pexels-photo-3184387.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    true,
+    ARRAY['Prix de la Meilleure Interprétation Féminine']
+  ),
+  (
+    'Renaissance',
+    'renaissance',
+    'archive',
+    'Un spectacle musical célébrant la renaissance culturelle après les temps difficiles.',
+    'Spectacle musical sur la renaissance.',
+    'Comédie musicale',
+    130,
+    8,
+    '2017-04-18T19:30:00+02:00',
+    'https://images.pexels.com/photos/3184445/pexels-photo-3184445.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    true,
+    null
+  ),
+  (
+    'Les Chemins de Traverse',
+    'les-chemins-de-traverse',
+    'archive',
+    'Un road-movie théâtral sur la quête d''identité et les rencontres qui changent une vie.',
+    'Road-movie théâtral.',
+    'Drame contemporain',
+    100,
+    4,
+    '2016-09-12T20:00:00+02:00',
+    'https://images.pexels.com/photos/3184423/pexels-photo-3184423.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    true,
+    ARRAY['Révélation de l''Année']
   );
 
 -- Optionnel: actualiser la colonne search_vector si un trigger n'est pas encore en place

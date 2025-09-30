@@ -13,19 +13,22 @@ export async function SpectaclesContainer() {
 
     const spectacles = await fetchAllSpectacles();
 
-    // Improved logic: separate current shows from archives based on dates and status
-    const now = new Date();
-    const threeMonthsAgo = new Date();
-    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+    // DEBUG: Log the raw data to understand what we're working with
+    //TODO: remove in production
+    /*
+    console.log('=== DEBUG SPECTACLES CONTAINER ===');
+    console.log('Total spectacles fetched:', spectacles.length);
+    console.log('All spectacles status/public:', spectacles.map(s => ({
+        title: s.title,
+        status: s.status,
+        public: s.public
+    })));
+    */
 
-    // Current shows: public and recent (within the last 3 months) or without premiere date
+    // Improved logic: separate current shows from archives based on status
+    // Current shows: public status and not archived
     const currentShows = spectacles
-        .filter((s) => s.public)
-        .filter((s) => {
-            if (!s.premiere) return true; // If no date, consider as current
-            const premiereDate = new Date(s.premiere);
-            return premiereDate >= threeMonthsAgo;
-        })
+        .filter((s) => s.public && s.status !== 'archive')
         .slice(0, 6)
         .map((s) => ({
             id: s.id,
@@ -44,14 +47,9 @@ export async function SpectaclesContainer() {
             awards: s.awards ?? [],
         }));
 
-    // Archived shows: all public shows older than 3 months or non-public shows
+    // Archived shows: all shows with 'archive' status (regardless of public flag)
     const archivedShows = spectacles
-        .filter((s) => {
-            if (!s.public) return true; // Include non-public shows (true archives)
-            if (!s.premiere) return false; // If no date and public, don't archive
-            const premiereDate = new Date(s.premiere);
-            return premiereDate < threeMonthsAgo; // Shows older than 3 months
-        })
+        .filter((s) => s.status === 'archive')
         .map((s) => ({
             id: s.id,
             title: s.title,
@@ -62,6 +60,14 @@ export async function SpectaclesContainer() {
             image: s.image_url ?? '/opengraph-image.png',
             awards: s.awards ?? [],
         }));
+
+    // DEBUG: Log the filtered results
+    /*
+    console.log('Current shows count:', currentShows.length);
+    console.log('Archived shows count:', archivedShows.length);
+    console.log('Archived shows details:', archivedShows.map(s => ({ title: s.title, id: s.id })));
+    console.log('=== END DEBUG ===');
+    */
 
     return (
         <SpectaclesView

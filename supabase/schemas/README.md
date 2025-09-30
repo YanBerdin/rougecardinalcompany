@@ -67,6 +67,10 @@ Note RLS: les nouvelles tables co‑localisent leurs politiques (dans le même f
 
 ---
 
+## 🆕 Mises à jour récentes (oct. 2025)
+
+- **Spectacles archivés publics** : Modification du seed `20250926153000_seed_spectacles.sql` pour marquer les spectacles archivés avec `public = true` au lieu de `public = false`. Cette approche simplifie la logique d'affichage des archives dans la fonctionnalité "Voir toutes nos créations" sans nécessiter de modification des politiques RLS. Les spectacles archivés restent identifiés par `status = 'archive'` mais sont maintenant visibles publiquement via la politique RLS existante.
+
 ## 🆕 Mises à jour récentes (sept. 2025)
 
 - Renommage `spectacles.cast` → `spectacles.casting` (évite collision et clarifie le sens).
@@ -86,6 +90,7 @@ Pour rappel, la migration générée est `supabase/migrations/20250918004849_app
 
 - Les seeds ne font pas partie du schéma déclaratif. Chaque seed est un fichier migration horodaté dans `supabase/migrations/` (ex: `20250921113000_seed_home_about_content.sql`).
 - Préférer des seeds idempotents (MERGE/UPSERT, `where not exists`) pour permettre la ré‑exécution locale.
+- **Migration spectacles** : `20250926153000_seed_spectacles.sql` mise à jour pour les spectacles archivés avec `public = true` (visibilité "Voir toutes nos créations").
 - Exemple de création: `supabase migration new seed_home_hero_slides`
 - Appliquer via `supabase db push` ou rejouer un fichier précis avec `psql -f`.
 
@@ -99,7 +104,7 @@ Pour rappel, la migration générée est `supabase/migrations/20250918004849_app
 |-------|---------|----------|----------------|
 | **profiles** | Publique | Propriétaire uniquement | Auto-création profil |
 | **medias** | Publique | Uploadeur ou admin | Gestion fichiers |
-| **spectacles** | Si public=true | Créateur ou admin | Visibilité contrôlée |
+| **spectacles** | Si public=true | Créateur ou admin | Visibilité contrôlée. Spectacles archivés publics (status='archive', public=true) |
 | **evenements** | Publique | Admin uniquement | Événements publics |
 | **lieux** | Publique | Admin uniquement | Lieux publics |
 | **membres_equipe** | Publique | Admin uniquement | Équipe publique |

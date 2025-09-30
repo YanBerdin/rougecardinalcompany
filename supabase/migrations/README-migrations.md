@@ -11,7 +11,7 @@
 - `20250930122000_seed_configurations_site.sql` — Seed configuration de base de l'application (⚠️ CRITIQUE)
 - `20250930121000_seed_categories_tags.sql` — Seed catégories et tags de base pour l'organisation du contenu
 - `20250930120000_seed_lieux.sql` — Seed lieux de représentation (⚠️ CRITIQUE pour événements)
-- `20250926153000_seed_spectacles.sql` — Seed spectacles avec casting et awards
+- `20250926153000_seed_spectacles.sql` — Seed spectacles avec casting et awards. **Mise à jour oct. 2025** : spectacles archivés marqués `public=true` pour fonctionnalité "Voir toutes nos créations"
 - `20250921113000_seed_home_about_content.sql` — Seed Home > About (ligne par défaut `slug='default'`)
 - `20250921110000_seed_compagnie_presentation_sections.sql` — Seed sections présentation Compagnie depuis la source typée côté code
 - `20250918102240_seed_team_and_presentation.sql` — Seed membres d'équipe et sections présentation (initial)
@@ -27,6 +27,7 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 - Fichiers horodatés: `YYYYMMDDHHMMSS_description.sql`
 - Pas de `seed.sql` générique à la racine: chaque seed est un fichier migration horodaté explicite
 - Idempotence recommandée (MERGE/UPSERT ou clauses `where not exists (...)`)
+- **Spectacles archivés** : utilisation de `public=true` + `status='archive'` pour visibilité publique via RLS standard
 
 ## Migrations de données (DML) notables
 

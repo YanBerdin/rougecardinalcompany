@@ -12,9 +12,9 @@ import { SpectaclesSkeleton } from '@/components/skeletons/spectacles-skeleton';
 export function SpectaclesView({ currentShows, archivedShows, loading = false }: SpectaclesViewProps) {
     const [showAllArchived, setShowAllArchived] = useState(false);
     
-    // Display initially 9 archived shows, then all if requested
-    const displayedArchivedShows = showAllArchived ? archivedShows : archivedShows.slice(0, 9);
-    const hasMoreArchivedShows = archivedShows.length > 9;
+    // Display initially 6 archived shows, then all if requested (adjusted for current content)
+    const displayedArchivedShows = showAllArchived ? archivedShows : archivedShows.slice(0, 6);
+    const hasMoreArchivedShows = archivedShows.length > 6;
     if (loading) {
         return <SpectaclesSkeleton />;
     }
@@ -194,7 +194,9 @@ export function SpectaclesView({ currentShows, archivedShows, loading = false }:
                         <p className="text-muted-foreground mb-6">
                             {showAllArchived 
                                 ? `${archivedShows.length} créations depuis 2008` 
-                                : `Plus de ${archivedShows.length - 9} autres créations depuis 2008...`
+                                : hasMoreArchivedShows 
+                                    ? `${displayedArchivedShows.length} créations affichées sur ${archivedShows.length} au total depuis 2008`
+                                    : `${archivedShows.length} créations depuis 2008`
                             }
                         </p>
                         {hasMoreArchivedShows && (
@@ -208,6 +210,14 @@ export function SpectaclesView({ currentShows, archivedShows, loading = false }:
                                 <ArrowRight className={`ml-2 h-5 w-5 transition-transform ${showAllArchived ? 'rotate-180' : ''}`} />
                             </Button>
                         )}
+                        {/* Debug info - TODO: remove in production */}
+                        {/*}
+                        {process.env.NODE_ENV === 'development' && (
+                            <div className="mt-4 text-xs text-muted-foreground">
+                                Debug: {archivedShows.length} spectacles archivés | Seuil: 6 | Bouton visible: {hasMoreArchivedShows ? 'Oui' : 'Non'}
+                            </div>
+                        )}
+                        */}
                     </div>
                 </div>
             </section>
