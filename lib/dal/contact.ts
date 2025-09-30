@@ -4,7 +4,8 @@ import "server-only";
 import { z } from "zod";
 import { createClient } from "@/supabase/server";
 
-export const ContactMessageSchema = z.object({
+// Schema et type définis dans le scope local pour éviter les exports non-async
+const ContactMessageSchema = z.object({
   firstName: z.string().trim().min(1).max(100),
   lastName: z.string().trim().min(1).max(100),
   email: z.string().email().toLowerCase(),
@@ -19,16 +20,19 @@ export const ContactMessageSchema = z.object({
 export type ContactMessageInput = z.infer<typeof ContactMessageSchema>;
 
 export async function createContactMessage(input: ContactMessageInput) {
+  // Validation des données d'entrée
+  const validatedInput = ContactMessageSchema.parse(input);
+  
   const supabase = await createClient();
 
   const payload = {
-    firstname: input.firstName,
-    lastname: input.lastName,
-    email: input.email,
-    phone: input.phone ?? null,
-    reason: input.reason,
-    message: input.message,
-    consent: input.consent,
+    firstname: validatedInput.firstName,
+    lastname: validatedInput.lastName,
+    email: validatedInput.email,
+    phone: validatedInput.phone ?? null,
+    reason: validatedInput.reason,
+    message: validatedInput.message,
+    consent: validatedInput.consent,
     metadata: {},
   } as const;
 

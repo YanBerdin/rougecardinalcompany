@@ -1,9 +1,20 @@
 "use server";
 
 import { z } from "zod";
-import { ContactMessageSchema, createContactMessage } from "@/lib/dal/contact";
+import { createContactMessage, type ContactMessageInput } from "@/lib/dal/contact";
 
-const FormSchema = ContactMessageSchema;
+// Schema de validation pour le formulaire (copie du schéma DAL)
+const FormSchema = z.object({
+  firstName: z.string().trim().min(1).max(100),
+  lastName: z.string().trim().min(1).max(100),
+  email: z.string().email().toLowerCase(),
+  phone: z.string().trim().max(40).optional().nullable(),
+  reason: z
+    .enum(["booking", "partenariat", "presse", "education", "technique", "autre"])
+    .default("autre"),
+  message: z.string().trim().min(1).max(5000),
+  consent: z.boolean().refine((v) => v === true, { message: "Consent required" }),
+});
 
 export async function submitContactAction(formData: FormData) {
   // Extract and validate
@@ -25,9 +36,9 @@ export async function submitContactAction(formData: FormData) {
     return { ok: false, error: "Invalid input", issues: parsed.error.format() } as const;
   }
 
-  // Artificial delay for skeleton testing (TODO: remove)
+  //TODO: Artificial delay for skeleton testing 
   await new Promise((r) => setTimeout(r, 800));
 
-  await createContactMessage(parsed.data);
+  await createContactMessage(parsed.data as ContactMessageInput);
   return { ok: true } as const;
 }

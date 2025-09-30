@@ -2,6 +2,19 @@
 
 ## Entrées récentes (sept. 2025)
 
+- fix(server-actions): resolve "Server Actions must be async functions" error in contact DAL
+  - Move ContactMessageSchema from export to local scope in lib/dal/contact.ts (Next.js 15 Server Actions constraint)
+  - Duplicate schema definition in components/features/public-site/contact/actions.ts for form validation
+  - Add explicit validation with ContactMessageSchema.parse() in DAL and explicit type casting
+  - Result: /contact page now responds 200 instead of 500; maintains strict Zod validation on both sides
+
+- feat(seeds): complete database seeding with all essential tables (14/24 production-ready)
+  - Create 20250930120000_seed_lieux.sql: 5 venues with GPS coordinates (Lyon, Montreuil, Thonon, Toulouse, Grenoble)
+  - Create 20250930121000_seed_categories_tags.sql: 5 categories + 15 tags for content organization
+  - Create 20250930122000_seed_configurations_site.sql: 29 essential app configurations (home, contact, presse, SEO, analytics)
+  - Update supabase/migrations/README-migrations.md with new seeds and critical priorities
+  - All seeds applied successfully to local DB; application now fully functional post-deployment
+
 - feat(contact): wire contact page to DAL with server action; deprecate client hook and add Suspense/Skeleton
   - Add server-only DAL (lib/dal/contact.ts) with Zod validation and Supabase insert into messages_contact
   - Add server action submitContactAction with artificial delay (TODO remove)

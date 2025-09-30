@@ -57,7 +57,7 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin}>
+          <form onSubmit={handleLogin} aria-busy={isLoading}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
@@ -67,6 +67,9 @@ export function LoginForm({
                   placeholder="m@example.com"
                   required
                   value={email}
+                  name="email" //? Email input field
+                  autoComplete="email" //? Enable browser autocomplete
+                  disabled={isLoading} //? Disable input while loading
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
@@ -84,11 +87,20 @@ export function LoginForm({
                   id="password"
                   type="password"
                   required
+                  name="password" //? Password input field
+                  autoComplete="current-password" //? Enable browser autocomplete
+                  disabled={isLoading} //? Disable input while loading
+                  aria-invalid={error ? true : false} //? Indicate if the input has an error
+                  aria-describedby={error ? "form-error" : undefined} //? Associate error message with input
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
+              {error && ( //? Display A11y error message if exists
+                <p id="form-error" role="alert" aria-live="polite" className="text-sm text-red-500">
+                  {error}
+                </p>
+              )}
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Logging in..." : "Login"}
               </Button>

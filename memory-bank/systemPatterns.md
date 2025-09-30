@@ -52,6 +52,48 @@ export async function fetchFeaturedPressReleases(limit = 3) {
 }
 ```
 
+### Pattern Server Actions (Next.js 15)
+
+⚠️ **Contrainte critique** : Dans un fichier marqué `"use server"`, tous les exports doivent être des fonctions async.
+
+```typescript
+// ❌ INCORRECT - Provoque "Server Actions must be async functions"
+"use server";
+export const MySchema = z.object({ ... }); // ❌ Export non-async
+
+// ✅ CORRECT - Schema local, seules les fonctions sont exportées
+"use server";
+const MySchema = z.object({ ... }); // ✅ Local scope
+export async function myAction(input) { // ✅ Async export
+  const validated = MySchema.parse(input);
+  // ...
+}
+
+// ✅ CORRECT - Types peuvent être exportés
+export type MyInput = z.infer<typeof MySchema>;
+```
+
+**Exemple DAL + Actions avec validation séparée :**
+
+```typescript
+// lib/dal/contact.ts
+"use server";
+const ContactSchema = z.object({ ... }); // Local
+export type ContactInput = z.infer<typeof ContactSchema>;
+export async function createContact(input: ContactInput) {
+  const validated = ContactSchema.parse(input);
+  // ...
+}
+
+// components/.../actions.ts  
+"use server";
+const FormSchema = z.object({ ... }); // Dupliqué mais nécessaire
+export async function submitForm(formData: FormData) {
+  const parsed = FormSchema.parse(extractFromFormData(formData));
+  await createContact(parsed as ContactInput);
+}
+```
+
 Principes:
 
 1. Modules `lib/dal/*` marqués `server-only` et sans code client.

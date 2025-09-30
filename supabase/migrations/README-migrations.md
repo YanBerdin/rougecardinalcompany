@@ -1,4 +1,24 @@
-# Migrations Manuelles - Rouge Cardinal Company
+# Migratio## Migration principale du schéma déclaratif
+
+- `20250918004849_apply_declarative_schema.sql` — Migration générée du schéma déclaratif principal (DDL)
+
+## Migrations DDL complémentaires
+
+- `20250921112000_add_home_about_content.sql` — Ajout table home_about_content (DDL ponctuelle)
+
+## Migrations de données (DML) notables
+
+- `20250930122000_seed_configurations_site.sql` — Seed configuration de base de l'application (⚠️ CRITIQUE)
+- `20250930121000_seed_categories_tags.sql` — Seed catégories et tags de base pour l'organisation du contenu
+- `20250930120000_seed_lieux.sql` — Seed lieux de représentation (⚠️ CRITIQUE pour événements)
+- `20250926153000_seed_spectacles.sql` — Seed spectacles avec casting et awards
+- `20250921113000_seed_home_about_content.sql` — Seed Home > About (ligne par défaut `slug='default'`)
+- `20250921110000_seed_compagnie_presentation_sections.sql` — Seed sections présentation Compagnie depuis la source typée côté code
+- `20250918102240_seed_team_and_presentation.sql` — Seed membres d'équipe et sections présentation (initial)
+- `20250918095610_seed_compagnie_values.sql` — Seed valeurs institutionnelles
+- `20250918101020_seed_events_press_articles.sql` — Seed événements et articles de presse (exemples)
+- `20250918094530_seed_core_content.sql` — Seed contenu de base (partenaires, lieux, config)
+- `20250918031500_seed_home_hero_slides.sql` — Seed slides Hero de la Homelles - Rouge Cardinal Company
 
 Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutées en complément du schéma déclaratif.
 
