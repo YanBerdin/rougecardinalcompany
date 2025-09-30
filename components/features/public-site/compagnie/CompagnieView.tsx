@@ -52,7 +52,7 @@ export function CompagnieView({ sections, values, team, loading = false }: Compa
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
                                     <div className="animate-fade-in-up">
                                         {section.title && <h2 className="text-2xl xl:text-3xl font-bold mb-6">{section.title}</h2>}
-                                        {section.content?.map((p, i) => (
+                                        {section.content?.map((p: string, i: number) => (
                                             <p key={i} className={`text-lg xl:text-xl text-muted-foreground ${i < (section.content?.length || 0) - 1 ? 'mb-4' : ''} leading-relaxed`}>
                                                 {p}
                                             </p>
@@ -108,7 +108,7 @@ export function CompagnieView({ sections, values, team, loading = false }: Compa
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                                     {values.map((value, index) => {
-                                        const Icon = LucideIconMap[value.icon] ?? Star;
+                                        const Icon = Star; // Default icon since values don't have icon property
                                         return (
                                             <Card key={index} className="text-center card-hover animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
                                                 <CardContent className="p-6">
@@ -139,9 +139,9 @@ export function CompagnieView({ sections, values, team, loading = false }: Compa
                                         </p>
                                     )}
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                                <div className="flex flex-wrap justify-center gap-8">
                                     {team.map((member, index) => (
-                                        <Card key={index} className="card-hover animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
+                                        <Card key={index} className="card-hover animate-fade-in-up w-full md:w-[calc(50%-1rem)] lg:w-[calc(25%-1.5rem)] max-w-xs" style={{ animationDelay: `${index * 0.1}s` }}>
                                             <div className="relative overflow-hidden rounded-t-lg">
                                                 <div
                                                     className="h-64 bg-cover bg-center transition-transform duration-300 hover:scale-105"

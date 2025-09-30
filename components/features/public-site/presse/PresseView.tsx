@@ -74,11 +74,11 @@ export function PresseView({
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="flex flex-wrap justify-center gap-8">
                         {pressReleases.map((release, index) => (
                             <Card
                                 key={release.id}
-                                className={`card-hover animate-fade-in-up`}
+                                className={`card-hover animate-fade-in-up w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm`}
                                 style={{ animationDelay: `${index * 0.1}s` }}
                             >
                                 <CardHeader>

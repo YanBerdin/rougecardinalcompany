@@ -13,11 +13,19 @@ export async function SpectaclesContainer() {
 
     const spectacles = await fetchAllSpectacles();
 
-    // Simple split current vs archived based on premiere date (example logic)
+    // Improved logic: separate current shows from archives based on dates and status
     const now = new Date();
+    const threeMonthsAgo = new Date();
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+    // Current shows: public and recent (within the last 3 months) or without premiere date
     const currentShows = spectacles
         .filter((s) => s.public)
-        .filter((s) => (s.premiere ? new Date(s.premiere) <= now : true))
+        .filter((s) => {
+            if (!s.premiere) return true; // If no date, consider as current
+            const premiereDate = new Date(s.premiere);
+            return premiereDate >= threeMonthsAgo;
+        })
         .slice(0, 6)
         .map((s) => ({
             id: s.id,
@@ -36,9 +44,14 @@ export async function SpectaclesContainer() {
             awards: s.awards ?? [],
         }));
 
+    // Archived shows: all public shows older than 3 months or non-public shows
     const archivedShows = spectacles
-        .filter((s) => !s.public)
-        .slice(0, 9)
+        .filter((s) => {
+            if (!s.public) return true; // Include non-public shows (true archives)
+            if (!s.premiere) return false; // If no date and public, don't archive
+            const premiereDate = new Date(s.premiere);
+            return premiereDate < threeMonthsAgo; // Shows older than 3 months
+        })
         .map((s) => ({
             id: s.id,
             title: s.title,

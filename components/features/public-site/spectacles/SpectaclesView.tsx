@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { Calendar, MapPin, Clock, Users, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,11 @@ import { SpectaclesViewProps } from './types';
 import { SpectaclesSkeleton } from '@/components/skeletons/spectacles-skeleton';
 
 export function SpectaclesView({ currentShows, archivedShows, loading = false }: SpectaclesViewProps) {
+    const [showAllArchived, setShowAllArchived] = useState(false);
+    
+    // Display initially 9 archived shows, then all if requested
+    const displayedArchivedShows = showAllArchived ? archivedShows : archivedShows.slice(0, 9);
+    const hasMoreArchivedShows = archivedShows.length > 9;
     if (loading) {
         return <SpectaclesSkeleton />;
     }
@@ -37,9 +43,9 @@ export function SpectaclesView({ currentShows, archivedShows, loading = false }:
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <div className="flex flex-wrap justify-center gap-12">
                         {currentShows.map((show, index) => (
-                            <Card key={show.id} className={`card-hover animate-fade-in-up overflow-hidden shows-card-dark`} style={{ animationDelay: `${index * 0.1}s` }}>
+                            <Card key={show.id} className={`card-hover animate-fade-in-up overflow-hidden shows-card-dark w-full lg:w-[calc(50%-1.5rem)] max-w-2xl`} style={{ animationDelay: `${index * 0.1}s` }}>
                                 <div className="grid grid-cols-1 md:grid-cols-2 h-full">
                                     <div className="relative">
                                         <div
@@ -131,9 +137,9 @@ export function SpectaclesView({ currentShows, archivedShows, loading = false }:
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {archivedShows.map((show, index) => (
-                            <Card key={show.id} className={`card-hover animate-fade-in-up overflow-hidden shows-card-dark`} style={{ animationDelay: `${index * 0.1}s` }}>
+                    <div className="flex flex-wrap justify-center gap-8">
+                        {displayedArchivedShows.map((show, index) => (
+                            <Card key={show.id} className={`card-hover animate-fade-in-up overflow-hidden shows-card-dark w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm`} style={{ animationDelay: `${index * 0.1}s` }}>
                                 <div className="relative">
                                     <div
                                         className="h-48 bg-cover bg-center"
@@ -186,15 +192,22 @@ export function SpectaclesView({ currentShows, archivedShows, loading = false }:
 
                     <div className="text-center mt-12">
                         <p className="text-muted-foreground mb-6">
-                            Plus de 40 autres créations depuis 2008...
+                            {showAllArchived 
+                                ? `${archivedShows.length} créations depuis 2008` 
+                                : `Plus de ${archivedShows.length - 9} autres créations depuis 2008...`
+                            }
                         </p>
-                        <Button
-                            variant="outline"
-                            size="lg"
-                            className="cta-blur-button"
-                        >
-                            Voir toutes nos créations
-                        </Button>
+                        {hasMoreArchivedShows && (
+                            <Button
+                                variant="outline"
+                                size="lg"
+                                className="cta-blur-button"
+                                onClick={() => setShowAllArchived(!showAllArchived)}
+                            >
+                                {showAllArchived ? 'Voir moins' : 'Voir toutes nos créations'}
+                                <ArrowRight className={`ml-2 h-5 w-5 transition-transform ${showAllArchived ? 'rotate-180' : ''}`} />
+                            </Button>
+                        )}
                     </div>
                 </div>
             </section>

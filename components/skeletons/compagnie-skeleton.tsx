@@ -78,9 +78,9 @@ export function CompagnieSkeleton() {
                         <div className="h-6 bg-muted animate-pulse rounded max-w-2xl mx-auto" />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div className="flex flex-wrap justify-center gap-8">
                         {[1, 2, 3, 4].map((i) => (
-                            <div key={i} className="bg-card rounded-lg overflow-hidden border">
+                            <div key={i} className="bg-card rounded-lg overflow-hidden border w-full md:w-[calc(50%-1rem)] lg:w-[calc(25%-1.5rem)] max-w-xs">
                                 <div className="h-64 bg-muted animate-pulse" />
                                 <div className="p-6 space-y-3">
                                     <div className="h-6 bg-muted animate-pulse rounded w-3/4" />

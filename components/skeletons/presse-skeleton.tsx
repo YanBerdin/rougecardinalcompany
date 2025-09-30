@@ -51,9 +51,9 @@ export function PresseSkeleton() {
                     </div>
 
                     {/* Cards Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="flex flex-wrap justify-center gap-8">
                         {Array.from({ length: 6 }).map((_, index) => (
-                            <Card key={index} className="animate-pulse">
+                            <Card key={index} className="animate-pulse w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm">
                                 <CardHeader>
                                     <div className="flex items-center justify-between mb-2">
                                         <div className="h-5 bg-muted animate-pulse rounded w-16" />

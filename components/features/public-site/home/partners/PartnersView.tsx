@@ -10,46 +10,59 @@ function PartnerCard({ partner, index }: { partner: Partner; index: number }) {
     return (
         <Card
             key={partner.id}
-            className="card-hover animate-fade-in-up group cursor-pointer transition-all duration-300 hover:shadow-xl"
-            style={{ animationDelay: `${index * 0.1}s` }}
+            className="group cursor-pointer transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 bg-gradient-to-br from-card via-card to-card/90 border-0 shadow-lg backdrop-blur-sm h-full overflow-hidden"
+            style={{ 
+                animationDelay: `${index * 0.1}s`,
+                background: 'linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--card)/0.95) 50%, hsl(var(--card)/0.9) 100%)',
+            }}
         >
-            <CardContent className="p-6 text-center h-full flex flex-col justify-between">
-                <div>
-                    <div className="relative mb-4 overflow-hidden rounded-lg">
-                        <div className="h-16 flex items-center justify-center bg-white/5 dark:bg-white/10 rounded-lg transition-transform duration-300 group-hover:scale-110">
-                            <img
-                                src={partner.logo}
-                                alt={`Logo ${partner.name}`}
-                                className="max-h-12 max-w-full object-contain filter brightness-0 dark:brightness-100 dark:invert-0 group-hover:brightness-100 transition-all duration-300"
-                                onError={(e) => {
-                                    // Fallback si le logo ne charge pas
-                                    const target = e.target as HTMLImageElement;
-                                    target.style.display = 'none';
-                                    const fallback = document.createElement('div');
-                                    fallback.className = 'w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center text-primary font-bold text-lg';
-                                    fallback.textContent = partner.name.charAt(0);
-                                    target.parentNode?.appendChild(fallback);
-                                }}
-                            />
-                        </div>
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/5 via-transparent to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            
+            <CardContent className="p-6 text-center h-full flex flex-col relative z-10">
+                <div className="relative mb-6 overflow-hidden rounded-xl">
+                    <div className="h-20 flex items-center justify-center bg-gradient-to-br from-primary/10 via-primary/5 to-primary/10 rounded-xl transition-all duration-500 group-hover:scale-105 group-hover:shadow-lg border border-primary/10">
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-xl" />
+                        <img
+                            src={partner.logo}
+                            alt={`Logo ${partner.name}`}
+                            className="max-h-14 max-w-full object-contain filter contrast-125 transition-all duration-500 group-hover:scale-110 drop-shadow-sm"
+                            style={{
+                                filter: 'contrast(1.2) brightness(1.1) saturate(1.1) drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+                            }}
+                            onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                const fallback = document.createElement('div');
+                                fallback.className = 'w-14 h-14 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center text-primary-foreground font-bold text-xl shadow-lg';
+                                fallback.textContent = partner.name.charAt(0);
+                                target.parentNode?.appendChild(fallback);
+                            }}
+                        />
                     </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-primary/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-xl" />
+                </div>
 
-                    <h3 className="font-semibold text-sm mb-2 group-hover:text-primary transition-colors">
+                <div className="flex-grow flex flex-col justify-center space-y-3">
+                    <h3 className="font-bold text-base mb-2 group-hover:text-primary transition-colors duration-300 leading-tight">
                         {partner.name}
                     </h3>
 
-                    <p className="text-xs text-primary font-medium mb-2">
-                        {partner.type}
-                    </p>
+                    <div className="inline-flex items-center justify-center">
+                        <span className="text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full border border-primary/20 transition-all duration-300 group-hover:bg-primary/20 group-hover:scale-105">
+                            {partner.type}
+                        </span>
+                    </div>
 
-                    <p className="text-xs text-muted-foreground leading-relaxed">
+                    <p className="text-xs text-muted-foreground leading-relaxed px-2 transition-colors duration-300 group-hover:text-foreground/80">
                         {partner.description}
                     </p>
                 </div>
 
-                <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <ExternalLink className="h-4 w-4 mx-auto text-primary" />
+                <div className="mt-6 flex justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0">
+                    <div className="p-2 bg-gradient-to-r from-primary to-primary/80 rounded-full shadow-lg transition-transform duration-300 group-hover:scale-110">
+                        <ExternalLink className="h-3 w-3 text-primary-foreground" />
+                    </div>
                 </div>
             </CardContent>
         </Card>
@@ -91,9 +104,11 @@ export function PartnersView({ partners, isLoading }: PartnersViewProps) {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-12">
+                <div className="flex flex-wrap justify-center gap-6 mb-12">
                     {partners.map((partner, index) => (
-                        <PartnerCard key={partner.id} partner={partner} index={index} />
+                        <div key={partner.id} className="w-full sm:w-[calc(50%-0.75rem)] md:w-[calc(33.333%-1rem)] lg:w-[calc(16.666%-1.25rem)] max-w-48">
+                            <PartnerCard partner={partner} index={index} />
+                        </div>
                     ))}
                 </div>
 

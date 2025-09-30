@@ -10,16 +10,18 @@ export function PartnersSkeleton() {
                     <div className="h-8 bg-muted animate-pulse rounded mb-4 max-w-md mx-auto" />
                     <div className="h-6 bg-muted animate-pulse rounded max-w-2xl mx-auto" />
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-12">
+                <div className="flex flex-wrap justify-center gap-6 mb-12">
                     {Array.from({ length: 6 }).map((_, i) => (
-                        <Card key={i} className="p-6 border">
-                            <div className="flex flex-col space-y-4">
-                                <div className="h-16 bg-muted animate-pulse rounded mb-2" />
-                                <div className="h-4 bg-muted animate-pulse rounded mb-2 w-3/4 mx-auto" />
-                                <div className="h-3 bg-muted animate-pulse rounded w-1/2 mx-auto" />
-                                <div className="h-3 bg-muted animate-pulse rounded w-4/5 mx-auto" />
-                            </div>
-                        </Card>
+                        <div key={i} className="w-full sm:w-[calc(50%-0.75rem)] md:w-[calc(33.333%-1rem)] lg:w-[calc(16.666%-1.25rem)] max-w-48">
+                            <Card className="p-6 border h-full">
+                                <div className="flex flex-col space-y-4">
+                                    <div className="h-16 bg-muted animate-pulse rounded mb-2" />
+                                    <div className="h-4 bg-muted animate-pulse rounded mb-2 w-3/4 mx-auto" />
+                                    <div className="h-3 bg-muted animate-pulse rounded w-1/2 mx-auto" />
+                                    <div className="h-3 bg-muted animate-pulse rounded w-4/5 mx-auto" />
+                                </div>
+                            </Card>
+                        </div>
                     ))}
                 </div>
                 <div className="text-center">
