@@ -2011,6 +2011,7 @@ L'application est maintenant entièrement fonctionnelle post-déploiement grâce
 ### Tables avec Seeds Existants
 
 #### 🎭 Contenu Principal
+
 - **`slides_home_hero`** : 5 slides pour le carrousel de la page d'accueil
 - **`lieux`** : 5 lieux de spectacle avec coordonnées GPS
   - Lyon (Théâtre des Célestins)
@@ -2020,12 +2021,14 @@ L'application est maintenant entièrement fonctionnelle post-déploiement grâce
   - Grenoble (MC2: Maison de la Culture)
 
 #### 🏷️ Système de Classification
+
 - **`categories`** : 5 catégories d'organisation du contenu
   - Spectacles, Communiqués de Presse, Actualités, Événements, Archives
 - **`tags`** : 15 tags pour la classification fine
   - Théâtre, Danse, Musique, Comédie, Drame, etc.
 
 #### ⚙️ Configuration Système
+
 - **`configurations_site`** : 29 configurations essentielles
   - Paramètres home, contact, presse, SEO, analytics
   - Prêt pour la production immédiate
@@ -2044,6 +2047,7 @@ Les tables de contenu dynamique (communiqués, spectacles, etc.) et les données
 ### Migration Seeds
 
 Toutes les migrations de seeds sont appliquées via :
+
 ```bash
 pnpm dlx supabase db reset --yes
 ```

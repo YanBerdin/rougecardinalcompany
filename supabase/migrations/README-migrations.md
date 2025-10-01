@@ -29,7 +29,7 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 - Idempotence recommandée (MERGE/UPSERT ou clauses `where not exists (...)`)
 - **Spectacles archivés** : utilisation de `public=true` + `status='archive'` pour visibilité publique via RLS standard
 
-## Migrations de données (DML) notables
+## Migrations de données (DML) notables (bis)
 
 - `20250921113000_seed_home_about_content.sql` — Seed Home > About (ligne par défaut `slug='default'`)
 - `20250921110000_seed_compagnie_presentation_sections.sql` — Seed sections présentation Compagnie depuis la source typée côté code

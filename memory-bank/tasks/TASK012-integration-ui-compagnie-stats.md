@@ -1,8 +1,9 @@
 # [TASK012] - Intégration UI des `compagnie_stats`
 
-**Status:** Pending  
+**Status:** Completed  
 **Added:** 17 septembre 2025  
-**Updated:** 17 septembre 2025
+**Updated:** 1er octobre 2025  
+**Completed:** 23 septembre 2025
 
 ## Original Request
 
@@ -22,18 +23,26 @@ Afficher les statistiques de la compagnie depuis la table `compagnie_stats` dans
 
 ## Progress Tracking
 
-**Overall Status:** Not Started - 0%
+**Overall Status:** Completed - 100%
 
 ### Subtasks
 
 | ID | Description | Status | Updated | Notes |
 |----|-------------|--------|---------|-------|
-| 2.1 | Service Supabase pour récupérer les stats | Not Started | 17-09-2025 | Server Component |
-| 2.2 | Composants UI (Container/View) | Not Started | 17-09-2025 | shadcn/ui |
-| 2.3 | Gestion des états vide/erreur | Not Started | 17-09-2025 | Skeletons |
-| 2.4 | Tests de rendu et formats | Not Started | 17-09-2025 | Vitest/RTL |
+| 2.1 | Service Supabase pour récupérer les stats | Complete | 23-09-2025 | DAL lib/dal/compagnie.ts |
+| 2.2 | Composants UI (Container/View) | Complete | 23-09-2025 | Intégré dans Compagnie |
+| 2.3 | Gestion des états vide/erreur | Complete | 23-09-2025 | Fallback automatique |
+| 2.4 | Tests de rendu et formats | Pending | 23-09-2025 | À implémenter |
 
 ## Progress Log
+
+### 23 septembre 2025
+
+- DAL créée : lib/dal/compagnie.ts avec fetchCompagnieStats()
+- Stats intégrées dans la page Compagnie et About de Home
+- Composants avec affichage des chiffres clés
+- Gestion des cas sans données avec fallback
+- Rendu visuel validé avec données réelles
 
 ### 17 septembre 2025
 

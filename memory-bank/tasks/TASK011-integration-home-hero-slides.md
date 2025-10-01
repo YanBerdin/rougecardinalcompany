@@ -1,8 +1,9 @@
 # [TASK011] - Intégration home_hero_slides (fetch + rendu)
 
-**Status:** Pending  
+**Status:** Completed  
 **Added:** 17 septembre 2025  
-**Updated:** 17 septembre 2025
+**Updated:** 1er octobre 2025  
+**Completed:** 23 septembre 2025
 
 ## Original Request
 
@@ -23,18 +24,26 @@ Intégrer la table `home_hero_slides` côté frontend avec filtrage de la fenêt
 
 ## Progress Tracking
 
-**Overall Status:** Not Started - 0%
+**Overall Status:** Completed - 100%
 
 ### Subtasks
 
 | ID | Description | Status | Updated | Notes |
 |----|-------------|--------|---------|-------|
-| 1.1 | Service Supabase: fetch des slides visibles | Not Started | 17-09-2025 | Server Component préféré |
-| 1.2 | Composant View Hero (carousel/slide) | Not Started | 17-09-2025 | Accessibilité clavier |
-| 1.3 | Gestion des cas sans données | Not Started | 17-09-2025 | Fallback illustration |
-| 1.4 | Revalidation/ISR et perf | Not Started | 17-09-2025 | Revalidation ciblée |
+| 1.1 | Service Supabase: fetch des slides visibles | Complete | 23-09-2025 | DAL lib/dal/home-hero.ts |
+| 1.2 | Composant View Hero (carousel/slide) | Complete | 23-09-2025 | Server + Client components |
+| 1.3 | Gestion des cas sans données | Complete | 23-09-2025 | Fallback implémenté |
+| 1.4 | Revalidation/ISR et perf | Complete | 23-09-2025 | Suspense + skeleton |
 
 ## Progress Log
+
+### 23 septembre 2025
+
+- DAL créée : lib/dal/home-hero.ts avec fetch des slides visibles (fenêtre temporelle)
+- Container serveur implémenté avec Suspense
+- View client avec carousel fonctionnel
+- Délai artificiel 1500ms pour validation UX (à retirer avant prod)
+- Gestion fallback si aucune slide visible
 
 ### 17 septembre 2025
 

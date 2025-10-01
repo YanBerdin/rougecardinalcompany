@@ -8,7 +8,7 @@
 - [x] Mise en place de l'architecture de base
 - [x] Intégration de Supabase
 - [x] Configuration du design system
-- [x] Schéma déclaratif consolidé (RLS 24/24)
+- [x] Schéma déclaratif consolidé (RLS 36/36 : 25 principales + 11 liaison)
 - [x] Harmonisation knowledge‑base + epics avec le schéma
 - [~] Développement des fonctionnalités principales (intégrations front restantes)
 - [ ] Tests et optimisation
@@ -37,7 +37,7 @@
 
 - [x] Configuration Supabase
 - [x] Authentification de base
-- [x] RLS sur 100% des tables (24/24)
+- [x] RLS sur 100% des tables (36/36 : 25 principales + 11 liaison)
 - [x] Versioning contenu (valeurs, stats, sections présentation)
 - [x] Tables ajoutées: `compagnie_values`, `compagnie_stats`, `compagnie_presentation_sections`, `home_hero_slides`
 - [~] Gestion des données spectacles (accueil: listes + dates)
@@ -46,18 +46,30 @@
 
 ### Intégrations Front prioritaires
 
-- En cours: Agenda/Événements (DAL + containers + UI)
-- À faire: Stratégie de seeds cloud (sécurisée) et synchronisation
+- En cours: Back-office (toggles centralisés, CRUD étendus)
+- En attente: Système d'emailing (newsletter, contacts)
+- En attente: Agenda/Événements (DAL + containers + UI)
 - Option: Modélisation `partners.type` si besoin UI
+
+## Problèmes Résolus (Octobre 2025)
+
+### Fixes majeurs
+
+1. ✅ Spectacles archivés : 11 spectacles maintenant visibles avec `public=true` + `status='archive'`
+2. ✅ UI Press releases : alignement des boutons PDF avec flexbox pattern
+3. ✅ Production cleanup : suppression des logs de debug
+4. ✅ Documentation Docker : volumes, disk space, prune behavior
+5. ✅ Documentation Supabase CLI : workflow déclaratif complet
 
 ## Problèmes Connus
 
-### Risques / Points ouverts
+### Points d'attention restants
 
-1. Synchronisation des fenêtres de visibilité (hero) avec le cache ISR
-2. Cohérence des toggles Back‑office ↔ pages publiques (Agenda/Accueil/Contact)
-3. Données de démo à prévoir pour prévisualisation
+1. Délais artificiels (1200-1500ms) dans les containers à retirer avant production
+2. Synchronisation des fenêtres de visibilité (hero) avec le cache ISR
+3. Cohérence des toggles Back‑office ↔ pages publiques (Agenda/Accueil/Contact)
 4. PostgREST cache: penser à redémarrer le stack en cas de mismatch pendant seeds
+5. Docker disk usage monitoring à mettre en place
 
 ## Tests
 
@@ -111,8 +123,14 @@
 ### Performance
 
 - First Contentful Paint: 1.2s (local)
-- Time to Interactive: 2.5s (local)
-- Lighthouse Score: 85 (à améliorer)
+- Time to Interactive: 2.5s (local)  
+- Lighthouse Score: 85 (à améliorer après retrait des délais artificiels)
+
+### Qualité du code
+
+- RLS Coverage: 36/36 tables protégées (100%) - 25 principales + 11 liaison
+- Documentation: 3 fichiers techniques majeurs mis à jour (Docker, Supabase CLI, migrations)
+- Debug logs: Nettoyés pour production
 
 ### Utilisation
 
@@ -121,6 +139,16 @@
 - Conversions: À mesurer
 
 ## Journal des Mises à Jour
+
+### 1er Octobre 2025
+
+- **Spectacles archivés** : Fix majeur avec changement de stratégie - 11 spectacles archivés maintenant `public=true` pour affichage via toggle "Voir toutes nos créations"
+- **UI Press releases** : Alignement des boutons "Télécharger PDF" avec pattern flexbox (`flex flex-col` + `flex-1` + `mt-auto`)
+- **Production cleanup** : Suppression des logs de debug dans SpectaclesContainer et SpectaclesView
+- **Documentation Docker** : Section complète sur inspection volumes (`docker volume ls`, `du -sh`), gestion espace disque, et comportement `docker system prune -a`
+- **Documentation Supabase CLI** : Commandes détaillées pour `db reset`, workflow déclaratif, et notes sur les conteneurs
+- **Documentation migrations** : Mise à jour conventions et notes sur spectacles archivés (`public=true` approach)
+- **Knowledge base** : Revue complète du fichier (4554 lignes) couvrant architecture, schéma DB, RLS, versioning
 
 ### 23 Septembre 2025
 
@@ -172,12 +200,14 @@
 
 ## Notes Importantes
 
-1. Privilégier les Server Components quand possible
-2. Maintenir la cohérence du design system
-3. Documenter les nouveaux composants
+1. ✅ Privilégier les Server Components quand possible (pattern appliqué)
+2. Maintenir la cohérence du design system (flexbox patterns documentés)
+3. Documenter les nouveaux composants et décisions architecturales
 4. Optimiser les performances en continu
+5. ⚠️ Retirer les délais artificiels avant production (1200-1500ms dans containers)
+6. ⚠️ Docker: `prune -a` supprime TOUTES les images inutilisées, pas seulement les anciennes versions
 
 ## Dernière Mise à Jour
 
-**Date**: 20 septembre 2025
+**Date**: 1er octobre 2025
 **Par**: GitHub Copilot

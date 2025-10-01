@@ -349,27 +349,31 @@ Objectif: unifier l'inscription newsletter derrière une API unique, factoriser 
 
 Composants clés:
 
-1. API route `app/api/newsletter/route.ts`
-  - Méthode POST, corps validé par Zod `{ email, consent?, source? }`.
-  - Upsert idempotent sur `public.abonnes_newsletter` avec `onConflict: 'email'`.
-  - Stocke `metadata` JSON: `{ consent, source }`.
-  - Retourne `{ status: 'subscribed' }` en succès, erreurs typées sinon.
+### 1. API route `app/api/newsletter/route.ts`
+>
+- Méthode POST, corps validé par Zod `{ email, consent?, source? }`.
+- Upsert idempotent sur `public.abonnes_newsletter` avec `onConflict: 'email'`.
+- Stocke `metadata` JSON: `{ consent, source }`.
+- Retourne `{ status: 'subscribed' }` en succès, erreurs typées sinon.
 
-2. Hook partagé `lib/hooks/useNewsletterSubscribe.ts`
-  - Signature: `useNewsletterSubscription({ source?: string })`.
-  - Gère `email`, `isSubscribed`, `isLoading`, `errorMessage` et handlers `handleEmailChange`, `handleSubmit`.
-  - Appelle `POST /api/newsletter`; surface d'erreur unifiée pour l'UI.
+### 2. Hook partagé `lib/hooks/useNewsletterSubscribe.ts`
+>
+- Signature: `useNewsletterSubscription({ source?: string })`.
+- Gère `email`, `isSubscribed`, `isLoading`, `errorMessage` et handlers `handleEmailChange`, `handleSubmit`.
+- Appelle `POST /api/newsletter`; surface d'erreur unifiée pour l'UI.
 
-3. Gating via DAL `lib/dal/home-newsletter.ts`
-  - Marqué `server-only`.
-  - Lit `configurations_site` clé `public:home:newsletter`.
-  - Valide via Zod et applique des valeurs par défaut (fallback sûrs).
-  - Les containers serveur retournent `null` si désactivé.
+### 3. Gating via DAL `lib/dal/home-newsletter.ts`
 
-4. Server/Client split + Suspense
-  - Server Container: `NewsletterContainer.tsx` appelle la DAL et rend le Client seulement si activé.
-  - Client Container: consomme le hook partagé et passe l'état/handlers à la View.
-  - Envelopper dans `<Suspense fallback={<NewsletterSkeleton />}>` avec délai artificiel (1500 ms) temporaire pour valider l'UX; à retirer avant prod.
+- Marqué `server-only`.
+- Lit `configurations_site` clé `public:home:newsletter`.
+- Valide via Zod et applique des valeurs par défaut (fallback sûrs).
+- Les containers serveur retournent `null` si désactivé.
+
+### 4. Server/Client split + Suspense
+
+- Server Container: `NewsletterContainer.tsx` appelle la DAL et rend le Client seulement si activé.
+- Client Container: consomme le hook partagé et passe l'état/handlers à la View.
+- Envelopper dans `<Suspense fallback={<NewsletterSkeleton />}>` avec délai artificiel (1500 ms) temporaire pour valider l'UX; à retirer avant prod.
 
 Principes:
 
@@ -419,21 +423,131 @@ Objectif: afficher la liste des spectacles à partir de la BDD en lecture serveu
 
 Composants clés:
 
-1. DAL server-only
-  - `lib/dal/spectacles.ts` → lit `public.spectacles` (id, title, slug, short_description, image_url, premiere, public). Retourne un tableau typed; logge les erreurs et fallback vide.
+### 1. DAL server-only
 
-2. Conteneur serveur
-  - `components/features/public-site/spectacles/SpectaclesContainer.tsx` (async Server Component): ajoute un délai artificiel (≈1200 ms) pour valider les skeletons (TODO: remove), récupère les spectacles via DAL, mappe vers les props de `SpectaclesView` et split courant/archives en attendant une logique métier plus fine.
+- `lib/dal/spectacles.ts` → lit `public.spectacles` (id, title, slug, short_description, image_url, premiere, public). Retourne un tableau typed; logge les erreurs et fallback vide.
 
-3. View présentielle (Client)
-  - `components/features/public-site/spectacles/SpectaclesView.tsx` (client) rend l’UI; affiche `<SpectaclesSkeleton />` si `loading`.
+### 2. Conteneur serveur
 
-4. Suspense + Skeleton
-  - La page `app/spectacles/page.tsx` peut envelopper le container dans `<Suspense fallback={<SpectaclesSkeleton />}>` pour du streaming progressif.
+- `components/features/public-site/spectacles/SpectaclesContainer.tsx` (async Server Component): ajoute un délai artificiel (≈1200 ms) pour valider les skeletons (TODO: remove), récupère les spectacles via DAL, mappe vers les props de `SpectaclesView` et split courant/archives en attendant une logique métier plus fine.
 
-5. Dépréciation des hooks mocks
-  - `components/features/public-site/spectacles/hooks.ts` → marqué `[DEPRECATED MOCK]`. L’export est retiré du barrel file; toute lecture passe par la DAL côté serveur.
+### 3. View présentielle (Client)
+
+- `components/features/public-site/spectacles/SpectaclesView.tsx` (client) rend l’UI; affiche `<SpectaclesSkeleton />` si `loading`.
+
+### 4. Suspense + Skeleton
+
+- La page `app/spectacles/page.tsx` peut envelopper le container dans `<Suspense fallback={<SpectaclesSkeleton />}>` pour du streaming progressif.
+
+### 5. Dépréciation des hooks mocks
+
+- `components/features/public-site/spectacles/hooks.ts` → marqué `[DEPRECATED MOCK]`. L’export est retiré du barrel file; toute lecture passe par la DAL côté serveur.
 
 Notes:
-- TODO remapper `genre`, `duration_minutes`, `cast`, `status`, `awards` selon le schéma réel lorsqu’ils seront disponibles (actuellement valeurs par défaut documentées dans le container).
 
+- - TODO remapper `genre`, `duration_minutes`, `cast`, `status`, `awards` selon le schéma réel lorsqu'ils seront disponibles (actuellement valeurs par défaut documentées dans le container).
+
+## Pattern Spectacles Archivés (Octobre 2025)
+
+Objectif: afficher les spectacles archivés de manière contrôlée via toggle utilisateur, en utilisant une approche RLS simplifiée.
+
+### Approche choisie
+
+Au lieu de créer une politique RLS complexe, les spectacles archivés sont marqués :
+
+- `public = true` (comme les spectacles courants)
+- `status = 'archive'` (pour différenciation)
+
+### Avantages
+
+1. **Simplicité RLS** : Pas besoin de politique additionnelle, la politique standard `public = true` fonctionne
+2. **Flexibilité UI** : Le filtrage se fait côté application (Container/View)
+3. **Maintenance** : Moins de complexité dans les politiques de sécurité
+
+### Implémentation
+
+```typescript
+// Container (Server Component)
+const allSpectacles = await fetchAllSpectacles();
+const archivedShows = allSpectacles.filter(s => s.status === 'archive');
+const currentShows = allSpectacles.filter(s => s.status !== 'archive');
+
+// View (Client Component)
+const [showAllArchived, setShowAllArchived] = useState(false);
+const displayedArchived = showAllArchived ? archivedShows : archivedShows.slice(0, threshold);
+```
+
+### Migration de données
+
+```sql
+-- Seed migration (20250926153000_seed_spectacles.sql)
+UPDATE public.spectacles 
+SET public = true 
+WHERE status = 'archive';
+```
+
+## Pattern UI Flexbox pour Alignement (Octobre 2025)
+
+Objectif: garantir l'alignement des boutons d'action en bas des cartes, indépendamment de la hauteur du contenu variable.
+
+### Pattern de base
+
+```tsx
+<Card className="flex flex-col">
+  <CardHeader>
+    <CardTitle>{title}</CardTitle>
+  </CardHeader>
+  <CardContent className="flex-1 flex flex-col">
+    <div className="flex-1">
+      {/* Contenu variable (description, etc.) */}
+      <p>{description}</p>
+    </div>
+    <Button className="mt-auto">
+      Action
+    </Button>
+  </CardContent>
+</Card>
+```
+
+### Classes clés
+
+- `flex flex-col` sur Card : Active le flex vertical
+- `flex-1 flex flex-col` sur CardContent : Prend tout l'espace disponible et active flex interne
+- `flex-1` sur le conteneur de contenu : Pousse le contenu vers le haut
+- `mt-auto` sur le Button : Pousse le bouton vers le bas
+
+### Cas d'usage
+
+- Press releases cards avec descriptions de longueurs variables
+- Cards de spectacles avec différentes quantités d'informations
+- Toute grille de cartes nécessitant un alignement cohérent
+
+### Exemple appliqué (PresseView.tsx)
+
+```tsx
+{pressReleases.map((release) => (
+  <Card key={release.id} className="flex flex-col overflow-hidden hover:shadow-lg transition-shadow">
+    <CardHeader>
+      <CardTitle className="text-xl">{release.title}</CardTitle>
+    </CardHeader>
+    <CardContent className="flex-1 flex flex-col">
+      <div className="flex-1 space-y-4">
+        <p className="text-muted-foreground">{release.description}</p>
+        <p className="text-sm text-muted-foreground">
+          {format(new Date(release.date_publication), "d MMMM yyyy", { locale: fr })}
+        </p>
+      </div>
+      <Button asChild className="mt-auto">
+        <Link href={release.pdf_url} target="_blank">
+          <Download className="mr-2 h-4 w-4" />
+          Télécharger le PDF
+        </Link>
+      </Button>
+    </CardContent>
+  </Card>
+))}
+```
+
+### Résultat
+
+Tous les boutons "Télécharger le PDF" sont parfaitement alignés horizontalement, même si les titres et descriptions ont des longueurs différentes.

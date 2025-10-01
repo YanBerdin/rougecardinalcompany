@@ -1,4 +1,4 @@
-# Knowledge Base – Rouge Cardinal Company
+# knowledge-base — Cahier des charges – Création de site internet  **Compagnie de Théâtre « Rouge Cardinal »**
 
 ## Entrées récentes (sept. 2025)
 
@@ -42,7 +42,6 @@
   - Remove any usage; strict types with Zod; icon optional with fallback in View
   - RLS: articles_presse co‑localized policies in 08_table_articles_presse.sql (public select on published_at not null; admin-only write)
   - Performance: add partial index idx_articles_published_at_public for public reads
-# knowledge-base — Cahier des charges – Création de site internet  **Compagnie de Théâtre « Rouge Cardinal »**
 
 ## Contexte
 
@@ -1568,7 +1567,7 @@ comment on view public.recurrent_events is 'Vue pour la gestion des événements
 **🔧 Nouvelle Organisation (Sept 2025) :**
 
 - **RLS intégrées** : Politiques maintenant incluses dans chaque fichier de table
-- **Maintenant 20/20 tables protégées** (incluant communiques_presse)
+- **36/36 tables protégées** (25 principales + 11 liaison)
 - **Performance optimisée** : `(select public.is_admin())` pour mise en cache
 - **Index RLS** : 10 index dédiés aux colonnes des politiques
 - **Documentation unifiée** : `supabase/schemas/README.md`
@@ -1580,12 +1579,15 @@ comment on view public.recurrent_events is 'Vue pour la gestion des événements
   - **Explicit TO** clauses: `to authenticated, anon` or `to authenticated`.
   - **Optimized function calls** : `(select public.is_admin())` vs `public.is_admin()`
 
-- Tables with RLS enabled (20/20 - 100% coverage):
-  - **Core**: `profiles`, `medias`, `spectacles`, `evenements`, `lieux`, `membres_equipe`
-  - **Content**: `articles_presse`, `communiques_presse`, `contacts_presse`, `partners`, `categories`, `tags`
-  - **System**: `configurations_site`, `logs_audit`, `abonnes_newsletter`, `messages_contact`
-  - **Analytics**: `analytics_events`, `content_versions`, `seo_redirects`, `sitemap_entries`
-  - **Recurrence**: `events_recurrence`
+- Tables with RLS enabled (36/36 - 100% coverage):
+  - **25 tables principales**:
+    - Core: `profiles`, `medias`, `spectacles`, `evenements`, `lieux`, `membres_equipe`
+    - Content: `articles_presse`, `communiques_presse`, `contacts_presse`, `partners`, `categories`, `tags`
+    - System: `configurations_site`, `logs_audit`, `abonnes_newsletter`, `messages_contact`
+    - Analytics: `analytics_events`, `content_versions`, `seo_redirects`, `sitemap_entries`
+    - Compagnie: `compagnie_values`, `compagnie_stats`, `compagnie_presentation_sections`
+    - Home: `home_hero_slides`, `home_about_content`
+  - **11 tables de liaison**: `spectacles_membres_equipe`, `spectacles_medias`, `articles_medias`, `communiques_medias`, `communiques_categories`, `communiques_tags`, `spectacles_categories`, `spectacles_tags`, `articles_categories`, `articles_tags`
 
 ### Policies on `medias`
 
@@ -2744,6 +2746,7 @@ Mise en œuvre (sept. 2025) — Pattern « Page Spectacles (DAL + Suspense + dé
 - Dépréciation des hooks mocks: `components/features/public-site/spectacles/hooks.ts` marqué `[DEPRECATED MOCK]`; export retiré du barrel.
 
 Notes:
+
 - Champs à remapper ultérieurement selon schéma réel: `genre`, `duration_minutes`, `cast`, `status`, `awards` (pour l’instant valeurs par défaut documentées).
 - Possibilité de joindre `evenements` pour les dates à l’affiche (voir pattern Home Shows) dans une itération suivante.
 

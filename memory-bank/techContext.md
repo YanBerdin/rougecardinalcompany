@@ -149,3 +149,17 @@ export function ComponentName() {
 2. Tests automatisés (à implémenter)
 3. Review des pull requests
 4. Déploiement automatique sur Vercel
+
+### Docker et Supabase Local
+
+- **Docker** : Utilisé pour Supabase Local (Postgres, Auth, Storage, etc.)
+- **Volumes Docker** : Inspection avec `docker volume ls --filter name=supabase` et `docker run --rm -v <volume>:/volume alpine du -sh /volume`
+- **Disk Space** : Gestion avec `docker system df` et `docker system prune -a` (⚠️ supprime TOUTES les images inutilisées)
+- **Supabase CLI** : `pnpm dlx supabase start/stop/status/db reset`
+- **Workflow déclaratif** : `db diff` pour générer migrations, `db push` pour appliquer
+
+### Documentation opérationnelle
+
+- `doc-perso/lancement-supabase-local/CLI-Supabase-Local.md` : Commandes Supabase CLI détaillées
+- `doc-perso/lancement-supabase-local/docker-install.md` : Installation Docker et gestion espace disque
+- `supabase/migrations/README-migrations.md` : Conventions migrations et ordre d'exécution
