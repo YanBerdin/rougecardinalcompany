@@ -454,3 +454,14 @@ Escalade future possible:
 - Journalisation anonymisée des désinscriptions (non nécessaire aujourd'hui)
 
 Référence détaillée: section RGPD interne 10.3.1 (knowledge-base).
+
+## Voir aussi
+
+- `supabase/migrations` — Schéma historique (DML/DDL ponctuelles)
+- `supabase/migrations/README.md` — Documentation des migrations
+- `supabase/migrations/` — Migrations DML/DDL ponctuelles horodatées
+- `.github/copilot/Declarative_Database_Schema.Instructions.md` — Instructions pour le schéma déclaratif
+- `.github/copilot/Create_migration.instructions.md` — Instructions pour créer une migration DML/DDL
+- `.github/copilot/Create_RLS_policies.Instructions.md` — Instructions pour créer des politiques RLS
+- `.github/copilot/Database_Create_functions.Instructions.md` — Instructions pour créer des fonctions
+- `.github/copilot/Postgres_SQL_Style_Guide.Instructions.md` — Instructions pour le style SQL
