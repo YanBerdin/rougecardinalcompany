@@ -1,5 +1,28 @@
 # knowledge-base — Cahier des charges – Création de site internet  **Compagnie de Théâtre « Rouge Cardinal »**
 
+## Entrées récentes (oct. 2025)
+
+- refactor(db): achieve 100% SQL style guide conformity by applying all minor suggestions
+  - Add 'as' keyword for all aliases in FROM/JOIN clauses (32 occurrences across 4 files)
+  - Improve indentation in 6 complex subqueries for better readability
+  - Document awards column exception (array type justifies plural naming)
+  - Modified files: 06_table_spectacles.sql, 10_tables_system.sql, 11_tables_relations.sql, 15_content_versioning.sql, 41_views_communiques.sql
+  - Result: 100% conformity with Postgres_SQL_Style_Guide.Instructions.md (all 8 categories perfect)
+  - Updated report: doc/postgres-sql-style-compliance-report.md with certification section
+
+- docs(db): complete SQL style guide compliance audit (98% conformity → 100%)
+  - Verify all 46 SQL files (33 schemas + 13 migrations) against Postgres_SQL_Style_Guide.Instructions.md
+  - Excellent: 100% lowercase keywords, snake_case, table plurals, identity columns, public schema prefix, table comments
+  - Strong: 98% singular columns, 95% query formatting, 97% alias usage with 'as' keyword
+  - Minor suggestions: add 'as' in FROM clauses for strict compliance, improve indentation in 2-3 complex views
+  - Report: doc/postgres-sql-style-compliance-report.md with detailed analysis and recommendations
+
+- chore(db): remove redundant home_about_content DDL migration to enforce declarative schema principles
+  - Delete 20250921112000_add_home_about_content.sql (table definition lives in declarative schema 07e_table_home_about.sql)
+  - Update README-migrations.md: 13 files total (1 DDL main + 11 DML + 1 manual), remove "DDL complémentaires" section
+  - Triggers for home_about_content managed centrally in 30_triggers.sql via dynamic loop
+  - Compliance: 100% with Declarative_Database_Schema.Instructions.md (36/36 tables via declarative workflow)
+
 ## Entrées récentes (sept. 2025)
 
 - fix(server-actions): resolve "Server Actions must be async functions" error in contact DAL

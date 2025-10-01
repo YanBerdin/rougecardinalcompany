@@ -25,3 +25,4 @@ create table public.spectacles (
 comment on table public.spectacles is 'shows/performances (base entity)';
 comment on column public.spectacles.casting is 'Nombre d  interprètes au plateau (anciennement `cast`)';
 comment on column public.spectacles.image_url is 'URL externe vers une image (alternative ou complément à image_media_id)';
+comment on column public.spectacles.awards is 'Liste des prix et distinctions (array, d''où le pluriel conforme au type)';

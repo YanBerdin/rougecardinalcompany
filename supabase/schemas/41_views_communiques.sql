@@ -36,22 +36,24 @@ select
   l.nom as lieu_nom,
   array_agg(distinct c.name) filter (where c.name is not null) as categories,
   array_agg(distinct t.name) filter (where t.name is not null) as tags
-from public.communiques_presse cp
-left join public.communiques_medias pdf_cm on cp.id = pdf_cm.communique_id and pdf_cm.ordre = -1
-left join public.medias pdf_m on pdf_cm.media_id = pdf_m.id
-left join public.communiques_medias cm on cp.id = cm.communique_id and cm.ordre = 0
-left join public.medias im on cm.media_id = im.id
-left join public.spectacles s on cp.spectacle_id = s.id
-left join public.evenements e on cp.evenement_id = e.id
-left join public.lieux l on e.lieu_id = l.id
-left join public.communiques_categories cc on cp.id = cc.communique_id
-left join public.categories c on cc.category_id = c.id and c.is_active = true
-left join public.communiques_tags ct on cp.id = ct.communique_id
-left join public.tags t on ct.tag_id = t.id
+from public.communiques_presse as cp
+left join public.communiques_medias as pdf_cm on cp.id = pdf_cm.communique_id and pdf_cm.ordre = -1
+left join public.medias as pdf_m on pdf_cm.media_id = pdf_m.id
+left join public.communiques_medias as cm on cp.id = cm.communique_id and cm.ordre = 0
+left join public.medias as im on cm.media_id = im.id
+left join public.spectacles as s on cp.spectacle_id = s.id
+left join public.evenements as e on cp.evenement_id = e.id
+left join public.lieux as l on e.lieu_id = l.id
+left join public.communiques_categories as cc on cp.id = cc.communique_id
+left join public.categories as c on cc.category_id = c.id and c.is_active = true
+left join public.communiques_tags as ct on cp.id = ct.communique_id
+left join public.tags as t on ct.tag_id = t.id
 where cp.public = true
   and exists (
-    select 1 from public.communiques_medias pdf_check 
-    where pdf_check.communique_id = cp.id and pdf_check.ordre = -1
+    select 1 
+    from public.communiques_medias as pdf_check 
+    where pdf_check.communique_id = cp.id 
+      and pdf_check.ordre = -1
   )
 group by cp.id, pdf_m.filename, pdf_m.size_bytes, pdf_m.storage_path, 
          cm.ordre, im.filename, im.storage_path, cp.image_url,
@@ -83,16 +85,16 @@ select
   cp.updated_at,
   count(cc.category_id) as nb_categories,
   count(ct.tag_id) as nb_tags
-from public.communiques_presse cp
-left join public.communiques_medias pdf_cm on cp.id = pdf_cm.communique_id and pdf_cm.ordre = -1
-left join public.medias pdf_m on pdf_cm.media_id = pdf_m.id
-left join public.communiques_medias cm on cp.id = cm.communique_id and cm.ordre = 0
-left join public.medias im on cm.media_id = im.id
-left join public.spectacles s on cp.spectacle_id = s.id
-left join public.evenements e on cp.evenement_id = e.id
-left join public.profiles p on cp.created_by = p.user_id
-left join public.communiques_categories cc on cp.id = cc.communique_id
-left join public.communiques_tags ct on cp.id = ct.communique_id
+from public.communiques_presse as cp
+left join public.communiques_medias as pdf_cm on cp.id = pdf_cm.communique_id and pdf_cm.ordre = -1
+left join public.medias as pdf_m on pdf_cm.media_id = pdf_m.id
+left join public.communiques_medias as cm on cp.id = cm.communique_id and cm.ordre = 0
+left join public.medias as im on cm.media_id = im.id
+left join public.spectacles as s on cp.spectacle_id = s.id
+left join public.evenements as e on cp.evenement_id = e.id
+left join public.profiles as p on cp.created_by = p.user_id
+left join public.communiques_categories as cc on cp.id = cc.communique_id
+left join public.communiques_tags as ct on cp.id = ct.communique_id
 group by cp.id, pdf_m.filename, pdf_m.size_bytes, im.filename, cp.image_url,
          s.title, e.date_debut, p.display_name
 order by cp.created_at desc;

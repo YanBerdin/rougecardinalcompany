@@ -1,12 +1,36 @@
 # File Tree: rougecardinalcompany
 
-Generated on: 26/09/2025, 05:00:00 PM
-Root path: `/home/yandev/projets/rougecardinalcompany`
+**Last Updated**: 02/10/2025, 03:00:00 PM  
+**Root path**: `/home/yandev/projets/rougecardinalcompany`
+
+## 📋 Changements Récents (Octobre 2025)
+
+- ✅ **doc/** : Ajout dossier `SQL-schema-Compliancy-report/` avec 2 rapports de conformité
+  - `declarative-schema-compliance-report.md` (100% conforme)
+  - `postgres-sql-style-compliance-report.md` (100% conforme)
+- ✅ **supabase/migrations/** : 13 fichiers (suppression de `20250921112000_add_home_about_content.sql`)
 
 ```bash
 ├── 📁 .git/ 🚫 (auto-hidden)
 ├── 📁 .github/
 │   ├── 📁 copilot/
+│   │   ├── 📝 1-clean-code.instructions.md
+│   │   ├── 📝 2-typescript.instructions.md
+│   │   ├── 📝 4-package-installation.instructions.md
+│   │   ├── 📝 Create_RLS_policies.Instructions.md
+│   │   ├── 📝 Create_migration.instructions.md
+│   │   ├── 📝 Database_Create_functions.Instructions.md
+│   │   ├── 📝 Declarative_Database_Schema.Instructions.md
+│   │   ├── 📝 Postgres_SQL_Style_Guide.Instructions.md
+│   │   ├── 📝 a11y.instructions.md
+│   │   ├── 📝 copilot-instructions.md
+│   │   ├── 📝 edge-functions.instructions.md
+│   │   ├── 📝 knowledge-base-170825-0035.md
+│   │   ├── 📝 memory-bank.instructions.md
+│   │   ├── 📝 nextjs-supabase-auth-2025.instructions.md
+│   │   ├── 📝 nextjs.instructions.md
+│   │   ├── 📝 nextjs15-backend-with-supabase.instructions.md
+│   │   └── 📝 security-and-owasp.instructions.md
 │   └── 📁 workflows/
 ├── 📁 .next/ 🚫 (auto-hidden)
 ├── 📁 .vscode/ 🚫 (auto-hidden)
@@ -54,6 +78,13 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 ├── 📁 components/
 │   ├── 📁 features/
 │   │   └── 📁 public-site/
+│   │       ├── 📁 agenda/
+│   │       │   ├── 📄 AgendaClientContainer.tsx
+│   │       │   ├── 📄 AgendaContainer.tsx
+│   │       │   ├── 📄 AgendaView.tsx
+│   │       │   ├── 📄 hooks.ts
+│   │       │   ├── 📄 index.ts
+│   │       │   └── 📄 types.ts
 │   │       ├── 📁 compagnie/
 │   │       │   ├── 📁 data/
 │   │       │   │   └── 📄 presentation.ts
@@ -62,8 +93,89 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   │       │   ├── 📄 hooks.ts
 │   │       │   ├── 📄 index.ts
 │   │       │   └── 📄 types.ts
-│   │       └── 📁 tutorial/
+│   │       ├── 📁 contact/
+│   │       │   ├── 📄 ContactPageContainer.tsx
+│   │       │   ├── 📄 ContactPageView.tsx
+│   │       │   ├── 📄 ContactServerGate.tsx
+│   │       │   ├── 📄 actions.ts
+│   │       │   ├── 📄 contact-hooks.ts
+│   │       │   └── 📄 contact-types.ts
+│   │       ├── 📁 home/
+│   │       │   ├── 📁 about/
+│   │       │   │   ├── 📄 AboutContainer.tsx
+│   │       │   │   ├── 📄 AboutView.tsx
+│   │       │   │   ├── 📄 hooks.ts
+│   │       │   │   ├── 📄 index.ts
+│   │       │   │   └── 📄 types.ts
+│   │       │   ├── 📁 hero/
+│   │       │   │   ├── 📄 HeroClient.tsx
+│   │       │   │   ├── 📄 HeroContainer.tsx
+│   │       │   │   ├── 📄 HeroView.tsx
+│   │       │   │   ├── 📄 hooks.ts
+│   │       │   │   ├── 📄 index.ts
+│   │       │   │   └── 📄 types.ts
+│   │       │   ├── 📁 news/
+│   │       │   │   ├── 📄 NewsContainer.tsx
+│   │       │   │   ├── 📄 NewsView.tsx
+│   │       │   │   ├── 📄 hooks.ts
+│   │       │   │   ├── 📄 index.ts
+│   │       │   │   └── 📄 types.ts
+│   │       │   ├── 📁 newsletter/
+│   │       │   │   ├── 📄 NewsletterClientContainer.tsx
+│   │       │   │   ├── 📄 NewsletterContainer.tsx
+│   │       │   │   ├── 📄 NewsletterView.tsx
+│   │       │   │   ├── 📄 hooks.ts
+│   │       │   │   ├── 📄 index.ts
+│   │       │   │   └── 📄 types.ts
+│   │       │   ├── 📁 partners/
+│   │       │   │   ├── 📄 PartnersContainer.tsx
+│   │       │   │   ├── 📄 PartnersView.tsx
+│   │       │   │   ├── 📄 hooks.ts
+│   │       │   │   ├── 📄 index.ts
+│   │       │   │   └── 📄 types.ts
+│   │       │   ├── 📁 shows/
+│   │       │   │   ├── 📄 ShowsContainer.tsx
+│   │       │   │   ├── 📄 ShowsView.tsx
+│   │       │   │   ├── 📄 hooks.ts
+│   │       │   │   ├── 📄 index.ts
+│   │       │   │   └── 📄 types.ts
+│   │       │   ├── 📄 index.ts
+│   │       │   └── 📄 types.ts
+│   │       ├── 📁 presse/
+│   │       │   ├── 📄 PresseContainer.tsx
+│   │       │   ├── 📄 PresseServerGate.tsx
+│   │       │   ├── 📄 PresseView.tsx
+│   │       │   ├── 📄 hooks.ts
+│   │       │   └── 📄 types.ts
+│   │       └── 📁 spectacles/
+│   │           ├── 📄 SpectaclesContainer.tsx
+│   │           ├── 📄 SpectaclesView.tsx
+│   │           ├── 📄 hooks.ts
+│   │           ├── 📄 index.ts
+│   │           └── 📄 types.ts
+│   ├── 📁 layout/
+│   │   ├── 📄 footer.tsx
+│   │   └── 📄 header.tsx
+│   ├── 📁 skeletons/
+│   │   ├── 📄 about-skeleton.tsx
+│   │   ├── 📄 agenda-skeleton.tsx
+│   │   ├── 📄 compagnie-skeleton.tsx
+│   │   ├── 📄 contact-skeleton.tsx
+│   │   ├── 📄 hero-skeleton.tsx
+│   │   ├── 📄 news-skeleton.tsx
+│   │   ├── 📄 newsletter-skeleton.tsx
+│   │   ├── 📄 partners-skeleton.tsx
+│   │   ├── 📄 presse-skeleton.tsx
+│   │   ├── 📄 shows-skeleton.tsx
+│   │   └── 📄 spectacles-skeleton.tsx
+│   ├── 📁 tutorial/
+│   │   ├── 📄 code-block.tsx
+│   │   ├── 📄 connect-supabase-steps.tsx
+│   │   ├── 📄 fetch-data-steps.tsx
+│   │   ├── 📄 sign-up-user-steps.tsx
+│   │   └── 📄 tutorial-step.tsx
 │   ├── 📁 ui/
+│   │   ├── 📄 alert.tsx
 │   │   ├── 📄 badge.tsx
 │   │   ├── 📄 button.tsx
 │   │   ├── 📄 card.tsx
@@ -71,35 +183,50 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   │   ├── 📄 dropdown-menu.tsx
 │   │   ├── 📄 input.tsx
 │   │   ├── 📄 label.tsx
-│   │   └── 📄 dropdown-menu.tsx
-│   ├──  auth-button.tsx
+│   │   ├── 📄 select.tsx
+│   │   ├── 📄 skeleton.tsx
+│   │   ├── 📄 tabs.tsx
+│   │   └── 📄 textarea.tsx
+│   ├── 📄 auth-button.tsx
 │   ├── 📄 deploy-button.tsx
 │   ├── 📄 env-var-warning.tsx
 │   ├── 📄 forgot-password-form.tsx
-│   ├── 📄 hero.tsx
 │   ├── 📄 login-form.tsx
 │   ├── 📄 logout-button.tsx
-│   ├── 📄 next-logo.tsx
 │   ├── 📄 sign-up-form.tsx
-│   ├── 📄 supabase-logo.tsx
 │   ├── 📄 theme-switcher.tsx
 │   └── 📄 update-password-form.tsx
 ├── 📁 doc/
+│   ├── 📁 SQL-schema-Compliancy-report/
+│   │   ├── create-functions-compliance-report.md       # ✅
+│   │   ├── create-migration-compliance-report.md       # ✅
+│   │   ├── create-rls-policies-compliance-report.md    # ✅
+│   │   ├── declarative-schema-compliance-report.md     # ✅
+│   │   └── postgres-sql-style-compliance-report.md     # ✅
+│   ├── 📝 Project_Architecture_Blueprint.md
+│   ├── 📝 Project_Folders_Structure_Blueprint(24-08-25).md
+│   ├── 📝 conventional-commit-cheatsheet.md
+│   ├── 📝 feature.Instructions.md
+│   ├── 📝 mcp-context-flow.md
+│   ├── 📝 nextjs-supabase-auth.instructions.md
+│   ├── 📝 nextjs15-backend.instructions.md
+│   ├── 📝 regles_copilot.md
+│   └── 📝 visuel-blueprintGenerator.md
 ├── 📁 doc-perso/
 ├── 📁 lib/
 │   ├── 📁 dal/
 │   │   ├── 📄 agenda.ts
-│   │   ├── 📄 compagnie.ts
 │   │   ├── 📄 compagnie-presentation.ts
-│   │   ├── 📄 spectacles.ts
+│   │   ├── 📄 compagnie.ts
+│   │   ├── 📄 contact.ts
 │   │   ├── 📄 home-about.ts
 │   │   ├── 📄 home-hero.ts
 │   │   ├── 📄 home-news.ts
 │   │   ├── 📄 home-newsletter.ts
 │   │   ├── 📄 home-partners.ts
 │   │   ├── 📄 home-shows.ts
-│   │   ├── 📄 contact.ts         # DAL server-only (messages_contact insert)
-│   │   └── 📄 presse.ts          # DAL server-only (articles/communiqués/kit média)
+│   │   ├── 📄 presse.ts
+│   │   └── 📄 spectacles.ts
 │   ├── 📁 hooks/
 │   │   └── 📄 useNewsletterSubscribe.ts
 │   └── 📄 utils.ts
@@ -119,10 +246,6 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   │   │   └── 📝 14.7-back‑office.md
 │   │   └── ⚙️ epics-map.yaml
 │   ├── 📁 tasks/
-│   │   ├── 📝 TASK011-integration-home-hero-slides.md
-│   │   ├── 📝 TASK012-integration-ui-compagnie-stats.md
-│   │   ├── 📝 TASK013-seeds-nouvelles-tables.md
-│   │   ├── 📝 TASK014-backoffice-toggles-centralises.md
 │   │   └── 📝 _index.md
 │   ├── 📝 activeContext.md
 │   ├── 📝 productContext.md
@@ -140,26 +263,21 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   │   └── 📄 _current_branch
 │   ├── 📁 .temp/
 │   │   └── 📄 cli-latest
-│   ├── 📁 migrations/
-│   │   ├── 🗄️ 20250918004849_apply_declarative_schema.sql
+│   ├── 📁 migrations/ (13 fichiers - voir README-migrations.md)
+│   │   ├── 🗄️ 20250918004849_apply_declarative_schema.sql (DDL générée)
 │   │   ├── 🗄️ 20250918031500_seed_home_hero_slides.sql
 │   │   ├── 🗄️ 20250918094530_seed_core_content.sql
 │   │   ├── 🗄️ 20250918095610_seed_compagnie_values.sql
-│   │       ├── 📁 spectacles/
-│   │       │   ├── 📄 SpectaclesContainer.tsx
-│   │       │   ├── 📄 SpectaclesView.tsx
-│   │       │   ├── 📄 hooks.ts
-│   │       │   ├── 📄 types.ts
-│   │       │   └── 📄 index.ts
 │   │   ├── 🗄️ 20250918101020_seed_events_press_articles.sql
-│   ├── 📁 skeletons/
-│   │   ├── 📄 spectacles-skeleton.tsx
-│   │   └── 📄 compagnie-skeleton.tsx
 │   │   ├── 🗄️ 20250918102240_seed_team_and_presentation.sql
 │   │   ├── 🗄️ 20250921110000_seed_compagnie_presentation_sections.sql
 │   │   ├── 🗄️ 20250921113000_seed_home_about_content.sql
+│   │   ├── 🗄️ 20250926153000_seed_spectacles.sql
+│   │   ├── 🗄️ 20250930120000_seed_lieux.sql
+│   │   ├── 🗄️ 20250930121000_seed_categories_tags.sql
+│   │   ├── 🗄️ 20250930122000_seed_configurations_site.sql
 │   │   ├── 📝 README-migrations.md
-│   │   └── 🗄️ sync_existing_profiles.sql
+│   │   └── 🗄️ sync_existing_profiles.sql (migration manuelle)
 │   ├── 📁 schemas/
 │   │   ├── 🗄️ 01_extensions.sql
 │   │   ├── 🗄️ 02_table_profiles.sql

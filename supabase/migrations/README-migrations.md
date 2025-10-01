@@ -6,10 +6,6 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 - `20250918004849_apply_declarative_schema.sql` — Migration générée du schéma déclaratif principal (DDL)
 
-## Migrations DDL complémentaires
-
-- `20250921112000_add_home_about_content.sql` — Ajout table home_about_content (DDL ponctuelle)
-
 ## Migrations de données (DML) - Ordre chronologique
 
 ### Septembre 2025 - Seeds initiaux
@@ -46,7 +42,7 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 - Pas de `seed.sql` générique à la racine: chaque seed est un fichier migration horodaté explicite
 - Idempotence recommandée (MERGE/UPSERT ou clauses `where not exists (...)`)
 - **Spectacles archivés** : utilisation de `public=true` + `status='archive'` pour visibilité publique via RLS standard
-- **Total** : 14 fichiers de migration (1 DDL principale + 1 DDL complémentaire + 11 DML + 1 manuelle)
+- **Total** : 13 fichiers de migration (1 DDL principale + 11 DML + 1 manuelle)
 
 ## Ordre d'exécution recommandé
 
@@ -84,7 +80,7 @@ pnpm dlx supabase db reset --yes --db-url "postgresql://postgres:postgres@127.0.
 - Les migrations de données (DML) sont versionnées ici et appliquées au besoin (idempotentes de préférence)
 - Toujours tester en local avant d'appliquer en production
 - **Les migrations de données (DML)** ne sont pas capturées par `supabase db diff` et doivent être gérées séparément
-- **Total** : 14 fichiers de migration SQL (1 DDL principale + 1 DDL complémentaire + 11 DML + 1 manuelle)
+- **Total** : 13 fichiers de migration SQL (1 DDL principale + 11 DML + 1 manuelle)
 
 ## Voir aussi
 

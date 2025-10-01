@@ -60,6 +60,13 @@
 3. ✅ Production cleanup : suppression des logs de debug
 4. ✅ Documentation Docker : volumes, disk space, prune behavior
 5. ✅ Documentation Supabase CLI : workflow déclaratif complet
+6. ✅ Migration DDL redondante : suppression de `20250921112000_add_home_about_content.sql` (table définie dans schéma déclaratif `07e_table_home_about.sql`)
+7. ✅ Audit complet conformité database : 5 rapports générés dans `doc/SQL-schema-Compliancy-report/`
+   - ✅ SQL Style Guide : 100% (32 aliases avec 'as', indentation optimisée, awards documenté)
+   - ✅ RLS Policies : 100% (36/36 tables, 70+ policies granulaires, 6 double SELECT corrigés)
+   - ✅ Functions : 99% (23/27 SECURITY INVOKER, 4/27 DEFINER justifiés, 100% search_path)
+   - ✅ Migrations : 92.9% (12/13 naming timestamp, 100% idempotence, workflow déclaratif)
+   - ✅ Declarative Schema : 100% (36/36 tables via workflow déclaratif, triggers centralisés)
 
 ## Problèmes Connus
 

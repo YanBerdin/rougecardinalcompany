@@ -474,7 +474,7 @@ select
   cv.created_by as created_by_id,
   char_length(cv.content_snapshot::text) as snapshot_size
 from public.content_versions cv
-left join public.profiles p on cv.created_by = p.user_id
+left join public.profiles as p on cv.created_by = p.user_id
 order by cv.entity_type, cv.entity_id, cv.version_number desc;
 
 comment on view public.content_versions_detailed is 'Vue détaillée de l''historique des versions avec informations sur les auteurs';

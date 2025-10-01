@@ -153,9 +153,10 @@ for select
 to anon, authenticated
 using ( 
   exists (
-    select 1 from public.communiques_presse cp 
+    select 1 
+    from public.communiques_presse as cp 
     where cp.id = communique_id 
-    and (cp.public = true or (select public.is_admin()))
+      and (cp.public = true or (select public.is_admin()))
   )
 );
 

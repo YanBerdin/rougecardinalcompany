@@ -72,7 +72,7 @@ select
   cp.media as contact_presse_media,
     cp.fonction as contact_presse_role
 from public.messages_contact mc
-left join public.contacts_presse cp on cp.id = mc.contact_presse_id;
+left join public.contacts_presse as cp on cp.id = mc.contact_presse_id;
 
 comment on view public.messages_contact_admin is 'Vue pour l administration: suivi des messages, latences, association presse.';
 
@@ -269,17 +269,19 @@ to authenticated
 using ( 
   (select public.is_admin()) 
   and exists (
-    select 1 from public.profiles p 
+    select 1 
+    from public.profiles as p 
     where p.user_id = (select auth.uid()) 
-    and p.role = 'super_admin'
+      and p.role = 'super_admin'
   )
 )
 with check ( 
   (select public.is_admin()) 
   and exists (
-    select 1 from public.profiles p 
+    select 1 
+    from public.profiles as p 
     where p.user_id = (select auth.uid()) 
-    and p.role = 'super_admin'
+      and p.role = 'super_admin'
   )
 );
 
@@ -291,8 +293,9 @@ to authenticated
 using ( 
   (select public.is_admin()) 
   and exists (
-    select 1 from public.profiles p 
+    select 1 
+    from public.profiles as p 
     where p.user_id = (select auth.uid()) 
-    and p.role = 'super_admin'
+      and p.role = 'super_admin'
   )
 );

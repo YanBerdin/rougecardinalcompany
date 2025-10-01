@@ -10,7 +10,7 @@ create policy "Admins can view analytics events"
 on public.analytics_events
 for select
 to authenticated
-using ( (select (select public.is_admin())) );
+using ( (select public.is_admin()) );
 
 -- Tout le monde peut insérer des événements analytiques
 drop policy if exists "Anyone can insert analytics events" on public.analytics_events;
@@ -26,15 +26,15 @@ create policy "Admins can update analytics events"
 on public.analytics_events
 for update
 to authenticated
-using ( (select (select public.is_admin())) )
-with check ( (select (select public.is_admin())) );
+using ( (select public.is_admin()) )
+with check ( (select public.is_admin()) );
 
 drop policy if exists "Admins can delete analytics events" on public.analytics_events;
 create policy "Admins can delete analytics events"
 on public.analytics_events
 for delete
 to authenticated
-using ( (select (select public.is_admin())) );
+using ( (select public.is_admin()) );
 
 -- ---- CATEGORIES ----
 alter table public.categories enable row level security;
@@ -53,7 +53,7 @@ create policy "Admins can view all categories"
 on public.categories
 for select
 to authenticated
-using ( (select (select public.is_admin())) );
+using ( (select public.is_admin()) );
 
 -- Seuls les admins peuvent gérer les catégories
 drop policy if exists "Admins can create categories" on public.categories;
@@ -61,22 +61,22 @@ create policy "Admins can create categories"
 on public.categories
 for insert
 to authenticated
-with check ( (select (select public.is_admin())) );
+with check ( (select public.is_admin()) );
 
 drop policy if exists "Admins can update categories" on public.categories;
 create policy "Admins can update categories"
 on public.categories
 for update
 to authenticated
-using ( (select (select public.is_admin())) )
-with check ( (select (select public.is_admin())) );
+using ( (select public.is_admin()) )
+with check ( (select public.is_admin()) );
 
 drop policy if exists "Admins can delete categories" on public.categories;
 create policy "Admins can delete categories"
 on public.categories
 for delete
 to authenticated
-using ( (select (select public.is_admin())) );
+using ( (select public.is_admin()) );
 
 -- ---- TAGS ----
 alter table public.tags enable row level security;
