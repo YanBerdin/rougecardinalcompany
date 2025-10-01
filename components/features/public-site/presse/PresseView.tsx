@@ -78,7 +78,7 @@ export function PresseView({
                         {pressReleases.map((release, index) => (
                             <Card
                                 key={release.id}
-                                className={`card-hover animate-fade-in-up w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm`}
+                                className={`card-hover animate-fade-in-up w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm flex flex-col`}
                                 style={{ animationDelay: `${index * 0.1}s` }}
                             >
                                 <CardHeader>
@@ -92,11 +92,11 @@ export function PresseView({
                                     </div>
                                     <CardTitle className="text-lg">{release.title}</CardTitle>
                                 </CardHeader>
-                                <CardContent>
-                                    <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
+                                <CardContent className="flex-1 flex flex-col">
+                                    <p className="text-muted-foreground mb-4 text-sm leading-relaxed flex-1">
                                         {release.description}
                                     </p>
-                                    <Button className="w-full" asChild>
+                                    <Button className="w-full mt-auto hover:bg-muted" asChild>
                                         <a href={release.fileUrl} download>
                                             <Download className="mr-2 h-4 w-4" />
                                             Télécharger le PDF
