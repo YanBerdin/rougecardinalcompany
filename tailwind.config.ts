@@ -60,5 +60,8 @@ export default {
       },
     },
   },
-  plugins: [animate],
+  plugins: [
+    animate,
+    require("./lib/plugins/touch-hitbox-plugin.js"),
+  ],
 } satisfies Config;

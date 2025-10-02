@@ -58,6 +58,7 @@ export function NewsView({ news }: NewsViewProps) {
                             <CardFooter>
                                 <Button
                                     variant="ghost"
+                                    size="lg"
                                     className="p-0 h-auto font-medium bg-white/10 border-white/30 text-foreground backdrop-blur-sm hover:bg-primary hover:text-primary-foreground transition-all duration-300 shadow-lg border px-4 py-2 rounded-lg"
                                     asChild
                                 >

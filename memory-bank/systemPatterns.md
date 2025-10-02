@@ -15,9 +15,16 @@ app/
     page.tsx       // Page avec paramètre
 ```
 
-### Pattern de Server Components
+### Pattern de Server Compo### 3. Exceptions WCAG autorisées
+
+- **Exception inline** : Liens dans un paragraphe de texte (exemple: lien intégré dans une phrase)
+- **Exception équivalente** : Si plusieurs cibles effectuent la même action, une seule doit respecter 44px
+- **Exception essentielle** : Quand modifier la taille changerait l'information (rare, documenter)
+
+### 4. Recommandations mobiles
 
 ```typescript
+
 // Composant Server par défaut
 export default async function PageComponent() {
   const data = await fetchData();
@@ -336,6 +343,79 @@ export interface Plugin {
   };
 }
 ```
+
+## Pattern WCAG 2.5.5 Target Size (Accessibilité AAA)
+
+Objectif: garantir une taille minimale de 44×44px pour tous les éléments interactifs (boutons, liens, champs de saisie) conformément au critère WCAG 2.5.5 (niveau AAA).
+
+### 1. Composants UI de base (mise à niveau globale)
+
+**Button (`components/ui/button.tsx`):**
+
+```typescript
+size: {
+  default: "h-11 px-4 py-2",     // 44px (était 36px)
+  sm: "h-11 rounded-md px-3",    // 44px (était 32px)
+  lg: "h-12 rounded-md px-8",    // 48px (était 40px)
+  icon: "h-11 w-11",             // 44px (était 36px)
+}
+```
+
+**Input (`components/ui/input.tsx`):**
+
+```typescript
+className: "h-11 w-full ..." // 44px (était 36px)
+```
+
+### 2. Plugin Tailwind touch-hitbox
+
+Pour les éléments visuellement petits qui nécessitent une zone tactile étendue (ex: indicateurs de slides) :
+
+**Plugin (`lib/plugins/touch-hitbox-plugin.js`):**
+
+```javascript
+'.touch-hitbox::before': {
+  content: '""',
+  position: 'absolute',
+  minWidth: '44px',
+  minHeight: '44px',
+  // ... positionnement centré
+}
+```
+
+**Usage:**
+
+```tsx
+<button className="touch-hitbox overflow-hidden">
+  <span className="block w-3 h-3 rounded-full transition-all hover:scale-110">
+    {/* Élément visuel petit (12px) */}
+  </span>
+</button>
+```
+
+### 3. Exceptions WCAG autorisées
+
+- **Exception inline** : Liens dans un paragraphe de texte (ex: "Voir nos [conditions générales](/)")
+- **Exception équivalente** : Si plusieurs cibles effectuent la même action, une seule doit respecter 44px
+- **Exception essentielle** : Quand modifier la taille changerait l'information (rare, documenter)
+
+### 4. Recommandations mobiles (bis)
+
+```css
+@media (max-width: 768px) {
+  .interactive-element {
+    min-width: 48px; /* Plus généreux sur tactile */
+    min-height: 48px;
+  }
+}
+```
+
+Principes:
+
+- **Cohérence** : Tous les boutons/inputs respectent automatiquement 44px minimum
+- **Zone stable** : Le plugin `touch-hitbox` crée une zone de détection fixe indépendante des effets visuels (scale, hover)
+- **Prévention du trembling** : L'effet `hover:scale-XX` s'applique sur l'enfant, pas sur la zone tactile
+- **Documentation** : Voir `.github/copilot/wcag_target_size.instructions.md` et `touch_hitbox.instructions.md`
 
 ## Mise à Jour des Patterns
 

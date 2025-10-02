@@ -62,7 +62,8 @@ export function ShowsView({ shows }: ShowsViewProps) {
                             <CardFooter className="pt-0">
                                 <div className="flex space-x-2 w-full">
                                     <Button
-                                        className="flex-1 btn-primary"
+                                        size="lg"
+                                        className="flex-1 btn-primary bg-red"
                                         asChild
                                     >
                                         <Link href={`/spectacles/${show.slug}`}>
@@ -71,7 +72,7 @@ export function ShowsView({ shows }: ShowsViewProps) {
                                     </Button>
                                     <Button
                                         variant="outline"
-                                        size="sm"
+                                        size="lg"
                                         asChild
                                         className="btn-outline"
                                     >

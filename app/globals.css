@@ -305,6 +305,7 @@
   }
 
   /* Ripple Effect - AMÉLIORÉ */
+  /*
   .ripple-effect {
     position: relative;
     overflow: hidden;
@@ -323,12 +324,13 @@
     transition: width 0.6s, height 0.6s;
     pointer-events: none;
   }
-
+  */
+/*
   .ripple-effect:active::after {
     width: 200px;
     height: 200px;
   }
-
+*/
   /* Mobile menu hover - CONTRASTE PARFAIT */
   .liquid-glass-mobile .nav-link-glass:hover {
     background: #c41e3a1a !important;
