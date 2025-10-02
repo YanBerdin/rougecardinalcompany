@@ -28,6 +28,10 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 - `20250930121000_seed_categories_tags.sql` — Seed catégories et tags de base pour l'organisation du contenu
 - `20250930122000_seed_configurations_site.sql` — Seed configuration de base de l'application (⚠️ CRITIQUE)
 
+### Octobre 2025 - Seeds médias et kit presse
+
+- `20251002120000_seed_communiques_presse_et_media_kit.sql` — Seed communiqués de presse et kit média (logos, photos, PDFs) avec URLs externes fonctionnelles pour téléchargement
+
 ## Autres migrations manuelles
 
 - `sync_existing_profiles.sql` — Synchronisation ponctuelle des profils existants avec `auth.users` (idempotent)
@@ -42,7 +46,8 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 - Pas de `seed.sql` générique à la racine: chaque seed est un fichier migration horodaté explicite
 - Idempotence recommandée (MERGE/UPSERT ou clauses `where not exists (...)`)
 - **Spectacles archivés** : utilisation de `public=true` + `status='archive'` pour visibilité publique via RLS standard
-- **Total** : 13 fichiers de migration (1 DDL principale + 11 DML + 1 manuelle)
+- **Kit média** : URLs externes stockées dans `metadata.external_url` (jsonb) pour médias téléchargeables sans Supabase Storage
+- **Total** : 14 fichiers de migration (1 DDL principale + 12 DML + 1 manuelle)
 
 ## Ordre d'exécution recommandé
 
@@ -80,7 +85,8 @@ pnpm dlx supabase db reset --yes --db-url "postgresql://postgres:postgres@127.0.
 - Les migrations de données (DML) sont versionnées ici et appliquées au besoin (idempotentes de préférence)
 - Toujours tester en local avant d'appliquer en production
 - **Les migrations de données (DML)** ne sont pas capturées par `supabase db diff` et doivent être gérées séparément
-- **Total** : 13 fichiers de migration SQL (1 DDL principale + 11 DML + 1 manuelle)
+- **Kit média** : Stratégie hybride (URLs externes dans metadata pour démo, migration vers Storage à terme)
+- **Total** : 14 fichiers de migration SQL (1 DDL principale + 12 DML + 1 manuelle)
 
 ## Voir aussi
 

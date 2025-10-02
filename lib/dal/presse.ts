@@ -57,7 +57,7 @@ export async function fetchPressReleases(limit?: number): Promise<PressRelease[]
     return [];
   }
 
-  return (data ?? []).map((row: any) => ({
+  return (data ?? []).map((row: CommuniquePresseRow) => ({
     id: Number(row.id),
     title: String(row.title),
     description: String(row.description ?? ""),
@@ -88,13 +88,13 @@ export async function fetchMediaArticles(limit?: number): Promise<MediaArticle[]
     return [];
   }
 
-  function coerceArticleType(v: unknown): "Article" | "Critique" | "Interview" | "Portrait" {
+  function coerceArticleType(v: string | null): "Article" | "Critique" | "Interview" | "Portrait" {
     const allowed = ["Article", "Critique", "Interview", "Portrait"] as const;
     const s = String(v ?? "Article");
-    return (allowed as readonly string[]).includes(s) ? (s as any) : "Article";
+    return (allowed as readonly string[]).includes(s) ? (s as "Article" | "Critique" | "Interview" | "Portrait") : "Article";
   }
 
-  return (data ?? []).map((row: any) => ({
+  return (data ?? []).map((row: ArticlePresseRow) => ({
     id: Number(row.id),
     title: String(row.title ?? ""),
     author: String(row.author ?? ""),
@@ -106,22 +106,71 @@ export async function fetchMediaArticles(limit?: number): Promise<MediaArticle[]
   }));
 }
 
-// Media kit minimal basé sur les communiqués publics (PDF principal)
+// Media kit récupère directement les médias (logos, photos, dossiers PDF)
 interface MediaKitItemDTO {
-  type: string; // ex: "Dossier de presse"
+  type: string; // ex: "Logo", "Photo", "Dossier de presse"
   description: string;
   fileSize: string;
   fileUrl: string;
 }
 
+interface MediaMetadata {
+  type?: string;
+  title?: string;
+  external_url?: string;
+  [key: string]: string | number | boolean | undefined;
+}
+
+interface MediaRow {
+  storage_path: string;
+  filename: string | null;
+  mime: string | null;
+  size_bytes: number | null;
+  alt_text: string | null;
+  metadata: MediaMetadata | null;
+}
+
+interface CommuniquePresseRow {
+  id: number;
+  title: string;
+  description: string | null;
+  date_publication: string;
+  image_url: string | null;
+  ordre_affichage: number;
+  public: boolean;
+  file_size_bytes: number | null;
+}
+
+interface ArticlePresseRow {
+  id: number;
+  title: string | null;
+  author: string | null;
+  type: string | null;
+  excerpt: string | null;
+  source_publication: string | null;
+  source_url: string | null;
+  published_at: string | null;
+}
+
+function getMediaType(metadata: MediaMetadata | null): string {
+  if (metadata?.type === "logo") return "Logo";
+  if (metadata?.type === "icon") return "Icône";
+  if (metadata?.type === "photo") return "Photo";
+  if (metadata?.type === "press_kit") return "Dossier de presse";
+  if (metadata?.type === "technical_sheet") return "Fiche technique";
+  if (metadata?.type === "image") return metadata?.title || "Image";
+  return "Document";
+}
+
 export async function fetchMediaKit(limit?: number): Promise<MediaKitItemDTO[]> {
   const supabase = await createClient();
 
+  // Récupère les médias du kit presse : logos, photos, dossiers PDF
   let query = supabase
-    .from("communiques_presse_public")
-    .select("title, description, file_url, file_size_display, ordre_affichage, date_publication")
-    .order("ordre_affichage", { ascending: true })
-    .order("date_publication", { ascending: false });
+    .from("medias")
+    .select("storage_path, filename, mime, size_bytes, alt_text, metadata")
+    .or("storage_path.like.press-kit/%,storage_path.like.photos/%,storage_path.like.dossiers/%")
+    .order("storage_path", { ascending: true });
 
   if (typeof limit === "number") {
     query = query.limit(limit);
@@ -133,10 +182,18 @@ export async function fetchMediaKit(limit?: number): Promise<MediaKitItemDTO[]> 
     return [];
   }
 
-  return (data ?? []).map((row: any) => ({
-    type: "Dossier de presse",
-    description: String(row.description ?? row.title ?? ""),
-    fileSize: String(row.file_size_display ?? "—"),
-    fileUrl: String(row.file_url ?? "#"),
-  }));
+  return (data ?? []).map((row: MediaRow) => {
+    // Prioriser l'URL externe si disponible dans metadata
+    const externalUrl = row.metadata?.external_url;
+    const fileUrl = externalUrl 
+      ? String(externalUrl)
+      : `/storage/v1/object/public/${row.storage_path}`;
+
+    return {
+      type: getMediaType(row.metadata),
+      description: String(row.alt_text ?? row.filename ?? ""),
+      fileSize: bytesToHuman(row.size_bytes),
+      fileUrl,
+    };
+  });
 }

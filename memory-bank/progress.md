@@ -67,6 +67,12 @@
    - ✅ Functions : 99% (23/27 SECURITY INVOKER, 4/27 DEFINER justifiés, 100% search_path)
    - ✅ Migrations : 92.9% (12/13 naming timestamp, 100% idempotence, workflow déclaratif)
    - ✅ Declarative Schema : 100% (36/36 tables via workflow déclaratif, triggers centralisés)
+8. ✅ Kit média Presse : seed complet avec URLs externes fonctionnelles (logos, photos HD, PDFs)
+   - ✅ Seed `20251002120000_seed_communiques_presse_et_media_kit.sql` : 8 médias + 4 communiqués + 4 catégories
+   - ✅ URLs externes dans `metadata.external_url` (Unsplash pour photos, W3C pour PDFs de démo)
+   - ✅ `fetchMediaKit()` modifié pour prioriser URLs externes sur storage local
+   - ✅ Types stricts : suppression de tous les `any`, ajout interfaces `MediaRow`, `CommuniquePresseRow`, `ArticlePresseRow`
+   - ✅ Conformité TypeScript : 100% (interfaces explicites, pas de `any`/`unknown`, type guards)
 
 ## Problèmes Connus
 

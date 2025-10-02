@@ -433,6 +433,89 @@ Composants clés:
 
 ### 3. View présentielle (Client)
 
+## Pattern Kit Média avec URLs Externes
+
+Objectif: permettre le téléchargement de médias (logos, photos, PDFs) via URLs externes stockées dans metadata, sans dépendre de Supabase Storage pour les seeds de démo.
+
+Composants clés:
+
+### 1. Schéma de données flexible
+
+- Table `medias` avec colonne `metadata jsonb` pour stocker des propriétés arbitraires
+- Champ `metadata.external_url` (string optionnel) pour URLs de téléchargement externes
+- Champ `metadata.type` pour catégoriser les médias (logo, photo, press_kit, etc.)
+
+### 2. Seed avec URLs externes
+
+```sql
+-- Exemple de seed avec URL externe
+insert into public.medias (storage_path, filename, mime, size_bytes, alt_text, metadata)
+select 'photos/spectacle-scene-1.jpg', 'spectacle-scene-1.jpg', 'image/jpeg', 2048000, 
+  'Scène du spectacle - Photo 1', 
+  '{"type": "photo", "resolution": "300dpi", "usage": "press", "external_url": "https://images.unsplash.com/photo-xxx?w=1920"}' ::jsonb
+where not exists (select 1 from public.medias where storage_path = 'photos/spectacle-scene-1.jpg');
+```
+
+### 3. DAL avec priorisation des URLs externes
+
+```typescript
+// lib/dal/presse.ts
+interface MediaMetadata {
+  type?: string;
+  title?: string;
+  external_url?: string;
+  [key: string]: string | number | boolean | undefined;
+}
+
+interface MediaRow {
+  storage_path: string;
+  metadata: MediaMetadata | null;
+  // ...
+}
+
+export async function fetchMediaKit(): Promise<MediaKitItemDTO[]> {
+  const { data } = await supabase
+    .from("medias")
+    .select("storage_path, metadata, ...")
+    .or("storage_path.like.press-kit/%,storage_path.like.photos/%");
+
+  return (data ?? []).map((row: MediaRow) => {
+    // Prioriser l'URL externe si disponible
+    const externalUrl = row.metadata?.external_url;
+    const fileUrl = externalUrl 
+      ? String(externalUrl)
+      : `/storage/v1/object/public/${row.storage_path}`;
+
+    return { fileUrl, /* ... */ };
+  });
+}
+```
+
+### 4. Types stricts (pas de `any`)
+
+```typescript
+// Interfaces explicites pour chaque type de row
+interface MediaRow {
+  storage_path: string;
+  filename: string | null;
+  metadata: MediaMetadata | null;
+  // ...
+}
+
+// Utilisation stricte dans les maps
+return (data ?? []).map((row: MediaRow) => { /* ... */ });
+```
+
+Principes:
+
+- **Hybride Storage/Externe** : Les médias peuvent pointer vers Supabase Storage (chemin local) OU vers une URL externe (metadata.external_url)
+- **Priorisation** : La DAL priorise toujours `metadata.external_url` si présent, sinon utilise `storage_path`
+- **Idempotence** : Seeds utilisent `WHERE NOT EXISTS` pour éviter les duplications
+- **Conformité TypeScript** : Aucun `any`, interfaces explicites pour tous les types de données
+- **Flexibilité** : Permet des seeds de démo fonctionnels (Unsplash, PDFs publics) sans configuration Storage complexe
+
+### 3. View présentielle (Client) (bis)
+
 - `components/features/public-site/spectacles/SpectaclesView.tsx` (client) rend l’UI; affiche `<SpectaclesSkeleton />` si `loading`.
 
 ### 4. Suspense + Skeleton

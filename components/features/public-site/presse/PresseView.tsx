@@ -15,6 +15,7 @@ export function PresseView({
     mediaArticles,
     mediaKit,
 }: PresseViewProps) {
+        // console.log("pressReleases", pressReleases, "mediaArticles", mediaArticles, "mediaKit", mediaKit); //TODO: remove
     return (
         <div className="pt-16">
             {/* Hero Section */}
