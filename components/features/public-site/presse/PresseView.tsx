@@ -195,17 +195,17 @@ export function PresseView({
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="flex flex-wrap justify-center gap-8">
                         {mediaKit.map((item, index) => {
                             const Icon = item.icon ?? FileText;
                             return (
                             <Card
                                 key={index}
-                                className={`card-hover animate-fade-in-up text-center`}
+                                className={`card-hover animate-fade-in-up text-center w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm flex flex-col`}
                                 style={{ animationDelay: `${index * 0.1}s` }}
                             >
-                                <CardContent className="p-6">
-                                    <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-lg mb-4">
+                                <CardContent className="p-6 flex flex-col flex-1">
+                                    <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-lg mb-4 mx-auto">
                                         <Icon className="h-8 w-8 text-primary" />
                                     </div>
 
@@ -217,7 +217,7 @@ export function PresseView({
                                         Taille : {item.fileSize}
                                     </p>
 
-                                    <Button className="w-full" asChild>
+                                    <Button className="w-full mt-auto" asChild>
                                         <a href={item.fileUrl} download>
                                             <Download className="mr-2 h-4 w-4" />
                                             Télécharger

@@ -276,6 +276,7 @@
 │   │   ├── 🗄️ 20250930120000_seed_lieux.sql
 │   │   ├── 🗄️ 20250930121000_seed_categories_tags.sql
 │   │   ├── 🗄️ 20250930122000_seed_configurations_site.sql
+│   │   ├── 🗄️ 20251002120000_seed_communiques_presse_et_media_kit.sql
 │   │   ├── 📝 README-migrations.md
 │   │   └── 🗄️ sync_existing_profiles.sql (migration manuelle)
 │   ├── 📁 schemas/
