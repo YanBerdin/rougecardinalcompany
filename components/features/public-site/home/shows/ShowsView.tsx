@@ -16,9 +16,9 @@ export function ShowsView({ shows }: ShowsViewProps) {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                <div className="flex flex-wrap justify-center gap-8 mb-12">
                     {shows.map((show, index) => (
-                        <Card key={show.id} className={`card-hover animate-fade-in-up overflow-hidden shows-card-dark`} style={{ animationDelay: `${index * 0.1}s` }}>
+                        <Card key={show.id} className={`card-hover animate-fade-in-up overflow-hidden shows-card-dark w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm flex flex-col`} style={{ animationDelay: `${index * 0.1}s` }}>
                             <div className="relative">
                                 <div
                                     className="h-48 bg-cover bg-center"
@@ -30,7 +30,7 @@ export function ShowsView({ shows }: ShowsViewProps) {
                                 </div>
                             </div>
 
-                            <CardContent className="p-6">
+                            <CardContent className="p-6 flex flex-col flex-1">
                                 <h3 className="text-xl font-semibold mb-3 hover:text-primary transition-colors card-title">
                                     <Link href={`/spectacles/${show.slug}`}>
                                         {show.title}
@@ -59,7 +59,7 @@ export function ShowsView({ shows }: ShowsViewProps) {
                                 )}
                             </CardContent>
 
-                            <CardFooter className="pt-0">
+                            <CardFooter className="pt-0 mt-auto">
                                 <div className="flex space-x-2 w-full">
                                     <Button
                                         size="lg"
