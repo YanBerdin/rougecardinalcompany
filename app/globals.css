@@ -517,17 +517,17 @@
       inset 0 2px 4px rgba(0, 0, 0, 0.3) !important;
   }
 
-  /* NOUVEAU : Cartes NOIRES pour section actualités en light mode */
+  /*! NOUVEAU : Cartes NOIRES pour section actualités en light mode */
   .news-card-dark {
     /* En light mode: fond noir selon spécifications */
     background: linear-gradient(135deg, 
-      #1a0408 0%, 
-      #2a0c10 50%, 
-      #1a0408 100%);
-    border: 1px solid #1a040820;
+      #e712c4ff 0%, 
+      #e915d7ff 50%, 
+      #f314e8ff 100%);
+    border: 1px solid #e71ccc20;
     color: white;
     box-shadow: 
-      0 4px 20px rgba(26, 4, 8, 0.3),
+      0 4px 20px rgba(26, 4, 21, 0.3),
       inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
 
@@ -835,11 +835,8 @@ html {
 
 /* Muted sections with subtle tint - ADAPTÉ AU NOUVEAU BACKGROUND */
 .bg-muted\/30 {
-  /* En light mode, utilise une teinte plus douce qui s'harmonise avec #fef7f8 */
-  background: linear-gradient(135deg, 
-    #fdf4f5 0%, 
-    #fcf1f2 50%, 
-    #fdf4f5 100%);
+  /*! En light mode, utilise une teinte plus douce qui s'harmonise avec #fef7f8 */
+      background: #70d437a9; /* Gris très clair avec transparence */
 }
 
 .dark .bg-muted\/30 {
