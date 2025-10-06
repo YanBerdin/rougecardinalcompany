@@ -43,3 +43,7 @@ next-env.d.ts
 
 # log files
 /doc-perso/
+
+# supabase
+supabase\.temp
+supabase/.temp
