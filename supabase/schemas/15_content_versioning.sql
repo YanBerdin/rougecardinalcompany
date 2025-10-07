@@ -111,10 +111,11 @@ begin
     change_type_value := 'create';
     change_summary_text := 'Création du spectacle: ' || NEW.title;
   else
-    if OLD.published_at is null and NEW.published_at is not null then
+    -- Utiliser le champ 'public' (boolean) au lieu de 'published_at'
+    if OLD.public = false and NEW.public = true then
       change_type_value := 'publish';
       change_summary_text := 'Publication du spectacle: ' || NEW.title;
-    elsif OLD.published_at is not null and NEW.published_at is null then
+    elsif OLD.public = true and NEW.public = false then
       change_type_value := 'unpublish';
       change_summary_text := 'Dépublication du spectacle: ' || NEW.title;
     else

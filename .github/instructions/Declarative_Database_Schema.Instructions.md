@@ -20,11 +20,21 @@ Mandatory Instructions for Supabase Declarative Schema Management
 - Before generating migrations, **stop the local Supabase development environment**
 
   ```bash
+# local database
   supabase stop
+# or
+  pnpm dlx supabase stop
   ```
 - Generate migration files by diffing the declared schema against the current database state
+
   ```bash
+# local database (no flags needed)
   supabase db diff -f <migration_name>
+# or
+  pnpm dlx supabase db diff -f <migration_name>
+
+# remote database (specify the --linked or --db-url flag respectively)
+  supabase db diff [flags]
   ```
   Replace `<migration_name>` with a descriptive name for the migration
 
@@ -44,6 +54,51 @@ Mandatory Instructions for Supabase Declarative Schema Management
     ```
 
   - Review the generated migration file carefully to avoid unintentional data loss
+
+## 5.5. **Hotfix Migrations and Schema Synchronization**
+
+When a critical bug requires immediate production fix:
+
+### Emergency Workflow
+1. **Create manual migration** for immediate deployment to production
+   ```bash
+   # Create timestamped migration manually
+   touch supabase/migrations/$(date +%Y%m%d%H%M%S)_fix_critical_bug.sql
+   ```
+2. **Apply to production** using Supabase CLI
+   ```bash
+   pnpm dlx supabase db push
+   ```
+
+### Post-Fix Synchronization (MANDATORY)
+3. **Update declarative schema** to reflect the fix
+   - Modify the corresponding `.sql` file in `supabase/schemas/`
+   - Ensure the schema file represents the corrected final state
+   
+4. **Document the redundancy** in `supabase/migrations/migrations.md`
+   ```markdown
+   - `YYYYMMDDHHMMSS_fix_critical_bug.sql` — Description of fix
+     - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/XX_affected_entity.sql`
+     - 📝 **Migration conservée** pour l'historique et la cohérence avec Supabase Cloud
+   ```
+
+### Migration Retention Policy
+- **KEEP manual hotfix migrations** in the repository for:
+  - Historical record of production fixes
+  - Consistency with Supabase Cloud migration history
+  - Ability to recreate database from scratch
+  
+- **NEVER delete applied migrations** that exist on production
+
+### Schema as Source of Truth
+- After integrating hotfix into declarative schema, the schema files in `supabase/schemas/` become the authoritative source
+- Future schema diffs will be generated from these updated schema files
+- Manual migrations serve only as historical documentation
+
+**Example from this project:**
+- Hotfix: `20250918000000_fix_spectacles_versioning_trigger.sql` (trigger bug fix)
+- Schema: `supabase/schemas/15_content_versioning.sql` (updated with correct logic)
+- Result: Both coexist - migration for history, schema for truth
 
 ## 6. **Known caveats**
 
