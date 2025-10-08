@@ -1,10 +1,20 @@
+
+import { updateSession } from "@/supabase/middleware";
+import { type NextRequest } from "next/server";
+
+/*
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+*/
 
+ export async function middleware(request: NextRequest) {
+  return await updateSession(request);
+
+/*
 export async function middleware(req: NextRequest) {
   let supabaseResponse = NextResponse.next({ request: req });
-
+*/
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,
@@ -49,7 +59,7 @@ export async function middleware(req: NextRequest) {
 
   if (isAuthRoute && claims) {
     const redirectUrl = req.nextUrl.clone();
-    redirectUrl.pathname = '/dashboard';
+    redirectUrl.pathname = '/protected';
     return NextResponse.redirect(redirectUrl);
   }
 
@@ -67,11 +77,12 @@ export const config = {
      * Feel free to modify this pattern to include more paths.
     */
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
-    /**  */
+    /** 
     "/dashboard/:path*",
     "/profile/:path*",
     "/admin/:path*",
     "/auth/login",
     "/auth/signup",
+     */
   ],
 };

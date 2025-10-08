@@ -18,7 +18,7 @@ export const SITE_CONFIG = {
     ADDRESS: "Adresse de votre compagnie",
   },
   AUTH: {
-    REDIRECT_TO_DASHBOARD: "/dashboard",
+    REDIRECT_TO_DASHBOARD: "/protected",
     REDIRECT_TO_LOGIN: "/auth/login",
     EMAIL_REDIRECT_TO: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
   },
