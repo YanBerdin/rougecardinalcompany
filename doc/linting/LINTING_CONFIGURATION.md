@@ -15,6 +15,7 @@ Configuration complète du linting pour le projet avec support TypeScript/JavaSc
 
 **Package**: `eslint` v9  
 **Plugins**:
+
 - `eslint-config-next`: Configuration Next.js
 - `@eslint/markdown`: Support des blocs de code dans Markdown
 - `@eslint/eslintrc`: Compatibilité avec l'ancien format
@@ -64,15 +65,19 @@ pnpm lint:all
 ## 📊 État Actuel
 
 ### TypeScript/JavaScript
+
 ✅ **Configuration complète**
+
 - ESLint configuré avec Next.js rules
 - Support des blocs de code Markdown
 - 0 erreur détectée dans le code
 
 ### Markdown
+
 ⚠️ **3442 erreurs détectées**
 
 Principales catégories d'erreurs :
+
 - `MD032` (blanks-around-lists): Listes non entourées de lignes vides
 - `MD031` (blanks-around-fences): Blocs de code non entourés de lignes vides
 - `MD022` (blanks-around-headings): Titres non entourés de lignes vides
@@ -151,16 +156,19 @@ export default eslintConfig;
 ### 1. Correction Progressive des Erreurs Markdown
 
 **Priorité Haute** :
+
 - [ ] Corriger `MD032` (blanks-around-lists) - Espaces autour des listes
 - [ ] Corriger `MD031` (blanks-around-fences) - Espaces autour des blocs de code
 - [ ] Corriger `MD022` (blanks-around-headings) - Espaces autour des titres
 
 **Priorité Moyenne** :
+
 - [ ] Corriger `MD049` (emphasis-style) - Uniformiser _underscore_ pour emphase
 - [ ] Corriger `MD009` (no-trailing-spaces) - Supprimer espaces de fin de ligne
 - [ ] Corriger `MD040` (fenced-code-language) - Ajouter langage aux blocs de code
 
 **Priorité Basse** :
+
 - [ ] Corriger `MD007` (ul-indent) - Indentation des listes
 - [ ] Autres erreurs mineures
 

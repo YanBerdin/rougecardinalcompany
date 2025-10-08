@@ -2577,7 +2577,7 @@ Tous les objets du schéma sont organisés dans le répertoire `supabase/schemas
 
 #### 13.3.1. Architecture en Couches
 
-```
+```mermaid
 User Action → API Endpoint → Zod Validation → DAL Insert → 
   Email Action (Server) → Template Render (React Email) → 
   Resend API → Email Sent → Database Log (Supabase)
@@ -2595,7 +2595,7 @@ User Action → API Endpoint → Zod Validation → DAL Insert →
 
 #### 13.3.3. Structure des Fichiers Email
 
-```
+```bash
 emails/                                  # Templates React Email
 ├── utils/
 │   ├── email-layout.tsx                # Layout partagé (header/footer)
@@ -2629,12 +2629,14 @@ types/
 #### 13.3.4. Template Layer - React Email Components
 
 **Layout Partagé** (`emails/utils/email-layout.tsx`) :
+
 - Header avec logo Rouge Cardinal Company
 - Footer avec informations légales et désinscription
 - Styles Tailwind CSS inline pour compatibilité email clients
 - Responsive design mobile-first
 
 **Composants Réutilisables** (`emails/utils/components.utils.tsx`) :
+
 - `EmailSection` : Container de section avec padding
 - `EmailButton` : Bouton CTA avec styles cohérents
 - `EmailText` : Paragraphe texte avec formatage par défaut
@@ -2680,6 +2682,7 @@ export async function sendContactNotification(
 ```
 
 **Configuration Resend** (`lib/resend.ts`) :
+
 ```typescript
 import { Resend } from "resend";
 
@@ -2691,6 +2694,7 @@ export const resend = new Resend(process.env.RESEND_API_KEY);
 ```
 
 **Site Configuration** (`lib/site-config.ts`) :
+
 ```typescript
 export const SITE_CONFIG = {
   EMAIL: {
@@ -2763,18 +2767,21 @@ export async function POST(request: NextRequest) {
 ```
 
 **Contact Form** (`app/api/contact/route.ts`) :
+
 - Même pattern que newsletter
 - Validation avec `ContactMessageSchema`
 - Insert dans `messages_contact`
 - Envoi email notification admin
 
 **Test Email** (`app/api/test-email/route.ts`) :
+
 - Development only (check environment)
 - POST : Test specific template
 - GET : List available templates
 - Useful for template development
 
 **Webhooks Resend** (`app/api/webhooks/resend/route.ts`) :
+
 - Receive delivery events from Resend
 - Update email status in database
 - Handle bounces, complaints, opens, clicks
@@ -2818,6 +2825,7 @@ export function useNewsletterSubscription({ source = "home" } = {}) {
 ```
 
 **Contact Form Hook** (`lib/hooks/useContactForm.ts`) :
+
 - Similar pattern to newsletter
 - Manages form state for multiple fields
 - Handles validation and submission
@@ -2865,6 +2873,7 @@ comment on table public.messages_contact is 'Contact form messages with status w
 #### 13.3.10. Row Level Security (RLS) Email
 
 **Newsletter Subscribers** :
+
 ```sql
 -- Anonymous can subscribe (public form)
 create policy "Anyone can subscribe to newsletter"
@@ -2886,6 +2895,7 @@ create policy "Admins can manage newsletter subscribers"
 ```
 
 **Contact Messages** :
+
 ```sql
 -- Anonymous can send messages (public form)
 create policy "Anyone can send contact messages"
@@ -2926,24 +2936,28 @@ pnpm run test:resend
 ```
 
 **Test Email Integration** (`scripts/test-email-integration.ts`) :
+
 - Tests newsletter confirmation email
 - Tests contact notification email
 - Verifies API responses
 - Checks database inserts
 
 **Check Email Logs** (`scripts/check-email-logs.ts`) :
+
 - Queries latest newsletter subscriptions
 - Queries latest contact messages
 - Displays email send status
 - Requires `SUPABASE_SERVICE_ROLE_KEY`
 
 **Test Webhooks** (`scripts/test-webhooks.ts`) :
+
 - Lists configured webhooks in Resend
 - Verifies webhook endpoint URL
 - Tests webhook connectivity
 - Validates webhook signature
 
 **Monitoring** :
+
 - Resend Dashboard : delivery rates, bounces, complaints
 - Supabase Database : insertion logs, timestamps
 - Application Logs : error tracking, success metrics
@@ -2969,22 +2983,26 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 #### 13.3.13. Security Best Practices
 
 **Server-Only Actions** :
+
 - All email actions marked with `"use server"` directive
 - Never expose Resend API key to client
 - Validate all inputs with Zod before processing
 
 **Rate Limiting** :
+
 - Implement rate limiting on API endpoints
 - Prevent spam via honeypot fields (recommended)
 - Monitor subscription patterns for abuse
 
 **Data Privacy (RGPD)** :
+
 - Double opt-in for newsletter (recommended)
 - Store consent timestamp and source
 - Provide unsubscribe link in all emails
 - Implement "right to be forgotten"
 
 **Error Handling** :
+
 - Never expose internal errors to client
 - Log errors server-side for debugging
 - Return generic error messages to users
@@ -2993,18 +3011,21 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 #### 13.3.14. Performance Optimization
 
 **Email Sending** :
+
 - Async email sending (non-blocking)
 - Queue system for bulk emails (future enhancement)
 - Retry logic for failed sends
 - Timeout handling
 
 **Database** :
+
 - Indexed email columns for fast lookups
 - Efficient upsert operations (ON CONFLICT)
 - Batch inserts for multiple subscriptions
 - Cleanup of old/inactive records
 
 **Caching** :
+
 - Template compilation caching
 - Configuration caching (SITE_CONFIG)
 - Static template assets
@@ -3012,17 +3033,20 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 #### 13.3.15. Documentation References
 
 **Detailed Documentation** :
+
 - `memory-bank/architecture/Email_Service_Architecture.md` : Architecture complète (850 lignes)
 - `TESTING_RESEND.md` : Guide de test détaillé avec exemples cURL
 - `.github/instructions/resend_supabase_integration.md` : Instructions d'intégration pas-à-pas
 
 **Code Examples** :
+
 - Template examples in `emails/` directory
 - Hook examples in `lib/hooks/`
 - API endpoint examples in `app/api/`
 - Test script examples in `scripts/`
 
 **External Resources** :
+
 - Resend Documentation : <https://resend.com/docs>
 - React Email Documentation : <https://react.email/docs>
 - Zod Documentation : <https://zod.dev>
@@ -3030,6 +3054,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 #### 13.3.16. Future Enhancements
 
 **Planned Features** :
+
 - [ ] Email campaign management (bulk sending)
 - [ ] Email templates editor in back-office
 - [ ] A/B testing for email templates
@@ -3037,6 +3062,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 - [ ] Email analytics dashboard
 
 **Under Consideration** :
+
 - [ ] Multiple language support (i18n)
 - [ ] Scheduled email sending
 - [ ] Email automation workflows
@@ -3047,7 +3073,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 ## 14. User Stories Complètes
 
-- **Audit-Logs** — *System* : Toutes opérations critiques sont auditées dans `logs_audit`.
+- **Audit-Logs** — **System** : Toutes opérations critiques sont auditées dans `logs_audit`.
 
 ### 14.1. Page d'Accueil
 
@@ -3072,7 +3098,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 **I want** voir logo + menu responsive  
 **So that** je navigue facilement
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Affichage logo et menu au chargement  
 - [ ] Menu cliquable et accessible mobile
@@ -3085,7 +3111,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 **I want** une animation fluide non bloquante  
 **So that** l’accueil soit impactant
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Démarrage auto sans freeze  
 - [ ] Compatibilité navigateurs principaux
@@ -3098,7 +3124,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 **I want** voir les dernières actus  
 **So that** je reste informé
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Tri antéchronologique  
 - [ ] Chaque actus = titre + date + lien détail
@@ -3111,7 +3137,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 **I want** un texte mission clair  
 **So that** je sache à quoi sert la compagnie
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Administrable via back-office  
 - [ ] Affichage responsive
@@ -3124,7 +3150,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 **I want** accéder aux réseaux officiels  
 **So that** je suive l’actualité
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Icônes cliquables, nouvel onglet  
 - [ ] Logos officiels
@@ -3137,7 +3163,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 **I want** consulter mentions légales, RGPD, plan du site  
 **So that** je sois informé
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Liens visibles et fonctionnels
 
@@ -3149,7 +3175,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 **I want** voir logos partenaires  
 **So that** je les découvre
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Filtrage partenaires actifs  
 - [ ] Lien vers leur site
@@ -3170,7 +3196,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 **I want** lire la page "La compagnie" avec histoire, mission, équipe  
 **So that** je comprenne l'identité et les valeurs
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] GIVEN : que je suis sur la page "La compagnie"  
 - [ ] WHEN : j’affiche la page  
@@ -3185,7 +3211,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 **I want** modifier le contenu via le back-office  
 **So that** je maintienne les informations à jour
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Connexion admin requise  
 - [ ] Sauvegarde en base avec confirmation  
@@ -3200,7 +3226,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 **I want** CRUD complet des membres d’équipe  
 **So that** je présente la composition actuelle
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Ajout avec photo, nom, rôle  
 - [ ] Modification des infos existantes  
@@ -3221,7 +3247,7 @@ Note de mise en œuvre (Sept 2025):
 **I want** disposer dans le back‑office d’un interrupteur (toggle) pour afficher ou masquer la section "À la une" et la section "Partenaires"  
 **So that** je contrôle leur présence sur le site sans les supprimer du contenu
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] GIVEN : que je suis connecté en admin  
 - [ ] WHEN : j’accède à la gestion de la présentation dans le back‑office  
@@ -3262,7 +3288,7 @@ Notes:
 **I want** voir la liste des événements "À l'affiche" avec image et titre  
 **So that** je découvre les événements en cours
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] GIVEN : que des événements "À l'affiche" existent en base  
 - [ ] WHEN : j’accède à la page "Nos Spectacles"  
@@ -3278,7 +3304,7 @@ Notes:
 **I want** consulter la fiche complète d’un événement  
 **So that** je décide de cliquer vers le lien de réservation
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] GIVEN : que je clique sur un événement dans la liste  
 - [ ] WHEN : la fiche s’ouvre  
@@ -3293,7 +3319,7 @@ Notes:
 **I want** filtrer les événements par critères avancés (date, lieu, type, statut)  
 **So that** j’explore facilement l’historique ou les en cours
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] GIVEN : que des filtres sont disponibles  
 - [ ] WHEN : je sélectionne un ou plusieurs filtres  
@@ -3308,7 +3334,7 @@ Notes:
 **I want** cliquer sur "Voir l'agenda" depuis la fiche d’un événement  
 **So that** j’accède aux dates correspondantes
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] GIVEN : que la fiche événement affiche un bouton "Voir l'agenda"  
 - [ ] WHEN : je clique dessus  
@@ -3322,7 +3348,7 @@ Notes:
 **I want** créer, lire, mettre à jour et supprimer des événements avec médias, date, lieux, description  
 **So that** je maintienne la base à jour
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Formulaire complet avec champs : titre, description, images, date(s), lieu, statut "À l'affiche"/archivé  
 - [ ] Upload images avec prévisualisation  
@@ -3338,7 +3364,7 @@ Notes:
 **I want** consulter l’historique des modifications des événements  
 **So that** je garde une traçabilité des changements
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Liste horodatée des modifications (création, édition, suppression)  
 - [ ] Indication de l’utilisateur ayant effectué l’action  
@@ -3366,7 +3392,7 @@ Notes:
 **I want** voir un calendrier interactif responsive  
 **So that** je planifie ma venue
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] GIVEN : que je suis sur la page Agenda  
 - [ ] WHEN : le calendrier se charge  
@@ -3382,7 +3408,7 @@ Notes:
 **I want** filtrer le calendrier par type d’événement (ex : concert, spectacle, exposition)  
 **So that** j’accède plus rapidement à l’info qui m’intéresse
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Liste de filtres accessible et claire  
 - [ ] Sélection d’un ou plusieurs types d’événement met à jour l’affichage du calendrier instantanément  
@@ -3396,7 +3422,7 @@ Notes:
 **I want** télécharger un fichier .ics pour un événement  
 **So that** je l’ajoute facilement à mon propre calendrier
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Sur chaque événement : bouton ou lien "Ajouter à mon calendrier"  
 - [ ] Clic sur le bouton télécharge un fichier .ics compatible (Google, Outlook, Apple Calendar)  
@@ -3410,7 +3436,7 @@ Notes:
 **I want** accéder depuis l’agenda aux liens de billetterie  
 **So that** j’achète mes billets rapidement
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] GIVEN : qu’un lien billetterie est configuré pour un événement  
 - [ ] WHEN : je clique sur "Billetterie"  
@@ -3425,7 +3451,7 @@ Notes:
 **I want** gérer la création, lecture, mise à jour, suppression des événements (médias, date, lieux, description)  
 **So that** je maintienne l’agenda à jour
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Formulaire avec champs : titre, description, images, dates/horaires, lieu, type, statut  
 - [ ] Upload d’images avec prévisualisation  
@@ -3441,7 +3467,7 @@ Notes:
 **I want** gérer les liens billetterie pour chaque événement  
 **So that** ils soient accessibles aux visiteurs
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Champ dédié au lien billetterie dans la fiche événement  
 - [ ] Vérification de format d’URL  
@@ -3456,7 +3482,7 @@ Notes:
 **I want** voir un appel à l’action pour m’abonner à la newsletter  
 **So that** je reste informé des prochains événements
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Bloc CTA visible sur la page Agenda (titre, texte court, champ email, bouton)  
 - [ ] Formulaire envoie l’email vers le service newsletter configuré  
@@ -3470,7 +3496,7 @@ Notes:
 **I want** activer ou désactiver l’affichage de la section "Abonnement Newsletter"  
 **So that** je choisis de la mettre en avant ou non
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Interrupteur (toggle) disponible dans BackOffice, section Paramètres Agenda  
 - [ ] WHEN : le toggle est activé  
@@ -3497,7 +3523,7 @@ Notes:
 **I want** télécharger les communiqués de presse au format PDF  
 **So that** j'accède aux documents officiels
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] GIVEN : qu'un ou plusieurs communiqués sont disponibles  
 - [ ] WHEN : j'affiche la page Presse  
@@ -3513,7 +3539,7 @@ Notes:
 **I want** voir la revue de presse (articles, vidéos)  
 **So that** je découvre les retombées médiatiques
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Liste claire avec vignette, titre, média/source, date de publication  
 - [ ] Les articles cliquables ouvrent le lien externe dans un nouvel onglet  
@@ -3528,7 +3554,7 @@ Notes:
 **I want** accéder à une médiathèque HD  
 **So that** j'utilise des visuels officiels pour illustrer mes articles
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Accès clair via bouton ou lien depuis la page Presse  
 - [ ] Galerie HD avec aperçu + option de téléchargement en taille originale  
@@ -3543,7 +3569,7 @@ Notes:
 **I want** créer, lire, mettre à jour, supprimer les communiqués et revues de presse  
 **So that** je centralise la gestion presse
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Formulaire d’édition avec champs : titre, date, résumé, lien/URL ou fichier PDF, type (communiqué/revue)  
 - [ ] Validation des champs requis  
@@ -3559,7 +3585,7 @@ Notes:
 **I want** uploader et organiser la médiathèque HD  
 **So that** je structure les ressources
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Upload d’images HD (JPG, PNG) avec prévisualisation  
 - [ ] Classement par catégories / tags (ex : événement, type de média)  
@@ -3588,7 +3614,7 @@ Notes:
 **I want** remplir un formulaire sécurisé  
 **So that** je puisse poser une question ou faire une demande à l'équipe
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] GIVEN : que je suis sur la page Contact  
 - [ ] WHEN : j'affiche le formulaire  
@@ -3605,7 +3631,7 @@ Notes:
 **I want** recevoir un accusé de réception automatique après envoi du formulaire  
 **So that** je sois certain que ma demande a été prise en compte
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] GIVEN : que j’ai soumis un formulaire valide  
 - [ ] WHEN : l’envoi est confirmé côté serveur  
@@ -3619,7 +3645,7 @@ Notes:
 **I want** consulter et traiter les messages reçus via le formulaire  
 **So that** je gère efficacement les demandes
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Interface back‑office listant les messages avec tri et filtres (date, motif, statut)  
 - [ ] Possibilité de marquer un message comme traité / en cours / en attente  
@@ -3634,7 +3660,7 @@ Notes:
 **I want** voir les coordonnées de la compagnie (email, téléphone, adresse, horaires, contacts spécialisés)  
 **So that** je puisse contacter directement la bonne personne
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Affichage dans une section dédiée avec icônes correspondantes  
 - [ ] Email et téléphone cliquables (mailto: / tel:)  
@@ -3648,7 +3674,7 @@ Notes:
 **I want** ajouter / modifier / supprimer les coordonnées affichées sur la page Contact  
 **So that** elles restent à jour
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Formulaire back‑office complet avec champs : Nom de la compagnie, adresse, email, téléphone, horaires, contacts spécialisés (email presse)
 - [ ] Validation des champs obligatoires  
@@ -3664,7 +3690,7 @@ Notes:
 **I want** m’inscrire avec mon email via le formulaire newsletter  
 **So that** je reçoive les actualités de la compagnie
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] GIVEN : que je suis sur la page Contact ou un autre emplacement intégrant le module newsletter  
 - [ ] WHEN : je saisis mon email et clique sur "S'abonner"  
@@ -3680,7 +3706,7 @@ Notes:
 **I want** me désinscrire facilement  
 **So that** j’exerce mon droit de retrait
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Lien de désinscription unique présent dans chaque email  
 - [ ] Confirmation de désinscription affichée côté front  
@@ -3694,7 +3720,7 @@ Notes:
 **I want** exporter la liste des abonnés au format CSV  
 **So that** je puisse gérer mes campagnes email dans un outil externe
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Bouton "Exporter CSV" dans le back‑office newsletter  
 - [ ] Fichier CSV contenant : email, date d’inscription, statut (actif/désinscrit)  
@@ -3708,7 +3734,7 @@ Notes:
 **I want** consulter les statistiques d’abonnement newsletter  
 **So that** je mesure l’engagement
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Graphiques et chiffres clés (abonnés actifs, nouveaux abonnés, désinscriptions)  
 - [ ] Filtre par période  
@@ -3722,7 +3748,7 @@ Notes:
 **I want** activer/désactiver l’affichage de la section "Abonnement Newsletter" sur la page Contact  
 **So that** je choisis de la mettre en avant ou non
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Interrupteur (toggle) disponible dans BackOffice, section Paramètres Contact  
 - [ ] WHEN : le toggle est activé  
@@ -3756,7 +3782,7 @@ Notes:
 **I want** me connecter avec une authentification sécurisée  
 **So that** je sécurise l'accès au back‑office
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Page de login avec champs identifiant et mot de passe  
 - [ ] Mots de passe chiffrés en base  
@@ -3772,7 +3798,7 @@ Notes:
 **I want** voir un dashboard avec statistiques  
 **So that** j’ai une vue d’ensemble de l’activité
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Indicateurs clés : nombre d’événements à venir, nouveaux médias, dernières connexions  
 - [ ] Graphiques interactifs (barres, lignes, camembert)  
@@ -3787,7 +3813,7 @@ Notes:
 **I want** gérer Spectacles, événements et presse via interface intuitive  
 **So that** je travaille en autonomie
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Interface unifiée avec recherche et filtres  
 - [ ] Formulaire clair avec champs spécifiques selon type de contenu  
@@ -3803,7 +3829,7 @@ Notes:
 **I want** uploader et gérer les médias avec prévisualisation  
 **So that** je garde une organisation claire
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Drag‑and‑drop pour upload  
 - [ ] Miniatures générées automatiquement  
@@ -3819,7 +3845,7 @@ Notes:
 **I want** gérer les rôles admin/éditeur  
 **So that** je contrôle les accès
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Liste des utilisateurs avec rôle et statut actif/inactif  
 - [ ] Modification des rôles à tout moment  
@@ -3834,7 +3860,7 @@ Notes:
 **I want** consulter les logs d’audit détaillés  
 **So that** je garde la traçabilité des actions
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Liste horodatée des actions (login, création, modification, suppression)  
 - [ ] Filtre par utilisateur, type d’action, période  
@@ -3849,7 +3875,7 @@ Notes:
 **I want** recevoir des alertes de sécurité  
 **So that** je surveille l’intégrité du système
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Notifications par email ou tableau de bord en cas de tentatives suspectes  
 - [ ] Journalisation de l’alerte dans les logs  
@@ -3863,7 +3889,7 @@ Notes:
 **I want** bénéficier d'une interface responsive  
 **So that** je puisse gérer le back‑office depuis tout appareil
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Affichage adapté aux mobiles, tablettes et desktops  
 - [ ] Menus et formulaires utilisables au tactile  
@@ -3877,7 +3903,7 @@ Notes:
 **I want** activer/désactiver la section "À la Une" sur la page d’accueil  
 **So that** je décide de mettre en avant ou non les prochains événements
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Toggle dans paramètres du back‑office  
 - [ ] Activation = section affichée sur page d’accueil  
@@ -3892,7 +3918,7 @@ Notes:
 **I want** activer/désactiver la section "Nos partenaires" sur la page d’accueil  
 **So that** je choisis de la mettre en avant ou non
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Toggle disponible dans les paramètres du back‑office  
 - [ ] Effet immédiat côté front  
@@ -3906,11 +3932,11 @@ Notes:
 **I want** activer/désactiver la section newsletter sur les pages Agenda, Accueil et Contact  
 **So that** je contrôle sa visibilité de façon centralisée
 
-*Acceptance Criteria:*
+**Acceptance Criteria:**
 
 - [ ] Toggle disponible dans le BackOffice pour les pages (Agenda, Accueil, Contact)  
 - [ ] Effet immédiat côté front sur les pages concernées  
-- [ ] Cohérence avec les user stories: *Agenda‑08*, *Accueil‑10*, *Newsletter‑05*  
+- [ ] Cohérence avec les user stories: **Agenda‑08**, **Accueil‑10**, **Newsletter‑05**  
 - [ ] État persisté en base (configurations) et appliqué sans redéploiement  
 - [ ] Journalisation des changements dans `logs_audit`
 
@@ -4920,7 +4946,7 @@ $$;
 - Employ consistent, descriptive identifiers for tables, columns, and other database objects.
 - Use white space and indentation to enhance the readability of your code.
 - Store dates in ISO 8601 format (`yyyy-mm-ddThh:mm:ss.sssss`).
-- Include comments for complex logic, using '/*...*/' for block comments and '--' for line comments.
+- Include comments for complex logic, using '/**...*/' for block comments and '--' for line comments.
 
 #### Naming Conventions
 
