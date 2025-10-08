@@ -714,3 +714,213 @@ Objectif: garantir l'alignement des boutons d'action en bas des cartes, indépen
 ### Résultat
 
 Tous les boutons "Télécharger le PDF" sont parfaitement alignés horizontalement, même si les titres et descriptions ont des longueurs différentes.
+
+## Pattern Email Service Architecture (Octobre 2025)
+
+Objectif: architecture en couches pour l'envoi d'emails transactionnels via Resend avec templates React Email, validation Zod, et logging en base de données.
+
+### Architecture en couches
+
+```
+User → API Endpoint → Zod Validation → DAL Insert → 
+  Email Action → Template Render → Resend API → Email Sent
+```
+
+### Composants clés
+
+**1. Template Layer** (`emails/`)
+- Templates React Email avec Tailwind CSS
+- `email-layout.tsx` : Layout partagé (header/footer branding)
+- `components.utils.tsx` : Composants réutilisables (sections, boutons, texte)
+- Templates : `newsletter-confirmation.tsx`, `contact-message-notification.tsx`
+
+**2. Action Layer** (`lib/email/actions.ts`)
+```typescript
+"use server";
+
+import { Resend } from "resend";
+import { SITE_CONFIG } from "@/lib/site-config";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+export async function sendEmail({
+  to,
+  subject,
+  react
+}: SendEmailParams) {
+  const { data, error } = await resend.emails.send({
+    from: SITE_CONFIG.EMAIL.FROM,
+    to,
+    subject,
+    react
+  });
+  
+  if (error) {
+    throw new Error(`Email send failed: ${error.message}`);
+  }
+  
+  return data;
+}
+
+export async function sendNewsletterConfirmation(email: string) {
+  await sendEmail({
+    to: email,
+    subject: "Confirmation d'inscription newsletter",
+    react: <NewsletterConfirmation email={email} />
+  });
+}
+```
+
+**3. Validation Layer** (`lib/email/schemas.ts`)
+```typescript
+import { z } from "zod";
+
+export const NewsletterSubscriptionSchema = z.object({
+  email: z.string().email("Email invalide"),
+  consent: z.boolean().optional(),
+  source: z.string().optional()
+});
+
+export type NewsletterSubscription = z.infer<typeof NewsletterSubscriptionSchema>;
+```
+
+**4. API Layer** (`app/api/newsletter/route.ts`)
+```typescript
+import { NextRequest, NextResponse } from "next/server";
+import { NewsletterSubscriptionSchema } from "@/lib/email/schemas";
+import { createNewsletterSubscription } from "@/lib/dal/home-newsletter";
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const validated = NewsletterSubscriptionSchema.parse(body);
+    
+    // Insert en base (triggers email via Supabase function)
+    await createNewsletterSubscription(validated);
+    
+    return NextResponse.json(
+      { status: 'subscribed' },
+      { status: 201 }
+    );
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Validation failed", details: error.errors },
+        { status: 400 }
+      );
+    }
+    return NextResponse.json(
+      { error: "Subscription failed" },
+      { status: 500 }
+    );
+  }
+}
+```
+
+**5. Custom Hooks** (`lib/hooks/`)
+```typescript
+// lib/hooks/useNewsletterSubscribe.ts
+"use client";
+
+import { useState, FormEvent } from "react";
+
+export function useNewsletterSubscription({ source }: { source?: string } = {}) {
+  const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setErrorMessage('');
+    
+    try {
+      const res = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, consent: true, source })
+      });
+      
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Subscription failed');
+      }
+      
+      setIsSubscribed(true);
+      setEmail('');
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Unknown error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  return {
+    email,
+    setEmail,
+    handleSubmit,
+    isLoading,
+    errorMessage,
+    isSubscribed
+  };
+}
+```
+
+### Principes
+
+- **Server-only actions** : Directive `"use server"` obligatoire sur tous les fichiers d'actions email
+- **Validation Zod** : Double validation (runtime + types) pour sécurité maximale
+- **Error handling** : Gestion explicite des erreurs avec messages utilisateur clairs
+- **Database logging** : Tous les emails envoyés sont loggés dans Supabase pour audit
+- **Template consistency** : Utilisation du layout partagé pour branding cohérent
+- **Hook reusability** : Hooks partagés dans `lib/hooks/` pour éviter duplication
+
+### Database Tables
+
+```sql
+-- abonnes_newsletter
+CREATE TABLE public.abonnes_newsletter (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  email text NOT NULL UNIQUE,
+  date_inscription timestamptz DEFAULT now(),
+  statut text DEFAULT 'active',
+  metadata jsonb,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+-- messages_contact
+CREATE TABLE public.messages_contact (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  first_name text NOT NULL,
+  last_name text NOT NULL,
+  email text NOT NULL,
+  phone text,
+  message text NOT NULL,
+  consent boolean NOT NULL,
+  metadata jsonb,
+  created_at timestamptz DEFAULT now()
+);
+```
+
+### Testing
+
+**Scripts de test** (`scripts/`)
+- `test-email-integration.ts` : Test envoi emails via API
+- `check-email-logs.ts` : Vérification logs base de données
+- `test-webhooks.ts` : Test configuration webhooks Resend
+
+**Commandes**
+```bash
+pnpm run test:email     # Test emails
+pnpm run test:logs      # Check DB logs
+pnpm run test:webhooks  # Test webhooks
+pnpm run test:resend    # Run all tests
+```
+
+### Documentation
+
+- `memory-bank/architecture/Email_Service_Architecture.md` : Architecture complète
+- `TESTING_RESEND.md` : Guide de test
+- `.github/instructions/resend_supabase_integration.md` : Instructions d'intégration

@@ -2567,9 +2567,481 @@ Tous les objets du schéma sont organisés dans le répertoire `supabase/schemas
 
 - **Google Ad Grants** : préparation SEO
 - **Réseaux sociaux** : partage automatique
-- **Services emailing** : Resend
+- **Services emailing** : Resend (architecture complète détaillée ci-dessous)
 - **Analytics** : Google Analytics, Matomo, Clarity
 - **Billetterie** : liens vers plateformes externes
+
+### 13.3. Email Service Architecture - Resend Integration (Octobre 2025)
+
+**🎯 Objectif** : Service d'emails transactionnels professionnel avec templates React Email, validation Zod, et logging complet en base de données.
+
+#### 13.3.1. Architecture en Couches
+
+```
+User Action → API Endpoint → Zod Validation → DAL Insert → 
+  Email Action (Server) → Template Render (React Email) → 
+  Resend API → Email Sent → Database Log (Supabase)
+```
+
+#### 13.3.2. Stack Technique Email
+
+| Composant | Technologie | Version | Rôle |
+|-----------|-------------|---------|------|
+| **Email Service** | Resend | ^4.0.1 | API d'envoi d'emails transactionnels |
+| **Templates** | React Email | ^0.0.30 | Composants React pour emails HTML |
+| **Validation** | Zod | ^3.24.1 | Validation runtime des données email |
+| **Styling** | Tailwind CSS | ^3.4 | Styles inline pour emails |
+| **Testing** | tsx | ^4.19.2 | Exécution scripts de test TypeScript |
+
+#### 13.3.3. Structure des Fichiers Email
+
+```
+emails/                                  # Templates React Email
+├── utils/
+│   ├── email-layout.tsx                # Layout partagé (header/footer)
+│   └── components.utils.tsx            # Composants réutilisables
+├── newsletter-confirmation.tsx         # Confirmation inscription newsletter
+└── contact-message-notification.tsx    # Notification admin contact
+
+lib/email/                              # Logic layer
+├── actions.ts                          # Server actions ("use server")
+└── schemas.ts                          # Zod validation schemas
+
+lib/hooks/                              # Client hooks
+├── useNewsletterSubscribe.ts           # Newsletter form logic
+└── useContactForm.ts                   # Contact form logic
+
+app/api/                                # REST endpoints
+├── newsletter/route.ts                 # POST /api/newsletter
+├── contact/route.ts                    # POST /api/contact
+├── test-email/route.ts                 # POST/GET /api/test-email (dev)
+└── webhooks/resend/route.ts            # POST /api/webhooks/resend
+
+scripts/                                # Testing scripts
+├── test-email-integration.ts           # Email sending tests
+├── check-email-logs.ts                 # Database logs verification
+└── test-webhooks.ts                    # Webhook configuration test
+
+types/
+└── email.d.ts                          # Email-specific TypeScript types
+```
+
+#### 13.3.4. Template Layer - React Email Components
+
+**Layout Partagé** (`emails/utils/email-layout.tsx`) :
+- Header avec logo Rouge Cardinal Company
+- Footer avec informations légales et désinscription
+- Styles Tailwind CSS inline pour compatibilité email clients
+- Responsive design mobile-first
+
+**Composants Réutilisables** (`emails/utils/components.utils.tsx`) :
+- `EmailSection` : Container de section avec padding
+- `EmailButton` : Bouton CTA avec styles cohérents
+- `EmailText` : Paragraphe texte avec formatage par défaut
+- `EmailDivider` : Séparateur visuel
+
+**Templates Disponibles** :
+
+1. **Newsletter Confirmation** (`newsletter-confirmation.tsx`)
+   - Confirmation d'inscription newsletter
+   - Message de bienvenue personnalisé
+   - Lien de désinscription
+   - Preview text optimisé
+
+2. **Contact Notification** (`contact-message-notification.tsx`)
+   - Notification admin pour nouveaux messages
+   - Détails complets du message (nom, email, motif, message)
+   - Lien direct vers back-office
+   - Informations de contact du demandeur
+
+#### 13.3.5. Action Layer - Server Actions
+
+**Fichier** : `lib/email/actions.ts` (obligatoirement `"use server"`)
+
+**Fonctions Principales** :
+
+```typescript
+// Generic email sender
+export async function sendEmail({
+  to: string | string[],
+  subject: string,
+  react: ReactElement
+}): Promise<EmailSendResult>
+
+// Newsletter confirmation
+export async function sendNewsletterConfirmation(
+  email: string
+): Promise<void>
+
+// Contact form notification to admin
+export async function sendContactNotification(
+  contactData: ContactMessage
+): Promise<void>
+```
+
+**Configuration Resend** (`lib/resend.ts`) :
+```typescript
+import { Resend } from "resend";
+
+if (!process.env.RESEND_API_KEY) {
+  throw new Error("RESEND_API_KEY is not defined");
+}
+
+export const resend = new Resend(process.env.RESEND_API_KEY);
+```
+
+**Site Configuration** (`lib/site-config.ts`) :
+```typescript
+export const SITE_CONFIG = {
+  EMAIL: {
+    FROM: process.env.EMAIL_FROM || "noreply@rougecardinalcompany.fr",
+    CONTACT: process.env.EMAIL_CONTACT || "contact@rougecardinalcompany.fr"
+  },
+  URL: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+};
+```
+
+#### 13.3.6. Validation Layer - Zod Schemas
+
+**Fichier** : `lib/email/schemas.ts`
+
+**Schemas Disponibles** :
+
+```typescript
+// Newsletter subscription
+export const NewsletterSubscriptionSchema = z.object({
+  email: z.string().email("Email invalide"),
+  consent: z.boolean().optional(),
+  source: z.string().optional() // "home" | "contact" | "footer"
+});
+
+// Contact message
+export const ContactMessageSchema = z.object({
+  first_name: z.string().min(1, "Prénom requis"),
+  last_name: z.string().min(1, "Nom requis"),
+  email: z.string().email("Email invalide"),
+  phone: z.string().optional(),
+  reason: z.enum(["booking", "partenariat", "presse", "education", "technique", "autre"]),
+  message: z.string().min(10, "Message trop court"),
+  consent: z.boolean().refine(val => val === true, "Consentement requis")
+});
+
+// Auto-generated types
+export type NewsletterSubscription = z.infer<typeof NewsletterSubscriptionSchema>;
+export type ContactMessage = z.infer<typeof ContactMessageSchema>;
+```
+
+#### 13.3.7. API Layer - REST Endpoints
+
+**Newsletter Subscription** (`app/api/newsletter/route.ts`) :
+
+```typescript
+export async function POST(request: NextRequest) {
+  try {
+    // 1. Parse and validate
+    const body = await request.json();
+    const validated = NewsletterSubscriptionSchema.parse(body);
+    
+    // 2. Insert in database (triggers email via Supabase function)
+    await createNewsletterSubscription(validated);
+    
+    // 3. Return success
+    return NextResponse.json({ status: 'subscribed' }, { status: 201 });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Validation failed", details: error.errors },
+        { status: 400 }
+      );
+    }
+    return NextResponse.json(
+      { error: "Subscription failed" },
+      { status: 500 }
+    );
+  }
+}
+```
+
+**Contact Form** (`app/api/contact/route.ts`) :
+- Même pattern que newsletter
+- Validation avec `ContactMessageSchema`
+- Insert dans `messages_contact`
+- Envoi email notification admin
+
+**Test Email** (`app/api/test-email/route.ts`) :
+- Development only (check environment)
+- POST : Test specific template
+- GET : List available templates
+- Useful for template development
+
+**Webhooks Resend** (`app/api/webhooks/resend/route.ts`) :
+- Receive delivery events from Resend
+- Update email status in database
+- Handle bounces, complaints, opens, clicks
+
+#### 13.3.8. Custom Hooks - Client Logic
+
+**Newsletter Hook** (`lib/hooks/useNewsletterSubscribe.ts`) :
+
+```typescript
+export function useNewsletterSubscription({ source = "home" } = {}) {
+  const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setErrorMessage('');
+    
+    try {
+      const res = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, consent: true, source })
+      });
+      
+      if (!res.ok) throw new Error('Subscription failed');
+      
+      setIsSubscribed(true);
+      setEmail('');
+    } catch (error) {
+      setErrorMessage(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  return { email, setEmail, handleSubmit, isLoading, errorMessage, isSubscribed };
+}
+```
+
+**Contact Form Hook** (`lib/hooks/useContactForm.ts`) :
+- Similar pattern to newsletter
+- Manages form state for multiple fields
+- Handles validation and submission
+- Provides error and success states
+
+#### 13.3.9. Database Tables Email
+
+**Newsletter Subscribers** :
+
+```sql
+create table public.abonnes_newsletter (
+  id uuid primary key default gen_random_uuid(),
+  email text not null unique,
+  date_inscription timestamptz default now(),
+  statut text default 'active',
+  metadata jsonb,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+comment on table public.abonnes_newsletter is 'Newsletter subscribers with consent tracking';
+comment on column public.abonnes_newsletter.metadata is 'JSON: {consent: boolean, source: string, ip?: string}';
+```
+
+**Contact Messages** :
+
+```sql
+create table public.messages_contact (
+  id uuid primary key default gen_random_uuid(),
+  first_name text not null,
+  last_name text not null,
+  email text not null,
+  phone text,
+  reason text not null check (reason in ('booking','partenariat','presse','education','technique','autre')),
+  message text not null,
+  consent boolean not null,
+  status text default 'nouveau' check (status in ('nouveau','en_cours','traite','archive','spam')),
+  metadata jsonb,
+  created_at timestamptz default now()
+);
+
+comment on table public.messages_contact is 'Contact form messages with status workflow';
+```
+
+#### 13.3.10. Row Level Security (RLS) Email
+
+**Newsletter Subscribers** :
+```sql
+-- Anonymous can subscribe (public form)
+create policy "Anyone can subscribe to newsletter"
+  on public.abonnes_newsletter for insert
+  to anon, authenticated
+  with check (true);
+
+-- Only admins can view/manage subscribers
+create policy "Admins can view all newsletter subscribers"
+  on public.abonnes_newsletter for select
+  to authenticated
+  using ((select public.is_admin()));
+
+create policy "Admins can manage newsletter subscribers"
+  on public.abonnes_newsletter for update
+  to authenticated
+  using ((select public.is_admin()))
+  with check ((select public.is_admin()));
+```
+
+**Contact Messages** :
+```sql
+-- Anonymous can send messages (public form)
+create policy "Anyone can send contact messages"
+  on public.messages_contact for insert
+  to anon, authenticated
+  with check (true);
+
+-- Only admins can view messages
+create policy "Admins can view contact messages"
+  on public.messages_contact for select
+  to authenticated
+  using ((select public.is_admin()));
+
+-- Admins can update status
+create policy "Admins can update message status"
+  on public.messages_contact for update
+  to authenticated
+  using ((select public.is_admin()))
+  with check ((select public.is_admin()));
+```
+
+#### 13.3.11. Testing & Monitoring
+
+**Test Scripts** (`scripts/`) :
+
+```bash
+# Test email sending via API
+pnpm run test:email
+
+# Check database logs for sent emails
+pnpm run test:logs
+
+# Verify webhook configuration
+pnpm run test:webhooks
+
+# Run all email tests
+pnpm run test:resend
+```
+
+**Test Email Integration** (`scripts/test-email-integration.ts`) :
+- Tests newsletter confirmation email
+- Tests contact notification email
+- Verifies API responses
+- Checks database inserts
+
+**Check Email Logs** (`scripts/check-email-logs.ts`) :
+- Queries latest newsletter subscriptions
+- Queries latest contact messages
+- Displays email send status
+- Requires `SUPABASE_SERVICE_ROLE_KEY`
+
+**Test Webhooks** (`scripts/test-webhooks.ts`) :
+- Lists configured webhooks in Resend
+- Verifies webhook endpoint URL
+- Tests webhook connectivity
+- Validates webhook signature
+
+**Monitoring** :
+- Resend Dashboard : delivery rates, bounces, complaints
+- Supabase Database : insertion logs, timestamps
+- Application Logs : error tracking, success metrics
+- Webhook Events : real-time delivery status updates
+
+#### 13.3.12. Environment Variables
+
+```env
+# Resend API Configuration
+RESEND_API_KEY=re_xxx                          # Required - Resend API key
+RESEND_AUDIENCE_ID=xxx                         # Optional - Resend audience ID
+
+# Email Addresses
+EMAIL_FROM=noreply@rougecardinalcompany.fr     # Default FROM address
+EMAIL_CONTACT=contact@rougecardinalcompany.fr  # Contact email for notifications
+
+# Site Configuration
+NEXT_PUBLIC_SITE_URL=https://rougecardinalcompany.fr  # Production URL
+# or for development:
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
+
+#### 13.3.13. Security Best Practices
+
+**Server-Only Actions** :
+- All email actions marked with `"use server"` directive
+- Never expose Resend API key to client
+- Validate all inputs with Zod before processing
+
+**Rate Limiting** :
+- Implement rate limiting on API endpoints
+- Prevent spam via honeypot fields (recommended)
+- Monitor subscription patterns for abuse
+
+**Data Privacy (RGPD)** :
+- Double opt-in for newsletter (recommended)
+- Store consent timestamp and source
+- Provide unsubscribe link in all emails
+- Implement "right to be forgotten"
+
+**Error Handling** :
+- Never expose internal errors to client
+- Log errors server-side for debugging
+- Return generic error messages to users
+- Monitor error rates in production
+
+#### 13.3.14. Performance Optimization
+
+**Email Sending** :
+- Async email sending (non-blocking)
+- Queue system for bulk emails (future enhancement)
+- Retry logic for failed sends
+- Timeout handling
+
+**Database** :
+- Indexed email columns for fast lookups
+- Efficient upsert operations (ON CONFLICT)
+- Batch inserts for multiple subscriptions
+- Cleanup of old/inactive records
+
+**Caching** :
+- Template compilation caching
+- Configuration caching (SITE_CONFIG)
+- Static template assets
+
+#### 13.3.15. Documentation References
+
+**Detailed Documentation** :
+- `memory-bank/architecture/Email_Service_Architecture.md` : Architecture complète (850 lignes)
+- `TESTING_RESEND.md` : Guide de test détaillé avec exemples cURL
+- `.github/instructions/resend_supabase_integration.md` : Instructions d'intégration pas-à-pas
+
+**Code Examples** :
+- Template examples in `emails/` directory
+- Hook examples in `lib/hooks/`
+- API endpoint examples in `app/api/`
+- Test script examples in `scripts/`
+
+**External Resources** :
+- Resend Documentation : <https://resend.com/docs>
+- React Email Documentation : <https://react.email/docs>
+- Zod Documentation : <https://zod.dev>
+
+#### 13.3.16. Future Enhancements
+
+**Planned Features** :
+- [ ] Email campaign management (bulk sending)
+- [ ] Email templates editor in back-office
+- [ ] A/B testing for email templates
+- [ ] Advanced segmentation for newsletters
+- [ ] Email analytics dashboard
+
+**Under Consideration** :
+- [ ] Multiple language support (i18n)
+- [ ] Scheduled email sending
+- [ ] Email automation workflows
+- [ ] Integration with CRM systems
+- [ ] SMS notifications via additional service
 
 ---
 
