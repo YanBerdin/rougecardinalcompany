@@ -37,7 +37,7 @@ const supabase = createClientComponentClient();
 // Patterns getAll/setAll conformes Next.js 15
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!
 );
 ```
 
@@ -52,7 +52,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=old_anon_key
 **Après :**
 
 ```env
-NEXT_PUBLIC_SUPABASE_KEY=your_publishable_key_here  # Nouveau format
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=your_publishable_key_here  # Nouveau format
 ```
 
 ### 4. Intégration DAL Existante

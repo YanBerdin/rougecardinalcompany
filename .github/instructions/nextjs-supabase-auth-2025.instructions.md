@@ -89,7 +89,7 @@ const claims = await supabase.auth.getClaims()  // ~2-5ms local verification
 ```env
 # ✅ NEW FORMAT - Use these for optimal performance
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_KEY=your_new_publishable_key
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=your_new_publishable_key
 SUPABASE_SERVICE_ROLE_KEY=your_new_secret_key
 
 # ❌ LEGACY FORMAT - Only use if not migrated to JWT Signing Keys
@@ -105,7 +105,7 @@ import { createBrowserClient } from '@supabase/ssr'
 export function createClient() {
   return createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_KEY!  // Use new publishable key
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!  // Use new publishable key
   )
 }
 ```
@@ -121,7 +121,7 @@ export async function createClient() {
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_KEY!,  // Use new publishable key
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,  // Use new publishable key
     {
       cookies: {
         getAll() {
@@ -157,7 +157,7 @@ export async function middleware(request: NextRequest) {
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_KEY!,  // Use new publishable key
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,  // Use new publishable key
     {
       cookies: {
         getAll() {

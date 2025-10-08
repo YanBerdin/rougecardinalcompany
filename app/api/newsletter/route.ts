@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createClient } from '@/supabase/server';
+import { sendNewsletterConfirmation } from '@/lib/email/actions';
 
 const NewsletterBodySchema = z.object({
   email: z.string().email(),
@@ -26,8 +27,8 @@ export async function POST(req: Request) {
     // Upsert subscriber; store consent/source in metadata
     const { error } = await supabase
       .from('abonnes_newsletter')
-      .upsert({ 
-        email, 
+      .upsert({
+        email,
         metadata: { consent: Boolean(consent), source }
       }, { onConflict: 'email' })
       .select('id')
@@ -36,6 +37,14 @@ export async function POST(req: Request) {
     if (error) {
       console.error('Newsletter subscribe error', error);
       return NextResponse.json({ error: 'Subscription failed' }, { status: 500 });
+    }
+
+    // Envoi email de confirmation via Resend
+    try {
+      await sendNewsletterConfirmation(email);
+    } catch (emailError) {
+      console.error('Newsletter confirmation email failed:', emailError);
+      // Ne pas échouer la souscription si l'email échoue
     }
 
     // Idempotent success (new or existing)

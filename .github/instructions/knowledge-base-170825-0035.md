@@ -3796,7 +3796,7 @@ const claims = await supabase.auth.getClaims()  // ~2-5ms local verification
 3. You MUST NEVER use `get`, `set`, or `remove` for cookies
 4. You MUST NEVER import from `@supabase/auth-helpers-nextjs`
 5. You MUST use `getClaims()` for performance-critical authentication checks
-6. You MUST use the new API key format (NEXT_PUBLIC_SUPABASE_KEY)
+6. You MUST use the new API key format (NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY)
 
 #### CORRECT BROWSER CLIENT IMPLEMENTATION
 
@@ -3806,7 +3806,7 @@ import { createBrowserClient } from '@supabase/ssr'
 export function createClient() {
   return createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_KEY!  // ✅ Use new publishable key format
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!  // ✅ Use new publishable key format
   )
 }
 ```
@@ -3822,7 +3822,7 @@ export async function createClient() {
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_KEY!,  // ✅ Use new publishable key format
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,  // ✅ Use new publishable key format
     {
       cookies: {
         getAll() {
@@ -3858,7 +3858,7 @@ export async function middleware(request: NextRequest) {
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_KEY!,  // ✅ Use new publishable key format
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,  // ✅ Use new publishable key format
     {
       cookies: {
         getAll() {
@@ -3944,7 +3944,7 @@ Before generating any code, you MUST verify:
 3. ✅ Do you see ANY instance of cookie `get`, `set`, or `remove`? If yes, STOP and FIX.
 4. ✅ Are you importing from `auth-helpers-nextjs`? If yes, STOP and FIX.
 5. ✅ Are you using `getClaims()` for authentication checks? If not, consider optimization.
-6. ✅ Are you using the new API key format (NEXT_PUBLIC_SUPABASE_KEY)? If not, update.
+6. ✅ Are you using the new API key format (NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY)? If not, update.
 
 ##### CONSEQUENCES OF INCORRECT IMPLEMENTATION
 
@@ -3971,7 +3971,7 @@ When asked about Supabase Auth SSR implementation, you MUST:
 1. ONLY use code patterns from this updated guide
 2. NEVER suggest deprecated approaches or packages
 3. ALWAYS use the optimized authentication methods (`getClaims()`)
-4. ALWAYS use the new API key format (NEXT_PUBLIC_SUPABASE_KEY)
+4. ALWAYS use the new API key format (NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY)
 5. VERIFY your response against the patterns shown here
 6. RECOMMEND JWT Signing Keys migration for 100x performance improvement
 
@@ -3980,7 +3980,7 @@ When asked about Supabase Auth SSR implementation, you MUST:
 - **JWT Signing Keys**: Enable in Supabase Dashboard for ~100x faster auth
 - **getClaims() vs getUser()**: ~2-5ms vs ~300ms performance difference
 - **New API Keys**: Use publishable/secret format instead of legacy anon keys
-- **Environment Variables**: Update to NEXT_PUBLIC_SUPABASE_KEY format
+- **Environment Variables**: Update to NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY format
 
 Remember: There are NO EXCEPTIONS to these rules. Always prioritize performance and security.
 

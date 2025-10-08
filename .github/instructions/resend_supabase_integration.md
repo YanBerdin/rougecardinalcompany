@@ -57,7 +57,7 @@ RESEND_AUDIENCE_ID=your_audience_id_here  # Optionnel
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=your_publishable_key_here  # Nouveau format
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key  # Pour admin
+#! SUPABASE_SERVICE_ROLE_KEY=your_service_role_key  # Pour admin
 
 # Site
 NEXT_PUBLIC_SITE_URL=http://localhost:3000

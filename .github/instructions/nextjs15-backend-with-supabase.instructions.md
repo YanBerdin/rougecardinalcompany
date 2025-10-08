@@ -128,7 +128,7 @@ export async function logout() {
 ```env
 # New API Keys format (recommended)
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_KEY=your_new_publishable_key
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=your_new_publishable_key
 SUPABASE_SERVICE_ROLE_KEY=your_new_secret_key
 
 # Legacy format (deprecated - only if not migrated)
@@ -146,7 +146,7 @@ export async function createClient() {
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,
     {
       cookies: {
         getAll() {
@@ -178,7 +178,7 @@ export function createClient(request: NextRequest) {
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,
     {
       cookies: {
         getAll() {
