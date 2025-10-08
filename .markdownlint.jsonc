@@ -1,0 +1,39 @@
+{
+  // Markdownlint Configuration
+  // Documentation: https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+  
+  // Default all rules to true
+  "default": true,
+  
+  // MD013: Line length - Disabled for flexibility in documentation
+  "MD013": false,
+  
+  // MD024: Multiple headings with the same content - Allowed in different sections
+  "MD024": {
+    "siblings_only": true
+  },
+  
+  // MD033: Inline HTML - Allowed for complex layouts and special formatting
+  "MD033": false,
+  
+  // MD034: Bare URL used - Disabled (we use bare URLs in some contexts)
+  "MD034": false,
+  
+  // MD041: First line in file should be a top level heading
+  "MD041": false,
+  
+  // MD046: Code block style - Consistent fenced code blocks
+  "MD046": {
+    "style": "fenced"
+  },
+  
+  // MD049: Emphasis style - Consistent underscore for emphasis
+  "MD049": {
+    "style": "underscore"
+  },
+  
+  // MD050: Strong style - Consistent asterisk for strong
+  "MD050": {
+    "style": "asterisk"
+  }
+}
