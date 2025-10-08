@@ -11,36 +11,34 @@
 - ✅ **supabase/migrations/** : 13 fichiers (suppression de `20250921112000_add_home_about_content.sql`)
 
 ```bash
+Generated on: 10/8/2025, 8:52:05 PM
+Root path: `/home/yandev/projets/rougecardinalcompany`
+
+```
 ├── 📁 .git/ 🚫 (auto-hidden)
 ├── 📁 .github/
 │   ├── 📁 copilot/
-│   │   ├── 📝 1-clean-code.instructions.md
-│   │   ├── 📝 2-typescript.instructions.md
-│   │   ├── 📝 4-package-installation.instructions.md
-│   │   ├── 📝 Create_RLS_policies.Instructions.md
-│   │   ├── 📝 Create_migration.instructions.md
-│   │   ├── 📝 Database_Create_functions.Instructions.md
-│   │   ├── 📝 Declarative_Database_Schema.Instructions.md
-│   │   ├── 📝 Postgres_SQL_Style_Guide.Instructions.md
-│   │   ├── 📝 a11y.instructions.md
-│   │   ├── 📝 copilot-instructions.md
-│   │   ├── 📝 edge-functions.instructions.md
-│   │   ├── 📝 knowledge-base-170825-0035.md
-│   │   ├── 📝 memory-bank.instructions.md
-│   │   ├── 📝 nextjs-supabase-auth-2025.instructions.md
-│   │   ├── 📝 nextjs.instructions.md
-│   │   ├── 📝 nextjs15-backend-with-supabase.instructions.md
-│   │   └── 📝 security-and-owasp.instructions.md
-│   └── 📁 workflows/
+│   ├── 📁 instructions/
+│   ├── 📁 workflows/
+│   └── 📝 copilot-instructions.md
 ├── 📁 .next/ 🚫 (auto-hidden)
 ├── 📁 .vscode/ 🚫 (auto-hidden)
 ├── 📁 app/
 │   ├── 📁 agenda/
 │   │   └── 📄 page.tsx
 │   ├── 📁 api/
-│   │   └── 📁 newsletter/
-│   │       └── 📄 route.ts
+│   │   ├── 📁 contact/
+│   │   │   └── 📄 route.ts
+│   │   ├── 📁 newsletter/
+│   │   │   └── 📄 route.ts
+│   │   ├── 📁 test-email/
+│   │   │   └── 📄 route.ts
+│   │   └── 📁 webhooks/
+│   │       └── 📁 resend/
+│   │           └── 📄 route.ts
 │   ├── 📁 auth/
+│   │   ├── 📁 callback/
+│   │   │   └── 📄 route.ts
 │   │   ├── 📁 confirm/
 │   │   │   └── 📄 route.ts
 │   │   ├── 📁 error/
@@ -76,6 +74,8 @@
 │   ├── 📄 page.tsx
 │   └── 🖼️ twitter-image.png
 ├── 📁 components/
+│   ├── 📁 auth/
+│   │   └── 📄 protected-route.tsx
 │   ├── 📁 features/
 │   │   └── 📁 public-site/
 │   │       ├── 📁 agenda/
@@ -197,23 +197,16 @@
 │   ├── 📄 theme-switcher.tsx
 │   └── 📄 update-password-form.tsx
 ├── 📁 doc/
-│   ├── 📁 SQL-schema-Compliancy-report/
-│   │   ├── create-functions-compliance-report.md       # ✅
-│   │   ├── create-migration-compliance-report.md       # ✅
-│   │   ├── create-rls-policies-compliance-report.md    # ✅
-│   │   ├── declarative-schema-compliance-report.md     # ✅
-│   │   └── postgres-sql-style-compliance-report.md     # ✅
-│   ├── 📝 Project_Architecture_Blueprint.md
-│   ├── 📝 Project_Folders_Structure_Blueprint(24-08-25).md
-│   ├── 📝 conventional-commit-cheatsheet.md
-│   ├── 📝 feature.Instructions.md
-│   ├── 📝 mcp-context-flow.md
-│   ├── 📝 nextjs-supabase-auth.instructions.md
-│   ├── 📝 nextjs15-backend.instructions.md
-│   ├── 📝 regles_copilot.md
-│   └── 📝 visuel-blueprintGenerator.md
 ├── 📁 doc-perso/
+├── 📁 emails/
+│   ├── 📁 utils/
+│   │   ├── 📄 components.utils.tsx
+│   │   └── 📄 email-layout.tsx
+│   ├── 📄 contact-message-notification.tsx
+│   └── 📄 newsletter-confirmation.tsx
 ├── 📁 lib/
+│   ├── 📁 auth/
+│   │   └── 📄 service.ts
 │   ├── 📁 dal/
 │   │   ├── 📄 agenda.ts
 │   │   ├── 📄 compagnie-presentation.ts
@@ -227,8 +220,18 @@
 │   │   ├── 📄 home-shows.ts
 │   │   ├── 📄 presse.ts
 │   │   └── 📄 spectacles.ts
+│   ├── 📁 email/
+│   │   ├── 📄 actions.ts
+│   │   └── 📄 schemas.ts
 │   ├── 📁 hooks/
+│   │   ├── 📄 useAuth.ts
+│   │   ├── 📄 useContactForm.ts
 │   │   └── 📄 useNewsletterSubscribe.ts
+│   ├── 📁 plugins/
+│   │   └── 📄 touch-hitbox-plugin.js
+│   ├── 📁 tailwind/
+│   ├── 📄 resend.ts
+│   ├── 📄 site-config.ts
 │   └── 📄 utils.ts
 ├── 📁 memory-bank/
 │   ├── 📁 architecture/
@@ -246,6 +249,14 @@
 │   │   │   └── 📝 14.7-back‑office.md
 │   │   └── ⚙️ epics-map.yaml
 │   ├── 📁 tasks/
+│   │   ├── 📝 TASK011-integration-home-hero-slides.md
+│   │   ├── 📝 TASK012-integration-ui-compagnie-stats.md
+│   │   ├── 📝 TASK013-seeds-nouvelles-tables.md
+│   │   ├── 📝 TASK014-backoffice-toggles-centralises.md
+│   │   ├── 📝 TASK019-fix-spectacles-archives.md
+│   │   ├── 📝 TASK020-alignement-ui-presse.md
+│   │   ├── 📝 TASK021-documentation-docker.md
+│   │   ├── 📝 TASK022-documentation-supabase-cli.md
 │   │   └── 📝 _index.md
 │   ├── 📝 activeContext.md
 │   ├── 📝 productContext.md
@@ -258,27 +269,30 @@
 ├── 📁 public/
 │   └── 🖼️ logo-florian.png
 ├── 📁 scripts/
+│   ├── 📄 check-email-logs.ts
+│   ├── 📄 test-email-integration.ts
+│   └── 📄 test-webhooks.ts
 ├── 📁 supabase/
 │   ├── 📁 .branches/
 │   │   └── 📄 _current_branch
-│   ├── 📁 .temp/
-│   │   └── 📄 cli-latest
-│   ├── 📁 migrations/ (13 fichiers - voir README-migrations.md)
-│   │   ├── 🗄️ 20250918004849_apply_declarative_schema.sql (DDL générée)
+│   ├── 📁 .temp/ 🚫 (auto-hidden)
+│   ├── 📁 migrations/
+│   │   ├── 🗄️ 20250918000000_fix_spectacles_versioning_trigger.sql
 │   │   ├── 🗄️ 20250918031500_seed_home_hero_slides.sql
 │   │   ├── 🗄️ 20250918094530_seed_core_content.sql
 │   │   ├── 🗄️ 20250918095610_seed_compagnie_values.sql
 │   │   ├── 🗄️ 20250918101020_seed_events_press_articles.sql
 │   │   ├── 🗄️ 20250918102240_seed_team_and_presentation.sql
 │   │   ├── 🗄️ 20250921110000_seed_compagnie_presentation_sections.sql
+│   │   ├── 🗄️ 20250921112900_add_home_about_content.sql
 │   │   ├── 🗄️ 20250921113000_seed_home_about_content.sql
 │   │   ├── 🗄️ 20250926153000_seed_spectacles.sql
 │   │   ├── 🗄️ 20250930120000_seed_lieux.sql
 │   │   ├── 🗄️ 20250930121000_seed_categories_tags.sql
 │   │   ├── 🗄️ 20250930122000_seed_configurations_site.sql
 │   │   ├── 🗄️ 20251002120000_seed_communiques_presse_et_media_kit.sql
-│   │   ├── 📝 README-migrations.md
-│   │   └── 🗄️ sync_existing_profiles.sql (migration manuelle)
+│   │   ├── 📝 migrations.md
+│   │   └── 🗄️ sync_existing_profiles.sql
 │   ├── 📁 schemas/
 │   │   ├── 🗄️ 01_extensions.sql
 │   │   ├── 🗄️ 02_table_profiles.sql
@@ -316,10 +330,15 @@
 │   ├── 📄 client.ts
 │   ├── 📄 middleware.ts
 │   └── 📄 server.ts
+├── 📁 types/
+│   ├── 📄 database.types.ts
+│   └── 📄 email.d.ts
 ├── 🔒 .env 🚫 (auto-hidden)
 ├── 📄 .env.example
+├── 📄 .env.local 🚫 (auto-hidden)
 ├── 🚫 .gitignore
 ├── 📖 README.md
+├── 📝 TESTING_RESEND.md
 ├── 📄 components.json
 ├── 📄 eslint.config.mjs
 ├── 📄 middleware.ts
@@ -329,6 +348,7 @@
 ├── ⚙️ pnpm-lock.yaml
 ├── 📄 postcss.config.mjs
 ├── 📄 tailwind.config.ts
+├── 📄 test-email-simple.js
 ├── 📄 tsconfig.json
 └── 📄 tsconfig.tsbuildinfo 🚫 (auto-hidden)
 ```

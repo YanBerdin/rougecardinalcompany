@@ -2,6 +2,16 @@
 
 ## **Auto-generated on $(date) - Architecture analysis and design patterns documentation**
 
+> ⚠️ **IMPORTANT - Supabase Auth Best Practices (2025)**
+> 
+> Ce document a été **mis à jour** pour respecter les dernières recommandations Supabase Auth :
+> - ✅ Utilisation de `@supabase/ssr` (moderne) au lieu de `@supabase/auth-helpers-nextjs` (déprécié)
+> - ✅ Utilisation de `getClaims()` pour une performance 100x supérieure (~2-5ms vs ~300ms)
+> - ✅ Utilisation des nouvelles clés API : `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY`
+> - ✅ Pattern cookies correct : `getAll/setAll` uniquement
+> 
+> 📖 Pour plus de détails, consultez : `.github/instructions/nextjs-supabase-auth-2025.instructions.md`
+
 ## 1. Architecture Detection & Analysis Phase
 
 ### 1.1 Automatic Technology Stack Detection
@@ -25,6 +35,8 @@ Authentication: Supabase Auth
 Database: PostgreSQL (via Supabase)
 Schema Management: SQL migrations with declarative approach
 Connection Layer: Supabase JavaScript SDK
+Email Service: Resend (transactional emails)
+Email Templates: React Email components
 ```
 
 #### Development & Deployment Stack
@@ -69,7 +81,14 @@ BaaS Integration Pattern
 ├── Client SDK Integration: Supabase JavaScript SDK
 ├── Authentication Flow: Server-side session management
 ├── Database Access: Direct client-to-database queries
-└── Real-time Capabilities: Supabase realtime subscriptions
+├── Real-time Capabilities: Supabase realtime subscriptions
+└── Email Service Integration: Resend API with React Email templates
+
+Email Architecture Pattern
+├── Template Layer: React Email components for visual consistency
+├── Action Layer: Server actions for email sending operations
+├── API Layer: REST endpoints for testing and webhooks
+└── Validation Layer: Zod schemas for email data validation
 ```
 
 ### 1.3 Development Paradigm Analysis
@@ -228,9 +247,14 @@ Monitoring: Error tracking and performance monitoring
 │  │  app/                                                               │    │
 │  │  ├── (public)/          # Public marketing site                     │    │
 │  │  ├── auth/              # Authentication flows                      │    │
+│  │  │   └── callback/      # OAuth callback handler                    │    │
 │  │  ├── protected/         # Authenticated user area                   │    │
 │  │  ├── admin/             # Admin management interface                │    │
 │  │  └── api/               # Server-side API endpoints                 │    │
+│  │      ├── test-email/    # Email testing endpoint                    │    │
+│  │      ├── newsletter/    # Newsletter subscription                   │    │
+│  │      ├── contact/       # Contact form submission                   │    │
+│  │      └── webhooks/      # Webhook handlers (Resend)                 │    │
 │  └─────────────────────────────────────────────────────────────────────┘    │
 │                                                                             │
 │  ┌─────────────────────┐            ┌─────────────────────────────────────┐ │
@@ -299,6 +323,28 @@ Monitoring: Error tracking and performance monitoring
 │  │  • File Storage Buckets        • Edge Functions Runtime             │    │
 │  │  • CDN Integration            • Serverless Computing                │    │
 │  │  • Image Transformations      • API Extensions                      │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────────────────┘
+                              │
+┌─────────────────────────────▼───────────────────────────────────────────────┐
+│                         Email Service Layer (Resend)                        │
+│                                                                             │
+│  ┌─────────────────────┐            ┌─────────────────────────────────────┐ │
+│  │  Email Templates    │            │       Email Delivery                │ │
+│  │  (React Email)      │            │                                     │ │
+│  │                     │◄──────────►│  • Transactional Emails             │ │
+│  │ • NewsletterConfirm │            │  • Delivery Tracking                │ │
+│  │ • ContactNotif      │            │  • Webhook Events                   │ │
+│  │ • EmailLayout       │            │  • Bounce Management                │ │
+│  │ • Reusable Comp     │            │  • Analytics & Reporting            │ │
+│  └─────────────────────┘            └─────────────────────────────────────┘ │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │                   Email Validation & Testing                        │    │
+│  │                                                                     │    │
+│  │  • Zod Schema Validation       • Test Email Endpoint                │    │
+│  │  • Email Format Checks         • Integration Tests                  │    │
+│  │  • Content Sanitization        • Webhook Verification               │    │
 │  └─────────────────────────────────────────────────────────────────────┘    │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -505,14 +551,30 @@ Feedback Components:
 **Client Configuration**:
 
 ```typescript
-// Browser client for client components
-const supabaseClient = createClientComponentClient();
+// ✅ CORRECT: Browser client for client components
+import { createBrowserClient } from '@supabase/ssr';
+const supabaseClient = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!
+);
 
-// Server client for server components and API routes
-const supabaseServer = createServerClient(cookieStore);
+// ✅ CORRECT: Server client for server components and API routes
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
+const cookieStore = await cookies();
+const supabaseServer = createServerClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,
+  {
+    cookies: {
+      getAll() { return cookieStore.getAll(); },
+      setAll(cookiesToSet) { /* ... */ }
+    }
+  }
+);
 
-// Middleware client for session management
-const supabaseMiddleware = createMiddlewareClient(request, response);
+// ✅ CORRECT: Middleware client for session management
+// See "Authentication Middleware Pattern" section for complete implementation
 ```
 
 **Service Boundaries**:
@@ -521,6 +583,124 @@ const supabaseMiddleware = createMiddlewareClient(request, response);
 - Database queries and mutations  
 - Real-time subscriptions
 - File storage operations
+
+#### Email Service Layer (lib/email/)
+
+**Purpose**: Provides transactional email capabilities via Resend integration
+
+**Architecture Components**:
+
+```typescript
+// Email client configuration
+// lib/resend.ts
+import { Resend } from 'resend';
+export const resend = new Resend(process.env.RESEND_API_KEY);
+
+// Site configuration
+// lib/site-config.ts
+export const SITE_CONFIG = {
+  EMAIL: {
+    FROM: process.env.EMAIL_FROM || 'noreply@rougecardinalcompany.fr',
+    CONTACT: process.env.EMAIL_CONTACT || 'contact@rougecardinalcompany.fr',
+  },
+  // ... other config
+};
+```
+
+**Email Actions (lib/email/actions.ts)**:
+
+- `sendEmail()`: Generic email sending with template support
+- `sendNewsletterConfirmation()`: Newsletter subscription confirmation
+- `sendContactNotification()`: Contact form notification to admin
+
+**Email Templates (emails/)**:
+
+```bash
+emails/
+├── newsletter-confirmation.tsx      # Newsletter welcome email
+├── contact-message-notification.tsx # Admin notification for contacts
+└── utils/
+    ├── email-layout.tsx            # Reusable email wrapper
+    └── components.utils.tsx        # Email component utilities
+```
+
+**Validation Schemas (lib/email/schemas.ts)**:
+
+```typescript
+// Zod schemas for email data validation
+export const NewsletterSubscriptionSchema = z.object({
+  email: z.string().email("Email invalide"),
+  consent: z.boolean().refine(v => v === true),
+  source: z.string().optional().default("website"),
+});
+
+export const ContactMessageSchema = z.object({
+  name: z.string().min(2),
+  email: z.string().email(),
+  subject: z.string().optional(),
+  message: z.string().min(10),
+  phone: z.string().optional(),
+  reason: z.enum(["general", "booking", "press", "partnership"]),
+});
+```
+
+**API Endpoints**:
+
+- `POST /api/newsletter`: Newsletter subscription with email confirmation
+- `POST /api/contact`: Contact form submission with admin notification
+- `POST /api/test-email`: Email testing endpoint (development)
+- `POST /api/webhooks/resend`: Webhook handler for email events
+
+**Integration with DAL**:
+
+The email service integrates with existing DAL functions:
+- `lib/dal/home-newsletter.ts`: Newsletter subscription persistence
+- `lib/dal/contact.ts`: Contact message storage
+- Email sending triggers after successful database operations
+
+**Custom Hooks**:
+
+```typescript
+// lib/hooks/useNewsletterSubscribe.ts
+export function useNewsletterSubscription() {
+  // Newsletter subscription logic with email confirmation
+}
+
+// lib/hooks/useContactForm.ts
+export function useContactForm() {
+  // Contact form submission with email notification
+}
+```
+
+**Testing Infrastructure**:
+
+```bash
+scripts/
+├── test-email-integration.ts  # Integration tests for email sending
+├── check-email-logs.ts       # Database log verification
+└── test-webhooks.ts          # Webhook configuration tests
+```
+
+**Security & Validation**:
+
+- Server-side Zod validation for all email data
+- CSRF protection via Next.js server actions
+- Rate limiting on email endpoints (recommended)
+- Email content sanitization
+- Webhook signature verification
+
+**📖 Documentation Détaillée**:
+
+Pour une documentation complète de l'architecture email avec diagrammes détaillés, code source complet, exemples d'utilisation et guides de troubleshooting, consultez :
+
+**[Email_Service_Architecture.md](./Email_Service_Architecture.md)** - ~850 lignes de documentation technique incluant :
+- Architecture en couches (Template/Action/API/Validation)
+- Code source complet de tous les composants
+- Exemples pratiques d'utilisation (hooks, API endpoints)
+- Scripts de test et validation
+- Configuration Resend Dashboard
+- Patterns de sécurité et best practices
+- Guide de troubleshooting
 
 ### 4.3 Cross-Cutting Concern Components
 
@@ -843,7 +1023,7 @@ export function [Feature]View({ data, onAction }: [Feature]ViewProps) {
 ```typescript
 // components/features/[domain]/[feature]/hooks.ts
 import { useState, useEffect, useCallback } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createBrowserClient } from '@supabase/ssr';
 import type { [Feature]Data, [Feature]Item } from './types';
 
 export function use[Feature]() {
@@ -851,7 +1031,11 @@ export function use[Feature]() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   
-  const supabase = createClientComponentClient();
+  // ✅ CORRECT: Use createBrowserClient from @supabase/ssr
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!
+  );
   
   const fetchData = useCallback(async () => {
     try {
@@ -931,20 +1115,46 @@ export const metadata = {
 
 #### Authentication Middleware Pattern
 
+> ✅ **OPTIMIZED PATTERN** : Utilise JWT Signing Keys pour une performance 100x supérieure (~2-5ms vs ~300ms)
+
 ```typescript
 // middleware.ts
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
+import { NextResponse, type NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
-  const res = NextResponse.next();
-  const supabase = createMiddlewareClient({ req: request, res });
-  
-  // Refresh session if expired
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  // ✅ CORRECT: Create response with request
+  let supabaseResponse = NextResponse.next({
+    request,
+  });
+
+  // ✅ CORRECT: Use @supabase/ssr with proper cookie handling
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,  // ✅ New key format
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          supabaseResponse = NextResponse.next({
+            request,
+          });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+
+  // ⚠️ CRITICAL: Do not run code between createServerClient and authentication check
+  // to avoid random logouts
+
+  // ✅ OPTIMIZED: Use getClaims() for ~100x faster authentication (~2-5ms vs ~300ms)
+  const claims = await supabase.auth.getClaims();
   
   // Define route protection logic
   const isAuthPage = request.nextUrl.pathname.startsWith('/auth');
@@ -952,26 +1162,33 @@ export async function middleware(request: NextRequest) {
   const isAdminPage = request.nextUrl.pathname.startsWith('/admin');
   
   // Redirect logic
-  if (isProtectedPage && !session) {
+  if (isProtectedPage && !claims) {
     return NextResponse.redirect(new URL('/auth/login', request.url));
   }
   
-  if (isAuthPage && session) {
+  if (isAuthPage && claims) {
     return NextResponse.redirect(new URL('/protected/dashboard', request.url));
   }
   
-  if (isAdminPage && (!session || !session.user.user_metadata?.role === 'admin')) {
+  if (isAdminPage && (!claims || claims.user_metadata?.role !== 'admin')) {
     return NextResponse.redirect(new URL('/protected/dashboard', request.url));
   }
   
-  return res;
+  // ✅ IMPORTANT: Must return supabaseResponse to maintain session state
+  return supabaseResponse;
 }
 
 export const config = {
   matcher: [
-    '/auth/:path*',
-    '/protected/:path*',
-    '/admin/:path*'
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - api/auth (Supabase auth endpoints)
+     * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
+     */
+    '/((?!_next/static|_next/image|favicon.ico|api/auth|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ]
 };
 ```
@@ -980,14 +1197,21 @@ export const config = {
 
 #### Supabase Client Configuration
 
+> ✅ **CORRECT PATTERNS** : Utilise `@supabase/ssr` avec les nouvelles clés API publishable/secret
+
 ```typescript
-// supabase/client.ts
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+// supabase/client.ts - Browser Client
+import { createBrowserClient } from '@supabase/ssr';
 
-export const supabaseClient = createClientComponentClient();
+export function createClient() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!  // ✅ New key format
+  );
+}
 
-// supabase/server.ts
-import { createServerClient } from '@supabase/auth-helpers-nextjs';
+// supabase/server.ts - Server Client
+import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
 export async function createClient() {
@@ -995,9 +1219,10 @@ export async function createClient() {
   
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,  // ✅ New key format
     {
       cookies: {
+        // ✅ CORRECT: Use getAll and setAll only
         getAll() {
           return cookieStore.getAll();
         },
@@ -1007,7 +1232,8 @@ export async function createClient() {
               cookieStore.set(name, value, options)
             );
           } catch {
-            // Server component context - cookies cannot be set
+            // The `setAll` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing user sessions.
           }
         },
       },
@@ -1021,14 +1247,18 @@ export async function createClient() {
 ```typescript
 // hooks/useRealTimeData.ts
 import { useEffect, useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createBrowserClient } from '@supabase/ssr';
 
 export function useRealTimeData<T>(
   table: string,
   filter?: string
 ) {
   const [data, setData] = useState<T[]>([]);
-  const supabase = createClientComponentClient();
+  // ✅ CORRECT: Use createBrowserClient from @supabase/ssr
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!
+  );
   
   useEffect(() => {
     // Initial data fetch
@@ -1230,17 +1460,22 @@ describe('[Feature]Container', () => {
 
   ```typescript
   // middleware.ts
+  // ✅ OPTIMIZED: Use getClaims() for 100x faster auth check (~2-5ms vs ~300ms)
   export async function middleware(request: NextRequest) {
-    // Vérification de la session
-    const { data: { session } } = await supabase.auth.getSession();
+    const supabase = createServerClient(/* proper config */);
+    
+    // ✅ CORRECT: Use getClaims() instead of getSession()
+    const claims = await supabase.auth.getClaims();
     
     // Redirection si nécessaire
-    if (!session && request.nextUrl.pathname.startsWith('/protected')) {
+    if (!claims && request.nextUrl.pathname.startsWith('/protected')) {
       return NextResponse.redirect(new URL('/auth/login', request.url));
     }
     
-    return NextResponse.next();
+    return supabaseResponse; // Must return response with updated cookies
   }
+  
+  // See "Authentication Middleware Pattern" section for complete implementation
   ```
 
 - **Loading et Error States**: Utilisation des fichiers spéciaux pour gérer les états
@@ -1622,11 +1857,11 @@ Les tests d'intégration vérifient l'interaction entre plusieurs composants ou 
 // __tests__/features/auth/login-form.test.tsx
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { LoginForm } from '@/components/login-form';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createBrowserClient } from '@supabase/ssr';
 
-// Mock de Supabase
-jest.mock('@supabase/auth-helpers-nextjs', () => ({
-  createClientComponentClient: jest.fn(),
+// ✅ CORRECT: Mock @supabase/ssr instead of deprecated auth-helpers
+jest.mock('@supabase/ssr', () => ({
+  createBrowserClient: jest.fn(),
 }));
 
 describe('LoginForm Integration', () => {
@@ -1637,7 +1872,7 @@ describe('LoginForm Integration', () => {
         signInWithPassword: jest.fn(),
       },
     };
-    (createClientComponentClient as jest.Mock).mockReturnValue(mockSupabase);
+    (createBrowserClient as jest.Mock).mockReturnValue(mockSupabase);
   });
 
   it('submits the form with user credentials', async () => {
@@ -1646,7 +1881,10 @@ describe('LoginForm Integration', () => {
       error: null 
     });
     
-    const supabase = createClientComponentClient();
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!
+    );
     supabase.auth.signInWithPassword = mockSignIn;
     
     render(<LoginForm />);
@@ -1879,9 +2117,15 @@ L'application utilise trois environnements distincts avec des configurations sp�
 ```env
 # .env.development
 NEXT_PUBLIC_SUPABASE_URL=https://dev-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-dev-anon-key
+# ✅ CORRECT: Use new publishable key format
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=your-dev-publishable-key
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 NODE_ENV=development
+
+# Email configuration
+RESEND_API_KEY=your-dev-resend-api-key
+EMAIL_FROM=noreply@dev.rougecardinalcompany.fr
+EMAIL_CONTACT=contact@dev.rougecardinalcompany.fr
 ```
 
 Caractéristiques :
@@ -1896,8 +2140,14 @@ Caractéristiques :
 ```env
 # .env.staging
 NEXT_PUBLIC_SUPABASE_URL=https://staging-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-staging-anon-key
+# ✅ CORRECT: Use new publishable key format
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=your-staging-publishable-key
 NEXT_PUBLIC_SITE_URL=https://staging.rougecardinalcompany.com
+
+# Email configuration
+RESEND_API_KEY=your-staging-resend-api-key
+EMAIL_FROM=noreply@staging.rougecardinalcompany.fr
+EMAIL_CONTACT=contact@staging.rougecardinalcompany.fr
 NODE_ENV=production
 ```
 
@@ -1913,9 +2163,18 @@ Caractéristiques :
 ```env
 # .env.production
 NEXT_PUBLIC_SUPABASE_URL=https://production-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-production-anon-key
+# ✅ CORRECT: Use new publishable key format
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=your-production-publishable-key
 NEXT_PUBLIC_SITE_URL=https://rougecardinalcompany.com
 NODE_ENV=production
+
+# Email configuration (production)
+RESEND_API_KEY=your-production-resend-api-key
+EMAIL_FROM=noreply@rougecardinalcompany.fr
+EMAIL_CONTACT=contact@rougecardinalcompany.fr
+
+# Security (production only)
+SUPABASE_SERVICE_ROLE_KEY=your-production-service-role-key
 ```
 
 Caractéristiques :

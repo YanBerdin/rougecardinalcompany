@@ -2,19 +2,9 @@
 import { updateSession } from "@/supabase/middleware";
 import { type NextRequest } from "next/server";
 
-/*
-import { createServerClient } from '@supabase/ssr';
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-*/
-
  export async function middleware(request: NextRequest) {
   return await updateSession(request);
 
-/*
-export async function middleware(req: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request: req });
-*/
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,
