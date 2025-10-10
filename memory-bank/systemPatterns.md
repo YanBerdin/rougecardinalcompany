@@ -715,6 +715,145 @@ Objectif: garantir l'alignement des boutons d'action en bas des cartes, indépen
 
 Tous les boutons "Télécharger le PDF" sont parfaitement alignés horizontalement, même si les titres et descriptions ont des longueurs différentes.
 
+## Pattern Warning System (Octobre 2025)
+
+Objectif: permettre les opérations critiques (BDD) même si les opérations secondaires (email) échouent, en retournant un avertissement.
+
+### Pattern de base
+
+```typescript
+// API Route avec warning pattern
+export async function POST(request: NextRequest) {
+  const validated = Schema.parse(await request.json());
+  
+  // 1. Opération critique (BDD) toujours prioritaire
+  await createRecord(validated);
+  
+  // 2. Opération secondaire (email) avec catch silencieux
+  let emailSent = true;
+  try {
+    await sendEmail(validated);
+  } catch (error) {
+    console.error('[Email] Failed:', error);
+    emailSent = false; // Ne pas throw, juste logger
+  }
+  
+  // 3. Retour avec warning optionnel
+  return NextResponse.json({
+    status: 'success',
+    ...(!emailSent && { warning: 'Email notification could not be sent' })
+  }, { status: 201 });
+}
+```
+
+### Server Action avec warning
+
+```typescript
+"use server";
+
+export async function submitAction(formData: FormData) {
+  const validated = Schema.parse(extractData(formData));
+  
+  // Opération BDD
+  await createRecord(validated);
+  
+  // Email avec catch
+  let emailSent = true;
+  try {
+    await sendEmail(validated);
+  } catch (error) {
+    console.error('[Action] Email failed:', error);
+    emailSent = false;
+  }
+  
+  return {
+    success: true,
+    ...(!emailSent && { warning: 'Email could not be sent' })
+  };
+}
+```
+
+### Cas d'usage
+
+- Newsletter: `{status:'subscribed', warning?:'Confirmation email could not be sent'}`
+- Contact: `{status:'sent', warning?:'Admin notification could not be sent'}`
+- Toute opération où l'email est secondaire
+
+## Pattern RGPD Data Protection (Octobre 2025)
+
+Objectif: protéger les données personnelles via RLS Supabase et pattern d'insertion sécurisé conforme RGPD.
+
+### DAL avec INSERT sans SELECT
+
+```typescript
+"use server";
+import 'server-only';
+
+export async function createContactMessage(input: ContactInput) {
+  const supabase = await createClient();
+  
+  // RGPD: INSERT sans SELECT pour éviter exposition RLS
+  // Si RLS bloque SELECT, l'erreur n'affecte pas l'insertion
+  const { error } = await supabase
+    .from('messages_contact')
+    .insert(payload);
+    // ❌ PAS DE .select() ici
+  
+  if (error) {
+    // Idempotence: unique_violation = déjà enregistré = succès
+    if (error.code === '23505') {
+      return { success: true };
+    }
+    throw new Error(`Database error: ${error.message}`);
+  }
+  
+  return { success: true };
+}
+```
+
+### RLS Policies Pattern
+
+```sql
+-- Lecture: Admin seulement (protection données sensibles)
+CREATE POLICY "Admin can read personal data"
+  ON messages_contact FOR SELECT
+  TO authenticated
+  USING ((SELECT public.is_admin()));
+
+-- Insertion: Public (formulaires)
+CREATE POLICY "Anyone can insert messages"
+  ON messages_contact FOR INSERT
+  TO anon, authenticated
+  WITH CHECK (true);
+```
+
+### Commentaires RGPD dans le code
+
+```typescript
+// lib/dal/contact.ts
+// RGPD: Utilise .insert() sans .select() pour éviter les blocages RLS
+// Les données personnelles (email, nom) ne sont lisibles que par les admins
+
+// supabase/schemas/10_tables_system.sql
+-- RGPD: Seuls les admins peuvent lire les données personnelles
+-- (prénom, nom, email, téléphone)
+CREATE POLICY "Admin can read all contact messages"...
+```
+
+### Principes RGPD
+
+1. **Data Minimization**: Ne retourner que le nécessaire
+2. **Access Control**: RLS empêche lecture publique
+3. **Insert-only Pattern**: `.insert()` sans `.select()` évite erreurs RLS
+4. **Audit Trail**: Logs SQL pour traçabilité
+5. **Idempotence**: Error 23505 traité comme succès
+
+### Documentation conformité
+
+- Vérifier conformité avec `.github/instructions/Create_RLS_policies.Instructions.md`
+- Vérifier conformité avec `.github/instructions/Declarative_Database_Schema.Instructions.md`
+- Documenter dans `doc/RGPD-Compliance-Validation.md`
+
 ## Pattern Email Service Architecture (Octobre 2025)
 
 Objectif: architecture en couches pour l'envoi d'emails transactionnels via Resend avec templates React Email, validation Zod, et logging en base de données.

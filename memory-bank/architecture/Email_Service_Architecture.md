@@ -23,7 +23,7 @@ Testing: Custom scripts + API endpoint testing
 
 ### 2.1 Diagramme d'Architecture
 
-```bash
+```mermaid
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                         Email Service Architecture                          │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -1264,6 +1264,222 @@ pnpm run test:logs
 
 ---
 
-**Dernière mise à jour** : 8 octobre 2025  
-**Version** : 1.0.0  
+## 16. Pattern Warning System & RGPD Compliance (Octobre 2025)
+
+### 16.1 Pattern Warning pour Graceful Degradation
+
+Objectif: permettre l'insertion en BDD même si l'envoi d'email échoue, en retournant un avertissement au client.
+
+**Pattern implémenté**:
+
+```typescript
+// API Routes avec warning pattern
+export async function POST(request: NextRequest) {
+  const validated = Schema.parse(await request.json());
+  
+  // 1. Insertion BDD toujours prioritaire (via DAL)
+  await createRecord(validated);
+  
+  // 2. Tentative envoi email avec catch silencieux
+  let emailSent = true;
+  try {
+    await sendEmail(validated);
+  } catch (error) {
+    console.error('[Email] Send failed:', error);
+    emailSent = false;
+  }
+  
+  // 3. Retour avec warning optionnel
+  return NextResponse.json({
+    status: 'success',
+    ...(!emailSent && { warning: 'Email notification could not be sent' })
+  }, { status: 201 });
+}
+```
+
+**Avantages**:
+
+- **Robustesse** : L'opération principale (BDD) n'échoue jamais à cause de l'email
+- **Transparence** : Le client est informé du problème email via le warning
+- **UX** : Permet d'afficher un message "Enregistré mais email non envoyé"
+- **Debugging** : Les erreurs email sont loggées côté serveur
+
+**Cas d'usage**:
+
+- Newsletter : `{status:'subscribed', warning?:'Confirmation email could not be sent'}`
+- Contact : `{status:'sent', warning?:'Admin notification could not be sent'}`
+- Tout formulaire où l'email est secondaire par rapport aux données
+
+### 16.2 RGPD Compliance Pattern
+
+Objectif: protéger les données personnelles conformément au RGPD avec RLS Supabase et pattern d'insertion sécurisé.
+
+**Pattern implémenté**:
+
+```typescript
+// DAL avec pattern INSERT sans SELECT
+"use server";
+import 'server-only';
+
+export async function createContactMessage(input: ContactInput) {
+  const supabase = await createClient();
+  
+  // RGPD: INSERT sans SELECT pour éviter exposition RLS
+  const { error } = await supabase
+    .from('messages_contact')
+    .insert(payload);
+    // ❌ PAS DE .select() ici
+  
+  if (error) {
+    if (error.code === '23505') {
+      return { success: true }; // Idempotence
+    }
+    throw new Error(`Database error: ${error.message}`);
+  }
+  
+  return { success: true };
+}
+```
+
+**RLS Policies**:
+
+```sql
+-- SELECT: Admin seulement (protection données personnelles)
+CREATE POLICY "Admin can read all contact messages"
+  ON messages_contact FOR SELECT
+  TO authenticated
+  USING ((SELECT public.is_admin()));
+
+-- INSERT: Public (formulaire)
+CREATE POLICY "Anyone can insert contact messages"
+  ON messages_contact FOR INSERT
+  TO anon, authenticated
+  WITH CHECK (true);
+```
+
+**Principes RGPD**:
+
+1. **Data Minimization** : Ne retourner que les données nécessaires
+2. **Access Control** : RLS empêche lecture publique des données sensibles
+3. **Insert-only** : Pattern `.insert()` sans `.select()` évite erreurs RLS
+4. **Audit Trail** : Logs SQL pour traçabilité
+5. **Idempotence** : PostgreSQL error 23505 (unique_violation) traité comme succès
+
+**Documentation associée**:
+
+- `doc/RGPD-Compliance-Validation.md` : Validation complète conformité RGPD
+- `supabase/schemas/10_tables_system.sql` : RLS policies avec commentaires RGPD
+- `.github/instructions/Create_RLS_policies.Instructions.md` : Guide RLS
+
+### 16.3 Schema Mapping Pattern (API ↔ DAL)
+
+Objectif: transformer les données du format API (UI-friendly) vers le format DAL (database schema).
+
+**Exemple Contact Form**:
+
+```typescript
+// API accepte un champ 'name' unique
+const ApiSchema = z.object({
+  name: z.string(),
+  subject: z.string(),
+  message: z.string(),
+  // ...
+});
+
+// DAL attend firstName/lastName séparés
+const DalSchema = z.object({
+  firstName: z.string(),
+  lastName: z.string(),
+  message: z.string(), // Avec subject intégré
+  // ...
+});
+
+// Mapping dans l'API route
+export async function POST(request: NextRequest) {
+  const apiData = ApiSchema.parse(await request.json());
+  
+  // Split name en firstName/lastName
+  const [firstName, ...lastNameParts] = apiData.name.trim().split(' ');
+  const lastName = lastNameParts.join(' ') || firstName;
+  
+  // Prefix subject dans le message
+  const messageWithSubject = `[${apiData.subject}]\n\n${apiData.message}`;
+  
+  // Appel DAL avec format attendu
+  await createContactMessage({
+    firstName,
+    lastName,
+    message: messageWithSubject,
+    ...rest
+  });
+}
+```
+
+**Avantages**:
+
+- **Séparation concerns** : API reste user-friendly, DAL reste database-aligned
+- **Évolutivité** : Modifier API sans toucher DAL (ou inverse)
+- **Type-safety** : Zod valide les deux formats indépendamment
+- **Lisibilité** : Schéma clair à chaque niveau
+
+### 16.4 Email Missing Bug Pattern (Server Actions)
+
+**Problème identifié**: Server Action ne synchronisait pas email avec API route.
+
+**Solution implémentée**:
+
+```typescript
+// Server Action DOIT avoir la même logique que l'API route
+"use server";
+
+export async function submitContactAction(formData: FormData) {
+  const validated = FormSchema.parse(extractFromFormData(formData));
+  
+  // 1. BDD via DAL (identique API)
+  await createContactMessage(validated);
+  
+  // 2. Email notification (ÉTAIT MANQUANT)
+  let emailSent = true;
+  try {
+    await sendContactNotification(validated);
+  } catch (error) {
+    console.error('[Server Action] Email failed:', error);
+    emailSent = false;
+  }
+  
+  // 3. Retour avec warning (cohérent avec API)
+  return {
+    success: true,
+    ...(!emailSent && { warning: 'Admin notification could not be sent' })
+  };
+}
+```
+
+**Leçon retenue**:
+
+- Server Actions et API Routes doivent partager la même logique métier
+- Factoriser les appels DAL + Email dans une fonction partagée si complexité augmente
+- Toujours tester les deux chemins d'accès (API curl + frontend Server Action)
+
+**Tests de validation**:
+
+```bash
+# Test API route (avec curl)
+curl -X POST http://localhost:3000/api/contact \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Test","email":"test@example.com","message":"Test"}'
+
+# Test frontend (Server Action)
+# → Soumettre via le formulaire UI et vérifier email reçu
+```
+
+**Documentation associée**:
+
+- `doc/Fix-Contact-Email-Missing.md` : Analyse détaillée du bug et fix
+- `doc/API-Contact-Test-Results.md` : Tests de validation complets
+
+---
+
+**Dernière mise à jour** : 26 octobre 2025  
+**Version** : 1.1.0 (ajout Warning System, RGPD, Schema Mapping, Server Actions patterns)  
 **Auteur** : Architecture Team - Rouge Cardinal Company

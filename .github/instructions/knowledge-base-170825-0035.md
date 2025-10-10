@@ -1,71 +1,5 @@
 # knowledge-base — Cahier des charges – Création de site internet  **Compagnie de Théâtre « Rouge Cardinal »**
 
-## Entrées récentes (oct. 2025)
-
-- refactor(db): achieve 100% SQL style guide conformity by applying all minor suggestions
-  - Add 'as' keyword for all aliases in FROM/JOIN clauses (32 occurrences across 4 files)
-  - Improve indentation in 6 complex subqueries for better readability
-  - Document awards column exception (array type justifies plural naming)
-  - Modified files: 06_table_spectacles.sql, 10_tables_system.sql, 11_tables_relations.sql, 15_content_versioning.sql, 41_views_communiques.sql
-  - Result: 100% conformity with Postgres_SQL_Style_Guide.Instructions.md (all 8 categories perfect)
-  - Updated report: doc/postgres-sql-style-compliance-report.md with certification section
-
-- docs(db): complete SQL style guide compliance audit (98% conformity → 100%)
-  - Verify all 46 SQL files (33 schemas + 13 migrations) against Postgres_SQL_Style_Guide.Instructions.md
-  - Excellent: 100% lowercase keywords, snake_case, table plurals, identity columns, public schema prefix, table comments
-  - Strong: 98% singular columns, 95% query formatting, 97% alias usage with 'as' keyword
-  - Minor suggestions: add 'as' in FROM clauses for strict compliance, improve indentation in 2-3 complex views
-  - Report: doc/postgres-sql-style-compliance-report.md with detailed analysis and recommendations
-
-- chore(db): remove redundant home_about_content DDL migration to enforce declarative schema principles
-  - Delete 20250921112000_add_home_about_content.sql (table definition lives in declarative schema 07e_table_home_about.sql)
-  - Update README-migrations.md: 13 files total (1 DDL main + 11 DML + 1 manual), remove "DDL complémentaires" section
-  - Triggers for home_about_content managed centrally in 30_triggers.sql via dynamic loop
-  - Compliance: 100% with Declarative_Database_Schema.Instructions.md (36/36 tables via declarative workflow)
-
-## Entrées récentes (sept. 2025)
-
-- fix(server-actions): resolve "Server Actions must be async functions" error in contact DAL
-  - Move ContactMessageSchema from export to local scope in lib/dal/contact.ts (Next.js 15 Server Actions constraint)
-  - Duplicate schema definition in components/features/public-site/contact/actions.ts for form validation
-  - Add explicit validation with ContactMessageSchema.parse() in DAL and explicit type casting
-  - Result: /contact page now responds 200 instead of 500; maintains strict Zod validation on both sides
-
-- feat(seeds): complete database seeding with all essential tables (14/24 production-ready)
-  - Create 20250930120000_seed_lieux.sql: 5 venues with GPS coordinates (Lyon, Montreuil, Thonon, Toulouse, Grenoble)
-  - Create 20250930121000_seed_categories_tags.sql: 5 categories + 15 tags for content organization
-  - Create 20250930122000_seed_configurations_site.sql: 29 essential app configurations (home, contact, presse, SEO, analytics)
-  - Update supabase/migrations/README-migrations.md with new seeds and critical priorities
-  - All seeds applied successfully to local DB; application now fully functional post-deployment
-
-- feat(contact): wire contact page to DAL with server action; deprecate client hook and add Suspense/Skeleton
-  - Add server-only DAL (lib/dal/contact.ts) with Zod validation and Supabase insert into messages_contact
-  - Add server action submitContactAction with artificial delay (TODO remove)
-  - Refactor ContactPageContainer to Server Component with Suspense + ContactServerGate
-  - Make ContactPageView a client component owning local state; uses server action + shared newsletter hook
-  - Deprecate contact-hooks and simplify contact-types (remove view prop interface)
-
-- sec(rls): replace broad 'FOR ALL' policies with granular insert/update/delete
-  - compagnie_presentation_sections, home_hero_slides, home_about_content
-  - relation tables (spectacles_*/articles_*/communiques_*)
-  - categories/tags relations, SEO redirects, sitemap entries
-  - contacts_presse; explicit update policy for content_versions
-  - Guidelines: avoid FOR ALL; use USING/WITH CHECK with public.is_admin().
-
-- fix(db): align bootstrap migration with declarative schema (spectacles.awards text[])
-  - Change awards column to text[] in 20250918004849_apply_declarative_schema.sql to match 06_table_spectacles.sql
-
-- chore(db): remove redundant home_about_content DDL migration and dedupe RLS in relations file
-  - Drop 20250921112000_add_home_about_content.sql (table lives in declarative schema 07e_table_home_about.sql)
-  - Clean duplicated communiques_medias RLS block in 11_tables_relations.sql
-
-- feat(presse): refactor Presse feature to server-only DAL + Suspense/Skeleton; deprecate client mock
-  - Add lib/dal/presse.ts with fetchPressReleases(), fetchMediaArticles(), fetchMediaKit() via view communiques_presse_public
-  - Convert PresseContainer to Server Component with PresseServerGate and artificial delay (TODO remove)
-  - Remove any usage; strict types with Zod; icon optional with fallback in View
-  - RLS: articles_presse co‑localized policies in 08_table_articles_presse.sql (public select on published_at not null; admin-only write)
-  - Performance: add partial index idx_articles_published_at_public for public reads
-
 ## Contexte
 
 - Projet : **from-scratch** (base vide).
@@ -78,10 +12,10 @@
 ## Table des matières
 
 - [1. Présentation](#1-présentation)
-  - [1.1. Coordonnées](#11-coordonnées)
-  - [1.2. Description de l'établissement](#12-description-de-létablissement)
-  - [1.3. Contexte et objectifs](#13-contexte-et-objectifs)
-  - [1.4. Références](#14-références)
+- [1.1. Coordonnées](#11-coordonnées)
+- [1.2. Description de l'établissement](#12-description-de-létablissement)
+- [1.3. Contexte et objectifs](#13-contexte-et-objectifs)
+- [1.4. Références](#14-références)
 - [2. Public cible](#2-public-cible)
 - [3. Objectifs fonctionnels](#3-objectifs-fonctionnels)
   - [3.1. Distinction Presse - Architecture Métier](#31-distinction-presse---architecture-métier)
@@ -153,6 +87,7 @@
   - [19.6. Database: Create RLS policies](#196-database-create-rls-policies)
   - [19.7. Database: Create functions](#197-database-create-functions)
   - [19.8. Database: Postgres SQL Style Guide](#198-database-postgres-sql-style-guide)
+  - [20. Entrées récentes (oct. 2025)](#20-entrées-récentes-oct-2025)
 
 ## 1. Présentation
 
@@ -5075,3 +5010,95 @@ from
 order by
   department_name;
 ```
+
+## 20. Entrées récentes (oct. 2025)
+
+- feat(contact): integrate DAL and fix missing email notification (commit 1e27497)
+  - Complete DAL integration in app/api/contact/route.ts with createContactMessage
+  - Fix critical bug: Server Action submitContactAction now calls sendContactNotification
+  - Schema mapping: API (name/subject) → DAL (firstName/lastName/message merged with subject prefix)
+  - Warning system: return warning when email fails (consistent pattern with newsletter)
+  - Tests validated: BDD storage + email notification working for both API route and Server Action
+  - Documentation: doc/API-Contact-Test-Results.md, doc/Fix-Contact-Email-Missing.md, doc/Complete-Session-Summary-RGPD-Contact.md
+  - RGPD compliance maintained: admin-only RLS, INSERT without SELECT pattern
+
+- feat(gdpr): complete RGPD compliance for personal data handling (commit 7562754)
+  - Newsletter API: add warning field when email sending fails ({status:'subscribed', warning?:'Confirmation email could not be sent'})
+  - Contact: add GDPR comments in lib/dal/contact.ts and supabase/schemas/10_tables_system.sql
+  - Documentation: comprehensive GDPR compliance validation report (doc/RGPD-Compliance-Validation.md)
+  - Testing: validate newsletter API behavior (valid email, invalid email with warning, duplicates idempotent)
+  - Compliance: 100% with Declarative_Database_Schema.Instructions.md and Create_RLS_policies.Instructions.md
+  - Data minimization principle: admin-only access to personal data (emails, names, phone)
+  - Insert-only pattern: no public SELECT exposure for abonnes_newsletter and messages_contact tables
+  - Tests: 6/6 validated (3 newsletter + 3 contact scenarios)
+
+- chore(email): fix React Email render warnings and improve email integration tooling
+  - Add prettier as devDependency to resolve @react-email/render peer dependency warnings
+  - Update scripts/check-email-logs.ts to use correct Supabase env var (NEXT_PUBLIC_SUPABASE_URL) and messages_contact table properties
+  - Rename hook function useNewsletterSubscribe to match filename convention (lib/hooks/use-newsletter-subscribe.ts)
+  - Update all imports and usages across components (ContactPageView, newsletter components)
+  - Add missing @eslint/markdown dependency for linting markdown files
+
+- refactor(db): achieve 100% SQL style guide conformity by applying all minor suggestions
+  - Add 'as' keyword for all aliases in FROM/JOIN clauses (32 occurrences across 4 files)
+  - Improve indentation in 6 complex subqueries for better readability
+  - Document awards column exception (array type justifies plural naming)
+  - Modified files: 06_table_spectacles.sql, 10_tables_system.sql, 11_tables_relations.sql, 15_content_versioning.sql, 41_views_communiques.sql
+  - Result: 100% conformity with Postgres_SQL_Style_Guide.Instructions.md (all 8 categories perfect)
+  - Updated report: doc/postgres-sql-style-compliance-report.md with certification section
+
+- docs(db): complete SQL style guide compliance audit (98% conformity → 100%)
+  - Verify all 46 SQL files (33 schemas + 13 migrations) against Postgres_SQL_Style_Guide.Instructions.md
+  - Excellent: 100% lowercase keywords, snake_case, table plurals, identity columns, public schema prefix, table comments
+  - Strong: 98% singular columns, 95% query formatting, 97% alias usage with 'as' keyword
+  - Minor suggestions: add 'as' in FROM clauses for strict compliance, improve indentation in 2-3 complex views
+  - Report: doc/postgres-sql-style-compliance-report.md with detailed analysis and recommendations
+
+- chore(db): remove redundant home_about_content DDL migration to enforce declarative schema principles
+  - Delete 20250921112000_add_home_about_content.sql (table definition lives in declarative schema 07e_table_home_about.sql)
+  - Update README-migrations.md: 13 files total (1 DDL main + 11 DML + 1 manual), remove "DDL complémentaires" section
+  - Triggers for home_about_content managed centrally in 30_triggers.sql via dynamic loop
+  - Compliance: 100% with Declarative_Database_Schema.Instructions.md (36/36 tables via declarative workflow)
+
+## Entrées récentes (sept. 2025)
+
+- fix(server-actions): resolve "Server Actions must be async functions" error in contact DAL
+  - Move ContactMessageSchema from export to local scope in lib/dal/contact.ts (Next.js 15 Server Actions constraint)
+  - Duplicate schema definition in components/features/public-site/contact/actions.ts for form validation
+  - Add explicit validation with ContactMessageSchema.parse() in DAL and explicit type casting
+  - Result: /contact page now responds 200 instead of 500; maintains strict Zod validation on both sides
+
+- feat(seeds): complete database seeding with all essential tables (14/24 production-ready)
+  - Create 20250930120000_seed_lieux.sql: 5 venues with GPS coordinates (Lyon, Montreuil, Thonon, Toulouse, Grenoble)
+  - Create 20250930121000_seed_categories_tags.sql: 5 categories + 15 tags for content organization
+  - Create 20250930122000_seed_configurations_site.sql: 29 essential app configurations (home, contact, presse, SEO, analytics)
+  - Update supabase/migrations/README-migrations.md with new seeds and critical priorities
+  - All seeds applied successfully to local DB; application now fully functional post-deployment
+
+- feat(contact): wire contact page to DAL with server action; deprecate client hook and add Suspense/Skeleton
+  - Add server-only DAL (lib/dal/contact.ts) with Zod validation and Supabase insert into messages_contact
+  - Add server action submitContactAction with artificial delay (TODO remove)
+  - Refactor ContactPageContainer to Server Component with Suspense + ContactServerGate
+  - Make ContactPageView a client component owning local state; uses server action + shared newsletter hook
+  - Deprecate contact-hooks and simplify contact-types (remove view prop interface)
+
+- sec(rls): replace broad 'FOR ALL' policies with granular insert/update/delete
+  - compagnie_presentation_sections, home_hero_slides, home_about_content
+  - relation tables (spectacles_*/articles_*/communiques_*)
+  - categories/tags relations, SEO redirects, sitemap entries
+  - contacts_presse; explicit update policy for content_versions
+  - Guidelines: avoid FOR ALL; use USING/WITH CHECK with public.is_admin().
+
+- fix(db): align bootstrap migration with declarative schema (spectacles.awards text[])
+  - Change awards column to text[] in 20250918004849_apply_declarative_schema.sql to match 06_table_spectacles.sql
+
+- chore(db): remove redundant home_about_content DDL migration and dedupe RLS in relations file
+  - Drop 20250921112000_add_home_about_content.sql (table lives in declarative schema 07e_table_home_about.sql)
+  - Clean duplicated communiques_medias RLS block in 11_tables_relations.sql
+
+- feat(presse): refactor Presse feature to server-only DAL + Suspense/Skeleton; deprecate client mock
+  - Add lib/dal/presse.ts with fetchPressReleases(), fetchMediaArticles(), fetchMediaKit() via view communiques_presse_public
+  - Convert PresseContainer to Server Component with PresseServerGate and artificial delay (TODO remove)
+  - Remove any usage; strict types with Zod; icon optional with fallback in View
+  - RLS: articles_presse co‑localized policies in 08_table_articles_presse.sql (public select on published_at not null; admin-only write)
+  - Performance: add partial index idx_articles_published_at_public for public reads
