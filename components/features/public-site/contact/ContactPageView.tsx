@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ContactSkeleton } from '@/components/skeletons/contact-skeleton';
-import { useNewsletterSubscription } from '@/lib/hooks/useNewsletterSubscribe';
+import { useNewsletterSubscribe } from '@/lib/hooks/useNewsletterSubscribe';
 import { submitContactAction } from './actions';
 import type { ContactFormData, ContactReason } from './contact-types';
 
@@ -44,7 +44,7 @@ export function ContactPageView() {
             errorMessage: newsletterError,
             handleEmailChange: onNewsletterEmailChange,
             handleSubmit: onNewsletterSubmit,
-        } = useNewsletterSubscription({ source: 'contact' });
+        } = useNewsletterSubscribe({ source: 'contact' });
 
         useEffect(() => {
             const t = setTimeout(() => setIsInitialLoading(false), 600); // artificial delay (TODO: remove)

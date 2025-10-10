@@ -1,7 +1,7 @@
 "use client";
 
 import { NewsletterView, NewsletterForm } from './NewsletterView';
-import { useNewsletterSubscription } from './hooks';
+import { useNewsletterSubscribe } from './hooks';
 
 export function NewsletterClientContainer() {
   const {
@@ -12,7 +12,7 @@ export function NewsletterClientContainer() {
     errorMessage,
     handleEmailChange,
     handleSubmit,
-  } = useNewsletterSubscription();
+  } = useNewsletterSubscribe();
 
   return (
     <NewsletterView

@@ -17,7 +17,7 @@ export const contactReasons: ContactReason[] = [
 ];
 
 import { useEffect } from 'react';
-import { useNewsletterSubscription } from '@/lib/hooks/useNewsletterSubscribe';
+import { useNewsletterSubscribe } from '@/lib/hooks/useNewsletterSubscribe';
 
 // supabase/schemas/10_tables_system.sql
 // table public.abonnes_newsletter
@@ -33,7 +33,7 @@ export function useContact() {
     errorMessage: newsletterError,
     handleEmailChange: handleNewsletterEmailChange,
     handleSubmit: handleNewsletterSubmit,
-  } = useNewsletterSubscription({ source: 'contact' });
+  } = useNewsletterSubscribe({ source: 'contact' });
   const [formData, setFormData] = useState<ContactFormData>({
     firstName: '',
     lastName: '',
@@ -75,7 +75,7 @@ export function useContact() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  // handlers newsletter déjà fournis via useNewsletterSubscription
+  // handlers newsletter déjà fournis via useNewsletterSubscribe
 
   const resetForm = () => {
     setIsSubmitted(false);
