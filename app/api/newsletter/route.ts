@@ -24,31 +24,37 @@ export async function POST(req: Request) {
 
     const supabase = await createClient();
 
-    // Upsert subscriber; store consent/source in metadata
+    // RGPD Compliance: Use INSERT instead of UPSERT to avoid exposing emails via RLS SELECT policy
+    // Don't use .select() to avoid RLS blocking the read after insert
+    // Handle duplicate emails gracefully (error code 23505 = unique_violation)
     const { error } = await supabase
       .from('abonnes_newsletter')
-      .upsert({
+      .insert({
         email,
         metadata: { consent: Boolean(consent), source }
-      }, { onConflict: 'email' })
-      .select('id')
-      .single();
+      });
 
-    if (error) {
+    // Error code 23505 = unique_violation (duplicate email) - this is OK, user is already subscribed
+    if (error && error.code !== '23505') {
       console.error('Newsletter subscribe error', error);
       return NextResponse.json({ error: 'Subscription failed' }, { status: 500 });
     }
 
     // Envoi email de confirmation via Resend
+    let emailSent = true;
     try {
       await sendNewsletterConfirmation(email);
     } catch (emailError) {
       console.error('Newsletter confirmation email failed:', emailError);
-      // Ne pas échouer la souscription si l'email échoue
+      emailSent = false;
+      // Ne pas échouer la souscription si l'email échoue (inscription en base réussie)
     }
 
     // Idempotent success (new or existing)
-    return NextResponse.json({ status: 'subscribed' }, { status: 200 });
+    return NextResponse.json({ 
+      status: 'subscribed',
+      ...(emailSent ? {} : { warning: 'Confirmation email could not be sent' })
+    }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }

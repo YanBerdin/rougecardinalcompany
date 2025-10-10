@@ -129,6 +129,7 @@ export const resend = new Resend(process.env.RESEND_API_KEY);
 ```
 
 **Responsabilités**:
+
 - Configuration centralisée du client Resend
 - Validation de la présence de l'API key
 - Export singleton pour réutilisation
@@ -168,6 +169,7 @@ export const WEBSITE_URL =
 ```
 
 **Responsabilités**:
+
 - Configuration centralisée de l'application
 - Gestion des URLs environnement-spécifiques
 - Export des adresses email
@@ -235,6 +237,7 @@ export async function sendContactNotification(params: {
 ```
 
 **Responsabilités**:
+
 - Envoi d'emails via Resend API
 - Rendu des templates React Email
 - Gestion des erreurs et logging
@@ -270,6 +273,7 @@ export type ContactMessage = z.infer<typeof ContactMessageSchema>;
 ```
 
 **Responsabilités**:
+
 - Validation runtime avec Zod
 - Messages d'erreur personnalisés
 - Typage TypeScript automatique
@@ -358,6 +362,7 @@ const footer = {
 ```
 
 **Responsabilités**:
+
 - Layout réutilisable pour tous les emails
 - Header avec logo
 - Footer avec informations légales
@@ -395,6 +400,7 @@ export default function NewsletterConfirmation({ email }: { email: string }) {
 ```
 
 **Responsabilités**:
+
 - Email de confirmation d'inscription newsletter
 - Présentation claire et accueillante
 - Affichage de l'email inscrit
@@ -441,6 +447,7 @@ export default function ContactMessageNotification({
 ```
 
 **Responsabilités**:
+
 - Notification admin pour nouveau message contact
 - Affichage structuré des informations
 - Champs optionnels gérés
@@ -491,6 +498,7 @@ export async function POST(request: NextRequest) {
 ```
 
 **Responsabilités**:
+
 - Endpoint REST pour inscription newsletter
 - Validation Zod des données
 - Intégration avec DAL newsletter
@@ -540,6 +548,7 @@ export async function POST(request: NextRequest) {
 ```
 
 **Responsabilités**:
+
 - Endpoint REST pour formulaire contact
 - Validation Zod des données
 - Intégration avec DAL contact
@@ -600,6 +609,7 @@ export async function GET() {
 ```
 
 **Responsabilités**:
+
 - Endpoint de test pour développement
 - Support newsletter et contact
 - Documentation inline via GET
@@ -673,6 +683,7 @@ export async function POST(req: NextRequest) {
 ```
 
 **Responsabilités**:
+
 - Réception des événements webhooks Resend
 - Logging des événements dans Supabase
 - Gestion événements spécifiques (sent, delivered, bounced, etc.)
@@ -749,6 +760,7 @@ export function useNewsletterSubscribe({
 ```
 
 **Responsabilités**:
+
 - Gestion état formulaire newsletter
 - Validation client-side basique
 - Appel API newsletter
@@ -858,6 +870,7 @@ export function useContactForm(): UseContactFormReturn {
 ```
 
 **Responsabilités**:
+
 - Gestion état formulaire contact complet
 - HandleChange générique pour tous les champs
 - Appel API contact
@@ -892,6 +905,7 @@ export async function POST(request: NextRequest) {
 ```
 
 **Points d'Intégration**:
+
 - La DAL gère la persistance database
 - Les email actions gèrent l'envoi email
 - Séparation claire des responsabilités
@@ -924,6 +938,7 @@ export async function POST(request: NextRequest) {
 ```
 
 **Points d'Intégration**:
+
 - DAL gère le stockage du message
 - Email action notifie l'admin
 - Logs et audit trail dans Supabase
@@ -1207,17 +1222,20 @@ console.warn('[Webhook] Unhandled event type:', event.type);
 ### 14.1 Problèmes Communs
 
 **Email non reçu**:
+
 - Vérifier `RESEND_API_KEY` valide
 - Vérifier domaine vérifié dans Resend dashboard
 - Vérifier logs serveur (`pnpm dev`)
 - Vérifier spam folder destinataire
 
 **Erreur validation**:
+
 - Vérifier schémas Zod sont corrects
 - Vérifier format données envoyées
 - Consulter logs d'erreur détaillés
 
 **Webhook non reçu**:
+
 - Vérifier URL webhook dans Resend dashboard
 - Vérifier endpoint accessible publiquement
 - Vérifier logs webhook handler

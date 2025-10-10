@@ -36,6 +36,9 @@ export async function createContactMessage(input: ContactMessageInput) {
     metadata: {},
   } as const;
 
+  // RGPD: Utilise .insert() sans .select() pour éviter les blocages RLS
+  // Seuls les admins peuvent lire les données personnelles (firstname, lastname, email, phone)
+  // L'insertion publique est autorisée pour le formulaire de contact
   const { error } = await supabase.from("messages_contact").insert(payload);
   if (error) {
     // Hide low-level details but log server-side

@@ -69,21 +69,6 @@ SUPABASE_SERVICE_ROLE_KEY=votre_clé_service_role_ici
 
 #### **Récupérez cette clé dans Supabase Dashboard > Settings > API > service_role > secret**
 
-```bash
-# ERREUR
-[Test Email] Error: SyntaxError: Unexpected end of JSON input
-    at JSON.parse (<anonymous>)
-    at async POST (app/api/test-email/route.ts:7:41)
-   5 | export async function POST(request: NextRequest) {
-   6 |   try {
->  7 |     const { type, email, contactData } = await request.json();
-     |                                         ^
-   8 |
-   9 |     console.log(`[Test Email] Received test request: ${type}`);
-  10 |
- POST /api/test-email 500 in 129ms
-```
-
 ## ✅ Résultats Attendus
 
 ### Test API Endpoint
@@ -160,22 +145,3 @@ Assurez-vous que vos domaines d'envoi sont vérifiés dans Resend :
 - [ ] Pas d'erreurs TypeScript
 - [ ] Variables d'environnement correctes</content>
 <parameter name="filePath">/home/yandev/projets/rougecardinalcompany/TESTING_RESEND.md
-
-test
-
-curl -X POST http://localhost:3000/api/test-email \
-  -H "Content-Type: application/json" \
-  -d '{
-    "type": "newsletter",
-    "email": "test@resend.dev"
-  }'
-{"success":true,"message":"Newsletter confirmation sent to test@resend.dev","t
-
-yandev@LAPTOP-CE57E7VI:~/projets/rougecardinalcompany$
-curl -X POST http://localhost:3000/api/test-email \
-  -H "Content-Type: application/json" \
-  -d '{
-    "type": "newsletter",
-    "email": "yandevformation@gmail.com"
-  }'
-{"success":true,"message":"Newsletter confirmation sent to yandevformation@gmail.com","data":{"type":"newsletter","email":"yandevformation@gmail.com"}}

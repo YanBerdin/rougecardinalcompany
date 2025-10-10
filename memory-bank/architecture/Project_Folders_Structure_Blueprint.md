@@ -5,8 +5,9 @@
 **Branch**: feat-resend
 
 > ⚠️ **IMPORTANT - Mise à Jour Majeure**
-> 
+>
 > Ce document a été mis à jour pour refléter :
+>
 > - ✅ **Intégration Resend** : Architecture email complète (templates, actions, API)
 > - ✅ **Supabase Auth 2025** : Patterns modernes avec `@supabase/ssr` et `getClaims()`
 > - ✅ **Scripts de Test** : Infrastructure de test pour emails et webhooks

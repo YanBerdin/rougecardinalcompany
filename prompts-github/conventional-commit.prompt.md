@@ -55,7 +55,9 @@ git commit -m "type(scope): description"
 
 ```xml
 <validation>
-	<type>Must be one of the allowed types. See <reference>https://www.conventionalcommits.org/en/v1.0.0/#specification</reference></type>
+	<type>Must be one of the allowed types. See 
+	https://www.conventionalcommits.org/en/v1.0.0/
+	</type>
 	<scope>Optional, but recommended for clarity.</scope>
 	<description>Required. Use the imperative mood (e.g., "add", not "added").</description>
 	<body>Optional. Use for additional context.</body>

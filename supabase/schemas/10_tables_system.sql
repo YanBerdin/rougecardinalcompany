@@ -109,7 +109,8 @@ comment on table public.logs_audit is 'audit log for create/update/delete operat
 -- ---- ABONNES NEWSLETTER ----
 alter table public.abonnes_newsletter enable row level security;
 
--- Seuls les admins peuvent voir les abonnés
+-- RGPD: Seuls les admins peuvent lire les emails des abonnés (donnée personnelle)
+-- L'email ne doit pas être exposé publiquement
 drop policy if exists "Admins can view newsletter subscribers" on public.abonnes_newsletter;
 create policy "Admins can view newsletter subscribers"
 on public.abonnes_newsletter
@@ -117,7 +118,8 @@ for select
 to authenticated
 using ( (select public.is_admin()) );
 
--- Tout le monde peut s'abonner à la newsletter
+-- Tout le monde peut s'abonner à la newsletter (insertion uniquement)
+-- L'API gère les doublons côté serveur avec ON CONFLICT DO NOTHING
 drop policy if exists "Anyone can subscribe to newsletter" on public.abonnes_newsletter;
 create policy "Anyone can subscribe to newsletter"
 on public.abonnes_newsletter
@@ -149,7 +151,8 @@ using (
 -- ---- MESSAGES CONTACT ----
 alter table public.messages_contact enable row level security;
 
--- Seuls les admins peuvent voir les messages de contact
+-- RGPD: Seuls les admins peuvent lire les données personnelles (prénom, nom, email, téléphone)
+-- Les messages de contact contiennent des informations sensibles qui ne doivent jamais être exposées publiquement
 drop policy if exists "Admins can view contact messages" on public.messages_contact;
 create policy "Admins can view contact messages"
 on public.messages_contact

@@ -119,7 +119,7 @@ Pour rappel, la migration générée est `supabase/migrations/20250918004849_app
 | **seo_redirects** | Admin uniquement | Admin uniquement | SEO interne |
 | **sitemap_entries** | Si indexé | Admin uniquement | Sitemap public |
 | **abonnes_newsletter** | Admin uniquement | Inscription libre | Protection RGPD (email seul, rétention ≤90j) |
-| **messages_contact** | Admin uniquement | Envoi libre | Contact public + vue admin |
+| **messages_contact** | Admin uniquement | Envoi libre | Protection RGPD (prénom/nom/email/téléphone) |
 | **configurations_site** | Si public:* | Admin uniquement | Config mixte |
 | **logs_audit** | Admin uniquement | Système auto | Audit sécurisé |
 | **events_recurrence** | Publique | Admin uniquement | Récurrence publique |
