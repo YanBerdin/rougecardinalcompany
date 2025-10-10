@@ -101,9 +101,15 @@
 
 - ✅ RLS restrictif : seuls les admins peuvent lire les données personnelles (prénom, nom, email, téléphone)
 - ✅ DAL `lib/dal/contact.ts` : utilise `.insert()` uniquement, pas de lecture après insertion
-- ✅ API `/api/contact` : envoie email uniquement, intégration DAL à finaliser (TODO dans le code)
+- ✅ API `/api/contact` : **intégration DAL complétée** avec pattern warning identique à newsletter
+- ✅ Gestion erreurs email : warning retourné si notification échoue, message stocké quand même
+- ✅ Mapping schémas : API (name/subject) → DAL (firstName/lastName/message fusionné)
 - ✅ Principe de minimisation : données personnelles stockées uniquement pour traitement admin
 - ✅ Conformité : lecture publique impossible, insertion libre pour formulaire de contact
+- ✅ Tests validés :
+  - Soumission valide : `{"status":"sent"}` + insertion BDD ✅
+  - Email invalide (format) : `{"error":"Données invalides"}` 400 ✅
+  - Mapping données : "Jean Dupont" → firstName="Jean", lastName="Dupont" ✅
 
 #### Validation Conformité Instructions Supabase
 
