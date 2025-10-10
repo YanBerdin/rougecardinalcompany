@@ -617,7 +617,7 @@ export function useAuth() {
 }
 
 // lib/hooks/useNewsletterSubscribe.ts
-export function useNewsletterSubscription() {
+export function useNewsletterSubscribe() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
@@ -974,7 +974,7 @@ Pattern: use[Feature][Action?]
 
 Examples:
   useAuth()
-  useNewsletterSubscription()
+  useNewsletterSubscribe()
   useContactForm()
   useHeroCarousel()
 ```

@@ -438,7 +438,7 @@ Composants clés:
 
 ### 2. Hook partagé `lib/hooks/useNewsletterSubscribe.ts`
 >
-- Signature: `useNewsletterSubscription({ source?: string })`.
+- Signature: `useNewsletterSubscribe({ source?: string })`.
 - Gère `email`, `isSubscribed`, `isLoading`, `errorMessage` et handlers `handleEmailChange`, `handleSubmit`.
 - Appelle `POST /api/newsletter`; surface d'erreur unifiée pour l'UI.
 
@@ -829,7 +829,7 @@ export async function POST(request: NextRequest) {
 
 import { useState, FormEvent } from "react";
 
-export function useNewsletterSubscription({ source }: { source?: string } = {}) {
+export function useNewsletterSubscribe({ source }: { source?: string } = {}) {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');

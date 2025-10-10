@@ -31,7 +31,7 @@
 1. **Templates React Email** - Structure email parfaitement utilisable
 2. **Configuration Resend** - Variables d'environnement et setup
 3. **Webhooks Logic** - Gestion des événements Resend
-4. **Hooks Client** - `useNewsletterSubscription` adaptable
+4. **Hooks Client** - `useNewsletterSubscribe` adaptable
 5. **Types Email** - Interfaces TypeScript utiles
 
 ## 🔄 Plan d'Adaptation
@@ -51,7 +51,7 @@
 ### Phase 3: Templates & Hooks
 
 - [ ] Adapter les templates email
-- [ ] Intégrer `useNewsletterSubscription` avec l'API existante
+- [ ] Intégrer `useNewsletterSubscribe` avec l'API existante
 - [ ] Tester l'intégration complète
 
 ### Phase 4: Webhooks & Monitoring

@@ -662,7 +662,7 @@ The email service integrates with existing DAL functions:
 
 ```typescript
 // lib/hooks/useNewsletterSubscribe.ts
-export function useNewsletterSubscription() {
+export function useNewsletterSubscribe() {
   // Newsletter subscription logic with email confirmation
 }
 

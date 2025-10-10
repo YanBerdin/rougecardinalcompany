@@ -124,7 +124,7 @@ const claims = await supabase.auth.getClaims(); // ~2-5ms (100x plus rapide)
 
 ### Phase 3: Templates & Hooks
 
-- [ ] Adapter hooks `useNewsletterSubscription` avec API existante
+- [ ] Adapter hooks `useNewsletterSubscribe` avec API existante
 - [ ] Personnaliser templates email
 - [ ] Configurer webhooks Resend
 

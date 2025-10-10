@@ -415,7 +415,7 @@ Mise en œuvre (frontend/backend unifiés):
   - Renvoie `{ status: 'subscribed' }` si succès
 
 - Hook partagé: `lib/hooks/useNewsletterSubscribe.ts`
-  - `useNewsletterSubscription({ source?: string })` gère l'état du formulaire (`email`, `isSubscribed`, `isLoading`, `errorMessage`)
+  - `useNewsletterSubscribe({ source?: string })` gère l'état du formulaire (`email`, `isSubscribed`, `isLoading`, `errorMessage`)
   - Appelle `POST /api/newsletter` et unifie la gestion d'erreurs pour l'UI
   - Réutilisé à la Home et sur la page Contact
 
@@ -2791,7 +2791,7 @@ export async function POST(request: NextRequest) {
 **Newsletter Hook** (`lib/hooks/useNewsletterSubscribe.ts`) :
 
 ```typescript
-export function useNewsletterSubscription({ source = "home" } = {}) {
+export function useNewsletterSubscribe({ source = "home" } = {}) {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');

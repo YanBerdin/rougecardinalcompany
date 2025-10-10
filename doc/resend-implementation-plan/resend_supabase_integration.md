@@ -927,7 +927,7 @@ interface UseNewsletterSubscriptionReturn {
   reset: () => void;
 }
 
-export function useNewsletterSubscription({
+export function useNewsletterSubscribe({
   source = "website",
 }: { source?: string } = {}): UseNewsletterSubscriptionReturn {
   const [email, setEmail] = useState("");
