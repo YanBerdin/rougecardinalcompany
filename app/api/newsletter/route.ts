@@ -49,7 +49,7 @@ export async function POST(req: Request) {
 
     // Idempotent success (new or existing)
     return NextResponse.json({ status: 'subscribed' }, { status: 200 });
-  } catch (err) {
+  } catch (error) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 }

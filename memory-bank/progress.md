@@ -47,8 +47,8 @@
 ### Intégrations Front prioritaires
 
 - En cours: Back-office (toggles centralisés, CRUD étendus)
-- En attente: Système d'emailing (newsletter, contacts)
-- En attente: Agenda/Événements (DAL + containers + UI)
+- Terminé: Système d'emailing (newsletter, contacts) – intégration Resend + React Email (templates), endpoints `/api/newsletter`, `/api/contact`, `/api/test-email`, webhooks (handler présent, config à finaliser)
+- Terminé: Agenda/Événements (DAL + containers + UI + export calendrier ICS)
 - Option: Modélisation `partners.type` si besoin UI
 
 ## Problèmes Résolus (Octobre 2025)
@@ -68,6 +68,16 @@
    - ✅ Migrations : 92.9% (12/13 naming timestamp, 100% idempotence, workflow déclaratif)
    - ✅ Declarative Schema : 100% (36/36 tables via workflow déclaratif, triggers centralisés)
 8. ✅ Kit média Presse : seed complet avec URLs externes fonctionnelles (logos, photos HD, PDFs)
+9. ✅ Emailing transactionnel (Resend)
+   - ✅ Intégration Resend via `lib/resend.ts` + gestion clé API
+   - ✅ Templates React Email: `emails/newsletter-confirmation.tsx`, `emails/contact-message-notification.tsx` (+ layout et composants utilitaires)
+   - ✅ Actions d'envoi: `lib/email/actions.ts` (avec rendu React Email + gestion FROM par défaut)
+   - ✅ Schémas Zod: `lib/email/schemas.ts` (validation newsletter/contact)
+   - ✅ API routes: `app/api/newsletter`, `app/api/contact`, `app/api/test-email` (+ `GET` doc de test)
+   - ✅ Scripts d'intégration: `scripts/test-email-integration.ts`, `scripts/check-email-logs.ts`, `scripts/test-webhooks.ts`
+   - ✅ Warnings `@react-email/render` résolus en ajoutant `prettier` (devDependency)
+   - ✅ Hook partagé renommé: `useNewsletterSubscribe` (cohérent avec le fichier) et usages mis à jour
+   - ✅ Tests automatisés `pnpm test:resend` OK (newsletter + contact)
    - ✅ Seed `20251002120000_seed_communiques_presse_et_media_kit.sql` : 8 médias + 4 communiqués + 4 catégories
    - ✅ URLs externes dans `metadata.external_url` (Unsplash pour photos, W3C pour PDFs de démo)
    - ✅ `fetchMediaKit()` modifié pour prioriser URLs externes sur storage local
@@ -82,7 +92,10 @@
 2. Synchronisation des fenêtres de visibilité (hero) avec le cache ISR
 3. Cohérence des toggles Back‑office ↔ pages publiques (Agenda/Accueil/Contact)
 4. PostgREST cache: penser à redémarrer le stack en cas de mismatch pendant seeds
-5. Docker disk usage monitoring à mettre en place
+5. Docker disk usage monitoring à mettre en place (si utilisation de Supabase local)
+6. Webhooks Resend non configurés dans le dashboard (à pointer vers `/api/webhooks/resend` et sélectionner les événements)
+7. ESLint: plusieurs règles à adresser (no-explicit-any, no-unescaped-entities, no-unused-vars) dans quelques composants/pages
+8. Markdown: ~3442 alertes détectées par markdownlint (plan de correction progressif en cours)
 
 ## Tests
 
@@ -96,6 +109,7 @@
 
 - [ ] Flux de navigation
 - [ ] Authentification
+- [x] Emailing (Resend): `pnpm test:resend` (newsletter + contact + vérification DB + webhooks à configurer)
 
 ### Tests E2E
 
@@ -120,16 +134,18 @@
 
 ### Court Terme
 
-1. Implémenter Agenda/Événements (DAL + containers + Suspense)
-2. Définir la stratégie seeds en environnement cloud (idempotent + safe)
-3. Valider les toggles Back‑office (Agenda/Accueil/Contact)
-4. Affiner mapping partenaires (type/tiers) si requis par le design
+1. Définir la stratégie seeds en environnement cloud (idempotent + safe)
+2. Valider les toggles Back‑office (Agenda/Accueil/Contact)
+3. Finaliser configuration des webhooks Resend (dashboard) et consigner les événements
+4. Lint: corriger les règles critiques (any, unused vars, no-unescaped-entities) dans les fichiers listés par ESLint
+5. Markdown: lancer `pnpm lint:md:fix` et corriger manuellement MD040/MD036 restantes
 
 ### Moyen Terme
 
 1. Back‑office avancé (CRUD et toggles centralisés)
 2. Option: versioning pour `home_hero_slides`
 3. Tests automatisés et analytics
+4. CI: ajouter job lint (`pnpm lint:all`) et tests emailing (`pnpm test:resend`) sur PR
 
 ## Métriques
 
@@ -222,5 +238,5 @@
 
 ## Dernière Mise à Jour
 
-**Date**: 1er octobre 2025
+**Date**: 10 octobre 2025
 **Par**: GitHub Copilot
