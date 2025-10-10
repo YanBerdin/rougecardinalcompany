@@ -7,6 +7,7 @@
 > ⚠️ **VERSION MISE À JOUR - INTÉGRATION RESEND COMPLÈTE**
 >
 > Cette version documente :
+>
 > - ✅ **Architecture Email** : Resend + React Email (templates, actions, API routes, webhooks)
 > - ✅ **Supabase Auth 2025** : Patterns modernes `@supabase/ssr` + `getClaims()`
 > - ✅ **Custom Hooks** : useAuth, useNewsletterSubscribe, useContactForm
@@ -14,6 +15,7 @@
 > - ✅ **Type System** : Types email dédiés + database types générés
 >
 > 📖 **Documents Complémentaires** :
+>
 > - `Email_Service_Architecture.md` : Architecture détaillée du service email
 > - `TESTING_RESEND.md` : Guide de test de l'intégration Resend
 > - `.github/instructions/resend_supabase_integration.md` : Instructions d'intégration
@@ -41,7 +43,8 @@
 
 **Primary Technology**: Next.js 15.4.5 (App Router) + TypeScript 5 + React 19
 
-**Architecture Type**: 
+**Architecture Type**:
+
 - **Monolithic Application** (single-app, not monorepo)
 - **Feature-Based Organization** avec Container/View pattern
 - **BaaS Integration** (Supabase for backend + Resend for emails)
@@ -90,18 +93,21 @@ Documentation:
 ### 1.2 Detected Patterns
 
 **Smart/Dumb Component Pattern**:
+
 - `[Feature]Container.tsx` → Business logic + data fetching (Server Component)
 - `[Feature]View.tsx` → Presentation pure (Client Component si interactif)
 - `hooks.ts` → Custom hooks pour logique client réutilisable
 - `types.ts` → Types feature-specific
 
 **Server/Client Strategy**:
+
 - Server Components par défaut pour SSR + SEO
 - Client Components (`"use client"`) uniquement pour interactivité
 - Data Access Layer (DAL) server-only avec `"use server"`
 - Email actions server-side uniquement
 
 **Email Architecture Pattern**:
+
 - Templates React Email dans `emails/`
 - Actions server-side dans `lib/email/actions.ts`
 - API endpoints REST dans `app/api/`
@@ -116,12 +122,13 @@ Documentation:
 #### 1. Feature-Based Organization
 
 Chaque feature business est encapsulée dans un dossier dédié contenant :
+
 - Container (logique métier + data fetching)
 - View (présentation pure)
 - Hooks (logique client réutilisable)
 - Types (types feature-specific)
 
-```
+```bash
 components/features/public-site/[feature]/
 ├── [Feature]Container.tsx   # Server Component (async)
 ├── [Feature]View.tsx         # Client Component (présentation)
@@ -133,11 +140,13 @@ components/features/public-site/[feature]/
 #### 2. Smart/Dumb (Container/View) Pattern
 
 **Smart Components (Containers)**:
+
 - Responsabilité : Business logic, data fetching, state management
 - Type : Server Component par défaut (async functions)
 - Pattern : Fetch data → Pass props → Render View
 
 **Dumb Components (Views)**:
+
 - Responsabilité : Presentation pure, UI interactions
 - Type : Client Component si interactivité nécessaire
 - Pattern : Receive props → Render UI → Emit callbacks
@@ -145,6 +154,7 @@ components/features/public-site/[feature]/
 #### 3. Data Access Layer (DAL)
 
 **Server-Only Data Access** (`lib/dal/*.ts`):
+
 - Directive `"use server"` obligatoire
 - Isolation de la logique d'accès données
 - Utilisation du client Supabase server-side
@@ -166,6 +176,7 @@ export async function createContactMessage(data: ContactMessage) {
 #### 4. Email Service Architecture
 
 **Layered Email Architecture**:
+
 - **Template Layer** : React Email components (`emails/`)
 - **Action Layer** : Server actions (`lib/email/actions.ts`)
 - **API Layer** : REST endpoints (`app/api/`)
@@ -187,21 +198,25 @@ User → API Endpoint → Validation (Zod) → Action (Server) →
 ### 2.2 Project Organization Rationale
 
 **Scalability**:
+
 - Ajout de nouvelles features sans modifier le code existant
 - Structure prévisible et répétable
 - Isolation des responsabilités
 
 **Maintainability**:
+
 - Code facile à localiser et à modifier
 - Séparation claire entre logique et présentation
 - Documentation colocalisée avec le code
 
 **Performance**:
+
 - Server Components pour initial load optimisé
 - Client Components uniquement pour interactivité
 - Data fetching server-side avec cache Next.js
 
 **Testability**:
+
 - Components isolés testables indépendamment
 - Mocking facilité grâce à la séparation
 - Test scripts dédiés pour intégrations
@@ -212,7 +227,7 @@ User → API Endpoint → Validation (Zod) → Action (Server) →
 
 ### 3.1 Complete Project Structure (Depth 4)
 
-```
+```bash
 rougecardinalcompany/
 │
 ├── 📁 app/                                    # Next.js 15 App Router
@@ -487,6 +502,7 @@ rougecardinalcompany/
 **Purpose**: Next.js 15 file-based routing avec Server/Client Components
 
 **Key Patterns**:
+
 - `page.tsx` : Route pages (Server Component par défaut)
 - `layout.tsx` : Shared layouts avec nested layouts
 - `route.ts` : API endpoints (Route Handlers)
@@ -494,7 +510,8 @@ rougecardinalcompany/
 - `error.tsx` : Error boundaries
 
 **New Routes (Resend Integration)**:
-```
+
+```bash
 POST /api/newsletter     → Newsletter subscription
 POST /api/contact        → Contact form submission
 POST /api/test-email     → Email testing (dev)
@@ -504,18 +521,21 @@ POST /api/webhooks/resend → Resend webhook handler
 ### 4.2 Email Architecture (`emails/`, `lib/email/`)
 
 **Template Layer** (`emails/`):
+
 - React Email components avec Tailwind CSS
 - `email-layout.tsx` : Layout réutilisable avec header/footer
 - `components.utils.tsx` : Composants email réutilisables
 - Templates : `newsletter-confirmation.tsx`, `contact-message-notification.tsx`
 
 **Action Layer** (`lib/email/actions.ts`):
+
 - `"use server"` directive obligatoire
 - `sendEmail()` : Generic email sending
 - `sendNewsletterConfirmation()` : Newsletter confirmation
 - `sendContactNotification()` : Contact form notification
 
 **Validation Layer** (`lib/email/schemas.ts`):
+
 - Zod schemas pour validation runtime
 - `NewsletterSubscriptionSchema`
 - `ContactMessageSchema`
@@ -524,7 +544,8 @@ POST /api/webhooks/resend → Resend webhook handler
 ### 4.3 Feature Components (`components/features/`)
 
 **Organization Pattern**:
-```
+
+```bash
 components/features/[domain]/[feature]/
 ├── [Feature]Container.tsx   # Server Component (async data fetching)
 ├── [Feature]View.tsx         # Client Component (presentation)
@@ -534,7 +555,8 @@ components/features/[domain]/[feature]/
 ```
 
 **Example - Newsletter Feature**:
-```
+
+```bash
 components/features/public-site/home/newsletter/
 ├── NewsletterContainer.tsx        # Server: fetch settings
 ├── NewsletterClientContainer.tsx  # Client: form logic
@@ -551,6 +573,7 @@ components/features/public-site/home/newsletter/
 **Purpose**: Server-only data access avec isolation complète
 
 **Pattern**:
+
 ```typescript
 // lib/dal/[entity].ts
 "use server";
@@ -571,6 +594,7 @@ export async function fetch[Entity]() {
 ```
 
 **Key Files**:
+
 - `home-hero.ts` : Hero slides
 - `home-newsletter.ts` : Newsletter settings
 - `contact.ts` : Contact messages (avec email trigger)
@@ -578,11 +602,12 @@ export async function fetch[Entity]() {
 
 ### 4.5 Custom Hooks (`lib/hooks/`)
 
-**✨ NEW: Centralized Client Hooks**
+#### **✨ NEW: Centralized Client Hooks**
 
 **Purpose**: Logique client réutilisable à travers features
 
 **Current Hooks**:
+
 ```typescript
 // lib/hooks/useAuth.ts
 export function useAuth() {
@@ -614,6 +639,7 @@ export function useContactForm() {
 ```
 
 **Migration Strategy**:
+
 - Hooks dans `components/features/*/hooks.ts` sont déprécié
 - Nouveau code doit utiliser `lib/hooks/`
 - Hooks réutilisables centralisés pour éviter duplication
@@ -621,18 +647,21 @@ export function useContactForm() {
 ### 4.6 Type System (`types/`)
 
 **Structure**:
-```
+
+```bash
 types/
 ├── database.types.ts   # ✨ Supabase generated (ne pas éditer)
 └── email.d.ts          # ✨ Email-specific types
 ```
 
 **database.types.ts**:
+
 - Généré automatiquement par Supabase CLI
 - Types pour toutes les tables, views, functions
 - À regénérer après changements schema : `supabase gen types typescript`
 
 **email.d.ts**:
+
 ```typescript
 export interface EmailRecipient {
   email: string;
@@ -652,25 +681,29 @@ export type EmailTemplate =
 
 ### 4.7 Testing Infrastructure (`scripts/`)
 
-**✨ NEW: Email Testing Scripts**
+#### **✨ NEW: Email Testing Scripts**
 
 **test-email-integration.ts**:
+
 - Tests l'envoi réel d'emails via API
 - Vérifie newsletter + contact form
 - Logs détaillés pour debugging
 
 **check-email-logs.ts**:
+
 - Vérifie les logs en base de données
 - Affiche derniers abonnés newsletter
 - Affiche derniers messages contact
 - Nécessite `SUPABASE_SERVICE_ROLE_KEY`
 
 **test-webhooks.ts**:
+
 - Vérifie configuration webhooks Resend
 - Teste connectivité API Resend
 - Affiche webhooks configurés
 
 **Usage**:
+
 ```bash
 # Test emails (require server running)
 pnpm run test:email
@@ -703,14 +736,16 @@ pnpm run test:resend
 ### 5.2 Component Placement Rules
 
 **Feature Components**:
-```
+
+```bash
 WHERE: components/features/[domain]/[feature]/
 WHEN: Business logic specific to one feature
 PATTERN: Container + View + hooks + types + index
 ```
 
 **Shared UI Components**:
-```
+
+```bash
 WHERE: components/ui/
 WHEN: Reusable across multiple features
 EXAMPLES: Button, Input, Card, Alert
@@ -718,14 +753,16 @@ SOURCE: shadcn/ui library
 ```
 
 **Layout Components**:
-```
+
+```bash
 WHERE: components/layout/
 WHEN: Structural components (Header, Footer, Navigation)
 SCOPE: Application-wide
 ```
 
 **Loading States**:
-```
+
+```bash
 WHERE: components/skeletons/
 WHEN: Suspense fallback UI
 PATTERN: [feature]-skeleton.tsx
@@ -734,7 +771,8 @@ PATTERN: [feature]-skeleton.tsx
 ### 5.3 Logic Placement Rules
 
 **Server-Only Logic**:
-```
+
+```bash
 WHERE: lib/dal/*.ts
 DIRECTIVE: "use server"
 PURPOSE: Database access, business rules
@@ -742,7 +780,8 @@ IMPORT: Never import in Client Components
 ```
 
 **Client-Only Logic**:
-```
+
+```bash
 WHERE: lib/hooks/*.ts
 DIRECTIVE: "use client" (implicit via useState, useEffect)
 PURPOSE: Client-side interactions, form state
@@ -750,7 +789,8 @@ SCOPE: Reusable across features
 ```
 
 **Email Logic**:
-```
+
+```bash
 WHERE: lib/email/actions.ts
 DIRECTIVE: "use server"
 PURPOSE: Email sending operations
@@ -760,7 +800,8 @@ VALIDATION: lib/email/schemas.ts (Zod)
 ### 5.4 Type Placement Rules
 
 **Generated Types**:
-```
+
+```bash
 WHERE: types/database.types.ts
 SOURCE: Supabase CLI (supabase gen types typescript)
 WARNING: Never edit manually
@@ -768,14 +809,16 @@ REGENERATE: After schema changes
 ```
 
 **Feature Types**:
-```
+
+```bash
 WHERE: components/features/[domain]/[feature]/types.ts
 SCOPE: Feature-specific interfaces
 EXPORT: Via index.ts
 ```
 
 **Domain Types**:
-```
+
+```bash
 WHERE: types/email.d.ts
 SCOPE: Cross-feature domain types
 PURPOSE: Shared contracts
@@ -784,14 +827,16 @@ PURPOSE: Shared contracts
 ### 5.5 API Endpoint Placement
 
 **REST API**:
-```
+
+```bash
 WHERE: app/api/[resource]/route.ts
 METHODS: GET, POST, PUT, DELETE, PATCH
 EXPORTS: Named functions per method
 ```
 
 **Webhooks**:
-```
+
+```bash
 WHERE: app/api/webhooks/[service]/route.ts
 PURPOSE: External service callbacks
 EXAMPLE: app/api/webhooks/resend/route.ts
@@ -804,7 +849,8 @@ EXAMPLE: app/api/webhooks/resend/route.ts
 ### 6.1 File Naming Conventions
 
 **Components**:
-```
+
+```bash
 Pattern: PascalCase.tsx
 Examples:
   - HeroContainer.tsx (Smart component)
@@ -813,7 +859,8 @@ Examples:
 ```
 
 **Utilities & Logic**:
-```
+
+```bash
 Pattern: camelCase.ts ou kebab-case.ts
 Examples:
   - utils.ts (utilities)
@@ -823,7 +870,8 @@ Examples:
 ```
 
 **Types**:
-```
+
+```bash
 Pattern: camelCase.ts or [domain].d.ts
 Examples:
   - types.ts (feature types)
@@ -832,7 +880,8 @@ Examples:
 ```
 
 **Tests**:
-```
+
+```bash
 Pattern: [name].test.ts
 Examples:
   - actions.test.ts
@@ -842,7 +891,8 @@ Examples:
 ### 6.2 Component Naming Patterns
 
 **Smart Components (Containers)**:
-```
+
+```bash
 Pattern: [Feature]Container.tsx
 Purpose: Business logic + data fetching
 Examples:
@@ -852,7 +902,8 @@ Examples:
 ```
 
 **Dumb Components (Views)**:
-```
+
+```bash
 Pattern: [Feature]View.tsx
 Purpose: Pure presentation
 Examples:
@@ -862,7 +913,8 @@ Examples:
 ```
 
 **Client Logic Components**:
-```
+
+```bash
 Pattern: [Feature]Client.tsx or [Feature]ClientContainer.tsx
 Purpose: Client-side interactivity
 Examples:
@@ -871,7 +923,8 @@ Examples:
 ```
 
 **Server Gate Components**:
-```
+
+```bash
 Pattern: [Feature]ServerGate.tsx
 Purpose: Server-side data validation before client rendering
 Examples:
@@ -882,6 +935,7 @@ Examples:
 ### 6.3 Function Naming Conventions
 
 **DAL Functions**:
+
 ```typescript
 Pattern: [action][Entity][Qualifier?]
 
@@ -903,6 +957,7 @@ Examples:
 ```
 
 **Email Actions**:
+
 ```typescript
 Pattern: send[EmailType][Purpose?]
 
@@ -913,6 +968,7 @@ Examples:
 ```
 
 **Custom Hooks**:
+
 ```typescript
 Pattern: use[Feature][Action?]
 
@@ -926,6 +982,7 @@ Examples:
 ### 6.4 Variable Naming Conventions
 
 **Constants**:
+
 ```typescript
 // SCREAMING_SNAKE_CASE for true constants
 const MAX_RETRIES = 3;
@@ -941,6 +998,7 @@ const SITE_CONFIG = {
 ```
 
 **State Variables**:
+
 ```typescript
 // camelCase with descriptive names
 const [isLoading, setIsLoading] = useState(false);
@@ -949,6 +1007,7 @@ const [currentSlide, setCurrentSlide] = useState(0);
 ```
 
 **Props Interfaces**:
+
 ```typescript
 // PascalCase with Props suffix
 interface HeroViewProps {
@@ -961,7 +1020,8 @@ interface HeroViewProps {
 ### 6.5 Folder Naming Conventions
 
 **Feature Folders**:
-```
+
+```bash
 Pattern: kebab-case
 Examples:
   - home/
@@ -971,7 +1031,8 @@ Examples:
 ```
 
 **Domain Folders**:
-```
+
+```bash
 Pattern: singular noun (camelCase if needed)
 Examples:
   - auth/
@@ -987,7 +1048,8 @@ Examples:
 ### 7.1 Entry Points for Development
 
 **Starting Points**:
-```
+
+```bash
 1. Homepage Implementation:
    → app/page.tsx (route)
    → components/features/public-site/home/ (features)
@@ -1013,7 +1075,8 @@ Examples:
 
 #### Adding a New Feature
 
-**Step 1: Create Feature Structure**
+##### **Step 1: Create Feature Structure**
+
 ```bash
 mkdir -p components/features/public-site/[feature]
 cd components/features/public-site/[feature]
@@ -1026,18 +1089,21 @@ touch types.ts                   # Types
 touch index.ts                   # Exports
 ```
 
-**Step 2: Create Data Access Layer**
+##### **Step 2: Create Data Access Layer**
+
 ```bash
 touch lib/dal/[entity].ts
 ```
 
-**Step 3: Add Route**
+##### **Step 3: Add Route**
+
 ```bash
 mkdir -p app/[route]
 touch app/[route]/page.tsx
 ```
 
-**Step 4: Implement**
+##### **Step 4: Implement**
+
 ```typescript
 // [Feature]Container.tsx
 import { fetch[Entity] } from "@/lib/dal/[entity]";
@@ -1068,12 +1134,14 @@ export type { [Feature]Data } from "./types";
 
 #### Adding Email Template
 
-**Step 1: Create Template**
+##### **Step 1: Create Template**
+
 ```bash
 touch emails/[template-name].tsx
 ```
 
-**Step 2: Create Action**
+##### **Step 2: Create Action**
+
 ```typescript
 // lib/email/actions.ts
 export async function send[TemplateName](params) {
@@ -1085,7 +1153,8 @@ export async function send[TemplateName](params) {
 }
 ```
 
-**Step 3: Add Validation Schema**
+##### **Step 3: Add Validation Schema**
+
 ```typescript
 // lib/email/schemas.ts
 export const [TemplateName]Schema = z.object({
@@ -1094,7 +1163,8 @@ export const [TemplateName]Schema = z.object({
 });
 ```
 
-**Step 4: Create API Endpoint (Optional)**
+##### **Step 4: Create API Endpoint (Optional)**
+
 ```typescript
 // app/api/[endpoint]/route.ts
 import { [TemplateName]Schema } from "@/lib/email/schemas";
@@ -1110,12 +1180,14 @@ export async function POST(request: NextRequest) {
 
 #### Adding Custom Hook
 
-**Step 1: Create Hook**
+##### **Step 1: Create Hook**
+
 ```bash
 touch lib/hooks/use[Feature].ts
 ```
 
-**Step 2: Implement**
+##### **Step 2: Implement**
+
 ```typescript
 // lib/hooks/use[Feature].ts
 "use client";
@@ -1137,7 +1209,8 @@ export function use[Feature]() {
 }
 ```
 
-**Step 3: Use in Component**
+##### **Step 3: Use in Component**
+
 ```typescript
 // components/features/.../[Feature]Client.tsx
 "use client";
@@ -1153,6 +1226,7 @@ export function [Feature]Client() {
 ### 7.3 Testing Workflow
 
 **Unit Testing** (Coming Soon):
+
 ```bash
 # Run tests
 pnpm test
@@ -1165,6 +1239,7 @@ pnpm test:coverage
 ```
 
 **Integration Testing (Email)**:
+
 ```bash
 # Start dev server
 pnpm dev
@@ -1174,6 +1249,7 @@ pnpm run test:resend
 ```
 
 **Manual Testing**:
+
 ```bash
 # Test email via cURL
 curl -X POST http://localhost:3000/api/test-email \
@@ -1184,6 +1260,7 @@ curl -X POST http://localhost:3000/api/test-email \
 ### 7.4 Database Workflow
 
 **Schema Changes**:
+
 ```bash
 # 1. Create migration
 supabase migration new [migration_name]
@@ -1199,6 +1276,7 @@ supabase gen types typescript --local > types/database.types.ts
 ```
 
 **Seeds**:
+
 ```bash
 # Apply seed data
 supabase db reset  # Resets + applies migrations + seeds
@@ -1210,7 +1288,7 @@ supabase db reset  # Resets + applies migrations + seeds
 
 ### 8.1 Email Architecture Overview
 
-```
+```mermaid
 ┌─────────────────────────────────────────────────────────┐
 │                  Email Service Stack                    │
 ├─────────────────────────────────────────────────────────┤
@@ -1237,7 +1315,7 @@ supabase db reset  # Resets + applies migrations + seeds
 
 ### 8.2 Email Flow Diagram
 
-```
+```mermaid
 User Action
     │
     ▼
@@ -1291,40 +1369,40 @@ User Action
 
 | Component | Path | Purpose |
 |-----------|------|---------|
-| **Templates** |
+| **Templates** | `emails/` | Email templates directory |
 | Newsletter Confirmation | `emails/newsletter-confirmation.tsx` | User subscription confirmation |
 | Contact Notification | `emails/contact-message-notification.tsx` | Admin notification for contact form |
 | Email Layout | `emails/utils/email-layout.tsx` | Shared layout with header/footer |
 | Email Utils | `emails/utils/components.utils.tsx` | Reusable email components |
-| **Actions** |
+| **Actions** |  |  |
 | Email Actions | `lib/email/actions.ts` | Server actions for sending |
-| **Validation** |
+| **Validation** |  |  |
 | Email Schemas | `lib/email/schemas.ts` | Zod validation schemas |
-| **API Endpoints** |
+| **API Endpoints** |  |  |
 | Newsletter API | `app/api/newsletter/route.ts` | POST newsletter subscription |
 | Contact API | `app/api/contact/route.ts` | POST contact form |
 | Test Email API | `app/api/test-email/route.ts` | POST/GET email testing |
 | Webhook Handler | `app/api/webhooks/resend/route.ts` | POST webhook reception |
-| **Configuration** |
+| **Configuration** |  |  |
 | Resend Client | `lib/resend.ts` | Resend API client config |
 | Site Config | `lib/site-config.ts` | Email addresses + URLs |
-| **Types** |
+| **Types** |  |  |
 | Email Types | `types/email.d.ts` | Email-specific TypeScript types |
-| **Hooks** |
+| **Hooks** |  |  |
 | Newsletter Hook | `lib/hooks/useNewsletterSubscribe.ts` | Newsletter subscription logic |
 | Contact Hook | `lib/hooks/useContactForm.ts` | Contact form logic |
-| **Testing** |
+| **Testing** |  |  |
 | Integration Test | `scripts/test-email-integration.ts` | Email sending tests |
 | Logs Checker | `scripts/check-email-logs.ts` | Database logs verification |
 | Webhook Test | `scripts/test-webhooks.ts` | Webhook config test |
-| **Documentation** |
+| **Documentation** |  |  |
 | Email Architecture | `memory-bank/architecture/Email_Service_Architecture.md` | Detailed architecture doc |
 | Testing Guide | `TESTING_RESEND.md` | Testing procedures |
 | Integration Guide | `.github/instructions/resend_supabase_integration.md` | Setup instructions |
 
 ### 8.4 Email Environment Variables
 
-```env
+```bash
 # Resend Configuration
 RESEND_API_KEY=re_xxx                      # Resend API key (required)
 RESEND_AUDIENCE_ID=xxx                     # Resend audience ID (optional)
@@ -1342,6 +1420,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000  # Development URL
 ### 8.5 Email Best Practices
 
 **Template Development**:
+
 - Use `EmailLayout` for consistent branding
 - Keep HTML simple (email client compatibility)
 - Inline styles for better rendering
@@ -1349,6 +1428,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000  # Development URL
 - Preview text for inbox display
 
 **Action Development**:
+
 - Always use `"use server"` directive
 - Validate input with Zod schemas
 - Handle errors gracefully
@@ -1356,6 +1436,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000  # Development URL
 - Return clear success/error messages
 
 **API Development**:
+
 - Validate with Zod before processing
 - Return appropriate HTTP status codes
 - Log errors for debugging
@@ -1363,6 +1444,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000  # Development URL
 - Use CORS appropriately
 
 **Testing**:
+
 - Test with real email addresses
 - Verify database logs
 - Check webhook configuration
@@ -1376,6 +1458,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000  # Development URL
 ### 9.1 New Feature Template
 
 **Directory Structure**:
+
 ```bash
 components/features/[domain]/[new-feature]/
 ├── [NewFeature]Container.tsx    # Server Component
@@ -1389,6 +1472,7 @@ app/[route]/page.tsx              # Route page
 ```
 
 **Container Template**:
+
 ```typescript
 // [NewFeature]Container.tsx
 import { fetch[Entity] } from "@/lib/dal/[entity]";
@@ -1407,6 +1491,7 @@ export async function [NewFeature]Container() {
 ```
 
 **View Template**:
+
 ```typescript
 // [NewFeature]View.tsx
 "use client";
@@ -1428,6 +1513,7 @@ export function [NewFeature]View({ data }: [NewFeature]ViewProps) {
 ```
 
 **Types Template**:
+
 ```typescript
 // types.ts
 export interface [NewFeature]Data {
@@ -1443,6 +1529,7 @@ export interface [NewFeature]Item {
 ```
 
 **Index Template**:
+
 ```typescript
 // index.ts
 export { [NewFeature]Container } from "./[NewFeature]Container";
@@ -1451,6 +1538,7 @@ export type { [NewFeature]Data, [NewFeature]Item } from "./types";
 ```
 
 **DAL Template**:
+
 ```typescript
 // lib/dal/[entity].ts
 "use server";
@@ -1479,6 +1567,7 @@ export async function fetch[Entity]() {
 ```
 
 **Page Template**:
+
 ```typescript
 // app/[route]/page.tsx
 import { [NewFeature]Container } from "@/components/features/[domain]/[new-feature]";
@@ -1499,6 +1588,7 @@ export default function [NewFeature]Page() {
 ### 9.2 New Email Template
 
 **Template File**:
+
 ```typescript
 // emails/[template-name].tsx
 import { SITE_CONFIG } from "@/lib/site-config";
@@ -1528,6 +1618,7 @@ export default function [TemplateName]({ ...props }: [TemplateName]Props) {
 ```
 
 **Email Action**:
+
 ```typescript
 // lib/email/actions.ts
 export async function send[TemplateName](params: [TemplateName]Params) {
@@ -1540,6 +1631,7 @@ export async function send[TemplateName](params: [TemplateName]Params) {
 ```
 
 **Validation Schema**:
+
 ```typescript
 // lib/email/schemas.ts
 export const [TemplateName]Schema = z.object({
@@ -1658,6 +1750,7 @@ export function use[Feature](options?: Use[Feature]Options) {
 ### 10.1 Document Update Procedures
 
 **When to Update This Document**:
+
 - Major architectural changes
 - New feature patterns introduced
 - Folder structure reorganization
@@ -1665,6 +1758,7 @@ export function use[Feature](options?: Use[Feature]Options) {
 - Deprecated patterns removed
 
 **How to Update**:
+
 1. Update relevant section(s)
 2. Increment version number
 3. Update "Last Updated" date
@@ -1674,6 +1768,7 @@ export function use[Feature](options?: Use[Feature]Options) {
 ### 10.2 Code Review Checklist
 
 **Architecture Compliance**:
+
 - [ ] Follows feature-based organization?
 - [ ] Uses Smart/Dumb pattern correctly?
 - [ ] Server Components for data fetching?
@@ -1681,12 +1776,14 @@ export function use[Feature](options?: Use[Feature]Options) {
 - [ ] DAL used for database access?
 
 **Naming Conventions**:
+
 - [ ] Component names follow PascalCase?
 - [ ] File names consistent with patterns?
 - [ ] Function names descriptive?
 - [ ] Types properly defined?
 
 **Email Integration** (if applicable):
+
 - [ ] Template uses EmailLayout?
 - [ ] Action has "use server" directive?
 - [ ] Validation with Zod schema?
@@ -1694,6 +1791,7 @@ export function use[Feature](options?: Use[Feature]Options) {
 - [ ] Database logging included?
 
 **Testing**:
+
 - [ ] Tests written for new features?
 - [ ] Manual testing performed?
 - [ ] Edge cases considered?
@@ -1717,6 +1815,7 @@ export function use[Feature](options?: Use[Feature]Options) {
 ### 10.5 Future Improvements
 
 **Planned**:
+
 - [ ] Add unit testing section with examples
 - [ ] Document internationalization patterns
 - [ ] Add performance optimization guidelines
@@ -1724,6 +1823,7 @@ export function use[Feature](options?: Use[Feature]Options) {
 - [ ] Add troubleshooting section
 
 **Under Consideration**:
+
 - [ ] Monorepo migration?
 - [ ] GraphQL integration?
 - [ ] Micro-frontend architecture?

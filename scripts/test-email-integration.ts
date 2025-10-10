@@ -16,7 +16,7 @@ async function testEmailIntegration() {
       },
       body: JSON.stringify({
         type: 'newsletter',
-        email: 'test@example.com'
+        email: 'yandevformation@gmail.com'
       })
     });
 
@@ -30,7 +30,7 @@ async function testEmailIntegration() {
       console.log('   Error:', await newsletterResponse.text());
     }
 
-    // Test 2: Contact form
+    // Test 2: Contact form (test ok avec test@example.com)
     console.log('\n📝 Testing contact form...');
     const contactResponse = await fetch(`${baseUrl}/api/test-email`, {
       method: 'POST',
@@ -41,7 +41,7 @@ async function testEmailIntegration() {
         type: 'contact',
         contactData: {
           name: 'Test User',
-          email: 'test@example.com',
+          email: 'yandevformation@gmail.com',
           subject: 'Test Subject',
           message: 'This is a test message from the integration test.'
         }

@@ -105,6 +105,7 @@ export const resend = new Resend(process.env.RESEND_API_KEY);
 ### Variables d'Environnement
 
 **Supabase:**
+
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=eyJ...
@@ -112,6 +113,7 @@ SUPABASE_SERVICE_ROLE_KEY=eyJ...  # Admin only (scripts)
 ```
 
 **Resend:**
+
 ```env
 RESEND_API_KEY=re_xxx                      # Required
 RESEND_AUDIENCE_ID=xxx                     # Optional
@@ -120,6 +122,7 @@ EMAIL_CONTACT=contact@rougecardinalcompany.fr # Contact email
 ```
 
 **Site:**
+
 ```env
 NEXT_PUBLIC_SITE_URL=https://rougecardinalcompany.fr # Production
 # or
@@ -234,15 +237,18 @@ export function ComponentName() {
 ### Documentation opérationnelle
 
 **Supabase Local:**
+
 - `doc-perso/lancement-supabase-local/CLI-Supabase-Local.md` : Commandes Supabase CLI détaillées
 - `doc-perso/lancement-supabase-local/docker-install.md` : Installation Docker et gestion espace disque
 - `supabase/migrations/README-migrations.md` : Conventions migrations et ordre d'exécution
 
 **Email Service:**
+
 - `memory-bank/architecture/Email_Service_Architecture.md` : Architecture email complète
 - `TESTING_RESEND.md` : Guide de test de l'intégration Resend
 - `.github/instructions/resend_supabase_integration.md` : Instructions d'intégration
 
 **Architecture:**
+
 - `memory-bank/architecture/Project_Architecture_Blueprint.md` : Architecture détaillée du projet
 - `memory-bank/architecture/Project_Folders_Structure_Blueprint.md` : Guide de structure des dossiers

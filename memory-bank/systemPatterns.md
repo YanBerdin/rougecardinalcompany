@@ -721,7 +721,7 @@ Objectif: architecture en couches pour l'envoi d'emails transactionnels via Rese
 
 ### Architecture en couches
 
-```
+```bash
 User → API Endpoint → Zod Validation → DAL Insert → 
   Email Action → Template Render → Resend API → Email Sent
 ```
@@ -729,12 +729,14 @@ User → API Endpoint → Zod Validation → DAL Insert →
 ### Composants clés
 
 **1. Template Layer** (`emails/`)
+
 - Templates React Email avec Tailwind CSS
 - `email-layout.tsx` : Layout partagé (header/footer branding)
 - `components.utils.tsx` : Composants réutilisables (sections, boutons, texte)
 - Templates : `newsletter-confirmation.tsx`, `contact-message-notification.tsx`
 
 **2. Action Layer** (`lib/email/actions.ts`)
+
 ```typescript
 "use server";
 
@@ -772,6 +774,7 @@ export async function sendNewsletterConfirmation(email: string) {
 ```
 
 **3. Validation Layer** (`lib/email/schemas.ts`)
+
 ```typescript
 import { z } from "zod";
 
@@ -785,6 +788,7 @@ export type NewsletterSubscription = z.infer<typeof NewsletterSubscriptionSchema
 ```
 
 **4. API Layer** (`app/api/newsletter/route.ts`)
+
 ```typescript
 import { NextRequest, NextResponse } from "next/server";
 import { NewsletterSubscriptionSchema } from "@/lib/email/schemas";
@@ -818,6 +822,7 @@ export async function POST(request: NextRequest) {
 ```
 
 **5. Custom Hooks** (`lib/hooks/`)
+
 ```typescript
 // lib/hooks/useNewsletterSubscribe.ts
 "use client";
@@ -906,12 +911,14 @@ CREATE TABLE public.messages_contact (
 
 ### Testing
 
-**Scripts de test** (`scripts/`)
+>**Scripts de test** (`scripts/`)
+
 - `test-email-integration.ts` : Test envoi emails via API
 - `check-email-logs.ts` : Vérification logs base de données
 - `test-webhooks.ts` : Test configuration webhooks Resend
 
-**Commandes**
+>**Commandes**
+
 ```bash
 pnpm run test:email     # Test emails
 pnpm run test:logs      # Check DB logs

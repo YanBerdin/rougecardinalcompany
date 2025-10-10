@@ -169,8 +169,10 @@ curl -X POST http://localhost:3000/api/test-email \
     "type": "newsletter",
     "email": "test@resend.dev"
   }'
-{"success":true,"message":"Newsletter c                              onfirmation sent to test@resend.dev","t
-yandev@LAPTOP-CE57E7VI:~/projets/rougecardinalcompany$ curl -X POST http://localhost:3000/api/test-email \
+{"success":true,"message":"Newsletter confirmation sent to test@resend.dev","t
+
+yandev@LAPTOP-CE57E7VI:~/projets/rougecardinalcompany$
+curl -X POST http://localhost:3000/api/test-email \
   -H "Content-Type: application/json" \
   -d '{
     "type": "newsletter",

@@ -7,6 +7,8 @@
 
 Configuration complète du linting pour le projet avec support TypeScript/JavaScript (ESLint) et Markdown (markdownlint-cli2).
 
+https://nextjs.org/blog/next-15-5#next-lint-deprecation
+
 ---
 
 ## 🔧 Outils Installés
