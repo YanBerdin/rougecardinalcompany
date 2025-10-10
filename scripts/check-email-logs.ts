@@ -37,13 +37,13 @@ async function checkEmailLogs() {
 
   // Check environment variables
   const supabaseUrl = envVars.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = envVars.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseKey = envVars.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
     console.log('❌ Missing Supabase environment variables');
     console.log('   Make sure your .env.local file has:');
     console.log('   NEXT_PUBLIC_SUPABASE_URL=...');
-    console.log('   SUPABASE_SERVICE_ROLE_KEY=...');
+    console.log('   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=...');
     console.log('\n   💡 You can find these values in your Supabase dashboard:');
     console.log('   https://supabase.com/dashboard/project/yvtrlvmbofklefxcxrzv/settings/api');
     return;
@@ -78,7 +78,7 @@ async function checkEmailLogs() {
     console.log('\n📬 Checking contact messages...');
     const { data: contactData, error: contactError } = await supabase
       .from('messages_contact')
-      .select('name, email, subject, created_at')
+      .select('firstname, lastname, email, reason, created_at')
       .order('created_at', { ascending: false })
       .limit(5);
 

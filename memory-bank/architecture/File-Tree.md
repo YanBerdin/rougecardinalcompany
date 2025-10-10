@@ -14,7 +14,6 @@
 Generated on: 10/8/2025, 8:52:05 PM
 Root path: `/home/yandev/projets/rougecardinalcompany`
 
-```
 ├── 📁 .git/ 🚫 (auto-hidden)
 ├── 📁 .github/
 │   ├── 📁 copilot/
@@ -257,7 +256,7 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   │   ├── 📝 TASK020-alignement-ui-presse.md
 │   │   ├── 📝 TASK021-documentation-docker.md
 │   │   ├── 📝 TASK022-documentation-supabase-cli.md
-│   │   └── 📝 _index.md
+│   │   └── 📝 index.md
 │   ├── 📝 activeContext.md
 │   ├── 📝 productContext.md
 │   ├── 📝 progress.md
