@@ -11,13 +11,13 @@ export const EventSchema = z.object({
   type: z.string(),
   status: z.string(),
   ticketUrl: z.string().nullable(),
-  image: z.string()
+  image: z.string(),
 });
 
 // Schéma pour les types d'événements
 export const EventTypeSchema = z.object({
   value: z.string(),
-  label: z.string()
+  label: z.string(),
 });
 
 // Types inférés des schémas

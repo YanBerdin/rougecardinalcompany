@@ -1,7 +1,7 @@
 "use client";
 
-import { NewsletterView, NewsletterForm } from './NewsletterView';
-import { useNewsletterSubscribe } from './hooks';
+import { NewsletterView, NewsletterForm } from "./NewsletterView";
+import { useNewsletterSubscribe } from "./hooks";
 
 export function NewsletterClientContainer() {
   const {

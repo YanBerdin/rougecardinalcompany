@@ -28,26 +28,26 @@ export async function POST(req: NextRequest) {
     case "email.complained":
       if (event.data.to) {
         await supabase
-          .from('abonnes_newsletter')
+          .from("abonnes_newsletter")
           .update({
             subscribed: false,
             unsubscribed_at: new Date().toISOString(),
-            metadata: { unsubscribe_reason: 'spam_complaint' }
+            metadata: { unsubscribe_reason: "spam_complaint" },
           })
-          .eq('email', event.data.to);
+          .eq("email", event.data.to);
       }
       break;
 
     case "email.bounced":
-      if (event.data.bounce_type === 'hard' && event.data.to) {
+      if (event.data.bounce_type === "hard" && event.data.to) {
         await supabase
-          .from('abonnes_newsletter')
+          .from("abonnes_newsletter")
           .update({
             subscribed: false,
             unsubscribed_at: new Date().toISOString(),
-            metadata: { unsubscribe_reason: 'hard_bounce' }
+            metadata: { unsubscribe_reason: "hard_bounce" },
           })
-          .eq('email', event.data.to);
+          .eq("email", event.data.to);
       }
       break;
 

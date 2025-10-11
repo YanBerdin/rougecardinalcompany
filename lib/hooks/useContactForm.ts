@@ -28,16 +28,23 @@ export function useContactForm(): UseContactFormReturn {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const updateField = (field: keyof ContactMessage, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const updateField = (
+    field: keyof ContactMessage,
+    value: string | boolean
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
     if (errorMessage) setErrorMessage(null);
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
 
-    if (!formData.name?.trim() || !formData.email?.trim() ||
-        !formData.subject?.trim() || !formData.message?.trim()) {
+    if (
+      !formData.name?.trim() ||
+      !formData.email?.trim() ||
+      !formData.subject?.trim() ||
+      !formData.message?.trim()
+    ) {
       setErrorMessage("Tous les champs obligatoires doivent être remplis");
       return;
     }
@@ -66,8 +73,13 @@ export function useContactForm(): UseContactFormReturn {
       if (data.success) {
         setIsSubmitted(true);
         setFormData({
-          name: "", email: "", subject: "", message: "",
-          phone: "", reason: "", consent: false,
+          name: "",
+          email: "",
+          subject: "",
+          message: "",
+          phone: "",
+          reason: "",
+          consent: false,
         });
       }
     } catch (error) {
@@ -82,13 +94,26 @@ export function useContactForm(): UseContactFormReturn {
 
   const reset = () => {
     setFormData({
-      name: "", email: "", subject: "", message: "",
-      phone: "", reason: "", consent: false,
+      name: "",
+      email: "",
+      subject: "",
+      message: "",
+      phone: "",
+      reason: "",
+      consent: false,
     });
     setIsSubmitting(false);
     setIsSubmitted(false);
     setErrorMessage(null);
   };
 
-  return { formData, isSubmitting, isSubmitted, errorMessage, updateField, handleSubmit, reset };
+  return {
+    formData,
+    isSubmitting,
+    isSubmitted,
+    errorMessage,
+    updateField,
+    handleSubmit,
+    reset,
+  };
 }

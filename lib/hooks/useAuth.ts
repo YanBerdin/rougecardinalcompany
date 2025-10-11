@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { createBrowserClient } from '@supabase/ssr';
-import type { User, Session } from '@supabase/supabase-js';
+import { useEffect, useState } from "react";
+import { createBrowserClient } from "@supabase/ssr";
+import type { User, Session } from "@supabase/supabase-js";
 
 interface UseAuthReturn {
   user: User | null;
@@ -23,7 +23,9 @@ export function useAuth(): UseAuthReturn {
   useEffect(() => {
     // Récupérer la session initiale
     const getInitialSession = async () => {
-      const { data: { session: initialSession } } = await supabase.auth.getSession();
+      const {
+        data: { session: initialSession },
+      } = await supabase.auth.getSession();
       setSession(initialSession);
       setUser(initialSession?.user ?? null);
       setLoading(false);
@@ -32,12 +34,12 @@ export function useAuth(): UseAuthReturn {
     getInitialSession();
 
     // Écouter les changements d'état d'auth
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, newSession) => {
-        setSession(newSession);
-        setUser(newSession?.user ?? null);
-      }
-    );
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
+      setUser(newSession?.user ?? null);
+    });
 
     return () => subscription.unsubscribe();
   }, [supabase]);
@@ -46,6 +48,6 @@ export function useAuth(): UseAuthReturn {
     user,
     session,
     loading,
-    isAuthenticated: !!user
+    isAuthenticated: !!user,
   };
 }

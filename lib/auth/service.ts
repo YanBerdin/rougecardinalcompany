@@ -1,13 +1,15 @@
 "use server";
 
 import { createClient } from "@/supabase/server";
-import { createBrowserClient } from '@supabase/ssr';
+import { createBrowserClient } from "@supabase/ssr";
 import { SITE_CONFIG } from "@/lib/site-config";
+/*
 import type {
   AuthError,
   SignUpWithPasswordCredentials,
   SignInWithPasswordCredentials
 } from '@supabase/supabase-js';
+*/
 
 // ========================================
 // SERVER-SIDE AUTH ACTIONS
@@ -19,7 +21,7 @@ import type {
 export async function signUpAction(
   email: string,
   password: string,
-  metadata?: Record<string, any>
+  metadata?: Record<string, any> //TODO: fix Unexpected any
 ) {
   const supabase = await createClient();
 
@@ -29,15 +31,15 @@ export async function signUpAction(
     options: {
       emailRedirectTo: SITE_CONFIG.AUTH.EMAIL_REDIRECT_TO,
       data: metadata, // Métadonnées utilisateur optionnelles
-    }
+    },
   });
 
   if (error) {
-    console.error('[Auth] Sign up error:', error);
+    console.error("[Auth] Sign up error:", error);
     return { success: false, error: error.message };
   }
 
-  console.log('[Auth] User signed up:', data.user?.email);
+  console.log("[Auth] User signed up:", data.user?.email);
   return { success: true, user: data.user };
 }
 
@@ -53,11 +55,11 @@ export async function signInAction(email: string, password: string) {
   });
 
   if (error) {
-    console.error('[Auth] Sign in error:', error);
+    console.error("[Auth] Sign in error:", error);
     return { success: false, error: error.message };
   }
 
-  console.log('[Auth] User signed in:', data.user.email);
+  console.log("[Auth] User signed in:", data.user.email);
   return { success: true, user: data.user };
 }
 
@@ -70,11 +72,11 @@ export async function signOutAction() {
   const { error } = await supabase.auth.signOut();
 
   if (error) {
-    console.error('[Auth] Sign out error:', error);
+    console.error("[Auth] Sign out error:", error);
     return { success: false, error: error.message };
   }
 
-  console.log('[Auth] User signed out');
+  console.log("[Auth] User signed out");
   return { success: true };
 }
 
@@ -89,11 +91,11 @@ export async function resetPasswordAction(email: string) {
   });
 
   if (error) {
-    console.error('[Auth] Password reset error:', error);
+    console.error("[Auth] Password reset error:", error);
     return { success: false, error: error.message };
   }
 
-  console.log('[Auth] Password reset email sent to:', email);
+  console.log("[Auth] Password reset email sent to:", email);
   return { success: true };
 }
 
@@ -108,11 +110,11 @@ export async function updatePasswordAction(newPassword: string) {
   });
 
   if (error) {
-    console.error('[Auth] Password update error:', error);
+    console.error("[Auth] Password update error:", error);
     return { success: false, error: error.message };
   }
 
-  console.log('[Auth] Password updated for user:', data.user?.email);
+  console.log("[Auth] Password updated for user:", data.user?.email);
   return { success: true };
 }
 
@@ -126,15 +128,15 @@ export async function signInWithMagicLinkAction(email: string) {
     email,
     options: {
       emailRedirectTo: SITE_CONFIG.AUTH.EMAIL_REDIRECT_TO,
-    }
+    },
   });
 
   if (error) {
-    console.error('[Auth] Magic link error:', error);
+    console.error("[Auth] Magic link error:", error);
     return { success: false, error: error.message };
   }
 
-  console.log('[Auth] Magic link sent to:', email);
+  console.log("[Auth] Magic link sent to:", email);
   return { success: true };
 }
 
@@ -144,7 +146,10 @@ export async function signInWithMagicLinkAction(email: string) {
 export async function resendVerificationEmailAction() {
   const supabase = await createClient();
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
 
   if (userError || !user) {
     return { success: false, error: "Non authentifié" };
@@ -155,19 +160,19 @@ export async function resendVerificationEmailAction() {
   }
 
   const { error } = await supabase.auth.resend({
-    type: 'signup',
+    type: "signup",
     email: user.email!,
     options: {
       emailRedirectTo: SITE_CONFIG.AUTH.EMAIL_REDIRECT_TO,
-    }
+    },
   });
 
   if (error) {
-    console.error('[Auth] Resend verification error:', error);
+    console.error("[Auth] Resend verification error:", error);
     return { success: false, error: error.message };
   }
 
-  console.log('[Auth] Verification email resent to:', user.email);
+  console.log("[Auth] Verification email resent to:", user.email);
   return { success: true };
 }
 
@@ -185,14 +190,19 @@ export class AuthService {
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!
   );
 
-  async signUp(email: string, password: string, metadata?: Record<string, any>) {
+  async signUp(
+    email: string,
+    password: string,
+    metadata?: Record<string, any>
+  ) {
+    //TODO: fix Unexpected any
     return await this.supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: SITE_CONFIG.AUTH.EMAIL_REDIRECT_TO,
         data: metadata,
-      }
+      },
     });
   }
 
@@ -219,7 +229,7 @@ export class AuthService {
       email,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
-      }
+      },
     });
   }
 

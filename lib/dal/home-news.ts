@@ -1,7 +1,7 @@
 "use server";
 
-import 'server-only';
-import { createClient } from '@/supabase/server';
+import "server-only";
+import { createClient } from "@/supabase/server";
 
 export type PressReleaseRecord = {
   id: number;
@@ -13,18 +13,19 @@ export type PressReleaseRecord = {
 };
 
 export async function fetchFeaturedPressReleases(limit = 3) {
-
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('communiques_presse')
-    .select('id, title, description, date_publication, image_url, ordre_affichage, public')
-    .eq('public', true)
-    .order('date_publication', { ascending: false })
+    .from("communiques_presse")
+    .select(
+      "id, title, description, date_publication, image_url, ordre_affichage, public"
+    )
+    .eq("public", true)
+    .order("date_publication", { ascending: false })
     .limit(limit);
 
   if (error) {
-    console.error('fetchFeaturedPressReleases error', error);
+    console.error("fetchFeaturedPressReleases error", error);
     return [] as PressReleaseRecord[];
   }
 
@@ -32,5 +33,8 @@ export async function fetchFeaturedPressReleases(limit = 3) {
   const cutoff = new Date(now);
   cutoff.setDate(now.getDate() - 30);
 
-  return (data ?? []).filter((r: any) => new Date(r.date_publication) >= cutoff) as PressReleaseRecord[];
+  //TODO: fix Unexpected any
+  return (data ?? []).filter(
+    (r: any) => new Date(r.date_publication) >= cutoff
+  ) as PressReleaseRecord[];
 }

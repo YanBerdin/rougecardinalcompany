@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { HeroSlide } from './types';
+import { useState, useEffect, useRef, useCallback } from "react";
+import { HeroSlide } from "./types";
 
 // Mock pour le slide de la page d'accueil
 // 07d_table_home_hero.sql
@@ -9,17 +9,21 @@ const heroSlides: HeroSlide[] = [
   {
     title: "L'Art de Raconter",
     subtitle: "Des histoires qui résonnent",
-    description: "Découvrez notre dernière création, une œuvre captivante qui explore les méandres de l'âme humaine.",
-    image: "https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    cta: "Découvrir le spectacle"
+    description:
+      "Découvrez notre dernière création, une œuvre captivante qui explore les méandres de l'âme humaine.",
+    image:
+      "https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    cta: "Découvrir le spectacle",
   },
   {
     title: "Saison 2025-2026",
     subtitle: "Une programmation exceptionnelle",
-    description: "Quatre créations inédites vous attendent cette saison, mêlant tradition et modernité.",
-    image: "https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    cta: "Voir la programmation"
-  }
+    description:
+      "Quatre créations inédites vous attendent cette saison, mêlant tradition et modernité.",
+    image:
+      "https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    cta: "Voir la programmation",
+  },
 ];
 
 export function useHero() {
@@ -37,11 +41,14 @@ export function useHero() {
     const fetchHeroData = async () => {
       try {
         // Simuler un appel API avec délai => skeleton
-        await new Promise(resolve => setTimeout(resolve, 1500)); //TODO: remove
-        
+        await new Promise((resolve) => setTimeout(resolve, 1500)); //TODO: remove
+
         setSlides(heroSlides);
       } catch (error) {
-        console.error("Erreur lors de la récupération des données du hero", error);
+        console.error(
+          "Erreur lors de la récupération des données du hero",
+          error
+        );
         setSlides([]);
       } finally {
         setIsLoading(false);
@@ -87,28 +94,34 @@ export function useHero() {
   }, []);
 
   // Touch/Mouse event handlers
-  const handleTouchStart = useCallback((e: React.TouchEvent | React.MouseEvent) => {
-    if (isLoading) return;
-    pauseAutoPlay();
-    isDragging.current = true;
-    
-    if ('touches' in e) {
-      touchStartX.current = e.touches[0].clientX;
-    } else {
-      touchStartX.current = e.clientX;
-      e.preventDefault(); // Prevent text selection on mouse drag
-    }
-  }, [pauseAutoPlay, isLoading]);
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent | React.MouseEvent) => {
+      if (isLoading) return;
+      pauseAutoPlay();
+      isDragging.current = true;
 
-  const handleTouchMove = useCallback((e: React.TouchEvent | React.MouseEvent) => {
-    if (!isDragging.current || isLoading) return;
-    
-    if ('touches' in e) {
-      touchEndX.current = e.touches[0].clientX;
-    } else {
-      touchEndX.current = e.clientX;
-    }
-  }, [isLoading]);
+      if ("touches" in e) {
+        touchStartX.current = e.touches[0].clientX;
+      } else {
+        touchStartX.current = e.clientX;
+        e.preventDefault(); // Prevent text selection on mouse drag
+      }
+    },
+    [pauseAutoPlay, isLoading]
+  );
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent | React.MouseEvent) => {
+      if (!isDragging.current || isLoading) return;
+
+      if ("touches" in e) {
+        touchEndX.current = e.touches[0].clientX;
+      } else {
+        touchEndX.current = e.clientX;
+      }
+    },
+    [isLoading]
+  );
 
   const handleTouchEnd = useCallback(() => {
     if (!isDragging.current || isLoading) return;
@@ -135,17 +148,17 @@ export function useHero() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isLoading) return;
-      if (e.key === 'ArrowLeft') {
+      if (e.key === "ArrowLeft") {
         pauseAutoPlay();
         prevSlide();
-      } else if (e.key === 'ArrowRight') {
+      } else if (e.key === "ArrowRight") {
         pauseAutoPlay();
         nextSlide();
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [nextSlide, prevSlide, pauseAutoPlay, isLoading]);
 
   return {
@@ -159,6 +172,6 @@ export function useHero() {
     pauseAutoPlay,
     handleTouchStart,
     handleTouchMove,
-    handleTouchEnd
+    handleTouchEnd,
   };
 }

@@ -8,7 +8,15 @@ import { compagniePresentationFallback } from "@/components/features/public-site
 // Schema défini dans le scope local pour éviter les exports non-async
 const PresentationSectionSchema = z.object({
   id: z.string(),
-  kind: z.enum(["hero", "history", "quote", "values", "team", "mission", "custom"]),
+  kind: z.enum([
+    "hero",
+    "history",
+    "quote",
+    "values",
+    "team",
+    "mission",
+    "custom",
+  ]),
   title: z.string().optional(),
   subtitle: z.string().optional(),
   content: z.array(z.string()).optional(),
@@ -58,7 +66,9 @@ function mapRecordToSection(r: SectionRecord): PresentationSection {
   return PresentationSectionSchema.parse(base);
 }
 
-export async function fetchCompagniePresentationSections(): Promise<PresentationSection[]> {
+export async function fetchCompagniePresentationSections(): Promise<
+  PresentationSection[]
+> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("compagnie_presentation_sections")

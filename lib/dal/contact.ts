@@ -11,10 +11,19 @@ const ContactMessageSchema = z.object({
   email: z.string().email().toLowerCase(),
   phone: z.string().trim().max(40).optional().nullable(),
   reason: z
-    .enum(["booking", "partenariat", "presse", "education", "technique", "autre"]) // align with DB CHECK constraint
+    .enum([
+      "booking",
+      "partenariat",
+      "presse",
+      "education",
+      "technique",
+      "autre",
+    ]) // align with DB CHECK constraint
     .default("autre"),
   message: z.string().trim().min(1).max(5000),
-  consent: z.boolean().refine((v) => v === true, { message: "Consent required" }),
+  consent: z
+    .boolean()
+    .refine((v) => v === true, { message: "Consent required" }),
 });
 
 export type ContactMessageInput = z.infer<typeof ContactMessageSchema>;
@@ -22,7 +31,7 @@ export type ContactMessageInput = z.infer<typeof ContactMessageSchema>;
 export async function createContactMessage(input: ContactMessageInput) {
   // Validation des données d'entrée
   const validatedInput = ContactMessageSchema.parse(input);
-  
+
   const supabase = await createClient();
 
   const payload = {

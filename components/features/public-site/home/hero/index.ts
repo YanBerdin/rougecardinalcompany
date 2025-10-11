@@ -1,2 +1,2 @@
-export { HeroContainer } from './HeroContainer';
-export { HeroView } from './HeroView';
+export { HeroContainer } from "./HeroContainer";
+export { HeroView } from "./HeroView";

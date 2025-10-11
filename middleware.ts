@@ -1,8 +1,7 @@
-
 import { updateSession } from "@/supabase/middleware";
 import { type NextRequest } from "next/server";
 
- export async function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   return await updateSession(request);
 
   const supabase = createServerClient(
@@ -14,7 +13,9 @@ import { type NextRequest } from "next/server";
           return req.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => req.cookies.set(name, value));
+          cookiesToSet.forEach(({ name, value }) =>
+            req.cookies.set(name, value)
+          );
           supabaseResponse = NextResponse.next({ request: req });
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
@@ -28,28 +29,28 @@ import { type NextRequest } from "next/server";
   const claims = await supabase.auth.getClaims();
 
   // Routes protégées
-  const protectedRoutes = ['/dashboard', '/profile', '/admin'];
-  const isProtectedRoute = protectedRoutes.some(route =>
+  const protectedRoutes = ["/dashboard", "/profile", "/admin"];
+  const isProtectedRoute = protectedRoutes.some((route) =>
     req.nextUrl.pathname.startsWith(route)
   );
 
   // Redirection si non authentifié
   if (isProtectedRoute && !claims) {
     const redirectUrl = req.nextUrl.clone();
-    redirectUrl.pathname = '/auth/login';
-    redirectUrl.searchParams.set('redirect', req.nextUrl.pathname);
+    redirectUrl.pathname = "/auth/login";
+    redirectUrl.searchParams.set("redirect", req.nextUrl.pathname);
     return NextResponse.redirect(redirectUrl);
   }
 
   // Routes auth (login, signup) - rediriger si déjà connecté
-  const authRoutes = ['/auth/login', '/auth/signup'];
-  const isAuthRoute = authRoutes.some(route =>
+  const authRoutes = ["/auth/login", "/auth/signup"];
+  const isAuthRoute = authRoutes.some((route) =>
     req.nextUrl.pathname.startsWith(route)
   );
 
   if (isAuthRoute && claims) {
     const redirectUrl = req.nextUrl.clone();
-    redirectUrl.pathname = '/protected';
+    redirectUrl.pathname = "/protected";
     return NextResponse.redirect(redirectUrl);
   }
 
@@ -65,7 +66,7 @@ export const config = {
      * - favicon.ico (favicon file)
      * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
      * Feel free to modify this pattern to include more paths.
-    */
+     */
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
     /** 
     "/dashboard/:path*",

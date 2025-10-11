@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 export function SpectaclesSkeleton() {
   return (
@@ -21,7 +21,10 @@ export function SpectaclesSkeleton() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20">
             {[1, 2].map((i) => (
-              <div key={i} className="bg-card rounded-lg overflow-hidden border">
+              <div
+                key={i}
+                className="bg-card rounded-lg overflow-hidden border"
+              >
                 <div className="grid grid-cols-1 md:grid-cols-2 h-full">
                   <div className="h-64 md:h-full bg-muted animate-pulse" />
                   <div className="p-6 space-y-4">
@@ -58,7 +61,10 @@ export function SpectaclesSkeleton() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="bg-card rounded-lg overflow-hidden border">
+              <div
+                key={i}
+                className="bg-card rounded-lg overflow-hidden border"
+              >
                 <div className="h-48 bg-muted animate-pulse" />
                 <div className="p-6 space-y-4">
                   <div className="h-6 bg-muted animate-pulse rounded" />

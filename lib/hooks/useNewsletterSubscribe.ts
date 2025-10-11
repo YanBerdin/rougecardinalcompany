@@ -73,5 +73,14 @@ export function useNewsletterSubscribe({
     setErrorMessage(null);
   };
 
-  return { email, isSubscribed, isLoading, isInitialLoading, errorMessage, handleEmailChange, handleSubmit, reset };
+  return {
+    email,
+    isSubscribed,
+    isLoading,
+    isInitialLoading,
+    errorMessage,
+    handleEmailChange,
+    handleSubmit,
+    reset,
+  };
 }

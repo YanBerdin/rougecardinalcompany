@@ -1,8 +1,8 @@
 "use server";
 
-import 'server-only';
-import { z } from 'zod';
-import { createClient } from '@/supabase/server';
+import "server-only";
+import { z } from "zod";
+import { createClient } from "@/supabase/server";
 
 export type NewsletterSettings = {
   enabled: boolean;
@@ -20,13 +20,13 @@ const NewsletterSettingsSchema = z.object({
 export async function fetchNewsletterSettings(): Promise<NewsletterSettings> {
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from('configurations_site')
-    .select('value')
-    .eq('key', 'public:home:newsletter')
+    .from("configurations_site")
+    .select("value")
+    .eq("key", "public:home:newsletter")
     .maybeSingle();
 
   if (error) {
-    console.error('fetchNewsletterSettings error', error);
+    console.error("fetchNewsletterSettings error", error);
     return { enabled: true };
   }
 

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { HeroView } from './HeroView';
-import { HeroSlide } from './types';
-import { HeroSkeleton } from '@/components/skeletons/hero-skeleton';
+import { useState, useEffect, useRef, useCallback } from "react";
+import { HeroView } from "./HeroView";
+import { HeroSlide } from "./types";
+import { HeroSkeleton } from "@/components/skeletons/hero-skeleton";
 
 export function HeroClient({ initialSlides }: { initialSlides: HeroSlide[] }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -25,7 +25,10 @@ export function HeroClient({ initialSlides }: { initialSlides: HeroSlide[] }) {
   }, [slides.length]);
 
   const prevSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev - 1 + Math.max(1, slides.length)) % Math.max(1, slides.length));
+    setCurrentSlide(
+      (prev) =>
+        (prev - 1 + Math.max(1, slides.length)) % Math.max(1, slides.length)
+    );
   }, [slides.length]);
 
   const goToSlide = useCallback((index: number) => {
@@ -48,26 +51,32 @@ export function HeroClient({ initialSlides }: { initialSlides: HeroSlide[] }) {
     setTimeout(() => setIsAutoPlaying(true), 10000);
   }, []);
 
-  const handleTouchStart = useCallback((e: React.TouchEvent | React.MouseEvent) => {
-    if (isLoading) return;
-    pauseAutoPlay();
-    isDragging.current = true;
-    if ('touches' in e) {
-      touchStartX.current = e.touches[0].clientX;
-    } else {
-      touchStartX.current = e.clientX;
-      e.preventDefault();
-    }
-  }, [pauseAutoPlay, isLoading]);
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent | React.MouseEvent) => {
+      if (isLoading) return;
+      pauseAutoPlay();
+      isDragging.current = true;
+      if ("touches" in e) {
+        touchStartX.current = e.touches[0].clientX;
+      } else {
+        touchStartX.current = e.clientX;
+        e.preventDefault();
+      }
+    },
+    [pauseAutoPlay, isLoading]
+  );
 
-  const handleTouchMove = useCallback((e: React.TouchEvent | React.MouseEvent) => {
-    if (!isDragging.current || isLoading) return;
-    if ('touches' in e) {
-      touchEndX.current = e.touches[0].clientX;
-    } else {
-      touchEndX.current = e.clientX;
-    }
-  }, [isLoading]);
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent | React.MouseEvent) => {
+      if (!isDragging.current || isLoading) return;
+      if ("touches" in e) {
+        touchEndX.current = e.touches[0].clientX;
+      } else {
+        touchEndX.current = e.clientX;
+      }
+    },
+    [isLoading]
+  );
 
   const handleTouchEnd = useCallback(() => {
     if (!isDragging.current || isLoading) return;

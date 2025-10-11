@@ -1,12 +1,18 @@
 import { SITE_CONFIG, WEBSITE_URL } from "@/lib/site-config";
 import {
-  Body, Container, Head, Hr, Html, Img, Text,
+  Body,
+  Container,
+  Head,
+  Hr,
+  Html,
+  Img,
+  Text,
 } from "@react-email/components";
 import { Tailwind } from "@react-email/tailwind";
 import type { PropsWithChildren } from "react";
 
 export const EmailLayout = (
-  props: PropsWithChildren<{ disableTailwind?: boolean }>,
+  props: PropsWithChildren<{ disableTailwind?: boolean }>
 ) => {
   let baseUrl = WEBSITE_URL;
 
@@ -20,7 +26,8 @@ export const EmailLayout = (
       <Body
         style={{
           backgroundColor: "#ffffff",
-          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+          fontFamily:
+            "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
         }}
       >
         <Container style={{ margin: "0 auto", padding: "1.5rem" }}>
@@ -43,7 +50,11 @@ export const EmailLayout = (
               </tr>
             </table>
           </Tailwind>
-          {props.disableTailwind ? props.children : <Tailwind>{props.children}</Tailwind>}
+          {props.disableTailwind ? (
+            props.children
+          ) : (
+            <Tailwind>{props.children}</Tailwind>
+          )}
           <Tailwind>
             <Hr className="mt-12 mb-6 border-gray-300" />
             <table cellPadding={0} cellSpacing={0}>

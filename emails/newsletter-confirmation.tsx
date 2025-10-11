@@ -19,7 +19,8 @@ export default function NewsletterConfirmation({ email }: { email: string }) {
         </EmailText>
       </EmailSection>
       <Text className="text-lg leading-6">
-        Merci de votre confiance,<br />- L'équipe {SITE_CONFIG.SEO.TITLE}
+        Merci de votre confiance,
+        <br />- L'équipe {SITE_CONFIG.SEO.TITLE}
       </Text>
     </EmailLayout>
   );

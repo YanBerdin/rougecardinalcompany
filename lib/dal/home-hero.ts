@@ -1,7 +1,7 @@
 "use server";
 
-import 'server-only';
-import { createClient } from '@/supabase/server';
+import "server-only";
+import { createClient } from "@/supabase/server";
 
 export type HomeHeroSlideRecord = {
   title: string;
@@ -17,16 +17,19 @@ export async function fetchActiveHomeHeroSlides() {
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('home_hero_slides')
-    .select('title, subtitle, description, image_url, cta_label, cta_url, position, active, starts_at, ends_at')
-    .order('position', { ascending: true });
+    .from("home_hero_slides")
+    .select(
+      "title, subtitle, description, image_url, cta_label, cta_url, position, active, starts_at, ends_at"
+    )
+    .order("position", { ascending: true });
 
   if (error) {
-    console.error('fetchActiveHomeHeroSlides error', error);
+    console.error("fetchActiveHomeHeroSlides error", error);
     return [] as HomeHeroSlideRecord[];
   }
   const now = new Date();
   const filtered = (data ?? []).filter((r: any) => {
+    //TODO: fix Unexpected any
     if (r.active === false) return false;
     const startsOk = !r.starts_at || new Date(r.starts_at) <= now;
     const endsOk = !r.ends_at || new Date(r.ends_at) >= now;

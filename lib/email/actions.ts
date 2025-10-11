@@ -1,8 +1,9 @@
 "use server";
 
-import { createClient } from "@/supabase/server";
+// import { createClient } from "@/supabase/server";
 import { resend } from "@/lib/resend";
-import { SITE_CONFIG, WEBSITE_URL } from "@/lib/site-config";
+// import { SITE_CONFIG, WEBSITE_URL } from "@/lib/site-config";
+import { SITE_CONFIG } from "@/lib/site-config";
 import NewsletterConfirmation from "@/emails/newsletter-confirmation";
 import ContactMessageNotification from "@/emails/contact-message-notification";
 import type { ResendParamsTypeWithConditionalFrom } from "@/types/email";
