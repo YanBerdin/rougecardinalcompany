@@ -1,6 +1,7 @@
 # graph TD
 
 ```mermaid
+    
     A[.github/copilot] --> B[Permanentes `alwaysApply: true`]
     A --> C[Contextuelles `alwaysApply: false`]
 

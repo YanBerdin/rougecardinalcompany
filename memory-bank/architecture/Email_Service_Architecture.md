@@ -24,44 +24,22 @@ Testing: Custom scripts + API endpoint testing
 ### 2.1 Diagramme d'Architecture
 
 ```mermaid
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         Email Service Architecture                          │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                    │
-        ┌───────────────────────────┼───────────────────────────┐
-        │                           │                           │
-        ▼                           ▼                           ▼
-┌───────────────────┐     ┌───────────────────┐     ┌─────────────────────┐
-│  Template Layer   │     │   Action Layer    │     │    API Layer        │
-│  (React Email)    │     │ (Server Actions)  │     │  (REST Endpoints)   │
-├───────────────────┤     ├───────────────────┤     ├─────────────────────┤
-│ • EmailLayout     │────▶│ • sendEmail()     │◀───│ POST /api/newsletter│
-│ • Newsletter      │     │ • sendNewsletter  │     │ POST /api/contact   │
-│ • ContactNotif    │     │ • sendContact     │     │ POST /api/test-email│
-│ • Components      │     │                   │     │ POST /api/webhooks  │
-└───────────────────┘     └───────────────────┘     └─────────────────────┘
-                                    │
-                                    ▼
-                          ┌───────────────────┐
-                          │ Validation Layer  │
-                          │  (Zod Schemas)    │
-                          ├───────────────────┤
-                          │ • Newsletter      │
-                          │ • Contact         │
-                          │ • Email types     │
-                          └───────────────────┘
-                                    │
-        ┌───────────────────────────┼───────────────────────────┐
-        │                           │                           │
-        ▼                           ▼                           ▼
-┌───────────────────┐     ┌───────────────────┐     ┌───────────────────┐
-│   Resend API      │     │   Supabase DAL    │     │  Custom Hooks     │
-│                   │     │                   │     │                   │
-│ • Email sending   │     │ • Newsletter DB   │     │ • useNewsletter   │
-│ • Tracking        │     │ • Contact DB      │     │ • useContactForm  │
-│ • Webhooks        │     │ • Logging         │     │ • Error handling  │
-│ • Analytics       │     │                   │     │                   │
-└───────────────────┘     └───────────────────┘     └───────────────────┘
+flowchart TD
+  subgraph EmailService[Email Service Architecture]
+    direction TB
+    Template["Template Layer\n(React Email)\n• EmailLayout\n• Newsletter\n• ContactNotif\n• Components"]
+    Action["Action Layer\n(Server Actions)\n• sendEmail()\n• sendNewsletter\n• sendContact"]
+    API["API Layer\n(REST Endpoints)\n• POST /api/newsletter\n• POST /api/contact\n• POST /api/test-email\n• POST /api/webhooks"]
+  end
+
+  Template --> Action
+  API --> Action
+  Action --> Validation["Validation Layer\n(Zod Schemas)\n• Newsletter\n• Contact\n• Email types"]
+
+  Validation --> Resend["Resend API\n• Email sending\n• Tracking\n• Webhooks\n• Analytics"]
+  Validation --> SupabaseDAL["Supabase DAL\n• Newsletter DB\n• Contact DB\n• Logging"]
+  Validation --> Hooks["Custom Hooks\n• useNewsletter\n• useContactForm\n• Error handling"]
+
 ```
 
 ## 3. Structure des Fichiers

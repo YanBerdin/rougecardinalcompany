@@ -30,14 +30,14 @@ Les migrations manuelles de correctifs sont des **instantanés temporels** pour 
 
 ### Architecture de la Solution
 
-```mermaid
+```bash
 ┌─────────────────────────────────────────────────────────────┐
 │                    SCHÉMA DÉCLARATIF                        │
-│                  supabase/schemas/*.sql                      │
-│                                                               │
-│              📋 Source de Vérité Unique                      │
-│          État Cible de la Base de Données                    │
-│                                                               │
+│                  supabase/schemas/*.sql                     │
+│                                                             │
+│              📋 Source de Vérité Unique                     │
+│          État Cible de la Base de Données                   │
+│                                                             │
 └─────────────────────────────────────────────────────────────┘
                            ▲
                            │
@@ -47,10 +47,10 @@ Les migrations manuelles de correctifs sont des **instantanés temporels** pour 
 ┌─────────────────────────┴───────────────────────────────────┐
 │                  MIGRATIONS HOTFIX                           │
 │             supabase/migrations/*.sql                        │
-│                                                               │
-│         📝 Historique Temporel des Correctifs                │
+│                                                              │
+│         📝 Historique Temporel des Correctifs               │
 │      Conservation Permanente pour Traçabilité                │
-│                                                               │
+│                                                              │
 └─────────────────────────────────────────────────────────────┘
 ```
 

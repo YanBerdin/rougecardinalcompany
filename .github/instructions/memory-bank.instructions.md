@@ -13,16 +13,16 @@ The Memory Bank consists of required core files and optional context files, all 
 
 ```mermaid
 flowchart TD
-    PB[projectbrief.md] --> PC[productContext.md]
-    PB --> SP[systemPatterns.md]
-    PB --> TC[techContext.md]
+   PB[projectbrief.md] --> PC[productContext.md]
+   PB --> SP[systemPatterns.md]
+   PB --> TC[techContext.md]
     
-    PC --> AC[activeContext.md]
-    SP --> AC
-    TC --> AC
+   PC --> AC[activeContext.md]
+   SP --> AC
+   TC --> AC
     
-    AC --> P[progress.md]
-    AC --> TF[tasks/ folder]
+   AC --> P[progress.md]
+   AC --> TF[tasks/ folder]
 ```
 
 ### Core Files (Required)
@@ -81,25 +81,25 @@ Create additional files/folders within memory-bank/ when they help organize:
 ### Plan Mode
 ```mermaid
 flowchart TD
-    Start[Start] --> ReadFiles[Read Memory Bank]
-    ReadFiles --> CheckFiles{Files Complete?}
+   Start[Start] --> ReadFiles[Read Memory Bank]
+   ReadFiles --> CheckFiles{Files Complete?}
     
-    CheckFiles -->|No| Plan[Create Plan]
-    Plan --> Document[Document in Chat]
+   CheckFiles -->|No| Plan[Create Plan]
+   Plan --> Document[Document in Chat]
     
-    CheckFiles -->|Yes| Verify[Verify Context]
-    Verify --> Strategy[Develop Strategy]
-    Strategy --> Present[Present Approach]
+   CheckFiles -->|Yes| Verify[Verify Context]
+   Verify --> Strategy[Develop Strategy]
+   Strategy --> Present[Present Approach]
 ```
 
 ### Act Mode
 ```mermaid
 flowchart TD
-    Start[Start] --> Context[Check Memory Bank]
-    Context --> Update[Update Documentation]
-    Update --> Rules[Update instructions if needed]
-    Rules --> Execute[Execute Task]
-    Execute --> Document[Document Changes]
+   Start[Start] --> Context[Check Memory Bank]
+   Context --> Update[Update Documentation]
+   Update --> Rules[Update instructions if needed]
+   Rules --> Execute[Execute Task]
+   Execute --> Document[Document Changes]
 ```
 
 ### Task Management

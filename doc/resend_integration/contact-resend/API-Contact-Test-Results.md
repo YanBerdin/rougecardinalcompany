@@ -11,9 +11,13 @@
 ### Architecture Implémentée
 
 ```mermaid
-Frontend Form → API Route → DAL Contact → Supabase (RLS protected)
-                    ↓
-                Email Notification → Resend → Admin
+flowchart LR
+  FrontendForm["Frontend Form"] --> APIRoute["API Route"]
+  APIRoute --> DAL["DAL Contact"]
+  DAL --> Supabase["Supabase (RLS protected)"]
+  APIRoute --> EmailNotification["Email Notification"]
+  EmailNotification --> Resend["Resend"]
+  Resend --> Admin["Admin"]
 ```
 
 **Pattern RGPD Appliqué** :

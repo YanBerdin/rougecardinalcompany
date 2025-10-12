@@ -3,13 +3,14 @@
 ## **Auto-generated on $(date) - Architecture analysis and design patterns documentation**
 
 > ⚠️ **IMPORTANT - Supabase Auth Best Practices (2025)**
-> 
+>
 > Ce document a été **mis à jour** pour respecter les dernières recommandations Supabase Auth :
+>
 > - ✅ Utilisation de `@supabase/ssr` (moderne) au lieu de `@supabase/auth-helpers-nextjs` (déprécié)
 > - ✅ Utilisation de `getClaims()` pour une performance 100x supérieure (~2-5ms vs ~300ms)
 > - ✅ Utilisation des nouvelles clés API : `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY`
 > - ✅ Pattern cookies correct : `getAll/setAll` uniquement
-> 
+>
 > 📖 Pour plus de détails, consultez : `.github/instructions/nextjs-supabase-auth-2025.instructions.md`
 
 ## 1. Architecture Detection & Analysis Phase
@@ -654,6 +655,7 @@ export const ContactMessageSchema = z.object({
 **Integration with DAL**:
 
 The email service integrates with existing DAL functions:
+
 - `lib/dal/home-newsletter.ts`: Newsletter subscription persistence
 - `lib/dal/contact.ts`: Contact message storage
 - Email sending triggers after successful database operations
@@ -694,6 +696,7 @@ scripts/
 Pour une documentation complète de l'architecture email avec diagrammes détaillés, code source complet, exemples d'utilisation et guides de troubleshooting, consultez :
 
 **[Email_Service_Architecture.md](./Email_Service_Architecture.md)** - ~850 lignes de documentation technique incluant :
+
 - Architecture en couches (Template/Action/API/Validation)
 - Code source complet de tous les composants
 - Exemples pratiques d'utilisation (hooks, API endpoints)
