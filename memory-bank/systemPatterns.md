@@ -6,13 +6,11 @@
 
 ```typescript
 // Structure type d'une route
-app/
-  layout.tsx       // Layout partagé
-  page.tsx         // Page principale
-  loading.tsx      // État de chargement
-  error.tsx        // Gestion d'erreur
-  [param]/         // Route dynamique
-    page.tsx       // Page avec paramètre
+app / layout.tsx; // Layout partagé
+page.tsx; // Page principale
+loading.tsx; // État de chargement
+error.tsx[param] / // Gestion d'erreur // Route dynamique
+  page.tsx; // Page avec paramètre
 ```
 
 ### Pattern de Server Components et Client Components
@@ -101,74 +99,20 @@ export function AuthButton() {
 - Compatible : fonctionne dans les layouts qui ne se re-rendent pas
 - Conformité : respecte `.github/instructions/nextjs-supabase-auth-2025.instructions.md`
 
-### Pattern Login/Logout avec Refresh
-
-```typescript
-// Login Form - Pattern avec router.refresh()
-"use client";
-import { useRouter } from "next/navigation";
-import { createClient } from "@/supabase/client";
-
-export function LoginForm() {
-  const router = useRouter();
-  
-  const handleLogin = async (email: string, password: string) => {
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    
-    if (error) throw error;
-    
-    // Force refresh pour mettre à jour les Server Components
-    router.refresh();
-    
-    // Petit délai pour synchro session/cookies
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    router.push("/protected");
-  };
-  
-  // ...
-}
-
-// Logout Button - Pattern avec window.location.href
-"use client";
-import { useRouter } from "next/navigation";
-import { createClient } from "@/supabase/client";
-
-export function LogoutButton() {
-  const router = useRouter();
-  
-  const logout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    
-    // Rechargement complet pour garantir synchro complète
-    window.location.href = "/auth/login";
-  };
-  
-  return <Button onClick={logout}>Logout</Button>;
-}
-```
-
-**Pourquoi cette différence ?**
-
-- **Login** : `router.refresh()` suffit car on passe d'une page publique à protégée
-- **Logout** : `window.location.href` garantit l'effacement complet des cookies/session
-
 ### Pattern DAL (Data Access Layer) côté serveur
 
 ```typescript
 // lib/dal/home-news.ts
-import 'server-only';
-import { createClient } from '@/supabase/server';
+import "server-only";
+import { createClient } from "@/supabase/server";
 
 export async function fetchFeaturedPressReleases(limit = 3) {
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from('communiques_presse')
-    .select('id, title, slug, description, date_publication, image_url')
-    .eq('public', true)
-    .order('date_publication', { ascending: false })
+    .from("communiques_presse")
+    .select("id, title, slug, description, date_publication, image_url")
+    .eq("public", true)
+    .order("date_publication", { ascending: false })
     .limit(limit);
   if (error) throw error;
   return data ?? [];
@@ -208,7 +152,7 @@ export async function createContact(input: ContactInput) {
   // ...
 }
 
-// components/.../actions.ts  
+// components/.../actions.ts
 "use server";
 const FormSchema = z.object({ ... }); // Dupliqué mais nécessaire
 export async function submitForm(formData: FormData) {
@@ -226,9 +170,9 @@ Principes:
 ### Pattern Suspense + Skeletons
 
 ```tsx
-import { Suspense } from 'react';
-import { NewsSkeleton } from './NewsSkeleton';
-import NewsContainer from './NewsContainer';
+import { Suspense } from "react";
+import { NewsSkeleton } from "./NewsSkeleton";
+import NewsContainer from "./NewsContainer";
 
 export function NewsSection() {
   return (
@@ -261,10 +205,10 @@ Conseils:
 export async function fetchFeaturedShows(limit = 3) {
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from('spectacles')
-    .select('id, title, slug, image_url')
-    .eq('public', true)
-    .order('updated_at', { ascending: false })
+    .from("spectacles")
+    .select("id, title, slug, image_url")
+    .eq("public", true)
+    .order("updated_at", { ascending: false })
     .limit(limit);
   if (error) throw error;
   return data ?? [];
@@ -310,7 +254,7 @@ export default function RootLayout({
 
 ```typescript
 // Structure type d'une section
-export function Section({ 
+export function Section({
   title,
   description,
   children
@@ -436,10 +380,7 @@ describe('SpectacleCard', () => {
  * @param {boolean} [isPreview] - Si true, affiche une version réduite
  * @returns {JSX.Element} Carte de spectacle
  */
-export function SpectacleCard({ 
-  spectacle,
-  isPreview 
-}: SpectacleCardProps) {
+export function SpectacleCard({ spectacle, isPreview }: SpectacleCardProps) {
   // Implementation
 }
 ```
@@ -480,7 +421,7 @@ size: {
 **Input (`components/ui/input.tsx`):**
 
 ```typescript
-className: "h-11 w-full ..." // 44px (était 36px)
+className: "h-11 w-full ..."; // 44px (était 36px)
 ```
 
 ### 2. Plugin Tailwind touch-hitbox
@@ -546,14 +487,18 @@ Objectif: unifier l'inscription newsletter derrière une API unique, factoriser 
 Composants clés:
 
 ### 1. API route `app/api/newsletter/route.ts`
+
 >
+
 - Méthode POST, corps validé par Zod `{ email, consent?, source? }`.
 - Upsert idempotent sur `public.abonnes_newsletter` avec `onConflict: 'email'`.
 - Stocke `metadata` JSON: `{ consent, source }`.
 - Retourne `{ status: 'subscribed' }` en succès, erreurs typées sinon.
 
 ### 2. Hook partagé `lib/hooks/useNewsletterSubscribe.ts`
+
 >
+
 - Signature: `useNewsletterSubscribe({ source?: string })`.
 - Gère `email`, `isSubscribed`, `isLoading`, `errorMessage` et handlers `handleEmailChange`, `handleSubmit`.
 - Appelle `POST /api/newsletter`; surface d'erreur unifiée pour l'UI.
@@ -646,8 +591,8 @@ Composants clés:
 ```sql
 -- Exemple de seed avec URL externe
 insert into public.medias (storage_path, filename, mime, size_bytes, alt_text, metadata)
-select 'photos/spectacle-scene-1.jpg', 'spectacle-scene-1.jpg', 'image/jpeg', 2048000, 
-  'Scène du spectacle - Photo 1', 
+select 'photos/spectacle-scene-1.jpg', 'spectacle-scene-1.jpg', 'image/jpeg', 2048000,
+  'Scène du spectacle - Photo 1',
   '{"type": "photo", "resolution": "300dpi", "usage": "press", "external_url": "https://images.unsplash.com/photo-xxx?w=1920"}' ::jsonb
 where not exists (select 1 from public.medias where storage_path = 'photos/spectacle-scene-1.jpg');
 ```
@@ -678,11 +623,11 @@ export async function fetchMediaKit(): Promise<MediaKitItemDTO[]> {
   return (data ?? []).map((row: MediaRow) => {
     // Prioriser l'URL externe si disponible
     const externalUrl = row.metadata?.external_url;
-    const fileUrl = externalUrl 
+    const fileUrl = externalUrl
       ? String(externalUrl)
       : `/storage/v1/object/public/${row.storage_path}`;
 
-    return { fileUrl, /* ... */ };
+    return { fileUrl /* ... */ };
   });
 }
 ```
@@ -699,7 +644,9 @@ interface MediaRow {
 }
 
 // Utilisation stricte dans les maps
-return (data ?? []).map((row: MediaRow) => { /* ... */ });
+return (data ?? []).map((row: MediaRow) => {
+  /* ... */
+});
 ```
 
 Principes:
@@ -748,20 +695,22 @@ Au lieu de créer une politique RLS complexe, les spectacles archivés sont marq
 ```typescript
 // Container (Server Component)
 const allSpectacles = await fetchAllSpectacles();
-const archivedShows = allSpectacles.filter(s => s.status === 'archive');
-const currentShows = allSpectacles.filter(s => s.status !== 'archive');
+const archivedShows = allSpectacles.filter((s) => s.status === "archive");
+const currentShows = allSpectacles.filter((s) => s.status !== "archive");
 
 // View (Client Component)
 const [showAllArchived, setShowAllArchived] = useState(false);
-const displayedArchived = showAllArchived ? archivedShows : archivedShows.slice(0, threshold);
+const displayedArchived = showAllArchived
+  ? archivedShows
+  : archivedShows.slice(0, threshold);
 ```
 
 ### Migration de données
 
 ```sql
 -- Seed migration (20250926153000_seed_spectacles.sql)
-UPDATE public.spectacles 
-SET public = true 
+UPDATE public.spectacles
+SET public = true
 WHERE status = 'archive';
 ```
 
@@ -781,9 +730,7 @@ Objectif: garantir l'alignement des boutons d'action en bas des cartes, indépen
       {/* Contenu variable (description, etc.) */}
       <p>{description}</p>
     </div>
-    <Button className="mt-auto">
-      Action
-    </Button>
+    <Button className="mt-auto">Action</Button>
   </CardContent>
 </Card>
 ```
@@ -804,27 +751,34 @@ Objectif: garantir l'alignement des boutons d'action en bas des cartes, indépen
 ### Exemple appliqué (PresseView.tsx)
 
 ```tsx
-{pressReleases.map((release) => (
-  <Card key={release.id} className="flex flex-col overflow-hidden hover:shadow-lg transition-shadow">
-    <CardHeader>
-      <CardTitle className="text-xl">{release.title}</CardTitle>
-    </CardHeader>
-    <CardContent className="flex-1 flex flex-col">
-      <div className="flex-1 space-y-4">
-        <p className="text-muted-foreground">{release.description}</p>
-        <p className="text-sm text-muted-foreground">
-          {format(new Date(release.date_publication), "d MMMM yyyy", { locale: fr })}
-        </p>
-      </div>
-      <Button asChild className="mt-auto">
-        <Link href={release.pdf_url} target="_blank">
-          <Download className="mr-2 h-4 w-4" />
-          Télécharger le PDF
-        </Link>
-      </Button>
-    </CardContent>
-  </Card>
-))}
+{
+  pressReleases.map((release) => (
+    <Card
+      key={release.id}
+      className="flex flex-col overflow-hidden hover:shadow-lg transition-shadow"
+    >
+      <CardHeader>
+        <CardTitle className="text-xl">{release.title}</CardTitle>
+      </CardHeader>
+      <CardContent className="flex-1 flex flex-col">
+        <div className="flex-1 space-y-4">
+          <p className="text-muted-foreground">{release.description}</p>
+          <p className="text-sm text-muted-foreground">
+            {format(new Date(release.date_publication), "d MMMM yyyy", {
+              locale: fr,
+            })}
+          </p>
+        </div>
+        <Button asChild className="mt-auto">
+          <Link href={release.pdf_url} target="_blank">
+            <Download className="mr-2 h-4 w-4" />
+            Télécharger le PDF
+          </Link>
+        </Button>
+      </CardContent>
+    </Card>
+  ));
+}
 ```
 
 ### Résultat
@@ -841,24 +795,27 @@ Objectif: permettre les opérations critiques (BDD) même si les opérations sec
 // API Route avec warning pattern
 export async function POST(request: NextRequest) {
   const validated = Schema.parse(await request.json());
-  
+
   // 1. Opération critique (BDD) toujours prioritaire
   await createRecord(validated);
-  
+
   // 2. Opération secondaire (email) avec catch silencieux
   let emailSent = true;
   try {
     await sendEmail(validated);
   } catch (error) {
-    console.error('[Email] Failed:', error);
+    console.error("[Email] Failed:", error);
     emailSent = false; // Ne pas throw, juste logger
   }
-  
+
   // 3. Retour avec warning optionnel
-  return NextResponse.json({
-    status: 'success',
-    ...(!emailSent && { warning: 'Email notification could not be sent' })
-  }, { status: 201 });
+  return NextResponse.json(
+    {
+      status: "success",
+      ...(!emailSent && { warning: "Email notification could not be sent" }),
+    },
+    { status: 201 }
+  );
 }
 ```
 
@@ -869,22 +826,22 @@ export async function POST(request: NextRequest) {
 
 export async function submitAction(formData: FormData) {
   const validated = Schema.parse(extractData(formData));
-  
+
   // Opération BDD
   await createRecord(validated);
-  
+
   // Email avec catch
   let emailSent = true;
   try {
     await sendEmail(validated);
   } catch (error) {
-    console.error('[Action] Email failed:', error);
+    console.error("[Action] Email failed:", error);
     emailSent = false;
   }
-  
+
   return {
     success: true,
-    ...(!emailSent && { warning: 'Email could not be sent' })
+    ...(!emailSent && { warning: "Email could not be sent" }),
   };
 }
 ```
@@ -903,26 +860,24 @@ Objectif: protéger les données personnelles via RLS Supabase et pattern d'inse
 
 ```typescript
 "use server";
-import 'server-only';
+import "server-only";
 
 export async function createContactMessage(input: ContactInput) {
   const supabase = await createClient();
-  
+
   // RGPD: INSERT sans SELECT pour éviter exposition RLS
   // Si RLS bloque SELECT, l'erreur n'affecte pas l'insertion
-  const { error } = await supabase
-    .from('messages_contact')
-    .insert(payload);
-    // ❌ PAS DE .select() ici
-  
+  const { error } = await supabase.from("messages_contact").insert(payload);
+  // ❌ PAS DE .select() ici
+
   if (error) {
     // Idempotence: unique_violation = déjà enregistré = succès
-    if (error.code === '23505') {
+    if (error.code === "23505") {
       return { success: true };
     }
     throw new Error(`Database error: ${error.message}`);
   }
-  
+
   return { success: true };
 }
 ```
@@ -977,7 +932,7 @@ Objectif: architecture en couches pour l'envoi d'emails transactionnels via Rese
 ### Architecture en couches
 
 ```bash
-User → API Endpoint → Zod Validation → DAL Insert → 
+User → API Endpoint → Zod Validation → DAL Insert →
   Email Action → Template Render → Resend API → Email Sent
 ```
 
@@ -1011,11 +966,11 @@ export async function sendEmail({
     subject,
     react
   });
-  
+
   if (error) {
     throw new Error(`Email send failed: ${error.message}`);
   }
-  
+
   return data;
 }
 
@@ -1036,10 +991,12 @@ import { z } from "zod";
 export const NewsletterSubscriptionSchema = z.object({
   email: z.string().email("Email invalide"),
   consent: z.boolean().optional(),
-  source: z.string().optional()
+  source: z.string().optional(),
 });
 
-export type NewsletterSubscription = z.infer<typeof NewsletterSubscriptionSchema>;
+export type NewsletterSubscription = z.infer<
+  typeof NewsletterSubscriptionSchema
+>;
 ```
 
 **4. API Layer** (`app/api/newsletter/route.ts`)
@@ -1053,14 +1010,11 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const validated = NewsletterSubscriptionSchema.parse(body);
-    
+
     // Insert en base (triggers email via Supabase function)
     await createNewsletterSubscription(validated);
-    
-    return NextResponse.json(
-      { status: 'subscribed' },
-      { status: 201 }
-    );
+
+    return NextResponse.json({ status: "subscribed" }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -1068,10 +1022,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    return NextResponse.json(
-      { error: "Subscription failed" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Subscription failed" }, { status: 500 });
   }
 }
 ```
@@ -1085,44 +1036,44 @@ export async function POST(request: NextRequest) {
 import { useState, FormEvent } from "react";
 
 export function useNewsletterSubscribe({ source }: { source?: string } = {}) {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
   const [isSubscribed, setIsSubscribed] = useState(false);
-  
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setErrorMessage('');
-    
+    setErrorMessage("");
+
     try {
-      const res = await fetch('/api/newsletter', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, consent: true, source })
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, consent: true, source }),
       });
-      
+
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || 'Subscription failed');
+        throw new Error(data.error || "Subscription failed");
       }
-      
+
       setIsSubscribed(true);
-      setEmail('');
+      setEmail("");
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Unknown error');
+      setErrorMessage(error instanceof Error ? error.message : "Unknown error");
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   return {
     email,
     setEmail,
     handleSubmit,
     isLoading,
     errorMessage,
-    isSubscribed
+    isSubscribed,
   };
 }
 ```
@@ -1166,13 +1117,13 @@ CREATE TABLE public.messages_contact (
 
 ### Testing
 
->**Scripts de test** (`scripts/`)
+> **Scripts de test** (`scripts/`)
 
 - `test-email-integration.ts` : Test envoi emails via API
 - `check-email-logs.ts` : Vérification logs base de données
 - `test-webhooks.ts` : Test configuration webhooks Resend
 
->**Commandes**
+> **Commandes**
 
 ```bash
 pnpm run test:email     # Test emails

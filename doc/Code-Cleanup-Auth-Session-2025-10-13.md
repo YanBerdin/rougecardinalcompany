@@ -102,11 +102,15 @@ export async function AuthButton() {
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
-  
+
   return user ? (
-    <div>Hey, {user.email}! <LogoutButton /></div>
+    <div>
+      Hey, {user.email}! <LogoutButton />
+    </div>
   ) : (
-    <div><Link href="/auth/login">Sign in</Link></div>
+    <div>
+      <Link href="/auth/login">Sign in</Link>
+    </div>
   );
 }
 ```
@@ -144,92 +148,43 @@ export function AuthButton() {
     getClaims();
 
     // ✅ Écoute les changements auth en temps réel
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        if (session?.user) {
-          setUserClaims({
-            sub: session.user.id,
-            email: session.user.email,
-            ...session.user.user_metadata,
-          });
-        } else {
-          setUserClaims(null);
-        }
-        setLoading(false);
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUserClaims({
+          sub: session.user.id,
+          email: session.user.email,
+          ...session.user.user_metadata,
+        });
+      } else {
+        setUserClaims(null);
       }
-    );
+      setLoading(false);
+    });
 
     return () => subscription.unsubscribe();
   }, [supabase.auth]);
 
   if (loading) return <LoadingButton />;
-  
+
   return userClaims ? (
-    <div>Hey, {userClaims.email}! <LogoutButton /></div>
+    <div>
+      Hey, {userClaims.email}! <LogoutButton />
+    </div>
   ) : (
-    <div><Link href="/auth/login">Sign in</Link></div>
+    <div>
+      <Link href="/auth/login">Sign in</Link>
+    </div>
   );
 }
 ```
 
 **Améliorations** :
 
-- ✅ **Performance 100x meilleure** : 2-5ms au lieu de 300ms
 - ✅ **Réactivité temps réel** : mise à jour automatique via `onAuthStateChange()`
 - ✅ **Fonctionne dans layout** : Client Component se met à jour même si le layout ne change pas
 - ✅ **Conformité instructions** : respecte `.github/instructions/nextjs-supabase-auth-2025.instructions.md`
-
-### 2. `components/login-form.tsx` - Ajout router.refresh()
-
-**Ajout** :
-
-```tsx
-const handleLogin = async (e: React.FormEvent) => {
-  // ...
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) throw error;
-  
-  // ✅ Force refresh pour mettre à jour les Server Components
-  router.refresh();
-  
-  // ✅ Petit délai pour synchro session/cookies
-  await new Promise(resolve => setTimeout(resolve, 100));
-  
-  router.push("/protected");
-};
-```
-
-**Raison** : Garantit que les Server Components (y compris dans le layout) récupèrent la nouvelle session
-
-### 3. `components/logout-button.tsx` - Rechargement complet
-
-**Avant** :
-
-```tsx
-const logout = async () => {
-  const supabase = createClient();
-  await supabase.auth.signOut();
-  router.push("/auth/login");
-};
-```
-
-**Après** :
-
-```tsx
-const logout = async () => {
-  const supabase = createClient();
-  await supabase.auth.signOut();
-  
-  // ✅ Rechargement complet pour garantir synchro
-  window.location.href = "/auth/login";
-};
-```
-
-**Raison** :
-
-- `router.refresh()` seul ne suffisait pas pour le logout
-- `window.location.href` force un rechargement complet
-- Garantit l'effacement complet des cookies/session
 
 ---
 
@@ -237,21 +192,21 @@ const logout = async () => {
 
 ### Authentification Initiale
 
-| Méthode | Temps | Type | Cas d'usage |
-|---------|-------|------|-------------|
-| `getUser()` ❌ | ~300ms | Appel réseau | Legacy, à éviter |
+| Méthode          | Temps  | Type                    | Cas d'usage                 |
+| ---------------- | ------ | ----------------------- | --------------------------- |
+| `getUser()` ❌   | ~300ms | Appel réseau            | Legacy, à éviter            |
 | `getClaims()` ✅ | ~2-5ms | Vérification JWT locale | Recommandé pour checks auth |
 
 **Gain** : **100x plus rapide** (298ms économisés)
 
 ### Impact UX
 
-| Scénario | Avant | Après |
-|----------|-------|-------|
-| Chargement initial header | 300ms | 2-5ms |
-| Login → affichage user | Refresh manuel requis | Instantané |
-| Logout → affichage public | Refresh manuel requis | Instantané |
-| Navigation avec auth | 300ms par page | 2-5ms par page |
+| Scénario                  | Avant                 | Après          |
+| ------------------------- | --------------------- | -------------- |
+| Chargement initial header | 300ms                 | 2-5ms          |
+| Login → affichage user    | Refresh manuel requis | Instantané     |
+| Logout → affichage public | Refresh manuel requis | Instantané     |
+| Navigation avec auth      | 300ms par page        | 2-5ms par page |
 
 ---
 
@@ -262,7 +217,7 @@ const logout = async () => {
 **Réponse : NON** ✅
 
 ### Principe fondamental
->
+
 > **"Never trust the client"** - L'affichage UI n'est JAMAIS une couche de sécurité
 
 ### Scénario d'attaque (inefficace)
@@ -271,7 +226,7 @@ Un attaquant pourrait modifier l'état client dans DevTools :
 
 ```javascript
 // Console DevTools
-React.setState({ userClaims: { email: "admin@example.com" } })
+React.setState({ userClaims: { email: "admin@example.com" } });
 ```
 
 **Résultat** : Le header affiche "Hey, admin@example.com!"
@@ -326,13 +281,13 @@ export async function GET(request: Request) {
 
 ### Conclusion Sécurité
 
-| Aspect | Server Component | Client Component | Sécurité |
-|--------|-----------------|------------------|----------|
-| **Affichage basé sur** | `getClaims()` serveur | `getClaims()` client | ⚖️ Égale |
-| **Manipulable par** | Modification cookies | DevTools React state | ⚖️ Égale |
-| **Impact sécurité** | Aucun (UI seulement) | Aucun (UI seulement) | ⚖️ Égale |
-| **Protection réelle** | Middleware + RLS | Middleware + RLS | ✅ Identique |
-| **Réactivité** | Nécessite refresh | Temps réel | ✅ Client meilleur |
+| Aspect                 | Server Component      | Client Component     | Sécurité           |
+| ---------------------- | --------------------- | -------------------- | ------------------ |
+| **Affichage basé sur** | `getClaims()` serveur | `getClaims()` client | ⚖️ Égale           |
+| **Manipulable par**    | Modification cookies  | DevTools React state | ⚖️ Égale           |
+| **Impact sécurité**    | Aucun (UI seulement)  | Aucun (UI seulement) | ⚖️ Égale           |
+| **Protection réelle**  | Middleware + RLS      | Middleware + RLS     | ✅ Identique       |
+| **Réactivité**         | Nécessite refresh     | Temps réel           | ✅ Client meilleur |
 
 ---
 
@@ -384,10 +339,7 @@ git commit -m "perf(auth): optimize AuthButton with getClaims() + real-time upda
 - Transform AuthButton from Server to Client Component
 - Replace getUser() (~300ms) with getClaims() (~2-5ms) - 100x faster
 - Add onAuthStateChange() listener for real-time reactivity
-- Add router.refresh() in login-form for Server Components update
-- Use window.location.href in logout for complete reload guarantee
 
-Performance: 2-5ms initial load (was 300ms)
 UX: Instant header update after login/logout (no manual refresh)
 Security: No vulnerabilities added (server protection unchanged)"
 ```

@@ -149,12 +149,12 @@ export async function middleware(request: NextRequest) {
 "use client";
 export function AuthButton() {
   const [userClaims, setUserClaims] = useState(null);
-  
+
   useEffect(() => {
     supabase.auth.getClaims().then(/* ... */);
     supabase.auth.onAuthStateChange(/* ... */);
   }, []);
-  
+
   return userClaims ? <UserMenu /> : <SignInButton />;
 }
 ```
@@ -234,16 +234,6 @@ Total: Code minimal, 100% template officiel
 - app/auth/callback route
 - EMAIL_REDIRECT_TO config
 
-### ✅ Toujours Mentionner
-
-- Appels Supabase directs dans composants
-- getClaims() pour performance (~2-5ms)
-- onAuthStateChange() pour réactivité
-- window.location.href pour logout
-- router.refresh() pour login
-- Middleware pour protection serveur
-- Client Component pour AuthButton
-
 ### 📝 Template de Documentation Auth
 
 Quand vous documentez l'authentification, utilisez ce template :
@@ -254,20 +244,23 @@ Quand vous documentez l'authentification, utilisez ce template :
 **Pattern**: Official Next.js + Supabase template (client-direct)
 
 **Components**:
+
 - `auth-button.tsx` - Client Component with getClaims() (~2-5ms)
 - `login-form.tsx` - Direct Supabase auth calls
-- `logout-button.tsx` - window.location.href for complete reload
 
 **Protection**:
+
 - `supabase/middleware.ts` - Server-side route protection with getClaims()
 - `app/protected/layout.tsx` - Additional auth verification
 
 **Performance**:
+
 - Initial load: 2-5ms (JWT verification)
 - Real-time updates: onAuthStateChange() listener
 - No network calls for auth checks
 
 **Security**:
+
 - Server-side protection (middleware + RLS)
 - Client UI for user experience only
 - No security vulnerabilities from Client Components

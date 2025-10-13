@@ -10,13 +10,13 @@
 
 ### Fichiers Mis à Jour
 
-| Fichier | Sections Modifiées | Lignes Impactées |
-|---------|-------------------|------------------|
-| **Project_Folders_Structure_Blueprint_v2.md** | 8 sections | ~30 lignes |
-| **Project_Folders_Structure_Blueprint.md** | 3 sections | ~10 lignes |
-| **Email_Service_Architecture.md** | 1 section | 1 ligne |
-| **File-Tree.md** | 2 sections | 2 lignes |
-| **Project_Architecture_Blueprint.md** | 1 section | 1 ligne |
+| Fichier                                       | Sections Modifiées | Lignes Impactées |
+| --------------------------------------------- | ------------------ | ---------------- |
+| **Project_Folders_Structure_Blueprint_v2.md** | 8 sections         | ~30 lignes       |
+| **Project_Folders_Structure_Blueprint.md**    | 3 sections         | ~10 lignes       |
+| **Email_Service_Architecture.md**             | 1 section          | 1 ligne          |
+| **File-Tree.md**                              | 2 sections         | 2 lignes         |
+| **Project_Architecture_Blueprint.md**         | 1 section          | 1 ligne          |
 
 ### Suppressions Effectuées
 
@@ -76,14 +76,14 @@
 
    ```diff
    **Current Hooks**:
-   
+
    - // lib/hooks/useAuth.ts
    - export function useAuth() {
    -   // Auth state management
    -   // Login/logout logic
    -   // Session handling
    - }
-   
+
    // lib/hooks/useNewsletterSubscribe.ts
    ```
 
@@ -180,7 +180,7 @@ grep -r "EMAIL_REDIRECT_TO" memory-bank/architecture/*.md
 
 ✅ **Aucune référence trouvée** dans les blueprints d'architecture  
 ✅ Les seules mentions restantes sont dans `progress.md` (documentation des suppressions)  
-✅ Tous les fichiers d'architecture sont synchronisés avec le code source  
+✅ Tous les fichiers d'architecture sont synchronisés avec le code source
 
 ---
 
@@ -201,8 +201,6 @@ Le projet utilise maintenant exclusivement :
 - ✅ `getClaims()` pour les vérifications d'auth (~2-5ms)
 - ✅ `middleware.ts` pour la protection serveur-side
 - ✅ Composants Client avec `onAuthStateChange()` pour la réactivité UI
-- ✅ Pattern `router.refresh()` + `router.push()` pour login
-- ✅ Pattern `window.location.href` pour logout (garantit le nettoyage des cookies)
 
 ### Références Documentaires
 

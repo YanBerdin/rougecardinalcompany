@@ -1,4 +1,4 @@
-# knowledge-base — Cahier des charges – Création de site internet  **Compagnie de Théâtre « Rouge Cardinal »**
+# knowledge-base — Cahier des charges – Création de site internet **Compagnie de Théâtre « Rouge Cardinal »**
 
 ## Contexte
 
@@ -93,11 +93,11 @@
 
 ### 1.1. Coordonnées
 
-- **Compagnie :** Rouge Cardinal  
-- **Forme juridique :** Association loi 1901  
-- **Siège social :** [Adresse complète]  
-- **Contact projet :** [Prénom Nom], Président / Responsable communication  
-- **Téléphone :** [Numéro]  
+- **Compagnie :** Rouge Cardinal
+- **Forme juridique :** Association loi 1901
+- **Siège social :** [Adresse complète]
+- **Contact projet :** [Prénom Nom], Président / Responsable communication
+- **Téléphone :** [Numéro]
 - **Email :** [adresse.email@rougecardinal.fr]
 
 ### 1.2. Description de l'établissement
@@ -107,15 +107,15 @@ Soutenue par des subventions et mécénats.
 
 ### 1.3. Contexte et objectifs
 
-- Offrir une vitrine professionnelle  
-- Valoriser les productions passées et en cours  
-- Faciliter les demandes de subventions et partenariats  
-- Exploiter Google Ad Grants pour accroître le trafic  
+- Offrir une vitrine professionnelle
+- Valoriser les productions passées et en cours
+- Faciliter les demandes de subventions et partenariats
+- Exploiter Google Ad Grants pour accroître le trafic
 
 ### 1.4. Références
 
 - Logo (SVG) : rougecardinal_logo.svg
-- RGAA (accessibilité)  
+- RGAA (accessibilité)
 - Guide SEO Google (mai 2025)
 - Charte graphique
 - Mood board
@@ -124,20 +124,20 @@ Soutenue par des subventions et mécénats.
 
 ## 2. Public cible
 
-- Grand public (amateurs de théâtre et photographie)  
-- Institutions culturelles, salles de spectacle  
-- Presse spécialisée  
+- Grand public (amateurs de théâtre et photographie)
+- Institutions culturelles, salles de spectacle
+- Presse spécialisée
 - Mécènes, donateurs, adhérents et bénévoles
 
 ---
 
 ## 3. Objectifs fonctionnels
 
-1. Présenter la compagnie et son identité  
-2. Mettre en avant spectacles et expositions (actuels et passés)  
-3. Gérer un agenda interactif d'événements  
-4. **Centraliser la presse** (communiqués émis PAR la compagnie + revues ÉCRITES SUR la compagnie)  
-5. Permettre une mise à jour autonome via un back-office sécurisé  
+1. Présenter la compagnie et son identité
+2. Mettre en avant spectacles et expositions (actuels et passés)
+3. Gérer un agenda interactif d'événements
+4. **Centraliser la presse** (communiqués émis PAR la compagnie + revues ÉCRITES SUR la compagnie)
+5. Permettre une mise à jour autonome via un back-office sécurisé
 6. Optimiser le SEO et préparer Google Ad Grants
 7. Gérer la newsletter et les contacts
 8. **Fournir un espace presse professionnel** avec kit média et ressources téléchargeables
@@ -151,7 +151,7 @@ Soutenue par des subventions et mécénats.
 - Kit média professionnel pour journalistes
 - URL de téléchargement direct, taille fichier affichée
 
-**📄 Articles de presse (`articles_presse`)** :  
+**📄 Articles de presse (`articles_presse`)** :
 
 - Articles **ÉCRITS SUR** la compagnie par les médias
 - Critiques, interviews, portraits dans la presse
@@ -162,60 +162,60 @@ Soutenue par des subventions et mécénats.
 
 ## 4. Architecture technique & choix technologiques
 
-| Élément               | Technologie retenue                              |
-|-----------------------|--------------------------------------------------|
-| **Frontend**          | Next.js 15.4.5 + Tailwind CSS + TypeScript           |
-| **Backend**           | Supabase (PostgreSQL + Auth + API + Storage)     |
-| **Back-office**       | Next.js Admin + Supabase Auth & RLS              |
-| **Hébergement**       | Vercel (CI/CD, CDN, SSL)                         |
-| **Cache**             | cache natif de Next.js + TanStack ou Redis (si nécessaire)                      |
-| **Validation**        | Zod (schémas de validation)                      |
-| **Stockage**          | Supabase Storage (images, PDF, vidéos)           |
-| **Domaine**           | <www.compagnie-rougecardinal.fr> (à configurer)            |
-| **Analytics**         | Google Analytics / A déterminer                        |
-| **Email**             | Service externe (Resend)           |
+| Élément         | Technologie retenue                                        |
+| --------------- | ---------------------------------------------------------- |
+| **Frontend**    | Next.js 15.4.5 + Tailwind CSS + TypeScript                 |
+| **Backend**     | Supabase (PostgreSQL + Auth + API + Storage)               |
+| **Back-office** | Next.js Admin + Supabase Auth & RLS                        |
+| **Hébergement** | Vercel (CI/CD, CDN, SSL)                                   |
+| **Cache**       | cache natif de Next.js + TanStack ou Redis (si nécessaire) |
+| **Validation**  | Zod (schémas de validation)                                |
+| **Stockage**    | Supabase Storage (images, PDF, vidéos)                     |
+| **Domaine**     | <www.compagnie-rougecardinal.fr> (à configurer)            |
+| **Analytics**   | Google Analytics / A déterminer                            |
+| **Email**       | Service externe (Resend)                                   |
 
 ### 4.0. Architectural Approach
 
 🔧 **Appliquer les méthodologies suivantes uniquement dans leurs contextes pertinents :**
 
-- **Clean Architecture** → Organiser le système en couches distinctes (application, domaine, infrastructure). Maintenir la modularité pour garantir l’évolutivité.  
-- **Feature-Driven Development (FDD)** → Catégoriser et structurer les fonctionnalités de manière efficace, en veillant à ce qu’elles restent autonomes et faciles à gérer.  
-- **Domain-Driven Design (DDD)** → Se concentrer sur une architecture orientée métier en utilisant des Entités, Agrégats, Objets de Valeur, Référentiels et Services pour assurer la cohérence du domaine.  
-- **Behavior-Driven Development (BDD)** → Lors du travail sur des user stories, des fichiers de test ou des scénarios Gherkin, se baser sur le comportement réel des utilisateurs pour orienter la conception du système.  
+- **Clean Architecture** → Organiser le système en couches distinctes (application, domaine, infrastructure). Maintenir la modularité pour garantir l’évolutivité.
+- **Feature-Driven Development (FDD)** → Catégoriser et structurer les fonctionnalités de manière efficace, en veillant à ce qu’elles restent autonomes et faciles à gérer.
+- **Domain-Driven Design (DDD)** → Se concentrer sur une architecture orientée métier en utilisant des Entités, Agrégats, Objets de Valeur, Référentiels et Services pour assurer la cohérence du domaine.
+- **Behavior-Driven Development (BDD)** → Lors du travail sur des user stories, des fichiers de test ou des scénarios Gherkin, se baser sur le comportement réel des utilisateurs pour orienter la conception du système.
 - **Principes SOLID** → Respecter la responsabilité unique, la modularité et le découplage afin d’assurer la maintenabilité et la flexibilité à long terme.
 
 ---
 
 ### 4.1. Environnements
 
-- Dev local (localhost + Supabase CLI)  
-- Staging (preview Vercel)  
+- Dev local (localhost + Supabase CLI)
+- Staging (preview Vercel)
 - Prod (companie-rouge-cardinal.fr)
 
 ### 4.2. Exigences non-fonctionnelles
 
-- **Mobile-First** : expérience optimale sur smartphones/tablettes.  
-- **Performance** : < 3 s de chargement, lazy-loading, compression, cache Redis.  
-- **SEO & Accessibilité** : meta-tags dynamiques, schéma événementiel, sitemap automatique, RGAA.  
-- **Sécurité** : HTTPS, JWT, RLS, rate-limiting, cookies sécurisés, protection XSS/CSRF/IDOR/Open Redirect.  
-- **RGPD** : double opt-in, droit à l'oubli, mentions légales visibles.  
+- **Mobile-First** : expérience optimale sur smartphones/tablettes.
+- **Performance** : < 3 s de chargement, lazy-loading, compression, cache Redis.
+- **SEO & Accessibilité** : meta-tags dynamiques, schéma événementiel, sitemap automatique, RGAA.
+- **Sécurité** : HTTPS, JWT, RLS, rate-limiting, cookies sécurisés, protection XSS/CSRF/IDOR/Open Redirect.
+- **RGPD** : double opt-in, droit à l'oubli, mentions légales visibles.
 - **Analytique** : Google Analytics / Matomo + statistiques internes.
 - **Disponibilité** : SLA 99,9% uptime, monitoring en temps réel.
 
 ### 4.3. UI et Design
 
-- Typographie audacieuse (titres XXL)  
-- Esthétique minimaliste (espaces blancs)  
+- Typographie audacieuse (titres XXL)
+- Esthétique minimaliste (espaces blancs)
 - Micro-interactions & animations subtiles
-- Mode sombre optionnel  
+- Mode sombre optionnel
 - Illustrations personnalisées (théâtre)
 
 ### 4.4. Capacités de billetterie & médias
 
-- **Pages Productions** : synopsis, bande‑annonce, distribution, galerie HD.  
-- **Billetterie** : lien vers plateforme externe, download billet  
-- **Fichier .ics** : export calendrier pour ajout personnel  
+- **Pages Productions** : synopsis, bande‑annonce, distribution, galerie HD.
+- **Billetterie** : lien vers plateforme externe, download billet
+- **Fichier .ics** : export calendrier pour ajout personnel
 - **Médiathèque** : photos HD, vidéos, documents presse
 - **Espace Presse Professionnel** :
   - Kit média avec communiqués PDF téléchargeables
@@ -247,29 +247,29 @@ Application concrète:
 
 - **Supabase Auth** : JWT (clés asymétriques (ES256)) avec refresh tokens
 
-   <https://supabase.com/docs/guides/auth/signing-keys>
+  <https://supabase.com/docs/guides/auth/signing-keys>
 
-   <https://supabase.com/docs/guides/auth/sessions>
+  <https://supabase.com/docs/guides/auth/sessions>
 
 L’objet user contient les attributs suivants :
 
-| Attributes         | Type             | Description   |
+| Attributes         | Type             | Description                                                                                                                                                                                                                                          |
 | ------------------ | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id                 | `string`         | The unique id of the identity of the user.  |
-| aud                | `string`         | The audience claim.  |
-| role               | `string`         | The role claim used by Postgres to perform Row Level Security (RLS) checks.  |
-| email              | `string`         | The user's email address.   |
-| email_confirmed_at | `string`         | The timestamp that the user's email was confirmed. If null, it means that the user's email is not confirmed.     |
-| phone              | `string`         | The user's phone  |
-| phone_confirmed_at | `string`         | The timestamp that the user's phone was confirmed. If null, it means that the user's phone is not confirmed.   |
-| confirmed_at       | `string`         | The timestamp that either the user's email or phone was confirmed. If null, it means that the user does not have a confirmed email address and phone number.   |
-| last_sign_in_at    | `string`         | The timestamp that the user last signed in.    |
-| app_metadata       | `object`         | The `provider` attribute indicates the first provider that the user used to sign up with. The `providers` attribute indicates the list of providers that the user can use to login with.   |
+| id                 | `string`         | The unique id of the identity of the user.                                                                                                                                                                                                           |
+| aud                | `string`         | The audience claim.                                                                                                                                                                                                                                  |
+| role               | `string`         | The role claim used by Postgres to perform Row Level Security (RLS) checks.                                                                                                                                                                          |
+| email              | `string`         | The user's email address.                                                                                                                                                                                                                            |
+| email_confirmed_at | `string`         | The timestamp that the user's email was confirmed. If null, it means that the user's email is not confirmed.                                                                                                                                         |
+| phone              | `string`         | The user's phone                                                                                                                                                                                                                                     |
+| phone_confirmed_at | `string`         | The timestamp that the user's phone was confirmed. If null, it means that the user's phone is not confirmed.                                                                                                                                         |
+| confirmed_at       | `string`         | The timestamp that either the user's email or phone was confirmed. If null, it means that the user does not have a confirmed email address and phone number.                                                                                         |
+| last_sign_in_at    | `string`         | The timestamp that the user last signed in.                                                                                                                                                                                                          |
+| app_metadata       | `object`         | The `provider` attribute indicates the first provider that the user used to sign up with. The `providers` attribute indicates the list of providers that the user can use to login with.                                                             |
 | user_metadata      | `object`         | Defaults to the first provider's identity data but can contain additional custom user metadata if specified. Refer to [**User Identity**](/docs/guides/auth/auth-identity-linking#the-user-identity) for more information about the identity object. |
-| identities         | `UserIdentity[]` | Contains an object array of identities linked to the user.   |
-| created_at         | `string`         | The timestamp that the user was created.     |
-| updated_at         | `string`         | The timestamp that the user was last updated.   |
-| is_anonymous       | `boolean`        | Is true if the user is an anonymous user.  |
+| identities         | `UserIdentity[]` | Contains an object array of identities linked to the user.                                                                                                                                                                                           |
+| created_at         | `string`         | The timestamp that the user was created.                                                                                                                                                                                                             |
+| updated_at         | `string`         | The timestamp that the user was last updated.                                                                                                                                                                                                        |
+| is_anonymous       | `boolean`        | Is true if the user is an anonymous user.                                                                                                                                                                                                            |
 
 - **Rôles** : `admin` (toutes permissions) et `editor` (contenu uniquement)
 - **RLS** : Row Level Security sur toutes les tables sensibles
@@ -287,7 +287,7 @@ L’objet user contient les attributs suivants :
 - Filtrage par année, type, statut
 - Historique des modifications
 
-#### 5.2.2. Agenda et Événements  
+#### 5.2.2. Agenda et Événements
 
 - CRUD événements avec types multiples
 - Gestion des récurrences
@@ -461,7 +461,7 @@ comment on column public.membres_equipe.image_url is 'URL externe de l image du 
 
 ```sql
 create or replace view public.membres_equipe_admin as
-select 
+select
   m.id,
   m.name,
   m.role,
@@ -623,10 +623,12 @@ create policy "Admins can manage compagnie presentation sections"
 
 ```ts
 const { data } = await supabase
-  .from('compagnie_presentation_sections')
-  .select('slug, kind, title, subtitle, content, quote_text, quote_author, image_url')
-  .eq('active', true)
-  .order('position', { ascending: true });
+  .from("compagnie_presentation_sections")
+  .select(
+    "slug, kind, title, subtitle, content, quote_text, quote_author, image_url"
+  )
+  .eq("active", true)
+  .order("position", { ascending: true });
 ```
 
 **Décisions de conception**:
@@ -762,14 +764,14 @@ create table public.evenements (
   recurrence_rule text,
   recurrence_end_date timestamptz,
   parent_event_id bigint references public.evenements(id) on delete cascade,
-  
+
   -- Nouveaux champs pour billeterie et horaires détaillés
   ticket_url text, -- URL vers la billetterie externe
   image_url text, -- URL d'image pour l'événement spécifique
   start_time time, -- Heure de début (complément à date_debut)
   end_time time, -- Heure de fin (complément à date_fin ou durée)
   type_array text[] default '{}', -- Tableau des types d'événements (spectacle, atelier, rencontre, etc.)
-  
+
   created_at timestamptz default now() not null,
   updated_at timestamptz default now() not null
 );
@@ -844,26 +846,26 @@ create table public.communiques_presse (
   slug text,
   description text, -- Description/résumé pour kit média
   date_publication date not null,
-  
-  -- Document PDF principal  
+
+  -- Document PDF principal
 - **communiques_presse** : Communiqués de presse professionnels (PDF téléchargeables)
   - Relations : spectacles, evenements via foreign keys
   - Médias : Utilise `communiques_medias` (ordre -1 = PDF principal, 0+ = images)
   - Catégorisation : `communiques_categories` (many-to-many)
   - Tags : `communiques_tags` (many-to-many)
-  
+
   -- Image externe (URLs)
   image_url text, -- URL d'image externe (alternative aux médias stockés via communiques_medias)
-  
+
   -- Relations avec autres entités
   spectacle_id bigint references public.spectacles(id) on delete set null,
   evenement_id bigint references public.evenements(id) on delete set null,
-  
+
   -- Métadonnées pour espace presse professionnel
   ordre_affichage integer default 0, -- Pour tri dans kit média
   public boolean default true,
   file_size_bytes bigint, -- Taille fichier pour affichage
-  
+
   -- Gestion standard
   created_by uuid references auth.users(id) on delete set null,
   created_at timestamptz default now() not null,
@@ -892,11 +894,11 @@ create table public.contacts_presse (
   notes text, -- Notes internes
   actif boolean default true,
   derniere_interaction timestamptz,
-  
+
   created_by uuid references auth.users(id) on delete set null,
   created_at timestamptz default now() not null,
   updated_at timestamptz default now() not null,
-  
+
   constraint contacts_presse_email_unique unique (email)
 );
 
@@ -1067,12 +1069,12 @@ create index idx_partners_active_order on public.partners(is_active, display_ord
 create index idx_partners_created_by on public.partners(created_by);
 
 -- Contraintes de validation
-alter table public.partners 
-add constraint check_website_url_format 
+alter table public.partners
+add constraint check_website_url_format
 check (website_url is null or website_url ~* '^https?://.*$');
 
-alter table public.partners 
-add constraint check_display_order_positive 
+alter table public.partners
+add constraint check_display_order_positive
 check (display_order >= 0);
 
 comment on table public.partners is 'Liste des partenaires (nom, logo, url, visibilité, ordre d''affichage)';
@@ -1232,17 +1234,17 @@ comment on column public.content_versions.change_type is 'Type de modification :
 
 ##### Couverture Versioning & Restauration (état actuel)
 
-| entity_type | Triggers | Types de change_type générés | Restauration supportée | Notes |
-|-------------|----------|-------------------------------|------------------------|-------|
-| spectacle | INSERT/UPDATE | create, update, publish, unpublish, restore | Oui | publish/unpublish basé sur `published_at` |
-| article_presse | INSERT/UPDATE | create, update, publish, unpublish, restore | Oui | Sémantique similaire spectacles |
-| communique_presse | INSERT/UPDATE | create, update, publish, unpublish, restore | Oui | Flag `public` contrôle publish state |
-| evenement | INSERT/UPDATE | create, update, restore | Oui | Statut variations agrégées sous `update` |
-| membre_equipe | INSERT/UPDATE | create, update, restore | Oui | Fallback legacy nom -> name |
-| partner | INSERT/UPDATE | create, update, restore | Oui | logo_url, ordre affichage versionnés |
-| compagnie_value | INSERT/UPDATE | create, update, restore | Oui | Contenu institutionnel (title, description, position) |
-| compagnie_stat | INSERT/UPDATE | create, update, restore | Oui | Statistiques institutionnelles (label, value, position) |
-| compagnie_presentation_section | INSERT/UPDATE | create, update, restore | Oui | Sections page présentation (slug, kind, contenu) |
+| entity_type                    | Triggers      | Types de change_type générés                | Restauration supportée | Notes                                                   |
+| ------------------------------ | ------------- | ------------------------------------------- | ---------------------- | ------------------------------------------------------- |
+| spectacle                      | INSERT/UPDATE | create, update, publish, unpublish, restore | Oui                    | publish/unpublish basé sur `published_at`               |
+| article_presse                 | INSERT/UPDATE | create, update, publish, unpublish, restore | Oui                    | Sémantique similaire spectacles                         |
+| communique_presse              | INSERT/UPDATE | create, update, publish, unpublish, restore | Oui                    | Flag `public` contrôle publish state                    |
+| evenement                      | INSERT/UPDATE | create, update, restore                     | Oui                    | Statut variations agrégées sous `update`                |
+| membre_equipe                  | INSERT/UPDATE | create, update, restore                     | Oui                    | Fallback legacy nom -> name                             |
+| partner                        | INSERT/UPDATE | create, update, restore                     | Oui                    | logo_url, ordre affichage versionnés                    |
+| compagnie_value                | INSERT/UPDATE | create, update, restore                     | Oui                    | Contenu institutionnel (title, description, position)   |
+| compagnie_stat                 | INSERT/UPDATE | create, update, restore                     | Oui                    | Statistiques institutionnelles (label, value, position) |
+| compagnie_presentation_section | INSERT/UPDATE | create, update, restore                     | Oui                    | Sections page présentation (slug, kind, contenu)        |
 
 Règles générales:
 
@@ -1382,7 +1384,7 @@ Le système inclut plusieurs vues pour faciliter l'accès aux données et géné
 create or replace view public.categories_hierarchy as
 with recursive category_tree as (
   -- Catégories racines
-  select 
+  select
     id,
     name,
     slug,
@@ -1392,11 +1394,11 @@ with recursive category_tree as (
     name as full_path
   from public.categories
   where parent_id is null and is_active = true
-  
+
   union all
-  
+
   -- Catégories enfants
-  select 
+  select
     c.id,
     c.name,
     c.slug,
@@ -1408,7 +1410,7 @@ with recursive category_tree as (
   join category_tree ct on c.parent_id = ct.id
   where c.is_active = true
 )
-select 
+select
   id,
   name,
   slug,
@@ -1426,14 +1428,14 @@ comment on view public.categories_hierarchy is 'Vue hiérarchique des catégorie
 
 ```sql
 create or replace view public.popular_tags as
-select 
+select
   id,
   name,
   slug,
   usage_count,
   is_featured,
   created_at
-from public.tags 
+from public.tags
 where usage_count > 0
 order by is_featured desc, usage_count desc, name asc;
 
@@ -1444,7 +1446,7 @@ comment on view public.popular_tags is 'Tags les plus utilisés, avec mise en av
 
 ```sql
 create or replace view public.popular_pages as
-select 
+select
   page_path,
   entity_type,
   entity_id,
@@ -1463,14 +1465,14 @@ comment on view public.popular_pages is 'Pages les plus consultées selon les é
 
 ```sql
 create or replace view public.recent_analytics_events as
-select 
+select
   ae.id,
   ae.event_type,
   ae.created_at,
   ae.page_path,
   ae.entity_type,
   ae.entity_id,
-  case 
+  case
     when ae.entity_type = 'spectacle' then (select title from public.spectacles where id = ae.entity_id)
     when ae.entity_type = 'article' then (select title from public.articles_presse where id = ae.entity_id)
     else null
@@ -1862,8 +1864,8 @@ begin
   -- Construction sécurisée du display_name
   profile_display_name := coalesce(
     new.raw_user_meta_data->>'display_name',
-    concat_ws(' ', 
-      new.raw_user_meta_data->>'first_name', 
+    concat_ws(' ',
+      new.raw_user_meta_data->>'first_name',
       new.raw_user_meta_data->>'last_name'
     ),
     new.email,
@@ -1871,8 +1873,8 @@ begin
   );
 
   -- Validation et assignation du rôle
-  profile_role := case 
-    when new.raw_user_meta_data->>'role' in ('user', 'editor', 'admin') 
+  profile_role := case
+    when new.raw_user_meta_data->>'role' in ('user', 'editor', 'admin')
     then new.raw_user_meta_data->>'role'
     else 'user'
   end;
@@ -1881,7 +1883,7 @@ begin
   begin
     insert into public.profiles (user_id, display_name, role)
     values (new.id, profile_display_name, profile_role);
-  exception 
+  exception
     when unique_violation then
       raise warning 'Profile already exists for user %', new.id;
     when others then
@@ -1934,7 +1936,7 @@ declare
   new_role text;
 begin
   -- Vérification des changements pertinents
-  if old.raw_user_meta_data is not distinct from new.raw_user_meta_data 
+  if old.raw_user_meta_data is not distinct from new.raw_user_meta_data
      and old.email is not distinct from new.email then
     return new;
   end if;
@@ -1942,8 +1944,8 @@ begin
   -- Construction du nouveau display_name
   new_display_name := coalesce(
     new.raw_user_meta_data->>'display_name',
-    concat_ws(' ', 
-      new.raw_user_meta_data->>'first_name', 
+    concat_ws(' ',
+      new.raw_user_meta_data->>'first_name',
       new.raw_user_meta_data->>'last_name'
     ),
     new.email,
@@ -1951,15 +1953,15 @@ begin
   );
 
   -- Validation du nouveau rôle
-  new_role := case 
-    when new.raw_user_meta_data->>'role' in ('user', 'editor', 'admin') 
+  new_role := case
+    when new.raw_user_meta_data->>'role' in ('user', 'editor', 'admin')
     then new.raw_user_meta_data->>'role'
     else coalesce((select role from public.profiles where user_id = new.id), 'user')
   end;
 
   begin
     update public.profiles
-    set 
+    set
       display_name = new_display_name,
       role = new_role,
       updated_at = now()
@@ -1972,7 +1974,7 @@ begin
   exception when others then
     raise warning 'Failed to update profile for user %: %', new.id, sqlerrm;
   end;
-  
+
   return new;
 end;
 $$;
@@ -2026,7 +2028,7 @@ begin
   into next_version
   from public.content_versions
   where entity_type = p_entity_type and entity_id = p_entity_id;
-  
+
   -- Insérer la nouvelle version
   insert into public.content_versions (
     entity_type, entity_id, version_number, content_snapshot,
@@ -2035,7 +2037,7 @@ begin
     p_entity_type, p_entity_id, next_version, p_content_snapshot,
     coalesce(p_change_summary, 'Modification'), p_change_type, (select auth.uid())
   ) returning id into version_id;
-  
+
   return version_id;
 end;
 $$;
@@ -2055,12 +2057,12 @@ declare
   normalized_text text;
 begin
   if input_text is null then return null; end if;
-  
+
   normalized_text := lower(input_text);
   normalized_text := unaccent(normalized_text);
   normalized_text := regexp_replace(normalized_text, '[^a-z0-9]+', '-', 'g');
   normalized_text := regexp_replace(normalized_text, '^-+|-+$', '', 'g');
-  
+
   return normalized_text;
 end;
 $$;
@@ -2386,7 +2388,7 @@ Tous les objets du schéma sont organisés dans le répertoire `supabase/schemas
 
 **Extensions et Tables (01-16) avec RLS intégrées :**
 
-- `01_extensions.sql` - Extensions PostgreSQL (pgcrypto, unaccent, pg_trgm, citext*)
+- `01_extensions.sql` - Extensions PostgreSQL (pgcrypto, unaccent, pg_trgm, citext\*)
 - `02_table_profiles.sql` - Table des profils utilisateurs + RLS
 - `03_table_medias.sql` - Gestion des médias et fichiers + RLS
 - `04_table_membres_equipe.sql` - Membres de l'équipe + RLS
@@ -2440,10 +2442,10 @@ Tous les objets du schéma sont organisés dans le répertoire `supabase/schemas
    ```bash
    # Arrêter l'instance locale
    supabase stop
-   
+
    # Générer la migration depuis le schéma déclaratif
    supabase db diff -f migration_name
-   
+
    # Redémarrer et appliquer
    supabase start
    ```
@@ -2513,20 +2515,20 @@ Tous les objets du schéma sont organisés dans le répertoire `supabase/schemas
 #### 13.3.1. Architecture en Couches
 
 ```mermaid
-User Action → API Endpoint → Zod Validation → DAL Insert → 
-  Email Action (Server) → Template Render (React Email) → 
+User Action → API Endpoint → Zod Validation → DAL Insert →
+  Email Action (Server) → Template Render (React Email) →
   Resend API → Email Sent → Database Log (Supabase)
 ```
 
 #### 13.3.2. Stack Technique Email
 
-| Composant | Technologie | Version | Rôle |
-|-----------|-------------|---------|------|
-| **Email Service** | Resend | ^4.0.1 | API d'envoi d'emails transactionnels |
-| **Templates** | React Email | ^0.0.30 | Composants React pour emails HTML |
-| **Validation** | Zod | ^3.24.1 | Validation runtime des données email |
-| **Styling** | Tailwind CSS | ^3.4 | Styles inline pour emails |
-| **Testing** | tsx | ^4.19.2 | Exécution scripts de test TypeScript |
+| Composant         | Technologie  | Version | Rôle                                 |
+| ----------------- | ------------ | ------- | ------------------------------------ |
+| **Email Service** | Resend       | ^4.0.1  | API d'envoi d'emails transactionnels |
+| **Templates**     | React Email  | ^0.0.30 | Composants React pour emails HTML    |
+| **Validation**    | Zod          | ^3.24.1 | Validation runtime des données email |
+| **Styling**       | Tailwind CSS | ^3.4    | Styles inline pour emails            |
+| **Testing**       | tsx          | ^4.19.2 | Exécution scripts de test TypeScript |
 
 #### 13.3.3. Structure des Fichiers Email
 
@@ -2634,9 +2636,9 @@ export const resend = new Resend(process.env.RESEND_API_KEY);
 export const SITE_CONFIG = {
   EMAIL: {
     FROM: process.env.EMAIL_FROM || "noreply@rougecardinalcompany.fr",
-    CONTACT: process.env.EMAIL_CONTACT || "contact@rougecardinalcompany.fr"
+    CONTACT: process.env.EMAIL_CONTACT || "contact@rougecardinalcompany.fr",
   },
-  URL: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+  URL: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
 };
 ```
 
@@ -2651,7 +2653,7 @@ export const SITE_CONFIG = {
 export const NewsletterSubscriptionSchema = z.object({
   email: z.string().email("Email invalide"),
   consent: z.boolean().optional(),
-  source: z.string().optional() // "home" | "contact" | "footer"
+  source: z.string().optional(), // "home" | "contact" | "footer"
 });
 
 // Contact message
@@ -2660,13 +2662,22 @@ export const ContactMessageSchema = z.object({
   last_name: z.string().min(1, "Nom requis"),
   email: z.string().email("Email invalide"),
   phone: z.string().optional(),
-  reason: z.enum(["booking", "partenariat", "presse", "education", "technique", "autre"]),
+  reason: z.enum([
+    "booking",
+    "partenariat",
+    "presse",
+    "education",
+    "technique",
+    "autre",
+  ]),
   message: z.string().min(10, "Message trop court"),
-  consent: z.boolean().refine(val => val === true, "Consentement requis")
+  consent: z.boolean().refine((val) => val === true, "Consentement requis"),
 });
 
 // Auto-generated types
-export type NewsletterSubscription = z.infer<typeof NewsletterSubscriptionSchema>;
+export type NewsletterSubscription = z.infer<
+  typeof NewsletterSubscriptionSchema
+>;
 export type ContactMessage = z.infer<typeof ContactMessageSchema>;
 ```
 
@@ -2680,12 +2691,12 @@ export async function POST(request: NextRequest) {
     // 1. Parse and validate
     const body = await request.json();
     const validated = NewsletterSubscriptionSchema.parse(body);
-    
+
     // 2. Insert in database (triggers email via Supabase function)
     await createNewsletterSubscription(validated);
-    
+
     // 3. Return success
-    return NextResponse.json({ status: 'subscribed' }, { status: 201 });
+    return NextResponse.json({ status: "subscribed" }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -2693,10 +2704,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    return NextResponse.json(
-      { error: "Subscription failed" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Subscription failed" }, { status: 500 });
   }
 }
 ```
@@ -2727,35 +2735,42 @@ export async function POST(request: NextRequest) {
 
 ```typescript
 export function useNewsletterSubscribe({ source = "home" } = {}) {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
   const [isSubscribed, setIsSubscribed] = useState(false);
-  
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setErrorMessage('');
-    
+    setErrorMessage("");
+
     try {
-      const res = await fetch('/api/newsletter', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, consent: true, source })
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, consent: true, source }),
       });
-      
-      if (!res.ok) throw new Error('Subscription failed');
-      
+
+      if (!res.ok) throw new Error("Subscription failed");
+
       setIsSubscribed(true);
-      setEmail('');
+      setEmail("");
     } catch (error) {
       setErrorMessage(error.message);
     } finally {
       setIsLoading(false);
     }
   };
-  
-  return { email, setEmail, handleSubmit, isLoading, errorMessage, isSubscribed };
+
+  return {
+    email,
+    setEmail,
+    handleSubmit,
+    isLoading,
+    errorMessage,
+    isSubscribed,
+  };
 }
 ```
 
@@ -3012,18 +3027,18 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 ### 14.1. Page d'Accueil
 
-| ID | En tant que | Je veux | Afin de |
-|----|-------------|---------|---------|
-| Accueil-01 | Visiteur | Voir une bannière dynamique avec logo et menu | Impression engageante |
-| Accueil-02 | Visiteur | Voir une animation de qualité (pas un carrousel) | Créer une ambiance immersive |
-| Accueil-03 | Visiteur | Afficher les dernières actus/événements | Rester informé |
-| Accueil-04 | Visiteur | Lire un court paragraphe de présentation | Comprendre rapidement la mission |
-| Accueil-05 | Visiteur | Accéder aux liens des réseaux sociaux | Engagement social |
-| Accueil-06 | Visiteur | Voir mentions légales, RGPD et plan du site | Conformité juridique |
-| Accueil-07 | Visiteur | Voir les partenaires de la compagnie. | Promouvoir et remercier les partenaires |
-| Accueil-08 | Administrateur | Choisir d'afficher ou non la section "À la Une" sur Page d'Accueil | Pouvoir mettre en avant ou pas les prochains évènements |
-| Accueil-09 | Administrateur | Choisir d'afficher ou non la section "Nos partenaires" sur la Page d'Accueil | Pouvoir mettre en avant ou pas les partenaires |
-| Accueil-10 | Administrateur | Choisir d'afficher ou non la section "Newsletter" sur Page d'Accueil | Pouvoir mettre en avant ou pas les prochains évènements |
+| ID         | En tant que    | Je veux                                                                      | Afin de                                                 |
+| ---------- | -------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------- |
+| Accueil-01 | Visiteur       | Voir une bannière dynamique avec logo et menu                                | Impression engageante                                   |
+| Accueil-02 | Visiteur       | Voir une animation de qualité (pas un carrousel)                             | Créer une ambiance immersive                            |
+| Accueil-03 | Visiteur       | Afficher les dernières actus/événements                                      | Rester informé                                          |
+| Accueil-04 | Visiteur       | Lire un court paragraphe de présentation                                     | Comprendre rapidement la mission                        |
+| Accueil-05 | Visiteur       | Accéder aux liens des réseaux sociaux                                        | Engagement social                                       |
+| Accueil-06 | Visiteur       | Voir mentions légales, RGPD et plan du site                                  | Conformité juridique                                    |
+| Accueil-07 | Visiteur       | Voir les partenaires de la compagnie.                                        | Promouvoir et remercier les partenaires                 |
+| Accueil-08 | Administrateur | Choisir d'afficher ou non la section "À la Une" sur Page d'Accueil           | Pouvoir mettre en avant ou pas les prochains évènements |
+| Accueil-09 | Administrateur | Choisir d'afficher ou non la section "Nos partenaires" sur la Page d'Accueil | Pouvoir mettre en avant ou pas les partenaires          |
+| Accueil-10 | Administrateur | Choisir d'afficher ou non la section "Newsletter" sur Page d'Accueil         | Pouvoir mettre en avant ou pas les prochains évènements |
 
 #### Epic : Page d’Accueil (Home page)
 
@@ -3035,7 +3050,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 **Acceptance Criteria:**
 
-- [ ] Affichage logo et menu au chargement  
+- [ ] Affichage logo et menu au chargement
 - [ ] Menu cliquable et accessible mobile
 
 ---
@@ -3048,7 +3063,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 **Acceptance Criteria:**
 
-- [ ] Démarrage auto sans freeze  
+- [ ] Démarrage auto sans freeze
 - [ ] Compatibilité navigateurs principaux
 
 ---
@@ -3061,7 +3076,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 **Acceptance Criteria:**
 
-- [ ] Tri antéchronologique  
+- [ ] Tri antéchronologique
 - [ ] Chaque actus = titre + date + lien détail
 
 ---
@@ -3074,7 +3089,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 **Acceptance Criteria:**
 
-- [ ] Administrable via back-office  
+- [ ] Administrable via back-office
 - [ ] Affichage responsive
 
 ---
@@ -3087,7 +3102,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 **Acceptance Criteria:**
 
-- [ ] Icônes cliquables, nouvel onglet  
+- [ ] Icônes cliquables, nouvel onglet
 - [ ] Logos officiels
 
 ---
@@ -3112,16 +3127,16 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 **Acceptance Criteria:**
 
-- [ ] Filtrage partenaires actifs  
+- [ ] Filtrage partenaires actifs
 - [ ] Lien vers leur site
 
 ### 14.2. Page présentation de la compagnie
 
-| ID | En tant que | Je veux | Afin de |
-|----|-------------|---------|---------|
-| Presentation-01 | Visiteur | Lire la page "La compagnie" avec histoire, mission, équipe | Comprendre l'identité et les valeurs |
-| Presentation-02 | Admin | Modifier le contenu de présentation via le back-office | Maintenir les informations à jour |
-| Presentation-03 | Admin | Gérer les membres de l'équipe (CRUD) | Présenter l'équipe actuelle |
+| ID              | En tant que | Je veux                                                    | Afin de                              |
+| --------------- | ----------- | ---------------------------------------------------------- | ------------------------------------ |
+| Presentation-01 | Visiteur    | Lire la page "La compagnie" avec histoire, mission, équipe | Comprendre l'identité et les valeurs |
+| Presentation-02 | Admin       | Modifier le contenu de présentation via le back-office     | Maintenir les informations à jour    |
+| Presentation-03 | Admin       | Gérer les membres de l'équipe (CRUD)                       | Présenter l'équipe actuelle          |
 
 #### Epic : Présentation de la compagnie
 
@@ -3133,9 +3148,9 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 **Acceptance Criteria:**
 
-- [ ] GIVEN : que je suis sur la page "La compagnie"  
-- [ ] WHEN : j’affiche la page  
-- [ ] THEN : l’histoire, la mission et la présentation de l’équipe sont visibles  
+- [ ] GIVEN : que je suis sur la page "La compagnie"
+- [ ] WHEN : j’affiche la page
+- [ ] THEN : l’histoire, la mission et la présentation de l’équipe sont visibles
 - [ ] AND : la mise en page est responsive et accessible
 
 ---
@@ -3148,9 +3163,9 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 **Acceptance Criteria:**
 
-- [ ] Connexion admin requise  
-- [ ] Sauvegarde en base avec confirmation  
-- [ ] Mise à jour immédiate sur le site  
+- [ ] Connexion admin requise
+- [ ] Sauvegarde en base avec confirmation
+- [ ] Mise à jour immédiate sur le site
 - [ ] Journalisation des modifications
 
 ---
@@ -3163,9 +3178,9 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 **Acceptance Criteria:**
 
-- [ ] Ajout avec photo, nom, rôle  
-- [ ] Modification des infos existantes  
-- [ ] Suppression effective  
+- [ ] Ajout avec photo, nom, rôle
+- [ ] Modification des infos existantes
+- [ ] Suppression effective
 - [ ] Tri personnalisable
 
 Note de mise en œuvre (Sept 2025):
@@ -3184,11 +3199,11 @@ Note de mise en œuvre (Sept 2025):
 
 **Acceptance Criteria:**
 
-- [ ] GIVEN : que je suis connecté en admin  
-- [ ] WHEN : j’accède à la gestion de la présentation dans le back‑office  
-- [ ] THEN : deux toggles distincts sont visibles : un pour "À la une", un pour "Partenaires"  
-- [ ] AND : chaque toggle permet d’activer ou désactiver l’affichage sur le site public  
-- [ ] AND : l’état du toggle est sauvegardé en base et appliqué en front immédiatement  
+- [ ] GIVEN : que je suis connecté en admin
+- [ ] WHEN : j’accède à la gestion de la présentation dans le back‑office
+- [ ] THEN : deux toggles distincts sont visibles : un pour "À la une", un pour "Partenaires"
+- [ ] AND : chaque toggle permet d’activer ou désactiver l’affichage sur le site public
+- [ ] AND : l’état du toggle est sauvegardé en base et appliqué en front immédiatement
 - [ ] AND : la modification est tracée dans le journal d’audit
 
 ### 14.3. Page Nos Spectacles (événements)
@@ -3206,14 +3221,14 @@ Notes:
 - Champs à remapper ultérieurement selon schéma réel: `genre`, `duration_minutes`, `cast`, `status`, `awards` (pour l’instant valeurs par défaut documentées).
 - Possibilité de joindre `evenements` pour les dates à l’affiche (voir pattern Home Shows) dans une itération suivante.
 
-| ID | En tant que | Je veux | Afin de |
-|----|-------------|---------|---------|
-| Spectacles-01 | Visiteur | Voir les événements "À l'affiche" (image+titre) | Découvrir les événement en cours |
-| Spectacles-02 | Visiteur | Consulter la fiche complète d'un événement | Décision de clic vers lien de  réservation |
-| Spectacles-03 | Visiteur | Parcourir les événements avec filtres avancés | Explorer l'historique |
-| Spectacles-04 | Visiteur | Cliquer sur "Voir l'agenda" depuis une fiche | Accéder aux dates |
-| Spectacles-05 | Admin | Gérer CRUD des événements (médias, date, lieux, description)  | Maintenir la base à jour |
-| Spectacles-06 | Admin | Voir l'historique des modifications | Traçabilité des changements |
+| ID            | En tant que | Je veux                                                      | Afin de                                   |
+| ------------- | ----------- | ------------------------------------------------------------ | ----------------------------------------- |
+| Spectacles-01 | Visiteur    | Voir les événements "À l'affiche" (image+titre)              | Découvrir les événement en cours          |
+| Spectacles-02 | Visiteur    | Consulter la fiche complète d'un événement                   | Décision de clic vers lien de réservation |
+| Spectacles-03 | Visiteur    | Parcourir les événements avec filtres avancés                | Explorer l'historique                     |
+| Spectacles-04 | Visiteur    | Cliquer sur "Voir l'agenda" depuis une fiche                 | Accéder aux dates                         |
+| Spectacles-05 | Admin       | Gérer CRUD des événements (médias, date, lieux, description) | Maintenir la base à jour                  |
+| Spectacles-06 | Admin       | Voir l'historique des modifications                          | Traçabilité des changements               |
 
 #### Epic : Page Nos Spectacles (événements)
 
@@ -3225,10 +3240,10 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] GIVEN : que des événements "À l'affiche" existent en base  
-- [ ] WHEN : j’accède à la page "Nos Spectacles"  
-- [ ] THEN : la liste affiche chaque événement avec son image et son titre  
-- [ ] AND : l’ordre est chronologique ou selon priorité définie  
+- [ ] GIVEN : que des événements "À l'affiche" existent en base
+- [ ] WHEN : j’accède à la page "Nos Spectacles"
+- [ ] THEN : la liste affiche chaque événement avec son image et son titre
+- [ ] AND : l’ordre est chronologique ou selon priorité définie
 - [ ] AND : l’affichage est responsive
 
 ---
@@ -3241,9 +3256,9 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] GIVEN : que je clique sur un événement dans la liste  
-- [ ] WHEN : la fiche s’ouvre  
-- [ ] THEN : elle affiche image, titre, description, lieu, dates, horaires, tarifs  
+- [ ] GIVEN : que je clique sur un événement dans la liste
+- [ ] WHEN : la fiche s’ouvre
+- [ ] THEN : elle affiche image, titre, description, lieu, dates, horaires, tarifs
 - [ ] AND : un bouton ou lien mène vers la réservation externe si disponible
 
 ---
@@ -3256,9 +3271,9 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] GIVEN : que des filtres sont disponibles  
-- [ ] WHEN : je sélectionne un ou plusieurs filtres  
-- [ ] THEN : la liste est mise à jour instantanément avec les résultats correspondants  
+- [ ] GIVEN : que des filtres sont disponibles
+- [ ] WHEN : je sélectionne un ou plusieurs filtres
+- [ ] THEN : la liste est mise à jour instantanément avec les résultats correspondants
 - [ ] AND : possibilité de réinitialiser les filtres
 
 ---
@@ -3271,8 +3286,8 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] GIVEN : que la fiche événement affiche un bouton "Voir l'agenda"  
-- [ ] WHEN : je clique dessus  
+- [ ] GIVEN : que la fiche événement affiche un bouton "Voir l'agenda"
+- [ ] WHEN : je clique dessus
 - [ ] THEN : je suis redirigé vers l’agenda filtré sur cet événement
 
 ---
@@ -3285,10 +3300,10 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Formulaire complet avec champs : titre, description, images, date(s), lieu, statut "À l'affiche"/archivé  
-- [ ] Upload images avec prévisualisation  
-- [ ] Validation des champs obligatoires  
-- [ ] Suppression avec confirmation  
+- [ ] Formulaire complet avec champs : titre, description, images, date(s), lieu, statut "À l'affiche"/archivé
+- [ ] Upload images avec prévisualisation
+- [ ] Validation des champs obligatoires
+- [ ] Suppression avec confirmation
 - [ ] Changements sauvegardés et visibles immédiatement
 
 ---
@@ -3301,23 +3316,23 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Liste horodatée des modifications (création, édition, suppression)  
-- [ ] Indication de l’utilisateur ayant effectué l’action  
-- [ ] Détail des champs modifiés  
+- [ ] Liste horodatée des modifications (création, édition, suppression)
+- [ ] Indication de l’utilisateur ayant effectué l’action
+- [ ] Détail des champs modifiés
 - [ ] Export possible en CSV/PDF
 
 ### 14.4. Page Agenda
 
-| ID | En tant que | Je veux | Afin de |
-|----|-------------|---------|---------|
-| Agenda-01 | Visiteur | Voir un calendrier interactif responsive | Planifier ma venue |
-| Agenda-02 | Visiteur | Filtrer par type d'événement | Rapidité d'accès |
-| Agenda-03 | Visiteur | Télécharger fichier .ics pour ajout à mon calendrier | Intégration personnelle |
-| Agenda-04 | Visiteur | Accéder aux liens billetterie externes | Acheter mes billets |
-| Agenda-05 | Admin | Gérer CRUD des événements (médias, date, lieux, description) via BackOffice | Mise à jour autonome |
-| Agenda-06 | Admin | Gérer CRUD des liens de billeterie via BackOffice | Mise à jour autonome |
-| Agenda-07 | Visiteur | Voir CTA de la section d'abonnement à la newsletter | Recevoir la newsletter |
-| Agenda-08 | Admin| Toggle dans BackOffice pour afficher ou non la section "Abonnement Newsletter" sur Page Agenda | Pouvoir mettre en avant ou pas la Newsletter |
+| ID        | En tant que | Je veux                                                                                        | Afin de                                      |
+| --------- | ----------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| Agenda-01 | Visiteur    | Voir un calendrier interactif responsive                                                       | Planifier ma venue                           |
+| Agenda-02 | Visiteur    | Filtrer par type d'événement                                                                   | Rapidité d'accès                             |
+| Agenda-03 | Visiteur    | Télécharger fichier .ics pour ajout à mon calendrier                                           | Intégration personnelle                      |
+| Agenda-04 | Visiteur    | Accéder aux liens billetterie externes                                                         | Acheter mes billets                          |
+| Agenda-05 | Admin       | Gérer CRUD des événements (médias, date, lieux, description) via BackOffice                    | Mise à jour autonome                         |
+| Agenda-06 | Admin       | Gérer CRUD des liens de billeterie via BackOffice                                              | Mise à jour autonome                         |
+| Agenda-07 | Visiteur    | Voir CTA de la section d'abonnement à la newsletter                                            | Recevoir la newsletter                       |
+| Agenda-08 | Admin       | Toggle dans BackOffice pour afficher ou non la section "Abonnement Newsletter" sur Page Agenda | Pouvoir mettre en avant ou pas la Newsletter |
 
 #### Epic : Page Agenda
 
@@ -3329,10 +3344,10 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] GIVEN : que je suis sur la page Agenda  
-- [ ] WHEN : le calendrier se charge  
-- [ ] THEN : il est affiché en format desktop et mobile de façon responsive  
-- [ ] AND : je peux naviguer par mois/semaine/jour  
+- [ ] GIVEN : que je suis sur la page Agenda
+- [ ] WHEN : le calendrier se charge
+- [ ] THEN : il est affiché en format desktop et mobile de façon responsive
+- [ ] AND : je peux naviguer par mois/semaine/jour
 - [ ] AND : les événements sont visibles dans les cases correspondantes avec titre court
 
 ---
@@ -3345,8 +3360,8 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Liste de filtres accessible et claire  
-- [ ] Sélection d’un ou plusieurs types d’événement met à jour l’affichage du calendrier instantanément  
+- [ ] Liste de filtres accessible et claire
+- [ ] Sélection d’un ou plusieurs types d’événement met à jour l’affichage du calendrier instantanément
 - [ ] Bouton "Réinitialiser" pour revenir à l’affichage complet
 
 ---
@@ -3359,8 +3374,8 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Sur chaque événement : bouton ou lien "Ajouter à mon calendrier"  
-- [ ] Clic sur le bouton télécharge un fichier .ics compatible (Google, Outlook, Apple Calendar)  
+- [ ] Sur chaque événement : bouton ou lien "Ajouter à mon calendrier"
+- [ ] Clic sur le bouton télécharge un fichier .ics compatible (Google, Outlook, Apple Calendar)
 - [ ] Le fichier contient au minimum : titre, date/heure, lieu, description courte, lien vers billetterie
 
 ---
@@ -3373,9 +3388,9 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] GIVEN : qu’un lien billetterie est configuré pour un événement  
-- [ ] WHEN : je clique sur "Billetterie"  
-- [ ] THEN : je suis redirigé vers le site externe dans un nouvel onglet  
+- [ ] GIVEN : qu’un lien billetterie est configuré pour un événement
+- [ ] WHEN : je clique sur "Billetterie"
+- [ ] THEN : je suis redirigé vers le site externe dans un nouvel onglet
 - [ ] AND : si aucun lien n’est disponible, le bouton est désactivé ou absent
 
 ---
@@ -3388,10 +3403,10 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Formulaire avec champs : titre, description, images, dates/horaires, lieu, type, statut  
-- [ ] Upload d’images avec prévisualisation  
-- [ ] Validation des champs requis  
-- [ ] Suppression avec confirmation  
+- [ ] Formulaire avec champs : titre, description, images, dates/horaires, lieu, type, statut
+- [ ] Upload d’images avec prévisualisation
+- [ ] Validation des champs requis
+- [ ] Suppression avec confirmation
 - [ ] Sauvegarde avec retour visuel de succès/échec
 
 ---
@@ -3404,9 +3419,9 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Champ dédié au lien billetterie dans la fiche événement  
-- [ ] Vérification de format d’URL  
-- [ ] Possibilité d’ajouter, modifier ou supprimer le lien  
+- [ ] Champ dédié au lien billetterie dans la fiche événement
+- [ ] Vérification de format d’URL
+- [ ] Possibilité d’ajouter, modifier ou supprimer le lien
 - [ ] Sauvegarde et mise à jour immédiate côté front
 
 ---
@@ -3419,8 +3434,8 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Bloc CTA visible sur la page Agenda (titre, texte court, champ email, bouton)  
-- [ ] Formulaire envoie l’email vers le service newsletter configuré  
+- [ ] Bloc CTA visible sur la page Agenda (titre, texte court, champ email, bouton)
+- [ ] Formulaire envoie l’email vers le service newsletter configuré
 - [ ] Message de confirmation après inscription réussie
 
 ---
@@ -3433,22 +3448,22 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Interrupteur (toggle) disponible dans BackOffice, section Paramètres Agenda  
-- [ ] WHEN : le toggle est activé  
-- [ ] THEN : la section newsletter apparaît côté front  
-- [ ] WHEN : il est désactivé  
-- [ ] THEN : la section n’est pas affichée  
+- [ ] Interrupteur (toggle) disponible dans BackOffice, section Paramètres Agenda
+- [ ] WHEN : le toggle est activé
+- [ ] THEN : la section newsletter apparaît côté front
+- [ ] WHEN : il est désactivé
+- [ ] THEN : la section n’est pas affichée
 - [ ] Changement visible immédiatement sans redéploiement
 
 ### 14.5. Page Presse
 
-| ID | En tant que | Je veux | Afin de |
-|----|-------------|---------|---------|
-| Presse-01 | Visiteur | Télécharger les communiqués de presse (PDF) | Accès aux documents officiels |
-| Presse-02 | Visiteur | Parcourir revues de presse (articles, vidéos) | Connaître retours médias |
-| Presse-03 | Visiteur | Accéder à la médiathèque HD | Illustrer mes articles |
-| Presse-04 | Admin | Gérer CRUD des communiqués et revues | Centraliser gestion presse |
-| Presse-05 | Admin | Uploader et organiser la médiathèque | Organisation des ressources |
+| ID        | En tant que | Je veux                                       | Afin de                       |
+| --------- | ----------- | --------------------------------------------- | ----------------------------- |
+| Presse-01 | Visiteur    | Télécharger les communiqués de presse (PDF)   | Accès aux documents officiels |
+| Presse-02 | Visiteur    | Parcourir revues de presse (articles, vidéos) | Connaître retours médias      |
+| Presse-03 | Visiteur    | Accéder à la médiathèque HD                   | Illustrer mes articles        |
+| Presse-04 | Admin       | Gérer CRUD des communiqués et revues          | Centraliser gestion presse    |
+| Presse-05 | Admin       | Uploader et organiser la médiathèque          | Organisation des ressources   |
 
 #### Epic : Page Presse
 
@@ -3460,10 +3475,10 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] GIVEN : qu'un ou plusieurs communiqués sont disponibles  
-- [ ] WHEN : j'affiche la page Presse  
-- [ ] THEN : chaque communiqué apparaît avec son titre, date, résumé  
-- [ ] AND : un bouton "Télécharger" déclenche le téléchargement direct du PDF  
+- [ ] GIVEN : qu'un ou plusieurs communiqués sont disponibles
+- [ ] WHEN : j'affiche la page Presse
+- [ ] THEN : chaque communiqué apparaît avec son titre, date, résumé
+- [ ] AND : un bouton "Télécharger" déclenche le téléchargement direct du PDF
 - [ ] AND : le lien ouvre le fichier dans un nouvel onglet si configuré ainsi
 
 ---
@@ -3476,9 +3491,9 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Liste claire avec vignette, titre, média/source, date de publication  
-- [ ] Les articles cliquables ouvrent le lien externe dans un nouvel onglet  
-- [ ] Les vidéos intégrées peuvent être lues directement sur la page (si autorisé)  
+- [ ] Liste claire avec vignette, titre, média/source, date de publication
+- [ ] Les articles cliquables ouvrent le lien externe dans un nouvel onglet
+- [ ] Les vidéos intégrées peuvent être lues directement sur la page (si autorisé)
 - [ ] Filtre ou tri possible (par date, type de média)
 
 ---
@@ -3491,9 +3506,9 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Accès clair via bouton ou lien depuis la page Presse  
-- [ ] Galerie HD avec aperçu + option de téléchargement en taille originale  
-- [ ] Mention des droits d’utilisation et crédits photo  
+- [ ] Accès clair via bouton ou lien depuis la page Presse
+- [ ] Galerie HD avec aperçu + option de téléchargement en taille originale
+- [ ] Mention des droits d’utilisation et crédits photo
 - [ ] Classement ou filtres par événement / thématique
 
 ---
@@ -3506,10 +3521,10 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Formulaire d’édition avec champs : titre, date, résumé, lien/URL ou fichier PDF, type (communiqué/revue)  
-- [ ] Validation des champs requis  
-- [ ] Upload de PDF avec contrôle de format et taille  
-- [ ] Suppression avec confirmation  
+- [ ] Formulaire d’édition avec champs : titre, date, résumé, lien/URL ou fichier PDF, type (communiqué/revue)
+- [ ] Validation des champs requis
+- [ ] Upload de PDF avec contrôle de format et taille
+- [ ] Suppression avec confirmation
 - [ ] Changements visibles immédiatement côté front
 
 ---
@@ -3522,24 +3537,24 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Upload d’images HD (JPG, PNG) avec prévisualisation  
-- [ ] Classement par catégories / tags (ex : événement, type de média)  
-- [ ] Édition des métadonnées (titre, description, crédits, droits)  
-- [ ] Suppression avec confirmation  
+- [ ] Upload d’images HD (JPG, PNG) avec prévisualisation
+- [ ] Classement par catégories / tags (ex : événement, type de média)
+- [ ] Édition des métadonnées (titre, description, crédits, droits)
+- [ ] Suppression avec confirmation
 - [ ] Réorganisation possible par glisser-déposer
 
 ### 14.6. Page Contact & Newsletter
 
-| ID | En tant que | Je veux | Afin de |
-|----|-------------|---------|---------|
-| Contact-01 | Visiteur | Remplir un formulaire sécurisé | Poser une question |
-| Contact-02 | Visiteur | Recevoir un accusé de réception automatique | Confirmation de prise en compte |
-| Contact-03 | Admin | Consulter et traiter les messages reçus | Gérer les demandes |
-| Newsletter-01 | Visiteur | M'inscrire avec double opt-in (RGPD) | Recevoir la newsletter |
-| Newsletter-02 | Abonné | Me désinscrire facilement | Exercer mon droit |
-| Newsletter-03 | Admin | Exporter liste des abonnés (CSV) | Gérer campagnes email |
-| Newsletter-04 | Admin | Voir statistiques d'abonnement | Mesurer l'engagement |
-| Newsletter-05 | Admin | Toggle dans BackOffice pour afficher ou non la section "Abonnement Newsletter" sur Page Contact | Pouvoir mettre en avant ou pas la Newsletter |
+| ID            | En tant que | Je veux                                                                                         | Afin de                                      |
+| ------------- | ----------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| Contact-01    | Visiteur    | Remplir un formulaire sécurisé                                                                  | Poser une question                           |
+| Contact-02    | Visiteur    | Recevoir un accusé de réception automatique                                                     | Confirmation de prise en compte              |
+| Contact-03    | Admin       | Consulter et traiter les messages reçus                                                         | Gérer les demandes                           |
+| Newsletter-01 | Visiteur    | M'inscrire avec double opt-in (RGPD)                                                            | Recevoir la newsletter                       |
+| Newsletter-02 | Abonné      | Me désinscrire facilement                                                                       | Exercer mon droit                            |
+| Newsletter-03 | Admin       | Exporter liste des abonnés (CSV)                                                                | Gérer campagnes email                        |
+| Newsletter-04 | Admin       | Voir statistiques d'abonnement                                                                  | Mesurer l'engagement                         |
+| Newsletter-05 | Admin       | Toggle dans BackOffice pour afficher ou non la section "Abonnement Newsletter" sur Page Contact | Pouvoir mettre en avant ou pas la Newsletter |
 
 #### Epic : Contact & Newsletter
 
@@ -3551,11 +3566,11 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] GIVEN : que je suis sur la page Contact  
-- [ ] WHEN : j'affiche le formulaire  
-- [ ] THEN : je vois les champs obligatoires : prénom, nom, email, téléphone (optionnel), motif, sujet, message, case RGPD  
-- [ ] AND : un captcha anti‑spam est présent et fonctionnel  
-- [ ] AND : le bouton d’envoi est désactivé tant que tous les champs obligatoires ne sont pas valides  
+- [ ] GIVEN : que je suis sur la page Contact
+- [ ] WHEN : j'affiche le formulaire
+- [ ] THEN : je vois les champs obligatoires : prénom, nom, email, téléphone (optionnel), motif, sujet, message, case RGPD
+- [ ] AND : un captcha anti‑spam est présent et fonctionnel
+- [ ] AND : le bouton d’envoi est désactivé tant que tous les champs obligatoires ne sont pas valides
 - [ ] AND : les données sont transmises en HTTPS
 
 ---
@@ -3568,8 +3583,8 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] GIVEN : que j’ai soumis un formulaire valide  
-- [ ] WHEN : l’envoi est confirmé côté serveur  
+- [ ] GIVEN : que j’ai soumis un formulaire valide
+- [ ] WHEN : l’envoi est confirmé côté serveur
 - [ ] THEN : un email automatique est envoyé à l’adresse indiquée, reprenant les informations soumises et les délais de réponse estimés
 
 ---
@@ -3582,9 +3597,9 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Interface back‑office listant les messages avec tri et filtres (date, motif, statut)  
-- [ ] Possibilité de marquer un message comme traité / en cours / en attente  
-- [ ] Consultation du détail complet d’un message  
+- [ ] Interface back‑office listant les messages avec tri et filtres (date, motif, statut)
+- [ ] Possibilité de marquer un message comme traité / en cours / en attente
+- [ ] Consultation du détail complet d’un message
 - [ ] Journalisation de l’ouverture et de l’état
 
 ---
@@ -3597,8 +3612,8 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Affichage dans une section dédiée avec icônes correspondantes  
-- [ ] Email et téléphone cliquables (mailto: / tel:)  
+- [ ] Affichage dans une section dédiée avec icônes correspondantes
+- [ ] Email et téléphone cliquables (mailto: / tel:)
 - [ ] Mise à jour dynamique si les données changent côté back‑office
 
 ---
@@ -3612,9 +3627,9 @@ Notes:
 **Acceptance Criteria:**
 
 - [ ] Formulaire back‑office complet avec champs : Nom de la compagnie, adresse, email, téléphone, horaires, contacts spécialisés (email presse)
-- [ ] Validation des champs obligatoires  
-- [ ] Suppression avec confirmation  
-- [ ] Historisation dans `audit_logs`  
+- [ ] Validation des champs obligatoires
+- [ ] Suppression avec confirmation
+- [ ] Historisation dans `audit_logs`
 - [ ] Changement visible immédiatement côté front
 
 ---
@@ -3627,10 +3642,10 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] GIVEN : que je suis sur la page Contact ou un autre emplacement intégrant le module newsletter  
-- [ ] WHEN : je saisis mon email et clique sur "S'abonner"  
-- [ ] THEN : un email de confirmation est envoyé (double opt‑in RGPD)  
-- [ ] AND : l’abonnement n’est effectif qu’après clic sur le lien de confirmation  
+- [ ] GIVEN : que je suis sur la page Contact ou un autre emplacement intégrant le module newsletter
+- [ ] WHEN : je saisis mon email et clique sur "S'abonner"
+- [ ] THEN : un email de confirmation est envoyé (double opt‑in RGPD)
+- [ ] AND : l’abonnement n’est effectif qu’après clic sur le lien de confirmation
 - [ ] AND : un lien de désinscription est présent dans chaque envoi
 
 ---
@@ -3643,8 +3658,8 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Lien de désinscription unique présent dans chaque email  
-- [ ] Confirmation de désinscription affichée côté front  
+- [ ] Lien de désinscription unique présent dans chaque email
+- [ ] Confirmation de désinscription affichée côté front
 - [ ] Email supprimé ou marqué comme "désinscrit" en base de données
 
 ---
@@ -3657,8 +3672,8 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Bouton "Exporter CSV" dans le back‑office newsletter  
-- [ ] Fichier CSV contenant : email, date d’inscription, statut (actif/désinscrit)  
+- [ ] Bouton "Exporter CSV" dans le back‑office newsletter
+- [ ] Fichier CSV contenant : email, date d’inscription, statut (actif/désinscrit)
 - [ ] Export limité aux administrateurs
 
 ---
@@ -3671,8 +3686,8 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Graphiques et chiffres clés (abonnés actifs, nouveaux abonnés, désinscriptions)  
-- [ ] Filtre par période  
+- [ ] Graphiques et chiffres clés (abonnés actifs, nouveaux abonnés, désinscriptions)
+- [ ] Filtre par période
 - [ ] Données actualisées en temps réel ou via rafraîchissement manuel
 
 ---
@@ -3685,29 +3700,29 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Interrupteur (toggle) disponible dans BackOffice, section Paramètres Contact  
-- [ ] WHEN : le toggle est activé  
-- [ ] THEN : la section newsletter apparaît côté front sur la page Contact  
-- [ ] WHEN : il est désactivé  
-- [ ] THEN : la section n’est pas affichée  
-- [ ] Changement visible immédiatement sans redéploiement  
+- [ ] Interrupteur (toggle) disponible dans BackOffice, section Paramètres Contact
+- [ ] WHEN : le toggle est activé
+- [ ] THEN : la section newsletter apparaît côté front sur la page Contact
+- [ ] WHEN : il est désactivé
+- [ ] THEN : la section n’est pas affichée
+- [ ] Changement visible immédiatement sans redéploiement
 - [ ] Journalisation dans `logs_audit`
 
 ### 14.7. Back-office Avancé
 
-| ID | En tant que | Je veux | Afin de |
-|----|-------------|---------|---------|
-| BO-01 | Administrateur | Me connecter avec authentification sécurisée | Sécuriser l'accès |
-| BO-02 | Administrateur | Voir un dashboard avec statistiques | Vue d'ensemble |
-| BO-03 | Éditeur | CRUD Spectacles, événements, presse via interface intuitive | Autonomie |
-| BO-04 | Éditeur | Uploader et gérer médias avec prévisualisation | Organisation |
-| BO-05 | Administrateur | Gérer rôles utilisateurs (admin/editor) | Contrôle d'accès |
-| BO-06 | Administrateur | Consulter logs d'audit détaillés | Traçabilité |
-| BO-07 | Administrateur | Recevoir alertes de sécurité | Monitoring |
-| BO-08 | Utilisateur | Bénéficier d'une interface responsive | Mobilité |
-| BO-09 | Administrateur| Choisir d'afficher ou non la section "A la Une" sur Page d'Accueil | Pouvoir mettre en avant ou pas les prochains évènements |
-| BO-10 | Administrateur| Choisir d'afficher ou non la section "Nos partenaires" sur la Page d'Accueil.| Pouvoir mettre en avant ou pas les partenaires. |
-| BO-11 | Administrateur| Toggle pour afficher ou non la section "Abonnement Newsletter" sur les Pages Agenda et Accueil et Contact | Pouvoir mettre en avant ou pas la Newsletter |
+| ID    | En tant que    | Je veux                                                                                                   | Afin de                                                 |
+| ----- | -------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| BO-01 | Administrateur | Me connecter avec authentification sécurisée                                                              | Sécuriser l'accès                                       |
+| BO-02 | Administrateur | Voir un dashboard avec statistiques                                                                       | Vue d'ensemble                                          |
+| BO-03 | Éditeur        | CRUD Spectacles, événements, presse via interface intuitive                                               | Autonomie                                               |
+| BO-04 | Éditeur        | Uploader et gérer médias avec prévisualisation                                                            | Organisation                                            |
+| BO-05 | Administrateur | Gérer rôles utilisateurs (admin/editor)                                                                   | Contrôle d'accès                                        |
+| BO-06 | Administrateur | Consulter logs d'audit détaillés                                                                          | Traçabilité                                             |
+| BO-07 | Administrateur | Recevoir alertes de sécurité                                                                              | Monitoring                                              |
+| BO-08 | Utilisateur    | Bénéficier d'une interface responsive                                                                     | Mobilité                                                |
+| BO-09 | Administrateur | Choisir d'afficher ou non la section "A la Une" sur Page d'Accueil                                        | Pouvoir mettre en avant ou pas les prochains évènements |
+| BO-10 | Administrateur | Choisir d'afficher ou non la section "Nos partenaires" sur la Page d'Accueil.                             | Pouvoir mettre en avant ou pas les partenaires.         |
+| BO-11 | Administrateur | Toggle pour afficher ou non la section "Abonnement Newsletter" sur les Pages Agenda et Accueil et Contact | Pouvoir mettre en avant ou pas la Newsletter            |
 
 #### Epic : Back‑office
 
@@ -3719,11 +3734,11 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Page de login avec champs identifiant et mot de passe  
-- [ ] Mots de passe chiffrés en base  
-- [ ] Support de l’authentification à deux facteurs (2FA)  
-- [ ] Message d’erreur clair en cas d’échec  
-- [ ] Déconnexion automatique après période d’inactivité configurable  
+- [ ] Page de login avec champs identifiant et mot de passe
+- [ ] Mots de passe chiffrés en base
+- [ ] Support de l’authentification à deux facteurs (2FA)
+- [ ] Message d’erreur clair en cas d’échec
+- [ ] Déconnexion automatique après période d’inactivité configurable
 
 ---
 
@@ -3735,10 +3750,10 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Indicateurs clés : nombre d’événements à venir, nouveaux médias, dernières connexions  
-- [ ] Graphiques interactifs (barres, lignes, camembert)  
-- [ ] Données actualisées en temps réel ou via refresh manuel  
-- [ ] Filtrage des statistiques par période  
+- [ ] Indicateurs clés : nombre d’événements à venir, nouveaux médias, dernières connexions
+- [ ] Graphiques interactifs (barres, lignes, camembert)
+- [ ] Données actualisées en temps réel ou via refresh manuel
+- [ ] Filtrage des statistiques par période
 
 ---
 
@@ -3750,10 +3765,10 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Interface unifiée avec recherche et filtres  
-- [ ] Formulaire clair avec champs spécifiques selon type de contenu  
-- [ ] Validation côté front et back  
-- [ ] Aperçu avant publication  
+- [ ] Interface unifiée avec recherche et filtres
+- [ ] Formulaire clair avec champs spécifiques selon type de contenu
+- [ ] Validation côté front et back
+- [ ] Aperçu avant publication
 - [ ] Historique des modifications accessible
 
 ---
@@ -3766,10 +3781,10 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Drag‑and‑drop pour upload  
-- [ ] Miniatures générées automatiquement  
-- [ ] Affichage des métadonnées (taille, format, date d’upload)  
-- [ ] Classement par dossier ou tags  
+- [ ] Drag‑and‑drop pour upload
+- [ ] Miniatures générées automatiquement
+- [ ] Affichage des métadonnées (taille, format, date d’upload)
+- [ ] Classement par dossier ou tags
 - [ ] Suppression ou remplacement facile d’un média
 
 ---
@@ -3782,9 +3797,9 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Liste des utilisateurs avec rôle et statut actif/inactif  
-- [ ] Modification des rôles à tout moment  
-- [ ] Attribution de permissions spécifiques par rôle  
+- [ ] Liste des utilisateurs avec rôle et statut actif/inactif
+- [ ] Modification des rôles à tout moment
+- [ ] Attribution de permissions spécifiques par rôle
 - [ ] Journalisation des changements de rôle
 
 ---
@@ -3797,9 +3812,9 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Liste horodatée des actions (login, création, modification, suppression)  
-- [ ] Filtre par utilisateur, type d’action, période  
-- [ ] Export CSV/PDF  
+- [ ] Liste horodatée des actions (login, création, modification, suppression)
+- [ ] Filtre par utilisateur, type d’action, période
+- [ ] Export CSV/PDF
 - [ ] Conservation des logs selon politique définie
 
 ---
@@ -3812,8 +3827,8 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Notifications par email ou tableau de bord en cas de tentatives suspectes  
-- [ ] Journalisation de l’alerte dans les logs  
+- [ ] Notifications par email ou tableau de bord en cas de tentatives suspectes
+- [ ] Journalisation de l’alerte dans les logs
 - [ ] Configuration du type d’événement déclencheur
 
 ---
@@ -3826,8 +3841,8 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Affichage adapté aux mobiles, tablettes et desktops  
-- [ ] Menus et formulaires utilisables au tactile  
+- [ ] Affichage adapté aux mobiles, tablettes et desktops
+- [ ] Menus et formulaires utilisables au tactile
 - [ ] Performances optimisées sur tous formats
 
 ---
@@ -3840,9 +3855,9 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Toggle dans paramètres du back‑office  
-- [ ] Activation = section affichée sur page d’accueil  
-- [ ] Désactivation = section masquée  
+- [ ] Toggle dans paramètres du back‑office
+- [ ] Activation = section affichée sur page d’accueil
+- [ ] Désactivation = section masquée
 - [ ] Modification visible immédiatement
 
 ---
@@ -3855,8 +3870,8 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Toggle disponible dans les paramètres du back‑office  
-- [ ] Effet immédiat côté front  
+- [ ] Toggle disponible dans les paramètres du back‑office
+- [ ] Effet immédiat côté front
 - [ ] Historique des changements
 
 ---
@@ -3869,10 +3884,10 @@ Notes:
 
 **Acceptance Criteria:**
 
-- [ ] Toggle disponible dans le BackOffice pour les pages (Agenda, Accueil, Contact)  
-- [ ] Effet immédiat côté front sur les pages concernées  
-- [ ] Cohérence avec les user stories: **Agenda‑08**, **Accueil‑10**, **Newsletter‑05**  
-- [ ] État persisté en base (configurations) et appliqué sans redéploiement  
+- [ ] Toggle disponible dans le BackOffice pour les pages (Agenda, Accueil, Contact)
+- [ ] Effet immédiat côté front sur les pages concernées
+- [ ] Cohérence avec les user stories: **Agenda‑08**, **Accueil‑10**, **Newsletter‑05**
+- [ ] État persisté en base (configurations) et appliqué sans redéploiement
 - [ ] Journalisation des changements dans `logs_audit`
 
 ---
@@ -3881,8 +3896,8 @@ Notes:
 
 ### 15.1. Livrables Techniques
 
-- Site fonctionnel sur rouge-cardinal.fr  
-- Back-office sécurisé et documenté  
+- Site fonctionnel sur rouge-cardinal.fr
+- Back-office sécurisé et documenté
 - API REST documentée (OpenAPI)
 - Tests automatisés (unitaires + intégration)
 - Scripts de migration et seeders
@@ -3970,7 +3985,7 @@ Each commit message follows this structure:
    Example: `ci(gitlab): update CI config for deployment pipeline`
 
 10. **perf**: Code changes that improve performance
-   Example: `perf(api): optimize database queries for faster responses`
+    Example: `perf(api): optimize database queries for faster responses`
 
 11. **env**: Changes related to environment setup or configuration
     Example: `env(docker): update Dockerfile for staging environment`
@@ -4092,8 +4107,8 @@ SELECT * FROM communiques_presse; -- Documents PDF ÉMIS PAR la compagnie
 
 ```sql
 -- Vue optimisée avec URLs de téléchargement
-SELECT * FROM communiques_presse_public 
-WHERE public = true 
+SELECT * FROM communiques_presse_public
+WHERE public = true
 ORDER BY ordre_affichage ASC, date_publication DESC;
 ```
 
@@ -4101,7 +4116,7 @@ ORDER BY ordre_affichage ASC, date_publication DESC;
 
 ```sql
 -- Articles publiés par les médias
-SELECT * FROM articles_presse 
+SELECT * FROM articles_presse
 WHERE published_at IS NOT NULL AND published_at <= NOW()
 ORDER BY published_at DESC;
 ```
@@ -4110,7 +4125,7 @@ ORDER BY published_at DESC;
 
 ```sql
 -- Historique complet des modifications
-SELECT * FROM content_versions 
+SELECT * FROM content_versions
 WHERE entity_type IN ('spectacle', 'article_presse', 'communique_presse')
 ORDER BY created_at DESC;
 
@@ -4122,23 +4137,25 @@ SELECT public.restore_content_version(version_id, 'Restauration suite à erreur'
 
 ```typescript
 // Types distincts pour l'espace presse
-interface PressRelease {        // communiques_presse
+interface PressRelease {
+  // communiques_presse
   id: number;
   title: string;
   description: string;
-  category?: string;            // Catégorie du communiqué
-  fileUrl: string;              // PDF téléchargeable
+  category?: string; // Catégorie du communiqué
+  fileUrl: string; // PDF téléchargeable
   fileSize: string;
-  imageUrl?: string;            // Image d'illustration
-  imageFileUrl?: string;        // URL fichier image depuis medias
+  imageUrl?: string; // Image d'illustration
+  imageFileUrl?: string; // URL fichier image depuis medias
 }
 
-interface MediaArticle {        // articles_presse  
+interface MediaArticle {
+  // articles_presse
   id: number;
   title: string;
   author: string;
   source_publication: string;
-  source_url: string;           // Lien externe
+  source_url: string; // Lien externe
   excerpt: string;
 }
 ```
@@ -4208,11 +4225,11 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=old_anon_key                // ❌ DEPRECATED
       const response = NextResponse.next({
         request,
       })
-      
+
       cookiesToSet.forEach(({ name, value, options }) => {
         response.cookies.set(name, value, options)
       })
-      
+
       return response
     }
   }
@@ -4234,38 +4251,38 @@ const claims = await supabase.auth.getClaims()  // ~2-5ms local verification
 #### CORRECT BROWSER CLIENT IMPLEMENTATION
 
 ```typescript
-import { createBrowserClient } from '@supabase/ssr'
+import { createBrowserClient } from "@supabase/ssr";
 
 export function createClient() {
   return createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!  // ✅ Use new publishable key format
-  )
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY! // ✅ Use new publishable key format
+  );
 }
 ```
 
 #### CORRECT SERVER CLIENT IMPLEMENTATION
 
 ```typescript
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 
 export async function createClient() {
-  const cookieStore = await cookies()
+  const cookieStore = await cookies();
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,  // ✅ Use new publishable key format
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!, // ✅ Use new publishable key format
     {
       cookies: {
         getAll() {
-          return cookieStore.getAll()
+          return cookieStore.getAll();
         },
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)
-            )
+            );
           } catch {
             // The `setAll` method was called from a Server Component.
             // This can be ignored if you have middleware refreshing
@@ -4274,47 +4291,49 @@ export async function createClient() {
         },
       },
     }
-  )
+  );
 }
 ```
 
 #### OPTIMIZED MIDDLEWARE IMPLEMENTATION
 
 ```typescript
-import { createServerClient } from '@supabase/ssr'
-import { NextResponse, type NextRequest } from 'next/server'
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
-    let supabaseResponse = NextResponse.next({
+  let supabaseResponse = NextResponse.next({
     request,
-  })
+  });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,  // ✅ Use new publishable key format
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!, // ✅ Use new publishable key format
     {
       cookies: {
         getAll() {
-          return request.cookies.getAll()
+          return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value, options }) =>
+            request.cookies.set(name, value)
+          );
           supabaseResponse = NextResponse.next({
             request,
-          })
+          });
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
-          )
+          );
         },
       },
     }
-  )
+  );
 
   // Do not run code between createServerClient and authentication check.
   // A simple mistake could make it very hard to debug issues with users being randomly logged out.
 
   // ✅ OPTIMIZED: Use getClaims() for ~100x faster authentication (~2-5ms vs ~300ms)
-  const claims = await supabase.auth.getClaims()
+  const claims = await supabase.auth.getClaims();
 
   // Optional performance monitoring (remove in production)
   // const start = Date.now()
@@ -4323,14 +4342,14 @@ export async function middleware(request: NextRequest) {
 
   if (
     !claims &&
-    !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/auth') &&
-    !request.nextUrl.pathname.startsWith('/api/auth')
+    !request.nextUrl.pathname.startsWith("/login") &&
+    !request.nextUrl.pathname.startsWith("/auth") &&
+    !request.nextUrl.pathname.startsWith("/api/auth")
   ) {
     // No authenticated user, redirect to login
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    return NextResponse.redirect(url)
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
   }
 
   // ⚠️ FALLBACK: Use getUser() only when you need complete user data
@@ -4350,7 +4369,7 @@ export async function middleware(request: NextRequest) {
   // If this is not done, you may be causing the browser and server to go out
   // of sync and terminate the user's session prematurely!
 
-  return supabaseResponse
+  return supabaseResponse;
 }
 
 export const config = {
@@ -4363,9 +4382,9 @@ export const config = {
      * - api/auth (Supabase auth endpoints)
      * Feel free to modify this pattern to include more paths.
      */
-    '/((?!_next/static|_next/image|favicon.ico|api/auth|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    "/((?!_next/static|_next/image|favicon.ico|api/auth|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
-}
+};
 ```
 
 ##### AI MODEL VERIFICATION STEPS
@@ -4749,12 +4768,10 @@ You're a Supabase Postgres expert in writing database functions. Generate **high
 #### General Guidelines
 
 1. **Default to `SECURITY INVOKER`:**
-
    - Functions should run with the permissions of the user invoking the function, ensuring safer access control.
    - Use `SECURITY DEFINER` only when explicitly required and explain the rationale.
 
 2. **Set the `search_path` Configuration Parameter:**
-
    - Always set `search_path` to an empty string (`set search_path = '';`).
    - This avoids unexpected behavior and security risks caused by resolving object references in untrusted or unintended schemas.
    - Use fully qualified names (e.g., `schema_name.table_name`) for all database objects referenced within the function.
@@ -4765,15 +4782,12 @@ You're a Supabase Postgres expert in writing database functions. Generate **high
 #### Best Practices
 
 1. **Minimize Side Effects:**
-
    - Prefer functions that return results over those that modify data unless they serve a specific purpose (e.g., triggers).
 
 2. **Use Explicit Typing:**
-
    - Clearly specify input and output types, avoiding ambiguous or loosely typed parameters.
 
 3. **Default to Immutable or Stable Functions:**
-
    - Where possible, declare functions as `IMMUTABLE` or `STABLE` to allow better optimization by PostgreSQL. Use `VOLATILE` only if the function modifies data or has side effects.
 
 4. **Triggers (if Applicable):**
@@ -4881,7 +4895,7 @@ $$;
 - Employ consistent, descriptive identifiers for tables, columns, and other database objects.
 - Use white space and indentation to enhance the readability of your code.
 - Store dates in ISO 8601 format (`yyyy-mm-ddThh:mm:ss.sssss`).
-- Include comments for complex logic, using '/**...*/' for block comments and '--' for line comments.
+- Include comments for complex logic, using '/\*_..._/' for block comments and '--' for line comments.
 
 #### Naming Conventions
 
@@ -4892,7 +4906,7 @@ $$;
 
 #### Tables
 
-- Avoid prefixes like 'tbl_' and ensure no table name matches any of its column names.
+- Avoid prefixes like 'tbl\_' and ensure no table name matches any of its column names.
 - Always add an `id` column of type `identity generated always` unless otherwise specified.
 - Create all tables in the `public` schema unless otherwise specified.
 - Always add the schema to SQL queries for clarity.
@@ -5084,7 +5098,7 @@ order by
 
 - sec(rls): replace broad 'FOR ALL' policies with granular insert/update/delete
   - compagnie_presentation_sections, home_hero_slides, home_about_content
-  - relation tables (spectacles_*/articles_*/communiques_*)
+  - relation tables (spectacles*\*/articles*_/communiques\__)
   - categories/tags relations, SEO redirects, sitemap entries
   - contacts_presse; explicit update policy for content_versions
   - Guidelines: avoid FOR ALL; use USING/WITH CHECK with public.is_admin().

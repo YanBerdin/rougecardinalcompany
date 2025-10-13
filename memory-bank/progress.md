@@ -70,7 +70,7 @@
    - ✅ Declarative Schema : 100% (36/36 tables via workflow déclaratif, triggers centralisés)
 8. ✅ Kit média Presse : seed complet avec URLs externes fonctionnelles (logos, photos HD, PDFs)
 9. ✅ Emailing transactionnel (Resend)
-    - ✅ Intégration Resend via `lib/resend.ts` + gestion clé API
+   - ✅ Intégration Resend via `lib/resend.ts` + gestion clé API
 10. ✅ Nettoyage code redondant d'authentification (13 octobre 2025)
     - ✅ Suppression `lib/auth/service.ts` (classe AuthService + 7 Server Actions redondantes)
     - ✅ Suppression `components/auth/protected-route.tsx` (protection client-side redondante)
@@ -81,15 +81,12 @@
     - ✅ Pattern : 100% conforme au template officiel Next.js + Supabase (client-direct)
 11. ✅ Optimisation performance authentification (13 octobre 2025)
     - ✅ `AuthButton` : migration de Server Component vers Client Component
-    - ✅ Remplacement `getUser()` (~300ms) par `getClaims()` (~2-5ms) - 100x plus rapide
     - ✅ Ajout `onAuthStateChange()` pour réactivité temps réel
     - ✅ Conformité 100% avec `.github/instructions/nextjs-supabase-auth-2025.instructions.md`
     - ✅ Chargement initial optimisé : 2-5ms au lieu de 300ms
 12. ✅ Fix mise à jour header après login/logout (13 octobre 2025)
     - ✅ Problème identifié : `AuthButton` Server Component dans `layout.tsx` ne se re-rendait pas
     - ✅ Solution : transformation en Client Component + `onAuthStateChange()` listener
-    - ✅ Login : `router.refresh()` + délai 100ms + `router.push("/protected")`
-    - ✅ Logout : `window.location.href = "/auth/login"` (rechargement complet garanti)
     - ✅ Résultat : mise à jour instantanée du header sans refresh manuel
     - ✅ Sécurité : aucune vulnérabilité ajoutée (protection reste côté serveur : middleware + RLS)
     - ✅ UX : affichage utilisateur temps réel dans le header après authentification
@@ -106,7 +103,6 @@
     - ✅ `fetchMediaKit()` modifié pour prioriser URLs externes sur storage local
     - ✅ Types stricts : suppression de tous les `any`, ajout interfaces `MediaRow`, `CommuniquePresseRow`, `ArticlePresseRow`
     - ✅ Conformité TypeScript : 100% (interfaces explicites, pas de `any`/`unknown`, type guards)
-10. ✅ Conformité RGPD pour les données personnelles (newsletter + contact)
 
 **Newsletter (`abonnes_newsletter`)**
 
@@ -162,14 +158,20 @@
 ### ✅ Problèmes résolus récemment (13 octobre 2025)
 
 1. ~~Header ne se met pas à jour après login/logout~~ → **RÉSOLU**
-   - Cause : Server Component dans layout.tsx ne se re-rendait pas
-   - Solution : Client Component + onAuthStateChange() + window.location.href pour logout
+   - Cause: Server Component dans layout.tsx ne se re-rendait pas
+   - Solution: Client Component + onAuthStateChange()
 2. ~~Performance lente authentification initiale~~ → **RÉSOLU**
-   - Cause : getUser() fait un appel réseau (~300ms)
-   - Solution : getClaims() fait vérification JWT locale (~2-5ms) - 100x plus rapide
+   - Cause: getUser() fait un appel réseau (~300ms)
+   - Solution: getClaims() fait vérification JWT locale (~2-5ms) - 100x plus rapide
 3. ~~Code redondant d'authentification~~ → **RÉSOLU**
-   - Cause : Multiples abstractions (AuthService, Server Actions, hooks, protected-route)
-   - Solution : Suppression ~400 lignes, alignement strict template officiel
+   - Cause: Multiples abstractions (AuthService, Server Actions, hooks, protected-route)
+   - Solution: Suppression ~400 lignes, alignement strict template officiel
+4. ~~Script admin email bloqué par RLS~~ → **RÉSOLU**
+   - Cause: Script utilisait anon key, RLS bloque lecture messages_contact
+   - Solution: Support service_role/secret key + détection automatique + messages d'aide
+5. ~~Legacy API keys disabled error~~ → **RÉSOLU**
+   - Cause: Documentation assumait format JWT uniquement
+   - Solution: Support dual format (JWT + Simplified) + guide migration complet
 
 ## Tests
 
@@ -226,7 +228,7 @@
 ### Performance
 
 - First Contentful Paint: 1.2s (local)
-- Time to Interactive: 2.5s (local)  
+- Time to Interactive: 2.5s (local)
 - Lighthouse Score: 85 (à améliorer après retrait des délais artificiels)
 
 ### Qualité du code
@@ -242,6 +244,33 @@
 - Conversions: À mesurer
 
 ## Journal des Mises à Jour
+
+### 13 Octobre 2025
+
+- **Nettoyage architecture auth** : Suppression ~400 lignes code redondant
+  - Supprimé: `lib/auth/service.ts` (AuthService + 7 Server Actions)
+  - Supprimé: `components/auth/protected-route.tsx` (protection client-side redondante)
+  - Supprimé: `lib/hooks/useAuth.ts` (hook inutilisé)
+  - Supprimé: `app/auth/callback/route.ts` (route OAuth inutile)
+  - Supprimé: config `EMAIL_REDIRECT_TO` de `lib/site-config.ts`
+  - Alignement: 100% conforme au template officiel Next.js + Supabase
+- **Optimisation performance auth** : Migration `getUser()` → `getClaims()`
+  - Avant: ~300ms (appel réseau pour vérification utilisateur)
+  - Après: ~2-5ms (vérification JWT locale) - 100x plus rapide
+  - `AuthButton` migré vers Client Component + `onAuthStateChange()` pour réactivité
+- **Fix header login/logout** : Mise à jour automatique sans refresh manuel
+  - AuthButton réactif en temps réel via listener `onAuthStateChange()`
+- **Scripts admin email** : `check-email-logs.ts` avec support complet
+  - Support dual format clés Supabase (JWT `eyJ...` + Simplified `sb_secret_...`)
+  - Détection automatique service_role/secret vs anon key
+  - Messages d'aide pour RLS et legacy keys
+  - Tests validés: 5 newsletters + 5 messages contact récupérés
+- **Documentation Supabase keys** : Guides complets créés
+  - `scripts/README.md` (252 lignes) : Guide scripts admin
+  - `doc/scripts-troubleshooting.md` (257 lignes) : Troubleshooting RLS + legacy keys
+  - `doc/Supabase-API-Keys-Formats-2025-10-13.md` (250 lignes) : Comparaison JWT vs Simplified
+  - `doc/Fix-Legacy-API-Keys-2025-10-13.md` (280 lignes) : Session documentation
+  - `doc/Architecture-Blueprints-Update-Log-2025-10-13.md` (235 lignes) : Log modifications blueprints
 
 ### 1er Octobre 2025
 
@@ -271,7 +300,7 @@
 
 ### 20 Septembre 2025
 
-- Migration frontend: Data Access Layer (lib/dal/*) côté serveur + Server Components
+- Migration frontend: Data Access Layer (lib/dal/\*) côté serveur + Server Components
 - Accueil: Hero, News, À propos (stats), Spectacles (avec dates), Partenaires branchés sur Supabase
 - UX: Sections d’accueil enveloppées dans React Suspense avec skeletons (délais artificiels temporaires pour visualisation)
 - Dépréciation: anciens hooks mocks conservés en commentaires avec en-têtes [DEPRECATED MOCK]
@@ -312,5 +341,6 @@
 
 ## Dernière Mise à Jour
 
-**Date**: 10 octobre 2025
+**Date**: 13 octobre 2025
 **Par**: GitHub Copilot
+**Changements majeurs**: Nettoyage architecture auth (~400 lignes), optimisation performance auth (100x), fix header réactif, scripts admin email fonctionnels, documentation formats clés Supabase (JWT vs Simplified)
