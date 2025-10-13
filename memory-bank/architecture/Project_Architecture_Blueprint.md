@@ -285,9 +285,9 @@ Monitoring: Error tracking and performance monitoring
 │  │  ┌─────────────────┐              ┌─────────────────────────────────┐│   │
 │  │  │  Custom Hooks   │              │      Shared UI Library          ││   │
 │  │  │                 │              │                                 ││   │
-│  │  │ • useAuth       │              │ • Button, Input, Card           ││   │
-│  │  │ • useData       │              │ • Form Components               ││   │
-│  │  │ • useForm       │              │ • Layout Components             ││   │
+│  │  │ • useData       │              │ • Button, Input, Card           ││   │
+│  │  │ • useForm       │              │ • Form Components               ││   │
+│  │  │ • useNewsletter │              │ • Layout Components             ││   │
 │  │  │ • Feature Logic │              │ • Accessibility Features        ││   │
 │  │  └─────────────────┘              └─────────────────────────────────┘│   │
 │  └──────────────────────────────────────────────────────────────────────┘   │

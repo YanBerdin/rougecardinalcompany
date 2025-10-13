@@ -29,10 +29,10 @@ import type {
 
 function mapMembreToTeamMember(membre: Membre): TeamMember {
   return {
-    name: membre.nom,
-    role: membre.role,
-    bio: membre.description,
-    image: membre.photo_url || "", // ou une fonction pour récupérer l’URL à partir de photo_media_id
+    name: membre.nom ?? membre.name, // nom est l'alias, name est dans la DB
+    role: membre.role ?? "",
+    bio: membre.description ?? "",
+    image: membre.photo_url || "", // ou une fonction pour récupérer l'URL à partir de photo_media_id
   };
 }
 
@@ -42,16 +42,16 @@ function mapSpectacleFromDb(
   return {
     id: dbSpectacle.id,
     title: dbSpectacle.title,
-    slug: dbSpectacle.slug,
+    slug: dbSpectacle.slug ?? undefined,
     description: dbSpectacle.description ?? "",
     genre: (dbSpectacle as any).genre ?? "", //TODO: fix Unexpected any
-    duration_minutes: dbSpectacle.duration_minutes ?? "",
+    duration_minutes: dbSpectacle.duration_minutes ? String(dbSpectacle.duration_minutes) : "",
     cast: (dbSpectacle as any).cast ?? 0, //TODO: fix Unexpected any
     premiere: (dbSpectacle as any).premiere ?? "", //TODO: fix Unexpected any
     public: dbSpectacle.public ?? false,
-    created_by: dbSpectacle.created_by,
+    created_by: dbSpectacle.created_by ?? "",
     created_at: dbSpectacle.created_at,
-    updated_at: dbSpectacle.updated_at,
+    updated_at: dbSpectacle.updated_at ?? dbSpectacle.created_at,
     image: (dbSpectacle as any).image ?? "", //TODO: fix Unexpected any
     status: (dbSpectacle as any).status ?? "", //TODO: fix Unexpected any
     awards: (dbSpectacle as any).awards ?? [], //TODO: fix Unexpected any
@@ -61,56 +61,29 @@ function mapSpectacleFromDb(
   };
 }
 
-// Types pour les données de test
-interface Spectacle {
-  id: number;
-  title: string;
-  slug?: string;
-  description?: string;
-  duration_minutes?: string;
-  premiere?: string;
-  public?: boolean;
-  created_by?: string;
-  created_at: string;
-  updated_at: string;
-}
+// Types pour les données de test - Utilisation du type global Spectacle
+// Extension si nécessaire pour compatibilité avec ancien code
+type SpectacleCompat = Spectacle & {
+  duration_minutes?: string; // Pour compatibilité avec ancien code qui attend string
+};
 
-interface Membre {
-  id: number;
-  nom: string;
-  role: string;
-  description: string;
-  photo_media_id?: number;
-  ordre: number;
-  active: boolean;
-  created_at: string;
-  updated_at: string;
+// Utilisation du type global MembreEquipe avec alias pour compatibilité
+type Membre = MembreEquipe & {
   // Optionnel : si tu ajoutes l'URL de la photo côté client
   photo_url?: string;
-}
+  // Alias pour compatibilité avec ancien code
+  nom?: string;
+};
 
-interface Actualite {
-  //TODO == mediaArticlesData
-  id: number;
-  title: string;
-  author: string;
-  slug: string | null;
-  type: string | null;
-  chapo: string | null;
-  excerpt: string | null;
-  source_publication: string | null;
-  source_url: string | null;
-  published_at: string | null;
-  created_at: string | null;
-  updated_at: string | null;
-}
+// Utilisation du type global ArticlePresse avec alias pour compatibilité
+type Actualite = ArticlePresse;
 
 export default function TestConnectionPage() {
   const [connectionStatus, setConnectionStatus] = useState<
     "loading" | "success" | "error" | "tables-missing"
   >("loading");
   const [spectacles, setSpectacles] = useState<
-    Array<Spectacle | CurrentShow | ArchivedShow>
+    Array<SpectacleCompat | CurrentShow | ArchivedShow>
   >([]);
   const [membres, setMembres] = useState<Membre[]>([]);
   const [actualites, setActualites] = useState<Actualite[]>([]);

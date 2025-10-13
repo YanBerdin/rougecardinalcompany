@@ -189,9 +189,6 @@ rougecardinalcompany/
 │   └── twitter-image.png                      # Twitter card image
 │
 ├── 📁 components/                             # React Components
-│   ├── 📁 auth/                               # ✨ NEW: Auth components
-│   │   └── protected-route.tsx                # Protected route wrapper
-│   │
 │   ├── 📁 features/                           # Feature-based components
 │   │   └── 📁 public-site/                    # Public website features
 │   │       ├── 📁 home/                       # Homepage sections
@@ -349,7 +346,6 @@ rougecardinalcompany/
 │   │   └── schemas.ts                         # Zod validation schemas
 │   │
 │   ├── 📁 hooks/                              # ✨ NEW: Custom client hooks
-│   │   ├── useAuth.ts                         # Auth hook
 │   │   ├── useNewsletterSubscribe.ts          # Newsletter subscription hook
 │   │   └── useContactForm.ts                  # Contact form hook
 │   │

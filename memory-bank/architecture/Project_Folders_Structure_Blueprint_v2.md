@@ -4,13 +4,14 @@
 **Version**: 2.0.0 (avec intégration Resend)  
 **Branch**: feat-resend
 
-> ⚠️ **VERSION MISE À JOUR - INTÉGRATION RESEND COMPLÈTE**
+> ⚠️ **VERSION MISE À JOUR - INTÉGRATION RESEND COMPLÈTE + NETTOYAGE AUTH**
 >
 > Cette version documente :
 >
 > - ✅ **Architecture Email** : Resend + React Email (templates, actions, API routes, webhooks)
-> - ✅ **Supabase Auth 2025** : Patterns modernes `@supabase/ssr` + `getClaims()`
-> - ✅ **Custom Hooks** : useAuth, useNewsletterSubscribe, useContactForm
+> - ✅ **Supabase Auth 2025** : Patterns modernes `@supabase/ssr` + `getClaims()` (~2-5ms, 100x plus rapide)
+> - ✅ **Nettoyage Auth** : Code redondant supprimé (~400 lignes), 100% template officiel
+> - ✅ **Custom Hooks** : useNewsletterSubscribe, useContactForm
 > - ✅ **Testing Infrastructure** : Scripts de test email, logs, webhooks
 > - ✅ **Type System** : Types email dédiés + database types générés
 >
@@ -243,7 +244,6 @@ rougecardinalcompany/
 │   │           └── route.ts                   # POST /api/webhooks/resend
 │   │
 │   ├── 📁 auth/                               # Authentication flows
-│   │   ├── 📁 callback/route.ts               # ✨ OAuth callback handler
 │   │   ├── 📁 login/page.tsx
 │   │   ├── 📁 sign-up/page.tsx
 │   │   ├── 📁 sign-up-success/page.tsx
@@ -271,9 +271,6 @@ rougecardinalcompany/
 │   └── [favicon, og-image, twitter-image]
 │
 ├── 📁 components/                             # React Components
-│   ├── 📁 auth/                               # ✨ NEW: Auth components
-│   │   └── protected-route.tsx                # Route protection wrapper
-│   │
 │   ├── 📁 features/public-site/               # Feature-based organization
 │   │   ├── 📁 home/                           # Homepage features
 │   │   │   ├── 📁 hero/                       # Hero carousel section
@@ -431,7 +428,6 @@ rougecardinalcompany/
 │   │   └── schemas.ts                         # Zod validation schemas
 │   │
 │   ├── 📁 hooks/                              # ✨ NEW: Custom hooks
-│   │   ├── useAuth.ts                         # Auth hook
 │   │   ├── useNewsletterSubscribe.ts          # Newsletter hook
 │   │   └── useContactForm.ts                  # Contact form hook
 │   │
@@ -609,13 +605,6 @@ export async function fetch[Entity]() {
 **Current Hooks**:
 
 ```typescript
-// lib/hooks/useAuth.ts
-export function useAuth() {
-  // Auth state management
-  // Login/logout logic
-  // Session handling
-}
-
 // lib/hooks/useNewsletterSubscribe.ts
 export function useNewsletterSubscribe() {
   const [email, setEmail] = useState('');
@@ -973,7 +962,6 @@ Examples:
 Pattern: use[Feature][Action?]
 
 Examples:
-  useAuth()
   useNewsletterSubscribe()
   useContactForm()
   useHeroCarousel()
@@ -1067,8 +1055,8 @@ Examples:
 
 4. Authentication:
    → app/auth/[flow]/page.tsx
-   → lib/auth/service.ts
    → middleware.ts (route protection)
+   → lib/supabase/server.ts (getClaims() ~2-5ms)
 ```
 
 ### 7.2 Common Development Tasks

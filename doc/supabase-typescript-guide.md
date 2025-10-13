@@ -1,4 +1,4 @@
-# Guide officiel : Typage TypeScript de bout en bout avec Supabase et Next.js App Router
+# Guide officiel : Typage TypeScript avec Supabase et Next.js App Router
 
 ## 1. Schéma du flux
 

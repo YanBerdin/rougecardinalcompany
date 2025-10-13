@@ -15,16 +15,9 @@ app/
     page.tsx       // Page avec paramètre
 ```
 
-### Pattern de Server Compo### 3. Exceptions WCAG autorisées
-
-- **Exception inline** : Liens dans un paragraphe de texte (exemple: lien intégré dans une phrase)
-- **Exception équivalente** : Si plusieurs cibles effectuent la même action, une seule doit respecter 44px
-- **Exception essentielle** : Quand modifier la taille changerait l'information (rare, documenter)
-
-### 4. Recommandations mobiles
+### Pattern de Server Components et Client Components
 
 ```typescript
-
 // Composant Server par défaut
 export default async function PageComponent() {
   const data = await fetchData();
@@ -38,6 +31,129 @@ export function ClientComponent({ initialData }) {
   // ...
 }
 ```
+
+### Pattern d'Authentification Optimisée (Next.js 15 + Supabase)
+
+⚠️ **Best Practice 2025** : Utiliser `getClaims()` au lieu de `getUser()` pour une performance 100x meilleure.
+
+```typescript
+// ❌ ANCIEN PATTERN (lent ~300ms)
+export async function AuthButton() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser(); // Appel réseau
+  return user ? <UserMenu user={user} /> : <SignInButton />;
+}
+
+// ✅ NOUVEAU PATTERN (rapide ~2-5ms) - Client Component avec réactivité
+"use client";
+import { useEffect, useState } from "react";
+import { createClient } from "@/supabase/client";
+
+interface UserClaims {
+  sub: string;
+  email?: string;
+  [key: string]: unknown;
+}
+
+export function AuthButton() {
+  const [userClaims, setUserClaims] = useState<UserClaims | null>(null);
+  const [loading, setLoading] = useState(true);
+  const supabase = createClient();
+
+  useEffect(() => {
+    // ✅ OPTIMIZED: getClaims() = ~2-5ms (vérification JWT locale)
+    const getClaims = async () => {
+      const { data } = await supabase.auth.getClaims();
+      setUserClaims(data?.claims ?? null);
+      setLoading(false);
+    };
+
+    getClaims();
+
+    // Écoute les changements auth en temps réel
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (session?.user) {
+          setUserClaims({
+            sub: session.user.id,
+            email: session.user.email,
+            ...session.user.user_metadata,
+          });
+        } else {
+          setUserClaims(null);
+        }
+        setLoading(false);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [supabase.auth]);
+
+  if (loading) return <LoadingButton />;
+  return userClaims ? <UserMenu email={userClaims.email} /> : <SignInButton />;
+}
+```
+
+**Avantages** :
+
+- Performance : 2-5ms au lieu de 300ms (100x plus rapide)
+- Réactivité : mise à jour automatique via `onAuthStateChange()`
+- Compatible : fonctionne dans les layouts qui ne se re-rendent pas
+- Conformité : respecte `.github/instructions/nextjs-supabase-auth-2025.instructions.md`
+
+### Pattern Login/Logout avec Refresh
+
+```typescript
+// Login Form - Pattern avec router.refresh()
+"use client";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/supabase/client";
+
+export function LoginForm() {
+  const router = useRouter();
+  
+  const handleLogin = async (email: string, password: string) => {
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    
+    if (error) throw error;
+    
+    // Force refresh pour mettre à jour les Server Components
+    router.refresh();
+    
+    // Petit délai pour synchro session/cookies
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    router.push("/protected");
+  };
+  
+  // ...
+}
+
+// Logout Button - Pattern avec window.location.href
+"use client";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/supabase/client";
+
+export function LogoutButton() {
+  const router = useRouter();
+  
+  const logout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    
+    // Rechargement complet pour garantir synchro complète
+    window.location.href = "/auth/login";
+  };
+  
+  return <Button onClick={logout}>Logout</Button>;
+}
+```
+
+**Pourquoi cette différence ?**
+
+- **Login** : `router.refresh()` suffit car on passe d'une page publique à protégée
+- **Logout** : `window.location.href` garantit l'effacement complet des cookies/session
 
 ### Pattern DAL (Data Access Layer) côté serveur
 

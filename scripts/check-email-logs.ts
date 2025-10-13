@@ -97,8 +97,9 @@ async function checkEmailLogs() {
       console.log("✅ Contact messages (last 5):");
       if (contactData && contactData.length > 0) {
         contactData.forEach((item, index) => {
+          const fullName = `${item.firstname || ""} ${item.lastname || ""}`.trim() || "Anonymous";
           console.log(
-            `   ${index + 1}. ${item.name} <${item.email}> - "${item.subject}" - ${new Date(item.created_at).toLocaleString()}`
+            `   ${index + 1}. ${fullName} <${item.email}> - "${item.reason}" - ${new Date(item.created_at).toLocaleString()}`
           );
         });
       } else {

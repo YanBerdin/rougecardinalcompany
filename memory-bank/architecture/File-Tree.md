@@ -73,8 +73,6 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   ├── 📄 page.tsx
 │   └── 🖼️ twitter-image.png
 ├── 📁 components/
-│   ├── 📁 auth/
-│   │   └── 📄 protected-route.tsx
 │   ├── 📁 features/
 │   │   └── 📁 public-site/
 │   │       ├── 📁 agenda/
@@ -223,7 +221,6 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   │   ├── 📄 actions.ts
 │   │   └── 📄 schemas.ts
 │   ├── 📁 hooks/
-│   │   ├── 📄 useAuth.ts
 │   │   ├── 📄 useContactForm.ts
 │   │   └── 📄 useNewsletterSubscribe.ts
 │   ├── 📁 plugins/

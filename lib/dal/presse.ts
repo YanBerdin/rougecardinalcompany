@@ -132,36 +132,39 @@ interface MediaMetadata {
   [key: string]: string | number | boolean | undefined;
 }
 
-interface MediaRow {
-  storage_path: string;
-  filename: string | null;
-  mime: string | null;
-  size_bytes: number | null;
-  alt_text: string | null;
+// Utilisation du type global Media avec metadata typée
+type MediaRow = Pick<
+  Media,
+  "storage_path" | "filename" | "mime" | "size_bytes" | "alt_text"
+> & {
   metadata: MediaMetadata | null;
-}
+};
 
-interface CommuniquePresseRow {
-  id: number;
-  title: string;
-  description: string | null;
-  date_publication: string;
-  image_url: string | null;
-  ordre_affichage: number;
-  public: boolean;
-  file_size_bytes: number | null;
-}
+// Utilisation du type global CommuniquePresse
+type CommuniquePresseRow = Pick<
+  CommuniquePresse,
+  | "id"
+  | "title"
+  | "description"
+  | "date_publication"
+  | "image_url"
+  | "ordre_affichage"
+  | "public"
+  | "file_size_bytes"
+>;
 
-interface ArticlePresseRow {
-  id: number;
-  title: string | null;
-  author: string | null;
-  type: string | null;
-  excerpt: string | null;
-  source_publication: string | null;
-  source_url: string | null;
-  published_at: string | null;
-}
+// Utilisation du type global ArticlePresse
+type ArticlePresseRow = Pick<
+  ArticlePresse,
+  | "id"
+  | "title"
+  | "author"
+  | "type"
+  | "excerpt"
+  | "source_publication"
+  | "source_url"
+  | "published_at"
+>;
 
 function getMediaType(metadata: MediaMetadata | null): string {
   if (metadata?.type === "logo") return "Logo";
@@ -197,15 +200,18 @@ export async function fetchMediaKit(
     return [];
   }
 
-  return (data ?? []).map((row: MediaRow) => {
+  return (data ?? []).map((row) => {
+    // Cast metadata de Json vers MediaMetadata
+    const metadata = row.metadata as MediaMetadata | null;
+    
     // Prioriser l'URL externe si disponible dans metadata
-    const externalUrl = row.metadata?.external_url;
+    const externalUrl = metadata?.external_url;
     const fileUrl = externalUrl
       ? String(externalUrl)
       : `/storage/v1/object/public/${row.storage_path}`;
 
     return {
-      type: getMediaType(row.metadata),
+      type: getMediaType(metadata),
       description: String(row.alt_text ?? row.filename ?? ""),
       fileSize: bytesToHuman(row.size_bytes),
       fileUrl,
