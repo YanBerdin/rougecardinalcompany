@@ -1,3 +1,7 @@
+---
+applyTo: "**"
+---
+
 description: Guidelines for writing Postgres Row Level Security policies
 alwaysApply: false
 ---
@@ -40,7 +44,7 @@ Supabase maps every request to one of the roles:
 - `anon`: an unauthenticated request (the user is not logged in)
 - `authenticated`: an authenticated request (the user is logged in)
 
-These are actually https://supabase.com/docs/guides/database/postgres/roles
+These are actually <https://supabase.com/docs/guides/database/postgres/roles>
 You can use these roles within your Policies using the `TO` clause:
 
 ```sql
@@ -138,7 +142,7 @@ using ( team_id in (select auth.jwt() -> 'app_metadata' -> 'teams'));
 
 ### MFA
 
-The `auth.jwt()` function can be used to check for (https://supabase.com/docs/guides/auth/auth-mfa)
+The `auth.jwt()` function can be used to check for (<https://supabase.com/docs/guides/auth/auth-mfa>)
 For example, you could restrict a user from updating their profile unless they have at least 2 levels of authentication (Assurance Level 2):
 
 ```sql
@@ -155,11 +159,11 @@ to authenticated using (
 
 Every authorization system has an impact on performance. While row level security is powerful, the performance impact is important to keep in mind. This is especially true for queries that scan every row in a table - like many `select` operations, including those using limit, offset, and ordering.
 
-Based on a series of (https://github.com/GaryAustin1/RLS-Performance), we have a few recommendations for RLS:
+Based on a series of (<https://github.com/GaryAustin1/RLS-Performance>), we have a few recommendations for RLS:
 
 ### Add indexes
 
-Make sure you've added (https://supabase.com/docs/guides/database/postgres/indexes) on any columns used within the Policies which are not already indexed (or primary keys). For a Policy like this:
+Make sure you've added (<https://supabase.com/docs/guides/database/postgres/indexes>) on any columns used within the Policies which are not already indexed (or primary keys). For a Policy like this:
 
 ```sql
 create policy "Users can access their own records" on test_table

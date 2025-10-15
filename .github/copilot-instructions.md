@@ -1,13 +1,20 @@
+---
+applyTo: "**"
+---
+
 # GitHub Copilot Instructions pour Rouge Cardinal Company
 
 ## Next.js 15 Best Practices
 
 Pour toute génération ou modification de code Next.js, appliquer systématiquement les standards et patterns définis dans :
--  `.github/copilot/nextjs.instructions.md`
--  `.github/copilot/nextjs15-backend-with-supabase.instructions.md`
--  `.github/copilot/nextjs-supabase-auth-2025.instructions.md`
+
+- `.github/instructions/README.md` (overview et mapping des fichiers d'instructions)
+- `.github/instructions/nextjs.instructions.md` (Next.js général)
+- `.github/instructions/nextjs15-backend-with-supabase.instructions.md` (Next.js 15 backend patterns)
+- `.github/instructions/nextjs-supabase-auth-2025.instructions.md` (CANONICAL - Supabase Auth rules)
 
 Ces fichiers contiennent :
+
 - Structure de projet recommandée (App Router, feature folders, colocation)
 - Différenciation Server/Client Components
 - Patterns de Data Access Layer (DAL) et sécurité
@@ -15,7 +22,7 @@ Ces fichiers contiennent :
 - Exemples de composants Smart/Dumb
 - Règles de migration et audit sécurité
 
-Copilot doit toujours prioriser ces instructions pour Next.js 15+ et vérifier la cohérence avec le code existant.
+Copilot doit toujours prioriser ces instructions pour Next.js 15+ et vérifier la cohérence avec le code existant. Pour les règles d'authentification Supabase (migrations de clés, middleware, patterns `createServerClient` et sécurité), utiliser le fichier CANONICAL indiqué ci‑dessus.
 
 ## Priority Guidelines
 
@@ -31,7 +38,7 @@ When generating code for this repository:
 
 Before generating code, scan the codebase to identify:
 
-1. **Language Versions**: 
+1. **Language Versions**:
    - TypeScript target: ES2017 (as specified in tsconfig.json)
    - React version: 19.0.0
    - Node.js environment: ^20 (specified in devDependencies)
@@ -50,6 +57,7 @@ Before generating code, scan the codebase to identify:
    - Never use APIs or features not available in the detected versions
 
 4. **Supabase Integration** :
+
 - `@supabase/ssr` (moderne) vs `@supabase/auth-helpers` (legacy)
 - `getClaims()` pour l'authentification (~2-5ms vs ~300ms)
 - RLS (Row Level Security) activé sur toutes les tables
@@ -77,12 +85,12 @@ When context files don't provide specific guidance:
    - Code organization (React hooks at the top, JSX at the bottom)
    - Error handling (try/catch with appropriate error handling)
    - Use of Server vs Client Components
-   
+
 3. Follow the most consistent patterns found in the codebase
 4. When conflicting patterns exist, prioritize patterns in newer files or files with higher test coverage
 5. Never introduce patterns not found in the existing codebase
 
-## Architecture Guidelines 
+## Architecture Guidelines
 
 ## 📁 Project Structure
 
@@ -178,7 +186,7 @@ components/
 
 **Smart Components (Containers)**:
 
-*Responsibilities*:
+_Responsibilities_:
 
 - Data fetching and mutations (Server: async data, Client: hooks)
 - Business logic implementation and validation
@@ -187,17 +195,17 @@ components/
 - Error handling and loading states
 - Orchestration of multiple dumb components
 
-*Server vs Client Decision*:
+_Server vs Client Decision_:
 
 - **Server Components** (default): Use for data fetching, SEO-critical content, initial page loads
 - **Client Components** (add `'use client'`): Use for interactivity, real-time updates, user input handling
 
-*Naming Conventions*:
+_Naming Conventions_:
 
 - Suffix `Container`: `ContentContainer`, `AuthContainer`
 - Business names: `AuthProvider`, `ContentManager`, `DashboardOrchestrator`
 
-*Implementation Pattern*:
+_Implementation Pattern_:
 
 ```tsx
 // Server Smart Component Example
@@ -266,7 +274,7 @@ export function InteractiveContentContainer() {
 
 **Dumb Components (Presentational)**:
 
-*Responsibilities*:
+_Responsibilities_:
 
 - Pure rendering based on props
 - UI interactions (hover, focus, simple animations)
@@ -274,7 +282,7 @@ export function InteractiveContentContainer() {
 - Accessibility implementation
 - No business logic or side effects
 
-*Characteristics*:
+_Characteristics_:
 
 - Strict TypeScript interfaces for all props
 - No direct API calls or external dependencies
@@ -282,7 +290,7 @@ export function InteractiveContentContainer() {
 - Reusable across different features
 - Can be Server or Client Components based on usage context
 
-*Implementation Pattern*:
+_Implementation Pattern_:
 
 ```tsx
 interface ArticleListProps {
@@ -483,6 +491,7 @@ export function ContentContainer() {
 ## Code Quality Standards
 
 ### Maintainability
+
 - Write self-documenting code with clear naming
 - Use PascalCase for component names and files (e.g., `ContentContainer.tsx`, `Hero.tsx`)
 - Use camelCase for variables, functions, and instance methods
@@ -493,6 +502,7 @@ export function ContentContainer() {
 - One main smart component per feature when possible
 
 ### Performance
+
 - Use useCallback for event handlers in components
 - Implement appropriate memoization using React.memo or useMemo
 - Optimize images using Next.js Image component
@@ -501,6 +511,7 @@ export function ContentContainer() {
 - Implement pagination or virtualization for large lists
 
 ### Security
+
 - Validate all user inputs
 - Use Supabase's built-in security features
 - Never expose sensitive information in client-side code
@@ -508,6 +519,7 @@ export function ContentContainer() {
 - Implement proper security checks in API routes
 
 ### Accessibility
+
 - Use semantic HTML elements (buttons for actions, anchors for navigation)
 - Include proper ARIA attributes where necessary
 - Ensure keyboard navigation support
@@ -516,6 +528,7 @@ export function ContentContainer() {
 - Respect user preferences (like reduced motion)
 
 ### Testability
+
 - Write code that is easy to test
 - Keep components small and focused
 - Avoid complex side effects
@@ -534,6 +547,7 @@ export function ContentContainer() {
 ## Testing Approach
 
 ### Unit Testing
+
 - Focus on testing component behavior and functionality
 - Test smart components for data handling and business logic
 - Test dumb components for rendering and prop handling
@@ -553,6 +567,7 @@ export function ContentContainer() {
 - Pages should import Smart components (Containers) from features
 
 ### TypeScript Guidelines
+
 - Use strict type checking
 - Define interfaces for component props
 - Use type inference where appropriate
@@ -588,12 +603,14 @@ export type Article = z.infer<typeof ArticleSchema>;
 ```
 
 This pattern provides:
+
 - Runtime validation for API inputs/outputs
 - Automatic TypeScript type generation
 - Consistent validation across features
 - Better error handling and user feedback
 
 ### React Guidelines
+
 - Use functional components with hooks
 - Follow the hook rules (don't call hooks conditionally)
 - Use controlled components for forms
@@ -603,6 +620,7 @@ This pattern provides:
 - Place custom hooks in feature hooks.ts files or lib/hooks/
 
 ### Supabase Guidelines
+
 - Use the patterns established in supabase/
 - Follow the Server Component pattern for data fetching
 - Use Row Level Security (RLS) policies
@@ -611,16 +629,19 @@ This pattern provides:
 - Validate data before sending to Supabase
 
 ### MCP GitHub Guidelines
+
 - Use to directly access repository files, issues, pull requests, and discussions without manual copy-paste.
 - Leverage MCP GitHub to retrieve information documented in `.github/copilot` and architecture files.
 - Always review and validate retrieved data before generating code.
 
 ### MCP Supabase Guidelines
+
 - Use to query the database, inspect the schema, or apply migrations directly from Copilot.
 - Strictly respect Row Level Security (RLS) policies and server-side validations.
 - Prefer secure, predefined queries over free-form SQL in prompts.
 
 ### Tailwind CSS Guidelines
+
 - Use the established color palette and design tokens
 - Follow the utility-first approach
 - Use consistent spacing and sizing
@@ -680,7 +701,9 @@ export function ArticleList({ articles }: ArticleListProps) {
 ## Project-Specific Guidance
 
 ### Rouge Cardinal Company Website
+
 This project is a website for a theater company with these key features:
+
 - Public-facing website with information about shows and events
 - Authentication for admin users
 - Content management capabilities
@@ -694,6 +717,7 @@ This project is a website for a theater company with these key features:
 - `auth`: Login, authentication guards
 
 The project focuses on:
+
 - Professional presentation of the company
 - Easy access to show information
 - Media resources for professionals

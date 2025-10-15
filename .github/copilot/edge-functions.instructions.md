@@ -1,3 +1,7 @@
+---
+applyTo: "**"
+---
+
 description: Coding rules for Supabase Edge Functions
 alwaysApply: false
 ---
@@ -16,10 +20,12 @@ You're an expert in writing TypeScript and Deno JavaScript runtime. Generate **h
 6. You can also use Node built-in APIs. You will need to import them using `node:` specifier. For example, to import Node process: `import process from "node:process". Use Node APIs when you find gaps in Deno APIs.
 7. Do NOT use `import { serve } from "https://deno.land/std@0.168.0/http/server.ts"`. Instead use the built-in `Deno.serve`.
 8. Following environment variables (ie. secrets) are pre-populated in both local and hosted Supabase environments. Users don't need to manually set them:
- * SUPABASE_URL
- * SUPABASE_ANON_KEY
- * SUPABASE_SERVICE_ROLE_KEY
- * SUPABASE_DB_URL
+
+* SUPABASE_URL
+* SUPABASE_ANON_KEY
+* SUPABASE_SERVICE_ROLE_KEY
+* SUPABASE_DB_URL
+
 9. To set other environment variables (ie. secrets) users can put them in a env file and run the `supabase secrets set --env-file path/to/env-file`
 10. A single Edge Function can handle multiple routes. It is recommended to use a library like Express or Hono to handle the routes as it's easier for developer to understand and maintain. Each route must be prefixed with `/function-name` so they are routed correctly.
 11. File write operations are ONLY permitted on `/tmp` directory. You can use either Deno or Node File APIs.

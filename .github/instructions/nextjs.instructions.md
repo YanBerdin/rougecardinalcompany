@@ -196,6 +196,7 @@ export async function getProfileDTO(slug: string) {
 - If session is needed in a navbar, make the navbar a Client Component and fetch session client‑side to keep siblings static when possible.
 
 ### 5.3. Component-Level Data Access (Prototypes Only)
+>
 > [!WARNING]
 > ⚠️ **WARNING**: Only for prototypes and learning. High risk of data exposure.
 
@@ -322,6 +323,7 @@ experimental_taintUniqueValue("API key leaked", process.env.API_KEY);
 ### 6.1. Built-in Security Features
 
 > [!IMPORTANT]
+>
 > - **Secure Action IDs**: Encrypted, non-deterministic IDs (regenerated every 14 days)
 > - **Dead Code Elimination**: Unused Server Actions removed from client bundle
 > - **POST Method Only**: Prevents CSRF vulnerabilities
@@ -388,6 +390,7 @@ export default async function Page() {
 
 > [!IMPORTANT]
 > **Validate ALL client inputs:**
+>
 >- Form data
 >- URL parameters
 >- Headers

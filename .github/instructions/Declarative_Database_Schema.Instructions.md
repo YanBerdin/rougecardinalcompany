@@ -1,3 +1,7 @@
+---
+applyTo: "**"
+---
+
 description: For when modifying the Supabase database schema.
 alwaysApply: false
 ---
@@ -8,7 +12,7 @@ Mandatory Instructions for Supabase Declarative Schema Management
 
 ## 1. **Exclusive Use of Declarative Schema**
 
--**All database schema modifications must be defined within `.sql` files located in the `supabase/schemas/` directory. -**Do not\*\* create or modify files directly in the `supabase/migrations/` directory unless the modification is about the known caveats below. Migration files are to be generated automatically through the CLI.
+**All database schema modifications must be defined within `.sql` files located in the `supabase/schemas/` directory. -**Do not\*\* create or modify files directly in the `supabase/migrations/` directory unless the modification is about the known caveats below. Migration files are to be generated automatically through the CLI.
 
 ## 2. **Schema Declaration**
 
@@ -19,24 +23,25 @@ Mandatory Instructions for Supabase Declarative Schema Management
 
 - Before generating migrations, **stop the local Supabase development environment**
 
-  ```bash
+```bash
 # local database
-  supabase stop
+supabase stop
 # or
-  pnpm dlx supabase stop
-  ```
+pnpm dlx supabase stop
+```
+
 - Generate migration files by diffing the declared schema against the current database state
 
-  ```bash
+```bash
 # local database (no flags needed)
-  supabase db diff -f <migration_name>
+supabase db diff -f <migration_name>
 # or
-  pnpm dlx supabase db diff -f <migration_name>
-
+pnpm dlx supabase db diff -f <migration_name>
 # remote database (specify the --linked or --db-url flag respectively)
-  supabase db diff [flags]
-  ```
-  Replace `<migration_name>` with a descriptive name for the migration
+supabase db diff [flags]
+```
+
+Replace `<migration_name>` with a descriptive name for the migration
 
 ## 4. **Schema File Organization**
 
@@ -49,40 +54,46 @@ Mandatory Instructions for Supabase Declarative Schema Management
   - Manually update the relevant `.sql` files in `supabase/schemas/` to reflect the desired state
   - Generate a new migration file capturing the rollback
 
-    ```bash
-    supabase db diff -f <rollback_migration_name>
-    ```
+```bash
+supabase db diff -f <rollback_migration_name>
+```
 
-  - Review the generated migration file carefully to avoid unintentional data loss
+- Review the generated migration file carefully to avoid unintentional data loss
 
 ## 5.5. **Hotfix Migrations and Schema Synchronization**
 
 When a critical bug requires immediate production fix:
 
 ### Emergency Workflow
-1. **Create manual migration** for immediate deployment to production
-   ```bash
-   # Create timestamped migration manually
-   touch supabase/migrations/$(date +%Y%m%d%H%M%S)_fix_critical_bug.sql
-   ```
-2. **Apply to production** using Supabase CLI
-   ```bash
-   pnpm dlx supabase db push
-   ```
+
+#### 1. **Create manual migration** for immediate deployment to production
+
+```bash
+# Create timestamped migration manually
+touch supabase/migrations/$(date +%Y%m%d%H%M%S)_fix_critical_bug.sql
+```
+
+#### 2. **Apply to production** using Supabase CLI
+
+```bash
+pnpm dlx supabase db push
+```
 
 ### Post-Fix Synchronization (MANDATORY)
-3. **Update declarative schema** to reflect the fix
-   - Modify the corresponding `.sql` file in `supabase/schemas/`
-   - Ensure the schema file represents the corrected final state
-   
-4. **Document the redundancy** in `supabase/migrations/migrations.md`
-   ```markdown
-   - `YYYYMMDDHHMMSS_fix_critical_bug.sql` — Description of fix
-     - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/XX_affected_entity.sql`
-     - 📝 **Migration conservée** pour l'historique et la cohérence avec Supabase Cloud
-   ```
+
+#### 1. **Update declarative schema** to reflect the fix
+
+- Modify the corresponding `.sql` file in `supabase/schemas/`
+- Ensure the schema file represents the corrected final state
+
+#### 2. **Document the redundancy** in `supabase/migrations/migrations.md`
+
+- `YYYYMMDDHHMMSS_fix_critical_bug.sql` — Description of fix
+  - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/XX_affected_entity.sql`
+  - 📝 **Migration conservée** pour l'historique et la cohérence avec Supabase Cloud
 
 ### Migration Retention Policy
+
 - **KEEP manual hotfix migrations** in the repository for:
   - Historical record of production fixes
   - Consistency with Supabase Cloud migration history
@@ -91,11 +102,13 @@ When a critical bug requires immediate production fix:
 - **NEVER delete applied migrations** that exist on production
 
 ### Schema as Source of Truth
+
 - After integrating hotfix into declarative schema, the schema files in `supabase/schemas/` become the authoritative source
 - Future schema diffs will be generated from these updated schema files
 - Manual migrations serve only as historical documentation
 
 **Example from this project:**
+
 - Hotfix: `20250918000000_fix_spectacles_versioning_trigger.sql` (trigger bug fix)
 - Schema: `supabase/schemas/15_content_versioning.sql` (updated with correct logic)
 - Result: Both coexist - migration for history, schema for truth
@@ -133,7 +146,7 @@ If you need to use any of the entities below, remember to add them through versi
 
 **Non-compliance with these instructions may lead to inconsistent database states and is strictly prohibited.**
 
-Résumé de l’historique de la conversationJe vais appliquer la même logique RGPD à la table `messages_contact` qui contient également des données personnelles (prénom, nom, email, téléphone). 
+Résumé de l’historique de la conversationJe vais appliquer la même logique RGPD à la table `messages_contact` qui contient également des données personnelles (prénom, nom, email, téléphone).
 
 Parfait ! Je vois que les politiques RLS pour `messages_contact` sont **déjà correctement configurées** selon les principes RGPD :
 
@@ -143,11 +156,11 @@ Parfait ! Je vois que les politiques RLS pour `messages_contact` sont **déjà c
 
 ✅ **Modification/Suppression admin** : seuls les admins peuvent modifier ou supprimer
 
-Maintenant, vérifions l'API de contact pour s'assurer qu'elle suit le même pattern que l'API newsletter (INSERT sans SELECT pour éviter les blocages RLS) : 
+Maintenant, vérifions l'API de contact pour s'assurer qu'elle suit le même pattern que l'API newsletter (INSERT sans SELECT pour éviter les blocages RLS) :
 
 Recherche de fichiers correspondant à `**/app/api/contact/route.ts`, correspondances 2
 
-Excellent ! L'API de contact n'accède **pas du tout** à Supabase pour le moment (elle envoie seulement un email). Il y a un TODO pour intégrer la DAL. Vérifions la DAL contact : 
+Excellent ! L'API de contact n'accède **pas du tout** à Supabase pour le moment (elle envoie seulement un email). Il y a un TODO pour intégrer la DAL. Vérifions la DAL contact :
 
 Parfait ! La DAL contact suit **déjà le bon pattern RGPD** :
 
@@ -155,31 +168,31 @@ Parfait ! La DAL contact suit **déjà le bon pattern RGPD** :
 ✅ **Pas d'UPSERT** : utilise `.insert()` donc pas besoin de policy SELECT
 ✅ **Gestion d'erreur** : cache les détails techniques, log côté serveur
 
-La table `messages_contact` est donc **déjà conforme RGPD** ! Vérifions maintenant la documentation pour s'assurer que tout est bien documenté : 
+La table `messages_contact` est donc **déjà conforme RGPD** ! Vérifions maintenant la documentation pour s'assurer que tout est bien documenté :
 
-Parfait ! Je vois que la conformité RGPD est déjà documentée pour la newsletter. Maintenant ajoutons une note pour confirmer que `messages_contact` suit le même pattern. Mettons à jour la documentation : 
+Parfait ! Je vois que la conformité RGPD est déjà documentée pour la newsletter. Maintenant ajoutons une note pour confirmer que `messages_contact` suit le même pattern. Mettons à jour la documentation :
 
-Excellent ! Maintenant vérifions également la conformité dans le README du schéma déclaratif : 
+Excellent ! Maintenant vérifions également la conformité dans le README du schéma déclaratif :
 
 Parfait ! Je vois que la ligne existe déjà :
 
 | **messages_contact** | Admin uniquement | Envoi libre | Contact public + vue admin |
 
-Mais ajoutons une note RGPD plus explicite. Mettons à jour : 
+Mais ajoutons une note RGPD plus explicite. Mettons à jour :
 
-Maintenant ajoutons des commentaires RGPD dans le fichier SQL schema pour documenter explicitement la protection des données personnelles : 
+Maintenant ajoutons des commentaires RGPD dans le fichier SQL schema pour documenter explicitement la protection des données personnelles :
 
-Maintenant vérifions si l'API de contact gère bien l'absence de `.select()` (comme l'API newsletter) en regardant le code DAL de plus près : 
+Maintenant vérifions si l'API de contact gère bien l'absence de `.select()` (comme l'API newsletter) en regardant le code DAL de plus près :
 
-Excellent ! Créons maintenant un commit pour documenter cette validation de conformité RGPD pour les messages de contact : 
+Excellent ! Créons maintenant un commit pour documenter cette validation de conformité RGPD pour les messages de contact :
 
 Ran terminal command: git status
 
 ---
 
-Je vais vérifier la conformité de nos modifications avec les instructions RLS et le schéma déclaratif. 
+Je vais vérifier la conformité de nos modifications avec les instructions RLS et le schéma déclaratif.
 
-Excellent ! Maintenant vérifions la conformité avec les instructions RLS : 
+Excellent ! Maintenant vérifions la conformité avec les instructions RLS :
 
 Parfait ! Analysons maintenant la conformité de nos modifications :
 
@@ -197,17 +210,17 @@ Parfait ! Analysons maintenant la conformité de nos modifications :
 
 ### 2. **Politiques RLS** (Create_RLS_policies.Instructions.md)
 
-Vérifions point par point : 
+Vérifions point par point :
 
 Thinking
 
-Créons maintenant un document récapitulatif de conformité : 
+Créons maintenant un document récapitulatif de conformité :
 
 Création de (file:///home/yandev/projets/rougecardinalcompany/doc/RGPD-Compliance-Validation.md) effectuée
 
-Parfait ! Maintenant créons un résumé pour la mémoire du projet : 
+Parfait ! Maintenant créons un résumé pour la mémoire du projet :
 
-Excellent ! La documentation est déjà à jour. Ajoutons juste une note sur la conformité aux instructions : 
+Excellent ! La documentation est déjà à jour. Ajoutons juste une note sur la conformité aux instructions :
 
 Utilisation de "Remplacer une chaîne dans un fichier"
 
@@ -247,12 +260,14 @@ Parfait ! Créons maintenant un résumé visuel de la validation :
 ### 📝 Points Clés de Conformité
 
 **Schéma Déclaratif :**
+
 1. ✅ Modifications dans schemas (pas de migrations directes)
 2. ✅ État final désiré représenté
 3. ✅ Organisation lexicographique respectée
 4. ✅ Commentaires explicatifs présents
 
 **Politiques RLS :**
+
 1. ✅ Séparation SELECT/INSERT/UPDATE/DELETE
 2. ✅ USING pour SELECT/DELETE uniquement
 3. ✅ WITH CHECK pour INSERT uniquement

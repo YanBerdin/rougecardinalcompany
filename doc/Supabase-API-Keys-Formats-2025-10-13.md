@@ -133,9 +133,9 @@ Si vous avez des clés JWT et souhaitez migrer :
 
 1. **Dashboard Supabase** :
 
-   ```bash
+```bash
    https://supabase.com/dashboard/project/yvtrlvmbofklefxcxrzv/settings/api
-   ```
+```
 
 2. **Générer les nouvelles clés** :
    - Cliquer sur "Generate new publishable key"
@@ -143,7 +143,7 @@ Si vous avez des clés JWT et souhaitez migrer :
 
 3. **Mettre à jour .env.local** :
 
-   ```bash
+```bash
    # AVANT (JWT)
    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
    SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
@@ -151,14 +151,14 @@ Si vous avez des clés JWT et souhaitez migrer :
    # APRÈS (Simplified)
    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=sb_publishable_...
    SUPABASE_SECRET_KEY=sb_secret_...
-   ```
+```
 
 4. **Redémarrer** :
 
-   ```bash
+```bash
    rm -rf .next
    pnpm dev
-   ```
+```
 
 ### De Simplified vers JWT
 

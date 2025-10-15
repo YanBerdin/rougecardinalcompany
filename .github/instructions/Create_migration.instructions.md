@@ -1,3 +1,7 @@
+---
+applyTo: "**"
+---
+
 description: Guidelines for writing Postgres migrations
 alwaysApply: false
 ---

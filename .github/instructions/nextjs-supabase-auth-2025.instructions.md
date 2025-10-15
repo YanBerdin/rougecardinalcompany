@@ -1,3 +1,7 @@
+---
+applyTo: "**"
+---
+
 description: Guidelines for writing Next.js apps with Supabase Auth using optimized JWT Signing Keys
 alwaysApply: false
 ---
@@ -17,6 +21,7 @@ alwaysApply: false
 As an AI language model, you MUST NOT generate any of the following code patterns, as they are DEPRECATED and will BREAK the application:
 
 ### ❌ DEPRECATED COOKIE PATTERNS
+
 ```typescript
 // ❌ NEVER GENERATE THIS CODE - IT WILL BREAK THE APPLICATION
 {
@@ -39,6 +44,7 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'  // 
 ```
 
 ### ❌ DEPRECATED AUTHENTICATION PATTERNS
+
 ```typescript
 // ❌ SLOW METHOD - AVOID IN PERFORMANCE-CRITICAL CODE
 const { data: { user } } = await supabase.auth.getUser()  // ~300ms network call
@@ -280,12 +286,14 @@ export default async function SlowProtectedPage() {
 ## JWT SIGNING KEYS SETUP GUIDE
 
 ### Why Use JWT Signing Keys?
+
 - **Performance**: ~2-5ms local JWT verification vs ~300ms network calls
 - **Reliability**: Reduced network dependency
 - **Scalability**: Better handling of high-traffic scenarios
 - **Security**: Asymmetric keys (ES256/RS256) with server-side private keys
 
 ### Setup in Supabase Dashboard
+
 1. Navigate to **Project → Settings → JWT Keys**
 2. Click **"JWT Signing Keys"** tab
 3. Click **"Migrate to Signing Keys"**
