@@ -49,7 +49,7 @@ Cursor + MCP server <---> MCP server (shadcn-ui-mcp-server)
 
 ### A. Préparer le plan UI (phase non-code)
 
-1. Ouvrir Claude. Brainstormer l'idée de l'application ou la page.
+1. Brainstormer l'idée de l'application ou la page.
 2. Demander à Claude de produire **un plan d'implémentation UI**. Exporte le résultat dans un fichier nommé `MCP store.md`.
    - Ce fichier contient la structure UI, le parcours utilisateur, et les noms des composants à utiliser.
    - Important: à ce stade **pas de code**. Seulement la structure et le mapping composants -> zones.
@@ -76,7 +76,7 @@ Cursor + MCP server <---> MCP server (shadcn-ui-mcp-server)
 
 ### C. Outils fournis par le MCP server et leur rôle
 
-- `list-components` : retourne la liste complète des composants disponibles. (dans la vidéo: 46 composants)
+- `list-components` : retourne la liste complète des composants disponibles.
 - `get-component` : renvoie les métadonnées d'un composant précis.
 - `get-component-demo` : récupère la **démonstration d'utilisation réelle** (code d'exemple). Outil crucial pour éviter les erreurs d'implémentation.
 - `list-blocks` / `get-blocks` : blocs composés (combinations of components). Ex: `login block`, `dashboard block`.
@@ -227,8 +227,6 @@ my-app/
 
 ---
 
-### Remerciements
-
-Ce tutoriel suit la structure et les idées de la vidéo fournie. Il condense le workflow recommandé: **planifier avec Claude -> documenter en `MCP store.md` -> implémenter via Cursor + MCP server -> personnaliser via TweakCN**.
+workflow recommandé: **planifier avec Claude -> documenter en `MCP store.md` -> implémenter via Cursor + MCP server -> personnaliser via TweakCN**.
 
 ---
