@@ -1,227 +1,235 @@
-"use client"
+"use client";
 
 //! ---------------- Warning -----------------//
-//TODO: Delete before production 
-import { useState, useEffect } from "react"
-import { createClient } from '@/supabase/client'
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
+//TODO: Delete before production
+import { useState, useEffect } from "react";
+import { createClient } from "@/supabase/client";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 // import { cn } from "@/lib/utils"
-import { SupabaseClient } from '@supabase/supabase-js'
-import { CheckCircle2, XCircle, RefreshCw, Database } from "lucide-react"
+import { SupabaseClient } from "@supabase/supabase-js";
+import { CheckCircle2, XCircle, RefreshCw, Database } from "lucide-react";
+import Image from "next/image";
 
 // Types pour les données de test
 // Mapping Membre (SQL) -> TeamMember (UI)
-import type { TeamMember } from '@/components/features/public-site/compagnie/types'
-import type { CurrentShow, ArchivedShow } from '@/components/features/public-site/spectacles/types'
+import type { TeamMember } from "@/components/features/public-site/compagnie/types";
+import type {
+  CurrentShow,
+  ArchivedShow,
+} from "@/components/features/public-site/spectacles/types";
 
 function mapMembreToTeamMember(membre: Membre): TeamMember {
   return {
-    name: membre.nom,
-    role: membre.role,
-    bio: membre.description,
-    image: membre.photo_url || "", // ou une fonction pour récupérer l’URL à partir de photo_media_id
-  }
+    name: membre.nom ?? membre.name, // nom est l'alias, name est dans la DB
+    role: membre.role ?? "",
+    bio: membre.description ?? "",
+    image: membre.photo_url || "", // ou une fonction pour récupérer l'URL à partir de photo_media_id
+  };
 }
 
-function mapSpectacleFromDb(dbSpectacle: Spectacle): CurrentShow | ArchivedShow {
+function mapSpectacleFromDb(
+  dbSpectacle: Spectacle
+): CurrentShow | ArchivedShow {
   return {
     id: dbSpectacle.id,
     title: dbSpectacle.title,
-    slug: dbSpectacle.slug,
+    slug: dbSpectacle.slug ?? undefined,
     description: dbSpectacle.description ?? "",
-    genre: (dbSpectacle as any).genre ?? "",
-    duration_minutes: dbSpectacle.duration_minutes ?? "",
-    cast: (dbSpectacle as any).cast ?? 0,
-    premiere: (dbSpectacle as any).premiere ?? "",
+    genre: (dbSpectacle as any).genre ?? "", //TODO: fix Unexpected any
+    duration_minutes: dbSpectacle.duration_minutes ? String(dbSpectacle.duration_minutes) : "",
+    cast: (dbSpectacle as any).cast ?? 0, //TODO: fix Unexpected any
+    premiere: (dbSpectacle as any).premiere ?? "", //TODO: fix Unexpected any
     public: dbSpectacle.public ?? false,
-    created_by: dbSpectacle.created_by,
+    created_by: dbSpectacle.created_by ?? "",
     created_at: dbSpectacle.created_at,
-    updated_at: dbSpectacle.updated_at,
-    image: (dbSpectacle as any).image ?? "",
-    status: (dbSpectacle as any).status ?? "",
-    awards: (dbSpectacle as any).awards ?? [],
+    updated_at: dbSpectacle.updated_at ?? dbSpectacle.created_at,
+    image: (dbSpectacle as any).image ?? "", //TODO: fix Unexpected any
+    status: (dbSpectacle as any).status ?? "", //TODO: fix Unexpected any
+    awards: (dbSpectacle as any).awards ?? [], //TODO: fix Unexpected any
     // year: (dbSpectacle as any).premiere
     //   ? String(new Date((dbSpectacle as any).premiere).getFullYear())
     //   : ((dbSpectacle as any).year ?? ""),
-  }
+  };
 }
 
-// Types pour les données de test
-interface Spectacle {
-  id: number;
-  title: string;
-  slug?: string;
-  description?: string;
-  duration_minutes?: string;
-  premiere?: string;
-  public?: boolean;
-  created_by?: string;
-  created_at: string;
-  updated_at: string;
-}
+// Types pour les données de test - Utilisation du type global Spectacle
+// Extension si nécessaire pour compatibilité avec ancien code
+type SpectacleCompat = Spectacle & {
+  duration_minutes?: string; // Pour compatibilité avec ancien code qui attend string
+};
 
-
-interface Membre {
-  id: number
-  nom: string
-  role: string
-  description: string
-  photo_media_id?: number
-  ordre: number
-  active: boolean
-  created_at: string
-  updated_at: string
+// Utilisation du type global MembreEquipe avec alias pour compatibilité
+type Membre = MembreEquipe & {
   // Optionnel : si tu ajoutes l'URL de la photo côté client
-  photo_url?: string
-}
+  photo_url?: string;
+  // Alias pour compatibilité avec ancien code
+  nom?: string;
+};
 
-interface Actualite { //TODO == mediaArticlesData
-  id: number;
-  title: string;
-  author: string;
-  slug: string | null;
-  type: string | null;
-  chapo: string | null;
-  excerpt: string | null;
-  source_publication: string | null;
-  source_url: string | null;
-  published_at : string | null;
-  created_at : string | null;
-  updated_at :  string | null;
-}
+// Utilisation du type global ArticlePresse avec alias pour compatibilité
+type Actualite = ArticlePresse;
 
 export default function TestConnectionPage() {
-  const [connectionStatus, setConnectionStatus] = useState<"loading" | "success" | "error" | "tables-missing">("loading")
-  const [spectacles, setSpectacles] = useState<Array<Spectacle | CurrentShow | ArchivedShow>>([])
-  const [membres, setMembres] = useState<Membre[]>([])
-  const [actualites, setActualites] = useState<Actualite[]>([])
-  const [errorMessage, setErrorMessage] = useState("")
-  const [isLoading, setIsLoading] = useState(true)
-  const [connectionDetails, setConnectionDetails] = useState<{ method?: string; error?: string } | null>(null)
-  const [connectionTestSuccess, setConnectionTestSuccess] = useState<boolean | null>(null)
+  const [connectionStatus, setConnectionStatus] = useState<
+    "loading" | "success" | "error" | "tables-missing"
+  >("loading");
+  const [spectacles, setSpectacles] = useState<
+    Array<SpectacleCompat | CurrentShow | ArchivedShow>
+  >([]);
+  const [membres, setMembres] = useState<Membre[]>([]);
+  const [actualites, setActualites] = useState<Actualite[]>([]);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [connectionDetails, setConnectionDetails] = useState<{
+    method?: string;
+    error?: string;
+  } | null>(null);
+  const [connectionTestSuccess, setConnectionTestSuccess] = useState<
+    boolean | null
+  >(null);
 
-  const supabase = createClient()
+  const supabase = createClient();
 
   // Fonction utilitaire pour tester la connexion de plusieurs façons
   const checkSupabaseConnection = async (client: SupabaseClient) => {
     try {
       // Méthode 1: Utiliser la fonction RPC personnalisée
-      const { error: rpcError } = await client.rpc('get_current_timestamp')
+      const { error: rpcError } = await client.rpc("get_current_timestamp");
 
       if (!rpcError) {
-        return { connected: true }
+        return { connected: true };
       }
 
       // Méthode 2: Si la RPC échoue, essayer avec health check
-      const { error: healthError } = await client.from('pg_stat_statements').select('query').limit(1)
+      const { error: healthError } = await client
+        .from("pg_stat_statements")
+        .select("query")
+        .limit(1);
 
-      if (!healthError || (healthError && healthError.message.includes("permission denied"))) {
+      if (
+        !healthError ||
+        (healthError && healthError.message.includes("permission denied"))
+      ) {
         // Si nous obtenons une erreur de permission, cela signifie que la connexion fonctionne
         // mais l'utilisateur n'a pas accès à cette table (ce qui est normal)
-        return { connected: true }
+        return { connected: true };
       }
 
       // Méthode 3: Dernière tentative avec le système d'authentification
-      const { error: authError } = await client.auth.getSession()
+      const { error: authError } = await client.auth.getSession();
 
       if (!authError) {
-        return { connected: true }
+        return { connected: true };
       }
 
       // Si toutes les méthodes échouent, retourner l'erreur la plus pertinente
       return {
         connected: false,
-        error: rpcError?.message || healthError?.message || authError?.message
-      }
+        error: rpcError?.message || healthError?.message || authError?.message,
+      };
     } catch (error) {
       return {
         connected: false,
-        error: error instanceof Error ? error.message : "Erreur inconnue"
-      }
+        error: error instanceof Error ? error.message : "Erreur inconnue",
+      };
     }
-  }
+  };
 
   // Fonction pour récupérer les spectacles
   const getSpectacles = async () => {
     const { data, error } = await supabase
-      .from('spectacles')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(6)
+      .from("spectacles")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(6);
 
-    if (error) throw error
-    return data || []
-  }
+    if (error) throw error;
+    return data || [];
+  };
 
   // Fonction pour récupérer les membres
   const getMembres = async () => {
     const { data, error } = await supabase
-      .from('membres_equipe')
-      .select('*')
-      .order('name')
-      .limit(6)
+      .from("membres_equipe")
+      .select("*")
+      .order("name")
+      .limit(6);
 
-    if (error) throw error
-    return data || []
-  }
+    if (error) throw error;
+    return data || [];
+  };
 
   // Fonction pour récupérer les actualités
   const getActualites = async () => {
     const { data, error } = await supabase
-      .from('articles_presse')
-      .select('*')
-      .order('author', { ascending: false })
-      .limit(6)
+      .from("articles_presse")
+      .select("*")
+      .order("author", { ascending: false })
+      .limit(6);
 
-    if (error) throw error
-    return data || []
-  }
+    if (error) throw error;
+    return data || [];
+  };
 
   const testConnection = async () => {
-    setIsLoading(true)
-    setConnectionStatus("loading")
-    setErrorMessage("")
+    setIsLoading(true);
+    setConnectionStatus("loading");
+    setErrorMessage("");
 
     try {
       // Test de connexion fiable
-      const connectionTest = await checkSupabaseConnection(supabase)
-      setConnectionDetails({ error: connectionTest.error })
-      setConnectionTestSuccess(connectionTest.connected)
+      const connectionTest = await checkSupabaseConnection(supabase);
+      setConnectionDetails({ error: connectionTest.error });
+      setConnectionTestSuccess(connectionTest.connected);
       if (!connectionTest.connected) {
-        throw new Error(connectionTest.error || "Impossible de se connecter à Supabase")
+        throw new Error(
+          connectionTest.error || "Impossible de se connecter à Supabase"
+        );
       }
 
       // Test spécifique pour vérifier si les tables du projet existent
       try {
         // Vérification de l'existence de la table spectacles
-        const { error: tableError } = await supabase.from("spectacles").select("count")
+        const { error: tableError } = await supabase
+          .from("spectacles")
+          .select("count");
 
         if (tableError) {
           // Si l'erreur contient "relation does not exist", les tables n'ont pas été créées
-          if (tableError.message && tableError.message.includes("relation") && tableError.message.includes("does not exist")) {
-            setConnectionStatus("tables-missing")
-            setErrorMessage("Les tables nécessaires n'ont pas été créées dans la base de données Supabase.")
-            setIsLoading(false)
-            return
+          if (
+            tableError.message &&
+            tableError.message.includes("relation") &&
+            tableError.message.includes("does not exist")
+          ) {
+            setConnectionStatus("tables-missing");
+            setErrorMessage(
+              "Les tables nécessaires n'ont pas été créées dans la base de données Supabase."
+            );
+            setIsLoading(false);
+            return;
           } else {
-            throw tableError
+            throw tableError;
           }
         }
 
         // Si la connexion fonctionne et que les tables existent, récupérer les données
-        const [spectaclesData, membresData, actualitesData] = await Promise.all([
-          getSpectacles(),
-          getMembres(),
-          getActualites()
-        ])
+        const [spectaclesData, membresData, actualitesData] = await Promise.all(
+          [getSpectacles(), getMembres(), getActualites()]
+        );
 
-        setSpectacles(spectaclesData.map(mapSpectacleFromDb))
-        setMembres(membresData)
-        setActualites(actualitesData)
-        setConnectionStatus("success")
+        setSpectacles(spectaclesData.map(mapSpectacleFromDb));
+        setMembres(membresData);
+        setActualites(actualitesData);
+        setConnectionStatus("success");
       } catch (tableError) {
         // Vérifier si l'erreur est liée à l'absence de tables
         if (
@@ -230,31 +238,37 @@ export default function TestConnectionPage() {
           "message" in tableError &&
           typeof (tableError as any).message === "string" &&
           (tableError as any).message.includes("relation") &&
-          (tableError as any).message.includes("does not exist")
+          (tableError as any).message.includes("does not exist") //TODO: fix Unexpected any
         ) {
-          setConnectionStatus("tables-missing")
-          setErrorMessage("Les tables nécessaires n'ont pas été créées dans la base de données Supabase.")
-        } else {
-          setConnectionStatus("error")
+          setConnectionStatus("tables-missing");
           setErrorMessage(
-            (tableError instanceof Error ? tableError.message : "Une erreur est survenue lors de l'accès aux tables")
-          )
+            "Les tables nécessaires n'ont pas été créées dans la base de données Supabase."
+          );
+        } else {
+          setConnectionStatus("error");
+          setErrorMessage(
+            tableError instanceof Error
+              ? tableError.message
+              : "Une erreur est survenue lors de l'accès aux tables"
+          );
         }
       }
     } catch (error) {
-      console.error("Erreur de connexion:", error)
-      setConnectionStatus("error")
+      console.error("Erreur de connexion:", error);
+      setConnectionStatus("error");
       setErrorMessage(
-        error instanceof Error ? error.message : "Une erreur est survenue lors de la connexion à Supabase"
-      )
+        error instanceof Error
+          ? error.message
+          : "Une erreur est survenue lors de la connexion à Supabase"
+      );
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    testConnection()
-  }, [])
+    testConnection();
+  }, []);
 
   return (
     <main className="py-12 px-4 mt-20">
@@ -264,7 +278,8 @@ export default function TestConnectionPage() {
           <Button onClick={testConnection} disabled={isLoading}>
             {isLoading ? (
               <>
-                <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> Test en cours...
+                <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> Test en
+                cours...
               </>
             ) : (
               <>
@@ -278,19 +293,26 @@ export default function TestConnectionPage() {
           <Alert className="mb-8">
             <RefreshCw className="h-4 w-4 animate-spin" />
             <AlertTitle>Test de connexion en cours</AlertTitle>
-            <AlertDescription>Veuillez patienter pendant que nous testons la connexion à Supabase...</AlertDescription>
+            <AlertDescription>
+              Veuillez patienter pendant que nous testons la connexion à
+              Supabase...
+            </AlertDescription>
           </Alert>
         )}
 
         {connectionStatus === "success" && (
           <Alert className="mb-8 bg-green-50 border-green-200">
             <CheckCircle2 className="h-4 w-4 text-green-600" />
-            <AlertTitle className="text-green-600">Connexion réussie</AlertTitle>
+            <AlertTitle className="text-green-600">
+              Connexion réussie
+            </AlertTitle>
             <AlertDescription>
-              La connexion à Supabase fonctionne correctement. Les données ont été récupérées avec succès.
+              La connexion à Supabase fonctionne correctement. Les données ont
+              été récupérées avec succès.
               {connectionDetails && connectionDetails.error && (
                 <div className="mt-2 text-sm text-muted-foreground">
-                  <span className="font-medium">Détail technique :</span> {connectionDetails.error}
+                  <span className="font-medium">Détail technique :</span>{" "}
+                  {connectionDetails.error}
                 </div>
               )}
             </AlertDescription>
@@ -300,7 +322,9 @@ export default function TestConnectionPage() {
         {connectionStatus === "tables-missing" && (
           <Alert className="mb-8 bg-amber-50 border-amber-200">
             <Database className="h-4 w-4 text-amber-600" />
-            <AlertTitle className="text-amber-600">Tables manquantes</AlertTitle>
+            <AlertTitle className="text-amber-600">
+              Tables manquantes
+            </AlertTitle>
             <AlertDescription className="space-y-4">
               <p>
                 {connectionTestSuccess === true
@@ -309,7 +333,8 @@ export default function TestConnectionPage() {
               </p>
               {connectionDetails && connectionDetails.error && (
                 <div className="mt-2 text-sm text-muted-foreground">
-                  <span className="font-medium">Détail technique :</span> {connectionDetails.error}
+                  <span className="font-medium">Détail technique :</span>{" "}
+                  {connectionDetails.error}
                 </div>
               )}
               <ol className="list-decimal pl-5 space-y-2">
@@ -325,17 +350,29 @@ export default function TestConnectionPage() {
                   </a>
                 </li>
                 <li>Sélectionnez votre projet</li>
-                <li>Allez dans la section &quot;SQL Editor&quot; dans le menu de gauche</li>
-                <li>Créez une nouvelle requête en cliquant sur &quot;New query&quot;</li>
-                <li>Copiez et collez le script SQL fourni dans le README du projet</li>
+                <li>
+                  Allez dans la section &quot;SQL Editor&quot; dans le menu de
+                  gauche
+                </li>
+                <li>
+                  Créez une nouvelle requête en cliquant sur &quot;New
+                  query&quot;
+                </li>
+                <li>
+                  Copiez et collez le script SQL fourni dans le README du projet
+                </li>
                 <li>Exécutez le script en cliquant sur &quot;Run&quot;</li>
-                <li>Revenez à cette page et cliquez sur &quot;Tester à nouveau&quot;</li>
+                <li>
+                  Revenez à cette page et cliquez sur &quot;Tester à
+                  nouveau&quot;
+                </li>
               </ol>
               <div className="bg-muted p-4 rounded-md mt-4">
                 <p className="font-medium mb-2">Besoin du script SQL ?</p>
                 <p>
-                  Si vous n&apos;avez pas le script SQL, consultez le dossier /supabase/schemas/ du projet ou
-                  demandez à le recevoir à nouveau.
+                  Si vous n&apos;avez pas le script SQL, consultez le dossier
+                  /supabase/schemas/ du projet ou demandez à le recevoir à
+                  nouveau.
                 </p>
               </div>
             </AlertDescription>
@@ -345,7 +382,9 @@ export default function TestConnectionPage() {
         {connectionStatus === "error" && (
           <Alert className="mb-8 bg-amber-400 border-red-200">
             <XCircle className="h-4 w-4 text-red-600" />
-            <AlertTitle className="font-medium text-red-600">Erreur de connexion</AlertTitle>
+            <AlertTitle className="font-medium text-red-600">
+              Erreur de connexion
+            </AlertTitle>
             <AlertDescription className="space-y-4">
               {connectionTestSuccess === true ? (
                 <>
@@ -353,27 +392,41 @@ export default function TestConnectionPage() {
                     La connexion à Supabase fonctionne
                   </div>
                   <div className="mb-2 p-2 rounded bg-red-600 text-white font-bold border border-red-800 shadow">
-                    Une erreur est survenue lors de l'accès aux tables ou aux données.
+                    Une erreur est survenue lors de l'accès aux tables ou aux
+                    données.
                   </div>
                 </>
               ) : (
-                <p>{errorMessage || "Une erreur est survenue lors de la connexion à Supabase. Veuillez vérifier vos identifiants."}</p>
+                <p>
+                  {errorMessage ||
+                    "Une erreur est survenue lors de la connexion à Supabase. Veuillez vérifier vos identifiants."}
+                </p>
               )}
               {connectionDetails && connectionDetails.error && (
                 <div className="mt-2 text-sm text-muted-foreground">
-                  <span className="font-medium">Détail technique :</span> {connectionDetails.error}
+                  <span className="font-medium">Détail technique :</span>{" "}
+                  {connectionDetails.error}
                 </div>
               )}
               <div className="bg-muted p-4 rounded-md mt-4">
-                <p className="font-medium mb-2">Vérifiez les points suivants :</p>
+                <p className="font-medium mb-2">
+                  Vérifiez les points suivants :
+                </p>
                 <ul className="list-disc pl-5 space-y-1">
                   <li>
-                    Les variables d&apos;environnement NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY sont
+                    Les variables d&apos;environnement NEXT_PUBLIC_SUPABASE_URL
+                    et NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY sont
                     correctement configurées
                   </li>
                   <li>Votre projet Supabase est actif et accessible</li>
-                  <li>Vous n&apos;avez pas de restrictions réseau qui bloquent les connexions à Supabase</li>
-                  <li>Vérifiez que les tables nécessaires existent bien dans votre base de données Supabase</li>
+                  <li>
+                    Vous n&apos;avez pas de restrictions réseau qui bloquent les
+                    connexions à Supabase
+                  </li>
+                  <li>
+                    Vérifiez que les tables nécessaires existent bien dans votre
+                    base de données Supabase
+                  </li>
                 </ul>
               </div>
             </AlertDescription>
@@ -383,9 +436,15 @@ export default function TestConnectionPage() {
         {connectionStatus === "success" && (
           <Tabs defaultValue="spectacles">
             <TabsList className="grid w-full grid-cols-3 mb-8">
-              <TabsTrigger value="spectacles">Spectacles ({spectacles.length})</TabsTrigger>
-              <TabsTrigger value="membres">Membres ({membres.length})</TabsTrigger>
-              <TabsTrigger value="actualites">Actualités ({actualites.length})</TabsTrigger>
+              <TabsTrigger value="spectacles">
+                Spectacles ({spectacles.length})
+              </TabsTrigger>
+              <TabsTrigger value="membres">
+                Membres ({membres.length})
+              </TabsTrigger>
+              <TabsTrigger value="actualites">
+                Actualités ({actualites.length})
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="spectacles">
@@ -394,36 +453,48 @@ export default function TestConnectionPage() {
                   <Card key={spectacle.id}>
                     <CardHeader>
                       <CardTitle>{spectacle.title}</CardTitle>
-                      <CardDescription>{'slug' in spectacle ? spectacle.slug : ""}</CardDescription>
+                      <CardDescription>
+                        {"slug" in spectacle ? spectacle.slug : ""}
+                      </CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2">
                         <div>
-                          <span className="font-medium">Public:</span> {spectacle.public ? "Oui" : "Non"}
+                          <span className="font-medium">Public:</span>{" "}
+                          {spectacle.public ? "Oui" : "Non"}
                         </div>
                         <div>
-                          <span className="font-medium">Date création:</span> {
-                            spectacle.created_at
-                              ? new Date(spectacle.created_at).toLocaleDateString("fr-FR", {
-                                day: "numeric",
-                                month: "long",
-                                year: "numeric",
-                              })
-                              : "-"
-                          }
+                          <span className="font-medium">Date création:</span>{" "}
+                          {spectacle.created_at
+                            ? new Date(spectacle.created_at).toLocaleDateString(
+                                "fr-FR",
+                                {
+                                  day: "numeric",
+                                  month: "long",
+                                  year: "numeric",
+                                }
+                              )
+                            : "-"}
                         </div>
                         <div>
                           <span className="font-medium">Durée:</span>
-                          {"duration_minutes" in spectacle && spectacle.duration_minutes
+                          {"duration_minutes" in spectacle &&
+                          spectacle.duration_minutes
                             ? spectacle.duration_minutes + " min"
-                            : "duration" in spectacle && spectacle.duration_minutes
+                            : "duration" in spectacle &&
+                                spectacle.duration_minutes
                               ? spectacle.duration_minutes
                               : "-"}
                         </div>
                         <div>
-                          <span className="font-medium">Année:</span> {spectacle.premiere ? new Date(spectacle.premiere).getFullYear() : "-"}
+                          <span className="font-medium">Année:</span>{" "}
+                          {spectacle.premiere
+                            ? new Date(spectacle.premiere).getFullYear()
+                            : "-"}
                         </div>
-                        <p className="text-sm text-muted-foreground mt-2">{spectacle.description || ""}</p>
+                        <p className="text-sm text-muted-foreground mt-2">
+                          {spectacle.description || ""}
+                        </p>
                       </div>
                     </CardContent>
                   </Card>
@@ -445,14 +516,16 @@ export default function TestConnectionPage() {
                         <div className="space-y-2">
                           {uiMembre.image && (
                             <div className="mb-3">
-                              <img
+                              <Image
                                 src={uiMembre.image}
                                 alt={uiMembre.name}
                                 className="w-full h-40 object-cover rounded-md"
                               />
                             </div>
                           )}
-                          <p className="text-sm text-muted-foreground">{uiMembre.bio}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {uiMembre.bio}
+                          </p>
                         </div>
                       </CardContent>
                     </Card>
@@ -469,11 +542,14 @@ export default function TestConnectionPage() {
                       <CardTitle>{actualite.title}</CardTitle>
                       <CardDescription>
                         {actualite.published_at
-                          ? new Date(actualite.published_at).toLocaleDateString("fr-FR", {
-                              day: "numeric",
-                              month: "long",
-                              year: "numeric",
-                            })
+                          ? new Date(actualite.published_at).toLocaleDateString(
+                              "fr-FR",
+                              {
+                                day: "numeric",
+                                month: "long",
+                                year: "numeric",
+                              }
+                            )
                           : "-"}
                       </CardDescription>
                     </CardHeader>
@@ -501,30 +577,45 @@ export default function TestConnectionPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Informations de connexion</CardTitle>
-                <CardDescription>Détails sur la connexion à Supabase</CardDescription>
+                <CardDescription>
+                  Détails sur la connexion à Supabase
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
                   <div>
                     <span className="font-medium">URL Supabase:</span>{" "}
                     <code className="bg-muted px-1 py-0.5 rounded text-sm">
-                      {process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/^https?:\/\//, "").split(".")[0]}...
+                      {
+                        process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(
+                          /^https?:\/\//,
+                          ""
+                        ).split(".")[0]
+                      }
+                      ...
                     </code>
                   </div>
                   <div>
                     <span className="font-medium">Clé anonyme:</span>{" "}
                     <code className="bg-muted px-1 py-0.5 rounded text-sm">
-                      {process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY?.substring(0, 5)}...
+                      {process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY?.substring(
+                        0,
+                        5
+                      )}
+                      ...
                     </code>
                   </div>
                   <div>
-                    <span className="font-medium">Spectacles récupérés:</span> {spectacles.length}
+                    <span className="font-medium">Spectacles récupérés:</span>{" "}
+                    {spectacles.length}
                   </div>
                   <div>
-                    <span className="font-medium">Membres récupérés:</span> {membres.length}
+                    <span className="font-medium">Membres récupérés:</span>{" "}
+                    {membres.length}
                   </div>
                   <div>
-                    <span className="font-medium">Actualités récupérées:</span> {actualites.length}
+                    <span className="font-medium">Actualités récupérées:</span>{" "}
+                    {actualites.length}
                   </div>
                 </div>
               </CardContent>
@@ -533,5 +624,5 @@ export default function TestConnectionPage() {
         )}
       </div>
     </main>
-  )
+  );
 }

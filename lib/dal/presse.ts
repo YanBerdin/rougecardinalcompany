@@ -36,13 +36,15 @@ function bytesToHuman(size: number | null | undefined): string {
   return `${s % 1 === 0 ? s.toFixed(0) : s.toFixed(1)} ${units[i]}`;
 }
 
-export async function fetchPressReleases(limit?: number): Promise<PressRelease[]> {
+export async function fetchPressReleases(
+  limit?: number
+): Promise<PressRelease[]> {
   const supabase = await createClient();
 
   let query = supabase
     .from("communiques_presse")
     .select(
-      "id, title, description, date_publication, image_url, ordre_affichage, public, file_size_bytes",
+      "id, title, description, date_publication, image_url, ordre_affichage, public, file_size_bytes"
     )
     .eq("public", true)
     .order("date_publication", { ascending: false });
@@ -63,18 +65,23 @@ export async function fetchPressReleases(limit?: number): Promise<PressRelease[]
     description: String(row.description ?? ""),
     date: String(row.date_publication),
     // Pas encore de fichier PDF stocké en BDD: on utilise un placeholder
-    fileUrl: typeof row.image_url === "string" && row.image_url.length > 0 ? row.image_url : "#",
+    fileUrl:
+      typeof row.image_url === "string" && row.image_url.length > 0
+        ? row.image_url
+        : "#",
     fileSize: bytesToHuman(row.file_size_bytes ?? null),
   }));
 }
 
-export async function fetchMediaArticles(limit?: number): Promise<MediaArticle[]> {
+export async function fetchMediaArticles(
+  limit?: number
+): Promise<MediaArticle[]> {
   const supabase = await createClient();
 
   let query = supabase
     .from("articles_presse")
     .select(
-      "id, title, author, type, excerpt, source_publication, source_url, published_at",
+      "id, title, author, type, excerpt, source_publication, source_url, published_at"
     )
     .order("published_at", { ascending: false, nullsFirst: false });
 
@@ -88,10 +95,14 @@ export async function fetchMediaArticles(limit?: number): Promise<MediaArticle[]
     return [];
   }
 
-  function coerceArticleType(v: string | null): "Article" | "Critique" | "Interview" | "Portrait" {
+  function coerceArticleType(
+    v: string | null
+  ): "Article" | "Critique" | "Interview" | "Portrait" {
     const allowed = ["Article", "Critique", "Interview", "Portrait"] as const;
     const s = String(v ?? "Article");
-    return (allowed as readonly string[]).includes(s) ? (s as "Article" | "Critique" | "Interview" | "Portrait") : "Article";
+    return (allowed as readonly string[]).includes(s)
+      ? (s as "Article" | "Critique" | "Interview" | "Portrait")
+      : "Article";
   }
 
   return (data ?? []).map((row: ArticlePresseRow) => ({
@@ -121,36 +132,39 @@ interface MediaMetadata {
   [key: string]: string | number | boolean | undefined;
 }
 
-interface MediaRow {
-  storage_path: string;
-  filename: string | null;
-  mime: string | null;
-  size_bytes: number | null;
-  alt_text: string | null;
+// Utilisation du type global Media avec metadata typée
+type MediaRow = Pick<
+  Media,
+  "storage_path" | "filename" | "mime" | "size_bytes" | "alt_text"
+> & {
   metadata: MediaMetadata | null;
-}
+};
 
-interface CommuniquePresseRow {
-  id: number;
-  title: string;
-  description: string | null;
-  date_publication: string;
-  image_url: string | null;
-  ordre_affichage: number;
-  public: boolean;
-  file_size_bytes: number | null;
-}
+// Utilisation du type global CommuniquePresse
+type CommuniquePresseRow = Pick<
+  CommuniquePresse,
+  | "id"
+  | "title"
+  | "description"
+  | "date_publication"
+  | "image_url"
+  | "ordre_affichage"
+  | "public"
+  | "file_size_bytes"
+>;
 
-interface ArticlePresseRow {
-  id: number;
-  title: string | null;
-  author: string | null;
-  type: string | null;
-  excerpt: string | null;
-  source_publication: string | null;
-  source_url: string | null;
-  published_at: string | null;
-}
+// Utilisation du type global ArticlePresse
+type ArticlePresseRow = Pick<
+  ArticlePresse,
+  | "id"
+  | "title"
+  | "author"
+  | "type"
+  | "excerpt"
+  | "source_publication"
+  | "source_url"
+  | "published_at"
+>;
 
 function getMediaType(metadata: MediaMetadata | null): string {
   if (metadata?.type === "logo") return "Logo";
@@ -162,14 +176,18 @@ function getMediaType(metadata: MediaMetadata | null): string {
   return "Document";
 }
 
-export async function fetchMediaKit(limit?: number): Promise<MediaKitItemDTO[]> {
+export async function fetchMediaKit(
+  limit?: number
+): Promise<MediaKitItemDTO[]> {
   const supabase = await createClient();
 
   // Récupère les médias du kit presse : logos, photos, dossiers PDF
   let query = supabase
     .from("medias")
     .select("storage_path, filename, mime, size_bytes, alt_text, metadata")
-    .or("storage_path.like.press-kit/%,storage_path.like.photos/%,storage_path.like.dossiers/%")
+    .or(
+      "storage_path.like.press-kit/%,storage_path.like.photos/%,storage_path.like.dossiers/%"
+    )
     .order("storage_path", { ascending: true });
 
   if (typeof limit === "number") {
@@ -182,15 +200,18 @@ export async function fetchMediaKit(limit?: number): Promise<MediaKitItemDTO[]> 
     return [];
   }
 
-  return (data ?? []).map((row: MediaRow) => {
+  return (data ?? []).map((row) => {
+    // Cast metadata de Json vers MediaMetadata
+    const metadata = row.metadata as MediaMetadata | null;
+    
     // Prioriser l'URL externe si disponible dans metadata
-    const externalUrl = row.metadata?.external_url;
-    const fileUrl = externalUrl 
+    const externalUrl = metadata?.external_url;
+    const fileUrl = externalUrl
       ? String(externalUrl)
       : `/storage/v1/object/public/${row.storage_path}`;
 
     return {
-      type: getMediaType(row.metadata),
+      type: getMediaType(metadata),
       description: String(row.alt_text ?? row.filename ?? ""),
       fileSize: bytesToHuman(row.size_bytes),
       fileUrl,

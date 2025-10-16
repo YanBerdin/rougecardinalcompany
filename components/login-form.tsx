@@ -97,7 +97,12 @@ export function LoginForm({
                 />
               </div>
               {error && ( //? Display A11y error message if exists
-                <p id="form-error" role="alert" aria-live="polite" className="text-sm text-red-500">
+                <p
+                  id="form-error"
+                  role="alert"
+                  aria-live="polite"
+                  className="text-sm text-red-500"
+                >
                   {error}
                 </p>
               )}

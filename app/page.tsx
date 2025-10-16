@@ -2,7 +2,7 @@
 //import { EnvVarWarning } from "@/components/env-var-warning";
 //import { AuthButton } from "@/components/auth-button";
 //import { ThemeSwitcher } from "@/components/theme-switcher";
-import { Suspense } from 'react';
+import { Suspense } from "react";
 import { ConnectSupabaseSteps } from "@/components/tutorial/connect-supabase-steps";
 import { SignUpUserSteps } from "@/components/tutorial/sign-up-user-steps";
 import { hasEnvVars } from "@/lib/utils";
@@ -12,14 +12,14 @@ import {
   AboutContainer,
   ShowsContainer,
   NewsletterContainer,
-  PartnersContainer
-} from '@/components/features/public-site/home';
-import { HeroSkeleton } from '@/components/skeletons/hero-skeleton';
-import { NewsSkeleton } from '@/components/skeletons/news-skeleton';
-import { AboutSkeleton } from '@/components/skeletons/about-skeleton';
-import { ShowsSkeleton } from '@/components/skeletons/shows-skeleton';
-import { PartnersSkeleton } from '@/components/skeletons/partners-skeleton';
-import { NewsletterSkeleton } from '@/components/skeletons/newsletter-skeleton';
+  PartnersContainer,
+} from "@/components/features/public-site/home";
+import { HeroSkeleton } from "@/components/skeletons/hero-skeleton";
+import { NewsSkeleton } from "@/components/skeletons/news-skeleton";
+import { AboutSkeleton } from "@/components/skeletons/about-skeleton";
+import { ShowsSkeleton } from "@/components/skeletons/shows-skeleton";
+import { PartnersSkeleton } from "@/components/skeletons/partners-skeleton";
+import { NewsletterSkeleton } from "@/components/skeletons/newsletter-skeleton";
 
 export default function Home() {
   return (

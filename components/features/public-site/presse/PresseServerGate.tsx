@@ -1,6 +1,10 @@
 import { PresseView } from "./PresseView";
 import type { MediaKitItem } from "./types";
-import { fetchMediaArticles, fetchPressReleases, fetchMediaKit } from "@/lib/dal/presse";
+import {
+  fetchMediaArticles,
+  fetchPressReleases,
+  fetchMediaKit,
+} from "@/lib/dal/presse";
 
 export default async function PresseServerGate() {
   // TODO: remove Délai artificiel pour tester le skeleton

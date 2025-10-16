@@ -21,9 +21,12 @@
       "type": "http",
       "url": "https://api.githubcopilot.com/mcp/"
     },
-    "supabase": {
-      "type": "http",
-      "url": "https://mcp.supabase.com/mcp",
+     "supabase": {
+      "command": "pnpm",
+      "args": ["dlx", "@supabase/mcp-server-supabase@latest"],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "${input:supabase-access-token}"
+      }
     }
   }
 }

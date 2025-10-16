@@ -17,13 +17,13 @@ export function HeroSkeleton() {
             <Skeleton className="h-16 md:h-20 w-full max-w-3xl mx-auto bg-white/20" />
             <Skeleton className="h-8 md:h-10 w-3/4 mx-auto bg-white/15" />
           </div>
-          
+
           {/* Description skeleton */}
           <div className="space-y-3 max-w-2xl mx-auto">
             <Skeleton className="h-6 w-full bg-white/10" />
             <Skeleton className="h-6 w-4/5 mx-auto bg-white/10" />
           </div>
-          
+
           {/* Buttons skeleton */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
             <Skeleton className="h-12 w-48 bg-white/15" />

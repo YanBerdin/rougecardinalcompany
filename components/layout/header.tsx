@@ -1,22 +1,22 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import type { ReactNode } from 'react';
-import { Menu, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import Image from 'next/image';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import type { ReactNode } from "react";
+import { Menu, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import Image from "next/image";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 
 const navigation = [
-  { name: 'Accueil', href: '/' },
-  { name: 'La Compagnie', href: '/compagnie' },
-  { name: 'Spectacles', href: '/spectacles' },
-  { name: 'Agenda', href: '/agenda' },
-  { name: 'Presse', href: '/presse' },
-  { name: 'Contact', href: '/contact' },
+  { name: "Accueil", href: "/" },
+  { name: "La Compagnie", href: "/compagnie" },
+  { name: "Spectacles", href: "/spectacles" },
+  { name: "Agenda", href: "/agenda" },
+  { name: "Presse", href: "/presse" },
+  { name: "Contact", href: "/contact" },
 ];
 
 interface HeaderProps {
@@ -32,26 +32,23 @@ export function Header({ authContent }: HeaderProps) {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
     <header
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out',
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out",
         isScrolled
-          ? 'liquid-glass-header header-scrolled'
-          : 'bg-transparent header-transparent'
+          ? "liquid-glass-header header-scrolled"
+          : "bg-transparent header-transparent"
       )}
     >
       <nav className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo - STABILISÉ */}
-          <Link
-            href="/"
-            className="logo-container"
-          >
+          <Link href="/" className="logo-container">
             <Image
               src="/logo-florian.png"
               alt="Rouge-Cardinal Logo"
@@ -70,10 +67,12 @@ export function Header({ authContent }: HeaderProps) {
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  'nav-link-glass text-sm font-medium transition-all duration-300 relative z-10',
+                  "nav-link-glass text-sm font-medium transition-all duration-300 relative z-10",
                   pathname === item.href
-                    ? 'text-primary font-bold active'
-                    : isScrolled ? 'text-foreground' : 'text-white'
+                    ? "text-primary font-bold active"
+                    : isScrolled
+                      ? "text-foreground"
+                      : "text-white"
                 )}
               >
                 {item.name}
@@ -84,9 +83,7 @@ export function Header({ authContent }: HeaderProps) {
             ))}
 
             {/* Auth Component */}
-            <div className="ml-4">
-              {authContent}
-            </div>
+            <div className="ml-4">{authContent}</div>
 
             <ThemeSwitcher />
           </div>
@@ -99,7 +96,9 @@ export function Header({ authContent }: HeaderProps) {
               onClick={() => setIsOpen(!isOpen)}
               className={cn(
                 "nav-link-glass ripple-effect",
-                isScrolled ? "text-foreground hover:text-foreground" : "text-white hover:text-white"
+                isScrolled
+                  ? "text-foreground hover:text-foreground"
+                  : "text-white hover:text-white"
               )}
             >
               {isOpen ? (
@@ -108,52 +107,44 @@ export function Header({ authContent }: HeaderProps) {
                 <Menu className="h-6 w-6" />
               )}
             </Button>
-
-
           </div>
         </div>
 
         {/* Mobile Navigation */}
-        {
-          isOpen && (
-            <div className="md:hidden animate-fade-in">
-              <div className="px-2 pt-4 pb-3 space-y-2 liquid-glass-mobile rounded-2xl mt-4 border shadow-2xl">
-                {navigation.map((item, index) => (
-                  <Link
-                    key={navigation[index].name}
-                    href={navigation[index].href}
-                    className={cn(
-                      'block px-4 py-3 rounded-xl text-base font-medium transition-all duration-300 nav-link-glass',
-                      pathname === navigation[index].href
-                        ? 'text-primary bg-primary/10 font-bold border border-primary/20 active'
-                        : 'text-white'
+        {isOpen && (
+          <div className="md:hidden animate-fade-in">
+            <div className="px-2 pt-4 pb-3 space-y-2 liquid-glass-mobile rounded-2xl mt-4 border shadow-2xl">
+              {navigation.map((item, index) => (
+                <Link
+                  key={navigation[index].name}
+                  href={navigation[index].href}
+                  className={cn(
+                    "block px-4 py-3 rounded-xl text-base font-medium transition-all duration-300 nav-link-glass",
+                    pathname === navigation[index].href
+                      ? "text-primary bg-primary/10 font-bold border border-primary/20 active"
+                      : "text-white"
+                  )}
+                  onClick={() => setIsOpen(false)}
+                  style={{
+                    animationDelay: `${index * 0.1}s`,
+                    animation: "fade-in-up 0.4s ease-out forwards",
+                  }}
+                >
+                  <div className="flex items-center justify-between">
+                    {navigation[index].name}
+                    {pathname === navigation[index].href && (
+                      <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
                     )}
-                    onClick={() => setIsOpen(false)}
-                    style={{
-                      animationDelay: `${index * 0.1}s`,
-                      animation: 'fade-in-up 0.4s ease-out forwards'
-                    }}
-                  >
-                    <div className="flex items-center justify-between">
-                      {navigation[index].name}
-                      {pathname === navigation[index].href && (
-                        <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                      )}
-                    </div>
-                  </Link>
+                  </div>
+                </Link>
+              ))}
 
-                ))}
-
-                <div className="px-4 pt-4">
-                  {authContent}
-                </div>
-                <ThemeSwitcher />
-              </div>
-
+              <div className="px-4 pt-4">{authContent}</div>
+              <ThemeSwitcher />
             </div>
-          )
-        }
-      </nav >
+          </div>
+        )}
+      </nav>
     </header>
   );
 }

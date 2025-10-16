@@ -1,2 +1,2 @@
-export { PartnersContainer } from './PartnersContainer';
-export { PartnersView } from './PartnersView';
+export { PartnersContainer } from "./PartnersContainer";
+export { PartnersView } from "./PartnersView";

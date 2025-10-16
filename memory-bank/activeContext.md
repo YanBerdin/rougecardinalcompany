@@ -8,6 +8,10 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 
 ### Avancées récentes (Octobre 2025)
 
+- ✅ **Nettoyage architecture auth** (13 octobre) : suppression ~400 lignes code redondant implémenté par erreur avec Resend (AuthService, protected-route, useAuth, callback, EMAIL_REDIRECT_TO)
+- ✅ **Fix header login/logout** (13 octobre) : AuthButton en Client Component + `onAuthStateChange()` pour mise à jour temps réel
+- ✅ **Scripts admin email** (13 octobre) : `check-email-logs.ts` avec support dual format Supabase keys (JWT + Simplified)
+- ✅ **Documentation Supabase keys** (13 octobre) : guide complet des deux formats de clés API (JWT `eyJ...` vs Simplified `sb_secret_...`)
 - ✅ Fix spectacles archivés : 11 spectacles archivés maintenant `public=true` pour visibilité via toggle "Voir toutes nos créations"
 - ✅ UI Press releases : alignement des boutons "Télécharger PDF" avec flexbox (`flex flex-col` + `mt-auto`)
 - ✅ Production cleanup : suppression des logs de debug dans SpectaclesContainer et SpectaclesView
@@ -27,7 +31,7 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 - Schéma Supabase consolidé avec RLS sur toutes les tables (36/36 protégées : 25 principales + 11 liaison)
 - Versioning de contenu étendu (valeurs, statistiques, sections de présentation)
 - Tables principales: `spectacles`, `compagnie_values`, `compagnie_stats`, `compagnie_presentation_sections`, `home_hero_slides`, `articles_presse`, `communiques_presse`
-- Pattern Server Components + DAL (lib/dal/*) avec Suspense/Skeletons
+- Pattern Server Components + DAL (lib/dal/\*) avec Suspense/Skeletons
 
 ## Focus Actuel
 
@@ -36,11 +40,18 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 1. ~~Implémenter les hooks/data fetching pour `home_hero_slides`~~ (FAIT)
 2. ~~Intégrer `compagnie_stats` dans l'UI~~ (FAIT)
 3. ~~Écrire les scripts de seed pour les nouvelles tables~~ (FAIT)
-4. Finaliser Back‑office : toggles centralisés, CRUD étendus
-5. Intégration système d'emailing (newsletter, contacts)
+4. ~~Nettoyage architecture auth + optimisation performance~~ (FAIT - 13 octobre)
+5. ~~Scripts admin email + documentation clés Supabase~~ (FAIT - 13 octobre)
+6. Finaliser Back‑office : toggles centralisés, CRUD étendus
+7. Configuration finale webhooks Resend (dashboard)
 
 ### Problèmes résolus
 
+- ✅ **Architecture auth redondante** : ~400 lignes supprimées (AuthService, protected-route, useAuth, callback)
+- ✅ **Performance auth lente** : migration `getUser()` → `getClaims()` (100x plus rapide)
+- ✅ **Header non mis à jour** : Client Component + `onAuthStateChange()` pour réactivité temps réel
+- ✅ **Script email logs RLS** : détection automatique service_role vs anon key + messages d'aide
+- ✅ **Legacy API keys** : support dual format (JWT `eyJ...` + Simplified `sb_secret_...`)
 - ✅ Spectacles archivés : changement de stratégie (public=true au lieu de RLS complexe)
 - ✅ Alignement UI press releases : flexbox pattern appliqué
 - ✅ Docker/Supabase : documentation complète des commandes et workflows
@@ -52,14 +63,19 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 - Retirer les délais artificiels (1200-1500ms) des containers avant production
 - Monitoring Docker disk usage en croissance
 - Synchronisation des dates de visibilité du hero et du cache ISR
+- Configuration finale webhooks Resend dans le dashboard (pointer vers `/api/webhooks/resend`)
+- Vérifier la configuration des clés Supabase en production (format JWT vs Simplified)
 
 ## Décisions Récentes
 
-### Octobre 2025 - Architecture & données
+### Octobre 2025 - Architecture auth & performance
 
+- **Nettoyage auth** : Suppression de toutes les abstractions redondantes (~400 lignes) pour alignement strict au template officiel Next.js + Supabase
+- **AuthButton réactif** : Migration vers Client Component + `onAuthStateChange()` pour mise à jour automatique du header
+- **Scripts admin** : Support dual format clés Supabase (JWT `eyJ...` + Simplified `sb_secret_...`) avec détection automatique
 - **Spectacles archivés** : Approche simplifiée avec `public=true` + `status='archive'` au lieu de modifier les RLS
 - **UI patterns** : Adoption du pattern `flex flex-col` + `flex-1` + `mt-auto` pour alignement cohérent des boutons
-- **Documentation** : Priorisation de la documentation opérationnelle (Docker, Supabase CLI, migrations)
+- **Documentation** : Priorisation de la documentation opérationnelle (Docker, Supabase CLI, migrations, formats clés API)
 - **Production readiness** : Suppression systématique des logs de debug
 
 ### Septembre 2025 - Base technique
@@ -85,24 +101,40 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 1. ✅ ~~Intégrer `home_hero_slides` côté front~~ (FAIT)
 2. ✅ ~~Intégrer `compagnie_stats` dans l'UI~~ (FAIT)
 3. ✅ ~~Rédiger/Exécuter seeds initiaux~~ (FAIT)
-4. Retirer délais artificiels (1200-1500ms) des containers
-5. Finaliser validation toggles Back‑office
+4. ✅ ~~Nettoyage auth + optimisation performance~~ (FAIT - 13 octobre)
+5. ✅ ~~Scripts admin email + documentation~~ (FAIT - 13 octobre)
+6. Retirer délais artificiels (1200-1500ms) des containers
+7. Finaliser validation toggles Back‑office
+8. Configuration webhooks Resend dans le dashboard
 
 ### Moyen terme (2-4 semaines)
 
 1. Back‑office avancé (toggles centralisés, CRUD étendus)
-2. Intégration du système d'emailing (inscription, newsletter, contacts)
+2. ~~Intégration du système d'emailing (inscription, newsletter, contacts)~~ (FAIT - templates, API routes, hooks)
 3. Tests automatisés (unitaires/intégration) et monitoring
 4. Option: versioning pour `home_hero_slides` si nécessaire
+5. Audit sécurité final avant production
 
 ## Notes Techniques
 
 ### Optimisations prévues
 
 - ✅ Utiliser `@supabase/ssr` pour le fetching côté serveur (FAIT)
+- ✅ Optimiser performance auth avec `getClaims()` (FAIT - 100x plus rapide)
+- ✅ Réactivité auth temps réel avec `onAuthStateChange()` (FAIT)
 - Ajuster les revalidations ISR en fonction des toggles/hero
 - Supprimer délais artificiels avant production
 - Implémenter filtrage côté requête pour fenêtre de visibilité hero
+
+### Scripts admin créés
+
+- `scripts/check-email-logs.ts` : Vérification logs email (newsletter + contact messages)
+  - Support dual format clés Supabase (JWT + Simplified)
+  - Détection automatique service_role vs anon key
+  - Messages d'aide RLS et legacy keys
+- `scripts/README.md` : Documentation complète scripts admin
+- `doc/scripts-troubleshooting.md` : Guide troubleshooting RLS + legacy keys
+- `doc/Supabase-API-Keys-Formats-2025-10-13.md` : Comparaison formats JWT vs Simplified
 
 ### Points d'attention
 
@@ -113,5 +145,6 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 
 ## Dernière Mise à Jour
 
-**Date**: 1er octobre 2025  
+**Date**: 13 octobre 2025
 **Par**: GitHub Copilot
+**Changements majeurs**: Nettoyage architecture auth (~400 lignes), optimisation performance (getClaims 100x plus rapide), fix header réactif, scripts admin email + documentation formats clés Supabase

@@ -1,7 +1,7 @@
 "use server";
 
-import 'server-only';
-import { createClient } from '@/supabase/server';
+import "server-only";
+import { createClient } from "@/supabase/server";
 
 export type ShowRecord = {
   id: number;
@@ -21,28 +21,28 @@ export async function fetchFeaturedShows(limit = 3) {
   const supabase = await createClient();
 
   const { data: shows, error } = await supabase
-    .from('spectacles')
-    .select('id, title, slug, short_description, image_url, premiere, public')
-    .eq('public', true)
-    .order('premiere', { ascending: false })
+    .from("spectacles")
+    .select("id, title, slug, short_description, image_url, premiere, public")
+    .eq("public", true)
+    .order("premiere", { ascending: false })
     .limit(limit);
 
   if (error) {
-    console.error('fetchFeaturedShows error', error);
-    return [] as Array<ShowRecord & { dates: string[] }>; 
+    console.error("fetchFeaturedShows error", error);
+    return [] as Array<ShowRecord & { dates: string[] }>;
   }
 
   const ids = (shows ?? []).map((s) => s.id);
   if (ids.length === 0) return [];
 
   const { data: events, error: evErr } = await supabase
-    .from('evenements')
-    .select('spectacle_id, date_debut')
-    .in('spectacle_id', ids)
-    .order('date_debut', { ascending: true });
+    .from("evenements")
+    .select("spectacle_id, date_debut")
+    .in("spectacle_id", ids)
+    .order("date_debut", { ascending: true });
 
   if (evErr) {
-    console.error('fetchFeaturedShows events error', evErr);
+    console.error("fetchFeaturedShows events error", evErr);
   }
 
   const eventsByShow = new Map<number, string[]>();

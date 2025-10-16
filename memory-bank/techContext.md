@@ -14,8 +14,10 @@
 ### Backend
 
 - **Base de données**: Supabase (PostgreSQL)
-- **Authentification**: Supabase Auth
+- **Authentification**: Supabase Auth (avec `@supabase/ssr` + `getClaims()`)
 - **API**: Server Components + DAL `lib/dal/*` (server-only) via Supabase Client
+- **Email Service**: Resend API avec React Email templates
+- **Validation**: Zod schemas pour runtime validation
 
 ### Déploiement
 
@@ -33,13 +35,40 @@
 │   ├── layout.tsx         # Layout principal
 │   ├── page.tsx           # Page d'accueil
 │   ├── auth/              # Routes d'authentification
-│   └── protected/         # Routes protégées
+│   ├── protected/         # Routes protégées
+│   └── api/               # API Routes
+│       ├── newsletter/    # Newsletter subscription
+│       ├── contact/       # Contact form
+│       ├── test-email/    # Email testing (dev)
+│       └── webhooks/      # Webhook handlers
+│           └── resend/    # Resend webhooks
 ├── components/            # Composants React
-│   ├── ui/               # Composants UI de base
-│   ├── sections/         # Sections de page
+│   ├── ui/               # Composants UI de base (shadcn/ui)
+│   ├── features/         # Features (Smart/Dumb pattern)
+│   │   └── public-site/  # Public website features
+│   ├── skeletons/        # Loading skeletons
 │   └── layout/           # Composants de layout
+├── emails/               # React Email templates
+│   ├── utils/            # Email layout & components
+│   ├── newsletter-confirmation.tsx
+│   └── contact-message-notification.tsx
 ├── lib/                  # Utilitaires et services
-│   └── supabase/        # Configuration Supabase
+│   ├── supabase/        # Configuration Supabase
+│   ├── dal/             # Data Access Layer (server-only)
+│   ├── email/           # Email actions & schemas
+│   ├── hooks/           # Custom React hooks
+│   ├── resend.ts        # Resend client config
+│   └── site-config.ts   # Site configuration
+├── types/                # TypeScript types
+│   ├── database.types.ts # Supabase generated types
+│   └── email.d.ts       # Email types
+├── scripts/              # Testing scripts
+│   ├── test-email-integration.ts
+│   ├── check-email-logs.ts
+│   └── test-webhooks.ts
+├── supabase/            # Supabase project
+│   ├── migrations/      # Database migrations
+│   └── schemas/         # [DEPRECATED] use migrations/
 └── public/              # Assets statiques
 ```
 
@@ -60,6 +89,46 @@ export async function createClient() {
 }
 ```
 
+### Configuration Resend
+
+```typescript
+// lib/resend.ts
+import { Resend } from "resend";
+
+if (!process.env.RESEND_API_KEY) {
+  throw new Error("RESEND_API_KEY is not defined");
+}
+
+export const resend = new Resend(process.env.RESEND_API_KEY);
+```
+
+### Variables d'Environnement
+
+**Supabase:**
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=eyJ...
+SUPABASE_SERVICE_ROLE_KEY=eyJ...  # Admin only (scripts)
+```
+
+**Resend:**
+
+```env
+RESEND_API_KEY=re_xxx                      # Required
+RESEND_AUDIENCE_ID=xxx                     # Optional
+EMAIL_FROM=noreply@rougecardinalcompany.fr # Default FROM
+EMAIL_CONTACT=contact@rougecardinalcompany.fr # Contact email
+```
+
+**Site:**
+
+```env
+NEXT_PUBLIC_SITE_URL=https://rougecardinalcompany.fr # Production
+# or
+NEXT_PUBLIC_SITE_URL=http://localhost:3000 # Development
+```
+
 ### Middleware Configuration
 
 ```typescript
@@ -77,15 +146,22 @@ export const config = {
 
 - next: 15.4.5
 - react: ^19
-- @supabase/ssr: latest
-- tailwindcss: ^3
+- @supabase/ssr: latest (Supabase Auth 2025)
+- tailwindcss: ^3.4
 - shadcn/ui: latest
+- **resend**: ^4.0.1 (Email service)
+- **@react-email/components**: ^0.0.30 (Email templates)
+- **zod**: ^3.24.1 (Runtime validation)
+- date-fns: ^4.1.0 (Date formatting)
+- react-icons: ^5.3.0 (Icon library)
 
 ### Développement
 
 - typescript: ^5
 - eslint: latest
 - prettier: latest
+- @types/node: latest
+- tsx: ^4.19.2 (TypeScript execution for scripts)
 
 ## Standards de Développement
 
@@ -160,6 +236,19 @@ export function ComponentName() {
 
 ### Documentation opérationnelle
 
+**Supabase Local:**
+
 - `doc-perso/lancement-supabase-local/CLI-Supabase-Local.md` : Commandes Supabase CLI détaillées
 - `doc-perso/lancement-supabase-local/docker-install.md` : Installation Docker et gestion espace disque
 - `supabase/migrations/README-migrations.md` : Conventions migrations et ordre d'exécution
+
+**Email Service:**
+
+- `memory-bank/architecture/Email_Service_Architecture.md` : Architecture email complète
+- `TESTING_RESEND.md` : Guide de test de l'intégration Resend
+- `.github/instructions/resend_supabase_integration.md` : Instructions d'intégration
+
+**Architecture:**
+
+- `memory-bank/architecture/Project_Architecture_Blueprint.md` : Architecture détaillée du projet
+- `memory-bank/architecture/Project_Folders_Structure_Blueprint.md` : Guide de structure des dossiers

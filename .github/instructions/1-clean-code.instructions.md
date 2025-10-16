@@ -1,8 +1,13 @@
+---
+applyTo: "**"
+---
+
 description: APPLY Clean Code principles WHENEVER writing code
 alwaysApply: true
 ---
 
 Code Quality:
+
 - Write no comments
 - Use strict types only
 - Disallow untyped values
@@ -13,18 +18,22 @@ Code Quality:
 - Eliminate duplication (DRY)
 
 Length Limits:
+
 - Max 30 lines per function
 - Max 5 params per function
 - Max 300 lines per file
 - Max 10 sub-files per folder
 
 Responsibilities:
+
 - One responsibility per file
 
 Functions:
+
 - No flag parameters
 
 Errors:
+
 - Fail fast
 - Throw errors early
 - Use custom domain errors

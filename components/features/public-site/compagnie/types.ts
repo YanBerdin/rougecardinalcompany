@@ -29,4 +29,3 @@ export interface CompagnieViewProps {
   team: TeamMember[];
   loading?: boolean;
 }
-

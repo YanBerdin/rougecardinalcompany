@@ -38,7 +38,9 @@ export const MediaKitItemSchema = z.object({
 // Types inférés des schémas
 export type PressRelease = z.infer<typeof PressReleaseSchema>;
 export type MediaArticle = z.infer<typeof MediaArticleSchema>;
-export type MediaKitItem = z.infer<typeof MediaKitItemSchema> & { icon?: IconComponent };
+export type MediaKitItem = z.infer<typeof MediaKitItemSchema> & {
+  icon?: IconComponent;
+};
 
 // Props pour le composant PresseView
 export interface PresseViewProps {

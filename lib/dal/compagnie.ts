@@ -1,7 +1,7 @@
 "use server";
 
-import 'server-only';
-import { createClient } from '@/supabase/server';
+import "server-only";
+import { createClient } from "@/supabase/server";
 
 export type CompagnieValueRecord = {
   id: number;
@@ -26,14 +26,14 @@ export type TeamMemberRecord = {
 export async function fetchCompagnieValues(limit = 12) {
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from('compagnie_values')
-    .select('id, key, title, description, position, active')
-    .eq('active', true)
-    .order('position', { ascending: true })
+    .from("compagnie_values")
+    .select("id, key, title, description, position, active")
+    .eq("active", true)
+    .order("position", { ascending: true })
     .limit(limit);
 
   if (error) {
-    console.error('fetchCompagnieValues error', error);
+    console.error("fetchCompagnieValues error", error);
     return [] as CompagnieValueRecord[];
   }
 
@@ -43,14 +43,16 @@ export async function fetchCompagnieValues(limit = 12) {
 export async function fetchTeamMembers(limit = 12) {
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from('membres_equipe')
-    .select('id, name, role, description, image_url, photo_media_id, ordre, active')
-    .eq('active', true)
-    .order('ordre', { ascending: true })
+    .from("membres_equipe")
+    .select(
+      "id, name, role, description, image_url, photo_media_id, ordre, active"
+    )
+    .eq("active", true)
+    .order("ordre", { ascending: true })
     .limit(limit);
 
   if (error) {
-    console.error('fetchTeamMembers error', error);
+    console.error("fetchTeamMembers error", error);
     return [] as TeamMemberRecord[];
   }
 

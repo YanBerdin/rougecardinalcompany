@@ -1,2 +1,2 @@
-export { NewsContainer } from './NewsContainer';
-export { NewsView } from './NewsView';
+export { NewsContainer } from "./NewsContainer";
+export { NewsView } from "./NewsView";

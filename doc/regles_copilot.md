@@ -1,8 +1,9 @@
-# graph TD
+# Architecture des instructions Copilot
 
 ```mermaid
-    A[.github/copilot] --> B[Permanentes `alwaysApply: true`]
-    A --> C[Contextuelles `alwaysApply: false`]
+graph TD
+    A[.github/copilot] --> B[Permanentes alwaysApply: true]
+    A --> C[Contextuelles alwaysApply: false]
 
     %% Permanentes
     B --> B1[0-clean-architecture.md]
@@ -12,7 +13,7 @@
     B --> B5[1-naming-conventions.md]
     B --> B6[2-typescript-naming-conventions.md]
     B --> B7[2-typescript.md]
-    B --> B8[3-tailwind@4.1.md]
+    B --> B8[3-tailwind-v4.1.md]
     B --> B9[Postgres_SQL_Style_Guide_Instructions.md]
     B --> B10[Project_Architecture_Blueprint.md]
     %% Contextuelles
@@ -24,3 +25,4 @@
     C --> C6[Declarative_Database_Schema_Instructions.md]
     C --> C7[edge-functions.md]
     C --> C8[nextjs-supabase-auth.md]
+```
