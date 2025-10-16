@@ -61,9 +61,11 @@ pnpm run test:webhooks
 pnpm run test:logs
 ```
 
-**⚠️ Prérequis :** Vous devez avoir `SUPABASE_SERVICE_ROLE_KEY` dans votre `.env.local`
+**⚠️ Prérequis :** Vous devez avoir `SUPABASE_SERVICE_ROLE_KEY` (legacy)  ou `SUPABASE_SECRET_KEY` dans votre `.env.local`
 
-```env
+```bash
+SUPABASE_SECRET_KEY=votre_clé_secrète_ici
+# ou pour les anciennes configurations
 SUPABASE_SERVICE_ROLE_KEY=votre_clé_service_role_ici
 ```
 
@@ -120,10 +122,12 @@ npx tsc --noEmit --pretty
 
 ### Variables d'Environnement
 
-```env
+```bash
 RESEND_API_KEY=your_resend_api_key_here
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=your_supabase_anon_key
+SUPABASE_SECRET_KEY=your_supabase_secret_key
+# ou pour les anciennes configurations
 SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 ```
 

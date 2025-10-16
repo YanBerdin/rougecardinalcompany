@@ -4,7 +4,6 @@ applyTo: "**"
 
 description: APPLY package installation rules WHEN installing a new package
 alwaysApply: false
-
 ---
 
 # Package installation rules
