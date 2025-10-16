@@ -24,3 +24,11 @@ Partners need logo uploads and a display-order field. Reuse Media Library for lo
 ### 2025-10-16
 
 - Task created from Milestone 2.
+
+## shadcn / TweakCN checklist
+
+- [ ] Discover components with shadcn MCP: Image, Grid, DraggableList
+- [ ] Use `get-component-demo` for drag-and-drop and image usage
+- [ ] Ensure Media Library integration for logos and thumbnails
+- [ ] Apply TweakCN theme and verify logo scaling and grid behavior
+- [ ] Mobile responsiveness for partner lists and reordering UI

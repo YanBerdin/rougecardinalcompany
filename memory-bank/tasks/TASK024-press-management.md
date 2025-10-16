@@ -25,3 +25,11 @@ Press items may include attachments (PDFs) and rich text. Ensure storage handlin
 ### 2025-10-16
 
 - Task file generated from epic.
+
+## shadcn / TweakCN checklist
+
+- [ ] Use shadcn MCP to get components: RichText (or editor wrapper), FileUpload, Card
+- [ ] Call `get-component-demo` for editor and file attachment patterns
+- [ ] Verify that previews use same components as public site (consistency)
+- [ ] Apply TweakCN theme and confirm PDF/attachment styling in previews
+- [ ] Accessibility checks for published press pages

@@ -25,3 +25,12 @@ This is a foundational admin feature. It requires a server-side DAL, server comp
 ### 2025-10-16
 
 - Task created from Back-office epic Milestone 2.
+
+## shadcn / TweakCN checklist
+
+- [ ] Use shadcn MCP to discover required components (list-components)
+- [ ] For each component, call `get-component-demo` and embed the demo usage
+- [ ] Add or update `components.json` registries if needed
+- [ ] Ensure components are placed under `components/ui/` following project conventions
+- [ ] Apply TweakCN theme (or paste TweakCN command output) and verify styles on the admin pages
+- [ ] Manual responsive check: mobile/tablet/desktop for CRUD screens

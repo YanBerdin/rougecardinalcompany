@@ -25,3 +25,11 @@ Team members are a relatively small data set but require image upload and orderi
 ### 2025-10-16
 
 - Task generated from epic Milestone 2.
+
+## shadcn / TweakCN checklist
+
+- [ ] Use shadcn MCP to find components (Avatar, ImageUpload, Form, Input)
+- [ ] Call `get-component-demo` for each component and use the demo code
+- [ ] Ensure uploads integrate with Media Library and Supabase Storage patterns
+- [ ] Apply TweakCN theme and verify avatar/photo styles and list layouts
+- [ ] Responsive checks for profile cards and modals
