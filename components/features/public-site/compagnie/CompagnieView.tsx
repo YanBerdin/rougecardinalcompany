@@ -202,12 +202,16 @@ export function CompagnieView({
                         <h3 className="text-xl font-semibold mb-2">
                           {member.name}
                         </h3>
-                        <p className="text-primary font-medium mb-3">
-                          {member.role}
-                        </p>
-                        <p className="text-muted-foreground text-sm leading-relaxed">
-                          {member.bio}
-                        </p>
+                        {member.role && (
+                          <p className="text-primary font-medium mb-3">
+                            {member.role}
+                          </p>
+                        )}
+                        {member.description && (
+                          <p className="text-muted-foreground text-sm leading-relaxed">
+                            {member.description}
+                          </p>
+                        )}
                       </CardContent>
                     </Card>
                   ))}

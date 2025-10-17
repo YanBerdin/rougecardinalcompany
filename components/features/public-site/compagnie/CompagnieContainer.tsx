@@ -21,9 +21,11 @@ export async function CompagnieContainer() {
       }))}
       team={team.map((m) => ({
         name: m.name,
-        role: m.role ?? "",
-        bio: m.description ?? "",
-        image: m.image_url || "/logo-florian.png",
+        role: m.role, // Preserve null for proper typing
+        description: m.description, // Preserve null for proper typing
+        // Virtual field: maps from image_url (external) or photo_media_id (Media Library)
+        // TODO TASK022: Implement photo_media_id → medias table lookup when Media Library is used
+        image: m.image_url ?? "/logo-florian.png",
       }))}
       loading={false}
     />

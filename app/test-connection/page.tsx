@@ -29,10 +29,10 @@ import type {
 
 function mapMembreToTeamMember(membre: Membre): TeamMember {
   return {
-    name: membre.nom ?? membre.name, // nom est l'alias, name est dans la DB
-    role: membre.role ?? "",
-    bio: membre.description ?? "",
-    image: membre.photo_url || "", // ou une fonction pour récupérer l'URL à partir de photo_media_id
+    name: membre.name,
+    role: membre.role,
+    description: membre.description,
+    image: membre.photo_url || membre.image_url || "", // photo_url (legacy) or image_url (DB field)
   };
 }
 
@@ -45,7 +45,9 @@ function mapSpectacleFromDb(
     slug: dbSpectacle.slug ?? undefined,
     description: dbSpectacle.description ?? "",
     genre: (dbSpectacle as any).genre ?? "", //TODO: fix Unexpected any
-    duration_minutes: dbSpectacle.duration_minutes ? String(dbSpectacle.duration_minutes) : "",
+    duration_minutes: dbSpectacle.duration_minutes
+      ? String(dbSpectacle.duration_minutes)
+      : "",
     cast: (dbSpectacle as any).cast ?? 0, //TODO: fix Unexpected any
     premiere: (dbSpectacle as any).premiere ?? "", //TODO: fix Unexpected any
     public: dbSpectacle.public ?? false,
@@ -67,12 +69,10 @@ type SpectacleCompat = Spectacle & {
   duration_minutes?: string; // Pour compatibilité avec ancien code qui attend string
 };
 
-// Utilisation du type global MembreEquipe avec alias pour compatibilité
+// Utilisation du type global MembreEquipe
 type Membre = MembreEquipe & {
-  // Optionnel : si tu ajoutes l'URL de la photo côté client
+  // Legacy field for backward compatibility with old test code
   photo_url?: string;
-  // Alias pour compatibilité avec ancien code
-  nom?: string;
 };
 
 // Utilisation du type global ArticlePresse avec alias pour compatibilité
@@ -524,7 +524,7 @@ export default function TestConnectionPage() {
                             </div>
                           )}
                           <p className="text-sm text-muted-foreground">
-                            {uiMembre.bio}
+                            {uiMembre.description}
                           </p>
                         </div>
                       </CardContent>
