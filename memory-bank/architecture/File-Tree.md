@@ -17,7 +17,27 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 ├── 📁 .git/ 🚫 (auto-hidden)
 ├── 📁 .github/
 │   ├── 📁 copilot/
+│   │   ├── 📝 4-package-installation.instructions.md
+│   │   ├── 📝 a11y.instructions.md
+│   │   ├── 📝 edge-functions.instructions.md
+│   │   ├── 📝 touch_hitbox.instructions.md
+│   │   └── 📝 wcag_target_size.instructions.md
 │   ├── 📁 instructions/
+│   │   ├── 📄 .markdownlint.jsonc
+│   │   ├── 📝 1-clean-code.instructions.md
+│   │   ├── 📝 2-typescript.instructions.md
+│   │   ├── 📝 Create_RLS_policies.Instructions.md
+│   │   ├── 📝 Create_migration.instructions.md
+│   │   ├── 📝 Database_Create_functions.Instructions.md
+│   │   ├── 📝 Declarative_Database_Schema.Instructions.md
+│   │   ├── 📝 Postgres_SQL_Style_Guide.Instructions.md
+│   │   ├── 📖 README.md
+│   │   ├── 📝 knowledge-base-170825-0035.md
+│   │   ├── 📝 memory-bank.instructions.md
+│   │   ├── 📝 nextjs-supabase-auth-2025.instructions.md
+│   │   ├── 📝 nextjs.instructions.md
+│   │   ├── 📝 nextjs15-backend-with-supabase.instructions.md
+│   │   └── 📝 security-and-owasp.instructions.md
 │   ├── 📁 workflows/
 │   └── 📝 copilot-instructions.md
 ├── 📁 .next/ 🚫 (auto-hidden)
@@ -73,6 +93,7 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   ├── 📄 page.tsx
 │   └── 🖼️ twitter-image.png
 ├── 📁 components/
+│   ├── 📁 auth/
 │   ├── 📁 features/
 │   │   └── 📁 public-site/
 │   │       ├── 📁 agenda/
@@ -194,6 +215,10 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   ├── 📄 theme-switcher.tsx
 │   └── 📄 update-password-form.tsx
 ├── 📁 doc/
+│   ├── 📁 SQL-schema-Compliancy-report/
+│   ├── 📁 linting/
+│   ├── 📁 resend_integration/
+│   ├── 📁 newsletter-resend/
 ├── 📁 doc-perso/
 ├── 📁 emails/
 │   ├── 📁 utils/
@@ -202,8 +227,6 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   ├── 📄 contact-message-notification.tsx
 │   └── 📄 newsletter-confirmation.tsx
 ├── 📁 lib/
-│   ├── 📁 auth/
-│   │   └── 📄 service.ts
 │   ├── 📁 dal/
 │   │   ├── 📄 agenda.ts
 │   │   ├── 📄 compagnie-presentation.ts
@@ -231,9 +254,11 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   └── 📄 utils.ts
 ├── 📁 memory-bank/
 │   ├── 📁 architecture/
+│   │   ├── 📝 Email_Service_Architecture.md
 │   │   ├── 📝 File-Tree.md
 │   │   ├── 📝 Project_Architecture_Blueprint.md
-│   │   └── 📝 Project_Folders_Structure_Blueprint.md
+│   │   ├── 📝 Project_Folders_Structure_Blueprint.md
+│   │   └── 📝 Project_Folders_Structure_Blueprint_v2.md
 │   ├── 📁 epics/
 │   │   ├── 📁 details/
 │   │   │   ├── 📝 14.1-page-accueil(Home).md
@@ -251,9 +276,35 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   │   ├── 📝 TASK014-backoffice-toggles-centralises.md
 │   │   ├── 📝 TASK019-fix-spectacles-archives.md
 │   │   ├── 📝 TASK020-alignement-ui-presse.md
+│   │   ├── 📝 TASK021-content-management-crud.md
 │   │   ├── 📝 TASK021-documentation-docker.md
 │   │   ├── 📝 TASK022-documentation-supabase-cli.md
-│   │   └── 📝 index.md
+│   │   ├── 📝 TASK022-team-management.md
+│   │   ├── 📝 TASK023-auth-cleanup-and-optimization.md
+│   │   ├── 📝 TASK023-partners-management.md
+│   │   ├── 📝 TASK024-admin-email-scripts.md
+│   │   ├── 📝 TASK024-press-management.md
+│   │   ├── 📝 TASK025-communications-dashboard.md
+│   │   ├── 📝 TASK026-homepage-content-management.md
+│   │   ├── 📝 TASK027-company-content-management.md
+│   │   ├── 📝 TASK028-content-versioning-ui.md
+│   │   ├── 📝 TASK029-media-library.md
+│   │   ├── 📝 TASK030-display-toggles.md
+│   │   ├── 📝 TASK031-analytics-dashboard.md
+│   │   ├── 📝 TASK032-user-role-management.md
+│   │   ├── 📝 TASK033-audit-logs-viewer.md
+│   │   ├── 📝 TASK034-performance-optimization.md
+│   │   ├── 📝 TASK035-testing-suite.md
+│   │   ├── 📝 TASK036-security-audit.md
+│   │   ├── 📝 TASK037-accessibility-compliance.md
+│   │   ├── 📝 TASK038-responsive-testing.md
+│   │   ├── 📝 TASK039-production-deployment.md
+│   │   ├── 📝 TASK040-documentation.md
+│   │   ├── 📝 _index.md
+│   │   ├── 📝 _issues_preview.md
+│   │   ├── 📄 _preview_backoffice_tasks.csv
+│   │   └── 📝 _preview_backoffice_tasks.md
+│   ├── 📝 Memory-Bank-Update-Session-2025-10-13.md
 │   ├── 📝 activeContext.md
 │   ├── 📝 productContext.md
 │   ├── 📝 progress.md
@@ -265,7 +316,9 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 ├── 📁 public/
 │   └── 🖼️ logo-florian.png
 ├── 📁 scripts/
+│   ├── 📖 README.md
 │   ├── 📄 check-email-logs.ts
+│   ├── 🐚 create_issues.sh
 │   ├── 📄 test-email-integration.ts
 │   └── 📄 test-webhooks.ts
 ├── 📁 supabase/
@@ -333,6 +386,7 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 ├── 📄 .env.example
 ├── 📄 .env.local 🚫 (auto-hidden)
 ├── 🚫 .gitignore
+├── 📄 .markdownlint.jsonc
 ├── 📖 README.md
 ├── 📝 TESTING_RESEND.md
 ├── 📄 components.json

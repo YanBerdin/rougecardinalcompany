@@ -1,3 +1,25 @@
+# knowledge-base — Documentation consolidée (Rouge Cardinal)
+
+Ce résumé centralise les points essentiels extraits de la memory-bank (architecture, patterns, email, DAL, RLS) et fournit un aperçu des tâches backoffice (TASK021..TASK040).
+
+Utilisez ce bloc comme sommaire rapide. Les documents détaillés restent dans `memory-bank/` (liens en bas de fichier).
+
+---
+
+Principaux points consolidés :
+
+- Next.js 15 (App Router) : privilégier Server Components pour les lectures et SEO; n'utiliser `"use client"` que pour l'interactivité.
+- Data Access Layer (DAL) server-only : tous les accès en lecture centralisés dans `lib/dal/*`, modules marqués `server-only` et validés avec Zod.
+- Supabase Auth optimisé : utiliser `@supabase/ssr`, cookies via `getAll()`/`setAll()`, et `supabase.auth.getClaims()` pour checks rapides; réserver `getUser()` aux usages nécessitant l'objet complet.
+- Row Level Security (RLS) : policies co‑localisées dans chaque fichier de table; une policy par opération (select/insert/update/delete); privilégier `public.is_admin()` pour checks admin.
+- Server Actions & Mutations : reads via Server Components, mutations via Server Actions / API routes; valider avec Zod et invalider le cache avec `revalidatePath()`/`revalidateTag()`.
+- Email : architecture Resend + React Email, templates React, Zod validation, webhooks pour bounces/deliveries, scripts d'intégration fournis.
+- Tests & Quality gates : build, typecheck, tests unitaires, markdownlint. Corriger MD warnings avant merge.
+
+Backoffice — tâches (aperçu rapide) : TASK021..TASK040 (auth roles, admin layout, CRUD spectacles/événements, gestion médias, espace presse, contacts, newsletter admin, versioning, SEO redirects, partners, équipe, home content, permissions, audits, imports, QA/accessibility).
+
+---
+
 # knowledge-base — Cahier des charges – Création de site internet **Compagnie de Théâtre « Rouge Cardinal »**
 
 ## Contexte
