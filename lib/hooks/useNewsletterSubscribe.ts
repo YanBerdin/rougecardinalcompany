@@ -6,7 +6,7 @@ interface UseNewsletterSubscriptionReturn {
   email: string;
   isSubscribed: boolean;
   isLoading: boolean;
-  //isInitialLoading: boolean;
+  isInitialLoading: boolean;
   errorMessage: string | null;
   handleEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSubmit: (e?: React.FormEvent) => Promise<void>;
@@ -19,7 +19,7 @@ export function useNewsletterSubscribe({
   const [email, setEmail] = useState("");
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
- // const [isInitialLoading, setIsInitialLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,6 +70,7 @@ export function useNewsletterSubscribe({
     setEmail("");
     setIsSubscribed(false);
     setIsLoading(false);
+    setIsInitialLoading(false);
     setErrorMessage(null);
   };
 
@@ -77,7 +78,7 @@ export function useNewsletterSubscribe({
     email,
     isSubscribed,
     isLoading,
-    // isInitialLoading,
+    isInitialLoading,
     errorMessage,
     handleEmailChange,
     handleSubmit,
