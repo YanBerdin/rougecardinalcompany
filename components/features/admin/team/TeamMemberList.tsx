@@ -5,7 +5,7 @@ import TeamMemberCard from "./TeamMemberCard";
 interface Props {
   members: TeamMemberDb[];
   onEditMember?: (id: number) => void;
-  onDesactivateMember?: (id: number) => void;
+  onDeactivateMember?: (id: number) => void;
   onReactivateMember?: (id: number) => void;
   onHardDeleteMember?: (id: number) => void;
 }
@@ -13,7 +13,7 @@ interface Props {
 export function TeamMemberList({
   members,
   onEditMember,
-  onDesactivateMember,
+  onDeactivateMember,
   onReactivateMember,
   onHardDeleteMember,
 }: Props) {
@@ -26,7 +26,7 @@ export function TeamMemberList({
           key={m.id}
           member={m}
           onEdit={() => onEditMember?.(m.id)}
-          onDesactivate={() => onDesactivateMember?.(m.id)}
+          onDesactivate={() => onDeactivateMember?.(m.id)}
           onRequestReactivate={() => onReactivateMember?.(m.id)}
           onHardDelete={() => onHardDeleteMember?.(m.id)}
         />

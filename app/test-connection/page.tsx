@@ -36,27 +36,36 @@ function mapMembreToTeamMember(membre: Membre): TeamMember {
   };
 }
 
+type ExtendedSpectacle = Spectacle & {
+  genre?: string | null;
+  cast?: number | null;
+  premiere?: string | null;
+  image?: string | null;
+  status?: string | null;
+  awards?: string[] | null;
+};
+
 function mapSpectacleFromDb(
-  dbSpectacle: Spectacle
+  dbSpectacle: ExtendedSpectacle
 ): CurrentShow | ArchivedShow {
   return {
     id: dbSpectacle.id,
     title: dbSpectacle.title,
     slug: dbSpectacle.slug ?? undefined,
     description: dbSpectacle.description ?? "",
-    genre: (dbSpectacle as any).genre ?? "", //TODO: fix Unexpected any
+    genre: dbSpectacle.genre ?? "",
     duration_minutes: dbSpectacle.duration_minutes
       ? String(dbSpectacle.duration_minutes)
       : "",
-    cast: (dbSpectacle as any).cast ?? 0, //TODO: fix Unexpected any
-    premiere: (dbSpectacle as any).premiere ?? "", //TODO: fix Unexpected any
+    cast: dbSpectacle.cast ?? 0,
+    premiere: dbSpectacle.premiere ?? "",
     public: dbSpectacle.public ?? false,
     created_by: dbSpectacle.created_by ?? "",
     created_at: dbSpectacle.created_at,
     updated_at: dbSpectacle.updated_at ?? dbSpectacle.created_at,
-    image: (dbSpectacle as any).image ?? "", //TODO: fix Unexpected any
-    status: (dbSpectacle as any).status ?? "", //TODO: fix Unexpected any
-    awards: (dbSpectacle as any).awards ?? [], //TODO: fix Unexpected any
+    image: dbSpectacle.image ?? "",
+    status: dbSpectacle.status ?? "",
+    awards: dbSpectacle.awards ?? [],
     // year: (dbSpectacle as any).premiere
     //   ? String(new Date((dbSpectacle as any).premiere).getFullYear())
     //   : ((dbSpectacle as any).year ?? ""),
@@ -205,10 +214,16 @@ export default function TestConnectionPage() {
 
         if (tableError) {
           // Si l'erreur contient "relation does not exist", les tables n'ont pas été créées
+          let tableErrMsg = "";
+          if (typeof tableError === "object" && tableError !== null) {
+            const asUnknown = tableError as unknown;
+            const maybeMessage = (asUnknown as Record<string, unknown>).message;
+            if (typeof maybeMessage === "string") tableErrMsg = maybeMessage;
+          }
+
           if (
-            tableError.message &&
-            tableError.message.includes("relation") &&
-            tableError.message.includes("does not exist")
+            tableErrMsg.includes("relation") &&
+            tableErrMsg.includes("does not exist")
           ) {
             setConnectionStatus("tables-missing");
             setErrorMessage(
@@ -232,13 +247,16 @@ export default function TestConnectionPage() {
         setConnectionStatus("success");
       } catch (tableError) {
         // Vérifier si l'erreur est liée à l'absence de tables
+        let tableErrMsg = "";
+        if (typeof tableError === "object" && tableError !== null) {
+          const asUnknown = tableError as unknown;
+          const maybeMessage = (asUnknown as Record<string, unknown>).message;
+          if (typeof maybeMessage === "string") tableErrMsg = maybeMessage;
+        }
+
         if (
-          typeof tableError === "object" &&
-          tableError !== null &&
-          "message" in tableError &&
-          typeof (tableError as any).message === "string" &&
-          (tableError as any).message.includes("relation") &&
-          (tableError as any).message.includes("does not exist") //TODO: fix Unexpected any
+          tableErrMsg.includes("relation") &&
+          tableErrMsg.includes("does not exist")
         ) {
           setConnectionStatus("tables-missing");
           setErrorMessage(

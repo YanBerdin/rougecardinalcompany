@@ -1,22 +1,8 @@
-import { Quote } from "lucide-react";
+import { Quote, Star } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { CompagnieViewProps } from "./types";
 import { CompagnieSkeleton } from "@/components/skeletons/compagnie-skeleton";
 // import * as LucideIcons from 'lucide-react';
-
-// Whitelist locale des icônes Lucide utilisées
-import {
-  Star,
-  Heart,
-  Award,
-  Users,
-  Globe,
-  Shield,
-  Rocket,
-  Book,
-  Briefcase,
-} from "lucide-react";
-
 /*const LucideIconMap: Record<string, React.ComponentType<{ className?: string }>> = {
     Star,
     Heart,

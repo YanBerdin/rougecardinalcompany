@@ -8,7 +8,7 @@ export interface Database {
           subscribed: boolean;
           subscribed_at: string | null;
           unsubscribed_at: string | null;
-          metadata: Record<string, any> | null; //TODO: fix Unexpected any
+          metadata: Record<string, unknown> | null;
           created_at: string;
         };
         Insert: {
@@ -17,7 +17,7 @@ export interface Database {
           subscribed?: boolean;
           subscribed_at?: string | null;
           unsubscribed_at?: string | null;
-          metadata?: Record<string, any> | null; //TODO: fix Unexpected any
+            metadata?: Record<string, unknown> | null;
           created_at?: string;
         };
         Update: {
@@ -26,7 +26,7 @@ export interface Database {
           subscribed?: boolean;
           subscribed_at?: string | null;
           unsubscribed_at?: string | null;
-          metadata?: Record<string, any> | null; //TODO: fix Unexpected any
+            metadata?: Record<string, unknown> | null;
           created_at?: string;
         };
       };
@@ -45,7 +45,7 @@ export interface Database {
           processed: boolean;
           processed_at: string | null;
           spam_score: number | null;
-          metadata: Record<string, any> | null; //TODO: fix Unexpected any
+            metadata: Record<string, unknown> | null;
           contact_presse_id: number | null;
           created_at: string;
         };
@@ -63,7 +63,7 @@ export interface Database {
           processed?: boolean;
           processed_at?: string | null;
           spam_score?: number | null;
-          metadata?: Record<string, any> | null; //TODO: fix Unexpected any
+            metadata?: Record<string, unknown> | null;
           contact_presse_id?: number | null;
           created_at?: string;
         };
@@ -81,7 +81,7 @@ export interface Database {
           processed?: boolean;
           processed_at?: string | null;
           spam_score?: number | null;
-          metadata?: Record<string, any> | null; //TODO: fix Unexpected any
+            metadata?: Record<string, unknown> | null;
           contact_presse_id?: number | null;
           created_at?: string;
         };

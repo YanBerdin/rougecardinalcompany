@@ -132,12 +132,14 @@ interface MediaMetadata {
   [key: string]: string | number | boolean | undefined;
 }
 
-// Utilisation du type global Media avec metadata typée
-type MediaRow = Pick<
-  Media,
-  "storage_path" | "filename" | "mime" | "size_bytes" | "alt_text"
-> & {
-  metadata: MediaMetadata | null;
+// Local shape for media rows returned by Supabase
+type SupabaseMediaRow = {
+  storage_path: string;
+  filename?: string | null;
+  mime?: string | null;
+  size_bytes?: number | null;
+  alt_text?: string | null;
+  metadata?: MediaMetadata | null;
 };
 
 // Utilisation du type global CommuniquePresse
@@ -200,7 +202,7 @@ export async function fetchMediaKit(
     return [];
   }
 
-  return (data ?? []).map((row) => {
+  return (data ?? []).map((row: SupabaseMediaRow) => {
     // Cast metadata de Json vers MediaMetadata
     const metadata = row.metadata as MediaMetadata | null;
     

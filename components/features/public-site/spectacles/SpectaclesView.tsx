@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Calendar, MapPin, Clock, Users, ArrowRight } from "lucide-react"; // Calendar, MapPin, non utilisés pour l'instant
+import { Clock, Users, ArrowRight } from "lucide-react"; // Calendar, MapPin, non utilisés
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

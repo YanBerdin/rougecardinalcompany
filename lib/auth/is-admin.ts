@@ -8,28 +8,31 @@ import { createClient } from "@/supabase/server";
 export async function isAdmin(): Promise<boolean> {
   const supabase = await createClient();
   try {
-    const { data } = await supabase.auth.getClaims();
-    const claims = (data as any)?.claims ?? {};
+  const { data } = await supabase.auth.getClaims();
+  type ClaimsShape = { claims?: Record<string, unknown> };
+  const claims = (data as ClaimsShape)?.claims ?? {};
+
+    // Helper to safely read nested string claim values
+    const getClaimString = (obj: unknown, key: string): string => {
+      try {
+        const record = obj as Record<string, unknown> | undefined;
+        const val = record?.[key];
+        return typeof val === "string" ? val : String(val ?? "");
+      } catch {
+        return "";
+      }
+    };
 
     // Whitelist of claim paths to check for an admin role.
     // Check several common locations where role may appear.
-    const isAdminFromTop = String(claims.role ?? "").toLowerCase() === "admin";
-    const isAdminFromUserMetadata =
-      String(claims?.user_metadata?.role ?? "").toLowerCase() === "admin";
-    const isAdminFromAppMetadata =
-      String(claims?.app_metadata?.role ?? "").toLowerCase() === "admin";
-    // Common JWT claim used by Hasura or similar setups
-    /*
-    const hasuraClaims =
-      claims?.["https://hasura.io/jwt/claims"] ?? claims?.hasura ?? null;
-    const isAdminFromHasura =
-      Boolean(hasuraClaims) &&
-      String(
-        hasuraClaims?.["x-hasura-role"] ?? hasuraClaims?.["x-hasura-role"] ?? ""
-      ).toLowerCase() === "admin";
-      */
-    // || isAdminFromHasura ||
-    return isAdminFromTop || isAdminFromUserMetadata || isAdminFromAppMetadata;
+   // const isAdminFromTop = getClaimString(claims, "role").toLowerCase() === "admin"; //TODO: delete
+  const userMeta = (claims as Record<string, unknown>)?.["user_metadata"];
+  // const appMeta = (claims as Record<string, unknown>)?.["app_metadata"];
+  const isAdminFromUserMetadata = getClaimString(userMeta, "role").toLowerCase() === "admin";
+  // const isAdminFromAppMetadata = getClaimString(appMeta, "role").toLowerCase() === "admin";
+
+  //  return isAdminFromTop || isAdminFromUserMetadata || isAdminFromAppMetadata;
+  return isAdminFromUserMetadata
   } catch (err) {
     console.error("isAdmin check failed:", err);
     return false;

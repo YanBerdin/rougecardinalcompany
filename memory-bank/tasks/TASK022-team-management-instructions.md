@@ -116,7 +116,7 @@ Implement a complete admin interface for managing team members (membres_equipe) 
   - Revalidate path on success
   - Return typed response
 - Implement `setTeamMemberActive(id: number, active: boolean)`:
-  - Desactivate: set `active = false` (preserve data)
+  - Deactivate: set `active = false` (preserve data)
   - Or hard delete: `.delete().eq('id', id)` (use with caution)
   - Revalidate path on success
 - Implement `reorderTeamMembers(updates: Array<{id: number, ordre: number}>)`:
@@ -147,12 +147,12 @@ Implement a complete admin interface for managing team members (membres_equipe) 
 > Build reusable UI components with no business logic
 
 - Create `components/features/admin/team/TeamMemberCard.tsx`:
-  - Props: `member: TeamMemberRecord`, `onEdit?: () => void`, `onDesactivate?: () => void`
+  - Props: `member: TeamMemberRecord`, `onEdit?: () => void`, `onDeactivate?: () => void`
   - Display: Avatar (shadcn Avatar component with photo), name, role, status badge (active/inactive), order number
   - Actions: Edit and Delete buttons (only if callbacks provided)
   - Styling: shadcn Card component, responsive layout
 - Create `components/features/admin/team/TeamMemberList.tsx`:
-  - Props: `members: TeamMemberRecord[]`, `onEditMember: (id: number) => void`, `onDesactivateMember: (id: number) => void`, `loading?: boolean`
+  - Props: `members: TeamMemberRecord[]`, `onEditMember: (id: number) => void`, `onDeactivateMember: (id: number) => void`, `loading?: boolean`
   - Display: Grid or table layout with TeamMemberCard components
   - Empty state: show message "No team members yet" with add button
   - Loading state: show skeleton cards (shadcn Skeleton component)
@@ -172,7 +172,7 @@ Implement a complete admin interface for managing team members (membres_equipe) 
 
 - Create `components/features/admin/team/TeamManagementContainer.tsx` with `"use client"` directive
 - Import DAL functions: `fetchAllTeamMembers` (or use Server Action to fetch)
-- Import Server Actions: `createTeamMember`, `updateTeamMember`, `desactivateTeamMember`, `reorderTeamMembers`
+- Import Server Actions: `createTeamMember`, `updateTeamMember`, `setTeamMemberActiveAction` (or `deactivate`), `reorderTeamMembers`
 - State management:
   - `members: TeamMemberRecord[]` (fetched data)
   - `selectedMember: TeamMemberRecord | null` (for edit dialog)
@@ -182,7 +182,7 @@ Implement a complete admin interface for managing team members (membres_equipe) 
 - Mutation handlers:
   - `handleCreate`: call `createTeamMember` action, show toast on success/error, refresh data, close dialog
   - `handleUpdate`: call `updateTeamMember` action, show toast, refresh data, close dialog
-  - `handleDesactivateTeamMember`: show confirmation dialog, call `desactivateTeamMember` action, show toast, refresh data
+  - `handleDeactivateTeamMember`: show confirmation dialog, call `setTeamMemberActiveAction` (or server action `setTeamMemberActive`) to set active=false, show toast, refresh data
   - `handleReorder`: if implementing drag-and-drop, call `reorderTeamMembers` action (otherwise manual numeric input in form)
 - Pass data and callbacks to dumb components: `<TeamMemberList>`, `<TeamMemberForm>` in Dialog
 - Error handling: display errors in toast notifications (use shadcn Toast/Sonner)
@@ -413,7 +413,7 @@ export async function createTeamMember(
 }
 ```
 
-Apply this pattern to all mutations: `updateTeamMember`, `desactivateTeamMember`, `reorderTeamMembers`.
+Apply this pattern to all mutations: `updateTeamMember`, `setTeamMemberActiveAction` (deactivate), `reorderTeamMembers`.
 
 ### Enhancement 3: Database Migration Script for Ordre Field
 
@@ -632,7 +632,7 @@ export async function fetchTeamMemberById(id: number): Promise<TeamMemberRow | n
 
 import { useState, useEffect } from "react";
 import { fetchAllTeamMembers } from "@/lib/dal/team";
-import { createTeamMember, updateTeamMember, desactivateTeamMember } from "@/app/admin/team/actions";
+import { createTeamMember, updateTeamMember, setTeamMemberActiveAction } from "@/app/admin/team/actions";
 import { useToast } from "@/components/ui/use-toast";
 import { TeamMemberList } from "./TeamMemberList";
 import { TeamMemberForm } from "./TeamMemberForm";

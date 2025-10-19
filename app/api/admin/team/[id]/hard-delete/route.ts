@@ -10,7 +10,7 @@ export async function POST(
     // Require admin privileges for destructive action
     try {
       await requireAdmin();
-    } catch (err) {
+    } catch {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
     const resolved = (await params) as { id: string };

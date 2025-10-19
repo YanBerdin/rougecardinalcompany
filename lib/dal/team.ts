@@ -16,7 +16,7 @@ export async function fetchAllTeamMembers(
       .order("ordre", { ascending: true });
 
     if (!includeInactive) {
-      // By default, exclude desactivated (active = false) members so that
+      // By default, exclude deactivated (active = false) members so that
       // it immediately hides the member from lists unless the user explicitly requests inactive members.
       query = query.eq("active", true);
     }
@@ -82,8 +82,8 @@ export async function upsertTeamMember(
     // This avoids sending an explicit `id` value to INSERT when the column is
     // defined as GENERATED ALWAYS (Postgres will reject non-default values).
     const { id, ...rest } = payload as Partial<TeamRow>;
-    let data: any = null;
-    let error: any = null;
+  let data: unknown = null;
+  let error: unknown = null;
 
     if (typeof id === "number" && Number.isFinite(id) && id > 0) {
       const res = await supabase
@@ -92,16 +92,16 @@ export async function upsertTeamMember(
         .eq("id", id)
         .select()
         .single();
-      data = res.data;
-      error = res.error;
+  data = res.data;
+  error = res.error;
     } else {
       const res = await supabase
         .from("membres_equipe")
         .insert(rest)
         .select()
         .single();
-      data = res.data;
-      error = res.error;
+  data = res.data;
+  error = res.error;
     }
 
     if (error) {
@@ -116,7 +116,7 @@ export async function upsertTeamMember(
     }
 
     return parsed.data as TeamRow;
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("upsertTeamMember exception:", err);
     return null;
   }
@@ -124,7 +124,7 @@ export async function upsertTeamMember(
 
 // Deprecated: use setTeamMemberActive(id, false) instead.
 /*
-export async function desactivateTeamMember(id: number): Promise<boolean> {
+export async function deactivateTeamMember(id: number): Promise<boolean> {
   return await setTeamMemberActive(id, false);
 }
 */
@@ -146,7 +146,7 @@ export async function setTeamMemberActive(
     }
 
     return true;
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("setTeamMemberActive exception:", err);
     return false;
   }
@@ -168,7 +168,7 @@ export async function hardDeleteTeamMember(id: number): Promise<boolean> {
     }
 
     return true;
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("hardDeleteTeamMember exception:", err);
     return false;
   }
@@ -194,7 +194,7 @@ export async function reorderTeamMembers(
     }
 
     return true;
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("reorderTeamMembers exception:", err);
     return false;
   }

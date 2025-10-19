@@ -1,6 +1,10 @@
 "use client";
 import { useState } from "react";
-import type { TeamMemberDb, CreateTeamMemberInput } from "@/lib/schemas/team";
+import type {
+  TeamMemberDb,
+  CreateTeamMemberInput,
+  UpdateTeamMemberInput,
+} from "@/lib/schemas/team";
 import TeamMemberList from "./TeamMemberList";
 import TeamMemberForm from "./TeamMemberForm";
 import MediaPickerDialog from "./MediaPickerDialog";
@@ -32,10 +36,10 @@ export function TeamManagementContainer({ initialMembers }: Props) {
   const [openForm, setOpenForm] = useState(false);
   const [editing, setEditing] = useState<TeamMemberDb | null>(null);
   const [openMedia, setOpenMedia] = useState(false);
-  const [deleteCandidate, setDesactivateTeamMember] = useState<number | null>(
+  const [deleteCandidate, setDeactivateTeamMember] = useState<number | null>(
     null
   );
-  const [openDeleteDialog, setOpenDesactivateDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeactivateDialog] = useState(false);
   const [reactivateCandidate, setReactivateCandidate] = useState<number | null>(
     null
   );
@@ -48,7 +52,8 @@ export function TeamManagementContainer({ initialMembers }: Props) {
   async function handleCreate(data: CreateTeamMemberInput) {
     const res = await createTeamMember(data);
     if (res.success && res.data) {
-      setMembers((prev) => [res.data, ...prev]);
+      const created = res.data as TeamMemberDb;
+      setMembers((prev) => [created, ...prev]);
       setOpenForm(false);
     }
   }
@@ -66,13 +71,13 @@ export function TeamManagementContainer({ initialMembers }: Props) {
     }
   }
 
-  function requestDesactivateTeamMember(id: number) {
-    setDesactivateTeamMember(id);
-    setOpenDesactivateDialog(true);
+  function requestDeactivateTeamMember(id: number) {
+    setDeactivateTeamMember(id);
+    setOpenDeactivateDialog(true);
   }
 
-  async function handleDesactivateTeamMember(id: number) {
-    setOpenDesactivateDialog(false);
+  async function handleDeactivateTeamMember(id: number) {
+    setOpenDeactivateDialog(false);
     const res = await setTeamMemberActiveAction(id, false);
     if (res.success) {
       setMembers((prev) => prev.filter((m) => m.id !== id));
@@ -80,7 +85,7 @@ export function TeamManagementContainer({ initialMembers }: Props) {
     } else {
       toast.error("Erreur lors de la suppression");
     }
-    setDesactivateTeamMember(null);
+    setDeactivateTeamMember(null);
     setShowInactiveTeamMember(false);
   }
 
@@ -103,10 +108,11 @@ export function TeamManagementContainer({ initialMembers }: Props) {
     }
   }
 
-  async function handleEditSubmit(id: number, data: any) {
+  async function handleEditSubmit(id: number, data: UpdateTeamMemberInput) {
     const res = await updateTeamMember(id, data);
     if (res.success && res.data) {
-      setMembers((prev) => prev.map((m) => (m.id === id ? res.data : m)));
+      const updated = res.data as TeamMemberDb;
+      setMembers((prev) => prev.map((m) => (m.id === id ? updated : m)));
       setEditing(null);
       setOpenForm(false);
     }
@@ -148,7 +154,7 @@ export function TeamManagementContainer({ initialMembers }: Props) {
           setEditing(m);
           setOpenForm(true);
         }}
-        onDesactivateMember={requestDesactivateTeamMember}
+        onDeactivateMember={requestDeactivateTeamMember}
         onReactivateMember={(id) => {
           setReactivateCandidate(id);
           setOpenReactivateDialog(true);
@@ -181,7 +187,7 @@ export function TeamManagementContainer({ initialMembers }: Props) {
         }}
       />
 
-      <Dialog open={openDeleteDialog} onOpenChange={setOpenDesactivateDialog}>
+      <Dialog open={openDeleteDialog} onOpenChange={setOpenDeactivateDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirmer la désactivation</DialogTitle>
@@ -193,14 +199,14 @@ export function TeamManagementContainer({ initialMembers }: Props) {
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setOpenDesactivateDialog(false)}
+              onClick={() => setOpenDeactivateDialog(false)}
             >
               Annuler
             </Button>
             <Button
               variant="destructive"
               onClick={() =>
-                deleteCandidate && handleDesactivateTeamMember(deleteCandidate)
+                deleteCandidate && handleDeactivateTeamMember(deleteCandidate)
               }
             >
               Désactiver

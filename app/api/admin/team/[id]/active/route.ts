@@ -10,7 +10,7 @@ export async function POST(
     // Require admin for toggling active flag
     try {
       await requireAdmin();
-    } catch (err) {
+    } catch {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
     // In Next.js 15 the `params` object may be a Promise-like; await it before reading properties.

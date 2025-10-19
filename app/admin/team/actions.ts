@@ -5,6 +5,9 @@ import {
   CreateTeamMemberInputSchema,
   UpdateTeamMemberInputSchema,
   ReorderTeamMembersInputSchema,
+  type TeamMemberDb,
+  type CreateTeamMemberInput,
+  type UpdateTeamMemberInput,
 } from "@/lib/schemas/team";
 import {
   upsertTeamMember,
@@ -24,11 +27,11 @@ type ActionResponse<T> = {
 
 export async function createTeamMember(
   input: unknown
-): Promise<ActionResponse<any>> {
+): Promise<ActionResponse<TeamMemberDb>> {
   try {
     await requireAdmin();
     const parsed = CreateTeamMemberInputSchema.parse(input);
-    const created = await upsertTeamMember(parsed as any);
+    const created = await upsertTeamMember(parsed as CreateTeamMemberInput);
 
     revalidatePath("/admin/team");
 
@@ -39,7 +42,7 @@ export async function createTeamMember(
         status: 500,
       };
     return { success: true, data: created };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("createTeamMember error:", err);
     if (err instanceof z.ZodError) {
       return {
@@ -51,7 +54,7 @@ export async function createTeamMember(
     }
     return {
       success: false,
-      error: err?.message ?? "Unknown error",
+      error: err instanceof Error ? err.message : String(err ?? "Unknown error"),
       status: 500,
     };
   }
@@ -60,7 +63,7 @@ export async function createTeamMember(
 export async function updateTeamMember(
   id: number,
   input: unknown
-): Promise<ActionResponse<any>> {
+): Promise<ActionResponse<TeamMemberDb>> {
   try {
     await requireAdmin();
     if (!Number.isFinite(id) || id <= 0) {
@@ -71,13 +74,13 @@ export async function updateTeamMember(
     const existing = await fetchTeamMemberById(id);
     if (!existing) return { success: false, error: "Not found" };
 
-    const updated = await upsertTeamMember({ ...parsed, id });
+  const updated = await upsertTeamMember({ ...(parsed as UpdateTeamMemberInput), id });
 
     revalidatePath("/admin/team");
 
     if (!updated) return { success: false, error: "Failed to update" };
     return { success: true, data: updated };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("updateTeamMember error:", err);
     if (err instanceof z.ZodError) {
       return {
@@ -89,34 +92,12 @@ export async function updateTeamMember(
     }
     return {
       success: false,
-      error: err?.message ?? "Unknown error",
+      error: err instanceof Error ? err.message : String(err ?? "Unknown error"),
       status: 500,
     };
   }
 }
-/*
-export async function desactivateTeamMember(
-  id: number
-): Promise<ActionResponse<null>> {
-  try {
-    await requireAdmin();
-    if (!Number.isFinite(id) || id <= 0) {
-      return { success: false, error: "Invalid id", status: 400 };
-    }
-    const ok = await setTeamMemberActive(id, false);
-    revalidatePath("/admin/team");
-    if (!ok) return { success: false, error: "Failed to delete" };
-    return { success: true, data: null };
-  } catch (err: any) {
-    console.error("desactivateTeamMember error:", err);
-    return {
-      success: false,
-      error: err?.message ?? "Unknown error",
-      status: 500,
-    };
-  }
-}
-*/
+
 export async function reorderTeamMembersAction(
   input: unknown
 ): Promise<ActionResponse<null>> {
@@ -127,7 +108,7 @@ export async function reorderTeamMembersAction(
     revalidatePath("/admin/team");
     if (!ok) return { success: false, error: "Failed to reorder" };
     return { success: true, data: null };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("reorderTeamMembersAction error:", err);
     if (err instanceof z.ZodError) {
       return {
@@ -139,7 +120,7 @@ export async function reorderTeamMembersAction(
     }
     return {
       success: false,
-      error: err?.message ?? "Unknown error",
+      error: err instanceof Error ? err.message : String(err ?? "Unknown error"),
       status: 500,
     };
   }
@@ -161,11 +142,11 @@ export async function setTeamMemberActiveAction(
     revalidatePath("/admin/team");
     if (!ok) return { success: false, error: "Failed to set active flag" };
     return { success: true, data: null };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("setTeamMemberActiveAction error:", err);
     return {
       success: false,
-      error: err?.message ?? "Unknown error",
+      error: err instanceof Error ? err.message : String(err ?? "Unknown error"),
       status: 500,
     };
   }

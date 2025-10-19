@@ -6,7 +6,7 @@ import { HeroSlide } from "./types";
 import { HeroSkeleton } from "@/components/skeletons/hero-skeleton";
 
 export function HeroClient({ initialSlides }: { initialSlides: HeroSlide[] }) {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
   const [slides, setSlides] = useState<HeroSlide[]>(initialSlides);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);

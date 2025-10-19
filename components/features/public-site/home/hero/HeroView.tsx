@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HeroProps } from "./types";
-import { HeroSkeleton } from "@/components/skeletons/hero-skeleton";
+// import { HeroSkeleton } from "@/components/skeletons/hero-skeleton";
 
 export function HeroView({
   slides,
