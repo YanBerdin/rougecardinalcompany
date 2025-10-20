@@ -21,7 +21,7 @@ This instruction document has been **UPDATED** to reflect the actual implementat
   - Destructures `{id, ...rest}` to avoid GENERATED ALWAYS conflicts
 - **Runtime Validation**: All DAL functions use `.safeParse()` to validate rows and filter invalid data
 - **Flexible Filtering**: `fetchAllTeamMembers(includeInactive = false)` parameter for conditional filtering
-- **Additional Functions**: 
+- **Additional Functions**:
   - `setTeamMemberActive(id, active)` for soft delete/activate
   - `hardDeleteTeamMember(id)` for RGPD compliance
   - `reorderTeamMembers(updates)` with sequential updates

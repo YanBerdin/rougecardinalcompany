@@ -545,7 +545,7 @@ Composants clés (exemple « La Compagnie »):
    - Conserver Suspense en prod; supprimer les délais artificiels.
 
 5. Fallback automatique (robustesse)
-   - Dans `lib/dal/compagnie-presentation.ts`: si la requête échoue ou retourne 0 lignes, retourner un contenu local de secours `compagniePresentationFallback` (ancien mock renommé et marqué « [DEPRECATED FALLBACK] »).
+   - Dans `lib/dal/compagnie-presentation.ts`: si la requête échoue ou retourne 0 lignes, retourner un contenu local de secours `compagniePresentationFallback` (ancien mock renommé et marqué « `[DEPRECATED FALLBACK]` »).
    - But: éviter les pages vides en environnement vierge ou lors d’un incident ponctuel; tracer l’erreur côté logs si pertinent.
 
 6. Dépréciation des mocks

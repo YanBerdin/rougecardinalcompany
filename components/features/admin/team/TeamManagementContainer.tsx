@@ -80,13 +80,17 @@ export function TeamManagementContainer({ initialMembers }: Props) {
     setOpenDeactivateDialog(false);
     const res = await setTeamMemberActiveAction(id, false);
     if (res.success) {
-      setMembers((prev) => prev.filter((m) => m.id !== id));
+      // Instead of filtering out, mark as inactive in local state
+      // This ensures the member stays visible if "show inactive" is checked
+      setMembers((prev) =>
+        prev.map((m) => (m.id === id ? { ...m, active: false } : m))
+      );
+      setShowInactiveTeamMember(true);
       toast.success("Membre désactivé");
     } else {
-      toast.error("Erreur lors de la suppression");
+      toast.error("Erreur lors de la désactivation");
     }
     setDeactivateTeamMember(null);
-    setShowInactiveTeamMember(false);
   }
 
   async function handleReactivateTeamMember(id: number) {
@@ -148,7 +152,7 @@ export function TeamManagementContainer({ initialMembers }: Props) {
       </div>
 
       <TeamMemberList
-        members={members}
+        members={showInactive ? members : members.filter((m) => m.active)}
         onEditMember={(id) => {
           const m = members.find((x) => x.id === id) || null;
           setEditing(m);

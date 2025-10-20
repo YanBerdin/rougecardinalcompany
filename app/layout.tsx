@@ -4,9 +4,6 @@ import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
-import { EnvVarWarning } from "@/components/env-var-warning";
-import { AuthButton } from "@/components/auth-button";
-import { hasEnvVars } from "@/lib/utils";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -15,8 +12,8 @@ const defaultUrl = process.env.VERCEL_URL
 //TODO: update metadata
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "Next.js and Supabase Starter Kit",
-  description: "The fastest way to build apps with Next.js and Supabase",
+  title: "Compagnie Rouge Cardinal",
+  description: "Collectif de jeunes diplômés des grandes écoles théâtrales françaises, la compagnie Rouge-Cardinal est née d'une envie commune : créer un théâtre qui parle à notre époque tout en puisant dans la richesse du patrimoine dramatique",
 };
 
 const geistSans = Geist({
@@ -41,9 +38,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <div className="min-h-screen flex flex-col">
-            <Header
-              authContent={!hasEnvVars ? <EnvVarWarning /> : <AuthButton />}
-            />
+            <Header />
             {children}
           </div>
           <Footer />

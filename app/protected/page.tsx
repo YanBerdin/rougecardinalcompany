@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-
+import Link from "next/link";
 import { createClient } from "@/supabase/server";
 import { InfoIcon } from "lucide-react";
 import { FetchDataSteps } from "@/components/tutorial/fetch-data-steps";
@@ -14,9 +14,15 @@ export default async function ProtectedPage() {
   }
 
   return (
-    <div className="flex-1 w-full flex flex-col gap-12">
+    <div className="flex-1 w-full flex flex-col gap-12 mt-20">
       <div className="w-full">
-        <div className="bg-accent text-sm p-3 px-5 rounded-md text-foreground flex gap-3 items-center">
+        <Link
+          href="/admin/team"
+          className="underline text-5xl hover:bg-primary/10 rounded px-1"
+        >
+         👉🏼 ADMIN/TEAM PAGE
+        </Link>
+        <div className="bg-accent text-sm p-3 px-5 rounded-md text-foreground flex gap-3 items-center mt-10">
           <InfoIcon size="16" strokeWidth={2} />
           This is a protected page that you can only see as an authenticated
           user
