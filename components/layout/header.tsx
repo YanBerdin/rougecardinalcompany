@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+//import type { ReactNode } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -18,12 +18,13 @@ const navigation = [
   { name: "Presse", href: "/presse" },
   { name: "Contact", href: "/contact" },
 ];
-
+/*
 interface HeaderProps {
   authContent: ReactNode;
 }
-
-export function Header({ authContent }: HeaderProps) {
+*/
+//export function Header({ authContent }: HeaderProps) {
+export function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
@@ -83,7 +84,7 @@ export function Header({ authContent }: HeaderProps) {
             ))}
 
             {/* Auth Component */}
-            <div className="ml-4">{authContent}</div>
+            {/*<div className="ml-4">{authContent}</div>*/}
 
             <ThemeSwitcher />
           </div>
@@ -139,7 +140,7 @@ export function Header({ authContent }: HeaderProps) {
                 </Link>
               ))}
 
-              <div className="px-4 pt-4">{authContent}</div>
+              {/*<div className="px-4 pt-4">{authContent}</div>*/}
               <ThemeSwitcher />
             </div>
           </div>

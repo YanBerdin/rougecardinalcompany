@@ -82,8 +82,8 @@ export async function upsertTeamMember(
     // This avoids sending an explicit `id` value to INSERT when the column is
     // defined as GENERATED ALWAYS (Postgres will reject non-default values).
     const { id, ...rest } = payload as Partial<TeamRow>;
-  let data: unknown = null;
-  let error: unknown = null;
+    let data: unknown = null;
+    let error: unknown = null;
 
     if (typeof id === "number" && Number.isFinite(id) && id > 0) {
       const res = await supabase
@@ -92,16 +92,16 @@ export async function upsertTeamMember(
         .eq("id", id)
         .select()
         .single();
-  data = res.data;
-  error = res.error;
+      data = res.data;
+      error = res.error;
     } else {
       const res = await supabase
         .from("membres_equipe")
         .insert(rest)
         .select()
         .single();
-  data = res.data;
-  error = res.error;
+      data = res.data;
+      error = res.error;
     }
 
     if (error) {
