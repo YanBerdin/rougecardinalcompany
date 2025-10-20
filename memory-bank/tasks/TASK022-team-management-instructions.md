@@ -2,6 +2,53 @@
 
 > Please follow this plan using proper rules from knowledge-base and copilot-instructions.
 
+## ✅ Implementation Status (Updated: 2025-10-20)
+
+This instruction document has been **UPDATED** to reflect the actual implementation completed during TASK022. Key differences between original instructions and final implementation:
+
+### Type System Changes
+
+- **Zod Schema Patterns**: Used explicit `.nullable()` instead of `.optional()` for better database compatibility
+- **CreateTeamMemberInputSchema**: Explicit field definitions with `.nullable().optional()` instead of `.omit()`
+- **UpdateTeamMemberInputSchema**: All fields optional, no `id` requirement (handled in DAL layer)
+- **Timestamp Handling**: `created_at` and `updated_at` are string `.optional()` (not `.datetime()`) to match DB format
+
+### DAL Architecture Changes
+
+- **Import Directive**: Uses `import "server-only"` only (NOT `"use server"` - that's for Server Actions)
+- **Unified Upsert**: Implemented `upsertTeamMember()` function that handles both INSERT and UPDATE
+  - Checks if `id` is valid (> 0) to determine INSERT vs UPDATE
+  - Destructures `{id, ...rest}` to avoid GENERATED ALWAYS conflicts
+- **Runtime Validation**: All DAL functions use `.safeParse()` to validate rows and filter invalid data
+- **Flexible Filtering**: `fetchAllTeamMembers(includeInactive = false)` parameter for conditional filtering
+- **Additional Functions**: 
+  - `setTeamMemberActive(id, active)` for soft delete/activate
+  - `hardDeleteTeamMember(id)` for RGPD compliance
+  - `reorderTeamMembers(updates)` with sequential updates
+
+### Server Actions Architecture
+
+- **Consistent Response Type**: All actions return `ActionResponse<T>` with `{success, data?, error?, status?, details?}`
+- **Explicit Auth**: All actions call `requireAdmin()` at start (in addition to RLS)
+- **Enhanced Error Handling**:
+  - Separate Zod validation errors (status 422 with details)
+  - Input validation (id checks, type checks)
+  - Generic error handling (status 500)
+- **DAL Integration**: Actions delegate to DAL functions instead of direct Supabase calls
+- **Action Naming**: `setTeamMemberActiveAction` and `reorderTeamMembersAction` to distinguish from DAL functions
+
+### Key Implementation Principles Applied
+
+1. **Separation of Concerns**: DAL handles data access, Server Actions handle validation and orchestration
+2. **Type Safety**: Runtime Zod validation + compile-time TypeScript types
+3. **Error Resilience**: Graceful degradation with empty arrays/null returns, detailed error logging
+4. **Security**: Explicit admin checks + RLS policies (defense in depth)
+5. **Database Compatibility**: Careful handling of GENERATED ALWAYS fields and nullable columns
+
+Sections below marked with **IMPLEMENTED** annotations show actual code patterns used.
+
+---
+
 ## Goal
 
 Implement a complete admin interface for managing team members (membres_equipe) with CRUD operations, photo management via Media Library, role assignment, display order control, and audit logging. Interface must follow Smart/Dumb component pattern with DAL for data access and Server Actions for mutations.
@@ -73,9 +120,12 @@ Implement a complete admin interface for managing team members (membres_equipe) 
   - `Database['public']['Tables']['membres_equipe']['Update']` for updates
 - Create `lib/schemas/team.ts` with admin-specific Zod schemas:
   - `TeamMemberDbSchema` for full DB record validation (id, name, role, description, image_url, photo_media_id, ordre, active, created_at, updated_at)
-  - `CreateTeamMemberInputSchema` using `.omit({ id: true, created_at: true, updated_at: true })`
-  - `UpdateTeamMemberInputSchema` using `.partial().required({ id: true })`
-  - `ReorderTeamMembersInput` schema (array of {id, ordre})
+    - **IMPLEMENTED:** Uses `.nullable()` for optional fields instead of `.optional()` for better database compatibility
+    - **IMPLEMENTED:** `created_at` and `updated_at` are `.optional()` strings (not `.datetime()`) to handle DB timestamps
+    - **IMPLEMENTED:** `ordre` and `active` are `.nullable()` to match actual DB schema
+  - `CreateTeamMemberInputSchema` **IMPLEMENTED:** Explicit field definition with `.nullable().optional()` pattern instead of `.omit()`
+  - `UpdateTeamMemberInputSchema` **IMPLEMENTED:** Explicit optional fields (no `id` required - handled in DAL)
+  - `ReorderTeamMembersInputSchema` **IMPLEMENTED:** Array of `{id: number, ordre: number}`
 - Export TypeScript types derived from Zod: `type CreateTeamMemberInput = z.infer<typeof CreateTeamMemberInputSchema>`
 - Note: Public schema uses "image" fields, admin uses "image_url", "photo_media_id"
 - Photo validation rules: max 5MB, formats WebP/AVIF/JPEG (handled by Media Library component)
@@ -86,16 +136,26 @@ Implement a complete admin interface for managing team members (membres_equipe) 
 
 - **IMPORTANT:** `fetchTeamMembers()` already exists in `lib/dal/compagnie.ts` for PUBLIC view (filters `active=true`, limit=12)
 - Do NOT modify existing `fetchTeamMembers()` - it's used by public Compagnie page
-- Create NEW file `lib/dal/team.ts` with `"use server"` and `import "server-only"` directives
+- Create NEW file `lib/dal/team.ts` with `import "server-only"` directive (no `"use server"` - this is a DAL, not Server Actions)
 - Import `createClient` from `@/supabase/server`
-- Import type: `Database['public']['Tables']['membres_equipe']['Row']` from `@/lib/database.types`
+- Import type: `Database['public']['Tables']['membres_equipe']['Row']` as `TeamRow` from `@/lib/database.types`
+- Import `TeamMemberDbSchema` from `@/lib/schemas/team` for runtime validation
 - Implement admin-specific functions:
-  - `fetchAllTeamMembers()`: fetch ALL members (active + inactive), ordered by `ordre`, NO limit, NO filter on active - this is different from public `fetchTeamMembers()`
-  - `fetchTeamMemberById(id: number)`: fetch single member by id for edit form
-  - Optional: `fetchTeamMembersWithMedia()`: join with medias table to get photo URLs if needed for optimization
-- Error handling: log errors with `console.error`, return empty arrays or null on failure
+  - `fetchAllTeamMembers(includeInactive = false)`: **IMPLEMENTED** with optional parameter to filter active members by default
+    - Uses Zod validation with `.safeParse()` to validate each row and filter out invalid data
+    - Returns only valid rows, logs errors for invalid ones
+  - `fetchTeamMemberById(id: number)`: **IMPLEMENTED** with Zod validation
+  - `upsertTeamMember(payload: Partial<TeamRow>)`: **IMPLEMENTED** handles both INSERT and UPDATE
+    - If `id` is present and valid (> 0), performs UPDATE
+    - If `id` is missing/invalid, performs INSERT
+    - Destructures `{id, ...rest}` to avoid sending `id` to INSERT (prevents GENERATED ALWAYS conflict)
+    - Uses Zod validation on response
+  - `setTeamMemberActive(id: number, active: boolean)`: **IMPLEMENTED** for soft delete/activate
+  - `hardDeleteTeamMember(id: number)`: **IMPLEMENTED** for RGPD compliance (permanent deletion)
+  - `reorderTeamMembers(updates: Array<{id, ordre}>)`: **IMPLEMENTED** with sequential updates
+- Error handling: **IMPLEMENTED** with try/catch, console.error, returns empty arrays/null/false on failure
 - No direct RLS bypass: rely on authenticated user context from `createClient()`
-- Key difference: PUBLIC queries filter active=true, ADMIN queries show all records
+- Key difference: PUBLIC queries filter active=true, ADMIN queries show all records (unless `includeInactive=false`)
 
 ### Group 3: Server Actions for Mutations
 
@@ -103,27 +163,39 @@ Implement a complete admin interface for managing team members (membres_equipe) 
 
 - Create `app/admin/team/actions.ts` with `"use server"` directive
 - Import validation schemas from `lib/schemas/team.ts`
-- Import `createClient` from `@/supabase/server`
+- Import DAL functions from `lib/dal/team.ts`: `upsertTeamMember`, `reorderTeamMembers`, `fetchTeamMemberById`, `setTeamMemberActive`
 - Import `revalidatePath` from `next/cache`
-- Implement `createTeamMember(input: CreateTeamMemberInput)`:
-  - Validate input with Zod: `CreateTeamMemberInputSchema.parse(input)`
-  - Insert into `membres_equipe` table
-  - Handle errors: return `{ success: false, error: string }`
-  - On success: call `revalidatePath('/admin/team')` and return `{ success: true, data: newRecord }`
-- Implement `updateTeamMember(id: number, input: UpdateTeamMemberInput)`:
-  - Validate input with Zod
-  - Update record by id
-  - Revalidate path on success
-  - Return typed response
-- Implement `setTeamMemberActive(id: number, active: boolean)`:
-  - Deactivate: set `active = false` (preserve data)
-  - Or hard delete: `.delete().eq('id', id)` (use with caution)
-  - Revalidate path on success
-- Implement `reorderTeamMembers(updates: Array<{id: number, ordre: number}>)`:
-  - Validate array with Zod
-  - Batch update ordre values (use loop or transaction if needed)
-  - Revalidate path on success
-- Auth verification: RLS policies enforce admin-only writes, no explicit check needed in actions (Supabase will return error if not admin)
+- Import `requireAdmin` from `lib/auth/is-admin` for explicit auth checks
+- **IMPLEMENTED:** All actions use consistent `ActionResponse<T>` type with `success`, `data?`, `error?`, `status?`, `details?`
+- Implement `createTeamMember(input: unknown)`: **IMPLEMENTED**
+  - Calls `requireAdmin()` for explicit auth check
+  - Validates input with Zod: `CreateTeamMemberInputSchema.parse(input)`
+  - Uses `upsertTeamMember()` DAL function (without id, triggers INSERT)
+  - Handles Zod errors separately with status 422 and details
+  - Returns `ActionResponse<TeamMemberDb>` with success/error structure
+  - On success: calls `revalidatePath('/admin/team')`
+- Implement `updateTeamMember(id: number, input: unknown)`: **IMPLEMENTED**
+  - Calls `requireAdmin()` for explicit auth check
+  - Validates id is finite and > 0
+  - Validates input with Zod: `UpdateTeamMemberInputSchema.parse(input)`
+  - Checks record exists with `fetchTeamMemberById(id)` before update
+  - Uses `upsertTeamMember({...parsed, id})` DAL function (with id, triggers UPDATE)
+  - Returns `ActionResponse<TeamMemberDb>`
+  - On success: calls `revalidatePath('/admin/team')`
+- Implement `setTeamMemberActiveAction(id: number, active: boolean)`: **IMPLEMENTED**
+  - Calls `requireAdmin()` for explicit auth check
+  - Validates id (finite, > 0) and active (boolean type check)
+  - Uses `setTeamMemberActive(id, active)` DAL function
+  - Returns `ActionResponse<null>`
+  - On success: calls `revalidatePath('/admin/team')`
+- Implement `reorderTeamMembersAction(input: unknown)`: **IMPLEMENTED**
+  - Calls `requireAdmin()` for explicit auth check
+  - Validates array with Zod: `ReorderTeamMembersInputSchema.parse(input)`
+  - Uses `reorderTeamMembers(parsed)` DAL function
+  - Returns `ActionResponse<null>`
+  - On success: calls `revalidatePath('/admin/team')`
+- Error handling: **IMPLEMENTED** with try/catch, Zod error handling (status 422 + details), generic errors (status 500)
+- Auth verification: **IMPLEMENTED** with explicit `requireAdmin()` calls in addition to RLS policies
 
 ### Group 4: Media Picker Integration
 
@@ -531,37 +603,47 @@ import { z } from "zod";
 // NOTE: Do NOT duplicate TeamMemberSchema from components/features/public-site/compagnie/types.ts
 // That schema is for public view (description, image). This is for admin (full DB fields).
 
-// Full DB record schema
+// IMPLEMENTED: Full DB record schema with .nullable() for optional fields
 export const TeamMemberDbSchema = z.object({
-  id: z.number().positive(),
-  name: z.string().min(1, "Le nom est requis").max(100),
-  role: z.string().max(100).nullable(),
-  description: z.string().max(500).nullable(),
+  id: z.number(),
+  name: z.string().min(1).max(200),
+  role: z.string().nullable(),
+  description: z.string().nullable(),
   image_url: z.string().url().nullable(),
-  photo_media_id: z.number().positive().nullable(),
-  ordre: z.number().int().default(0),
-  active: z.boolean().default(true),
-  created_at: z.string().datetime(),
-  updated_at: z.string().datetime(),
+  photo_media_id: z.number().nullable(),
+  ordre: z.number().nullable(),
+  active: z.boolean().nullable(),
+  created_at: z.string().optional(),
+  updated_at: z.string().optional(),
 });
 
-// Create schema (omit auto-generated fields)
-export const CreateTeamMemberInputSchema = TeamMemberDbSchema.omit({
-  id: true,
-  created_at: true,
-  updated_at: true,
+// IMPLEMENTED: Create schema with explicit nullable/optional fields
+export const CreateTeamMemberInputSchema = z.object({
+  name: z.string().min(1).max(200),
+  role: z.string().nullable().optional(),
+  description: z.string().nullable().optional(),
+  image_url: z.string().url().nullable().optional(),
+  photo_media_id: z.number().nullable().optional(),
+  ordre: z.number().nullable().optional(),
+  active: z.boolean().optional(),
 });
 
-// Update schema (all optional except id)
-export const UpdateTeamMemberInputSchema = TeamMemberDbSchema
-  .partial()
-  .required({ id: true });
+// IMPLEMENTED: Update schema with all fields optional (no id required)
+export const UpdateTeamMemberInputSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  role: z.string().nullable().optional(),
+  description: z.string().nullable().optional(),
+  image_url: z.string().url().nullable().optional(),
+  photo_media_id: z.number().nullable().optional(),
+  ordre: z.number().nullable().optional(),
+  active: z.boolean().optional(),
+});
 
 // Reorder schema
 export const ReorderTeamMembersInputSchema = z.array(
   z.object({
-    id: z.number().positive(),
-    ordre: z.number().int(),
+    id: z.number(),
+    ordre: z.number(),
   })
 );
 
@@ -574,56 +656,141 @@ export type ReorderTeamMembersInput = z.infer<typeof ReorderTeamMembersInputSche
 
 ```typescript
 // lib/dal/team.ts
-"use server";
-
 import "server-only";
 import { createClient } from "@/supabase/server";
 import type { Database } from "@/lib/database.types";
+import { TeamMemberDbSchema } from "@/lib/schemas/team";
 
-type TeamMemberRow = Database["public"]["Tables"]["membres_equipe"]["Row"];
+type TeamRow = Database["public"]["Tables"]["membres_equipe"]["Row"];
 
 /**
- * Fetch ALL team members (active + inactive) for admin interface
+ * IMPLEMENTED: Fetch team members with optional includeInactive parameter
+ * Default behavior: filters active=true (for admin lists)
+ * includeInactive=true: shows all members (active + inactive)
  * 
- * IMPORTANT: This is different from fetchTeamMembers() in lib/dal/compagnie.ts
- * - compagnie.ts: filters active=true, limit=12 (for PUBLIC page)
- * - team.ts: fetches all records (for ADMIN interface)
+ * Uses Zod validation with safeParse to filter out invalid rows
  */
-export async function fetchAllTeamMembers(): Promise<TeamMemberRow[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("membres_equipe")
-    .select("*")
-    .order("ordre", { ascending: true });
+export async function fetchAllTeamMembers(
+  includeInactive = false
+): Promise<TeamRow[]> {
+  try {
+    const supabase = await createClient();
+    let query = supabase
+      .from("membres_equipe")
+      .select("*")
+      .order("ordre", { ascending: true });
 
-  if (error) {
-    console.error("fetchAllTeamMembers error:", error);
+    if (!includeInactive) {
+      query = query.eq("active", true);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("fetchAllTeamMembers error:", error);
+      return [];
+    }
+
+    const rows = (data as TeamRow[]) || [];
+
+    // Validate each row with Zod; log invalid rows and filter them out
+    const validRows: TeamRow[] = [];
+    for (const r of rows) {
+      const parsed = TeamMemberDbSchema.safeParse(r as unknown);
+      if (parsed.success) validRows.push(parsed.data as TeamRow);
+      else console.error("fetchAllTeamMembers: invalid row:", parsed.error);
+    }
+
+    return validRows;
+  } catch (err) {
+    console.error("fetchAllTeamMembers exception:", err);
     return [];
   }
-
-  return data ?? [];
 }
 
 /**
- * Fetch single team member by ID (for edit form)
+ * IMPLEMENTED: Fetch single team member by ID with Zod validation
  */
-export async function fetchTeamMemberById(id: number): Promise<TeamMemberRow | null> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("membres_equipe")
-    .select("*")
-    .eq("id", id)
-    .single();
+export async function fetchTeamMemberById(id: number): Promise<TeamRow | null> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("membres_equipe")
+      .select("*")
+      .eq("id", id)
+      .single();
 
-  if (error) {
-    console.error("fetchTeamMemberById error:", error);
+    if (error) {
+      console.error("fetchTeamMemberById error:", error);
+      return null;
+    }
+
+    const parsed = TeamMemberDbSchema.safeParse(data as unknown);
+    if (!parsed.success) {
+      console.error("fetchTeamMemberById: invalid row:", parsed.error);
+      return null;
+    }
+
+    return parsed.data as TeamRow;
+  } catch (err) {
+    console.error("fetchTeamMemberById exception:", err);
     return null;
   }
-
-  return data;
 }
 
-// ... other DAL functions if needed
+/**
+ * IMPLEMENTED: Unified upsert function
+ * - If id is present and valid (> 0): performs UPDATE
+ * - If id is missing/invalid: performs INSERT
+ * - Destructures {id, ...rest} to avoid sending id to INSERT
+ */
+export async function upsertTeamMember(
+  payload: Partial<TeamRow>
+): Promise<TeamRow | null> {
+  try {
+    const supabase = await createClient();
+    const { id, ...rest } = payload as Partial<TeamRow>;
+    let data: unknown = null;
+    let error: unknown = null;
+
+    if (typeof id === "number" && Number.isFinite(id) && id > 0) {
+      const res = await supabase
+        .from("membres_equipe")
+        .update(rest)
+        .eq("id", id)
+        .select()
+        .single();
+      data = res.data;
+      error = res.error;
+    } else {
+      const res = await supabase
+        .from("membres_equipe")
+        .insert(rest)
+        .select()
+        .single();
+      data = res.data;
+      error = res.error;
+    }
+
+    if (error) {
+      console.error("upsertTeamMember error:", error);
+      return null;
+    }
+
+    const parsed = TeamMemberDbSchema.safeParse(data as unknown);
+    if (!parsed.success) {
+      console.error("upsertTeamMember: invalid response:", parsed.error);
+      return null;
+    }
+
+    return parsed.data as TeamRow;
+  } catch (err: unknown) {
+    console.error("upsertTeamMember exception:", err);
+    return null;
+  }
+}
+
+// ... other DAL functions: setTeamMemberActive, hardDeleteTeamMember, reorderTeamMembers
 ```
 
 ```typescript

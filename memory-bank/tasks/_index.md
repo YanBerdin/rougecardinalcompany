@@ -2,9 +2,9 @@
 
 ## En Cours
 
-- `TASK014` Back‑office: centralisation et validation des toggles (Agenda/Accueil/Contact)
 - `TASK004` Agenda des événements (DAL + containers + UI)
-- `TASK022` Team Management (CRUD équipe + photos + rôles + ordre) — En cours (en attente intégration Médiathèque et ajustements layout Admin)
+- `TASK014` Back‑office: centralisation et validation des toggles (Agenda/Accueil/Contact)
+- `TASK022` Team Management (CRUD équipe + photos + rôles + ordre) — 85% (en attente: intégration Médiathèque + ajustements layout Admin)
 
 ## En Attente
 
@@ -31,8 +31,6 @@
 - `TASK021` Documentation Docker (volumes, disk space, prune) - Completed on 2025-10-01
 - `TASK021B` Documentation Supabase CLI (workflow déclaratif) - Completed on 2025-10-01
 - `TASK023` Nettoyage architecture auth et optimisation performance - Completed on 2025-10-13 (~400 lignes supprimées, getClaims 100x plus rapide, header réactif)
-- `TASK024` Scripts admin email et documentation clés Supabase - Completed on 2025-10-13 (check-email-logs.ts, support dual format JWT/Simplified, 4 docs créés)
-
-## Abandonné
+- `TASK024` Scripts admin email et documentation clés Supabase - Completed on 2025-10-13 (check-email-logs.ts, support dual format JWT/Simplified, 4 docs créés)## Abandonné
 
 Aucune tâche abandonnée pour le moment.
