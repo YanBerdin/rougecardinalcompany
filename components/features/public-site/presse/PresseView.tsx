@@ -16,6 +16,7 @@ export function PresseView({
   mediaKit,
 }: PresseViewProps) {
   // console.log("pressReleases", pressReleases, "mediaArticles", mediaArticles, "mediaKit", mediaKit); //TODO: remove
+  console.log("mediaArticles", mediaArticles); //TODO: remove
   return (
     <div className="pt-16">
       {/* Hero Section */}
@@ -159,7 +160,7 @@ export function PresseView({
                       </h3>
 
                       <p className="text-muted-foreground mb-3 italic">
-                        "{article.excerpt}"
+                        &quot;{article.excerpt}&quot;
                       </p>
 
                       <p className="text-sm text-muted-foreground">
@@ -175,7 +176,7 @@ export function PresseView({
                           rel="noopener noreferrer"
                         >
                           <ExternalLink className="mr-2 h-4 w-4" />
-                          Lire l'article
+                          Lire l&apos;article
                         </a>
                       </Button>
                     </div>
@@ -237,7 +238,7 @@ export function PresseView({
       <section className="py-20 hero-gradient">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold mb-6 text-white">
-            Demande d'Accréditation
+            Demande d&apos;Accréditation
           </h2>
           <p className="text-xl text-white/90 mb-8">
             Journalistes et critiques, demandez votre accréditation pour nos
@@ -245,7 +246,7 @@ export function PresseView({
           </p>
           <div className="space-y-4 text-white/90 mb-8">
             <p>
-              Pour toute demande d'accréditation, merci d'envoyer un email à
+              Pour toute demande d&apos;accréditation, merci d&apos;envoyer un email à
               <strong className="text-white"> presse@rouge-cardinal.fr</strong>{" "}
               en précisant :
             </p>
@@ -256,12 +257,12 @@ export function PresseView({
               <li>• Votre carte de presse</li>
             </ul>
           </div>
-          <Button
+            <Button
             size="lg"
             className="bg-white/10 border-white/30 text-white backdrop-blur-sm hover:bg-white hover:text-black transition-all duration-300 shadow-lg border"
             asChild
           >
-            <a href="mailto:presse@rouge-cardinal.fr?subject=Demande d'accréditation">
+            <a href="mailto:presse@rouge-cardinal.fr?subject=Demande%20d%27accr%C3%A9ditation">
               Faire une demande
             </a>
           </Button>

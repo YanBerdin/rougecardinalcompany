@@ -169,7 +169,7 @@ export function AgendaView({
                               rel="noopener noreferrer"
                             >
                               {event.type === "Atelier"
-                                ? "S'inscrire"
+                                ? "S&apos;inscrire"
                                 : "Réserver"}
                               <ExternalLink className="ml-2 h-4 w-4" />
                             </a>
@@ -216,7 +216,7 @@ export function AgendaView({
             className="bg-white/10 border-white/30 text-white backdrop-blur-sm hover:bg-white hover:text-black transition-all duration-300 shadow-lg border"
             asChild
           >
-            <Link href="/contact#newsletter">S'abonner aux actualités</Link>
+            <Link href="/contact#newsletter">S&apos;abonner aux actualités</Link>
           </Button>
         </div>
       </section>

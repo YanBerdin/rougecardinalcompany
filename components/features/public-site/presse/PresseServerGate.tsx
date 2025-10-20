@@ -15,7 +15,8 @@ export default async function PresseServerGate() {
     fetchMediaArticles(),
     fetchMediaKit(),
   ]);
-
+  // console.log("mediaArticles", mediaArticles); //TODO: remove
+  
   // Map DTO -> MediaKitItem pour l'UI (icône optionnelle)
   const mediaKit: MediaKitItem[] = mediaKitRows.map((r) => ({
     type: r.type,
