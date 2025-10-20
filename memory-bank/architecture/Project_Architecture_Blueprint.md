@@ -1,5 +1,7 @@
 # Project Architecture Blueprint: Rouge Cardinal Company
 
+> Note: Ce document est conservé pour l’historique. La version active et maintenue est désormais: `Project_Architecture_Blueprint_v2.md` (niveau Implementation-Ready, C4, ADRs). Veuillez vous y référer pour toute évolution d’architecture.
+
 ## **Auto-generated on $(date) - Architecture analysis and design patterns documentation**
 
 > ⚠️ **IMPORTANT - Supabase Auth Best Practices (2025)**

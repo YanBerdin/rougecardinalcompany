@@ -1,7 +1,7 @@
-# Project Folders Structure Blueprint - v2.0.0
+# Project Folders Structure Blueprint - v2.0.1
 
-**Last Updated**: 8 octobre 2025  
-**Version**: 2.0.0 (avec intégration Resend)  
+**Last Updated**: 20 octobre 2025  
+**Version**: 2.0.1 (Resend + Backoffice Admin updates)  
 **Branch**: feat-resend
 
 > ⚠️ **VERSION MISE À JOUR - INTÉGRATION RESEND COMPLÈTE + NETTOYAGE AUTH**
@@ -14,6 +14,11 @@
 > - ✅ **Custom Hooks** : useNewsletterSubscribe, useContactForm
 > - ✅ **Testing Infrastructure** : Scripts de test email, logs, webhooks
 > - ✅ **Type System** : Types email dédiés + database types générés
+>
+> 🆕 20/10/2025 — Mises à jour additionnelles:
+>
+> - ✅ **Backoffice Admin (TASK022)** : Blueprint d'architecture pour la gestion d'équipe (Team Management) côté admin
+> - ✅ **Sécurité** : Rappel des patterns canoniques Supabase Auth 2025 (middleware + `getClaims()`)
 >
 > 📖 **Documents Complémentaires** :
 >
@@ -87,6 +92,7 @@ Testing & Scripts:
 
 Documentation:
   ✓ memory-bank/ → Architecture + context + tasks
+  ✓ doc/ → Documentation projet
   ✓ .github/instructions/ → AI instructions + best practices
   ✓ prompts-github/ → AI prompt templates
 ```
@@ -256,6 +262,12 @@ rougecardinalcompany/
 │   │   ├── layout.tsx                         # Auth-required layout
 │   │   └── page.tsx                           # Protected dashboard
 │   │
+│   ├── 📁 admin/                              # ✨ NEW: Backoffice (admin-only)
+│   │   ├── 📁 team/                           # TASK022 - Team management
+│   │   │   ├── page.tsx
+│   │   │   └── actions.ts                     # Server actions (admin)
+│   │   └── layout.tsx                         # Admin layout + guard
+│   │
 │   ├── 📁 agenda/page.tsx                     # Events calendar
 │   ├── 📁 compagnie/page.tsx                  # Company presentation
 │   ├── 📁 spectacles/page.tsx                 # Shows listing
@@ -397,6 +409,17 @@ rougecardinalcompany/
 │   │   └── textarea.tsx
 │   │
 │   └── [auth-button, logout-button, forms, etc.]
+
+├── 📁 components/features/admin/              # ✨ NEW: Admin features
+│   └── 📁 team/                               # Team management UI
+│       ├── TeamContainer.tsx                  # Smart (orchestrates)
+│       ├── TeamList.tsx                       # Dumb list
+│       ├── TeamCard.tsx                       # Dumb card
+│       ├── TeamForm.tsx                       # Dumb form
+│       ├── MediaPicker.tsx                    # Dumb media picker
+│       ├── hooks.ts                           # Admin UI hooks (client)
+│       ├── types.ts                           # Zod types for forms
+│       └── index.ts                           # Exports
 │
 ├── 📁 emails/                                 # ✨ NEW: React Email templates
 │   ├── 📁 utils/
@@ -423,6 +446,8 @@ rougecardinalcompany/
 │   │   ├── presse.ts                          # Press
 │   │   └── contact.ts                         # Contact messages
 │   │
+│   │   ├── team.ts                            # ✨ NEW: Team members CRUD (TASK022)
+│   │
 │   ├── 📁 email/                              # ✨ NEW: Email service
 │   │   ├── actions.ts                         # "use server" email actions
 │   │   └── schemas.ts                         # Zod validation schemas
@@ -446,6 +471,9 @@ rougecardinalcompany/
 ├── 📁 types/                                  # ✨ NEW: TypeScript types
 │   ├── database.types.ts                      # Supabase generated types
 │   └── email.d.ts                             # Email-specific types
+│
+├── 📁 deprecated/                             # Legacy moved files
+│   └── types/database.types.legacy.ts         # Legacy DB types (moved)
 │
 ├── 📁 scripts/                                # ✨ NEW: Testing scripts
 │   ├── test-email-integration.ts              # Email integration test
@@ -473,6 +501,11 @@ rougecardinalcompany/
 │   ├── 📁 epics/[details/, epics-map.yaml]
 │   ├── 📁 tasks/[TASK*.md, _index.md]
 │   └── [activeContext, productContext, progress, etc.]
+│
+├── 📁 doc/                                    # Project documentation
+│
+├── 📁 public/                                 # Public assets (images, fonts)
+│   └── [favicons, social images, logos]
 │
 ├── 📁 .github/
 │   ├── 📁 instructions/
@@ -564,6 +597,60 @@ components/features/public-site/home/newsletter/
 
 **Migration Note**: Les hooks de features sont progressivement migrés vers `lib/hooks/` pour réutilisabilité.
 
+### 4.3bis Admin Backoffice (`components/features/admin/` + `app/admin/`)
+
+Purpose: Interfaces d’administration (backoffice) protégées pour la gestion des contenus métiers. Première implémentation: TASK022 — Team Management.
+
+Structure:
+
+```bash
+app/admin/
+├── layout.tsx                 # Admin layout avec garde d’auth (requireAdmin)
+└── team/
+    ├── page.tsx               # Page admin Team
+    └── actions.ts             # Server actions (create/update/reorder/setActive)
+
+components/features/admin/team/
+├── TeamContainer.tsx          # Smart: orchestre data + actions
+├── TeamList.tsx               # Dumb: liste des membres
+├── TeamCard.tsx               # Dumb: carte membre
+├── TeamForm.tsx               # Dumb: formulaire (Zod + UI)
+├── MediaPicker.tsx            # Dumb: sélection médias (photos)
+├── hooks.ts                   # Hooks client (toast, forms)
+├── types.ts                   # Schemas Zod + types form
+└── index.ts                   # Exports
+```
+
+Data Layer:
+
+```typescript
+// lib/dal/team.ts (server-only)
+"use server";
+
+// Fonctions clés (exemples)
+export async function fetchAllTeamMembers() {}
+export async function fetchTeamMemberById(id: string) {}
+export async function createTeamMember(input: CreateTeamMemberInput) {}
+export async function updateTeamMember(id: string, input: UpdateTeamMemberInput) {}
+export async function setTeamMemberActive(id: string, active: boolean) {}
+export async function reorderTeamMembers(order: string[]) {}
+```
+
+Auth Guard:
+
+```typescript
+// lib/auth/is-admin.ts
+export async function requireAdmin() {
+  // getClaims() + vérif rôle/permissions
+}
+```
+
+Policies:
+
+- Soft-delete via champ `active=false` (hard-delete réservé)
+- RLS activé côté Supabase; actions sensibles protégées par `requireAdmin()`
+- Validation d’E/S via Zod au niveau formulaire et DAL
+
 ### 4.4 Data Access Layer (`lib/dal/`)
 
 **Purpose**: Server-only data access avec isolation complète
@@ -595,6 +682,7 @@ export async function fetch[Entity]() {
 - `home-newsletter.ts` : Newsletter settings
 - `contact.ts` : Contact messages (avec email trigger)
 - `presse.ts` : Press articles + releases
+- `team.ts` : Team members CRUD + reorder + soft delete (TASK022)
 
 ### 4.5 Custom Hooks (`lib/hooks/`)
 
@@ -667,6 +755,14 @@ export type EmailTemplate =
   | 'newsletter-confirmation'
   | 'contact-notification';
 ```
+
+### 4.8 Auth & Security Notes
+
+- Auth basé sur Supabase `@supabase/ssr` + `getClaims()` côté serveur (2–5ms)
+- Middleware Next.js pour protéger les routes sensibles
+- `requireAdmin()` pour les actions admin (server-side) → renvoie 403 sinon
+- RLS activé sur toutes les tables; privilégier DAL server-only
+- Ne jamais exposer de secrets côté client; pas de service_role dans le code app
 
 ### 4.7 Testing Infrastructure (`scripts/`)
 
@@ -1270,6 +1366,36 @@ supabase gen types typescript --local > types/database.types.ts
 supabase db reset  # Resets + applies migrations + seeds
 ```
 
+### 7.5 Build & Output Organization
+
+**Build Configuration Files**:
+
+- `next.config.ts` (Next.js config)
+- `tsconfig.json` (TypeScript strict config)
+- `tailwind.config.ts` (Tailwind CSS config)
+- `postcss.config.mjs` (PostCSS config)
+- `eslint.config.mjs` (ESLint rules)
+
+**Common Commands**:
+
+```bash
+pnpm dev         # Start dev server (Turbopack by default)
+pnpm build       # Production build
+pnpm start       # Start production server
+pnpm lint        # Run ESLint
+```
+
+**Outputs & Artifacts**:
+
+- `.next/` (Next.js build output – not versioned)
+- `public/` (Static assets served as-is)
+
+**Environment Variables**:
+
+- `.env.local` (local dev)
+- `.env.staging` (optional)
+- `.env.production` (production)
+
 ---
 
 ## 8. Email Service Integration
@@ -1788,6 +1914,7 @@ export function use[Feature](options?: Use[Feature]Options) {
 
 | Version | Date | Changes | Author |
 |---------|------|---------|--------|
+| 2.0.1 | 2025-10-20 | Admin Backoffice (TASK022) blueprint, Tailwind plugin ESM note, Auth & Security notes | AI Assistant |
 | 2.0.0 | 2025-10-08 | Complete rewrite with Resend integration, new hooks system, updated patterns | AI Assistant |
 | 1.0.0 | 2025-09-XX | Initial document | Previous |
 
@@ -1821,4 +1948,4 @@ export function use[Feature](options?: Use[Feature]Options) {
 
 **Document Maintainers**: Development Team  
 **Review Frequency**: After major changes or quarterly  
-**Last Review**: 8 octobre 2025
+**Last Review**: 20 octobre 2025

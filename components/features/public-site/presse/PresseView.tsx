@@ -16,7 +16,7 @@ export function PresseView({
   mediaKit,
 }: PresseViewProps) {
   // console.log("pressReleases", pressReleases, "mediaArticles", mediaArticles, "mediaKit", mediaKit); //TODO: remove
-  console.log("mediaArticles", mediaArticles); //TODO: remove
+  // console.log("mediaArticles", mediaArticles); //TODO: remove
   return (
     <div className="pt-16">
       {/* Hero Section */}
@@ -246,7 +246,8 @@ export function PresseView({
           </p>
           <div className="space-y-4 text-white/90 mb-8">
             <p>
-              Pour toute demande d&apos;accréditation, merci d&apos;envoyer un email à
+              Pour toute demande d&apos;accréditation, merci d&apos;envoyer un
+              email à
               <strong className="text-white"> presse@rouge-cardinal.fr</strong>{" "}
               en précisant :
             </p>
@@ -257,7 +258,7 @@ export function PresseView({
               <li>• Votre carte de presse</li>
             </ul>
           </div>
-            <Button
+          <Button
             size="lg"
             className="bg-white/10 border-white/30 text-white backdrop-blur-sm hover:bg-white hover:text-black transition-all duration-300 shadow-lg border"
             asChild

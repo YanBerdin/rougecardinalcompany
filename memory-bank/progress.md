@@ -10,7 +10,7 @@
 - [x] Configuration du design system
 - [x] Schéma déclaratif consolidé (RLS 36/36 : 25 principales + 11 liaison)
 - [x] Harmonisation knowledge‑base + epics avec le schéma
-- [~] Développement des fonctionnalités principales (intégrations front restantes)
+- [x] Développement des fonctionnalités principales (intégrations front restantes)
 - [ ] Tests et optimisation
 - [ ] Déploiement en production
 
@@ -41,7 +41,9 @@
 - [x] Versioning contenu (valeurs, stats, sections présentation)
 - [x] Tables ajoutées: `compagnie_values`, `compagnie_stats`, `compagnie_presentation_sections`, `home_hero_slides`
 - [x] Nettoyage architecture auth (~400 lignes code redondant supprimées)
-- [~] Gestion des données spectacles (accueil: listes + dates)
+- [x] Gestion des données spectacles (accueil: listes + dates)
+- [ ] Back‑office Team Management (CRUD membres équipe, photos, rôles, ordre d’affichage) — schemas Zod, DAL server‑only, Server Actions, UI admin, requireAdmin(), soft‑delete + reorder (restant: intégration Médiathèque + ajustements layout Admin)
+- [x] Documentation d’architecture v2 (C4 + ADRs) publiée et référencée
 
 ## Fonctionnalités en Cours
 
@@ -245,6 +247,11 @@
 
 ## Journal des Mises à Jour
 
+### 20 Octobre 2025
+
+- Architecture: publication de `Project_Architecture_Blueprint_v2.md` (Implementation‑Ready, C4, ADRs, patterns canoniques Supabase Auth 2025)
+- Back‑office: avancement TASK022 Team Management (DAL `lib/dal/team.ts`, Server Actions `app/admin/team/actions.ts`, UI `components/features/admin/team/*`, guard `requireAdmin()`, soft‑delete + reorder) — statut: En cours (Médiathèque + layout Admin restants)
+
 ### 13 Octobre 2025
 
 - **Nettoyage architecture auth** : Suppression ~400 lignes code redondant
@@ -287,7 +294,7 @@
 - Compagnie: migration complète vers DAL server-only pour valeurs et équipe (`lib/dal/compagnie.ts`).
 - Compagnie: sections éditoriales branchées sur `public.compagnie_presentation_sections` via `lib/dal/compagnie-presentation.ts` (Zod + mapping quotes).
 - Page `app/compagnie/page.tsx`: enveloppée dans `<Suspense>` avec `CompagnieSkeleton`; délai artificiel 1500 ms dans le conteneur pour validation UX (à retirer avant prod).
-- Fallback automatique: si la table des sections est vide ou en erreur, retour du contenu local `compagniePresentationFallback` [DEPRECATED FALLBACK] pour éviter une page vide.
+- Fallback automatique: si la table des sections est vide ou en erreur, retour du contenu local `compagniePresentationFallback` (DEPRECATED FALLBACK) pour éviter une page vide.
 - Dépréciation: anciens hooks/données mocks de la Compagnie annotés `[DEPRECATED MOCK]` et non utilisés par le rendu.
 
 ### 22 Septembre 2025
@@ -303,7 +310,7 @@
 - Migration frontend: Data Access Layer (lib/dal/\*) côté serveur + Server Components
 - Accueil: Hero, News, À propos (stats), Spectacles (avec dates), Partenaires branchés sur Supabase
 - UX: Sections d’accueil enveloppées dans React Suspense avec skeletons (délais artificiels temporaires pour visualisation)
-- Dépréciation: anciens hooks mocks conservés en commentaires avec en-têtes [DEPRECATED MOCK]
+- Dépréciation: anciens hooks mocks conservés en commentaires avec en-têtes `[DEPRECATED MOCK]`
 - Documentation: début de mise à jour knowledge‑base + memory‑bank (patterns, tech context, tasks)
 
 ### 20 Septembre 2025 — Ajouts récents

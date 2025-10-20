@@ -8,6 +8,9 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 
 ### Avancées récentes (Octobre 2025)
 
+- ✅ 20 octobre — Architecture: ajout du blueprint v2 « Project_Architecture_Blueprint_v2.md » (Implementation-Ready, C4, ADRs, patterns Next.js 15 + Supabase Auth 2025, Resend). L’ancien blueprint est marqué comme historique et pointe vers la v2.
+- ✅ 20 octobre — Back‑office: Team Management (TASK022) en grande partie implémenté (schemas Zod, DAL `lib/dal/team.ts`, Server Actions `app/admin/team/actions.ts`, UI admin `components/features/admin/team/*`, guard `requireAdmin()`, soft‑delete + reorder). Nettoyage ESLint/Types: entités JSX échappées, avertissements isolés. Restant: intégration Médiathèque (photos) et itération structure layout Admin.
+
 - ✅ **Nettoyage architecture auth** (13 octobre) : suppression ~400 lignes code redondant implémenté par erreur avec Resend (AuthService, protected-route, useAuth, callback, EMAIL_REDIRECT_TO)
 - ✅ **Fix header login/logout** (13 octobre) : AuthButton en Client Component + `onAuthStateChange()` pour mise à jour temps réel
 - ✅ **Scripts admin email** (13 octobre) : `check-email-logs.ts` avec support dual format Supabase keys (JWT + Simplified)
@@ -61,7 +64,7 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 
 - Cohérence des états de toggles entre back‑office et pages publiques
 - Retirer les délais artificiels (1200-1500ms) des containers avant production
-- Monitoring Docker disk usage en croissance
+- Monitoring Docker disk usage en croissance (si utilisation de Supabase local)
 - Synchronisation des dates de visibilité du hero et du cache ISR
 - Configuration finale webhooks Resend dans le dashboard (pointer vers `/api/webhooks/resend`)
 - Vérifier la configuration des clés Supabase en production (format JWT vs Simplified)
@@ -107,6 +110,11 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 7. Finaliser validation toggles Back‑office
 8. Configuration webhooks Resend dans le dashboard
 
+### Nouveaux livrables (20 octobre)
+
+- `memory-bank/architecture/Project_Architecture_Blueprint_v2.md` (référence active)
+- Back‑office Team Management (CRUD équipe) — statut: En cours (voir TASK022)
+
 ### Moyen terme (2-4 semaines)
 
 1. Back‑office avancé (toggles centralisés, CRUD étendus)
@@ -145,6 +153,6 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 
 ## Dernière Mise à Jour
 
-**Date**: 13 octobre 2025
+**Date**: 20 octobre 2025
 **Par**: GitHub Copilot
-**Changements majeurs**: Nettoyage architecture auth (~400 lignes), optimisation performance (getClaims 100x plus rapide), fix header réactif, scripts admin email + documentation formats clés Supabase
+**Changements majeurs**: Blueprint d’architecture v2 (C4 + ADRs) publié, TASK022 Team Management livré (DAL + Server Actions + UI admin), nettoyage ESLint/Type complémentaire (entities JSX, plugin Tailwind ESM)

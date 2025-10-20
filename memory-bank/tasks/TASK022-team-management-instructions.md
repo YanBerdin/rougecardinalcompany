@@ -279,7 +279,7 @@ Implement a complete admin interface for managing team members (membres_equipe) 
 - Accessibility: keyboard navigation, ARIA labels, focus management
 - No console errors in browser DevTools
 - Build passes: `pnpm run build` succeeds
-- TypeScript checks pass: `pnpm run typecheck` succeeds
+- TypeScript checks pass: `pnpm tsc --noEmit` succeeds
 - Markdown lint passes: `pnpm run lint:md` succeeds (if docs updated)
 
 ## Additional Notes
