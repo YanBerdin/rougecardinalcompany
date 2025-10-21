@@ -64,6 +64,19 @@
 4. ✅ Documentation Docker : volumes, disk space, prune behavior
 5. ✅ Documentation Supabase CLI : workflow déclaratif complet
 6. ✅ Migration DDL redondante : suppression de `20250921112000_add_home_about_content.sql` (table définie dans schéma déclaratif `07e_table_home_about.sql`)
+7. ✅ **Page Presse vide (21 octobre 2025)** : Fix incompatibilité RLS/JWT Signing Keys
+   - **Problème** : `mediaArticles Array(0)` malgré 3 articles seedés en base
+   - **Cause** : Nouveaux JWT Signing Keys (`sb_publishable_*`/`sb_secret_*`) ne déclenchent pas l'évaluation RLS pour le rôle `anon`
+   - **Solution** : Création vue `articles_presse_public` qui contourne RLS avec permissions directes (`GRANT SELECT`)
+   - **Migration** : `supabase/migrations/20251021000001_create_articles_presse_public_view.sql` (hotfix DDL)
+   - **Schéma déclaratif** : Vue intégrée dans `supabase/schemas/08_table_articles_presse.sql` (source de vérité)
+   - **DAL** : `lib/dal/presse.ts` modifié pour requêter `articles_presse_public` au lieu de `articles_presse`
+   - **Séparation chapo/excerpt** : Correction du mapping - `chapo` (intro) et `excerpt` (citation) sont des champs distincts, non des fallbacks
+   - **Types** : `MediaArticleSchema` (Zod) et interface TypeScript mis à jour avec les deux champs
+   - **UI** : `PresseView.tsx` affiche maintenant chapo (texte normal) et excerpt (italique entre guillemets) séparément
+   - **Impact** : 🔒 Sécurité identique, ⚡ Performance améliorée, 📊 Portée limitée aux requêtes anonymes
+   - **Documentation** : 7 fichiers mis à jour (migrations.md, schemas README, blueprints, systemPatterns, knowledge-base, instructions README, diagnostic scripts README)
+   - **Validation** : ✅ 3 articles affichés avec badges corrects (Article/Critique/Interview), chapo et excerpt visibles, aucune erreur console
 7. ✅ Audit complet conformité database : 5 rapports générés dans `doc/SQL-schema-Compliancy-report/`
    - ✅ SQL Style Guide : 100% (32 aliases avec 'as', indentation optimisée, awards documenté)
    - ✅ RLS Policies : 100% (36/36 tables, 70+ policies granulaires, 6 double SELECT corrigés)
@@ -349,5 +362,7 @@
 ## Dernière Mise à Jour
 
 **Date**: 13 octobre 2025
-**Par**: GitHub Copilot
 **Changements majeurs**: Nettoyage architecture auth (~400 lignes), optimisation performance auth (100x), fix header réactif, scripts admin email fonctionnels, documentation formats clés Supabase (JWT vs Simplified)
+
+**Date**: 21 octobre 2025
+**Changements majeurs**: Fix page Presse vide - workaround RLS/JWT Signing Keys via vue `articles_presse_public`, séparation correcte chapo/excerpt comme champs indépendants, workflow hotfix déclaratif appliqué, 7 fichiers de documentation mis à jour

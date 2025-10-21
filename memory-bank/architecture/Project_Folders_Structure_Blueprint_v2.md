@@ -69,6 +69,8 @@ Backend Services:
   ✓ lib/dal/ → Data Access Layer (server-only functions)
   ✓ types/database.types.ts → Supabase generated types
   ✓ middleware.ts → Authentication middleware
+  ✓ supabase/migrations/20251021000001_create_articles_presse_public_view.sql → Hotfix RLS/JWT
+  ✓ supabase/schemas/08_table_articles_presse.sql → Vue publique (source de vérité)
 
 Email Infrastructure:
   ✓ lib/resend.ts → Resend client configuration

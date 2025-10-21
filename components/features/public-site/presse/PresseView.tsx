@@ -15,8 +15,6 @@ export function PresseView({
   mediaArticles,
   mediaKit,
 }: PresseViewProps) {
-  // console.log("pressReleases", pressReleases, "mediaArticles", mediaArticles, "mediaKit", mediaKit); //TODO: remove
-  // console.log("mediaArticles", mediaArticles); //TODO: remove
   return (
     <div className="pt-16">
       {/* Hero Section */}
@@ -159,9 +157,17 @@ export function PresseView({
                         {article.title}
                       </h3>
 
-                      <p className="text-muted-foreground mb-3 italic">
-                        &quot;{article.excerpt}&quot;
-                      </p>
+                      {article.chapo && (
+                        <p className="text-muted-foreground mb-2">
+                          {article.chapo}
+                        </p>
+                      )}
+
+                      {article.excerpt && (
+                        <p className="text-muted-foreground mb-3 italic">
+                          &quot;{article.excerpt}&quot;
+                        </p>
+                      )}
 
                       <p className="text-sm text-muted-foreground">
                         Par {article.author}

@@ -293,27 +293,42 @@ export async function middleware(req: NextRequest) {
 ### Pattern de Protection des Données
 
 ```sql
+### Pattern de Protection des Données
+
+```sql
 -- Politique RLS Supabase type (exemples)
 create policy "Accès public aux spectacles"
   on spectacles
-  for select
-  to anon, authenticated
+  /* Lines 299-301 omitted */
   using (public = true);
 
 -- Lecture publique des articles de presse publiés (RLS co-localisé dans 08_table_articles_presse.sql)
 create policy "Public press articles are viewable by everyone"
   on articles_presse
-  for select
-  to anon, authenticated
+  /* Lines 306-308 omitted */
   using (published_at is not null);
 
 -- Gestion admin
 create policy "Admins can update press articles"
   on articles_presse
-  for update
-  to authenticated
-  using ((select public.is_admin()))
+  /* Lines 313-316 omitted */
   with check ((select public.is_admin()));
+
+-- Vue publique pour contourner les problèmes RLS/JWT Signing Keys (oct. 2025)
+-- Voir: supabase/migrations/20251021000001_create_articles_presse_public_view.sql
+create view articles_presse_public as
+select id, title, author, type, chapo, excerpt, source_publication, source_url, published_at, created_at
+from articles_presse
+where published_at is not null;
+
+grant select on articles_presse_public to anon, authenticated;
+```
+
+Optimisations RLS recommandées:
+
+- Appeler les fonctions dans les policies via `(select ...)` pour initPlan.
+- Index partiels alignés sur les filtres RLS (ex: `published_at is not null` sur `articles_presse`).
+- **Vues publiques** : pour contourner incompatibilités RLS avec JWT Signing Keys, créer des vues avec permissions directes.
 ```
 
 Optimisations RLS recommandées:

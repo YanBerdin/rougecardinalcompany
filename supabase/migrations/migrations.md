@@ -12,7 +12,7 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 > - 🔄 La cohérence avec l'historique de migration Supabase Cloud
 > - 🏗️ La possibilité de reconstruire la base depuis zéro
 >
-> **Documentation complète** : [`doc-perso/declarative-schema-hotfix-workflow.md`](../../doc-perso/declarative-schema-hotfix-workflow.md)
+> **Documentation complète** : `doc-perso/declarative-schema-hotfix-workflow.md`
 
 ## Migration principale du schéma déclaratif
 
@@ -23,6 +23,14 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 - `20250918000000_fix_spectacles_versioning_trigger.sql` — **FIX CRITIQUE** : Correction du trigger `spectacles_versioning_trigger()` pour utiliser le champ `public` (boolean) au lieu de `published_at` (inexistant dans la table spectacles). Ce trigger causait une erreur `record "old" has no field "published_at"` lors des insertions/updates de spectacles.
   - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/15_content_versioning.sql` (déjà corrigé)
   - 📝 **Migration conservée** pour l'historique et la cohérence avec Supabase Cloud
+
+- `20251021000001_create_articles_presse_public_view.sql` — **FIX : Workaround RLS/JWT Signing Keys** : Création d'une vue publique `articles_presse_public` pour contourner l'incompatibilité entre les nouveaux JWT Signing Keys (`sb_publishable_*`/`sb_secret_*`) et les politiques RLS en base de données.
+  - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/08_table_articles_presse.sql` (09 oct. 2025)
+  - 📝 **Migration conservée** pour l'historique et la cohérence avec Supabase Cloud
+  - 🔒 **Impact sécurité** : Aucun (remplace RLS par permission directe sur la vue : même résultat attendu)
+  - ⚡ **Avantage performance** : Évite l'évaluation RLS (amélioration théorique des temps de requête)
+  - 📊 **Portée** : Affecte uniquement les requêtes anonymes (role `anon`) sur les articles presse publiés
+  - 🔄 **Migration future** : Si JWT Signing Keys + RLS sont corrigés dans un futur SDK, cette vue peut être remplacée par un retour direct sur `articles_presse` avec RLS activé
 
 ## Migrations de données (DML) - Ordre chronologique
 

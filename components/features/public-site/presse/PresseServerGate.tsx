@@ -7,15 +7,11 @@ import {
 } from "@/lib/dal/presse";
 
 export default async function PresseServerGate() {
-  // TODO: remove Délai artificiel pour tester le skeleton
-  await new Promise((r) => setTimeout(r, 1500));
-
   const [pressReleases, mediaArticles, mediaKitRows] = await Promise.all([
     fetchPressReleases(),
     fetchMediaArticles(),
     fetchMediaKit(),
   ]);
-  // console.log("mediaArticles", mediaArticles); //TODO: remove
   
   // Map DTO -> MediaKitItem pour l'UI (icône optionnelle)
   const mediaKit: MediaKitItem[] = mediaKitRows.map((r) => ({

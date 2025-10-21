@@ -5,6 +5,7 @@
 - `TASK004` Agenda des événements (DAL + containers + UI)
 - `TASK014` Back‑office: centralisation et validation des toggles (Agenda/Accueil/Contact)
 - `TASK022` Team Management (CRUD équipe + photos + rôles + ordre) — 85% (en attente: intégration Médiathèque + ajustements layout Admin)
+- `TASK021` Content Management CRUD (CRUD spectacles, événements, articles)
 
 ## En Attente
 
@@ -28,8 +29,8 @@
 - `TASK013` Écriture et exécution des scripts de seed (valeurs, stats, sections, hero) - Completed on 2025-09-23
 - `TASK019` Fix spectacles archivés (public=true approach) - Completed on 2025-10-01
 - `TASK020` Alignement UI press releases (flexbox pattern) - Completed on 2025-10-01
-- `TASK021` Documentation Docker (volumes, disk space, prune) - Completed on 2025-10-01
-- `TASK021B` Documentation Supabase CLI (workflow déclaratif) - Completed on 2025-10-01
+- `TASK020B` Documentation Docker (volumes, disk space, prune) - Completed on 2025-10-01
+- `TASK020C` Documentation Supabase CLI (workflow déclaratif) - Completed on 2025-10-01
 - `TASK023` Nettoyage architecture auth et optimisation performance - Completed on 2025-10-13 (~400 lignes supprimées, getClaims 100x plus rapide, header réactif)
 - `TASK024` Scripts admin email et documentation clés Supabase - Completed on 2025-10-13 (check-email-logs.ts, support dual format JWT/Simplified, 4 docs créés)## Abandonné
 

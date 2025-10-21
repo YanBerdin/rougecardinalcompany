@@ -23,6 +23,30 @@ comment on table public.articles_presse is 'press articles referencing shows or 
 -- Enable Row Level Security and define policies (co-located with table)
 alter table public.articles_presse enable row level security;
 
+-- Public view for published articles (bypasses RLS issues with JWT Signing Keys)
+drop view if exists public.articles_presse_public cascade;
+create view public.articles_presse_public as
+select 
+  id,
+  title,
+  author,
+  type,
+  slug,
+  chapo,
+  excerpt,
+  source_publication,
+  source_url,
+  published_at,
+  created_at
+from public.articles_presse
+where published_at is not null;
+
+comment on view public.articles_presse_public is 
+'Public view of published press articles - bypasses RLS issues with JWT signing keys. Used by anon/authenticated users to access published articles without triggering RLS policy evaluation delays.';
+
+-- Grant read access to all roles
+grant select on public.articles_presse_public to anon, authenticated;
+
 -- Public can read only published articles
 drop policy if exists "Public press articles are viewable by everyone" on public.articles_presse;
 create policy "Public press articles are viewable by everyone"
