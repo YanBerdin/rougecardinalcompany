@@ -154,20 +154,24 @@ Règles:
 ### 6.1 Workaround RLS/JWT Signing Keys
 
 **Problème identifié (oct. 2025)** :
+
 - Les nouveaux JWT Signing Keys (`sb_publishable_*`/`sb_secret_*`) ne déclenchent pas correctement l'évaluation des politiques RLS pour le rôle `anon`
 - Requêtes bloquées malgré des politiques RLS correctement configurées
 
 **Solution implémentée** :
+
 - Création de vues publiques (ex: `articles_presse_public`) qui filtrent les données et contournent l'évaluation RLS
 - Permissions accordées directement sur la vue via `GRANT SELECT`
 - Filtre intégré: `WHERE published_at IS NOT NULL` pour répliquer la logique RLS
 
 **Impact** :
+
 - 🔒 Sécurité : Identique aux politiques RLS originales
 - ⚡ Performance : Amélioration potentielle (pas d'overhead RLS)
 - 📊 Portée : Affecte uniquement les requêtes anonymes sur contenu publié
 
 **Fichiers concernés** :
+
 - Migration : `supabase/migrations/20251021000001_create_articles_presse_public_view.sql`
 - Schéma déclaratif : `supabase/schemas/08_table_articles_presse.sql` (source de vérité)
 - DAL : `lib/dal/presse.ts` (requête sur vue au lieu de table)

@@ -329,6 +329,7 @@ Optimisations RLS recommandées:
 - Appeler les fonctions dans les policies via `(select ...)` pour initPlan.
 - Index partiels alignés sur les filtres RLS (ex: `published_at is not null` sur `articles_presse`).
 - **Vues publiques** : pour contourner incompatibilités RLS avec JWT Signing Keys, créer des vues avec permissions directes.
+
 ```
 
 Optimisations RLS recommandées:

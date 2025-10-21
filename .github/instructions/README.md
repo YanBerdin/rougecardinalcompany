@@ -45,11 +45,13 @@ grant select on articles_presse_public to anon, authenticated;
 ```
 
 **Impact** :
+
 - Sécurité identique (même filtre que RLS)
 - Performance améliorée (pas d'overhead RLS)
 - Migration hotfix + intégration au schéma déclaratif
 
 **Références** :
+
 - Migration : `supabase/migrations/20251021000001_create_articles_presse_public_view.sql`
 - Schéma : `supabase/schemas/08_table_articles_presse.sql`
 - Documentation : `supabase/migrations/migrations.md`, `scripts/Test_fetchMediaArticles/README.md`
