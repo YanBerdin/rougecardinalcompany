@@ -217,7 +217,10 @@ to authenticated
 using ( (select public.is_admin()) );
 
 -- Vue pour naviguer dans les catégories avec hiérarchie
-create or replace view public.categories_hierarchy as
+-- SECURITY: Explicitly set SECURITY INVOKER to run with querying user's privileges
+create or replace view public.categories_hierarchy
+with (security_invoker = true)
+as
 with recursive category_tree as (
   -- Catégories racines
   select 
@@ -257,10 +260,13 @@ select
 from category_tree
 order by path;
 
-comment on view public.categories_hierarchy is 'Vue hiérarchique des catégories avec niveaux et chemins complets';
+comment on view public.categories_hierarchy is 'Vue hiérarchique des catégories avec niveaux et chemins complets. SECURITY INVOKER: Runs with querying user privileges, protected by RLS on base tables.';
 
 -- Vue pour les tags populaires
-create or replace view public.popular_tags as
+-- SECURITY: Explicitly set SECURITY INVOKER to run with querying user's privileges
+create or replace view public.popular_tags
+with (security_invoker = true)
+as
 select 
   id,
   name,
@@ -272,4 +278,4 @@ from public.tags
 where usage_count > 0
 order by is_featured desc, usage_count desc, name asc;
 
-comment on view public.popular_tags is 'Tags les plus utilisés, avec mise en avant des tags featured';
+comment on view public.popular_tags is 'Tags les plus utilisés, avec mise en avant des tags featured. SECURITY INVOKER: Runs with querying user privileges, protected by RLS on base tables.';

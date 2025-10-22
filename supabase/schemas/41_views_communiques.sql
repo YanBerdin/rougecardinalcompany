@@ -2,8 +2,11 @@
 -- Ordre: 41 - après 11_tables_relations.sql
 
 -- Vue publique communiqués
+-- SECURITY: Explicitly set SECURITY INVOKER to run with querying user's privileges
 drop view if exists public.communiques_presse_public cascade;
-create or replace view public.communiques_presse_public as
+create or replace view public.communiques_presse_public
+with (security_invoker = true)
+as
 select 
   cp.id,
   cp.title,
@@ -61,11 +64,14 @@ group by cp.id, pdf_m.filename, pdf_m.size_bytes, pdf_m.storage_path,
 order by cp.ordre_affichage asc, cp.date_publication desc;
 
 comment on view public.communiques_presse_public is 
-'Vue publique optimisée pour l''espace presse professionnel avec URLs de téléchargement, images et catégories. Exclut les communiqués sans PDF principal.';
+'Vue publique optimisée pour l''espace presse professionnel avec URLs de téléchargement, images et catégories. Exclut les communiqués sans PDF principal. SECURITY INVOKER: Runs with querying user privileges (not definer).';
 
 -- Vue dashboard admin
+-- SECURITY: Explicitly set SECURITY INVOKER to run with querying user's privileges
 drop view if exists public.communiques_presse_dashboard cascade;
-create or replace view public.communiques_presse_dashboard as
+create or replace view public.communiques_presse_dashboard
+with (security_invoker = true)
+as
 select 
   cp.id,
   cp.title,
@@ -100,4 +106,4 @@ group by cp.id, pdf_m.filename, pdf_m.size_bytes, im.filename, cp.image_url,
 order by cp.created_at desc;
 
 comment on view public.communiques_presse_dashboard is 
-'Vue dashboard admin pour la gestion des communiqués avec statistiques et gestion des images';
+'Vue dashboard admin pour la gestion des communiqués avec statistiques et gestion des images. SECURITY INVOKER: Runs with querying user privileges (not definer), protected by RLS on base tables.';
