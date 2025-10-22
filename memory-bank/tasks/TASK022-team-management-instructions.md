@@ -1,4 +1,4 @@
-# Instruction: Team Management CRUD Interface (TASK022)
+# Instruction: Team Management CRUD Interface (TASK021C)
 
 > Please follow this plan using proper rules from knowledge-base and copilot-instructions.
 
@@ -558,7 +558,7 @@ export async function isAdmin(): Promise<boolean> {
     
     // Check for admin role in claims
     // Adjust claim path based on your auth setup
-    const role = claims.user_role || claims.app_metadata?.role;
+    const role = claims.user?.user_metadata?.role;
     return role === "admin";
   } catch (error) {
     console.error("isAdmin check failed:", error);

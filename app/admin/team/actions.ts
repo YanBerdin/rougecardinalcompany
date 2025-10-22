@@ -54,7 +54,8 @@ export async function createTeamMember(
     }
     return {
       success: false,
-      error: err instanceof Error ? err.message : String(err ?? "Unknown error"),
+      error:
+        err instanceof Error ? err.message : String(err ?? "Unknown error"),
       status: 500,
     };
   }
@@ -74,7 +75,10 @@ export async function updateTeamMember(
     const existing = await fetchTeamMemberById(id);
     if (!existing) return { success: false, error: "Not found" };
 
-  const updated = await upsertTeamMember({ ...(parsed as UpdateTeamMemberInput), id });
+    const updated = await upsertTeamMember({
+      ...(parsed as UpdateTeamMemberInput),
+      id,
+    });
 
     revalidatePath("/admin/team");
 
@@ -92,7 +96,8 @@ export async function updateTeamMember(
     }
     return {
       success: false,
-      error: err instanceof Error ? err.message : String(err ?? "Unknown error"),
+      error:
+        err instanceof Error ? err.message : String(err ?? "Unknown error"),
       status: 500,
     };
   }
@@ -120,7 +125,8 @@ export async function reorderTeamMembersAction(
     }
     return {
       success: false,
-      error: err instanceof Error ? err.message : String(err ?? "Unknown error"),
+      error:
+        err instanceof Error ? err.message : String(err ?? "Unknown error"),
       status: 500,
     };
   }
@@ -146,7 +152,116 @@ export async function setTeamMemberActiveAction(
     console.error("setTeamMemberActiveAction error:", err);
     return {
       success: false,
-      error: err instanceof Error ? err.message : String(err ?? "Unknown error"),
+      error:
+        err instanceof Error ? err.message : String(err ?? "Unknown error"),
+      status: 500,
+    };
+  }
+}
+
+export async function uploadTeamMemberPhoto(
+  formData: FormData
+): Promise<ActionResponse<{ mediaId: number; publicUrl: string }>> {
+  try {
+    await requireAdmin();
+
+    const file = formData.get("file") as File | null;
+    if (!file) {
+      return { success: false, error: "No file provided", status: 400 };
+    }
+
+    // Validation
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      return {
+        success: false,
+        error: "File too large (max 5MB)",
+        status: 400,
+      };
+    }
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "image/avif",
+    ];
+    if (!allowedTypes.includes(file.type)) {
+      return {
+        success: false,
+        error: "Invalid file type. Allowed: JPEG, PNG, WebP, AVIF",
+        status: 400,
+      };
+    }
+
+    // Générer nom de fichier unique
+    const timestamp = Date.now();
+    const randomStr = Math.random().toString(36).substring(2, 9);
+    const ext = file.name.split(".").pop() || "jpg";
+    const filename = `team-${timestamp}-${randomStr}.${ext}`;
+    const storagePath = `team-photos/${filename}`;
+
+    // Upload vers Supabase Storage
+    const { createClient } = await import("@/supabase/server");
+    const supabase = await createClient();
+
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from("medias")
+      .upload(storagePath, file, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (uploadError) {
+      console.error("Storage upload error:", uploadError);
+      return {
+        success: false,
+        error: `Upload failed: ${uploadError.message}`,
+        status: 500,
+      };
+    }
+
+    // Obtenir URL publique
+    const { data: urlData } = supabase.storage
+      .from("medias")
+      .getPublicUrl(storagePath);
+
+    // Créer enregistrement dans table medias
+    const { data: mediaRecord, error: insertError } = await supabase
+      .from("medias")
+      .insert({
+        storage_path: storagePath,
+        filename: file.name,
+        mime: file.type,
+        size_bytes: file.size,
+        metadata: { bucket: "medias", type: "team_photo" },
+      })
+      .select()
+      .single();
+
+    if (insertError || !mediaRecord) {
+      console.error("Media record insertion error:", insertError);
+      // Tenter de nettoyer le fichier uploadé
+      await supabase.storage.from("medias").remove([storagePath]);
+      return {
+        success: false,
+        error: "Failed to create media record",
+        status: 500,
+      };
+    }
+
+    return {
+      success: true,
+      data: {
+        mediaId: mediaRecord.id,
+        publicUrl: urlData.publicUrl,
+      },
+    };
+  } catch (err: unknown) {
+    console.error("uploadTeamMemberPhoto error:", err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Upload failed",
       status: 500,
     };
   }

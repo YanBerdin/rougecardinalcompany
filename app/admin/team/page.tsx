@@ -10,7 +10,7 @@ export default async function AdminTeamPage() {
   const supabase = await createClient();
 
   const { data, error } = await supabase.auth.getClaims();
-  console.log("AdminTeamPage claims:", data?.claims);
+  // console.log("AdminTeamPage claims:", data?.claims); //TODO: Remove this line
   if (error || !data?.claims || data.claims.user_metadata.role !== "admin") {
     redirect("/auth/login");
   }
@@ -18,9 +18,16 @@ export default async function AdminTeamPage() {
   const members = await fetchAllTeamMembers();
 
   return (
-    <div className="container mt-20 mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">Gestion des membres</h1>
+    <div className="space-y-6 mt-24">
       {!hasEnvVars ? <EnvVarWarning /> : <AuthButton />}
+      <div>
+        <h1 className="text-3xl font-bold">Gestion de l&apos;équipe</h1>
+        <p className="text-muted-foreground mt-2">
+          Gérez les membres de votre compagnie : artistes, techniciens,
+          administration
+        </p>
+      </div>
+
       <TeamManagementContainer initialMembers={members} />
     </div>
   );

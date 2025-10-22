@@ -1,8 +1,8 @@
 # TASK022 - Team Management
 
-**Status:** In Progress  
+**Status:** Completed  
 **Added:** 2025-10-16  
-**Updated:** 2025-10-20
+**Updated:** 2025-10-22
 
 ## Original Request
 
@@ -44,7 +44,42 @@ Team members are a relatively small data set but require image upload and orderi
 - Admin layout structure: iterate to match final design (breadcrumbs, navigation)
 - Photo upload flow: validate with Storage and transformations (WebP/AVIF/JPEG)
 
-**Overall Status:** In Progress — 85%
+### 2025-10-22
+
+- **COMPLETED** Media Library integration:
+  - `MediaPickerDialog.tsx` fully functional (replaced placeholder)
+  - File validation: 5MB max, JPEG/PNG/WebP/AVIF only
+  - Image preview with Next.js Image + fill layout
+  - Upload via `uploadTeamMemberPhoto()` Server Action
+  - Toast notifications with Sonner library
+  - Error handling + cleanup on failure
+  
+- **COMPLETED** Admin layout structure:
+  - Created `app/admin/layout.tsx`: Responsive sidebar navigation
+  - Created `app/admin/page.tsx`: Dashboard with statistics cards
+  - Navigation: Dashboard, Team, Shows, Events, Press, Media, Settings
+  - Auth checks: getClaims() at layout level (redirects non-admins)
+  - Mobile-friendly design (hamburger menu support)
+  
+- **COMPLETED** Photo upload flow:
+  - Storage migration created: `supabase/migrations/20251022000001_create_medias_storage_bucket.sql`
+  - Bucket "medias" with RLS policies (public read, auth upload, admin delete)
+  - Server Action `uploadTeamMemberPhoto()`: Full implementation (~120 lines)
+  - Flow: File validation → Storage upload → DB insert → Error rollback
+  - Form integration: Photo preview, add/change/remove buttons
+  - External URL fallback: `image_url` field with helper text
+  
+- **COMPLETED** TypeScript validation:
+  - Fixed toast import: Changed from `@/hooks/use-toast` to `import { toast } from "sonner"`
+  - Updated 6 toast calls to use correct Sonner syntax
+  - Compilation passed: No TypeScript errors
+  
+- **COMPLETED** Code cleanup:
+  - Removed debug logs from `app/admin/team/page.tsx`
+  - Improved typography and semantic HTML
+  - Production-ready state achieved
+
+**Overall Status:** Completed — 100%
 
 ## shadcn / TweakCN checklist
 

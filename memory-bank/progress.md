@@ -42,14 +42,24 @@
 - [x] Tables ajoutées: `compagnie_values`, `compagnie_stats`, `compagnie_presentation_sections`, `home_hero_slides`
 - [x] Nettoyage architecture auth (~400 lignes code redondant supprimées)
 - [x] Gestion des données spectacles (accueil: listes + dates)
-- [ ] Back‑office Team Management (CRUD membres équipe, photos, rôles, ordre d’affichage) — schemas Zod, DAL server‑only, Server Actions, UI admin, requireAdmin(), soft‑delete + reorder (restant: intégration Médiathèque + ajustements layout Admin)
-- [x] Documentation d’architecture v2 (C4 + ADRs) publiée et référencée
+- [x] Back‑office Team Management (CRUD membres équipe) — **COMPLÉTÉ 22/10/2025** :
+  - Schemas Zod + DAL server‑only (`lib/dal/team.ts`)
+  - Server Actions (`app/admin/team/actions.ts`) avec `requireAdmin()`
+  - UI admin complète (`components/features/admin/team/*`)
+  - Médiathèque fonctionnelle (`MediaPickerDialog.tsx`)
+  - Storage bucket "medias" créé et déployé sur Supabase Cloud
+  - Upload photos : Server Action `uploadTeamMemberPhoto()` avec validation (5MB, JPEG/PNG/WebP/AVIF)
+  - Admin Dashboard : Layout + statistiques + navigation sidebar
+  - Soft‑delete + reorder + form validation
+  - Production-ready : TypeScript OK, ESLint clean
+- [x] Documentation d'architecture v2 (C4 + ADRs) publiée et référencée
 
 ## Fonctionnalités en Cours
 
 ### Intégrations Front prioritaires
 
-- En cours: Back-office (toggles centralisés, CRUD étendus)
+- En cours: Back-office (toggles centralisés, CRUD étendus pour spectacles, événements, articles)
+- Terminé: Team Management (CRUD équipe + photos + roles + ordre) — 22 octobre 2025
 - Terminé: Système d'emailing (newsletter, contacts) – intégration Resend + React Email (templates), endpoints `/api/newsletter`, `/api/contact`, `/api/test-email`, webhooks (handler présent, config à finaliser)
 - Terminé: Agenda/Événements (DAL + containers + UI + export calendrier ICS)
 - Option: Modélisation `partners.type` si besoin UI
@@ -260,6 +270,20 @@
 
 ## Journal des Mises à Jour
 
+### 22 Octobre 2025
+
+- **TASK022 Team Management COMPLÉTÉ à 100%**
+  - Médiathèque : `MediaPickerDialog.tsx` fonctionnel avec validation, preview, upload
+  - Storage bucket "medias" : Migration appliquée sur Supabase Cloud avec RLS policies
+  - Upload flow : Server Action `uploadTeamMemberPhoto()` (~120 lignes) avec validation, Storage, DB, rollback
+  - Admin layout : Dashboard + statistiques + sidebar navigation responsive
+  - Form intégré : Preview photo, add/change/remove buttons, fallback image_url
+  - TypeScript : Correction imports toast (Sonner), compilation OK
+  - Production-ready : Debug logs supprimés, erreurs ESLint résolues
+- **Schéma déclaratif** : `supabase/schemas/02c_storage_buckets.sql` synchronisé avec migration
+- **Documentation** : `supabase/schemas/README.md` et `supabase/migrations/migrations.md` mis à jour
+- **Configuration Next.js** : Hostname Supabase Storage ajouté à `remotePatterns` pour Image optimization
+
 ### 20 Octobre 2025
 
 - Architecture: publication de `Project_Architecture_Blueprint_v2.md` (Implementation‑Ready, C4, ADRs, patterns canoniques Supabase Auth 2025)
@@ -361,8 +385,16 @@
 
 ## Dernière Mise à Jour
 
-**Date**: 13 octobre 2025
-**Changements majeurs**: Nettoyage architecture auth (~400 lignes), optimisation performance auth (100x), fix header réactif, scripts admin email fonctionnels, documentation formats clés Supabase (JWT vs Simplified)
+**Date**: 22 octobre 2025
+**Changements majeurs**:
+
+- TASK022 Team Management complété à 100%
+- Migration Supabase Cloud appliquée avec succès (`20251022000001_create_medias_storage_bucket.sql`)
+- Schéma déclaratif synchronisé (`supabase/schemas/02c_storage_buckets.sql`)
+- Admin Dashboard opérationnel
+- Upload photos membres équipe fonctionnel avec Supabase Storage
+- Next.js Image hostname configuré
+- Production-ready : TypeScript OK, ESLint clean
 
 **Date**: 21 octobre 2025
 **Changements majeurs**: Fix page Presse vide - workaround RLS/JWT Signing Keys via vue `articles_presse_public`, séparation correcte chapo/excerpt comme champs indépendants, workflow hotfix déclaratif appliqué, 7 fichiers de documentation mis à jour

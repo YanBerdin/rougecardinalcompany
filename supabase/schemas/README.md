@@ -30,6 +30,7 @@ Ce dossier contient le schéma déclaratif de la base de données selon les inst
 supabase/schemas/
 ├── 01_extensions.sql              # Extensions PostgreSQL (pgcrypto, pg_trgm)
 ├── 02b_functions_core.sql         # Fonctions cœur précoces (is_admin, helpers, immutable…)
+├── 02c_storage_buckets.sql        # Buckets Supabase Storage (medias) + RLS policies
 ├── 02_table_profiles.sql          # Table des profils + RLS
 ├── 03_table_medias.sql            # Table des médias + RLS
 ├── 04_table_membres_equipe.sql    # Table membres équipe + RLS

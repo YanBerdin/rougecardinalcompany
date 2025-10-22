@@ -8,8 +8,17 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 
 ### Avancées récentes (Octobre 2025)
 
-- ✅ 20 octobre — Architecture: ajout du blueprint v2 « Project_Architecture_Blueprint_v2.md » (Implementation-Ready, C4, ADRs, patterns Next.js 15 + Supabase Auth 2025, Resend). L’ancien blueprint est marqué comme historique et pointe vers la v2.
-- ✅ 20 octobre — Back‑office: Team Management (TASK022) en grande partie implémenté (schemas Zod, DAL `lib/dal/team.ts`, Server Actions `app/admin/team/actions.ts`, UI admin `components/features/admin/team/*`, guard `requireAdmin()`, soft‑delete + reorder). Nettoyage ESLint/Types: entités JSX échappées, avertissements isolés. Restant: intégration Médiathèque (photos) et itération structure layout Admin.
+- ✅ **22 octobre — TASK022 Team Management COMPLÉTÉ** (100%) :
+  - Médiathèque fonctionnelle : `MediaPickerDialog.tsx` avec validation (5MB max, JPEG/PNG/WebP/AVIF), preview Next.js Image, upload via Server Action
+  - Storage bucket "medias" : Migration appliquée sur Supabase Cloud avec RLS (lecture publique, upload auth, delete admin)
+  - Upload flow complet : `uploadTeamMemberPhoto()` Server Action (~120 lignes) avec validation, Storage, DB, rollback
+  - Admin layout finalisé : Dashboard avec statistiques, sidebar responsive, navigation (Team/Shows/Events/Press/Media)
+  - Form intégré : Preview photo, boutons add/change/remove, fallback image_url
+  - TypeScript validation : Correction imports toast (Sonner), 6 appels ajustés, compilation OK
+  - Production-ready : Debug logs supprimés, erreurs ESLint résolues
+  - Schéma déclaratif : `supabase/schemas/02c_storage_buckets.sql` documenté et synchronisé avec migration
+  
+- ✅ 20 octobre — Architecture: ajout du blueprint v2 « Project_Architecture_Blueprint_v2.md » (Implementation-Ready, C4, ADRs, patterns Next.js 15 + Supabase Auth 2025, Resend). L'ancien blueprint est marqué comme historique et pointe vers la v2.
 
 - ✅ **Nettoyage architecture auth** (13 octobre) : suppression ~400 lignes code redondant implémenté par erreur avec Resend (AuthService, protected-route, useAuth, callback, EMAIL_REDIRECT_TO)
 - ✅ **Fix header login/logout** (13 octobre) : AuthButton en Client Component + `onAuthStateChange()` pour mise à jour temps réel
@@ -45,8 +54,9 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 3. ~~Écrire les scripts de seed pour les nouvelles tables~~ (FAIT)
 4. ~~Nettoyage architecture auth + optimisation performance~~ (FAIT - 13 octobre)
 5. ~~Scripts admin email + documentation clés Supabase~~ (FAIT - 13 octobre)
-6. Finaliser Back‑office : toggles centralisés, CRUD étendus
-7. Configuration finale webhooks Resend (dashboard)
+6. ~~TASK022 Team Management~~ (COMPLÉTÉ - 22 octobre)
+7. Finaliser Back‑office : toggles centralisés, CRUD étendus (spectacles, événements, articles)
+8. Configuration finale webhooks Resend (dashboard)
 
 ### Problèmes résolus
 
@@ -68,6 +78,7 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 - Synchronisation des dates de visibilité du hero et du cache ISR
 - Configuration finale webhooks Resend dans le dashboard (pointer vers `/api/webhooks/resend`)
 - Vérifier la configuration des clés Supabase en production (format JWT vs Simplified)
+- **NOUVEAU (22 octobre)** : Next.js Image hostname configuré pour Supabase Storage (`yvtrlvmbofklefxcxrzv.supabase.co`) - requiert restart serveur
 
 ## Décisions Récentes
 
@@ -110,10 +121,13 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 7. Finaliser validation toggles Back‑office
 8. Configuration webhooks Resend dans le dashboard
 
-### Nouveaux livrables (20 octobre)
+### Nouveaux livrables (20-22 octobre)
 
-- `memory-bank/architecture/Project_Architecture_Blueprint_v2.md` (référence active)
-- Back‑office Team Management (CRUD équipe) — statut: En cours (voir TASK022)
+- ✅ `memory-bank/architecture/Project_Architecture_Blueprint_v2.md` (référence active)
+- ✅ Back‑office Team Management (CRUD équipe) — statut: **COMPLÉTÉ** (voir TASK022)
+- ✅ Storage bucket "medias" : Migration appliquée + schéma déclaratif synchronisé
+- ✅ Admin Dashboard : Layout avec statistiques + navigation sidebar
+- ✅ Media Library : Dialog de sélection photo fonctionnel avec upload Supabase Storage
 
 ### Moyen terme (2-4 semaines)
 
@@ -153,6 +167,14 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 
 ## Dernière Mise à Jour
 
-**Date**: 20 octobre 2025
+**Date**: 22 octobre 2025
 **Par**: GitHub Copilot
-**Changements majeurs**: Blueprint d’architecture v2 (C4 + ADRs) publié, TASK022 Team Management livré (DAL + Server Actions + UI admin), nettoyage ESLint/Type complémentaire (entities JSX, plugin Tailwind ESM)
+**Changements majeurs**:
+
+- TASK022 Team Management complété à 100% (Médiathèque fonctionnelle, Storage bucket déployé)
+- Migration Supabase Cloud appliquée avec succès (`20251022000001_create_medias_storage_bucket.sql`)
+- Schéma déclaratif synchronisé (`supabase/schemas/02c_storage_buckets.sql`)
+- Admin Dashboard opérationnel (layout, statistiques, navigation)
+- Upload photos membres équipe avec validation, Storage, preview, rollback
+- Next.js Image hostname configuré pour Supabase Storage
+- Production-ready : TypeScript OK, ESLint clean, debug logs supprimés

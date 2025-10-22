@@ -140,6 +140,90 @@ export async function myAction(input) { // ✅ Async export
 export type MyInput = z.infer<typeof MySchema>;
 ```
 
+### Pattern Upload Supabase Storage (TASK022)
+
+**Upload Server Action avec Rollback :**
+
+```typescript
+"use server";
+import { createClient } from "@/supabase/server";
+
+export async function uploadTeamMemberPhoto(formData: FormData) {
+  const supabase = await createClient();
+  const file = formData.get("file") as File;
+  
+  // 1. Validation
+  if (!file || file.size > 5 * 1024 * 1024) {
+    throw new Error("File too large (max 5MB)");
+  }
+  
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error("Invalid file type");
+  }
+  
+  // 2. Upload to Storage
+  const fileName = `team/${Date.now()}-${file.name}`;
+  const { data: uploadData, error: uploadError } = await supabase.storage
+    .from("medias")
+    .upload(fileName, file);
+    
+  if (uploadError) throw uploadError;
+  
+  try {
+    // 3. Insert metadata to database
+    const { data: media, error: dbError } = await supabase
+      .from("medias")
+      .insert({
+        category_id: categoryId,
+        storage_path: uploadData.path,
+        file_name: file.name,
+        file_size: file.size,
+        mime_type: file.type,
+      })
+      .select()
+      .single();
+      
+    if (dbError) throw dbError;
+    return media;
+    
+  } catch (error) {
+    // 4. Rollback: delete uploaded file if DB insert fails
+    await supabase.storage.from("medias").remove([uploadData.path]);
+    throw error;
+  }
+}
+```
+
+**Storage Bucket RLS Policies :**
+
+```sql
+-- Public read
+create policy "Public read medias"
+  on storage.objects for select
+  to public
+  using ( bucket_id = 'medias' );
+
+-- Authenticated upload
+create policy "Authenticated users can upload medias"
+  on storage.objects for insert
+  to authenticated
+  with check ( bucket_id = 'medias' );
+
+-- Authenticated update
+create policy "Authenticated users can update medias"
+  on storage.objects for update
+  to authenticated
+  using ( bucket_id = 'medias' )
+  with check ( bucket_id = 'medias' );
+
+-- Admin delete
+create policy "Admins can delete medias"
+  on storage.objects for delete
+  to authenticated
+  using ( bucket_id = 'medias' and (select public.is_admin()) );
+```
+
 **Exemple DAL + Actions avec validation séparée :**
 
 ```typescript
