@@ -24,8 +24,11 @@ comment on table public.articles_presse is 'press articles referencing shows or 
 alter table public.articles_presse enable row level security;
 
 -- Public view for published articles (bypasses RLS issues with JWT Signing Keys)
+-- SECURITY: Explicitly set SECURITY INVOKER to run with querying user's privileges
 drop view if exists public.articles_presse_public cascade;
-create view public.articles_presse_public as
+create view public.articles_presse_public
+with (security_invoker = true)
+as
 select 
   id,
   title,
@@ -42,7 +45,7 @@ from public.articles_presse
 where published_at is not null;
 
 comment on view public.articles_presse_public is 
-'Public view of published press articles - bypasses RLS issues with JWT signing keys. Used by anon/authenticated users to access published articles without triggering RLS policy evaluation delays.';
+'Public view of published press articles - bypasses RLS issues with JWT signing keys. SECURITY INVOKER: Runs with querying user privileges (not definer). Used by anon/authenticated users to access published articles without triggering RLS policy evaluation delays.';
 
 -- Grant read access to all roles
 grant select on public.articles_presse_public to anon, authenticated;

@@ -36,6 +36,13 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
   - ⚡ **Avantage performance** : Évite l'évaluation RLS (amélioration théorique des temps de requête)
   - 📊 **Portée** : Affecte uniquement les requêtes anonymes (role `anon`) sur les articles presse publiés
 
+- `20251022120000_fix_articles_presse_public_security_invoker.sql` — **SECURITY FIX : View security_invoker** : Correction de la vue `articles_presse_public` pour utiliser `SECURITY INVOKER` au lieu de `SECURITY DEFINER`, éliminant le risque d'escalade de privilèges.
+  - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/08_table_articles_presse.sql` (22 oct. 2025)
+  - 📝 **Migration manuelle requise** : Known caveat - "security invoker on views" n'est PAS capturé par `supabase db diff`
+  - 🔐 **Impact sécurité** : CRITIQUE - Évite que les requêtes s'exécutent avec les privilèges du créateur (superuser)
+  - ✅ **Principe moindre privilège** : Les requêtes s'exécutent maintenant avec les privilèges de l'utilisateur qui requête
+  - 🎯 **Conformité** : Suit les instructions Declarative Schema (hotfix + sync schéma déclaratif)
+
 ## Migrations de données (DML) - Ordre chronologique
 
 ### Septembre 2025 - Seeds initiaux
