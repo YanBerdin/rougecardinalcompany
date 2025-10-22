@@ -5053,6 +5053,16 @@ order by
 
 ## 20. Entrées récentes (oct. 2025)
 
+- **fix(rls): resolve empty media articles display after SECURITY INVOKER migration** (commit à venir)
+  - **Root cause 1**: RLS enabled on `articles_presse` but NO policies applied → PostgreSQL deny all by default
+  - **Root cause 2**: SECURITY INVOKER view without base table GRANT permissions → anon users blocked
+  - **Solution 1**: Apply 5 RLS policies (public read published, admin CRUD) via `20251022150000_apply_articles_presse_rls_policies.sql`
+  - **Solution 2**: Add GRANT SELECT on `articles_presse` to anon/authenticated via `20251022140000_grant_select_articles_presse_anon.sql`
+  - **Pattern**: Defense in depth - GRANT permissions + RLS policies + SECURITY INVOKER view
+  - **Testing**: Validated with `SET ROLE anon` (0 → 3 articles visible)
+  - **Documentation**: `doc/rls-policies-troubleshooting.md` with complete analysis and checklist
+  - **Impact**: Media articles display fully restored in production
+
 - feat(contact): integrate DAL and fix missing email notification (commit 1e27497)
   - Complete DAL integration in app/api/contact/route.ts with createContactMessage
   - Fix critical bug: Server Action submitContactAction now calls sendContactNotification

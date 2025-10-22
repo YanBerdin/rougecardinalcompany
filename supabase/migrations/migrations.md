@@ -43,6 +43,18 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
   - ✅ **Principe moindre privilège** : Les requêtes s'exécutent maintenant avec les privilèges de l'utilisateur qui requête
   - 🎯 **Conformité** : Suit les instructions Declarative Schema (hotfix + sync schéma déclaratif)
 
+- `20251022140000_grant_select_articles_presse_anon.sql` — **FIX : Base table permissions for SECURITY INVOKER view** : Ajout du GRANT SELECT sur la table `articles_presse` pour les rôles anon/authenticated. Résout le problème d'affichage vide des articles après migration SECURITY INVOKER.
+  - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/08_table_articles_presse.sql` (22 oct. 2025)
+  - 🔐 **Root cause** : SECURITY INVOKER views require base table permissions for querying users (RLS policies + GRANT permissions)
+  - ⚡ **Impact** : Media articles display restored (empty array → 3 articles visible)
+  - 🎯 **Security model** : Defense in depth - GRANT permissions + RLS policies filtering
+
+- `20251022150000_apply_articles_presse_rls_policies.sql` — **FIX : RLS policies missing from Cloud database** : Application des 5 policies RLS sur `articles_presse` qui étaient définies dans le schéma déclaratif mais jamais appliquées en Cloud.
+  - 🔐 **Root cause** : RLS enabled but no policies = deny all by default (PostgreSQL secure behavior)
+  - ✅ **Policies applied** : Public read (published articles), Admin full access (CRUD)
+  - ⚡ **Impact** : Anon users can now query articles_presse_public view successfully
+  - 🎯 **Security** : Proper RLS enforcement with row-level filtering
+
 ## Migrations de données (DML) - Ordre chronologique
 
 ### Septembre 2025 - Seeds initiaux

@@ -23,6 +23,9 @@ comment on table public.articles_presse is 'press articles referencing shows or 
 -- Enable Row Level Security and define policies (co-located with table)
 alter table public.articles_presse enable row level security;
 
+-- Grant base permissions on table for anon/authenticated (required for SECURITY INVOKER view)
+grant select on public.articles_presse to anon, authenticated;
+
 -- Public view for published articles (bypasses RLS issues with JWT Signing Keys)
 -- SECURITY: Explicitly set SECURITY INVOKER to run with querying user's privileges
 drop view if exists public.articles_presse_public cascade;

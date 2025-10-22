@@ -383,36 +383,61 @@ export async function middleware(req: NextRequest) {
 -- Politique RLS Supabase type (exemples)
 create policy "Accès public aux spectacles"
   on spectacles
-  /* Lines 299-301 omitted */
+  for select
+  to anon, authenticated
   using (public = true);
 
 -- Lecture publique des articles de presse publiés (RLS co-localisé dans 08_table_articles_presse.sql)
 create policy "Public press articles are viewable by everyone"
   on articles_presse
-  /* Lines 306-308 omitted */
+  for select
+  to anon, authenticated
   using (published_at is not null);
 
 -- Gestion admin
 create policy "Admins can update press articles"
   on articles_presse
-  /* Lines 313-316 omitted */
+  for update
+  to authenticated
+  using ((select public.is_admin()))
   with check ((select public.is_admin()));
 
 -- Vue publique pour contourner les problèmes RLS/JWT Signing Keys (oct. 2025)
--- Voir: supabase/migrations/20251021000001_create_articles_presse_public_view.sql
-create view articles_presse_public as
+-- SECURITY INVOKER: runs with querying user privileges (not creator/definer)
+create view articles_presse_public
+with (security_invoker = true)
+as
 select id, title, author, type, chapo, excerpt, source_publication, source_url, published_at, created_at
 from articles_presse
 where published_at is not null;
 
+-- IMPORTANT: SECURITY INVOKER views require base table GRANT permissions
+grant select on articles_presse to anon, authenticated;
 grant select on articles_presse_public to anon, authenticated;
 ```
+
+**Pattern Defense in Depth (oct. 2025)** :
+
+Modèle de sécurité en trois couches pour SECURITY INVOKER views :
+
+1. **VIEW (SECURITY INVOKER)** : Filtre WHERE + exécution avec privilèges utilisateur
+2. **GRANT PERMISSIONS** : Contrôle d'accès de base sur table (anon/authenticated SELECT)
+3. **RLS POLICIES** : Filtrage fin au niveau des lignes
+
+**Root cause patterns (Troubleshooting RLS)** :
+
+- RLS activé sans policies → PostgreSQL deny all by default (comportement sécurisé)
+- SECURITY INVOKER sans GRANT → Vue inaccessible pour anon users
+- **Fix** : Appliquer policies RLS + GRANT SELECT sur table base
 
 Optimisations RLS recommandées:
 
 - Appeler les fonctions dans les policies via `(select ...)` pour initPlan.
 - Index partiels alignés sur les filtres RLS (ex: `published_at is not null` sur `articles_presse`).
 - **Vues publiques** : pour contourner incompatibilités RLS avec JWT Signing Keys, créer des vues avec permissions directes.
+- **Testing** : Toujours tester avec `SET ROLE anon` pour simuler utilisateurs anonymes
+
+Documentation complète : `doc/rls-policies-troubleshooting.md`
 
 ```
 

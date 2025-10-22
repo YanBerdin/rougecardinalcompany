@@ -72,6 +72,13 @@ Note RLS: les nouvelles tables co‑localisent leurs politiques (dans le même f
 
 - **Spectacles archivés publics** : Modification du seed `20250926153000_seed_spectacles.sql` pour marquer les spectacles archivés avec `public = true` au lieu de `public = false`. Cette approche simplifie la logique d'affichage des archives dans la fonctionnalité "Voir toutes nos créations" sans nécessiter de modification des politiques RLS. Les spectacles archivés restent identifiés par `status = 'archive'` mais sont maintenant visibles publiquement via la politique RLS existante.
 
+- **Articles de presse - Fix affichage (22 oct. 2025)** : Résolution problème affichage vide des articles de presse après migration SECURITY INVOKER.
+  - **Root cause** : RLS activé sur `articles_presse` mais aucune policy appliquée → PostgreSQL deny all by default
+  - **Fix 1** : Application policies RLS manquantes (lecture publique articles publiés, gestion admin)
+  - **Fix 2** : GRANT SELECT sur table base requis pour SECURITY INVOKER views
+  - **Migrations** : `20251022150000_apply_articles_presse_rls_policies.sql` + `20251022140000_grant_select_articles_presse_anon.sql`
+  - **Pattern** : Defense in depth - GRANT permissions + RLS policies + SECURITY INVOKER view
+
 ## 🆕 Mises à jour récentes (sept. 2025)
 
 - Renommage `spectacles.cast` → `spectacles.casting` (évite collision et clarifie le sens).
