@@ -62,9 +62,12 @@ to anon, authenticated
 using ( published_at is not null );
 
 -- Admins can read all articles (including drafts)
+-- RESTRICTIVE policy: acts as OR gate for admin users
+-- Performance: Avoids evaluating both permissive policies for authenticated users
 drop policy if exists "Admins can view all press articles" on public.articles_presse;
 create policy "Admins can view all press articles"
 on public.articles_presse
+as restrictive  -- RESTRICTIVE: admin users bypass public filter
 for select
 to authenticated
 using ( (select public.is_admin()) );
