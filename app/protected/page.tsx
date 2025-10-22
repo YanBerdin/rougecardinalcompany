@@ -20,7 +20,14 @@ export default async function ProtectedPage() {
           href="/admin/team"
           className="underline text-5xl hover:bg-primary/10 rounded px-1"
         >
-         👉🏼 ADMIN/TEAM PAGE
+          👉🏼 ADMIN/TEAM PAGE
+        </Link>
+        <br />
+        <Link
+          href="/admin"
+          className="underline text-5xl hover:bg-primary/10 rounded px-1 mt-5 block"
+        >
+          👉🏼 ADMIN PAGE
         </Link>
         <div className="bg-accent text-sm p-3 px-5 rounded-md text-foreground flex gap-3 items-center mt-10">
           <InfoIcon size="16" strokeWidth={2} />
