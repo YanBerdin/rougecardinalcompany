@@ -4,7 +4,7 @@
  * 
  * PURPOSE:
  *   Workaround for RLS/JWT Signing Keys incompatibility on articles_presse table.
- *   JWT Signing Keys with new format (sb_publishable_*/sb_secret_*) don't trigger 
+ *   JWT Signing Keys with new format (publishable/secret keys) do not trigger 
  *   RLS policy evaluation correctly for anon role, blocking public article queries.
  * 
  * TYPE: Hotfix (DDL)

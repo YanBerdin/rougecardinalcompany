@@ -26,25 +26,29 @@ insert into storage.buckets (id, name, public)
 values ('medias', 'medias', true)
 on conflict (id) do nothing;
 
--- Allow public read access
+-- Allow public read access (idempotent)
+drop policy if exists "Public read access for medias" on storage.objects;
 create policy "Public read access for medias"
 on storage.objects for select
 to public
 using ( bucket_id = 'medias' );
 
--- Allow authenticated users to upload
+-- Allow authenticated users to upload (idempotent)
+drop policy if exists "Authenticated users can upload to medias" on storage.objects;
 create policy "Authenticated users can upload to medias"
 on storage.objects for insert
 to authenticated
 with check ( bucket_id = 'medias' );
 
--- Allow authenticated users to update their own uploads
+-- Allow authenticated users to update their own uploads (idempotent)
+drop policy if exists "Authenticated users can update medias" on storage.objects;
 create policy "Authenticated users can update medias"
 on storage.objects for update
 to authenticated
 using ( bucket_id = 'medias' );
 
--- Allow admins to delete (requires is_admin() check)
+-- Allow admins to delete (requires is_admin() check) (idempotent)
+drop policy if exists "Admins can delete medias" on storage.objects;
 create policy "Admins can delete medias"
 on storage.objects for delete
 to authenticated
