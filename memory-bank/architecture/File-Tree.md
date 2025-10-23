@@ -284,7 +284,6 @@ Root path: `/home/yandev/projets/rougecardinalcompany`
 │   │   ├── 📝 TASK023-partners-management.md
 │   │   ├── 📝 TASK024-admin-email-scripts.md
 │   │   ├── 📝 TASK024-press-management.md
-│   │   ├── 📝 TASK025-communications-dashboard.md
 │   │   ├── 📝 TASK026-homepage-content-management.md
 │   │   ├── 📝 TASK027-company-content-management.md
 │   │   ├── 📝 TASK028-content-versioning-ui.md

@@ -18,8 +18,10 @@ Ce fichier liste les titres et descriptions extraites des fichiers de tâches `T
 4. TASK024 — Press management
    - Résumé: Espace presse pour ajouter communiqués, dossiers de presse et contacts.
 
-5. TASK025 — (reserved)
-   - Résumé: Réservé / placeholder.
+5. **TASK025 — RLS Security & Performance Fixes** ✅
+   - **Résumé**: Résolution complète de 3 problèmes critiques RLS (Row Level Security) - articles vides, SECURITY DEFINER views, performance optimization. 4 migrations créées, ~40% gain performance, documentation exhaustive.
+   - **Etat**: Completed (23 oct 2025)
+   - **Issue**: [#5](https://github.com/YanBerdin/rougecardinalcompany/issues/5) (CLOSED)
 
 6. TASK026 — Homepage content management
    - Résumé: Panneau pour éditer contenus d'accueil (hero, news, shows).

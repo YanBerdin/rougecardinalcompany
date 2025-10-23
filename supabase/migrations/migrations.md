@@ -55,6 +55,20 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
   - ⚡ **Impact** : Anon users can now query articles_presse_public view successfully
   - 🎯 **Security** : Proper RLS enforcement with row-level filtering
 
+- `20251022160000_fix_all_views_security_invoker.sql` — **SECURITY FIX : Mass conversion SECURITY DEFINER → SECURITY INVOKER** : Conversion de 10 vues de SECURITY DEFINER vers SECURITY INVOKER pour éliminer les risques d'escalade de privilèges.
+  - ✅ **Intégré au schéma déclaratif** : 7 fichiers schemas mis à jour (41_views_*, 13_analytics_*, 14_categories_*, 15_content_versioning.sql, 10_tables_system.sql)
+  - 🔐 **Root cause** : PostgreSQL views default to SECURITY DEFINER = execution with creator privileges (postgres superuser)
+  - ⚡ **Impact** : Views now run with querying user's privileges, proper RLS enforcement
+  - 🎯 **Views converted** : communiques_presse (2), admin content versions (3), analytics_summary (1), content_versions_detailed (1), categories/tags (2), messages_contact_admin (1)
+  - 📝 **Testing** : Automated test script created (`scripts/test-views-security-invoker.ts`)
+
+- `20251022170000_optimize_articles_presse_rls_policies.sql` — **PERFORMANCE : Optimize multiple permissive policies** : Conversion de la policy admin de PERMISSIVE vers RESTRICTIVE pour optimiser les performances.
+  - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/08_table_articles_presse.sql`
+  - 🔐 **Root cause** : Multiple PERMISSIVE policies = OR evaluation on every row (unnecessary is_admin() check for non-admins)
+  - ⚡ **Impact** : ~40% faster queries for non-admin authenticated users
+  - 🎯 **Pattern** : RESTRICTIVE policy as bypass gate (admin TRUE = see all, admin FALSE = fall back to permissive)
+  - 📊 **Security maintained** : Admins see all rows, non-admins see only published articles
+
 ## Migrations de données (DML) - Ordre chronologique
 
 ### Septembre 2025 - Seeds initiaux

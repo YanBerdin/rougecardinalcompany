@@ -151,30 +151,66 @@ Règles:
 - Index partiels pour contenu publié/actif
 - **Vues publiques** : contournement RLS pour JWT Signing Keys (`articles_presse_public` pour articles publiés)
 
-### 6.1 Workaround RLS/JWT Signing Keys
+### 6.1 Fix Articles de Presse - RLS Policies & SECURITY INVOKER
 
-**Problème identifié (oct. 2025)** :
+**Problème identifié (22 oct. 2025)** :
 
-- Les nouveaux JWT Signing Keys (`sb_publishable_*`/`sb_secret_*`) ne déclenchent pas correctement l'évaluation des politiques RLS pour le rôle `anon`
-- Requêtes bloquées malgré des politiques RLS correctement configurées
+- Vue `articles_presse_public` renvoyait un tableau vide côté client (`[]`)
+- DAL `fetchMediaArticles()` retournait `[]` alors que 3 articles publiés existaient en base
+- Requête SQL directe (role postgres) montrait bien 3 articles
 
-**Solution implémentée** :
+**Root Cause Analysis** :
 
-- Création de vues publiques (ex: `articles_presse_public`) qui filtrent les données et contournent l'évaluation RLS
-- Permissions accordées directement sur la vue via `GRANT SELECT`
-- Filtre intégré: `WHERE published_at IS NOT NULL` pour répliquer la logique RLS
+Le problème provenait de **deux causes combinées** :
+
+1. **RLS activé sans policies appliquées**
+   - RLS était activé sur la table `articles_presse`
+   - AUCUNE policy n'existait pour autoriser l'accès
+   - **Comportement PostgreSQL** : RLS activé sans policies = deny-all par défaut (sécurité)
+
+2. **SECURITY INVOKER sans permissions base table**
+   - Vue définie avec `WITH (security_invoker = true)` (bonne pratique)
+   - Avec SECURITY INVOKER, la vue s'exécute avec les privilèges de l'utilisateur (`anon`)
+   - Le role `anon` n'avait pas de `GRANT SELECT` sur la table `articles_presse`
+
+**Solutions appliquées** :
+
+1. **Application des RLS policies** (Migration `20251022150000`)
+   - 5 policies créées (lecture publique, admin CRUD complet)
+   - Principe: "Public press articles are viewable by everyone" avec `published_at IS NOT NULL`
+
+2. **GRANT permissions sur table base** (Migration `20251022140000`)
+   - `GRANT SELECT ON public.articles_presse TO anon, authenticated;`
+   - Requis pour que SECURITY INVOKER fonctionne avec role anon
+
+**Modèle de sécurité (Defense in Depth)** :
+
+```
+┌─────────────────────────────────────────┐
+│ Layer 1: VIEW (articles_presse_public)  │
+│ ↓ Filtre: published_at IS NOT NULL      │
+├─────────────────────────────────────────┤
+│ Layer 2: GRANT SELECT                   │
+│ ↓ Permissions base table                │
+├─────────────────────────────────────────┤
+│ Layer 3: RLS Policies                   │
+│ ↓ published_at IS NOT NULL (users)      │
+│ ↓ Full access (admins)                  │
+└─────────────────────────────────────────┘
+```
 
 **Impact** :
 
-- 🔒 Sécurité : Identique aux politiques RLS originales
-- ⚡ Performance : Amélioration potentielle (pas d'overhead RLS)
-- 📊 Portée : Affecte uniquement les requêtes anonymes sur contenu publié
+- 🔒 Sécurité : Defense in Depth (VIEW + GRANT + RLS)
+- ⚡ Performance : Optimal avec indexes partiels
+- ✅ Validation : 3 articles affichés correctement après fix
 
 **Fichiers concernés** :
 
-- Migration : `supabase/migrations/20251021000001_create_articles_presse_public_view.sql`
-- Schéma déclaratif : `supabase/schemas/08_table_articles_presse.sql` (source de vérité)
-- DAL : `lib/dal/presse.ts` (requête sur vue au lieu de table)
+- Migrations : `20251022140000_grant_select_articles_presse_anon.sql`, `20251022150000_apply_articles_presse_rls_policies.sql`
+- Schéma déclaratif : `supabase/schemas/08_table_articles_presse.sql` (source de vérité avec GRANT + RLS)
+- DAL : `lib/dal/presse.ts` (requête sur vue `articles_presse_public`)
+- Documentation : `doc/rls-policies-troubleshooting.md` (guide complet 202 lignes)
 
 ---
 

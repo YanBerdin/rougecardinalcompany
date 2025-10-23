@@ -14,6 +14,7 @@ Principaux points consolidés :
 - Row Level Security (RLS) : policies co‑localisées dans chaque fichier de table; une policy par opération (select/insert/update/delete); privilégier `public.is_admin()` pour checks admin.
 - Server Actions & Mutations : reads via Server Components, mutations via Server Actions / API routes; valider avec Zod et invalider le cache avec `revalidatePath()`/`revalidateTag()`.
 - **Supabase Storage** : bucket "medias" avec RLS (lecture publique, upload auth, delete admin); Server Actions avec rollback en cas d'erreur DB; validation client + serveur (5MB max, JPEG/PNG/WebP/AVIF).
+- **RLS Policies & SECURITY INVOKER** : toujours appliquer RLS policies ET GRANT permissions sur tables base pour les vues SECURITY INVOKER; PostgreSQL deny-all par défaut si RLS activé sans policies; Defense in Depth (VIEW + GRANT + RLS).
 - Email : architecture Resend + React Email, templates React, Zod validation, webhooks pour bounces/deliveries, scripts d'intégration fournis.
 - Tests & Quality gates : build, typecheck, tests unitaires, markdownlint. Corriger MD warnings avant merge.
 
