@@ -4,6 +4,7 @@ applyTo: "**"
 
 title: MCP Server
 description: Use the shadcn MCP server to browse, search, and install components from registries
+
 ---
 
 # Shadcn MCP Server
@@ -14,7 +15,7 @@ For example, you can ask an AI assistant to "Build a landing page using componen
 
 Registries are configured in your project's `components.json` file.
 
-```json title="components.json" showLineNumbers
+```json
 {
   "registries": {
     "@acme": "https://acme.com/r/{name}.json"
@@ -28,79 +29,20 @@ Registries are configured in your project's `components.json` file.
 
 Select your MCP client and follow the instructions to configure the shadcn MCP server. If you'd like to do it manually, see the configuration section.
 
-<Tabs defaultValue="claude">
-  <TabsList>
-    <TabsTrigger value="claude">Claude Code</TabsTrigger>
-    <TabsTrigger value="cursor">Cursor</TabsTrigger>
-    <TabsTrigger value="vscode">VS Code</TabsTrigger>
-    <TabsTrigger value="codex">Codex</TabsTrigger>
-  </TabsList>
-  <TabsContent value="claude" className="mt-4">
-    **Run the following command** in your project:
-       ```bash
-       npx shadcn@latest mcp init --client claude
-       ```
+**Run the following command** in your project:
 
-    **Restart Claude Code** and try the following prompts:
-       - Show me all available components in the shadcn registry
-       - Add the button, dialog and card components to my project
-       - Create a contact form using components from the shadcn registry
-
-    **Note:** You can use `/mcp` command in Claude Code to debug the MCP server.
-
-  </TabsContent>
-
-  <TabsContent value="cursor" className="mt-4">
-    **Run the following command** in your project:
-       ```bash
-       npx shadcn@latest mcp init --client cursor
-       ```
-
-    Open **Cursor Settings** and **Enable the MCP server** for shadcn. Then try the following prompts:
-       - Show me all available components in the shadcn registry
-       - Add the button, dialog and card components to my project
-       - Create a contact form using components from the shadcn registry
-
-  </TabsContent>
-
-  <TabsContent value="vscode" className="mt-4">
-    **Run the following command** in your project:
        ```bash
        npx shadcn@latest mcp init --client vscode
        ```
 
-    Open `.vscode/mcp.json` and click **Start** next to the shadcn server. Then try the following prompts with GitHub Copilot:
+Open `.vscode/mcp.json` and click **Start** next to the shadcn server. Then try the following prompts with GitHub Copilot:
+
        - Show me all available components in the shadcn registry
        - Add the button, dialog and card components to my project
        - Create a contact form using components from the shadcn registry
 
-  </TabsContent>
-
-  <TabsContent value="codex" className="mt-4">
-    <Callout className="mt-0">
-      **Note:** The `shadcn` CLI cannot automatically update `~/.codex/config.toml`.
+**Note:** The `shadcn` CLI cannot automatically update `~/.codex/config.toml`.
       You'll need to add the configuration manually for Codex.
-    </Callout>
-
-    **Run the following command** in your project:
-       ```bash
-       npx shadcn@latest mcp init --client codex
-       ```
-
-    **Then, add the following configuration** to `~/.codex/config.toml`:
-       ```toml
-       [mcp_servers.shadcn]
-       command = "npx"
-       args = ["shadcn@latest", "mcp"]
-       ```
-
-    **Restart Codex** and try the following prompts:
-       - Show me all available components in the shadcn registry
-       - Add the button, dialog and card components to my project
-       - Create a contact form using components from the shadcn registry
-
-  </TabsContent>
-</Tabs>
 
 ---
 
@@ -141,46 +83,6 @@ The shadcn MCP server works out of the box with any shadcn-compatible registry.
 
 You can use any MCP client to interact with the shadcn MCP server. Here are the instructions for the most popular ones.
 
-### Claude Code
-
-To use the shadcn MCP server with Claude Code, add the following configuration to your project's `.mcp.json` file:
-
-```json title=".mcp.json" showLineNumbers
-{
-  "mcpServers": {
-    "shadcn": {
-      "command": "npx",
-      "args": ["shadcn@latest", "mcp"]
-    }
-  }
-}
-```
-
-After adding the configuration, restart Claude Code and run `/mcp` to see the shadcn MCP server in the list. If you see `Connected`, you're good to go.
-
-See the Claude Code MCP documentation: https://docs.anthropic.com/en/docs/claude-code/mcp for more details.
-
-### Cursor
-
-To configure MCP in Cursor, add the shadcn server to your project's `.cursor/mcp.json` configuration file:
-
-```json title=".cursor/mcp.json" showLineNumbers
-{
-  "mcpServers": {
-    "shadcn": {
-      "command": "npx",
-      "args": ["shadcn@latest", "mcp"]
-    }
-  }
-}
-```
-
-After adding the configuration, enable the shadcn MCP server in Cursor Settings.
-
-Once enabled, you should see a green dot next to the shadcn server in the MCP server list and a list of available tools.
-
-See the Cursor MCP documentation (https://docs.cursor.com/en/context/mcp) for more details.
-
 ### VS Code
 
 To configure MCP in VS Code with GitHub Copilot, add the shadcn server to your project's `.vscode/mcp.json` configuration file:
@@ -199,23 +101,6 @@ To configure MCP in VS Code with GitHub Copilot, add the shadcn server to your p
 After adding the configuration, open `.vscode/mcp.json` and click **Start** next to the shadcn server.
 
 See the VS Code MCP documentation(https://code.visualstudio.com/docs/copilot/chat/mcp-servers) for more details.
-
-### Codex
-
-<Callout>
-  **Note:** The `shadcn` CLI cannot automatically update `~/.codex/config.toml`.
-  You'll need to add the configuration manually.
-</Callout>
-
-To configure MCP in Codex, add the shadcn server to `~/.codex/config.toml`:
-
-```toml title="~/.codex/config.toml" showLineNumbers
-[mcp_servers.shadcn]
-command = "npx"
-args = ["shadcn@latest", "mcp"]
-```
-
-After adding the configuration, restart Codex to load the MCP server.
 
 ---
 

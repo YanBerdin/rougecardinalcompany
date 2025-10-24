@@ -122,6 +122,8 @@ export function TeamManagementContainer({ initialMembers }: Props) {
     }
   }
 
+  //TODO: handleHardDeleteCandidate => handleHardDeleteMember
+  
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4 justify-between">

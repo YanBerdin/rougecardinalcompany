@@ -77,7 +77,7 @@ Après la mise à jour, vous devriez voir :
 Si votre application ne démarre pas après le changement de clés, vérifiez :
 
 1. **Middleware** : `middleware.ts` utilise-t-il les bonnes variables d'environnement ?
-2. **Client Supabase** : `lib/supabase/server.ts` et `lib/supabase/client.ts` utilisent les bonnes clés ?
+2. **Client Supabase** : `supabase/server.ts` et `supabase/client.ts` utilisent les bonnes clés ?
 3. **Cache** : Videz le cache Next.js : `rm -rf .next`
 
 ### Plus d'Informations

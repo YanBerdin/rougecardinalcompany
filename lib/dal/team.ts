@@ -122,13 +122,6 @@ export async function upsertTeamMember(
   }
 }
 
-// Deprecated: use setTeamMemberActive(id, false) instead.
-/*
-export async function deactivateTeamMember(id: number): Promise<boolean> {
-  return await setTeamMemberActive(id, false);
-}
-*/
-
 export async function setTeamMemberActive(
   id: number,
   active: boolean
@@ -148,28 +141,6 @@ export async function setTeamMemberActive(
     return true;
   } catch (err: unknown) {
     console.error("setTeamMemberActive exception:", err);
-    return false;
-  }
-}
-
-// Permanent deletion (RGPD): deletes the row from the database.
-// Use with caution; audit logs should be checked if required prior to deletion.
-export async function hardDeleteTeamMember(id: number): Promise<boolean> {
-  try {
-    const supabase = await createClient();
-    const { error } = await supabase
-      .from("membres_equipe")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      console.error("hardDeleteTeamMember error:", error);
-      return false;
-    }
-
-    return true;
-  } catch (err: unknown) {
-    console.error("hardDeleteTeamMember exception:", err);
     return false;
   }
 }

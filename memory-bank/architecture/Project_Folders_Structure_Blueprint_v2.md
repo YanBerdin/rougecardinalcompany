@@ -1154,7 +1154,7 @@ Examples:
 4. Authentication:
    → app/auth/[flow]/page.tsx
    → middleware.ts (route protection)
-   → lib/supabase/server.ts (getClaims() ~2-5ms)
+   → supabase/server.ts (getClaims() ~2-5ms)
 ```
 
 ### 7.2 Common Development Tasks

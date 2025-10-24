@@ -159,6 +159,50 @@ export async function setTeamMemberActiveAction(
   }
 }
 
+/*
+export async function hardDeleteTeamMemberAction(
+  id: number
+): Promise<ActionResponse<null>> {
+  try {
+    await requireAdmin();
+    if (!Number.isFinite(id) || id <= 0) {
+      return { success: false, error: "Invalid id", status: 400 };
+    }
+
+    // Permanent deletion (RGPD): deletes the row from the database.
+    // This is a critical operation that requires explicit admin verification.
+    const { createClient } = await import("@/supabase/server");
+    const supabase = await createClient();
+
+    const { error } = await supabase
+      .from("membres_equipe")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      console.error("hardDeleteTeamMemberAction database error:", error);
+      return {
+        success: false,
+        error: "Failed to permanently delete team member",
+        status: 500,
+      };
+    }
+
+    revalidatePath("/admin/team");
+
+    return { success: true, data: null };
+  } catch (err: unknown) {
+    console.error("hardDeleteTeamMemberAction error:", err);
+    return {
+      success: false,
+      error:
+        err instanceof Error ? err.message : String(err ?? "Unknown error"),
+      status: 500,
+    };
+  }
+}
+*/
+
 export async function uploadTeamMemberPhoto(
   formData: FormData
 ): Promise<ActionResponse<{ mediaId: number; publicUrl: string }>> {

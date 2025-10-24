@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
-import { fetchTeamMemberById, hardDeleteTeamMember } from "@/lib/dal/team";
+import { fetchTeamMemberById } from "@/lib/dal/team";
+import { createClient } from "@/supabase/server";
 import { requireAdmin } from "@/lib/auth/is-admin";
 
+//TODO: Refactor the route into small helpers to improve adherence to clean-code principles
 export async function POST(
   request: Request,
   { params }: { params: { id: string } | Promise<{ id: string }> }
@@ -30,9 +32,17 @@ export async function POST(
       );
     }
 
-    const ok = await hardDeleteTeamMember(id);
-    if (!ok)
+    // Critical operation : Permanent deletion (RGPD)
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from("membres_equipe")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      console.error("Hard delete database error:", error);
       return NextResponse.json({ error: "Failed to delete" }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {

@@ -840,7 +840,7 @@ html {
 /* Muted sections with subtle tint - ADAPTÉ AU NOUVEAU BACKGROUND */
 .bg-muted\/30 {
   /*! En light mode, utilise une teinte plus douce qui s'harmonise avec #fef7f8 */
-      background: #70d437a9; /* Gris très clair avec transparence */
+      background: #70d437a9; /* background: linear-gradient(90deg, #E3BE46, #D4AF37, #f7e17fef); */
 }
 
 .dark .bg-muted\/30 {

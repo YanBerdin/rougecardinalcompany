@@ -121,7 +121,7 @@ flowchart TD
 ### 4.5 Auth & middleware
 
 - middleware.ts: client serveur Supabase + cookies getAll/setAll + getClaims()
-- lib/supabase/server.ts, lib/supabase/client.ts: implémentations canoniques
+- supabase/server.ts, supabase/client.ts: implémentations canoniques
 
 ### 4.6 Email (emails/, lib/email/*)
 
