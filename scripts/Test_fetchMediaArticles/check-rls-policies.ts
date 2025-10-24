@@ -24,7 +24,7 @@ const supabase = createClient(supabaseUrl, serviceKey);
 
 async function checkRLSPolicies() {
   // Check if RLS is enabled
-  const { data: rlsCheck, error: rlsError } = await supabase
+  const { data: _rlsCheck, error: _rlsError } = await supabase
     .rpc("exec_sql", {
       sql: `
       SELECT relname, relrowsecurity 
@@ -33,6 +33,10 @@ async function checkRLSPolicies() {
     `,
     })
     .match(() => ({ data: null, error: null }));
+
+  // Keep values available for debugging to avoid unused variable lint errors
+  void _rlsCheck;
+  void _rlsError;
 
   // Try direct query to pg_policies (if accessible)
   console.log("1️⃣ Checking policies on articles_presse:");

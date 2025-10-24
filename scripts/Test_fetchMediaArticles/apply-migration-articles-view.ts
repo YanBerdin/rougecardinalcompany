@@ -20,12 +20,12 @@ if (!supabaseUrl || !serviceKey) {
 
 console.log("🚀 Applying migration: create articles_presse_public view\n");
 
-const supabase = createClient(supabaseUrl, serviceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
+// const supabase = createClient(supabaseUrl, serviceKey, {
+//   auth: {
+//     autoRefreshToken: false,
+//     persistSession: false,
+//   },
+// });
 
 const migrationSQL = `
 -- Migration pour créer une vue publique des articles de presse

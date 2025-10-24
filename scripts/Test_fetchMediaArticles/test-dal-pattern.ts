@@ -12,10 +12,13 @@ dotenv.config({ path: envPath });
 import { createClient } from "@supabase/supabase-js";
 
 // Mock next/headers pour permettre au DAL de fonctionner
-const mockCookies = {
+const _mockCookies = {
   getAll: () => [],
   setAll: () => {},
 };
+
+// Mark as intentionally unused in this quick script test to satisfy linting rules
+void _mockCookies;
 
 // Note: Ce test ne peut pas vraiment importer le DAL car il nécessite next/headers
 // On va plutôt tester directement la requête Supabase
@@ -30,7 +33,7 @@ const supabase = createClient(supabaseUrl, anonKey);
 async function testDALPattern() {
   console.log("1️⃣ Testing fetchMediaArticles pattern:");
 
-  let query = supabase
+  const query = supabase
     .from("articles_presse_public")
     .select(
       "id, title, author, type, excerpt, source_publication, source_url, published_at"
@@ -49,10 +52,11 @@ async function testDALPattern() {
   if (data && data.length > 0) {
     console.log("\n📄 Processing articles (as DAL would):");
 
-    const processedArticles = data.map((row: any) => {
+    const processedArticles = data.map((row) => {
+      const r = row as Record<string, unknown>;
       // Reproduction de la logique du DAL
       function coerceArticleType(
-        v: string | null
+        v: unknown
       ): "Article" | "Critique" | "Interview" | "Portrait" {
         const raw = String(v ?? "")
           .trim()
@@ -64,14 +68,14 @@ async function testDALPattern() {
       }
 
       return {
-        id: Number(row.id),
-        title: String(row.title ?? ""),
-        author: String(row.author ?? ""),
-        type: coerceArticleType(row.type),
-        excerpt: String(row.excerpt ?? (row as any).chapo ?? ""),
-        source_publication: String(row.source_publication ?? ""),
-        source_url: String(row.source_url ?? ""),
-        published_at: String(row.published_at ?? ""),
+        id: Number(r.id),
+        title: String(r.title ?? ""),
+        author: String(r.author ?? ""),
+        type: coerceArticleType(r.type),
+        excerpt: String(r.excerpt ?? (r.chapo as string) ?? ""),
+        source_publication: String(r.source_publication ?? ""),
+        source_url: String(r.source_url ?? ""),
+        published_at: String(r.published_at ?? ""),
       };
     });
 

@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Users, FileText, Calendar, Image } from "lucide-react";
+import { Users, FileText, Calendar, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -45,25 +45,25 @@ export default async function AdminDashboard() {
         <StatsCard
           title="Membres de l'équipe"
           value={teamCount || 0}
-          icon={<Users className="h-4 w-4" />}
+          icon={<Users className="h-4 w-4" aria-hidden />}
           href="/admin/team"
         />
         <StatsCard
           title="Spectacles"
           value={showsCount || 0}
-          icon={<FileText className="h-4 w-4" />}
+          icon={<FileText className="h-4 w-4" aria-hidden />}
           href="/admin/shows"
         />
         <StatsCard
           title="Événements"
           value={eventsCount || 0}
-          icon={<Calendar className="h-4 w-4" />}
+          icon={<Calendar className="h-4 w-4" aria-hidden />}
           href="/admin/events"
         />
         <StatsCard
           title="Médias"
           value={mediaCount || 0}
-          icon={<Image className="h-4 w-4" />}
+          icon={<ImageIcon className="h-4 w-4" aria-hidden />}
           href="/admin/media"
         />
       </div>
@@ -80,7 +80,7 @@ export default async function AdminDashboard() {
           <Button variant="outline" className="h-auto py-4" asChild>
             <Link href="/admin/team">
               <div className="flex flex-col items-center gap-2">
-                <Users className="h-6 w-6" />
+                <Users className="h-6 w-6" aria-hidden />
                 <span>Gérer l&apos;équipe</span>
               </div>
             </Link>
@@ -88,7 +88,7 @@ export default async function AdminDashboard() {
           <Button variant="outline" className="h-auto py-4" asChild>
             <Link href="/admin/shows">
               <div className="flex flex-col items-center gap-2">
-                <FileText className="h-6 w-6" />
+                <FileText className="h-6 w-6" aria-hidden />
                 <span>Gérer les spectacles</span>
               </div>
             </Link>
@@ -96,7 +96,7 @@ export default async function AdminDashboard() {
           <Button variant="outline" className="h-auto py-4" asChild>
             <Link href="/admin/events">
               <div className="flex flex-col items-center gap-2">
-                <Calendar className="h-6 w-6" />
+                <Calendar className="h-6 w-6" aria-hidden />
                 <span>Gérer les événements</span>
               </div>
             </Link>

@@ -7,7 +7,7 @@ import {
   Home,
   Calendar,
   FileText,
-  Image,
+  Image as ImageIcon,
   Settings,
   Menu,
 } from "lucide-react";
@@ -38,33 +38,33 @@ export default async function AdminLayout({
         </div>
 
         <nav className="space-y-2">
-          <NavLink href="/admin" icon={<Home className="h-4 w-4" />}>
+          <NavLink href="/admin" icon={<Home className="h-4 w-4" aria-hidden />}> 
             Tableau de bord
           </NavLink>
 
-          <NavLink href="/admin/team" icon={<Users className="h-4 w-4" />}>
+          <NavLink href="/admin/team" icon={<Users className="h-4 w-4" aria-hidden />}>
             Équipe
           </NavLink>
 
-          <NavLink href="/admin/shows" icon={<FileText className="h-4 w-4" />}>
+          <NavLink href="/admin/shows" icon={<FileText className="h-4 w-4" aria-hidden />}>
             Spectacles
           </NavLink>
 
-          <NavLink href="/admin/events" icon={<Calendar className="h-4 w-4" />}>
+          <NavLink href="/admin/events" icon={<Calendar className="h-4 w-4" aria-hidden />}>
             Événements
           </NavLink>
 
-          <NavLink href="/admin/press" icon={<FileText className="h-4 w-4" />}>
+          <NavLink href="/admin/press" icon={<FileText className="h-4 w-4" aria-hidden />}>
             Presse
           </NavLink>
 
-          <NavLink href="/admin/media" icon={<Image className="h-4 w-4" />}>
+          <NavLink href="/admin/media" icon={<ImageIcon className="h-4 w-4" aria-hidden />}>
             Médiathèque
           </NavLink>
 
           <NavLink
             href="/admin/settings"
-            icon={<Settings className="h-4 w-4" />}
+            icon={<Settings className="h-4 w-4" aria-hidden />}
           >
             Paramètres
           </NavLink>
@@ -86,7 +86,7 @@ export default async function AdminLayout({
         <div className="md:hidden border-b p-4 flex items-center justify-between">
           <h2 className="text-xl font-bold text-brand-red">Admin</h2>
           <Button variant="ghost" size="icon">
-            <Menu className="h-5 w-5" />
+            <Menu className="h-5 w-5" aria-hidden />
           </Button>
         </div>
 

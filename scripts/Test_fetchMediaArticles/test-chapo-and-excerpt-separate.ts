@@ -29,13 +29,16 @@ async function testSeparateFields() {
   console.log(`✅ Found ${data?.length || 0} articles\n`);
 
   // Simulate DAL processing
-  const processed = data?.map((row: any) => ({
-    id: Number(row.id),
-    title: String(row.title ?? ""),
-    type: String(row.type ?? ""),
-    chapo: String(row.chapo ?? ""),
-    excerpt: String(row.excerpt ?? ""),
-  }));
+  const processed = data?.map((row) => {
+    const r = row as Record<string, unknown>;
+    return {
+      id: Number(r.id),
+      title: String(r.title ?? ""),
+      type: String(r.type ?? ""),
+      chapo: String(r.chapo ?? ""),
+      excerpt: String(r.excerpt ?? ""),
+    };
+  });
 
   processed?.forEach((article) => {
     console.log(`📰 Article #${article.id}: ${article.title}`);

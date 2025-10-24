@@ -50,11 +50,13 @@ export async function POST(
     }
 
     const ok = await setTeamMemberActive(id, active);
-    if (!ok)
+    if (!ok || !ok.success) {
+      console.error("setTeamMemberActive failed:", ok?.error);
       return NextResponse.json(
-        { error: "Failed to update active flag" },
+        { error: ok?.error ?? "Failed to update active flag" },
         { status: 500 }
       );
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {

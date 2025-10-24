@@ -29,19 +29,21 @@ export async function createTeamMember(
   input: unknown
 ): Promise<ActionResponse<TeamMemberDb>> {
   try {
-    await requireAdmin();
+    // Authorization is enforced inside the DAL (requireAdmin) to centralize checks.
     const parsed = CreateTeamMemberInputSchema.parse(input);
     const created = await upsertTeamMember(parsed as CreateTeamMemberInput);
 
     revalidatePath("/admin/team");
 
-    if (!created)
+    if (!created || !created.success) {
       return {
         success: false,
-        error: "Failed to create team member",
+        error: created?.error ?? "Failed to create team member",
         status: 500,
       };
-    return { success: true, data: created };
+    }
+
+    return { success: true, data: created.data ?? null };
   } catch (err: unknown) {
     console.error("createTeamMember error:", err);
     if (err instanceof z.ZodError) {
@@ -66,7 +68,7 @@ export async function updateTeamMember(
   input: unknown
 ): Promise<ActionResponse<TeamMemberDb>> {
   try {
-    await requireAdmin();
+    // Authorization is enforced in the DAL (requireAdmin)
     if (!Number.isFinite(id) || id <= 0) {
       return { success: false, error: "Invalid id", status: 400 };
     }
@@ -82,8 +84,11 @@ export async function updateTeamMember(
 
     revalidatePath("/admin/team");
 
-    if (!updated) return { success: false, error: "Failed to update" };
-    return { success: true, data: updated };
+    if (!updated || !updated.success) {
+      return { success: false, error: updated?.error ?? "Failed to update" };
+    }
+
+    return { success: true, data: updated.data ?? null };
   } catch (err: unknown) {
     console.error("updateTeamMember error:", err);
     if (err instanceof z.ZodError) {
@@ -107,11 +112,12 @@ export async function reorderTeamMembersAction(
   input: unknown
 ): Promise<ActionResponse<null>> {
   try {
-    await requireAdmin();
+    // Authorization enforced in DAL
     const parsed = ReorderTeamMembersInputSchema.parse(input);
     const ok = await reorderTeamMembers(parsed);
     revalidatePath("/admin/team");
-    if (!ok) return { success: false, error: "Failed to reorder" };
+    if (!ok || !ok.success)
+      return { success: false, error: ok?.error ?? "Failed to reorder" };
     return { success: true, data: null };
   } catch (err: unknown) {
     console.error("reorderTeamMembersAction error:", err);
@@ -137,7 +143,7 @@ export async function setTeamMemberActiveAction(
   active: boolean
 ): Promise<ActionResponse<null>> {
   try {
-    await requireAdmin();
+    // Authorization enforced in DAL
     if (!Number.isFinite(id) || id <= 0) {
       return { success: false, error: "Invalid id", status: 400 };
     }
@@ -146,7 +152,8 @@ export async function setTeamMemberActiveAction(
     }
     const ok = await setTeamMemberActive(id, active);
     revalidatePath("/admin/team");
-    if (!ok) return { success: false, error: "Failed to set active flag" };
+    if (!ok || !ok.success)
+      return { success: false, error: ok?.error ?? "Failed to set active flag" };
     return { success: true, data: null };
   } catch (err: unknown) {
     console.error("setTeamMemberActiveAction error:", err);
@@ -203,6 +210,7 @@ export async function hardDeleteTeamMemberAction(
 }
 */
 
+//TODO: enforce Authorization inside the DAL (requireAdmin) to centralize checks.
 export async function uploadTeamMemberPhoto(
   formData: FormData
 ): Promise<ActionResponse<{ mediaId: number; publicUrl: string }>> {
@@ -249,7 +257,7 @@ export async function uploadTeamMemberPhoto(
     const { createClient } = await import("@/supabase/server");
     const supabase = await createClient();
 
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from("medias")
       .upload(storagePath, file, {
         cacheControl: "3600",

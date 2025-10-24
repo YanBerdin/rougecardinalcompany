@@ -1,9 +1,37 @@
 import "server-only";
 import { createClient } from "@/supabase/server";
+import { requireAdmin } from "@/lib/auth/is-admin";
 import type { Database } from "@/lib/database.types";
 import { TeamMemberDbSchema } from "@/lib/schemas/team";
+import { z } from "zod";
+
+function getErrorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  if (typeof err === "object" && err !== null && "message" in err) {
+    const maybe = (err as { message?: unknown }).message;
+    if (typeof maybe === "string") return maybe;
+  }
+  try {
+    return JSON.stringify(err);
+  } catch {
+    return String(err);
+  }
+}
 
 type TeamRow = Database["public"]["Tables"]["membres_equipe"]["Row"];
+
+type DALSuccess<T> = { success: true; data: T };
+type DALError = { success: false; error: string };
+export type DALResult<T> = DALSuccess<T> | DALError;
+
+const UpsertTeamMemberSchema = TeamMemberDbSchema.partial();
+
+const ReorderItemSchema = z.object({ id: z.number().int().positive(), ordre: z.number().int() });
+const ReorderSchema = z
+  .array(ReorderItemSchema)
+  .min(1)
+  .refine((arr) => new Set(arr.map((i) => i.id)).size === arr.length, { message: "Duplicate id in updates" })
+  .refine((arr) => new Set(arr.map((i) => i.ordre)).size === arr.length, { message: "Duplicate ordre in updates" });
 
 export async function fetchAllTeamMembers(
   includeInactive = false
@@ -74,8 +102,17 @@ export async function fetchTeamMemberById(id: number): Promise<TeamRow | null> {
 
 export async function upsertTeamMember(
   payload: Partial<TeamRow>
-): Promise<TeamRow | null> {
+): Promise<DALResult<TeamRow>> {
   try {
+    await requireAdmin();
+
+    // Validate input
+    const validated = UpsertTeamMemberSchema.safeParse(payload as unknown);
+    if (!validated.success) {
+      console.error("upsertTeamMember: invalid payload:", validated.error);
+      return { success: false, error: "Invalid payload" };
+    }
+
     const supabase = await createClient();
 
     // If payload contains an id, perform an update. Otherwise perform an insert.
@@ -106,27 +143,35 @@ export async function upsertTeamMember(
 
     if (error) {
       console.error("upsertTeamMember error:", error);
-      return null;
+      return { success: false, error: getErrorMessage(error) };
     }
 
     const parsed = TeamMemberDbSchema.safeParse(data as unknown);
     if (!parsed.success) {
       console.error("upsertTeamMember: invalid response:", parsed.error);
-      return null;
+      return { success: false, error: "Invalid response from database" };
     }
 
-    return parsed.data as TeamRow;
+    return { success: true, data: parsed.data as TeamRow };
   } catch (err: unknown) {
     console.error("upsertTeamMember exception:", err);
-    return null;
+    return { success: false, error: getErrorMessage(err) };
   }
 }
 
 export async function setTeamMemberActive(
   id: number,
   active: boolean
-): Promise<boolean> {
+): Promise<DALResult<{ id: number; active: boolean }>> {
   try {
+    await requireAdmin();
+
+    // Validate inputs
+    const idCheck = z.number().int().positive().safeParse(id);
+    if (!idCheck.success) {
+      return { success: false, error: "Invalid id" };
+    }
+
     const supabase = await createClient();
     const { error } = await supabase
       .from("membres_equipe")
@@ -135,24 +180,32 @@ export async function setTeamMemberActive(
 
     if (error) {
       console.error("setTeamMemberActive error:", error);
-      return false;
+      return { success: false, error: getErrorMessage(error) };
     }
 
-    return true;
+    return { success: true, data: { id, active } };
   } catch (err: unknown) {
     console.error("setTeamMemberActive exception:", err);
-    return false;
+    return { success: false, error: getErrorMessage(err) };
   }
 }
 
 export async function reorderTeamMembers(
   updates: { id: number; ordre: number }[]
-): Promise<boolean> {
+): Promise<DALResult<null>> {
   try {
+    await requireAdmin();
     const supabase = await createClient();
 
+    // Validate updates payload
+    const validated = ReorderSchema.safeParse(updates as unknown);
+    if (!validated.success) {
+      console.error("reorderTeamMembers: invalid updates:", validated.error);
+      return { success: false, error: "Invalid reorder payload" };
+    }
+
     // perform updates sequentially to leverage triggers/audit logs
-    for (const u of updates) {
+    for (const u of validated.data) {
       const { error } = await supabase
         .from("membres_equipe")
         .update({ ordre: u.ordre })
@@ -160,13 +213,13 @@ export async function reorderTeamMembers(
 
       if (error) {
         console.error("reorderTeamMembers partial error for id", u.id, error);
-        // continue but mark as failed
+        return { success: false, error: `Failed to update id ${u.id}` };
       }
     }
 
-    return true;
+    return { success: true, data: null };
   } catch (err: unknown) {
     console.error("reorderTeamMembers exception:", err);
-    return false;
+    return { success: false, error: getErrorMessage(err) };
   }
 }
