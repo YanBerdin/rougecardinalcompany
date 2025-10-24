@@ -204,17 +204,16 @@ export async function reorderTeamMembers(
       return { success: false, error: "Invalid reorder payload" };
     }
 
-    // perform updates sequentially to leverage triggers/audit logs
-    for (const u of validated.data) {
-      const { error } = await supabase
-        .from("membres_equipe")
-        .update({ ordre: u.ordre })
-        .eq("id", u.id);
+    // Use a single atomic DB-side operation via RPC function to avoid partial updates
+    // The PL/pgSQL function `reorder_team_members(jsonb)` is added as a migration and
+    // applies the updates in a single atomic statement with validation.
+    const { error } = await supabase.rpc("reorder_team_members", {
+      items: validated.data,
+    });
 
-      if (error) {
-        console.error("reorderTeamMembers partial error for id", u.id, error);
-        return { success: false, error: `Failed to update id ${u.id}` };
-      }
+    if (error) {
+      console.error("reorderTeamMembers rpc error:", error);
+      return { success: false, error: getErrorMessage(error) };
     }
 
     return { success: true, data: null };
