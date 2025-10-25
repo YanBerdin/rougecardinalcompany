@@ -60,4 +60,6 @@ comment on view public.articles_presse_public is
 'Public view of published press articles - bypasses RLS issues with JWT signing keys';
 
 -- Grant read access to all roles
-grant select on public.articles_presse_public to anon, authenticated;
+-- NOTE: Removed broad grant to anon/authenticated to comply with CI audit.
+-- If necessary, grant access explicitly to 'authenticated' in a controlled
+-- migration after review.

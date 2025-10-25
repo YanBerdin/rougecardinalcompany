@@ -52,8 +52,8 @@ where published_at is not null;
 comment on view public.articles_presse_public is 
 'Public view of published press articles - bypasses RLS issues with JWT signing keys';
 
--- Grant read access to all roles
-grant select on public.articles_presse_public to anon, authenticated;
+-- NOTE: Grant removed in repo to comply with security audit. Apply
+-- targeted grants separately if authenticated users must access the view.
 `;
 
 async function applyMigration() {

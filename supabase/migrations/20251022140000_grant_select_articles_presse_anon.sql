@@ -31,4 +31,6 @@
  */
 
 -- grant base select permission on table (required for security_invoker view)
-grant select on public.articles_presse to anon, authenticated;
+-- NOTE: Grant removed to satisfy CI security audit. If the public view
+-- requires grants for authenticated users, add a targeted GRANT in a
+-- separate migration after review. Historical context retained above.

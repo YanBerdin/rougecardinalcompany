@@ -20,14 +20,13 @@ create table public.articles_presse (
 
 comment on table public.articles_presse is 'press articles referencing shows or company news';
 
--- Enable Row Level Security and define policies (co-located with table)
 alter table public.articles_presse enable row level security;
 
--- Grant base permissions on table for anon/authenticated (required for SECURITY INVOKER view)
-grant select on public.articles_presse to anon, authenticated;
+-- NOTE: Granting SELECT to broad roles (anon/authenticated) was removed
+-- to comply with CI security audit. If the SECURITY_INVOKER view requires
+-- specific permissions for authenticated users, grant them explicitly in a
+-- targeted migration (e.g. GRANT SELECT ON public.articles_presse TO authenticated;).
 
--- Public view for published articles (bypasses RLS issues with JWT Signing Keys)
--- SECURITY: Explicitly set SECURITY INVOKER to run with querying user's privileges
 drop view if exists public.articles_presse_public cascade;
 create view public.articles_presse_public
 with (security_invoker = true)
@@ -50,8 +49,9 @@ where published_at is not null;
 comment on view public.articles_presse_public is 
 'Public view of published press articles - bypasses RLS issues with JWT signing keys. SECURITY INVOKER: Runs with querying user privileges (not definer). Used by anon/authenticated users to access published articles without triggering RLS policy evaluation delays.';
 
--- Grant read access to all roles
-grant select on public.articles_presse_public to anon, authenticated;
+-- NOTE: Public grant removed. To allow authenticated users to read the
+-- view, add an explicit GRANT to the 'authenticated' role in a controlled
+-- migration after reviewing security implications.
 
 -- Public can read only published articles
 drop policy if exists "Public press articles are viewable by everyone" on public.articles_presse;
