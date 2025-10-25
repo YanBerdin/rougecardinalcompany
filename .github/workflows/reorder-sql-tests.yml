@@ -36,48 +36,19 @@ jobs:
       - name: Install psql client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
-      - name: Install Supabase CLI (optional)
+      - name: Install Supabase CLI
         run: |
-          echo "Installing Supabase CLI from GitHub releases (official binary)..."
+          echo "Installing Supabase CLI official Linux binary..."
           set -euo pipefail
 
-          API_URL="https://api.github.com/repos/supabase/cli/releases/latest"
-          echo "Querying latest release from $API_URL"
+          # Use the published Linux amd64 archive from the releases 'latest' tag.
+          ASSET_URL="https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz"
+          TMPFILE=/tmp/supabase_asset.tar.gz
+          echo "Downloading $ASSET_URL to $TMPFILE"
+          curl -L --retry 3 --retry-delay 2 -o "$TMPFILE" "$ASSET_URL"
 
-          ASSET_URL=$(curl -sSf "$API_URL" \
-            | grep '"browser_download_url":' \
-            | sed -E 's/.*"([^"]+)".*/\1/' \
-            | grep -E 'linux' \
-            | grep -E '\.(tar\.gz|tar\.xz|zip)$' \
-            | head -n 1 || true)
-
-          if [ -z "$ASSET_URL" ]; then
-            echo "No suitable Linux asset found in latest release; falling back to npm install (best-effort)"
-            npm install -g supabase@latest || true
-            supabase --version || true
-            exit 0
-          fi
-
-          echo "Found asset: $ASSET_URL"
-          TMPFILE=/tmp/supabase_asset
-          echo "Downloading to $TMPFILE"
-          curl -L --retry 3 --retry-delay 2 "$ASSET_URL" -o "$TMPFILE"
-
-          case "$ASSET_URL" in
-            *.tar.gz)
-              tar -xzf "$TMPFILE" -C /tmp
-              ;;
-            *.tar.xz)
-              tar -xJf "$TMPFILE" -C /tmp
-              ;;
-            *.zip)
-              unzip -q "$TMPFILE" -d /tmp
-              ;;
-            *)
-              echo "Unknown archive format for $ASSET_URL" >&2
-              exit 1
-              ;;
-          esac
+          echo "Extracting archive"
+          tar -xzf "$TMPFILE" -C /tmp
 
           BINPATH=$(find /tmp -maxdepth 2 -type f -name supabase -print -quit || true)
           if [ -z "$BINPATH" ]; then
@@ -89,7 +60,7 @@ jobs:
           echo "Installing supabase binary from $BINPATH to /usr/local/bin"
           sudo mv "$BINPATH" /usr/local/bin/supabase
           sudo chmod +x /usr/local/bin/supabase
-          supabase --version || true
+          supabase --version
 
       - name: Apply declarative schema to Supabase Cloud (optional)
         if: ${{ env.SUPABASE_TOKEN != '' && env.SUPABASE_PROJECT_REF != '' }}
