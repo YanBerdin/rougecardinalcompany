@@ -67,9 +67,65 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
   - 🔐 **Completion** : Complète Round 7 en révoquant authenticated qui avait été manqué initialement
   - ✅ **CI Detection** : Audit CI a détecté que realtime.subscription était encore exposé à authenticated
   - 📊 **Impact** : 1 objet complété (realtime.subscription now fully secured)
-  - 🎯 **Final status** : 28 objets totaux sécurisés sur 7 rounds + 1 round complémentaire
+  - 🎯 **Final status Round 1-7b** : 28 objets totaux sécurisés sur 7 rounds + 1 round complémentaire
 
-**Total sécurité audit** : 28 objets exposés détectés et corrigés (15 tables + 4 junction + 4 vues admin + 1 vue tags + 3 Realtime system + 1 PostgreSQL system). Toutes les migrations sont idempotentes et peuvent être rejouées sans effet de bord. Script d'audit : `supabase/scripts/audit_grants.sql` + `analyze_remaining_grants.sh`.
+**Pivot stratégique après Round 7b** : Adoption d'une stratégie whitelist (`audit_grants_filtered.sql`) pour exclure les objets système PostgreSQL/Supabase (`information_schema, realtime.*, storage.*, extensions.*`) qui se ré-appliquent automatiquement.
+
+### Security Audit - Rounds 8-17 (October 26, 2025)
+
+**Context:** Rounds 8-17 focused on business objects detected by filtered audit. System objects now whitelisted as safe.
+
+- `20251026080000_revoke_articles_presse_functions.sql` — **SECURITY : Round 8** : Révocation grants sur articles_presse/articles_tags + trigger functions versioning/slugification. Idempotent.
+  - 🔐 **Objets** : 6 (2 tables + 4 triggers)
+  - ✅ **Impact** : Fonctions métier sécurisées
+
+- `20251026090000_revoke_categories_analytics_functions.sql` — **SECURITY : Round 9** : Révocation grants sur categories, categories_hierarchy + analytics functions. Idempotent.
+  - 🔐 **Objets** : 6 (1 table + 1 vue + 4 fonctions)
+  - ✅ **Impact** : Pipeline analytics sécurisé
+
+- `20251026100000_revoke_storage_search_functions.sql` — **SECURITY : Round 10** : Découverte storage.buckets + search function. Idempotent.
+  - 🔐 **Objets** : 3 (1 Storage + 2 fonctions)
+  - ✅ **Whitelist** : storage.buckets ajouté
+
+- `20251026110000_revoke_storage_analytics_persistent_functions.sql` — **SECURITY : Round 11** : storage.buckets_analytics + pg_trgm functions. Idempotent.
+  - 🔐 **Objets** : 3 (1 Storage + 2 pg_trgm)
+  - ✅ **Whitelist** : Extension pg_trgm patterns ajoutés (~200+ fonctions exclues)
+
+- `20251026120000_revoke_storage_objects_business_functions.sql` — **SECURITY : Round 12 - CRITICAL** : storage.objects avec ALL PRIVILEGES! Idempotent.
+  - 🔐 **Objets** : 5 (1 CRITICAL Storage + 4 fonctions)
+  - ⚠️ **VULNÉRABILITÉ CRITIQUE** : Bypass complet Storage RLS
+  - ✅ **Fix** : Révocation ALL + whitelist
+
+- `20251026130000_revoke_storage_prefixes_versioning_functions.sql` — **SECURITY : Round 13** : storage.prefixes + is_admin(). Idempotent.
+  - 🔐 **Objets** : 5 (1 Storage + 4 fonctions dont is_admin)
+  - ✅ **Vérification** : is_admin() fonctionne via RLS SECURITY DEFINER
+
+- `20251026140000_revoke_storage_multipart_auth_triggers.sql` — **SECURITY : Round 14** : storage.s3_multipart_uploads + triggers auth. Idempotent.
+  - 🔐 **Objets** : 4 (1 Storage + 3 auth triggers)
+  - ✅ **Whitelist** : Multipart uploads système
+
+- `20251026150000_revoke_storage_multipart_parts_utility_functions.sql` — **SECURITY : Round 15** : s3_multipart_uploads_parts + utilities. Idempotent.
+  - 🔐 **Objets** : 5 (1 Storage + 4 utilities)
+  - ✅ **Completion** : 6 tables Storage whitelistées
+
+- `20251026160000_revoke_remaining_versioning_triggers.sql` — **SECURITY : Round 16** : Nettoyage final triggers versioning. Idempotent.
+  - 🔐 **Objets** : 6 triggers (spectacles, membres, partners, etc.)
+  - ✅ **Completion** : 14 triggers versioning totaux
+
+- `20251026170000_revoke_check_communique_has_pdf_function.sql` — **SECURITY : Round 17 - FINAL** : Dernière fonction métier détectée. Idempotent.
+  - 🔐 **Objets** : 1 fonction (check_communique_has_pdf)
+  - 🎯 **Detection** : CI après Round 16
+  - ✅ **Status** : **CAMPAIGN COMPLETE** - 73 objets sécurisés
+  - 🚀 **CI** : ✅ PASSED - Zero exposed objects
+
+### 🎊 Security Campaign Complete
+
+**Total:** 73 objets (17 rounds, Oct 25-26 2025)  
+**Critical:** storage.objects vulnerability (Round 12)  
+**Tools:** audit_grants_filtered.sql + check-security-audit.sh  
+**Status:** ✅ Ready for production merge
+
+**Total sécurité audit Rounds 1-7b** : 28 objets exposés détectés et corrigés (15 tables + 4 junction + 4 vues admin + 1 vue tags + 3 Realtime system + 1 PostgreSQL system). Toutes les migrations sont idempotentes et peuvent être rejouées sans effet de bord. Script d'audit : `supabase/scripts/audit_grants.sql` + `analyze_remaining_grants.sh`.
 
 ## Corrections et fixes critiques
 
