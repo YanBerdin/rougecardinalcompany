@@ -88,13 +88,19 @@ Revoked grants on:
 ### Round 7: Realtime System Tables (2025-10-25)
 
 **Objects secured:** 3
+
 - `realtime.messages` (authenticated)
 - `realtime.schema_migrations` (authenticated, anon)
-- `realtime.subscription` (anon)
+- `realtime.subscription` (anon, authenticated)
 
-**Status:** ✅ Migration created, applied, and verified
-**Migration file:** `20251025191000_revoke_realtime_schema.sql`
-**Verification:** Database confirmed up to date - all migrations applied
+**Status:** ⚠️ Migration updated - awaiting application
+**Migration files:**
+
+- `20251025191000_revoke_realtime_schema.sql` (initial - updated to revoke both roles)
+- `20251025192000_revoke_realtime_subscription_authenticated.sql` (補完 - specific fix for authenticated)
+
+**Issue:** CI detected `realtime.subscription` was still exposed to `authenticated` after Round 7
+**Fix:** Created Round 7b migration to specifically revoke authenticated role
 
 ## Total Impact
 

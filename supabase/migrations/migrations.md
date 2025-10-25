@@ -57,11 +57,17 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
   - ✅ **Tags table** : Table tags (système de taxonomie) sécurisée
   - 📊 **Impact** : 4 objets sécurisés (3 junction tables + 1 table) + retry info_schema
 
-- `20251025191000_revoke_realtime_schema.sql` — **SECURITY : Revoke exposed grants (round 7 - FINAL)** : Révocation des grants anon/authenticated sur realtime.messages, realtime.schema_migrations, realtime.subscription (objets système Supabase Realtime). Tentative finale révocation information_schema. Migration idempotente.
+- `20251025191000_revoke_realtime_schema.sql` — **SECURITY : Revoke exposed grants (round 7)** : Révocation des grants anon/authenticated sur realtime.messages, realtime.schema_migrations, realtime.subscription (objets système Supabase Realtime). Tentative finale révocation information_schema. Migration idempotente.
   - 🔐 **Supabase Realtime** : Tables système Realtime sécurisées (messages, migrations, subscriptions)
   - ✅ **System security** : Accès Realtime contrôlé via RLS sur tables utilisateurs, pas via grants directs
   - 📊 **Impact** : 3 objets système Supabase sécurisés + final retry info_schema
-  - 🎯 **Final status** : 28 objets totaux sécurisés sur 7 rounds de migration
+  - ⚠️ **Note** : Migration mise à jour pour révoquer anon ET authenticated sur realtime.subscription
+
+- `20251025192000_revoke_realtime_subscription_authenticated.sql` — **SECURITY : Revoke exposed grants (round 7b - 補完)** : Révocation complémentaire du grant authenticated sur realtime.subscription (détecté par CI après Round 7). Migration idempotente.
+  - 🔐 **Completion** : Complète Round 7 en révoquant authenticated qui avait été manqué initialement
+  - ✅ **CI Detection** : Audit CI a détecté que realtime.subscription était encore exposé à authenticated
+  - 📊 **Impact** : 1 objet complété (realtime.subscription now fully secured)
+  - 🎯 **Final status** : 28 objets totaux sécurisés sur 7 rounds + 1 round complémentaire
 
 **Total sécurité audit** : 28 objets exposés détectés et corrigés (15 tables + 4 junction + 4 vues admin + 1 vue tags + 3 Realtime system + 1 PostgreSQL system). Toutes les migrations sont idempotentes et peuvent être rejouées sans effet de bord. Script d'audit : `supabase/scripts/audit_grants.sql` + `analyze_remaining_grants.sh`.
 
