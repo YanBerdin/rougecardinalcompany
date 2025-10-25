@@ -61,11 +61,24 @@ Revoked grants on:
 - `public.popular_tags` → authenticated (view)
 - `public.profiles` → authenticated (table)
 
+### Round 5: SEO, spectacles and categories (20251025185000)
+
+**File:** `20251025185000_revoke_seo_spectacles_final.sql`
+
+Revoked grants on:
+
+- `public.seo_redirects` → authenticated (table)
+- `public.sitemap_entries` → authenticated (table)
+- `public.spectacles` → authenticated (table)
+- `public.spectacles_categories` → authenticated (junction table)
+- `information_schema.administrable_role_authorizations` → PUBLIC (retry)
+
 ## Total Impact
 
-**17 objects secured:**
+**21 objects secured:**
 
-- 11 tables (partners, profiles, membres_equipe, messages_contact, content_versions, evenements, home_about_content, home_hero_slides, lieux, logs_audit, medias)
+- 14 tables (seo_redirects, sitemap_entries, spectacles, partners, profiles, membres_equipe, messages_contact, content_versions, evenements, home_about_content, home_hero_slides, lieux, logs_audit, medias)
+- 1 junction table (spectacles_categories)
 - 4 admin views (partners_admin, membres_equipe_admin, messages_contact_admin, content_versions_detailed)
 - 1 tag view (popular_tags)
 - 1 system view (information_schema.administrable_role_authorizations)
@@ -113,13 +126,16 @@ Tables with public read access via RLS (no grants needed):
 |-------|-------------|--------------|
 | `home_hero_slides` | anon, authenticated (active + dates) | Admin only |
 | `lieux` | anon, authenticated | Admin only |
-| `medias` | anon, authenticated | Authenticated upload, Admin manage |
+| `spectacles` | anon, authenticated (public=true) | Admin only |
+| `medias` | anon, authenticated (tous) | Authenticated upload, Admin manage |
 | `membres_equipe` | anon, authenticated | Admin only |
 | `partners` | anon, authenticated (active) | Admin only |
 | `evenements` | anon, authenticated | Admin only |
 | `home_about_content` | anon, authenticated | Admin only |
 | `content_versions` | Admin only | System + Admin |
 | `profiles` | Public (own + public profiles) | Owner only |
+| `seo_redirects` | Admin only | Admin only |
+| `sitemap_entries` | Public (if indexed) | Admin only |
 
 ### Admin-Only Tables
 
