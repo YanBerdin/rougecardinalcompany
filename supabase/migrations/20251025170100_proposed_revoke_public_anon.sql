@@ -1,4 +1,4 @@
--- 20251025_proposed_revoke_public_anon.sql
+-- 20251025170100_proposed_revoke_public_anon.sql
 -- DRY RUN migration: propose REVOKE / GRANT statements to remove broad
 -- privileges granted to PUBLIC / anon / authenticated and to revoke
 -- unexpected role memberships. This file only emits RAISE NOTICE lines

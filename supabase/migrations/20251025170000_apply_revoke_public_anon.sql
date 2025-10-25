@@ -1,4 +1,4 @@
--- 20251025_apply_revoke_public_anon.sql
+-- 20251025170000_apply_revoke_public_anon.sql
 -- APPLY migration: revoke broad privileges granted to PUBLIC/anon and grant to authenticated
 -- WARNING: This migration will execute REVOKE/GRANT commands. Review carefully in a test environment
 -- before applying to production. This file is idempotent: REVOKE on a missing grant is no-op.

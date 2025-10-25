@@ -1,22 +1,16 @@
--- Migration: Revoke PUBLIC privileges on pg_stat_statements extension
+-- Migration: Deprecated placeholder
 -- Date: 2025-10-25
--- Purpose: The CI audit flagged 'extensions.pg_stat_statements' as accessible to PUBLIC.
--- This migration revokes all privileges on the extension from PUBLIC. If you
--- require more granular adjustments (e.g., allow only certain roles to use
--- specific functions), add targeted GRANTs after review.
+-- NOTE: The original attempt used `REVOKE ... ON EXTENSION` which is not a
+-- valid SQL target and therefore raised a syntax error during `db push`.
+-- The real, idempotent revocation logic for objects owned by the
+-- `pg_stat_statements` extension has been implemented in:
+--   20251025163000_revoke_pg_stat_statements_objects.sql
+-- To avoid failing the migration pipeline we keep this file as a safe no-op
+-- that simply emits a NOTICE. This preserves migration ordering/history while
+-- preventing the syntax error.
 
-REVOKE ALL ON EXTENSION pg_stat_statements FROM PUBLIC;
-
--- Additionally, make sure no functions/views belonging to the extension are
--- granted to PUBLIC explicitly. The following statements are safe no-ops if
--- there are no explicit grants.
 DO $$
 BEGIN
-  -- Revoke execute on any functions in the pg_stat_statements schema (if present)
-  PERFORM 'REVOKE ALL ON ALL FUNCTIONS IN SCHEMA public FROM PUBLIC';
-EXCEPTION WHEN others THEN
-  -- Ignore any errors here; keep migration idempotent
-  RAISE NOTICE 'Ignoring error when revoking functions privileges: %', SQLERRM;
-END$$;
-
--- NOTE: Review the effect in a preview environment before applying to prod.
+  RAISE NOTICE 'Skipping deprecated migration 20251025161000_revoke_pg_stat_statements.sql - see 20251025163000_revoke_pg_stat_statements_objects.sql for actual revokes.';
+END
+$$;
