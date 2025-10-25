@@ -102,7 +102,7 @@
       → app/auth/[flow]/page.tsx
    -  → lib/auth/service.ts
       → middleware.ts (route protection)
-   +  → lib/supabase/server.ts (getClaims() ~2-5ms)
+   +  → supabase/server.ts (getClaims() ~2-5ms)
    ```
 
 ### 2. Project_Folders_Structure_Blueprint.md

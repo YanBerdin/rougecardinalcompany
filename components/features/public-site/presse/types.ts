@@ -17,7 +17,8 @@ export const MediaArticleSchema = z.object({
   title: z.string(),
   author: z.string(),
   type: z.enum(["Article", "Critique", "Interview", "Portrait"]),
-  excerpt: z.string(),
+  chapo: z.string(), // Introduction/chapô de l'article
+  excerpt: z.string(), // Extrait/citation de l'article
   source_publication: z.string(),
   source_url: z.string(),
   published_at: z.string(),

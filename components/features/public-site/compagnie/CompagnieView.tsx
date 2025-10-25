@@ -1,22 +1,8 @@
-import { Quote } from "lucide-react";
+import { Quote, Star } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { CompagnieViewProps } from "./types";
 import { CompagnieSkeleton } from "@/components/skeletons/compagnie-skeleton";
 // import * as LucideIcons from 'lucide-react';
-
-// Whitelist locale des icônes Lucide utilisées
-import {
-  Star,
-  Heart,
-  Award,
-  Users,
-  Globe,
-  Shield,
-  Rocket,
-  Book,
-  Briefcase,
-} from "lucide-react";
-
 /*const LucideIconMap: Record<string, React.ComponentType<{ className?: string }>> = {
     Star,
     Heart,
@@ -202,12 +188,16 @@ export function CompagnieView({
                         <h3 className="text-xl font-semibold mb-2">
                           {member.name}
                         </h3>
-                        <p className="text-primary font-medium mb-3">
-                          {member.role}
-                        </p>
-                        <p className="text-muted-foreground text-sm leading-relaxed">
-                          {member.bio}
-                        </p>
+                        {member.role && (
+                          <p className="text-primary font-medium mb-3">
+                            {member.role}
+                          </p>
+                        )}
+                        {member.description && (
+                          <p className="text-muted-foreground text-sm leading-relaxed">
+                            {member.description}
+                          </p>
+                        )}
                       </CardContent>
                     </Card>
                   ))}

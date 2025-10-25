@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Calendar, MapPin, Clock, Users, ArrowRight } from "lucide-react";
+import { Clock, Users, ArrowRight } from "lucide-react"; // Calendar, MapPin, non utilisés
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -46,7 +46,7 @@ export function SpectaclesView({
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">À l'Affiche</h2>
+            <h2 className="text-3xl font-bold mb-4">À l&apos;Affiche</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Nos créations actuellement en représentation
             </p>

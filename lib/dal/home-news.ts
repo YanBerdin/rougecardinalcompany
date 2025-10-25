@@ -33,8 +33,17 @@ export async function fetchFeaturedPressReleases(limit = 3) {
   const cutoff = new Date(now);
   cutoff.setDate(now.getDate() - 30);
 
-  //TODO: fix Unexpected any
-  return (data ?? []).filter(
-    (r: any) => new Date(r.date_publication) >= cutoff
+  type SupabasePressRow = {
+    id: number;
+    title: string;
+    description?: string | null;
+    date_publication: string;
+    image_url?: string | null;
+    ordre_affichage?: number | null;
+    public?: boolean | null;
+  };
+
+  return (data ?? []).filter((r: SupabasePressRow) =>
+    new Date(r.date_publication) >= cutoff
   ) as PressReleaseRecord[];
 }

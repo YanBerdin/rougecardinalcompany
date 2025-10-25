@@ -46,8 +46,11 @@ comment on column public.messages_contact.processed is 'Champ dérivé: true si 
 comment on column public.messages_contact.contact_presse_id is 'Lien optionnel vers un contact presse existant (association manuelle back-office).';
 
 -- Vue d'administration pour le suivi et le tri des messages de contact
+-- SECURITY: Explicitly set SECURITY INVOKER to run with querying user's privileges
 drop view if exists public.messages_contact_admin cascade;
-create view public.messages_contact_admin as
+create view public.messages_contact_admin
+with (security_invoker = true)
+as
 select
   mc.id,
   mc.created_at,

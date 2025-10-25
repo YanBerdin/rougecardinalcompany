@@ -77,7 +77,7 @@ npx supabase gen types typescript --project-id <PROJECT_ID> > lib/database.types
 
 ### 5.1 Création du client serveur typé
 
-Créer `lib/supabase/server.ts` :
+Créer `supabase/server.ts` :
 
 ```ts
 import type { Database } from '@/lib/database.types';
@@ -120,7 +120,7 @@ export async function createClient() {
 
 ### 5.2 Création du client browser typé
 
-Créer `lib/supabase/client.ts` :
+Créer `supabase/client.ts` :
 
 ```ts
 import type { Database } from '@/lib/database.types';
@@ -213,15 +213,15 @@ const client = createServerClient<Database>(url, key, options);
 
 ### 7.2 Utilisation des utilitaires typés
 
-Si vous avez créé les utilitaires `lib/supabase/server.ts` et `lib/supabase/client.ts`, le typage est automatique :
+Si vous avez créé les utilitaires `supabase/server.ts` et `supabase/client.ts`, le typage est automatique :
 
 ```ts
 // Server Components, Server Actions, Route Handlers
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/supabase/server';
 const supabase = await createClient(); // ✅ Déjà typé <Database>
 
 // Client Components
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/supabase/client';
 const supabase = createClient(); // ✅ Déjà typé <Database>
 ```
 
@@ -355,9 +355,9 @@ pnpm dlx -p typescript -- tsc --noEmit
 
 | Fichier | Description |
 |---------|-------------|
-| `lib/database.types.ts` | Types générés depuis Postgres |
-| `lib/supabase/server.ts` | Client serveur typé (Server Components, Server Actions, Route Handlers) |
-| `lib/supabase/client.ts` | Client browser typé (Client Components) |
+| `database.types.ts` | Types générés depuis Postgres |
+| `supabase/server.ts` | Client serveur typé (Server Components, Server Actions, Route Handlers) |
+| `supabase/client.ts` | Client browser typé (Client Components) |
 | `app/global.d.ts` | Déclarations de types globaux (optionnel) |
 | `.env.local` | Variables d'environnement |
 
@@ -409,8 +409,8 @@ Committer `lib/database.types.ts` dans le repository pour cohérence d'équipe.
 
 Créer des utilitaires séparés pour server et client évite les erreurs :
 
-- `lib/supabase/server.ts` : Pour Server Components, Server Actions, Route Handlers
-- `lib/supabase/client.ts` : Pour Client Components uniquement
+- `supabase/server.ts` : Pour Server Components, Server Actions, Route Handlers
+- `supabase/client.ts` : Pour Client Components uniquement
 
 ## 12. Architecture des types Supabase
 
@@ -528,7 +528,7 @@ const todos: TodoSubset[] = data ?? [];
 ### 14.1 Server Component typé
 
 ```ts
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/supabase/server';
 import type { Database } from '@/lib/database.types';
 
 type Todo = Database['public']['Tables']['todos']['Row'];
@@ -560,7 +560,7 @@ export default async function TodosPage() {
 ```ts
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/supabase/server';
 import type { Database } from '@/lib/database.types';
 import { revalidatePath } from 'next/cache';
 
@@ -609,7 +609,7 @@ export async function updateTodo(id: number, completed: boolean) {
 ```tsx
 'use client';
 
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/supabase/client';
 import { useEffect, useState } from 'react';
 import type { Database } from '@/lib/database.types';
 
@@ -661,7 +661,7 @@ export function TodoList() {
 ### 14.4 Route Handler typé
 
 ```ts
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/supabase/server';
 import { NextResponse } from 'next/server';
 import type { Database } from '@/lib/database.types';
 

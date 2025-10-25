@@ -263,28 +263,32 @@
   }
 
   /* Hover pour header scrollé - CONTRASTE OPTIMAL */
+/*
   .header-scrolled .nav-link-glass:hover::before {
     background: hsl(0 65% 50% / 0.1);
     box-shadow: 
       0 2px 8px rgba(0, 0, 0, 0.05),
       inset 0 1px 0 rgba(0, 0, 0, 0.05);
   }
-
+*/
   /* Hover pour header transparent - CONTRASTE BLANC */
+/*
   .nav-link-glass:hover {
     color: white !important;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     transform: translateY(-1px);
   }
-
+*/
   /* Hover pour header scrollé - CONTRASTE ROUGE */
+  /*
   .header-scrolled .nav-link-glass:hover {
     color: #c41e3a !important;
     text-shadow: none;
     font-weight: 600;
   }
-
+*/
   /* Dark mode adjustments */
+  /*
   .dark .nav-link-glass::before {
     background: rgba(255, 255, 255, 0.08);
   }
@@ -303,7 +307,7 @@
   .dark .header-scrolled .nav-link-glass:hover {
     color: #d63851 !important;
   }
-
+*/
   /* Ripple Effect - AMÉLIORÉ */
   /*
   .ripple-effect {
@@ -836,7 +840,7 @@ html {
 /* Muted sections with subtle tint - ADAPTÉ AU NOUVEAU BACKGROUND */
 .bg-muted\/30 {
   /*! En light mode, utilise une teinte plus douce qui s'harmonise avec #fef7f8 */
-      background: #70d437a9; /* Gris très clair avec transparence */
+      background: #70d437a9; /* background: linear-gradient(90deg, #E3BE46, #D4AF37, #f7e17fef); */
 }
 
 .dark .bg-muted\/30 {

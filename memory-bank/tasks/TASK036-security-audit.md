@@ -1,4 +1,4 @@
-# [TASK036] - Security Audit
+# `[TASK036]` - Security Audit
 
 **Status:** Pending  
 **Added:** 2025-10-16  

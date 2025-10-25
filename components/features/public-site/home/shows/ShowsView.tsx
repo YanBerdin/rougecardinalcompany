@@ -96,7 +96,7 @@ export function ShowsView({ shows }: ShowsViewProps) {
             className="cta-blur-button"
           >
             <Link href="/agenda">
-              Voir tout l'agenda
+              Voir tout l&apos;agenda
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </Button>

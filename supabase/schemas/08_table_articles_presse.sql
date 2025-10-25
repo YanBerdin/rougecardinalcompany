@@ -20,8 +20,38 @@ create table public.articles_presse (
 
 comment on table public.articles_presse is 'press articles referencing shows or company news';
 
--- Enable Row Level Security and define policies (co-located with table)
 alter table public.articles_presse enable row level security;
+
+-- NOTE: Granting SELECT to broad roles (anon/authenticated) was removed
+-- to comply with CI security audit. If the SECURITY_INVOKER view requires
+-- specific permissions for authenticated users, grant them explicitly in a
+-- targeted migration (e.g. GRANT SELECT ON public.articles_presse TO authenticated;).
+
+drop view if exists public.articles_presse_public cascade;
+create view public.articles_presse_public
+with (security_invoker = true)
+as
+select 
+  id,
+  title,
+  author,
+  type,
+  slug,
+  chapo,
+  excerpt,
+  source_publication,
+  source_url,
+  published_at,
+  created_at
+from public.articles_presse
+where published_at is not null;
+
+comment on view public.articles_presse_public is 
+'Public view of published press articles - bypasses RLS issues with JWT signing keys. SECURITY INVOKER: Runs with querying user privileges (not definer). Used by anon/authenticated users to access published articles without triggering RLS policy evaluation delays.';
+
+-- NOTE: Public grant removed. To allow authenticated users to read the
+-- view, add an explicit GRANT to the 'authenticated' role in a controlled
+-- migration after reviewing security implications.
 
 -- Public can read only published articles
 drop policy if exists "Public press articles are viewable by everyone" on public.articles_presse;
@@ -32,9 +62,12 @@ to anon, authenticated
 using ( published_at is not null );
 
 -- Admins can read all articles (including drafts)
+-- RESTRICTIVE policy: acts as OR gate for admin users
+-- Performance: Avoids evaluating both permissive policies for authenticated users
 drop policy if exists "Admins can view all press articles" on public.articles_presse;
 create policy "Admins can view all press articles"
 on public.articles_presse
+as restrictive  -- RESTRICTIVE: admin users bypass public filter
 for select
 to authenticated
 using ( (select public.is_admin()) );

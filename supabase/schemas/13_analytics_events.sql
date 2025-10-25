@@ -101,7 +101,10 @@ end;
 $$;
 
 -- Vue pour statistiques rapides
-create or replace view public.analytics_summary as
+-- SECURITY: Explicitly set SECURITY INVOKER to run with querying user's privileges
+create or replace view public.analytics_summary
+with (security_invoker = true)
+as
 select 
   event_type,
   entity_type,
@@ -114,4 +117,4 @@ where created_at >= current_date - interval '30 days'
 group by event_type, entity_type, date_trunc('day', created_at)
 order by event_date desc, total_events desc;
 
-comment on view public.analytics_summary is 'Vue résumé des statistiques analytiques sur 30 jours';
+comment on view public.analytics_summary is 'Vue résumé des statistiques analytiques sur 30 jours. SECURITY INVOKER: Runs with querying user privileges, protected by RLS on base tables.';

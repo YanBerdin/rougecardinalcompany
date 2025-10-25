@@ -140,6 +140,90 @@ export async function myAction(input) { // ✅ Async export
 export type MyInput = z.infer<typeof MySchema>;
 ```
 
+### Pattern Upload Supabase Storage (TASK022)
+
+**Upload Server Action avec Rollback :**
+
+```typescript
+"use server";
+import { createClient } from "@/supabase/server";
+
+export async function uploadTeamMemberPhoto(formData: FormData) {
+  const supabase = await createClient();
+  const file = formData.get("file") as File;
+  
+  // 1. Validation
+  if (!file || file.size > 5 * 1024 * 1024) {
+    throw new Error("File too large (max 5MB)");
+  }
+  
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error("Invalid file type");
+  }
+  
+  // 2. Upload to Storage
+  const fileName = `team/${Date.now()}-${file.name}`;
+  const { data: uploadData, error: uploadError } = await supabase.storage
+    .from("medias")
+    .upload(fileName, file);
+    
+  if (uploadError) throw uploadError;
+  
+  try {
+    // 3. Insert metadata to database
+    const { data: media, error: dbError } = await supabase
+      .from("medias")
+      .insert({
+        category_id: categoryId,
+        storage_path: uploadData.path,
+        file_name: file.name,
+        file_size: file.size,
+        mime_type: file.type,
+      })
+      .select()
+      .single();
+      
+    if (dbError) throw dbError;
+    return media;
+    
+  } catch (error) {
+    // 4. Rollback: delete uploaded file if DB insert fails
+    await supabase.storage.from("medias").remove([uploadData.path]);
+    throw error;
+  }
+}
+```
+
+**Storage Bucket RLS Policies :**
+
+```sql
+-- Public read
+create policy "Public read medias"
+  on storage.objects for select
+  to public
+  using ( bucket_id = 'medias' );
+
+-- Authenticated upload
+create policy "Authenticated users can upload medias"
+  on storage.objects for insert
+  to authenticated
+  with check ( bucket_id = 'medias' );
+
+-- Authenticated update
+create policy "Authenticated users can update medias"
+  on storage.objects for update
+  to authenticated
+  using ( bucket_id = 'medias' )
+  with check ( bucket_id = 'medias' );
+
+-- Admin delete
+create policy "Admins can delete medias"
+  on storage.objects for delete
+  to authenticated
+  using ( bucket_id = 'medias' and (select public.is_admin()) );
+```
+
 **Exemple DAL + Actions avec validation séparée :**
 
 ```typescript
@@ -293,6 +377,9 @@ export async function middleware(req: NextRequest) {
 ### Pattern de Protection des Données
 
 ```sql
+### Pattern de Protection des Données
+
+```sql
 -- Politique RLS Supabase type (exemples)
 create policy "Accès public aux spectacles"
   on spectacles
@@ -314,6 +401,44 @@ create policy "Admins can update press articles"
   to authenticated
   using ((select public.is_admin()))
   with check ((select public.is_admin()));
+
+-- Vue publique pour contourner les problèmes RLS/JWT Signing Keys (oct. 2025)
+-- SECURITY INVOKER: runs with querying user privileges (not creator/definer)
+create view articles_presse_public
+with (security_invoker = true)
+as
+select id, title, author, type, chapo, excerpt, source_publication, source_url, published_at, created_at
+from articles_presse
+where published_at is not null;
+
+-- IMPORTANT: SECURITY INVOKER views require base table GRANT permissions
+grant select on articles_presse to anon, authenticated;
+grant select on articles_presse_public to anon, authenticated;
+```
+
+**Pattern Defense in Depth (oct. 2025)** :
+
+Modèle de sécurité en trois couches pour SECURITY INVOKER views :
+
+1. **VIEW (SECURITY INVOKER)** : Filtre WHERE + exécution avec privilèges utilisateur
+2. **GRANT PERMISSIONS** : Contrôle d'accès de base sur table (anon/authenticated SELECT)
+3. **RLS POLICIES** : Filtrage fin au niveau des lignes
+
+**Root cause patterns (Troubleshooting RLS)** :
+
+- RLS activé sans policies → PostgreSQL deny all by default (comportement sécurisé)
+- SECURITY INVOKER sans GRANT → Vue inaccessible pour anon users
+- **Fix** : Appliquer policies RLS + GRANT SELECT sur table base
+
+Optimisations RLS recommandées:
+
+- Appeler les fonctions dans les policies via `(select ...)` pour initPlan.
+- Index partiels alignés sur les filtres RLS (ex: `published_at is not null` sur `articles_presse`).
+- **Vues publiques** : pour contourner incompatibilités RLS avec JWT Signing Keys, créer des vues avec permissions directes.
+- **Testing** : Toujours tester avec `SET ROLE anon` pour simuler utilisateurs anonymes
+
+Documentation complète : `doc/rls-policies-troubleshooting.md`
+
 ```
 
 Optimisations RLS recommandées:
@@ -545,7 +670,7 @@ Composants clés (exemple « La Compagnie »):
    - Conserver Suspense en prod; supprimer les délais artificiels.
 
 5. Fallback automatique (robustesse)
-   - Dans `lib/dal/compagnie-presentation.ts`: si la requête échoue ou retourne 0 lignes, retourner un contenu local de secours `compagniePresentationFallback` (ancien mock renommé et marqué « [DEPRECATED FALLBACK] »).
+   - Dans `lib/dal/compagnie-presentation.ts`: si la requête échoue ou retourne 0 lignes, retourner un contenu local de secours `compagniePresentationFallback` (ancien mock renommé et marqué « `[DEPRECATED FALLBACK]` »).
    - But: éviter les pages vides en environnement vierge ou lors d’un incident ponctuel; tracer l’erreur côté logs si pertinent.
 
 6. Dépréciation des mocks

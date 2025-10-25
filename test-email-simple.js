@@ -1,5 +1,5 @@
 // test-email-simple.js
-const fetch = require("node-fetch");
+import fetch from "node-fetch";
 
 async function testNewsletter() {
   try {
@@ -25,7 +25,7 @@ async function testNewsletter() {
       console.log("❌ Newsletter test failed:", result.error);
     }
   } catch (error) {
-    console.error("❌ Error:", error.message);
+    console.error("❌ Error:", error?.message ?? String(error));
   }
 }
 
@@ -58,7 +58,7 @@ async function testContact() {
       console.log("❌ Contact test failed:", result.error);
     }
   } catch (error) {
-    console.error("❌ Error:", error.message);
+    console.error("❌ Error:", error?.message ?? String(error));
   }
 }
 

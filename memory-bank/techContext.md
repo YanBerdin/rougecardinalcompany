@@ -36,6 +36,12 @@
 │   ├── page.tsx           # Page d'accueil
 │   ├── auth/              # Routes d'authentification
 │   ├── protected/         # Routes protégées
+│   ├── admin/             # 🆕 Backoffice administration
+│   │   ├── layout.tsx     # Admin layout avec sidebar
+│   │   ├── page.tsx       # Dashboard avec statistiques
+│   │   └── team/          # Team management
+│   │       ├── page.tsx   # Liste membres équipe
+│   │       └── actions.ts # Server Actions (upload, CRUD)
 │   └── api/               # API Routes
 │       ├── newsletter/    # Newsletter subscription
 │       ├── contact/       # Contact form
@@ -45,7 +51,15 @@
 ├── components/            # Composants React
 │   ├── ui/               # Composants UI de base (shadcn/ui)
 │   ├── features/         # Features (Smart/Dumb pattern)
-│   │   └── public-site/  # Public website features
+│   │   ├── public-site/  # Public website features
+│   │   └── admin/        # 🆕 Admin features
+│   │       └── team/     # Team management UI
+│   │           ├── TeamContainer.tsx
+│   │           ├── TeamView.tsx
+│   │           ├── TeamForm.tsx
+│   │           ├── TeamList.tsx
+│   │           ├── TeamCard.tsx
+│   │           └── MediaPickerDialog.tsx
 │   ├── skeletons/        # Loading skeletons
 │   └── layout/           # Composants de layout
 ├── emails/               # React Email templates
@@ -55,6 +69,8 @@
 ├── lib/                  # Utilitaires et services
 │   ├── supabase/        # Configuration Supabase
 │   ├── dal/             # Data Access Layer (server-only)
+│   │   ├── team.ts      # 🆕 Team members DAL
+│   │   └── ...          # Other DAL modules
 │   ├── email/           # Email actions & schemas
 │   ├── hooks/           # Custom React hooks
 │   ├── resend.ts        # Resend client config
@@ -68,7 +84,9 @@
 │   └── test-webhooks.ts
 ├── supabase/            # Supabase project
 │   ├── migrations/      # Database migrations
-│   └── schemas/         # [DEPRECATED] use migrations/
+│   │   └── 20251022000001_create_medias_storage_bucket.sql  # 🆕 Storage bucket
+│   └── schemas/         # Declarative schema (source of truth)
+│       └── 02c_storage_buckets.sql  # 🆕 Storage bucket schema
 └── public/              # Assets statiques
 ```
 
@@ -119,6 +137,14 @@ RESEND_API_KEY=re_xxx                      # Required
 RESEND_AUDIENCE_ID=xxx                     # Optional
 EMAIL_FROM=noreply@rougecardinalcompany.fr # Default FROM
 EMAIL_CONTACT=contact@rougecardinalcompany.fr # Contact email
+```
+
+**Next.js Image Configuration:**
+
+```env
+# In next.config.ts remotePatterns
+# Supabase Storage hostname configured for Image optimization
+# yvtrlvmbofklefxcxrzv.supabase.co/storage/v1/object/public/**
 ```
 
 **Site:**

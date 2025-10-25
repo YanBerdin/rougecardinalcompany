@@ -24,3 +24,10 @@ Media handling must be robust: upload, thumbnails, metadata, tagging, and deleti
 ### 2025-10-16
 
 - Task generated from Milestone 3.
+
+## shadcn / TweakCN checklist
+
+- [ ] Use shadcn MCP to fetch FileUpload, Gallery, Tag components
+- [ ] Call `get-component-demo` to ensure upload UX matches shadcn patterns
+- [ ] Verify thumbnail generation and gallery presentation under the TweakCN theme
+- [ ] Responsive checks for gallery and upload flows

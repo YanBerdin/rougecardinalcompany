@@ -24,3 +24,10 @@ Toggles are configuration stored in DB and read by public pages; ensure fast rea
 ### 2025-10-16
 
 - Task created from Milestone 3.
+
+## shadcn / TweakCN checklist
+
+- [ ] Use shadcn MCP to fetch Toggle, Switch, and Settings UI components
+- [ ] Call `get-component-demo` for toggles and confirm the required wrappers
+- [ ] Apply TweakCN theme and verify toggle appearance across admin pages
+- [ ] Accessibility checks for toggle controls (keyboard focus, aria-labels)

@@ -1,3 +1,30 @@
+# knowledge-base — Documentation consolidée (Rouge Cardinal)
+
+Ce résumé centralise les points essentiels extraits de la memory-bank (architecture, patterns, email, DAL, RLS) et fournit un aperçu des tâches backoffice (TASK021..TASK040).
+
+Utilisez ce bloc comme sommaire rapide. Les documents détaillés restent dans `memory-bank/` (liens en bas de fichier).
+
+---
+
+Principaux points consolidés :
+
+- Next.js 15 (App Router) : privilégier Server Components pour les lectures et SEO; n'utiliser `"use client"` que pour l'interactivité.
+- Data Access Layer (DAL) server-only : tous les accès en lecture centralisés dans `lib/dal/*`, modules marqués `server-only` et validés avec Zod.
+- Supabase Auth optimisé : utiliser `@supabase/ssr`, cookies via `getAll()`/`setAll()`, et `supabase.auth.getClaims()` pour checks rapides; réserver `getUser()` aux usages nécessitant l'objet complet.
+- Row Level Security (RLS) : policies co‑localisées dans chaque fichier de table; une policy par opération (select/insert/update/delete); privilégier `public.is_admin()` pour checks admin.
+- Server Actions & Mutations : reads via Server Components, mutations via Server Actions / API routes; valider avec Zod et invalider le cache avec `revalidatePath()`/`revalidateTag()`.
+- **Supabase Storage** : bucket "medias" avec RLS (lecture publique, upload auth, delete admin); Server Actions avec rollback en cas d'erreur DB; validation client + serveur (5MB max, JPEG/PNG/WebP/AVIF).
+- **RLS Policies & SECURITY INVOKER** : toujours appliquer RLS policies ET GRANT permissions sur tables base pour les vues SECURITY INVOKER; PostgreSQL deny-all par défaut si RLS activé sans policies; Defense in Depth (VIEW + GRANT + RLS).
+- Email : architecture Resend + React Email, templates React, Zod validation, webhooks pour bounces/deliveries, scripts d'intégration fournis.
+- Tests & Quality gates : build, typecheck, tests unitaires, markdownlint. Corriger MD warnings avant merge.
+
+Backoffice — tâches (aperçu rapide) :
+
+- ✅ **TASK022 Team Management** (COMPLÉTÉ 22/10/2025) : CRUD équipe avec photos Supabase Storage, médiathèque fonctionnelle, admin dashboard opérationnel
+- TASK021..TASK040 (auth roles, admin layout, CRUD spectacles/événements, gestion médias, espace presse, contacts, newsletter admin, versioning, SEO redirects, partners, home content, permissions, audits, imports, QA/accessibility).
+
+---
+
 # knowledge-base — Cahier des charges – Création de site internet **Compagnie de Théâtre « Rouge Cardinal »**
 
 ## Contexte
@@ -95,10 +122,10 @@
 
 - **Compagnie :** Rouge Cardinal
 - **Forme juridique :** Association loi 1901
-- **Siège social :** [Adresse complète]
-- **Contact projet :** [Prénom Nom], Président / Responsable communication
-- **Téléphone :** [Numéro]
-- **Email :** [adresse.email@rougecardinal.fr]
+- **Siège social :** `[Adresse complète]`
+- **Contact projet :** `[Prénom Nom]`, Président / Responsable communication
+- **Téléphone :** `[Numéro]`
+- **Email :** `[adresse.email@rougecardinal.fr]`
 
 ### 1.2. Description de l'établissement
 
@@ -265,7 +292,7 @@ L’objet user contient les attributs suivants :
 | confirmed_at       | `string`         | The timestamp that either the user's email or phone was confirmed. If null, it means that the user does not have a confirmed email address and phone number.                                                                                         |
 | last_sign_in_at    | `string`         | The timestamp that the user last signed in.                                                                                                                                                                                                          |
 | app_metadata       | `object`         | The `provider` attribute indicates the first provider that the user used to sign up with. The `providers` attribute indicates the list of providers that the user can use to login with.                                                             |
-| user_metadata      | `object`         | Defaults to the first provider's identity data but can contain additional custom user metadata if specified. Refer to [**User Identity**](/docs/guides/auth/auth-identity-linking#the-user-identity) for more information about the identity object. |
+| user_metadata      | `object`         | Defaults to the first provider's identity data but can contain additional custom user metadata if specified. Refer to [**User Identity**](`/docs/guides/auth/auth-identity-linking#the-user-identity`) for more information about the identity object. |
 | identities         | `UserIdentity[]` | Contains an object array of identities linked to the user.                                                                                                                                                                                           |
 | created_at         | `string`         | The timestamp that the user was created.                                                                                                                                                                                                             |
 | updated_at         | `string`         | The timestamp that the user was last updated.                                                                                                                                                                                                        |
@@ -4555,7 +4582,7 @@ Supabase maps every request to one of the roles:
 - `anon`: an unauthenticated request (the user is not logged in)
 - `authenticated`: an authenticated request (the user is logged in)
 
-These are actually [Postgres Roles](/docs/guides/database/postgres/roles). You can use these roles within your Policies using the `TO` clause:
+These are actually [Postgres Roles](`/docs/guides/database/postgres/roles`). You can use these roles within your Policies using the `TO` clause:
 
 ```sql
 create policy "Profiles are viewable by everyone"
@@ -4652,7 +4679,7 @@ using ( team_id in (select auth.jwt() -> 'app_metadata' -> 'teams'));
 
 #### MFA
 
-The `auth.jwt()` function can be used to check for [Multi-Factor Authentication](/docs/guides/auth/auth-mfa#enforce-rules-for-mfa-logins). For example, you could restrict a user from updating their profile unless they have at least 2 levels of authentication (Assurance Level 2):
+The `auth.jwt()` function can be used to check for [Multi-Factor Authentication](`/docs/guides/auth/auth-mfa#enforce-rules-for-mfa-logins`). For example, you could restrict a user from updating their profile unless they have at least 2 levels of authentication (Assurance Level 2):
 
 ```sql
 create policy "Restrict updates."
@@ -4672,7 +4699,7 @@ Based on a series of [tests](https://github.com/GaryAustin1/RLS-Performance), we
 
 ##### Add indexes
 
-Make sure you've added [indexes](/docs/guides/database/postgres/indexes) on any columns used within the Policies which are not already indexed (or primary keys). For a Policy like this:
+Make sure you've added [indexes](`/docs/guides/database/postgres/indexes`) on any columns used within the Policies which are not already indexed (or primary keys). For a Policy like this:
 
 ```sql
 create policy "Users can access their own records" on test_table
@@ -5026,6 +5053,16 @@ order by
 ```
 
 ## 20. Entrées récentes (oct. 2025)
+
+- **fix(rls): resolve empty media articles display after SECURITY INVOKER migration** (commit à venir)
+  - **Root cause 1**: RLS enabled on `articles_presse` but NO policies applied → PostgreSQL deny all by default
+  - **Root cause 2**: SECURITY INVOKER view without base table GRANT permissions → anon users blocked
+  - **Solution 1**: Apply 5 RLS policies (public read published, admin CRUD) via `20251022150000_apply_articles_presse_rls_policies.sql`
+  - **Solution 2**: Add GRANT SELECT on `articles_presse` to anon/authenticated via `20251022140000_grant_select_articles_presse_anon.sql`
+  - **Pattern**: Defense in depth - GRANT permissions + RLS policies + SECURITY INVOKER view
+  - **Testing**: Validated with `SET ROLE anon` (0 → 3 articles visible)
+  - **Documentation**: `doc/rls-policies-troubleshooting.md` with complete analysis and checklist
+  - **Impact**: Media articles display fully restored in production
 
 - feat(contact): integrate DAL and fix missing email notification (commit 1e27497)
   - Complete DAL integration in app/api/contact/route.ts with createContactMessage

@@ -24,3 +24,10 @@ Similar to homepage content; relatively low volume but critical for public prese
 ### 2025-10-16
 
 - Task created from epic Milestone 2.
+
+## shadcn / TweakCN checklist
+
+- [ ] Use shadcn MCP to find components for stats, icons, and layout grids
+- [ ] Use `get-component-demo` to ensure proper markup for stat cards
+- [ ] Apply TweakCN theme for company pages and check color/contrast for brand values
+- [ ] Responsive verification for stats and presentation sections

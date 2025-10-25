@@ -2,8 +2,11 @@
 -- Ordre: 41 - après 15_content_versioning.sql
 
 -- Membres équipe admin view
+-- SECURITY: Explicitly set SECURITY INVOKER to run with querying user's privileges
 drop view if exists public.membres_equipe_admin cascade;
-create or replace view public.membres_equipe_admin as
+create or replace view public.membres_equipe_admin
+with (security_invoker = true)
+as
 select 
   m.id,
   m.name,
@@ -33,11 +36,14 @@ left join lateral (
   where entity_type = 'membre_equipe' and entity_id = m.id
 ) vcount on true;
 
-comment on view public.membres_equipe_admin is 'Vue d''administration des membres avec métadonnées de versioning (dernière version et total).';
+comment on view public.membres_equipe_admin is 'Vue d''administration des membres avec métadonnées de versioning (dernière version et total). SECURITY INVOKER: Runs with querying user privileges, protected by RLS on base tables.';
 
 -- Sections présentation admin view
+-- SECURITY: Explicitly set SECURITY INVOKER to run with querying user's privileges
 drop view if exists public.compagnie_presentation_sections_admin cascade;
-create or replace view public.compagnie_presentation_sections_admin as
+create or replace view public.compagnie_presentation_sections_admin
+with (security_invoker = true)
+as
 select
   s.id,
   s.slug,
@@ -71,11 +77,14 @@ left join lateral (
   where entity_type = 'compagnie_presentation_section' and entity_id = s.id
 ) vcount on true;
 
-comment on view public.compagnie_presentation_sections_admin is 'Vue administration sections présentation avec métadonnées de versioning.';
+comment on view public.compagnie_presentation_sections_admin is 'Vue administration sections présentation avec métadonnées de versioning. SECURITY INVOKER: Runs with querying user privileges, protected by RLS on base tables.';
 
 -- Partenaires admin view
+-- SECURITY: Explicitly set SECURITY INVOKER to run with querying user's privileges
 drop view if exists public.partners_admin cascade;
-create view public.partners_admin as
+create view public.partners_admin
+with (security_invoker = true)
+as
 select
   p.id,
   p.name,
@@ -100,4 +109,4 @@ left join lateral (
   limit 1
 ) lv on true;
 
-comment on view public.partners_admin is 'Vue administration partenaires incluant métadonnées versioning';
+comment on view public.partners_admin is 'Vue administration partenaires incluant métadonnées versioning. SECURITY INVOKER: Runs with querying user privileges, protected by RLS on base tables.';

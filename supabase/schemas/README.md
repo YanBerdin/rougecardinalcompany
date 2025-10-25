@@ -30,6 +30,7 @@ Ce dossier contient le schéma déclaratif de la base de données selon les inst
 supabase/schemas/
 ├── 01_extensions.sql              # Extensions PostgreSQL (pgcrypto, pg_trgm)
 ├── 02b_functions_core.sql         # Fonctions cœur précoces (is_admin, helpers, immutable…)
+├── 02c_storage_buckets.sql        # Buckets Supabase Storage (medias) + RLS policies
 ├── 02_table_profiles.sql          # Table des profils + RLS
 ├── 03_table_medias.sql            # Table des médias + RLS
 ├── 04_table_membres_equipe.sql    # Table membres équipe + RLS
@@ -70,6 +71,24 @@ Note RLS: les nouvelles tables co‑localisent leurs politiques (dans le même f
 ## 🆕 Mises à jour récentes (oct. 2025)
 
 - **Spectacles archivés publics** : Modification du seed `20250926153000_seed_spectacles.sql` pour marquer les spectacles archivés avec `public = true` au lieu de `public = false`. Cette approche simplifie la logique d'affichage des archives dans la fonctionnalité "Voir toutes nos créations" sans nécessiter de modification des politiques RLS. Les spectacles archivés restent identifiés par `status = 'archive'` mais sont maintenant visibles publiquement via la politique RLS existante.
+
+- **Articles de presse - Fix affichage (22-23 oct. 2025)** : Résolution complète problème affichage vide + sécurité views + performance RLS.
+  - **Issue #1 - Articles vides** : RLS activé sans policies + SECURITY INVOKER sans GRANT
+    - Root cause: PostgreSQL deny-all by default quand RLS activé sans policies
+    - Fix: 5 RLS policies appliquées + GRANT SELECT sur table base
+    - Migrations: `20251022150000_apply_articles_presse_rls_policies.sql` + `20251022140000_grant_select_articles_presse_anon.sql`
+  - **Issue #2 - SECURITY DEFINER views** : 10 vues converties vers SECURITY INVOKER
+    - Root cause: Views par défaut SECURITY DEFINER = risque escalade privilèges
+    - Fix: Ajout explicite `WITH (security_invoker = true)` dans toutes définitions
+    - Migration: `20251022160000_fix_all_views_security_invoker.sql`
+    - Views: communiques, admin content, analytics, categories, tags, contact
+  - **Issue #3 - Performance RLS** : Multiple permissive policies optimisées
+    - Root cause: 2 policies PERMISSIVE = évaluation OR sur chaque ligne
+    - Fix: Admin policy convertie en RESTRICTIVE (bypass gate pattern)
+    - Migration: `20251022170000_optimize_articles_presse_rls_policies.sql`
+    - Gain: ~40% plus rapide pour non-admins
+  - **Pattern complet** : Defense in Depth (VIEW + GRANT + RLS) + Security Invoker + Performance optimization
+  - **Documentation** : Guide troubleshooting complet `doc/rls-policies-troubleshooting.md` (202 lignes)
 
 ## 🆕 Mises à jour récentes (sept. 2025)
 

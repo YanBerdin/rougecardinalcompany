@@ -462,7 +462,10 @@ create trigger trg_compagnie_presentation_sections_versioning
   for each row execute function public.compagnie_presentation_sections_versioning_trigger();
 
 -- Vue pour consulter facilement l'historique d'une entité
-create or replace view public.content_versions_detailed as
+-- SECURITY: Explicitly set SECURITY INVOKER to run with querying user's privileges
+create or replace view public.content_versions_detailed
+with (security_invoker = true)
+as
 select 
   cv.id,
   cv.entity_type,
@@ -478,7 +481,7 @@ from public.content_versions cv
 left join public.profiles as p on cv.created_by = p.user_id
 order by cv.entity_type, cv.entity_id, cv.version_number desc;
 
-comment on view public.content_versions_detailed is 'Vue détaillée de l''historique des versions avec informations sur les auteurs';
+comment on view public.content_versions_detailed is 'Vue détaillée de l''historique des versions avec informations sur les auteurs. SECURITY INVOKER: Runs with querying user privileges, protected by RLS on base tables.';
 
 -- Fonction pour restaurer une version antérieure
 create or replace function public.restore_content_version(

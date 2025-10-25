@@ -59,10 +59,10 @@ async function testWebhookConfiguration() {
 
       if (webhooks && webhooks.length > 0) {
         console.log(`📋 Found ${webhooks.length} webhook(s):`);
-        webhooks.forEach((webhook: any, index: number) => {
-          //TODO: fix Unexpected any
+        type WebhookInfo = { url?: string; events?: string[] };
+        webhooks.forEach((webhook: WebhookInfo, index: number) => {
           console.log(
-            `   ${index + 1}. ${webhook.url} (${webhook.events?.join(", ") || "no events"})`
+            `   ${index + 1}. ${webhook.url ?? "<no url>"} (${(webhook.events || []).join(", ") || "no events"})`
           );
         });
       } else {

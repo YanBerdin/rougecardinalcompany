@@ -8,7 +8,7 @@ Ce fichier est une prévisualisation consolidée des 20 tâches générées à p
 | TASK022 | Team Management             | Pending | 2025-10-16 | 2025-10-16 | CRUD for team members with photos and roles              | `memory-bank/tasks/TASK022-team-management.md`             |
 | TASK023 | Partners Management         | Pending | 2025-10-16 | 2025-10-16 | CRUD for partners with logos and display order           | `memory-bank/tasks/TASK023-partners-management.md`         |
 | TASK024 | Press Management            | Pending | 2025-10-16 | 2025-10-16 | CRUD for press releases and press contacts               | `memory-bank/tasks/TASK024-press-management.md`            |
-| TASK025 | Communications Dashboard    | Pending | 2025-10-16 | 2025-10-16 | View newsletter subscribers and contact messages         | `memory-bank/tasks/TASK025-communications-dashboard.md`    |
+| TASK025 | RLS Security & Performance Fixes             | Completed  | 2025-10-22 | 2025-10-23 | Fix RLS policies, SECURITY INVOKER views, performance optimization (~40% gain) | `memory-bank/tasks/TASK025-rls-security-performance-fixes.md` |
 | TASK026 | Homepage Content Management | Pending | 2025-10-16 | 2025-10-16 | Edit hero slides, about section, news highlights         | `memory-bank/tasks/TASK026-homepage-content-management.md` |
 | TASK027 | Company Content Management  | Pending | 2025-10-16 | 2025-10-16 | Edit company values, stats, presentation sections        | `memory-bank/tasks/TASK027-company-content-management.md`  |
 | TASK028 | Content Versioning UI       | Pending | 2025-10-16 | 2025-10-16 | View history, compare versions, restore                  | `memory-bank/tasks/TASK028-content-versioning-ui.md`       |

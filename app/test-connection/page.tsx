@@ -1,5 +1,6 @@
 "use client";
 
+/* eslint-disable react-hooks/exhaustive-deps */
 //! ---------------- Warning -----------------//
 //TODO: Delete before production
 import { useState, useEffect } from "react";
@@ -29,32 +30,43 @@ import type {
 
 function mapMembreToTeamMember(membre: Membre): TeamMember {
   return {
-    name: membre.nom ?? membre.name, // nom est l'alias, name est dans la DB
-    role: membre.role ?? "",
-    bio: membre.description ?? "",
-    image: membre.photo_url || "", // ou une fonction pour récupérer l'URL à partir de photo_media_id
+    name: membre.name,
+    role: membre.role,
+    description: membre.description,
+    image: membre.photo_url || membre.image_url || "", // photo_url (legacy) or image_url (DB field)
   };
 }
 
+type ExtendedSpectacle = Spectacle & {
+  genre?: string | null;
+  cast?: number | null;
+  premiere?: string | null;
+  image?: string | null;
+  status?: string | null;
+  awards?: string[] | null;
+};
+
 function mapSpectacleFromDb(
-  dbSpectacle: Spectacle
+  dbSpectacle: ExtendedSpectacle
 ): CurrentShow | ArchivedShow {
   return {
     id: dbSpectacle.id,
     title: dbSpectacle.title,
     slug: dbSpectacle.slug ?? undefined,
     description: dbSpectacle.description ?? "",
-    genre: (dbSpectacle as any).genre ?? "", //TODO: fix Unexpected any
-    duration_minutes: dbSpectacle.duration_minutes ? String(dbSpectacle.duration_minutes) : "",
-    cast: (dbSpectacle as any).cast ?? 0, //TODO: fix Unexpected any
-    premiere: (dbSpectacle as any).premiere ?? "", //TODO: fix Unexpected any
+    genre: dbSpectacle.genre ?? "",
+    duration_minutes: dbSpectacle.duration_minutes
+      ? String(dbSpectacle.duration_minutes)
+      : "",
+    cast: dbSpectacle.cast ?? 0,
+    premiere: dbSpectacle.premiere ?? "",
     public: dbSpectacle.public ?? false,
     created_by: dbSpectacle.created_by ?? "",
     created_at: dbSpectacle.created_at,
     updated_at: dbSpectacle.updated_at ?? dbSpectacle.created_at,
-    image: (dbSpectacle as any).image ?? "", //TODO: fix Unexpected any
-    status: (dbSpectacle as any).status ?? "", //TODO: fix Unexpected any
-    awards: (dbSpectacle as any).awards ?? [], //TODO: fix Unexpected any
+    image: dbSpectacle.image ?? "",
+    status: dbSpectacle.status ?? "",
+    awards: dbSpectacle.awards ?? [],
     // year: (dbSpectacle as any).premiere
     //   ? String(new Date((dbSpectacle as any).premiere).getFullYear())
     //   : ((dbSpectacle as any).year ?? ""),
@@ -67,12 +79,10 @@ type SpectacleCompat = Spectacle & {
   duration_minutes?: string; // Pour compatibilité avec ancien code qui attend string
 };
 
-// Utilisation du type global MembreEquipe avec alias pour compatibilité
+// Utilisation du type global MembreEquipe
 type Membre = MembreEquipe & {
-  // Optionnel : si tu ajoutes l'URL de la photo côté client
+  // Legacy field for backward compatibility with old test code
   photo_url?: string;
-  // Alias pour compatibilité avec ancien code
-  nom?: string;
 };
 
 // Utilisation du type global ArticlePresse avec alias pour compatibilité
@@ -205,10 +215,16 @@ export default function TestConnectionPage() {
 
         if (tableError) {
           // Si l'erreur contient "relation does not exist", les tables n'ont pas été créées
+          let tableErrMsg = "";
+          if (typeof tableError === "object" && tableError !== null) {
+            const asUnknown = tableError as unknown;
+            const maybeMessage = (asUnknown as Record<string, unknown>).message;
+            if (typeof maybeMessage === "string") tableErrMsg = maybeMessage;
+          }
+
           if (
-            tableError.message &&
-            tableError.message.includes("relation") &&
-            tableError.message.includes("does not exist")
+            tableErrMsg.includes("relation") &&
+            tableErrMsg.includes("does not exist")
           ) {
             setConnectionStatus("tables-missing");
             setErrorMessage(
@@ -232,13 +248,16 @@ export default function TestConnectionPage() {
         setConnectionStatus("success");
       } catch (tableError) {
         // Vérifier si l'erreur est liée à l'absence de tables
+        let tableErrMsg = "";
+        if (typeof tableError === "object" && tableError !== null) {
+          const asUnknown = tableError as unknown;
+          const maybeMessage = (asUnknown as Record<string, unknown>).message;
+          if (typeof maybeMessage === "string") tableErrMsg = maybeMessage;
+        }
+
         if (
-          typeof tableError === "object" &&
-          tableError !== null &&
-          "message" in tableError &&
-          typeof (tableError as any).message === "string" &&
-          (tableError as any).message.includes("relation") &&
-          (tableError as any).message.includes("does not exist") //TODO: fix Unexpected any
+          tableErrMsg.includes("relation") &&
+          tableErrMsg.includes("does not exist")
         ) {
           setConnectionStatus("tables-missing");
           setErrorMessage(
@@ -266,6 +285,8 @@ export default function TestConnectionPage() {
     }
   };
 
+  // Intentionally run once on mount; testConnection is stable for this debug page
+
   useEffect(() => {
     testConnection();
   }, []);
@@ -276,7 +297,7 @@ export default function TestConnectionPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <h1 className="text-4xl font-bold">Test de connexion Supabase</h1>
           <Button onClick={testConnection} disabled={isLoading}>
-            {isLoading ? (
+                {isLoading ? (
               <>
                 <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> Test en
                 cours...
@@ -391,8 +412,8 @@ export default function TestConnectionPage() {
                   <div className="mb-2 p-2 rounded bg-green-600 text-white font-bold border border-green-800 shadow">
                     La connexion à Supabase fonctionne
                   </div>
-                  <div className="mb-2 p-2 rounded bg-red-600 text-white font-bold border border-red-800 shadow">
-                    Une erreur est survenue lors de l'accès aux tables ou aux
+                    <div className="mb-2 p-2 rounded bg-red-600 text-white font-bold border border-red-800 shadow">
+                    Une erreur est survenue lors de l&apos;accès aux tables ou aux
                     données.
                   </div>
                 </>
@@ -524,7 +545,7 @@ export default function TestConnectionPage() {
                             </div>
                           )}
                           <p className="text-sm text-muted-foreground">
-                            {uiMembre.bio}
+                            {uiMembre.description}
                           </p>
                         </div>
                       </CardContent>

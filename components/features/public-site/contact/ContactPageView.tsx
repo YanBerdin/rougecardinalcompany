@@ -306,9 +306,9 @@ export function ContactPageView() {
                         htmlFor="consent"
                         className="text-sm text-muted-foreground leading-relaxed"
                       >
-                        J'accepte que mes données personnelles soient traitées
+                        J&apos;accepte que mes données personnelles soient traitées
                         pour répondre à ma demande. Conformément au RGPD, vous
-                        disposez d'un droit d'accès, de rectification et de
+                        disposez d&apos;un droit d&apos;accès, de rectification et de
                         suppression de vos données.
                       </label>
                     </div>
@@ -475,7 +475,7 @@ export function ContactPageView() {
                         className="w-full"
                         disabled={isLoading}
                       >
-                        {isLoading ? "Inscription..." : "S'abonner"}
+                        {isLoading ? "Inscription..." : "S&apos;abonner"}
                       </Button>
                       {newsletterError && (
                         <p className="text-sm text-red-600">

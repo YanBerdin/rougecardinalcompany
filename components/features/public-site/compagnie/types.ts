@@ -7,12 +7,15 @@ export const ValueSchema = z.object({
   description: z.string(),
 });
 
-// Schéma pour les membres de l'équipe
+// Team Member Schema
+// Note: This is a simplified schema for the PUBLIC view
+// - 'image' is a VIRTUAL field mapped from DB fields 'image_url' (external URL) or 'photo_media_id' (Media Library)
+// - Admin schema with all DB fields is in lib/schemas/team.ts (TASK022)
 export const TeamMemberSchema = z.object({
   name: z.string(),
-  role: z.string(),
-  bio: z.string(),
-  image: z.string(),
+  role: z.string().nullable(), // Aligned with DB (string | null)
+  description: z.string().nullable(), // Aligned with DB (string | null)
+  image: z.string(), // Virtual field (mapped from image_url or photo_media_id → medias.url)
 });
 
 // Types inférés des schémas
