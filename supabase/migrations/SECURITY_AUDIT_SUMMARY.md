@@ -21,6 +21,7 @@ The security audit script (`supabase/scripts/audit_grants.sql`) detected broad t
 **File:** `20251025181000_revoke_final_exposed_objects.sql`
 
 Revoked grants on:
+
 - `information_schema.administrable_role_authorizations` → PUBLIC
 - `public.content_versions` → authenticated
 - `public.content_versions_detailed` → authenticated
@@ -32,6 +33,7 @@ Revoked grants on:
 **File:** `20251025182000_revoke_new_exposed_objects.sql`
 
 Revoked grants on:
+
 - `public.home_hero_slides` → authenticated
 - `public.lieux` → authenticated
 - `public.logs_audit` → authenticated
@@ -42,18 +44,31 @@ Revoked grants on:
 **File:** `20251025183000_revoke_membres_messages_views.sql`
 
 Revoked grants on:
+
 - `public.membres_equipe` → authenticated (table)
 - `public.membres_equipe_admin` → authenticated (view)
 - `public.messages_contact` → authenticated (table)
 - `public.messages_contact_admin` → authenticated (view)
 
+### Round 4: Partners, profiles and tag views (20251025184000)
+
+**File:** `20251025184000_revoke_final_round_partners_profiles.sql`
+
+Revoked grants on:
+
+- `public.partners` → authenticated (table)
+- `public.partners_admin` → authenticated (view)
+- `public.popular_tags` → authenticated (view)
+- `public.profiles` → authenticated (table)
+
 ## Total Impact
 
-**13 objects secured:**
-- 9 tables
-- 2 views (admin content versions)
-- 2 admin views (team members, contact messages)
-- 1 system view (information_schema)
+**17 objects secured:**
+
+- 11 tables (partners, profiles, membres_equipe, messages_contact, content_versions, evenements, home_about_content, home_hero_slides, lieux, logs_audit, medias)
+- 4 admin views (partners_admin, membres_equipe_admin, messages_contact_admin, content_versions_detailed)
+- 1 tag view (popular_tags)
+- 1 system view (information_schema.administrable_role_authorizations)
 
 ## Security Model After Fix
 
@@ -84,6 +99,7 @@ AS SELECT ...;
 ```
 
 **Why this matters:**
+
 - `SECURITY DEFINER` (default) → runs with creator (postgres) privileges → **dangerous**
 - `SECURITY INVOKER` → runs with querying user privileges → **safe**
 
@@ -99,9 +115,11 @@ Tables with public read access via RLS (no grants needed):
 | `lieux` | anon, authenticated | Admin only |
 | `medias` | anon, authenticated | Authenticated upload, Admin manage |
 | `membres_equipe` | anon, authenticated | Admin only |
+| `partners` | anon, authenticated (active) | Admin only |
 | `evenements` | anon, authenticated | Admin only |
 | `home_about_content` | anon, authenticated | Admin only |
 | `content_versions` | Admin only | System + Admin |
+| `profiles` | Public (own + public profiles) | Owner only |
 
 ### Admin-Only Tables
 
@@ -115,17 +133,21 @@ Tables accessible only to admins:
 - `messages_contact`: Public insert (contact form), Admin read
 - `messages_contact_admin`: Admin-only view (SECURITY INVOKER)
 - `membres_equipe_admin`: Admin-only view (SECURITY INVOKER)
+- `partners_admin`: Admin-only view with versioning (SECURITY INVOKER)
+- `popular_tags`: Public read view for tag statistics (SECURITY INVOKER)
 
 ## Verification
 
 ### Manual Test (SQL Editor)
 
 Run `supabase/scripts/quick_audit_test.sql` in Supabase SQL Editor:
+
 - **Expected result:** 0 rows (no exposed objects)
 
 ### Automated Test (CI)
 
 The CI workflow `.github/workflows/reorder-sql-tests.yml` runs:
+
 1. `supabase db push --linked` (apply migrations)
 2. `psql ... -f audit_grants.sql` (audit for exposed objects)
 3. Fails if any objects are exposed

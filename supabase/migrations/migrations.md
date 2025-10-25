@@ -42,7 +42,13 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
   - 📊 **Impact** : 4 objets sécurisés (2 tables + 2 vues admin)
   - 📝 **Documentation** : Voir `SECURITY_AUDIT_SUMMARY.md` pour détails complets
 
-**Total sécurité audit** : 13 objets exposés détectés et corrigés (9 tables + 2 vues content + 2 vues admin). Toutes les migrations sont idempotentes et peuvent être rejouées sans effet de bord. Script d'audit : `supabase/scripts/audit_grants.sql` + `analyze_remaining_grants.sh`.
+- `20251025184000_revoke_final_round_partners_profiles.sql` — **SECURITY : Revoke exposed grants (round 4 - final)** : Révocation des grants à authenticated sur partners, profiles et leurs vues admin/tags. Migration idempotente avec gestion d'erreur.
+  - 🔐 **Views security** : partners_admin et popular_tags utilisent SECURITY INVOKER
+  - ✅ **Core tables** : partners (partenaires actifs) et profiles (profils utilisateurs) sécurisés via RLS uniquement
+  - 📊 **Impact** : 4 objets sécurisés (2 tables + 2 vues)
+  - 🎯 **Final status** : 17 objets totaux sécurisés sur 4 rounds de migration
+
+**Total sécurité audit** : 17 objets exposés détectés et corrigés (11 tables + 4 vues admin + 1 vue tags + 1 vue system). Toutes les migrations sont idempotentes et peuvent être rejouées sans effet de bord. Script d'audit : `supabase/scripts/audit_grants.sql` + `analyze_remaining_grants.sh`.
 
 ## Corrections et fixes critiques
 
