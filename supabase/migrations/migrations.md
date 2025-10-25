@@ -18,6 +18,12 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 - `20250918004849_apply_declarative_schema.sql` — Migration générée du schéma déclaratif principal (DDL)
 
+## New generated migration (reorder team members)
+
+- `20251024214802_reorder_team_members.sql` — Migration generated to add the PL/pgSQL function `public.reorder_team_members(jsonb)` and associated metadata. This migration implements a server-side RPC that applies multiple `ordre` updates on `public.membres_equipe` atomically with validation and advisory locking. The declarative function source lives in `supabase/schemas/63_reorder_team_members.sql` and should be synchronized with this migration.
+
+- `20251024231855_restrict_reorder_execute.sql` — HOTFIX: restrict execute on `public.reorder_team_members(jsonb)` by revoking EXECUTE from `public`/`anon` and granting EXECUTE to `authenticated` only. Applied as a manual hotfix to reduce attack surface; declarative schema updated in `supabase/schemas/63_reorder_team_members.sql` to reflect the grant.
+
 ## Corrections et fixes critiques
 
 - `20250918000000_fix_spectacles_versioning_trigger.sql` — **FIX CRITIQUE** : Correction du trigger `spectacles_versioning_trigger()` pour utiliser le champ `public` (boolean) au lieu de `published_at` (inexistant dans la table spectacles). Ce trigger causait une erreur `record "old" has no field "published_at"` lors des insertions/updates de spectacles.
@@ -290,3 +296,15 @@ pnpm dlx supabase status --linked
 - `.github/copilot/Create_RLS_policies.Instructions.md` — Instructions pour créer des politiques RLS
 - `.github/copilot/Database_Create_functions.Instructions.md` — Instructions pour créer des fonctions
 - `.github/copilot/Postgres_SQL_Style_Guide.Instructions.md` — Instructions pour le style SQL
+
+## Tests exécutés et observations
+
+- `20251025_test_reorder_and_views.sql` — Exécuté dans le Supabase SQL Editor le 2025-10-25 pour vérifier :
+  - la lecture via la vue `public.membres_equipe_admin` (SECURITY INVOKER) pour les rôles `anon` et `authenticated` ;
+  - les permissions `EXECUTE` sur `public.reorder_team_members(jsonb)` pour `anon` / `authenticated` / `postgres`.
+  
+  Résultat observé dans le SQL Editor : "Success. No rows returned.". Le script utilise des blocs PL/pgSQL `DO $$ ... $$` qui émettent des `RAISE NOTICE` pour chaque étape de test (sélection / appel RPC).
+
+  Remarques complémentaires :
+  - Le script a été adapté pour fonctionner dans l'éditeur SQL et comme migration (remplacement des méta-commandes psql `\echo` par `RAISE NOTICE`).
+  - Une tentative d'exécution locale via `psql` a échoué pour l'environnement de développement en raison d'une erreur réseau (résolution IPv6 sans connectivité IPv6 locale : "Network is unreachable"). Exécuter le script depuis le SQL Editor ou via une connexion IPv4/une instance Supabase Preview est recommandé pour la reproductibilité.

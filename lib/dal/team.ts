@@ -26,12 +26,19 @@ export type DALResult<T> = DALSuccess<T> | DALError;
 
 const UpsertTeamMemberSchema = TeamMemberDbSchema.partial();
 
-const ReorderItemSchema = z.object({ id: z.number().int().positive(), ordre: z.number().int() });
+const ReorderItemSchema = z.object({
+  id: z.number().int().positive(),
+  ordre: z.number().int(),
+});
 const ReorderSchema = z
   .array(ReorderItemSchema)
   .min(1)
-  .refine((arr) => new Set(arr.map((i) => i.id)).size === arr.length, { message: "Duplicate id in updates" })
-  .refine((arr) => new Set(arr.map((i) => i.ordre)).size === arr.length, { message: "Duplicate ordre in updates" });
+  .refine((arr) => new Set(arr.map((i) => i.id)).size === arr.length, {
+    message: "Duplicate id in updates",
+  })
+  .refine((arr) => new Set(arr.map((i) => i.ordre)).size === arr.length, {
+    message: "Duplicate ordre in updates",
+  });
 
 export async function fetchAllTeamMembers(
   includeInactive = false

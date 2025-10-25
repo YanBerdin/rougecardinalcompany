@@ -78,4 +78,5 @@ begin
 end;
 $$ language plpgsql security definer;
 
--- grant execute on function public.reorder_team_members(jsonb) to authenticated;
+-- grant execute to authenticated so only authenticated users (admin UI / server) can execute the rpc
+grant execute on function public.reorder_team_members(jsonb) to authenticated;

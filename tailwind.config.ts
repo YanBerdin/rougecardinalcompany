@@ -61,8 +61,5 @@ export default {
       },
     },
   },
-  plugins: [
-    animate,
-    touchHitboxPlugin,
-  ],
+  plugins: [animate, touchHitboxPlugin],
 } satisfies Config;
