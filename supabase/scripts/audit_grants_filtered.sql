@@ -30,7 +30,7 @@ WHERE (CASE WHEN split_part(acl_item::text, '=', 1) = '' THEN 'PUBLIC' ELSE spli
     (nspname = 'realtime' AND relname IN ('messages', 'schema_migrations', 'subscription'))
     OR
     -- Supabase Storage system tables (managed via Storage API and RLS on storage.objects)
-    (nspname = 'storage' AND relname IN ('buckets', 'buckets_analytics', 'objects', 'prefixes', 's3_multipart_uploads'))
+    (nspname = 'storage' AND relname IN ('buckets', 'buckets_analytics', 'objects', 'prefixes', 's3_multipart_uploads', 's3_multipart_uploads_parts'))
     OR
     -- PostgreSQL system catalogs
     nspname IN ('pg_catalog', 'pg_toast')
@@ -80,7 +80,7 @@ ORDER BY schema, object_name;
 
 -- Note: This filtered version excludes:
 -- 1. information_schema.*, pg_catalog.* (PostgreSQL system)
--- 2. realtime.*, storage.* (5 tables), graphql.*, graphql_public.* (Supabase internal)
+-- 2. realtime.*, storage.* (6 tables), graphql.*, graphql_public.* (Supabase internal)
 -- 3. extensions.* (Supabase extensions: pgjwt, pg_net, pgrst, etc.)
 -- 4. auth.* (Supabase Auth functions - used safely by SDKs)
 -- 5. pg_trgm functions (gtrgm_*, gin_extract%trgm*, gin_trgm_*, similarity_*, set_limit, show_limit, show_trgm)
