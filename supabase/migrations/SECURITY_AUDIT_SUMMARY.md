@@ -237,12 +237,14 @@ The CI workflow `.github/workflows/reorder-sql-tests.yml` runs:
 ### Whitelisted System Objects (Safe/Expected)
 
 These objects are intentionally excluded from the audit as they are:
+
 - ✅ **PostgreSQL or Supabase system objects**
 - ✅ **Not containing user/business data**
 - ✅ **Managed by the database engine**
 - ✅ **Low security risk**
 
 **Excluded objects:**
+
 - `information_schema.administrable_role_authorizations` (PostgreSQL system view)
 - `realtime.messages` (Supabase Realtime internal queue)
 - `realtime.schema_migrations` (Supabase Realtime migration metadata)
