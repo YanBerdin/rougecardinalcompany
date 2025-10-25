@@ -30,7 +30,7 @@ WHERE (CASE WHEN split_part(acl_item::text, '=', 1) = '' THEN 'PUBLIC' ELSE spli
     (nspname = 'realtime' AND relname IN ('messages', 'schema_migrations', 'subscription'))
     OR
     -- Supabase Storage system tables (managed via Storage API and RLS on storage.objects)
-    (nspname = 'storage' AND relname IN ('buckets', 'buckets_analytics', 'objects'))
+    (nspname = 'storage' AND relname IN ('buckets', 'buckets_analytics', 'objects', 'prefixes'))
     OR
     -- PostgreSQL system catalogs
     nspname IN ('pg_catalog', 'pg_toast')
