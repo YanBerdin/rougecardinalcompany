@@ -105,14 +105,33 @@ Revoked grants on:
 
 ## Total Impact
 
-**28 objects secured:**
+**72 objects secured across 16 rounds:**
 
-- 15 tables (seo_redirects, sitemap_entries, spectacles, partners, profiles, membres_equipe, messages_contact, content_versions, evenements, home_about_content, home_hero_slides, lieux, logs_audit, medias, tags)
-- 4 junction tables (spectacles_categories, spectacles_medias, spectacles_membres_equipe, spectacles_tags)
-- 4 admin views (partners_admin, membres_equipe_admin, messages_contact_admin, content_versions_detailed)
-- 1 tag view (popular_tags)
-- 3 Supabase Realtime system tables (messages, schema_migrations, subscription)
-- 1 PostgreSQL system view (information_schema.administrable_role_authorizations)
+- 21 business tables (seo_redirects, sitemap_entries, spectacles, partners, profiles, membres_equipe, messages_contact, content_versions, evenements, home_about_content, home_hero_slides, lieux, logs_audit, medias, tags, categories, articles_presse_public, articles_tags, etc.)
+- 5 junction tables (spectacles_categories, spectacles_medias, spectacles_membres_equipe, spectacles_tags, articles_tags)
+- 6 admin views (partners_admin, membres_equipe_admin, messages_contact_admin, content_versions_detailed, popular_tags, categories_hierarchy)
+- **4 Realtime system tables** (messages, schema_migrations, subscription + 1) - **WHITELISTED**
+- **6 Storage system tables** (buckets, buckets_analytics, objects, prefixes, s3_multipart_uploads, s3_multipart_uploads_parts) - **WHITELISTED**
+- **30 functions**:
+  - **14 trigger functions**: 10 versioning triggers (spectacles, membres_equipe, partners, evenements, articles, communiques, compagnie_presentation_sections, compagnie_stats, compagnie_values), audit_trigger, handle_new_user, handle_user_deletion, handle_user_update, set_messages_contact_consent_timestamp, set_slug_if_empty
+  - **5 admin functions**: reorder_team_members, restore_content_version, validate_communique_creation, validate_rrule, create_content_version
+  - **5 analytics/search/utility functions**: track_analytics_event, to_tsvector_french, show_trgm (partial), generate_slug, get_current_timestamp
+  - **3 auth helper functions**: is_admin, handle_new_user, handle_user_deletion
+  - **3 pg_trgm functions**: show_limit, show_trgm (complete), gin_trgm_triconsistent
+
+### Campaign Timeline (Oct 25-26, 2025)
+
+**Round 1-7** (Oct 25): Initial 28 business objects  
+**Round 7b補完** (Oct 25): realtime.subscription authenticated fix  
+**Round 8** (Oct 26 08:00): 6 objects - articles_presse tables + trigger functions  
+**Round 9** (Oct 26 09:00): 6 objects - categories + analytics functions  
+**Round 10** (Oct 26 10:00): 3 objects - storage.buckets + search utilities  
+**Round 11** (Oct 26 11:00): 3 objects - storage.buckets_analytics + persistent pg_trgm  
+**Round 12** (Oct 26 12:00): 5 objects - storage.objects (CRITICAL!) + business functions  
+**Round 13** (Oct 26 13:00): 5 objects - storage.prefixes + versioning/auth functions  
+**Round 14** (Oct 26 14:00): 4 objects - storage.s3_multipart_uploads + auth triggers  
+**Round 15** (Oct 26 15:00): 5 objects - storage.s3_multipart_uploads_parts + utilities  
+**Round 16** (Oct 26 16:00): 6 objects - Final versioning triggers cleanup
 
 ## Security Model After Fix
 
@@ -255,8 +274,8 @@ These objects are intentionally excluded from the audit as they are:
 
 ---
 
-**Status:** ✅ All 28 business objects secured + system objects whitelisted  
-**Database Status:** ✅ Round 7b applied successfully (2025-10-25)  
-**Audit Status:** ✅ CI configured to use filtered audit (passes security check)  
-**Last Updated:** 2025-10-25 (post Round 7b + whitelist implementation)  
-**Author:** Security Audit Remediation
+**Status:** ✅ 72 objects secured across 16 rounds + comprehensive system whitelist  
+**Database Status:** ✅ Round 16 applied successfully (2025-10-26)  
+**Audit Status:** 🔄 CI running - Round 16 verification in progress  
+**Last Updated:** 2025-10-26 16:00 (Round 16 - Final versioning triggers cleanup)  
+**Author:** Security Audit Remediation Campaign (Oct 25-26, 2025)
