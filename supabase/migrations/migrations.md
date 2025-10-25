@@ -24,6 +24,26 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 - `20251024231855_restrict_reorder_execute.sql` — HOTFIX: restrict execute on `public.reorder_team_members(jsonb)` by revoking EXECUTE from `public`/`anon` and granting EXECUTE to `authenticated` only. Applied as a manual hotfix to reduce attack surface; declarative schema updated in `supabase/schemas/63_reorder_team_members.sql` to reflect the grant.
 
+## Security audit remediation (October 2025)
+
+- `20251025181000_revoke_final_exposed_objects.sql` — **SECURITY : Revoke exposed grants (round 1)** : Révocation des grants à PUBLIC/authenticated sur 5 objets détectés par l'audit CI (content_versions, content_versions_detailed, evenements, home_about_content, information_schema.administrable_role_authorizations). Migration idempotente avec gestion d'erreur via blocs DO.
+  - 🔐 **Root cause** : Table-level grants court-circuitent les politiques RLS
+  - ✅ **Solution** : Utiliser RLS exclusivement pour le contrôle d'accès
+  - 📊 **Impact** : 5 objets sécurisés (0 re-grant nécessaire, RLS policies suffisent)
+
+- `20251025182000_revoke_new_exposed_objects.sql` — **SECURITY : Revoke exposed grants (round 2)** : Révocation des grants à authenticated sur 4 tables supplémentaires (home_hero_slides, lieux, logs_audit, medias). Migration idempotente avec gestion d'erreur.
+  - 🔐 **Pattern** : Defense in depth - RLS policies only, no table-level grants
+  - ✅ **Validated** : Schéma déclaratif ne contient aucun grant large
+  - 📊 **Impact** : 4 objets sécurisés (logs_audit reste admin-only)
+
+- `20251025183000_revoke_membres_messages_views.sql` — **SECURITY : Revoke exposed grants (round 3)** : Révocation des grants à authenticated sur membres_equipe, messages_contact et leurs vues admin associées. Migration idempotente avec gestion d'erreur.
+  - 🔐 **Views security** : Toutes les vues admin utilisent SECURITY INVOKER (membres_equipe_admin, messages_contact_admin)
+  - ✅ **Access control** : RLS policies + SECURITY INVOKER views = defense in depth
+  - 📊 **Impact** : 4 objets sécurisés (2 tables + 2 vues admin)
+  - 📝 **Documentation** : Voir `SECURITY_AUDIT_SUMMARY.md` pour détails complets
+
+**Total sécurité audit** : 13 objets exposés détectés et corrigés (9 tables + 2 vues content + 2 vues admin). Toutes les migrations sont idempotentes et peuvent être rejouées sans effet de bord. Script d'audit : `supabase/scripts/audit_grants.sql` + `analyze_remaining_grants.sh`.
+
 ## Corrections et fixes critiques
 
 - `20250918000000_fix_spectacles_versioning_trigger.sql` — **FIX CRITIQUE** : Correction du trigger `spectacles_versioning_trigger()` pour utiliser le champ `public` (boolean) au lieu de `published_at` (inexistant dans la table spectacles). Ce trigger causait une erreur `record "old" has no field "published_at"` lors des insertions/updates de spectacles.
