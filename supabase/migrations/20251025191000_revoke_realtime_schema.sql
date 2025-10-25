@@ -38,12 +38,12 @@ BEGIN
 END;
 $$;
 
--- 3. Revoke anon grants on realtime.subscription
+-- 3. Revoke anon and authenticated grants on realtime.subscription
 DO $$
 BEGIN
   BEGIN
-    REVOKE ALL ON TABLE realtime.subscription FROM anon;
-    RAISE NOTICE 'Revoked ALL on realtime.subscription from anon';
+    REVOKE ALL ON TABLE realtime.subscription FROM anon, authenticated;
+    RAISE NOTICE 'Revoked ALL on realtime.subscription from anon, authenticated';
   EXCEPTION
     WHEN undefined_table THEN
       RAISE NOTICE 'Table realtime.subscription does not exist - skipping';

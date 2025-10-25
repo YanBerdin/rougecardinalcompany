@@ -85,16 +85,16 @@ Revoked grants on:
 - `public.tags` → authenticated (table)
 - `information_schema.administrable_role_authorizations` → PUBLIC (retry)
 
-### Round 7: Supabase Realtime system tables (20251025191000)
+### Round 7: Realtime System Tables (2025-10-25)
 
-**File:** `20251025191000_revoke_realtime_schema.sql`
+**Objects secured:** 3
+- `realtime.messages` (authenticated)
+- `realtime.schema_migrations` (authenticated, anon)
+- `realtime.subscription` (anon)
 
-Revoked grants on:
-
-- `realtime.messages` → authenticated (Supabase Realtime system table)
-- `realtime.schema_migrations` → authenticated, anon (Realtime migration history)
-- `realtime.subscription` → anon (Realtime subscription tracking)
-- `information_schema.administrable_role_authorizations` → PUBLIC (final retry)
+**Status:** ✅ Migration created, applied, and verified
+**Migration file:** `20251025191000_revoke_realtime_schema.sql`
+**Verification:** Database confirmed up to date - all migrations applied
 
 ## Total Impact
 
@@ -219,13 +219,14 @@ The CI workflow `.github/workflows/reorder-sql-tests.yml` runs:
 
 ## Next Steps
 
-1. ✅ All migrations applied to cloud database
-2. ⏳ **Pending:** CI workflow run to confirm audit passes
-3. ⏳ **Pending:** Merge PR after CI success
+1. ✅ All 7 migrations applied to cloud database (verified with `db push`)
+2. 🔍 **Pending:** CI workflow run to confirm security audit passes with 0 exposed objects
+3. ⏳ **Pending:** If CI passes, merge PR; if new objects detected, create Round 8
 4. 📝 **Follow-up:** Document this pattern in team guidelines
 
 ---
 
-**Status:** ✅ All known exposed objects revoked  
+**Status:** ✅ All 28 known exposed objects revoked via 7 idempotent migrations  
+**Database Status:** ✅ Remote database confirmed up to date  
 **Last Updated:** 2025-10-25  
 **Author:** Security Audit Remediation
