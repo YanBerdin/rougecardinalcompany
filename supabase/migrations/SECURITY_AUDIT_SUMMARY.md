@@ -73,15 +73,39 @@ Revoked grants on:
 - `public.spectacles_categories` → authenticated (junction table)
 - `information_schema.administrable_role_authorizations` → PUBLIC (retry)
 
+### Round 6: Spectacles junction tables and tags (20251025190000)
+
+**File:** `20251025190000_revoke_junction_tables_final.sql`
+
+Revoked grants on:
+
+- `public.spectacles_medias` → authenticated (junction table)
+- `public.spectacles_membres_equipe` → authenticated (junction table)
+- `public.spectacles_tags` → authenticated (junction table)
+- `public.tags` → authenticated (table)
+- `information_schema.administrable_role_authorizations` → PUBLIC (retry)
+
+### Round 7: Supabase Realtime system tables (20251025191000)
+
+**File:** `20251025191000_revoke_realtime_schema.sql`
+
+Revoked grants on:
+
+- `realtime.messages` → authenticated (Supabase Realtime system table)
+- `realtime.schema_migrations` → authenticated, anon (Realtime migration history)
+- `realtime.subscription` → anon (Realtime subscription tracking)
+- `information_schema.administrable_role_authorizations` → PUBLIC (final retry)
+
 ## Total Impact
 
-**21 objects secured:**
+**28 objects secured:**
 
-- 14 tables (seo_redirects, sitemap_entries, spectacles, partners, profiles, membres_equipe, messages_contact, content_versions, evenements, home_about_content, home_hero_slides, lieux, logs_audit, medias)
-- 1 junction table (spectacles_categories)
+- 15 tables (seo_redirects, sitemap_entries, spectacles, partners, profiles, membres_equipe, messages_contact, content_versions, evenements, home_about_content, home_hero_slides, lieux, logs_audit, medias, tags)
+- 4 junction tables (spectacles_categories, spectacles_medias, spectacles_membres_equipe, spectacles_tags)
 - 4 admin views (partners_admin, membres_equipe_admin, messages_contact_admin, content_versions_detailed)
 - 1 tag view (popular_tags)
-- 1 system view (information_schema.administrable_role_authorizations)
+- 3 Supabase Realtime system tables (messages, schema_migrations, subscription)
+- 1 PostgreSQL system view (information_schema.administrable_role_authorizations)
 
 ## Security Model After Fix
 

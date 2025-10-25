@@ -47,13 +47,23 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
   - ✅ **Core tables** : partners (partenaires actifs) et profiles (profils utilisateurs) sécurisés via RLS uniquement
   - 📊 **Impact** : 4 objets sécurisés (2 tables + 2 vues)
 
-- `20251025185000_revoke_seo_spectacles_final.sql` — **SECURITY : Revoke exposed grants (round 5 - FINAL)** : Révocation des grants à authenticated sur seo_redirects, sitemap_entries, spectacles et spectacles_categories. Re-tentative révocation information_schema. Migration idempotente avec gestion d'erreur.
+- `20251025185000_revoke_seo_spectacles_final.sql` — **SECURITY : Revoke exposed grants (round 5)** : Révocation des grants à authenticated sur seo_redirects, sitemap_entries, spectacles et spectacles_categories. Re-tentative révocation information_schema. Migration idempotente avec gestion d'erreur.
   - 🔐 **SEO & Core content** : Tables SEO (redirects, sitemap) et spectacles (table principale + junction categories) sécurisées
   - ✅ **System view** : information_schema retry avec gestion warnings (objet système PostgreSQL)
   - 📊 **Impact** : 4 objets sécurisés (3 tables + 1 junction table) + retry info_schema
-  - 🎯 **Final status** : 21 objets totaux sécurisés sur 5 rounds de migration
 
-**Total sécurité audit** : 21 objets exposés détectés et corrigés (14 tables + 1 junction + 4 vues admin + 1 vue tags + 1 vue system). Toutes les migrations sont idempotentes et peuvent être rejouées sans effet de bord. Script d'audit : `supabase/scripts/audit_grants.sql` + `analyze_remaining_grants.sh`.
+- `20251025190000_revoke_junction_tables_final.sql` — **SECURITY : Revoke exposed grants (round 6)** : Révocation des grants à authenticated sur spectacles_medias, spectacles_membres_equipe, spectacles_tags et tags. Double tentative révocation information_schema. Migration idempotente.
+  - 🔐 **Junction tables** : Tables de liaison spectacles (medias, membres, tags) sécurisées via RLS uniquement
+  - ✅ **Tags table** : Table tags (système de taxonomie) sécurisée
+  - 📊 **Impact** : 4 objets sécurisés (3 junction tables + 1 table) + retry info_schema
+
+- `20251025191000_revoke_realtime_schema.sql` — **SECURITY : Revoke exposed grants (round 7 - FINAL)** : Révocation des grants anon/authenticated sur realtime.messages, realtime.schema_migrations, realtime.subscription (objets système Supabase Realtime). Tentative finale révocation information_schema. Migration idempotente.
+  - 🔐 **Supabase Realtime** : Tables système Realtime sécurisées (messages, migrations, subscriptions)
+  - ✅ **System security** : Accès Realtime contrôlé via RLS sur tables utilisateurs, pas via grants directs
+  - 📊 **Impact** : 3 objets système Supabase sécurisés + final retry info_schema
+  - 🎯 **Final status** : 28 objets totaux sécurisés sur 7 rounds de migration
+
+**Total sécurité audit** : 28 objets exposés détectés et corrigés (15 tables + 4 junction + 4 vues admin + 1 vue tags + 3 Realtime system + 1 PostgreSQL system). Toutes les migrations sont idempotentes et peuvent être rejouées sans effet de bord. Script d'audit : `supabase/scripts/audit_grants.sql` + `analyze_remaining_grants.sh`.
 
 ## Corrections et fixes critiques
 
