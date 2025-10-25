@@ -90,17 +90,19 @@ jobs:
           fi
 
           # Run audit SQL and check for any non-empty output (any row -> fail)
+          # Using filtered audit to exclude known system objects (information_schema, realtime.*)
           set +e
-          OUT=$(psql "$DBURL" -q -t -A -f supabase/scripts/audit_grants.sql | sed '/^$/d' | head -n 1 || true)
+          OUT=$(psql "$DBURL" -q -t -A -f supabase/scripts/audit_grants_filtered.sql | sed '/^$/d' | head -n 1 || true)
           set -e
 
           if [ -n "$OUT" ]; then
             echo "Security audit FAILED: found objects exposed to PUBLIC/anon/authenticated"
             # Show a little context for debugging
-            psql "$DBURL" -q -t -A -f supabase/scripts/audit_grants.sql | sed -n '1,200p' || true
+            psql "$DBURL" -q -t -A -f supabase/scripts/audit_grants_filtered.sql | sed -n '1,200p' || true
             exit 1
           fi
           echo "Security audit passed: no exposed objects detected."
+          echo "Note: System objects (information_schema, realtime.*) are whitelisted as safe."
 
       - name: Show test plan
         run: |
