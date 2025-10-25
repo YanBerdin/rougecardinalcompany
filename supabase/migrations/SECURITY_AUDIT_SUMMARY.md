@@ -93,14 +93,15 @@ Revoked grants on:
 - `realtime.schema_migrations` (authenticated, anon)
 - `realtime.subscription` (anon, authenticated)
 
-**Status:** ⚠️ Migration updated - awaiting application
+**Status:** ✅ Migrations applied successfully
 **Migration files:**
 
 - `20251025191000_revoke_realtime_schema.sql` (initial - updated to revoke both roles)
-- `20251025192000_revoke_realtime_subscription_authenticated.sql` (補完 - specific fix for authenticated)
+- `20251025192000_revoke_realtime_subscription_authenticated.sql` (補完 - **APPLIED**)
 
-**Issue:** CI detected `realtime.subscription` was still exposed to `authenticated` after Round 7
-**Fix:** Created Round 7b migration to specifically revoke authenticated role
+**Issue:** CI detected `realtime.subscription` was still exposed to `authenticated` after Round 7  
+**Fix:** Created Round 7b migration to specifically revoke authenticated role  
+**Result:** ✅ Applied successfully with expected warnings on system columns (NOTICE: Revoked ALL on realtime.subscription from authenticated)
 
 ## Total Impact
 
@@ -225,14 +226,16 @@ The CI workflow `.github/workflows/reorder-sql-tests.yml` runs:
 
 ## Next Steps
 
-1. ✅ All 7 migrations applied to cloud database (verified with `db push`)
-2. 🔍 **Pending:** CI workflow run to confirm security audit passes with 0 exposed objects
-3. ⏳ **Pending:** If CI passes, merge PR; if new objects detected, create Round 8
-4. 📝 **Follow-up:** Document this pattern in team guidelines
+1. ✅ All 7 migrations + Round 7b applied to cloud database
+2. 🔍 **Awaiting CI verification** - Next CI run should confirm security audit passes
+3. ⚠️ **Known system objects** that may persist:
+   - `information_schema.administrable_role_authorizations` (PostgreSQL system view - may be acceptable)
+   - Realtime column warnings (expected for system tables - revocations succeeded)
+4. 📝 **If CI still fails**: Analyze new objects and create Round 8 following established pattern
 
 ---
 
-**Status:** ✅ All 28 known exposed objects revoked via 7 idempotent migrations  
-**Database Status:** ✅ Remote database confirmed up to date  
-**Last Updated:** 2025-10-25  
+**Status:** ✅ All 28 known exposed objects revoked via 7 rounds + 1 補完 migration  
+**Database Status:** ✅ Round 7b applied successfully (2025-10-25)  
+**Last Updated:** 2025-10-25 (post Round 7b application)  
 **Author:** Security Audit Remediation
