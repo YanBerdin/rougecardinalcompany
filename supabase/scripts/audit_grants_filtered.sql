@@ -51,13 +51,34 @@ SELECT
   split_part(split_part(acl_item::text, '=', 2), '/', 1) AS privileges
 FROM function_acls
 WHERE (CASE WHEN split_part(acl_item::text, '=', 1) = '' THEN 'PUBLIC' ELSE split_part(acl_item::text, '=', 1) END) IN ('PUBLIC', 'anon', 'authenticated')
-  -- EXCLUDE system functions
-  AND nspname NOT IN ('information_schema', 'pg_catalog', 'realtime')
+  -- EXCLUDE system functions and extensions
+  AND nspname NOT IN (
+    'information_schema',  -- PostgreSQL system catalog
+    'pg_catalog',          -- PostgreSQL internal functions
+    'realtime',            -- Supabase Realtime internal functions
+    'graphql',             -- Supabase GraphQL extension (pg_graphql)
+    'graphql_public',      -- Supabase GraphQL public API
+    'extensions',          -- Supabase extensions (pgjwt, pg_net, etc.)
+    'auth'                 -- Supabase Auth functions (safe - used by SDK)
+  )
+  -- EXCLUDE pg_trgm extension functions (fuzzy search - safe system extension)
+  AND func_sig NOT LIKE '%gtrgm%'
+  AND func_sig NOT LIKE '%gin_extract%trgm%'
+  AND func_sig NOT LIKE '%set_limit%'
+  AND func_sig NOT LIKE '%similarity%'
+  -- EXCLUDE citext extension functions (case-insensitive text - safe system extension)
+  AND func_sig NOT LIKE '%citext%'
+  -- EXCLUDE unaccent extension functions (text normalization - safe system extension)  
+  AND func_sig NOT LIKE '%unaccent%'
 ORDER BY schema, object_name;
 
 -- Note: This filtered version excludes:
--- 1. information_schema.* (PostgreSQL system catalog - safe default grants)
--- 2. realtime.* (Supabase Realtime system tables - managed by Supabase)
--- 3. pg_catalog.*, pg_toast.* (PostgreSQL internal schemas)
+-- 1. information_schema.*, pg_catalog.* (PostgreSQL system)
+-- 2. realtime.*, graphql.*, graphql_public.* (Supabase internal)
+-- 3. extensions.* (Supabase extensions: pgjwt, pg_net, pgrst, etc.)
+-- 4. auth.* (Supabase Auth functions - used safely by SDKs)
+-- 5. pg_trgm functions (gtrgm_*, gin_*trgm*, similarity_*, set_limit)
+-- 6. citext functions (case-insensitive text type)
+-- 7. unaccent functions (text normalization)
 --
 -- If this query returns 0 rows, your security audit PASSES ✅
