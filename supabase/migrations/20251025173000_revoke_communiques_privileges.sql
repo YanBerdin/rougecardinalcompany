@@ -5,7 +5,8 @@
 REVOKE ALL PRIVILEGES ON TABLE public.communiques_categories FROM authenticated;
 REVOKE ALL PRIVILEGES ON TABLE public.communiques_medias FROM authenticated;
 REVOKE ALL PRIVILEGES ON TABLE public.communiques_presse FROM authenticated;
-REVOKE ALL PRIVILEGES ON VIEW public.communiques_presse_dashboard FROM authenticated;
+-- PostgreSQL treats views as tables for GRANT/REVOKE; use ON TABLE for views
+REVOKE ALL PRIVILEGES ON TABLE public.communiques_presse_dashboard FROM authenticated;
 
 -- Provide notices for auditability when run in SQL Editor
 DO $$
