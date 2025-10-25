@@ -38,8 +38,21 @@ jobs:
 
       - name: Install Supabase CLI (optional)
         run: |
-          echo "Installing Supabase CLI..."
-          npm install -g supabase@latest
+          echo "Installing Supabase CLI from GitHub releases (official binary)..."
+          set -e
+          # Determine latest release tag
+          LATEST_TAG=$(curl -sSf https://api.github.com/repos/supabase/cli/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+          echo "Latest supabase CLI release: $LATEST_TAG"
+          VERSION=${LATEST_TAG#v}
+          ARCH=linux_amd64
+          FILE="supabase_${VERSION}_${ARCH}.tar.gz"
+          URL="https://github.com/supabase/cli/releases/download/${LATEST_TAG}/${FILE}"
+          echo "Downloading $URL"
+          curl -sSL "$URL" -o /tmp/supabase.tar.gz
+          tar -xzf /tmp/supabase.tar.gz -C /tmp
+          sudo mv /tmp/supabase /usr/local/bin/supabase
+          sudo chmod +x /usr/local/bin/supabase
+          supabase --version || true
 
       - name: Apply declarative schema to Supabase Cloud (optional)
         if: ${{ env.SUPABASE_TOKEN != '' && env.SUPABASE_PROJECT_REF != '' }}
