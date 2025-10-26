@@ -52,6 +52,13 @@
   - Admin Dashboard : Layout + statistiques + navigation sidebar
   - Soft‑delete + reorder + form validation
   - Production-ready : TypeScript OK, ESLint clean
+- [x] **Audit sécurité database complet (73 objets sécurisés)** — **TERMINÉ 26/10/2025** :
+  - 17 rounds de sécurisation (25-26 octobre)
+  - Migrations idempotentes avec gestion d'erreurs
+  - Whitelist objets système (audit_grants_filtered.sql)
+  - Documentation complète (SECURITY_AUDIT_SUMMARY.md)
+  - CI security audit ✅ PASSED
+  - PR #25 merged, issues #26/#27/#28 créées
 - [x] Documentation d'architecture v2 (C4 + ADRs) publiée et référencée
 
 ## Fonctionnalités en Cours
@@ -65,6 +72,32 @@
 - Option: Modélisation `partners.type` si besoin UI
 
 ## Problèmes Résolus (Octobre 2025)
+
+### Campagne sécurité audit database (25-26 octobre)
+
+- ✅ **73 objets exposés sécurisés** sur 17 rounds de migration
+  - Round 1-7 : 28 objets business initiaux
+  - Round 7b補完 : fix realtime.subscription authenticated  
+  - Round 8-17 : 45 objets supplémentaires
+- ✅ **Round 12 CRITIQUE** : storage.objects avec ALL PRIVILEGES
+  - Vulnérabilité majeure : bypass complet Storage RLS
+  - Fix : Révocation ALL + whitelist système
+- ✅ **Round 17 FINAL** : check_communique_has_pdf()
+  - Détection CI après Round 16
+  - Migration appliquée : CI ✅ PASSED
+- ✅ **Pivot stratégique whitelist** :
+  - audit_grants_filtered.sql (focus business uniquement)
+  - Exclusion système : `information_schema, realtime.*, storage.*, extensions.*`
+- ✅ **Outils audit créés** :
+  - scripts/check-security-audit.sh (runner CI/manuel)
+  - supabase/scripts/quick_check_all_grants.sql (inspection détaillée)
+- ✅ **Documentation complète** :
+  - SECURITY_AUDIT_SUMMARY.md (campagne 17 rounds)
+  - ROUND_7B_ANALYSIS.md (analyse pivot whitelist)
+  - migrations.md (détail par round)
+- ✅ **GitHub** :
+  - PR #25 merged : Suppression broad grants articles_presse
+  - Issues créées : #26 (search_path), #27 (DEFINER rationale), #28 (cleanup scripts)
 
 ### Fixes majeurs
 
@@ -309,6 +342,21 @@
 
 ## Journal des Mises à Jour
 
+### 26 Octobre 2025
+
+- **Campagne de sécurité TERMINÉE (73 objets sécurisés)**
+  - 17 rounds de migrations (25-26 octobre)
+  - Round 12 CRITIQUE : storage.objects ALL PRIVILEGES (vulnérabilité majeure corrigée)
+  - Round 17 FINAL : check_communique_has_pdf() - CI ✅ PASSED
+  - Migrations idempotentes avec DO blocks + exception handling
+  - Whitelist stratégie : audit_grants_filtered.sql (exclusion objets système)
+  - Documentation : SECURITY_AUDIT_SUMMARY.md (campagne complète), ROUND_7B_ANALYSIS.md (pivot whitelist)
+  - GitHub : PR #25 merged, issues #26/#27/#28 créées
+  - Outils audit : check-security-audit.sh, quick_check_all_grants.sql
+- **Next steps identifiés** :
+  - Patches conformité DB (≈20 fonctions : SET search_path + DEFINER rationale)
+  - Cleanup scripts obsolètes (3 candidats après approbation)
+
 ### 23 Octobre 2025
 
 - **Résolution complète problèmes sécurité et performance RLS**
@@ -441,16 +489,17 @@
 
 ## Dernière Mise à Jour
 
-**Date**: 23 octobre 2025
+**Date**: 26 octobre 2025
 **Changements majeurs**:
 
-- **3 problèmes sécurité/performance RLS résolus** : Articles vides, SECURITY DEFINER views, Multiple permissive policies
-- **4 migrations créées et appliquées** : RLS policies, GRANT permissions, SECURITY INVOKER views, RESTRICTIVE policy
-- **Documentation exhaustive** : Guide troubleshooting RLS 202 lignes, test script automatisé
-- **4 commits prêts** sur `feature/backoffice` (b331558, 8645103, a7b4a62, e7a8611)
-- **22 fichiers modifiés** : Migrations, schemas, docs, test script, source files
-- **Memory-bank corrigé** : JWT Signing Keys → vraie root cause RLS
-- Production-ready : Defense in Depth activée, toutes validations passées
+- **Campagne de sécurité database TERMINÉE** : 73 objets sécurisés sur 17 rounds (25-26 octobre)
+- **Round 12 critique** : storage.objects ALL PRIVILEGES (vulnérabilité majeure) - CORRIGÉ
+- **Round 17 final** : check_communique_has_pdf() - CI ✅ PASSED
+- **Stratégie whitelist** : audit_grants_filtered.sql pour focus objets business uniquement
+- **Documentation exhaustive** : SECURITY_AUDIT_SUMMARY.md, ROUND_7B_ANALYSIS.md, migrations.md
+- **GitHub** : PR #25 merged, issues #26/#27/#28 créées (conformité conventions DB)
+- **Outils audit** : check-security-audit.sh, quick_check_all_grants.sql
+- **Production-ready** : Zero exposed objects, RLS-only model, defense in depth
 
 **Date**: 21 octobre 2025
 **Changements majeurs**: Fix page Presse vide - workaround RLS/JWT Signing Keys via vue `articles_presse_public`, séparation correcte chapo/excerpt comme champs indépendants, workflow hotfix déclaratif appliqué, 7 fichiers de documentation mis à jour

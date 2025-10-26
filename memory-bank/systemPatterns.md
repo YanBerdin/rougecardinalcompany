@@ -2,6 +2,105 @@
 
 ## Patterns Architecturaux
 
+### Security Patterns (Database)
+
+#### RLS-Only Access Control Model
+
+**Pattern** : Utiliser exclusivement les politiques RLS pour le contrôle d'accès, jamais de table-level grants.
+
+```sql
+-- ❌ ANTI-PATTERN: Table-level grants bypass RLS
+GRANT SELECT ON TABLE public.articles_presse TO authenticated;
+
+-- ✅ PATTERN: RLS policies only
+CREATE POLICY "Public read published articles"
+  ON public.articles_presse FOR SELECT
+  TO anon, authenticated
+  USING (published_at IS NOT NULL);
+```
+
+**Rationale** : Table-level grants court-circuitent RLS et créent des failles de sécurité.
+
+#### SECURITY INVOKER Views Pattern
+
+**Pattern** : Toujours utiliser `WITH (security_invoker = true)` pour les vues.
+
+```sql
+-- ❌ ANTI-PATTERN: SECURITY DEFINER (default) = privilege escalation risk
+CREATE VIEW public.articles_presse_public AS
+  SELECT * FROM articles_presse WHERE published_at IS NOT NULL;
+
+-- ✅ PATTERN: SECURITY INVOKER = principle of least privilege
+CREATE VIEW public.articles_presse_public
+WITH (security_invoker = true) AS
+  SELECT * FROM articles_presse WHERE published_at IS NOT NULL;
+
+-- ⚠️ REQUIRED: Grant permissions on base table for SECURITY INVOKER
+GRANT SELECT ON public.articles_presse TO anon, authenticated;
+```
+
+**Defense in Depth** :
+
+1. VIEW filtrage (published_at IS NOT NULL)
+2. GRANT permissions (table base)
+3. RLS policies (row-level filtering)
+
+#### Function Security Pattern
+
+**Pattern** : `SECURITY INVOKER` par défaut, `SECURITY DEFINER` uniquement si justifié.
+
+```sql
+-- ✅ DEFAULT PATTERN: SECURITY INVOKER + SET search_path
+CREATE OR REPLACE FUNCTION public.generate_slug(input_text text)
+RETURNS text
+LANGUAGE plpgsql
+SECURITY INVOKER  -- Runs with caller's privileges
+AS $$
+BEGIN
+  SET search_path = '';  -- Prevent SQL injection
+  -- Function logic...
+END;
+$$;
+
+-- ⚠️ EXCEPTION PATTERN: SECURITY DEFINER avec rationale documentée
+-- SECURITY DEFINER rationale: requires elevated privileges for [specific reason]
+-- Reviewed per ISSUE #27
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER  -- Runs with creator (postgres) privileges
+SET search_path = ''
+AS $$
+BEGIN
+  -- Must run as postgres to access auth.jwt() and user_metadata
+  RETURN (auth.jwt() ->> 'user_metadata' ->> 'role') = 'admin';
+END;
+$$;
+```
+
+#### Whitelist Audit Pattern
+
+**Pattern** : Exclure les objets système de l'audit de sécurité pour focus sur business objects.
+
+```sql
+-- audit_grants_filtered.sql (production)
+SELECT
+  schemaname,
+  tablename,
+  grantee,
+  privilege_type
+FROM information_schema.table_privileges
+WHERE schemaname NOT IN ('information_schema', 'pg_catalog', 'auth', 'extensions')
+  AND schemaname NOT LIKE 'pg_%'
+  AND grantee IN ('PUBLIC', 'anon', 'authenticated')
+  -- Whitelist système Supabase
+  AND NOT (schemaname = 'realtime' AND tablename IN ('messages', 'schema_migrations', 'subscription'))
+  AND NOT (schemaname = 'storage' AND tablename IN ('buckets', 'objects', 'prefixes', 's3_multipart_uploads', 's3_multipart_uploads_parts'))
+ORDER BY schemaname, tablename;
+```
+
+**Rationale** : Objets système PostgreSQL/Supabase se ré-appliquent automatiquement; focus sur business objects.
+
 ### App Router Pattern
 
 ```typescript

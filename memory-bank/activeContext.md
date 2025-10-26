@@ -8,6 +8,18 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 
 ### Avancées récentes (Octobre 2025)
 
+- ✅ **26 octobre — Campagne de sécurité TERMINÉE (73 objets sécurisés)** :
+  - **17 rounds de sécurisation** (25-26 octobre) : 73 objets exposés détectés et corrigés
+    - Rounds 1-7 : 28 objets business (tables, vues, junction tables)
+    - Round 7b補完 : fix realtime.subscription authenticated
+    - Rounds 8-17 : 45 objets supplémentaires (storage critique, fonctions, triggers)
+  - **Round 12 CRITIQUE** : storage.objects avec ALL PRIVILEGES (vulnérabilité majeure)
+  - **Round 17 FINAL** : check_communique_has_pdf() - ✅ CI PASSED
+  - **Pivot stratégique whitelist** : audit_grants_filtered.sql (exclusion objets système)
+  - **PR #25 merged** : Suppression broad grants articles_presse
+  - **Issues créées** : #26 (search_path), #27 (DEFINER rationale), #28 (scripts obsolètes)
+  - Documentation complète : SECURITY_AUDIT_SUMMARY.md, migrations.md
+
 - ✅ **23 octobre — Résolution complète des problèmes de sécurité et performance RLS** :
   - **Issue #1 - Articles vides** : RLS activé sans policies + SECURITY INVOKER sans GRANT permissions
     - Migration `20251022150000` : 5 RLS policies appliquées (lecture publique, admin CRUD)
@@ -70,9 +82,11 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 5. ~~Scripts admin email + documentation clés Supabase~~ (FAIT - 13 octobre)
 6. ~~TASK022 Team Management~~ (COMPLÉTÉ - 22 octobre)
 7. ~~Résolution problèmes RLS et sécurité views~~ (COMPLÉTÉ - 23 octobre)
-8. **Push des changements vers GitHub** : 4 commits prêts sur branche `feature/backoffice`
-9. Finaliser Back‑office : toggles centralisés, CRUD étendus (spectacles, événements, articles)
-10. Configuration finale webhooks Resend (dashboard)
+8. ~~Campagne sécurité audit database~~ (TERMINÉE - 26 octobre)
+9. **Patches conformité conventions DB** : Ajouter SET search_path, justifier SECURITY DEFINER (issues #26/#27)
+10. **Nettoyage scripts obsolètes** : Proposition deletion (issue #28)
+11. Finaliser Back‑office : toggles centralisés, CRUD étendus (spectacles, événements, articles)
+12. Configuration finale webhooks Resend (dashboard)
 
 ### Problèmes résolus
 
@@ -98,16 +112,25 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 
 ### Points d'attention restants
 
-- **Push GitHub imminent** : 4 commits prêts sur `feature/backoffice` (attente confirmation utilisateur)
+- **Patches DB conventions** : ≈20 fonctions à patcher (SET search_path + DEFINER rationale)
+- **Scripts obsolètes** : 3 candidats à supprimer après approbation (quick_audit_test.sql, check_round7b_grants.sh, verify_round7_grants.sql)
 - Cohérence des états de toggles entre back‑office et pages publiques
 - Retirer les délais artificiels (1200-1500ms) des containers avant production
 - Monitoring Docker disk usage en croissance (si utilisation de Supabase local)
 - Synchronisation des dates de visibilité du hero et du cache ISR
 - Configuration finale webhooks Resend dans le dashboard (pointer vers `/api/webhooks/resend`)
 - Vérifier la configuration des clés Supabase en production (format JWT vs Simplified)
-- **NOUVEAU (22 octobre)** : Next.js Image hostname configuré pour Supabase Storage (`yvtrlvmbofklefxcxrzv.supabase.co`) - requiert restart serveur
+- Next.js Image hostname configuré pour Supabase Storage (`yvtrlvmbofklefxcxrzv.supabase.co`)
 
 ## Décisions Récentes
+
+### Octobre 2025 - Sécurité audit database
+
+- **Stratégie whitelist** : Pivot vers audit_grants_filtered.sql pour exclure objets système (`information_schema, realtime.*, storage.*, extensions.*`)
+- **RLS-only model** : Révocation de tous les table-level grants pour forcer le contrôle d'accès via RLS uniquement
+- **SECURITY INVOKER views** : Conversion systématique de 10 vues pour éliminer risques d'escalade de privilèges
+- **Conventions fonctions** : Identification du besoin de standardiser SET search_path et documenter SECURITY DEFINER
+- **Documentation complète** : SECURITY_AUDIT_SUMMARY.md (campagne 17 rounds), migrations.md (détail par round)
 
 ### Octobre 2025 - Architecture auth & performance
 
@@ -194,17 +217,17 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 
 ## Dernière Mise à Jour
 
-**Date**: 23 octobre 2025
+**Date**: 26 octobre 2025
 **Par**: GitHub Copilot
 **Changements majeurs**:
 
-- **Résolution complète 3 problèmes sécurité/performance RLS** :
-  - Articles vides : RLS policies + GRANT permissions appliqués (2 migrations)
-  - SECURITY DEFINER views : 10 vues converties vers SECURITY INVOKER (1 migration)
-  - Performance RLS : Admin policy RESTRICTIVE pour ~40% gain (1 migration)
-- **Documentation exhaustive** : `doc/rls-policies-troubleshooting.md` (202 lignes)
-- **Testing complet** : SQL tests + script automatisé + validation browser
-- **4 commits prêts** sur `feature/backoffice` (b331558, 8645103, a7b4a62, e7a8611)
-- **22 fichiers modifiés** : 4 migrations, 7 schemas, 2 docs, 1 test script, 2 source files
-- **Memory-bank mis à jour** : corrections JWT Signing Keys → vraie root cause RLS
-- Production-ready : Toutes validations passées, défense en profondeur activée
+- **Campagne de sécurité TERMINÉE** : 73 objets sécurisés sur 17 rounds (25-26 octobre)
+  - Round 12 critique : storage.objects ALL PRIVILEGES (vulnérabilité majeure)
+  - Round 17 final : check_communique_has_pdf() - CI PASSED ✅
+  - Migrations idempotentes : DO blocks avec exception handling
+  - Documentation : SECURITY_AUDIT_SUMMARY.md, ROUND_7B_ANALYSIS.md
+- **Pivot whitelist** : audit_grants_filtered.sql (focus objets business uniquement)
+- **PR #25 merged** : Suppression broad grants articles_presse
+- **Issues créées** : #26 (search_path), #27 (DEFINER rationale), #28 (cleanup scripts)
+- **Outils audit** : scripts/check-security-audit.sh, quick_check_all_grants.sql
+- **Next steps** : Patches conformité DB conventions (≈20 fonctions à corriger)

@@ -203,6 +203,15 @@ export const config = {
 - Utilitaires: camelCase (ex: `utils.ts`)
 - Pages: kebab-case (URLs)
 
+### Database Conventions
+
+- **SQL Functions** : `SET search_path = ''` obligatoire (prévention SQL injection)
+- **SECURITY DEFINER** : Justification explicite requise (issue #27)
+- **Views** : `WITH (security_invoker = true)` par défaut
+- **RLS** : Activé sur 100% des tables (36/36), aucun table-level grant
+- **Migrations** : Idempotentes avec DO blocks + exception handling
+- **Audit** : audit_grants_filtered.sql (whitelist objets système)
+
 ### Pattern de Composants
 
 ```typescript
@@ -218,6 +227,14 @@ export function ComponentName() {
 ```
 
 ## Sécurité
+
+### Database Security
+
+- **RLS-only model** : Aucun table-level grant, contrôle d'accès 100% via RLS policies
+- **SECURITY INVOKER views** : 10 vues converties pour éliminer escalade privilèges
+- **Storage RLS** : Bucket "medias" avec policies (public read, auth upload, admin delete)
+- **Function security** : `SET search_path = ''` + SECURITY INVOKER par défaut
+- **Audit automation** : CI security check avec audit_grants_filtered.sql
 
 ### Authentification
 
@@ -260,6 +277,14 @@ export function ComponentName() {
 - **Supabase CLI** : `pnpm dlx supabase start/stop/status/db reset`
 - **Workflow déclaratif** : `db diff` pour générer migrations, `db push` pour appliquer
 
+### Security Audit Tools
+
+- **CI automation** : `.github/workflows/security-audit.yml` avec audit_grants_filtered.sql
+- **Manual check** : `scripts/check-security-audit.sh` (requires DB URL extraction fix)
+- **Detailed inspection** : `supabase/scripts/quick_check_all_grants.sql`
+- **Whitelist strategy** : Exclusion objets système (`information_schema, realtime.*, storage.*, extensions.*`)
+- **Verification** : Après chaque migration, CI check pour détecter expositions
+
 ### Documentation opérationnelle
 
 **Supabase Local:**
@@ -278,3 +303,11 @@ export function ComponentName() {
 
 - `memory-bank/architecture/Project_Architecture_Blueprint.md` : Architecture détaillée du projet
 - `memory-bank/architecture/Project_Folders_Structure_Blueprint.md` : Guide de structure des dossiers
+
+**Security Audit:**
+
+- `supabase/migrations/SECURITY_AUDIT_SUMMARY.md` : Campagne complète 17 rounds (73 objets)
+- `supabase/migrations/ROUND_7B_ANALYSIS.md` : Analyse pivot whitelist
+- `doc/rls-policies-troubleshooting.md` : Guide troubleshooting RLS (202 lignes)
+- `supabase/scripts/audit_grants_filtered.sql` : Script audit production
+- `scripts/check-security-audit.sh` : Runner CI/manuel
