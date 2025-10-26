@@ -24,3 +24,10 @@ Versioning adds complexity to storage; prefer a lightweight revision table that 
 ### 2025-10-16
 
 - Task created from Milestone 3 list.
+
+## shadcn / TweakCN checklist
+
+- [ ] Use shadcn MCP to find components for diffs, modal viewers, and side-by-side layout
+- [ ] Call `get-component-demo` and reuse dialog/modal patterns for compare/restore flows
+- [ ] Apply TweakCN theme to versioning UI and confirm contrast for diff highlights
+- [ ] Accessibility checks for diff navigation and keyboard interactions

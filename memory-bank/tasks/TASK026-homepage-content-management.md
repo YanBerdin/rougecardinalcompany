@@ -24,3 +24,11 @@ Homepage content affects public pages; changes should be immediate and versioned
 ### 2025-10-16
 
 - Task created from Back-office milestone 2.
+
+## shadcn / TweakCN checklist
+
+- [ ] Use shadcn MCP to fetch Hero, Carousel, Card components
+- [ ] Call `get-component-demo` and copy demo usage for hero slides and highlights
+- [ ] Ensure images use Media Library and Next/Image optimizations
+- [ ] Apply TweakCN theme for homepage styling and verify hero responsiveness
+- [ ] Visual QA for homepage after revalidation

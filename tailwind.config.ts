@@ -1,5 +1,6 @@
 import type { Config } from "tailwindcss";
 import animate from "tailwindcss-animate";
+import touchHitboxPlugin from "./lib/plugins/touch-hitbox-plugin.js";
 
 export default {
   darkMode: ["class"],
@@ -60,8 +61,5 @@ export default {
       },
     },
   },
-  plugins: [
-    animate,
-    require("./lib/plugins/touch-hitbox-plugin.js"),
-  ],
+  plugins: [animate, touchHitboxPlugin],
 } satisfies Config;

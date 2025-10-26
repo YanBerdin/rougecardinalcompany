@@ -52,24 +52,35 @@ export async function fetchUpcomingEvents(
 
   if (error) throw error;
 
-  return (data ?? []).map((row: any) => {
-    //TODO: fix Unexpected any
+  type SupabaseEventRow = {
+    id: number;
+    date_debut: string;
+    start_time?: string | null;
+    status?: string | null;
+    ticket_url?: string | null;
+    image_url?: string | null;
+    type_array?: string[] | null;
+    spectacles?: { title?: string | null; image_url?: string | null }[] | null;
+    lieux?: { nom?: string | null; adresse?: string | null; ville?: string | null; code_postal?: string | null }[] | null;
+  };
+
+  return (data ?? []).map((row: SupabaseEventRow) => {
     const dateDebut = new Date(row.date_debut);
     const time = formatTime(dateDebut, row.start_time);
-    const venue = row.lieux?.nom ?? "Lieu à venir";
+    const venue = row.lieux?.[0]?.nom ?? "Lieu à venir";
     const addressParts = [
-      row.lieux?.adresse,
-      [row.lieux?.code_postal, row.lieux?.ville].filter(Boolean).join(" "),
+      row.lieux?.[0]?.adresse,
+      [row.lieux?.[0]?.code_postal, row.lieux?.[0]?.ville].filter(Boolean).join(" "),
     ].filter(Boolean);
     const address = addressParts.join(", ");
-    const title = row.spectacles?.title ?? "Événement";
+  const title = row.spectacles?.[0]?.title ?? "Événement";
     const type =
       Array.isArray(row.type_array) && row.type_array.length > 0
         ? row.type_array[0]
         : "Spectacle";
     const status = row.status ? row.status : "programmé";
     const image =
-      row.image_url || row.spectacles?.image_url || "/opengraph-image.png";
+      row.image_url || row.spectacles?.[0]?.image_url || "/opengraph-image.png";
     return {
       id: row.id,
       title,

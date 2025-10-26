@@ -70,6 +70,7 @@ export function useNewsletterSubscribe({
     setEmail("");
     setIsSubscribed(false);
     setIsLoading(false);
+    setIsInitialLoading(false);
     setErrorMessage(null);
   };
 

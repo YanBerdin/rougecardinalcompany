@@ -28,12 +28,25 @@ export async function fetchActiveHomeHeroSlides() {
     return [] as HomeHeroSlideRecord[];
   }
   const now = new Date();
-  const filtered = (data ?? []).filter((r: any) => {
-    //TODO: fix Unexpected any
+  type SupabaseHeroRow = {
+    title: string;
+    subtitle?: string | null;
+    description?: string | null;
+    image_url?: string | null;
+    cta_label?: string | null;
+    cta_url?: string | null;
+    position?: number | null;
+    active?: boolean | null;
+    starts_at?: string | null;
+    ends_at?: string | null;
+  };
+
+  const filtered = (data ?? []).filter((r: SupabaseHeroRow) => {
     if (r.active === false) return false;
     const startsOk = !r.starts_at || new Date(r.starts_at) <= now;
     const endsOk = !r.ends_at || new Date(r.ends_at) >= now;
     return startsOk && endsOk;
   });
+
   return filtered as HomeHeroSlideRecord[];
 }

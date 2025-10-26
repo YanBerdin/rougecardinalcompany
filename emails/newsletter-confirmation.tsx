@@ -10,7 +10,7 @@ export default function NewsletterConfirmation({ email }: { email: string }) {
       <EmailSection>
         <EmailText>Bonjour,</EmailText>
         <EmailText>
-          Merci de vous être inscrit(e) à notre newsletter avec l'email{" "}
+          Merci de vous être inscrit(e) à notre newsletter avec l&apos;email{" "}
           <strong>{email}</strong>.
         </EmailText>
         <EmailText>
@@ -20,7 +20,7 @@ export default function NewsletterConfirmation({ email }: { email: string }) {
       </EmailSection>
       <Text className="text-lg leading-6">
         Merci de votre confiance,
-        <br />- L'équipe {SITE_CONFIG.SEO.TITLE}
+        <br />- L&apos;équipe {SITE_CONFIG.SEO.TITLE}
       </Text>
     </EmailLayout>
   );

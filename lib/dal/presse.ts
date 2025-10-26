@@ -18,6 +18,7 @@ interface MediaArticle {
   title: string;
   author: string;
   type: "Article" | "Critique" | "Interview" | "Portrait";
+  chapo: string;
   excerpt: string;
   source_publication: string;
   source_url: string;
@@ -64,7 +65,7 @@ export async function fetchPressReleases(
     title: String(row.title),
     description: String(row.description ?? ""),
     date: String(row.date_publication),
-    // Pas encore de fichier PDF stocké en BDD: on utilise un placeholder
+    // Pas encore de fichier PDF stocké en BDD: on utilise un placeholder //TODO
     fileUrl:
       typeof row.image_url === "string" && row.image_url.length > 0
         ? row.image_url
@@ -78,10 +79,11 @@ export async function fetchMediaArticles(
 ): Promise<MediaArticle[]> {
   const supabase = await createClient();
 
+  // Use the public view instead of the table to bypass RLS issues with JWT Signing Keys
   let query = supabase
-    .from("articles_presse")
+    .from("articles_presse_public")
     .select(
-      "id, title, author, type, excerpt, source_publication, source_url, published_at"
+      "id, title, author, type, chapo, excerpt, source_publication, source_url, published_at"
     )
     .order("published_at", { ascending: false, nullsFirst: false });
 
@@ -98,11 +100,15 @@ export async function fetchMediaArticles(
   function coerceArticleType(
     v: string | null
   ): "Article" | "Critique" | "Interview" | "Portrait" {
-    const allowed = ["Article", "Critique", "Interview", "Portrait"] as const;
-    const s = String(v ?? "Article");
-    return (allowed as readonly string[]).includes(s)
-      ? (s as "Article" | "Critique" | "Interview" | "Portrait")
-      : "Article";
+    // Map common DB values (lowercase / français) to the UI enum values.
+    const raw = String(v ?? "")
+      .trim()
+      .toLowerCase();
+    if (raw === "critique") return "Critique";
+    if (raw === "entretien" || raw === "interview") return "Interview";
+    if (raw === "portrait") return "Portrait";
+    // 'chronique' and other editorial types map to generic Article
+    return "Article";
   }
 
   return (data ?? []).map((row: ArticlePresseRow) => ({
@@ -110,6 +116,7 @@ export async function fetchMediaArticles(
     title: String(row.title ?? ""),
     author: String(row.author ?? ""),
     type: coerceArticleType(row.type),
+    chapo: String(row.chapo ?? ""),
     excerpt: String(row.excerpt ?? ""),
     source_publication: String(row.source_publication ?? ""),
     source_url: String(row.source_url ?? ""),
@@ -117,7 +124,7 @@ export async function fetchMediaArticles(
   }));
 }
 
-// Media kit récupère directement les médias (logos, photos, dossiers PDF)
+// Media kit récupère les médias (logos, photos, dossiers PDF)
 interface MediaKitItemDTO {
   type: string; // ex: "Logo", "Photo", "Dossier de presse"
   description: string;
@@ -132,12 +139,14 @@ interface MediaMetadata {
   [key: string]: string | number | boolean | undefined;
 }
 
-// Utilisation du type global Media avec metadata typée
-type MediaRow = Pick<
-  Media,
-  "storage_path" | "filename" | "mime" | "size_bytes" | "alt_text"
-> & {
-  metadata: MediaMetadata | null;
+// Local shape for media rows returned by Supabase
+type SupabaseMediaRow = {
+  storage_path: string;
+  filename?: string | null;
+  mime?: string | null;
+  size_bytes?: number | null;
+  alt_text?: string | null;
+  metadata?: MediaMetadata | null;
 };
 
 // Utilisation du type global CommuniquePresse
@@ -160,6 +169,7 @@ type ArticlePresseRow = Pick<
   | "title"
   | "author"
   | "type"
+  | "chapo"
   | "excerpt"
   | "source_publication"
   | "source_url"
@@ -200,10 +210,10 @@ export async function fetchMediaKit(
     return [];
   }
 
-  return (data ?? []).map((row) => {
+  return (data ?? []).map((row: SupabaseMediaRow) => {
     // Cast metadata de Json vers MediaMetadata
     const metadata = row.metadata as MediaMetadata | null;
-    
+
     // Prioriser l'URL externe si disponible dans metadata
     const externalUrl = metadata?.external_url;
     const fileUrl = externalUrl
