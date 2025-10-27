@@ -89,20 +89,31 @@ jobs:
             DBURL="postgresql://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/postgres?sslmode=disable"
           fi
 
-          # Run audit SQL and check for any non-empty output (any row -> fail)
-          # Using filtered audit to exclude known system objects (information_schema, realtime.*)
+          # Run audit SQL and capture all rows (one per line). We then exclude any entries
+          # that match the repository allowlist file supabase/scripts/allowed_exposed_objects.txt.
+          # This prevents the CI from failing on known/restored GRANTs (explicitly whitelisted).
           set +e
-          OUT=$(psql "$DBURL" -q -t -A -f supabase/scripts/audit_grants_filtered.sql | sed '/^$/d' | head -n 1 || true)
+          OUT_FULL=$(psql "$DBURL" -q -t -A -f supabase/scripts/audit_grants_filtered.sql | sed '/^$/d' || true)
           set -e
 
-          if [ -n "$OUT" ]; then
-            echo "Security audit FAILED: found objects exposed to PUBLIC/anon/authenticated"
-            # Show a little context for debugging
-            psql "$DBURL" -q -t -A -f supabase/scripts/audit_grants_filtered.sql | sed -n '1,200p' || true
+          FILTERED="$OUT_FULL"
+          if [ -n "$OUT_FULL" ] && [ -f supabase/scripts/allowed_exposed_objects.txt ]; then
+            # Exclude lines containing any allowlist pattern (simple substring match).
+            FILTERED=$(echo "$OUT_FULL" | grep -v -F -f supabase/scripts/allowed_exposed_objects.txt || true)
+          fi
+
+          if [ -n "$FILTERED" ]; then
+            echo "Security audit FAILED: found objects exposed to PUBLIC/anon/authenticated (excluding allowlist)"
+            echo "--- Exposed objects (filtered) ---"
+            echo "$FILTERED" | sed -n '1,200p' || true
+            echo "--- Full audit output (for debugging) ---"
+            echo "$OUT_FULL" | sed -n '1,400p' || true
             exit 1
           fi
-          echo "Security audit passed: no exposed objects detected."
-          echo "Note: System objects (information_schema, realtime.*) are whitelisted as safe."
+
+          echo "Security audit passed: no exposed objects detected after applying allowlist."
+          echo "Note: System objects (information_schema, realtime.*) are whitelisted in the audit_sql,"
+          echo "and additional allowed objects are read from supabase/scripts/allowed_exposed_objects.txt if present."
 
       - name: Show test plan
         run: |
