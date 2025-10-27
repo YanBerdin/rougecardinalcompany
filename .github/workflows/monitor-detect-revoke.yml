@@ -1,0 +1,95 @@
+name: Monitor detect-revoke workflow (daily)
+
+on:
+  schedule:
+    # Run daily at 06:30 UTC
+    - cron: '30 6 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  monitor:
+    name: Daily monitor for detect-revoke runs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Collect workflow runs for detect-revoke (last 7 days)
+        env:
+          GITHUB_API: https://api.github.com
+          REPO: ${{ github.repository }}
+          WORKFLOW_FILE: detect-revoke-warn.yml
+          DAYS: 7
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -eu
+          echo "Collecting detect-revoke workflow runs for repository $REPO"
+          UNTIL_DATE=$(date -u -d "-$DAYS days" +%Y-%m-%dT%H:%M:%SZ)
+          echo "Considering runs since: $UNTIL_DATE"
+
+          # Fetch workflow runs from the workflow file
+          API_URL="$GITHUB_API/repos/$REPO/actions/workflows/$WORKFLOW_FILE/runs?per_page=100"
+          echo "API URL: $API_URL"
+          RESP=$(curl -s -H "Authorization: token $TOKEN" -H "Accept: application/vnd.github+json" "$API_URL")
+
+          # Filter runs in the last DAYS days
+          echo "$RESP" | jq -r --arg UNTIL "$UNTIL_DATE" '.workflow_runs[] | select(.created_at >= $UNTIL) | {id: .id, head_sha: .head_sha, status: .status, conclusion: .conclusion, created_at: .created_at, html_url: .html_url}'> runs.json
+
+          TOTAL=$(jq -s 'length' runs.json)
+          FAILS=$(jq -s '[.[] | select(.conclusion=="failure" or .conclusion=="cancelled" or .conclusion==null)] | length' runs.json)
+
+          echo "Total runs in last $DAYS days: $TOTAL"
+          echo "Failed/cancelled runs: $FAILS"
+
+          # Prepare summary
+          SUMMARY_FILE=detect-revoke-summary-$(date -u +%Y%m%d).md
+          echo "# detect-revoke workflow monitor" > $SUMMARY_FILE
+          echo "Repository: $REPO" >> $SUMMARY_FILE
+          echo "Period: last $DAYS days (since $UNTIL_DATE)" >> $SUMMARY_FILE
+          echo "" >> $SUMMARY_FILE
+          echo "Total runs: $TOTAL" >> $SUMMARY_FILE
+          echo "Failed/cancelled runs: $FAILS" >> $SUMMARY_FILE
+          echo "" >> $SUMMARY_FILE
+          echo "## Runs" >> $SUMMARY_FILE
+          jq -r '. | "- [\(.conclusion // \"in_progress\")] (\(.created_at)) - \(.html_url)"' runs.json >> $SUMMARY_FILE || true
+
+          # Upload summary as artifact
+          echo "Summary saved to $SUMMARY_FILE"
+          echo "$SUMMARY_FILE" > upload_list.txt
+
+      - name: Upload summary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: detect-revoke-monitor-summary
+          path: |
+            detect-revoke-summary-*.md
+
+      - name: Create issue if failures detected
+        if: ${{ always() }}
+        env:
+          REPO: ${{ github.repository }}
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -eu
+          FAILS=$(jq -s '[.[] | select(.conclusion=="failure" or .conclusion=="cancelled" or .conclusion==null)] | length' runs.json)
+          if [ "$FAILS" -gt 0 ]; then
+            echo "Detected $FAILS failing/cancelled runs in the last period. Creating or updating an issue."
+            TITLE="CI Monitor: detect-revoke failures (automated)"
+            # Check if an open issue with the same title exists
+            ISSUES=$(curl -s -H "Authorization: token $TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/$REPO/issues?state=open&per_page=100")
+            EXISTS=$(echo "$ISSUES" | jq -r --arg TITLE "$TITLE" '.[] | select(.title==$TITLE) | .number' | head -n1 || true)
+            BODY=$(cat detect-revoke-summary-*.md)
+            if [ -n "$EXISTS" ]; then
+              echo "Updating existing issue #$EXISTS"
+              curl -s -X POST -H "Authorization: token $TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/$REPO/issues/$EXISTS/comments" -d $(jq -Rn --arg body "$BODY" '$body') >/dev/null
+            else
+              echo "Creating new issue: $TITLE"
+              curl -s -X POST -H "Authorization: token $TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/$REPO/issues" -d $(jq -Rn --arg title "$TITLE" --arg body "$BODY" '{title:$title, body:$body, labels:["ci-monitor","detect-revoke"]}') >/dev/null
+            fi
+          else
+            echo "No failures detected; no issue created."
+          fi
