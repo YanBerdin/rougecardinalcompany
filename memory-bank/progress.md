@@ -1,3 +1,48 @@
+# Progress
+
+Etat des actions liées à l'incident RLS/GRANT (2025-10-27):
+
+## Complété
+
+- Migrations d'urgence RLS et `is_admin()` appliquées.
+- Migrations de restauration des GRANTs appliquées (20251027020000 → 20251027022500).
+- Annotations ajoutées aux migrations `revoke_*` et déplacement recommandé vers `supabase/migrations/legacy-migrations`.
+- CI: allowlist `supabase/scripts/allowed_exposed_objects.txt` ajouté et workflow d'audit mis à jour.
+- CI: workflow `detect-revoke` ajouté (fail-on-match) pour bloquer nouveaux REVOKE non autorisés.
+- CI: monitoring `monitor-detect-revoke` ajouté (cron daily) pour surveiller et créer issues automatiques.
+
+## Références (commits & migrations)
+
+Commits clés récents (branche `feature/backoffice`):
+
+- c74115e: ci(monitor): add scheduled monitor for detect-revoke workflow — https://github.com/YanBerdin/rougecardinalcompany/commit/c74115e4ea9c847d8748411372b841c8f1e294b4
+- e6b5249: ci(security): fail CI when changed migrations contain REVOKE — https://github.com/YanBerdin/rougecardinalcompany/commit/e6b5249686a2482dd3bfd1e94f15270e6b865edf
+- e0f0916: chore(ci): add README for allowed_exposed_objects and warn-only workflow — https://github.com/YanBerdin/rougecardinalcompany/commit/e0f09163b1ca075d1b5c0e9e8391b0620b46a70e
+- 3e160a8: chore(ci): add detected exposed DB objects to allowlist — https://github.com/YanBerdin/rougecardinalcompany/commit/3e160a842fba05c637c64237421b71cd90cd3aa0
+- d1cfaad: chore(ci): allowlist known restored DB objects in audit — https://github.com/YanBerdin/rougecardinalcompany/commit/d1cfaadc8a5b776eea3867faeb7a842296e68360
+- 8b9df19: chore(migrations): add warning headers to revoke_* migrations — https://github.com/YanBerdin/rougecardinalcompany/commit/8b9df198de4716ec7e9f45820c8141f3142e356a
+
+Migrations d'urgence appliquées pour la résolution :
+
+- `20251026180000_apply_spectacles_partners_rls_policies.sql`
+- `20251026181000_apply_missing_rls_policies_home_content.sql`
+- `20251027000000_create_is_admin_function.sql`
+- `20251027020000_restore_basic_grants_for_rls.sql`
+- `20251027021000_restore_remaining_grants.sql`
+- `20251027021500_restore_views_grants.sql`
+- `20251027022000_fix_logs_audit_grants.sql`
+- `20251027022500_grant_execute_all_trigger_functions.sql`
+
+## En cours
+
+- Surveillance du workflow `detect-revoke` (7 jours) pour collecter et traiter faux positifs.
+
+## À faire
+
+- Ajouter tests d'intégration CI pour valider l'accès DAL (anon/authenticated) après migrations.
+- Formaliser la procédure d'ajout à l'allowlist (template PR, approbation DB/infra).
+- Revue: décider si `schemas/` reste en parallèle avec `migrations/` ou si on harmonise.
+
 # Suivi de Progression
 
 ## État Général du Projet

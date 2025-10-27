@@ -1,3 +1,17 @@
+# Tasks Index
+
+## In Progress
+
+- `[TASK007]` Update memory bank - Générer et mettre à jour les fichiers du memory-bank avec le contexte de l'incident et actions prises.
+
+## Completed
+
+- `[TASK001]` Commit & annotate revoke migrations
+- `[TASK002]` Adapt CI audit to allow known restored GRANTs
+- `[TASK003]` Create CI gate for REVOKE detection
+- `[TASK004]` Add README for allowlist
+- `[TASK005]` Add runtime allowlist entries
+
 # Index des Tâches
 
 ## En Cours

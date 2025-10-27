@@ -513,8 +513,8 @@ HAVING COUNT(pol.policyname) = 0;
 
 ## 🔗 Références
 
-- ❌ [Security Audit Summary (DEPRECATED)](../supabase/migrations/SECURITY_AUDIT_SUMMARY.md) - Campagne erronée Rounds 1-17
-- ✅ [Incident Post-Mortem COMPLET](./INCIDENT_POSTMORTEM_RLS_GRANTS_2025-10-27.md) - Analyse complète et résolution finale
+- ❌ [Security Audit Summary (DEPRECATED)](./SECURITY_AUDIT_SUMMARY.md) - Campagne erronée Rounds 1-17
+- ✅ [Incident Post-Mortem COMPLET](../INCIDENT_POSTMORTEM_RLS_GRANTS_2025-10-27.md) - Analyse complète et résolution finale
 - [PostgreSQL RLS Docs](https://www.postgresql.org/docs/current/ddl-rowsecurity.html)
 - [Supabase RLS Guide](https://supabase.com/docs/guides/auth/row-level-security)
 - [PostgreSQL GRANT Docs](https://www.postgresql.org/docs/current/sql-grant.html)

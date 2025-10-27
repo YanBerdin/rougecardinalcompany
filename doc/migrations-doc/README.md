@@ -11,7 +11,7 @@
   - Leçons apprises et checklist de prévention
   - **À LIRE EN PRIORITÉ** pour comprendre le modèle de sécurité PostgreSQL
 
-- ⚠️ **[RLS_POLICIES_HOTFIX_2025-10-26.md](./legacy-migrations/RLS_POLICIES_HOTFIX_2025-10-26.md)** - Analyse partielle (conservée pour historique)
+- ⚠️ **[RLS_POLICIES_HOTFIX_2025-10-26.md](./legacy-migrations/DEPRECATED/RLS_POLICIES_HOTFIX_2025-10-26.md)** - Analyse partielle (conservée pour historique)
   - Première analyse de l'incident (incomplète)
   - Identifie RLS policies manquantes et fonction is_admin
   - **NE reflète PAS la résolution finale**
@@ -83,6 +83,34 @@ Voir `.github/copilot-instructions.md` pour :
 - **Migrations d'urgence** : 7 migrations créées (2 RLS + 1 function + 1 séparation + 5 GRANTs)
 - **Cause racine** : Campagne de sécurité basée sur fausse prémisse "RLS-only"
 - **Résolution** : Restauration de tous les GRANTs + création RLS policies + fonction is_admin
+
+## Références commit & migrations
+
+Commits récents liés aux corrections et CI (branche `feature/backoffice`):
+
+- c74115e — ci(monitor): add scheduled monitor for detect-revoke workflow (YanBerdin)
+  - https://github.com/YanBerdin/rougecardinalcompany/commit/c74115e4ea9c847d8748411372b841c8f1e294b4
+- e6b5249 — ci(security): fail CI when changed migrations contain REVOKE (YanBerdin)
+  - https://github.com/YanBerdin/rougecardinalcompany/commit/e6b5249686a2482dd3bfd1e94f15270e6b865edf
+- e0f0916 — chore(ci): add README for allowed_exposed_objects and warn-only workflow (YanBerdin)
+  - https://github.com/YanBerdin/rougecardinalcompany/commit/e0f09163b1ca075d1b5c0e9e8391b0620b46a70e
+- 3e160a8 — chore(ci): add detected exposed DB objects to allowlist (YanBerdin)
+  - https://github.com/YanBerdin/rougecardinalcompany/commit/3e160a842fba05c637c64237421b71cd90cd3aa0
+- d1cfaad — chore(ci): allowlist known restored DB objects in audit (YanBerdin)
+  - https://github.com/YanBerdin/rougecardinalcompany/commit/d1cfaadc8a5b776eea3867faeb7a842296e68360
+- 8b9df19 — chore(migrations): add warning headers to revoke_* migrations and move dangerous ones to legacy-migrations (YanBerdin)
+  - https://github.com/YanBerdin/rougecardinalcompany/commit/8b9df198de4716ec7e9f45820c8141f3142e356a
+
+Migrations d'urgence (résolution GRANTs & RLS) :
+
+- `supabase/migrations/20251026180000_apply_spectacles_partners_rls_policies.sql`
+- `supabase/migrations/20251026181000_apply_missing_rls_policies_home_content.sql`
+- `supabase/migrations/20251027000000_create_is_admin_function.sql`
+- `supabase/migrations/20251027020000_restore_basic_grants_for_rls.sql`
+- `supabase/migrations/20251027021000_restore_remaining_grants.sql`
+- `supabase/migrations/20251027021500_restore_views_grants.sql`
+- `supabase/migrations/20251027022000_fix_logs_audit_grants.sql`
+- `supabase/migrations/20251027022500_grant_execute_all_trigger_functions.sql`
 
 ## 🔗 Références Externes
 

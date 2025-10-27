@@ -86,7 +86,7 @@ ERROR: permission denied for function create_content_version (42501)
 
 ## 📚 Documentation Complète
 
-**Post-mortem détaillé** : [`doc/INCIDENT_POSTMORTEM_RLS_GRANTS_2025-10-27.md`](./doc/INCIDENT_POSTMORTEM_RLS_GRANTS_2025-10-27.md)
+**Post-mortem détaillé** : [`doc/INCIDENT_POSTMORTEM_RLS_GRANTS_2025-10-27.md`](./INCIDENT_POSTMORTEM_RLS_GRANTS_2025-10-27.md)
 
 Contient :
 
@@ -163,9 +163,9 @@ GRANT + RLS = **Security Multicouche** (pas alternatifs)
 
 ### Documentation Projet
 
-- [Instructions Next.js 15 Backend](./.github/instructions/nextjs15-backend-with-supabase.instructions.md)
-- [Supabase Auth Optimisée](./.github/instructions/nextjs-supabase-auth-2025.instructions.md)
-- [Copilot Instructions](./.github/copilot-instructions.md)
+- [Instructions Next.js 15 Backend](../../../.github/instructions/nextjs15-backend-with-supabase.instructions.md)
+- [Supabase Auth Optimisée](../../../.github/instructions/nextjs-supabase-auth-2025.instructions.md)
+- [Copilot Instructions](../../../.github/copilot-instructions.md)
 
 ## ⚠️ Message pour les Développeurs Futurs
 

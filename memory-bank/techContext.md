@@ -1,4 +1,25 @@
-# Contexte Technique
+# Tech Context
+
+Versions et dépendances clés observées dans le dépôt (2025-10-27):
+
+- Node.js: ^20 (devDeps)
+- Next.js: 15.4.5
+- TypeScript: ^5
+- Tailwind CSS: ^3.4.x
+- Supabase: client/server integration via `@supabase/ssr` and `@supabase/supabase-js` patterns
+
+Structure principale:
+
+- `app/` — App Router, pages et layouts
+- `components/` — composants réutilisables (ui/, features/)
+- `supabase/` — scripts, migrations, server client helpers
+- `lib/` — utilitaires et DAL
+
+Outils et commandes utiles:
+
+- Supabase CLI: `supabase db push`, `supabase link`
+- Scripts locaux: `supabase/scripts/*` pour audit et diagnostics
+- CI: GitHub Actions (workflows ajoutés pour audit, détection REVOKE, monitoring)
 
 ## Stack Technologique
 

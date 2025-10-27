@@ -1,4 +1,45 @@
-# Contexte Actif
+# Active Context
+
+Contexte courant (au 2025-10-27):
+
+- Incident de sécurité / outage (2025-10-25 → 2025-10-27) causé par une campagne de migrations REVOKE (Rounds 1-17) qui a supprimé des GRANTs table-level sur ~73 objets. Conséquence: erreurs PostgreSQL 42501 et indisponibilité de la homepage.
+- Actions réalisées depuis l'incident:
+  - Migrations d'urgence ajoutées pour restaurer les GRANTs critiques et EXECUTE sur fonctions (20251027020000 → 20251027022500).
+  - Migrations RLS et fonction `is_admin()` créées pour combler les manques.
+  - Les migrations dangereuses (`revoke_*`) ont été annotées et déplacées dans `supabase/migrations/legacy-migrations` pour éviter l'exécution accidentelle.
+  - CI: ajout d'une allowlist `supabase/scripts/allowed_exposed_objects.txt` et adaptation de l'audit SQL dans `.github/workflows/reorder-sql-tests.yml` pour exclure les objets autorisés.
+  - CI: ajout d'un workflow `detect-revoke` (fail-on-match) pour bloquer les merges contenant de nouveaux REVOKE non autorisés (ignore `legacy-migrations`).
+  - CI: ajout d'un workflow de monitoring `monitor-detect-revoke` (cron daily) pour surveiller les runs et créer une issue si des échecs sont détectés.
+
+Prochaines étapes immédiates:
+
+- Surveiller `detect-revoke` pendant 7 jours; affiner les règles et régler les faux positifs.
+- Documenter la procédure d'ajout à l'allowlist (PR + justification + approbation DB/infra).
+- Ajouter tests d'intégration CI pour vérifier accès DAL (anon/authenticated) après modifications de migrations.
+
+## Références (commits & migrations)
+
+Commits récents pertinents (branche `feature/backoffice`):
+
+- ci(monitor): add scheduled monitor for detect-revoke workflow — https://github.com/YanBerdin/rougecardinalcompany/commit/c74115e4ea9c847d8748411372b841c8f1e294b4 (YanBerdin)
+- ci(security): fail CI when changed migrations contain REVOKE — https://github.com/YanBerdin/rougecardinalcompany/commit/e6b5249686a2482dd3bfd1e94f15270e6b865edf (YanBerdin)
+- chore(ci): add README for allowed_exposed_objects and warn-only workflow — https://github.com/YanBerdin/rougecardinalcompany/commit/e0f09163b1ca075d1b5c0e9e8391b0620b46a70e (YanBerdin)
+- add detected exposed DB objects to allowlist — https://github.com/YanBerdin/rougecardinalcompany/commit/3e160a842fba05c637c64237421b71cd90cd3aa0 (YanBerdin)
+- chore(ci): allowlist known restored DB objects in audit — https://github.com/YanBerdin/rougecardinalcompany/commit/d1cfaadc8a5b776eea3867faeb7a842296e68360 (YanBerdin)
+- chore(migrations): add warning headers & move dangerous revoke_* to legacy — https://github.com/YanBerdin/rougecardinalcompany/commit/8b9df198de4716ec7e9f45820c8141f3142e356a (YanBerdin)
+
+Migrations d'urgence (résolution GRANTs & RLS) :
+
+- `supabase/migrations/20251026180000_apply_spectacles_partners_rls_policies.sql`
+- `supabase/migrations/20251026181000_apply_missing_rls_policies_home_content.sql`
+- `supabase/migrations/20251027000000_create_is_admin_function.sql`
+- `supabase/migrations/20251027020000_restore_basic_grants_for_rls.sql`
+- `supabase/migrations/20251027021000_restore_remaining_grants.sql`
+- `supabase/migrations/20251027021500_restore_views_grants.sql`
+- `supabase/migrations/20251027022000_fix_logs_audit_grants.sql`
+- `supabase/migrations/20251027022500_grant_execute_all_trigger_functions.sql`
+
+Ces fichiers contiennent les opérations appliquées lors de l'incident ; voir le post-mortem (`doc/migrations-doc/legacy-migrations/INCIDENT_POSTMORTEM_RLS_GRANTS_2025-10-27.md`) pour les détails étape par étape.
 
 ## État Actuel du Projet
 

@@ -1,5 +1,11 @@
 # Project Brief: Rouge Cardinal Company
 
+Nom du projet: Rouge Cardinal Company (site public et backoffice)
+
+But: fournir un site public présentant les spectacles, la compagnie et les ressources presse, avec une interface d'administration pour gérer le contenu et les médias. Le projet vise un déploiement sécurisé avec Supabase (Postgres + RLS) et Next.js (App Router).
+
+Contrainte principale: garantir que la sécurité des données repose sur une stratégie cohérente GRANT + RLS, tests CI et migrations auditables.
+
 ## Vue d'Ensemble du Projet
 
 Rouge Cardinal Company est un site web pour une compagnie de théâtre professionnelle, construit avec Next.js 15.4.5 et Supabase.

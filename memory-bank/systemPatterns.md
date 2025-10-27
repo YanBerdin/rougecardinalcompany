@@ -1,4 +1,19 @@
-# Patterns Système
+# System Patterns
+
+Architecture et patterns observés dans le projet:
+
+- App Router Next.js (app/) pour pages et layouts.
+- Pattern Smart/Dumb components: containers server-side pour la data, composants clients pour l'interactivité.
+- DAL pattern recommandé: `lib/dal/` ou `supabase/` pour centraliser l'accès à la base (server-only modules).
+- Sécurité: combinaison GRANT (table-level) + RLS (policies) requise — ne pas considérer RLS comme substitut au GRANT.
+- Migrations: `supabase/migrations/` est la source de vérité pour les modifications appliquées en base; `supabase/schemas/` sert de documentation/declarative reference.
+- Tests & CI: vérifier explicitement que les roles `anon` et `authenticated` peuvent accéder aux DTO nécessaires (tests d'intégration DAL).
+
+Conventions importantes:
+
+1. Tous les changements de schéma doivent être accompagnés d'une migration.
+2. Les migrations dangereuses (REVOKE massifs) doivent être revues et, si nécessaire, déplacées vers `supabase/migrations/legacy-migrations`.
+3. Les scripts d'audit doivent être alignés avec le modèle de sécurité (ne pas considérer un GRANT comme "exposé" quand il est requis pour RLS).
 
 ## Patterns Architecturaux
 
