@@ -1,4 +1,4 @@
-name: Detect REVOKE in migrations (warn-only)
+name: Detect REVOKE in migrations (fail-on-match)
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   detect-revoke:
-    name: Scan changed migrations for REVOKE (warn-only)
+    name: Scan changed migrations for REVOKE (fail-on-match)
     runs-on: ubuntu-latest
 
     steps:
@@ -34,7 +34,7 @@ jobs:
           echo "$CHANGED" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Scan changed migration SQLs for REVOKE
+      - name: Scan changed migration SQLs for REVOKE and fail
         run: |
           set -eu
           CHANGED="${{ steps.changed.outputs.changed_files }}"
@@ -43,13 +43,17 @@ jobs:
           # Iterate over changed files and scan only SQL migration files under supabase/migrations
           while IFS= read -r file; do
             [ -z "$file" ] && continue
+            # Ignore legacy migrations folder (quarantined dangerous migrations)
             case "$file" in
+              supabase/migrations/legacy-migrations/*)
+                echo "Skipping legacy migration $file"
+                continue
+                ;;
               supabase/migrations/*.sql|supabase/migrations/**/*.sql)
                 if grep -n -E '\bREVOKE\b' -- "$file" >/dev/null 2>&1; then
                   FOUND=1
-                  # Print a workflow annotation (warning) for the first match
-                  echo "::warning file=$file::REVOKE found in migration $file - please confirm intent and add to allowlist if intentional."
-                  # show matching lines for context
+                  # Create a workflow annotation (error) and show context
+                  echo "::error file=$file::REVOKE found in migration $file - remove or justify this change before merging."
                   echo "--- matches in $file ---"
                   grep -n -E '\bREVOKE\b' -- "$file" | sed -n '1,200p' || true
                 fi
@@ -60,8 +64,9 @@ jobs:
           done <<< "$CHANGED"
 
           if [ "$FOUND" -eq 1 ]; then
-            echo "Warning: one or more changed migration files contain REVOKE statements. This job is warn-only and will not fail the run."
-            echo "If these REVOKE statements are intentional, add an explanation to the PR and consider adding the affected objects to supabase/scripts/allowed_exposed_objects.txt if they are intentionally exposed."
-          else
-            echo "No REVOKE statements found in changed migration files."
+            echo "Error: one or more changed migration files contain REVOKE statements. This job will FAIL to block merges until the change is justified or moved to legacy-migrations."
+            echo "If the REVOKE is intentional, either move the migration to supabase/migrations/legacy-migrations or add a clear justification to the PR and update the allowlist as appropriate."
+            exit 1
           fi
+
+          echo "No REVOKE statements found in changed migration files."
