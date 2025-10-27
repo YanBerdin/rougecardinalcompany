@@ -33,6 +33,22 @@ Migrations d'urgence appliquées pour la résolution :
 - `20251027022000_fix_logs_audit_grants.sql`
 - `20251027022500_grant_execute_all_trigger_functions.sql`
 
+## Production verification
+
+Vérification de l'historique des migrations sur le projet Supabase associé au dépôt. Projet détecté : `Rouge-Cardinal-Companie` (project_id: `yvtrlvmbofklefxcxrzv`). Les migrations d'urgence suivantes apparaissent dans l'historique des migrations du projet (présentes = appliquées) :
+
+- `20251026180000_apply_spectacles_partners_rls_policies`
+- `20251026181000_apply_missing_rls_policies_home_content`
+- `20251027000000_create_is_admin_function`
+- `20251027010000_recreate_all_rls_policies`
+- `20251027020000_restore_basic_grants_for_rls`
+- `20251027021000_restore_remaining_grants`
+- `20251027021500_restore_views_grants`
+- `20251027022000_fix_logs_audit_grants`
+- `20251027022500_grant_execute_all_trigger_functions`
+
+Cette vérification a été réalisée via l'API Supabase MCP et confirme que les migrations d'urgence figurent bien dans l'historique du projet.
+
 ## En cours
 
 - Surveillance du workflow `detect-revoke` (7 jours) pour collecter et traiter faux positifs.
