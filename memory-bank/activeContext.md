@@ -8,6 +8,31 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 
 ### Avancées récentes (Octobre 2025)
 
+- ✅ **26 octobre — INCIDENT CRITIQUE RÉSOLU : RLS Policies Manquantes** :
+  - **Symptôme** : Homepage + toutes fonctionnalités publiques DOWN (PostgreSQL 42501 "permission denied for table")
+  - **Tables affectées** : 7 tables core (spectacles, partners, home_hero_slides, home_about_content, compagnie_stats, configurations_site, communiques_presse)
+  - **Cause racine #1** : Architecture hybride schemas/migrations
+    - Schéma déclaratif contenait les RLS policies
+    - MAIS policies jamais migrées vers la base de données
+    - Campagne sécurité (Rounds 1-17) a révoqué tous les GRANTS
+    - Résultat : RLS enabled + 0 policies = **DENY ALL**
+  - **Résolution Phase 1 (26 oct)** : 2 migrations RLS créées (30 policies)
+    - `20251026180000_apply_spectacles_partners_rls_policies.sql`
+    - `20251026181000_apply_missing_rls_policies_home_content.sql`
+  - **Cause racine #2 (27 oct)** : Fonction `is_admin()` manquante
+    - Les policies RLS utilisent `(select public.is_admin())`
+    - Fonction existe dans schéma déclaratif MAIS jamais migrée
+    - Résultat : **TOUTES les policies échouent** (même pour admin)
+  - **Résolution Phase 2 (27 oct)** : Migration fonction créée
+    - `20251027000000_create_is_admin_function.sql`
+  - **Leçons apprises** :
+    - Créé `check_rls_coverage.sh` pour détecter tables RLS sans policies
+    - Documenté conventions strictes schemas/ vs migrations/
+    - Incident complet documenté dans `doc/RLS_POLICIES_HOTFIX_2025-10-26.md`
+  - **Durée totale** : 4h (détection → résolution complète)
+  - **Impact** : 4h d'indisponibilité intermittente, 0 perte de données
+  - ✅ Production restaurée (en attente confirmation finale)
+
 - ✅ **26 octobre — Campagne de sécurité TERMINÉE (73 objets sécurisés)** :
   - **17 rounds de sécurisation** (25-26 octobre) : 73 objets exposés détectés et corrigés
     - Rounds 1-7 : 28 objets business (tables, vues, junction tables)
@@ -15,6 +40,7 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
     - Rounds 8-17 : 45 objets supplémentaires (storage critique, fonctions, triggers)
   - **Round 12 CRITIQUE** : storage.objects avec ALL PRIVILEGES (vulnérabilité majeure)
   - **Round 17 FINAL** : check_communique_has_pdf() - ✅ CI PASSED
+  - **⚠️ Conséquence non anticipée** : Révocation GRANTS sans RLS policies → DENY ALL (incident ci-dessus)
   - **Pivot stratégique whitelist** : audit_grants_filtered.sql (exclusion objets système)
   - **PR #25 merged** : Suppression broad grants articles_presse
   - **Issues créées** : #26 (search_path), #27 (DEFINER rationale), #28 (scripts obsolètes)
@@ -90,6 +116,11 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 
 ### Problèmes résolus
 
+- ✅ **Homepage DOWN - RLS Policies Manquantes (CRITIQUE)** : Production complètement cassée (26 oct)
+  - Root cause : Schéma déclaratif avec policies MAIS jamais migré en base
+  - Révocation GRANTS (campagne sécurité) → RLS enabled + 0 policies = DENY ALL
+  - Solution : 2 migrations d'urgence (30 policies appliquées)
+  - Prevention : Script `check_rls_coverage.sh` + conventions strictes
 - ✅ **Articles presse vides (CRITIQUE)** : RLS activé sans policies + SECURITY INVOKER sans GRANT (22-23 oct)
   - Root cause : PostgreSQL deny-all par défaut quand RLS activé sans policies
   - Solution : 5 RLS policies + GRANT SELECT sur table base
@@ -112,6 +143,9 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 
 ### Points d'attention restants
 
+- **Ajouter check RLS au CI** : Intégrer `check_rls_coverage.sh` dans pipeline pour bloquer merge si tables RLS sans policies
+- **Auditer toutes tables** : Vérifier coverage RLS complet sur les 36 tables (pas juste les 7 affectées)
+- **Décision architecture** : Garder schemas/ déclaratif ou passer 100% migrations ?
 - **Patches DB conventions** : ≈20 fonctions à patcher (SET search_path + DEFINER rationale)
 - **Scripts obsolètes** : 3 candidats à supprimer après approbation (quick_audit_test.sql, check_round7b_grants.sh, verify_round7_grants.sql)
 - Cohérence des états de toggles entre back‑office et pages publiques

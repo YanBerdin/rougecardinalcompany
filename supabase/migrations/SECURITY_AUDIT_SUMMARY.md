@@ -1,20 +1,128 @@
-# Security Audit - Grant Revocation Summary
+# ⚠️ DEPRECATED - Security Audit Documentation
 
-**Date:** 2025-10-25  
+> **❌ CRITICAL WARNING - THIS DOCUMENT DESCRIBES A FAILED SECURITY CAMPAIGN**
+>
+> **Date of Incident:** October 27, 2025 02:00
+> **Status:** ❌ DEPRECATED - DO NOT USE AS REFERENCE
+> **Replacement:** See `doc/INCIDENT_POSTMORTEM_RLS_GRANTS_2025-10-27.md`
+>
+> This document is preserved **only for historical purposes** and to serve as a warning against incorrect security assumptions.
+
+---
+
+# Security Audit - Grant Revocation Summary (❌ FAILED CAMPAIGN)
+
+**Date:** 2025-10-25 to 2025-10-26  
 **Branch:** feature/backoffice  
-**Issue:** CI security audit detected database objects exposed to PUBLIC/anon/authenticated roles
+**Original Claim:** "CI security audit detected database objects exposed to PUBLIC/anon/authenticated roles"  
+**Actual Result:** **PRODUCTION FAILURE** - Entire application broken for 8 hours
 
-## Problem
+## ❌ FLAWED PROBLEM STATEMENT
 
-The security audit script (`supabase/scripts/audit_grants.sql`) detected broad table-level grants that bypass RLS (Row Level Security) policies. These grants were likely remnants from old migrations or initial setup.
+**Original claim:**
+> "The security audit script detected broad table-level grants that bypass RLS (Row Level Security) policies."
 
-## Root Cause
+**Reality:**
+Table-level grants DO NOT bypass RLS. They are REQUIRED for RLS to function.
 
-**Anti-pattern:** Table-level grants (e.g., `GRANT SELECT ON TABLE foo TO authenticated`) **short-circuit RLS policies**, making the policies ineffective.
+## ❌ INCORRECT ROOT CAUSE ANALYSIS
 
-**Best practice:** Use RLS policies exclusively for access control. Avoid table-level grants to PUBLIC/anon/authenticated.
+**Original claim:**
+> "Anti-pattern: Table-level grants short-circuit RLS policies, making the policies ineffective."
+> "Best practice: Use RLS policies exclusively for access control."
 
-## Migrations Created
+**Reality:**
+This is **architecturally incorrect**. PostgreSQL security model requires:
+
+1. **GRANT (table-level)** - Controls WHO can access the table structure
+2. **RLS (row-level)** - Controls WHICH rows within accessible tables
+
+**Without GRANT, PostgreSQL returns "permission denied" BEFORE evaluating RLS policies.**
+
+## ❌ ACTUAL RESULT OF CAMPAIGN
+
+### Rounds 1-17 Summary (Oct 25-26, 2025)
+
+**Claimed:** "73 objects secured"  
+**Reality:** **73 objects BROKEN**
+
+**Breakdown:**
+
+- 21 business tables → **21 tables inaccessible**
+- 5 junction tables → **5 relations broken**
+- 6 admin views → **6 views returning permission denied**
+- 31 functions → **31 functions failing with "permission denied for function"**
+- 10 system tables → **Correctly whitelisted** (only positive outcome)
+
+### Production Impact (October 27, 2025)
+
+**02:00** - Production DOWN  
+**Errors reported:**
+
+- "permission denied for table home_hero_slides" (PostgreSQL 42501)
+- "permission denied for table evenements"
+- "permission denied for view articles_presse_public"
+- "permission denied for table logs_audit"
+- "permission denied for function create_content_version"
+
+**Pages affected:**
+
+- Homepage (7 DAL functions failing)
+- All public pages
+- All admin pages
+- Authentication system
+- Content management
+
+**Duration:** 8 hours until root cause identified and corrected
+
+## ✅ CORRECT RESOLUTION (Oct 27, 2025)
+
+### Emergency GRANT Restoration
+
+Five emergency migrations created to restore GRANTs:
+
+1. **20251027020000_restore_basic_grants_for_rls.sql** - 9 critical tables
+2. **20251027021000_restore_remaining_grants.sql** - 26 remaining tables
+3. **20251027021500_restore_views_grants.sql** - 11 views
+4. **20251027022000_fix_logs_audit_grants.sql** - Audit trigger permissions
+5. **20251027022500_grant_execute_all_trigger_functions.sql** - 15 trigger functions
+
+**Total restored:** 59 database objects  
+**Result:** Production operational again
+
+### Correct Security Model
+
+```sql
+-- ✅ CORRECT: GRANT + RLS work TOGETHER
+-- Step 1: GRANT table-level access
+GRANT SELECT ON TABLE public.spectacles TO anon, authenticated;
+GRANT INSERT, UPDATE, DELETE ON TABLE public.spectacles TO authenticated;
+
+-- Step 2: RLS filters which rows
+CREATE POLICY "Public spectacles are viewable by everyone"
+  ON public.spectacles FOR SELECT
+  TO anon, authenticated
+  USING (public = true);
+
+CREATE POLICY "Admins see all spectacles"
+  ON public.spectacles FOR SELECT
+  TO authenticated
+  USING (is_admin());
+```
+
+**How it works:**
+
+1. PostgreSQL checks GRANT first → "Can this role access this table?"
+2. If GRANT exists, PostgreSQL then checks RLS → "Which rows can they see?"
+3. Both layers = Defense in depth (correct security model)
+
+## ❌ INCORRECT SECTIONS BELOW
+
+The following sections describe the flawed campaign. They are preserved for historical reference but should NOT be used as guidance.
+
+---
+
+## Original (Incorrect) Migrations Created
 
 ### Round 1: Initial exposed objects (20251025181000)
 
@@ -274,82 +382,95 @@ These objects are intentionally excluded from the audit as they are:
 
 ---
 
-## ✅ CAMPAIGN COMPLETE
+## ✅ CORRECT APPROACH - LESSONS LEARNED
 
-**Status:** ✅ **ALL AUDITS PASSING** - Campaign successfully completed  
-**Database Status:** ✅ All 17 rounds applied successfully (2025-10-26)  
-**Audit Status:** ✅ **CI PASSED** - Zero exposed objects detected  
-**Total Objects Secured:** 73 objects across 17 rounds  
-**Last Updated:** 2025-10-26 17:00:00 (Round 17 - FINAL)  
+### What Should Have Been Done
 
-### Round 17: Final Business Logic Function (20251026170000)
+**Correct security audit questions:**
 
-**File:** `20251026170000_revoke_check_communique_has_pdf_function.sql`
+1. ✅ "Are RLS policies enabled on all tables?" (Answer: Yes)
+2. ✅ "Are RLS policies correctly filtering rows?" (Answer: Yes)
+3. ✅ "Are there overly permissive RLS policies?" (Answer: No - all policies have proper checks)
+4. ❌ "Should we remove all GRANTs?" (Answer: NO - PostgreSQL requires them)
 
-**Detected by CI after Round 16:**
+### Correct Security Model Documentation
 
-- `public.check_communique_has_pdf()` → authenticated (EXECUTE privilege)
+**PostgreSQL requires TWO security layers:**
 
-**Actions taken:**
+```sql
+-- Layer 1: Table-level permissions (GRANT)
+-- Controls: WHO can access the table structure
+-- Check: Happens FIRST
+GRANT SELECT ON TABLE public.spectacles TO anon, authenticated;
+GRANT INSERT, UPDATE, DELETE ON TABLE public.spectacles TO authenticated;
 
-- ✅ Revoked EXECUTE from authenticated
-- ✅ Revoked EXECUTE from PUBLIC (defense in depth)
-- ✅ Revoked EXECUTE from anon (defense in depth)
+-- Layer 2: Row-level permissions (RLS)
+-- Controls: WHICH rows within accessible tables
+-- Check: Happens SECOND (only if GRANT passed)
+CREATE POLICY "Public spectacles viewable by everyone"
+  ON public.spectacles FOR SELECT
+  TO anon, authenticated
+  USING (public = true);
+```
 
-**Security rationale:**
-Business logic functions should NEVER have direct EXECUTE grants to client roles. This function is used in:
+**Without GRANT:** PostgreSQL returns `permission denied for table` (42501) BEFORE checking RLS.
 
-- RLS policies (SECURITY DEFINER context - still works)
-- Database triggers (DEFINER privileges - still works)
-- Server-side code only
+### Real Security Issues That Should Be Audited
 
-**Impact:** Prevents malicious direct client calls while preserving legitimate server-side usage.
+1. ✅ **Overly permissive RLS policies** - `USING (true)` without good reason
+2. ✅ **Missing RLS on sensitive tables** - Tables without `ALTER TABLE ... ENABLE ROW LEVEL SECURITY`
+3. ✅ **SECURITY DEFINER functions** - Functions that bypass RLS should be carefully reviewed
+4. ✅ **Leaked credentials** - API keys, passwords in code or logs
+5. ✅ **SQL injection vulnerabilities** - Unparameterized queries
+6. ❌ **Table-level GRANTs** - These are REQUIRED, not a security issue
+
+### Tools That Led to the Error
+
+**Flawed tools (DO NOT USE):**
+
+- `supabase/scripts/audit_grants.sql` (unfiltered) - Flags all GRANTs as "exposed"
+- `supabase/scripts/audit_grants_filtered.sql` - Still based on flawed premise
+- `.github/workflows/check-security-audit.sh` - Fails CI when GRANTs exist
+
+**Reason:** These tools assume "no GRANTs = secure" which is incorrect.
+
+**Correct approach:**
+
+- Audit RLS policies for overly permissive rules
+- Verify RLS is enabled on all tables
+- Test actual access patterns with different roles
+- Use `SET ROLE authenticated` to simulate user access
+
+### References
+
+- ✅ **Incident Post-Mortem:** `doc/INCIDENT_POSTMORTEM_RLS_GRANTS_2025-10-27.md`
+- ✅ **Emergency Migrations:** `supabase/migrations/20251027*.sql` (5 files)
+- ✅ **PostgreSQL Security Documentation:** [Row Security Policies](https://www.postgresql.org/docs/current/ddl-rowsecurity.html)
+- ❌ **This document (deprecated):** Historical reference only
 
 ---
 
-## 🎊 Final Campaign Summary
+## 🚨 FINAL WARNING
 
-**Timeline:**
+**DO NOT:**
 
-- **Started:** October 25, 2025
-- **Completed:** October 26, 2025
-- **Duration:** 2 days
-- **Total Rounds:** 17 migrations
-- **Total Objects Secured:** 73
+- Use this document as a security reference
+- Replicate the migrations described above (Rounds 1-17)
+- Assume "RLS-only" is sufficient
+- Remove table-level GRANTs
 
-**Breakdown by Object Type:**
+**DO:**
 
-- **Business tables:** 21
-- **Junction tables:** 5
-- **Admin/analytics views:** 6
-- **System tables (whitelisted):** 10 (4 Realtime + 6 Storage)
-- **Functions:** 31
-  - 14 trigger functions (versioning, auth, utility)
-  - 5 admin functions
-  - 5 analytics/search/utility functions
-  - 4 auth helper functions
-  - 3 pg_trgm extension functions
+- Read the post-mortem: `doc/INCIDENT_POSTMORTEM_RLS_GRANTS_2025-10-27.md`
+- Understand PostgreSQL security requires GRANT + RLS
+- Test access with `SET ROLE authenticated` before production
+- Focus security audits on RLS policy logic, not GRANT existence
 
-**Critical Vulnerabilities Fixed:**
+**Preserved for:** Historical reference and learning from mistakes  
+**Status:** ❌ DEPRECATED - DO NOT REPLICATE  
+**Date:** October 27, 2025
 
-1. **storage.objects (Round 12)** - Had `arwdDxtm` (ALL PRIVILEGES) on anon/authenticated
-   - Anyone could read/write/delete ALL files
-   - Completely bypassed Supabase Storage RLS
-   - **Severity:** CRITICAL
-2. **check_communique_has_pdf (Round 17)** - Business logic function exposed
-   - Allowed direct client manipulation of PDF validation logic
-   - **Severity:** HIGH
+---
 
-**Security Achievements:**
-
-- ✅ RLS policies enforced for ALL data access
-- ✅ Zero table-level grants to PUBLIC/anon/authenticated
-- ✅ All business logic functions secured
-- ✅ Comprehensive system object whitelist
-- ✅ Defense in depth security model
-- ✅ Idempotent migrations with exception handling
-- ✅ Complete audit trail and documentation
-
-**Status:** 🚀 **READY FOR PRODUCTION MERGE**
-
-**Author:** Security Audit Remediation Campaign (Oct 25-26, 2025)
+**Author:** Security Audit Remediation Campaign (Oct 25-26, 2025) - FAILED  
+**Corrected by:** Emergency Incident Response (Oct 27, 2025) - SUCCESSFUL
