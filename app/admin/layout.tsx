@@ -11,6 +11,9 @@ import {
   Settings,
   Menu,
 } from "lucide-react";
+import { EnvVarWarning } from "@/components/env-var-warning";
+import { AuthButton } from "@/components/auth-button";
+import { hasEnvVars } from "@/lib/utils";
 
 export default async function AdminLayout({
   children,
@@ -38,27 +41,45 @@ export default async function AdminLayout({
         </div>
 
         <nav className="space-y-2">
-          <NavLink href="/admin" icon={<Home className="h-4 w-4" aria-hidden />}> 
+          <NavLink
+            href="/admin"
+            icon={<Home className="h-4 w-4" aria-hidden />}
+          >
             Tableau de bord
           </NavLink>
 
-          <NavLink href="/admin/team" icon={<Users className="h-4 w-4" aria-hidden />}>
+          <NavLink
+            href="/admin/team"
+            icon={<Users className="h-4 w-4" aria-hidden />}
+          >
             Équipe
           </NavLink>
 
-          <NavLink href="/admin/shows" icon={<FileText className="h-4 w-4" aria-hidden />}>
+          <NavLink
+            href="/admin/shows"
+            icon={<FileText className="h-4 w-4" aria-hidden />}
+          >
             Spectacles
           </NavLink>
 
-          <NavLink href="/admin/events" icon={<Calendar className="h-4 w-4" aria-hidden />}>
+          <NavLink
+            href="/admin/events"
+            icon={<Calendar className="h-4 w-4" aria-hidden />}
+          >
             Événements
           </NavLink>
 
-          <NavLink href="/admin/press" icon={<FileText className="h-4 w-4" aria-hidden />}>
+          <NavLink
+            href="/admin/press"
+            icon={<FileText className="h-4 w-4" aria-hidden />}
+          >
             Presse
           </NavLink>
 
-          <NavLink href="/admin/media" icon={<ImageIcon className="h-4 w-4" aria-hidden />}>
+          <NavLink
+            href="/admin/media"
+            icon={<ImageIcon className="h-4 w-4" aria-hidden />}
+          >
             Médiathèque
           </NavLink>
 
@@ -69,14 +90,18 @@ export default async function AdminLayout({
             Paramètres
           </NavLink>
         </nav>
+        <div className="mt-8 mb-8 pt-8 border-t space-y-4">
+          {/* Env var warning or auth button — placed here so it's present on all admin pages */}
+          <div>{!hasEnvVars ? <EnvVarWarning /> : <AuthButton />}</div>
 
-        <div className="mt-8 pt-8 border-t">
-          <Link
-            href="/"
-            className="text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Retour au site
-          </Link>
+          <div className="mt-8 pt-8 border-t">
+            <Link
+              href="/"
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              ← Retour au site
+            </Link>
+          </div>
         </div>
       </aside>
 
@@ -88,6 +113,13 @@ export default async function AdminLayout({
           <Button variant="ghost" size="icon">
             <Menu className="h-5 w-5" aria-hidden />
           </Button>
+        </div>
+
+        {/* Mobile-only env/auth row (visible when sidebar is hidden) */}
+        <div className="md:hidden border-b px-2 py-1">
+          <div className="flex ">
+            {!hasEnvVars ? <EnvVarWarning /> : <AuthButton />}
+          </div>
         </div>
 
         {/* Content */}

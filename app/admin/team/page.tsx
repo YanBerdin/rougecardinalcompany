@@ -1,6 +1,4 @@
-import { AuthButton } from "@/components/auth-button";
-import { EnvVarWarning } from "@/components/env-var-warning";
-import { hasEnvVars } from "@/lib/utils";
+// Auth / env UI is rendered in the admin layout to keep it unique across admin pages
 import { redirect } from "next/navigation";
 import { createClient } from "@/supabase/server";
 import { fetchAllTeamMembers } from "@/lib/dal/team";
@@ -19,7 +17,6 @@ export default async function AdminTeamPage() {
 
   return (
     <div className="space-y-6 mt-24">
-      {!hasEnvVars ? <EnvVarWarning /> : <AuthButton />}
       <div>
         <h1 className="text-3xl font-bold">Gestion de l&apos;équipe</h1>
         <p className="text-muted-foreground mt-2">

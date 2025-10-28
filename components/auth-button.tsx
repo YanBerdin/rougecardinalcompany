@@ -60,8 +60,8 @@ export function AuthButton() {
   }
 
   return userClaims ? (
-    <div className="flex items-center gap-4">
-      Hey, {userClaims.email}!
+    <div className="flex items-center gap-4  flex-col">
+      Hello👋🏼 {userClaims.email}
       <LogoutButton />
     </div>
   ) : (

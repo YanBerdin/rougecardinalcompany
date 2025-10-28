@@ -1,6 +1,4 @@
-import { AuthButton } from "@/components/auth-button";
-import { EnvVarWarning } from "@/components/env-var-warning";
-import { hasEnvVars } from "@/lib/utils";
+// Auth / env UI is rendered in the admin layout to keep it unique across admin pages
 
 import { createClient } from "@/supabase/server";
 import {
@@ -33,7 +31,6 @@ export default async function AdminDashboard() {
   return (
     <div className="space-y-8 mt-20">
       <div>
-        {!hasEnvVars ? <EnvVarWarning /> : <AuthButton />}
         <h1 className="text-3xl font-bold mt-8">Tableau de bord</h1>
         <p className="text-muted-foreground mt-2">
           Gérez le contenu et la configuration de votre site
