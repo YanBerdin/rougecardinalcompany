@@ -11,8 +11,7 @@ import {
   Settings,
   Menu,
 } from "lucide-react";
-import { EnvVarWarning } from "@/components/env-var-warning";
-import { AuthButton } from "@/components/auth-button";
+import AdminAuthRow from "@/components/admin/AdminAuthRow";
 import { hasEnvVars } from "@/lib/utils";
 
 export default async function AdminLayout({
@@ -91,8 +90,10 @@ export default async function AdminLayout({
           </NavLink>
         </nav>
         <div className="mt-8 mb-8 pt-8 border-t space-y-4">
-          {/* Env var warning or auth button — placed here so it's present on all admin pages */}
-          <div>{!hasEnvVars ? <EnvVarWarning /> : <AuthButton />}</div>
+          {/* Admin auth row: centralized client component */}
+          <div>
+            <AdminAuthRow hasEnvVars={!!hasEnvVars} />
+          </div>
 
           <div className="mt-8 pt-8 border-t">
             <Link
@@ -118,7 +119,7 @@ export default async function AdminLayout({
         {/* Mobile-only env/auth row (visible when sidebar is hidden) */}
         <div className="md:hidden border-b px-2 py-1">
           <div className="flex ">
-            {!hasEnvVars ? <EnvVarWarning /> : <AuthButton />}
+            <AdminAuthRow hasEnvVars={!!hasEnvVars} />
           </div>
         </div>
 
