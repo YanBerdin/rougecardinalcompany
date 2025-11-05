@@ -17,7 +17,7 @@ export default {
         foreground: "hsl(var(--foreground))",
         card: {
           DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
+          foreground: "hsl(var(--card-foreground))", 
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
@@ -36,7 +36,7 @@ export default {
           foreground: "hsl(var(--muted-foreground))",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
+          DEFAULT: "hsl(var(--accent))", 
           foreground: "hsl(var(--accent-foreground))",
         },
         destructive: {
@@ -47,17 +47,43 @@ export default {
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         chart: {
-          "1": "hsl(var(--chart-1))",
-          "2": "hsl(var(--chart-2))",
-          "3": "hsl(var(--chart-3))",
-          "4": "hsl(var(--chart-4))",
-          "5": "hsl(var(--chart-5))",
+          1: "hsl(var(--chart-1))",
+          2: "hsl(var(--chart-2))",
+          3: "hsl(var(--chart-3))",
+          4: "hsl(var(--chart-4))",
+          5: "hsl(var(--chart-5))",
         },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      cardinal: {
+        DEFAULT: "#A60303",
+        dark: "#5E0202",
+        light: "#C42727",
+      },
+      ecru: {
+        DEFAULT: "#F2EDE4",
+        dark: "#E5DFD4",
+        light: "#FAF7F0",
+      },
+      night: {
+        DEFAULT: "#070707",
+        light: "#1A1A1A",
+        lighter: "#27201f",
+      },
+      alabaster: {
+        DEFAULT: "#f6f2e6",
+        dark: "#ede8d9",
+        darker: "#e4dfc8",
+      },
+      backgroundImage: {
+        "gradient-cardinal":
+          "linear-gradient(135deg, #A60303 0%, #5E0202 50%, #A60303 100%)",
+        "gradient-ecru": "linear-gradient(135deg, #F2EDE4 0%, #FAF7F0 100%)",
+        "gradient-hero": "linear-gradient(180deg, #A60303 0%, #F2EDE4 100%)",
       },
     },
   },

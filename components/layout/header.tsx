@@ -68,12 +68,12 @@ export function Header() {
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  "nav-link-glass text-sm font-medium transition-all duration-300 relative z-10",
+                  "nav-link-glass sm:text-sm md:text-md lg:text-lg font-medium transition-all duration-300 relative z-10",
                   pathname === item.href
                     ? "text-primary font-bold active"
                     : isScrolled
                       ? "text-foreground"
-                      : "text-white"
+                      : "text-primary"
                 )}
               >
                 {item.name}

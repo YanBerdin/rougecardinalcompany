@@ -32,8 +32,8 @@ export default async function AdminLayout({
     <div className="flex min-h-screen">
       {/* Sidebar */}
       <aside className="w-64 border-r bg-muted/30 p-6 hidden md:block">
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-brand-red">Admin</h2>
+        <div className="mb-8 mt-8">
+          <h2 className="text-2xl font-bold">Admin</h2>
           <p className="text-sm text-muted-foreground">
             Rouge Cardinal Company
           </p>
@@ -110,7 +110,7 @@ export default async function AdminLayout({
       <main className="flex-1">
         {/* Mobile header */}
         <div className="md:hidden border-b p-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-brand-red">Admin</h2>
+          <h2 className="text-xl font-bold">Admin</h2>
           <Button variant="ghost" size="icon">
             <Menu className="h-5 w-5" aria-hidden />
           </Button>

@@ -24,7 +24,7 @@ export function NewsView({ news }: NewsViewProps) {
           {news.map((item, index) => (
             <Card
               key={item.id}
-              className={`card-hover animate-fade-in-up news-card-dark w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm flex flex-col`}
+              className={`card-hover animate-fade-in-up w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm flex flex-col`}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <div className="relative overflow-hidden rounded-t-lg">
