@@ -79,7 +79,7 @@ export function AgendaView({
             {events.map((event, index) => (
               <Card
                 key={event.id}
-                className={`card-hover animate-fade-in-up overflow-hidden shows-card-dark`}
+                className={`card-hover animate-fade-in-up overflow-hidden`}
                 style={{ animationDelay: `${index * 0.05}s` }}
               >
                 <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5">
@@ -216,7 +216,9 @@ export function AgendaView({
             className="bg-white/10 border-white/30 text-white backdrop-blur-sm hover:bg-white hover:text-black transition-all duration-300 shadow-lg border"
             asChild
           >
-            <Link href="/contact#newsletter">S&apos;abonner aux actualités</Link>
+            <Link href="/contact#newsletter">
+              S&apos;abonner aux actualités
+            </Link>
           </Button>
         </div>
       </section>

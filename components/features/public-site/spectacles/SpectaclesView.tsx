@@ -56,7 +56,7 @@ export function SpectaclesView({
             {currentShows.map((show, index) => (
               <Card
                 key={show.id}
-                className={`card-hover animate-fade-in-up overflow-hidden shows-card-dark w-full lg:w-[calc(50%-1.5rem)] max-w-2xl`}
+                className={`card-hover animate-fade-in-up overflow-hidden w-full lg:w-[calc(50%-1.5rem)] max-w-2xl`}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 h-full">
@@ -156,7 +156,7 @@ export function SpectaclesView({
             {displayedArchivedShows.map((show, index) => (
               <Card
                 key={show.id}
-                className={`card-hover animate-fade-in-up overflow-hidden shows-card-dark w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm`}
+                className={`card-hover animate-fade-in-up overflow-hidden w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm`}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div className="relative">

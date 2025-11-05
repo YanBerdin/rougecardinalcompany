@@ -20,7 +20,7 @@ export function ShowsView({ shows }: ShowsViewProps) {
           {shows.map((show, index) => (
             <Card
               key={show.id}
-              className={`card-hover animate-fade-in-up overflow-hidden shows-card-dark w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm flex flex-col`}
+              className={`card-hover animate-fade-in-up overflow-hidden w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm flex flex-col`}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <div className="relative">
