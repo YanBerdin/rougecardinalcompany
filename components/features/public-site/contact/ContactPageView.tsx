@@ -475,7 +475,7 @@ export function ContactPageView() {
                         className="w-full"
                         disabled={isLoading}
                       >
-                        {isLoading ? "Inscription..." : "S&apos;abonner"}
+                        {isLoading ? "Inscription..." : "S'abonner"}
                       </Button>
                       {newsletterError && (
                         <p className="text-sm text-red-600">

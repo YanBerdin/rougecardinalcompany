@@ -96,7 +96,9 @@ export function PresseView({
                   <p className="text-muted-foreground mb-4 text-sm leading-relaxed flex-1">
                     {release.description}
                   </p>
-                  <Button className="w-full mt-auto hover:bg-muted" asChild>
+                  <Button 
+                  variant="outline-primary"
+                  className="w-full mt-auto" asChild>
                     <a href={release.fileUrl} download>
                       <Download className="mr-2 h-4 w-4" />
                       Télécharger le PDF
@@ -226,7 +228,7 @@ export function PresseView({
                       Taille : {item.fileSize}
                     </p>
 
-                    <Button className="w-full mt-auto" asChild>
+                    <Button variant="outline-primary" className="w-full mt-auto" asChild>
                       <a href={item.fileUrl} download>
                         <Download className="mr-2 h-4 w-4" />
                         Télécharger

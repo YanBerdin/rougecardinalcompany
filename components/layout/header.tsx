@@ -72,8 +72,8 @@ export function Header() {
                   pathname === item.href
                     ? "text-primary font-bold active"
                     : isScrolled
-                      ? "text-foreground"
-                      : "text-primary"
+                      ? "text-foreground font-bold"
+                      : "text-foreground font-bold"
                 )}
               >
                 {item.name}

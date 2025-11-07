@@ -68,8 +68,9 @@ export function ShowsView({ shows }: ShowsViewProps) {
               <CardFooter className="pt-0 mt-auto">
                 <div className="flex space-x-2 w-full">
                   <Button
+                    variant="outline-primary"
                     size="lg"
-                    className="flex-1 btn-primary bg-red"
+                    className="flex-1"
                     asChild
                   >
                     <Link href={`/spectacles/${show.slug}`}>Réserver</Link>
@@ -90,10 +91,10 @@ export function ShowsView({ shows }: ShowsViewProps) {
 
         <div className="text-center">
           <Button
-            variant="outline"
+            variant="default"
             size="lg"
             asChild
-            className="cta-blur-button"
+            className=""
           >
             <Link href="/agenda">
               Voir tout l&apos;agenda

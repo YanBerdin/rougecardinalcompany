@@ -59,9 +59,9 @@ export function NewsView({ news }: NewsViewProps) {
 
               <CardFooter className="mt-auto">
                 <Button
-                  variant="ghost"
+                  variant="outline-primary"
                   size="lg"
-                  className="p-0 h-auto font-medium bg-white/10 border-white/30 text-foreground backdrop-blur-sm hover:bg-primary hover:text-primary-foreground transition-all duration-300 shadow-lg border px-4 py-2 rounded-lg"
+                  className=""
                   asChild
                 >
                   <Link href={`/actualites/${item.id}`}>
@@ -76,7 +76,7 @@ export function NewsView({ news }: NewsViewProps) {
 
         <div className="text-center">
           <Button
-            variant="outline"
+            variant="default"
             size="lg"
             asChild
             className="cta-blur-button"
