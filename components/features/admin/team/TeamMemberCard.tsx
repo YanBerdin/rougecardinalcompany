@@ -42,7 +42,7 @@ export function TeamMemberCard({
         </div>
 
         <div className="mt-4 flex gap-2">
-          <Button variant="outline" onClick={onEdit}>
+          <Button variant="default" onClick={onEdit}>
             Modifier
           </Button>
           {member.active ? (
@@ -50,7 +50,7 @@ export function TeamMemberCard({
               Désactiver
             </Button>
           ) : (
-            <Button variant="ghost" onClick={onRequestReactivate}>
+            <Button variant="outline-primary" onClick={onRequestReactivate}>
               Réactiver
             </Button>
           )}
@@ -60,7 +60,7 @@ export function TeamMemberCard({
               onClick={onHardDelete}
               title="Supprimer définitivement"
             >
-              Supprimer définitivement
+              Supprimer
             </Button>
           )}
         </div>

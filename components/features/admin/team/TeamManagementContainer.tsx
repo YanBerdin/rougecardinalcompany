@@ -123,7 +123,7 @@ export function TeamManagementContainer({ initialMembers }: Props) {
   }
 
   //TODO: handleHardDeleteCandidate => handleHardDeleteMember
-  
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4 justify-between">
@@ -142,15 +142,16 @@ export function TeamManagementContainer({ initialMembers }: Props) {
         </div>
       </div>
       <div className="flex justify-end">
-        <button
-          className="btn btn-primary"
+        <Button
+          variant="default"
+          className=""
           onClick={() => {
             setEditing(null);
             setOpenForm(true);
           }}
         >
           Ajouter un membre
-        </button>
+        </Button>
       </div>
 
       <TeamMemberList
@@ -204,7 +205,7 @@ export function TeamManagementContainer({ initialMembers }: Props) {
           </DialogHeader>
           <DialogFooter>
             <Button
-              variant="outline"
+              variant="outline-primary"
               onClick={() => setOpenDeactivateDialog(false)}
             >
               Annuler
@@ -264,7 +265,7 @@ export function TeamManagementContainer({ initialMembers }: Props) {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Supprimer définitivement</DialogTitle>
+            <DialogTitle>Confirmer la suppression définitive</DialogTitle>
             <DialogDescription>
               Cette action supprimera définitivement le membre (RGPD).
               Voulez-vous continuer ? Cette opération est irréversible.
@@ -272,7 +273,7 @@ export function TeamManagementContainer({ initialMembers }: Props) {
           </DialogHeader>
           <DialogFooter>
             <Button
-              variant="outline"
+              variant="outline-primary"
               onClick={() => setOpenHardDeleteDialog(false)}
             >
               Annuler

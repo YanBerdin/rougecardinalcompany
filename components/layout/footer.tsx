@@ -38,6 +38,7 @@ export function Footer() {
                   href="#"
                   aria-label="Facebook"
                   className="hover:text-primary"
+                  title="Facebook"
                 >
                   <Facebook className="h-5 w-5" />
                 </a>
@@ -47,12 +48,13 @@ export function Footer() {
                   href="#"
                   aria-label="Instagram"
                   className="hover:text-primary"
+                  title="Instagram"
                 >
                   <Instagram className="h-5 w-5" />
                 </a>
               </Button>
               <Button variant="ghost" size="sm" asChild>
-                <a href="#" aria-label="Twitter" className="hover:text-primary">
+                <a href="#" aria-label="Twitter" className="hover:text-primary" title="Twitter">
                   <Twitter className="h-5 w-5" />
                 </a>
               </Button>

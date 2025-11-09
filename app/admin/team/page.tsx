@@ -16,7 +16,7 @@ export default async function AdminTeamPage() {
   const members = await fetchAllTeamMembers();
 
   return (
-    <div className="space-y-6 mt-24">
+    <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Gestion de l&apos;équipe</h1>
         <p className="text-muted-foreground mt-2">

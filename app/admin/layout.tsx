@@ -31,12 +31,32 @@ export default async function AdminLayout({
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
-      <aside className="w-64 border-r bg-muted/30 p-6 hidden md:block">
-        <div className="mb-8 mt-8">
+      <aside className="w-64 border-r bg-muted/30 pl-20 pt-20 hidden md:block">
+        {/*
+        <div className="mt-16">
           <h2 className="text-2xl font-bold">Admin</h2>
+
           <p className="text-sm text-muted-foreground">
             Rouge Cardinal Company
-          </p>
+          </p> 
+        </div>
+        */}
+        <div className="mb-8 pl-4 space-y-4">
+          {/* Admin auth row: centralized client component */}
+          <div className="">
+            <AdminAuthRow hasEnvVars={!!hasEnvVars} />
+          </div>
+
+          {/*          
+          <div className="mt-8 pt-8 border-t">
+            <Link
+              href="/"
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              ← Retour au site
+            </Link>
+          </div>
+        */}
         </div>
 
         <nav className="space-y-2">
@@ -89,21 +109,6 @@ export default async function AdminLayout({
             Paramètres
           </NavLink>
         </nav>
-        <div className="mt-8 mb-8 pt-8 border-t space-y-4">
-          {/* Admin auth row: centralized client component */}
-          <div>
-            <AdminAuthRow hasEnvVars={!!hasEnvVars} />
-          </div>
-
-          <div className="mt-8 pt-8 border-t">
-            <Link
-              href="/"
-              className="text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Retour au site
-            </Link>
-          </div>
-        </div>
       </aside>
 
       {/* Main content */}
@@ -118,13 +123,13 @@ export default async function AdminLayout({
 
         {/* Mobile-only env/auth row (visible when sidebar is hidden) */}
         <div className="md:hidden border-b px-2 py-1">
-          <div className="flex ">
+          <div className="flex">
             <AdminAuthRow hasEnvVars={!!hasEnvVars} />
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-6">{children}</div>
+        <div className="p-20">{children}</div>
       </main>
     </div>
   );

@@ -47,7 +47,7 @@ export function Header() {
       )}
     >
       <nav className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex flex-nowrap justify-between items-center h-16">
           {/* Logo - STABILISÉ */}
           <Link href="/" className="logo-container">
             <Image
@@ -58,7 +58,7 @@ export function Header() {
               className="logo-image"
               priority
             />
-            <span className="logo-text">Rouge-Cardinal</span>
+            <span className="logo-text whitespace-nowrap">Rouge-Cardinal</span>
           </Link>
 
           {/* Navigation Desktop */}
@@ -68,7 +68,7 @@ export function Header() {
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  "nav-link-glass sm:text-sm md:text-md font-medium transition-all duration-300 relative z-10",
+                  "nav-link-glass sm:text-sm md:text-md font-medium whitespace-nowrap transition-all duration-300 relative z-10",
                   pathname === item.href
                     ? "text-primary font-bold active"
                     : isScrolled

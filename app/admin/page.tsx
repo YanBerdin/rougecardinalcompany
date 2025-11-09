@@ -29,16 +29,16 @@ export default async function AdminDashboard() {
   ]);
 
   return (
-    <div className="space-y-8 mt-20">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold mt-8">Tableau de bord</h1>
+        <h1 className="text-3xl font-bold">Tableau de bord</h1>
         <p className="text-muted-foreground mt-2">
           Gérez le contenu et la configuration de votre site
         </p>
       </div>
 
       {/* Stats cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 whitespace-nowrap">
         <StatsCard
           title="Membres de l'équipe"
           value={teamCount || 0}
@@ -74,7 +74,7 @@ export default async function AdminDashboard() {
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <Button variant="outline" className="h-auto py-4" asChild>
+          <Button variant="outline-primary" className="h-auto py-4" asChild>
             <Link href="/admin/team">
               <div className="flex flex-col items-center gap-2">
                 <Users className="h-6 w-6" aria-hidden />
@@ -82,7 +82,7 @@ export default async function AdminDashboard() {
               </div>
             </Link>
           </Button>
-          <Button variant="outline" className="h-auto py-4" asChild>
+          <Button variant="outline-primary" className="h-auto py-4" asChild>
             <Link href="/admin/shows">
               <div className="flex flex-col items-center gap-2">
                 <FileText className="h-6 w-6" aria-hidden />
@@ -90,7 +90,7 @@ export default async function AdminDashboard() {
               </div>
             </Link>
           </Button>
-          <Button variant="outline" className="h-auto py-4" asChild>
+          <Button variant="outline-primary" className="h-auto py-4" asChild>
             <Link href="/admin/events">
               <div className="flex flex-col items-center gap-2">
                 <Calendar className="h-6 w-6" aria-hidden />
