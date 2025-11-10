@@ -1,18 +1,18 @@
 "use client";
-import { useState } from "react";
+import { useState } from "react"
 import type {
   TeamMemberDb,
   CreateTeamMemberInput,
   UpdateTeamMemberInput,
-} from "@/lib/schemas/team";
-import TeamMemberList from "./TeamMemberList";
-import TeamMemberForm from "./TeamMemberForm";
-import MediaPickerDialog from "./MediaPickerDialog";
+} from "@/lib/schemas/team"
+import TeamMemberList from "./TeamMemberList"
+import TeamMemberForm from "./TeamMemberForm"
+import MediaPickerDialog from "./MediaPickerDialog"
 import {
   createTeamMember,
   setTeamMemberActiveAction,
   updateTeamMember,
-} from "@/app/admin/team/actions";
+} from "@/app/(admin)/admin/team/actions"
 import {
   Dialog,
   DialogContent,
@@ -21,10 +21,10 @@ import {
   DialogDescription,
   DialogFooter,
   DialogClose,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Toaster } from "@/components/ui/sonner";
-import { toast } from "sonner";
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Toaster } from "@/components/ui/sonner"
+import { toast } from "sonner"
 
 interface Props {
   initialMembers: TeamMemberDb[];

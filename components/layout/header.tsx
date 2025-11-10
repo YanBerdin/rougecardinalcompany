@@ -24,7 +24,7 @@ interface HeaderProps {
 }
 */
 //export function Header({ authContent }: HeaderProps) {
-export function Header() {
+export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();

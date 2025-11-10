@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { uploadTeamMemberPhoto } from "@/app/admin/team/actions";
+import { uploadTeamMemberPhoto } from "@/app/(admin)/admin/team/actions";
 import { Loader2, Upload } from "lucide-react";
 import Image from "next/image";
 

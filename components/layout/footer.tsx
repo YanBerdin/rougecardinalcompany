@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
-export function Footer() {
+export default function Footer() {
   return (
     <footer className="bg-muted/50 border-t">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

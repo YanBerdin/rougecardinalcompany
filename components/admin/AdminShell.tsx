@@ -1,7 +1,8 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/supabase/server";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+"use client";
+import React, { useState } from "react"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import AdminAuthRow from "@/components/admin/AdminAuthRow"
 import {
   Users,
   Home,
@@ -10,77 +11,59 @@ import {
   Image as ImageIcon,
   Settings,
   Menu,
-} from "lucide-react";
-import AdminAuthRow from "@/components/admin/AdminAuthRow";
-import { hasEnvVars } from "@/lib/utils";
+  X,
+  ArrowLeft,
+} from "lucide-react"
 
-export default async function AdminLayout({
-  children,
-}: {
+interface AdminShellProps {
   children: React.ReactNode;
-}) {
-  const supabase = await createClient();
+  hasEnvVars?: boolean;
+}
 
-  // Vérifier l'authentification et le rôle admin
-  const { data, error } = await supabase.auth.getClaims();
-
-  if (error || !data?.claims || data.claims.user_metadata.role !== "admin") {
-    redirect("/auth/login");
-  }
+export default function AdminShell({
+  children,
+  hasEnvVars = false,
+}: AdminShellProps) {
+  const [open, setOpen] = useState(false);
 
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar */}
-      <aside className="w-64 border-r bg-muted/30 pl-20 pt-20 hidden md:block">
-        {/*
-        <div className="mt-16">
-          <h2 className="text-2xl font-bold">Admin</h2>
-
-          <p className="text-sm text-muted-foreground">
-            Rouge Cardinal Company
-          </p> 
+      {/* Off-canvas sidebar for mobile, static for md+ */}
+      <aside
+        className={
+          `fixed inset-y-0 left-0 z-50 w-64 bg-muted/30 pl-8 pt-8 transform transition-transform duration-200 ` +
+          (open ? "translate-x-0" : "-translate-x-full") +
+          " md:static md:translate-x-0"
+        }
+        aria-hidden={!open}
+      >
+        <div className="pl-4 pb-8 border-b">
+          <h2 className="text-3xl font-bold text-primary">Admin</h2>
         </div>
-        */}
+
         <div className="mb-8 pl-4 space-y-4">
-          {/* Admin auth row: centralized client component */}
-          <div className="">
-            <AdminAuthRow hasEnvVars={!!hasEnvVars} />
-          </div>
-
-          {/*          
-          <div className="mt-8 pt-8 border-t">
-            <Link
-              href="/"
-              className="text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Retour au site
-            </Link>
-          </div>
-        */}
+          <AdminAuthRow hasEnvVars={!!hasEnvVars} />
         </div>
 
-        <nav className="space-y-2">
+        <nav className="p-4 space-y-2">
           <NavLink
             href="/admin"
             icon={<Home className="h-4 w-4" aria-hidden />}
           >
             Tableau de bord
           </NavLink>
-
           <NavLink
             href="/admin/team"
             icon={<Users className="h-4 w-4" aria-hidden />}
           >
             Équipe
           </NavLink>
-
           <NavLink
             href="/admin/shows"
             icon={<FileText className="h-4 w-4" aria-hidden />}
           >
             Spectacles
           </NavLink>
-
           <NavLink
             href="/admin/events"
             icon={<Calendar className="h-4 w-4" aria-hidden />}
@@ -108,29 +91,39 @@ export default async function AdminLayout({
           >
             Paramètres
           </NavLink>
+          <NavLink href="/" icon={<ArrowLeft className="h-4 w-4" aria-hidden />}>
+            Retour au site
+          </NavLink>
         </nav>
       </aside>
 
-      {/* Main content */}
-      <main className="flex-1">
+      {/* Backdrop for mobile when open */}
+      {open && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 md:hidden"
+          onClick={() => setOpen(false)}
+        />
+      )}
+
+      <div className="flex-1">
         {/* Mobile header */}
         <div className="md:hidden border-b p-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold">Admin</h2>
-          <Button variant="ghost" size="icon">
-            <Menu className="h-5 w-5" aria-hidden />
-          </Button>
-        </div>
+          <h2 className="text-xl font-bold text-primary">Admin</h2>
 
-        {/* Mobile-only env/auth row (visible when sidebar is hidden) */}
-        <div className="md:hidden border-b px-2 py-1">
-          <div className="flex">
-            <AdminAuthRow hasEnvVars={!!hasEnvVars} />
-          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+          >
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
         </div>
 
         {/* Content */}
         <div className="p-20">{children}</div>
-      </main>
+      </div>
     </div>
   );
 }
