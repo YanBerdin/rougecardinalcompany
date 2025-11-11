@@ -243,7 +243,7 @@ export function TeamManagementContainer({ initialMembers }: Props) {
               Annuler
             </Button>
             <Button
-              variant="secondary"
+              variant="default"
               onClick={() => {
                 if (reactivateCandidate) {
                   handleReactivateTeamMember(reactivateCandidate);

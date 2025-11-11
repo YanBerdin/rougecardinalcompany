@@ -1,8 +1,17 @@
 import { requireAdmin } from "@/lib/auth/is-admin";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
-import "../globals.css";
-import AdminShell from "@/components/admin/AdminShell";
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import AppSidebar from "@/components/admin/AdminSidebar";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Separator } from "@/components/ui/separator";
 import { hasEnvVars } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -28,8 +37,30 @@ export default async function AdminLayout({
   }
 
   return (
-    <AdminShell hasEnvVars={!!hasEnvVars}>
-      {children}
-    </AdminShell>
+    <SidebarProvider>
+      <AppSidebar hasEnvVars={!!hasEnvVars} />
+      <SidebarInset>
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem className="hidden md:block">
+                <BreadcrumbLink href="/admin">
+                  Building Your Application
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="hidden md:block" />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Data Fetching</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </header>
+        <div className="flex flex-1 flex-col gap-4 p-4">
+          {children}
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
