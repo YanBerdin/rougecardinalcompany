@@ -81,6 +81,7 @@ const otherItems = [
   },
 ];
 
+// https://ui.shadcn.com/docs/components/sidebar
 export default function AppSidebar({ hasEnvVars = false }: AppSidebarProps) {
   const pathname = usePathname();
 

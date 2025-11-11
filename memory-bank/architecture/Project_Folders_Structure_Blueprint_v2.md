@@ -1,260 +1,162 @@
-# Project Folders Structure Blueprint - v2.0.1
+# Project Folders Structure Blueprint — Rouge Cardinal Company
 
-**Last Updated**: 20 octobre 2025  
-**Version**: 2.0.1 (Resend + Backoffice Admin updates)  
-**Branch**: feat-resend
+**Dernière mise à jour** : 11 novembre 2025
+**Fichier généré depuis** : doc/prompts-github/folder-structure-blueprint-generator.prompt.md
+**Contexte** : Next.js 15 (App Router), TypeScript strict, Supabase (RLS), Resend (email), shadcn/ui
 
-> ⚠️ **VERSION MISE À JOUR - INTÉGRATION RESEND COMPLÈTE + NETTOYAGE AUTH**
->
-> Cette version documente :
->
-> - ✅ **Architecture Email** : Resend + React Email (templates, actions, API routes, webhooks)
-> - ✅ **Supabase Auth 2025** : Patterns modernes `@supabase/ssr` + `getClaims()` (~2-5ms, 100x plus rapide)
-> - ✅ **Nettoyage Auth** : Code redondant supprimé (~400 lignes), 100% template officiel
-> - ✅ **Custom Hooks** : useNewsletterSubscribe, useContactForm
-> - ✅ **Testing Infrastructure** : Scripts de test email, logs, webhooks
-> - ✅ **Type System** : Types email dédiés + database types générés
->
-> 🆕 20/10/2025 — Mises à jour additionnelles:
->
-> - ✅ **Backoffice Admin (TASK022)** : Blueprint d'architecture pour la gestion d'équipe (Team Management) côté admin
-> - ✅ **Sécurité** : Rappel des patterns canoniques Supabase Auth 2025 (middleware + `getClaims()`)
->
-> 📖 **Documents Complémentaires** :
->
-> - `Email_Service_Architecture.md` : Architecture détaillée du service email
-> - `TESTING_RESEND.md` : Guide de test de l'intégration Resend
-> - `.github/instructions/resend_supabase_integration.md` : Instructions d'intégration
+## Résumé exécutif
 
----
+Ce document décrit la structure de dossier recommandée et observée du projet "rougecardinalcompany". Il a été généré automatiquement en analysant l'arborescence du dépôt et les fichiers de configuration. Il vise à :
 
-## Table des Matières
+- capturer les conventions existantes (App Router, pattern Smart/Dumb),
+- formaliser les règles de placement des fichiers (DAL, hooks, components),
+- fournir des templates et étapes pour ajouter de nouvelles fonctionnalités,
+- rappeler les patterns de sécurité (Supabase + getClaims(), RLS) et bonnes pratiques pour l'email (Resend + React Email).
 
-1. [Initial Auto-detection Phase](#1-initial-auto-detection-phase)
-2. [Structural Overview](#2-structural-overview)
-3. [Directory Visualization](#3-directory-visualization)
-4. [Key Directory Analysis](#4-key-directory-analysis)
-5. [File Placement Patterns](#5-file-placement-patterns)
-6. [Naming and Organization Conventions](#6-naming-and-organization-conventions)
-7. [Navigation and Development Workflow](#7-navigation-and-development-workflow)
-8. [Email Service Integration](#8-email-service-integration)
-9. [Extension Templates](#9-extension-templates)
-10. [Maintenance](#10-maintenance)
+1. Détection automatique (synthèse)
 
----
+- Framework principal : Next.js 15 (app/ — App Router)
+- Langage : TypeScript (tsconfig strict)
+- UI : React 19 + TailwindCSS 3.4 + shadcn/ui
+- Backend / BaaS : Supabase (migrations, schemas, clients)
+- Email : Resend + React Email templates
+- Structure : application monolithique feature-based (pas de monorepo)
 
-## 1. Initial Auto-detection Phase
+Indicateurs clés détectés : `next.config.ts`, `package.json`, `app/`, `supabase/`, `lib/dal/`, `emails/`, `components/ui/`, `memory-bank/`.
 
-### 1.1 Project Type Detection
+2. Aperçu structurel (principes)
 
-**Primary Technology**: Next.js 15.4.5 (App Router) + TypeScript 5 + React 19
+- Organisation par feature : chaque feature a son Container (logique serveur) et sa View (présentation). Les hooks réutilisables migrent vers `lib/hooks/`.
+- DAL (Data Access Layer) : `lib/dal/` — server-only, directive `"use server"`, isolation des accès DB et des vérifications d'autorisation.
+- Auth & sécurité : middleware Next.js, `@supabase/ssr`, `supabase.auth.getClaims()` pour vérifications rapides (~2–5ms), `requireAdmin()` guard pour backoffice.
+- Email : `emails/` (templates), `lib/email/actions.ts` (server actions), `lib/email/schemas.ts` (validation Zod), endpoints `app/api/...`.
 
-**Architecture Type**:
+3. Visualisation synthétique (arborescence — niveau 3)
 
-- **Monolithic Application** (single-app, not monorepo)
-- **Feature-Based Organization** avec Container/View pattern
-- **BaaS Integration** (Supabase for backend + Resend for emails)
-
-**Key Indicators**:
-
-```yaml
-Framework Detection:
-  ✓ next.config.ts → Next.js 15.4.5
-  ✓ tsconfig.json → TypeScript 5 (strict mode)
-  ✓ app/ directory → App Router architecture
-  ✓ package.json → React 19, Next 15
-
-Backend Services:
-  ✓ supabase/ → Supabase integration (schemas, migrations, clients)
-  ✓ lib/dal/ → Data Access Layer (server-only functions)
-  ✓ types/database.types.ts → Supabase generated types
-  ✓ middleware.ts → Authentication middleware
-  ✓ supabase/migrations/20251021000001_create_articles_presse_public_view.sql → Hotfix RLS/JWT
-  ✓ supabase/schemas/08_table_articles_presse.sql → Vue publique (source de vérité)
-
-Email Infrastructure:
-  ✓ lib/resend.ts → Resend client configuration
-  ✓ emails/ → React Email templates
-  ✓ lib/email/ → Email actions + Zod schemas
-  ✓ app/api/newsletter/ → Newsletter subscription endpoint
-  ✓ app/api/contact/ → Contact form endpoint
-  ✓ app/api/webhooks/resend/ → Webhook handler
-  ✓ types/email.d.ts → Email type definitions
-
-UI Framework:
-  ✓ tailwind.config.ts → Tailwind CSS 3.4
-  ✓ components/ui/ → shadcn/ui components
-  ✓ app/globals.css → Global styles
-
-Testing & Scripts:
-  ✓ scripts/test-email-integration.ts → Email testing
-  ✓ scripts/check-email-logs.ts → Database logs checker
-  ✓ scripts/test-webhooks.ts → Webhook testing
-  ✓ TESTING_RESEND.md → Testing documentation
-
-Documentation:
-  ✓ memory-bank/ → Architecture + context + tasks
-  ✓ doc/ → Documentation projet
-  ✓ .github/instructions/ → AI instructions + best practices
-  ✓ prompts-github/ → AI prompt templates
-```
-
-### 1.2 Detected Patterns
-
-**Smart/Dumb Component Pattern**:
-
-- `[Feature]Container.tsx` → Business logic + data fetching (Server Component)
-- `[Feature]View.tsx` → Presentation pure (Client Component si interactif)
-- `hooks.ts` → Custom hooks pour logique client réutilisable
-- `types.ts` → Types feature-specific
-
-**Server/Client Strategy**:
-
-- Server Components par défaut pour SSR + SEO
-- Client Components (`"use client"`) uniquement pour interactivité
-- Data Access Layer (DAL) server-only avec `"use server"`
-- Email actions server-side uniquement
-
-**Email Architecture Pattern**:
-
-- Templates React Email dans `emails/`
-- Actions server-side dans `lib/email/actions.ts`
-- API endpoints REST dans `app/api/`
-- Validation Zod dans `lib/email/schemas.ts`
-
----
-
-## 2. Structural Overview
-
-### 2.1 Core Architectural Principles
-
-#### 1. Feature-Based Organization
-
-Chaque feature business est encapsulée dans un dossier dédié contenant :
-
-- Container (logique métier + data fetching)
-- View (présentation pure)
-- Hooks (logique client réutilisable)
-- Types (types feature-specific)
-
-```bash
-components/features/public-site/[feature]/
-├── [Feature]Container.tsx   # Server Component (async)
-├── [Feature]View.tsx         # Client Component (présentation)
-├── hooks.ts                  # Custom hooks (client-side)
-├── types.ts                  # Feature types
-└── index.ts                  # Public exports
-```
-
-#### 2. Smart/Dumb (Container/View) Pattern
-
-**Smart Components (Containers)**:
-
-- Responsabilité : Business logic, data fetching, state management
-- Type : Server Component par défaut (async functions)
-- Pattern : Fetch data → Pass props → Render View
-
-**Dumb Components (Views)**:
-
-- Responsabilité : Presentation pure, UI interactions
-- Type : Client Component si interactivité nécessaire
-- Pattern : Receive props → Render UI → Emit callbacks
-
-#### 3. Data Access Layer (DAL)
-
-**Server-Only Data Access** (`lib/dal/*.ts`):
-
-- Directive `"use server"` obligatoire
-- Isolation de la logique d'accès données
-- Utilisation du client Supabase server-side
-- Typage fort avec types générés
-
-```typescript
-// lib/dal/contact.ts
-"use server";
-import { createClient } from "@/supabase/server";
-
-export async function createContactMessage(data: ContactMessage) {
-  const supabase = await createClient();
-  const { error } = await supabase.from("messages_contact").insert(data);
-  if (error) throw new Error(error.message);
-  return { ok: true };
-}
-```
-
-#### 4. Email Service Architecture
-
-**Layered Email Architecture**:
-
-- **Template Layer** : React Email components (`emails/`)
-- **Action Layer** : Server actions (`lib/email/actions.ts`)
-- **API Layer** : REST endpoints (`app/api/`)
-- **Validation Layer** : Zod schemas (`lib/email/schemas.ts`)
-
-```mermaid
-Email Flow:
-User → API Endpoint → Validation (Zod) → Action (Server) → 
-  Resend API → Database Log (Supabase) → Template Render → Send
-```
-
-#### 5. Type Safety Strategy
-
-- **Supabase Types** : Auto-générés (`types/database.types.ts`)
-- **Email Types** : Dédiés (`types/email.d.ts`)
-- **Runtime Validation** : Zod schemas (`lib/email/schemas.ts`)
-- **Feature Types** : Colocalisés dans chaque feature
-
-### 2.2 Project Organization Rationale
-
-**Scalability**:
-
-- Ajout de nouvelles features sans modifier le code existant
-- Structure prévisible et répétable
-- Isolation des responsabilités
-
-**Maintainability**:
-
-- Code facile à localiser et à modifier
-- Séparation claire entre logique et présentation
-- Documentation colocalisée avec le code
-
-**Performance**:
-
-- Server Components pour initial load optimisé
-- Client Components uniquement pour interactivité
-- Data fetching server-side avec cache Next.js
-
-**Testability**:
-
-- Components isolés testables indépendamment
-- Mocking facilité grâce à la séparation
-- Test scripts dédiés pour intégrations
-
----
-
-## 3. Directory Visualization
-
-### 3.1 Complete Project Structure (Depth 4)
-
-```bash
 rougecardinalcompany/
-│
-├── 📁 app/                                    # Next.js 15 App Router
-│   ├── 📁 api/                                # ✨ NEW: API Routes
-│   │   ├── 📁 newsletter/                     # Newsletter subscription
-│   │   │   └── route.ts                       # POST /api/newsletter
-│   │   ├── 📁 contact/                        # Contact form submission
-│   │   │   └── route.ts                       # POST /api/contact
-│   │   ├── 📁 test-email/                     # Email testing (dev only)
-│   │   │   └── route.ts                       # POST/GET /api/test-email
-│   │   └── 📁 webhooks/
-│   │       └── 📁 resend/                     # Resend webhooks
-│   │           └── route.ts                   # POST /api/webhooks/resend
-│   │
-│   ├── 📁 auth/                               # Authentication flows
-│   │   ├── 📁 login/page.tsx
-│   │   ├── 📁 sign-up/page.tsx
-│   │   ├── 📁 sign-up-success/page.tsx
+├─ app/
+│  ├─ api/                  # endpoints (newsletter, contact, webhooks)
+│  ├─ auth/                 # flows d'authentification (login/sign-up/forgot)
+│  ├─ (marketing)/          # pages publiques (spectacles, presse, compagnie)
+│  ├─ (admin)/              # admin backoffice (guarded)
+│  ├─ layout.tsx
+│  └─ globals.css
+├─ components/
+│  ├─ features/             # feature-based containers & views
+│  └─ ui/                   # composants shadcn/ui réutilisables
+├─ lib/
+│  ├─ dal/                  # accès base de données (server-only)
+│  ├─ email/                # actions + schemas (Zod)
+│  ├─ supabase/             # clients server/browser + middleware
+│  └─ hooks/                # hooks client réutilisables
+├─ emails/                  # templates React Email
+├─ scripts/                 # outils et tests d'intégration (email, webhooks)
+├─ supabase/                # migrations, schemas, scripts DB
+├─ types/                   # types générés (database.types.ts, email.d.ts)
+├─ memory-bank/             # documentation interne & tasks
+└─ public/                  # assets (images, icônes)
+
+4. Analyse détaillée par dossier
+
+-------
+
+4.1 `app/`
+
+- Usage : points d'entrée de l'application (Server Components par défaut).
+- Patterns : `page.tsx`, `layout.tsx`, `route.ts` (API), `loading.tsx`, `error.tsx`.
+- Particularités : `app/(admin)/layout.tsx` utilise `SidebarProvider` et `requireAdmin()`.
+
+Recommandation :
+
+- Les pages doivent invoquer des Containers Server-only qui appellent le DAL et retournent des DTO minimalistes.
+
+4.2 `components/`
+
+- `components/features/` : colocation feature-based (Container + View + hooks + types)
+- `components/ui/` : composants low-level (shadcn wrappers).
+
+Recommandation :
+
+- Placer tout composant réutilisable dans `components/ui/`.
+- Respecter `PascalCase` pour les composants et `kebab-case` pour assets.
+
+4.3 `lib/dal/` (Data Access Layer)
+
+- Rôle : centraliser toutes les requêtes vers Supabase et les règles d'autorisation.
+- Obligation : importer `server-only` et ne jamais exposer de secret côté client.
+
+Sécurité :
+
+- Toujours valider/sanitiser les arguments côté DAL.
+- Utiliser des erreurs domain-specific et traduire pour l’UI si nécessaire.
+
+4.4 `supabase/`
+
+- Contient migrations, schémas et scripts SQL.
+- RLS activé : vérifier les politiques après chaque migration (`supabase/migrations/`).
+
+4.5 `emails/` + `lib/email/`
+
+- Templates React Email pour compatibilité multi-client.
+- Actions server-side qui appellent `lib/resend.ts`.
+- Validation Zod avant toute enquête d'envoi.
+
+4.6 `memory-bank/`
+
+- Stocke la documentation active (architecture, tâches, epics).
+- `architecture/` contient ce blueprint et autres docs d'architecture.
+
+5. Règles & patterns de placement (récapitulatif)
+
+- Components : `components/features/[domain]/[feature]/{Container,View,hooks,types}`
+- Shared UI : `components/ui/*`
+- DAL : `lib/dal/*` (server-only)
+- Hooks réutilisables : `lib/hooks/*` (client)
+- API endpoints : `app/api/[resource]/route.ts`
+- Email templates : `emails/*`
+- Migrations : `supabase/migrations/*`
+
+6. Conventions de nommage (essentiel)
+
+- Fichiers composants : PascalCase (ex: `HeroContainer.tsx`, `HeroView.tsx`).
+- DAL / utilitaires : camelCase (ex: `home-hero.ts`).
+- Types générés : `types/database.types.ts` (ne pas modifier manuellement).
+- Hooks : `useFeatureName` (ex: `useNewsletterSubscribe`).
+
+7. Templates rapides (ajout d’une feature)
+
+1) Créer le dossier : `components/features/<domain>/<feature>`.
+2) Ajouter : `FeatureContainer.tsx` (server), `FeatureView.tsx` (client), `types.ts`, `index.ts`.
+3) Ajouter DAL : `lib/dal/<entity>.ts`.
+4) Ajouter route : `app/<route>/page.tsx`.
+
+See also examples in section `Extension Templates` of the original generator.
+
+8. Build / scripts utiles
+
+- `pnpm dev` — dev server (Turbopack)
+- `pnpm build` — production build
+- `pnpm start` — start built app
+- `pnpm run test:email` — test d’intégration email
+
+9. Sécurité & bonnes pratiques
+
+- Ne jamais exposer `SUPABASE_SERVICE_ROLE_KEY` côté client.
+- Utiliser `getClaims()` pour checks rapides en middleware ou server components.
+- Valider toutes les entrées via Zod (forms, endpoints, DAL).
+- RLS : vérifier les policies après migration.
+
+10. Maintenance et mise à jour du document
+
+- Quand : à chaque changement d’architecture, ajout d’intégration, ou refactor majeur.
+- Comment : modifier ce fichier, incrémenter la date/version, ajouter un changelog court.
+
+## Notes finales
+
+Ce blueprint est volontairement synthétique — il capture l’essentiel et donne des instructions concrètes pour maintenir la cohérence du projet. Pour les sections avancées (tests unitaires, CI/CD, performance, i18n) il est recommandé d’ajouter des sous-documents dans `memory-bank/`.
+
+**Fait le** : 11 novembre 2025
+
 │   │   ├── 📁 forgot-password/page.tsx
 │   │   ├── 📁 update-password/page.tsx
 │   │   ├── 📁 error/page.tsx
@@ -282,7 +184,7 @@ rougecardinalcompany/
 │   ├── page.tsx                               # Homepage
 │   ├── layout.tsx                             # Root layout
 │   ├── globals.css                            # Global styles
-│   └── [favicon, og-image, twitter-image]
+│   └── 'favicon, og-image, twitter-image'
 │
 ├── 📁 components/                             # React Components
 │   ├── 📁 features/public-site/               # Feature-based organization
@@ -410,7 +312,7 @@ rougecardinalcompany/
 │   │   ├── tabs.tsx
 │   │   └── textarea.tsx
 │   │
-│   └── [auth-button, logout-button, forms, etc.]
+│   └── auth-button, logout-button, forms, etc.
 
 ├── 📁 components/features/admin/              # ✨ NEW: Admin features
 │   └── 📁 team/                               # Team management UI
@@ -487,7 +389,7 @@ rougecardinalcompany/
 │   ├── 📁 migrations/                         # Database migrations (seeds)
 │   │   ├── 20250918000000_fix_spectacles_versioning_trigger.sql
 │   │   ├── 20250918031500_seed_home_hero_slides.sql
-│   │   ├── [... other migrations ...]
+│   │   ├── (... other migrations ...)
 │   │   └── migrations.md
 │   ├── 📁 schemas/                            # ⚠️ DEPRECATED: use migrations/
 │   ├── client.ts
@@ -500,28 +402,29 @@ rougecardinalcompany/
 │   │   ├── Project_Architecture_Blueprint.md
 │   │   ├── Project_Folders_Structure_Blueprint.md
 │   │   └── Email_Service_Architecture.md      # ✨ NEW: Email docs
-│   ├── 📁 epics/[details/, epics-map.yaml]
-│   ├── 📁 tasks/[TASK*.md, _index.md]
-│   └── [activeContext, productContext, progress, etc.]
+│   ├── 📁 epics/(details/, epics-map.yaml)
+│   ├── 📁 tasks/(TASK*.md,_index.md)
+│   └── (activeContext, productContext, progress, etc.)
 │
 ├── 📁 doc/                                    # Project documentation
 │
 ├── 📁 public/                                 # Public assets (images, fonts)
-│   └── [favicons, social images, logos]
+│   └── (favicons, social images, logos)
 │
 ├── 📁 .github/
 │   ├── 📁 instructions/
 │   │   ├── copilot-instructions.md            # ✨ NEW: Main instructions
 │   │   ├── nextjs-supabase-auth-2025.instructions.md
 │   │   ├── resend_supabase_integration.md     # ✨ NEW: Resend guide
-│   │   └── [...]
+│   │   └── (...)
 │   └── 📁 workflows/
 │
 ├── middleware.ts                              # Next.js middleware (auth)
-├── [configuration files]
+├── (configuration files)
 ├── .env.local                                 # Environment variables
 ├── README.md
 └── TESTING_RESEND.md                          # ✨ NEW: Resend testing
+
 ```
 
 ---
@@ -805,8 +708,6 @@ pnpm run test:webhooks
 pnpm run test:resend
 ```
 
----
-
 ## 5. File Placement Patterns
 
 ### 5.1 Configuration Files
@@ -928,8 +829,6 @@ WHERE: app/api/webhooks/[service]/route.ts
 PURPOSE: External service callbacks
 EXAMPLE: app/api/webhooks/resend/route.ts
 ```
-
----
 
 ## 6. Naming and Organization Conventions
 
@@ -1126,8 +1025,6 @@ Examples:
   - hooks/
   - dal/
 ```
-
----
 
 ## 7. Navigation and Development Workflow
 
@@ -1398,8 +1295,6 @@ pnpm lint        # Run ESLint
 - `.env.staging` (optional)
 - `.env.production` (production)
 
----
-
 ## 8. Email Service Integration
 
 ### 8.1 Email Architecture Overview
@@ -1566,8 +1461,6 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000  # Development URL
 - Check webhook configuration
 - Monitor Resend dashboard
 - Test error scenarios
-
----
 
 ## 9. Extension Templates
 
@@ -1859,8 +1752,6 @@ export function use[Feature](options?: Use[Feature]Options) {
 }
 ```
 
----
-
 ## 10. Maintenance
 
 ### 10.1 Document Update Procedures
@@ -1945,8 +1836,6 @@ export function use[Feature](options?: Use[Feature]Options) {
 - [ ] GraphQL integration?
 - [ ] Micro-frontend architecture?
 - [ ] Additional email providers?
-
----
 
 **Document Maintainers**: Development Team  
 **Review Frequency**: After major changes or quarterly  

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { hasEnvVars } from "@/lib/utils";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 
 export const metadata: Metadata = {
   title: {
@@ -56,6 +57,9 @@ export default async function AdminLayout({
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
+          <div className="ml-auto">
+            <ThemeSwitcher />
+          </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4">
           {children}
