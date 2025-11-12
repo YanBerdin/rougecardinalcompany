@@ -632,7 +632,7 @@ app/
 ### Required TypeScript Patterns
 
 ```typescript
-// ✅ ALWAYS: Explicit typing, no any/unknown
+// ✅ ALWAYS: Explicit typing, never use any
 interface TeamMemberProps {
   member: {
     id: string;
@@ -651,32 +651,106 @@ interface User {
 // ✅ Use type for unions and primitives
 type Status = 'pending' | 'completed' | 'cancelled';
 type ActionResponse<T> = 
-  | { success: true; data: T }
-  | { success: false; error: string };
+  | { readonly success: true; readonly data: T }
+  | { readonly success: false; readonly error: string };
 
-// ✅ Generics with descriptive names
+// ✅ Prefer string literal unions over enums
+type Role = 'admin' | 'user' | 'guest';
+
+// ✅ Generics with descriptive names (T prefix)
 function fetchResource<TData>(endpoint: string): Promise<TData> {
   return fetch(endpoint).then(res => res.json());
 }
 
-// ✅ Type guards for runtime checks
+// ✅ Type guards for runtime checks (prefer over `as` assertions)
 function isTeamMember(obj: unknown): obj is TeamMember {
   return typeof obj === 'object' && obj !== null && 'id' in obj;
 }
+
+function isAllowedMimeType(mime: string): mime is AllowedMimeType {
+  return ALLOWED_TYPES.includes(mime as AllowedMimeType);
+}
+```
+
+### Type Assertions Rules
+
+```typescript
+// ✅ Safe assertions
+const config = { apiUrl: 'https://api.example.com' } as const;
+type ButtonComponent = typeof Button as React.ComponentType;
+
+// ❌ NEVER use unsafe assertions
+const data = response as User; // Dangerous!
+const file = formData.get('file') as File; // Use type guard instead
+
+// ✅ Use type guards instead
+const file = formData.get('file');
+if (!(file instanceof File)) {
+  throw new Error('Not a file');
+}
+// Now TypeScript knows file is File
+```
+
+### Nullability Handling
+
+```typescript
+// ✅ Optional properties (preferred)
+interface Config {
+  name: string;
+  description?: string; // undefined when not set
+}
+
+// ✅ Pick one convention: null OR undefined (not both)
+function findUser(id: string): User | null {
+  // Consistent: always return null when not found
+}
+
+// ✅ Nullish coalescing for defaults
+const displayName = user.name ?? 'Anonymous';
+const maxRetries = config.retries ?? 3;
+
+// ✅ Enable strictNullChecks in tsconfig.json
 ```
 
 ### TypeScript Error Handling
 
 ```typescript
-// ✅ Catch as unknown, then type guard
+// ✅ Always catch as unknown, then type guard
 try {
   await riskyOperation();
-} catch (error) {
+} catch (error: unknown) {
   if (error instanceof Error) {
     console.error('Operation failed:', error.message);
+  } else if (error instanceof z.ZodError) {
+    console.error('Validation failed:', error.issues);
   } else {
     console.error('Unknown error:', error);
   }
+}
+
+// ✅ Custom error classes for domain errors
+class TeamMemberValidationError extends Error {
+  constructor(public field: string, message: string) {
+    super(message);
+    this.name = 'TeamMemberValidationError';
+  }
+}
+```
+
+### Validation Pattern (External Data)
+
+```typescript
+// ✅ ALWAYS use unknown for external data (FormData, API responses, user input)
+export async function createTeamMember(input: unknown) {
+  // Runtime validation with Zod
+  const validated: CreateTeamMemberInput = CreateTeamMemberInputSchema.parse(input);
+  // Now type-safe after validation
+  return await createTeamMemberDAL(validated);
+}
+
+// ❌ NEVER assume data is valid without runtime checks
+export async function createTeamMember(input: CreateTeamMemberInput) {
+  // No validation - dangerous!
 }
 ```
 
@@ -864,7 +938,8 @@ pnmp dlx supabase db push
 ```
 
 **Schema File Organization** (lexicographic order):
-```
+
+```bash
 supabase/schemas/
   01_auth_extensions.sql      # Auth setup
   10_users_and_profiles.sql   # User tables
@@ -878,7 +953,8 @@ supabase/schemas/
 **Based on**: `.github/instructions/memory-bank.instructions.md`
 
 **Core Structure**:
-```
+
+```bash
 memory-bank/
   projectbrief.md      # Foundation document
   productContext.md    # Why this exists  
@@ -898,7 +974,8 @@ memory-bank/
 - **show tasks active** → Filter tasks by status
 
 **Task File Template**:
-```markdown
+
+```md
 # [TASK001] - Implement Team Management
 
 **Status:** In Progress  
