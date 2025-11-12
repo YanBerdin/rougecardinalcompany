@@ -491,9 +491,6 @@ export async function middleware(req: NextRequest) {
 ### Pattern de Protection des Données
 
 ```sql
-### Pattern de Protection des Données
-
-```sql
 -- Politique RLS Supabase type (exemples)
 create policy "Accès public aux spectacles"
   on spectacles
@@ -552,8 +549,6 @@ Optimisations RLS recommandées:
 - **Testing** : Toujours tester avec `SET ROLE anon` pour simuler utilisateurs anonymes
 
 Documentation complète : `doc/rls-policies-troubleshooting.md`
-
-```
 
 Optimisations RLS recommandées:
 
@@ -691,7 +686,7 @@ Pour les éléments visuellement petits qui nécessitent une zone tactile étend
 
 ### 3. Exceptions WCAG autorisées
 
-- **Exception inline** : Liens dans un paragraphe de texte (ex: "Voir nos [conditions générales](/)")
+- **Exception inline** : Liens dans un paragraphe de texte (ex: "Voir nos [<conditions générales>](/)")
 - **Exception équivalente** : Si plusieurs cibles effectuent la même action, une seule doit respecter 44px
 - **Exception essentielle** : Quand modifier la taille changerait l'information (rare, documenter)
 
