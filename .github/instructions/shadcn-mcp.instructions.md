@@ -42,13 +42,13 @@ Open `.vscode/mcp.json` and click **Start** next to the shadcn server. Then try 
 - Create a contact form using components from the shadcn registry
 
 **Note:** The `shadcn` CLI cannot automatically update `~/.codex/config.toml`.
-      You'll need to add the configuration manually for Codex.
+You'll need to add the configuration manually for Codex.
 
 ---
 
 ## What is MCP?
 
-Model Context Protocol (MCP)(https://modelcontextprotocol.io) is an open protocol that enables AI assistants to securely connect to external data sources and tools. With the shadcn MCP server, your AI assistant gains direct access to:
+Model Context Protocol (MCP)(<https://modelcontextprotocol.io>) is an open protocol that enables AI assistants to securely connect to external data sources and tools. With the shadcn MCP server, your AI assistant gains direct access to:
 
 - **Browse Components** - List all available components, blocks, and templates from any configured registry
 - **Search Across Registries** - Find specific components by name or functionality across multiple sources
@@ -100,7 +100,7 @@ To configure MCP in VS Code with GitHub Copilot, add the shadcn server to your p
 
 After adding the configuration, open `.vscode/mcp.json` and click **Start** next to the shadcn server.
 
-See the VS Code MCP documentation(https://code.visualstudio.com/docs/copilot/chat/mcp-servers) for more details.
+See the VS Code MCP documentation(<https://code.visualstudio.com/docs/copilot/chat/mcp-servers>) for more details.
 
 ---
 
@@ -124,10 +124,8 @@ Configure additional registries in your `components.json`:
 }
 ```
 
-<Callout>
-  **Note:** No configuration is needed to access the standard shadcn/ui
-  registry.
-</Callout>
+> [!NOTE]
+> **Note:** No configuration is needed to access the standard shadcn/ui registry. It is included by default.
 
 ---
 
@@ -208,7 +206,7 @@ If you see the `No tools or prompts` message, try the following:
 
 ## Learn More
 
-- Registry Documentation: https://ui.shadcn.com/docs/registry — Complete guide to shadcn registries
-- Namespaces: https://ui.shadcn.com/docs/registry/namespace — Configure multiple registry sources
-- Authentication: https://ui.shadcn.com/docs/registry/authentication — Secure your private registries
-- MCP Specification: https://modelcontextprotocol.io/ — Learn about Model Context Protocol
+- Registry Documentation: <https://ui.shadcn.com/docs/registry> — Complete guide to shadcn registries
+- Namespaces: <https://ui.shadcn.com/docs/registry/namespace> — Configure multiple registry sources
+- Authentication: <https://ui.shadcn.com/docs/registry/authentication> — Secure your private registries
+- MCP Specification: <https://modelcontextprotocol.io/> — Learn about Model Context Protocol

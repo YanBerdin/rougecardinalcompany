@@ -18,7 +18,7 @@ A **theater company website** built with **Next.js 15 + TypeScript + Supabase + 
 app/
   layout.tsx              # Root: HTML shell + ThemeProvider
   (admin)/
-    layout.tsx           # Admin: AppSidebar + auth protection  
+    layout.tsx           # Admin: AppSidebar + auth protection
     admin/
       debug-auth/page.tsx # Diagnostic tools (auth & RLS testing)
       team/page.tsx       # CRUD interfaces
@@ -42,10 +42,10 @@ import { createClient } from "@/supabase/server";
 export async function fetchTeamMembers() {
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from('membres_equipe')
-    .select('id, name, role, active')
-    .eq('active', true);
-  
+    .from("membres_equipe")
+    .select("id, name, role, active")
+    .eq("active", true);
+
   if (error) throw error;
   return data ?? [];
 }
@@ -134,7 +134,7 @@ import { revalidatePath } from "next/cache";
 
 const TeamMemberSchema = z.object({
   name: z.string().min(1),
-  role: z.string().min(1)
+  role: z.string().min(1),
 });
 
 export async function createTeamMember(input: unknown) {
@@ -142,7 +142,7 @@ export async function createTeamMember(input: unknown) {
     await requireAdmin(); // Explicit auth check
     const validated = TeamMemberSchema.parse(input);
     const result = await upsertTeamMember(validated);
-    revalidatePath('/admin/team');
+    revalidatePath("/admin/team");
     return { success: true, data: result };
   } catch (error) {
     return { success: false, error: error.message };
@@ -158,7 +158,7 @@ export async function createTeamMember(input: unknown) {
 # Development
 pnpm dev                    # Start dev server with turbopack
 
-# Quality Gates  
+# Quality Gates
 pnpm lint                   # ESLint check
 pnpm lint:md                # Markdown lint
 pnpm build                  # Production build test
@@ -194,7 +194,7 @@ components/
   features/
     admin/team/           # Feature: team management
       TeamContainer.tsx   # Smart component
-      TeamList.tsx        # Dumb component  
+      TeamList.tsx        # Dumb component
       TeamCard.tsx        # Dumb component
       types.ts           # Feature types
     public-site/home/     # Feature: homepage
@@ -229,7 +229,7 @@ import { z } from "zod";
 const TeamMemberSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1).max(100),
-  role: z.string().min(1)
+  role: z.string().min(1),
 });
 
 export type TeamMember = z.infer<typeof TeamMemberSchema>;
@@ -248,15 +248,15 @@ export async function validateTeamMember(data: unknown): Promise<TeamMember> {
 
 ```typescript
 // scripts/test-email-integration.ts
-import { sendNewsletterConfirmation } from '@/lib/email/actions';
+import { sendNewsletterConfirmation } from "@/lib/email/actions";
 
 async function testEmailService() {
   try {
-    console.log('🧪 Testing newsletter confirmation...');
-    const result = await sendNewsletterConfirmation('test@example.com');
-    console.log('✅ Success:', result);
+    console.log("🧪 Testing newsletter confirmation...");
+    const result = await sendNewsletterConfirmation("test@example.com");
+    console.log("✅ Success:", result);
   } catch (error) {
-    console.error('❌ Failed:', error.message);
+    console.error("❌ Failed:", error.message);
     process.exit(1);
   }
 }
@@ -272,14 +272,14 @@ testEmailService();
 
 ```typescript
 // Test via fetch to localhost
-const response = await fetch('http://localhost:3000/api/contact', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(testData)
+const response = await fetch("http://localhost:3000/api/contact", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(testData),
 });
 
 const result = await response.json();
-expect(result.status).toBe('sent');
+expect(result.status).toBe("sent");
 ```
 
 ### Security Validation Testing
@@ -290,13 +290,11 @@ expect(result.status).toBe('sent');
 // scripts/test-admin-access.ts - Test anon vs admin access
 async function testAnonAccess() {
   const anonClient = createAnonClient();
-  const { data, error } = await anonClient
-    .from('membres_equipe')
-    .select('*');
-  
+  const { data, error } = await anonClient.from("membres_equipe").select("*");
+
   // Should be blocked by RLS
   expect(error).toBeTruthy();
-  console.log('✅ Anon properly blocked from admin table');
+  console.log("✅ Anon properly blocked from admin table");
 }
 ```
 
@@ -306,12 +304,12 @@ async function testAnonAccess() {
 
 ```typescript
 // Test invalid email format
-const invalidEmail = 'not-an-email';
+const invalidEmail = "not-an-email";
 const result = await subscribeToNewsletter(invalidEmail);
-expect(result.error).toContain('Invalid email');
+expect(result.error).toContain("Invalid email");
 
 // Test network failure simulation
-mockFetch.mockRejectOnce(new Error('Network failure'));
+mockFetch.mockRejectOnce(new Error("Network failure"));
 const result = await apiCall();
 expect(result.success).toBe(false);
 ```
@@ -323,29 +321,31 @@ expect(result.success).toBe(false);
 **Standard**: All Server Actions return consistent response type:
 
 ```typescript
-type ActionResponse<T = unknown> = 
+type ActionResponse<T = unknown> =
   | { success: true; data: T }
   | { success: false; error: string; status?: number; details?: unknown };
 
-export async function createTeamMember(input: CreateTeamMemberInput): Promise<ActionResponse<TeamMember>> {
+export async function createTeamMember(
+  input: CreateTeamMemberInput
+): Promise<ActionResponse<TeamMember>> {
   try {
     // 1. Explicit auth check (defense in depth)
     await requireAdmin();
-    
+
     // 2. Input validation with detailed error handling
     const validated = CreateTeamMemberInputSchema.parse(input);
-    
+
     // 3. Database operation
     const result = await createTeamMemberDAL(validated);
-    
+
     return { success: true, data: result };
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return { 
-        success: false, 
-        error: 'Validation failed', 
-        status: 422, 
-        details: error.issues 
+      return {
+        success: false,
+        error: "Validation failed",
+        status: 422,
+        details: error.issues,
       };
     }
     return { success: false, error: error.message, status: 500 };
@@ -362,30 +362,30 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const validated = ContactSchema.parse(body);
-    
+
     // Primary operation (never fail on email errors)
     const messageId = await createContactMessage(validated);
-    
+
     // Secondary operation (graceful degradation)
     let emailSent = true;
     try {
       await sendContactNotification(validated);
     } catch (emailError) {
-      console.error('[Contact] Email notification failed:', emailError);
+      console.error("[Contact] Email notification failed:", emailError);
       emailSent = false;
     }
-    
+
     return NextResponse.json({
-      status: 'sent',
-      message: 'Message envoyé',
-      ...(emailSent ? {} : { warning: 'Notification email could not be sent' })
+      status: "sent",
+      message: "Message envoyé",
+      ...(emailSent ? {} : { warning: "Notification email could not be sent" }),
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
+      return NextResponse.json({ error: "Invalid input" }, { status: 400 });
     }
-    console.error('[Contact API] Error:', error);
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
+    console.error("[Contact API] Error:", error);
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 }
 ```
@@ -398,12 +398,12 @@ export async function POST(request: NextRequest) {
 export async function fetchTeamMembers() {
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from('membres_equipe')
-    .select('id, name, role, active')
-    .eq('active', true);
-  
+    .from("membres_equipe")
+    .select("id, name, role, active")
+    .eq("active", true);
+
   if (error) throw error; // Let caller handle
-  return data ?? [];       // Defensive fallback
+  return data ?? []; // Defensive fallback
 }
 ```
 
@@ -427,7 +427,7 @@ if (error) {
 // Toast notifications for action results
 const handleSubmit = async (data: FormData) => {
   const result = await createTeamMemberAction(data);
-  
+
   if (result.success) {
     toast.success('Member created successfully');
   } else {
@@ -446,7 +446,7 @@ const contactId = await createContactMessage(data);
 try {
   await sendEmail(data);
 } catch (emailError) {
-  console.error('Email failed:', emailError);
+  console.error("Email failed:", emailError);
   // Don't throw - log and continue
 }
 return { success: true, id: contactId };
@@ -484,17 +484,19 @@ comment on table membres_equipe is 'Membres de l''équipe théâtrale avec leur 
 ```
 
 **Naming Conventions**:
-- Tables: `snake_case` plurals (`membres_equipe`, `spectacles`)  
+
+- Tables: `snake_case` plurals (`membres_equipe`, `spectacles`)
 - Columns: `snake_case` singular (`nom`, `photo_url`, `user_id`)
 - Foreign keys: `{table_singular}_id` (e.g., `user_id` references `users`)
 - Avoid prefixes like `tbl_`, use meaningful aliases with `as` keyword
 
 **Query Formatting**:
+
 ```sql
 -- Small queries: keep concise
 select * from spectacles where active = true;
 
--- Large queries: format for readability  
+-- Large queries: format for readability
 select
   s.titre,
   s.description,
@@ -511,7 +513,7 @@ order by
   s.created_at desc;
 ```
 
-### Next.js 15 Backend Requirements  
+### Next.js 15 Backend Requirements
 
 **Based on**: `.github/instructions/nextjs15-backend-with-supabase.instructions.md`
 
@@ -522,25 +524,25 @@ import { headers, cookies } from "next/headers";
 export default async function ServerComponent() {
   const headersList = await headers();
   const cookieStore = await cookies();
-  
+
   const userAgent = headersList.get("user-agent");
   const theme = cookieStore.get("theme");
-  
+
   return <div data-theme={theme?.value}>Content</div>;
 }
 
-// ✅ API Routes: proper header/cookie handling  
+// ✅ API Routes: proper header/cookie handling
 export async function GET(request: NextRequest) {
   const headersList = await headers();
   const authorization = headersList.get("authorization");
-  
+
   return NextResponse.json({ data: results });
 }
 
 // ✅ Server Actions: secure cookie setting
 export async function loginAction(formData: FormData) {
   const cookieStore = await cookies();
-  
+
   cookieStore.set("auth-token", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -559,14 +561,14 @@ export async function loginAction(formData: FormData) {
 const claims = await supabase.auth.getClaims();
 if (!claims) redirect('/login');
 
-// ✅ SLOW: Only use getUser() when you need full user data (~300ms)  
+// ✅ SLOW: Only use getUser() when you need full user data (~300ms)
 const { data: { user } } = await supabase.auth.getUser();
 
 // ✅ COOKIES: ONLY use getAll/setAll pattern (NEVER get/set/remove)
 {
   cookies: {
     getAll() { return cookieStore.getAll() },
-    setAll(cookiesToSet) { 
+    setAll(cookiesToSet) {
       cookiesToSet.forEach(({ name, value, options }) => {
         response.cookies.set(name, value, options)
       })
@@ -599,7 +601,7 @@ export function InteractiveTeamForm() {
 ### Server Actions vs API Routes Decision Tree
 
 1. **Mutations from same Next.js frontend** → **Server Action**
-2. **Public APIs for external clients** → **API Route** 
+2. **Public APIs for external clients** → **API Route**
 3. **Webhooks/OAuth callbacks** → **API Route**
 4. **Initial page data fetching** → **Server Component**
 
@@ -620,7 +622,7 @@ app/
     layout.tsx            # Admin layout + auth protection
     admin/
       team/page.tsx       # /admin/team
-  (marketing)/            # Route group - public zone  
+  (marketing)/            # Route group - public zone
     layout.tsx            # Public layout + header/footer
     page.tsx              # Homepage /
 ```
@@ -649,22 +651,22 @@ interface User {
 }
 
 // ✅ Use type for unions and primitives
-type Status = 'pending' | 'completed' | 'cancelled';
-type ActionResponse<T> = 
+type Status = "pending" | "completed" | "cancelled";
+type ActionResponse<T> =
   | { readonly success: true; readonly data: T }
   | { readonly success: false; readonly error: string };
 
 // ✅ Prefer string literal unions over enums
-type Role = 'admin' | 'user' | 'guest';
+type Role = "admin" | "user" | "guest";
 
 // ✅ Generics with descriptive names (T prefix)
 function fetchResource<TData>(endpoint: string): Promise<TData> {
-  return fetch(endpoint).then(res => res.json());
+  return fetch(endpoint).then((res) => res.json());
 }
 
 // ✅ Type guards for runtime checks (prefer over `as` assertions)
 function isTeamMember(obj: unknown): obj is TeamMember {
-  return typeof obj === 'object' && obj !== null && 'id' in obj;
+  return typeof obj === "object" && obj !== null && "id" in obj;
 }
 
 function isAllowedMimeType(mime: string): mime is AllowedMimeType {
@@ -706,7 +708,7 @@ function findUser(id: string): User | null {
 }
 
 // ✅ Nullish coalescing for defaults
-const displayName = user.name ?? 'Anonymous';
+const displayName = user.name ?? "Anonymous";
 const maxRetries = config.retries ?? 3;
 
 // ✅ Enable strictNullChecks in tsconfig.json
@@ -720,19 +722,22 @@ try {
   await riskyOperation();
 } catch (error: unknown) {
   if (error instanceof Error) {
-    console.error('Operation failed:', error.message);
+    console.error("Operation failed:", error.message);
   } else if (error instanceof z.ZodError) {
-    console.error('Validation failed:', error.issues);
+    console.error("Validation failed:", error.issues);
   } else {
-    console.error('Unknown error:', error);
+    console.error("Unknown error:", error);
   }
 }
 
 // ✅ Custom error classes for domain errors
 class TeamMemberValidationError extends Error {
-  constructor(public field: string, message: string) {
+  constructor(
+    public field: string,
+    message: string
+  ) {
     super(message);
-    this.name = 'TeamMemberValidationError';
+    this.name = "TeamMemberValidationError";
   }
 }
 ```
@@ -743,7 +748,8 @@ class TeamMemberValidationError extends Error {
 // ✅ ALWAYS use unknown for external data (FormData, API responses, user input)
 export async function createTeamMember(input: unknown) {
   // Runtime validation with Zod
-  const validated: CreateTeamMemberInput = CreateTeamMemberInputSchema.parse(input);
+  const validated: CreateTeamMemberInput =
+    CreateTeamMemberInputSchema.parse(input);
   // Now type-safe after validation
   return await createTeamMemberDAL(validated);
 }
@@ -761,7 +767,7 @@ export async function createTeamMember(input: CreateTeamMemberInput) {
 ### Function & File Limits
 
 - **Max 30 lines per function**
-- **Max 5 parameters per function** 
+- **Max 5 parameters per function**
 - **Max 300 lines per file**
 - **Max 10 sub-files per folder**
 - **One responsibility per file**
@@ -780,20 +786,21 @@ const SESSION_DURATION_DAYS = 7;
 // ✅ Fail fast with early returns
 export async function createTeamMember(input: unknown) {
   if (!input) {
-    return { success: false, error: 'Input required' };
+    return { success: false, error: "Input required" };
   }
-  
+
   const validated = TeamMemberSchema.safeParse(input);
   if (!validated.success) {
-    return { success: false, error: 'Validation failed' };
+    return { success: false, error: "Validation failed" };
   }
-  
+
   // Continue with main logic...
 }
 
 // ✅ No comments needed - code should be self-explanatory
 const isUserAuthorizedForAdminArea = await checkAdminPermissions(user);
-const shouldAllowTeamMemberCreation = isUserAuthorizedForAdminArea && hasValidInput;
+const shouldAllowTeamMemberCreation =
+  isUserAuthorizedForAdminArea && hasValidInput;
 ```
 
 ### Error Handling Standards
@@ -803,14 +810,14 @@ const shouldAllowTeamMemberCreation = isUserAuthorizedForAdminArea && hasValidIn
 class TeamMemberValidationError extends Error {
   constructor(field: string) {
     super(`Invalid team member ${field}`);
-    this.name = 'TeamMemberValidationError';
+    this.name = "TeamMemberValidationError";
   }
 }
 
 // ✅ Throw early, handle at boundaries
 export async function createTeamMember(data: unknown) {
-  if (!data) throw new TeamMemberValidationError('data');
-  
+  if (!data) throw new TeamMemberValidationError("data");
+
   const validated = TeamMemberSchema.parse(data); // Throws if invalid
   return await createTeamMemberDAL(validated);
 }
@@ -852,7 +859,7 @@ on public.profiles for select
 to anon, authenticated
 using (true);
 
--- RLS Policy: Users can only edit their own profile  
+-- RLS Policy: Users can only edit their own profile
 create policy "Users can edit own profile"
 on public.profiles for all
 to authenticated
@@ -883,11 +890,11 @@ begin
   into profile_data
   from public.profiles p
   where p.id = get_user_profile.profile_id;
-  
+
   if profile_data is null then
     raise exception 'Profile not found';
   end if;
-  
+
   return profile_data;
 end;
 $$;
@@ -957,7 +964,7 @@ supabase/schemas/
 ```bash
 memory-bank/
   projectbrief.md      # Foundation document
-  productContext.md    # Why this exists  
+  productContext.md    # Why this exists
   activeContext.md     # Current focus (CRITICAL)
   systemPatterns.md    # Architecture decisions
   techContext.md       # Technologies used
@@ -968,6 +975,7 @@ memory-bank/
 ```
 
 **Key Commands**:
+
 - **update memory bank** → Review ALL memory-bank files
 - **add task** → Create new task file + update \_index.md
 - **update task TASKID** → Add progress log entry
@@ -988,23 +996,24 @@ memory-bank/
 
 ### Subtasks
 
-| ID  | Description           | Status      | Updated    | Notes |
-|-----|-----------------------|-------------|------------|-------|
-| 1.1 | Create DAL functions  | Complete    | 2025-11-12 | ✅    |
-| 1.2 | Build Server Actions  | In Progress | 2025-11-12 | 🔄    |
-| 1.3 | Create UI Components  | Not Started | -          | ⏳    |
+| ID  | Description          | Status      | Updated    | Notes |
+| --- | -------------------- | ----------- | ---------- | ----- |
+| 1.1 | Create DAL functions | Complete    | 2025-11-12 | ✅    |
+| 1.2 | Build Server Actions | In Progress | 2025-11-12 | 🔄    |
+| 1.3 | Create UI Components | Not Started | -          | ⏳    |
 
 ## Progress Log
 
 ### 2025-11-12
+
 - Completed DAL functions for team CRUD
 - Started Server Action implementation
 - Made decision to use ActionResponse pattern
-```
 
 **Memory Bank Update Triggers**:
+
 - After significant architecture changes
-- When implementing new patterns  
+- When implementing new patterns
 - User requests "update memory bank"
 - Before major feature development
 - After completing tasks
@@ -1020,9 +1029,10 @@ memory-bank/
 **Quality Standards**:
 
 - Server Components first, Client Components only for interactivity
-- Zod validation at all data boundaries  
+- Zod validation at all data boundaries
 - Explicit admin checks + RLS policies (defense in depth)
 - TypeScript strict mode, no `any` types
 - Responsive design with shadcn/ui components
 
 When in doubt, always examine existing patterns in the codebase and prioritize security, type safety, and maintainability.
+```
