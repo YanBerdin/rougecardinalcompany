@@ -1,4 +1,5 @@
 "use server";
+
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
@@ -17,304 +18,355 @@ import {
 } from "@/lib/dal/team";
 import { requireAdmin } from "@/lib/auth/is-admin";
 
-type ActionResponse<T> = {
-  success: boolean;
-  data?: T | null;
-  error?: string;
-  status?: number; // HTTP-like status for callers
-  details?: unknown; // optional extra details (e.g. Zod issues)
+// ============================================================================
+// Constants
+// ============================================================================
+
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+const CACHE_CONTROL_SECONDS = "3600";
+const ALLOWED_IMAGE_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/avif",
+] as const;
+
+// ============================================================================
+// Types
+// ============================================================================
+
+type SuccessResponse<T> = {
+  readonly success: true;
+  readonly data: T;
 };
+
+type ErrorResponse = {
+  readonly success: false;
+  readonly error: string;
+  readonly status?: number;
+  readonly details?: unknown;
+};
+
+type ActionResponse<T> = SuccessResponse<T> | ErrorResponse;
+
+type AllowedMimeType = (typeof ALLOWED_IMAGE_MIME_TYPES)[number];
+
+// ============================================================================
+// Exported Actions
+// ============================================================================
 
 export async function createTeamMember(
   input: unknown
 ): Promise<ActionResponse<TeamMemberDb>> {
   try {
-    // Authorization is enforced inside the DAL (requireAdmin) to centralize checks.
-    const parsed = CreateTeamMemberInputSchema.parse(input);
-    const created = await upsertTeamMember(parsed as CreateTeamMemberInput);
+    const validated: CreateTeamMemberInput =
+      CreateTeamMemberInputSchema.parse(input);
+    const result = await upsertTeamMember(validated);
 
     revalidatePath("/admin/team");
 
-    if (!created || !created.success) {
+    if (!result?.success) {
       return {
         success: false,
-        error: created?.error ?? "Failed to create team member",
+        error: result?.error ?? "Failed to create team member",
         status: 500,
       };
     }
 
-    return { success: true, data: created.data ?? null };
-  } catch (err: unknown) {
-    console.error("createTeamMember error:", err);
-    if (err instanceof z.ZodError) {
-      return {
-        success: false,
-        error: "Validation failed",
-        status: 422,
-        details: err.issues,
-      };
-    }
-    return {
-      success: false,
-      error:
-        err instanceof Error ? err.message : String(err ?? "Unknown error"),
-      status: 500,
-    };
+    return { success: true, data: result.data };
+  } catch (error: unknown) {
+    return handleActionError(error, "createTeamMember");
   }
 }
 
 export async function updateTeamMember(
-  id: number,
-  input: unknown
+  teamMemberId: number,
+  updateInput: unknown
 ): Promise<ActionResponse<TeamMemberDb>> {
   try {
-    // Authorization is enforced in the DAL (requireAdmin)
-    if (!Number.isFinite(id) || id <= 0) {
+    if (!isValidTeamMemberId(teamMemberId)) {
       return { success: false, error: "Invalid id", status: 400 };
     }
-    const parsed = UpdateTeamMemberInputSchema.parse(input);
-    // ensure the record exists
-    const existing = await fetchTeamMemberById(id);
-    if (!existing) return { success: false, error: "Not found" };
 
-    const updated = await upsertTeamMember({
-      ...(parsed as UpdateTeamMemberInput),
-      id,
+    const validated: UpdateTeamMemberInput =
+      UpdateTeamMemberInputSchema.parse(updateInput);
+    const existing = await fetchTeamMemberById(teamMemberId);
+
+    if (!existing) {
+      return { success: false, error: "Team member not found", status: 404 };
+    }
+
+    const result = await upsertTeamMember({
+      ...validated,
+      id: teamMemberId,
     });
 
     revalidatePath("/admin/team");
 
-    if (!updated || !updated.success) {
-      return { success: false, error: updated?.error ?? "Failed to update" };
-    }
-
-    return { success: true, data: updated.data ?? null };
-  } catch (err: unknown) {
-    console.error("updateTeamMember error:", err);
-    if (err instanceof z.ZodError) {
+    if (!result?.success) {
       return {
         success: false,
-        error: "Validation failed",
-        status: 422,
-        details: err.issues,
+        error: result?.error ?? "Failed to update team member",
+        status: 500,
       };
     }
-    return {
-      success: false,
-      error:
-        err instanceof Error ? err.message : String(err ?? "Unknown error"),
-      status: 500,
-    };
+
+    return { success: true, data: result.data };
+  } catch (error: unknown) {
+    return handleActionError(error, "updateTeamMember");
   }
 }
 
 export async function reorderTeamMembersAction(
-  input: unknown
+  reorderInput: unknown
 ): Promise<ActionResponse<null>> {
   try {
-    // Authorization enforced in DAL
-    const parsed = ReorderTeamMembersInputSchema.parse(input);
-    const ok = await reorderTeamMembers(parsed);
+    const validated = ReorderTeamMembersInputSchema.parse(reorderInput);
+    const result = await reorderTeamMembers(validated);
+
     revalidatePath("/admin/team");
-    if (!ok || !ok.success)
-      return { success: false, error: ok?.error ?? "Failed to reorder" };
-    return { success: true, data: null };
-  } catch (err: unknown) {
-    console.error("reorderTeamMembersAction error:", err);
-    if (err instanceof z.ZodError) {
+
+    if (!result?.success) {
       return {
         success: false,
-        error: "Validation failed",
-        status: 422,
-        details: err.issues,
+        error: result?.error ?? "Failed to reorder team members",
+        status: 500,
       };
     }
-    return {
-      success: false,
-      error:
-        err instanceof Error ? err.message : String(err ?? "Unknown error"),
-      status: 500,
-    };
+
+    return { success: true, data: null };
+  } catch (error: unknown) {
+    return handleActionError(error, "reorderTeamMembersAction");
   }
 }
 
 export async function setTeamMemberActiveAction(
-  id: number,
-  active: boolean
+  teamMemberId: number,
+  isActiveStatus: boolean
 ): Promise<ActionResponse<null>> {
   try {
-    // Authorization enforced in DAL
-    if (!Number.isFinite(id) || id <= 0) {
-      return { success: false, error: "Invalid id", status: 400 };
+    if (!isValidTeamMemberId(teamMemberId)) {
+      return { success: false, error: "Invalid team member id", status: 400 };
     }
-    if (typeof active !== "boolean") {
-      return { success: false, error: "Invalid active value", status: 400 };
-    }
-    const ok = await setTeamMemberActive(id, active);
+
+    const result = await setTeamMemberActive(teamMemberId, isActiveStatus);
     revalidatePath("/admin/team");
-    if (!ok || !ok.success)
-      return { success: false, error: ok?.error ?? "Failed to set active flag" };
-    return { success: true, data: null };
-  } catch (err: unknown) {
-    console.error("setTeamMemberActiveAction error:", err);
-    return {
-      success: false,
-      error:
-        err instanceof Error ? err.message : String(err ?? "Unknown error"),
-      status: 500,
-    };
-  }
-}
 
-/*
-export async function hardDeleteTeamMemberAction(
-  id: number
-): Promise<ActionResponse<null>> {
-  try {
-    await requireAdmin();
-    if (!Number.isFinite(id) || id <= 0) {
-      return { success: false, error: "Invalid id", status: 400 };
-    }
-
-    // Permanent deletion (RGPD): deletes the row from the database.
-    // This is a critical operation that requires explicit admin verification.
-    const { createClient } = await import("@/supabase/server");
-    const supabase = await createClient();
-
-    const { error } = await supabase
-      .from("membres_equipe")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      console.error("hardDeleteTeamMemberAction database error:", error);
+    if (!result?.success) {
       return {
         success: false,
-        error: "Failed to permanently delete team member",
+        error: result?.error ?? "Failed to set team member active flag",
         status: 500,
       };
     }
 
-    revalidatePath("/admin/team");
-
     return { success: true, data: null };
-  } catch (err: unknown) {
-    console.error("hardDeleteTeamMemberAction error:", err);
-    return {
-      success: false,
-      error:
-        err instanceof Error ? err.message : String(err ?? "Unknown error"),
-      status: 500,
-    };
+  } catch (error: unknown) {
+    return handleActionError(error, "setTeamMemberActiveAction");
   }
 }
-*/
 
-//TODO: enforce Authorization inside the DAL (requireAdmin) to centralize checks.
 export async function uploadTeamMemberPhoto(
-  formData: FormData
+  photoFormData: FormData
 ): Promise<ActionResponse<{ mediaId: number; publicUrl: string }>> {
   try {
     await requireAdmin();
 
-    const file = formData.get("file") as File | null;
-    if (!file) {
-      return { success: false, error: "No file provided", status: 400 };
+    const uploadedFile = extractFileFromFormData(photoFormData);
+    if (!uploadedFile.success) {
+      return { success: false, error: uploadedFile.error, status: uploadedFile.status };
     }
 
-    // Validation
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    if (file.size > maxSize) {
-      return {
-        success: false,
-        error: "File too large (max 5MB)",
-        status: 400,
-      };
+    const validatedFile = validateImageFile(uploadedFile.data);
+    if (!validatedFile.success) {
+      return { success: false, error: validatedFile.error, status: validatedFile.status };
     }
 
-    const allowedTypes = [
-      "image/jpeg",
-      "image/png",
-      "image/webp",
-      "image/avif",
-    ];
-    if (!allowedTypes.includes(file.type)) {
-      return {
-        success: false,
-        error: "Invalid file type. Allowed: JPEG, PNG, WebP, AVIF",
-        status: 400,
-      };
+    const uploadResult = await uploadFileToStorage(validatedFile.data);
+    if (!uploadResult.success) {
+      return { success: false, error: uploadResult.error, status: uploadResult.status };
     }
 
-    // Générer nom de fichier unique
-    const timestamp = Date.now();
-    const randomStr = Math.random().toString(36).substring(2, 9);
-    const ext = file.name.split(".").pop() || "jpg";
-    const filename = `team-${timestamp}-${randomStr}.${ext}`;
-    const storagePath = `team-photos/${filename}`;
-
-    // Upload vers Supabase Storage
-    const { createClient } = await import("@/supabase/server");
-    const supabase = await createClient();
-
-    const { error: uploadError } = await supabase.storage
-      .from("medias")
-      .upload(storagePath, file, {
-        cacheControl: "3600",
-        upsert: false,
-      });
-
-    if (uploadError) {
-      console.error("Storage upload error:", uploadError);
-      return {
-        success: false,
-        error: `Upload failed: ${uploadError.message}`,
-        status: 500,
-      };
+    const mediaResult = await createMediaRecord(
+      uploadResult.data,
+      validatedFile.data
+    );
+    if (!mediaResult.success) {
+      await cleanupStorageFile(uploadResult.data.storagePath);
     }
 
-    // Obtenir URL publique
-    const { data: urlData } = supabase.storage
-      .from("medias")
-      .getPublicUrl(storagePath);
+    return mediaResult;
+  } catch (error: unknown) {
+    return handleActionError(error, "uploadTeamMemberPhoto");
+  }
+}
 
-    // Créer enregistrement dans table medias
-    const { data: mediaRecord, error: insertError } = await supabase
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+function isValidTeamMemberId(teamMemberId: number): boolean {
+  return Number.isFinite(teamMemberId) && teamMemberId > 0;
+}
+
+function isAllowedMimeType(mimeType: string): mimeType is AllowedMimeType {
+  return ALLOWED_IMAGE_MIME_TYPES.includes(mimeType as AllowedMimeType);
+}
+
+function extractFileFromFormData(formData: FormData): ActionResponse<File> {
+  const uploadedFile = formData.get("file");
+
+  if (!uploadedFile || !(uploadedFile instanceof File)) {
+    return { success: false, error: "No file provided", status: 400 };
+  }
+
+  return { success: true, data: uploadedFile };
+}
+
+function validateImageFile(uploadedFile: File): ActionResponse<File> {
+  if (uploadedFile.size > MAX_FILE_SIZE_BYTES) {
+    return {
+      success: false,
+      error: "File too large (max 5MB)",
+      status: 400,
+    };
+  }
+
+  if (!isAllowedMimeType(uploadedFile.type)) {
+    return {
+      success: false,
+      error: `Invalid file type. Allowed: ${ALLOWED_IMAGE_MIME_TYPES.join(", ")}`,
+      status: 400,
+    };
+  }
+
+  return { success: true, data: uploadedFile };
+}
+
+async function uploadFileToStorage(
+  uploadedFile: File
+): Promise<ActionResponse<{ storagePath: string; publicUrl: string }>> {
+  const uniqueFileName = generateUniqueFileName(
+    uploadedFile.name,
+    uploadedFile.type
+  );
+  const storageFilePath = `team-photos/${uniqueFileName}`;
+
+  const { createClient } = await import("@/supabase/server");
+  const supabaseClient = await createClient();
+
+  const { error: storageUploadError } = await supabaseClient.storage
+    .from("medias")
+    .upload(storageFilePath, uploadedFile, {
+      cacheControl: CACHE_CONTROL_SECONDS,
+      upsert: false,
+    });
+
+  if (storageUploadError) {
+    console.error("Storage upload error:", storageUploadError);
+    return {
+      success: false,
+      error: `Upload failed: ${storageUploadError.message}`,
+      status: 500,
+    };
+  }
+
+  const { data: publicUrlData } = supabaseClient.storage
+    .from("medias")
+    .getPublicUrl(storageFilePath);
+
+  return {
+    success: true,
+    data: {
+      storagePath: storageFilePath,
+      publicUrl: publicUrlData.publicUrl,
+    },
+  };
+}
+
+async function createMediaRecord(
+  uploadData: { storagePath: string; publicUrl: string },
+  originalFile: File
+): Promise<ActionResponse<{ mediaId: number; publicUrl: string }>> {
+  const { createClient } = await import("@/supabase/server");
+  const supabaseClient = await createClient();
+
+  const { data: createdMediaRecord, error: mediaInsertError } =
+    await supabaseClient
       .from("medias")
       .insert({
-        storage_path: storagePath,
-        filename: file.name,
-        mime: file.type,
-        size_bytes: file.size,
+        storage_path: uploadData.storagePath,
+        filename: originalFile.name,
+        mime: originalFile.type,
+        size_bytes: originalFile.size,
         metadata: { bucket: "medias", type: "team_photo" },
       })
       .select()
       .single();
 
-    if (insertError || !mediaRecord) {
-      console.error("Media record insertion error:", insertError);
-      // Tenter de nettoyer le fichier uploadé
-      await supabase.storage.from("medias").remove([storagePath]);
-      return {
-        success: false,
-        error: "Failed to create media record",
-        status: 500,
-      };
-    }
-
-    return {
-      success: true,
-      data: {
-        mediaId: mediaRecord.id,
-        publicUrl: urlData.publicUrl,
-      },
-    };
-  } catch (err: unknown) {
-    console.error("uploadTeamMemberPhoto error:", err);
+  if (mediaInsertError || !createdMediaRecord) {
+    console.error("Media record insertion error:", mediaInsertError);
     return {
       success: false,
-      error: err instanceof Error ? err.message : "Upload failed",
+      error: "Failed to create media record",
       status: 500,
     };
   }
+
+  return {
+    success: true,
+    data: {
+      mediaId: createdMediaRecord.id,
+      publicUrl: uploadData.publicUrl,
+    },
+  };
+}
+
+function generateUniqueFileName(
+  originalFileName: string,
+  mimeType: string
+): string {
+  const currentTimestamp = Date.now();
+  const randomIdentifier = Math.random().toString(36).substring(2, 9);
+
+  const extractedExtension = originalFileName.split(".").pop()?.toLowerCase();
+  const extensionFromMime = mimeType.split("/")[1];
+  const fileExtension = extractedExtension || extensionFromMime || "jpg";
+
+  return `team-${currentTimestamp}-${randomIdentifier}.${fileExtension}`;
+}
+
+async function cleanupStorageFile(storagePath: string): Promise<void> {
+  try {
+    const { createClient } = await import("@/supabase/server");
+    const supabaseClient = await createClient();
+
+    await supabaseClient.storage.from("medias").remove([storagePath]);
+  } catch (error: unknown) {
+    console.error("Failed to cleanup storage file:", error);
+    // Don't throw - cleanup is best effort
+  }
+}
+
+function handleActionError(
+  error: unknown,
+  functionName: string
+): ErrorResponse {
+  console.error(`${functionName} error:`, error);
+
+  if (error instanceof z.ZodError) {
+    return {
+      success: false,
+      error: "Validation failed",
+      status: 422,
+      details: error.issues,
+    };
+  }
+
+  return {
+    success: false,
+    error:
+      error instanceof Error ? error.message : String(error ?? "Unknown error"),
+    status: 500,
+  };
 }

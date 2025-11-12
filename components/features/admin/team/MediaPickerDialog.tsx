@@ -78,7 +78,7 @@ export function MediaPickerDialog({ open, onClose, onSelect }: Props) {
 
       const result = await uploadTeamMemberPhoto(formData);
 
-      if (result.success && result.data) {
+      if (result.success) {
         toast.success("Image téléversée", {
           description: "L'image a été uploadée avec succès",
         });
