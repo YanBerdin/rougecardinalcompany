@@ -1,11 +1,3 @@
-// This file is used to configure the MCP server for Supabase.
-// Replace <personal-access-token> with your actual Supabase personal access token.
-// The command will run in WSL and start the Supabase MCP server.
-// The MCP server is used to connect to the Supabase API and provide a local development environment.
-// The server will be started with the latest version of the Supabase MCP server package.
-// The server will be started with the access token provided in the args.
-// The server will be started in the WSL environment.
-// The server will be started with the command provided in the args.
 {
   "inputs": [
     {

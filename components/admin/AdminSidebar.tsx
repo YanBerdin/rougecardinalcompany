@@ -12,6 +12,7 @@ import {
   Settings,
   Search,
   LayoutDashboard,
+  Bug,
 } from "lucide-react";
 import {
   Sidebar,
@@ -73,6 +74,11 @@ const otherItems = [
     title: "Paramètres",
     href: "/admin/settings",
     icon: Settings,
+  },
+  {
+    title: "Debug Auth",
+    href: "/admin/debug-auth",
+    icon: Bug,
   },
   {
     title: "Retour au site",

@@ -45,7 +45,7 @@ async function main() {
   console.log("\n📋 Test 2: SELECT avec JOIN spectacle");
   const { data: eventsWithShow, error: joinError } = await client
     .from("evenements")
-    .select("id, date_debut, spectacles(id, titre)")
+    .select("id, date_debut, spectacles(id, title)")
     .limit(3);
 
   if (joinError) {
@@ -54,6 +54,15 @@ async function main() {
     console.log(
       `  ✅ Succès: ${eventsWithShow?.length ?? 0} événement(s) avec spectacle`
     );
+    if (eventsWithShow && eventsWithShow.length > 0) {
+      eventsWithShow.forEach((e) => {
+        // Supabase retourne un objet (pas un array) pour une relation one-to-one
+        const spectacle = e.spectacles as unknown as { id: number; title: string } | null;
+        console.log(
+          `     - Event #${e.id} (${e.date_debut}) - Spectacle: ${spectacle?.title ?? "N/A"}`
+        );
+      });
+    }
   }
 
   // Test 3: Vérifier les GRANTs
@@ -73,14 +82,20 @@ async function main() {
   });
 
   if (grants) {
-    const anonGrants = grants.filter((g: any) => g.grantee === "anon");
-    const authGrants = grants.filter((g: any) => g.grantee === "authenticated");
+    interface Grant {
+      grantee: string;
+      privilege_type: string;
+    }
+    const anonGrants = grants.filter((g: Grant) => g.grantee === "anon");
+    const authGrants = grants.filter(
+      (g: Grant) => g.grantee === "authenticated"
+    );
 
     console.log(
-      `  anon: ${anonGrants.map((g: any) => g.privilege_type).join(", ") || "AUCUN"}`
+      `  anon: ${anonGrants.map((g: Grant) => g.privilege_type).join(", ") || "AUCUN"}`
     );
     console.log(
-      `  authenticated: ${authGrants.map((g: any) => g.privilege_type).join(", ") || "AUCUN"}`
+      `  authenticated: ${authGrants.map((g: Grant) => g.privilege_type).join(", ") || "AUCUN"}`
     );
   }
 

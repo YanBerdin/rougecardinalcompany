@@ -3,8 +3,10 @@
  * Test script to verify SECURITY INVOKER views work correctly
  * after migration 20251022160000_fix_all_views_security_invoker.sql
  */
-
+import * as dotenv from "dotenv";
 import { createClient } from '@supabase/supabase-js';
+
+dotenv.config();
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!;
@@ -13,7 +15,7 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 async function testViews() {
   console.log('🧪 Testing SECURITY INVOKER views after migration...\n');
-  console.log('📋 All views should work with anon role (public access)\n');
+  console.log('📋 Testing PUBLIC views with anon role\n');
   
   let allPassed = true;
   
@@ -96,19 +98,25 @@ async function testViews() {
     allPassed = false;
   }
   
-  // Test 5: analytics_summary (should work if table has data)
-  console.log('\n5️⃣ Testing analytics_summary view...');
+  // Test 5: analytics_summary (ADMIN-ONLY - should be denied for anon)
+  console.log('\n5️⃣ Testing analytics_summary view (admin-only)...');
   try {
-    const { data: analytics, error: analyticsError } = await supabase
+    const { error: analyticsError } = await supabase
       .from('analytics_summary')
       .select('event_type, total_events')
       .limit(5);
     
     if (analyticsError) {
-      console.error('   ❌ Error:', analyticsError.message);
-      allPassed = false;
+      // This is EXPECTED for anon role - it's an admin-only view
+      if (analyticsError.message.includes('permission denied')) {
+        console.log('   ✅ Correctly denied: admin-only view not accessible to anon');
+      } else {
+        console.error('   ❌ Unexpected error:', analyticsError.message);
+        allPassed = false;
+      }
     } else {
-      console.log(`   ✅ Success: ${analytics?.length || 0} analytics entries fetched`);
+      console.error('   ❌ Security issue: admin view should NOT be accessible to anon!');
+      allPassed = false;
     }
   } catch (error) {
     console.error('   ❌ Exception:', error);
@@ -117,8 +125,10 @@ async function testViews() {
   
   console.log('\n' + '='.repeat(60));
   if (allPassed) {
-    console.log('✅ All public views tested successfully!');
-    console.log('🔐 SECURITY INVOKER migration verified: views run with anon user privileges');
+    console.log('✅ All view security tests passed!');
+    console.log('🔐 PUBLIC views: accessible to anon (as expected)');
+    console.log('🔒 ADMIN views: correctly denied to anon (as expected)');
+    console.log('✨ SECURITY INVOKER migration verified successfully!');
   } else {
     console.log('❌ Some views failed - check errors above');
     process.exit(1);

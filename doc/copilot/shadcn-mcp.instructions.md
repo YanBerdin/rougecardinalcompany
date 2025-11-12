@@ -31,15 +31,15 @@ Select your MCP client and follow the instructions to configure the shadcn MCP s
 
 **Run the following command** in your project:
 
-       ```bash
-       npx shadcn@latest mcp init --client vscode
-       ```
+```bash
+npx shadcn@latest mcp init --client vscode
+```
 
 Open `.vscode/mcp.json` and click **Start** next to the shadcn server. Then try the following prompts with GitHub Copilot:
 
-       - Show me all available components in the shadcn registry
-       - Add the button, dialog and card components to my project
-       - Create a contact form using components from the shadcn registry
+- Show me all available components in the shadcn registry
+- Add the button, dialog and card components to my project
+- Create a contact form using components from the shadcn registry
 
 **Note:** The `shadcn` CLI cannot automatically update `~/.codex/config.toml`.
       You'll need to add the configuration manually for Codex.

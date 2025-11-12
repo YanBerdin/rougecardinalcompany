@@ -1,4 +1,59 @@
-# Project Architecture Blueprint — v3 (Multiple Layout Routes)
+````markdown
+# Project Architecture Blueprint — v3 (Layouts & Admin Sidebar migration)
+
+**Dernière mise à jour** : 11 novembre 2025
+**Contexte** : refactor des layouts (route groups) et migration admin UI vers composant shadcn sidebar (collapsible icon mode)
+
+Résumé
+
+Ce document capture les changements d'architecture pertinents introduits le 11 novembre 2025 : migration vers Next.js route groups `(admin)`/`(marketing)`, création d'un `root layout` central, et migration de l'UI admin vers la sidebar officielle shadcn (remplacement d'AdminShell).
+
+Pourquoi cette version
+
+- Clarifier la nouvelle structure de routes (route groups) et ses implications (middlewares, guards, revalidation).
+- Documenter la migration UI admin (AppSidebar) et les règles d'intégration pour éviter regressions (hydration, styles Tailwind v3, provider placement).
+
+Changements clés
+
+1) Route groups & root layout
+
+- Structure : adoption des route groups Next.js pour isoler les zones fonctionnelles : `app/(admin)` et `app/(marketing)`.
+- Root layout (`app/layout.tsx`) pris en charge pour le HTML de base et le ThemeProvider ; les route groups contiennent leurs `layout.tsx` spécifiques.
+- Impact : les chemins précédents basés sur une structure plate peuvent nécessiter des mises à jour d'import/paths et des ajustements pour le middleware/matching.
+
+2) Admin UI : migration vers shadcn AppSidebar
+
+- Remplacement d'`AdminShell` par `AppSidebar` (basé sur les composants shadcn + Radix) offrant :
+  - sidebar collapsible avec mode icônes et masquage automatique du texte,
+  - off-canvas mobile menu,
+  - breadcrumb dans le header,
+  - support keyboard shortcut (Cmd/Ctrl+B),
+  - meilleure accessibilité et maintenance via composants UI réutilisables.
+- Opérations réalisées : déplacement de `SidebarProvider`/`SidebarInset` dans `app/(admin)/layout.tsx`, ajout/ajustement CSS variables dans `app/globals.css` et corrections Tailwind v3 (inline style pour largeur du sidebar quand nécessaire).
+
+3) Breaking changes & migration checklist
+
+- Breaking change: route structure migrated to route groups — vérifier tous les liens, middlewares et imports.
+- Breaking change: AdminShell removed — remplacer références par `AppSidebar` et adapter props/slots.
+
+Checklist de migration rapide
+
+1. Rechercher usages de `components/admin/AdminShell.tsx` et remplacer par `components/admin/AdminSidebar.tsx` (ou wrapper adapté).
+2. Valider `app/(admin)/layout.tsx` pour inclure `SidebarProvider` et `SidebarInset` correctement.
+3. Lancer `pnpm run lint` et `pnpm run build` ; corriger les erreurs (esp. tailwind classes et hydration warnings).
+4. Tester flows : navigation admin, mobile menu off-canvas, collapsed icon mode, breadcrumb, keyboard shortcut.
+5. Mettre à jour la documentation interne (`memory-bank/architecture/` et `memory-bank/progress.md`) et ajouter exemples de snippets si nécessaire.
+
+Références & fichiers touchés (exemples)
+
+- ajoutés : `components/admin/AdminSidebar.tsx`, `components/ui/sidebar.tsx`, `components/ui/breadcrumb.tsx`, `hooks/use-mobile.ts`, `app/(admin)/loading.tsx`
+- modifiés : `app/(admin)/layout.tsx`, `app/layout.tsx`, `app/globals.css`, `components/admin/AdminAuthRow.tsx`, `components/ui/button.tsx`, `components/ui/input.tsx`
+- supprimés : `components/admin/AdminShell.tsx`
+
+---
+
+Fait le 11 novembre 2025
+````# Project Architecture Blueprint — v3 (Multiple Layout Routes)
 
 **Dernière mise à jour** : 11 novembre 2025
 **Projet** : Rouge Cardinal Company — Next.js 15 + TypeScript + Supabase + Resend

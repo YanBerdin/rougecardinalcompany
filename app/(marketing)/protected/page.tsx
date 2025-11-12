@@ -29,6 +29,24 @@ export default async function ProtectedPage() {
         >
           👉🏼 ADMIN PAGE
         </Link>
+        <Link
+          href="/test-connection"
+          className="underline text-5xl hover:bg-primary/10 rounded px-1 mt-5 block"
+        >
+          👉🏼 TEST CONNECTION PAGE
+        </Link>
+        <Link
+          href="/debug-auth-before-admin"
+          className="underline text-5xl hover:bg-primary/10 rounded px-1 mt-5 block"
+        >
+          👉🏼 DEBUG PUBLIC AUTH PAGE
+        </Link>
+        <Link
+          href="/admin/debug-auth"
+          className="underline text-5xl hover:bg-primary/10 rounded px-1 mt-5 block"
+        >
+          👉🏼 DEBUG ADMIN AUTH PAGE
+        </Link>
         <div className="bg-accent text-sm p-3 px-5 rounded-md text-foreground flex gap-3 items-center mt-10">
           <InfoIcon size="16" strokeWidth={2} />
           This is a protected page that you can only see as an authenticated

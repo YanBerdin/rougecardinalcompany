@@ -66,7 +66,7 @@ export function AuthButton() {
             setUserClaims(null);
           }
         }
-      } catch (err) {
+      } catch {
         setUserClaims(null);
       } finally {
         setLoading(false);

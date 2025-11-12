@@ -1,3 +1,7 @@
+---
+applyTo: "**"
+---
+
 # Next.js 15 - Règles d'implémentation Server Actions & API Routes
 
 > Instructions pour agents IA (GitHub Copilot, Claude Code, Cursor, etc.)
@@ -655,10 +659,12 @@ graph TD
 
 ## 📖 RESSOURCES
 
-- Next.js 15 Docs - Server Actions: https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations
-- React 19 - useActionState: https://react.dev/reference/react/useActionState
-- Next.js 15 - Route Handlers: https://nextjs.org/docs/app/building-your-application/routing/route-handlers
-- Zod validation: https://zod.dev/
+```md
+- Next.js 15 Docs - Server Actions: 'https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations'
+- React 19 - useActionState: 'https://react.dev/reference/react/useActionState'
+- Next.js 15 - Route Handlers: 'https://nextjs.org/docs/app/building-your-application/routing/route-handlers'
+- Zod validation: 'https://zod.dev/'
+```
 
 ---
 

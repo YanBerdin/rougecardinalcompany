@@ -2,7 +2,8 @@
 applyTo: "**"
 ---
 
-Coding standards, domain knowledge, and preferences that AI should follow.
+Coding standards, domain knowledge, and preferences that AI should follow
+
 ---
 
 # Memory Bank
@@ -305,7 +306,7 @@ When you request **add task** or use the command **create task**, I will:
 4. Set an initial status
 5. Update the \_index.md file to include the new task
 
-For existing tasks, the command **update task [ID]** will prompt me to:
+For existing tasks, the command **update task (ID)** will prompt me to:
 
 1. Open the specific task file
 2. Add a new progress log entry with today's date
@@ -313,7 +314,7 @@ For existing tasks, the command **update task [ID]** will prompt me to:
 4. Update the \_index.md file to reflect any status changes
 5. Integrate any new decisions into the thought process
 
-To view tasks, the command **show tasks [filter]** will:
+To view tasks, the command **show tasks (filter)** will:
 
 1. Display a filtered list of tasks based on the specified criteria
 2. Valid filters include:
@@ -323,8 +324,8 @@ To view tasks, the command **show tasks [filter]** will:
    - **completed** - Show only tasks with "Completed" status
    - **blocked** - Show only tasks with "Blocked" status
    - **recent** - Show tasks updated in the last week
-   - **tag:[tagname]** - Show tasks with a specific tag
-   - **priority:[level]** - Show tasks with specified priority level
+   - **tag:(tagname)** - Show tasks with a specific tag
+   - **priority:(level)** - Show tasks with specified priority level
 3. The output will include:
    - Task ID and name
    - Current status and completion percentage

@@ -4,6 +4,7 @@ applyTo: "**"
 
 description: Guidelines for writing Postgres Row Level Security policies
 alwaysApply: false
+
 ---
 
 # Database: Create RLS policies

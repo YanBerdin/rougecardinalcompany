@@ -114,7 +114,7 @@ Backoffice — tâches (aperçu rapide) :
   - [19.6. Database: Create RLS policies](#196-database-create-rls-policies)
   - [19.7. Database: Create functions](#197-database-create-functions)
   - [19.8. Database: Postgres SQL Style Guide](#198-database-postgres-sql-style-guide)
-  - [20. Entrées récentes (oct. 2025)](#20-entrées-récentes-oct-2025)
+  - [20. Breaking Changes & Changelog](#20-breaking-changes--changelog)
 
 ## 1. Présentation
 
@@ -5052,7 +5052,28 @@ order by
   department_name;
 ```
 
-## 20. Entrées récentes (oct. 2025)
+## 20. Breaking Changes & Changelog
+
+### Changelog (nov. 2025)
+
+- feat(admin): add comprehensive diagnostic tools for auth and RLS validation (commit b710660)
+  - **Admin debug page**: `app/(admin)/admin/debug-auth/page.tsx` (346 lines)
+    - Comprehensive auth & RLS diagnostics with 7 test sections
+    - Tests: Cookies, User, Profile DB, Public tables, Admin views, JOINs, Configuration
+    - Responsive grid layout with expandable details
+    - Automatically protected by (admin) route group layout
+  - **Security test script**: `scripts/test-admin-access.ts` (102 lines)
+    - Automated testing: anon access denial, is_admin() validation, service key access
+    - Validation results: ✅ Admin views protected, ✅ RLS policies functional, ✅ Service key operational
+  - **Admin sidebar integration**: "Debug Auth" link added (Bug icon, /admin/debug-auth)
+  - **Pre-auth testing**: Public debug page moved to `app/debug-auth-before-admin/page.tsx` for non-authenticated testing
+  - **Script fixes**: Updated URLs in `diagnose-server-auth.ts`, fixed column names and TypeScript types in `test-evenements-access.ts`, added dotenv and clarified expectations in `test-views-security-invoker.ts`
+  - **Documentation**: Memory Bank updated (activeContext.md, progress.md), migration changelog added, Blueprint v3 enriched
+  - **Instructions reorganization**: Accessibility/WCAG files moved to `.github/copilot/`, filenames standardized to lowercase
+  - **RLS policy guide**: Comprehensive Copilot instructions added (`doc/copilot/Create_RLS_policies.instructions.md`)
+  - Purpose: Provide admin developers with diagnostic capabilities for troubleshooting auth/RLS issues in development
+
+### Changelog (oct. 2025)
 
 - **fix(rls): resolve empty media articles display after SECURITY INVOKER migration** (commit à venir)
   - **Root cause 1**: RLS enabled on `articles_presse` but NO policies applied → PostgreSQL deny all by default
@@ -5111,7 +5132,26 @@ order by
   - Triggers for home_about_content managed centrally in 30_triggers.sql via dynamic loop
   - Compliance: 100% with Declarative_Database_Schema.Instructions.md (36/36 tables via declarative workflow)
 
-## Entrées récentes (sept. 2025)
+- refactor(admin): migrate layouts architecture to Next.js route groups with shadcn sidebar (commit à venir)
+  - **Route groups implementation**: Separation `(admin)` and `(marketing)` for functional isolation
+    - Root layout centralized (html/body + ThemeProvider)
+    - Dedicated layouts per functional zone
+    - Fix hydration errors (removed html/body duplications)
+  - **Admin sidebar modernization**: Replace AdminShell with AppSidebar (shadcn official component)
+    - Collapsible icon mode with automatic text hiding
+    - Off-canvas Sheet for mobile (touch-friendly)
+    - Keyboard shortcuts (Cmd/Ctrl+B) + breadcrumb navigation
+    - Branding integration: Rouge Cardinal logo + company name
+  - **Structured navigation**: Logical groups (Général/Contenu/Autres)
+  - **AdminAuthRow refactored**: Dropdown menu pattern with logout + settings
+  - **UI collapse fixes**: Sidebar width + logo compression resolved
+  - **BREAKING CHANGES**: Route structure migrated, verify imports/paths/middleware/guards
+  - **Documentation**: Complete changelog, Blueprint v3, migration checklist
+  - **Components created**: AdminSidebar.tsx (AppSidebar), sidebar.tsx, breadcrumb.tsx, separator.tsx, sheet.tsx, tooltip.tsx, use-mobile.ts
+  - **Components modified**: AdminAuthRow.tsx, layout.tsx (admin), globals.css, button/input.tsx
+  - **Components deleted**: AdminShell.tsx (deprecated)
+
+## Changelog (sept. 2025)
 
 - fix(server-actions): resolve "Server Actions must be async functions" error in contact DAL
   - Move ContactMessageSchema from export to local scope in lib/dal/contact.ts (Next.js 15 Server Actions constraint)

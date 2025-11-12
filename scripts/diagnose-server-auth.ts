@@ -118,7 +118,7 @@ async function main() {
 
       console.log("\n  📊 Test d'accès à toutes les tables:");
       for (const table of tables) {
-        const { data, error } = await adminClient
+        const { error } = await adminClient
           .from(table)
           .select("*", { count: "exact", head: true });
 
@@ -138,9 +138,9 @@ async function main() {
 
   // 4. Recommandations
   console.log("💡 Recommandations:");
-  console.log("  1. Visitez http://localhost:3000/debug-auth pour test visuel");
+  console.log("  1. Visitez http://localhost:3000/admin/debug-auth pour test visuel");
   console.log(
-    "  2. Visitez http://localhost:3000/api/debug-auth pour rapport JSON"
+    "  2. Visitez http://localhost:3000/api/admin/debug-auth pour rapport JSON"
   );
   console.log("  3. Vérifiez que vous êtes authentifié dans le navigateur");
   console.log(

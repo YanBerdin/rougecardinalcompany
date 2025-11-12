@@ -47,7 +47,35 @@ Ces fichiers contiennent les opérations appliquées lors de l'incident ; voir l
 
 Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique complète (Docker, Supabase, migrations).
 
-### Avancées récentes (Octobre 2025)
+### Avancées récentes
+
+#### Novembre 2025
+
+- ✅ **11 novembre — Migration architecture layouts + admin UI** :
+  - **Route groups** : Implémentation de `(admin)` et `(marketing)` avec layouts dédiés
+    - Root layout centralisé (`app/layout.tsx`) avec ThemeProvider
+    - Isolation zones fonctionnelles et application comportements distincts
+    - Fix hydration errors (suppression html/body dupliqués dans route groups)
+  - **Admin sidebar** : Migration vers composant shadcn officiel (AppSidebar)
+    - Remplacement d'AdminShell par AppSidebar (collapsible icon mode)
+    - Branding: logo RC + nom compagnie Rouge Cardinal
+    - Navigation groupée (Général/Contenu/Autres), keyboard shortcut (Cmd/Ctrl+B)
+    - Refactor AdminAuthRow avec dropdown menu
+    - Fix largeur sidebar collapse + compression logo
+  - **Outils de diagnostic** : Page debug-auth et script de test créés
+    - Page `app/(admin)/debug-auth/page.tsx` déplacée dans layout admin (protégée)
+    - Page `app/debug-auth/page.tsx` conservée pour debug provisoire publique (avant admin auth)
+    - Script `scripts/test-admin-access.ts` pour tests automatisés sécurité
+    - Tests : cookies, auth, tables publiques/admin, vues, JOINs, RLS policies
+    - Lien "Debug Auth" ajouté dans sidebar admin (section "Autres")
+  - **Composants créés** : AdminSidebar (AppSidebar), sidebar.tsx, breadcrumb.tsx, separator.tsx, sheet.tsx, tooltip.tsx, use-mobile.ts
+  - **Composants modifiés** : AdminAuthRow.tsx, app/(admin)/layout.tsx, globals.css, button.tsx, input.tsx
+  - **Composants supprimés** : AdminShell.tsx (deprecated), app/debug-auth/ (déplacé)
+  - **BREAKING CHANGES** : Structure routes migrée vers route groups — vérifier imports/paths/middleware
+  - **Documentation** : Changelog créé dans `memory-bank/changes/2025-11-11-layouts-admin-sidebar.md`
+  - **Blueprint v3** : `memory-bank/architecture/Project_Architecture_Blueprint_v3.md` (résumé migration)
+
+#### Octobre 2025
 
 - ✅ **26 octobre — INCIDENT CRITIQUE RÉSOLU : RLS Policies Manquantes** :
   - **Symptôme** : Homepage + toutes fonctionnalités publiques DOWN (PostgreSQL 42501 "permission denied for table")
@@ -123,7 +151,7 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 - ✅ Documentation Docker complète : inspection volumes, gestion espace disque, comportement `prune`
 - ✅ Documentation Supabase CLI : commandes détaillées, db reset, workflow déclaratif
 - ✅ Knowledge base revue : architecture complète, schéma DB, RLS, versioning
-- ✅ Conformité schéma déclaratif : suppression migration DDL redondante `20250921112000_add_home_about_content.sql` (100% conformité avec Declarative_Database_Schema.Instructions.md)
+- ✅ Conformité schéma déclaratif : suppression migration DDL redondante `20250921112000_add_home_about_content.sql` (100% conformité avec Declarative_Database_Schema.instructions.md)
 - ✅ Conformité SQL Style Guide : 100% (ajout 'as' pour 32 aliases, indentation améliorée, documentation awards) → rapport généré
 - ✅ Conformité RLS Policies : 100% (36/36 tables protégées, 70+ policies granulaires, 6 double SELECT corrigés) → rapport généré
 - ✅ Conformité Functions : 99% (23/27 SECURITY INVOKER, 4/27 DEFINER justifiés, 100% search_path) → rapport généré
@@ -150,10 +178,12 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 6. ~~TASK022 Team Management~~ (COMPLÉTÉ - 22 octobre)
 7. ~~Résolution problèmes RLS et sécurité views~~ (COMPLÉTÉ - 23 octobre)
 8. ~~Campagne sécurité audit database~~ (TERMINÉE - 26 octobre)
-9. **Patches conformité conventions DB** : Ajouter SET search_path, justifier SECURITY DEFINER (issues #26/#27)
-10. **Nettoyage scripts obsolètes** : Proposition deletion (issue #28)
-11. Finaliser Back‑office : toggles centralisés, CRUD étendus (spectacles, événements, articles)
-12. Configuration finale webhooks Resend (dashboard)
+9. ~~Migration route groups + admin sidebar~~ (FAIT - 11 novembre)
+10. **Validation post-migration** : Tests navigation admin, middleware, guards, mobile menu
+11. **Patches conformité conventions DB** : Ajouter SET search_path, justifier SECURITY DEFINER (issues #26/#27)
+12. **Nettoyage scripts obsolètes** : Proposition deletion (issue #28)
+13. Finaliser Back‑office : toggles centralisés, CRUD étendus (spectacles, événements, articles)
+14. Configuration finale webhooks Resend (dashboard)
 
 ### Problèmes résolus
 
@@ -184,6 +214,9 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 
 ### Points d'attention restants
 
+- **Post-migration route groups** : Vérifier tous les liens internes, middleware matchers, et imports
+- **Validation admin UI** : Tests navigation sidebar, mobile menu, breadcrumb, keyboard shortcuts
+- **Migration code legacy** : Remplacer toutes références à AdminShell par AppSidebar
 - **Ajouter check RLS au CI** : Intégrer `check_rls_coverage.sh` dans pipeline pour bloquer merge si tables RLS sans policies
 - **Auditer toutes tables** : Vérifier coverage RLS complet sur les 36 tables (pas juste les 7 affectées)
 - **Décision architecture** : Garder schemas/ déclaratif ou passer 100% migrations ?
@@ -198,6 +231,19 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 - Next.js Image hostname configuré pour Supabase Storage (`yvtrlvmbofklefxcxrzv.supabase.co`)
 
 ## Décisions Récentes
+
+### Novembre 2025 - Architecture layouts & admin UI
+
+- **Route groups adoption** : Séparation claire entre zones admin `(admin)` et marketing `(marketing)` avec layouts dédiés
+- **AppSidebar officiel** : Abandon d'AdminShell custom au profit du composant shadcn (maintenance + accessibilité)
+- **Mobile-first sidebar** : Collapsible icon mode avec masquage automatique texte, sheet off-canvas pour mobile
+- **Branding admin** : Logo RC + nom compagnie Rouge Cardinal intégrés dans la sidebar
+- **Navigation structurée** : Groupes logiques (Général/Contenu/Autres) pour meilleure organisation
+- **Outils de diagnostic intégrés** : Page debug-auth déplacée dans layout admin avec script de test automatisé
+  - Vérification cookies, auth, tables publiques/admin, vues, JOINs
+  - Lien ajouté dans sidebar pour accès rapide
+  - Sécurité validée : vues admin correctement protégées, RLS policies fonctionnelles
+- **Documentation architecture** : Blueprint v3 créé pour capturer la migration + checklist validation
 
 ### Octobre 2025 - Sécurité audit database
 
@@ -292,10 +338,16 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 
 ## Dernière Mise à Jour
 
-**Date**: 26 octobre 2025
+**Date**: 11 novembre 2025
 **Par**: GitHub Copilot
 **Changements majeurs**:
 
+- **Migration architecture layouts + admin UI** (11 novembre)
+  - Route groups implémentés : `(admin)` et `(marketing)` avec layouts dédiés
+  - AdminShell remplacé par AppSidebar (composant shadcn officiel)
+  - Collapsible icon mode, breadcrumb navigation, keyboard shortcuts
+  - BREAKING CHANGES documentés + checklist de validation
+  - Documentation : changelog + blueprint v3 créés
 - **Campagne de sécurité TERMINÉE** : 73 objets sécurisés sur 17 rounds (25-26 octobre)
   - Round 12 critique : storage.objects ALL PRIVILEGES (vulnérabilité majeure)
   - Round 17 final : check_communique_has_pdf() - CI PASSED ✅
@@ -305,4 +357,4 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 - **PR #25 merged** : Suppression broad grants articles_presse
 - **Issues créées** : #26 (search_path), #27 (DEFINER rationale), #28 (cleanup scripts)
 - **Outils audit** : scripts/check-security-audit.sh, quick_check_all_grants.sql
-- **Next steps** : Patches conformité DB conventions (≈20 fonctions à corriger)
+- **Next steps** : Validation post-migration + patches conformité DB conventions (≈20 fonctions à corriger)

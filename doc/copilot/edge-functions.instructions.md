@@ -4,6 +4,7 @@ applyTo: "**"
 
 description: Coding rules for Supabase Edge Functions
 alwaysApply: false
+
 ---
 
 # Writing Supabase Edge Functions

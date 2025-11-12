@@ -132,7 +132,24 @@ Cette vérification a été réalisée via l'API Supabase MCP et confirme que le
 - Terminé: Agenda/Événements (DAL + containers + UI + export calendrier ICS)
 - Option: Modélisation `partners.type` si besoin UI
 
-## Problèmes Résolus (Octobre 2025)
+## Problèmes Résolus
+
+### Migration architecture layouts + admin UI (11 novembre 2025)
+
+- ✅ **Route groups Next.js implémentés** : Séparation `(admin)` et `(marketing)`
+  - Root layout centralisé pour html/body + ThemeProvider
+  - Layouts dédiés par zone fonctionnelle
+  - Fix hydration errors (suppression duplications)
+- ✅ **Admin sidebar modernisé** : AdminShell → AppSidebar (shadcn)
+  - Composant officiel avec meilleure accessibilité
+  - Collapsible icon mode + masquage texte automatique
+  - Sheet off-canvas pour mobile (touch-friendly)
+  - Keyboard shortcuts + breadcrumb navigation
+- ✅ **Branding admin intégré** : Logo RC + nom compagnie
+- ✅ **Navigation structurée** : Groupes logiques (Général/Contenu/Autres)
+- ✅ **AdminAuthRow refactoré** : Dropdown menu avec logout + settings
+- ✅ **Fix UI collapse** : Largeur sidebar + compression logo résolus
+- ✅ **Documentation complète** : Changelog + Blueprint v3 + checklist migration
 
 ### Campagne sécurité audit database (25-26 octobre)
 
@@ -290,11 +307,11 @@ Cette vérification a été réalisée via l'API Supabase MCP et confirme que le
 
 #### Validation Conformité Instructions Supabase
 
-- ✅ **Schéma Déclaratif** : 100% conforme à `.github/instructions/Declarative_Database_Schema.Instructions.md`
+- ✅ **Schéma Déclaratif** : 100% conforme à `.github/instructions/Declarative_Database_Schema.instructions.md`
   - Modifications dans `supabase/schemas/10_tables_system.sql` (pas de migrations manuelles)
   - État final désiré représenté dans le schéma déclaratif
   - Commentaires RGPD explicites
-- ✅ **Politiques RLS** : 100% conforme à `.github/instructions/Create_RLS_policies.Instructions.md`
+- ✅ **Politiques RLS** : 100% conforme à `.github/instructions/Create_RLS_policies.instructions.md`
   - 4 policies distinctes (SELECT/INSERT/UPDATE/DELETE) par table
   - USING/WITH CHECK correctement utilisés selon l'opération
   - Noms descriptifs et commentaires hors policies
@@ -402,6 +419,58 @@ Cette vérification a été réalisée via l'API Supabase MCP et confirme que le
 - Conversions: À mesurer
 
 ## Journal des Mises à Jour
+
+### 11 Novembre 2025 (suite)
+
+**Outils de diagnostic admin créés et intégrés** :
+
+- Page `app/(admin)/debug-auth/page.tsx` : Diagnostic complet auth & RLS
+  - Déplacée de `app/debug-auth/` vers layout admin (protégée automatiquement)
+  - Tests : cookies, utilisateur, profile DB, tables publiques/admin, vues, JOINs
+  - 7 sections de vérification : hero_slides, membres_equipe, spectacles, événements, dashboard, analytics
+  - Layout responsive grid avec détails expandables
+- Script `scripts/test-admin-access.ts` : Tests automatisés sécurité
+  - Test 1 : Accès anon sur tables admin (vérification blocage)
+  - Test 2 : Vérification fonction `is_admin()`
+  - Test 3 : Accès service_role sur tables critiques
+  - Validation : ✅ Vues admin protégées, ✅ RLS policies fonctionnelles
+- Lien "Debug Auth" ajouté dans sidebar admin (section "Autres", icône Bug)
+- Résultats validation :
+  - ✅ `communiques_presse_dashboard` et `analytics_summary` bloquées pour anon
+  - ✅ `profiles` correctement protégée
+  - ✅ `membres_equipe` accessible en lecture (intentionnel : affichage site public)
+  - ✅ Service key fonctionne pour tous les accès
+
+**Fichiers modifiés** :
+
+- `components/admin/AdminSidebar.tsx` : Ajout import Bug icon + item "Debug Auth"
+- `memory-bank/activeContext.md` : Sections Avancées récentes + Décisions Récentes mises à jour
+
+### 11 Novembre 2025
+
+- **Migration architecture layouts + admin UI**
+  - **Route groups** : Implémentation Next.js `(admin)` et `(marketing)`
+    - Root layout centralisé avec ThemeProvider
+    - Isolation zones fonctionnelles (admin/public)
+    - Fix hydration errors (html/body dupliqués supprimés)
+  - **Admin sidebar shadcn** : Remplacement AdminShell par AppSidebar
+    - Collapsible icon mode avec masquage automatique texte
+    - Branding compagnie (logo RC + nom Rouge Cardinal)
+    - Navigation groupée (Général/Contenu/Autres)
+    - Keyboard shortcut (Cmd/Ctrl+B), breadcrumb navigation
+    - Dropdown menu AdminAuthRow refactoré
+    - Fix largeur collapse + compression logo
+  - **Composants** :
+    - Créés : AdminSidebar.tsx (AppSidebar), sidebar.tsx, breadcrumb.tsx, separator.tsx, sheet.tsx, tooltip.tsx, use-mobile.ts
+    - Modifiés : AdminAuthRow.tsx, layout.tsx (admin), globals.css, button/input.tsx
+    - Supprimés : AdminShell.tsx (deprecated)
+  - **BREAKING CHANGES** :
+    - Structure routes migrée vers route groups
+    - Vérifier imports/paths/middleware/guards
+  - **Documentation** :
+    - Changelog : `memory-bank/changes/2025-11-11-layouts-admin-sidebar.md`
+    - Blueprint v3 : `memory-bank/architecture/Project_Architecture_Blueprint_v3.md`
+  - **Next steps** : Tests navigation, mobile menu, validation post-migration
 
 ### 26 Octobre 2025
 
@@ -550,17 +619,21 @@ Cette vérification a été réalisée via l'API Supabase MCP et confirme que le
 
 ## Dernière Mise à Jour
 
-**Date**: 26 octobre 2025
+**Date**: 11 novembre 2025
 **Changements majeurs**:
 
+- **Migration architecture layouts + admin UI** (11 novembre)
+  - Route groups `(admin)` et `(marketing)` implémentés
+  - AdminShell remplacé par AppSidebar (composant shadcn officiel)
+  - Collapsible icon mode, breadcrumb, keyboard shortcuts, navigation groupée
+  - BREAKING CHANGES : structure routes, imports/paths/middleware à vérifier
+  - Documentation : changelog + blueprint v3 créés
+  - Next steps : validation post-migration (tests navigation, mobile menu, guards)
 - **Campagne de sécurité database TERMINÉE** : 73 objets sécurisés sur 17 rounds (25-26 octobre)
-- **Round 12 critique** : storage.objects ALL PRIVILEGES (vulnérabilité majeure) - CORRIGÉ
-- **Round 17 final** : check_communique_has_pdf() - CI ✅ PASSED
-- **Stratégie whitelist** : audit_grants_filtered.sql pour focus objets business uniquement
-- **Documentation exhaustive** : SECURITY_AUDIT_SUMMARY.md, ROUND_7B_ANALYSIS.md, migrations.md
-- **GitHub** : PR #25 merged, issues #26/#27/#28 créées (conformité conventions DB)
-- **Outils audit** : check-security-audit.sh, quick_check_all_grants.sql
-- **Production-ready** : Zero exposed objects, RLS-only model, defense in depth
-
-**Date**: 21 octobre 2025
-**Changements majeurs**: Fix page Presse vide - workaround RLS/JWT Signing Keys via vue `articles_presse_public`, séparation correcte chapo/excerpt comme champs indépendants, workflow hotfix déclaratif appliqué, 7 fichiers de documentation mis à jour
+  - Round 12 critique : storage.objects ALL PRIVILEGES (vulnérabilité majeure) - CORRIGÉ
+  - Round 17 final : check_communique_has_pdf() - CI ✅ PASSED
+  - Stratégie whitelist : audit_grants_filtered.sql pour focus objets business uniquement
+  - Documentation exhaustive : SECURITY_AUDIT_SUMMARY.md, ROUND_7B_ANALYSIS.md, migrations.md
+  - GitHub : PR #25 merged, issues #26/#27/#28 créées (conformité conventions DB)
+  - Outils audit : check-security-audit.sh, quick_check_all_grants.sql
+  - Production-ready : Zero exposed objects, RLS-only model, defense in depth
