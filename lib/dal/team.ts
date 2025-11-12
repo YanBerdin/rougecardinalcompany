@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient } from "@/supabase/server";
 import { requireAdmin } from "@/lib/auth/is-admin";
+import { revalidatePath } from "next/cache";
 import type { Database } from "@/lib/database.types";
 import { TeamMemberDbSchema } from "@/lib/schemas/team";
 import { z } from "zod";
@@ -23,6 +24,13 @@ type TeamRow = Database["public"]["Tables"]["membres_equipe"]["Row"];
 type DALSuccess<T> = { success: true; data: T };
 type DALError = { success: false; error: string };
 export type DALResult<T> = DALSuccess<T> | DALError;
+
+type DalResponse<T = null> = {
+  success: boolean;
+  data?: T;
+  error?: string;
+  status?: number;
+};
 
 const UpsertTeamMemberSchema = TeamMemberDbSchema.partial();
 
@@ -228,4 +236,99 @@ export async function reorderTeamMembers(
     console.error("reorderTeamMembers exception:", err);
     return { success: false, error: getErrorMessage(err) };
   }
+}
+
+/**
+ * Permanently deletes a team member from the database (RGPD compliance).
+ *
+ * CRITICAL: This operation is irreversible. The team member must be inactive
+ * before deletion to prevent accidental data loss.
+ *
+ * @param id - Team member ID to delete
+ * @returns Response indicating success or failure
+ */
+export async function hardDeleteTeamMember(id: number): Promise<DalResponse> {
+  try {
+    await requireAdmin();
+
+    const validationResult = await validateTeamMemberForDeletion(id);
+    if (!validationResult.success) {
+      return validationResult;
+    }
+
+    const deletionResult = await performTeamMemberDeletion(id);
+    if (!deletionResult.success) {
+      return deletionResult;
+    }
+
+    revalidatePath("/admin/team");
+    return { success: true };
+  } catch (error: unknown) {
+    return handleHardDeleteError(error);
+  }
+}
+
+// ============================================================================
+// Hard Delete Helpers
+// ============================================================================
+
+async function validateTeamMemberForDeletion(
+  id: number
+): Promise<DalResponse> {
+  const member = await fetchTeamMemberById(id);
+
+  if (!member) {
+    return {
+      success: false,
+      error: "Team member not found",
+      status: 404,
+    };
+  }
+
+  if (member.active) {
+    return {
+      success: false,
+      error: "Cannot delete active team member. Deactivate first.",
+      status: 400,
+    };
+  }
+
+  return { success: true };
+}
+
+async function performTeamMemberDeletion(id: number): Promise<DalResponse> {
+  const supabase = await createClient();
+  const { error: deleteError } = await supabase
+    .from("membres_equipe")
+    .delete()
+    .eq("id", id);
+
+  if (deleteError) {
+    console.error("[DAL] Hard delete failed:", deleteError);
+    return {
+      success: false,
+      error: "Failed to delete team member",
+      status: 500,
+    };
+  }
+
+  return { success: true };
+}
+
+function handleHardDeleteError(error: unknown): DalResponse {
+  console.error("[DAL] hardDeleteTeamMember error:", error);
+
+  if (error instanceof Error && error.message.includes("Forbidden")) {
+    return {
+      success: false,
+      error: "Insufficient permissions",
+      status: 403,
+    };
+  }
+
+  return {
+    success: false,
+    error: "Internal error during deletion",
+    status: 500,
+  };
 }

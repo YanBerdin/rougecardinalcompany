@@ -1,52 +1,58 @@
 import { NextResponse } from "next/server";
-import { fetchTeamMemberById } from "@/lib/dal/team";
-import { createClient } from "@/supabase/server";
+import { hardDeleteTeamMember } from "@/lib/dal/team";
 import { requireAdmin } from "@/lib/auth/is-admin";
 
-//TODO: Refactor the route into small helpers to improve adherence to clean-code principles
-export async function POST(
-  request: Request,
-  { params }: { params: { id: string } | Promise<{ id: string }> }
-) {
-  try {
-    // Require admin privileges for destructive action
-    try {
-      await requireAdmin();
-    } catch {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-    const resolved = (await params) as { id: string };
-    const id = Number(resolved.id);
-    if (!Number.isFinite(id) || id <= 0) {
-      return NextResponse.json({ error: "Invalid id" }, { status: 400 });
-    }
+type RouteContext = {
+  params: Promise<{ id: string }> | { id: string };
+};
 
-    // Ensure member exists and is inactive
-    const member = await fetchTeamMemberById(id);
-    if (!member)
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
-    if (member.active) {
+export async function POST(_request: Request, context: RouteContext) {
+  try {
+    await requireAdmin();
+    
+    const { id: idString } = await context.params;
+    const id = parseTeamMemberId(idString);
+    
+    if (!id) {
       return NextResponse.json(
-        { error: "Member must be inactive to hard delete" },
+        { error: "Invalid team member ID" },
         { status: 400 }
       );
     }
 
-    // Critical operation : Permanent deletion (RGPD)
-    const supabase = await createClient();
-    const { error } = await supabase
-      .from("membres_equipe")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      console.error("Hard delete database error:", error);
-      return NextResponse.json({ error: "Failed to delete" }, { status: 500 });
+    const result = await hardDeleteTeamMember(id);
+    
+    if (!result.success) {
+      return NextResponse.json(
+        { error: result.error ?? "Failed to delete team member" },
+        { status: result.status ?? 500 }
+      );
     }
 
     return NextResponse.json({ success: true });
-  } catch (err) {
-    console.error("/api/admin/team/[id]/hard-delete POST error:", err);
-    return NextResponse.json({ error: "Internal error" }, { status: 500 });
+  } catch (error: unknown) {
+    console.error("[API] Hard delete error:", error);
+    
+    if (isAuthError(error)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
+}
+
+// ============================================================================
+// Helpers
+// ============================================================================
+
+function parseTeamMemberId(id: string): number | null {
+  const parsed = Number(id);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function isAuthError(error: unknown): boolean {
+  return error instanceof Error && error.message.includes("Forbidden");
 }
