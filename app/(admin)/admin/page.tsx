@@ -1,6 +1,8 @@
 // Auth / env UI is rendered in the admin layout to keep it unique across admin pages
 
-import { createClient } from "@/supabase/server";
+import { Suspense } from "react";
+import { DashboardStatsContainer } from "@/components/admin/dashboard/DashboardStatsContainer";
+import { StatsCardsSkeleton } from "@/components/skeletons/StatsCardsSkeleton";
 import {
   Card,
   CardContent,
@@ -8,26 +10,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Users, FileText, Calendar, Image as ImageIcon } from "lucide-react";
+import { Users, FileText, Calendar } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export default async function AdminDashboard() {
-  const supabase = await createClient();
-
-  // Récupérer quelques statistiques de base
-  const [
-    { count: teamCount },
-    { count: showsCount },
-    { count: eventsCount },
-    { count: mediaCount },
-  ] = await Promise.all([
-    supabase.from("membres_equipe").select("*", { count: "exact", head: true }),
-    supabase.from("spectacles").select("*", { count: "exact", head: true }),
-    supabase.from("evenements").select("*", { count: "exact", head: true }),
-    supabase.from("medias").select("*", { count: "exact", head: true }),
-  ]);
-
+export default function AdminDashboard() {
   return (
     <div className="space-y-8">
       <div>
@@ -38,32 +25,9 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Stats cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 whitespace-nowrap">
-        <StatsCard
-          title="Membres de l'équipe"
-          value={teamCount || 0}
-          icon={<Users className="h-4 w-4" aria-hidden />}
-          href="/admin/team"
-        />
-        <StatsCard
-          title="Spectacles"
-          value={showsCount || 0}
-          icon={<FileText className="h-4 w-4" aria-hidden />}
-          href="/admin/shows"
-        />
-        <StatsCard
-          title="Événements"
-          value={eventsCount || 0}
-          icon={<Calendar className="h-4 w-4" aria-hidden />}
-          href="/admin/events"
-        />
-        <StatsCard
-          title="Médias"
-          value={mediaCount || 0}
-          icon={<ImageIcon className="h-4 w-4" aria-hidden />}
-          href="/admin/media"
-        />
-      </div>
+      <Suspense fallback={<StatsCardsSkeleton />}>
+        <DashboardStatsContainer />
+      </Suspense>
 
       {/* Quick actions */}
       <Card>
@@ -101,31 +65,5 @@ export default async function AdminDashboard() {
         </CardContent>
       </Card>
     </div>
-  );
-}
-
-function StatsCard({
-  title,
-  value,
-  icon,
-  href,
-}: {
-  title: string;
-  value: number;
-  icon: React.ReactNode;
-  href: string;
-}) {
-  return (
-    <Link href={href}>
-      <Card className="hover:bg-accent transition-colors cursor-pointer">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">{title}</CardTitle>
-          {icon}
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{value}</div>
-        </CardContent>
-      </Card>
-    </Link>
   );
 }

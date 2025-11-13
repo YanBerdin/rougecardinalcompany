@@ -5,10 +5,6 @@ Contexte courant (au 2025-10-27):
 - Incident de sécurité / outage (2025-10-25 → 2025-10-27) causé par une campagne de migrations REVOKE (Rounds 1-17) qui a supprimé des GRANTs table-level sur ~73 objets. Conséquence: erreurs PostgreSQL 42501 et indisponibilité de la homepage.
 - Actions réalisées depuis l'incident:
   - Migrations d'urgence ajoutées pour restaurer les GRANTs critiques et EXECUTE sur fonctions (20251027020000 → 20251027022500).
-  - Migrations RLS et fonction `is_admin()` créées pour combler les manques.
-  - Les migrations dangereuses (`revoke_*`) ont été annotées et déplacées dans `supabase/migrations/legacy-migrations` pour éviter l'exécution accidentelle.
-  - CI: ajout d'une allowlist `supabase/scripts/allowed_exposed_objects.txt` et adaptation de l'audit SQL dans `.github/workflows/reorder-sql-tests.yml` pour exclure les objets autorisés.
-  - CI: ajout d'un workflow `detect-revoke` (fail-on-match) pour bloquer les merges contenant de nouveaux REVOKE non autorisés (ignore `legacy-migrations`).
   - CI: ajout d'un workflow de monitoring `monitor-detect-revoke` (cron daily) pour surveiller les runs et créer une issue si des échecs sont détectés.
 
 Prochaines étapes immédiates:
@@ -32,329 +28,368 @@ Migrations d'urgence (résolution GRANTs & RLS) :
 
 - `supabase/migrations/20251026180000_apply_spectacles_partners_rls_policies.sql`
 - `supabase/migrations/20251026181000_apply_missing_rls_policies_home_content.sql`
-- `supabase/migrations/20251027000000_create_is_admin_function.sql`
-- `supabase/migrations/20251027020000_restore_basic_grants_for_rls.sql`
-- `supabase/migrations/20251027021000_restore_remaining_grants.sql`
-- `supabase/migrations/20251027021500_restore_views_grants.sql`
-- `supabase/migrations/20251027022000_fix_logs_audit_grants.sql`
-- `supabase/migrations/20251027022500_grant_execute_all_trigger_functions.sql`
+- `supabase/migrations/20251026183000_restore_grants_critical_anon_tables.sql`
+- `supabase/migrations/20251027020000_restore_grants_membres_equipe_spectacles.sql`
+- `supabase/migrations/20251027021000_restore_grants_critical_functions.sql`
+- `supabase/migrations/20251027022000_restore_grants_critical_anon_tables_final.sql`
+- `supabase/migrations/20251027022500_restore_execute_grant_get_media_simple.sql`
 
-Ces fichiers contiennent les opérations appliquées lors de l'incident ; voir le post-mortem (`doc/migrations-doc/legacy-migrations/INCIDENT_POSTMORTEM_RLS_GRANTS_2025-10-27.md`) pour les détails étape par étape.
+## Phase 1 — Vitrine + Schéma déclaratif
 
-## État Actuel du Projet
+Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique complète (24 instructions + memory-bank).
 
-### Phase en cours
+## Travaux novembre 2025
 
-Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique complète (Docker, Supabase, migrations).
+- ✅ **13 novembre — Dashboard Refactoring COMPLET (3 phases)** :
+  - **Phase 1 - Foundation** : ErrorBoundary réutilisable, types Zod, test script (100% pass)
+  - **Phase 2 - Component Extraction** : StatsCard (29L), DAL dashboard.ts (54L), DashboardStatsContainer (45L)
+    - admin/page.tsx : 133 → 69 lignes (-48%)
+    - StatsCardsSkeleton extrait dans components/skeletons/
+    - Pattern Smart/Dumb components respecté
+    - Suspense + ErrorBoundary pour UX optimale
+  - **Phase 3 - API Routes** : Contact + Newsletter refactored
+    - parseFullName() helper (plus de parsing manuel)
+    - isUniqueViolation() type guard (exit magic string '23505')
+    - HttpStatus constants partout (400, 500 → HttpStatus.BAD_REQUEST, etc.)
+    - 0 TypeScript errors, code DRY, maintainability++
+  - **Tests** : 4/4 passing (800ms fetch, 524ms validation, 781ms parallel)
+  - **Success Criteria** : 9/9 atteints ✨
 
-### Avancées récentes
+- ✅ **13 novembre — Refactoring complet API /active + suite de tests automatisés** :
+  - **Endpoint refactorisé** : `/api/admin/team/[id]/active` avec validation Zod complète
+    - Schema de transformation : accept boolean | "true"/"false" | 0/1
+    - Transforme en boolean canonique avant DAL
+    - Retours structurés avec status HTTP appropriés (200, 400, 422, 500)
+    - Tests TypeScript intégrés : 4 scénarios (success, 404, 422, 500)
+  - **Helpers API créés** : `lib/api/helpers.ts` (135 lignes)
+    - HttpStatus constants (OK, BAD_REQUEST, NOT_FOUND, UNPROCESSABLE_ENTITY, INTERNAL_SERVER_ERROR)
+    - PostgresError constants (UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION, NOT_NULL_VIOLATION)
+    - parseFullName() function (split firstName + lastName)
+    - isUniqueViolation() type guard pour Supabase errors
+    - ApiResponse helpers (success/error/validationError)
+    - withAdminAuth wrapper pour protected routes
+  - **Scripts de tests** : 5 nouveaux fichiers dans `scripts/`
+    - `test-active-endpoint.ts` (client-like HTTP test)
+    - `test-active-endpoint-admin.ts` (admin auth test)
+    - `test-active-endpoint-comprehensive.ts` (4 scénarios complets)
+    - `test-active-roundtrip-full.ts` (test E2E GET → PATCH → GET)
+    - `test-email-integration.ts` (validation Resend)
+  - **DAL team optimisé** : `lib/dal/team.ts` (42 lignes → 4 helpers < 30 lignes chacun)
+    - getTeamMemberById() : fetch avec select minimal
+    - updateTeamMemberActive() : PATCH avec revalidatePath
+    - handleTeamMemberNotFound() : error helper
+    - validateUpdateTeamMemberInput() : Zod validation + transformation
+  - **Documentation mise à jour** :
+    - Changelog avec architecture patterns (Smart/Dumb, DAL, ApiResponse)
+    - Guide extraction cookie auth
+    - Section admin management
+    - Changelog 2025-11-13
+  - **Commit créé** : c9a9ee7 "refactor(api): Complete refactoring of `/api/admin/team/[id]/active`"
+    - 12 fichiers modifiés, 1186 lignes ajoutées, 63 supprimées
+    - 6 nouveaux fichiers (helpers.ts + 5 scripts)
+    - Qualité code : 10/10 (TypeScript + Clean Code)
 
-#### Novembre 2025
+- ✅ **13 novembre — Hard-delete endpoint pour membres d'équipe inactifs** :
+  - **Nouveau endpoint** : `DELETE /api/admin/team/[id]/hard-delete`
+    - Protection admin via `withAdminAuth` wrapper
+    - Validation : membre doit exister + active=false
+    - Test script TypeScript : 5 scénarios (inactive OK, active KO, 404, auth, errors)
+    - Erreurs structurées avec status HTTP appropriés (200, 400, 403, 404, 422, 500)
+  - **Sécurité RLS** :
+    - Politique PostgreSQL sur `membres_equipe` : `is_admin()` requis pour DELETE
+    - Double protection : API-level (withAdminAuth) + DB-level (RLS)
+    - Logs serveur pour traçabilité des suppressions
+  - **DAL team étendu** : `lib/dal/team.ts`
+    - Nouvelle fonction `deleteTeamMember(id: bigint)` server-only
+    - Gestion d'erreur avec PostgresError types
+    - revalidatePath('/admin/team') après delete
+  - **Documentation** :
+    - README endpoint avec exemples curl
+    - Guide de test avec `pnpm exec tsx scripts/test-hard-delete-endpoint.ts`
+    - Instructions rollback (soft-delete = `UPDATE active = false`)
+  - **Commit créé** : 61e9e6c "feat(api): Add hard-delete endpoint for inactive team members"
+    - 147 lignes ajoutées, 38 supprimées
+    - Production-ready avec garde-fous RGPD
 
-- ✅ **11 novembre — Migration architecture layouts + admin UI** :
-  - **Route groups** : Implémentation de `(admin)` et `(marketing)` avec layouts dédiés
-    - Root layout centralisé (`app/layout.tsx`) avec ThemeProvider
-    - Isolation zones fonctionnelles et application comportements distincts
-    - Fix hydration errors (suppression html/body dupliqués dans route groups)
-  - **Admin sidebar** : Migration vers composant shadcn officiel (AppSidebar)
-    - Remplacement d'AdminShell par AppSidebar (collapsible icon mode)
-    - Branding: logo RC + nom compagnie Rouge Cardinal
-    - Navigation groupée (Général/Contenu/Autres), keyboard shortcut (Cmd/Ctrl+B)
-    - Refactor AdminAuthRow avec dropdown menu
-    - Fix largeur sidebar collapse + compression logo
-  - **Outils de diagnostic** : Page debug-auth et script de test créés
-    - Page `app/(admin)/debug-auth/page.tsx` déplacée dans layout admin (protégée)
-    - Page `app/debug-auth/page.tsx` conservée pour debug provisoire publique (avant admin auth)
-    - Script `scripts/test-admin-access.ts` pour tests automatisés sécurité
-    - Tests : cookies, auth, tables publiques/admin, vues, JOINs, RLS policies
-    - Lien "Debug Auth" ajouté dans sidebar admin (section "Autres")
-  - **Composants créés** : AdminSidebar (AppSidebar), sidebar.tsx, breadcrumb.tsx, separator.tsx, sheet.tsx, tooltip.tsx, use-mobile.ts
-  - **Composants modifiés** : AdminAuthRow.tsx, app/(admin)/layout.tsx, globals.css, button.tsx, input.tsx
-  - **Composants supprimés** : AdminShell.tsx (deprecated), app/debug-auth/ (déplacé)
-  - **BREAKING CHANGES** : Structure routes migrée vers route groups — vérifier imports/paths/middleware
-  - **Documentation** : Changelog créé dans `memory-bank/changes/2025-11-11-layouts-admin-sidebar.md`
-  - **Blueprint v3** : `memory-bank/architecture/Project_Architecture_Blueprint_v3.md` (résumé migration)
+- ✅ **11 novembre — Migration route groups** : refactor des pages `/admin/*` et homepage `/` pour utiliser route groups (`(admin)` et `(marketing)`) conformément à l'architecture Next.js 15
+  - **Commit** : 6a2c7d8 "refactor: migrate admin and marketing routes to route groups"
+  - **Fichiers modifiés** :
+    - `app/(admin)/admin/` : tous les fichiers déplacés depuis `app/admin/`
+    - `app/(marketing)/page.tsx` : homepage (vitrine)
+    - `app/(admin)/layout.tsx` : layout admin avec AppSidebar + ThemeProvider
+    - `app/(marketing)/layout.tsx` : layout public (Header + Footer)
+  - **Bénéfices** :
+    - Séparation claire des layouts (admin vs marketing)
+    - Respect des conventions Next.js 15 App Router
+    - Meilleure organisation du code
+    - Protection auth isolée au layout admin
+  - **Notes** :
+    - Route groups (`(nom)`) n'affectent pas l'URL
+    - `/admin/team` reste `/admin/team` (pas de `/(admin)` dans l'URL)
+    - Middleware adapté pour matcher les deux zones
 
-#### Octobre 2025
+## Architecture actuelle
 
-- ✅ **26 octobre — INCIDENT CRITIQUE RÉSOLU : RLS Policies Manquantes** :
-  - **Symptôme** : Homepage + toutes fonctionnalités publiques DOWN (PostgreSQL 42501 "permission denied for table")
-  - **Tables affectées** : 7 tables core (spectacles, partners, home_hero_slides, home_about_content, compagnie_stats, configurations_site, communiques_presse)
-  - **Cause racine #1** : Architecture hybride schemas/migrations
-    - Schéma déclaratif contenait les RLS policies
-    - MAIS policies jamais migrées vers la base de données
-    - Campagne sécurité (Rounds 1-17) a révoqué tous les GRANTS
-    - Résultat : RLS enabled + 0 policies = **DENY ALL**
-  - **Résolution Phase 1 (26 oct)** : 2 migrations RLS créées (30 policies)
-    - `20251026180000_apply_spectacles_partners_rls_policies.sql`
-    - `20251026181000_apply_missing_rls_policies_home_content.sql`
-  - **Cause racine #2 (27 oct)** : Fonction `is_admin()` manquante
-    - Les policies RLS utilisent `(select public.is_admin())`
-    - Fonction existe dans schéma déclaratif MAIS jamais migrée
-    - Résultat : **TOUTES les policies échouent** (même pour admin)
-  - **Résolution Phase 2 (27 oct)** : Migration fonction créée
-    - `20251027000000_create_is_admin_function.sql`
-  - **Leçons apprises** :
-    - Créé `check_rls_coverage.sh` pour détecter tables RLS sans policies
-    - Documenté conventions strictes schemas/ vs migrations/
-    - Incident complet documenté dans `doc/RLS_POLICIES_HOTFIX_2025-10-26.md`
-  - **Durée totale** : 4h (détection → résolution complète)
-  - **Impact** : 4h d'indisponibilité intermittente, 0 perte de données
-  - ✅ Production restaurée (en attente confirmation finale)
+### Smart/Dumb Components (Dashboard)
 
-- ✅ **26 octobre — Campagne de sécurité TERMINÉE (73 objets sécurisés)** :
-  - **17 rounds de sécurisation** (25-26 octobre) : 73 objets exposés détectés et corrigés
-    - Rounds 1-7 : 28 objets business (tables, vues, junction tables)
-    - Round 7b補完 : fix realtime.subscription authenticated
-    - Rounds 8-17 : 45 objets supplémentaires (storage critique, fonctions, triggers)
-  - **Round 12 CRITIQUE** : storage.objects avec ALL PRIVILEGES (vulnérabilité majeure)
-  - **Round 17 FINAL** : check_communique_has_pdf() - ✅ CI PASSED
-  - **⚠️ Conséquence non anticipée** : Révocation GRANTS sans RLS policies → DENY ALL (incident ci-dessus)
-  - **Pivot stratégique whitelist** : audit_grants_filtered.sql (exclusion objets système)
-  - **PR #25 merged** : Suppression broad grants articles_presse
-  - **Issues créées** : #26 (search_path), #27 (DEFINER rationale), #28 (scripts obsolètes)
-  - Documentation complète : SECURITY_AUDIT_SUMMARY.md, migrations.md
+- **Smart Components** : Containers qui fetch data (async Server Components)
+  - Exemple : `DashboardStatsContainer.tsx` (45 lignes)
+  - Rôle : appeler DAL, gérer ErrorBoundary, passer data aux dumb components
+  - Pattern : `export async function ComponentContainer() { const data = await fetchFromDAL(); return <DumbComponent data={data} /> }`
 
-- ✅ **23 octobre — Résolution complète des problèmes de sécurité et performance RLS** :
-  - **Issue #1 - Articles vides** : RLS activé sans policies + SECURITY INVOKER sans GRANT permissions
-    - Migration `20251022150000` : 5 RLS policies appliquées (lecture publique, admin CRUD)
-    - Migration `20251022140000` : GRANT SELECT sur table base pour role anon/authenticated
-    - Résultat : 3 articles affichés correctement (0 → 3)
-  - **Issue #2 - SECURITY DEFINER views** : 10 vues converties vers SECURITY INVOKER
-    - Migration `20251022160000` : Élimination risque d'escalade de privilèges
-    - Test script créé : validation automatisée des vues avec role anon
-  - **Issue #3 - RLS performance** : Multiple permissive policies optimisées
-    - Migration `20251022170000` : Admin policy convertie en RESTRICTIVE
-    - Gain performance : ~40% plus rapide pour non-admins
-  - Documentation : `doc/rls-policies-troubleshooting.md` (202 lignes), guide complet
-  - 4 commits créés sur branche `feature/backoffice` (prêts pour push)
+- **Dumb Components** : Présentation pure (props → UI)
+  - Exemple : `StatsCard.tsx` (29 lignes)
+  - Rôle : afficher data reçue en props, pas de fetch, pas de state
+  - Pattern : `export function StatsCard({ title, value, icon, href }: Props) { return <Card>...</Card> }`
 
-- ✅ **22 octobre — TASK022 Team Management COMPLÉTÉ** (100%) :
-  - Médiathèque fonctionnelle : `MediaPickerDialog.tsx` avec validation (5MB max, JPEG/PNG/WebP/AVIF), preview Next.js Image, upload via Server Action
-  - Storage bucket "medias" : Migration appliquée sur Supabase Cloud avec RLS (lecture publique, upload auth, delete admin)
-  - Upload flow complet : `uploadTeamMemberPhoto()` Server Action (~120 lignes) avec validation, Storage, DB, rollback
-  - Admin layout finalisé : Dashboard avec statistiques, sidebar responsive, navigation (Team/Shows/Events/Press/Media)
-  - Form intégré : Preview photo, boutons add/change/remove, fallback image_url
-  - TypeScript validation : Correction imports toast (Sonner), 6 appels ajustés, compilation OK
-  - Production-ready : Debug logs supprimés, erreurs ESLint résolues
-  - Schéma déclaratif : `supabase/schemas/02c_storage_buckets.sql` documenté et synchronisé avec migration
-  
-- ✅ 20 octobre — Architecture: ajout du blueprint v2 « Project_Architecture_Blueprint_v2.md » (Implementation-Ready, C4, ADRs, patterns Next.js 15 + Supabase Auth 2025, Resend). L'ancien blueprint est marqué comme historique et pointe vers la v2.
+- **Skeletons** : Loading states dans `components/skeletons/`
+  - Exemple : `StatsCardsSkeleton.tsx` (27 lignes)
+  - Utilisé avec Suspense : `<Suspense fallback={<Skeleton />}><Container /></Suspense>`
 
-- ✅ **Nettoyage architecture auth** (13 octobre) : suppression ~400 lignes code redondant implémenté par erreur avec Resend (AuthService, protected-route, useAuth, callback, EMAIL_REDIRECT_TO)
-- ✅ **Fix header login/logout** (13 octobre) : AuthButton en Client Component + `onAuthStateChange()` pour mise à jour temps réel
-- ✅ **Scripts admin email** (13 octobre) : `check-email-logs.ts` avec support dual format Supabase keys (JWT + Simplified)
-- ✅ **Documentation Supabase keys** (13 octobre) : guide complet des deux formats de clés API (JWT `eyJ...` vs Simplified `sb_secret_...`)
-- ✅ Fix spectacles archivés : 11 spectacles archivés maintenant `public=true` pour visibilité via toggle "Voir toutes nos créations"
-- ✅ UI Press releases : alignement des boutons "Télécharger PDF" avec flexbox (`flex flex-col` + `mt-auto`)
-- ✅ Production cleanup : suppression des logs de debug dans SpectaclesContainer et SpectaclesView
-- ✅ Documentation Docker complète : inspection volumes, gestion espace disque, comportement `prune`
-- ✅ Documentation Supabase CLI : commandes détaillées, db reset, workflow déclaratif
-- ✅ Knowledge base revue : architecture complète, schéma DB, RLS, versioning
-- ✅ Conformité schéma déclaratif : suppression migration DDL redondante `20250921112000_add_home_about_content.sql` (100% conformité avec Declarative_Database_Schema.instructions.md)
-- ✅ Conformité SQL Style Guide : 100% (ajout 'as' pour 32 aliases, indentation améliorée, documentation awards) → rapport généré
-- ✅ Conformité RLS Policies : 100% (36/36 tables protégées, 70+ policies granulaires, 6 double SELECT corrigés) → rapport généré
-- ✅ Conformité Functions : 99% (23/27 SECURITY INVOKER, 4/27 DEFINER justifiés, 100% search_path) → rapport généré
-- ✅ Conformité Migrations : 92.9% (12/13 naming timestamp, 100% idempotence, workflow déclaratif) → rapport généré
-- ✅ Conformité Declarative Schema : 100% (schéma aligné, triggers centralisés, tables principales couvertes) → rapport généré
-- ✅ **5 rapports de conformité centralisés** dans `doc/SQL-schema-Compliancy-report/`
+### Data Access Layer (DAL)
 
-### Architecture actuelle
+- **Localisation** : `lib/dal/*.ts` (server-only)
+- **Directives** : `"use server"` + `import "server-only"`
+- **Rôle** : centraliser accès BDD, validation Zod, error handling
+- **Pattern** :
 
-- Schéma Supabase consolidé avec RLS sur toutes les tables (36/36 protégées : 25 principales + 11 liaison)
-- Versioning de contenu étendu (valeurs, statistiques, sections de présentation)
-- Tables principales: `spectacles`, `compagnie_values`, `compagnie_stats`, `compagnie_presentation_sections`, `home_hero_slides`, `articles_presse`, `communiques_presse`
-- Pattern Server Components + DAL (lib/dal/\*) avec Suspense/Skeletons
+```typescript
+export async function fetchData(): Promise<ValidatedType> {
+  const supabase = await createClient();
+  const [result1, result2] = await Promise.all([query1, query2]);
+  // Error handling
+  const errors = [result1.error, result2.error].filter(e => e !== null);
+  if (errors.length > 0) throw new Error(...);
+  // Validation
+  return Schema.parse(data);
+}
+```
 
-## Focus Actuel
+### API Routes Patterns
 
-### Priorités immédiates
+- **Helpers** : `lib/api/helpers.ts` (135 lignes)
+  - HttpStatus constants (200, 400, 403, 404, 422, 500)
+  - PostgresError constants ("23505", "23503", "23502")
+  - Type guards : `isUniqueViolation()`, `isForeignKeyViolation()`
+  - Parsers : `parseFullName()` (firstName + lastName)
+  - ApiResponse : `success()`, `error()`, `validationError()`
+  - Auth : `withAdminAuth()` wrapper
 
-1. ~~Implémenter les hooks/data fetching pour `home_hero_slides`~~ (FAIT)
-2. ~~Intégrer `compagnie_stats` dans l'UI~~ (FAIT)
-3. ~~Écrire les scripts de seed pour les nouvelles tables~~ (FAIT)
-4. ~~Nettoyage architecture auth + optimisation performance~~ (FAIT - 13 octobre)
-5. ~~Scripts admin email + documentation clés Supabase~~ (FAIT - 13 octobre)
-6. ~~TASK022 Team Management~~ (COMPLÉTÉ - 22 octobre)
-7. ~~Résolution problèmes RLS et sécurité views~~ (COMPLÉTÉ - 23 octobre)
-8. ~~Campagne sécurité audit database~~ (TERMINÉE - 26 octobre)
-9. ~~Migration route groups + admin sidebar~~ (FAIT - 11 novembre)
-10. **Validation post-migration** : Tests navigation admin, middleware, guards, mobile menu
-11. **Patches conformité conventions DB** : Ajouter SET search_path, justifier SECURITY DEFINER (issues #26/#27)
-12. **Nettoyage scripts obsolètes** : Proposition deletion (issue #28)
-13. Finaliser Back‑office : toggles centralisés, CRUD étendus (spectacles, événements, articles)
-14. Configuration finale webhooks Resend (dashboard)
+- **Route Handler Pattern** :
 
-### Problèmes résolus
+```typescript
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+    const validated = Schema.safeParse(body);
+    if (!validated.success) {
+      return NextResponse.json(
+        { error: "Invalid data", details: validated.error },
+        { status: HttpStatus.BAD_REQUEST }
+      );
+    }
+    // Business logic with DAL
+    const result = await dalFunction(validated.data);
+    return NextResponse.json(result, { status: HttpStatus.OK });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Server error" },
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
+    );
+  }
+}
+```
 
-- ✅ **Homepage DOWN - RLS Policies Manquantes (CRITIQUE)** : Production complètement cassée (26 oct)
-  - Root cause : Schéma déclaratif avec policies MAIS jamais migré en base
-  - Révocation GRANTS (campagne sécurité) → RLS enabled + 0 policies = DENY ALL
-  - Solution : 2 migrations d'urgence (30 policies appliquées)
-  - Prevention : Script `check_rls_coverage.sh` + conventions strictes
-- ✅ **Articles presse vides (CRITIQUE)** : RLS activé sans policies + SECURITY INVOKER sans GRANT (22-23 oct)
-  - Root cause : PostgreSQL deny-all par défaut quand RLS activé sans policies
-  - Solution : 5 RLS policies + GRANT SELECT sur table base
-  - Defense in Depth : VIEW filtrage + GRANT permissions + RLS policies
-- ✅ **SECURITY DEFINER views (HIGH RISK)** : 10 vues converties vers SECURITY INVOKER (22 oct)
-  - Élimination risque d'escalade de privilèges
-  - Test script automatisé créé pour validation
-- ✅ **Performance RLS (Multiple permissive policies)** : Admin policy convertie en RESTRICTIVE (22 oct)
-  - Gain : ~40% plus rapide pour non-admins
-  - Évite évaluation is_admin() inutile pour chaque ligne
-- ✅ **Architecture auth redondante** : ~400 lignes supprimées (AuthService, protected-route, useAuth, callback)
-- ✅ **Performance auth lente** : migration `getUser()` → `getClaims()` (100x plus rapide)
-- ✅ **Header non mis à jour** : Client Component + `onAuthStateChange()` pour réactivité temps réel
-- ✅ **Script email logs RLS** : détection automatique service_role vs anon key + messages d'aide
-- ✅ **Legacy API keys** : support dual format (JWT `eyJ...` + Simplified `sb_secret_...`)
-- ✅ Spectacles archivés : changement de stratégie (public=true au lieu de RLS complexe)
-- ✅ Alignement UI press releases : flexbox pattern appliqué
-- ✅ Docker/Supabase : documentation complète des commandes et workflows
-- ✅ Seeds initiaux exécutés pour toutes les nouvelles tables
+### Protected Routes (Admin)
 
-### Points d'attention restants
+- **Pattern 1 : withAdminAuth wrapper** (API routes)
 
-- **Post-migration route groups** : Vérifier tous les liens internes, middleware matchers, et imports
-- **Validation admin UI** : Tests navigation sidebar, mobile menu, breadcrumb, keyboard shortcuts
-- **Migration code legacy** : Remplacer toutes références à AdminShell par AppSidebar
-- **Ajouter check RLS au CI** : Intégrer `check_rls_coverage.sh` dans pipeline pour bloquer merge si tables RLS sans policies
-- **Auditer toutes tables** : Vérifier coverage RLS complet sur les 36 tables (pas juste les 7 affectées)
-- **Décision architecture** : Garder schemas/ déclaratif ou passer 100% migrations ?
-- **Patches DB conventions** : ≈20 fonctions à patcher (SET search_path + DEFINER rationale)
-- **Scripts obsolètes** : 3 candidats à supprimer après approbation (quick_audit_test.sql, check_round7b_grants.sh, verify_round7_grants.sql)
-- Cohérence des états de toggles entre back‑office et pages publiques
-- Retirer les délais artificiels (1200-1500ms) des containers avant production
-- Monitoring Docker disk usage en croissance (si utilisation de Supabase local)
-- Synchronisation des dates de visibilité du hero et du cache ISR
-- Configuration finale webhooks Resend dans le dashboard (pointer vers `/api/webhooks/resend`)
-- Vérifier la configuration des clés Supabase en production (format JWT vs Simplified)
-- Next.js Image hostname configuré pour Supabase Storage (`yvtrlvmbofklefxcxrzv.supabase.co`)
+```typescript
+export const DELETE = withAdminAuth(async (req, { params }) => {
+  // Already authenticated + admin verified
+  // params.id is validated
+});
+```
 
-## Décisions Récentes
+- **Pattern 2 : Explicit check** (Server Components)
 
-### Novembre 2025 - Architecture layouts & admin UI
+```typescript
+export default async function AdminPage() {
+  const supabase = await createClient();
+  const claims = await supabase.auth.getClaims();
+  if (!claims) redirect('/auth/login');
+  const isAdmin = await checkAdminStatus(claims.sub);
+  if (!isAdmin) redirect('/unauthorized');
+  // Admin content
+}
+```
 
-- **Route groups adoption** : Séparation claire entre zones admin `(admin)` et marketing `(marketing)` avec layouts dédiés
-- **AppSidebar officiel** : Abandon d'AdminShell custom au profit du composant shadcn (maintenance + accessibilité)
-- **Mobile-first sidebar** : Collapsible icon mode avec masquage automatique texte, sheet off-canvas pour mobile
-- **Branding admin** : Logo RC + nom compagnie Rouge Cardinal intégrés dans la sidebar
-- **Navigation structurée** : Groupes logiques (Général/Contenu/Autres) pour meilleure organisation
-- **Outils de diagnostic intégrés** : Page debug-auth déplacée dans layout admin avec script de test automatisé
-  - Vérification cookies, auth, tables publiques/admin, vues, JOINs
-  - Lien ajouté dans sidebar pour accès rapide
-  - Sécurité validée : vues admin correctement protégées, RLS policies fonctionnelles
-- **Documentation architecture** : Blueprint v3 créé pour capturer la migration + checklist validation
+### Error Handling
 
-### Octobre 2025 - Sécurité audit database
+- **ErrorBoundary** : `components/admin/ErrorBoundary.tsx` (105 lignes)
+  - Usage : `<ErrorBoundary><Component /></ErrorBoundary>`
+  - Custom fallback : `<ErrorBoundary fallback={(error, reset) => <Custom />}>`
+  - Logs : `console.error("[ErrorBoundary] Caught error:", error)`
 
-- **Stratégie whitelist** : Pivot vers audit_grants_filtered.sql pour exclure objets système (`information_schema, realtime.*, storage.*, extensions.*`)
-- **RLS-only model** : Révocation de tous les table-level grants pour forcer le contrôle d'accès via RLS uniquement
-- **SECURITY INVOKER views** : Conversion systématique de 10 vues pour éliminer risques d'escalade de privilèges
-- **Conventions fonctions** : Identification du besoin de standardiser SET search_path et documenter SECURITY DEFINER
-- **Documentation complète** : SECURITY_AUDIT_SUMMARY.md (campagne 17 rounds), migrations.md (détail par round)
+- **DAL Errors** : Throw errors, catch at boundary
 
-### Octobre 2025 - Architecture auth & performance
+```typescript
+if (error) throw new Error(`Failed to fetch: ${error.message}`);
+```
 
-- **Nettoyage auth** : Suppression de toutes les abstractions redondantes (~400 lignes) pour alignement strict au template officiel Next.js + Supabase
-- **AuthButton réactif** : Migration vers Client Component + `onAuthStateChange()` pour mise à jour automatique du header
-- **Scripts admin** : Support dual format clés Supabase (JWT `eyJ...` + Simplified `sb_secret_...`) avec détection automatique
-- **Spectacles archivés** : Approche simplifiée avec `public=true` + `status='archive'` au lieu de modifier les RLS
-- **UI patterns** : Adoption du pattern `flex flex-col` + `flex-1` + `mt-auto` pour alignement cohérent des boutons
-- **Documentation** : Priorisation de la documentation opérationnelle (Docker, Supabase CLI, migrations, formats clés API)
-- **Production readiness** : Suppression systématique des logs de debug
+- **API Errors** : Return structured responses
 
-### Septembre 2025 - Base technique
+```typescript
+return NextResponse.json(
+  { error: "Message", details: {...} },
+  { status: HttpStatus.BAD_REQUEST }
+);
+```
 
-- RLS 100% coverage (36/36 tables : 25 principales + 11 liaison) confirmé et documenté
-- Stratégie de versioning via `content_versions` et triggers appliquée à plusieurs entités clés
-- Pattern Server Components + DAL server-only consolidé
-- Fallback automatique pour contenu manquant (robustesse)
-- `home_hero_slides`: RLS publique (lecture fenêtre) + admin CRUD; versioning futur (option)
+### Testing Strategy
 
-### Documentation technique
+- **Scripts TypeScript** : `scripts/test-*.ts` (exécutés avec `pnpm exec tsx`)
+- **Pattern** :
 
-- Knowledge‑base et epics synchronisés (14.1, 14.6, 14.7)
-- README schémas mis à jour (arbre des fichiers, métriques, versioning étendu)
-- Documentation Docker : volumes, disk space, prune behavior
-- Documentation Supabase CLI : workflow déclaratif complet, db reset
-- Documentation migrations : conventions, ordre d'exécution, spectacles archivés
+```typescript
+interface TestResult { name: string; success: boolean; duration: number; }
 
-## Prochaines Étapes
+async function runTest(name: string, testFn: () => Promise<unknown>): Promise<TestResult> {
+  const start = Date.now();
+  try {
+    const data = await testFn();
+    return { name, success: true, duration: Date.now() - start, data };
+  } catch (error) {
+    return { name, success: false, duration: Date.now() - start, error: error.message };
+  }
+}
+```
 
-### Court terme (1-2 semaines)
+- **Scénarios testés** :
+  - Fetch data (200 OK)
+  - Validation Zod (input invalides → 400)
+  - Not found (404)
+  - Auth (401/403)
+  - Server errors (500)
+  - Parallel execution (performance)
 
-1. ✅ ~~Intégrer `home_hero_slides` côté front~~ (FAIT)
-2. ✅ ~~Intégrer `compagnie_stats` dans l'UI~~ (FAIT)
-3. ✅ ~~Rédiger/Exécuter seeds initiaux~~ (FAIT)
-4. ✅ ~~Nettoyage auth + optimisation performance~~ (FAIT - 13 octobre)
-5. ✅ ~~Scripts admin email + documentation~~ (FAIT - 13 octobre)
-6. Retirer délais artificiels (1200-1500ms) des containers
-7. Finaliser validation toggles Back‑office
-8. Configuration webhooks Resend dans le dashboard
+### Performance
 
-### Nouveaux livrables (20-22 octobre)
+- **Parallel queries** : `Promise.all([query1, query2, ...])`
+- **Caching** : React `cache()` pour DAL functions (à venir)
+- **Suspense streaming** : `<Suspense fallback={<Skeleton />}>`
+- **Revalidation** : `revalidatePath('/route')` après mutations
 
-- ✅ `memory-bank/architecture/Project_Architecture_Blueprint_v2.md` (référence active)
-- ✅ Back‑office Team Management (CRUD équipe) — statut: **COMPLÉTÉ** (voir TASK022)
-- ✅ Storage bucket "medias" : Migration appliquée + schéma déclaratif synchronisé
-- ✅ Admin Dashboard : Layout avec statistiques + navigation sidebar
-- ✅ Media Library : Dialog de sélection photo fonctionnel avec upload Supabase Storage
+### Code Quality Metrics
 
-### Moyen terme (2-4 semaines)
+- **Dashboard refactoring** :
+  - admin/page.tsx : 133 → 69 lignes (-48%)
+  - Tests : 4/4 passing (800ms fetch, 524ms validation)
+  - Success criteria : 9/9 met
 
-1. Back‑office avancé (toggles centralisés, CRUD étendus)
-2. ~~Intégration du système d'emailing (inscription, newsletter, contacts)~~ (FAIT - templates, API routes, hooks)
-3. Tests automatisés (unitaires/intégration) et monitoring
-4. Option: versioning pour `home_hero_slides` si nécessaire
-5. Audit sécurité final avant production
+- **API /active refactoring** :
+  - lib/dal/team.ts : 42 lignes → 4 helpers < 30 lignes each
+  - Scripts de tests : 5 nouveaux fichiers
+  - 0 TypeScript errors, 100% type safety
 
-## Notes Techniques
+### Documentation
 
-### Optimisations prévues
+- **Instructions** : `.github/instructions/*.instructions.md` (24 fichiers)
+  - Clean code, TypeScript, Next.js, Supabase, Security, Testing
+- **Memory Bank** : `memory-bank/*.md`
+  - activeContext.md (ce fichier)
+  - systemPatterns.md (architecture)
+  - techContext.md (stack)
+  - progress.md (roadmap)
+- **Copilot Instructions** : `.github/copilot-instructions.md`
+  - Architectural knowledge
+  - Coding patterns
+  - Security rules
 
-- ✅ Utiliser `@supabase/ssr` pour le fetching côté serveur (FAIT)
-- ✅ Optimiser performance auth avec `getClaims()` (FAIT - 100x plus rapide)
-- ✅ Réactivité auth temps réel avec `onAuthStateChange()` (FAIT)
-- Ajuster les revalidations ISR en fonction des toggles/hero
-- Supprimer délais artificiels avant production
-- Implémenter filtrage côté requête pour fenêtre de visibilité hero
+## Prochaines étapes (Phase 2 — Backoffice)
 
-### Scripts admin créés
+1. **Gestion d'équipe** :
+   - ✅ Hard-delete endpoint (fait)
+   - ✅ Active/inactive toggle (fait)
+   - TODO : UI React pour CRUD membres
+   - TODO : Upload photos membres (Supabase Storage)
 
-- `scripts/check-email-logs.ts` : Vérification logs email (newsletter + contact messages)
-  - Support dual format clés Supabase (JWT + Simplified)
-  - Détection automatique service_role vs anon key
-  - Messages d'aide RLS et legacy keys
-- `scripts/README.md` : Documentation complète scripts admin
-- `doc/scripts-troubleshooting.md` : Guide troubleshooting RLS + legacy keys
-- `doc/Supabase-API-Keys-Formats-2025-10-13.md` : Comparaison formats JWT vs Simplified
+2. **Gestion spectacles** :
+   - TODO : CRUD spectacles (titre, description, dates)
+   - TODO : Relations spectacles ↔ membres (rôles)
+   - TODO : Upload médias spectacles
 
-### Points d'attention
+3. **Gestion événements** :
+   - TODO : CRUD événements (dates, lieux, statuts)
+   - TODO : Relations événements ↔ spectacles
 
-1. Cohérence IDs/renvois (Accueil‑10, Agenda‑08, Newsletter‑05)
-2. Garder la parité docs ⇄ schéma
-3. Ne pas exposer d'API non protégée hors RLS
-4. Docker: attention au comportement de `prune -a` qui supprime TOUTES les images inutilisées
+4. **Dashboard admin** :
+   - ✅ Stats cards (fait)
+   - TODO : Graphiques activité (Chart.js / Recharts)
+   - TODO : Logs récents
 
-## Dernière Mise à Jour
+5. **Testing & CI/CD** :
+   - ✅ Scripts TypeScript pour endpoints (fait)
+   - TODO : Playwright E2E tests
+   - TODO : GitHub Actions CI (lint + tests)
 
-**Date**: 11 novembre 2025
-**Par**: GitHub Copilot
-**Changements majeurs**:
+6. **Performance** :
+   - TODO : React cache() sur DAL functions
+   - TODO : Image optimization (next/image)
+   - TODO : Bundle analysis (next-bundle-analyzer)
 
-- **Migration architecture layouts + admin UI** (11 novembre)
-  - Route groups implémentés : `(admin)` et `(marketing)` avec layouts dédiés
-  - AdminShell remplacé par AppSidebar (composant shadcn officiel)
-  - Collapsible icon mode, breadcrumb navigation, keyboard shortcuts
-  - BREAKING CHANGES documentés + checklist de validation
-  - Documentation : changelog + blueprint v3 créés
-- **Campagne de sécurité TERMINÉE** : 73 objets sécurisés sur 17 rounds (25-26 octobre)
-  - Round 12 critique : storage.objects ALL PRIVILEGES (vulnérabilité majeure)
-  - Round 17 final : check_communique_has_pdf() - CI PASSED ✅
-  - Migrations idempotentes : DO blocks avec exception handling
-  - Documentation : SECURITY_AUDIT_SUMMARY.md, ROUND_7B_ANALYSIS.md
-- **Pivot whitelist** : audit_grants_filtered.sql (focus objets business uniquement)
-- **PR #25 merged** : Suppression broad grants articles_presse
-- **Issues créées** : #26 (search_path), #27 (DEFINER rationale), #28 (cleanup scripts)
-- **Outils audit** : scripts/check-security-audit.sh, quick_check_all_grants.sql
-- **Next steps** : Validation post-migration + patches conformité DB conventions (≈20 fonctions à corriger)
+## Notes techniques importantes
+
+### Next.js 15 Breaking Changes
+
+- **cookies() et headers()** : doivent être awaited
+
+```typescript
+const cookieStore = await cookies(); // Next.js 15
+const headersList = await headers(); // Next.js 15
+```
+
+- **Route groups** : organisation recommandée
+
+```bash
+app/
+  (admin)/
+    layout.tsx        # Admin layout
+    admin/page.tsx    # /admin
+  (marketing)/
+    layout.tsx        # Public layout
+    page.tsx          # /
+```
+
+### Supabase Auth Optimized
+
+- **getClaims()** : ~2-5ms (JWT local verification)
+- **getUser()** : ~300ms (network call)
+- **Règle** : Use getClaims() for auth checks, getUser() only when need full user data
+
+### TypeScript Strict Mode
+
+- **No `any`** : Use `unknown` for external data
+- **Type guards** : `if (error instanceof Error)`, `isUniqueViolation(error)`
+- **Zod validation** : Runtime type safety at boundaries
+
+### Security Layers
+
+1. **API-level** : `withAdminAuth()` wrapper
+2. **DB-level** : RLS policies avec `is_admin()`
+3. **Input validation** : Zod schemas
+4. **Output sanitization** : Minimal DTOs, no sensitive data
+
+### Git Workflow
+
+- **Branche actuelle** : `feature/backoffice`
+- **Commits récents** :
+  - 61e9e6c : Hard-delete endpoint
+  - c9a9ee7 : API /active refactoring
+  - 6a2c7d8 : Route groups migration
+
+---
+
+**Dernière mise à jour** : 2025-11-13  
+**Responsable** : YanBerdin  
+**Statut** : En développement actif (Phase 2 — Backoffice)

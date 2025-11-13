@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ContactMessageSchema } from "@/lib/email/schemas";
+import { ContactMessageSchema } from "@/types/contact.types";
 import { sendContactNotification } from "@/lib/email/actions";
 import {
   createContactMessage,
   type ContactMessageInput,
 } from "@/lib/dal/contact";
+import { parseFullName, HttpStatus } from "@/lib/api/helpers";
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,7 +15,7 @@ export async function POST(request: NextRequest) {
     if (!validation.success) {
       return NextResponse.json(
         { error: "Données invalides", details: validation.error.issues },
-        { status: 400 }
+        { status: HttpStatus.BAD_REQUEST }
       );
     }
 
@@ -22,9 +23,7 @@ export async function POST(request: NextRequest) {
 
     // Mapper le schéma API vers le schéma DAL
     // API: name (string unique) → DAL: firstName + lastName
-    const nameParts = contactData.name.trim().split(" ");
-    const firstName = nameParts[0] || contactData.name;
-    const lastName = nameParts.slice(1).join(" ") || contactData.name;
+    const { firstName, lastName } = parseFullName(contactData.name);
 
     const dalInput: ContactMessageInput = {
       firstName,
@@ -62,13 +61,19 @@ export async function POST(request: NextRequest) {
       // Ne pas échouer la soumission si l'email échoue
     }
 
-    return NextResponse.json({
-      status: "sent",
-      message: "Message envoyé",
-      ...(emailSent ? {} : { warning: "Notification email could not be sent" }),
-    });
+    return NextResponse.json(
+      {
+        status: "sent",
+        message: "Message envoyé",
+        ...(emailSent ? {} : { warning: "Notification email could not be sent" }),
+      },
+      { status: HttpStatus.OK }
+    );
   } catch (error) {
     console.error("[Contact API] Error:", error);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Erreur serveur" },
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
+    );
   }
 }

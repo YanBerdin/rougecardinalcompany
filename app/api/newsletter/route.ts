@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/supabase/server";
 import { sendNewsletterConfirmation } from "@/lib/email/actions";
+import {
+  HttpStatus,
+  PostgresError,
+  isUniqueViolation,
+} from "@/lib/api/helpers";
 
 const NewsletterBodySchema = z.object({
   email: z.string().email(),
@@ -20,7 +25,7 @@ export async function POST(req: Request) {
     if (!body.success) {
       return NextResponse.json(
         { error: "Invalid payload", details: body.error.flatten() },
-        { status: 400 }
+        { status: HttpStatus.BAD_REQUEST }
       );
     }
     const { email, consent, source } = body.data as NewsletterBody;
@@ -29,18 +34,18 @@ export async function POST(req: Request) {
 
     // RGPD Compliance: Use INSERT instead of UPSERT to avoid exposing emails via RLS SELECT policy
     // Don't use .select() to avoid RLS blocking the read after insert
-    // Handle duplicate emails gracefully (error code 23505 = unique_violation)
+    // Handle duplicate emails gracefully (unique_violation)
     const { error } = await supabase.from("abonnes_newsletter").insert({
       email,
       metadata: { consent: Boolean(consent), source },
     });
 
-    // Error code 23505 = unique_violation (duplicate email) - this is OK, user is already subscribed
-    if (error && error.code !== "23505") {
+    // Unique violation (duplicate email) is OK - user is already subscribed
+    if (error && !isUniqueViolation(error)) {
       console.error("Newsletter subscribe error", error);
       return NextResponse.json(
         { error: "Subscription failed" },
-        { status: 500 }
+        { status: HttpStatus.INTERNAL_SERVER_ERROR }
       );
     }
 
@@ -62,9 +67,12 @@ export async function POST(req: Request) {
           ? {}
           : { warning: "Confirmation email could not be sent" }),
       },
-      { status: 200 }
+      { status: HttpStatus.OK }
     );
   } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid JSON body" },
+      { status: HttpStatus.BAD_REQUEST }
+    );
   }
 }
