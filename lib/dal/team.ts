@@ -22,7 +22,7 @@ function getErrorMessage(err: unknown): string {
 type TeamRow = Database["public"]["Tables"]["membres_equipe"]["Row"];
 
 type DALSuccess<T> = { success: true; data: T };
-type DALError = { success: false; error: string };
+type DALError = { success: false; error: string; status?: number };
 export type DALResult<T> = DALSuccess<T> | DALError;
 
 type DalResponse<T = null> = {

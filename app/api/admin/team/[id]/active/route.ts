@@ -1,66 +1,98 @@
-import { NextResponse } from "next/server";
 import { setTeamMemberActive } from "@/lib/dal/team";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import {
+  withAdminAuth,
+  parseNumericId,
+  ApiResponse,
+  HttpStatus,
+  type HttpStatusCode,
+} from "@/lib/api/helpers";
+import { z } from "zod";
 
-export async function POST(
-  request: Request,
-  { params }: { params: { id: string } | Promise<{ id: string }> }
-) {
-  try {
-    // Require admin for toggling active flag
+// ============================================================================
+// Types
+// ============================================================================
+// In Next.js 15 the `params` object may be a Promise-like
+type RouteContext = {
+  params: Promise<{ id: string }> | { id: string };
+};
+
+// ============================================================================
+// Validation Schema
+// ============================================================================
+
+const SetActiveBodySchema = z.object({
+  active: z
+    .union([
+      z.boolean(),
+      z.enum(["true", "false"]),
+      z.number().int().min(0).max(1),
+    ])
+    .transform((val) => {
+      if (typeof val === "boolean") return val;
+      if (typeof val === "string") return val === "true";
+      return val === 1;
+    }),
+});
+
+// ============================================================================
+// Route Handler
+// ============================================================================
+
+export async function POST(request: Request, context: RouteContext) {
+  return withAdminAuth(async () => {
     try {
-      await requireAdmin();
-    } catch {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-    // In Next.js 15 the `params` object may be a Promise-like; await it before reading properties.
-    const resolvedParams = (await params) as { id: string };
-    const id = Number(resolvedParams.id);
+      // 1. Parse and validate ID
+      const { id: idString } = await context.params;
+      const id = parseNumericId(idString);
 
-    if (!Number.isFinite(id) || id <= 0) {
-      return NextResponse.json({ error: "Invalid id" }, { status: 400 });
-    }
+      if (!id) {
+        return ApiResponse.error(
+          "Invalid team member ID",
+          HttpStatus.BAD_REQUEST
+        );
+      }
 
-    const contentType = request.headers.get("content-type") || "";
-    if (!contentType.includes("application/json")) {
-      return NextResponse.json(
-        { error: "Expected application/json" },
-        { status: 400 }
+      // 2. Validate content type
+      const contentType = request.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        return ApiResponse.error(
+          "Content-Type must be application/json",
+          HttpStatus.BAD_REQUEST
+        );
+      }
+
+      // 3. Parse and validate body
+      const body = await request.json();
+      const validation = SetActiveBodySchema.safeParse(body);
+
+      if (!validation.success) {
+        return ApiResponse.validationError(validation.error.issues);
+      }
+
+      const { active } = validation.data;
+
+      // 4. Update team member active status
+      const result = await setTeamMemberActive(id, active);
+
+      if (!result.success) {
+        return ApiResponse.error(
+          result.error ?? "Failed to update active status",
+          (result.status ?? HttpStatus.INTERNAL_SERVER_ERROR) as HttpStatusCode
+        );
+      }
+
+      return ApiResponse.success({ updated: true, id, active });
+    } catch (error: unknown) {
+      console.error("[API] Set team member active error:", error);
+
+      if (error instanceof SyntaxError) {
+        return ApiResponse.error("Invalid JSON body", HttpStatus.BAD_REQUEST);
+      }
+
+      return ApiResponse.error(
+        "Internal server error",
+        HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
-
-    const body = await request.json();
-
-    // Accept boolean, 'true'/'false' strings, or 0/1 numbers.
-    let active: boolean | null = null;
-    if (typeof body.active === "boolean") active = body.active;
-    else if (typeof body.active === "string") {
-      const v = body.active.toLowerCase();
-      if (v === "true") active = true;
-      else if (v === "false") active = false;
-    } else if (typeof body.active === "number") {
-      active = body.active === 1;
-    }
-
-    if (active === null) {
-      return NextResponse.json(
-        { error: "Invalid payload: active must be boolean" },
-        { status: 400 }
-      );
-    }
-
-    const ok = await setTeamMemberActive(id, active);
-    if (!ok || !ok.success) {
-      console.error("setTeamMemberActive failed:", ok?.error);
-      return NextResponse.json(
-        { error: ok?.error ?? "Failed to update active flag" },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({ success: true });
-  } catch (err) {
-    console.error("api/admin/team/[id]/active POST error:", err);
-    return NextResponse.json({ error: "Internal error" }, { status: 500 });
-  }
+  });
 }

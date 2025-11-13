@@ -6,12 +6,12 @@ async function main() {
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     // Prefer service/secret key if available for full visibility (do not print it)
-    const supabaseServiceKey =
+    const supabaseSecretKey =
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
     const supabaseAnonKey =
       process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY;
 
-    const supabaseKey = supabaseServiceKey ?? supabaseAnonKey;
+    const supabaseKey = supabaseSecretKey ?? supabaseAnonKey;
 
     if (!supabaseUrl || !supabaseKey) {
       console.error(
@@ -20,7 +20,7 @@ async function main() {
       process.exit(1);
     }
 
-    const usingServiceKey = Boolean(supabaseServiceKey);
+    const usingServiceKey = Boolean(supabaseSecretKey);
     console.log("Using service/secret key for test client:", usingServiceKey);
     const testClient = createSupabaseClient(supabaseUrl, supabaseKey);
 

@@ -4,6 +4,154 @@ Ce dossier contient des scripts d'administration pour gérer et surveiller l'app
 
 ## 📋 Liste des Scripts
 
+### 🧪 Tests API
+
+#### test-active-endpoint.ts (TypeScript)
+
+**Description** : Script TypeScript complet avec 17 tests automatisés pour l'endpoint `/api/admin/team/[id]/active`.
+
+**Utilisation** :
+
+```bash
+# Sans authentification (teste la protection auth)
+pnpm exec tsx scripts/test-active-endpoint.ts
+
+# Avec authentification (teste tous les cas)
+pnpm exec tsx scripts/test-active-endpoint.ts --cookie "sb-xxx-auth-token=your-token"
+```
+
+**Comment obtenir le cookie d'authentification** :
+
+1. Se connecter sur http://localhost:3000 avec un compte admin
+2. Ouvrir les DevTools (F12) → Application → Cookies → http://localhost:3000
+3. Copier la valeur du cookie `sb-yvtrlvmbofklefxcxrzv-auth-token`
+4. Utiliser dans le script : `--cookie "sb-yvtrlvmbofklefxcxrzv-auth-token=VALEUR_COPIEE"`
+
+**Tests couverts (17 tests)** :
+
+| Type | Tests | Status Attendu |
+|------|-------|----------------|
+| **Valeurs valides** | Boolean `true`/`false` | 200 OK |
+| | String `"true"`/`"false"` | 200 OK |
+| | Number `0`/`1` | 200 OK |
+| **Valeurs invalides** | String `"maybe"` | 422 Validation Error |
+| | Number `2`, `-1` | 422 Validation Error |
+| | `null`, array, object | 422 Validation Error |
+| | Champ manquant | 422 Validation Error |
+| **IDs invalides** | Non-numeric `"abc"` | 400 Bad Request |
+| | Négatif `-1` | 400 Bad Request |
+| | Zéro `0` | 400 Bad Request |
+| | Décimal `1.5` | 400 Bad Request |
+| **Sécurité** | Sans cookie | 403 Forbidden |
+
+**Résumé automatique** :
+
+```
+================================================
+Test Summary
+================================================
+Total: 17
+Passed: 17
+Failed: 0
+```
+
+#### test-active-endpoint.sh (Bash)
+
+**Description** : Script bash léger pour tester rapidement l'endpoint.
+
+**Utilisation** :
+
+```bash
+# Sans authentification
+./scripts/test-active-endpoint.sh
+
+# Avec authentification
+./scripts/test-active-endpoint.sh "sb-xxx-auth-token=your-token-here"
+```
+
+**Tests couverts (14 tests)** :
+
+- ✅ Cas valides : Boolean, String, Number
+- ❌ Cas invalides : Valeurs incorrectes, champ manquant, ID invalide
+- 🔒 Sécurité : Vérification protection auth
+
+#### quick-test-active.sh (Interactif)
+
+**Description** : Script interactif qui guide l'utilisateur pas à pas.
+
+**Utilisation** :
+
+```bash
+./scripts/quick-test-active.sh
+```
+
+**Fonctionnalités** :
+
+- ✅ Vérifie si le serveur dev tourne
+- ✅ Affiche les instructions pour obtenir le cookie
+- ✅ Demande le cookie de manière interactive
+- ✅ Lance les tests automatiquement
+
+---
+
+### 🔐 Administration & Sécurité
+
+#### check-admin-status.ts
+
+**Description** : Vérifie le statut admin d'un utilisateur et affiche les métadonnées complètes.
+
+**Utilisation** :
+
+```bash
+# Vérifier tous les utilisateurs
+pnpm exec tsx scripts/check-admin-status.ts
+
+# Vérifier un utilisateur spécifique
+pnpm exec tsx scripts/check-admin-status.ts yandevformation@gmail.com
+```
+
+**Fonctionnalités** :
+
+- ✅ Liste tous les utilisateurs ou filtre par email
+- ✅ Affiche `app_metadata` (contrôlé serveur) et `user_metadata` (éditable client)
+- ✅ Vérifie si `role: "admin"` est présent dans `app_metadata`
+- ✅ Fournit la commande SQL pour ajouter le rôle admin si nécessaire
+
+**Configuration Requise** :
+
+```bash
+SUPABASE_SECRET_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**Exemple de sortie** :
+
+```
+📧 User: yandevformation@gmail.com
+   ID: 4ea792b9-4cd9-4363-98aa-641fad96ee16
+   ✅ Email Confirmed: Yes
+   📋 app_metadata: {"provider":"email","providers":["email"],"role":"admin"}
+   📋 user_metadata: {"email":"yandevformation@gmail.com","role":"admin"}
+   ✅ Admin in app_metadata: Yes
+```
+
+#### set-admin-role.ts
+
+**Description** : Ajoute le rôle admin à un utilisateur via l'API Supabase.
+
+**Utilisation** :
+
+```bash
+pnpm exec tsx scripts/set-admin-role.ts yandevformation@gmail.com
+```
+
+**Fonctionnalités** :
+
+- ✅ Met à jour `app_metadata.role = "admin"` via `auth.admin.updateUserById`
+- ✅ Instructions de fallback si la clé secrète n'est pas disponible
+- ⚠️ L'utilisateur doit se déconnecter/reconnecter pour obtenir un nouveau JWT avec le rôle
+
+---
+
 ### check-email-logs.ts
 
 **Description** : Vérifie les logs d'emails et de messages de contact dans la base de données Supabase.
@@ -257,6 +405,25 @@ main().catch(console.error);
 
 ---
 
-**Dernière mise à jour** : 13 octobre 2025  
+---
+
+## 📝 Changelog
+
+### 2025-11-13 : Refactoring Endpoint Active + Tests Complets
+
+**Modifications** :
+
+- ✅ Refactoring complet de `/api/admin/team/[id]/active` avec validation Zod
+- ✅ Ajout de `lib/api/helpers.ts` (HttpStatus constants, ApiResponse, withAdminAuth, parseNumericId)
+- ✅ Correction de `lib/auth/is-admin.ts` pour vérifier `app_metadata.role` en priorité
+- ✅ Ajout de 3 scripts de test (bash, TypeScript, interactif) avec 17 tests automatisés
+- ✅ Ajout de `check-admin-status.ts` et `set-admin-role.ts` pour la gestion des admins
+- ✅ Fix du bug des IDs décimaux dans `parseNumericId`
+
+**Tests** : 17/17 passent (100% de succès)
+
+---
+
+**Dernière mise à jour** : 13 novembre 2025  
 **Mainteneur** : YanBerdin  
 **Contact** : yandevformation@gmail.com
