@@ -127,6 +127,172 @@ error.tsx[param] / // Gestion d'erreur // Route dynamique
   page.tsx; // Page avec paramètre
 ```
 
+### Route Groups Pattern (Next.js 15)
+
+**Introduced**: 11 novembre 2025 - Migration architecture layouts
+
+**Pattern** : Utiliser les parenthèses pour organiser les routes sans affecter l'URL.
+
+```typescript
+// Structure avec route groups
+app/
+  layout.tsx                    // Root: HTML shell + ThemeProvider
+  (admin)/                      // Route group: admin zone
+    layout.tsx                  // Admin layout: AppSidebar + requireAdmin()
+    admin/
+      team/page.tsx             // URL: /admin/team
+      debug-auth/page.tsx       // URL: /admin/debug-auth
+  (marketing)/                  // Route group: public zone
+    layout.tsx                  // Public layout: Header + Footer
+    page.tsx                    // URL: /
+    spectacles/page.tsx         // URL: /spectacles
+    compagnie/page.tsx          // URL: /compagnie
+```
+
+**Avantages** :
+
+1. **Isolation zones fonctionnelles** : Comportements distincts (auth, UI, navigation)
+2. **Layouts dédiés** : Chaque zone a son propre layout sans affecter l'URL
+3. **Zero breaking URL** : `/admin/team` reste `/admin/team` (pas `/(admin)/admin/team`)
+4. **Meilleure organisation** : Structure claire admin vs public
+
+**Root Layout Pattern** :
+
+```typescript
+// app/layout.tsx - HTML shell only
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="fr" suppressHydrationWarning>
+      <body className={inter.className}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+**Admin Layout Pattern** :
+
+```typescript
+// app/(admin)/layout.tsx - Protected with sidebar
+import { requireAdmin } from "@/lib/auth/is-admin";
+import { AppSidebar } from "@/components/admin/AdminSidebar";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  await requireAdmin(); // Auth guard
+  
+  return (
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <main className="flex-1 p-6">
+          {children}
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
+  );
+}
+```
+
+**Marketing Layout Pattern** :
+
+```typescript
+// app/(marketing)/layout.tsx - Public with header/footer
+import { Header } from "@/components/marketing/Header";
+import { Footer } from "@/components/marketing/Footer";
+
+export default function MarketingLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex min-h-screen flex-col">
+      <Header />
+      <main className="flex-1">
+        {children}
+      </main>
+      <Footer />
+    </div>
+  );
+}
+```
+
+**Middleware Matching avec Route Groups** :
+
+```typescript
+// middleware.ts
+import { createServerClient } from '@supabase/ssr';
+import { NextResponse, type NextRequest } from 'next/server';
+
+export async function middleware(request: NextRequest) {
+  let supabaseResponse = NextResponse.next({ request });
+  
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return request.cookies.getAll() },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          supabaseResponse = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+
+  const claims = await supabase.auth.getClaims();
+
+  // Redirect to login if accessing admin routes without auth
+  if (
+    !claims &&
+    request.nextUrl.pathname.startsWith('/admin')
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/auth/login';
+    return NextResponse.redirect(url);
+  }
+
+  return supabaseResponse;
+}
+
+export const config = {
+  matcher: [
+    /*
+     * Match all paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization)
+     * - favicon.ico
+     * - api/auth (Supabase auth endpoints)
+     * - public assets
+     */
+    '/((?!_next/static|_next/image|favicon.ico|api/auth|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
+};
+```
+
+**BREAKING CHANGES** (migration checklist) :
+
+- ✅ Vérifier tous imports/paths relatifs dans les composants
+- ✅ Mettre à jour middleware matchers si nécessaire
+- ✅ Tester navigation entre zones (admin ↔ public)
+- ✅ Valider que layouts s'appliquent correctement
+- ✅ Vérifier hydration warnings (pas de html/body dupliqués dans route groups)
+
+**Références** :
+
+- Documentation : `memory-bank/changes/2025-11-11-layouts-admin-sidebar.md`
+- Blueprint : `memory-bank/architecture/Project_Architecture_Blueprint_v3.md`
+- Commit : 6a2c7d8 "feat(architecture): Complete route groups migration"
+
 ### Pattern de Server Components et Client Components
 
 ```typescript
@@ -232,6 +398,198 @@ export async function fetchFeaturedPressReleases(limit = 3) {
   return data ?? [];
 }
 ```
+
+### Pattern DAL Decomposition (Novembre 2025)
+
+**Règle** : Toute fonction DAL > 30 lignes doit être décomposée en helpers focused (< 30 lignes chacun).
+
+**Principes** :
+
+1. **Single Responsibility** : Chaque helper une seule responsabilité (validation, opération DB, gestion erreurs)
+2. **Type Guards** : error: unknown avec instanceof checks au lieu de type assertions
+3. **Safety Checks** : Vérifications RGPD pour opérations destructives (hard-delete)
+4. **JSDoc complète** : Documentation des comportements critiques
+
+```typescript
+// lib/dal/team.ts
+import "server-only";
+import { createClient } from "@/supabase/server";
+import { requireAdmin } from "@/lib/auth/is-admin";
+import { revalidatePath } from "next/cache";
+
+type DalResponse<T = null> = {
+  success: boolean;
+  data?: T;
+  error?: string;
+  status?: number;
+};
+
+/**
+ * Permanently deletes a team member from the database (RGPD compliance).
+ *
+ * CRITICAL: This operation is irreversible. The team member must be inactive
+ * before deletion to prevent accidental data loss.
+ *
+ * @param id - Team member ID to delete
+ * @returns Response indicating success or failure
+ */
+export async function hardDeleteTeamMember(id: number): Promise<DalResponse> {
+  try {
+    await requireAdmin();
+
+    // Helper 1: Validation
+    const validationResult = await validateTeamMemberForDeletion(id);
+    if (!validationResult.success) return validationResult;
+
+    // Helper 2: DB operation
+    const deletionResult = await performTeamMemberDeletion(id);
+    if (!deletionResult.success) return deletionResult;
+
+    revalidatePath("/admin/team");
+    return { success: true };
+  } catch (error: unknown) {
+    // Helper 3: Error handling
+    return handleHardDeleteError(error);
+  }
+}
+
+// ============================================================================
+// Hard Delete Helpers (< 30 lines each)
+// ============================================================================
+
+/**
+ * Validates team member exists and is inactive before deletion.
+ * RGPD safety: prevents accidental deletion of active members.
+ */
+async function validateTeamMemberForDeletion(
+  id: number
+): Promise<DalResponse> {
+  const member = await fetchTeamMemberById(id);
+
+  if (!member) {
+    return {
+      success: false,
+      error: "Team member not found",
+      status: 404,
+    };
+  }
+
+  if (member.active) {
+    return {
+      success: false,
+      error: "Cannot delete active team member. Deactivate first.",
+      status: 400,
+    };
+  }
+
+  return { success: true };
+}
+
+/**
+ * Performs database deletion operation.
+ */
+async function performTeamMemberDeletion(id: number): Promise<DalResponse> {
+  const supabase = await createClient();
+  const { error: deleteError } = await supabase
+    .from("membres_equipe")
+    .delete()
+    .eq("id", id);
+
+  if (deleteError) {
+    console.error("[DAL] Hard delete failed:", deleteError);
+    return {
+      success: false,
+      error: "Failed to delete team member",
+      status: 500,
+    };
+  }
+
+  return { success: true };
+}
+
+/**
+ * Handles errors with type guards (no assertions).
+ */
+function handleHardDeleteError(error: unknown): DalResponse {
+  console.error("[DAL] hardDeleteTeamMember error:", error);
+
+  // Type guard pattern instead of assertion
+  if (error instanceof Error && error.message.includes("Forbidden")) {
+    return {
+      success: false,
+      error: "Insufficient permissions",
+      status: 403,
+    };
+  }
+
+  return {
+    success: false,
+    error: "Internal error during deletion",
+    status: 500,
+  };
+}
+```
+
+**Avantages** :
+
+- ✅ Clean Code compliance (toutes fonctions < 30 lignes)
+- ✅ Testabilité maximale (chaque helper testable indépendamment)
+- ✅ Maintenabilité (responsabilités séparées)
+- ✅ Sécurité RGPD (safety checks explicites)
+- ✅ Type safety (type guards au lieu d'assertions)
+
+### Pattern Next.js 15 Async Params (Novembre 2025)
+
+**Nouveau pattern obligatoire** : Migration vers `await context.params` pour compatibilité future.
+
+```typescript
+// app/api/admin/team/[id]/hard-delete/route.ts
+
+// ❌ OLD PATTERN (deprecated)
+export async function POST(
+  request: Request,
+  { params }: { params: { id: string } | Promise<{ id: string }> }
+) {
+  const resolved = (await params) as { id: string }; // Type assertion nécessaire
+  const id = Number(resolved.id);
+  // ...
+}
+
+// ✅ NEW PATTERN (Next.js 15 compatible)
+type RouteContext = {
+  params: Promise<{ id: string }> | { id: string };
+};
+
+export async function POST(_request: Request, context: RouteContext) {
+  // Await context.params (compatible Promise ou objet direct)
+  const { id: idString } = await context.params;
+  
+  // Helper pour validation
+  const id = parseTeamMemberId(idString);
+  
+  if (!id) {
+    return NextResponse.json(
+      { error: "Invalid team member ID" },
+      { status: 400 }
+    );
+  }
+  
+  // Continue logic...
+}
+
+// Helper function pour validation ID
+function parseTeamMemberId(id: string): number | null {
+  const parsed = Number(id);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+```
+
+**Avantages** :
+
+- ✅ Type-safe sans assertions
+- ✅ Compatible Next.js 15 async params
+- ✅ Pattern consistant pour tous endpoints
+- ✅ Validation centralisée dans helper
 
 ### Pattern Server Actions (Next.js 15)
 

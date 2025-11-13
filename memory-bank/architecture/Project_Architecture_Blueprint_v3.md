@@ -263,6 +263,75 @@ Configuration & Secrets
 
 Auth middleware (pattern recommandé) — résumé : utiliser `createServerClient` avec cookies getAll/setAll et `getClaims()` pour décisions de redirection.
 
+DAL decomposition pattern (nouveau - 13 novembre 2025) :
+
+- Toute fonction DAL > 30 lignes doit être décomposée en helpers focused
+- Chaque helper : une seule responsabilité (validation, opération DB, gestion erreurs)
+- Type guards au lieu de type assertions (error: unknown avec instanceof)
+- Safety checks RGPD pour opérations destructives (hard-delete)
+
+Exemple hardDeleteTeamMember (lib/dal/team.ts) :
+
+```ts
+// Fonction principale orchestration (< 30 lignes)
+export async function hardDeleteTeamMember(id: number): Promise<DalResponse> {
+  try {
+    await requireAdmin();
+    const validationResult = await validateTeamMemberForDeletion(id);
+    if (!validationResult.success) return validationResult;
+    
+    const deletionResult = await performTeamMemberDeletion(id);
+    if (!deletionResult.success) return deletionResult;
+    
+    revalidatePath('/admin/team');
+    return { success: true };
+  } catch (error: unknown) {
+    return handleHardDeleteError(error);
+  }
+}
+
+// Helper 1: Validation focused (< 30 lignes)
+async function validateTeamMemberForDeletion(id: number): Promise<DalResponse> {
+  const member = await fetchTeamMemberById(id);
+  if (!member) return { success: false, error: 'Not found', status: 404 };
+  if (member.active) return { success: false, error: 'Must be inactive', status: 400 };
+  return { success: true };
+}
+
+// Helper 2: DB operation focused (< 30 lignes)
+async function performTeamMemberDeletion(id: number): Promise<DalResponse> {
+  const supabase = await createClient();
+  const { error } = await supabase.from('membres_equipe').delete().eq('id', id);
+  if (error) return { success: false, error: 'Delete failed', status: 500 };
+  return { success: true };
+}
+
+// Helper 3: Error handling focused (< 30 lignes)
+function handleHardDeleteError(error: unknown): DalResponse {
+  if (error instanceof Error && error.message.includes('Forbidden')) {
+    return { success: false, error: 'Insufficient permissions', status: 403 };
+  }
+  return { success: false, error: 'Internal error', status: 500 };
+}
+```
+
+Next.js 15 async params pattern (nouveau - 13 novembre 2025) :
+
+```ts
+// ❌ OLD: Direct destructuring
+export async function POST(request: Request, { params }: { params: { id: string } }) {
+  const id = Number(params.id);
+}
+
+// ✅ NEW: Await context.params (Next.js 15 compatible)
+type RouteContext = { params: Promise<{ id: string }> | { id: string } };
+
+export async function POST(request: Request, context: RouteContext) {
+  const { id: idString } = await context.params;
+  const id = parseTeamMemberId(idString);
+}
+```
+
 DAL (pattern recommandé) :
 
 - directive `"use server"`
@@ -314,6 +383,9 @@ Ajouter une nouvelle feature :
 - ADR: Utiliser `getClaims()` vs `getUser()` dans middleware (performance)
 - ADR: DAL server-only + Zod (sécurité & centralisation)
 - ADR: Email via Resend + templates React (testabilité)
+- ADR (13 nov 2025): DAL functions > 30 lignes = decomposition en helpers focused (Clean Code compliance)
+- ADR (13 nov 2025): Next.js 15 async params pattern (`await context.params`) pour future-proofing
+- ADR (13 nov 2025): Safety checks RGPD sur hard-delete (membre inactif obligatoire avant suppression)
 
 13) Gouvernance & maintenabilité
 

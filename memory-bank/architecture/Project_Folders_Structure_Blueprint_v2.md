@@ -539,7 +539,31 @@ export async function createTeamMember(input: CreateTeamMemberInput) {}
 export async function updateTeamMember(id: string, input: UpdateTeamMemberInput) {}
 export async function setTeamMemberActive(id: string, active: boolean) {}
 export async function reorderTeamMembers(order: string[]) {}
+
+// ✨ NEW (13 nov 2025): Hard-delete avec DAL decomposition pattern
+export async function hardDeleteTeamMember(id: number): Promise<DalResponse> {
+  // Orchestration (< 30 lignes)
+  // Décomposition en 3 helpers focused:
+  // - validateTeamMemberForDeletion (safety check RGPD)
+  // - performTeamMemberDeletion (DB operation)
+  // - handleHardDeleteError (type guards)
+}
 ```
+
+**DAL Decomposition Pattern** (13 novembre 2025) :
+
+Toute fonction DAL > 30 lignes doit être décomposée en helpers < 30 lignes chacun :
+
+- **validateTeamMemberForDeletion** : Vérifications existence + inactif (safety RGPD)
+- **performTeamMemberDeletion** : Opération DELETE en base
+- **handleHardDeleteError** : Gestion erreurs avec type guards (error: unknown)
+
+Principes :
+
+- Single Responsibility (une fonction = une responsabilité)
+- Type guards au lieu de type assertions
+- JSDoc complète pour opérations critiques
+- revalidatePath cache invalidation
 
 Auth Guard:
 
@@ -555,6 +579,74 @@ Policies:
 - Soft-delete via champ `active=false` (hard-delete réservé)
 - RLS activé côté Supabase; actions sensibles protégées par `requireAdmin()`
 - Validation d’E/S via Zod au niveau formulaire et DAL
+
+### 4.3ter API Routes Admin (`app/api/admin/`)
+
+**Purpose**: Endpoints API pour opérations admin (alternative aux Server Actions)
+
+**Next.js 15 Async Params Pattern** (13 novembre 2025) :
+
+```typescript
+// app/api/admin/team/[id]/hard-delete/route.ts
+import { NextResponse } from 'next/server';
+import { hardDeleteTeamMember } from '@/lib/dal/team';
+import { requireAdmin } from '@/lib/auth/is-admin';
+
+type RouteContext = {
+  params: Promise<{ id: string }> | { id: string };
+};
+
+export async function POST(_request: Request, context: RouteContext) {
+  try {
+    await requireAdmin();
+    
+    // ✅ NEW: Await context.params (compatible Next.js 15)
+    const { id: idString } = await context.params;
+    const id = parseTeamMemberId(idString);
+    
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Invalid team member ID' },
+        { status: 400 }
+      );
+    }
+    
+    const result = await hardDeleteTeamMember(id);
+    
+    if (!result.success) {
+      return NextResponse.json(
+        { error: result.error ?? 'Failed to delete' },
+        { status: result.status ?? 500 }
+      );
+    }
+    
+    return NextResponse.json({ success: true });
+  } catch (error: unknown) {
+    // Type guard pattern
+    if (isAuthError(error)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+  }
+}
+
+// Helper functions
+function parseTeamMemberId(id: string): number | null {
+  const parsed = Number(id);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function isAuthError(error: unknown): boolean {
+  return error instanceof Error && error.message.includes('Forbidden');
+}
+```
+
+**Avantages** :
+
+- Type-safe sans assertions
+- Compatible Next.js 15 future changes
+- Pattern consistant pour tous endpoints admin
+- Helper functions pour réutilisabilité
 
 ### 4.4 Data Access Layer (`lib/dal/`)
 
