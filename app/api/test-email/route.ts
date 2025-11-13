@@ -4,6 +4,7 @@ import {
   sendNewsletterConfirmation,
   sendContactNotification,
 } from "@/lib/email/actions";
+import { HttpStatus } from "@/lib/api/helpers";
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,7 +17,7 @@ export async function POST(request: NextRequest) {
         if (!email) {
           return NextResponse.json(
             { error: "Email is required for newsletter test" },
-            { status: 400 }
+            { status: HttpStatus.BAD_REQUEST }
           );
         }
 
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
         if (!contactData) {
           return NextResponse.json(
             { error: "Contact data is required for contact test" },
-            { status: 400 }
+            { status: HttpStatus.BAD_REQUEST }
           );
         }
 
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
       default:
         return NextResponse.json(
           { error: 'Invalid test type. Use "newsletter" or "contact"' },
-          { status: 400 }
+          { status: HttpStatus.BAD_REQUEST }
         );
     }
   } catch (error) {
@@ -55,7 +56,7 @@ export async function POST(request: NextRequest) {
         error: "Failed to send test email",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     );
   }
 }

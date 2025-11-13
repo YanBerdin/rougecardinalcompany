@@ -5,6 +5,7 @@
 import { createClient } from "@/supabase/server";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { HttpStatus } from "@/lib/api/helpers";
 
 export async function GET() {
   try {
@@ -97,7 +98,7 @@ export async function GET() {
         stack: error instanceof Error ? error.stack : undefined,
       },
       {
-        status: 500,
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
       }
     );
   }

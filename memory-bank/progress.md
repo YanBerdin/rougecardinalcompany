@@ -420,6 +420,41 @@ Cette vérification a été réalisée via l'API Supabase MCP et confirme que le
 
 ## Journal des Mises à Jour
 
+### 13 Novembre 2025
+
+**Refactoring complet API Routes + DAL avec HttpStatus Constants (3 phases)** :
+
+- **Phase 1 : Dashboard Refactoring COMPLÉTÉ** (9/9 success criteria) :
+  - ErrorBoundary réutilisable + types Zod + test script (4/4 passing)
+  - StatsCard extracted (29L), DAL dashboard.ts (54L), DashboardStatsContainer (45L)
+  - admin/page.tsx : 133 → 69 lignes (-48% code)
+  - API Routes Contact + Newsletter refactored (parseFullName, isUniqueViolation, HttpStatus)
+  - Commit dea0cd9 : "feat(admin): Dashboard refactoring complete (3 phases)"
+
+- **Phase 2 : Extension Pattern Helpers** (5 routes API + DAL) :
+  - Routes refactorées : debug-auth, test-email, team, webhooks/resend, hard-delete
+  - lib/dal/team.ts : Fix types (HttpStatusCode strict union au lieu de number)
+  - Magic numbers éliminés : 14 total (10 dans routes + 4 dans DAL)
+  - TypeScript errors : 0 (type safety 100%)
+  - Pattern standardisé pour toutes futures routes
+
+- **Phase 3 : Tests et Validation** :
+  - test-active-endpoint.ts : 17/17 tests passed avec cookie admin ✅
+  - test-team-active-dal.ts : 5/5 tests passed avec service key (DAL direct) ✅
+  - Scripts admin créés : check-admin-status.ts, set-admin-role.ts
+  - Fix bug parseNumericId : rejet des IDs décimaux (1.5 → 400 Bad Request)
+
+- **Impact architectural** :
+  - lib/api/helpers.ts : Bibliothèque centralisée (HttpStatus, ApiResponse, withAdminAuth, parseNumericId)
+  - lib/auth/is-admin.ts : Fix sécurité (app_metadata.role prioritaire sur user_metadata.role)
+  - Consistency : 100% des routes API utilisent helpers communs
+  - Type safety : HttpStatusCode union type partout (compile-time checks)
+
+- **Documentation synchronisée** :
+  - scripts/README.md : Section test-team-active-dal.ts ajoutée
+  - memory-bank/activeContext.md : Avancées récentes + Prochaines Étapes mises à jour
+  - .github/prompts/plan-dashboardRefactoring.prompt.md : Toutes phases marquées COMPLETED
+
 ### 11 Novembre 2025 (suite)
 
 **Outils de diagnostic admin créés et intégrés** :
@@ -522,6 +557,20 @@ Cette vérification a été réalisée via l'API Supabase MCP et confirme que le
 
 - Architecture: publication de `Project_Architecture_Blueprint_v2.md` (Implementation‑Ready, C4, ADRs, patterns canoniques Supabase Auth 2025)
 - Back‑office: avancement TASK022 Team Management (DAL `lib/dal/team.ts`, Server Actions `app/admin/team/actions.ts`, UI `components/features/admin/team/*`, guard `requireAdmin()`, soft‑delete + reorder) — statut: En cours (Médiathèque + layout Admin restants)
+
+### 13 Novembre 2025 (suite)
+
+**Validation complète suite de tests API /active** :
+
+- Script test-active-endpoint.ts : ✅ 17/17 tests passing avec --cookie flag
+  - Test 1-6 (valeurs valides) : Boolean, String, Number → 200 OK ✅
+  - Test 7-13 (valeurs invalides) : String/Number/null/array/object/missing → 422 Validation Error ✅
+  - Test 14-17 (IDs invalides) : Non-numeric/négatif/zéro/décimal → 400 Bad Request ✅
+  - Protection auth : Sans cookie → 403 Forbidden ✅
+- Pattern établi pour tests futurs : extraction cookie manuel + script TypeScript détaillé
+- Decision : Conservation test-active-endpoint.ts comme référence production-ready
+- Documentation : scripts/README.md, memory-bank/activeContext.md, progress.md synchronisés
+- Confirmation : Test avec cookie admin extrait du navigateur (DevTools → Application → Cookies)
 
 ### 13 Octobre 2025
 

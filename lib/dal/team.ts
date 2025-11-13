@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import type { Database } from "@/lib/database.types";
 import { TeamMemberDbSchema } from "@/lib/schemas/team";
 import { z } from "zod";
+import { HttpStatus, type HttpStatusCode } from "@/lib/api/helpers";
 
 function getErrorMessage(err: unknown): string {
   if (err instanceof Error) return err.message;
@@ -22,14 +23,14 @@ function getErrorMessage(err: unknown): string {
 type TeamRow = Database["public"]["Tables"]["membres_equipe"]["Row"];
 
 type DALSuccess<T> = { success: true; data: T };
-type DALError = { success: false; error: string; status?: number };
+type DALError = { success: false; error: string; status?: HttpStatusCode };
 export type DALResult<T> = DALSuccess<T> | DALError;
 
 type DalResponse<T = null> = {
   success: boolean;
   data?: T;
   error?: string;
-  status?: number;
+  status?: HttpStatusCode;
 };
 
 const UpsertTeamMemberSchema = TeamMemberDbSchema.partial();
@@ -281,7 +282,7 @@ async function validateTeamMemberForDeletion(
     return {
       success: false,
       error: "Team member not found",
-      status: 404,
+      status: HttpStatus.NOT_FOUND,
     };
   }
 
@@ -289,7 +290,7 @@ async function validateTeamMemberForDeletion(
     return {
       success: false,
       error: "Cannot delete active team member. Deactivate first.",
-      status: 400,
+      status: HttpStatus.BAD_REQUEST,
     };
   }
 
@@ -304,11 +305,11 @@ async function performTeamMemberDeletion(id: number): Promise<DalResponse> {
     .eq("id", id);
 
   if (deleteError) {
-    console.error("[DAL] Hard delete failed:", deleteError);
+    console.error("[DAL] Error deleting team member:", deleteError);
     return {
       success: false,
       error: "Failed to delete team member",
-      status: 500,
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
     };
   }
 
@@ -322,13 +323,13 @@ function handleHardDeleteError(error: unknown): DalResponse {
     return {
       success: false,
       error: "Insufficient permissions",
-      status: 403,
+      status: HttpStatus.FORBIDDEN,
     };
   }
 
   return {
     success: false,
     error: "Internal error during deletion",
-    status: 500,
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
   };
 }

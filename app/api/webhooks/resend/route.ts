@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/supabase/server";
 import { z } from "zod";
+import { HttpStatus } from "@/lib/api/helpers";
 
 const ResendWebhookSchema = z.object({
   type: z.string(),
@@ -19,7 +20,10 @@ export async function POST(req: NextRequest) {
     console.log(`[Resend Webhook] Event: ${event.type}`);
   } catch (error) {
     console.error("[Resend Webhook] Parse error", error);
-    return NextResponse.json({ error: "Invalid format" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid format" },
+      { status: HttpStatus.BAD_REQUEST }
+    );
   }
 
   const supabase = await createClient();
