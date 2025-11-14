@@ -4,7 +4,6 @@ import {
   parseNumericId,
   ApiResponse,
   HttpStatus,
-  type HttpStatusCode,
 } from "@/lib/api/helpers";
 import { z } from "zod";
 
@@ -75,9 +74,11 @@ export async function POST(request: Request, context: RouteContext) {
       const result = await setTeamMemberActive(id, active);
 
       if (!result.success) {
+        // ✅ Solution : Variable intermédiaire pour éliminer le cast
+        const errorStatus = result.status ?? HttpStatus.INTERNAL_SERVER_ERROR;
         return ApiResponse.error(
           result.error ?? "Failed to update active status",
-          (result.status ?? HttpStatus.INTERNAL_SERVER_ERROR) as HttpStatusCode
+          errorStatus
         );
       }
 

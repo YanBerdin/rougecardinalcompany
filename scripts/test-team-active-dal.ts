@@ -195,7 +195,7 @@ async function main() {
   // Test 5: Invalid ID (should fail)
   results.push(
     await runTest("Invalid ID (999999)", async () => {
-      const result = await toggleMemberActive(999999, true);
+      await toggleMemberActive(999999, true);
       
       // Check if update affected 0 rows (member doesn't exist)
       const status = await getMemberStatus(999999);

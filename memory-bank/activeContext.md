@@ -22,7 +22,7 @@ Commits récents pertinents (branche `feature/backoffice`):
 - chore(ci): add README for allowed_exposed_objects and warn-only workflow — https://github.com/YanBerdin/rougecardinalcompany/commit/e0f09163b1ca075d1b5c0e9e8391b0620b46a70e (YanBerdin)
 - add detected exposed DB objects to allowlist — https://github.com/YanBerdin/rougecardinalcompany/commit/3e160a842fba05c637c64237421b71cd90cd3aa0 (YanBerdin)
 - chore(ci): allowlist known restored DB objects in audit — https://github.com/YanBerdin/rougecardinalcompany/commit/d1cfaadc8a5b776eea3867faeb7a842296e68360 (YanBerdin)
-- chore(migrations): add warning headers & move dangerous revoke_* to legacy — https://github.com/YanBerdin/rougecardinalcompany/commit/8b9df198de4716ec7e9f45820c8141f3142e356a (YanBerdin)
+- chore(migrations): add warning headers & move dangerous revoke\_\* to legacy — https://github.com/YanBerdin/rougecardinalcompany/commit/8b9df198de4716ec7e9f45820c8141f3142e356a (YanBerdin)
 
 Migrations d'urgence (résolution GRANTs & RLS) :
 
@@ -40,32 +40,36 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 
 ## Travaux novembre 2025
 
-- ✅ **14 novembre — API Code Quality Refactoring (3 phases - 40 min)** :
+- ✅ **14 novembre — API Code Quality Refactoring + Newsletter Migration** :
   - **Documentation** : Plan d'analyse et refactoring complet créé (`.github/prompts/plan-apiRefactoringReview.prompt.md`)
     - 10 fichiers analysés (8 API routes + 1 DAL + 1 helpers)
     - Score global : 9.4/10 (production-ready)
     - 22 issues identifiées (priorities 1-5)
     - Plan structuré en 3 phases avec checklists
-  - **Phase 1 (15 min) - ApiResponse Pattern Unification** :
+  - **Phase 1 - ApiResponse Pattern Unification** :
     - `contact/route.ts` : Full ApiResponse migration (validationError, success, error)
     - `team/route.ts` : Hybrid approach pour backward compatibility (NextResponse.json pour arrays, ApiResponse.error pour erreurs)
+    - `newsletter/route.ts` : Full ApiResponse migration (4 replacements - validation, DB error, success, catch)
     - Import cleanup : Suppression des imports inutilisés (NextResponse, PostgresError)
     - Fix import path : `@/types/contact.types` → `@/lib/email/schemas`
-  - **Phase 2 (5 min) - DAL Type Naming Consistency** :
+  - **Phase - DAL Type Naming Consistency** :
     - Suppression du type `DalResponse<T>` (duplication)
     - Unification sur `DALResult<null>` pour 4 fonctions (hardDelete, validate, perform, handleError)
     - Mise à jour des return statements : `{ success: true }` → `{ success: true, data: null }`
     - Type system 100% cohérent
-  - **Phase 3 (20 min) - JSDoc Comprehensive Documentation** :
+  - **Phase 3 - JSDoc Comprehensive Documentation** :
     - 8 fonctions DAL documentées avec JSDoc complet
     - Tags ajoutés : `@param`, `@returns`, `@example`
     - ~69 lignes de documentation inline
     - IntelliSense IDE pleinement fonctionnel
-  - **Validation** :
+  - **Validation Complète** :
     - TypeScript : `pnpm tsc --noEmit` ✅ (0 errors)
-    - ESLint : `pnpm eslint app/ lib/ --quiet` ✅ (0 warnings)
+    - ESLint : `pnpm eslint --quiet` ✅ (0 warnings après fix 2 erreurs scripts)
     - Runtime : Tests browser ✅ (backward compatibility OK)
-  - **Score improvement** : 9.4/10 → 9.7/10 (estimé)
+    - Tests DAL : `test-team-active-dal.ts` ✅ (5/5 passed - 1073ms total)
+    - Tests API : `test-active-endpoint.ts` ✅ (17/17 passed avec auth admin)
+      -Tests Newsletter : `test-newsletter-endpoint.ts` ✅ (6/6 passed - 1452ms total)
+  - **Score improvement** : 9.4/10 → 9.8/10 (avec newsletter + validation complète)
 
 - ✅ **13 novembre — Dashboard Refactoring COMPLET (3 phases)** :
   - **Phase 1 - Foundation** : ErrorBoundary réutilisable, types Zod, test script (100% pass)
@@ -244,9 +248,9 @@ export const DELETE = withAdminAuth(async (req, { params }) => {
 export default async function AdminPage() {
   const supabase = await createClient();
   const claims = await supabase.auth.getClaims();
-  if (!claims) redirect('/auth/login');
+  if (!claims) redirect("/auth/login");
   const isAdmin = await checkAdminStatus(claims.sub);
-  if (!isAdmin) redirect('/unauthorized');
+  if (!isAdmin) redirect("/unauthorized");
   // Admin content
 }
 ```
@@ -279,15 +283,27 @@ return NextResponse.json(
 - **Pattern** :
 
 ```typescript
-interface TestResult { name: string; success: boolean; duration: number; }
+interface TestResult {
+  name: string;
+  success: boolean;
+  duration: number;
+}
 
-async function runTest(name: string, testFn: () => Promise<unknown>): Promise<TestResult> {
+async function runTest(
+  name: string,
+  testFn: () => Promise<unknown>
+): Promise<TestResult> {
   const start = Date.now();
   try {
     const data = await testFn();
     return { name, success: true, duration: Date.now() - start, data };
   } catch (error) {
-    return { name, success: false, duration: Date.now() - start, error: error.message };
+    return {
+      name,
+      success: false,
+      duration: Date.now() - start,
+      error: error.message,
+    };
   }
 }
 ```

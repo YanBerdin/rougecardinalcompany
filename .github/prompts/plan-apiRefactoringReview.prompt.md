@@ -8,16 +8,16 @@
 
 ## 📋 Table des Matières
 
-1. [Résumé Exécutif](#resume-executif)
+1. [Résumé Exécutif](#résumé-exéutif)
 2. [Analyse Détaillée par Fichier](#analyse-détaillée)
 3. [Matrice des Issues](#matrice-des-issues)
 4. [Recommandations Prioritaires](#recommandations)
-5. [Plan d'Implémentation](#plan-implémentation)
-6. [Métriques de Qualité](#métriques)
+5. [Plan d'Implémentation](#plan-d-implémentation)
+6. [Métriques de Qualité](#métriques-de-qualité)
 
 ---
 
-## 1. Résumé Exécutif {#résumé-executif}
+## 1. Résumé Exécutif
 
 ### Contexte
 Revue approfondie du refactoring avec HttpStatus helpers, ApiResponse patterns, et optimisation DAL.
@@ -556,14 +556,14 @@ async function validateTeamMemberForDeletion(...) { ... }
 - ✅ Tests existants passent
 - 📋 Améliorations reportées à sprint futur
 
-**Option B : Amélioration Rapide** (40 min)
+**Option B : Amélioration Rapide**
 - 📝 Phases 1-3 ci-dessous
 - 🎯 Score attendu : 9.7/10
 - ✅ Merge après validation
 
 ---
 
-### 5.2 Phase 1 : Cohérence ApiResponse (15 min)
+### 5.2 Phase 1 : Cohérence ApiResponse
 
 **Objectif :** Unifier usage ApiResponse helpers
 
@@ -592,7 +592,7 @@ pnpm test -- team.test.ts
 
 ---
 
-### 5.3 Phase 2 : Naming Consistency (5 min)
+### 5.3 Phase 2 : Naming Consistenc
 
 **Objectif :** Unifier `DALResult` vs `DalResponse`
 
@@ -622,7 +622,7 @@ pnpm test -- team.test.ts
 
 ---
 
-### 5.4 Phase 3 : Documentation JSDoc (20 min)
+### 5.4 Phase 3 : Documentation JSDoc
 
 **Objectif :** Améliorer Developer Experience
 
@@ -707,11 +707,11 @@ JSDoc Documentation    : 3/10 fichiers (30%)   ❌
 - Issues non-bloquantes
 - Améliorations en backlog
 
-**Si temps disponible (40 min) :**
+**Si temps disponible :**
 → ⏸️ **Implémenter Phases 1-3**
-- Cohérence ApiResponse (15 min)
-- Naming unification (5 min)
-- JSDoc documentation (20 min)
+- Cohérence ApiResponse
+- Naming unificatio
+- JSDoc documentation
 - Score final attendu : 9.7/10
 
 ### 7.3 Prochaines Étapes
@@ -835,14 +835,14 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
 - Tests existants passent
 - Amélirations reportées à sprint futur
 
-**Option B : Amélioration Rapide** (40 min)
+**Option B : Amélioration Rapide**
 - Phases 1-3 ci-dessous
 - Score attendu : 9.7/10
 - Merge après validation
 
 ---
 
-### 5.2 Phase 1 : Cohérence ApiResponse (15 min)
+### 5.2 Phase 1 : Cohérence ApiResponse
 
 **Objectif :** Unifier usage ApiResponse helpers
 
@@ -871,7 +871,7 @@ pnpm test -- team.test.ts
 
 ---
 
-### 5.3 Phase 2 : Naming Consistency (5 min)
+### 5.3 Phase 2 : Naming Consistenc
 
 **Objectif :** Unifier `DALResult` vs `DalResponse`
 
@@ -901,7 +901,7 @@ pnpm test -- team.test.ts
 
 ---
 
-### 5.4 Phase 3 : Documentation JSDoc (20 min)
+### 5.4 Phase 3 : Documentation JSDoc
 
 **Objectif :** Améliorer Developer Experience
 
