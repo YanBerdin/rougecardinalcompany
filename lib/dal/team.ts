@@ -26,13 +26,6 @@ type DALSuccess<T> = { success: true; data: T };
 type DALError = { success: false; error: string; status?: HttpStatusCode };
 export type DALResult<T> = DALSuccess<T> | DALError;
 
-type DalResponse<T = null> = {
-  success: boolean;
-  data?: T;
-  error?: string;
-  status?: HttpStatusCode;
-};
-
 const UpsertTeamMemberSchema = TeamMemberDbSchema.partial();
 
 const ReorderItemSchema = z.object({
@@ -49,6 +42,22 @@ const ReorderSchema = z
     message: "Duplicate ordre in updates",
   });
 
+/**
+ * Fetches all team members from the database
+ *
+ * By default, only active members are returned. Invalid rows that fail
+ * Zod validation are filtered out and logged.
+ *
+ * @param includeInactive - If true, includes deactivated members
+ * @returns Array of validated team member records
+ *
+ * @example
+ * Get only active members
+ * const activeMembers = await fetchAllTeamMembers();
+ *
+ * Get all members including inactive
+ * const allMembers = await fetchAllTeamMembers(true);
+ */
 export async function fetchAllTeamMembers(
   includeInactive = false
 ): Promise<TeamRow[]> {
@@ -89,6 +98,18 @@ export async function fetchAllTeamMembers(
   }
 }
 
+/**
+ * Fetches a single team member by ID
+ *
+ * @param id - Team member ID
+ * @returns Team member record or null if not found or invalid
+ *
+ * @example
+ * const member = await fetchTeamMemberById(123);
+ * if (member) {
+ *   console.log(`Found: ${member.nom}`);
+ * }
+ */
 export async function fetchTeamMemberById(id: number): Promise<TeamRow | null> {
   try {
     const supabase = await createClient();
@@ -116,6 +137,29 @@ export async function fetchTeamMemberById(id: number): Promise<TeamRow | null> {
   }
 }
 
+/**
+ * Creates or updates a team member
+ *
+ * If payload contains an `id`, performs an UPDATE. Otherwise performs an INSERT.
+ * Validates payload with Zod and requires admin permissions.
+ *
+ * @param payload - Partial team member data (id optional for insert)
+ * @returns DALResult with the created/updated member or error details
+ *
+ * @example
+ * * Create new member
+ * const result = await upsertTeamMember({
+ *   nom: 'John Doe',
+ *   role: 'Actor',
+ *   active: true
+ * });
+ *
+ * * Update existing member
+ * const updateResult = await upsertTeamMember({
+ *   id: 123,
+ *   nom: 'Jane Doe'
+ * });
+ */
 export async function upsertTeamMember(
   payload: Partial<TeamRow>
 ): Promise<DALResult<TeamRow>> {
@@ -175,6 +219,23 @@ export async function upsertTeamMember(
   }
 }
 
+/**
+ * Activates or deactivates a team member
+ *
+ * Requires admin permissions. Used to soft-delete members by setting
+ * active=false, allowing restoration without data loss.
+ *
+ * @param id - Team member ID
+ * @param active - New active status (true=active, false=inactive)
+ * @returns DALResult with updated id and active status
+ *
+ * @example
+ * * Deactivate member (soft delete)
+ * const result = await setTeamMemberActive(123, false);
+ *
+ * * Reactivate member
+ * const restoreResult = await setTeamMemberActive(123, true);
+ */
 export async function setTeamMemberActive(
   id: number,
   active: boolean
@@ -206,6 +267,22 @@ export async function setTeamMemberActive(
   }
 }
 
+/**
+ * Reorders team members by updating their display order
+ *
+ * Uses a single atomic RPC call to the database to prevent partial updates.
+ * Validates that all IDs and order values are unique.
+ *
+ * @param updates - Array of id/ordre pairs to update
+ * @returns DALResult indicating success or validation error
+ *
+ * @example
+ * const result = await reorderTeamMembers([
+ *   { id: 1, ordre: 2 },
+ *   { id: 2, ordre: 1 },
+ *   { id: 3, ordre: 3 }
+ * ]);
+ */
 export async function reorderTeamMembers(
   updates: { id: number; ordre: number }[]
 ): Promise<DALResult<null>> {
@@ -248,7 +325,9 @@ export async function reorderTeamMembers(
  * @param id - Team member ID to delete
  * @returns Response indicating success or failure
  */
-export async function hardDeleteTeamMember(id: number): Promise<DalResponse> {
+export async function hardDeleteTeamMember(
+  id: number
+): Promise<DALResult<null>> {
   try {
     await requireAdmin();
 
@@ -263,7 +342,7 @@ export async function hardDeleteTeamMember(id: number): Promise<DalResponse> {
     }
 
     revalidatePath("/admin/team");
-    return { success: true };
+    return { success: true, data: null };
   } catch (error: unknown) {
     return handleHardDeleteError(error);
   }
@@ -273,9 +352,25 @@ export async function hardDeleteTeamMember(id: number): Promise<DalResponse> {
 // Hard Delete Helpers
 // ============================================================================
 
+/**
+ * Validates team member eligibility for deletion
+ *
+ * Checks:
+ * - Member exists in database
+ * - Member is not currently active (must be deactivated first)
+ *
+ * @param id - Team member ID to validate
+ * @returns DALResult with success status or error details
+ *
+ * @example
+ * const result = await validateTeamMemberForDeletion(123);
+ * if (!result.success) {
+ *   console.error(result.error);
+ * }
+ */
 async function validateTeamMemberForDeletion(
   id: number
-): Promise<DalResponse> {
+): Promise<DALResult<null>> {
   const member = await fetchTeamMemberById(id);
 
   if (!member) {
@@ -294,10 +389,25 @@ async function validateTeamMemberForDeletion(
     };
   }
 
-  return { success: true };
+  return { success: true, data: null };
 }
 
-async function performTeamMemberDeletion(id: number): Promise<DalResponse> {
+/**
+ * Performs the actual database deletion of a team member
+ *
+ * CRITICAL: This operation is irreversible. Validation should be
+ * performed before calling this function.
+ *
+ * @param id - Team member ID to delete
+ * @returns DALResult with success status or error details
+ *
+ * @example
+ * const result = await performTeamMemberDeletion(123);
+ * if (result.success) {
+ *   console.log('Member deleted successfully');
+ * }
+ */
+async function performTeamMemberDeletion(id: number): Promise<DALResult<null>> {
   const supabase = await createClient();
   const { error: deleteError } = await supabase
     .from("membres_equipe")
@@ -313,10 +423,19 @@ async function performTeamMemberDeletion(id: number): Promise<DalResponse> {
     };
   }
 
-  return { success: true };
+  return { success: true, data: null };
 }
 
-function handleHardDeleteError(error: unknown): DalResponse {
+/**
+ * Handles errors during hard delete operations
+ *
+ * Provides user-friendly error messages and appropriate HTTP status codes
+ * based on the error type.
+ *
+ * @param error - Error object caught during deletion
+ * @returns DALResult with error details and appropriate status code
+ */
+function handleHardDeleteError(error: unknown): DALResult<null> {
   console.error("[DAL] hardDeleteTeamMember error:", error);
 
   if (error instanceof Error && error.message.includes("Forbidden")) {

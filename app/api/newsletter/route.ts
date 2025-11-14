@@ -4,7 +4,6 @@ import { createClient } from "@/supabase/server";
 import { sendNewsletterConfirmation } from "@/lib/email/actions";
 import {
   HttpStatus,
-  PostgresError,
   isUniqueViolation,
 } from "@/lib/api/helpers";
 

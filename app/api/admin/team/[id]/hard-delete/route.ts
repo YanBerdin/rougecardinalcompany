@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { hardDeleteTeamMember } from "@/lib/dal/team";
 import {
   withAdminAuth,

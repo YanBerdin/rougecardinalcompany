@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
-import { ContactMessageSchema } from "@/types/contact.types";
+import { NextRequest } from "next/server";
+import { ContactMessageSchema } from "@/lib/email/schemas";
 import { sendContactNotification } from "@/lib/email/actions";
 import {
   createContactMessage,
   type ContactMessageInput,
 } from "@/lib/dal/contact";
-import { parseFullName, HttpStatus } from "@/lib/api/helpers";
+import { parseFullName, HttpStatus, ApiResponse } from "@/lib/api/helpers";
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,10 +13,7 @@ export async function POST(request: NextRequest) {
     const validation = ContactMessageSchema.safeParse(body);
 
     if (!validation.success) {
-      return NextResponse.json(
-        { error: "Données invalides", details: validation.error.issues },
-        { status: HttpStatus.BAD_REQUEST }
-      );
+      return ApiResponse.validationError(validation.error.issues);
     }
 
     const contactData = validation.data;
@@ -61,19 +58,16 @@ export async function POST(request: NextRequest) {
       // Ne pas échouer la soumission si l'email échoue
     }
 
-    return NextResponse.json(
+    return ApiResponse.success(
       {
         status: "sent",
         message: "Message envoyé",
         ...(emailSent ? {} : { warning: "Notification email could not be sent" }),
       },
-      { status: HttpStatus.OK }
+      HttpStatus.OK
     );
   } catch (error) {
     console.error("[Contact API] Error:", error);
-    return NextResponse.json(
-      { error: "Erreur serveur" },
-      { status: HttpStatus.INTERNAL_SERVER_ERROR }
-    );
+    return ApiResponse.error("Erreur serveur", HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }
