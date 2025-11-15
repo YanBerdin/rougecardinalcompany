@@ -40,6 +40,19 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 
 ## Travaux novembre 2025
 
+- ✅ **15 novembre — TASK027B SECURITY DEFINER Rationale Headers COMPLÉTÉ** :
+  - **Issue** : #27 - Require explicit SECURITY DEFINER justification in function headers
+  - **Résultat** : 6 fonctions documentées avec headers de justification explicites
+  - **Fonctions modifiées** :
+    - Auth/Profiles sync triggers : `handle_new_user()`, `handle_user_deletion()`, `handle_user_update()`
+    - Core helpers : `is_admin()`, `get_current_timestamp()`
+    - Admin RPC : `reorder_team_members(jsonb)`
+  - **Template header** : Rationale, Risks Evaluated, Validation, Grant Policy
+  - **Documentation** : `.github/instructions/Database_Create_functions.instructions.md` mis à jour
+  - **Checklist sécurité** : 10 items pour code review
+  - **Issue GitHub** : #27 fermée avec rapport complet (15 nov 2025)
+  - **Impact** : Traçabilité améliorée, code reviews facilités, aucun impact runtime
+
 - ✅ **15 novembre — TASK028B Cleanup Scripts Obsolètes COMPLÉTÉ** :
   - **Issue** : #28 - Suppression de 3 scripts d'audit temporaires Round 7
   - **Résultat** : Fichiers déjà supprimés le 26 oct 2025 (commit `20ecfbb`)
@@ -380,11 +393,10 @@ async function runTest(
 
 ## Prochaines étapes (Phase 2 — Backoffice)
 
-**Issues GitHub ouvertes (20 total)** :
+**Issues GitHub ouvertes (19 total)** :
 
 **Priorité Haute** :
 
-- Issue #27 : Add rationale headers to SECURITY DEFINER functions (TASK027B)
 - Issue #1 : Content management CRUD (TASK021) - En cours
 
 **Back-office Tasks (Issues #1-20)** :
@@ -413,6 +425,7 @@ async function runTest(
 - ✅ Issue #5 : TASK025 - RLS Security & Performance Fixes (23 oct 2025)
 - ✅ Issue #24 : TASK025B - Security Audit Campaign (26 oct 2025 - fermée 15 nov 2025)
 - ✅ Issue #26 : TASK026B - Database Functions Compliance (15 nov 2025)
+- ✅ Issue #27 : TASK027B - SECURITY DEFINER Rationale Headers (fermée 15 nov 2025)
 - ✅ Issue #28 : TASK028B - Cleanup Obsolete Scripts (26 oct 2025 - fermée 15 nov 2025)
 
 1. **Gestion d'équipe** :
