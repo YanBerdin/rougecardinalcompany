@@ -53,7 +53,7 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
     - `doc-perso/TASK026B-cloud-fix-procedure.md` : Procédure hotfix validée
   - **Validation** : `SELECT proconfig FROM pg_proc WHERE proname = 'reorder_team_members'` → `{search_path=}` ✅
   - **Issue #26** : Commentaire complet (audit results + correction details + documentation) + closed with "completed"
-  - **Commits** : 5 fichiers modifiés (migrations.md, _index.md, _preview, TASK026B.md, GitHub comment/close)
+  - **Commits** : 5 fichiers modifiés (`migrations.md, _index.md, _preview, TASK026B.md, GitHub comment/close`)
   - **Impact sécurité** : Protection contre injection schéma sur fonction SECURITY DEFINER admin
   - **Performance** : Zero downtime (remplacement à chaud)
 

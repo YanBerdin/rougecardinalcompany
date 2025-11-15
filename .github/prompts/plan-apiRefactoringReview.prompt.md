@@ -1,4 +1,4 @@
-# Plan de Revue : Refactoring API Routes + DAL
+Plan de Revue : Refactoring API Routes + DAL
 
 **Date :** November 14, 2025  
 **Score Global :** 9.4/10 ✅  
@@ -6,18 +6,19 @@
 
 ---
 
-## 📋 Table des Matières
+📋 Table des Matières
 
 - [1. Résumé Exécutif](#1-résumé-exécutif)
 - [2. Analyse Détaillée par Fichier](#2-analyse-détaillée-par-fichier)
 - [3. Matrice des Issues](#3-matrice-des-issues)
 - [4. Recommandations Prioritaires](#4-recommandations-prioritaires)
-- [5. Plan d'Implémentation](#5-plan-d---implémentation)
+- [5. Plan d'Implémentation](#5-plan-d-implementation)
 - [6. Métriques de Qualité](#6-métriques-de-qualité)
 
 ## 1. Résumé Exécutif
 
 ### Contexte
+
 Revue approfondie du refactoring avec HttpStatus helpers, ApiResponse patterns, et optimisation DAL.
 
 ### Objectifs de la Revue
@@ -171,6 +172,7 @@ return ApiResponse.validationError(validation.error.issues);
 **Score :** 10/10 ✅ **RÉFÉRENCE**
 
 **Points forts :**
+
 ```typescript
 // ✅ EXCELLENT usage de isUniqueViolation
 if (error && !isUniqueViolation(error)) {
@@ -337,8 +339,6 @@ type DalResponse<T = null> = ...;  // Ligne 27
 - ✅ Documentation inline complète
 
 **Verdict :** Base solide pour tout le codebase
-
----
 
 ## 3. Matrice des Issues
 
@@ -766,27 +766,17 @@ pnpm build                  # Production build
 pnpm dev                    # Start dev server
 ```
 
-### 8.3 Contacts & Resources
-
-**Code Review :** [Team Lead]  
-**Questions :** [Slack #dev-backend]  
-**Documentation :** `/docs/api-guidelines.md`
-
----
-
 **Plan créé le :** November 14, 2025  
 **Dernière mise à jour :** November 14, 2025  
 **Version :** 1.0  
 **Auteur :** Code Review Bot
-```
-
----
 
 #### 2. **Ajouter JSDoc aux fonctions DAL publiques**
 
 **Objectif :** Améliorer DX (Developer Experience) avec documentation inline.
 
 **Exemple suggéré :**
+
 ```typescript
 /**
  * Fetches dashboard statistics from Supabase
@@ -823,7 +813,7 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
 
 ---
 
-## 5. Plan d'Implémentation {#plan-implémentation}
+## 9. Plan d'Implémentation {#plan-implémentation}
 
 ### 5.1 Stratégie d'Exécution
 
@@ -954,9 +944,9 @@ async function validateTeamMemberForDeletion(...) { ... }
 
 ---
 
-## 6. Métriques de Qualité {#métriques}
+## 10. Métriques de Qualité {#métriques}
 
-### 6.1 Comparatif Avant/Après
+### 10.1 Comparatif Avant/Après
 
 | Métrique | Avant Refactoring | Après Refactoring | Gain |
 |----------|-------------------|-------------------|------|
@@ -967,7 +957,7 @@ async function validateTeamMemberForDeletion(...) { ... }
 | **Maintenabilité** | 65% | 90% | +25% |
 | **Score Global** | 6.5/10 | 9.4/10 | +2.9 pts |
 
-### 6.2 Couverture Patterns
+### 10.2 Couverture Patterns
 
 ```
 HttpStatus Constants   : 10/10 fichiers (100%) ✅
@@ -977,7 +967,7 @@ Zod Validation         : 7/10 fichiers (70%)   ✅
 JSDoc Documentation    : 3/10 fichiers (30%)   ❌
 ```
 
-### 6.3 Complexité Code
+### 10.3 Complexité Code
 
 **DAL Functions :**
 - Moyenne lignes/fonction : 18 (target: <30) ✅
@@ -991,9 +981,9 @@ JSDoc Documentation    : 3/10 fichiers (30%)   ❌
 
 ---
 
-## 7. Conclusion & Next Steps
+## 11. Conclusion & Next Steps
 
-### 7.1 Verdict Final
+### 11.1 Verdict Final
 
 ✅ **Code Production-Ready**
 - Score global : **9.4/10**
@@ -1001,7 +991,7 @@ JSDoc Documentation    : 3/10 fichiers (30%)   ❌
 - Tests passent : **100%**
 - Type safety : **95%**
 
-### 7.2 Décision Recommandée
+### 11.2 Décision Recommandée
 
 1. Cohérence `ApiResponse` vs `NextResponse.json` (cosmétique)
 2. Naming `DALResult` vs `DalResponse` (cosmétique)

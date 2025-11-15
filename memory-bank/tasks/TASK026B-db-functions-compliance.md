@@ -107,7 +107,7 @@ $$;
 
 ### 2025-11-15 - Evening - ✅ TASK COMPLETED
 
-**Application de la correction sur Supabase Cloud**
+#### **Application de la correction sur Supabase Cloud**
 
 - ✅ **Fonction corrigée** : `public.reorder_team_members(jsonb)` avec `SET search_path = ''`
 - 📝 **Méthode** : SQL Editor direct (hotfix) pour contourner conflit migration history
@@ -117,11 +117,13 @@ $$;
 - 🎯 **Résultat final** : **100% compliance** - 28/28 fonctions avec `SET search_path = ''`
 
 **Justification approche hotfix** :
+
 - 32 migrations Cloud manquantes (incident RLS 27 oct - campagne erronée déjà annulée)
 - Approche conforme Section 5.5 "Hotfix Migrations and Schema Synchronization"
 - Plus rapide et sûre que `migration repair` (5 min vs 30+ min)
 
 **Actions post-déploiement** :
+
 - ✅ Vérifié avec `SELECT proconfig FROM pg_proc WHERE proname = 'reorder_team_members'`
 - ✅ Résultat attendu : `{search_path=}` confirmé
 - ✅ Memory-bank mis à jour (statut Completed)

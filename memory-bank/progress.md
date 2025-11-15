@@ -683,7 +683,7 @@ Cette vérification a été réalisée via l'API Supabase MCP et confirme que le
 5. ⚠️ Retirer les délais artificiels avant production (1200-1500ms dans containers)
 6. ⚠️ Docker: `prune -a` supprime TOUTES les images inutilisées, pas seulement les anciennes versions
 
-## Journal des Mises à Jour
+## Journal des Mises à Jour (suite)
 
 ### 14-15 Novembre 2025
 
