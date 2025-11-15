@@ -47,7 +47,7 @@ export default function AdminDashboard() {
             </Link>
           </Button>
           <Button variant="outline-primary" className="h-auto py-4" asChild>
-            <Link href="/admin/shows">
+            <Link href="/admin/spectacles">
               <div className="flex flex-col items-center gap-2">
                 <FileText className="h-6 w-6" aria-hidden />
                 <span>Gérer les spectacles</span>

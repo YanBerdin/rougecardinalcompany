@@ -49,7 +49,7 @@ const generalItems = [
 const contentItems = [
   {
     title: "Spectacles",
-    href: "/admin/shows",
+    href: "/admin/spectacles",
     icon: FileText,
   },
   {

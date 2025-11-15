@@ -32,8 +32,8 @@ function getErrorMessage(err: unknown): string {
   }
 }
 
-type DALSuccess<T> = { success: true; data: T };
-type DALError = { success: false; error: string; status?: HttpStatusCode };
+type DALSuccess<T> = { readonly success: true; readonly data: T };
+type DALError = { readonly success: false; readonly error: string; readonly status?: HttpStatusCode };
 export type DALResult<T> = DALSuccess<T> | DALError;
 
 // ============================================================================
@@ -180,6 +180,72 @@ export async function fetchSpectacleBySlug(
 // ============================================================================
 
 /**
+ * Validates spectacle creation input
+ * @internal
+ */
+async function validateCreateInput(
+  input: CreateSpectacleInput
+): Promise<DALResult<CreateSpectacleInput>> {
+  const validated = CreateSpectacleSchema.safeParse(input as unknown);
+  if (!validated.success) {
+    console.error("createSpectacle: invalid input:", validated.error);
+    return {
+      success: false,
+      error: "Données invalides : vérifiez les champs requis",
+      status: HttpStatus.BAD_REQUEST,
+    };
+  }
+  return { success: true, data: validated.data };
+}
+
+/**
+ * Inserts spectacle into database with auto-generated slug if needed
+ * @internal
+ */
+async function insertSpectacle(
+  validatedData: CreateSpectacleInput
+): Promise<DALResult<SpectacleDb>> {
+  const dataToInsert = validatedData.slug
+    ? validatedData
+    : { ...validatedData, slug: generateSlug(validatedData.title) };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("spectacles")
+    .insert(dataToInsert)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("insertSpectacle error:", error);
+    if (error.code === "23505") {
+      return {
+        success: false,
+        error: "Un spectacle avec ce slug existe déjà",
+        status: HttpStatus.CONFLICT,
+      };
+    }
+    return {
+      success: false,
+      error: getErrorMessage(error),
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+    };
+  }
+
+  const parsed = SpectacleDbSchema.safeParse(data as unknown);
+  if (!parsed.success) {
+    console.error("insertSpectacle: invalid response:", parsed.error);
+    return {
+      success: false,
+      error: "Réponse invalide de la base de données",
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+    };
+  }
+
+  return { success: true, data: parsed.data };
+}
+
+/**
  * Creates a new spectacle
  *
  * Validates input with Zod and requires admin permissions.
@@ -207,59 +273,14 @@ export async function createSpectacle(
   try {
     await requireAdmin();
 
-    // Validate input
-    const validated = CreateSpectacleSchema.safeParse(input as unknown);
-    if (!validated.success) {
-      console.error("createSpectacle: invalid input:", validated.error);
-      return {
-        success: false,
-        error: "Invalid input data",
-        status: HttpStatus.BAD_REQUEST,
-      };
-    }
+    const validationResult = await validateCreateInput(input);
+    if (!validationResult.success) return validationResult;
 
-    // Auto-generate slug if not provided
-    const dataToInsert = validated.data;
-    if (!dataToInsert.slug) {
-      dataToInsert.slug = generateSlug(dataToInsert.title);
-    }
-
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("spectacles")
-      .insert(dataToInsert)
-      .select()
-      .single();
-
-    if (error) {
-      console.error("createSpectacle error:", error);
-      // Check for unique constraint violation (slug)
-      if (error.code === "23505") {
-        return {
-          success: false,
-          error: "A spectacle with this slug already exists",
-          status: HttpStatus.CONFLICT,
-        };
-      }
-      return {
-        success: false,
-        error: getErrorMessage(error),
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
-      };
-    }
-
-    const parsed = SpectacleDbSchema.safeParse(data as unknown);
-    if (!parsed.success) {
-      console.error("createSpectacle: invalid response:", parsed.error);
-      return {
-        success: false,
-        error: "Invalid response from database",
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
-      };
-    }
+    const insertResult = await insertSpectacle(validationResult.data);
+    if (!insertResult.success) return insertResult;
 
     revalidatePath("/admin/spectacles");
-    return { success: true, data: parsed.data };
+    return insertResult;
   } catch (err: unknown) {
     console.error("createSpectacle exception:", err);
     return {
@@ -273,6 +294,70 @@ export async function createSpectacle(
 // ============================================================================
 // UPDATE Operation
 // ============================================================================
+
+/**
+ * Validates spectacle update input
+ * @internal
+ */
+async function validateUpdateInput(
+  input: UpdateSpectacleInput
+): Promise<DALResult<UpdateSpectacleInput>> {
+  const validated = UpdateSpectacleSchema.safeParse(input as unknown);
+  if (!validated.success) {
+    console.error("updateSpectacle: invalid input:", validated.error);
+    return {
+      success: false,
+      error: "Données invalides : vérifiez les champs modifiés",
+      status: HttpStatus.BAD_REQUEST,
+    };
+  }
+  return { success: true, data: validated.data };
+}
+
+/**
+ * Performs database update for spectacle
+ * @internal
+ */
+async function performSpectacleUpdate(
+  id: number,
+  updateData: Partial<CreateSpectacleInput>
+): Promise<DALResult<SpectacleDb>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("spectacles")
+    .update(updateData)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("performSpectacleUpdate error:", error);
+    if (error.code === "23505") {
+      return {
+        success: false,
+        error: "Un spectacle avec ce slug existe déjà",
+        status: HttpStatus.CONFLICT,
+      };
+    }
+    return {
+      success: false,
+      error: getErrorMessage(error),
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+    };
+  }
+
+  const parsed = SpectacleDbSchema.safeParse(data as unknown);
+  if (!parsed.success) {
+    console.error("performSpectacleUpdate: invalid response:", parsed.error);
+    return {
+      success: false,
+      error: "Réponse invalide de la base de données",
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+    };
+  }
+
+  return { success: true, data: parsed.data };
+}
 
 /**
  * Updates an existing spectacle
@@ -296,67 +381,26 @@ export async function updateSpectacle(
   try {
     await requireAdmin();
 
-    // Validate input
-    const validated = UpdateSpectacleSchema.safeParse(input as unknown);
-    if (!validated.success) {
-      console.error("updateSpectacle: invalid input:", validated.error);
-      return {
-        success: false,
-        error: "Invalid input data",
-        status: HttpStatus.BAD_REQUEST,
-      };
-    }
+    const validationResult = await validateUpdateInput(input);
+    if (!validationResult.success) return validationResult;
 
-    const { id, ...updateData } = validated.data;
+    const { id, ...updateData } = validationResult.data;
 
-    // Check if spectacle exists
     const existing = await fetchSpectacleById(id);
     if (!existing) {
       return {
         success: false,
-        error: "Spectacle not found",
+        error: "Spectacle introuvable",
         status: HttpStatus.NOT_FOUND,
       };
     }
 
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("spectacles")
-      .update(updateData)
-      .eq("id", id)
-      .select()
-      .single();
-
-    if (error) {
-      console.error("updateSpectacle error:", error);
-      // Check for unique constraint violation (slug)
-      if (error.code === "23505") {
-        return {
-          success: false,
-          error: "A spectacle with this slug already exists",
-          status: HttpStatus.CONFLICT,
-        };
-      }
-      return {
-        success: false,
-        error: getErrorMessage(error),
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
-      };
-    }
-
-    const parsed = SpectacleDbSchema.safeParse(data as unknown);
-    if (!parsed.success) {
-      console.error("updateSpectacle: invalid response:", parsed.error);
-      return {
-        success: false,
-        error: "Invalid response from database",
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
-      };
-    }
+    const updateResult = await performSpectacleUpdate(id, updateData);
+    if (!updateResult.success) return updateResult;
 
     revalidatePath("/admin/spectacles");
     revalidatePath(`/admin/spectacles/${id}`);
-    return { success: true, data: parsed.data };
+    return updateResult;
   } catch (err: unknown) {
     console.error("updateSpectacle exception:", err);
     return {
@@ -396,7 +440,7 @@ export async function deleteSpectacle(id: number): Promise<DALResult<null>> {
     if (!existing) {
       return {
         success: false,
-        error: "Spectacle not found",
+        error: "Spectacle introuvable",
         status: HttpStatus.NOT_FOUND,
       };
     }
@@ -410,7 +454,7 @@ export async function deleteSpectacle(id: number): Promise<DALResult<null>> {
       if (error.code === "23503") {
         return {
           success: false,
-          error: "Cannot delete spectacle with related records",
+          error: "Impossible de supprimer : ce spectacle a des événements associés",
           status: HttpStatus.CONFLICT,
         };
       }
