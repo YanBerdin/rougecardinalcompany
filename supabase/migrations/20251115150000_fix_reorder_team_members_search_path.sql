@@ -1,26 +1,6 @@
--- 63_reorder_team_members.sql
---
--- Purpose: provide an atomic, server-side operation to reorder rows in
--- the `public.membres_equipe` table. this function accepts a jsonb array of
--- objects with shape {"id": <int>, "ordre": <int>} and applies all updates
--- in a single transaction. it performs input validation, rejects duplicates,
--- and acquires a transaction-scoped advisory lock to avoid concurrent
--- reordering races.
---
--- Affected objects:
---  - public.reorder_team_members(jsonb) function
---  - public.membres_equipe table (updates ordre column)
---
--- Security notes:
---  - this function is defined with security definer to allow controlled
---    updates regardless of caller privileges; however it enforces an
---    authorization check using public.is_admin() to prevent non-admin RPC
---    calls from performing changes (defense-in-depth).
---  - grant execute should be applied deliberately (e.g. to authenticated)
---    by migrations/ops only after review. do not grant to anon.
---
--- Usage (from supabase/dal):
---   select public.reorder_team_members('[{"id":12,"ordre":1},{"id":45,"ordre":2}]'::jsonb);
+-- Fix TASK026B: Add SET search_path to reorder_team_members function
+-- Issue #26: Database Functions Compliance
+-- Security: Prevents schema injection attacks
 
 create or replace function public.reorder_team_members(items jsonb)
 returns void as $$
@@ -78,5 +58,5 @@ begin
 end;
 $$ language plpgsql security definer set search_path = '';
 
--- grant execute to authenticated so only authenticated users (admin UI / server) can execute the rpc
-grant execute on function public.reorder_team_members(jsonb) to authenticated;
+comment on function public.reorder_team_members(jsonb) is 
+'Atomically reorders team members. SECURITY DEFINER with SET search_path for schema injection protection.';

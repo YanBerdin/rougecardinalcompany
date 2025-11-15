@@ -40,6 +40,23 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 
 ## Travaux novembre 2025
 
+- ✅ **15 novembre — TASK026B Database Functions Compliance COMPLÉTÉ** :
+  - **Résultat final** : 100% compliance (28/28 fonctions avec `SET search_path = ''`)
+  - **Fonction corrigée** : `public.reorder_team_members(jsonb)` dans `63_reorder_team_members.sql`
+  - **Méthode** : Hotfix SQL Editor direct (Section 5.5 "Hotfix Migrations and Schema Synchronization")
+  - **Justification** : 32 migrations Cloud manquantes (incident RLS 27 oct - campagne erronée déjà annulée)
+  - **Migration locale** : `20251115150000_fix_reorder_team_members_search_path.sql` créée et documentée
+  - **Schéma déclaratif** : `supabase/schemas/63_reorder_team_members.sql` synchronisé
+  - **Documentation** :
+    - `supabase/migrations/migrations.md` : Section "Corrections et fixes critiques" ajoutée
+    - `memory-bank/tasks/TASK026B-db-functions-compliance.md` : Progress log complet
+    - `doc-perso/TASK026B-cloud-fix-procedure.md` : Procédure hotfix validée
+  - **Validation** : `SELECT proconfig FROM pg_proc WHERE proname = 'reorder_team_members'` → `{search_path=}` ✅
+  - **Issue #26** : Commentaire complet (audit results + correction details + documentation) + closed with "completed"
+  - **Commits** : 5 fichiers modifiés (migrations.md, _index.md, _preview, TASK026B.md, GitHub comment/close)
+  - **Impact sécurité** : Protection contre injection schéma sur fonction SECURITY DEFINER admin
+  - **Performance** : Zero downtime (remplacement à chaud)
+
 - ✅ **14 novembre — API Code Quality Refactoring + Newsletter Migration** :
   - **Documentation** : Plan d'analyse et refactoring complet créé (`.github/prompts/plan-apiRefactoringReview.prompt.md`)
     - 10 fichiers analysés (8 API routes + 1 DAL + 1 helpers)
@@ -351,9 +368,15 @@ async function runTest(
 
 ## Prochaines étapes (Phase 2 — Backoffice)
 
+**Issues GitHub ouvertes** :
+
+- Issue #27 : Add rationale headers to SECURITY DEFINER functions (TASK027B)
+- Issue #28 : Cleanup obsolete Round 7 audit scripts (TASK028B)
+
 1. **Gestion d'équipe** :
    - ✅ Hard-delete endpoint (fait)
    - ✅ Active/inactive toggle (fait)
+   - ✅ Database functions compliance (TASK026B - fait)
    - TODO : UI React pour CRUD membres
    - TODO : Upload photos membres (Supabase Storage)
 

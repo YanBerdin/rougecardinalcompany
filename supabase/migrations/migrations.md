@@ -220,6 +220,12 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## Corrections et fixes critiques
 
+- `20251115150000_fix_reorder_team_members_search_path.sql` — **FIX TASK026B** : Add SET search_path to reorder_team_members
+  - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/63_reorder_team_members.sql`
+  - 📝 **Appliqué manuellement sur Cloud** via SQL Editor (conflit migration history - 32 migrations obsolètes du 27 oct)
+  - 🔗 **Issue** : #26 - Database Functions Compliance
+  - 🎯 **Résultat** : 28/28 functions compliant with SET search_path = '' (100%)
+
 - `20250918000000_fix_spectacles_versioning_trigger.sql` — **FIX CRITIQUE** : Correction du trigger `spectacles_versioning_trigger()` pour utiliser le champ `public` (boolean) au lieu de `published_at` (inexistant dans la table spectacles). Ce trigger causait une erreur `record "old" has no field "published_at"` lors des insertions/updates de spectacles.
   - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/15_content_versioning.sql` (déjà corrigé)
   - 📝 **Migration conservée** pour l'historique et la cohérence avec Supabase Cloud

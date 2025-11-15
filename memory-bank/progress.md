@@ -120,6 +120,23 @@ Cette vérification a été réalisée via l'API Supabase MCP et confirme que le
   - Documentation complète (SECURITY_AUDIT_SUMMARY.md)
   - CI security audit ✅ PASSED
   - PR #25 merged, issues #26/#27/#28 créées
+- [x] **Database Functions Compliance (TASK026B)** — **TERMINÉ 15/11/2025** :
+  - 28/28 fonctions avec `SET search_path = ''` (100%)
+  - Fonction `reorder_team_members()` corrigée
+  - Hotfix SQL Editor (Section 5.5 workflow)
+  - Issue #26 closed with comprehensive report
+  - Migration `20251115150000` créée et documentée
+- [x] **API Code Quality Refactoring** — **TERMINÉ 14/11/2025** :
+  - ApiResponse pattern unifié (Contact, Newsletter, Team)
+  - Helpers centralisés : HttpStatus, parseFullName, isUniqueViolation
+  - DAL type consistency : DALResult<T> standardisé
+  - JSDoc documentation complète (8 fonctions)
+  - Score qualité : 9.4/10 → 9.8/10
+- [x] **Dashboard Refactoring** — **TERMINÉ 13/11/2025** :
+  - Smart/Dumb components pattern
+  - admin/page.tsx : 133 → 69 lignes (-48%)
+  - ErrorBoundary réutilisable + Zod types
+  - Tests : 4/4 passing (9/9 success criteria)
 - [x] Documentation d'architecture v2 (C4 + ADRs) publiée et référencée
 
 ## Fonctionnalités en Cours
@@ -666,9 +683,55 @@ Cette vérification a été réalisée via l'API Supabase MCP et confirme que le
 5. ⚠️ Retirer les délais artificiels avant production (1200-1500ms dans containers)
 6. ⚠️ Docker: `prune -a` supprime TOUTES les images inutilisées, pas seulement les anciennes versions
 
+## Journal des Mises à Jour
+
+### 14-15 Novembre 2025
+
+**Refactoring complet API Routes + Dashboard + TASK026B Completion**:
+
+- ✅ **TASK026B Database Functions Compliance COMPLÉTÉ** (15 nov):
+  - 100% compliance : 28/28 fonctions avec `SET search_path = ''`
+  - Fonction corrigée : `public.reorder_team_members(jsonb)`
+  - Méthode : Hotfix SQL Editor (Section 5.5 Declarative Schema instructions)
+  - Justification : 32 migrations Cloud manquantes (incident RLS 27 oct)
+  - Documentation : migrations.md, TASK026B.md, procedure.md
+  - Issue #26 : Commentaire complet + closed with "completed" status
+  - Migration locale : `20251115150000_fix_reorder_team_members_search_path.sql`
+  - Validation : `SELECT proconfig FROM pg_proc` → `{search_path=}` ✅
+
+- ✅ **API Code Quality Refactoring** (14 nov):
+  - **Phase 1 - ApiResponse Pattern Unification**:
+    - Contact, Newsletter, Team routes refactorées
+    - Helpers centralisés : HttpStatus, ApiResponse, withAdminAuth
+    - Magic numbers éliminés (14 total)
+  - **Phase 2 - DAL Type Consistency**:
+    - Type `DalResponse<T>` supprimé (duplication)
+    - Unification sur `DALResult<null>` (4 fonctions)
+    - Type safety : 100% (HttpStatusCode union type)
+  - **Phase 3 - JSDoc Documentation**:
+    - 8 fonctions DAL documentées (~69 lignes)
+    - IntelliSense IDE complet
+  - **Validation**: TypeScript ✅, ESLint ✅, Tests ✅ (17+6 passed)
+  - **Score**: 9.4/10 → 9.8/10
+
+- ✅ **Dashboard Refactoring COMPLET** (13 nov - 3 phases):
+  - Phase 1: ErrorBoundary, types Zod, test script (4/4 passing)
+  - Phase 2: Component extraction (StatsCard, DAL dashboard.ts)
+    - admin/page.tsx : 133 → 69 lignes (-48%)
+  - Phase 3: API Routes Contact + Newsletter
+    - parseFullName(), isUniqueViolation() helpers
+    - HttpStatus constants partout
+  - Success Criteria: 9/9 atteints ✨
+
+- ✅ **Suite de tests API complète** (13 nov):
+  - test-active-endpoint.ts : 17/17 tests passing
+  - test-team-active-dal.ts : 5/5 tests passed
+  - test-newsletter-endpoint.ts : 6/6 tests passed
+  - Pattern établi pour tests futurs
+
 ## Dernière Mise à Jour
 
-**Date**: 11 novembre 2025
+**Date**: 15 novembre 2025
 **Changements majeurs**:
 
 - **Migration architecture layouts + admin UI** (11 novembre)

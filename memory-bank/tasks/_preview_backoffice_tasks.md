@@ -4,14 +4,18 @@ Ce fichier est une prévisualisation consolidée des 20 tâches générées à p
 
 | id      | titre                       |  statut |     ajouté | mis à jour | description courte                                       | fichier                                                    |
 | ------- | --------------------------- | ------: | ---------: | ---------: | -------------------------------------------------------- | ---------------------------------------------------------- |
-| TASK021 | Content Management CRUD     | Pending | 2025-10-16 | 2025-10-16 | CRUD for shows, events, articles                         | `memory-bank/tasks/TASK021-content-management-crud.md`     |
-| TASK022 | Team Management             | Pending | 2025-10-16 | 2025-10-16 | CRUD for team members with photos and roles              | `memory-bank/tasks/TASK022-team-management.md`             |
+| TASK021 | Content Management CRUD     | In Progress | 2025-10-16 | 2025-11-15 | CRUD for shows, events, articles                         | `memory-bank/tasks/TASK021-content-management-crud.md`     |
+| TASK022 | Team Management             | Completed | 2025-10-16 | 2025-10-22 | CRUD for team members with photos and roles              | `memory-bank/tasks/TASK022-team-management.md`             |
 | TASK023 | Partners Management         | Pending | 2025-10-16 | 2025-10-16 | CRUD for partners with logos and display order           | `memory-bank/tasks/TASK023-partners-management.md`         |
 | TASK024 | Press Management            | Pending | 2025-10-16 | 2025-10-16 | CRUD for press releases and press contacts               | `memory-bank/tasks/TASK024-press-management.md`            |
-| TASK025 | RLS Security & Performance Fixes             | Completed  | 2025-10-22 | 2025-10-23 | Fix RLS policies, SECURITY INVOKER views, performance optimization (~40% gain) | `memory-bank/tasks/TASK025-rls-security-performance-fixes.md` |
-| TASK026 | Homepage Content Management | Pending | 2025-10-16 | 2025-10-16 | Edit hero slides, about section, news highlights         | `memory-bank/tasks/TASK026-homepage-content-management.md` |
-| TASK027 | Company Content Management  | Pending | 2025-10-16 | 2025-10-16 | Edit company values, stats, presentation sections        | `memory-bank/tasks/TASK027-company-content-management.md`  |
-| TASK028 | Content Versioning UI       | Pending | 2025-10-16 | 2025-10-16 | View history, compare versions, restore                  | `memory-bank/tasks/TASK028-content-versioning-ui.md`       |
+| TASK025 | RLS Security & Performance Fixes | Completed  | 2025-10-22 | 2025-10-23 | Fix RLS policies, SECURITY INVOKER views, performance optimization (~40% gain) | `memory-bank/tasks/TASK025-rls-security-performance-fixes.md` |
+| TASK025B | Database Security Audit Campaign | Completed | 2025-10-26 | 2025-10-26 | Complete database security audit (73 objects secured, Round 17 CI passed) | Issue #24 - `memory-bank/tasks/TASK025B-security-audit-campaign.md` |
+| TASK026 | Homepage Content Management | Pending | 2025-10-16 | 2025-11-15 | Edit hero slides, about section, news highlights         | `memory-bank/tasks/TASK026-homepage-content-management.md` |
+| TASK026B | Database Functions Compliance | Completed | 2025-10-26 | 2025-11-15 | 28/28 functions with SET search_path (applied via SQL Editor hotfix) | Issue #26 - `memory-bank/tasks/TASK026B-db-functions-compliance.md` |
+| TASK027 | Company Content Management  | Pending | 2025-10-16 | 2025-11-15 | Edit company values, stats, presentation sections        | `memory-bank/tasks/TASK027-company-content-management.md`  |
+| TASK027B | Security Definer Rationale | Pending | 2025-10-26 | 2025-11-15 | Require explicit SECURITY DEFINER rationale in function headers | Issue #27 - `memory-bank/tasks/TASK027B-security-definer-rationale.md` |
+| TASK028 | Content Versioning UI       | Pending | 2025-10-16 | 2025-11-15 | View history, compare versions, restore                  | `memory-bank/tasks/TASK028-content-versioning-ui.md`       |
+| TASK028B | Cleanup Obsolete Scripts | Pending | 2025-10-26 | 2025-11-15 | Propose deletion of obsolescent audit scripts (Round7 artifacts) | Issue #28 - `memory-bank/tasks/TASK028B-cleanup-obsolete-scripts.md` |
 | TASK029 | Media Library               | Pending | 2025-10-16 | 2025-10-16 | Upload, organize, tag and manage media files             | `memory-bank/tasks/TASK029-media-library.md`               |
 | TASK030 | Display Toggles             | Pending | 2025-10-16 | 2025-10-16 | Feature flags for newsletter, partners, featured content | `memory-bank/tasks/TASK030-display-toggles.md`             |
 | TASK031 | Analytics Dashboard         | Pending | 2025-10-16 | 2025-10-16 | Site statistics, popular pages, engagement               | `memory-bank/tasks/TASK031-analytics-dashboard.md`         |
@@ -28,9 +32,3 @@ Ce fichier est une prévisualisation consolidée des 20 tâches générées à p
 ---
 
 Fichier CSV : `memory-bank/tasks/_preview_backoffice_tasks.csv`
-
-Prochaines étapes proposées :
-
-- Valider le contenu et demander des modifications (titres, priorités, estimations).
-- Commit & push des nouveaux fichiers.
-- Optionnel : je peux appliquer un formatage pour respecter `markdownlint` (espaces autour des headings) sur ces fichiers avant commit.

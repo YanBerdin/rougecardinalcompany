@@ -8,14 +8,12 @@
 
 ## 📋 Table des Matières
 
-1. [Résumé Exécutif](#résumé-exéutif)
-2. [Analyse Détaillée par Fichier](#analyse-détaillée)
-3. [Matrice des Issues](#matrice-des-issues)
-4. [Recommandations Prioritaires](#recommandations)
-5. [Plan d'Implémentation](#plan-d-implémentation)
-6. [Métriques de Qualité](#métriques-de-qualité)
-
----
+- [1. Résumé Exécutif](#1-résumé-exécutif)
+- [2. Analyse Détaillée par Fichier](#2-analyse-détaillée-par-fichier)
+- [3. Matrice des Issues](#3-matrice-des-issues)
+- [4. Recommandations Prioritaires](#4-recommandations-prioritaires)
+- [5. Plan d'Implémentation](#5-plan-d---implémentation)
+- [6. Métriques de Qualité](#6-métriques-de-qualité)
 
 ## 1. Résumé Exécutif
 
@@ -40,7 +38,7 @@ Revue approfondie du refactoring avec HttpStatus helpers, ApiResponse patterns, 
 
 ---
 
-## 2. Analyse Détaillée par Fichier {#analyse-détaillée}
+## 2. Analyse Détaillée par Fichier
 
 ### 2.1 Routes API Admin
 
@@ -342,7 +340,7 @@ type DalResponse<T = null> = ...;  // Ligne 27
 
 ---
 
-## 3. Matrice des Issues {#matrice-des-issues}
+## 3. Matrice des Issues
 
 ### 3.1 Scores par Fichier
 

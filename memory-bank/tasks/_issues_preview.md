@@ -23,7 +23,12 @@ Ce fichier liste les titres et descriptions extraites des fichiers de tâches `T
    - **Etat**: Completed (23 oct 2025)
    - **Issue**: [#5](https://github.com/YanBerdin/rougecardinalcompany/issues/5) (CLOSED)
 
-6. TASK026 — Homepage content management
+6. **TASK026B — Database Functions Compliance: SET search_path** ✅
+   - **Résumé**: Application `SET search_path = ''` à toutes les fonctions database pour prévenir injection schéma. 28/28 fonctions conformes (100%). Hotfix appliqué via SQL Editor (Section 5.5).
+   - **Etat**: Completed (15 nov 2025)
+   - **Issue**: [#26](https://github.com/YanBerdin/rougecardinalcompany/issues/26) (CLOSED)
+
+7. TASK026 — Homepage content management
    - Résumé: Panneau pour éditer contenus d'accueil (hero, news, shows).
 
 7. TASK027 — Company content management
