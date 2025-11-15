@@ -2,42 +2,459 @@
 
 import "server-only";
 import { createClient } from "@/supabase/server";
+import { requireAdmin } from "@/lib/auth/is-admin";
+import { revalidatePath } from "next/cache";
+import {
+  SpectacleDbSchema,
+  CreateSpectacleSchema,
+  UpdateSpectacleSchema,
+  type SpectacleDb,
+  type CreateSpectacleInput,
+  type UpdateSpectacleInput,
+  type SpectacleSummary,
+} from "@/lib/schemas/spectacles";
+import { HttpStatus, type HttpStatusCode } from "@/lib/api/helpers";
 
-export type SpectacleSummary = {
-  id: number;
-  title: string;
-  slug: string | null;
-  short_description: string | null;
-  image_url: string | null;
-  premiere: string | null;
-  public: boolean;
-  genre: string | null;
-  duration_minutes: number | null;
-  casting: number | null;
-  status: string | null;
-  awards: string[] | null;
-};
+// ============================================================================
+// Types & Helpers
+// ============================================================================
+
+function getErrorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  if (typeof err === "object" && err !== null && "message" in err) {
+    const maybe = (err as { message?: unknown }).message;
+    if (typeof maybe === "string") return maybe;
+  }
+  try {
+    return JSON.stringify(err);
+  } catch {
+    return String(err);
+  }
+}
+
+type DALSuccess<T> = { success: true; data: T };
+type DALError = { success: false; error: string; status?: HttpStatusCode };
+export type DALResult<T> = DALSuccess<T> | DALError;
+
+// ============================================================================
+// READ Operations
+// ============================================================================
 
 /**
- * Fetch all spectacles from DB.
- * - 06_table_spectacles > table public.spectacles (mock currentShowsData[] + archivedShowsData[] )
- * - Only selects safe, known columns
- * - Returns an empty array on error
+ * Fetches all spectacles from the database
+ *
+ * By default, only public spectacles are returned. Invalid rows that fail
+ * Zod validation are filtered out and logged.
+ *
+ * @param includePrivate - If true, includes private spectacles (admin only)
+ * @returns Array of validated spectacle records
+ *
+ * @example
+ * // Get only public spectacles
+ * const publicSpectacles = await fetchAllSpectacles();
+ *
+ * // Get all spectacles including private (admin)
+ * const allSpectacles = await fetchAllSpectacles(true);
  */
-export async function fetchAllSpectacles(): Promise<SpectacleSummary[]> {
-  const supabase = await createClient();
+export async function fetchAllSpectacles(
+  includePrivate = false
+): Promise<SpectacleSummary[]> {
+  try {
+    const supabase = await createClient();
+    let query = supabase
+      .from("spectacles")
+      .select(
+        "id, title, slug, short_description, image_url, premiere, public, genre, duration_minutes, casting, status, awards"
+      )
+      .order("premiere", { ascending: false });
 
-  const { data, error } = await supabase
-    .from("spectacles")
-    .select(
-      "id, title, slug, short_description, image_url, premiere, public, genre, duration_minutes, casting, status, awards"
-    )
-    .order("premiere", { ascending: false });
+    if (!includePrivate) {
+      query = query.eq("public", true);
+    }
 
-  if (error) {
-    console.error("fetchAllSpectacles error", error);
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("fetchAllSpectacles error:", error);
+      return [];
+    }
+
+    const rows = (data as SpectacleSummary[]) || [];
+
+    // Validate each row with Zod; log invalid rows and filter them out
+    const validRows: SpectacleSummary[] = [];
+    for (const r of rows) {
+      const parsed = SpectacleDbSchema.partial().safeParse(r as unknown);
+      if (parsed.success) validRows.push(r);
+      else console.error("fetchAllSpectacles: invalid row:", parsed.error);
+    }
+
+    return validRows;
+  } catch (err) {
+    console.error("fetchAllSpectacles exception:", err);
     return [];
   }
+}
 
-  return (data ?? []) as SpectacleSummary[];
+/**
+ * Fetches a single spectacle by ID
+ *
+ * @param id - Spectacle ID
+ * @returns Spectacle record or null if not found or invalid
+ *
+ * @example
+ * const spectacle = await fetchSpectacleById(123);
+ * if (spectacle) {
+ *   console.log(`Found: ${spectacle.title}`);
+ * }
+ */
+export async function fetchSpectacleById(
+  id: number
+): Promise<SpectacleDb | null> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("spectacles")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      console.error("fetchSpectacleById error:", error);
+      return null;
+    }
+
+    const parsed = SpectacleDbSchema.safeParse(data as unknown);
+    if (!parsed.success) {
+      console.error("fetchSpectacleById: invalid row:", parsed.error);
+      return null;
+    }
+
+    return parsed.data;
+  } catch (err) {
+    console.error("fetchSpectacleById exception:", err);
+    return null;
+  }
+}
+
+/**
+ * Fetches a spectacle by slug
+ *
+ * @param slug - Spectacle slug (URL-friendly identifier)
+ * @returns Spectacle record or null if not found
+ *
+ * @example
+ * const spectacle = await fetchSpectacleBySlug("hamlet-2025");
+ */
+export async function fetchSpectacleBySlug(
+  slug: string
+): Promise<SpectacleDb | null> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("spectacles")
+      .select("*")
+      .eq("slug", slug)
+      .single();
+
+    if (error) {
+      console.error("fetchSpectacleBySlug error:", error);
+      return null;
+    }
+
+    const parsed = SpectacleDbSchema.safeParse(data as unknown);
+    if (!parsed.success) {
+      console.error("fetchSpectacleBySlug: invalid row:", parsed.error);
+      return null;
+    }
+
+    return parsed.data;
+  } catch (err) {
+    console.error("fetchSpectacleBySlug exception:", err);
+    return null;
+  }
+}
+
+// ============================================================================
+// CREATE Operation
+// ============================================================================
+
+/**
+ * Creates a new spectacle
+ *
+ * Validates input with Zod and requires admin permissions.
+ * Automatically generates slug from title if not provided.
+ *
+ * @param input - Spectacle data (title required)
+ * @returns DALResult with the created spectacle or error details
+ *
+ * @example
+ * const result = await createSpectacle({
+ *   title: 'Hamlet',
+ *   genre: 'Tragédie',
+ *   duration_minutes: 180,
+ *   casting: 12,
+ *   public: true
+ * });
+ *
+ * if (result.success) {
+ *   console.log(`Created spectacle ID: ${result.data.id}`);
+ * }
+ */
+export async function createSpectacle(
+  input: CreateSpectacleInput
+): Promise<DALResult<SpectacleDb>> {
+  try {
+    await requireAdmin();
+
+    // Validate input
+    const validated = CreateSpectacleSchema.safeParse(input as unknown);
+    if (!validated.success) {
+      console.error("createSpectacle: invalid input:", validated.error);
+      return {
+        success: false,
+        error: "Invalid input data",
+        status: HttpStatus.BAD_REQUEST,
+      };
+    }
+
+    // Auto-generate slug if not provided
+    const dataToInsert = validated.data;
+    if (!dataToInsert.slug) {
+      dataToInsert.slug = generateSlug(dataToInsert.title);
+    }
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("spectacles")
+      .insert(dataToInsert)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("createSpectacle error:", error);
+      // Check for unique constraint violation (slug)
+      if (error.code === "23505") {
+        return {
+          success: false,
+          error: "A spectacle with this slug already exists",
+          status: HttpStatus.CONFLICT,
+        };
+      }
+      return {
+        success: false,
+        error: getErrorMessage(error),
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      };
+    }
+
+    const parsed = SpectacleDbSchema.safeParse(data as unknown);
+    if (!parsed.success) {
+      console.error("createSpectacle: invalid response:", parsed.error);
+      return {
+        success: false,
+        error: "Invalid response from database",
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      };
+    }
+
+    revalidatePath("/admin/spectacles");
+    return { success: true, data: parsed.data };
+  } catch (err: unknown) {
+    console.error("createSpectacle exception:", err);
+    return {
+      success: false,
+      error: getErrorMessage(err),
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+    };
+  }
+}
+
+// ============================================================================
+// UPDATE Operation
+// ============================================================================
+
+/**
+ * Updates an existing spectacle
+ *
+ * Validates input with Zod and requires admin permissions.
+ * Only updates provided fields (partial update).
+ *
+ * @param input - Partial spectacle data with required id
+ * @returns DALResult with the updated spectacle or error details
+ *
+ * @example
+ * const result = await updateSpectacle({
+ *   id: 123,
+ *   title: 'Hamlet (New Version)',
+ *   duration_minutes: 200
+ * });
+ */
+export async function updateSpectacle(
+  input: UpdateSpectacleInput
+): Promise<DALResult<SpectacleDb>> {
+  try {
+    await requireAdmin();
+
+    // Validate input
+    const validated = UpdateSpectacleSchema.safeParse(input as unknown);
+    if (!validated.success) {
+      console.error("updateSpectacle: invalid input:", validated.error);
+      return {
+        success: false,
+        error: "Invalid input data",
+        status: HttpStatus.BAD_REQUEST,
+      };
+    }
+
+    const { id, ...updateData } = validated.data;
+
+    // Check if spectacle exists
+    const existing = await fetchSpectacleById(id);
+    if (!existing) {
+      return {
+        success: false,
+        error: "Spectacle not found",
+        status: HttpStatus.NOT_FOUND,
+      };
+    }
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("spectacles")
+      .update(updateData)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("updateSpectacle error:", error);
+      // Check for unique constraint violation (slug)
+      if (error.code === "23505") {
+        return {
+          success: false,
+          error: "A spectacle with this slug already exists",
+          status: HttpStatus.CONFLICT,
+        };
+      }
+      return {
+        success: false,
+        error: getErrorMessage(error),
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      };
+    }
+
+    const parsed = SpectacleDbSchema.safeParse(data as unknown);
+    if (!parsed.success) {
+      console.error("updateSpectacle: invalid response:", parsed.error);
+      return {
+        success: false,
+        error: "Invalid response from database",
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      };
+    }
+
+    revalidatePath("/admin/spectacles");
+    revalidatePath(`/admin/spectacles/${id}`);
+    return { success: true, data: parsed.data };
+  } catch (err: unknown) {
+    console.error("updateSpectacle exception:", err);
+    return {
+      success: false,
+      error: getErrorMessage(err),
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+    };
+  }
+}
+
+// ============================================================================
+// DELETE Operation
+// ============================================================================
+
+/**
+ * Permanently deletes a spectacle from the database
+ *
+ * CRITICAL: This operation is irreversible and will cascade delete
+ * related records (events, relations, etc.) due to ON DELETE CASCADE
+ * constraints.
+ *
+ * @param id - Spectacle ID to delete
+ * @returns DALResult indicating success or failure
+ *
+ * @example
+ * const result = await deleteSpectacle(123);
+ * if (result.success) {
+ *   console.log('Spectacle deleted successfully');
+ * }
+ */
+export async function deleteSpectacle(id: number): Promise<DALResult<null>> {
+  try {
+    await requireAdmin();
+
+    // Check if spectacle exists
+    const existing = await fetchSpectacleById(id);
+    if (!existing) {
+      return {
+        success: false,
+        error: "Spectacle not found",
+        status: HttpStatus.NOT_FOUND,
+      };
+    }
+
+    const supabase = await createClient();
+    const { error } = await supabase.from("spectacles").delete().eq("id", id);
+
+    if (error) {
+      console.error("deleteSpectacle error:", error);
+      // Check for foreign key constraint violation
+      if (error.code === "23503") {
+        return {
+          success: false,
+          error: "Cannot delete spectacle with related records",
+          status: HttpStatus.CONFLICT,
+        };
+      }
+      return {
+        success: false,
+        error: getErrorMessage(error),
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      };
+    }
+
+    revalidatePath("/admin/spectacles");
+    return { success: true, data: null };
+  } catch (err: unknown) {
+    console.error("deleteSpectacle exception:", err);
+    return {
+      success: false,
+      error: getErrorMessage(err),
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+    };
+  }
+}
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+/**
+ * Generates a URL-friendly slug from a title
+ *
+ * Converts to lowercase, replaces spaces with dashes, removes special chars
+ *
+ * @param title - Title to convert to slug
+ * @returns URL-friendly slug
+ *
+ * @example
+ * generateSlug("Hamlet: La Tragédie") // "hamlet-la-tragedie"
+ */
+function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // Remove accents
+    .replace(/[^a-z0-9\s-]/g, "") // Remove special chars
+    .trim()
+    .replace(/\s+/g, "-") // Replace spaces with dashes
+    .replace(/-+/g, "-"); // Remove duplicate dashes
 }
