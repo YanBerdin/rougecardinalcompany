@@ -40,6 +40,18 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 
 ## Travaux novembre 2025
 
+- ✅ **15 novembre — TASK028B Cleanup Scripts Obsolètes COMPLÉTÉ** :
+  - **Issue** : #28 - Suppression de 3 scripts d'audit temporaires Round 7
+  - **Résultat** : Fichiers déjà supprimés le 26 oct 2025 (commit `20ecfbb`)
+  - **Fichiers supprimés** :
+    - `supabase/scripts/quick_audit_test.sql` (version simplifiée redondante)
+    - `supabase/scripts/check_round7b_grants.sh` (script bash Round 7b)
+    - `supabase/migrations/verify_round7_grants.sql` (vérification ponctuelle)
+  - **Outils conservés** : `audit_grants.sql`, `quick_check_all_grants.sql`, `audit_grants_filtered.sql`
+  - **Documentation** : Section "Cleanup Post-Audit" ajoutée dans `migrations.md`
+  - **Issue GitHub** : #28 fermée avec rapport complet (15 nov 2025)
+  - **Impact** : Repository nettoyé, maintenance simplifiée, scripts archivés dans Git
+
 - ✅ **15 novembre — TASK026B Database Functions Compliance COMPLÉTÉ** :
   - **Résultat final** : 100% compliance (28/28 fonctions avec `SET search_path = ''`)
   - **Fonction corrigée** : `public.reorder_team_members(jsonb)` dans `63_reorder_team_members.sql`
@@ -368,12 +380,11 @@ async function runTest(
 
 ## Prochaines étapes (Phase 2 — Backoffice)
 
-**Issues GitHub ouvertes (21 total)** :
+**Issues GitHub ouvertes (20 total)** :
 
 **Priorité Haute** :
 
 - Issue #27 : Add rationale headers to SECURITY DEFINER functions (TASK027B)
-- Issue #28 : Cleanup obsolete Round 7 audit scripts (TASK028B)
 - Issue #1 : Content management CRUD (TASK021) - En cours
 
 **Back-office Tasks (Issues #1-20)** :
@@ -402,6 +413,7 @@ async function runTest(
 - ✅ Issue #5 : TASK025 - RLS Security & Performance Fixes (23 oct 2025)
 - ✅ Issue #24 : TASK025B - Security Audit Campaign (26 oct 2025 - fermée 15 nov 2025)
 - ✅ Issue #26 : TASK026B - Database Functions Compliance (15 nov 2025)
+- ✅ Issue #28 : TASK028B - Cleanup Obsolete Scripts (26 oct 2025 - fermée 15 nov 2025)
 
 1. **Gestion d'équipe** :
    - ✅ Hard-delete endpoint (fait)
