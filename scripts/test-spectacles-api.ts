@@ -30,21 +30,26 @@ async function runTest(
   name: string,
   testFn: () => Promise<unknown>
 ): Promise<TestResult> {
-  const start = Date.now();
+  const startTime = Date.now();
   try {
     const data = await testFn();
+    const duration = Date.now() - startTime;
     return {
       name,
       success: true,
-      duration: Date.now() - start,
+      duration,
       data,
     };
-  } catch (error) {
+  } catch (error: unknown) {
+    const duration = Date.now() - startTime;
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+
     return {
       name,
       success: false,
-      duration: Date.now() - start,
-      error: error instanceof Error ? error.message : String(error),
+      duration,
+      error: errorMessage,
     };
   }
 }
