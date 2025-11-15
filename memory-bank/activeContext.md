@@ -368,10 +368,40 @@ async function runTest(
 
 ## Prochaines étapes (Phase 2 — Backoffice)
 
-**Issues GitHub ouvertes** :
+**Issues GitHub ouvertes (21 total)** :
+
+**Priorité Haute** :
 
 - Issue #27 : Add rationale headers to SECURITY DEFINER functions (TASK027B)
 - Issue #28 : Cleanup obsolete Round 7 audit scripts (TASK028B)
+- Issue #1 : Content management CRUD (TASK021) - En cours
+
+**Back-office Tasks (Issues #1-20)** :
+
+- #1 : TASK021 - Content Management CRUD (en cours)
+- #3 : TASK023 - Partners Management
+- #4 : TASK024 - Press Management
+- #6 : TASK026 - Homepage Content Management
+- #7 : TASK027 - Company Content Management
+- #8 : TASK028 - Content Versioning UI
+- #9 : TASK029 - Media Library
+- #10 : TASK030 - Display Toggles
+- #11 : TASK031 - Access Controls for Content
+- #12 : TASK032 - Audit Log and Activity
+- #13 : TASK033 - Bulk Import/Export
+- #14 : TASK034 - Editorial Workflow
+- #15 : TASK035 - UI Localization
+- #16 : TASK036 - Notifications & Email Templates
+- #17 : TASK037 - Data Retention & Purge
+- #18 : TASK038 - Performance Optimisation
+- #19 : TASK039 - Tests & QA
+- #20 : TASK040 - Documentation
+
+**Issues Fermées Récemment** :
+
+- ✅ Issue #5 : TASK025 - RLS Security & Performance Fixes (23 oct 2025)
+- ✅ Issue #24 : TASK025B - Security Audit Campaign (26 oct 2025 - fermée 15 nov 2025)
+- ✅ Issue #26 : TASK026B - Database Functions Compliance (15 nov 2025)
 
 1. **Gestion d'équipe** :
    - ✅ Hard-delete endpoint (fait)
