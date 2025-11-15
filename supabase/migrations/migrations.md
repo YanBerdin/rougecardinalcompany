@@ -218,6 +218,26 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 **Total sécurité audit Rounds 1-7b** : 28 objets exposés détectés et corrigés (15 tables + 4 junction + 4 vues admin + 1 vue tags + 3 Realtime system + 1 PostgreSQL system). Toutes les migrations sont idempotentes et peuvent être rejouées sans effet de bord. Script d'audit : `supabase/scripts/audit_grants.sql` + `analyze_remaining_grants.sh`.
 
+### Cleanup Post-Audit (October 26, 2025)
+
+**TASK028B - Suppression des scripts obsolètes Round 7** (Issue #28, commit `20ecfbb`, 26 oct 2025 02:25)
+
+Suite à la finalisation de la campagne de sécurité (Round 17, CI passed), 3 fichiers temporaires d'audit/diagnostic ont été supprimés pour nettoyer le dépôt :
+
+- ❌ `supabase/scripts/quick_audit_test.sql` — Version simplifiée redondante de `audit_grants.sql`
+- ❌ `supabase/scripts/check_round7b_grants.sh` — Script bash spécifique Round 7b (utilisait un flag non supporté)
+- ❌ `supabase/migrations/verify_round7_grants.sql` — Vérification Round 7 spécifique (one-time check)
+
+**Fichiers conservés** (outils de diagnostic permanents) :
+
+- ✅ `supabase/scripts/audit_grants.sql` — Référence audit complète (non filtrée)
+- ✅ `supabase/scripts/quick_check_all_grants.sql` — Outil diagnostic complet
+- ✅ `supabase/scripts/audit_grants_filtered.sql` — Version filtrée (whitelist système)
+
+**Motivation** : Les fichiers historiques sont déjà documentés dans `supabase/migrations/migrations.md` et `supabase/migrations/SECURITY_AUDIT_SUMMARY.md`. Le nettoyage simplifie la maintenance et réduit le bruit pour les futurs audits.
+
+**Impact** : Aucun (scripts temporaires archivés dans l'historique Git si besoin de consultation).
+
 ## Corrections et fixes critiques
 
 - `20251115150000_fix_reorder_team_members_search_path.sql` — **FIX TASK026B** : Add SET search_path to reorder_team_members
