@@ -2,6 +2,26 @@
 -- Ordre: 02b - Après 02_table_profiles.sql pour pouvoir référencer profiles
 
 -- Fonction helper pour vérifier les droits admin
+/*
+ * Security Model: SECURITY DEFINER
+ * 
+ * Rationale:
+ *   1. Needs access to auth.uid() which requires authentication context
+ *   2. Must read profiles table reliably across different security contexts
+ *   3. Used by RLS policies and other functions for authorization checks
+ *   4. Marked STABLE since auth.uid() remains constant during transaction
+ * 
+ * Risks Evaluated:
+ *   - Read-only operation (SELECT only, no mutations)
+ *   - No user input parameters (zero injection risk)
+ *   - Simple boolean return value
+ *   - Used extensively in RLS policies (must be reliable and secure)
+ * 
+ * Validation:
+ *   - Tested with admin and non-admin users
+ *   - Used in multiple RLS policies across the schema
+ *   - Performance optimized with STABLE volatility
+ */
 create or replace function public.is_admin()
 returns boolean
 language sql
@@ -118,6 +138,25 @@ comment on function public.to_tsvector_french(text) is
 'Helper function for French full-text search vector generation. Marked IMMUTABLE because same input always produces same output, enabling PostgreSQL query optimization and index usage.';
 
 -- Fonction de test de connexion Supabase
+/*
+ * Security Model: SECURITY DEFINER
+ * 
+ * Rationale:
+ *   1. Used for health checks and connectivity testing from client applications
+ *   2. Must work regardless of user permissions (including anon users)
+ *   3. Provides reliable system-level timestamp for monitoring
+ *   4. No security risk as it only returns current server time
+ * 
+ * Risks Evaluated:
+ *   - No user input (zero injection risk)
+ *   - No data access (only system function now())
+ *   - Granted to anon users intentionally for health checks
+ *   - Read-only operation with no side effects
+ * 
+ * Validation:
+ *   - Tested with anon and authenticated users
+ *   - Used in client application health check endpoints
+ */
 create or replace function public.get_current_timestamp()
 returns timestamptz
 language plpgsql

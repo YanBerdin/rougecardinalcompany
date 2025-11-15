@@ -2,6 +2,25 @@
 -- Ordre: 21 - Dépend des fonctions core et table profiles
 
 -- Fonction pour créer automatiquement un profil lors de l'inscription
+/*
+ * Security Model: SECURITY DEFINER
+ * 
+ * Rationale:
+ *   1. Must access auth.users table (restricted to service_role by default)
+ *   2. Must insert into public.profiles regardless of user RLS policies
+ *   3. Executes in trigger context where user permissions may be limited
+ *   4. Ensures profile creation succeeds even for new users without existing permissions
+ * 
+ * Risks Evaluated:
+ *   - Input validation: Validates new.id is not null before processing
+ *   - SQL injection: Uses parameterized values, no dynamic SQL
+ *   - Privilege escalation: Only performs controlled profile creation, no arbitrary operations
+ * 
+ * Validation:
+ *   - Tested with new user registration flow (auth.users insert triggers profile creation)
+ *   - Exception handling prevents silent failures
+ *   - Unique violation handled gracefully (idempotent)
+ */
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
@@ -59,6 +78,24 @@ comment on function public.handle_new_user() is
 This is a legitimate use case for SECURITY DEFINER as it performs administrative setup tasks.';
 
 -- Fonction pour supprimer le profil lors de la suppression d'un utilisateur
+/*
+ * Security Model: SECURITY DEFINER
+ * 
+ * Rationale:
+ *   1. Executes during user deletion from auth.users (system operation)
+ *   2. Must bypass RLS policies to ensure complete cleanup
+ *   3. Maintains referential integrity between auth.users and profiles
+ *   4. Prevents orphaned profile records that could cause security issues
+ * 
+ * Risks Evaluated:
+ *   - Input validation: Checks old.id is not null before deletion
+ *   - Data integrity: Ensures profile cleanup happens atomically with user deletion
+ *   - Error handling: Logs warnings but doesn't block user deletion if profile cleanup fails
+ * 
+ * Validation:
+ *   - Tested with user account deletion flow (auth.users delete triggers profile removal)
+ *   - Exception handling prevents cascade failure
+ */
 create or replace function public.handle_user_deletion()
 returns trigger
 language plpgsql
@@ -91,6 +128,24 @@ comment on function public.handle_user_deletion() is
 Essential for data consistency and security during user account deletion.';
 
 -- Fonction pour mettre à jour le profil lors de la mise à jour d'un utilisateur
+/*
+ * Security Model: SECURITY DEFINER
+ * 
+ * Rationale:
+ *   1. Accesses auth.users.raw_user_meta_data (restricted by default)
+ *   2. Must update profiles regardless of user RLS permissions
+ *   3. Ensures metadata synchronization works for all user roles
+ *   4. Executes in trigger context where standard user permissions may be insufficient
+ * 
+ * Risks Evaluated:
+ *   - Input validation: Checks for relevant metadata changes before processing (performance optimization)
+ *   - Role validation: Validates role against whitelist ('user', 'editor', 'admin')
+ *   - Error handling: Logs warnings for missing profiles without blocking the operation
+ * 
+ * Validation:
+ *   - Tested with user metadata update flow (display_name, role changes)
+ *   - Only processes relevant changes (skips if no metadata/email changed)
+ */
 create or replace function public.handle_user_update()
 returns trigger
 language plpgsql
