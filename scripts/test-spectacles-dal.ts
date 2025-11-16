@@ -1,26 +1,26 @@
 #!/usr/bin/env tsx
 /**
  * Test script for Spectacles DAL (Data Access Layer)
- * 
+ *
  * NOTE: This script only tests READ operations due to server-only restrictions.
  * For full CRUD testing, use Playwright E2E tests or API endpoint tests.
- * 
+ *
  * Tests READ operations:
  * 1. Fetch all spectacles
  * 2. Fetch spectacle by ID (if any exist)
  * 3. Fetch spectacle by slug (if any exist)
- * 
+ *
  * Run with: pnpm exec tsx scripts/test-spectacles-dal.ts
  */
-
-// Workaround for server-only package in Node.js scripts
-process.env.NEXT_RUNTIME = 'nodejs';
 
 import {
   fetchAllSpectacles,
   fetchSpectacleById,
   fetchSpectacleBySlug,
-} from "@/lib/dal/spectacles";
+} from "../lib/dal/spectacles";
+
+// Workaround for server-only package in Node.js scripts
+process.env.NEXT_RUNTIME = "nodejs";
 
 interface TestResult {
   name: string;
@@ -55,9 +55,11 @@ async function runTest(
 
 async function main() {
   console.log("🧪 Testing Spectacles DAL (READ Operations Only)\n");
-  console.log("=" .repeat(60));
-  console.log("⚠️  Note: CREATE/UPDATE/DELETE require admin auth and API endpoints");
-  console.log("=" .repeat(60) + "\n");
+  console.log("=".repeat(60));
+  console.log(
+    "⚠️  Note: CREATE/UPDATE/DELETE require admin auth and API endpoints"
+  );
+  console.log("=".repeat(60) + "\n");
 
   const results: TestResult[] = [];
 
@@ -68,13 +70,15 @@ async function main() {
       if (!Array.isArray(spectacles)) {
         throw new Error("Expected array of spectacles");
       }
-      return { 
+      return {
         count: spectacles.length,
-        sample: spectacles[0] ? {
-          id: spectacles[0].id,
-          title: spectacles[0].title,
-          slug: spectacles[0].slug
-        } : null
+        sample: spectacles[0]
+          ? {
+              id: spectacles[0].id,
+              title: spectacles[0].title,
+              slug: spectacles[0].slug,
+            }
+          : null,
       };
     })
   );
@@ -97,31 +101,37 @@ async function main() {
   // Test 3: Fetch spectacle by ID (if exists)
   if (firstSpectacle) {
     results.push(
-      await runTest(`Fetch spectacle by ID (${firstSpectacle.id})`, async () => {
-        const spectacle = await fetchSpectacleById(firstSpectacle.id);
-        if (!spectacle) {
-          throw new Error("Spectacle not found");
+      await runTest(
+        `Fetch spectacle by ID (${firstSpectacle.id})`,
+        async () => {
+          const spectacle = await fetchSpectacleById(firstSpectacle.id);
+          if (!spectacle) {
+            throw new Error("Spectacle not found");
+          }
+          if (spectacle.id !== firstSpectacle.id) {
+            throw new Error("ID mismatch");
+          }
+          return { id: spectacle.id, title: spectacle.title };
         }
-        if (spectacle.id !== firstSpectacle.id) {
-          throw new Error("ID mismatch");
-        }
-        return { id: spectacle.id, title: spectacle.title };
-      })
+      )
     );
 
     // Test 4: Fetch spectacle by slug (if has slug)
     if (firstSpectacle.slug) {
       results.push(
-        await runTest(`Fetch spectacle by slug (${firstSpectacle.slug})`, async () => {
-          const spectacle = await fetchSpectacleBySlug(firstSpectacle.slug!);
-          if (!spectacle) {
-            throw new Error("Spectacle not found by slug");
+        await runTest(
+          `Fetch spectacle by slug (${firstSpectacle.slug})`,
+          async () => {
+            const spectacle = await fetchSpectacleBySlug(firstSpectacle.slug!);
+            if (!spectacle) {
+              throw new Error("Spectacle not found by slug");
+            }
+            if (spectacle.slug !== firstSpectacle.slug) {
+              throw new Error("Slug mismatch");
+            }
+            return { id: spectacle.id, slug: spectacle.slug };
           }
-          if (spectacle.slug !== firstSpectacle.slug) {
-            throw new Error("Slug mismatch");
-          }
-          return { id: spectacle.id, slug: spectacle.slug };
-        })
+        )
       );
     }
   } else {
@@ -142,7 +152,9 @@ async function main() {
   // Test 6: Error handling - invalid slug
   results.push(
     await runTest("Fetch non-existent slug", async () => {
-      const spectacle = await fetchSpectacleBySlug("non-existent-slug-xyz-" + Date.now());
+      const spectacle = await fetchSpectacleBySlug(
+        "non-existent-slug-xyz-" + Date.now()
+      );
       if (spectacle !== null) {
         throw new Error("Expected null for non-existent slug");
       }

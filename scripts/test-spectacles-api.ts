@@ -15,8 +15,20 @@
  * 
  * Run with: pnpm exec tsx scripts/test-spectacles-api.ts
  */
+import * as dotenv from "dotenv";
+import { resolve } from "path";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+dotenv.config({ path: resolve(process.cwd(), ".env.local") });
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+if (!SUPABASE_URL) {
+  console.error("❌ Missing environment variables:");
+  console.error("   - NEXT_PUBLIC_SUPABASE_URL");
+  console.error("   - SUPABASE_SERVICE_ROLE_KEY");
+  process.exit(1);
+}
+
 
 interface TestResult {
   name: string;
@@ -57,7 +69,7 @@ async function runTest(
 async function main() {
   console.log("🧪 Testing Spectacles API Endpoints\n");
   console.log("=".repeat(60));
-  console.log(`API Base: ${API_BASE}`);
+  console.log(`API Base: ${SUPABASE_URL}`);
   console.log("⚠️  Note: This requires a running dev server and admin auth");
   console.log("=".repeat(60) + "\n");
 

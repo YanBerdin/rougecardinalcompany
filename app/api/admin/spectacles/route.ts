@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
 
     return ApiResponse.success(spectacles, HttpStatus.OK);
   } catch (error: unknown) {
-    console.error("[API] Error fetching spectacles:", error);
+    console.error("[API] Error fetching spectacles:", error); //TODO: Remove in production
     const errorMessage = error instanceof Error ? error.message : "Failed to fetch spectacles";
     return ApiResponse.error(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
   }
@@ -90,6 +90,8 @@ export async function POST(request: NextRequest) {
       // Validate request body
       const validationResult = CreateSpectacleSchema.safeParse(requestBody);
       if (!validationResult.success) {
+        console.error("[API] Validation failed:", JSON.stringify(validationResult.error.issues, null, 2)); //TODO: Remove in production
+        console.error("[API] Received body:", JSON.stringify(requestBody, null, 2)); //TODO: Remove in production
         return ApiResponse.validationError(validationResult.error.issues);
       }
 
@@ -105,7 +107,7 @@ export async function POST(request: NextRequest) {
 
       return ApiResponse.success(createResult.data, HttpStatus.CREATED);
     } catch (error: unknown) {
-      console.error("[API] Error creating spectacle:", error);
+      console.error("[API] Error creating spectacle:", error); //TODO: Remove in production
       const errorMessage = error instanceof Error ? error.message : "Failed to create spectacle";
       return ApiResponse.error(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
     }

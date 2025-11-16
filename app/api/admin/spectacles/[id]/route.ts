@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { revalidatePath } from "next/cache";
 import { 
   ApiResponse, 
   HttpStatus, 
@@ -58,10 +59,11 @@ function parseSpectacleId(idString: string): number | null {
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const spectacleId = parseSpectacleId(params.id);
+    const { id } = await params;
+    const spectacleId = parseSpectacleId(id);
 
     if (spectacleId === null) {
       return ApiResponse.error(
@@ -122,11 +124,12 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   return withAdminAuth(async () => {
     try {
-      const spectacleId = parseSpectacleId(params.id);
+      const { id } = await params;
+      const spectacleId = parseSpectacleId(id);
 
       if (spectacleId === null) {
         return ApiResponse.error(
@@ -136,14 +139,18 @@ export async function PATCH(
       }
 
       const requestBody = await request.json();
-
-      // Validate request body with ID from route
+      console.log("Request body for updating spectacle:", requestBody); //TODO: remove
+      
+      // Validate request body with ID from route (as number, not BigInt)
       const validationResult = UpdateSpectacleSchema.safeParse({
         ...requestBody,
-        id: BigInt(spectacleId),
+        id: spectacleId,
       });
 
       if (!validationResult.success) {
+        console.error("[API] PATCH Validation failed:", JSON.stringify(validationResult.error.issues, null, 2));//TODO: remove
+        console.error("[API] PATCH Received body:", JSON.stringify(requestBody, null, 2));//TODO: remove
+        console.error("[API] PATCH With ID added:", JSON.stringify({ ...requestBody, id: BigInt(spectacleId) }, null, 2));//TODO: remove
         return ApiResponse.validationError(validationResult.error.issues);
       }
 
@@ -156,6 +163,10 @@ export async function PATCH(
           updateResult.status || HttpStatus.INTERNAL_SERVER_ERROR
         );
       }
+
+      // Invalidate cache after successful update
+      revalidatePath("/admin/spectacles");
+      revalidatePath(`/admin/spectacles/${spectacleId}`);
 
       return ApiResponse.success(updateResult.data, HttpStatus.OK);
     } catch (error: unknown) {
@@ -191,11 +202,12 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   return withAdminAuth(async () => {
     try {
-      const spectacleId = parseSpectacleId(params.id);
+      const { id } = await params;
+      const spectacleId = parseSpectacleId(id);
 
       if (spectacleId === null) {
         return ApiResponse.error(
@@ -214,9 +226,12 @@ export async function DELETE(
         );
       }
 
+      // Invalidate cache after successful deletion
+      revalidatePath("/admin/spectacles");
+
       return ApiResponse.success(null, HttpStatus.OK);
     } catch (error: unknown) {
-      console.error("[API] Error deleting spectacle:", error);
+      console.error("[API] Error deleting spectacle:", error);//TODO: remove
       const errorMessage = error instanceof Error 
         ? error.message 
         : "Failed to delete spectacle";

@@ -25,13 +25,13 @@ export async function DashboardStatsContainer() {
           title="Spectacles"
           value={stats.showsCount}
           icon={<FileText className="h-4 w-4" aria-hidden />}
-          href="/admin/shows"
+          href="/admin/spectacles"
         />
         <StatsCard
           title="Événements"
           value={stats.eventsCount}
           icon={<Calendar className="h-4 w-4" aria-hidden />}
-          href="/admin/events"
+          href="/admin/evenements"
         />
         <StatsCard
           title="Médias"

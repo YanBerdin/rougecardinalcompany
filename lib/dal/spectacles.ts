@@ -4,6 +4,7 @@ import "server-only";
 import { createClient } from "@/supabase/server";
 import { requireAdmin } from "@/lib/auth/is-admin";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import {
   SpectacleDbSchema,
   CreateSpectacleSchema,
@@ -33,7 +34,11 @@ function getErrorMessage(err: unknown): string {
 }
 
 type DALSuccess<T> = { readonly success: true; readonly data: T };
-type DALError = { readonly success: false; readonly error: string; readonly status?: HttpStatusCode };
+type DALError = {
+  readonly success: false;
+  readonly error: string;
+  readonly status?: HttpStatusCode;
+};
 export type DALResult<T> = DALSuccess<T> | DALError;
 
 // ============================================================================
@@ -120,7 +125,10 @@ export async function fetchSpectacleById(
       .single();
 
     if (error) {
-      console.error("fetchSpectacleById error:", error);
+      // PGRST116 = Not found (0 rows) - this is expected for non-existent IDs
+      if (error.code !== "PGRST116") {
+        console.error("fetchSpectacleById error:", error);
+      }
       return null;
     }
 
@@ -180,6 +188,38 @@ export async function fetchSpectacleBySlug(
 // ============================================================================
 
 /**
+ * Gets the current authenticated user ID for insert operations
+ * @internal
+ */
+async function getCurrentUserForInsert(): Promise<DALResult<string>> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError) {
+    console.error("getCurrentUserForInsert: auth error:", authError);
+    return {
+      success: false,
+      error: "Erreur d'authentification",
+      status: HttpStatus.UNAUTHORIZED,
+    };
+  }
+
+  if (!user) {
+    console.error("getCurrentUserForInsert: no user found");
+    return {
+      success: false,
+      error: "Utilisateur non authentifié",
+      status: HttpStatus.UNAUTHORIZED,
+    };
+  }
+
+  return { success: true, data: user.id };
+}
+
+/**
  * Validates spectacle creation input
  * @internal
  */
@@ -199,16 +239,33 @@ async function validateCreateInput(
 }
 
 /**
- * Inserts spectacle into database with auto-generated slug if needed
+ * Validates database response against a Zod schema
  * @internal
  */
-async function insertSpectacle(
-  validatedData: CreateSpectacleInput
-): Promise<DALResult<SpectacleDb>> {
-  const dataToInsert = validatedData.slug
-    ? validatedData
-    : { ...validatedData, slug: generateSlug(validatedData.title) };
+function validateDatabaseResponse<T>(
+  data: unknown,
+  schema: z.ZodType<T>,
+  operation: string
+): DALResult<T> {
+  const parsed = schema.safeParse(data);
+  if (!parsed.success) {
+    console.error(`${operation}: invalid response:`, parsed.error);
+    return {
+      success: false,
+      error: "Réponse invalide de la base de données",
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+    };
+  }
+  return { success: true, data: parsed.data };
+}
 
+/**
+ * Performs the database insert operation for a spectacle
+ * @internal
+ */
+async function performDatabaseInsert(
+  dataToInsert: CreateSpectacleInput & { created_by: string }
+): Promise<DALResult<SpectacleDb>> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("spectacles")
@@ -217,7 +274,7 @@ async function insertSpectacle(
     .single();
 
   if (error) {
-    console.error("insertSpectacle error:", error);
+    console.error("performDatabaseInsert error:", error);
     if (error.code === "23505") {
       return {
         success: false,
@@ -232,17 +289,34 @@ async function insertSpectacle(
     };
   }
 
-  const parsed = SpectacleDbSchema.safeParse(data as unknown);
-  if (!parsed.success) {
-    console.error("insertSpectacle: invalid response:", parsed.error);
-    return {
-      success: false,
-      error: "Réponse invalide de la base de données",
-      status: HttpStatus.INTERNAL_SERVER_ERROR,
-    };
-  }
+  return validateDatabaseResponse(
+    data,
+    SpectacleDbSchema,
+    "performDatabaseInsert"
+  );
+}
 
-  return { success: true, data: parsed.data };
+/**
+ * Inserts spectacle into database with auto-generated slug if needed
+ * @internal
+ */
+async function insertSpectacle(
+  validatedData: CreateSpectacleInput
+): Promise<DALResult<SpectacleDb>> {
+  // Get authenticated user
+  const userResult = await getCurrentUserForInsert();
+  if (!userResult.success) return userResult;
+
+  // Prepare data with slug and user ID
+  const dataToInsert = {
+    ...(validatedData.slug
+      ? validatedData
+      : { ...validatedData, slug: generateSlug(validatedData.title) }),
+    created_by: userResult.data,
+  };
+
+  // Perform insert
+  return await performDatabaseInsert(dataToInsert);
 }
 
 /**
@@ -346,17 +420,11 @@ async function performSpectacleUpdate(
     };
   }
 
-  const parsed = SpectacleDbSchema.safeParse(data as unknown);
-  if (!parsed.success) {
-    console.error("performSpectacleUpdate: invalid response:", parsed.error);
-    return {
-      success: false,
-      error: "Réponse invalide de la base de données",
-      status: HttpStatus.INTERNAL_SERVER_ERROR,
-    };
-  }
-
-  return { success: true, data: parsed.data };
+  return validateDatabaseResponse(
+    data,
+    SpectacleDbSchema,
+    "performSpectacleUpdate"
+  );
 }
 
 /**
@@ -454,7 +522,8 @@ export async function deleteSpectacle(id: number): Promise<DALResult<null>> {
       if (error.code === "23503") {
         return {
           success: false,
-          error: "Impossible de supprimer : ce spectacle a des événements associés",
+          error:
+            "Impossible de supprimer : ce spectacle a des événements associés",
           status: HttpStatus.CONFLICT,
         };
       }
