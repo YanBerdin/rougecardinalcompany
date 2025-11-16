@@ -93,6 +93,118 @@ END;
 $$;
 ```
 
+#### Admin Authorization Pattern
+
+**CRITICAL REQUIREMENT** : Admin users MUST have profile entry with `role='admin'`
+
+**Pattern** : Profile-based authorization avec `is_admin()` function pour RLS policies.
+
+```sql
+-- 1. Profile table with role column
+CREATE TABLE public.profiles (
+  id bigint generated always as identity primary key,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  display_name text,
+  role text default 'user',
+  created_at timestamptz default now() not null,
+  updated_at timestamptz default now() not null,
+  constraint profiles_userid_unique unique (user_id)
+);
+
+-- 2. is_admin() function (SECURITY DEFINER)
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+STABLE
+AS $$
+DECLARE
+  user_role text;
+BEGIN
+  SELECT role 
+  INTO user_role 
+  FROM public.profiles 
+  WHERE user_id = auth.uid();
+  
+  RETURN user_role = 'admin';
+END;
+$$;
+
+-- 3. RLS policy using is_admin()
+CREATE POLICY "Authenticated users can create spectacles"
+ON public.spectacles
+FOR INSERT
+TO authenticated
+WITH CHECK ( (SELECT public.is_admin()) = true );
+
+-- 4. Admin profile registration (manual)
+INSERT INTO public.profiles (user_id, role, display_name)
+VALUES (
+  'UUID_FROM_AUTH_USERS',
+  'admin',
+  'Admin Name'
+)
+ON CONFLICT (user_id) 
+DO UPDATE SET role = 'admin';
+```
+
+**Architecture Defense in Depth** :
+
+1. **Middleware Level** : Route protection (`/admin/*` requires auth)
+2. **API Level** : `withAdminAuth()` wrapper for endpoints
+3. **Database Level** : RLS policies with `is_admin()`
+
+**Common Pitfall** : Authenticated user ≠ Authorized admin
+
+```typescript
+// ❌ WRONG: Assume authenticated = admin
+const { data: { user } } = await supabase.auth.getUser();
+if (user) {
+  // User is authenticated but might not be admin!
+  await supabase.from('spectacles').insert(data); // RLS ERROR 42501
+}
+
+// ✅ CORRECT: Check admin status
+const { data: { user } } = await supabase.auth.getUser();
+if (!user) {
+  return { error: 'Not authenticated', status: 401 };
+}
+
+const { data: isAdmin } = await supabase.rpc('is_admin');
+if (!isAdmin) {
+  return { error: 'Not authorized', status: 403 };
+}
+
+// Now safe to perform admin operations
+await supabase.from('spectacles').insert(data);
+```
+
+**Registration Workflow** :
+
+1. User registers via Supabase Auth → Entry in `auth.users`
+2. Admin manually creates profile → Entry in `profiles` table with `role='admin'`
+3. `is_admin()` function returns true → RLS allows admin operations
+
+**Troubleshooting** :
+
+```sql
+-- Check if profile exists
+SELECT * FROM profiles WHERE user_id = auth.uid();
+
+-- Test is_admin() (from application, NOT SQL Editor)
+SELECT public.is_admin();
+
+-- Verify auth.uid() (from application)
+SELECT auth.uid();
+```
+
+**⚠️ SQL Editor Limitation** : Supabase SQL Editor uses `service_role` without user session. `auth.uid()` returns NULL in this environment. Always test user-context functions from the application.
+
+**Complete Procedure** : See `memory-bank/procedures/admin-user-registration.md`
+
+**Discovered in** : TASK021 - Admin Backoffice Spectacles CRUD (16 November 2025)
+
 #### Whitelist Audit Pattern
 
 **Pattern** : Exclure les objets système de l'audit de sécurité pour focus sur business objects.

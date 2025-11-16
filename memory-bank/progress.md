@@ -137,6 +137,14 @@ Cette vérification a été réalisée via l'API Supabase MCP et confirme que le
   - admin/page.tsx : 133 → 69 lignes (-48%)
   - ErrorBoundary réutilisable + Zod types
   - Tests : 4/4 passing (9/9 success criteria)
+- [x] **TASK021 Admin Backoffice Spectacles CRUD** — **TERMINÉ 16/11/2025** :
+  - Phase 1: DAL spectacles (Clean Code ≤ 30 lignes)
+  - Phase 2: API routes (5 endpoints complets)
+  - Phase 3: Admin UI (7 composants React)
+  - Bug résolu: RLS 42501 → Missing admin profile
+  - Procédure admin registration documentée
+  - Commit: 96c32f3 (4 files, 77+/45-)
+  - Validation complète: CREATE/READ/UPDATE/DELETE ✅
 - [x] Documentation d'architecture v2 (C4 + ADRs) publiée et référencée
 
 ## Fonctionnalités en Cours
@@ -731,8 +739,36 @@ Cette vérification a été réalisée via l'API Supabase MCP et confirme que le
 
 ## Dernière Mise à Jour
 
-**Date**: 15 novembre 2025
+**Date**: 16 novembre 2025
 **Changements majeurs**:
+
+- **TASK021 Admin Backoffice Spectacles CRUD - TERMINÉ** (16 novembre) :
+  - ✅ Phase 1-3 complétées : DAL + API Routes + Admin UI
+  - 🐛 **Bug résolu** : RLS 42501 error → Root cause: Missing admin profile
+    - Investigation : Debug logs révèlent user authentifié mais `is_admin()` retourne false
+    - Diagnostic : Profile absent dans table `profiles` avec `role='admin'`
+    - Solution : Création profile via SQL Editor + verification
+  - 🔧 **Refactoring** : `insertSpectacle()` preserve Supabase client context
+    - Helper function `performAuthenticatedInsert()` avec client parameter
+    - Single client instance prevents auth context loss
+  - 📝 **Procédure documentée** : `memory-bank/procedures/admin-user-registration.md`
+    - Guide complet étape par étape pour enregistrer nouveaux admins
+    - Section troubleshooting avec issues communes
+    - Documentation architecture sécurité (RLS + is_admin())
+  - 💾 **Commit** : `96c32f3` - "fix(dal): preserve Supabase client auth context"
+    - 4 files changed, 77 insertions(+), 45 deletions(-)
+  - ✅ **Clean Code** : Toutes fonctions ≤ 30 lignes
+  - ✅ **Production Ready** : Debug logs supprimés, TypeScript OK
+  - ✅ **Validation CRUD** :
+    - CREATE: Spectacle créé avec succès
+    - READ: Liste et détails fonctionnels
+    - UPDATE: Modifications enregistrées
+    - DELETE: Suppression opérationnelle
+  - 🎯 **User confirmation** : "CRUD fonctionne !!!"
+  - 📚 **Documentation mise à jour** :
+    - activeContext.md : Section admin authorization pattern ajoutée
+    - systemPatterns.md : (à mettre à jour)
+    - tasks/TASK021 : (à finaliser)
 
 - **Migration architecture layouts + admin UI** (11 novembre)
   - Route groups `(admin)` et `(marketing)` implémentés

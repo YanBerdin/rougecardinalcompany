@@ -18,9 +18,6 @@
 
 - `TASK004` Agenda des événements (DAL + containers + UI)
 - `TASK014` Back‑office: centralisation et validation des toggles (Agenda/Accueil/Contact)
-- TASK021 Content Management CRUD (CRUD spectacles, événements, articles) - Issue #1
-- TASK027B Security Definer Rationale (explicit justification) - Issue #27
-- TASK028B Cleanup Obsolete Scripts (propose deletion) - Issue #28
 
 ## En Attente
 
@@ -52,5 +49,8 @@
 - `TASK025` Résolution problèmes sécurité et performance RLS - Completed on 2025-10-23 (3 issues résolus: Articles vides, SECURITY DEFINER views, Multiple permissive policies; 4 migrations créées; documentation exhaustive)
 - `TASK025B` Campagne sécurité audit database complet - Completed on 2025-10-26 (73 objets sécurisés sur 17 rounds, Round 12 critique storage.objects ALL PRIVILEGES corrigé, CI PASSED, PR #25 merged, issues #26/#27/#28 créées, documentation SECURITY_AUDIT_SUMMARY.md) - Issue #24
 - `TASK026B` Database Functions Compliance - Completed on 2025-11-15 (28/28 functions compliant, SET search_path applied via SQL Editor hotfix) - Issue #26
+- `TASK027B` Security Definer Rationale Headers - Completed on 2025-11-15 (6 functions documented with explicit justification headers, template created, security checklist added) - Issue #27
+- `TASK028B` Cleanup Obsolete Scripts - Completed on 2025-11-15 (3 audit scripts removed, already deleted on 26 oct 2025, documentation updated) - Issue #28
+- `TASK021` Admin Backoffice Spectacles CRUD - Completed on 2025-11-16 (Phases 1+2+3: DAL + API Routes + Admin UI, RLS 42501 bug resolved, admin registration procedure documented, commit 96c32f3) - Issue #1
 
 Aucune tâche abandonnée pour le moment.

@@ -40,6 +40,40 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 
 ## Travaux novembre 2025
 
+- ✅ **16 novembre — TASK021 Admin Backoffice Spectacles CRUD COMPLÉTÉ (Phases 1+2+3)** :
+  - **Issue** : #1 - Content Management CRUD avec gestion spectacles complète
+  - **Phases complétées** :
+    - ✅ **Phase 1 - DAL Spectacles** : Toutes fonctions Clean Code compliant (≤ 30 lignes)
+    - ✅ **Phase 2 - API Routes** : 5 endpoints (GET list, POST create, GET detail, PATCH update, DELETE)
+    - ✅ **Phase 3 - Admin UI** : 7 composants (SpectacleForm, SpectaclesTable, SpectacleCard, etc.)
+  - **Bug découvert & résolu** : Erreur RLS 42501 "row-level security policy violation"
+    - **Root Cause** : Missing profile entry in `profiles` table with `role='admin'`
+    - **Investigation** : Debug logs → Discovered user authenticated but `is_admin()` returns false
+    - **Solution** : Created admin profile via SQL Editor: `INSERT INTO profiles (user_id, role) VALUES (...)`
+  - **Refactoring clé** : `insertSpectacle()` preserve Supabase client context throughout operation
+    - Helper function `performAuthenticatedInsert()` with client parameter passing
+    - Single client instance prevents auth context loss
+  - **Migration créée** : `20251116160000_fix_spectacles_insert_policy.sql`
+    - Documents RLS policy fix (use `is_admin()` instead of `auth.uid()`)
+    - Hotfix migration (Cloud already has correct policy via declarative schema)
+  - **Procédure documentée** : `memory-bank/procedures/admin-user-registration.md`
+    - Complete step-by-step guide for registering new admin users
+    - Troubleshooting section with common issues
+    - Security notes and architecture documentation
+  - **Validation complète** :
+    - CREATE: ✅ Spectacle créé avec succès
+    - READ: ✅ Liste et détails fonctionnels
+    - UPDATE: ✅ Modifications enregistrées
+    - DELETE: ✅ Suppression opérationnelle
+  - **Code quality** :
+    - TypeScript: ✅ 0 errors (`pnpm tsc --noEmit`)
+    - Clean Code: ✅ All functions ≤ 30 lines
+    - Production-ready: ✅ Debug logs removed
+  - **Commit** : `96c32f3` - "fix(dal): preserve Supabase client auth context + add RLS policy migration"
+    - 4 files changed, 77 insertions(+), 45 deletions(-)
+  - **User confirmation** : "CRUD fonctionne !!!" ✅
+  - **Impact** : Admin backoffice spectacles fully functional, ready for production use
+
 - ✅ **15 novembre — TASK027B SECURITY DEFINER Rationale Headers COMPLÉTÉ** :
   - **Issue** : #27 - Require explicit SECURITY DEFINER justification in function headers
   - **Résultat** : 6 fonctions documentées avec headers de justification explicites
@@ -273,6 +307,47 @@ export async function POST(req: Request) {
 }
 ```
 
+### Admin Authorization Pattern
+
+**CRITICAL REQUIREMENT** : Admin users MUST have profile entry with `role='admin'`
+
+**Architecture** :
+
+- RLS policies use `public.is_admin()` function (SECURITY DEFINER)
+- Function checks `profiles.role = 'admin'` for `auth.uid()`
+- Without profile entry → `is_admin()` returns false → RLS blocks operations
+
+**Profile Creation** :
+
+```sql
+INSERT INTO public.profiles (user_id, role, display_name)
+VALUES (
+  'UUID_FROM_AUTH_USERS',
+  'admin',
+  'Display Name'
+)
+ON CONFLICT (user_id) 
+DO UPDATE SET role = 'admin';
+```
+
+**Complete Procedure** : See `memory-bank/procedures/admin-user-registration.md`
+
+**Common Pitfall** : Authenticated user ≠ Authorized admin
+
+- User exists in `auth.users` (Supabase Auth)
+- User has session and JWT token
+- BUT: No profile entry → `is_admin()` returns false → RLS error 42501
+
+**Troubleshooting** :
+
+```sql
+-- Check if profile exists
+SELECT * FROM profiles WHERE user_id = auth.uid();
+
+-- Test is_admin() (from application, NOT SQL Editor)
+SELECT public.is_admin();
+```
+
 ### Protected Routes (Admin)
 
 - **Pattern 1 : withAdminAuth wrapper** (API routes)
@@ -393,15 +468,16 @@ async function runTest(
 
 ## Prochaines étapes (Phase 2 — Backoffice)
 
-**Issues GitHub ouvertes (19 total)** :
+**Issues GitHub ouvertes (18 total)** :
 
 **Priorité Haute** :
 
-- Issue #1 : Content management CRUD (TASK021) - En cours
+- Issue #3 : Partners Management (TASK023) - Prochaine tâche
+- Issue #6 : Homepage Content Management (TASK026) - Haute priorité
 
 **Back-office Tasks (Issues #1-20)** :
 
-- #1 : TASK021 - Content Management CRUD (en cours)
+- ✅ #1 : TASK021 - Content Management CRUD (TERMINÉ 16 nov 2025)
 - #3 : TASK023 - Partners Management
 - #4 : TASK024 - Press Management
 - #6 : TASK026 - Homepage Content Management
