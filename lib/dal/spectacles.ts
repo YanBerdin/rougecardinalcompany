@@ -3,6 +3,7 @@
 import "server-only";
 import { createClient } from "@/supabase/server";
 import { requireAdmin } from "@/lib/auth/is-admin";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
@@ -188,38 +189,6 @@ export async function fetchSpectacleBySlug(
 // ============================================================================
 
 /**
- * Gets the current authenticated user ID for insert operations
- * @internal
- */
-async function getCurrentUserForInsert(): Promise<DALResult<string>> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError) {
-    console.error("getCurrentUserForInsert: auth error:", authError);
-    return {
-      success: false,
-      error: "Erreur d'authentification",
-      status: HttpStatus.UNAUTHORIZED,
-    };
-  }
-
-  if (!user) {
-    console.error("getCurrentUserForInsert: no user found");
-    return {
-      success: false,
-      error: "Utilisateur non authentifié",
-      status: HttpStatus.UNAUTHORIZED,
-    };
-  }
-
-  return { success: true, data: user.id };
-}
-
-/**
  * Validates spectacle creation input
  * @internal
  */
@@ -260,13 +229,34 @@ function validateDatabaseResponse<T>(
 }
 
 /**
- * Performs the database insert operation for a spectacle
+ * Performs database insert with authenticated Supabase client
  * @internal
  */
-async function performDatabaseInsert(
+async function performAuthenticatedInsert(
+  supabase: SupabaseClient,
   dataToInsert: CreateSpectacleInput & { created_by: string }
 ): Promise<DALResult<SpectacleDb>> {
-  const supabase = await createClient();
+  // DEBUG: Vérifier les données avant insert
+  // console.log("=== DEBUG INSERT ===");
+  // console.log("Data to insert:", JSON.stringify(dataToInsert, null, 2));
+
+  // DEBUG: Vérifier l'authentification
+  // const { data: { user } } = await supabase.auth.getUser();
+  // console.log("Current user:", user?.id);
+  // console.log("User metadata:", user?.user_metadata);
+
+  // DEBUG: Tester is_admin() function
+  // const { data: isAdminResult, error: adminCheckError } = await supabase
+  // .rpc("is_admin");
+  // console.log("is_admin() result:", isAdminResult, "error:", adminCheckError);
+
+  // DEBUG: Tester une simple requête SELECT pour vérifier le contexte auth
+  // const { data: selectTest, error: selectError } = await supabase
+  //  .from("spectacles")
+  //  .select("id")
+  //  .limit(1);
+  // console.log("SELECT test:", selectTest ? "SUCCESS" : "FAILED", selectError);
+
   const { data, error } = await supabase
     .from("spectacles")
     .insert(dataToInsert)
@@ -274,7 +264,10 @@ async function performDatabaseInsert(
     .single();
 
   if (error) {
-    console.error("performDatabaseInsert error:", error);
+    console.error("performAuthenticatedInsert error:", error);
+    console.error("Error code:", error.code);
+    console.error("Error details:", error.details);
+    console.error("Error hint:", error.hint);
     if (error.code === "23505") {
       return {
         success: false,
@@ -292,7 +285,7 @@ async function performDatabaseInsert(
   return validateDatabaseResponse(
     data,
     SpectacleDbSchema,
-    "performDatabaseInsert"
+    "performAuthenticatedInsert"
   );
 }
 
@@ -303,20 +296,37 @@ async function performDatabaseInsert(
 async function insertSpectacle(
   validatedData: CreateSpectacleInput
 ): Promise<DALResult<SpectacleDb>> {
-  // Get authenticated user
-  const userResult = await getCurrentUserForInsert();
-  if (!userResult.success) return userResult;
+  const supabase = await createClient();
 
-  // Prepare data with slug and user ID
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError) {
+    return {
+      success: false,
+      error: "Erreur d'authentification",
+      status: HttpStatus.UNAUTHORIZED,
+    };
+  }
+
+  if (!user) {
+    return {
+      success: false,
+      error: "Utilisateur non authentifié",
+      status: HttpStatus.UNAUTHORIZED,
+    };
+  }
+
   const dataToInsert = {
     ...(validatedData.slug
       ? validatedData
       : { ...validatedData, slug: generateSlug(validatedData.title) }),
-    created_by: userResult.data,
+    created_by: user.id,
   };
 
-  // Perform insert
-  return await performDatabaseInsert(dataToInsert);
+  return await performAuthenticatedInsert(supabase, dataToInsert);
 }
 
 /**

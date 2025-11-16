@@ -48,7 +48,7 @@ create policy "Authenticated users can create spectacles"
 on public.spectacles
 for insert
 to authenticated
-with check ( (select auth.uid()) is not null );
+with check ( (select public.is_admin()) = true );
 
 drop policy if exists "Owners or admins can update spectacles" on public.spectacles;
 create policy "Owners or admins can update spectacles"
