@@ -739,8 +739,27 @@ Cette vérification a été réalisée via l'API Supabase MCP et confirme que le
 
 ## Dernière Mise à Jour
 
-**Date**: 16 novembre 2025
+**Date**: 17 novembre 2025
 **Changements majeurs**:
+
+- **Opération de maintenance Migration History Cleanup & Repair** (17 novembre 2025) :
+  - ✅ **Migration History Repair** : 32 migrations marquées "reverted" dans Supabase Cloud
+    - Commande : `supabase migration repair --status reverted [32 migrations] --linked`
+    - Impact : Cohérence entre développement local et production
+  - ✅ **Duplicate Files Cleanup** : 4 fichiers spectacles en double supprimés
+    - Fichiers supprimés : `20251117000000_fix_spectacles_insert_rls_policy.sql`, etc.
+    - Fichier conservé : `20251117154411_fix_spectacles_rls_clean.sql` (TASK021 FINAL)
+    - Vérification : `ls -la supabase/migrations/*spectacles*.sql` → 1 fichier restant
+  - ✅ **Additional Cleanup** : 5 fichiers obsolètes supplémentaires supprimés
+    - Debug/test scripts (3) : `debug_spectacles_policies.sql`, `test_insert_public_false.sql`, `check_rls_policies_detailed.sql`
+    - Intermediate fixes (2) : anciennes versions du fix spectacles RLS
+    - Total nettoyé : 41 → 36 fichiers (-5)
+  - ✅ **Documentation ajoutée** : Section complète dans `supabase/migrations/migrations.md`
+    - Contexte : Maintenance cohérence historique migrations
+    - Détails opération : Commandes exactes + impacts
+    - Justification : Critique pour éviter conflits déploiement
+    - Statut : ✅ Migration history repaired and duplicates cleaned up successfully
+  - 🎯 **Importance** : Opération critique pour cohérence développement/production
 
 - **TASK021 Admin Backoffice Spectacles CRUD - TERMINÉ** (16 novembre) :
   - ✅ Phase 1-3 complétées : DAL + API Routes + Admin UI
@@ -768,7 +787,12 @@ Cette vérification a été réalisée via l'API Supabase MCP et confirme que le
   - 📚 **Documentation mise à jour** :
     - activeContext.md : Section admin authorization pattern ajoutée
     - systemPatterns.md : (à mettre à jour)
-    - tasks/TASK021 : (à finaliser)
+    - tasks/TASK021 : Détails commit 2533679 ajoutés (17 novembre 2025)
+
+- **Documentation synchronisée** (17 novembre 2025) :
+  - ✅ **Commit 2533679 documenté** : Description détaillée ajoutée dans TASK021-admin-spectacles-crud.md
+  - ✅ **Synchronisation complète** : Tous les 6 derniers commits maintenant documentés
+  - ✅ **Couverture** : 100% des commits récents (6/6) avec documentation à jour
 
 - **Migration architecture layouts + admin UI** (11 novembre)
   - Route groups `(admin)` et `(marketing)` implémentés

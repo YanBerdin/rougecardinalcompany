@@ -28,7 +28,7 @@
 
 ### 17 septembre 2025
 
-- Tâche créée. Plan et sous-tâches définis.rs, stats, sections présentation, hero)
+- Tâche créée. Plan et sous-tâches définis.rs, stats, sections présentation, hero
 
 **Status:** Completed  
 **Added:** 17 septembre 2025  

@@ -68,7 +68,25 @@ Note RLS: les nouvelles tables co‑localisent leurs politiques (dans le même f
 
 ---
 
-## 🆕 Mises à jour récentes (oct. 2025)
+## 🆕 Mises à jour récentes (novembre 2025)
+
+- **TASK021 - Spectacles CRUD RLS Corrections** : Corrections finales des politiques RLS pour les spectacles suite à l'implémentation complète du CRUD admin.
+  - **Issue #1 - RLS 42501 Error** : Résolution du problème d'insertion spectacles causé par un profil admin manquant
+    - Root cause: Utilisateur authentifié mais `is_admin()` retournait false (profil manquant)
+    - Fix: Création du profil admin via SQL Editor + migration RLS corrective
+    - Migration: `20251117154411_fix_spectacles_rls_clean.sql` (politiques RLS nettoyées et recréées)
+  - **Issue #2 - Contexte Auth Perdu** : Perte du contexte d'authentification lors des insertions
+    - Root cause: Client Supabase différent entre vérification auth et insertion
+    - Fix: Helper `performAuthenticatedInsert()` avec passage de client
+    - Impact: Contexte auth préservé, insertions réussies
+  - **Politiques RLS Finales** : Intégrées dans `supabase/schemas/61_rls_main_tables.sql`
+    - SELECT: Spectacles publics visibles par tous, privés uniquement par admins
+    - INSERT: Création réservée aux admins (vérification directe sur profiles.role)
+    - UPDATE/DELETE: Propriétaires ou admins uniquement
+    - Pattern: Direct query sur profiles au lieu de is_admin() pour éviter problèmes de contexte
+  - **Validation** : CRUD spectacles entièrement fonctionnel, TypeScript clean, production-ready
+
+## 🆕 Mises à jour récentes (octobre 2025)
 
 - **Spectacles archivés publics** : Modification du seed `20250926153000_seed_spectacles.sql` pour marquer les spectacles archivés avec `public = true` au lieu de `public = false`. Cette approche simplifie la logique d'affichage des archives dans la fonctionnalité "Voir toutes nos créations" sans nécessiter de modification des politiques RLS. Les spectacles archivés restent identifiés par `status = 'archive'` mais sont maintenant visibles publiquement via la politique RLS existante.
 
