@@ -6,7 +6,17 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { z } from "zod";
+import {
+  submitSpectacleToApi,
+  handleSpectacleApiError,
+  getSpectacleSuccessMessage,
+} from "@/lib/api/spectacles-helpers";
+import {
+  spectacleFormSchema,
+  type SpectacleFormValues,
+  cleanSpectacleFormData,
+} from "@/lib/forms/spectacle-form-helpers";
+//import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -28,34 +38,21 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 
-// Form schema matching CreateSpectacleSchema
-const spectacleFormSchema = z.object({
-  title: z.string().min(1, "Le titre est requis").max(255),
-  slug: z.string().optional(),
-  status: z.enum(["draft", "published", "archived"]).optional(),
-  description: z.string().optional(),
-  short_description: z.string().max(500).optional(),
-  genre: z.string().max(100).optional(),
-  duration_minutes: z.coerce.number().int().positive().optional(),
-  casting: z.coerce.number().int().positive().optional(),
-  premiere: z.string().optional(),
-  image_url: z.string().url().optional().or(z.literal("")),
-  public: z.boolean().optional(),
-});
-
-type SpectacleFormValues = z.infer<typeof spectacleFormSchema>;
-
-interface Props {
+interface SpectacleFormProps {
   defaultValues?: Partial<SpectacleFormValues>;
   spectacleId?: number;
   onSuccess?: () => void;
 }
 
+// ==========================================================================
+// Main Component (<30 lines)
+// ==========================================================================
+
 export default function SpectacleForm({
   defaultValues,
   spectacleId,
   onSuccess,
-}: Props) {
+}: SpectacleFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isEditing = !!spectacleId;
@@ -64,9 +61,9 @@ export default function SpectacleForm({
     resolver: zodResolver(spectacleFormSchema),
     defaultValues: {
       title: defaultValues?.title ?? "",
-    slug: defaultValues?.slug ?? "",
-    status: defaultValues?.status ?? "draft",
-    description: defaultValues?.description ?? "",
+      slug: defaultValues?.slug ?? "",
+      status: defaultValues?.status ?? "draft",
+      description: defaultValues?.description ?? "",
       short_description: defaultValues?.short_description ?? "",
       genre: defaultValues?.genre ?? "",
       duration_minutes: defaultValues?.duration_minutes ?? "",
@@ -79,65 +76,25 @@ export default function SpectacleForm({
 
   async function onSubmit(data: SpectacleFormValues) {
     setIsSubmitting(true);
+
     try {
-      // Clean empty strings to undefined and convert string numbers to actual numbers
-      const cleanData: Record<string, unknown> = {};
-      
-      for (const [key, value] of Object.entries(data)) {
-        // Skip undefined values
-        if (value === undefined) {
-          continue;
-        }
-        
-        // Convert empty strings to undefined
-        if (value === "" || value === null) {
-          cleanData[key] = undefined;
-        } 
-        // Convert number fields from string to number
-        else if (key === "duration_minutes" || key === "casting") {
-          const numValue = typeof value === "string" ? parseInt(value, 10) : value;
-          cleanData[key] = !isNaN(numValue as number) && numValue !== 0 ? numValue : undefined;
-        } 
-        // Convert date to ISO datetime (YYYY-MM-DD -> YYYY-MM-DDTHH:MM:SS.sssZ)
-        else if (key === "premiere" && typeof value === "string") {
-          cleanData[key] = new Date(value).toISOString();
-        }
-        // Convert slug to lowercase and replace spaces with dashes (required by API schema)
-        else if (key === "slug" && typeof value === "string") {
-          cleanData[key] = value.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-        }
-        // Keep all other values as-is (including booleans, non-empty strings, etc.)
-        else {
-          cleanData[key] = value;
-        }
-      }
-      // Log data for debugging
-      console.log("Form data before cleaning:", data); //TODO: remove
-      console.log("Clean data being sent to API:", cleanData); //TODO: Remove
-
-      const endpoint = isEditing
-        ? `/api/admin/spectacles/${spectacleId}`
-        : `/api/admin/spectacles`;
-      const method = isEditing ? "PATCH" : "POST";
-
-      const response = await fetch(endpoint, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(cleanData),
-      });
+      const cleanData = cleanSpectacleFormData(data);
+      const response = await submitSpectacleToApi(cleanData, spectacleId);
 
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Échec de la sauvegarde");
       }
 
-      await response.json(); // Consume response
+      await response.json();
 
-      toast.success(isEditing ? "Spectacle mis à jour" : "Spectacle créé", {
-        description: `"${data.title}" a été ${
-          isEditing ? "mis à jour" : "créé"
-        } avec succès.`,
-      });
+      const successAction = isEditing
+        ? "Spectacle mis à jour"
+        : "Spectacle créé";
+      toast.success(
+        successAction,
+        getSpectacleSuccessMessage(isEditing, data.title)
+      );
 
       if (onSuccess) {
         onSuccess();
@@ -147,12 +104,7 @@ export default function SpectacleForm({
       }
     } catch (error) {
       console.error("Submit error:", error);
-      toast.error("Erreur", {
-        description:
-          error instanceof Error
-            ? error.message
-            : "Impossible de sauvegarder le spectacle",
-      });
+      toast.error("Erreur", { description: handleSpectacleApiError(error) });
     } finally {
       setIsSubmitting(false);
     }
@@ -288,7 +240,7 @@ export default function SpectacleForm({
                   <Input
                     type="number"
                     placeholder="90"
-                    value={typeof field.value === 'number' ? field.value : ""}
+                    value={typeof field.value === "number" ? field.value : ""}
                     onChange={(e) =>
                       field.onChange(
                         e.target.value ? parseInt(e.target.value) : ""
@@ -314,7 +266,7 @@ export default function SpectacleForm({
                   <Input
                     type="number"
                     placeholder="5"
-                    value={typeof field.value === 'number' ? field.value : ""}
+                    value={typeof field.value === "number" ? field.value : ""}
                     onChange={(e) =>
                       field.onChange(
                         e.target.value ? parseInt(e.target.value) : ""

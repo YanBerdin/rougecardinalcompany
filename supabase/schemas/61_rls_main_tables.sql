@@ -43,27 +43,71 @@ for select
 to anon, authenticated
 using ( public = true );
 
+create policy "Admins can view all spectacles"
+on public.spectacles
+for select
+to authenticated
+using (
+  exists (
+    select 1
+    from public.profiles
+    where user_id = auth.uid()
+    and role = 'admin'
+  )
+);
+
 drop policy if exists "Authenticated users can create spectacles" on public.spectacles;
-create policy "Authenticated users can create spectacles"
+create policy "Admins can create spectacles"
 on public.spectacles
 for insert
 to authenticated
-with check ( (select public.is_admin()) = true );
+with check (
+  exists (
+    select 1
+    from public.profiles
+    where user_id = auth.uid()
+    and role = 'admin'
+  )
+);
 
 drop policy if exists "Owners or admins can update spectacles" on public.spectacles;
 create policy "Owners or admins can update spectacles"
 on public.spectacles
 for update
 to authenticated
-using ( (created_by = (select auth.uid())) or (select public.is_admin()) )
-with check ( (created_by = (select auth.uid())) or (select public.is_admin()) );
+using (
+  (created_by = (select auth.uid()))
+  or exists (
+    select 1
+    from public.profiles
+    where user_id = auth.uid()
+    and role = 'admin'
+  )
+)
+with check (
+  (created_by = (select auth.uid()))
+  or exists (
+    select 1
+    from public.profiles
+    where user_id = auth.uid()
+    and role = 'admin'
+  )
+);
 
 drop policy if exists "Owners or admins can delete spectacles" on public.spectacles;
 create policy "Owners or admins can delete spectacles"
 on public.spectacles
 for delete
 to authenticated
-using ( (created_by = (select auth.uid())) or (select public.is_admin()) );
+using (
+  (created_by = (select auth.uid()))
+  or exists (
+    select 1
+    from public.profiles
+    where user_id = auth.uid()
+    and role = 'admin'
+  )
+);
 
 -- ---- EVENEMENTS ----
 alter table public.evenements enable row level security;

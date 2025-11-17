@@ -236,26 +236,6 @@ async function performAuthenticatedInsert(
   supabase: SupabaseClient,
   dataToInsert: CreateSpectacleInput & { created_by: string }
 ): Promise<DALResult<SpectacleDb>> {
-  // DEBUG: Vérifier les données avant insert
-  // console.log("=== DEBUG INSERT ===");
-  // console.log("Data to insert:", JSON.stringify(dataToInsert, null, 2));
-
-  // DEBUG: Vérifier l'authentification
-  // const { data: { user } } = await supabase.auth.getUser();
-  // console.log("Current user:", user?.id);
-  // console.log("User metadata:", user?.user_metadata);
-
-  // DEBUG: Tester is_admin() function
-  // const { data: isAdminResult, error: adminCheckError } = await supabase
-  // .rpc("is_admin");
-  // console.log("is_admin() result:", isAdminResult, "error:", adminCheckError);
-
-  // DEBUG: Tester une simple requête SELECT pour vérifier le contexte auth
-  // const { data: selectTest, error: selectError } = await supabase
-  //  .from("spectacles")
-  //  .select("id")
-  //  .limit(1);
-  // console.log("SELECT test:", selectTest ? "SUCCESS" : "FAILED", selectError);
 
   const { data, error } = await supabase
     .from("spectacles")
@@ -265,9 +245,6 @@ async function performAuthenticatedInsert(
 
   if (error) {
     console.error("performAuthenticatedInsert error:", error);
-    console.error("Error code:", error.code);
-    console.error("Error details:", error.details);
-    console.error("Error hint:", error.hint);
     if (error.code === "23505") {
       return {
         success: false,

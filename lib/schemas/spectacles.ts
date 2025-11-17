@@ -58,9 +58,10 @@ export const CreateSpectacleSchema = z.object({
   premiere: z
     .string()
     .datetime({ message: "Invalid datetime format" })
+    .nullable()
     .optional(),
   image_url: z.string().url("Invalid URL format").optional(),
-  public: z.boolean().optional().default(true),
+  public: z.boolean().default(false),
   awards: z.array(z.string()).optional(),
 });
 
