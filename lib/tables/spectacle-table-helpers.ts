@@ -1,20 +1,33 @@
 import type { SpectacleSummary } from "@/lib/schemas/spectacles";
 import { Badge } from "@/components/ui/badge";
 import React from "react";
+import { capitalizeWords } from "@/lib/forms/spectacle-form-helpers";
 
 export const STATUS_VARIANTS: Record<
   string,
   "default" | "secondary" | "outline"
 > = {
-  en_cours: "default",
-  termine: "secondary",
-  projet: "outline",
+  "en cours": "default",
+  "terminé": "secondary",
+  "projet": "outline",
+  "draft": "outline",
+  "published": "default",
+  "archived": "secondary",
+  "a l affiche": "default",
+  "en preparation": "outline",
+  "annule": "secondary",
 };
 
 export const STATUS_LABELS: Record<string, string> = {
-  en_cours: "En cours",
-  termine: "Terminé",
-  projet: "Projet",
+  "en cours": "En cours",
+  "terminé": "Terminé",
+  "projet": "Projet",
+  "draft": "Brouillon",
+  "published": "Publié",
+  "archived": "Archivé",
+  "a l affiche": "À l'affiche",
+  "en preparation": "En préparation",
+  "annule": "Annulé",
 };
 
 export function formatSpectacleDate(dateString: string | null): string {
@@ -54,6 +67,93 @@ export function removeSpectacleFromList(
 }
 
 // ========================================================================
+// Sorting Helpers
+// ========================================================================
+
+export type SortField = "title" | "status" | "genre" | "premiere";
+export type SortDirection = "asc" | "desc";
+
+export interface SortState {
+  field: SortField;
+  direction: SortDirection;
+}
+
+export function sortSpectacles(
+  spectacles: SpectacleSummary[],
+  sortState: SortState
+): SpectacleSummary[] {
+  return [...spectacles].sort((a, b) => {
+    const { field, direction } = sortState;
+    const multiplier = direction === "asc" ? 1 : -1;
+
+    let aValue: any;
+    let bValue: any;
+
+    switch (field) {
+      case "title":
+        aValue = a.title?.toLowerCase() || "";
+        bValue = b.title?.toLowerCase() || "";
+        break;
+
+      case "status":
+        aValue = (a.status || "").replace(/_/g, ' ');
+        bValue = (b.status || "").replace(/_/g, ' ');
+        break;
+
+      case "genre":
+        aValue = a.genre?.toLowerCase() || "";
+        bValue = b.genre?.toLowerCase() || "";
+        break;
+
+      case "premiere":
+        aValue = a.premiere ? new Date(a.premiere).getTime() : 0;
+        bValue = b.premiere ? new Date(b.premiere).getTime() : 0;
+        break;
+
+      default:
+        return 0;
+    }
+
+    // Handle null/empty values - put them at the end
+    if (!aValue && bValue) return 1 * multiplier;
+    if (aValue && !bValue) return -1 * multiplier;
+    if (!aValue && !bValue) return 0;
+
+    // String comparison with French locale
+    if (typeof aValue === "string" && typeof bValue === "string") {
+      return aValue.localeCompare(bValue, "fr", { sensitivity: "base" }) * multiplier;
+    }
+
+    // Numeric comparison
+    if (typeof aValue === "number" && typeof bValue === "number") {
+      return (aValue - bValue) * multiplier;
+    }
+
+    return 0;
+  });
+}
+
+export function toggleSortDirection(currentDirection: SortDirection): SortDirection {
+  return currentDirection === "asc" ? "desc" : "asc";
+}
+
+export function getNextSortState(
+  currentSort: SortState | null,
+  clickedField: SortField
+): SortState {
+  if (!currentSort || currentSort.field !== clickedField) {
+    // First click on this field - sort ascending
+    return { field: clickedField, direction: "asc" };
+  }
+
+  // Same field clicked - toggle direction
+  return {
+    field: clickedField,
+    direction: toggleSortDirection(currentSort.direction),
+  };
+}
+
+// ========================================================================
 // Badge Helpers (React Components)
 // ========================================================================
 
@@ -62,8 +162,14 @@ export function getStatusBadge(
 ): React.ReactElement | null {
   if (!status) return null;
 
-  const variant = STATUS_VARIANTS[status] || "outline";
-  const label = STATUS_LABELS[status] || status;
+  // Normalize status for display (handle old underscore format)
+  const normalizedStatus = status.replace(/_/g, ' ');
+
+  const variant = STATUS_VARIANTS[normalizedStatus] || "outline";
+  const predefinedLabel = STATUS_LABELS[normalizedStatus];
+
+  // Use predefined label if available, otherwise capitalize the normalized status
+  const label = predefinedLabel || capitalizeWords(normalizedStatus);
 
   return React.createElement(Badge, { variant }, label);
 }

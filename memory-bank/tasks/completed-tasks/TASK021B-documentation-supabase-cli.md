@@ -1,4 +1,4 @@
-# [TASK022] - Documentation Supabase CLI (workflow déclaratif)
+# \[TASK022] - Documentation Supabase CLI (workflow déclaratif)
 
 **Status:** Completed  
 **Added:** 1er octobre 2025  

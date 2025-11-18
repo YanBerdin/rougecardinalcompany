@@ -184,6 +184,45 @@ export async function fetchSpectacleBySlug(
   }
 }
 
+/**
+ * Fetches all distinct genres used in spectacles
+ * Returns sorted array of non-null genres
+ *
+ * @example
+ * const genres = await fetchDistinctGenres();
+ * // ["Comédie", "Drame", "Tragédie"]
+ */
+export async function fetchDistinctGenres(): Promise<string[]> {
+  try {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from('spectacles')
+      .select('genre')
+      .not('genre', 'is', null)
+      .order('genre');
+
+    if (error) {
+      console.error('[DAL] fetchDistinctGenres error:', error);
+      return [];
+    }
+
+    // Extract unique genres and filter out nulls/empty
+    const uniqueGenres = Array.from(
+      new Set(
+        data
+          .map(item => item.genre)
+          .filter((genre): genre is string => Boolean(genre && genre.trim()))
+      )
+    );
+
+    return uniqueGenres.sort((a, b) => a.localeCompare(b, 'fr'));
+  } catch (error) {
+    console.error('[DAL] fetchDistinctGenres exception:', error);
+    return [];
+  }
+}
+
 // ============================================================================
 // CREATE Operation
 // ============================================================================

@@ -1,12 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import type { SpectacleSummary } from "@/lib/schemas/spectacles";
 import {
   deleteSpectacleFromApi,
   removeSpectacleFromList,
+  sortSpectacles,
+  getNextSortState,
+  type SortState,
+  type SortField,
 } from "@/lib/tables/spectacle-table-helpers";
 import { handleSpectacleApiError } from "@/lib/api/spectacles-helpers";
 import { Button } from "@/components/ui/button";
@@ -35,6 +39,17 @@ export default function SpectaclesManagementContainer({
   const [deleteCandidate, setDeleteCandidate] = useState<number | null>(null);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [sortState, setSortState] = useState<SortState | null>(null);
+
+  // Sort spectacles based on current sort state
+  const sortedSpectacles = useMemo(() => {
+    if (!sortState) return spectacles;
+    return sortSpectacles(spectacles, sortState);
+  }, [spectacles, sortState]);
+
+  function handleSort(field: SortField): void {
+    setSortState((currentSort) => getNextSortState(currentSort, field));
+  }
   /*
   const openDeleteDialog = deleteCandidate !== null;
 
@@ -105,10 +120,12 @@ export default function SpectaclesManagementContainer({
       </div>
 
       <SpectaclesTable
-        spectacles={spectacles}
+        spectacles={sortedSpectacles}
         onView={handleView}
         onEdit={handleEdit}
         onDelete={requestDelete}
+        sortState={sortState}
+        onSort={handleSort}
       />
 
       {/* Delete Confirmation Dialog */}

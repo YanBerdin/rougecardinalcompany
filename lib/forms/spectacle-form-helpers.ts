@@ -1,5 +1,41 @@
 import { z } from "zod";
 
+// ============================================================================
+// String Formatting Helpers
+// ============================================================================
+
+/**
+ * Capitalizes first letter of each word and normalizes spaces
+ * @example capitalizeWords("en cours") → "En cours"
+ * @example capitalizeWords("tragédie") → "Tragédie"
+ */
+export function capitalizeWords(text: string): string {
+  return text
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+/**
+ * Normalizes status: removes underscores and capitalizes
+ * @example normalizeStatus("en_cours") → "En cours"
+ */
+export function normalizeStatus(status: string): string {
+  return capitalizeWords(status.replace(/_/g, ' '));
+}
+
+/**
+ * Normalizes genre: capitalizes first letter only
+ * @example normalizeGenre("tragédie") → "Tragédie"
+ * @example normalizeGenre("comédie musicale") → "Comédie musicale"
+ */
+export function normalizeGenre(genre: string): string {
+  const trimmed = genre.trim();
+  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
+}
+
 // Types
 export const spectacleFormSchema = z.object({
   title: z.string().min(1, "Le titre est requis").max(255),
@@ -7,7 +43,7 @@ export const spectacleFormSchema = z.object({
   status: z.enum(["draft", "published", "archived"]).optional(),
   description: z.string().optional(),
   short_description: z.string().max(500).optional(),
-  genre: z.string().max(100).optional(),
+  genre: z.string().max(100).optional().transform((val) => val ? normalizeGenre(val) : val),
   duration_minutes: z.coerce.number().int().positive().optional(),
   casting: z.coerce.number().int().positive().optional(),
   premiere: z.string().optional(),

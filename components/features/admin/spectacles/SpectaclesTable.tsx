@@ -7,6 +7,8 @@ import {
   formatSpectacleDuration,
   getStatusBadge,
   getVisibilityBadge,
+  type SortState,
+  type SortField,
 } from "@/lib/tables/spectacle-table-helpers";
 import {
   Table,
@@ -17,6 +19,16 @@ import {
   TableHeader,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { SortableHeader } from "./SortableHeader";
+
+interface SpectaclesTableProps {
+  spectacles: SpectacleSummary[];
+  onView: (id: number) => void;
+  onEdit: (id: number) => void;
+  onDelete: (id: number) => void;
+  sortState: SortState | null;
+  onSort: (field: SortField) => void;
+}
 
 interface SpectaclesTableProps {
   spectacles: SpectacleSummary[];
@@ -30,6 +42,8 @@ export default function SpectaclesTable({
   onView,
   onEdit,
   onDelete,
+  sortState,
+  onSort,
 }: SpectaclesTableProps) {
   if (spectacles.length === 0) {
     return <div>Aucun spectacle trouvé.</div>;
@@ -40,11 +54,39 @@ export default function SpectaclesTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Titre</TableHead>
-            <TableHead>Genre</TableHead>
-            <TableHead>Statut</TableHead>
+            <TableHead>
+              <SortableHeader
+                field="title"
+                label="Titre"
+                currentSort={sortState}
+                onSort={onSort}
+              />
+            </TableHead>
+            <TableHead>
+              <SortableHeader
+                field="genre"
+                label="Genre"
+                currentSort={sortState}
+                onSort={onSort}
+              />
+            </TableHead>
+            <TableHead>
+              <SortableHeader
+                field="status"
+                label="Statut"
+                currentSort={sortState}
+                onSort={onSort}
+              />
+            </TableHead>
             <TableHead>Durée</TableHead>
-            <TableHead>Première</TableHead>
+            <TableHead>
+              <SortableHeader
+                field="premiere"
+                label="Première"
+                currentSort={sortState}
+                onSort={onSort}
+              />
+            </TableHead>
             <TableHead>Visibilité</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>

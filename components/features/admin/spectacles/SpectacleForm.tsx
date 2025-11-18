@@ -15,6 +15,7 @@ import {
   spectacleFormSchema,
   type SpectacleFormValues,
   cleanSpectacleFormData,
+  normalizeGenre,
 } from "@/lib/forms/spectacle-form-helpers";
 //import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -37,11 +38,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Check, ChevronsUpDown, Plus } from "lucide-react";
 
 interface SpectacleFormProps {
   defaultValues?: Partial<SpectacleFormValues>;
   spectacleId?: number;
   onSuccess?: () => void;
+  existingGenres?: string[];
 }
 
 // ==========================================================================
@@ -52,9 +61,12 @@ export default function SpectacleForm({
   defaultValues,
   spectacleId,
   onSuccess,
+  existingGenres = [],
 }: SpectacleFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCreatingNewGenre, setIsCreatingNewGenre] = useState(false);
+  const [genreDropdownOpen, setGenreDropdownOpen] = useState(false);
   const isEditing = !!spectacleId;
 
   const form = useForm({
@@ -181,7 +193,79 @@ export default function SpectacleForm({
               <FormItem>
                 <FormLabel>Genre</FormLabel>
                 <FormControl>
-                  <Input placeholder="Tragédie, Comédie..." {...field} />
+                  {isCreatingNewGenre ? (
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Nouveau genre..."
+                        value={field.value}
+                        onChange={(e) => {
+                          const normalized = normalizeGenre(e.target.value);
+                          field.onChange(normalized);
+                        }}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        ref={field.ref}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setIsCreatingNewGenre(false);
+                          if (!field.value?.trim()) {
+                            field.onChange("");
+                          }
+                        }}
+                      >
+                        Annuler
+                      </Button>
+                    </div>
+                  ) : (
+                    <DropdownMenu
+                      open={genreDropdownOpen}
+                      onOpenChange={setGenreDropdownOpen}
+                    >
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={genreDropdownOpen}
+                          className="w-full justify-between"
+                        >
+                          {field.value || "Sélectionner un genre..."}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-full min-w-[200px] p-0">
+                        {existingGenres.map((genre) => (
+                          <DropdownMenuItem
+                            key={genre}
+                            onClick={() => {
+                              field.onChange(genre);
+                              setGenreDropdownOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={`mr-2 h-4 w-4 ${
+                                field.value === genre ? "opacity-100" : "opacity-0"
+                              }`}
+                            />
+                            {genre}
+                          </DropdownMenuItem>
+                        ))}
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setIsCreatingNewGenre(true);
+                            setGenreDropdownOpen(false);
+                          }}
+                          className="border-t"
+                        >
+                          <Plus className="mr-2 h-4 w-4" />
+                          Créer un nouveau genre
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
                 </FormControl>
                 <FormMessage />
               </FormItem>

@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import SpectacleForm from "@/components/features/admin/spectacles/SpectacleForm";
-import { fetchSpectacleById } from "@/lib/dal/spectacles";
+import { fetchSpectacleById, fetchDistinctGenres } from "@/lib/dal/spectacles";
 
 interface Props {
   params: {
@@ -27,17 +27,21 @@ export default async function EditSpectaclePage({ params }: Props) {
     notFound();
   }
 
-  // Fetch spectacle
-  const spectacle = await fetchSpectacleById(spectacleId);
+  // Fetch spectacle and existing genres in parallel
+  const [spectacle, existingGenres] = await Promise.all([
+    fetchSpectacleById(spectacleId),
+    fetchDistinctGenres(),
+  ]);
+
   if (!spectacle) {
     notFound();
   }
 
-  // Map database status to form status
+  // Map database status to form status (updated for normalized values)
   const statusMap: Record<string, "draft" | "published" | "archived"> = {
-    projet: "draft",
-    en_cours: "published",
-    termine: "archived",
+    "projet": "draft",
+    "en cours": "published",
+    "terminé": "archived",
   };
 
   // Transform database data to form values
@@ -72,7 +76,11 @@ export default async function EditSpectaclePage({ params }: Props) {
       </div>
 
       <div className="max-w-2xl">
-        <SpectacleForm defaultValues={defaultValues} spectacleId={spectacle.id} />
+        <SpectacleForm
+          defaultValues={defaultValues}
+          spectacleId={spectacle.id}
+          existingGenres={existingGenres}
+        />
       </div>
     </div>
   );

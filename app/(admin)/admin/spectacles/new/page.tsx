@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import SpectacleForm from "@/components/features/admin/spectacles/SpectacleForm";
+import { fetchDistinctGenres } from "@/lib/dal/spectacles";
 
 export default async function NewSpectaclePage() {
   const supabase = await createClient();
@@ -13,6 +14,9 @@ export default async function NewSpectaclePage() {
   if (error || !data?.claims || data.claims.user_metadata.role !== "admin") {
     redirect("/auth/login");
   }
+
+  // Load existing genres for the form
+  const existingGenres = await fetchDistinctGenres();
 
   return (
     <div className="space-y-6">
@@ -31,7 +35,7 @@ export default async function NewSpectaclePage() {
       </div>
 
       <div className="max-w-2xl">
-        <SpectacleForm />
+        <SpectacleForm existingGenres={existingGenres} />
       </div>
     </div>
   );
