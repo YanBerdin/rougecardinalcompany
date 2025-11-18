@@ -119,7 +119,7 @@ Note RLS: les nouvelles tables co‑localisent leurs politiques (dans le même f
 
 - `articles_presse`: activation RLS co‑localisée dans `08_table_articles_presse.sql` avec lecture publique des articles publiés (`published_at is not null`) et gestion admin (insert/update/delete). Ajout d’un index partiel `idx_articles_published_at_public` pour optimiser les sélections publiques.
 
-Pour rappel, la migration générée est `supabase/migrations/20250918004849_apply_declarative_schema.sql` (patchée pour l’ordre `validate_rrule()` → `check_valid_rrule`).
+Pour rappel, la migration générée est `supabase/migrations/20250918000002_apply_declarative_schema_complete.sql`. Cette migration reconstruit le schéma complet depuis les fichiers déclaratifs et doit s'exécuter avant tous les seeds.
 
 ---
 
