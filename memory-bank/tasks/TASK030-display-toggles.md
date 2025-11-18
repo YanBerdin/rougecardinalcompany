@@ -1,4 +1,4 @@
-# [TASK030] - Display Toggles
+# \[TASK030] - Display Toggles
 
 **Status:** Pending  
 **Added:** 2025-10-16  

@@ -2,35 +2,35 @@
 
 ## In Progress
 
-- `[TASK007]` Update memory bank - Générer et mettre à jour les fichiers du memory-bank avec le contexte de l'incident et actions prises.
+- \[TASK007\] Update memory bank - Générer et mettre à jour les fichiers du memory-bank avec le contexte de l'incident et actions prises.
 
 ## Completed
 
-- `[TASK001]` Commit & annotate revoke migrations
-- `[TASK002]` Adapt CI audit to allow known restored GRANTs
-- `[TASK003]` Create CI gate for REVOKE detection
-- `[TASK004]` Add README for allowlist
-- `[TASK005]` Add runtime allowlist entries
+- \[TASK001\] Commit & annotate revoke migrations
+- \[TASK002\] Adapt CI audit to allow known restored GRANTs
+- \[TASK003\] Create CI gate for REVOKE detection
+- \[TASK004\] Add README for allowlist
+- \[TASK005\] Add runtime allowlist entries
 
 # Index des Tâches
 
 ## En Cours
 
-- `TASK004` Agenda des événements (DAL + containers + UI)
-- `TASK014` Back‑office: centralisation et validation des toggles (Agenda/Accueil/Contact)
+- \[TASK004\] Agenda des événements (DAL + containers + UI)
+- \[TASK014\] Back‑office: centralisation et validation des toggles (Agenda/Accueil/Contact)
 
 ## En Attente
 
-- `TASK005` Optimisation SEO et meta-tags dynamiques
-- `TASK006` Médiathèque professionnelle (photos HD, vidéos)
-- `TASK007` Tests automatisés et monitoring
-- `TASK008` Configuration des redirections vers billetterie externe
-- `TASK009` Gestion des partenaires et mécènes
-- `TASK010` Mise en place des toggles d'affichage dans le back-office
-- `TASK015` Stratégie seeds cloud (sécurisée) + synchronisation
-- `TASK016` Option: modélisation `partners.type` si requis par le design
-- `TASK017` Retrait des délais artificiels (1200-1500ms) des containers
-- `TASK018` Intégration système d'emailing (newsletter, contacts)
+- \[TASK005\] Optimisation SEO et meta-tags dynamiques
+- \[TASK006\] Médiathèque professionnelle (photos HD, vidéos)
+- \[TASK007\] Tests automatisés et monitoring
+- \[TASK008\] Configuration des redirections vers billetterie externe
+- \[TASK009\] Gestion des partenaires et mécènes
+- \[TASK010\] Mise en place des toggles d'affichage dans le back-office
+- \[TASK015\] Stratégie seeds cloud (sécurisée) + synchronisation
+- \[TASK016\] Option: modélisation \[partners.type\] si requis par le design
+- \[TASK017\] Retrait des délais artificiels (1200-1500ms) des containers
+- \[TASK018\] Intégration système d'emailing (newsletter, contacts)
 
 ## Terminé
 

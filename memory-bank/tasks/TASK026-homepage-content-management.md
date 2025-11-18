@@ -1,4 +1,4 @@
-# [TASK026] - Homepage Content Management
+# \[TASK026] - Homepage Content Management
 
 **Status:** Pending  
 **Added:** 2025-10-16  

@@ -1,4 +1,4 @@
-# [TASK021] - Content Management CRUD
+# \[TASK021] - Content Management CRUD
 
 **Status:** Pending  
 **Added:** 2025-10-16  

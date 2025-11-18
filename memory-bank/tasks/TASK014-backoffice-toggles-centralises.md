@@ -1,4 +1,4 @@
-# [TASK014] - Back‑office: toggles centralisés (Agenda/Accueil/Contact)
+# \[TASK014] - Back‑office: toggles centralisés (Agenda/Accueil/Contact)
 
 **Status:** Pending  
 **Added:** 17 septembre 2025  

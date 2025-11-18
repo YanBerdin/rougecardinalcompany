@@ -1,4 +1,4 @@
-# [TASK037] - Accessibility Compliance
+# \[TASK037] - Accessibility Compliance
 
 **Status:** Pending  
 **Added:** 2025-10-16  
