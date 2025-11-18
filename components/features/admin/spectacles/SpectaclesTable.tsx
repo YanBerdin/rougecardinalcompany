@@ -3,10 +3,10 @@
 import { Eye, Pencil, Trash2 } from "lucide-react";
 import type { SpectacleSummary } from "@/lib/schemas/spectacles";
 import {
-  STATUS_VARIANTS,
-  STATUS_LABELS,
   formatSpectacleDate,
   formatSpectacleDuration,
+  getStatusBadge,
+  getVisibilityBadge,
 } from "@/lib/tables/spectacle-table-helpers";
 import {
   Table,
@@ -17,29 +17,12 @@ import {
   TableHeader,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { JSX } from "react/jsx-runtime";
 
 interface SpectaclesTableProps {
   spectacles: SpectacleSummary[];
   onView: (id: number) => void;
   onEdit: (id: number) => void;
   onDelete: (id: number) => void;
-}
-
-function getStatusBadge(status: string | null): JSX.Element | null {
-  if (!status) return null;
-  const variant = STATUS_VARIANTS[status] || "outline";
-  const label = STATUS_LABELS[status] || status;
-  return <Badge variant={variant}>{label}</Badge>;
-}
-
-function getVisibilityBadge(isPublic: boolean): JSX.Element {
-  return (
-    <Badge variant={isPublic ? "default" : "secondary"}>
-      {isPublic ? "Public" : "Privé"}
-    </Badge>
-  );
 }
 
 export default function SpectaclesTable({

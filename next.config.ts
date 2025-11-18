@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 // https://nextjs.org/docs/messages/next-image-unconfigured-host
+// https://nextjs.org/docs/app/api-reference/components/image#remotepatterns
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [

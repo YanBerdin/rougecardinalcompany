@@ -33,8 +33,9 @@ export default function SpectaclesManagementContainer({
   const [spectacles, setSpectacles] =
     useState<SpectacleSummary[]>(initialSpectacles);
   const [deleteCandidate, setDeleteCandidate] = useState<number | null>(null);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-
+  /*
   const openDeleteDialog = deleteCandidate !== null;
 
   function setOpenDeleteDialog(open: boolean): void {
@@ -42,7 +43,7 @@ export default function SpectaclesManagementContainer({
       setDeleteCandidate(null);
     }
   }
-
+  */
   function handleCreate(): void {
     router.push("/admin/spectacles/new");
   }
@@ -57,9 +58,11 @@ export default function SpectaclesManagementContainer({
 
   function requestDelete(id: number): void {
     setDeleteCandidate(id);
+    setOpenDeleteDialog(true);
   }
 
   function cancelDelete(): void {
+    setOpenDeleteDialog(false);
     setDeleteCandidate(null);
   }
 
@@ -71,8 +74,13 @@ export default function SpectaclesManagementContainer({
     try {
       await deleteSpectacleFromApi(deleteCandidate);
       setSpectacles((prev) => removeSpectacleFromList(prev, deleteCandidate));
+
+      toast.success("Spectacle supprimé", {
+        description: "Le spectacle a été supprimé avec succès.",
+      });
+
+      setOpenDeleteDialog(false);
       setDeleteCandidate(null);
-      toast.success("Spectacle supprimé");
       router.refresh();
     } catch (error) {
       console.error("Delete error:", error);

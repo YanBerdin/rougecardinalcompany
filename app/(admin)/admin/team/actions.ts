@@ -18,10 +18,6 @@ import {
 } from "@/lib/dal/team";
 import { requireAdmin } from "@/lib/auth/is-admin";
 
-// ============================================================================
-// Constants
-// ============================================================================
-
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
 const CACHE_CONTROL_SECONDS = "3600";
 const ALLOWED_IMAGE_MIME_TYPES = [
@@ -30,10 +26,6 @@ const ALLOWED_IMAGE_MIME_TYPES = [
   "image/webp",
   "image/avif",
 ] as const;
-
-// ============================================================================
-// Types
-// ============================================================================
 
 type SuccessResponse<T> = {
   readonly success: true;
@@ -50,10 +42,6 @@ type ErrorResponse = {
 type ActionResponse<T> = SuccessResponse<T> | ErrorResponse;
 
 type AllowedMimeType = (typeof ALLOWED_IMAGE_MIME_TYPES)[number];
-
-// ============================================================================
-// Exported Actions
-// ============================================================================
 
 export async function createTeamMember(
   input: unknown
@@ -200,10 +188,6 @@ export async function uploadTeamMemberPhoto(
     return handleActionError(error, "uploadTeamMemberPhoto");
   }
 }
-
-// ============================================================================
-// Helper Functions
-// ============================================================================
 
 function isValidTeamMemberId(teamMemberId: number): boolean {
   return Number.isFinite(teamMemberId) && teamMemberId > 0;
