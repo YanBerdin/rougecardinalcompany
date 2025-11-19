@@ -3,11 +3,13 @@
 ## Current Status
 
 ✅ **Phase 1: Foundation - COMPLETED**
+
 - ErrorBoundary component created
 - Dashboard types with Zod schemas created
 - Test script created and validated (100% success rate)
 
 ✅ **Phase 2: Component Extraction - COMPLETED**
+
 - StatsCard.tsx extracted (29 lines)
 - dashboard.ts DAL function created (54 lines)
 - DashboardStatsContainer.tsx created (45 lines)
@@ -15,6 +17,7 @@
 - All tests passing (800ms avg performance)
 
 ✅ **Phase 3: API Routes Refactoring - COMPLETED**
+
 - Contact API: Uses parseFullName() helper, HttpStatus constants
 - Newsletter API: Uses isUniqueViolation() type guard, PostgresError constants
 - Both routes: Consistent error handling, no magic strings
@@ -23,14 +26,18 @@
 ## Test Results
 
 ### Phase 1 (Initial)
+
 All 4 tests passed:
+
 - Fetch dashboard stats: 648ms
 - Validate stats schema: 12057ms (initial fetch + validation)
 - Parallel execution (3x): Success
 - Error handling: Validated
 
 ### Phase 2 (Post-Refactoring)
+
 All 4 tests passed:
+
 - Fetch dashboard stats: 800ms
 - Validate stats schema: 524ms (optimized)
 - Parallel execution (3x): 781ms
@@ -41,9 +48,11 @@ Current stats: 6 team members, 16 shows, 4 events, 17 media items
 ## Phase 2: Component Extraction
 
 ### 2.1. Create StatsCard Component
+
 **File:** `components/admin/dashboard/StatsCard.tsx`
 **Type:** Dumb component (presentational)
 **Props:**
+
 ```typescript
 interface StatsCardProps {
   title: string;
@@ -54,6 +63,7 @@ interface StatsCardProps {
 ```
 
 **Requirements:**
+
 - Use shadcn/ui Card components
 - Display title, value, icon
 - Link to href with next/link
@@ -65,10 +75,12 @@ interface StatsCardProps {
 ---
 
 ### 2.2. Create DashboardStatsContainer Component
+
 **File:** `components/admin/dashboard/DashboardStatsContainer.tsx`
 **Type:** Smart component (container with logic)
 
 **Responsibilities:**
+
 - Fetch dashboard stats via DAL
 - Handle loading state with Suspense
 - Wrap with ErrorBoundary
@@ -76,6 +88,7 @@ interface StatsCardProps {
 - Render 4 stat cards in grid layout
 
 **Pattern:**
+
 ```typescript
 export async function DashboardStatsContainer() {
   const stats = await fetchDashboardStats(); // DAL call
@@ -96,10 +109,12 @@ export async function DashboardStatsContainer() {
 ---
 
 ### 2.3. Create DAL Function
+
 **File:** `lib/dal/dashboard.ts`
 **Function:** `fetchDashboardStats()`
 
 **Requirements:**
+
 - Mark with `'use server'` and `import 'server-only'`
 - Parallel Supabase queries (Promise.all)
 - Individual error handling for each query
@@ -107,6 +122,7 @@ export async function DashboardStatsContainer() {
 - Cache with React cache() if appropriate
 
 **Signature:**
+
 ```typescript
 export async function fetchDashboardStats(): Promise<DashboardStats> {
   const [teamResult, showsResult, eventsResult, mediaResult] = await Promise.all([
@@ -123,15 +139,18 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
 ---
 
 ### 2.4. Refactor Admin Dashboard Page
+
 **File:** `app/(admin)/admin/page.tsx`
 
 **Changes:**
+
 1. Remove inline StatsCard function (lines 108-133)
 2. Remove direct Supabase queries (lines 18-29)
 3. Import DashboardStatsContainer
 4. Replace stats section with container
 
 **Before (133 lines):**
+
 ```typescript
 export default async function AdminDashboard() {
   const supabase = await createClient();
@@ -150,6 +169,7 @@ export default async function AdminDashboard() {
 ```
 
 **After (~70 lines):**
+
 ```typescript
 import { DashboardStatsContainer } from "@/components/admin/dashboard/DashboardStatsContainer";
 
@@ -171,18 +191,22 @@ export default function AdminDashboard() {
 ## Phase 3: API Routes Refactoring
 
 ### 3.1. Refactor Contact API Route
+
 **File:** `app/api/contact/route.ts`
 
 **Changes:**
+
 - Use `parseFullName()` from `lib/api/helpers.ts` (already exists)
 - Replace nested try-catch with single error handler
 - Use HttpStatus constants
 - Improve error messages
 
 ### 3.2. Refactor Newsletter API Route
+
 **File:** `app/api/newsletter/route.ts`
 
 **Changes:**
+
 - Replace magic string `'23505'` with `PostgresError.UNIQUE_VIOLATION`
 - Use `isUniqueViolation()` type guard from helpers
 - Consolidate error handling
@@ -209,14 +233,17 @@ export default function AdminDashboard() {
 ## Phase 4: Team Active Toggle Tests Validation
 
 ### 4.1. Validate test-active-endpoint.ts with Admin Cookie
+
 **Status:** ✅ COMPLETED (13 novembre 2025)
 
 **Tests Executés:**
+
 ```bash
 pnpm exec tsx scripts/test-active-endpoint.ts --cookie "sb-xxx-auth-token=ADMIN_TOKEN"
 ```
 
 **Résultats:**
+
 - ✅ Valid inputs (6 tests): Boolean true/false, String "true"/"false", Number 0/1 → 200 OK
 - ✅ Invalid inputs (7 tests): String "maybe", Number 2/-1, null, array, object, missing → 422 Validation Error
 - ✅ Invalid IDs (4 tests): Non-numeric, négatif, zéro, décimal → 400 Bad Request
@@ -225,6 +252,7 @@ pnpm exec tsx scripts/test-active-endpoint.ts --cookie "sb-xxx-auth-token=ADMIN_
 **Total:** 17/17 passing (100% success rate)
 
 **Pattern Établi:**
+
 - Extraction cookie manuel depuis navigateur (DevTools → Application → Cookies)
 - Script TypeScript avec descriptions détaillées pour chaque test
 - Gestion erreurs typée (Zod, parseNumericId, withAdminAuth)
@@ -252,24 +280,28 @@ pnpm exec tsx scripts/test-active-endpoint.ts --cookie "sb-xxx-auth-token=ADMIN_
 ## Benefits
 
 **Code Quality:**
+
 - Separation of concerns (Smart/Dumb components)
 - Single Responsibility Principle
 - DRY (Don't Repeat Yourself)
 - Type safety with runtime validation
 
 **Maintainability:**
+
 - StatsCard reusable across admin section
 - Easier to test individual components
 - Clear data flow: DAL → Container → Card
 - Consistent error handling patterns
 
 **Performance:**
+
 - Parallel queries maintained
 - React cache() for DAL function
 - Suspense for progressive rendering
 - Error boundaries prevent full page crashes
 
 **Security:**
+
 - DAL centralizes database access
 - Server-only code protection
 - Type validation at boundaries

@@ -178,14 +178,13 @@ export default function TestConnectionPage() {
     return data || [];
   };
 
-  // Fonction pour récupérer les actualités
   const getActualites = async () => {
     const { data, error } = await supabase
       .from("articles_presse")
       .select("*")
-      .order("author", { ascending: false })
+      .order("published_at", { ascending: false })
       .limit(6);
-
+    console.log("Actualites data:", data); //TODO: Remove debug
     if (error) throw error;
     return data || [];
   };
@@ -297,7 +296,7 @@ export default function TestConnectionPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <h1 className="text-4xl font-bold">Test de connexion Supabase</h1>
           <Button onClick={testConnection} disabled={isLoading}>
-                {isLoading ? (
+            {isLoading ? (
               <>
                 <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> Test en
                 cours...
@@ -412,9 +411,9 @@ export default function TestConnectionPage() {
                   <div className="mb-2 p-2 rounded bg-green-600 text-white font-bold border border-green-800 shadow">
                     La connexion à Supabase fonctionne
                   </div>
-                    <div className="mb-2 p-2 rounded bg-red-600 text-white font-bold border border-red-800 shadow">
-                    Une erreur est survenue lors de l&apos;accès aux tables ou aux
-                    données.
+                  <div className="mb-2 p-2 rounded bg-red-600 text-white font-bold border border-red-800 shadow">
+                    Une erreur est survenue lors de l&apos;accès aux tables ou
+                    aux données.
                   </div>
                 </>
               ) : (
@@ -540,6 +539,8 @@ export default function TestConnectionPage() {
                               <Image
                                 src={uiMembre.image}
                                 alt={uiMembre.name}
+                                width={400}
+                                height={300}
                                 className="w-full h-40 object-cover rounded-md"
                               />
                             </div>

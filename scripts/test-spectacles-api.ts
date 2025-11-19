@@ -38,7 +38,8 @@ interface TestResult {
   error?: string;
 }
 
-async function runTest(
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function _runTest(
   name: string,
   testFn: () => Promise<unknown>
 ): Promise<TestResult> {
@@ -73,7 +74,8 @@ async function main() {
   console.log("⚠️  Note: This requires a running dev server and admin auth");
   console.log("=".repeat(60) + "\n");
 
-  const results: TestResult[] = [];
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _results: TestResult[] = [];
 
   // Note: For now, just document the expected API structure
   // Full implementation requires admin session/cookie handling

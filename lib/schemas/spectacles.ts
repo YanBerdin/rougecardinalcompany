@@ -37,7 +37,7 @@ export const CreateSpectacleSchema = z.object({
     .regex(/^[a-z0-9-]+$/, "Slug must be lowercase alphanumeric with dashes")
     .optional(),
   status: z
-    .enum(["draft", "published", "archived"])
+    .enum(["draft", "published", "archived", "brouillon","actuellement", "archive"])
     .optional()
     .default("draft"),
   description: z.string().optional(),

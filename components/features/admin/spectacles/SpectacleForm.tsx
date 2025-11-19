@@ -177,8 +177,8 @@ export default function SpectacleForm({
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="draft">Brouillon</SelectItem>
-                    <SelectItem value="published">Publié</SelectItem>
-                    <SelectItem value="archived">Archivé</SelectItem>
+                    <SelectItem value="published">Actuellement</SelectItem>
+                    <SelectItem value="archived">Archive</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />

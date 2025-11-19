@@ -40,7 +40,7 @@ export function normalizeGenre(genre: string): string {
 export const spectacleFormSchema = z.object({
   title: z.string().min(1, "Le titre est requis").max(255),
   slug: z.string().optional(),
-  status: z.enum(["draft", "published", "archived"]).optional(),
+  status: z.enum(["draft", "published", "archived", "brouillon","actuellement", "archive"]).optional(),
   description: z.string().optional(),
   short_description: z.string().max(500).optional(),
   genre: z.string().max(100).optional().transform((val) => val ? normalizeGenre(val) : val),

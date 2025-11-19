@@ -91,25 +91,73 @@
 
 > [!NOTE]
 > L'application suit les meilleures pratiques Next.js 15 avec un emphasis sur la sécurité, la performance et l'expérience utilisateur professionnelle.
-> [!NOTE]
-> Useful information that users should know, even when skimming content.
 
--
+## 🚀 Quick Start
 
-> [!TIP]
-> Helpful advice for doing things better or more easily.
+### Prérequis
 
--
+- Node.js 20+
+- pnpm 8+
+- Compte Supabase (projet remote configuré)
 
-> [!IMPORTANT]
-> Key information users need to know to achieve their goal.
+### Installation
 
--
+```bash
+# Cloner et installer
+git clone https://github.com/YanBerdin/rougecardinalcompany.git
+cd rougecardinalcompany
+pnpm install
 
-> [!WARNING]
-> Urgent info that needs immediate user attention to avoid problems.
+# Configurer les variables d'environnement
+cp .env.example .env.local
+# Éditer .env.local avec vos credentials Supabase
 
--
+# Créer l'utilisateur admin initial
+pnpm exec tsx scripts/create-admin-user.ts
 
-> [!CAUTION]
-> Advises about risks or negative outcomes of certain action.
+# Démarrer le serveur dev
+pnpm dev
+```
+
+L'application sera accessible sur http://localhost:3000
+
+**⚠️ IMPORTANT** : Ce projet utilise une **base Supabase remote** (pas de Supabase local).
+
+### Gestion de la base de données
+
+```bash
+# Linker le projet remote
+pnpm dlx supabase link --project-ref YOUR_PROJECT_ID
+
+# Modifier le schéma déclaratif
+code supabase/schemas/02a_policies_tables.sql
+
+# Générer une migration
+pnpm dlx supabase db diff --linked -f nom_migration
+
+# Pousser vers remote
+pnpm dlx supabase db push
+```
+
+### Authentification Admin
+
+Si vous ne pouvez pas accéder aux pages `/admin` :
+
+```bash
+# Vérifier/créer l'utilisateur admin
+pnpm exec tsx scripts/create-admin-user.ts
+```
+
+**Architecture à double couche** :
+
+1. **JWT claims** : `app_metadata.role = 'admin'` (vérifié par middleware)
+2. **Profil DB** : `public.profiles.role = 'admin'` (vérifié par RLS)
+
+**Les deux doivent être synchronisés** pour que l'authentification fonctionne.
+
+## 📚 Documentation
+
+- [Guide de développement](./doc/guide-developpement.md) - Setup complet et workflow
+- [Troubleshooting Admin Auth](./doc/troubleshooting-admin-auth.md) - Résolution problèmes auth
+- [Schémas déclaratifs](./supabase/schemas/README.md) - Structure de la base
+- [Progress](`./doc/progress.md`) - État d'avancement du projet

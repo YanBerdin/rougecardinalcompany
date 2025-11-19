@@ -10,6 +10,8 @@
     "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"!doc-perso/**\"",
     "lint:md:fix": "markdownlint-cli2 --fix \"**/*.md\" \"#node_modules\" \"!doc-perso/**\"",
     "lint:all": "pnpm lint && pnpm lint:md",
+    "db:reset": "pnpm dlx supabase db reset --yes && ./scripts/post-reset.sh",
+    "db:init-admin": "tsx scripts/create-admin-user.ts",
     "test:email": "tsx scripts/test-email-integration.ts",
     "test:logs": "tsx scripts/check-email-logs.ts",
     "test:webhooks": "tsx scripts/test-webhooks.ts",

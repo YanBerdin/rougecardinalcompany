@@ -5,6 +5,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { fetchSpectacleById } from "@/lib/dal/spectacles";
+import { STATUS_LABELS } from "@/lib/tables/spectacle-table-helpers";
+import { capitalizeWords } from "@/lib/forms/spectacle-form-helpers";
 import Image from "next/image";
 
 // Force dynamic rendering
@@ -54,12 +56,13 @@ export default async function SpectacleDetailPage({ params }: Props) {
   }
 
   function getStatusLabel(status: string | null): string {
-    const labels: Record<string, string> = {
-      projet: "Projet",
-      en_cours: "En cours",
-      termine: "Terminé",
-    };
-    return status ? labels[status] || status : "—";
+    if (!status) return "—";
+    
+    // Normalize status (handle old underscore format)
+    const normalizedStatus = status.replace(/_/g, ' ');
+    
+    // Use predefined label if available, otherwise capitalize
+    return STATUS_LABELS[normalizedStatus] || capitalizeWords(normalizedStatus);
   }
 
   return (

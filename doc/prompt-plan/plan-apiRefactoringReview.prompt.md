@@ -22,18 +22,21 @@ Plan de Revue : Refactoring API Routes + DAL
 Revue approfondie du refactoring avec HttpStatus helpers, ApiResponse patterns, et optimisation DAL.
 
 ### Objectifs de la Revue
+
 - ✅ Vérifier l'adoption des HttpStatus constants
 - ✅ Valider l'usage des ApiResponse helpers
 - ✅ Analyser la cohérence des patterns DAL
 - ✅ Identifier les améliorations possibles
 
 ### Résultats Globaux
+
 - **8 routes API** analysées : scores 9-10/10
 - **1 module DAL** analysé : score 9.5/10
 - **1 bibliothèque helpers** : score 10/10 (référence)
 - **22 issues identifiées** : 2 critiques, 7 cohérence, 6 documentation, 5 sécurité, 2 mineurs
 
 ### Décision Finale
+
 ✅ **Merger maintenant** si deadline pressée  
 ⏸️ **Améliorer** si temps disponible (40 min estimé)
 
@@ -48,6 +51,7 @@ Revue approfondie du refactoring avec HttpStatus helpers, ApiResponse patterns, 
 **Score :** 9.5/10 ✅
 
 **Points forts :**
+
 - ✅ Validation Zod avec transformation boolean
 - ✅ withAdminAuth wrapper pour sécurité
 - ✅ parseNumericId pour validation stricte
@@ -81,6 +85,7 @@ type DALError = {
 **Score :** 10/10 ✅ **RÉFÉRENCE**
 
 **Points forts :**
+
 - ✅ Pattern de référence parfait
 - ✅ Next.js 15 async params pattern
 - ✅ Gestion d'erreurs comprehensive
@@ -364,6 +369,7 @@ type DalResponse<T = null> = ...;  // Ligne 27
 ### 3.2 Classification des Issues
 
 #### Priorité 1 - Critique (Type System)
+
 - **Issue #1** : Deux types de retour DAL (`DALResult` vs `DalResponse`)
   - Fichier : `lib/dal/team.ts` lignes 22-27
   - Impact : Incohérence typing, confusion développeur
@@ -375,6 +381,7 @@ type DalResponse<T = null> = ...;  // Ligne 27
   - Effort : 10 min
 
 #### Priorité 2 - Cohérence (ApiResponse Pattern)
+
 - **Issue #3** : NextResponse.json dans `contact/route.ts` ligne 19
 - **Issue #4** : NextResponse.json dans `team/route.ts` (multiple)
 - **Issue #5** : NextResponse.json dans `debug-auth/route.ts`
@@ -386,6 +393,7 @@ type DalResponse<T = null> = ...;  // Ligne 27
   - Effort total : 15 min
 
 #### Priorité 3 - Documentation
+
 - **Issue #10** : JSDoc manquant sur `validateTeamMemberForDeletion()`
 - **Issue #11** : JSDoc manquant sur `performTeamMemberDeletion()`
 - **Issue #12** : JSDoc manquant sur `handleHardDeleteError()`
@@ -396,6 +404,7 @@ type DalResponse<T = null> = ...;  // Ligne 27
   - Effort total : 20 min
 
 #### Priorité 4 - Sécurité (Considérations)
+
 - **Issue #16** : Rate limiting non implémenté sur routes publiques
 - **Issue #17** : Webhook signature validation non documentée
 - **Issue #18** : Debug route accessible en production
@@ -405,6 +414,7 @@ type DalResponse<T = null> = ...;  // Ligne 27
   - Effort : Variable (hors scope)
 
 #### Priorité 5 - Mineur (Cleanup)
+
 - **Issue #21** : Constantes intermédiaires pour type casts (cosmétique)
 - **Issue #22** : Ordre imports non uniforme
   - Impact : Négligeable
@@ -440,6 +450,7 @@ Risque Production     : FAIBLE ✅
 Usage mixte de `NextResponse.json()` et `ApiResponse` helpers dans le codebase.
 
 **Exemple (contact/route.ts ligne 19) :**
+
 ```typescript
 // ❌ Actuel (pas faux, mais moins cohérent)
 return NextResponse.json(
@@ -452,11 +463,13 @@ return ApiResponse.validationError(validation.error.issues);
 ```
 
 **Fichiers concernés :**
+
 - `app/api/contact/route.ts` (ligne 19)
 - `app/api/admin/team/route.ts` (plusieurs occurrences)
 - `app/api/debug-auth/route.ts` (quelques occurrences)
 
 **Bénéfice :**
+
 - Cohérence pattern dans tout le codebase
 - Moins de code boilerplate
 - Respect DRY principle
@@ -470,6 +483,7 @@ return ApiResponse.validationError(validation.error.issues);
 **Impact :** Uniformité naming
 
 **Problématique :**
+
 ```typescript
 // lib/dal/team.ts
 type DALResult<T> = ...;           // Ligne 22 (PascalCase complet)
@@ -496,6 +510,7 @@ export async function hardDeleteTeamMember(
 ```
 
 **Bénéfice :**
+
 - Uniformité naming dans tout le DAL
 - Moins de confusion pour les développeurs
 - Meilleure cohérence type system
@@ -512,6 +527,7 @@ export async function hardDeleteTeamMember(
 Améliorer la documentation inline pour faciliter l'onboarding et la maintenance.
 
 **Exemple de documentation JSDoc :**
+
 ```typescript
 /**
  * Validates team member eligibility for deletion
@@ -533,11 +549,13 @@ async function validateTeamMemberForDeletion(...) { ... }
 ```
 
 **Fichiers concernés :**
+
 - `lib/dal/team.ts` (3 fonctions)
 - `lib/dal/dashboard.ts` (1 fonction)
 - Routes API handlers (optionnel)
 
 **Bénéfice :**
+
 - Meilleure autocomplétion IDE
 - Documentation embarquée
 - Onboarding nouveau développeur facilité
@@ -549,12 +567,14 @@ async function validateTeamMemberForDeletion(...) { ... }
 ### 5.1 Stratégie d'Exécution
 
 **Option A : Merge Immédiat** (Recommandé si deadline)
+
 - ✅ Code production-ready (9.4/10)
 - ✅ Issues identifiées non-bloquantes
 - ✅ Tests existants passent
 - 📋 Améliorations reportées à sprint futur
 
 **Option B : Amélioration Rapide**
+
 - 📝 Phases 1-3 ci-dessous
 - 🎯 Score attendu : 9.7/10
 - ✅ Merge après validation
@@ -566,6 +586,7 @@ async function validateTeamMemberForDeletion(...) { ... }
 **Objectif :** Unifier usage ApiResponse helpers
 
 **Actions :**
+
 ```typescript
 // Fichier : app/api/contact/route.ts (ligne 19)
 // AVANT
@@ -579,10 +600,12 @@ return ApiResponse.validationError(validation.error.issues);
 ```
 
 **Fichiers concernés :**
+
 - `app/api/contact/route.ts` (1 occurrence)
 - `app/api/admin/team/route.ts` (3 occurrences)
 
 **Validation :**
+
 ```bash
 pnpm test -- contact.test.ts
 pnpm test -- team.test.ts
@@ -595,6 +618,7 @@ pnpm test -- team.test.ts
 **Objectif :** Unifier `DALResult` vs `DalResponse`
 
 **Actions :**
+
 ```typescript
 // Fichier : lib/dal/team.ts (ligne 27)
 // AVANT
@@ -613,6 +637,7 @@ export async function hardDeleteTeamMember(
 ```
 
 **Validation :**
+
 ```bash
 pnpm tsc --noEmit  # Type check
 pnpm test -- team.test.ts
@@ -627,6 +652,7 @@ pnpm test -- team.test.ts
 **Actions :** Ajouter JSDoc aux fonctions DAL et API handlers (voir exemple section 4.3)
 
 **Validation :**
+
 - VSCode IntelliSense vérification manuelle
 - Documentation générée avec TypeDoc (optionnel)
 
@@ -635,6 +661,7 @@ pnpm test -- team.test.ts
 ### 5.5 Checklist de Validation Finale
 
 **Avant merge :**
+
 - [ ] Tous les tests passent (`pnpm test`)
 - [ ] Type check OK (`pnpm tsc --noEmit`)
 - [ ] Lint OK (`pnpm lint`)
@@ -643,6 +670,7 @@ pnpm test -- team.test.ts
 - [ ] Documentation à jour
 
 **Post-merge :**
+
 - [ ] CI/CD pipeline verte
 - [ ] Déploiement staging OK
 - [ ] Smoke tests production
@@ -676,11 +704,13 @@ JSDoc Documentation    : 3/10 fichiers (30%)   ❌
 ### 6.3 Complexité Code
 
 **DAL Functions :**
+
 - Moyenne lignes/fonction : 18 (target: <30) ✅
 - Fonctions >30 lignes : 0/12 (0%) ✅
 - Complexité cyclomatique moyenne : 3.2 ✅
 
 **API Routes :**
+
 - Moyenne lignes/handler : 35 (acceptable) ✅
 - Routes >100 lignes : 0/8 (0%) ✅
 - Try/catch coverage : 100% ✅
@@ -692,6 +722,7 @@ JSDoc Documentation    : 3/10 fichiers (30%)   ❌
 ### 7.1 Verdict Final
 
 ✅ **Code Production-Ready**
+
 - Score global : **9.4/10**
 - 22 issues identifiées : **0 blockers**
 - Tests passent : **100%**
@@ -701,12 +732,14 @@ JSDoc Documentation    : 3/10 fichiers (30%)   ❌
 
 **Si deadline pressée :**
 → ✅ **Merger maintenant**
+
 - Code fonctionnel et sécurisé
 - Issues non-bloquantes
 - Améliorations en backlog
 
 **Si temps disponible :**
 → ⏸️ **Implémenter Phases 1-3**
+
 - Cohérence ApiResponse
 - Naming unificatio
 - JSDoc documentation
@@ -715,16 +748,19 @@ JSDoc Documentation    : 3/10 fichiers (30%)   ❌
 ### 7.3 Prochaines Étapes
 
 **Immédiat :**
+
 1. Valider décision avec équipe (merge vs amélioration)
 2. Si amélioration → créer branch `refactor/api-polish`
 3. Si merge → créer issues pour backlog
 
 **Court terme (Sprint+1) :**
+
 1. Rate limiting sur routes publiques
 2. Monitoring erreurs production
 3. Documentation API complète
 
 **Moyen terme :**
+
 1. Tests d'intégration additionnels
 2. Performance benchmarking
 3. Security audit complet
@@ -736,11 +772,13 @@ JSDoc Documentation    : 3/10 fichiers (30%)   ❌
 ### 8.1 Références Code
 
 **Patterns de référence à suivre :**
+
 - `app/api/admin/team/[id]/hard-delete/route.ts` (10/10)
 - `app/api/newsletter/route.ts` (10/10)
 - `lib/api/helpers.ts` (10/10)
 
 **Fichiers nécessitant attention :**
+
 - `lib/dal/team.ts` (naming consistency)
 - `app/api/contact/route.ts` (ApiResponse usage)
 - `app/api/admin/team/route.ts` (ApiResponse usage)
@@ -801,10 +839,12 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
 ```
 
 **Fichiers concernés :**
+
 - `lib/dal/dashboard.ts`
 - `lib/dal/team.ts` (fonctions publiques)
 
 **Bénéfice :**
+
 - Meilleure autocomplétion IDE
 - Documentation embarquée
 - Onboarding nouveau dev facilité
@@ -818,12 +858,14 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
 ### 5.1 Stratégie d'Exécution
 
 **Option A : Merge Immédiat** (Recommandé si deadline)
+
 - Code production-ready (9.4/10)
 - Issues identifiées non-bloquantes
 - Tests existants passent
 - Amélirations reportées à sprint futur
 
 **Option B : Amélioration Rapide**
+
 - Phases 1-3 ci-dessous
 - Score attendu : 9.7/10
 - Merge après validation
@@ -835,6 +877,7 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
 **Objectif :** Unifier usage ApiResponse helpers
 
 **Actions :**
+
 ```typescript
 // Fichier : app/api/contact/route.ts (ligne 19)
 // AVANT
@@ -848,10 +891,12 @@ return ApiResponse.validationError(validation.error.issues);
 ```
 
 **Fichiers concernés :**
+
 - `app/api/contact/route.ts` (1 occurrence)
 - `app/api/admin/team/route.ts` (3 occurrences)
 
 **Validation :**
+
 ```bash
 pnpm test -- contact.test.ts
 pnpm test -- team.test.ts
@@ -864,6 +909,7 @@ pnpm test -- team.test.ts
 **Objectif :** Unifier `DALResult` vs `DalResponse`
 
 **Actions :**
+
 ```typescript
 // Fichier : lib/dal/team.ts (ligne 27)
 // AVANT
@@ -882,6 +928,7 @@ export async function hardDeleteTeamMember(
 ```
 
 **Validation :**
+
 ```bash
 pnpm tsc --noEmit  # Type check
 pnpm test -- team.test.ts
@@ -894,6 +941,7 @@ pnpm test -- team.test.ts
 **Objectif :** Améliorer Developer Experience
 
 **Actions :**
+
 ```typescript
 // Fichier : lib/dal/team.ts
 /**
@@ -916,11 +964,13 @@ async function validateTeamMemberForDeletion(...) { ... }
 ```
 
 **Fichiers concernés :**
+
 - `lib/dal/team.ts` (3 fonctions)
 - `lib/dal/dashboard.ts` (1 fonction)
 - Routes API handlers (optionnel)
 
 **Validation :**
+
 - VSCode IntelliSense vérification manuelle
 - Documentation générée avec TypeDoc (optionnel)
 
@@ -929,6 +979,7 @@ async function validateTeamMemberForDeletion(...) { ... }
 ### 5.5 Checklist de Validation Finale
 
 **Avant merge :**
+
 - [ ] Tous les tests passent (`pnpm test`)
 - [ ] Type check OK (`pnpm tsc --noEmit`)
 - [ ] Lint OK (`pnpm lint`)
@@ -937,6 +988,7 @@ async function validateTeamMemberForDeletion(...) { ... }
 - [ ] Documentation à jour
 
 **Post-merge :**
+
 - [ ] CI/CD pipeline verte
 - [ ] Déploiement staging OK
 - [ ] Smoke tests production
@@ -970,11 +1022,13 @@ JSDoc Documentation    : 3/10 fichiers (30%)   ❌
 ### 10.3 Complexité Code
 
 **DAL Functions :**
+
 - Moyenne lignes/fonction : 18 (target: <30) ✅
 - Fonctions >30 lignes : 0/12 (0%) ✅
 - Complexité cyclomatique moyenne : 3.2 ✅
 
 **API Routes :**
+
 - Moyenne lignes/handler : 35 (acceptable) ✅
 - Routes >100 lignes : 0/8 (0%) ✅
 - Try/catch coverage : 100% ✅
@@ -986,6 +1040,7 @@ JSDoc Documentation    : 3/10 fichiers (30%)   ❌
 ### 11.1 Verdict Final
 
 ✅ **Code Production-Ready**
+
 - Score global : **9.4/10**
 - 22 issues identifiées : **0 blockers**
 - Tests passent : **100%**
@@ -996,4 +1051,3 @@ JSDoc Documentation    : 3/10 fichiers (30%)   ❌
 1. Cohérence `ApiResponse` vs `NextResponse.json` (cosmétique)
 2. Naming `DALResult` vs `DalResponse` (cosmétique)
 3. JSDoc manquant sur fonctions DAL (nice-to-have)
-

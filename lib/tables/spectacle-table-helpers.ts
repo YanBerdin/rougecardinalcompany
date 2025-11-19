@@ -11,11 +11,14 @@ export const STATUS_VARIANTS: Record<
   "terminé": "secondary",
   "projet": "outline",
   "draft": "outline",
+  "brouillon": "outline",
   "published": "default",
   "archived": "secondary",
-  "a l affiche": "default",
+  "archive": "secondary",
+  "a l'affiche": "default",
   "en preparation": "outline",
-  "annule": "secondary",
+  "annulé": "secondary",
+  "actuellement": "default",
 };
 
 export const STATUS_LABELS: Record<string, string> = {
@@ -23,11 +26,14 @@ export const STATUS_LABELS: Record<string, string> = {
   "terminé": "Terminé",
   "projet": "Projet",
   "draft": "Brouillon",
-  "published": "Publié",
+  "brouillon": "Brouillon",
+  "published": "Actuellement",
   "archived": "Archivé",
-  "a l affiche": "À l'affiche",
+  "archive": "Archive",
+  "a l'affiche": "À l'affiche",
   "en preparation": "En préparation",
-  "annule": "Annulé",
+  "annulé": "Annulé",
+  "actuellement": "Actuellement",
 };
 
 export function formatSpectacleDate(dateString: string | null): string {
@@ -70,7 +76,7 @@ export function removeSpectacleFromList(
 // Sorting Helpers
 // ========================================================================
 
-export type SortField = "title" | "status" | "genre" | "premiere";
+export type SortField = "title" | "genre" | "status" | "duration_minutes" | "premiere" | "public";
 export type SortDirection = "asc" | "desc";
 
 export interface SortState {
@@ -86,8 +92,8 @@ export function sortSpectacles(
     const { field, direction } = sortState;
     const multiplier = direction === "asc" ? 1 : -1;
 
-    let aValue: any;
-    let bValue: any;
+    let aValue: string | number | null;
+    let bValue: string | number | null;
 
     switch (field) {
       case "title":
@@ -108,6 +114,16 @@ export function sortSpectacles(
       case "premiere":
         aValue = a.premiere ? new Date(a.premiere).getTime() : 0;
         bValue = b.premiere ? new Date(b.premiere).getTime() : 0;
+        break;
+
+      case "duration_minutes":
+        aValue = a.duration_minutes || 0;
+        bValue = b.duration_minutes || 0;
+        break;
+
+      case "public":
+        aValue = a.public ? 1 : 0;
+        bValue = b.public ? 1 : 0;
         break;
 
       default:

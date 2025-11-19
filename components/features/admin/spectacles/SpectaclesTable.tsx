@@ -78,7 +78,14 @@ export default function SpectaclesTable({
                 onSort={onSort}
               />
             </TableHead>
-            <TableHead>Durée</TableHead>
+            <TableHead>
+              <SortableHeader
+                field="duration_minutes"
+                label="Durée"
+                currentSort={sortState}
+                onSort={onSort}
+              />
+            </TableHead>
             <TableHead>
               <SortableHeader
                 field="premiere"
@@ -87,7 +94,14 @@ export default function SpectaclesTable({
                 onSort={onSort}
               />
             </TableHead>
-            <TableHead>Visibilité</TableHead>
+            <TableHead>
+              <SortableHeader
+                field="public"
+                label="Visibilité"
+                currentSort={sortState}
+                onSort={onSort}
+              />
+            </TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
