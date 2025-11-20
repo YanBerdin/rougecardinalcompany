@@ -97,7 +97,7 @@ begin
   
   -- Normaliser: minuscules, supprimer les accents, remplacer espaces/caractères spéciaux par des tirets
   normalized_text := lower(input_text);
-  normalized_text := unaccent(normalized_text);
+  normalized_text := extensions.unaccent(normalized_text);
   normalized_text := regexp_replace(normalized_text, '[^a-z0-9]+', '-', 'g');
   normalized_text := regexp_replace(normalized_text, '^-+|-+$', '', 'g');
   

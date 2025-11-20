@@ -86,6 +86,11 @@ Note RLS: les nouvelles tables co‑localisent leurs politiques (dans le même f
     - Pattern: Direct query sur profiles au lieu de is_admin() pour éviter problèmes de contexte
   - **Validation** : CRUD spectacles entièrement fonctionnel, TypeScript clean, production-ready
 
+- **Sécurité Base de données - Extensions (20 nov. 2025)** : Déplacement des extensions PostgreSQL (`pgcrypto`, `pg_trgm`, `unaccent`, `citext`) vers un schéma dédié `extensions` pour éviter la pollution du schéma `public` et respecter les recommandations de sécurité Supabase.
+  - **Migration** : `20251120120000_move_extensions_to_schema.sql`
+  - **Schéma déclaratif** : `01_extensions.sql` mis à jour avec `WITH SCHEMA extensions`
+  - **Impact** : `search_path` mis à jour (`public, extensions`), appels de fonctions qualifiés (ex: `extensions.unaccent()`)
+
 ## 🆕 Mises à jour récentes (octobre 2025)
 
 - **Spectacles archivés publics** : Modification du seed `20250926153000_seed_spectacles.sql` pour marquer les spectacles archivés avec `public = true` au lieu de `public = false`. Cette approche simplifie la logique d'affichage des archives dans la fonctionnalité "Voir toutes nos créations" sans nécessiter de modification des politiques RLS. Les spectacles archivés restent identifiés par `status = 'archive'` mais sont maintenant visibles publiquement via la politique RLS existante.

@@ -344,6 +344,10 @@ Suite à la finalisation de la campagne de sécurité (Round 17, CI passed), 3 f
   - ⚡ **Solution** : Requête directe `EXISTS (SELECT 1 FROM profiles WHERE user_id = auth.uid() AND role = 'admin')`
   - 🎯 **Impact** : Évite les problèmes de fonction context lors des insertions
 
+- `20251120120000_move_extensions_to_schema.sql` — **SECURITY : Move extensions to dedicated schema** : Déplacement des extensions (`pgcrypto`, `pg_trgm`, `unaccent`, `citext`) du schéma `public` vers un nouveau schéma `extensions`. Mise à jour du `search_path` de la base de données.
+  - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/01_extensions.sql`
+  - 🔐 **Sécurité** : Réduit la surface d'attaque sur le schéma `public` et satisfait les linters de sécurité Supabase.
+
 - `20251117015616_fix_spectacles_rls_insert_policy.sql` — **TASK021 FIX** : Correction initiale de la politique INSERT spectacles pour résoudre l'erreur 42501.
   - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/61_rls_main_tables.sql`
   - 🔐 **Issue** : Politique INSERT trop restrictive causait échec des insertions admin

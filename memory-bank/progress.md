@@ -540,9 +540,10 @@ Cette vérification a été réalisée via l'API Supabase MCP et confirme que le
   - Round 17 FINAL : check_communique_has_pdf() - CI ✅ PASSED
   - Migrations idempotentes avec DO blocks + exception handling
   - Whitelist stratégie : audit_grants_filtered.sql (exclusion objets système)
-  - Documentation : SECURITY_AUDIT_SUMMARY.md (campagne complète), ROUND_7B_ANALYSIS.md (pivot whitelist)
+  - Documentation exhaustive : SECURITY_AUDIT_SUMMARY.md, ROUND_7B_ANALYSIS.md, migrations.md
   - GitHub : PR #25 merged, issues #26/#27/#28 créées
   - Outils audit : check-security-audit.sh, quick_check_all_grants.sql
+  - Production-ready : Zero exposed objects, RLS-only model, defense in depth
 - **Next steps identifiés** :
   - Patches conformité DB (≈20 fonctions : SET search_path + DEFINER rationale)
   - Cleanup scripts obsolètes (3 candidats après approbation)
@@ -737,75 +738,14 @@ Cette vérification a été réalisée via l'API Supabase MCP et confirme que le
   - test-newsletter-endpoint.ts : 6/6 tests passed
   - Pattern établi pour tests futurs
 
-## Dernière Mise à Jour
+### 20 Novembre 2025
 
-**Date**: 17 novembre 2025
-**Changements majeurs**:
+**Sécurité Database : Déplacement extensions vers schéma dédié** :
 
-- **Opération de maintenance Migration History Cleanup & Repair** (17 novembre 2025) :
-  - ✅ **Migration History Repair** : 32 migrations marquées "reverted" dans Supabase Cloud
-    - Commande : `supabase migration repair --status reverted [32 migrations] --linked`
-    - Impact : Cohérence entre développement local et production
-  - ✅ **Duplicate Files Cleanup** : 4 fichiers spectacles en double supprimés
-    - Fichiers supprimés : `20251117000000_fix_spectacles_insert_rls_policy.sql`, etc.
-    - Fichier conservé : `20251117154411_fix_spectacles_rls_clean.sql` (TASK021 FINAL)
-    - Vérification : `ls -la supabase/migrations/*spectacles*.sql` → 1 fichier restant
-  - ✅ **Additional Cleanup** : 5 fichiers obsolètes supplémentaires supprimés
-    - Debug/test scripts (3) : `debug_spectacles_policies.sql`, `test_insert_public_false.sql`, `check_rls_policies_detailed.sql`
-    - Intermediate fixes (2) : anciennes versions du fix spectacles RLS
-    - Total nettoyé : 41 → 36 fichiers (-5)
-  - ✅ **Documentation ajoutée** : Section complète dans `supabase/migrations/migrations.md`
-    - Contexte : Maintenance cohérence historique migrations
-    - Détails opération : Commandes exactes + impacts
-    - Justification : Critique pour éviter conflits déploiement
-    - Statut : ✅ Migration history repaired and duplicates cleaned up successfully
-  - 🎯 **Importance** : Opération critique pour cohérence développement/production
-
-- **TASK021 Admin Backoffice Spectacles CRUD - TERMINÉ** (16 novembre) :
-  - ✅ Phase 1-3 complétées : DAL + API Routes + Admin UI
-  - 🐛 **Bug résolu** : RLS 42501 error → Root cause: Missing admin profile
-    - Investigation : Debug logs révèlent user authentifié mais `is_admin()` retourne false
-    - Diagnostic : Profile absent dans table `profiles` avec `role='admin'`
-    - Solution : Création profile via SQL Editor + verification
-  - 🔧 **Refactoring** : `insertSpectacle()` preserve Supabase client context
-    - Helper function `performAuthenticatedInsert()` avec client parameter
-    - Single client instance prevents auth context loss
-  - 📝 **Procédure documentée** : `memory-bank/procedures/admin-user-registration.md`
-    - Guide complet étape par étape pour enregistrer nouveaux admins
-    - Section troubleshooting avec issues communes
-    - Documentation architecture sécurité (RLS + is_admin())
-  - 💾 **Commit** : `96c32f3` - "fix(dal): preserve Supabase client auth context"
-    - 4 files changed, 77 insertions(+), 45 deletions(-)
-  - ✅ **Clean Code** : Toutes fonctions ≤ 30 lignes
-  - ✅ **Production Ready** : Debug logs supprimés, TypeScript OK
-  - ✅ **Validation CRUD** :
-    - CREATE: Spectacle créé avec succès
-    - READ: Liste et détails fonctionnels
-    - UPDATE: Modifications enregistrées
-    - DELETE: Suppression opérationnelle
-  - 🎯 **User confirmation** : "CRUD fonctionne !!!"
-  - 📚 **Documentation mise à jour** :
-    - activeContext.md : Section admin authorization pattern ajoutée
-    - systemPatterns.md : (à mettre à jour)
-    - tasks/TASK021 : Détails commit 2533679 ajoutés (17 novembre 2025)
-
-- **Documentation synchronisée** (17 novembre 2025) :
-  - ✅ **Commit 2533679 documenté** : Description détaillée ajoutée dans TASK021-admin-spectacles-crud.md
-  - ✅ **Synchronisation complète** : Tous les 6 derniers commits maintenant documentés
-  - ✅ **Couverture** : 100% des commits récents (6/6) avec documentation à jour
-
-- **Migration architecture layouts + admin UI** (11 novembre)
-  - Route groups `(admin)` et `(marketing)` implémentés
-  - AdminShell remplacé par AppSidebar (composant shadcn officiel)
-  - Collapsible icon mode, breadcrumb, keyboard shortcuts, navigation groupée
-  - BREAKING CHANGES : structure routes, imports/paths/middleware à vérifier
-  - Documentation : changelog + blueprint v3 créés
-  - Next steps : validation post-migration (tests navigation, mobile menu, guards)
-- **Campagne de sécurité database TERMINÉE** : 73 objets sécurisés sur 17 rounds (25-26 octobre)
-  - Round 12 critique : storage.objects ALL PRIVILEGES (vulnérabilité majeure) - CORRIGÉ
-  - Round 17 final : check_communique_has_pdf() - CI ✅ PASSED
-  - Stratégie whitelist : audit_grants_filtered.sql pour focus objets business uniquement
-  - Documentation exhaustive : SECURITY_AUDIT_SUMMARY.md, ROUND_7B_ANALYSIS.md, migrations.md
-  - GitHub : PR #25 merged, issues #26/#27/#28 créées (conformité conventions DB)
-  - Outils audit : check-security-audit.sh, quick_check_all_grants.sql
-  - Production-ready : Zero exposed objects, RLS-only model, defense in depth
+- **Problème** : Alertes de sécurité Supabase concernant les extensions installées dans le schéma `public`.
+- **Résolution** :
+  - Création d'un schéma dédié `extensions`.
+  - Déplacement de `unaccent`, `pg_trgm`, `citext` et `pgcrypto` vers ce schéma.
+  - Mise à jour du `search_path` de la base de données pour inclure `extensions`.
+  - Mise à jour du schéma déclaratif (`01_extensions.sql` et `16_seo_metadata.sql`).
+- **Migration** : `20251120120000_move_extensions_to_schema.sql`.

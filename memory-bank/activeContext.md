@@ -236,6 +236,19 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
     - `/admin/team` reste `/admin/team` (pas de `/(admin)` dans l'URL)
     - Middleware adapté pour matcher les deux zones
 
+- ✅ **20 novembre — Sécurité Database : Déplacement extensions vers schéma dédié** :
+  - **Issue** : Warning Supabase MCP "Extension in public schema" (unaccent, pg_trgm, citext)
+  - **Action** : Création schéma `extensions` et déplacement des extensions
+  - **Migration** : `20251120120000_move_extensions_to_schema.sql`
+    - Création schéma `extensions`
+    - Grant usage à `postgres`, `anon`, `authenticated`, `service_role`
+    - `ALTER EXTENSION ... SET SCHEMA extensions`
+    - `ALTER DATABASE ... SET search_path TO public, extensions`
+  - **Schéma déclaratif** :
+    - `supabase/schemas/01_extensions.sql` : Ajout `WITH SCHEMA extensions`
+    - `supabase/schemas/16_seo_metadata.sql` : Qualification `extensions.unaccent()`
+  - **Impact** : Schéma `public` nettoyé, conformité recommandations sécurité Supabase
+
 ## Architecture actuelle
 
 ### Smart/Dumb Components (Dashboard)
