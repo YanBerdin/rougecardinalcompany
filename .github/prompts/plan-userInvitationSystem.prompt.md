@@ -1,5 +1,121 @@
 # Plan Détaillé - Système de Gestion Utilisateurs avec Invitation Email
 
+title: Plan d'implémentation — Système d'invitation utilisateur (admin)
+summary: |
+  Plan structuré pour implémenter un système d'invitation administrateur sécurisé.
+  Respecte les conventions du projet : DAL server-only, zod validation, revalidation,
+  RLS-aware migrations, journaux d'audit et mécanismes de retry pour envois d'email.
+
+## Objectif
+
+Fournir une fonctionnalité admin pour inviter des utilisateurs par email, créer
+leur compte et profil de façon atomique, assurer la fiabilité des envois (retry),
+tenir un journal d'audit des actions admin et protéger le flux par rate-limiting.
+
+## Variables d'environnement requises
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY` (obligatoire, **ne jamais committer**)
+- `RESEND_API_KEY` (ou autre provider d'email)
+- `NEXT_PUBLIC_SITE_URL` (pour liens d'invitation)
+
+## Principes & Contraintes
+
+- DAL server-only (`lib/dal/*`) pour toute interaction DB (import "server-only").
+- Server Actions pour mutations front -> backend réutilisant DAL.
+- Zod pour validation d'entrée à chaque frontière (Server Actions et DAL).
+- Revalidate via `revalidatePath()` ou `revalidateTag()` après mutations.
+- RLS: migrations doivent activer RLS et fournir policies séparées `select|insert|update|delete`.
+- Toutes les opérations admin utilisant `SUPABASE_SERVICE_ROLE_KEY` passent par
+  `supabase/admin.ts` (service-role client centralisé).
+
+## Phases (priorisées)
+
+Phase 0 — Préparations (prérequis)
+- Créer `supabase/admin.ts` : wrapper `createServerClient` / `@supabase/ssr` utilisant
+  `cookies` pattern `getAll`/`setAll` et capable d'utiliser `SUPABASE_SERVICE_ROLE_KEY`.
+- Ajouter `README` court indiquant la nécessité du `service_role` et variables d'env.
+
+Phase 1 — Schéma & migrations
+- Migration `supabase/migrations/YYYYMMDDHHmmss_create_user_invitations.sql` :
+  - table `user_invitations` (id, email, token, invited_by, status, expires_at, created_at)
+  - enable rls; policies pour `authenticated` et `anon` si nécessaire (select public true)
+- Migration `supabase/migrations/YYYYMMDDHHmmss_create_pending_invitations.sql` :
+  - table `pending_invitations` pour file d'attente retry, metadata, attempts, last_error
+  - trigger / function pour auto-updates de timestamp
+
+Phase 2 — DAL & logique atomique
+- `lib/dal/admin-users.ts` ("use server") :
+  - `inviteUser(input: unknown)`: parse Zod, requireAdmin(), create user via admin client,
+    create explicit profile row, insert into `user_invitations`, push to `pending_invitations`
+  - garantir rollback partiel si création profil échoue ou email non envoyé (compensation)
+  - exposer `processPendingInvitations(batchSize)` pour worker
+
+Phase 3 — Envoi d'email
+- `emails/invitation-email.tsx` : template React Email (compatible avec resend)
+- `lib/email/sendInvitationEmail.ts` : wrapper send + error handling
+- En cas d'échec, écrire l'erreur dans `pending_invitations` et créer des métriques/logs
+
+Phase 4 — UI Admin
+- Route page admin `/admin/users` (Server Component) + Client component `InviteUserForm` (`'use client'`)
+- Formulaire utilise `useActionState(inviteUserAction)` — action serveur appelle DAL
+
+Phase 5 — Fiabilité & sécurité
+- Rate limiting: middleware ou guard côté Server Action (ip + admin quota)
+- Retry worker: script `scripts/process_pending_invitations.ts` (cron / supabase scheduled)
+- Audit: table `admin_actions` + écriture d'un log à chaque action admin clé
+
+Phase 6 — Tests & CI
+- Unit tests pour DAL (mock supabase client) et email wrapper
+- Script d'intégration `scripts/test-invitation-flow.ts` (simulateur)
+- Ajouter checks CI: `pnpm dlx supabase db diff` validation, tsc, lint, tests
+
+## Exemples de noms de fichiers / endpoints
+
+- `supabase/admin.ts`
+- `lib/dal/admin-users.ts`
+- `supabase/migrations/20251120_create_user_invitations.sql`
+- `supabase/migrations/20251120_create_pending_invitations.sql`
+- `emails/invitation-email.tsx`
+- `scripts/process_pending_invitations.ts`
+- `app/(admin)/admin/users/page.tsx` (Server Component)
+
+## Recommandations pratiques
+
+- Toujours `await cookies()` dans Server Components et middleware (Next.js 15)
+- Utiliser `getClaims()` pour checks rapides dans middleware/pages publiques;
+  utiliser `getUser()` uniquement si besoin du profil complet
+- Documenter clairement la procédure de rotation / révocation du `SUPABASE_SERVICE_ROLE_KEY`
+- Logging: console + sentry/opentelemetry (si présent) pour erreurs email et échecs DB
+- Garder la logique d'envoi d'email idempotente (token unique dans `user_invitations`)
+
+## Commandes utiles
+
+```bash
+# run typescript checks
+pnpm tsc --noEmit
+
+# run lint
+pnpm lint
+
+# create migration (local supabase cli)
+pnpm dlx supabase db diff -f create_user_invitations
+
+# run pending invitations worker locally
+node scripts/process_pending_invitations.js
+```
+
+## Critères de réussite
+
+- Invitations envoyées et consommées (lien fonctionne)
+- Compte + profil créés atomiquement ou état compensé
+- Retrys automatiques pour erreurs d'envoi, avec backoff et limite
+- Logs d'audit remplis pour chaque action admin critique
+- Tests unitaires et E2E couvrant le flux principal
+
+---
+
 **Date**: 20 novembre 2025  
 **Projet**: Rouge Cardinal Company  
 **Contexte**: Implémentation interface admin pour gestion utilisateurs + système invitation par email  
