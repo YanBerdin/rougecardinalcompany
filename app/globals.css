@@ -22,7 +22,7 @@
     --accent-foreground: 0 0% 10.9804%; /* #1C1C1C */
     --destructive: 2.7 100% 60.7843%; /* #ad0000 */
     --destructive-foreground: 41.0526 65.5172% 94.3137%; /* #faf4e7 */
-    --border: 0 0% 87.8431%; /* #EBEBEB */
+    --border:0 0% 83.1373%; /* #D4D4D4 */
     --border-primary: 4.64, 79.74%, 55.49%; /* #e84133 */
     --input: 0 0% 83.1373%; /* #D4D4D4 */
     --ring: 0 100% 33.9216%; /* #ad0000 */
@@ -326,7 +326,10 @@
 
   .dark .nav-link-glass:hover::before {
     background: rgba(255, 255, 255, 0.12); /* hsl(0 65% 55% / 0.15) */
-    box-shadow: var(--shadow-sm);
+    /*box-shadow: var(--shadow-md);*/
+    box-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
   }
 
   .dark .header-scrolled .nav-link-glass:hover::before {
