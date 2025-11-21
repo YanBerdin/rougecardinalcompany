@@ -31,40 +31,45 @@
 - **Articles de presse** : Revue de presse (critiques externes)
 - Kit média professionnel avec téléchargements
 
-### 4. Communication
+### Installation
 
-- Formulaire de contact avec validation RGPD
-- Newsletter avec double opt-in
-- Gestion des abonnés et contacts presse
+```bash
+# cloner et installer
+git clone https://github.com/YanBerdin/rougecardinalcompany.git
+cd rougecardinalcompany
+pnpm install
+```
 
-### 5. Back-office
+# configurer les variables d'environnement
 
-- Authentification admin via Supabase Auth
-- CRUD complet pour tous les contenus
-- Gestion des médias et documents
-- Gestion des utilisateurs et rôles
-- Toggle publication/dépublication
-- Audit des actions administratives
-- Statistiques et analytics
+```bash
+cp .env.example .env.local
+# éditez .env.local avec vos credentials Supabase
+```
 
-## Patterns Architecturaux
+> **Note (dev only)**: si vous testez les invitations localement et que votre fournisseur d'email (ex. Resend en test-mode) limite les destinataires, activez la redirection d'email de développement dans `.env.local`.
 
-### Data Access Layer (DAL)
+```bash
+EMAIL_DEV_REDIRECT=true
+EMAIL_DEV_REDIRECT_TO=your-dev-email@example.com
+```
 
-- Modules `server-only` dans dal
-- Accès base de données centralisé côté serveur
-- Validation Zod et types TypeScript stricts
+Lorsque `EMAIL_DEV_REDIRECT` est `true`, les emails d'invitation seront envoyés à l'adresse définie par `EMAIL_DEV_REDIRECT_TO` (utile pour tests locaux). Assurez-vous de désactiver cette option en production.
 
-### Composants
+## Créer l'utilisateur admin initial
 
-- **Server Components** : Par défaut pour les données (SEO, performance)
-- **Client Components** : Pour l'interactivité (`'use client'`)
-- Pattern Smart/Dumb : Containers (logique) + Views (présentation)
+```bash
+pnpm exec tsx scripts/create-admin-user.ts
+```
 
-### Sécurité
+## Démarrer le serveur dev
 
-- RLS activé sur toutes les tables (36/36)
-- Politiques granularisées (lecture publique, écriture admin)
+```bash
+pnpm dev
+```
+
+L'application sera accessible sur http://localhost:3000
+
 - Validation input côté serveur
 - Protection XSS/CSRF/IDOR
 
@@ -107,15 +112,33 @@
 git clone https://github.com/YanBerdin/rougecardinalcompany.git
 cd rougecardinalcompany
 pnpm install
+```
 
-# Configurer les variables d'environnement
+### Configuration des variables d'environnement
+
+```bash
 cp .env.example .env.local
-# Éditer .env.local avec vos credentials Supabase
+# Éditez .env.local avec vos credentials Supabase
+```
 
-# Créer l'utilisateur admin initial
+> **Note (dev only)**: si vous testez les invitations localement et que votre fournisseur d'email (ex. Resend en test-mode) limite les destinataires, activez la redirection d'email de développement dans `.env.local`.
+
+```bash
+EMAIL_DEV_REDIRECT=true
+EMAIL_DEV_REDIRECT_TO=your-dev-email@example.com
+```
+
+Lorsque `EMAIL_DEV_REDIRECT` est `true`, les emails d'invitation seront envoyés à l'adresse définie par `EMAIL_DEV_REDIRECT_TO` (utile pour tests locaux). Assurez-vous de désactiver cette option en production.
+
+### Créer l'utilisateur admin initial
+
+```bash
 pnpm exec tsx scripts/create-admin-user.ts
+```
 
-# Démarrer le serveur dev
+### Démarrer le serveur dev
+
+```bash
 pnpm dev
 ```
 

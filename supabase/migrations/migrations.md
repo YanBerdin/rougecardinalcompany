@@ -24,6 +24,13 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 - `20251024231855_restrict_reorder_execute.sql` — HOTFIX: restrict execute on `public.reorder_team_members(jsonb)` by revoking EXECUTE from `public`/`anon` and granting EXECUTE to `authenticated` only. Applied as a manual hotfix to reduce attack surface; declarative schema updated in `supabase/schemas/63_reorder_team_members.sql` to reflect the grant.
 
+## Migrations récentes (novembre 2025)
+
+- `20251121185458_allow_admin_update_profiles.sql` — **RLS & invite flow fix (2025-11-21)** : migration générée par `supabase db diff` pour remplacer la policy `update` trop restrictive sur `public.profiles`. Contexte : `upsert` côté application effectue d'abord un `update` puis un `insert`, et la policy UPDATE bloquait les invites administrateurs (erreur 42501). Cette migration permet aux administrateurs d'atteindre la phase UPDATE lors d'un UPSERT tout en conservant les vérifications `with check` pour les INSERTs.
+  - Statut : ✅ appliquée sur la branche `feature/backoffice` et poussée au remote via `pnpm dlx supabase db push` (2025-11-21).
+  - Impact : Permet l'utilisation d'`upsert()` côté serveur pour créer/mettre à jour les `profiles` lors de l'invitation d'utilisateurs sans déclencher d'erreur RLS.
+  - Remarques opérationnelles : vérifier qu'un index existe sur `profiles(user_id)` si des requêtes massives d'upsert sont attendues.
+
 ## ⚠️ CRITICAL WARNING - Security Campaign Error (October 2025)
 
 > **❌ ERREUR ARCHITECTURALE MAJEURE - NE PAS REPRODUIRE**

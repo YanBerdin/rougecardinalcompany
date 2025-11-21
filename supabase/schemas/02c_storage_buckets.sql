@@ -75,11 +75,9 @@ using (
   and (select public.is_admin())
 );
 
-comment on policy "Public read access for medias" on storage.objects is 
-  'Anyone can view media files';
-comment on policy "Authenticated users can upload to medias" on storage.objects is 
-  'Authenticated users can upload files (admin check in Server Actions)';
-comment on policy "Authenticated users can update medias" on storage.objects is 
-  'Authenticated users can update file metadata';
-comment on policy "Admins can delete medias" on storage.objects is 
-  'Only admins can delete media files';
+-- Note: comments on storage.objects policies not supported in declarative schema
+-- Policy descriptions:
+-- - Public read access: Anyone can view media files
+-- - Upload access: Authenticated users (admin check in Server Actions)
+-- - Update access: Authenticated users can update file metadata
+-- - Delete access: Only admins can delete media files

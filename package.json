@@ -11,6 +11,7 @@
     "lint:md:fix": "markdownlint-cli2 --fix \"**/*.md\" \"#node_modules\" \"!doc-perso/**\"",
     "lint:all": "pnpm lint && pnpm lint:md",
     "db:reset": "pnpm dlx supabase db reset --yes && ./scripts/post-reset.sh",
+    "db:seed-admin": "tsx scripts/seed-admin.ts",
     "db:init-admin": "tsx scripts/create-admin-user.ts",
     "test:email": "tsx scripts/test-email-integration.ts",
     "test:logs": "tsx scripts/check-email-logs.ts",
@@ -19,6 +20,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-checkbox": "^1.3.1",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -36,6 +38,7 @@
     "@supabase/supabase-js": "latest",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "dotenv": "^17.2.3",
     "lucide-react": "^0.511.0",
     "next": "15.4.5",

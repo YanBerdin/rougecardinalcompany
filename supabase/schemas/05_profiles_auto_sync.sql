@@ -68,6 +68,8 @@ COMMENT ON FUNCTION public.handle_new_user() IS
   'Uses SECURITY DEFINER to ensure profile creation even if RLS is enabled.';
 
 -- Créer le trigger sur auth.users
+-- Note: Automatically creates a profile in public.profiles when a new user signs up.
+-- Ensures data consistency between auth.users and public.profiles.
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 
 CREATE TRIGGER on_auth_user_created
@@ -75,7 +77,5 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_new_user();
 
--- Commentaire sur le trigger
-COMMENT ON TRIGGER on_auth_user_created ON auth.users IS 
-  'Automatically creates a profile in public.profiles when a new user signs up. '
-  'Ensures data consistency between auth.users and public.profiles.';
+-- Note: COMMENT ON TRIGGER for auth.users is not supported (system table)
+-- The trigger documentation is provided in the inline comments above

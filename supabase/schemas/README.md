@@ -91,6 +91,13 @@ Note RLS: les nouvelles tables co‑localisent leurs politiques (dans le même f
   - **Schéma déclaratif** : `01_extensions.sql` mis à jour avec `WITH SCHEMA extensions`
   - **Impact** : `search_path` mis à jour (`public, extensions`), appels de fonctions qualifiés (ex: `extensions.unaccent()`)
 
+- **Profiles RLS & Invite Flow (21 nov. 2025)** : Correction des politiques RLS pour `public.profiles` afin de supporter les opérations d'`upsert()` utilisées par le flux d'invitation des administrateurs.
+  - **Migration** : `20251121185458_allow_admin_update_profiles.sql` (générée et appliquée le 2025-11-21)
+  - **Contexte** : `upsert()` effectue un `UPDATE` puis un `INSERT` ; la policy `UPDATE` auparavant trop restrictive provoquait des erreurs 42501 lors des invitations créées via `admin.generateLink()`.
+  - **Fix côté application** : la DAL utilise désormais `upsert(..., { onConflict: 'user_id' })` pour créer/mettre à jour les `profiles`, et a remplacé les appels lourds `getUser()` par `getClaims()` pour vérifications rapides de claims.
+  - **Email dev/testing** : un mécanisme dev-only de redirection des emails de test a été ajouté (variables d'environnement `EMAIL_DEV_REDIRECT=true|false` et `EMAIL_DEV_REDIRECT_TO`) pour contourner les limitations de test-mode du fournisseur d'envoi lors des essais locaux. Ce mécanisme est explicitement documenté et doit rester désactivé en production.
+  - **Impact** : Invite flow fonctionnel pour les admins, templates email corrigés (Tailwind wrapper unique et styles inlinés) ; migration appliquée et tests manuels de l'invite OK.
+
 ## 🆕 Mises à jour récentes (octobre 2025)
 
 - **Spectacles archivés publics** : Modification du seed `20250926153000_seed_spectacles.sql` pour marquer les spectacles archivés avec `public = true` au lieu de `public = false`. Cette approche simplifie la logique d'affichage des archives dans la fonctionnalité "Voir toutes nos créations" sans nécessiter de modification des politiques RLS. Les spectacles archivés restent identifiés par `status = 'archive'` mais sont maintenant visibles publiquement via la politique RLS existante.
