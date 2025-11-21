@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict'
 import React from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import InvitationEmail from '@/emails/invitation-email'
+
+// ensure React symbol is available to modules that expect it (jsx runtime differences)
+globalThis.React = React as unknown as typeof globalThis.React
+
+// import the component after ensuring React exists on the global scope
+const InvitationEmail = (await import('@/emails/invitation-email')).default
 
 async function main() {
   const invitationUrl = 'https://example.com/invite/abc123'
