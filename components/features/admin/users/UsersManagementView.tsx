@@ -142,7 +142,7 @@ export function UsersManagementView({ users }: UsersManagementViewProps) {
             </p>
           </div>
         ) : (
-          <div className="rounded-md border">
+          <div className="rounded-md border bg-card shadow-sm">
             <Table>
               <TableHeader>
                 <TableRow>

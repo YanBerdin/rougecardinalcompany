@@ -37,7 +37,7 @@
     --sidebar-foreground: 0 0% 10.9804%; /* #1C1C1C */
     --sidebar-primary: 0 100% 33.9216%; /* #ad0000 */
     --sidebar-primary-foreground: 41.0526 65.5172% 94.3137%; /* #faf4e7 */
-    --sidebar-accent: 41.0526 65.5172% 94.3137%; /* #faf4e7 */
+    --sidebar-accent: 0 0% 100%; /* #FFFFFF */
     --sidebar-accent-foreground: 0 0% 10.9804%; /* #1C1C1C */
     --sidebar-border: 0 0% 83.1373%; /* #D4D4D4 */
     --sidebar-ring: 0 100% 33.9216%; /* #ad0000 */

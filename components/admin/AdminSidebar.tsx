@@ -9,6 +9,7 @@ import {
   Calendar,
   FileText,
   Image as ImageIcon,
+  UserCog,
   Settings,
   Search,
   LayoutDashboard,
@@ -43,6 +44,11 @@ const generalItems = [
     title: "Équipe",
     href: "/admin/team",
     icon: Users,
+  },
+  {
+    title: "Utilisateurs",
+    href: "/admin/users",
+    icon: UserCog,
   },
 ];
 
