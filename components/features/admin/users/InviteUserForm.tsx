@@ -76,7 +76,7 @@ export function InviteUserForm() {
     setIsSubmitting(true);
     try {
       const result = await inviteUser(data);
-console.log(data); //TODO: Remove debug log
+      // console.log(data); //TODO: Remove debug log
       if (result.success) {
         toast.success("Invitation envoyée avec succès", {
           description: `Un email a été envoyé à ${data.email}`,
@@ -153,7 +153,7 @@ console.log(data); //TODO: Remove debug log
                             <span className="text-xs text-muted-foreground">
                               {
                                 roleDescriptions[
-                                  value as keyof typeof roleDescriptions
+                                value as keyof typeof roleDescriptions
                                 ]
                               }
                             </span>

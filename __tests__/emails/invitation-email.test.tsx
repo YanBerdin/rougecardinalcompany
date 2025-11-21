@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict'
 import React from 'react'
-import { render } from '@react-email/render'
+import { renderToStaticMarkup } from 'react-dom/server'
 import InvitationEmail from '@/emails/invitation-email'
 
 async function main() {
   const invitationUrl = 'https://example.com/invite/abc123'
 
-  const html = render(
+  const html = renderToStaticMarkup(
     <InvitationEmail
       email="test@example.com"
       role="admin"

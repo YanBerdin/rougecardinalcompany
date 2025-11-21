@@ -30,6 +30,22 @@ tenir un journal d'audit des actions admin et protéger le flux par rate-limitin
 - Toutes les opérations admin utilisant `SUPABASE_SERVICE_ROLE_KEY` passent par
   `supabase/admin.ts` (service-role client centralisé).
 
+## État actuel (2025-11-21) — résumé des implémentations
+
+- ✅ `supabase/migrations/20251121185458_allow_admin_update_profiles.sql` générée et appliquée : corrige la policy UPDATE trop restrictive sur `public.profiles` (résout erreur RLS 42501 lors d'UPSERT pendant le flux d'invitation).
+- ✅ DAL `lib/dal/admin-users.ts` : `inviteUser()` corrigée — utilise désormais `upsert(..., { onConflict: 'user_id' })` (résilience face au trigger `on_auth_user_created`) et remplace les usages coûteux de `getUser()` par `getClaims()` là où seuls les claims sont nécessaires.
+- ✅ Email templates : `emails/*` mis à jour — unique wrapper `<Tailwind>` et suppression des classes non-inlinables (hover:*), liens CTA rendus inline pour éviter body vide dans les emails.
+- ✅ Dev-only email redirect ajouté et documenté : variables d'env `EMAIL_DEV_REDIRECT` et `EMAIL_DEV_REDIRECT_TO` permettent de rediriger les envois en environnement local (doit rester désactivé en production).
+- ✅ Tests rapides locaux : `pnpm tsc --noEmit` et `pnpm lint` exécutés avec corrections appliquées (aucune erreur restante). Scripts utilitaires exécutés pour debug (`scripts/find-auth-user.js`, `scripts/delete-test-user.js`).
+
+Points restants / recommandations :
+
+- ⚠️ Désactiver `EMAIL_DEV_REDIRECT` en production avant merge. Documenter le drapeau dans la PR et la checklist de déploiement.
+- 🔐 Vérifier en production la configuration de l'adresse d'envoi (enregistrer le domaine chez Resend, mettre `EMAIL_FROM` vérifié dans `SITE_CONFIG`).
+- 🧪 Ajouter un test unitaire d'affichage HTML pour `InvitationEmail` (assert non-empty HTML/text) et l'intégrer dans CI.
+- 🔎 Optionnel : ajouter un index sur `profiles(user_id)` si des upserts massifs sont anticipés.
+
+
 ## Phases (priorisées)
 
 Phase 0 — Préparations (prérequis)
@@ -175,7 +191,7 @@ node scripts/process_pending_invitations.js
 
 ---
 
-**Date**: 20 novembre 2025  
+**Date**: 21 novembre 2025  
 **Projet**: Rouge Cardinal Company  
 **Contexte**: Implémentation interface admin pour gestion utilisateurs + système invitation par email  
 **Objectif**: Éliminer les manipulations SQL manuelles pour attribution rôles admin
