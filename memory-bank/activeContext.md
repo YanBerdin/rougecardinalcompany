@@ -40,7 +40,268 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 
 ## Travaux novembre 2025
 
+- ✅ **21 novembre — TASK032 Admin User Invitation System COMPLÉTÉ** :
+  - **Issue** : #32 - Système d'invitation admin complet pour onboarder de nouveaux administrateurs
+  - **Composants implémentés** :
+    - Migrations : `20251121185458_allow_admin_update_profiles.sql`, `20251120231121_create_user_invitations.sql`, `20251120231146_create_pending_invitations.sql`
+    - DAL : `lib/dal/admin-users.ts` - fonction `inviteUser()` avec validation Zod, rate limiting (5/h), client admin Supabase
+    - Email : Templates React Email (`emails/invitation-email.tsx`), layout et composants utilitaires, service Resend avec dev-redirect
+    - Actions : `lib/email/actions.ts` - envoi d'emails d'invitation avec gestion d'erreurs
+    - Admin UI : `app/(admin)/admin/users/page.tsx`, `app/(admin)/admin/users/invite/page.tsx`, composants `UsersManagementContainer.tsx`
+    - Scripts : `scripts/find-auth-user.js`, `scripts/generate-invite-link.js`, `scripts/test-full-invitation.js`
+  - **Sécurité** : RLS policies restrictives (admin-only), validation côté serveur, audit logging, rate limiting
+  - **Tests** : Scripts automatisés pour validation complète du flux d'invitation (création, email, acceptation)
+  - **Documentation** : Mise à jour `.env.example`, `supabase/README.md`, guides d'utilisation
+  - **Architecture** : Pattern Smart/Dumb components, DAL server-only, email service avec graceful degradation
+  - **Validation** : TypeScript OK, ESLint clean, tests scripts passing, production-ready
+  - **Impact** : Admin backoffice complet avec gestion utilisateurs, invitations sécurisées, audit trail
+  - **Issue** : Mise à jour documentation architecture email avec dev-redirect et render test/CI
+  - **Actions** :
+    - Version bump : 1.1.0 → 1.2.0 (date 22-11-2025)
+    - Ajout section dev-redirect : logique `EMAIL_DEV_REDIRECT`/`EMAIL_DEV_REDIRECT_TO` avec code snippet
+    - Documentation render test : `__tests__/emails/invitation-email.test.tsx` et CI workflow
+    - Commit : `61643e7` - "docs(email): update Email Service Architecture with dev-redirect and render test"
+    - Push : ✅ Poussé vers `feature/backoffice`
+  - **Impact** : Documentation à jour, dev-redirect documenté, tests CI couverts
+
+- ✅ **22 novembre — Project Architecture & Folder Blueprint v3 Generated** :
+  - **Issue** : Régénération blueprints architecture avec generator prompt
+  - **Actions** :
+    - Utilisation prompt `architecture-blueprint-generator.prompt.md`
+    - Génération `doc/architecture/Project_Architecture_Blueprint.md`
+    - Génération `memory-bank/architecture/Project_Folders_Structure_Blueprint_v3.md`
+    - Commit : `8a34f8e` - "docs(doc): generate project architecture and project folder blueprint"
+    - Push : ✅ Poussé vers `feature/backoffice`
+  - **Impact** : Blueprints v3 publiés, architecture documentée
+
+- ✅ **22 novembre — Invitation Email Render Test + CI** :
+  - **Issue** : Test unitaire pour `InvitationEmail` + CI workflow
+  - **Actions** :
+    - Test standalone : `__tests__/emails/invitation-email.test.tsx` (renderToStaticMarkup)
+    - Fix runtime error : `globalThis.React = React` avant dynamic import
+    - CI workflow : `.github/workflows/invitation-email-test.yml` (runs on push/PR)
+    - Validation : Test passe localement, CI workflow créé
+  - **Impact** : Email rendering testable, CI coverage ajoutée
+
+- ✅ **22 novembre — Admin User Invitation Flow Restored** :
+  - **Issue** : RLS 42501 bloquant admin invite (UPSERT UPDATE policy violation)
+  - **Root Cause** : UPDATE policy manquait sur `public.profiles` pour admin operations
+  - **Solution** :
+    - Migration : `20251121185458_allow_admin_update_profiles.sql`
+    - DAL update : `upsert(..., { onConflict: 'user_id' })` pour resilience
+    - DB push : ✅ Appliqué sur remote Supabase
+  - **Validation** : Invite flow fonctionnel, admin profile creation possible
+  - **Impact** : Admin backoffice opérationnel
+
+- ✅ **22 novembre — Admin Sidebar Updated** :
+  - **Issue** : Ajout menu "Utilisateurs" dans admin dashboard
+  - **Actions** :
+    - `components/admin/AdminSidebar.tsx` : Ajout `UserCog` icon + "Utilisateurs" link
+    - Navigation : `/admin/users` ajouté
+  - **Impact** : Accès direct à gestion utilisateurs depuis sidebar
+
 - ✅ **16 novembre — TASK021 Admin Backoffice Spectacles CRUD COMPLÉTÉ (Phases 1+2+3)** :
+  - **Issue** : #1 - Content Management CRUD avec gestion spectacles complète
+  - **Phases complétées** :
+    - ✅ **Phase 1 - DAL Spectacles** : Toutes fonctions Clean Code compliant (≤ 30 lignes)
+    - ✅ **Phase 2 - API Routes** : 5 endpoints (GET list, POST create, GET detail, PATCH update, DELETE)
+    - ✅ **Phase 3 - Admin UI** : 7 composants (SpectacleForm, SpectaclesTable, SpectacleCard, etc.)
+  - **Bug découvert & résolu** : Erreur RLS 42501 "row-level security policy violation"
+    - **Root Cause** : Missing profile entry in `profiles` table with `role='admin'`
+    - **Investigation** : Debug logs → Discovered user authenticated but `is_admin()` returns false
+    - **Solution** : Created admin profile via SQL Editor: `INSERT INTO profiles (user_id, role) VALUES (...)`
+  - **Refactoring clé** : `insertSpectacle()` preserve Supabase client context throughout operation
+    - Helper function `performAuthenticatedInsert()` with client parameter passing
+    - Single client instance prevents auth context loss
+  - **Migration créée** : `20251116160000_fix_spectacles_insert_policy.sql`
+    - Documents RLS policy fix (use `is_admin()` instead of `auth.uid()`)
+    - Hotfix migration (Cloud already has correct policy via declarative schema)
+  - **Procédure documentée** : `memory-bank/procedures/admin-user-registration.md`
+    - Complete step-by-step guide for registering new admin users
+    - Troubleshooting section with common issues
+    - Security notes and architecture documentation
+  - **Validation complète** :
+    - CREATE: ✅ Spectacle créé avec succès
+    - READ: ✅ Liste et détails fonctionnels
+    - UPDATE: ✅ Modifications enregistrées
+    - DELETE: ✅ Suppression opérationnelle
+  - **Code quality** :
+    - TypeScript: ✅ 0 errors (`pnpm tsc --noEmit`)
+    - Clean Code: ✅ All functions ≤ 30 lignes
+    - Production-ready: ✅ Debug logs removed
+  - **Commit** : `96c32f3` - "fix(dal): preserve Supabase client auth context + add RLS policy migration"
+    - 4 files changed, 77 insertions(+), 45 deletions(-)
+
+  - **Push GitHub** : ✅ Commits poussés vers `feature/backoffice` (Everything up-to-date)
+  - **Impact** : Admin backoffice spectacles fully functional, ready for production use
+
+- ✅ **15 novembre — TASK027B SECURITY DEFINER Rationale Headers COMPLÉTÉ** :
+  - **Issue** : #27 - Require explicit SECURITY DEFINER justification in function headers
+  - **Résultat** : 6 fonctions documentées avec headers de justification explicites
+  - **Fonctions modifiées** :
+    - Auth/Profiles sync triggers : `handle_new_user()`, `handle_user_deletion()`, `handle_user_update()`
+    - Core helpers : `is_admin()`, `get_current_timestamp()`
+    - Admin RPC : `reorder_team_members(jsonb)`
+  - **Template header** : Rationale, Risks Evaluated, Validation, Grant Policy
+  - **Documentation** : `.github/instructions/Database_Create_functions.instructions.md` mis à jour
+  - **Issue GitHub** : #27 fermée avec rapport complet (15 nov 2025)
+  - **Impact** : Traçabilité améliorée, code reviews facilités, aucun impact runtime
+
+- ✅ **15 novembre — TASK028B Cleanup Scripts Obsolètes COMPLÉTÉ** :
+  - **Issue** : #28 - Suppression de 3 scripts d'audit temporaires Round 7
+  - **Résultat** : Fichiers déjà supprimés le 26 oct 2025 (commit `20ecfbb`)
+  - **Fichiers supprimés** :
+    - `supabase/scripts/quick_audit_test.sql` (version simplifiée redondante)
+    - `supabase/scripts/check_round7b_grants.sh` (script bash Round 7b)
+    - `supabase/migrations/verify_round7_grants.sql` (vérification ponctuelle)
+  - **Outils conservés** : `audit_grants.sql`, `quick_check_all_grants.sql`, `audit_grants_filtered.sql`
+  - **Documentation** : Section "Cleanup Post-Audit" ajoutée dans `migrations.md`
+  - **Issue GitHub** : #28 fermée avec rapport complet (15 nov 2025)
+  - **Impact** : Repository nettoyé, maintenance simplifiée, scripts archivés dans Git
+
+- ✅ **15 novembre — TASK026B Database Functions Compliance COMPLÉTÉ** :
+  - **Résultat final** : 100% compliance (28/28 fonctions avec `SET search_path = ''`)
+  - **Fonction corrigée** : `public.reorder_team_members(jsonb)` dans `63_reorder_team_members.sql`
+  - **Méthode** : Hotfix SQL Editor direct (Section 5.5 "Hotfix Migrations and Schema Synchronization")
+  - **Justification** : 32 migrations Cloud manquantes (incident RLS 27 oct - campagne erronée déjà annulée)
+  - **Migration locale** : `20251115150000_fix_reorder_team_members_search_path.sql` créée et documentée
+  - **Schéma déclaratif** : `supabase/schemas/63_reorder_team_members.sql` synchronisé
+  - **Documentation** :
+    - `supabase/migrations/migrations.md` : Section "Corrections et fixes critiques" ajoutée
+    - `memory-bank/tasks/TASK026B-db-functions-compliance.md` : Progress log complet
+    - `doc-perso/TASK026B-cloud-fix-procedure.md` : Procédure hotfix validée
+  - **Validation** : `SELECT proconfig FROM pg_proc WHERE proname = 'reorder_team_members'` → `{search_path=}` ✅
+  - **Issue #26** : Commentaire complet (audit results + correction details + documentation) + closed with "completed"
+  - **Impact sécurité** : Protection contre injection schéma sur fonction SECURITY DEFINER admin
+  - **Performance** : Zero downtime (remplacement à chaud)
+
+- ✅ **14 novembre — API Code Quality Refactoring + Newsletter Migration** :
+  - **Documentation** : Plan d'analyse et refactoring complet créé (`.github/prompts/plan-apiRefactoringReview.prompt.md`)
+    - 10 fichiers analysés (8 API routes + 1 DAL + 1 helpers)
+    - Score global : 9.4/10 (production-ready)
+    - 22 issues identifiées (priorities 1-5)
+    - Plan structuré en 3 phases avec checklists
+  - **Phase 1 - ApiResponse Pattern Unification** :
+    - `contact/route.ts` : Full ApiResponse migration (validationError, success, error)
+    - `team/route.ts` : Hybrid approach pour backward compatibility (NextResponse.json pour arrays, ApiResponse.error pour erreurs)
+    - `newsletter/route.ts` : Full ApiResponse migration (4 replacements - validation, DB error, success, catch)
+    - Import cleanup : Suppression des imports inutilisés (NextResponse, PostgresError)
+    - Fix import path : `@/types/contact.types` → `@/lib/email/schemas`
+  - **Phase 2 - DAL Type Naming Consistency** :
+    - Suppression du type `DalResponse<T>` (duplication)
+    - Unification sur `DALResult<null>` pour 4 fonctions (hardDelete, validate, perform, handleError)
+    - Mise à jour des return statements : `{ success: true }` → `{ success: true, data: null }`
+    - Type system 100% cohérent
+  - **Phase 3 - JSDoc Comprehensive Documentation** :
+    - 8 fonctions DAL documentées avec JSDoc complet
+    - Tags ajoutés : `@param`, `@returns`, `@example`
+    - ~69 lignes de documentation inline
+    - IntelliSense IDE pleinement fonctionnel
+  - **Validation Complète** :
+    - TypeScript : `pnpm tsc --noEmit` ✅ (0 errors)
+    - ESLint : `pnpm eslint --quiet` ✅ (0 warnings après fix 2 erreurs scripts)
+    - Runtime : Tests browser ✅ (backward compatibility OK)
+    - Tests DAL : `test-team-active-dal.ts` ✅ (5/5 passed - 1073ms total)
+    - Tests API : `test-active-endpoint.ts` ✅ (17/17 passed avec auth admin)
+      -Tests Newsletter : `test-newsletter-endpoint.ts` ✅ (6/6 passed - 1452ms total)
+  - **Score improvement** : 9.4/10 → 9.8/10 (avec newsletter + validation complète)
+
+- ✅ **13 novembre — Dashboard Refactoring COMPLET (3 phases)** :
+  - **Phase 1 - Foundation** : ErrorBoundary réutilisable, types Zod, test script (100% pass)
+  - **Phase 2 - Component Extraction** : StatsCard (29L), DAL dashboard.ts (54L), DashboardStatsContainer (45L)
+    - admin/page.tsx : 133 → 69 lignes (-48%)
+    - StatsCardsSkeleton extrait dans components/skeletons/
+    - Pattern Smart/Dumb components respecté
+    - Suspense + ErrorBoundary pour UX optimale
+  - **Phase 3 - API Routes** : Contact + Newsletter refactored
+    - parseFullName() helper (plus de parsing manuel)
+    - isUniqueViolation() type guard (exit magic string '23505')
+    - HttpStatus constants partout (400, 500 → HttpStatus.BAD_REQUEST, etc.)
+    - 0 TypeScript errors, code DRY, maintainability++
+  - **Tests** : 4/4 passing (800ms fetch, 524ms validation, 781ms parallel)
+  - **Success Criteria** : 9/9 atteints ✨
+
+- ✅ **13 novembre — Refactoring complet API /active + suite de tests automatisés** :
+  - **Endpoint refactorisé** : `/api/admin/team/[id]/active` avec validation Zod complète
+    - Schema de transformation : accept boolean | "true"/"false" | 0/1
+    - Transforme en boolean canonique avant DAL
+    - Retours structurés avec status HTTP appropriés (200, 400, 422, 500)
+    - Tests TypeScript intégrés : 4 scénarios (success, 404, 422, 500)
+  - **Helpers API créés** : `lib/api/helpers.ts` (135 lignes)
+    - HttpStatus constants (OK, BAD_REQUEST, NOT_FOUND, UNPROCESSABLE_ENTITY, INTERNAL_SERVER_ERROR)
+    - PostgresError constants (UNIQUE_VIOLATION, FOREIGN_KEY_VIOLATION, NOT_NULL_VIOLATION)
+    - parseFullName() function (split firstName + lastName)
+    - isUniqueViolation() type guard pour Supabase errors
+    - ApiResponse helpers (success/error/validationError)
+    - withAdminAuth wrapper pour protected routes
+  - **Scripts de tests** : 5 nouveaux fichiers dans `scripts/`
+    - `test-active-endpoint.ts` (client-like HTTP test)
+    - `test-active-endpoint-admin.ts` (admin auth test)
+    - `test-active-endpoint-comprehensive.ts` (4 scénarios complets)
+    - `test-active-roundtrip-full.ts` (test E2E GET → PATCH → GET)
+    - `test-email-integration.ts` (validation Resend)
+  - **DAL team optimisé** : `lib/dal/team.ts` (42 lignes → 4 helpers < 30 lignes chacun)
+    - getTeamMemberById() : fetch avec select minimal
+    - updateTeamMemberActive() : PATCH avec revalidatePath
+    - handleTeamMemberNotFound() : error helper
+    - validateUpdateTeamMemberInput() : Zod validation + transformation
+  - **Documentation mise à jour** :
+    - Changelog avec architecture patterns (Smart/Dumb, DAL, ApiResponse)
+    - Guide extraction cookie auth
+    - Section admin management
+    - Changelog 2025-11-13
+  - **Commit créé** : c9a9ee7 "refactor(api): Complete refactoring of `/api/admin/team/[id]/active`"
+    - 12 fichiers modifiés, 1186 lignes ajoutées, 63 supprimées
+    - 6 nouveaux fichiers (helpers.ts + 5 scripts)
+    - Qualité code : 10/10 (TypeScript + Clean Code)
+
+- ✅ **13 novembre — Hard-delete endpoint pour membres d'équipe inactifs** :
+  - **Nouveau endpoint** : `DELETE /api/admin/team/[id]/hard-delete`
+    - Protection admin via `withAdminAuth` wrapper
+    - Validation : membre doit exister + active=false
+    - Test script TypeScript : 5 scénarios (inactive OK, active KO, 404, auth, errors)
+    - Erreurs structurées avec status HTTP appropriés (200, 400, 403, 404, 422, 500)
+  - **DAL team étendu** : `lib/dal/team.ts`
+    - Nouvelle fonction `deleteTeamMember(id: bigint)` server-only
+    - Gestion d'erreur avec PostgresError types
+    - revalidatePath('/admin/team') après delete
+  - **Documentation** :
+    - README endpoint avec exemples curl
+    - Guide de test avec `pnpm exec tsx scripts/test-hard-delete-endpoint.ts`
+    - Instructions rollback (soft-delete = `UPDATE active = false`)
+  - **Commit créé** : 61e9e6c "feat(api): Add hard-delete endpoint for inactive team members"
+    - 147 lignes ajoutées, 38 supprimées
+    - Production-ready avec garde-fous RGPD
+
+- ✅ **11 novembre — Migration route groups** : refactor des pages `/admin/*` et homepage `/` pour utiliser route groups (`(admin)` et `(marketing)`) conformément à l'architecture Next.js 15
+  - **Commit** : 6a2c7d8 "refactor: migrate admin and marketing routes to route groups"
+  - **Fichiers modifiés** :
+    - `app/(admin)/admin/` : tous les fichiers déplacés depuis `app/admin/`
+    - `app/(marketing)/page.tsx` : homepage (vitrine)
+    - `app/(admin)/layout.tsx` : layout admin avec AppSidebar + ThemeProvider
+    - `app/(marketing)/layout.tsx` : layout public (Header + Footer)
+  - **Bénéfices** :
+    - Séparation claire des layouts (admin vs marketing)
+    - Respect des conventions Next.js 15 App Router
+    - Meilleure organisation du code
+    - Protection auth isolée au layout admin
+  - **Notes** :
+    - Route groups (`(nom)`) n'affectent pas l'URL
+    - `/admin/team` reste `/admin/team` (pas de `/(admin)` dans l'URL)
+    - Middleware adapté pour matcher les deux zones
+
+- ✅ **20 novembre — Sécurité Database : Déplacement extensions vers schéma dédié** :
+  - **Issue** : Warning Supabase MCP "Extension in public schema" (unaccent, pg_trgm, citext)
+  - **Action** : Création schéma `extensions` et déplacement des extensions
+  - **Migration** : `20251120120000_move_extensions_to_schema.sql`
+    - Création schéma `extensions`
+    - Grant usage à `postgres`, `anon`, `authenticated`, `service_role`
+    - `ALTER EXTENSION ... SET SCHEMA extensions`
+    - `ALTER DATABASE ... SET search_path TO public, extensions`
+  - **Schéma déclaratif** :
+    - `supabase/schemas/01_extensions.sql` : Ajout `WITH SCHEMA extensions`
+    - `supabase/schemas/16_seo_metadata.sql` : Qualification `extensions.unaccent()`
+  - **Impact** : Schéma `public` nettoyé, conformité recommandations sécurité Supabase
   - **Issue** : #1 - Content Management CRUD avec gestion spectacles complète
   - **Phases complétées** :
     - ✅ **Phase 1 - DAL Spectacles** : Toutes fonctions Clean Code compliant (≤ 30 lignes)

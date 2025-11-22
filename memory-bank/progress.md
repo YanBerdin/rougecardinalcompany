@@ -145,7 +145,16 @@ Cette vérification a été réalisée via l'API Supabase MCP et confirme que le
   - Procédure admin registration documentée
   - Commit: 96c32f3 (4 files, 77+/45-)
   - Validation complète: CREATE/READ/UPDATE/DELETE ✅
-- [x] Documentation d'architecture v2 (C4 + ADRs) publiée et référencée
+- [x] **Système d'invitation admin (TASK032)** — **TERMINÉ 21/11/2025** :
+  - Migrations : `20251121185458_allow_admin_update_profiles.sql`, `20251120231121_create_user_invitations.sql`, `20251120231146_create_pending_invitations.sql`
+  - DAL : `lib/dal/admin-users.ts` - fonction `inviteUser()` avec validation Zod, rate limiting, client admin Supabase
+  - Email : Templates React Email (`emails/invitation-email.tsx`), layout et composants utilitaires, service Resend avec dev-redirect
+  - Actions : `lib/email/actions.ts` - envoi d'emails d'invitation avec gestion d'erreurs
+  - Admin UI : `app/(admin)/admin/users/page.tsx`, `app/(admin)/admin/users/invite/page.tsx`, composants `UsersManagementContainer.tsx`
+  - Scripts : `scripts/find-auth-user.js`, `scripts/generate-invite-link.js`, `scripts/test-full-invitation.js`
+  - Sécurité : RLS policies restrictives, validation côté serveur, audit logging
+  - Tests : Scripts automatisés pour validation complète du flux d'invitation
+  - Documentation : Mise à jour `.env.example`, `supabase/README.md`, guides d'utilisation
 
 ## Fonctionnalités en Cours
 

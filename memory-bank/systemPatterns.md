@@ -1841,3 +1841,357 @@ pnpm run test:resend    # Run all tests
 - `memory-bank/architecture/Email_Service_Architecture.md` : Architecture complète
 - `TESTING_RESEND.md` : Guide de test
 - `.github/instructions/resend_supabase_integration.md` : Instructions d'intégration
+
+### Admin Invitation System Patterns (Novembre 2025)
+
+**Introduced**: 21 novembre 2025 - TASK032 Admin User Invitation System
+
+**Pattern**: Architecture sécurisée pour inviter des utilisateurs externes à devenir admins, avec validation, rate limiting, audit logging et email notifications.
+
+#### Core Components Pattern
+
+```typescript
+// 1. DAL Layer - Server-only data access with validation
+// lib/dal/admin-users.ts
+"use server";
+import "server-only";
+import { z } from "zod";
+import { createClient } from "@/supabase/server";
+import { requireAdmin } from "@/lib/auth/is-admin";
+
+const InviteUserSchema = z.object({
+  email: z.string().email(),
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+});
+
+export async function inviteUser(input: unknown) {
+  // Validation
+  const validated = InviteUserSchema.parse(input);
+  
+  // Admin authorization
+  await requireAdmin();
+  
+  // Rate limiting (5 invites/hour per admin)
+  await checkRateLimit();
+  
+  // Business logic
+  const supabase = await createClient();
+  const { data: existingUser } = await supabase.auth.admin.getUserByEmail(validated.email);
+  
+  if (existingUser) {
+    throw new Error("User already exists");
+  }
+  
+  // Create invitation record
+  const invitation = await createInvitationRecord(validated);
+  
+  // Send invitation email
+  await sendInvitationEmail(invitation);
+  
+  // Audit logging
+  await logAdminAction('user_invitation', { email: validated.email });
+  
+  return invitation;
+}
+```
+
+#### Email Service Integration Pattern
+
+```typescript
+// 2. Email Actions - React Email templates with Resend
+// lib/email/actions.ts
+"use server";
+
+import { Resend } from "resend";
+import { InvitationEmail } from "@/emails/invitation-email";
+
+export async function sendInvitationEmail(invitation: InvitationData) {
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  
+  const { data, error } = await resend.emails.send({
+    from: process.env.EMAIL_FROM!,
+    to: invitation.email,
+    subject: "Invitation à rejoindre l'équipe admin",
+    react: <InvitationEmail 
+      firstName={invitation.firstName}
+      inviteLink={invitation.inviteLink}
+      expiresAt={invitation.expiresAt}
+    />
+  });
+  
+  if (error) {
+    console.error("[Email] Invitation failed:", error);
+    throw new Error("Failed to send invitation email");
+  }
+  
+  return data;
+}
+```
+
+#### Database Schema Pattern
+
+```sql
+-- 3. Database Tables - Invitation tracking with expiration
+CREATE TABLE public.user_invitations (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  email text NOT NULL,
+  first_name text NOT NULL,
+  last_name text NOT NULL,
+  invite_token text NOT NULL UNIQUE,
+  invite_link text NOT NULL,
+  status text DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'expired', 'cancelled')),
+  expires_at timestamptz NOT NULL,
+  invited_by uuid REFERENCES auth.users(id),
+  accepted_at timestamptz,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+-- RLS Policies - Admin-only access
+CREATE POLICY "Admins can manage invitations"
+  ON public.user_invitations
+  FOR ALL
+  TO authenticated
+  USING ((SELECT public.is_admin()))
+  WITH CHECK ((SELECT public.is_admin()));
+```
+
+#### Admin UI Pattern
+
+```typescript
+// 4. Admin UI - Smart/Dumb component separation
+// components/features/admin/users/UsersManagementContainer.tsx (Smart)
+export async function UsersManagementContainer() {
+  const invitations = await fetchPendingInvitations();
+  const users = await fetchAdminUsers();
+  
+  return (
+    <UsersManagementView 
+      invitations={invitations}
+      users={users}
+      onInvite={inviteUserAction}
+      onCancel={cancelInvitationAction}
+    />
+  );
+}
+
+// components/features/admin/users/UsersManagementView.tsx (Dumb)
+interface UsersManagementViewProps {
+  invitations: Invitation[];
+  users: User[];
+  onInvite: (data: InviteFormData) => Promise<void>;
+  onCancel: (id: string) => Promise<void>;
+}
+
+export function UsersManagementView({ 
+  invitations, 
+  users, 
+  onInvite, 
+  onCancel 
+}: UsersManagementViewProps) {
+  // Pure presentation logic
+  return (
+    <div className="space-y-6">
+      <InviteUserForm onSubmit={onInvite} />
+      <InvitationsList invitations={invitations} onCancel={onCancel} />
+      <AdminUsersList users={users} />
+    </div>
+  );
+}
+```
+
+#### Security Patterns
+
+**Rate Limiting Pattern**:
+
+```typescript
+// Rate limiting - 5 invites per hour per admin
+async function checkRateLimit() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+  
+  const { count } = await supabase
+    .from('user_invitations')
+    .select('*', { count: 'exact', head: true })
+    .eq('invited_by', user!.id)
+    .gte('created_at', oneHourAgo.toISOString());
+    
+  if (count >= 5) {
+    throw new Error("Rate limit exceeded: 5 invitations per hour");
+  }
+}
+```
+
+**Audit Logging Pattern**:
+
+```typescript
+// Audit trail for admin actions
+async function logAdminAction(action: string, details: any) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  await supabase.from('admin_audit_log').insert({
+    admin_id: user!.id,
+    action,
+    details,
+    ip_address: getClientIP(),
+    user_agent: getUserAgent(),
+  });
+}
+```
+
+#### Error Handling Pattern
+
+```typescript
+// Graceful degradation - Primary operations succeed even if secondary fail
+export async function inviteUser(input: unknown) {
+  try {
+    // Primary: Create invitation record
+    const invitation = await createInvitationRecord(validated);
+    
+    // Secondary: Send email (don't fail if email fails)
+    try {
+      await sendInvitationEmail(invitation);
+    } catch (emailError) {
+      console.error("[Invitation] Email failed:", emailError);
+      // Log but don't throw - invitation is still valid
+    }
+    
+    return { success: true, invitation };
+  } catch (error) {
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : "Unknown error" 
+    };
+  }
+}
+```
+
+#### Testing Patterns
+
+**Integration Testing**:
+
+```typescript
+// scripts/test-full-invitation.js
+async function testInvitationFlow() {
+  console.log("🧪 Testing admin invitation flow...");
+  
+  // 1. Create invitation
+  const inviteResult = await createTestInvitation();
+  expect(inviteResult.success).toBe(true);
+  
+  // 2. Verify database record
+  const dbRecord = await checkInvitationInDB(inviteResult.invitation.id);
+  expect(dbRecord.status).toBe('pending');
+  
+  // 3. Verify email sent (mock or check logs)
+  const emailSent = await checkEmailLogs(inviteResult.invitation.email);
+  expect(emailSent).toBe(true);
+  
+  console.log("✅ Invitation flow test passed");
+}
+```
+
+**Security Testing**:
+
+```typescript
+// scripts/test-admin-access.ts
+async function testInvitationSecurity() {
+  // Test 1: Non-admin cannot invite
+  const nonAdminResult = await attemptInviteAsNonAdmin();
+  expect(nonAdminResult.error).toContain("Unauthorized");
+  
+  // Test 2: Rate limiting works
+  await createMultipleInvitations(6); // Exceed limit
+  const rateLimitResult = await createOneMoreInvitation();
+  expect(rateLimitResult.error).toContain("Rate limit exceeded");
+  
+  // Test 3: Duplicate emails blocked
+  const duplicateResult = await inviteExistingEmail();
+  expect(duplicateResult.error).toContain("User already exists");
+}
+```
+
+#### Migration Patterns
+
+**Database Migrations**:
+
+```sql
+-- 20251121185458_allow_admin_update_profiles.sql
+-- Allow admins to update user profiles for invitation management
+GRANT UPDATE ON public.profiles TO authenticated;
+-- Note: RLS policies restrict to admin users only
+
+-- 20251120231121_create_user_invitations.sql
+CREATE TABLE public.user_invitations (...);
+-- RLS policies ensure only admins can manage invitations
+
+-- 20251120231146_create_pending_invitations.sql
+-- Additional indexes and constraints for performance
+CREATE INDEX idx_user_invitations_status_expires 
+ON public.user_invitations(status, expires_at);
+```
+
+**Environment Variables**:
+
+```env
+# .env.example updates
+# Email service for invitations
+RESEND_API_KEY=your_resend_api_key
+EMAIL_FROM=noreply@yourdomain.com
+
+# Invitation settings
+INVITATION_EXPIRE_HOURS=24
+MAX_INVITES_PER_HOUR=5
+```
+
+#### Dev/Redirect Pattern for Emails
+
+```typescript
+// lib/email/utils/dev-redirect.ts
+export function getEmailRecipient(originalEmail: string): string {
+  if (process.env.NODE_ENV === 'development') {
+    return process.env.DEV_EMAIL_REDIRECT || 'dev@example.com';
+  }
+  return originalEmail;
+}
+
+// Usage in email actions
+const recipient = getEmailRecipient(invitation.email);
+await sendEmail({ to: recipient, ... });
+```
+
+**Benefits**:
+
+1. **Development Safety**: All emails redirect to dev email in development
+2. **Production Integrity**: Real emails sent in production
+3. **Testing Flexibility**: Easy to test email flows without spamming real users
+4. **Configuration Simplicity**: Single environment variable controls behavior
+
+#### Complete Flow Architecture
+
+```
+Admin UI → Server Action → DAL Validation → Database Insert → Email Service → Audit Log
+     ↓              ↓              ↓                    ↓              ↓            ↓
+  Form       Rate Limiting   Admin Auth         RLS Policies    React Email   Admin Log
+```
+
+**Key Principles**:
+
+- **Defense in Depth**: Multiple security layers (auth, RLS, rate limiting, validation)
+- **Graceful Degradation**: Core functionality works even if email fails
+- **Audit Trail**: All admin actions logged for compliance
+- **User Experience**: Clear error messages and loading states
+- **Testability**: Comprehensive test scripts for all components
+- **Scalability**: Rate limiting and efficient database queries
+
+**References**:
+
+- Implementation: `lib/dal/admin-users.ts`, `lib/email/actions.ts`
+- UI: `app/(admin)/admin/users/`, `components/features/admin/users/`
+- Database: `supabase/migrations/2025112*`
+- Tests: `scripts/test-full-invitation.js`, `scripts/test-admin-access.ts`
+- Documentation: `memory-bank/tasks/TASK032-user-role-management.md`
