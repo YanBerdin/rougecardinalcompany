@@ -41,5 +41,3 @@ Initial scope was role management UI, but evolved to complete admin invitation s
 - **Security Features**: Rate limiting (5/hour), expiration (24h), audit trail, RLS protection
 - **Testing**: Automated scripts validate creation, email sending, and acceptance flow
 - **Documentation**: Updated memory-bank with patterns and implementation details
-
-

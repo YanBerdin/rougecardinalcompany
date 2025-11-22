@@ -87,6 +87,16 @@ interface DALResult<T = null> {
   warning?: string;
 }
 
+// Helper pour logs RGPD-compliant
+function sanitizeEmailForLogs(email: string): string {
+  const [local, domain] = email.split('@');
+  if (!domain) return email; // Invalid email, return as-is
+  const maskedLocal = local.length > 2
+    ? local[0] + '*'.repeat(local.length - 2) + local[local.length - 1]
+    : local[0] + '*';
+  return `${maskedLocal}@${domain}`;
+}
+
 export async function listAllUsers(): Promise<UserWithProfile[]> {
   await requireAdmin();
 
@@ -271,7 +281,7 @@ export async function inviteUser(
     }
   }
 
-  console.log(`[inviteUser] Checking for existing user: ${validated.email}`);
+  console.log(`[inviteUser] Checking for existing user: ${sanitizeEmailForLogs(validated.email)}`);
   const existingUser = await findUserByEmail(adminClient, validated.email);
 
   if (existingUser) {
@@ -387,11 +397,27 @@ export async function inviteUser(
     });
     console.log(`[DAL] Invitation email sent to ${validated.email}`);
   } catch (error: unknown) {
-    console.error("[DAL] Failed to send invitation email:", error);
-    // Do not delete the created auth user automatically. Return a clear error for admin action.
+    console.error("[DAL] Failed to send invitation email, initiating complete rollback:", error);
+
+    // ROLLBACK: Delete the profile we just created
+    try {
+      await adminClient.from("profiles").delete().eq("user_id", userId);
+      console.log(`[DAL] Profile rolled back for user ${userId}`);
+    } catch (profileDeleteError) {
+      console.error("[DAL] Failed to rollback profile:", profileDeleteError);
+    }
+
+    // ROLLBACK: Delete the auth user we just created
+    try {
+      await adminClient.auth.admin.deleteUser(userId);
+      console.log(`[DAL] Auth user rolled back: ${userId}`);
+    } catch (userDeleteError) {
+      console.error("[DAL] Failed to rollback auth user:", userDeleteError);
+    }
+
     return {
       success: false,
-      error: `Failed to send invitation email to ${validated.email}. L'utilisateur a été créé (id=${userId}) mais l'envoi a échoué. Vérifiez le service email ou contactez l'administrateur.`,
+      error: `Échec de l'envoi de l'email d'invitation. Rollback complet effectué.`,
     };
   }
 
@@ -407,7 +433,7 @@ export async function inviteUser(
   revalidatePath("/admin/users");
 
   console.log(
-    `[DAL] User invited successfully: ${validated.email} (${validated.role})`
+    `[DAL] User invited successfully: userId=${userId} role=${validated.role}`
   );
 
   return {
