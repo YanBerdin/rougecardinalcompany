@@ -1,7 +1,8 @@
 # Email Service Architecture - Rouge Cardinal Company
 
 **Date de création**: 8 octobre 2025  
-**Version**: 1.0.0  
+**Version**: 1.2.0  
+**Dernière mise à jour**: 22 novembre 2025  
 **Intégration**: feat-resend branch
 
 ## Vue d'Ensemble
@@ -220,6 +221,26 @@ export async function sendContactNotification(params: {
 - Gestion des erreurs et logging
 - Configuration FROM par défaut
 - Types de notification spécifiques
+
+**Note (dev-only redirect)**:
+
+Le projet implémente un mécanisme de redirection en développement pour éviter d'envoyer des emails réels lors des tests locaux. La fonction `sendInvitationEmail` dans `lib/email/actions.ts` utilise les variables d'environnement `EMAIL_DEV_REDIRECT` (true|false) et `EMAIL_DEV_REDIRECT_TO` (adresse de redirection). Exemple simplifié:
+
+```ts
+// extrait (lib/email/actions.ts)
+const devRedirectEnabled =
+  process.env.NODE_ENV === 'development' &&
+  String(process.env.EMAIL_DEV_REDIRECT).toLowerCase() === 'true';
+
+const recipientEmail = devRedirectEnabled
+  ? process.env.EMAIL_DEV_REDIRECT_TO ?? 'dev@example.com'
+  : params.email;
+
+await sendEmail({ to: recipientEmail, subject: `Invitation ...`, react: InvitationEmail({...}) });
+```
+
+> [!WARNING]
+> La logique conserve l'email original dans le template (utile pour le debug), mais redirige l'envoi réel vers l'adresse de développement quand activé.
 
 ### 4.4 Schémas de Validation (lib/email/schemas.ts)
 
@@ -1059,6 +1080,22 @@ curl -X POST http://localhost:3000/api/test-email \
     }
   }'
 ```
+
+### 9.3 Render test & CI
+
+Le projet inclut un test de rendu pour les templates email (vérifie que le HTML rendu n'est pas vide et contient les éléments clés). Fichier de test :
+
+- `__tests__/emails/invitation-email.test.tsx` — rend `InvitationEmail` via `react-dom/server` et vérifie la présence du CTA et du lien d'invitation.
+
+Commande locale pour exécuter le test standalone :
+
+```bash
+pnpm exec tsx __tests__/emails/invitation-email.test.tsx
+```
+
+CI : un workflow GitHub Actions ` .github/workflows/invitation-email-test.yml ` a été ajouté pour exécuter ce test sur les pushes/PRs. Il exécute la même commande et échoue si le rendu ne contient pas les éléments attendus.
+
+Recommandation : intégrer ce test dans la suite de tests principale (Vitest/Jest) pour reporting et couverture.
 
 ## 10. Configuration et Variables d'Environnement
 
