@@ -29,6 +29,9 @@ jobs:
         with:
           version: 8
 
+      - name: Ensure pnpm in PATH
+        run: corepack prepare pnpm@8 --activate
+
       - name: Enable Corepack and install dependencies
         run: |
           corepack enable
