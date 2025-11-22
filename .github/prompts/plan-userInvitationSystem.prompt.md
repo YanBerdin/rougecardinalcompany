@@ -40,6 +40,8 @@ tenir un journal d'audit des actions admin et protéger le flux par rate-limitin
 
 Points restants / recommandations :
 
+- 🛠️ Finaliser et tester le script de traitement des invitations en attente (`scripts/process_pending_invitations.ts`).
+- ⚠️ Voir pourquoi CTA **activer mon compte**"** renvoie une **404**
 - ⚠️ Désactiver `EMAIL_DEV_REDIRECT` en production avant merge. Documenter le drapeau dans la PR et la checklist de déploiement.
 - 🔐 Vérifier en production la configuration de l'adresse d'envoi (enregistrer le domaine chez Resend, mettre `EMAIL_FROM` vérifié dans `SITE_CONFIG`).
 - 🧪 Ajouter un test unitaire d'affichage HTML pour `InvitationEmail` (assert non-empty HTML/text) et l'intégrer dans CI.
