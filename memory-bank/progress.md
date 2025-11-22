@@ -758,3 +758,31 @@ Cette vérification a été réalisée via l'API Supabase MCP et confirme que le
   - Mise à jour du `search_path` de la base de données pour inclure `extensions`.
   - Mise à jour du schéma déclaratif (`01_extensions.sql` et `16_seo_metadata.sql`).
 - **Migration** : `20251120120000_move_extensions_to_schema.sql`.
+
+### 22 Novembre 2025
+
+**Critical Fix: Invitation Setup 404 Resolution** :
+
+- **Issue** : 404 error on `/auth/setup-account` preventing invited users from completing registration
+- **Root Cause** : Supabase invitation tokens in URL hash (`#access_token=...`) invisible to server-side middleware
+- **Solution** :
+  - Converted `app/(marketing)/auth/setup-account/page.tsx` to client component (`'use client'`)
+  - Added `useEffect` to extract tokens from `window.location.hash`
+  - Implemented `supabase.auth.setSession()` with extracted tokens
+  - Added error handling and loading states
+  - Maintained server-side validation for security
+- **Technical Details** :
+  - Client-side token processing required because hash fragments not sent to server
+  - Pattern: `useEffect(() => { const hash = window.location.hash; ... })`
+  - Security: Server-side validation still enforced after client-side session establishment
+- **Validation** : End-to-end invitation flow tested successfully
+- **Impact** : Complete admin user invitation system now functional
+
+### 22 Novembre 2025 (suite)
+
+**Memory-bank Documentation Updates** :
+
+- **activeContext.md** : Added critical fix entry for invitation system 404 resolution (client-side token processing pattern)
+- **systemPatterns.md** : Added comprehensive pattern documentation for "Client-Side Token Processing for Invitations" including implementation details, security considerations, and testing patterns
+- **techContext.md** : Added "Évolutions Technologiques Récentes" section documenting the client-side token processing solution and its performance impact
+- **Documentation Impact** : All memory-bank files now accurately reflect the resolved invitation system issues and established patterns for future development

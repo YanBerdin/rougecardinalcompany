@@ -2337,7 +2337,8 @@ pnpm dlx supabase db dump --table profiles
 
 ## 🔍 Notes importantes (sécurité mot de passe)
 
-- **Transmission à Supabase** : Supabase attend le mot de passe **en clair** (via HTTPS) pour le hacher correctement. Ne jamais hacher le mot de passe avant l'envoi à l'API Supabase.
+> [!CAUTION]
+> - **Transmission à Supabase** : Supabase attend le mot de passe **en clair** (via HTTPS) pour le hacher correctement. Ne jamais hacher le mot de passe avant l'envoi à l'API Supabase.
 - **Bonnes pratiques Frontend** :
   - Utiliser HTTPS (obligatoire).
   - Ne pas stocker le mot de passe dans le state React (utiliser `FormData` ou `react-hook-form`).

@@ -93,6 +93,22 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
   - **Validation** : Invite flow fonctionnel, admin profile creation possible
   - **Impact** : Admin backoffice opérationnel
 
+- ✅ **22 novembre — Critical Fix: Invitation Setup 404 Resolution** :
+  - **Issue** : 404 error on `/auth/setup-account` preventing invited users from completing registration
+  - **Root Cause** : Supabase invitation tokens in URL hash (`#access_token=...`) invisible to server-side middleware
+  - **Solution** :
+    - Converted `app/(marketing)/auth/setup-account/page.tsx` to client component (`'use client'`)
+    - Added `useEffect` to extract tokens from `window.location.hash`
+    - Implemented `supabase.auth.setSession()` with extracted tokens
+    - Added error handling and loading states
+    - Maintained server-side validation for security
+  - **Technical Details** :
+    - Client-side token processing required because hash fragments not sent to server
+    - Pattern: `useEffect(() => { const hash = window.location.hash; ... })`
+    - Security: Server-side validation still enforced after client-side session establishment
+  - **Validation** : End-to-end invitation flow tested successfully
+  - **Impact** : Complete admin user invitation system now functional
+
 - ✅ **22 novembre — Admin Sidebar Updated** :
   - **Issue** : Ajout menu "Utilisateurs" dans admin dashboard
   - **Actions** :
