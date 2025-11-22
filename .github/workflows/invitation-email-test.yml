@@ -22,18 +22,25 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
-
-      - name: Install pnpm
-        run: npm install -g pnpm
 
       - name: Enable Corepack and install dependencies
         run: |
           corepack enable
-          npx pnpm install --frozen-lockfile
+          pnpm install --frozen-lockfile
 
       - name: Run InvitationEmail render test
         env:
           NODE_ENV: test
-        run: npx pnpm exec tsx __tests__/emails/invitation-email.test.tsx
+        run: pnpm exec tsx __tests__/emails/invitation-email.test.tsx
