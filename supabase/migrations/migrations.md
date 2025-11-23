@@ -33,6 +33,11 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
   - 🎯 **Root cause** : Vue définie dans schéma mais non déployée en base (advisor détecte absence comme SECURITY DEFINER)
   - ⚡ **Résolution** : Migration manuelle appliquée, alerte Security Advisor résolue
 
+- `20251123143116_fix_restore_content_version_published_at.sql` — **ARCHIVE** : fichier de correctif temporaire contenant la recréation de la vue `messages_contact_admin` et la fonction `restore_content_version`.
+  - ℹ️ **Remarque** : Le même code est présent et géré par le schéma déclaratif (`supabase/schemas/15_content_versioning.sql` et `supabase/schemas/10_tables_system.sql`).
+  - 📦 **Action** : Ce fichier a été déplacé vers `supabase/migrations/archived/` le 2025-11-23 pour clarifier qu'il s'agit d'un hotfix historisé déjà synchronisé dans le schéma déclaratif.
+  - ✅ **Raison** : Conserver l'historique sans créer de duplication active dans le répertoire principal `supabase/migrations/`.
+
 - `20251121185458_allow_admin_update_profiles.sql` — **RLS & invite flow fix (2025-11-21)** : migration générée par `supabase db diff` pour remplacer la policy `update` trop restrictive sur `public.profiles`. Contexte : `upsert` côté application effectue d'abord un `update` puis un `insert`, et la policy UPDATE bloquait les invites administrateurs (erreur 42501). Cette migration permet aux administrateurs d'atteindre la phase UPDATE lors d'un UPSERT tout en conservant les vérifications `with check` pour les INSERTs.
   - Statut : ✅ appliquée sur la branche `feature/backoffice` et poussée au remote via `pnpm dlx supabase db push` (2025-11-21).
   - Impact : Permet l'utilisation d'`upsert()` côté serveur pour créer/mettre à jour les `profiles` lors de l'invitation d'utilisateurs sans déclencher d'erreur RLS.

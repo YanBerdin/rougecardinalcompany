@@ -178,6 +178,24 @@ pnpm exec tsx scripts/create-admin-user.ts
 
 **Les deux doivent être synchronisés** pour que l'authentification fonctionne.
 
+## 🔒 Corrections de Sécurité Récentes
+
+### Novembre 2024 - Corrections Appliquées
+
+**✅ Vue messages_contact_admin** : Changement de `SECURITY DEFINER` vers `SECURITY INVOKER`
+
+- **Problème** : Risque d'escalade de privilèges et contournement des RLS
+- **Solution** : Vue maintenant sécurisée avec `security_invoker = true`
+- **Impact** : Protection renforcée des données sensibles
+
+**✅ Fonction restore_content_version** : Correction référence colonne inexistante
+
+- **Problème** : Référence à `published_at` dans table `spectacles` (colonne supprimée)
+- **Solution** : Utilisation du champ `public` (boolean) correct
+- **Impact** : Restauration de versions fonctionnelle
+
+**Validation** : Toutes les corrections validées par `supabase db lint --linked` ✅
+
 ## 📚 Documentation
 
 - [Guide de développement](./doc/guide-developpement.md) - Setup complet et workflow

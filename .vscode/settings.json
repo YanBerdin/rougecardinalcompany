@@ -39,5 +39,14 @@
         "titleBar.activeBackground": "#b60606",
         "titleBar.activeForeground": "#f7ebf7"
     },
-    "markdown.validate.enabled": true
+    "markdown.validate.enabled": true,
+    "chat.mcp.serverSampling": {
+        "rougecardinalcompany/.vscode/mcp.json: supabase": {
+            "allowedModels": [
+                "copilot/claude-sonnet-4.5",
+                "copilot/gpt-5-mini",
+                "copilot/grok-code-fast-1"
+            ]
+        }
+    }
 }

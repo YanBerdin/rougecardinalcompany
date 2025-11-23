@@ -72,10 +72,17 @@ select
   mc.metadata,
   mc.contact_presse_id,
   cp.nom as contact_presse_nom,
-  cp.media as contact_presse_media,
-    cp.fonction as contact_presse_role
+  cp.email as contact_presse_email
 from public.messages_contact mc
-left join public.contacts_presse as cp on cp.id = mc.contact_presse_id;
+left join public.contacts_presse as cp on cp.id = mc.contact_presse_id
+order by
+  case
+    when mc.status = 'nouveau' then 1
+    when mc.status = 'en_cours' then 2
+    when mc.status = 'traite' then 3
+    else 4
+  end,
+  mc.created_at desc;
 
 comment on view public.messages_contact_admin is 'Vue pour l administration: suivi des messages, latences, association presse.';
 
