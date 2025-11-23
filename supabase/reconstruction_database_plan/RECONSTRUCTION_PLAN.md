@@ -141,3 +141,140 @@ Pour rappel, la migration générée est `supabase/migrations/20250918000002_app
 - ✅ Toutes les tables créées avec RLS
 - ✅ Tous les seeds appliqués
 - ✅ Site fonctionnel en local et en production
+
+---
+
+## 🔐 Post-Migration: Création de l'Utilisateur Admin
+
+### ⚠️ IMPORTANT : auth.users Ne Peut Pas Être Seedé par SQL
+
+La table `auth.users` est gérée par l'Auth API de Supabase et **ne peut pas être modifiée directement via SQL migrations**.
+
+### Pourquoi la migration `20251119000000_seed_admin_user.sql` ne crée pas l'utilisateur ?
+
+Cette migration contient une **protection intentionnelle** :
+
+```sql
+-- Note: Dans Supabase local, auth.users n'accepte pas INSERT direct
+-- Cette partie nécessite l'utilisation de l'Admin API
+-- Voir scripts/create-admin-user.ts pour la création initiale
+
+RAISE NOTICE '⚠️  Cannot create auth.users directly via SQL migration.';
+RAISE NOTICE '   Run: pnpm exec tsx scripts/create-admin-user.ts';
+RETURN;
+```
+
+La migration s'exécute mais **retourne immédiatement** si aucun utilisateur n'existe, laissant `auth.users` vide.
+
+### ✅ Solution : Utiliser le Script TypeScript
+
+Après avoir reconstruit la base de données (local ou cloud), exécutez **manuellement** :
+
+```bash
+# Créer l'utilisateur admin via l'Admin API
+pnpm exec tsx scripts/create-admin-user.ts
+```
+
+### 📋 Que fait le script ?
+
+1. **Vérifie** si l'utilisateur `yandevformation@gmail.com` existe déjà
+2. **Si existe** : Met à jour les métadonnées (`role: 'admin'`)
+3. **Si n'existe pas** : Crée l'utilisateur avec :
+   - Email : `yandevformation@gmail.com`
+   - Password : `AdminRouge2025!` (temporaire)
+   - Role : `admin` (dans `app_metadata` et `user_metadata`)
+   - Email confirmé automatiquement
+4. **Crée/met à jour** le profil dans `public.profiles` :
+   - `display_name` : "Administrateur"
+   - `role` : "admin"
+
+### 🐛 Si le Script Échoue avec "duplicate key constraint"
+
+Si vous obtenez l'erreur `profiles_userid_unique` :
+
+```bash
+# L'utilisateur existe dans auth.users mais le profil est incomplet
+# Corriger manuellement avec SQL :
+```
+
+```sql
+-- Via Supabase SQL Editor ou psql
+UPDATE public.profiles 
+SET display_name = 'Administrateur', 
+    updated_at = now() 
+WHERE user_id = (
+  SELECT id FROM auth.users 
+  WHERE email = 'yandevformation@gmail.com'
+);
+```
+
+Ou via MCP Supabase (si connecté) :
+
+```typescript
+// Dans GitHub Copilot Chat avec MCP Supabase activé
+UPDATE public.profiles 
+SET display_name = 'Administrateur', updated_at = now() 
+WHERE user_id = '3bb6d67d-8a61-4042-9a6b-7240bca26f5f';
+```
+
+### 📊 Vérification Post-Création
+
+```bash
+# Vérifier l'utilisateur dans auth.users
+pnpm dlx supabase db execute "SELECT id, email, raw_app_meta_data->>'role' as role FROM auth.users;"
+
+# Vérifier le profil
+pnpm dlx supabase db execute "SELECT user_id, display_name, role FROM public.profiles;"
+```
+
+Ou avec MCP Supabase :
+
+```sql
+-- auth.users
+SELECT id, email, raw_app_meta_data->>'role' as role, email_confirmed_at 
+FROM auth.users 
+WHERE email = 'yandevformation@gmail.com';
+
+-- public.profiles
+SELECT user_id, display_name, role, created_at 
+FROM public.profiles 
+WHERE user_id = (SELECT id FROM auth.users WHERE email = 'yandevformation@gmail.com');
+```
+
+### 🚀 Checklist Complète Post-Reset
+
+Après un `pnpm dlx supabase db reset` :
+
+- [ ] **1. Migrations appliquées** : Vérifier avec `pnpm dlx supabase migration list`
+- [ ] **2. Tables créées** : Vérifier ~36 tables avec `\dt public.*` ou MCP
+- [ ] **3. Seeds appliqués** : Vérifier `home_hero_slides`, `spectacles`, etc.
+- [ ] **4. Utilisateur admin créé** : **EXÉCUTER** `pnpm exec tsx scripts/create-admin-user.ts`
+- [ ] **5. Profil vérifié** : `display_name` et `role` corrects dans `public.profiles`
+- [ ] **6. Connexion testée** : Login avec `yandevformation@gmail.com` / `AdminRouge2025!`
+- [ ] **7. ⚠️ MOT DE PASSE CHANGÉ** : Changer le mot de passe temporaire immédiatement
+
+### 🔑 Identifiants Admin (Par Défaut)
+
+| Champ | Valeur |
+|-------|---------|
+| **📧 Email** | `yandevformation@gmail.com` |
+| **🔒 Mot de passe** | `AdminRouge2025!` |
+| **🔐 Rôle** | `admin` |
+| **📝 Nom d'affichage** | `Administrateur` |
+
+⚠️ **IMPORTANT** : Changez le mot de passe après la première connexion !
+
+### 📚 Scripts Disponibles
+
+- `scripts/create-admin-user.ts` — **Principal** : Crée l'utilisateur admin (à utiliser après reset)
+- `scripts/sync-admin-profile.ts` — Synchronise le profil si incohérent
+- `scripts/set-admin-role.ts` — Définit le rôle admin pour un utilisateur existant
+- `scripts/check-admin-status.ts` — Vérifie le statut admin d'un utilisateur
+- `scripts/test-admin-access.ts` — Teste les permissions admin (RLS, DAL, etc.)
+
+### 🎯 TL;DR - Commande Rapide
+
+```bash
+# Après chaque reset de base de données
+pnpm dlx supabase db reset && pnpm exec tsx scripts/create-admin-user.ts
+```

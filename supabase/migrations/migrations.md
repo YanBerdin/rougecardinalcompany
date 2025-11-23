@@ -26,6 +26,13 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## Migrations récentes (novembre 2025)
 
+- `20251123170231_create_messages_contact_admin_view.sql` — **SECURITY FIX : Deploy missing messages_contact_admin view** : Création de la vue `messages_contact_admin` définie dans le schéma déclaratif mais absente de la base de données. Résout l'alerte Security Advisor "SECURITY DEFINER view" (faux positif - vue configurée avec `security_invoker = true`).
+  - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/10_tables_system.sql`
+  - 🔐 **Sécurité** : Vue avec `security_invoker = true` (pas de privilèges élevés)
+  - 📝 **Migration conservée** pour l'historique et la cohérence avec Supabase Cloud
+  - 🎯 **Root cause** : Vue définie dans schéma mais non déployée en base (advisor détecte absence comme SECURITY DEFINER)
+  - ⚡ **Résolution** : Migration manuelle appliquée, alerte Security Advisor résolue
+
 - `20251121185458_allow_admin_update_profiles.sql` — **RLS & invite flow fix (2025-11-21)** : migration générée par `supabase db diff` pour remplacer la policy `update` trop restrictive sur `public.profiles`. Contexte : `upsert` côté application effectue d'abord un `update` puis un `insert`, et la policy UPDATE bloquait les invites administrateurs (erreur 42501). Cette migration permet aux administrateurs d'atteindre la phase UPDATE lors d'un UPSERT tout en conservant les vérifications `with check` pour les INSERTs.
   - Statut : ✅ appliquée sur la branche `feature/backoffice` et poussée au remote via `pnpm dlx supabase db push` (2025-11-21).
   - Impact : Permet l'utilisation d'`upsert()` côté serveur pour créer/mettre à jour les `profiles` lors de l'invitation d'utilisateurs sans déclencher d'erreur RLS.
