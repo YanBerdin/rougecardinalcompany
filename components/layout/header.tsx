@@ -98,8 +98,8 @@ export default function Header() {
               className={cn(
                 "nav-link-glass ripple-effect",
                 isScrolled
-                  ? "text-foreground hover:text-foreground"
-                  : "text-white hover:text-white"
+                  ? "text-foreground hover:text-accent"
+                  : "text-foreground hover:text-accent"
               )}
             >
               {isOpen ? (
@@ -113,17 +113,17 @@ export default function Header() {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden animate-fade-in">
-            <div className="px-2 pt-4 pb-3 space-y-2 liquid-glass-mobile rounded-2xl mt-4 border shadow-2xl">
+          <div className="md:hidden animate-fade-in px-4">
+            <div className="px-2 pt-4 pb-3 space-y-2 liquid-glass-mobile rounded-2xl mt-4 border">
               {navigation.map((item, index) => (
                 <Link
                   key={navigation[index].name}
                   href={navigation[index].href}
                   className={cn(
-                    "block px-4 py-3 rounded-xl text-base font-medium transition-all duration-300 nav-link-glass",
+                    "block px-4 py-3 text-base font-medium transition-all duration-300 nav-link-glass",
                     pathname === navigation[index].href
                       ? "text-primary bg-primary/10 font-bold border border-primary/20 active"
-                      : "text-white"
+                      : "text-foreground"
                   )}
                   onClick={() => setIsOpen(false)}
                   style={{
@@ -141,7 +141,9 @@ export default function Header() {
               ))}
 
               {/*<div className="px-4 pt-4">{authContent}</div>*/}
+              <div className="px-2 space-y-2 nav-link-glass">
               <ThemeSwitcher />
+</div>
             </div>
           </div>
         )}
