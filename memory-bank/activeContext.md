@@ -40,21 +40,121 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 
 ## Travaux novembre 2025
 
-- ✅ **21 novembre — TASK032 Admin User Invitation System COMPLÉTÉ** :
-  - **Issue** : #32 - Système d'invitation admin complet pour onboarder de nouveaux administrateurs
-  - **Composants implémentés** :
-    - Migrations : `20251121185458_allow_admin_update_profiles.sql`, `20251120231121_create_user_invitations.sql`, `20251120231146_create_pending_invitations.sql`
-    - DAL : `lib/dal/admin-users.ts` - fonction `inviteUser()` avec validation Zod, rate limiting (5/h), client admin Supabase
-    - Email : Templates React Email (`emails/invitation-email.tsx`), layout et composants utilitaires, service Resend avec dev-redirect
-    - Actions : `lib/email/actions.ts` - envoi d'emails d'invitation avec gestion d'erreurs
-    - Admin UI : `app/(admin)/admin/users/page.tsx`, `app/(admin)/admin/users/invite/page.tsx`, composants `UsersManagementContainer.tsx`
-    - Scripts : `scripts/find-auth-user.js`, `scripts/generate-invite-link.js`, `scripts/test-full-invitation.js`
-  - **Sécurité** : RLS policies restrictives (admin-only), validation côté serveur, audit logging, rate limiting
-  - **Tests** : Scripts automatisés pour validation complète du flux d'invitation (création, email, acceptation)
-  - **Documentation** : Mise à jour `.env.example`, `supabase/README.md`, guides d'utilisation
-  - **Architecture** : Pattern Smart/Dumb components, DAL server-only, email service avec graceful degradation
-  - **Validation** : TypeScript OK, ESLint clean, tests scripts passing, production-ready
-  - **Impact** : Admin backoffice complet avec gestion utilisateurs, invitations sécurisées, audit trail
+- ✅ **24 novembre — CardsDashboard & Skeleton Centralization COMPLÉTÉ** :
+  - **Issue** : Améliorer UX admin dashboard avec cards réutilisables et loading states cohérents
+  - **Résultat** : Interface administrative modernisée avec grille de cartes et skeletons centralisés
+  - **Composants créés** :
+    - `components/admin/CardsDashboard.tsx` : Grille responsive de cards admin (6 liens rapides : équipe, spectacles, événements, médias, utilisateurs, réglages)
+    - `components/skeletons/AdminDashboardSkeleton.tsx` : Skeleton full-page admin dashboard
+    - `components/skeletons/AdminTeamSkeleton.tsx` : Skeleton grille de cards équipe (md:2, lg:3)
+    - `components/skeletons/AdminSpectaclesSkeleton.tsx` : Skeleton table 7 colonnes (6 rows)
+  - **Pages modifiées** :
+    - `app/(admin)/admin/page.tsx` : Remplacement section "Actions rapides" par CardsDashboard
+    - `app/(admin)/admin/loading.tsx` : Utilise AdminDashboardSkeleton directement
+    - `app/(admin)/admin/team/loading.tsx` : Utilise AdminTeamSkeleton
+    - `app/(admin)/admin/spectacles/loading.tsx` : Nouvelle page loading avec AdminSpectaclesSkeleton
+    - `app/(admin)/admin/users/loading.tsx` : Utilise UsersManagementSkeleton
+  - **Architecture** :
+    - Suspense limité aux Server Components async (DashboardStatsContainer)
+    - Loading states via `loading.tsx` Next.js convention (pas de Suspense wrapper)
+    - Pattern Smart/Dumb : CardsDashboard (dumb) consommé par page admin (smart)
+    - Responsive design : gap-4 md:grid-cols-2 lg:grid-cols-3
+    - Icons : lucide-react (Users, Film, Calendar, Image, Settings, UserCog)
+  - **Commit** : `feat(admin): add CardsDashboard and integrate into admin page`
+  - **Push** : ✅ branch `feature/backoffice` mise à jour
+  - **Impact** : Admin dashboard cohérent, réutilisable, loading states améliorés
+
+- ✅ **21-23 novembre — TASK032 Admin User Invitation System COMPLÉTÉ** :
+  - **Issue** : #32 - Système d'invitation admin end-to-end pour onboarder de nouveaux utilisateurs avec rôles (admin/editor/user)
+  
+  - **Fonctionnalités implémentées** :
+    - ✅ **Liste utilisateurs** : Tableau shadcn/ui (email, nom, rôle, statut, date création, actions)
+    - ✅ **Changement rôle** : Select interactif user/editor/admin avec Server Action
+    - ✅ **Badges statut** : Vérifié (CheckCircle2), Invité (Mail), Non vérifié (AlertCircle) avec lucide-react
+    - ✅ **Formatage dates** : date-fns locale fr ("il y a 2 jours")
+    - ✅ **Suppression** : AlertDialog confirmation + Server Action
+    - ✅ **Toast notifications** : Feedback sonner pour toutes actions
+    - ✅ **Loading states** : Disabled pendant mutations
+    - ✅ **Empty state** : Message si aucun utilisateur
+    - ✅ **Formulaire invitation** : Validation Zod client (react-hook-form) + serveur
+    - ✅ **Pattern Container/View** : Smart/Dumb components avec Suspense + Skeleton
+
+  - **Architecture technique** :
+    - **Migrations** :
+      - `20251121185458_allow_admin_update_profiles.sql` : Fix RLS pour UPSERT (résout 42501)
+      - `20251120231121_create_user_invitations.sql` : Table audit invitations
+      - `20251120231146_create_pending_invitations.sql` : Table tracking pending
+    - **DAL** : `lib/dal/admin-users.ts`
+      - `inviteUser()` : Orchestration complète (rate-limit, création user, génération link, UPSERT profil avec `onConflict: 'user_id'`, audit, email, rollback complet si échec)
+      - `findUserByEmail()` : Typage strict AuthUser | null
+      - `listAllUsers()` : JOIN profiles avec UserWithProfile[]
+      - `updateUserRole()`, `deleteUser()` : Server Actions avec validation Zod
+      - Performance : `getClaims()` utilisé plutôt que `getUser()` quand ID suffisant
+    - **Admin Client** : `supabase/admin.ts`
+      - `createAdminClient()` : Wrapper service_role key, pattern cookies getAll/setAll
+      - Import server-only pour protection client-side
+    - **Email** : Templates React Email
+      - `emails/invitation-email.tsx` : Template avec design Rouge Cardinal, unique Tailwind wrapper, CTA inline styles (indigo bg, white text)
+      - `emails/utils/email-layout.tsx` : Layout réutilisable header/footer
+      - `emails/utils/components.utils.tsx` : Composants Button/Section/Text
+      - Validation render : Test unitaire vérifie HTML non vide + CTA/URL/recipient
+    - **Email Service** : `lib/email/actions.ts`
+      - `sendInvitationEmail()` : Server Action avec render React Email via Resend
+      - Dev redirect : Gate EMAIL_DEV_REDIRECT + EMAIL_DEV_REDIRECT_TO env vars
+      - Logging RGPD : sanitizeEmailForLogs() masque emails (y***@gmail.com)
+    - **Client-Side Token** : `app/auth/setup-account/page.tsx`
+      - Problème résolu : Tokens Supabase en URL hash invisible serveur
+      - Solution : Client Component avec extraction window.location.hash
+      - Session establishment via setSession() + cleanup sécurisé token
+
+  - **Corrections critiques appliquées** :
+    - 🔴 **Rollback Incomplet** : Ajout rollback complet dans inviteUser() si email échoue (delete profil + auth user)
+    - 🔴 **Logs RGPD** : sanitizeEmailForLogs() pour masquer emails dans logs applicatifs
+    - 🔴 **Test Email** : 4 assertions critiques ajoutées (styles inline CTA, conversion Tailwind, labels FR)
+    - 🔴 **Doc .env** : Section CRITICAL WARNING ajoutée + deployment checklist + guide troubleshooting
+    - 🔴 **CI pnpm** : Migration vers pnpm/action-setup@v4 + cache manuel actions/cache (résout path validation errors)
+    - 🔴 **404 Setup** : Conversion page Client Component pour hash token processing (résout invitation flow)
+
+  - **Tests & CI** :
+    - Unit test : `__tests__/emails/invitation-email.test.tsx` (HTML render, CTA styles, Tailwind conversion, labels FR)
+    - GitHub Actions : Workflow CI avec pnpm/action-setup@v4, cache manuel pnpm store, build + typecheck + tests
+    - Scripts locaux : test-full-invitation.js, test-profile-insertion.js, find-auth-user.js, delete-test-user.js, generate-invite-link.js, check-existing-profile.js, seed-admin.ts
+
+  - **Documentation & Commits** :
+    - `.env.example` : Variables EMAIL_DEV_REDIRECT avec warnings production
+    - `doc/dev-email-redirect.md` : Guide troubleshooting complet
+    - `supabase/migrations/migrations.md` : Documentation migrations RLS
+    - `memory-bank/activeContext.md` : Entry complète système invitation
+    - Commits clés : feat(admin/invite), fix(admin-invitation), fix(auth), fix(ci) (5+ commits nov. 21-23)
+
+  - **Respect Instructions** :
+    - ✅ Clean Code : Fonctions ≤ 30 lignes, early returns, variables explicites
+    - ✅ TypeScript Strict : Typage explicite partout, pas de any, type guards, Zod validation
+    - ✅ RLS Policies : Une policy par opération, SELECT/USING, INSERT/WITH CHECK, UPDATE/USING+WITH CHECK, DELETE/USING
+    - ✅ Migrations : Nommage YYYYMMDDHHmmss_description.sql, headers metadata, commentaires, SQL lowercase
+    - ✅ Declarative Schema : Modifications dans supabase/schemas/, migrations générées via supabase db diff
+    - ✅ Next.js 15 Backend : await headers()/cookies(), Server Components, Client Components pour interactivité, Server Actions 'use server'
+    - ✅ Supabase Auth : @supabase/ssr, pattern cookies getAll/setAll, getClaims() pour checks rapides
+
+  - **Workflow Invitation Complet** :
+    1. Admin → /admin/users → Clic "Inviter"
+    2. Formulaire → email, prénom, nom, rôle → Submit
+    3. Server Action submitInvitation() → DAL inviteUser()
+    4. Création auth user → Génération invite link → UPSERT profil (résilient trigger) → Audit → Email
+    5. Si échec email → Rollback complet (delete profil + auth user)
+    6. Utilisateur reçoit email → Clic lien
+    7. Redirection /auth/setup-account#access_token=...
+    8. Client Component → Extraction token hash → setSession() → Cleanup → Redirect
+    9. Utilisateur connecté → Accès selon rôle
+
+  - **Validation complète** :
+    - TypeScript : ✅ 0 errors (pnpm tsc --noEmit)
+    - ESLint : ✅ Clean
+    - Tests : ✅ Unit test email passing, scripts locaux validés
+    - CI : ✅ GitHub Actions build + typecheck + tests passing
+    - Production-ready : ✅ Rollback complet, logging RGPD, dev-redirect documenté
+
+  - **Impact** : Admin backoffice complet avec gestion utilisateurs end-to-end, invitations sécurisées, audit trail, templates email professionnels, flux invitation fonctionnel, documentation complète
   - **Issue** : Mise à jour documentation architecture email avec dev-redirect et render test/CI
   - **Actions** :
     - Version bump : 1.1.0 → 1.2.0 (date 22-11-2025)
