@@ -43,6 +43,11 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
   - Impact : Permet l'utilisation d'`upsert()` côté serveur pour créer/mettre à jour les `profiles` lors de l'invitation d'utilisateurs sans déclencher d'erreur RLS.
   - Remarques opérationnelles : vérifier qu'un index existe sur `profiles(user_id)` si des requêtes massives d'upsert sont attendues.
 
+- `20251123150000_remote_schema.sql` — **REMOTE WARNING: pg_net extension** : migration minimale exécutant `drop extension if exists "pg_net"`.
+  - 📊 Diff Local vs Cloud : la base locale ne contient jamais `pg_net`, mais le projet Cloud a renvoyé un warning lié à cette extension (spécifique à Supabase Cloud pour webhooks).
+  - 🛠️ Impact local : aucune action requise — la suppression est idempotente et la base locale est propre.
+  - 🔎 Action recommandée : garder la migration pour tracer le contrôle cloud-local ; si vous voulez forcer l'état sur le cloud, appliquez la migration via la CLI/SQL Editor. Voir `scripts/check-extension.ts` pour un contrôle programmatique.
+
 ## ⚠️ CRITICAL WARNING - Security Campaign Error (October 2025)
 
 > **❌ ERREUR ARCHITECTURALE MAJEURE - NE PAS REPRODUIRE**
