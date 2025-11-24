@@ -87,7 +87,6 @@ interface DALResult<T = null> {
   warning?: string;
 }
 
-// Helper pour logs RGPD-compliant
 function sanitizeEmailForLogs(email: string): string {
   const [local, domain] = email.split('@');
   if (!domain) return email; // Invalid email, return as-is
@@ -248,66 +247,72 @@ export async function deleteUser(userId: string): Promise<DALResult> {
   return { success: true };
 }
 
-export async function inviteUser(
-  input: InviteUserInput
-): Promise<DALResult<{ userId: string }>> {
-  await requireAdmin();
-
-  const validated = InviteUserSchema.parse(input);
-  const supabase = await createClient();
-  const adminClient = await createAdminClient();
-
-  // Use getClaims() for fast local JWT verification (performance ~2-5ms)
-  // We only need the current user's id for rate-limiting, so avoid the slower getUser() network call
+async function getCurrentAdminIdFromClaims(
+  supabase: SupabaseClient
+): Promise<string | null> {
   const { data: claimsData } = await supabase.auth.getClaims();
   const claims = (claimsData as { claims?: Record<string, unknown> } | undefined)?.claims;
-  const currentAdminId = claims?.sub ? String(claims.sub) : null;
+  return claims?.sub ? String(claims.sub) : null;
+}
 
-  if (currentAdminId) {
-    const { count } = await supabase
-      .from("user_invitations")
-      .select("*", { count: "exact", head: true })
-      .eq("invited_by", currentAdminId)
-      .gte(
-        "created_at",
-        new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-      );
-
-    if (count && count >= 10) {
-      return {
-        success: false,
-        error: "Rate limit dépassé: maximum 10 invitations par jour",
-      };
-    }
+async function checkInvitationRateLimit(
+  supabase: SupabaseClient,
+  currentAdminId: string | null
+): Promise<void> {
+  if (!currentAdminId) {
+    return;
   }
+  // 24 * 60 * 60 * 1000 ms = 1 jour
+  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const { count } = await supabase
+    .from("user_invitations")
+    .select("*", { count: "exact", head: true })
+    .eq("invited_by", currentAdminId)
+    .gte("created_at", oneDayAgo);
 
-  console.log(`[inviteUser] Checking for existing user: ${sanitizeEmailForLogs(validated.email)}`);
-  const existingUser = await findUserByEmail(adminClient, validated.email);
+  if (count && count >= 10) {
+    throw new Error("[ERR_INVITE_001] Rate limit dépassé: maximum 10 invitations par jour");
+  }
+}
+
+async function verifyUserDoesNotExist(
+  adminClient: SupabaseClient,
+  email: string
+): Promise<void> {
+  console.log(`[inviteUser] Checking for existing user: ${sanitizeEmailForLogs(email)}`);
+
+  const existingUser = await findUserByEmail(adminClient, email);
 
   if (existingUser) {
-    console.log(`[inviteUser] User ${validated.email} already exists`);
-    return {
-      success: false,
-      error: `Un utilisateur avec l'adresse ${validated.email} existe déjà dans le système.`,
-    };
+    console.log(`[inviteUser] User ${email} already exists`);
+    throw new Error(
+      `[ERR_INVITE_002] Un utilisateur avec l'adresse ${email} existe déjà dans le système.`
+    );
   }
+}
 
-  // Generate an invite link first. generateLink(type: 'invite') will create the
-  // auth user and produce the invitation link. Creating the auth user first
-  // and then calling generateLink causes `email_exists` because generateLink
-  // expects to create the user for 'invite'.
+// Generate an invite link first. generateLink(type: 'invite') will create the
+// auth user and produce the invitation link. Creating the auth user first
+// and then calling generateLink causes `email_exists` because generateLink
+// expects to create the user for 'invite'.
+
+async function generateUserInviteLinkWithUrl(
+  adminClient: SupabaseClient,
+  email: string,
+  role: string,
+  displayName: string
+): Promise<{ invitationUrl: string }> {
   const redirectUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/auth/setup-account`;
 
   const { data: linkData, error: linkError } =
     await adminClient.auth.admin.generateLink({
       type: "invite",
-      email: validated.email,
+      email: email,
       options: {
         redirectTo: redirectUrl,
         data: {
-          role: validated.role,
-          display_name:
-            validated.displayName || validated.email.split("@")[0],
+          role: role,
+          display_name: displayName,
         },
       },
     });
@@ -318,7 +323,8 @@ export async function inviteUser(
     console.log(`[DEBUG] linkError.code: ${linkError.code}, linkError.message: ${linkError.message}`);
 
     // Try to find an existing user record to provide more context to caller
-    const existing = await findUserByEmail(adminClient, validated.email);
+    // const existing = await findUserByEmail(adminClient, validated.email);
+    const existing = await findUserByEmail(adminClient, email);
     const existingId = existing?.id ?? null;
 
     if (
@@ -326,50 +332,55 @@ export async function inviteUser(
       linkError.message?.includes("email_exists") ||
       linkError.message?.includes("already been registered")
     ) {
-      return {
-        success: false,
-        error: existingId
-          ? `Invitation impossible : un compte existe déjà (id=${existingId}). Vérifiez auth.users ou utilisez le flow de récupération.`
-          : `Un utilisateur avec l'adresse ${validated.email} existe déjà dans le système.`,
-      };
+      const errorMessage = existingId
+        ? `Invitation impossible : un compte existe déjà (id=${existingId}). Vérifiez auth.users ou utilisez le flow de récupération.`
+        : `Un utilisateur avec l'adresse ${email} existe déjà dans le système.`;
+
+      throw new Error(`[ERR_INVITE_003] ${errorMessage}`);
     }
 
-    return {
-      success: false,
-      error: `Erreur lors de la génération du lien d'invitation: ${linkError.message}`,
-    };
+    throw new Error(
+      `[ERR_INVITE_004] Erreur lors de la génération du lien d'invitation: ${linkError.message}`
+    );
   }
 
-  const invitationUrl: string = linkData.properties.action_link;
+  return { invitationUrl: linkData.properties.action_link };
+}
 
-  // After generateLink, locate the created auth user (may be async).
-  let userId: string | null = null;
-  for (let attempt = 0; attempt < 5; attempt++) {
-    const found = await findUserByEmail(adminClient, validated.email);
+async function waitForAuthUserCreation(
+  adminClient: SupabaseClient,
+  email: string
+): Promise<string> {
+  const maxAttempts = 5;
+  const delayMs = 500;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const found = await findUserByEmail(adminClient, email);
     if (found?.id) {
-      userId = found.id;
-      break;
+      return found.id;
     }
-    await new Promise((res) => setTimeout(res, 500));
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
   }
 
-  if (!userId) {
-    console.error('[DAL] Could not find auth user after generateLink.');
-    return {
-      success: false,
-      error: `Invitation créée (lien), mais l'utilisateur n'a pas encore été visible dans auth.users. Veuillez vérifier manuellement.`,
-    };
-  }
+  console.error("[DAL] Could not find auth user after generateLink.");
+  throw new Error(
+    `[ERR_INVITE_005] Invitation créée (lien), mais l'utilisateur n'a pas encore été visible dans auth.users. Veuillez vérifier manuellement.`
+  );
+}
 
-  // Use adminClient to upsert profile (trigger may have already created it with default role)
-  // We need to UPDATE it with the correct role and display_name
+async function createUserProfileWithRole(
+  adminClient: SupabaseClient,
+  userId: string,
+  role: string,
+  displayName: string
+): Promise<void> {
   const { error: profileError } = await adminClient
     .from("profiles")
     .upsert(
       {
         user_id: userId,
-        role: validated.role,
-        display_name: validated.displayName || validated.email.split("@")[0],
+        role: role,
+        display_name: displayName,
       },
       {
         onConflict: "user_id",
@@ -378,66 +389,112 @@ export async function inviteUser(
 
   if (profileError) {
     console.error("[DAL] Failed to upsert profile:", profileError);
-    // Do not delete the created auth user automatically. Return an informative error
-    return {
-      success: false,
-      error: `Failed to upsert profile for user ${userId}: ${profileError.message}. L'utilisateur a été créé dans auth.users; veuillez vérifier manuellement si nécessaire.`,
-    };
+    throw new Error(
+      `[ERR_INVITE_006] Failed to upsert profile for user ${userId}: ${profileError.message}. L'utilisateur a été créé dans auth.users; veuillez vérifier manuellement si nécessaire.`
+    );
   }
 
   console.log(`[DAL] Profile upserted (created or updated) for user ${userId}`);
+}
 
+async function rollbackProfileAndAuthUser(
+  adminClient: SupabaseClient,
+  userId: string
+): Promise<void> {
+  try {
+    await adminClient.from("profiles").delete().eq("user_id", userId);
+    console.log(`[DAL] Profile rolled back for user ${userId}`);
+  } catch (profileDeleteError) {
+    console.error("[DAL] Failed to rollback profile:", profileDeleteError);
+  }
+
+  try {
+    await adminClient.auth.admin.deleteUser(userId);
+    console.log(`[DAL] Auth user rolled back: ${userId}`);
+  } catch (userDeleteError) {
+    console.error("[DAL] Failed to rollback auth user:", userDeleteError);
+  }
+}
+
+async function sendInvitationEmailWithRollback(
+  adminClient: SupabaseClient,
+  email: string,
+  role: string,
+  displayName: string | undefined,
+  invitationUrl: string,
+  userId: string
+): Promise<void> {
   try {
     const emailActions = await import("@/lib/email/actions");
     await emailActions.sendInvitationEmail({
-      email: validated.email,
-      role: validated.role,
-      displayName: validated.displayName,
+      email: email,
+      role: role,
+      displayName: displayName,
       invitationUrl: invitationUrl,
     });
-    console.log(`[DAL] Invitation email sent to ${validated.email}`);
+    console.log(`[DAL] Invitation email sent to ${email}`);
   } catch (error: unknown) {
-    console.error("[DAL] Failed to send invitation email, initiating complete rollback:", error);
+    console.error(
+      "[DAL] Failed to send invitation email, initiating complete rollback:",
+      error
+    );
 
-    // ROLLBACK: Delete the profile we just created
-    try {
-      await adminClient.from("profiles").delete().eq("user_id", userId);
-      console.log(`[DAL] Profile rolled back for user ${userId}`);
-    } catch (profileDeleteError) {
-      console.error("[DAL] Failed to rollback profile:", profileDeleteError);
-    }
+    await rollbackProfileAndAuthUser(adminClient, userId);
 
-    // ROLLBACK: Delete the auth user we just created
-    try {
-      await adminClient.auth.admin.deleteUser(userId);
-      console.log(`[DAL] Auth user rolled back: ${userId}`);
-    } catch (userDeleteError) {
-      console.error("[DAL] Failed to rollback auth user:", userDeleteError);
-    }
+    throw new Error(
+      "[ERR_INVITE_007] Échec de l'envoi de l'email d'invitation. Rollback complet effectué."
+    );
+  }
+}
 
-    return {
-      success: false,
-      error: `Échec de l'envoi de l'email d'invitation. Rollback complet effectué.`,
-    };
+async function logInvitationAuditRecord(
+  supabase: SupabaseClient,
+  currentAdminId: string | null,
+  userId: string,
+  email: string,
+  role: string
+): Promise<void> {
+  if (!currentAdminId) {
+    return;
   }
 
-  if (currentAdminId) {
-    await supabase.from("user_invitations").insert({
-      user_id: userId,
-      email: validated.email,
-      role: validated.role,
-      invited_by: currentAdminId,
-    });
-  }
+  await supabase.from("user_invitations").insert({
+    user_id: userId,
+    email: email,
+    role: role,
+    invited_by: currentAdminId,
+  });
+}
+
+export async function inviteUser(
+  input: InviteUserInput
+): Promise<DALResult<{ userId: string }>> {
+  await requireAdmin();
+
+  const validated = InviteUserSchema.parse(input);
+  const supabase = await createClient();
+  const adminClient = await createAdminClient();
+
+  const currentAdminId = await getCurrentAdminIdFromClaims(supabase);
+
+  await checkInvitationRateLimit(supabase, currentAdminId);
+  await verifyUserDoesNotExist(adminClient, validated.email);
+
+  const displayName = validated.displayName || validated.email.split("@")[0];
+  const { invitationUrl } = await generateUserInviteLinkWithUrl(
+    adminClient,
+    validated.email,
+    validated.role,
+    displayName
+  );
+
+  const userId = await waitForAuthUserCreation(adminClient, validated.email);
+  await createUserProfileWithRole(adminClient, userId, validated.role, displayName);
+  await sendInvitationEmailWithRollback(adminClient, validated.email, validated.role, validated.displayName, invitationUrl, userId);
+  await logInvitationAuditRecord(supabase, currentAdminId, userId, validated.email, validated.role);
 
   revalidatePath("/admin/users");
 
-  console.log(
-    `[DAL] User invited successfully: userId=${userId} role=${validated.role}`
-  );
-
-  return {
-    success: true,
-    data: { userId },
-  };
+  console.log(`[DAL] User invited successfully: userId=${userId} role=${validated.role}`);
+  return { success: true, data: { userId } };
 }
