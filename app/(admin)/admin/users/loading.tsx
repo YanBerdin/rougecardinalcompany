@@ -1,4 +1,4 @@
-import { UsersManagementSkeleton } from "@/components/features/admin/users/UsersManagementSkeleton";
+import { UsersManagementSkeleton } from "@/components/skeletons/UsersManagementSkeleton";
 
 export default function Loading() {
   return (

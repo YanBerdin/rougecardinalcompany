@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { Metadata } from "next";
 import { UsersManagementContainer } from "@/components/features/admin/users/UsersManagementContainer";
-import { UsersManagementSkeleton } from "@/components/features/admin/users/UsersManagementSkeleton";
+import { UsersManagementSkeleton } from "@/components/skeletons/UsersManagementSkeleton";
 
 export const metadata: Metadata = {
   title: "Gestion des utilisateurs",

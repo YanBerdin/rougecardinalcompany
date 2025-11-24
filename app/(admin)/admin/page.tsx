@@ -24,7 +24,7 @@ export default function AdminDashboard() {
         </p>
       </div>
 
-      {/* Stats cards */}
+      {/* Stats cards: suspend only the stats container so header and actions render immediately */}
       <Suspense fallback={<StatsCardsSkeleton />}>
         <DashboardStatsContainer />
       </Suspense>

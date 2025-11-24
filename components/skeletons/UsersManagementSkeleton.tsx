@@ -1,4 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
+
 import {
   Table,
   TableBody,
@@ -11,9 +12,9 @@ import {
 export function UsersManagementSkeleton() {
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <Skeleton className="h-5 w-32" />
-        <Skeleton className="h-10 w-48" />
+      <div>
+        <div className="h-8 w-64 bg-muted rounded animate-pulse" />
+        <div className="h-4 w-96 bg-muted rounded mt-2 animate-pulse" />
       </div>
 
       <div className="rounded-md border">
