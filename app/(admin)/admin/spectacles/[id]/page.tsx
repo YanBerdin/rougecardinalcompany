@@ -57,10 +57,10 @@ export default async function SpectacleDetailPage({ params }: Props) {
 
   function getStatusLabel(status: string | null): string {
     if (!status) return "—";
-    
+
     // Normalize status (handle old underscore format)
     const normalizedStatus = status.replace(/_/g, ' ');
-    
+
     // Use predefined label if available, otherwise capitalize
     return STATUS_LABELS[normalizedStatus] || capitalizeWords(normalizedStatus);
   }
