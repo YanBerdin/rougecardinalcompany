@@ -186,9 +186,9 @@ Body/UI: Geist Sans (already configured)
 
 **Navigation Links**:
 ```tsx
-<a className="nav-link-glass">
+<Link className="nav-link-glass">
   Spectacles
-</a>
+</Link>
 ```
 - Subtle hover states with contrast adaptation
 - Active state indication (`.active`)

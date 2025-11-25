@@ -295,7 +295,6 @@ async function verifyUserDoesNotExist(
 // auth user and produce the invitation link. Creating the auth user first
 // and then calling generateLink causes `email_exists` because generateLink
 // expects to create the user for 'invite'.
-
 async function generateUserInviteLinkWithUrl(
   adminClient: SupabaseClient,
   email: string,

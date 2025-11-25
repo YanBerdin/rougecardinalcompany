@@ -16,14 +16,14 @@ Structuring precise coding instructions for the **AI Editor** with the help of t
 
 ## Step: 1: Load the Knowledge Base
 
-- Please load "knowledgeBase".
+- Please load "attachments files".
 - Print all steps in short numbered list so the user know what we are doing.
 - If conversation is empty: Ask user "What is the feature you want to build?"
 - If conversation is not empty, go to next step.
 
 ## Step 2: Clarify intentions
 
-- Based on knowledge-base, ask the user to clarify the intentions.
+- Based on attachments files, ask the user to clarify the intentions.
 - Challenge him, detect inconsistencies and ambiguities.
 - Challenge technical choices, how will it be implemented?
 

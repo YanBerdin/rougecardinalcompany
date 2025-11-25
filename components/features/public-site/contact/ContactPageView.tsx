@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Link from "next/link";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ContactSkeleton } from "@/components/skeletons/contact-skeleton";
@@ -349,12 +350,12 @@ export function ContactPageView() {
                     <Mail className="h-5 w-5 text-primary mt-1" />
                     <div>
                       <p className="font-medium">Email</p>
-                      <a
+                      <Link
                         href="mailto:contact@rouge-cardinal.fr"
                         className="text-muted-foreground hover:text-primary"
                       >
                         contact@rouge-cardinal.fr
-                      </a>
+                      </Link>
                     </div>
                   </div>
 
@@ -362,12 +363,12 @@ export function ContactPageView() {
                     <Phone className="h-5 w-5 text-primary mt-1" />
                     <div>
                       <p className="font-medium">Téléphone</p>
-                      <a
+                      <Link
                         href="tel:+33123456789"
                         className="text-muted-foreground hover:text-primary"
                       >
                         +33 1 23 45 67 89
-                      </a>
+                      </Link>
                     </div>
                   </div>
 
@@ -421,12 +422,12 @@ export function ContactPageView() {
                     <Users className="h-5 w-5 text-primary mt-1" />
                     <div>
                       <p className="font-medium">Presse & Médias</p>
-                      <a
+                      <Link
                         href="mailto:presse@rouge-cardinal.fr"
                         className="text-muted-foreground hover:text-primary text-sm"
                       >
                         presse@rouge-cardinal.fr
-                      </a>
+                      </Link>
                     </div>
                   </div>
 
@@ -434,12 +435,12 @@ export function ContactPageView() {
                     <Calendar className="h-5 w-5 text-primary mt-1" />
                     <div>
                       <p className="font-medium">Billetterie</p>
-                      <a
+                      <Link
                         href="mailto:billetterie@rouge-cardinal.fr"
                         className="text-muted-foreground hover:text-primary text-sm"
                       >
                         billetterie@rouge-cardinal.fr
-                      </a>
+                      </Link>
                     </div>
                   </div>
                 </CardContent>

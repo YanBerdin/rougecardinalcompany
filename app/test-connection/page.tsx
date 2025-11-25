@@ -5,6 +5,7 @@
 //TODO: Delete before production
 import { useState, useEffect } from "react";
 import { createClient } from "@/supabase/client";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -360,14 +361,14 @@ export default function TestConnectionPage() {
               <ol className="list-decimal pl-5 space-y-2">
                 <li>
                   Connectez-vous à votre{" "}
-                  <a
+                  <Link
                     href="https://supabase.com/dashboard"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-primary underline"
                   >
                     tableau de bord Supabase
-                  </a>
+                  </Link>
                 </li>
                 <li>Sélectionnez votre projet</li>
                 <li>
@@ -487,22 +488,22 @@ export default function TestConnectionPage() {
                           <span className="font-medium">Date création:</span>{" "}
                           {spectacle.created_at
                             ? new Date(spectacle.created_at).toLocaleDateString(
-                                "fr-FR",
-                                {
-                                  day: "numeric",
-                                  month: "long",
-                                  year: "numeric",
-                                }
-                              )
+                              "fr-FR",
+                              {
+                                day: "numeric",
+                                month: "long",
+                                year: "numeric",
+                              }
+                            )
                             : "-"}
                         </div>
                         <div>
                           <span className="font-medium">Durée:</span>
                           {"duration_minutes" in spectacle &&
-                          spectacle.duration_minutes
+                            spectacle.duration_minutes
                             ? spectacle.duration_minutes + " min"
                             : "duration" in spectacle &&
-                                spectacle.duration_minutes
+                              spectacle.duration_minutes
                               ? spectacle.duration_minutes
                               : "-"}
                         </div>
@@ -565,13 +566,13 @@ export default function TestConnectionPage() {
                       <CardDescription>
                         {actualite.published_at
                           ? new Date(actualite.published_at).toLocaleDateString(
-                              "fr-FR",
-                              {
-                                day: "numeric",
-                                month: "long",
-                                year: "numeric",
-                              }
-                            )
+                            "fr-FR",
+                            {
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            }
+                          )
                           : "-"}
                       </CardDescription>
                     </CardHeader>

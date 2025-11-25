@@ -34,29 +34,29 @@ export default function Footer() {
             </p>
             <div className="flex space-x-4">
               <Button variant="ghost" size="sm" asChild>
-                <a
+                <Link
                   href="#"
                   aria-label="Facebook"
                   className="hover:text-primary"
                   title="Facebook"
                 >
                   <Facebook className="h-5 w-5" />
-                </a>
+                </Link>
               </Button>
               <Button variant="ghost" size="sm" asChild>
-                <a
+                <Link
                   href="#"
                   aria-label="Instagram"
                   className="hover:text-primary"
                   title="Instagram"
                 >
                   <Instagram className="h-5 w-5" />
-                </a>
+                </Link>
               </Button>
               <Button variant="ghost" size="sm" asChild>
-                <a href="#" aria-label="Twitter" className="hover:text-primary" title="Twitter">
+                <Link href="#" aria-label="Twitter" className="hover:text-primary" title="Twitter">
                   <Twitter className="h-5 w-5" />
-                </a>
+                </Link>
               </Button>
             </div>
           </div>

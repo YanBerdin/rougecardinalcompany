@@ -162,8 +162,8 @@ export function AgendaView({
                       {/* Actions */}
                       <div className="flex flex-col justify-center space-y-3">
                         {event.ticketUrl && (
-                          <Button className="w-full btn-primary" asChild>
-                            <a
+                          <Button variant="default" className="w-full" asChild>
+                            <Link
                               href={event.ticketUrl}
                               target="_blank"
                               rel="noopener noreferrer"
@@ -172,12 +172,13 @@ export function AgendaView({
                                 ? "S&apos;inscrire"
                                 : "Réserver"}
                               <ExternalLink className="ml-2 h-4 w-4" />
-                            </a>
+                            </Link>
                           </Button>
                         )}
 
                         <Button
-                          className="w-full btn-outline"
+                          variant="outline"
+                          className="w-full"
                           onClick={() => generateCalendarFile(event)}
                         >
                           <Download className="mr-2 h-4 w-4" />
@@ -212,6 +213,7 @@ export function AgendaView({
             avant-première de nos prochaines représentations et événements.
           </p>
           <Button
+            variant="outline"
             size="lg"
             className="bg-white/10 border-white/30 text-white backdrop-blur-sm hover:bg-white hover:text-black transition-all duration-300 shadow-lg border"
             asChild

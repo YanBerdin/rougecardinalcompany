@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 import { Download, ExternalLink, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -96,13 +96,13 @@ export function PresseView({
                   <p className="text-muted-foreground mb-4 text-sm leading-relaxed flex-1">
                     {release.description}
                   </p>
-                  <Button 
-                  variant="outline-primary"
-                  className="w-full mt-auto" asChild>
-                    <a href={release.fileUrl} download>
+                  <Button
+                    variant="outline-primary"
+                    className="w-full mt-auto" asChild>
+                    <Link href={release.fileUrl} download>
                       <Download className="mr-2 h-4 w-4" />
                       Télécharger le PDF
-                    </a>
+                    </Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -178,14 +178,14 @@ export function PresseView({
 
                     <div className="flex items-center justify-center lg:justify-end">
                       <Button variant="outline" asChild>
-                        <a
+                        <Link
                           href={article.source_url}
                           target="_blank"
                           rel="noopener noreferrer"
                         >
                           <ExternalLink className="mr-2 h-4 w-4" />
                           Lire l&apos;article
-                        </a>
+                        </Link>
                       </Button>
                     </div>
                   </div>
@@ -229,10 +229,10 @@ export function PresseView({
                     </p>
 
                     <Button variant="outline-primary" className="w-full mt-auto" asChild>
-                      <a href={item.fileUrl} download>
+                      <Link href={item.fileUrl} download>
                         <Download className="mr-2 h-4 w-4" />
                         Télécharger
-                      </a>
+                      </Link>
                     </Button>
                   </CardContent>
                 </Card>
@@ -271,9 +271,9 @@ export function PresseView({
             className="bg-white/10 border-white/30 text-white backdrop-blur-sm hover:bg-white hover:text-black transition-all duration-300 shadow-lg border"
             asChild
           >
-            <a href="mailto:presse@rouge-cardinal.fr?subject=Demande%20d%27accr%C3%A9ditation">
+            <Link href="mailto:presse@rouge-cardinal.fr?subject=Demande%20d%27accr%C3%A9ditation">
               Faire une demande
-            </a>
+            </Link>
           </Button>
         </div>
       </section>
