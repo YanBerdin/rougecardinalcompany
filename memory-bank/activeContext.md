@@ -40,6 +40,29 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
 
 ## Travaux novembre 2025
 
+- ✅ **24-25 novembre — Clean Code Compliance Refactoring COMPLÉTÉ** :
+  - **Issue** : Code quality audit identifie violation critique dans `lib/dal/admin-users.ts`
+  - **Violation** : Fonction `inviteUser()` ~200 lignes (max 30 lignes requis par clean code standards)
+  - **Actions** :
+    - Plan de refactoring complet créé (`.github/prompts/plan-refactorInviteUserFunction.prompt.md`)
+    - Extraction de 9 helper functions depuis monolithe 200 lignes
+    - Ajout codes d'erreur systématiques `[ERR_INVITE_001]` à `[ERR_INVITE_007]`
+    - Suppression de tous les commentaires (self-documenting function names)
+    - Fonction principale réduite à 31 lignes (conforme < 30)
+  - **Helper Functions créées** :
+    1. `getCurrentAdminIdFromClaims()` - Extract admin ID from JWT (7 lignes)
+    2. `checkInvitationRateLimit()` - Validate 10/day limit (15 lignes) + `ERR_INVITE_001`
+    3. `verifyUserDoesNotExist()` - Check user existence (13 lignes) + `ERR_INVITE_002`
+    4. `generateUserInviteLinkWithUrl()` - Create invite link (40 lignes) + `ERR_INVITE_003`, `ERR_INVITE_004`
+    5. `waitForAuthUserCreation()` - Retry loop for user creation (17 lignes) + `ERR_INVITE_005`
+    6. `createUserProfileWithRole()` - Upsert profile (25 lignes) + `ERR_INVITE_006`
+    7. `rollbackProfileAndAuthUser()` - Cleanup helper (17 lignes)
+    8. `sendInvitationEmailWithRollback()` - Email + rollback (24 lignes) + `ERR_INVITE_007`
+    9. `logInvitationAuditRecord()` - Audit trail (12 lignes)
+  - **Validation** : TypeScript 0 errors, ESLint clean, toutes fonctionnalités préservées
+  - **Commit** : `24df375` - "refactor(dal): split inviteUser into helper functions per clean code standards"
+  - **Impact** : Code maintenable, debuggable (error codes), testable (fonctions unitaires), conforme standards projet
+
 - ✅ **24 novembre — CardsDashboard & Skeleton Centralization COMPLÉTÉ** :
   - **Issue** : Améliorer UX admin dashboard avec cards réutilisables et loading states cohérents
   - **Résultat** : Interface administrative modernisée avec grille de cartes et skeletons centralisés

@@ -234,7 +234,7 @@ Beyond original instructions:
 
 ## Remaining Work (15%)
 
-As documented in TASK022-team-management.md:
+As documented in memory-bank/tasks/completed-tasks/TASK022-team-management.md:
 
 1. **Media Library Integration**:
    - Finalize or confirm fallback MediaPicker component
