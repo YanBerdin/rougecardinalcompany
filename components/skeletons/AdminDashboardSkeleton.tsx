@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { StatsCardsSkeleton } from "@/components/skeletons/StatsCardsSkeleton";
 
 /**

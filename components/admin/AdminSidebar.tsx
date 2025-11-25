@@ -75,6 +75,19 @@ const contentItems = [
   },
 ];
 
+const homepageItems = [
+  {
+    title: "Hero Slides",
+    href: "/admin/home/hero",
+    icon: ImageIcon,
+  },
+  {
+    title: "About Section",
+    href: "/admin/home/about",
+    icon: FileText,
+  },
+];
+
 const otherItems = [
   {
     title: "Paramètres",
@@ -155,6 +168,29 @@ export default function AppSidebar({ hasEnvVars = false }: AppSidebarProps) {
           <SidebarGroupContent>
             <SidebarMenu>
               {contentItems.map((item) => {
+                const isActive =
+                  pathname === item.href ||
+                  (item.href !== "/admin" && pathname.startsWith(item.href));
+                return (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton asChild isActive={isActive}>
+                      <Link href={item.href}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Accueil</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {homepageItems.map((item) => {
                 const isActive =
                   pathname === item.href ||
                   (item.href !== "/admin" && pathname.startsWith(item.href));

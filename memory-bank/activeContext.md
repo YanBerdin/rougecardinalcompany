@@ -1,6 +1,38 @@
 # Active Context
 
-Contexte courant (au 2025-10-27):
+**Current Focus (2025-11-12)**: TASK026 Homepage Content Management - COMPLETED ✅
+
+## TASK026 - Homepage Content Management `[COMPLETED]`
+
+**Status**: Complete (14 groups, 25 files, 100% implementation)
+
+### What Was Done
+
+- **Backend Infrastructure** (10 files): Database RPC reorder function, Zod schemas with refinements, DAL with 8 functions, 9 API route handlers
+- **React UI Components** (11 files): DnD Kit drag-drop with optimistic updates, form components with character counters, loading skeletons with Suspense, admin page routes
+- **Infrastructure** (4 files): Error boundary, debounce hook, API test script, sidebar navigation update
+
+### Key Technical Achievements
+
+1. **Database**: RPC with SECURITY DEFINER + advisory lock for atomic reordering
+2. **Security**: requireAdmin() on all mutations, RLS policies on all operations, server-only DAL with error codes
+3. **UX**: Optimistic UI with rollback, drag-drop keyboard accessibility, character counters for accessibility
+4. **Architecture**: Server/Client component split with Suspense boundaries, Zod validation at multiple layers
+
+### Files Created
+
+- Backend: supabase/schemas/63b_reorder_hero_slides.sql, lib/schemas/home-content.ts, lib/utils/validate-image-url.ts, lib/dal/admin-home-hero.ts, lib/dal/admin-home-about.ts, app/api/admin/home/* (5 route files)
+- UI: `components/skeletons/*(2)`, `components/features/admin/home/*(7)`, `app/(admin)/admin/home/* (2)`
+- Infrastructure: lib/hooks/use-debounce.ts, scripts/test-home-hero-api.ts, components/admin/AdminSidebar.tsx (updated), package.json (updated)
+
+### Next Steps
+
+- Manual testing checklist (TASK026 Group 11 specifications)
+- Future enhancements: scheduled publishing, content versioning, A/B testing, multi-language support
+
+---
+
+Contexte précédent (au 2025-10-27):
 
 - Incident de sécurité / outage (2025-10-25 → 2025-10-27) causé par une campagne de migrations REVOKE (Rounds 1-17) qui a supprimé des GRANTs table-level sur ~73 objets. Conséquence: erreurs PostgreSQL 42501 et indisponibilité de la homepage.
 - Actions réalisées depuis l'incident:

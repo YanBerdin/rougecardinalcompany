@@ -94,7 +94,7 @@ export default function SetupAccountPage() {
                         onClick={() => router.push("/")}
                         className="mt-4 text-primary hover:text-primary/80 transition-colors"
                     >
-                        Retour à l'accueil
+                        Retour à l&apos;accueil
                     </button>
                 </div>
             </div>
