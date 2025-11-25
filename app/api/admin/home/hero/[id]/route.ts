@@ -1,6 +1,5 @@
 import { NextRequest } from "next/server";
-import { ApiResponse, HttpStatus } from "@/lib/api/helpers";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { withAdminAuth, ApiResponse, HttpStatus } from "@/lib/api/helpers";
 import {
     fetchHeroSlideById,
     updateHeroSlide,
@@ -16,22 +15,23 @@ export async function GET(
     _request: NextRequest,
     { params }: { params: { id: string } }
 ) {
-    try {
-        await requireAdmin();
-        const id = BigInt(params.id);
-        const slide = await fetchHeroSlideById(id);
+    return withAdminAuth(async () => {
+        try {
+            const id = BigInt(params.id);
+            const slide = await fetchHeroSlideById(id);
 
-        if (!slide) {
-            return ApiResponse.error("Hero slide not found", HttpStatus.NOT_FOUND);
+            if (!slide) {
+                return ApiResponse.error("Hero slide not found", HttpStatus.NOT_FOUND);
+            }
+
+            return ApiResponse.success({ slide });
+        } catch (error: unknown) {
+            return ApiResponse.error(
+                error instanceof Error ? error.message : "Failed to fetch hero slide",
+                HttpStatus.INTERNAL_SERVER_ERROR
+            );
         }
-
-        return ApiResponse.success({ slide });
-    } catch (error: unknown) {
-        return ApiResponse.error(
-            error instanceof Error ? error.message : "Failed to fetch hero slide",
-            HttpStatus.INTERNAL_SERVER_ERROR
-        );
-    }
+    });
 }
 
 /**
@@ -42,31 +42,32 @@ export async function PATCH(
     request: NextRequest,
     { params }: { params: { id: string } }
 ) {
-    try {
-        await requireAdmin();
-        const id = BigInt(params.id);
-        const body = await request.json();
-        const validated = HeroSlideInputSchema.partial().parse(body);
+    return withAdminAuth(async () => {
+        try {
+            const id = BigInt(params.id);
+            const body = await request.json();
+            const validated = HeroSlideInputSchema.partial().parse(body);
 
-        const result = await updateHeroSlide(id, validated);
+            const result = await updateHeroSlide(id, validated);
 
-        if (!result.success) {
+            if (!result.success) {
+                return ApiResponse.error(
+                    result.error || "Failed to update hero slide",
+                    HttpStatus.BAD_REQUEST
+                );
+            }
+
+            return ApiResponse.success({ slide: result.data });
+        } catch (error: unknown) {
+            if (error instanceof Error && error.name === "ZodError") {
+                return ApiResponse.error("Invalid input data", HttpStatus.UNPROCESSABLE_ENTITY);
+            }
             return ApiResponse.error(
-                result.error || "Failed to update hero slide",
-                HttpStatus.BAD_REQUEST
+                error instanceof Error ? error.message : "Failed to update hero slide",
+                HttpStatus.INTERNAL_SERVER_ERROR
             );
         }
-
-        return ApiResponse.success({ slide: result.data });
-    } catch (error: unknown) {
-        if (error instanceof Error && error.name === "ZodError") {
-            return ApiResponse.error("Invalid input data", HttpStatus.UNPROCESSABLE_ENTITY);
-        }
-        return ApiResponse.error(
-            error instanceof Error ? error.message : "Failed to update hero slide",
-            HttpStatus.INTERNAL_SERVER_ERROR
-        );
-    }
+    });
 }
 
 /**
@@ -77,23 +78,24 @@ export async function DELETE(
     _request: NextRequest,
     { params }: { params: { id: string } }
 ) {
-    try {
-        await requireAdmin();
-        const id = BigInt(params.id);
-        const result = await deleteHeroSlide(id);
+    return withAdminAuth(async () => {
+        try {
+            const id = BigInt(params.id);
+            const result = await deleteHeroSlide(id);
 
-        if (!result.success) {
+            if (!result.success) {
+                return ApiResponse.error(
+                    result.error || "Failed to delete hero slide",
+                    HttpStatus.BAD_REQUEST
+                );
+            }
+
+            return ApiResponse.success({ message: "Hero slide deleted" });
+        } catch (error: unknown) {
             return ApiResponse.error(
-                result.error || "Failed to delete hero slide",
-                HttpStatus.BAD_REQUEST
+                error instanceof Error ? error.message : "Failed to delete hero slide",
+                HttpStatus.INTERNAL_SERVER_ERROR
             );
         }
-
-        return ApiResponse.success({ message: "Hero slide deleted" });
-    } catch (error: unknown) {
-        return ApiResponse.error(
-            error instanceof Error ? error.message : "Failed to delete hero slide",
-            HttpStatus.INTERNAL_SERVER_ERROR
-        );
-    }
+    });
 }

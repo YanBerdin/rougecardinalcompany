@@ -1,14 +1,12 @@
-import { ApiResponse, HttpStatus } from "@/lib/api/helpers";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { withAdminAuth, ApiResponse, HttpStatus } from "@/lib/api/helpers";
 import { fetchActiveAboutContent } from "@/lib/dal/admin-home-about";
 
 /**
  * GET /api/admin/home/about
  * Fetch active about content (single record)
  */
-export async function GET() {
+export const GET = withAdminAuth(async () => {
   try {
-    await requireAdmin();
     const content = await fetchActiveAboutContent();
     
     if (!content) {
@@ -22,4 +20,4 @@ export async function GET() {
       HttpStatus.INTERNAL_SERVER_ERROR
     );
   }
-}
+});

@@ -58,12 +58,12 @@ export function parseNumericId(id: string): number | null {
   }
 
   const parsed = parseInt(id, 10);
-  
+
   // Verify it's a valid positive integer and the string representation matches
   if (isNaN(parsed) || parsed <= 0 || parsed.toString() !== id) {
     return null;
   }
-  
+
   return parsed;
 }
 

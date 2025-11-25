@@ -2,39 +2,39 @@ import { z } from "zod";
 
 // Hero Slide Input Schema
 export const HeroSlideInputSchema = z.object({
-    title: z.string().min(1, "Title required").max(80, "Title max 80 characters"),
-    subtitle: z.string().max(150, "Subtitle max 150 characters").default(""),
-    description: z.string().max(500, "Description max 500 characters").default(""),
-    image_url: z.string().url("Invalid URL format").optional(),
-    image_media_id: z.string().optional(),
-    cta_label: z.string().max(50, "CTA label max 50 characters").default(""),
-    cta_url: z.string().url("Invalid CTA URL format").optional(),
-    alt_text: z.string().min(1, "Alt text required for accessibility").max(125, "Alt text max 125 characters"),
-    active: z.boolean().default(true),
-    position: z.number().int().min(0, "Position must be non-negative").optional(),
+  title: z.string().min(1, "Title required").max(80, "Title max 80 characters"),
+  subtitle: z.string().max(150, "Subtitle max 150 characters").optional(),
+  description: z.string().max(500, "Description max 500 characters").optional(),
+  image_url: z.string().url("Invalid URL format").optional(),
+  image_media_id: z.coerce.bigint().optional(),
+  cta_label: z.string().max(50, "CTA label max 50 characters").optional(),
+  cta_url: z.string().url("Invalid CTA URL format").optional(),
+  alt_text: z.string().min(1, "Alt text required for accessibility").max(125, "Alt text max 125 characters"),
+  active: z.boolean().optional(),
+  position: z.number().int().min(0, "Position must be non-negative").optional(),
 }).refine(
-    (data) => data.image_media_id !== undefined || data.image_url !== undefined,
-    { message: "An image is required (media ID or URL)", path: ["image_media_id"] }
+  (data) => data.image_media_id !== undefined || data.image_url !== undefined,
+  { message: "An image is required (media ID or URL)", path: ["image_media_id"] }
 ).refine(
-    (data) => !data.cta_label || data.cta_url !== undefined,
-    { message: "CTA URL required when label provided", path: ["cta_url"] }
+  (data) => !data.cta_label || data.cta_url !== undefined,
+  { message: "CTA URL required when label provided", path: ["cta_url"] }
 ).refine(
-    (data) => !data.cta_url || data.cta_label !== undefined,
-    { message: "CTA label required when URL provided", path: ["cta_label"] }
+  (data) => !data.cta_url || data.cta_label !== undefined,
+  { message: "CTA label required when URL provided", path: ["cta_label"] }
 );
 
 export type HeroSlideInput = z.infer<typeof HeroSlideInputSchema>;
 
 // About Content Input Schema
 export const AboutContentInputSchema = z.object({
-    title: z.string().min(1, "Title required").max(80, "Title max 80 characters"),
-    intro1: z.string().min(1, "First intro paragraph required").max(1000, "Intro 1 max 1000 characters"),
-    intro2: z.string().min(1, "Second intro paragraph required").max(1000, "Intro 2 max 1000 characters"),
-    mission_title: z.string().min(1, "Mission title required").max(80, "Mission title max 80 characters"),
-    mission_text: z.string().min(1, "Mission text required").max(4000, "Mission text max 4000 characters"),
-    image_url: z.string().url("Invalid URL format").optional(),
-    image_media_id: z.string().optional(),
-    alt_text: z.string().max(125, "Alt text max 125 characters").optional(),
+  title: z.string().min(1, "Title required").max(80, "Title max 80 characters"),
+  intro1: z.string().min(1, "First intro paragraph required").max(1000, "Intro 1 max 1000 characters"),
+  intro2: z.string().min(1, "Second intro paragraph required").max(1000, "Intro 2 max 1000 characters"),
+  mission_title: z.string().min(1, "Mission title required").max(80, "Mission title max 80 characters"),
+  mission_text: z.string().min(1, "Mission text required").max(4000, "Mission text max 4000 characters"),
+  image_url: z.string().url("Invalid URL format").optional(),
+  image_media_id: z.coerce.bigint().optional(),
+  alt_text: z.string().max(125, "Alt text max 125 characters").optional(),
 });
 
 export type AboutContentInput = z.infer<typeof AboutContentInputSchema>;
@@ -42,7 +42,7 @@ export type AboutContentInput = z.infer<typeof AboutContentInputSchema>;
 // Reorder Input Schema
 export const ReorderInputSchema = z.array(
     z.object({
-        id: z.string(),
+        id: z.coerce.bigint(),
         position: z.number().int().min(0),
     })
 );
