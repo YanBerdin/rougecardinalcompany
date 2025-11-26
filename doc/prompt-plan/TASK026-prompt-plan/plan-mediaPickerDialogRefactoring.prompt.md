@@ -289,7 +289,30 @@ import { MediaExternalUrlInput } from "@/components/features/admin/media";
 
 ---
 
+## 🎓 Leçons Apprises (Post-Mortem)
+
+### Problème de re-render avec API Routes
+
+Lors de l'implémentation initiale des formulaires Hero/About, l'architecture utilisait des **API Routes** pour les mutations CRUD. Cela a causé un bug critique :
+
+**Symptôme** : Après création/modification/suppression, l'UI ne se mettait pas à jour immédiatement.
+
+**Cause** : `revalidatePath()` appelé depuis le DAL via une API Route ne déclenche pas de re-render côté client.
+
+**Solution** : Remplacer les API Routes par des **Server Actions** pour les mutations, en suivant le pattern documenté dans `.github/instructions/crud-server-actions-pattern.instructions.md`.
+
+### Impact sur ce refactoring
+
+Les composants `MediaLibraryPicker` et `MediaUploadDialog` sont correctement intégrés dans les formulaires, mais les formulaires eux-mêmes ont dû être refactorisés pour utiliser des Server Actions au lieu de `fetch()` vers des API Routes.
+
+**Documentation de référence** :
+- `.github/instructions/crud-server-actions-pattern.instructions.md`
+- `doc/fix-rerender-homeHeroSlide.md`
+
+---
+
 **Date d'implémentation** : 2025-11-25
+**Date de mise à jour** : 2025-11-26 (ajout leçons apprises)
 **Statut** : ✅ TERMINÉ
 
 ````

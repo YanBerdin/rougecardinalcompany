@@ -34,6 +34,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { MediaLibraryPicker, MediaExternalUrlInput, type MediaSelectResult } from "@/components/features/admin/media";
 import { HeroSlideInputSchema, type HeroSlideDTO } from "@/lib/schemas/home-content";
+import { createHeroSlideAction, updateHeroSlideAction } from "@/lib/actions/home-hero-actions";
 
 interface HeroSlideFormProps {
     open: boolean;
@@ -118,32 +119,24 @@ export function HeroSlideForm({
         setIsPending(true);
 
         try {
-            const url = slide
-                ? `/api/admin/home/hero/${slide.id}`
-                : "/api/admin/home/hero";
-            const method = slide ? "PATCH" : "POST";
-
-            console.log(`[HeroSlideForm] Sending ${method} request to ${url}`);
-
             // ensure numeric id (UI stores number); server will coerce to bigint
             const payload = { ...data } as unknown;
 
-            const response = await fetch(url, {
-                method,
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                console.error('[HeroSlideForm] Server error:', error);
-                throw new Error(error.error || "Failed to save slide");
+            if (slide) {
+                // update - call server action directly
+                const result = await updateHeroSlideAction(String(slide.id), payload);
+                if (!result.success) {
+                    throw new Error(result.error || "Update failed");
+                }
+                toast.success("Slide updated successfully");
+            } else {
+                // create - call server action directly
+                const result = await createHeroSlideAction(payload);
+                if (!result.success) {
+                    throw new Error(result.error || "Create failed");
+                }
+                toast.success("Slide created successfully");
             }
-
-            const result = await response.json();
-            console.log('[HeroSlideForm] Server response:', result);
-
-            toast.success(slide ? "Slide updated successfully" : "Slide created successfully");
 
             // Appeler onSuccess AVANT de reset le form
             await onSuccess();

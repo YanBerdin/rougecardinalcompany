@@ -18,7 +18,7 @@ Build complete admin interface for managing homepage content with three main sec
 ## Prerequisites
 
 - Admin authentication system operational
-- Media Library available (`MediaPickerDialog`)
+- Media Library available (`MediaLibraryPicker`, `MediaUploadDialog`)
 - Existing DAL pattern from TASK021
 - Supabase local database running
 - Required npm packages:
@@ -52,7 +52,7 @@ components/ui/input.tsx                                 # shadcn/ui input
 components/ui/textarea.tsx                              # shadcn/ui textarea
 components/ui/form.tsx                                  # shadcn/ui form
 components/ui/dialog.tsx                                # shadcn/ui dialog
-components/features/admin/media/MediaPickerDialog.tsx  # Media picker
+components/features/admin/media/index.ts              # Media picker (MediaLibraryPicker, MediaUploadDialog)
 supabase/schemas/07d_table_home_hero.sql               # Hero slides table
 supabase/schemas/07e_table_home_about.sql              # About content table
 supabase/schemas/08b_communiques_presse.sql            # Press releases table
@@ -1492,7 +1492,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { MediaPickerDialog } from "@/components/features/admin/media/MediaPickerDialog";
+import { MediaLibraryPicker, type MediaSelectResult } from "@/components/features/admin/media";
 import { HeroSlideInputSchema, type HeroSlideInput, type HeroSlideDTO } from "@/lib/schemas/home-content";
 
 interface HeroSlideFormProps {
@@ -1563,9 +1563,9 @@ export function HeroSlideForm({ open, onClose, onSuccess, slide }: HeroSlideForm
     }
   };
 
-  const handleMediaSelect = (media: { id: bigint; url: string }) => {
-    form.setValue("image_media_id", media.id);
-    form.setValue("image_url", media.url);
+  const handleMediaSelect = (result: MediaSelectResult) => {
+    form.setValue("image_media_id", BigInt(result.id));
+    form.setValue("image_url", result.url);
     setIsMediaPickerOpen(false);
   };
 
@@ -1716,7 +1716,7 @@ export function HeroSlideForm({ open, onClose, onSuccess, slide }: HeroSlideForm
         </DialogContent>
       </Dialog>
 
-      <MediaPickerDialog
+      <MediaLibraryPicker
         open={isMediaPickerOpen}
         onClose={() => setIsMediaPickerOpen(false)}
         onSelect={handleMediaSelect}
@@ -1880,7 +1880,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { MediaPickerDialog } from "@/components/features/admin/media/MediaPickerDialog";
+import { MediaLibraryPicker, type MediaSelectResult } from "@/components/features/admin/media";
 import { AboutContentInputSchema, type AboutContentInput, type AboutContentDTO } from "@/lib/schemas/home-content";
 
 interface AboutContentFormProps {
@@ -1930,9 +1930,9 @@ export function AboutContentForm({ content }: AboutContentFormProps) {
     }
   };
 
-  const handleMediaSelect = (media: { id: bigint; url: string }) => {
-    form.setValue("image_media_id", media.id);
-    form.setValue("image_url", media.url);
+  const handleMediaSelect = (result: MediaSelectResult) => {
+    form.setValue("image_media_id", BigInt(result.id));
+    form.setValue("image_url", result.url);
     setIsMediaPickerOpen(false);
   };
 
@@ -2095,7 +2095,7 @@ export function AboutContentForm({ content }: AboutContentFormProps) {
         </Card>
       </div>
 
-      <MediaPickerDialog
+      <MediaLibraryPicker
         open={isMediaPickerOpen}
         onClose={() => setIsMediaPickerOpen(false)}
         onSelect={handleMediaSelect}
@@ -2520,16 +2520,65 @@ interface ContentVersion {
 
 ---
 
+## ⚠️ CRITICAL: Architecture CRUD avec Server Actions
+
+> **IMPORTANT** : Les Groups 4-7 (DAL et API Routes) de ce document sont **OBSOLÈTES**.
+> Suivre obligatoirement le pattern documenté dans `.github/instructions/crud-server-actions-pattern.instructions.md`
+
+### Problème identifié (Novembre 2025)
+
+L'architecture originale de TASK026 utilisait des **API Routes** pour les mutations CRUD.
+Cela causait un problème critique : **`revalidatePath()` appelé depuis une API Route ne déclenche pas de re-render immédiat**.
+
+### Solution adoptée
+
+**Utiliser des Server Actions au lieu d'API Routes** pour toutes les mutations admin :
+
+```typescript
+// ❌ INCORRECT : fetch() vers API Route (ne fonctionne pas pour re-render)
+const response = await fetch(`/api/admin/home/hero/${id}`, {
+  method: "DELETE",
+});
+
+// ✅ CORRECT : Appel direct Server Action
+import { deleteHeroSlideAction } from "@/lib/actions/hero-slides-actions";
+const result = await deleteHeroSlideAction(String(id));
+```
+
+### Fichiers à créer (REMPLACE Groups 4-7)
+
+```
+lib/actions/hero-slides-actions.ts    # Server Actions avec revalidatePath()
+lib/actions/about-content-actions.ts  # Server Actions avec revalidatePath()
+lib/dal/admin-home-hero.ts            # DAL SANS revalidatePath()
+lib/dal/admin-home-about.ts           # DAL SANS revalidatePath()
+```
+
+### Règles obligatoires
+
+1. **Page admin** : `export const dynamic = 'force-dynamic'` + `export const revalidate = 0`
+2. **Server Actions** : Contiennent `revalidatePath()` après mutations
+3. **DAL** : Opérations DB uniquement, PAS de `revalidatePath()`
+4. **Client Components** : `useEffect(() => setState(props), [props])` pour sync état/props
+5. **Handlers** : Appellent Server Actions directement + `router.refresh()`
+
+### Documentation de référence
+
+- `.github/instructions/crud-server-actions-pattern.instructions.md` (pattern obligatoire)
+- `doc/fix-rerender-homeHeroSlide.md` (post-mortem détaillé)
+
+---
+
 ## Implementation Notes
 
-- **Pattern Consistency**: Follow TASK021 Spectacles CRUD patterns
+- **Pattern Consistency**: ⚠️ **Suivre `.github/instructions/crud-server-actions-pattern.instructions.md`** (et NON les Groups 4-7 ci-dessus)
 - **Component Library**: Use shadcn/ui components per `shadcn-mcp.instructions.md` (MCP-assisted installation)
 - **Design Excellence**: Apply `rouge-cardinal-frontend-skill.instructions.md` for all views and UI components
   - Theatrical aesthetic over generic AI-generated interfaces
   - Deliberate design choices reflecting brand identity
   - Cardinal red accents, elegant typography, sophisticated layouts
-- **Security**: All DAL functions require admin auth, all API routes use `withAdminAuth()`
-- **Validation**: Zod schemas at API boundaries, TypeScript strict mode
+- **Security**: All DAL functions require admin auth, Server Actions also check auth
+- **Validation**: Zod schemas at Server Action inputs, TypeScript strict mode
 - **Performance**: Optimistic UI updates with revalidation, debounce on reorder (300ms)
 - **Accessibility**: Alt text required for all images, keyboard navigation for drag-drop
 - **Error Handling**: Structured error codes for debugging, toast notifications for user feedback

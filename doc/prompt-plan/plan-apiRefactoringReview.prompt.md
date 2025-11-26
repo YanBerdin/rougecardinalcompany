@@ -15,13 +15,13 @@ Plan de Revue : Refactoring API Routes + DAL
 - [5. Plan d'Implémentation](#5-plan-d-implementation)
 - [6. Métriques de Qualité](#6-métriques-de-qualité)
 
-## 1. Résumé Exécutif
+# 1. Résumé Exécutif
 
-### Contexte
+## Contexte
 
 Revue approfondie du refactoring avec HttpStatus helpers, ApiResponse patterns, et optimisation DAL.
 
-### Objectifs de la Revue
+## Objectifs de la Revue
 
 - ✅ Vérifier l'adoption des HttpStatus constants
 - ✅ Valider l'usage des ApiResponse helpers

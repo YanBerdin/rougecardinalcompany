@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
     DndContext,
@@ -26,6 +26,10 @@ import { GripVertical, Pencil, Trash2, Plus } from "lucide-react";
 import { HeroSlideForm } from "./HeroSlideForm";
 import { HeroSlidePreview } from "./HeroSlidePreview";
 import type { HeroSlideDTO } from "@/lib/schemas/home-content";
+import {
+    deleteHeroSlideAction,
+    reorderHeroSlidesAction,
+} from "@/lib/actions/home-hero-actions";
 
 interface HeroSlidesViewProps {
     initialSlides: HeroSlideDTO[];
@@ -100,6 +104,11 @@ export function HeroSlidesView({ initialSlides }: HeroSlidesViewProps) {
     const [editingSlide, setEditingSlide] = useState<HeroSlideDTO | null>(null);
     const [isPending, setIsPending] = useState(false);
 
+    // Sync local state when props change (after router.refresh())
+    useEffect(() => {
+        setSlides(initialSlides);
+    }, [initialSlides]);
+
     const sensors = useSensors(
         useSensor(PointerSensor),
         useSensor(KeyboardSensor, {
@@ -120,49 +129,34 @@ export function HeroSlidesView({ initialSlides }: HeroSlidesViewProps) {
             setSlides(reordered);
 
             const orderData = reordered.map((slide, index) => ({
-                id: slide.id,
+                id: Number(slide.id),
                 position: index,
             }));
 
             try {
-                const response = await fetch("/api/admin/home/hero/reorder", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(orderData),
-                });
-
-                if (!response.ok) {
-                    throw new Error("Failed to reorder slides");
+                // call server action directly (handles revalidation)
+                const result = await reorderHeroSlidesAction(orderData);
+                if (!result.success) {
+                    throw new Error(result.error || "Reorder failed");
                 }
 
                 toast.success("Slides reordered successfully");
+                // Server Action already called revalidatePath(), so just refresh
                 router.refresh();
-            } catch {
+            } catch (err) {
+                console.error('Reorder error:', err);
                 toast.error("Failed to reorder slides");
-                setSlides(initialSlides);
+                setSlides(initialSlides); // Rollback on error
             }
         },
         [slides, initialSlides, router]
     );
 
-    const handleEdit = useCallback(async (slide: HeroSlideDTO) => {
-        console.log('[HeroSlidesView] Edit clicked for slide:', slide.id);
-        
-        // Recharger les données fraîches depuis le serveur
-        try {
-            const response = await fetch(`/api/admin/home/hero/${slide.id}`);
-            if (response.ok) {
-                const data = await response.json();
-                console.log('[HeroSlidesView] Loaded fresh slide data:', data.slide);
-                setEditingSlide(data.slide);
-                setIsFormOpen(true);
-            } else {
-                toast.error("Failed to load slide data");
-            }
-        } catch (error) {
-            console.error('Failed to load slide:', error);
-            toast.error("Failed to load slide data");
-        }
+    const handleEdit = useCallback((slide: HeroSlideDTO) => {
+        console.log('[HeroSlidesView] Edit clicked for slide:', slide.id, slide);
+        // Use the slide data directly from the list (already fresh from server)
+        setEditingSlide(slide);
+        setIsFormOpen(true);
     }, []);
 
     const handleDelete = useCallback(
@@ -171,19 +165,17 @@ export function HeroSlidesView({ initialSlides }: HeroSlidesViewProps) {
 
             setIsPending(true);
             try {
-                const response = await fetch(`/api/admin/home/hero/${id}`, {
-                    method: "DELETE",
-                });
-
-                if (!response.ok) {
-                    throw new Error("Failed to delete slide");
+                // call server action directly (handles revalidation)
+                const result = await deleteHeroSlideAction(String(id));
+                if (!result.success) {
+                    throw new Error(result.error || "Delete failed");
                 }
 
-                // Mettre à jour le state local immédiatement
-                setSlides(prevSlides => prevSlides.filter(s => s.id !== id));
                 toast.success("Slide deleted successfully");
+                // Server Action already called revalidatePath(), so just refresh
                 router.refresh();
-            } catch {
+            } catch (err) {
+                console.error('Delete error:', err);
                 toast.error("Failed to delete slide");
             } finally {
                 setIsPending(false);
@@ -197,31 +189,19 @@ export function HeroSlidesView({ initialSlides }: HeroSlidesViewProps) {
         setEditingSlide(null);
     }, []);
 
-    const handleFormSuccess = useCallback(async () => {
-        console.log('[HeroSlidesView] Form success - reloading slides...');
+    const handleFormSuccess = useCallback(() => {
+        console.log('[HeroSlidesView] Form success - triggering refresh...');
         
-        // Fermer le formulaire d'abord
+        // Fermer le formulaire immédiatement
         setIsFormOpen(false);
         setEditingSlide(null);
         
-        // Recharger les slides depuis le serveur
-        try {
-            const response = await fetch('/api/admin/home/hero');
-            if (response.ok) {
-                const data = await response.json();
-                console.log('[HeroSlidesView] Loaded slides:', data.slides?.length);
-                setSlides(data.slides || []);
-                toast.success('Slides refreshed successfully');
-            } else {
-                toast.error('Failed to refresh slides list');
-            }
-        } catch (error) {
-            console.error('Failed to refresh slides:', error);
-            toast.error('Failed to refresh slides list');
-        }
-        
+        // Utiliser router.refresh() pour recharger les Server Components
+        // Les Server Actions ont déjà appelé revalidatePath(), donc les données sont fraîches
         router.refresh();
     }, [router]);
+
+
 
     const activeSlides = slides.filter((s) => s.active);
     const canAddMore = activeSlides.length < 10;

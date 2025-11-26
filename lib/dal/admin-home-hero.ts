@@ -1,7 +1,6 @@
 "use server";
 import "server-only";
 import { createClient } from "@/supabase/server";
-import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { HeroSlideInput, HeroSlideDTO, ReorderInput } from "@/lib/schemas/home-content";
 import { HeroSlideInputSchema, ReorderInputSchema } from "@/lib/schemas/home-content";
@@ -101,7 +100,7 @@ async function generateUniqueSlug(supabase: SupabaseClient, baseSlug: string): P
 
 /**
  * Generate unique slug excluding a specific ID (for updates)
- * ✅ CORRECTION: Type SupabaseClient au lieu de any
+ * 
  */
 async function generateUniqueSlugExcluding(
     supabase: SupabaseClient,
@@ -164,8 +163,7 @@ export async function createHeroSlide(input: HeroSlideInput): Promise<DALResult<
             };
         }
 
-        revalidatePath("/admin/home/hero");
-        revalidatePath("/");
+        // revalidation is handled by Server Actions to ensure immediate UI updates
 
         return { success: true, data };
     } catch (error: unknown) {
@@ -232,8 +230,7 @@ export async function updateHeroSlide(
             };
         }
 
-        revalidatePath("/admin/home/hero");
-        revalidatePath("/");
+        // revalidation is handled by Server Actions to ensure immediate UI updates
 
         return { success: true, data };
     } catch (error: unknown) {
@@ -273,8 +270,7 @@ export async function deleteHeroSlide(id: bigint): Promise<DALResult<null>> {
             };
         }
 
-        revalidatePath("/admin/home/hero");
-        revalidatePath("/");
+        // revalidation is handled by Server Actions to ensure immediate UI updates
 
         return { success: true, data: null };
     } catch (error: unknown) {
@@ -311,8 +307,7 @@ export async function reorderHeroSlides(order: ReorderInput): Promise<DALResult<
             };
         }
 
-        revalidatePath("/admin/home/hero");
-        revalidatePath("/");
+        // revalidation is handled by Server Actions to ensure immediate UI updates
 
         return { success: true, data: null };
     } catch (error: unknown) {
