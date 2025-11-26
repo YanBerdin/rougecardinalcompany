@@ -145,9 +145,24 @@ export function HeroSlidesView({ initialSlides }: HeroSlidesViewProps) {
         [slides, initialSlides, router]
     );
 
-    const handleEdit = useCallback((slide: HeroSlideDTO) => {
-        setEditingSlide(slide);
-        setIsFormOpen(true);
+    const handleEdit = useCallback(async (slide: HeroSlideDTO) => {
+        console.log('[HeroSlidesView] Edit clicked for slide:', slide.id);
+        
+        // Recharger les données fraîches depuis le serveur
+        try {
+            const response = await fetch(`/api/admin/home/hero/${slide.id}`);
+            if (response.ok) {
+                const data = await response.json();
+                console.log('[HeroSlidesView] Loaded fresh slide data:', data.slide);
+                setEditingSlide(data.slide);
+                setIsFormOpen(true);
+            } else {
+                toast.error("Failed to load slide data");
+            }
+        } catch (error) {
+            console.error('Failed to load slide:', error);
+            toast.error("Failed to load slide data");
+        }
     }, []);
 
     const handleDelete = useCallback(
@@ -164,6 +179,8 @@ export function HeroSlidesView({ initialSlides }: HeroSlidesViewProps) {
                     throw new Error("Failed to delete slide");
                 }
 
+                // Mettre à jour le state local immédiatement
+                setSlides(prevSlides => prevSlides.filter(s => s.id !== id));
                 toast.success("Slide deleted successfully");
                 router.refresh();
             } catch {
@@ -180,9 +197,29 @@ export function HeroSlidesView({ initialSlides }: HeroSlidesViewProps) {
         setEditingSlide(null);
     }, []);
 
-    const handleFormSuccess = useCallback(() => {
+    const handleFormSuccess = useCallback(async () => {
+        console.log('[HeroSlidesView] Form success - reloading slides...');
+        
+        // Fermer le formulaire d'abord
         setIsFormOpen(false);
         setEditingSlide(null);
+        
+        // Recharger les slides depuis le serveur
+        try {
+            const response = await fetch('/api/admin/home/hero');
+            if (response.ok) {
+                const data = await response.json();
+                console.log('[HeroSlidesView] Loaded slides:', data.slides?.length);
+                setSlides(data.slides || []);
+                toast.success('Slides refreshed successfully');
+            } else {
+                toast.error('Failed to refresh slides list');
+            }
+        } catch (error) {
+            console.error('Failed to refresh slides:', error);
+            toast.error('Failed to refresh slides list');
+        }
+        
         router.refresh();
     }, [router]);
 
@@ -194,7 +231,10 @@ export function HeroSlidesView({ initialSlides }: HeroSlidesViewProps) {
             <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold">Hero Slides</h2>
                 <Button
-                    onClick={() => setIsFormOpen(true)}
+                    onClick={() => {
+                        setEditingSlide(null);
+                        setIsFormOpen(true);
+                    }}
                     disabled={!canAddMore || isPending}
                 >
                     <Plus className="h-4 w-4 mr-2" />
@@ -203,6 +243,7 @@ export function HeroSlidesView({ initialSlides }: HeroSlidesViewProps) {
             </div>
 
             <DndContext
+                id="hero-slides-dnd"
                 sensors={sensors}
                 collisionDetection={closestCenter}
                 onDragEnd={handleDragEnd}

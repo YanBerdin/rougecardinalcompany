@@ -1,4 +1,5 @@
 import type { HeroSlideDTO } from "@/lib/schemas/home-content";
+import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 
 interface HeroSlidePreviewProps {
@@ -9,7 +10,9 @@ export function HeroSlidePreview({ slide }: HeroSlidePreviewProps) {
     return (
         <div className="flex items-center gap-4 flex-1">
             {slide.image_url && (
-                <img
+                <Image
+                    width={96}
+                    height={64}
                     src={slide.image_url}
                     alt={slide.alt_text}
                     className="h-16 w-24 object-cover rounded"

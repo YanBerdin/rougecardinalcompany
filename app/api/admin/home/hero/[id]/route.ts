@@ -13,11 +13,12 @@ import { HeroSlideInputSchema } from "@/lib/schemas/home-content";
  */
 export async function GET(
     _request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     return withAdminAuth(async () => {
         try {
-            const id = BigInt(params.id);
+            const { id: idStr } = await context.params;
+            const id = BigInt(idStr);
             const slide = await fetchHeroSlideById(id);
 
             if (!slide) {
@@ -40,11 +41,12 @@ export async function GET(
  */
 export async function PATCH(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     return withAdminAuth(async () => {
         try {
-            const id = BigInt(params.id);
+            const { id: idStr } = await context.params;
+            const id = BigInt(idStr);
             const body = await request.json();
             const validated = HeroSlideInputSchema.partial().parse(body);
 
@@ -76,11 +78,12 @@ export async function PATCH(
  */
 export async function DELETE(
     _request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     return withAdminAuth(async () => {
         try {
-            const id = BigInt(params.id);
+            const { id: idStr } = await context.params;
+            const id = BigInt(idStr);
             const result = await deleteHeroSlide(id);
 
             if (!result.success) {

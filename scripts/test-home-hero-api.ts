@@ -1,7 +1,37 @@
-import "dotenv/config";
+import dotenv from 'dotenv'// Load .env.local first, then .env as fallback
+dotenv.config({ path: '.env.local' })
+dotenv.config()
 
-const API_BASE = process.env.NEXT_PUBLIC_SUPABASE_URL || "http://localhost:3000";
-const ADMIN_TOKEN = process.env.ADMIN_TEST_TOKEN;
+// Prefer the site/dev server URL for calling local Next.js admin API routes.
+// Fallback to NEXT_PUBLIC_SUPABASE_URL only if site URL is not set (legacy).
+const API_BASE = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "http://localhost:3000";
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN;
+
+// Helper to build headers supporting two admin token formats:
+// - cookie string: e.g. "sb-...-auth-token=base64:..." -> sent as `Cookie` header
+// - bearer token: simple JWT -> sent as `Authorization: Bearer <token>`
+function buildAuthHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {};
+
+    if (!ADMIN_TOKEN) return headers;
+
+    // If token contains an equal sign, treat it as a cookie key=value string
+    if (ADMIN_TOKEN.includes("=")) {
+        // Some CI/envs may pass multiple cookies separated by ';', preserve as-is
+        headers["Cookie"] = ADMIN_TOKEN;
+    } else {
+        // Otherwise treat as bearer token
+        headers["Authorization"] = `Bearer ${ADMIN_TOKEN}`;
+    }
+
+    return headers;
+}
+
+// Guard: if API_BASE looks like a postgres connection string, warn and exit early
+if (API_BASE.startsWith("postgres://") || API_BASE.startsWith("postgresql://")) {
+    console.error("\n[ERROR] NEXT_PUBLIC_SUPABASE_URL appears to be a Postgres connection string.\nPlease set NEXT_PUBLIC_SUPABASE_URL to your frontend/API base (e.g. http://localhost:3000) and not the DB URL.\n");
+    process.exit(2);
+}
 
 interface TestResult {
     name: string;
@@ -13,11 +43,24 @@ const results: TestResult[] = [];
 
 async function testFetchAllSlides() {
     try {
+        const headers = buildAuthHeaders();
+
+        // Diagnostic info (do not log secret values). We show which header type will be used.
+        console.log("[DEBUG] API_BASE:", API_BASE);
+        console.log("[DEBUG] Sending as Cookie:", !!headers["Cookie"], " Authorization:", !!headers["Authorization"]);
+
+        if (Object.keys(headers).length === 0) {
+            throw new Error('Missing ADMIN_TOKEN environment variable');
+        }
+
         const response = await fetch(`${API_BASE}/api/admin/home/hero`, {
-            headers: { Authorization: `Bearer ${ADMIN_TOKEN}` },
+            headers,
         });
 
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        if (!response.ok) {
+            const text = await response.text().catch(() => "");
+            throw new Error(`HTTP ${response.status} - ${text}`);
+        }
 
         const data = await response.json();
         results.push({
@@ -35,10 +78,19 @@ async function testFetchAllSlides() {
 
 async function testCreateSlide() {
     try {
+        const headers = buildAuthHeaders();
+
+        console.log("[DEBUG] API_BASE:", API_BASE);
+        console.log("[DEBUG] Sending as Cookie:", !!headers["Cookie"], " Authorization:", !!headers["Authorization"]);
+
+        if (Object.keys(headers).length === 0) {
+            throw new Error('Missing ADMIN_TOKEN environment variable');
+        }
+
         const response = await fetch(`${API_BASE}/api/admin/home/hero`, {
             method: "POST",
             headers: {
-                Authorization: `Bearer ${ADMIN_TOKEN}`,
+                ...headers,
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
@@ -50,7 +102,10 @@ async function testCreateSlide() {
             }),
         });
 
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        if (!response.ok) {
+            const text = await response.text().catch(() => "");
+            throw new Error(`HTTP ${response.status} - ${text}`);
+        }
 
         const data = await response.json();
         results.push({

@@ -38,8 +38,8 @@ async function checkView() {
     }
 
     return { exists: true, sample: data?.[0] ?? null };
-  } catch (err: any) {
-    return { exists: false, error: err.message };
+  } catch (err: unknown) {
+    return { exists: false, error: err instanceof Error ? err.message : String(err) };
   }
 }
 
@@ -52,8 +52,8 @@ async function checkFunction() {
     }
 
     return { exists: true, result: data };
-  } catch (err: any) {
-    return { exists: false, error: err.message };
+  } catch (err: unknown) {
+    return { exists: false, error: err instanceof Error ? err.message : String(err) };
   }
 }
 

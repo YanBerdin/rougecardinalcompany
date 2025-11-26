@@ -47,8 +47,9 @@ async function main() {
 
     console.log('   ⚠️ L\'extension `pg_net` n\'est pas trouvée (ou n\'existe pas).');
     process.exit(1);
-  } catch (err: any) {
-    console.log('   ❌ Erreur inattendue:', err.message || err);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.log('   ❌ Erreur inattendue:', msg);
     process.exit(4);
   }
 }

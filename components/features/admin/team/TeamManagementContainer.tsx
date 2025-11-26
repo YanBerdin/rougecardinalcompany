@@ -7,7 +7,7 @@ import type {
 } from "@/lib/schemas/team"
 import TeamMemberList from "./TeamMemberList"
 import TeamMemberForm from "./TeamMemberForm"
-import MediaPickerDialog from "./MediaPickerDialog"
+import { MediaUploadDialog, type MediaSelectResult } from "@/components/features/admin/media"
 import {
   createTeamMember,
   setTeamMemberActiveAction,
@@ -185,11 +185,11 @@ export function TeamManagementContainer({ initialMembers }: Props) {
         </div>
       )}
 
-      <MediaPickerDialog
+      <MediaUploadDialog
         open={openMedia}
         onClose={() => setOpenMedia(false)}
-        onSelect={(id) => {
-          console.log("selected media", id);
+        onSelect={(result: MediaSelectResult) => {
+          console.log("selected media", result.id, result.url);
           setOpenMedia(false);
         }}
       />

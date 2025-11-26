@@ -8,7 +8,7 @@ import type {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { MediaPickerDialog } from "./MediaPickerDialog";
+import { MediaUploadDialog, MediaExternalUrlInput, type MediaSelectResult } from "@/components/features/admin/media";
 import Image from "next/image";
 import { ImageIcon, Upload } from "lucide-react";
 
@@ -47,9 +47,9 @@ export function TeamMemberForm({ member, onSubmit, onCancel }: Props) {
     }
   }
 
-  const handlePhotoSelect = (mediaId: number, publicUrl: string) => {
-    setPhotoMediaId(mediaId);
-    setImageUrl(publicUrl);
+  const handlePhotoSelect = (result: MediaSelectResult) => {
+    setPhotoMediaId(result.id);
+    setImageUrl(result.url);
   };
 
   const currentPhotoUrl = imageUrl || (member?.image_url ?? null);
@@ -135,20 +135,12 @@ export function TeamMemberForm({ member, onSubmit, onCancel }: Props) {
         </div>
 
         {/* URL externe (fallback) */}
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            URL externe (optionnel)
-          </label>
-          <Input
-            value={imageUrl ?? ""}
-            onChange={(e) => setImageUrl(e.target.value)}
-            placeholder="https://..."
-            type="url"
-          />
-          <p className="text-xs text-muted-foreground mt-1">
-            Utilisé si aucune photo n&apos;est téléversée
-          </p>
-        </div>
+        <MediaExternalUrlInput
+          value={imageUrl ?? ""}
+          onChange={setImageUrl}
+          label="URL externe (optionnel)"
+          description="Utilisé si aucune photo n'est téléversée"
+        />
 
         <div className="flex gap-2 pt-4">
           <Button variant="outline-primary" type="button" onClick={onCancel}>
@@ -160,7 +152,7 @@ export function TeamMemberForm({ member, onSubmit, onCancel }: Props) {
         </div>
       </form>
 
-      <MediaPickerDialog
+      <MediaUploadDialog
         open={showMediaPicker}
         onClose={() => setShowMediaPicker(false)}
         onSelect={handlePhotoSelect}

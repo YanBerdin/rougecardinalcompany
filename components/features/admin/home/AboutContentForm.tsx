@@ -1,9 +1,14 @@
 "use client";
 
 import { useForm } from "react-hook-form";
+import type { Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import type { AboutContentInput } from "@/lib/schemas/home-content";
+// UI form uses number for media id to keep JSON payloads simple; server will coerce to bigint
+type AboutFormValues = Omit<AboutContentInput, "image_media_id"> & { image_media_id?: number | undefined };
 import {
     Card,
     CardContent,
@@ -23,7 +28,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { MediaPickerDialog } from "@/components/features/admin/media/MediaPickerDialog";
+import { MediaLibraryPicker, MediaExternalUrlInput, type MediaSelectResult } from "@/components/features/admin/media";
 import { AboutContentInputSchema, type AboutContentDTO } from "@/lib/schemas/home-content";
 
 interface AboutContentFormProps {
@@ -35,8 +40,9 @@ export function AboutContentForm({ content }: AboutContentFormProps) {
     const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
     const [isPending, setIsPending] = useState(false);
 
-    const form = useForm({
-        resolver: zodResolver(AboutContentInputSchema),
+    const form = useForm<AboutFormValues>({
+        // cast resolver to local UI shape; Zod on server will coerce number -> bigint
+        resolver: zodResolver(AboutContentInputSchema) as unknown as Resolver<AboutFormValues>,
         defaultValues: {
             title: content.title,
             intro1: content.intro1,
@@ -44,15 +50,16 @@ export function AboutContentForm({ content }: AboutContentFormProps) {
             mission_title: content.mission_title,
             mission_text: content.mission_text,
             image_url: content.image_url ?? "",
-            image_media_id: content.image_media_id,
+            image_media_id: content.image_media_id !== null ? Number(content.image_media_id) : undefined,
             alt_text: content.alt_text ?? "",
         },
     });
 
-    const onSubmit = async (data: any) => {
+    const onSubmit = async (data: AboutFormValues) => {
         setIsPending(true);
 
         try {
+            // send numeric id; server Zod schema will coerce to bigint
             const response = await fetch(`/api/admin/home/about/${content.id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
@@ -75,9 +82,10 @@ export function AboutContentForm({ content }: AboutContentFormProps) {
         }
     };
 
-    const handleMediaSelect = (media: { id: bigint; url: string }) => {
-        form.setValue("image_media_id", media.id);
-        form.setValue("image_url", media.url);
+    const handleMediaSelect = (result: MediaSelectResult) => {
+        // store as number in the UI; backend will coerce
+        form.setValue("image_media_id", Number(result.id));
+        form.setValue("image_url", result.url);
         setIsMediaPickerOpen(false);
     };
 
@@ -186,12 +194,14 @@ export function AboutContentForm({ content }: AboutContentFormProps) {
 
                                 <div className="space-y-2">
                                     <FormLabel>Section Image</FormLabel>
-                                    <div className="flex gap-4">
+                                    <div className="flex gap-4 items-center">
                                         {form.watch("image_url") && (
-                                            <img
-                                                src={form.watch("image_url") || ""}
-                                                alt="Preview"
+                                            <Image
+                                                src={String(form.watch("image_url") || "")}
+                                                alt={String(form.watch("image_url") || "Preview")}
                                                 className="h-32 w-48 object-cover rounded"
+                                                width={192}
+                                                height={128}
                                             />
                                         )}
                                         <Button
@@ -199,10 +209,18 @@ export function AboutContentForm({ content }: AboutContentFormProps) {
                                             variant="outline"
                                             onClick={() => setIsMediaPickerOpen(true)}
                                         >
-                                            Select Image
+                                            Sélectionner depuis la médiathèque
                                         </Button>
                                     </div>
                                 </div>
+
+                                {/* URL externe (fallback) */}
+                                <MediaExternalUrlInput
+                                    value={form.watch("image_url") ?? ""}
+                                    onChange={(url) => form.setValue("image_url", url)}
+                                    label="URL externe (optionnel)"
+                                    description="Utilisé si aucune image n'est sélectionnée depuis la médiathèque"
+                                />
 
                                 <FormField
                                     control={form.control}
@@ -240,7 +258,7 @@ export function AboutContentForm({ content }: AboutContentFormProps) {
                 </Card>
             </div>
 
-            <MediaPickerDialog
+            <MediaLibraryPicker
                 open={isMediaPickerOpen}
                 onClose={() => setIsMediaPickerOpen(false)}
                 onSelect={handleMediaSelect}
