@@ -22,12 +22,12 @@ create table public.home_hero_slides (
   updated_at timestamptz not null default now()
 );
 
-comment on table public.home_hero_slides is 'Slides hero page d accueil (carousel) avec CTA et planification optionnelle.';
+comment on table public.home_hero_slides is 'Slides hero page d''accueil (carousel) avec CTA et planification optionnelle.';
 comment on column public.home_hero_slides.slug is 'Identifiant stable pour ciblage et tracking.';
 comment on column public.home_hero_slides.image_media_id is 'Référence media interne (prioritaire sur image_url).';
-comment on column public.home_hero_slides.alt_text is 'Texte alternatif pour l image (accessibilité, max 125 caractères).';
-comment on column public.home_hero_slides.starts_at is 'Date/heure de début d affichage (NULL = immédiat).';
-comment on column public.home_hero_slides.ends_at is 'Date/heure de fin d affichage (NULL = illimité).';
+comment on column public.home_hero_slides.alt_text is 'Texte alternatif pour l''image (accessibilité, max 125 caractères).';
+comment on column public.home_hero_slides.starts_at is 'Date/heure de début d''affichage (NULL = immédiat).';
+comment on column public.home_hero_slides.ends_at is 'Date/heure de fin d''affichage (NULL = illimité).';
 
 -- Contraintes
 alter table public.home_hero_slides
@@ -51,7 +51,13 @@ create policy "Home hero slides are viewable by everyone"
     and (ends_at is null or ends_at >= now())
   );
 
--- Gestion admin
+-- Admins can view all slides (including inactive)
+drop policy if exists "Admins can view all home hero slides" on public.home_hero_slides;
+create policy "Admins can view all home hero slides"
+  on public.home_hero_slides for select
+  to authenticated
+  using ((select public.is_admin()));
+
 -- Gestion admin (politiques granulaires)
 drop policy if exists "Admins can insert home hero slides" on public.home_hero_slides;
 create policy "Admins can insert home hero slides"

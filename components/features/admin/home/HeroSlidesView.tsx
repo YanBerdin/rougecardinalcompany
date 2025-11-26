@@ -84,7 +84,7 @@ function SortableSlide({ slide, onEdit, onDelete }: SortableSlideProps) {
                     </Button>
 
                     <Button
-                        variant="outline"
+                        variant="destructive"
                         size="icon"
                         onClick={() => onDelete(slide.id)}
                         aria-label="Delete slide"
