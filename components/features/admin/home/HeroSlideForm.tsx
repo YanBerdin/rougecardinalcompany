@@ -1,16 +1,8 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import Image from "next/image";
-import type { HeroSlideInput } from "@/lib/schemas/home-content";
-// UI form uses number for media id to simplify JSON and avoid BigInt serialization issues
-type HeroSlideFormValues = Omit<HeroSlideInput, "image_media_id" | "position"> & {
-    image_media_id?: number | undefined;
-    position?: number | undefined;
-};
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useEffect } from "react";
-import type { Resolver } from "react-hook-form";
 import {
     Dialog,
     DialogContent,
@@ -18,23 +10,14 @@ import {
     DialogTitle,
     DialogFooter,
 } from "@/components/ui/dialog";
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-    FormDescription,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { MediaLibraryPicker, MediaExternalUrlInput, type MediaSelectResult } from "@/components/features/admin/media";
-import { HeroSlideInputSchema, type HeroSlideDTO } from "@/lib/schemas/home-content";
+import { MediaLibraryPicker, type MediaSelectResult } from "@/components/features/admin/media";
+import { HeroSlideFormSchema, type HeroSlideFormValues, type HeroSlideDTO } from "@/lib/schemas/home-content";
 import { createHeroSlideAction, updateHeroSlideAction } from "@/lib/actions/home-hero-actions";
+import { HeroSlideFormFields, HeroSlideCtaFields, HeroSlideActiveToggle } from "./HeroSlideFormFields";
+import { HeroSlideImageSection, handleMediaSelection } from "./HeroSlideImageSection";
 
 interface HeroSlideFormProps {
     open: boolean;
@@ -54,8 +37,7 @@ export function HeroSlideForm({
     const [isPending, setIsPending] = useState(false);
 
     const form = useForm<HeroSlideFormValues>({
-        // cast resolver to local UI shape; server schema will coerce number -> bigint
-        resolver: zodResolver(HeroSlideInputSchema) as unknown as Resolver<HeroSlideFormValues>,
+        resolver: zodResolver(HeroSlideFormSchema),
         defaultValues: {
             title: "",
             slug: "",
@@ -154,15 +136,9 @@ export function HeroSlideForm({
     };
 
     const handleMediaSelect = (result: MediaSelectResult) => {
-        // media picker returns numeric id; keep as number in UI
-        form.setValue("image_media_id", Number(result.id));
-        form.setValue("image_url", result.url);
+        handleMediaSelection(form, result);
         setIsMediaPickerOpen(false);
     };
-
-    const watchSubtitle = form.watch("subtitle") ?? "";
-    const watchDescription = form.watch("description") ?? "";
-    const watchAltText = form.watch("alt_text") ?? "";
 
     return (
         <>
@@ -190,151 +166,16 @@ export function HeroSlideForm({
                             )}
                             className="space-y-4"
                         >
-                            <FormField
-                                control={form.control}
-                                name="title"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Title *</FormLabel>
-                                        <FormControl>
-                                            <Input {...field} maxLength={80} placeholder="Main headline" />
-                                        </FormControl>
-                                        <FormDescription>
-                                            {field.value.length}/80 characters
-                                        </FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
+                            <HeroSlideFormFields form={form} />
+
+                            <HeroSlideImageSection 
+                                form={form} 
+                                onOpenMediaPicker={() => setIsMediaPickerOpen(true)} 
                             />
 
-                            <FormField
-                                control={form.control}
-                                name="subtitle"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Subtitle</FormLabel>
-                                        <FormControl>
-                                            <Input {...field} maxLength={150} placeholder="Supporting text" />
-                                        </FormControl>
-                                        <FormDescription>
-                                            {watchSubtitle.length}/150 characters
-                                        </FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                            <HeroSlideCtaFields form={form} />
 
-                            <FormField
-                                control={form.control}
-                                name="description"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Description</FormLabel>
-                                        <FormControl>
-                                            <Textarea {...field} maxLength={500} rows={3} />
-                                        </FormControl>
-                                        <FormDescription>
-                                            {watchDescription.length}/500 characters
-                                        </FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <div className="space-y-2">
-                                <FormLabel>Image *</FormLabel>
-                                <div className="flex gap-2 items-center">
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={() => setIsMediaPickerOpen(true)}
-                                    >
-                                        Sélectionner depuis la médiathèque
-                                    </Button>
-                                    {form.watch("image_url") ? (
-                                        <Image
-                                            src={String(form.watch("image_url"))}
-                                            alt={String(form.watch("alt_text") ?? "Preview")}
-                                            className="h-20 w-32 object-cover rounded"
-                                            width={128}
-                                            height={80}
-                                        />
-                                    ) : null}
-                                </div>
-                            </div>
-
-                            {/* URL externe (fallback) */}
-                            <MediaExternalUrlInput
-                                value={String(form.watch("image_url") ?? "")}
-                                onChange={(url) => form.setValue("image_url", url)}
-                                label="URL externe (optionnel)"
-                                description="Utilisé si aucune image n'est sélectionnée depuis la médiathèque"
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name="alt_text"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Alt Text * (Accessibility)</FormLabel>
-                                        <FormControl>
-                                            <Input {...field} maxLength={125} placeholder="Describe the image" />
-                                        </FormControl>
-                                        <FormDescription>
-                                            {watchAltText.length}/125 characters
-                                        </FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <FormField
-                                    control={form.control}
-                                    name="cta_label"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>CTA Label</FormLabel>
-                                            <FormControl>
-                                                <Input {...field} maxLength={50} placeholder="Learn More" />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name="cta_url"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>CTA URL</FormLabel>
-                                            <FormControl>
-                                                <Input {...field} type="url" placeholder="https://..." />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-
-                            <FormField
-                                control={form.control}
-                                name="active"
-                                render={({ field }) => (
-                                    <FormItem className="flex items-center justify-between rounded-lg border p-4">
-                                        <div className="space-y-0.5">
-                                            <FormLabel className="text-base">Active</FormLabel>
-                                            <div className="text-sm text-muted-foreground">
-                                                Display this slide on the homepage
-                                            </div>
-                                        </div>
-                                        <FormControl>
-                                            <Switch checked={field.value} onCheckedChange={field.onChange} />
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
+                            <HeroSlideActiveToggle form={form} />
 
                             <DialogFooter>
                                 <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>

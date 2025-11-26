@@ -6,7 +6,8 @@ description: Pattern obligatoire pour implémenter des CRUDs avec Server Actions
 # 🔄 CRUD avec Server Actions - Pattern obligatoire
 
 > Guide d'implémentation pour tous les CRUDs admin nécessitant un re-render immédiat après mutation.  
-> **Version** : 1.0 | **Date** : Novembre 2025
+> **Version** : 1.1 | **Date** : Novembre 2025  
+> **Mise à jour** : Ajout règles schémas UI, split composants, suppression API Routes obsolètes
 
 ---
 
@@ -64,7 +65,7 @@ lib/
 ├── dal/
 │   └── [feature].ts             # DAL sans revalidatePath()
 └── schemas/
-    └── [feature].ts             # Zod schemas
+    └── [feature].ts             # Zod schemas (Server + UI)
 
 app/(admin)/admin/[feature]/
 └── page.tsx                      # dynamic + revalidate exports
@@ -72,8 +73,18 @@ app/(admin)/admin/[feature]/
 components/features/admin/[feature]/
 ├── Container.tsx                 # Server Component
 ├── View.tsx                      # Client Component avec useEffect
-└── Form.tsx                      # Client Component pour formulaire
+├── Form.tsx                      # Client Component principal (<300 lignes)
+├── FormFields.tsx                # Sous-composant : champs texte
+└── FormImageSection.tsx          # Sous-composant : section image
 ```
+
+### Règle Clean Code : Max 300 lignes par fichier
+
+Si un formulaire dépasse 300 lignes, le splitter en sous-composants :
+- `FormFields.tsx` — Champs texte (title, description, etc.)
+- `FormImageSection.tsx` — Sélection d'image avec MediaLibraryPicker
+- `FormCtaFields.tsx` — Champs CTA (label, url)
+- `FormToggle.tsx` — Switches (active, published, etc.)
 
 ---
 
@@ -275,6 +286,42 @@ export function View({ initialItems }: ViewProps) {
 
 ## 🔴 RÈGLE N°4 : Formulaire avec Server Actions directes
 
+### Schémas Zod : Server vs UI
+
+**Problème** : `bigint` ne peut pas être sérialisé en JSON pour les formulaires UI.  
+**Solution** : Créer un schéma UI séparé avec `number` au lieu de `bigint`.
+
+```typescript
+// lib/schemas/[feature].ts
+import { z } from "zod";
+
+// ✅ Schéma SERVER (pour DAL/BDD) — utilise bigint
+export const FeatureInputSchema = z.object({
+  title: z.string().min(1).max(80),
+  image_media_id: z.coerce.bigint().optional(),
+  // ...
+});
+export type FeatureInput = z.infer<typeof FeatureInputSchema>;
+
+// ✅ Schéma UI (pour formulaires) — utilise number
+export const FeatureFormSchema = z.object({
+  title: z.string().min(1).max(80),
+  image_media_id: z.number().int().positive().optional(),
+  // ...
+});
+export type FeatureFormValues = z.infer<typeof FeatureFormSchema>;
+
+// ✅ DTO (retourné par le DAL)
+export type FeatureDTO = {
+  id: bigint;
+  title: string;
+  image_media_id: bigint | null;
+  // ...
+};
+```
+
+### Formulaire avec schéma UI
+
 ```typescript
 // components/features/admin/[feature]/Form.tsx
 "use client";
@@ -284,7 +331,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { createFeatureAction, updateFeatureAction } from "@/lib/actions/[feature]-actions";
-import { FeatureInputSchema, type FeatureInput, type FeatureDTO } from "@/lib/schemas/[feature]";
+// ✅ Utiliser le schéma UI (pas le schéma Server)
+import { FeatureFormSchema, type FeatureFormValues, type FeatureDTO } from "@/lib/schemas/[feature]";
 
 interface FormProps {
   open: boolean;
@@ -296,26 +344,32 @@ interface FormProps {
 export function Form({ open, onClose, onSuccess, item }: FormProps) {
   const [isPending, setIsPending] = useState(false);
   
-  const form = useForm<FeatureInput>({
-    resolver: zodResolver(FeatureInputSchema),
+  // ✅ Utiliser FeatureFormValues (UI) — PAS FeatureInput (Server)
+  // ✅ Utiliser FeatureFormSchema — évite le type casting `as unknown as Resolver<>`
+  const form = useForm<FeatureFormValues>({
+    resolver: zodResolver(FeatureFormSchema),
     defaultValues: item ? {
-      // Map item to form values
-      name: item.name,
+      // Map bigint → number pour l'UI
+      title: item.title,
+      image_media_id: item.image_media_id !== null ? Number(item.image_media_id) : undefined,
       // ...
     } : {
-      name: "",
+      title: "",
+      image_media_id: undefined,
       // ...
     },
   });
 
-  const onSubmit = async (data: FeatureInput) => {
+  // ✅ Le type est FeatureFormValues (UI avec number)
+  const onSubmit = async (data: FeatureFormValues) => {
     setIsPending(true);
 
     try {
       // ✅ Appel direct Server Action (pas de fetch API)
+      // La Server Action valide avec le schéma Server et convertit number → bigint
       const result = item
-        ? await updateFeatureAction(String(item.id), data)
-        : await createFeatureAction(data);
+        ? await updateHeroSlideAction(String(item.id), data)
+        : await createHeroSlideAction(data);
 
       if (!result.success) {
         throw new Error(result.error);
@@ -447,6 +501,32 @@ const [isPending, setIsPending] = useState(false);
 const result = await createFeatureAction(data);
 ```
 
+### ❌ Erreur 5 : Type casting `as unknown as Resolver<>`
+
+```typescript
+// ❌ INCORRECT : Casting dangereux dû à bigint/number mismatch
+const form = useForm<FeatureInput>({
+  resolver: zodResolver(FeatureInputSchema) as unknown as Resolver<FeatureInput>,
+});
+
+// ✅ CORRECT : Utiliser un schéma UI séparé avec number
+const form = useForm<FeatureFormValues>({
+  resolver: zodResolver(FeatureFormSchema), // Pas de casting nécessaire
+});
+```
+
+### ❌ Erreur 6 : Garder les API Routes après migration
+
+Après migration vers Server Actions, **supprimer les API Routes obsolètes** :
+
+```bash
+# ❌ À supprimer si non utilisées ailleurs
+app/api/admin/[feature]/route.ts       # GET/POST
+app/api/admin/[feature]/[id]/route.ts  # PATCH/DELETE
+```
+
+Vérifier qu'aucun autre fichier n'importe ces routes avant suppression.
+
 ---
 
 ## ✅ Checklist d'implémentation
@@ -482,6 +562,17 @@ Pour chaque nouveau CRUD, vérifier :
 - [ ] Appel direct `createAction()` ou `updateAction()`
 - [ ] `onSuccess()` callback pour refresh parent
 - [ ] `form.reset()` après succès
+- [ ] Utilise schéma UI (`FeatureFormSchema`) — pas schéma Server
+- [ ] Pas de type casting `as unknown as Resolver<>`
+- [ ] Fichier < 300 lignes (sinon splitter en sous-composants)
+
+### Schémas Zod (`lib/schemas/`)
+- [ ] Schéma Server avec `z.coerce.bigint()` pour IDs
+- [ ] Schéma UI avec `z.number().int().positive()` pour IDs
+- [ ] Types exportés : `FeatureInput`, `FeatureFormValues`, `FeatureDTO`
+
+### Nettoyage
+- [ ] Supprimer les API Routes obsolètes après migration
 
 ---
 
@@ -491,3 +582,12 @@ Pour chaque nouveau CRUD, vérifier :
 - [Next.js - Server Actions](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations)
 - [React - Synchronizing with Effects](https://react.dev/learn/synchronizing-with-effects)
 - Documentation interne : `doc/fix-rerender-homeHeroSlide.md`
+
+---
+
+## 📝 Historique des modifications
+
+| Version | Date | Changements |
+|---------|------|-------------|
+| 1.1 | 2025-11-27 | Ajout règle schémas UI séparés (bigint→number), règle split composants (<300 lignes), erreurs 5-6, checklist étendue |
+| 1.0 | 2025-11 | Version initiale |

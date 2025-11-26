@@ -1,14 +1,10 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import type { Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import type { AboutContentInput } from "@/lib/schemas/home-content";
-// UI form uses number for media id to keep JSON payloads simple; server will coerce to bigint
-type AboutFormValues = Omit<AboutContentInput, "image_media_id"> & { image_media_id?: number | undefined };
 import {
     Card,
     CardContent,
@@ -29,7 +25,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { MediaLibraryPicker, MediaExternalUrlInput, type MediaSelectResult } from "@/components/features/admin/media";
-import { AboutContentInputSchema, type AboutContentDTO } from "@/lib/schemas/home-content";
+import { AboutContentFormSchema, type AboutContentFormValues, type AboutContentDTO } from "@/lib/schemas/home-content";
+import { updateAboutContentAction } from "@/lib/actions/home-about-actions";
 
 interface AboutContentFormProps {
     content: AboutContentDTO;
@@ -40,9 +37,8 @@ export function AboutContentForm({ content }: AboutContentFormProps) {
     const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
     const [isPending, setIsPending] = useState(false);
 
-    const form = useForm<AboutFormValues>({
-        // cast resolver to local UI shape; Zod on server will coerce number -> bigint
-        resolver: zodResolver(AboutContentInputSchema) as unknown as Resolver<AboutFormValues>,
+    const form = useForm<AboutContentFormValues>({
+        resolver: zodResolver(AboutContentFormSchema),
         defaultValues: {
             title: content.title,
             intro1: content.intro1,
@@ -55,20 +51,14 @@ export function AboutContentForm({ content }: AboutContentFormProps) {
         },
     });
 
-    const onSubmit = async (data: AboutFormValues) => {
+    const onSubmit = async (data: AboutContentFormValues) => {
         setIsPending(true);
 
         try {
-            // send numeric id; server Zod schema will coerce to bigint
-            const response = await fetch(`/api/admin/home/about/${content.id}`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
-            });
+            const result = await updateAboutContentAction(String(content.id), data);
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || "Failed to update content");
+            if (!result.success) {
+                throw new Error(result.error || "Failed to update content");
             }
 
             toast.success("About content updated successfully");

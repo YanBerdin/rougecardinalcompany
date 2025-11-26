@@ -1,7 +1,6 @@
 "use server";
 import "server-only";
 import { createClient } from "@/supabase/server";
-import { revalidatePath } from "next/cache";
 import type { AboutContentInput, AboutContentDTO } from "@/lib/schemas/home-content";
 import { AboutContentInputSchema } from "@/lib/schemas/home-content";
 import { requireAdmin } from "@/lib/auth/is-admin";
@@ -60,15 +59,11 @@ export async function updateAboutContent(
             .single();
 
         if (error) {
-            console.error("[DAL] Failed to update about content:", error);
             return {
                 success: false,
                 error: `[ERR_ABOUT_002] Failed to update about content: ${error.message}`,
             };
         }
-
-        revalidatePath("/admin/home/about");
-        revalidatePath("/");
 
         return { success: true, data };
     } catch (error: unknown) {
