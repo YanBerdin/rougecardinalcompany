@@ -1,10 +1,6 @@
 ---
 applyTo: "**"
----
-
 description: For when modifying the Supabase database schema.
-alwaysApply: false
-
 ---
 
 # Database: Declarative Database Schema

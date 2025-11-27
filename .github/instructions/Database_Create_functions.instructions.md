@@ -1,10 +1,6 @@
 ---
 applyTo: "**"
----
-
 description: Guidelines for writing Supabase database functions
-alwaysApply: false
-
 ---
 
 # Database: Create functions

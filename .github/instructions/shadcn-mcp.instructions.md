@@ -1,8 +1,5 @@
 ---
 applyTo: "**"
----
-
-title: MCP Server
 description: Use the shadcn MCP server to browse, search, and install components from registries
 
 ---

@@ -2,8 +2,9 @@
 
 **Status:** Completed  
 **Added:** 2025-10-16  
-**Updated:** 2025-11-23  
-**Completed:** 2025-11-23
+**Updated:** 2025-11-27  
+**Completed:** 2025-11-23  
+**Refined:** 2025-11-27 (Clean Code & TypeScript Conformity)
 
 ## Original Request
 
@@ -93,20 +94,23 @@ Implement complete admin interface for managing homepage content: Hero Slides (C
 
 ## Files Created/Modified
 
-**Backend** (10 new files):
+**Backend** (10 new files + 1 action file):
 
 - supabase/schemas/63b_reorder_hero_slides.sql
-- lib/schemas/home-content.ts
+- lib/schemas/home-content.ts (+ UI schemas added 2025-11-27)
 - lib/utils/validate-image-url.ts
 - lib/dal/admin-home-hero.ts
-- lib/dal/admin-home-about.ts
+- lib/dal/admin-home-about.ts (revalidatePath removed 2025-11-27)
+- lib/actions/home-about-actions.ts (NEW 2025-11-27)
 - app/api/admin/home/hero/* (3 route files)
-- app/api/admin/home/about/* (2 route files)
+- ~~app/api/admin/home/about/*~~ (DELETED 2025-11-27 — migrated to Server Actions)
 
-**UI** (11 new files):
+**UI** (11 new files + 2 sub-components):
 
 - components/skeletons/* (2 skeleton files)
 - components/features/admin/home/* (7 component files)
+- components/features/admin/home/HeroSlideFormFields.tsx (NEW 2025-11-27)
+- components/features/admin/home/HeroSlideImageSection.tsx (NEW 2025-11-27)
 - app/(admin)/admin/home/* (2 page files)
 
 **Infrastructure** (3 modified/new files):
@@ -185,6 +189,98 @@ Optional enhancements per Group 14:
 - Image optimization (WebP, responsive sizes)
 - Video background support
 - Keyboard shortcuts for power users
+
+---
+
+## Post-Completion Refinement: Clean Code & TypeScript Conformity
+
+**Date:** 2025-11-27  
+**Plan:** `.github/prompts/plan-cleanCodeTypeScriptConformity.prompt.md`  
+**Commit:** `8aaefe1`
+
+### Overview
+
+Applied Clean Code & TypeScript conformity plan to align About Content CRUD with established patterns and ensure code maintainability.
+
+### Changes Applied (8 Steps)
+
+| Step | Description | Status |
+|------|-------------|--------|
+| 1 | Create `lib/actions/home-about-actions.ts` Server Actions | ✅ |
+| 2 | Remove `revalidatePath()` from DAL `admin-home-about.ts` | ✅ |
+| 3 | Add UI schemas to `lib/schemas/home-content.ts` | ✅ |
+| 4 | Update `AboutContentForm.tsx` to use Server Actions | ✅ |
+| 5 | Delete obsolete API routes (`about/route.ts`, `about/[id]/route.ts`) | ✅ |
+| 6 | Split `HeroSlideForm.tsx` into sub-components (<300 lines) | ✅ |
+| 7 | TypeScript compilation validation | ✅ |
+| 8 | Update plan status | ✅ |
+
+### New Files Created
+
+```
+lib/actions/home-about-actions.ts        # Server Actions (create, update, delete)
+components/features/admin/home/
+├── HeroSlideFormFields.tsx              # Text fields sub-component (143 lines)
+└── HeroSlideImageSection.tsx            # Image picker sub-component (85 lines)
+```
+
+### Files Modified
+
+```
+lib/dal/admin-home-about.ts              # Removed revalidatePath() (DAL-only)
+lib/schemas/home-content.ts              # Added UI schemas (number vs bigint)
+components/features/admin/home/
+├── AboutContentForm.tsx                 # fetch→Server Action migration
+└── HeroSlideForm.tsx                    # 316→200 lines (sub-components)
+```
+
+### Files Deleted
+
+```
+app/api/admin/home/about/route.ts        # Obsolete GET/POST
+app/api/admin/home/about/[id]/route.ts   # Obsolete PATCH/DELETE
+```
+
+### Key Pattern Applied: UI Schemas
+
+Solved BigInt JSON serialization issue by creating separate Zod schemas:
+
+```typescript
+// Server schema (DAL/DB) — uses bigint
+export const HomeAboutContentInputSchema = z.object({
+  image_media_id: z.coerce.bigint().optional(),
+});
+
+// UI schema (Forms) — uses number  
+export const HomeAboutContentFormSchema = z.object({
+  image_media_id: z.number().int().positive().optional(),
+});
+```
+
+### Component Split Pattern
+
+Applied <300 lines rule to `HeroSlideForm.tsx`:
+
+| Component | Lines | Responsibility |
+|-----------|-------|----------------|
+| `HeroSlideForm.tsx` | 200 | Main dialog + form orchestration |
+| `HeroSlideFormFields.tsx` | 143 | Title, subtitle, description, CTA, toggle |
+| `HeroSlideImageSection.tsx` | 85 | Media picker, preview, alt text |
+
+### Documentation Updated
+
+- `.github/instructions/crud-server-actions-pattern.instructions.md` v1.0 → v1.1
+  - Added UI schemas pattern documentation
+  - Added component split rules (<300 lines)
+  - Added errors 5-6 (type casting, obsolete API routes)
+  - Extended checklist with new validations
+
+### Validation
+
+- ✅ TypeScript: `npx tsc --noEmit` — 0 errors
+- ✅ All Server Actions use `"use server"` + `import "server-only"`
+- ✅ All `revalidatePath()` calls in Server Actions only
+- ✅ All forms use UI schemas (no type casting)
 
 ## Related Resources
 

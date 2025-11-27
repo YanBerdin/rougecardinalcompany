@@ -1,11 +1,6 @@
 ---
-applyTo: "**"
----
-
-description: APPLY TypeScript best practices WHEN writing TS code
 applyTo: **/*.ts, **/*.tsx
-alwaysApply: true
-
+description: APPLY TypeScript best practices WHEN writing TS code
 ---
 
 # TypeScript best practices WHEN writing TS code
