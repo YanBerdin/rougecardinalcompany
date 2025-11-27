@@ -1,6 +1,95 @@
 # Active Context
 
-**Current Focus (2025-11-23)**: TASK026 Homepage Content Management - COMPLETED ✅✅
+**Current Focus (2025-11-27)**: Clean Code & TypeScript Conformity Plan - COMPLETED ✅ + Blueprints Updated
+
+## Architecture Updates (2025-11-27)
+
+### Clean Code & TypeScript Conformity - TASK026 Refinement COMPLETED ✅
+
+**8-step plan fully executed** (commit `8aaefe1`):
+
+1. ✅ **Server Actions créées** : `lib/actions/home-about-actions.ts`, `lib/actions/home-hero-actions.ts`
+   - Pattern `ActionResult<T>` unifié
+   - Validation Zod avec schémas serveur
+   - `revalidatePath()` après DAL calls
+
+2. ✅ **DAL refactorisé** : `lib/dal/admin-home-hero.ts`, `lib/dal/admin-home-about.ts`
+   - Suppression de tous les `revalidatePath()` (déplacés vers Server Actions)
+   - Pattern `DALResult<T>` unifié
+   - Codes d'erreur systématiques `[ERR_*]`
+
+3. ✅ **Migration fetch() → Server Actions** : `AboutContentForm.tsx`
+   - Remplacement API Routes par appels Server Actions directs
+   - useEffect sync pattern pour re-render immédiat
+
+4. ✅ **Splitting composants** : `HeroSlideForm.tsx` (316→200 lignes)
+   - Extraction `HeroSlideFormImageSection.tsx` (91 lignes)
+   - Respect règle Clean Code < 300 lignes/fichier
+
+5. ✅ **Schémas UI créés** : `lib/schemas/home-content.ts`
+   - `HeroSlideInputSchema` (server) avec `z.coerce.bigint()`
+   - `HeroSlideFormSchema` (UI) avec `z.number().int().positive()`
+   - Évite type casting `as unknown as Resolver<>`
+
+6. ✅ **API Routes obsolètes supprimées** :
+   - `app/api/admin/home/hero/route.ts`
+   - `app/api/admin/home/hero/[id]/route.ts`
+   - `app/api/admin/home/about/route.ts`
+
+7. ✅ **Documentation mise à jour** :
+   - `.github/instructions/crud-server-actions-pattern.instructions.md` v1.1
+   - Ajout règles schémas UI, split composants, erreurs 5-6
+
+8. ✅ **Commit** : `8aaefe1` - "refactor: Clean Code & TypeScript conformity for TASK026"
+   - 16 files changed, +504/-307 lines
+
+### Architecture Pattern - 4 Layers
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Presentation (Client Components)                               │
+│  └── Form.tsx uses UI schema (number for IDs)                  │
+├─────────────────────────────────────────────────────────────────┤
+│  Server Actions (lib/actions/)                                  │
+│  └── Validation + DAL call + revalidatePath() ← SEUL ENDROIT   │
+├─────────────────────────────────────────────────────────────────┤
+│  Data Access Layer (lib/dal/)                                   │
+│  └── Database ops + DALResult<T> + error codes [ERR_*]         │
+├─────────────────────────────────────────────────────────────────┤
+│  Database (Supabase)                                            │
+│  └── RLS policies + is_admin() checks                          │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Blueprints Updated (2025-11-27)
+
+- ✅ `memory-bank/architecture/Project_Folders_Structure_Blueprint_v3.md`
+  - Date: Nov 22 → Nov 27
+  - Section `lib/actions/` avec Server Actions pattern
+  - Section `lib/schemas/` avec dual schemas (Server vs UI)
+  - Extension template CRUD Feature (6 étapes)
+  - Naming conventions détaillées
+
+- ✅ `memory-bank/architecture/Project_Architecture_Blueprint.md`
+  - Date: Nov 22 → Nov 27
+  - 15+ sections mises à jour
+  - ASCII diagrams (layer hierarchy, data flow)
+  - useEffect sync pattern documenté
+  - ADR entries pour décisions Nov 2025
+  - Common Pitfalls table
+
+### Key Files Reference
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `lib/actions/home-hero-actions.ts` | 77 | Server Actions CRUD Hero Slides |
+| `lib/actions/home-about-actions.ts` | 33 | Server Actions About Content |
+| `lib/schemas/home-content.ts` | 127 | Dual schemas (Server + UI) |
+| `lib/dal/admin-home-hero.ts` | 265 | DAL Hero avec helpers <30L |
+| `HeroSlideForm.tsx` | 200 | Form principal (splitté) |
+| `HeroSlideFormImageSection.tsx` | 91 | Sous-composant image |
+
+---
 
 ## TASK026 - Homepage Content Management `[FULLY IMPLEMENTED & COMMITTED]`
 
@@ -1033,6 +1122,6 @@ app/
 
 ---
 
-**Dernière mise à jour** : 2025-11-16  
+**Dernière mise à jour** : 2025-11-27  
 **Responsable** : YanBerdin  
-**Statut** : TASK021 terminé, commits poussés, documentation mise à jour
+**Statut** : Clean Code Conformity complété, Blueprints v4 mis à jour, documentation synchronisée

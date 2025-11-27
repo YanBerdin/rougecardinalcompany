@@ -786,3 +786,53 @@ Cette vérification a été réalisée via l'API Supabase MCP et confirme que le
 - **systemPatterns.md** : Added comprehensive pattern documentation for "Client-Side Token Processing for Invitations" including implementation details, security considerations, and testing patterns
 - **techContext.md** : Added "Évolutions Technologiques Récentes" section documenting the client-side token processing solution and its performance impact
 - **Documentation Impact** : All memory-bank files now accurately reflect the resolved invitation system issues and established patterns for future development
+
+### 27 Novembre 2025
+
+**Clean Code & TypeScript Conformity Plan - COMPLETED** :
+
+- **Context** : Finalisation du plan de conformité Clean Code & TypeScript pour TASK026
+- **8 étapes exécutées** :
+  1. ✅ Server Actions créées (`home-about-actions.ts`, `home-hero-actions.ts`)
+  2. ✅ DAL refactorisé (suppression `revalidatePath()`, ajout codes erreur `[ERR_*]`)
+  3. ✅ Migration fetch() → Server Actions (`AboutContentForm.tsx`)
+  4. ✅ Splitting `HeroSlideForm.tsx` (316→200 lignes + `HeroSlideFormImageSection.tsx`)
+  5. ✅ Schémas UI créés (`HeroSlideFormSchema` avec `number` au lieu de `bigint`)
+  6. ✅ API Routes obsolètes supprimées (3 fichiers)
+  7. ✅ Documentation v1.1 mise à jour (`crud-server-actions-pattern.instructions.md`)
+  8. ✅ Git commit `8aaefe1` (16 files, +504/-307)
+
+**Architecture 4-Layer établie** :
+
+- Presentation → Server Actions → DAL → Database
+- `revalidatePath()` UNIQUEMENT dans Server Actions
+- Dual Zod schemas : Server (bigint) vs UI (number)
+- Component splitting rule < 300 lignes
+
+**Blueprints mis à jour** :
+
+- ✅ `Project_Folders_Structure_Blueprint_v3.md` (Nov 22 → Nov 27)
+  - Sections `lib/actions/`, `lib/schemas/` ajoutées
+  - Extension template CRUD Feature (6 étapes)
+  - Naming conventions détaillées
+- ✅ `Project_Architecture_Blueprint.md` (Nov 22 → Nov 27)
+  - 15+ sections mises à jour
+  - ASCII diagrams (layer hierarchy, data flow)
+  - useEffect sync pattern documenté
+  - ADR entries Nov 2025
+  - Common Pitfalls table
+
+**Fichiers clés référencés** :
+
+| Fichier | Lignes | Rôle |
+|---------|--------|------|
+| `lib/actions/home-hero-actions.ts` | 77 | Server Actions CRUD |
+| `lib/schemas/home-content.ts` | 127 | Dual schemas |
+| `lib/dal/admin-home-hero.ts` | 265 | DAL avec helpers |
+| `HeroSlideForm.tsx` | 200 | Form splitté |
+
+**Memory-bank synchronisé** :
+
+- `activeContext.md` : Nouveau focus 2025-11-27
+- `progress.md` : Journal mis à jour (cette entrée)
+- `tasks/_index.md` : TASK026 marqué "Refined on 2025-11-27"

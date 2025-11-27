@@ -405,6 +405,172 @@ export const config = {
 - Blueprint : `memory-bank/architecture/Project_Architecture_Blueprint_v3.md`
 - Commit : 6a2c7d8 "feat(architecture): Complete route groups migration"
 
+### Server Actions Layer Pattern (Next.js 15)
+
+**Introduced**: 27 novembre 2025 - Clean Code & TypeScript Conformity
+
+**Pattern** : Architecture 4-layer avec Server Actions comme couche d'orchestration.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Presentation (Client Components)                               │
+│  └── Form.tsx uses UI schema (number for IDs)                  │
+├─────────────────────────────────────────────────────────────────┤
+│  Server Actions (lib/actions/)                                  │
+│  └── Validation + DAL call + revalidatePath() ← SEUL ENDROIT   │
+├─────────────────────────────────────────────────────────────────┤
+│  Data Access Layer (lib/dal/)                                   │
+│  └── Database ops + DALResult<T> + error codes [ERR_*]         │
+├─────────────────────────────────────────────────────────────────┤
+│  Database (Supabase)                                            │
+│  └── RLS policies + is_admin() checks                          │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Server Action Pattern** :
+
+```typescript
+// lib/actions/feature-actions.ts
+"use server";
+import "server-only";
+import { revalidatePath } from "next/cache";
+import { createFeature, updateFeature } from "@/lib/dal/feature";
+import { FeatureInputSchema } from "@/lib/schemas/feature";
+
+export type ActionResult<T = unknown> = 
+  | { success: true; data?: T } 
+  | { success: false; error: string };
+
+export async function createFeatureAction(input: unknown): Promise<ActionResult> {
+  try {
+    // 1. Validation Zod (Server schema)
+    const validated = FeatureInputSchema.parse(input);
+    
+    // 2. Appel DAL
+    const result = await createFeature(validated);
+    
+    if (!result.success) {
+      return { success: false, error: result.error ?? "Create failed" };
+    }
+    
+    // 3. ✅ Revalidation UNIQUEMENT ICI
+    revalidatePath("/admin/feature");
+    
+    return { success: true, data: result.data };
+  } catch (err: unknown) {
+    return { 
+      success: false, 
+      error: err instanceof Error ? err.message : "Unknown error" 
+    };
+  }
+}
+```
+
+**DAL Pattern (NO revalidatePath)** :
+
+```typescript
+// lib/dal/feature.ts
+"use server";
+import "server-only";
+import { createClient } from "@/supabase/server";
+import { requireAdmin } from "@/lib/auth/is-admin";
+import type { FeatureInput, FeatureDTO } from "@/lib/schemas/feature";
+
+// ❌ NE PAS importer revalidatePath ici
+// import { revalidatePath } from "next/cache";
+
+export interface DALResult<T = unknown> {
+  success: boolean;
+  data?: T;
+  error?: string;
+}
+
+export async function createFeature(
+  input: FeatureInput
+): Promise<DALResult<FeatureDTO>> {
+  await requireAdmin();
+  
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("features")
+    .insert(input)
+    .select()
+    .single();
+
+  if (error) {
+    // Error codes for debugging: [ERR_FEATURE_001]
+    return { success: false, error: `[ERR_FEATURE_001] ${error.message}` };
+  }
+
+  // ❌ PAS DE revalidatePath() ICI
+  return { success: true, data };
+}
+```
+
+**Dual Zod Schemas Pattern** :
+
+```typescript
+// lib/schemas/feature.ts
+import { z } from "zod";
+
+// ✅ Schéma SERVER (pour DAL/BDD) — utilise bigint
+export const FeatureInputSchema = z.object({
+  title: z.string().min(1).max(80),
+  image_media_id: z.coerce.bigint().optional(),
+});
+export type FeatureInput = z.infer<typeof FeatureInputSchema>;
+
+// ✅ Schéma UI (pour formulaires) — utilise number
+export const FeatureFormSchema = z.object({
+  title: z.string().min(1).max(80),
+  image_media_id: z.number().int().positive().optional(),
+});
+export type FeatureFormValues = z.infer<typeof FeatureFormSchema>;
+```
+
+**Client Component with useEffect Sync** :
+
+```typescript
+// components/features/admin/feature/View.tsx
+"use client";
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { deleteFeatureAction } from "@/lib/actions/feature-actions";
+
+export function View({ initialItems }: { initialItems: FeatureDTO[] }) {
+  const router = useRouter();
+  const [items, setItems] = useState(initialItems);
+
+  // ✅ CRITIQUE : Sync local state when props change (after router.refresh())
+  useEffect(() => {
+    setItems(initialItems);
+  }, [initialItems]);
+
+  const handleDelete = useCallback(async (id: bigint) => {
+    const result = await deleteFeatureAction(String(id));
+    if (result.success) {
+      router.refresh(); // ✅ Déclenche re-fetch Server Component
+    }
+  }, [router]);
+
+  return (/* UI */);
+}
+```
+
+**Règles Critiques** :
+
+1. `revalidatePath()` UNIQUEMENT dans Server Actions
+2. DAL retourne `DALResult<T>` sans revalidation
+3. Schémas UI (number) ≠ Schémas Server (bigint)
+4. useEffect sync pour re-render après router.refresh()
+5. Composants > 300 lignes doivent être splittés
+
+**Références** :
+
+- Documentation : `.github/instructions/crud-server-actions-pattern.instructions.md`
+- Blueprint : `memory-bank/architecture/Project_Architecture_Blueprint.md`
+- Commit : 8aaefe1 "refactor: Clean Code & TypeScript conformity for TASK026"
+
 ### Pattern de Server Components et Client Components
 
 ```typescript
