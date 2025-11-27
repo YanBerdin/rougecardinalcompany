@@ -26,6 +26,22 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## Migrations récentes (novembre 2025)
 
+- **Refactoring architectural (27 nov. 2025)** — **Clean Code & TypeScript Conformity pour TASK026** : Ce refactoring n'a pas généré de migration base de données car il concerne uniquement la couche application.
+
+- `20251126215129_fix_hero_slides_admin_select_policy.sql` — **RLS FIX : Admins can view ALL hero slides**
+  - Ajout policy `Admins can view all home hero slides` sur `home_hero_slides`
+  - Permet aux admins de voir les slides inactifs pour les gérer via toggle
+  - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/07d_table_home_hero.sql`
+
+- `20251126001251_add_alt_text_to_home_hero_slides.sql` — **A11Y + CRUD : Hero Slides enhancements**
+  - **Colonne `alt_text`** : texte alternatif pour accessibilité (max 125 caractères, contrainte CHECK)
+  - **Fonction `reorder_hero_slides(jsonb)`** : SECURITY DEFINER pour réordonner les slides
+    - Authorization : `is_admin()` check explicite
+    - Concurrency : Advisory lock `pg_advisory_xact_lock`
+    - Input validation : JSONB array structure
+  - **Fonction `restore_content_version`** : Mise à jour pour support `home_hero_slides`
+  - ✅ **Intégré aux schémas déclaratifs** : `07d_table_home_hero.sql` + `63b_reorder_hero_slides.sql`
+
 - `20251123170231_create_messages_contact_admin_view.sql` — **SECURITY FIX : Deploy missing messages_contact_admin view** : Création de la vue `messages_contact_admin` définie dans le schéma déclaratif mais absente de la base de données. Résout l'alerte Security Advisor "SECURITY DEFINER view" (faux positif - vue configurée avec `security_invoker = true`).
   - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/10_tables_system.sql`
   - 🔐 **Sécurité** : Vue avec `security_invoker = true` (pas de privilèges élevés)

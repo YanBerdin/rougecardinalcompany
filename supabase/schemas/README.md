@@ -70,6 +70,16 @@ Note RLS: les nouvelles tables co‑localisent leurs politiques (dans le même f
 
 ## 🆕 Mises à jour récentes (novembre 2025)
 
+- **TASK026 Clean Code & TypeScript Conformity (27 nov. 2025)** : Refactoring architectural pour conformité aux standards Clean Code & TypeScript du projet.
+
+- **Hero Slides - A11Y & CRUD Enhancements (26 nov. 2025)** : Améliorations accessibilité et fonctionnalités CRUD pour les slides Hero.
+  - **`07d_table_home_hero.sql`** : Ajout colonne `alt_text` (texte alternatif, max 125 caractères) + contrainte CHECK + policy RLS admin SELECT
+  - **`63b_reorder_hero_slides.sql`** : Nouvelle fonction SECURITY DEFINER pour réordonner les slides
+    - Authorization : `is_admin()` check explicite (defense-in-depth)
+    - Concurrency : Advisory lock `pg_advisory_xact_lock`
+    - Input validation : Structure JSONB array
+  - **Policy RLS** : `Admins can view all home hero slides` - permet aux admins de voir les slides inactifs
+
 - **TASK021 - Spectacles CRUD RLS Corrections** : Corrections finales des politiques RLS pour les spectacles suite à l'implémentation complète du CRUD admin.
   - **Issue #1 - RLS 42501 Error** : Résolution du problème d'insertion spectacles causé par un profil admin manquant
     - Root cause: Utilisateur authentifié mais `is_admin()` retournait false (profil manquant)
