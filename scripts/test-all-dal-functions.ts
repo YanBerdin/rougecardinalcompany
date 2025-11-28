@@ -1,7 +1,12 @@
 #!/usr/bin/env tsx
 /**
- * Test complet de toutes les fonctions DAL
- * Simule l'accès comme le fait le serveur Next.js
+ * Test complet de toutes les fonctions DAL (lecture publique)
+ * 
+ * Simule l'accès comme un utilisateur anonyme (anon key).
+ * Pour les tests admin (mutations), utiliser: test-dal-admin-users.ts
+ * 
+ * Usage:
+ *   pnpm exec tsx scripts/test-all-dal-functions.ts
  */
 
 import * as dotenv from "dotenv";
@@ -10,14 +15,22 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
 dotenv.config({ path: resolve(process.cwd(), ".env.local") });
 
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY;
+
+if (!supabaseUrl || !publishableKey) {
+  console.error("❌ Variables d'environnement manquantes:");
+  console.error("   - NEXT_PUBLIC_SUPABASE_URL");
+  console.error("   - NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY");
+  process.exit(1);
+}
+
 async function main() {
-  console.log("🧪 Test Complet des Fonctions DAL\n");
+  console.log("═══════════════════════════════════════════════════════════");
+  console.log("🧪 Test des fonctions DAL - Lecture publique (anon)");
+  console.log("═══════════════════════════════════════════════════════════\n");
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const publishableKey =
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!;
-
-  const client = createSupabaseClient(supabaseUrl, publishableKey);
+  const client = createSupabaseClient(supabaseUrl!, publishableKey!);
 
   const tests = [
     {
@@ -111,7 +124,9 @@ async function main() {
   console.log(`\n📊 Résultats: ${passed}/${tests.length} tests réussis`);
 
   if (failed === 0) {
-    console.log("\n🎉 TOUS LES TESTS PASSENT ! Production restaurée.");
+    console.log("\n🎉 Tous les tests de lecture publique passent !");
+    console.log("\n💡 Pour tester les fonctions admin (mutations), exécuter:");
+    console.log("   pnpm exec tsx scripts/test-dal-admin-users.ts");
   } else {
     console.log(
       `\n⚠️  ${failed} test(s) en échec. Vérifier les logs ci-dessus.`

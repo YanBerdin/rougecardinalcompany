@@ -4,7 +4,6 @@ import { createClient } from "@/supabase/server";
 import { createAdminClient } from "@/supabase/admin";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireAdmin } from "@/lib/auth/is-admin";
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 export interface UserWithProfile {
@@ -211,8 +210,6 @@ export async function updateUserRole(
     };
   }
 
-  revalidatePath("/admin/users");
-
   console.log(`[DAL] Role updated: ${validated.userId} → ${validated.role}`);
   return { success: true };
 }
@@ -240,8 +237,6 @@ export async function deleteUser(userId: string): Promise<DALResult> {
       error: `Failed to delete user: ${error.message}`,
     };
   }
-
-  revalidatePath("/admin/users");
 
   console.log(`[DAL] User deleted: ${userId}`);
   return { success: true };
@@ -396,56 +391,6 @@ async function createUserProfileWithRole(
   console.log(`[DAL] Profile upserted (created or updated) for user ${userId}`);
 }
 
-async function rollbackProfileAndAuthUser(
-  adminClient: SupabaseClient,
-  userId: string
-): Promise<void> {
-  try {
-    await adminClient.from("profiles").delete().eq("user_id", userId);
-    console.log(`[DAL] Profile rolled back for user ${userId}`);
-  } catch (profileDeleteError) {
-    console.error("[DAL] Failed to rollback profile:", profileDeleteError);
-  }
-
-  try {
-    await adminClient.auth.admin.deleteUser(userId);
-    console.log(`[DAL] Auth user rolled back: ${userId}`);
-  } catch (userDeleteError) {
-    console.error("[DAL] Failed to rollback auth user:", userDeleteError);
-  }
-}
-
-async function sendInvitationEmailWithRollback(
-  adminClient: SupabaseClient,
-  email: string,
-  role: string,
-  displayName: string | undefined,
-  invitationUrl: string,
-  userId: string
-): Promise<void> {
-  try {
-    const emailActions = await import("@/lib/email/actions");
-    await emailActions.sendInvitationEmail({
-      email: email,
-      role: role,
-      displayName: displayName,
-      invitationUrl: invitationUrl,
-    });
-    console.log(`[DAL] Invitation email sent to ${email}`);
-  } catch (error: unknown) {
-    console.error(
-      "[DAL] Failed to send invitation email, initiating complete rollback:",
-      error
-    );
-
-    await rollbackProfileAndAuthUser(adminClient, userId);
-
-    throw new Error(
-      "[ERR_INVITE_007] Échec de l'envoi de l'email d'invitation. Rollback complet effectué."
-    );
-  }
-}
-
 async function logInvitationAuditRecord(
   supabase: SupabaseClient,
   currentAdminId: string | null,
@@ -465,9 +410,15 @@ async function logInvitationAuditRecord(
   });
 }
 
-export async function inviteUser(
+/**
+ * Invite un utilisateur SANS envoyer l'email.
+ * L'envoi d'email doit être géré par le Server Action appelant.
+ * 
+ * @returns userId et invitationUrl pour que le Server Action puisse envoyer l'email
+ */
+export async function inviteUserWithoutEmail(
   input: InviteUserInput
-): Promise<DALResult<{ userId: string }>> {
+): Promise<DALResult<{ userId: string; invitationUrl: string }>> {
   await requireAdmin();
 
   const validated = InviteUserSchema.parse(input);
@@ -489,11 +440,40 @@ export async function inviteUser(
 
   const userId = await waitForAuthUserCreation(adminClient, validated.email);
   await createUserProfileWithRole(adminClient, userId, validated.role, displayName);
-  await sendInvitationEmailWithRollback(adminClient, validated.email, validated.role, validated.displayName, invitationUrl, userId);
   await logInvitationAuditRecord(supabase, currentAdminId, userId, validated.email, validated.role);
 
-  revalidatePath("/admin/users");
+  console.log(`[DAL] User created successfully: userId=${userId} role=${validated.role}`);
+  return { success: true, data: { userId, invitationUrl } };
+}
 
-  console.log(`[DAL] User invited successfully: userId=${userId} role=${validated.role}`);
-  return { success: true, data: { userId } };
+/**
+ * @deprecated Utiliser inviteUserWithoutEmail + Server Action avec Pattern Warning
+ * Cette fonction est conservée pour rétrocompatibilité mais viole les règles SOLID DAL
+ */
+export async function inviteUser(
+  input: InviteUserInput
+): Promise<DALResult<{ userId: string }>> {
+  console.warn("[DAL] inviteUser is deprecated, use inviteUserWithoutEmail + Server Action");
+
+  const result = await inviteUserWithoutEmail(input);
+
+  if (!result.success || !result.data) {
+    return { success: false, error: result.error };
+  }
+
+  // Legacy: envoi email direct (viole Pattern Warning)
+  try {
+    const emailActions = await import("@/lib/email/actions");
+    await emailActions.sendInvitationEmail({
+      email: input.email,
+      role: input.role,
+      displayName: input.displayName,
+      invitationUrl: result.data.invitationUrl,
+    });
+  } catch (error) {
+    console.error("[DAL] Email failed:", error);
+    // Note: ne fait PAS de rollback car Pattern Warning
+  }
+
+  return { success: true, data: { userId: result.data.userId } };
 }
