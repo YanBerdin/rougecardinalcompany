@@ -1,3 +1,9 @@
+/**
+ * @deprecated Préférer utiliser le Server Action setTeamMemberActiveAction depuis
+ * app/(admin)/admin/team/actions.ts
+ *
+ * Cette API Route est conservée pour rétrocompatibilité avec des clients externes.
+ */
 import { setTeamMemberActive } from "@/lib/dal/team";
 import {
   withAdminAuth,

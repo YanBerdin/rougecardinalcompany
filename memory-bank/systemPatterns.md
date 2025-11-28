@@ -1322,7 +1322,7 @@ Pour les éléments visuellement petits qui nécessitent une zone tactile étend
 
 ### 3. Exceptions WCAG autorisées
 
-- **Exception inline** : Liens dans un paragraphe de texte (ex: "Voir nos [<conditions générales>](/)")
+- **Exception inline** : Liens dans un paragraphe de texte (ex: "Voir nos [<conditions générales>](`/`)")
 - **Exception équivalente** : Si plusieurs cibles effectuent la même action, une seule doit respecter 44px
 - **Exception essentielle** : Quand modifier la taille changerait l'information (rare, documenter)
 

@@ -1,3 +1,10 @@
+/**
+ * @deprecated Préférer utiliser le Server Action hardDeleteTeamMemberAction depuis
+ * app/(admin)/admin/team/actions.ts
+ *
+ * Cette API Route est conservée pour rétrocompatibilité avec des clients externes
+ * ou scripts RGPD automatisés.
+ */
 import { hardDeleteTeamMember } from "@/lib/dal/team";
 import {
   withAdminAuth,
@@ -5,6 +12,7 @@ import {
   ApiResponse,
   HttpStatus,
 } from "@/lib/api/helpers";
+import { revalidatePath } from "next/cache";
 
 type RouteContext = {
   params: Promise<{ id: string }> | { id: string };
@@ -31,6 +39,9 @@ export async function POST(_request: Request, context: RouteContext) {
           result.status ?? HttpStatus.INTERNAL_SERVER_ERROR
         );
       }
+
+      // Invalidate cache after successful deletion
+      revalidatePath("/admin/team");
 
       return ApiResponse.success({ deleted: true, id });
     } catch (error: unknown) {

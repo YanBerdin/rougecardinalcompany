@@ -15,6 +15,7 @@ import {
   reorderTeamMembers,
   fetchTeamMemberById,
   setTeamMemberActive,
+  hardDeleteTeamMember,
 } from "@/lib/dal/team";
 import { requireAdmin } from "@/lib/auth/is-admin";
 
@@ -151,6 +152,37 @@ export async function setTeamMemberActiveAction(
     return { success: true, data: null };
   } catch (error: unknown) {
     return handleActionError(error, "setTeamMemberActiveAction");
+  }
+}
+
+/**
+ * Permanently deletes a team member (RGPD compliance)
+ * 
+ * CRITICAL: This operation is irreversible.
+ * The member must be deactivated before deletion.
+ */
+export async function hardDeleteTeamMemberAction(
+  teamMemberId: number
+): Promise<ActionResponse<null>> {
+  try {
+    if (!isValidTeamMemberId(teamMemberId)) {
+      return { success: false, error: "Invalid team member id", status: 400 };
+    }
+
+    const result = await hardDeleteTeamMember(teamMemberId);
+
+    if (!result?.success) {
+      return {
+        success: false,
+        error: result?.error ?? "Failed to delete team member",
+        status: result?.status ?? 500,
+      };
+    }
+
+    revalidatePath("/admin/team");
+    return { success: true, data: null };
+  } catch (error: unknown) {
+    return handleActionError(error, "hardDeleteTeamMemberAction");
   }
 }
 

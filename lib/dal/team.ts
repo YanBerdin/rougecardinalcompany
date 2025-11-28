@@ -1,7 +1,7 @@
+"use server";
 import "server-only";
 import { createClient } from "@/supabase/server";
 import { requireAdmin } from "@/lib/auth/is-admin";
-import { revalidatePath } from "next/cache";
 import type { Database } from "@/lib/database.types";
 import { TeamMemberDbSchema } from "@/lib/schemas/team";
 import { z } from "zod";
@@ -341,7 +341,7 @@ export async function hardDeleteTeamMember(
       return deletionResult;
     }
 
-    revalidatePath("/admin/team");
+    // Note: revalidatePath moved to Server Action (SOLID DIP compliance)
     return { success: true, data: null };
   } catch (error: unknown) {
     return handleHardDeleteError(error);
