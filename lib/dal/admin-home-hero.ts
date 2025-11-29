@@ -7,9 +7,6 @@ import { HeroSlideInputSchema, ReorderInputSchema } from "@/lib/schemas/home-con
 import { requireAdmin } from "@/lib/auth/is-admin";
 import { type DALResult, generateSlug } from "@/lib/dal/helpers";
 
-// Re-export types for consumers
-export type { DALResult };
-
 // =============================================================================
 // Helpers (domain-specific)
 // =============================================================================

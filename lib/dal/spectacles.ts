@@ -21,9 +21,6 @@ import {
   generateSlug,
 } from "@/lib/dal/helpers";
 
-// Re-export types for consumers
-export type { DALResult };
-
 // ============================================================================
 // READ Operations
 // ============================================================================

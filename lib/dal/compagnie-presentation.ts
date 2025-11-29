@@ -6,9 +6,6 @@ import { createClient } from "@/supabase/server";
 import { compagniePresentationFallback } from "@/components/features/public-site/compagnie/data/presentation";
 import { type DALResult } from "@/lib/dal/helpers";
 
-// Re-export types for consumers
-export type { DALResult };
-
 const PresentationSectionSchema = z.object({
   id: z.string(),
   kind: z.enum([

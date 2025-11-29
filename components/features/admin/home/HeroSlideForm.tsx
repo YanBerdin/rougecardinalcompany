@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { MediaLibraryPicker, type MediaSelectResult } from "@/components/features/admin/media";
 import { HeroSlideFormSchema, type HeroSlideFormValues, type HeroSlideDTO } from "@/lib/schemas/home-content";
-import { createHeroSlideAction, updateHeroSlideAction } from "@/lib/actions/home-hero-actions";
+import { createHeroSlideAction, updateHeroSlideAction } from "@/app/(admin)/admin/home/hero/home-hero-actions";
 import { HeroSlideFormFields, HeroSlideCtaFields, HeroSlideActiveToggle } from "./HeroSlideFormFields";
 import { HeroSlideImageSection, handleMediaSelection } from "./HeroSlideImageSection";
 

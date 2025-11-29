@@ -8,7 +8,7 @@
 
 **8-step plan fully executed** (commit `8aaefe1`):
 
-1. ✅ **Server Actions créées** : `lib/actions/home-about-actions.ts`, `lib/actions/home-hero-actions.ts`
+1. ✅ **Server Actions créées** : `app/(admin)/admin/home/about/home-about-actions.ts`, `app/(admin)/admin/home/hero/home-hero-actions.ts`
    - Pattern `ActionResult<T>` unifié
    - Validation Zod avec schémas serveur
    - `revalidatePath()` après DAL calls

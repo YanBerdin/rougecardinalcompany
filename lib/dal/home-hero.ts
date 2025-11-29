@@ -4,9 +4,6 @@ import "server-only";
 import { createClient } from "@/supabase/server";
 import { type DALResult } from "@/lib/dal/helpers";
 
-// Re-export types for consumers
-export type { DALResult };
-
 export type HomeHeroSlideRecord = {
   title: string;
   subtitle: string | null;

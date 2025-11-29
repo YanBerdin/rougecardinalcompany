@@ -11,9 +11,6 @@ import {
   getErrorMessage,
 } from "@/lib/dal/helpers";
 
-// Re-export types for consumers
-export type { DALResult };
-
 type TeamRow = Database["public"]["Tables"]["membres_equipe"]["Row"];
 
 const UpsertTeamMemberSchema = TeamMemberDbSchema.partial();

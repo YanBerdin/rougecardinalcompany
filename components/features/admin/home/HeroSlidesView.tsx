@@ -29,7 +29,7 @@ import type { HeroSlideDTO } from "@/lib/schemas/home-content";
 import {
     deleteHeroSlideAction,
     reorderHeroSlidesAction,
-} from "@/lib/actions/home-hero-actions";
+} from "@/app/(admin)/admin/home/hero/home-hero-actions";
 
 interface HeroSlidesViewProps {
     initialSlides: HeroSlideDTO[];

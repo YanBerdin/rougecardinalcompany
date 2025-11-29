@@ -5,9 +5,6 @@ import { z } from "zod";
 import { createClient } from "@/supabase/server";
 import { type DALResult } from "@/lib/dal/helpers";
 
-// Re-export types for consumers
-export type { DALResult };
-
 export type NewsletterSettings = {
   enabled: boolean;
   title?: string | null;

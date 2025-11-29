@@ -26,7 +26,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { MediaLibraryPicker, MediaExternalUrlInput, type MediaSelectResult } from "@/components/features/admin/media";
 import { AboutContentFormSchema, type AboutContentFormValues, type AboutContentDTO } from "@/lib/schemas/home-content";
-import { updateAboutContentAction } from "@/lib/actions/home-about-actions";
+import { updateAboutContentAction } from "@/app/(admin)/admin/home/about/home-about-actions";
 
 interface AboutContentFormProps {
     content: AboutContentDTO;

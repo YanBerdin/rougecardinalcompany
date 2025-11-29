@@ -4,9 +4,6 @@ import "server-only";
 import { createClient } from "@/supabase/server";
 import { type DALResult, bytesToHuman } from "@/lib/dal/helpers";
 
-// Re-export types for consumers
-export type { DALResult };
-
 interface PressRelease {
   id: number;
   title: string;

@@ -12,9 +12,6 @@ import {
   toISODateString,
 } from "@/lib/dal/helpers";
 
-// Re-export types for consumers
-export type { DALResult };
-
 // Re-export for backward compatibility
 export type AgendaEventDTO = AgendaEvent;
 export type { EventTypeOption };

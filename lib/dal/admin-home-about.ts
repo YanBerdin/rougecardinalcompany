@@ -6,9 +6,6 @@ import { AboutContentInputSchema } from "@/lib/schemas/home-content";
 import { requireAdmin } from "@/lib/auth/is-admin";
 import { type DALResult } from "@/lib/dal/helpers";
 
-// Re-export types for consumers
-export type { DALResult };
-
 // =============================================================================
 // DAL Functions
 // =============================================================================
