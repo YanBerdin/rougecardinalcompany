@@ -7,12 +7,11 @@ import SpectacleForm from "@/components/features/admin/spectacles/SpectacleForm"
 import { fetchSpectacleById, fetchDistinctGenres } from "@/lib/dal/spectacles";
 
 interface Props {
-  params: {
-    id: string;
-  };
+  params: Promise<{ id: string }>;
 }
 
 export default async function EditSpectaclePage({ params }: Props) {
+  const { id } = await params;
   const supabase = await createClient();
 
   // Check admin authentication
@@ -22,7 +21,7 @@ export default async function EditSpectaclePage({ params }: Props) {
   }
 
   // Parse and validate ID
-  const spectacleId = parseInt(params.id, 10);
+  const spectacleId = parseInt(id, 10);
   if (isNaN(spectacleId) || spectacleId <= 0) {
     notFound();
   }

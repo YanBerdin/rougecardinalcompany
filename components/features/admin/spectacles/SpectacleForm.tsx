@@ -4,8 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Check, ChevronsUpDown, Plus, CheckCircle2, XCircle, X, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
+import Image from "next/image";
 import {
   submitSpectacleToApi,
   handleSpectacleApiError,
@@ -16,7 +17,9 @@ import {
   type SpectacleFormValues,
   cleanSpectacleFormData,
   normalizeGenre,
+  formatDateForInput,
 } from "@/lib/forms/spectacle-form-helpers";
+import { validateImageUrl } from "@/lib/utils/validate-image-url";
 //import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,7 +47,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Check, ChevronsUpDown, Plus } from "lucide-react";
 
 interface SpectacleFormProps {
   defaultValues?: Partial<SpectacleFormValues>;
@@ -67,6 +69,9 @@ export default function SpectacleForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCreatingNewGenre, setIsCreatingNewGenre] = useState(false);
   const [genreDropdownOpen, setGenreDropdownOpen] = useState(false);
+  const [isValidatingImage, setIsValidatingImage] = useState(false);
+  const [imageValidationError, setImageValidationError] = useState<string | null>(null);
+  const [imageValidationSuccess, setImageValidationSuccess] = useState<string | null>(null);
   const isEditing = !!spectacleId;
 
   const form = useForm({
@@ -80,7 +85,7 @@ export default function SpectacleForm({
       genre: defaultValues?.genre ?? "",
       duration_minutes: defaultValues?.duration_minutes ?? "",
       casting: defaultValues?.casting ?? "",
-      premiere: defaultValues?.premiere ?? "",
+      premiere: formatDateForInput(defaultValues?.premiere),
       image_url: defaultValues?.image_url ?? "",
       public: defaultValues?.public ?? false,
     },
@@ -148,7 +153,7 @@ export default function SpectacleForm({
             <FormItem>
               <FormLabel>Slug</FormLabel>
               <FormControl>
-                <Input placeholder="hamlet" {...field} />
+                <Input placeholder="⚠️ Laissez vide pour génération automatique" {...field} />
               </FormControl>
               <FormDescription>
                 Laissez vide pour génération automatique depuis le titre
@@ -196,7 +201,7 @@ export default function SpectacleForm({
                   {isCreatingNewGenre ? (
                     <div className="flex gap-2">
                       <Input
-                        placeholder="Nouveau genre..."
+                        placeholder="Nouveau genre de spectacle..."
                         value={field.value}
                         onChange={(e) => {
                           const normalized = normalizeGenre(e.target.value);
@@ -205,6 +210,7 @@ export default function SpectacleForm({
                         onBlur={field.onBlur}
                         name={field.name}
                         ref={field.ref}
+                        autoFocus
                       />
                       <Button
                         type="button"
@@ -246,15 +252,15 @@ export default function SpectacleForm({
                             }}
                           >
                             <Check
-                              className={`mr-2 h-4 w-4 ${
-                                field.value === genre ? "opacity-100" : "opacity-0"
-                              }`}
+                              className={`mr-2 h-4 w-4 ${field.value === genre ? "opacity-100" : "opacity-0"
+                                }`}
                             />
                             {genre}
                           </DropdownMenuItem>
                         ))}
                         <DropdownMenuItem
                           onClick={() => {
+                            field.onChange(""); // Reset pour afficher le placeholder
                             setIsCreatingNewGenre(true);
                             setGenreDropdownOpen(false);
                           }}
@@ -388,14 +394,108 @@ export default function SpectacleForm({
           name="image_url"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>URL de l&apos;image</FormLabel>
+              <FormLabel>Image du spectacle</FormLabel>
               <FormControl>
-                <Input
-                  type="url"
-                  placeholder="https://example.com/image.jpg"
-                  {...field}
-                />
+                <div className="space-y-3">
+                  {/* Aperçu de l'image */}
+                  {field.value && imageValidationSuccess && (
+                    <div className="relative w-48 h-32 rounded-lg overflow-hidden border bg-muted">
+                      <Image
+                        src={field.value}
+                        alt="Aperçu du spectacle"
+                        fill
+                        className="object-cover"
+                        unoptimized
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-1 right-1 h-6 w-6"
+                        onClick={() => {
+                          field.onChange("");
+                          setImageValidationError(null);
+                          setImageValidationSuccess(null);
+                        }}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Champ URL + bouton vérifier */}
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        type="url"
+                        placeholder="https://example.com/image.jpg"
+                        className="pl-9"
+                        {...field}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          setImageValidationError(null);
+                          setImageValidationSuccess(null);
+                        }}
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={!field.value || isValidatingImage}
+                      onClick={async () => {
+                        if (!field.value) return;
+                        setIsValidatingImage(true);
+                        setImageValidationError(null);
+                        setImageValidationSuccess(null);
+                        try {
+                          const result = await validateImageUrl(field.value);
+                          if (!result.valid) {
+                            setImageValidationError(result.error || "Image invalide");
+                            toast.error("Image invalide", {
+                              description: result.error || "Vérifiez l'URL",
+                            });
+                          } else {
+                            const successMsg = `${result.mime}${result.size ? ` (${Math.round(result.size / 1024)}KB)` : ""}`;
+                            setImageValidationSuccess(successMsg);
+                            toast.success("✅ Image valide", {
+                              description: successMsg,
+                            });
+                          }
+                        } catch (err) {
+                          const errorMsg = err instanceof Error ? err.message : "Erreur de validation";
+                          setImageValidationError(errorMsg);
+                          toast.error("Erreur", { description: errorMsg });
+                        } finally {
+                          setIsValidatingImage(false);
+                        }
+                      }}
+                    >
+                      {isValidatingImage ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Vérifier"
+                      )}
+                    </Button>
+                  </div>
+                </div>
               </FormControl>
+              {imageValidationError && (
+                <p className="text-sm text-destructive flex items-center gap-1">
+                  <XCircle className="h-4 w-4" />
+                  {imageValidationError}
+                </p>
+              )}
+              {imageValidationSuccess && !field.value && (
+                <p className="text-sm text-green-600 flex items-center gap-1">
+                  <CheckCircle2 className="h-4 w-4" />
+                  Image valide : {imageValidationSuccess}
+                </p>
+              )}
+              <FormDescription>
+                Formats acceptés : JPEG, PNG, WebP, SVG, GIF. Cliquez sur &quot;Vérifier&quot; pour valider et afficher l&apos;aperçu.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

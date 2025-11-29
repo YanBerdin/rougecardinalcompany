@@ -1,6 +1,26 @@
 import { z } from "zod";
 
 // ============================================================================
+// Date Formatting Helpers
+// ============================================================================
+
+/**
+ * Converts ISO date string to YYYY-MM-DD format for date input fields
+ * @example formatDateForInput("2023-10-15T20:30:00+02:00") → "2023-10-15"
+ * @example formatDateForInput(null) → ""
+ */
+export function formatDateForInput(dateString: string | null | undefined): string {
+  if (!dateString) return "";
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "";
+    return date.toISOString().split("T")[0];
+  } catch {
+    return "";
+  }
+}
+
+// ============================================================================
 // String Formatting Helpers
 // ============================================================================
 
@@ -40,7 +60,7 @@ export function normalizeGenre(genre: string): string {
 export const spectacleFormSchema = z.object({
   title: z.string().min(1, "Le titre est requis").max(255),
   slug: z.string().optional(),
-  status: z.enum(["draft", "published", "archived", "brouillon","actuellement", "archive"]).optional(),
+  status: z.enum(["draft", "published", "archived", "brouillon", "actuellement", "archive"]).optional(),
   description: z.string().optional(),
   short_description: z.string().max(500).optional(),
   genre: z.string().max(100).optional().transform((val) => val ? normalizeGenre(val) : val),
