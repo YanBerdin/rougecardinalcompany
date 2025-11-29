@@ -11,7 +11,7 @@ import {
   ApiResponse,
   HttpStatus,
 } from "@/lib/api/helpers";
-import { z } from "zod";
+import { SetActiveBodySchema } from "@/lib/schemas/team";
 
 // ============================================================================
 // Types
@@ -20,24 +20,6 @@ import { z } from "zod";
 type RouteContext = {
   params: Promise<{ id: string }> | { id: string };
 };
-
-// ============================================================================
-// Validation Schema
-// ============================================================================
-
-const SetActiveBodySchema = z.object({
-  active: z
-    .union([
-      z.boolean(),
-      z.enum(["true", "false"]),
-      z.number().int().min(0).max(1),
-    ])
-    .transform((val) => {
-      if (typeof val === "boolean") return val;
-      if (typeof val === "string") return val === "true";
-      return val === 1;
-    }),
-});
 
 // ============================================================================
 // Route Handler

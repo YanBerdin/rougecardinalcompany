@@ -71,7 +71,7 @@ export function HeroView({
             <Button
               variant="outline"
               size="lg"
-              className="bg-white/10 border-white/30 text-white backdrop-blur-sm hover:bg-white hover:text-black transition-all duration-300 shadow-lg"
+              className="bg-white/30 border-white/50 text-white backdrop-blur-md hover:bg-white hover:text-black transition-all duration-300 shadow-lg"
             >
               <Play className="mr-2 h-5 w-5" />
               Voir la bande-annonce
@@ -86,7 +86,7 @@ export function HeroView({
           onPauseAutoPlay();
           onPrevSlide();
         }}
-        className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/30 hover:bg-black/50 text-white p-3 rounded-full transition-all duration-200 backdrop-blur-sm"
+        className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/30 hover:bg-black/50 text-white p-3 rounded-full transition-all duration-200 backdrop-blur-md"
         aria-label="Slide précédent"
       >
         <ArrowRight className="h-6 w-6 rotate-180" />

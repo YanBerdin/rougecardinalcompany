@@ -5,12 +5,22 @@ import { ErrorBoundary } from "@/components/admin/ErrorBoundary";
 
 /**
  * Smart component that fetches and displays dashboard statistics
- * 
+ *
  * Handles data fetching via DAL and error boundaries
  * Renders 4 stat cards in responsive grid layout
  */
 export async function DashboardStatsContainer() {
-  const stats = await fetchDashboardStats();
+  const result = await fetchDashboardStats();
+
+  if (!result.success) {
+    return (
+      <div className="text-destructive text-sm">
+        Erreur lors du chargement des statistiques
+      </div>
+    );
+  }
+
+  const stats = result.data;
 
   return (
     <ErrorBoundary>

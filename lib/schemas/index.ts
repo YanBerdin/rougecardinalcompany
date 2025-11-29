@@ -61,10 +61,14 @@ export {
     CreateSpectacleSchema,
     UpdateSpectacleSchema,
     SpectacleSummarySchema,
+    CurrentShowSchema,
+    ArchivedShowSchema,
     type SpectacleDb,
     type CreateSpectacleInput,
     type UpdateSpectacleInput,
     type SpectacleSummary,
+    type CurrentShow,
+    type ArchivedShow,
 } from "./spectacles";
 
 // Team (Admin schemas)
@@ -73,10 +77,12 @@ export {
     CreateTeamMemberInputSchema,
     UpdateTeamMemberInputSchema,
     ReorderTeamMembersInputSchema,
+    SetActiveBodySchema,
     type TeamMemberDb,
     type CreateTeamMemberInput,
     type UpdateTeamMemberInput,
     type ReorderTeamMembersInput,
+    type SetActiveBody,
 } from "./team";
 
 // Dashboard
@@ -106,3 +112,25 @@ export {
     type ExternalUrlInput,
     type AllowedImageMimeType,
 } from "./media";
+
+// Admin Users
+export {
+    UpdateUserRoleSchema,
+    InviteUserSchema,
+    UserRoleEnum,
+    type UpdateUserRoleInput,
+    type InviteUserInput,
+    type UserRole,
+} from "./admin-users";
+
+// Contact
+export {
+    ContactMessageSchema,
+    ContactEmailSchema,
+    NewsletterSubscriptionSchema,
+    ContactReasonEnum,
+    type ContactMessageInput,
+    type ContactEmailInput,
+    type NewsletterSubscription,
+    type ContactReason,
+} from "./contact";

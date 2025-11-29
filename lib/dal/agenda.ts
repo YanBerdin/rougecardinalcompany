@@ -12,9 +12,9 @@ import {
   toISODateString,
 } from "@/lib/dal/helpers";
 
-// Re-export for backward compatibility
-export type AgendaEventDTO = AgendaEvent;
-export type { EventTypeOption };
+// NOTE: Types AgendaEvent and EventTypeOption should be imported directly 
+// from '@/components/features/public-site/agenda/types' or '@/lib/schemas/agenda'
+// Server files cannot re-export types in Next.js 15
 
 // ============================================================================
 // Internal Types (Supabase response shape)
@@ -52,9 +52,9 @@ function buildAddress(lieu?: SupabaseEventRow["lieux"]): string {
 }
 
 /**
- * Map Supabase row to AgendaEventDTO with Zod validation
+ * Map Supabase row to AgendaEvent with Zod validation
  */
-function mapRowToEventDTO(row: SupabaseEventRow): AgendaEventDTO {
+function mapRowToEventDTO(row: SupabaseEventRow): AgendaEvent {
   const dateDebut = new Date(row.date_debut);
 
   const rawEvent = {
@@ -84,11 +84,11 @@ function mapRowToEventDTO(row: SupabaseEventRow): AgendaEventDTO {
 /**
  * Fetch upcoming events from agenda
  * @param limit - Maximum number of events to return (default: 10)
- * @returns DALResult with array of AgendaEventDTO
+ * @returns DALResult with array of AgendaEvent
  */
 export async function fetchUpcomingEvents(
   limit = 10
-): Promise<DALResult<AgendaEventDTO[]>> {
+): Promise<DALResult<AgendaEvent[]>> {
   try {
     const supabase = await createClient();
 
@@ -189,7 +189,7 @@ export async function fetchEventTypes(): Promise<DALResult<EventTypeOption[]>> {
  */
 export async function fetchUpcomingEventsLegacy(
   limit = 10
-): Promise<AgendaEventDTO[]> {
+): Promise<AgendaEvent[]> {
   const result = await fetchUpcomingEvents(limit);
   if (!result.success) {
     console.error("[DAL] fetchUpcomingEventsLegacy error:", result.error);

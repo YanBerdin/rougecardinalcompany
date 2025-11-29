@@ -11,9 +11,11 @@ import {
   Users,
   Calendar,
 } from "lucide-react";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Form } from "@/components/ui/form";
 import {
   Select,
   SelectContent,
@@ -169,12 +171,12 @@ export function ContactPageView() {
                   <form onSubmit={onFormSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label
+                        <Label
                           htmlFor="firstName"
                           className="block text-sm font-medium mb-2"
                         >
                           Prénom *
-                        </label>
+                        </Label>
                         <Input
                           id="firstName"
                           required
@@ -185,12 +187,12 @@ export function ContactPageView() {
                         />
                       </div>
                       <div>
-                        <label
+                        <Label
                           htmlFor="lastName"
                           className="block text-sm font-medium mb-2"
                         >
                           Nom *
-                        </label>
+                        </Label>
                         <Input
                           id="lastName"
                           required
@@ -204,12 +206,12 @@ export function ContactPageView() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label
+                        <Label
                           htmlFor="email"
                           className="block text-sm font-medium mb-2"
                         >
                           Email *
-                        </label>
+                        </Label>
                         <Input
                           id="email"
                           type="email"
@@ -221,12 +223,12 @@ export function ContactPageView() {
                         />
                       </div>
                       <div>
-                        <label
+                        <Label
                           htmlFor="phone"
                           className="block text-sm font-medium mb-2"
                         >
                           Téléphone
-                        </label>
+                        </Label>
                         <Input
                           id="phone"
                           type="tel"
@@ -239,12 +241,12 @@ export function ContactPageView() {
                     </div>
 
                     <div>
-                      <label
+                      <Label
                         htmlFor="reason"
                         className="block text-sm font-medium mb-2"
                       >
                         Motif de votre demande *
-                      </label>
+                      </Label>
                       <Select
                         value={formData.reason}
                         onValueChange={(value) =>
@@ -263,26 +265,14 @@ export function ContactPageView() {
                         </SelectContent>
                       </Select>
                     </div>
-                    {/*
-                                        <div>
-                                            <label htmlFor="subject" className="block text-sm font-medium mb-2">
-                                                Sujet *
-                                            </label>
-                                            <Input
-                                                id="subject"
-                                                required
-                                                value={formData.subject}
-                                                onChange={(e) => onInputChange('subject', e.target.value)}
-                                            />
-                                        </div>
-                                        */}
+
                     <div>
-                      <label
+                      <Label
                         htmlFor="message"
                         className="block text-sm font-medium mb-2"
                       >
                         Message *
-                      </label>
+                      </Label>
                       <Textarea
                         id="message"
                         required
@@ -303,7 +293,7 @@ export function ContactPageView() {
                           onInputChange("consent", checked as boolean)
                         }
                       />
-                      <label
+                      <Label
                         htmlFor="consent"
                         className="text-sm text-muted-foreground leading-relaxed"
                       >
@@ -311,7 +301,7 @@ export function ContactPageView() {
                         pour répondre à ma demande. Conformément au RGPD, vous
                         disposez d&apos;un droit d&apos;accès, de rectification et de
                         suppression de vos données.
-                      </label>
+                      </Label>
                     </div>
 
                     <Button
@@ -447,6 +437,7 @@ export function ContactPageView() {
               </Card>
 
               {/* Newsletter */}
+              {/** Form (de react-hook-form) n'accepte pas onSubmit. Wrapper attend un objet UseFormReturn. => balise <form> native  */}
               <Card id="newsletter">
                 <CardHeader>
                   <CardTitle>Newsletter</CardTitle>

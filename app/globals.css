@@ -69,8 +69,11 @@
     --shadow-2xl: 0rem 0.25rem 0.5rem 0rem hsl(0 0% 0% / 0.25);
     --tracking-normal: 0.025em;
     --spacing: 0.25rem;
-    --blur-xl: 64px;
-    --blur-lg: 20px;
+    --blur-3xl: 64px; /* 64px */
+    --blur-xl: 32px; /* 24px */
+    --blur-lg: 20px; /* 16px */
+    --blur-md: 12px; /* 12px */
+    --blur-sm: 8px; /* 8px */
   }
   .dark {
     --background: 0 0% 10.9804%; /* #1C1C1C */
@@ -861,8 +864,8 @@ html {
   ); /* rgba(196, 30, 58, 0.04) subtle warm tint, not white */
 
   /* Use the design token for consistent blur intensity */
-  -webkit-backdrop-filter: blur(var(--blur-xl));
-  backdrop-filter: blur(var(--blur-xl));
+  -webkit-backdrop-filter: blur(var(--blur-3xl));
+  backdrop-filter: blur(var(--blur-3xl));
   will-change: backdrop-filter, background, box-shadow;
 
   /* gentle elevation to separate from content */

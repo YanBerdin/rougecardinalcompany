@@ -231,13 +231,15 @@ export function SpectaclesView({
               </Button>
             )}
             {/* Debug info - TODO: remove in production */}
-            {/*}
+            {/*
+            }
                         {process.env.NODE_ENV === 'development' && (
                             <div className="mt-4 text-xs text-muted-foreground">
                                 Debug: {archivedShows.length} spectacles archivés | Seuil: 6 | Bouton visible: {hasMoreArchivedShows ? 'Oui' : 'Non'}
                             </div>
                         )}
-                        */}
+            */
+            }
           </div>
         </div>
       </section>

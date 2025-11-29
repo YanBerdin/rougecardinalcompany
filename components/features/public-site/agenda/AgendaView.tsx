@@ -215,7 +215,7 @@ export function AgendaView({
           <Button
             variant="outline"
             size="lg"
-            className="bg-white/10 border-white/30 text-white backdrop-blur-sm hover:bg-white hover:text-black transition-all duration-300 shadow-lg border"
+            className="bg-white/30 border-white/30 text-white backdrop-blur-md hover:bg-white hover:text-black transition-all duration-300 shadow-lg border"
             asChild
           >
             <Link href="/contact#newsletter">

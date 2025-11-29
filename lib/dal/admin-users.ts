@@ -4,7 +4,12 @@ import { createClient } from "@/supabase/server";
 import { createAdminClient } from "@/supabase/admin";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireAdmin } from "@/lib/auth/is-admin";
-import { z } from "zod";
+import {
+  UpdateUserRoleSchema,
+  InviteUserSchema,
+  type UpdateUserRoleInput,
+  type InviteUserInput,
+} from "@/lib/schemas/admin-users";
 
 export interface UserWithProfile {
   id: string;
@@ -18,66 +23,6 @@ export interface UserWithProfile {
     display_name: string | null;
   } | null;
 }
-
-const UpdateUserRoleSchema = z.object({
-  userId: z.string().uuid({ message: "UUID utilisateur invalide" }),
-  role: z.enum(["user", "editor", "admin"], {
-    message: "Rôle invalide",
-  }),
-});
-
-type UpdateUserRoleInput = z.infer<typeof UpdateUserRoleSchema>;
-
-const InviteUserSchema = z.object({
-  email: z
-    .string()
-    .email({ message: "Email invalide" })
-    .refine(
-      (email) => {
-        const domain = email.split("@")[1];
-        const blockedDomains = [
-          "tempmail.com",
-          "10minutemail.com",
-          "guerrillamail.com",
-          "mailinator.com",
-          "throwaway.email",
-        ];
-        return !blockedDomains.includes(domain);
-      },
-      {
-        message:
-          "Domaine email non autorisé (domaines jetables interdits)",
-      }
-    )
-    .refine(
-      (email) => {
-        const domain = email.split("@")[1];
-        const commonTypos: Record<string, string> = {
-          "gmial.com": "gmail.com",
-          "gmai.com": "gmail.com",
-          "yahooo.com": "yahoo.com",
-          "outlok.com": "outlook.com",
-        };
-        if (commonTypos[domain]) {
-          throw new Error(
-            `Vérifiez l'orthographe du domaine email (vouliez-vous dire ${commonTypos[domain]} ?)`
-          );
-        }
-        return true;
-      },
-      { message: "Vérifiez l'orthographe du domaine email" }
-    ),
-  role: z.enum(["user", "editor", "admin"], {
-    message: "Rôle invalide",
-  }),
-  displayName: z
-    .string()
-    .min(2, { message: "Nom doit contenir au moins 2 caractères" })
-    .optional()
-    .or(z.literal("")),
-});
-
-type InviteUserInput = z.infer<typeof InviteUserSchema>;
 
 interface DALResult<T = null> {
   success: boolean;
@@ -446,34 +391,6 @@ export async function inviteUserWithoutEmail(
   return { success: true, data: { userId, invitationUrl } };
 }
 
-/**
- * @deprecated Utiliser inviteUserWithoutEmail + Server Action avec Pattern Warning
- * Cette fonction est conservée pour rétrocompatibilité mais viole les règles SOLID DAL
- */
-export async function inviteUser(
-  input: InviteUserInput
-): Promise<DALResult<{ userId: string }>> {
-  console.warn("[DAL] inviteUser is deprecated, use inviteUserWithoutEmail + Server Action");
-
-  const result = await inviteUserWithoutEmail(input);
-
-  if (!result.success || !result.data) {
-    return { success: false, error: result.error };
-  }
-
-  // Legacy: envoi email direct (viole Pattern Warning)
-  try {
-    const emailActions = await import("@/lib/email/actions");
-    await emailActions.sendInvitationEmail({
-      email: input.email,
-      role: input.role,
-      displayName: input.displayName,
-      invitationUrl: result.data.invitationUrl,
-    });
-  } catch (error) {
-    console.error("[DAL] Email failed:", error);
-    // Note: ne fait PAS de rollback car Pattern Warning
-  }
-
-  return { success: true, data: { userId: result.data.userId } };
-}
+// NOTE: La fonction `inviteUser` deprecated a été supprimée.
+// Utiliser `inviteUserWithoutEmail` + Server Action `inviteUserAction` 
+// depuis app/(admin)/admin/users/admin-users-actions.ts

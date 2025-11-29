@@ -1,9 +1,8 @@
 import {
   fetchUpcomingEvents,
   fetchEventTypes,
-  type AgendaEventDTO,
-  type EventTypeOption,
 } from "@/lib/dal/agenda";
+import type { Event as AgendaEvent, EventType as EventTypeOption } from "./types";
 import AgendaClientContainer from "./AgendaClientContainer";
 
 export default async function AgendaContainer() {
@@ -13,7 +12,7 @@ export default async function AgendaContainer() {
   ]);
 
   // Handle DALResult - graceful degradation
-  const events: AgendaEventDTO[] = eventsResult.success
+  const events: AgendaEvent[] = eventsResult.success
     ? (eventsResult.data ?? [])
     : [];
 

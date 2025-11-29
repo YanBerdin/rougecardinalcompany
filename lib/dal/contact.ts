@@ -1,35 +1,23 @@
 "use server";
 
 import "server-only";
-import { z } from "zod";
 import { createClient } from "@/supabase/server";
+import { type DALResult } from "@/lib/dal/helpers";
+import {
+  ContactMessageSchema,
+  type ContactMessageInput,
+} from "@/lib/schemas/contact";
 
-// Schema et type définis dans le scope local pour éviter les exports non-async
-const ContactMessageSchema = z.object({
-  firstName: z.string().trim().min(1).max(100),
-  lastName: z.string().trim().min(1).max(100),
-  email: z.string().email().toLowerCase(),
-  phone: z.string().trim().max(40).optional().nullable(),
-  reason: z
-    .enum([
-      "booking",
-      "partenariat",
-      "presse",
-      "education",
-      "technique",
-      "autre",
-    ]) // align with DB CHECK constraint
-    .default("autre"),
-  message: z.string().trim().min(1).max(5000),
-  consent: z
-    .boolean()
-    .refine((v) => v === true, { message: "Consent required" }),
-});
+// NOTE: ContactMessageInput type is exported from @/lib/schemas/contact
+// Server files cannot re-export types in Next.js 15
 
-export type ContactMessageInput = z.infer<typeof ContactMessageSchema>;
+// =============================================================================
+// CREATE CONTACT MESSAGE
+// =============================================================================
 
-export async function createContactMessage(input: ContactMessageInput) {
-  // Validation des données d'entrée
+export async function createContactMessage(
+  input: ContactMessageInput
+): Promise<DALResult<{ ok: true }>> {
   const validatedInput = ContactMessageSchema.parse(input);
 
   const supabase = await createClient();
@@ -45,15 +33,15 @@ export async function createContactMessage(input: ContactMessageInput) {
     metadata: {},
   } as const;
 
-  // RGPD: Utilise .insert() sans .select() pour éviter les blocages RLS
-  // Seuls les admins peuvent lire les données personnelles (firstname, lastname, email, phone)
-  // L'insertion publique est autorisée pour le formulaire de contact
+  //? RGPD: Utilise .insert() sans .select() pour éviter les blocages RLS
+  //? Seuls les admins peuvent lire les données personnelles (firstname, lastname, email, phone)
+  //? L'insertion publique est autorisée pour le formulaire de contact
   const { error } = await supabase.from("messages_contact").insert(payload);
+
   if (error) {
-    // Hide low-level details but log server-side
-    console.error("createContactMessage error", error);
-    throw new Error("Failed to submit contact message");
+    console.error("[ERR_CONTACT_001] createContactMessage failed:", error.message);
+    return { success: false, error: `[ERR_CONTACT_001] ${error.message}` };
   }
 
-  return { ok: true } as const;
+  return { success: true, data: { ok: true } };
 }

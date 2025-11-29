@@ -1,33 +1,11 @@
 "use server";
 
-import { z } from "zod";
-import {
-  createContactMessage,
-  type ContactMessageInput,
-} from "@/lib/dal/contact";
+import { createContactMessage } from "@/lib/dal/contact";
 import { sendContactNotification } from "@/lib/email/actions";
-
-// Schema de validation pour le formulaire (copie du schéma DAL)
-const FormSchema = z.object({
-  firstName: z.string().trim().min(1).max(100),
-  lastName: z.string().trim().min(1).max(100),
-  email: z.string().email().toLowerCase(),
-  phone: z.string().trim().max(40).optional().nullable(),
-  reason: z
-    .enum([
-      "booking",
-      "partenariat",
-      "presse",
-      "education",
-      "technique",
-      "autre",
-    ])
-    .default("autre"),
-  message: z.string().trim().min(1).max(5000),
-  consent: z
-    .boolean()
-    .refine((v) => v === true, { message: "Consent required" }),
-});
+import {
+  ContactMessageSchema,
+  type ContactMessageInput,
+} from "@/lib/schemas/contact";
 
 export async function submitContactAction(formData: FormData) {
   // Extract and validate
@@ -44,7 +22,7 @@ export async function submitContactAction(formData: FormData) {
     consent: String(formData.get("consent") ?? "false") === "true",
   };
 
-  const parsed = FormSchema.safeParse(shape);
+  const parsed = ContactMessageSchema.safeParse(shape);
   if (!parsed.success) {
     return {
       ok: false,
@@ -57,7 +35,11 @@ export async function submitContactAction(formData: FormData) {
   await new Promise((r) => setTimeout(r, 1500));
 
   // Persistance en base (priorité RGPD)
-  await createContactMessage(parsed.data as ContactMessageInput);
+  const dalResult = await createContactMessage(parsed.data as ContactMessageInput);
+  if (!dalResult.success) {
+    console.error("[Contact Action] DAL error:", dalResult.error);
+    return { ok: false, error: "Database error" } as const;
+  }
 
   // Envoi notification email admin
   // Note: Le schéma API attend 'name' et 'subject', mais la DAL a 'firstName'/'lastName'

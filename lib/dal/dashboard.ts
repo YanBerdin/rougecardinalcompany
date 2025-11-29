@@ -2,23 +2,23 @@
 import "server-only";
 
 import { createClient } from "@/supabase/server";
+import { type DALResult } from "@/lib/dal/helpers";
 import {
   DashboardStatsSchema,
   type DashboardStats,
 } from "@/lib/schemas/dashboard";
 
+// =============================================================================
+// FETCH DASHBOARD STATS
+// =============================================================================
+
 /**
  * Fetch dashboard statistics from Supabase
- *
  * Performs parallel queries for team, shows, events, and media counts
- * Returns validated DashboardStats object
- *
- * @throws Error if any query fails
  */
-export async function fetchDashboardStats(): Promise<DashboardStats> {
+export async function fetchDashboardStats(): Promise<DALResult<DashboardStats>> {
   const supabase = await createClient();
 
-  // Parallel queries for optimal performance
   const [teamResult, showsResult, eventsResult, mediaResult] =
     await Promise.all([
       supabase
@@ -29,7 +29,6 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
       supabase.from("medias").select("*", { count: "exact", head: true }),
     ]);
 
-  // Check for individual errors
   const errors = [
     { name: "membres_equipe", error: teamResult.error },
     { name: "spectacles", error: showsResult.error },
@@ -41,17 +40,16 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
     const errorMessages = errors
       .map((e) => `${e.name}: ${e.error?.message}`)
       .join(", ");
-    throw new Error(`Failed to fetch dashboard stats: ${errorMessages}`);
+    console.error("[ERR_DASHBOARD_001] Failed to fetch stats:", errorMessages);
+    return { success: false, error: `[ERR_DASHBOARD_001] ${errorMessages}` };
   }
 
-  // Build and validate stats object
   const stats = {
-    teamCount: teamResult.count || 0,
-    showsCount: showsResult.count || 0,
-    eventsCount: eventsResult.count || 0,
-    mediaCount: mediaResult.count || 0,
+    teamCount: teamResult.count ?? 0,
+    showsCount: showsResult.count ?? 0,
+    eventsCount: eventsResult.count ?? 0,
+    mediaCount: mediaResult.count ?? 0,
   };
 
-  // Runtime validation with Zod
-  return DashboardStatsSchema.parse(stats);
+  return { success: true, data: DashboardStatsSchema.parse(stats) };
 }

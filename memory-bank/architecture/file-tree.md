@@ -1,21 +1,61 @@
 # File Tree: rougecardinalcompany
 
-**Generated:** 11/11/2025, 4:15:54 PM
+**Generated:** 11/29/2025, 8:55:59 PM
 **Root Path:** `/home/yandev/projets/rougecardinalcompany`
 
 ```bash
 ├── 📁 .github
 │   ├── 📁 copilot
+│   │   ├── 📝 Postgres_SQL_Style_Guide.instructions.md
+│   │   ├── 📝 a11y.instructions.md
+│   │   ├── 📝 conventional-commit.instructions.md
+│   │   ├── 📝 edge-functions.instructions.md
+│   │   ├── 📝 security-and-owasp.instructions.md
+│   │   ├── 📝 touch_hitbox.instructions.md
+│   │   └── 📝 wcag_target_size.instructions.md
 │   ├── 📁 instructions
+│   │   ├── ⚙️ .markdownlint.jsonc
+│   │   ├── 📝 1-clean-code.instructions.md
+│   │   ├── 📝 2-typescript.instructions.md
+│   │   ├── 📝 Create-RLS-policies.instructions.md
+│   │   ├── 📝 Create_migration.instructions.md
+│   │   ├── 📝 Database_Create_functions.instructions.md
+│   │   ├── 📝 Declarative_Database_Schema.instructions.md
+│   │   ├── 📝 README.md
+│   │   ├── 📝 crud-server-actions-pattern.instructions.md
+│   │   ├── 📝 dal-solid-principles.instructions.md
+│   │   ├── 📝 knowledge-base-170825-0035.md
+│   │   ├── 📝 memory-bank.instructions.md
+│   │   ├── 📝 next-backend.instructions.md
+│   │   ├── 📝 nextjs-supabase-auth-2025.instructions.md
+│   │   ├── 📝 nextjs.instructions.md
+│   │   ├── 📝 nextjs15-backend-with-supabase.instructions.md
+│   │   ├── 📝 rouge-cardinal-frontend-skill.instructions.md
+│   │   └── 📝 shadcn-mcp.instructions.md
 │   ├── 📁 prompts
-│   └──  📁 workflows
+│   │   └── 📝 plan.dalSolidRefactoring.prompt.md
+│   ├── 📁 workflows
+│   │   ├── ⚙️ detect-revoke-warn.yml
+│   │   ├── ⚙️ invitation-email-test.yml
+│   │   ├── ⚙️ monitor-detect-revoke.yml
+│   │   └── ⚙️ reorder-sql-tests.yml
+│   ├── 📝 SECRETS_EXAMPLES.md
+│   └── 📝 copilot-instructions.md
 ├── 📁 __tests__
 │   └── 📁 emails
+│       └── 📄 invitation-email.test.tsx
 ├── 📁 app
 │   ├── 📁 (admin)
 │   │   ├── 📁 admin
 │   │   │   ├── 📁 debug-auth
 │   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 home
+│   │   │   │   ├── 📁 about
+│   │   │   │   │   ├── 📄 home-about-actions.ts
+│   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   └── 📁 hero
+│   │   │   │       ├── 📄 home-hero-actions.ts
+│   │   │   │       └── 📄 page.tsx
 │   │   │   ├── 📁 spectacles
 │   │   │   │   ├── 📁 [id]
 │   │   │   │   │   ├── 📁 edit
@@ -23,6 +63,8 @@
 │   │   │   │   │   └── 📄 page.tsx
 │   │   │   │   ├── 📁 new
 │   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   ├── 📄 actions.ts
+│   │   │   │   ├── 📄 loading.tsx
 │   │   │   │   └── 📄 page.tsx
 │   │   │   ├── 📁 team
 │   │   │   │   ├── 📄 actions.ts
@@ -41,6 +83,9 @@
 │   ├── 📁 (marketing)
 │   │   ├── 📁 agenda
 │   │   │   └── 📄 page.tsx
+│   │   ├── 📁 auth
+│   │   │   └── 📁 setup-account
+│   │   │       └── 📄 page.tsx
 │   │   ├── 📁 compagnie
 │   │   │   └── 📄 page.tsx
 │   │   ├── 📁 contact
@@ -57,8 +102,18 @@
 │   │   └── 📄 page.tsx
 │   ├── 📁 api
 │   │   ├── 📁 admin
+│   │   │   ├── 📁 home
+│   │   │   │   └── 📁 hero
+│   │   │   │       ├── 📁 [id]
+│   │   │   │       │   └── 📄 route.ts
+│   │   │   │       ├── 📁 reorder
+│   │   │   │       │   └── 📄 route.ts
+│   │   │   │       └── 📄 route.ts
 │   │   │   ├── 📁 invite-user
 │   │   │   │   └── 📄 route.ts
+│   │   │   ├── 📁 media
+│   │   │   │   └── 📁 search
+│   │   │   │       └── 📄 route.ts
 │   │   │   ├── 📁 spectacles
 │   │   │   │   ├── 📁 [id]
 │   │   │   │   │   └── 📄 route.ts
@@ -74,6 +129,8 @@
 │   │   │   └── 📄 route.ts
 │   │   ├── 📁 debug-auth
 │   │   │   └── 📄 route.ts
+│   │   ├── 📁 home
+│   │   │   └── 📁 hero
 │   │   ├── 📁 newsletter
 │   │   │   └── 📄 route.ts
 │   │   ├── 📁 public
@@ -120,17 +177,33 @@
 │   │   │   └── 📄 StatsCard.tsx
 │   │   ├── 📄 AdminAuthRow.tsx
 │   │   ├── 📄 AdminSidebar.tsx
+│   │   ├── 📄 CardsDashboard.tsx
 │   │   └── 📄 ErrorBoundary.tsx
-│   ├── 📁 dev
+│   ├── 📁 auth
+│   │   └── 📄 SetupAccountForm.tsx
 │   ├── 📁 features
 │   │   ├── 📁 admin
+│   │   │   ├── 📁 home
+│   │   │   │   ├── 📄 AboutContentContainer.tsx
+│   │   │   │   ├── 📄 AboutContentForm.tsx
+│   │   │   │   ├── 📄 HeroSlideForm.tsx
+│   │   │   │   ├── 📄 HeroSlideFormFields.tsx
+│   │   │   │   ├── 📄 HeroSlideImageSection.tsx
+│   │   │   │   ├── 📄 HeroSlidePreview.tsx
+│   │   │   │   ├── 📄 HeroSlidesContainer.tsx
+│   │   │   │   ├── 📄 HeroSlidesErrorBoundary.tsx
+│   │   │   │   └── 📄 HeroSlidesView.tsx
+│   │   │   ├── 📁 media
+│   │   │   │   ├── 📄 MediaExternalUrlInput.tsx
+│   │   │   │   ├── 📄 MediaLibraryPicker.tsx
+│   │   │   │   ├── 📄 MediaUploadDialog.tsx
+│   │   │   │   └── 📄 index.ts
 │   │   │   ├── 📁 spectacles
 │   │   │   │   ├── 📄 SortableHeader.tsx
 │   │   │   │   ├── 📄 SpectacleForm.tsx
 │   │   │   │   ├── 📄 SpectaclesManagementContainer.tsx
 │   │   │   │   └── 📄 SpectaclesTable.tsx
 │   │   │   ├── 📁 team
-│   │   │   │   ├── 📄 MediaPickerDialog.tsx
 │   │   │   │   ├── 📄 TeamManagementContainer.tsx
 │   │   │   │   ├── 📄 TeamMemberCard.tsx
 │   │   │   │   ├── 📄 TeamMemberForm.tsx
@@ -138,7 +211,6 @@
 │   │   │   └── 📁 users
 │   │   │       ├── 📄 InviteUserForm.tsx
 │   │   │       ├── 📄 UsersManagementContainer.tsx
-│   │   │       ├── 📄 UsersManagementSkeleton.tsx
 │   │   │       ├── 📄 UsersManagementView.tsx
 │   │   │       └── 📄 index.ts
 │   │   └── 📁 public-site
@@ -222,7 +294,13 @@
 │   │   ├── 📄 footer.tsx
 │   │   └── 📄 header.tsx
 │   ├── 📁 skeletons
+│   │   ├── 📄 AboutContentSkeleton.tsx
+│   │   ├── 📄 AdminDashboardSkeleton.tsx
+│   │   ├── 📄 AdminSpectaclesSkeleton.tsx
+│   │   ├── 📄 AdminTeamSkeleton.tsx
+│   │   ├── 📄 HeroSlidesSkeleton.tsx
 │   │   ├── 📄 StatsCardsSkeleton.tsx
+│   │   ├── 📄 UsersManagementSkeleton.tsx
 │   │   ├── 📄 about-skeleton.tsx
 │   │   ├── 📄 agenda-skeleton.tsx
 │   │   ├── 📄 compagnie-skeleton.tsx
@@ -275,7 +353,217 @@
 │   ├── 📄 theme-switcher.tsx
 │   └── 📄 update-password-form.tsx
 ├── 📁 doc
+│   ├── 📁 API-keys
+│   │   └── 📝 scripts-troubleshooting.md
+│   ├── 📁 copilot
+│   │   └── 📝 package-installation.instructions.md
+│   ├── 📁 linting
+│   │   ├── 📝 LINTING_CONFIGURATION.md
+│   │   └── 📝 MARKDOWN_ERRORS_REPORT.md
+│   ├── 📁 migrations-doc
+│   │   ├── 📁 legacy-migrations
+│   │   │   ├── 📁 DEPRECATED
+│   │   │   │   ├── 📄 20251002130000_sync_existing_profiles.sql.skip
+│   │   │   │   ├── 📄 20251022150000_apply_articles_presse_rls_policies.sql.skip
+│   │   │   │   ├── 📄 20251022170000_optimize_articles_presse_rls_policies.sql.skip
+│   │   │   │   ├── 📄 20251026180000_apply_spectacles_partners_rls_policies.sql.skip
+│   │   │   │   ├── 📄 20251026181000_apply_missing_rls_policies_home_content.sql.skip
+│   │   │   │   ├── 📄 20251027010000_recreate_all_rls_policies.sql.skip
+│   │   │   │   ├── 📄 20251117154411_fix_spectacles_rls_clean.sql.skip
+│   │   │   │   ├── 📝 RECONSTRUCTION_SUCCES.md
+│   │   │   │   ├── 📝 RLS_POLICIES_HOTFIX_2025-10-26.md
+│   │   │   │   └── 📝 SECURITY_AUDIT_SUMMARY.md
+│   │   │   ├── 📄 20251024215030_run_reorder_tests.sql
+│   │   │   ├── 📄 20251024215130_check_grants_membres_equipe.sql
+│   │   │   ├── 📄 20251024231855_restrict_reorder_execute.sql
+│   │   │   ├── 📄 20251025160000_revoke_exposed_grants.sql
+│   │   │   ├── 📄 20251025161000_revoke_pg_stat_statements.sql
+│   │   │   ├── 📄 20251025163000_revoke_pg_stat_statements_objects.sql
+│   │   │   ├── 📄 20251025164500_revoke_articles_tables.sql
+│   │   │   ├── 📄 20251025170000_apply_revoke_public_anon.sql
+│   │   │   ├── 📄 20251025170100_proposed_revoke_public_anon.sql
+│   │   │   ├── 📄 20251025173000_revoke_communiques_privileges.sql
+│   │   │   ├── 📄 20251025174500_revoke_information_schema_and_role_memberships.sql
+│   │   │   ├── 📄 20251025175500_revoke_additional_authenticated_grants.sql
+│   │   │   ├── 📄 20251025180000_revoke_more_authenticated_grants.sql
+│   │   │   ├── 📄 20251025181000_revoke_final_exposed_objects.sql
+│   │   │   ├── 📄 20251025182000_revoke_new_exposed_objects.sql
+│   │   │   ├── 📄 20251025183000_revoke_membres_messages_views.sql
+│   │   │   ├── 📄 20251025184000_revoke_final_round_partners_profiles.sql
+│   │   │   ├── 📄 20251025185000_revoke_seo_spectacles_final.sql
+│   │   │   ├── 📄 20251025190000_revoke_junction_tables_final.sql
+│   │   │   ├── 📄 20251025191000_revoke_realtime_schema.sql
+│   │   │   ├── 📄 20251025192000_revoke_realtime_subscription_authenticated.sql
+│   │   │   ├── 📄 20251026080000_revoke_articles_presse_functions.sql
+│   │   │   ├── 📄 20251026090000_revoke_categories_analytics_functions.sql
+│   │   │   ├── 📄 20251026100000_revoke_storage_search_functions.sql
+│   │   │   ├── 📄 20251026110000_revoke_storage_analytics_persistent_functions.sql
+│   │   │   ├── 📄 20251026120000_revoke_storage_objects_business_functions.sql
+│   │   │   ├── 📄 20251026130000_revoke_storage_prefixes_versioning_functions.sql
+│   │   │   ├── 📄 20251026140000_revoke_storage_multipart_auth_triggers.sql
+│   │   │   ├── 📄 20251026150000_revoke_storage_multipart_parts_utility_functions.sql
+│   │   │   ├── 📄 20251026160000_revoke_remaining_versioning_triggers.sql
+│   │   │   ├── 📄 20251026170000_revoke_check_communique_has_pdf_function.sql
+│   │   │   ├── 📝 INCIDENT_POSTMORTEM_RLS_GRANTS_2025-10-27.md
+│   │   │   ├── 📝 SECURITY_INCIDENT_2025-10-27.md
+│   │   │   └── 📝 rls-policies-troubleshooting.md
+│   │   ├── 📝 fix_all_views_security_invoker.md
+│   │   └── 📝 incident_RLS_GRANTS.md
+│   ├── 📁 prompt-plan
+│   │   ├── 📁 TASK026-prompt-plan
+│   │   │   ├── 📝 TASK026-homepage-content-management.instructions.md
+│   │   │   ├── 📝 fix-rerender-homeHeroSlide.md
+│   │   │   ├── 📝 plan-cleanCodeTypeScriptConformity.prompt.md
+│   │   │   └── 📝 plan-mediaPickerDialogRefactoring.prompt.md
+│   │   ├── 📝 TASK022-team-management-instructions.md
+│   │   ├── 📝 fix-.plan-userInvitationSystem.prompt.md
+│   │   ├── 📄 migrate-route-groups.sh
+│   │   ├── 📝 plan-apiRefactoringReview.prompt.md
+│   │   ├── 📝 plan-dashboardRefactoring.prompt.md
+│   │   ├── 📝 plan-refactorInviteUserFunction.prompt.md
+│   │   ├── 📝 plan-spectaclesImplementationCompletion.prompt.md
+│   │   ├── 📝 plan-spectaclesSortingAndGenreRefactoring.prompt.md
+│   │   └── 📝 plan-userInvitationSystem.prompt.md
+│   ├── 📁 prompts-github
+│   │   ├── 📝 architecture-blueprint-generator.prompt.md
+│   │   ├── 📝 conventional-commit.prompt.md
+│   │   ├── 📝 copilot-instructions-blueprint-generator.prompt.md
+│   │   ├── 📝 copilot-thought-logging.instructions.md
+│   │   ├── 📝 feature.Instructions.md
+│   │   └── 📝 folder-structure-blueprint-generator.prompt.md
+│   ├── 📁 resend_integration
+│   │   ├── 📁 contact-resend
+│   │   │   ├── 📝 API-Contact-Test-Results.md
+│   │   │   └── 📝 Fix-Contact-Email-Missing.md
+│   │   ├── 📁 newsletter-resend
+│   │   │   └── 📝 API-Newsletter-Test-Results.md
+│   │   ├── 📝 Complete-Session-Summary-RGPD-Contact.md
+│   │   ├── 📝 RGPD-Compliance-Validation.md
+│   │   ├── 📝 Session-RGPD-Summary-2025-10-10.md
+│   │   └── 📝 resend_supabase_integration_prompt.md
+│   ├── 📝 dev-email-redirect.md
+│   ├── 📝 guide-developpement.md
+│   ├── 📝 regles_copilot.md
+│   ├── 🖼️ snap.png
+│   ├── 📝 solution-admin-auth.md
+│   ├── 📝 supabase-typescript-guide.md
+│   ├── 📝 troubleshooting-admin-auth.md
+│   └── 📝 visuel-blueprintGenerator.md
 ├── 📁 doc-perso
+│   ├── 📁 Appliquer-instructions-plan
+│   │   ├── 📝 TASK022-CLEANUP-NOM-ALIAS.md
+│   │   ├── 📝 TASK022-CORRECTIONS.md
+│   │   ├── 📝 TASK022-MAPPING-FIXES.md
+│   │   ├── 📝 TASK022-REVIEW.md
+│   │   ├── 📝 TASK022-SCHEMA-COHERENCE.md
+│   │   ├── 📝 TASK022-SUMMARY-MAPPING-CHECK.md
+│   │   ├── 📝 TASK022-team-management-instructions.md
+│   │   └── 📝 fetch-media-articles-progress.md
+│   ├── 📁 SQL-schema-Compliancy-report
+│   │   ├── 📝 create-functions-compliance-report.md
+│   │   ├── 📝 create-migration-compliance-report.md
+│   │   ├── 📝 create-rls-policies-compliance-report.md
+│   │   ├── 📝 declarative-schema-compliance-report.md
+│   │   └── 📝 postgres-sql-style-compliance-report.md
+│   ├── 📁 Schema_et_migrations
+│   │   └── 📝 terminal-schema-progress.md
+│   ├── 📁 Supabase API Keys 
+│   │   ├── 📝 Fix-Legacy-API-Keys-2025-10-13.md
+│   │   └── 📝 Supabase-API-Keys-Formats-2025-10-13.md
+│   ├── 📁 TASK026
+│   │   ├── 📝 TASK026B-terminal.md
+│   │   └── 📝 task026-complianct-report-before-refacto.md
+│   ├── 📁 Team-DAL-refacto-
+│   │   ├── 📝 3-suite-terminal.md
+│   │   ├── 📝 suite-terminal.md
+│   │   └── 📝 terminal-progress.md
+│   ├── 📁 conversation Coplilot
+│   │   ├── 📝 bug-typescript-et-migration.md
+│   │   ├── 📝 bug-wsl.md
+│   │   └── 📝 declarative-schema-hotfix.md
+│   ├── 📁 db-reset
+│   │   └── 📝 db-reset.md
+│   ├── 📁 deprecated
+│   │   ├── 📁 legacy-migrations
+│   │   │   ├── 📄 20251117015616_fix_spectacles_rls_insert_policy.sql
+│   │   │   ├── 📄 20251117020919_fix_spectacles_rls_direct_query.sql
+│   │   │   ├── 📄 20251117154221_debug_spectacles_policies.sql
+│   │   │   ├── 📄 20251117154301_test_insert_public_false.sql
+│   │   │   └── 📄 20251117154330_check_rls_policies_detailed.sql
+│   │   ├── 📁 types
+│   │   │   └── 📄 database.types.legacy.ts
+│   │   ├── 📄 actions.legacy.ts
+│   │   └── 📝 copilot-instructions-old.md
+│   ├── 📁 feat-Admin-discuss
+│   │   └── 📝 sync_existing_profiles_guide.md
+│   ├── 📁 fix-declarative-schema-report
+│   │   ├── 📝 20251007-migration-supabase-cloud-success.md
+│   │   ├── 📝 DECISION-hotfix-migrations-synchronization.md
+│   │   └── 📝 declarative-schema-hotfix-workflow.md
+│   ├── 📁 lancement-supabase-cloud
+│   │   ├── 📝 CLI-Supabase-Cloud.md
+│   │   └── 📝 docker-volume-backed-up.md
+│   ├── 📁 lancement-supabase-local
+│   │   ├── 📝 CLI-Supabase-Local.md
+│   │   └── 📝 docker-install.md
+│   ├── 📁 linting-conversation
+│   │   └── 📝 linting-conversation.md
+│   ├── 📁 memory-bank-deprecated
+│   │   ├── 📝 Project_Architecture_Blueprint.md
+│   │   ├── 📝 Project_Architecture_Blueprint_v3.md
+│   │   ├── 📝 Project_Folders_Structure_Blueprint.md
+│   │   └── 📝 Project_Folders_Structure_Blueprint_v2.md
+│   ├── 📁 prompts-custom-claude
+│   │   └── 📝 feature_based_prompt.md
+│   ├── 📁 prompts-custom-copilot-pc
+│   │   └── 📝 0-clean-architecture-nextjs.md
+│   ├── 📁 refacto-active-route-admin
+│   │   ├── 📝 analyse-refacto-todo.md
+│   │   ├── 📝 refacto-terminal-suite.md
+│   │   └── 📝 refacto-terminal.md
+│   ├── 📁 resend-integration
+│   │   ├── 📁 MISE_A_JOUR_RESEND_discussion.md
+│   │   │   ├── 📝 0-RGPD-Compliance-discuss-conformité.md
+│   │   │   ├── 📝 1-resend-update-discuss.md
+│   │   │   ├── 📝 2-progress-and-test-resend.md
+│   │   │   ├── 📝 3-eslint-discuss.md
+│   │   │   ├── 📝 4-useNewsletterSubscription to useNewsletterSubscribe.md
+│   │   │   ├── 📝 5-articles_presse_rls-DAL-contact.md
+│   │   │   ├── 📝 6-newsletter-log-test-fix-rgpd.md
+│   │   │   ├── 📝 7-DAL-contact.md
+│   │   │   └── 📝 8-eslint-types-error-todo.md
+│   │   └── 📁 resend-implementation-plan
+│   │       ├── 📝 COMPATIBILITY_ISSUES.md
+│   │       ├── 📝 MISE_A_JOUR_RESEND_INTEGRATION.md
+│   │       └── 📝 resend_supabase_integration.md
+│   ├── 📁 spectaclesImplementationCompletion
+│   │   ├── 📄 promote-admin.ts
+│   │   ├── 📝 see-admin-terminal.md
+│   │   ├── 📝 seedAdmin-discuss.md
+│   │   └── 📝 spectaclesImplementationCompletion.md
+│   ├── 📁 userInvitationSystem-terminal.md
+│   │   └── 📝 new.md
+│   ├── 📝 1-naming-conventions.instructions.md
+│   ├── 📝 2-typescript-naming-conventions.md
+│   ├── 📝 Architecture-Blueprints-Update-Log-2025-10-13.md
+│   ├── 📝 Architecture-Update-Auth-Cleanup-2025-10-13.md
+│   ├── 📝 Code-Cleanup-Auth-Session-2025-10-13.md
+│   ├── 📝 DECISION-hotfix-migrations-synchronization.md
+│   ├── 📝 Project_Folders_Structure_Blueprint.md
+│   ├── 📝 README-CORRECTIONS-CONFORMITE.md
+│   ├── 📝 cahier-des-charges.md
+│   ├── 📝 copilot-extensions-espace-disk.md
+│   ├── 📄 global.css
+│   ├── 📝 many-to-many.md
+│   ├── 📝 mcp-context-flow.md
+│   ├── ⚙️ mcp.json
+│   ├── 📝 nextjs.instructions.md
+│   ├── 📝 progress.md
+│   ├── 📝 shadcn-mcp.md
+│   ├── 📄 test-form-schema.ts
+│   ├── 📝 update-node-18to-22.md
+│   ├── 📝 updated_copilot_instructions(4).md
+│   └── 📝 updated_copilot_instructions.md
 ├── 📁 emails
 │   ├── 📁 utils
 │   │   ├── 📄 components.utils.tsx
@@ -292,6 +580,13 @@
 │   ├── 📁 auth
 │   │   └── 📄 is-admin.ts
 │   ├── 📁 dal
+│   │   ├── 📁 helpers
+│   │   │   ├── 📄 error.ts
+│   │   │   ├── 📄 format.ts
+│   │   │   ├── 📄 index.ts
+│   │   │   └── 📄 slug.ts
+│   │   ├── 📄 admin-home-about.ts
+│   │   ├── 📄 admin-home-hero.ts
 │   │   ├── 📄 admin-users.ts
 │   │   ├── 📄 agenda.ts
 │   │   ├── 📄 compagnie-presentation.ts
@@ -309,38 +604,301 @@
 │   │   └── 📄 team.ts
 │   ├── 📁 email
 │   │   ├── 📄 actions.ts
-│   │   └── 📄 schemas.ts
+│   │   ├── 📄 schemas.ts
+│   │   └── 📄 types.ts
 │   ├── 📁 forms
-│   │   ├── 📁 __tests__
 │   │   └── 📄 spectacle-form-helpers.ts
 │   ├── 📁 hooks
+│   │   ├── 📄 use-debounce.ts
 │   │   ├── 📄 useContactForm.ts
 │   │   └── 📄 useNewsletterSubscribe.ts
 │   ├── 📁 plugins
 │   │   └── 📄 touch-hitbox-plugin.js
 │   ├── 📁 schemas
+│   │   ├── 📄 agenda.ts
+│   │   ├── 📄 compagnie.ts
+│   │   ├── 📄 dashboard.ts
+│   │   ├── 📄 home-content.ts
+│   │   ├── 📄 index.ts
+│   │   ├── 📄 media.ts
+│   │   ├── 📄 presse.ts
 │   │   ├── 📄 spectacles.ts
 │   │   └── 📄 team.ts
 │   ├── 📁 tables
 │   │   └── 📄 spectacle-table-helpers.ts
+│   ├── 📁 types
+│   │   └── 📄 media.ts
+│   ├── 📁 utils
+│   │   └── 📄 validate-image-url.ts
 │   ├── 📄 database.types.ts
 │   ├── 📄 resend.ts
 │   ├── 📄 site-config.ts
 │   └── 📄 utils.ts
 ├── 📁 memory-bank
+│   ├── 📁 architecture
+│   │   ├── 📝 Email_Service_Architecture.md
+│   │   ├── 📝 Project_Architecture_Blueprint.md
+│   │   ├── 📝 Project_Folders_Structure_Blueprint_v4.md
+│   │   ├── 📝 dev-email-redirect.md
+│   │   └── 📝 file-tree.md
+│   ├── 📁 changes
+│   │   └── 📝 2025-11-11-layouts-admin-sidebar.md
+│   ├── 📁 epics
+│   │   ├── 📁 details
+│   │   │   ├── 📝 14.1-page-accueil(Home).md
+│   │   │   ├── 📝 14.2-page-presentation-companie.md
+│   │   │   ├── 📝 14.3-page-spectacles-(événements).md
+│   │   │   ├── 📝 14.4-page-agenda.md
+│   │   │   ├── 📝 14.5-page-presse.md
+│   │   │   ├── 📝 14.6-contact-newsletter.md
+│   │   │   └── 📝 14.7-back‑office.md
+│   │   └── ⚙️ epics-map.yaml
+│   ├── 📁 procedures
+│   │   ├── 📝 admin-management.md
+│   │   └── 📝 admin-user-registration.md
+│   ├── 📁 tasks
+│   │   ├── 📁 completed-tasks
+│   │   │   ├── 📝 TASK007-update-memory-bank.md
+│   │   │   ├── 📝 TASK011-integration-home-hero-slides.md
+│   │   │   ├── 📝 TASK012-integration-ui-compagnie-stats.md
+│   │   │   ├── 📝 TASK013-seeds-nouvelles-tables.md
+│   │   │   ├── 📝 TASK019-fix-spectacles-archives.md
+│   │   │   ├── 📝 TASK020-alignement-ui-presse.md
+│   │   │   ├── 📝 TASK021-admin-backoffice-spectacles.md
+│   │   │   ├── 📝 TASK021-admin-spectacles-crud.md
+│   │   │   ├── 📝 TASK021-content-management-crud.md
+│   │   │   ├── 📝 TASK021-documentation-docker.md
+│   │   │   ├── 📝 TASK021B-documentation-supabase-cli.md
+│   │   │   ├── 📝 TASK021C-auth-cleanup-and-optimization.md
+│   │   │   ├── 📝 TASK022-REVIEW.md
+│   │   │   ├── 📝 TASK022-implementation-summary.md
+│   │   │   ├── 📝 TASK022-team-management.md
+│   │   │   ├── 📝 TASK024-admin-email-scripts.md
+│   │   │   ├── 📝 TASK025-rls-security-performance-fixes.md
+│   │   │   ├── 📝 TASK025B-security-audit-campaign.md
+│   │   │   ├── 📝 TASK026-COMPLIANCE-FIXES.md
+│   │   │   ├── 📝 TASK026-FINAL-STATUS.md
+│   │   │   ├── 📝 TASK026-homepage-content-management.md
+│   │   │   ├── 📝 TASK026B-cloud-fix-procedure.md
+│   │   │   ├── 📝 TASK026B-db-functions-compliance.md
+│   │   │   ├── 📝 TASK027B-security-definer-rationale.md
+│   │   │   ├── 📝 TASK028B-cleanup-obsolete-scripts.md
+│   │   │   ├── 📝 TASK032-user-role-management-FINAL.md
+│   │   │   └── 📝 TASK032-user-role-management.md
+│   │   ├── 📝 RESOLVED_db_reconstruction_2025-11-18.md
+│   │   ├── 📝 TASK014-backoffice-toggles-centralises.md
+│   │   ├── 📝 TASK023-partners-management.md
+│   │   ├── 📝 TASK024-press-management.md
+│   │   ├── 📝 TASK027-company-content-management.md
+│   │   ├── 📝 TASK028-content-versioning-ui.md
+│   │   ├── 📝 TASK029-media-library.md
+│   │   ├── 📝 TASK030-display-toggles.md
+│   │   ├── 📝 TASK031-analytics-dashboard.md
+│   │   ├── 📝 TASK033-audit-logs-viewer.md
+│   │   ├── 📝 TASK034-performance-optimization.md
+│   │   ├── 📝 TASK035-testing-suite.md
+│   │   ├── 📝 TASK036-security-audit.md
+│   │   ├── 📝 TASK037-accessibility-compliance.md
+│   │   ├── 📝 TASK038-responsive-testing.md
+│   │   ├── 📝 TASK039-production-deployment.md
+│   │   ├── 📝 TASK040-documentation.md
+│   │   ├── 📝 _archived_TASK025-communications-dashboard.md
+│   │   ├── 📝 _index.md
+│   │   ├── 📝 _issues_preview.md
+│   │   └── 📝 _preview_backoffice_tasks.md
+│   ├── 📝 Memory-Bank-Update-Session-2025-10-13.md
+│   ├── 📝 Memory-Bank-Update-Session-2025-10-26.md
+│   ├── 📝 activeContext.md
+│   ├── 📝 productContext.md
+│   ├── 📝 progress.md
+│   ├── 📝 projectbrief.md
+│   ├── 📝 systemPatterns.md
+│   └── 📝 techContext.md
 ├── 📁 public
+│   └── 🖼️ logo-florian.png
 ├── 📁 scripts
 │   ├── 📁 Test_fetchMediaArticles
+│   │   ├── 📝 README.md
+│   │   ├── 📄 apply-migration-articles-view.ts
+│   │   ├── 📄 check-chapo-excerpt.ts
+│   │   ├── 📄 check-rls-policies.ts
+│   │   ├── 📄 test-chapo-and-excerpt-separate.ts
+│   │   ├── 📄 test-dal-pattern.ts
+│   │   ├── 📄 test-public-view.ts
+│   │   ├── 📄 test-rls-articles copy.ts
+│   │   └── 📄 test-rls-articles.ts
+│   ├── 📁 test-invitation-email
+│   │   ├── 📄 generate-invite-link.js
+│   │   ├── 📄 test-complete-flow.js
+│   │   ├── 📄 test-invitation-flow.js
+│   │   ├── 📄 test-invitation-link-flow.js
+│   │   ├── 📄 test-local-invitation.js
+│   │   └── 📄 test-redirect-flow.js
+│   ├── 📝 README.md
+│   ├── 📄 check-admin-status.ts
+│   ├── 📄 check-email-logs.ts
+│   ├── 📄 check-existing-profile.js
+│   ├── 📄 check-extension.ts
+│   ├── 📄 check-migration-applied.ts
+│   ├── 📄 check-security-advisors.js
+│   ├── 📄 check-security-audit.sh
+│   ├── 📄 create-admin-user.ts
+│   ├── 📄 create-local-admin.ts
+│   ├── 📄 create_issues.sh
+│   ├── 📄 delete-test-user.js
+│   ├── 📄 diagnose-server-auth.ts
+│   ├── 📄 find-auth-user.js
+│   ├── 📄 post-reset.sh
+│   ├── 📄 quick-test-active.sh
+│   ├── 📄 rebuild-cloud-schema.sh
+│   ├── 📄 seed-admin.ts
+│   ├── 📄 set-admin-role.ts
+│   ├── 📄 supabase-env.sh
+│   ├── 📄 sync-admin-profile.ts
+│   ├── 📄 test-active-endpoint-service.ts
+│   ├── 📄 test-active-endpoint.sh
+│   ├── 📄 test-active-endpoint.ts
+│   ├── 📄 test-admin-access.ts
+│   ├── 📄 test-all-dal-functions.ts
+│   ├── 📄 test-dal-admin-users.ts
+│   ├── 📄 test-dashboard-stats.ts
+│   ├── 📄 test-email-integration.ts
+│   ├── 📄 test-evenements-access.ts
+│   ├── 📄 test-fetch-media-articles.ts
+│   ├── 📄 test-full-invitation.js
+│   ├── 📄 test-home-hero-api.ts
+│   ├── 📄 test-profile-insertion.js
+│   ├── 📄 test-spectacles-api.ts
+│   ├── 📄 test-spectacles-crud.ts
+│   ├── 📄 test-spectacles-dal.ts
+│   ├── 📄 test-spectacles-endpoints.ts
+│   ├── 📄 test-team-active-dal.ts
+│   ├── 📄 test-views-security-invoker.ts
+│   ├── 📄 test-webhooks.ts
+│   └── 📄 verify-view-security-invoker.ts
 ├── 📁 supabase
 │   ├── 📁 .branches
 │   │   └── 📄 _current_branch
 │   ├── 📁 migrations
+│   │   ├── 📁 archived
+│   │   │   ├── 📄 20251123143116_fix_restore_content_version_published_at.sql
+│   │   │   └── 📝 supabase-view-security-invoker-caveat.md
+│   │   ├── 📄 20250918000000_fix_spectacles_versioning_trigger.sql
+│   │   ├── 📄 20250918000002_apply_declarative_schema_complete.sql
+│   │   ├── 📄 20250918031500_seed_home_hero_slides.sql
+│   │   ├── 📄 20250918094530_seed_core_content.sql
+│   │   ├── 📄 20250918095610_seed_compagnie_values.sql
+│   │   ├── 📄 20250918101020_seed_events_press_articles.sql
+│   │   ├── 📄 20250918102240_seed_team_and_presentation.sql
+│   │   ├── 📄 20250921110000_seed_compagnie_presentation_sections.sql
+│   │   ├── 📄 20250921112900_add_home_about_content.sql
+│   │   ├── 📄 20250921113000_seed_home_about_content.sql
+│   │   ├── 📄 20250926153000_seed_spectacles.sql
+│   │   ├── 📄 20250930120000_seed_lieux.sql
+│   │   ├── 📄 20250930121000_seed_categories_tags.sql
+│   │   ├── 📄 20250930122000_seed_configurations_site.sql
+│   │   ├── 📄 20251002120000_seed_communiques_presse_et_media_kit.sql
+│   │   ├── 📄 20251022000001_create_medias_storage_bucket.sql
+│   │   ├── 📄 20251022120000_fix_articles_presse_public_security_invoker.sql
+│   │   ├── 📄 20251022140000_grant_select_articles_presse_anon.sql
+│   │   ├── 📄 20251022160000_fix_all_views_security_invoker.sql
+│   │   ├── 📄 20251024214802_reorder_team_members.sql
+│   │   ├── 📄 20251024214930_grant_select_membres_equipe.sql
+│   │   ├── 📄 20251027000000_create_is_admin_function.sql
+│   │   ├── 📄 20251027020000_restore_basic_grants_for_rls.sql
+│   │   ├── 📄 20251027021000_restore_remaining_grants.sql
+│   │   ├── 📄 20251027021500_restore_views_grants.sql
+│   │   ├── 📄 20251027022000_fix_logs_audit_grants.sql
+│   │   ├── 📄 20251027022500_grant_execute_all_trigger_functions.sql
+│   │   ├── 📄 20251115150000_fix_reorder_team_members_search_path.sql
+│   │   ├── 📄 20251118125945_normalize_spectacles_status.sql
+│   │   ├── 📄 20251118130000_normalize_spectacles_status.sql
+│   │   ├── 📄 20251119000000_seed_admin_user.sql
+│   │   ├── 📄 20251120120000_move_extensions_to_schema.sql
+│   │   ├── 📄 20251120231121_create_user_invitations.sql
+│   │   ├── 📄 20251120231146_create_pending_invitations.sql
+│   │   ├── 📄 20251121184519_allow_admin_insert_profiles.sql
+│   │   ├── 📄 20251121185458_allow_admin_update_profiles.sql
+│   │   ├── 📄 20251123150000_remote_schema.sql
+│   │   ├── 📄 20251123170231_create_messages_contact_admin_view.sql
+│   │   ├── 📄 20251126001251_add_alt_text_to_home_hero_slides.sql
+│   │   ├── 📄 20251126215129_fix_hero_slides_admin_select_policy.sql
+│   │   ├── 📝 ROUND_7B_ANALYSIS.md
+│   │   ├── 📝 migrations.md
+│   │   └── 📄 sync_existing_profiles.sql
+│   ├── 📁 reconstruction_database_plan
+│   │   ├── 📝 RECONSTRUCTION_PLAN.md
+│   │   └── 📝 RECONSTRUCTION_SUCCESS.md
 │   ├── 📁 schemas
+│   │   ├── 📄 01_extensions.sql
+│   │   ├── 📄 02_table_profiles.sql
+│   │   ├── 📄 02b_functions_core.sql
+│   │   ├── 📄 02c_storage_buckets.sql
+│   │   ├── 📄 03_table_medias.sql
+│   │   ├── 📄 04_table_membres_equipe.sql
+│   │   ├── 📄 05_profiles_auto_sync.sql
+│   │   ├── 📄 05_table_lieux.sql
+│   │   ├── 📄 06_table_spectacles.sql
+│   │   ├── 📄 07_table_evenements.sql
+│   │   ├── 📄 07b_table_compagnie_content.sql
+│   │   ├── 📄 07c_table_compagnie_presentation.sql
+│   │   ├── 📄 07d_table_home_hero.sql
+│   │   ├── 📄 07e_table_home_about.sql
+│   │   ├── 📄 08_table_articles_presse.sql
+│   │   ├── 📄 08b_communiques_presse.sql
+│   │   ├── 📄 09_table_partners.sql
+│   │   ├── 📄 10_tables_system.sql
+│   │   ├── 📄 10b_tables_user_management.sql
+│   │   ├── 📄 11_tables_relations.sql
+│   │   ├── 📄 12_evenements_recurrence.sql
+│   │   ├── 📄 13_analytics_events.sql
+│   │   ├── 📄 14_categories_tags.sql
+│   │   ├── 📄 15_content_versioning.sql
+│   │   ├── 📄 16_seo_metadata.sql
+│   │   ├── 📄 20_functions_core.sql
+│   │   ├── 📄 21_functions_auth_sync.sql
+│   │   ├── 📄 30_triggers.sql
+│   │   ├── 📄 40_indexes.sql
+│   │   ├── 📄 41_views_admin_content_versions.sql
+│   │   ├── 📄 41_views_communiques.sql
+│   │   ├── 📄 50_constraints.sql
+│   │   ├── 📄 60_rls_profiles.sql
+│   │   ├── 📄 61_rls_main_tables.sql
+│   │   ├── 📄 62_rls_advanced_tables.sql
+│   │   ├── 📄 63_reorder_team_members.sql
+│   │   ├── 📄 63b_reorder_hero_slides.sql
 │   │   └── 📝 README.md
 │   ├── 📁 scripts
+│   │   ├── 📝 allowed_exposed_objects.README.md
+│   │   ├── 📄 allowed_exposed_objects.txt
+│   │   ├── 📄 analyze_remaining_grants.sh
+│   │   ├── 📄 audit_grants.sql
+│   │   ├── 📄 audit_grants_filtered.sql
+│   │   ├── 📄 check_rls_coverage.sh
+│   │   ├── 📄 check_rls_policies.sql
+│   │   ├── 📄 diagnose_admin_access.sql
+│   │   ├── 📄 quick_check_all_grants.sql
+│   │   ├── 📄 test_rls_anon_access.sql
+│   │   ├── 📄 verify_policies_applied.sql
+│   │   └── 📄 verify_rls_policies.sql
 │   ├── 📁 tests
-│   └── 📝 README.md
-├── 📁 types
+│   │   ├── 📄 20251025_test_reorder_and_views.sql
+│   │   ├── 📝 README.md
+│   │   ├── 📄 ci-run.sh
+│   │   ├── 📄 run_audit_grants.sh
+│   │   └── 📄 run_reorder_tests.sh
+│   ├── 📝 README.md
+│   ├── 📄 admin.ts
+│   ├── 📄 client.ts
+│   ├── 📄 middleware.ts
+│   └── 📄 server.ts
+├── 📁 swark-output
+│   ├── 📝 2025-11-11__15-47-43__diagram.md
+│   ├── 📝 2025-11-11__15-47-43__log.md
+│   ├── 📝 2025-11-11__15-51-52__diagram.md
+│   ├── 📝 2025-11-11__15-51-52__log.md
+│   ├── 📝 2025-11-11__15-52-57__diagram.md
+│   └── 📝 2025-11-11__15-52-57__log.md
 ├── ⚙️ .env.example
 ├── ⚙️ .gitignore
 ├── ⚙️ .markdownlint.jsonc
@@ -351,7 +909,6 @@
 ├── 📄 eslint.config.mjs
 ├── 📄 inspect-tables.sql
 ├── 📄 middleware.ts
-├── 📄 migrate-route-groups.sh
 ├── 📄 next.config.ts
 ├── ⚙️ package.json
 ├── ⚙️ pnpm-lock.yaml

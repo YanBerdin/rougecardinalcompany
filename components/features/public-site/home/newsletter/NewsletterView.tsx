@@ -29,7 +29,7 @@ export function NewsletterForm({
           type="submit"
           variant="outline"
           disabled={isLoading}
-          className="bg-white/30 border-white/30 text-white backdrop-blur-sm hover:bg-white hover:text-black transition-all duration-300 shadow-lg whitespace-nowrap"
+          className="bg-white/30 border-white/30 text-white backdrop-blur-md hover:bg-white hover:text-black transition-all duration-300 shadow-lg whitespace-nowrap"
         >
           {isLoading ? "Inscription..." : "S'inscrire"}
         </Button>
