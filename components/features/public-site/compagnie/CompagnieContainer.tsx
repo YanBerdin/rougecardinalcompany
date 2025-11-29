@@ -6,11 +6,16 @@ export async function CompagnieContainer() {
   // TODO: remove artificial delay used for skeleton validation
   await new Promise((r) => setTimeout(r, 1500));
 
-  const [sections, values, team] = await Promise.all([
+  const [sectionsResult, valuesResult, teamResult] = await Promise.all([
     fetchCompagniePresentationSections(),
     fetchCompagnieValues(12),
     fetchTeamMembers(12),
   ]);
+
+  // Handle errors gracefully with fallback empty arrays
+  const sections = sectionsResult.success ? sectionsResult.data : [];
+  const values = valuesResult.success ? valuesResult.data : [];
+  const team = teamResult.success ? teamResult.data : [];
 
   return (
     <CompagnieView
@@ -21,10 +26,8 @@ export async function CompagnieContainer() {
       }))}
       team={team.map((m) => ({
         name: m.name,
-        role: m.role, // Preserve null for proper typing
-        description: m.description, // Preserve null for proper typing
-        // Virtual field: maps from image_url (external) or photo_media_id (Media Library)
-        // TODO TASK022: Implement photo_media_id → medias table lookup when Media Library is used
+        role: m.role,
+        description: m.description,
         image: m.image_url ?? "/logo-florian.png",
       }))}
       loading={false}

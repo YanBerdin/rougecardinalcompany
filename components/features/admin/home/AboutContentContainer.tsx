@@ -4,9 +4,17 @@ import { AboutContentForm } from "./AboutContentForm";
 import { AboutContentSkeleton } from "@/components/skeletons/AboutContentSkeleton";
 
 async function AboutContentData() {
-  const content = await fetchActiveAboutContent();
+  const result = await fetchActiveAboutContent();
 
-  if (!content) {
+  if (!result.success) {
+    return (
+      <div className="text-center text-destructive py-8">
+        Error: {result.error}
+      </div>
+    );
+  }
+
+  if (!result.data) {
     return (
       <div className="text-center text-muted-foreground py-8">
         No about content found. Please create one.
@@ -14,7 +22,7 @@ async function AboutContentData() {
     );
   }
 
-  return <AboutContentForm content={content} />;
+  return <AboutContentForm content={result.data} />;
 }
 
 export function AboutContentContainer() {

@@ -6,7 +6,9 @@ export async function NewsContainer() {
   // TODO: remove - artificial delay to visualize Suspense skeletons
   await new Promise((resolve) => setTimeout(resolve, 1500));
 
-  const rows = await fetchFeaturedPressReleases(3);
+  const result = await fetchFeaturedPressReleases(3);
+
+  const rows = result.success ? result.data : [];
 
   const news: NewsItem[] = rows.map((r) => ({
     id: r.id,

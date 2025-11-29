@@ -4,8 +4,11 @@ import "server-only";
 import { z } from "zod";
 import { createClient } from "@/supabase/server";
 import { compagniePresentationFallback } from "@/components/features/public-site/compagnie/data/presentation";
+import { type DALResult } from "@/lib/dal/helpers";
 
-// Schema défini dans le scope local pour éviter les exports non-async
+// Re-export types for consumers
+export type { DALResult };
+
 const PresentationSectionSchema = z.object({
   id: z.string(),
   kind: z.enum([
@@ -28,7 +31,6 @@ const PresentationSectionSchema = z.object({
 
 export type PresentationSection = z.infer<typeof PresentationSectionSchema>;
 
-// Raw DB record type
 type SectionRecord = {
   id: number;
   slug: string;
@@ -43,6 +45,10 @@ type SectionRecord = {
   position: number;
   active: boolean;
 };
+
+// =============================================================================
+// Helpers
+// =============================================================================
 
 function mapRecordToSection(r: SectionRecord): PresentationSection {
   const base = {
@@ -66,31 +72,61 @@ function mapRecordToSection(r: SectionRecord): PresentationSection {
   return PresentationSectionSchema.parse(base);
 }
 
+// =============================================================================
+// DAL Functions
+// =============================================================================
+
+/**
+ * Fetch active compagnie presentation sections
+ * Falls back to static data if database unavailable or empty
+ * @returns Presentation sections ordered by position
+ */
 export async function fetchCompagniePresentationSections(): Promise<
-  PresentationSection[]
+  DALResult<PresentationSection[]>
 > {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("compagnie_presentation_sections")
-    .select(
-      "id, slug, kind, title, subtitle, content, quote_text, quote_author, image_url, image_media_id, position, active"
-    )
-    .eq("active", true)
-    .order("position", { ascending: true });
+  try {
+    const supabase = await createClient();
 
-  if (error) {
-    console.error("fetchCompagniePresentationSections error", error);
-    // Fallback automatique si la lecture échoue
-    return compagniePresentationFallback as unknown as PresentationSection[];
+    const { data, error } = await supabase
+      .from("compagnie_presentation_sections")
+      .select(
+        "id, slug, kind, title, subtitle, content, quote_text, quote_author, image_url, image_media_id, position, active"
+      )
+      .eq("active", true)
+      .order("position", { ascending: true });
+
+    if (error) {
+      console.error("[DAL] fetchCompagniePresentationSections error:", error);
+      // Fallback to static data on error
+      return {
+        success: true,
+        data: compagniePresentationFallback as unknown as PresentationSection[],
+      };
+    }
+
+    if (!data || data.length === 0) {
+      // Fallback to static data if table empty
+      return {
+        success: true,
+        data: compagniePresentationFallback as unknown as PresentationSection[],
+      };
+    }
+
+    const sections = (data as SectionRecord[]).map(mapRecordToSection);
+    const validatedSections = sections.map((s) =>
+      PresentationSectionSchema.parse(s)
+    );
+
+    return { success: true, data: validatedSections };
+  } catch (err: unknown) {
+    console.error(
+      "[DAL] fetchCompagniePresentationSections unexpected error:",
+      err
+    );
+    // Fallback on unexpected errors
+    return {
+      success: true,
+      data: compagniePresentationFallback as unknown as PresentationSection[],
+    };
   }
-
-  if (!data || data.length === 0) {
-    // Fallback automatique si la table est vide
-    return compagniePresentationFallback as unknown as PresentationSection[];
-  }
-
-  const sections = (data as SectionRecord[]).map(mapRecordToSection);
-
-  // Final validation and sanitization
-  return sections.map((s) => PresentationSectionSchema.parse(s));
 }

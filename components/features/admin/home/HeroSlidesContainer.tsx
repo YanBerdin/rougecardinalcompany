@@ -4,8 +4,17 @@ import { HeroSlidesView } from "./HeroSlidesView";
 import { HeroSlidesSkeleton } from "@/components/skeletons/HeroSlidesSkeleton";
 
 async function HeroSlidesData() {
-  const slides = await fetchAllHeroSlides();
-  return <HeroSlidesView initialSlides={slides} />;
+  const result = await fetchAllHeroSlides();
+
+  if (!result.success) {
+    return (
+      <div className="text-center text-destructive py-8">
+        Error: {result.error}
+      </div>
+    );
+  }
+
+  return <HeroSlidesView initialSlides={result.data} />;
 }
 
 export function HeroSlidesContainer() {

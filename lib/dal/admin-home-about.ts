@@ -4,35 +4,54 @@ import { createClient } from "@/supabase/server";
 import type { AboutContentInput, AboutContentDTO } from "@/lib/schemas/home-content";
 import { AboutContentInputSchema } from "@/lib/schemas/home-content";
 import { requireAdmin } from "@/lib/auth/is-admin";
+import { type DALResult } from "@/lib/dal/helpers";
 
-export interface DALResult<T = unknown> {
-    success: boolean;
-    data?: T;
-    error?: string;
-}
+// Re-export types for consumers
+export type { DALResult };
+
+// =============================================================================
+// DAL Functions
+// =============================================================================
 
 /**
  * Fetch active about content (single record)
  * @returns Active about content or null if not found
  */
-export async function fetchActiveAboutContent(): Promise<AboutContentDTO | null> {
+export async function fetchActiveAboutContent(): Promise<
+  DALResult<AboutContentDTO | null>
+> {
+  try {
     await requireAdmin();
 
     const supabase = await createClient();
     const { data, error } = await supabase
-        .from("home_about_content")
-        .select("*")
-        .eq("active", true)
-        .order("position", { ascending: true })
-        .limit(1)
-        .single();
+      .from("home_about_content")
+      .select("*")
+      .eq("active", true)
+      .order("position", { ascending: true })
+      .limit(1)
+      .single();
 
     if (error) {
-        if (error.code === "PGRST116") return null;
-        throw new Error(`[ERR_ABOUT_001] Failed to fetch about content: ${error.message}`);
+      if (error.code === "PGRST116") {
+        return { success: true, data: null };
+      }
+      console.error("[DAL] fetchActiveAboutContent error:", error);
+      return {
+        success: false,
+        error: `[ERR_ABOUT_001] Failed to fetch about content: ${error.message}`,
+      };
     }
 
-    return data;
+    return { success: true, data };
+  } catch (err: unknown) {
+    console.error("[DAL] fetchActiveAboutContent unexpected error:", err);
+    return {
+      success: false,
+      error:
+        err instanceof Error ? err.message : "[ERR_ABOUT_002] Unknown error",
+    };
+  }
 }
 
 /**
@@ -42,34 +61,37 @@ export async function fetchActiveAboutContent(): Promise<AboutContentDTO | null>
  * @returns Updated about content
  */
 export async function updateAboutContent(
-    id: bigint,
-    input: AboutContentInput
+  id: bigint,
+  input: AboutContentInput
 ): Promise<DALResult<AboutContentDTO>> {
-    try {
-        await requireAdmin();
+  try {
+    await requireAdmin();
 
-        const validated = AboutContentInputSchema.parse(input);
+    const validated = AboutContentInputSchema.parse(input);
 
-        const supabase = await createClient();
-        const { data, error } = await supabase
-            .from("home_about_content")
-            .update({ ...validated, updated_at: new Date().toISOString() })
-            .eq("id", id)
-            .select()
-            .single();
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("home_about_content")
+      .update({ ...validated, updated_at: new Date().toISOString() })
+      .eq("id", id)
+      .select()
+      .single();
 
-        if (error) {
-            return {
-                success: false,
-                error: `[ERR_ABOUT_002] Failed to update about content: ${error.message}`,
-            };
-        }
-
-        return { success: true, data };
-    } catch (error: unknown) {
-        return {
-            success: false,
-            error: error instanceof Error ? error.message : "Unknown error",
-        };
+    if (error) {
+      console.error("[DAL] updateAboutContent error:", error);
+      return {
+        success: false,
+        error: `[ERR_ABOUT_003] Failed to update about content: ${error.message}`,
+      };
     }
+
+    return { success: true, data };
+  } catch (err: unknown) {
+    console.error("[DAL] updateAboutContent unexpected error:", err);
+    return {
+      success: false,
+      error:
+        err instanceof Error ? err.message : "[ERR_ABOUT_004] Unknown error",
+    };
+  }
 }

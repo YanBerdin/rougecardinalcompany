@@ -14,32 +14,15 @@ import {
   type UpdateSpectacleInput,
   type SpectacleSummary,
 } from "@/lib/schemas/spectacles";
-import { HttpStatus, type HttpStatusCode } from "@/lib/api/helpers";
+import { HttpStatus } from "@/lib/api/helpers";
+import {
+  type DALResult,
+  getErrorMessage,
+  generateSlug,
+} from "@/lib/dal/helpers";
 
-// ============================================================================
-// Types & Helpers
-// ============================================================================
-
-function getErrorMessage(err: unknown): string {
-  if (err instanceof Error) return err.message;
-  if (typeof err === "object" && err !== null && "message" in err) {
-    const maybe = (err as { message?: unknown }).message;
-    if (typeof maybe === "string") return maybe;
-  }
-  try {
-    return JSON.stringify(err);
-  } catch {
-    return String(err);
-  }
-}
-
-type DALSuccess<T> = { readonly success: true; readonly data: T };
-type DALError = {
-  readonly success: false;
-  readonly error: string;
-  readonly status?: HttpStatusCode;
-};
-export type DALResult<T> = DALSuccess<T> | DALError;
+// Re-export types for consumers
+export type { DALResult };
 
 // ============================================================================
 // READ Operations
@@ -567,28 +550,3 @@ export async function deleteSpectacle(id: number): Promise<DALResult<null>> {
   }
 }
 
-// ============================================================================
-// Helper Functions
-// ============================================================================
-
-/**
- * Generates a URL-friendly slug from a title
- *
- * Converts to lowercase, replaces spaces with dashes, removes special chars
- *
- * @param title - Title to convert to slug
- * @returns URL-friendly slug
- *
- * @example
- * generateSlug("Hamlet: La Tragédie") // "hamlet-la-tragedie"
- */
-function generateSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // Remove accents
-    .replace(/[^a-z0-9\s-]/g, "") // Remove special chars
-    .trim()
-    .replace(/\s+/g, "-") // Replace spaces with dashes
-    .replace(/-+/g, "-"); // Remove duplicate dashes
-}

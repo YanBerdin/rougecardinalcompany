@@ -6,8 +6,11 @@ export async function ShowsContainer() {
   // TODO: remove - artificial delay to visualize Suspense skeletons
   await new Promise((resolve) => setTimeout(resolve, 1500));
 
-  const records = await fetchFeaturedShows(3);
-  const shows: Show[] = (records ?? []).map((r) => ({
+  const result = await fetchFeaturedShows(3);
+
+  const records = result.success ? result.data : [];
+
+  const shows: Show[] = records.map((r) => ({
     id: r.id,
     title: r.title,
     short_description: r.short_description ?? "",
@@ -15,5 +18,6 @@ export async function ShowsContainer() {
     slug: r.slug ?? String(r.id),
     dates: r.dates ?? [],
   }));
+
   return <ShowsView shows={shows} />;
 }

@@ -2,6 +2,10 @@
 
 import "server-only";
 import { createClient } from "@/supabase/server";
+import { type DALResult } from "@/lib/dal/helpers";
+
+// Re-export types for consumers
+export type { DALResult };
 
 export type PressReleaseRecord = {
   id: number;
@@ -12,38 +16,83 @@ export type PressReleaseRecord = {
   ordre_affichage: number | null;
 };
 
-export async function fetchFeaturedPressReleases(limit = 3) {
-  const supabase = await createClient();
+type SupabasePressRow = {
+  id: number;
+  title: string;
+  description?: string | null;
+  date_publication: string;
+  image_url?: string | null;
+  ordre_affichage?: number | null;
+  public?: boolean | null;
+};
 
-  const { data, error } = await supabase
-    .from("communiques_presse")
-    .select(
-      "id, title, description, date_publication, image_url, ordre_affichage, public"
-    )
-    .eq("public", true)
-    .order("date_publication", { ascending: false })
-    .limit(limit);
+// =============================================================================
+// Helpers
+// =============================================================================
 
-  if (error) {
-    console.error("fetchFeaturedPressReleases error", error);
-    return [] as PressReleaseRecord[];
-  }
-
+function filterRecentReleases(
+  rows: SupabasePressRow[],
+  cutoffDays: number
+): PressReleaseRecord[] {
   const now = new Date();
   const cutoff = new Date(now);
-  cutoff.setDate(now.getDate() - 30);
+  cutoff.setDate(now.getDate() - cutoffDays);
 
-  type SupabasePressRow = {
-    id: number;
-    title: string;
-    description?: string | null;
-    date_publication: string;
-    image_url?: string | null;
-    ordre_affichage?: number | null;
-    public?: boolean | null;
-  };
+  return rows
+    .filter((row) => new Date(row.date_publication) >= cutoff)
+    .map((row) => ({
+      id: row.id,
+      title: row.title,
+      description: row.description ?? null,
+      date_publication: row.date_publication,
+      image_url: row.image_url ?? null,
+      ordre_affichage: row.ordre_affichage ?? null,
+    }));
+}
 
-  return (data ?? []).filter((r: SupabasePressRow) =>
-    new Date(r.date_publication) >= cutoff
-  ) as PressReleaseRecord[];
+// =============================================================================
+// DAL Functions
+// =============================================================================
+
+/**
+ * Fetch featured press releases from the last 30 days
+ * @param limit Maximum number of releases to return
+ * @returns Recent press releases ordered by publication date
+ */
+export async function fetchFeaturedPressReleases(
+  limit = 3
+): Promise<DALResult<PressReleaseRecord[]>> {
+  try {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from("communiques_presse")
+      .select(
+        "id, title, description, date_publication, image_url, ordre_affichage, public"
+      )
+      .eq("public", true)
+      .order("date_publication", { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error("[DAL] fetchFeaturedPressReleases error:", error);
+      return {
+        success: false,
+        error: `[ERR_HOME_NEWS_001] Failed to fetch press releases: ${error.message}`,
+      };
+    }
+
+    const recentReleases = filterRecentReleases(data ?? [], 30);
+
+    return { success: true, data: recentReleases };
+  } catch (err: unknown) {
+    console.error("[DAL] fetchFeaturedPressReleases unexpected error:", err);
+    return {
+      success: false,
+      error:
+        err instanceof Error
+          ? err.message
+          : "[ERR_HOME_NEWS_002] Unknown error",
+    };
+  }
 }

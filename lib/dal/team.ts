@@ -5,26 +5,16 @@ import { requireAdmin } from "@/lib/auth/is-admin";
 import type { Database } from "@/lib/database.types";
 import { TeamMemberDbSchema } from "@/lib/schemas/team";
 import { z } from "zod";
-import { HttpStatus, type HttpStatusCode } from "@/lib/api/helpers";
+import { HttpStatus } from "@/lib/api/helpers";
+import {
+  type DALResult,
+  getErrorMessage,
+} from "@/lib/dal/helpers";
 
-function getErrorMessage(err: unknown): string {
-  if (err instanceof Error) return err.message;
-  if (typeof err === "object" && err !== null && "message" in err) {
-    const maybe = (err as { message?: unknown }).message;
-    if (typeof maybe === "string") return maybe;
-  }
-  try {
-    return JSON.stringify(err);
-  } catch {
-    return String(err);
-  }
-}
+// Re-export types for consumers
+export type { DALResult };
 
 type TeamRow = Database["public"]["Tables"]["membres_equipe"]["Row"];
-
-type DALSuccess<T> = { success: true; data: T };
-type DALError = { success: false; error: string; status?: HttpStatusCode };
-export type DALResult<T> = DALSuccess<T> | DALError;
 
 const UpsertTeamMemberSchema = TeamMemberDbSchema.partial();
 
