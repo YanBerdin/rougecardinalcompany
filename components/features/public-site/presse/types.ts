@@ -1,49 +1,32 @@
-import { z } from "zod";
-import type { LucideIcon } from "lucide-react";
+/**
+ * @file Presse Types
+ * @description Types for presse feature components
+ *
+ * Schemas are centralized in lib/schemas/presse.ts
+ * This file only contains ViewProps interfaces
+ */
 
-// Schéma pour les communiqués de presse
-export const PressReleaseSchema = z.object({
-  id: z.number(),
-  title: z.string(),
-  date: z.string(),
-  description: z.string(),
-  fileUrl: z.string(),
-  fileSize: z.string(),
-});
+// Re-export schemas and types from centralized location
+export {
+  PressReleaseSchema,
+  MediaArticleSchema,
+  MediaKitItemSchema,
+  MediaArticleTypeEnum,
+  type PressRelease,
+  type MediaArticle,
+  type MediaKitItem,
+  type IconComponent,
+} from "@/lib/schemas/presse";
 
-// Schéma pour les articles médias
-export const MediaArticleSchema = z.object({
-  id: z.number(),
-  title: z.string(),
-  author: z.string(),
-  type: z.enum(["Article", "Critique", "Interview", "Portrait"]),
-  chapo: z.string(), // Introduction/chapô de l'article
-  excerpt: z.string(), // Extrait/citation de l'article
-  source_publication: z.string(),
-  source_url: z.string(),
-  published_at: z.string(),
-});
+// =============================================================================
+// VIEW PROPS
+// =============================================================================
 
-// Schéma pour les éléments du kit média
-// Icône acceptée: composant React (Lucide) avec props 'className' facultative
-export type IconComponent = LucideIcon;
+import type { PressRelease, MediaArticle, MediaKitItem } from "@/lib/schemas/presse";
 
-export const MediaKitItemSchema = z.object({
-  type: z.string(),
-  description: z.string(),
-  // Pas d'icône dans les données runtime (vient de l'UI)
-  fileSize: z.string(),
-  fileUrl: z.string(),
-});
-
-// Types inférés des schémas
-export type PressRelease = z.infer<typeof PressReleaseSchema>;
-export type MediaArticle = z.infer<typeof MediaArticleSchema>;
-export type MediaKitItem = z.infer<typeof MediaKitItemSchema> & {
-  icon?: IconComponent;
-};
-
-// Props pour le composant PresseView
+/**
+ * Props for the PresseView component
+ */
 export interface PresseViewProps {
   pressReleases: PressRelease[];
   mediaArticles: MediaArticle[];

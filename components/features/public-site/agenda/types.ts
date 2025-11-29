@@ -1,30 +1,28 @@
-import { z } from "zod";
+/**
+ * @file Agenda Types
+ * @description Types for agenda feature components
+ *
+ * Schemas are centralized in lib/schemas/agenda.ts
+ * This file only contains ViewProps interfaces
+ */
 
-// Schéma pour les événements de l'agenda
-export const EventSchema = z.object({
-  id: z.number(),
-  title: z.string(),
-  date: z.string(),
-  time: z.string(),
-  venue: z.string(),
-  address: z.string(),
-  type: z.string(),
-  status: z.string(),
-  ticketUrl: z.string().nullable(),
-  image: z.string(),
-});
+// Re-export schemas and types from centralized location
+export {
+  EventSchema,
+  EventTypeSchema,
+  type Event,
+  type EventType,
+} from "@/lib/schemas/agenda";
 
-// Schéma pour les types d'événements
-export const EventTypeSchema = z.object({
-  value: z.string(),
-  label: z.string(),
-});
+// =============================================================================
+// VIEW PROPS
+// =============================================================================
 
-// Types inférés des schémas
-export type Event = z.infer<typeof EventSchema>;
-export type EventType = z.infer<typeof EventTypeSchema>;
+import type { Event, EventType } from "@/lib/schemas/agenda";
 
-// Props pour le composant AgendaView
+/**
+ * Props for the AgendaView component
+ */
 export interface AgendaViewProps {
   events: Event[];
   eventTypes: EventType[];
