@@ -221,3 +221,155 @@ Créer `scripts/validate-dal-solid.ts` pour vérifier :
 - [ ] Error codes `[ERR_ENTITY_NNN]` uniformisés
 - [ ] Directive `"use server"` + `import "server-only"` sur tous les fichiers
 - [ ] Score SOLID moyen ≥ 22.5/25 (90%)
+
+---
+---
+
+**Dernière mise à jour** : 29 novembre 2025
+
+## 📊 État Actuel (Audit SOLID - Mis à jour)
+
+| Fichier | Score | Violations Majeures | Statut |
+|---------|-------|---------------------|--------|
+| `admin-home-about.ts` | **23/25** ✅ | Conforme | ✅ Done |
+| `admin-home-hero.ts` | **23/25** ✅ | `createHeroSlide` ~47 lignes | ✅ Done |
+| `admin-users.ts` | **18/25** ⚠️ | ❌ Email import (ligne 466) | 🔄 Partiel |
+| `agenda.ts` | **22/25** ✅ | ✅ `"use server"`, ✅ DALResult | ✅ Done |
+| `compagnie-presentation.ts` | **22/25** ✅ | ✅ DALResult | ✅ Done |
+| `compagnie.ts` | **22/25** ✅ | ✅ DALResult | ✅ Done |
+| `contact.ts` | **19/25** | ❌ Pas DALResult | ⏳ TODO |
+| `dashboard.ts` | **19/25** | ❌ Pas DALResult | ⏳ TODO |
+| `home-about.ts` | **17/25** | ❌ Pas DALResult, Fonction >30 lignes | ⏳ TODO |
+| `home-hero.ts` | **22/25** ✅ | ✅ DALResult | ✅ Done |
+| `home-news.ts` | **22/25** ✅ | ✅ DALResult | ✅ Done |
+| `home-newsletter.ts` | **22/25** ✅ | ✅ DALResult | ✅ Done |
+| `home-partners.ts` | **22/25** ✅ | ✅ DALResult | ✅ Done |
+| `home-shows.ts` | **22/25** ✅ | ✅ DALResult | ✅ Done |
+| `presse.ts` | **22/25** ✅ | ✅ DALResult, ✅ Zod | ✅ Done |
+| `spectacles.ts` | **22/25** ✅ | ✅ DALResult | ✅ Done |
+| `team.ts` | **22/25** ✅ | ✅ `"use server"`, ✅ DALResult | ✅ Done |
+
+**Score moyen actuel : 21.2/25 (85%)**
+**Objectif : 22.5/25 (90%)**
+
+---
+
+## ✅ Progrès Réalisés
+
+### Phase 1 : Fichiers Critiques - TERMINÉE
+
+#### 1. ✅ `team.ts` - CORRIGÉ
+- [x] Directive `"use server"` ajoutée
+- [x] `revalidatePath()` supprimé (commentaire conservé)
+- [x] Interface `DALResult<T>` utilisée partout
+- [x] Error codes `[ERR_TEAM_NNN]` ajoutés
+
+#### 2. ✅ `spectacles.ts` - CORRIGÉ
+- [x] `revalidatePath()` supprimé
+- [x] Interface `DALResult<T>` utilisée
+- [x] Error codes uniformisés
+
+#### 3. ✅ `agenda.ts` - CORRIGÉ
+- [x] Directive `"use server"` ajoutée
+- [x] Interface `DALResult<T>` utilisée
+- [x] Schéma Zod `EventFilterSchema` créé dans `lib/schemas/agenda.ts`
+
+#### 4. ⚠️ `admin-users.ts` - PARTIELLEMENT CORRIGÉ
+- [x] `revalidatePath()` supprimé
+- [x] Directive `"use server"` présente
+- [ ] ❌ **Import email reste** (ligne 466) - Nécessite Server Action wrapper
+
+### Phase 2 : DALResult Uniformisation - TERMINÉE (13/13)
+
+| Fichier | DALResult | Error Codes | Statut |
+|---------|-----------|-------------|--------|
+| `compagnie-presentation.ts` | ✅ | ✅ | Done |
+| `compagnie.ts` | ✅ | ✅ | Done |
+| `home-hero.ts` | ✅ | ✅ | Done |
+| `home-news.ts` | ✅ | ✅ | Done |
+| `home-newsletter.ts` | ✅ | ✅ | Done |
+| `home-partners.ts` | ✅ | ✅ | Done |
+| `home-shows.ts` | ✅ | ✅ | Done |
+| `presse.ts` | ✅ | ✅ | Done |
+
+**Fichiers restants sans DALResult :**
+| `contact.ts` | ❌ | ⏳ | TODO |
+| `dashboard.ts` | ❌ | ⏳ | TODO |
+| `home-about.ts` | ❌ | ⏳ | TODO |
+
+### Phase 3 : Schémas Zod - TERMINÉE
+
+| Fichier DAL | Schéma | Emplacement | Statut |
+|-------------|--------|-------------|--------|
+| `agenda.ts` | `EventSchema`, `EventFilterSchema` | `lib/schemas/agenda.ts` | ✅ Done |
+| `compagnie.ts` | `ValueSchema`, `TeamMemberSchema` | `lib/schemas/compagnie.ts` | ✅ Done |
+| `presse.ts` | `PressReleaseSchema`, `MediaArticleSchema` | `lib/schemas/presse.ts` | ✅ Done |
+| `dashboard.ts` | `DashboardStatsSchema` | `lib/schemas/dashboard.ts` | ✅ Done |
+| (media) | `MediaItemSchema`, `MediaSelectResultSchema` | `lib/schemas/media.ts` | ✅ Done |
+
+---
+
+## ⏳ Actions Restantes
+
+### Priorité HAUTE : Email Import dans admin-users.ts
+
+**Problème** : `import("@/lib/email/actions")` ligne 466 viole la règle SOLID
+
+**Solution proposée** :
+1. Créer `lib/actions/admin-users-actions.ts`
+2. Déplacer la logique d'envoi d'email dans une Server Action wrapper
+3. Le DAL retourne seulement `{ userId, invitationUrl }`
+4. La Server Action appelle DAL + Email
+
+```typescript
+// lib/actions/admin-users-actions.ts
+"use server";
+import { inviteUserDAL } from "@/lib/dal/admin-users";
+import { sendInvitationEmail } from "@/lib/email/actions";
+
+export async function inviteUserAction(input: InviteUserInput) {
+  const result = await inviteUserDAL(input);
+  if (!result.success) return result;
+  
+  // Email envoyé depuis Action, pas DAL
+  await sendInvitationEmail({
+    email: input.email,
+    invitationUrl: result.data.invitationUrl,
+  });
+  
+  return { success: true, data: { userId: result.data.userId } };
+}
+```
+
+### Priorité MOYENNE : DALResult sur fichiers restants
+
+| Fichier | Action |
+|---------|--------|
+| `contact.ts` | Ajouter `DALResult<T>` + error codes |
+| `dashboard.ts` | Ajouter `DALResult<T>` + error codes |
+| `home-about.ts` | Ajouter `DALResult<T>` + splitter fonctions longues |
+
+---
+
+## Checklist de validation finale
+
+- [x] ~~Aucun import `revalidatePath` dans `lib/dal/`~~ ✅ (1 commentaire inoffensif)
+- [ ] ❌ Aucun import `@/lib/email` dans `lib/dal/` → **1 violation** (`admin-users.ts:466`)
+- [ ] Toutes les fonctions < 30 lignes → **Quelques violations mineures**
+- [x] Interface `DALResult<T>` sur 14/17 fichiers ✅
+- [x] Error codes `[ERR_ENTITY_NNN]` uniformisés ✅
+- [x] Directive `"use server"` + `import "server-only"` sur tous les fichiers ✅
+- [ ] Score SOLID moyen ≥ 22.5/25 (90%) → **Actuel: 85%**
+
+---
+
+## Résumé
+
+| Métrique | Avant | Après | Objectif |
+|----------|-------|-------|----------|
+| Score moyen | 17.6/25 (70%) | 21.2/25 (85%) | 22.5/25 (90%) |
+| revalidatePath imports | 8 | 0 | 0 ✅ |
+| Email imports | 1 | 1 | 0 ❌ |
+| DALResult coverage | 4/17 | 14/17 | 17/17 |
+| "use server" directive | 13/17 | 17/17 | 17/17 ✅ |
+| Schémas Zod centralisés | 3 | 9 | 9 ✅ |
