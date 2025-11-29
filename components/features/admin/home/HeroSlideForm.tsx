@@ -38,6 +38,7 @@ export function HeroSlideForm({
 
     const form = useForm<HeroSlideFormValues>({
         resolver: zodResolver(HeroSlideFormSchema),
+        mode: "onBlur", // Validate on blur for immediate feedback
         defaultValues: {
             title: "",
             slug: "",
@@ -153,15 +154,14 @@ export function HeroSlideForm({
                             onSubmit={form.handleSubmit(
                                 onSubmit,
                                 (errors) => {
+                                    // Extract first error message for user-friendly toast
+                                    const firstError = Object.entries(errors)[0];
+                                    const errorMessage = firstError 
+                                        ? `${firstError[0]}: ${firstError[1]?.message}` 
+                                        : "Please fix validation errors";
+                                    
                                     console.error("[HeroSlideForm] Validation errors:", errors);
-                                    console.error("[HeroSlideForm] Form values at validation:", form.getValues());
-
-                                    // Afficher les erreurs spécifiques
-                                    Object.entries(errors).forEach(([field, error]) => {
-                                        console.error(`  - ${field}:`, error?.message);
-                                    });
-
-                                    toast.error("Please fix validation errors - check console");
+                                    toast.error(errorMessage);
                                 }
                             )}
                             className="space-y-4"
