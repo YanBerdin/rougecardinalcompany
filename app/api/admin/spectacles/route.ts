@@ -1,12 +1,13 @@
 import { NextRequest } from "next/server";
-import { 
-  ApiResponse, 
-  HttpStatus, 
-  withAdminAuth 
+import { revalidatePath } from "next/cache";
+import {
+  ApiResponse,
+  HttpStatus,
+  withAdminAuth
 } from "@/lib/api/helpers";
-import { 
-  fetchAllSpectacles, 
-  createSpectacle 
+import {
+  fetchAllSpectacles,
+  createSpectacle
 } from "@/lib/dal/spectacles";
 import { CreateSpectacleSchema } from "@/lib/schemas/spectacles";
 
@@ -51,6 +52,10 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/admin/spectacles - Create new spectacle
+ * 
+ * @deprecated Prefer using createSpectacleAction from
+ * app/(admin)/admin/spectacles/actions.ts for frontend mutations.
+ * This API Route is kept for external clients and backward compatibility.
  * 
  * Requires admin authentication.
  * 
@@ -104,6 +109,9 @@ export async function POST(request: NextRequest) {
           createResult.status || HttpStatus.INTERNAL_SERVER_ERROR
         );
       }
+
+      // Invalidate cache after successful creation
+      revalidatePath("/admin/spectacles");
 
       return ApiResponse.success(createResult.data, HttpStatus.CREATED);
     } catch (error: unknown) {

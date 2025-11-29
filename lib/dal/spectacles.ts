@@ -4,7 +4,6 @@ import "server-only";
 import { createClient } from "@/supabase/server";
 import { requireAdmin } from "@/lib/auth/is-admin";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
   SpectacleDbSchema,
@@ -379,7 +378,6 @@ export async function createSpectacle(
     const insertResult = await insertSpectacle(validationResult.data);
     if (!insertResult.success) return insertResult;
 
-    revalidatePath("/admin/spectacles");
     return insertResult;
   } catch (err: unknown) {
     console.error("createSpectacle exception:", err);
@@ -492,8 +490,6 @@ export async function updateSpectacle(
     const updateResult = await performSpectacleUpdate(id, updateData);
     if (!updateResult.success) return updateResult;
 
-    revalidatePath("/admin/spectacles");
-    revalidatePath(`/admin/spectacles/${id}`);
     return updateResult;
   } catch (err: unknown) {
     console.error("updateSpectacle exception:", err);
@@ -560,7 +556,6 @@ export async function deleteSpectacle(id: number): Promise<DALResult<null>> {
       };
     }
 
-    revalidatePath("/admin/spectacles");
     return { success: true, data: null };
   } catch (err: unknown) {
     console.error("deleteSpectacle exception:", err);

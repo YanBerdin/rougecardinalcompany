@@ -1,14 +1,14 @@
 import { NextRequest } from "next/server";
 import { revalidatePath } from "next/cache";
-import { 
-  ApiResponse, 
-  HttpStatus, 
-  withAdminAuth 
+import {
+  ApiResponse,
+  HttpStatus,
+  withAdminAuth
 } from "@/lib/api/helpers";
-import { 
-  fetchSpectacleById, 
-  updateSpectacle, 
-  deleteSpectacle 
+import {
+  fetchSpectacleById,
+  updateSpectacle,
+  deleteSpectacle
 } from "@/lib/dal/spectacles";
 import { UpdateSpectacleSchema } from "@/lib/schemas/spectacles";
 
@@ -21,14 +21,14 @@ function parseSpectacleId(idString: string): number | null {
     if (!/^\d+$/.test(idString)) {
       return null;
     }
-    
+
     const parsedId = parseInt(idString, 10);
-    
+
     // Ensure positive value and valid number
     if (isNaN(parsedId) || parsedId <= 0) {
       return null;
     }
-    
+
     return parsedId;
   } catch {
     return null;
@@ -84,8 +84,8 @@ export async function GET(
     return ApiResponse.success(spectacle, HttpStatus.OK);
   } catch (error: unknown) {
     console.error("[API] Error fetching spectacle:", error);
-    const errorMessage = error instanceof Error 
-      ? error.message 
+    const errorMessage = error instanceof Error
+      ? error.message
       : "Failed to fetch spectacle";
     return ApiResponse.error(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
   }
@@ -93,6 +93,10 @@ export async function GET(
 
 /**
  * PATCH /api/admin/spectacles/[id] - Update spectacle
+ * 
+ * @deprecated Prefer using updateSpectacleAction from
+ * app/(admin)/admin/spectacles/actions.ts for frontend mutations.
+ * This API Route is kept for external clients and backward compatibility.
  * 
  * Requires admin authentication.
  * 
@@ -140,7 +144,7 @@ export async function PATCH(
 
       const requestBody = await request.json();
       console.log("Request body for updating spectacle:", requestBody); //TODO: remove
-      
+
       // Validate request body with ID from route (as number, not BigInt)
       const validationResult = UpdateSpectacleSchema.safeParse({
         ...requestBody,
@@ -171,8 +175,8 @@ export async function PATCH(
       return ApiResponse.success(updateResult.data, HttpStatus.OK);
     } catch (error: unknown) {
       console.error("[API] Error updating spectacle:", error);
-      const errorMessage = error instanceof Error 
-        ? error.message 
+      const errorMessage = error instanceof Error
+        ? error.message
         : "Failed to update spectacle";
       return ApiResponse.error(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -181,6 +185,10 @@ export async function PATCH(
 
 /**
  * DELETE /api/admin/spectacles/[id] - Delete spectacle
+ * 
+ * @deprecated Prefer using deleteSpectacleAction from
+ * app/(admin)/admin/spectacles/actions.ts for frontend mutations.
+ * This API Route is kept for external clients and backward compatibility.
  * 
  * Requires admin authentication.
  * Performs hard delete with cascade on related records.
@@ -232,8 +240,8 @@ export async function DELETE(
       return ApiResponse.success(null, HttpStatus.OK);
     } catch (error: unknown) {
       console.error("[API] Error deleting spectacle:", error);//TODO: remove
-      const errorMessage = error instanceof Error 
-        ? error.message 
+      const errorMessage = error instanceof Error
+        ? error.message
         : "Failed to delete spectacle";
       return ApiResponse.error(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
     }
