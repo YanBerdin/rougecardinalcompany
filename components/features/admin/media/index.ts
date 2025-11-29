@@ -42,7 +42,7 @@ export { MediaUploadDialog } from "./MediaUploadDialog";
 export { MediaLibraryPicker } from "./MediaLibraryPicker";
 export { MediaExternalUrlInput } from "./MediaExternalUrlInput";
 
-// Types (re-exported from lib/types/media.ts)
+// Types (colocated in ./types.ts, schemas in lib/schemas/media.ts)
 export type {
     MediaSelectResult,
     MediaItem,
@@ -52,10 +52,10 @@ export type {
     MediaLibraryPickerProps,
     MediaExternalUrlInputProps,
     AllowedImageMimeType,
-} from "@/lib/types/media";
+} from "./types";
 
 export {
     ALLOWED_IMAGE_MIME_TYPES,
     MAX_UPLOAD_SIZE_BYTES,
     isAllowedImageMimeType,
-} from "@/lib/types/media";
+} from "./types";

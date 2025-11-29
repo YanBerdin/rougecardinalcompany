@@ -14,12 +14,12 @@ import { toast } from "sonner";
 import { uploadTeamMemberPhoto } from "@/app/(admin)/admin/team/actions";
 import { Loader2, Upload } from "lucide-react";
 import Image from "next/image";
-import type { MediaUploadDialogProps } from "@/lib/types/media";
+import type { MediaUploadDialogProps } from "./types";
 import {
     ALLOWED_IMAGE_MIME_TYPES,
     MAX_UPLOAD_SIZE_BYTES,
     isAllowedImageMimeType,
-} from "@/lib/types/media";
+} from "./types";
 
 /**
  * MediaUploadDialog - Upload mode for media picker

@@ -1,40 +1,34 @@
 /**
- * @file Media Types
- * @description Types and props for media picker components
+ * @file Media Component Types
+ * @description Props interfaces for media picker components
  *
- * Schemas and validation are in lib/schemas/media.ts
- * This file contains component props interfaces
+ * Zod schemas and validation are in lib/schemas/media.ts
+ * This file contains component-specific props interfaces (colocation pattern)
  */
 
-// Re-export schemas, types and constants from centralized location
+import type { MediaSelectResult } from "@/lib/schemas/media";
+
+// Re-export commonly used types from schemas for convenience
+export type {
+    MediaItem,
+    MediaSelectResult,
+    MediaSearchItem,
+    MediaPickerMode,
+    MediaUploadInput,
+    ExternalUrlInput,
+    AllowedImageMimeType,
+} from "@/lib/schemas/media";
+
+// Re-export constants and type guards
 export {
-    // Schemas
-    MediaItemSchema,
-    MediaSelectResultSchema,
-    MediaSearchItemSchema,
-    MediaPickerModeSchema,
-    MediaUploadInputSchema,
-    ExternalUrlInputSchema,
-    // Types
-    type MediaItem,
-    type MediaSelectResult,
-    type MediaSearchItem,
-    type MediaPickerMode,
-    type MediaUploadInput,
-    type ExternalUrlInput,
-    // Constants
     ALLOWED_IMAGE_MIME_TYPES,
     MAX_UPLOAD_SIZE_BYTES,
-    type AllowedImageMimeType,
-    // Type guards
     isAllowedImageMimeType,
 } from "@/lib/schemas/media";
 
 // =============================================================================
 // COMPONENT PROPS
 // =============================================================================
-
-import type { MediaSelectResult } from "@/lib/schemas/media";
 
 /**
  * Props for the MediaUploadDialog component

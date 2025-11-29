@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import Image from "next/image";
-import type { MediaExternalUrlInputProps } from "@/lib/types/media";
+import type { MediaExternalUrlInputProps } from "./types";
 
 type ValidationStatus = "idle" | "validating" | "valid" | "invalid";
 

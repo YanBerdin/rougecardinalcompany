@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Search, ImageIcon, Check } from "lucide-react";
 import Image from "next/image";
-import type { MediaLibraryPickerProps, MediaSearchItem } from "@/lib/types/media";
+import type { MediaLibraryPickerProps, MediaSearchItem } from "./types";
 
 interface PaginationInfo {
     page: number;

@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { withAdminAuth, ApiResponse, HttpStatus } from "@/lib/api/helpers";
 import { createClient } from "@/supabase/server";
-import type { MediaSearchItem } from "@/lib/types/media";
+import type { MediaSearchItem } from "@/lib/schemas/media";
 
 const SUPABASE_PROJECT_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const STORAGE_BUCKET = "medias";
