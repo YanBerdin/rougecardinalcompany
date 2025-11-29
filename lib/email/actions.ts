@@ -7,7 +7,7 @@ import { SITE_CONFIG } from "@/lib/site-config";
 import NewsletterConfirmation from "@/emails/newsletter-confirmation";
 import ContactMessageNotification from "@/emails/contact-message-notification";
 import InvitationEmail from "@/emails/invitation-email";
-import type { ResendParamsTypeWithConditionalFrom } from "@/types/email";
+import type { ResendParamsTypeWithConditionalFrom } from "@/lib/email/types";
 
 export const sendEmail = async (
   ...params: ResendParamsTypeWithConditionalFrom

@@ -5,7 +5,7 @@ import { createClient } from "@/supabase/server";
 import {
   DashboardStatsSchema,
   type DashboardStats,
-} from "@/types/dashboard.types";
+} from "@/lib/schemas/dashboard";
 
 /**
  * Fetch dashboard statistics from Supabase

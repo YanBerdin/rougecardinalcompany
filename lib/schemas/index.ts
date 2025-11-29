@@ -78,3 +78,31 @@ export {
     type UpdateTeamMemberInput,
     type ReorderTeamMembersInput,
 } from "./team";
+
+// Dashboard
+export {
+    DashboardStatsSchema,
+    type DashboardStats,
+    type StatItem,
+    type QuickAction,
+} from "./dashboard";
+
+// Media
+export {
+    MediaItemSchema,
+    MediaSelectResultSchema,
+    MediaSearchItemSchema,
+    MediaPickerModeSchema,
+    MediaUploadInputSchema,
+    ExternalUrlInputSchema,
+    ALLOWED_IMAGE_MIME_TYPES,
+    MAX_UPLOAD_SIZE_BYTES,
+    isAllowedImageMimeType,
+    type MediaItem,
+    type MediaSelectResult,
+    type MediaSearchItem,
+    type MediaPickerMode,
+    type MediaUploadInput,
+    type ExternalUrlInput,
+    type AllowedImageMimeType,
+} from "./media";
