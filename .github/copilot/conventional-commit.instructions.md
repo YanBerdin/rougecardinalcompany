@@ -25,17 +25,25 @@ git commit -m "feat(auth): add Google login feature"
 1. **Make Changes**: Modify your files as needed.
 
 2. **Stage Your Changes**: Add your modified files to the staging area.
-    git add [filename]
-    Or to add all changed files at once:
-    git add .
+
+```bash
+git add `filename`
+Or to add all changed files at once:
+git add .
+```
 
 3. **Commit with Conventional Commit Message**: After staging the changes, use the following command to commit:
     git commit -m "feat(button): add rounded corners"
 
-4. **Push the Changes**: Push your commits to the remote repository.
-    git push
-    Or if you are pushing to a specific branch:
-    git push origin [branch-name]
+4. **Push the Changes**
+
+Push your commits to the remote repository.
+
+```bash
+git push
+Or if you are pushing to a specific branch:
+git push origin `branch-name`
+```
 
 ## 🚀 Basic Structure
 

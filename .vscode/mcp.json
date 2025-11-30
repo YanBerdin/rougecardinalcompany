@@ -1,10 +1,5 @@
-// This file is used to configure the MCP server for Supabase.
-// The command will run in WSL and start the Supabase MCP server.
-// The MCP server is used to connect to the Supabase API and provide a local development environment.
 // The server will be started with the latest version of the Supabase MCP server package.
 // The server will use environment variables for authentication (SUPABASE_ACCESS_TOKEN, SUPABASE_PROJECT_REF).
-// The server will be started in the WSL environment.
-// The server will be started with the command provided in the args.
 {
   "servers": {
     "github": {
