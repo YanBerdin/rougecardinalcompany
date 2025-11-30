@@ -534,10 +534,12 @@ Vérifier qu'aucun autre fichier n'importe ces routes avant suppression.
 Pour chaque nouveau CRUD, vérifier :
 
 ### Page admin
+
 - [ ] `export const dynamic = 'force-dynamic'`
 - [ ] `export const revalidate = 0`
 
 ### Server Actions (`lib/actions/`)
+
 - [ ] Directive `"use server"` + `import "server-only"`
 - [ ] Validation Zod de l'input
 - [ ] Appel DAL
@@ -545,12 +547,14 @@ Pour chaque nouveau CRUD, vérifier :
 - [ ] Return type `ActionResult<T>`
 
 ### DAL (`lib/dal/`)
+
 - [ ] Directive `"use server"` + `import "server-only"`
 - [ ] `requireAdmin()` au début
 - [ ] **PAS** de `revalidatePath()`
 - [ ] Return type `DALResult<T>`
 
 ### Client Component View
+
 - [ ] `useState(initialProps)` pour l'état local
 - [ ] `useEffect(() => setState(props), [props])` pour sync
 - [ ] Handlers appellent Server Actions directement

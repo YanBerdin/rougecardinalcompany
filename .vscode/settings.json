@@ -45,7 +45,8 @@
             "allowedModels": [
                 "copilot/claude-sonnet-4.5",
                 "copilot/gpt-5-mini",
-                "copilot/grok-code-fast-1"
+                "copilot/grok-code-fast-1",
+                "copilot/claude-opus-4.5",
             ]
         }
     }

@@ -6,34 +6,8 @@
 ```bash
 ├── 📁 .github
 │   ├── 📁 copilot
-│   │   ├── 📝 Postgres_SQL_Style_Guide.instructions.md
-│   │   ├── 📝 a11y.instructions.md
-│   │   ├── 📝 conventional-commit.instructions.md
-│   │   ├── 📝 edge-functions.instructions.md
-│   │   ├── 📝 security-and-owasp.instructions.md
-│   │   ├── 📝 touch_hitbox.instructions.md
-│   │   └── 📝 wcag_target_size.instructions.md
 │   ├── 📁 instructions
-│   │   ├── ⚙️ .markdownlint.jsonc
-│   │   ├── 📝 1-clean-code.instructions.md
-│   │   ├── 📝 2-typescript.instructions.md
-│   │   ├── 📝 Create-RLS-policies.instructions.md
-│   │   ├── 📝 Create_migration.instructions.md
-│   │   ├── 📝 Database_Create_functions.instructions.md
-│   │   ├── 📝 Declarative_Database_Schema.instructions.md
-│   │   ├── 📝 README.md
-│   │   ├── 📝 crud-server-actions-pattern.instructions.md
-│   │   ├── 📝 dal-solid-principles.instructions.md
-│   │   ├── 📝 knowledge-base-170825-0035.md
-│   │   ├── 📝 memory-bank.instructions.md
-│   │   ├── 📝 next-backend.instructions.md
-│   │   ├── 📝 nextjs-supabase-auth-2025.instructions.md
-│   │   ├── 📝 nextjs.instructions.md
-│   │   ├── 📝 nextjs15-backend-with-supabase.instructions.md
-│   │   ├── 📝 rouge-cardinal-frontend-skill.instructions.md
-│   │   └── 📝 shadcn-mcp.instructions.md
 │   ├── 📁 prompts
-│   │   └── 📝 plan.dalSolidRefactoring.prompt.md
 │   ├── 📁 workflows
 │   │   ├── ⚙️ detect-revoke-warn.yml
 │   │   ├── ⚙️ invitation-email-test.yml
@@ -197,7 +171,8 @@
 │   │   │   │   ├── 📄 MediaExternalUrlInput.tsx
 │   │   │   │   ├── 📄 MediaLibraryPicker.tsx
 │   │   │   │   ├── 📄 MediaUploadDialog.tsx
-│   │   │   │   └── 📄 index.ts
+│   │   │   │   ├── 📄 index.ts
+│   │   │   │   └── 📄 types.ts
 │   │   │   ├── 📁 spectacles
 │   │   │   │   ├── 📄 SortableHeader.tsx
 │   │   │   │   ├── 📄 SpectacleForm.tsx
@@ -353,217 +328,7 @@
 │   ├── 📄 theme-switcher.tsx
 │   └── 📄 update-password-form.tsx
 ├── 📁 doc
-│   ├── 📁 API-keys
-│   │   └── 📝 scripts-troubleshooting.md
-│   ├── 📁 copilot
-│   │   └── 📝 package-installation.instructions.md
-│   ├── 📁 linting
-│   │   ├── 📝 LINTING_CONFIGURATION.md
-│   │   └── 📝 MARKDOWN_ERRORS_REPORT.md
-│   ├── 📁 migrations-doc
-│   │   ├── 📁 legacy-migrations
-│   │   │   ├── 📁 DEPRECATED
-│   │   │   │   ├── 📄 20251002130000_sync_existing_profiles.sql.skip
-│   │   │   │   ├── 📄 20251022150000_apply_articles_presse_rls_policies.sql.skip
-│   │   │   │   ├── 📄 20251022170000_optimize_articles_presse_rls_policies.sql.skip
-│   │   │   │   ├── 📄 20251026180000_apply_spectacles_partners_rls_policies.sql.skip
-│   │   │   │   ├── 📄 20251026181000_apply_missing_rls_policies_home_content.sql.skip
-│   │   │   │   ├── 📄 20251027010000_recreate_all_rls_policies.sql.skip
-│   │   │   │   ├── 📄 20251117154411_fix_spectacles_rls_clean.sql.skip
-│   │   │   │   ├── 📝 RECONSTRUCTION_SUCCES.md
-│   │   │   │   ├── 📝 RLS_POLICIES_HOTFIX_2025-10-26.md
-│   │   │   │   └── 📝 SECURITY_AUDIT_SUMMARY.md
-│   │   │   ├── 📄 20251024215030_run_reorder_tests.sql
-│   │   │   ├── 📄 20251024215130_check_grants_membres_equipe.sql
-│   │   │   ├── 📄 20251024231855_restrict_reorder_execute.sql
-│   │   │   ├── 📄 20251025160000_revoke_exposed_grants.sql
-│   │   │   ├── 📄 20251025161000_revoke_pg_stat_statements.sql
-│   │   │   ├── 📄 20251025163000_revoke_pg_stat_statements_objects.sql
-│   │   │   ├── 📄 20251025164500_revoke_articles_tables.sql
-│   │   │   ├── 📄 20251025170000_apply_revoke_public_anon.sql
-│   │   │   ├── 📄 20251025170100_proposed_revoke_public_anon.sql
-│   │   │   ├── 📄 20251025173000_revoke_communiques_privileges.sql
-│   │   │   ├── 📄 20251025174500_revoke_information_schema_and_role_memberships.sql
-│   │   │   ├── 📄 20251025175500_revoke_additional_authenticated_grants.sql
-│   │   │   ├── 📄 20251025180000_revoke_more_authenticated_grants.sql
-│   │   │   ├── 📄 20251025181000_revoke_final_exposed_objects.sql
-│   │   │   ├── 📄 20251025182000_revoke_new_exposed_objects.sql
-│   │   │   ├── 📄 20251025183000_revoke_membres_messages_views.sql
-│   │   │   ├── 📄 20251025184000_revoke_final_round_partners_profiles.sql
-│   │   │   ├── 📄 20251025185000_revoke_seo_spectacles_final.sql
-│   │   │   ├── 📄 20251025190000_revoke_junction_tables_final.sql
-│   │   │   ├── 📄 20251025191000_revoke_realtime_schema.sql
-│   │   │   ├── 📄 20251025192000_revoke_realtime_subscription_authenticated.sql
-│   │   │   ├── 📄 20251026080000_revoke_articles_presse_functions.sql
-│   │   │   ├── 📄 20251026090000_revoke_categories_analytics_functions.sql
-│   │   │   ├── 📄 20251026100000_revoke_storage_search_functions.sql
-│   │   │   ├── 📄 20251026110000_revoke_storage_analytics_persistent_functions.sql
-│   │   │   ├── 📄 20251026120000_revoke_storage_objects_business_functions.sql
-│   │   │   ├── 📄 20251026130000_revoke_storage_prefixes_versioning_functions.sql
-│   │   │   ├── 📄 20251026140000_revoke_storage_multipart_auth_triggers.sql
-│   │   │   ├── 📄 20251026150000_revoke_storage_multipart_parts_utility_functions.sql
-│   │   │   ├── 📄 20251026160000_revoke_remaining_versioning_triggers.sql
-│   │   │   ├── 📄 20251026170000_revoke_check_communique_has_pdf_function.sql
-│   │   │   ├── 📝 INCIDENT_POSTMORTEM_RLS_GRANTS_2025-10-27.md
-│   │   │   ├── 📝 SECURITY_INCIDENT_2025-10-27.md
-│   │   │   └── 📝 rls-policies-troubleshooting.md
-│   │   ├── 📝 fix_all_views_security_invoker.md
-│   │   └── 📝 incident_RLS_GRANTS.md
-│   ├── 📁 prompt-plan
-│   │   ├── 📁 TASK026-prompt-plan
-│   │   │   ├── 📝 TASK026-homepage-content-management.instructions.md
-│   │   │   ├── 📝 fix-rerender-homeHeroSlide.md
-│   │   │   ├── 📝 plan-cleanCodeTypeScriptConformity.prompt.md
-│   │   │   └── 📝 plan-mediaPickerDialogRefactoring.prompt.md
-│   │   ├── 📝 TASK022-team-management-instructions.md
-│   │   ├── 📝 fix-.plan-userInvitationSystem.prompt.md
-│   │   ├── 📄 migrate-route-groups.sh
-│   │   ├── 📝 plan-apiRefactoringReview.prompt.md
-│   │   ├── 📝 plan-dashboardRefactoring.prompt.md
-│   │   ├── 📝 plan-refactorInviteUserFunction.prompt.md
-│   │   ├── 📝 plan-spectaclesImplementationCompletion.prompt.md
-│   │   ├── 📝 plan-spectaclesSortingAndGenreRefactoring.prompt.md
-│   │   └── 📝 plan-userInvitationSystem.prompt.md
-│   ├── 📁 prompts-github
-│   │   ├── 📝 architecture-blueprint-generator.prompt.md
-│   │   ├── 📝 conventional-commit.prompt.md
-│   │   ├── 📝 copilot-instructions-blueprint-generator.prompt.md
-│   │   ├── 📝 copilot-thought-logging.instructions.md
-│   │   ├── 📝 feature.Instructions.md
-│   │   └── 📝 folder-structure-blueprint-generator.prompt.md
-│   ├── 📁 resend_integration
-│   │   ├── 📁 contact-resend
-│   │   │   ├── 📝 API-Contact-Test-Results.md
-│   │   │   └── 📝 Fix-Contact-Email-Missing.md
-│   │   ├── 📁 newsletter-resend
-│   │   │   └── 📝 API-Newsletter-Test-Results.md
-│   │   ├── 📝 Complete-Session-Summary-RGPD-Contact.md
-│   │   ├── 📝 RGPD-Compliance-Validation.md
-│   │   ├── 📝 Session-RGPD-Summary-2025-10-10.md
-│   │   └── 📝 resend_supabase_integration_prompt.md
-│   ├── 📝 dev-email-redirect.md
-│   ├── 📝 guide-developpement.md
-│   ├── 📝 regles_copilot.md
-│   ├── 🖼️ snap.png
-│   ├── 📝 solution-admin-auth.md
-│   ├── 📝 supabase-typescript-guide.md
-│   ├── 📝 troubleshooting-admin-auth.md
-│   └── 📝 visuel-blueprintGenerator.md
 ├── 📁 doc-perso
-│   ├── 📁 Appliquer-instructions-plan
-│   │   ├── 📝 TASK022-CLEANUP-NOM-ALIAS.md
-│   │   ├── 📝 TASK022-CORRECTIONS.md
-│   │   ├── 📝 TASK022-MAPPING-FIXES.md
-│   │   ├── 📝 TASK022-REVIEW.md
-│   │   ├── 📝 TASK022-SCHEMA-COHERENCE.md
-│   │   ├── 📝 TASK022-SUMMARY-MAPPING-CHECK.md
-│   │   ├── 📝 TASK022-team-management-instructions.md
-│   │   └── 📝 fetch-media-articles-progress.md
-│   ├── 📁 SQL-schema-Compliancy-report
-│   │   ├── 📝 create-functions-compliance-report.md
-│   │   ├── 📝 create-migration-compliance-report.md
-│   │   ├── 📝 create-rls-policies-compliance-report.md
-│   │   ├── 📝 declarative-schema-compliance-report.md
-│   │   └── 📝 postgres-sql-style-compliance-report.md
-│   ├── 📁 Schema_et_migrations
-│   │   └── 📝 terminal-schema-progress.md
-│   ├── 📁 Supabase API Keys 
-│   │   ├── 📝 Fix-Legacy-API-Keys-2025-10-13.md
-│   │   └── 📝 Supabase-API-Keys-Formats-2025-10-13.md
-│   ├── 📁 TASK026
-│   │   ├── 📝 TASK026B-terminal.md
-│   │   └── 📝 task026-complianct-report-before-refacto.md
-│   ├── 📁 Team-DAL-refacto-
-│   │   ├── 📝 3-suite-terminal.md
-│   │   ├── 📝 suite-terminal.md
-│   │   └── 📝 terminal-progress.md
-│   ├── 📁 conversation Coplilot
-│   │   ├── 📝 bug-typescript-et-migration.md
-│   │   ├── 📝 bug-wsl.md
-│   │   └── 📝 declarative-schema-hotfix.md
-│   ├── 📁 db-reset
-│   │   └── 📝 db-reset.md
-│   ├── 📁 deprecated
-│   │   ├── 📁 legacy-migrations
-│   │   │   ├── 📄 20251117015616_fix_spectacles_rls_insert_policy.sql
-│   │   │   ├── 📄 20251117020919_fix_spectacles_rls_direct_query.sql
-│   │   │   ├── 📄 20251117154221_debug_spectacles_policies.sql
-│   │   │   ├── 📄 20251117154301_test_insert_public_false.sql
-│   │   │   └── 📄 20251117154330_check_rls_policies_detailed.sql
-│   │   ├── 📁 types
-│   │   │   └── 📄 database.types.legacy.ts
-│   │   ├── 📄 actions.legacy.ts
-│   │   └── 📝 copilot-instructions-old.md
-│   ├── 📁 feat-Admin-discuss
-│   │   └── 📝 sync_existing_profiles_guide.md
-│   ├── 📁 fix-declarative-schema-report
-│   │   ├── 📝 20251007-migration-supabase-cloud-success.md
-│   │   ├── 📝 DECISION-hotfix-migrations-synchronization.md
-│   │   └── 📝 declarative-schema-hotfix-workflow.md
-│   ├── 📁 lancement-supabase-cloud
-│   │   ├── 📝 CLI-Supabase-Cloud.md
-│   │   └── 📝 docker-volume-backed-up.md
-│   ├── 📁 lancement-supabase-local
-│   │   ├── 📝 CLI-Supabase-Local.md
-│   │   └── 📝 docker-install.md
-│   ├── 📁 linting-conversation
-│   │   └── 📝 linting-conversation.md
-│   ├── 📁 memory-bank-deprecated
-│   │   ├── 📝 Project_Architecture_Blueprint.md
-│   │   ├── 📝 Project_Architecture_Blueprint_v3.md
-│   │   ├── 📝 Project_Folders_Structure_Blueprint.md
-│   │   └── 📝 Project_Folders_Structure_Blueprint_v2.md
-│   ├── 📁 prompts-custom-claude
-│   │   └── 📝 feature_based_prompt.md
-│   ├── 📁 prompts-custom-copilot-pc
-│   │   └── 📝 0-clean-architecture-nextjs.md
-│   ├── 📁 refacto-active-route-admin
-│   │   ├── 📝 analyse-refacto-todo.md
-│   │   ├── 📝 refacto-terminal-suite.md
-│   │   └── 📝 refacto-terminal.md
-│   ├── 📁 resend-integration
-│   │   ├── 📁 MISE_A_JOUR_RESEND_discussion.md
-│   │   │   ├── 📝 0-RGPD-Compliance-discuss-conformité.md
-│   │   │   ├── 📝 1-resend-update-discuss.md
-│   │   │   ├── 📝 2-progress-and-test-resend.md
-│   │   │   ├── 📝 3-eslint-discuss.md
-│   │   │   ├── 📝 4-useNewsletterSubscription to useNewsletterSubscribe.md
-│   │   │   ├── 📝 5-articles_presse_rls-DAL-contact.md
-│   │   │   ├── 📝 6-newsletter-log-test-fix-rgpd.md
-│   │   │   ├── 📝 7-DAL-contact.md
-│   │   │   └── 📝 8-eslint-types-error-todo.md
-│   │   └── 📁 resend-implementation-plan
-│   │       ├── 📝 COMPATIBILITY_ISSUES.md
-│   │       ├── 📝 MISE_A_JOUR_RESEND_INTEGRATION.md
-│   │       └── 📝 resend_supabase_integration.md
-│   ├── 📁 spectaclesImplementationCompletion
-│   │   ├── 📄 promote-admin.ts
-│   │   ├── 📝 see-admin-terminal.md
-│   │   ├── 📝 seedAdmin-discuss.md
-│   │   └── 📝 spectaclesImplementationCompletion.md
-│   ├── 📁 userInvitationSystem-terminal.md
-│   │   └── 📝 new.md
-│   ├── 📝 1-naming-conventions.instructions.md
-│   ├── 📝 2-typescript-naming-conventions.md
-│   ├── 📝 Architecture-Blueprints-Update-Log-2025-10-13.md
-│   ├── 📝 Architecture-Update-Auth-Cleanup-2025-10-13.md
-│   ├── 📝 Code-Cleanup-Auth-Session-2025-10-13.md
-│   ├── 📝 DECISION-hotfix-migrations-synchronization.md
-│   ├── 📝 Project_Folders_Structure_Blueprint.md
-│   ├── 📝 README-CORRECTIONS-CONFORMITE.md
-│   ├── 📝 cahier-des-charges.md
-│   ├── 📝 copilot-extensions-espace-disk.md
-│   ├── 📄 global.css
-│   ├── 📝 many-to-many.md
-│   ├── 📝 mcp-context-flow.md
-│   ├── ⚙️ mcp.json
-│   ├── 📝 nextjs.instructions.md
-│   ├── 📝 progress.md
-│   ├── 📝 shadcn-mcp.md
-│   ├── 📄 test-form-schema.ts
-│   ├── 📝 update-node-18to-22.md
-│   ├── 📝 updated_copilot_instructions(4).md
-│   └── 📝 updated_copilot_instructions.md
 ├── 📁 emails
 │   ├── 📁 utils
 │   │   ├── 📄 components.utils.tsx
@@ -571,8 +336,6 @@
 │   ├── 📄 contact-message-notification.tsx
 │   ├── 📄 invitation-email.tsx
 │   └── 📄 newsletter-confirmation.tsx
-├── 📁 hooks
-│   └── 📄 use-mobile.ts
 ├── 📁 lib
 │   ├── 📁 api
 │   │   ├── 📄 helpers.ts
@@ -604,19 +367,21 @@
 │   │   └── 📄 team.ts
 │   ├── 📁 email
 │   │   ├── 📄 actions.ts
-│   │   ├── 📄 schemas.ts
 │   │   └── 📄 types.ts
 │   ├── 📁 forms
 │   │   └── 📄 spectacle-form-helpers.ts
 │   ├── 📁 hooks
 │   │   ├── 📄 use-debounce.ts
+│   │   ├── 📄 use-mobile.ts
 │   │   ├── 📄 useContactForm.ts
 │   │   └── 📄 useNewsletterSubscribe.ts
 │   ├── 📁 plugins
 │   │   └── 📄 touch-hitbox-plugin.js
 │   ├── 📁 schemas
+│   │   ├── 📄 admin-users.ts
 │   │   ├── 📄 agenda.ts
 │   │   ├── 📄 compagnie.ts
+│   │   ├── 📄 contact.ts
 │   │   ├── 📄 dashboard.ts
 │   │   ├── 📄 home-content.ts
 │   │   ├── 📄 index.ts
@@ -626,8 +391,6 @@
 │   │   └── 📄 team.ts
 │   ├── 📁 tables
 │   │   └── 📄 spectacle-table-helpers.ts
-│   ├── 📁 types
-│   │   └── 📄 media.ts
 │   ├── 📁 utils
 │   │   └── 📄 validate-image-url.ts
 │   ├── 📄 database.types.ts

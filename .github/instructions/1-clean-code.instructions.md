@@ -3,7 +3,7 @@ applyTo: "**"
 description: APPLY Clean Code principles WHENEVER writing code
 ---
 
-# Code Quality:
+# Code Quality
 
 - Write no comments
 - Use strict types only
@@ -14,21 +14,21 @@ description: APPLY Clean Code principles WHENEVER writing code
 - Write the simplest code possible
 - Eliminate duplication (DRY)
 
-## Length Limits:
+## Length Limits
 
 - Max 30 lines per function
 - Max 5 params per function
 - Max 300 lines per file
 - Max 10 sub-files per folder
 
-## Responsibilities:
+## Responsibilities
 
 - One responsibility per file
 
-## Functions:
+## Functions
 - No flag parameters
 
-## Errors:
+## Errors
 
 - Fail fast
 - Throw errors early
