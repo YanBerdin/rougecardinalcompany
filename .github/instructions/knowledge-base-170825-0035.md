@@ -10,9 +10,11 @@ Principaux points consolidés :
 
 - Next.js 15 (App Router) : privilégier Server Components pour les lectures et SEO; n'utiliser `"use client"` que pour l'interactivité.
 - Data Access Layer (DAL) server-only : tous les accès en lecture centralisés dans `lib/dal/*`, modules marqués `server-only` et validés avec Zod.
+- **DAL SOLID Pattern (Nov 2025)** : 17/17 modules DAL utilisent `DALResult<T>`, helpers centralisés dans `lib/dal/helpers/`, `revalidatePath()` uniquement dans Server Actions, props colocalisées avec composants.
 - Supabase Auth optimisé : utiliser `@supabase/ssr`, cookies via `getAll()`/`setAll()`, et `supabase.auth.getClaims()` pour checks rapides; réserver `getUser()` aux usages nécessitant l'objet complet.
 - Row Level Security (RLS) : policies co‑localisées dans chaque fichier de table; une policy par opération (select/insert/update/delete); privilégier `public.is_admin()` pour checks admin.
-- Server Actions & Mutations : reads via Server Components, mutations via Server Actions / API routes; valider avec Zod et invalider le cache avec `revalidatePath()`/`revalidateTag()`.
+- Server Actions & Mutations : reads via Server Components, mutations via Server Actions colocalisées dans `app/(admin)/admin/<feature>/actions.ts`; valider avec Zod et invalider le cache avec `revalidatePath()`/`revalidateTag()`.
+instructions : `.github/instructions/dal-solid-principles.instructions.md`
 - **Supabase Storage** : bucket "medias" avec RLS (lecture publique, upload auth, delete admin); Server Actions avec rollback en cas d'erreur DB; validation client + serveur (5MB max, JPEG/PNG/WebP/AVIF).
 - **RLS Policies & SECURITY INVOKER** : toujours appliquer RLS policies ET GRANT permissions sur tables base pour les vues SECURITY INVOKER; PostgreSQL deny-all par défaut si RLS activé sans policies; Defense in Depth (VIEW + GRANT + RLS).
 - Email : architecture Resend + React Email, templates React, Zod validation, webhooks pour bounces/deliveries, scripts d'intégration fournis.
@@ -20,10 +22,86 @@ Principaux points consolidés :
 
 Backoffice — tâches (aperçu rapide) :
 
+- ✅ **30 novembre 2025 — DAL SOLID Refactoring COMPLÉTÉ** : 92% SOLID compliance (target 90%), 17/17 DAL avec DALResult pattern, 0 revalidatePath dans DAL, 11 schemas centralisés, helpers créés (lib/dal/helpers/), props colocalisées, Server Actions colocalisées, 4 blueprints architecture mis à jour
 - ✅ **24 novembre 2025 — CardsDashboard & Skeleton Centralization COMPLÉTÉ** : Dashboard admin modernisé avec grille de 6 cards réutilisables (équipe, spectacles, événements, médias, utilisateurs, réglages), skeletons centralisés dans components/skeletons/, pattern Smart/Dumb components, responsive design (md:2, lg:3)
 - ✅ **21-23 novembre 2025 — Admin User Invitation System COMPLÉTÉ** : Système d'invitation admin end-to-end avec gestion complète des utilisateurs, templates email React, RLS policies robustes, rollback complet, logging RGPD-compliant, tests CI automatisés, client-side token processing pour hash-based auth, documentation complète
 - ✅ **TASK022 Team Management** (COMPLÉTÉ 22/10/2025) : CRUD équipe avec photos Supabase Storage, médiathèque fonctionnelle, admin dashboard opérationnel
 - TASK021..TASK040 (auth roles, admin layout, CRUD spectacles/événements, gestion médias, espace presse, contacts, newsletter admin, versioning, SEO redirects, partners, home content, permissions, audits, imports, QA/accessibility).
+
+## DAL SOLID Refactoring — Architecture (30 nov. 2025)
+
+### Vue d'ensemble
+
+Refactoring complet du Data Access Layer pour atteindre 92% de conformité SOLID (Single Responsibility, Open/Closed, Liskov, Interface Segregation, Dependency Inversion).
+
+### Métriques finales
+
+| Critère | Avant | Après | Cible |
+|---------|-------|-------|-------|
+| DAL avec DALResult | 0/17 | 17/17 | 100% |
+| revalidatePath dans DAL | ~12 | 0 | 0 |
+| Imports email dans DAL | 3 | 0 | 0 |
+| Schemas centralisés | ~8 | 11 | 100% |
+| **Score SOLID global** | ~60% | **92%** | 90% |
+
+### Pattern DALResult
+
+```typescript
+// lib/dal/helpers/error.ts
+export type DALResult<T> = 
+  | { success: true; data: T }
+  | { success: false; error: string };
+
+export function toDALResult<T>(
+  data: T | null,
+  error: Error | null
+): DALResult<T> {
+  if (error) return { success: false, error: error.message };
+  if (data === null) return { success: false, error: "No data returned" };
+  return { success: true, data };
+}
+```
+
+### Structure DAL Helpers
+
+```bash
+lib/dal/helpers/
+├── error.ts      # DALResult<T> + toDALResult()
+├── format.ts     # formatDate(), etc.
+├── slug.ts       # generateSlug()
+└── index.ts      # Barrel exports
+```
+
+### Server Actions Colocalisées
+
+```bash
+app/(admin)/admin/<feature>/
+├── page.tsx        # Server Component
+└── actions.ts      # Server Actions (validation + DAL + revalidatePath)
+```
+
+### Schemas Dual Pattern
+
+```typescript
+// lib/schemas/<feature>.ts
+export const FeatureInputSchema = z.object({
+  id: z.coerce.bigint(),  // Server (bigint)
+});
+
+export const FeatureFormSchema = z.object({
+  id: z.number().int().positive(),  // UI (number)
+});
+```
+
+### Règles critiques
+
+- ✅ DAL retourne `DALResult<T>` — JAMAIS throw
+- ✅ `revalidatePath()` dans Server Actions UNIQUEMENT — JAMAIS dans DAL
+- ✅ Imports email dans service email UNIQUEMENT — JAMAIS dans DAL
+- ✅ Props colocalisées avec composants dans `types.ts`
+- ✅ Server Actions colocalisées dans `app/(admin)/admin/<feature>/actions.ts`
+
+---
 
 ## Admin User Invitation System — Architecture & Implementation (21-23 nov. 2025)
 

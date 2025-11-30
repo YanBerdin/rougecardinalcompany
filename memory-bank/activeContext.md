@@ -1,6 +1,79 @@
 # Active Context
 
-**Current Focus (2025-11-27)**: Clean Code & TypeScript Conformity Plan - COMPLETED ✅ + Blueprints Updated
+**Current Focus (2025-11-30)**: DAL SOLID Refactoring - COMPLETED ✅ (92% SOLID Compliance)
+
+## Architecture Updates (2025-11-30)
+
+### DAL SOLID Refactoring - COMPLETED ✅
+
+**Objectif atteint** : 92% SOLID compliance (target: 90%)
+
+#### Métriques finales
+
+| Critère | Avant | Après | Cible |
+|---------|-------|-------|-------|
+| DAL avec DALResult<T> | 0/17 | 17/17 | 100% |
+| revalidatePath dans DAL | ~12 | 0 | 0 |
+| Imports email dans DAL | 3 | 0 | 0 |
+| Schemas centralisés | ~8 | 11 | 100% |
+| **Score SOLID global** | ~60% | **92%** | 90% |
+
+#### Changements architecturaux majeurs
+
+1. **DAL Helpers centralisés** (`lib/dal/helpers/`)
+   - `error.ts` : Type `DALResult<T>` unifié + helper `toDALResult()`
+   - `format.ts` : Helpers formatage (dates, etc.)
+   - `slug.ts` : Génération slugs
+   - `index.ts` : Barrel exports
+
+2. **Pattern DALResult<T>** appliqué aux 17 modules DAL :
+
+   ```typescript
+   export type DALResult<T> = 
+     | { success: true; data: T }
+     | { success: false; error: string };
+   ```
+
+3. **Server Actions colocalisées** :
+   - Location : `app/(admin)/admin/<feature>/actions.ts`
+   - Responsabilité : validation Zod + DAL call + `revalidatePath()`
+   - Pattern : `ActionResult<T>` avec codes HTTP
+
+4. **Schemas centralisés** (`lib/schemas/`) :
+   - 11 fichiers : admin-users, agenda, compagnie, contact, dashboard, home-content, index, media, presse, spectacles, team
+   - Pattern dual : Server schemas (`bigint`) + UI schemas (`number`)
+   - Barrel export via `index.ts`
+
+5. **Colocation des props** :
+   - Props composants dans `components/features/admin/<feature>/types.ts`
+   - Re-exports des constantes depuis `lib/schemas/`
+
+#### Fichiers clés créés/modifiés
+
+| Fichier | Action | Rôle |
+|---------|--------|------|
+| `lib/dal/helpers/error.ts` | Créé | DALResult<T> + toDALResult() |
+| `lib/dal/helpers/format.ts` | Créé | Helpers formatage |
+| `lib/dal/helpers/slug.ts` | Créé | Génération slugs |
+| `lib/dal/helpers/index.ts` | Créé | Barrel exports |
+| `components/features/admin/media/types.ts` | Créé | Props colocalisées |
+| `lib/types/` | Supprimé | Contenu migré vers colocation |
+
+#### Documentation mise à jour
+
+- ✅ `.github/prompts/plan.dalSolidRefactoring.prompt.md` → COMPLETE
+- ✅ `memory-bank/architecture/Project_Folders_Structure_Blueprint_v5.md`
+- ✅ `memory-bank/architecture/Project_Architecture_Blueprint.md` (v2)
+- ✅ `memory-bank/architecture/Email_Service_Architecture.md` (v1.3.0)
+
+#### Commits (branche `feature/backoffice`)
+
+- `f002844` — refactor(media): colocate component props with media feature
+- `dec0ecf` — docs(plan): mark DAL SOLID refactoring as complete (92%)
+- `5180884` — docs(architecture): update blueprint to v5 after SOLID refactoring
+- `066990d` — docs(architecture): update Architecture and Email blueprints after SOLID refactoring
+
+---
 
 ## Architecture Updates (2025-11-27)
 

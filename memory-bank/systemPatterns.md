@@ -3,8 +3,9 @@
 Architecture et patterns observés dans le projet:
 
 - App Router Next.js (app/) pour pages et layouts.
-- Pattern Smart/Dumb components: containers server-side pour la data, composants clients pour l'interactivité.
+- Pattern **Smart/Dumb** components: containers server-side pour la data, composants clients pour l'interactivité.
 - DAL pattern recommandé: `lib/dal/` ou `supabase/` pour centraliser l'accès à la base (server-only modules).
+- **DAL SOLID Pattern (Nov 2025)**: Tous les DAL retournent `DALResult<T>`, helpers centralisés dans `lib/dal/helpers/`.
 - Sécurité: combinaison GRANT (table-level) + RLS (policies) requise — ne pas considérer RLS comme substitut au GRANT.
 - Migrations: `supabase/migrations/` est la source de vérité pour les modifications appliquées en base; `supabase/schemas/` sert de documentation/declarative reference.
 - Tests & CI: vérifier explicitement que les roles `anon` et `authenticated` peuvent accéder aux DTO nécessaires (tests d'intégration DAL).
@@ -14,6 +15,87 @@ Conventions importantes:
 1. Tous les changements de schéma doivent être accompagnés d'une migration.
 2. Les migrations dangereuses (REVOKE massifs) doivent être revues et, si nécessaire, déplacées vers `supabase/migrations/legacy-migrations`.
 3. Les scripts d'audit doivent être alignés avec le modèle de sécurité (ne pas considérer un GRANT comme "exposé" quand il est requis pour RLS).
+
+## DAL SOLID Architecture (Nov 2025)
+
+### DALResult<T> Pattern
+
+**Pattern unifié** pour tous les modules DAL (17/17 compliant):
+
+```typescript
+// lib/dal/helpers/error.ts
+export type DALResult<T> = 
+  | { success: true; data: T }
+  | { success: false; error: string };
+
+export function toDALResult<T>(
+  data: T | null,
+  error: Error | null
+): DALResult<T> {
+  if (error) {
+    return { success: false, error: error.message };
+  }
+  if (data === null) {
+    return { success: false, error: "No data returned" };
+  }
+  return { success: true, data };
+}
+```
+
+### DAL Helpers Structure
+
+```bash
+lib/dal/helpers/
+├── error.ts      # DALResult<T> + toDALResult()
+├── format.ts     # formatDate(), etc.
+├── slug.ts       # generateSlug()
+└── index.ts      # Barrel exports
+```
+
+### Server Actions Location
+
+**Pattern** : Server Actions colocalisées avec les pages admin:
+
+```bash
+app/(admin)/admin/<feature>/
+├── page.tsx        # Server Component
+└── actions.ts      # Server Actions (validation + DAL + revalidatePath)
+```
+
+> [!CAUTION]
+> **Règle critique ⚠️** : `revalidatePath()` UNIQUEMENT dans les Server Actions, JAMAIS dans le DAL.
+
+### Schemas Dual Pattern
+
+**Pattern** : Schémas Server (bigint) + UI (number) séparés:
+
+```typescript
+// lib/schemas/<feature>.ts
+
+// Server schema (pour DAL/BDD)
+export const FeatureInputSchema = z.object({
+  id: z.coerce.bigint(),
+  // ...
+});
+
+// UI schema (pour formulaires)
+export const FeatureFormSchema = z.object({
+  id: z.number().int().positive(),
+  // ...
+});
+```
+
+### Props Colocation Pattern
+
+**Pattern** : Props composants colocalisées avec les composants:
+
+```bash
+components/features/admin/<feature>/
+├── types.ts              # Props interfaces + re-exports
+├── Container.tsx         # Smart component
+├── View.tsx              # Client component
+└── Form.tsx              # Form component
+```
 
 ## Patterns Architecturaux
 
@@ -95,7 +177,9 @@ $$;
 
 #### Admin Authorization Pattern
 
-**CRITICAL REQUIREMENT** : Admin users MUST have profile entry with `role='admin'`
+> [!CAUTION]
+> **CRITICAL REQUIREMENT ⚠️** :
+> Admin users MUST have profile entry with `role='admin'`
 
 **Pattern** : Profile-based authorization avec `is_admin()` function pour RLS policies.
 
@@ -557,13 +641,14 @@ export function View({ initialItems }: { initialItems: FeatureDTO[] }) {
 }
 ```
 
-**Règles Critiques** :
-
-1. `revalidatePath()` UNIQUEMENT dans Server Actions
-2. DAL retourne `DALResult<T>` sans revalidation
-3. Schémas UI (number) ≠ Schémas Server (bigint)
-4. useEffect sync pour re-render après router.refresh()
-5. Composants > 300 lignes doivent être splittés
+> [!CAUTION]
+> **Règles Critiques** :
+>
+>1. `revalidatePath()` UNIQUEMENT dans Server Actions
+>2. DAL retourne `DALResult<T>` sans revalidation
+>3. Schémas UI (number) ≠ Schémas Server (bigint)
+>4. useEffect sync pour re-render après router.refresh()
+>5. Composants > 300 lignes doivent être splittés
 
 **Références** :
 

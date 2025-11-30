@@ -54,9 +54,10 @@ export async function fetchTeamMembers() {
 **Critical Rules**:
 
 - NEVER import DAL in Client Components
-- ALL mutations must revalidate: `revalidatePath('/admin/team')`
+- ALL mutations revalidate via Server Actions (not in DAL)
 - Use Zod validation in both DAL inputs and Server Action inputs
-- Return minimal DTOs, not full database rows
+- Return `DALResult<T>` from DAL, minimal DTOs not full database rows
+- DAL helpers centralized in `lib/dal/helpers/`
 
 ### 3. Smart/Dumb Component Pattern
 
@@ -189,14 +190,14 @@ pnpm exec tsx scripts/check-email-logs.ts     # Email audit
 
 ### File Organization
 
-```
+```bash
 components/
   features/
     admin/team/           # Feature: team management
       TeamContainer.tsx   # Smart component
       TeamList.tsx        # Dumb component
       TeamCard.tsx        # Dumb component
-      types.ts           # Feature types
+      types.ts           # Feature types + props interfaces
     public-site/home/     # Feature: homepage
       HeroContainer.tsx   # Smart component
       Hero.tsx           # Dumb component
@@ -206,11 +207,82 @@ components/
     sidebar.tsx
 
 lib/
-  dal/                    # Server-only data access
+  dal/                    # Server-only data access (17 modules)
+    helpers/              # Centralized DAL utilities
+      error.ts           # DALResult<T> type + toDALResult()
+      format.ts          # Formatting helpers
+      slug.ts            # Slug generation
+      index.ts           # Barrel exports
     team.ts
     home.ts
+  schemas/               # Zod schemas (11 files)
+    team.ts              # Server + UI schemas
+    media.ts             # Media validation
+    index.ts             # Barrel exports
   hooks/                  # Client-side hooks
     use-newsletter-subscribe.ts
+
+app/(admin)/admin/
+  team/
+    page.tsx             # Server Component
+    actions.ts           # Server Actions (colocated)
+```
+
+### DAL SOLID Pattern (Nov 2025)
+
+**ALL 17 DAL modules follow this pattern** (92% SOLID compliance):
+
+```typescript
+// lib/dal/helpers/error.ts
+export type DALResult<T> = 
+  | { success: true; data: T }
+  | { success: false; error: string };
+
+// Usage in DAL modules
+export async function createTeamMember(
+  input: TeamMemberInput
+): Promise<DALResult<TeamMemberDTO>> {
+  await requireAdmin();
+  const supabase = await createClient();
+  
+  const { data, error } = await supabase
+    .from("membres_equipe")
+    .insert(input)
+    .select()
+    .single();
+
+  if (error) return { success: false, error: error.message };
+  return { success: true, data };
+}
+```
+
+**Critical Rules**:
+
+- ✅ DAL returns `DALResult<T>` — NEVER throws
+- ✅ `revalidatePath()` in Server Actions ONLY — NEVER in DAL
+- ✅ Email imports in email service ONLY — NEVER in DAL
+- ✅ Props colocated with components in `types.ts`
+- ✅ Server Actions colocated at `app/(admin)/admin/<feature>/actions.ts`
+
+### Schemas Pattern (Server vs UI)
+
+```typescript
+// lib/schemas/team.ts
+
+// Server schema (bigint for database IDs)
+export const TeamMemberInputSchema = z.object({
+  id: z.coerce.bigint(),
+  name: z.string().min(1),
+});
+
+// UI schema (number for form handling)
+export const TeamMemberFormSchema = z.object({
+  id: z.number().int().positive(),
+  name: z.string().min(1),
+});
+
+export type TeamMemberInput = z.infer<typeof TeamMemberInputSchema>;
+export type TeamMemberFormValues = z.infer<typeof TeamMemberFormSchema>;
 ```
 
 ### Security Rules (36/36 tables have RLS)
@@ -392,20 +464,27 @@ export async function POST(request: NextRequest) {
 
 ### DAL Error Handling
 
-**Standard**: Throw errors early, return minimal data:
+**Standard**: Return `DALResult<T>`, NEVER throw errors:
 
 ```typescript
-export async function fetchTeamMembers() {
+import { DALResult } from "@/lib/dal/helpers";
+
+export async function fetchTeamMembers(): Promise<DALResult<TeamMemberDTO[]>> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("membres_equipe")
     .select("id, name, role, active")
     .eq("active", true);
 
-  if (error) throw error; // Let caller handle
-  return data ?? []; // Defensive fallback
+  if (error) {
+    return { success: false, error: error.message };
+  }
+  
+  return { success: true, data: data ?? [] };
 }
 ```
+
+**Note**: L'ancien pattern `throw error` est déprécié. Utiliser `DALResult<T>` pour tous les modules DAL (voir section "DAL SOLID Pattern").
 
 ### Client Component Error Handling
 
@@ -983,8 +1062,7 @@ memory-bank/
 
 **Task File Template**:
 
-```md
-# [TASK001] - Implement Team Management
+# `TASK001` - Implement Team Management
 
 **Status:** In Progress  
 **Added:** 2025-11-12  
@@ -1022,7 +1100,8 @@ memory-bank/
 
 **Architecture Documentation**:
 
-- `memory-bank/architecture/Project_Architecture_Blueprint_v3.md` - Current architecture
+- `memory-bank/architecture/Project_Architecture_Blueprint.md` - Current architecture (v2, Nov 2025)
+- `memory-bank/architecture/Project_Folders_Structure_Blueprint_v5.md` - Folder structure reference
 - `memory-bank/activeContext.md` - Recent changes and current focus
 - `.github/instructions/nextjs-supabase-auth-2025.instructions.md` - Auth patterns (CANONICAL)
 
@@ -1035,4 +1114,3 @@ memory-bank/
 - Responsive design with shadcn/ui components
 
 When in doubt, always examine existing patterns in the codebase and prioritize security, type safety, and maintainability.
-```

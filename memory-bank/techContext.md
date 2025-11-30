@@ -50,7 +50,7 @@ Outils et commandes utiles:
 
 ### Structure des Dossiers
 
-```txt
+```bash
 /
 ├── app/                    # Pages et routes Next.js
 │   ├── layout.tsx         # Layout principal
@@ -89,9 +89,19 @@ Outils et commandes utiles:
 │   └── contact-message-notification.tsx
 ├── lib/                  # Utilitaires et services
 │   ├── supabase/        # Configuration Supabase
-│   ├── dal/             # Data Access Layer (server-only)
-│   │   ├── team.ts      # 🆕 Team members DAL
-│   │   └── ...          # Other DAL modules
+│   ├── dal/             # Data Access Layer (server-only) — 17 modules
+│   │   ├── helpers/     # 🆕 DAL utilities (error, format, slug)
+│   │   │   ├── error.ts # DALResult<T> + toDALResult()
+│   │   │   ├── format.ts
+│   │   │   ├── slug.ts
+│   │   │   └── index.ts # Barrel exports
+│   │   ├── team.ts
+│   │   └── ...          # Other DAL modules (17 total)
+│   ├── schemas/         # 🆕 Zod schemas centralisés (11 files)
+│   │   ├── team.ts      # Server + UI schemas
+│   │   ├── media.ts
+│   │   └── index.ts     # Barrel exports
+│   ├── actions/         # 🆕 Server Actions centralisées
 │   ├── email/           # Email actions & schemas
 │   ├── hooks/           # Custom React hooks
 │   ├── resend.ts        # Resend client config
@@ -392,3 +402,77 @@ window.history.replaceState(null, "", window.location.pathname);
 - Implementation: `app/(marketing)/auth/setup-account/page.tsx`
 - Pattern documenté: `memory-bank/systemPatterns.md` (section "Client-Side Token Processing")
 - Tests: `scripts/test-invitation-flow.ts`
+
+### DAL SOLID Refactoring (30 novembre 2025)
+
+**Contexte**: Refactoring complet du Data Access Layer pour atteindre 92% de conformité SOLID.
+
+**Métriques finales**:
+
+| Critère | Avant | Après | Cible |
+|---------|-------|-------|-------|
+| DAL avec DALResult | 0/17 | 17/17 | 100% |
+| revalidatePath dans DAL | ~12 | 0 | 0 |
+| Imports email dans DAL | 3 | 0 | 0 |
+| Schemas centralisés | ~8 | 11 | 100% |
+| **Score SOLID global** | ~60% | **92%** | 90% |
+
+**Pattern DALResult** (Standard):
+
+```typescript
+// lib/dal/helpers/error.ts
+export type DALResult<T> = 
+  | { success: true; data: T }
+  | { success: false; error: string };
+
+// Usage dans tous les modules DAL
+export async function fetchTeamMembers(): Promise<DALResult<TeamMemberDTO[]>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("membres_equipe").select("*");
+
+  if (error) return { success: false, error: error.message };
+  return { success: true, data: data ?? [] };
+}
+```
+
+**Dual Schemas Pattern** (Server vs UI):
+
+```typescript
+// lib/schemas/feature.ts
+
+// Server schema (bigint pour database IDs)
+export const FeatureInputSchema = z.object({
+  id: z.coerce.bigint(),
+  // ...
+});
+
+// UI schema (number pour formulaires)
+export const FeatureFormSchema = z.object({
+  id: z.number().int().positive(),
+  // ...
+});
+```
+
+**Règles critiques**:
+
+- ✅ DAL retourne `DALResult<T>` — JAMAIS throw
+- ✅ `revalidatePath()` dans Server Actions UNIQUEMENT — JAMAIS dans DAL
+- ✅ Imports email dans service email UNIQUEMENT — JAMAIS dans DAL
+- ✅ Props colocalisées avec composants dans `types.ts`
+- ✅ Server Actions colocalisées dans `app/(admin)/admin/<feature>/actions.ts`
+
+**Structure DAL Helpers**:
+
+```bash
+lib/dal/helpers/
+├── error.ts      # DALResult<T> + toDALResult()
+├── format.ts     # formatDate(), formatPrice(), etc.
+├── slug.ts       # generateSlug()
+└── index.ts      # Barrel exports
+```
+
+**Références**:
+
+- Instructions: `.github/instructions/dal-solid-principles.instructions.md`
+- Pattern CRUD: `.github/instructions/crud-server-actions-pattern.instructions.md`
+- Architecture: `memory-bank/architecture/Project_Architecture_Blueprint.md`

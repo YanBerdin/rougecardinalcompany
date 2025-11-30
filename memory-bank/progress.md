@@ -1,5 +1,27 @@
 # Progress
 
+## DAL SOLID Refactoring - COMPLETED (2025-11-30)
+
+**Score final : 92% SOLID compliance** (target: 90%)
+
+### Résultats
+
+- ✅ 17/17 DAL modules avec pattern `DALResult<T>`
+- ✅ 0 `revalidatePath()` dans le DAL (tous déplacés vers Server Actions)
+- ✅ 0 imports email dans le DAL (SRP respecté)
+- ✅ 11 schemas centralisés dans `lib/schemas/`
+- ✅ DAL helpers créés : `lib/dal/helpers/` (error.ts, format.ts, slug.ts)
+- ✅ Props composants colocalisées : `components/features/admin/<feature>/types.ts`
+- ✅ Server Actions colocalisées : `app/(admin)/admin/<feature>/actions.ts`
+
+### Documentation mise à jour
+
+- `memory-bank/architecture/Project_Folders_Structure_Blueprint_v5.md`
+- `memory-bank/architecture/Project_Architecture_Blueprint.md` (v2)
+- `memory-bank/architecture/Email_Service_Architecture.md` (v1.3.0)
+
+---
+
 Etat des actions liées à l'incident RLS/GRANT (2025-10-27):
 
 ## Complété
