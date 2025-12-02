@@ -3,6 +3,8 @@ import { SpectaclesContainer } from "@/components/features/public-site/spectacle
 import { Suspense } from "react";
 import { SpectaclesSkeleton } from "@/components/skeletons/spectacles-skeleton";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Spectacles | Rouge-Cardinal",
   description:

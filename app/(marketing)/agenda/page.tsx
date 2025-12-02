@@ -3,6 +3,8 @@ import AgendaContainer from "@/components/features/public-site/agenda/AgendaCont
 import { Suspense } from "react";
 import { AgendaSkeleton } from "@/components/skeletons/agenda-skeleton";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Agenda | Rouge-Cardinal",
   description:

@@ -3,6 +3,8 @@
 //import { AuthButton } from "@/components/auth-button";
 //import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Suspense } from "react";
+
+export const dynamic = "force-dynamic";
 //import { ConnectSupabaseSteps } from "@/components/tutorial/connect-supabase-steps";
 //import { SignUpUserSteps } from "@/components/tutorial/sign-up-user-steps";
 //import { hasEnvVars } from "@/lib/utils";

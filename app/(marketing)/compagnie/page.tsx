@@ -3,6 +3,8 @@ import { Suspense } from "react";
 import { CompagnieContainer } from "@/components/features/public-site/compagnie/CompagnieContainer";
 import { CompagnieSkeleton } from "@/components/skeletons/compagnie-skeleton";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Notre Compagnie | Rouge-Cardinal",
   description:
