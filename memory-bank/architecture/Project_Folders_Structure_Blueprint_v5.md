@@ -55,7 +55,10 @@ app/
   │   │   │   ├─ hero/        # Hero slides management (CRUD + DnD reorder)
   │   │   │   └─ about/       # About section editor
   │   │   ├─ users/           # admin users pages & invite flow
-  │   │   ├─ team/            # team management
+  │   │   ├─ team/            # team management (CRUD pages pattern)
+  │   │   │   ├─ new/         # Create new member page
+  │   │   │   ├─ [id]/edit/   # Edit member page
+  │   │   │   └─ actions.ts   # Server Actions (all Team mutations)
   │   │   └─ spectacles/      # spectacles CRUD
   │   └─ layout.tsx
   ├─ (marketing)/
@@ -68,8 +71,7 @@ app/
   │   ├─ admin/
   │   │   ├─ home/hero/       # Hero slides API (list, create, update, delete, reorder)
   │   │   ├─ media/           # Media library API
-  │   │   ├─ spectacles/      # Spectacles API
-  │   │   └─ team/            # Team API
+  │   │   └─ spectacles/      # Spectacles API
   │   ├─ public/              # Public API endpoints
   │   └─ newsletter/          # Newsletter subscription
   └─ layout.tsx
@@ -247,7 +249,7 @@ Centralized Zod schemas with barrel exports from `lib/schemas/index.ts`:
 - `lib/schemas/media.ts` — `MediaItemSchema`, `MediaSelectResultSchema`, constants
 - `lib/schemas/presse.ts` — `PressReleaseSchema`, `MediaArticleSchema`
 - `lib/schemas/spectacles.ts` — `SpectacleSchema`, `CurrentShowSchema`, `ArchivedShowSchema`
-- `lib/schemas/team.ts` — `TeamMemberSchema`, `SetActiveBodySchema`
+- `lib/schemas/team.ts` — `TeamMemberDbSchema`, `TeamMemberFormSchema`, `optionalUrlSchema`, DTOs
 
 ### Admin Components (`components/features/admin/`)
 

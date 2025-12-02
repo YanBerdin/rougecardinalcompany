@@ -1,18 +1,14 @@
 "use client";
-import { useState } from "react"
-import type {
-  TeamMemberDb,
-  CreateTeamMemberInput,
-  UpdateTeamMemberInput,
-} from "@/lib/schemas/team"
-import TeamMemberList from "./TeamMemberList"
-import TeamMemberForm from "./TeamMemberForm"
-import { MediaUploadDialog, type MediaSelectResult } from "@/components/features/admin/media"
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import type { TeamMemberDb } from "@/lib/schemas/team";
+import TeamMemberList from "./TeamMemberList";
 import {
-  createTeamMember,
   setTeamMemberActiveAction,
-  updateTeamMember,
-} from "@/app/(admin)/admin/team/actions"
+  hardDeleteTeamMemberAction,
+} from "@/app/(admin)/admin/team/actions";
 import {
   Dialog,
   DialogContent,
@@ -21,21 +17,22 @@ import {
   DialogDescription,
   DialogFooter,
   DialogClose,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Toaster } from "@/components/ui/sonner"
-import { toast } from "sonner"
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
+import { Plus } from "lucide-react";
 
 interface Props {
   initialMembers: TeamMemberDb[];
 }
 
 export function TeamManagementContainer({ initialMembers }: Props) {
+  const router = useRouter();
   const [members, setMembers] = useState<TeamMemberDb[]>(initialMembers || []);
   const [showInactive, setShowInactiveTeamMember] = useState(false);
-  const [openForm, setOpenForm] = useState(false);
-  const [editing, setEditing] = useState<TeamMemberDb | null>(null);
-  const [openMedia, setOpenMedia] = useState(false);
+
+  // Dialogs state
   const [deleteCandidate, setDeactivateTeamMember] = useState<number | null>(
     null
   );
@@ -49,27 +46,10 @@ export function TeamManagementContainer({ initialMembers }: Props) {
   );
   const [openHardDeleteDialog, setOpenHardDeleteDialog] = useState(false);
 
-  async function handleCreate(data: CreateTeamMemberInput) {
-    const res = await createTeamMember(data);
-    if (res.success && res.data) {
-      const created = res.data as TeamMemberDb;
-      setMembers((prev) => [created, ...prev]);
-      setOpenForm(false);
-    }
-  }
-
-  async function fetchMembers(includeInactive = false) {
-    try {
-      const res = await fetch(
-        `/api/admin/team?includeInactive=${includeInactive}`
-      );
-      if (!res.ok) throw new Error("Failed to fetch");
-      const data = await res.json();
-      setMembers(data);
-    } catch (err) {
-      console.error("fetchMembers error:", err);
-    }
-  }
+  // ✅ CRITICAL: Sync local state when props change (after router.refresh())
+  useEffect(() => {
+    setMembers(initialMembers);
+  }, [initialMembers]);
 
   function requestDeactivateTeamMember(id: number) {
     setDeactivateTeamMember(id);
@@ -80,8 +60,6 @@ export function TeamManagementContainer({ initialMembers }: Props) {
     setOpenDeactivateDialog(false);
     const res = await setTeamMemberActiveAction(id, false);
     if (res.success) {
-      // Instead of filtering out, mark as inactive in local state
-      // This ensures the member stays visible if "show inactive" is checked
       setMembers((prev) =>
         prev.map((m) => (m.id === id ? { ...m, active: false } : m))
       );
@@ -94,35 +72,28 @@ export function TeamManagementContainer({ initialMembers }: Props) {
   }
 
   async function handleReactivateTeamMember(id: number) {
-    try {
-      const res = await fetch(`/api/admin/team/${id}/active`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ active: true }),
-      });
-      if (!res.ok) throw new Error("Failed");
-      // update local list: set active to true for that member
+    const res = await setTeamMemberActiveAction(id, true);
+    if (res.success) {
       setMembers((prev) =>
         prev.map((m) => (m.id === id ? { ...m, active: true } : m))
       );
       toast.success("Membre réactivé");
-    } catch (err) {
-      console.error("reactivate error", err);
+    } else {
       toast.error("Impossible de réactiver");
     }
   }
 
-  async function handleEditSubmit(id: number, data: UpdateTeamMemberInput) {
-    const res = await updateTeamMember(id, data);
-    if (res.success && res.data) {
-      const updated = res.data as TeamMemberDb;
-      setMembers((prev) => prev.map((m) => (m.id === id ? updated : m)));
-      setEditing(null);
-      setOpenForm(false);
+  async function handleHardDeleteMember(id: number) {
+    const res = await hardDeleteTeamMemberAction(id);
+    if (res.success) {
+      setMembers((prev) => prev.filter((m) => m.id !== id));
+      toast.success("Membre supprimé définitivement");
+    } else {
+      toast.error(res.error ?? "Impossible de supprimer définitivement");
     }
+    setOpenHardDeleteDialog(false);
+    setHardDeleteCandidate(null);
   }
-
-  //TODO: handleHardDeleteCandidate => handleHardDeleteMember
 
   return (
     <div className="space-y-6">
@@ -133,33 +104,26 @@ export function TeamManagementContainer({ initialMembers }: Props) {
           <input
             type="checkbox"
             checked={showInactive}
-            onChange={async (e) => {
-              const val = e.currentTarget.checked;
-              setShowInactiveTeamMember(val);
-              await fetchMembers(val);
+            onChange={(e) => {
+              setShowInactiveTeamMember(e.currentTarget.checked);
             }}
           />
         </div>
       </div>
+
       <div className="flex justify-end">
-        <Button
-          variant="default"
-          className=""
-          onClick={() => {
-            setEditing(null);
-            setOpenForm(true);
-          }}
-        >
-          Ajouter un membre
+        <Button asChild>
+          <Link href="/admin/team/new">
+            <Plus className="mr-2 h-4 w-4" />
+            Ajouter un membre
+          </Link>
         </Button>
       </div>
 
       <TeamMemberList
         members={showInactive ? members : members.filter((m) => m.active)}
         onEditMember={(id) => {
-          const m = members.find((x) => x.id === id) || null;
-          setEditing(m);
-          setOpenForm(true);
+          router.push(`/admin/team/${id}/edit`);
         }}
         onDeactivateMember={requestDeactivateTeamMember}
         onReactivateMember={(id) => {
@@ -172,28 +136,7 @@ export function TeamManagementContainer({ initialMembers }: Props) {
         }}
       />
 
-      {openForm && (
-        <div className="p-4 bg-card rounded">
-          <TeamMemberForm
-            member={editing}
-            onSubmit={async (data) => {
-              if (editing) await handleEditSubmit(editing.id, data);
-              else await handleCreate(data as CreateTeamMemberInput);
-            }}
-            onCancel={() => setOpenForm(false)}
-          />
-        </div>
-      )}
-
-      <MediaUploadDialog
-        open={openMedia}
-        onClose={() => setOpenMedia(false)}
-        onSelect={(result: MediaSelectResult) => {
-          console.log("selected media", result.id, result.url);
-          setOpenMedia(false);
-        }}
-      />
-
+      {/* Deactivate Dialog */}
       <Dialog open={openDeleteDialog} onOpenChange={setOpenDeactivateDialog}>
         <DialogContent>
           <DialogHeader>
@@ -223,6 +166,7 @@ export function TeamManagementContainer({ initialMembers }: Props) {
         </DialogContent>
       </Dialog>
 
+      {/* Reactivate Dialog */}
       <Dialog
         open={openReactivateDialog}
         onOpenChange={setOpenReactivateDialog}
@@ -259,6 +203,7 @@ export function TeamManagementContainer({ initialMembers }: Props) {
         </DialogContent>
       </Dialog>
 
+      {/* Hard Delete Dialog */}
       <Dialog
         open={openHardDeleteDialog}
         onOpenChange={setOpenHardDeleteDialog}
@@ -280,28 +225,9 @@ export function TeamManagementContainer({ initialMembers }: Props) {
             </Button>
             <Button
               variant="destructive"
-              onClick={async () => {
-                if (!hardDeleteCandidate) return;
-                try {
-                  const res = await fetch(
-                    `/api/admin/team/${hardDeleteCandidate}/hard-delete`,
-                    {
-                      method: "POST",
-                    }
-                  );
-                  if (!res.ok) throw new Error("Failed");
-                  setMembers((prev) =>
-                    prev.filter((m) => m.id !== hardDeleteCandidate)
-                  );
-                  toast.success("Membre supprimé définitivement");
-                } catch (err) {
-                  console.error("hard delete error", err);
-                  toast.error("Impossible de supprimer définitivement");
-                } finally {
-                  setOpenHardDeleteDialog(false);
-                  setHardDeleteCandidate(null);
-                }
-              }}
+              onClick={() =>
+                hardDeleteCandidate && handleHardDeleteMember(hardDeleteCandidate)
+              }
             >
               Supprimer définitivement
             </Button>

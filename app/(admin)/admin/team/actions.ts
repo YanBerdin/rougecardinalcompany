@@ -156,9 +156,8 @@ export async function setTeamMemberActiveAction(
 }
 
 /**
- * Permanently deletes a team member (RGPD compliance)
  * 
- * CRITICAL: This operation is irreversible.
+ * CRITICAL: Permanently deletes a team member (RGPD compliance).
  * The member must be deactivated before deletion.
  */
 export async function hardDeleteTeamMemberAction(

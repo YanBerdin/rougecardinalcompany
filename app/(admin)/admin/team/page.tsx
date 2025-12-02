@@ -4,16 +4,19 @@ import { createClient } from "@/supabase/server";
 import { fetchAllTeamMembers } from "@/lib/dal/team";
 import TeamManagementContainer from "@/components/features/admin/team/TeamManagementContainer";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function AdminTeamPage() {
   const supabase = await createClient();
 
   const { data, error } = await supabase.auth.getClaims();
-  // console.log("AdminTeamPage claims:", data?.claims); //TODO: Remove this line
   if (error || !data?.claims || data.claims.user_metadata.role !== "admin") {
     redirect("/auth/login");
   }
 
-  const members = await fetchAllTeamMembers();
+  // Fetch ALL members (including inactive) for client-side filtering
+  const members = await fetchAllTeamMembers(true);
 
   return (
     <div className="space-y-6">

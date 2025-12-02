@@ -8,7 +8,12 @@ export const TeamMemberDbSchema = z.object({
   name: z.string().min(1).max(200),
   role: z.string().nullable(),
   description: z.string().nullable(),
-  image_url: z.string().url().nullable(),
+  image_url: z
+    .string()
+    .url()
+    .nullable()
+    .optional()
+    .or(z.literal("")),
   photo_media_id: z.number().nullable(),
   ordre: z.number().nullable(),
   active: z.boolean().nullable(),
@@ -20,7 +25,12 @@ export const CreateTeamMemberInputSchema = z.object({
   name: z.string().min(1).max(200),
   role: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
-  image_url: z.string().url().nullable().optional(),
+  image_url: z
+    .string()
+    .url()
+    .nullable()
+    .optional()
+    .or(z.literal("")),
   photo_media_id: z.number().nullable().optional(),
   ordre: z.number().nullable().optional(),
   active: z.boolean().optional(),
@@ -30,7 +40,12 @@ export const UpdateTeamMemberInputSchema = z.object({
   name: z.string().min(1).max(200).optional(),
   role: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
-  image_url: z.string().url().nullable().optional(),
+  image_url: z
+    .string()
+    .url()
+    .nullable()
+    .optional()
+    .or(z.literal("")),
   photo_media_id: z.number().nullable().optional(),
   ordre: z.number().nullable().optional(),
   active: z.boolean().optional(),
@@ -70,5 +85,27 @@ export const SetActiveBodySchema = z.object({
 });
 
 export type SetActiveBody = z.infer<typeof SetActiveBodySchema>;
+
+// =============================================================================
+// UI FORM SCHEMA (for react-hook-form + Next.js form components)
+// =============================================================================
+
+/**
+ * UI schema for TeamMemberForm component
+ * Uses number (not bigint) for JSON serialization compatibility with forms
+ * 
+ * @see CreateTeamMemberInputSchema for server-side validation
+ */
+export const TeamMemberFormSchema = z.object({
+  name: z.string().min(1, "Le nom est requis").max(200, "200 caractères maximum"),
+  role: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
+  image_url: z.string().url("URL invalide").optional().nullable().or(z.literal("")),
+  photo_media_id: z.number().int().positive().optional().nullable(),
+  ordre: z.number().int().optional().nullable(),
+  active: z.boolean().optional(),
+});
+
+export type TeamMemberFormValues = z.infer<typeof TeamMemberFormSchema>;
 
 export default TeamMemberDbSchema;

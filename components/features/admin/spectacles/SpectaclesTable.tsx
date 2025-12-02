@@ -50,7 +50,7 @@ export default function SpectaclesTable({
   }
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md bg-card border">
       <Table>
         <TableHeader>
           <TableRow>

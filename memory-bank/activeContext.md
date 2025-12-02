@@ -1,14 +1,71 @@
 # Active Context
 
-**Current Focus (2025-11-30)**: DAL SOLID Refactoring - COMPLETED ✅ (92% SOLID Compliance)
+**Current Focus (2025-12-02)**: Team CRUD Migration to Server Actions Pattern - COMPLETED ✅
 
-## Architecture Updates (2025-11-30)
+## Architecture Updates (2025-12-02)
 
-### DAL SOLID Refactoring - COMPLETED ✅
+### Team CRUD Migration - COMPLETED ✅
 
-**Objectif atteint** : 92% SOLID compliance (target: 90%)
+**Objectif atteint** : Migration complète du formulaire Team vers le pattern Server Actions avec pages CRUD dédiées.
 
-#### Métriques finales
+#### Changements réalisés
+
+| Composant | Avant | Après |
+|-----------|-------|-------|
+| Affichage form | Inline dans TeamManagementContainer | Pages dédiées `/admin/team/new` et `/admin/team/[id]/edit` |
+| API Routes | 3 fichiers dans `app/api/admin/team/` | **Supprimés** (0 fichiers) |
+| Mutations | fetch() vers API Routes | Server Actions directes |
+| Validation form | 6 useState | react-hook-form + zodResolver |
+| Schémas Zod | Schéma unique | Dual schemas (Server + UI) + `optionalUrlSchema` |
+
+#### Fichiers créés
+
+| Fichier | Lignes | Rôle |
+|---------|--------|------|
+| `app/(admin)/admin/team/new/page.tsx` | 55 | Page création membre |
+| `app/(admin)/admin/team/new/loading.tsx` | 36 | Skeleton loading |
+| `app/(admin)/admin/team/[id]/edit/page.tsx` | 82 | Page édition membre |
+| `app/(admin)/admin/team/[id]/edit/loading.tsx` | 65 | Skeleton loading |
+| `components/features/admin/team/TeamMemberFormWrapper.tsx` | 65 | Bridge avec sanitizePayload() |
+
+#### Fichiers modifiés
+
+| Fichier | Changement |
+|---------|------------|
+| `lib/schemas/team.ts` | Ajout `optionalUrlSchema`, `TeamMemberFormSchema`, `TeamMemberFormValues` |
+| `components/features/admin/team/TeamMemberForm.tsx` | Refactoring vers react-hook-form + zodResolver |
+| `components/features/admin/team/TeamManagementContainer.tsx` | Simplification (retrait form inline, Link/router.push) |
+| `app/(admin)/admin/team/page.tsx` | Ajout `dynamic = 'force-dynamic'`, `revalidate = 0`, `fetchAllTeamMembers(true)` |
+| `app/(admin)/admin/team/actions.ts` | Ajout `hardDeleteTeamMemberAction` |
+
+#### Fichiers supprimés (API Routes obsolètes)
+
+- `app/api/admin/team/route.ts`
+- `app/api/admin/team/[id]/active/route.ts`
+- `app/api/admin/team/[id]/hard-delete/route.ts`
+- `app/api/admin/team/[id]/` (répertoire)
+- `app/api/admin/team/` (répertoire)
+
+#### Bugs corrigés pendant la migration
+
+1. **"Afficher inactifs" ne fonctionnait plus** → `fetchAllTeamMembers(true)` pour charger tous les membres
+2. **"Validation failed" sans image** → `optionalUrlSchema` pour accepter chaînes vides
+3. **Contrainte DB `membres_equipe_image_url_format`** → `sanitizePayload()` convertit `""` → `null`
+
+#### Documentation mise à jour
+
+- ✅ `memory-bank/architecture/file-tree.md`
+- ✅ `memory-bank/architecture/Project_Architecture_Blueprint.md`
+- ✅ `memory-bank/architecture/Project_Folders_Structure_Blueprint_v5.md`
+- ✅ `.github/prompts/plan-teamMemberFormMigration.prompt.md` → 7/7 steps FAIT
+
+---
+
+## Previous Focus (2025-11-30): DAL SOLID Refactoring - COMPLETED ✅
+
+**Score final : 92% SOLID compliance** (target: 90%)
+
+### Métriques finales
 
 | Critère | Avant | Après | Cible |
 |---------|-------|-------|-------|

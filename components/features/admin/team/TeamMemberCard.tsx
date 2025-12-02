@@ -42,18 +42,6 @@ export function TeamMemberCard({
         </div>
 
         <div className="mt-4 flex gap-2">
-          <Button variant="outline" onClick={onEdit}>
-            Modifier
-          </Button>
-          {member.active ? (
-            <Button variant="destructive" onClick={onDesactivate}>
-              Désactiver
-            </Button>
-          ) : (
-            <Button variant="outline-primary" onClick={onRequestReactivate}>
-              Réactiver
-            </Button>
-          )}
           {!member.active && (
             <Button
               variant="destructive"
@@ -63,6 +51,19 @@ export function TeamMemberCard({
               Supprimer
             </Button>
           )}
+
+          {member.active ? (
+            <Button variant="destructive" onClick={onDesactivate}>
+              Désactiver
+            </Button>
+          ) : (
+            <Button variant="outline" onClick={onRequestReactivate}>
+              Réactiver
+            </Button>
+          )}
+          <Button variant="outline" onClick={onEdit}>
+            Modifier
+          </Button>
         </div>
       </CardContent>
     </Card>

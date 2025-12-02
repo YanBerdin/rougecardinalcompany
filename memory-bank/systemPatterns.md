@@ -97,6 +97,41 @@ components/features/admin/<feature>/
 └── Form.tsx              # Form component
 ```
 
+### CRUD Pages Pattern (Dec 2025)
+
+**Pattern** : Formulaires CRUD sur pages dédiées (plus inline):
+
+```bash
+app/(admin)/admin/<feature>/
+├── page.tsx              # Liste avec bouton "Ajouter"
+├── loading.tsx           # Skeleton liste
+├── actions.ts            # Server Actions CRUD
+├── new/
+│   ├── page.tsx          # Création (Server Component + FormWrapper)
+│   └── loading.tsx       # Skeleton création
+└── [id]/
+    └── edit/
+        ├── page.tsx      # Édition (Server Component + FormWrapper)
+        └── loading.tsx   # Skeleton édition
+```
+
+**Composants associés** :
+
+```bash
+components/features/admin/<feature>/
+├── <Feature>ManagementContainer.tsx   # Server Component (liste)
+├── <Feature>Form.tsx                   # Form fields (react-hook-form)
+├── <Feature>FormWrapper.tsx            # Bridge: sanitize → Server Action → redirect
+├── <Feature>List.tsx                   # Liste/grille dumb component
+└── <Feature>Card.tsx                   # Card individuel
+```
+
+**Avantages** :
+
+- UX améliorée : URL dédiée, navigation back, refresh page
+- Séparation claire : Container/Wrapper/Form responsibilities
+- `sanitizePayload()` pour contraintes DB (empty string → null)
+
 ## Patterns Architecturaux
 
 ### Security Patterns (Database)

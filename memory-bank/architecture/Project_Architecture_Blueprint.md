@@ -352,7 +352,12 @@ export type HeroSlideFormValues = z.infer<typeof HeroSlideFormSchema>;
 
 - `home/` — 9 fichiers: Hero Slides + About management
 - `users/` — User invitation and management
-- `team/` — Team member CRUD
+- `team/` — Team member CRUD (5 fichiers):
+  - `TeamManagementContainer.tsx` — Server Component, fetches data
+  - `TeamMemberList.tsx` — Card grid with actions
+  - `TeamMemberCard.tsx` — Individual member card
+  - `TeamMemberForm.tsx` — React Hook Form + zodResolver
+  - `TeamMemberFormWrapper.tsx` — Bridge with `sanitizePayload()` for DB constraints
 - `media/` — Media library picker
 - `spectacles/` — Shows management
 
@@ -695,6 +700,11 @@ export function FeatureForm({ onSuccess }: { onSuccess: () => void }) {
   - Pattern `useEffect` sync dans Client Components pour synchroniser état après `router.refresh()`
 - **Novembre 2025**: Dual Zod schemas (Server vs UI) pour éviter les erreurs de sérialisation bigint/JSON
 - **Novembre 2025**: Split des formulaires > 300 lignes en sous-composants (`*FormFields.tsx`, `*ImageSection.tsx`)
+- **Novembre 2025**: Migration Team CRUD vers le pattern Server Actions complet
+  - Suppression API Routes `/api/admin/team/` (3 fichiers) au profit de Server Actions colocalisées
+  - Migration inline form → pages dédiées (`/admin/team/new`, `/admin/team/[id]/edit`)
+  - Ajout `TeamMemberFormWrapper.tsx` avec `sanitizePayload()` (empty string → null) pour contrainte DB
+  - Ajout helper `optionalUrlSchema` pour champs URL acceptant chaînes vides
 
 ## 16. Governance & qualité
 

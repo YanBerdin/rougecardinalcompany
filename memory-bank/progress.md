@@ -1,5 +1,39 @@
 # Progress
 
+## Team CRUD Migration to Server Actions - COMPLETED (2025-12-02)
+
+**Migration complète du formulaire Team vers le pattern Server Actions avec pages CRUD dédiées.**
+
+### Résultats
+
+- ✅ Pages CRUD créées : `/admin/team/new` et `/admin/team/[id]/edit`
+- ✅ API Routes supprimées : 3 fichiers (route.ts, active/route.ts, hard-delete/route.ts)
+- ✅ Form refactorisé : 6 useState → react-hook-form + zodResolver
+- ✅ Schémas Zod mis à jour : `optionalUrlSchema`, `TeamMemberFormSchema`
+- ✅ Wrapper créé : `TeamMemberFormWrapper.tsx` avec `sanitizePayload()`
+- ✅ Container simplifié : TeamManagementContainer sans form inline
+- ✅ Bugs corrigés : "Afficher inactifs", validation URL, contrainte DB
+
+### Fichiers créés
+
+- `app/(admin)/admin/team/new/page.tsx` + `loading.tsx`
+- `app/(admin)/admin/team/[id]/edit/page.tsx` + `loading.tsx`
+- `components/features/admin/team/TeamMemberFormWrapper.tsx`
+
+### Fichiers supprimés
+
+- `app/api/admin/team/route.ts`
+- `app/api/admin/team/[id]/active/route.ts`
+- `app/api/admin/team/[id]/hard-delete/route.ts`
+
+### Documentation mise à jour
+
+- `memory-bank/architecture/file-tree.md`
+- `memory-bank/architecture/Project_Architecture_Blueprint.md`
+- `memory-bank/architecture/Project_Folders_Structure_Blueprint_v5.md`
+
+---
+
 ## DAL SOLID Refactoring - COMPLETED (2025-11-30)
 
 **Score final : 92% SOLID compliance** (target: 90%)
