@@ -6,9 +6,11 @@ export async function HeroContainer() {
   // TODO: remove - artificial delay to visualize Suspense skeletons
   await new Promise((resolve) => setTimeout(resolve, 1500));
 
-  const records = await fetchActiveHomeHeroSlides();
+  const result = await fetchActiveHomeHeroSlides();
 
-  const slides: HeroSlide[] = (records ?? []).map((r) => ({
+  const records = result.success ? result.data : [];
+
+  const slides: HeroSlide[] = records.map((r) => ({
     title: r.title,
     subtitle: r.subtitle ?? "",
     description: r.description ?? "",

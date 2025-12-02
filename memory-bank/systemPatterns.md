@@ -1,6 +1,351 @@
-# Patterns Système
+# System Patterns
+
+Architecture et patterns observés dans le projet:
+
+- App Router Next.js (app/) pour pages et layouts.
+- Pattern **Smart/Dumb** components: containers server-side pour la data, composants clients pour l'interactivité.
+- DAL pattern recommandé: `lib/dal/` ou `supabase/` pour centraliser l'accès à la base (server-only modules).
+- **DAL SOLID Pattern (Nov 2025)**: Tous les DAL retournent `DALResult<T>`, helpers centralisés dans `lib/dal/helpers/`.
+- Sécurité: combinaison GRANT (table-level) + RLS (policies) requise — ne pas considérer RLS comme substitut au GRANT.
+- Migrations: `supabase/migrations/` est la source de vérité pour les modifications appliquées en base; `supabase/schemas/` sert de documentation/declarative reference.
+- Tests & CI: vérifier explicitement que les roles `anon` et `authenticated` peuvent accéder aux DTO nécessaires (tests d'intégration DAL).
+
+Conventions importantes:
+
+1. Tous les changements de schéma doivent être accompagnés d'une migration.
+2. Les migrations dangereuses (REVOKE massifs) doivent être revues et, si nécessaire, déplacées vers `supabase/migrations/legacy-migrations`.
+3. Les scripts d'audit doivent être alignés avec le modèle de sécurité (ne pas considérer un GRANT comme "exposé" quand il est requis pour RLS).
+
+## DAL SOLID Architecture (Nov 2025)
+
+### DALResult<T> Pattern
+
+**Pattern unifié** pour tous les modules DAL (17/17 compliant):
+
+```typescript
+// lib/dal/helpers/error.ts
+export type DALResult<T> = 
+  | { success: true; data: T }
+  | { success: false; error: string };
+
+export function toDALResult<T>(
+  data: T | null,
+  error: Error | null
+): DALResult<T> {
+  if (error) {
+    return { success: false, error: error.message };
+  }
+  if (data === null) {
+    return { success: false, error: "No data returned" };
+  }
+  return { success: true, data };
+}
+```
+
+### DAL Helpers Structure
+
+```bash
+lib/dal/helpers/
+├── error.ts      # DALResult<T> + toDALResult()
+├── format.ts     # formatDate(), etc.
+├── slug.ts       # generateSlug()
+└── index.ts      # Barrel exports
+```
+
+### Server Actions Location
+
+**Pattern** : Server Actions colocalisées avec les pages admin:
+
+```bash
+app/(admin)/admin/<feature>/
+├── page.tsx        # Server Component
+└── actions.ts      # Server Actions (validation + DAL + revalidatePath)
+```
+
+> [!CAUTION]
+> **Règle critique ⚠️** : `revalidatePath()` UNIQUEMENT dans les Server Actions, JAMAIS dans le DAL.
+
+### Schemas Dual Pattern
+
+**Pattern** : Schémas Server (bigint) + UI (number) séparés:
+
+```typescript
+// lib/schemas/<feature>.ts
+
+// Server schema (pour DAL/BDD)
+export const FeatureInputSchema = z.object({
+  id: z.coerce.bigint(),
+  // ...
+});
+
+// UI schema (pour formulaires)
+export const FeatureFormSchema = z.object({
+  id: z.number().int().positive(),
+  // ...
+});
+```
+
+### Props Colocation Pattern
+
+**Pattern** : Props composants colocalisées avec les composants:
+
+```bash
+components/features/admin/<feature>/
+├── types.ts              # Props interfaces + re-exports
+├── Container.tsx         # Smart component
+├── View.tsx              # Client component
+└── Form.tsx              # Form component
+```
+
+### CRUD Pages Pattern (Dec 2025)
+
+**Pattern** : Formulaires CRUD sur pages dédiées (plus inline):
+
+```bash
+app/(admin)/admin/<feature>/
+├── page.tsx              # Liste avec bouton "Ajouter"
+├── loading.tsx           # Skeleton liste
+├── actions.ts            # Server Actions CRUD
+├── new/
+│   ├── page.tsx          # Création (Server Component + FormWrapper)
+│   └── loading.tsx       # Skeleton création
+└── [id]/
+    └── edit/
+        ├── page.tsx      # Édition (Server Component + FormWrapper)
+        └── loading.tsx   # Skeleton édition
+```
+
+**Composants associés** :
+
+```bash
+components/features/admin/<feature>/
+├── <Feature>ManagementContainer.tsx   # Server Component (liste)
+├── <Feature>Form.tsx                   # Form fields (react-hook-form)
+├── <Feature>FormWrapper.tsx            # Bridge: sanitize → Server Action → redirect
+├── <Feature>List.tsx                   # Liste/grille dumb component
+└── <Feature>Card.tsx                   # Card individuel
+```
+
+**Avantages** :
+
+- UX améliorée : URL dédiée, navigation back, refresh page
+- Séparation claire : Container/Wrapper/Form responsibilities
+- `sanitizePayload()` pour contraintes DB (empty string → null)
 
 ## Patterns Architecturaux
+
+### Security Patterns (Database)
+
+#### RLS-Only Access Control Model
+
+**Pattern** : Utiliser exclusivement les politiques RLS pour le contrôle d'accès, jamais de table-level grants.
+
+```sql
+-- ❌ ANTI-PATTERN: Table-level grants bypass RLS
+GRANT SELECT ON TABLE public.articles_presse TO authenticated;
+
+-- ✅ PATTERN: RLS policies only
+CREATE POLICY "Public read published articles"
+  ON public.articles_presse FOR SELECT
+  TO anon, authenticated
+  USING (published_at IS NOT NULL);
+```
+
+**Rationale** : Table-level grants court-circuitent RLS et créent des failles de sécurité.
+
+#### SECURITY INVOKER Views Pattern
+
+**Pattern** : Toujours utiliser `WITH (security_invoker = true)` pour les vues.
+
+```sql
+-- ❌ ANTI-PATTERN: SECURITY DEFINER (default) = privilege escalation risk
+CREATE VIEW public.articles_presse_public AS
+  SELECT * FROM articles_presse WHERE published_at IS NOT NULL;
+
+-- ✅ PATTERN: SECURITY INVOKER = principle of least privilege
+CREATE VIEW public.articles_presse_public
+WITH (security_invoker = true) AS
+  SELECT * FROM articles_presse WHERE published_at IS NOT NULL;
+
+-- ⚠️ REQUIRED: Grant permissions on base table for SECURITY INVOKER
+GRANT SELECT ON public.articles_presse TO anon, authenticated;
+```
+
+**Defense in Depth** :
+
+1. VIEW filtrage (published_at IS NOT NULL)
+2. GRANT permissions (table base)
+3. RLS policies (row-level filtering)
+
+#### Function Security Pattern
+
+**Pattern** : `SECURITY INVOKER` par défaut, `SECURITY DEFINER` uniquement si justifié.
+
+```sql
+-- ✅ DEFAULT PATTERN: SECURITY INVOKER + SET search_path
+CREATE OR REPLACE FUNCTION public.generate_slug(input_text text)
+RETURNS text
+LANGUAGE plpgsql
+SECURITY INVOKER  -- Runs with caller's privileges
+AS $$
+BEGIN
+  SET search_path = '';  -- Prevent SQL injection
+  -- Function logic...
+END;
+$$;
+
+-- ⚠️ EXCEPTION PATTERN: SECURITY DEFINER avec rationale documentée
+-- SECURITY DEFINER rationale: requires elevated privileges for [specific reason]
+-- Reviewed per ISSUE #27
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER  -- Runs with creator (postgres) privileges
+SET search_path = ''
+AS $$
+BEGIN
+  -- Must run as postgres to access auth.jwt() and user_metadata
+  RETURN (auth.jwt() ->> 'user_metadata' ->> 'role') = 'admin';
+END;
+$$;
+```
+
+#### Admin Authorization Pattern
+
+> [!CAUTION]
+> **CRITICAL REQUIREMENT ⚠️** :
+> Admin users MUST have profile entry with `role='admin'`
+
+**Pattern** : Profile-based authorization avec `is_admin()` function pour RLS policies.
+
+```sql
+-- 1. Profile table with role column
+CREATE TABLE public.profiles (
+  id bigint generated always as identity primary key,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  display_name text,
+  role text default 'user',
+  created_at timestamptz default now() not null,
+  updated_at timestamptz default now() not null,
+  constraint profiles_userid_unique unique (user_id)
+);
+
+-- 2. is_admin() function (SECURITY DEFINER)
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+STABLE
+AS $$
+DECLARE
+  user_role text;
+BEGIN
+  SELECT role 
+  INTO user_role 
+  FROM public.profiles 
+  WHERE user_id = auth.uid();
+  
+  RETURN user_role = 'admin';
+END;
+$$;
+
+-- 3. RLS policy using is_admin()
+CREATE POLICY "Authenticated users can create spectacles"
+ON public.spectacles
+FOR INSERT
+TO authenticated
+WITH CHECK ( (SELECT public.is_admin()) = true );
+
+-- 4. Admin profile registration (manual)
+INSERT INTO public.profiles (user_id, role, display_name)
+VALUES (
+  'UUID_FROM_AUTH_USERS',
+  'admin',
+  'Admin Name'
+)
+ON CONFLICT (user_id) 
+DO UPDATE SET role = 'admin';
+```
+
+**Architecture Defense in Depth** :
+
+1. **Middleware Level** : Route protection (`/admin/*` requires auth)
+2. **API Level** : `withAdminAuth()` wrapper for endpoints
+3. **Database Level** : RLS policies with `is_admin()`
+
+**Common Pitfall** : Authenticated user ≠ Authorized admin
+
+```typescript
+// ❌ WRONG: Assume authenticated = admin
+const { data: { user } } = await supabase.auth.getUser();
+if (user) {
+  // User is authenticated but might not be admin!
+  await supabase.from('spectacles').insert(data); // RLS ERROR 42501
+}
+
+// ✅ CORRECT: Check admin status
+const { data: { user } } = await supabase.auth.getUser();
+if (!user) {
+  return { error: 'Not authenticated', status: 401 };
+}
+
+const { data: isAdmin } = await supabase.rpc('is_admin');
+if (!isAdmin) {
+  return { error: 'Not authorized', status: 403 };
+}
+
+// Now safe to perform admin operations
+await supabase.from('spectacles').insert(data);
+```
+
+**Registration Workflow** :
+
+1. User registers via Supabase Auth → Entry in `auth.users`
+2. Admin manually creates profile → Entry in `profiles` table with `role='admin'`
+3. `is_admin()` function returns true → RLS allows admin operations
+
+**Troubleshooting** :
+
+```sql
+-- Check if profile exists
+SELECT * FROM profiles WHERE user_id = auth.uid();
+
+-- Test is_admin() (from application, NOT SQL Editor)
+SELECT public.is_admin();
+
+-- Verify auth.uid() (from application)
+SELECT auth.uid();
+```
+
+**⚠️ SQL Editor Limitation** : Supabase SQL Editor uses `service_role` without user session. `auth.uid()` returns NULL in this environment. Always test user-context functions from the application.
+
+**Complete Procedure** : See `memory-bank/procedures/admin-user-registration.md`
+
+**Discovered in** : TASK021 - Admin Backoffice Spectacles CRUD (16 November 2025)
+
+#### Whitelist Audit Pattern
+
+**Pattern** : Exclure les objets système de l'audit de sécurité pour focus sur business objects.
+
+```sql
+-- audit_grants_filtered.sql (production)
+SELECT
+  schemaname,
+  tablename,
+  grantee,
+  privilege_type
+FROM information_schema.table_privileges
+WHERE schemaname NOT IN ('information_schema', 'pg_catalog', 'auth', 'extensions')
+  AND schemaname NOT LIKE 'pg_%'
+  AND grantee IN ('PUBLIC', 'anon', 'authenticated')
+  -- Whitelist système Supabase
+  AND NOT (schemaname = 'realtime' AND tablename IN ('messages', 'schema_migrations', 'subscription'))
+  AND NOT (schemaname = 'storage' AND tablename IN ('buckets', 'objects', 'prefixes', 's3_multipart_uploads', 's3_multipart_uploads_parts'))
+ORDER BY schemaname, tablename;
+```
+
+**Rationale** : Objets système PostgreSQL/Supabase se ré-appliquent automatiquement; focus sur business objects.
 
 ### App Router Pattern
 
@@ -12,6 +357,339 @@ loading.tsx; // État de chargement
 error.tsx[param] / // Gestion d'erreur // Route dynamique
   page.tsx; // Page avec paramètre
 ```
+
+### Route Groups Pattern (Next.js 15)
+
+**Introduced**: 11 novembre 2025 - Migration architecture layouts
+
+**Pattern** : Utiliser les parenthèses pour organiser les routes sans affecter l'URL.
+
+```typescript
+// Structure avec route groups
+app/
+  layout.tsx                    // Root: HTML shell + ThemeProvider
+  (admin)/                      // Route group: admin zone
+    layout.tsx                  // Admin layout: AppSidebar + requireAdmin()
+    admin/
+      team/page.tsx             // URL: /admin/team
+      debug-auth/page.tsx       // URL: /admin/debug-auth
+  (marketing)/                  // Route group: public zone
+    layout.tsx                  // Public layout: Header + Footer
+    page.tsx                    // URL: /
+    spectacles/page.tsx         // URL: /spectacles
+    compagnie/page.tsx          // URL: /compagnie
+```
+
+**Avantages** :
+
+1. **Isolation zones fonctionnelles** : Comportements distincts (auth, UI, navigation)
+2. **Layouts dédiés** : Chaque zone a son propre layout sans affecter l'URL
+3. **Zero breaking URL** : `/admin/team` reste `/admin/team` (pas `/(admin)/admin/team`)
+4. **Meilleure organisation** : Structure claire admin vs public
+
+**Root Layout Pattern** :
+
+```typescript
+// app/layout.tsx - HTML shell only
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="fr" suppressHydrationWarning>
+      <body className={inter.className}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+**Admin Layout Pattern** :
+
+```typescript
+// app/(admin)/layout.tsx - Protected with sidebar
+import { requireAdmin } from "@/lib/auth/is-admin";
+import { AppSidebar } from "@/components/admin/AdminSidebar";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  await requireAdmin(); // Auth guard
+  
+  return (
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <main className="flex-1 p-6">
+          {children}
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
+  );
+}
+```
+
+**Marketing Layout Pattern** :
+
+```typescript
+// app/(marketing)/layout.tsx - Public with header/footer
+import { Header } from "@/components/marketing/Header";
+import { Footer } from "@/components/marketing/Footer";
+
+export default function MarketingLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex min-h-screen flex-col">
+      <Header />
+      <main className="flex-1">
+        {children}
+      </main>
+      <Footer />
+    </div>
+  );
+}
+```
+
+**Middleware Matching avec Route Groups** :
+
+```typescript
+// middleware.ts
+import { createServerClient } from '@supabase/ssr';
+import { NextResponse, type NextRequest } from 'next/server';
+
+export async function middleware(request: NextRequest) {
+  let supabaseResponse = NextResponse.next({ request });
+  
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return request.cookies.getAll() },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          supabaseResponse = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+
+  const claims = await supabase.auth.getClaims();
+
+  // Redirect to login if accessing admin routes without auth
+  if (
+    !claims &&
+    request.nextUrl.pathname.startsWith('/admin')
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/auth/login';
+    return NextResponse.redirect(url);
+  }
+
+  return supabaseResponse;
+}
+
+export const config = {
+  matcher: [
+    /*
+     * Match all paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization)
+     * - favicon.ico
+     * - api/auth (Supabase auth endpoints)
+     * - public assets
+     */
+    '/((?!_next/static|_next/image|favicon.ico|api/auth|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
+};
+```
+
+**BREAKING CHANGES** (migration checklist) :
+
+- ✅ Vérifier tous imports/paths relatifs dans les composants
+- ✅ Mettre à jour middleware matchers si nécessaire
+- ✅ Tester navigation entre zones (admin ↔ public)
+- ✅ Valider que layouts s'appliquent correctement
+- ✅ Vérifier hydration warnings (pas de html/body dupliqués dans route groups)
+
+**Références** :
+
+- Documentation : `memory-bank/changes/2025-11-11-layouts-admin-sidebar.md`
+- Blueprint : `memory-bank/architecture/Project_Architecture_Blueprint_v3.md`
+- Commit : 6a2c7d8 "feat(architecture): Complete route groups migration"
+
+### Server Actions Layer Pattern (Next.js 15)
+
+**Introduced**: 27 novembre 2025 - Clean Code & TypeScript Conformity
+
+**Pattern** : Architecture 4-layer avec Server Actions comme couche d'orchestration.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Presentation (Client Components)                               │
+│  └── Form.tsx uses UI schema (number for IDs)                  │
+├─────────────────────────────────────────────────────────────────┤
+│  Server Actions (lib/actions/)                                  │
+│  └── Validation + DAL call + revalidatePath() ← SEUL ENDROIT   │
+├─────────────────────────────────────────────────────────────────┤
+│  Data Access Layer (lib/dal/)                                   │
+│  └── Database ops + DALResult<T> + error codes [ERR_*]         │
+├─────────────────────────────────────────────────────────────────┤
+│  Database (Supabase)                                            │
+│  └── RLS policies + is_admin() checks                          │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Server Action Pattern** :
+
+```typescript
+// lib/actions/feature-actions.ts
+"use server";
+import "server-only";
+import { revalidatePath } from "next/cache";
+import { createFeature, updateFeature } from "@/lib/dal/feature";
+import { FeatureInputSchema } from "@/lib/schemas/feature";
+
+export type ActionResult<T = unknown> = 
+  | { success: true; data?: T } 
+  | { success: false; error: string };
+
+export async function createFeatureAction(input: unknown): Promise<ActionResult> {
+  try {
+    // 1. Validation Zod (Server schema)
+    const validated = FeatureInputSchema.parse(input);
+    
+    // 2. Appel DAL
+    const result = await createFeature(validated);
+    
+    if (!result.success) {
+      return { success: false, error: result.error ?? "Create failed" };
+    }
+    
+    // 3. ✅ Revalidation UNIQUEMENT ICI
+    revalidatePath("/admin/feature");
+    
+    return { success: true, data: result.data };
+  } catch (err: unknown) {
+    return { 
+      success: false, 
+      error: err instanceof Error ? err.message : "Unknown error" 
+    };
+  }
+}
+```
+
+**DAL Pattern (NO revalidatePath)** :
+
+```typescript
+// lib/dal/feature.ts
+"use server";
+import "server-only";
+import { createClient } from "@/supabase/server";
+import { requireAdmin } from "@/lib/auth/is-admin";
+import type { FeatureInput, FeatureDTO } from "@/lib/schemas/feature";
+
+// ❌ NE PAS importer revalidatePath ici
+// import { revalidatePath } from "next/cache";
+
+export interface DALResult<T = unknown> {
+  success: boolean;
+  data?: T;
+  error?: string;
+}
+
+export async function createFeature(
+  input: FeatureInput
+): Promise<DALResult<FeatureDTO>> {
+  await requireAdmin();
+  
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("features")
+    .insert(input)
+    .select()
+    .single();
+
+  if (error) {
+    // Error codes for debugging: [ERR_FEATURE_001]
+    return { success: false, error: `[ERR_FEATURE_001] ${error.message}` };
+  }
+
+  // ❌ PAS DE revalidatePath() ICI
+  return { success: true, data };
+}
+```
+
+**Dual Zod Schemas Pattern** :
+
+```typescript
+// lib/schemas/feature.ts
+import { z } from "zod";
+
+// ✅ Schéma SERVER (pour DAL/BDD) — utilise bigint
+export const FeatureInputSchema = z.object({
+  title: z.string().min(1).max(80),
+  image_media_id: z.coerce.bigint().optional(),
+});
+export type FeatureInput = z.infer<typeof FeatureInputSchema>;
+
+// ✅ Schéma UI (pour formulaires) — utilise number
+export const FeatureFormSchema = z.object({
+  title: z.string().min(1).max(80),
+  image_media_id: z.number().int().positive().optional(),
+});
+export type FeatureFormValues = z.infer<typeof FeatureFormSchema>;
+```
+
+**Client Component with useEffect Sync** :
+
+```typescript
+// components/features/admin/feature/View.tsx
+"use client";
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { deleteFeatureAction } from "@/lib/actions/feature-actions";
+
+export function View({ initialItems }: { initialItems: FeatureDTO[] }) {
+  const router = useRouter();
+  const [items, setItems] = useState(initialItems);
+
+  // ✅ CRITIQUE : Sync local state when props change (after router.refresh())
+  useEffect(() => {
+    setItems(initialItems);
+  }, [initialItems]);
+
+  const handleDelete = useCallback(async (id: bigint) => {
+    const result = await deleteFeatureAction(String(id));
+    if (result.success) {
+      router.refresh(); // ✅ Déclenche re-fetch Server Component
+    }
+  }, [router]);
+
+  return (/* UI */);
+}
+```
+
+> [!CAUTION]
+> **Règles Critiques** :
+>
+>1. `revalidatePath()` UNIQUEMENT dans Server Actions
+>2. DAL retourne `DALResult<T>` sans revalidation
+>3. Schémas UI (number) ≠ Schémas Server (bigint)
+>4. useEffect sync pour re-render après router.refresh()
+>5. Composants > 300 lignes doivent être splittés
+
+**Références** :
+
+- Documentation : `.github/instructions/crud-server-actions-pattern.instructions.md`
+- Blueprint : `memory-bank/architecture/Project_Architecture_Blueprint.md`
+- Commit : 8aaefe1 "refactor: Clean Code & TypeScript conformity for TASK026"
 
 ### Pattern de Server Components et Client Components
 
@@ -118,6 +796,198 @@ export async function fetchFeaturedPressReleases(limit = 3) {
   return data ?? [];
 }
 ```
+
+### Pattern DAL Decomposition (Novembre 2025)
+
+**Règle** : Toute fonction DAL > 30 lignes doit être décomposée en helpers focused (< 30 lignes chacun).
+
+**Principes** :
+
+1. **Single Responsibility** : Chaque helper une seule responsabilité (validation, opération DB, gestion erreurs)
+2. **Type Guards** : error: unknown avec instanceof checks au lieu de type assertions
+3. **Safety Checks** : Vérifications RGPD pour opérations destructives (hard-delete)
+4. **JSDoc complète** : Documentation des comportements critiques
+
+```typescript
+// lib/dal/team.ts
+import "server-only";
+import { createClient } from "@/supabase/server";
+import { requireAdmin } from "@/lib/auth/is-admin";
+import { revalidatePath } from "next/cache";
+
+type DalResponse<T = null> = {
+  success: boolean;
+  data?: T;
+  error?: string;
+  status?: number;
+};
+
+/**
+ * Permanently deletes a team member from the database (RGPD compliance).
+ *
+ * CRITICAL: This operation is irreversible. The team member must be inactive
+ * before deletion to prevent accidental data loss.
+ *
+ * @param id - Team member ID to delete
+ * @returns Response indicating success or failure
+ */
+export async function hardDeleteTeamMember(id: number): Promise<DalResponse> {
+  try {
+    await requireAdmin();
+
+    // Helper 1: Validation
+    const validationResult = await validateTeamMemberForDeletion(id);
+    if (!validationResult.success) return validationResult;
+
+    // Helper 2: DB operation
+    const deletionResult = await performTeamMemberDeletion(id);
+    if (!deletionResult.success) return deletionResult;
+
+    revalidatePath("/admin/team");
+    return { success: true };
+  } catch (error: unknown) {
+    // Helper 3: Error handling
+    return handleHardDeleteError(error);
+  }
+}
+
+// ============================================================================
+// Hard Delete Helpers (< 30 lines each)
+// ============================================================================
+
+/**
+ * Validates team member exists and is inactive before deletion.
+ * RGPD safety: prevents accidental deletion of active members.
+ */
+async function validateTeamMemberForDeletion(
+  id: number
+): Promise<DalResponse> {
+  const member = await fetchTeamMemberById(id);
+
+  if (!member) {
+    return {
+      success: false,
+      error: "Team member not found",
+      status: 404,
+    };
+  }
+
+  if (member.active) {
+    return {
+      success: false,
+      error: "Cannot delete active team member. Deactivate first.",
+      status: 400,
+    };
+  }
+
+  return { success: true };
+}
+
+/**
+ * Performs database deletion operation.
+ */
+async function performTeamMemberDeletion(id: number): Promise<DalResponse> {
+  const supabase = await createClient();
+  const { error: deleteError } = await supabase
+    .from("membres_equipe")
+    .delete()
+    .eq("id", id);
+
+  if (deleteError) {
+    console.error("[DAL] Hard delete failed:", deleteError);
+    return {
+      success: false,
+      error: "Failed to delete team member",
+      status: 500,
+    };
+  }
+
+  return { success: true };
+}
+
+/**
+ * Handles errors with type guards (no assertions).
+ */
+function handleHardDeleteError(error: unknown): DalResponse {
+  console.error("[DAL] hardDeleteTeamMember error:", error);
+
+  // Type guard pattern instead of assertion
+  if (error instanceof Error && error.message.includes("Forbidden")) {
+    return {
+      success: false,
+      error: "Insufficient permissions",
+      status: 403,
+    };
+  }
+
+  return {
+    success: false,
+    error: "Internal error during deletion",
+    status: 500,
+  };
+}
+```
+
+**Avantages** :
+
+- ✅ Clean Code compliance (toutes fonctions < 30 lignes)
+- ✅ Testabilité maximale (chaque helper testable indépendamment)
+- ✅ Maintenabilité (responsabilités séparées)
+- ✅ Sécurité RGPD (safety checks explicites)
+- ✅ Type safety (type guards au lieu d'assertions)
+
+### Pattern Next.js 15 Async Params (Novembre 2025)
+
+**Nouveau pattern obligatoire** : Migration vers `await context.params` pour compatibilité future.
+
+```typescript
+// app/api/admin/team/[id]/hard-delete/route.ts
+
+// ❌ OLD PATTERN (deprecated)
+export async function POST(
+  request: Request,
+  { params }: { params: { id: string } | Promise<{ id: string }> }
+) {
+  const resolved = (await params) as { id: string }; // Type assertion nécessaire
+  const id = Number(resolved.id);
+  // ...
+}
+
+// ✅ NEW PATTERN (Next.js 15 compatible)
+type RouteContext = {
+  params: Promise<{ id: string }> | { id: string };
+};
+
+export async function POST(_request: Request, context: RouteContext) {
+  // Await context.params (compatible Promise ou objet direct)
+  const { id: idString } = await context.params;
+  
+  // Helper pour validation
+  const id = parseTeamMemberId(idString);
+  
+  if (!id) {
+    return NextResponse.json(
+      { error: "Invalid team member ID" },
+      { status: 400 }
+    );
+  }
+  
+  // Continue logic...
+}
+
+// Helper function pour validation ID
+function parseTeamMemberId(id: string): number | null {
+  const parsed = Number(id);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+```
+
+**Avantages** :
+
+- ✅ Type-safe sans assertions
+- ✅ Compatible Next.js 15 async params
+- ✅ Pattern consistant pour tous endpoints
+- ✅ Validation centralisée dans helper
 
 ### Pattern Server Actions (Next.js 15)
 
@@ -377,9 +1247,6 @@ export async function middleware(req: NextRequest) {
 ### Pattern de Protection des Données
 
 ```sql
-### Pattern de Protection des Données
-
-```sql
 -- Politique RLS Supabase type (exemples)
 create policy "Accès public aux spectacles"
   on spectacles
@@ -438,8 +1305,6 @@ Optimisations RLS recommandées:
 - **Testing** : Toujours tester avec `SET ROLE anon` pour simuler utilisateurs anonymes
 
 Documentation complète : `doc/rls-policies-troubleshooting.md`
-
-```
 
 Optimisations RLS recommandées:
 
@@ -577,7 +1442,7 @@ Pour les éléments visuellement petits qui nécessitent une zone tactile étend
 
 ### 3. Exceptions WCAG autorisées
 
-- **Exception inline** : Liens dans un paragraphe de texte (ex: "Voir nos [conditions générales](/)")
+- **Exception inline** : Liens dans un paragraphe de texte (ex: "Voir nos [<conditions générales>](`/`)")
 - **Exception équivalente** : Si plusieurs cibles effectuent la même action, une seule doit respecter 44px
 - **Exception essentielle** : Quand modifier la taille changerait l'information (rare, documenter)
 
@@ -1262,3 +2127,579 @@ pnpm run test:resend    # Run all tests
 - `memory-bank/architecture/Email_Service_Architecture.md` : Architecture complète
 - `TESTING_RESEND.md` : Guide de test
 - `.github/instructions/resend_supabase_integration.md` : Instructions d'intégration
+
+### Admin Invitation System Patterns (Novembre 2025)
+
+**Introduced**: 21 novembre 2025 - TASK032 Admin User Invitation System
+
+**Pattern**: Architecture sécurisée pour inviter des utilisateurs externes à devenir admins, avec validation, rate limiting, audit logging et email notifications.
+
+#### Core Components Pattern
+
+```typescript
+// 1. DAL Layer - Server-only data access with validation
+// lib/dal/admin-users.ts
+"use server";
+import "server-only";
+import { z } from "zod";
+import { createClient } from "@/supabase/server";
+import { requireAdmin } from "@/lib/auth/is-admin";
+
+const InviteUserSchema = z.object({
+  email: z.string().email(),
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+});
+
+export async function inviteUser(input: unknown) {
+  // Validation
+  const validated = InviteUserSchema.parse(input);
+  
+  // Admin authorization
+  await requireAdmin();
+  
+  // Rate limiting (5 invites/hour per admin)
+  await checkRateLimit();
+  
+  // Business logic
+  const supabase = await createClient();
+  const { data: existingUser } = await supabase.auth.admin.getUserByEmail(validated.email);
+  
+  if (existingUser) {
+    throw new Error("User already exists");
+  }
+  
+  // Create invitation record
+  const invitation = await createInvitationRecord(validated);
+  
+  // Send invitation email
+  await sendInvitationEmail(invitation);
+  
+  // Audit logging
+  await logAdminAction('user_invitation', { email: validated.email });
+  
+  return invitation;
+}
+```
+
+#### Email Service Integration Pattern
+
+```typescript
+// 2. Email Actions - React Email templates with Resend
+// lib/email/actions.ts
+"use server";
+
+import { Resend } from "resend";
+import { InvitationEmail } from "@/emails/invitation-email";
+
+export async function sendInvitationEmail(invitation: InvitationData) {
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  
+  const { data, error } = await resend.emails.send({
+    from: process.env.EMAIL_FROM!,
+    to: invitation.email,
+    subject: "Invitation à rejoindre l'équipe admin",
+    react: <InvitationEmail 
+      firstName={invitation.firstName}
+      inviteLink={invitation.inviteLink}
+      expiresAt={invitation.expiresAt}
+    />
+  });
+  
+  if (error) {
+    console.error("[Email] Invitation failed:", error);
+    throw new Error("Failed to send invitation email");
+  }
+  
+  return data;
+}
+```
+
+#### Database Schema Pattern
+
+```sql
+-- 3. Database Tables - Invitation tracking with expiration
+CREATE TABLE public.user_invitations (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  email text NOT NULL,
+  first_name text NOT NULL,
+  last_name text NOT NULL,
+  invite_token text NOT NULL UNIQUE,
+  invite_link text NOT NULL,
+  status text DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'expired', 'cancelled')),
+  expires_at timestamptz NOT NULL,
+  invited_by uuid REFERENCES auth.users(id),
+  accepted_at timestamptz,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+-- RLS Policies - Admin-only access
+CREATE POLICY "Admins can manage invitations"
+  ON public.user_invitations
+  FOR ALL
+  TO authenticated
+  USING ((SELECT public.is_admin()))
+  WITH CHECK ((SELECT public.is_admin()));
+```
+
+#### Admin UI Pattern
+
+```typescript
+// 4. Admin UI - Smart/Dumb component separation
+// components/features/admin/users/UsersManagementContainer.tsx (Smart)
+export async function UsersManagementContainer() {
+  const invitations = await fetchPendingInvitations();
+  const users = await fetchAdminUsers();
+  
+  return (
+    <UsersManagementView 
+      invitations={invitations}
+      users={users}
+      onInvite={inviteUserAction}
+      onCancel={cancelInvitationAction}
+    />
+  );
+}
+
+// components/features/admin/users/UsersManagementView.tsx (Dumb)
+interface UsersManagementViewProps {
+  invitations: Invitation[];
+  users: User[];
+  onInvite: (data: InviteFormData) => Promise<void>;
+  onCancel: (id: string) => Promise<void>;
+}
+
+export function UsersManagementView({ 
+  invitations, 
+  users, 
+  onInvite, 
+  onCancel 
+}: UsersManagementViewProps) {
+  // Pure presentation logic
+  return (
+    <div className="space-y-6">
+      <InviteUserForm onSubmit={onInvite} />
+      <InvitationsList invitations={invitations} onCancel={onCancel} />
+      <AdminUsersList users={users} />
+    </div>
+  );
+}
+```
+
+#### Security Patterns
+
+**Rate Limiting Pattern**:
+
+```typescript
+// Rate limiting - 5 invites per hour per admin
+async function checkRateLimit() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+  
+  const { count } = await supabase
+    .from('user_invitations')
+    .select('*', { count: 'exact', head: true })
+    .eq('invited_by', user!.id)
+    .gte('created_at', oneHourAgo.toISOString());
+    
+  if (count >= 5) {
+    throw new Error("Rate limit exceeded: 5 invitations per hour");
+  }
+}
+```
+
+**Audit Logging Pattern**:
+
+```typescript
+// Audit trail for admin actions
+async function logAdminAction(action: string, details: any) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  await supabase.from('admin_audit_log').insert({
+    admin_id: user!.id,
+    action,
+    details,
+    ip_address: getClientIP(),
+    user_agent: getUserAgent(),
+  });
+}
+```
+
+#### Error Handling Pattern
+
+```typescript
+// Graceful degradation - Primary operations succeed even if secondary fail
+export async function inviteUser(input: unknown) {
+  try {
+    // Primary: Create invitation record
+    const invitation = await createInvitationRecord(validated);
+    
+    // Secondary: Send email (don't fail if email fails)
+    try {
+      await sendInvitationEmail(invitation);
+    } catch (emailError) {
+      console.error("[Invitation] Email failed:", emailError);
+      // Log but don't throw - invitation is still valid
+    }
+    
+    return { success: true, invitation };
+  } catch (error) {
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : "Unknown error" 
+    };
+  }
+}
+```
+
+#### Testing Patterns
+
+**Integration Testing**:
+
+```typescript
+// scripts/test-full-invitation.js
+async function testInvitationFlow() {
+  console.log("🧪 Testing admin invitation flow...");
+  
+  // 1. Create invitation
+  const inviteResult = await createTestInvitation();
+  expect(inviteResult.success).toBe(true);
+  
+  // 2. Verify database record
+  const dbRecord = await checkInvitationInDB(inviteResult.invitation.id);
+  expect(dbRecord.status).toBe('pending');
+  
+  // 3. Verify email sent (mock or check logs)
+  const emailSent = await checkEmailLogs(inviteResult.invitation.email);
+  expect(emailSent).toBe(true);
+  
+  console.log("✅ Invitation flow test passed");
+}
+```
+
+**Security Testing**:
+
+```typescript
+// scripts/test-admin-access.ts
+async function testInvitationSecurity() {
+  // Test 1: Non-admin cannot invite
+  const nonAdminResult = await attemptInviteAsNonAdmin();
+  expect(nonAdminResult.error).toContain("Unauthorized");
+  
+  // Test 2: Rate limiting works
+  await createMultipleInvitations(6); // Exceed limit
+  const rateLimitResult = await createOneMoreInvitation();
+  expect(rateLimitResult.error).toContain("Rate limit exceeded");
+  
+  // Test 3: Duplicate emails blocked
+  const duplicateResult = await inviteExistingEmail();
+  expect(duplicateResult.error).toContain("User already exists");
+}
+```
+
+#### Migration Patterns
+
+**Database Migrations**:
+
+```sql
+-- 20251121185458_allow_admin_update_profiles.sql
+-- Allow admins to update user profiles for invitation management
+GRANT UPDATE ON public.profiles TO authenticated;
+-- Note: RLS policies restrict to admin users only
+
+-- 20251120231121_create_user_invitations.sql
+CREATE TABLE public.user_invitations (...);
+-- RLS policies ensure only admins can manage invitations
+
+-- 20251120231146_create_pending_invitations.sql
+-- Additional indexes and constraints for performance
+CREATE INDEX idx_user_invitations_status_expires 
+ON public.user_invitations(status, expires_at);
+```
+
+**Environment Variables**:
+
+```bash
+# .env.example updates
+# Email service for invitations
+RESEND_API_KEY=your_resend_api_key
+EMAIL_FROM=noreply@yourdomain.com
+
+# Invitation settings
+INVITATION_EXPIRE_HOURS=24
+MAX_INVITES_PER_HOUR=5
+```
+
+#### Dev/Redirect Pattern for Emails
+
+```typescript
+// lib/email/utils/dev-redirect.ts
+export function getEmailRecipient(originalEmail: string): string {
+  if (process.env.NODE_ENV === 'development') {
+    return process.env.DEV_EMAIL_REDIRECT || 'dev@example.com';
+  }
+  return originalEmail;
+}
+
+// Usage in email actions
+const recipient = getEmailRecipient(invitation.email);
+await sendEmail({ to: recipient, ... });
+```
+
+**Benefits**:
+
+1. **Development Safety**: All emails redirect to dev email in development
+2. **Production Integrity**: Real emails sent in production
+3. **Testing Flexibility**: Easy to test email flows without spamming real users
+4. **Configuration Simplicity**: Single environment variable controls behavior
+
+#### Complete Flow Architecture
+
+```bash
+Admin UI → Server Action → DAL Validation → Database Insert → Email Service → Audit Log
+     ↓              ↓              ↓                    ↓              ↓            ↓
+  Form       Rate Limiting   Admin Auth         RLS Policies    React Email   Admin Log
+```
+
+**Key Principles**:
+
+- **Defense in Depth**: Multiple security layers (auth, RLS, rate limiting, validation)
+- **Graceful Degradation**: Core functionality works even if email fails
+- **Audit Trail**: All admin actions logged for compliance
+- **User Experience**: Clear error messages and loading states
+- **Testability**: Comprehensive test scripts for all components
+- **Scalability**: Rate limiting and efficient database queries
+
+**References**:
+
+- Implementation: `lib/dal/admin-users.ts`, `lib/email/actions.ts`
+- UI: `app/(admin)/admin/users/`, `components/features/admin/users/`
+- Database: `supabase/migrations/2025112*`
+- Tests: `scripts/test-full-invitation.js`, `scripts/test-admin-access.ts`
+- Documentation: `memory-bank/tasks/TASK032-user-role-management.md`
+
+## Pattern Client-Side Token Processing for Invitations (Novembre 2025)
+
+**Introduced**: 22 novembre 2025 - Critical fix for invitation system 404 error
+
+**Problem**: Users clicking invitation email links were getting 404 errors on `/auth/setup-account` because Supabase invitation tokens are passed in the URL hash (`#access_token=...`) instead of query parameters, but server-side middleware couldn't access hash-based tokens.
+
+**Root Cause**:
+
+- Supabase Auth uses URL fragments (`#`) for sensitive tokens to prevent server-side logging
+- Next.js middleware runs server-side and cannot read `window.location.hash`
+- Server Components cannot access client-side URL state**Solution Pattern**: Convert setup-account page to Client Component that extracts tokens from `window.location.hash` and establishes Supabase session client-side.
+
+### Client Component Pattern for Auth Pages
+
+```typescript
+// app/(marketing)/auth/setup-account/page.tsx
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/supabase/client";
+import { SetupAccountForm } from "@/components/auth/SetupAccountForm";
+
+export default function SetupAccountPage() {
+  const [isProcessing, setIsProcessing] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [invitationData, setInvitationData] = useState<InvitationData | null>(null);
+  const router = useRouter();
+  const supabase = createClient();
+
+  useEffect(() => {
+    async function processInvitationToken() {
+      try {
+        // Extract tokens from URL hash (client-side only)
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get("access_token");
+        const refreshToken = hashParams.get("refresh_token");
+        const type = hashParams.get("type");
+
+        if (!accessToken || type !== "signup") {
+          setError("Invalid or expired invitation link");
+          setIsProcessing(false);
+          return;
+        }
+
+        // Establish Supabase session with invitation tokens
+        const { data, error: sessionError } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken || "",
+        });
+
+        if (sessionError || !data.user) {
+          throw sessionError || new Error("Failed to establish session");
+        }
+
+        // Fetch invitation details from database
+        const { data: invitation } = await supabase
+          .from("user_invitations")
+          .select("*")
+          .eq("invite_token", hashParams.get("invite_token"))
+          .single();
+
+        if (!invitation) {
+          throw new Error("Invitation not found");
+        }
+
+        // Clear URL hash for security
+        window.history.replaceState(null, "", window.location.pathname);
+
+        setInvitationData(invitation);
+        setIsProcessing(false);
+      } catch (err) {
+        console.error("[SetupAccount] Token processing failed:", err);
+        setError(err instanceof Error ? err.message : "Authentication failed");
+        setIsProcessing(false);
+      }
+    }
+
+    processInvitationToken();
+  }, [supabase.auth]);
+
+  if (isProcessing) {
+    return <LoadingSpinner />;
+  }
+
+  if (error) {
+    return <ErrorDisplay error={error} />;
+  }
+
+  if (!invitationData) {
+    return <InvalidInvitation />;
+  }
+
+  return <SetupAccountForm invitation={invitationData} />;
+}
+```
+
+#### Key Implementation Details
+
+**1. Client-Side Token Extraction**:
+
+```typescript
+// ❌ Server-side approach (doesn't work)
+const searchParams = useSearchParams(); // Cannot access hash
+const token = searchParams.get("access_token"); // null
+
+// ✅ Client-side approach
+const hashParams = new URLSearchParams(window.location.hash.substring(1));
+const accessToken = hashParams.get("access_token"); // Works!
+```
+
+**2. Session Establishment**:
+
+```typescript
+const { data, error } = await supabase.auth.setSession({
+  access_token: accessToken,
+  refresh_token: refreshToken || "",
+});
+```
+
+**3. Security Cleanup**:
+
+```typescript
+// Remove sensitive tokens from URL after processing
+window.history.replaceState(null, "", window.location.pathname);
+```
+
+**4. Error Handling with User Context**:
+
+```typescript
+if (error.includes("expired")) {
+  return <ExpiredInvitation onResend={handleResend} />;
+}
+if (error.includes("already accepted")) {
+  return <AlreadyAccepted redirectTo="/auth/login" />;
+}
+```
+
+#### Database Schema Updates
+
+```sql
+-- Add invite_token column for token lookup
+ALTER TABLE public.user_invitations 
+ADD COLUMN invite_token text UNIQUE;
+
+-- Update invitation creation to generate secure tokens
+UPDATE public.user_invitations 
+SET invite_token = encode(gen_random_bytes(32), 'hex')
+WHERE invite_token IS NULL;
+```
+
+#### Email Template Updates
+
+```typescript
+// lib/email/actions.ts
+const inviteLink = `${process.env.NEXT_PUBLIC_SITE_URL}/auth/setup-account#access_token=${accessToken}&refresh_token=${refreshToken}&type=signup&invite_token=${inviteToken}`;
+```
+
+#### Testing Pattern
+
+```typescript
+// scripts/test-invitation-flow.ts
+async function testInvitationFlow() {
+  // 1. Create invitation
+  const invitation = await createTestInvitation();
+  
+  // 2. Simulate email click (construct URL with hash)
+  const inviteUrl = `${BASE_URL}/auth/setup-account#access_token=${invitation.accessToken}&type=signup`;
+  
+  // 3. Test page load and token processing
+  const pageResponse = await fetch(inviteUrl);
+  expect(pageResponse.status).toBe(200);
+  
+  // 4. Verify session establishment
+  const { data: { user } } = await supabase.auth.getUser();
+  expect(user?.email).toBe(invitation.email);
+}
+```
+
+#### Security Considerations
+
+**Token Handling**:
+
+- Tokens processed client-side only (never server-side)
+- URL hash cleared after session establishment
+- Tokens expire after 24 hours (configurable)
+
+**Session Security**:
+
+- `setSession()` establishes authenticated session
+- Automatic token refresh via Supabase
+- Middleware protects admin routes
+
+**Error Boundaries**:
+
+- Invalid tokens show user-friendly error messages
+- Expired invitations offer resend option
+- Network errors handled gracefully
+
+#### Migration Checklist
+
+- [x] Convert `/auth/setup-account` to Client Component
+- [x] Update email templates to use hash-based URLs
+- [x] Add `invite_token` column to database
+- [x] Update invitation creation logic
+- [x] Test end-to-end invitation flow
+- [x] Update documentation
+
+#### Performance Impact
+
+- **Before**: 404 errors, broken user experience
+- **After**: Seamless invitation acceptance, ~2-5ms token processing
+- **JWT Optimization**: Uses fast `getClaims()` instead of `getUser()`
+
+#### References
+
+- Implementation: `app/(marketing)/auth/setup-account/page.tsx`
+- Email templates: `emails/invitation-email.tsx`
+- Database: `supabase/migrations/20251122*`
+- Tests: `scripts/test-invitation-flow.ts`
+- Documentation: `memory-bank/activeContext.md` (entry 2025-11-22)

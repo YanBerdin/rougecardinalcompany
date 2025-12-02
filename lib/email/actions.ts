@@ -6,7 +6,8 @@ import { resend } from "@/lib/resend";
 import { SITE_CONFIG } from "@/lib/site-config";
 import NewsletterConfirmation from "@/emails/newsletter-confirmation";
 import ContactMessageNotification from "@/emails/contact-message-notification";
-import type { ResendParamsTypeWithConditionalFrom } from "@/types/email";
+import InvitationEmail from "@/emails/invitation-email";
+import type { ResendParamsTypeWithConditionalFrom } from "@/lib/email/types";
 
 export const sendEmail = async (
   ...params: ResendParamsTypeWithConditionalFrom
@@ -65,5 +66,37 @@ export async function sendContactNotification(params: {
     to: SITE_CONFIG.EMAIL.CONTACT,
     subject: `Nouveau contact : ${params.subject}`,
     react: ContactMessageNotification(params),
+  });
+}
+
+export async function sendInvitationEmail(params: {
+  email: string;
+  role: string;
+  displayName?: string;
+  invitationUrl: string;
+}): Promise<void> {
+  // Dev-only redirect: enabled only when EMAIL_DEV_REDIRECT is 'true'.
+  // This avoids accidental permanent overrides and respects TypeScript/clean-code rules.
+  const devRedirectEnabled =
+    process.env.NODE_ENV === "development" &&
+    String(process.env.EMAIL_DEV_REDIRECT).toLowerCase() === "true";
+
+  const recipientEmail = devRedirectEnabled
+    ? process.env.EMAIL_DEV_REDIRECT_TO ?? "yandevformation@gmail.com"
+    : params.email;
+
+  console.log(
+    `[Email] ${devRedirectEnabled ? `DEV MODE - Redirecting from ${params.email} to ${recipientEmail}` : `Sending to ${recipientEmail}`}`
+  );
+
+  await sendEmail({
+    to: recipientEmail,
+    subject: `Invitation à rejoindre ${SITE_CONFIG.SEO.TITLE}`,
+    react: InvitationEmail({
+      email: params.email, // Garde l'email original dans le template
+      role: params.role,
+      displayName: params.displayName,
+      invitationUrl: params.invitationUrl,
+    }),
   });
 }

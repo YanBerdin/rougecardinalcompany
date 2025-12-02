@@ -1,0 +1,20 @@
+/**
+ * DAL Helper Functions - Barrel Export
+ * @module lib/dal/helpers
+ */
+
+// Error handling
+export {
+    type DALSuccess,
+    type DALError,
+    type DALResult,
+    getErrorMessage,
+    dalSuccess,
+    dalError,
+} from "./error";
+
+// Formatting utilities
+export { formatTime, toISODateString, bytesToHuman } from "./format";
+
+// Slug generation
+export { generateSlug, generateUniqueSlug } from "./slug";

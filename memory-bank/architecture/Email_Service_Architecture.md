@@ -1,12 +1,19 @@
 # Email Service Architecture - Rouge Cardinal Company
 
 **Date de création**: 8 octobre 2025  
-**Version**: 1.0.0  
-**Intégration**: feat-resend branch
+**Version**: 1.3.0  
+**Dernière mise à jour**: 30 novembre 2025  
+**Intégration**: feat-resend branch → feature/backoffice
 
 ## Vue d'Ensemble
 
 L'architecture email du projet Rouge Cardinal Company est construite autour de l'intégration de **Resend** pour les emails transactionnels et **React Email** pour les templates. Cette architecture s'intègre harmonieusement avec l'architecture Next.js 15 existante et la Data Access Layer (DAL) Supabase.
+
+**Mise à jour v1.3.0 (30 novembre 2025) — SOLID Refactoring:**
+
+- **Email imports supprimés du DAL**: Conformité SOLID, l'envoi d'email se fait uniquement via Server Actions
+- **Schemas email centralisés**: Schemas déplacés vers `lib/schemas/contact.ts`
+- **Invitation email**: `admin-users.ts` ne fait plus d'import email, l'envoi est dans `app/(admin)/admin/users/invite/actions.ts`
 
 ## 1. Stack Technologique Email
 
@@ -27,19 +34,41 @@ Testing: Custom scripts + API endpoint testing
 flowchart TD
   subgraph EmailService[Email Service Architecture]
     direction TB
-    Template["Template Layer\n(React Email)\n• EmailLayout\n• Newsletter\n• ContactNotif\n• Components"]
-    Action["Action Layer\n(Server Actions)\n• sendEmail()\n• sendNewsletter\n• sendContact"]
+    Template["Template Layer\n(React Email)\n• EmailLayout\n• Newsletter\n• ContactNotif\n• InvitationEmail\n• Components"]
+    ServerAction["Server Actions Layer\n(app/.../actions.ts)\n• sendEmail()\n• sendNewsletter\n• sendContact\n• sendInvitation"]
     API["API Layer\n(REST Endpoints)\n• POST /api/newsletter\n• POST /api/contact\n• POST /api/test-email\n• POST /api/webhooks"]
   end
 
-  Template --> Action
-  API --> Action
-  Action --> Validation["Validation Layer\n(Zod Schemas)\n• Newsletter\n• Contact\n• Email types"]
+  Template --> ServerAction
+  API --> ServerAction
+  ServerAction --> Validation["Validation Layer\n(lib/schemas/)\n• ContactEmailSchema\n• NewsletterSchema\n• InviteUserSchema"]
 
   Validation --> Resend["Resend API\n• Email sending\n• Tracking\n• Webhooks\n• Analytics"]
-  Validation --> SupabaseDAL["Supabase DAL\n• Newsletter DB\n• Contact DB\n• Logging"]
-  Validation --> Hooks["Custom Hooks\n• useNewsletter\n• useContactForm\n• Error handling"]
+  ServerAction --> DAL["DAL Layer\n(lib/dal/)\n• NO email imports!\n• DB operations only"]
+  DAL --> Supabase["Supabase DB\n• Newsletter DB\n• Contact DB\n• Logging"]
+  ServerAction --> Hooks["Custom Hooks\n• useNewsletter\n• useContactForm\n• Error handling"]
+```
 
+### 2.2 Règle SOLID: Email uniquement dans Server Actions
+
+**Important**: Suite au refactoring SOLID (30 novembre 2025), les imports email sont **interdits dans le DAL**.
+
+```typescript
+// ❌ INTERDIT dans lib/dal/*.ts
+import { sendInvitationEmail } from "@/lib/email/actions";
+
+// ✅ AUTORISÉ dans app/(admin)/admin/.../actions.ts
+"use server";
+import { sendInvitationEmail } from "@/lib/email/actions";
+import { inviteUserDAL } from "@/lib/dal/admin-users";
+
+export async function inviteUserAction(input: unknown) {
+  const result = await inviteUserDAL(input);  // DAL call (no email)
+  if (!result.success) return result;
+  
+  await sendInvitationEmail(result.data);     // Email in Server Action
+  return { success: true };
+}
 ```
 
 ## 3. Structure des Fichiers
@@ -51,6 +80,7 @@ project-root/
 ├── emails/                               # Templates React Email
 │   ├── newsletter-confirmation.tsx       # Email confirmation newsletter
 │   ├── contact-message-notification.tsx  # Notification admin contact
+│   ├── invitation-email.tsx              # Email d'invitation utilisateur
 │   └── utils/
 │       ├── email-layout.tsx             # Layout réutilisable
 │       └── components.utils.tsx         # Composants email utilitaires
@@ -59,16 +89,19 @@ project-root/
 │   ├── resend.ts                        # Client Resend configuré
 │   ├── site-config.ts                   # Configuration email (FROM, CONTACT)
 │   ├── email/
-│   │   ├── actions.ts                   # Server actions pour envoi email
-│   │   └── schemas.ts                   # Schémas Zod de validation
+│   │   └── actions.ts                   # Server actions pour envoi email
+│   ├── schemas/
+│   │   └── contact.ts                   # Schémas Zod email (centralisés)
 │   ├── hooks/
 │   │   ├── useNewsletterSubscribe.ts    # Hook newsletter client
 │   │   └── useContactForm.ts            # Hook formulaire contact
 │   └── dal/
-│       ├── home-newsletter.ts           # DAL newsletter (existant)
-│       └── contact.ts                   # DAL contact (existant)
+│       ├── home-newsletter.ts           # DAL newsletter (NO email imports!)
+│       └── contact.ts                   # DAL contact (NO email imports!)
 │
 ├── app/
+│   ├── (admin)/admin/users/invite/
+│   │   └── actions.ts                   # Server Action invitation (EMAIL here!)
 │   └── api/
 │       ├── newsletter/
 │       │   └── route.ts                 # Endpoint subscription newsletter
@@ -76,6 +109,7 @@ project-root/
 │       │   └── route.ts                 # Endpoint formulaire contact
 │       ├── test-email/
 │       │   └── route.ts                 # Endpoint de test (dev)
+│       └── webhooks/
 │       └── webhooks/
 │           └── resend/
 │               └── route.ts             # Handler webhooks Resend
@@ -220,6 +254,26 @@ export async function sendContactNotification(params: {
 - Gestion des erreurs et logging
 - Configuration FROM par défaut
 - Types de notification spécifiques
+
+**Note (dev-only redirect)**:
+
+Le projet implémente un mécanisme de redirection en développement pour éviter d'envoyer des emails réels lors des tests locaux. La fonction `sendInvitationEmail` dans `lib/email/actions.ts` utilise les variables d'environnement `EMAIL_DEV_REDIRECT` (true|false) et `EMAIL_DEV_REDIRECT_TO` (adresse de redirection). Exemple simplifié:
+
+```ts
+// extrait (lib/email/actions.ts)
+const devRedirectEnabled =
+  process.env.NODE_ENV === 'development' &&
+  String(process.env.EMAIL_DEV_REDIRECT).toLowerCase() === 'true';
+
+const recipientEmail = devRedirectEnabled
+  ? process.env.EMAIL_DEV_REDIRECT_TO ?? 'dev@example.com'
+  : params.email;
+
+await sendEmail({ to: recipientEmail, subject: `Invitation ...`, react: InvitationEmail({...}) });
+```
+
+> [!WARNING]
+> La logique conserve l'email original dans le template (utile pour le debug), mais redirige l'envoi réel vers l'adresse de développement quand activé.
 
 ### 4.4 Schémas de Validation (lib/email/schemas.ts)
 
@@ -1059,6 +1113,22 @@ curl -X POST http://localhost:3000/api/test-email \
     }
   }'
 ```
+
+### 9.3 Render test & CI
+
+Le projet inclut un test de rendu pour les templates email (vérifie que le HTML rendu n'est pas vide et contient les éléments clés). Fichier de test :
+
+- `__tests__/emails/invitation-email.test.tsx` — rend `InvitationEmail` via `react-dom/server` et vérifie la présence du CTA et du lien d'invitation.
+
+Commande locale pour exécuter le test standalone :
+
+```bash
+pnpm exec tsx __tests__/emails/invitation-email.test.tsx
+```
+
+CI : un workflow GitHub Actions ` .github/workflows/invitation-email-test.yml ` a été ajouté pour exécuter ce test sur les pushes/PRs. Il exécute la même commande et échoue si le rendu ne contient pas les éléments attendus.
+
+Recommandation : intégrer ce test dans la suite de tests principale (Vitest/Jest) pour reporting et couverture.
 
 ## 10. Configuration et Variables d'Environnement
 

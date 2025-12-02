@@ -10,7 +10,11 @@ export const EmailLink = (props: LinkProps) => {
   return (
     <Link
       {...props}
-      className={cn("text-indigo-500 hover:underline", props.className)}
+      className={cn("text-indigo-500", props.className)}
+      style={{
+        textDecoration: "underline",
+        ...props.style,
+      }}
     />
   );
 };

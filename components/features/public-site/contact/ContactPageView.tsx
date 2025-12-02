@@ -11,6 +11,7 @@ import {
   Users,
   Calendar,
 } from "lucide-react";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Link from "next/link";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ContactSkeleton } from "@/components/skeletons/contact-skeleton";
@@ -168,12 +170,12 @@ export function ContactPageView() {
                   <form onSubmit={onFormSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label
+                        <Label
                           htmlFor="firstName"
                           className="block text-sm font-medium mb-2"
                         >
                           Prénom *
-                        </label>
+                        </Label>
                         <Input
                           id="firstName"
                           required
@@ -184,12 +186,12 @@ export function ContactPageView() {
                         />
                       </div>
                       <div>
-                        <label
+                        <Label
                           htmlFor="lastName"
                           className="block text-sm font-medium mb-2"
                         >
                           Nom *
-                        </label>
+                        </Label>
                         <Input
                           id="lastName"
                           required
@@ -203,12 +205,12 @@ export function ContactPageView() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label
+                        <Label
                           htmlFor="email"
                           className="block text-sm font-medium mb-2"
                         >
                           Email *
-                        </label>
+                        </Label>
                         <Input
                           id="email"
                           type="email"
@@ -220,12 +222,12 @@ export function ContactPageView() {
                         />
                       </div>
                       <div>
-                        <label
+                        <Label
                           htmlFor="phone"
                           className="block text-sm font-medium mb-2"
                         >
                           Téléphone
-                        </label>
+                        </Label>
                         <Input
                           id="phone"
                           type="tel"
@@ -238,12 +240,12 @@ export function ContactPageView() {
                     </div>
 
                     <div>
-                      <label
+                      <Label
                         htmlFor="reason"
                         className="block text-sm font-medium mb-2"
                       >
                         Motif de votre demande *
-                      </label>
+                      </Label>
                       <Select
                         value={formData.reason}
                         onValueChange={(value) =>
@@ -262,26 +264,14 @@ export function ContactPageView() {
                         </SelectContent>
                       </Select>
                     </div>
-                    {/*
-                                        <div>
-                                            <label htmlFor="subject" className="block text-sm font-medium mb-2">
-                                                Sujet *
-                                            </label>
-                                            <Input
-                                                id="subject"
-                                                required
-                                                value={formData.subject}
-                                                onChange={(e) => onInputChange('subject', e.target.value)}
-                                            />
-                                        </div>
-                                        */}
+
                     <div>
-                      <label
+                      <Label
                         htmlFor="message"
                         className="block text-sm font-medium mb-2"
                       >
                         Message *
-                      </label>
+                      </Label>
                       <Textarea
                         id="message"
                         required
@@ -302,7 +292,7 @@ export function ContactPageView() {
                           onInputChange("consent", checked as boolean)
                         }
                       />
-                      <label
+                      <Label
                         htmlFor="consent"
                         className="text-sm text-muted-foreground leading-relaxed"
                       >
@@ -310,7 +300,7 @@ export function ContactPageView() {
                         pour répondre à ma demande. Conformément au RGPD, vous
                         disposez d&apos;un droit d&apos;accès, de rectification et de
                         suppression de vos données.
-                      </label>
+                      </Label>
                     </div>
 
                     <Button
@@ -349,12 +339,12 @@ export function ContactPageView() {
                     <Mail className="h-5 w-5 text-primary mt-1" />
                     <div>
                       <p className="font-medium">Email</p>
-                      <a
+                      <Link
                         href="mailto:contact@rouge-cardinal.fr"
                         className="text-muted-foreground hover:text-primary"
                       >
                         contact@rouge-cardinal.fr
-                      </a>
+                      </Link>
                     </div>
                   </div>
 
@@ -362,12 +352,12 @@ export function ContactPageView() {
                     <Phone className="h-5 w-5 text-primary mt-1" />
                     <div>
                       <p className="font-medium">Téléphone</p>
-                      <a
+                      <Link
                         href="tel:+33123456789"
                         className="text-muted-foreground hover:text-primary"
                       >
                         +33 1 23 45 67 89
-                      </a>
+                      </Link>
                     </div>
                   </div>
 
@@ -421,12 +411,12 @@ export function ContactPageView() {
                     <Users className="h-5 w-5 text-primary mt-1" />
                     <div>
                       <p className="font-medium">Presse & Médias</p>
-                      <a
+                      <Link
                         href="mailto:presse@rouge-cardinal.fr"
                         className="text-muted-foreground hover:text-primary text-sm"
                       >
                         presse@rouge-cardinal.fr
-                      </a>
+                      </Link>
                     </div>
                   </div>
 
@@ -434,18 +424,19 @@ export function ContactPageView() {
                     <Calendar className="h-5 w-5 text-primary mt-1" />
                     <div>
                       <p className="font-medium">Billetterie</p>
-                      <a
+                      <Link
                         href="mailto:billetterie@rouge-cardinal.fr"
                         className="text-muted-foreground hover:text-primary text-sm"
                       >
                         billetterie@rouge-cardinal.fr
-                      </a>
+                      </Link>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               {/* Newsletter */}
+              {/** Form (de react-hook-form) n'accepte pas onSubmit. Wrapper attend un objet UseFormReturn. => balise <form> native  */}
               <Card id="newsletter">
                 <CardHeader>
                   <CardTitle>Newsletter</CardTitle>
@@ -475,7 +466,7 @@ export function ContactPageView() {
                         className="w-full"
                         disabled={isLoading}
                       >
-                        {isLoading ? "Inscription..." : "S&apos;abonner"}
+                        {isLoading ? "Inscription..." : "S'abonner"}
                       </Button>
                       {newsletterError && (
                         <p className="text-sm text-red-600">

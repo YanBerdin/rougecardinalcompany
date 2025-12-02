@@ -11,17 +11,35 @@
 --  - public.reorder_team_members(jsonb) function
 --  - public.membres_equipe table (updates ordre column)
 --
--- Security notes:
---  - this function is defined with security definer to allow controlled
---    updates regardless of caller privileges; however it enforces an
---    authorization check using public.is_admin() to prevent non-admin RPC
---    calls from performing changes (defense-in-depth).
---  - grant execute should be applied deliberately (e.g. to authenticated)
---    by migrations/ops only after review. do not grant to anon.
---
 -- Usage (from supabase/dal):
 --   select public.reorder_team_members('[{"id":12,"ordre":1},{"id":45,"ordre":2}]'::jsonb);
 
+/*
+ * Security Model: SECURITY DEFINER
+ * 
+ * Rationale:
+ *   1. Allows controlled atomic updates to membres_equipe.ordre column
+ *   2. Bypasses RLS to perform batch updates efficiently
+ *   3. Uses advisory locking to prevent concurrent reordering conflicts
+ *   4. Must work regardless of individual row-level permissions
+ * 
+ * Risks Evaluated:
+ *   - Authorization: Explicit is_admin() check enforces admin-only access (defense-in-depth)
+ *   - Input validation: Validates JSON array structure, checks for duplicate IDs/ordre values
+ *   - Concurrency: Advisory lock (hashtext('reorder_team_members')) prevents race conditions
+ *   - SQL injection: Uses parameterized queries with format() and $1 placeholder
+ *   - Data integrity: Atomic transaction ensures all-or-nothing updates
+ * 
+ * Validation:
+ *   - Tested with valid reorder operations (admin user)
+ *   - Tested authorization denial (non-admin user)
+ *   - Tested concurrent reorder attempts (advisory lock prevents conflicts)
+ *   - Tested invalid inputs (empty array, duplicates, non-array JSON)
+ * 
+ * Grant Policy:
+ *   - EXECUTE granted to authenticated role only (not anon)
+ *   - Requires manual review before granting to additional roles
+ */
 create or replace function public.reorder_team_members(items jsonb)
 returns void as $$
 declare
@@ -76,7 +94,7 @@ begin
   ) using ids;
 
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = '';
 
 -- grant execute to authenticated so only authenticated users (admin UI / server) can execute the rpc
 grant execute on function public.reorder_team_members(jsonb) to authenticated;

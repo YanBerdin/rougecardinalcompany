@@ -1,6 +1,21 @@
 {
     // Use the TypeScript version installed in the workspace
     "typescript.tsdk": "node_modules/typescript/lib",
+    "files.watcherExclude": {
+        "**/*.md": true,
+        "**/doc/**": true,
+        "**/doc-perso/**": true
+    },
+    "search.exclude": {
+        "node_modules/**": true,
+        ".next/**": true,
+        "out/**": true,
+        "build/**": true,
+        "next-env.d.ts": true,
+       // "**/*.md": true,
+        "**/doc-perso/**": true,
+        "**/doc/**": true
+    },
     "workbench.colorCustomizations": {
         "editorBracketHighlight.foreground1": "#fac928",
         "editorBracketHighlight.foreground2": "#c122e9",
@@ -24,5 +39,15 @@
         "titleBar.activeBackground": "#b60606",
         "titleBar.activeForeground": "#f7ebf7"
     },
-    "markdown.validate.enabled": true
+    "markdown.validate.enabled": true,
+    "chat.mcp.serverSampling": {
+        "rougecardinalcompany/.vscode/mcp.json: supabase": {
+            "allowedModels": [
+                "copilot/claude-sonnet-4.5",
+                "copilot/gpt-5-mini",
+                "copilot/grok-code-fast-1",
+                "copilot/claude-opus-4.5",
+            ]
+        }
+    }
 }

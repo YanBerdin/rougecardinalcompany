@@ -5,6 +5,7 @@
 //TODO: Delete before production
 import { useState, useEffect } from "react";
 import { createClient } from "@/supabase/client";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -178,14 +179,13 @@ export default function TestConnectionPage() {
     return data || [];
   };
 
-  // Fonction pour récupérer les actualités
   const getActualites = async () => {
     const { data, error } = await supabase
       .from("articles_presse")
       .select("*")
-      .order("author", { ascending: false })
+      .order("published_at", { ascending: false })
       .limit(6);
-
+    console.log("Actualites data:", data); //TODO: Remove debug
     if (error) throw error;
     return data || [];
   };
@@ -297,7 +297,7 @@ export default function TestConnectionPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <h1 className="text-4xl font-bold">Test de connexion Supabase</h1>
           <Button onClick={testConnection} disabled={isLoading}>
-                {isLoading ? (
+            {isLoading ? (
               <>
                 <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> Test en
                 cours...
@@ -361,14 +361,14 @@ export default function TestConnectionPage() {
               <ol className="list-decimal pl-5 space-y-2">
                 <li>
                   Connectez-vous à votre{" "}
-                  <a
+                  <Link
                     href="https://supabase.com/dashboard"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-primary underline"
                   >
                     tableau de bord Supabase
-                  </a>
+                  </Link>
                 </li>
                 <li>Sélectionnez votre projet</li>
                 <li>
@@ -412,9 +412,9 @@ export default function TestConnectionPage() {
                   <div className="mb-2 p-2 rounded bg-green-600 text-white font-bold border border-green-800 shadow">
                     La connexion à Supabase fonctionne
                   </div>
-                    <div className="mb-2 p-2 rounded bg-red-600 text-white font-bold border border-red-800 shadow">
-                    Une erreur est survenue lors de l&apos;accès aux tables ou aux
-                    données.
+                  <div className="mb-2 p-2 rounded bg-red-600 text-white font-bold border border-red-800 shadow">
+                    Une erreur est survenue lors de l&apos;accès aux tables ou
+                    aux données.
                   </div>
                 </>
               ) : (
@@ -488,22 +488,22 @@ export default function TestConnectionPage() {
                           <span className="font-medium">Date création:</span>{" "}
                           {spectacle.created_at
                             ? new Date(spectacle.created_at).toLocaleDateString(
-                                "fr-FR",
-                                {
-                                  day: "numeric",
-                                  month: "long",
-                                  year: "numeric",
-                                }
-                              )
+                              "fr-FR",
+                              {
+                                day: "numeric",
+                                month: "long",
+                                year: "numeric",
+                              }
+                            )
                             : "-"}
                         </div>
                         <div>
                           <span className="font-medium">Durée:</span>
                           {"duration_minutes" in spectacle &&
-                          spectacle.duration_minutes
+                            spectacle.duration_minutes
                             ? spectacle.duration_minutes + " min"
                             : "duration" in spectacle &&
-                                spectacle.duration_minutes
+                              spectacle.duration_minutes
                               ? spectacle.duration_minutes
                               : "-"}
                         </div>
@@ -540,6 +540,8 @@ export default function TestConnectionPage() {
                               <Image
                                 src={uiMembre.image}
                                 alt={uiMembre.name}
+                                width={400}
+                                height={300}
                                 className="w-full h-40 object-cover rounded-md"
                               />
                             </div>
@@ -564,13 +566,13 @@ export default function TestConnectionPage() {
                       <CardDescription>
                         {actualite.published_at
                           ? new Date(actualite.published_at).toLocaleDateString(
-                              "fr-FR",
-                              {
-                                day: "numeric",
-                                month: "long",
-                                year: "numeric",
-                              }
-                            )
+                            "fr-FR",
+                            {
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            }
+                          )
                           : "-"}
                       </CardDescription>
                     </CardHeader>

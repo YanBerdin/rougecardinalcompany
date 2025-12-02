@@ -23,7 +23,30 @@ Ce fichier liste les titres et descriptions extraites des fichiers de tâches `T
    - **Etat**: Completed (23 oct 2025)
    - **Issue**: [#5](https://github.com/YanBerdin/rougecardinalcompany/issues/5) (CLOSED)
 
-6. TASK026 — Homepage content management
+5b. **TASK025B — Database Security Audit Campaign** ✅
+
+- **Résumé**: Audit exhaustif de 73 objets database sur 17 rounds. Round 12 CRITIQUE: storage.objects ALL PRIVILEGES → explicit. CI gate créé avec allowlist REVOKE. Documentation complète SECURITY_AUDIT_SUMMARY.md.
+- **Etat**: Completed (26 oct 2025)
+- **Issue**: [#24](https://github.com/YanBerdin/rougecardinalcompany/issues/24) (CLOSED)
+
+6. **TASK026B — Database Functions Compliance: SET search_path** ✅
+   - **Résumé**: Application `SET search_path = ''` à toutes les fonctions database pour prévenir injection schéma. 28/28 fonctions conformes (100%). Hotfix appliqué via SQL Editor (Section 5.5).
+   - **Etat**: Completed (15 nov 2025)
+   - **Issue**: [#26](https://github.com/YanBerdin/rougecardinalcompany/issues/26) (CLOSED)
+
+6b. **TASK027B — Security Definer Rationale Headers** ✅
+
+- **Résumé**: Template et headers SECURITY DEFINER ajoutés aux fonctions. 6 fonctions documentées avec justifications explicites, risques évalués, validations. Security checklist créé.
+- **Etat**: Completed (15 nov 2025)
+- **Issue**: [#27](https://github.com/YanBerdin/rougecardinalcompany/issues/27) (CLOSED)
+
+6c. **TASK028B — Cleanup Obsolete Scripts** ✅
+
+- **Résumé**: Suppression de 3 scripts obsolètes Round 7 (déjà supprimés le 26 oct 2025). Documentation updated. Repository cleanup.
+- **Etat**: Completed (15 nov 2025)
+- **Issue**: [#28](https://github.com/YanBerdin/rougecardinalcompany/issues/28) (CLOSED)
+
+7. TASK026 — Homepage content management
    - Résumé: Panneau pour éditer contenus d'accueil (hero, news, shows).
 
 7. TASK027 — Company content management
@@ -41,8 +64,10 @@ Ce fichier liste les titres et descriptions extraites des fichiers de tâches `T
 11. TASK031 — Access controls for content
     - Résumé: Rôles et permissions pour accès éditeur/admin.
 
-12. TASK032 — Audit log and activity
-    - Résumé: Historique des changements, export CSV et filtres.
+12. **TASK032 — Admin User Invitation System** ✅
+    - **Résumé**: Système complet d'invitation admin end-to-end avec emails, DAL, RLS policies, UI admin, client-side token processing (404 fix), CI tests. Production-ready avec rollback complet et conformité RGPD.
+    - **Etat**: Completed (23 nov 2025)
+    - **Issue**: [#12](https://github.com/YanBerdin/rougecardinalcompany/issues/12) (CLOSED)
 
 13. TASK033 — Bulk import/export
     - Résumé: Import CSV / export JSON pour contenu et partenaires.

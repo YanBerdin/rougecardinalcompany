@@ -24,7 +24,7 @@ interface HeaderProps {
 }
 */
 //export function Header({ authContent }: HeaderProps) {
-export function Header() {
+export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
@@ -47,7 +47,7 @@ export function Header() {
       )}
     >
       <nav className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex flex-nowrap justify-between items-center h-16">
           {/* Logo - STABILISÉ */}
           <Link href="/" className="logo-container">
             <Image
@@ -58,7 +58,7 @@ export function Header() {
               className="logo-image"
               priority
             />
-            <span className="logo-text">Rouge-Cardinal</span>
+            <span className="logo-text whitespace-nowrap">Rouge-Cardinal</span>
           </Link>
 
           {/* Navigation Desktop */}
@@ -68,12 +68,12 @@ export function Header() {
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  "nav-link-glass text-sm font-medium transition-all duration-300 relative z-10",
+                  "nav-link-glass sm:text-sm md:text-md font-medium whitespace-nowrap transition-all duration-300 relative z-10",
                   pathname === item.href
                     ? "text-primary font-bold active"
                     : isScrolled
-                      ? "text-foreground"
-                      : "text-white"
+                      ? "text-foreground font-bold"
+                      : "text-foreground font-bold"
                 )}
               >
                 {item.name}
@@ -98,8 +98,8 @@ export function Header() {
               className={cn(
                 "nav-link-glass ripple-effect",
                 isScrolled
-                  ? "text-foreground hover:text-foreground"
-                  : "text-white hover:text-white"
+                  ? "text-foreground hover:text-accent"
+                  : "text-foreground hover:text-accent"
               )}
             >
               {isOpen ? (
@@ -113,17 +113,17 @@ export function Header() {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden animate-fade-in">
-            <div className="px-2 pt-4 pb-3 space-y-2 liquid-glass-mobile rounded-2xl mt-4 border shadow-2xl">
+          <div className="md:hidden animate-fade-in px-4">
+            <div className="px-2 pt-4 pb-3 space-y-2 liquid-glass-mobile rounded-2xl mt-4 border">
               {navigation.map((item, index) => (
                 <Link
                   key={navigation[index].name}
                   href={navigation[index].href}
                   className={cn(
-                    "block px-4 py-3 rounded-xl text-base font-medium transition-all duration-300 nav-link-glass",
+                    "block px-4 py-3 text-base font-medium transition-all duration-300 nav-link-glass",
                     pathname === navigation[index].href
                       ? "text-primary bg-primary/10 font-bold border border-primary/20 active"
-                      : "text-white"
+                      : "text-foreground"
                   )}
                   onClick={() => setIsOpen(false)}
                   style={{
@@ -141,7 +141,9 @@ export function Header() {
               ))}
 
               {/*<div className="px-4 pt-4">{authContent}</div>*/}
+              <div className="px-2 space-y-2 nav-link-glass">
               <ThemeSwitcher />
+</div>
             </div>
           </div>
         )}

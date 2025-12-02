@@ -201,6 +201,8 @@ Le Memory Bank est maintenant à jour et reflète précisément l'état actuel d
 
 ---
 
+**Note de mise à jour** : Ce document couvre la session du 13 octobre 2025. Pour les mises à jour ultérieures (14-15 novembre 2025), voir `activeContext.md` et `progress.md`.
+
 **Date de création** : 13 octobre 2025
 **Durée session** : ~30 minutes
 **Par** : GitHub Copilot (Memory Bank update execution)

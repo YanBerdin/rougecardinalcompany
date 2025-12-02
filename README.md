@@ -31,40 +31,45 @@
 - **Articles de presse** : Revue de presse (critiques externes)
 - Kit média professionnel avec téléchargements
 
-### 4. Communication
+### Installation
 
-- Formulaire de contact avec validation RGPD
-- Newsletter avec double opt-in
-- Gestion des abonnés et contacts presse
+```bash
+# cloner et installer
+git clone https://github.com/YanBerdin/rougecardinalcompany.git
+cd rougecardinalcompany
+pnpm install
+```
 
-### 5. Back-office
+# configurer les variables d'environnement
 
-- Authentification admin via Supabase Auth
-- CRUD complet pour tous les contenus
-- Gestion des médias et documents
-- Gestion des utilisateurs et rôles
-- Toggle publication/dépublication
-- Audit des actions administratives
-- Statistiques et analytics
+```bash
+cp .env.example .env.local
+# éditez .env.local avec vos credentials Supabase
+```
 
-## Patterns Architecturaux
+> **Note (dev only)**: si vous testez les invitations localement et que votre fournisseur d'email (ex. Resend en test-mode) limite les destinataires, activez la redirection d'email de développement dans `.env.local`.
 
-### Data Access Layer (DAL)
+```bash
+EMAIL_DEV_REDIRECT=true
+EMAIL_DEV_REDIRECT_TO=your-dev-email@example.com
+```
 
-- Modules `server-only` dans dal
-- Accès base de données centralisé côté serveur
-- Validation Zod et types TypeScript stricts
+Lorsque `EMAIL_DEV_REDIRECT` est `true`, les emails d'invitation seront envoyés à l'adresse définie par `EMAIL_DEV_REDIRECT_TO` (utile pour tests locaux). Assurez-vous de désactiver cette option en production.
 
-### Composants
+## Créer l'utilisateur admin initial
 
-- **Server Components** : Par défaut pour les données (SEO, performance)
-- **Client Components** : Pour l'interactivité (`'use client'`)
-- Pattern Smart/Dumb : Containers (logique) + Views (présentation)
+```bash
+pnpm exec tsx scripts/create-admin-user.ts
+```
 
-### Sécurité
+## Démarrer le serveur dev
 
-- RLS activé sur toutes les tables (36/36)
-- Politiques granularisées (lecture publique, écriture admin)
+```bash
+pnpm dev
+```
+
+L'application sera accessible sur http://localhost:3000
+
 - Validation input côté serveur
 - Protection XSS/CSRF/IDOR
 
@@ -88,6 +93,115 @@
 - Focus sur la sécurité et l'accessibilité
 - Intégration email (Resend) et analytics
 - Tests et scripts de validation
+
+> [!NOTE]
+> L'application suit les meilleures pratiques Next.js 15 avec un emphasis sur la sécurité, la performance et l'expérience utilisateur professionnelle.
+
+## 🚀 Quick Start
+
+### Prérequis
+
+- Node.js 20+
+- pnpm 8+
+- Compte Supabase (projet remote configuré)
+
+### Installation
+
+```bash
+# Cloner et installer
+git clone https://github.com/YanBerdin/rougecardinalcompany.git
+cd rougecardinalcompany
+pnpm install
+```
+
+### Configuration des variables d'environnement
+
+```bash
+cp .env.example .env.local
+# Éditez .env.local avec vos credentials Supabase
+```
+
+> **Note (dev only)**: si vous testez les invitations localement et que votre fournisseur d'email (ex. Resend en test-mode) limite les destinataires, activez la redirection d'email de développement dans `.env.local`.
+
+```bash
+EMAIL_DEV_REDIRECT=true
+EMAIL_DEV_REDIRECT_TO=your-dev-email@example.com
+```
+
+Lorsque `EMAIL_DEV_REDIRECT` est `true`, les emails d'invitation seront envoyés à l'adresse définie par `EMAIL_DEV_REDIRECT_TO` (utile pour tests locaux). Assurez-vous de désactiver cette option en production.
+
+### Créer l'utilisateur admin initial
+
+```bash
+pnpm exec tsx scripts/create-admin-user.ts
+```
+
+### Démarrer le serveur dev
+
+```bash
+pnpm dev
+```
+
+L'application sera accessible sur http://localhost:3000
+
+**⚠️ IMPORTANT** : Ce projet utilise une **base Supabase remote** (pas de Supabase local).
+
+### Gestion de la base de données
+
+```bash
+# Linker le projet remote
+pnpm dlx supabase link --project-ref YOUR_PROJECT_ID
+
+# Modifier le schéma déclaratif
+code supabase/schemas/02a_policies_tables.sql
+
+# Générer une migration
+pnpm dlx supabase db diff --linked -f nom_migration
+
+# Pousser vers remote
+pnpm dlx supabase db push
+```
+
+### Authentification Admin
+
+Si vous ne pouvez pas accéder aux pages `/admin` :
+
+```bash
+# Vérifier/créer l'utilisateur admin
+pnpm exec tsx scripts/create-admin-user.ts
+```
+
+**Architecture à double couche** :
+
+1. **JWT claims** : `app_metadata.role = 'admin'` (vérifié par middleware)
+2. **Profil DB** : `public.profiles.role = 'admin'` (vérifié par RLS)
+
+**Les deux doivent être synchronisés** pour que l'authentification fonctionne.
+
+## 🔒 Corrections de Sécurité Récentes
+
+### Novembre 2024 - Corrections Appliquées
+
+**✅ Vue messages_contact_admin** : Changement de `SECURITY DEFINER` vers `SECURITY INVOKER`
+
+- **Problème** : Risque d'escalade de privilèges et contournement des RLS
+- **Solution** : Vue maintenant sécurisée avec `security_invoker = true`
+- **Impact** : Protection renforcée des données sensibles
+
+**✅ Fonction restore_content_version** : Correction référence colonne inexistante
+
+- **Problème** : Référence à `published_at` dans table `spectacles` (colonne supprimée)
+- **Solution** : Utilisation du champ `public` (boolean) correct
+- **Impact** : Restauration de versions fonctionnelle
+
+**Validation** : Toutes les corrections validées par `supabase db lint --linked` ✅
+
+## 📚 Documentation
+
+- [Guide de développement](./doc/guide-developpement.md) - Setup complet et workflow
+- [Troubleshooting Admin Auth](./doc/troubleshooting-admin-auth.md) - Résolution problèmes auth
+- [Schémas déclaratifs](./supabase/schemas/README.md) - Structure de la base
+- [Progress](`./doc/progress.md`) - État d'avancement du projet
 
 > [!NOTE]
 > L'application suit les meilleures pratiques Next.js 15 avec un emphasis sur la sécurité, la performance et l'expérience utilisateur professionnelle.

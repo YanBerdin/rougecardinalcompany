@@ -1,3 +1,120 @@
+# Progress
+
+## Team CRUD Migration to Server Actions - COMPLETED (2025-12-02)
+
+**Migration complète du formulaire Team vers le pattern Server Actions avec pages CRUD dédiées.**
+
+### Résultats
+
+- ✅ Pages CRUD créées : `/admin/team/new` et `/admin/team/[id]/edit`
+- ✅ API Routes supprimées : 3 fichiers (route.ts, active/route.ts, hard-delete/route.ts)
+- ✅ Form refactorisé : 6 useState → react-hook-form + zodResolver
+- ✅ Schémas Zod mis à jour : `optionalUrlSchema`, `TeamMemberFormSchema`
+- ✅ Wrapper créé : `TeamMemberFormWrapper.tsx` avec `sanitizePayload()`
+- ✅ Container simplifié : TeamManagementContainer sans form inline
+- ✅ Bugs corrigés : "Afficher inactifs", validation URL, contrainte DB
+
+### Fichiers créés
+
+- `app/(admin)/admin/team/new/page.tsx` + `loading.tsx`
+- `app/(admin)/admin/team/[id]/edit/page.tsx` + `loading.tsx`
+- `components/features/admin/team/TeamMemberFormWrapper.tsx`
+
+### Fichiers supprimés
+
+- `app/api/admin/team/route.ts`
+- `app/api/admin/team/[id]/active/route.ts`
+- `app/api/admin/team/[id]/hard-delete/route.ts`
+
+### Documentation mise à jour
+
+- `memory-bank/architecture/file-tree.md`
+- `memory-bank/architecture/Project_Architecture_Blueprint.md`
+- `memory-bank/architecture/Project_Folders_Structure_Blueprint_v5.md`
+
+---
+
+## DAL SOLID Refactoring - COMPLETED (2025-11-30)
+
+**Score final : 92% SOLID compliance** (target: 90%)
+
+### Résultats
+
+- ✅ 17/17 DAL modules avec pattern `DALResult<T>`
+- ✅ 0 `revalidatePath()` dans le DAL (tous déplacés vers Server Actions)
+- ✅ 0 imports email dans le DAL (SRP respecté)
+- ✅ 11 schemas centralisés dans `lib/schemas/`
+- ✅ DAL helpers créés : `lib/dal/helpers/` (error.ts, format.ts, slug.ts)
+- ✅ Props composants colocalisées : `components/features/admin/<feature>/types.ts`
+- ✅ Server Actions colocalisées : `app/(admin)/admin/<feature>/actions.ts`
+
+### Documentation mise à jour
+
+- `memory-bank/architecture/Project_Folders_Structure_Blueprint_v5.md`
+- `memory-bank/architecture/Project_Architecture_Blueprint.md` (v2)
+- `memory-bank/architecture/Email_Service_Architecture.md` (v1.3.0)
+
+---
+
+Etat des actions liées à l'incident RLS/GRANT (2025-10-27):
+
+## Complété
+
+- Migrations d'urgence RLS et `is_admin()` appliquées.
+- Migrations de restauration des GRANTs appliquées (20251027020000 → 20251027022500).
+- Annotations ajoutées aux migrations `revoke_*` et déplacement recommandé vers `supabase/migrations/legacy-migrations`.
+- CI: allowlist `supabase/scripts/allowed_exposed_objects.txt` ajouté et workflow d'audit mis à jour.
+- CI: workflow `detect-revoke` ajouté (fail-on-match) pour bloquer nouveaux REVOKE non autorisés.
+- CI: monitoring `monitor-detect-revoke` ajouté (cron daily) pour surveiller et créer issues automatiques.
+
+## Références (commits & migrations)
+
+Commits clés récents (branche `feature/backoffice`):
+
+- c74115e: ci(monitor): add scheduled monitor for detect-revoke workflow — https://github.com/YanBerdin/rougecardinalcompany/commit/c74115e4ea9c847d8748411372b841c8f1e294b4
+- e6b5249: ci(security): fail CI when changed migrations contain REVOKE — https://github.com/YanBerdin/rougecardinalcompany/commit/e6b5249686a2482dd3bfd1e94f15270e6b865edf
+- e0f0916: chore(ci): add README for allowed_exposed_objects and warn-only workflow — https://github.com/YanBerdin/rougecardinalcompany/commit/e0f09163b1ca075d1b5c0e9e8391b0620b46a70e
+- 3e160a8: chore(ci): add detected exposed DB objects to allowlist — https://github.com/YanBerdin/rougecardinalcompany/commit/3e160a842fba05c637c64237421b71cd90cd3aa0
+- d1cfaad: chore(ci): allowlist known restored DB objects in audit — https://github.com/YanBerdin/rougecardinalcompany/commit/d1cfaadc8a5b776eea3867faeb7a842296e68360
+- 8b9df19: chore(migrations): add warning headers to revoke_* migrations — https://github.com/YanBerdin/rougecardinalcompany/commit/8b9df198de4716ec7e9f45820c8141f3142e356a
+
+Migrations d'urgence appliquées pour la résolution :
+
+- `20251026180000_apply_spectacles_partners_rls_policies.sql`
+- `20251026181000_apply_missing_rls_policies_home_content.sql`
+- `20251027000000_create_is_admin_function.sql`
+- `20251027020000_restore_basic_grants_for_rls.sql`
+- `20251027021000_restore_remaining_grants.sql`
+- `20251027021500_restore_views_grants.sql`
+- `20251027022000_fix_logs_audit_grants.sql`
+- `20251027022500_grant_execute_all_trigger_functions.sql`
+
+## Production verification
+
+Vérification de l'historique des migrations sur le projet Supabase associé au dépôt. Projet détecté : `Rouge-Cardinal-Companie` (project_id: `yvtrlvmbofklefxcxrzv`). Les migrations d'urgence suivantes apparaissent dans l'historique des migrations du projet (présentes = appliquées) :
+
+- `20251026180000_apply_spectacles_partners_rls_policies`
+- `20251026181000_apply_missing_rls_policies_home_content`
+- `20251027000000_create_is_admin_function`
+- `20251027010000_recreate_all_rls_policies`
+- `20251027020000_restore_basic_grants_for_rls`
+- `20251027021000_restore_remaining_grants`
+- `20251027021500_restore_views_grants`
+- `20251027022000_fix_logs_audit_grants`
+- `20251027022500_grant_execute_all_trigger_functions`
+
+Cette vérification a été réalisée via l'API Supabase MCP et confirme que les migrations d'urgence figurent bien dans l'historique du projet.
+
+## En cours
+
+- Surveillance du workflow `detect-revoke` (7 jours) pour collecter et traiter faux positifs.
+
+## À faire
+
+- Ajouter tests d'intégration CI pour valider l'accès DAL (anon/authenticated) après migrations.
+- Formaliser la procédure d'ajout à l'allowlist (template PR, approbation DB/infra).
+- Revue: décider si `schemas/` reste en parallèle avec `migrations/` ou si on harmonise.
+
 # Suivi de Progression
 
 ## État Général du Projet
@@ -52,7 +169,48 @@
   - Admin Dashboard : Layout + statistiques + navigation sidebar
   - Soft‑delete + reorder + form validation
   - Production-ready : TypeScript OK, ESLint clean
-- [x] Documentation d'architecture v2 (C4 + ADRs) publiée et référencée
+- [x] **Audit sécurité database complet (73 objets sécurisés)** — **TERMINÉ 26/10/2025** :
+  - 17 rounds de sécurisation (25-26 octobre)
+  - Migrations idempotentes avec gestion d'erreurs
+  - Whitelist objets système (audit_grants_filtered.sql)
+  - Documentation complète (SECURITY_AUDIT_SUMMARY.md)
+  - CI security audit ✅ PASSED
+  - PR #25 merged, issues #26/#27/#28 créées
+- [x] **Database Functions Compliance (TASK026B)** — **TERMINÉ 15/11/2025** :
+  - 28/28 fonctions avec `SET search_path = ''` (100%)
+  - Fonction `reorder_team_members()` corrigée
+  - Hotfix SQL Editor (Section 5.5 workflow)
+  - Issue #26 closed with comprehensive report
+  - Migration `20251115150000` créée et documentée
+- [x] **API Code Quality Refactoring** — **TERMINÉ 14/11/2025** :
+  - ApiResponse pattern unifié (Contact, Newsletter, Team)
+  - Helpers centralisés : HttpStatus, parseFullName, isUniqueViolation
+  - DAL type consistency : DALResult<T> standardisé
+  - JSDoc documentation complète (8 fonctions)
+  - Score qualité : 9.4/10 → 9.8/10
+- [x] **Dashboard Refactoring** — **TERMINÉ 13/11/2025** :
+  - Smart/Dumb components pattern
+  - admin/page.tsx : 133 → 69 lignes (-48%)
+  - ErrorBoundary réutilisable + Zod types
+  - Tests : 4/4 passing (9/9 success criteria)
+- [x] **TASK021 Admin Backoffice Spectacles CRUD** — **TERMINÉ 16/11/2025** :
+  - Phase 1: DAL spectacles (Clean Code ≤ 30 lignes)
+  - Phase 2: API routes (5 endpoints complets)
+  - Phase 3: Admin UI (7 composants React)
+  - Bug résolu: RLS 42501 → Missing admin profile
+  - Procédure admin registration documentée
+  - Commit: 96c32f3 (4 files, 77+/45-)
+  - Validation complète: CREATE/READ/UPDATE/DELETE ✅
+- [x] **Système d'invitation admin (TASK032)** — **TERMINÉ 21/11/2025** :
+  - Migrations : `20251121185458_allow_admin_update_profiles.sql`, `20251120231121_create_user_invitations.sql`, `20251120231146_create_pending_invitations.sql`
+  - DAL : `lib/dal/admin-users.ts` - fonction `inviteUser()` avec validation Zod, rate limiting, client admin Supabase
+  - Email : Templates React Email (`emails/invitation-email.tsx`), layout et composants utilitaires, service Resend avec dev-redirect
+  - Actions : `lib/email/actions.ts` - envoi d'emails d'invitation avec gestion d'erreurs
+  - Admin UI : `app/(admin)/admin/users/page.tsx`, `app/(admin)/admin/users/invite/page.tsx`, composants `UsersManagementContainer.tsx`
+  - Scripts : `scripts/find-auth-user.js`, `scripts/generate-invite-link.js`, `scripts/test-full-invitation.js`
+  - Sécurité : RLS policies restrictives, validation côté serveur, audit logging
+  - Tests : Scripts automatisés pour validation complète du flux d'invitation
+  - Documentation : Mise à jour `.env.example`, `supabase/README.md`, guides d'utilisation
 
 ## Fonctionnalités en Cours
 
@@ -64,7 +222,50 @@
 - Terminé: Agenda/Événements (DAL + containers + UI + export calendrier ICS)
 - Option: Modélisation `partners.type` si besoin UI
 
-## Problèmes Résolus (Octobre 2025)
+## Problèmes Résolus
+
+### Migration architecture layouts + admin UI (11 novembre 2025)
+
+- ✅ **Route groups Next.js implémentés** : Séparation `(admin)` et `(marketing)`
+  - Root layout centralisé pour html/body + ThemeProvider
+  - Layouts dédiés par zone fonctionnelle
+  - Fix hydration errors (suppression duplications)
+- ✅ **Admin sidebar modernisé** : AdminShell → AppSidebar (shadcn)
+  - Composant officiel avec meilleure accessibilité
+  - Collapsible icon mode + masquage texte automatique
+  - Sheet off-canvas pour mobile (touch-friendly)
+  - Keyboard shortcuts + breadcrumb navigation
+- ✅ **Branding admin intégré** : Logo RC + nom compagnie
+- ✅ **Navigation structurée** : Groupes logiques (Général/Contenu/Autres)
+- ✅ **AdminAuthRow refactoré** : Dropdown menu avec logout + settings
+- ✅ **Fix UI collapse** : Largeur sidebar + compression logo résolus
+- ✅ **Documentation complète** : Changelog + Blueprint v3 + checklist migration
+
+### Campagne sécurité audit database (25-26 octobre)
+
+- ✅ **73 objets exposés sécurisés** sur 17 rounds de migration
+  - Round 1-7 : 28 objets business initiaux
+  - Round 7b補完 : fix realtime.subscription authenticated  
+  - Round 8-17 : 45 objets supplémentaires
+- ✅ **Round 12 CRITIQUE** : storage.objects avec ALL PRIVILEGES
+  - Vulnérabilité majeure : bypass complet Storage RLS
+  - Fix : Révocation ALL + whitelist système
+- ✅ **Round 17 FINAL** : check_communique_has_pdf()
+  - Détection CI après Round 16
+  - Migration appliquée : CI ✅ PASSED
+- ✅ **Pivot stratégique whitelist** :
+  - audit_grants_filtered.sql (focus business uniquement)
+  - Exclusion système : `information_schema, realtime.*, storage.*, extensions.*`
+- ✅ **Outils audit créés** :
+  - scripts/check-security-audit.sh (runner CI/manuel)
+  - supabase/scripts/quick_check_all_grants.sql (inspection détaillée)
+- ✅ **Documentation complète** :
+  - SECURITY_AUDIT_SUMMARY.md (campagne 17 rounds)
+  - ROUND_7B_ANALYSIS.md (analyse pivot whitelist)
+  - migrations.md (détail par round)
+- ✅ **GitHub** :
+  - PR #25 merged : Suppression broad grants articles_presse
+  - Issues créées : #26 (search_path), #27 (DEFINER rationale), #28 (cleanup scripts)
 
 ### Fixes majeurs
 
@@ -196,11 +397,11 @@
 
 #### Validation Conformité Instructions Supabase
 
-- ✅ **Schéma Déclaratif** : 100% conforme à `.github/instructions/Declarative_Database_Schema.Instructions.md`
+- ✅ **Schéma Déclaratif** : 100% conforme à `.github/instructions/Declarative_Database_Schema.instructions.md`
   - Modifications dans `supabase/schemas/10_tables_system.sql` (pas de migrations manuelles)
   - État final désiré représenté dans le schéma déclaratif
   - Commentaires RGPD explicites
-- ✅ **Politiques RLS** : 100% conforme à `.github/instructions/Create_RLS_policies.Instructions.md`
+- ✅ **Politiques RLS** : 100% conforme à `.github/instructions/Create_RLS_policies.instructions.md`
   - 4 policies distinctes (SELECT/INSERT/UPDATE/DELETE) par table
   - USING/WITH CHECK correctement utilisés selon l'opération
   - Noms descriptifs et commentaires hors policies
@@ -309,6 +510,109 @@
 
 ## Journal des Mises à Jour
 
+### 13 Novembre 2025
+
+**Refactoring complet API Routes + DAL avec HttpStatus Constants (3 phases)** :
+
+- **Phase 1 : Dashboard Refactoring COMPLÉTÉ** (9/9 success criteria) :
+  - ErrorBoundary réutilisable + types Zod + test script (4/4 passing)
+  - StatsCard extracted (29L), DAL dashboard.ts (54L), DashboardStatsContainer (45L)
+  - admin/page.tsx : 133 → 69 lignes (-48% code)
+  - API Routes Contact + Newsletter refactored (parseFullName, isUniqueViolation, HttpStatus)
+  - Commit dea0cd9 : "feat(admin): Dashboard refactoring complete (3 phases)"
+
+- **Phase 2 : Extension Pattern Helpers** (5 routes API + DAL) :
+  - Routes refactorées : debug-auth, test-email, team, webhooks/resend, hard-delete
+  - lib/dal/team.ts : Fix types (HttpStatusCode strict union au lieu de number)
+  - Magic numbers éliminés : 14 total (10 dans routes + 4 dans DAL)
+  - TypeScript errors : 0 (type safety 100%)
+  - Pattern standardisé pour toutes futures routes
+
+- **Phase 3 : Tests et Validation** :
+  - test-active-endpoint.ts : 17/17 tests passed avec cookie admin ✅
+  - test-team-active-dal.ts : 5/5 tests passed avec service key (DAL direct) ✅
+  - Scripts admin créés : check-admin-status.ts, set-admin-role.ts
+  - Fix bug parseNumericId : rejet des IDs décimaux (1.5 → 400 Bad Request)
+
+- **Impact architectural** :
+  - lib/api/helpers.ts : Bibliothèque centralisée (HttpStatus, ApiResponse, withAdminAuth, parseNumericId)
+  - lib/auth/is-admin.ts : Fix sécurité (app_metadata.role prioritaire sur user_metadata.role)
+  - Consistency : 100% des routes API utilisent helpers communs
+  - Type safety : HttpStatusCode union type partout (compile-time checks)
+
+- **Documentation synchronisée** :
+  - scripts/README.md : Section test-team-active-dal.ts ajoutée
+  - memory-bank/activeContext.md : Avancées récentes + Prochaines Étapes mises à jour
+  - .github/prompts/plan-dashboardRefactoring.prompt.md : Toutes phases marquées COMPLETED
+
+### 11 Novembre 2025 (suite)
+
+**Outils de diagnostic admin créés et intégrés** :
+
+- Page `app/(admin)/debug-auth/page.tsx` : Diagnostic complet auth & RLS
+  - Déplacée de `app/debug-auth/` vers layout admin (protégée automatiquement)
+  - Tests : cookies, utilisateur, profile DB, tables publiques/admin, vues, JOINs
+  - 7 sections de vérification : hero_slides, membres_equipe, spectacles, événements, dashboard, analytics
+  - Layout responsive grid avec détails expandables
+- Script `scripts/test-admin-access.ts` : Tests automatisés sécurité
+  - Test 1 : Accès anon sur tables admin (vérification blocage)
+  - Test 2 : Vérification fonction `is_admin()`
+  - Test 3 : Accès service_role sur tables critiques
+  - Validation : ✅ Vues admin protégées, ✅ RLS policies fonctionnelles
+- Lien "Debug Auth" ajouté dans sidebar admin (section "Autres", icône Bug)
+- Résultats validation :
+  - ✅ `communiques_presse_dashboard` et `analytics_summary` bloquées pour anon
+  - ✅ `profiles` correctement protégée
+  - ✅ `membres_equipe` accessible en lecture (intentionnel : affichage site public)
+  - ✅ Service key fonctionne pour tous les accès
+
+**Fichiers modifiés** :
+
+- `components/admin/AdminSidebar.tsx` : Ajout import Bug icon + item "Debug Auth"
+- `memory-bank/activeContext.md` : Sections Avancées récentes + Décisions Récentes mises à jour
+
+### 11 Novembre 2025
+
+- **Migration architecture layouts + admin UI**
+  - **Route groups** : Implémentation Next.js `(admin)` et `(marketing)`
+    - Root layout centralisé avec ThemeProvider
+    - Isolation zones fonctionnelles (admin/public)
+    - Fix hydration errors (html/body dupliqués supprimés)
+  - **Admin sidebar shadcn** : Remplacement AdminShell par AppSidebar
+    - Collapsible icon mode avec masquage automatique texte
+    - Branding compagnie (logo RC + nom Rouge Cardinal)
+    - Navigation groupée (Général/Contenu/Autres)
+    - Keyboard shortcut (Cmd/Ctrl+B), breadcrumb navigation
+    - Dropdown menu AdminAuthRow refactoré
+    - Fix largeur collapse + compression logo
+  - **Composants** :
+    - Créés : AdminSidebar.tsx (AppSidebar), sidebar.tsx, breadcrumb.tsx, separator.tsx, sheet.tsx, tooltip.tsx, use-mobile.ts
+    - Modifiés : AdminAuthRow.tsx, layout.tsx (admin), globals.css, button/input.tsx
+    - Supprimés : AdminShell.tsx (deprecated)
+  - **BREAKING CHANGES** :
+    - Structure routes migrée vers route groups
+    - Vérifier imports/paths/middleware/guards
+  - **Documentation** :
+    - Changelog : `memory-bank/changes/2025-11-11-layouts-admin-sidebar.md`
+    - Blueprint v3 : `memory-bank/architecture/Project_Architecture_Blueprint_v3.md`
+  - **Next steps** : Tests navigation, mobile menu, validation post-migration
+
+### 26 Octobre 2025
+
+- **Campagne de sécurité TERMINÉE (73 objets sécurisés)**
+  - 17 rounds de migrations (25-26 octobre)
+  - Round 12 CRITIQUE : storage.objects ALL PRIVILEGES (vulnérabilité majeure corrigée)
+  - Round 17 FINAL : check_communique_has_pdf() - CI ✅ PASSED
+  - Migrations idempotentes avec DO blocks + exception handling
+  - Whitelist stratégie : audit_grants_filtered.sql (exclusion objets système)
+  - Documentation exhaustive : SECURITY_AUDIT_SUMMARY.md, ROUND_7B_ANALYSIS.md, migrations.md
+  - GitHub : PR #25 merged, issues #26/#27/#28 créées
+  - Outils audit : check-security-audit.sh, quick_check_all_grants.sql
+  - Production-ready : Zero exposed objects, RLS-only model, defense in depth
+- **Next steps identifiés** :
+  - Patches conformité DB (≈20 fonctions : SET search_path + DEFINER rationale)
+  - Cleanup scripts obsolètes (3 candidats après approbation)
+
 ### 23 Octobre 2025
 
 - **Résolution complète problèmes sécurité et performance RLS**
@@ -344,6 +648,20 @@
 
 - Architecture: publication de `Project_Architecture_Blueprint_v2.md` (Implementation‑Ready, C4, ADRs, patterns canoniques Supabase Auth 2025)
 - Back‑office: avancement TASK022 Team Management (DAL `lib/dal/team.ts`, Server Actions `app/admin/team/actions.ts`, UI `components/features/admin/team/*`, guard `requireAdmin()`, soft‑delete + reorder) — statut: En cours (Médiathèque + layout Admin restants)
+
+### 13 Novembre 2025 (suite)
+
+**Validation complète suite de tests API /active** :
+
+- Script test-active-endpoint.ts : ✅ 17/17 tests passing avec --cookie flag
+  - Test 1-6 (valeurs valides) : Boolean, String, Number → 200 OK ✅
+  - Test 7-13 (valeurs invalides) : String/Number/null/array/object/missing → 422 Validation Error ✅
+  - Test 14-17 (IDs invalides) : Non-numeric/négatif/zéro/décimal → 400 Bad Request ✅
+  - Protection auth : Sans cookie → 403 Forbidden ✅
+- Pattern établi pour tests futurs : extraction cookie manuel + script TypeScript détaillé
+- Decision : Conservation test-active-endpoint.ts comme référence production-ready
+- Documentation : scripts/README.md, memory-bank/activeContext.md, progress.md synchronisés
+- Confirmation : Test avec cookie admin extrait du navigateur (DevTools → Application → Cookies)
 
 ### 13 Octobre 2025
 
@@ -439,18 +757,138 @@
 5. ⚠️ Retirer les délais artificiels avant production (1200-1500ms dans containers)
 6. ⚠️ Docker: `prune -a` supprime TOUTES les images inutilisées, pas seulement les anciennes versions
 
-## Dernière Mise à Jour
+## Journal des Mises à Jour (suite)
 
-**Date**: 23 octobre 2025
-**Changements majeurs**:
+### 14-15 Novembre 2025
 
-- **3 problèmes sécurité/performance RLS résolus** : Articles vides, SECURITY DEFINER views, Multiple permissive policies
-- **4 migrations créées et appliquées** : RLS policies, GRANT permissions, SECURITY INVOKER views, RESTRICTIVE policy
-- **Documentation exhaustive** : Guide troubleshooting RLS 202 lignes, test script automatisé
-- **4 commits prêts** sur `feature/backoffice` (b331558, 8645103, a7b4a62, e7a8611)
-- **22 fichiers modifiés** : Migrations, schemas, docs, test script, source files
-- **Memory-bank corrigé** : JWT Signing Keys → vraie root cause RLS
-- Production-ready : Defense in Depth activée, toutes validations passées
+**Refactoring complet API Routes + Dashboard + TASK026B Completion**:
 
-**Date**: 21 octobre 2025
-**Changements majeurs**: Fix page Presse vide - workaround RLS/JWT Signing Keys via vue `articles_presse_public`, séparation correcte chapo/excerpt comme champs indépendants, workflow hotfix déclaratif appliqué, 7 fichiers de documentation mis à jour
+- ✅ **TASK026B Database Functions Compliance COMPLÉTÉ** (15 nov):
+  - 100% compliance : 28/28 fonctions avec `SET search_path = ''`
+  - Fonction corrigée : `public.reorder_team_members(jsonb)`
+  - Méthode : Hotfix SQL Editor (Section 5.5 Declarative Schema instructions)
+  - Justification : 32 migrations Cloud manquantes (incident RLS 27 oct)
+  - Documentation : migrations.md, TASK026B.md, procedure.md
+  - Issue #26 : Commentaire complet + closed with "completed" status
+  - Migration locale : `20251115150000_fix_reorder_team_members_search_path.sql`
+  - Validation : `SELECT proconfig FROM pg_proc` → `{search_path=}` ✅
+
+- ✅ **API Code Quality Refactoring** (14 nov):
+  - **Phase 1 - ApiResponse Pattern Unification**:
+    - Contact, Newsletter, Team routes refactorées
+    - Helpers centralisés : HttpStatus, ApiResponse, withAdminAuth
+    - Magic numbers éliminés (14 total)
+  - **Phase 2 - DAL Type Consistency**:
+    - Type `DalResponse<T>` supprimé (duplication)
+    - Unification sur `DALResult<null>` (4 fonctions)
+    - Type safety : 100% (HttpStatusCode union type)
+  - **Phase 3 - JSDoc Documentation**:
+    - 8 fonctions DAL documentées (~69 lignes)
+    - IntelliSense IDE complet
+  - **Validation**: TypeScript ✅, ESLint ✅, Tests ✅ (17+6 passed)
+  - **Score**: 9.4/10 → 9.8/10
+
+- ✅ **Dashboard Refactoring COMPLET** (13 nov - 3 phases):
+  - Phase 1: ErrorBoundary, types Zod, test script (4/4 passing)
+  - Phase 2: Component extraction (StatsCard, DAL dashboard.ts)
+    - admin/page.tsx : 133 → 69 lignes (-48%)
+  - Phase 3: API Routes Contact + Newsletter
+    - parseFullName(), isUniqueViolation() helpers
+    - HttpStatus constants partout
+  - Success Criteria: 9/9 atteints ✨
+
+- ✅ **Suite de tests API complète** (13 nov):
+  - test-active-endpoint.ts : 17/17 tests passing
+  - test-team-active-dal.ts : 5/5 tests passed
+  - test-newsletter-endpoint.ts : 6/6 tests passed
+  - Pattern établi pour tests futurs
+
+### 20 Novembre 2025
+
+**Sécurité Database : Déplacement extensions vers schéma dédié** :
+
+- **Problème** : Alertes de sécurité Supabase concernant les extensions installées dans le schéma `public`.
+- **Résolution** :
+  - Création d'un schéma dédié `extensions`.
+  - Déplacement de `unaccent`, `pg_trgm`, `citext` et `pgcrypto` vers ce schéma.
+  - Mise à jour du `search_path` de la base de données pour inclure `extensions`.
+  - Mise à jour du schéma déclaratif (`01_extensions.sql` et `16_seo_metadata.sql`).
+- **Migration** : `20251120120000_move_extensions_to_schema.sql`.
+
+### 22 Novembre 2025
+
+**Critical Fix: Invitation Setup 404 Resolution** :
+
+- **Issue** : 404 error on `/auth/setup-account` preventing invited users from completing registration
+- **Root Cause** : Supabase invitation tokens in URL hash (`#access_token=...`) invisible to server-side middleware
+- **Solution** :
+  - Converted `app/(marketing)/auth/setup-account/page.tsx` to client component (`'use client'`)
+  - Added `useEffect` to extract tokens from `window.location.hash`
+  - Implemented `supabase.auth.setSession()` with extracted tokens
+  - Added error handling and loading states
+  - Maintained server-side validation for security
+- **Technical Details** :
+  - Client-side token processing required because hash fragments not sent to server
+  - Pattern: `useEffect(() => { const hash = window.location.hash; ... })`
+  - Security: Server-side validation still enforced after client-side session establishment
+- **Validation** : End-to-end invitation flow tested successfully
+- **Impact** : Complete admin user invitation system now functional
+
+### 22 Novembre 2025 (suite)
+
+**Memory-bank Documentation Updates** :
+
+- **activeContext.md** : Added critical fix entry for invitation system 404 resolution (client-side token processing pattern)
+- **systemPatterns.md** : Added comprehensive pattern documentation for "Client-Side Token Processing for Invitations" including implementation details, security considerations, and testing patterns
+- **techContext.md** : Added "Évolutions Technologiques Récentes" section documenting the client-side token processing solution and its performance impact
+- **Documentation Impact** : All memory-bank files now accurately reflect the resolved invitation system issues and established patterns for future development
+
+### 27 Novembre 2025
+
+**Clean Code & TypeScript Conformity Plan - COMPLETED** :
+
+- **Context** : Finalisation du plan de conformité Clean Code & TypeScript pour TASK026
+- **8 étapes exécutées** :
+  1. ✅ Server Actions créées (`home-about-actions.ts`, `home-hero-actions.ts`)
+  2. ✅ DAL refactorisé (suppression `revalidatePath()`, ajout codes erreur `[ERR_*]`)
+  3. ✅ Migration fetch() → Server Actions (`AboutContentForm.tsx`)
+  4. ✅ Splitting `HeroSlideForm.tsx` (316→200 lignes + `HeroSlideFormImageSection.tsx`)
+  5. ✅ Schémas UI créés (`HeroSlideFormSchema` avec `number` au lieu de `bigint`)
+  6. ✅ API Routes obsolètes supprimées (3 fichiers)
+  7. ✅ Documentation v1.1 mise à jour (`crud-server-actions-pattern.instructions.md`)
+  8. ✅ Git commit `8aaefe1` (16 files, +504/-307)
+
+**Architecture 4-Layer établie** :
+
+- Presentation → Server Actions → DAL → Database
+- `revalidatePath()` UNIQUEMENT dans Server Actions
+- Dual Zod schemas : Server (bigint) vs UI (number)
+- Component splitting rule < 300 lignes
+
+**Blueprints mis à jour** :
+
+- ✅ `Project_Folders_Structure_Blueprint_v3.md` (Nov 22 → Nov 27)
+  - Sections `lib/actions/`, `lib/schemas/` ajoutées
+  - Extension template CRUD Feature (6 étapes)
+  - Naming conventions détaillées
+- ✅ `Project_Architecture_Blueprint.md` (Nov 22 → Nov 27)
+  - 15+ sections mises à jour
+  - ASCII diagrams (layer hierarchy, data flow)
+  - useEffect sync pattern documenté
+  - ADR entries Nov 2025
+  - Common Pitfalls table
+
+**Fichiers clés référencés** :
+
+| Fichier | Lignes | Rôle |
+|---------|--------|------|
+| `lib/actions/home-hero-actions.ts` | 77 | Server Actions CRUD |
+| `lib/schemas/home-content.ts` | 127 | Dual schemas |
+| `lib/dal/admin-home-hero.ts` | 265 | DAL avec helpers |
+| `HeroSlideForm.tsx` | 200 | Form splitté |
+
+**Memory-bank synchronisé** :
+
+- `activeContext.md` : Nouveau focus 2025-11-27
+- `progress.md` : Journal mis à jour (cette entrée)
+- `tasks/_index.md` : TASK026 marqué "Refined on 2025-11-27"

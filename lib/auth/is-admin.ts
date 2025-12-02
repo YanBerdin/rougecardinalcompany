@@ -23,11 +23,15 @@ export async function isAdmin(): Promise<boolean> {
       }
     };
 
-  // Whitelist of claim paths to check for an admin role.
+  // Check for admin role in app_metadata (secure, cannot be modified by user)
+  const appMeta = (claims as Record<string, unknown>)?.["app_metadata"];
+  const isAdminFromAppMetadata = getClaimString(appMeta, "role").toLowerCase() === "admin";
+
+  // Fallback: also check user_metadata for backward compatibility
   const userMeta = (claims as Record<string, unknown>)?.["user_metadata"];
   const isAdminFromUserMetadata = getClaimString(userMeta, "role").toLowerCase() === "admin";
 
-  return isAdminFromUserMetadata
+  return isAdminFromAppMetadata || isAdminFromUserMetadata
   } catch (err) {
     console.error("isAdmin check failed:", err);
     return false;

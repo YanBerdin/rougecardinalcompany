@@ -7,12 +7,22 @@ import {
 } from "@/lib/dal/presse";
 
 export default async function PresseServerGate() {
-  const [pressReleases, mediaArticles, mediaKitRows] = await Promise.all([
-    fetchPressReleases(),
-    fetchMediaArticles(),
-    fetchMediaKit(),
-  ]);
-  
+  const [pressReleasesResult, mediaArticlesResult, mediaKitResult] =
+    await Promise.all([
+      fetchPressReleases(),
+      fetchMediaArticles(),
+      fetchMediaKit(),
+    ]);
+
+  // Handle errors gracefully with fallback empty arrays
+  const pressReleases = pressReleasesResult.success
+    ? pressReleasesResult.data
+    : [];
+  const mediaArticles = mediaArticlesResult.success
+    ? mediaArticlesResult.data
+    : [];
+  const mediaKitRows = mediaKitResult.success ? mediaKitResult.data : [];
+
   // Map DTO -> MediaKitItem pour l'UI (icône optionnelle)
   const mediaKit: MediaKitItem[] = mediaKitRows.map((r) => ({
     type: r.type,

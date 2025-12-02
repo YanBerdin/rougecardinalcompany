@@ -90,8 +90,8 @@ when not matched then insert (
 merge into public.spectacles as sp
 using (
   values
-    ('romeo-et-juliette', 'Roméo et Juliette', 'drame', 120, 8, 'Réinterprétation contemporaine du classique de Shakespeare.', 'Une fresque amoureuse et tragique revisitée.', timestamp with time zone '2025-11-15 20:00:00+00', 'https://images.pexels.com/photos/167636/pexels-photo-167636.jpeg'),
-    ('la-tempete', 'La Tempête', 'drame', 110, 7, 'Magie, pouvoir et rédemption sur une île mystérieuse.', 'Un conte envoûtant entre illusion et réalité.', timestamp with time zone '2026-02-20 20:00:00+00', 'https://images.pexels.com/photos/158163/clouds-cloudporn-weather-lookup-158163.jpeg'),
+    ('romeo-et-juliette', 'Roméo et Juliette', 'Drame', 120, 8, 'Réinterprétation contemporaine du classique de Shakespeare.', 'Une fresque amoureuse et tragique revisitée.', timestamp with time zone '2025-11-15 20:00:00+00', 'https://images.pexels.com/photos/167636/pexels-photo-167636.jpeg'),
+    ('la-tempete', 'La Tempête', 'Drame', 110, 7, 'Magie, pouvoir et rédemption sur une île mystérieuse.', 'Un conte envoûtant entre illusion et réalité.', timestamp with time zone '2026-02-20 20:00:00+00', 'https://images.pexels.com/photos/158163/clouds-cloudporn-weather-lookup-158163.jpeg'),
     ('le-misanthrope', 'Le Misanthrope', 'comedie', 105, 6, 'Satire mordante des mœurs et des hypocrisies sociales.', 'Molière en version incisive et moderne.', timestamp with time zone '2025-09-30 20:00:00+00', 'https://images.pexels.com/photos/167092/pexels-photo-167092.jpeg')
 ) as s(slug, title, genre, duration_minutes, casting, description, short_description, premiere, image_url)
 on sp.slug = s.slug
@@ -110,7 +110,7 @@ when not matched then insert (
   duration_minutes, casting, premiere, image_url, public,
   awards, created_by, created_at, updated_at
 ) values (
-  s.title, s.slug, 'a_l_affiche', s.description, s.short_description, s.genre,
+  s.title, s.slug, 'actuellement', s.description, s.short_description, s.genre,
   s.duration_minutes, s.casting, s.premiere, s.image_url, true,
   null, null, now(), now()
 );

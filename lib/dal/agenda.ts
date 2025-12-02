@@ -1,127 +1,212 @@
+"use server";
 import "server-only";
 import { createClient } from "@/supabase/server";
+import {
+  EventSchema,
+  type Event as AgendaEvent,
+  type EventType as EventTypeOption,
+} from "@/components/features/public-site/agenda/types";
+import {
+  type DALResult,
+  formatTime,
+  toISODateString,
+} from "@/lib/dal/helpers";
 
-export type AgendaEventDTO = {
+// NOTE: Types AgendaEvent and EventTypeOption should be imported directly 
+// from '@/components/features/public-site/agenda/types' or '@/lib/schemas/agenda'
+// Server files cannot re-export types in Next.js 15
+
+// ============================================================================
+// Internal Types (Supabase response shape)
+// ============================================================================
+
+type SupabaseEventRow = {
   id: number;
-  title: string;
-  date: string; // ISO date string
-  time: string; // e.g. 20h30
-  venue: string;
-  address: string;
-  type: string;
-  status: string;
-  ticketUrl: string | null;
-  image: string;
+  date_debut: string;
+  start_time?: string | null;
+  status?: string | null;
+  ticket_url?: string | null;
+  image_url?: string | null;
+  type_array?: string[] | null;
+  spectacles?: { title?: string | null; image_url?: string | null }[] | null;
+  lieux?: {
+    nom?: string | null;
+    adresse?: string | null;
+    ville?: string | null;
+    code_postal?: string | null;
+  }[] | null;
 };
 
-function formatTime(date: Date, startTime?: string | null): string {
-  if (startTime) {
-    // start_time as HH:MM:SS
-    const [h, m] = startTime.split(":");
-    return `${h}h${m}`;
-  }
-  const h = date.getHours().toString().padStart(2, "0");
-  const m = date.getMinutes().toString().padStart(2, "0");
-  return `${h}h${m}`;
+// ============================================================================
+// Helper Functions (domain-specific)
+// ============================================================================
+
+/**
+ * Build address string from lieu parts
+ */
+function buildAddress(lieu?: SupabaseEventRow["lieux"]): string {
+  if (!lieu?.[0]) return "";
+  const { adresse, code_postal, ville } = lieu[0];
+  const cityPart = [code_postal, ville].filter(Boolean).join(" ");
+  return [adresse, cityPart].filter(Boolean).join(", ");
 }
 
-function toISODateString(d: Date): string {
-  const y = d.getFullYear();
-  const m = (d.getMonth() + 1).toString().padStart(2, "0");
-  const day = d.getDate().toString().padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
+/**
+ * Map Supabase row to AgendaEvent with Zod validation
+ */
+function mapRowToEventDTO(row: SupabaseEventRow): AgendaEvent {
+  const dateDebut = new Date(row.date_debut);
 
-// Mock eventsData: Event[]
-// 07_table_evenements.sql
-export async function fetchUpcomingEvents(
-  limit = 10
-): Promise<AgendaEventDTO[]> {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from("evenements")
-    .select(
-      `id, date_debut, start_time, status, ticket_url, image_url, type_array,
-       spectacles (title, image_url),
-       lieux (nom, adresse, ville, code_postal)`
-    )
-    .gte("date_debut", new Date().toISOString())
-    .order("date_debut", { ascending: true })
-    .limit(limit);
-
-  if (error) throw error;
-
-  type SupabaseEventRow = {
-    id: number;
-    date_debut: string;
-    start_time?: string | null;
-    status?: string | null;
-    ticket_url?: string | null;
-    image_url?: string | null;
-    type_array?: string[] | null;
-    spectacles?: { title?: string | null; image_url?: string | null }[] | null;
-    lieux?: { nom?: string | null; adresse?: string | null; ville?: string | null; code_postal?: string | null }[] | null;
+  const rawEvent = {
+    id: row.id,
+    title: row.spectacles?.[0]?.title ?? "Événement",
+    date: toISODateString(dateDebut),
+    time: formatTime(dateDebut, row.start_time),
+    venue: row.lieux?.[0]?.nom ?? "Lieu à venir",
+    address: buildAddress(row.lieux),
+    type: row.type_array?.[0] ?? "Spectacle",
+    status: row.status ?? "programmé",
+    ticketUrl: row.ticket_url ?? null,
+    image:
+      row.image_url ||
+      row.spectacles?.[0]?.image_url ||
+      "/opengraph-image.png",
   };
 
-  return (data ?? []).map((row: SupabaseEventRow) => {
-    const dateDebut = new Date(row.date_debut);
-    const time = formatTime(dateDebut, row.start_time);
-    const venue = row.lieux?.[0]?.nom ?? "Lieu à venir";
-    const addressParts = [
-      row.lieux?.[0]?.adresse,
-      [row.lieux?.[0]?.code_postal, row.lieux?.[0]?.ville].filter(Boolean).join(" "),
-    ].filter(Boolean);
-    const address = addressParts.join(", ");
-  const title = row.spectacles?.[0]?.title ?? "Événement";
-    const type =
-      Array.isArray(row.type_array) && row.type_array.length > 0
-        ? row.type_array[0]
-        : "Spectacle";
-    const status = row.status ? row.status : "programmé";
-    const image =
-      row.image_url || row.spectacles?.[0]?.image_url || "/opengraph-image.png";
-    return {
-      id: row.id,
-      title,
-      date: toISODateString(dateDebut),
-      time,
-      venue,
-      address,
-      type,
-      status,
-      ticketUrl: row.ticket_url ?? null,
-      image,
-    } as AgendaEventDTO;
-  });
+  // Validate with Zod schema
+  return EventSchema.parse(rawEvent);
 }
 
-// Mock eventTypesData: EventType[]
-// Derived from distinct type_array values in evenements
-// 07_table_evenements.sql >
-export async function fetchEventTypes(): Promise<
-  { value: string; label: string }[]
-> {
-  const supabase = await createClient();
-  // Aggregate distinct types from type_array; fallback to defaults
-  const { data, error } = await supabase
-    .from("evenements")
-    .select("type_array")
-    .not("type_array", "is", null)
-    .limit(200);
-  if (error) throw error;
+// ============================================================================
+// DAL Functions
+// ============================================================================
 
-  const set = new Set<string>();
-  for (const row of data ?? []) {
-    for (const t of row.type_array ?? []) set.add(t);
+/**
+ * Fetch upcoming events from agenda
+ * @param limit - Maximum number of events to return (default: 10)
+ * @returns DALResult with array of AgendaEvent
+ */
+export async function fetchUpcomingEvents(
+  limit = 10
+): Promise<DALResult<AgendaEvent[]>> {
+  try {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from("evenements")
+      .select(
+        `id, date_debut, start_time, status, ticket_url, image_url, type_array,
+         spectacles (title, image_url),
+         lieux (nom, adresse, ville, code_postal)`
+      )
+      .gte("date_debut", new Date().toISOString())
+      .order("date_debut", { ascending: true })
+      .limit(limit);
+
+    if (error) {
+      console.error("[DAL] fetchUpcomingEvents error:", error);
+      return {
+        success: false,
+        error: `[ERR_AGENDA_001] Failed to fetch events: ${error.message}`,
+      };
+    }
+
+    const events = (data ?? []).map((row) =>
+      mapRowToEventDTO(row as SupabaseEventRow)
+    );
+
+    return { success: true, data: events };
+  } catch (err: unknown) {
+    console.error("[DAL] fetchUpcomingEvents exception:", err);
+    return {
+      success: false,
+      error: `[ERR_AGENDA_002] ${err instanceof Error ? err.message : "Unknown error"}`,
+    };
   }
-  const values = Array.from(set);
-  const base =
-    values.length > 0
-      ? values
-      : ["Spectacle", "Première", "Rencontre", "Atelier"];
-  return [
-    { value: "all", label: "Tous les événements" },
-    ...base.map((v) => ({ value: v, label: v + (v.endsWith("s") ? "" : "s") })),
-  ];
+}
+
+/**
+ * Fetch distinct event types from database
+ * @returns DALResult with array of EventTypeOption for filters
+ */
+export async function fetchEventTypes(): Promise<DALResult<EventTypeOption[]>> {
+  try {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from("evenements")
+      .select("type_array")
+      .not("type_array", "is", null)
+      .limit(200);
+
+    if (error) {
+      console.error("[DAL] fetchEventTypes error:", error);
+      return {
+        success: false,
+        error: `[ERR_AGENDA_003] Failed to fetch event types: ${error.message}`,
+      };
+    }
+
+    // Extract unique types from arrays
+    const typeSet = new Set<string>();
+    for (const row of data ?? []) {
+      for (const t of row.type_array ?? []) {
+        typeSet.add(t);
+      }
+    }
+
+    const values = Array.from(typeSet);
+    const baseTypes =
+      values.length > 0
+        ? values
+        : ["Spectacle", "Première", "Rencontre", "Atelier"];
+
+    const options: EventTypeOption[] = [
+      { value: "all", label: "Tous les événements" },
+      ...baseTypes.map((v) => ({
+        value: v,
+        label: v + (v.endsWith("s") ? "" : "s"),
+      })),
+    ];
+
+    return { success: true, data: options };
+  } catch (err: unknown) {
+    console.error("[DAL] fetchEventTypes exception:", err);
+    return {
+      success: false,
+      error: `[ERR_AGENDA_004] ${err instanceof Error ? err.message : "Unknown error"}`,
+    };
+  }
+}
+
+// ============================================================================
+// Legacy Exports (backward compatibility)
+// ============================================================================
+
+/**
+ * @deprecated Use fetchUpcomingEvents() with DALResult instead
+ * Kept for backward compatibility with existing components
+ */
+export async function fetchUpcomingEventsLegacy(
+  limit = 10
+): Promise<AgendaEvent[]> {
+  const result = await fetchUpcomingEvents(limit);
+  if (!result.success) {
+    console.error("[DAL] fetchUpcomingEventsLegacy error:", result.error);
+    return [];
+  }
+  return result.data ?? [];
+}
+
+/**
+ * @deprecated Use fetchEventTypes() with DALResult instead
+ * Kept for backward compatibility with existing components
+ */
+export async function fetchEventTypesLegacy(): Promise<EventTypeOption[]> {
+  const result = await fetchEventTypes();
+  if (!result.success) {
+    console.error("[DAL] fetchEventTypesLegacy error:", result.error);
+    return [{ value: "all", label: "Tous les événements" }];
+  }
+  return result.data ?? [];
 }

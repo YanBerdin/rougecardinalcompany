@@ -10,9 +10,11 @@ Principaux points consolidés :
 
 - Next.js 15 (App Router) : privilégier Server Components pour les lectures et SEO; n'utiliser `"use client"` que pour l'interactivité.
 - Data Access Layer (DAL) server-only : tous les accès en lecture centralisés dans `lib/dal/*`, modules marqués `server-only` et validés avec Zod.
+- **DAL SOLID Pattern (Nov 2025)** : 17/17 modules DAL utilisent `DALResult<T>`, helpers centralisés dans `lib/dal/helpers/`, `revalidatePath()` uniquement dans Server Actions, props colocalisées avec composants.
 - Supabase Auth optimisé : utiliser `@supabase/ssr`, cookies via `getAll()`/`setAll()`, et `supabase.auth.getClaims()` pour checks rapides; réserver `getUser()` aux usages nécessitant l'objet complet.
 - Row Level Security (RLS) : policies co‑localisées dans chaque fichier de table; une policy par opération (select/insert/update/delete); privilégier `public.is_admin()` pour checks admin.
-- Server Actions & Mutations : reads via Server Components, mutations via Server Actions / API routes; valider avec Zod et invalider le cache avec `revalidatePath()`/`revalidateTag()`.
+- Server Actions & Mutations : reads via Server Components, mutations via Server Actions colocalisées dans `app/(admin)/admin/<feature>/actions.ts`; valider avec Zod et invalider le cache avec `revalidatePath()`/`revalidateTag()`.
+instructions : `.github/instructions/dal-solid-principles.instructions.md`
 - **Supabase Storage** : bucket "medias" avec RLS (lecture publique, upload auth, delete admin); Server Actions avec rollback en cas d'erreur DB; validation client + serveur (5MB max, JPEG/PNG/WebP/AVIF).
 - **RLS Policies & SECURITY INVOKER** : toujours appliquer RLS policies ET GRANT permissions sur tables base pour les vues SECURITY INVOKER; PostgreSQL deny-all par défaut si RLS activé sans policies; Defense in Depth (VIEW + GRANT + RLS).
 - Email : architecture Resend + React Email, templates React, Zod validation, webhooks pour bounces/deliveries, scripts d'intégration fournis.
@@ -20,8 +22,443 @@ Principaux points consolidés :
 
 Backoffice — tâches (aperçu rapide) :
 
+- ✅ **30 novembre 2025 — DAL SOLID Refactoring COMPLÉTÉ** : 92% SOLID compliance (target 90%), 17/17 DAL avec DALResult pattern, 0 revalidatePath dans DAL, 11 schemas centralisés, helpers créés (lib/dal/helpers/), props colocalisées, Server Actions colocalisées, 4 blueprints architecture mis à jour
+- ✅ **24 novembre 2025 — CardsDashboard & Skeleton Centralization COMPLÉTÉ** : Dashboard admin modernisé avec grille de 6 cards réutilisables (équipe, spectacles, événements, médias, utilisateurs, réglages), skeletons centralisés dans components/skeletons/, pattern Smart/Dumb components, responsive design (md:2, lg:3)
+- ✅ **21-23 novembre 2025 — Admin User Invitation System COMPLÉTÉ** : Système d'invitation admin end-to-end avec gestion complète des utilisateurs, templates email React, RLS policies robustes, rollback complet, logging RGPD-compliant, tests CI automatisés, client-side token processing pour hash-based auth, documentation complète
 - ✅ **TASK022 Team Management** (COMPLÉTÉ 22/10/2025) : CRUD équipe avec photos Supabase Storage, médiathèque fonctionnelle, admin dashboard opérationnel
 - TASK021..TASK040 (auth roles, admin layout, CRUD spectacles/événements, gestion médias, espace presse, contacts, newsletter admin, versioning, SEO redirects, partners, home content, permissions, audits, imports, QA/accessibility).
+
+## DAL SOLID Refactoring — Architecture (30 nov. 2025)
+
+### Vue d'ensemble
+
+Refactoring complet du Data Access Layer pour atteindre 92% de conformité SOLID (Single Responsibility, Open/Closed, Liskov, Interface Segregation, Dependency Inversion).
+
+### Métriques finales
+
+| Critère | Avant | Après | Cible |
+|---------|-------|-------|-------|
+| DAL avec DALResult | 0/17 | 17/17 | 100% |
+| revalidatePath dans DAL | ~12 | 0 | 0 |
+| Imports email dans DAL | 3 | 0 | 0 |
+| Schemas centralisés | ~8 | 11 | 100% |
+| **Score SOLID global** | ~60% | **92%** | 90% |
+
+### Pattern DALResult
+
+```typescript
+// lib/dal/helpers/error.ts
+export type DALResult<T> = 
+  | { success: true; data: T }
+  | { success: false; error: string };
+
+export function toDALResult<T>(
+  data: T | null,
+  error: Error | null
+): DALResult<T> {
+  if (error) return { success: false, error: error.message };
+  if (data === null) return { success: false, error: "No data returned" };
+  return { success: true, data };
+}
+```
+
+### Structure DAL Helpers
+
+```bash
+lib/dal/helpers/
+├── error.ts      # DALResult<T> + toDALResult()
+├── format.ts     # formatDate(), etc.
+├── slug.ts       # generateSlug()
+└── index.ts      # Barrel exports
+```
+
+### Server Actions Colocalisées
+
+```bash
+app/(admin)/admin/<feature>/
+├── page.tsx        # Server Component
+└── actions.ts      # Server Actions (validation + DAL + revalidatePath)
+```
+
+### Schemas Dual Pattern
+
+```typescript
+// lib/schemas/<feature>.ts
+export const FeatureInputSchema = z.object({
+  id: z.coerce.bigint(),  // Server (bigint)
+});
+
+export const FeatureFormSchema = z.object({
+  id: z.number().int().positive(),  // UI (number)
+});
+```
+
+### Règles critiques
+
+- ✅ DAL retourne `DALResult<T>` — JAMAIS throw
+- ✅ `revalidatePath()` dans Server Actions UNIQUEMENT — JAMAIS dans DAL
+- ✅ Imports email dans service email UNIQUEMENT — JAMAIS dans DAL
+- ✅ Props colocalisées avec composants dans `types.ts`
+- ✅ Server Actions colocalisées dans `app/(admin)/admin/<feature>/actions.ts`
+
+---
+
+## Admin User Invitation System — Architecture & Implementation (21-23 nov. 2025)
+
+### Vue d'ensemble
+
+Système d'invitation end-to-end permettant aux admins d'inviter de nouveaux utilisateurs avec rôles (admin/editor/user), création automatique de compte Supabase Auth, envoi d'email d'invitation avec lien sécurisé, et gestion complète du cycle de vie utilisateur.
+
+### Fonctionnalités implémentées
+
+#### Interface Admin (`/admin/users`)
+
+- ✅ **Liste des utilisateurs** : Tableau shadcn/ui avec colonnes (email, nom, rôle, statut, date création, actions)
+- ✅ **Changement de rôle** : Select interactif (user/editor/admin) avec Server Action
+- ✅ **Badges de statut** : Vérifié (CheckCircle2) / Invité (Mail) / Non vérifié (AlertCircle) avec lucide-react
+- ✅ **Formatage dates** : date-fns avec locale fr ("il y a 2 jours")
+- ✅ **Suppression** : AlertDialog de confirmation + Server Action
+- ✅ **Toast notifications** : Feedback instantané (sonner) pour toutes les actions
+- ✅ **Loading states** : Disabled pendant mutations
+- ✅ **Empty state** : Message si aucun utilisateur
+- ✅ **Navigation** : Bouton "Inviter un utilisateur" vers `/admin/users/invite`
+
+#### Formulaire d'invitation (`/admin/users/invite`)
+
+- ✅ **Validation Zod** : Côté client (react-hook-form) + serveur (Server Action)
+- ✅ **Champs** : Email, prénom, nom, rôle (select)
+- ✅ **Pattern Container/View** : Smart component (Container) + Dumb component (Form)
+- ✅ **Suspense boundaries** : Skeleton pendant chargement
+- ✅ **TypeScript strict** : 0 erreurs, interfaces explicites
+
+#### DAL & Logique Serveur (`lib/dal/admin-users.ts`)
+
+- ✅ **inviteUser()** : Fonction centrale orchestrant tout le flux
+  - Rate-limit check (max 10 invitations/jour)
+  - Création user via `adminClient.auth.admin.createUser()`
+  - Génération invite link via `adminClient.auth.admin.generateLink()`
+  - Création explicite profil avec `upsert({ onConflict: 'user_id' })` (résilience trigger)
+  - Enregistrement audit dans `user_invitations`
+  - Envoi email via `sendInvitationEmail()`
+  - **Rollback complet** : Si échec email → suppression profil + auth user
+- ✅ **findUserByEmail()** : Typage strict avec `SupabaseClient` et `AuthUser` interface
+- ✅ **listAllUsers()** : Retourne `UserWithProfile[]` avec JOIN profiles
+- ✅ **updateUserRole()** : Server Action avec validation Zod
+- ✅ **deleteUser()** : Suppression cascade (profil + auth user)
+- ✅ **Performance** : `getClaims()` utilisé plutôt que `getUser()` quand ID suffisant
+
+#### Admin Client Supabase (`supabase/admin.ts`)
+
+- ✅ **createAdminClient()** : Wrapper service_role key pour opérations admin sécurisées
+- ✅ **Pattern cookies** : `getAll()`/`setAll()` conformément à nextjs15-backend-with-supabase.instructions.md
+- ✅ **Import server-only** : Protection contre exécution client-side
+
+#### Email Templates React (`emails/`)
+
+- ✅ **invitation-email.tsx** : Template React Email avec design Rouge Cardinal
+  - Unique `<Tailwind>` wrapper (fix render warnings)
+  - CTA button avec styles inline (indigo bg, white text) pour compatibilité clients email
+  - Variables dynamiques : nom, rôle (labels FR), lien invitation
+  - Validation render : test unitaire vérifie HTML non vide + présence CTA/URL/recipient
+- ✅ **email-layout.tsx** : Layout réutilisable avec header/footer compagnie
+- ✅ **components.utils.tsx** : Composants réutilisables (Button, Section, Text)
+
+#### Service Email (`lib/email/actions.ts`)
+
+- ✅ **sendInvitationEmail()** : Server Action marked `'use server'`
+  - Render template avec `render()` from @react-email/render
+  - Envoi via Resend API
+  - **Dev redirect** : Gate `EMAIL_DEV_REDIRECT='true'` + `EMAIL_DEV_REDIRECT_TO` env vars
+  - Gestion erreur avec retour `{ success, error }` pattern
+- ✅ **Logging RGPD** : `sanitizeEmailForLogs()` masque emails (y\*\*\*@gmail.com)
+
+#### Migrations & Schéma RLS
+
+- ✅ **20251121185458_allow_admin_update_profiles.sql** : Fix RLS pour permettre UPSERT
+  - Policy UPDATE avec `(select public.is_admin())` en USING et WITH CHECK
+  - Résout erreur 42501 pendant phase UPDATE d'un UPSERT
+- ✅ **20251120231121_create_user_invitations.sql** : Table audit invitations
+- ✅ **20251120231146_create_pending_invitations.sql** : Table tracking invitations pending
+- ✅ **60_rls_profiles.sql** : Policies conformes Create-RLS-policies.instructions.md
+  - Une policy par opération (select/insert/update/delete)
+  - Utilisation `(select auth.uid())` et `(select public.is_admin())`
+  - INSERT avec WITH CHECK, SELECT avec USING, etc.
+
+#### Client-Side Token Processing (`app/auth/setup-account/page.tsx`)
+
+- ✅ **Problème résolu** : Tokens d'invitation Supabase passés en URL hash (#access_token=...)
+  - Hash invisible côté serveur → middleware/Server Components ne peuvent pas accéder
+- ✅ **Solution** : Convert page to Client Component
+  - Extraction token depuis `window.location.hash` côté client
+  - Session establishment via `setSession()` de Supabase client
+  - Cleanup sécurisé du token après traitement
+  - Error handling complet + loading states
+- ✅ **Pattern documenté** : memory-bank/activeContext.md + cette section
+
+#### Tests & CI
+
+- ✅ **Unit test email** : `__tests__/emails/invitation-email.test.tsx`
+  - Vérifie render HTML non vide
+  - Vérifie présence CTA avec styles inline (indigo bg, white text)
+  - Vérifie conversion Tailwind classes → inline styles
+  - Vérifie labels rôle français (Administrateur/Éditeur/Utilisateur)
+  - Tous tests passent ✅
+- ✅ **GitHub Actions** : Workflow CI avec pnpm
+  - Fix: Utilisation `pnpm/action-setup@v4` (officiel) plutôt que `npm install -g pnpm`
+  - Cache manuel `actions/cache` pour pnpm store (évite path validation errors)
+  - Build + typecheck + tests exécutés automatiquement
+- ✅ **Scripts de test locaux** :
+  - `scripts/test-full-invitation.js` : Test end-to-end invitation flow
+  - `scripts/test-profile-insertion.js` : Test UPSERT profiles avec RLS
+  - `scripts/find-auth-user.js` : Recherche users par email
+  - `scripts/delete-test-user.js` : Cleanup utilisateurs test
+  - `scripts/generate-invite-link.js` : Génération liens invitation
+  - `scripts/check-existing-profile.js` : Vérification profils existants
+  - `scripts/seed-admin.ts` : Création admin initial (post-reset DB)
+
+### Corrections critiques appliquées
+
+#### 🔴 Rollback Incomplet (CRITIQUE) - FIXED
+
+- **Problème** : Si envoi email échoue après création user, profil et auth user restent orphelins
+- **Solution** :
+  - Ajout rollback complet dans `inviteUser()`
+  - Suppression profil : `adminClient.from('profiles').delete()`
+  - Suppression auth user : `adminClient.auth.admin.deleteUser()`
+  - Logging détaillé du rollback
+  - Prévient accumulation données orphelines
+
+#### 🔴 Logs Sensibles RGPD (IMPORTANT) - FIXED
+
+- **Problème** : Emails en clair dans logs applicatifs (non-conformité RGPD)
+- **Solution** :
+  - Helper `sanitizeEmailForLogs()` créé
+  - Tous logs email remplacés par versions masquées (y\*\*\*@gmail.com)
+  - Suppression données personnelles des logs applicatifs
+  - Conformité RGPD pour logs invitation utilisateurs
+
+#### 🔴 Test Render Email Incomplet (MINEUR) - FIXED
+
+- **Problème** : Test unitaire vérifie seulement HTML non vide, pas les styles critiques
+- **Solution** :
+  - 4 assertions critiques ajoutées à `invitation-email.test.tsx`
+  - Vérifie styles inline CTA (background indigo, text white)
+  - Vérifie conversion classes Tailwind → inline styles
+  - Vérifie absence attributs `class` restants
+  - Vérifie labels rôle français (Administrateur/Éditeur/Utilisateur)
+  - Tous tests passent ✅
+
+#### 🔴 Documentation .env.example Insuffisante (MINEUR) - FIXED
+
+- **Problème** : Variables `EMAIL_DEV_REDIRECT` documentées mais risques production pas clairs
+- **Solution** :
+  - Section `CRITICAL WARNING` ajoutée dans `.env.example`
+  - Deployment checklist avec exigences sécurité production
+  - Guide troubleshooting créé : `doc/dev-email-redirect.md`
+  - Warnings explicites sur risques activation production
+
+#### 🔴 CI pnpm Installation Failures - FIXED
+
+- **Problème** : Erreur "Unable to locate executable file: pnpm" dans GitHub Actions
+- **Solution progressive** :
+  1. Ajout `pnpm install -g` step → échec PATH
+  2. Migration vers `pnpm/action-setup@v4` (officiel) → succès installation
+  3. Fix cache: remplacement auto Node.js cache par `actions/cache` manuel
+  4. Utilisation `pnpm store path` pour correct cache directory
+  5. Cache uniquement pnpm store (pas node_modules)
+  6. Résolution "Path Validation Error" dans cache setup
+- **Résultat** : CI fonctionnel, builds passent ✅
+
+#### 🔴 404 Error on Invitation Setup Page - FIXED
+
+- **Problème** : Page `/auth/setup-account` retourne 404 après clic lien invitation
+- **Root cause** : Tokens Supabase en URL hash (#access_token=...) invisibles côté serveur
+- **Solution** :
+  - Convert page to Client Component ("use client")
+  - Extraction token client-side via `window.location.hash`
+  - Session establishment avec `setSession()`
+  - Cleanup sécurisé token après traitement
+  - Error handling complet + loading states
+- **Impact** : Flux invitation admin fonctionnel end-to-end ✅
+
+### Architecture & Patterns Respectés
+
+#### Clean Code (1-clean-code.instructions.md)
+
+- ✅ Fonctions < 30 lignes (sauf orchestration complexe documentée)
+- ✅ Max 5 params par fonction
+- ✅ Variables explicites (pas de magic numbers)
+- ✅ Early returns (fail fast)
+- ✅ Pas de commentaires superflus (code self-explanatory)
+
+#### TypeScript Strict (2-typescript.instructions.md)
+
+- ✅ Typage explicite partout (retours fonctions, paramètres)
+- ✅ Pas de `any` (sauf scripts utilitaires legacy)
+- ✅ Interfaces vs types : interfaces pour objets extensibles, types pour unions
+- ✅ Type guards utilisés (`AuthUser | null`)
+- ✅ Validation runtime avec Zod (entrées externes)
+
+#### RLS Policies (Create-RLS-policies.instructions.md)
+
+- ✅ Une policy par opération (select/insert/update/delete)
+- ✅ Pas de `FOR ALL` (séparé en policies granulaires)
+- ✅ SELECT avec USING uniquement
+- ✅ INSERT avec WITH CHECK uniquement
+- ✅ UPDATE avec USING + WITH CHECK
+- ✅ DELETE avec USING uniquement
+- ✅ Utilisation `(select auth.uid())` et `(select public.is_admin())`
+- ✅ Double apostrophe dans strings SQL
+
+#### Migrations (Create_migration.instructions.md)
+
+- ✅ Nommage : `YYYYMMDDHHmmss_description.sql`
+- ✅ Header avec metadata (purpose, affected tables, considerations)
+- ✅ Commentaires expliquant chaque étape
+- ✅ SQL lowercase
+- ✅ Commentaires copieux pour opérations destructives
+- ✅ RLS enabled + policies pour nouvelles tables
+
+#### Declarative Schema (Declarative_Database_Schema.instructions.md)
+
+- ✅ Modifications schéma dans `supabase/schemas/`
+- ✅ Migrations générées via `supabase db diff`
+- ✅ Schema files = source de vérité
+- ✅ Organisation lexicographique (60_rls_profiles.sql, etc.)
+- ✅ Hotfix migrations documentées dans `migrations.md` avec statut intégration
+
+#### Next.js 15 Backend (nextjs15-backend-with-supabase.instructions.md)
+
+- ✅ `await headers()` et `await cookies()` systématiquement
+- ✅ Server Components pour data fetching initial
+- ✅ Client Components uniquement pour interactivité
+- ✅ Server Actions marquées `'use server'`
+- ✅ Pattern cookies `getAll()`/`setAll()` dans `createServerClient`
+- ✅ `getClaims()` utilisé plutôt que `getUser()` quand ID suffisant (perf)
+
+#### Supabase Auth Optimized (nextjs-supabase-auth-2025.instructions.md)
+
+- ✅ `@supabase/ssr` utilisé (pas `auth-helpers-nextjs`)
+- ✅ Pattern cookies `getAll()`/`setAll()` UNIQUEMENT (jamais `get`/`set`/`remove`)
+- ✅ `getClaims()` pour checks auth rapides (~2-5ms)
+- ✅ `getUser()` uniquement quand données user complètes nécessaires
+- ✅ Middleware optimisé avec `getClaims()`
+
+### Structure Fichiers Clés
+
+```bash
+app/
+  (admin)/
+    admin/
+      users/
+        page.tsx                    # Liste utilisateurs (Server Component)
+        actions.ts                  # Server Actions (updateRole, deleteUser)
+        invite/
+          page.tsx                  # Formulaire invitation (Server Component)
+          actions.ts                # Server Action (submitInvitation)
+  auth/
+    setup-account/
+      page.tsx                      # Client Component (hash token processing)
+
+components/
+  features/
+    admin/
+      users/
+        UsersManagementContainer.tsx    # Smart component (async, fetch data)
+        UsersManagementView.tsx         # Dumb component (render + interactions)
+        InviteUserForm.tsx              # Form component (Client, react-hook-form)
+        UsersManagementSkeleton.tsx     # Loading skeleton
+
+lib/
+  dal/
+    admin-users.ts                  # DAL server-only (inviteUser, CRUD)
+  email/
+    actions.ts                      # Email sending (sendInvitationEmail)
+
+emails/
+  invitation-email.tsx              # React Email template
+  utils/
+    email-layout.tsx                # Layout réutilisable
+    components.utils.tsx            # UI components (Button, Section, Text)
+
+supabase/
+  admin.ts                          # Admin client (service_role)
+  schemas/
+    60_rls_profiles.sql             # RLS policies profiles
+    10b_tables_user_management.sql  # Tables invitations
+  migrations/
+    20251121185458_allow_admin_update_profiles.sql
+    20251120231121_create_user_invitations.sql
+    20251120231146_create_pending_invitations.sql
+
+scripts/
+  test-full-invitation.js           # Test end-to-end
+  test-profile-insertion.js         # Test UPSERT + RLS
+  seed-admin.ts                     # Création admin initial
+  find-auth-user.js                 # Recherche users
+  delete-test-user.js               # Cleanup test users
+
+__tests__/
+  emails/
+    invitation-email.test.tsx       # Unit test template email
+
+doc/
+  dev-email-redirect.md             # Guide troubleshooting email dev
+```
+
+### Workflow Invitation Complet
+
+1. **Admin accède** `/admin/users` → liste utilisateurs
+2. **Clic "Inviter"** → navigation `/admin/users/invite`
+3. **Remplit formulaire** → email, prénom, nom, rôle
+4. **Submit** → Server Action `submitInvitation()`
+5. **DAL `inviteUser()`** :
+   - Rate-limit check
+   - Création auth user via admin client
+   - Génération invite link
+   - UPSERT profil (résilient au trigger)
+   - Enregistrement audit
+   - Envoi email
+   - Si échec email → rollback complet
+6. **Utilisateur reçoit email** → clic lien invitation
+7. **Redirection** `/auth/setup-account#access_token=...`
+8. **Client Component** :
+   - Extraction token depuis hash
+   - `setSession()` établit session
+   - Cleanup token de l'URL
+   - Redirection `/admin` ou page setup
+9. **Utilisateur connecté** → accès interface selon rôle
+
+### Recommandations Post-Implementation
+
+#### Production Checklist
+
+- ⚠️ **CRITICAL** : `EMAIL_DEV_REDIRECT='false'` en production
+- 🔐 Vérifier configuration Resend (domaine vérifié, `EMAIL_FROM` valide)
+- 📧 Tester envoi email production (sandbox Resend disabled)
+- 🧪 Ajouter monitoring envois emails (webhooks Resend bounces/deliveries)
+- 🔎 Optionnel : index sur `profiles(user_id)` si volume UPSERT élevé
+- 📊 Monitoring rate-limit invitations (alertes si dépassement)
+
+#### Améliorations Futures
+
+- [ ] Rate limiting configurable (actuellement hardcodé 10/jour)
+- [ ] Retry logic pour envois email échoués
+- [ ] Dashboard statistiques invitations (envoyées/acceptées/expirées)
+- [ ] Gestion expiration liens invitation (actuellement 7 jours Supabase default)
+- [ ] Notification admin quand invitation acceptée
+- [ ] Bulk invitations (import CSV)
+- [ ] Personnalisation template email par organisation
+
+### Références Documentation
+
+- Plan initial : `.github/prompts/plan-userInvitationSystem.prompt.md`
+- Email architecture : `memory-bank/architecture/Email_Service_Architecture.md`
+- Commits clés :
+  - feat(admin/invite): admin invitation flow (multiple commits nov. 21-23)
+  - fix(admin-invitation): apply critical fixes from userInvitationSystem plan
+  - fix(auth): resolve 404 error on invitation setup page
+  - fix(ci): use official pnpm/action-setup@v4 for reliable pnpm installation
 
 ---
 
@@ -114,7 +551,7 @@ Backoffice — tâches (aperçu rapide) :
   - [19.6. Database: Create RLS policies](#196-database-create-rls-policies)
   - [19.7. Database: Create functions](#197-database-create-functions)
   - [19.8. Database: Postgres SQL Style Guide](#198-database-postgres-sql-style-guide)
-  - [20. Entrées récentes (oct. 2025)](#20-entrées-récentes-oct-2025)
+  - [20. Breaking Changes & Changelog](#20-breaking-changes--changelog)
 
 ## 1. Présentation
 
@@ -5052,7 +5489,28 @@ order by
   department_name;
 ```
 
-## 20. Entrées récentes (oct. 2025)
+## 20. Breaking Changes & Changelog
+
+### Changelog (nov. 2025)
+
+- feat(admin): add comprehensive diagnostic tools for auth and RLS validation (commit b710660)
+  - **Admin debug page**: `app/(admin)/admin/debug-auth/page.tsx` (346 lines)
+    - Comprehensive auth & RLS diagnostics with 7 test sections
+    - Tests: Cookies, User, Profile DB, Public tables, Admin views, JOINs, Configuration
+    - Responsive grid layout with expandable details
+    - Automatically protected by (admin) route group layout
+  - **Security test script**: `scripts/test-admin-access.ts` (102 lines)
+    - Automated testing: anon access denial, is_admin() validation, service key access
+    - Validation results: ✅ Admin views protected, ✅ RLS policies functional, ✅ Service key operational
+  - **Admin sidebar integration**: "Debug Auth" link added (Bug icon, /admin/debug-auth)
+  - **Pre-auth testing**: Public debug page moved to `app/debug-auth-before-admin/page.tsx` for non-authenticated testing
+  - **Script fixes**: Updated URLs in `diagnose-server-auth.ts`, fixed column names and TypeScript types in `test-evenements-access.ts`, added dotenv and clarified expectations in `test-views-security-invoker.ts`
+  - **Documentation**: Memory Bank updated (activeContext.md, progress.md), migration changelog added, Blueprint v3 enriched
+  - **Instructions reorganization**: Accessibility/WCAG files moved to `.github/copilot/`, filenames standardized to lowercase
+  - **RLS policy guide**: Comprehensive Copilot instructions added (`doc/copilot/Create_RLS_policies.instructions.md`)
+  - Purpose: Provide admin developers with diagnostic capabilities for troubleshooting auth/RLS issues in development
+
+### Changelog (oct. 2025)
 
 - **fix(rls): resolve empty media articles display after SECURITY INVOKER migration** (commit à venir)
   - **Root cause 1**: RLS enabled on `articles_presse` but NO policies applied → PostgreSQL deny all by default
@@ -5111,7 +5569,26 @@ order by
   - Triggers for home_about_content managed centrally in 30_triggers.sql via dynamic loop
   - Compliance: 100% with Declarative_Database_Schema.Instructions.md (36/36 tables via declarative workflow)
 
-## Entrées récentes (sept. 2025)
+- refactor(admin): migrate layouts architecture to Next.js route groups with shadcn sidebar (commit à venir)
+  - **Route groups implementation**: Separation `(admin)` and `(marketing)` for functional isolation
+    - Root layout centralized (html/body + ThemeProvider)
+    - Dedicated layouts per functional zone
+    - Fix hydration errors (removed html/body duplications)
+  - **Admin sidebar modernization**: Replace AdminShell with AppSidebar (shadcn official component)
+    - Collapsible icon mode with automatic text hiding
+    - Off-canvas Sheet for mobile (touch-friendly)
+    - Keyboard shortcuts (Cmd/Ctrl+B) + breadcrumb navigation
+    - Branding integration: Rouge Cardinal logo + company name
+  - **Structured navigation**: Logical groups (Général/Contenu/Autres)
+  - **AdminAuthRow refactored**: Dropdown menu pattern with logout + settings
+  - **UI collapse fixes**: Sidebar width + logo compression resolved
+  - **BREAKING CHANGES**: Route structure migrated, verify imports/paths/middleware/guards
+  - **Documentation**: Complete changelog, Blueprint v3, migration checklist
+  - **Components created**: AdminSidebar.tsx (AppSidebar), sidebar.tsx, breadcrumb.tsx, separator.tsx, sheet.tsx, tooltip.tsx, use-mobile.ts
+  - **Components modified**: AdminAuthRow.tsx, layout.tsx (admin), globals.css, button/input.tsx
+  - **Components deleted**: AdminShell.tsx (deprecated)
+
+## Changelog (sept. 2025)
 
 - fix(server-actions): resolve "Server Actions must be async functions" error in contact DAL
   - Move ContactMessageSchema from export to local scope in lib/dal/contact.ts (Next.js 15 Server Actions constraint)

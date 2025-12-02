@@ -2,14 +2,11 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
   : "http://localhost:3000";
 
-//TODO: update metadata
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
   title: "Compagnie Rouge Cardinal",
@@ -22,14 +19,13 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-//TODO: check <head> tags
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="fr" suppressHydrationWarning>
       <body className={`${geistSans.className} antialiased`}>
         <ThemeProvider
           attribute="class"
@@ -37,11 +33,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="min-h-screen flex flex-col">
-            <Header />
-            {children}
-          </div>
-          <Footer />
+          {children}
         </ThemeProvider>
       </body>
     </html>

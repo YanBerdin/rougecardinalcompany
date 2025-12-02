@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
-export function Footer() {
+export default function Footer() {
   return (
     <footer className="bg-muted/50 border-t">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -34,27 +34,29 @@ export function Footer() {
             </p>
             <div className="flex space-x-4">
               <Button variant="ghost" size="sm" asChild>
-                <a
+                <Link
                   href="#"
                   aria-label="Facebook"
                   className="hover:text-primary"
+                  title="Facebook"
                 >
                   <Facebook className="h-5 w-5" />
-                </a>
+                </Link>
               </Button>
               <Button variant="ghost" size="sm" asChild>
-                <a
+                <Link
                   href="#"
                   aria-label="Instagram"
                   className="hover:text-primary"
+                  title="Instagram"
                 >
                   <Instagram className="h-5 w-5" />
-                </a>
+                </Link>
               </Button>
               <Button variant="ghost" size="sm" asChild>
-                <a href="#" aria-label="Twitter" className="hover:text-primary">
+                <Link href="#" aria-label="Twitter" className="hover:text-primary" title="Twitter">
                   <Twitter className="h-5 w-5" />
-                </a>
+                </Link>
               </Button>
             </div>
           </div>

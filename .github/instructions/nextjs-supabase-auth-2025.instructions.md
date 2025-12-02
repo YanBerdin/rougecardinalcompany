@@ -1,9 +1,6 @@
 ---
 applyTo: "**"
----
-
 description: Guidelines for writing Next.js apps with Supabase Auth using optimized JWT Signing Keys
-alwaysApply: false
 ---
 
 # Bootstrap Next.js app with Supabase Auth (Optimized with JWT Signing Keys)

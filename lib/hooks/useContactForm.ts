@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import type { ContactMessage } from "@/lib/email/schemas";
+import type { ContactEmailInput } from "@/lib/schemas/contact";
+
+// Alias for backward compatibility
+type ContactMessage = ContactEmailInput;
 
 interface UseContactFormReturn {
   formData: Partial<ContactMessage>;

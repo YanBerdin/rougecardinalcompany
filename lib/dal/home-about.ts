@@ -2,6 +2,11 @@
 
 import "server-only";
 import { createClient } from "@/supabase/server";
+import { type DALResult } from "@/lib/dal/helpers";
+
+// =============================================================================
+// TYPES
+// =============================================================================
 
 export type CompanyStatRecord = {
   id: number;
@@ -12,26 +17,6 @@ export type CompanyStatRecord = {
   active: boolean;
 };
 
-export async function fetchCompanyStats() {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from("compagnie_stats")
-    .select("id, key, label, value, position, active")
-    .eq("active", true)
-    .order("position", { ascending: true });
-
-  if (error) {
-    console.error("fetchCompanyStats error", error);
-    return [] as CompanyStatRecord[];
-  }
-
-  return data ?? [];
-}
-
-// Contenu "About" de la page d'accueil à partir de public.home_about_content
-// 07e_table_home_about.sql
-
 export type HomeAboutContentDTO = {
   title: string;
   intro1: string;
@@ -40,6 +25,10 @@ export type HomeAboutContentDTO = {
   missionTitle: string;
   missionText: string;
 };
+
+// =============================================================================
+// CONSTANTS
+// =============================================================================
 
 const DEFAULT_ABOUT: HomeAboutContentDTO = {
   title: "La Passion du Théâtre depuis 2008",
@@ -54,79 +43,93 @@ const DEFAULT_ABOUT: HomeAboutContentDTO = {
     "Créer des spectacles qui émeuvent, questionnent et rassemblent les publics autour de l'art vivant.",
 };
 
-/**
- * Récupère le contenu "About" de la page d'accueil depuis `public.home_about_content` uniquement.
- * Si aucune ligne active n'est trouvée, retourne des valeurs par défaut contrôlées.
- */
-export async function fetchHomeAboutContent(): Promise<HomeAboutContentDTO> {
+// =============================================================================
+// FETCH COMPANY STATS
+// =============================================================================
+
+export async function fetchCompanyStats(): Promise<DALResult<CompanyStatRecord[]>> {
   const supabase = await createClient();
 
-  // Helper: transforme storage_path ("bucket/key") en URL publique via Supabase Storage
-  const resolvePublicUrl = (storagePath?: string | null): string | null => {
-    if (!storagePath) return null;
-    const firstSlash = storagePath.indexOf("/");
-    if (firstSlash <= 0 || firstSlash === storagePath.length - 1) return null;
-    const bucket = storagePath.slice(0, firstSlash);
-    const key = storagePath.slice(firstSlash + 1);
-    try {
-      const { data } = supabase.storage.from(bucket).getPublicUrl(key);
-      return data?.publicUrl ?? null;
-    } catch (e) {
-      console.warn("resolvePublicUrl error", e);
-      return null;
-    }
-  };
+  const { data, error } = await supabase
+    .from("compagnie_stats")
+    .select("id, key, label, value, position, active")
+    .eq("active", true)
+    .order("position", { ascending: true });
 
-  // Table dédiée `home_about_content`
-  // 07e_table_home_about.sql
-  try {
-    const { data: aboutRow, error: aboutErr } = await supabase
-      .from("home_about_content")
-      .select(
-        "title,intro1,intro2,image_url,image_media_id,mission_title,mission_text"
-      )
-      .eq("active", true)
-      .order("position", { ascending: true })
-      .limit(1)
-      .maybeSingle();
-
-    if (aboutErr) {
-      console.warn("fetchHomeAboutContent(home_about_content) error", aboutErr);
-    }
-
-    if (aboutRow) {
-      let mediaPublicUrl: string | null = null;
-      if (aboutRow.image_media_id) {
-        const { data: mediaRow, error: mediaErr } = await supabase
-          .from("medias")
-          .select("storage_path")
-          .eq("id", aboutRow.image_media_id)
-          .maybeSingle();
-        if (mediaErr) {
-          console.warn("fetchHomeAboutContent medias error", mediaErr);
-        }
-        mediaPublicUrl = resolvePublicUrl(
-          mediaRow?.storage_path as string | undefined
-        );
-      }
-
-      return {
-        title: aboutRow.title ?? DEFAULT_ABOUT.title,
-        intro1: aboutRow.intro1 ?? DEFAULT_ABOUT.intro1,
-        intro2: aboutRow.intro2 ?? DEFAULT_ABOUT.intro2,
-        imageUrl:
-          mediaPublicUrl || aboutRow.image_url || DEFAULT_ABOUT.imageUrl,
-        missionTitle: aboutRow.mission_title ?? DEFAULT_ABOUT.missionTitle,
-        missionText: aboutRow.mission_text ?? DEFAULT_ABOUT.missionText,
-      };
-    }
-  } catch (e) {
-    console.warn(
-      "fetchHomeAboutContent(home_about_content) unexpected error",
-      e
-    );
+  if (error) {
+    console.error("[ERR_HOME_ABOUT_001] fetchCompanyStats:", error.message);
+    return { success: false, error: `[ERR_HOME_ABOUT_001] ${error.message}` };
   }
 
-  // Aucune donnée disponible dans `home_about_content`: valeurs par défaut
-  return DEFAULT_ABOUT;
+  return { success: true, data: data ?? [] };
+}
+
+// =============================================================================
+// HELPERS
+// =============================================================================
+
+function resolvePublicUrl(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  storagePath?: string | null
+): string | null {
+  if (!storagePath) return null;
+  const firstSlash = storagePath.indexOf("/");
+  if (firstSlash <= 0 || firstSlash === storagePath.length - 1) return null;
+  const bucket = storagePath.slice(0, firstSlash);
+  const key = storagePath.slice(firstSlash + 1);
+  try {
+    const { data } = supabase.storage.from(bucket).getPublicUrl(key);
+    return data?.publicUrl ?? null;
+  } catch {
+    return null;
+  }
+}
+
+// =============================================================================
+// FETCH HOME ABOUT CONTENT
+// =============================================================================
+
+export async function fetchHomeAboutContent(): Promise<DALResult<HomeAboutContentDTO>> {
+  const supabase = await createClient();
+
+  const { data: aboutRow, error: aboutErr } = await supabase
+    .from("home_about_content")
+    .select(
+      "title,intro1,intro2,image_url,image_media_id,mission_title,mission_text"
+    )
+    .eq("active", true)
+    .order("position", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (aboutErr) {
+    console.error("[ERR_HOME_ABOUT_002] fetchHomeAboutContent:", aboutErr.message);
+    return { success: false, error: `[ERR_HOME_ABOUT_002] ${aboutErr.message}` };
+  }
+
+  if (!aboutRow) {
+    return { success: true, data: DEFAULT_ABOUT };
+  }
+
+  let mediaPublicUrl: string | null = null;
+  if (aboutRow.image_media_id) {
+    const { data: mediaRow } = await supabase
+      .from("medias")
+      .select("storage_path")
+      .eq("id", aboutRow.image_media_id)
+      .maybeSingle();
+    mediaPublicUrl = resolvePublicUrl(supabase, mediaRow?.storage_path);
+  }
+
+  return {
+    success: true,
+    data: {
+      title: aboutRow.title ?? DEFAULT_ABOUT.title,
+      intro1: aboutRow.intro1 ?? DEFAULT_ABOUT.intro1,
+      intro2: aboutRow.intro2 ?? DEFAULT_ABOUT.intro2,
+      imageUrl: mediaPublicUrl || aboutRow.image_url || DEFAULT_ABOUT.imageUrl,
+      missionTitle: aboutRow.mission_title ?? DEFAULT_ABOUT.missionTitle,
+      missionText: aboutRow.mission_text ?? DEFAULT_ABOUT.missionText,
+    },
+  };
 }

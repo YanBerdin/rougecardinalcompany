@@ -49,13 +49,9 @@ export const EmailLayout = (
                 </td>
               </tr>
             </table>
-          </Tailwind>
-          {props.disableTailwind ? (
-            props.children
-          ) : (
-            <Tailwind>{props.children}</Tailwind>
-          )}
-          <Tailwind>
+            
+            {props.children}
+            
             <Hr className="mt-12 mb-6 border-gray-300" />
             <table cellPadding={0} cellSpacing={0}>
               <tr>

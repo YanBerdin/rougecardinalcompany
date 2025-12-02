@@ -24,7 +24,7 @@ export function NewsView({ news }: NewsViewProps) {
           {news.map((item, index) => (
             <Card
               key={item.id}
-              className={`card-hover animate-fade-in-up news-card-dark w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm flex flex-col`}
+              className={`card-hover animate-fade-in-up w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm flex flex-col`}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <div className="relative overflow-hidden rounded-t-lg">
@@ -59,9 +59,9 @@ export function NewsView({ news }: NewsViewProps) {
 
               <CardFooter className="mt-auto">
                 <Button
-                  variant="ghost"
+                  variant="outline-primary"
                   size="lg"
-                  className="p-0 h-auto font-medium bg-white/10 border-white/30 text-foreground backdrop-blur-sm hover:bg-primary hover:text-primary-foreground transition-all duration-300 shadow-lg border px-4 py-2 rounded-lg"
+                  className=""
                   asChild
                 >
                   <Link href={`/actualites/${item.id}`}>
@@ -76,7 +76,7 @@ export function NewsView({ news }: NewsViewProps) {
 
         <div className="text-center">
           <Button
-            variant="outline"
+            variant="default"
             size="lg"
             asChild
             className="cta-blur-button"

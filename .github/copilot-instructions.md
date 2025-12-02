@@ -2,725 +2,1115 @@
 applyTo: "**"
 ---
 
-# GitHub Copilot Instructions pour Rouge Cardinal Company
+# GitHub Copilot Instructions - Rouge Cardinal Company
 
-## Next.js 15 Best Practices
+## Project Overview
 
-Pour toute génération ou modification de code Next.js, appliquer systématiquement les standards et patterns définis dans :
+A **theater company website** built with **Next.js 15 + TypeScript + Supabase + Tailwind/shadcn/ui**.
 
-- `.github/instructions/README.md` (overview et mapping des fichiers d'instructions)
-- `.github/instructions/nextjs.instructions.md` (Next.js général)
-- `.github/instructions/nextjs15-backend-with-supabase.instructions.md` (Next.js 15 backend patterns)
-- `.github/instructions/nextjs-supabase-auth-2025.instructions.md` (CANONICAL - Supabase Auth rules)
+**Key Architecture**: Multi-layout routes with `(admin)` and `(marketing)` zones, server-first with optimized Supabase auth, comprehensive RLS security, and feature-based organization.
 
-Ces fichiers contiennent :
+## Critical Architectural Knowledge
 
-- Structure de projet recommandée (App Router, feature folders, colocation)
-- Différenciation Server/Client Components
-- Patterns de Data Access Layer (DAL) et sécurité
-- Validation, tests, accessibilité, documentation
-- Exemples de composants Smart/Dumb
-- Règles de migration et audit sécurité
+### 1. Route Groups & Layouts (November 2025 Migration)
 
-Copilot doit toujours prioriser ces instructions pour Next.js 15+ et vérifier la cohérence avec le code existant. Pour les règles d'authentification Supabase (migrations de clés, middleware, patterns `createServerClient` et sécurité), utiliser le fichier CANONICAL indiqué ci‑dessus.
-
-## Priority Guidelines
-
-When generating code for this repository:
-
-1. **Version Compatibility**: Always detect and respect the exact versions of languages, frameworks, and libraries used in this project
-2. **Context Files**: Prioritize patterns and standards defined in the .github/copilot directory
-3. **Codebase Patterns**: When context files don't provide specific guidance, scan the codebase for established patterns
-4. **Architectural Consistency**: Maintain our Layered architectural style and established boundaries
-5. **Code Quality**: Prioritize maintainability, performance, security, accessibility, and testability in all generated code
-
-## Technology Version Detection
-
-Before generating code, scan the codebase to identify:
-
-1. **Language Versions**:
-   - TypeScript target: ES2017 (as specified in tsconfig.json)
-   - React version: 19.0.0
-   - Node.js environment: ^20 (specified in devDependencies)
-
-2. **Framework Versions**:
-   - Next.js: 15.4.5
-   - Supabase: latest (from package.json)
-   - Tailwind CSS: ^3.4.1
-   - TypeScript: ^5
-
-3. **Library Versions**:
-   - Radix UI components: various versions (^1.x-^2.x)
-   - Lucide React: ^0.511.0
-   - Next Themes: ^0.4.6
-   - ESLint: ^9
-   - Never use APIs or features not available in the detected versions
-
-4. **Supabase Integration** :
-
-- `@supabase/ssr` (moderne) vs `@supabase/auth-helpers` (legacy)
-- `getClaims()` pour l'authentification (~2-5ms vs ~300ms)
-- RLS (Row Level Security) activé sur toutes les tables
-- DAL (Data Access Layer) avec validation Zod
-
-## Context Files
-
-Priority context directories to scan:
-
-- `/memory-bank`: Project documentation and context
-- `/.github/copilot/`: Copilot-specific configuration and instruction files
-- `/app`: Next.js App Router structure
-- `/components`: Reusable UI components
-- `/supabase`: Supabase integration code
-
-Additional context available via MCP GitHub and MCP Supabase
-
-## Codebase Scanning Instructions
-
-When context files don't provide specific guidance:
-
-1. Identify similar files to the one being modified or created
-2. Analyze patterns for:
-   - Naming conventions (camelCase for variables/functions, PascalCase for components)
-   - Code organization (React hooks at the top, JSX at the bottom)
-   - Error handling (try/catch with appropriate error handling)
-   - Use of Server vs Client Components
-
-3. Follow the most consistent patterns found in the codebase
-4. When conflicting patterns exist, prioritize patterns in newer files or files with higher test coverage
-5. Never introduce patterns not found in the existing codebase
-
-## Architecture Guidelines
-
-## 📁 Project Structure
-
-```yaml
-├── app/                          # Next.js App Router
-│   ├── auth/                     # Routes d'authentification
-│   ├── protected/                # Routes protégées
-│   └── layout.tsx               # Layout racine
-├── components/
-│   ├── features/                # Composants métier (Smart/Dumb)
-│   │   └── public-site/home/    # Feature: page d'accueil
-│   └── ui/                      # Composants réutilisables (shadcn/ui)
-├── lib/
-│   ├── dal/                     # Data Access Layer (Server Actions)
-│   ├── hooks/                   # Custom hooks
-│   └── utils.ts                 # Utilitaires partagés
-├── supabase/
-│   ├── schemas/                 # Migrations SQL + RLS policies
-│   ├── server.ts                # Client serveur Supabase
-│   └── middleware.ts            # Middleware auth
-└── middleware.ts                # Middleware Next.js
+```bash
+app/
+  layout.tsx              # Root: HTML shell + ThemeProvider
+  (admin)/
+    layout.tsx           # Admin: AppSidebar + auth protection
+    admin/
+      debug-auth/page.tsx # Diagnostic tools (auth & RLS testing)
+      team/page.tsx       # CRUD interfaces
+  (marketing)/
+    layout.tsx           # Public: Header + Footer
+    page.tsx             # Homepage
 ```
 
-### Feature-Based Organization
+**BREAKING CHANGE**: Old flat structure migrated to route groups. Always check imports/middleware matchers when modifying routes.
 
-**Core Principles**:
-Organize code by business functionality with clear separation between data handling and presentation. Each feature is self-contained but can expose public APIs to other features.
+### 2. Data Access Layer (DAL) - The Security Boundary
 
-**Project Features**:
+**Pattern**: All data access goes through `lib/dal/*.ts` modules marked `"use server"` and `import "server-only"`
 
-- `auth`: Authentication, login, user management
-- `content`: Article/content management, CRUD operations  
-- `public-site`: Homepage, company info, shows display
-- `admin`: Dashboard, backoffice interface, analytics
+```typescript
+// lib/dal/team.ts
+"use server";
+import "server-only";
+import { createClient } from "@/supabase/server";
 
-**Complete Feature Structure**:
+export async function fetchTeamMembers() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("membres_equipe")
+    .select("id, name, role, active")
+    .eq("active", true);
+
+  if (error) throw error;
+  return data ?? [];
+}
+```
+
+**Critical Rules**:
+
+- NEVER import DAL in Client Components
+- ALL mutations revalidate via Server Actions (not in DAL)
+- Use Zod validation in both DAL inputs and Server Action inputs
+- Return `DALResult<T>` from DAL, minimal DTOs not full database rows
+- DAL helpers centralized in `lib/dal/helpers/`
+
+### 3. Smart/Dumb Component Pattern
+
+**Smart Components (Containers)**: Handle data, business logic, side effects
+
+```typescript
+// Server Smart Component (default choice)
+export async function TeamContainer() {
+  const teamMembers = await fetchTeamMembers(); // DAL call
+  return <TeamList members={teamMembers} />;
+}
+
+// Client Smart Component (when interactivity needed)
+'use client'
+export function InteractiveTeamContainer() {
+  const [members, setMembers] = useState([]);
+  // ... state management, event handlers
+  return <TeamEditor members={members} onSave={handleSave} />;
+}
+```
+
+**Dumb Components**: Pure presentation, no data fetching or business logic
+
+```typescript
+interface TeamListProps {
+  members: TeamMember[];
+  onEdit?: (member: TeamMember) => void;
+}
+
+export function TeamList({ members, onEdit }: TeamListProps) {
+  return (
+    <div className="grid gap-4">
+      {members.map(member => (
+        <TeamCard key={member.id} member={member} onEdit={onEdit} />
+      ))}
+    </div>
+  );
+}
+```
+
+### 4. Supabase Auth Optimization (CANONICAL)
+
+**Reference**: `.github/instructions/nextjs-supabase-auth-2025.instructions.md` for complete rules
+
+**Key Patterns**:
+
+```typescript
+// Fast auth check (~2-5ms vs ~300ms)
+const claims = await supabase.auth.getClaims();
+if (!claims) redirect('/auth/login');
+
+// Full user data only when needed
+const { data: { user } } = await supabase.auth.getUser();
+
+// Cookies: ONLY use getAll/setAll pattern
+{
+  cookies: {
+    getAll() { return cookieStore.getAll() },
+    setAll(cookiesToSet) { /* implementation */ }
+  }
+}
+```
+
+### 5. Server Actions Architecture
+
+**Pattern**: Validation + Auth + DAL + Revalidation
+
+```typescript
+// app/admin/team/actions.ts
+"use server";
+import { z } from "zod";
+import { requireAdmin } from "@/lib/auth/guards";
+import { upsertTeamMember } from "@/lib/dal/team";
+import { revalidatePath } from "next/cache";
+
+const TeamMemberSchema = z.object({
+  name: z.string().min(1),
+  role: z.string().min(1),
+});
+
+export async function createTeamMember(input: unknown) {
+  try {
+    await requireAdmin(); // Explicit auth check
+    const validated = TeamMemberSchema.parse(input);
+    const result = await upsertTeamMember(validated);
+    revalidatePath("/admin/team");
+    return { success: true, data: result };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+```
+
+## Essential Workflows
+
+### Development Commands
+
+```bash
+# Development
+pnpm dev                    # Start dev server with turbopack
+
+# Quality Gates
+pnpm lint                   # ESLint check
+pnpm lint:md                # Markdown lint
+pnpm build                  # Production build test
+
+# Email Testing
+pnpm test:resend           # Test email integration
+
+# Admin Scripts
+pnpm exec tsx scripts/test-admin-access.ts    # Security validation
+pnpm exec tsx scripts/check-email-logs.ts     # Email audit
+```
+
+### Debugging Workflows
+
+**Auth/RLS Issues**: Visit `/admin/debug-auth` (requires admin login)
+
+- Tests cookies, user auth, database access permissions
+- Validates RLS policies on public/admin tables
+- Shows detailed error messages for troubleshooting
+
+**Database Security**: Run `scripts/test-admin-access.ts`
+
+- Verifies anon users are properly blocked from admin data
+- Tests is_admin() function
+- Validates service key access
+
+## Project-Specific Conventions
+
+### File Organization
 
 ```bash
 components/
   features/
-    auth/                    # Authentication feature
-      AuthContainer.tsx      # Smart component (Server/Client)
-      AuthGuard.tsx         # Smart component for route protection
-      LoginForm.tsx         # Dumb component
-      SignUpForm.tsx        # Dumb component  
-      types.ts              # Auth-specific types and Zod schemas
-      hooks.ts              # useAuth, useLogin, useSignUp hooks
-    
-    content/                 # Content management feature
-      ContentContainer.tsx   # Smart component (Server/Client)
-      ContentEditor.tsx     # Smart component for editing
-      ArticleCard.tsx       # Dumb component
-      ArticleList.tsx       # Dumb component
-      ArticleGrid.tsx       # Dumb component
-      types.ts              # Content types and validation schemas
-      hooks.ts              # useContent, useArticles, useCreateArticle hooks
-    
-    public-site/            # Public website feature
-      HeroContainer.tsx     # Smart component (Server for SEO)
-      Hero.tsx             # Dumb component
-      NewsContainer.tsx    # Smart component (Server for SEO)
-      NewsList.tsx         # Dumb component
-      ShowsContainer.tsx   # Smart component 
-      ShowCard.tsx         # Dumb component
-      types.ts             # Public site types
-      hooks.ts             # usePublicContent, useShows hooks
-    
-    admin/                  # Admin interface feature
-      DashboardContainer.tsx # Smart component (Client for interactivity)
-      Dashboard.tsx         # Dumb component
-      StatsContainer.tsx    # Smart component
-      StatsCard.tsx        # Dumb component
-      UserManagement.tsx   # Dumb component
-      types.ts             # Admin types and schemas
-      hooks.ts             # useAdminData, useStats, useUserManagement hooks
-  
-  ui/                       # Reusable dumb components
+    admin/team/           # Feature: team management
+      TeamContainer.tsx   # Smart component
+      TeamList.tsx        # Dumb component
+      TeamCard.tsx        # Dumb component
+      types.ts           # Feature types + props interfaces
+    public-site/home/     # Feature: homepage
+      HeroContainer.tsx   # Smart component
+      Hero.tsx           # Dumb component
+  ui/                     # shadcn/ui components
     button.tsx
     card.tsx
-    input.tsx
-    modal.tsx
-    skeleton.tsx
-    ...
-  
-  layout/                   # Layout components
-    header.tsx
-    footer.tsx
     sidebar.tsx
-    navigation.tsx
+
+lib/
+  dal/                    # Server-only data access (17 modules)
+    helpers/              # Centralized DAL utilities
+      error.ts           # DALResult<T> type + toDALResult()
+      format.ts          # Formatting helpers
+      slug.ts            # Slug generation
+      index.ts           # Barrel exports
+    team.ts
+    home.ts
+  schemas/               # Zod schemas (11 files)
+    team.ts              # Server + UI schemas
+    media.ts             # Media validation
+    index.ts             # Barrel exports
+  hooks/                  # Client-side hooks
+    use-newsletter-subscribe.ts
+
+app/(admin)/admin/
+  team/
+    page.tsx             # Server Component
+    actions.ts           # Server Actions (colocated)
 ```
 
-### Smart/Dumb Component Pattern
+### DAL SOLID Pattern (Nov 2025)
 
-**Smart Components (Containers)**:
+**ALL 17 DAL modules follow this pattern** (92% SOLID compliance):
 
-_Responsibilities_:
+```typescript
+// lib/dal/helpers/error.ts
+export type DALResult<T> = 
+  | { success: true; data: T }
+  | { success: false; error: string };
 
-- Data fetching and mutations (Server: async data, Client: hooks)
-- Business logic implementation and validation
-- State management (local and global)
-- Side effects (API calls, navigation, notifications)
-- Error handling and loading states
-- Orchestration of multiple dumb components
-
-_Server vs Client Decision_:
-
-- **Server Components** (default): Use for data fetching, SEO-critical content, initial page loads
-- **Client Components** (add `'use client'`): Use for interactivity, real-time updates, user input handling
-
-_Naming Conventions_:
-
-- Suffix `Container`: `ContentContainer`, `AuthContainer`
-- Business names: `AuthProvider`, `ContentManager`, `DashboardOrchestrator`
-
-_Implementation Pattern_:
-
-```tsx
-// Server Smart Component Example
-export async function ContentContainer() {
-  const supabase = createClient()
-  const { data: articles, error } = await supabase
-    .from('articles')
-    .select('*')
-    .eq('status', 'published')
-    .order('created_at', { ascending: false })
+// Usage in DAL modules
+export async function createTeamMember(
+  input: TeamMemberInput
+): Promise<DALResult<TeamMemberDTO>> {
+  await requireAdmin();
+  const supabase = await createClient();
   
-  if (error) {
-    console.error('Error fetching articles:', error)
-    return <ErrorMessage error={error} />
-  }
-  
-  return <ArticleList articles={articles} />
-}
+  const { data, error } = await supabase
+    .from("membres_equipe")
+    .insert(input)
+    .select()
+    .single();
 
-// Client Smart Component Example
-'use client'
-export function InteractiveContentContainer() {
-  const { articles, loading, error, createArticle, updateArticle } = useContent()
-  const { user } = useAuth()
-  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null)
-  
-  const handleCreate = async (data: CreateArticleData) => {
-    try {
-      await createArticle(data)
-      toast.success('Article créé avec succès')
-    } catch (error) {
-      toast.error('Erreur lors de la création')
-      console.error(error)
-    }
-  }
-  
-  const handleEdit = (article: Article) => {
-    setSelectedArticle(article)
-  }
-  
-  if (loading) return <ContentSkeleton />
-  if (error) return <ErrorMessage error={error} />
-  
-  return (
-    <>
-      <ContentToolbar 
-        onCreateArticle={handleCreate}
-        canCreate={user?.role === 'admin'}
-      />
-      <ArticleGrid 
-        articles={articles}
-        onEditArticle={handleEdit}
-        canEdit={user?.role === 'admin'}
-      />
-      {selectedArticle && (
-        <ArticleEditor
-          article={selectedArticle}
-          onSave={updateArticle}
-          onCancel={() => setSelectedArticle(null)}
-        />
-      )}
-    </>
-  )
+  if (error) return { success: false, error: error.message };
+  return { success: true, data };
 }
 ```
 
-**Dumb Components (Presentational)**:
+**Critical Rules**:
 
-_Responsibilities_:
+- ✅ DAL returns `DALResult<T>` — NEVER throws
+- ✅ `revalidatePath()` in Server Actions ONLY — NEVER in DAL
+- ✅ Email imports in email service ONLY — NEVER in DAL
+- ✅ Props colocated with components in `types.ts`
+- ✅ Server Actions colocated at `app/(admin)/admin/<feature>/actions.ts`
 
-- Pure rendering based on props
-- UI interactions (hover, focus, simple animations)
-- Layout and composition
-- Accessibility implementation
-- No business logic or side effects
+### Schemas Pattern (Server vs UI)
 
-_Characteristics_:
+```typescript
+// lib/schemas/team.ts
 
-- Strict TypeScript interfaces for all props
-- No direct API calls or external dependencies
-- Easily testable in isolation
-- Reusable across different features
-- Can be Server or Client Components based on usage context
+// Server schema (bigint for database IDs)
+export const TeamMemberInputSchema = z.object({
+  id: z.coerce.bigint(),
+  name: z.string().min(1),
+});
 
-_Implementation Pattern_:
+// UI schema (number for form handling)
+export const TeamMemberFormSchema = z.object({
+  id: z.number().int().positive(),
+  name: z.string().min(1),
+});
 
-```tsx
-interface ArticleListProps {
-  articles: Article[]
-  onEditArticle?: (article: Article) => void
-  canEdit?: boolean
-  loading?: boolean
-}
-
-export function ArticleList({ 
-  articles, 
-  onEditArticle, 
-  canEdit = false,
-  loading = false 
-}: ArticleListProps) {
-  if (loading) {
-    return <ArticleListSkeleton />
-  }
-  
-  if (articles.length === 0) {
-    return (
-      <EmptyState 
-        title="Aucun article"
-        description="Commencez par créer votre premier article"
-      />
-    )
-  }
-  
-  return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {articles.map(article => (
-        <ArticleCard
-          key={article.id}
-          article={article}
-          onEdit={canEdit ? onEditArticle : undefined}
-          showEditButton={canEdit}
-        />
-      ))}
-    </div>
-  )
-}
-
-interface ArticleCardProps {
-  article: Article
-  onEdit?: (article: Article) => void
-  showEditButton?: boolean
-}
-
-export function ArticleCard({ article, onEdit, showEditButton }: ArticleCardProps) {
-  return (
-    <Card className="h-full flex flex-col">
-      <CardHeader>
-        <CardTitle className="line-clamp-2">{article.title}</CardTitle>
-        <CardDescription>
-          {new Date(article.created_at).toLocaleDateString()}
-        </CardDescription>
-      </CardHeader>
-      
-      <CardContent className="flex-grow">
-        <p className="text-sm text-muted-foreground line-clamp-3">
-          {article.excerpt}
-        </p>
-      </CardContent>
-      
-      {showEditButton && onEdit && (
-        <CardFooter>
-          <Button 
-            variant="outline" 
-            onClick={() => onEdit(article)}
-            className="w-full"
-          >
-            Modifier
-          </Button>
-        </CardFooter>
-      )}
-    </Card>
-  )
-}
+export type TeamMemberInput = z.infer<typeof TeamMemberInputSchema>;
+export type TeamMemberFormValues = z.infer<typeof TeamMemberFormSchema>;
 ```
 
-### Data Flow Architecture
+### Security Rules (36/36 tables have RLS)
 
-**Complete Flow Pattern**:
+- ALL tables use Row Level Security
+- Public tables: `published_at IS NOT NULL` (read-only)
+- Admin tables: `(select public.is_admin())` for all operations
+- SECURITY INVOKER views require GRANT permissions on base tables
 
-1. **Page/Layout** → imports Smart Component (Container)
-2. **Smart Component (Server)** → fetches initial data server-side
-3. **Smart Component (Client)** → uses hooks for client-side data management
-4. **Smart Component** → processes business logic, handles errors
-5. **Smart Component** → passes clean data as props to Dumb Components
-6. **Dumb Components** → render UI and trigger callback events
-7. **Smart Component** → handles callbacks, updates state, triggers side effects
-8. **Hooks** → manage API calls, caching, and data synchronization
-
-**Example Complete Flow**:
-
-```tsx
-// 1. Page imports Smart Component
-// app/admin/content/page.tsx
-export default function AdminContentPage() {
-  return (
-    <div className="container mx-auto p-6">
-      <PageHeader title="Gestion du contenu" />
-      <ContentContainer /> {/* Smart Component */}
-    </div>
-  )
-}
-
-// 2. Smart Component orchestrates everything
-// features/content/ContentContainer.tsx
-'use client'
-export function ContentContainer() {
-  const { articles, loading, createArticle, updateArticle } = useContent()
-  
-  return (
-    <ContentManager
-      articles={articles}
-      loading={loading}
-      onCreateArticle={createArticle}
-      onUpdateArticle={updateArticle}
-    />
-  )
-}
-
-// 3. Dumb Component handles presentation
-// features/content/ContentManager.tsx
-export function ContentManager({ articles, loading, onCreateArticle }: Props) {
-  return (
-    <div className="space-y-6">
-      <CreateArticleForm onSubmit={onCreateArticle} />
-      <ArticleList articles={articles} loading={loading} />
-    </div>
-  )
-}
-
-// 4. Hook manages data layer
-// features/content/hooks.ts
-export function useContent() {
-  const queryClient = useQueryClient()
-  
-  const { data: articles, isLoading } = useQuery({
-    queryKey: ['articles'],
-    queryFn: fetchArticles
-  })
-  
-  const createMutation = useMutation({
-    mutationFn: createArticle,
-    onSuccess: () => {
-      queryClient.invalidateQueries(['articles'])
-      toast.success('Article créé')
-    },
-    onError: (error) => {
-      toast.error('Erreur lors de la création')
-    }
-  })
-  
-  return {
-    articles: articles || [],
-    loading: isLoading,
-    createArticle: createMutation.mutate,
-  }
-}
-```
-
-### Feature Boundaries and Communication
-
-**Rules for Inter-Feature Communication**:
-
-- Features should be autonomous and self-contained
-- Use shared types in `lib/types/` for cross-feature interfaces
-- Communicate via props, context, or events, never direct imports
-- Shared utilities go in `lib/` directory
-- Shared UI components go in `components/ui/`
-
-**Example Cross-Feature Communication**:
-
-```tsx
-// Shared types
-// lib/types/shared.ts
-export interface User {
-  id: string
-  role: 'admin' | 'editor' | 'viewer'
-}
-
-// Auth feature exposes user via context
-// features/auth/AuthProvider.tsx
-export const AuthContext = createContext<{ user: User | null }>()
-
-// Content feature consumes user context
-// features/content/ContentContainer.tsx
-export function ContentContainer() {
-  const { user } = useContext(AuthContext)
-  const canEdit = user?.role === 'admin' || user?.role === 'editor'
-  
-  return <ContentList canEdit={canEdit} />
-}
-```
-
-## Code Quality Standards
-
-### Maintainability
-
-- Write self-documenting code with clear naming
-- Use PascalCase for component names and files (e.g., `ContentContainer.tsx`, `Hero.tsx`)
-- Use camelCase for variables, functions, and instance methods
-- Keep components focused on single responsibilities following Smart/Dumb pattern
-- Organize hooks at the top of components
-- Use React hooks appropriately (useState, useEffect, useCallback)
-- Follow feature-based folder structure for new components
-- One main smart component per feature when possible
-
-### Performance
-
-- Use useCallback for event handlers in components
-- Implement appropriate memoization using React.memo or useMemo
-- Optimize images using Next.js Image component
-- Apply loading states and skeletons for async operations
-- Use efficient state management techniques
-- Implement pagination or virtualization for large lists
-
-### Security
-
-- Validate all user inputs
-- Use Supabase's built-in security features
-- Never expose sensitive information in client-side code
-- Follow secure authentication patterns as seen in auth components
-- Implement proper security checks in API routes
-
-### Accessibility
-
-- Use semantic HTML elements (buttons for actions, anchors for navigation)
-- Include proper ARIA attributes where necessary
-- Ensure keyboard navigation support
-- Maintain sufficient color contrast
-- Provide text alternatives for images
-- Respect user preferences (like reduced motion)
-
-### Testability
-
-- Write code that is easy to test
-- Keep components small and focused
-- Avoid complex side effects
-- Allow for dependency injection where appropriate
-- Use clear interfaces and props
-
-## Documentation Requirements
-
-- Follow JSDoc style comments for functions and components
-- Document non-obvious behaviors
-- Add inline comments for complex logic
-- Use consistent format for parameter descriptions
-- Include example usage for complex components or functions
-- Document feature boundaries and component responsibilities
-
-## Testing Approach
-
-### Unit Testing
-
-- Focus on testing component behavior and functionality
-- Test smart components for data handling and business logic
-- Test dumb components for rendering and prop handling
-- Use appropriate mocking for external dependencies
-- Follow the testing patterns established in the codebase
-
-## Technology-Specific Guidelines
-
-### Next.js Guidelines
-
-- Use App Router pattern with page.tsx and layout.tsx
-- Properly differentiate between Server and Client Components
-- Use "use client" directive only when necessary
-- Leverage built-in Next.js features (Image, Link, etc.)
-- Follow the metadata pattern for SEO
-- Use dynamic imports for code splitting
-- Pages should import Smart components (Containers) from features
-
-### TypeScript Guidelines
-
-- Use strict type checking
-- Define interfaces for component props
-- Use type inference where appropriate
-- Avoid any type unless absolutely necessary
-- Use proper type guards
-- Use functional programming patterns with TypeScript features
-- Create feature-specific types in dedicated types.ts files
-
-**Type Definition Pattern**:
-Always define types with Zod for validation and type safety:
+### Type Safety Pattern
 
 ```typescript
 import { z } from "zod";
 
-// Basic schema
-export const CourseSchema = z.object({
-  id: z.string(),
-  title: z.string().min(1).max(100),
-  slug: z.string(),
+// Runtime validation + TypeScript types
+const TeamMemberSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1).max(100),
+  role: z.string().min(1),
 });
 
-// Schema with data cleaning and transformation
-export const ArticleSchema = z.object({
-  title: z.string().transform(val => val.trim()).pipe(z.string().min(1).max(200)),
-  content: z.string().transform(val => val.trim()),
-  status: z.enum(['draft', 'published']),
-  tags: z.array(z.string().transform(val => val.trim().toLowerCase())),
-  publishedAt: z.coerce.date().optional()
-});
+export type TeamMember = z.infer<typeof TeamMemberSchema>;
 
-export type Course = z.infer<typeof CourseSchema>;
-export type Article = z.infer<typeof ArticleSchema>;
-```
-
-This pattern provides:
-
-- Runtime validation for API inputs/outputs
-- Automatic TypeScript type generation
-- Consistent validation across features
-- Better error handling and user feedback
-
-### React Guidelines
-
-- Use functional components with hooks
-- Follow the hook rules (don't call hooks conditionally)
-- Use controlled components for forms
-- Implement proper error boundaries
-- Use context API appropriately for global state
-- Keep dumb components pure when possible
-- Place custom hooks in feature hooks.ts files or lib/hooks/
-
-### Supabase Guidelines
-
-- Use the patterns established in supabase/
-- Follow the Server Component pattern for data fetching
-- Use Row Level Security (RLS) policies
-- Apply proper error handling for database operations
-- Use TypeScript types for database entities
-- Validate data before sending to Supabase
-
-### MCP GitHub Guidelines
-
-- Use to directly access repository files, issues, pull requests, and discussions without manual copy-paste.
-- Leverage MCP GitHub to retrieve information documented in `.github/copilot` and architecture files.
-- Always review and validate retrieved data before generating code.
-
-### MCP Supabase Guidelines
-
-- Use to query the database, inspect the schema, or apply migrations directly from Copilot.
-- Strictly respect Row Level Security (RLS) policies and server-side validations.
-- Prefer secure, predefined queries over free-form SQL in prompts.
-
-### Tailwind CSS Guidelines
-
-- Use the established color palette and design tokens
-- Follow the utility-first approach
-- Use consistent spacing and sizing
-- Apply responsive design patterns using breakpoints
-- Use shadcn/ui component library styling conventions
-
-## General Best Practices
-
-- Follow naming conventions exactly as they appear in existing code
-- Match code organization patterns from similar files
-- Apply error handling consistent with existing patterns
-- Match logging patterns from existing code
-- Use the same approach to configuration as seen in the codebase
-- Implement consistent loading states and error states
-- Respect feature boundaries when creating cross-feature dependencies
-- Keep shared utilities in lib/ and shared UI components in components/ui/
-
-## Feature-Specific Component Examples
-
-### Creating New Components
-
-**Smart Component Example**:
-
-```tsx
-// Server Smart Component
-export async function ContentContainer() {
-  const articles = await fetchArticles() // Server-side data fetching
-  return <ArticleList articles={articles} />
-}
-
-// Client Smart Component  
-'use client'
-export function InteractiveContentContainer() {
-  const { data, loading } = useContent() // Client-side hook
-  return <ContentEditor data={data} loading={loading} />
+// Use in DAL
+export async function validateTeamMember(data: unknown): Promise<TeamMember> {
+  return TeamMemberSchema.parse(data);
 }
 ```
 
-**Dumb Component Example**:
+## Testing Patterns
 
-```tsx
-interface ArticleListProps {
-  articles: Article[]
+### Integration Testing via Scripts
+
+**Pattern**: Use standalone Node.js scripts for testing API endpoints and services:
+
+```typescript
+// scripts/test-email-integration.ts
+import { sendNewsletterConfirmation } from "@/lib/email/actions";
+
+async function testEmailService() {
+  try {
+    console.log("🧪 Testing newsletter confirmation...");
+    const result = await sendNewsletterConfirmation("test@example.com");
+    console.log("✅ Success:", result);
+  } catch (error) {
+    console.error("❌ Failed:", error.message);
+    process.exit(1);
+  }
 }
 
-export function ArticleList({ articles }: ArticleListProps) {
+testEmailService();
+```
+
+**Run with**: `pnpm exec tsx scripts/test-email-integration.ts`
+
+### API Endpoint Testing
+
+**Pattern**: Test endpoints by making HTTP requests to running dev server:
+
+```typescript
+// Test via fetch to localhost
+const response = await fetch("http://localhost:3000/api/contact", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(testData),
+});
+
+const result = await response.json();
+expect(result.status).toBe("sent");
+```
+
+### Security Validation Testing
+
+**Pattern**: Test different permission levels to validate RLS and auth guards:
+
+```typescript
+// scripts/test-admin-access.ts - Test anon vs admin access
+async function testAnonAccess() {
+  const anonClient = createAnonClient();
+  const { data, error } = await anonClient.from("membres_equipe").select("*");
+
+  // Should be blocked by RLS
+  expect(error).toBeTruthy();
+  console.log("✅ Anon properly blocked from admin table");
+}
+```
+
+### Error State Testing
+
+**Pattern**: Test error conditions with mock data and network failures:
+
+```typescript
+// Test invalid email format
+const invalidEmail = "not-an-email";
+const result = await subscribeToNewsletter(invalidEmail);
+expect(result.error).toContain("Invalid email");
+
+// Test network failure simulation
+mockFetch.mockRejectOnce(new Error("Network failure"));
+const result = await apiCall();
+expect(result.success).toBe(false);
+```
+
+## Error Handling Patterns
+
+### ActionResponse Pattern (Server Actions)
+
+**Standard**: All Server Actions return consistent response type:
+
+```typescript
+type ActionResponse<T = unknown> =
+  | { success: true; data: T }
+  | { success: false; error: string; status?: number; details?: unknown };
+
+export async function createTeamMember(
+  input: CreateTeamMemberInput
+): Promise<ActionResponse<TeamMember>> {
+  try {
+    // 1. Explicit auth check (defense in depth)
+    await requireAdmin();
+
+    // 2. Input validation with detailed error handling
+    const validated = CreateTeamMemberInputSchema.parse(input);
+
+    // 3. Database operation
+    const result = await createTeamMemberDAL(validated);
+
+    return { success: true, data: result };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: "Validation failed",
+        status: 422,
+        details: error.issues,
+      };
+    }
+    return { success: false, error: error.message, status: 500 };
+  }
+}
+```
+
+### API Route Error Handling
+
+**Standard**: Consistent HTTP status codes and error structure:
+
+```typescript
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const validated = ContactSchema.parse(body);
+
+    // Primary operation (never fail on email errors)
+    const messageId = await createContactMessage(validated);
+
+    // Secondary operation (graceful degradation)
+    let emailSent = true;
+    try {
+      await sendContactNotification(validated);
+    } catch (emailError) {
+      console.error("[Contact] Email notification failed:", emailError);
+      emailSent = false;
+    }
+
+    return NextResponse.json({
+      status: "sent",
+      message: "Message envoyé",
+      ...(emailSent ? {} : { warning: "Notification email could not be sent" }),
+    });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+    }
+    console.error("[Contact API] Error:", error);
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+  }
+}
+```
+
+### DAL Error Handling
+
+**Standard**: Return `DALResult<T>`, NEVER throw errors:
+
+```typescript
+import { DALResult } from "@/lib/dal/helpers";
+
+export async function fetchTeamMembers(): Promise<DALResult<TeamMemberDTO[]>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("membres_equipe")
+    .select("id, name, role, active")
+    .eq("active", true);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+  
+  return { success: true, data: data ?? [] };
+}
+```
+
+**Note**: L'ancien pattern `throw error` est déprécié. Utiliser `DALResult<T>` pour tous les modules DAL (voir section "DAL SOLID Pattern").
+
+### Client Component Error Handling
+
+**Pattern**: Error boundaries + user-friendly error states:
+
+```typescript
+// Error boundary for unexpected errors
+if (error) {
   return (
-    <div className="space-y-4">
-      {articles.map(article => (
-        <ArticleCard key={article.id} article={article} />
-      ))}
+    <div className="error-container" role="alert">
+      <p>Error: {error.message}</p>
+      <button onClick={actions.retry} className="retry-button">
+        Retry
+      </button>
     </div>
-  )
+  );
+}
+
+// Toast notifications for action results
+const handleSubmit = async (data: FormData) => {
+  const result = await createTeamMemberAction(data);
+
+  if (result.success) {
+    toast.success('Member created successfully');
+  } else {
+    toast.error('Error', { description: result.error });
+  }
+};
+```
+
+### Graceful Degradation Pattern
+
+**Critical**: Never fail primary operations due to secondary service failures:
+
+```typescript
+// ✅ CORRECT: Primary operation succeeds even if email fails
+const contactId = await createContactMessage(data);
+try {
+  await sendEmail(data);
+} catch (emailError) {
+  console.error("Email failed:", emailError);
+  // Don't throw - log and continue
+}
+return { success: true, id: contactId };
+
+// ❌ WRONG: Email failure breaks entire operation
+const contactId = await createContactMessage(data);
+await sendEmail(data); // If this fails, entire operation fails
+```
+
+## Database & SQL Guidelines
+
+### SQL Style Requirements
+
+**Based on**: `.github/instructions/Postgres_SQL_Style_Guide.instructions.md`
+
+```sql
+-- ✅ ALWAYS use lowercase SQL keywords
+create table membres_equipe (
+  id bigint generated always as identity primary key,
+  nom text not null,
+  role text not null,
+  photo_url text,
+  order_index integer default 0,
+  active boolean default true,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+comment on table membres_equipe is 'Membres de l''équipe théâtrale avec leur rôle et informations';
+
+-- ✅ Use snake_case for tables/columns, plurals for tables, singular for columns
+-- ✅ Always include table comments (up to 1024 characters)
+-- ✅ Prefer `identity generated always` for IDs
+-- ✅ Use ISO 8601 format for dates (timestamptz)
+```
+
+**Naming Conventions**:
+
+- Tables: `snake_case` plurals (`membres_equipe`, `spectacles`)
+- Columns: `snake_case` singular (`nom`, `photo_url`, `user_id`)
+- Foreign keys: `{table_singular}_id` (e.g., `user_id` references `users`)
+- Avoid prefixes like `tbl_`, use meaningful aliases with `as` keyword
+
+**Query Formatting**:
+
+```sql
+-- Small queries: keep concise
+select * from spectacles where active = true;
+
+-- Large queries: format for readability
+select
+  s.titre,
+  s.description,
+  m.nom as auteur
+from
+  spectacles s
+join
+  membres_equipe m on s.auteur_id = m.id
+where
+  s.published_at is not null
+and
+  s.active = true
+order by
+  s.created_at desc;
+```
+
+### Next.js 15 Backend Requirements
+
+**Based on**: `.github/instructions/nextjs15-backend-with-supabase.instructions.md`
+
+```typescript
+// ✅ ALWAYS await headers() and cookies() in Next.js 15
+import { headers, cookies } from "next/headers";
+
+export default async function ServerComponent() {
+  const headersList = await headers();
+  const cookieStore = await cookies();
+
+  const userAgent = headersList.get("user-agent");
+  const theme = cookieStore.get("theme");
+
+  return <div data-theme={theme?.value}>Content</div>;
+}
+
+// ✅ API Routes: proper header/cookie handling
+export async function GET(request: NextRequest) {
+  const headersList = await headers();
+  const authorization = headersList.get("authorization");
+
+  return NextResponse.json({ data: results });
+}
+
+// ✅ Server Actions: secure cookie setting
+export async function loginAction(formData: FormData) {
+  const cookieStore = await cookies();
+
+  cookieStore.set("auth-token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 7 // 7 days
+  });
 }
 ```
 
-## Project-Specific Guidance
+### Supabase Integration Rules
 
-### Rouge Cardinal Company Website
+**Critical Performance Rules** (from canonical auth guide):
 
-This project is a website for a theater company with these key features:
+```typescript
+// ✅ FAST: Use getClaims() for auth checks (~2-5ms)
+const claims = await supabase.auth.getClaims();
+if (!claims) redirect('/login');
 
-- Public-facing website with information about shows and events
-- Authentication for admin users
-- Content management capabilities
-- Press resources and media library
+// ✅ SLOW: Only use getUser() when you need full user data (~300ms)
+const { data: { user } } = await supabase.auth.getUser();
 
-**Feature Organization**:
+// ✅ COOKIES: ONLY use getAll/setAll pattern (NEVER get/set/remove)
+{
+  cookies: {
+    getAll() { return cookieStore.getAll() },
+    setAll(cookiesToSet) {
+      cookiesToSet.forEach(({ name, value, options }) => {
+        response.cookies.set(name, value, options)
+      })
+    }
+  }
+}
+```
 
-- `public-site`: Hero, shows display, company information
-- `admin`: Dashboard, content management interface
-- `content`: Article management, media handling
-- `auth`: Login, authentication guards
+## Next.js 15 & React 19 Best Practices
 
-The project focuses on:
+**Based on**: `.github/instructions/nextjs.instructions.md` + `.github/instructions/next-backend.instructions.md`
 
-- Professional presentation of the company
-- Easy access to show information
-- Media resources for professionals
-- Administrative capabilities
+### Component Architecture Rules
 
-When implementing features, ensure they match the existing style, follow the Smart/Dumb component pattern, and are aligned with these goals.
+```typescript
+// ✅ Server Component (default) - for data fetching, SSR
+export default async function TeamPage() {
+  const teamMembers = await fetchTeamMembers(); // Direct DAL call
+  return <TeamList members={teamMembers} />;
+}
+
+// ✅ Client Component - only for interactivity
+'use client'
+export function InteractiveTeamForm() {
+  const [state, action, isPending] = useActionState(createTeamAction, null);
+  return <form action={action}>{/* interactive form */}</form>;
+}
+```
+
+### Server Actions vs API Routes Decision Tree
+
+1. **Mutations from same Next.js frontend** → **Server Action**
+2. **Public APIs for external clients** → **API Route**
+3. **Webhooks/OAuth callbacks** → **API Route**
+4. **Initial page data fetching** → **Server Component**
+
+### Critical Next.js 15 Rules
+
+- **NEVER use `next/dynamic` with `{ ssr: false }` in Server Components**
+- **ALWAYS await `headers()` and `cookies()` calls**
+- **Use Route Groups** `(admin)`, `(marketing)` for layout organization
+- **Server Actions must have `'use server'` directive** (lowercase)
+- **Use `useActionState` not `startTransition`** for Server Actions
+
+### App Router Structure
+
+```bash
+app/
+  layout.tsx              # Root: HTML + providers
+  (admin)/                # Route group - admin zone
+    layout.tsx            # Admin layout + auth protection
+    admin/
+      team/page.tsx       # /admin/team
+  (marketing)/            # Route group - public zone
+    layout.tsx            # Public layout + header/footer
+    page.tsx              # Homepage /
+```
+
+## TypeScript Strict Guidelines
+
+**Based on**: `.github/instructions/2-typescript.instructions.md`
+
+### Required TypeScript Patterns
+
+```typescript
+// ✅ ALWAYS: Explicit typing, never use any
+interface TeamMemberProps {
+  member: {
+    id: string;
+    name: string;
+    role: string;
+  };
+  onEdit?: (member: TeamMember) => void; // Optional with explicit type
+}
+
+// ✅ Use interfaces for extensible objects
+interface User {
+  id: string;
+  email: string;
+}
+
+// ✅ Use type for unions and primitives
+type Status = "pending" | "completed" | "cancelled";
+type ActionResponse<T> =
+  | { readonly success: true; readonly data: T }
+  | { readonly success: false; readonly error: string };
+
+// ✅ Prefer string literal unions over enums
+type Role = "admin" | "user" | "guest";
+
+// ✅ Generics with descriptive names (T prefix)
+function fetchResource<TData>(endpoint: string): Promise<TData> {
+  return fetch(endpoint).then((res) => res.json());
+}
+
+// ✅ Type guards for runtime checks (prefer over `as` assertions)
+function isTeamMember(obj: unknown): obj is TeamMember {
+  return typeof obj === "object" && obj !== null && "id" in obj;
+}
+
+function isAllowedMimeType(mime: string): mime is AllowedMimeType {
+  return ALLOWED_TYPES.includes(mime as AllowedMimeType);
+}
+```
+
+### Type Assertions Rules
+
+```typescript
+// ✅ Safe assertions
+const config = { apiUrl: 'https://api.example.com' } as const;
+type ButtonComponent = typeof Button as React.ComponentType;
+
+// ❌ NEVER use unsafe assertions
+const data = response as User; // Dangerous!
+const file = formData.get('file') as File; // Use type guard instead
+
+// ✅ Use type guards instead
+const file = formData.get('file');
+if (!(file instanceof File)) {
+  throw new Error('Not a file');
+}
+// Now TypeScript knows file is File
+```
+
+### Nullability Handling
+
+```typescript
+// ✅ Optional properties (preferred)
+interface Config {
+  name: string;
+  description?: string; // undefined when not set
+}
+
+// ✅ Pick one convention: null OR undefined (not both)
+function findUser(id: string): User | null {
+  // Consistent: always return null when not found
+}
+
+// ✅ Nullish coalescing for defaults
+const displayName = user.name ?? "Anonymous";
+const maxRetries = config.retries ?? 3;
+
+// ✅ Enable strictNullChecks in tsconfig.json
+```
+
+### TypeScript Error Handling
+
+```typescript
+// ✅ Always catch as unknown, then type guard
+try {
+  await riskyOperation();
+} catch (error: unknown) {
+  if (error instanceof Error) {
+    console.error("Operation failed:", error.message);
+  } else if (error instanceof z.ZodError) {
+    console.error("Validation failed:", error.issues);
+  } else {
+    console.error("Unknown error:", error);
+  }
+}
+
+// ✅ Custom error classes for domain errors
+class TeamMemberValidationError extends Error {
+  constructor(
+    public field: string,
+    message: string
+  ) {
+    super(message);
+    this.name = "TeamMemberValidationError";
+  }
+}
+```
+
+### Validation Pattern (External Data)
+
+```typescript
+// ✅ ALWAYS use unknown for external data (FormData, API responses, user input)
+export async function createTeamMember(input: unknown) {
+  // Runtime validation with Zod
+  const validated: CreateTeamMemberInput =
+    CreateTeamMemberInputSchema.parse(input);
+  // Now type-safe after validation
+  return await createTeamMemberDAL(validated);
+}
+
+// ❌ NEVER assume data is valid without runtime checks
+export async function createTeamMember(input: CreateTeamMemberInput) {
+  // No validation - dangerous!
+}
+```
+
+## Clean Code Principles
+
+**Based on**: `.github/instructions/1-clean-code.instructions.md`
+
+### Function & File Limits
+
+- **Max 30 lines per function**
+- **Max 5 parameters per function**
+- **Max 300 lines per file**
+- **Max 10 sub-files per folder**
+- **One responsibility per file**
+
+### Code Quality Rules
+
+```typescript
+// ✅ Long, readable variable names
+const authenticatedUserFromDatabase = await getCurrentUser();
+const teamMemberCreationFormData = extractFormData(request);
+
+// ✅ Explicit constants, no magic numbers
+const MAX_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+const SESSION_DURATION_DAYS = 7;
+
+// ✅ Fail fast with early returns
+export async function createTeamMember(input: unknown) {
+  if (!input) {
+    return { success: false, error: "Input required" };
+  }
+
+  const validated = TeamMemberSchema.safeParse(input);
+  if (!validated.success) {
+    return { success: false, error: "Validation failed" };
+  }
+
+  // Continue with main logic...
+}
+
+// ✅ No comments needed - code should be self-explanatory
+const isUserAuthorizedForAdminArea = await checkAdminPermissions(user);
+const shouldAllowTeamMemberCreation =
+  isUserAuthorizedForAdminArea && hasValidInput;
+```
+
+### Error Handling Standards
+
+```typescript
+// ✅ Custom domain errors
+class TeamMemberValidationError extends Error {
+  constructor(field: string) {
+    super(`Invalid team member ${field}`);
+    this.name = "TeamMemberValidationError";
+  }
+}
+
+// ✅ Throw early, handle at boundaries
+export async function createTeamMember(data: unknown) {
+  if (!data) throw new TeamMemberValidationError("data");
+
+  const validated = TeamMemberSchema.parse(data); // Throws if invalid
+  return await createTeamMemberDAL(validated);
+}
+```
+
+## Database Management & Supabase Workflows
+
+### Migration Guidelines
+
+**Based on**: `.github/instructions/Create_migration.instructions.md`
+
+**File Naming Convention**: `YYYYMMDDHHmmss_short_description.sql`
+
+```sql
+-- 20240906123045_create_profiles.sql
+
+-- Migration Purpose: Create user profiles table with RLS
+-- Affected Tables: profiles (new)
+-- Special Considerations: Enables RLS for security
+
+-- Create profiles table
+create table public.profiles (
+  id bigint generated always as identity primary key,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  name text not null,
+  bio text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+comment on table public.profiles is 'User profiles with biographical information';
+
+-- Enable RLS (MANDATORY for all new tables)
+alter table public.profiles enable row level security;
+
+-- RLS Policy: Users can view all profiles
+create policy "Anyone can view profiles"
+on public.profiles for select
+to anon, authenticated
+using (true);
+
+-- RLS Policy: Users can only edit their own profile
+create policy "Users can edit own profile"
+on public.profiles for all
+to authenticated
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+```
+
+### Database Functions
+
+**Based on**: `.github/instructions/Database_Create_functions.instructions.md`
+
+**Default Pattern**: `SECURITY INVOKER` with empty `search_path`
+
+```sql
+-- Template for Supabase functions
+create or replace function public.get_user_profile(profile_id bigint)
+returns json
+language plpgsql
+security invoker -- Run with caller permissions (default choice)
+set search_path = '' -- Prevent schema injection attacks
+stable -- Optimize for read-only operations
+as $$
+declare
+  profile_data json;
+begin
+  -- Use fully qualified names
+  select row_to_json(p)
+  into profile_data
+  from public.profiles p
+  where p.id = get_user_profile.profile_id;
+
+  if profile_data is null then
+    raise exception 'Profile not found';
+  end if;
+
+  return profile_data;
+end;
+$$;
+
+-- Function with trigger example
+create or replace function public.update_updated_at()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+begin
+  -- Update timestamp on row modification
+  new.updated_at := now();
+  return new;
+end;
+$$;
+
+-- Attach trigger to table
+create trigger profiles_updated_at_trigger
+before update on public.profiles
+for each row
+execute function public.update_updated_at();
+```
+
+### Declarative Schema Management
+
+**Based on**: `.github/instructions/Declarative_Database_Schema.instructions.md`
+
+**CRITICAL WORKFLOW**:
+
+1. **Schema Files**: All changes in `supabase/schemas/*.sql`
+2. **Stop Database**: `pnpm dlx supabase stop` before diff
+3. **Generate Migration**: `pnpm dlx supabase db diff -f migration_name`
+4. **Never Edit Migrations**: Only edit schema files, let CLI generate migrations
+
+```bash
+# Normal workflow
+pnpm dlx supabase stop
+# Edit supabase/schemas/10_profiles.sql
+pnpm dlx supabase db diff -f add_profiles_table
+pnpm dlx supabase start
+
+# Emergency hotfix workflow (production only)
+touch supabase/migrations/$(date +%Y%m%d%H%M%S)_fix_critical_bug.sql
+pnmp dlx supabase db push
+# THEN update supabase/schemas/ to match
+```
+
+**Schema File Organization** (lexicographic order):
+
+```bash
+supabase/schemas/
+  01_auth_extensions.sql      # Auth setup
+  10_users_and_profiles.sql   # User tables
+  20_content_tables.sql       # Main content
+  30_functions.sql            # Database functions
+  90_rls_policies.sql         # Security policies
+```
+
+### Memory Bank Management
+
+**Based on**: `.github/instructions/memory-bank.instructions.md`
+
+**Core Structure**:
+
+```bash
+memory-bank/
+  projectbrief.md      # Foundation document
+  productContext.md    # Why this exists
+  activeContext.md     # Current focus (CRITICAL)
+  systemPatterns.md    # Architecture decisions
+  techContext.md       # Technologies used
+  progress.md          # Current status
+  tasks/
+    _index.md          # Task status overview
+    TASK001-name.md    # Individual task files
+```
+
+**Key Commands**:
+
+- **update memory bank** → Review ALL memory-bank files
+- **add task** → Create new task file + update \_index.md
+- **update task TASKID** → Add progress log entry
+- **show tasks active** → Filter tasks by status
+
+**Task File Template**:
+
+# `TASK001` - Implement Team Management
+
+**Status:** In Progress  
+**Added:** 2025-11-12  
+**Updated:** 2025-11-12
+
+## Progress Tracking
+
+**Overall Status:** In Progress - 60%
+
+### Subtasks
+
+| ID  | Description          | Status      | Updated    | Notes |
+| --- | -------------------- | ----------- | ---------- | ----- |
+| 1.1 | Create DAL functions | Complete    | 2025-11-12 | ✅    |
+| 1.2 | Build Server Actions | In Progress | 2025-11-12 | 🔄    |
+| 1.3 | Create UI Components | Not Started | -          | ⏳    |
+
+## Progress Log
+
+### 2025-11-12
+
+- Completed DAL functions for team CRUD
+- Started Server Action implementation
+- Made decision to use ActionResponse pattern
+
+**Memory Bank Update Triggers**:
+
+- After significant architecture changes
+- When implementing new patterns
+- User requests "update memory bank"
+- Before major feature development
+- After completing tasks
+
+## Key References
+
+**Architecture Documentation**:
+
+- `memory-bank/architecture/Project_Architecture_Blueprint.md` - Current architecture (v2, Nov 2025)
+- `memory-bank/architecture/Project_Folders_Structure_Blueprint_v5.md` - Folder structure reference
+- `memory-bank/activeContext.md` - Recent changes and current focus
+- `.github/instructions/nextjs-supabase-auth-2025.instructions.md` - Auth patterns (CANONICAL)
+
+**Quality Standards**:
+
+- Server Components first, Client Components only for interactivity
+- Zod validation at all data boundaries
+- Explicit admin checks + RLS policies (defense in depth)
+- TypeScript strict mode, no `any` types
+- Responsive design with shadcn/ui components
+
+When in doubt, always examine existing patterns in the codebase and prioritize security, type safety, and maintainability.

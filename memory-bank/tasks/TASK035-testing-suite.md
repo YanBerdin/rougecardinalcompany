@@ -1,4 +1,4 @@
-# [TASK035] - Testing Suite
+# \[TASK035] - Testing Suite
 
 **Status:** Pending  
 **Added:** 2025-10-16  

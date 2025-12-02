@@ -68,7 +68,47 @@ Note RLS: les nouvelles tables co‑localisent leurs politiques (dans le même f
 
 ---
 
-## 🆕 Mises à jour récentes (oct. 2025)
+## 🆕 Mises à jour récentes (novembre 2025)
+
+- **TASK026 Clean Code & TypeScript Conformity (27 nov. 2025)** : Refactoring architectural pour conformité aux standards Clean Code & TypeScript du projet.
+
+- **Hero Slides - A11Y & CRUD Enhancements (26 nov. 2025)** : Améliorations accessibilité et fonctionnalités CRUD pour les slides Hero.
+  - **`07d_table_home_hero.sql`** : Ajout colonne `alt_text` (texte alternatif, max 125 caractères) + contrainte CHECK + policy RLS admin SELECT
+  - **`63b_reorder_hero_slides.sql`** : Nouvelle fonction SECURITY DEFINER pour réordonner les slides
+    - Authorization : `is_admin()` check explicite (defense-in-depth)
+    - Concurrency : Advisory lock `pg_advisory_xact_lock`
+    - Input validation : Structure JSONB array
+  - **Policy RLS** : `Admins can view all home hero slides` - permet aux admins de voir les slides inactifs
+
+- **TASK021 - Spectacles CRUD RLS Corrections** : Corrections finales des politiques RLS pour les spectacles suite à l'implémentation complète du CRUD admin.
+  - **Issue #1 - RLS 42501 Error** : Résolution du problème d'insertion spectacles causé par un profil admin manquant
+    - Root cause: Utilisateur authentifié mais `is_admin()` retournait false (profil manquant)
+    - Fix: Création du profil admin via SQL Editor + migration RLS corrective
+    - Migration: `20251117154411_fix_spectacles_rls_clean.sql` (politiques RLS nettoyées et recréées)
+  - **Issue #2 - Contexte Auth Perdu** : Perte du contexte d'authentification lors des insertions
+    - Root cause: Client Supabase différent entre vérification auth et insertion
+    - Fix: Helper `performAuthenticatedInsert()` avec passage de client
+    - Impact: Contexte auth préservé, insertions réussies
+  - **Politiques RLS Finales** : Intégrées dans `supabase/schemas/61_rls_main_tables.sql`
+    - SELECT: Spectacles publics visibles par tous, privés uniquement par admins
+    - INSERT: Création réservée aux admins (vérification directe sur profiles.role)
+    - UPDATE/DELETE: Propriétaires ou admins uniquement
+    - Pattern: Direct query sur profiles au lieu de is_admin() pour éviter problèmes de contexte
+  - **Validation** : CRUD spectacles entièrement fonctionnel, TypeScript clean, production-ready
+
+- **Sécurité Base de données - Extensions (20 nov. 2025)** : Déplacement des extensions PostgreSQL (`pgcrypto`, `pg_trgm`, `unaccent`, `citext`) vers un schéma dédié `extensions` pour éviter la pollution du schéma `public` et respecter les recommandations de sécurité Supabase.
+  - **Migration** : `20251120120000_move_extensions_to_schema.sql`
+  - **Schéma déclaratif** : `01_extensions.sql` mis à jour avec `WITH SCHEMA extensions`
+  - **Impact** : `search_path` mis à jour (`public, extensions`), appels de fonctions qualifiés (ex: `extensions.unaccent()`)
+
+- **Profiles RLS & Invite Flow (21 nov. 2025)** : Correction des politiques RLS pour `public.profiles` afin de supporter les opérations d'`upsert()` utilisées par le flux d'invitation des administrateurs.
+  - **Migration** : `20251121185458_allow_admin_update_profiles.sql` (générée et appliquée le 2025-11-21)
+  - **Contexte** : `upsert()` effectue un `UPDATE` puis un `INSERT` ; la policy `UPDATE` auparavant trop restrictive provoquait des erreurs 42501 lors des invitations créées via `admin.generateLink()`.
+  - **Fix côté application** : la DAL utilise désormais `upsert(..., { onConflict: 'user_id' })` pour créer/mettre à jour les `profiles`, et a remplacé les appels lourds `getUser()` par `getClaims()` pour vérifications rapides de claims.
+  - **Email dev/testing** : un mécanisme dev-only de redirection des emails de test a été ajouté (variables d'environnement `EMAIL_DEV_REDIRECT=true|false` et `EMAIL_DEV_REDIRECT_TO`) pour contourner les limitations de test-mode du fournisseur d'envoi lors des essais locaux. Ce mécanisme est explicitement documenté et doit rester désactivé en production.
+  - **Impact** : Invite flow fonctionnel pour les admins, templates email corrigés (Tailwind wrapper unique et styles inlinés) ; migration appliquée et tests manuels de l'invite OK.
+
+## 🆕 Mises à jour récentes (octobre 2025)
 
 - **Spectacles archivés publics** : Modification du seed `20250926153000_seed_spectacles.sql` pour marquer les spectacles archivés avec `public = true` au lieu de `public = false`. Cette approche simplifie la logique d'affichage des archives dans la fonctionnalité "Voir toutes nos créations" sans nécessiter de modification des politiques RLS. Les spectacles archivés restent identifiés par `status = 'archive'` mais sont maintenant visibles publiquement via la politique RLS existante.
 
@@ -101,7 +141,7 @@ Note RLS: les nouvelles tables co‑localisent leurs politiques (dans le même f
 
 - `articles_presse`: activation RLS co‑localisée dans `08_table_articles_presse.sql` avec lecture publique des articles publiés (`published_at is not null`) et gestion admin (insert/update/delete). Ajout d’un index partiel `idx_articles_published_at_public` pour optimiser les sélections publiques.
 
-Pour rappel, la migration générée est `supabase/migrations/20250918004849_apply_declarative_schema.sql` (patchée pour l’ordre `validate_rrule()` → `check_valid_rrule`).
+Pour rappel, la migration générée est `supabase/migrations/20250918000002_apply_declarative_schema_complete.sql`. Cette migration reconstruit le schéma complet depuis les fichiers déclaratifs et doit s'exécuter avant tous les seeds.
 
 ---
 

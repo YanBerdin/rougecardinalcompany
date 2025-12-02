@@ -1,30 +1,23 @@
-import { NextRequest, NextResponse } from "next/server";
-import { ContactMessageSchema } from "@/lib/email/schemas";
+import { NextRequest } from "next/server";
+import { ContactEmailSchema, type ContactMessageInput } from "@/lib/schemas/contact";
 import { sendContactNotification } from "@/lib/email/actions";
-import {
-  createContactMessage,
-  type ContactMessageInput,
-} from "@/lib/dal/contact";
+import { createContactMessage } from "@/lib/dal/contact";
+import { parseFullName, HttpStatus, ApiResponse } from "@/lib/api/helpers";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const validation = ContactMessageSchema.safeParse(body);
+    const validation = ContactEmailSchema.safeParse(body);
 
     if (!validation.success) {
-      return NextResponse.json(
-        { error: "Données invalides", details: validation.error.issues },
-        { status: 400 }
-      );
+      return ApiResponse.validationError(validation.error.issues);
     }
 
     const contactData = validation.data;
 
     // Mapper le schéma API vers le schéma DAL
     // API: name (string unique) → DAL: firstName + lastName
-    const nameParts = contactData.name.trim().split(" ");
-    const firstName = nameParts[0] || contactData.name;
-    const lastName = nameParts.slice(1).join(" ") || contactData.name;
+    const { firstName, lastName } = parseFullName(contactData.name);
 
     const dalInput: ContactMessageInput = {
       firstName,
@@ -38,10 +31,9 @@ export async function POST(request: NextRequest) {
 
     // RGPD Compliance: Persist to database using DAL (INSERT sans SELECT)
     // Seuls les admins peuvent lire les données personnelles via RLS
-    try {
-      await createContactMessage(dalInput);
-    } catch (dbError) {
-      console.error("[Contact API] Database error:", dbError);
+    const dalResult = await createContactMessage(dalInput);
+    if (!dalResult.success) {
+      console.error("[Contact API] Database error:", dalResult.error);
       // Ne pas bloquer l'envoi d'email si la BDD échoue
     }
 
@@ -62,13 +54,16 @@ export async function POST(request: NextRequest) {
       // Ne pas échouer la soumission si l'email échoue
     }
 
-    return NextResponse.json({
-      status: "sent",
-      message: "Message envoyé",
-      ...(emailSent ? {} : { warning: "Notification email could not be sent" }),
-    });
+    return ApiResponse.success(
+      {
+        status: "sent",
+        message: "Message envoyé",
+        ...(emailSent ? {} : { warning: "Notification email could not be sent" }),
+      },
+      HttpStatus.OK
+    );
   } catch (error) {
     console.error("[Contact API] Error:", error);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    return ApiResponse.error("Erreur serveur", HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }

@@ -1,4 +1,4 @@
-# [TASK031] - Analytics Dashboard
+# \[TASK031] - Analytics Dashboard
 
 **Status:** Pending  
 **Added:** 2025-10-16  

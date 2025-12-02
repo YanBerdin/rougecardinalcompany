@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/supabase/server";
 import { sendNewsletterConfirmation } from "@/lib/email/actions";
+import { HttpStatus, ApiResponse, isUniqueViolation } from "@/lib/api/helpers";
 
 const NewsletterBodySchema = z.object({
   email: z.string().email(),
@@ -13,15 +13,23 @@ type NewsletterBody = z.infer<typeof NewsletterBodySchema>;
 
 // supabase/schemas/10_tables_system.sql
 // table public.abonnes_newsletter
+/**
+ * Handles newsletter subscription requests.
+ *
+ * Expects a JSON body with the following structure:
+ * {
+ *   email: string (valid email address),
+ *   consent: boolean (optional, defaults to true),
+ *   source: string (optional, max length 64, defaults to "home")
+ * }
+ *
+ */
 export async function POST(req: Request) {
   try {
     const json = await req.json();
     const body = NewsletterBodySchema.safeParse(json);
     if (!body.success) {
-      return NextResponse.json(
-        { error: "Invalid payload", details: body.error.flatten() },
-        { status: 400 }
-      );
+      return ApiResponse.validationError(body.error.issues);
     }
     const { email, consent, source } = body.data as NewsletterBody;
 
@@ -29,18 +37,18 @@ export async function POST(req: Request) {
 
     // RGPD Compliance: Use INSERT instead of UPSERT to avoid exposing emails via RLS SELECT policy
     // Don't use .select() to avoid RLS blocking the read after insert
-    // Handle duplicate emails gracefully (error code 23505 = unique_violation)
+    // Handle duplicate emails gracefully (unique_violation)
     const { error } = await supabase.from("abonnes_newsletter").insert({
       email,
       metadata: { consent: Boolean(consent), source },
     });
 
-    // Error code 23505 = unique_violation (duplicate email) - this is OK, user is already subscribed
-    if (error && error.code !== "23505") {
+    // Unique violation (duplicate email) is OK - user is already subscribed
+    if (error && !isUniqueViolation(error)) {
       console.error("Newsletter subscribe error", error);
-      return NextResponse.json(
-        { error: "Subscription failed" },
-        { status: 500 }
+      return ApiResponse.error(
+        "Subscription failed",
+        HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
 
@@ -55,16 +63,16 @@ export async function POST(req: Request) {
     }
 
     // Idempotent success (new or existing)
-    return NextResponse.json(
+    return ApiResponse.success(
       {
         status: "subscribed",
         ...(emailSent
           ? {}
           : { warning: "Confirmation email could not be sent" }),
       },
-      { status: 200 }
+      HttpStatus.OK
     );
   } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    return ApiResponse.error("Invalid JSON body", HttpStatus.BAD_REQUEST);
   }
 }

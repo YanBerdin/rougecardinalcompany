@@ -24,110 +24,374 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 - `20251024231855_restrict_reorder_execute.sql` — HOTFIX: restrict execute on `public.reorder_team_members(jsonb)` by revoking EXECUTE from `public`/`anon` and granting EXECUTE to `authenticated` only. Applied as a manual hotfix to reduce attack surface; declarative schema updated in `supabase/schemas/63_reorder_team_members.sql` to reflect the grant.
 
-## Security audit remediation (October 2025)
+## Migrations récentes (novembre 2025)
+
+- **Refactoring architectural (27 nov. 2025)** — **Clean Code & TypeScript Conformity pour TASK026** : Ce refactoring n'a pas généré de migration base de données car il concerne uniquement la couche application.
+
+- `20251126215129_fix_hero_slides_admin_select_policy.sql` — **RLS FIX : Admins can view ALL hero slides**
+  - Ajout policy `Admins can view all home hero slides` sur `home_hero_slides`
+  - Permet aux admins de voir les slides inactifs pour les gérer via toggle
+  - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/07d_table_home_hero.sql`
+
+- `20251126001251_add_alt_text_to_home_hero_slides.sql` — **A11Y + CRUD : Hero Slides enhancements**
+  - **Colonne `alt_text`** : texte alternatif pour accessibilité (max 125 caractères, contrainte CHECK)
+  - **Fonction `reorder_hero_slides(jsonb)`** : SECURITY DEFINER pour réordonner les slides
+    - Authorization : `is_admin()` check explicite
+    - Concurrency : Advisory lock `pg_advisory_xact_lock`
+    - Input validation : JSONB array structure
+  - **Fonction `restore_content_version`** : Mise à jour pour support `home_hero_slides`
+  - ✅ **Intégré aux schémas déclaratifs** : `07d_table_home_hero.sql` + `63b_reorder_hero_slides.sql`
+
+- `20251123170231_create_messages_contact_admin_view.sql` — **SECURITY FIX : Deploy missing messages_contact_admin view** : Création de la vue `messages_contact_admin` définie dans le schéma déclaratif mais absente de la base de données. Résout l'alerte Security Advisor "SECURITY DEFINER view" (faux positif - vue configurée avec `security_invoker = true`).
+  - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/10_tables_system.sql`
+  - 🔐 **Sécurité** : Vue avec `security_invoker = true` (pas de privilèges élevés)
+  - 📝 **Migration conservée** pour l'historique et la cohérence avec Supabase Cloud
+  - 🎯 **Root cause** : Vue définie dans schéma mais non déployée en base (advisor détecte absence comme SECURITY DEFINER)
+  - ⚡ **Résolution** : Migration manuelle appliquée, alerte Security Advisor résolue
+
+- `20251123143116_fix_restore_content_version_published_at.sql` — **ARCHIVE** : fichier de correctif temporaire contenant la recréation de la vue `messages_contact_admin` et la fonction `restore_content_version`.
+  - ℹ️ **Remarque** : Le même code est présent et géré par le schéma déclaratif (`supabase/schemas/15_content_versioning.sql` et `supabase/schemas/10_tables_system.sql`).
+  - 📦 **Action** : Ce fichier a été déplacé vers `supabase/migrations/archived/` le 2025-11-23 pour clarifier qu'il s'agit d'un hotfix historisé déjà synchronisé dans le schéma déclaratif.
+  - ✅ **Raison** : Conserver l'historique sans créer de duplication active dans le répertoire principal `supabase/migrations/`.
+
+- `20251121185458_allow_admin_update_profiles.sql` — **RLS & invite flow fix (2025-11-21)** : migration générée par `supabase db diff` pour remplacer la policy `update` trop restrictive sur `public.profiles`. Contexte : `upsert` côté application effectue d'abord un `update` puis un `insert`, et la policy UPDATE bloquait les invites administrateurs (erreur 42501). Cette migration permet aux administrateurs d'atteindre la phase UPDATE lors d'un UPSERT tout en conservant les vérifications `with check` pour les INSERTs.
+  - Statut : ✅ appliquée sur la branche `feature/backoffice` et poussée au remote via `pnpm dlx supabase db push` (2025-11-21).
+  - Impact : Permet l'utilisation d'`upsert()` côté serveur pour créer/mettre à jour les `profiles` lors de l'invitation d'utilisateurs sans déclencher d'erreur RLS.
+  - Remarques opérationnelles : vérifier qu'un index existe sur `profiles(user_id)` si des requêtes massives d'upsert sont attendues.
+
+- `20251123150000_remote_schema.sql` — **REMOTE WARNING: pg_net extension** : migration minimale exécutant `drop extension if exists "pg_net"`.
+  - 📊 Diff Local vs Cloud : la base locale ne contient jamais `pg_net`, mais le projet Cloud a renvoyé un warning lié à cette extension (spécifique à Supabase Cloud pour webhooks).
+  - 🛠️ Impact local : aucune action requise — la suppression est idempotente et la base locale est propre.
+  - 🔎 Action recommandée : garder la migration pour tracer le contrôle cloud-local ; si vous voulez forcer l'état sur le cloud, appliquez la migration via la CLI/SQL Editor. Voir `scripts/check-extension.ts` pour un contrôle programmatique.
+
+## ⚠️ CRITICAL WARNING - Security Campaign Error (October 2025)
+
+> **❌ ERREUR ARCHITECTURALE MAJEURE - NE PAS REPRODUIRE**
+>
+> La campagne de sécurité RLS (Rounds 1-17, 25-26 octobre 2025) était basée sur une **compréhension erronée du modèle de sécurité PostgreSQL**.
+>
+> **FAUSSE HYPOTHÈSE** :
+>
+> - "RLS seul suffit pour le contrôle d'accès"
+> - "Les GRANTs au niveau table court-circuitent les politiques RLS"
+> - "Révocation de tous les GRANTs = amélioration de la sécurité"
+>
+> **RÉALITÉ** :
+>
+> - PostgreSQL requiert **DEUX niveaux** de permissions : GRANT (table-level) + RLS (row-level)
+> - **Sans GRANT, RLS n'est JAMAIS évalué** → permission denied avant vérification des policies
+> - **GRANT SELECT + RLS policy = Defense in depth** (sécurité multicouche)
+>
+> **CONSÉQUENCES** :
+>
+> - **27 octobre 2025 02:00** : Production DOWN - "permission denied for table" sur 33 tables
+> - 7 fonctions DAL en échec → homepage et pages publiques inaccessibles
+> - 8 heures d'incident critique pour identifier et corriger l'erreur
+>
+> **RÉSOLUTION** :
+>
+> - 5 migrations d'urgence pour restaurer les GRANTs (20251027020000 à 20251027022500)
+> - 33 tables : GRANT SELECT to anon,authenticated; GRANT INSERT,UPDATE,DELETE to authenticated
+> - 11 vues : GRANT SELECT avec distinction public/admin
+> - 15 fonctions : GRANT EXECUTE to authenticated pour triggers
+>
+> **DOCUMENTATION POST-MORTEM** : `doc/INCIDENT_POSTMORTEM_RLS_GRANTS_2025-10-27.md`
+>
+> **MODÈLE SÉCURITAIRE CORRECT** :
+>
+> 1. GRANT permissions (table-level) → PostgreSQL vérifie en PREMIER
+> 2. RLS policies (row-level) → Filtre ensuite les lignes autorisées
+> 3. Les deux sont COMPLÉMENTAIRES, pas alternatifs
+>
+> **⚠️ Les migrations Rounds 1-17 ci-dessous sont CONSERVÉES pour l'historique mais ne doivent JAMAIS être reproduites.**
+
+## Security audit remediation (October 2025) - ❌ DEPRECATED - DO NOT REPLICATE
+
+> **WARNING**: Ces migrations ont causé un incident de production majeur. Elles sont conservées uniquement pour l'historique.
+> Voir la section ci-dessus et le post-mortem pour comprendre l'erreur architecturale.
 
 - `20251025181000_revoke_final_exposed_objects.sql` — **SECURITY : Revoke exposed grants (round 1)** : Révocation des grants à PUBLIC/authenticated sur 5 objets détectés par l'audit CI (content_versions, content_versions_detailed, evenements, home_about_content, information_schema.administrable_role_authorizations). Migration idempotente avec gestion d'erreur via blocs DO.
-  - 🔐 **Root cause** : Table-level grants court-circuitent les politiques RLS
-  - ✅ **Solution** : Utiliser RLS exclusivement pour le contrôle d'accès
-  - 📊 **Impact** : 5 objets sécurisés (0 re-grant nécessaire, RLS policies suffisent)
+  - ❌ **ERREUR** : "Table-level grants court-circuitent RLS" → FAUX - GRANTs sont requis AVANT RLS
+  - ❌ **Fausse solution** : "RLS exclusivement" → Impossible - PostgreSQL vérifie GRANTs en premier
+  - ⚠️ **Impact réel** : 5 objets devenus inaccessibles (production cassée le 27 oct 2025)
 
 - `20251025182000_revoke_new_exposed_objects.sql` — **SECURITY : Revoke exposed grants (round 2)** : Révocation des grants à authenticated sur 4 tables supplémentaires (home_hero_slides, lieux, logs_audit, medias). Migration idempotente avec gestion d'erreur.
-  - 🔐 **Pattern** : Defense in depth - RLS policies only, no table-level grants
-  - ✅ **Validated** : Schéma déclaratif ne contient aucun grant large
-  - 📊 **Impact** : 4 objets sécurisés (logs_audit reste admin-only)
+  - ❌ **ERREUR** : "Defense in depth - RLS policies only" → FAUX - GRANTs sont obligatoires
+  - ❌ **Fausse validation** : "Schéma déclaratif ne contient aucun grant large" → Erreur de conception
+  - ⚠️ **Impact réel** : 4 objets devenus inaccessibles (homepage cassée)
 
 - `20251025183000_revoke_membres_messages_views.sql` — **SECURITY : Revoke exposed grants (round 3)** : Révocation des grants à authenticated sur membres_equipe, messages_contact et leurs vues admin associées. Migration idempotente avec gestion d'erreur.
-  - 🔐 **Views security** : Toutes les vues admin utilisent SECURITY INVOKER (membres_equipe_admin, messages_contact_admin)
-  - ✅ **Access control** : RLS policies + SECURITY INVOKER views = defense in depth
-  - 📊 **Impact** : 4 objets sécurisés (2 tables + 2 vues admin)
-  - 📝 **Documentation** : Voir `SECURITY_AUDIT_SUMMARY.md` pour détails complets
+  - ❌ **ERREUR** : "RLS policies + SECURITY INVOKER views = defense in depth" → Incomplet sans GRANTs
+  - ⚠️ **Impact réel** : 4 objets inaccessibles (2 tables + 2 vues admin)
 
 - `20251025184000_revoke_final_round_partners_profiles.sql` — **SECURITY : Revoke exposed grants (round 4)** : Révocation des grants à authenticated sur partners, profiles et leurs vues admin/tags. Migration idempotente avec gestion d'erreur.
-  - 🔐 **Views security** : partners_admin et popular_tags utilisent SECURITY INVOKER
-  - ✅ **Core tables** : partners (partenaires actifs) et profiles (profils utilisateurs) sécurisés via RLS uniquement
-  - 📊 **Impact** : 4 objets sécurisés (2 tables + 2 vues)
+  - ❌ **ERREUR** : "Tables sécurisées via RLS uniquement" → Impossible - PostgreSQL refuse l'accès sans GRANT
+  - ⚠️ **Impact réel** : 4 objets inaccessibles (partners, profiles critiques pour auth)
 
 - `20251025185000_revoke_seo_spectacles_final.sql` — **SECURITY : Revoke exposed grants (round 5)** : Révocation des grants à authenticated sur seo_redirects, sitemap_entries, spectacles et spectacles_categories. Re-tentative révocation information_schema. Migration idempotente avec gestion d'erreur.
-  - 🔐 **SEO & Core content** : Tables SEO (redirects, sitemap) et spectacles (table principale + junction categories) sécurisées
-  - ✅ **System view** : information_schema retry avec gestion warnings (objet système PostgreSQL)
-  - 📊 **Impact** : 4 objets sécurisés (3 tables + 1 junction table) + retry info_schema
+  - ❌ **ERREUR** : "Tables SEO et spectacles sécurisées" → Rendues inaccessibles même aux utilisateurs légitimes
+  - ⚠️ **Impact réel** : 4 objets inaccessibles (spectacles = table centrale du site)
 
 - `20251025190000_revoke_junction_tables_final.sql` — **SECURITY : Revoke exposed grants (round 6)** : Révocation des grants à authenticated sur spectacles_medias, spectacles_membres_equipe, spectacles_tags et tags. Double tentative révocation information_schema. Migration idempotente.
-  - 🔐 **Junction tables** : Tables de liaison spectacles (medias, membres, tags) sécurisées via RLS uniquement
-  - ✅ **Tags table** : Table tags (système de taxonomie) sécurisée
-  - 📊 **Impact** : 4 objets sécurisés (3 junction tables + 1 table) + retry info_schema
+  - ❌ **ERREUR** : "Junction tables sécurisées via RLS uniquement" → Relations inaccessibles
+  - ⚠️ **Impact réel** : 4 objets inaccessibles (relations critiques cassées)
 
 - `20251025191000_revoke_realtime_schema.sql` — **SECURITY : Revoke exposed grants (round 7)** : Révocation des grants anon/authenticated sur realtime.messages, realtime.schema_migrations, realtime.subscription (objets système Supabase Realtime). Tentative finale révocation information_schema. Migration idempotente.
-  - 🔐 **Supabase Realtime** : Tables système Realtime sécurisées (messages, migrations, subscriptions)
-  - ✅ **System security** : Accès Realtime contrôlé via RLS sur tables utilisateurs, pas via grants directs
-  - 📊 **Impact** : 3 objets système Supabase sécurisés + final retry info_schema
-  - ⚠️ **Note** : Migration mise à jour pour révoquer anon ET authenticated sur realtime.subscription
+  - ❌ **ERREUR** : "Accès Realtime contrôlé via RLS sur tables utilisateurs" → Logique erronée
+  - ⚠️ **Impact réel** : 3 objets système Supabase affectés
 
 - `20251025192000_revoke_realtime_subscription_authenticated.sql` — **SECURITY : Revoke exposed grants (round 7b - 補完)** : Révocation complémentaire du grant authenticated sur realtime.subscription (détecté par CI après Round 7). Migration idempotente.
-  - 🔐 **Completion** : Complète Round 7 en révoquant authenticated qui avait été manqué initialement
-  - ✅ **CI Detection** : Audit CI a détecté que realtime.subscription était encore exposé à authenticated
-  - 📊 **Impact** : 1 objet complété (realtime.subscription now fully secured)
-  - 🎯 **Final status Round 1-7b** : 28 objets totaux sécurisés sur 7 rounds + 1 round complémentaire
+  - ❌ **ERREUR** : "Completion Round 7" → Continuation d'une stratégie erronée
+  - ⚠️ **Final status Round 1-7b** : 28 objets totaux révoqués → 28 objets cassés en production
 
-**Pivot stratégique après Round 7b** : Adoption d'une stratégie whitelist (`audit_grants_filtered.sql`) pour exclure les objets système PostgreSQL/Supabase (`information_schema, realtime.*, storage.*, extensions.*`) qui se ré-appliquent automatiquement.
+**Pivot stratégique après Round 7b** : Adoption d'une stratégie whitelist (`audit_grants_filtered.sql`) pour exclure les objets système PostgreSQL/Supabase. **❌ ERREUR** : Le pivot n'a pas questionné la prémisse erronée "RLS-only security model".
 
-### Security Audit - Rounds 8-17 (October 26, 2025)
+### Security Audit - Rounds 8-17 (October 26, 2025) - ❌ DEPRECATED
 
-**Context:** Rounds 8-17 focused on business objects detected by filtered audit. System objects now whitelisted as safe.
+**Context:** Rounds 8-17 continued the flawed security model. System objects whitelisted but business objects still broken.
 
 - `20251026080000_revoke_articles_presse_functions.sql` — **SECURITY : Round 8** : Révocation grants sur articles_presse/articles_tags + trigger functions versioning/slugification. Idempotent.
-  - 🔐 **Objets** : 6 (2 tables + 4 triggers)
-  - ✅ **Impact** : Fonctions métier sécurisées
+  - ❌ **ERREUR** : "Fonctions métier sécurisées" → Fonctions métier devenues inaccessibles
+  - ⚠️ **Impact** : 6 objets cassés (2 tables + 4 triggers)
 
 - `20251026090000_revoke_categories_analytics_functions.sql` — **SECURITY : Round 9** : Révocation grants sur categories, categories_hierarchy + analytics functions. Idempotent.
-  - 🔐 **Objets** : 6 (1 table + 1 vue + 4 fonctions)
-  - ✅ **Impact** : Pipeline analytics sécurisé
+  - ❌ **ERREUR** : "Pipeline analytics sécurisé" → Pipeline analytics cassé
+  - ⚠️ **Impact** : 6 objets cassés (1 table + 1 vue + 4 fonctions)
 
 - `20251026100000_revoke_storage_search_functions.sql` — **SECURITY : Round 10** : Découverte storage.buckets + search function. Idempotent.
-  - 🔐 **Objets** : 3 (1 Storage + 2 fonctions)
-  - ✅ **Whitelist** : storage.buckets ajouté
+  - ⚠️ **Impact** : 3 objets Storage whitelistés (bonne décision pour objets système)
 
 - `20251026110000_revoke_storage_analytics_persistent_functions.sql` — **SECURITY : Round 11** : storage.buckets_analytics + pg_trgm functions. Idempotent.
-  - 🔐 **Objets** : 3 (1 Storage + 2 pg_trgm)
-  - ✅ **Whitelist** : Extension pg_trgm patterns ajoutés (~200+ fonctions exclues)
+  - ⚠️ **Impact** : Extension pg_trgm patterns ajoutés à whitelist (bonne décision)
 
 - `20251026120000_revoke_storage_objects_business_functions.sql` — **SECURITY : Round 12 - CRITICAL** : storage.objects avec ALL PRIVILEGES! Idempotent.
-  - 🔐 **Objets** : 5 (1 CRITICAL Storage + 4 fonctions)
-  - ⚠️ **VULNÉRABILITÉ CRITIQUE** : Bypass complet Storage RLS
-  - ✅ **Fix** : Révocation ALL + whitelist
+  - ⚠️ **Vraie vulnérabilité** : storage.objects avec ALL PRIVILEGES était un vrai problème de sécurité
+  - ✅ **Fix légitime** : Révocation ALL sur storage.objects (seul Round avec bénéfice réel)
+  - ⚠️ **Impact** : 1 vulnérabilité critique corrigée + 4 fonctions cassées
 
 - `20251026130000_revoke_storage_prefixes_versioning_functions.sql` — **SECURITY : Round 13** : storage.prefixes + is_admin(). Idempotent.
-  - 🔐 **Objets** : 5 (1 Storage + 4 fonctions dont is_admin)
-  - ✅ **Vérification** : is_admin() fonctionne via RLS SECURITY DEFINER
+  - ❌ **ERREUR** : Révocation EXECUTE sur is_admin() alors que fonction critique pour RLS
+  - ⚠️ **Impact** : 5 objets affectés (1 Storage whitelisté + 4 fonctions cassées)
 
 - `20251026140000_revoke_storage_multipart_auth_triggers.sql` — **SECURITY : Round 14** : storage.s3_multipart_uploads + triggers auth. Idempotent.
-  - 🔐 **Objets** : 4 (1 Storage + 3 auth triggers)
-  - ✅ **Whitelist** : Multipart uploads système
+  - ⚠️ **Impact** : 1 Storage whitelisté + 3 auth triggers cassés
 
 - `20251026150000_revoke_storage_multipart_parts_utility_functions.sql` — **SECURITY : Round 15** : s3_multipart_uploads_parts + utilities. Idempotent.
-  - 🔐 **Objets** : 5 (1 Storage + 4 utilities)
-  - ✅ **Completion** : 6 tables Storage whitelistées
+  - ⚠️ **Impact** : 1 Storage whitelisté + 4 utilities cassées
 
 - `20251026160000_revoke_remaining_versioning_triggers.sql` — **SECURITY : Round 16** : Nettoyage final triggers versioning. Idempotent.
-  - 🔐 **Objets** : 6 triggers (spectacles, membres, partners, etc.)
-  - ✅ **Completion** : 14 triggers versioning totaux
+  - ❌ **ERREUR** : Révocation EXECUTE sur triggers de versioning → Système de versioning cassé
+  - ⚠️ **Impact** : 6 triggers versioning cassés (spectacles, membres, partners, etc.)
 
 - `20251026170000_revoke_check_communique_has_pdf_function.sql` — **SECURITY : Round 17 - FINAL** : Dernière fonction métier détectée. Idempotent.
-  - 🔐 **Objets** : 1 fonction (check_communique_has_pdf)
-  - 🎯 **Detection** : CI après Round 16
-  - ✅ **Status** : **CAMPAIGN COMPLETE** - 73 objets sécurisés
-  - 🚀 **CI** : ✅ PASSED - Zero exposed objects
+  - ❌ **ERREUR** : "CAMPAIGN COMPLETE - Zero exposed objects" → 73 objets cassés en production
+  - ⚠️ **Faux succès CI** : CI vérifie absence de GRANTs, pas fonctionnalité de l'application
+  - 🚨 **Résultat final** : Production entièrement cassée le 27 octobre 2025 02:00
 
-### 🎊 Security Campaign Complete
+### ⚠️ Bilan Final Campagne de Sécurité (Rounds 1-17)
 
-**Total:** 73 objets (17 rounds, Oct 25-26 2025)  
-**Critical:** storage.objects vulnerability (Round 12)  
-**Tools:** audit_grants_filtered.sql + check-security-audit.sh  
-**Status:** ✅ Ready for production merge
+**Total:** 73 objets révoqués = 73 objets cassés  
+**Vraie vulnérabilité corrigée:** 1 seule (storage.objects ALL PRIVILEGES - Round 12)  
+**Faux positifs:** 72 objets (GRANTs légitimes et nécessaires)  
+**Tools défaillants:** audit_grants_filtered.sql + check-security-audit.sh (vérifient absence de GRANTs, pas fonctionnalité)  
+**Status:** ❌ Production DOWN - Incident critique - 8h de résolution  
+**Leçons apprises:** Voir `doc/INCIDENT_POSTMORTEM_RLS_GRANTS_2025-10-27.md`
 
-**Total sécurité audit Rounds 1-7b** : 28 objets exposés détectés et corrigés (15 tables + 4 junction + 4 vues admin + 1 vue tags + 3 Realtime system + 1 PostgreSQL system). Toutes les migrations sont idempotentes et peuvent être rejouées sans effet de bord. Script d'audit : `supabase/scripts/audit_grants.sql` + `analyze_remaining_grants.sh`.
+---
+
+## ✅ Emergency Remediation - GRANT Restoration (October 27, 2025)
+
+**Context:** Production down since Oct 27 02:00. Root cause identified: Missing GRANTs break PostgreSQL security model.
+
+**Resolution Timeline:**
+
+- 02:00 - Production incident reported: "permission denied for table home_hero_slides"
+- 02:15 - Root cause identified: PostgreSQL requires GRANT + RLS (not RLS alone)
+- 02:20 - Emergency migrations created to restore GRANTs
+- 02:30 - Production restored
+
+### Emergency Migrations (Corrective)
+
+- `20251027020000_restore_basic_grants_for_rls.sql` — **EMERGENCY : Restore GRANTs for 7 critical tables**
+  - ✅ **Correct model** : GRANT SELECT to anon,authenticated + GRANT INSERT,UPDATE,DELETE to authenticated
+  - ✅ **Tables restored** : home_hero_slides, spectacles, partners, communiques_presse, compagnie_stats, configurations_site, home_about_content, profiles, membres_equipe
+  - ✅ **Impact** : Homepage functionality restored
+  - 📊 **Total** : 9 tables (7 critical + profiles + membres_equipe)
+
+- `20251027021000_restore_remaining_grants.sql` — **EMERGENCY : Restore GRANTs for 26 remaining tables**
+  - ✅ **Categories** : Content tables, compagnie tables, liaison tables (11), system tables
+  - ✅ **Sequences** : GRANT USAGE ON ALL SEQUENCES IN SCHEMA public
+  - ✅ **Impact** : All business functionality restored
+  - 📊 **Total** : 26 tables + sequences
+
+- `20251027021500_restore_views_grants.sql` — **EMERGENCY : Restore GRANTs for 11 views**
+  - ✅ **Public views** : GRANT SELECT to anon,authenticated (articles_presse_public, communiques_presse_public, categories_hierarchy, popular_tags)
+  - ✅ **Admin views** : GRANT SELECT to authenticated (dashboard, admin views)
+  - ✅ **Impact** : All views accessible again
+  - 📊 **Total** : 11 views (4 public + 7 admin)
+
+- `20251027022000_fix_logs_audit_grants.sql` — **EMERGENCY : Fix audit trigger failures**
+  - ✅ **Root cause** : audit_trigger() needs INSERT permission on logs_audit
+  - ✅ **Solution** : GRANT INSERT ON logs_audit TO authenticated
+  - ✅ **Impact** : Audit system functional again
+  - 📊 **Total** : 1 system table
+
+- `20251027022500_grant_execute_all_trigger_functions.sql` — **EMERGENCY : Restore EXECUTE on trigger functions**
+  - ✅ **Functions** : Audit, versioning core (2), versioning triggers (9), automation (3)
+  - ✅ **Solution** : GRANT EXECUTE ON FUNCTION TO authenticated
+  - ✅ **Impact** : All triggers functional (audit, versioning, automation)
+  - 📊 **Total** : 15 trigger functions
+
+## ✅ Emergency Remediation Complete
+
+**Total restored:** 59 database objects (33 tables + 11 views + 15 functions)  
+**Production status:** ✅ OPERATIONAL  
+**Documentation:** `doc/INCIDENT_POSTMORTEM_RLS_GRANTS_2025-10-27.md`  
+**Lessons learned:** PostgreSQL security = GRANT (table-level) + RLS (row-level) - Both required, not alternatives
+
+---
+
+## 🧹 Migration History Cleanup & Repair (November 17, 2025)
+
+**Context:** Maintenance operation to clean up duplicate migration files and repair migration history consistency between local development and Supabase Cloud.
+
+### Operation Details
+
+#### 1. Migration History Repair
+
+```bash
+cd /home/yandev/projets/rougecardinalcompany && pnpm dlx supabase migration repair --status reverted 20251021000001 20251024215030 20251024215130 20251024231855 20251025160000 20251025161000 20251025163000 20251025164500 20251025170000 20251025170100 20251025173000 20251025174500 20251025175500 20251025180000 20251025181000 20251025182000 20251025183000 20251025184000 20251025185000 20251025190000 20251025191000 20251025192000 20251026080000 20251026090000 20251026100000 20251026110000 20251026120000 20251026130000 20251026140000 20251026150000 20251026160000 20251026170000 --linked
+```
+
+**Impact:** Marked 32 migration files as "reverted" status in Supabase Cloud migration history to ensure consistency with local development state.
+
+#### 2. Duplicate Spectacles Migration Files Cleanup
+
+```bash
+cd /home/yandev/projets/rougecardinalcompany && rm -f supabase/migrations/20251117000000_fix_spectacles_insert_rls_policy.sql supabase/migrations/20251117000000_fix_spectacles_rls_insert_policy.sql supabase/migrations/20251116144733_fix_spectacles_insert_policy.sql supabase/migrations/20251116160000_fix_spectacles_insert_policy.sql && ls -la supabase/migrations/*spectacles*.sql
+```
+
+**Files removed:** 4 duplicate migration files for spectacles RLS policies  
+**Files kept:** 1 unique migration file with proper timestamp  
+**Total found:** 8 spectacles-related migration files (4 removed, 1 kept)
+
+### Why This Operation Was Critical
+
+1. **Migration History Consistency:** Ensures Supabase Cloud and local development have synchronized migration states
+2. **Duplicate Prevention:** Eliminates confusion from multiple migration files with same purpose but different timestamps
+3. **Production Safety:** Prevents potential migration conflicts during deployments
+4. **Development Hygiene:** Maintains clean, organized migration directory structure
+
+### Files Affected
+
+**Removed duplicates:**
+
+- `20251117000000_fix_spectacles_insert_rls_policy.sql`
+- `20251117000000_fix_spectacles_rls_insert_policy.sql`
+- `20251116144733_fix_spectacles_insert_policy.sql`
+- `20251116160000_fix_spectacles_insert_policy.sql`
+
+**Kept unique file:**
+
+- `20251117154411_fix_spectacles_rls_clean.sql` (TASK021 FINAL - properly integrated into declarative schema)
+
+### Verification
+
+```bash
+ls -la supabase/migrations/*spectacles*.sql
+# Result: Only 1 file remaining (the correct one)
+```
+
+**Status:** ✅ Migration history repaired and duplicates cleaned up successfully
+
+---
+
+## 🧹 Migration Files Cleanup (November 17, 2025)
+
+**Context:** Additional cleanup of obsolete migration files identified during verification.
+
+### Files Removed
+
+**Debug/Test Scripts (3 files):**
+
+- ❌ `20251117154221_debug_spectacles_policies.sql` — Debug script for checking RLS policies
+- ❌ `20251117154301_test_insert_public_false.sql` — Test script for public=false insertion
+- ❌ `20251117154330_check_rls_policies_detailed.sql` — Detailed RLS policies diagnostic
+
+**Intermediate Spectacles Fixes (2 files):**
+
+- ❌ `20251117015616_fix_spectacles_rls_insert_policy.sql` — Used is_admin() function (deprecated)
+- ❌ `20251117020919_fix_spectacles_rls_direct_query.sql` — Intermediate version with direct query
+
+### Files Kept
+
+**Final Spectacles Fix:**
+
+- ✅ `20251117154411_fix_spectacles_rls_clean.sql` — Complete RLS cleanup (TASK021 FINAL)
+
+**Other Files Status:**
+
+- `ROUND_7B_ANALYSIS.md` — Historical analysis document (consider moving to docs/)
+- `migrations.md` — This documentation file
+- `sync_existing_profiles.sql` — One-time sync script (potentially obsolete)
+
+### Result
+
+- **Before:** 41 files
+- **After:** 36 files  
+- **Removed:** 5 obsolete files
+- **Status:** ✅ Cleanup completed successfully
+
+---
+
+## Security Audit Remediation (October 2025) - ❌ DEPRECATED - DO NOT REPLICATE
+
+**TASK028B - Suppression des scripts obsolètes Round 7** (Issue #28, commit `20ecfbb`, 26 oct 2025 02:25)
+
+Suite à la finalisation de la campagne de sécurité (Round 17, CI passed), 3 fichiers temporaires d'audit/diagnostic ont été supprimés pour nettoyer le dépôt :
+
+- ❌ `supabase/scripts/quick_audit_test.sql` — Version simplifiée redondante de `audit_grants.sql`
+- ❌ `supabase/scripts/check_round7b_grants.sh` — Script bash spécifique Round 7b (utilisait un flag non supporté)
+- ❌ `supabase/migrations/verify_round7_grants.sql` — Vérification Round 7 spécifique (one-time check)
+
+**Fichiers conservés** (outils de diagnostic permanents) :
+
+- ✅ `supabase/scripts/audit_grants.sql` — Référence audit complète (non filtrée)
+- ✅ `supabase/scripts/quick_check_all_grants.sql` — Outil diagnostic complet
+- ✅ `supabase/scripts/audit_grants_filtered.sql` — Version filtrée (whitelist système)
+
+**Motivation** : Les fichiers historiques sont déjà documentés dans `supabase/migrations/migrations.md` et `supabase/migrations/SECURITY_AUDIT_SUMMARY.md`. Le nettoyage simplifie la maintenance et réduit le bruit pour les futurs audits.
+
+**Impact** : Aucun (scripts temporaires archivés dans l'historique Git si besoin de consultation).
 
 ## Corrections et fixes critiques
+
+- `20251117154411_fix_spectacles_rls_clean.sql` — **TASK021 FINAL** : Nettoyage et recréation complète des politiques RLS spectacles après résolution des problèmes de contexte auth.
+  - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/61_rls_main_tables.sql`
+  - 🔐 **Politiques nettoyées** : Toutes les anciennes policies supprimées et recréées proprement
+  - 🎯 **Pattern final** : Direct query sur profiles.role au lieu de is_admin() pour éviter problèmes de contexte
+  - 📊 **Sécurité** : Admins uniquement pour INSERT, propriétaires/admins pour UPDATE/DELETE, public pour SELECT si public=true
+
+- `20251117154330_check_rls_policies_detailed.sql` — **DEBUG TASK021** : Script de diagnostic détaillé pour vérifier l'état des politiques RLS spectacles pendant le debugging.
+
+- `20251117154301_test_insert_public_false.sql` — **DEBUG TASK021** : Test d'insertion avec public=false pour valider les politiques RLS restrictives.
+
+- `20251117154221_debug_spectacles_policies.sql` — **DEBUG TASK021** : Script de debug pour analyser les politiques RLS spectacles et identifier les problèmes de contexte.
+
+- `20251117020919_fix_spectacles_rls_direct_query.sql` — **TASK021 FIX** : Correction de la politique INSERT spectacles avec requête directe sur profiles au lieu de is_admin().
+  - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/61_rls_main_tables.sql`
+  - 🔐 **Root cause** : Contexte d'évaluation RLS différent du contexte RPC
+  - ⚡ **Solution** : Requête directe `EXISTS (SELECT 1 FROM profiles WHERE user_id = auth.uid() AND role = 'admin')`
+  - 🎯 **Impact** : Évite les problèmes de fonction context lors des insertions
+
+- `20251120120000_move_extensions_to_schema.sql` — **SECURITY : Move extensions to dedicated schema** : Déplacement des extensions (`pgcrypto`, `pg_trgm`, `unaccent`, `citext`) du schéma `public` vers un nouveau schéma `extensions`. Mise à jour du `search_path` de la base de données.
+  - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/01_extensions.sql`
+  - 🔐 **Sécurité** : Réduit la surface d'attaque sur le schéma `public` et satisfait les linters de sécurité Supabase.
+
+- `20251117015616_fix_spectacles_rls_insert_policy.sql` — **TASK021 FIX** : Correction initiale de la politique INSERT spectacles pour résoudre l'erreur 42501.
+  - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/61_rls_main_tables.sql`
+  - 🔐 **Issue** : Politique INSERT trop restrictive causait échec des insertions admin
+  - ⚡ **Fix** : Simplification de la logique de vérification admin
 
 - `20250918000000_fix_spectacles_versioning_trigger.sql` — **FIX CRITIQUE** : Correction du trigger `spectacles_versioning_trigger()` pour utiliser le champ `public` (boolean) au lieu de `published_at` (inexistant dans la table spectacles). Ce trigger causait une erreur `record "old" has no field "published_at"` lors des insertions/updates de spectacles.
   - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/15_content_versioning.sql` (déjà corrigé)

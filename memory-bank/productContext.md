@@ -1,4 +1,22 @@
-# Contexte Produit
+# Product Context
+
+Pourquoi ce produit existe:
+
+- Fournir une vitrine culturelle professionnelle pour la compagnie Rouge Cardinal.
+- Permettre la gestion de contenu (shows, presse, médias) via un back-office sécurisé.
+- Offrir des ressources presse et un accès contrôlé aux données sensibles.
+
+Public cible:
+
+- Grand public (visiteurs du site)
+- Professionnels de la presse
+- Administrateurs et éditeurs internes
+
+Principaux points de valeur:
+
+- Présentation claire et soignée des spectacles
+- Processus éditorial simple et sécurisé
+- Accès sécurisé aux contenus privés via RLS + GRANTs
 
 ## Vision du Produit
 

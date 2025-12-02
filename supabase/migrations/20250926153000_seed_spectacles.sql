@@ -6,7 +6,7 @@ values
   (
     'Les Murmures du Temps',
     'les-murmures-du-temps',
-    'en_tournee',
+    'actuellement',
     'Un voyage poétique à travers les âges, où passé et présent se rencontrent dans un dialogue bouleversant. Cette création originale explore les liens invisibles qui nous unissent à travers le temps.',
     'Voyage poétique entre passé et présent.',
     'Drame contemporain',
@@ -20,7 +20,7 @@ values
   (
     'Fragments d''Éternité',
     'fragments-d-eternite',
-    'nouvelle_creation',
+    'actuellement',
     'Une création originale qui explore les liens invisibles qui nous unissent, entre rire et larmes. Un spectacle touchant sur la condition humaine et nos quêtes de sens.',
     'Création originale sur les liens invisibles.',
     'Création originale',

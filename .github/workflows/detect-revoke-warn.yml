@@ -1,0 +1,72 @@
+name: Detect REVOKE in migrations (fail-on-match)
+
+on:
+  push:
+    branches: [ feature/backoffice, main ]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  detect-revoke:
+    name: Scan changed migrations for REVOKE (fail-on-match)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository (full)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Find changed files
+        id: changed
+        run: |
+          echo "Determining changed files..."
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE=${{ github.event.pull_request.base.ref }}
+            echo "Fetching base branch $BASE"
+            git fetch origin $BASE --depth=1 || true
+            CHANGED=$(git diff --name-only origin/$BASE...HEAD || true)
+          else
+            # For pushes, compare against previous commit
+            CHANGED=$(git diff --name-only HEAD~1 HEAD || true)
+          fi
+          echo "changed_files<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGED" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Scan changed migration SQLs for REVOKE and fail
+        run: |
+          set -eu
+          CHANGED="${{ steps.changed.outputs.changed_files }}"
+          echo "Changed files:"; echo "$CHANGED"
+          FOUND=0
+          # Iterate over changed files and scan only SQL migration files under supabase/migrations
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            # Ignore legacy migrations folder (quarantined dangerous migrations)
+            case "$file" in
+              supabase/migrations/legacy-migrations/*)
+                echo "Skipping legacy migration $file"
+                continue
+                ;;
+              supabase/migrations/*.sql|supabase/migrations/**/*.sql)
+                if grep -n -E '\bREVOKE\b' -- "$file" >/dev/null 2>&1; then
+                  FOUND=1
+                  # Create a workflow annotation (error) and show context
+                  echo "::error file=$file::REVOKE found in migration $file - remove or justify this change before merging."
+                  echo "--- matches in $file ---"
+                  grep -n -E '\bREVOKE\b' -- "$file" | sed -n '1,200p' || true
+                fi
+                ;;
+              *)
+                ;;
+            esac
+          done <<< "$CHANGED"
+
+          if [ "$FOUND" -eq 1 ]; then
+            echo "Error: one or more changed migration files contain REVOKE statements. This job will FAIL to block merges until the change is justified or moved to legacy-migrations."
+            echo "If the REVOKE is intentional, either move the migration to supabase/migrations/legacy-migrations or add a clear justification to the PR and update the allowlist as appropriate."
+            exit 1
+          fi
+
+          echo "No REVOKE statements found in changed migration files."

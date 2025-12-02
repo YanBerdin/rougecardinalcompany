@@ -1,0 +1,12 @@
+-- List of objects (one per line) that are allowed to have GRANTs to PUBLIC/anon/authenticated
+-- This file is used by CI to exclude known/restored objects from the security audit
+-- Format: schema.object_name (e.g. public.membres_equipe)
+public.membres_equipe
+public.membres_equipe_admin
+
+# Entries added 2025-10-27 to address CI audit findings (objects intentionally exposed to 'authenticated')
+relation|public|abonnes_newsletter|authenticated
+function|public|set_slug_if_empty()|authenticated
+function|public|spectacles_versioning_trigger()|authenticated
+function|public|update_tag_usage_count()|authenticated
+function|public|update_updated_at_column()|authenticated

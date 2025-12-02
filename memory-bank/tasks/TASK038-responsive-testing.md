@@ -1,4 +1,4 @@
-# [TASK038] - Responsive Testing
+# \[TASK038] - Responsive Testing
 
 **Status:** Pending  
 **Added:** 2025-10-16  

@@ -6,8 +6,11 @@ export async function PartnersContainer() {
   // TODO: remove - artificial delay to visualize Suspense skeletons
   await new Promise((resolve) => setTimeout(resolve, 1500));
 
-  const records = await fetchActivePartners(12);
-  const partners: Partner[] = (records ?? []).map((r) => ({
+  const result = await fetchActivePartners(12);
+
+  const records = result.success ? result.data : [];
+
+  const partners: Partner[] = records.map((r) => ({
     id: r.id,
     name: r.name,
     type: "",
@@ -15,5 +18,6 @@ export async function PartnersContainer() {
     logo: r.logo_url ?? "",
     website: r.website_url ?? "#",
   }));
+
   return <PartnersView partners={partners} isLoading={false} />;
 }

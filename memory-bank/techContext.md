@@ -1,4 +1,25 @@
-# Contexte Technique
+# Tech Context
+
+Versions et dépendances clés observées dans le dépôt (2025-10-27):
+
+- Node.js: ^20 (devDeps)
+- Next.js: 15.4.5
+- TypeScript: ^5
+- Tailwind CSS: ^3.4.x
+- Supabase: client/server integration via `@supabase/ssr` and `@supabase/supabase-js` patterns
+
+Structure principale:
+
+- `app/` — App Router, pages et layouts
+- `components/` — composants réutilisables (ui/, features/)
+- `supabase/` — scripts, migrations, server client helpers
+- `lib/` — utilitaires et DAL
+
+Outils et commandes utiles:
+
+- Supabase CLI: `supabase db push`, `supabase link`
+- Scripts locaux: `supabase/scripts/*` pour audit et diagnostics
+- CI: GitHub Actions (workflows ajoutés pour audit, détection REVOKE, monitoring)
 
 ## Stack Technologique
 
@@ -29,7 +50,7 @@
 
 ### Structure des Dossiers
 
-```txt
+```bash
 /
 ├── app/                    # Pages et routes Next.js
 │   ├── layout.tsx         # Layout principal
@@ -68,9 +89,19 @@
 │   └── contact-message-notification.tsx
 ├── lib/                  # Utilitaires et services
 │   ├── supabase/        # Configuration Supabase
-│   ├── dal/             # Data Access Layer (server-only)
-│   │   ├── team.ts      # 🆕 Team members DAL
-│   │   └── ...          # Other DAL modules
+│   ├── dal/             # Data Access Layer (server-only) — 17 modules
+│   │   ├── helpers/     # 🆕 DAL utilities (error, format, slug)
+│   │   │   ├── error.ts # DALResult<T> + toDALResult()
+│   │   │   ├── format.ts
+│   │   │   ├── slug.ts
+│   │   │   └── index.ts # Barrel exports
+│   │   ├── team.ts
+│   │   └── ...          # Other DAL modules (17 total)
+│   ├── schemas/         # 🆕 Zod schemas centralisés (11 files)
+│   │   ├── team.ts      # Server + UI schemas
+│   │   ├── media.ts
+│   │   └── index.ts     # Barrel exports
+│   ├── actions/         # 🆕 Server Actions centralisées
 │   ├── email/           # Email actions & schemas
 │   ├── hooks/           # Custom React hooks
 │   ├── resend.ts        # Resend client config
@@ -203,6 +234,15 @@ export const config = {
 - Utilitaires: camelCase (ex: `utils.ts`)
 - Pages: kebab-case (URLs)
 
+### Database Conventions
+
+- **SQL Functions** : `SET search_path = ''` obligatoire (prévention SQL injection)
+- **SECURITY DEFINER** : Justification explicite requise (issue #27)
+- **Views** : `WITH (security_invoker = true)` par défaut
+- **RLS** : Activé sur 100% des tables (36/36), aucun table-level grant
+- **Migrations** : Idempotentes avec DO blocks + exception handling
+- **Audit** : audit_grants_filtered.sql (whitelist objets système)
+
 ### Pattern de Composants
 
 ```typescript
@@ -218,6 +258,14 @@ export function ComponentName() {
 ```
 
 ## Sécurité
+
+### Database Security
+
+- **RLS-only model** : Aucun table-level grant, contrôle d'accès 100% via RLS policies
+- **SECURITY INVOKER views** : 10 vues converties pour éliminer escalade privilèges
+- **Storage RLS** : Bucket "medias" avec policies (public read, auth upload, admin delete)
+- **Function security** : `SET search_path = ''` + SECURITY INVOKER par défaut
+- **Audit automation** : CI security check avec audit_grants_filtered.sql
 
 ### Authentification
 
@@ -260,6 +308,14 @@ export function ComponentName() {
 - **Supabase CLI** : `pnpm dlx supabase start/stop/status/db reset`
 - **Workflow déclaratif** : `db diff` pour générer migrations, `db push` pour appliquer
 
+### Security Audit Tools
+
+- **CI automation** : `.github/workflows/security-audit.yml` avec audit_grants_filtered.sql
+- **Manual check** : `scripts/check-security-audit.sh` (requires DB URL extraction fix)
+- **Detailed inspection** : `supabase/scripts/quick_check_all_grants.sql`
+- **Whitelist strategy** : Exclusion objets système (`information_schema, realtime.*, storage.*, extensions.*`)
+- **Verification** : Après chaque migration, CI check pour détecter expositions
+
 ### Documentation opérationnelle
 
 **Supabase Local:**
@@ -278,3 +334,145 @@ export function ComponentName() {
 
 - `memory-bank/architecture/Project_Architecture_Blueprint.md` : Architecture détaillée du projet
 - `memory-bank/architecture/Project_Folders_Structure_Blueprint.md` : Guide de structure des dossiers
+
+**Security Audit:**
+
+- `supabase/migrations/SECURITY_AUDIT_SUMMARY.md` : Campagne complète 17 rounds (73 objets)
+- `supabase/migrations/ROUND_7B_ANALYSIS.md` : Analyse pivot whitelist
+- `doc/rls-policies-troubleshooting.md` : Guide troubleshooting RLS (202 lignes)
+- `supabase/scripts/audit_grants_filtered.sql` : Script audit production
+- `scripts/check-security-audit.sh` : Runner CI/manuel
+
+## Évolutions Technologiques Récentes (Novembre 2025)
+
+### Client-Side Token Processing Pattern
+
+**Contexte**: Résolution critique du système d'invitation admin (22 novembre 2025)
+
+**Problème résolu**:
+
+- Erreurs 404 sur `/auth/setup-account` lors de l'acceptation d'invitations
+- Tokens Supabase passés dans URL hash (`#access_token=...`) invisibles côté serveur
+- Middleware Next.js ne peut pas lire `window.location.hash`
+
+**Solution technique**:
+
+- Conversion de `app/(marketing)/auth/setup-account/page.tsx` en Client Component
+- Extraction de tokens depuis `window.location.hash` côté client
+- Établissement de session Supabase avec `setSession()`
+- Nettoyage sécurisé de l'URL après traitement
+
+**Technologies impliquées**:
+
+```typescript
+// Pattern Client Component pour auth
+"use client";
+import { useEffect, useState } from "react";
+import { createClient } from "@/supabase/client";
+
+// Extraction tokens hash URL
+const hashParams = new URLSearchParams(window.location.hash.substring(1));
+const accessToken = hashParams.get("access_token");
+
+// Établissement session
+const { data, error } = await supabase.auth.setSession({
+  access_token: accessToken,
+  refresh_token: refreshToken || "",
+});
+
+// Nettoyage sécurité
+window.history.replaceState(null, "", window.location.pathname);
+```
+
+**Impact performance**:
+
+- **Avant**: 404 erreurs, expérience utilisateur cassée
+- **Après**: Acceptation d'invitation fluide, ~2-5ms traitement tokens
+- **Optimisation JWT**: Utilisation `getClaims()` au lieu de `getUser()` (100x plus rapide)
+
+**Standards appliqués**:
+
+- Client Components uniquement pour logique nécessitant `window` API
+- Server Components par défaut pour tout le reste
+- Validation TypeScript stricte et gestion d'erreurs robuste
+- Sécurité: tokens nettoyés après utilisation, sessions établies correctement
+
+**Références**:
+
+- Implementation: `app/(marketing)/auth/setup-account/page.tsx`
+- Pattern documenté: `memory-bank/systemPatterns.md` (section "Client-Side Token Processing")
+- Tests: `scripts/test-invitation-flow.ts`
+
+### DAL SOLID Refactoring (30 novembre 2025)
+
+**Contexte**: Refactoring complet du Data Access Layer pour atteindre 92% de conformité SOLID.
+
+**Métriques finales**:
+
+| Critère | Avant | Après | Cible |
+|---------|-------|-------|-------|
+| DAL avec DALResult | 0/17 | 17/17 | 100% |
+| revalidatePath dans DAL | ~12 | 0 | 0 |
+| Imports email dans DAL | 3 | 0 | 0 |
+| Schemas centralisés | ~8 | 11 | 100% |
+| **Score SOLID global** | ~60% | **92%** | 90% |
+
+**Pattern DALResult** (Standard):
+
+```typescript
+// lib/dal/helpers/error.ts
+export type DALResult<T> = 
+  | { success: true; data: T }
+  | { success: false; error: string };
+
+// Usage dans tous les modules DAL
+export async function fetchTeamMembers(): Promise<DALResult<TeamMemberDTO[]>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("membres_equipe").select("*");
+
+  if (error) return { success: false, error: error.message };
+  return { success: true, data: data ?? [] };
+}
+```
+
+**Dual Schemas Pattern** (Server vs UI):
+
+```typescript
+// lib/schemas/feature.ts
+
+// Server schema (bigint pour database IDs)
+export const FeatureInputSchema = z.object({
+  id: z.coerce.bigint(),
+  // ...
+});
+
+// UI schema (number pour formulaires)
+export const FeatureFormSchema = z.object({
+  id: z.number().int().positive(),
+  // ...
+});
+```
+
+**Règles critiques**:
+
+- ✅ DAL retourne `DALResult<T>` — JAMAIS throw
+- ✅ `revalidatePath()` dans Server Actions UNIQUEMENT — JAMAIS dans DAL
+- ✅ Imports email dans service email UNIQUEMENT — JAMAIS dans DAL
+- ✅ Props colocalisées avec composants dans `types.ts`
+- ✅ Server Actions colocalisées dans `app/(admin)/admin/<feature>/actions.ts`
+
+**Structure DAL Helpers**:
+
+```bash
+lib/dal/helpers/
+├── error.ts      # DALResult<T> + toDALResult()
+├── format.ts     # formatDate(), formatPrice(), etc.
+├── slug.ts       # generateSlug()
+└── index.ts      # Barrel exports
+```
+
+**Références**:
+
+- Instructions: `.github/instructions/dal-solid-principles.instructions.md`
+- Pattern CRUD: `.github/instructions/crud-server-actions-pattern.instructions.md`
+- Architecture: `memory-bank/architecture/Project_Architecture_Blueprint.md`

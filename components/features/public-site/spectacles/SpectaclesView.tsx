@@ -56,7 +56,7 @@ export function SpectaclesView({
             {currentShows.map((show, index) => (
               <Card
                 key={show.id}
-                className={`card-hover animate-fade-in-up overflow-hidden shows-card-dark w-full lg:w-[calc(50%-1.5rem)] max-w-2xl`}
+                className={`card-hover animate-fade-in-up overflow-hidden w-full lg:w-[calc(50%-1.5rem)] max-w-2xl`}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 h-full">
@@ -124,7 +124,7 @@ export function SpectaclesView({
                     </div>
 
                     <div className="flex space-x-3">
-                      <Button className="flex-1 btn-primary" asChild>
+                      <Button variant="default" className="flex-1" asChild>
                         <Link href={`/spectacles/${show.id}`}>Réserver</Link>
                       </Button>
                       <Button variant="outline" asChild className="btn-outline">
@@ -156,7 +156,7 @@ export function SpectaclesView({
             {displayedArchivedShows.map((show, index) => (
               <Card
                 key={show.id}
-                className={`card-hover animate-fade-in-up overflow-hidden shows-card-dark w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm`}
+                className={`card-hover animate-fade-in-up overflow-hidden w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm`}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div className="relative">
@@ -195,7 +195,7 @@ export function SpectaclesView({
 
                 <CardFooter>
                   <Button
-                    variant="ghost"
+                    variant="outline-primary"
                     className="w-full btn-outline px-4 py-2 rounded-lg"
                     asChild
                   >
@@ -219,7 +219,7 @@ export function SpectaclesView({
             </p>
             {hasMoreArchivedShows && (
               <Button
-                variant="outline"
+                variant="default"
                 size="lg"
                 className="cta-blur-button"
                 onClick={() => setShowAllArchived(!showAllArchived)}
@@ -231,13 +231,15 @@ export function SpectaclesView({
               </Button>
             )}
             {/* Debug info - TODO: remove in production */}
-            {/*}
+            {/*
+            }
                         {process.env.NODE_ENV === 'development' && (
                             <div className="mt-4 text-xs text-muted-foreground">
                                 Debug: {archivedShows.length} spectacles archivés | Seuil: 6 | Bouton visible: {hasMoreArchivedShows ? 'Oui' : 'Non'}
                             </div>
                         )}
-                        */}
+            */
+            }
           </div>
         </div>
       </section>
