@@ -9,7 +9,7 @@ import {
   removeSpectacleFromList,
   sortSpectacles,
   getNextSortState,
-  type SortState,
+  type SpectacleSortState,
   type SortField,
 } from "@/lib/tables/spectacle-table-helpers";
 import { handleSpectacleApiError } from "@/lib/api/spectacles-helpers";
@@ -39,7 +39,7 @@ export default function SpectaclesManagementContainer({
   const [deleteCandidate, setDeleteCandidate] = useState<number | null>(null);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [sortState, setSortState] = useState<SortState | null>(null);
+  const [sortState, setSortState] = useState<SpectacleSortState | null>(null);
 
   // Sort spectacles based on current sort state
   const sortedSpectacles = useMemo(() => {

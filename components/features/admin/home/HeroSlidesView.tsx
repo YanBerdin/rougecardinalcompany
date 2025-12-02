@@ -55,20 +55,24 @@ function SortableSlide({ slide, onEdit, onDelete }: SortableSlideProps) {
         transform: CSS.Transform.toString(transform),
         transition,
         opacity: isDragging ? 0.5 : 1,
+        zIndex: isDragging ? 50 : undefined,
     };
 
     return (
-        <Card ref={setNodeRef} style={style}>
+        <Card ref={setNodeRef} style={style} className={isDragging ? "shadow-lg" : ""}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div className="flex items-center gap-3 flex-1">
-                    <button
-                        className="cursor-grab active:cursor-grabbing touch-none"
+                    <div
+                        className="cursor-grab active:cursor-grabbing p-1 rounded hover:bg-muted transition-colors"
                         {...attributes}
                         {...listeners}
+                        role="button"
+                        tabIndex={0}
                         aria-label="Drag to reorder"
+                        title="Réorganiser le slide"
                     >
                         <GripVertical className="h-5 w-5 text-muted-foreground" />
-                    </button>
+                    </div>
 
                     <HeroSlidePreview slide={slide} />
                 </div>
@@ -110,7 +114,11 @@ export function HeroSlidesView({ initialSlides }: HeroSlidesViewProps) {
     }, [initialSlides]);
 
     const sensors = useSensors(
-        useSensor(PointerSensor),
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8, // 8px de mouvement requis pour activer le drag
+            },
+        }),
         useSensor(KeyboardSensor, {
             coordinateGetter: sortableKeyboardCoordinates,
         })

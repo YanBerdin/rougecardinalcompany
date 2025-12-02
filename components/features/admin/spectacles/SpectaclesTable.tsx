@@ -7,7 +7,7 @@ import {
   formatSpectacleDuration,
   getStatusBadge,
   getVisibilityBadge,
-  type SortState,
+  type SpectacleSortState,
   type SortField,
 } from "@/lib/tables/spectacle-table-helpers";
 import {
@@ -26,7 +26,7 @@ interface SpectaclesTableProps {
   onView: (id: number) => void;
   onEdit: (id: number) => void;
   onDelete: (id: number) => void;
-  sortState: SortState | null;
+  sortState: SpectacleSortState | null;
   onSort: (field: SortField) => void;
 }
 

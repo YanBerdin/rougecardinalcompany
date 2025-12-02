@@ -2,6 +2,7 @@ import type { SpectacleSummary } from "@/lib/schemas/spectacles";
 import { Badge } from "@/components/ui/badge";
 import React from "react";
 import { capitalizeWords } from "@/lib/forms/spectacle-form-helpers";
+import type { SortState } from "@/components/ui/sortable-header";
 
 export const STATUS_VARIANTS: Record<
   string,
@@ -79,14 +80,15 @@ export function removeSpectacleFromList(
 export type SortField = "title" | "genre" | "status" | "duration_minutes" | "premiere" | "public";
 export type SortDirection = "asc" | "desc";
 
-export interface SortState {
-  field: SortField;
-  direction: SortDirection;
-}
+// Re-export generic SortState with spectacle-specific field type
+export type SpectacleSortState = SortState<SortField>;
+
+// Keep backward compatibility alias
+export type { SortState } from "@/components/ui/sortable-header";
 
 export function sortSpectacles(
   spectacles: SpectacleSummary[],
-  sortState: SortState
+  sortState: SpectacleSortState
 ): SpectacleSummary[] {
   return [...spectacles].sort((a, b) => {
     const { field, direction } = sortState;
@@ -154,9 +156,9 @@ export function toggleSortDirection(currentDirection: SortDirection): SortDirect
 }
 
 export function getNextSortState(
-  currentSort: SortState | null,
+  currentSort: SpectacleSortState | null,
   clickedField: SortField
-): SortState {
+): SpectacleSortState {
   if (!currentSort || currentSort.field !== clickedField) {
     // First click on this field - sort ascending
     return { field: clickedField, direction: "asc" };

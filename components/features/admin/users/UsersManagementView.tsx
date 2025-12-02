@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { SortableHeader } from "@/components/ui/sortable-header";
 import {
   Table,
   TableBody,
@@ -42,6 +43,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import type { UserWithProfile } from "@/lib/dal/admin-users";
 import { updateUserRole, deleteUser } from "@/app/(admin)/admin/users/actions";
+import {
+  sortUsers,
+  toggleUserSort,
+  type UserSortField,
+  type UserSortState,
+} from "@/lib/tables/user-table-helpers";
 
 interface UsersManagementViewProps {
   users: UserWithProfile[];
@@ -61,6 +68,16 @@ export function UsersManagementView({ users }: UsersManagementViewProps) {
     id: string;
     email: string;
   } | null>(null);
+  const [sortState, setSortState] = useState<UserSortState | null>(null);
+
+  const sortedUsers = useMemo(() => {
+    if (!sortState) return users;
+    return sortUsers(users, sortState);
+  }, [users, sortState]);
+
+  function handleSort(field: UserSortField) {
+    setSortState(toggleUserSort(sortState, field));
+  }
 
   async function handleRoleChange(
     userId: string,
@@ -146,17 +163,59 @@ export function UsersManagementView({ users }: UsersManagementViewProps) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Nom</TableHead>
-                  <TableHead>Rôle</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Inscription</TableHead>
-                  <TableHead>Dernière connexion</TableHead>
+                  <TableHead>
+                    <SortableHeader<UserSortField>
+                      field="email"
+                      label="Email"
+                      currentSort={sortState}
+                      onSort={handleSort}
+                    />
+                  </TableHead>
+                  <TableHead>
+                    <SortableHeader<UserSortField>
+                      field="name"
+                      label="Nom"
+                      currentSort={sortState}
+                      onSort={handleSort}
+                    />
+                  </TableHead>
+                  <TableHead>
+                    <SortableHeader<UserSortField>
+                      field="role"
+                      label="Rôle"
+                      currentSort={sortState}
+                      onSort={handleSort}
+                    />
+                  </TableHead>
+                  <TableHead>
+                    <SortableHeader<UserSortField>
+                      field="status"
+                      label="Statut"
+                      currentSort={sortState}
+                      onSort={handleSort}
+                    />
+                  </TableHead>
+                  <TableHead>
+                    <SortableHeader<UserSortField>
+                      field="created_at"
+                      label="Inscription"
+                      currentSort={sortState}
+                      onSort={handleSort}
+                    />
+                  </TableHead>
+                  <TableHead>
+                    <SortableHeader<UserSortField>
+                      field="last_sign_in_at"
+                      label="Dernière connexion"
+                      currentSort={sortState}
+                      onSort={handleSort}
+                    />
+                  </TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {users.map((user) => (
+                {sortedUsers.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell className="font-medium">{user.email}</TableCell>
                     <TableCell>
