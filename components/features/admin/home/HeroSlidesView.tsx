@@ -21,6 +21,16 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { GripVertical, Pencil, Trash2, Plus } from "lucide-react";
 import { HeroSlideForm } from "./HeroSlideForm";
@@ -107,6 +117,11 @@ export function HeroSlidesView({ initialSlides }: HeroSlidesViewProps) {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingSlide, setEditingSlide] = useState<HeroSlideDTO | null>(null);
     const [isPending, setIsPending] = useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [slideToDelete, setSlideToDelete] = useState<{
+        id: bigint;
+        title: string;
+    } | null>(null);
 
     // Sync local state when props change (after router.refresh())
     useEffect(() => {
@@ -167,30 +182,35 @@ export function HeroSlidesView({ initialSlides }: HeroSlidesViewProps) {
         setIsFormOpen(true);
     }, []);
 
-    const handleDelete = useCallback(
-        async (id: bigint) => {
-            if (!confirm("Delete this hero slide?")) return;
+    const openDeleteDialog = useCallback((id: bigint, title: string) => {
+        setSlideToDelete({ id, title });
+        setDeleteDialogOpen(true);
+    }, []);
 
-            setIsPending(true);
-            try {
-                // call server action directly (handles revalidation)
-                const result = await deleteHeroSlideAction(String(id));
-                if (!result.success) {
-                    throw new Error(result.error || "Delete failed");
-                }
+    const handleConfirmDelete = useCallback(async () => {
+        if (!slideToDelete) return;
 
-                toast.success("Slide deleted successfully");
-                // Server Action already called revalidatePath(), so just refresh
-                router.refresh();
-            } catch (err) {
-                console.error('Delete error:', err);
-                toast.error("Failed to delete slide");
-            } finally {
-                setIsPending(false);
+        setIsPending(true);
+        setDeleteDialogOpen(false);
+
+        try {
+            // call server action directly (handles revalidation)
+            const result = await deleteHeroSlideAction(String(slideToDelete.id));
+            if (!result.success) {
+                throw new Error(result.error || "Delete failed");
             }
-        },
-        [router]
-    );
+
+            toast.success("Slide deleted successfully");
+            // Server Action already called revalidatePath(), so just refresh
+            router.refresh();
+        } catch (err) {
+            console.error('Delete error:', err);
+            toast.error("Failed to delete slide");
+        } finally {
+            setIsPending(false);
+            setSlideToDelete(null);
+        }
+    }, [slideToDelete, router]);
 
     const handleFormClose = useCallback(() => {
         setIsFormOpen(false);
@@ -199,11 +219,11 @@ export function HeroSlidesView({ initialSlides }: HeroSlidesViewProps) {
 
     const handleFormSuccess = useCallback(() => {
         console.log('[HeroSlidesView] Form success - triggering refresh...');
-        
+
         // Fermer le formulaire immédiatement
         setIsFormOpen(false);
         setEditingSlide(null);
-        
+
         // Utiliser router.refresh() pour recharger les Server Components
         // Les Server Actions ont déjà appelé revalidatePath(), donc les données sont fraîches
         router.refresh();
@@ -246,7 +266,7 @@ export function HeroSlidesView({ initialSlides }: HeroSlidesViewProps) {
                                 key={slide.id.toString()}
                                 slide={slide}
                                 onEdit={handleEdit}
-                                onDelete={handleDelete}
+                                onDelete={() => openDeleteDialog(slide.id, slide.title)}
                             />
                         ))}
                     </div>
@@ -267,6 +287,28 @@ export function HeroSlidesView({ initialSlides }: HeroSlidesViewProps) {
                 onSuccess={handleFormSuccess}
                 slide={editingSlide}
             />
+
+            <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Confirmer la suppression définitive</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Cette action supprimera définitivement le slide &quot;
+                            {slideToDelete?.title}&quot;? Voulez-vous continuer ? Cette opération est irréversible.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isPending}>Annuler</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleConfirmDelete}
+                            disabled={isPending}
+                            className="hover:text-destructive hover:bg-white "
+                        >
+                            {isPending ? "Suppression en cours..." : "Supprimer"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

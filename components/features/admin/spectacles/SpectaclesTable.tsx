@@ -145,7 +145,7 @@ export default function SpectaclesTable({
                     size="icon"
                     onClick={() => onDelete(spectacle.id)}
                     title="Supprimer"
-                    className="text-destructive hover:text-destructive hover:brightness-150"
+                    className="hover:text-destructive hover:brightness-150"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

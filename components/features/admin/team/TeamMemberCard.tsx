@@ -58,7 +58,7 @@ export function TeamMemberCard({
             <Button
               variant="destructive"
               onClick={onHardDelete}
-              title="Supprimer définitivement"
+              title="Supprimer"
             >
               Supprimer
             </Button>

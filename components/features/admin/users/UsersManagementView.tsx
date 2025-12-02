@@ -309,7 +309,7 @@ export function UsersManagementView({ users }: UsersManagementViewProps) {
             <AlertDialogDescription>
               Cette action est irréversible. L&apos;utilisateur{" "}
               <strong>{userToDelete?.email}</strong> et toutes ses données
-              seront définitivement supprimés.
+              seront définitivement supprimées.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
