@@ -1,5 +1,43 @@
 # Progress
 
+## Next.js 16 Migration - COMPLETED (2025-12-02)
+
+**Migration complète de Next.js 15.4.5 vers 16.0.6 avec corrections de sécurité.**
+
+### Résultats
+
+- ✅ Next.js 15.4.5 → 16.0.6 via `@next/codemod@canary`
+- ✅ `middleware.ts` renommé en `proxy.ts` (convention Next.js 16)
+- ✅ 6 pages avec `dynamic = 'force-dynamic'` pour Supabase cookies
+- ✅ CVE-2025-57822 (SSRF) corrigé par upgrade
+- ✅ CVE-2025-64718 (js-yaml) corrigé par pnpm override
+- ✅ `pnpm audit` : 0 vulnérabilités
+- ✅ Build passing avec Turbopack (défaut)
+
+### Codemod appliqué
+
+```bash
+pnpx @next/codemod@canary upgrade latest
+# 3 transformations appliquées
+```
+
+### Fichiers modifiés
+
+- `package.json` — Next.js 16.0.6, pnpm.overrides
+- `pnpm-lock.yaml` — Dépendances mises à jour
+- `tsconfig.json` — Include `.next/dev/types/**/*.ts`
+- `middleware.ts` → `proxy.ts` — Renommé
+- 6 pages marketing/admin avec `dynamic = 'force-dynamic'`
+
+### Sécurité
+
+| CVE | Sévérité | Solution |
+|-----|----------|----------|
+| CVE-2025-57822 | High | Next.js 16.0.6 |
+| CVE-2025-64718 | Moderate | js-yaml >=4.1.1 override |
+
+---
+
 ## Team CRUD Migration to Server Actions - COMPLETED (2025-12-02)
 
 **Migration complète du formulaire Team vers le pattern Server Actions avec pages CRUD dédiées.**

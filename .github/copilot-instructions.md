@@ -1105,6 +1105,29 @@ memory-bank/
 - `memory-bank/activeContext.md` - Recent changes and current focus
 - `.github/instructions/nextjs-supabase-auth-2025.instructions.md` - Auth patterns (CANONICAL)
 
+**Migration Guides**:
+
+- `.github/prompts/plan-teamMemberFormMigration.prompt.md` - Team CRUD migration to Server Actions + dedicated pages (`/new`, `/[id]/edit`)
+- `.github/prompts/plan.dalSolidRefactoring.prompt.md` - DAL SOLID refactoring (17 modules, 92% compliance target)
+
+**Next.js 16 Migration (December 2025)**:
+
+The project was upgraded from Next.js 15.4.5 to 16.0.6 with the following key changes:
+
+1. **Middleware renamed**: `middleware.ts` → `proxy.ts` (Next.js 16 convention)
+2. **Turbopack default**: Now the default bundler in development
+3. **Static generation stricter**: Pages using Supabase cookies require `export const dynamic = 'force-dynamic'`
+4. **Codemod applied**: `pnpx @next/codemod@canary upgrade latest`
+5. **Security fixes**: CVE-2025-57822 (SSRF), CVE-2025-64718 (js-yaml) resolved
+
+**Pages requiring dynamic export** (Supabase SSR cookies):
+- `app/(marketing)/page.tsx`
+- `app/(marketing)/agenda/page.tsx`
+- `app/(marketing)/presse/page.tsx`
+- `app/(marketing)/spectacles/page.tsx`
+- `app/(marketing)/compagnie/page.tsx`
+- `app/(admin)/admin/home/about/page.tsx`
+
 **Quality Standards**:
 
 - Server Components first, Client Components only for interactivity

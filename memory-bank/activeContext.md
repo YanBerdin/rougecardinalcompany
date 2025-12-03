@@ -1,14 +1,65 @@
 # Active Context
 
-**Current Focus (2025-12-02)**: Team CRUD Migration to Server Actions Pattern - COMPLETED ✅
+**Current Focus (2025-12-02)**: Next.js 16 Migration - COMPLETED ✅
 
 ## Architecture Updates (2025-12-02)
 
-### Team CRUD Migration - COMPLETED ✅
+### Next.js 16 Migration - COMPLETED ✅
+
+**Migration complète de Next.js 15.4.5 vers 16.0.6 avec corrections de sécurité.**
+
+#### Changements réalisés
+
+| Composant | Avant | Après |
+|-----------|-------|-------|
+| Next.js | 15.4.5 | 16.0.6 |
+| eslint-config-next | 15.x | 16.0.6 |
+| Middleware | `middleware.ts` | `proxy.ts` (renommé) |
+| Bundler | Webpack | Turbopack (défaut) |
+| Pages Supabase | Static generation | `dynamic = 'force-dynamic'` |
+
+#### Fichiers modifiés
+
+| Fichier | Changement |
+|---------|------------|
+| `package.json` | Next.js 16.0.6, pnpm.overrides `js-yaml: >=4.1.1` |
+| `pnpm-lock.yaml` | Dépendances mises à jour |
+| `tsconfig.json` | Ajout `.next/dev/types/**/*.ts` |
+| `middleware.ts` → `proxy.ts` | Renommé (convention Next.js 16) |
+| `app/(marketing)/page.tsx` | `export const dynamic = 'force-dynamic'` |
+| `app/(marketing)/agenda/page.tsx` | `export const dynamic = 'force-dynamic'` |
+| `app/(marketing)/presse/page.tsx` | `export const dynamic = 'force-dynamic'` |
+| `app/(marketing)/spectacles/page.tsx` | `export const dynamic = 'force-dynamic'` |
+| `app/(marketing)/compagnie/page.tsx` | `export const dynamic = 'force-dynamic'` |
+| `app/(admin)/admin/home/about/page.tsx` | `export const dynamic = 'force-dynamic'` |
+
+#### Vulnérabilités corrigées
+
+| CVE | Sévérité | Package | Solution |
+|-----|----------|---------|----------|
+| CVE-2025-57822 | High | next <16.0.4 | Upgrade Next.js 16.0.6 |
+| CVE-2025-64718 | Moderate | js-yaml <4.1.1 | pnpm override `>=4.1.1` |
+
+**Audit final** : `0 vulnerabilities found`
+
+#### Codemod appliqué
+
+```bash
+pnpx @next/codemod@canary upgrade latest
+# 3 transformations : app-dir-runtime-config-experimental-edge, next-async-request-api, next-og-import
+```
+
+#### Commits
+
+- `00cec7b` — chore(deps): upgrade Next.js 15.4.5 → 16.0.6, fix CVE-2025-57822 and CVE-2025-64718
+
+---
+
+## Previous Focus (2025-12-02): Team CRUD Migration to Server Actions Pattern - COMPLETED ✅
 
 **Objectif atteint** : Migration complète du formulaire Team vers le pattern Server Actions avec pages CRUD dédiées.
 
-#### Changements réalisés
+### Changements réalisés
 
 | Composant | Avant | Après |
 |-----------|-------|-------|
