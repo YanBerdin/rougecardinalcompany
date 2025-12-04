@@ -71,6 +71,58 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
   - 🛠️ Impact local : aucune action requise — la suppression est idempotente et la base locale est propre.
   - 🔎 Action recommandée : garder la migration pour tracer le contrôle cloud-local ; si vous voulez forcer l'état sur le cloud, appliquez la migration via la CLI/SQL Editor. Voir `scripts/check-extension.ts` pour un contrôle programmatique.
 
+## 📌 Post-Mortem : Incident pg_net (Décembre 2025)
+
+> **Résumé** : L'extension `pg_net` a causé une exécution partielle de migration, laissant la fonction `reorder_hero_slides` non créée.
+
+### Chronologie
+
+| Date | Événement |
+|------|-----------|
+| 23 nov. 2025 | Migration `20251123150000` appliquée (drop pg_net - idempotent) |
+| 26 nov. 2025 | Migration `20251126001251` appliquée - **ÉCHEC SILENCIEUX** |
+| 4 déc. 2025 | Découverte : fonction `reorder_hero_slides` manquante → erreur 42883 |
+| 4 déc. 2025 | Hotfix `20251204133540` appliqué via Supabase MCP |
+
+### Root Cause
+
+La migration `20251126001251` contenait initialement :
+
+```sql
+create extension if not exists "pg_net" with schema "extensions";
+```
+
+Cette ligne a échoué silencieusement sur Supabase Cloud car :
+
+1. `pg_net` est une extension **gérée par Supabase** (webhooks/edge functions)
+2. Les utilisateurs ne peuvent pas la créer/modifier directement
+3. L'échec a interrompu l'exécution **avant** la création de `reorder_hero_slides`
+4. La migration a été marquée "applied" malgré l'exécution partielle
+
+### Résolution appliquée
+
+1. ✅ **Suppression de la ligne pg_net** dans `20251126001251` (commit ce79f87)
+2. ✅ **Hotfix migration** `20251204133540` pour recréer la fonction manquante
+3. ✅ **Schéma déclaratif** mis à jour : `supabase/schemas/63b_reorder_hero_slides.sql`
+4. ✅ **Script de diagnostic** : `scripts/check-extension.ts`
+
+### Leçons apprises
+
+> ⚠️ **NE JAMAIS inclure `create extension pg_net`** dans les migrations utilisateur.
+>
+> - `pg_net` est géré automatiquement par Supabase Cloud
+> - Les migrations locales n'en ont pas besoin (l'extension n'existe pas en local)
+> - Utiliser `scripts/check-extension.ts` pour diagnostiquer
+
+### Fichiers concernés (état final)
+
+| Fichier | État |
+|---------|------|
+| `20251123150000_remote_schema.sql` | ✅ `drop extension if exists "pg_net"` (idempotent) |
+| `20251126001251_add_alt_text...sql` | ✅ Ligne pg_net supprimée + commentaire explicatif |
+| `20251204133540_create_reorder...sql` | ✅ Hotfix - fonction créée |
+| `supabase/schemas/63b_reorder_hero_slides.sql` | ✅ Source de vérité déclarative |
+
 ## ⚠️ CRITICAL WARNING - Security Campaign Error (October 2025)
 
 > **❌ ERREUR ARCHITECTURALE MAJEURE - NE PAS REPRODUIRE**
