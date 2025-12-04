@@ -9,18 +9,21 @@ import {
 import { sendInvitationEmail } from "@/lib/email/actions";
 
 export type ActionResult<T = null> =
-  | { success: true; data?: T }
+  | { success: true; data?: T; warning?: string }
   | { success: false; error: string };
 
 /**
  * Invite a new user via email
  * DAL handles database logic, action handles email + revalidation
+ *
+ * Pattern Warning: Si l'email échoue, l'utilisateur est quand même créé
+ * et un warning est retourné (pas un échec).
  */
-export async function inviteUserAction(input: {
+export async function inviteUser(input: {
   email: string;
   role: "user" | "editor" | "admin";
   displayName?: string;
-}): Promise<ActionResult> {
+}): Promise<ActionResult<{ userId: string }>> {
   // 1. Create user in database (returns invitationUrl)
   const result = await inviteUserDAL(input);
 
@@ -28,21 +31,36 @@ export async function inviteUserAction(input: {
     return { success: false, error: result.error ?? "Invitation failed" };
   }
 
+  const { userId, invitationUrl } = result.data;
+
   // 2. Send invitation email with the generated URL
+  let emailSent = true;
   try {
     await sendInvitationEmail({
       email: input.email,
       role: input.role,
       displayName: input.displayName,
-      invitationUrl: result.data.invitationUrl,
+      invitationUrl,
     });
   } catch (emailError) {
-    console.error("[inviteUserAction] Email failed:", emailError);
-    // Don't fail the action if email fails - user is already created
+    console.error("[inviteUser] Email failed:", emailError);
+    emailSent = false;
   }
 
+  // 3. Revalidation
   revalidatePath("/admin/users");
-  return { success: true };
+
+  // 4. Return with warning if email failed
+  if (!emailSent) {
+    return {
+      success: true,
+      data: { userId },
+      warning:
+        "Utilisateur créé mais l'email d'invitation n'a pas pu être envoyé. Veuillez renvoyer l'invitation manuellement.",
+    };
+  }
+
+  return { success: true, data: { userId } };
 }
 
 export async function updateUserRole(input: {

@@ -32,7 +32,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { inviteUser } from "@/app/(admin)/admin/users/invite/actions";
+import { inviteUser } from "@/app/(admin)/admin/users/actions";
 
 const inviteUserSchema = z.object({
   email: z
@@ -76,11 +76,16 @@ export function InviteUserForm() {
     setIsSubmitting(true);
     try {
       const result = await inviteUser(data);
-      // console.log(data); //TODO: Remove debug log
       if (result.success) {
-        toast.success("Invitation envoyée avec succès", {
-          description: `Un email a été envoyé à ${data.email}`,
-        });
+        if (result.warning) {
+          toast.warning("Invitation partiellement réussie", {
+            description: result.warning,
+          });
+        } else {
+          toast.success("Invitation envoyée avec succès", {
+            description: `Un email a été envoyé à ${data.email}`,
+          });
+        }
         router.push("/admin/users");
       } else {
         toast.error("Erreur lors de l'invitation", {

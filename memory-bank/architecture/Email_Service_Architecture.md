@@ -13,7 +13,7 @@ L'architecture email du projet Rouge Cardinal Company est construite autour de l
 
 - **Email imports supprimés du DAL**: Conformité SOLID, l'envoi d'email se fait uniquement via Server Actions
 - **Schemas email centralisés**: Schemas déplacés vers `lib/schemas/contact.ts`
-- **Invitation email**: `admin-users.ts` ne fait plus d'import email, l'envoi est dans `app/(admin)/admin/users/invite/actions.ts`
+- **Invitation email**: `admin-users.ts` ne fait plus d'import email, l'envoi est dans `app/(admin)/admin/users/actions.ts`
 
 ## 1. Stack Technologique Email
 
