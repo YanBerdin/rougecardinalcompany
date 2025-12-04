@@ -6,6 +6,8 @@
 **Files Modified**: 9  
 **Changes**: 550 insertions(+), 566 deletions(-)
 
+> **⚠️ Mise à jour décembre 2025**: Les API Routes documentées ci-dessous (`app/api/admin/home/*`) ont été supprimées lors du nettoyage API Routes. Toutes les mutations passent désormais par Server Actions colocalisées dans `app/(admin)/admin/home/*/actions.ts`. Voir `.github/prompts/plan-api-routes-deprecation.prompt.md`.
+
 ---
 
 ## Executive Summary
@@ -68,15 +70,15 @@ export async function POST(request: NextRequest) {
 }
 ```
 
-**Routes Updated**:
+**Routes Updated** (avant dépréciation):
 
-- ✅ `app/api/admin/home/hero/route.ts`
-- ✅ `app/api/admin/home/hero/[id]/route.ts`
-- ✅ `app/api/admin/home/hero/reorder/route.ts`
-- ✅ `app/api/admin/home/about/route.ts`
-- ✅ `app/api/admin/home/about/[id]/route.ts`
+- ~~`app/api/admin/home/hero/route.ts`~~ → SUPPRIMÉE (déc. 2025)
+- ~~`app/api/admin/home/hero/[id]/route.ts`~~ → SUPPRIMÉE (déc. 2025)
+- ~~`app/api/admin/home/hero/reorder/route.ts`~~ → SUPPRIMÉE (déc. 2025)
+- ~~`app/api/admin/home/about/route.ts`~~ → SUPPRIMÉE (déc. 2025)
+- ~~`app/api/admin/home/about/[id]/route.ts`~~ → SUPPRIMÉE (déc. 2025)
 
-**Impact**: Consistent security layer across all admin endpoints.
+**Impact**: Ces routes ont été remplacées par Server Actions colocalisées pour un meilleur pattern architectural.
 
 ---
 
@@ -310,13 +312,16 @@ Statistics:
    - ✅ BigInt type fixes for all ID fields
    - ✅ Removed `.default()` from optional fields
 
-### API Routes (5 files)
+### ~~API Routes~~ (SUPPRIMÉES — Décembre 2025)
 
-1. `app/api/admin/home/hero/route.ts`
-2. `app/api/admin/home/hero/[id]/route.ts`
-3. `app/api/admin/home/hero/reorder/route.ts`
-4. `app/api/admin/home/about/route.ts`
-5. `app/api/admin/home/about/[id]/route.ts`
+> Les API Routes listées ci-dessous ont été supprimées au profit de Server Actions.
+> Voir commit de dépréciation et `.github/prompts/plan-api-routes-deprecation.prompt.md`.
+
+1. ~~`app/api/admin/home/hero/route.ts`~~ → `app/(admin)/admin/home/hero/actions.ts`
+2. ~~`app/api/admin/home/hero/[id]/route.ts`~~ → Server Actions
+3. ~~`app/api/admin/home/hero/reorder/route.ts`~~ → Server Actions
+4. ~~`app/api/admin/home/about/route.ts`~~ → `app/(admin)/admin/home/about/actions.ts`
+5. ~~`app/api/admin/home/about/[id]/route.ts`~~ → Server Actions
 
 ### Form Components (2 files)
 

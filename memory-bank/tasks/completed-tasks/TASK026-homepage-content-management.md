@@ -2,9 +2,10 @@
 
 **Status:** Completed  
 **Added:** 2025-10-16  
-**Updated:** 2025-11-27  
+**Updated:** 2025-12-04  
 **Completed:** 2025-11-23  
-**Refined:** 2025-11-27 (Clean Code & TypeScript Conformity)
+**Refined:** 2025-11-27 (Clean Code & TypeScript Conformity)  
+**API Cleanup:** 2025-12-04 (API Routes → Server Actions migration)
 
 ## Original Request
 
@@ -21,7 +22,7 @@ Implement complete admin interface for managing homepage content: Hero Slides (C
 - Image URL validation helper (MIME type check, 5s timeout)
 - Hero slides DAL: fetchAll, fetchById, create, update, delete, reorder (6 functions)
 - About content DAL: fetchActive, update (2 functions)
-- API routes: 6 hero endpoints + 2 about endpoints with requireAdmin() auth
+- ~~API routes: 6 hero endpoints + 2 about endpoints~~ → **Server Actions** (déc. 2025)
 
 ### UI Components (Groups 8-10)
 
@@ -50,8 +51,8 @@ Implement complete admin interface for managing homepage content: Hero Slides (C
 | 3 | Image URL validation | 1 | ✅ Complete |
 | 4 | Hero DAL (6 functions) | 1 | ✅ Complete |
 | 5 | About DAL (2 functions) | 1 | ✅ Complete |
-| 6 | Hero API routes (6 endpoints) | 3 | ✅ Complete |
-| 7 | About API routes (2 endpoints) | 2 | ✅ Complete |
+| 6 | ~~Hero API routes~~ → Server Actions | 3→1 | 🗑️ Déprécié (déc. 2025) |
+| 7 | ~~About API routes~~ → Server Actions | 2→1 | 🗑️ Déprécié (déc. 2025) |
 | 8 | Loading skeletons | 2 | ✅ Complete |
 | 9 | Hero admin UI + page | 5 | ✅ Complete |
 | 10 | About admin UI + page | 3 | ✅ Complete |
@@ -94,7 +95,7 @@ Implement complete admin interface for managing homepage content: Hero Slides (C
 
 ## Files Created/Modified
 
-**Backend** (10 new files + 1 action file):
+**Backend** (10 new files + 2 action files):
 
 - supabase/schemas/63b_reorder_hero_slides.sql
 - lib/schemas/home-content.ts (+ UI schemas added 2025-11-27)
@@ -102,7 +103,8 @@ Implement complete admin interface for managing homepage content: Hero Slides (C
 - lib/dal/admin-home-hero.ts
 - lib/dal/admin-home-about.ts (revalidatePath removed 2025-11-27)
 - lib/actions/home-about-actions.ts (NEW 2025-11-27)
-- app/api/admin/home/hero/* (3 route files)
+- app/(admin)/admin/home/hero/actions.ts (NEW déc. 2025)
+- ~~app/api/admin/home/hero/*~~ (3 route files) → SUPPRIMÉES (déc. 2025)
 - ~~app/api/admin/home/about/*~~ (DELETED 2025-11-27 — migrated to Server Actions)
 
 **UI** (11 new files + 2 sub-components):
@@ -116,7 +118,7 @@ Implement complete admin interface for managing homepage content: Hero Slides (C
 **Infrastructure** (3 modified/new files):
 
 - lib/hooks/use-debounce.ts
-- scripts/test-home-hero-api.ts
+- ~~scripts/test-home-hero-api.ts~~ → archivé dans `doc-perso/scripts-archived/` (déc. 2025)
 - components/admin/AdminSidebar.tsx (updated)
 - package.json (updated)
 
@@ -135,10 +137,10 @@ Implement complete admin interface for managing homepage content: Hero Slides (C
 - [x] Test character limits on all fields
 - [x] Verify revalidation after mutations
 
-**API Testing**:
+**~~API Testing~~** (Obsolète — API Routes supprimées):
 
-- Run: `pnpm test:hero-api`
-- Tests: Fetch all, Create, Delete workflows
+- ~~Run: `pnpm test:hero-api`~~ — Script archivé
+- Tests passés via Server Actions (déc. 2025)
 
 ## Progress Log
 
