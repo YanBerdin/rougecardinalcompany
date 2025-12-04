@@ -6,6 +6,12 @@ import { HeroSlideInputSchema } from "@/lib/schemas/home-content";
 /**
  * GET /api/admin/home/hero
  * Fetch all hero slides (admin view)
+ *
+ * @deprecated For admin UI, prefer Server Component with direct DAL call:
+ * import { fetchAllHeroSlides } from "@/lib/dal/admin-home-hero";
+ * const slides = await fetchAllHeroSlides();
+ *
+ * This API Route is kept for external clients and backward compatibility.
  */
 export const GET = withAdminAuth(async () => {
     try {
@@ -22,6 +28,10 @@ export const GET = withAdminAuth(async () => {
 /**
  * POST /api/admin/home/hero
  * Create new hero slide
+ *
+ * @deprecated Prefer using createHeroSlideAction from
+ * app/(admin)/admin/home/hero/home-hero-actions.ts for frontend mutations.
+ * This API Route is kept for external clients and backward compatibility.
  */
 export async function POST(request: NextRequest) {
     return withAdminAuth(async () => {

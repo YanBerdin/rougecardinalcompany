@@ -13,6 +13,12 @@ import { CreateSpectacleSchema } from "@/lib/schemas/spectacles";
 
 /**
  * GET /api/admin/spectacles - List all spectacles
+ *
+ * @deprecated For admin UI, prefer Server Component with direct DAL call:
+ * import { fetchAllSpectacles } from "@/lib/dal/spectacles";
+ * const spectacles = await fetchAllSpectacles(true);
+ *
+ * This API Route is kept for external clients and backward compatibility.
  * 
  * Query params:
  * - includePrivate: boolean - Include non-public spectacles (default: false)

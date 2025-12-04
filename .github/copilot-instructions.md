@@ -675,6 +675,22 @@ export function InteractiveTeamForm() {
   const [state, action, isPending] = useActionState(createTeamAction, null);
   return <form action={action}>{/* interactive form */}</form>;
 }
+
+'use client'
+import { useActionState, startTransition } from 'react'
+import { createPost } from '@/app/actions'
+import { LoadingSpinner } from '@/app/ui/loading-spinner'
+ 
+export function Button() {
+  const [state, action, pending] = useActionState(createPost, false)
+ 
+  return (
+    <button onClick={() => startTransition(action)}>
+      {pending ? <LoadingSpinner /> : 'Create Post'}
+    </button>
+  )
+}
+
 ```
 
 ### Server Actions vs API Routes Decision Tree

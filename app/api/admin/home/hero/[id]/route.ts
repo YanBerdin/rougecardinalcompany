@@ -10,6 +10,12 @@ import { HeroSlideInputSchema } from "@/lib/schemas/home-content";
 /**
  * GET /api/admin/home/hero/[id]
  * Fetch single hero slide by ID
+ *
+ * @deprecated For admin UI, prefer Server Component with direct DAL call:
+ * import { fetchHeroSlideById } from "@/lib/dal/admin-home-hero";
+ * const slide = await fetchHeroSlideById(id);
+ *
+ * This API Route is kept for external clients and backward compatibility.
  */
 export async function GET(
     _request: NextRequest,
@@ -38,6 +44,10 @@ export async function GET(
 /**
  * PATCH /api/admin/home/hero/[id]
  * Update existing hero slide
+ *
+ * @deprecated Prefer using updateHeroSlideAction from
+ * app/(admin)/admin/home/hero/home-hero-actions.ts for frontend mutations.
+ * This API Route is kept for external clients and backward compatibility.
  */
 export async function PATCH(
     request: NextRequest,
@@ -75,6 +85,10 @@ export async function PATCH(
 /**
  * DELETE /api/admin/home/hero/[id]
  * Soft delete hero slide (set active=false)
+ *
+ * @deprecated Prefer using deleteHeroSlideAction from
+ * app/(admin)/admin/home/hero/home-hero-actions.ts for frontend mutations.
+ * This API Route is kept for external clients and backward compatibility.
  */
 export async function DELETE(
     _request: NextRequest,

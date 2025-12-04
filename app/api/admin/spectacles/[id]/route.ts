@@ -37,6 +37,12 @@ function parseSpectacleId(idString: string): number | null {
 
 /**
  * GET /api/admin/spectacles/[id] - Get single spectacle by ID
+ *
+ * @deprecated For admin UI, prefer Server Component with direct DAL call:
+ * import { fetchSpectacleById } from "@/lib/dal/spectacles";
+ * const spectacle = await fetchSpectacleById(id);
+ *
+ * This API Route is kept for external clients and backward compatibility.
  * 
  * @example
  * GET /api/admin/spectacles/1

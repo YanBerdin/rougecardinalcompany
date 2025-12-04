@@ -27,6 +27,10 @@ function buildPublicUrl(storagePath: string): string {
  * GET /api/admin/media/search?q=searchQuery&page=1&limit=20
  * Search media library by filename or alt_text
  * Returns paginated results from the medias table
+ *
+ * NOTE: This API Route is intentionally kept (not migrated to Server Action)
+ * because it serves client-side interactive search with pagination and debounce.
+ * Server Actions are better suited for mutations, not paginated queries.
  */
 export async function GET(request: NextRequest) {
     return withAdminAuth(async () => {

@@ -6,6 +6,10 @@ import { ReorderInputSchema } from "@/lib/schemas/home-content";
 /**
  * POST /api/admin/home/hero/reorder
  * Reorder hero slides via database RPC
+ *
+ * @deprecated Prefer using reorderHeroSlidesAction from
+ * app/(admin)/admin/home/hero/home-hero-actions.ts for frontend mutations.
+ * This API Route is kept for external clients and backward compatibility.
  */
 export async function POST(request: NextRequest) {
   return withAdminAuth(async () => {
