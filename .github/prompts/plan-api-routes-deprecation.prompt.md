@@ -2,65 +2,40 @@
 
 **TL;DR** : Migration progressive des API Routes admin vers Server Actions + appels DAL directs en Server Components. Les API Routes sont conservées pour les clients externes mais marquées `@deprecated` pour le frontend Next.js.
 
+**Statut : ✅ TERMINÉ** (4 décembre 2025)
+
 ---
 
 ## 📊 Tableau récapitulatif (Décembre 2025)
 
 | API Route | Méthode | Statut | Référence |
 |-----------|---------|--------|-----------|
-| `/api/admin/invite-user` | POST | ✅ Déjà `@deprecated` | `app/(admin)/admin/users/invite/actions.ts` |
-| `/api/admin/home/hero` | GET | ✅ `@deprecated` | DAL `fetchAllHeroSlides` |
-| `/api/admin/home/hero` | POST | ✅ `@deprecated` | `createHeroSlideAction` |
-| `/api/admin/home/hero/[id]` | GET | ✅ `@deprecated` | DAL `fetchHeroSlideById` |
-| `/api/admin/home/hero/[id]` | PATCH | ✅ `@deprecated` | `updateHeroSlideAction` |
-| `/api/admin/home/hero/[id]` | DELETE | ✅ `@deprecated` | `deleteHeroSlideAction` |
-| `/api/admin/home/hero/reorder` | POST | ✅ `@deprecated` | `reorderHeroSlidesAction` |
-| `/api/admin/spectacles` | GET | ✅ `@deprecated` | DAL `fetchAllSpectacles` |
-| `/api/admin/spectacles` | POST | ✅ `@deprecated` | `createSpectacleAction` |
-| `/api/admin/spectacles/[id]` | GET | ✅ `@deprecated` | DAL `fetchSpectacleById` |
-| `/api/admin/spectacles/[id]` | PATCH | ✅ `@deprecated` | `updateSpectacleAction` |
-| `/api/admin/spectacles/[id]` | DELETE | ✅ `@deprecated` | `deleteSpectacleAction` |
-| `/api/admin/media/search` | GET | ✅ Intentionally kept | Recherche interactive client |
+| `/api/admin/invite-user` | POST | 🗑️ **SUPPRIMÉ** | `app/(admin)/admin/users/actions.ts` |
+| `/api/admin/home/hero` | GET | 🗑️ **SUPPRIMÉ** | DAL `fetchAllHeroSlides` |
+| `/api/admin/home/hero` | POST | 🗑️ **SUPPRIMÉ** | `createHeroSlideAction` |
+| `/api/admin/home/hero/[id]` | GET | 🗑️ **SUPPRIMÉ** | DAL `fetchHeroSlideById` |
+| `/api/admin/home/hero/[id]` | PATCH | 🗑️ **SUPPRIMÉ** | `updateHeroSlideAction` |
+| `/api/admin/home/hero/[id]` | DELETE | 🗑️ **SUPPRIMÉ** | `deleteHeroSlideAction` |
+| `/api/admin/home/hero/reorder` | POST | 🗑️ **SUPPRIMÉ** | `reorderHeroSlidesAction` |
+| `/api/admin/spectacles` | GET | 🗑️ **SUPPRIMÉ** | DAL `fetchAllSpectacles` |
+| `/api/admin/spectacles` | POST | 🗑️ **SUPPRIMÉ** | `createSpectacleAction` |
+| `/api/admin/spectacles/[id]` | GET | 🗑️ **SUPPRIMÉ** | DAL `fetchSpectacleById` |
+| `/api/admin/spectacles/[id]` | PATCH | 🗑️ **SUPPRIMÉ** | `updateSpectacleAction` |
+| `/api/admin/spectacles/[id]` | DELETE | 🗑️ **SUPPRIMÉ** | `deleteSpectacleAction` |
+| `/api/admin/media/search` | GET | ✅ **Conservé** | Recherche interactive client |
 
 ---
 
-## 🎯 Prochaines étapes
+## ✅ Résultat final
 
-### Phase 1 : Suppression Hero Slides API Routes ⏳
-
-Les Server Actions sont déjà utilisées par `HeroSlidesView.tsx` (confirmé par analyse).
-
-**Avant suppression, vérifier qu'aucun `fetch()` ne cible ces routes :**
-
-```bash
-# Rechercher les usages dans le code
-grep -r "api/admin/home/hero" components/ app/
-grep -r "/api/admin/home/hero" --include="*.ts" --include="*.tsx" .
+```
+app/api/admin/
+└── media/
+    └── search/
+        └── route.ts  ← Seule route restante (intentionnellement conservée)
 ```
 
-**Fichiers à supprimer (après validation) :**
-- `app/api/admin/home/hero/route.ts`
-- `app/api/admin/home/hero/[id]/route.ts`
-- `app/api/admin/home/hero/reorder/route.ts`
-
-### Phase 2 : Suppression Spectacles API Routes ⏳
-
-Vérifier que `SpectaclesManagementContainer.tsx` utilise les Server Actions :
-
-```bash
-grep -r "api/admin/spectacles" components/ app/
-```
-
-**Fichiers à supprimer (après validation) :**
-- `app/api/admin/spectacles/route.ts`
-- `app/api/admin/spectacles/[id]/route.ts`
-
-### Phase 3 : Media Search — Conserver ✅
-
-Cette route reste volontairement en place car :
-- Recherche interactive avec debounce côté client
-- Pagination via query params (`?q=&page=&limit=`)
-- Pattern plus adapté à une API Route qu'un Server Action
+**11 routes supprimées, 1 route conservée.**
 
 ---
 
@@ -108,6 +83,7 @@ Cette route reste volontairement en place car :
 
 | Date | Action |
 |------|--------|
+| 2025-12-04 | ✅ **PLAN TERMINÉ** — Suppression routes hero, spectacles, invite-user + consolidation actions |
 | 2025-12-04 | Annotation `@deprecated` ajoutée aux 9 méthodes Hero/Spectacles + note Media Search |
 | 2025-12-02 | Suppression API Routes Team (migration complète) |
 | 2025-11-27 | Annotation Spectacles POST/PATCH/DELETE |
@@ -116,4 +92,4 @@ Cette route reste volontairement en place car :
 ---
 
 **Auteur** : Généré par GitHub Copilot  
-**Version** : 1.0
+**Version** : 2.0 (Terminé)
