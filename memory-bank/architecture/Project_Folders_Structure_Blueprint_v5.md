@@ -1,9 +1,10 @@
 # Project Folders Structure Blueprint — Rouge Cardinal Company
 
 **Generated:** 30 November 2025  
+**Updated:** 4 December 2025  
 **Source:** `doc/prompts-github/folder-structure-blueprint-generator.prompt.md` (executed locally)  
-**Branch:** feature/backoffice  
-**Version:** v5
+**Branch:** master  
+**Version:** v5.1
 
 ## Executive summary
 
@@ -19,6 +20,12 @@ Key updates since v4 → v5 (SOLID Refactoring):
 - **revalidatePath removed from DAL** — All 17 DAL files are now pure data access; cache invalidation happens in Server Actions only.
 - **Error codes standardized** — All DAL files use `[ERR_ENTITY_NNN]` format (e.g., `[ERR_TEAM_001]`, `[ERR_CONTACT_001]`).
 - **SOLID compliance** — Score improved from 70% to **92%** (target was 90%).
+
+Key updates v5 → v5.1 (API Routes Cleanup - December 2025):
+
+- **API Routes deprecated** — 11 admin API routes removed, replaced by Server Actions
+- **invite/actions.ts consolidated** — Merged into `app/(admin)/admin/users/actions.ts`
+- **Only 1 admin API route remains** — `/api/admin/media/search` (intentionally kept for interactive search)
 
 ## Auto-detection summary
 
@@ -69,11 +76,10 @@ app/
   │   └─ presse/
   ├─ api/
   │   ├─ admin/
-  │   │   ├─ home/hero/       # Hero slides API (list, create, update, delete, reorder)
-  │   │   ├─ media/           # Media library API
-  │   │   └─ spectacles/      # Spectacles API
+  │   │   └─ media/search/    # Media library search (only remaining admin API)
   │   ├─ public/              # Public API endpoints
-  │   └─ newsletter/          # Newsletter subscription
+  │   ├─ newsletter/          # Newsletter subscription
+  │   └─ contact/             # Contact form
   └─ layout.tsx
 
 components/

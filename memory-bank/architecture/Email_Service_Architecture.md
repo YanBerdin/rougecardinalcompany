@@ -1,13 +1,19 @@
 # Email Service Architecture - Rouge Cardinal Company
 
 **Date de création**: 8 octobre 2025  
-**Version**: 1.3.0  
-**Dernière mise à jour**: 30 novembre 2025  
-**Intégration**: feat-resend branch → feature/backoffice
+**Version**: 1.3.1  
+**Dernière mise à jour**: 4 décembre 2025  
+**Intégration**: feat-resend branch → feature/backoffice → master
 
 ## Vue d'Ensemble
 
 L'architecture email du projet Rouge Cardinal Company est construite autour de l'intégration de **Resend** pour les emails transactionnels et **React Email** pour les templates. Cette architecture s'intègre harmonieusement avec l'architecture Next.js 15 existante et la Data Access Layer (DAL) Supabase.
+
+**Mise à jour v1.3.1 (4 décembre 2025) — API Routes Cleanup:**
+
+- **Actions consolidées**: `inviteUser` déplacé de `users/invite/actions.ts` vers `users/actions.ts`
+- **API Route supprimée**: `/api/admin/invite-user` supprimée (dépréciation)
+- **Warning support**: `ActionResult<T>` supporte `warning?: string` pour échecs email partiels
 
 **Mise à jour v1.3.0 (30 novembre 2025) — SOLID Refactoring:**
 

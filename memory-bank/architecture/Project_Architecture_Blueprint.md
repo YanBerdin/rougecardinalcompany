@@ -1,9 +1,10 @@
 # Project Architecture Blueprint — Rouge Cardinal Company
 
-Generated: 30 November 2025
-Source: `doc/prompts-github/architecture-blueprint-generator.prompt.md`
-Repository branch: `feature/backoffice`
-Version: v2
+Generated: 30 November 2025  
+Updated: 4 December 2025  
+Source: `doc/prompts-github/architecture-blueprint-generator.prompt.md`  
+Repository branch: `master`  
+Version: v2.1
 
 Résumé: ce document analyse la base de code existante et formalise le modèle d'architecture, les patterns observés et les recommandations pour l'évolution et l'extensibilité. Il s'appuie sur l'organisation actuelle (Next.js 15, TypeScript strict, Supabase, React 19) et couvre les composantes clés, la sécurité RLS, les modèles d'accès aux données, les tests et le déploiement.
 
@@ -16,6 +17,13 @@ Résumé: ce document analyse la base de code existante et formalise le modèle 
 - **Email/revalidatePath**: Supprimés du DAL, uniquement dans Server Actions
 - **Error codes**: Standardisés `[ERR_ENTITY_NNN]` dans tous les DAL
 - **SOLID compliance**: Score 92% (objectif était 90%)
+
+**Mise à jour v2.1 (4 décembre 2025) — API Routes Cleanup:**
+
+- **API Routes dépréciées supprimées**: 11 routes admin supprimées (hero, spectacles, invite-user)
+- **Server Actions consolidées**: `invite/actions.ts` fusionné dans `users/actions.ts`
+- **1 seule API admin conservée**: `/api/admin/media/search` (recherche interactive)
+- **Scripts de test archivés**: `test-home-hero-api.ts`, `test-spectacles-api.ts` → `doc-perso/scripts-archived/`
 
 ## 1. Détection et analyse du projet
 
@@ -85,10 +93,10 @@ Boundaries:
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐              │
 │  │  (marketing)    │  │   (admin)       │  │   api/          │              │
 │  │  Public pages   │  │   Backoffice    │  │   API Routes    │              │
-│  │  - spectacles   │  │   - home/hero   │  │   - admin/*     │              │
-│  │  - compagnie    │  │   - users       │  │   - public/*    │              │
-│  │  - contact      │  │   - team        │  │   - newsletter  │              │
-│  │  - agenda       │  │   - spectacles  │  │   - contact     │              │
+│  │  - spectacles   │  │   - home/hero   │  │   (minimales)   │              │
+│  │  - compagnie    │  │   - users       │  │   - newsletter  │              │
+│  │  - contact      │  │   - team        │  │   - contact     │              │
+│  │  - agenda       │  │   - spectacles  │  │   - media/search│              │
 │  │  - presse       │  │                 │  │                 │              │
 │  └─────────────────┘  └─────────────────┘  └─────────────────┘              │
 │                                    │                                        │
