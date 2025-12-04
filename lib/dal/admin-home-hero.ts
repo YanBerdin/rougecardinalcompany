@@ -313,9 +313,15 @@ export async function reorderHeroSlides(
 
         const validated = ReorderInputSchema.parse(order);
 
+        // Convert bigint to number for JSON serialization (Supabase RPC)
+        const orderData = validated.map((item) => ({
+            id: Number(item.id),
+            position: item.position,
+        }));
+
         const supabase = await createClient();
         const { error } = await supabase.rpc("reorder_hero_slides", {
-            order_data: validated,
+            order_data: orderData,
         });
 
         if (error) {

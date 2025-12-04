@@ -147,3 +147,26 @@ export function cleanSpectacleFormData(
 
   return cleanData;
 }
+
+// ============================================================================
+// UI Message Helpers
+// ============================================================================
+
+/**
+ * Generate success message for create/update operations
+ */
+export function getSpectacleSuccessMessage(
+  isEditing: boolean,
+  title: string
+): {
+  action: string;
+  description: string;
+} {
+  const action = isEditing ? "Spectacle mis à jour" : "Spectacle créé";
+  const verb = isEditing ? "mis à jour" : "créé";
+
+  return {
+    action,
+    description: `"${title}" a été ${verb} avec succès.`,
+  };
+}

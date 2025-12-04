@@ -24,30 +24,42 @@ export function HeroSlideImageSection({ form, onOpenMediaPicker }: HeroSlideImag
     const watchAltText = form.watch("alt_text") ?? "";
     const imageUrl = form.watch("image_url");
     const altText = form.watch("alt_text");
+    const imageError = form.formState.errors.image_url;
 
     return (
         <>
-            <div className="space-y-2">
-                <FormLabel>Image *</FormLabel>
-                <div className="flex gap-2 items-center">
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={onOpenMediaPicker}
-                    >
-                        Sélectionner depuis la médiathèque
-                    </Button>
-                    {imageUrl ? (
-                        <Image
-                            src={String(imageUrl)}
-                            alt={String(altText ?? "Preview")}
-                            className="h-20 w-32 object-cover rounded"
-                            width={128}
-                            height={80}
-                        />
-                    ) : null}
-                </div>
-            </div>
+            <FormField
+                control={form.control}
+                name="image_url"
+                render={() => (
+                    <FormItem>
+                        <FormLabel>Image *</FormLabel>
+                        <div className="flex gap-2 items-center">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={onOpenMediaPicker}
+                            >
+                                Sélectionner depuis la médiathèque
+                            </Button>
+                            {imageUrl ? (
+                                <Image
+                                    src={String(imageUrl)}
+                                    alt={String(altText ?? "Preview")}
+                                    className="h-20 w-32 object-cover rounded"
+                                    width={128}
+                                    height={80}
+                                />
+                            ) : null}
+                        </div>
+                        {imageError && (
+                            <p className="text-sm font-medium text-destructive">
+                                {imageError.message}
+                            </p>
+                        )}
+                    </FormItem>
+                )}
+            />
 
             <MediaExternalUrlInput
                 value={String(form.watch("image_url") ?? "")}

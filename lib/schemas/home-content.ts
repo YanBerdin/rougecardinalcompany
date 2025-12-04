@@ -18,8 +18,20 @@ export const HeroSlideInputSchema = z.object({
         return val;
     }, z.string().url("Invalid URL format").optional()),
     image_media_id: z.coerce.bigint().optional(),
-    cta_label: z.string().max(50, "CTA label max 50 characters").optional(),
-    cta_url: z.string().url("Invalid CTA URL format").optional(),
+    cta_label: z.preprocess((val) => {
+        if (typeof val === "string") {
+            const t = val.trim();
+            return t === "" ? undefined : t;
+        }
+        return val;
+    }, z.string().max(50, "CTA label max 50 characters").optional()),
+    cta_url: z.preprocess((val) => {
+        if (typeof val === "string") {
+            const t = val.trim();
+            return t === "" ? undefined : t;
+        }
+        return val;
+    }, z.string().url("Invalid CTA URL format").optional()),
     alt_text: z.string().min(1, "Alt text required for accessibility").max(125, "Alt text max 125 characters"),
     active: z.boolean().optional(),
     position: z.number().int().min(0, "Position must be non-negative").optional(),
@@ -107,12 +119,36 @@ export const HeroSlideFormSchema = z.object({
     description: z.string().max(500, "Description max 500 characters").optional(),
     image_url: z.string().url("Invalid URL format").optional().or(z.literal("")),
     image_media_id: z.number().int().positive().optional(),
-    cta_label: z.string().max(50, "CTA label max 50 characters").optional(),
+    show_cta: z.boolean().optional(),
+    cta_label: z.string().max(50, "CTA label max 50 characters").optional().or(z.literal("")),
     cta_url: z.string().url("Invalid CTA URL format").optional().or(z.literal("")),
     alt_text: z.string().min(1, "Alt text required for accessibility").max(125, "Alt text max 125 characters"),
     active: z.boolean().optional(),
     position: z.number().int().min(0, "Position must be non-negative").optional(),
-});
+}).refine(
+    (data) => data.image_media_id !== undefined || (typeof data.image_url === 'string' && data.image_url.trim().length > 0),
+    { message: "An image is required (media ID or URL)", path: ["image_url"] }
+).refine(
+    (data) => {
+        // If CTA toggle is enabled, both fields are required
+        if (data.show_cta === true) {
+            const hasLabel = typeof data.cta_label === 'string' && data.cta_label.trim().length > 0;
+            return hasLabel;
+        }
+        return true;
+    },
+    { message: "CTA label required when CTA is enabled", path: ["cta_label"] }
+).refine(
+    (data) => {
+        // If CTA toggle is enabled, both fields are required
+        if (data.show_cta === true) {
+            const hasUrl = typeof data.cta_url === 'string' && data.cta_url.trim().length > 0;
+            return hasUrl;
+        }
+        return true;
+    },
+    { message: "CTA URL required when CTA is enabled", path: ["cta_url"] }
+);
 
 export type HeroSlideFormValues = z.infer<typeof HeroSlideFormSchema>;
 

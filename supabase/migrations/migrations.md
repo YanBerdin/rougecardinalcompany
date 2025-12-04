@@ -28,6 +28,13 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 - **Refactoring architectural (27 nov. 2025)** — **Clean Code & TypeScript Conformity pour TASK026** : Ce refactoring n'a pas généré de migration base de données car il concerne uniquement la couche application.
 
+- `20251204133540_create_reorder_hero_slides_function.sql` — **HOTFIX : Create missing reorder_hero_slides function**
+  - 🎯 **Root cause** : Migration `20251126001251` marquée appliquée mais fonction non créée
+  - 📝 **Explication** : La ligne `create extension pg_net` en début de migration a échoué silencieusement, interrompant l'exécution avant la création de la fonction
+  - 🛠️ **Résolution** : Fonction créée via Supabase MCP `apply_migration`
+  - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/63b_reorder_hero_slides.sql`
+  - 📝 **Migration conservée** pour l'historique et la cohérence avec Supabase Cloud
+
 - `20251126215129_fix_hero_slides_admin_select_policy.sql` — **RLS FIX : Admins can view ALL hero slides**
   - Ajout policy `Admins can view all home hero slides` sur `home_hero_slides`
   - Permet aux admins de voir les slides inactifs pour les gérer via toggle
@@ -35,7 +42,7 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 - `20251126001251_add_alt_text_to_home_hero_slides.sql` — **A11Y + CRUD : Hero Slides enhancements**
   - **Colonne `alt_text`** : texte alternatif pour accessibilité (max 125 caractères, contrainte CHECK)
-  - **Fonction `reorder_hero_slides(jsonb)`** : SECURITY DEFINER pour réordonner les slides
+  - **Fonction `reorder_hero_slides(jsonb)`** : ⚠️ **PARTIELLEMENT ÉCHOUÉE** - voir `20251204133540`
     - Authorization : `is_admin()` check explicite
     - Concurrency : Advisory lock `pg_advisory_xact_lock`
     - Input validation : JSONB array structure

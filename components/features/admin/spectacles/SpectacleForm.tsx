@@ -8,16 +8,17 @@ import { Loader2, Check, ChevronsUpDown, Plus, CheckCircle2, XCircle, X, ImageIc
 import { toast } from "sonner";
 import Image from "next/image";
 import {
-  submitSpectacleToApi,
-  handleSpectacleApiError,
-  getSpectacleSuccessMessage,
-} from "@/lib/api/spectacles-helpers";
+  createSpectacleAction,
+  updateSpectacleAction,
+} from "@/app/(admin)/admin/spectacles/actions";
+import type { CreateSpectacleInput, UpdateSpectacleInput } from "@/lib/schemas/spectacles";
 import {
   spectacleFormSchema,
   type SpectacleFormValues,
   cleanSpectacleFormData,
   normalizeGenre,
   formatDateForInput,
+  getSpectacleSuccessMessage,
 } from "@/lib/forms/spectacle-form-helpers";
 import { validateImageUrl } from "@/lib/utils/validate-image-url";
 //import { z } from "zod";
@@ -95,15 +96,15 @@ export default function SpectacleForm({
     setIsSubmitting(true);
 
     try {
-      const cleanData = cleanSpectacleFormData(data);
-      const response = await submitSpectacleToApi(cleanData, spectacleId);
+      const cleanData = cleanSpectacleFormData(data) as CreateSpectacleInput;
+      
+      const result = spectacleId
+        ? await updateSpectacleAction({ id: spectacleId, ...cleanData } as UpdateSpectacleInput)
+        : await createSpectacleAction(cleanData);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Échec de la sauvegarde");
+      if (!result.success) {
+        throw new Error(result.error);
       }
-
-      await response.json();
 
       const successAction = isEditing
         ? "Spectacle mis à jour"
@@ -121,7 +122,9 @@ export default function SpectacleForm({
       }
     } catch (error) {
       console.error("Submit error:", error);
-      toast.error("Erreur", { description: handleSpectacleApiError(error) });
+      toast.error("Erreur", { 
+        description: error instanceof Error ? error.message : "Impossible de sauvegarder le spectacle" 
+      });
     } finally {
       setIsSubmitting(false);
     }

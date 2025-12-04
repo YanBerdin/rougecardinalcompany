@@ -1,4 +1,5 @@
-create extension if not exists "pg_net" with schema "extensions";
+-- Note: pg_net extension line removed (not available on Supabase Cloud, caused silent failure)
+-- The function reorder_hero_slides was re-created via hotfix migration 20251204133540
 
 alter table "public"."home_hero_slides" add column "alt_text" text not null default ''::text;
 

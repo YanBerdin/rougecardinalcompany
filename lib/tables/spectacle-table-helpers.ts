@@ -55,17 +55,6 @@ export function formatSpectacleDuration(minutes: number | null): string {
   return minutes ? `${minutes} min` : "—";
 }
 
-export async function deleteSpectacleFromApi(id: number): Promise<void> {
-  const response = await fetch(`/api/admin/spectacles/${id}`, {
-    method: "DELETE",
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || "Failed to delete spectacle");
-  }
-}
-
 export function removeSpectacleFromList(
   spectacles: SpectacleSummary[],
   id: number

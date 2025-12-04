@@ -38,7 +38,7 @@ export function HeroSlideForm({
 
     const form = useForm<HeroSlideFormValues>({
         resolver: zodResolver(HeroSlideFormSchema),
-        mode: "onBlur", // Validate on blur for immediate feedback
+        mode: "onTouched", // Validate touched fields + all fields on submit
         defaultValues: {
             title: "",
             slug: "",
@@ -46,6 +46,7 @@ export function HeroSlideForm({
             description: "",
             image_url: "",
             image_media_id: undefined,
+            show_cta: false,
             cta_label: "",
             cta_url: "",
             alt_text: "",
@@ -57,7 +58,9 @@ export function HeroSlideForm({
     // Réinitialiser le formulaire quand le dialog s'ouvre ou quand slide change
     useEffect(() => {
         if (open && slide) {
-            console.log('[HeroSlideForm] Resetting form with slide data:', slide);
+            console.log('[HeroSlideForm] Resetting form with slide ID:', String(slide.id));
+            // Determine if CTA should be shown based on existing data
+            const hasCtaData = Boolean(slide.cta_label || slide.cta_url);
             form.reset({
                 title: slide.title,
                 slug: slide.slug,
@@ -65,6 +68,7 @@ export function HeroSlideForm({
                 description: slide.description ?? "",
                 image_url: slide.image_url ?? "",
                 image_media_id: slide.image_media_id !== null ? Number(slide.image_media_id) : undefined,
+                show_cta: hasCtaData,
                 cta_label: slide.cta_label ?? "",
                 cta_url: slide.cta_url ?? "",
                 alt_text: slide.alt_text,
@@ -80,6 +84,7 @@ export function HeroSlideForm({
                 description: "",
                 image_url: "",
                 image_media_id: undefined,
+                show_cta: false,
                 cta_label: "",
                 cta_url: "",
                 alt_text: "",
@@ -91,8 +96,8 @@ export function HeroSlideForm({
 
     const onSubmit = async (data: HeroSlideFormValues) => {
         console.log("[HeroSlideForm] ===== FORM SUBMISSION STARTED =====");
-        console.log("[HeroSlideForm] Editing slide ID:", slide?.id);
-        console.log("[HeroSlideForm] Form submitted with data:", data);
+        console.log("[HeroSlideForm] Editing slide ID:", slide?.id ? String(slide.id) : "new");
+        console.log("[HeroSlideForm] Form submitted with data:", JSON.stringify(data, (_, v) => typeof v === 'bigint' ? v.toString() : v));
         console.log("[HeroSlideForm] Form validation state:", {
             errors: form.formState.errors,
             isValid: form.formState.isValid,
@@ -151,26 +156,39 @@ export function HeroSlideForm({
 
                     <Form {...form}>
                         <form
-                            onSubmit={form.handleSubmit(
-                                onSubmit,
-                                (errors) => {
+                            onSubmit={async (e) => {
+                                e.preventDefault();
+
+                                // Trigger validation first
+                                const isValid = await form.trigger();
+                                const errors = form.formState.errors;
+
+                                console.log("[HeroSlideForm] Manual validation result:", { isValid, errors });
+
+                                if (!isValid) {
                                     // Extract first error message for user-friendly toast
-                                    const firstError = Object.entries(errors)[0];
-                                    const errorMessage = firstError 
-                                        ? `${firstError[0]}: ${firstError[1]?.message}` 
-                                        : "Please fix validation errors";
-                                    
-                                    console.error("[HeroSlideForm] Validation errors:", errors);
-                                    toast.error(errorMessage);
+                                    const errorEntries = Object.entries(errors);
+                                    if (errorEntries.length > 0) {
+                                        const [field, error] = errorEntries[0];
+                                        const message = (error as { message?: string })?.message || "Validation failed";
+                                        toast.error(`${field}: ${message}`);
+                                    } else {
+                                        toast.error("Please fix validation errors");
+                                    }
+                                    return;
                                 }
-                            )}
+
+                                // If valid, proceed with submission
+                                const data = form.getValues();
+                                await onSubmit(data);
+                            }}
                             className="space-y-4"
                         >
                             <HeroSlideFormFields form={form} />
 
-                            <HeroSlideImageSection 
-                                form={form} 
-                                onOpenMediaPicker={() => setIsMediaPickerOpen(true)} 
+                            <HeroSlideImageSection
+                                form={form}
+                                onOpenMediaPicker={() => setIsMediaPickerOpen(true)}
                             />
 
                             <HeroSlideCtaFields form={form} />

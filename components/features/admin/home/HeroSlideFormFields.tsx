@@ -83,35 +83,64 @@ interface HeroSlideCtaFieldsProps {
 }
 
 export function HeroSlideCtaFields({ form }: HeroSlideCtaFieldsProps) {
+    const showCta = form.watch("show_cta");
+
     return (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-4">
+            {/* Toggle to enable/disable CTA */}
             <FormField
                 control={form.control}
-                name="cta_label"
+                name="show_cta"
                 render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>CTA Label</FormLabel>
+                    <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                            <FormLabel className="text-base">Afficher un Call-to-Action</FormLabel>
+                            <div className="text-sm text-muted-foreground">
+                                Ajouter un bouton d&apos;appel à l&apos;action sur ce slide
+                            </div>
+                        </div>
                         <FormControl>
-                            <Input {...field} maxLength={50} placeholder="Learn More" />
+                            <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                            />
                         </FormControl>
-                        <FormMessage />
                     </FormItem>
                 )}
             />
 
-            <FormField
-                control={form.control}
-                name="cta_url"
-                render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>CTA URL</FormLabel>
-                        <FormControl>
-                            <Input {...field} type="url" placeholder="https://..." />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                )}
-            />
+            {/* CTA fields - only shown when toggle is enabled */}
+            {showCta && (
+                <div className="grid grid-cols-2 gap-4 pl-4 border-l-2 border-primary/20">
+                    <FormField
+                        control={form.control}
+                        name="cta_label"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>CTA Label *</FormLabel>
+                                <FormControl>
+                                    <Input {...field} maxLength={50} placeholder="En savoir plus" />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="cta_url"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>CTA URL *</FormLabel>
+                                <FormControl>
+                                    <Input {...field} type="url" placeholder="https://..." />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+            )}
         </div>
     );
 }

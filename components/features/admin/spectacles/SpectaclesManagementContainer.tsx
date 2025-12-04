@@ -5,14 +5,13 @@ import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import type { SpectacleSummary } from "@/lib/schemas/spectacles";
 import {
-  deleteSpectacleFromApi,
   removeSpectacleFromList,
   sortSpectacles,
   getNextSortState,
   type SpectacleSortState,
   type SortField,
 } from "@/lib/tables/spectacle-table-helpers";
-import { handleSpectacleApiError } from "@/lib/api/spectacles-helpers";
+import { deleteSpectacleAction } from "@/app/(admin)/admin/spectacles/actions";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
@@ -87,7 +86,12 @@ export default function SpectaclesManagementContainer({
     setIsDeleting(true);
 
     try {
-      await deleteSpectacleFromApi(deleteCandidate);
+      const result = await deleteSpectacleAction(deleteCandidate);
+
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
       setSpectacles((prev) => removeSpectacleFromList(prev, deleteCandidate));
 
       toast.success("Spectacle supprimé", {
@@ -99,7 +103,9 @@ export default function SpectaclesManagementContainer({
       router.refresh();
     } catch (error) {
       console.error("Delete error:", error);
-      toast.error("Erreur", { description: handleSpectacleApiError(error) });
+      toast.error("Erreur", {
+        description: error instanceof Error ? error.message : "Impossible de supprimer le spectacle"
+      });
     } finally {
       setIsDeleting(false);
     }
