@@ -20,7 +20,7 @@ pnpm audit
 
 ### Alertes résolues
 
-#### CWE-918 — SSRF in validateImageUrl (5 décembre 2025)
+#### CodeQL js/request-forgery — SSRF in validateImageUrl (5 décembre 2025)
 
 | Champ | Valeur |
 |-------|--------|
@@ -29,16 +29,30 @@ pnpm audit
 | **Règle** | CodeQL `js/request-forgery` |
 | **CWE** | [CWE-918](https://cwe.mitre.org/data/definitions/918.html) |
 
-**Problème** : L'URL fournie par l'utilisateur était directement utilisée dans `fetch()`, permettant une attaque SSRF vers des services internes.
+**Problème** : L'URL fournie par l'utilisateur était directement utilisée dans `fetch()`, permettant une attaque SSRF vers des services internes. CodeQL exige que le hostname utilisé dans une requête HTTP provienne de valeurs contrôlées par le serveur, pas de l'input utilisateur.
 
-**Résolution** :
+**Résolution** (3 commits itératifs) :
 
-- Validation du hostname contre une allowlist (Supabase Storage uniquement)
-- Blocage des IPs privées/internes (10.x, 172.16-31.x, 192.168.x)
-- Enforcement HTTPS (HTTP uniquement en développement)
-- Blocage des redirections (`redirect: 'error'`)
+1. **`4e0715d`** — Validation initiale : allowlist hostname + blocage IPs privées
+2. **`b290d03`** — Reconstruction URL depuis composants validés
+3. **`072b68a`** — Refonte complète avec `getCanonicalHostname()` :
+   - Le hostname utilisé dans `fetch()` provient exclusivement de valeurs serveur-contrôlées
+   - Sources autorisées : `ALLOWED_HOSTNAMES` Map, `NEXT_PUBLIC_SUPABASE_URL`, pattern `*.supabase.co`
+   - Blocage IPs privées/internes (10.x, 172.16-31.x, 192.168.x)
+   - Enforcement HTTPS (HTTP uniquement en développement)
+   - Blocage des redirections (`redirect: 'error'`)
 
-**Commit** : `4e0715d` — fix(security): prevent SSRF in validateImageUrl (CWE-918)
+**Pattern CodeQL-compliant** :
+
+```typescript
+// Le hostname vient d'une source serveur-contrôlée
+const canonicalHostname = getCanonicalHostname(parsedUrl.hostname);
+if (!canonicalHostname) return { valid: false, error: "Hostname not allowed" };
+
+// URL construite avec hostname serveur-contrôlé
+const safeUrl = `${parsedUrl.protocol}//${canonicalHostname}${parsedUrl.pathname}${parsedUrl.search}`;
+const response = await fetch(safeUrl, { redirect: "error" });
+```
 
 ---
 
