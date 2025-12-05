@@ -23,6 +23,8 @@ async function main() {
   // Assertions: html should be non-empty and include key parts
   assert.ok(typeof html === 'string' && html.length > 0, 'Rendered html should not be empty')
   assert.ok(html.includes('Activer mon compte'), 'Rendered html should include CTA text')
+  // codeql[js/incomplete-url-substring-sanitization] - False positive: This is a test assertion,
+  // not a security check. We're verifying the email template contains the expected URL.
   assert.ok(html.includes(invitationUrl), 'Rendered html should include invitation URL')
   assert.ok(html.includes('test@example.com'), 'Rendered html should include recipient email')
 
