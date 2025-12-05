@@ -20,6 +20,28 @@ pnpm audit
 
 ### Alertes résolues
 
+#### CWE-918 — SSRF in validateImageUrl (5 décembre 2025)
+
+| Champ | Valeur |
+|-------|--------|
+| **Sévérité** | 🔴 CRITICAL |
+| **Fichier** | `lib/utils/validate-image-url.ts` |
+| **Règle** | CodeQL `js/request-forgery` |
+| **CWE** | [CWE-918](https://cwe.mitre.org/data/definitions/918.html) |
+
+**Problème** : L'URL fournie par l'utilisateur était directement utilisée dans `fetch()`, permettant une attaque SSRF vers des services internes.
+
+**Résolution** :
+
+- Validation du hostname contre une allowlist (Supabase Storage uniquement)
+- Blocage des IPs privées/internes (10.x, 172.16-31.x, 192.168.x)
+- Enforcement HTTPS (HTTP uniquement en développement)
+- Blocage des redirections (`redirect: 'error'`)
+
+**Commit** : `4e0715d` — fix(security): prevent SSRF in validateImageUrl (CWE-918)
+
+---
+
 #### CVE-2025-66478 — Next.js RCE via React Flight Protocol (5 décembre 2025)
 
 | Champ | Valeur |
@@ -37,7 +59,7 @@ pnpm audit
 pnpm add next@16.0.7
 ```
 
-**Commit** : `À commiter` — fix(security): update next.js 16.0.6→16.0.7 (CVE-2025-66478)
+**Commit** : `7a11b96` — fix(security): update next.js 16.0.6→16.0.7 (CVE-2025-66478)
 
 ---
 
