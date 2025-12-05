@@ -11,8 +11,9 @@ const NewsletterBodySchema = z.object({
 
 type NewsletterBody = z.infer<typeof NewsletterBodySchema>;
 
-// supabase/schemas/10_tables_system.sql
-// table public.abonnes_newsletter
+//TODO: add rate limiting
+//* supabase/schemas/10_tables_system.sql
+//* table public.abonnes_newsletter
 /**
  * Handles newsletter subscription requests.
  *

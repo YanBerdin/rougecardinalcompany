@@ -2,6 +2,7 @@
  * Route de diagnostic pour tester l'authentification serveur
  * Vérifie si les cookies d'auth sont présents et valides
  */
+//TODO: delete this test route in production
 import { createClient } from "@/supabase/server";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";

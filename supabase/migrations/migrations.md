@@ -2,6 +2,45 @@
 
 Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutées en complément du schéma déclaratif.
 
+## 🔐 Sécurité : Vérification des vulnérabilités
+
+### Procédure de vérification
+
+```bash
+# 1. Vérifier les vulnérabilités des dépendances npm
+pnpm audit
+
+# 2. Si des vulnérabilités sont trouvées, mettre à jour les packages
+pnpm update <package-name>@<version-corrigée>
+
+# 3. Vérifier que les vulnérabilités sont corrigées
+pnpm audit
+# Attendu : "No known vulnerabilities found"
+```
+
+### Alertes résolues
+
+#### CVE-2025-66478 — Next.js RCE via React Flight Protocol (5 décembre 2025)
+
+| Champ | Valeur |
+|-------|--------|
+| **Sévérité** | 🔴 CRITICAL |
+| **Package** | `next` |
+| **Versions vulnérables** | `>=16.0.0-canary.0 <16.0.7` |
+| **Version corrigée** | `16.0.7` |
+| **Advisory** | [GHSA-9qr9-h5gf-34mp](https://github.com/advisories/GHSA-9qr9-h5gf-34mp) |
+| **Blog** | [nextjs.org/blog/CVE-2025-66478](https://nextjs.org/blog/CVE-2025-66478) |
+
+**Résolution** :
+
+```bash
+pnpm add next@16.0.7
+```
+
+**Commit** : `À commiter` — fix(security): update next.js 16.0.6→16.0.7 (CVE-2025-66478)
+
+---
+
 ## ⚠️ Important : Schéma Déclaratif comme Source de Vérité
 
 > **Le schéma déclaratif (`supabase/schemas/`) est la source de vérité unique pour la structure de la base de données.**

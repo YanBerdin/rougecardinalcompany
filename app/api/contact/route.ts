@@ -4,6 +4,7 @@ import { sendContactNotification } from "@/lib/email/actions";
 import { createContactMessage } from "@/lib/dal/contact";
 import { parseFullName, HttpStatus, ApiResponse } from "@/lib/api/helpers";
 
+//TODO : add rate limiting
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

@@ -1,4 +1,4 @@
-// app/api/test-email/route.ts
+// app/api/test-email/route.ts //TODO: delete this test route in production
 import { NextRequest, NextResponse } from "next/server";
 import {
   sendNewsletterConfirmation,
