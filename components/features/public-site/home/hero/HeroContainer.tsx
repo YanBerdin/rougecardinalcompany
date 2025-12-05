@@ -15,8 +15,14 @@ export async function HeroContainer() {
     subtitle: r.subtitle ?? "",
     description: r.description ?? "",
     image: r.image_url ?? "",
-    cta: r.cta_label ?? "",
-    ctaUrl: r.cta_url ?? "#",
+    // CTA Primaire
+    ctaPrimaryEnabled: r.cta_primary_enabled,
+    ctaPrimaryLabel: r.cta_primary_label ?? undefined,
+    ctaPrimaryUrl: r.cta_primary_url ?? undefined,
+    // CTA Secondaire
+    ctaSecondaryEnabled: r.cta_secondary_enabled,
+    ctaSecondaryLabel: r.cta_secondary_label ?? undefined,
+    ctaSecondaryUrl: r.cta_secondary_url ?? undefined,
   }));
 
   return <HeroClient initialSlides={slides} />;

@@ -9,8 +9,14 @@ export type HomeHeroSlideRecord = {
   subtitle: string | null;
   description: string | null;
   image_url: string | null;
-  cta_label: string | null;
-  cta_url: string | null;
+  // CTA Primaire
+  cta_primary_enabled: boolean;
+  cta_primary_label: string | null;
+  cta_primary_url: string | null;
+  // CTA Secondaire
+  cta_secondary_enabled: boolean;
+  cta_secondary_label: string | null;
+  cta_secondary_url: string | null;
   position: number;
 };
 
@@ -19,8 +25,14 @@ type SupabaseHeroRow = {
   subtitle?: string | null;
   description?: string | null;
   image_url?: string | null;
-  cta_label?: string | null;
-  cta_url?: string | null;
+  // CTA Primaire
+  cta_primary_enabled?: boolean | null;
+  cta_primary_label?: string | null;
+  cta_primary_url?: string | null;
+  // CTA Secondaire
+  cta_secondary_enabled?: boolean | null;
+  cta_secondary_label?: string | null;
+  cta_secondary_url?: string | null;
   position?: number | null;
   active?: boolean | null;
   starts_at?: string | null;
@@ -47,8 +59,14 @@ function filterActiveSlides(
       subtitle: row.subtitle ?? null,
       description: row.description ?? null,
       image_url: row.image_url ?? null,
-      cta_label: row.cta_label ?? null,
-      cta_url: row.cta_url ?? null,
+      // CTA Primaire
+      cta_primary_enabled: row.cta_primary_enabled ?? false,
+      cta_primary_label: row.cta_primary_label ?? null,
+      cta_primary_url: row.cta_primary_url ?? null,
+      // CTA Secondaire
+      cta_secondary_enabled: row.cta_secondary_enabled ?? false,
+      cta_secondary_label: row.cta_secondary_label ?? null,
+      cta_secondary_url: row.cta_secondary_url ?? null,
       position: row.position ?? 0,
     }));
 }
@@ -70,12 +88,13 @@ export async function fetchActiveHomeHeroSlides(): Promise<
     const { data, error } = await supabase
       .from("home_hero_slides")
       .select(
-        "title, subtitle, description, image_url, cta_label, cta_url, position, active, starts_at, ends_at"
+        "title, subtitle, description, image_url, cta_primary_enabled, cta_primary_label, cta_primary_url, cta_secondary_enabled, cta_secondary_label, cta_secondary_url, position, active, starts_at, ends_at"
       )
       .order("position", { ascending: true });
 
     if (error) {
-      console.error("[DAL] fetchActiveHomeHeroSlides error:", error);
+      console.error("[DAL] fetchActiveHomeHeroSlides error:", JSON.stringify(error, null, 2));
+      console.error("[DAL] Error details - code:", error.code, "message:", error.message, "hint:", error.hint);
       return {
         success: false,
         error: `[ERR_HOME_HERO_001] Failed to fetch hero slides: ${error.message}`,

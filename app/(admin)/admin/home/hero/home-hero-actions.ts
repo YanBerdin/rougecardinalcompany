@@ -24,7 +24,8 @@ export async function createHeroSlideAction(input: unknown): Promise<ActionResul
     revalidatePath("/admin/home/hero");
     revalidatePath("/");
 
-    return { success: true, data: result.data };
+    // Don't return data with bigint - client will refresh to get updated list
+    return { success: true };
   } catch (err: unknown) {
     return { success: false, error: err instanceof Error ? err.message : "Unknown error" };
   }
@@ -32,7 +33,7 @@ export async function createHeroSlideAction(input: unknown): Promise<ActionResul
 
 export async function updateHeroSlideAction(id: string | number, input: unknown): Promise<ActionResult> {
   try {
-    const slideId = typeof id === "string" ? BigInt(id) : BigInt(id);
+    const slideId = typeof id === "string" ? Number(id) : Number(id);
     const validated = HeroSlideInputSchema.partial().parse(input);
     const result = await updateHeroSlide(slideId, validated as Partial<HeroSlideInput>);
 
@@ -41,7 +42,8 @@ export async function updateHeroSlideAction(id: string | number, input: unknown)
     revalidatePath("/admin/home/hero");
     revalidatePath("/");
 
-    return { success: true, data: result.data };
+    // Don't return data with bigint - client will refresh to get updated list
+    return { success: true };
   } catch (err: unknown) {
     return { success: false, error: err instanceof Error ? err.message : "Unknown error" };
   }
@@ -49,7 +51,7 @@ export async function updateHeroSlideAction(id: string | number, input: unknown)
 
 export async function deleteHeroSlideAction(id: string | number): Promise<ActionResult<null>> {
   try {
-    const slideId = typeof id === "string" ? BigInt(id) : BigInt(id);
+    const slideId = typeof id === "string" ? Number(id) : Number(id);
     const result = await deleteHeroSlide(slideId);
     if (!result.success) return { success: false, error: result.error ?? "delete failed" };
 

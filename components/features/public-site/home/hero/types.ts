@@ -3,8 +3,16 @@ export interface HeroSlide {
   subtitle?: string;
   description?: string;
   image: string;
-  cta: string;
-  ctaUrl?: string;
+  
+  // CTA Primaire (bouton principal)
+  ctaPrimaryEnabled: boolean;
+  ctaPrimaryLabel?: string;
+  ctaPrimaryUrl?: string;
+  
+  // CTA Secondaire (bouton outline)
+  ctaSecondaryEnabled: boolean;
+  ctaSecondaryLabel?: string;
+  ctaSecondaryUrl?: string;
 }
 
 export interface HeroProps {

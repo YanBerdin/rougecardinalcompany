@@ -747,19 +747,36 @@ create table public.home_hero_slides (
   description text,
   image_url text, -- fallback externe
   image_media_id bigint null references public.medias(id) on delete set null, -- media prioritaire
-  cta_label text, -- texte du bouton
-  cta_url text,   -- lien associé (interne ou externe)
+  -- CTA Primary (bouton principal)
+  cta_primary_enabled boolean not null default false,
+  cta_primary_label text,
+  cta_primary_url text,
+  -- CTA Secondary (bouton secondaire)
+  cta_secondary_enabled boolean not null default false,
+  cta_secondary_label text,
+  cta_secondary_url text,
   position smallint not null default 0,
   active boolean not null default true,
   starts_at timestamptz, -- fenêtre d'activation planifiée (optionnel)
   ends_at timestamptz,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  -- Contraintes de validation
+  constraint home_hero_slides_cta_primary_label_length check (cta_primary_label is null or char_length(cta_primary_label) <= 50),
+  constraint home_hero_slides_cta_secondary_label_length check (cta_secondary_label is null or char_length(cta_secondary_label) <= 50),
+  constraint home_hero_slides_cta_primary_consistency check (cta_primary_enabled = false or (cta_primary_enabled = true and cta_primary_label is not null and cta_primary_url is not null)),
+  constraint home_hero_slides_cta_secondary_consistency check (cta_secondary_enabled = false or (cta_secondary_enabled = true and cta_secondary_label is not null and cta_secondary_url is not null))
 );
 
-comment on table public.home_hero_slides is 'Slides hero page d accueil (carousel) avec CTA et planification optionnelle.';
+comment on table public.home_hero_slides is 'Slides hero page d accueil (carousel) avec 2 CTA indépendants et planification optionnelle.';
 comment on column public.home_hero_slides.slug is 'Identifiant stable pour ciblage et tracking.';
 comment on column public.home_hero_slides.image_media_id is 'Référence media interne (prioritaire sur image_url).';
+comment on column public.home_hero_slides.cta_primary_enabled is 'Active/désactive le bouton CTA principal.';
+comment on column public.home_hero_slides.cta_primary_label is 'Texte du bouton CTA principal (max 50 caractères).';
+comment on column public.home_hero_slides.cta_primary_url is 'URL du CTA principal (relative /path ou absolue https://...).';
+comment on column public.home_hero_slides.cta_secondary_enabled is 'Active/désactive le bouton CTA secondaire.';
+comment on column public.home_hero_slides.cta_secondary_label is 'Texte du bouton CTA secondaire (max 50 caractères).';
+comment on column public.home_hero_slides.cta_secondary_url is 'URL du CTA secondaire (relative /path ou absolue https://...).';
 comment on column public.home_hero_slides.starts_at is 'Date/heure de début d affichage (NULL = immédiat).';
 comment on column public.home_hero_slides.ends_at is 'Date/heure de fin d affichage (NULL = illimité).';
 

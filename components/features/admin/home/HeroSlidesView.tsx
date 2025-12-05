@@ -48,7 +48,7 @@ interface HeroSlidesViewProps {
 interface SortableSlideProps {
     slide: HeroSlideDTO;
     onEdit: (slide: HeroSlideDTO) => void;
-    onDelete: (id: bigint) => void;
+    onDelete: (id: number) => void;
 }
 
 function SortableSlide({ slide, onEdit, onDelete }: SortableSlideProps) {
@@ -119,7 +119,7 @@ export function HeroSlidesView({ initialSlides }: HeroSlidesViewProps) {
     const [isPending, setIsPending] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [slideToDelete, setSlideToDelete] = useState<{
-        id: bigint;
+        id: number;
         title: string;
     } | null>(null);
 
@@ -182,7 +182,7 @@ export function HeroSlidesView({ initialSlides }: HeroSlidesViewProps) {
         setIsFormOpen(true);
     }, []);
 
-    const openDeleteDialog = useCallback((id: bigint, title: string) => {
+    const openDeleteDialog = useCallback((id: number, title: string) => {
         setSlideToDelete({ id, title });
         setDeleteDialogOpen(true);
     }, []);

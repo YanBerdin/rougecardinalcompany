@@ -31,9 +31,12 @@ export function HeroSlidePreview({ slide }: HeroSlidePreviewProps) {
                     </p>
                 )}
 
-                {slide.cta_label && (
+                {slide.cta_primary_enabled && slide.cta_primary_label && (
                     <p className="text-xs text-muted-foreground">
-                        CTA: {slide.cta_label}
+                        CTA: {slide.cta_primary_label}
+                        {slide.cta_secondary_enabled && slide.cta_secondary_label && (
+                            <span> | {slide.cta_secondary_label}</span>
+                        )}
                     </p>
                 )}
             </div>

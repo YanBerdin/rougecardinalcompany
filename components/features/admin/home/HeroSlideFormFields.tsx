@@ -83,64 +83,128 @@ interface HeroSlideCtaFieldsProps {
 }
 
 export function HeroSlideCtaFields({ form }: HeroSlideCtaFieldsProps) {
-    const showCta = form.watch("show_cta");
+    const ctaPrimaryEnabled = form.watch("cta_primary_enabled");
+    const ctaSecondaryEnabled = form.watch("cta_secondary_enabled");
 
     return (
         <div className="space-y-4">
-            {/* Toggle to enable/disable CTA */}
-            <FormField
-                control={form.control}
-                name="show_cta"
-                render={({ field }) => (
-                    <FormItem className="flex items-center justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                            <FormLabel className="text-base">Afficher un Call-to-Action</FormLabel>
-                            <div className="text-sm text-muted-foreground">
-                                Ajouter un bouton d&apos;appel à l&apos;action sur ce slide
+            {/* ===== CTA PRIMAIRE ===== */}
+            <div className="rounded-lg border p-4 space-y-4">
+                <FormField
+                    control={form.control}
+                    name="cta_primary_enabled"
+                    render={({ field }) => (
+                        <FormItem className="flex items-center justify-between">
+                            <div className="space-y-0.5">
+                                <FormLabel className="text-base">CTA Primaire</FormLabel>
+                                <div className="text-sm text-muted-foreground">
+                                    Bouton principal (style plein)
+                                </div>
                             </div>
-                        </div>
-                        <FormControl>
-                            <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                            />
-                        </FormControl>
-                    </FormItem>
+                            <FormControl>
+                                <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                />
+                            </FormControl>
+                        </FormItem>
+                    )}
+                />
+
+                {ctaPrimaryEnabled && (
+                    <div className="grid grid-cols-2 gap-4 pl-4 border-l-2 border-primary/30">
+                        <FormField
+                            control={form.control}
+                            name="cta_primary_label"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Label *</FormLabel>
+                                    <FormControl>
+                                        <Input {...field} maxLength={50} placeholder="Voir la programmation" />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="cta_primary_url"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>URL *</FormLabel>
+                                    <FormControl>
+                                        <Input {...field} placeholder="/spectacles ou https://..." />
+                                    </FormControl>
+                                    <FormDescription className="text-xs">
+                                        Relative (/page) ou absolue (https://...)
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
                 )}
-            />
+            </div>
 
-            {/* CTA fields - only shown when toggle is enabled */}
-            {showCta && (
-                <div className="grid grid-cols-2 gap-4 pl-4 border-l-2 border-primary/20">
-                    <FormField
-                        control={form.control}
-                        name="cta_label"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>CTA Label *</FormLabel>
-                                <FormControl>
-                                    <Input {...field} maxLength={50} placeholder="En savoir plus" />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+            {/* ===== CTA SECONDAIRE ===== */}
+            <div className="rounded-lg border p-4 space-y-4">
+                <FormField
+                    control={form.control}
+                    name="cta_secondary_enabled"
+                    render={({ field }) => (
+                        <FormItem className="flex items-center justify-between">
+                            <div className="space-y-0.5">
+                                <FormLabel className="text-base">CTA Secondaire</FormLabel>
+                                <div className="text-sm text-muted-foreground">
+                                    Bouton secondaire (style outline)
+                                </div>
+                            </div>
+                            <FormControl>
+                                <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                />
+                            </FormControl>
+                        </FormItem>
+                    )}
+                />
 
-                    <FormField
-                        control={form.control}
-                        name="cta_url"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>CTA URL *</FormLabel>
-                                <FormControl>
-                                    <Input {...field} type="url" placeholder="https://..." />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </div>
-            )}
+                {ctaSecondaryEnabled && (
+                    <div className="grid grid-cols-2 gap-4 pl-4 border-l-2 border-muted-foreground/30">
+                        <FormField
+                            control={form.control}
+                            name="cta_secondary_label"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Label *</FormLabel>
+                                    <FormControl>
+                                        <Input {...field} maxLength={50} placeholder="Réserver des billets" />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="cta_secondary_url"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>URL *</FormLabel>
+                                    <FormControl>
+                                        <Input {...field} placeholder="/agenda ou https://..." />
+                                    </FormControl>
+                                    <FormDescription className="text-xs">
+                                        Relative (/page) ou absolue (https://...)
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

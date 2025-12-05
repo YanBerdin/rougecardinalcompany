@@ -47,7 +47,7 @@ async function generateUniqueSlug(
 async function generateUniqueSlugExcluding(
     supabase: SupabaseClient,
     baseSlug: string,
-    excludeId: bigint
+    excludeId: number
 ): Promise<string> {
     let slug = baseSlug;
     let counter = 1;
@@ -116,7 +116,7 @@ export async function fetchAllHeroSlides(): Promise<DALResult<HeroSlideDTO[]>> {
  * @returns Hero slide or null if not found
  */
 export async function fetchHeroSlideById(
-    id: bigint
+    id: number
 ): Promise<DALResult<HeroSlideDTO | null>> {
     try {
         await requireAdmin();
@@ -200,7 +200,7 @@ export async function createHeroSlide(
  * @returns Updated hero slide
  */
 export async function updateHeroSlide(
-    id: bigint,
+    id: number,
     input: Partial<HeroSlideInput>
 ): Promise<DALResult<HeroSlideDTO>> {
     try {
@@ -270,7 +270,7 @@ export async function updateHeroSlide(
  * @param id - Hero slide ID
  * @returns Success status
  */
-export async function deleteHeroSlide(id: bigint): Promise<DALResult<null>> {
+export async function deleteHeroSlide(id: number): Promise<DALResult<null>> {
     try {
         await requireAdmin();
 

@@ -36,9 +36,8 @@ export function HeroView({
       {slides.map((slide, index) => (
         <div
           key={index}
-          className={`absolute inset-0 transition-opacity duration-1000 ${
-            index === currentSlide ? "opacity-100" : "opacity-0"
-          }`}
+          className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? "opacity-100" : "opacity-0"
+            }`}
         >
           <div
             className="absolute inset-0 bg-cover bg-center"
@@ -62,20 +61,30 @@ export function HeroView({
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button variant="default" size="lg" className="" asChild>
-              <Link href={slides[currentSlide].ctaUrl || "/spectacles"}>
-                {slides[currentSlide].cta}
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="bg-white/30 border-white/50 text-white backdrop-blur-md hover:bg-white hover:text-black transition-all duration-300 shadow-lg"
-            >
-              <Play className="mr-2 h-5 w-5" />
-              Voir la bande-annonce
-            </Button>
+            {/* CTA Primaire - Bouton plein */}
+            {slides[currentSlide].ctaPrimaryEnabled && slides[currentSlide].ctaPrimaryLabel && (
+              <Button variant="default" size="lg" asChild>
+                <Link href={slides[currentSlide].ctaPrimaryUrl || "/spectacles"}>
+                  {slides[currentSlide].ctaPrimaryLabel}
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+            )}
+
+            {/* CTA Secondaire - Bouton outline */}
+            {slides[currentSlide].ctaSecondaryEnabled && slides[currentSlide].ctaSecondaryLabel && (
+              <Button
+                variant="outline"
+                size="lg"
+                className="bg-white/30 border-white/50 text-white backdrop-blur-md hover:bg-white hover:text-black transition-all duration-300 shadow-lg"
+                asChild
+              >
+                <Link href={slides[currentSlide].ctaSecondaryUrl || "/agenda"}>
+                  {slides[currentSlide].ctaSecondaryLabel}
+                  <Play className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -116,11 +125,10 @@ export function HeroView({
             aria-label={`Aller au slide ${index + 1}`}
           >
             <span
-              className={`block w-3 h-3 rounded-full transition-all duration-200 ${
-                index === currentSlide
+              className={`block w-3 h-3 rounded-full transition-all duration-200 ${index === currentSlide
                   ? "bg-white scale-110"
                   : "bg-white/50 hover:bg-white/75 scale-95"
-              }`}
+                }`}
             />
           </button>
         ))}

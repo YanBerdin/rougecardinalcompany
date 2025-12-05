@@ -46,10 +46,15 @@ export function HeroSlideForm({
             description: "",
             image_url: "",
             image_media_id: undefined,
-            show_cta: false,
-            cta_label: "",
-            cta_url: "",
             alt_text: "",
+            // CTA Primaire
+            cta_primary_enabled: false,
+            cta_primary_label: "",
+            cta_primary_url: "",
+            // CTA Secondaire
+            cta_secondary_enabled: false,
+            cta_secondary_label: "",
+            cta_secondary_url: "",
             active: true,
             position: undefined,
         },
@@ -59,8 +64,6 @@ export function HeroSlideForm({
     useEffect(() => {
         if (open && slide) {
             console.log('[HeroSlideForm] Resetting form with slide ID:', String(slide.id));
-            // Determine if CTA should be shown based on existing data
-            const hasCtaData = Boolean(slide.cta_label || slide.cta_url);
             form.reset({
                 title: slide.title,
                 slug: slide.slug,
@@ -68,10 +71,15 @@ export function HeroSlideForm({
                 description: slide.description ?? "",
                 image_url: slide.image_url ?? "",
                 image_media_id: slide.image_media_id !== null ? Number(slide.image_media_id) : undefined,
-                show_cta: hasCtaData,
-                cta_label: slide.cta_label ?? "",
-                cta_url: slide.cta_url ?? "",
                 alt_text: slide.alt_text,
+                // CTA Primaire
+                cta_primary_enabled: slide.cta_primary_enabled,
+                cta_primary_label: slide.cta_primary_label ?? "",
+                cta_primary_url: slide.cta_primary_url ?? "",
+                // CTA Secondaire
+                cta_secondary_enabled: slide.cta_secondary_enabled,
+                cta_secondary_label: slide.cta_secondary_label ?? "",
+                cta_secondary_url: slide.cta_secondary_url ?? "",
                 active: slide.active,
                 position: slide.position,
             });
@@ -84,10 +92,15 @@ export function HeroSlideForm({
                 description: "",
                 image_url: "",
                 image_media_id: undefined,
-                show_cta: false,
-                cta_label: "",
-                cta_url: "",
                 alt_text: "",
+                // CTA Primaire
+                cta_primary_enabled: false,
+                cta_primary_label: "",
+                cta_primary_url: "",
+                // CTA Secondaire
+                cta_secondary_enabled: false,
+                cta_secondary_label: "",
+                cta_secondary_url: "",
                 active: true,
                 position: undefined,
             });
