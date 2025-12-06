@@ -1,23 +1,18 @@
 # File Tree: rougecardinalcompany
 
-**Generated:** 11/29/2025, 8:55:59 PM
-**Root Path:** `/home/yandev/projets/rougecardinalcompany`
+**Generated:** 12/6/2025, 1:55:40 AM
+**Root Path:** `memory-bank/architecture`
 
 ```bash
 ├── 📁 .github
 │   ├── 📁 copilot
 │   ├── 📁 instructions
+│   │   ├── ⚙️ .markdownlint.jsonc
 │   ├── 📁 prompts
 │   ├── 📁 workflows
-│   │   ├── ⚙️ detect-revoke-warn.yml
-│   │   ├── ⚙️ invitation-email-test.yml
-│   │   ├── ⚙️ monitor-detect-revoke.yml
-│   │   └── ⚙️ reorder-sql-tests.yml
 │   ├── 📝 SECRETS_EXAMPLES.md
 │   └── 📝 copilot-instructions.md
 ├── 📁 __tests__
-│   └── 📁 emails
-│       └── 📄 invitation-email.test.tsx
 ├── 📁 app
 │   ├── 📁 (admin)
 │   │   ├── 📁 admin
@@ -53,7 +48,6 @@
 │   │   │   │   └── 📄 page.tsx
 │   │   │   ├── 📁 users
 │   │   │   │   ├── 📁 invite
-│   │   │   │   │   ├── 📄 actions.ts
 │   │   │   │   │   └── 📄 page.tsx
 │   │   │   │   ├── 📄 actions.ts
 │   │   │   │   ├── 📄 loading.tsx
@@ -83,28 +77,13 @@
 │   │   └── 📄 page.tsx
 │   ├── 📁 api
 │   │   ├── 📁 admin
-#   │   │   ├── 📁 home
-#   │   │   │   └── 📁 hero
-#   │   │   │       ├── 📁 [id]
-#   │   │   │       │   └── 📄 route.ts
-#   │   │   │       ├── 📁 reorder
-#   │   │   │       │   └── 📄 route.ts
-#   │   │   │       └── 📄 route.ts
-#   │   │   ├── 📁 invite-user
-#   │   │   │   └── 📄 route.ts
-│   │   │   ├── 📁 media
-│   │   │   │   └── 📁 search
-│   │   │   │       └── 📄 route.ts
-│   │   │   └── 📁 spectacles
-│   │   │       ├── 📁 [id]
-│   │   │       │   └── 📄 route.ts
-│   │   │       └── 📄 route.ts
+│   │   │   └── 📁 media
+│   │   │       └── 📁 search
+│   │   │           └── 📄 route.ts
 │   │   ├── 📁 contact
 │   │   │   └── 📄 route.ts
 │   │   ├── 📁 debug-auth
 │   │   │   └── 📄 route.ts
-│   │   ├── 📁 home
-│   │   │   └── 📁 hero
 │   │   ├── 📁 newsletter
 │   │   │   └── 📄 route.ts
 │   │   ├── 📁 public
@@ -141,7 +120,6 @@
 │   ├── 📄 global.d.ts
 │   ├── 🎨 globals.css
 │   ├── 📄 layout.tsx
-│   ├── 📄 layout.tsx.backup
 │   ├── 🖼️ opengraph-image.png
 │   └── 🖼️ twitter-image.png
 ├── 📁 components
@@ -160,6 +138,7 @@
 │   │   │   ├── 📁 home
 │   │   │   │   ├── 📄 AboutContentContainer.tsx
 │   │   │   │   ├── 📄 AboutContentForm.tsx
+│   │   │   │   ├── 📄 CtaFieldGroup.tsx
 │   │   │   │   ├── 📄 HeroSlideForm.tsx
 │   │   │   │   ├── 📄 HeroSlideFormFields.tsx
 │   │   │   │   ├── 📄 HeroSlideImageSection.tsx
@@ -314,6 +293,7 @@
 │   │   ├── 📄 sidebar.tsx
 │   │   ├── 📄 skeleton.tsx
 │   │   ├── 📄 sonner.tsx
+│   │   ├── 📄 sortable-header.tsx
 │   │   ├── 📄 switch.tsx
 │   │   ├── 📄 table.tsx
 │   │   ├── 📄 tabs.tsx
@@ -329,7 +309,6 @@
 │   ├── 📄 theme-switcher.tsx
 │   └── 📄 update-password-form.tsx
 ├── 📁 doc
-├── 📁 doc-perso
 ├── 📁 emails
 │   ├── 📁 utils
 │   │   ├── 📄 components.utils.tsx
@@ -339,10 +318,11 @@
 │   └── 📄 newsletter-confirmation.tsx
 ├── 📁 lib
 │   ├── 📁 api
-│   │   ├── 📄 helpers.ts
-│   │   └── 📄 spectacles-helpers.ts
+│   │   └── 📄 helpers.ts
 │   ├── 📁 auth
 │   │   └── 📄 is-admin.ts
+│   ├── 📁 constants
+│   │   └── 📄 hero-slides.ts
 │   ├── 📁 dal
 │   │   ├── 📁 helpers
 │   │   │   ├── 📄 error.ts
@@ -375,6 +355,10 @@
 │   │   ├── 📄 use-debounce.ts
 │   │   ├── 📄 use-mobile.ts
 │   │   ├── 📄 useContactForm.ts
+│   │   ├── 📄 useHeroSlideForm.ts
+│   │   ├── 📄 useHeroSlideFormSync.ts
+│   │   ├── 📄 useHeroSlidesDelete.ts
+│   │   ├── 📄 useHeroSlidesDnd.ts
 │   │   └── 📄 useNewsletterSubscribe.ts
 │   ├── 📁 plugins
 │   │   └── 📄 touch-hitbox-plugin.js
@@ -391,7 +375,8 @@
 │   │   ├── 📄 spectacles.ts
 │   │   └── 📄 team.ts
 │   ├── 📁 tables
-│   │   └── 📄 spectacle-table-helpers.ts
+│   │   ├── 📄 spectacle-table-helpers.ts
+│   │   └── 📄 user-table-helpers.ts
 │   ├── 📁 utils
 │   │   └── 📄 validate-image-url.ts
 │   ├── 📄 database.types.ts
@@ -402,76 +387,13 @@
 │   ├── 📁 architecture
 │   │   ├── 📝 Email_Service_Architecture.md
 │   │   ├── 📝 Project_Architecture_Blueprint.md
-│   │   ├── 📝 Project_Folders_Structure_Blueprint_v4.md
-│   │   ├── 📝 dev-email-redirect.md
-│   │   └── 📝 file-tree.md
+│   │   ├── 📝 Project_Folders_Structure_Blueprint_v5.md
+│   │   └── 📝 dev-email-redirect.md
 │   ├── 📁 changes
 │   │   └── 📝 2025-11-11-layouts-admin-sidebar.md
 │   ├── 📁 epics
-│   │   ├── 📁 details
-│   │   │   ├── 📝 14.1-page-accueil(Home).md
-│   │   │   ├── 📝 14.2-page-presentation-companie.md
-│   │   │   ├── 📝 14.3-page-spectacles-(événements).md
-│   │   │   ├── 📝 14.4-page-agenda.md
-│   │   │   ├── 📝 14.5-page-presse.md
-│   │   │   ├── 📝 14.6-contact-newsletter.md
-│   │   │   └── 📝 14.7-back‑office.md
-│   │   └── ⚙️ epics-map.yaml
 │   ├── 📁 procedures
-│   │   ├── 📝 admin-management.md
-│   │   └── 📝 admin-user-registration.md
 │   ├── 📁 tasks
-│   │   ├── 📁 completed-tasks
-│   │   │   ├── 📝 TASK007-update-memory-bank.md
-│   │   │   ├── 📝 TASK011-integration-home-hero-slides.md
-│   │   │   ├── 📝 TASK012-integration-ui-compagnie-stats.md
-│   │   │   ├── 📝 TASK013-seeds-nouvelles-tables.md
-│   │   │   ├── 📝 TASK019-fix-spectacles-archives.md
-│   │   │   ├── 📝 TASK020-alignement-ui-presse.md
-│   │   │   ├── 📝 TASK021-admin-backoffice-spectacles.md
-│   │   │   ├── 📝 TASK021-admin-spectacles-crud.md
-│   │   │   ├── 📝 TASK021-content-management-crud.md
-│   │   │   ├── 📝 TASK021-documentation-docker.md
-│   │   │   ├── 📝 TASK021B-documentation-supabase-cli.md
-│   │   │   ├── 📝 TASK021C-auth-cleanup-and-optimization.md
-│   │   │   ├── 📝 TASK022-REVIEW.md
-│   │   │   ├── 📝 TASK022-implementation-summary.md
-│   │   │   ├── 📝 TASK022-team-management.md
-│   │   │   ├── 📝 TASK024-admin-email-scripts.md
-│   │   │   ├── 📝 TASK025-rls-security-performance-fixes.md
-│   │   │   ├── 📝 TASK025B-security-audit-campaign.md
-│   │   │   ├── 📝 TASK026-COMPLIANCE-FIXES.md
-│   │   │   ├── 📝 TASK026-FINAL-STATUS.md
-│   │   │   ├── 📝 TASK026-homepage-content-management.md
-│   │   │   ├── 📝 TASK026B-cloud-fix-procedure.md
-│   │   │   ├── 📝 TASK026B-db-functions-compliance.md
-│   │   │   ├── 📝 TASK027B-security-definer-rationale.md
-│   │   │   ├── 📝 TASK028B-cleanup-obsolete-scripts.md
-│   │   │   ├── 📝 TASK032-user-role-management-FINAL.md
-│   │   │   └── 📝 TASK032-user-role-management.md
-│   │   ├── 📝 RESOLVED_db_reconstruction_2025-11-18.md
-│   │   ├── 📝 TASK014-backoffice-toggles-centralises.md
-│   │   ├── 📝 TASK023-partners-management.md
-│   │   ├── 📝 TASK024-press-management.md
-│   │   ├── 📝 TASK027-company-content-management.md
-│   │   ├── 📝 TASK028-content-versioning-ui.md
-│   │   ├── 📝 TASK029-media-library.md
-│   │   ├── 📝 TASK030-display-toggles.md
-│   │   ├── 📝 TASK031-analytics-dashboard.md
-│   │   ├── 📝 TASK033-audit-logs-viewer.md
-│   │   ├── 📝 TASK034-performance-optimization.md
-│   │   ├── 📝 TASK035-testing-suite.md
-│   │   ├── 📝 TASK036-security-audit.md
-│   │   ├── 📝 TASK037-accessibility-compliance.md
-│   │   ├── 📝 TASK038-responsive-testing.md
-│   │   ├── 📝 TASK039-production-deployment.md
-│   │   ├── 📝 TASK040-documentation.md
-│   │   ├── 📝 _archived_TASK025-communications-dashboard.md
-│   │   ├── 📝 _index.md
-│   │   ├── 📝 _issues_preview.md
-│   │   └── 📝 _preview_backoffice_tasks.md
-│   ├── 📝 Memory-Bank-Update-Session-2025-10-13.md
-│   ├── 📝 Memory-Bank-Update-Session-2025-10-26.md
 │   ├── 📝 activeContext.md
 │   ├── 📝 productContext.md
 │   ├── 📝 progress.md
@@ -479,67 +401,7 @@
 │   ├── 📝 systemPatterns.md
 │   └── 📝 techContext.md
 ├── 📁 public
-│   └── 🖼️ logo-florian.png
 ├── 📁 scripts
-│   ├── 📁 Test_fetchMediaArticles
-│   │   ├── 📝 README.md
-│   │   ├── 📄 apply-migration-articles-view.ts
-│   │   ├── 📄 check-chapo-excerpt.ts
-│   │   ├── 📄 check-rls-policies.ts
-│   │   ├── 📄 test-chapo-and-excerpt-separate.ts
-│   │   ├── 📄 test-dal-pattern.ts
-│   │   ├── 📄 test-public-view.ts
-│   │   ├── 📄 test-rls-articles copy.ts
-│   │   └── 📄 test-rls-articles.ts
-│   ├── 📁 test-invitation-email
-│   │   ├── 📄 generate-invite-link.js
-│   │   ├── 📄 test-complete-flow.js
-│   │   ├── 📄 test-invitation-flow.js
-│   │   ├── 📄 test-invitation-link-flow.js
-│   │   ├── 📄 test-local-invitation.js
-│   │   └── 📄 test-redirect-flow.js
-│   ├── 📝 README.md
-│   ├── 📄 check-admin-status.ts
-│   ├── 📄 check-email-logs.ts
-│   ├── 📄 check-existing-profile.js
-│   ├── 📄 check-extension.ts
-│   ├── 📄 check-migration-applied.ts
-│   ├── 📄 check-security-advisors.js
-│   ├── 📄 check-security-audit.sh
-│   ├── 📄 create-admin-user.ts
-│   ├── 📄 create-local-admin.ts
-│   ├── 📄 create_issues.sh
-│   ├── 📄 delete-test-user.js
-│   ├── 📄 diagnose-server-auth.ts
-│   ├── 📄 find-auth-user.js
-│   ├── 📄 post-reset.sh
-│   ├── 📄 quick-test-active.sh
-│   ├── 📄 rebuild-cloud-schema.sh
-│   ├── 📄 seed-admin.ts
-│   ├── 📄 set-admin-role.ts
-│   ├── 📄 supabase-env.sh
-│   ├── 📄 sync-admin-profile.ts
-│   ├── 📄 test-active-endpoint-service.ts
-│   ├── 📄 test-active-endpoint.sh
-│   ├── 📄 test-active-endpoint.ts
-│   ├── 📄 test-admin-access.ts
-│   ├── 📄 test-all-dal-functions.ts
-│   ├── 📄 test-dal-admin-users.ts
-│   ├── 📄 test-dashboard-stats.ts
-│   ├── 📄 test-email-integration.ts
-│   ├── 📄 test-evenements-access.ts
-│   ├── 📄 test-fetch-media-articles.ts
-│   ├── 📄 test-full-invitation.js
-│   ├── 📄 test-home-hero-api.ts
-│   ├── 📄 test-profile-insertion.js
-│   ├── 📄 test-spectacles-api.ts
-│   ├── 📄 test-spectacles-crud.ts
-│   ├── 📄 test-spectacles-dal.ts
-│   ├── 📄 test-spectacles-endpoints.ts
-│   ├── 📄 test-team-active-dal.ts
-│   ├── 📄 test-views-security-invoker.ts
-│   ├── 📄 test-webhooks.ts
-│   └── 📄 verify-view-security-invoker.ts
 ├── 📁 supabase
 │   ├── 📁 .branches
 │   │   └── 📄 _current_branch
@@ -587,6 +449,8 @@
 │   │   ├── 📄 20251123170231_create_messages_contact_admin_view.sql
 │   │   ├── 📄 20251126001251_add_alt_text_to_home_hero_slides.sql
 │   │   ├── 📄 20251126215129_fix_hero_slides_admin_select_policy.sql
+│   │   ├── 📄 20251204133540_create_reorder_hero_slides_function.sql
+│   │   ├── 📄 20251205220000_refactor_hero_slides_cta_dual_buttons.sql
 │   │   ├── 📝 ROUND_7B_ANALYSIS.md
 │   │   ├── 📝 migrations.md
 │   │   └── 📄 sync_existing_profiles.sql
@@ -646,23 +510,12 @@
 │   │   ├── 📄 verify_policies_applied.sql
 │   │   └── 📄 verify_rls_policies.sql
 │   ├── 📁 tests
-│   │   ├── 📄 20251025_test_reorder_and_views.sql
-│   │   ├── 📝 README.md
-│   │   ├── 📄 ci-run.sh
-│   │   ├── 📄 run_audit_grants.sh
-│   │   └── 📄 run_reorder_tests.sh
 │   ├── 📝 README.md
 │   ├── 📄 admin.ts
 │   ├── 📄 client.ts
 │   ├── 📄 middleware.ts
 │   └── 📄 server.ts
 ├── 📁 swark-output
-│   ├── 📝 2025-11-11__15-47-43__diagram.md
-│   ├── 📝 2025-11-11__15-47-43__log.md
-│   ├── 📝 2025-11-11__15-51-52__diagram.md
-│   ├── 📝 2025-11-11__15-51-52__log.md
-│   ├── 📝 2025-11-11__15-52-57__diagram.md
-│   └── 📝 2025-11-11__15-52-57__log.md
 ├── ⚙️ .env.example
 ├── ⚙️ .gitignore
 ├── ⚙️ .markdownlint.jsonc
@@ -672,14 +525,13 @@
 ├── ⚙️ components.json
 ├── 📄 eslint.config.mjs
 ├── 📄 inspect-tables.sql
-├── 📄 middleware.ts
 ├── 📄 next.config.ts
 ├── ⚙️ package.json
 ├── ⚙️ pnpm-lock.yaml
 ├── 📄 postcss.config.mjs
+├── 📄 proxy.ts
 ├── 📄 supabase_public_data.sql
 ├── 📄 tailwind.config.ts
 ├── 📄 test-email-simple.js
-├── 📄 test-invitation.js
 └── ⚙️ tsconfig.json
 ```

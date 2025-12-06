@@ -1,10 +1,10 @@
 # Project Architecture Blueprint — Rouge Cardinal Company
 
 Generated: 30 November 2025  
-Updated: 4 December 2025  
+Updated: 6 December 2025  
 Source: `doc/prompts-github/architecture-blueprint-generator.prompt.md`  
 Repository branch: `master`  
-Version: v2.1
+Version: v2.2
 
 Résumé: ce document analyse la base de code existante et formalise le modèle d'architecture, les patterns observés et les recommandations pour l'évolution et l'extensibilité. Il s'appuie sur l'organisation actuelle (Next.js 15, TypeScript strict, Supabase, React 19) et couvre les composantes clés, la sécurité RLS, les modèles d'accès aux données, les tests et le déploiement.
 
@@ -17,6 +17,14 @@ Résumé: ce document analyse la base de code existante et formalise le modèle 
 - **Email/revalidatePath**: Supprimés du DAL, uniquement dans Server Actions
 - **Error codes**: Standardisés `[ERR_ENTITY_NNN]` dans tous les DAL
 - **SOLID compliance**: Score 92% (objectif était 90%)
+
+**Mise à jour v2.2 (6 décembre 2025) — Clean Code Refactoring:**
+
+- **lib/constants/ créé**: Nouveau `lib/constants/hero-slides.ts` avec `HERO_SLIDE_LIMITS`, `HERO_SLIDE_DEFAULTS`, `ANIMATION_CONFIG`, `DRAG_CONFIG`
+- **Hooks extraits**: 4 nouveaux hooks dans `lib/hooks/`: `useHeroSlideForm.ts`, `useHeroSlideFormSync.ts`, `useHeroSlidesDnd.ts`, `useHeroSlidesDelete.ts`
+- **CtaFieldGroup component**: Nouveau composant DRY `components/features/admin/home/CtaFieldGroup.tsx` pour champs CTA
+- **Fichiers < 300 lignes**: `HeroSlideForm.tsx` (117 lignes), `HeroSlideFormFields.tsx` (127 lignes), `HeroSlidesView.tsx` (241 lignes)
+- **Pattern hooks extraction**: Extraction de logique dans hooks custom quand composant > 300 lignes
 
 **Mise à jour v2.1 (4 décembre 2025) — API Routes Cleanup:**
 
@@ -64,6 +72,8 @@ Principes directeurs:
 - Validation runtime à chaque frontière (Zod) + typage TypeScript strict
 - RLS (Row-Level Security) activé et considéré premier mécanisme de sécurité côté DB
 - **Clean Code**: max 300 lignes par fichier, split des formulaires en sous-composants
+- **Constants centralisées**: `lib/constants/` pour éviter les magic numbers (LIMITS, DEFAULTS, CONFIG)
+- **Hooks extraction**: Logique complexe extraite dans `lib/hooks/` (DnD, form state, delete dialog)
 - **Props colocation**: Props interfaces avec leurs composants, pas dans lib/types/
 
 Boundaries:
@@ -85,20 +95,20 @@ Boundaries:
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                           NEXT.JS APP                                       │
 │  ┌─────────────────────────────────────────────────────────────────────────┐│
-│  │  Middleware (supabase/middleware.ts)                                    ││
-│  │  - JWT claims validation via getClaims() (~2-5ms)                       ││
-│  │  - Admin route protection (/admin/*, /api/admin/*)                      ││
+│  │              Middleware (supabase/middleware.ts)                        ││
+│  │              - JWT claims validation via getClaims() (~2-5ms)           ││
+│  │              - Admin route protection (/admin/*, /api/admin/*)          ││
 │  └─────────────────────────────────────────────────────────────────────────┘│
 │                                    │                                        │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐              │
-│  │  (marketing)    │  │   (admin)       │  │   api/          │              │
-│  │  Public pages   │  │   Backoffice    │  │   API Routes    │              │
-│  │  - spectacles   │  │   - home/hero   │  │   (minimales)   │              │
-│  │  - compagnie    │  │   - users       │  │   - newsletter  │              │
-│  │  - contact      │  │   - team        │  │   - contact     │              │
-│  │  - agenda       │  │   - spectacles  │  │   - media/search│              │
-│  │  - presse       │  │                 │  │                 │              │
-│  └─────────────────┘  └─────────────────┘  └─────────────────┘              │
+│          ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐      │
+│          │  (marketing)    │  │   (admin)       │  │   api/          │      │
+│          │  Public pages   │  │   Backoffice    │  │   API Routes    │      │
+│          │  - spectacles   │  │   - home/hero   │  │   (minimales)   │      │
+│          │  - compagnie    │  │   - users       │  │   - newsletter  │      │
+│          │  - contact      │  │   - team        │  │   - contact     │      │
+│          │  - agenda       │  │   - spectacles  │  │   - media/search│      │
+│          │  - presse       │  │                 │  │                 │      │
+│          └─────────────────┘  └─────────────────┘  └─────────────────┘      │
 │                                    │                                        │
 │  ┌─────────────────────────────────────────────────────────────────────────┐│
 │  │  LAYER: Server Actions (app/(admin)/admin/.../actions.ts)               ││
@@ -144,25 +154,42 @@ app/(admin)/admin/home/hero/page.tsx
   ├── export const revalidate = 0
   └── <HeroSlidesContainer />
 
+lib/constants/
+  └── hero-slides.ts
+        ├── HERO_SLIDE_LIMITS (title: 80, subtitle: 120, description: 500, etc.)
+        ├── HERO_SLIDE_DEFAULTS (initial form values)
+        ├── ANIMATION_CONFIG (Framer Motion settings)
+        └── DRAG_CONFIG (dnd-kit configuration)
+
+lib/hooks/
+  ├── useHeroSlideForm.ts (53 lines) — Form state + submission logic
+  ├── useHeroSlideFormSync.ts (38 lines) — Props/form sync via useEffect
+  ├── useHeroSlidesDnd.ts (73 lines) — Drag & drop with @dnd-kit
+  └── useHeroSlidesDelete.ts (61 lines) — Delete confirmation dialog
+
 components/features/admin/home/
   ├── HeroSlidesContainer.tsx (Server Component)
   │     └── fetchAllHeroSlides() → <HeroSlidesView slides={data} />
   │
-  ├── HeroSlidesView.tsx (Client Component)
-  │     ├── useState(initialSlides)
+  ├── HeroSlidesView.tsx (~241 lines, Client Component)
+  │     ├── useHeroSlidesDnd() — Extracted DnD logic
+  │     ├── useHeroSlidesDelete() — Extracted delete logic
   │     ├── useEffect(() => setSlides(props), [props])  ← CRITICAL for re-render
-  │     ├── DnD reordering with @dnd-kit
   │     └── <HeroSlideForm />
   │
-  ├── HeroSlideForm.tsx (~200 lines)
-  │     ├── useForm<HeroSlideFormValues>()
-  │     ├── zodResolver(HeroSlideFormSchema)  ← UI schema (number IDs)
+  ├── HeroSlideForm.tsx (~117 lines)
+  │     ├── useHeroSlideForm() — Extracted form logic
+  │     ├── useHeroSlideFormSync() — Extracted sync logic
   │     ├── <HeroSlideFormFields form={form} />
   │     └── <HeroSlideImageSection form={form} />
   │
-  ├── HeroSlideFormFields.tsx (143 lines) — Extracted text fields
+  ├── HeroSlideFormFields.tsx (~127 lines) — Text fields + CtaFieldGroup
+  │     └── <CtaFieldGroup /> — DRY CTA Primary/Secondary
   │
-  └── HeroSlideImageSection.tsx (85 lines) — Extracted image picker
+  ├── CtaFieldGroup.tsx (~130 lines) — Config-driven CTA fields
+  │     └── CTA_CONFIGS for Primary/Secondary field mapping
+  │
+  └── HeroSlideImageSection.tsx (85 lines) — Image picker
 ```
 
 ### Data Flow (Mutation)
@@ -303,7 +330,119 @@ export async function createSomething(input: ValidatedInput): Promise<DALResult<
 - ❌ NO `revalidatePath()` imports
 - ❌ NO `@/lib/email` imports
 
-### 4.3 Schemas (`lib/schemas/`)
+### 4.3 Constants (`lib/constants/`)
+
+**Fichiers actuels:**
+
+- `hero-slides.ts` — Constantes pour Hero Slides feature
+
+**Pattern obligatoire:**
+
+```typescript
+// lib/constants/hero-slides.ts
+
+// Validation limits (no magic numbers in components)
+export const HERO_SLIDE_LIMITS = {
+  TITLE_MAX_LENGTH: 80,
+  SUBTITLE_MAX_LENGTH: 120,
+  DESCRIPTION_MAX_LENGTH: 500,
+  CTA_LABEL_MAX_LENGTH: 30,
+  CTA_URL_MAX_LENGTH: 500,
+} as const;
+
+// Form default values
+export const HERO_SLIDE_DEFAULTS = {
+  title: "",
+  subtitle: "",
+  description: "",
+  is_active: true,
+  // ...
+} as const;
+
+// Animation configuration (Framer Motion)
+export const ANIMATION_CONFIG = {
+  duration: 0.2,
+  ease: "easeInOut",
+} as const;
+
+// Drag configuration (dnd-kit)
+export const DRAG_CONFIG = {
+  activationConstraint: {
+    distance: 8,
+  },
+} as const;
+```
+
+**Règles de nommage:**
+
+- `*_LIMITS` — Longueurs max pour validation
+- `*_DEFAULTS` — Valeurs par défaut formulaires
+- `*_CONFIG` — Objets de configuration
+
+### 4.4 Hooks (`lib/hooks/`)
+
+**Fichiers actuels (9 hooks):**
+
+**Hero Slides (Clean Code extraction):**
+
+- `useHeroSlideForm.ts` (53 lines) — Form state, isPending, handleSubmit
+- `useHeroSlideFormSync.ts` (38 lines) — Sync form with props via useEffect
+- `useHeroSlidesDnd.ts` (73 lines) — Drag & drop avec @dnd-kit, sensors, handleDragEnd
+- `useHeroSlidesDelete.ts` (61 lines) — Delete dialog state, handleDelete
+
+**General:**
+
+- `use-debounce.ts` — Value debouncing
+- `use-mobile.ts` — Mobile viewport detection
+- `useContactForm.ts` — Contact form logic
+- `useMediaUpload.ts` — Media upload state
+- `useNewsletterSubscribe.ts` — Newsletter subscription
+
+**Pattern extraction hook:**
+
+```typescript
+// lib/hooks/useHeroSlidesDnd.ts
+"use client";
+
+import { useState } from "react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import { DRAG_CONFIG } from "@/lib/constants/hero-slides";
+
+export function useHeroSlidesDnd(
+  slides: HeroSlideDTO[],
+  onReorder: (slides: HeroSlideDTO[]) => Promise<void>
+) {
+  const [isReordering, setIsReordering] = useState(false);
+  
+  const sensors = useSensors(
+    useSensor(PointerSensor, DRAG_CONFIG),
+    useSensor(KeyboardSensor)
+  );
+  
+  const handleDragEnd = async (event: DragEndEvent) => {
+    // ... reorder logic
+  };
+  
+  return { sensors, handleDragEnd, isReordering };
+}
+```
+
+**Règles d'extraction:**
+
+- Extraire quand composant > 300 lignes
+- Extraire quand logique réutilisable
+- Hook max ~70-80 lignes
+- Nommage: `use<Feature><Action>.ts`
+
+### 4.5 Schemas (`lib/schemas/`)
 
 **Fichiers actuels (11 fichiers + barrel):**
 
@@ -349,12 +488,12 @@ export const HeroSlideFormSchema = z.object({
 export type HeroSlideFormValues = z.infer<typeof HeroSlideFormSchema>;
 ```
 
-### 4.4 Emails (`emails/`)
+### 4.6 Emails (`emails/`)
 
 - Templates: React Email components; wrapper unique `<Tailwind>` pour compatibilité
 - Envoi: `lib/email/actions.ts` contient gate `EMAIL_DEV_REDIRECT` pour redirection en environnement dev/test
 
-### 4.5 Admin UI Components
+### 4.7 Admin UI Components
 
 **Structure par feature** (`components/features/admin/`):
 
@@ -384,10 +523,10 @@ FeatureContainer.tsx   (Server Component)
 
 ```bash
 ┌───────────────────────────────────────────────────────────────┐
-│  PRESENTATION LAYER                                           │
-│  app/, components/                                            │
-│  - Server Components (fetching, rendering)                    │
-│  - Client Components (interactivity, forms)                   │
+│   PRESENTATION LAYER                                           │
+│   app/, components/                                            │
+│   - Server Components (fetching, rendering)                    │
+│   - Client Components (interactivity, forms)                   │
 └───────────────────────────────────────────────────────────────┘
                               │
                               ▼
