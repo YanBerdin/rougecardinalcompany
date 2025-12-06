@@ -205,6 +205,75 @@ export function CtaFieldGroup({ form, type }: Props) {
 - ✅ DRY (pas de duplication)
 - ✅ Aucun console.log
 
+### Bfcache Handler Pattern (Dec 2025)
+
+**Pattern** : Prévenir les erreurs d'hydratation React causées par le browser bfcache.
+
+#### Problème
+
+Quand un utilisateur navigue en arrière (ex: depuis une page 404), le browser peut restaurer la page depuis son bfcache (back-forward cache). React tente de re-hydrater avec de nouveaux IDs (`useId()`), causant un mismatch avec les IDs stockés dans le DOM bfcache.
+
+```
+Error: Hydration failed because the server rendered HTML didn't match the client.
+React tree: id="_R_39bn5ri..."
+Server HTML: id="_R_d5esnebn..."
+```
+
+#### Solution
+
+**Composant** : `components/admin/BfcacheHandler.tsx`
+
+```typescript
+"use client";
+import { useEffect } from "react";
+
+export function BfcacheHandler() {
+  useEffect(() => {
+    function handlePageShow(event: PageTransitionEvent) {
+      if (event.persisted) {
+        window.location.reload();
+      }
+    }
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, []);
+  return null;
+}
+```
+
+**Intégration** : Ajouter au layout admin (ou tout layout avec formulaires React).
+
+```tsx
+// app/(admin)/layout.tsx
+import { BfcacheHandler } from "@/components/admin/BfcacheHandler";
+
+export default function AdminLayout({ children }) {
+  return (
+    <>
+      <BfcacheHandler />
+      {/* ... rest of layout */}
+    </>
+  );
+}
+```
+
+#### Conformité
+
+- ✅ **web.dev/bfcache** : Pattern `pageshow` + `event.persisted` + `reload()` explicitement recommandé par Google
+- ✅ **Next.js** : bfcache est distinct du Router Cache, pas de solution built-in
+- ✅ **React** : Seule solution fiable pour les formulaires avec `useId()`
+
+#### Quand utiliser
+
+- Layouts admin avec formulaires contrôlés (react-hook-form)
+- Pages utilisant `useId()` pour les IDs de formulaires
+- Applications où les utilisateurs naviguent fréquemment en arrière
+
+#### Référence
+
+- [web.dev/articles/bfcache](https://web.dev/articles/bfcache) — Documentation officielle Google
+- Section "Mettre à jour des données obsolètes ou sensibles après la restauration de bfcache"
+
 ## Patterns Architecturaux
 
 ### Security Patterns (Database)

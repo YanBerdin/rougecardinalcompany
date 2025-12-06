@@ -1,5 +1,34 @@
 # Progress
 
+## Bfcache Hydration Fix - COMPLETED (2025-12-06)
+
+### Problème
+
+- Erreur `Hydration failed` lors de navigation retour depuis 404 vers formulaire admin
+- React IDs mismatch causé par browser bfcache restaurant l'ancien DOM
+
+### Solution
+
+- ✅ `components/admin/BfcacheHandler.tsx` créé (26 lignes)
+- ✅ Écoute `pageshow` event avec `event.persisted` check
+- ✅ Force `window.location.reload()` si page restaurée depuis bfcache
+- ✅ Intégré dans `app/(admin)/layout.tsx`
+
+### Conformité
+
+- ✅ Pattern recommandé par [web.dev/bfcache](https://web.dev/articles/bfcache)
+- ✅ Next.js n'a pas de solution built-in (bfcache ≠ Router Cache)
+- ✅ Clean Code : < 30 lignes, single responsibility
+
+### Fichiers créés/modifiés
+
+| Fichier | Action |
+|---------|--------|
+| `components/admin/BfcacheHandler.tsx` | Créé |
+| `app/(admin)/layout.tsx` | Import + composant ajouté |
+
+---
+
 ## Hero Slides Clean Code Refactoring - COMPLETED (2025-12-06)
 
 ### Résultats

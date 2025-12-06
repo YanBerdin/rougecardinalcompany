@@ -1,8 +1,61 @@
 # Active Context
 
-**Current Focus (2025-12-06)**: Hero Slides Clean Code Refactoring - COMPLETED ✅
+**Current Focus (2025-12-06)**: Bfcache Hydration Fix - COMPLETED ✅
 
 ## Architecture Updates (2025-12-06)
+
+### Bfcache Hydration Mismatch Fix - COMPLETED ✅
+
+**Correction du bug d'hydratation React causé par le browser back-forward cache (bfcache).**
+
+#### Problème résolu
+
+Erreur `Hydration failed` avec IDs React différents (`_R_39bn5ri...` vs `_R_d5esnebn...`) lors de la navigation retour depuis une page 404 vers un formulaire d'édition admin.
+
+#### Cause racine
+
+Le browser bfcache restaure la page avec l'ancien DOM React (incluant les IDs `useId()`), mais React tente de re-hydrater avec de nouveaux IDs, causant un mismatch.
+
+#### Solution implémentée
+
+| Fichier | Rôle |
+|---------|------|
+| `components/admin/BfcacheHandler.tsx` | Client Component qui force un reload sur `pageshow` avec `event.persisted=true` |
+| `app/(admin)/layout.tsx` | Intégration du composant au début du layout admin |
+
+#### Conformité vérifiée
+
+- ✅ **web.dev/bfcache** : Pattern `pageshow` + `event.persisted` + `reload()` explicitement recommandé
+- ✅ **Next.js docs** : bfcache distinct du Router Cache, pas de solution built-in
+- ✅ **Clean Code** : Composant < 30 lignes, single responsibility
+
+#### Code
+
+```typescript
+// components/admin/BfcacheHandler.tsx
+"use client";
+import { useEffect } from "react";
+
+export function BfcacheHandler() {
+  useEffect(() => {
+    function handlePageShow(event: PageTransitionEvent) {
+      if (event.persisted) {
+        window.location.reload();
+      }
+    }
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, []);
+  return null;
+}
+```
+
+#### Référence
+
+- [web.dev/bfcache](https://web.dev/articles/bfcache) — Google's official bfcache documentation
+- Pattern recommandé pour les données sensibles/sessions
+
+---
 
 ### Hero Slides Clean Code Refactoring - COMPLETED ✅
 
