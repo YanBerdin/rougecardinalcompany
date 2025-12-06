@@ -1,9 +1,9 @@
 # Tech Context
 
-Versions et dépendances clés observées dans le dépôt (2025-10-27):
+Versions et dépendances clés observées dans le dépôt (2025-12-06):
 
 - Node.js: ^20 (devDeps)
-- Next.js: 15.4.5
+- Next.js: 16.0.6
 - TypeScript: ^5
 - Tailwind CSS: ^3.4.x
 - Supabase: client/server integration via `@supabase/ssr` and `@supabase/supabase-js` patterns
@@ -12,8 +12,8 @@ Structure principale:
 
 - `app/` — App Router, pages et layouts
 - `components/` — composants réutilisables (ui/, features/)
+- `lib/` — utilitaires, DAL, schemas, constants, hooks
 - `supabase/` — scripts, migrations, server client helpers
-- `lib/` — utilitaires et DAL
 
 Outils et commandes utiles:
 
@@ -25,7 +25,7 @@ Outils et commandes utiles:
 
 ### Frontend
 
-- **Framework**: Next.js 15.4.5
+- **Framework**: Next.js 16.0.6 (App Router, Turbopack default)
 - **Langage**: TypeScript
 - **UI Framework**:
   - Tailwind CSS pour le styling
@@ -39,6 +39,12 @@ Outils et commandes utiles:
 - **API**: Server Components + DAL `lib/dal/*` (server-only) via Supabase Client
 - **Email Service**: Resend API avec React Email templates
 - **Validation**: Zod schemas pour runtime validation
+
+### Architecture Clean Code (Dec 2025)
+
+- **Constants**: `lib/constants/<feature>.ts` (LIMITS, DEFAULTS, CONFIG)
+- **Hooks**: `lib/hooks/use<Feature><Action>.ts` (extracted logic)
+- **DRY Components**: Config-driven components (CtaFieldGroup pattern)
 
 ### Déploiement
 

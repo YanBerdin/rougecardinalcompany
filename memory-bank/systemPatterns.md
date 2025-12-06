@@ -132,6 +132,79 @@ components/features/admin/<feature>/
 - Séparation claire : Container/Wrapper/Form responsibilities
 - `sanitizePayload()` pour contraintes DB (empty string → null)
 
+### Clean Code Pattern (Dec 2025)
+
+**Pattern** : Extraction logique dans hooks et constantes pour conformité Clean Code.
+
+#### Constants Pattern
+
+**Location** : `lib/constants/<feature>.ts`
+
+```typescript
+// lib/constants/hero-slides.ts
+export const HERO_SLIDE_LIMITS = {
+  TITLE_MAX_LENGTH: 80,
+  SUBTITLE_MAX_LENGTH: 120,
+  DESCRIPTION_MAX_LENGTH: 500,
+} as const;
+
+export const HERO_SLIDE_DEFAULTS = {
+  title: "",
+  is_active: true,
+} as const;
+
+export const ANIMATION_CONFIG = {
+  duration: 0.2,
+  ease: "easeInOut",
+} as const;
+```
+
+**Naming** : `*_LIMITS`, `*_DEFAULTS`, `*_CONFIG`
+
+#### Hooks Extraction Pattern
+
+**Location** : `lib/hooks/use<Feature><Action>.ts`
+
+```bash
+lib/hooks/
+├── useHeroSlideForm.ts       # Form state + submission (53 lines)
+├── useHeroSlideFormSync.ts   # Props/form sync via useEffect (38 lines)
+├── useHeroSlidesDnd.ts       # Drag & drop with @dnd-kit (73 lines)
+└── useHeroSlidesDelete.ts    # Delete confirmation dialog (61 lines)
+```
+
+**Rules** :
+
+- Extraire quand composant > 300 lignes
+- Hook max ~70-80 lignes
+- Single responsibility per hook
+
+#### DRY Component Pattern
+
+**Pattern** : Composant config-driven pour éliminer la duplication.
+
+```typescript
+// CtaFieldGroup.tsx — DRY CTA Primary/Secondary
+const CTA_CONFIGS = {
+  primary: { enabledField: "cta_primary_enabled", labelField: "cta_primary_label", urlField: "cta_primary_url" },
+  secondary: { enabledField: "cta_secondary_enabled", ... },
+} as const;
+
+export function CtaFieldGroup({ form, type }: Props) {
+  const config = CTA_CONFIGS[type];
+  // Render fields using config...
+}
+```
+
+#### Clean Code Compliance Checklist
+
+- ✅ Max 30 lignes par fonction
+- ✅ Max 300 lignes par fichier
+- ✅ Aucun commentaire (code auto-documenté)
+- ✅ Aucun magic number (constantes nommées)
+- ✅ DRY (pas de duplication)
+- ✅ Aucun console.log
+
 ## Patterns Architecturaux
 
 ### Security Patterns (Database)
