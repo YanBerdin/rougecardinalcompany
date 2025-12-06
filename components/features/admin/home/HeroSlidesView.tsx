@@ -2,21 +2,8 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import {
-    DndContext,
-    closestCenter,
-    KeyboardSensor,
-    PointerSensor,
-    useSensor,
-    useSensors,
-    DragEndEvent,
-} from "@dnd-kit/core";
-import {
-    arrayMove,
-    SortableContext,
-    sortableKeyboardCoordinates,
-    verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+import { DndContext, closestCenter } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
@@ -31,15 +18,13 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
 import { GripVertical, Pencil, Trash2, Plus } from "lucide-react";
 import { HeroSlideForm } from "./HeroSlideForm";
 import { HeroSlidePreview } from "./HeroSlidePreview";
 import type { HeroSlideDTO } from "@/lib/schemas/home-content";
-import {
-    deleteHeroSlideAction,
-    reorderHeroSlidesAction,
-} from "@/app/(admin)/admin/home/hero/home-hero-actions";
+import { useHeroSlidesDnd } from "@/lib/hooks/useHeroSlidesDnd";
+import { useHeroSlidesDelete } from "@/lib/hooks/useHeroSlidesDelete";
+import { HERO_SLIDE_LIMITS } from "@/lib/constants/hero-slides";
 
 interface HeroSlidesViewProps {
     initialSlides: HeroSlideDTO[];
@@ -61,7 +46,7 @@ function SortableSlide({ slide, onEdit, onDelete }: SortableSlideProps) {
         isDragging,
     } = useSortable({ id: slide.id.toString() });
 
-    const style = {
+    const dragStyle = {
         transform: CSS.Transform.toString(transform),
         transition,
         opacity: isDragging ? 0.5 : 1,
@@ -69,7 +54,7 @@ function SortableSlide({ slide, onEdit, onDelete }: SortableSlideProps) {
     };
 
     return (
-        <Card ref={setNodeRef} style={style} className={isDragging ? "shadow-lg" : ""}>
+        <Card ref={setNodeRef} style={dragStyle} className={isDragging ? "shadow-lg" : ""}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div className="flex items-center gap-3 flex-1">
                     <div
@@ -79,7 +64,6 @@ function SortableSlide({ slide, onEdit, onDelete }: SortableSlideProps) {
                         role="button"
                         tabIndex={0}
                         aria-label="Drag to reorder"
-                        title="Réorganiser le slide"
                     >
                         <GripVertical className="h-5 w-5 text-muted-foreground" />
                     </div>
@@ -116,101 +100,30 @@ export function HeroSlidesView({ initialSlides }: HeroSlidesViewProps) {
     const [slides, setSlides] = useState(initialSlides);
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingSlide, setEditingSlide] = useState<HeroSlideDTO | null>(null);
-    const [isPending, setIsPending] = useState(false);
-    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    const [slideToDelete, setSlideToDelete] = useState<{
-        id: number;
-        title: string;
-    } | null>(null);
 
-    // Sync local state when props change (after router.refresh())
     useEffect(() => {
         setSlides(initialSlides);
     }, [initialSlides]);
 
-    const sensors = useSensors(
-        useSensor(PointerSensor, {
-            activationConstraint: {
-                distance: 8, // 8px de mouvement requis pour activer le drag
-            },
-        }),
-        useSensor(KeyboardSensor, {
-            coordinateGetter: sortableKeyboardCoordinates,
-        })
-    );
+    const { sensors, handleDragEnd } = useHeroSlidesDnd({
+        slides,
+        setSlides,
+        initialSlides,
+    });
 
-    const handleDragEnd = useCallback(
-        async (event: DragEndEvent) => {
-            const { active, over } = event;
-
-            if (!over || active.id === over.id) return;
-
-            const oldIndex = slides.findIndex((s) => s.id.toString() === active.id);
-            const newIndex = slides.findIndex((s) => s.id.toString() === over.id);
-
-            const reordered = arrayMove(slides, oldIndex, newIndex);
-            setSlides(reordered);
-
-            const orderData = reordered.map((slide, index) => ({
-                id: Number(slide.id),
-                position: index,
-            }));
-
-            try {
-                // call server action directly (handles revalidation)
-                const result = await reorderHeroSlidesAction(orderData);
-                if (!result.success) {
-                    throw new Error(result.error || "Reorder failed");
-                }
-
-                toast.success("Slides reordered successfully");
-                // Server Action already called revalidatePath(), so just refresh
-                router.refresh();
-            } catch (err) {
-                console.error('Reorder error:', err);
-                toast.error("Failed to reorder slides");
-                setSlides(initialSlides); // Rollback on error
-            }
-        },
-        [slides, initialSlides, router]
-    );
+    const {
+        isDeleteDialogOpen,
+        slideToDelete,
+        isDeletePending,
+        openDeleteDialog,
+        closeDeleteDialog,
+        confirmDelete,
+    } = useHeroSlidesDelete();
 
     const handleEdit = useCallback((slide: HeroSlideDTO) => {
-        console.log('[HeroSlidesView] Edit clicked for slide:', slide.id, slide);
-        // Use the slide data directly from the list (already fresh from server)
         setEditingSlide(slide);
         setIsFormOpen(true);
     }, []);
-
-    const openDeleteDialog = useCallback((id: number, title: string) => {
-        setSlideToDelete({ id, title });
-        setDeleteDialogOpen(true);
-    }, []);
-
-    const handleConfirmDelete = useCallback(async () => {
-        if (!slideToDelete) return;
-
-        setIsPending(true);
-        setDeleteDialogOpen(false);
-
-        try {
-            // call server action directly (handles revalidation)
-            const result = await deleteHeroSlideAction(String(slideToDelete.id));
-            if (!result.success) {
-                throw new Error(result.error || "Delete failed");
-            }
-
-            toast.success("Slide deleted successfully");
-            // Server Action already called revalidatePath(), so just refresh
-            router.refresh();
-        } catch (err) {
-            console.error('Delete error:', err);
-            toast.error("Failed to delete slide");
-        } finally {
-            setIsPending(false);
-            setSlideToDelete(null);
-        }
-    }, [slideToDelete, router]);
 
     const handleFormClose = useCallback(() => {
         setIsFormOpen(false);
@@ -218,37 +131,26 @@ export function HeroSlidesView({ initialSlides }: HeroSlidesViewProps) {
     }, []);
 
     const handleFormSuccess = useCallback(() => {
-        console.log('[HeroSlidesView] Form success - triggering refresh...');
-
-        // Fermer le formulaire immédiatement
         setIsFormOpen(false);
         setEditingSlide(null);
-
-        // Utiliser router.refresh() pour recharger les Server Components
-        // Les Server Actions ont déjà appelé revalidatePath(), donc les données sont fraîches
         router.refresh();
     }, [router]);
 
+    const handleOpenNewSlideForm = useCallback(() => {
+        setEditingSlide(null);
+        setIsFormOpen(true);
+    }, []);
 
-
-    const activeSlides = slides.filter((s) => s.active);
-    const canAddMore = activeSlides.length < 10;
+    const activeSlidesCount = slides.filter((s) => s.active).length;
+    const canAddMoreSlides = activeSlidesCount < HERO_SLIDE_LIMITS.MAX_ACTIVE_SLIDES;
 
     return (
         <div className="space-y-4">
-            <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold">Hero Slides</h2>
-                <Button
-                    onClick={() => {
-                        setEditingSlide(null);
-                        setIsFormOpen(true);
-                    }}
-                    disabled={!canAddMore || isPending}
-                >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Slide {!canAddMore && "(Max 10)"}
-                </Button>
-            </div>
+            <HeroSlidesHeader
+                canAddMore={canAddMoreSlides}
+                isDisabled={isDeletePending}
+                onAddSlide={handleOpenNewSlideForm}
+            />
 
             <DndContext
                 id="hero-slides-dnd"
@@ -273,13 +175,7 @@ export function HeroSlidesView({ initialSlides }: HeroSlidesViewProps) {
                 </SortableContext>
             </DndContext>
 
-            {slides.length === 0 && (
-                <Card>
-                    <CardContent className="pt-6 text-center text-muted-foreground">
-                        No hero slides yet. Create your first slide!
-                    </CardContent>
-                </Card>
-            )}
+            <EmptySlidesPlaceholder isVisible={slides.length === 0} />
 
             <HeroSlideForm
                 open={isFormOpen}
@@ -288,27 +184,93 @@ export function HeroSlidesView({ initialSlides }: HeroSlidesViewProps) {
                 slide={editingSlide}
             />
 
-            <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Confirmer la suppression définitive</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Cette action supprimera définitivement le slide &quot;
-                            {slideToDelete?.title}&quot;? Voulez-vous continuer ? Cette opération est irréversible.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel disabled={isPending}>Annuler</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={handleConfirmDelete}
-                            disabled={isPending}
-                            className="hover:text-destructive hover:bg-white "
-                        >
-                            {isPending ? "Suppression en cours..." : "Supprimer"}
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            <DeleteSlideDialog
+                isOpen={isDeleteDialogOpen}
+                slideTitle={slideToDelete?.title}
+                isPending={isDeletePending}
+                onOpenChange={closeDeleteDialog}
+                onConfirm={confirmDelete}
+            />
         </div>
+    );
+}
+
+interface HeroSlidesHeaderProps {
+    canAddMore: boolean;
+    isDisabled: boolean;
+    onAddSlide: () => void;
+}
+
+function HeroSlidesHeader({ canAddMore, isDisabled, onAddSlide }: HeroSlidesHeaderProps) {
+    const buttonLabel = canAddMore
+        ? "Add Slide"
+        : `Add Slide (Max ${HERO_SLIDE_LIMITS.MAX_ACTIVE_SLIDES})`;
+
+    return (
+        <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold">Hero Slides</h2>
+            <Button onClick={onAddSlide} disabled={!canAddMore || isDisabled}>
+                <Plus className="h-4 w-4 mr-2" />
+                {buttonLabel}
+            </Button>
+        </div>
+    );
+}
+
+interface EmptySlidesPlaceholderProps {
+    isVisible: boolean;
+}
+
+function EmptySlidesPlaceholder({ isVisible }: EmptySlidesPlaceholderProps) {
+    if (!isVisible) return null;
+
+    return (
+        <Card>
+            <CardContent className="pt-6 text-center text-muted-foreground">
+                No hero slides yet. Create your first slide!
+            </CardContent>
+        </Card>
+    );
+}
+
+interface DeleteSlideDialogProps {
+    isOpen: boolean;
+    slideTitle: string | undefined;
+    isPending: boolean;
+    onOpenChange: () => void;
+    onConfirm: () => void;
+}
+
+function DeleteSlideDialog({
+    isOpen,
+    slideTitle,
+    isPending,
+    onOpenChange,
+    onConfirm,
+}: DeleteSlideDialogProps) {
+    const confirmButtonLabel = isPending ? "Suppression en cours..." : "Supprimer";
+
+    return (
+        <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Confirmer la suppression définitive</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        Cette action supprimera définitivement le slide &quot;{slideTitle}&quot;.
+                        Cette opération est irréversible.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel disabled={isPending}>Annuler</AlertDialogCancel>
+                    <AlertDialogAction
+                        onClick={onConfirm}
+                        disabled={isPending}
+                        className="hover:text-destructive hover:bg-white"
+                    >
+                        {confirmButtonLabel}
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
     );
 }
