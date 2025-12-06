@@ -1,5 +1,47 @@
 # Progress
 
+## Hero Slides Clean Code Refactoring - COMPLETED (2025-12-06)
+
+### Résultats
+
+- ✅ `HeroSlideForm.tsx` : 232 → 117 lignes (-49%)
+- ✅ `HeroSlideFormFields.tsx` : 237 → 127 lignes (-46%)
+- ✅ `HeroSlidesView.tsx` : 315 → 241 lignes (-23%)
+- ✅ `lib/constants/hero-slides.ts` créé (LIMITS, DEFAULTS, CONFIGS)
+- ✅ 4 hooks extraits dans `lib/hooks/` (useHeroSlideForm, useHeroSlideFormSync, useHeroSlidesDnd, useHeroSlidesDelete)
+- ✅ `CtaFieldGroup.tsx` créé (DRY CTA Primary/Secondary)
+- ✅ Aucun fichier > 300 lignes
+- ✅ Aucun magic number (constantes centralisées)
+
+### Fichiers créés
+
+| Fichier | Lignes | Rôle |
+|---------|--------|------|
+| `lib/constants/hero-slides.ts` | 30 | Constants centralisées |
+| `lib/hooks/useHeroSlideForm.ts` | 53 | Form logic |
+| `lib/hooks/useHeroSlideFormSync.ts` | 38 | Props/form sync |
+| `lib/hooks/useHeroSlidesDnd.ts` | 73 | Drag & drop |
+| `lib/hooks/useHeroSlidesDelete.ts` | 61 | Delete logic |
+| `components/.../CtaFieldGroup.tsx` | 130 | DRY CTA fields |
+
+### Commits
+
+- `81a8899` — refactor(hero-slides): apply clean code principles
+- `aabfdf5` — docs(blueprint): update to v5.2
+- `18c43f8` — docs(architecture): update to v2.2
+
+### Documentation mise à jour
+
+- `Project_Folders_Structure_Blueprint_v5.md` → v5.2
+- `Project_Architecture_Blueprint.md` → v2.2
+
+### Prompts de référence
+
+- `.github/prompts/refactor_hero_slides_cta_with_toggles.prompt.md` — Feature CTA avec toggles indépendants (schéma DB, migration, composants)
+- `.github/prompts/refactor_hero_slides_cta_clean_code.prompt.md` — Refactoring Clean Code (extraction hooks, constantes, DRY)
+
+---
+
 ## Next.js 16 Migration - COMPLETED (2025-12-02)
 
 **Migration complète de Next.js 15.4.5 vers 16.0.6 avec corrections de sécurité.**

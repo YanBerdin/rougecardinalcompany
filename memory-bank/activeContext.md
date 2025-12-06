@@ -1,14 +1,65 @@
 # Active Context
 
-**Current Focus (2025-12-02)**: Next.js 16 Migration - COMPLETED ✅
+**Current Focus (2025-12-06)**: Hero Slides Clean Code Refactoring - COMPLETED ✅
 
-## Architecture Updates (2025-12-02)
+## Architecture Updates (2025-12-06)
 
-### Next.js 16 Migration - COMPLETED ✅
+### Hero Slides Clean Code Refactoring - COMPLETED ✅
+
+**Refactoring complet du code Hero Slides selon les principes Clean Code.**
+
+#### Changements réalisés
+
+| Composant | Avant | Après |
+|-----------|-------|-------|
+| `HeroSlideForm.tsx` | 232 lignes | 117 lignes (-49%) |
+| `HeroSlideFormFields.tsx` | 237 lignes | 127 lignes (-46%) |
+| `HeroSlidesView.tsx` | 315 lignes | 241 lignes (-23%) |
+| Constants | Magic numbers inline | `lib/constants/hero-slides.ts` |
+| Form logic | Dans le composant | `useHeroSlideForm` hook |
+| DnD logic | Dans le composant | `useHeroSlidesDnd` hook |
+| CTA fields | Duplication | `CtaFieldGroup` component DRY |
+
+#### Nouveaux fichiers créés
+
+| Fichier | Lignes | Rôle |
+|---------|--------|------|
+| `lib/constants/hero-slides.ts` | 30 | HERO_SLIDE_LIMITS, HERO_SLIDE_DEFAULTS, ANIMATION_CONFIG, DRAG_CONFIG |
+| `lib/hooks/useHeroSlideForm.ts` | 53 | Form state + submission logic |
+| `lib/hooks/useHeroSlideFormSync.ts` | 38 | Props/form sync via useEffect |
+| `lib/hooks/useHeroSlidesDnd.ts` | 73 | Drag & drop avec @dnd-kit |
+| `lib/hooks/useHeroSlidesDelete.ts` | 61 | Delete confirmation dialog logic |
+| `components/.../CtaFieldGroup.tsx` | 130 | Composant DRY pour CTA Primary/Secondary |
+
+#### Conformité Clean Code atteinte
+
+- ✅ Tous les fichiers < 300 lignes
+- ✅ Fonctions < 30 lignes (via extraction hooks)
+- ✅ Aucun commentaire (supprimés)
+- ✅ Aucun magic number (constantes centralisées)
+- ✅ DRY respecté (CtaFieldGroup élimine duplication)
+- ✅ Aucun console.log (supprimés)
+
+#### Commits
+
+- `81a8899` — refactor(hero-slides): apply clean code principles
+- `aabfdf5` — docs(blueprint): update to v5.2 with Clean Code refactoring changes
+- `18c43f8` — docs(architecture): update to v2.2 with Clean Code refactoring
+
+#### Documentation mise à jour
+
+- `memory-bank/architecture/Project_Folders_Structure_Blueprint_v5.md` (v5.1 → v5.2)
+- `memory-bank/architecture/Project_Architecture_Blueprint.md` (v2.1 → v2.2)
+- `.github/prompts/refactor_hero_slides_cta_clean_code.prompt.md` (statut COMPLÉTÉ)
+- `.github/prompts/refactor_hero_slides_cta_with_toggles.prompt.md` (feature CTA avec toggles - exécuté préalablement)
+
+---
+
+## Previous Focus (2025-12-02): Next.js 16 Migration - COMPLETED ✅
 
 **Migration complète de Next.js 15.4.5 vers 16.0.6 avec corrections de sécurité.**
 
-#### Changements réalisés
+### Changements réalisés
 
 | Composant | Avant | Après |
 |-----------|-------|-------|
