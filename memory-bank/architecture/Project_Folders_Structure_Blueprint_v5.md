@@ -1,14 +1,22 @@
 # Project Folders Structure Blueprint — Rouge Cardinal Company
 
 **Generated:** 30 November 2025  
-**Updated:** 4 December 2025  
+**Updated:** 6 December 2025  
 **Source:** `doc/prompts-github/folder-structure-blueprint-generator.prompt.md` (executed locally)  
 **Branch:** master  
-**Version:** v5.1
+**Version:** v5.2
 
 ## Executive summary
 
 This document is an updated project folder blueprint generated from the repository structure and the project prompt. It captures current conventions (Next.js 15 app router, strict TypeScript, Supabase with RLS, Resend + React Email), and the recent SOLID refactoring completed on `feature/backoffice`.
+
+Key updates since v5.1 → v5.2 (Clean Code Refactoring):
+
+- **lib/constants/ created** — New `lib/constants/hero-slides.ts` with `HERO_SLIDE_LIMITS`, `HERO_SLIDE_DEFAULTS`, `ANIMATION_CONFIG`, `DRAG_CONFIG` constants.
+- **Hero Slides hooks extracted** — 4 new hooks in `lib/hooks/`: `useHeroSlideForm.ts`, `useHeroSlideFormSync.ts`, `useHeroSlidesDnd.ts`, `useHeroSlidesDelete.ts`.
+- **CtaFieldGroup component** — New DRY component `components/features/admin/home/CtaFieldGroup.tsx` for CTA Primary/Secondary fields.
+- **HeroSlideFormFields simplified** — Removed inline `HeroSlideCtaFields`, now uses `CtaFieldGroup` component.
+- **File size compliance** — All refactored files < 300 lines (Clean Code limit). Forms split into sub-components.
 
 Key updates since v4 → v5 (SOLID Refactoring):
 
@@ -101,6 +109,8 @@ components/
   └─ ui/                      # shadcn/ui components
 
 lib/
+  ├─ constants/               # Feature constants (Clean Code: no magic numbers)
+  │   └─ hero-slides.ts       # HERO_SLIDE_LIMITS, HERO_SLIDE_DEFAULTS, ANIMATION_CONFIG, DRAG_CONFIG
   ├─ dal/                     # Data Access Layer (server-only, NO revalidatePath, NO email)
   │   ├─ helpers/             # Shared DAL utilities
   │   │   ├─ error.ts         # DALResult<T> type + handleError()
@@ -140,7 +150,16 @@ lib/
   │   └─ actions.ts           # sendInvitationEmail wrapper
   ├─ api/                     # API helpers (withAdminAuth, etc.)
   ├─ auth/                    # Auth utilities (is-admin, guards)
-  ├─ hooks/                   # Custom hooks (use-debounce, etc.)
+  ├─ hooks/                   # Custom hooks
+  │   ├─ use-debounce.ts      # Debounce hook
+  │   ├─ use-mobile.ts        # Mobile detection hook
+  │   ├─ useContactForm.ts    # Contact form logic
+  │   ├─ useHeroSlideForm.ts  # Form state + submission logic (53 lines)
+  │   ├─ useHeroSlideFormSync.ts # Props/form sync with useEffect (38 lines)
+  │   ├─ useHeroSlidesDnd.ts  # Drag & drop logic with dnd-kit (73 lines)
+  │   ├─ useHeroSlidesDelete.ts # Delete confirmation dialog logic (61 lines)
+  │   ├─ useMediaUpload.ts    # Media upload logic
+  │   └─ useNewsletterSubscribe.ts # Newsletter subscription logic
   ├─ forms/                   # Form utilities
   ├─ utils/                   # Utility functions
   └─ database.types.ts        # Supabase generated types
@@ -162,6 +181,39 @@ supabase/
 ```
 
 ## Key directory analysis
+
+### Constants (`lib/constants/`)
+
+Centralized constants for Clean Code compliance (no magic numbers):
+
+- `lib/constants/hero-slides.ts`:
+  - `HERO_SLIDE_LIMITS` — Max lengths for title (80), subtitle (120), description (500), CTA label (30), CTA URL (500)
+  - `HERO_SLIDE_DEFAULTS` — Default values for form initialization
+  - `ANIMATION_CONFIG` — Framer Motion animation settings
+  - `DRAG_CONFIG` — dnd-kit drag configuration
+
+**Pattern**: Export named const objects, use in components via imports.
+
+### Hooks (`lib/hooks/`)
+
+Extracted hooks following Clean Code principles (max 30 lines/function, single responsibility):
+
+**Hero Slides hooks** (extracted from large components):
+
+- `useHeroSlideForm.ts` (53 lines) — Form state management + submission logic
+- `useHeroSlideFormSync.ts` (38 lines) — Syncs form with props changes via `useEffect`
+- `useHeroSlidesDnd.ts` (73 lines) — Drag & drop reordering with dnd-kit
+- `useHeroSlidesDelete.ts` (61 lines) — Delete confirmation dialog state + handler
+
+**General hooks**:
+
+- `use-debounce.ts` — Value debouncing
+- `use-mobile.ts` — Mobile viewport detection
+- `useContactForm.ts` — Contact form logic
+- `useMediaUpload.ts` — Media upload state + handlers
+- `useNewsletterSubscribe.ts` — Newsletter subscription logic
+
+**Pattern**: Extract logic when component exceeds 300 lines or when logic is reusable.
 
 ### DAL Helpers (`lib/dal/helpers/`)
 
@@ -259,13 +311,16 @@ Centralized Zod schemas with barrel exports from `lib/schemas/index.ts`:
 
 ### Admin Components (`components/features/admin/`)
 
-- `components/features/admin/home/` — Homepage management (10 files):
+- `components/features/admin/home/` — Homepage management (11 files):
   - `HeroSlidesContainer.tsx` — Server Component, fetches data
-  - `HeroSlidesView.tsx` — Client Component, list + DnD + state sync via `useEffect`
-  - `HeroSlideForm.tsx` (~200 lines) — Main form dialog
-  - `HeroSlideFormFields.tsx` — Extracted text fields (title, subtitle, description, CTA, toggle)
+  - `HeroSlidesView.tsx` (~241 lines) — Client Component, list + DnD + state sync via `useEffect`, uses extracted hooks
+  - `HeroSlideForm.tsx` (~117 lines) — Main form dialog, uses `useHeroSlideForm` and `useHeroSlideFormSync` hooks
+  - `HeroSlideFormFields.tsx` (~127 lines) — Extracted text fields (title, subtitle, description, toggle), uses `CtaFieldGroup`
   - `HeroSlideImageSection.tsx` — Extracted image picker section
-  - `AboutContentContainer.tsx`, `AboutContentView.tsx`, `AboutContentForm.tsx`
+  - `HeroSlidePreview.tsx` — Preview component
+  - `HeroSlidesErrorBoundary.tsx` — Error boundary wrapper
+  - `CtaFieldGroup.tsx` (~130 lines) — **NEW** DRY component for CTA Primary/Secondary fields, config-driven with `CTA_CONFIGS`
+  - `AboutContentContainer.tsx`, `AboutContentForm.tsx` — About section management
 - `components/features/admin/media/` — Media library with colocated types:
   - `MediaLibraryPicker.tsx`, `MediaUploadDialog.tsx`, `MediaExternalUrlInput.tsx`
   - `types.ts` — Props interfaces (colocated, not in lib/types/)
@@ -323,6 +378,24 @@ Centralized Zod schemas with barrel exports from `lib/schemas/index.ts`:
 - **Location**: `components/features/admin/<feature>/types.ts` (colocated with components)
 - **NOT in**: `lib/types/` (folder removed)
 - **Re-exports**: Can re-export from `lib/schemas/` for convenience
+
+### Constants (Clean Code: No Magic Numbers)
+
+- **Location**: `lib/constants/<feature>.ts` (e.g., `hero-slides.ts`)
+- **Naming**: `UPPER_SNAKE_CASE` for constants (e.g., `HERO_SLIDE_LIMITS`, `ANIMATION_CONFIG`)
+- **Pattern**: Export named const objects
+- **Content examples**:
+  - `*_LIMITS` — Max lengths for validation (title, description, etc.)
+  - `*_DEFAULTS` — Default values for form initialization
+  - `*_CONFIG` — Configuration objects (animation, drag, etc.)
+
+### Hooks (Clean Code: Single Responsibility)
+
+- **Location**: `lib/hooks/use<Feature>.ts` (e.g., `useHeroSlideForm.ts`)
+- **Naming**: `use<Feature><Action>.ts` (e.g., `useHeroSlidesDnd.ts`, `useHeroSlidesDelete.ts`)
+- **Max lines**: ~70-80 lines per hook (extracted from components)
+- **Pattern**: Extract when component > 300 lines or logic is reusable
+- **Exports**: Single default export of the hook function
 
 ### Email templates
 
