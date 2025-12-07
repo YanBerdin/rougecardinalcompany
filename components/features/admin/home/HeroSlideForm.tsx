@@ -10,11 +10,10 @@ import {
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { MediaLibraryPicker, type MediaSelectResult } from "@/components/features/admin/media";
+import { ImageFieldGroup } from "@/components/features/admin/media";
 import type { HeroSlideFormValues, HeroSlideDTO } from "@/lib/schemas/home-content";
 import { createHeroSlideAction, updateHeroSlideAction } from "@/app/(admin)/admin/home/hero/home-hero-actions";
 import { HeroSlideFormFields, HeroSlideActiveToggle } from "./HeroSlideFormFields";
-import { HeroSlideImageSection, handleMediaSelection } from "./HeroSlideImageSection";
 import { CtaFieldGroup } from "./CtaFieldGroup";
 import { useHeroSlideForm } from "@/lib/hooks/useHeroSlideForm";
 import { useHeroSlideFormSync } from "@/lib/hooks/useHeroSlideFormSync";
@@ -29,11 +28,8 @@ interface HeroSlideFormProps {
 export function HeroSlideForm({ open, onClose, onSuccess, slide }: HeroSlideFormProps) {
     const {
         form,
-        isMediaPickerOpen,
         isPending,
         setIsPending,
-        openMediaPicker,
-        closeMediaPicker,
     } = useHeroSlideForm();
 
     useHeroSlideFormSync(open, slide, form);
@@ -84,48 +80,44 @@ export function HeroSlideForm({ open, onClose, onSuccess, slide }: HeroSlideForm
         }
     };
 
-    const handleMediaSelect = (result: MediaSelectResult) => {
-        handleMediaSelection(form, result);
-        closeMediaPicker();
-    };
-
     const dialogTitle = slide ? "Edit Hero Slide" : "Add Hero Slide";
     const submitButtonLabel = isPending ? "Saving..." : slide ? "Update" : "Create";
 
     return (
-        <>
-            <Dialog open={open} onOpenChange={onClose}>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                        <DialogTitle>{dialogTitle}</DialogTitle>
-                    </DialogHeader>
+        <Dialog open={open} onOpenChange={onClose}>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                    <DialogTitle>{dialogTitle}</DialogTitle>
+                </DialogHeader>
 
-                    <Form {...form}>
-                        <form onSubmit={handleValidatedSubmit} className="space-y-4">
-                            <HeroSlideFormFields form={form} />
-                            <HeroSlideImageSection form={form} onOpenMediaPicker={openMediaPicker} />
-                            <CtaFieldGroup form={form} ctaType="primary" />
-                            <CtaFieldGroup form={form} ctaType="secondary" />
-                            <HeroSlideActiveToggle form={form} />
+                <Form {...form}>
+                    <form onSubmit={handleValidatedSubmit} className="space-y-4">
+                        <HeroSlideFormFields form={form} />
 
-                            <DialogFooter>
-                                <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>
-                                    Cancel
-                                </Button>
-                                <Button type="submit" disabled={isPending}>
-                                    {submitButtonLabel}
-                                </Button>
-                            </DialogFooter>
-                        </form>
-                    </Form>
-                </DialogContent>
-            </Dialog>
+                        <ImageFieldGroup
+                            form={form}
+                            imageUrlField="image_url"
+                            imageMediaIdField="image_media_id"
+                            altTextField="alt_text"
+                            label="Image"
+                            required
+                        />
 
-            <MediaLibraryPicker
-                open={isMediaPickerOpen}
-                onClose={closeMediaPicker}
-                onSelect={handleMediaSelect}
-            />
-        </>
+                        <CtaFieldGroup form={form} ctaType="primary" />
+                        <CtaFieldGroup form={form} ctaType="secondary" />
+                        <HeroSlideActiveToggle form={form} />
+
+                        <DialogFooter>
+                            <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>
+                                Cancel
+                            </Button>
+                            <Button type="submit" disabled={isPending}>
+                                {submitButtonLabel}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </Form>
+            </DialogContent>
+        </Dialog>
     );
 }

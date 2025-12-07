@@ -41,6 +41,7 @@
 export { MediaUploadDialog } from "./MediaUploadDialog";
 export { MediaLibraryPicker } from "./MediaLibraryPicker";
 export { MediaExternalUrlInput } from "./MediaExternalUrlInput";
+export { ImageFieldGroup } from "./ImageFieldGroup";
 
 // Types (colocated in ./types.ts, schemas in lib/schemas/media.ts)
 export type {

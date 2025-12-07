@@ -196,6 +196,82 @@ export function CtaFieldGroup({ form, type }: Props) {
 }
 ```
 
+#### ImageFieldGroup Pattern (Dec 2025)
+
+**Pattern** : Composant générique réutilisable pour tous les champs image admin avec validation SSRF.
+
+**Problème résolu** :
+
+- Code dupliqué dans 4 formulaires admin (HeroSlide, Spectacle, TeamMember, AboutContent)
+- Validation URL externe inconsistante (risque SSRF dans SpectacleForm)
+- Gestion preview/fallback répétée
+
+**Solution** :
+
+**Composant** : `components/features/admin/media/ImageFieldGroup.tsx`
+
+```typescript
+interface ImageFieldGroupProps<TForm extends FieldValues> {
+  form: UseFormReturn<TForm>;
+  imageUrlField: Path<TForm>;
+  imageMediaIdField?: Path<TForm>;
+  altTextField?: Path<TForm>;
+  label?: string;
+  required?: boolean;
+  showMediaLibrary?: boolean;
+  showExternalUrl?: boolean;
+  showAltText?: boolean;
+}
+
+export function ImageFieldGroup<TForm extends FieldValues>({
+  form,
+  imageUrlField,
+  imageMediaIdField,
+  altTextField,
+  label = "Image",
+  required = false,
+  showMediaLibrary = true,
+  showExternalUrl = true,
+  showAltText = true,
+}: ImageFieldGroupProps<TForm>) {
+  // Encapsulates:
+  // - MediaLibraryPicker integration
+  // - validateImageUrl() SSRF protection
+  // - Preview image with fallback placeholder
+  // - Alt text field (optional)
+}
+```
+
+**Usage** :
+
+```tsx
+// Dans n'importe quel formulaire admin
+<ImageFieldGroup
+  form={form}
+  imageUrlField="image_url"
+  imageMediaIdField="image_media_id"
+  altTextField="alt_text"
+  label="Image du spectacle"
+  required
+/>
+```
+
+**Fonctionnalités** :
+
+- ✅ **SSRF Protection** : `validateImageUrl()` avec hostname allowlist
+- ✅ **MediaLibraryPicker** : Sélection depuis la bibliothèque Supabase
+- ✅ **External URL** : Saisie URL externe avec validation
+- ✅ **Preview** : Affichage avec fallback SVG placeholder
+- ✅ **Alt Text** : Champ accessibilité optionnel
+- ✅ **Type-safe** : Génériques TypeScript pour typage formulaire strict
+
+**Formulaires migrés** :
+
+- `HeroSlideForm.tsx` — Hero slides homepage
+- `SpectacleForm.tsx` — Gestion spectacles (fix SSRF)
+- `TeamMemberForm.tsx` — Membres équipe
+- `AboutContentForm.tsx` — Section À propos
+
 #### Clean Code Compliance Checklist
 
 - ✅ Max 30 lignes par fonction

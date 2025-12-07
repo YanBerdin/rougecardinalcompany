@@ -3,8 +3,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Image from "next/image";
-import { ImageIcon, Upload } from "lucide-react";
 
 import {
   TeamMemberFormSchema,
@@ -22,11 +20,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  MediaUploadDialog,
-  MediaExternalUrlInput,
-  type MediaSelectResult,
-} from "@/components/features/admin/media";
+import { ImageFieldGroup } from "@/components/features/admin/media";
 
 interface TeamMemberFormProps {
   member?: TeamMemberDb | null;
@@ -40,7 +34,6 @@ export function TeamMemberForm({
   onCancel,
 }: TeamMemberFormProps) {
   const [isPending, setIsPending] = useState(false);
-  const [showMediaPicker, setShowMediaPicker] = useState(false);
 
   const form = useForm<TeamMemberFormValues>({
     resolver: zodResolver(TeamMemberFormSchema),
@@ -63,19 +56,6 @@ export function TeamMemberForm({
       setIsPending(false);
     }
   };
-
-  const handlePhotoSelect = (result: MediaSelectResult) => {
-    form.setValue("photo_media_id", result.id);
-    form.setValue("image_url", result.url);
-  };
-
-  const handleRemovePhoto = () => {
-    form.setValue("image_url", "");
-    form.setValue("photo_media_id", null);
-  };
-
-  const currentPhotoUrl = form.watch("image_url");
-  const currentName = form.watch("name");
 
   return (
     <>
@@ -135,66 +115,13 @@ export function TeamMemberForm({
             )}
           />
 
-          {/* Photo section */}
-          <div>
-            <label className="block text-sm font-medium mb-2">Photo</label>
-
-            {currentPhotoUrl ? (
-              <div className="space-y-2">
-                <div className="relative w-32 h-32 rounded-lg overflow-hidden border">
-                  <Image
-                    src={currentPhotoUrl}
-                    alt={currentName || "Photo du membre"}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    onClick={handleRemovePhoto}
-                  >
-                    Supprimer
-                  </Button>
-
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowMediaPicker(true)}
-                  >
-                    <Upload className="mr-2 h-4 w-4" />
-                    Changer
-                  </Button>
-
-                </div>
-              </div>
-            ) : (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowMediaPicker(true)}
-              >
-                <ImageIcon className="mr-2 h-4 w-4" />
-                Ajouter une photo
-              </Button>
-            )}
-          </div>
-
-          {/* URL externe (fallback) */}
-          <FormField
-            control={form.control}
-            name="image_url"
-            render={({ field }) => (
-              <MediaExternalUrlInput
-                value={field.value ?? ""}
-                onChange={field.onChange}
-                label="URL externe (optionnel)"
-                description="Utilisé si aucune photo n'est téléversée"
-              />
-            )}
+          {/* Photo section - Using ImageFieldGroup */}
+          <ImageFieldGroup
+            form={form}
+            imageUrlField="image_url"
+            imageMediaIdField="photo_media_id"
+            label="Photo du membre"
+            showAltText={false}
           />
 
           <div className="flex gap-2 pt-4">
@@ -212,12 +139,6 @@ export function TeamMemberForm({
           </div>
         </form>
       </Form>
-
-      <MediaUploadDialog
-        open={showMediaPicker}
-        onClose={() => setShowMediaPicker(false)}
-        onSelect={handlePhotoSelect}
-      />
     </>
   );
 }

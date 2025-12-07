@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import {
     Card,
     CardContent,
@@ -24,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { MediaLibraryPicker, MediaExternalUrlInput, type MediaSelectResult } from "@/components/features/admin/media";
+import { ImageFieldGroup } from "@/components/features/admin/media";
 import { AboutContentFormSchema, type AboutContentFormValues, type AboutContentDTO } from "@/lib/schemas/home-content";
 import { updateAboutContentAction } from "@/app/(admin)/admin/home/about/home-about-actions";
 
@@ -34,7 +33,6 @@ interface AboutContentFormProps {
 
 export function AboutContentForm({ content }: AboutContentFormProps) {
     const router = useRouter();
-    const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
     const [isPending, setIsPending] = useState(false);
 
     const form = useForm<AboutContentFormValues>({
@@ -70,13 +68,6 @@ export function AboutContentForm({ content }: AboutContentFormProps) {
         } finally {
             setIsPending(false);
         }
-    };
-
-    const handleMediaSelect = (result: MediaSelectResult) => {
-        // store as number in the UI; backend will coerce
-        form.setValue("image_media_id", Number(result.id));
-        form.setValue("image_url", result.url);
-        setIsMediaPickerOpen(false);
     };
 
     const watchIntro1 = form.watch("intro1") ?? "";
@@ -182,51 +173,13 @@ export function AboutContentForm({ content }: AboutContentFormProps) {
                                     )}
                                 />
 
-                                <div className="space-y-2">
-                                    <FormLabel>Section Image</FormLabel>
-                                    <div className="flex gap-4 items-center">
-                                        {form.watch("image_url") && (
-                                            <Image
-                                                src={String(form.watch("image_url") || "")}
-                                                alt={String(form.watch("image_url") || "Preview")}
-                                                className="h-32 w-48 object-cover rounded"
-                                                width={192}
-                                                height={128}
-                                            />
-                                        )}
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() => setIsMediaPickerOpen(true)}
-                                        >
-                                            Sélectionner depuis la médiathèque
-                                        </Button>
-                                    </div>
-                                </div>
-
-                                {/* URL externe (fallback) */}
-                                <MediaExternalUrlInput
-                                    value={form.watch("image_url") ?? ""}
-                                    onChange={(url) => form.setValue("image_url", url)}
-                                    label="URL externe (optionnel)"
-                                    description="Utilisé si aucune image n'est sélectionnée depuis la médiathèque"
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name="alt_text"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Image Alt Text (Accessibility)</FormLabel>
-                                            <FormControl>
-                                                <Input {...field} maxLength={125} placeholder="Describe the image" />
-                                            </FormControl>
-                                            <FormDescription>
-                                                {(field.value || "").length}/125 characters
-                                            </FormDescription>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
+                                {/* Image section - Using ImageFieldGroup */}
+                                <ImageFieldGroup
+                                    form={form}
+                                    imageUrlField="image_url"
+                                    imageMediaIdField="image_media_id"
+                                    altTextField="alt_text"
+                                    label="Section Image"
                                 />
 
                                 <div className="flex justify-end gap-2">
@@ -247,12 +200,6 @@ export function AboutContentForm({ content }: AboutContentFormProps) {
                     </CardContent>
                 </Card>
             </div>
-
-            <MediaLibraryPicker
-                open={isMediaPickerOpen}
-                onClose={() => setIsMediaPickerOpen(false)}
-                onSelect={handleMediaSelect}
-            />
         </>
     );
 }

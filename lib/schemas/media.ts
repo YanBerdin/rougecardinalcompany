@@ -46,10 +46,12 @@ export const MediaItemSchema = z.object({
 
 /**
  * Schema for media selection result (from library or upload)
+ * @property error - Optional error message if selection failed
  */
 export const MediaSelectResultSchema = z.object({
     id: z.number().int().positive(),
     url: z.string().url(),
+    error: z.string().optional(),
 });
 
 /**

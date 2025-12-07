@@ -4,9 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Loader2, Check, ChevronsUpDown, Plus, CheckCircle2, XCircle, X, ImageIcon } from "lucide-react";
+import { Loader2, Check, ChevronsUpDown, Plus } from "lucide-react";
 import { toast } from "sonner";
-import Image from "next/image";
 import {
   createSpectacleAction,
   updateSpectacleAction,
@@ -20,8 +19,7 @@ import {
   formatDateForInput,
   getSpectacleSuccessMessage,
 } from "@/lib/forms/spectacle-form-helpers";
-import { validateImageUrl } from "@/lib/utils/validate-image-url";
-//import { z } from "zod";
+import { ImageFieldGroup } from "@/components/features/admin/media";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -70,9 +68,6 @@ export default function SpectacleForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCreatingNewGenre, setIsCreatingNewGenre] = useState(false);
   const [genreDropdownOpen, setGenreDropdownOpen] = useState(false);
-  const [isValidatingImage, setIsValidatingImage] = useState(false);
-  const [imageValidationError, setImageValidationError] = useState<string | null>(null);
-  const [imageValidationSuccess, setImageValidationSuccess] = useState<string | null>(null);
   const isEditing = !!spectacleId;
 
   const form = useForm({
@@ -97,7 +92,7 @@ export default function SpectacleForm({
 
     try {
       const cleanData = cleanSpectacleFormData(data) as CreateSpectacleInput;
-      
+
       const result = spectacleId
         ? await updateSpectacleAction({ id: spectacleId, ...cleanData } as UpdateSpectacleInput)
         : await createSpectacleAction(cleanData);
@@ -122,8 +117,8 @@ export default function SpectacleForm({
       }
     } catch (error) {
       console.error("Submit error:", error);
-      toast.error("Erreur", { 
-        description: error instanceof Error ? error.message : "Impossible de sauvegarder le spectacle" 
+      toast.error("Erreur", {
+        description: error instanceof Error ? error.message : "Impossible de sauvegarder le spectacle"
       });
     } finally {
       setIsSubmitting(false);
@@ -391,117 +386,14 @@ export default function SpectacleForm({
           )}
         />
 
-        {/* Image URL */}
-        <FormField
-          control={form.control}
-          name="image_url"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Image du spectacle</FormLabel>
-              <FormControl>
-                <div className="space-y-3">
-                  {/* Aperçu de l'image */}
-                  {field.value && imageValidationSuccess && (
-                    <div className="relative w-48 h-32 rounded-lg overflow-hidden border bg-muted">
-                      <Image
-                        src={field.value}
-                        alt="Aperçu du spectacle"
-                        fill
-                        className="object-cover"
-                        unoptimized
-                      />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute top-1 right-1 h-6 w-6"
-                        onClick={() => {
-                          field.onChange("");
-                          setImageValidationError(null);
-                          setImageValidationSuccess(null);
-                        }}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  )}
-
-                  {/* Champ URL + bouton vérifier */}
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
-                      <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        type="url"
-                        placeholder="https://example.com/image.jpg"
-                        className="pl-9"
-                        {...field}
-                        onChange={(e) => {
-                          field.onChange(e);
-                          setImageValidationError(null);
-                          setImageValidationSuccess(null);
-                        }}
-                      />
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      disabled={!field.value || isValidatingImage}
-                      onClick={async () => {
-                        if (!field.value) return;
-                        setIsValidatingImage(true);
-                        setImageValidationError(null);
-                        setImageValidationSuccess(null);
-                        try {
-                          const result = await validateImageUrl(field.value);
-                          if (!result.valid) {
-                            setImageValidationError(result.error || "Image invalide");
-                            toast.error("Image invalide", {
-                              description: result.error || "Vérifiez l'URL",
-                            });
-                          } else {
-                            const successMsg = `${result.mime}${result.size ? ` (${Math.round(result.size / 1024)}KB)` : ""}`;
-                            setImageValidationSuccess(successMsg);
-                            toast.success("✅ Image valide", {
-                              description: successMsg,
-                            });
-                          }
-                        } catch (err) {
-                          const errorMsg = err instanceof Error ? err.message : "Erreur de validation";
-                          setImageValidationError(errorMsg);
-                          toast.error("Erreur", { description: errorMsg });
-                        } finally {
-                          setIsValidatingImage(false);
-                        }
-                      }}
-                    >
-                      {isValidatingImage ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        "Vérifier"
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              </FormControl>
-              {imageValidationError && (
-                <p className="text-sm text-destructive flex items-center gap-1">
-                  <XCircle className="h-4 w-4" />
-                  {imageValidationError}
-                </p>
-              )}
-              {imageValidationSuccess && !field.value && (
-                <p className="text-sm text-green-600 flex items-center gap-1">
-                  <CheckCircle2 className="h-4 w-4" />
-                  Image valide : {imageValidationSuccess}
-                </p>
-              )}
-              <FormDescription>
-                Formats acceptés : JPEG, PNG, WebP, SVG, GIF. Cliquez sur &quot;Vérifier&quot; pour valider et afficher l&apos;aperçu.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
+        {/* Image URL - Using ImageFieldGroup with SSRF validation */}
+        <ImageFieldGroup
+          form={form}
+          imageUrlField="image_url"
+          label="Image du spectacle"
+          showMediaLibrary={true}
+          showAltText={false}
+          description="Formats acceptés : JPEG, PNG, WebP, AVIF. Cliquez sur « Vérifier » pour valider."
         />
 
         {/* Public Checkbox */}
