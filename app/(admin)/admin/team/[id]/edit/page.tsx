@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { redirect, notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/supabase/server";
@@ -41,13 +41,14 @@ export default async function EditTeamMemberPage({
     const { id } = await params;
     const memberId = parseInt(id, 10);
     if (isNaN(memberId) || memberId <= 0) {
-        notFound();
+        redirect("/admin/team?error=invalid_id");
     }
 
     // Fetch member via DAL
     const member = await fetchTeamMemberById(memberId);
     if (!member) {
-        notFound();
+        // Member was deleted or doesn't exist - redirect to list with message
+        redirect("/admin/team?deleted=true");
     }
 
     return (

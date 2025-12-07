@@ -107,19 +107,22 @@ export async function fetchTeamMemberById(id: number): Promise<TeamRow | null> {
       .single();
 
     if (error) {
-      console.error("fetchTeamMemberById error:", error);
+      // PGRST116 = "not found" - expected behavior, not an error
+      if (error.code !== "PGRST116") {
+        console.error("[ERR_TEAM_010] fetchTeamMemberById error:", error);
+      }
       return null;
     }
 
     const parsed = TeamMemberDbSchema.safeParse(data as unknown);
     if (!parsed.success) {
-      console.error("fetchTeamMemberById: invalid row:", parsed.error);
+      console.error("[ERR_TEAM_011] fetchTeamMemberById: invalid row:", parsed.error);
       return null;
     }
 
     return parsed.data as TeamRow;
   } catch (err) {
-    console.error("fetchTeamMemberById exception:", err);
+    console.error("[ERR_TEAM_012] fetchTeamMemberById exception:", err);
     return null;
   }
 }
