@@ -68,6 +68,10 @@ export default function SpectacleForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCreatingNewGenre, setIsCreatingNewGenre] = useState(false);
   const [genreDropdownOpen, setGenreDropdownOpen] = useState(false);
+  // null = non testé, true = validé, false = invalide
+  const [isImageValidated, setIsImageValidated] = useState<boolean | null>(
+    defaultValues?.image_url ? true : null
+  );
   const isEditing = !!spectacleId;
 
   const form = useForm({
@@ -88,6 +92,24 @@ export default function SpectacleForm({
   });
 
   async function onSubmit(data: SpectacleFormValues) {
+    // ✅ Validation : si une URL est fournie, elle DOIT être validée (peu importe public/non public)
+    if (data.image_url && data.image_url !== "") {
+      if (isImageValidated !== true) {
+        toast.error("Image non validée", {
+          description: "Cliquez sur 'Vérifier' pour valider l'URL de l'image, ou supprimez-la."
+        });
+        return;
+      }
+    }
+
+    // ✅ Validation : si public, l'image est obligatoire
+    if (data.public && (!data.image_url || data.image_url === "")) {
+      toast.error("Image requise", {
+        description: "Un spectacle visible publiquement doit avoir une image validée."
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -390,10 +412,15 @@ export default function SpectacleForm({
         <ImageFieldGroup
           form={form}
           imageUrlField="image_url"
-          label="Image du spectacle"
+          label={`Image du spectacle${form.watch("public") ? " *" : ""}`}
           showMediaLibrary={true}
           showAltText={false}
-          description="Formats acceptés : JPEG, PNG, WebP, AVIF. Cliquez sur « Vérifier » pour valider."
+          description={
+            form.watch("public")
+              ? "⚠️ Image OBLIGATOIRE et doit être validée. Cliquez sur « Vérifier » avant d'enregistrer."
+              : "⚠️ Toute URL doit être validée avant enregistrement. Laissez vide ou cliquez sur « Vérifier »."
+          }
+          onValidationChange={setIsImageValidated}
         />
 
         {/* Public Checkbox */}
@@ -411,7 +438,10 @@ export default function SpectacleForm({
               <div className="space-y-1 leading-none">
                 <FormLabel>Visible publiquement</FormLabel>
                 <FormDescription>
-                  Ce spectacle sera affiché sur le site public
+                  {field.value
+                    ? "⚠️ Ce spectacle sera affiché sur le site public. Une image est obligatoire."
+                    : "Ce spectacle sera affiché sur le site public"
+                  }
                 </FormDescription>
               </div>
             </FormItem>

@@ -69,6 +69,15 @@ export const spectacleFormSchema = z.object({
   premiere: z.string().optional(),
   image_url: z.string().url().optional().or(z.literal("")),
   public: z.boolean().optional(),
+}).superRefine((data, ctx) => {
+  // ✅ Si le spectacle est public, l'image est OBLIGATOIRE
+  if (data.public && (!data.image_url || data.image_url === "")) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["image_url"],
+      message: "Une image est requise pour un spectacle visible publiquement",
+    });
+  }
 });
 
 export type SpectacleFormValues = z.infer<typeof spectacleFormSchema>;

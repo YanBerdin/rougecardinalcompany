@@ -141,12 +141,12 @@
 │   │   │   │   ├── 📄 CtaFieldGroup.tsx
 │   │   │   │   ├── 📄 HeroSlideForm.tsx
 │   │   │   │   ├── 📄 HeroSlideFormFields.tsx
-│   │   │   │   ├── 📄 HeroSlideImageSection.tsx
 │   │   │   │   ├── 📄 HeroSlidePreview.tsx
 │   │   │   │   ├── 📄 HeroSlidesContainer.tsx
 │   │   │   │   ├── 📄 HeroSlidesErrorBoundary.tsx
 │   │   │   │   └── 📄 HeroSlidesView.tsx
 │   │   │   ├── 📁 media
+│   │   │   │   ├── 📄 ImageFieldGroup.tsx
 │   │   │   │   ├── 📄 MediaExternalUrlInput.tsx
 │   │   │   │   ├── 📄 MediaLibraryPicker.tsx
 │   │   │   │   ├── 📄 MediaUploadDialog.tsx
@@ -359,6 +359,7 @@
 │   │   ├── 📄 useHeroSlideFormSync.ts
 │   │   ├── 📄 useHeroSlidesDelete.ts
 │   │   ├── 📄 useHeroSlidesDnd.ts
+│   │   ├── 📄 useImageValidation.ts
 │   │   └── 📄 useNewsletterSubscribe.ts
 │   ├── 📁 plugins
 │   │   └── 📄 touch-hitbox-plugin.js

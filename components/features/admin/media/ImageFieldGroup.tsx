@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { UseFormReturn, FieldValues, Path, PathValue } from "react-hook-form";
 import Image from "next/image";
 import {
@@ -13,10 +13,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ImageIcon, Loader2, CheckCircle2, XCircle, Library, Link2 } from "lucide-react";
+import { ImageIcon, Loader2, CheckCircle2, XCircle, Library, Link2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { MediaLibraryPicker, type MediaSelectResult } from "@/components/features/admin/media";
-import { validateImageUrl } from "@/lib/utils/validate-image-url";
+import { useImageValidation } from "@/lib/hooks/useImageValidation";
 
 const IMAGE_ALT_MAX_LENGTH = 125;
 
@@ -39,6 +39,11 @@ interface ImageFieldGroupProps<TForm extends FieldValues> {
     showMediaLibrary?: boolean;
     showExternalUrl?: boolean;
     description?: string;
+    /**
+     * Callback appelé quand l'état de validation change.
+     * Permet au formulaire parent de savoir si l'image est validée.
+     */
+    onValidationChange?: (isValid: boolean | null) => void;
 }
 
 export function ImageFieldGroup<TForm extends FieldValues>({
@@ -53,19 +58,38 @@ export function ImageFieldGroup<TForm extends FieldValues>({
     showMediaLibrary = true,
     showExternalUrl = true,
     description,
+    onValidationChange,
 }: ImageFieldGroupProps<TForm>) {
     const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
-    const [isValidating, setIsValidating] = useState(false);
-    const [validationError, setValidationError] = useState<string | null>(null);
-    const [validationSuccess, setValidationSuccess] = useState<string | null>(null);
+    const {
+        isValidating,
+        validationError,
+        validationSuccess,
+        handleValidateUrl,
+        resetValidation,
+    } = useImageValidation();
 
     const imageUrl = form.watch(imageUrlField) as string | undefined;
     const altText = altTextField ? (form.watch(altTextField) as string | undefined) : undefined;
     const imageError = form.formState.errors[imageUrlField];
 
+    // Notifier le parent de l'état de validation
+    useEffect(() => {
+        if (!onValidationChange) return;
+        
+        if (validationSuccess) {
+            onValidationChange(true);
+        } else if (validationError) {
+            onValidationChange(false);
+        } else if (!imageUrl) {
+            onValidationChange(null);
+        }
+    }, [validationSuccess, validationError, imageUrl, onValidationChange]);
+
     const handleMediaSelect = (result: MediaSelectResult) => {
         if (result.error) {
             toast.error("Erreur média", { description: result.error });
+            onValidationChange?.(false);
             return;
         }
 
@@ -73,8 +97,9 @@ export function ImageFieldGroup<TForm extends FieldValues>({
             form.setValue(imageMediaIdField, Number(result.id) as PathValue<TForm, Path<TForm>>);
         }
         form.setValue(imageUrlField, result.url as PathValue<TForm, Path<TForm>>);
-        setValidationError(null);
-        setValidationSuccess(null);
+        resetValidation();
+        // ✅ Image de la médiathèque = déjà validée
+        onValidationChange?.(true);
         setIsMediaPickerOpen(false);
     };
 
@@ -83,38 +108,9 @@ export function ImageFieldGroup<TForm extends FieldValues>({
         if (imageMediaIdField) {
             form.setValue(imageMediaIdField, undefined as PathValue<TForm, Path<TForm>>);
         }
-        setValidationError(null);
-        setValidationSuccess(null);
-    };
-
-    const handleValidateUrl = async () => {
-        if (!imageUrl) return;
-
-        setIsValidating(true);
-        setValidationError(null);
-        setValidationSuccess(null);
-
-        try {
-            const result = await validateImageUrl(imageUrl);
-
-            if (!result.valid) {
-                const errorMessage = result.error ?? "Image invalide";
-                setValidationError(errorMessage);
-                toast.error("Image invalide", {
-                    description: errorMessage,
-                });
-            } else {
-                const successMsg = `${result.mime}${result.size ? ` (${Math.round(result.size / 1024)}KB)` : ""}`;
-                setValidationSuccess(successMsg);
-                toast.success("Image valide", { description: successMsg });
-            }
-        } catch (error: unknown) {
-            const errorMsg = error instanceof Error ? error.message : "Erreur de validation";
-            setValidationError(errorMsg);
-            toast.error("Erreur", { description: errorMsg });
-        } finally {
-            setIsValidating(false);
-        }
+        resetValidation();
+        // ⚠️ URL changée = nécessite re-validation
+        onValidationChange?.(null);
     };
 
     const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
@@ -146,7 +142,13 @@ export function ImageFieldGroup<TForm extends FieldValues>({
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                         <Link2 className="h-4 w-4" />
-                                        <span>Ou saisir une URL externe</span>
+                                        <span>Ou saisir une URL d'image directe</span>
+                                    </div>
+                                    <div className="rounded-md bg-blue-50 border border-blue-200 p-2 mb-2">
+                                        <p className="text-xs text-blue-800">
+                                            <strong>💡 Astuce :</strong> L'URL doit pointer vers le fichier image (.jpg, .png, etc.), pas vers une page web.
+                                            {' '}<strong>Unsplash :</strong> Clic droit sur l'image → "Copier l'adresse de l'image"
+                                        </p>
                                     </div>
                                     <div className="flex gap-2">
                                         <div className="relative flex-1">
@@ -164,7 +166,7 @@ export function ImageFieldGroup<TForm extends FieldValues>({
                                             variant="outline"
                                             size="sm"
                                             disabled={!imageUrl || isValidating}
-                                            onClick={handleValidateUrl}
+                                            onClick={() => handleValidateUrl(imageUrl ?? "")}
                                         >
                                             {isValidating ? <Loader2 className="h-4 w-4 animate-spin" /> : "Vérifier"}
                                         </Button>
@@ -172,7 +174,20 @@ export function ImageFieldGroup<TForm extends FieldValues>({
                                 </div>
                             )}
 
-                            {imageUrl && (
+                            {imageUrl && !validationSuccess && (
+                                <div className="flex items-center gap-2 p-3 border rounded-lg bg-yellow-50 border-yellow-200">
+                                    <AlertCircle className="h-4 w-4 text-yellow-600" />
+                                    <div className="flex-1 text-sm text-yellow-800">
+                                        <p className="font-medium">URL non validée</p>
+                                        <p className="text-xs truncate">{imageUrl}</p>
+                                    </div>
+                                    <p className="text-xs text-yellow-600 font-medium">
+                                        Cliquez sur "Vérifier"
+                                    </p>
+                                </div>
+                            )}
+
+                            {imageUrl && validationSuccess && (
                                 <div className="flex items-center gap-4 p-3 border rounded-lg bg-muted/50">
                                     <div className="relative h-20 w-32 rounded overflow-hidden">
                                         <Image

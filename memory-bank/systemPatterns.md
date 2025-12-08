@@ -260,15 +260,55 @@ export function ImageFieldGroup<TForm extends FieldValues>({
 
 - ✅ **SSRF Protection** : `validateImageUrl()` avec hostname allowlist
 - ✅ **MediaLibraryPicker** : Sélection depuis la bibliothèque Supabase
-- ✅ **External URL** : Saisie URL externe avec validation
+- ✅ **External URL** : Saisie URL externe avec validation + aide exemple Unsplash
 - ✅ **Preview** : Affichage avec fallback SVG placeholder
 - ✅ **Alt Text** : Champ accessibilité optionnel
 - ✅ **Type-safe** : Génériques TypeScript pour typage formulaire strict
+- ✅ **Validation State** : Warning visuel si URL non validée
+- ✅ **HTML Detection** : Message d'erreur spécifique si URL pointe vers page web
+
+**Validation Conditionnelle (Dec 2025)** :
+
+Pattern pour rendre l'image obligatoire selon une condition :
+
+```typescript
+// Schema Zod avec superRefine
+export const spectacleFormSchema = z.object({
+  image_url: z.string().url().optional().or(z.literal("")),
+  public: z.boolean().optional(),
+}).superRefine((data, ctx) => {
+  if (data.public && (!data.image_url || data.image_url === "")) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["image_url"],
+      message: "Une image est requise pour un spectacle visible publiquement",
+    });
+  }
+});
+
+// Validation côté client dans onSubmit
+if (data.public && (!data.image_url || data.image_url === "")) {
+  toast.error("Image requise", {
+    description: "Un spectacle visible publiquement doit avoir une image."
+  });
+  return;
+}
+
+// UI dynamique avec form.watch()
+<ImageFieldGroup
+  label={`Image${form.watch("public") ? " *" : ""}`}
+  description={
+    form.watch("public") 
+      ? "⚠️ Image OBLIGATOIRE pour un spectacle visible publiquement."
+      : "Image optionnelle."
+  }
+/>
+```
 
 **Formulaires migrés** :
 
 - `HeroSlideForm.tsx` — Hero slides homepage
-- `SpectacleForm.tsx` — Gestion spectacles (fix SSRF)
+- `SpectacleForm.tsx` — Gestion spectacles (SSRF + validation conditionnelle)
 - `TeamMemberForm.tsx` — Membres équipe
 - `AboutContentForm.tsx` — Section À propos
 
