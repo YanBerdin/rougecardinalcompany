@@ -185,36 +185,29 @@ export async function hardDeleteTeamMemberAction(
   }
 }
 
+/**
+ * @deprecated Use `uploadMediaImage(formData, folder)` from `@/lib/actions` instead.
+ * This wrapper keeps the old API for backwards compatibility while ensuring
+ * the exported symbol is an async Server Action (required by Next.js).
+ */
 export async function uploadTeamMemberPhoto(
   photoFormData: FormData
 ): Promise<ActionResponse<{ mediaId: number; publicUrl: string }>> {
   try {
-    await requireAdmin();
+    const actions = await import("@/lib/actions");
+    const result = await actions.uploadMediaImage(photoFormData, "team");
 
-    const uploadedFile = extractFileFromFormData(photoFormData);
-    if (!uploadedFile.success) {
-      return { success: false, error: uploadedFile.error, status: uploadedFile.status };
+    if (!result.success) {
+      return { success: false, error: result.error ?? "Upload failed" };
     }
 
-    const validatedFile = validateImageFile(uploadedFile.data);
-    if (!validatedFile.success) {
-      return { success: false, error: validatedFile.error, status: validatedFile.status };
-    }
-
-    const uploadResult = await uploadFileToStorage(validatedFile.data);
-    if (!uploadResult.success) {
-      return { success: false, error: uploadResult.error, status: uploadResult.status };
-    }
-
-    const mediaResult = await createMediaRecord(
-      uploadResult.data,
-      validatedFile.data
-    );
-    if (!mediaResult.success) {
-      await cleanupStorageFile(uploadResult.data.storagePath);
-    }
-
-    return mediaResult;
+    return {
+      success: true,
+      data: {
+        mediaId: result.data.mediaId,
+        publicUrl: result.data.publicUrl,
+      },
+    };
   } catch (error: unknown) {
     return handleActionError(error, "uploadTeamMemberPhoto");
   }

@@ -6,7 +6,7 @@ values
   (
     'Les Murmures du Temps',
     'les-murmures-du-temps',
-    'actuellement',
+    'published',
     'Un voyage poétique à travers les âges, où passé et présent se rencontrent dans un dialogue bouleversant. Cette création originale explore les liens invisibles qui nous unissent à travers le temps.',
     'Voyage poétique entre passé et présent.',
     'Drame contemporain',
@@ -20,7 +20,7 @@ values
   (
     'Fragments d''Éternité',
     'fragments-d-eternite',
-    'actuellement',
+    'published',
     'Une création originale qui explore les liens invisibles qui nous unissent, entre rire et larmes. Un spectacle touchant sur la condition humaine et nos quêtes de sens.',
     'Création originale sur les liens invisibles.',
     'Création originale',
@@ -34,7 +34,7 @@ values
   (
     'La Danse des Ombres',
     'la-danse-des-ombres',
-    'archive',
+    'archived',
     'Adaptation moderne d''un classique, revisité avec audace et sensibilité par notre équipe artistique.',
     'Classique revisité avec audace.',
     'Classique revisité',
@@ -48,7 +48,7 @@ values
   (
     'Échos de Liberté',
     'echos-de-liberte',
-    'archive',
+    'archived',
     'Un spectacle engagé sur les droits humains et la liberté d''expression dans le monde contemporain.',
     'Spectacle engagé sur les droits humains.',
     'Théâtre documentaire',
@@ -62,7 +62,7 @@ values
   (
     'Rêves d''Enfance',
     'reves-d-enfance',
-    'archive',
+    'archived',
     'Un spectacle familial poétique qui ravive la magie de l''enfance chez petits et grands.',
     'Spectacle familial poétique.',
     'Tout public',
@@ -76,7 +76,7 @@ values
   (
     'Solitudes Partagées',
     'solitudes-partagees',
-    'archive',
+    'archived',
     'Une réflexion intimiste sur la solitude moderne et les moyens de créer du lien dans notre société.',
     'Réflexion intimiste sur la solitude.',
     'Drame psychologique',
@@ -90,7 +90,7 @@ values
   (
     'Mémoires de Guerre',
     'memoires-de-guerre',
-    'archive',
+    'archived',
     'Un témoignage bouleversant sur les survivants de guerre et la transmission de la mémoire.',
     'Témoignage sur la mémoire de guerre.',
     'Théâtre historique',
@@ -104,7 +104,7 @@ values
   (
     'Les Voix du Silence',
     'les-voix-du-silence',
-    'archive',
+    'archived',
     'Spectacle inclusif donnant la parole aux personnes sourdes et malentendantes.',
     'Spectacle inclusif sur la surdité.',
     'Théâtre social',
@@ -118,7 +118,7 @@ values
   (
     'Nuit Blanche à Paris',
     'nuit-blanche-a-paris',
-    'archive',
+    'archived',
     'Une comédie romantique pleine de rebondissements dans les rues de la capitale.',
     'Comédie romantique parisienne.',
     'Comédie',
@@ -132,7 +132,7 @@ values
   (
     'L''Appel de la Forêt',
     'l-appel-de-la-foret',
-    'archive',
+    'archived',
     'Adaptation théâtrale du chef-d''œuvre de Jack London, entre aventure et introspection.',
     'Adaptation de Jack London.',
     'Aventure dramatique',
@@ -146,7 +146,7 @@ values
   (
     'Portraits de Famille',
     'portraits-de-famille',
-    'archive',
+    'archived',
     'Une chronique familiale touchante sur trois générations de femmes.',
     'Chronique familiale sur trois générations.',
     'Drame familial',
@@ -160,7 +160,7 @@ values
   (
     'Renaissance',
     'renaissance',
-    'archive',
+    'archived',
     'Un spectacle musical célébrant la renaissance culturelle après les temps difficiles.',
     'Spectacle musical sur la renaissance.',
     'Comédie musicale',
@@ -174,7 +174,7 @@ values
   (
     'Les Chemins de Traverse',
     'les-chemins-de-traverse',
-    'archive',
+    'archived',
     'Un road-movie théâtral sur la quête d''identité et les rencontres qui changent une vie.',
     'Road-movie théâtral.',
     'Drame contemporain',

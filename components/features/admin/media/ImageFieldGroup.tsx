@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { UseFormReturn, FieldValues, Path, PathValue } from "react-hook-form";
 import Image from "next/image";
 import {
@@ -13,15 +13,28 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ImageIcon, Loader2, CheckCircle2, XCircle, Library, Link2, AlertCircle } from "lucide-react";
+import {
+    ImageIcon,
+    Loader2,
+    CheckCircle2,
+    XCircle,
+    Library,
+    Link2,
+    X,
+    Upload,
+} from "lucide-react";
 import { toast } from "sonner";
-import { MediaLibraryPicker, type MediaSelectResult } from "@/components/features/admin/media";
-import { useImageValidation } from "@/lib/hooks/useImageValidation";
+import {
+    MediaLibraryPicker,
+    MediaUploadDialog,
+    type MediaSelectResult,
+} from "@/components/features/admin/media";
+import { validateImageUrl } from "@/lib/utils/validate-image-url";
 
 const IMAGE_ALT_MAX_LENGTH = 125;
 
-// SVG placeholder inline (évite dépendance fichier externe)
-const PLACEHOLDER_IMAGE_DATA_URI = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='80' viewBox='0 0 128 80'%3E%3Crect fill='%23f3f4f6' width='128' height='80'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%239ca3af' font-family='system-ui' font-size='12'%3EImage%3C/text%3E%3C/svg%3E";
+const PLACEHOLDER_IMAGE_DATA_URI =
+    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='80' viewBox='0 0 128 80'%3E%3Crect fill='%23f3f4f6' width='128' height='80'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%239ca3af' font-family='system-ui' font-size='12'%3EImage%3C/text%3E%3C/svg%3E";
 
 interface ImageFieldGroupProps<TForm extends FieldValues> {
     form: UseFormReturn<TForm>;
@@ -30,20 +43,14 @@ interface ImageFieldGroupProps<TForm extends FieldValues> {
     altTextField?: Path<TForm>;
     label?: string;
     altTextLabel?: string;
-    /**
-     * Affichage visuel uniquement (*).
-     * La validation obligatoire doit être gérée dans le schéma Zod du formulaire parent.
-     */
     required?: boolean;
     showAltText?: boolean;
     showMediaLibrary?: boolean;
     showExternalUrl?: boolean;
+    showUpload?: boolean;
+    uploadFolder?: string;
     description?: string;
-    /**
-     * Callback appelé quand l'état de validation change.
-     * Permet au formulaire parent de savoir si l'image est validée.
-     */
-    onValidationChange?: (isValid: boolean | null) => void;
+    onValidationChange?: (isValid: boolean | null) => void; // NEW: Callback for validation state
 }
 
 export function ImageFieldGroup<TForm extends FieldValues>({
@@ -57,60 +64,135 @@ export function ImageFieldGroup<TForm extends FieldValues>({
     showAltText = true,
     showMediaLibrary = true,
     showExternalUrl = true,
+    showUpload = false,
+    uploadFolder = "team",
     description,
-    onValidationChange,
+    onValidationChange, // NEW: Callback prop
 }: ImageFieldGroupProps<TForm>) {
     const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
-    const {
-        isValidating,
-        validationError,
-        validationSuccess,
-        handleValidateUrl,
-        resetValidation,
-    } = useImageValidation();
+    const [isUploadOpen, setIsUploadOpen] = useState(false);
+    const [isValidating, setIsValidating] = useState(false);
+    const [validationError, setValidationError] = useState<string | null>(null);
+    const [validationSuccess, setValidationSuccess] = useState<string | null>(
+        null
+    );
 
     const imageUrl = form.watch(imageUrlField) as string | undefined;
-    const altText = altTextField ? (form.watch(altTextField) as string | undefined) : undefined;
+    const altText = altTextField
+        ? (form.watch(altTextField) as string | undefined)
+        : undefined;
     const imageError = form.formState.errors[imageUrlField];
-
-    // Notifier le parent de l'état de validation
-    useEffect(() => {
-        if (!onValidationChange) return;
-        
-        if (validationSuccess) {
-            onValidationChange(true);
-        } else if (validationError) {
-            onValidationChange(false);
-        } else if (!imageUrl) {
-            onValidationChange(null);
-        }
-    }, [validationSuccess, validationError, imageUrl, onValidationChange]);
 
     const handleMediaSelect = (result: MediaSelectResult) => {
         if (result.error) {
             toast.error("Erreur média", { description: result.error });
-            onValidationChange?.(false);
             return;
         }
 
         if (imageMediaIdField) {
-            form.setValue(imageMediaIdField, Number(result.id) as PathValue<TForm, Path<TForm>>);
+            form.setValue(
+                imageMediaIdField,
+                Number(result.id) as PathValue<TForm, Path<TForm>>
+            );
         }
         form.setValue(imageUrlField, result.url as PathValue<TForm, Path<TForm>>);
-        resetValidation();
-        // ✅ Image de la médiathèque = déjà validée
+        setValidationError(null);
+        setValidationSuccess(null);
+
+        // Notify parent that image from library is considered valid
         onValidationChange?.(true);
+
         setIsMediaPickerOpen(false);
+    };
+
+    const handleUploadSelect = (result: MediaSelectResult) => {
+        if (result.error) {
+            toast.error("Erreur de téléversement", { description: result.error });
+            return;
+        }
+
+        if (imageMediaIdField) {
+            form.setValue(
+                imageMediaIdField,
+                Number(result.id) as PathValue<TForm, Path<TForm>>
+            );
+        }
+        form.setValue(imageUrlField, result.url as PathValue<TForm, Path<TForm>>);
+        setValidationError(null);
+        setValidationSuccess(null);
+
+        // Notify parent that uploaded image is valid
+        onValidationChange?.(true);
+
+        setIsUploadOpen(false);
     };
 
     const handleUrlChange = (url: string) => {
         form.setValue(imageUrlField, url as PathValue<TForm, Path<TForm>>);
         if (imageMediaIdField) {
-            form.setValue(imageMediaIdField, undefined as PathValue<TForm, Path<TForm>>);
+            form.setValue(
+                imageMediaIdField,
+                undefined as PathValue<TForm, Path<TForm>>
+            );
         }
-        resetValidation();
-        // ⚠️ URL changée = nécessite re-validation
+        setValidationError(null);
+        setValidationSuccess(null);
+
+        // Reset validation state when URL changes
         onValidationChange?.(null);
+    };
+
+    const handleClearUrl = () => {
+        handleUrlChange("");
+        if (imageMediaIdField) {
+            form.setValue(
+                imageMediaIdField,
+                undefined as PathValue<TForm, Path<TForm>>
+            );
+        }
+
+        // Notify parent that validation state is reset
+        onValidationChange?.(null);
+    };
+
+    const handleValidateUrl = async () => {
+        if (!imageUrl) return;
+
+        setIsValidating(true);
+        setValidationError(null);
+        setValidationSuccess(null);
+
+        try {
+            const result = await validateImageUrl(imageUrl);
+
+            if (!result.valid) {
+                const errorMessage = result.error ?? "Image invalide";
+                setValidationError(errorMessage);
+                toast.error("Image invalide", {
+                    description: errorMessage,
+                });
+
+                // Notify parent of validation failure
+                onValidationChange?.(false);
+            } else {
+                const successMsg = `${result.mime}${result.size ? ` (${Math.round(result.size / 1024)}KB)` : ""}`;
+                setValidationSuccess(successMsg);
+                toast.success("Image valide", { description: successMsg });
+
+                // Notify parent of validation success
+                onValidationChange?.(true);
+            }
+        } catch (error: unknown) {
+            const errorMsg =
+                error instanceof Error ? error.message : "Erreur de validation";
+            setValidationError(errorMsg);
+            toast.error("Erreur", { description: errorMsg });
+
+            // Notify parent of validation error
+            onValidationChange?.(false);
+        } finally {
+            setIsValidating(false);
+        }
     };
 
     const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
@@ -124,31 +206,43 @@ export function ImageFieldGroup<TForm extends FieldValues>({
                 name={imageUrlField}
                 render={() => (
                     <FormItem>
-                        <FormLabel>{label} {required && <span className="text-destructive">*</span>}</FormLabel>
+                        <FormLabel>
+                            {label}{" "}
+                            {required && <span className="text-destructive">*</span>}
+                        </FormLabel>
 
                         <div className="space-y-3">
-                            {showMediaLibrary && (
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => setIsMediaPickerOpen(true)}
-                                >
-                                    <Library className="h-4 w-4 mr-2" />
-                                    Sélectionner depuis la médiathèque
-                                </Button>
-                            )}
+                            {/* Action buttons row */}
+                            <div className="flex flex-wrap gap-2">
+                                {showMediaLibrary && (
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => setIsMediaPickerOpen(true)}
+                                    >
+                                        <Library className="h-4 w-4 mr-2" />
+                                        Médiathèque
+                                    </Button>
+                                )}
 
+                                {showUpload && (
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => setIsUploadOpen(true)}
+                                    >
+                                        <Upload className="h-4 w-4 mr-2" />
+                                        Téléverser
+                                    </Button>
+                                )}
+                            </div>
+
+                            {/* External URL input */}
                             {showExternalUrl && (
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                         <Link2 className="h-4 w-4" />
-                                        <span>Ou saisir une URL d'image directe</span>
-                                    </div>
-                                    <div className="rounded-md bg-blue-50 border border-blue-200 p-2 mb-2">
-                                        <p className="text-xs text-blue-800">
-                                            <strong>💡 Astuce :</strong> L'URL doit pointer vers le fichier image (.jpg, .png, etc.), pas vers une page web.
-                                            {' '}<strong>Unsplash :</strong> Clic droit sur l'image → "Copier l'adresse de l'image"
-                                        </p>
+                                        <span>Ou saisir une URL externe</span>
                                     </div>
                                     <div className="flex gap-2">
                                         <div className="relative flex-1">
@@ -161,33 +255,36 @@ export function ImageFieldGroup<TForm extends FieldValues>({
                                                 onChange={(e) => handleUrlChange(e.target.value)}
                                             />
                                         </div>
+                                        {imageUrl && (
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={handleClearUrl}
+                                                title="Effacer l'URL"
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </Button>
+                                        )}
                                         <Button
                                             type="button"
                                             variant="outline"
                                             size="sm"
                                             disabled={!imageUrl || isValidating}
-                                            onClick={() => handleValidateUrl(imageUrl ?? "")}
+                                            onClick={handleValidateUrl}
                                         >
-                                            {isValidating ? <Loader2 className="h-4 w-4 animate-spin" /> : "Vérifier"}
+                                            {isValidating ? (
+                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                            ) : (
+                                                "Vérifier"
+                                            )}
                                         </Button>
                                     </div>
                                 </div>
                             )}
 
-                            {imageUrl && !validationSuccess && (
-                                <div className="flex items-center gap-2 p-3 border rounded-lg bg-yellow-50 border-yellow-200">
-                                    <AlertCircle className="h-4 w-4 text-yellow-600" />
-                                    <div className="flex-1 text-sm text-yellow-800">
-                                        <p className="font-medium">URL non validée</p>
-                                        <p className="text-xs truncate">{imageUrl}</p>
-                                    </div>
-                                    <p className="text-xs text-yellow-600 font-medium">
-                                        Cliquez sur "Vérifier"
-                                    </p>
-                                </div>
-                            )}
-
-                            {imageUrl && validationSuccess && (
+                            {/* Image preview */}
+                            {imageUrl && (
                                 <div className="flex items-center gap-4 p-3 border rounded-lg bg-muted/50">
                                     <div className="relative h-20 w-32 rounded overflow-hidden">
                                         <Image
@@ -237,7 +334,10 @@ export function ImageFieldGroup<TForm extends FieldValues>({
                     name={altTextField}
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>{altTextLabel} {required && <span className="text-destructive">*</span>}</FormLabel>
+                            <FormLabel>
+                                {altTextLabel}{" "}
+                                {required && <span className="text-destructive">*</span>}
+                            </FormLabel>
                             <FormControl>
                                 <Input
                                     {...field}
@@ -247,7 +347,8 @@ export function ImageFieldGroup<TForm extends FieldValues>({
                                 />
                             </FormControl>
                             <FormDescription>
-                                {((field.value as string) ?? "").length}/{IMAGE_ALT_MAX_LENGTH} caractères
+                                {((field.value as string) ?? "").length}/{IMAGE_ALT_MAX_LENGTH}{" "}
+                                caractères
                             </FormDescription>
                             <FormMessage />
                         </FormItem>
@@ -260,6 +361,15 @@ export function ImageFieldGroup<TForm extends FieldValues>({
                     open={isMediaPickerOpen}
                     onClose={() => setIsMediaPickerOpen(false)}
                     onSelect={handleMediaSelect}
+                />
+            )}
+
+            {showUpload && (
+                <MediaUploadDialog
+                    open={isUploadOpen}
+                    onClose={() => setIsUploadOpen(false)}
+                    onSelect={handleUploadSelect}
+                    uploadFolder={uploadFolder}
                 />
             )}
         </>

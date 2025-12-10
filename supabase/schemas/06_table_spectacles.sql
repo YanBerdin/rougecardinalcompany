@@ -23,7 +23,7 @@ create table public.spectacles (
 );
 
 comment on table public.spectacles is 'shows/performances (base entity)';
-comment on column public.spectacles.status is 'Status values: draft, published, archived, en cours, terminé, projet, a l''affiche, en préparation, annulé (normalized - no underscores, proper French accents and apostrophes)';
+comment on column public.spectacles.status is 'canonical status values stored as english tokens: ''draft'', ''published'', ''archived''. ui translations to french are handled in application code (e.g. translateStatus). legacy values (fr) may exist and should be migrated using an update migration. do not rely on raw db text for display.';
 comment on column public.spectacles.casting is 'Nombre d  interprètes au plateau (anciennement `cast`)';
 comment on column public.spectacles.image_url is 'URL externe vers une image (alternative ou complément à image_media_id)';
 comment on column public.spectacles.awards is 'Liste des prix et distinctions (array, d''où le pluriel conforme au type)';

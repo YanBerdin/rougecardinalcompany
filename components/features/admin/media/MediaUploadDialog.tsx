@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { uploadTeamMemberPhoto } from "@/app/(admin)/admin/team/actions";
+import { uploadMediaImage } from "@/lib/actions";
+import type { MediaUploadResult } from "@/lib/actions";
 import { Loader2, Upload } from "lucide-react";
 import Image from "next/image";
 import type { MediaUploadDialogProps } from "./types";
@@ -23,18 +24,55 @@ import {
 
 /**
  * MediaUploadDialog - Upload mode for media picker
- * Allows uploading images to Supabase storage
- * Based on components/features/admin/team/MediaPickerDialog.tsx
+ * 
+ * ENHANCEMENTS:
+ * - Accepts custom uploadAction prop
+ * - Default to generic uploadMediaImage from @/lib/actions
+ * - Supports configurable upload folder
+ * 
+ * @example
+ * ```tsx
+ * // Default usage (team photos)
+ * <MediaUploadDialog
+ *   open={isOpen}
+ *   onClose={handleClose}
+ *   onSelect={handleSelect}
+ * />
+ * 
+ * // Custom folder (spectacles)
+ * <MediaUploadDialog
+ *   open={isOpen}
+ *   onClose={handleClose}
+ *   onSelect={handleSelect}
+ *   uploadFolder="spectacles"
+ * />
+ * 
+ * // Custom upload action
+ * <MediaUploadDialog
+ *   open={isOpen}
+ *   onClose={handleClose}
+ *   onSelect={handleSelect}
+ *   uploadAction={customUploadFunction}
+ * />
+ * ```
  */
 export function MediaUploadDialog({
     open,
     onClose,
     onSelect,
-}: MediaUploadDialogProps) {
+    uploadFolder = "team",
+    uploadAction,
+}: MediaUploadDialogProps & {
+    uploadFolder?: string;
+    uploadAction?: (formData: FormData) => Promise<MediaUploadResult>;
+}) {
     const [uploading, setUploading] = useState(false);
     const [preview, setPreview] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Use custom upload action or default to generic uploadMediaImage
+    const performUpload = uploadAction || ((formData: FormData) => uploadMediaImage(formData, uploadFolder));
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -79,7 +117,7 @@ export function MediaUploadDialog({
             const formData = new FormData();
             formData.append("file", selectedFile);
 
-            const result = await uploadTeamMemberPhoto(formData);
+            const result = await performUpload(formData);
 
             if (result.success) {
                 toast.success("Image téléversée", {

@@ -2,6 +2,7 @@ import type { SpectacleSummary } from "@/lib/schemas/spectacles";
 import { Badge } from "@/components/ui/badge";
 import React from "react";
 import { capitalizeWords } from "@/lib/forms/spectacle-form-helpers";
+import { translateStatus } from "@/lib/i18n/status";
 import type { SortState } from "@/components/ui/sortable-header";
 
 export const STATUS_VARIANTS: Record<
@@ -173,10 +174,9 @@ export function getStatusBadge(
   const normalizedStatus = status.replace(/_/g, ' ');
 
   const variant = STATUS_VARIANTS[normalizedStatus] || "outline";
-  const predefinedLabel = STATUS_LABELS[normalizedStatus];
 
-  // Use predefined label if available, otherwise capitalize the normalized status
-  const label = predefinedLabel || capitalizeWords(normalizedStatus);
+  // Use central translate helper to show the french label
+  const label = translateStatus(normalizedStatus) || capitalizeWords(normalizedStatus);
 
   return React.createElement(Badge, { variant }, label);
 }

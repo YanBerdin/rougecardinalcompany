@@ -3,14 +3,17 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { Loader2, Check, ChevronsUpDown, Plus } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Loader2, Check, ChevronsUpDown, Plus, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import {
   createSpectacleAction,
   updateSpectacleAction,
 } from "@/app/(admin)/admin/spectacles/actions";
-import type { CreateSpectacleInput, UpdateSpectacleInput } from "@/lib/schemas/spectacles";
+import type {
+  CreateSpectacleInput,
+  UpdateSpectacleInput,
+} from "@/lib/schemas/spectacles";
 import {
   spectacleFormSchema,
   type SpectacleFormValues,
@@ -46,6 +49,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface SpectacleFormProps {
   defaultValues?: Partial<SpectacleFormValues>;
@@ -53,10 +57,6 @@ interface SpectacleFormProps {
   onSuccess?: () => void;
   existingGenres?: string[];
 }
-
-// ==========================================================================
-// Main Component (<30 lines)
-// ==========================================================================
 
 export default function SpectacleForm({
   defaultValues,
@@ -68,10 +68,12 @@ export default function SpectacleForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCreatingNewGenre, setIsCreatingNewGenre] = useState(false);
   const [genreDropdownOpen, setGenreDropdownOpen] = useState(false);
-  // null = non testé, true = validé, false = invalide
+
+  // Image validation state (null = untested, true = valid, false = invalid)
   const [isImageValidated, setIsImageValidated] = useState<boolean | null>(
     defaultValues?.image_url ? true : null
   );
+
   const isEditing = !!spectacleId;
 
   const form = useForm({
@@ -91,21 +93,61 @@ export default function SpectacleForm({
     },
   });
 
+  // Watch public checkbox and form values for dynamic validation feedback
+  const isPublic = form.watch("public");
+  const currentStatus = form.watch("status");
+  const imageUrl = form.watch("image_url");
+  const [showPublicWarning, setShowPublicWarning] = useState(false);
+
+  // Show progressive validation warning when public=true
+  useEffect(() => {
+    if (isPublic) {
+      const genre = form.getValues("genre");
+      const premiere = form.getValues("premiere");
+      const shortDesc = form.getValues("short_description");
+      const description = form.getValues("description");
+
+      const isIncomplete =
+        currentStatus === "draft" ||
+        !genre ||
+        !premiere ||
+        !shortDesc ||
+        !description ||
+        !imageUrl ||
+        isImageValidated !== true;
+
+      setShowPublicWarning(isIncomplete);
+    } else {
+      setShowPublicWarning(false);
+    }
+  }, [
+    isPublic,
+    currentStatus,
+    imageUrl,
+    isImageValidated,
+    form.watch("genre"),
+    form.watch("premiere"),
+    form.watch("short_description"),
+    form.watch("description"),
+  ]);
+
   async function onSubmit(data: SpectacleFormValues) {
-    // ✅ Validation : si une URL est fournie, elle DOIT être validée (peu importe public/non public)
+    // CRITICAL: Image URL validation (if provided, must be validated)
     if (data.image_url && data.image_url !== "") {
       if (isImageValidated !== true) {
         toast.error("Image non validée", {
-          description: "Cliquez sur 'Vérifier' pour valider l'URL de l'image, ou supprimez-la."
+          description:
+            "Cliquez sur 'Vérifier' pour valider l'URL de l'image, ou supprimez-la.",
         });
         return;
       }
     }
 
-    // ✅ Validation : si public, l'image est obligatoire
+    // CRITICAL: Public spectacles require validated image
     if (data.public && (!data.image_url || data.image_url === "")) {
       toast.error("Image requise", {
-        description: "Un spectacle visible publiquement doit avoir une image validée."
+        description:
+          "Un spectacle visible publiquement doit avoir une image validée.",
       });
       return;
     }
@@ -116,7 +158,10 @@ export default function SpectacleForm({
       const cleanData = cleanSpectacleFormData(data) as CreateSpectacleInput;
 
       const result = spectacleId
-        ? await updateSpectacleAction({ id: spectacleId, ...cleanData } as UpdateSpectacleInput)
+        ? await updateSpectacleAction({
+          id: spectacleId,
+          ...cleanData,
+        } as UpdateSpectacleInput)
         : await createSpectacleAction(cleanData);
 
       if (!result.success) {
@@ -140,7 +185,10 @@ export default function SpectacleForm({
     } catch (error) {
       console.error("Submit error:", error);
       toast.error("Erreur", {
-        description: error instanceof Error ? error.message : "Impossible de sauvegarder le spectacle"
+        description:
+          error instanceof Error
+            ? error.message
+            : "Impossible de sauvegarder le spectacle",
       });
     } finally {
       setIsSubmitting(false);
@@ -150,6 +198,18 @@ export default function SpectacleForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {/* Progressive validation warning */}
+        {showPublicWarning && (
+          <Alert className="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Un spectacle public nécessite : statut publié/archivé, genre, date
+              de première, descriptions courte et complète, et une image
+              validée.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Title */}
         <FormField
           control={form.control}
@@ -173,7 +233,10 @@ export default function SpectacleForm({
             <FormItem>
               <FormLabel>Slug</FormLabel>
               <FormControl>
-                <Input placeholder="⚠️ Laissez vide pour génération automatique" {...field} />
+                <Input
+                  placeholder="⚠️ Laissez vide pour génération automatique"
+                  {...field}
+                />
               </FormControl>
               <FormDescription>
                 Laissez vide pour génération automatique depuis le titre
@@ -190,7 +253,10 @@ export default function SpectacleForm({
             name="status"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Statut</FormLabel>
+                <FormLabel>
+                  Statut{" "}
+                  {isPublic && <span className="text-destructive">*</span>}
+                </FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
@@ -206,6 +272,11 @@ export default function SpectacleForm({
                     <SelectItem value="archived">Archive</SelectItem>
                   </SelectContent>
                 </Select>
+                {isPublic && field.value === "draft" && (
+                  <FormDescription className="text-destructive">
+                    Un spectacle public ne peut pas être en brouillon
+                  </FormDescription>
+                )}
                 <FormMessage />
               </FormItem>
             )}
@@ -216,7 +287,10 @@ export default function SpectacleForm({
             name="genre"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Genre</FormLabel>
+                <FormLabel>
+                  Genre{" "}
+                  {isPublic && <span className="text-destructive">*</span>}
+                </FormLabel>
                 <FormControl>
                   {isCreatingNewGenre ? (
                     <div className="flex gap-2">
@@ -272,7 +346,9 @@ export default function SpectacleForm({
                             }}
                           >
                             <Check
-                              className={`mr-2 h-4 w-4 ${field.value === genre ? "opacity-100" : "opacity-0"
+                              className={`mr-2 h-4 w-4 ${field.value === genre
+                                  ? "opacity-100"
+                                  : "opacity-0"
                                 }`}
                             />
                             {genre}
@@ -280,7 +356,7 @@ export default function SpectacleForm({
                         ))}
                         <DropdownMenuItem
                           onClick={() => {
-                            field.onChange(""); // Reset pour afficher le placeholder
+                            field.onChange("");
                             setIsCreatingNewGenre(true);
                             setGenreDropdownOpen(false);
                           }}
@@ -305,7 +381,10 @@ export default function SpectacleForm({
           name="short_description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description courte</FormLabel>
+              <FormLabel>
+                Description courte{" "}
+                {isPublic && <span className="text-destructive">*</span>}
+              </FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="Un résumé bref pour les listes..."
@@ -325,7 +404,10 @@ export default function SpectacleForm({
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description complète</FormLabel>
+              <FormLabel>
+                Description complète{" "}
+                {isPublic && <span className="text-destructive">*</span>}
+              </FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="Description détaillée du spectacle..."
@@ -399,7 +481,10 @@ export default function SpectacleForm({
           name="premiere"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Date de première</FormLabel>
+              <FormLabel>
+                Date de première{" "}
+                {isPublic && <span className="text-destructive">*</span>}
+              </FormLabel>
               <FormControl>
                 <Input type="date" {...field} />
               </FormControl>
@@ -408,15 +493,17 @@ export default function SpectacleForm({
           )}
         />
 
-        {/* Image URL - Using ImageFieldGroup with SSRF validation */}
+        {/* Image URL with validation state tracking */}
         <ImageFieldGroup
           form={form}
           imageUrlField="image_url"
-          label={`Image du spectacle${form.watch("public") ? " *" : ""}`}
+          label={`Image du spectacle${isPublic ? " *" : ""}`}
           showMediaLibrary={true}
+          showUpload={true}
+          uploadFolder="spectacles"
           showAltText={false}
           description={
-            form.watch("public")
+            isPublic
               ? "⚠️ Image OBLIGATOIRE et doit être validée. Cliquez sur « Vérifier » avant d'enregistrer."
               : "⚠️ Toute URL doit être validée avant enregistrement. Laissez vide ou cliquez sur « Vérifier »."
           }
@@ -439,9 +526,8 @@ export default function SpectacleForm({
                 <FormLabel>Visible publiquement</FormLabel>
                 <FormDescription>
                   {field.value
-                    ? "⚠️ Ce spectacle sera affiché sur le site public. Une image est obligatoire."
-                    : "Ce spectacle sera affiché sur le site public"
-                  }
+                    ? "⚠️ Ce spectacle sera affiché sur le site public. Une image validée est obligatoire."
+                    : "Ce spectacle sera affiché sur le site public (nécessite les champs marqués *)"}
                 </FormDescription>
               </div>
             </FormItem>

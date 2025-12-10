@@ -60,7 +60,7 @@ export function normalizeGenre(genre: string): string {
 export const spectacleFormSchema = z.object({
   title: z.string().min(1, "Le titre est requis").max(255),
   slug: z.string().optional(),
-  status: z.enum(["draft", "published", "archived", "brouillon", "actuellement", "archive"]).optional(),
+  status: z.enum(["draft", "published", "archived"]).optional(),
   description: z.string().optional(),
   short_description: z.string().max(500).optional(),
   genre: z.string().max(100).optional().transform((val) => val ? normalizeGenre(val) : val),
@@ -70,13 +70,57 @@ export const spectacleFormSchema = z.object({
   image_url: z.string().url().optional().or(z.literal("")),
   public: z.boolean().optional(),
 }).superRefine((data, ctx) => {
-  // ✅ Si le spectacle est public, l'image est OBLIGATOIRE
-  if (data.public && (!data.image_url || data.image_url === "")) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ["image_url"],
-      message: "Une image est requise pour un spectacle visible publiquement",
-    });
+  // ✅ Validation renforcée lorsque le spectacle est marqué comme public
+  if (data.public) {
+    // Status must not be draft
+    if (data.status === "draft") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["status"],
+        message: "Un spectacle public ne peut pas être en brouillon",
+      });
+    }
+
+    // Required fields for public visibility
+    if (!data.genre || String(data.genre).trim() === "") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["genre"],
+        message: "Le genre est requis pour publier un spectacle",
+      });
+    }
+
+    if (!data.premiere || String(data.premiere).trim() === "") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["premiere"],
+        message: "La date de première est requise pour publier un spectacle",
+      });
+    }
+
+    if (!data.short_description || String(data.short_description).trim() === "") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["short_description"],
+        message: "La description courte est requise pour publier un spectacle",
+      });
+    }
+
+    if (!data.description || String(data.description).trim() === "") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["description"],
+        message: "La description complète est requise pour publier un spectacle",
+      });
+    }
+
+    if (!data.image_url || data.image_url === "") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["image_url"],
+        message: "Une image est requise pour un spectacle visible publiquement",
+      });
+    }
   }
 });
 
