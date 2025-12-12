@@ -26,40 +26,70 @@ alter table "public"."home_hero_slides"
 
 -- ============================================================================
 -- STEP 2: Migrate existing data (cta_label/cta_url → cta_primary_*)
+-- Only runs if old columns still exist (idempotent)
 -- ============================================================================
-update public.home_hero_slides
-set 
-  cta_primary_enabled = (cta_label is not null and cta_url is not null),
-  cta_primary_label = cta_label,
-  cta_primary_url = cta_url
-where cta_label is not null or cta_url is not null;
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns 
+    where table_schema = 'public' 
+      and table_name = 'home_hero_slides' 
+      and column_name = 'cta_label'
+  ) then
+    update public.home_hero_slides
+    set 
+      cta_primary_enabled = (cta_label is not null and cta_url is not null),
+      cta_primary_label = cta_label,
+      cta_primary_url = cta_url
+    where cta_label is not null or cta_url is not null;
+  end if;
+end$$;
 
 -- ============================================================================
--- STEP 3: Add constraints after data migration
+-- STEP 3: Add constraints after data migration (idempotent)
 -- ============================================================================
-alter table "public"."home_hero_slides" 
-  add constraint "home_hero_slides_cta_primary_label_length" 
-    check ((cta_primary_label is null) or (char_length(cta_primary_label) <= 50));
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'home_hero_slides_cta_primary_label_length'
+  ) then
+    alter table "public"."home_hero_slides" 
+      add constraint "home_hero_slides_cta_primary_label_length" 
+        check ((cta_primary_label is null) or (char_length(cta_primary_label) <= 50));
+  end if;
 
-alter table "public"."home_hero_slides" 
-  add constraint "home_hero_slides_cta_secondary_label_length" 
-    check ((cta_secondary_label is null) or (char_length(cta_secondary_label) <= 50));
+  if not exists (
+    select 1 from pg_constraint where conname = 'home_hero_slides_cta_secondary_label_length'
+  ) then
+    alter table "public"."home_hero_slides" 
+      add constraint "home_hero_slides_cta_secondary_label_length" 
+        check ((cta_secondary_label is null) or (char_length(cta_secondary_label) <= 50));
+  end if;
 
-alter table "public"."home_hero_slides" 
-  add constraint "home_hero_slides_cta_primary_consistency" 
-    check (
-      (cta_primary_enabled = false) 
-      or 
-      ((cta_primary_enabled = true) and (cta_primary_label is not null) and (cta_primary_url is not null))
-    );
+  if not exists (
+    select 1 from pg_constraint where conname = 'home_hero_slides_cta_primary_consistency'
+  ) then
+    alter table "public"."home_hero_slides" 
+      add constraint "home_hero_slides_cta_primary_consistency" 
+        check (
+          (cta_primary_enabled = false) 
+          or 
+          ((cta_primary_enabled = true) and (cta_primary_label is not null) and (cta_primary_url is not null))
+        );
+  end if;
 
-alter table "public"."home_hero_slides" 
-  add constraint "home_hero_slides_cta_secondary_consistency" 
-    check (
-      (cta_secondary_enabled = false) 
-      or 
-      ((cta_secondary_enabled = true) and (cta_secondary_label is not null) and (cta_secondary_url is not null))
-    );
+  if not exists (
+    select 1 from pg_constraint where conname = 'home_hero_slides_cta_secondary_consistency'
+  ) then
+    alter table "public"."home_hero_slides" 
+      add constraint "home_hero_slides_cta_secondary_consistency" 
+        check (
+          (cta_secondary_enabled = false) 
+          or 
+          ((cta_secondary_enabled = true) and (cta_secondary_label is not null) and (cta_secondary_url is not null))
+        );
+  end if;
+end$$;
 
 -- ============================================================================
 -- STEP 4: Add comments

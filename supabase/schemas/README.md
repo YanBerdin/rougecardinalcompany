@@ -68,6 +68,22 @@ Note RLS: les nouvelles tables co‑localisent leurs politiques (dans le même f
 
 ---
 
+## 🆕 Mises à jour récentes (décembre 2025)
+
+- **Normalisation `spectacles.status` (9-12 déc. 2025)** : Normalisation des valeurs de statut vers des tokens anglais canoniques.
+  - **Valeurs canoniques** : `'draft'`, `'published'`, `'archived'` (exclusivement)
+  - **Migration DML** : `20251209120000_normalize_spectacles_status_to_english.sql` (⚠️ modifie les données en place)
+  - **Contrainte CHECK** : `chk_spectacles_status_allowed` ajoutée pour prévenir les régressions
+  - **Schéma déclaratif** : `06_table_spectacles.sql` mis à jour avec la contrainte et `status text not null default 'draft'`
+  - **Traduction UI** : Gérée par `translateStatus()` côté application
+  - **Legacy cleanup** : Anciennes migrations archivées dans `supabase/migrations/archived/`
+
+- **Hero Slides CTA Dual Buttons (5 déc. 2025)** : Refactoring des boutons CTA pour supporter deux boutons (primaire + secondaire).
+  - **Migration** : `20251205220000_refactor_hero_slides_cta_dual_buttons.sql` (idempotente)
+  - **Nouvelles colonnes** : `cta_primary_enabled`, `cta_primary_label`, `cta_primary_url`, `cta_secondary_*`
+  - **Contraintes CHECK** : Cohérence entre enabled/label/url pour chaque CTA
+  - **Pattern idempotent** : DO blocks avec vérification `information_schema.columns` et `pg_constraint`
+
 ## 🆕 Mises à jour récentes (novembre 2025)
 
 - **TASK026 Clean Code & TypeScript Conformity (27 nov. 2025)** : Refactoring architectural pour conformité aux standards Clean Code & TypeScript du projet.

@@ -25,7 +25,6 @@ begin
 end$$;
 
 -- 1) update common french/legacy variants -> canonical english
--- ⚠️ MODIFIES DATA IN PLACE - backup created above for recovery if needed
 update public.spectacles
 set status = case
   -- drafts

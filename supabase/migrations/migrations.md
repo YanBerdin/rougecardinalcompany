@@ -99,6 +99,30 @@ pnpm add next@16.0.7
 
 - `20251024231855_restrict_reorder_execute.sql` — HOTFIX: restrict execute on `public.reorder_team_members(jsonb)` by revoking EXECUTE from `public`/`anon` and granting EXECUTE to `authenticated` only. Applied as a manual hotfix to reduce attack surface; declarative schema updated in `supabase/schemas/63_reorder_team_members.sql` to reflect the grant.
 
+## Migrations récentes (décembre 2025)
+
+- `20251209120000_normalize_spectacles_status_to_english.sql` — **DATA MIGRATION : Normalize spectacles.status to English tokens**
+  - ⚠️ **MODIFIES DATA IN PLACE** — Backup table created: `spectacles_backup_20251209120000`
+  - 🎯 **Objectif** : Normaliser les valeurs de statut vers des tokens anglais canoniques
+  - 📊 **Valeurs canoniques** : `'draft'`, `'published'`, `'archived'` (exclusivement)
+  - 🔄 **Mapping appliqué** :
+    - `brouillon`, `projet` → `draft`
+    - `actuellement`, `a l'affiche`, `en cours`, `en_tournee` → `published`
+    - `archive`, `archivé`, `terminé`, `annulé` → `archived`
+  - ✅ **Contrainte CHECK** : `chk_spectacles_status_allowed` ajoutée post-migration
+  - 📝 **Trigger** : Désactivé pendant migration (`trg_spectacles_versioning`) puis réactivé
+  - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/06_table_spectacles.sql`
+
+- `20251205220000_refactor_hero_slides_cta_dual_buttons.sql` — **DDL + DML : Hero Slides CTA refactoring**
+  - 🎯 **Objectif** : Remplacer single CTA par dual buttons (primary + secondary)
+  - 📊 **Nouvelles colonnes** : `cta_primary_enabled`, `cta_primary_label`, `cta_primary_url`, `cta_secondary_*`
+  - 🔄 **Migration données** : `cta_label`/`cta_url` → `cta_primary_*` (idempotente via DO block)
+  - ✅ **Contraintes CHECK** : 4 contraintes de cohérence (length + enabled/label/url)
+  - 🛡️ **Idempotence** : STEP 2 et STEP 3 utilisent des DO blocks avec vérification `information_schema`/`pg_constraint`
+  - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/07d_table_home_hero.sql`
+
+---
+
 ## Migrations récentes (novembre 2025)
 
 - **Refactoring architectural (27 nov. 2025)** — **Clean Code & TypeScript Conformity pour TASK026** : Ce refactoring n'a pas généré de migration base de données car il concerne uniquement la couche application.

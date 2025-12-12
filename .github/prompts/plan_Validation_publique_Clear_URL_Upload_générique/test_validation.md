@@ -322,7 +322,5 @@ const cleanData = cleanSpectacleFormData(data);
 
 ---
 
-**Tester**: [Votre nom]  
-**Date**: [Date d'exécution]  
-**Environnement**: Development / Staging / Production  
+**Environnement**: Development
 **Résultat**: ✅ PASS / ❌ FAIL
