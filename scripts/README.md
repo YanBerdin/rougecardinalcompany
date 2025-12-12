@@ -4,50 +4,36 @@ Ce dossier contient des scripts d'administration pour gérer et surveiller l'app
 
 ## 📋 Liste des Scripts
 
-### 🧪 Tests API
+### 🧪 Tests DAL (Data Access Layer)
 
-#### test-active-endpoint.ts (TypeScript) ✅ RECOMMANDÉ
+#### test-team-server-actions.ts (TypeScript) ✅ RECOMMANDÉ
 
-**Description** : Script TypeScript complet avec 17 tests automatisés pour l'endpoint `/api/admin/team/[id]/active`.
-
-**✅ Production-ready** : Tous les tests passent (17/17) avec authentification admin.
+**Description** : Tests DAL directs pour les opérations team (toggle active, list, fetch). Utilise le service role key pour accéder directement à la base de données.
 
 **Utilisation** :
 
 ```bash
-# Sans authentification (teste la protection auth)
-pnpm exec tsx scripts/test-active-endpoint.ts
-
-# Avec authentification (teste tous les cas)
-pnpm exec tsx scripts/test-active-endpoint.ts --cookie "sb-xxx-auth-token=your-token"
+pnpm exec tsx scripts/test-team-server-actions.ts
 ```
 
-#### test-team-active-dal.ts (TypeScript)
+**Tests couverts (7 tests)** :
 
-**Description** : Tests DAL directs (Data Access Layer) pour le toggle active/inactive des membres d'équipe. Utilise le service role key pour accéder directement à la base de données, contournant l'authentification Next.js.
-
-**Utilisation** :
-
-```bash
-pnpm exec tsx scripts/test-team-active-dal.ts
-```
-
-**Tests couverts (5 tests)** :
-
-| Test | Description | Durée |
-|------|-------------|-------|
-| Test 1 | Set to active (true) | ~350ms |
-| Test 2 | Set to inactive (false) | ~190ms |
-| Test 3 | Toggle back to active | ~170ms |
-| Test 4 | Idempotence check | ~160ms |
-| Test 5 | Invalid ID handling | ~160ms |
+| Test | Description |
+|------|-------------|
+| Test 1 | Toggle to inactive (false) |
+| Test 2 | Toggle to active (true) |
+| Test 3 | Idempotence check (set true twice) |
+| Test 4 | Restore original state |
+| Test 5 | List team members |
+| Test 6 | Fetch single member by ID |
+| Test 7 | Invalid ID returns null (not error) |
 
 **Avantages** :
 
 - ✅ Pas besoin de cookie admin (utilise service role key)
 - ✅ Tests rapides (~1 seconde total)
 - ✅ Validation directe de la logique DAL
-- ✅ Indépendent de l'authentification Next.js
+- ✅ Indépendant de l'authentification Next.js
 
 **Configuration Requise** :
 
@@ -55,81 +41,29 @@ pnpm exec tsx scripts/test-team-active-dal.ts
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
-**Comment obtenir le cookie d'authentification** :
+#### test-team-active-dal.ts (TypeScript)
 
-1. Se connecter sur http://localhost:3000 avec un compte admin
-2. Ouvrir les DevTools (F12) → Application → Cookies → http://localhost:3000
-3. Copier la valeur du cookie `sb-yvtrlvmbofklefxcxrzv-auth-token`
-4. Utiliser dans le script : `--cookie "sb-yvtrlvmbofklefxcxrzv-auth-token=VALEUR_COPIEE"`
-
-**Tests couverts (17 tests)** :
-
-| Type | Tests | Status Attendu |
-|------|-------|----------------|
-| **Valeurs valides** | Boolean `true`/`false` | 200 OK |
-| | String `"true"`/`"false"` | 200 OK |
-| | Number `0`/`1` | 200 OK |
-| **Valeurs invalides** | String `"maybe"` | 422 Validation Error |
-| | Number `2`, `-1` | 422 Validation Error |
-| | `null`, array, object | 422 Validation Error |
-| | Champ manquant | 422 Validation Error |
-| **IDs invalides** | Non-numeric `"abc"` | 400 Bad Request |
-| | Négatif `-1` | 400 Bad Request |
-| | Zéro `0` | 400 Bad Request |
-| | Décimal `1.5` | 400 Bad Request |
-| **Sécurité** | Sans cookie | 403 Forbidden |
-
-**Résumé automatique** :
-
-```
-================================================
-Test Summary
-================================================
-Total: 17
-Passed: 17
-Failed: 0
-```
-
-**✅ STATUT VALIDÉ** : Tous les tests passent avec authentification admin (--cookie flag).
-
-**Dernier test** : 13 novembre 2025 - Succès complet (17/17) avec cookie admin extrait du navigateur.
-
-#### test-active-endpoint.sh (Bash)
-
-**Description** : Script bash léger pour tester rapidement l'endpoint.
-
-**Utilisation** :
+**Description** : Tests DAL legacy pour le toggle active/inactive. Remplacé par `test-team-server-actions.ts`.
 
 ```bash
-# Sans authentification
-./scripts/test-active-endpoint.sh
-
-# Avec authentification
-./scripts/test-active-endpoint.sh "sb-xxx-auth-token=your-token-here"
+pnpm exec tsx scripts/test-team-active-dal.ts
 ```
 
-**Tests couverts (14 tests)** :
+---
 
-- ✅ Cas valides : Boolean, String, Number
-- ❌ Cas invalides : Valeurs incorrectes, champ manquant, ID invalide
-- 🔒 Sécurité : Vérification protection auth
+### ⚠️ Scripts Archivés (API Routes supprimées)
 
-#### quick-test-active.sh (Interactif)
+Les scripts suivants testaient des API Routes qui ont été supprimées lors de la migration vers Server Actions (décembre 2025). Ils sont archivés dans `scripts/Archived-tests/` :
 
-**Description** : Script interactif qui guide l'utilisateur pas à pas.
+| Script archivé | API Route supprimée | Remplacement |
+|----------------|---------------------|--------------|
+| `test-active-endpoint.ts` | `/api/admin/team/[id]/active` | `test-team-server-actions.ts` |
+| `test-active-endpoint-service.ts` | `/api/admin/team/[id]/active` | `test-team-server-actions.ts` |
+| `test-active-endpoint.sh` | `/api/admin/team/[id]/active` | `test-team-server-actions.ts` |
+| `quick-test-active.sh` | `/api/admin/team/[id]/active` | `test-team-server-actions.ts` |
+| `test-spectacles-endpoints.ts` | `/api/admin/spectacles/*` | Server Actions dans `app/(admin)/admin/spectacles/actions.ts` |
 
-**Utilisation** :
-
-```bash
-./scripts/quick-test-active.sh
-```
-
-**Fonctionnalités** :
-
-- ✅ Vérifie si le serveur dev tourne
-- ✅ Affiche les instructions pour obtenir le cookie
-- ✅ Demande le cookie de manière interactive
-- ✅ Lance les tests automatiquement
+**Note** : Les opérations CRUD team/spectacles utilisent maintenant des Server Actions colocalisées dans `app/(admin)/admin/<feature>/actions.ts`.
 
 ---
 
