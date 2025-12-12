@@ -1,65 +1,21 @@
 import { NextRequest } from "next/server";
-import { ContactEmailSchema, type ContactMessageInput } from "@/lib/schemas/contact";
-import { sendContactNotification } from "@/lib/email/actions";
-import { createContactMessage } from "@/lib/dal/contact";
-import { parseFullName, HttpStatus, ApiResponse } from "@/lib/api/helpers";
+import { handleContactSubmission } from "@/lib/actions/contact-server";
+import { HttpStatus, ApiResponse } from "@/lib/api/helpers";
 
-//TODO : add rate limiting
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const validation = ContactEmailSchema.safeParse(body);
+    const result = await handleContactSubmission(body);
 
-    if (!validation.success) {
-      return ApiResponse.validationError(validation.error.issues);
-    }
-
-    const contactData = validation.data;
-
-    // Mapper le schéma API vers le schéma DAL
-    // API: name (string unique) → DAL: firstName + lastName
-    const { firstName, lastName } = parseFullName(contactData.name);
-
-    const dalInput: ContactMessageInput = {
-      firstName,
-      lastName,
-      email: contactData.email,
-      phone: contactData.phone || null,
-      reason: (contactData.reason as ContactMessageInput["reason"]) || "autre",
-      message: `[${contactData.subject}]\n\n${contactData.message}`, // Inclure le sujet dans le message
-      consent: contactData.consent,
-    };
-
-    // RGPD Compliance: Persist to database using DAL (INSERT sans SELECT)
-    // Seuls les admins peuvent lire les données personnelles via RLS
-    const dalResult = await createContactMessage(dalInput);
-    if (!dalResult.success) {
-      console.error("[Contact API] Database error:", dalResult.error);
-      // Ne pas bloquer l'envoi d'email si la BDD échoue
-    }
-
-    // Envoi de notification email via Resend
-    let emailSent = true;
-    try {
-      await sendContactNotification({
-        name: contactData.name,
-        email: contactData.email,
-        subject: contactData.subject,
-        message: contactData.message,
-        phone: contactData.phone,
-        reason: contactData.reason,
-      });
-    } catch (emailError) {
-      console.error("[Contact API] Email notification failed:", emailError);
-      emailSent = false;
-      // Ne pas échouer la soumission si l'email échoue
+    if (!result.success) {
+      return ApiResponse.error(result.error, HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
     return ApiResponse.success(
       {
-        status: "sent",
+        status: result.data.status,
         message: "Message envoyé",
-        ...(emailSent ? {} : { warning: "Notification email could not be sent" }),
+        ...(result.data.warning ? { warning: result.data.warning } : {}),
       },
       HttpStatus.OK
     );

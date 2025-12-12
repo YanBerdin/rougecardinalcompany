@@ -24,6 +24,7 @@ Files inspected / to review manually in repo:
 
 Exports to implement (per file):
 - `lib/actions/contact-server.ts`
+  - Directives: `"use server"` + `import "server-only"`
   - export async function `handleContactSubmission(input: unknown): Promise<ActionResult<{ status: 'sent' }>>`
     - Validate input with `ContactEmailSchema`
     - Map `name` → `firstName`/`lastName` (use `parseFullName`)
@@ -55,5 +56,32 @@ Notes on server-only directive:
 - `lib/actions/contact-server.ts` must include `"use server"` and live under `lib/actions/` to match project patterns.
 - `app/actions/contact.actions.ts` must include `"use server"` at top.
 
+✅ **Implémentation terminée avec succès !**
 
-End of plan.
+### Fichiers créés/modifiés :
+
+| Fichier | Action |
+|---------|--------|
+| contact-server.ts | **Créé** — Logique partagée `handleContactSubmission()` |
+| route.ts | **Modifié** — Appelle maintenant `handleContactSubmission()` |
+| contact.actions.ts | **Créé** — Server Action `submitContactAction()` |
+
+### Architecture résultante :
+
+┌──────────────────────────────┐
+│  useContactForm (fetch)      │ ── POST ──▶ /api/contact/route.ts
+└──────────────────────────────┘                    │
+                                                    ▼
+┌──────────────────────────────┐         handleContactSubmission()
+│  <form action={...}>         │ ─────────▶ lib/actions/contact-server.ts
+└──────────────────────────────┘                    │
+          │                                         │
+          ▼                              ┌──────────┴──────────┐
+  submitContactAction()                  │                     │
+  app/actions/contact.actions.ts         ▼                     ▼
+                              createContactMessage()  sendContactNotification()
+                                    (DAL)                  (Email)
+
+**Le build passe sans erreur** — la compatibilité descendante est préservée (curl, clients externes) et la Server Action est disponible pour le progressive enhancement futur du formulaire.
+
+Les modifications ont été apportées.
