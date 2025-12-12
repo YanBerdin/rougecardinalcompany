@@ -47,6 +47,7 @@ type ActionResult<T> =
 ```
 
 **Benefits**:
+
 - ✅ Exhaustive type checking
 - ✅ No try-catch boilerplate
 - ✅ Clear success/failure paths
@@ -56,6 +57,7 @@ type ActionResult<T> =
 All actions are marked with `"use server"` directive.
 
 **Security**:
+
 - 🔒 Never expose database credentials to client
 - 🔒 Enforce authentication/authorization server-side
 - 🔒 Validate all inputs with Zod schemas
@@ -80,6 +82,7 @@ function uploadMediaImage(
 ```
 
 **Parameters**:
+
 - `formData` - FormData object with `file` field
 - `folder` - Optional storage folder (default: "team")
   - Examples: `"team"`, `"spectacles"`, `"press"`
@@ -92,6 +95,7 @@ function uploadMediaImage(
 ```
 
 **Validation**:
+
 - File size: Max 5MB
 - MIME types: `image/jpeg`, `image/png`, `image/webp`, `image/avif`
 - Authentication: Requires admin role
@@ -129,6 +133,7 @@ function deleteMediaImage(
 ```
 
 **Parameters**:
+
 - `mediaId` - ID from `medias` table
 
 **Returns**: `ActionResult` with deleted media info
@@ -434,16 +439,15 @@ export async function adminOnlyAction() {
 
 ## 📚 Related Documentation
 
-- [DAL Layer](../dal/README.md) - Database access layer
-- [Forms Guide](../forms/README.md) - Form validation patterns
-- [API Helpers](../api/helpers.ts) - HTTP status codes, error handling
-- [Migration Guide](../../docs/MIGRATION.md) - v1.5 → v2.0 changes
+- [DAL Layer](../../lib/actions/actions_readme.md) - Database access layer
+- [API Helpers](../../lib/api/helpers.ts) - HTTP status codes, error handling
+- [Migration Guide](../../supabase/migrations/migrations.md) - v1.5 → v2.0 changes
 
 ---
 
 ## 🤝 Contributing
 
-Before submitting a PR with new actions:
+Before submitting new actions:
 
 1. Ensure action is **generic** and reusable
 2. Follow existing naming conventions (`verb + Entity + Action`)
@@ -451,11 +455,3 @@ Before submitting a PR with new actions:
 4. Include usage examples in this README
 5. Write unit tests (coverage > 80%)
 6. Update CHANGELOG.md
-
-**Questions?** Ask in #engineering-help on Slack.
-
----
-
-**Maintained by**: Engineering Team  
-**Last Updated**: December 2025  
-**Next Review**: January 2026
