@@ -12,8 +12,8 @@
 
 ## En Cours
 
-- `TASK004` Agenda des événements (DAL + containers + UI)
-- `TASK014` Back‑office: centralisation et validation des toggles (Agenda/Accueil/Contact)
+- `TASK046` Rate-limiting handlers contact/newsletter (middleware ou inside handler)
+- `TASK047` Extraire `NewsletterSubscriptionSchema` vers `lib/schemas/newsletter.ts`
 
 ## En Attente
 
@@ -26,7 +26,6 @@
 - `TASK015` Stratégie seeds cloud (sécurisée) + synchronisation
 - `TASK016` Option: modélisation `partners.type` si requis par le design
 - `TASK017` Retrait des délais artificiels (1200-1500ms) des containers
-- `TASK018` Intégration système d'emailing (newsletter, contacts)
 
 ## Terminé
 
@@ -35,6 +34,7 @@
 - `TASK011` Intégration `home_hero_slides` (fetch + rendu + fenêtre visibilité) - Completed on 2025-09-23
 - `TASK012` Intégration UI des `compagnie_stats` (accueil/compagnie) - Completed on 2025-09-23
 - `TASK013` Écriture et exécution des scripts de seed (valeurs, stats, sections, hero) - Completed on 2025-09-23
+- `TASK018` Intégration système d'emailing (newsletter, contacts) - Completed on 2025-12-13 (factorisation handlers, DAL idempotent, Server Actions)
 - `TASK019` Fix spectacles archivés (public=true approach) - Completed on 2025-10-01
 - `TASK020` Alignement UI press releases (flexbox pattern) - Completed on 2025-10-01
 - `TASK020B` Documentation Docker (volumes, disk space, prune) - Completed on 2025-10-01
@@ -58,3 +58,7 @@
 - `TASK041` Team CRUD Migration to Server Actions - Completed on 2025-12-02 (Migration inline form → pages dédiées /admin/team/new et /admin/team/\[id]/edit, suppression 3 API Routes obsolètes, refactoring react-hook-form + zodResolver, ajout optionalUrlSchema + sanitizePayload, 3 bugs corrigés, documentation architecture mise à jour)
 - `TASK042` Next.js 16 Migration - Completed on 2025-12-02 (Upgrade 15.4.5 → 16.0.6 via @next/codemod, middleware.ts → proxy.ts rename, 6 pages with dynamic='force-dynamic' for Supabase cookies, CVE-2025-57822 SSRF fixed, CVE-2025-64718 js-yaml fixed with pnpm override, 0 audit vulnerabilities, Turbopack default)
 - `TASK043` Hero Slides Clean Code Refactoring - Completed on 2025-12-06 (lib/constants/hero-slides.ts created, 4 hooks extracted to lib/hooks/, CtaFieldGroup DRY component, HeroSlideForm 232→117 lines, HeroSlideFormFields 237→127 lines, HeroSlidesView 315→241 lines, all files <300 lines, no magic numbers, blueprints updated to v5.2/v2.2)
+- `TASK044B` Contact/Newsletter Handler Factorization - Completed on 2025-12-13 (lib/actions/contact-server.ts + newsletter-server.ts créés, lib/dal/newsletter-subscriber.ts avec gestion idempotente, Server Actions pour progressive enhancement, routes API simplifiées, blueprints v5 mis à jour)
+- `TASK045B` Next.js Security Update 16.0.10 - Completed on 2025-12-13 (Upgrade 16.0.7 → 16.0.10, 10/10 Dependabot alerts fixed, commit 8a8c37c)
+- `TASK044` ImageFieldGroup v2 - Completed on 2025-12-13 (Composant réutilisable MediaLibraryPicker + validateImageUrl + alt text, validation SSRF intégrée, DRY pour tous formulaires admin)
+- `TASK045` Validation publique + Upload générique - Completed on 2025-12-13 (uploadMediaImage générique, deleteMediaImage, ActionResult<T> types, progressive validation spectacles, Clear URL button)

@@ -1,11 +1,16 @@
 # System Patterns
 
+**Last Updated**: 2025-12-13
+
 Architecture et patterns observés dans le projet:
 
 - App Router Next.js (app/) pour pages et layouts.
 - Pattern **Smart/Dumb** components: containers server-side pour la data, composants clients pour l'interactivité.
-- DAL pattern recommandé: `lib/dal/` ou `supabase/` pour centraliser l'accès à la base (server-only modules).
+- DAL pattern recommandé: `lib/dal/` pour centraliser l'accès à la base (server-only modules).
 - **DAL SOLID Pattern (Nov 2025)**: Tous les DAL retournent `DALResult<T>`, helpers centralisés dans `lib/dal/helpers/`.
+- **Handler Factorization Pattern (Dec 2025)**: Logique partagée dans `lib/actions/*-server.ts`, réutilisée par API Routes et Server Actions.
+- **ImageFieldGroup Pattern (Dec 2025)**: Composant réutilisable pour champs image avec validation SSRF intégrée.
+- **Upload Générique Pattern (Dec 2025)**: `uploadMediaImage(formData, folder)` configurable par entité.
 - Sécurité: combinaison GRANT (table-level) + RLS (policies) requise — ne pas considérer RLS comme substitut au GRANT.
 - Migrations: `supabase/migrations/` est la source de vérité pour les modifications appliquées en base; `supabase/schemas/` sert de documentation/declarative reference.
 - Tests & CI: vérifier explicitement que les roles `anon` et `authenticated` peuvent accéder aux DTO nécessaires (tests d'intégration DAL).
@@ -320,6 +325,167 @@ if (data.public && (!data.image_url || data.image_url === "")) {
 - ✅ Aucun magic number (constantes nommées)
 - ✅ DRY (pas de duplication)
 - ✅ Aucun console.log
+
+### Handler Factorization Pattern (Dec 2025)
+
+**Pattern** : Extraire la logique métier dans des handlers partagés réutilisés par API Routes et Server Actions.
+
+#### Structure
+
+```bash
+lib/actions/
+├── contact-server.ts      # handleContactSubmission()
+├── newsletter-server.ts   # handleNewsletterSubscription()
+├── media-actions.ts       # uploadMediaImage(), deleteMediaImage()
+├── types.ts               # ActionResult<T>
+└── index.ts               # Barrel exports
+
+app/actions/
+├── contact.actions.ts     # Server Action wrapper
+└── newsletter.actions.ts  # Server Action wrapper
+
+app/api/
+├── contact/route.ts       # Délègue à handleContactSubmission()
+└── newsletter/route.ts    # Délègue à handleNewsletterSubscription()
+```
+
+#### Handler Pattern
+
+```typescript
+// lib/actions/contact-server.ts
+"use server";
+import "server-only";
+import { z } from "zod";
+import { createContactMessage } from "@/lib/dal/contact";
+import { sendContactNotification } from "@/lib/email/actions";
+import type { ActionResult } from "./types";
+
+const ContactSchema = z.object({
+  name: z.string().min(1),
+  email: z.string().email(),
+  message: z.string().min(10),
+});
+
+export async function handleContactSubmission(
+  input: unknown
+): Promise<ActionResult<{ status: "sent" }>> {
+  try {
+    // 1. Validation
+    const validated = ContactSchema.parse(input);
+    
+    // 2. Persist (DAL)
+    await createContactMessage(validated);
+    
+    // 3. Notification (non-bloquante)
+    try {
+      await sendContactNotification(validated);
+    } catch (emailError) {
+      console.error("[Contact] Email failed:", emailError);
+      // Ne pas échouer l'opération principale
+    }
+    
+    return { success: true, data: { status: "sent" } };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
+  }
+}
+```
+
+#### Idempotent DAL Pattern (Newsletter)
+
+```typescript
+// lib/dal/newsletter-subscriber.ts
+export async function createNewsletterSubscriber(
+  email: string
+): Promise<DALResult<{ isNew: boolean }>> {
+  const supabase = await createClient();
+  
+  const { error } = await supabase
+    .from("abonnes_newsletter")
+    .insert({ email, active: true });
+  
+  // unique_violation = déjà abonné = succès idempotent
+  if (error && isUniqueViolation(error)) {
+    return { success: true, data: { isNew: false } };
+  }
+  
+  if (error) {
+    return { success: false, error: error.message };
+  }
+  
+  return { success: true, data: { isNew: true } };
+}
+```
+
+#### Avantages
+
+- ✅ **DRY** : Logique centralisée, pas de duplication entre API Route et Server Action
+- ✅ **Rétrocompatibilité** : Routes API conservées pour clients externes (curl, mobile)
+- ✅ **Progressive Enhancement** : Server Actions pour formulaires JS
+- ✅ **Graceful Degradation** : Erreur email ne fait pas échouer l'opération
+- ✅ **Idempotence** : Newsletter gère les doublons comme succès
+
+### Upload Générique Pattern (Dec 2025)
+
+**Pattern** : Actions d'upload configurables par folder pour toutes les entités.
+
+#### Structure
+
+```typescript
+// lib/actions/media-actions.ts
+"use server";
+import "server-only";
+import { requireAdmin } from "@/lib/auth/guards";
+import type { ActionResult } from "./types";
+
+export async function uploadMediaImage(
+  formData: FormData,
+  folder: string = "team"
+): Promise<ActionResult<{ url: string; mediaId: bigint }>> {
+  await requireAdmin();
+  
+  const file = formData.get("file") as File;
+  // Validation MIME + size
+  // Upload to Supabase Storage
+  // Insert metadata in medias table
+  // Return URL + ID
+}
+
+export async function deleteMediaImage(
+  mediaId: bigint
+): Promise<ActionResult<void>> {
+  await requireAdmin();
+  // Delete from Storage + medias table
+}
+```
+
+#### Usage
+
+```typescript
+// Team photos
+const result = await uploadMediaImage(formData, "team");
+
+// Spectacle images
+const result = await uploadMediaImage(formData, "spectacles");
+
+// Press releases
+const result = await uploadMediaImage(formData, "press");
+```
+
+#### ActionResult<T> Type
+
+```typescript
+// lib/actions/types.ts
+export type ActionResult<T = unknown> =
+  | { success: true; data: T; warning?: string }
+  | { success: false; error: string; status?: number };
+
+export function isActionSuccess<T>(
+  result: ActionResult<T>
+): result is { success: true; data: T } {
+  return result.success === true;
+}
+```
 
 ### Bfcache Handler Pattern (Dec 2025)
 

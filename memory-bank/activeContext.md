@@ -1,6 +1,147 @@
 # Active Context
 
-**Current Focus (2025-12-06)**: Bfcache Hydration Fix - COMPLETED ✅
+**Current Focus (2025-12-13)**: Handler Factorization & Security Update - COMPLETED ✅
+
+## Architecture Updates (2025-12-13)
+
+### Security Update - Next.js 16.0.10 - COMPLETED ✅
+
+**Mise à jour de sécurité Next.js 16.0.7 → 16.0.10 suite aux alertes Dependabot.**
+
+#### Résultats
+
+- ✅ 10/10 alertes Dependabot corrigées (4 étaient ouvertes)
+- ✅ 2 alertes High + 2 Medium sur `next` package → Fixed
+- ✅ Build passé sans erreur
+- ✅ Commit `8a8c37c` — `chore(deps): update next 16.0.7 → 16.0.10 (security fixes)`
+
+#### Alertes résolues
+
+| # | Sévérité | Package | Status |
+|---|----------|---------|--------|
+| 10, 8 | High | next | ✅ Fixed |
+| 9, 7 | Medium | next | ✅ Fixed |
+
+---
+
+### Contact Handler Factorization - COMPLETED ✅
+
+**Extraction de la logique Contact dans un module serveur réutilisable.**
+
+#### Fichiers créés/modifiés
+
+| Fichier | Action | Lignes |
+|---------|--------|--------|
+| `lib/actions/contact-server.ts` | **Créé** | 52 |
+| `app/api/contact/route.ts` | Simplifié | 22 |
+| `app/actions/contact.actions.ts` | **Créé** | 21 |
+
+#### Architecture résultante
+
+```bash
+useContactForm (fetch) ─▶ /api/contact/route.ts
+                                │
+                                ▼
+<form action={...}> ───▶ handleContactSubmission()
+                         lib/actions/contact-server.ts
+                                │
+                    ┌───────────┴───────────┐
+                    ▼                       ▼
+           createContactMessage()  sendContactNotification()
+                  (DAL)                  (Email)
+```
+
+---
+
+### Newsletter Handler Factorization - COMPLETED ✅
+
+**Extraction de la logique Newsletter avec DAL dédié et gestion idempotente.**
+
+#### Fichiers créés/modifiés
+
+| Fichier | Action | Lignes | Rôle |
+|---------|--------|--------|------|
+| `lib/dal/newsletter-subscriber.ts` | **Créé** | 47 | DAL avec `unique_violation` → succès idempotent |
+| `lib/actions/newsletter-server.ts` | **Créé** | 52 | Handler partagé (validation + DAL + email) |
+| `app/api/newsletter/route.ts` | Simplifié | 22 | Délégation au handler |
+| `app/actions/newsletter.actions.ts` | **Créé** | 21 | Server Action pour progressive enhancement |
+
+#### Différences vs Contact
+
+| Aspect | Contact | Newsletter |
+|--------|---------|------------|
+| Duplicats | Pas de contrainte | `unique_violation` → succès idempotent |
+| Statut retour | `{ status: 'sent' }` | `{ status: 'subscribed', isNew?: boolean }` |
+| Email cible | Admin | Utilisateur (confirmation) |
+
+---
+
+### Architecture Blueprints Updated - COMPLETED ✅
+
+**Mise à jour des documents d'architecture suite aux factorisations.**
+
+| Document | Version | Status |
+|----------|---------|--------|
+| `Project_Folders_Structure_Blueprint_v5.md` | v5 | ✅ Mis à jour |
+| `Project_Architecture_Blueprint.md` | v2.2 | ✅ Mis à jour |
+| `Email_Service_Architecture.md` | v1 | ✅ **Créé** |
+
+---
+
+### ImageFieldGroup v2 - COMPLETED ✅
+
+**Composant réutilisable encapsulant `MediaLibraryPicker` + `validateImageUrl` + alt text.**
+
+#### Fichiers créés/modifiés
+
+| Fichier | Action | Rôle |
+|---------|--------|------|
+| `components/features/admin/media/ImageFieldGroup.tsx` | **Créé** | Composant générique DRY |
+| `components/features/admin/media/types.ts` | Modifié | Ajout `error?: string` à `MediaSelectResult` |
+| `components/features/admin/media/index.ts` | Modifié | Export `ImageFieldGroup` |
+
+#### Avantages
+
+- ✅ DRY : Un seul composant pour tous les formulaires
+- ✅ Validation SSRF : `validateImageUrl` intégré
+- ✅ UX cohérente : Même interface partout
+- ✅ Type-safe : Générique TypeScript
+
+**Fichier plan** : `.github/prompts/plan-imageFieldGroupFinalization/plan-imageFieldGroupV2.prompt.md`
+
+---
+
+### Validation publique + Upload générique - COMPLETED ✅
+
+**Pattern pour validation d'URLs publiques et upload via service de stockage.**
+
+#### Fichiers créés
+
+| Fichier | Rôle |
+|---------|------|
+| `lib/actions/media-actions.ts` | Upload/delete générique configurable par folder |
+| `lib/actions/types.ts` | `ActionResult<T>` type + type guards |
+| `lib/actions/index.ts` | Barrel exports |
+
+#### Features
+
+- ✅ `uploadMediaImage(formData, folder)` — Configurable (team, spectacles, press)
+- ✅ `deleteMediaImage(mediaId)` — Delete avec cleanup Storage
+- ✅ Progressive validation pour spectacles publics
+- ✅ Clear URL button (X icon)
+
+**Fichier plan** : `.github/prompts/plan_Validation_publique_Clear_URL_Upload_générique/`
+
+---
+
+## Prochaines priorités
+
+- `TASK046` Rate-limiting handlers contact/newsletter
+- `TASK047` Extraire `NewsletterSubscriptionSchema` vers `lib/schemas/newsletter.ts`
+
+---
+
+## Previous Focus (2025-12-06): Bfcache Hydration Fix - COMPLETED ✅
 
 ## Architecture Updates (2025-12-06)
 

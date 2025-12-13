@@ -1,9 +1,11 @@
 # Tech Context
 
-Versions et dépendances clés observées dans le dépôt (2025-12-06):
+**Last Updated**: 2025-12-13
+
+Versions et dépendances clés observées dans le dépôt:
 
 - Node.js: ^20 (devDeps)
-- Next.js: 16.0.6
+- Next.js: **16.0.10** (security update 2025-12-13)
 - TypeScript: ^5
 - Tailwind CSS: ^3.4.x
 - Supabase: client/server integration via `@supabase/ssr` and `@supabase/supabase-js` patterns
@@ -12,8 +14,19 @@ Structure principale:
 
 - `app/` — App Router, pages et layouts
 - `components/` — composants réutilisables (ui/, features/)
-- `lib/` — utilitaires, DAL, schemas, constants, hooks
+- `lib/` — utilitaires, DAL, schemas, constants, hooks, actions
 - `supabase/` — scripts, migrations, server client helpers
+
+## Mises à jour récentes (Dec 2025)
+
+| Date | Changement | Impact |
+|------|------------|--------|
+| 2025-12-13 | Next.js 16.0.7 → 16.0.10 | Security fix (Dependabot) |
+| 2025-12-13 | Handler Contact/Newsletter factorisés | `lib/actions/*-server.ts` |
+| 2025-12-13 | ImageFieldGroup v2 | Composant réutilisable SSRF-safe |
+| 2025-12-13 | Upload générique | `uploadMediaImage(formData, folder)` |
+| 2025-12-06 | Bfcache Handler | Prévention erreurs hydratation |
+| 2025-12-06 | Clean Code Refactoring | Hooks + constants extraits |
 
 Outils et commandes utiles:
 
@@ -25,12 +38,12 @@ Outils et commandes utiles:
 
 ### Frontend
 
-- **Framework**: Next.js 16.0.6 (App Router, Turbopack default)
+- **Framework**: Next.js **16.0.10** (App Router, Turbopack default) — security update 2025-12-13
 - **Langage**: TypeScript
 - **UI Framework**:
   - Tailwind CSS pour le styling
   - shadcn/ui pour les composants
-- **State Management**: React Hooks + Context API ou Redux (si nécessaire)
+- **State Management**: React Hooks + Context API
 
 ### Backend
 
@@ -44,7 +57,20 @@ Outils et commandes utiles:
 
 - **Constants**: `lib/constants/<feature>.ts` (LIMITS, DEFAULTS, CONFIG)
 - **Hooks**: `lib/hooks/use<Feature><Action>.ts` (extracted logic)
-- **DRY Components**: Config-driven components (CtaFieldGroup pattern)
+- **DRY Components**: Config-driven components (CtaFieldGroup, ImageFieldGroup patterns)
+
+### Handler Factorization Pattern (Dec 2025)
+
+- **Contact**: `lib/actions/contact-server.ts` → `handleContactSubmission()`
+- **Newsletter**: `lib/actions/newsletter-server.ts` → `handleNewsletterSubscription()`
+- **DAL Newsletter**: `lib/dal/newsletter-subscriber.ts` (idempotent unique_violation)
+- **Server Actions**: `app/actions/contact.actions.ts`, `app/actions/newsletter.actions.ts`
+
+### Upload Générique Pattern (Dec 2025)
+
+- **Actions**: `lib/actions/media-actions.ts` → `uploadMediaImage(formData, folder)`
+- **Types**: `lib/actions/types.ts` → `ActionResult<T>` discriminated union
+- **Delete**: `deleteMediaImage(mediaId)` avec cleanup Storage
 
 ### Déploiement
 
@@ -95,21 +121,28 @@ Outils et commandes utiles:
 │   └── contact-message-notification.tsx
 ├── lib/                  # Utilitaires et services
 │   ├── supabase/        # Configuration Supabase
-│   ├── dal/             # Data Access Layer (server-only) — 17 modules
-│   │   ├── helpers/     # 🆕 DAL utilities (error, format, slug)
+│   ├── dal/             # Data Access Layer (server-only) — 18 modules
+│   │   ├── helpers/     # DAL utilities (error, format, slug)
 │   │   │   ├── error.ts # DALResult<T> + toDALResult()
 │   │   │   ├── format.ts
 │   │   │   ├── slug.ts
 │   │   │   └── index.ts # Barrel exports
 │   │   ├── team.ts
-│   │   └── ...          # Other DAL modules (17 total)
-│   ├── schemas/         # 🆕 Zod schemas centralisés (11 files)
+│   │   ├── newsletter-subscriber.ts  # 🆕 Idempotent unique_violation
+│   │   └── ...          # Other DAL modules
+│   ├── schemas/         # Zod schemas centralisés (11 files)
 │   │   ├── team.ts      # Server + UI schemas
 │   │   ├── media.ts
 │   │   └── index.ts     # Barrel exports
-│   ├── actions/         # 🆕 Server Actions centralisées
+│   ├── actions/         # 🆕 Shared server handlers (Dec 2025)
+│   │   ├── contact-server.ts      # handleContactSubmission()
+│   │   ├── newsletter-server.ts   # handleNewsletterSubscription()
+│   │   ├── media-actions.ts       # uploadMediaImage(), deleteMediaImage()
+│   │   ├── types.ts               # ActionResult<T>
+│   │   └── index.ts               # Barrel exports
 │   ├── email/           # Email actions & schemas
 │   ├── hooks/           # Custom React hooks
+│   ├── constants/       # Feature constants (LIMITS, DEFAULTS, CONFIG)
 │   ├── resend.ts        # Resend client config
 │   └── site-config.ts   # Site configuration
 ├── types/                # TypeScript types

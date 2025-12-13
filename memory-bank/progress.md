@@ -1,5 +1,113 @@
 # Progress
 
+## ImageFieldGroup v2 - COMPLETED (2025-12-13)
+
+### Objectif
+
+Créer un composant générique encapsulant `MediaLibraryPicker` + `validateImageUrl` + alt text pour éviter la duplication.
+
+### Résultats
+
+- ✅ `components/features/admin/media/ImageFieldGroup.tsx` créé
+- ✅ Validation SSRF intégrée via `validateImageUrl`
+- ✅ UX cohérente pour tous les formulaires (hero, spectacles, team, about)
+- ✅ Type-safe avec génériques TypeScript
+- ✅ Props configurables (`showAltText`, `showMediaLibrary`, `required`)
+
+---
+
+## Validation publique + Upload générique - COMPLETED (2025-12-13)
+
+### Objectif
+
+Pattern pour validation d'URLs publiques et upload configurable par entité.
+
+### Résultats
+
+- ✅ `lib/actions/media-actions.ts` — `uploadMediaImage(formData, folder)` générique
+- ✅ `lib/actions/types.ts` — `ActionResult<T>` type + type guards
+- ✅ Progressive validation pour spectacles publics (champs requis si `public: true`)
+- ✅ Clear URL button (X icon) dans `ImageFieldGroup`
+- ✅ Upload configurable par folder (team, spectacles, press)
+
+### Documentation
+
+- `.github/prompts/plan_Validation_publique_Clear_URL_Upload_générique/changelog_v15.md`
+- `.github/prompts/plan_Validation_publique_Clear_URL_Upload_générique/migration_docs.md`
+
+---
+
+## Security Update - Next.js 16.0.10 - COMPLETED (2025-12-13)
+
+### Problème
+
+- 4 alertes Dependabot ouvertes sur package `next` (2 High, 2 Medium)
+- Vulnérabilités de sécurité identifiées dans Next.js 16.0.7
+
+### Solution
+
+- ✅ Mise à jour Next.js 16.0.7 → 16.0.10
+- ✅ Build vérifié sans erreur
+- ✅ 10/10 alertes Dependabot maintenant "fixed"
+
+### Commit
+
+- `8a8c37c` — `chore(deps): update next 16.0.7 → 16.0.10 (security fixes)`
+
+---
+
+## Contact Handler Factorization - COMPLETED (2025-12-13)
+
+### Objectif
+
+Extraire la logique Contact dans un module serveur réutilisable (même pattern que Newsletter).
+
+### Résultats
+
+- ✅ `lib/actions/contact-server.ts` créé — `handleContactSubmission()`
+- ✅ `app/api/contact/route.ts` simplifié — délègue au handler
+- ✅ `app/actions/contact.actions.ts` créé — Server Action pour progressive enhancement
+
+### Architecture
+
+- Route API conservée pour rétrocompatibilité (curl, clients externes)
+- Server Action disponible pour formulaires progressifs
+- Centralisation validation Zod + DAL + email
+
+---
+
+## Newsletter Handler Factorization - COMPLETED (2025-12-13)
+
+### Objectif
+
+Extraire la logique Newsletter avec DAL dédié et gestion idempotente des duplicats.
+
+### Résultats
+
+- ✅ `lib/dal/newsletter-subscriber.ts` créé — DAL avec `unique_violation` → succès idempotent
+- ✅ `lib/actions/newsletter-server.ts` créé — Handler partagé (validation + DAL + email)
+- ✅ `app/api/newsletter/route.ts` simplifié — Délégation au handler
+- ✅ `app/actions/newsletter.actions.ts` créé — Server Action pour progressive enhancement
+
+### Spécificités vs Contact
+
+- Gestion idempotente des duplicats (double inscription = succès)
+- Email envoyé à l'utilisateur (confirmation) vs admin (notification)
+
+---
+
+## Architecture Blueprints Updated - COMPLETED (2025-12-13)
+
+### Documents mis à jour/créés
+
+| Document | Action |
+|----------|--------|
+| `Project_Folders_Structure_Blueprint_v5.md` | Mis à jour avec factorisations |
+| `Project_Architecture_Blueprint.md` | Mis à jour v2.2 |
+| `Email_Service_Architecture.md` | **Créé** — Documentation service email |
+
+---
+
 ## Bfcache Hydration Fix - COMPLETED (2025-12-06)
 
 ### Problème
