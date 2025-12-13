@@ -1,3 +1,134 @@
+# Project Folders Structure Blueprint v5
+
+Date: 2025-12-13
+
+# Résumé
+
+Ce document présente la structure projet actuelle et les décisions récentes (v5) intégrant les évolutions suivantes :
+
+- Factorisation du handler Contact (plan-factoriserContactHandler-v2.prompt.md)
+- Factorisation du handler Newsletter (plan-factoriserNewsletterHandler.prompt.md)
+- Finalisation du groupement ImageField (plan-imageFieldGroupFinalization/plan-imageFieldGroupV2.prompt.md)
+- Plan de validation publique pour upload Clear URL (plan_Validation_publique_Clear_URL_Upload_générique)
+
+Objectif
+
+---
+
+Fournir un guide unique qui décrit l'organisation des dossiers, conventions et modifications récentes pour faciliter les contributions, la revue et l'intégration CI/CD.
+
+## Principes d'organisation
+
+---
+
+- Architecture feature-first (App Router + route groups `(admin)` et `(marketing)`).
+- Séparation claire Server vs Client : DAL (`lib/dal/*`) = server-only, Server Actions (`app/actions` ou `lib/actions`) pour mutations, API Routes `/api/*` conservées pour compatibilité externe.
+- Zod pour validation runtime + types TypeScript stricts.
+- Mail/Notifications dans `lib/email/*` (effet secondaire asynchrone, non bloquant pour l'opération principale).
+
+## Résumé des changements récents
+
+---
+
+1) Factorisation Contact
+
+- Nouveau module partagé `lib/actions/contact-server.ts` implémente `handleContactSubmission()`.
+- `app/api/contact/route.ts` délègue à cette fonction, conservant le contrat API (compatibilité curl/clients externes).
+- `app/actions/contact.actions.ts` expose la Server Action `submitContactAction(formData)` pour progressive enhancement.
+- Effet : centralisation validation (Zod) + DAL appels + notifications; rate-limiting / journaux recommandés en prochain ticket.
+
+2) Factorisation Newsletter
+
+- Nouveau DAL `lib/dal/newsletter-subscriber.ts` (idempotence sur `unique_violation`).
+- `lib/actions/newsletter-server.ts` expose `handleNewsletterSubscription()` : valide, insère via DAL, envoie mail de confirmation (erreur mail non bloquante).
+- `app/actions/newsletter.actions.ts` propose `subscribeNewsletterAction(formData)` pour formulaires JS progressive.
+- `app/api/newsletter/route.ts` simplifié pour délégation au handler partagé.
+
+3) ImageFieldGroup finalization (V2)
+
+- Regroupement des composants média/image dans `components/features/admin/*/media/`.
+- Création/split : `ImageFieldGroup.tsx` (champs texte/meta), `MediaLibraryPicker.tsx`, `MediaUploadDialog.tsx`.
+- Règle : chaque gros composant < 300 lignes; splitter champs et sections (FormFields, FormImageSection, FormCtaFields...).
+- Conséquence : meilleure réutilisabilité pour modules `hero`, `spectacles`, `team`.
+
+4) Validation publique Clear URL / Upload générique
+
+- Nouveau pattern pour validation d'URL publiques et upload via service de stockage :
+  - Schémas Zod côté serveur pour `ClearUrlUpload` (validate url, mime-type, size limits).
+  - Middleware ou logique centralisée pour `getClaims()` (Supabase optimized) et `cookies` getAll/setAll pattern.
+  - Stocker métadonnées dans table dédiée `uploads_public` et appliquer RLS poli cies appropriées.
+- Emplacement recommandé : `lib/schemas/uploads.ts`, `lib/dal/uploads.ts`, `lib/actions/uploads-server.ts`.
+
+## Structure de dossiers (points clés)
+
+---
+
+- app/
+  - (admin)/admin/* : pages admin (force-dynamic, revalidate=0 where required)
+  - (marketing)/* : pages publiques
+  - api/contact/route.ts -> délègue à `lib/actions/contact-server.ts`
+  - api/newsletter/route.ts -> délègue à `lib/actions/newsletter-server.ts`
+
+- components/
+  - features/admin/*/media/
+    - ImageFieldGroup.tsx
+    - MediaLibraryPicker.tsx
+    - MediaUploadDialog.tsx
+  - features/*/_Form_.tsx split en `FormFields`, `FormImageSection`, `FormCtaFields`, `FormToggle` si >300 lignes
+
+- lib/
+  - dal/
+    - newsletter-subscriber.ts  # insert idempotent
+    - home-newsletter.ts        # lecture / listing (si applicable)
+    - uploads.ts                # DAL pour uploads public (recommandé)
+  - actions/
+    - contact-server.ts         # handleContactSubmission
+    - newsletter-server.ts      # handleNewsletterSubscription
+    - uploads-server.ts         # handle upload validation + insert
+  - schemas/
+    - contact.ts                # Contact + NewsletterFormSchema (ou split to newsletter.ts)
+    - newsletter.ts             # recommandation : extraire NewsletterSubscriptionSchema ici
+    - uploads.ts                # Clear URL / Upload schemas
+  - email/
+    - actions.ts                # sendContactNotification, sendNewsletterConfirmation
+  - api/
+    - helpers.ts                # ApiResponse, HttpStatus, isUniqueViolation
+
+## Conventions et règles de design
+
+---
+
+- DAL must be server-only (`"use server"` + `import "server-only"`) and return `DALResult<T>` — ne doit pas appeler `revalidatePath()`.
+- Server Actions reside in `app/actions` or `lib/actions` with `"use server"` and must call DAL then `revalidatePath()` where needed.
+- Client forms: use UI schema (numbers) vs server schema (bigint) — voir `FeatureFormSchema` pattern.
+- Supabase auth: prefer `getClaims()` for fast checks; use `createServerClient` from `@supabase/ssr` and cookie pattern `getAll/setAll`.
+- Keep files < 300 lines; split large forms into subcomponents per CRUD pattern doc.
+
+## Migration notes & compatibilité
+
+---
+
+- Toutes les routes `/api/contact` et `/api/newsletter` restent pour rétrocompatibilité mais délèguent au code centralisé. Les hooks client (`lib/hooks/useContactForm.ts`, `lib/hooks/useNewsletterSubscribe.ts`) continuent de fonctionner.
+- Recommander d'ajouter tests DAL (scripts/tests) pour les mutations (idempotence newsletter, toggles team) et d'ajouter ces tests au pipeline CI.
+- Prochaine tâche prioritaire : rate-limiting sur `handleNewsletterSubscription()` et `handleContactSubmission()` (middleware ou inside handler).
+
+## Checklist d'actions recommandées
+
+---
+
+- [ ] Extraire `NewsletterSubscriptionSchema` dans `lib/schemas/newsletter.ts`.
+- [ ] Ajouter `lib/dal/uploads.ts` + `lib/actions/uploads-server.ts` pour pattern Clear URL upload.
+- [ ] Intégrer tests DAL dans CI (scripts/test-*.ts).
+- [ ] Ajouter rate-limiting (IP/form throttling) pour contact/newsletter handlers.
+
+Annexes
+
+---
+
+- Références : voir prompts sources dans `.github/prompts/` et instructions détaillées dans `.github/instructions/` pour Next.js 15, Supabase auth et CRUD Server Actions pattern.
+
+Fin du document.
+
 # Project Folders Structure Blueprint — Rouge Cardinal Company
 
 **Generated:** 30 November 2025  

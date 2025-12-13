@@ -7,12 +7,17 @@
 ├── 📁 .github
 │   ├── 📁 copilot
 │   ├── 📁 instructions
-│   │   ├── ⚙️ .markdownlint.jsonc
 │   ├── 📁 prompts
 │   ├── 📁 workflows
+│   │   ├── ⚙️ detect-revoke-warn.yml
+│   │   ├── ⚙️ invitation-email-test.yml
+│   │   ├── ⚙️ monitor-detect-revoke.yml
+│   │   └── ⚙️ reorder-sql-tests.yml
 │   ├── 📝 SECRETS_EXAMPLES.md
 │   └── 📝 copilot-instructions.md
 ├── 📁 __tests__
+│   └── 📁 emails
+│       └── 📄 invitation-email.test.tsx
 ├── 📁 app
 │   ├── 📁 (admin)
 │   │   ├── 📁 admin
@@ -75,6 +80,9 @@
 │   │   │   └── 📄 page.tsx
 │   │   ├── 📄 layout.tsx
 │   │   └── 📄 page.tsx
+│   ├── 📁 actions
+│   │   ├── 📄 contact.actions.ts
+│   │   └── 📄 newsletter.actions.ts
 │   ├── 📁 api
 │   │   ├── 📁 admin
 │   │   │   └── 📁 media
@@ -86,9 +94,6 @@
 │   │   │   └── 📄 route.ts
 │   │   ├── 📁 newsletter
 │   │   │   └── 📄 route.ts
-│   │   ├── 📁 public
-│   │   │   └── 📁 spectacles
-│   │   │       └── 📁 [id]
 │   │   ├── 📁 test-email
 │   │   │   └── 📄 route.ts
 │   │   └── 📁 webhooks
@@ -129,8 +134,10 @@
 │   │   │   └── 📄 StatsCard.tsx
 │   │   ├── 📄 AdminAuthRow.tsx
 │   │   ├── 📄 AdminSidebar.tsx
+│   │   ├── 📄 BfcacheHandler.tsx
 │   │   ├── 📄 CardsDashboard.tsx
-│   │   └── 📄 ErrorBoundary.tsx
+│   │   ├── 📄 ErrorBoundary.tsx
+│   │   └── 📄 TeamPageToasts.tsx
 │   ├── 📁 auth
 │   │   └── 📄 SetupAccountForm.tsx
 │   ├── 📁 features
@@ -309,6 +316,7 @@
 │   ├── 📄 theme-switcher.tsx
 │   └── 📄 update-password-form.tsx
 ├── 📁 doc
+├── 📁 doc-perso
 ├── 📁 emails
 │   ├── 📁 utils
 │   │   ├── 📄 components.utils.tsx
@@ -317,6 +325,13 @@
 │   ├── 📄 invitation-email.tsx
 │   └── 📄 newsletter-confirmation.tsx
 ├── 📁 lib
+│   ├── 📁 actions
+│   │   ├── 📝 actions_readme.md
+│   │   ├── 📄 contact-server.ts
+│   │   ├── 📄 index.ts
+│   │   ├── 📄 media-actions.ts
+│   │   ├── 📄 newsletter-server.ts
+│   │   └── 📄 types.ts
 │   ├── 📁 api
 │   │   └── 📄 helpers.ts
 │   ├── 📁 auth
@@ -343,6 +358,7 @@
 │   │   ├── 📄 home-newsletter.ts
 │   │   ├── 📄 home-partners.ts
 │   │   ├── 📄 home-shows.ts
+│   │   ├── 📄 newsletter-subscriber.ts
 │   │   ├── 📄 presse.ts
 │   │   ├── 📄 spectacles.ts
 │   │   └── 📄 team.ts
@@ -361,6 +377,8 @@
 │   │   ├── 📄 useHeroSlidesDnd.ts
 │   │   ├── 📄 useImageValidation.ts
 │   │   └── 📄 useNewsletterSubscribe.ts
+│   ├── 📁 i18n
+│   │   └── 📄 status.ts
 │   ├── 📁 plugins
 │   │   └── 📄 touch-hitbox-plugin.js
 │   ├── 📁 schemas
@@ -389,12 +407,16 @@
 │   │   ├── 📝 Email_Service_Architecture.md
 │   │   ├── 📝 Project_Architecture_Blueprint.md
 │   │   ├── 📝 Project_Folders_Structure_Blueprint_v5.md
-│   │   └── 📝 dev-email-redirect.md
+│   │   ├── 📝 dev-email-redirect.md
+│   │   └── 📝 file-tree.md
 │   ├── 📁 changes
-│   │   └── 📝 2025-11-11-layouts-admin-sidebar.md
 │   ├── 📁 epics
+│   │   ├── 📁 details
+│   │   └── ⚙️ epics-map.yaml
 │   ├── 📁 procedures
 │   ├── 📁 tasks
+│   ├── 📝 Memory-Bank-Update-Session-2025-10-13.md
+│   ├── 📝 Memory-Bank-Update-Session-2025-10-26.md
 │   ├── 📝 activeContext.md
 │   ├── 📝 productContext.md
 │   ├── 📝 progress.md
@@ -403,13 +425,50 @@
 │   └── 📝 techContext.md
 ├── 📁 public
 ├── 📁 scripts
+│   ├── 📁 Archived-tests
+│   ├── 📁 Test_fetchMediaArticles
+│   ├── 📁 test-invitation-email
+│   ├── 📝 README.md
+│   ├── 📄 check-admin-status.ts
+│   ├── 📄 check-email-logs.ts
+│   ├── 📄 check-existing-profile.js
+│   ├── 📄 check-extension.ts
+│   ├── 📄 check-migration-applied.ts
+│   ├── 📄 check-security-advisors.js
+│   ├── 📄 check-security-audit.sh
+│   ├── 📄 create-admin-user.ts
+│   ├── 📄 create-local-admin.ts
+│   ├── 📄 create_issues.sh
+│   ├── 📄 delete-test-user.js
+│   ├── 📄 diagnose-server-auth.ts
+│   ├── 📄 find-auth-user.js
+│   ├── 📄 post-reset.sh
+│   ├── 📄 rebuild-cloud-schema.sh
+│   ├── 📄 seed-admin.ts
+│   ├── 📄 set-admin-role.ts
+│   ├── 📄 supabase-env.sh
+│   ├── 📄 sync-admin-profile.ts
+│   ├── 📄 test-admin-access.ts
+│   ├── 📄 test-all-dal-functions.ts
+│   ├── 📄 test-dal-admin-users.ts
+│   ├── 📄 test-dashboard-stats.ts
+│   ├── 📄 test-email-integration.ts
+│   ├── 📄 test-evenements-access.ts
+│   ├── 📄 test-fetch-media-articles.ts
+│   ├── 📄 test-profile-insertion.js
+│   ├── 📄 test-spectacles-crud.ts
+│   ├── 📄 test-spectacles-dal.ts
+│   ├── 📄 test-ssrf-validation.ts
+│   ├── 📄 test-team-active-dal.ts
+│   ├── 📄 test-team-server-actions.ts
+│   ├── 📄 test-views-security-invoker.ts
+│   ├── 📄 test-webhooks.ts
+│   └── 📄 verify-view-security-invoker.ts
 ├── 📁 supabase
 │   ├── 📁 .branches
 │   │   └── 📄 _current_branch
 │   ├── 📁 migrations
 │   │   ├── 📁 archived
-│   │   │   ├── 📄 20251123143116_fix_restore_content_version_published_at.sql
-│   │   │   └── 📝 supabase-view-security-invoker-caveat.md
 │   │   ├── 📄 20250918000000_fix_spectacles_versioning_trigger.sql
 │   │   ├── 📄 20250918000002_apply_declarative_schema_complete.sql
 │   │   ├── 📄 20250918031500_seed_home_hero_slides.sql
@@ -438,8 +497,6 @@
 │   │   ├── 📄 20251027022000_fix_logs_audit_grants.sql
 │   │   ├── 📄 20251027022500_grant_execute_all_trigger_functions.sql
 │   │   ├── 📄 20251115150000_fix_reorder_team_members_search_path.sql
-│   │   ├── 📄 20251118125945_normalize_spectacles_status.sql
-│   │   ├── 📄 20251118130000_normalize_spectacles_status.sql
 │   │   ├── 📄 20251119000000_seed_admin_user.sql
 │   │   ├── 📄 20251120120000_move_extensions_to_schema.sql
 │   │   ├── 📄 20251120231121_create_user_invitations.sql
@@ -452,12 +509,11 @@
 │   │   ├── 📄 20251126215129_fix_hero_slides_admin_select_policy.sql
 │   │   ├── 📄 20251204133540_create_reorder_hero_slides_function.sql
 │   │   ├── 📄 20251205220000_refactor_hero_slides_cta_dual_buttons.sql
+│   │   ├── 📄 20251209120000_normalize_spectacles_status_to_english.sql
 │   │   ├── 📝 ROUND_7B_ANALYSIS.md
 │   │   ├── 📝 migrations.md
 │   │   └── 📄 sync_existing_profiles.sql
 │   ├── 📁 reconstruction_database_plan
-│   │   ├── 📝 RECONSTRUCTION_PLAN.md
-│   │   └── 📝 RECONSTRUCTION_SUCCESS.md
 │   ├── 📁 schemas
 │   │   ├── 📄 01_extensions.sql
 │   │   ├── 📄 02_table_profiles.sql
@@ -511,12 +567,23 @@
 │   │   ├── 📄 verify_policies_applied.sql
 │   │   └── 📄 verify_rls_policies.sql
 │   ├── 📁 tests
+│   │   ├── 📄 20251025_test_reorder_and_views.sql
+│   │   ├── 📝 README.md
+│   │   ├── 📄 ci-run.sh
+│   │   ├── 📄 run_audit_grants.sh
+│   │   └── 📄 run_reorder_tests.sh
 │   ├── 📝 README.md
 │   ├── 📄 admin.ts
 │   ├── 📄 client.ts
 │   ├── 📄 middleware.ts
 │   └── 📄 server.ts
 ├── 📁 swark-output
+│   ├── 📝 2025-11-11__15-47-43__diagram.md
+│   ├── 📝 2025-11-11__15-47-43__log.md
+│   ├── 📝 2025-11-11__15-51-52__diagram.md
+│   ├── 📝 2025-11-11__15-51-52__log.md
+│   ├── 📝 2025-11-11__15-52-57__diagram.md
+│   └── 📝 2025-11-11__15-52-57__log.md
 ├── ⚙️ .env.example
 ├── ⚙️ .gitignore
 ├── ⚙️ .markdownlint.jsonc

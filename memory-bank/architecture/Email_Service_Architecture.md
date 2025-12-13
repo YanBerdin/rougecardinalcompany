@@ -1,5 +1,68 @@
 # Email Service Architecture - Rouge Cardinal Company
 
+Date: 2025-12-13
+
+Objectif
+
+-----
+Décrire l'architecture de l'envoi d'emails (transactionnels et notifications) : intégration Resend, templates React Email, gestion des erreurs, webhooks, tests et conformité RGPD.
+
+## Composants principaux
+
+-----
+
+- `lib/email/actions.ts` : fonctions d'envoi (sendContactNotification, sendNewsletterConfirmation, sendTransactionalEmail). Appelées depuis Server Actions ou handlers d'API.
+- `emails/` : templates React Email et composants partagés (`emails/utils/email-layout.tsx`).
+- Webhook receiver : `app/api/webhooks/resend/route.ts` — reçoit events (deliveries, bounces) et met à jour l'état et logs.
+- Queue / retry : simple retry synchrone + backoff côté service appelant; pour montée en charge ajouter une file (e.g., BullMQ) ou service externe.
+
+## Flux d'envoi recommandé
+
+1. Server Action reçoit mutation (ex: contact form) → valide input.
+2. Appelle DAL pour persister (si nécessaire).
+3. Appelle `lib/email/actions.ts::sendContactNotification()`.
+   - L'envoi doit être non bloquant pour l'opération principale :
+     - Si l'envoi échoue, retourner success pour l'utilisateur mais logguer erreur et déclencher retry asynchrone.
+4. `send*` normalise payload (to, subject, template props), appelle Resend API.
+
+## Gestion des erreurs & idempotence
+
+- Ne pas échouer la mutation métier si l'email échoue (graceful degradation).
+- Utiliser identifiants d'opération (`messageId`, `requestId`) pour idempotence côté Resend et logs.
+- Sur `unique_violation` pour newsletters, considérer déjà abonné comme succès et envoyer éventuellement un email de rappel si `isNew` true.
+
+## Webhooks
+
+- Endpoint `app/api/webhooks/resend/route.ts` :
+  - Valider la signature (Resend) si fourni.
+  - Traiter events `delivered`, `failed`, `bounced`, `complaint`.
+  - Mettre à jour table `email_events` ou `email_status` via DAL.
+
+## Templates & tests
+
+- Templates React Email stockés sous `emails/` et rendus server-side for sending.
+- Tests : snapshots des templates, test d'intégration sandbox (Resend test keys) et scripts `scripts/test-email-*` déjà dans repo.
+
+## Conformité RGPD
+
+- Ne jamais logguer de PII inutile en clair (email ok si nécessaire, mais pas tokens ou cookies).
+- Consentement : stocker consent metadata dans `abonnes_newsletter` (consent true/false + timestamp + source).
+- Opt-out : fournir endpoint et lien de désinscription gestionnaire qui met `active=false` en DAL.
+
+## Monitoring & alerting
+
+- Logger centralisé avec codes d'erreur (`[ERR_EMAIL_001]`) et métriques: sends, bounces, failures, latency.
+- Alerts pour taux de bounce élevé ou erreurs 5xx répétés.
+
+## Evolution & scalabilité
+
+- Pour montée en charge : déplacer envoi vers worker/background (BullMQ / Redis) pour découpler la latence.
+- Ajouter un store d'événements pour retrier et reprocesser en cas d'erreurs réseau transitoires.
+
+Fin update
+
+## Email Service Architecture - Rouge Cardinal Company
+
 **Date de création**: 8 octobre 2025  
 **Version**: 1.3.1  
 **Dernière mise à jour**: 4 décembre 2025  
@@ -1315,8 +1378,6 @@ pnpm run test:logs
 - **React Email Docs** : https://react.email/docs
 - **.github/instructions/resend_supabase_integration.md** : Instructions d'intégration complètes
 
----
-
 ## 16. Pattern Warning System & RGPD Compliance (Octobre 2025)
 
 ### 16.1 Pattern Warning pour Graceful Degradation
@@ -1530,8 +1591,6 @@ curl -X POST http://localhost:3000/api/contact \
 
 - `doc/Fix-Contact-Email-Missing.md` : Analyse détaillée du bug et fix
 - `doc/API-Contact-Test-Results.md` : Tests de validation complets
-
----
 
 **Dernière mise à jour** : 26 octobre 2025  
 **Version** : 1.1.0 (ajout Warning System, RGPD, Schema Mapping, Server Actions patterns)  

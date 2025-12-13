@@ -1,5 +1,86 @@
 # Project Architecture Blueprint — Rouge Cardinal Company
 
+Date: 2025-12-13
+
+Décrire l'architecture globale de l'application Rouge Cardinal Company : patterns d'accès aux données, organisation des routes, Server/Client split, sécurité (Supabase/RLS), et bonnes pratiques opérationnelles (CI, tests, migrations).
+
+## Résumé exécutif
+
+- Framework principal : Next.js 16 (App Router) avec React 19.
+- Langage : TypeScript (strict). Conventions Clean Code (max 300 lignes/fichier, fonctions courtes).
+- Base de données : Supabase (Postgres) avec RLS, migrations déclaratives dans `supabase/schemas`.
+- Auth : Supabase optimized JWT Signing Keys; utiliser `getClaims()` pour checks rapides.
+- Mutations internes : Server Actions (colocées sous `app/actions` ou `lib/actions`) — API Routes conservées uniquement pour clients externes ou webhooks.
+- DAL : centralisé sous `lib/dal/*` (server-only, retourne `DALResult<T>`, ne fait pas de revalidatePath).
+
+## Principes architecturaux
+
+- Séparation nette des responsabilités :
+  - Lecture & rendu initial → Server Components (app/ pages & containers).
+  - Mutations → Server Actions → app/actions ou lib/actions (validation Zod, requireAuth, DAL call, revalidatePath()).
+  - Accès DB encapsulé → `lib/dal/*.ts` ("use server" + `import 'server-only'`).
+
+- Pattern dual-schema :
+  - Schémas SERVER (BDD) utilisent `z.coerce.bigint()` pour les IDs.
+  - Schémas UI (forms) utilisent `number` pour les inputs (évite casting dangereux dans react-hook-form).
+
+- Révalidation / cache :
+  - `revalidatePath()` ou `revalidateTag()` appelés uniquement dans les Server Actions après mutations.
+  - Pages admin sensibles exportent `export const dynamic = 'force-dynamic'` et `export const revalidate = 0` où nécessaire.
+
+## Organisation des dossiers (rappel synthétique)
+
+- `app/` : routes, layouts, groupe `(admin)` et `(marketing)`.
+- `components/` : UI partagé et features (split smart/dumb).
+- `lib/` :
+  - `lib/dal/` — DAL server-only
+  - `lib/actions/` — shared server handlers (contact-server.ts, newsletter-server.ts, uploads-server.ts)
+  - `lib/schemas/` — Zod schemas (barrel)
+  - `lib/email/` — envois d'email (sendNewsletterConfirmation, sendContactNotification)
+  - `lib/api/helpers.ts` — ApiResponse, HttpStatus, utilitaires (isUniqueViolation)
+- `emails/` : templates React Email + layout
+- `supabase/schemas/` & `supabase/migrations/` : source of truth DB schema
+
+## Data flow exemples
+
+1) Inscription newsletter (public)
+
+- Client form → `POST /api/newsletter` (route existante) ou Server Action `app/actions/newsletter.actions.ts`.
+- Route/Action appelle `lib/actions/newsletter-server.ts` (validate Zod → `lib/dal/newsletter-subscriber.ts` → send email non bloquant → return ActionResult).
+- DAL gère `unique_violation` comme succès idempotent.
+
+2) Edition backoffice (Hero slides)
+
+- Server Component fetch initial data via DAL (`lib/dal/home-hero.ts`)
+- Client form uses UI schema + `app/actions/home-hero-actions.ts` Server Action for create/update (Server Action validates, calls DAL, revalidatePath on success).
+
+## Sécurité et auth
+
+- Toujours valider côté serveur (Zod) pour toutes les entrées externes.
+- Utiliser `requireAdmin()` / guards dans les Server Actions avant DAL ops.
+- Supabase : préférer `getClaims()` (fast local JWT verify) dans middleware et Server Components; `getUser()` uniquement si besoin du profil complet.
+- Cookies : usage `getAll` / `setAll` pattern via `@supabase/ssr`.
+
+## CI / Tests / Migration
+
+- Tests DAL : scripts/tests (ex: `scripts/test-team-server-actions.ts`) à intégrer au pipeline CI pour valider mutations idempotentes.
+- Migrations : workflow déclaratif (`supabase db diff` → migration files) et `supabase/schemas` as source of truth.
+
+## Operational considerations
+
+- Rate limiting: ajouter throttle sur `handleContactSubmission()` et `handleNewsletterSubscription()` (middleware ou inside handler) — TODO prioritaire.
+- Monitoring: tracer erreurs email et échecs DAL; normaliser logs avec codes d'erreur `[ERR_ENTITY_NNN]`.
+- Key rotation: planifier rotation périodique des JWT signing keys dans Supabase.
+
+## Annexes & références
+
+- Voir `memory-bank/architecture/Project_Folders_Structure_Blueprint_v5.md` pour mapping fichiers et recommandations d'extraction de schémas.
+- Voir `.github/instructions/nextjs-supabase-auth-2025.instructions.md` pour patterns auth.
+
+Fin
+
+## Project Architecture Blueprint — Rouge Cardinal Company
+
 Generated: 30 November 2025  
 Updated: 6 December 2025  
 Source: `doc/prompts-github/architecture-blueprint-generator.prompt.md`  
@@ -900,7 +981,7 @@ export function FeatureForm({ onSuccess }: { onSuccess: () => void }) {
 | Form > 300 lignes | Split en `*FormFields.tsx`, `*ImageSection.tsx` |
 | API Route pour mutation interne | Utiliser Server Action |
 
-## Annexes & références
+## Annexes & références bis
 
 - Fichiers clefs:
   - `lib/actions/*` — Server Actions
