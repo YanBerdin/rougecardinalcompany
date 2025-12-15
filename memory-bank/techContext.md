@@ -240,7 +240,7 @@ export const config = {
 
 ### Production
 
-- next: 15.4.5
+- next: **16.0.10** (security update 2025-12-13)
 - react: ^19
 - @supabase/ssr: latest (Supabase Auth 2025)
 - tailwindcss: ^3.4

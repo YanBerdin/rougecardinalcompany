@@ -36,18 +36,11 @@ export default async function EditSpectaclePage({ params }: Props) {
     notFound();
   }
 
-  // Map database status to form status (updated for normalized values)
-  const statusMap: Record<string, "draft" | "published" | "archived"> = {
-    "projet": "draft",
-    "en cours": "published",
-    "terminé": "archived",
-  };
-
   // Transform database data to form values
   const defaultValues = {
     title: spectacle.title,
     slug: spectacle.slug || undefined,
-    status: spectacle.status ? statusMap[spectacle.status] : undefined,
+    status: spectacle.status as "draft" | "published" | "archived" | undefined,
     description: spectacle.description || undefined,
     short_description: spectacle.short_description || undefined,
     genre: spectacle.genre || undefined,

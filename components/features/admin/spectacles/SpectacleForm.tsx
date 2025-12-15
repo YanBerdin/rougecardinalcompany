@@ -247,7 +247,7 @@ export default function SpectacleForm({
         />
 
         {/* Status and Genre row */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 items-start">
           <FormField
             control={form.control}
             name="status"
@@ -421,7 +421,7 @@ export default function SpectacleForm({
         />
 
         {/* Duration and Casting row */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 items-start">
           <FormField
             control={form.control}
             name="duration_minutes"
@@ -431,6 +431,7 @@ export default function SpectacleForm({
                 <FormControl>
                   <Input
                     type="number"
+                    min="1"
                     placeholder="90"
                     value={typeof field.value === "number" ? field.value : ""}
                     onChange={(e) =>
@@ -457,6 +458,7 @@ export default function SpectacleForm({
                 <FormControl>
                   <Input
                     type="number"
+                    min="1"
                     placeholder="5"
                     value={typeof field.value === "number" ? field.value : ""}
                     onChange={(e) =>

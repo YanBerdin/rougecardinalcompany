@@ -23,8 +23,9 @@ Valider le comportement de la validation dynamique pour les spectacles publics :
 **Actions**:
 
 1. Remplir uniquement `title`: "Test Brouillon"
-2. Laisser `public: false` (default)
-3. Cliquer "Créer le spectacle"
+2. Remplir Nbre interpretes: 1 Durée: 01
+3. Laisser `public: false` (default)
+4. Cliquer "Créer le spectacle"
 
 **Résultat attendu**:
 
@@ -76,7 +77,7 @@ Valider le comportement de la validation dynamique pour les spectacles publics :
 1. Remplir tous les champs :
    - `title`: "Hamlet - Test Public"
    - `slug`: (auto-généré ou "hamlet-test")
-   - `status`: "published"
+   - `status`: "Actuellement" (= published)
    - `genre`: "Tragédie"
    - `description`: "Description complète du spectacle..."
    - `short_description`: "Résumé bref"
@@ -304,11 +305,11 @@ const cleanData = cleanSpectacleFormData(data);
 
 ## 📊 Métriques de succès
 
-- [ ] 100% des scénarios SUCCÈS passent
-- [ ] 100% des scénarios ÉCHEC bloquent correctement
-- [ ] Temps de réponse validation < 100ms
-- [ ] Aucune régression sur formulaires existants (Team, etc.)
-- [ ] Compatibilité mobile (responsive)
+- [X] 100% des scénarios SUCCÈS passent
+- [X] 100% des scénarios ÉCHEC bloquent correctement
+- [X] Temps de réponse validation < 100ms
+- [X] Aucune régression sur formulaires existants (Team, etc.)
+- [X] Compatibilité mobile (responsive)
 
 ---
 

@@ -28,7 +28,7 @@ export async function SpectaclesContainer() {
   // Improved logic: separate current shows from archives based on status
   // Current shows: public status and not archived
   const currentShows = spectacles
-    .filter((s) => s.public && s.status !== "archive")
+    .filter((s) => s.public && s.status !== "archived")
     .slice(0, 6)
     .map((s) => ({
       id: s.id,
@@ -48,9 +48,9 @@ export async function SpectaclesContainer() {
       awards: s.awards ?? [],
     }));
 
-  // Archived shows: all shows with 'archive' status (regardless of public flag)
+  // Archived shows: all shows with 'archived' status (regardless of public flag)
   const archivedShows = spectacles
-    .filter((s) => s.status === "archive")
+    .filter((s) => s.status === "archived")
     .map((s) => ({
       id: s.id,
       title: s.title,
