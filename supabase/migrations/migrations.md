@@ -101,8 +101,13 @@ pnpm add next@16.0.7
 
 ## Migrations récentes (décembre 2025)
 
+- `20251217100000_cleanup_spectacles_backup.sql` — **CLEANUP : Remove spectacles backup table**
+  - 🗑️ **Suppression** : Table `spectacles_backup_20251209120000` (backup normalization status)
+  - ✅ **Vérification préalable** : Contrainte `chk_spectacles_status_allowed` présente sur `spectacles`
+  - 📝 **Notes** : Backup conservé 8 jours après migration, Time Travel Supabase disponible pour recovery
+
 - `20251209120000_normalize_spectacles_status_to_english.sql` — **DATA MIGRATION : Normalize spectacles.status to English tokens**
-  - ⚠️ **MODIFIES DATA IN PLACE** — Backup table created: `spectacles_backup_20251209120000`
+  - ⚠️ **MODIFIES DATA IN PLACE** — Backup table created: `spectacles_backup_20251209120000` (supprimée le 2025-12-17)
   - 🎯 **Objectif** : Normaliser les valeurs de statut vers des tokens anglais canoniques
   - 📊 **Valeurs canoniques** : `'draft'`, `'published'`, `'archived'` (exclusivement)
   - 🔄 **Mapping appliqué** :

@@ -115,13 +115,14 @@ export default function SpectaclesManagementContainer({
     <div className="space-y-4">
       <Toaster />
 
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="text-sm text-muted-foreground">
           {spectacles.length} spectacle{spectacles.length > 1 ? "s" : ""}
         </div>
-        <Button onClick={handleCreate}>
+        <Button onClick={handleCreate} className="w-full sm:w-auto">
           <Plus className="h-4 w-4 mr-2" />
-          Nouveau spectacle
+          <span className="hidden sm:inline">Nouveau spectacle</span>
+          <span className="sm:hidden">Nouveau</span>
         </Button>
       </div>
 

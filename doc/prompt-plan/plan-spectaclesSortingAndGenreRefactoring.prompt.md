@@ -11,7 +11,7 @@
 
 ## 📐 Architecture Proposée
 
-```
+```bash
 lib/
 ├── tables/
 │   └── spectacle-table-helpers.ts      # Ajout : sortSpectacles()

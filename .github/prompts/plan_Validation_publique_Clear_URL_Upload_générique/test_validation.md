@@ -309,7 +309,7 @@ const cleanData = cleanSpectacleFormData(data);
 - [X] 100% des scénarios ÉCHEC bloquent correctement
 - [X] Temps de réponse validation < 100ms
 - [X] Aucune régression sur formulaires existants (Team, etc.)
-- [X] Compatibilité mobile (responsive)
+- [ ] Compatibilité mobile (responsive)
 
 ---
 
