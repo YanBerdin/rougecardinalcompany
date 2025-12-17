@@ -77,12 +77,12 @@ const contentItems = [
 
 const homepageItems = [
   {
-    title: "Hero Slides",
+    title: "Accueil Slides",
     href: "/admin/home/hero",
     icon: ImageIcon,
   },
   {
-    title: "About Section",
+    title: "La compagnie Section",
     href: "/admin/home/about",
     icon: FileText,
   },
@@ -100,7 +100,7 @@ const otherItems = [
     icon: Bug,
   },
   {
-    title: "Retour au site",
+    title: "Retour au site publique",
     href: "/",
     icon: Home,
   },
@@ -149,7 +149,7 @@ export default function AppSidebar({ hasEnvVars = false }: AppSidebarProps) {
                   pathname === item.href ||
                   (item.href !== "/admin" && pathname.startsWith(item.href));
                 return (
-                  <SidebarMenuItem key={item.href}>
+                  <SidebarMenuItem key={item.href} title={item.title}>
                     <SidebarMenuButton asChild isActive={isActive}>
                       <Link href={item.href}>
                         <item.icon />
@@ -172,7 +172,7 @@ export default function AppSidebar({ hasEnvVars = false }: AppSidebarProps) {
                   pathname === item.href ||
                   (item.href !== "/admin" && pathname.startsWith(item.href));
                 return (
-                  <SidebarMenuItem key={item.href}>
+                  <SidebarMenuItem key={item.href} title={item.title}>
                     <SidebarMenuButton asChild isActive={isActive}>
                       <Link href={item.href}>
                         <item.icon />
@@ -195,7 +195,7 @@ export default function AppSidebar({ hasEnvVars = false }: AppSidebarProps) {
                   pathname === item.href ||
                   (item.href !== "/admin" && pathname.startsWith(item.href));
                 return (
-                  <SidebarMenuItem key={item.href}>
+                  <SidebarMenuItem key={item.href}  title={item.title}>
                     <SidebarMenuButton asChild isActive={isActive}>
                       <Link href={item.href}>
                         <item.icon />
@@ -216,7 +216,7 @@ export default function AppSidebar({ hasEnvVars = false }: AppSidebarProps) {
               {otherItems.map((item) => {
                 const isActive = pathname === item.href;
                 return (
-                  <SidebarMenuItem key={item.href}>
+                  <SidebarMenuItem key={item.href} title={item.title}>
                     <SidebarMenuButton asChild isActive={isActive}>
                       <Link href={item.href}>
                         <item.icon />
@@ -233,7 +233,7 @@ export default function AppSidebar({ hasEnvVars = false }: AppSidebarProps) {
 
       <SidebarFooter>
         <SidebarMenu>
-          <SidebarMenuItem>
+          <SidebarMenuItem title="Authentification">
             <AdminAuthRow hasEnvVars={hasEnvVars} />
           </SidebarMenuItem>
         </SidebarMenu>

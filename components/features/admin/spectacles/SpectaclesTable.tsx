@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, Pencil, Trash2, ArrowUpDown, Calendar, Clock, Tag, Globe, Lock } from "lucide-react";
+import { Eye, Pencil, Trash2, Calendar, Clock, Tag } from "lucide-react";
 import type { SpectacleSummary } from "@/lib/schemas/spectacles";
 import {
   formatSpectacleDate,
