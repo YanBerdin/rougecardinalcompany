@@ -39,15 +39,16 @@ function TitleField({ form }: HeroSlideFormFieldsProps) {
             name="title"
             render={({ field }) => (
                 <FormItem>
-                    <FormLabel>Title *</FormLabel>
+                    <FormLabel className="text-sm sm:text-base">Title *</FormLabel>
                     <FormControl>
                         <Input
                             {...field}
                             maxLength={HERO_SLIDE_LIMITS.TITLE_MAX_LENGTH}
                             placeholder="Main headline"
+                            className="h-10 sm:h-11 text-base"
                         />
                     </FormControl>
-                    <FormDescription>
+                    <FormDescription className="text-xs sm:text-sm">
                         {field.value.length}/{HERO_SLIDE_LIMITS.TITLE_MAX_LENGTH} characters
                     </FormDescription>
                     <FormMessage />
@@ -68,15 +69,16 @@ function SubtitleField({ form, characterCount }: FieldWithCountProps) {
             name="subtitle"
             render={({ field }) => (
                 <FormItem>
-                    <FormLabel>Subtitle</FormLabel>
+                    <FormLabel className="text-sm sm:text-base">Subtitle</FormLabel>
                     <FormControl>
                         <Input
                             {...field}
                             maxLength={HERO_SLIDE_LIMITS.SUBTITLE_MAX_LENGTH}
                             placeholder="Supporting text"
+                            className="h-10 sm:h-11 text-base"
                         />
                     </FormControl>
-                    <FormDescription>
+                    <FormDescription className="text-xs sm:text-sm">
                         {characterCount}/{HERO_SLIDE_LIMITS.SUBTITLE_MAX_LENGTH} characters
                     </FormDescription>
                     <FormMessage />
@@ -93,15 +95,16 @@ function DescriptionField({ form, characterCount }: FieldWithCountProps) {
             name="description"
             render={({ field }) => (
                 <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel className="text-sm sm:text-base">Description</FormLabel>
                     <FormControl>
                         <Textarea
                             {...field}
                             maxLength={HERO_SLIDE_LIMITS.DESCRIPTION_MAX_LENGTH}
                             rows={3}
+                            className="text-base min-h-[80px] sm:min-h-[90px]"
                         />
                     </FormControl>
-                    <FormDescription>
+                    <FormDescription className="text-xs sm:text-sm">
                         {characterCount}/{HERO_SLIDE_LIMITS.DESCRIPTION_MAX_LENGTH} characters
                     </FormDescription>
                     <FormMessage />
@@ -121,10 +124,10 @@ export function HeroSlideActiveToggle({ form }: HeroSlideActiveToggleProps) {
             control={form.control}
             name="active"
             render={({ field }) => (
-                <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                <FormItem className="flex items-center justify-between rounded-lg border p-3 sm:p-4">
                     <div className="space-y-0.5">
-                        <FormLabel className="text-base">Active</FormLabel>
-                        <div className="text-sm text-muted-foreground">
+                        <FormLabel className="text-sm sm:text-base">Active</FormLabel>
+                        <div className="text-xs sm:text-sm text-muted-foreground">
                             Display this slide on the homepage
                         </div>
                     </div>

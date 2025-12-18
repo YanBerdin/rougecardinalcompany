@@ -22,7 +22,7 @@ Ce pattern résout les problèmes de re-render rencontrés lors de l'implémenta
 
 ## 🏗️ Architecture obligatoire
 
-```
+```bash
 ┌─────────────────────────────────────────────────────────────────┐
 │                        ARCHITECTURE CRUD                        │
 ├─────────────────────────────────────────────────────────────────┤
@@ -58,7 +58,7 @@ Ce pattern résout les problèmes de re-render rencontrés lors de l'implémenta
 
 ## 📁 Structure des fichiers
 
-```
+```bash
 lib/
 ├── actions/
 │   └── [feature]-actions.ts     # Server Actions avec revalidatePath()

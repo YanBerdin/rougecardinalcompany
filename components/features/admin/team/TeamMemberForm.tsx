@@ -62,16 +62,20 @@ export function TeamMemberForm({
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleFormSubmit)}
-          className="space-y-4"
+          className="space-y-4 sm:space-y-5"
         >
           <FormField
             control={form.control}
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nom *</FormLabel>
+                <FormLabel className="text-sm sm:text-base">Nom *</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="Nom du membre" />
+                  <Input 
+                    {...field} 
+                    placeholder="Nom du membre"
+                    className="h-10 sm:h-11 text-base"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -83,12 +87,13 @@ export function TeamMemberForm({
             name="role"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Rôle</FormLabel>
+                <FormLabel className="text-sm sm:text-base">Rôle</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
                     value={field.value ?? ""}
                     placeholder="Ex: Acteur, Metteur en scène..."
+                    className="h-10 sm:h-11 text-base"
                   />
                 </FormControl>
                 <FormMessage />
@@ -101,13 +106,14 @@ export function TeamMemberForm({
             name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Description</FormLabel>
+                <FormLabel className="text-sm sm:text-base">Description</FormLabel>
                 <FormControl>
                   <Textarea
                     {...field}
                     value={field.value ?? ""}
                     placeholder="Biographie, parcours..."
                     rows={4}
+                    className="text-base min-h-[100px]"
                   />
                 </FormControl>
                 <FormMessage />
@@ -124,16 +130,21 @@ export function TeamMemberForm({
             showAltText={false}
           />
 
-          <div className="flex gap-2 pt-4">
+          <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-2 pt-4">
             <Button
               variant="outline"
               type="button"
               onClick={onCancel}
               disabled={isPending}
+              className="w-full sm:w-auto h-11 sm:h-10 text-base sm:text-sm"
             >
               Annuler
             </Button>
-            <Button type="submit" disabled={isPending}>
+            <Button 
+              type="submit" 
+              disabled={isPending}
+              className="w-full sm:w-auto h-11 sm:h-10 text-base sm:text-sm"
+            >
               {isPending ? "Enregistrement..." : "Enregistrer"}
             </Button>
           </div>

@@ -85,9 +85,9 @@ export function HeroSlideForm({ open, onClose, onSuccess, slide }: HeroSlideForm
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>{dialogTitle}</DialogTitle>
+                    <DialogTitle className="text-lg sm:text-xl">{dialogTitle}</DialogTitle>
                 </DialogHeader>
 
                 <Form {...form}>
@@ -107,11 +107,21 @@ export function HeroSlideForm({ open, onClose, onSuccess, slide }: HeroSlideForm
                         <CtaFieldGroup form={form} ctaType="secondary" />
                         <HeroSlideActiveToggle form={form} />
 
-                        <DialogFooter>
-                            <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>
+                        <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
+                            <Button 
+                                type="button" 
+                                variant="outline" 
+                                onClick={onClose} 
+                                disabled={isPending}
+                                className="w-full sm:w-auto h-10 sm:h-9"
+                            >
                                 Cancel
                             </Button>
-                            <Button type="submit" disabled={isPending}>
+                            <Button 
+                                type="submit" 
+                                disabled={isPending}
+                                className="w-full sm:w-auto h-10 sm:h-9"
+                            >
                                 {submitButtonLabel}
                             </Button>
                         </DialogFooter>

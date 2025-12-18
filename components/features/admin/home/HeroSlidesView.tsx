@@ -52,31 +52,32 @@ function SortableSlide({ slide, onEdit, onDelete }: SortableSlideProps) {
         opacity: isDragging ? 0.5 : 1,
         zIndex: isDragging ? 50 : undefined,
     };
-
+    
     return (
         <Card ref={setNodeRef} style={dragStyle} className={isDragging ? "shadow-lg" : ""}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <div className="flex items-center gap-3 flex-1">
+            <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0 sm:pb-2">
+                <div className="flex items-center gap-2 sm:gap-3 flex-1">
                     <div
-                        className="cursor-grab active:cursor-grabbing p-1 rounded hover:bg-muted transition-colors"
+                        className="cursor-grab active:cursor-grabbing p-1 rounded hover:bg-muted transition-colors shrink-0"
                         {...attributes}
                         {...listeners}
                         role="button"
                         tabIndex={0}
                         aria-label="Drag to reorder"
                     >
-                        <GripVertical className="h-5 w-5 text-muted-foreground" />
+                        <GripVertical className="h-5 w-5 sm:h-5 sm:w-5 text-muted-foreground" />
                     </div>
 
                     <HeroSlidePreview slide={slide} />
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex gap-2 sm:gap-2 justify-end">
                     <Button
                         variant="outline"
                         size="icon"
                         onClick={() => onEdit(slide)}
                         aria-label="Edit slide"
+                        className="h-9 w-9 sm:h-8 sm:w-8"
                     >
                         <Pencil className="h-4 w-4" />
                     </Button>
@@ -86,6 +87,7 @@ function SortableSlide({ slide, onEdit, onDelete }: SortableSlideProps) {
                         size="icon"
                         onClick={() => onDelete(slide.id)}
                         aria-label="Delete slide"
+                        className="h-9 w-9 sm:h-8 sm:w-8"
                     >
                         <Trash2 className="h-4 w-4" />
                     </Button>
@@ -207,11 +209,15 @@ function HeroSlidesHeader({ canAddMore, isDisabled, onAddSlide }: HeroSlidesHead
         : `Add Slide (Max ${HERO_SLIDE_LIMITS.MAX_ACTIVE_SLIDES})`;
 
     return (
-        <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">Hero Slides</h2>
-            <Button onClick={onAddSlide} disabled={!canAddMore || isDisabled}>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
+            <h2 className="text-xl sm:text-2xl font-bold">Hero Slides</h2>
+            <Button 
+                onClick={onAddSlide} 
+                disabled={!canAddMore || isDisabled}
+                className="w-full sm:w-auto h-10 sm:h-9"
+            >
                 <Plus className="h-4 w-4 mr-2" />
-                {buttonLabel}
+                <span className="text-sm sm:text-base">{buttonLabel}</span>
             </Button>
         </div>
     );
@@ -226,8 +232,8 @@ function EmptySlidesPlaceholder({ isVisible }: EmptySlidesPlaceholderProps) {
 
     return (
         <Card>
-            <CardContent className="pt-6 text-center text-muted-foreground">
-                No hero slides yet. Create your first slide!
+            <CardContent className="py-8 sm:py-12 text-center text-muted-foreground">
+                <p className="text-sm sm:text-base">No hero slides yet. Create your first slide!</p>
             </CardContent>
         </Card>
     );
@@ -252,20 +258,25 @@ function DeleteSlideDialog({
 
     return (
         <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
-            <AlertDialogContent>
+            <AlertDialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg">
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Confirmer la suppression définitive</AlertDialogTitle>
-                    <AlertDialogDescription>
+                    <AlertDialogTitle className="text-base sm:text-lg">Confirmer la suppression définitive</AlertDialogTitle>
+                    <AlertDialogDescription className="text-sm">
                         Cette action supprimera définitivement le slide &quot;{slideTitle}&quot;.
                         Cette opération est irréversible.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel disabled={isPending}>Annuler</AlertDialogCancel>
+                <AlertDialogFooter className="flex-col-reverse sm:flex-row gap-2">
+                    <AlertDialogCancel 
+                        disabled={isPending}
+                        className="w-full sm:w-auto h-10 sm:h-9"
+                    >
+                        Annuler
+                    </AlertDialogCancel>
                     <AlertDialogAction
                         onClick={onConfirm}
                         disabled={isPending}
-                        className="hover:text-destructive hover:bg-white"
+                        className="w-full sm:w-auto h-10 sm:h-9 hover:text-destructive hover:bg-white"
                     >
                         {confirmButtonLabel}
                     </AlertDialogAction>

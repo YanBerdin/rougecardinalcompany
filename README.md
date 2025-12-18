@@ -6,7 +6,7 @@
 
 ## Architecture Technique
 
-- **Frontend** : Next.js 15.4.5 + Tailwind CSS + TypeScript
+- **Frontend** : Next.js 16 + Tailwind CSS + TypeScript
 - **Backend** : Supabase (PostgreSQL + Auth + Storage + API)
 - **Architecture** : App Router avec séparation Server/Client Components
 - **Sécurité** : RLS (Row Level Security) sur 100% des tables, validation Zod, Server Actions

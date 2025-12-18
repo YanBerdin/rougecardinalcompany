@@ -60,7 +60,7 @@ export function CtaFieldGroup({ form, ctaType }: CtaFieldGroupProps) {
     const isCtaEnabled = form.watch(config.enabledFieldName);
 
     return (
-        <div className="rounded-lg border p-4 space-y-4">
+        <div className="rounded-lg border p-3 sm:p-4 space-y-3 sm:space-y-4">
             <CtaToggleField form={form} config={config} />
             {isCtaEnabled && <CtaInputFields form={form} config={config} />}
         </div>
@@ -80,8 +80,8 @@ function CtaToggleField({ form, config }: CtaToggleFieldProps) {
             render={({ field }) => (
                 <FormItem className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                        <FormLabel className="text-base">{config.toggleTitle}</FormLabel>
-                        <div className="text-sm text-muted-foreground">
+                        <FormLabel className="text-sm sm:text-base">{config.toggleTitle}</FormLabel>
+                        <div className="text-xs sm:text-sm text-muted-foreground">
                             {config.toggleDescription}
                         </div>
                     </div>
@@ -101,18 +101,19 @@ interface CtaInputFieldsProps {
 
 function CtaInputFields({ form, config }: CtaInputFieldsProps) {
     return (
-        <div className={`grid grid-cols-2 gap-4 pl-4 border-l-2 ${config.borderColorClass}`}>
+        <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pl-3 sm:pl-4 border-l-2 ${config.borderColorClass}`}>
             <FormField
                 control={form.control}
                 name={config.labelFieldName}
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Label *</FormLabel>
+                        <FormLabel className="text-sm sm:text-base">Label *</FormLabel>
                         <FormControl>
                             <Input
                                 {...field}
                                 maxLength={HERO_SLIDE_LIMITS.CTA_LABEL_MAX_LENGTH}
                                 placeholder={config.labelPlaceholder}
+                                className="h-10 sm:h-11 text-base"
                             />
                         </FormControl>
                         <FormMessage />
@@ -125,9 +126,13 @@ function CtaInputFields({ form, config }: CtaInputFieldsProps) {
                 name={config.urlFieldName}
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>URL *</FormLabel>
+                        <FormLabel className="text-sm sm:text-base">URL *</FormLabel>
                         <FormControl>
-                            <Input {...field} placeholder={config.urlPlaceholder} />
+                            <Input 
+                                {...field} 
+                                placeholder={config.urlPlaceholder}
+                                className="h-10 sm:h-11 text-base"
+                            />
                         </FormControl>
                         <FormDescription className="text-xs">
                             Relative (/page) ou absolue (https://...)

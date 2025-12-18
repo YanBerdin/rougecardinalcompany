@@ -68,6 +68,13 @@ export function UsersManagementView({ users }: UsersManagementViewProps) {
     id: string;
     email: string;
   } | null>(null);
+  const [roleChangeDialogOpen, setRoleChangeDialogOpen] = useState(false);
+  const [roleChangeData, setRoleChangeData] = useState<{
+    userId: string;
+    email: string;
+    currentRole: string;
+    newRole: "user" | "editor" | "admin";
+  } | null>(null);
   const [sortState, setSortState] = useState<UserSortState | null>(null);
 
   const sortedUsers = useMemo(() => {
@@ -79,13 +86,25 @@ export function UsersManagementView({ users }: UsersManagementViewProps) {
     setSortState(toggleUserSort(sortState, field));
   }
 
-  async function handleRoleChange(
+  function handleRoleChange(
     userId: string,
+    email: string,
+    currentRole: string,
     newRole: "user" | "editor" | "admin"
   ) {
-    setLoading(userId);
+    setRoleChangeData({ userId, email, currentRole, newRole });
+    setRoleChangeDialogOpen(true);
+  }
+
+  async function handleConfirmRoleChange() {
+    if (!roleChangeData) return;
+
+    setLoading(roleChangeData.userId);
     try {
-      const result = await updateUserRole({ userId, role: newRole });
+      const result = await updateUserRole({
+        userId: roleChangeData.userId,
+        role: roleChangeData.newRole,
+      });
 
       if (result.success) {
         toast.success("Rôle mis à jour avec succès");
@@ -102,6 +121,8 @@ export function UsersManagementView({ users }: UsersManagementViewProps) {
       });
     } finally {
       setLoading(null);
+      setRoleChangeDialogOpen(false);
+      setRoleChangeData(null);
     }
   }
 
@@ -144,14 +165,14 @@ export function UsersManagementView({ users }: UsersManagementViewProps) {
           <p className="text-sm text-muted-foreground">
             {users.length} utilisateur{users.length > 1 ? "s" : ""} au total
           </p>
-          <Button onClick={() => router.push("/admin/users/invite")}>
+          <Button size="sm" onClick={() => router.push("/admin/users/invite")}>
             <UserPlus className="mr-2 h-4 w-4" />
             Inviter un utilisateur
           </Button>
         </div>
 
         {users.length === 0 ? (
-          <div className="py-12 text-center text-muted-foreground border rounded-lg">
+          <div className="py-6 text-center text-muted-foreground border rounded-lg">
             <Mail className="mx-auto h-12 w-12 mb-4 opacity-50" />
             <p className="text-lg font-medium">Aucun utilisateur trouvé</p>
             <p className="text-sm mt-2">
@@ -159,78 +180,60 @@ export function UsersManagementView({ users }: UsersManagementViewProps) {
             </p>
           </div>
         ) : (
-          <div className="rounded-md border bg-card shadow-sm">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>
-                    <SortableHeader<UserSortField>
-                      field="email"
-                      label="Email"
-                      currentSort={sortState}
-                      onSort={handleSort}
-                    />
-                  </TableHead>
-                  <TableHead>
-                    <SortableHeader<UserSortField>
-                      field="name"
-                      label="Nom"
-                      currentSort={sortState}
-                      onSort={handleSort}
-                    />
-                  </TableHead>
-                  <TableHead>
-                    <SortableHeader<UserSortField>
-                      field="role"
-                      label="Rôle"
-                      currentSort={sortState}
-                      onSort={handleSort}
-                    />
-                  </TableHead>
-                  <TableHead>
-                    <SortableHeader<UserSortField>
-                      field="status"
-                      label="Statut"
-                      currentSort={sortState}
-                      onSort={handleSort}
-                    />
-                  </TableHead>
-                  <TableHead>
-                    <SortableHeader<UserSortField>
-                      field="created_at"
-                      label="Inscription"
-                      currentSort={sortState}
-                      onSort={handleSort}
-                    />
-                  </TableHead>
-                  <TableHead>
-                    <SortableHeader<UserSortField>
-                      field="last_sign_in_at"
-                      label="Dernière connexion"
-                      currentSort={sortState}
-                      onSort={handleSort}
-                    />
-                  </TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sortedUsers.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="font-medium">{user.email}</TableCell>
-                    <TableCell>
-                      {user.profile?.display_name || (
-                        <span className="text-muted-foreground italic">
-                          Non renseigné
-                        </span>
+          <div className="w-full space-y-4">
+            {/* 
+              MOBILE VIEW (Cards) 
+              Visible only on small screens (< 640px)
+            */}
+            <div className="grid grid-cols-1 gap-4 sm:hidden">
+              {sortedUsers.map((user) => (
+                <div
+                  key={user.id}
+                  className="bg-card rounded-lg border shadow-sm p-4 space-y-4"
+                >
+                  {/* Header: Email and Status */}
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="space-y-1 flex-1 min-w-0">
+                      <h3 className="font-semibold text-base leading-tight text-foreground truncate">
+                        {user.email}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {user.profile?.display_name || (
+                          <span className="italic">Non renseigné</span>
+                        )}
+                      </p>
+                    </div>
+                    <div className="flex-shrink-0">
+                      {user.email_confirmed_at ? (
+                        <Badge variant="default" className="gap-1">
+                          <CheckCircle className="h-3 w-3" />
+                          Vérifié
+                        </Badge>
+                      ) : user.invited_at ? (
+                        <Badge variant="secondary" className="gap-1">
+                          <Clock className="h-3 w-3" />
+                          Invité
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="gap-1">
+                          <XCircle className="h-3 w-3" />
+                          Non vérifié
+                        </Badge>
                       )}
-                    </TableCell>
-                    <TableCell>
+                    </div>
+                  </div>
+
+                  {/* Body: Role and Dates */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Rôle</span>
                       <Select
                         value={user.profile?.role || "user"}
                         onValueChange={(value) =>
                           handleRoleChange(
                             user.id,
+                            user.email,
+                            user.profile?.role || "user",
                             value as "user" | "editor" | "admin"
                           )
                         }
@@ -251,72 +254,287 @@ export function UsersManagementView({ users }: UsersManagementViewProps) {
                           </SelectItem>
                         </SelectContent>
                       </Select>
-                    </TableCell>
-                    <TableCell>
-                      {user.email_confirmed_at ? (
-                        <Badge variant="default" className="gap-1">
-                          <CheckCircle className="h-3 w-3" />
-                          Vérifié
-                        </Badge>
-                      ) : user.invited_at ? (
-                        <Badge variant="secondary" className="gap-1">
-                          <Clock className="h-3 w-3" />
-                          Invité
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="gap-1">
-                          <XCircle className="h-3 w-3" />
-                          Non vérifié
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {format(new Date(user.created_at), "dd MMM yyyy", {
-                        locale: fr,
-                      })}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {user.last_sign_in_at ? (
-                        format(new Date(user.last_sign_in_at), "dd MMM yyyy", {
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Inscription</span>
+                      <span className="text-foreground">
+                        {format(new Date(user.created_at), "dd MMM yyyy", {
                           locale: fr,
-                        })
-                      ) : (
-                        <span className="italic">Jamais</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => openDeleteDialog(user.id, user.email)}
-                        disabled={loading === user.id}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </TableCell>
+                        })}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">
+                        Dernière connexion
+                      </span>
+                      <span className="text-foreground">
+                        {user.last_sign_in_at ? (
+                          format(
+                            new Date(user.last_sign_in_at),
+                            "dd MMM yyyy",
+                            {
+                              locale: fr,
+                            }
+                          )
+                        ) : (
+                          <span className="italic">Jamais</span>
+                        )}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Footer: Actions */}
+                  <div className="flex items-center justify-end pt-3 border-t mt-3">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => openDeleteDialog(user.id, user.email)}
+                      disabled={loading === user.id}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 h-10 min-w-[56px] px-3"
+                      aria-label={`Supprimer ${user.email}`}
+                    >
+                      <Trash2 className="h-5 w-5 mr-2" />
+                      Supprimer
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* 
+              DESKTOP VIEW (Table) 
+              Visible only on larger screens (>= 640px)
+            */}
+            <div className="hidden sm:block rounded-md border bg-card shadow-sm">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[22%]">
+                      <SortableHeader<UserSortField>
+                        field="email"
+                        label="Email"
+                        currentSort={sortState}
+                        onSort={handleSort}
+                      />
+                    </TableHead>
+                    <TableHead className="hidden lg:table-cell w-[16%]">
+                      <SortableHeader<UserSortField>
+                        field="name"
+                        label="Nom"
+                        currentSort={sortState}
+                        onSort={handleSort}
+                      />
+                    </TableHead>
+                    <TableHead className="w-[16%]">
+                      <SortableHeader<UserSortField>
+                        field="role"
+                        label="Rôle"
+                        currentSort={sortState}
+                        onSort={handleSort}
+                      />
+                    </TableHead>
+                    <TableHead className="hidden md:table-cell w-[14%]">
+                      <SortableHeader<UserSortField>
+                        field="status"
+                        label="Statut"
+                        currentSort={sortState}
+                        onSort={handleSort}
+                      />
+                    </TableHead>
+                    <TableHead className="hidden xl:table-cell w-[13%]">
+                      <SortableHeader<UserSortField>
+                        field="created_at"
+                        label="Inscription"
+                        currentSort={sortState}
+                        onSort={handleSort}
+                      />
+                    </TableHead>
+                    <TableHead className="hidden xl:table-cell w-[13%]">
+                      <SortableHeader<UserSortField>
+                        field="last_sign_in_at"
+                        label="Dernière connexion"
+                        currentSort={sortState}
+                        onSort={handleSort}
+                      />
+                    </TableHead>
+                    <TableHead className="text-right w-[12%]">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {sortedUsers.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell className="font-medium">
+                        <div className="flex flex-col">
+                          <span className="truncate max-w-[250px]" title={user.email}>
+                            {user.email}
+                          </span>
+                          {/* Mobile-ish fallback for smaller screens */}
+                          <span className="md:hidden text-xs text-muted-foreground mt-1">
+                            {user.email_confirmed_at ? (
+                              <span className="text-green-600">✓ Vérifié</span>
+                            ) : user.invited_at ? (
+                              <span className="text-blue-600">⏱ Invité</span>
+                            ) : (
+                              <span className="text-gray-600">✗ Non vérifié</span>
+                            )}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell">
+                        {user.profile?.display_name || (
+                          <span className="text-muted-foreground italic">
+                            Non renseigné
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Select
+                          value={user.profile?.role || "user"}
+                          onValueChange={(value) =>
+                            handleRoleChange(
+                              user.id,
+                              user.email,
+                              user.profile?.role || "user",
+                              value as "user" | "editor" | "admin"
+                            )
+                          }
+                          disabled={loading === user.id}
+                        >
+                          <SelectTrigger className="w-[140px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="user">
+                              {roleLabels.user}
+                            </SelectItem>
+                            <SelectItem value="editor">
+                              {roleLabels.editor}
+                            </SelectItem>
+                            <SelectItem value="admin">
+                              {roleLabels.admin}
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        {user.email_confirmed_at ? (
+                          <Badge variant="default" className="gap-1">
+                            <CheckCircle className="h-3 w-3" />
+                            Vérifié
+                          </Badge>
+                        ) : user.invited_at ? (
+                          <Badge variant="secondary" className="gap-1">
+                            <Clock className="h-3 w-3" />
+                            Invité
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="gap-1">
+                            <XCircle className="h-3 w-3" />
+                            Non vérifié
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="hidden xl:table-cell text-sm text-muted-foreground">
+                        {format(new Date(user.created_at), "dd MMM yyyy", {
+                          locale: fr,
+                        })}
+                      </TableCell>
+                      <TableCell className="hidden xl:table-cell text-sm text-muted-foreground">
+                        {user.last_sign_in_at ? (
+                          format(new Date(user.last_sign_in_at), "dd MMM yyyy", {
+                            locale: fr,
+                          })
+                        ) : (
+                          <span className="italic">Jamais</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openDeleteDialog(user.id, user.email)}
+                          disabled={loading === user.id}
+                          className="h-8 w-8 sm:h-9 sm:w-9 hover:bg-red-100 hover:text-red-700"
+                          aria-label={`Supprimer ${user.email}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         )}
       </div>
 
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+      <AlertDialog open={roleChangeDialogOpen} onOpenChange={setRoleChangeDialogOpen}>
+        <AlertDialogContent className="max-w-md sm:max-w-lg">
           <AlertDialogHeader>
-            <AlertDialogTitle>Supprimer cet utilisateur ?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-lg sm:text-xl">
+              Modifier le rôle de cet utilisateur ?
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="text-sm sm:text-base space-y-2">
+                <p className="text-muted-foreground">
+                  Vous êtes sur le point de modifier le rôle de{" "}
+                  <strong className="text-foreground">{roleChangeData?.email}</strong>.
+                </p>
+                <div className="bg-card p-3 rounded-md space-y-1 text-xs sm:text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Rôle actuel :</span>
+                    <span className="font-medium text-foreground">
+                      {roleChangeData?.currentRole && roleLabels[roleChangeData.currentRole as keyof typeof roleLabels]}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Nouveau rôle :</span>
+                    <span className="font-semibold text-foreground">
+                      {roleChangeData?.newRole && roleLabels[roleChangeData.newRole]}
+                    </span>
+                  </div>
+                </div>
+                <p className="text-xs sm:text-sm text-muted-foreground pt-2">
+                  Cette modification prendra effet immédiatement et changera les
+                  permissions de l&apos;utilisateur.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+            <AlertDialogCancel className="w-full sm:w-auto">
+              Annuler
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmRoleChange}
+              className="w-full sm:w-auto bg-destructive text-destructive-foreground hover:bg-card hover:text-destructive"
+            >
+              Confirmer la modification
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent className="max-w-md sm:max-w-lg">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg sm:text-xl">
+              Supprimer cet utilisateur ?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm sm:text-base">
               Cette action est irréversible. L&apos;utilisateur{" "}
-              <strong>{userToDelete?.email}</strong> et toutes ses données
+              <strong className="text-foreground">{userToDelete?.email}</strong> et toutes ses données
               seront définitivement supprimées.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+            <AlertDialogCancel className="w-full sm:w-auto">
+              Annuler
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="w-full sm:w-auto bg-destructive text-destructive-foreground hover:bg-card hover:text-destructive"
             >
               Supprimer
             </AlertDialogAction>

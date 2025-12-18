@@ -103,31 +103,32 @@ export function InviteUserForm() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Nouvelle invitation</CardTitle>
-        <CardDescription>
+    <Card className="w-full max-w-2xl mx-auto">
+      <CardHeader className="space-y-1 px-4 sm:px-6">
+        <CardTitle className="text-xl sm:text-2xl">Nouvelle invitation</CardTitle>
+        <CardDescription className="text-sm sm:text-base">
           Invitez un nouvel utilisateur à rejoindre la plateforme. Un email
           avec un lien d&apos;invitation lui sera envoyé.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-4 sm:px-6 pb-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 sm:space-y-6">
             <FormField
               control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email *</FormLabel>
+                  <FormLabel className="text-sm sm:text-base">Email *</FormLabel>
                   <FormControl>
                     <Input
                       type="email"
                       placeholder="utilisateur@example.com"
+                      className="h-10 sm:h-11 text-base"
                       {...field}
                     />
                   </FormControl>
-                  <FormDescription>
+                  <FormDescription className="text-xs sm:text-sm">
                     L&apos;adresse email de la personne à inviter
                   </FormDescription>
                   <FormMessage />
@@ -140,21 +141,21 @@ export function InviteUserForm() {
               name="role"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Rôle *</FormLabel>
+                  <FormLabel className="text-sm sm:text-base">Rôle *</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="h-10 sm:h-11 text-base">
                         <SelectValue placeholder="Sélectionner un rôle" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {Object.entries(roleLabels).map(([value, label]) => (
                         <SelectItem key={value} value={value}>
-                          <div className="flex flex-col">
-                            <span>{label}</span>
+                          <div className="flex flex-col py-1">
+                            <span className="text-sm sm:text-base">{label}</span>
                             <span className="text-xs text-muted-foreground">
                               {
                                 roleDescriptions[
@@ -167,7 +168,7 @@ export function InviteUserForm() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormDescription>
+                  <FormDescription className="text-xs sm:text-sm">
                     Le niveau d&apos;accès accordé à cet utilisateur
                   </FormDescription>
                   <FormMessage />
@@ -180,11 +181,17 @@ export function InviteUserForm() {
               name="displayName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nom d&apos;affichage (optionnel)</FormLabel>
+                  <FormLabel className="text-sm sm:text-base">
+                    Nom d&apos;affichage (optionnel)
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="Jean Dupont" {...field} />
+                    <Input
+                      placeholder="Jean Dupont"
+                      className="h-10 sm:h-11 text-base"
+                      {...field}
+                    />
                   </FormControl>
-                  <FormDescription>
+                  <FormDescription className="text-xs sm:text-sm">
                     Le nom qui sera affiché dans l&apos;interface
                   </FormDescription>
                   <FormMessage />
@@ -192,16 +199,21 @@ export function InviteUserForm() {
               )}
             />
 
-            <div className="flex gap-4">
+            <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 pt-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => router.push("/admin/users")}
                 disabled={isSubmitting}
+                className="w-full sm:w-auto h-11 sm:h-10 text-base sm:text-sm"
               >
                 Annuler
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full sm:w-auto h-11 sm:h-10 text-base sm:text-sm"
+              >
                 {isSubmitting && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
