@@ -5,7 +5,7 @@ export const HERO_SLIDE_LIMITS = {
     ALT_TEXT_MAX_LENGTH: 125,
     CTA_LABEL_MAX_LENGTH: 50,
     SLUG_MAX_LENGTH: 100,
-    MAX_ACTIVE_SLIDES: 10,
+    MAX_ACTIVE_SLIDES: 10, //TODO: adjust as needed
 } as const;
 
 export const HERO_SLIDE_DEFAULTS = {

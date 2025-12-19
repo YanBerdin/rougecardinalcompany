@@ -34,16 +34,16 @@ export class HeroSlidesErrorBoundary extends Component<Props, State> {
                         <div className="flex flex-col items-center gap-4 text-center">
                             <AlertCircle className="h-12 w-12 text-destructive" />
                             <div>
-                                <h3 className="font-semibold text-lg">Something went wrong</h3>
+                                <h3 className="font-semibold text-lg">Une erreur est survenue</h3>
                                 <p className="text-sm text-muted-foreground">
-                                    {this.state.error?.message || "Failed to load hero slides"}
+                                    {this.state.error?.message || "Échec du chargement des diapositives principales"}
                                 </p>
                             </div>
                             <Button
                                 onClick={() => window.location.reload()}
                                 variant="outline"
                             >
-                                Reload Page
+                                Recharger la page
                             </Button>
                         </div>
                     </CardContent>

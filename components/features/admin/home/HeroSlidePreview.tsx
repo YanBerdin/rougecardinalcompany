@@ -8,36 +8,48 @@ interface HeroSlidePreviewProps {
 
 export function HeroSlidePreview({ slide }: HeroSlidePreviewProps) {
     return (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 flex-1 min-w-0">
+        <div className="flex flex-col gap-3 w-full">
             {slide.image_url && (
-                <Image
-                    width={96}
-                    height={64}
-                    src={slide.image_url}
-                    alt={slide.alt_text}
-                    className="h-12 w-18 sm:h-16 sm:w-24 object-cover rounded shrink-0"
-                />
+                <div className="relative w-full aspect-video rounded-md overflow-hidden bg-muted border shadow-sm">
+                    <Image
+                        fill
+                        src={slide.image_url}
+                        alt={slide.alt_text}
+                        className="object-cover transition-transform hover:scale-105 duration-500"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
+                </div>
             )}
 
-            <div className="space-y-0.5 sm:space-y-1 flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-semibold text-sm sm:text-base truncate">{slide.title}</h3>
-                    {!slide.active && <Badge variant="secondary" className="text-xs">Inactive</Badge>}
+            <div className="space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-semibold text-base leading-tight line-clamp-2">{slide.title}</h3>
+                    {slide.active ? (
+                        <Badge variant="default" className="shrink-0">Active</Badge>
+                    ) : (
+                        <Badge variant="secondary" className="shrink-0">Inactive</Badge>
+                    )}
                 </div>
 
                 {slide.subtitle && (
-                    <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1">
+                    <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
                         {slide.subtitle}
                     </p>
                 )}
 
-                {slide.cta_primary_enabled && slide.cta_primary_label && (
-                    <p className="text-xs text-muted-foreground line-clamp-1">
-                        CTA: {slide.cta_primary_label}
-                        {slide.cta_secondary_enabled && slide.cta_secondary_label && (
-                            <span> | {slide.cta_secondary_label}</span>
+                {(slide.cta_primary_enabled || slide.cta_secondary_enabled) && (
+                    <div className="flex flex-wrap gap-2 pt-1">
+                        {slide.cta_primary_enabled && slide.cta_primary_label && (
+                            <Badge variant="outline" className="text-xs font-normal bg-background" title="CTA Principal">
+                                {slide.cta_primary_label}
+                            </Badge>
                         )}
-                    </p>
+                        {slide.cta_secondary_enabled && slide.cta_secondary_label && (
+                            <Badge variant="outline" className="text-xs font-normal bg-background" title="CTA Secondaire">
+                                {slide.cta_secondary_label}
+                            </Badge>
+                        )}
+                    </div>
                 )}
             </div>
         </div>

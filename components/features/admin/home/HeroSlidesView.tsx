@@ -32,11 +32,12 @@ interface HeroSlidesViewProps {
 
 interface SortableSlideProps {
     slide: HeroSlideDTO;
+    index: number;
     onEdit: (slide: HeroSlideDTO) => void;
     onDelete: (id: number) => void;
 }
 
-function SortableSlide({ slide, onEdit, onDelete }: SortableSlideProps) {
+function SortableSlide({ slide, index, onEdit, onDelete }: SortableSlideProps) {
     const {
         attributes,
         listeners,
@@ -52,45 +53,49 @@ function SortableSlide({ slide, onEdit, onDelete }: SortableSlideProps) {
         opacity: isDragging ? 0.5 : 1,
         zIndex: isDragging ? 50 : undefined,
     };
-    
+
     return (
-        <Card ref={setNodeRef} style={dragStyle} className={isDragging ? "shadow-lg" : ""}>
-            <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0 sm:pb-2">
-                <div className="flex items-center gap-2 sm:gap-3 flex-1">
+        <Card ref={setNodeRef} style={dragStyle} className={isDragging ? "shadow-lg ring-2 ring-primary/20" : "hover:border-primary/50 transition-colors min-w-[250px]"}>
+            <CardHeader className="flex flex-row items-start gap-3 p-4 h-full space-y-0">
+                <div className="flex flex-col items-center gap-3 shrink-0 pt-1">
                     <div
-                        className="cursor-grab active:cursor-grabbing p-1 rounded hover:bg-muted transition-colors shrink-0"
+                        className="cursor-grab active:cursor-grabbing p-1 rounded-md hover:bg-muted transition-colors"
                         {...attributes}
                         {...listeners}
                         role="button"
                         tabIndex={0}
-                        aria-label="Drag to reorder"
+                        aria-label="Glisser pour réordonner"
+                        title="Glisser pour réordonner"
                     >
-                        <GripVertical className="h-5 w-5 sm:h-5 sm:w-5 text-muted-foreground" />
+                        <GripVertical className="h-10 w-5 text-muted-foreground" />
                     </div>
-
-                    <HeroSlidePreview slide={slide} />
+                    <span className="max-sm:text-xs text-sm md:text-md lg:text-lg font-medium text-muted-foreground hover:brightness-125" title="Ordre d'affichage">{index + 1}</span>
                 </div>
 
-                <div className="flex gap-2 sm:gap-2 justify-end">
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => onEdit(slide)}
-                        aria-label="Edit slide"
-                        className="h-9 w-9 sm:h-8 sm:w-8"
-                    >
-                        <Pencil className="h-4 w-4" />
-                    </Button>
+                <div className="flex flex-col flex-1 min-w-0 gap-4">
+                    <HeroSlidePreview slide={slide} />
 
-                    <Button
-                        variant="destructive"
-                        size="icon"
-                        onClick={() => onDelete(slide.id)}
-                        aria-label="Delete slide"
-                        className="h-9 w-9 sm:h-8 sm:w-8"
-                    >
-                        <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-2">
+
+                        <Button
+                            variant="destructive"
+                            size="icon"
+                            onClick={() => onDelete(slide.id)}
+                            aria-label="Delete slide"
+                            className="h-9 w-9 shrink-0"
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                            variant="outline"
+                            onClick={() => onEdit(slide)}
+                            aria-label="Editer le slide"
+                            className="flex-1 texte-sm md:text-md h-9 gap-2"
+                        >
+                            <Pencil className="h-4 w-4 ml-2" /> Modifier
+                        </Button>
+
+                    </div>
                 </div>
             </CardHeader>
         </Card>
@@ -147,7 +152,7 @@ export function HeroSlidesView({ initialSlides }: HeroSlidesViewProps) {
     const canAddMoreSlides = activeSlidesCount < HERO_SLIDE_LIMITS.MAX_ACTIVE_SLIDES;
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 ">
             <HeroSlidesHeader
                 canAddMore={canAddMoreSlides}
                 isDisabled={isDeletePending}
@@ -164,11 +169,12 @@ export function HeroSlidesView({ initialSlides }: HeroSlidesViewProps) {
                     items={slides.map((s) => s.id.toString())}
                     strategy={verticalListSortingStrategy}
                 >
-                    <div className="grid gap-4">
-                        {slides.map((slide) => (
+                    <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">
+                        {slides.map((slide, index) => (
                             <SortableSlide
                                 key={slide.id.toString()}
                                 slide={slide}
+                                index={index}
                                 onEdit={handleEdit}
                                 onDelete={() => openDeleteDialog(slide.id, slide.title)}
                             />
@@ -205,14 +211,14 @@ interface HeroSlidesHeaderProps {
 
 function HeroSlidesHeader({ canAddMore, isDisabled, onAddSlide }: HeroSlidesHeaderProps) {
     const buttonLabel = canAddMore
-        ? "Add Slide"
-        : `Add Slide (Max ${HERO_SLIDE_LIMITS.MAX_ACTIVE_SLIDES})`;
+        ? "Ajouter un slide"
+        : `Limite slides actifs (Max ${HERO_SLIDE_LIMITS.MAX_ACTIVE_SLIDES})`;
 
     return (
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
-            <h2 className="text-xl sm:text-2xl font-bold">Hero Slides</h2>
-            <Button 
-                onClick={onAddSlide} 
+            <h2 className="text-xl sm:text-2xl font-bold">Slides page d'accueil</h2>
+            <Button
+                onClick={onAddSlide}
                 disabled={!canAddMore || isDisabled}
                 className="w-full sm:w-auto h-10 sm:h-9"
             >
@@ -267,7 +273,7 @@ function DeleteSlideDialog({
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter className="flex-col-reverse sm:flex-row gap-2">
-                    <AlertDialogCancel 
+                    <AlertDialogCancel
                         disabled={isPending}
                         className="w-full sm:w-auto h-10 sm:h-9"
                     >

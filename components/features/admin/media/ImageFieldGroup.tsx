@@ -241,52 +241,56 @@ export function ImageFieldGroup<TForm extends FieldValues>({
                             {showExternalUrl && (
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                        <Link2 className="h-4 w-4" />
+                                        <Link2 className="h-4 w-4 shrink-0" />
                                         <span>Ou saisir une URL externe</span>
                                     </div>
-                                    <div className="flex gap-2">
-                                        <div className="relative flex-1">
+                                    <div className="flex flex-col sm:flex-row gap-2">
+                                        <div className="relative flex-1 min-w-0">
                                             <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                             <Input
                                                 type="url"
                                                 placeholder="https://example.com/image.jpg"
-                                                className="pl-9"
+                                                className="pl-9 w-full"
                                                 value={imageUrl ?? ""}
                                                 onChange={(e) => handleUrlChange(e.target.value)}
                                             />
                                         </div>
-                                        {imageUrl && (
+                                        <div className="flex gap-2 shrink-0">
+                                            {imageUrl && (
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={handleClearUrl}
+                                                    title="Effacer l'URL"
+                                                    className="shrink-0"
+                                                >
+                                                    <X className="h-4 w-4" />
+                                                </Button>
+                                            )}
                                             <Button
                                                 type="button"
-                                                variant="ghost"
+                                                variant="outline"
                                                 size="sm"
-                                                onClick={handleClearUrl}
-                                                title="Effacer l'URL"
+                                                disabled={!imageUrl || isValidating}
+                                                onClick={handleValidateUrl}
+                                                className="shrink-0"
                                             >
-                                                <X className="h-4 w-4" />
+                                                {isValidating ? (
+                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                ) : (
+                                                    "Vérifier"
+                                                )}
                                             </Button>
-                                        )}
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            disabled={!imageUrl || isValidating}
-                                            onClick={handleValidateUrl}
-                                        >
-                                            {isValidating ? (
-                                                <Loader2 className="h-4 w-4 animate-spin" />
-                                            ) : (
-                                                "Vérifier"
-                                            )}
-                                        </Button>
+                                        </div>
                                     </div>
                                 </div>
                             )}
 
                             {/* Image preview */}
                             {imageUrl && (
-                                <div className="flex items-center gap-4 p-3 border rounded-lg bg-muted/50">
-                                    <div className="relative h-20 w-32 rounded overflow-hidden">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 border rounded-lg bg-muted/50">
+                                    <div className="relative h-20 w-32 rounded overflow-hidden shrink-0">
                                         <Image
                                             src={imageUrl}
                                             alt={altText ?? "Preview"}
@@ -296,7 +300,7 @@ export function ImageFieldGroup<TForm extends FieldValues>({
                                             onError={handleImageError}
                                         />
                                     </div>
-                                    <div className="flex-1 text-sm text-muted-foreground truncate">
+                                    <div className="flex-1 min-w-0 text-sm text-muted-foreground break-all">
                                         {imageUrl}
                                     </div>
                                 </div>

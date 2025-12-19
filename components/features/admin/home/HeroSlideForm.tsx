@@ -47,11 +47,11 @@ export function HeroSlideForm({ open, onClose, onSuccess, slide }: HeroSlideForm
                 throw new Error(result.error ?? "Save failed");
             }
 
-            toast.success(slide ? "Slide updated successfully" : "Slide created successfully");
+            toast.success(slide ? "Slide mis à jour" : "Slide créé avec succès");
             await onSuccess();
             form.reset();
         } catch (error) {
-            toast.error(error instanceof Error ? error.message : "Failed to save slide");
+            toast.error(error instanceof Error ? error.message : "Échec de l'enregistrement du slide");
         } finally {
             setIsPending(false);
         }
@@ -80,18 +80,18 @@ export function HeroSlideForm({ open, onClose, onSuccess, slide }: HeroSlideForm
         }
     };
 
-    const dialogTitle = slide ? "Edit Hero Slide" : "Add Hero Slide";
-    const submitButtonLabel = isPending ? "Saving..." : slide ? "Update" : "Create";
+    const dialogTitle = slide ? "Modifier le slide" : "Nouveau slide";
+    const submitButtonLabel = isPending ? "Enregistrement..." : slide ? "Mettre à jour" : "Créer";
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="w-[calc(100vw-2rem)] sm:w-full sm:max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-lg">
                 <DialogHeader>
                     <DialogTitle className="text-lg sm:text-xl">{dialogTitle}</DialogTitle>
                 </DialogHeader>
 
                 <Form {...form}>
-                    <form onSubmit={handleValidatedSubmit} className="space-y-4">
+                    <form onSubmit={handleValidatedSubmit} className="space-y-4 overflow-x-hidden">
                         <HeroSlideFormFields form={form} />
 
                         <ImageFieldGroup
