@@ -1,4 +1,3 @@
-// lib/site-config.ts
 import { env } from "./env";
 
 export const SITE_CONFIG = {
@@ -8,13 +7,11 @@ export const SITE_CONFIG = {
     ICON: "/favicon.ico",
   },
   EMAIL: {
-    // ✅ Validated & typed via T3 Env
     FROM: env.EMAIL_FROM,
     CONTACT: env.EMAIL_CONTACT,
   },
   SERVER: {
     PROD_URL: "https://rougecardinalcompany.fr",
-    // ✅ Type-safe client var
     DEV_URL: env.NEXT_PUBLIC_SITE_URL,
   },
   MAKER: {

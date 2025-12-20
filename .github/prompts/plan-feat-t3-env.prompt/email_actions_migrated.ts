@@ -1,12 +1,13 @@
-// lib/email/actions.ts
 "use server";
 
+import { createClient } from "@/supabase/server";
 import { resend } from "@/lib/resend";
-import { SITE_CONFIG, WEBSITE_URL } from "@/lib/site-config";
 import { env } from "@/lib/env";
+import { SITE_CONFIG, WEBSITE_URL } from "@/lib/site-config";
 import NewsletterConfirmation from "@/emails/newsletter-confirmation";
 import ContactMessageNotification from "@/emails/contact-message-notification";
 import InvitationEmail from "@/emails/invitation-email";
+import type { ResendParamsTypeWithConditionalFrom } from "./types";
 
 export const sendEmail = async (
   ...params: ResendParamsTypeWithConditionalFrom
@@ -57,39 +58,37 @@ export async function sendContactNotification(params: {
   });
 }
 
+/**
+ * Sends invitation email with dev redirect support.
+ * In development, emails can be redirected to a test address.
+ */
 export async function sendInvitationEmail(params: {
   email: string;
-  invitedBy: string;
-  role: string;
-  invitationUrl: string;
+  firstName: string;
+  inviteLink: string;
+  expiresAt: string;
 }) {
-  // ============================================================================
-  // 🚨 DEVELOPMENT EMAIL REDIRECT (DEV ONLY)
-  // ============================================================================
-  // ✅ Type-safe boolean via T3 Env transform
-  const devRedirectEnabled =
-    env.NODE_ENV === "development" && env.EMAIL_DEV_REDIRECT;
-
+  // Dev redirect logic using T3 Env
+  const devRedirectEnabled = env.EMAIL_DEV_REDIRECT;
   const recipientEmail = devRedirectEnabled
-    ? env.EMAIL_DEV_REDIRECT_TO ?? "dev@example.com"
+    ? env.EMAIL_DEV_REDIRECT_TO ?? params.email
     : params.email;
 
-  // Log redirect for debugging
-  if (devRedirectEnabled) {
+  if (devRedirectEnabled && env.EMAIL_DEV_REDIRECT_TO) {
     console.log(
-      `[Email] DEV REDIRECT: ${params.email} → ${recipientEmail}`
+      `[Email] DEV MODE: Redirecting invitation from ${params.email} to ${env.EMAIL_DEV_REDIRECT_TO}`
     );
   }
 
   await sendEmail({
     to: recipientEmail,
     subject: `Invitation à rejoindre ${SITE_CONFIG.MAKER.NAME}`,
-    // ✅ Props alignées avec l'interface InvitationEmailProps de emails/invitation-email.tsx
     react: InvitationEmail({
-      email: params.email,           // Adresse email de l'invité
-      role: params.role,             // Rôle attribué (admin, editor, user)
-      displayName: params.invitedBy, // Nom de l'inviteur (optionnel)
-      invitationUrl: params.invitationUrl,
+      firstName: params.firstName,
+      inviteLink: params.inviteLink,
+      expiresAt: params.expiresAt,
+      // Keep original email in template for debugging
+      recipientEmail: params.email,
     }),
   });
 }

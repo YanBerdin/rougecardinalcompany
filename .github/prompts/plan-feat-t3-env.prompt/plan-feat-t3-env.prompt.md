@@ -1,273 +1,256 @@
-# Plan d'Implémentation de T3 Env
+# Plan d'Implémentation T3 Env pour Rouge Cardinal Company
 
-> **Dernière mise à jour** : 20 décembre 2025  
-> **Statut** : Prêt pour implémentation (après Phase 0)
+## 📋 Vue d'Ensemble
 
-## 📋 Vue d'ensemble
+### Contexte
+Le projet utilise actuellement des variables d'environnement avec des accès directs `process.env.*` et une validation manuelle (`hasEnvVars`). T3 Env apportera:
 
-T3 Env (@t3-oss/env-nextjs) est une solution de validation et typage des variables d'environnement qui apporte :
-- Validation runtime avec Zod
-- Type-safety TypeScript
-- Différenciation client/server
-- Détection précoce des erreurs de configuration
+✅ **Validation runtime** avec Zod  
+✅ **Type-safety** TypeScript complète  
+✅ **Séparation client/server** sécurisée  
+✅ **Détection précoce** des erreurs de configuration  
+✅ **DX améliorée** (autocomplete, erreurs claires)
 
-## 🎯 Objectifs
+### Décisions Architecturales
 
-1. Remplacer les accès directs `process.env.*` par un système validé
-2. Assurer la sécurité (jamais exposer les clés sensibles côté client)
-3. Améliorer la DX avec autocomplete et type-checking
-4. Détecter les erreurs de configuration au démarrage
-
----
-
-## ⚠️ PHASE 0 : Pré-requis (OBLIGATOIRE avant implémentation)
-
-### 0.1 Standardiser les variables d'environnement Supabase
-
-**Problème 1** : Le projet utilise deux noms différents pour la clé service role :
-- `.env.local` ligne 43 : `SUPABASE_SECRET_KEY`
-- `.env.local` ligne 55 : `SUPABASE_SERVICE_ROLE_KEY`
-- 10+ scripts utilisent `SUPABASE_SECRET_KEY`
-
-**Problème 2** : Selon `.github/instructions/nextjs-supabase-auth-2025.instructions.md` (CANONICAL), la clé publique devrait utiliser le nouveau format :
-- ✅ **NEW FORMAT** : `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY` (avec JWT Signing Keys)
-- ❌ **LEGACY FORMAT** : `NEXT_PUBLIC_SUPABASE_ANON_KEY` (deprecated)
-
-**Actions** :
-1. Standardiser sur `SUPABASE_SERVICE_ROLE_KEY` partout (le nom est correct)
-2. Migrer vers `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY` si JWT Signing Keys activées
-3. Si pas encore migré vers JWT Signing Keys, garder `NEXT_PUBLIC_SUPABASE_ANON_KEY` temporairement
-
-**Scripts à mettre à jour** (chercher/remplacer `SUPABASE_SECRET_KEY` → `SUPABASE_SERVICE_ROLE_KEY`) :
-- `scripts/create-admin-user.ts`
-- `scripts/create-local-admin.ts`
-- `scripts/check-admin-status.ts`
-- `scripts/diagnose-server-auth.ts`
-- `scripts/test-admin-access.ts`
-- `scripts/test-evenements-access.ts`
-- `scripts/test-spectacles-crud.ts`
-- `scripts/test-team-active-dal.ts`
-- `scripts/verify-view-security-invoker.ts`
-- `scripts/Test_fetchMediaArticles/check-rls-policies.ts`
-- `scripts/Test_fetchMediaArticles/apply-migration-articles-view.ts`
-
-### 0.2 Nettoyer `.env.local`
-
-**Problème** : Duplication de la clé service role (lignes 43 et 55)
-
-**Action** : 
-1. Supprimer la ligne 43 (`SUPABASE_SECRET_KEY=...`)
-2. Garder uniquement la ligne 55 (`SUPABASE_SERVICE_ROLE_KEY=...`)
-
-### 0.3 Supprimer `hasEnvVars`
-
-**Problème** : `hasEnvVars` est utilisé dans 5 fichiers mais T3 Env gère la validation au démarrage.
-
-**Fichiers à modifier** :
-| Fichier | Action |
-|---------|--------|
-| `lib/utils.ts` | Supprimer l'export `hasEnvVars` |
-| `supabase/middleware.ts` | Supprimer import et bloc `if (!hasEnvVars)` |
-| `app/(admin)/layout.tsx` | Supprimer import et prop `hasEnvVars` |
-| `components/admin/AdminSidebar.tsx` | Supprimer prop et passage à `AdminAuthRow` |
-| `components/admin/AdminAuthRow.tsx` | Supprimer prop et condition `if (!hasEnvVars)` |
-
----
-
-## 📦 Étape 1 : Installation
-
-```bash
-pnpm add @t3-oss/env-nextjs
-# Note: zod est déjà installé dans le projet
-```
-
-## 🏗️ Étape 2 : Création du fichier de configuration
-
-Créer `lib/env.ts` avec le contenu de `t3_env_config.ts`.
-
-## 🔄 Étape 3 : Migration des fichiers existants
-
-### 3.1 Migration `lib/site-config.ts`
-
-Voir `site_config_migrated.ts` - **Note** : `REDIRECT_TO_DASHBOARD` reste `/protected` (pas `/dashboard`).
-
-### 3.2 Migration `lib/resend.ts`
-
-Voir `resend_migrated.ts`
-
-### 3.3 Migration Supabase (4 fichiers séparés)
-
-**Architecture décidée** : GARDER la séparation entre les fichiers Supabase pour :
-- Sécurité : admin operations explicites
-- Audit : facile de tracer `createAdminClient()`
-- SOLID : une responsabilité par fichier
-- Clarté : imports montrent le niveau de privilège
-
-Voir `supabase_files_migrated.ts` qui contient :
-- FILE 1: `supabase/client.ts`
-- FILE 2: `supabase/server.ts`
-- FILE 3: `supabase/admin.ts`
-- FILE 4: `supabase/middleware.ts`
-
-### 3.4 Migration `lib/email/actions.ts`
-
-Voir `email_actions_migrated.ts` - **Note** : Props `InvitationEmail` alignées avec l'interface actuelle.
-
-## 🛠️ Étape 4 : Mise à jour des scripts
-
-### 4.1 Migration `scripts/create-admin-user.ts`
+#### 1. Variables MCP/CI-CD ✅
 
 ```typescript
-// scripts/create-admin-user.ts
-import { env } from "../lib/env";
-import { createAdminClient } from "../supabase/admin";
+// Variables optionnelles pour tooling externe
+SUPABASE_PROJECT_REF: z.string().optional(),
+SUPABASE_ACCESS_TOKEN: z.string().optional(),
+GITHUB_TOKEN: z.string().optional(),
+CONTEXT7_API_KEY: z.string().optional()
+```
 
-async function createAdminUser() {
-  // ✅ Validated via T3 Env
-  const email = env.DEFAULT_ADMIN_EMAIL ?? "admin@rougecardinal.com";
-  const password = env.DEFAULT_ADMIN_PASSWORD ?? "Admin123!";
-  
-  // ... rest of script
+**Justification**:
+- Ne sont PAS nécessaires au runtime Next.js
+- Utilisées uniquement par MCP Supabase et GitHub Actions
+- Marquées `.optional()` pour ne pas bloquer le démarrage
+
+#### 2. Séparation Server/Admin Clients ✅
+
+**GARDER** la structure actuelle:
+
+```typescript
+supabase/
+├── server.ts    // User-scoped operations (authenticated/anon)
+└── admin.ts     // Service-role operations (elevated privileges)
+```
+
+**Justifications**:
+- ✅ **Sécurité**: Admin operations explicites et tracées
+- ✅ **Audit**: Facile d'identifier les appels privilégiés
+- ✅ **SOLID**: Une responsabilité par fichier
+- ✅ **Clarté**: Import montre le niveau de privilège
+
+#### 3. hasEnvVars Check ✅
+
+**SUPPRIMER** de:
+- `supabase/middleware.ts` (lines 10-15)
+- `lib/utils.ts` (export `hasEnvVars`)
+
+**Justification**: T3 Env gère la validation au démarrage, checks manuels redondants
+
+---
+
+## 🎯 Phase 1: Setup Initial
+
+### 1.1 Installation
+
+```bash
+pnpm add @t3-oss/env-nextjs zod
+```
+
+### 1.2 Créer lib/env.ts### 1.3 Script de test de validation---
+
+## 🎯 Phase 2: Migration Core Files
+
+### 2.1 lib/site-config.ts
+### 2.2 lib/resend.ts
+### 2.3 supabase/server.ts
+### 2.4 supabase/client.ts
+### 2.5 supabase/admin.ts
+### 2.6 supabase/middleware.ts---
+
+## 🎯 Phase 3: Email System Migration
+
+### 3.1 lib/email/actions.ts---
+
+## 📚 Documentation Guide---
+
+## 📋 Phase 4-7 Implementation Strategy
+
+Pour les phases restantes (DAL, Scripts, API Routes, Tests), voici le plan d'action:
+
+### Phase 4: DAL Files (17 fichiers)
+
+**Pattern de migration standardisé:**
+
+```typescript
+// Avant
+import { createClient } from "@/supabase/server";
+
+export async function fetchData() {
+  const supabase = await createClient();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;  // ❌
+  // ...
+}
+
+// Après
+import { createClient } from "@/supabase/server";
+import { env } from "@/lib/env";
+
+export async function fetchData() {
+  const supabase = await createClient();
+  const siteUrl = env.NEXT_PUBLIC_SITE_URL;  // ✅
+  // ...
 }
 ```
 
-## 📝 Étape 5 : Mise à jour `.env.example`
+**Fichiers à migrer** (ordre de priorité):
+1. `lib/dal/admin-users.ts` (utilise EMAIL_DEV_REDIRECT)
+2. `lib/dal/admin-home-*.ts`
+3. Tous les autres DAL files
 
-Voir `env_example_updated.sh` - Le fichier `.env.example` actuel est déjà bien structuré.
+### Phase 5: Scripts
 
-## 🧪 Étape 6 : Tests de validation
+**Fichiers à migrer**:
+- `scripts/create-admin-user.ts`
+- `scripts/seed-admin.ts`
+- `scripts/test-*.ts` (déjà créé le nouveau `test-env-validation.ts`)
 
-Voir `test_env_validation.ts`
+**Pattern de migration**:
 
-## 📚 Étape 7 : Documentation
+```typescript
+// Avant
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
-Voir `t3_env_readme.md` pour le guide complet.
+// Après
+import { env } from "../lib/env";
+const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
+```
+
+### Phase 6: API Routes (minimal)
+
+**Fichiers à migrer**:
+- `app/api/admin/media/search/route.ts`
+- `app/api/contact/route.ts`
+- `app/api/newsletter/route.ts`
+
+**Pattern**:
+
+```typescript
+// app/api/newsletter/route.ts
+import { env } from "@/lib/env";
+
+export async function POST(request: NextRequest) {
+  // env.NEXT_PUBLIC_SITE_URL au lieu de process.env...
+}
+```
+
+### Phase 7: Tests & CI
+
+**Checklist finale**:
+1. ✅ Exécuter `pnpm tsx scripts/test-env-validation.ts`
+2. ✅ Vérifier build: `pnpm build`
+3. ✅ Vérifier TypeScript: `pnpm tsc --noEmit`
+4. ✅ Mettre à jour `.env.example` si nécessaire
+5. ✅ Tester en local (dev + build)
+6. ✅ Documenter dans memory-bank
+7. ✅ CI/CD: ajouter step validation si nécessaire
 
 ---
 
-## 📋 Checklist de Migration Complète
+## 🎯 Prochaines Actions Recommandées
 
-### Phase 0 : Pré-requis (⚠️ OBLIGATOIRE)
-- [ ] Standardiser `SUPABASE_SECRET_KEY` → `SUPABASE_SERVICE_ROLE_KEY` dans 11 scripts
-- [ ] Nettoyer `.env.local` (supprimer duplication ligne 43)
-- [ ] Supprimer `hasEnvVars` de 5 fichiers
+### Actions Immédiates
 
-### Phase 1 : Setup (✅ Prêt)
-- [x] Installer `@t3-oss/env-nextjs` (zod déjà présent)
-- [x] Créer `lib/env.ts` avec tous les schémas → `t3_env_config.ts`
-- [x] Créer documentation → `t3_env_readme.md`
-- [x] Créer script de test → `test_env_validation.ts`
+1. **Créer les fichiers de Phase 1**:
+   - `lib/env.ts`
+   - `scripts/test-env-validation.ts`
+   - `docs/T3_ENV_GUIDE.md`
 
-### Phase 2 : Core Files (Priorité haute)
-- [ ] Migrer `lib/site-config.ts` → `site_config_migrated.ts`
-- [ ] Migrer `lib/resend.ts` → `resend_migrated.ts`
-- [ ] Migrer `supabase/server.ts` → FILE 2 dans `supabase_files_migrated.ts`
-- [ ] Migrer `supabase/client.ts` → FILE 1 dans `supabase_files_migrated.ts`
-- [ ] Migrer `supabase/admin.ts` → FILE 3 dans `supabase_files_migrated.ts`
-- [ ] Migrer `supabase/middleware.ts` → FILE 4 dans `supabase_files_migrated.ts`
+2. **Installer dépendances**:
+   ```bash
+   pnpm add @t3-oss/env-nextjs zod
+   ```
 
-### Phase 3 : Email System
-- [ ] Migrer `lib/email/actions.ts` → `email_actions_migrated.ts`
-- [ ] Tester redirect dev avec T3 Env
+3. **Tester la validation**:
+   ```bash
+   pnpm tsx scripts/test-env-validation.ts
+   ```
 
-### Phase 4 : DAL Files (17 fichiers)
-- [ ] `lib/dal/admin-*.ts`
-- [ ] `lib/dal/home-*.ts`
-- [ ] `lib/dal/*.ts` (autres)
+### Actions Phase 2
 
-### Phase 5 : Scripts (11 fichiers)
-- [ ] `scripts/create-admin-user.ts`
-- [ ] `scripts/create-local-admin.ts`
-- [ ] `scripts/check-admin-status.ts`
-- [ ] Tous les autres scripts de test
+4. **Migrer core files** (utiliser les artifacts créés):
+   - `lib/site-config.ts`
+   - `lib/resend.ts`
+   - `supabase/server.ts`
+   - `supabase/client.ts`
+   - `supabase/admin.ts`
+   - `supabase/middleware.ts`
 
-### Phase 6 : API Routes (minimal)
-- [ ] `app/api/admin/media/search/route.ts`
-- [ ] `app/api/contact/route.ts`
-- [ ] `app/api/newsletter/route.ts`
+5. **Supprimer `hasEnvVars`**:
+   - Dans `lib/utils.ts` (retirer export)
+   - Dans `supabase/middleware.ts` (retirer check lines 10-15)
 
-### Phase 7 : Tests & CI
-- [ ] Exécuter `pnpm tsx scripts/test-env-validation.ts`
-- [ ] Vérifier build Next.js : `pnpm build`
-- [ ] Mettre à jour CI/CD si nécessaire
+6. **Tester compilation**:
+   ```bash
+   pnpm tsc --noEmit
+   pnpm build
+   ```
 
----
+### Actions Phase 3+
 
-## 🎯 Ordre d'Exécution Recommandé
+7. **Migrer email system**:
+   - `lib/email/actions.ts`
 
-### Jour 1 : Phase 0 (Pré-requis)
-```bash
-# 1. Vérifier le format des clés Supabase dans .env.local
-# Si JWT Signing Keys activées → utiliser NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY
-# Sinon → garder NEXT_PUBLIC_SUPABASE_ANON_KEY temporairement
+8. **Migrer DAL files progressivement** (17 fichiers)
 
-# 2. Chercher/remplacer dans tous les scripts
-find scripts -name "*.ts" -exec sed -i 's/SUPABASE_SECRET_KEY/SUPABASE_SERVICE_ROLE_KEY/g' {} \;
+9. **Migrer scripts** (create-admin, seed-admin, test-*)
 
-# 3. Nettoyer .env.local (manuellement, supprimer ligne 43)
+10. **Migrer API routes** (3 fichiers)
 
-# 4. Supprimer hasEnvVars (manuellement dans 5 fichiers)
-```
+### Validation Finale
 
-### Jour 2 : Phase 1 + 2
-```bash
-# 1. Installer T3 Env
-pnpm add @t3-oss/env-nextjs
+11. **Tests complets**:
+    ```bash
+    pnpm tsx scripts/test-env-validation.ts
+    pnpm build
+    pnpm dev  # Vérifier démarrage
+    ```
 
-# 2. Créer lib/env.ts
-cp .github/prompts/plan-feat-t3-env.prompt/t3_env_config.ts lib/env.ts
-
-# 3. Migrer les core files un par un, tester après chaque migration
-pnpm dev  # Vérifier que l'app démarre
-```
-
-### Jour 3 : Phase 3 + 4
-```bash
-# Migrer email system et DAL files
-# Tester après chaque fichier
-```
-
-### Jour 4 : Phase 5 + 6 + 7
-```bash
-# Migrer scripts et API routes
-# Tests finaux
-pnpm build
-pnpm tsx scripts/test-env-validation.ts
-```
+12. **Documentation**:
+    - Mettre à jour `.env.example`
+    - Ajouter entry dans `memory-bank/systemPatterns.md`
+    - Mettre à jour `memory-bank/activeContext.md`
 
 ---
 
-## 🚨 Points d'Attention
+## 📝 Résumé du Plan
 
-1. **Variables Supabase** : 
-   - ✅ **Si JWT Signing Keys activées** : utiliser `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY`
-   - ⚠️ **Si pas encore migrées** : garder `NEXT_PUBLIC_SUPABASE_ANON_KEY` (legacy)
-   - La clé service role reste `SUPABASE_SERVICE_ROLE_KEY` dans les deux cas
-   - Référence canonique : `.github/instructions/nextjs-supabase-auth-2025.instructions.md`
+✅ **Phase 1**: Setup complet (`lib/env.ts`, script test, docs)  
+✅ **Phase 2**: Core files (6 fichiers)  
+✅ **Phase 3**: Email system  
+⏳ **Phase 4**: DAL files (17 fichiers)  
+⏳ **Phase 5**: Scripts  
+⏳ **Phase 6**: API Routes (3 fichiers)  
+⏳ **Phase 7**: Tests & CI
 
-2. **Variables dupliquées** : `NEXT_PUBLIC_SUPABASE_URL` apparaît dans `server` ET `client` car elle est utilisée des deux côtés
+**Bénéfices attendus**:
+- ✅ Type-safety complète
+- ✅ Validation runtime
+- ✅ Meilleure DX (autocomplete)
+- ✅ Détection précoce des erreurs
+- ✅ Code plus maintenable
 
-3. **Transform boolean** : `EMAIL_DEV_REDIRECT` utilise `.transform()` pour convertir `"true"/"false"` en boolean
+**Risques identifiés**:
+- ⚠️ Breaking changes si env vars mal configurées
+- ⚠️ Nécessite tests approfondis après migration
 
-4. **Optional variables** : Les vars de dev/test sont marquées `.optional()` pour ne pas bloquer la prod
-
-5. **CI/CD** : Ajouter `SKIP_ENV_VALIDATION=true` dans CI uniquement si nécessaire
-
-6. **Architecture Supabase** : GARDER la séparation entre `server.ts`, `admin.ts`, `client.ts` et `middleware.ts`
-
-7. **Interface InvitationEmail** : Les props sont `{ email, role, displayName?, invitationUrl }` (pas `invitedUserEmail`, `companyName`, etc.)
-
----
-
-## 📁 Fichiers de Référence
-
-| Fichier | Description |
-|---------|-------------|
-| `t3_env_config.ts` | Configuration complète `lib/env.ts` |
-| `t3_env_readme.md` | Guide utilisateur + architecture Supabase |
-| `site_config_migrated.ts` | Migration `lib/site-config.ts` |
-| `resend_migrated.ts` | Migration `lib/resend.ts` |
-| `supabase_files_migrated.ts` | Migration des 4 fichiers Supabase |
-| `email_actions_migrated.ts` | Migration `lib/email/actions.ts` |
-| `test_env_validation.ts` | Script de test validation |
-| `env_example_updated.sh` | Template `.env.example` mis à jour |
+**Mitigation**:
+- ✅ Script de validation automatisé
+- ✅ Documentation complète
+- ✅ Migration progressive par phases
+- ✅ Tests à chaque phase
