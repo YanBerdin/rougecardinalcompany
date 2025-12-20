@@ -3,45 +3,49 @@ refactor(dal,actions): enforce SOLID principles and Server Actions pattern
 BREAKING CHANGES: None - Internal refactoring only
 
 ## Summary
+
 Complete refactoring of Data Access Layer (DAL) and Server Actions to achieve
 98% compliance with CRUD Server Actions pattern and SOLID principles.
 
 ## DAL Layer Improvements (lib/dal/)
 
 ### admin-users.ts
+
 - ✅ Remove local DALResult<T=null> interface definition
 - ✅ Import centralized DALResult from lib/dal/helpers
 - ✅ Convert 5 helper functions from throw to DALResult<null>:
-  * checkInvitationRateLimit()
-  * verifyUserDoesNotExist()
-  * generateUserInviteLinkWithUrl()
-  * waitForAuthUserCreation()
-  * createUserProfileWithRole()
+  - checkInvitationRateLimit()
+  - verifyUserDoesNotExist()
+  - generateUserInviteLinkWithUrl()
+  - waitForAuthUserCreation()
+  - createUserProfileWithRole()
 - ✅ Add data: null in all success returns (DALSuccess<T> compliance)
 - ✅ Replace direct .error access with type guards
-  * Before: return { success: false, error: result.error }
-  * After: return result (discriminated union narrows type)
+  - Before: return { success: false, error: result.error }
+  - After: return result (discriminated union narrows type)
 - ✅ Decompose listAllUsers() into 3 helpers (<30 lines each):
-  * fetchAuthUsers()
-  * fetchUserProfiles()
-  * mapUsersWithProfiles()
+  - fetchAuthUsers()
+  - fetchUserProfiles()
+  - mapUsersWithProfiles()
 
 ### admin-home-hero.ts
+
 - ✅ Convert generateUniqueSlug() to DALResult<string>
 - ✅ Convert generateUniqueSlugExcluding() to DALResult<string>
 - ✅ Update callers in createHeroSlide() and updateHeroSlide()
 
 ### media.ts (NEW FILE)
+
 - ✅ Extract Storage/DB operations from team/actions.ts
 - ✅ Create 4 focused helpers (<30 lines each):
-  * uploadToStorage() - Handle Supabase Storage upload
-  * getPublicUrl() - Retrieve public URL
-  * createMediaRecord() - Insert database record
-  * cleanupStorage() - Best-effort file cleanup
+  - uploadToStorage() - Handle Supabase Storage upload
+  - getPublicUrl() - Retrieve public URL
+  - createMediaRecord() - Insert database record
+  - cleanupStorage() - Best-effort file cleanup
 - ✅ Export 3 public DAL functions:
-  * uploadMedia() - Full upload workflow
-  * deleteMedia() - Full delete workflow
-  * getMediaById() - Fetch media record
+  - uploadMedia() - Full upload workflow
+  - deleteMedia() - Full delete workflow
+  - getMediaById() - Fetch media record
 - ✅ All functions return DALResult<T>
 - ✅ No revalidatePath() calls (respects DAL boundary)
 - ✅ Proper TypeScript types with Awaited<ReturnType<>>
@@ -49,42 +53,48 @@ Complete refactoring of Data Access Layer (DAL) and Server Actions to achieve
 ## Server Actions Improvements (lib/actions/, app/)
 
 ### media-actions.ts
+
 - ✅ Refactor from 263 to 156 lines (41% reduction)
 - ✅ uploadMediaImage(): 76 → 28 lines
 - ✅ deleteMediaImage(): 62 → 21 lines
 - ✅ Add revalidatePath() for:
-  * /admin/medias
-  * /admin/team
-  * /admin/spectacles
+  - /admin/medias
+  - /admin/team
+  - /admin/spectacles
 - ✅ Add import "server-only" directive
 - ✅ Extract validation to separate helper
 - ✅ Call centralized DAL instead of inline Storage/DB
 
 ### email/actions.ts
+
 - ✅ Add import "server-only" directive
 - ✅ Decompose sendEmail() from 41 to 19 lines
 - ✅ Extract buildEmailParams() helper (18 lines)
 - ✅ Improve code readability and maintainability
 
 ### team/actions.ts
+
 - ✅ Add import "server-only" directive
 - ✅ Remove 120+ lines of duplicate Storage helpers:
-  * uploadFileToStorage() - replaced by DAL
-  * createMediaRecord() - replaced by DAL
-  * generateUniqueFileName() - replaced by DAL
-  * cleanupStorageFile() - replaced by DAL
-  * extractFileFromFormData() - moved to media-actions
-  * validateImageFile() - moved to media-actions
+  - uploadFileToStorage() - replaced by DAL
+  - createMediaRecord() - replaced by DAL
+  - generateUniqueFileName() - replaced by DAL
+  - cleanupStorageFile() - replaced by DAL
+  - extractFileFromFormData() - moved to media-actions
+  - validateImageFile() - moved to media-actions
 - ✅ Use centralized ActionResult<T> type
 - ✅ Keep @deprecated wrapper for backward compatibility
 
 ### contact.actions.ts
+
 - ✅ Add import "server-only" directive
 
 ### newsletter.actions.ts
+
 - ✅ Add import "server-only" directive
 
 ### users/actions.ts (already compliant)
+
 - ✅ Pattern Warning for email graceful degradation
 - ✅ Proper try-catch error handling
 - ✅ revalidatePath() after mutations
@@ -92,12 +102,14 @@ Complete refactoring of Data Access Layer (DAL) and Server Actions to achieve
 ## Compliance Metrics
 
 ### Before Refactoring
+
 - Pattern Compliance: 78%
 - Files with violations: 3/6
 - Average function length: 45 lines
 - Code duplication: High (Storage helpers in 2 places)
 
 ### After Refactoring
+
 - Pattern Compliance: 98%
 - Files with violations: 0/6
 - Average function length: 22 lines
@@ -106,28 +118,34 @@ Complete refactoring of Data Access Layer (DAL) and Server Actions to achieve
 ## SOLID Principles Applied
 
 ✅ **Single Responsibility**
+
 - Each function has one clear purpose
 - All functions < 30 lines
 
 ✅ **Dependency Inversion**
+
 - Server Actions depend on DAL abstractions
 - No direct Storage/DB access in actions
 
 ✅ **Interface Segregation**
+
 - DALResult<T> discriminated union
 - Type-safe error handling
 
 ## Testing Impact
+
 - No breaking changes to public APIs
 - All existing Server Action calls remain valid
 - TypeScript compilation: 0 errors
 
 ## Files Changed
+
 - Modified: 8 files
 - Created: 1 file (lib/dal/media.ts)
 - Total changes: +574 insertions, -438 deletions
 
 ## Related Documentation
+
 - .github/instructions/crud-server-actions-pattern.instructions.md
 - .github/instructions/dal-solid-principles.instructions.md
 - .github/instructions/1-clean-code.instructions.md
