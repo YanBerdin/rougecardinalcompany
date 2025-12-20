@@ -1,6 +1,7 @@
 // import type { Database } from "@/lib/database.types";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { env } from "@/lib/env";
 
 /**
  * Especially important if using Fluid compute: Don't put this client in a
@@ -12,8 +13,8 @@ export async function createClient() {
   //return createServerClient<Database>(
   return createServerClient(
 
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,
+    env.NEXT_PUBLIC_SUPABASE_URL,
+    env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY,
     {
       cookies: {
         getAll() {

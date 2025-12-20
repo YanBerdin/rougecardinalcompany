@@ -2,22 +2,14 @@ import "server-only";
 
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { env } from "@/lib/env";
 
 export async function createAdminClient() {
-  const serviceRoleKey = process.env.SUPABASE_SECRET_KEY;
-
-  if (!serviceRoleKey) {
-    throw new Error(
-      "SUPABASE_SECRET_KEY manquante. Cette clé est requise pour les opérations admin. " +
-        "Ajoutez-la à .env.local (ne jamais committer cette clé !)"
-    );
-  }
-
   const cookieStore = await cookies();
 
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    serviceRoleKey,
+    env.NEXT_PUBLIC_SUPABASE_URL,
+    env.SUPABASE_SECRET_KEY,
     {
       cookies: {
         getAll() {

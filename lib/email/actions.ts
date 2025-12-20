@@ -1,9 +1,8 @@
 "use server";
 
-// import { createClient } from "@/supabase/server";
 import { resend } from "@/lib/resend";
-// import { SITE_CONFIG, WEBSITE_URL } from "@/lib/site-config";
 import { SITE_CONFIG } from "@/lib/site-config";
+import { env } from "@/lib/env";
 import NewsletterConfirmation from "@/emails/newsletter-confirmation";
 import ContactMessageNotification from "@/emails/contact-message-notification";
 import InvitationEmail from "@/emails/invitation-email";
@@ -17,7 +16,7 @@ export const sendEmail = async (
 
   console.log(`[Email] Sending to ${emailTo}: ${emailSubject}`);
 
-  if (process.env.NODE_ENV === "development") {
+  if (env.NODE_ENV === "development") {
     params[0].subject = `[DEV] ${params[0].subject}`;
   }
 
@@ -78,11 +77,10 @@ export async function sendInvitationEmail(params: {
   // Dev-only redirect: enabled only when EMAIL_DEV_REDIRECT is 'true'.
   // This avoids accidental permanent overrides and respects TypeScript/clean-code rules.
   const devRedirectEnabled =
-    process.env.NODE_ENV === "development" &&
-    String(process.env.EMAIL_DEV_REDIRECT).toLowerCase() === "true";
+    env.NODE_ENV === "development" && env.EMAIL_DEV_REDIRECT;
 
   const recipientEmail = devRedirectEnabled
-    ? process.env.EMAIL_DEV_REDIRECT_TO ?? "yandevformation@gmail.com"
+    ? env.EMAIL_DEV_REDIRECT_TO ?? "yandevformation@gmail.com"
     : params.email;
 
   console.log(

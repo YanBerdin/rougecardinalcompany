@@ -13,7 +13,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
-import { hasEnvVars } from "@/lib/utils";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 
 export const metadata: Metadata = {
@@ -41,7 +40,7 @@ export default async function AdminLayout({
   return (
     <SidebarProvider>
       <BfcacheHandler />
-      <AppSidebar hasEnvVars={!!hasEnvVars} />
+      <AppSidebar />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />

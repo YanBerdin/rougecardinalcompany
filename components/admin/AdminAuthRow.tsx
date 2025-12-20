@@ -15,16 +15,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-interface AdminAuthRowProps {
-  hasEnvVars: boolean;
-}
-
 interface UserData {
   email?: string;
   role?: string;
 }
 
-export default function AdminAuthRow({ hasEnvVars }: AdminAuthRowProps) {
+export default function AdminAuthRow() {
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
@@ -69,10 +65,6 @@ export default function AdminAuthRow({ hasEnvVars }: AdminAuthRowProps) {
     await supabase.auth.signOut();
     window.location.href = "/auth/login";
   };
-
-  if (!hasEnvVars) {
-    return <EnvVarWarning />;
-  }
 
   if (loading) {
     return (

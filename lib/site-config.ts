@@ -1,4 +1,6 @@
 // lib/site-config.ts
+import { env } from "./env";
+
 export const SITE_CONFIG = {
   SEO: {
     TITLE: "Rouge Cardinal Company",
@@ -6,12 +8,12 @@ export const SITE_CONFIG = {
     ICON: "/favicon.ico",
   },
   EMAIL: {
-    FROM: process.env.EMAIL_FROM || "noreply@rougecardinalcompany.fr",
-    CONTACT: process.env.EMAIL_CONTACT || "contact@rougecardinalcompany.fr",
+    FROM: env.EMAIL_FROM,
+    CONTACT: env.EMAIL_CONTACT,
   },
   SERVER: {
     PROD_URL: "https://rougecardinalcompany.fr",
-    DEV_URL: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+    DEV_URL: env.NEXT_PUBLIC_SITE_URL,
   },
   MAKER: {
     NAME: "Rouge Cardinal Company",
@@ -24,6 +26,6 @@ export const SITE_CONFIG = {
 } as const;
 
 export const WEBSITE_URL =
-  process.env.NODE_ENV === "production"
+  env.NODE_ENV === "production"
     ? SITE_CONFIG.SERVER.PROD_URL
     : SITE_CONFIG.SERVER.DEV_URL;
