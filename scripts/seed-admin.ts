@@ -1,12 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
-import * as dotenv from 'dotenv';
-
-// Load environment variables
-dotenv.config({ path: '.env.local' });
+import { env } from '../lib/env';
 
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SECRET_KEY!
+  env.NEXT_PUBLIC_SUPABASE_URL,
+  env.SUPABASE_SECRET_KEY
 );
 
 /**
@@ -17,8 +14,8 @@ async function seedAdmin() {
   console.log('🌱 Création de l\'administrateur par défaut...');
 
   // Configuration de l'admin par défaut
-  const adminEmail = process.env.DEFAULT_ADMIN_EMAIL || 'admin@rougecardinal.com';
-  const adminPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'Admin123!';
+  const adminEmail = 'admin@rougecardinal.com';
+  const adminPassword = 'Admin123!';
 
   try {
     // 1. Créer l'utilisateur dans Supabase Auth
