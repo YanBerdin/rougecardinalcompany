@@ -17,11 +17,11 @@ import { type DALResult, generateSlug } from "@/lib/dal/helpers";
 async function generateUniqueSlug(
     supabase: SupabaseClient,
     baseSlug: string
-): Promise<string> {
+): Promise<DALResult<string>> {
     let slug = baseSlug;
     let counter = 1;
 
-    while (true) {
+    while (counter <= 100) {
         const { data: existing } = await supabase
             .from("home_hero_slides")
             .select("id")
@@ -29,16 +29,17 @@ async function generateUniqueSlug(
             .maybeSingle();
 
         if (!existing) {
-            return slug;
+            return { success: true, data: slug };
         }
 
         slug = `${baseSlug}-${counter}`;
         counter++;
-
-        if (counter > 100) {
-            throw new Error("Unable to generate unique slug");
-        }
     }
+
+    return {
+        success: false,
+        error: "[ERR_HERO_009] Unable to generate unique slug after 100 attempts"
+    };
 }
 
 /**
@@ -48,11 +49,11 @@ async function generateUniqueSlugExcluding(
     supabase: SupabaseClient,
     baseSlug: string,
     excludeId: number
-): Promise<string> {
+): Promise<DALResult<string>> {
     let slug = baseSlug;
     let counter = 1;
 
-    while (true) {
+    while (counter <= 100) {
         const { data: existing } = await supabase
             .from("home_hero_slides")
             .select("id")
@@ -61,16 +62,17 @@ async function generateUniqueSlugExcluding(
             .maybeSingle();
 
         if (!existing) {
-            return slug;
+            return { success: true, data: slug };
         }
 
         slug = `${baseSlug}-${counter}`;
         counter++;
-
-        if (counter > 100) {
-            throw new Error("Unable to generate unique slug");
-        }
     }
+
+    return {
+        success: false,
+        error: "[ERR_HERO_010] Unable to generate unique slug after 100 attempts"
+    };
 }
 
 // =============================================================================
@@ -166,11 +168,15 @@ export async function createHeroSlide(
         const supabase = await createClient();
 
         const baseSlug = validated.slug || generateSlug(validated.title);
-        const slug = await generateUniqueSlug(supabase, baseSlug);
+        const slugResult = await generateUniqueSlug(supabase, baseSlug);
+        
+        if (!slugResult.success) {
+            return slugResult;
+        }
 
         const { data, error } = await supabase
             .from("home_hero_slides")
-            .insert({ ...validated, slug })
+            .insert({ ...validated, slug: slugResult.data })
             .select()
             .single();
 
@@ -222,21 +228,31 @@ export async function updateHeroSlide(
             if (currentSlide) {
                 const baseSlug = generateSlug(validated.title);
                 if (baseSlug !== currentSlide.slug) {
-                    const uniqueSlug = await generateUniqueSlugExcluding(
+                    const slugResult = await generateUniqueSlugExcluding(
                         supabase,
                         baseSlug,
                         id
                     );
-                    updateData = { ...updateData, slug: uniqueSlug };
+                    
+                    if (!slugResult.success) {
+                        return slugResult;
+                    }
+                    
+                    updateData = { ...updateData, slug: slugResult.data };
                 }
             }
         } else if (validated.slug) {
-            const uniqueSlug = await generateUniqueSlugExcluding(
+            const slugResult = await generateUniqueSlugExcluding(
                 supabase,
                 validated.slug,
                 id
             );
-            updateData = { ...updateData, slug: uniqueSlug };
+            
+            if (!slugResult.success) {
+                return slugResult;
+            }
+            
+            updateData = { ...updateData, slug: slugResult.data };
         }
 
         const { data, error } = await supabase

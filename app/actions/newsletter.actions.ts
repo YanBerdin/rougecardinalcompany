@@ -1,5 +1,6 @@
 "use server";
 
+import "server-only";
 import { handleNewsletterSubscription } from "@/lib/actions/newsletter-server";
 import type { ActionResult } from "@/lib/actions/types";
 

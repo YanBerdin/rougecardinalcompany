@@ -1,5 +1,6 @@
 "use server";
 
+import "server-only";
 import { resend } from "@/lib/resend";
 import { SITE_CONFIG } from "@/lib/site-config";
 import { env } from "@/lib/env";
@@ -8,22 +9,19 @@ import ContactMessageNotification from "@/emails/contact-message-notification";
 import InvitationEmail from "@/emails/invitation-email";
 import type { ResendParamsTypeWithConditionalFrom } from "@/lib/email/types";
 
-export const sendEmail = async (
-  ...params: ResendParamsTypeWithConditionalFrom
-) => {
-  const emailTo = params[0].to;
-  const emailSubject = params[0].subject; //TODO: subject column required ?
+// =============================================================================
+// HELPER FUNCTIONS (< 30 lines each)
+// =============================================================================
 
-  console.log(`[Email] Sending to ${emailTo}: ${emailSubject}`);
-
-  if (env.NODE_ENV === "development") {
-    params[0].subject = `[DEV] ${params[0].subject}`;
-  }
-
-  const emailParams = {
+function buildEmailParams(
+  params: ResendParamsTypeWithConditionalFrom
+): Parameters<typeof resend.emails.send>[0] {
+  const isDevelopment = env.NODE_ENV === "development";
+  
+  return {
     from: params[0].from ?? SITE_CONFIG.EMAIL.FROM,
     to: params[0].to,
-    subject: params[0].subject,
+    subject: isDevelopment ? `[DEV] ${params[0].subject}` : params[0].subject,
     react: params[0].react,
     ...(params[0].cc && { cc: params[0].cc }),
     ...(params[0].bcc && { bcc: params[0].bcc }),
@@ -33,7 +31,21 @@ export const sendEmail = async (
     ...(params[0].attachments && { attachments: params[0].attachments }),
     ...(params[0].tags && { tags: params[0].tags }),
   };
+}
 
+// =============================================================================
+// PUBLIC FUNCTIONS
+// =============================================================================
+
+export const sendEmail = async (
+  ...params: ResendParamsTypeWithConditionalFrom
+) => {
+  const emailTo = params[0].to;
+  const emailSubject = params[0].subject;
+
+  console.log(`[Email] Sending to ${emailTo}: ${emailSubject}`);
+
+  const emailParams = buildEmailParams(params);
   const result = await resend.emails.send(emailParams, params[1]);
 
   if (result.error) {

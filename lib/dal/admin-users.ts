@@ -11,6 +11,7 @@ import {
   type UpdateUserRoleInput,
   type InviteUserInput,
 } from "@/lib/schemas/admin-users";
+import { type DALResult } from "@/lib/dal/helpers";
 
 export interface UserWithProfile {
   id: string;
@@ -25,13 +26,6 @@ export interface UserWithProfile {
   } | null;
 }
 
-interface DALResult<T = null> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  warning?: string;
-}
-
 function sanitizeEmailForLogs(email: string): string {
   const [local, domain] = email.split('@');
   if (!domain) return email; // Invalid email, return as-is
@@ -41,12 +35,22 @@ function sanitizeEmailForLogs(email: string): string {
   return `${maskedLocal}@${domain}`;
 }
 
-export async function listAllUsers(): Promise<UserWithProfile[]> {
-  await requireAdmin();
+// ============================================================================
+// Helpers (< 30 lines each)
+// ============================================================================
 
-  const supabase = await createClient();
-  const adminClient = await createAdminClient();
+interface AuthUserData {
+  id: string;
+  email?: string | null;
+  created_at: string;
+  email_confirmed_at?: string | null;
+  last_sign_in_at?: string | null;
+  invited_at?: string | null;
+}
 
+async function fetchAuthUsers(
+  adminClient: SupabaseClient
+): Promise<DALResult<AuthUserData[]>> {
   const {
     data: { users },
     error: usersError,
@@ -54,10 +58,19 @@ export async function listAllUsers(): Promise<UserWithProfile[]> {
 
   if (usersError) {
     console.error("[DAL] Failed to fetch users:", usersError);
-    throw new Error(`Failed to fetch users: ${usersError.message}`);
+    return {
+      success: false,
+      error: `[ERR_USER_001] Failed to fetch users: ${usersError.message}`,
+    };
   }
 
-  const userIds: string[] = users.map((u): string => u.id);
+  return { success: true, data: users as AuthUserData[] };
+}
+
+async function fetchUserProfiles(
+  supabase: SupabaseClient,
+  userIds: string[]
+): Promise<DALResult<Array<{ user_id: string; role: string; display_name: string | null }>>> {
   const { data: profiles, error: profilesError } = await supabase
     .from("profiles")
     .select("user_id, role, display_name")
@@ -65,11 +78,21 @@ export async function listAllUsers(): Promise<UserWithProfile[]> {
 
   if (profilesError) {
     console.error("[DAL] Failed to fetch profiles:", profilesError);
-    throw new Error(`Failed to fetch profiles: ${profilesError.message}`);
+    return {
+      success: false,
+      error: `[ERR_USER_002] Failed to fetch profiles: ${profilesError.message}`,
+    };
   }
 
-  return users.map((user: { id: string; email?: string | null; created_at: string; email_confirmed_at?: string | null; last_sign_in_at?: string | null; invited_at?: string | null }): UserWithProfile => {
-    const profile = profiles?.find((p: { user_id: string }) => p.user_id === user.id);
+  return { success: true, data: profiles ?? [] };
+}
+
+function mapUsersWithProfiles(
+  users: AuthUserData[],
+  profiles: Array<{ user_id: string; role: string; display_name: string | null }>
+): UserWithProfile[] {
+  return users.map((user): UserWithProfile => {
+    const profile = profiles.find((p) => p.user_id === user.id);
     return {
       id: user.id,
       email: user.email ?? "",
@@ -79,12 +102,50 @@ export async function listAllUsers(): Promise<UserWithProfile[]> {
       invited_at: user.invited_at ?? null,
       profile: profile
         ? {
-          role: profile.role ?? "user",
-          display_name: profile.display_name,
-        }
+            role: profile.role ?? "user",
+            display_name: profile.display_name,
+          }
         : null,
     };
   });
+}
+
+/**
+ * List all users with their profiles (admin only)
+ * @returns DALResult with array of users or error
+ */
+export async function listAllUsers(): Promise<DALResult<UserWithProfile[]>> {
+  try {
+    await requireAdmin();
+
+    const supabase = await createClient();
+    const adminClient = await createAdminClient();
+
+    // 1. Fetch auth users
+    const usersResult = await fetchAuthUsers(adminClient);
+    if (!usersResult.success) {
+      return usersResult;
+    }
+
+    const users = usersResult.data;
+    const userIds = users.map((u) => u.id);
+
+    // 2. Fetch profiles
+    const profilesResult = await fetchUserProfiles(supabase, userIds);
+    if (!profilesResult.success) {
+      return profilesResult;
+    }
+
+    // 3. Map and return
+    const usersWithProfiles = mapUsersWithProfiles(users, profilesResult.data);
+    return { success: true, data: usersWithProfiles };
+  } catch (err: unknown) {
+    console.error("[DAL] listAllUsers unexpected error:", err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "[ERR_USER_003] Unknown error",
+    };
+  }
 }
 
 // Minimal auth user shape returned by admin list/find operations
@@ -117,7 +178,7 @@ async function findUserByEmail(
 
 export async function updateUserRole(
   input: UpdateUserRoleInput
-): Promise<DALResult> {
+): Promise<DALResult<null>> {
   await requireAdmin();
 
   const validated = UpdateUserRoleSchema.parse(input);
@@ -157,10 +218,10 @@ export async function updateUserRole(
   }
 
   console.log(`[DAL] Role updated: ${validated.userId} → ${validated.role}`);
-  return { success: true };
+  return { success: true, data: null };
 }
 
-export async function deleteUser(userId: string): Promise<DALResult> {
+export async function deleteUser(userId: string): Promise<DALResult<null>> {
   await requireAdmin();
 
   const UUID_REGEX =
@@ -185,7 +246,7 @@ export async function deleteUser(userId: string): Promise<DALResult> {
   }
 
   console.log(`[DAL] User deleted: ${userId}`);
-  return { success: true };
+  return { success: true, data: null };
 }
 
 async function getCurrentAdminIdFromClaims(
@@ -199,9 +260,9 @@ async function getCurrentAdminIdFromClaims(
 async function checkInvitationRateLimit(
   supabase: SupabaseClient,
   currentAdminId: string | null
-): Promise<void> {
+): Promise<DALResult<null>> {
   if (!currentAdminId) {
-    return;
+    return { success: true, data: null };
   }
   // 24 * 60 * 60 * 1000 ms = 1 jour
   const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
@@ -212,24 +273,32 @@ async function checkInvitationRateLimit(
     .gte("created_at", oneDayAgo);
 
   if (count && count >= 10) {
-    throw new Error("[ERR_INVITE_001] Rate limit dépassé: maximum 10 invitations par jour");
+    return {
+      success: false,
+      error: "[ERR_INVITE_001] Rate limit dépassé: maximum 10 invitations par jour"
+    };
   }
+
+  return { success: true, data: null };
 }
 
 async function verifyUserDoesNotExist(
   adminClient: SupabaseClient,
   email: string
-): Promise<void> {
+): Promise<DALResult<null>> {
   console.log(`[inviteUser] Checking for existing user: ${sanitizeEmailForLogs(email)}`);
 
   const existingUser = await findUserByEmail(adminClient, email);
 
   if (existingUser) {
     console.log(`[inviteUser] User ${email} already exists`);
-    throw new Error(
-      `[ERR_INVITE_002] Un utilisateur avec l'adresse ${email} existe déjà dans le système.`
-    );
+    return {
+      success: false,
+      error: `[ERR_INVITE_002] Un utilisateur avec l'adresse ${email} existe déjà dans le système.`
+    };
   }
+
+  return { success: true, data: null };
 }
 
 // Generate an invite link first. generateLink(type: 'invite') will create the
@@ -241,7 +310,7 @@ async function generateUserInviteLinkWithUrl(
   email: string,
   role: string,
   displayName: string
-): Promise<{ invitationUrl: string }> {
+): Promise<DALResult<{ invitationUrl: string }>> {
   const redirectUrl = `${env.NEXT_PUBLIC_SITE_URL}/auth/setup-account`;
 
   const { data: linkData, error: linkError } =
@@ -263,7 +332,6 @@ async function generateUserInviteLinkWithUrl(
     console.log(`[DEBUG] linkError.code: ${linkError.code}, linkError.message: ${linkError.message}`);
 
     // Try to find an existing user record to provide more context to caller
-    // const existing = await findUserByEmail(adminClient, validated.email);
     const existing = await findUserByEmail(adminClient, email);
     const existingId = existing?.id ?? null;
 
@@ -276,36 +344,41 @@ async function generateUserInviteLinkWithUrl(
         ? `Invitation impossible : un compte existe déjà (id=${existingId}). Vérifiez auth.users ou utilisez le flow de récupération.`
         : `Un utilisateur avec l'adresse ${email} existe déjà dans le système.`;
 
-      throw new Error(`[ERR_INVITE_003] ${errorMessage}`);
+      return {
+        success: false,
+        error: `[ERR_INVITE_003] ${errorMessage}`
+      };
     }
 
-    throw new Error(
-      `[ERR_INVITE_004] Erreur lors de la génération du lien d'invitation: ${linkError.message}`
-    );
+    return {
+      success: false,
+      error: `[ERR_INVITE_004] Erreur lors de la génération du lien d'invitation: ${linkError.message}`
+    };
   }
 
-  return { invitationUrl: linkData.properties.action_link };
+  return { success: true, data: { invitationUrl: linkData.properties.action_link } };
 }
 
 async function waitForAuthUserCreation(
   adminClient: SupabaseClient,
   email: string
-): Promise<string> {
+): Promise<DALResult<{ userId: string }>> {
   const maxAttempts = 5;
   const delayMs = 500;
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const found = await findUserByEmail(adminClient, email);
     if (found?.id) {
-      return found.id;
+      return { success: true, data: { userId: found.id } };
     }
     await new Promise((resolve) => setTimeout(resolve, delayMs));
   }
 
   console.error("[DAL] Could not find auth user after generateLink.");
-  throw new Error(
-    `[ERR_INVITE_005] Invitation créée (lien), mais l'utilisateur n'a pas encore été visible dans auth.users. Veuillez vérifier manuellement.`
-  );
+  return {
+    success: false,
+    error: `[ERR_INVITE_005] Invitation créée (lien), mais l'utilisateur n'a pas encore été visible dans auth.users. Veuillez vérifier manuellement.`
+  };
 }
 
 async function createUserProfileWithRole(
@@ -313,7 +386,7 @@ async function createUserProfileWithRole(
   userId: string,
   role: string,
   displayName: string
-): Promise<void> {
+): Promise<DALResult<null>> {
   const { error: profileError } = await adminClient
     .from("profiles")
     .upsert(
@@ -329,12 +402,14 @@ async function createUserProfileWithRole(
 
   if (profileError) {
     console.error("[DAL] Failed to upsert profile:", profileError);
-    throw new Error(
-      `[ERR_INVITE_006] Failed to upsert profile for user ${userId}: ${profileError.message}. L'utilisateur a été créé dans auth.users; veuillez vérifier manuellement si nécessaire.`
-    );
+    return {
+      success: false,
+      error: `[ERR_INVITE_006] Failed to upsert profile for user ${userId}: ${profileError.message}. L'utilisateur a été créé dans auth.users; veuillez vérifier manuellement si nécessaire.`
+    };
   }
 
   console.log(`[DAL] Profile upserted (created or updated) for user ${userId}`);
+  return { success: true, data: null };
 }
 
 async function logInvitationAuditRecord(
@@ -373,19 +448,52 @@ export async function inviteUserWithoutEmail(
 
   const currentAdminId = await getCurrentAdminIdFromClaims(supabase);
 
-  await checkInvitationRateLimit(supabase, currentAdminId);
-  await verifyUserDoesNotExist(adminClient, validated.email);
+  // 1. Check rate limit
+  const rateLimitResult = await checkInvitationRateLimit(supabase, currentAdminId);
+  if (!rateLimitResult.success) {
+    return { success: false, error: rateLimitResult.error };
+  }
 
+  // 2. Verify user does not exist
+  const verifyResult = await verifyUserDoesNotExist(adminClient, validated.email);
+  if (!verifyResult.success) {
+    return { success: false, error: verifyResult.error };
+  }
+
+  // 3. Generate invitation link
   const displayName = validated.displayName || validated.email.split("@")[0];
-  const { invitationUrl } = await generateUserInviteLinkWithUrl(
+  const linkResult = await generateUserInviteLinkWithUrl(
     adminClient,
     validated.email,
     validated.role,
     displayName
   );
+  if (!linkResult.success) {
+    return linkResult;
+  }
 
-  const userId = await waitForAuthUserCreation(adminClient, validated.email);
-  await createUserProfileWithRole(adminClient, userId, validated.role, displayName);
+  const { invitationUrl } = linkResult.data;
+
+  // 4. Wait for auth user creation
+  const userCreationResult = await waitForAuthUserCreation(adminClient, validated.email);
+  if (!userCreationResult.success) {
+    return userCreationResult;
+  }
+
+  const { userId } = userCreationResult.data;
+
+  // 5. Create user profile
+  const profileResult = await createUserProfileWithRole(
+    adminClient,
+    userId,
+    validated.role,
+    displayName
+  );
+  if (!profileResult.success) {
+    return profileResult;
+  }
+
+  // 6. Log audit record
   await logInvitationAuditRecord(supabase, currentAdminId, userId, validated.email, validated.role);
 
   console.log(`[DAL] User created successfully: userId=${userId} role=${validated.role}`);

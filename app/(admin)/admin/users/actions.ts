@@ -24,43 +24,52 @@ export async function inviteUser(input: {
   role: "user" | "editor" | "admin";
   displayName?: string;
 }): Promise<ActionResult<{ userId: string }>> {
-  // 1. Create user in database (returns invitationUrl)
-  const result = await inviteUserDAL(input);
-
-  if (!result.success || !result.data) {
-    return { success: false, error: result.error ?? "Invitation failed" };
-  }
-
-  const { userId, invitationUrl } = result.data;
-
-  // 2. Send invitation email with the generated URL
-  let emailSent = true;
   try {
-    await sendInvitationEmail({
-      email: input.email,
-      role: input.role,
-      displayName: input.displayName,
-      invitationUrl,
-    });
-  } catch (emailError) {
-    console.error("[inviteUser] Email failed:", emailError);
-    emailSent = false;
-  }
+    // 1. Create user in database (returns invitationUrl)
+    const result = await inviteUserDAL(input);
 
-  // 3. Revalidation
-  revalidatePath("/admin/users");
+    if (!result.success) {
+      return { success: false, error: result.error };
+    }
 
-  // 4. Return with warning if email failed
-  if (!emailSent) {
+    const { userId, invitationUrl } = result.data;
+
+    // 2. Send invitation email with the generated URL
+    let emailSent = true;
+    try {
+      await sendInvitationEmail({
+        email: input.email,
+        role: input.role,
+        displayName: input.displayName,
+        invitationUrl,
+      });
+    } catch (emailError) {
+      console.error("[inviteUser] Email failed:", emailError);
+      emailSent = false;
+    }
+
+    // 3. Revalidation
+    revalidatePath("/admin/users");
+
+    // 4. Return with warning if email failed
+    if (!emailSent) {
+      return {
+        success: true,
+        data: { userId },
+        warning:
+          "Utilisateur créé mais l'email d'invitation n'a pas pu être envoyé. Veuillez renvoyer l'invitation manuellement.",
+      };
+    }
+
+    return { success: true, data: { userId } };
+  } catch (error) {
+    // Catch any unexpected errors (validation, network, etc.)
+    console.error("[inviteUser] Unexpected error:", error);
     return {
-      success: true,
-      data: { userId },
-      warning:
-        "Utilisateur créé mais l'email d'invitation n'a pas pu être envoyé. Veuillez renvoyer l'invitation manuellement.",
+      success: false,
+      error: error instanceof Error ? error.message : "Erreur inattendue lors de l'invitation",
     };
   }
-
-  return { success: true, data: { userId } };
 }
 
 export async function updateUserRole(input: {

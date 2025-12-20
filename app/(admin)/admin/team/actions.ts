@@ -1,5 +1,6 @@
 "use server";
 
+import "server-only";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
@@ -19,30 +20,11 @@ import {
 } from "@/lib/dal/team";
 import { requireAdmin } from "@/lib/auth/is-admin";
 
-const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
-const CACHE_CONTROL_SECONDS = "3600";
-const ALLOWED_IMAGE_MIME_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/avif",
-] as const;
+// Use centralized ActionResult<T> from @/lib/actions/types
+import type { ActionResult } from "@/lib/actions/types";
 
-type SuccessResponse<T> = {
-  readonly success: true;
-  readonly data: T;
-};
-
-type ErrorResponse = {
-  readonly success: false;
-  readonly error: string;
-  readonly status?: number;
-  readonly details?: unknown;
-};
-
-type ActionResponse<T> = SuccessResponse<T> | ErrorResponse;
-
-type AllowedMimeType = (typeof ALLOWED_IMAGE_MIME_TYPES)[number];
+// Extended type for team actions that need HTTP status codes
+type ActionResponse<T> = ActionResult<T> & { status?: number; details?: unknown };
 
 export async function createTeamMember(
   input: unknown
@@ -217,149 +199,12 @@ function isValidTeamMemberId(teamMemberId: number): boolean {
   return Number.isFinite(teamMemberId) && teamMemberId > 0;
 }
 
-function isAllowedMimeType(mimeType: string): mimeType is AllowedMimeType {
-  return ALLOWED_IMAGE_MIME_TYPES.includes(mimeType as AllowedMimeType);
-}
-
-function extractFileFromFormData(formData: FormData): ActionResponse<File> {
-  const uploadedFile = formData.get("file");
-
-  if (!uploadedFile || !(uploadedFile instanceof File)) {
-    return { success: false, error: "No file provided", status: 400 };
-  }
-
-  return { success: true, data: uploadedFile };
-}
-
-function validateImageFile(uploadedFile: File): ActionResponse<File> {
-  if (uploadedFile.size > MAX_FILE_SIZE_BYTES) {
-    return {
-      success: false,
-      error: "File too large (max 5MB)",
-      status: 400,
-    };
-  }
-
-  if (!isAllowedMimeType(uploadedFile.type)) {
-    return {
-      success: false,
-      error: `Invalid file type. Allowed: ${ALLOWED_IMAGE_MIME_TYPES.join(", ")}`,
-      status: 400,
-    };
-  }
-
-  return { success: true, data: uploadedFile };
-}
-
-async function uploadFileToStorage(
-  uploadedFile: File
-): Promise<ActionResponse<{ storagePath: string; publicUrl: string }>> {
-  const uniqueFileName = generateUniqueFileName(
-    uploadedFile.name,
-    uploadedFile.type
-  );
-  const storageFilePath = `team-photos/${uniqueFileName}`;
-
-  const { createClient } = await import("@/supabase/server");
-  const supabaseClient = await createClient();
-
-  const { error: storageUploadError } = await supabaseClient.storage
-    .from("medias")
-    .upload(storageFilePath, uploadedFile, {
-      cacheControl: CACHE_CONTROL_SECONDS,
-      upsert: false,
-    });
-
-  if (storageUploadError) {
-    console.error("Storage upload error:", storageUploadError);
-    return {
-      success: false,
-      error: `Upload failed: ${storageUploadError.message}`,
-      status: 500,
-    };
-  }
-
-  const { data: publicUrlData } = supabaseClient.storage
-    .from("medias")
-    .getPublicUrl(storageFilePath);
-
-  return {
-    success: true,
-    data: {
-      storagePath: storageFilePath,
-      publicUrl: publicUrlData.publicUrl,
-    },
-  };
-}
-
-async function createMediaRecord(
-  uploadData: { storagePath: string; publicUrl: string },
-  originalFile: File
-): Promise<ActionResponse<{ mediaId: number; publicUrl: string }>> {
-  const { createClient } = await import("@/supabase/server");
-  const supabaseClient = await createClient();
-
-  const { data: createdMediaRecord, error: mediaInsertError } =
-    await supabaseClient
-      .from("medias")
-      .insert({
-        storage_path: uploadData.storagePath,
-        filename: originalFile.name,
-        mime: originalFile.type,
-        size_bytes: originalFile.size,
-        metadata: { bucket: "medias", type: "team_photo" },
-      })
-      .select()
-      .single();
-
-  if (mediaInsertError || !createdMediaRecord) {
-    console.error("Media record insertion error:", mediaInsertError);
-    return {
-      success: false,
-      error: "Failed to create media record",
-      status: 500,
-    };
-  }
-
-  return {
-    success: true,
-    data: {
-      mediaId: createdMediaRecord.id,
-      publicUrl: uploadData.publicUrl,
-    },
-  };
-}
-
-function generateUniqueFileName(
-  originalFileName: string,
-  mimeType: string
-): string {
-  const currentTimestamp = Date.now();
-  const randomIdentifier = Math.random().toString(36).substring(2, 9);
-
-  const extractedExtension = originalFileName.split(".").pop()?.toLowerCase();
-  const extensionFromMime = mimeType.split("/")[1];
-  const fileExtension = extractedExtension || extensionFromMime || "jpg";
-
-  return `team-${currentTimestamp}-${randomIdentifier}.${fileExtension}`;
-}
-
-async function cleanupStorageFile(storagePath: string): Promise<void> {
-  try {
-    const { createClient } = await import("@/supabase/server");
-    const supabaseClient = await createClient();
-
-    await supabaseClient.storage.from("medias").remove([storagePath]);
-  } catch (error: unknown) {
-    console.error("Failed to cleanup storage file:", error);
-    // Don't throw - cleanup is best effort
-  }
-}
+// Helper functions removed - now using centralized lib/actions/media-actions
 
 function handleActionError(
   error: unknown,
   functionName: string
-): ErrorResponse {
+): ActionResponse<never> {
   console.error(`${functionName} error:`, error);
 
   if (error instanceof z.ZodError) {

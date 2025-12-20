@@ -1,5 +1,6 @@
 "use server";
 
+import "server-only";
 import { handleContactSubmission } from "@/lib/actions/contact-server";
 import type { ActionResult } from "@/lib/actions/types";
 
