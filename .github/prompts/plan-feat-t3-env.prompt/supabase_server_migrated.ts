@@ -1,18 +1,15 @@
-// import type { Database } from "@/lib/database.types";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { env } from "@/lib/env";
 
 /**
  * Especially important if using Fluid compute: Don't put this client in a
- * global variable. Always create a new client within each function when using
- * it.
+ * global variable. Always create a new client within each function when using it.
  */
 export async function createClient() {
   const cookieStore = await cookies();
-  //return createServerClient<Database>(
+  
   return createServerClient(
-
     env.NEXT_PUBLIC_SUPABASE_URL,
     env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY,
     {
@@ -27,8 +24,7 @@ export async function createClient() {
             );
           } catch {
             // The `setAll` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
+            // This can be ignored if you have middleware refreshing user sessions.
           }
         },
       },

@@ -38,7 +38,7 @@ pnpm exec tsx scripts/test-team-server-actions.ts
 **Configuration Requise** :
 
 ```bash
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+SUPABASE_SECRET_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
 #### test-team-active-dal.ts (TypeScript)
@@ -150,7 +150,7 @@ NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 # Recommandé (accès admin complet)
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+SUPABASE_SECRET_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
 **Troubleshooting** : Voir [scripts-troubleshooting.md](../doc/scripts-troubleshooting.md)
@@ -176,7 +176,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ
 
 # Supabase - Admin Key (scripts/backend only)
 # ⚠️ NEVER commit this key to version control
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+SUPABASE_SECRET_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 # Resend (email service)
 RESEND_API_KEY=re_...
@@ -224,7 +224,7 @@ pnpm run check-logs
 
 ### Service Role Key
 
-La clé `SUPABASE_SERVICE_ROLE_KEY` donne un **accès administrateur complet** :
+La clé `SUPABASE_SECRET_KEY` donne un **accès administrateur complet** :
 
 - ✅ Bypass toutes les politiques RLS (Row Level Security)
 - ✅ Lecture/écriture sur toutes les tables
@@ -359,7 +359,7 @@ async function main() {
   // Use service_role key for admin access
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY! // Bypasses RLS
+    process.env.SUPABASE_SECRET_KEY! // Bypasses RLS
   );
 
   // Your admin logic here

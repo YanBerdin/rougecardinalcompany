@@ -7,6 +7,7 @@ import { createClient } from "@/supabase/server";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { HttpStatus } from "@/lib/api/helpers";
+import { env } from "@/lib/env";
 
 export async function GET() {
   try {
@@ -79,9 +80,9 @@ export async function GET() {
 
       environment: {
         supabaseUrl:
-          process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 30) + "...",
+          env.NEXT_PUBLIC_SUPABASE_URL.substring(0, 30) + "...",
         hasPublishableKey:
-          !!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY,
+          !!env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY,
         keyType: "PUBLISHABLE_OR_ANON",
       },
     };

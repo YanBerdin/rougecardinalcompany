@@ -12,10 +12,10 @@ const email = process.argv[2] || "yandevformation@gmail.com";
 
 async function setAdminRole() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceRoleKey = process.env.SUPABASE_SECRET_KEY;
 
   if (!supabaseUrl || !serviceRoleKey) {
-    console.error("\n❌ Missing SUPABASE_SERVICE_ROLE_KEY in .env.local");
+    console.error("\n❌ Missing SUPABASE_SECRET_KEY in .env.local");
     console.error("\n📋 To add admin role manually:");
     console.error("\n1. Go to https://supabase.com/dashboard");
     console.error("2. Select your project");

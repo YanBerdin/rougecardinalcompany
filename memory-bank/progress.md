@@ -1,5 +1,82 @@
 # Progress
 
+## T3 Env Type-Safe Environment Variables - COMPLETED (2025-12-20)
+
+### Objectif
+
+Implémenter la validation type-safe des variables d'environnement avec @t3-oss/env-nextjs selon le plan `.github/prompts/plan-feat-t3-env.prompt/plan-feat-t3-env.prompt.md`.
+
+### Résultats
+
+#### Fichiers créés
+
+- ✅ `lib/env.ts` (82 lignes) — Configuration centrale T3 Env avec validation Zod
+- ✅ `scripts/test-env-validation.ts` (88 lignes) — Tests automatisés de validation
+
+#### Migration complète (12 fichiers)
+
+**Phase 2 — Core (6 files)** :
+
+- `lib/site-config.ts` — env.EMAIL_FROM, env.NEXT_PUBLIC_SITE_URL
+- `lib/resend.ts` — env.RESEND_API_KEY (suppression check manuel)
+- `supabase/server.ts, client.ts, admin.ts` — env imports
+- `supabase/middleware.ts` — Removal hasEnvVars check
+
+**Phase 4-6 — DAL/Scripts/API** :
+
+- `lib/dal/admin-users.ts`
+- `scripts/create-admin-user.ts, seed-admin.ts` (removal dotenv)
+- `app/api/admin/media/search/route.ts`
+- `app/api/debug-auth/route.ts`
+
+**Phase 7 — Cleanup (hasEnvVars pattern removed)** :
+
+- `lib/utils.ts` — Export hasEnvVars supprimé
+- `components/admin/AdminAuthRow.tsx, AdminSidebar.tsx` — Prop supprimée
+- `app/(admin)/layout.tsx` — Import supprimé
+
+#### Variables validées (14 au total)
+
+**Server-only** :
+
+- SUPABASE_SECRET_KEY, RESEND_API_KEY, EMAIL_FROM, EMAIL_CONTACT
+- EMAIL_DEV_REDIRECT (boolean transform), EMAIL_DEV_REDIRECT_TO
+- MCP/CI optionnels (SUPABASE_PROJECT_REF, GITHUB_TOKEN, etc.)
+
+**Client-accessible** :
+
+- NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY, NEXT_PUBLIC_SITE_URL
+
+#### Validation & Build
+
+| Test | Résultat |
+| ------ | ---------- |
+| TypeScript compilation | ✅ PASS (0 errors) |
+| Production build | ✅ PASS (29 routes) |
+| Validation script | ✅ CORRECT (détecte missing vars) |
+
+#### Commits
+
+- `feat(env): implement T3 Env validation (Phases 1-3)` — Core migration
+- `feat(env): complete T3 Env migration (Phases 4-7)` — Final cleanup
+
+#### Bénéfices
+
+1. **Fail Fast** : App crash au démarrage si variables manquantes
+2. **Type Safety** : Full TypeScript inference (autocomplete `env.*`)
+3. **Security** : Séparation client/server enforced
+4. **Code Cleanup** : ~100 lignes de code hasEnvVars supprimées
+5. **Documentation** : Single source of truth dans `lib/env.ts`
+6. **Testing** : `SKIP_ENV_VALIDATION=1` pour CI/Docker
+
+### Documentation
+
+- `.github/prompts/plan-feat-t3-env.prompt/plan-feat-t3-env.prompt.md` — Plan d'implémentation
+- `.github/prompts/plan-feat-t3-env.prompt/t3_env_config.ts` — Config corrigée
+- `memory-bank/tasks/TASK048-t3-env-implementation.md` — Task complète
+
+---
+
 ## ImageFieldGroup v2 - COMPLETED (2025-12-13)
 
 ### Objectif
@@ -101,7 +178,7 @@ Extraire la logique Newsletter avec DAL dédié et gestion idempotente des dupli
 ### Documents mis à jour/créés
 
 | Document | Action |
-|----------|--------|
+| ---------- | -------- |
 | `Project_Folders_Structure_Blueprint_v5.md` | Mis à jour avec factorisations |
 | `Project_Architecture_Blueprint.md` | Mis à jour v2.2 |
 | `Email_Service_Architecture.md` | **Créé** — Documentation service email |
@@ -131,7 +208,7 @@ Extraire la logique Newsletter avec DAL dédié et gestion idempotente des dupli
 ### Fichiers créés/modifiés
 
 | Fichier | Action |
-|---------|--------|
+| --------- | -------- |
 | `components/admin/BfcacheHandler.tsx` | Créé |
 | `app/(admin)/layout.tsx` | Import + composant ajouté |
 
@@ -153,7 +230,7 @@ Extraire la logique Newsletter avec DAL dédié et gestion idempotente des dupli
 ### Fichiers créés
 
 | Fichier | Lignes | Rôle |
-|---------|--------|------|
+| --------- | -------- | ------ |
 | `lib/constants/hero-slides.ts` | 30 | Constants centralisées |
 | `lib/hooks/useHeroSlideForm.ts` | 53 | Form logic |
 | `lib/hooks/useHeroSlideFormSync.ts` | 38 | Props/form sync |
@@ -211,7 +288,7 @@ pnpx @next/codemod@canary upgrade latest
 ### Sécurité
 
 | CVE | Sévérité | Solution |
-|-----|----------|----------|
+| ----- | ---------- | ---------- |
 | CVE-2025-57822 | High | Next.js 16.0.6 |
 | CVE-2025-64718 | Moderate | js-yaml >=4.1.1 override |
 
@@ -1098,7 +1175,7 @@ Cette vérification a été réalisée via l'API Supabase MCP et confirme que le
 **Fichiers clés référencés** :
 
 | Fichier | Lignes | Rôle |
-|---------|--------|------|
+| --------- | -------- | ------ |
 | `lib/actions/home-hero-actions.ts` | 77 | Server Actions CRUD |
 | `lib/schemas/home-content.ts` | 127 | Dual schemas |
 | `lib/dal/admin-home-hero.ts` | 265 | DAL avec helpers |

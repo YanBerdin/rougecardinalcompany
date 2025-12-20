@@ -28,7 +28,7 @@ export async function MyServerComponent() {
 
 Client Supabase **admin** avec privilèges élevés (service-role).
 
-- Utilise `SUPABASE_SERVICE_ROLE_KEY` (**ne JAMAIS committer cette clé !**)
+- Utilise `SUPABASE_SECRET_KEY` (**ne JAMAIS committer cette clé !**)
 - **Bypass les RLS policies** — accès complet à toutes les données
 - Utilisé uniquement pour opérations admin critiques :
   - Invitation utilisateurs (`auth.admin.generateLink`, `auth.admin.createUser`)
@@ -72,7 +72,7 @@ NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=eyJxxx...
 
 # Admin (requis pour opérations admin uniquement)
-SUPABASE_SERVICE_ROLE_KEY=eyJxxx...  # ⚠️ NE JAMAIS COMMITTER
+SUPABASE_SECRET_KEY=eyJxxx...  # ⚠️ NE JAMAIS COMMITTER
 
 # Email (requis pour invitations)
 RESEND_API_KEY=re_xxx...
@@ -99,7 +99,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000  # ou https://votre-domaine.com
 
 ## Rotation des clés
 
-En cas de compromission de `SUPABASE_SERVICE_ROLE_KEY` :
+En cas de compromission de `SUPABASE_SECRET_KEY` :
 
 1. Générez une nouvelle clé via Supabase Dashboard (Settings → API → "Rotate service role key")
 2. Mettez à jour `.env.local` localement

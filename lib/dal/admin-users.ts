@@ -4,6 +4,7 @@ import { createClient } from "@/supabase/server";
 import { createAdminClient } from "@/supabase/admin";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireAdmin } from "@/lib/auth/is-admin";
+import { env } from "@/lib/env";
 import {
   UpdateUserRoleSchema,
   InviteUserSchema,
@@ -241,7 +242,7 @@ async function generateUserInviteLinkWithUrl(
   role: string,
   displayName: string
 ): Promise<{ invitationUrl: string }> {
-  const redirectUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/auth/setup-account`;
+  const redirectUrl = `${env.NEXT_PUBLIC_SITE_URL}/auth/setup-account`;
 
   const { data: linkData, error: linkError } =
     await adminClient.auth.admin.generateLink({

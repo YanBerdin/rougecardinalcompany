@@ -1,6 +1,6 @@
 # Tech Context
 
-**Last Updated**: 2025-12-13
+**Last Updated**: 2025-12-20
 
 Versions et dépendances clés observées dans le dépôt:
 
@@ -9,18 +9,21 @@ Versions et dépendances clés observées dans le dépôt:
 - TypeScript: ^5
 - Tailwind CSS: ^3.4.x
 - Supabase: client/server integration via `@supabase/ssr` and `@supabase/supabase-js` patterns
+- **@t3-oss/env-nextjs**: **0.13.10** (type-safe env validation, added 2025-12-20)
+- **Zod**: **4.1.12** (runtime validation)
 
 Structure principale:
 
 - `app/` — App Router, pages et layouts
 - `components/` — composants réutilisables (ui/, features/)
-- `lib/` — utilitaires, DAL, schemas, constants, hooks, actions
+- `lib/` — utilitaires, DAL, schemas, constants, hooks, actions, **env.ts**
 - `supabase/` — scripts, migrations, server client helpers
 
 ## Mises à jour récentes (Dec 2025)
 
 | Date | Changement | Impact |
-|------|------------|--------|
+| ------ | ------------ | -------- |
+| 2025-12-20 | T3 Env Implementation | Type-safe env vars, ~100 lignes code supprimées |
 | 2025-12-13 | Next.js 16.0.7 → 16.0.10 | Security fix (Dependabot) |
 | 2025-12-13 | Handler Contact/Newsletter factorisés | `lib/actions/*-server.ts` |
 | 2025-12-13 | ImageFieldGroup v2 | Composant réutilisable SSRF-safe |
@@ -33,6 +36,7 @@ Outils et commandes utiles:
 - Supabase CLI: `supabase db push`, `supabase link`
 - Scripts locaux: `supabase/scripts/*` pour audit et diagnostics
 - CI: GitHub Actions (workflows ajoutés pour audit, détection REVOKE, monitoring)
+- **Env validation**: `pnpm tsx scripts/test-env-validation.ts`
 
 ## Stack Technologique
 
@@ -52,6 +56,7 @@ Outils et commandes utiles:
 - **API**: Server Components + DAL `lib/dal/*` (server-only) via Supabase Client
 - **Email Service**: Resend API avec React Email templates
 - **Validation**: Zod schemas pour runtime validation
+- **Environment Variables**: T3 Env (@t3-oss/env-nextjs) pour type-safety et validation au démarrage
 
 ### Architecture Clean Code (Dec 2025)
 
@@ -194,15 +199,15 @@ export const resend = new Resend(process.env.RESEND_API_KEY);
 
 **Supabase:**
 
-```env
+```bash
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=eyJ...
-SUPABASE_SERVICE_ROLE_KEY=eyJ...  # Admin only (scripts)
+SUPABASE_SECRET_KEY=eyJ...  # Admin only (scripts)
 ```
 
 **Resend:**
 
-```env
+```bash
 RESEND_API_KEY=re_xxx                      # Required
 RESEND_AUDIENCE_ID=xxx                     # Optional
 EMAIL_FROM=noreply@rougecardinalcompany.fr # Default FROM
@@ -449,7 +454,7 @@ window.history.replaceState(null, "", window.location.pathname);
 **Métriques finales**:
 
 | Critère | Avant | Après | Cible |
-|---------|-------|-------|-------|
+| --------- | ------- | ------- | ------- |
 | DAL avec DALResult | 0/17 | 17/17 | 100% |
 | revalidatePath dans DAL | ~12 | 0 | 0 |
 | Imports email dans DAL | 3 | 0 | 0 |

@@ -1,11 +1,58 @@
 # Email Service Architecture - Rouge Cardinal Company
 
-Date: 2025-12-13
+Date: 2025-12-20
 
 Objectif
 
 -----
 Décrire l'architecture de l'envoi d'emails (transactionnels et notifications) : intégration Resend, templates React Email, gestion des erreurs, webhooks, tests et conformité RGPD.
+
+## Mise à jour T3 Env (20 décembre 2025)
+
+Suite à l'implémentation de T3 Env pour la validation type-safe des variables d'environnement :
+
+**Variables email validées:**
+
+- `RESEND_API_KEY` (server-only, required) — Clé API Resend avec validation Zod
+- `EMAIL_FROM` (server-only, required) — Email expéditeur, format email validé
+- `EMAIL_CONTACT` (server-only, required) — Email contact, format email validé
+- `EMAIL_DEV_REDIRECT` (server-only, optional) — Boolean transform pour redirection dev
+- `EMAIL_DEV_REDIRECT_TO` (server-only, optional) — Email de redirection dev
+
+**Pattern d'utilisation:**
+
+```typescript
+// ✅ CORRECT — Utiliser env pour accéder aux variables
+import { env } from '@/lib/env';
+
+// lib/resend.ts
+import { Resend } from 'resend';
+import { env } from '@/lib/env';
+
+export const resend = new Resend(env.RESEND_API_KEY);
+
+// lib/site-config.ts
+import { env } from '@/lib/env';
+
+export const SITE_CONFIG = {
+  email: {
+    from: env.EMAIL_FROM,
+    contact: env.EMAIL_CONTACT,
+    devRedirect: env.EMAIL_DEV_REDIRECT,
+    devRedirectTo: env.EMAIL_DEV_REDIRECT_TO,
+  },
+};
+
+// ❌ INCORRECT — Ne jamais accéder directement à process.env
+const apiKey = process.env.RESEND_API_KEY;
+```
+
+**Bénéfices:**
+
+- **Validation au démarrage** : App crash si RESEND_API_KEY manquant (fail fast)
+- **Type safety** : Autocomplete pour toutes les variables email
+- **Format validation** : EMAIL_FROM et EMAIL_CONTACT validés comme email valides
+- **Transform** : EMAIL_DEV_REDIRECT automatiquement converti en boolean
 
 ## Composants principaux
 
@@ -64,13 +111,21 @@ Fin update
 ## Email Service Architecture - Rouge Cardinal Company
 
 **Date de création**: 8 octobre 2025  
-**Version**: 1.3.1  
-**Dernière mise à jour**: 4 décembre 2025  
+**Version**: 1.4.0  
+**Dernière mise à jour**: 20 décembre 2025  
 **Intégration**: feat-resend branch → feature/backoffice → master
 
 ## Vue d'Ensemble
 
-L'architecture email du projet Rouge Cardinal Company est construite autour de l'intégration de **Resend** pour les emails transactionnels et **React Email** pour les templates. Cette architecture s'intègre harmonieusement avec l'architecture Next.js 15 existante et la Data Access Layer (DAL) Supabase.
+L'architecture email du projet Rouge Cardinal Company est construite autour de l'intégration de **Resend** pour les emails transactionnels et **React Email** pour les templates. Cette architecture s'intègre harmonieusement avec l'architecture Next.js 16 existante et la Data Access Layer (DAL) Supabase.
+
+**Mise à jour v1.4.0 (20 décembre 2025) — T3 Env Integration:**
+
+- **Environment Variables**: Type-safe validation avec @t3-oss/env-nextjs
+- **Pattern migration**: Suppression des accès directs `process.env.*`
+- **Variables email**: `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_CONTACT`, `EMAIL_DEV_REDIRECT` validées avec Zod
+- **Fail fast**: App crash au démarrage si variables email manquantes
+- **Code cleanup**: Simplification `lib/resend.ts` (suppression check manuel)
 
 **Mise à jour v1.3.1 (4 décembre 2025) — API Routes Cleanup:**
 
@@ -1117,7 +1172,7 @@ async function checkEmailLogs() {
   console.log('📊 Checking email delivery logs...\n');
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseKey = process.env.SUPABASE_SECRET_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
     console.log('❌ Missing Supabase environment variables');
@@ -1156,7 +1211,7 @@ checkEmailLogs();
 
 **Commande**: `pnpm run test:logs`
 
-**Prérequis**: `SUPABASE_SERVICE_ROLE_KEY` dans `.env.local`
+**Prérequis**: `SUPABASE_SECRET_KEY` dans `.env.local`
 
 ### 9.2 Test via cURL
 
@@ -1203,7 +1258,7 @@ Recommandation : intégrer ce test dans la suite de tests principale (Vitest/Jes
 
 ### 10.1 Variables Requises
 
-```env
+```bash
 # Resend API
 RESEND_API_KEY=re_your_api_key_here
 RESEND_AUDIENCE_ID=your_audience_id  # Optionnel
@@ -1215,7 +1270,7 @@ EMAIL_CONTACT=contact@votre-domaine.fr
 # Supabase (existant)
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=xxx
-SUPABASE_SERVICE_ROLE_KEY=xxx  # Pour scripts admin
+SUPABASE_SECRET_KEY=xxx  # Pour scripts admin
 
 # Site
 NEXT_PUBLIC_SITE_URL=http://localhost:3000

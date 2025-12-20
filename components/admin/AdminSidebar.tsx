@@ -30,10 +30,6 @@ import {
 import { Input } from "@/components/ui/input";
 import AdminAuthRow from "@/components/admin/AdminAuthRow";
 
-interface AppSidebarProps {
-  hasEnvVars?: boolean;
-}
-
 const generalItems = [
   {
     title: "Tableau de bord",
@@ -107,7 +103,7 @@ const otherItems = [
 ];
 
 // https://ui.shadcn.com/docs/components/sidebar
-export default function AppSidebar({ hasEnvVars = false }: AppSidebarProps) {
+export default function AppSidebar() {
   const pathname = usePathname();
 
   return (
@@ -195,7 +191,7 @@ export default function AppSidebar({ hasEnvVars = false }: AppSidebarProps) {
                   pathname === item.href ||
                   (item.href !== "/admin" && pathname.startsWith(item.href));
                 return (
-                  <SidebarMenuItem key={item.href}  title={item.title}>
+                  <SidebarMenuItem key={item.href} title={item.title}>
                     <SidebarMenuButton asChild isActive={isActive}>
                       <Link href={item.href}>
                         <item.icon />
@@ -234,7 +230,7 @@ export default function AppSidebar({ hasEnvVars = false }: AppSidebarProps) {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem title="Authentification">
-            <AdminAuthRow hasEnvVars={hasEnvVars} />
+            <AdminAuthRow />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

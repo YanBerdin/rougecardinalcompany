@@ -1,9 +1,14 @@
 import "server-only";
-
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { env } from "@/lib/env";
 
+/**
+ * Creates a Supabase client with service-role privileges for admin operations.
+ * 
+ * ⚠️  CRITICAL: This client bypasses RLS policies. Use with extreme caution.
+ * Only use for operations that require elevated privileges (e.g., user management).
+ */
 export async function createAdminClient() {
   const cookieStore = await cookies();
 

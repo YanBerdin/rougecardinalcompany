@@ -61,7 +61,7 @@ pnpm run test:webhooks
 pnpm run test:logs
 ```
 
-**⚠️ Prérequis :** Vous devez avoir `SUPABASE_SERVICE_ROLE_KEY` (legacy)  ou `SUPABASE_SECRET_KEY` dans votre `.env.local`
+**⚠️ Prérequis :** Vous devez avoir `SUPABASE_SERVICE_ROLE_KEY` (❌ legacy)  ou `SUPABASE_SECRET_KEY` dans votre `.env.local`
 
 ```bash
 SUPABASE_SECRET_KEY=votre_clé_secrète_ici

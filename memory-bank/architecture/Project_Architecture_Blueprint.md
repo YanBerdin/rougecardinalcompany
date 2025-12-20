@@ -1,6 +1,6 @@
 # Project Architecture Blueprint — Rouge Cardinal Company
 
-Date: 2025-12-13
+Date: 2025-12-20
 
 Décrire l'architecture globale de l'application Rouge Cardinal Company : patterns d'accès aux données, organisation des routes, Server/Client split, sécurité (Supabase/RLS), et bonnes pratiques opérationnelles (CI, tests, migrations).
 
@@ -12,6 +12,7 @@ Décrire l'architecture globale de l'application Rouge Cardinal Company : patter
 - Auth : Supabase optimized JWT Signing Keys; utiliser `getClaims()` pour checks rapides.
 - Mutations internes : Server Actions (colocées sous `app/actions` ou `lib/actions`) — API Routes conservées uniquement pour clients externes ou webhooks.
 - DAL : centralisé sous `lib/dal/*` (server-only, retourne `DALResult<T>`, ne fait pas de revalidatePath).
+- **Environment Variables** : Type-safe validation avec T3 Env (@t3-oss/env-nextjs) dans `lib/env.ts`; accès UNIQUEMENT via `import { env } from '@/lib/env'`, JAMAIS `process.env.*` directement.
 
 ## Principes architecturaux
 
@@ -82,12 +83,28 @@ Fin
 ## Project Architecture Blueprint — Rouge Cardinal Company
 
 Generated: 30 November 2025  
-Updated: 6 December 2025  
+Updated: 20 December 2025  
 Source: `doc/prompts-github/architecture-blueprint-generator.prompt.md`  
 Repository branch: `master`  
-Version: v2.2
+Version: v2.3
 
-Résumé: ce document analyse la base de code existante et formalise le modèle d'architecture, les patterns observés et les recommandations pour l'évolution et l'extensibilité. Il s'appuie sur l'organisation actuelle (Next.js 15, TypeScript strict, Supabase, React 19) et couvre les composantes clés, la sécurité RLS, les modèles d'accès aux données, les tests et le déploiement.
+Résumé: ce document analyse la base de code existante et formalise le modèle d'architecture, les patterns observés et les recommandations pour l'évolution et l'extensibilité. Il s'appuie sur l'organisation actuelle (Next.js 16, TypeScript strict, Supabase, React 19) et couvre les composantes clés, la sécurité RLS, les modèles d'accès aux données, les tests et le déploiement.
+
+**Mise à jour v2.3 (20 décembre 2025) — T3 Env Integration:**
+
+- **Environment Variables**: Type-safe validation avec @t3-oss/env-nextjs v0.13.10
+- **lib/env.ts**: Configuration centrale avec validation Zod au démarrage
+- **Pattern hasEnvVars supprimé**: ~100 lignes de code manuel nettoyées
+- **Validation runtime**: Fail fast si variables requises manquantes
+- **Type safety**: Full TypeScript inference pour toutes les variables env
+- **Security**: Séparation client/server enforced (NEXT_PUBLIC_* uniquement dans client section)
+
+**Mise à jour v2.2 (6 décembre 2025) — Clean Code Refactoring:**
+
+- **Constants extraction**: `lib/constants/hero-slides.ts` (LIMITS, DEFAULTS, CONFIGS)
+- **Hooks extraction**: 4 hooks extraits (useHeroSlideForm, useHeroSlideFormSync, useHeroSlidesDnd, useHeroSlidesDelete)
+- **DRY components**: CtaFieldGroup composant config-driven
+- **File size compliance**: Tous fichiers < 300 lignes
 
 **Mise à jour v2 (30 novembre 2025) — SOLID Refactoring:**
 
@@ -531,6 +548,125 @@ export function useHeroSlidesDnd(
 - `agenda.ts` — `EventSchema`, `EventFilterSchema`
 - `compagnie.ts` — `ValueSchema`, `TeamMemberSchema`
 - `contact.ts` — `ContactMessageSchema`, `ContactEmailSchema`, `NewsletterSubscriptionSchema`
+
+### 4.6 Environment Variables (`lib/env.ts`) 🆕
+
+#### **T3 Env Type-Safe Configuration (v0.13.10)**
+
+Fichier central pour la validation type-safe des variables d'environnement avec Zod runtime validation.
+
+**Configuration structure:**
+
+```typescript
+// lib/env.ts
+import { createEnv } from "@t3-oss/env-nextjs";
+import { z } from "zod";
+
+export const env = createEnv({
+  server: {
+    // Variables server-only (sensibles)
+    SUPABASE_SECRET_KEY: z.string().min(1),
+    RESEND_API_KEY: z.string().min(1),
+    EMAIL_FROM: z.string().email(),
+    EMAIL_CONTACT: z.string().email(),
+    EMAIL_DEV_REDIRECT: z
+      .string()
+      .default("false")
+      .transform(val => val === "true"), // boolean transform
+    // ... optional MCP/CI variables
+  },
+  client: {
+    // Variables client-accessible (publiques)
+    // ⚠️ NEXT_PUBLIC_* MUST be in client section only
+    NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY: z.string().min(1),
+    NEXT_PUBLIC_SITE_URL: z.string().url(),
+  },
+  runtimeEnv: {
+    // Manual destructuring for Edge Runtime compatibility
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY: 
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY,
+    // ... all variables
+  },
+  skipValidation: !!process.env.SKIP_ENV_VALIDATION, // Docker builds
+  emptyStringAsUndefined: true,
+});
+```
+
+**Variables validées (14 au total):**
+
+**Server-only (sensibles):**
+
+- `SUPABASE_SECRET_KEY` — Clé secrète Supabase (admin access)
+- `RESEND_API_KEY` — Clé API Resend pour emails
+- `EMAIL_FROM` — Email expéditeur (format validé)
+- `EMAIL_CONTACT` — Email contact (format validé)
+- `EMAIL_DEV_REDIRECT` — Boolean transform (dev email redirection)
+- `EMAIL_DEV_REDIRECT_TO` — Email de redirection dev (optionnel)
+- MCP/CI optionnels : `SUPABASE_PROJECT_REF`, `GITHUB_TOKEN`, etc.
+
+**Client-accessible (publiques):**
+
+- `NEXT_PUBLIC_SUPABASE_URL` — URL Supabase (format URL validé)
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY` — Clé publique Supabase
+- `NEXT_PUBLIC_SITE_URL` — URL du site (format URL validé)
+
+**Règles d'utilisation:**
+
+> [!CAUTION]
+> **Règle critique ⚠️** :
+>
+> - TOUJOURS utiliser `import { env } from '@/lib/env'`
+> - JAMAIS accéder directement à `process.env.*`
+> - NEXT_PUBLIC_* variables DOIVENT être dans la section `client` uniquement
+
+**Pattern d'import:**
+
+```typescript
+// ✅ CORRECT
+import { env } from '@/lib/env';
+
+const apiKey = env.RESEND_API_KEY;
+const siteUrl = env.NEXT_PUBLIC_SITE_URL;
+
+// ❌ INCORRECT
+const apiKey = process.env.RESEND_API_KEY;
+```
+
+**Bénéfices:**
+
+1. **Fail Fast** — App crash au démarrage si variables requises manquantes
+2. **Type Safety** — Full TypeScript inference (autocomplete `env.*`)
+3. **Security** — Séparation client/server enforced par Zod
+4. **Documentation** — Single source of truth pour toutes les variables
+5. **Testing** — `SKIP_ENV_VALIDATION=1` pour CI/Docker builds
+6. **Code Cleanup** — ~100 lignes de code `hasEnvVars` supprimées
+
+**Fichiers migrés (12 au total):**
+
+- `lib/site-config.ts` — Utilise `env.EMAIL_FROM`, `env.NEXT_PUBLIC_SITE_URL`
+- `lib/resend.ts` — Utilise `env.RESEND_API_KEY`
+- `supabase/server.ts, client.ts, admin.ts` — Utilise `env` pour credentials
+- `lib/dal/admin-users.ts` — Utilise `env.NEXT_PUBLIC_SITE_URL`
+- `scripts/create-admin-user.ts, seed-admin.ts` — Imports `env` (pas dotenv)
+- `app/api/admin/media/search/route.ts`
+- `app/api/debug-auth/route.ts`
+
+**Validation script:**
+
+```bash
+# Test de validation (sans .env.local, doit échouer)
+pnpm tsx scripts/test-env-validation.ts
+
+# Build avec skip validation (Docker/CI)
+SKIP_ENV_VALIDATION=1 pnpm build
+```
+
+**Commits:**
+
+- `feat(env): implement T3 Env validation (Phases 1-3)` — Core migration
+- `feat(env): complete T3 Env migration (Phases 4-7)` — Final cleanup
 - `dashboard.ts` — `DashboardStatsSchema`
 - `home-content.ts` — Hero Slides + About schemas (Server + UI)
 - `media.ts` — `MediaItemSchema`, `MediaSelectResultSchema`, constants
@@ -973,7 +1109,7 @@ export function FeatureForm({ onSuccess }: { onSuccess: () => void }) {
 ### Common Pitfalls à éviter
 
 | ❌ Anti-pattern | ✅ Solution |
-|-----------------|-------------|
+| ----------------- | ------------- |
 | `revalidatePath()` dans DAL | Déplacer dans Server Action |
 | `useState(props)` sans `useEffect` | Ajouter `useEffect(() => setState(props), [props])` |
 | UI schema avec `bigint` | Utiliser `z.number()` pour form IDs |

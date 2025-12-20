@@ -1,11 +1,12 @@
-# Project Folders Structure Blueprint v5
+# Project Folders Structure Blueprint v5.1
 
-Date: 2025-12-13
+Date: 2025-12-20
 
 # Résumé
 
-Ce document présente la structure projet actuelle et les décisions récentes (v5) intégrant les évolutions suivantes :
+Ce document présente la structure projet actuelle et les décisions récentes (v5.1) intégrant les évolutions suivantes :
 
+- **T3 Env Implementation** (plan-feat-t3-env.prompt.md) — Type-safe environment variables
 - Factorisation du handler Contact (plan-factoriserContactHandler-v2.prompt.md)
 - Factorisation du handler Newsletter (plan-factoriserNewsletterHandler.prompt.md)
 - Finalisation du groupement ImageField (plan-imageFieldGroupFinalization/plan-imageFieldGroupV2.prompt.md)
@@ -93,6 +94,12 @@ Fournir un guide unique qui décrit l'organisation des dossiers, conventions et 
     - actions.ts                # sendContactNotification, sendNewsletterConfirmation
   - api/
     - helpers.ts                # ApiResponse, HttpStatus, isUniqueViolation
+
+scripts/
+  ├─ create-admin-user.ts     # Admin user creation (uses env)
+  ├─ seed-admin.ts            # Database seeding (uses env)
+  ├─ test-env-validation.ts   # ⚠️ T3 Env validation tests (88 lines)
+  └─ test-*.ts                # Various test scripts
 
 ## Conventions et règles de design
 
@@ -240,6 +247,7 @@ components/
   └─ ui/                      # shadcn/ui components
 
 lib/
+  ├─ env.ts                   # ⚠️ T3 Env configuration (type-safe environment variables)
   ├─ constants/               # Feature constants (Clean Code: no magic numbers)
   │   └─ hero-slides.ts       # HERO_SLIDE_LIMITS, HERO_SLIDE_DEFAULTS, ANIMATION_CONFIG, DRAG_CONFIG
   ├─ dal/                     # Data Access Layer (server-only, NO revalidatePath, NO email)
@@ -440,6 +448,66 @@ Centralized Zod schemas with barrel exports from `lib/schemas/index.ts`:
 - `lib/schemas/spectacles.ts` — `SpectacleSchema`, `CurrentShowSchema`, `ArchivedShowSchema`
 - `lib/schemas/team.ts` — `TeamMemberDbSchema`, `TeamMemberFormSchema`, `optionalUrlSchema`, DTOs
 
+### Environment Variables (`lib/env.ts`) 🆕
+
+#### **T3 Env Type-Safe Configuration (v0.13.10)**
+
+Configuration centrale pour la validation des variables d'environnement avec @t3-oss/env-nextjs.
+
+**Pattern d'utilisation:**
+
+```typescript
+// ✅ CORRECT
+import { env } from '@/lib/env';
+
+const apiKey = env.RESEND_API_KEY;           // Server-only
+const siteUrl = env.NEXT_PUBLIC_SITE_URL;    // Client-accessible
+
+// ❌ INCORRECT — NEVER USE
+const apiKey = process.env.RESEND_API_KEY;
+```
+
+**Variables validées:**
+
+**Server-only (14 variables):**
+
+- `SUPABASE_SECRET_KEY`, `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_CONTACT`
+- `EMAIL_DEV_REDIRECT` (boolean transform), `EMAIL_DEV_REDIRECT_TO`
+- MCP/CI optionnels: `SUPABASE_PROJECT_REF`, `GITHUB_TOKEN`, etc.
+
+**Client-accessible (publiques):**
+
+- `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY`, `NEXT_PUBLIC_SITE_URL`
+
+**Règles architecturales:**
+
+> [!CAUTION]
+>
+> 1. NEXT_PUBLIC_* variables MUST be in `client` section only (T3 Env requirement)
+> 2. ALWAYS import `{ env }` from '@/lib/env', NEVER access `process.env.*` directly
+> 3. App crashes at startup if required variables missing (fail fast)
+> 4. Use `SKIP_ENV_VALIDATION=1` for Docker builds / CI environments
+
+**Bénéfices:**
+
+- **Type Safety**: Full TypeScript inference, autocomplete pour toutes les variables
+- **Fail Fast**: Erreurs détectées au démarrage, pas à runtime
+- **Security**: Séparation client/server enforced par Zod
+- **Code Cleanup**: ~100 lignes de code `hasEnvVars` pattern supprimées
+
+**Fichiers impactés:**
+
+- Core: `lib/site-config.ts`, `lib/resend.ts`, `supabase/server.ts`, `supabase/client.ts`, `supabase/admin.ts`
+- DAL: `lib/dal/admin-users.ts`
+- Scripts: `scripts/create-admin-user.ts`, `scripts/seed-admin.ts` (dotenv removed)
+- API: `app/api/admin/media/search/route.ts`, `app/api/debug-auth/route.ts`
+
+**Validation script:**
+
+```bash
+pnpm tsx scripts/test-env-validation.ts  # Tests 6 catégories de validation
+```
+
 ### Admin Components (`components/features/admin/`)
 
 - `components/features/admin/home/` — Homepage management (11 files):
@@ -552,7 +620,7 @@ Centralized Zod schemas with barrel exports from `lib/schemas/index.ts`:
 ## Security & RLS
 
 - RLS policies live under `supabase/schemas/60_rls_profiles.sql` and related files. Recent migration relaxed the UPDATE policy for `profiles` to allow admin UPSERT scenario.
-- Never expose `SUPABASE_SERVICE_ROLE_KEY` to the client. Use server-only admin client for privileged operations.
+- Never expose `(❌ SUPABASE_SERVICE_ROLE_KEY/✅ SUPABASE_SECRET_KEY` to the client. Use server-only admin client for privileged operations.
 
 ## Extension templates (how to add a new feature)
 
@@ -611,6 +679,7 @@ Centralized Zod schemas with barrel exports from `lib/schemas/index.ts`:
 
 | Metric | Value | Status |
 |--------|-------|--------|
+
 | DALResult coverage | 17/17 | ✅ |
 | revalidatePath in DAL | 0 | ✅ |
 | Email imports in DAL | 0 | ✅ |

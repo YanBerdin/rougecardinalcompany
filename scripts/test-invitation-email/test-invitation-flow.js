@@ -10,7 +10,7 @@ async function testInvitationFlow() {
 
   // Create admin client directly
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceRoleKey = process.env.SUPABASE_SECRET_KEY;
 
   if (!supabaseUrl || !serviceRoleKey) {
     console.error("❌ Missing Supabase environment variables");

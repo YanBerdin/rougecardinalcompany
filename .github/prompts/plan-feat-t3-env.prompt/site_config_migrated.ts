@@ -1,4 +1,3 @@
-// lib/site-config.ts
 import { env } from "./env";
 
 export const SITE_CONFIG = {
@@ -20,7 +19,7 @@ export const SITE_CONFIG = {
     ADDRESS: "Adresse de votre compagnie",
   },
   AUTH: {
-    REDIRECT_TO_DASHBOARD: "/protected",
+    REDIRECT_TO_DASHBOARD: "/dashboard",
     REDIRECT_TO_LOGIN: "/auth/login",
   },
 } as const;
