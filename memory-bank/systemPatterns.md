@@ -1,6 +1,6 @@
 # System Patterns
 
-**Last Updated**: 2025-12-13
+**Last Updated**: 2025-12-20
 
 Architecture et patterns observés dans le projet:
 
@@ -11,6 +11,7 @@ Architecture et patterns observés dans le projet:
 - **Handler Factorization Pattern (Dec 2025)**: Logique partagée dans `lib/actions/*-server.ts`, réutilisée par API Routes et Server Actions.
 - **ImageFieldGroup Pattern (Dec 2025)**: Composant réutilisable pour champs image avec validation SSRF intégrée.
 - **Upload Générique Pattern (Dec 2025)**: `uploadMediaImage(formData, folder)` configurable par entité.
+- **T3 Env Pattern (Dec 2025)**: Variables d'environnement type-safe avec validation Zod au démarrage via `lib/env.ts`.
 - Sécurité: combinaison GRANT (table-level) + RLS (policies) requise — ne pas considérer RLS comme substitut au GRANT.
 - Migrations: `supabase/migrations/` est la source de vérité pour les modifications appliquées en base; `supabase/schemas/` sert de documentation/declarative reference.
 - Tests & CI: vérifier explicitement que les roles `anon` et `authenticated` peuvent accéder aux DTO nécessaires (tests d'intégration DAL).
@@ -20,8 +21,87 @@ Conventions importantes:
 1. Tous les changements de schéma doivent être accompagnés d'une migration.
 2. Les migrations dangereuses (REVOKE massifs) doivent être revues et, si nécessaire, déplacées vers `supabase/migrations/legacy-migrations`.
 3. Les scripts d'audit doivent être alignés avec le modèle de sécurité (ne pas considérer un GRANT comme "exposé" quand il est requis pour RLS).
+4. **Variables d'environnement** : Accès UNIQUEMENT via `import { env } from '@/lib/env'`, JAMAIS `process.env.*` directement.
 
 ## DAL SOLID Architecture (Nov 2025)
+
+### T3 Env Pattern (Dec 2025)
+
+**Pattern unifié** pour l'accès aux variables d'environnement avec validation type-safe.
+
+#### Configuration centrale
+
+```typescript
+// lib/env.ts
+import { createEnv } from "@t3-oss/env-nextjs";
+import { z } from "zod";
+
+export const env = createEnv({
+  server: {
+    // Variables server-only (sensibles)
+    SUPABASE_SECRET_KEY: z.string().min(1),
+    RESEND_API_KEY: z.string().min(1),
+    EMAIL_FROM: z.string().email(),
+    EMAIL_CONTACT: z.string().email(),
+    EMAIL_DEV_REDIRECT: z
+      .string()
+      .default("false")
+      .transform(val => val === "true"), // boolean transform
+    // ... optional MCP variables
+  },
+  client: {
+    // Variables client-accessible (publiques)
+    NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY: z.string().min(1),
+    NEXT_PUBLIC_SITE_URL: z.string().url(),
+  },
+  runtimeEnv: {
+    // Manual destructuring for Edge Runtime
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    // ... all variables
+  },
+  skipValidation: !!process.env.SKIP_ENV_VALIDATION, // Docker builds
+  emptyStringAsUndefined: true,
+});
+```
+
+#### Règles d'utilisation
+
+> [!CAUTION]
+> **Règle critique ⚠️** :
+>
+> - TOUJOURS utiliser `import { env } from '@/lib/env'`
+> - JAMAIS accéder directement à `process.env.*`
+> - NEXT_PUBLIC_* variables DOIVENT être dans la section `client` uniquement
+
+#### Pattern d'import
+
+```typescript
+// ✅ CORRECT
+import { env } from '@/lib/env';
+
+const apiKey = env.RESEND_API_KEY;
+const siteUrl = env.NEXT_PUBLIC_SITE_URL;
+
+// ❌ INCORRECT
+const apiKey = process.env.RESEND_API_KEY;
+```
+
+#### Bénéfices
+
+- **Fail Fast** : App crash au démarrage si variables requises manquantes
+- **Type Safety** : Full TypeScript inference (autocomplete `env.*`)
+- **Security** : Séparation client/server enforced par Zod
+- **Documentation** : Single source of truth pour toutes les variables
+- **Testing** : `SKIP_ENV_VALIDATION=1` pour CI/Docker builds
+
+#### Fichiers impactés
+
+- `lib/site-config.ts` — Utilise `env.EMAIL_FROM`, `env.NEXT_PUBLIC_SITE_URL`
+- `lib/resend.ts` — Utilise `env.RESEND_API_KEY`
+- `supabase/server.ts, client.ts, admin.ts` — Utilise `env` pour credentials
+- `lib/dal/*` — Accès uniquement via `env` (pas `process.env`)
+- `scripts/*` — Imports `env` (pas dotenv)
 
 ### DALResult<T> Pattern
 

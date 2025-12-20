@@ -1,6 +1,129 @@
 # Active Context
 
-**Current Focus (2025-12-13)**: Handler Factorization & Security Update - COMPLETED ✅
+**Current Focus (2025-12-20)**: T3 Env Type-Safe Environment Variables - COMPLETED ✅
+
+## Architecture Updates (2025-12-20)
+
+### T3 Env Implementation - COMPLETED ✅
+
+**Type-safe environment variable validation using @t3-oss/env-nextjs with Zod runtime validation.**
+
+#### Problème résolu
+
+Avant cette implémentation, le projet utilisait `process.env.*` directement partout sans validation :
+
+- ❌ Aucune validation au démarrage de l'application
+- ❌ Erreurs détectées tardivement (runtime) au lieu de fail fast
+- ❌ Pattern `hasEnvVars` manuel et incomplet (~100 lignes de code)
+- ❌ Risque d'oubli de variables critiques (RESEND_API_KEY, SUPABASE keys)
+- ❌ Pas de typage TypeScript pour les variables d'environnement
+
+#### Solution implémentée
+
+| Fichier créé | Rôle |
+| -------------- | ------ |
+| `lib/env.ts` (82 lignes) | Configuration centrale T3 Env avec validation Zod |
+| `scripts/test-env-validation.ts` (88 lignes) | Tests automatisés de validation |
+
+#### Variables validées
+
+**Server-only (sensibles)** :
+
+- `SUPABASE_SECRET_KEY` (requis)
+- `RESEND_API_KEY` (requis)
+- `EMAIL_FROM` (requis, email format)
+- `EMAIL_CONTACT` (requis, email format)
+- `EMAIL_DEV_REDIRECT` (optionnel, transform → boolean)
+- `EMAIL_DEV_REDIRECT_TO` (optionnel)
+- MCP/CI vars optionnelles (SUPABASE_PROJECT_REF, GITHUB_TOKEN, etc.)
+
+**Client-accessible (publiques)** :
+
+- `NEXT_PUBLIC_SUPABASE_URL` (requis, URL format)
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY` (requis)
+- `NEXT_PUBLIC_SITE_URL` (requis, URL format)
+
+#### Architecture décision critique
+
+**NEXT_PUBLIC_** variables MUST be in `client` section only** (per T3 Env design) :
+
+```typescript
+// ❌ WRONG (TypeScript error)
+server: {
+  NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
+}
+
+// ✅ CORRECT
+client: {
+  NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
+}
+```
+
+Rationale : Les variables client sont validées différemment et accessibles côté client ET serveur.
+
+#### Migration réalisée (7 phases)
+
+| Phase | Fichiers modifiés | Résultat |
+| ------- | ------------------- | ---------- |
+| 1 | Dependencies + setup | @t3-oss/env-nextjs@0.13.10, zod@4.1.12 |
+| 2 | Core (6 files) | site-config, resend, supabase clients/middleware |
+| 3 | Email | Vérification conformité (déjà utilisait env) |
+| 4 | DAL | lib/dal/admin-users.ts |
+| 5 | Scripts | create-admin-user, seed-admin (removal dotenv) |
+| 6 | API Routes | 2 fichiers (media search, debug-auth) |
+| 7 | Cleanup | Removal hasEnvVars pattern (~100 lignes) |
+
+#### Fichiers nettoyés (hasEnvVars pattern removed)
+
+- `lib/utils.ts` — Export hasEnvVars supprimé
+- `supabase/middleware.ts` — Check hasEnvVars (lignes 10-14) supprimé
+- `components/admin/AdminAuthRow.tsx` — Prop hasEnvVars supprimée
+- `components/admin/AdminSidebar.tsx` — Prop hasEnvVars supprimée
+- `app/(admin)/layout.tsx` — Import hasEnvVars supprimé
+
+#### Configuration T3 Env
+
+```typescript
+// lib/env.ts
+export const env = createEnv({
+  server: { /* ... */ },
+  client: { /* ... */ },
+  runtimeEnv: {
+    // Manual destructuring for Edge Runtime
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    // ... all variables
+  },
+  skipValidation: !!process.env.SKIP_ENV_VALIDATION, // Docker builds
+  emptyStringAsUndefined: true,
+});
+```
+
+#### Validation & Build
+
+| Test | Résultat |
+| ------- | ---------- |
+| `pnpm tsc --noEmit` | ✅ PASS (0 errors) |
+| `SKIP_ENV_VALIDATION=1 pnpm build` | ✅ PASS (29 routes) |
+| Validation script | ✅ CORRECT (détecte missing vars) |
+
+#### Commits créés
+
+1. `feat(env): implement T3 Env validation (Phases 1-3)` — Core migration
+2. `feat(env): complete T3 Env migration (Phases 4-7)` — Final cleanup
+
+#### Bénéfices atteints
+
+1. **Type Safety** : Full TypeScript inference pour toutes les variables env
+2. **Fail Fast** : App crash au démarrage si variables requises manquantes
+3. **Developer Experience** : Autocomplete `env.*` partout
+4. **Security** : Séparation client/server enforced
+5. **Testing** : `SKIP_ENV_VALIDATION=1` pour CI/Docker
+6. **Documentation** : Single source of truth dans `lib/env.ts`
+7. **Code Cleanup** : ~100 lignes de code manuel supprimées
+
+---
+
+## Previous Focus (2025-12-13): Handler Factorization & Security Update - COMPLETED ✅
 
 ## Architecture Updates (2025-12-13)
 

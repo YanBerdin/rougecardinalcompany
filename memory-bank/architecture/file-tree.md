@@ -1,7 +1,8 @@
 # File Tree: rougecardinalcompany
 
-**Generated:** 12/6/2025, 1:55:40 AM
+**Generated:** 12/20/2025, 10:00:00 AM
 **Root Path:** `memory-bank/architecture`
+**Last Updated:** Added lib/env.ts (T3 Env implementation)
 
 ```bash
 ├── 📁 .github
@@ -399,6 +400,7 @@
 │   ├── 📁 utils
 │   │   └── 📄 validate-image-url.ts
 │   ├── 📄 database.types.ts
+│   ├── 📄 env.ts
 │   ├── 📄 resend.ts
 │   ├── 📄 site-config.ts
 │   └── 📄 utils.ts
@@ -410,11 +412,73 @@
 │   │   ├── 📝 dev-email-redirect.md
 │   │   └── 📝 file-tree.md
 │   ├── 📁 changes
+│   │   └── 📝 2025-11-11-layouts-admin-sidebar.md
 │   ├── 📁 epics
 │   │   ├── 📁 details
+│   │   │   ├── 📝 14.1-page-accueil(Home).md
+│   │   │   ├── 📝 14.2-page-presentation-companie.md
+│   │   │   ├── 📝 14.3-page-spectacles-(événements).md
+│   │   │   ├── 📝 14.4-page-agenda.md
+│   │   │   ├── 📝 14.5-page-presse.md
+│   │   │   ├── 📝 14.6-contact-newsletter.md
+│   │   │   └── 📝 14.7-back‑office.md
 │   │   └── ⚙️ epics-map.yaml
 │   ├── 📁 procedures
+│   │   ├── 📝 admin-management.md
+│   │   └── 📝 admin-user-registration.md
 │   ├── 📁 tasks
+│   │   ├── 📁 completed-tasks
+│   │   │   ├── 📝 TASK007-update-memory-bank.md
+│   │   │   ├── 📝 TASK011-integration-home-hero-slides.md
+│   │   │   ├── 📝 TASK012-integration-ui-compagnie-stats.md
+│   │   │   ├── 📝 TASK013-seeds-nouvelles-tables.md
+│   │   │   ├── 📝 TASK019-fix-spectacles-archives.md
+│   │   │   ├── 📝 TASK020-alignement-ui-presse.md
+│   │   │   ├── 📝 TASK021-admin-backoffice-spectacles.md
+│   │   │   ├── 📝 TASK021-admin-spectacles-crud.md
+│   │   │   ├── 📝 TASK021-content-management-crud.md
+│   │   │   ├── 📝 TASK021-documentation-docker.md
+│   │   │   ├── 📝 TASK021B-documentation-supabase-cli.md
+│   │   │   ├── 📝 TASK021C-auth-cleanup-and-optimization.md
+│   │   │   ├── 📝 TASK022-REVIEW.md
+│   │   │   ├── 📝 TASK022-implementation-summary.md
+│   │   │   ├── 📝 TASK022-team-management.md
+│   │   │   ├── 📝 TASK024-admin-email-scripts.md
+│   │   │   ├── 📝 TASK025-rls-security-performance-fixes.md
+│   │   │   ├── 📝 TASK025B-security-audit-campaign.md
+│   │   │   ├── 📝 TASK026-COMPLIANCE-FIXES.md
+│   │   │   ├── 📝 TASK026-FINAL-STATUS.md
+│   │   │   ├── 📝 TASK026-homepage-content-management.md
+│   │   │   ├── 📝 TASK026B-cloud-fix-procedure.md
+│   │   │   ├── 📝 TASK026B-db-functions-compliance.md
+│   │   │   ├── 📝 TASK027B-security-definer-rationale.md
+│   │   │   ├── 📝 TASK028B-cleanup-obsolete-scripts.md
+│   │   │   ├── 📝 TASK032-user-role-management-FINAL.md
+│   │   │   └── 📝 TASK032-user-role-management.md
+│   │   ├── 📝 RESOLVED_db_reconstruction_2025-11-18.md
+│   │   ├── 📝 TASK014-backoffice-toggles-centralises.md
+│   │   ├── 📝 TASK023-partners-management.md
+│   │   ├── 📝 TASK024-press-management.md
+│   │   ├── 📝 TASK027-company-content-management.md
+│   │   ├── 📝 TASK028-content-versioning-ui.md
+│   │   ├── 📝 TASK029-media-library.md
+│   │   ├── 📝 TASK030-display-toggles.md
+│   │   ├── 📝 TASK031-analytics-dashboard.md
+│   │   ├── 📝 TASK033-audit-logs-viewer.md
+│   │   ├── 📝 TASK034-performance-optimization.md
+│   │   ├── 📝 TASK035-testing-suite.md
+│   │   ├── 📝 TASK036-security-audit.md
+│   │   ├── 📝 TASK037-accessibility-compliance.md
+│   │   ├── 📝 TASK038-responsive-testing.md
+│   │   ├── 📝 TASK039-production-deployment.md
+│   │   ├── 📝 TASK040-documentation.md
+│   │   ├── 📝 TASK046-rate-limiting-handlers.md
+│   │   ├── 📝 TASK047-newsletter-schema-extraction.md
+│   │   ├── 📝 TASK048-t3-env-implementation.md
+│   │   ├── 📝 _archived_TASK025-communications-dashboard.md
+│   │   ├── 📝 _index.md
+│   │   ├── 📝 _issues_preview.md
+│   │   └── 📝 _preview_backoffice_tasks.md
 │   ├── 📝 Memory-Bank-Update-Session-2025-10-13.md
 │   ├── 📝 Memory-Bank-Update-Session-2025-10-26.md
 │   ├── 📝 activeContext.md
@@ -424,12 +488,32 @@
 │   ├── 📝 systemPatterns.md
 │   └── 📝 techContext.md
 ├── 📁 public
+│   └── 🖼️ logo-florian.png
 ├── 📁 scripts
 │   ├── 📁 Archived-tests
+│   │   ├── 📄 quick-test-active.sh
+│   │   ├── 📄 test-active-endpoint-service.ts
+│   │   ├── 📄 test-active-endpoint.sh
+│   │   ├── 📄 test-active-endpoint.ts
+│   │   └── 📄 test-spectacles-endpoints.ts
 │   ├── 📁 Test_fetchMediaArticles
+│   │   ├── 📝 README.md
+│   │   ├── 📄 apply-migration-articles-view.ts
+│   │   ├── 📄 check-chapo-excerpt.ts
+│   │   ├── 📄 check-rls-policies.ts
+│   │   ├── 📄 test-chapo-and-excerpt-separate.ts
+│   │   ├── 📄 test-dal-pattern.ts
+│   │   ├── 📄 test-public-view.ts
+│   │   ├── 📄 test-rls-articles copy.ts
+│   │   └── 📄 test-rls-articles.ts
 │   ├── 📁 test-invitation-email
+│   │   ├── 📄 generate-invite-link.js
+│   │   ├── 📄 test-complete-flow.js
+│   │   ├── 📄 test-invitation-flow.js
+│   │   ├── 📄 test-invitation-link-flow.js
+│   │   ├── 📄 test-local-invitation.js
+│   │   └── 📄 test-redirect-flow.js
 │   ├── 📝 README.md
-│   ├── 📄 check-admin-status.ts
 │   ├── 📄 check-email-logs.ts
 │   ├── 📄 check-existing-profile.js
 │   ├── 📄 check-extension.ts
@@ -437,38 +521,36 @@
 │   ├── 📄 check-security-advisors.js
 │   ├── 📄 check-security-audit.sh
 │   ├── 📄 create-admin-user.ts
-│   ├── 📄 create-local-admin.ts
 │   ├── 📄 create_issues.sh
 │   ├── 📄 delete-test-user.js
-│   ├── 📄 diagnose-server-auth.ts
 │   ├── 📄 find-auth-user.js
 │   ├── 📄 post-reset.sh
 │   ├── 📄 rebuild-cloud-schema.sh
 │   ├── 📄 seed-admin.ts
 │   ├── 📄 set-admin-role.ts
 │   ├── 📄 supabase-env.sh
-│   ├── 📄 sync-admin-profile.ts
-│   ├── 📄 test-admin-access.ts
 │   ├── 📄 test-all-dal-functions.ts
-│   ├── 📄 test-dal-admin-users.ts
 │   ├── 📄 test-dashboard-stats.ts
 │   ├── 📄 test-email-integration.ts
-│   ├── 📄 test-evenements-access.ts
-│   ├── 📄 test-fetch-media-articles.ts
+│   ├── 📄 test-env-validation.ts
 │   ├── 📄 test-profile-insertion.js
 │   ├── 📄 test-spectacles-crud.ts
 │   ├── 📄 test-spectacles-dal.ts
 │   ├── 📄 test-ssrf-validation.ts
-│   ├── 📄 test-team-active-dal.ts
 │   ├── 📄 test-team-server-actions.ts
 │   ├── 📄 test-views-security-invoker.ts
-│   ├── 📄 test-webhooks.ts
-│   └── 📄 verify-view-security-invoker.ts
+│   └── 📄 test-webhooks.ts
 ├── 📁 supabase
 │   ├── 📁 .branches
 │   │   └── 📄 _current_branch
 │   ├── 📁 migrations
 │   │   ├── 📁 archived
+│   │   │   ├── 📄 20251118125945_normalize_spectacles_status.sql
+│   │   │   ├── 📄 20251118130000_normalize_spectacles_status.sql
+│   │   │   ├── 📄 20251123143116_fix_restore_content_version_published_at.sql
+│   │   │   ├── 📄 20251209120000_normalize_spectacles_status_to_english.sql
+│   │   │   ├── 📄 20251217100000_cleanup_spectacles_backup.sql
+│   │   │   └── 📝 supabase-view-security-invoker-caveat.md
 │   │   ├── 📄 20250918000000_fix_spectacles_versioning_trigger.sql
 │   │   ├── 📄 20250918000002_apply_declarative_schema_complete.sql
 │   │   ├── 📄 20250918031500_seed_home_hero_slides.sql
@@ -514,6 +596,8 @@
 │   │   ├── 📝 migrations.md
 │   │   └── 📄 sync_existing_profiles.sql
 │   ├── 📁 reconstruction_database_plan
+│   │   ├── 📝 RECONSTRUCTION_PLAN.md
+│   │   └── 📝 RECONSTRUCTION_SUCCESS.md
 │   ├── 📁 schemas
 │   │   ├── 📄 01_extensions.sql
 │   │   ├── 📄 02_table_profiles.sql

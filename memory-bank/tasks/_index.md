@@ -62,3 +62,4 @@
 - `TASK045B` Next.js Security Update 16.0.10 - Completed on 2025-12-13 (Upgrade 16.0.7 → 16.0.10, 10/10 Dependabot alerts fixed, commit 8a8c37c)
 - `TASK044` ImageFieldGroup v2 - Completed on 2025-12-13 (Composant réutilisable MediaLibraryPicker + validateImageUrl + alt text, validation SSRF intégrée, DRY pour tous formulaires admin)
 - `TASK045` Validation publique + Upload générique - Completed on 2025-12-13 (uploadMediaImage générique, deleteMediaImage, ActionResult<T> types, progressive validation spectacles, Clear URL button)
+- `TASK048` T3 Env Implementation - Completed on 2025-12-20 (Type-safe environment variables with @t3-oss/env-nextjs, validation runtime Zod, removal hasEnvVars pattern, 12 files migrated, 2 commits created, TypeScript/Build PASS)
