@@ -2,12 +2,21 @@
 # 🗄️ SUPABASE CONFIGURATION (Required)
 # ============================================================================
 # Get these from: https://app.supabase.com/project/_/settings/api
+# 
+# Reference: .github/instructions/nextjs-supabase-auth-2025.instructions.md
+# 
+# ✅ NEW FORMAT (with JWT Signing Keys - recommended):
+#    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY
+# 
+# ❌ LEGACY FORMAT (deprecated - only if not migrated):
+#    NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=your-anon-key
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=your-publishable-or-anon-key
 
 # ⚠️ CRITICAL: Service Role Key - NEVER commit to version control!
 # Used for: Admin operations (user invitation, role management)
+# Same name in both NEW and LEGACY formats (NOT deprecated)
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
 # ============================================================================

@@ -18,7 +18,7 @@
 #### Alertes résolues
 
 | # | Sévérité | Package | Status |
-|---|----------|---------|--------|
+| --- | ---------- | --------- | -------- |
 | 10, 8 | High | next | ✅ Fixed |
 | 9, 7 | Medium | next | ✅ Fixed |
 
@@ -31,7 +31,7 @@
 #### Fichiers créés/modifiés
 
 | Fichier | Action | Lignes |
-|---------|--------|--------|
+| --------- | -------- | -------- |
 | `lib/actions/contact-server.ts` | **Créé** | 52 |
 | `app/api/contact/route.ts` | Simplifié | 22 |
 | `app/actions/contact.actions.ts` | **Créé** | 21 |
@@ -42,7 +42,7 @@
 useContactForm (fetch) ─▶ /api/contact/route.ts
                                 │
                                 ▼
-<form action={...}> ───▶ handleContactSubmission()
+<form action=(...)> ───▶ handleContactSubmission()
                          lib/actions/contact-server.ts
                                 │
                     ┌───────────┴───────────┐
@@ -60,7 +60,7 @@ useContactForm (fetch) ─▶ /api/contact/route.ts
 #### Fichiers créés/modifiés
 
 | Fichier | Action | Lignes | Rôle |
-|---------|--------|--------|------|
+| --------- | -------- | -------- | ------ |
 | `lib/dal/newsletter-subscriber.ts` | **Créé** | 47 | DAL avec `unique_violation` → succès idempotent |
 | `lib/actions/newsletter-server.ts` | **Créé** | 52 | Handler partagé (validation + DAL + email) |
 | `app/api/newsletter/route.ts` | Simplifié | 22 | Délégation au handler |
@@ -69,7 +69,7 @@ useContactForm (fetch) ─▶ /api/contact/route.ts
 #### Différences vs Contact
 
 | Aspect | Contact | Newsletter |
-|--------|---------|------------|
+| -------- | --------- | ------------ |
 | Duplicats | Pas de contrainte | `unique_violation` → succès idempotent |
 | Statut retour | `{ status: 'sent' }` | `{ status: 'subscribed', isNew?: boolean }` |
 | Email cible | Admin | Utilisateur (confirmation) |
@@ -81,7 +81,7 @@ useContactForm (fetch) ─▶ /api/contact/route.ts
 **Mise à jour des documents d'architecture suite aux factorisations.**
 
 | Document | Version | Status |
-|----------|---------|--------|
+| ---------- | --------- | -------- |
 | `Project_Folders_Structure_Blueprint_v5.md` | v5 | ✅ Mis à jour |
 | `Project_Architecture_Blueprint.md` | v2.2 | ✅ Mis à jour |
 | `Email_Service_Architecture.md` | v1 | ✅ **Créé** |
@@ -95,7 +95,7 @@ useContactForm (fetch) ─▶ /api/contact/route.ts
 #### Fichiers créés/modifiés
 
 | Fichier | Action | Rôle |
-|---------|--------|------|
+| --------- | -------- | ------ |
 | `components/features/admin/media/ImageFieldGroup.tsx` | **Créé** | Composant générique DRY |
 | `components/features/admin/media/types.ts` | Modifié | Ajout `error?: string` à `MediaSelectResult` |
 | `components/features/admin/media/index.ts` | Modifié | Export `ImageFieldGroup` |
@@ -118,7 +118,7 @@ useContactForm (fetch) ─▶ /api/contact/route.ts
 #### Fichiers créés
 
 | Fichier | Rôle |
-|---------|------|
+| --------- | ------ |
 | `lib/actions/media-actions.ts` | Upload/delete générique configurable par folder |
 | `lib/actions/types.ts` | `ActionResult<T>` type + type guards |
 | `lib/actions/index.ts` | Barrel exports |
@@ -160,7 +160,7 @@ Le browser bfcache restaure la page avec l'ancien DOM React (incluant les IDs `u
 #### Solution implémentée
 
 | Fichier | Rôle |
-|---------|------|
+| --------- | ------ |
 | `components/admin/BfcacheHandler.tsx` | Client Component qui force un reload sur `pageshow` avec `event.persisted=true` |
 | `app/(admin)/layout.tsx` | Intégration du composant au début du layout admin |
 
@@ -205,7 +205,7 @@ export function BfcacheHandler() {
 #### Changements réalisés
 
 | Composant | Avant | Après |
-|-----------|-------|-------|
+| ----------- | ------- | ------- |
 | `HeroSlideForm.tsx` | 232 lignes | 117 lignes (-49%) |
 | `HeroSlideFormFields.tsx` | 237 lignes | 127 lignes (-46%) |
 | `HeroSlidesView.tsx` | 315 lignes | 241 lignes (-23%) |
@@ -217,7 +217,7 @@ export function BfcacheHandler() {
 #### Nouveaux fichiers créés
 
 | Fichier | Lignes | Rôle |
-|---------|--------|------|
+| --------- | -------- | ------ |
 | `lib/constants/hero-slides.ts` | 30 | HERO_SLIDE_LIMITS, HERO_SLIDE_DEFAULTS, ANIMATION_CONFIG, DRAG_CONFIG |
 | `lib/hooks/useHeroSlideForm.ts` | 53 | Form state + submission logic |
 | `lib/hooks/useHeroSlideFormSync.ts` | 38 | Props/form sync via useEffect |
@@ -256,7 +256,7 @@ export function BfcacheHandler() {
 ### Changements réalisés
 
 | Composant | Avant | Après |
-|-----------|-------|-------|
+| ----------- | ------- | ------- |
 | Next.js | 15.4.5 | 16.0.6 |
 | eslint-config-next | 15.x | 16.0.6 |
 | Middleware | `middleware.ts` | `proxy.ts` (renommé) |
@@ -266,7 +266,7 @@ export function BfcacheHandler() {
 #### Fichiers modifiés
 
 | Fichier | Changement |
-|---------|------------|
+| --------- | ------------ |
 | `package.json` | Next.js 16.0.6, pnpm.overrides `js-yaml: >=4.1.1` |
 | `pnpm-lock.yaml` | Dépendances mises à jour |
 | `tsconfig.json` | Ajout `.next/dev/types/**/*.ts` |
@@ -281,7 +281,7 @@ export function BfcacheHandler() {
 #### Vulnérabilités corrigées
 
 | CVE | Sévérité | Package | Solution |
-|-----|----------|---------|----------|
+| ----- | ---------- | --------- | ---------- |
 | CVE-2025-57822 | High | next <16.0.4 | Upgrade Next.js 16.0.6 |
 | CVE-2025-64718 | Moderate | js-yaml <4.1.1 | pnpm override `>=4.1.1` |
 
@@ -307,7 +307,7 @@ pnpx @next/codemod@canary upgrade latest
 ### Changements réalisés
 
 | Composant | Avant | Après |
-|-----------|-------|-------|
+| ----------- | ------- | ------- |
 | Affichage form | Inline dans TeamManagementContainer | Pages dédiées `/admin/team/new` et `/admin/team/[id]/edit` |
 | API Routes | 3 fichiers dans `app/api/admin/team/` | **Supprimés** (0 fichiers) |
 | Mutations | fetch() vers API Routes | Server Actions directes |
@@ -317,7 +317,7 @@ pnpx @next/codemod@canary upgrade latest
 #### Fichiers créés
 
 | Fichier | Lignes | Rôle |
-|---------|--------|------|
+| --------- | -------- | ------ |
 | `app/(admin)/admin/team/new/page.tsx` | 55 | Page création membre |
 | `app/(admin)/admin/team/new/loading.tsx` | 36 | Skeleton loading |
 | `app/(admin)/admin/team/[id]/edit/page.tsx` | 82 | Page édition membre |
@@ -327,7 +327,7 @@ pnpx @next/codemod@canary upgrade latest
 #### Fichiers modifiés
 
 | Fichier | Changement |
-|---------|------------|
+| --------- | ------------ |
 | `lib/schemas/team.ts` | Ajout `optionalUrlSchema`, `TeamMemberFormSchema`, `TeamMemberFormValues` |
 | `components/features/admin/team/TeamMemberForm.tsx` | Refactoring vers react-hook-form + zodResolver |
 | `components/features/admin/team/TeamManagementContainer.tsx` | Simplification (retrait form inline, Link/router.push) |
@@ -364,7 +364,7 @@ pnpx @next/codemod@canary upgrade latest
 ### Métriques finales
 
 | Critère | Avant | Après | Cible |
-|---------|-------|-------|-------|
+| --------- | ------- | ------- | ------- |
 | DAL avec DALResult<T> | 0/17 | 17/17 | 100% |
 | revalidatePath dans DAL | ~12 | 0 | 0 |
 | Imports email dans DAL | 3 | 0 | 0 |
@@ -404,7 +404,7 @@ pnpx @next/codemod@canary upgrade latest
 #### Fichiers clés créés/modifiés
 
 | Fichier | Action | Rôle |
-|---------|--------|------|
+| --------- | -------- | ------ |
 | `lib/dal/helpers/error.ts` | Créé | DALResult<T> + toDALResult() |
 | `lib/dal/helpers/format.ts` | Créé | Helpers formatage |
 | `lib/dal/helpers/slug.ts` | Créé | Génération slugs |
@@ -507,7 +507,7 @@ pnpx @next/codemod@canary upgrade latest
 ### Key Files Reference
 
 | File | Lines | Purpose |
-|------|-------|---------|
+| ------ | ------- | --------- |
 | `lib/actions/home-hero-actions.ts` | 77 | Server Actions CRUD Hero Slides |
 | `lib/actions/home-about-actions.ts` | 33 | Server Actions About Content |
 | `lib/schemas/home-content.ts` | 127 | Dual schemas (Server + UI) |

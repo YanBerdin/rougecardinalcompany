@@ -89,7 +89,7 @@ const claims = await supabase.auth.getClaims()  // ~2-5ms local verification
 
 ## ENVIRONMENT VARIABLES (UPDATED FORMAT)
 
-```env
+```bash
 # ✅ NEW FORMAT - Use these for optimal performance
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=your_new_publishable_key

@@ -22,14 +22,21 @@ T3 Env (@t3-oss/env-nextjs) est une solution de validation et typage des variabl
 
 ## ⚠️ PHASE 0 : Pré-requis (OBLIGATOIRE avant implémentation)
 
-### 0.1 Standardiser le nom de la variable service role
+### 0.1 Standardiser les variables d'environnement Supabase
 
-**Problème** : Le projet utilise deux noms différents :
+**Problème 1** : Le projet utilise deux noms différents pour la clé service role :
 - `.env.local` ligne 43 : `SUPABASE_SECRET_KEY`
 - `.env.local` ligne 55 : `SUPABASE_SERVICE_ROLE_KEY`
 - 10+ scripts utilisent `SUPABASE_SECRET_KEY`
 
-**Action** : Standardiser sur `SUPABASE_SERVICE_ROLE_KEY` partout.
+**Problème 2** : Selon `.github/instructions/nextjs-supabase-auth-2025.instructions.md` (CANONICAL), la clé publique devrait utiliser le nouveau format :
+- ✅ **NEW FORMAT** : `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY` (avec JWT Signing Keys)
+- ❌ **LEGACY FORMAT** : `NEXT_PUBLIC_SUPABASE_ANON_KEY` (deprecated)
+
+**Actions** :
+1. Standardiser sur `SUPABASE_SERVICE_ROLE_KEY` partout (le nom est correct)
+2. Migrer vers `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY` si JWT Signing Keys activées
+3. Si pas encore migré vers JWT Signing Keys, garder `NEXT_PUBLIC_SUPABASE_ANON_KEY` temporairement
 
 **Scripts à mettre à jour** (chercher/remplacer `SUPABASE_SECRET_KEY` → `SUPABASE_SERVICE_ROLE_KEY`) :
 - `scripts/create-admin-user.ts`
@@ -190,12 +197,16 @@ Voir `t3_env_readme.md` pour le guide complet.
 
 ### Jour 1 : Phase 0 (Pré-requis)
 ```bash
-# 1. Chercher/remplacer dans tous les scripts
+# 1. Vérifier le format des clés Supabase dans .env.local
+# Si JWT Signing Keys activées → utiliser NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY
+# Sinon → garder NEXT_PUBLIC_SUPABASE_ANON_KEY temporairement
+
+# 2. Chercher/remplacer dans tous les scripts
 find scripts -name "*.ts" -exec sed -i 's/SUPABASE_SECRET_KEY/SUPABASE_SERVICE_ROLE_KEY/g' {} \;
 
-# 2. Nettoyer .env.local (manuellement, supprimer ligne 43)
+# 3. Nettoyer .env.local (manuellement, supprimer ligne 43)
 
-# 3. Supprimer hasEnvVars (manuellement dans 5 fichiers)
+# 4. Supprimer hasEnvVars (manuellement dans 5 fichiers)
 ```
 
 ### Jour 2 : Phase 1 + 2
@@ -228,17 +239,23 @@ pnpm tsx scripts/test-env-validation.ts
 
 ## 🚨 Points d'Attention
 
-1. **Variables dupliquées** : `NEXT_PUBLIC_SUPABASE_URL` apparaît dans `server` ET `client` car elle est utilisée des deux côtés
+1. **Variables Supabase** : 
+   - ✅ **Si JWT Signing Keys activées** : utiliser `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY`
+   - ⚠️ **Si pas encore migrées** : garder `NEXT_PUBLIC_SUPABASE_ANON_KEY` (legacy)
+   - La clé service role reste `SUPABASE_SERVICE_ROLE_KEY` dans les deux cas
+   - Référence canonique : `.github/instructions/nextjs-supabase-auth-2025.instructions.md`
 
-2. **Transform boolean** : `EMAIL_DEV_REDIRECT` utilise `.transform()` pour convertir `"true"/"false"` en boolean
+2. **Variables dupliquées** : `NEXT_PUBLIC_SUPABASE_URL` apparaît dans `server` ET `client` car elle est utilisée des deux côtés
 
-3. **Optional variables** : Les vars de dev/test sont marquées `.optional()` pour ne pas bloquer la prod
+3. **Transform boolean** : `EMAIL_DEV_REDIRECT` utilise `.transform()` pour convertir `"true"/"false"` en boolean
 
-4. **CI/CD** : Ajouter `SKIP_ENV_VALIDATION=true` dans CI uniquement si nécessaire
+4. **Optional variables** : Les vars de dev/test sont marquées `.optional()` pour ne pas bloquer la prod
 
-5. **Architecture Supabase** : GARDER la séparation entre `server.ts`, `admin.ts`, `client.ts` et `middleware.ts`
+5. **CI/CD** : Ajouter `SKIP_ENV_VALIDATION=true` dans CI uniquement si nécessaire
 
-6. **Interface InvitationEmail** : Les props sont `{ email, role, displayName?, invitationUrl }` (pas `invitedUserEmail`, `companyName`, etc.)
+6. **Architecture Supabase** : GARDER la séparation entre `server.ts`, `admin.ts`, `client.ts` et `middleware.ts`
+
+7. **Interface InvitationEmail** : Les props sont `{ email, role, displayName?, invitationUrl }` (pas `invitedUserEmail`, `companyName`, etc.)
 
 ---
 

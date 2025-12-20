@@ -18,10 +18,14 @@ export const env = createEnv({
     // ============================================================================
     // 🗄️ DATABASE (Supabase)
     // ============================================================================
+    // Reference: .github/instructions/nextjs-supabase-auth-2025.instructions.md
+    // ✅ NEW FORMAT: NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY (with JWT Signing Keys)
+    // ❌ LEGACY FORMAT: NEXT_PUBLIC_SUPABASE_ANON_KEY (deprecated)
     NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY: z.string().min(1),
 
     // CRITICAL: Service role key - admin operations only
+    // Same name in both NEW and LEGACY formats (NOT deprecated)
     SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
 
     // ============================================================================
@@ -80,6 +84,10 @@ export const env = createEnv({
    * Elles DOIVENT commencer par NEXT_PUBLIC_
    * 
    * ⚠️ NE JAMAIS mettre de secrets ici !
+   * 
+   * Reference: .github/instructions/nextjs-supabase-auth-2025.instructions.md
+   * ✅ NEW FORMAT: NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY (with JWT Signing Keys)
+   * ❌ LEGACY FORMAT: NEXT_PUBLIC_SUPABASE_ANON_KEY (deprecated)
    */
   client: {
     NEXT_PUBLIC_SUPABASE_URL: z.string().url(),

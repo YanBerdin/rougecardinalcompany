@@ -514,9 +514,13 @@ This project uses [T3 Env](https://env.t3.gg/) for type-safe environment variabl
 
 ### Required Variables
 
+**Reference**: `.github/instructions/nextjs-supabase-auth-2025.instructions.md` (CANONICAL)
+
 - `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
-- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY` - Supabase anon key
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY` - ✅ **NEW FORMAT** (with JWT Signing Keys)
+  - ⚠️ **LEGACY**: `NEXT_PUBLIC_SUPABASE_ANON_KEY` (deprecated, only if not migrated to JWT Signing Keys)
 - `SUPABASE_SERVICE_ROLE_KEY` - ⚠️ Admin operations only (never commit!)
+  - Same name in both NEW and LEGACY formats (NOT deprecated)
 - `RESEND_API_KEY` - Email service API key
 
 See `.env.example` for full list and documentation.
