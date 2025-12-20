@@ -611,6 +611,7 @@ Centralized Zod schemas with barrel exports from `lib/schemas/index.ts`:
 
 | Metric | Value | Status |
 |--------|-------|--------|
+
 | DALResult coverage | 17/17 | ✅ |
 | revalidatePath in DAL | 0 | ✅ |
 | Email imports in DAL | 0 | ✅ |

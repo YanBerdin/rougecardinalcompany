@@ -1,85 +1,70 @@
 # ============================================================================
-#* 🗄️ SUPABASE CONFIGURATION (Required)
+# 🗄️ SUPABASE CONFIGURATION (Required)
 # ============================================================================
 # Get these from: https://app.supabase.com/project/_/settings/api
-NEXT_PUBLIC_SUPABASE_URL=your-project-url
+
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=your-anon-key
 
-# Admin operations (user invitation, role management)
-# ⚠️ CRITICAL: Never commit to version control!
-# Get it from: https://app.supabase.com/project/_/settings/api > Service Role Key
+# ⚠️ CRITICAL: Service Role Key - NEVER commit to version control!
 # Used for: Admin operations (user invitation, role management)
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
-# Site URL (for invitation links)
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
+# ============================================================================
+# 🌐 APPLICATION CONFIGURATION (Required)
+# ============================================================================
 
-# ============================================================================
-#* 🌐 APPLICATION CONFIGURATION (Required)
-# ============================================================================
 # Site URL (used for invitation links, redirects)
 # Development: http://localhost:3000
 # Production: https://rougecardinalcompany.fr
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 # ============================================================================
-# 🔐 ADMIN SEEDING (Optional - Local Development)
-# ============================================================================
-# Used by scripts/create-admin-user.ts for local database seeding
-# ADMIN SEEDING (for db:seed-admin script)
-DEFAULT_ADMIN_EMAIL=admin@rougecardinal.com
-#! DEFAULT_ADMIN_PASSWORD=Admin123!
-
-# ============================================================================
 # 📧 EMAIL CONFIGURATION (Resend - Required)
 # ============================================================================
-# DEVELOPMENT EMAIL REDIRECT
-# When `EMAIL_DEV_REDIRECT` is `true` and you run the app in development,
-# invitation emails will be redirected to `EMAIL_DEV_REDIRECT_TO`.
-# This is intended for local testing with providers that restrict recipients (eg. Resend test-mode).
+# Get API key from: https://resend.com/api-keys
 
-# Resend API Key (required for email sending)
-RESEND_API_KEY=your_resend_api_key
+# Resend API Key (format: re_xxxxx)
+RESEND_API_KEY=re_your_api_key_here
 
-# Email sender address (must be verified in Resend dashboard)
+# Sender email (must be verified in Resend dashboard)
 EMAIL_FROM=noreply@rougecardinalcompany.fr
 
-# Contact email for admin notifications
+# Admin contact email (receives contact form notifications)
 EMAIL_CONTACT=contact@rougecardinalcompany.fr
 
 # ============================================================================
-# 🚨 DEVELOPMENT EMAIL REDIRECT (DEV ONLY)
+# 🚨 DEVELOPMENT EMAIL REDIRECT (Optional - Dev Only)
 # ============================================================================
+# ⚠️  WARNING: MUST be 'false' or omitted in production!
 #
-# ⚠️  CRITICAL WARNING: This feature MUST be disabled in production!
+# Purpose: Redirect ALL invitation emails to a test address during development
+# Useful for: Testing invitation flow without sending to real users
 #
-# When enabled, ALL invitation emails will be redirected to EMAIL_DEV_REDIRECT_TO
-# regardless of the recipient's actual email address.
+# Activation requirements:
+# 1. NODE_ENV='development'
+# 2. EMAIL_DEV_REDIRECT='true'
 #
-# Purpose: Test invitation flow locally without sending real emails
-#
-#* Activation requirements: 
-# NODE_ENV='development' 
-# EMAIL_DEV_REDIRECT='true'
-#
-# ❌ DO NOT enable this in production - it will redirect real user invitations!
-# ✅ Safe values for production: 'false', undefined, or omit entirely
-#
+# ❌ DO NOT enable in production - will redirect real user invitations!
+# ✅ Safe production values: 'false', undefined, or omit these lines
+
 EMAIL_DEV_REDIRECT=false
-EMAIL_DEV_REDIRECT_TO=yandevformation@gmail.com
+EMAIL_DEV_REDIRECT_TO=your-test-email@example.com
 
 # ============================================================================
-# Deployment Checklist:
-# 1. EMAIL_DEV_REDIRECT must be 'false' or undefined
-# 2. EMAIL_FROM must be a verified domain in Resend
-# 3. RESEND_API_KEY must be production key (not test mode)
+# 🔐 ADMIN SEEDING (Optional - Local Development)
 # ============================================================================
+# Used by scripts/create-admin-user.ts for local database seeding
+
+DEFAULT_ADMIN_EMAIL=admin@rougecardinal.com
+DEFAULT_ADMIN_PASSWORD=Admin123!
 
 # ============================================================================
 # 🧪 TESTING & DEVELOPMENT (Optional)
 # ============================================================================
-TEST_DB_URL=...
-GITHUB_TOKEN=...
+
+TEST_DB_URL=postgresql://...
+GITHUB_TOKEN=ghp_...
 CONTEXT7_API_KEY=...
 
 # ============================================================================
@@ -96,7 +81,7 @@ CONTEXT7_API_KEY=...
 # Safe to omit if you're only running the Next.js app locally.
 
 SUPABASE_PROJECT_REF=your-project-ref
-SUPABASE_ACCESS_TOKEN=your-access-token
+SUPABASE_ACCESS_TOKEN=sbp_your-access-token
 
 # ============================================================================
 # ⚙️ ENVIRONMENT (Auto-detected by Next.js)
