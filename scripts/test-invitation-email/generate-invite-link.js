@@ -17,7 +17,7 @@ async function main() {
   const redirectUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000/auth/setup-account';
 
   if (!url || !serviceKey) {
-    console.error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in environment.');
+    console.error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SECRET_KEY in environment.');
     process.exit(2);
   }
 

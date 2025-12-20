@@ -12,7 +12,7 @@
  *   pnpm exec tsx scripts/test-team-server-actions.ts
  *
  * Prerequisites:
- *   SUPABASE_SERVICE_ROLE_KEY in .env.local
+ *   SUPABASE_SECRET_KEY in .env.local
  */
 
 import { createClient } from "@supabase/supabase-js";
@@ -21,12 +21,12 @@ import { config } from "dotenv";
 config({ path: ".env.local" });
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const SERVICE_ROLE_KEY = process.env.SUPABASE_SECRET_KEY;
 
 if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
   console.error("❌ Missing environment variables:");
   console.error("   NEXT_PUBLIC_SUPABASE_URL:", SUPABASE_URL ? "✓" : "✗");
-  console.error("   SUPABASE_SERVICE_ROLE_KEY:", SERVICE_ROLE_KEY ? "✓" : "✗");
+  console.error("   SUPABASE_SECRET_KEY:", SERVICE_ROLE_KEY ? "✓" : "✗");
   process.exit(1);
 }
 

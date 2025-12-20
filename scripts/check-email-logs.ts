@@ -43,8 +43,6 @@ async function checkEmailLogs() {
   // ❌ LEGACY FORMAT - Only use if not migrated to JWT Signing Keys
   // ✅ NEW FORMAT - SUPABASE_SECRET_KEY
   const supabaseKey =
-    //  envVars.SUPABASE_SERVICE_ROLE_KEY ||
-    //  process.env.SUPABASE_SERVICE_ROLE_KEY ||
     envVars.SUPABASE_SECRET_KEY ||
     process.env.SUPABASE_SECRET_KEY ||
     envVars.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY ||

@@ -20,7 +20,7 @@ async function testInvitationLinkFlow() {
   const client = createClient(supabaseUrl, anonKey);
 
   // Generate invitation link (using admin client)
-  const adminClient = createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY, {
+  const adminClient = createClient(supabaseUrl, process.env.SUPABASE_SECRET_KEY, {
     auth: { autoRefreshToken: false, persistSession: false }
   });
 

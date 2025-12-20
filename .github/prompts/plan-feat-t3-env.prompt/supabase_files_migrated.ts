@@ -71,11 +71,11 @@ import { env } from "@/lib/env";
  */
 export async function createAdminClient() {
   // T3 Env validates at startup, but keep explicit check for better error message
-  const serviceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceRoleKey = env.SUPABASE_SECRET_KEY;
 
   if (!serviceRoleKey) {
     throw new Error(
-      "[ADMIN_CLIENT] SUPABASE_SERVICE_ROLE_KEY manquante. " +
+      "[ADMIN_CLIENT] SUPABASE_SECRET_KEY manquante. " +
       "Cette clé est requise pour les opérations admin. " +
       "Ajoutez-la à .env.local (ne jamais committer cette clé !)"
     );

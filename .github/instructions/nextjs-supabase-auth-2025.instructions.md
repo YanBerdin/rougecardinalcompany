@@ -93,11 +93,11 @@ const claims = await supabase.auth.getClaims()  // ~2-5ms local verification
 # ✅ NEW FORMAT - Use these for optimal performance
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=your_new_publishable_key
-SUPABASE_SERVICE_ROLE_KEY=your_new_secret_key
+SUPABASE_SECRET_KEY=your_new_secret_key
 
 # ❌ LEGACY FORMAT - Only use if not migrated to JWT Signing Keys
-# NEXT_PUBLIC_SUPABASE_ANON_KEY=old_anon_key
-# SUPABASE_SERVICE_ROLE_KEY=old_service_role_key
+# ❌ NEXT_PUBLIC_SUPABASE_ANON_KEY=old_anon_key
+# ❌ SUPABASE_SERVICE_ROLE_KEY=old_service_role_key
 ```
 
 ## CORRECT BROWSER CLIENT IMPLEMENTATION

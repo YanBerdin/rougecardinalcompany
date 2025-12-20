@@ -27,7 +27,7 @@ async function testLocalInvitationFlow() {
   // Simulate the invitation flow
   console.log("1. Generating invitation link...");
 
-  const adminClient = createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY || '', {
+  const adminClient = createClient(supabaseUrl, process.env.SUPABASE_SECRET_KEY || '', {
     auth: { autoRefreshToken: false, persistSession: false }
   });
 

@@ -552,7 +552,7 @@ Centralized Zod schemas with barrel exports from `lib/schemas/index.ts`:
 ## Security & RLS
 
 - RLS policies live under `supabase/schemas/60_rls_profiles.sql` and related files. Recent migration relaxed the UPDATE policy for `profiles` to allow admin UPSERT scenario.
-- Never expose `SUPABASE_SERVICE_ROLE_KEY` to the client. Use server-only admin client for privileged operations.
+- Never expose `(❌ SUPABASE_SERVICE_ROLE_KEY/✅ SUPABASE_SECRET_KEY` to the client. Use server-only admin client for privileged operations.
 
 ## Extension templates (how to add a new feature)
 

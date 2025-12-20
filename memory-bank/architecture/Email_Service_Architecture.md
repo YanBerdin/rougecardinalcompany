@@ -1117,7 +1117,7 @@ async function checkEmailLogs() {
   console.log('📊 Checking email delivery logs...\n');
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseKey = process.env.SUPABASE_SECRET_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
     console.log('❌ Missing Supabase environment variables');
@@ -1156,7 +1156,7 @@ checkEmailLogs();
 
 **Commande**: `pnpm run test:logs`
 
-**Prérequis**: `SUPABASE_SERVICE_ROLE_KEY` dans `.env.local`
+**Prérequis**: `SUPABASE_SECRET_KEY` dans `.env.local`
 
 ### 9.2 Test via cURL
 
@@ -1203,7 +1203,7 @@ Recommandation : intégrer ce test dans la suite de tests principale (Vitest/Jes
 
 ### 10.1 Variables Requises
 
-```env
+```bash
 # Resend API
 RESEND_API_KEY=re_your_api_key_here
 RESEND_AUDIENCE_ID=your_audience_id  # Optionnel
@@ -1215,7 +1215,7 @@ EMAIL_CONTACT=contact@votre-domaine.fr
 # Supabase (existant)
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=xxx
-SUPABASE_SERVICE_ROLE_KEY=xxx  # Pour scripts admin
+SUPABASE_SECRET_KEY=xxx  # Pour scripts admin
 
 # Site
 NEXT_PUBLIC_SITE_URL=http://localhost:3000

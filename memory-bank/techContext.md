@@ -194,15 +194,15 @@ export const resend = new Resend(process.env.RESEND_API_KEY);
 
 **Supabase:**
 
-```env
+```bash
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=eyJ...
-SUPABASE_SERVICE_ROLE_KEY=eyJ...  # Admin only (scripts)
+SUPABASE_SECRET_KEY=eyJ...  # Admin only (scripts)
 ```
 
 **Resend:**
 
-```env
+```bash
 RESEND_API_KEY=re_xxx                      # Required
 RESEND_AUDIENCE_ID=xxx                     # Optional
 EMAIL_FROM=noreply@rougecardinalcompany.fr # Default FROM

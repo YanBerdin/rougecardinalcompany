@@ -25,8 +25,8 @@ Créer un script admin pour vérifier les logs email (newsletter + contact messa
    - Format Simplified (moderne 2024+): `sb_secret_...` / `sb_publishable_...` (~50-60 chars)
 
 2. **Deux noms de variables**:
-   - `SUPABASE_SERVICE_ROLE_KEY` pour format JWT
-   - `SUPABASE_SECRET_KEY` pour format Simplified
+   - `❌ SUPABASE_SERVICE_ROLE_KEY` pour format JWT (deprecated)
+   - `✅ SUPABASE_SECRET_KEY` pour format Simplified
 
 3. **RLS protection fonctionnelle**:
    - Politique "Admin can read" empêche lecture publique des données personnelles
@@ -87,7 +87,7 @@ Créer un script admin pour vérifier les logs email (newsletter + contact messa
 
 #### **Solution: Utiliser service_role key**
 
-- Modifié script pour supporter `SUPABASE_SERVICE_ROLE_KEY`
+- Modifié script pour supporter `SUPABASE_SECRET_KEY`
 - Ajouté détection automatique: service_role vs anon key
 - Ajouté messages d'aide si RLS bloque avec anon key
 - Ajouté fallback chain: service_role → anon
@@ -131,7 +131,7 @@ Créer un script admin pour vérifier les logs email (newsletter + contact messa
   1. **JWT (legacy/standard)**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` (~250+ chars)
   2. **Simplified (moderne 2024+)**: `sb_secret_...` / `sb_publishable_...` (~50-60 chars)
 - Chaque format a son nom de variable:
-  - JWT → `SUPABASE_SERVICE_ROLE_KEY`
+  - JWT → `SUPABASE_SERVICE_ROLE_KEY` (deprecated)
   - Simplified → `SUPABASE_SECRET_KEY`
 
 #### **Solution universelle: Support dual format**
@@ -140,7 +140,7 @@ Créer un script admin pour vérifier les logs email (newsletter + contact messa
 
   ```typescript
   const supabaseKey =
-    envVars.SUPABASE_SERVICE_ROLE_KEY || // JWT format
+    envVars.SUPABASE_SERVICE_ROLE_KEY || // JWT format (legacy)
     envVars.SUPABASE_SECRET_KEY || // Simplified format
     envVars.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY;
   ```

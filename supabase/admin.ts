@@ -4,11 +4,11 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 export async function createAdminClient() {
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceRoleKey = process.env.SUPABASE_SECRET_KEY;
 
   if (!serviceRoleKey) {
     throw new Error(
-      "SUPABASE_SERVICE_ROLE_KEY manquante. Cette clé est requise pour les opérations admin. " +
+      "SUPABASE_SECRET_KEY manquante. Cette clé est requise pour les opérations admin. " +
         "Ajoutez-la à .env.local (ne jamais committer cette clé !)"
     );
   }
