@@ -359,6 +359,7 @@
 │   │   ├── 📄 home-newsletter.ts
 │   │   ├── 📄 home-partners.ts
 │   │   ├── 📄 home-shows.ts
+│   │   ├── 📄 media.ts
 │   │   ├── 📄 newsletter-subscriber.ts
 │   │   ├── 📄 presse.ts
 │   │   ├── 📄 spectacles.ts

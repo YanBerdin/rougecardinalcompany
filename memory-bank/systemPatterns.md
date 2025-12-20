@@ -182,6 +182,59 @@ components/features/admin/<feature>/
 └── Form.tsx              # Form component
 ```
 
+### Media DAL Pattern (Dec 2025)
+
+**Pattern** : Centralized Storage/DB operations for media files.
+
+**Location**: `lib/dal/media.ts`
+
+**Exports** (3 public functions):
+
+- `uploadMedia(file, folder, fileName?)` — Full upload workflow
+- `deleteMedia(mediaId)` — Full delete workflow (Storage + DB)
+- `getMediaById(mediaId)` — Fetch media record
+
+**Helpers** (4 private functions):
+
+- `uploadToStorage(supabase, file, folder, fileName)` — Handle Supabase Storage upload
+- `getPublicUrl(supabase, path)` — Retrieve public URL
+- `createMediaRecord(supabase, data)` — Insert database record
+- `cleanupStorage(supabase, path)` — Best-effort file cleanup
+
+**Usage in Server Actions**:
+
+```typescript
+// lib/actions/media-actions.ts
+import { uploadMedia, deleteMedia } from '@/lib/dal/media';
+
+export async function uploadMediaImage(formData, folder) {
+  const file = formData.get('file');
+  const result = await uploadMedia(file, folder);
+  
+  if (!result.success) {
+    return { success: false, error: result.error };
+  }
+  
+  revalidatePath('/admin/medias');
+  return { success: true, data: result.data };
+}
+```
+
+**Benefits**:
+
+- ✅ Eliminates code duplication (120+ lines removed from team/actions.ts)
+- ✅ All functions < 30 lines (SOLID compliance)
+- ✅ Type-safe with DALResult<T>
+- ✅ No revalidatePath() in DAL (respects boundaries)
+- ✅ Centralized error handling
+
+**Related Refactoring**:
+
+- `lib/actions/media-actions.ts` — Refactored from 263 to 156 lines (41% reduction)
+- `app/(admin)/admin/team/actions.ts` — Removed duplicate Storage helpers
+
+---
+
 ### CRUD Pages Pattern (Dec 2025)
 
 **Pattern** : Formulaires CRUD sur pages dédiées (plus inline):

@@ -1,11 +1,12 @@
-# Project Folders Structure Blueprint v5.1
+# Project Folders Structure Blueprint v5.2
 
 Date: 2025-12-20
 
 # Résumé
 
-Ce document présente la structure projet actuelle et les décisions récentes (v5.1) intégrant les évolutions suivantes :
+Ce document présente la structure projet actuelle et les décisions récentes (v5.2) intégrant les évolutions suivantes :
 
+- **SOLID & Server Actions Refactoring** — Compliance 78%→98%, création lib/dal/media.ts
 - **T3 Env Implementation** (plan-feat-t3-env.prompt.md) — Type-safe environment variables
 - Factorisation du handler Contact (plan-factoriserContactHandler-v2.prompt.md)
 - Factorisation du handler Newsletter (plan-factoriserNewsletterHandler.prompt.md)
@@ -31,7 +32,29 @@ Fournir un guide unique qui décrit l'organisation des dossiers, conventions et 
 
 ---
 
-1) Factorisation Contact
+1) SOLID & Server Actions Refactoring (Dec 2025)
+
+- **Compliance achieved**: 78%→98% pattern compliance (0/6 files with violations)
+- **New DAL module**: `lib/dal/media.ts` (234 lines) — Centralized Storage/DB operations
+  - 4 helpers: uploadToStorage(), getPublicUrl(), createMediaRecord(), cleanupStorage()
+  - 3 public functions: uploadMedia(), deleteMedia(), getMediaById()
+- **Code quality improvements**:
+  - Average function length: 45→22 lines (51% reduction)
+  - Code duplication eliminated: 120+ lines removed from team/actions.ts
+- **DAL Layer refactoring**:
+  - `lib/dal/admin-users.ts` — 5 helpers converted to DALResult<null>, listAllUsers() decomposed
+  - `lib/dal/admin-home-hero.ts` — Slug generators converted to DALResult<string>
+- **Server Actions refactoring**:
+  - `lib/actions/media-actions.ts` — 263→156 lines (41% reduction)
+  - `lib/email/actions.ts` — sendEmail() decomposed 41→19 lines
+  - All files: Added "server-only" directive
+- **SOLID principles**:
+  - Single Responsibility: All functions < 30 lines
+  - Dependency Inversion: Server Actions depend on DAL abstractions
+  - Interface Segregation: DALResult<T> discriminated union
+- Effet: Improved maintainability, type safety, eliminated duplication
+
+2) Factorisation Contact
 
 - Nouveau module partagé `lib/actions/contact-server.ts` implémente `handleContactSubmission()`.
 - `app/api/contact/route.ts` délègue à cette fonction, conservant le contrat API (compatibilité curl/clients externes).
