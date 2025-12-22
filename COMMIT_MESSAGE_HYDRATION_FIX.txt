@@ -1,0 +1,66 @@
+fix(forms): resolve React Hook Form hydration mismatches and DALResult handling
+
+## Hydration Fixes
+
+### About Content Form
+- Create AboutContentFormWrapper.tsx with next/dynamic + ssr:false
+- Move dynamic import to Client Component (Next.js 16 requirement)
+- Add skeleton loading state during client-side hydration
+- Prevents ID mismatch between server/client renders
+
+### Team Member Form
+- Create TeamMemberFormClient.tsx with next/dynamic + ssr:false
+- Apply same pattern: Client Component wrapper for dynamic import
+- Update both /admin/team/new and /admin/team/[id]/edit pages
+- Use Tailwind skeleton (animate-pulse) for loading state
+
+## DALResult Error Fix
+
+### Users Management Container
+- Add result.success check for listAllUsers() DALResult
+- Extract result.data before passing to View component
+- Display error message if DAL operation fails
+- Prevents "sortedUsers.map is not a function" runtime error
+
+## Root Cause
+
+React Hook Form generates random IDs (_R_xxx) for form fields. When forms
+render server-side (SSR), these IDs differ from client-side hydration IDs,
+causing React hydration mismatch errors.
+
+## Solution Pattern
+
+```tsx
+// Client Component with dynamic import
+const FormComponent = dynamic(
+  () => import("./Form"),
+  { ssr: false, loading: () => <Skeleton /> }
+);
+```
+
+This ensures forms render ONLY client-side, avoiding ID mismatches.
+
+## Files Changed
+
+**Created:**
+- components/features/admin/home/AboutContentFormWrapper.tsx
+- components/features/admin/team/TeamMemberFormClient.tsx
+
+**Modified:**
+- components/features/admin/home/AboutContentContainer.tsx
+- components/features/admin/users/UsersManagementContainer.tsx
+- app/(admin)/admin/team/new/page.tsx
+- app/(admin)/admin/team/[id]/edit/page.tsx
+
+## Testing
+
+- ✅ /admin/home/about - No hydration errors
+- ✅ /admin/team/new - No hydration errors  
+- ✅ /admin/team/[id]/edit - No hydration errors
+- ✅ /admin/users - sortedUsers.map works correctly
+
+## Related Patterns
+
+- Next.js 16: `ssr: false` must be in Client Component
+- SOLID DAL: Always check DALResult.success before accessing .data
+- Conventional Commits: fix(scope) for bug corrections

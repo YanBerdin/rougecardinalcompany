@@ -12,7 +12,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { TeamMemberFormWrapper } from "@/components/features/admin/team/TeamMemberFormWrapper";
+import { TeamMemberFormClient } from "@/components/features/admin/team/TeamMemberFormClient";
 
 export const metadata: Metadata = {
     title: "Modifier membre | Admin",
@@ -76,7 +76,7 @@ export default async function EditTeamMemberPage({
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <TeamMemberFormWrapper member={member} />
+                    <TeamMemberFormClient member={member} />
                 </CardContent>
             </Card>
         </div>

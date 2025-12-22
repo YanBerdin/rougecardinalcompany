@@ -1,8 +1,8 @@
 # File Tree: rougecardinalcompany
 
-**Generated:** 12/20/2025, 10:00:00 AM
+**Generated:** 12/22/2025, 10:00:00 AM
 **Root Path:** `memory-bank/architecture`
-**Last Updated:** Added lib/env.ts (T3 Env implementation)
+**Last Updated:** Added hydration fix wrappers (AboutContentFormWrapper.tsx, TeamMemberFormClient.tsx) and commit message
 
 ```bash
 ├── 📁 .github
@@ -146,6 +146,7 @@
 │   │   │   ├── 📁 home
 │   │   │   │   ├── 📄 AboutContentContainer.tsx
 │   │   │   │   ├── 📄 AboutContentForm.tsx
+│   │   │   │   ├── 📄 AboutContentFormWrapper.tsx
 │   │   │   │   ├── 📄 CtaFieldGroup.tsx
 │   │   │   │   ├── 📄 HeroSlideForm.tsx
 │   │   │   │   ├── 📄 HeroSlideFormFields.tsx
@@ -169,6 +170,7 @@
 │   │   │   │   ├── 📄 TeamManagementContainer.tsx
 │   │   │   │   ├── 📄 TeamMemberCard.tsx
 │   │   │   │   ├── 📄 TeamMemberForm.tsx
+│   │   │   │   ├── 📄 TeamMemberFormClient.tsx
 │   │   │   │   ├── 📄 TeamMemberFormWrapper.tsx
 │   │   │   │   └── 📄 TeamMemberList.tsx
 │   │   │   └── 📁 users
@@ -672,6 +674,7 @@
 ├── ⚙️ .env.example
 ├── ⚙️ .gitignore
 ├── ⚙️ .markdownlint.jsonc
+├── 📝 COMMIT_MESSAGE_HYDRATION_FIX.txt
 ├── 📝 README.md
 ├── 📝 TESTING_RESEND.md
 ├── 📄 check_spectacles_rls.sql

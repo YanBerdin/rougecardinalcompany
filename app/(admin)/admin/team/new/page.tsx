@@ -11,7 +11,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { TeamMemberFormWrapper } from "@/components/features/admin/team/TeamMemberFormWrapper";
+import { TeamMemberFormClient } from "@/components/features/admin/team/TeamMemberFormClient";
 
 export const metadata: Metadata = {
     title: "Nouveau membre | Admin",
@@ -54,7 +54,7 @@ export default async function NewTeamMemberPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <TeamMemberFormWrapper member={null} />
+                    <TeamMemberFormClient member={null} />
                 </CardContent>
             </Card>
         </div>

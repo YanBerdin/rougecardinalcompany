@@ -90,6 +90,15 @@ Version: v2.3
 
 Résumé: ce document analyse la base de code existante et formalise le modèle d'architecture, les patterns observés et les recommandations pour l'évolution et l'extensibilité. Il s'appuie sur l'organisation actuelle (Next.js 16, TypeScript strict, Supabase, React 19) et couvre les composantes clés, la sécurité RLS, les modèles d'accès aux données, les tests et le déploiement.
 
+**Mise à jour v2.5 (22 décembre 2025) — React Hook Form Hydration Fixes:**
+
+- **Hydration Pattern**: Client Component wrappers with next/dynamic + ssr:false for forms
+- **Files Created**: AboutContentFormWrapper.tsx, TeamMemberFormClient.tsx
+- **Forms Fixed**: About content, Team member (new/edit)
+- **DALResult Safety**: UsersManagementContainer now checks result.success
+- **Zero Hydration Errors**: All admin forms load client-side only
+- **Next.js 16 Compliant**: ssr:false pattern in Client Components (required)
+
 **Mise à jour v2.4 (20 décembre 2025) — SOLID & Server Actions Refactoring:**
 
 - **Compliance**: Pattern compliance 78%→98% (0/6 files with violations)

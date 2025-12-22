@@ -270,6 +270,103 @@ components/features/admin/<feature>/
 - Séparation claire : Container/Wrapper/Form responsibilities
 - `sanitizePayload()` pour contraintes DB (empty string → null)
 
+### React Hook Form Hydration Fix Pattern (Dec 2025)
+
+**Pattern** : Éviter les hydration mismatches avec React Hook Form en utilisant Client Component + next/dynamic.
+
+#### Problème
+
+React Hook Form génère des IDs aléatoires (`_R_xxx`) pour les champs. Ces IDs diffèrent entre:
+
+- Rendu serveur (SSR) : `_R_qinebn5ritrknelb_`
+- Rendu client (hydratation) : `_R_6klritpesnesnelb_`
+
+**Erreur résultante** : "A tree hydrated but some attributes of the server rendered HTML didn't match the client properties."
+
+#### Solution
+
+Créer un **Client Component wrapper** utilisant `next/dynamic` avec `ssr: false`.
+
+**Structure** :
+
+```bash
+Components Hierarchy:
+  Container.tsx (Server Component)
+    ↓ fetches data via DAL
+  FormWrapper.tsx (Client Component - "use client")
+    ↓ next/dynamic with ssr: false
+  Form.tsx (Client Component - loaded client-side only)
+```
+
+**Implementation** :
+
+```typescript
+// FormWrapper.tsx (Client Component)
+"use client";
+
+import dynamic from "next/dynamic";
+import type { EntityDTO } from "@/lib/schemas/entity";
+
+const EntityForm = dynamic(
+  () => import("./EntityForm").then((mod) => ({ default: mod.EntityForm })),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="space-y-4">
+        <div className="h-12 w-full animate-pulse rounded-md bg-muted" />
+        <div className="h-12 w-full animate-pulse rounded-md bg-muted" />
+      </div>
+    )
+  }
+);
+
+interface FormWrapperProps {
+  entity: EntityDTO | null;
+}
+
+export function FormWrapper({ entity }: FormWrapperProps) {
+  return <EntityForm entity={entity} />;
+}
+```
+
+**Usage in Server Component** :
+
+```typescript
+// Container.tsx (Server Component)
+import { fetchEntity } from "@/lib/dal/entity";
+import { FormWrapper } from "./FormWrapper";
+
+export async function EntityContainer() {
+  const result = await fetchEntity();
+  
+  if (!result.success) {
+    return <div>Error: {result.error}</div>;
+  }
+  
+  return <FormWrapper entity={result.data} />;
+}
+```
+
+#### Files Using This Pattern
+
+- `components/features/admin/home/AboutContentFormWrapper.tsx` — About content form
+- `components/features/admin/team/TeamMemberFormClient.tsx` — Team member form
+
+#### Benefits
+
+- ✅ Eliminates hydration mismatch errors
+- ✅ Forms render ONLY client-side (consistent IDs)
+- ✅ Proper loading states with skeleton
+- ✅ Conforme Next.js 16 (`ssr: false` must be in Client Component)
+- ✅ Works with react-hook-form, shadcn/ui forms
+
+#### Related Issues Fixed
+
+- React Hook Form ID mismatches on About content form
+- React Hook Form ID mismatches on Team member forms (new/edit)
+
+---
+
 ### Clean Code Pattern (Dec 2025)
 
 **Pattern** : Extraction logique dans hooks et constantes pour conformité Clean Code.
@@ -628,7 +725,7 @@ export function isActionSuccess<T>(
 
 Quand un utilisateur navigue en arrière (ex: depuis une page 404), le browser peut restaurer la page depuis son bfcache (back-forward cache). React tente de re-hydrater avec de nouveaux IDs (`useId()`), causant un mismatch avec les IDs stockés dans le DOM bfcache.
 
-```
+```bash
 Error: Hydration failed because the server rendered HTML didn't match the client.
 React tree: id="_R_39bn5ri..."
 Server HTML: id="_R_d5esnebn..."
@@ -1087,7 +1184,7 @@ export const config = {
 
 **Pattern** : Architecture 4-layer avec Server Actions comme couche d'orchestration.
 
-```
+```bash
 ┌─────────────────────────────────────────────────────────────────┐
 │  Presentation (Client Components)                               │
 │  └── Form.tsx uses UI schema (number for IDs)                  │

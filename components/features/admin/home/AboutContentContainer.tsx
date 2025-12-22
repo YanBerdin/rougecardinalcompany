@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { fetchActiveAboutContent } from "@/lib/dal/admin-home-about";
-import { AboutContentForm } from "./AboutContentForm";
+import { AboutContentFormWrapper } from "./AboutContentFormWrapper";
 import { AboutContentSkeleton } from "@/components/skeletons/AboutContentSkeleton";
 
 async function AboutContentData() {
@@ -22,7 +22,7 @@ async function AboutContentData() {
     );
   }
 
-  return <AboutContentForm content={result.data} />;
+  return <AboutContentFormWrapper content={result.data} />;
 }
 
 export function AboutContentContainer() {

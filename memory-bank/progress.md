@@ -1,5 +1,88 @@
 # Progress
 
+## React Hook Form Hydration Fixes - COMPLETED (2025-12-22)
+
+### Objectif
+
+Résoudre les erreurs d'hydration React causées par les IDs aléatoires générés par React Hook Form qui diffèrent entre le rendu serveur et client.
+
+### Résultats
+
+#### Fichiers créés
+
+- ✅ `components/features/admin/home/AboutContentFormWrapper.tsx` (27 lignes)
+  - Client Component wrapper avec `next/dynamic` et `ssr: false`
+  - Skeleton loading avec animate-pulse
+- ✅ `components/features/admin/team/TeamMemberFormClient.tsx` (30 lignes)
+  - Client Component wrapper pour formulaires team
+  - Pattern identique pour cohérence
+
+#### Fichiers modifiés
+
+**Admin Forms** (4 files):
+
+- `components/features/admin/home/AboutContentContainer.tsx` — Utilise AboutContentFormWrapper
+- `app/(admin)/admin/team/new/page.tsx` — Utilise TeamMemberFormClient
+- `app/(admin)/admin/team/[id]/edit/page.tsx` — Utilise TeamMemberFormClient
+
+**DALResult Fix** (1 file):
+
+- `components/features/admin/users/UsersManagementContainer.tsx` — Vérification result.success
+
+#### Problèmes résolus
+
+| Erreur | Cause | Solution |
+| -------- | ------- | ---------- |
+| **Hydration mismatch** About form | React Hook Form IDs aléatoires SSR≠Client | AboutContentFormWrapper + ssr:false |
+| **Hydration mismatch** Team forms | React Hook Form IDs aléatoires SSR≠Client | TeamMemberFormClient + ssr:false |
+| **sortedUsers.map is not a function** | DALResult passé directement sans extraction .data | Vérification result.success + result.data |
+
+#### Pattern implémenté
+
+**Client Component Wrapper Pattern** :
+
+```typescript
+// FormWrapper.tsx ("use client")
+const Form = dynamic(
+  () => import("./Form"),
+  { ssr: false, loading: () => <Skeleton /> }
+);
+
+export function FormWrapper({ data }) {
+  return <Form data={data} />;
+}
+```
+
+**Avantages** :
+
+- ✅ Formulaires chargés UNIQUEMENT côté client
+- ✅ IDs React Hook Form cohérents (pas de mismatch)
+- ✅ Conforme Next.js 16 (ssr:false dans Client Component)
+- ✅ Skeleton visible pendant chargement
+
+#### Validation & Testing
+
+| Test | Résultat |
+| ------ | ---------- |
+| /admin/home/about | ✅ No hydration errors |
+| /admin/team/new | ✅ No hydration errors |
+| /admin/team/\[id]/edit | ✅ No hydration errors |
+| /admin/users | ✅ sortedUsers.map works |
+| Build production | ✅ PASS |
+
+#### Commit
+
+- `fix(forms): resolve React Hook Form hydration mismatches and DALResult handling`
+  - 6 files changed: +57 insertions, -6 deletions
+  - 2 new files created (wrappers)
+
+#### Documentation
+
+- `memory-bank/systemPatterns.md` — React Hook Form Hydration Fix Pattern documenté
+- `COMMIT_MESSAGE_HYDRATION_FIX.txt` — Detailed commit message
+
+---
+
 ## SOLID & Server Actions Refactoring - COMPLETED (2025-12-20)
 
 ### Objectif

@@ -1,6 +1,84 @@
 # Active Context
 
-**Current Focus (2025-12-20)**: SOLID & Server Actions Refactoring - COMPLETED ✅
+**Current Focus (2025-12-22)**: React Hook Form Hydration Fixes - COMPLETED ✅
+
+## Architecture Updates (2025-12-22)
+
+### React Hook Form Hydration Fixes - COMPLETED ✅
+
+**Résolution des erreurs d'hydration React causées par les IDs aléatoires de React Hook Form.**
+
+#### Problème résolu
+
+- ❌ Hydration mismatch errors sur formulaires admin (About, Team)
+- ❌ "sortedUsers.map is not a function" sur page /admin/users
+- ❌ IDs React Hook Form différents entre SSR et client (`_R_xxx`)
+
+#### Solution implémentée
+
+| Fichier créé/modifié | Rôle | Impact |
+| ---------------------- | ------ | -------- |
+| `AboutContentFormWrapper.tsx` | **CRÉÉ** — Client wrapper avec ssr:false | 27 lignes |
+| `TeamMemberFormClient.tsx` | **CRÉÉ** — Client wrapper pour Team forms | 30 lignes |
+| `AboutContentContainer.tsx` | Modifié — Utilise wrapper au lieu de direct import | Switch to wrapper |
+| `UsersManagementContainer.tsx` | Modifié — Vérification DALResult.success | Extract .data |
+| `team/new/page.tsx` | Modifié — TeamMemberFormClient | Switch to wrapper |
+| `team/[id]/edit/page.tsx` | Modifié — TeamMemberFormClient | Switch to wrapper |
+
+#### Pattern Client Component Wrapper
+
+**Architecture** :
+
+```bash
+Server Component (Container)
+  ↓ Fetches data via DAL
+  ↓ Checks result.success
+  ↓
+Client Component (Wrapper) — "use client"
+  ↓ next/dynamic with ssr: false
+  ↓ loading: () => <Skeleton />
+  ↓
+Client Component (Form) — Loaded ONLY client-side
+  ↓ React Hook Form with consistent IDs
+```
+
+**Code Pattern** :
+
+```typescript
+// FormWrapper.tsx
+"use client";
+import dynamic from "next/dynamic";
+
+const Form = dynamic(
+  () => import("./Form").then(mod => ({ default: mod.Form })),
+  { 
+    ssr: false,
+    loading: () => <div className="h-12 animate-pulse bg-muted" />
+  }
+);
+
+export function FormWrapper({ data }) {
+  return <Form data={data} />;
+}
+```
+
+#### Bénéfices atteints
+
+1. **Zero Hydration Errors** — Formulaires chargés uniquement côté client
+2. **Consistent IDs** — React Hook Form génère IDs cohérents
+3. **Next.js 16 Compliant** — `ssr: false` dans Client Component (requis)
+4. **Better UX** — Skeleton visible pendant chargement
+5. **DALResult Safety** — Vérification systématique de result.success
+
+#### Commits créés
+
+- `fix(forms): resolve React Hook Form hydration mismatches and DALResult handling`
+  - 6 files changed: +57 insertions, -6 deletions
+  - 2 new files: AboutContentFormWrapper, TeamMemberFormClient
+
+---
+
+## Previous Focus (2025-12-20): SOLID & Server Actions Refactoring - COMPLETED ✅
 
 ## Architecture Updates (2025-12-20)
 
