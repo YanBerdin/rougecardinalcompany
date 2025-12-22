@@ -55,11 +55,13 @@ export type ActionResult<T> =
  * @property mediaId - Database ID from medias table
  * @property publicUrl - Public URL for the uploaded file
  * @property storagePath - Internal storage path (for reference)
+ * @property isDuplicate - True if file already existed (hash match)
  */
 export interface MediaUploadData {
     mediaId: number;
     publicUrl: string;
     storagePath: string;
+    isDuplicate?: boolean;
 }
 
 /**

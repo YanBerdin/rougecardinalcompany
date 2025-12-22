@@ -17,6 +17,7 @@ export interface MediaUploadInput {
     file: File;
     folder: string;
     uploadedBy: string | undefined;
+    fileHash?: string;
 }
 
 export interface MediaUploadData {
@@ -94,6 +95,7 @@ async function createMediaRecord(
             filename: input.file.name,
             mime: input.file.type,
             size_bytes: input.file.size,
+            file_hash: input.fileHash,
             uploaded_by: input.uploadedBy,
         })
         .select("id")
@@ -239,4 +241,47 @@ export async function getMediaById(
     }
 
     return { success: true, data };
+}
+
+/**
+ * Find media by file hash
+ * 
+ * @param fileHash - SHA-256 hash (64 hex chars)
+ * @returns DALResult with media record or null if not found
+ */
+export async function findMediaByHash(
+    fileHash: string
+): Promise<DALResult<MediaRecord | null>> {
+    await requireAdmin();
+
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+        .from("medias")
+        .select("id, storage_path, filename, mime, size_bytes")
+        .eq("file_hash", fileHash)
+        .maybeSingle();
+
+    if (error) {
+        return {
+            success: false,
+            error: "Database query failed",
+        };
+    }
+
+    return { success: true, data };
+}
+
+/**
+ * Get public URL for a storage path
+ * 
+ * @param storagePath - Storage path in bucket
+ * @returns Public URL
+ */
+export async function getMediaPublicUrl(storagePath: string): Promise<string> {
+    const supabase = await createClient();
+    const {
+        data: { publicUrl },
+    } = await supabase.storage.from(BUCKET_NAME).getPublicUrl(storagePath);
+    return publicUrl;
 }

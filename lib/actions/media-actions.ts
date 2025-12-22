@@ -3,7 +3,7 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/supabase/server";
-import { uploadMedia, deleteMedia } from "@/lib/dal/media";
+import { uploadMedia, deleteMedia, findMediaByHash, getMediaPublicUrl } from "@/lib/dal/media";
 import type { MediaUploadResult } from "./types";
 
 /**
@@ -80,9 +80,9 @@ async function getCurrentUserId(): Promise<string | undefined> {
 /**
  * Upload media image to Storage and database
  * 
- * @param formData - FormData containing file field
+ * @param formData - FormData containing file field and optional fileHash
  * @param folder - Optional subfolder in bucket (default: "medias")
- * @returns MediaUploadResult with media ID and public URL
+ * @returns MediaUploadResult with media ID, public URL, and isDuplicate flag
  */
 export async function uploadMediaImage(
   formData: FormData,
@@ -98,18 +98,40 @@ export async function uploadMediaImage(
     // 2. Get current user
     const uploadedBy = await getCurrentUserId();
 
-    // 3. Call DAL
+    // 3. Check for duplicate (if hash provided)
+    const fileHash = formData.get("fileHash");
+    
+    if (fileHash && typeof fileHash === "string") {
+      const existingMedia = await findMediaByHash(fileHash);
+      
+      if (existingMedia.success && existingMedia.data) {
+        const publicUrl = await getMediaPublicUrl(existingMedia.data.storage_path);
+        
+        return {
+          success: true,
+          data: {
+            mediaId: existingMedia.data.id,
+            publicUrl,
+            storagePath: existingMedia.data.storage_path,
+            isDuplicate: true,
+          },
+        };
+      }
+    }
+
+    // 4. Call DAL (no duplicate found)
     const result = await uploadMedia({
       file: validation.file,
       folder,
       uploadedBy,
+      fileHash: typeof fileHash === "string" ? fileHash : undefined,
     });
 
     if (!result.success) {
       return { success: false, error: result.error };
     }
 
-    // 4. ✅ Revalidation (UNIQUEMENT dans Server Action)
+    // 5. ✅ Revalidation (UNIQUEMENT dans Server Action)
     revalidatePath("/admin/medias");
     revalidatePath("/admin/team");
     revalidatePath("/admin/spectacles");

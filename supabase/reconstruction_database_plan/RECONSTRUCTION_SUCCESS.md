@@ -57,7 +57,7 @@ Les migrations suivantes ont été renommées en `.skip` car elles recréaient d
 
 ### 3. Ordre d'Exécution Final
 
-```
+```bash
 1. 20250918000000_fix_spectacles_versioning_trigger.sql     ✅ Fix fonction
 2. 20250918000002_apply_declarative_schema_complete.sql     ✅ CRÉER TOUTES LES TABLES
 3. 20250918031500_seed_home_hero_slides.sql                 ✅ Seed
@@ -140,26 +140,26 @@ SELECT COUNT(*) FROM pg_policies WHERE schemaname='public';
 
 1. **Modifier le schéma déclaratif**:
 
-   ```bash
+```bash
    # Éditer les fichiers dans supabase/schemas/
    vim supabase/schemas/06_table_spectacles.sql
    ```
 
 2. **Arrêter Supabase local**:
 
-   ```bash
+```bash
    pnpm dlx supabase stop
    ```
 
 3. **Générer une migration diff**:
 
-   ```bash
+```bash
    pnpm dlx supabase db diff -f nom_de_la_modification
    ```
 
 4. **Tester en local**:
 
-   ```bash
+```bash
    pnpm dlx supabase db reset
    # ou
    pnpm dlx supabase start
@@ -167,7 +167,7 @@ SELECT COUNT(*) FROM pg_policies WHERE schemaname='public';
 
 5. **Déployer sur le cloud**:
 
-   ```bash
+```bash
    pnpm dlx supabase db push
    ```
 

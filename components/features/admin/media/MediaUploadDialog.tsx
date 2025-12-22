@@ -10,10 +10,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { uploadMediaImage } from "@/lib/actions";
 import type { MediaUploadResult } from "@/lib/actions";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2, Upload, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 import type { MediaUploadDialogProps } from "./types";
 import {
@@ -21,6 +22,9 @@ import {
     MAX_UPLOAD_SIZE_BYTES,
     isAllowedImageMimeType,
 } from "./types";
+import { computeFileHash, type HashProgress } from "@/lib/utils/file-hash";
+
+type UploadPhase = "idle" | "hashing" | "uploading";
 
 /**
  * MediaUploadDialog - Upload mode for media picker
@@ -66,7 +70,8 @@ export function MediaUploadDialog({
     uploadFolder?: string;
     uploadAction?: (formData: FormData) => Promise<MediaUploadResult>;
 }) {
-    const [uploading, setUploading] = useState(false);
+    const [phase, setPhase] = useState<UploadPhase>("idle");
+    const [hashProgress, setHashProgress] = useState(0);
     const [preview, setPreview] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -112,22 +117,46 @@ export function MediaUploadDialog({
             return;
         }
 
-        setUploading(true);
         try {
+            // Phase 1: Hash computation
+            setPhase("hashing");
+            setHashProgress(0);
+
+            const handleHashProgress = (progress: HashProgress) => {
+                setHashProgress(progress.percent);
+            };
+
+            const fileHash = await computeFileHash(
+                selectedFile,
+                selectedFile.size > 2 * 1024 * 1024 ? handleHashProgress : undefined
+            );
+
+            // Phase 2: Upload
+            setPhase("uploading");
+
             const formData = new FormData();
             formData.append("file", selectedFile);
+            formData.append("fileHash", fileHash);
 
             const result = await performUpload(formData);
 
             if (result.success) {
-                toast.success("Image téléversée", {
-                    description: "L'image a été uploadée avec succès",
-                });
+                if (result.data.isDuplicate) {
+                    toast.success("Image déjà présente", {
+                        description: "L'image existe déjà, elle a été réutilisée",
+                        icon: <CheckCircle2 className="h-5 w-5" />,
+                    });
+                } else {
+                    toast.success("Image téléversée", {
+                        description: "L'image a été uploadée avec succès",
+                    });
+                }
                 onSelect({
                     id: result.data.mediaId,
                     url: result.data.publicUrl,
                 });
-                handleClose();
+                // Delay close to allow toast to display
+                setTimeout(() => handleClose(), 100);
             } else {
                 toast.error("Erreur de téléversement", {
                     description: result.error || "Une erreur est survenue",
@@ -139,13 +168,16 @@ export function MediaUploadDialog({
                 description: "Impossible de téléverser l'image",
             });
         } finally {
-            setUploading(false);
+            setPhase("idle");
+            setHashProgress(0);
         }
     };
 
     const handleClose = () => {
         setPreview(null);
         setSelectedFile(null);
+        setPhase("idle");
+        setHashProgress(0);
         if (fileInputRef.current) {
             fileInputRef.current.value = "";
         }
@@ -174,7 +206,7 @@ export function MediaUploadDialog({
                             type="file"
                             accept={acceptFormats}
                             onChange={handleFileChange}
-                            disabled={uploading}
+                            disabled={phase !== "idle"}
                         />
                     </div>
 
@@ -190,20 +222,36 @@ export function MediaUploadDialog({
                         </div>
                     )}
 
+                    {/* Progress indicator */}
+                    {phase === "hashing" && (
+                        <div className="space-y-2">
+                            <div className="flex justify-between text-sm text-muted-foreground">
+                                <span>Calcul de l'empreinte...</span>
+                                <span>{hashProgress}%</span>
+                            </div>
+                            <Progress value={hashProgress} />
+                        </div>
+                    )}
+
                     {/* Actions */}
                     <div className="flex gap-2 justify-end">
                         <Button
                             variant="outline"
                             onClick={handleClose}
-                            disabled={uploading}
+                            disabled={phase !== "idle"}
                         >
                             Annuler
                         </Button>
                         <Button
                             onClick={handleUpload}
-                            disabled={!selectedFile || uploading}
+                            disabled={!selectedFile || phase !== "idle"}
                         >
-                            {uploading ? (
+                            {phase === "hashing" ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Calcul empreinte...
+                                </>
+                            ) : phase === "uploading" ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                     Téléversement...

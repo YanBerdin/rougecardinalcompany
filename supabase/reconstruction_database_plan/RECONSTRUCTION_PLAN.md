@@ -6,7 +6,7 @@ La migration principale `20250918004849_apply_declarative_schema.sql` qui devait
 
 ### Situation Actuelle
 
-```
+```bash
 supabase/schemas/          ✅ COMPLET (36 fichiers de schéma déclaratif)
 supabase/migrations/       ⚠️  INCOMPLET (manque la migration de base)
   ├── 20250918000000_fix_spectacles_versioning_trigger.sql
@@ -90,7 +90,7 @@ sed -i 's/^comment on policy.*storage\.objects/-- &/' supabase/migrations/202509
 
 Après correction, les migrations s'exécuteront dans cet ordre:
 
-```
+```bash
 1. 20250918000000_fix_spectacles_versioning_trigger.sql    ✅ Fix fonction
 2. 20250918000002_apply_declarative_schema_complete.sql    ✅ CRÉER TOUTES LES TABLES
 3. 20250918031500_seed_home_hero_slides.sql                ✅ Seed (tables existent)
@@ -130,9 +130,7 @@ psql $DB_URL -c "SELECT COUNT(*) FROM public.home_hero_slides;"
 
 Après réussite, mettre à jour `supabase/schemas/README.md`:
 
-```markdown
 Pour rappel, la migration générée est `supabase/migrations/20250918000002_apply_declarative_schema_complete.sql`
-```
 
 ## 🎉 Résultat Attendu
 

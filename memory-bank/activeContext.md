@@ -1,8 +1,170 @@
 # Active Context
 
-**Current Focus (2025-12-22)**: React Hook Form Hydration Fixes - COMPLETED ✅
+**Current Focus (2025-12-23)**: Media Duplicate Prevention - COMPLETED ✅
 
-## Architecture Updates (2025-12-22)
+---
+
+## Latest Implementation (2025-12-23)
+
+### Media Duplicate Prevention - COMPLETED ✅
+
+**Système complet de détection et prévention des doublons d'images via hash SHA-256.**
+
+#### Objectif
+
+Éviter le stockage de fichiers dupliqués dans Supabase Storage en détectant les doublons avant upload via empreinte cryptographique.
+
+#### Implémentation complète
+
+##### **1. Database Migration**
+
+- ✅ Migration `20251222120000_add_media_file_hash.sql` appliquée
+- ✅ Colonne `file_hash` char(64) nullable
+- ✅ Index unique partiel : `CREATE UNIQUE INDEX WHERE file_hash IS NOT NULL`
+
+##### **2. Hash Computation Utility**
+
+- ✅ `lib/utils/file-hash.ts` créé (73 lignes)
+- ✅ `computeFileHash(file, onProgress?)` — Web Crypto API SHA-256
+- ✅ Chunked reading (2MB chunks) pour éviter saturation mémoire
+- ✅ Progress callbacks pour fichiers >2MB
+
+##### **3. Data Access Layer Extensions**
+
+- ✅ `findMediaByHash(fileHash)` — Query duplicate detection
+- ✅ `getMediaPublicUrl(storagePath)` — Retrieve public URL for existing media
+- ✅ `createMediaRecord()` modifié — Save file_hash on insert
+
+##### **4. Server Action Logic**
+
+- ✅ `uploadMediaImage()` extended with duplicate check
+- ✅ Hash received via FormData before upload
+- ✅ Early return with `isDuplicate: true` if hash match found
+- ✅ Existing media reused (no Storage upload)
+
+##### **5. User Interface**
+
+- ✅ `MediaUploadDialog.tsx` refactorisé — 3-phase state machine
+  - Phase "hashing": Compute SHA-256 with progress bar
+  - Phase "uploading": Upload to Storage/DB
+  - Toast "Image déjà présente" avec CheckCircle2 icon
+- ✅ Delay 100ms before dialog close (toast visibility fix)
+
+##### **6. Root Layout Fix**
+
+- ✅ `app/layout.tsx` — `<Toaster />` Sonner component added (was missing)
+
+#### Résultats
+
+| Metric | Résultat |
+| -------- | ---------- |
+| Hash computation | ✅ SHA-256 (64 hex chars) |
+| Duplicate detection | ✅ findMediaByHash works |
+| Toast display | ✅ "Image déjà présente" visible 3s |
+| Storage economy | ✅ No duplicate uploaded |
+| Database integrity | ✅ Unique index enforced |
+
+#### Workflow complet
+
+```
+1. User selects file
+   ↓
+2. computeFileHash() → SHA-256 (with progress bar if >2MB)
+   ↓
+3. FormData.append("fileHash", hash)
+   ↓
+4. uploadMediaImage(formData)
+   ↓
+5. findMediaByHash(fileHash)
+   ├─ Found → Return existing media + isDuplicate: true
+   └─ Not found → Upload new file + save hash
+   ↓
+6. Toast feedback
+   ├─ Duplicate: "Image déjà présente" (green ✓)
+   └─ New: "Image téléversée"
+```
+
+#### Fichiers créés/modifiés
+
+**Créés**:
+
+- `supabase/migrations/20251222120000_add_media_file_hash.sql`
+- `lib/utils/file-hash.ts`
+
+**Modifiés**:
+
+- `supabase/schemas/03_table_medias.sql` (declarative schema)
+- `lib/dal/media.ts` (findMediaByHash, getMediaPublicUrl)
+- `lib/actions/media-actions.ts` (duplicate check logic)
+- `lib/actions/types.ts` (isDuplicate flag)
+- `components/features/admin/media/MediaUploadDialog.tsx` (3-phase state)
+- `app/layout.tsx` (Toaster component)
+
+---
+
+## Previous Updates (2025-12-22)
+
+### Image Upload Activation in Admin Forms - COMPLETED ✅
+
+**Activation du téléversement d'images direct dans tous les formulaires admin utilisant ImageFieldGroup.**
+
+#### Problème résolu
+
+- ❌ Seul SpectacleForm permettait le téléversement direct d'images
+- ❌ AboutContentForm, HeroSlideForm et TeamMemberForm limités à URL externe ou médiathèque
+- ❌ Workflow inefficace : téléverser dans média puis sélectionner depuis médiathèque
+
+#### Solution implémentée
+
+| Formulaire | Props ajoutées | Upload folder | Justification |
+| ---------- | -------------- | ------------- | ------------- |
+| `AboutContentForm.tsx` | `showUpload={true}` | `home-about` | Section "À propos" homepage |
+| `HeroSlideForm.tsx` | `showUpload={true}` | `home-hero` | Slides carousel principal (HD) |
+| `TeamMemberForm.tsx` | `showUpload={true}` | `team` | Photos membres équipe |
+
+#### Structure des dossiers Storage
+
+```bash
+medias/
+├── spectacles/        # ✅ Existant (SpectacleForm)
+├── team/              # ✅ Activé (TeamMemberForm)
+├── home-hero/         # ✅ Nouveau (HeroSlideForm)
+├── home-about/        # ✅ Nouveau (AboutContentForm)
+└── press/             # Existant (autre fonctionnalité)
+```
+
+#### Bénéfices atteints
+
+1. **Workflow simplifié** — Upload direct sans passer par la médiathèque
+2. **Cohérence UX** — Tous les formulaires offrent les 3 options (upload/médiathèque/URL)
+3. **Organisation Storage** — Dossiers séparés par feature pour meilleure organisation
+4. **DRY Compliance** — Réutilisation du composant ImageFieldGroup existant
+
+#### Pattern appliqué
+
+```tsx
+<ImageFieldGroup
+  form={form}
+  imageUrlField="image_url"
+  imageMediaIdField="image_media_id"  // ou photo_media_id pour Team
+  showUpload={true}                   // ✅ ACTIVÉ
+  uploadFolder="feature-name"         // ✅ DOSSIER SPÉCIFIQUE
+  // ... autres props
+/>
+```
+
+#### Commits créés
+
+- `feat(forms): enable image upload in AboutContent, HeroSlide, and TeamMember forms`
+  - 3 files changed: AboutContentForm, HeroSlideForm, TeamMemberForm
+  - TypeScript compilation: 0 errors
+  - Implements: `.github/prompts/plan-mediaUpload-form.md`
+
+---
+
+## Previous Focus (2025-12-22): React Hook Form Hydration Fixes - COMPLETED ✅
+
+---
 
 ### React Hook Form Hydration Fixes - COMPLETED ✅
 

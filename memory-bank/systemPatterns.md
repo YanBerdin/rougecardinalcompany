@@ -182,6 +182,124 @@ components/features/admin/<feature>/
 └── Form.tsx              # Form component
 ```
 
+### Media Duplicate Prevention Pattern (Dec 2025)
+
+**Pattern** : Détection de fichiers dupliqués via hash SHA-256 avant upload.
+
+#### Architecture
+
+```typescript
+// 1. Client: Hash computation
+import { computeFileHash } from '@/lib/utils/file-hash';
+
+const fileHash = await computeFileHash(file, (progress) => {
+  setHashProgress(progress.percent);
+});
+
+// 2. Server Action: Duplicate check
+import { findMediaByHash, uploadMedia } from '@/lib/dal/media';
+
+export async function uploadMediaImage(formData: FormData) {
+  const fileHash = formData.get('fileHash');
+  
+  if (fileHash && typeof fileHash === 'string') {
+    const existingMedia = await findMediaByHash(fileHash);
+    
+    if (existingMedia.success && existingMedia.data) {
+      return {
+        success: true,
+        data: {
+          mediaId: existingMedia.data.id,
+          publicUrl: await getMediaPublicUrl(existingMedia.data.storage_path),
+          isDuplicate: true,
+        },
+      };
+    }
+  }
+  
+  // Upload new file with hash
+  return await uploadMedia({ file, fileHash });
+}
+
+// 3. UI: Toast feedback
+if (result.data.isDuplicate) {
+  toast.success("Image déjà présente", {
+    description: "L'image existe déjà, elle a été réutilisée",
+    icon: <CheckCircle2 />,
+  });
+}
+```
+
+#### Database Schema
+
+```sql
+-- medias table extension
+ALTER TABLE medias ADD COLUMN file_hash char(64);
+COMMENT ON COLUMN medias.file_hash IS 'SHA-256 hash for duplicate detection (64 hex chars)';
+
+-- Partial unique index (only non-null hashes)
+CREATE UNIQUE INDEX medias_file_hash_unique_idx ON medias(file_hash)
+WHERE file_hash IS NOT NULL;
+```
+
+#### Hash Utility
+
+**Location**: `lib/utils/file-hash.ts`
+
+**Functions**:
+
+- `computeFileHash(file, onProgress?)` — SHA-256 with chunking
+- `isValidFileHash(hash)` — Validate 64 hex chars
+
+**Features**:
+
+- Web Crypto API (browser native)
+- 2MB chunk size (memory-efficient)
+- Progress callbacks for large files
+- ArrayBuffer → hex string conversion
+
+#### DAL Functions
+
+**Location**: `lib/dal/media.ts`
+
+**Exports**:
+
+- `findMediaByHash(fileHash)` — Query by hash
+- `getMediaPublicUrl(storagePath)` — Get public URL
+- `createMediaRecord()` — Save file_hash on insert
+
+#### UI Pattern
+
+**3-Phase State Machine**:
+
+1. **"hashing"** — Compute SHA-256 + progress bar
+2. **"uploading"** — Upload to Storage/DB
+3. **"idle"** — Reset after success/error
+
+**Toast Messages**:
+
+- Duplicate: "Image déjà présente" (CheckCircle2 icon)
+- New upload: "Image téléversée"
+
+#### Benefits
+
+- ✅ **Storage Economy**: No duplicate files in Supabase
+- ✅ **Performance**: O(1) lookup via unique index
+- ✅ **UX Clarity**: Explicit user feedback
+- ✅ **Data Integrity**: SHA-256 guarantees uniqueness
+- ✅ **Scalability**: Chunked reading for large files
+
+#### Related Files
+
+- Migration: `20251222120000_add_media_file_hash.sql`
+- Utils: `lib/utils/file-hash.ts`
+- DAL: `lib/dal/media.ts`
+- Actions: `lib/actions/media-actions.ts`
+- Types: `lib/actions/types.ts` (MediaUploadData.isDuplicate)
+- UI: `components/features/admin/media/MediaUploadDialog.tsx`
+
+---
+
 ### Media DAL Pattern (Dec 2025)
 
 **Pattern** : Centralized Storage/DB operations for media files.
@@ -1018,7 +1136,7 @@ error.tsx[param] / // Gestion d'erreur // Route dynamique
 
 **Pattern** : Utiliser les parenthèses pour organiser les routes sans affecter l'URL.
 
-```typescript
+```bash
 // Structure avec route groups
 app/
   layout.tsx                    // Root: HTML shell + ThemeProvider
@@ -1187,16 +1305,16 @@ export const config = {
 ```bash
 ┌─────────────────────────────────────────────────────────────────┐
 │  Presentation (Client Components)                               │
-│  └── Form.tsx uses UI schema (number for IDs)                  │
+│  └── Form.tsx uses UI schema (number for IDs)                   │
 ├─────────────────────────────────────────────────────────────────┤
 │  Server Actions (lib/actions/)                                  │
-│  └── Validation + DAL call + revalidatePath() ← SEUL ENDROIT   │
+│  └── Validation + DAL call + revalidatePath() ← SEUL ENDROIT    │
 ├─────────────────────────────────────────────────────────────────┤
 │  Data Access Layer (lib/dal/)                                   │
-│  └── Database ops + DALResult<T> + error codes [ERR_*]         │
+│  └── Database ops + DALResult<T> + error codes [ERR_*]          │
 ├─────────────────────────────────────────────────────────────────┤
 │  Database (Supabase)                                            │
-│  └── RLS policies + is_admin() checks                          │
+│  └── RLS policies + is_admin() checks                           │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
