@@ -180,6 +180,8 @@ export function AboutContentForm({ content }: AboutContentFormProps) {
                                     imageMediaIdField="image_media_id"
                                     altTextField="alt_text"
                                     label="Section Image"
+                                    showUpload={true}
+                                    uploadFolder="home-about"
                                 />
 
                                 <div className="flex justify-end gap-2">

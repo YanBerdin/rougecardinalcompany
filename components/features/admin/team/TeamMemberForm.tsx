@@ -128,6 +128,8 @@ export function TeamMemberForm({
             imageMediaIdField="photo_media_id"
             label="Photo du membre"
             showAltText={false}
+            showUpload={true}
+            uploadFolder="team"
           />
 
           <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-2 pt-4">

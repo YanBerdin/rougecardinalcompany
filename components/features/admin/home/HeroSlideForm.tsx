@@ -101,6 +101,8 @@ export function HeroSlideForm({ open, onClose, onSuccess, slide }: HeroSlideForm
                             altTextField="alt_text"
                             label="Image"
                             required
+                            showUpload={true}
+                            uploadFolder="home-hero"
                         />
 
                         <CtaFieldGroup form={form} ctaType="primary" />
