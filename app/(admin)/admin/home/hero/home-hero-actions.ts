@@ -10,12 +10,25 @@ import {
   deleteHeroSlide,
   reorderHeroSlides,
 } from "@/lib/dal/admin-home-hero";
+import { validateImageUrl } from "@/lib/utils/validate-image-url";
 
 export type ActionResult<T = unknown> = { success: true; data?: T } | { success: false; error: string };
 
 export async function createHeroSlideAction(input: unknown): Promise<ActionResult> {
   try {
     const validated = HeroSlideInputSchema.parse(input);
+    
+    // Validate external image URL if provided
+    if (validated.image_url) {
+      const urlValidation = await validateImageUrl(validated.image_url);
+      if (!urlValidation.valid) {
+        return {
+          success: false,
+          error: urlValidation.error || "URL d'image invalide ou non autorisée",
+        };
+      }
+    }
+    
     const result = await createHeroSlide(validated as HeroSlideInput);
 
     if (!result.success) return { success: false, error: result.error ?? "create failed" };
@@ -35,6 +48,18 @@ export async function updateHeroSlideAction(id: string | number, input: unknown)
   try {
     const slideId = typeof id === "string" ? Number(id) : Number(id);
     const validated = HeroSlideInputSchema.partial().parse(input);
+    
+    // Validate external image URL if provided
+    if (validated.image_url) {
+      const urlValidation = await validateImageUrl(validated.image_url);
+      if (!urlValidation.valid) {
+        return {
+          success: false,
+          error: urlValidation.error || "URL d'image invalide ou non autorisée",
+        };
+      }
+    }
+    
     const result = await updateHeroSlide(slideId, validated as Partial<HeroSlideInput>);
 
     if (!result.success) return { success: false, error: result.error ?? "update failed" };

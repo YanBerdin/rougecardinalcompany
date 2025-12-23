@@ -56,7 +56,8 @@ export function AboutContentForm({ content }: AboutContentFormProps) {
             const result = await updateAboutContentAction(String(content.id), data);
 
             if (!result.success) {
-                throw new Error(result.error || "Failed to update content");
+                toast.error(result.error || "Failed to update content");
+                return;
             }
 
             toast.success("About content updated successfully");

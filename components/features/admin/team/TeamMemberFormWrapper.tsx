@@ -33,7 +33,8 @@ export function TeamMemberFormWrapper({ member }: TeamMemberFormWrapperProps) {
           : await createTeamMember(cleanedData);
 
         if (!result.success) {
-          throw new Error(result.error);
+          toast.error(result.error || "Une erreur est survenue");
+          return;
         }
 
         toast.success(member ? "Membre mis à jour" : "Membre créé avec succès");
@@ -43,7 +44,6 @@ export function TeamMemberFormWrapper({ member }: TeamMemberFormWrapperProps) {
         toast.error(
           error instanceof Error ? error.message : "Une erreur est survenue"
         );
-        throw error;
       }
     },
     [member, router]

@@ -113,6 +113,7 @@ const BLOCKED_IP_PATTERNS = [
 ] as const;
 
 export interface ImageValidationResult {
+    //isValid: any;
     valid: boolean;
     error?: string;
     mime?: AllowedMimeType;

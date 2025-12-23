@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { UseFormReturn, FieldValues, Path, PathValue } from "react-hook-form";
 import Image from "next/image";
 import {
@@ -22,6 +22,7 @@ import {
     Link2,
     X,
     Upload,
+    AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -76,12 +77,46 @@ export function ImageFieldGroup<TForm extends FieldValues>({
     const [validationSuccess, setValidationSuccess] = useState<string | null>(
         null
     );
+    const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const lastValidatedUrlRef = useRef<string | null>(null);
 
     const imageUrl = form.watch(imageUrlField) as string | undefined;
     const altText = altTextField
         ? (form.watch(altTextField) as string | undefined)
         : undefined;
     const imageError = form.formState.errors[imageUrlField];
+
+    // Auto-validate external URLs with debounce
+    useEffect(() => {
+        // Clear previous timer
+        if (debounceTimerRef.current) {
+            clearTimeout(debounceTimerRef.current);
+        }
+
+        // Skip validation if:
+        // - No URL
+        // - URL is empty
+        // - URL was already validated
+        if (!imageUrl || imageUrl.trim() === "" || imageUrl === lastValidatedUrlRef.current) {
+            return;
+        }
+
+        // Reset validation state when URL changes
+        setValidationError(null);
+        setValidationSuccess(null);
+        onValidationChange?.(null);
+
+        // Debounce validation (1 second after user stops typing)
+        debounceTimerRef.current = setTimeout(() => {
+            handleValidateUrl();
+        }, 1000);
+
+        return () => {
+            if (debounceTimerRef.current) {
+                clearTimeout(debounceTimerRef.current);
+            }
+        };
+    }, [imageUrl]); // Only depend on imageUrl
 
     const handleMediaSelect = (result: MediaSelectResult) => {
         if (result.error) {
@@ -137,6 +172,7 @@ export function ImageFieldGroup<TForm extends FieldValues>({
         }
         setValidationError(null);
         setValidationSuccess(null);
+        lastValidatedUrlRef.current = null; // Reset validated URL
 
         // Reset validation state when URL changes
         onValidationChange?.(null);
@@ -150,6 +186,7 @@ export function ImageFieldGroup<TForm extends FieldValues>({
                 undefined as PathValue<TForm, Path<TForm>>
             );
         }
+        lastValidatedUrlRef.current = null; // Reset validated URL
 
         // Notify parent that validation state is reset
         onValidationChange?.(null);
@@ -157,6 +194,11 @@ export function ImageFieldGroup<TForm extends FieldValues>({
 
     const handleValidateUrl = async () => {
         if (!imageUrl) return;
+
+        // Skip if already validated
+        if (imageUrl === lastValidatedUrlRef.current) {
+            return;
+        }
 
         setIsValidating(true);
         setValidationError(null);
@@ -168,16 +210,14 @@ export function ImageFieldGroup<TForm extends FieldValues>({
             if (!result.valid) {
                 const errorMessage = result.error ?? "Image invalide";
                 setValidationError(errorMessage);
-                toast.error("Image invalide", {
-                    description: errorMessage,
-                });
-
+                lastValidatedUrlRef.current = null; // Reset on error
+                
                 // Notify parent of validation failure
                 onValidationChange?.(false);
             } else {
                 const successMsg = `${result.mime}${result.size ? ` (${Math.round(result.size / 1024)}KB)` : ""}`;
                 setValidationSuccess(successMsg);
-                toast.success("Image valide", { description: successMsg });
+                lastValidatedUrlRef.current = imageUrl; // Mark as validated
 
                 // Notify parent of validation success
                 onValidationChange?.(true);
@@ -186,7 +226,7 @@ export function ImageFieldGroup<TForm extends FieldValues>({
             const errorMsg =
                 error instanceof Error ? error.message : "Erreur de validation";
             setValidationError(errorMsg);
-            toast.error("Erreur", { description: errorMsg });
+            lastValidatedUrlRef.current = null; // Reset on error
 
             // Notify parent of validation error
             onValidationChange?.(false);
@@ -196,7 +236,9 @@ export function ImageFieldGroup<TForm extends FieldValues>({
     };
 
     const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-        e.currentTarget.src = PLACEHOLDER_IMAGE_DATA_URI;
+        const target = e.currentTarget;
+        target.src = PLACEHOLDER_IMAGE_DATA_URI;
+        target.onerror = null; // Prevent infinite loop if placeholder fails
     };
 
     return (
@@ -268,37 +310,49 @@ export function ImageFieldGroup<TForm extends FieldValues>({
                                                     <X className="h-4 w-4" />
                                                 </Button>
                                             )}
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                size="sm"
-                                                disabled={!imageUrl || isValidating}
-                                                onClick={handleValidateUrl}
-                                                className="shrink-0"
-                                            >
-                                                {isValidating ? (
+                                            {isValidating && (
+                                                <div className="flex items-center gap-2 px-3 text-sm text-muted-foreground">
                                                     <Loader2 className="h-4 w-4 animate-spin" />
-                                                ) : (
-                                                    "Vérifier"
-                                                )}
-                                            </Button>
+                                                    <span className="hidden sm:inline">Vérification...</span>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
+                                    {imageUrl && !isValidating && (
+                                        <p className="text-xs text-muted-foreground">
+                                            💡 L&apos;URL sera validée automatiquement
+                                        </p>
+                                    )}
                                 </div>
                             )}
 
-                            {/* Image preview */}
+                            {/* Image preview - only show validated images */}
                             {imageUrl && (
                                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 border rounded-lg bg-muted/50">
-                                    <div className="relative h-20 w-32 rounded overflow-hidden shrink-0">
-                                        <Image
-                                            src={imageUrl}
-                                            alt={altText ?? "Preview"}
-                                            className="object-cover"
-                                            fill
-                                            sizes="128px"
-                                            onError={handleImageError}
-                                        />
+                                    <div className="relative h-20 w-32 rounded overflow-hidden shrink-0 bg-muted">
+                                        {isValidating ? (
+                                            <div className="h-full w-full flex items-center justify-center">
+                                                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                                            </div>
+                                        ) : validationSuccess ? (
+                                            /* eslint-disable-next-line @next/next/no-img-element */
+                                            <img
+                                                src={imageUrl}
+                                                alt={altText ?? "Preview"}
+                                                className="h-full w-full object-cover"
+                                                onError={handleImageError}
+                                            />
+                                        ) : validationError ? (
+                                            <div className="h-full w-full flex flex-col items-center justify-center gap-1 p-2">
+                                                <XCircle className="h-6 w-6 text-destructive" />
+                                                <span className="text-xs text-center text-destructive">Non autorisée</span>
+                                            </div>
+                                        ) : (
+                                            <div className="h-full w-full flex flex-col items-center justify-center gap-1 p-2">
+                                                <AlertCircle className="h-6 w-6 text-muted-foreground" />
+                                                <span className="text-xs text-center text-muted-foreground">En attente</span>
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="flex-1 min-w-0 text-sm text-muted-foreground break-all">
                                         {imageUrl}

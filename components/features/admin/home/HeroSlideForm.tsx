@@ -44,7 +44,8 @@ export function HeroSlideForm({ open, onClose, onSuccess, slide }: HeroSlideForm
                 : await createHeroSlideAction(payload);
 
             if (!result.success) {
-                throw new Error(result.error ?? "Save failed");
+                toast.error(result.error || "Échec de l'enregistrement du slide");
+                return;
             }
 
             toast.success(slide ? "Slide mis à jour" : "Slide créé avec succès");

@@ -165,7 +165,8 @@ export default function SpectacleForm({
         : await createSpectacleAction(cleanData);
 
       if (!result.success) {
-        throw new Error(result.error);
+        toast.error(result.error || "Échec de l'enregistrement du spectacle");
+        return;
       }
 
       const successAction = isEditing
