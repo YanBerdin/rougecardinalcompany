@@ -3,6 +3,7 @@ import Image from "next/image";
 import { TeamMemberDb } from "@/lib/schemas/team";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Trash2 } from "lucide-react";
 
 interface Props {
   member: TeamMemberDb;
@@ -41,27 +42,42 @@ export function TeamMemberCard({
           </div>
         </div>
 
-        <div className="mt-4 flex gap-2">
+        <div className="mt-4 flex flex-col md:flex-row gap-2">
           {!member.active && (
             <Button
               variant="destructive"
+              size="sm"
               onClick={onHardDelete}
               title="Supprimer"
+              className="w-full sm:w-auto justify-center"
             >
-              Supprimer
+              <Trash2 className="h-4 w-4 sm:mr-0" />
+              <span className="sm:hidden ml-2">Supprimer</span>
             </Button>
           )}
 
           {member.active ? (
-            <Button variant="destructive" onClick={onDesactivate}>
+            <Button
+              variant="destructive"
+              onClick={onDesactivate}
+              className="w-full sm:w-auto"
+            >
               Désactiver
             </Button>
           ) : (
-            <Button variant="outline" onClick={onRequestReactivate}>
+            <Button
+              variant="outline"
+              onClick={onRequestReactivate}
+              className="w-full sm:w-auto"
+            >
               Réactiver
             </Button>
           )}
-          <Button variant="outline" onClick={onEdit}>
+          <Button
+            variant="outline"
+            onClick={onEdit}
+            className="w-full sm:w-auto"
+          >
             Modifier
           </Button>
         </div>
