@@ -3,6 +3,7 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/supabase/server";
+import { requireAdmin } from "@/lib/auth/is-admin";
 import { uploadMedia, deleteMedia, findMediaByHash, getMediaPublicUrl } from "@/lib/dal/media";
 import type { MediaUploadResult } from "./types";
 
@@ -69,7 +70,7 @@ function validateFile(formData: FormData): ValidationResult {
 
 async function getCurrentUserId(): Promise<string | undefined> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser(); //TODO: getClaims() ?
   return user?.id;
 }
 
@@ -89,6 +90,9 @@ export async function uploadMediaImage(
   folder: string = BUCKET_NAME
 ): Promise<MediaUploadResult> {
   try {
+    // 0. Auth check
+    await requireAdmin();
+    
     // 1. Validation
     const validation = validateFile(formData);
     if (!validation.success) {
@@ -100,13 +104,13 @@ export async function uploadMediaImage(
 
     // 3. Check for duplicate (if hash provided)
     const fileHash = formData.get("fileHash");
-    
+
     if (fileHash && typeof fileHash === "string") {
       const existingMedia = await findMediaByHash(fileHash);
-      
+
       if (existingMedia.success && existingMedia.data) {
         const publicUrl = await getMediaPublicUrl(existingMedia.data.storage_path);
-        
+
         return {
           success: true,
           data: {

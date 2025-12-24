@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useRef } from "react";
 import {
     Dialog,
@@ -14,7 +15,7 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { uploadMediaImage } from "@/lib/actions";
 import type { MediaUploadResult } from "@/lib/actions";
-import { Loader2, Upload, CheckCircle2 } from "lucide-react";
+import { Loader2, Upload, CheckCircle2, Info } from "lucide-react";
 import Image from "next/image";
 import type { MediaUploadDialogProps } from "./types";
 import {
@@ -26,40 +27,6 @@ import { computeFileHash, type HashProgress } from "@/lib/utils/file-hash";
 
 type UploadPhase = "idle" | "hashing" | "uploading";
 
-/**
- * MediaUploadDialog - Upload mode for media picker
- * 
- * ENHANCEMENTS:
- * - Accepts custom uploadAction prop
- * - Default to generic uploadMediaImage from @/lib/actions
- * - Supports configurable upload folder
- * 
- * @example
- * ```tsx
- * // Default usage (team photos)
- * <MediaUploadDialog
- *   open={isOpen}
- *   onClose={handleClose}
- *   onSelect={handleSelect}
- * />
- * 
- * // Custom folder (spectacles)
- * <MediaUploadDialog
- *   open={isOpen}
- *   onClose={handleClose}
- *   onSelect={handleSelect}
- *   uploadFolder="spectacles"
- * />
- * 
- * // Custom upload action
- * <MediaUploadDialog
- *   open={isOpen}
- *   onClose={handleClose}
- *   onSelect={handleSelect}
- *   uploadAction={customUploadFunction}
- * />
- * ```
- */
 export function MediaUploadDialog({
     open,
     onClose,
@@ -72,18 +39,17 @@ export function MediaUploadDialog({
 }) {
     const [phase, setPhase] = useState<UploadPhase>("idle");
     const [hashProgress, setHashProgress] = useState(0);
+    const [uploadProgress, setUploadProgress] = useState(0);
     const [preview, setPreview] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Use custom upload action or default to generic uploadMediaImage
     const performUpload = uploadAction || ((formData: FormData) => uploadMediaImage(formData, uploadFolder));
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // Validation: File size
         if (file.size > MAX_UPLOAD_SIZE_BYTES) {
             toast.error("Fichier trop volumineux", {
                 description: "L'image ne doit pas dépasser 5MB",
@@ -91,7 +57,6 @@ export function MediaUploadDialog({
             return;
         }
 
-        // Validation: MIME type
         if (!isAllowedImageMimeType(file.type)) {
             toast.error("Format non supporté", {
                 description: "Formats acceptés : JPEG, PNG, WebP, AVIF",
@@ -100,8 +65,8 @@ export function MediaUploadDialog({
         }
 
         setSelectedFile(file);
+        setHashProgress(0);
 
-        // Create preview
         const reader = new FileReader();
         reader.onloadend = () => {
             setPreview(reader.result as string);
@@ -118,45 +83,58 @@ export function MediaUploadDialog({
         }
 
         try {
-            // Phase 1: Hash computation
+            // Phase 1: Calcul du hash avec progression
             setPhase("hashing");
             setHashProgress(0);
 
-            const handleHashProgress = (progress: HashProgress) => {
+            const fileHash = await computeFileHash(selectedFile, (progress: HashProgress) => {
                 setHashProgress(progress.percent);
-            };
+            });
 
-            const fileHash = await computeFileHash(
-                selectedFile,
-                selectedFile.size > 2 * 1024 * 1024 ? handleHashProgress : undefined
-            );
+            console.log("[Upload] Hash complete:", fileHash.substring(0, 16) + "..."); //TODO: remove log in prod
 
-            // Phase 2: Upload
+            // Phase 2: Upload via Server Action
             setPhase("uploading");
+            setUploadProgress(0);
+
+            console.log("[Upload] Starting upload via Server Action..."); //TODO: remove log in prod
 
             const formData = new FormData();
             formData.append("file", selectedFile);
             formData.append("fileHash", fileHash);
 
+            // Simuler une progression visuelle (Server Actions ne supportent pas les events progress)
+            const progressSimulation = setInterval(() => {
+                setUploadProgress(prev => Math.min(prev + 10, 90));
+            }, 150);
+
             const result = await performUpload(formData);
 
+            clearInterval(progressSimulation);
+            setUploadProgress(100);
+
+            // Petit délai pour montrer 100%
+            await new Promise(resolve => setTimeout(resolve, 300));
+
             if (result.success) {
+                // Vérifier si c'est un doublon
                 if (result.data.isDuplicate) {
-                    toast.success("Image déjà présente", {
-                        description: "L'image existe déjà, elle a été réutilisée",
-                        icon: <CheckCircle2 className="h-5 w-5" />,
+                    toast.info("Image déjà présente", {
+                        description: "Cette image existe déjà dans la médiathèque. Elle a été réutilisée.",
+                        icon: <CheckCircle2 className="h-4 w-4 text-blue-500" />,
+                        duration: 5000,
                     });
                 } else {
                     toast.success("Image téléversée", {
                         description: "L'image a été uploadée avec succès",
                     });
                 }
+
                 onSelect({
                     id: result.data.mediaId,
                     url: result.data.publicUrl,
                 });
-                // Delay close to allow toast to display
-                setTimeout(() => handleClose(), 100);
+                handleClose();
             } else {
                 toast.error("Erreur de téléversement", {
                     description: result.error || "Une erreur est survenue",
@@ -170,6 +148,7 @@ export function MediaUploadDialog({
         } finally {
             setPhase("idle");
             setHashProgress(0);
+            setUploadProgress(0);
         }
     };
 
@@ -178,12 +157,14 @@ export function MediaUploadDialog({
         setSelectedFile(null);
         setPhase("idle");
         setHashProgress(0);
+        setUploadProgress(0);
         if (fileInputRef.current) {
             fileInputRef.current.value = "";
         }
         onClose();
     };
 
+    const isProcessing = phase !== "idle";
     const acceptFormats = ALLOWED_IMAGE_MIME_TYPES.join(",");
 
     return (
@@ -197,7 +178,6 @@ export function MediaUploadDialog({
                 </DialogHeader>
 
                 <div className="space-y-4">
-                    {/* File input */}
                     <div className="space-y-2">
                         <Label htmlFor="media-upload">Sélectionner une image</Label>
                         <Input
@@ -206,7 +186,7 @@ export function MediaUploadDialog({
                             type="file"
                             accept={acceptFormats}
                             onChange={handleFileChange}
-                            disabled={phase !== "idle"}
+                            disabled={isProcessing}
                         />
                     </div>
 
@@ -222,14 +202,25 @@ export function MediaUploadDialog({
                         </div>
                     )}
 
-                    {/* Progress indicator */}
+                    {/* Progress indicator for hash computation */}
                     {phase === "hashing" && (
                         <div className="space-y-2">
-                            <div className="flex justify-between text-sm text-muted-foreground">
-                                <span>Calcul de l'empreinte...</span>
-                                <span>{hashProgress}%</span>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Info className="h-4 w-4" />
+                                <span>Vérification du fichier... {hashProgress}%</span>
                             </div>
-                            <Progress value={hashProgress} />
+                            <Progress value={hashProgress} className="h-2" />
+                        </div>
+                    )}
+
+                    {/* Upload indicator */}
+                    {phase === "uploading" && (
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                <span>Téléversement en cours... {uploadProgress}%</span>
+                            </div>
+                            <Progress value={uploadProgress} className="h-2" />
                         </div>
                     )}
 
@@ -238,18 +229,18 @@ export function MediaUploadDialog({
                         <Button
                             variant="outline"
                             onClick={handleClose}
-                            disabled={phase !== "idle"}
+                            disabled={isProcessing}
                         >
                             Annuler
                         </Button>
                         <Button
                             onClick={handleUpload}
-                            disabled={!selectedFile || phase !== "idle"}
+                            disabled={!selectedFile || isProcessing}
                         >
                             {phase === "hashing" ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Calcul empreinte...
+                                    Vérification...
                                 </>
                             ) : phase === "uploading" ? (
                                 <>

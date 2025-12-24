@@ -198,6 +198,7 @@ export async function hardDeleteTeamMemberAction(
  * This wrapper keeps the old API for backwards compatibility while ensuring
  * the exported symbol is an async Server Action (required by Next.js).
  */
+/*
 export async function uploadTeamMemberPhoto(
   photoFormData: FormData
 ): Promise<ActionResponse<{ mediaId: number; publicUrl: string }>> {
@@ -220,7 +221,7 @@ export async function uploadTeamMemberPhoto(
     return handleActionError(error, "uploadTeamMemberPhoto");
   }
 }
-
+*/
 function isValidTeamMemberId(teamMemberId: number): boolean {
   return Number.isFinite(teamMemberId) && teamMemberId > 0;
 }

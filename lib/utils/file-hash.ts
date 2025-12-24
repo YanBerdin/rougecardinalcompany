@@ -24,10 +24,30 @@ export async function computeFileHash(
 ): Promise<string> {
   const CHUNK_SIZE = 2 * 1024 * 1024;
   const fileSize = file.size;
-  
+
+  // Signal start
+  if (onProgress) {
+    onProgress({
+      loaded: 0,
+      total: fileSize,
+      percent: 0,
+    });
+  }
+
   if (fileSize <= CHUNK_SIZE) {
     const arrayBuffer = await file.arrayBuffer();
-    return hashArrayBuffer(arrayBuffer);
+    const hash = await hashArrayBuffer(arrayBuffer);
+
+    // Signal completion for small files
+    if (onProgress) {
+      onProgress({
+        loaded: fileSize,
+        total: fileSize,
+        percent: 100,
+      });
+    }
+
+    return hash;
   }
 
   const chunks: ArrayBuffer[] = [];
@@ -51,13 +71,24 @@ export async function computeFileHash(
   const totalLength = chunks.reduce((acc, chunk) => acc + chunk.byteLength, 0);
   const combined = new Uint8Array(totalLength);
   let position = 0;
-  
+
   for (const chunk of chunks) {
     combined.set(new Uint8Array(chunk), position);
     position += chunk.byteLength;
   }
 
-  return hashArrayBuffer(combined.buffer);
+  const hash = await hashArrayBuffer(combined.buffer);
+
+  // Signal completion
+  if (onProgress) {
+    onProgress({
+      loaded: fileSize,
+      total: fileSize,
+      percent: 100,
+    });
+  }
+
+  return hash;
 }
 
 async function hashArrayBuffer(buffer: ArrayBuffer): Promise<string> {

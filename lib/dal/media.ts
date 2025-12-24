@@ -136,6 +136,7 @@ async function cleanupStorage(
 export async function uploadMedia(
     input: MediaUploadInput
 ): Promise<DALResult<MediaUploadData>> {
+    // ✅ Defense in depth: Always check auth at DAL level
     await requireAdmin();
 
     const supabase = await createClient();

@@ -2,6 +2,11 @@ import type { NextConfig } from "next";
 // https://nextjs.org/docs/messages/next-image-unconfigured-host
 // https://nextjs.org/docs/app/api-reference/components/image#remotepatterns
 const nextConfig: NextConfig = {
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "6mb", // 5MB fichiers + overhead formData
+    },
+  },
   images: {
     remotePatterns: [
       {
