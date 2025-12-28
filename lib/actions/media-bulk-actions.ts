@@ -182,3 +182,50 @@ export async function bulkTagMediaAction(
         };
     }
 }
+
+// =============================================================================
+// BULK TAG REMOVAL
+// =============================================================================
+
+/**
+ * Remove tags from multiple media items
+ * Max 50 items per request
+ */
+export async function bulkUntagMediaAction(
+    mediaIds: number[],
+    tagIds: number[]
+): Promise<BulkActionResult> {
+    try {
+        await requireAdmin();
+
+        // Validation (reuse BulkTagSchema)
+        const validated = BulkTagSchema.parse({
+            media_ids: mediaIds,
+            tag_ids: tagIds,
+        });
+
+        const supabase = await createClient();
+
+        // Delete all matching media_id x tag_id combinations
+        const { error: deleteError } = await supabase
+            .from("media_item_tags")
+            .delete()
+            .in("media_id", validated.media_ids)
+            .in("tag_id", validated.tag_ids);
+
+        if (deleteError) {
+            throw new Error(deleteError.message);
+        }
+
+        revalidatePath("/admin/media");
+        revalidatePath("/admin/media/library");
+
+        return { success: true, count: validated.media_ids.length };
+    } catch (error) {
+        console.error("[bulkUntagMediaAction] Error:", error);
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : "Erreur retrait tags bulk",
+        };
+    }
+}

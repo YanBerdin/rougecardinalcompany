@@ -2,10 +2,14 @@
  * @file MediaCard - Optimized with Thumbnails & Lazy Loading
  * @description Display media card with automatic thumbnail loading (Phase 3)
  * @pattern Uses Intersection Observer API for lazy loading
+ * @phase4 Enhanced with smooth animations and full accessibility support
  */
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { Folder, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { MediaItemExtendedDTO } from "@/lib/schemas/media";
 
@@ -14,6 +18,7 @@ interface MediaCardProps {
   isSelected?: boolean;
   selectionMode?: boolean;
   onSelect?: (media: MediaItemExtendedDTO) => void;
+  onKeyboardSelect?: (media: MediaItemExtendedDTO, event: React.KeyboardEvent) => void;
 }
 
 export function MediaCard({
@@ -21,6 +26,7 @@ export function MediaCard({
   isSelected,
   selectionMode,
   onSelect,
+  onKeyboardSelect,
 }: MediaCardProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -65,32 +71,61 @@ export function MediaCard({
     };
   }, []);
 
+  // Keyboard navigation handler (Phase 4.2 - Accessibility)
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === " " || e.key === "Enter") {
+      e.preventDefault();
+      onSelect?.(media);
+      onKeyboardSelect?.(media, e);
+    }
+  };
+
+  const formattedDate = media.created_at
+    ? format(new Date(media.created_at), "dd MMM yyyy", { locale: fr })
+    : "N/A";
+
   return (
     <div
       ref={cardRef}
       className={cn(
-        "group relative overflow-hidden rounded-lg border bg-card cursor-pointer transition-all",
+        "group relative overflow-hidden rounded-lg border bg-card cursor-pointer",
+        // Phase 4.1 - Smooth animations
+        "transition-all duration-200 ease-in-out",
+        "hover:shadow-lg hover:-translate-y-1",
+        // Accessibility focus styles
+        "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
         selectionMode && "hover:border-primary",
         isSelected && "ring-2 ring-primary border-primary"
       )}
       onClick={() => onSelect?.(media)}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label={`${isSelected ? "Désélectionner" : "Sélectionner"} ${media.filename}`}
+      aria-selected={isSelected}
     >
       {/* Selection Checkbox */}
       {selectionMode && (
         <div className="absolute top-2 right-2 z-10">
           <div
             className={cn(
-              "h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors",
+              "h-6 w-6 rounded-full border-2 flex items-center justify-center",
+              // Phase 4.1 - Smooth checkbox transition
+              "transition-all duration-150 ease-in-out",
+              isSelected && "scale-110",
               isSelected
                 ? "bg-primary border-primary"
                 : "bg-background/80 border-muted-foreground/50"
             )}
+            role="checkbox"
+            aria-checked={isSelected}
           >
             {isSelected && (
               <svg
-                className="h-4 w-4 text-primary-foreground"
+                className="h-4 w-4 text-primary-foreground animate-in fade-in duration-150"
                 fill="currentColor"
                 viewBox="0 0 20 20"
+                aria-hidden="true"
               >
                 <path
                   fillRule="evenodd"
@@ -131,7 +166,11 @@ export function MediaCard({
           <>
             {/* Loading skeleton */}
             {!imageLoaded && !imageError && isVisible && (
-              <div className="absolute inset-0 animate-pulse bg-muted" />
+              <div 
+                className="absolute inset-0 animate-pulse bg-muted"
+                role="status"
+                aria-label="Chargement de l'image"
+              />
             )}
 
             {/* Lazy loaded image */}
@@ -161,12 +200,17 @@ export function MediaCard({
 
             {/* Error fallback */}
             {imageError && (
-              <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+              <div 
+                className="flex h-full w-full items-center justify-center text-muted-foreground"
+                role="img"
+                aria-label="Erreur de chargement d'image"
+              >
                 <svg
                   className="h-12 w-12"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  aria-hidden="true"
                 >
                   <path
                     strokeLinecap="round"
@@ -179,7 +223,11 @@ export function MediaCard({
             )}
           </>
         ) : (
-          <div className="flex h-full items-center justify-center">
+          <div 
+            className="flex h-full items-center justify-center"
+            role="img"
+            aria-label={`Fichier ${media.mime?.split("/")[0] ?? "inconnu"}`}
+          >
             <p className="text-sm text-muted-foreground">
               {media.mime?.split("/")[0] ?? "fichier"}
             </p>
@@ -198,26 +246,57 @@ export function MediaCard({
 
         {/* Tags */}
         {media.tags.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1">
+          <div 
+            className="mt-2 flex flex-wrap gap-1"
+            role="list"
+            aria-label="Tags du média"
+          >
             {media.tags.slice(0, 3).map((tag) => (
               <span
                 key={tag.id}
                 className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-xs"
+                role="listitem"
               >
                 <div
                   className="h-2 w-2 rounded-full"
                   style={{ backgroundColor: tag.color ?? undefined }}
+                  aria-hidden="true"
                 />
                 {tag.name}
               </span>
             ))}
             {media.tags.length > 3 && (
-              <span className="text-xs text-muted-foreground">
+              <span 
+                className="text-xs text-muted-foreground"
+                aria-label={`${media.tags.length - 3} tags supplémentaires`}
+              >
                 +{media.tags.length - 3}
               </span>
             )}
           </div>
         )}
+
+        {/* Folder & Usage Info */}
+        <div className="mt-2 flex flex-col gap-1">
+          {/* Folder location */}
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground" title={media.folder?.name ?? "Racine"}>
+            <Folder className="h-3 w-3 flex-shrink-0" aria-hidden="true" />
+            <span className="truncate">
+              {media.folder?.name ?? "Racine"}
+            </span>
+          </div>
+
+          {/* Public usage indicator - Placeholder for Phase 4.3+ */}
+          {/* TODO Phase 4.3: Implémenter le tracking d'usage pour vérifier si le média est utilisé dans app/(marketing) */}
+          {/* Exemple d'utilisation future:
+          {media.is_used_public && (
+            <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
+              <Eye className="h-3 w-3 flex-shrink-0" aria-hidden="true" />
+              <span>Utilisé sur le site</span>
+            </div>
+          )}
+          */}
+        </div>
       </div>
     </div>
   );

@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Upload, Search, Filter, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import {
     Select,
     SelectContent,
@@ -21,7 +22,6 @@ import { MediaDetailsPanel } from "./MediaDetailsPanel";
 import { MediaBulkActions } from "./MediaBulkActions";
 import { MediaCard } from "./MediaCard";
 import type { MediaItemExtendedDTO, MediaTagDTO, MediaFolderDTO } from "@/lib/schemas/media";
-import { cn } from "@/lib/utils";
 
 interface MediaLibraryViewProps {
     initialMedia: MediaItemExtendedDTO[];
@@ -116,18 +116,30 @@ export function MediaLibraryView({
                         {filteredMedia.length !== media.length && ` (sur ${media.length})`}
                     </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                     <Button
+                        size="lg"
                         variant={selectionMode ? "default" : "outline"}
                         onClick={() => {
                             setSelectionMode(!selectionMode);
                             setSelectedIds([]);
                         }}
+                        className={cn(
+                            "h-11 px-5 text-base font-medium transition-all",
+                            selectionMode && "ring-2 ring-primary ring-offset-2"
+                        )}
+                        aria-pressed={selectionMode}
+                        aria-label={selectionMode ? "Quitter le mode sélection" : "Activer le mode sélection"}
                     >
                         {selectionMode ? "Mode sélection" : "Sélectionner"}
                     </Button>
-                    <Button onClick={handleUpload}>
-                        <Upload className="mr-2 h-4 w-4" />
+                    <Button 
+                        size="lg"
+                        onClick={handleUpload}
+                        className="h-11 px-5 text-base font-medium"
+                        aria-label="Téléverser de nouveaux médias"
+                    >
+                        <Upload className="mr-2 h-5 w-5" />
                         Upload
                     </Button>
                 </div>
@@ -209,7 +221,7 @@ export function MediaLibraryView({
             {/* Bulk Actions Bar */}
             {selectedIds.length > 0 && (
                 <MediaBulkActions
-                    selectedIds={selectedIds}
+                    selectedMedia={media.filter(m => selectedIds.includes(m.id))}
                     folders={availableFolders}
                     tags={availableTags}
                     onClearSelection={() => setSelectedIds([])}
