@@ -286,3 +286,578 @@ export async function getMediaPublicUrl(storagePath: string): Promise<string> {
     } = await supabase.storage.from(BUCKET_NAME).getPublicUrl(storagePath);
     return publicUrl;
 }
+
+// =============================================================================
+// MEDIA TAGS CRUD
+// =============================================================================
+
+/**
+ * List all media tags
+ */
+export async function listMediaTags(): Promise<DALResult<Array<{
+    id: bigint;
+    name: string;
+    slug: string;
+    description: string | null;
+    color: string | null;
+    created_at: Date;
+    updated_at: Date;
+}>>> {
+    await requireAdmin();
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+        .from("media_tags")
+        .select("*")
+        .order("name");
+
+    if (error) {
+        return {
+            success: false,
+            error: `Failed to list media tags: ${error.message}`,
+        };
+    }
+
+    return { success: true, data: data ?? [] };
+}
+
+/**
+ * Get media tag by ID
+ */
+export async function getMediaTagById(id: bigint): Promise<DALResult<{
+    id: bigint;
+    name: string;
+    slug: string;
+    description: string | null;
+    color: string | null;
+    created_at: Date;
+    updated_at: Date;
+} | null>> {
+    await requireAdmin();
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+        .from("media_tags")
+        .select("*")
+        .eq("id", String(id))
+        .maybeSingle();
+
+    if (error) {
+        return {
+            success: false,
+            error: `Failed to get media tag: ${error.message}`,
+        };
+    }
+
+    return { success: true, data };
+}
+
+/**
+ * Create media tag
+ */
+export async function createMediaTag(input: {
+    name: string;
+    slug: string;
+    description?: string | null;
+    color?: string | null;
+}): Promise<DALResult<{
+    id: bigint;
+    name: string;
+    slug: string;
+    description: string | null;
+    color: string | null;
+    created_at: Date;
+    updated_at: Date;
+}>> {
+    await requireAdmin();
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+        .from("media_tags")
+        .insert({
+            name: input.name,
+            slug: input.slug,
+            description: input.description ?? null,
+            color: input.color ?? null,
+        })
+        .select()
+        .single();
+
+    if (error) {
+        return {
+            success: false,
+            error: `Failed to create media tag: ${error.message}`,
+        };
+    }
+
+    return { success: true, data };
+}
+
+/**
+ * Update media tag
+ */
+export async function updateMediaTag(
+    id: bigint,
+    input: Partial<{
+        name: string;
+        description: string | null;
+        color: string | null;
+    }>
+): Promise<DALResult<{
+    id: bigint;
+    name: string;
+    slug: string;
+    description: string | null;
+    color: string | null;
+    created_at: Date;
+    updated_at: Date;
+}>> {
+    await requireAdmin();
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+        .from("media_tags")
+        .update(input)
+        .eq("id", String(id))
+        .select()
+        .single();
+
+    if (error) {
+        return {
+            success: false,
+            error: `Failed to update media tag: ${error.message}`,
+        };
+    }
+
+    return { success: true, data };
+}
+
+/**
+ * Delete media tag
+ */
+export async function deleteMediaTag(id: bigint): Promise<DALResult<null>> {
+    await requireAdmin();
+
+    const supabase = await createClient();
+    const { error } = await supabase
+        .from("media_tags")
+        .delete()
+        .eq("id", String(id));
+
+    if (error) {
+        return {
+            success: false,
+            error: `Failed to delete media tag: ${error.message}`,
+        };
+    }
+
+    return { success: true, data: null };
+}
+
+// =============================================================================
+// MEDIA FOLDERS CRUD
+// =============================================================================
+
+/**
+ * List all media folders
+ */
+export async function listMediaFolders(): Promise<DALResult<Array<{
+    id: bigint;
+    name: string;
+    slug: string;
+    description: string | null;
+    parent_id: bigint | null;
+    created_at: Date;
+    updated_at: Date;
+}>>> {
+    await requireAdmin();
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+        .from("media_folders")
+        .select("*")
+        .order("name");
+
+    if (error) {
+        return {
+            success: false,
+            error: `Failed to list media folders: ${error.message}`,
+        };
+    }
+
+    return { success: true, data: data ?? [] };
+}
+
+/**
+ * Get media folder by ID
+ */
+export async function getMediaFolderById(id: bigint): Promise<DALResult<{
+    id: bigint;
+    name: string;
+    slug: string;
+    description: string | null;
+    parent_id: bigint | null;
+    created_at: Date;
+    updated_at: Date;
+} | null>> {
+    await requireAdmin();
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+        .from("media_folders")
+        .select("*")
+        .eq("id", String(id))
+        .maybeSingle();
+
+    if (error) {
+        return {
+            success: false,
+            error: `Failed to get media folder: ${error.message}`,
+        };
+    }
+
+    return { success: true, data };
+}
+
+/**
+ * Create media folder
+ */
+export async function createMediaFolder(input: {
+    name: string;
+    slug: string;
+    description?: string | null;
+    parent_id?: bigint | null;
+}): Promise<DALResult<{
+    id: bigint;
+    name: string;
+    slug: string;
+    description: string | null;
+    parent_id: bigint | null;
+    created_at: Date;
+    updated_at: Date;
+}>> {
+    await requireAdmin();
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+        .from("media_folders")
+        .insert({
+            name: input.name,
+            slug: input.slug,
+            description: input.description ?? null,
+            parent_id: input.parent_id ? String(input.parent_id) : null,
+        })
+        .select()
+        .single();
+
+    if (error) {
+        return {
+            success: false,
+            error: `Failed to create media folder: ${error.message}`,
+        };
+    }
+
+    return { success: true, data };
+}
+
+/**
+ * Update media folder
+ */
+export async function updateMediaFolder(
+    id: bigint,
+    input: Partial<{
+        name: string;
+        description: string | null;
+        parent_id: bigint | null;
+    }>
+): Promise<DALResult<{
+    id: bigint;
+    name: string;
+    slug: string;
+    description: string | null;
+    parent_id: bigint | null;
+    created_at: Date;
+    updated_at: Date;
+}>> {
+    await requireAdmin();
+
+    const supabase = await createClient();
+
+    const updateData: Record<string, unknown> = {};
+    if (input.name !== undefined) updateData.name = input.name;
+    if (input.description !== undefined) updateData.description = input.description;
+    if (input.parent_id !== undefined) {
+        updateData.parent_id = input.parent_id !== null ? String(input.parent_id) : null;
+    }
+
+    const { data, error } = await supabase
+        .from("media_folders")
+        .update(updateData)
+        .eq("id", String(id))
+        .select()
+        .single();
+
+    if (error) {
+        return {
+            success: false,
+            error: `Failed to update media folder: ${error.message}`,
+        };
+    }
+
+    return { success: true, data };
+}
+
+/**
+ * Delete media folder
+ */
+export async function deleteMediaFolder(id: bigint): Promise<DALResult<null>> {
+    await requireAdmin();
+
+    const supabase = await createClient();
+    const { error } = await supabase
+        .from("media_folders")
+        .delete()
+        .eq("id", String(id));
+
+    if (error) {
+        return {
+            success: false,
+            error: `Failed to delete media folder: ${error.message}`,
+        };
+    }
+
+    return { success: true, data: null };
+}
+
+// =============================================================================
+// MEDIA ITEM TAGS (Many-to-Many Operations)
+// =============================================================================
+
+/**
+ * Add tags to media item
+ */
+export async function addMediaItemTags(
+    mediaId: bigint,
+    tagIds: bigint[]
+): Promise<DALResult<null>> {
+    await requireAdmin();
+
+    const supabase = await createClient();
+
+    const records = tagIds.map(tagId => ({
+        media_id: String(mediaId),
+        tag_id: String(tagId),
+    }));
+
+    const { error } = await supabase
+        .from("media_item_tags")
+        .insert(records);
+
+    if (error) {
+        return {
+            success: false,
+            error: `Failed to add tags to media: ${error.message}`,
+        };
+    }
+
+    return { success: true, data: null };
+}
+
+/**
+ * Remove tags from media item
+ */
+export async function removeMediaItemTags(
+    mediaId: bigint,
+    tagIds: bigint[]
+): Promise<DALResult<null>> {
+    await requireAdmin();
+
+    const supabase = await createClient();
+
+    const { error } = await supabase
+        .from("media_item_tags")
+        .delete()
+        .eq("media_id", String(mediaId))
+        .in("tag_id", tagIds.map(id => String(id)));
+
+    if (error) {
+        return {
+            success: false,
+            error: `Failed to remove tags from media: ${error.message}`,
+        };
+    }
+
+    return { success: true, data: null };
+}
+
+/**
+ * Get tags for media item
+ */
+export async function getMediaItemTags(mediaId: bigint): Promise<DALResult<Array<{
+    id: bigint;
+    name: string;
+    slug: string;
+    description: string | null;
+    color: string | null;
+}>>> {
+    await requireAdmin();
+
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+        .from("media_item_tags")
+        .select("tag_id, media_tags(*)")
+        .eq("media_id", String(mediaId));
+
+    if (error) {
+        return {
+            success: false,
+            error: `Failed to get media tags: ${error.message}`,
+        };
+    }
+
+    const tags = data?.map((row: unknown) => {
+        const typedRow = row as { media_tags: unknown };
+        return typedRow.media_tags;
+    }).filter(Boolean) ?? [];
+
+    return {
+        success: true, data: tags as Array<{
+            id: bigint;
+            name: string;
+            slug: string;
+            description: string | null;
+            color: string | null;
+        }>
+    };
+}
+
+/**
+ * List all media items with their tags and folders
+ * @returns Array of media items with extended data
+ */
+export async function listMediaItems(): Promise<DALResult<Array<{
+    id: bigint;
+    storage_path: string;
+    filename: string;
+    mime: string;
+    size_bytes: number;
+    alt_text: string | null;
+    folder_id: bigint | null;
+    created_at: string | Date;
+    updated_at: string | Date;
+    tags: Array<{
+        id: bigint;
+        name: string;
+        slug: string;
+        description: string | null;
+        color: string | null;
+        created_at: string | Date;
+        updated_at: string | Date;
+    }>;
+    folder: {
+        id: bigint;
+        name: string;
+        slug: string;
+        description: string | null;
+        parent_id: bigint | null;
+        created_at: string | Date;
+        updated_at: string | Date;
+    } | null;
+}>>> {
+    await requireAdmin();
+
+    const supabase = await createClient();
+
+    // Fetch all media items
+    const { data: mediaData, error: mediaError } = await supabase
+        .from("medias")
+        .select("id, storage_path, filename, mime, size_bytes, alt_text, folder_id, created_at, updated_at")
+        .order("created_at", { ascending: false });
+
+    if (mediaError) {
+        return {
+            success: false,
+            error: `Failed to list media: ${mediaError.message}`,
+        };
+    }
+
+    if (!mediaData || mediaData.length === 0) {
+        return { success: true, data: [] };
+    }
+
+    // Fetch tags for all media items
+    const mediaIds = mediaData.map((m) => String(m.id));
+    const { data: tagsData, error: tagsError } = await supabase
+        .from("media_item_tags")
+        .select("media_id, media_tags(*)")
+        .in("media_id", mediaIds);
+
+    if (tagsError) {
+        console.error("[DAL] Failed to fetch tags:", tagsError);
+    }
+
+    // Fetch folders
+    const folderIds = mediaData
+        .map((m) => m.folder_id)
+        .filter((id): id is string => id !== null)
+        .map(String);
+
+    const { data: foldersData, error: foldersError } = folderIds.length > 0
+        ? await supabase
+            .from("media_folders")
+            .select("id, name, slug, description, parent_id, created_at, updated_at")
+            .in("id", folderIds)
+        : { data: null, error: null };
+
+    if (foldersError) {
+        console.error("[DAL] Failed to fetch folders:", foldersError);
+    }
+
+    // Build tags map
+    const tagsMap = new Map<string, Array<unknown>>();
+    tagsData?.forEach((row: unknown) => {
+        const typedRow = row as { media_id: bigint; media_tags: unknown };
+        const mediaId = String(typedRow.media_id);
+        if (!tagsMap.has(mediaId)) {
+            tagsMap.set(mediaId, []);
+        }
+        if (typedRow.media_tags) {
+            tagsMap.get(mediaId)!.push(typedRow.media_tags);
+        }
+    });
+
+    // Build folders map
+    const foldersMap = new Map<string, unknown>();
+    foldersData?.forEach((folder: unknown) => {
+        const typedFolder = folder as { id: bigint };
+        foldersMap.set(String(typedFolder.id), folder);
+    });
+
+    // Combine data
+    const result = mediaData.map((media) => ({
+        ...media,
+        tags: (tagsMap.get(String(media.id)) ?? []) as Array<{
+            id: bigint;
+            name: string;
+            slug: string;
+            description: string | null;
+            color: string | null;
+            created_at: string | Date;
+            updated_at: string | Date;
+        }>,
+        folder: media.folder_id
+            ? (foldersMap.get(String(media.folder_id)) as {
+                id: bigint;
+                name: string;
+                slug: string;
+                description: string | null;
+                parent_id: bigint | null;
+                created_at: string | Date;
+                updated_at: string | Date;
+            } | null)
+            : null,
+    }));
+
+    return { success: true, data: result };
+}

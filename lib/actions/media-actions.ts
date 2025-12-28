@@ -188,3 +188,59 @@ export async function deleteMediaImage(
     };
   }
 }
+
+// =============================================================================
+// MEDIA LIBRARY ACTIONS
+// =============================================================================
+
+import { listMediaItems } from "@/lib/dal/media";
+import { toMediaItemExtendedDTO } from "@/lib/dal/helpers/serialize";
+import type { MediaItemExtendedDTO } from "@/lib/schemas/media";
+
+export type MediaItemsListResult = 
+  | { success: true; data: MediaItemExtendedDTO[] }
+  | { success: false; error: string };
+
+/**
+ * List all media items with tags and folders
+ * @returns Array of MediaItemExtendedDTO
+ */
+export async function listMediaItemsAction(): Promise<MediaItemsListResult> {
+  try {
+    const result = await listMediaItems();
+
+    if (!result.success) {
+      return { success: false, error: result.error };
+    }
+
+    // Normalize dates before mapping to DTOs
+    const normalizedData = result.data.map((item) => ({
+      ...item,
+      created_at: item.created_at instanceof Date ? item.created_at : new Date(item.created_at),
+      updated_at: item.updated_at instanceof Date ? item.updated_at : new Date(item.updated_at),
+      tags: item.tags.map((tag) => ({
+        ...tag,
+        created_at: tag.created_at instanceof Date ? tag.created_at : new Date(tag.created_at),
+        updated_at: tag.updated_at instanceof Date ? tag.updated_at : new Date(tag.updated_at),
+      })),
+      folder: item.folder
+        ? {
+            ...item.folder,
+            created_at: item.folder.created_at instanceof Date ? item.folder.created_at : new Date(item.folder.created_at),
+            updated_at: item.folder.updated_at instanceof Date ? item.folder.updated_at : new Date(item.folder.updated_at),
+          }
+        : null,
+    }));
+
+    // Convert to DTOs (bigint -> number, Date -> string)
+    const dtos = normalizedData.map(toMediaItemExtendedDTO);
+
+    return { success: true, data: dtos };
+  } catch (error) {
+    console.error("[listMediaItemsAction] Error:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
