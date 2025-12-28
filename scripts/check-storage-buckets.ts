@@ -1,11 +1,12 @@
 import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
+import { env } from "../lib/env";
 
 dotenv.config({ path: ".env.local" });
 
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SECRET_KEY!
+  env.NEXT_PUBLIC_SUPABASE_URL,
+  env.SUPABASE_SECRET_KEY
 );
 
 async function checkBuckets() {
@@ -48,7 +49,7 @@ async function checkBuckets() {
   if (files && files.length > 0) {
     console.log(`\n  ✅ ${files.length} fichiers trouvés dans press-kit/logos/`);
     files.forEach((file) => {
-      const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/medias/press-kit/logos/${file.name}`;
+      const url = `${env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/medias/press-kit/logos/${file.name}`;
       console.log(`    - ${file.name}`);
       console.log(`      URL: ${url}`);
     });

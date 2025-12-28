@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/supabase/server";
 import { requireAdmin } from "@/lib/auth/is-admin";
 import { uploadMedia, deleteMedia, findMediaByHash, getMediaPublicUrl } from "@/lib/dal/media";
+import { recordRequest } from "@/lib/utils/rate-limit";
 import type { MediaUploadResult } from "./types";
 
 /**
@@ -92,7 +93,7 @@ export async function uploadMediaImage(
   try {
     // 0. Auth check
     await requireAdmin();
-    
+
     // 1. Validation
     const validation = validateFile(formData);
     if (!validation.success) {
@@ -102,7 +103,26 @@ export async function uploadMediaImage(
     // 2. Get current user
     const uploadedBy = await getCurrentUserId();
 
-    // 3. Check for duplicate (if hash provided)
+    // 3. Rate limiting: 10 uploads per minute per user
+    const rateLimitKey = `upload:${uploadedBy}`;
+    const rateLimitResult = recordRequest(
+      rateLimitKey,
+      10, // max 10 uploads
+      60 * 1000 // per 1 minute
+    );
+
+    if (!rateLimitResult.success) {
+      const resetTime = rateLimitResult.resetAt.toLocaleTimeString("fr-FR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      return {
+        success: false,
+        error: `Limite d'uploads atteinte (10/min). Réessayez après ${resetTime}.`,
+      };
+    }
+
+    // 4. Check for duplicate (if hash provided)
     const fileHash = formData.get("fileHash");
 
     if (fileHash && typeof fileHash === "string") {
@@ -123,7 +143,7 @@ export async function uploadMediaImage(
       }
     }
 
-    // 4. Call DAL (no duplicate found)
+    // 5. Call DAL (no duplicate found)
     const result = await uploadMedia({
       file: validation.file,
       folder,
@@ -135,7 +155,7 @@ export async function uploadMediaImage(
       return { success: false, error: result.error };
     }
 
-    // 5. ✅ Revalidation (UNIQUEMENT dans Server Action)
+    // 6. ✅ Revalidation (UNIQUEMENT dans Server Action)
     revalidatePath("/admin/medias");
     revalidatePath("/admin/team");
     revalidatePath("/admin/spectacles");
@@ -197,7 +217,7 @@ import { listMediaItems } from "@/lib/dal/media";
 import { toMediaItemExtendedDTO } from "@/lib/dal/helpers/serialize";
 import type { MediaItemExtendedDTO } from "@/lib/schemas/media";
 
-export type MediaItemsListResult = 
+export type MediaItemsListResult =
   | { success: true; data: MediaItemExtendedDTO[] }
   | { success: false; error: string };
 
@@ -225,10 +245,10 @@ export async function listMediaItemsAction(): Promise<MediaItemsListResult> {
       })),
       folder: item.folder
         ? {
-            ...item.folder,
-            created_at: item.folder.created_at instanceof Date ? item.folder.created_at : new Date(item.folder.created_at),
-            updated_at: item.folder.updated_at instanceof Date ? item.folder.updated_at : new Date(item.folder.updated_at),
-          }
+          ...item.folder,
+          created_at: item.folder.created_at instanceof Date ? item.folder.created_at : new Date(item.folder.created_at),
+          updated_at: item.folder.updated_at instanceof Date ? item.folder.updated_at : new Date(item.folder.updated_at),
+        }
         : null,
     }));
 
@@ -241,6 +261,85 @@ export async function listMediaItemsAction(): Promise<MediaItemsListResult> {
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+// =============================================================================
+// METADATA UPDATE
+// =============================================================================
+
+export type MediaMetadataUpdateInput = {
+  alt_text?: string | null;
+  folder_id?: number | null;
+  tag_ids?: number[];
+};
+
+export type MediaMetadataUpdateResult =
+  | { success: true }
+  | { success: false; error: string };
+
+/**
+ * Update media metadata (alt_text, folder, tags)
+ */
+export async function updateMediaMetadataAction(
+  mediaId: number,
+  input: MediaMetadataUpdateInput
+): Promise<MediaMetadataUpdateResult> {
+  try {
+    await requireAdmin();
+
+    const supabase = await createClient();
+
+    // Update media table
+    // Note: Supabase client handles number → bigint conversion automatically
+    const { error: updateError } = await supabase
+      .from("medias")
+      .update({
+        alt_text: input.alt_text,
+        folder_id: input.folder_id ?? null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", mediaId);
+
+    if (updateError) {
+      throw new Error(updateError.message);
+    }
+
+    // Update tags if provided
+    if (input.tag_ids !== undefined) {
+      // Delete existing tags
+      await supabase
+        .from("media_item_tags")
+        .delete()
+        .eq("media_id", mediaId);
+
+      // Insert new tags
+      if (input.tag_ids.length > 0) {
+        const tagInserts = input.tag_ids.map((tagId) => ({
+          media_id: mediaId,
+          tag_id: tagId,
+        }));
+
+        const { error: tagsError } = await supabase
+          .from("media_item_tags")
+          .insert(tagInserts);
+
+        if (tagsError) {
+          throw new Error(tagsError.message);
+        }
+      }
+    }
+
+    revalidatePath("/admin/media");
+    revalidatePath("/admin/media/library");
+
+    return { success: true };
+  } catch (error) {
+    console.error("[updateMediaMetadataAction] Error:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Erreur mise à jour",
     };
   }
 }

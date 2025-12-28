@@ -107,7 +107,7 @@ export function MediaFoldersView({ initialFolders }: MediaFoldersViewProps) {
         <div className="space-y-4">
             <div className="flex items-center gap-4 mb-6">
                 <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     onClick={() => router.push("/admin/media")}
                     className="gap-2"
@@ -180,7 +180,7 @@ export function MediaFoldersView({ initialFolders }: MediaFoldersViewProps) {
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => handleDelete(folder)}
-                                        className="text-red-600 hover:text-red-700 hover:bg-red-50 h-10 min-w-[56px] px-3"
+                                        className= "hover:text-red-700 hover:bg-red-50 h-10 min-w-[56px] px-3"
                                         aria-label={`Supprimer ${folder.name}`}
                                     >
                                         <Trash2 className="h-5 w-5 mr-2" /> Supprimer

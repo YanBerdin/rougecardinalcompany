@@ -4,12 +4,13 @@
 import * as dotenv from "dotenv";
 import { createClient } from "@supabase/supabase-js";
 import { resolve } from "path";
+import { env } from "../../lib/env";
 
 const envPath = resolve(process.cwd(), ".env.local");
 dotenv.config({ path: envPath });
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!;
+const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
+const anonKey = env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY;
 
 console.log("🔍 Checking chapo and excerpt columns...\n");
 

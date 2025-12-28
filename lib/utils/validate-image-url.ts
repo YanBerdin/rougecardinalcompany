@@ -1,5 +1,7 @@
 "use server";
 
+import { env } from "@/lib/env";
+
 const ALLOWED_MIME_TYPES = [
     "image/jpeg",
     "image/png",
@@ -34,7 +36,7 @@ const ALLOWED_HOSTNAMES: ReadonlyMap<string, string> = new Map([
  * Returns null if not configured.
  */
 function getSupabaseStorageHost(): string | null {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
     if (!supabaseUrl) return null;
 
     try {
@@ -54,7 +56,7 @@ function getSupabaseStorageHost(): string | null {
  * to their canonical server-controlled equivalents.
  */
 function getCanonicalHostname(userHostname: string): string | null {
-    const isDev = process.env.NODE_ENV === "development";
+    const isDev = env.NODE_ENV === "development";
 
     // Block internal IPs (except in development)
     if (!isDev) {
@@ -137,7 +139,7 @@ export async function validateImageUrl(
 
         // Only allow HTTPS (and HTTP in development)
         const allowedProtocols =
-            process.env.NODE_ENV === "development"
+            env.NODE_ENV === "development"
                 ? ["https:", "http:"]
                 : ["https:"];
 

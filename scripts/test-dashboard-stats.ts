@@ -12,19 +12,13 @@ import * as dotenv from "dotenv";
 import { resolve } from "path";
 import { createClient } from "@supabase/supabase-js";
 import { DashboardStatsSchema } from "../types/dashboard.types";
+import { env } from "../lib/env";
 
 dotenv.config({ path: resolve(process.cwd(), ".env.local") });
 
 // Configuration
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SECRET_KEY;
-
-if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-  console.error("❌ Missing environment variables:");
-  console.error("   - NEXT_PUBLIC_SUPABASE_URL");
-  console.error("   - SUPABASE_SECRET_KEY");
-  process.exit(1);
-}
+const SUPABASE_URL = env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_SERVICE_KEY = env.SUPABASE_SECRET_KEY;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 

@@ -5,11 +5,12 @@
  */
 import * as dotenv from "dotenv";
 import { createClient } from '@supabase/supabase-js';
+import { env } from '../lib/env';
 
 dotenv.config();
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!;
+const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY;
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 

@@ -1,4 +1,4 @@
-# Rapport de Conformité Phase 1 - Media Library
+# Rapport de Conformité Phase 1 - plan-TASK029-MediaLibrary.prompt
 
 **Date**: 28 décembre 2025  
 **Scope**: 27 fichiers de la Phase 1 (TASK029)  

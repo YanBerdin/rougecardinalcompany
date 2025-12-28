@@ -17,7 +17,10 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { MediaDetailsPanel } from "./MediaDetailsPanel";
+import { MediaBulkActions } from "./MediaBulkActions";
 import type { MediaItemExtendedDTO, MediaTagDTO, MediaFolderDTO } from "@/lib/schemas/media";
+import { cn } from "@/lib/utils";
 
 interface MediaLibraryViewProps {
     initialMedia: MediaItemExtendedDTO[];
@@ -35,6 +38,9 @@ export function MediaLibraryView({
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedFolder, setSelectedFolder] = useState<string>("all");
     const [selectedTag, setSelectedTag] = useState<string>("all");
+    const [selectedMedia, setSelectedMedia] = useState<MediaItemExtendedDTO | null>(null);
+    const [selectedIds, setSelectedIds] = useState<number[]>([]);
+    const [selectionMode, setSelectionMode] = useState(false);
 
     // Sync state when props change (after router.refresh())
     useEffect(() => {
@@ -66,15 +72,31 @@ export function MediaLibraryView({
     }, [media, searchQuery, selectedFolder, selectedTag]);
 
     const handleUpload = useCallback(() => {
-        toast.info("Upload non encore implémenté (Phase 1 suite)");
+        toast.info("Upload non encore implémenté (Phase 2 suite)");
     }, []);
+
+    const toggleSelection = useCallback((mediaId: number) => {
+        setSelectedIds((prev) =>
+            prev.includes(mediaId)
+                ? prev.filter((id) => id !== mediaId)
+                : [...prev, mediaId]
+        );
+    }, []);
+
+    const handleCardClick = useCallback((item: MediaItemExtendedDTO) => {
+        if (selectionMode) {
+            toggleSelection(item.id);
+        } else {
+            setSelectedMedia(item);
+        }
+    }, [selectionMode, toggleSelection]);
 
     return (
         <div className="space-y-6">
             {/* Bouton retour */}
             <div className="flex items-center gap-4">
                 <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     onClick={() => router.push("/admin/media")}
                     className="gap-2"
@@ -93,10 +115,21 @@ export function MediaLibraryView({
                         {filteredMedia.length !== media.length && ` (sur ${media.length})`}
                     </p>
                 </div>
-                <Button onClick={handleUpload}>
-                    <Upload className="mr-2 h-4 w-4" />
-                    Upload
-                </Button>
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant={selectionMode ? "default" : "outline"}
+                        onClick={() => {
+                            setSelectionMode(!selectionMode);
+                            setSelectedIds([]);
+                        }}
+                    >
+                        {selectionMode ? "Mode sélection" : "Sélectionner"}
+                    </Button>
+                    <Button onClick={handleUpload}>
+                        <Upload className="mr-2 h-4 w-4" />
+                        Upload
+                    </Button>
+                </div>
             </div>
 
             {/* Filters */}
@@ -161,9 +194,43 @@ export function MediaLibraryView({
             ) : (
                 <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
                     {filteredMedia.map((item) => (
-                        <MediaCard key={item.id} media={item} />
+                        <MediaCard
+                            key={item.id}
+                            media={item}
+                            isSelected={selectedIds.includes(item.id)}
+                            selectionMode={selectionMode}
+                            onSelect={handleCardClick}
+                        />
                     ))}
                 </div>
+            )}
+
+            {/* Bulk Actions Bar */}
+            {selectedIds.length > 0 && (
+                <MediaBulkActions
+                    selectedIds={selectedIds}
+                    folders={availableFolders}
+                    tags={availableTags}
+                    onClearSelection={() => setSelectedIds([])}
+                    onSuccess={() => {
+                        router.refresh();
+                        setSelectedIds([]);
+                    }}
+                />
+            )}
+
+            {/* Details Panel */}
+            {selectedMedia && !selectionMode && (
+                <MediaDetailsPanel
+                    media={selectedMedia}
+                    folders={availableFolders}
+                    tags={availableTags}
+                    onClose={() => setSelectedMedia(null)}
+                    onUpdate={() => {
+                        router.refresh();
+                        setSelectedMedia(null);
+                    }}
+                />
             )}
         </div>
     );
@@ -171,16 +238,43 @@ export function MediaLibraryView({
 
 interface MediaCardProps {
     media: MediaItemExtendedDTO;
+    isSelected?: boolean;
+    selectionMode?: boolean;
+    onSelect?: (media: MediaItemExtendedDTO) => void;
 }
 
-function MediaCard({ media }: MediaCardProps) {
+function MediaCard({ media, isSelected, selectionMode, onSelect }: MediaCardProps) {
     const isImage = media.mime?.startsWith("image/") ?? false;
-    
+
     // storage_path is already relative to medias bucket (e.g., "press-kit/logos/file.png")
     const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/medias/${media.storage_path}`;
 
     return (
-        <div className="group relative overflow-hidden rounded-lg border bg-card">
+        <div
+            className={cn(
+                "group relative overflow-hidden rounded-lg border bg-card cursor-pointer transition-all",
+                selectionMode && "hover:border-primary",
+                isSelected && "ring-2 ring-primary border-primary"
+            )}
+            onClick={() => onSelect?.(media)}
+        >
+            {/* Selection Checkbox */}
+            {selectionMode && (
+                <div className="absolute top-2 right-2 z-10">
+                    <div className={cn(
+                        "h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors",
+                        isSelected
+                            ? "bg-primary border-primary"
+                            : "bg-background/80 border-muted-foreground/50"
+                    )}>
+                        {isSelected && (
+                            <svg className="h-4 w-4 text-primary-foreground" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                        )}
+                    </div>
+                </div>
+            )}
             <div className="aspect-square overflow-hidden bg-muted">
                 {isImage ? (
                     <img

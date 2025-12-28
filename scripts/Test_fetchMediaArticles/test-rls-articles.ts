@@ -5,20 +5,14 @@
 import * as dotenv from "dotenv";
 import { createClient } from "@supabase/supabase-js";
 import { resolve } from "path";
+import { env } from "../../lib/env";
 
 // Force load .env.local
 const envPath = resolve(process.cwd(), ".env.local");
 dotenv.config({ path: envPath });
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY;
-
-if (!supabaseUrl || !anonKey) {
-  console.error("❌ Missing env vars:");
-  console.error("   NEXT_PUBLIC_SUPABASE_URL:", supabaseUrl);
-  console.error("   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY:", anonKey?.substring(0, 20) + "...");
-  process.exit(1);
-}
+const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
+const anonKey = env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY;
 
 console.log("🔍 Testing RLS with ANON key (as used in the app)...\n");
 

@@ -93,7 +93,7 @@ export function MediaTagsView({ initialTags }: MediaTagsViewProps) {
         <div className="space-y-4">
             <div className="flex items-center gap-4 mb-6">
                 <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     onClick={() => router.push("/admin/media")}
                     className="gap-2"
