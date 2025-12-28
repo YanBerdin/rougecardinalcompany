@@ -60,6 +60,7 @@ export function toMediaItemExtendedDTO(media: MediaItemExtended): MediaItemExten
         size_bytes: media.size_bytes,
         alt_text: media.alt_text,
         folder_id: media.folder_id !== null ? Number(media.folder_id) : null,
+        thumbnail_path: media.thumbnail_path ?? null, // Phase 3: Thumbnail support
         created_at: typeof media.created_at === 'string' ? media.created_at : media.created_at.toISOString(),
         updated_at: typeof media.updated_at === 'string' ? media.updated_at : media.updated_at.toISOString(),
         tags: media.tags.map(toMediaTagDTO),

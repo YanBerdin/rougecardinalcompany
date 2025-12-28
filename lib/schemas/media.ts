@@ -129,6 +129,7 @@ export const MediaItemExtendedSchema = z.object({
     size_bytes: z.number().int().nonnegative().nullable(),
     alt_text: z.string().nullable(),
     folder_id: z.coerce.bigint().nullable(),
+    thumbnail_path: z.string().nullable(), // Phase 3: Thumbnail support
     created_at: z.coerce.date(),
     updated_at: z.coerce.date(),
     tags: z.array(MediaTagSchema).default([]),
@@ -176,6 +177,7 @@ export const MediaItemExtendedDTOSchema = z.object({
     size_bytes: z.number().int().nonnegative().nullable(),
     alt_text: z.string().nullable(),
     folder_id: z.number().int().positive().nullable(),
+    thumbnail_path: z.string().nullable(), // Phase 3: Thumbnail support
     created_at: z.string(),
     updated_at: z.string(),
     tags: z.array(MediaTagDTOSchema).default([]),

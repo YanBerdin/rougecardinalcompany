@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { MediaDetailsPanel } from "./MediaDetailsPanel";
 import { MediaBulkActions } from "./MediaBulkActions";
+import { MediaCard } from "./MediaCard";
 import type { MediaItemExtendedDTO, MediaTagDTO, MediaFolderDTO } from "@/lib/schemas/media";
 import { cn } from "@/lib/utils";
 
@@ -234,106 +235,4 @@ export function MediaLibraryView({
             )}
         </div>
     );
-}
-
-interface MediaCardProps {
-    media: MediaItemExtendedDTO;
-    isSelected?: boolean;
-    selectionMode?: boolean;
-    onSelect?: (media: MediaItemExtendedDTO) => void;
-}
-
-function MediaCard({ media, isSelected, selectionMode, onSelect }: MediaCardProps) {
-    const isImage = media.mime?.startsWith("image/") ?? false;
-
-    // storage_path is already relative to medias bucket (e.g., "press-kit/logos/file.png")
-    const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/medias/${media.storage_path}`;
-
-    return (
-        <div
-            className={cn(
-                "group relative overflow-hidden rounded-lg border bg-card cursor-pointer transition-all",
-                selectionMode && "hover:border-primary",
-                isSelected && "ring-2 ring-primary border-primary"
-            )}
-            onClick={() => onSelect?.(media)}
-        >
-            {/* Selection Checkbox */}
-            {selectionMode && (
-                <div className="absolute top-2 right-2 z-10">
-                    <div className={cn(
-                        "h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors",
-                        isSelected
-                            ? "bg-primary border-primary"
-                            : "bg-background/80 border-muted-foreground/50"
-                    )}>
-                        {isSelected && (
-                            <svg className="h-4 w-4 text-primary-foreground" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                        )}
-                    </div>
-                </div>
-            )}
-            <div className="aspect-square overflow-hidden bg-muted">
-                {isImage ? (
-                    <img
-                        src={publicUrl}
-                        alt={media.alt_text ?? media.filename ?? undefined}
-                        className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                        onError={(e) => {
-                            // Fallback: hide broken image, show placeholder
-                            e.currentTarget.style.display = 'none';
-                            const parent = e.currentTarget.parentElement;
-                            if (parent && !parent.querySelector('.fallback-icon')) {
-                                const fallback = document.createElement('div');
-                                fallback.className = 'fallback-icon flex h-full w-full items-center justify-center text-muted-foreground';
-                                fallback.innerHTML = '<svg class="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>';
-                                parent.appendChild(fallback);
-                            }
-                        }}
-                    />
-                ) : (
-                    <div className="flex h-full items-center justify-center">
-                        <p className="text-sm text-muted-foreground">
-                            {media.mime?.split("/")[0] ?? "fichier"}
-                        </p>
-                    </div>
-                )}
-            </div>
-            <div className="p-3">
-                <p className="truncate text-sm font-medium">{media.filename}</p>
-                <p className="text-xs text-muted-foreground">
-                    {media.size_bytes !== null ? formatFileSize(media.size_bytes) : "Taille inconnue"}
-                </p>
-                {media.tags.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-1">
-                        {media.tags.slice(0, 3).map((tag) => (
-                            <span
-                                key={tag.id}
-                                className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-xs"
-                            >
-                                <div
-                                    className="h-2 w-2 rounded-full"
-                                    style={{ backgroundColor: tag.color ?? undefined }}
-                                />
-                                {tag.name}
-                            </span>
-                        ))}
-                        {media.tags.length > 3 && (
-                            <span className="text-xs text-muted-foreground">
-                                +{media.tags.length - 3}
-                            </span>
-                        )}
-                    </div>
-                )}
-            </div>
-        </div>
-    );
-}
-
-function formatFileSize(bytes: number): string {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }

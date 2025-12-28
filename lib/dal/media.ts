@@ -769,10 +769,10 @@ export async function listMediaItems(): Promise<DALResult<Array<{
 
     const supabase = await createClient();
 
-    // Fetch all media items
+    // Fetch all media items (Phase 3: added thumbnail_path)
     const { data: mediaData, error: mediaError } = await supabase
         .from("medias")
-        .select("id, storage_path, filename, mime, size_bytes, alt_text, folder_id, created_at, updated_at")
+        .select("id, storage_path, filename, mime, size_bytes, alt_text, folder_id, thumbnail_path, created_at, updated_at")
         .order("created_at", { ascending: false });
 
     if (mediaError) {

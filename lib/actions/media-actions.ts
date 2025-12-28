@@ -155,12 +155,43 @@ export async function uploadMediaImage(
       return { success: false, error: result.error };
     }
 
-    // 6. ✅ Revalidation (UNIQUEMENT dans Server Action)
+    // 6. ⚠️ PATTERN WARNING: Non-blocking thumbnail generation
+    // Upload succeeds even if thumbnail generation fails
+    let thumbnailWarning: string | undefined;
+
+    try {
+      await fetch(
+        `${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/api/admin/media/thumbnail`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            mediaId: result.data.mediaId,
+            storagePath: result.data.storagePath,
+          }),
+        }
+      );
+    } catch (thumbnailError) {
+      console.warn(
+        "[uploadMediaImage] Thumbnail generation failed (non-critical):",
+        thumbnailError
+      );
+      thumbnailWarning =
+        "Image uploaded but thumbnail generation failed. Thumbnail will be created on next upload.";
+    }
+
+    // 7. ✅ Revalidation (UNIQUEMENT dans Server Action)
     revalidatePath("/admin/medias");
     revalidatePath("/admin/team");
     revalidatePath("/admin/spectacles");
 
-    return { success: true, data: result.data };
+    return {
+      success: true,
+      data: {
+        ...result.data,
+        warning: thumbnailWarning,
+      },
+    };
   } catch (error) {
     console.error("[uploadMediaImage] Error:", error);
     return {
@@ -235,7 +266,7 @@ export async function listMediaItemsAction(): Promise<MediaItemsListResult> {
 
     // Normalize dates before mapping to DTOs
     const normalizedData = result.data.map((item) => ({
-      ...item,
+      ...item, // Includes thumbnail_path (Phase 3)
       created_at: item.created_at instanceof Date ? item.created_at : new Date(item.created_at),
       updated_at: item.updated_at instanceof Date ? item.updated_at : new Date(item.updated_at),
       tags: item.tags.map((tag) => ({
@@ -253,7 +284,7 @@ export async function listMediaItemsAction(): Promise<MediaItemsListResult> {
     }));
 
     // Convert to DTOs (bigint -> number, Date -> string)
-    const dtos = normalizedData.map(toMediaItemExtendedDTO);
+    const dtos = normalizedData.map((item) => toMediaItemExtendedDTO(item as any)); // TS workaround for complex nested types
 
     return { success: true, data: dtos };
   } catch (error) {
