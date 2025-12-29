@@ -2,7 +2,8 @@
 
 **Date**: 28 Décembre 2025  
 **Status**: ✅ TERMINÉ  
-**Composants modifiés**: 
+**Composants modifiés**:
+
 - `components/features/admin/media/MediaBulkActions.tsx`
 - `components/features/admin/media/MediaCard.tsx`
 - `components/features/admin/media/MediaLibraryView.tsx`
@@ -37,6 +38,7 @@
 ```
 
 **Visuellement** :
+
 - 📁 Icône Folder + nom du dossier
 - Texte tronqué avec tooltip complet
 - Style muted-foreground (discret)
@@ -84,6 +86,7 @@ const sourceFolders = Array.from(
 ```
 
 **Comportement** :
+
 - 1 dossier : "Nom du dossier"
 - Plusieurs : "3 dossiers différents"
 - Tooltip avec liste complète
@@ -150,6 +153,7 @@ export async function bulkUntagMediaAction(
 ```
 
 **États séparés** :
+
 - `selectedTagsToAdd`: Tags à ajouter
 - `selectedTagsToRemove`: Tags à retirer
 - Boutons distincts (+) et (-)
@@ -173,6 +177,7 @@ export async function bulkUntagMediaAction(
 ```
 
 **Avantage** :
+
 - Accès aux informations complètes (folder, tags)
 - Pas besoin de fetch supplémentaire
 - Cohérence avec pattern existant
@@ -182,7 +187,7 @@ export async function bulkUntagMediaAction(
 ### Codes Couleur
 
 | Élément | Couleur | Raison |
-|---------|---------|--------|
+| --------- | --------- | -------- |
 | **Dossiers** | `text-muted-foreground` | Information contextuelle, non prioritaire |
 | **Ajouter tags** | `variant="default"` (primary) | Action positive |
 | **Retirer tags** | `variant="destructive"` (rouge) | Action de suppression |
@@ -207,7 +212,7 @@ export async function bulkUntagMediaAction(
 ### Fichiers Modifiés
 
 | Fichier | Lignes | Changements |
-|---------|--------|-------------|
+| --------- | -------- | ------------- |
 | **MediaCard.tsx** | +35 | Import Folder/Eye, section dossier+usage |
 | **MediaBulkActions.tsx** | +85 | Interface, dossiers sources, dual tags UI |
 | **MediaLibraryView.tsx** | 1 ligne | Filter médias au lieu de passer IDs |
@@ -235,12 +240,14 @@ selectedMedia: MediaItemExtendedDTO[];  // Au lieu de selectedIds: number[]
 ## ✅ Validation
 
 ### TypeScript
+
 ```bash
 pnpm tsc --noEmit
 # ✅ Aucune erreur
 ```
 
 ### Build Next.js 16
+
 ```bash
 pnpm build
 # ✅ Build successful
@@ -248,6 +255,7 @@ pnpm build
 ```
 
 ### Tests Manuels Recommandés
+
 - [ ] Sélectionner médias d'un même dossier → Affiche "Nom dossier"
 - [ ] Sélectionner médias de 3 dossiers → Affiche "3 dossiers différents"
 - [ ] Sélectionner médias sans dossier → Affiche "Racine"
@@ -275,12 +283,14 @@ async function isMediaUsedPublic(mediaId: bigint): Promise<boolean> {
 ```
 
 **Ajout schema** :
+
 ```typescript
 // MediaItemExtendedDTOSchema
 is_used_public: z.boolean().optional(),
 ```
 
 **UI** (décommenter dans MediaCard) :
+
 ```tsx
 {media.is_used_public && (
     <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
@@ -291,6 +301,7 @@ is_used_public: z.boolean().optional(),
 ```
 
 **Avantages** :
+
 - ⚠️ Avertir avant suppression média utilisé
 - 📊 Statistiques d'usage
 - 🔍 Filter "médias utilisés/non utilisés"

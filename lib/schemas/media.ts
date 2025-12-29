@@ -134,6 +134,9 @@ export const MediaItemExtendedSchema = z.object({
     updated_at: z.coerce.date(),
     tags: z.array(MediaTagSchema).default([]),
     folder: MediaFolderSchema.nullable(),
+    // Phase 4.3: Usage tracking
+    is_used_public: z.boolean().default(false),
+    usage_locations: z.array(z.string()).default([]),
 });
 
 // =============================================================================
@@ -182,6 +185,9 @@ export const MediaItemExtendedDTOSchema = z.object({
     updated_at: z.string(),
     tags: z.array(MediaTagDTOSchema).default([]),
     folder: MediaFolderDTOSchema.nullable(),
+    // Phase 4.3: Usage tracking
+    is_used_public: z.boolean().default(false),
+    usage_locations: z.array(z.string()).default([]),
 });
 
 // =============================================================================

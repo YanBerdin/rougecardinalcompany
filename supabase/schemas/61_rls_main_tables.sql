@@ -179,3 +179,120 @@ on public.partners
 for delete
 to authenticated
 using ( (select public.is_admin()) );
+
+-- ---- MEDIA TAGS ----
+alter table public.media_tags enable row level security;
+
+drop policy if exists "Anon can view media tags" on public.media_tags;
+create policy "Anon can view media tags"
+on public.media_tags
+for select
+to anon
+using ( true );
+
+drop policy if exists "Authenticated can view media tags" on public.media_tags;
+create policy "Authenticated can view media tags"
+on public.media_tags
+for select
+to authenticated
+using ( true );
+
+drop policy if exists "Admins can insert media tags" on public.media_tags;
+create policy "Admins can insert media tags"
+on public.media_tags
+for insert
+to authenticated
+with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can update media tags" on public.media_tags;
+create policy "Admins can update media tags"
+on public.media_tags
+for update
+to authenticated
+using ( (select public.is_admin()) )
+with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can delete media tags" on public.media_tags;
+create policy "Admins can delete media tags"
+on public.media_tags
+for delete
+to authenticated
+using ( (select public.is_admin()) );
+
+-- ---- MEDIA FOLDERS ----
+alter table public.media_folders enable row level security;
+
+drop policy if exists "Anon can view media folders" on public.media_folders;
+create policy "Anon can view media folders"
+on public.media_folders
+for select
+to anon
+using ( true );
+
+drop policy if exists "Authenticated can view media folders" on public.media_folders;
+create policy "Authenticated can view media folders"
+on public.media_folders
+for select
+to authenticated
+using ( true );
+
+drop policy if exists "Admins can insert media folders" on public.media_folders;
+create policy "Admins can insert media folders"
+on public.media_folders
+for insert
+to authenticated
+with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can update media folders" on public.media_folders;
+create policy "Admins can update media folders"
+on public.media_folders
+for update
+to authenticated
+using ( (select public.is_admin()) )
+with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can delete media folders" on public.media_folders;
+create policy "Admins can delete media folders"
+on public.media_folders
+for delete
+to authenticated
+using ( (select public.is_admin()) );
+
+-- ---- MEDIA ITEM TAGS (Junction Table) ----
+alter table public.media_item_tags enable row level security;
+
+drop policy if exists "Anon can view media item tags" on public.media_item_tags;
+create policy "Anon can view media item tags"
+on public.media_item_tags
+for select
+to anon
+using ( true );
+
+drop policy if exists "Authenticated can view media item tags" on public.media_item_tags;
+create policy "Authenticated can view media item tags"
+on public.media_item_tags
+for select
+to authenticated
+using ( true );
+
+drop policy if exists "Admins can insert media item tags" on public.media_item_tags;
+create policy "Admins can insert media item tags"
+on public.media_item_tags
+for insert
+to authenticated
+with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can update media item tags" on public.media_item_tags;
+create policy "Admins can update media item tags"
+on public.media_item_tags
+for update
+to authenticated
+using ( (select public.is_admin()) )
+with check ( (select public.is_admin()) );
+
+drop policy if exists "Admins can delete media item tags" on public.media_item_tags;
+create policy "Admins can delete media item tags"
+on public.media_item_tags
+for delete
+to authenticated
+using ( (select public.is_admin()) );

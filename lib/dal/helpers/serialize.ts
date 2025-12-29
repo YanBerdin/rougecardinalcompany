@@ -65,5 +65,8 @@ export function toMediaItemExtendedDTO(media: MediaItemExtended): MediaItemExten
         updated_at: typeof media.updated_at === 'string' ? media.updated_at : media.updated_at.toISOString(),
         tags: media.tags.map(toMediaTagDTO),
         folder: media.folder !== null ? toMediaFolderDTO(media.folder) : null,
+        // Phase 4.3: Usage tracking
+        is_used_public: media.is_used_public ?? false,
+        usage_locations: media.usage_locations ?? [],
     };
 }

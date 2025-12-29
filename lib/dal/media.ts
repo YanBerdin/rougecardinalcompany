@@ -764,6 +764,9 @@ export async function listMediaItems(): Promise<DALResult<Array<{
         created_at: string | Date;
         updated_at: string | Date;
     } | null;
+    // Phase 4.3: Usage tracking
+    is_used_public?: boolean;
+    usage_locations?: string[];
 }>>> {
     await requireAdmin();
 
@@ -814,6 +817,11 @@ export async function listMediaItems(): Promise<DALResult<Array<{
         console.error("[DAL] Failed to fetch folders:", foldersError);
     }
 
+    // Phase 4.3: Bulk check media usage in public pages
+    const { bulkCheckMediaUsagePublic } = await import("@/lib/dal/media-usage");
+    const mediaBigintIds = mediaData.map((m) => BigInt(m.id));
+    const usageMap = await bulkCheckMediaUsagePublic(mediaBigintIds);
+
     // Build tags map
     const tagsMap = new Map<string, Array<unknown>>();
     tagsData?.forEach((row: unknown) => {
@@ -835,29 +843,35 @@ export async function listMediaItems(): Promise<DALResult<Array<{
     });
 
     // Combine data
-    const result = mediaData.map((media) => ({
-        ...media,
-        tags: (tagsMap.get(String(media.id)) ?? []) as Array<{
-            id: bigint;
-            name: string;
-            slug: string;
-            description: string | null;
-            color: string | null;
-            created_at: string | Date;
-            updated_at: string | Date;
-        }>,
-        folder: media.folder_id
-            ? (foldersMap.get(String(media.folder_id)) as {
+    const result = mediaData.map((media) => {
+        const usageInfo = usageMap.get(String(media.id));
+        return {
+            ...media,
+            tags: (tagsMap.get(String(media.id)) ?? []) as Array<{
                 id: bigint;
                 name: string;
                 slug: string;
                 description: string | null;
-                parent_id: bigint | null;
+                color: string | null;
                 created_at: string | Date;
                 updated_at: string | Date;
-            } | null)
-            : null,
-    }));
+            }>,
+            folder: media.folder_id
+                ? (foldersMap.get(String(media.folder_id)) as {
+                    id: bigint;
+                    name: string;
+                    slug: string;
+                    description: string | null;
+                    parent_id: bigint | null;
+                    created_at: string | Date;
+                    updated_at: string | Date;
+                } | null)
+                : null,
+            // Phase 4.3: Add usage tracking info
+            is_used_public: usageInfo?.is_used_public ?? false,
+            usage_locations: usageInfo?.usage_locations ?? [],
+        };
+    });
 
     return { success: true, data: result };
 }

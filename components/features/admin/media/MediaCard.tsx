@@ -247,7 +247,7 @@ export function MediaCard({
         {/* Tags */}
         {media.tags.length > 0 && (
           <div 
-            className="mt-2 flex flex-wrap gap-1"
+            className="mt-2 flex flex-wrap gap-1 justify-end"
             role="list"
             aria-label="Tags du média"
           >
@@ -279,23 +279,23 @@ export function MediaCard({
         {/* Folder & Usage Info */}
         <div className="mt-2 flex flex-col gap-1">
           {/* Folder location */}
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground" title={media.folder?.name ?? "Racine"}>
-            <Folder className="h-3 w-3 flex-shrink-0" aria-hidden="true" />
+          <div className="flex items-center gap-1.5 text-sm text-muted-foreground" title={media.folder?.name ?? "Racine"}>
+            <Folder className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
             <span className="truncate">
               {media.folder?.name ?? "Racine"}
             </span>
           </div>
 
-          {/* Public usage indicator - Placeholder for Phase 4.3+ */}
-          {/* TODO Phase 4.3: Implémenter le tracking d'usage pour vérifier si le média est utilisé dans app/(marketing) */}
-          {/* Exemple d'utilisation future:
+          {/* Phase 4.3: Public usage indicator */}
           {media.is_used_public && (
-            <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
-              <Eye className="h-3 w-3 flex-shrink-0" aria-hidden="true" />
-              <span>Utilisé sur le site</span>
+            <div 
+              className="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 justify-end"
+              title={`Utilisé dans: ${media.usage_locations?.join(", ") ?? ""}`}
+            >
+              <Eye className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
+              <span className="truncate">Utilisé sur le site</span>
             </div>
           )}
-          */}
         </div>
       </div>
     </div>

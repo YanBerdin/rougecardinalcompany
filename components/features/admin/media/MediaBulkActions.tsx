@@ -54,6 +54,13 @@ export function MediaBulkActions({
     const count = selectedMedia.length;
     const selectedIds = selectedMedia.map(m => m.id);
 
+    // Phase 4.3: Check if any selected media is used on public pages
+    const usedMediaCount = selectedMedia.filter(m => m.is_used_public).length;
+    const usedMediaLocations = selectedMedia
+        .filter(m => m.is_used_public && m.usage_locations)
+        .flatMap(m => m.usage_locations ?? []);
+    const uniqueLocations = Array.from(new Set(usedMediaLocations));
+
     // Get unique source folders
     const sourceFolders = Array.from(
         new Set(
@@ -394,10 +401,36 @@ export function MediaBulkActions({
                         <AlertDialogTitle className="text-xl font-semibold">
                             Confirmer la suppression
                         </AlertDialogTitle>
-                        <AlertDialogDescription className="text-base">
-                            Êtes-vous sûr de vouloir supprimer définitivement <strong>{count} média{count > 1 ? "s" : ""}</strong> ?
-                            <br />
-                            <span className="text-destructive font-medium">Cette action est irréversible.</span>
+                        <AlertDialogDescription asChild>
+                            <div className="space-y-3">
+                                <p className="text-base">
+                                    Êtes-vous sûr de vouloir supprimer définitivement <strong>{count} média{count > 1 ? "s" : ""}</strong> ?
+                                </p>
+                                
+                                {/* Phase 4.3: Warning for used media */}
+                                {usedMediaCount > 0 && (
+                                    <div className="rounded-md bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 p-3">
+                                        <p className="text-sm text-amber-800 dark:text-amber-200 font-medium flex items-center gap-2">
+                                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                            </svg>
+                                            Attention
+                                        </p>
+                                        <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                                            <strong>{usedMediaCount}</strong> média{usedMediaCount > 1 ? "s sont utilisés" : " est utilisé"} sur le site public.
+                                        </p>
+                                        {uniqueLocations.length > 0 && (
+                                            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                                                Emplacements : {uniqueLocations.join(", ")}
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
+                                
+                                <p className="text-sm">
+                                    <span className="text-destructive font-medium">Cette action est irréversible.</span>
+                                </p>
+                            </div>
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
