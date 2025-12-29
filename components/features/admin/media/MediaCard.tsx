@@ -7,6 +7,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Folder, Eye } from "lucide-react";
@@ -166,7 +167,7 @@ export function MediaCard({
           <>
             {/* Loading skeleton */}
             {!imageLoaded && !imageError && isVisible && (
-              <div 
+              <div
                 className="absolute inset-0 animate-pulse bg-muted"
                 role="status"
                 aria-label="Chargement de l'image"
@@ -175,11 +176,13 @@ export function MediaCard({
 
             {/* Lazy loaded image */}
             {isVisible && !imageError && (
-              <img
+              <Image
                 src={imageUrl}
-                alt={media.alt_text ?? media.filename ?? undefined}
+                alt={media.alt_text ?? media.filename ?? ""}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className={cn(
-                  "h-full w-full object-cover transition-all duration-300",
+                  "object-cover transition-all duration-300",
                   imageLoaded
                     ? "opacity-100 group-hover:scale-105"
                     : "opacity-0"
@@ -200,7 +203,7 @@ export function MediaCard({
 
             {/* Error fallback */}
             {imageError && (
-              <div 
+              <div
                 className="flex h-full w-full items-center justify-center text-muted-foreground"
                 role="img"
                 aria-label="Erreur de chargement d'image"
@@ -223,7 +226,7 @@ export function MediaCard({
             )}
           </>
         ) : (
-          <div 
+          <div
             className="flex h-full items-center justify-center"
             role="img"
             aria-label={`Fichier ${media.mime?.split("/")[0] ?? "inconnu"}`}
@@ -246,7 +249,7 @@ export function MediaCard({
 
         {/* Tags */}
         {media.tags.length > 0 && (
-          <div 
+          <div
             className="mt-2 flex flex-wrap gap-1 justify-end"
             role="list"
             aria-label="Tags du média"
@@ -266,7 +269,7 @@ export function MediaCard({
               </span>
             ))}
             {media.tags.length > 3 && (
-              <span 
+              <span
                 className="text-xs text-muted-foreground"
                 aria-label={`${media.tags.length - 3} tags supplémentaires`}
               >
@@ -288,8 +291,8 @@ export function MediaCard({
 
           {/* Phase 4.3: Public usage indicator */}
           {media.is_used_public && (
-            <div 
-              className="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 justify-end"
+            <div
+              className="flex items-center gap-1.5 text-md font-bold text-emerald-600 dark:text-emerald-400 justify-end"
               title={`Utilisé dans: ${media.usage_locations?.join(", ") ?? ""}`}
             >
               <Eye className="h-5 w-5 flex-shrink-0" aria-hidden="true" />

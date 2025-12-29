@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { X, Save, Trash2 } from "lucide-react";
+import { X, Save, Trash2, Eye } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { updateMediaMetadataAction, deleteMediaImage } from "@/lib/actions/media-actions";
-import { MediaItemSchema, type MediaItemExtendedDTO, type MediaFolderDTO, type MediaTagDTO } from "@/lib/schemas/media";
+import { MediaItemExtendedDTOSchema, type MediaItemExtendedDTO, type MediaFolderDTO, type MediaTagDTO } from "@/lib/schemas/media";
 import { getMediaPublicUrl } from "@/lib/dal/media";
 import { cn } from "@/lib/utils";
 
@@ -33,15 +33,13 @@ interface MediaDetailsPanelProps {
     onUpdate: () => void;
 }
 
-const MetadataFormSchema = MediaItemSchema.pick({
+const MetadataFormSchema = MediaItemExtendedDTOSchema.pick({
     alt_text: true,
-    description: true,
     folder_id: true,
 }).partial();
 
 type MetadataFormValues = {
     alt_text?: string | null;
-    description?: string | null;
     folder_id?: number | null;
 };
 
@@ -54,8 +52,9 @@ export function MediaDetailsPanel({
 }: MediaDetailsPanelProps) {
     const [isUpdating, setIsUpdating] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
-    const [selectedTags, setSelectedTags] = useState<number[]>([]);
-    const [publicUrl, setPublicUrl] = useState<string>("");
+    const [selectedTagsToAdd, setSelectedTagsToAdd] = useState<number[]>([]);
+    const [selectedTagsToRemove, setSelectedTagsToRemove] = useState<number[]>([]);
+    const [publicUrl, setPublicUrl] = useState<string | null>(null);
 
     const form = useForm<MetadataFormValues>({
         resolver: zodResolver(MetadataFormSchema),
@@ -65,13 +64,21 @@ export function MediaDetailsPanel({
         },
     });
 
+    // Tags déjà attribués au média
+    const assignedTags = media?.tags ?? [];
+    const assignedTagIds = assignedTags.map(t => t.id);
+
+    // Tags disponibles (non encore attribués)
+    const availableTags = tags.filter(tag => !assignedTagIds.includes(tag.id));
+
     useEffect(() => {
         if (media) {
             form.reset({
                 alt_text: media.alt_text ?? "",
                 folder_id: media.folder_id ?? undefined,
             });
-            setSelectedTags(media.tags?.map((t) => t.id) ?? []);
+            setSelectedTagsToAdd([]);
+            setSelectedTagsToRemove([]);
 
             const resolveUrl = async () => {
                 const url = await getMediaPublicUrl(media.storage_path);
@@ -79,7 +86,7 @@ export function MediaDetailsPanel({
             };
             resolveUrl();
         } else {
-            setPublicUrl("");
+            setPublicUrl(null);
         }
     }, [media, form]);
 
@@ -90,10 +97,21 @@ export function MediaDetailsPanel({
     const handleUpdate = async (data: MetadataFormValues) => {
         setIsUpdating(true);
         try {
+            // Calculer les nouveaux tag_ids : (assignés - à retirer) + à ajouter
+            const currentTagIds = new Set(assignedTagIds);
+            
+            // Retirer les tags sélectionnés pour suppression
+            selectedTagsToRemove.forEach(id => currentTagIds.delete(id));
+            
+            // Ajouter les tags sélectionnés pour ajout
+            selectedTagsToAdd.forEach(id => currentTagIds.add(id));
+            
+            const finalTagIds = Array.from(currentTagIds);
+
             const result = await updateMediaMetadataAction(media.id, {
                 alt_text: data.alt_text,
                 folder_id: data.folder_id,
-                tag_ids: selectedTags,
+                tag_ids: finalTagIds,
             });
 
             if (!result.success) {
@@ -101,6 +119,8 @@ export function MediaDetailsPanel({
             }
 
             toast.success("Métadonnées mises à jour");
+            setSelectedTagsToAdd([]);
+            setSelectedTagsToRemove([]);
             onUpdate();
         } catch (error) {
             toast.error(error instanceof Error ? error.message : "Erreur mise à jour");
@@ -133,7 +153,15 @@ export function MediaDetailsPanel({
     };
 
     const toggleTag = (tagId: number) => {
-        setSelectedTags((prev) =>
+        setSelectedTagsToAdd((prev) =>
+            prev.includes(tagId)
+                ? prev.filter((id) => id !== tagId)
+                : [...prev, tagId]
+        );
+    };
+
+    const toggleTagToRemove = (tagId: number) => {
+        setSelectedTagsToRemove((prev) =>
             prev.includes(tagId)
                 ? prev.filter((id) => id !== tagId)
                 : [...prev, tagId]
@@ -165,12 +193,18 @@ export function MediaDetailsPanel({
                     <div className="p-4 space-y-6">
                         {/* Preview */}
                         <div className="aspect-video rounded-md overflow-hidden bg-muted relative">
-                            <Image
-                                src={publicUrl}
-                                alt={media.alt_text ?? media.filename ?? "Media preview"}
-                                fill
-                                className="object-contain"
-                            />
+                            {publicUrl ? (
+                                <Image
+                                    src={publicUrl}
+                                    alt={media.alt_text ?? media.filename ?? "Media preview"}
+                                    fill
+                                    className="object-contain"
+                                />
+                            ) : (
+                                <div className="flex items-center justify-center h-full text-muted-foreground">
+                                    <p className="text-sm">Chargement de l'aperçu...</p>
+                                </div>
+                            )}
                         </div>
 
                         {/* File Info */}
@@ -191,6 +225,21 @@ export function MediaDetailsPanel({
                                     <p className="text-sm text-muted-foreground">{fileSize}</p>
                                 </div>
                             </div>
+                            
+                            {/* Phase 4.3: Public usage indicator */}
+                            {media.is_used_public && (
+                                <div className="rounded-md bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 p-3">
+                                    <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300 font-medium">
+                                        <Eye className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                                        <span className="text-sm">Utilisé sur le site public</span>
+                                    </div>
+                                    {media.usage_locations && media.usage_locations.length > 0 && (
+                                        <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1 ml-6">
+                                            Emplacements : {media.usage_locations.join(", ")}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                         <Separator />
@@ -207,31 +256,20 @@ export function MediaDetailsPanel({
                                 />
                             </div>
 
-                            {/* Description */}
-                            <div className="space-y-2">
-                                <Label htmlFor="description">Description</Label>
-                                <Textarea
-                                    id="description"
-                                    placeholder="Description détaillée"
-                                    rows={3}
-                                    {...form.register("description")}
-                                />
-                            </div>
-
                             {/* Folder */}
                             <div className="space-y-2">
                                 <Label htmlFor="folder">Dossier</Label>
                                 <Select
-                                    value={form.watch("folder_id")?.toString() ?? ""}
+                                    value={form.watch("folder_id")?.toString() ?? "none"}
                                     onValueChange={(value) =>
-                                        form.setValue("folder_id", value ? Number(value) : null)
+                                        form.setValue("folder_id", value === "none" ? null : Number(value))
                                     }
                                 >
                                     <SelectTrigger id="folder">
                                         <SelectValue placeholder="Aucun dossier" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="">Aucun dossier</SelectItem>
+                                        <SelectItem value="none">Aucun dossier</SelectItem>
                                         {folders.map((folder) => (
                                             <SelectItem key={folder.id} value={folder.id.toString()}>
                                                 {folder.name}
@@ -242,25 +280,58 @@ export function MediaDetailsPanel({
                             </div>
 
                             {/* Tags */}
-                            <div className="space-y-2">
+                            <div className="space-y-3">
                                 <Label>Tags</Label>
-                                <div className="flex flex-wrap gap-2">
-                                    {tags.map((tag) => (
-                                        <Badge
-                                            key={tag.id}
-                                            variant={selectedTags.includes(tag.id) ? "default" : "outline"}
-                                            className={cn(
-                                                "cursor-pointer transition-colors",
-                                                selectedTags.includes(tag.id) && tag.color
-                                                    ? `bg-[${tag.color}] hover:bg-[${tag.color}]/80`
-                                                    : ""
-                                            )}
-                                            onClick={() => toggleTag(tag.id)}
-                                        >
-                                            {tag.name}
-                                        </Badge>
-                                    ))}
-                                </div>
+                                
+                                {/* Tags déjà attribués */}
+                                {assignedTags.length > 0 && (
+                                    <div className="space-y-2">
+                                        <p className="text-xs text-muted-foreground">Tags attribués (cliquez pour retirer) :</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {assignedTags.map((tag) => (
+                                                <Badge
+                                                    key={tag.id}
+                                                    variant={selectedTagsToRemove.includes(tag.id) ? "destructive" : "default"}
+                                                    className={cn(
+                                                        "cursor-pointer transition-all hover:scale-105",
+                                                        selectedTagsToRemove.includes(tag.id) && "opacity-50"
+                                                    )}
+                                                    onClick={() => toggleTagToRemove(tag.id)}
+                                                >
+                                                    {tag.name}
+                                                    {selectedTagsToRemove.includes(tag.id) && " ✕"}
+                                                </Badge>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Tags disponibles à ajouter */}
+                                {availableTags.length > 0 && (
+                                    <div className="space-y-2">
+                                        <p className="text-xs text-muted-foreground">Tags disponibles (cliquez pour ajouter) :</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {availableTags.map((tag) => (
+                                                <Badge
+                                                    key={tag.id}
+                                                    variant={selectedTagsToAdd.includes(tag.id) ? "default" : "outline"}
+                                                    className={cn(
+                                                        "cursor-pointer transition-all hover:scale-105",
+                                                        selectedTagsToAdd.includes(tag.id) && "ring-2 ring-primary"
+                                                    )}
+                                                    onClick={() => toggleTag(tag.id)}
+                                                >
+                                                    {selectedTagsToAdd.includes(tag.id) && "✓ "}
+                                                    {tag.name}
+                                                </Badge>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {assignedTags.length === 0 && availableTags.length === 0 && (
+                                    <p className="text-sm text-muted-foreground italic">Aucun tag disponible</p>
+                                )}
                             </div>
 
                             <Button

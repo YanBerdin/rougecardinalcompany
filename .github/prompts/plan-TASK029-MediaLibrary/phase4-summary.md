@@ -1,7 +1,7 @@
-# Phase 4.1 & 4.2 - Summary Report
+# Phase 4 - Complete Summary Report
 
-**Date:** 2025-12-28  
-**Phase:** Polish & Accessibility (Animations + ARIA)  
+**Date:** 2025-12-29  
+**Phase:** Polish & Accessibility + Usage Tracking  
 **Status:** ✅ **COMPLETE**
 
 ---
@@ -24,6 +24,15 @@
 - [x] Lecteur d'écran support
 - [x] Tags accessibles (role="list/listitem")
 - [x] États de chargement/erreur avec ARIA
+
+### Phase 4.3 - Usage Tracking ✅
+
+- [x] DAL module `media-usage.ts` avec bulk optimization
+- [x] Schémas Zod étendus (`is_used_public`, `usage_locations`)
+- [x] Indicateur Eye badge dans MediaCard (emerald)
+- [x] Warning dialog dans MediaBulkActions
+- [x] Affichage usage dans MediaDetailsPanel
+- [x] Correction bugs (serialization, schemas, RLS)
 
 ---
 
@@ -98,7 +107,7 @@ const handleKeyDown = (e: React.KeyboardEvent) => {
 ### Validation Manuelle Requise
 
 - [ ] Tests avec lecteur d'écran (NVDA/JAWS)
-- [ ] Contraste couleurs (focus ring vs background)
+- [X] Contraste couleurs (focus ring vs background)
 - [ ] Navigation clavier complète (toutes les cards)
 - [ ] Annonces lecteur conformes
 
@@ -186,7 +195,7 @@ pnpm build
 - [x] Build production
 - [ ] Manual keyboard navigation test
 - [ ] Screen reader validation (NVDA/JAWS)
-- [ ] Color contrast check
+- [X] Color contrast check
 - [ ] Reduced motion browser test
 
 ---
