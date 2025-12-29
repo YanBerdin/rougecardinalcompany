@@ -21,7 +21,9 @@ import {
 import { MediaDetailsPanel } from "./MediaDetailsPanel";
 import { MediaBulkActions } from "./MediaBulkActions";
 import { MediaCard } from "./MediaCard";
+import { MediaUploadDialog } from "./MediaUploadDialog"; // ✅ AJOUT
 import type { MediaItemExtendedDTO, MediaTagDTO, MediaFolderDTO } from "@/lib/schemas/media";
+import type { MediaSelectResult } from "./types"; // ✅ AJOUT
 
 interface MediaLibraryViewProps {
     initialMedia: MediaItemExtendedDTO[];
@@ -42,6 +44,7 @@ export function MediaLibraryView({
     const [selectedMedia, setSelectedMedia] = useState<MediaItemExtendedDTO | null>(null);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [selectionMode, setSelectionMode] = useState(false);
+    const [isUploadOpen, setIsUploadOpen] = useState(false); // ✅ AJOUT
 
     // Sync state when props change (after router.refresh())
     useEffect(() => {
@@ -73,8 +76,18 @@ export function MediaLibraryView({
     }, [media, searchQuery, selectedFolder, selectedTag]);
 
     const handleUpload = useCallback(() => {
-        toast.info("Upload non encore implémenté (Phase 2 suite)");
+        setIsUploadOpen(true);
     }, []);
+
+    const handleUploadSuccess = useCallback((result: MediaSelectResult) => {
+        if (result.error) {
+            toast.error("Erreur d'upload", { description: result.error });
+            return;
+        }
+
+        toast.success("Image uploadée avec succès");
+        router.refresh(); // Recharger la liste des médias
+    }, [router]);
 
     const toggleSelection = useCallback((mediaId: number) => {
         setSelectedIds((prev) =>
@@ -133,7 +146,7 @@ export function MediaLibraryView({
                     >
                         {selectionMode ? "Mode sélection" : "Sélectionner"}
                     </Button>
-                    <Button 
+                    <Button
                         size="lg"
                         onClick={handleUpload}
                         className="h-11 px-5 text-base font-medium"
@@ -245,6 +258,14 @@ export function MediaLibraryView({
                     }}
                 />
             )}
+
+            {/* ✅ AJOUTER MediaUploadDialog */}
+            <MediaUploadDialog
+                open={isUploadOpen}
+                onClose={() => setIsUploadOpen(false)}
+                onSelect={handleUploadSuccess}
+                uploadFolder="uploads" // Dossier générique pour uploads directs depuis la bibliothèque
+            />
         </div>
     );
 }
