@@ -18,7 +18,6 @@
 ## En Attente
 
 - `TASK005` Optimisation SEO et meta-tags dynamiques
-- `TASK006` Médiathèque professionnelle (photos HD, vidéos)
 - `TASK007` Tests automatisés et monitoring
 - `TASK008` Configuration des redirections vers billetterie externe
 - `TASK009` Gestion des partenaires et mécènes
@@ -63,3 +62,4 @@
 - `TASK044` ImageFieldGroup v2 - Completed on 2025-12-13 (Composant réutilisable MediaLibraryPicker + validateImageUrl + alt text, validation SSRF intégrée, DRY pour tous formulaires admin)
 - `TASK045` Validation publique + Upload générique - Completed on 2025-12-13 (uploadMediaImage générique, deleteMediaImage, ActionResult<T> types, progressive validation spectacles, Clear URL button)
 - `TASK048` T3 Env Implementation - Completed on 2025-12-20 (Type-safe environment variables with @t3-oss/env-nextjs, validation runtime Zod, removal hasEnvVars pattern, 12 files migrated, 2 commits created, TypeScript/Build PASS)
+- `TASK029` Media Library Complete Implementation - Completed on 2025-12-29 (7 phases: Foundation (duplicate SHA-256), Tags & Folders (hierarchical), Bulk Operations (move/tag/delete), Rate Limiting (10/min), Thumbnails (Sharp 300x300), Animations (reduced-motion), Accessibility (WCAG 2.1 AA), Usage Tracking (7 tables, bulk optimization); 3 tables created, 5 migrations, 4 DAL modules (3500+ lines), 8 UI components, 15 RLS policies, 7 bugs resolved, branch feat-MediaLibrary pushed)

@@ -56,12 +56,14 @@ export type ActionResult<T> =
  * @property publicUrl - Public URL for the uploaded file
  * @property storagePath - Internal storage path (for reference)
  * @property isDuplicate - True if file already existed (hash match)
+ * @property warning - Optional warning message (e.g., thumbnail generation failed)
  */
 export interface MediaUploadData {
     mediaId: number;
     publicUrl: string;
     storagePath: string;
     isDuplicate?: boolean;
+    warning?: string;
 }
 
 /**

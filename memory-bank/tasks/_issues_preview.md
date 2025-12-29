@@ -55,8 +55,10 @@ Ce fichier liste les titres et descriptions extraites des fichiers de tâches `T
 8. TASK028 — Content versioning UI
    - Résumé: Interface pour versionner et restaurer anciennes versions de contenu.
 
-9. TASK029 — Media library
-   - Résumé: Gestion des médias (upload, tags, transformations, storage).
+9. TASK029 — Media library ✅
+    - Résumé: Gestion des médias (upload, tags, transformations, storage).
+    - État: Completed (2025-12-29)
+    - Issue: [#9](https://github.com/YanBerdin/rougecardinalcompany/issues/9) (OPEN) — fermer ou lier la PR.
 
 10. TASK030 — Display toggles
     - Résumé: Basculer affichage de sections publiques (shows, news, partners).

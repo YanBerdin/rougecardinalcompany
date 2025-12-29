@@ -47,9 +47,9 @@ export default function Header() {
       )}
     >
       <nav className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-nowrap justify-between items-center h-16">
-          {/* Logo - STABILISÉ */}
-          <Link href="/" className="logo-container">
+        <div className="flex flex-nowrap justify-between items-center h-16 gap-4">
+          {/* Logo */}
+          <Link href="/" className="logo-container flex-shrink-0">
             <Image
               src="/logo-florian.png"
               alt="Rouge-Cardinal Logo"
@@ -58,17 +58,17 @@ export default function Header() {
               className="logo-image"
               priority
             />
-            <span className="logo-text whitespace-nowrap">Rouge-Cardinal</span>
+            <span className="logo-text whitespace-nowrap">Rouge Cardinal</span>
           </Link>
 
           {/* Navigation Desktop */}
-          <div className="hidden md:flex items-center space-x-2">
+          <div className="hidden md:flex items-center space-x-1 lg:space-x-2 justify-center">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  "nav-link-glass sm:text-sm md:text-md font-medium whitespace-nowrap transition-all duration-300 relative z-10",
+                  "nav-link-glass text-xs sm:text-sm md:text-md px-2 lg:px-3 py-1 font-medium whitespace-nowrap transition-all duration-300 relative z-10",
                   pathname === item.href
                     ? "text-primary font-bold active"
                     : isScrolled
@@ -141,9 +141,9 @@ export default function Header() {
               ))}
 
               {/*<div className="px-4 pt-4">{authContent}</div>*/}
-              <div className="px-2 space-y-2 nav-link-glass">
-              <ThemeSwitcher />
-</div>
+              <div className="px-2 lg:px-3 space-y-2 nav-link-glass">
+                <ThemeSwitcher />
+              </div>
             </div>
           </div>
         )}

@@ -23,7 +23,7 @@ pnpm audit
 #### CodeQL js/request-forgery — SSRF in validateImageUrl (5 décembre 2025)
 
 | Champ | Valeur |
-|-------|--------|
+| ------- | -------- |
 | **Sévérité** | 🔴 CRITICAL |
 | **Fichier** | `lib/utils/validate-image-url.ts` |
 | **Règle** | CodeQL `js/request-forgery` |
@@ -59,7 +59,7 @@ const response = await fetch(safeUrl, { redirect: "error" });
 #### CVE-2025-66478 — Next.js RCE via React Flight Protocol (5 décembre 2025)
 
 | Champ | Valeur |
-|-------|--------|
+| ------- | -------- |
 | **Sévérité** | 🔴 CRITICAL |
 | **Package** | `next` |
 | **Versions vulnérables** | `>=16.0.0-canary.0 <16.0.7` |
@@ -182,7 +182,7 @@ pnpm add next@16.0.7
 ### Chronologie
 
 | Date | Événement |
-|------|-----------|
+| ------ | ----------- |
 | 23 nov. 2025 | Migration `20251123150000` appliquée (drop pg_net - idempotent) |
 | 26 nov. 2025 | Migration `20251126001251` appliquée - **ÉCHEC SILENCIEUX** |
 | 4 déc. 2025 | Découverte : fonction `reorder_hero_slides` manquante → erreur 42883 |
@@ -221,7 +221,7 @@ Cette ligne a échoué silencieusement sur Supabase Cloud car :
 ### Fichiers concernés (état final)
 
 | Fichier | État |
-|---------|------|
+| --------- | ------ |
 | `20251123150000_remote_schema.sql` | ✅ `drop extension if exists "pg_net"` (idempotent) |
 | `20251126001251_add_alt_text...sql` | ✅ Ligne pg_net supprimée + commentaire explicatif |
 | `20251204133540_create_reorder...sql` | ✅ Hotfix - fonction créée |
