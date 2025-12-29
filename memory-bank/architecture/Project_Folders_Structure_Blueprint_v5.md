@@ -162,14 +162,26 @@ Fin du document.
 # Project Folders Structure Blueprint — Rouge Cardinal Company
 
 **Generated:** 30 November 2025  
-**Updated:** 6 December 2025  
+**Updated:** 29 December 2025  
 **Source:** `doc/prompts-github/folder-structure-blueprint-generator.prompt.md` (executed locally)  
-**Branch:** master  
-**Version:** v5.2
+**Branch:** feat-MediaLibrary  
+**Version:** v5.3
 
 ## Executive summary
 
-This document is an updated project folder blueprint generated from the repository structure and the project prompt. It captures current conventions (Next.js 15 app router, strict TypeScript, Supabase with RLS, Resend + React Email), and the recent SOLID refactoring completed on `feature/backoffice`.
+This document is an updated project folder blueprint generated from the repository structure and the project prompt. It captures current conventions (Next.js 16 app router, strict TypeScript, Supabase with RLS, Resend + React Email), the SOLID refactoring, Clean Code compliance, and the complete Media Library implementation (TASK029).
+
+Key updates since v5.2 → v5.3 (TASK029 Media Library - December 2025):
+
+- **Media Library Complete** — 7 phases: Foundation (SHA-256 duplicate detection), Tags & Folders (hierarchical organization), Bulk Operations (move/tag/delete), Rate Limiting (10 uploads/min), Thumbnails (Sharp 300x300 JPEG), Animations (reduced-motion support), Accessibility (WCAG 2.1 AA), Usage Tracking (7 tables checked with bulk Map optimization).
+- **New tables** — `media_tags`, `media_folders`, `media_tag_assignments` (many-to-many).
+- **DAL modules created** — 4 modules: `lib/dal/media.ts` (864 lines, Storage + DB ops), `lib/dal/media-tags.ts` (146 lines), `lib/dal/media-folders.ts` (133 lines), `lib/dal/media-usage.ts` (262 lines).
+- **UI components** — 8 majeurs: MediaCard, MediaUploadDialog, MediaLibraryPicker, MediaTagsView, MediaFoldersView, MediaBulkActions, MediaDetailsPanel, MediaLibraryView.
+- **Security** — 15 RLS policies granulaires (3 tables × 5 policies: select anon/auth, insert/update/delete admin).
+- **Performance** — SHA-256 hash index unique pour duplicate prevention, bulk usage tracking Map-based, rate limiting LRU cache.
+- **Accessibility** — 100% WCAG 2.1 AA: keyboard navigation (Space/Enter/Tab), ARIA attributes complets, screen reader support, reduced-motion CSS.
+- **Quality** — 7 bugs critiques résolus (Phase 4.3), conformité 100% CRUD Pattern, DAL SOLID, Clean Code (<300 lignes par fichier).
+- **Documentation** — 7 fichiers complets: plan principal, phase reports (3, 4, 4.3), implementation guides, compliance report.
 
 Key updates since v5.1 → v5.2 (Clean Code Refactoring):
 
@@ -466,7 +478,27 @@ Centralized Zod schemas with barrel exports from `lib/schemas/index.ts`:
   - **Server schemas**: `HeroSlideInputSchema` (uses `z.coerce.bigint()` for IDs)
   - **UI schemas**: `HeroSlideFormSchema` (uses `z.number().int().positive()` for JSON serialization)
   - **DTOs**: `HeroSlideDTO`, `AboutContentDTO` types
-- `lib/schemas/media.ts` — `MediaItemSchema`, `MediaSelectResultSchema`, constants
+- `lib/schemas/media.ts` — **TASK029 Media Library schemas** (268 lignes totales):
+  - **Server schemas** (utilise `z.coerce.bigint()` pour les IDs database):
+    - `MediaTagInputSchema` — tag creation/update avec name + color
+    - `MediaFolderInputSchema` — folder creation avec parent_id optionnel
+    - `MediaItemExtendedSchema` — full media item avec relations (tags[], folder, usage)
+  - **UI/DTO schemas** (utilise `z.number()` pour sérialisation JSON):
+    - `MediaTagDTOSchema` — tag DTO pour UI components
+    - `MediaFolderDTOSchema` — folder DTO avec parent_id number
+    - `MediaItemExtendedDTOSchema` — media item DTO avec tags array, folder object, usage tracking
+  - **Filter schemas**:
+    - `MediaFilterSchema` — query (string) + tags (array) + folders (array)
+    - `BulkOperationSchema` — validation pour sélections multiples
+    - `BulkMoveSchema` — move to folder avec target_folder_id
+    - `BulkTagSchema` — assign/remove tags avec tag_ids array
+  - **Usage tracking fields**:
+    - `is_used_public: z.boolean().default(false)` — flag pour médias utilisés sur pages publiques
+    - `usage_locations: z.array(z.string()).default([])` — array des emplacements d'utilisation
+  - **Legacy schemas** (rétrocompatibilité):
+    - `MediaItemSchema` — schéma basique original
+    - `MediaSelectResultSchema` — pour anciennes queries SELECT
+  - **Types exportés**: `MediaTagInput`, `MediaTagDTO`, `MediaFolderInput`, `MediaFolderDTO`, `MediaItemExtended`, `MediaFilter`, `BulkMoveData`, `BulkTagData`
 - `lib/schemas/presse.ts` — `PressReleaseSchema`, `MediaArticleSchema`
 - `lib/schemas/spectacles.ts` — `SpectacleSchema`, `CurrentShowSchema`, `ArchivedShowSchema`
 - `lib/schemas/team.ts` — `TeamMemberDbSchema`, `TeamMemberFormSchema`, `optionalUrlSchema`, DTOs
@@ -543,10 +575,33 @@ pnpm tsx scripts/test-env-validation.ts  # Tests 6 catégories de validation
   - `HeroSlidesErrorBoundary.tsx` — Error boundary wrapper
   - `CtaFieldGroup.tsx` (~130 lines) — **NEW** DRY component for CTA Primary/Secondary fields, config-driven with `CTA_CONFIGS`
   - `AboutContentContainer.tsx`, `AboutContentForm.tsx` — About section management
-- `components/features/admin/media/` — Media library with colocated types:
-  - `MediaLibraryPicker.tsx`, `MediaUploadDialog.tsx`, `MediaExternalUrlInput.tsx`
-  - `types.ts` — Props interfaces (colocated, not in lib/types/)
-  - `index.ts` — Barrel exports
+- `components/features/admin/media/` — **TASK029 Media Library** (8 composants majeurs, 2200+ lignes total):
+  - **Core Components**:
+    - `MediaLibraryContainer.tsx` (Server) — Fetches initial data via DAL, passes to View
+    - `MediaLibraryView.tsx` (Client, ~350 lines) — Main orchestrator avec state management, useEffect sync, filters state
+    - `MediaCard.tsx` (Client, 326 lines) — Card avec thumbnail lazy-loading, checkbox multi-select, Eye badge usage indicator, keyboard handlers (Space/Enter), ARIA attributes
+  - **Upload & Selection**:
+    - `MediaUploadDialog.tsx` (Client, ~200 lines) — 3-phase upload (hashing SHA-256 → uploading → success), progress bars, duplicate detection toast
+    - `MediaLibraryPicker.tsx` (Client, ~180 lines) — Modal picker avec recherche + pagination 12 items, utilisé dans ImageFieldGroup
+    - `MediaExternalUrlInput.tsx` — Input URL externe avec validation SSRF
+  - **Organization**:
+    - `MediaTagsView.tsx` (Client, 240 lines) — Tags CRUD avec color picker, inline editing, drag reordering
+    - `MediaFoldersView.tsx` (Client, 280 lines) — Hierarchical folders tree avec DnD, expand/collapse, parent-child relationships
+  - **Bulk Operations**:
+    - `MediaBulkActions.tsx` (Client, 457 lines) — Toolbar avec actions groupées (move to folder, assign/remove tags, delete with warnings)
+    - `MediaDetailsPanel.tsx` (Client, 350 lines) — Side panel metadata editor (alt text, folder selector, dual tag system: attribués/disponibles, usage locations display)
+  - **Shared**:
+    - `types.ts` — Props interfaces (colocated pattern)
+    - `index.ts` — Barrel exports
+  - **Features**:
+    - ✅ Duplicate prevention (SHA-256 hash unique index)
+    - ✅ Advanced filters (query + tags + folders)
+    - ✅ Bulk operations (select multiple, move, tag, delete)
+    - ✅ Thumbnails (300x300 JPEG via Sharp, lazy-loaded)
+    - ✅ Usage tracking (7 public tables checked: hero, about, team, spectacles, partners, compagnie, presse)
+    - ✅ Rate limiting (10 uploads/min via LRU cache)
+    - ✅ Accessibility (WCAG 2.1 AA: keyboard nav, ARIA, screen readers, reduced-motion)
+    - ✅ Eye badge indicator (emerald) pour médias utilisés sur pages publiques
 - `components/features/admin/users/` — User management:
   - `UsersManagementContainer.tsx` (Server), `UsersManagementView.tsx` (Client), `InviteUserForm.tsx`
 

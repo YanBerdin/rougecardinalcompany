@@ -31,6 +31,14 @@
 │   │   │   │   └── 📁 hero
 │   │   │   │       ├── 📄 home-hero-actions.ts
 │   │   │   │       └── 📄 page.tsx
+│   │   │   ├── 📁 media
+│   │   │   │   ├── 📁 folders
+│   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   ├── 📁 library
+│   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   ├── 📁 tags
+│   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   └── 📄 page.tsx
 │   │   │   ├── 📁 spectacles
 │   │   │   │   ├── 📁 [id]
 │   │   │   │   │   ├── 📁 edit
@@ -87,7 +95,9 @@
 │   ├── 📁 api
 │   │   ├── 📁 admin
 │   │   │   └── 📁 media
-│   │   │       └── 📁 search
+│   │   │       ├── 📁 search
+│   │   │       │   └── 📄 route.ts
+│   │   │       └── 📁 thumbnail
 │   │   │           └── 📄 route.ts
 │   │   ├── 📁 contact
 │   │   │   └── 📄 route.ts
@@ -156,8 +166,18 @@
 │   │   │   │   └── 📄 HeroSlidesView.tsx
 │   │   │   ├── 📁 media
 │   │   │   │   ├── 📄 ImageFieldGroup.tsx
+│   │   │   │   ├── 📄 MediaBulkActions.tsx
+│   │   │   │   ├── 📄 MediaCard.tsx
+│   │   │   │   ├── 📄 MediaDetailsPanel.tsx
 │   │   │   │   ├── 📄 MediaExternalUrlInput.tsx
+│   │   │   │   ├── 📄 MediaFoldersContainer.tsx
+│   │   │   │   ├── 📄 MediaFoldersView.tsx
+│   │   │   │   ├── 📄 MediaLibraryContainer.tsx
 │   │   │   │   ├── 📄 MediaLibraryPicker.tsx
+│   │   │   │   ├── 📄 MediaLibraryView.tsx
+│   │   │   │   ├── 📄 MediaLibraryViewClient.tsx
+│   │   │   │   ├── 📄 MediaTagsContainer.tsx
+│   │   │   │   ├── 📄 MediaTagsView.tsx
 │   │   │   │   ├── 📄 MediaUploadDialog.tsx
 │   │   │   │   ├── 📄 index.ts
 │   │   │   │   └── 📄 types.ts
@@ -297,6 +317,8 @@
 │   │   ├── 📄 form.tsx
 │   │   ├── 📄 input.tsx
 │   │   ├── 📄 label.tsx
+│   │   ├── 📄 progress.tsx
+│   │   ├── 📄 scroll-area.tsx
 │   │   ├── 📄 select.tsx
 │   │   ├── 📄 separator.tsx
 │   │   ├── 📄 sheet.tsx
@@ -333,6 +355,9 @@
 │   │   ├── 📄 contact-server.ts
 │   │   ├── 📄 index.ts
 │   │   ├── 📄 media-actions.ts
+│   │   ├── 📄 media-bulk-actions.ts
+│   │   ├── 📄 media-folders-actions.ts
+│   │   ├── 📄 media-tags-actions.ts
 │   │   ├── 📄 newsletter-server.ts
 │   │   └── 📄 types.ts
 │   ├── 📁 api
@@ -346,6 +371,7 @@
 │   │   │   ├── 📄 error.ts
 │   │   │   ├── 📄 format.ts
 │   │   │   ├── 📄 index.ts
+│   │   │   ├── 📄 serialize.ts
 │   │   │   └── 📄 slug.ts
 │   │   ├── 📄 admin-home-about.ts
 │   │   ├── 📄 admin-home-hero.ts
@@ -361,6 +387,7 @@
 │   │   ├── 📄 home-newsletter.ts
 │   │   ├── 📄 home-partners.ts
 │   │   ├── 📄 home-shows.ts
+│   │   ├── 📄 media-usage.ts
 │   │   ├── 📄 media.ts
 │   │   ├── 📄 newsletter-subscriber.ts
 │   │   ├── 📄 presse.ts
@@ -401,6 +428,8 @@
 │   │   ├── 📄 spectacle-table-helpers.ts
 │   │   └── 📄 user-table-helpers.ts
 │   ├── 📁 utils
+│   │   ├── 📄 file-hash.ts
+│   │   ├── 📄 rate-limit.ts
 │   │   └── 📄 validate-image-url.ts
 │   ├── 📄 database.types.ts
 │   ├── 📄 env.ts
@@ -595,6 +624,12 @@
 │   │   ├── 📄 20251204133540_create_reorder_hero_slides_function.sql
 │   │   ├── 📄 20251205220000_refactor_hero_slides_cta_dual_buttons.sql
 │   │   ├── 📄 20251209120000_normalize_spectacles_status_to_english.sql
+│   │   ├── 📄 20251222120000_add_media_file_hash.sql
+│   │   ├── 📄 20251227203314_add_media_tags_folders.sql
+│   │   ├── 📄 20251227223934_fix_storage_path_urls_in_views.sql
+│   │   ├── 📄 20251227225607_restore_medias_folder_id.sql
+│   │   ├── 📄 20251228145621_add_thumbnail_support_phase3.sql
+│   │   ├── 📄 20251228220350_fix_media_tags_folders_rls_granular.sql
 │   │   ├── 📝 ROUND_7B_ANALYSIS.md
 │   │   ├── 📝 migrations.md
 │   │   └── 📄 sync_existing_profiles.sql
@@ -607,6 +642,7 @@
 │   │   ├── 📄 02b_functions_core.sql
 │   │   ├── 📄 02c_storage_buckets.sql
 │   │   ├── 📄 03_table_medias.sql
+│   │   ├── 📄 04_table_media_tags_folders.sql
 │   │   ├── 📄 04_table_membres_equipe.sql
 │   │   ├── 📄 05_profiles_auto_sync.sql
 │   │   ├── 📄 05_table_lieux.sql
@@ -653,6 +689,7 @@
 │   │   ├── 📄 test_rls_anon_access.sql
 │   │   ├── 📄 verify_policies_applied.sql
 │   │   └── 📄 verify_rls_policies.sql
+│   ├── 📁 snippets
 │   ├── 📁 tests
 │   │   ├── 📄 20251025_test_reorder_and_views.sql
 │   │   ├── 📝 README.md
