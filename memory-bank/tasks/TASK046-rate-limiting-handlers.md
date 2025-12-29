@@ -22,7 +22,7 @@ Ces endpoints publics sont exposés via API Routes et Server Actions, rendant le
 ### Options envisagées
 
 | Option | Pros | Cons |
-|--------|------|------|
+| -------- | ------ | ------ |
 | **A. Middleware Next.js** | Centralisé, appliqué avant le handler | Complexité config, matcher patterns |
 | **B. Inside handler** | Simple, proche du code | Duplication potentielle |
 | **C. Library (upstash/ratelimit)** | Production-ready, Redis-backed | Dépendance externe, coût |
@@ -50,7 +50,7 @@ Ces endpoints publics sont exposés via API Routes et Server Actions, rendant le
 ### Limites suggérées
 
 | Endpoint | Limite | Fenêtre |
-|----------|--------|---------|
+| ---------- | -------- | --------- |
 | Contact | 5 requêtes | 15 minutes |
 | Newsletter | 3 requêtes | 1 heure |
 
@@ -61,7 +61,7 @@ Ces endpoints publics sont exposés via API Routes et Server Actions, rendant le
 ### Subtasks
 
 | ID | Description | Status | Updated | Notes |
-|----|-------------|--------|---------|-------|
+| ---- | ------------- | -------- | --------- | ------- |
 | 1.1 | Créer `lib/utils/rate-limiter.ts` | Not Started | - | MVP in-memory |
 | 1.2 | Intégrer dans `handleContactSubmission()` | Not Started | - | |
 | 1.3 | Intégrer dans `handleNewsletterSubscription()` | Not Started | - | |
