@@ -6,9 +6,9 @@ applyTo: "**"
 
 ## Project Overview
 
-A **theater company website** built with **Next.js 15 + TypeScript + Supabase + Tailwind/shadcn/ui**.
+A **theater company website** built with **Next.js 16 + TypeScript + Supabase + Tailwind/shadcn/ui**.
 
-**Key Architecture**: Multi-layout routes with `(admin)` and `(marketing)` zones, server-first with optimized Supabase auth, comprehensive RLS security, and feature-based organization.
+**Key Architecture**: Multi-layout routes with `(admin)` and `(marketing)` zones, server-first with optimized Supabase auth, comprehensive RLS security, feature-based organization, T3 Env for type-safe environment variables, and complete Media Library with Storage/Folders sync.
 
 ## Critical Architectural Knowledge
 
@@ -230,7 +230,7 @@ app/(admin)/admin/
 
 ### DAL SOLID Pattern (Nov 2025)
 
-**ALL 17 DAL modules follow this pattern** (92% SOLID compliance):
+**ALL 21+ DAL modules follow this pattern** (92% SOLID compliance):
 
 ```typescript
 // lib/dal/helpers/error.ts
@@ -263,6 +263,64 @@ export async function createTeamMember(
 - ✅ Email imports in email service ONLY — NEVER in DAL
 - ✅ Props colocated with components in `types.ts`
 - ✅ Server Actions colocated at `app/(admin)/admin/<feature>/actions.ts`
+
+### Media Library Pattern (TASK029 - Complete)
+
+**Architecture**: Complete media management system with Storage/Folders synchronization.
+
+**Database Tables**:
+- `media` — Main media records with metadata
+- `media_tags` — Tag management (junction table)
+- `media_folders` — 9 base folders hierarchy
+
+**DAL Modules**:
+```bash
+lib/dal/
+  media.ts           # CRUD for media records
+  media-tags.ts      # Tag operations
+  media-folders.ts   # Folder management
+  media-usage.ts     # Usage tracking across entities
+```
+
+**Storage/Folders Sync Pattern**:
+```typescript
+// lib/dal/helpers/folder.ts
+export async function getFolderIdFromPath(
+  supabase: SupabaseClient,
+  storagePath: string
+): Promise<bigint | null> {
+  const folderName = storagePath.split('/')[0];
+  const { data } = await supabase
+    .from('media_folders')
+    .select('id')
+    .eq('name', folderName)
+    .single();
+  return data?.id ?? null;
+}
+```
+
+**9 Base Folders** (auto-assigned via `folder_id`):
+| Folder | Description |
+| ------ | ----------- |
+| spectacles | Spectacle visuals |
+| team | Team photos |
+| press | Press images |
+| gallery | General gallery |
+| hero | Homepage hero |
+| about | About section |
+| partners | Partner logos |
+| documents | PDFs and documents |
+| misc | Miscellaneous |
+
+**Thumbnail Generation** (Sharp):
+```typescript
+// Thumbnails: 300x300 JPEG, stored in media.thumbnail_url
+import sharp from 'sharp';
+const thumbnail = await sharp(buffer)
+  .resize(300, 300, { fit: 'cover' })
+  .jpeg({ quality: 80 })
+  .toBuffer();
+```
 
 ### Schemas Pattern (Server vs UI)
 
@@ -788,6 +846,27 @@ if (!(file instanceof File)) {
 // Now TypeScript knows file is File
 ```
 
+### Environment Variables (T3 Env)
+
+**CRITICAL**: Always use T3 Env for type-safe environment variable access.
+
+```typescript
+// ✅ ALWAYS use the env helper from lib/env.ts
+import { env } from '@/lib/env';
+
+const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
+const apiKey = env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY;
+
+// ❌ NEVER access process.env directly
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL; // Dangerous!
+```
+
+**Benefits**:
+- Runtime validation with Zod schemas
+- Type safety for all environment variables
+- Clear distinction between client/server variables
+- Build-time validation catches missing variables
+
 ### Nullability Handling
 
 ```typescript
@@ -1128,7 +1207,7 @@ memory-bank/
 
 **Next.js 16 Migration (December 2025)**:
 
-The project was upgraded from Next.js 15.4.5 to 16.0.6 with the following key changes:
+The project was upgraded from Next.js 15.4.5 to 16.0.10 with the following key changes:
 
 1. **Middleware renamed**: `middleware.ts` → `proxy.ts` (Next.js 16 convention)
 2. **Turbopack default**: Now the default bundler in development

@@ -8,7 +8,7 @@ Contrainte principale: garantir que la sécurité des données repose sur une st
 
 ## Vue d'Ensemble du Projet
 
-Rouge Cardinal Company est un site web pour une compagnie de théâtre professionnelle, construit avec Next.js 15.4.5 et Supabase.
+Rouge Cardinal Company est un site web pour une compagnie de théâtre professionnelle, construit avec Next.js 16 et Supabase.
 
 ## Objectifs Principaux
 

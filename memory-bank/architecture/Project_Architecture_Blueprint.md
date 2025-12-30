@@ -1,6 +1,6 @@
 # Project Architecture Blueprint — Rouge Cardinal Company
 
-Date: 2025-12-20
+Date: 2025-12-30
 
 Décrire l'architecture globale de l'application Rouge Cardinal Company : patterns d'accès aux données, organisation des routes, Server/Client split, sécurité (Supabase/RLS), et bonnes pratiques opérationnelles (CI, tests, migrations).
 
@@ -74,8 +74,12 @@ Décrire l'architecture globale de l'application Rouge Cardinal Company : patter
   - TODO: Ajouter throttle sur `handleContactSubmission()` et `handleNewsletterSubscription()` (middleware ou inside handler)
 - **Monitoring**: tracer erreurs email et échecs DAL; normaliser logs avec codes d'erreur `[ERR_ENTITY_NNN]`.
 - **Key rotation**: planifier rotation périodique des JWT signing keys dans Supabase.
-- **Media Library** (TASK029 complété 29/12/2025):
+- **Media Library** (TASK029 complété 29/12/2025, mis à jour 30/12/2025):
   - **Système complet**: Tags, folders, bulk operations, usage tracking, thumbnails, accessibility
+  - **Folders/Storage sync** (v2.7): Synchronisation automatique `media_folders.slug` ↔ `storage_path` prefix (medias/{slug}/)
+  - **9 base folders**: equipe, home-about, home-hero, spectacles, partenaires, presse, compagnie, agenda, autres
+  - **Auto-assign folder**: `getFolderIdFromPath()` helper auto-détecte folder_id lors de l'upload
+  - **UI improvements**: "Uploads génériques" au lieu de "Racine", AlertDialog pour confirmations delete, stats dynamiques
   - **Usage tracking**: Scanne 7 tables publiques (hero_slides, sections_apropos, membres_equipe, spectacles, partenaires, sections_compagnie, articles_presse)
   - **Eye badge indicator**: Emerald badge sur médias utilisés sur pages publiques
   - **Performance**: SHA-256 duplicate detection évite stockage doublons; bulk usage tracking via Map optimization (~2-5ms par média)
@@ -94,12 +98,23 @@ Fin
 ## Project Architecture Blueprint — Rouge Cardinal Company
 
 Generated: 30 November 2025  
-Updated: 20 December 2025  
+Updated: 30 December 2025  
 Source: `doc/prompts-github/architecture-blueprint-generator.prompt.md`  
 Repository branch: `master`  
-Version: v2.3
+Version: v2.7
 
 Résumé: ce document analyse la base de code existante et formalise le modèle d'architecture, les patterns observés et les recommandations pour l'évolution et l'extensibilité. Il s'appuie sur l'organisation actuelle (Next.js 16, TypeScript strict, Supabase, React 19) et couvre les composantes clés, la sécurité RLS, les modèles d'accès aux données, les tests et le déploiement.
+
+**Mise à jour v2.7 (30 décembre 2025) — Media Library Storage/Folders Sync:**
+
+- **Folders/Storage Architecture**: Synchronisation `media_folders.slug` ↔ Storage bucket paths (medias/{slug}/)
+- **9 Base Folders**: equipe, home-about, home-hero, spectacles, partenaires, presse, compagnie, agenda, autres
+- **Auto-assign folder**: Nouveau helper `getFolderIdFromPath()` dans DAL pour auto-détection du folder_id lors de l'upload
+- **UI Improvements**: Renommage "Racine" → "Uploads génériques", AlertDialog pour delete confirmation, stats dynamiques (`fetchMediaStats()`)
+- **Migration sync**: Placeholder migration 20251228140000, migration 20251230120000_sync_media_folders_with_storage
+- **Scripts fixes**: test-dashboard-stats (import path), test-spectacles-crud (status 'published'), test-thumbnail-generation (direct Supabase client)
+- **Folder select dropdown**: Sélection du folder avant upload dans MediaLibraryView
+- **Slug field warning**: Warning UI dans MediaFoldersView concernant la synchronisation Storage path
 
 **Mise à jour v2.6 (29 décembre 2025) — TASK029 Media Library Complete:**
 
@@ -174,14 +189,16 @@ Résumé: ce document analyse la base de code existante et formalise le modèle 
 ## 1. Détection et analyse du projet
 
 - Principaux frameworks et technologies détectés:
-  - Next.js 15.4.5 (app/ router, Server Components, Server Actions)
+  - Next.js 16 (app/ router, Server Components, Server Actions)
   - React 19
   - TypeScript 5.x (mode strict)
-  - Supabase (Postgres) avec RLS, schémas déclaratifs (37 fichiers) et migrations
+  - Supabase (Postgres) avec RLS, schémas déclaratifs (38 fichiers) et migrations
   - React Email + Tailwind pour templates d'email
   - React Hook Form 7.x + Zod 4.x pour validation
   - @dnd-kit pour drag & drop (réordonnancement Hero Slides)
   - Radix UI pour composants accessibles
+  - Sharp pour génération de thumbnails
+  - @t3-oss/env-nextjs v0.13.10 pour validation env type-safe
   - pnpm / tsx pour scripts de développement/test
   - GitHub Actions pour CI légère (workflows ajoutés)
 
@@ -189,9 +206,10 @@ Résumé: ce document analyse la base de code existante et formalise le modèle 
   - Structure feature-based: `components/features/*`, `lib/dal/*`, `lib/schemas/*`
   - Route groups: `app/(admin)` et `app/(marketing)` pour séparation des layouts
   - **Server Actions** colocalisées avec routes: `app/(admin)/admin/.../actions.ts`
-  - **DAL** (Data Access Layer) dans `lib/dal/*` avec `lib/dal/helpers/` pour utilitaires partagés
+  - **DAL** (Data Access Layer) dans `lib/dal/*` (21 modules) avec `lib/dal/helpers/` pour utilitaires partagés
   - **Schemas Zod** centralisés dans `lib/schemas/*` (11 fichiers avec barrel exports)
   - **Props colocation**: Props des composants colocalisées avec features (ex: `components/features/admin/media/types.ts`)
+  - **Environment Variables**: Type-safe via `lib/env.ts` (T3 Env)
   - Emails centralisés sous `emails/` avec utilitaires dans `emails/utils`
   - Migrations et schémas Supabase sous `supabase/schemas` et `supabase/migrations`
 
@@ -408,7 +426,7 @@ export async function createSomethingAction(input: unknown): Promise<ActionResul
 
 ### 4.2 DAL (`lib/dal/`)
 
-**Fichiers actuels (17 modules):**
+**Fichiers actuels (21 modules):**
 
 - `admin-home-hero.ts` — Hero Slides CRUD (fetch, create, update, delete, reorder)
 - `admin-home-about.ts` — About section CRUD
@@ -417,6 +435,10 @@ export async function createSomethingAction(input: unknown): Promise<ActionResul
 - `dashboard.ts`, `home-about.ts`, `home-hero.ts`, `home-news.ts`
 - `home-newsletter.ts`, `home-partners.ts`, `home-shows.ts`
 - `presse.ts`, `spectacles.ts`, `team.ts`
+- `media.ts` — Media CRUD centralisé (Storage/DB operations)
+- `media-tags.ts` — Tags management
+- `media-folders.ts` — Folders management + `getFolderIdFromPath()` helper
+- `media-usage.ts` — Usage tracking across public pages
 
 **DAL Helpers (`lib/dal/helpers/`):**
 
@@ -707,6 +729,107 @@ SKIP_ENV_VALIDATION=1 pnpm build
 
 - `feat(env): implement T3 Env validation (Phases 1-3)` — Core migration
 - `feat(env): complete T3 Env migration (Phases 4-7)` — Final cleanup
+
+### 4.7 Media Library Architecture (v2.7) 🆕
+
+#### Storage/Folders Synchronization Pattern
+
+L'architecture Media Library utilise un pattern de synchronisation entre les folders de la base de données (`media_folders`) et les préfixes de chemins dans le Storage bucket.
+
+**Principe:**
+
+```bash
+media_folders.slug ↔ storage_path prefix (medias/{slug}/)
+```
+
+**9 base folders créés par migration:**
+
+| Folder Name | Slug | Storage Path Prefix |
+| ------------- | ------ | --------------------- |
+| Équipe | `equipe` | `medias/equipe/` |
+| Home - Hero | `home-hero` | `medias/home-hero/` |
+| Home - À propos | `home-about` | `medias/home-about/` |
+| Spectacles | `spectacles` | `medias/spectacles/` |
+| Partenaires | `partenaires` | `medias/partenaires/` |
+| Presse | `presse` | `medias/presse/` |
+| Compagnie | `compagnie` | `medias/compagnie/` |
+| Agenda | `agenda` | `medias/agenda/` |
+| Uploads génériques | `autres` | `medias/autres/` |
+
+**Auto-assign folder helper:**
+
+```typescript
+// lib/dal/media-folders.ts
+export async function getFolderIdFromPath(
+  storagePath: string
+): Promise<DALResult<bigint | null>> {
+  // Extract first segment from path (medias/{slug}/filename.jpg → {slug})
+  const match = storagePath.match(/^medias\/([^/]+)\//);
+  if (!match) return { success: true, data: null };
+
+  const slug = match[1];
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("media_folders")
+    .select("id")
+    .eq("slug", slug)
+    .single();
+
+  if (error || !data) return { success: true, data: null };
+  return { success: true, data: BigInt(data.id) };
+}
+```
+
+**Upload flow avec auto-assign:**
+
+```bash
+User selects folder "Équipe" in dropdown
+         │
+         ▼
+uploadMedia() constructs path: medias/equipe/{uuid}_{filename}
+         │
+         ▼
+getFolderIdFromPath() extracts "equipe" → queries media_folders
+         │
+         ▼
+INSERT INTO medias WITH folder_id automatically linked
+```
+
+**UI Components:**
+
+- `MediaLibraryView.tsx` — Folder select dropdown avant upload
+- `MediaFoldersView.tsx` — CRUD folders avec warning slug ↔ Storage sync
+- `MediaDetailsPanel.tsx` — AlertDialog pour delete confirmation
+- `MediaCard.tsx` — Folder location display, usage indicator (Eye badge)
+
+**Stats dynamiques:**
+
+```typescript
+// lib/dal/media.ts
+export async function fetchMediaStats(): Promise<DALResult<MediaStatsDTO>> {
+  // Returns real-time counts: medias, tags, folders, storage usage
+}
+```
+
+**Tables et RLS:**
+
+```sql
+-- 3 tables avec 15 RLS policies (5 per table)
+media_tags      → SELECT(all), SELECT(admin), INSERT, UPDATE, DELETE
+media_folders   → SELECT(all), SELECT(admin), INSERT, UPDATE, DELETE  
+media_tag_assignments → SELECT(all), SELECT(admin), INSERT, UPDATE, DELETE
+```
+
+**Migrations clés:**
+
+- `20251228140000_add_thumbnail_support` — Thumbnail support
+- `20251228220350_fix_media_tags_folders_rls_granular` — Granular RLS
+- `20251230120000_sync_media_folders_with_storage` — 9 base folders + folder_id restore
+
+### 4.8 Schemas (`lib/schemas/`)
+
+**Fichiers actuels (11 fichiers + barrel):**
+
 - `dashboard.ts` — `DashboardStatsSchema`
 - `home-content.ts` — Hero Slides + About schemas (Server + UI)
 - `media.ts` — `MediaItemSchema`, `MediaSelectResultSchema`, constants
@@ -745,12 +868,12 @@ export const HeroSlideFormSchema = z.object({
 export type HeroSlideFormValues = z.infer<typeof HeroSlideFormSchema>;
 ```
 
-### 4.6 Emails (`emails/`)
+### 4.9 Emails (`emails/`)
 
 - Templates: React Email components; wrapper unique `<Tailwind>` pour compatibilité
 - Envoi: `lib/email/actions.ts` contient gate `EMAIL_DEV_REDIRECT` pour redirection en environnement dev/test
 
-### 4.7 Admin UI Components
+### 4.10 Admin UI Components
 
 **Structure par feature** (`components/features/admin/`):
 
@@ -762,12 +885,20 @@ export type HeroSlideFormValues = z.infer<typeof HeroSlideFormSchema>;
   - `TeamMemberCard.tsx` — Individual member card
   - `TeamMemberForm.tsx` — React Hook Form + zodResolver
   - `TeamMemberFormWrapper.tsx` — Bridge with `sanitizePayload()` for DB constraints
-- `media/` — Media library picker
+- `media/` — Media library management (13 fichiers):
+  - `MediaLibraryView.tsx` — Main view avec folder select dropdown
+  - `MediaCard.tsx` — Card avec folder location + usage indicator
+  - `MediaUploadDialog.tsx` — Upload avec folder selection + SHA-256 duplicate detection
+  - `MediaDetailsPanel.tsx` — Details + AlertDialog delete confirmation
+  - `MediaBulkActions.tsx` — Bulk operations (delete, move, tag)
+  - `MediaFoldersView.tsx` — Folders CRUD avec slug/Storage warning
+  - `MediaTagsView.tsx` — Tags CRUD
+  - `MediaLibraryPicker.tsx` — Picker intégré aux forms
 - `spectacles/` — Shows management
 
 **Component hierarchy pattern:**
 
-```
+```bash
 FeatureContainer.tsx   (Server Component)
   └── FeatureView.tsx  (Client Component with state)
         ├── FeatureForm.tsx (~200 lines max)
@@ -826,12 +957,13 @@ FeatureContainer.tsx   (Server Component)
 
 ## 6. Architecture des données
 
-- Modèle de données principal: tables Postgres avec RLS; 37 fichiers de schémas déclaratifs
-- Tables principales: `profiles`, `membres_equipe`, `spectacles`, `home_hero_slides`, `home_about`, `medias`
+- Modèle de données principal: tables Postgres avec RLS; 38 fichiers de schémas déclaratifs
+- Tables principales: `profiles`, `membres_equipe`, `spectacles`, `home_hero_slides`, `home_about`, `medias`, `media_tags`, `media_folders`, `media_tag_assignments`
 - Accès: DAL retourne DTOs minimalistes; éviter d'exposer colonnes sensibles
 - Transactions & upserts: pattern `upsert(..., { onConflict: 'user_id' })` pour gérer trigger `on_auth_user_created`
-- Indexation: recommander index sur colonnes utilisées dans policies (e.g., `user_id` dans `profiles`)
+- Indexation: recommander index sur colonnes utilisées dans policies (e.g., `user_id` dans `profiles`, `file_hash` unique dans `medias`)
 - Fonctions DB: `is_admin()`, `reorder_hero_slides()` pour opérations complexes
+- SHA-256 duplicate detection: `file_hash` unique partial index pour éviter stockage doublons
 
 ## 7. Cross-cutting concerns
 
@@ -1097,7 +1229,7 @@ export function FeatureForm({ onSuccess }: { onSuccess: () => void }) {
 
 ## 15. Records de décisions architecturales (ADR) — aperçu
 
-- Choix d'utiliser Next.js 15 App Router et Server Components pour prioriser SSR et sécurité
+- Choix d'utiliser Next.js 16 App Router et Server Components pour prioriser SSR et sécurité
 - Migration vers JWT Signing Keys pour Supabase (`getClaims()` central) pour latence d'auth ~2-5ms
 - **Novembre 2025**: Séparation Server Actions / DAL pour résoudre les problèmes de re-render
   - `revalidatePath()` uniquement dans Server Actions (pas dans DAL)
@@ -1109,6 +1241,20 @@ export function FeatureForm({ onSuccess }: { onSuccess: () => void }) {
   - Migration inline form → pages dédiées (`/admin/team/new`, `/admin/team/[id]/edit`)
   - Ajout `TeamMemberFormWrapper.tsx` avec `sanitizePayload()` (empty string → null) pour contrainte DB
   - Ajout helper `optionalUrlSchema` pour champs URL acceptant chaînes vides
+- **Décembre 2025**: T3 Env (@t3-oss/env-nextjs) pour validation type-safe des variables d'environnement
+  - Suppression du pattern manuel `hasEnvVars` (~100 lignes)
+  - Fail fast au démarrage si variables requises manquantes
+  - Séparation client/server enforced
+- **Décembre 2025**: Media Library System (TASK029) - Architecture complète
+  - 3 nouvelles tables: `media_tags`, `media_folders`, `media_tag_assignments`
+  - 15 RLS policies granulaires (5 par table)
+  - SHA-256 duplicate detection pour éviter stockage doublons
+  - Pattern Warning: thumbnails générés à la demande (pas en masse)
+- **Décembre 2025**: Storage/Folders Synchronization
+  - `media_folders.slug` synchronisé avec préfixes de chemins Storage (`medias/{slug}/`)
+  - 9 base folders créés par migration pour correspondre aux contextes d'utilisation
+  - `getFolderIdFromPath()` helper auto-détecte folder_id lors de l'upload
+  - UI warning dans MediaFoldersView concernant la création de nouveaux folders
 
 ## 16. Governance & qualité
 
@@ -1161,11 +1307,12 @@ export function FeatureForm({ onSuccess }: { onSuccess: () => void }) {
 
 - Fichiers clefs:
   - `lib/actions/*` — Server Actions
-  - `lib/dal/*` — DAL
+  - `lib/dal/*` — DAL (21 modules)
   - `lib/schemas/*` — Zod schemas (Server + UI)
+  - `lib/env.ts` — T3 Env type-safe configuration
   - `components/features/admin/*` — Admin UI components
   - `emails/*` — Email templates
-  - `supabase/schemas/*` — Declarative schema (37 files)
+  - `supabase/schemas/*` — Declarative schema (38 files)
   - `supabase/migrations/*` — Generated migrations
   - `.github/instructions/crud-server-actions-pattern.instructions.md` — CRUD pattern v1.1
   - `.github/workflows/*` — CI
@@ -1173,5 +1320,7 @@ export function FeatureForm({ onSuccess }: { onSuccess: () => void }) {
 ---
 
 Maintenir ce document à jour: exécuter le générateur chaque fois qu'une refonte structurelle (nouveau route group, changement DAL/Server Actions majeur, migration de provider critique) est effectuée.
+
+Dernière mise à jour: 30 décembre 2025 (v2.7)
 
 End of file

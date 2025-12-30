@@ -1,6 +1,6 @@
 # System Patterns
 
-**Last Updated**: 2025-12-20
+**Last Updated**: 2025-12-30
 
 Architecture et patterns observés dans le projet:
 
@@ -148,11 +148,61 @@ export async function addMediaItemTags(mediaId, tagIds): Promise<DALResult<void>
 // lib/dal/media-folders.ts (133 lines) - Folders CRUD
 export async function listMediaFolders(): Promise<DALResult<MediaFolder[]>>
 export async function createMediaFolder(input): Promise<DALResult<MediaFolder>>
+export async function getFolderIdFromPath(storagePath): Promise<bigint | null>
 
 // lib/dal/media-usage.ts (262 lines) - Usage tracking
 export async function checkMediaUsagePublic(mediaId): Promise<DALResult<MediaUsageCheck>>
 export async function bulkCheckMediaUsagePublic(mediaIds): Promise<Map<string, MediaUsageCheck>>
+
+// lib/dal/media.ts - Stats function (added 2025-12-30)
+export async function fetchMediaStats(): Promise<DALResult<MediaStats>>
 ```
+
+#### Storage/Folders Synchronization Pattern (2025-12-30)
+
+**Architecture**: Le champ `slug` dans `media_folders` correspond au premier segment du `storage_path` (medias/{slug}/).
+
+```typescript
+// DAL helper pour auto-assign folder_id
+export async function getFolderIdFromPath(storagePath: string): Promise<bigint | null> {
+  // Extract slug from path: "medias/spectacles/abc.jpg" → "spectacles"
+  const match = storagePath.match(/^medias\/([^/]+)\//);
+  if (!match) return null;
+  
+  const slug = match[1];
+  const folder = await findFolderBySlug(slug);
+  return folder?.id ?? null;
+}
+
+// Upload auto-assigns folder
+export async function uploadMedia(file, folder: string): Promise<DALResult<MediaItem>> {
+  const storagePath = `medias/${folder}/${uuid}.${ext}`;
+  
+  // Upload to Storage...
+  
+  // Auto-assign folder_id via path match
+  const folderId = await getFolderIdFromPath(storagePath);
+  
+  return createMediaRecord({
+    ...data,
+    folder_id: folderId, // Automatically linked
+  });
+}
+```
+
+**9 Base Folders (seeded via migration)**:
+
+| Name | Slug | Storage Path |
+| ---- | ---- | ------------ |
+| Équipe | equipe | medias/equipe/* |
+| À propos (Accueil) | home-about | medias/home-about/* |
+| Hero (Accueil) | home-hero | medias/home-hero/* |
+| Spectacles | spectacles | medias/spectacles/* |
+| Partenaires | partenaires | medias/partenaires/* |
+| Presse | presse | medias/presse/* |
+| Compagnie | compagnie | medias/compagnie/* |
+| Agenda | agenda | medias/agenda/* |
+| Autres | autres | medias/autres/* |
 
 #### Server Actions Pattern
 

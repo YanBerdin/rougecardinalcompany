@@ -1,10 +1,83 @@
 # Active Context
 
-**Current Focus (2025-12-29)**: TASK029 Media Library - COMPLETED ✅
+**Current Focus (2025-12-30)**: TASK029 Media Library - Storage/Folders Sync Finalized ✅
 
 ---
 
-## Latest Implementation (2025-12-29)
+## Latest Updates (2025-12-30)
+
+### Media Library Storage/Folders Synchronization - FINALIZED ✅
+
+**Architecture finale pour la synchronisation automatique entre `media_folders.slug` et les paths Storage.**
+
+#### Commits du 30 décembre 2025
+
+1. **`7aba7e2` - feat(media): synchronize Storage bucket folders with media_folders table**
+   - Migration `20251230120000_sync_media_folders_with_storage` : restaure `folder_id` et seed 9 dossiers de base
+   - `getFolderIdFromPath()` helper dans DAL pour auto-assign `folder_id` lors de l'upload
+   - `uploadMedia()` modifié pour auto-détecter et lier le folder selon le prefix `storage_path`
+   - Dropdown folder select dans `MediaLibraryView` avant upload
+   - Champ `slug` dans `MediaFoldersView` avec warning sur sync Storage path
+   - Schema `MediaFolderInputSchema` : ajout validation du champ `slug`
+   - Script `validate-media-folders.ts` pour détecter médias orphelins
+
+2. **`abeb7ae` - fix(migrations): sync local/remote migration history**
+   - Placeholder pour migration remote `20251228140000_add_thumbnail_support`
+   - Suppression migration conflictuelle locale `20251228145621_add_thumbnail_support_phase3`
+   - Push production : 9 `media_folders` créés, colonne `folder_id` restaurée
+
+3. **`fed07e7` - feat(media): UI improvements and dynamic stats**
+   - Renommage "Racine"/"Aucun dossier" → "Uploads génériques" dans tous les composants
+   - AlertDialog pour confirmation delete dans `MediaDetailsPanel` (consistance avec bulk actions)
+   - `fetchMediaStats()` DAL function pour statistiques en temps réel
+   - Page index media : affichage compteurs réels (medias, tags, folders, storage)
+
+4. **`711f74b` - fix(scripts): update test scripts for compatibility**
+   - `test-dashboard-stats`: fix import path `DashboardStatsSchema`
+   - `test-spectacles-crud`: fix status value 'en cours' → 'published' (constraint `chk_spectacles_status_allowed`)
+   - `test-thumbnail-generation`: génération thumbnails via Supabase client direct (bypass session admin)
+
+#### Architecture Storage/Folders Sync
+
+```bash
+Media Upload Flow (avec auto-folder detection)
+├── 1. User selects folder in MediaLibraryView dropdown
+├── 2. FormData includes folder slug (e.g., "spectacles")
+├── 3. uploadMedia() builds storage_path: "medias/spectacles/{uuid}.{ext}"
+├── 4. getFolderIdFromPath(storage_path) extracts "spectacles" prefix
+├── 5. Matches media_folders.slug → Returns folder_id
+├── 6. createMediaRecord() saves with folder_id auto-assigned
+└── 7. Media organized both in Storage AND database
+
+media_folders (9 base folders seeded)
+├── equipe (slug: "equipe") → medias/equipe/*
+├── home-about (slug: "home-about") → medias/home-about/*
+├── home-hero (slug: "home-hero") → medias/home-hero/*
+├── spectacles (slug: "spectacles") → medias/spectacles/*
+├── partenaires (slug: "partenaires") → medias/partenaires/*
+├── presse (slug: "presse") → medias/presse/*
+├── compagnie (slug: "compagnie") → medias/compagnie/*
+├── agenda (slug: "agenda") → medias/agenda/*
+└── autres (slug: "autres") → medias/autres/*
+```
+
+#### Bénéfices finaux
+
+1. **Cohérence Storage/DB** — Même organisation dans bucket Storage ET table `medias`
+2. **Auto-detection** — Médias existants automatiquement liés au bon folder via path
+3. **Migration Safe** — Script `validate-media-folders.ts` détecte orphelins
+4. **UX améliorée** — Labels "Uploads génériques", AlertDialogs consistants
+5. **Stats temps réel** — Dashboard avec compteurs dynamiques
+
+---
+
+## Previous Focus (2025-12-29)
+
+### TASK029 - Media Library Complete Implementation - COMPLETED ✅
+
+---
+
+## Previous Implementation (2025-12-29)
 
 ### TASK029 - Media Library Complete Implementation
 

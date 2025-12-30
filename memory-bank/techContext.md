@@ -1,6 +1,6 @@
 # Tech Context
 
-**Last Updated**: 2025-12-20
+**Last Updated**: 2025-12-30
 
 Versions et dépendances clés observées dans le dépôt:
 
@@ -10,6 +10,7 @@ Versions et dépendances clés observées dans le dépôt:
 - Tailwind CSS: ^3.4.x
 - Supabase: client/server integration via `@supabase/ssr` and `@supabase/supabase-js` patterns
 - **@t3-oss/env-nextjs**: **0.13.10** (type-safe env validation, added 2025-12-20)
+- **Sharp**: Image processing for thumbnails (300x300 JPEG)
 - **Zod**: **4.1.12** (runtime validation)
 
 Structure principale:
@@ -23,6 +24,8 @@ Structure principale:
 
 | Date | Changement | Impact |
 | ------ | ------------ | -------- |
+| 2025-12-30 | Storage/Folders Sync | `getFolderIdFromPath()`, 9 base folders, dynamic stats |
+| 2025-12-29 | TASK029 Media Library Complete | 7 phases, 4 DAL modules, 15 RLS policies |
 | 2025-12-20 | T3 Env Implementation | Type-safe env vars, ~100 lignes code supprimées |
 | 2025-12-13 | Next.js 16.0.7 → 16.0.10 | Security fix (Dependabot) |
 | 2025-12-13 | Handler Contact/Newsletter factorisés | `lib/actions/*-server.ts` |

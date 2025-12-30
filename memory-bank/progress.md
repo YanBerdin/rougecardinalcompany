@@ -1,5 +1,40 @@
 # Progress
 
+## TASK029 - Media Library - Storage/Folders Sync FINALIZED (2025-12-30)
+
+### Updates 30 décembre 2025
+
+Suite à la complétion initiale de TASK029 (29/12), finalisation de la synchronisation Storage/Folders :
+
+#### Commits
+
+1. `7aba7e2` — feat(media): synchronize Storage bucket folders with media_folders table
+2. `abeb7ae` — fix(migrations): sync local/remote migration history
+3. `fed07e7` — feat(media): UI improvements and dynamic stats
+4. `711f74b` — fix(scripts): update test scripts for compatibility
+
+#### Résultats
+
+| Feature | État |
+| ------- | ---- |
+| Migration 9 base folders | ✅ Production |
+| `getFolderIdFromPath()` helper | ✅ Auto-assign folder_id |
+| Folder dropdown avant upload | ✅ UI |
+| "Uploads génériques" labeling | ✅ UX |
+| AlertDialog delete confirmation | ✅ Consistance |
+| `fetchMediaStats()` DAL | ✅ Stats temps réel |
+| Scripts tests compatibilité | ✅ Fixed |
+
+#### Architecture finale
+
+```bash
+media_folders.slug ↔ storage_path prefix (medias/{slug}/)
+```
+
+9 dossiers de base synchronisés : equipe, home-about, home-hero, spectacles, partenaires, presse, compagnie, agenda, autres.
+
+---
+
 ## TASK029 - Media Library Complete Implementation - COMPLETED (2025-12-29)
 
 ### Objectif Global
