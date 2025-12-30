@@ -88,8 +88,8 @@ export async function createMediaFolderAction(
         // Validation with Zod
         const validated: MediaFolderInput = MediaFolderInputSchema.parse(input);
 
-        // Generate slug from name
-        const slug = await generateSlug(validated.name);
+        // Use provided slug or generate from name
+        const slug = validated.slug || await generateSlug(validated.name);
 
         // Create folder via DAL
         const result = await createMediaFolder({
@@ -127,9 +127,10 @@ export async function updateMediaFolderAction(
         // Validation with Zod (partial)
         const validated = MediaFolderInputSchema.partial().parse(input);
 
-        // Update folder via DAL
+        // Update folder via DAL (include slug if provided)
         const result = await updateMediaFolder(BigInt(id), {
             name: validated.name,
+            slug: validated.slug,
             description: validated.description ?? null,
             parent_id: validated.parent_id ? BigInt(validated.parent_id) : null,
         });

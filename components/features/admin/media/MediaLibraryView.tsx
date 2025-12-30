@@ -44,7 +44,8 @@ export function MediaLibraryView({
     const [selectedMedia, setSelectedMedia] = useState<MediaItemExtendedDTO | null>(null);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [selectionMode, setSelectionMode] = useState(false);
-    const [isUploadOpen, setIsUploadOpen] = useState(false); // ✅ AJOUT
+    const [isUploadOpen, setIsUploadOpen] = useState(false);
+    const [uploadFolder, setUploadFolder] = useState<string>("uploads");
 
     // Sync state when props change (after router.refresh())
     useEffect(() => {
@@ -146,6 +147,20 @@ export function MediaLibraryView({
                     >
                         {selectionMode ? "Mode sélection" : "Sélectionner"}
                     </Button>
+
+                    <Select value={uploadFolder} onValueChange={setUploadFolder}>
+                        <SelectTrigger className="w-[160px] h-11">
+                            <SelectValue placeholder="Dossier d'upload" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {availableFolders.map((folder) => (
+                                <SelectItem key={folder.id} value={folder.slug}>
+                                    {folder.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+
                     <Button
                         size="lg"
                         onClick={handleUpload}
@@ -259,12 +274,11 @@ export function MediaLibraryView({
                 />
             )}
 
-            {/* ✅ AJOUTER MediaUploadDialog */}
             <MediaUploadDialog
                 open={isUploadOpen}
                 onClose={() => setIsUploadOpen(false)}
                 onSelect={handleUploadSuccess}
-                uploadFolder="uploads" // Dossier générique pour uploads directs depuis la bibliothèque
+                uploadFolder={uploadFolder}
             />
         </div>
     );

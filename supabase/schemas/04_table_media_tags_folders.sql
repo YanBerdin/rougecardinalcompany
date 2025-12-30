@@ -47,7 +47,7 @@ create table public.media_folders (
 
 comment on table public.media_folders is 'Dossiers hiérarchiques pour organiser les médias';
 comment on column public.media_folders.name is 'Nom du dossier';
-comment on column public.media_folders.slug is 'Slug unique généré automatiquement';
+comment on column public.media_folders.slug is 'URL-friendly identifier (MUST match Storage directory name in medias/{slug}/)';
 comment on column public.media_folders.description is 'Description optionnelle du dossier';
 comment on column public.media_folders.parent_id is 'Référence au dossier parent (hiérarchie)';
 

@@ -83,10 +83,37 @@ async function getPublicUrl(
     return publicUrl;
 }
 
+/**
+ * Validate storage path and get matching folder_id
+ * @param supabase - Supabase client
+ * @param storagePath - Full storage path (e.g., "team/123-photo.jpg")
+ * @returns folder_id if matching folder exists, null otherwise
+ */
+async function getFolderIdFromPath(
+    supabase: Awaited<ReturnType<typeof createClient>>,
+    storagePath: string
+): Promise<bigint | null> {
+    const folderSlug = storagePath.split("/")[0];
+    
+    const { data } = await supabase
+        .from("media_folders")
+        .select("id")
+        .eq("slug", folderSlug)
+        .maybeSingle();
+    
+    if (!data) {
+        console.warn(`[DAL] No matching folder for path prefix: ${folderSlug}`);
+        return null;
+    }
+    
+    return BigInt(data.id);
+}
+
 async function createMediaRecord(
     supabase: Awaited<ReturnType<typeof createClient>>,
     input: MediaUploadInput,
-    storagePath: string
+    storagePath: string,
+    folderId: bigint | null
 ): Promise<DALResult<number>> {
     const { data, error } = await supabase
         .from("medias")
@@ -97,6 +124,7 @@ async function createMediaRecord(
             size_bytes: input.file.size,
             file_hash: input.fileHash,
             uploaded_by: input.uploadedBy,
+            folder_id: folderId ? String(folderId) : null,
         })
         .select("id")
         .single();
@@ -151,8 +179,11 @@ export async function uploadMedia(
     // 2. Get public URL
     const publicUrl = await getPublicUrl(supabase, storagePath);
 
-    // 3. Create database record
-    const dbResult = await createMediaRecord(supabase, input, storagePath);
+    // 3. Auto-assign folder_id based on storage path prefix
+    const folderId = await getFolderIdFromPath(supabase, storagePath);
+
+    // 4. Create database record with folder_id
+    const dbResult = await createMediaRecord(supabase, input, storagePath, folderId);
     if (!dbResult.success) {
         await cleanupStorage(supabase, storagePath);
         return dbResult;
@@ -567,6 +598,7 @@ export async function updateMediaFolder(
     id: bigint,
     input: Partial<{
         name: string;
+        slug: string;
         description: string | null;
         parent_id: bigint | null;
     }>
@@ -585,6 +617,7 @@ export async function updateMediaFolder(
 
     const updateData: Record<string, unknown> = {};
     if (input.name !== undefined) updateData.name = input.name;
+    if (input.slug !== undefined) updateData.slug = input.slug;
     if (input.description !== undefined) updateData.description = input.description;
     if (input.parent_id !== undefined) {
         updateData.parent_id = input.parent_id !== null ? String(input.parent_id) : null;

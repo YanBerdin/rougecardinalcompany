@@ -35,6 +35,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 import type { MediaFolderDTO } from "@/lib/schemas/media";
 import {
     createMediaFolderAction,
@@ -276,20 +278,40 @@ function MediaFolderFormDialog({
     setIsSubmitting,
 }: MediaFolderFormDialogProps) {
     const [name, setName] = useState("");
+    const [slug, setSlug] = useState("");
     const [description, setDescription] = useState("");
     const [parentId, setParentId] = useState<string>("root");
 
     useEffect(() => {
         if (folder) {
             setName(folder.name);
+            setSlug(folder.slug);
             setDescription(folder.description || "");
             setParentId(folder.parent_id ? String(folder.parent_id) : "root");
         } else {
             setName("");
+            setSlug("");
             setDescription("");
             setParentId("root");
         }
     }, [folder]);
+
+    const generateSlug = (value: string): string => {
+        return value
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/[^a-z0-9-]/g, "-")
+            .replace(/-+/g, "-")
+            .replace(/^-|-$/g, "");
+    };
+
+    const handleNameChange = (value: string) => {
+        setName(value);
+        if (!folder) {
+            setSlug(generateSlug(value));
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -298,6 +320,7 @@ function MediaFolderFormDialog({
         try {
             const input = {
                 name,
+                slug: slug || generateSlug(name),
                 description: description || null,
                 parent_id: parentId && parentId !== "root" ? Number(parentId) : null,
             };
@@ -336,16 +359,41 @@ function MediaFolderFormDialog({
                     </DialogHeader>
 
                     <div className="space-y-4 py-4">
+                        <Alert className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/20">
+                            <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                            <AlertDescription className="text-amber-800 dark:text-amber-200 text-sm">
+                                Le <strong>slug</strong> doit correspondre à un dossier existant dans Storage
+                                (<code className="bg-amber-100 dark:bg-amber-900/40 px-1 rounded">medias/{"{slug}"}/</code>).
+                                Les médias sont automatiquement liés au dossier selon leur chemin.
+                            </AlertDescription>
+                        </Alert>
+
                         <div>
                             <Label htmlFor="name">Nom *</Label>
                             <Input
                                 id="name"
                                 value={name}
-                                onChange={(e) => setName(e.target.value)}
+                                onChange={(e) => handleNameChange(e.target.value)}
                                 required
                                 maxLength={100}
                                 placeholder="Ex: Spectacles, Presse"
                             />
+                        </div>
+
+                        <div>
+                            <Label htmlFor="slug">Slug (chemin Storage) *</Label>
+                            <Input
+                                id="slug"
+                                value={slug}
+                                onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))}
+                                required
+                                maxLength={100}
+                                placeholder="ex: spectacles, press"
+                                className="font-mono text-sm"
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">
+                                Chemin dans Storage : <code>medias/{slug || "..."}/</code>
+                            </p>
                         </div>
 
                         <div>

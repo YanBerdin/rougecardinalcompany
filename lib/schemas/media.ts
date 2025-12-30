@@ -205,9 +205,14 @@ export const MediaTagInputSchema = z.object({
 
 /**
  * Input schema for creating/updating media folders
+ * slug must match a Storage bucket path: medias/{slug}/
  */
 export const MediaFolderInputSchema = z.object({
     name: z.string().min(1, "Le nom est requis").max(100),
+    slug: z.string()
+        .min(1, "Le slug est requis")
+        .max(100)
+        .regex(/^[a-z0-9-]+$/, "Le slug ne peut contenir que des lettres minuscules, chiffres et tirets"),
     description: z.string().max(300).nullable().optional(),
     parent_id: z.number().int().positive().nullable().optional(),
 });

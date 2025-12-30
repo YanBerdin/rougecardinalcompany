@@ -33,4 +33,25 @@ create index if not exists idx_medias_thumbnail_path
 on public.medias (thumbnail_path) 
 where thumbnail_path is not null;
 
+-- Index for folder lookups by storage_path prefix (for auto-assignment)
+create index if not exists idx_medias_storage_path_prefix 
+on public.medias (split_part(storage_path, '/', 1));
+
 -- NOTE: medias_folder_id_idx index will be created by migration 20251227203314_add_media_tags_folders.sql after folder_id column is added
+
+-- =============================================================================
+-- HELPER FUNCTIONS
+-- =============================================================================
+
+-- Extract folder slug from storage_path (e.g., "team/photo.jpg" → "team")
+create or replace function public.extract_folder_from_path(storage_path text)
+returns text
+language sql
+immutable
+set search_path = ''
+as $$
+  select split_part(storage_path, '/', 1)
+$$;
+
+comment on function public.extract_folder_from_path(text) is 
+  'Extract folder slug from storage_path (e.g., "team/photo.jpg" → "team")';
