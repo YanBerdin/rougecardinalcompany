@@ -83,39 +83,71 @@ async function uploadTestImage(
   };
 }
 
-// Call thumbnail generation API
+const THUMBNAIL_SIZE = 300;
+const THUMBNAIL_QUALITY = 80;
+const THUMBNAIL_SUFFIX = "_thumb.jpg";
+
+// Generate thumbnail directly (bypasses API auth for testing)
 async function generateThumbnail(
+  supabase: any,
   mediaId: string,
   storagePath: string
 ): Promise<{ success: boolean; thumbPath?: string; error?: string }> {
-  console.log('🖼️  Calling thumbnail generation API...');
+  console.log('🖼️  Generating thumbnail directly (bypassing API)...');
   
-  const response = await fetch('http://localhost:3000/api/admin/media/thumbnail', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      mediaId,
-      storagePath
-    })
-  });
-  
-  const result = await response.json();
-  
-  if (!response.ok) {
-    return {
-      success: false,
-      error: result.error || `HTTP ${response.status}`
-    };
+  try {
+    // 1. Download original from storage
+    const { data: fileData, error: downloadError } = await supabase.storage
+      .from('medias')
+      .download(storagePath);
+    
+    if (downloadError) {
+      return { success: false, error: `Download failed: ${downloadError.message}` };
+    }
+    
+    // 2. Generate thumbnail with Sharp
+    const arrayBuffer = await fileData.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    
+    const thumbnailBuffer = await sharp(buffer)
+      .resize(THUMBNAIL_SIZE, THUMBNAIL_SIZE, { fit: 'cover' })
+      .jpeg({ quality: THUMBNAIL_QUALITY })
+      .toBuffer();
+    
+    // 3. Upload thumbnail to Storage
+    const thumbPath = storagePath.replace(
+      /\.(jpg|jpeg|png|webp)$/i,
+      THUMBNAIL_SUFFIX
+    );
+    
+    const { error: uploadError } = await supabase.storage
+      .from('medias')
+      .upload(thumbPath, thumbnailBuffer, {
+        contentType: 'image/jpeg',
+        cacheControl: '31536000',
+        upsert: true
+      });
+    
+    if (uploadError) {
+      return { success: false, error: `Upload failed: ${uploadError.message}` };
+    }
+    
+    // 4. Update database with thumbnail_path
+    const { error: updateError } = await supabase
+      .from('medias')
+      .update({ thumbnail_path: thumbPath })
+      .eq('id', parseInt(mediaId, 10));
+    
+    if (updateError) {
+      return { success: false, error: `DB update failed: ${updateError.message}` };
+    }
+    
+    console.log(`✅ Thumbnail generated: ${thumbPath}`);
+    
+    return { success: true, thumbPath };
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : String(err) };
   }
-  
-  console.log(`✅ Thumbnail generated: ${result.thumbPath}`);
-  
-  return {
-    success: true,
-    thumbPath: result.thumbPath
-  };
 }
 
 // Verify thumbnail in storage
@@ -255,6 +287,7 @@ async function testPatternWarning(): Promise<void> {
     
     // Try to generate thumbnail with invalid path
     const result = await generateThumbnail(
+      supabase,
       mediaData.id.toString(),
       'INVALID/PATH/TO/IMAGE.jpg' // ❌ Invalid path
     );
@@ -297,7 +330,7 @@ async function main() {
     storagePath = uploadResult.storagePath;
     
     // 3. Generate thumbnail
-    const thumbnailResult = await generateThumbnail(mediaId, storagePath);
+    const thumbnailResult = await generateThumbnail(supabase, mediaId, storagePath);
     
     if (!thumbnailResult.success) {
       throw new Error(`Thumbnail generation failed: ${thumbnailResult.error}`);

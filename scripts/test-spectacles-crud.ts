@@ -239,7 +239,7 @@ async function main() {
         const updatedTitle = `${testTitle} (Updated)`;
         const spectacle = await updateSpectacle(createdSpectacleId, {
             title: updatedTitle,
-            status: "en cours",
+            status: "published",
             public: true,
         });
 

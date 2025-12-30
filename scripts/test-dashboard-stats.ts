@@ -11,7 +11,7 @@
 import * as dotenv from "dotenv";
 import { resolve } from "path";
 import { createClient } from "@supabase/supabase-js";
-import { DashboardStatsSchema } from "../types/dashboard.types";
+import { DashboardStatsSchema } from "../lib/schemas/dashboard";
 import { env } from "../lib/env";
 
 dotenv.config({ path: resolve(process.cwd(), ".env.local") });
