@@ -1,0 +1,1 @@
+-- Migration already applied to remote (thumbnail support)
