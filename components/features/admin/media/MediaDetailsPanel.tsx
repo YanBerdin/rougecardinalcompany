@@ -20,6 +20,16 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { updateMediaMetadataAction, deleteMediaImage } from "@/lib/actions/media-actions";
 import { MediaItemExtendedDTOSchema, type MediaItemExtendedDTO, type MediaFolderDTO, type MediaTagDTO } from "@/lib/schemas/media";
 import { getMediaPublicUrl } from "@/lib/dal/media";
@@ -52,6 +62,7 @@ export function MediaDetailsPanel({
 }: MediaDetailsPanelProps) {
     const [isUpdating, setIsUpdating] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [selectedTagsToAdd, setSelectedTagsToAdd] = useState<number[]>([]);
     const [selectedTagsToRemove, setSelectedTagsToRemove] = useState<number[]>([]);
     const [publicUrl, setPublicUrl] = useState<string | null>(null);
@@ -130,10 +141,6 @@ export function MediaDetailsPanel({
     };
 
     const handleDelete = async () => {
-        if (!confirm("Supprimer définitivement ce média ?")) {
-            return;
-        }
-
         setIsDeleting(true);
         try {
             const result = await deleteMediaImage(media.id);
@@ -143,6 +150,7 @@ export function MediaDetailsPanel({
             }
 
             toast.success("Média supprimé");
+            setShowDeleteDialog(false);
             onClose();
             onUpdate();
         } catch (error) {
@@ -266,10 +274,10 @@ export function MediaDetailsPanel({
                                     }
                                 >
                                     <SelectTrigger id="folder">
-                                        <SelectValue placeholder="Aucun dossier" />
+                                        <SelectValue placeholder="Uploads génériques" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="none">Aucun dossier</SelectItem>
+                                        <SelectItem value="none">Uploads génériques</SelectItem>
                                         {folders.map((folder) => (
                                             <SelectItem key={folder.id} value={folder.id.toString()}>
                                                 {folder.name}
@@ -350,15 +358,54 @@ export function MediaDetailsPanel({
                         <Button
                             variant="destructive"
                             className="w-full"
-                            onClick={handleDelete}
+                            onClick={() => setShowDeleteDialog(true)}
                             disabled={isUpdating || isDeleting}
                         >
                             <Trash2 className="mr-2 h-4 w-4" />
-                            {isDeleting ? "Suppression..." : "Supprimer le média"}
+                            Supprimer le média
                         </Button>
                     </div>
                 </ScrollArea>
             </div>
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <AlertDialogContent className="max-w-md">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="text-xl font-semibold">
+                            Confirmer la suppression
+                        </AlertDialogTitle>
+                        <AlertDialogDescription asChild>
+                            <div className="space-y-3">
+                                <p className="text-base">
+                                    Êtes-vous sûr de vouloir supprimer définitivement ce média ?
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                    Fichier : <strong>{media.filename ?? media.storage_path}</strong>
+                                </p>
+                                <p className="text-sm">
+                                    <span className="text-destructive font-medium">Cette action est irréversible.</span>
+                                </p>
+                            </div>
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel
+                            disabled={isDeleting}
+                            className="h-11 px-6 text-base"
+                        >
+                            Annuler
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleDelete}
+                            disabled={isDeleting}
+                            className="h-11 px-6 text-base bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            {isDeleting ? "Suppression..." : "Supprimer"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

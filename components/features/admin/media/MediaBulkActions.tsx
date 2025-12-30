@@ -65,7 +65,7 @@ export function MediaBulkActions({
     const sourceFolders = Array.from(
         new Set(
             selectedMedia
-                .map(m => m.folder?.name ?? "Racine")
+                .map(m => m.folder?.name ?? "Uploads génériques")
         )
     );
 
@@ -262,7 +262,7 @@ export function MediaBulkActions({
                                     <SelectValue placeholder="Déplacer vers..." />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="root">Racine</SelectItem>
+                                    <SelectItem value="root">Uploads génériques</SelectItem>
                                     {folders.map((folder) => (
                                         <SelectItem key={folder.id} value={folder.id.toString()}>
                                             {folder.name}

@@ -8,7 +8,7 @@ import type { DALResult } from "@/lib/dal/helpers";
  * @file Media Data Access Layer
  * @description Database and Storage operations for media files
  */
-
+//TODO: Split into smaller files if this grows too large
 // =============================================================================
 // TYPES
 // =============================================================================
@@ -907,4 +907,65 @@ export async function listMediaItems(): Promise<DALResult<Array<{
     });
 
     return { success: true, data: result };
+}
+
+// =============================================================================
+// STATISTICS
+// =============================================================================
+
+export interface MediaStats {
+    totalMedia: number;
+    totalTags: number;
+    totalFolders: number;
+    storageUsedBytes: number;
+    storageUsed: string;
+}
+
+export async function fetchMediaStats(): Promise<DALResult<MediaStats>> {
+    await requireAdmin();
+    const supabase = await createClient();
+
+    const [mediaResult, tagsResult, foldersResult] = await Promise.all([
+        supabase.from("medias").select("size_bytes", { count: "exact" }),
+        supabase.from("media_tags").select("id", { count: "exact", head: true }),
+        supabase.from("media_folders").select("id", { count: "exact", head: true }),
+    ]);
+
+    if (mediaResult.error) {
+        console.error("[DAL] Failed to fetch media stats:", mediaResult.error);
+        return { success: false, error: mediaResult.error.message };
+    }
+
+    const totalMedia = mediaResult.count ?? 0;
+    const totalTags = tagsResult.count ?? 0;
+    const totalFolders = foldersResult.count ?? 0;
+
+    const storageUsedBytes = mediaResult.data?.reduce(
+        (sum, m) => sum + (m.size_bytes ?? 0),
+        0
+    ) ?? 0;
+
+    const storageUsed = formatStorageSize(storageUsedBytes);
+
+    return {
+        success: true,
+        data: {
+            totalMedia,
+            totalTags,
+            totalFolders,
+            storageUsedBytes,
+            storageUsed,
+        },
+    };
+}
+
+function formatStorageSize(bytes: number): string {
+    if (bytes === 0) return "0 MB";
+    if (bytes < 1024 * 1024) {
+        return `${(bytes / 1024).toFixed(1)} KB`;
+    }
+    if (bytes < 1024 * 1024 * 1024) {
+        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    }
+    return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
 }

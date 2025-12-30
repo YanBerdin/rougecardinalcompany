@@ -5,7 +5,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { Folder, Tag, Images } from "lucide-react";
-// import { Button } from "@/components/ui/button";
 import {
     Card,
     CardContent,
@@ -14,6 +13,7 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { fetchMediaStats } from "@/lib/dal/media";
 
 export const metadata = {
     title: "Médiathèque | Admin",
@@ -101,13 +101,11 @@ export default function MediaLibraryPage() {
 }
 
 async function MediaStatsSection() {
-    // TODO: Fetch real stats from DAL
-    const stats = {
-        totalMedia: 0,
-        totalTags: 0,
-        totalFolders: 0,
-        storageUsed: "0 MB",
-    };
+    const result = await fetchMediaStats();
+    
+    const stats = result.success
+        ? result.data
+        : { totalMedia: 0, totalTags: 0, totalFolders: 0, storageUsed: "Erreur" };
 
     return (
         <div className="mt-8 grid gap-4 md:grid-cols-4">

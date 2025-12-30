@@ -192,7 +192,7 @@ export function MediaLibraryView({
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="all">Tous les dossiers</SelectItem>
-                        <SelectItem value="root">Racine (sans dossier)</SelectItem>
+                        <SelectItem value="root">Uploads génériques</SelectItem>
                         {availableFolders.map((folder) => (
                             <SelectItem key={folder.id} value={String(folder.id)}>
                                 {folder.name}

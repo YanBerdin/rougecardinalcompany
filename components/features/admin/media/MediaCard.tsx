@@ -282,10 +282,10 @@ export function MediaCard({
         {/* Folder & Usage Info */}
         <div className="mt-2 flex flex-col gap-1">
           {/* Folder location */}
-          <div className="flex items-center gap-1.5 text-sm text-muted-foreground" title={media.folder?.name ?? "Racine"}>
+          <div className="flex items-center gap-1.5 text-sm text-muted-foreground" title={media.folder?.name ?? "Uploads génériques"}>
             <Folder className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
             <span className="truncate">
-              {media.folder?.name ?? "Racine"}
+              {media.folder?.name ?? "Uploads génériques"}
             </span>
           </div>
 
