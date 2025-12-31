@@ -70,6 +70,19 @@ Note RLS: les nouvelles tables co‑localisent leurs politiques (dans le même f
 
 ## 🆕 Mises à jour récentes (décembre 2025)
 
+- **Corrections RLS & SECURITY INVOKER (31 déc. 2025)** : Résolution complète des politiques RLS et enforcement SECURITY INVOKER sur toutes les vues.
+  - **Migration RLS** : `20251231010000_fix_base_tables_rls_revoke_admin_views_anon.sql`
+    - Fix politiques RLS `membres_equipe` : lecture publique limitée à `active = true`
+    - Fix politiques RLS `compagnie_presentation_sections` : lecture publique limitée à `active = true`
+    - Révocation accès anon aux 7 vues admin (*_admin)
+    - Schémas déclaratifs mis à jour : `04_table_membres_equipe.sql`, `07c_table_compagnie_presentation.sql`
+  - **Migration SECURITY INVOKER** : `20251231020000_enforce_security_invoker_all_views_final.sql`
+    - Force SECURITY INVOKER sur 11 vues publiques via `ALTER VIEW ... SET (security_invoker = true)`
+    - Résout le problème de migration snapshot qui recréait les vues sans security_invoker
+    - Vues corrigées : communiques_presse_dashboard, communiques_presse_public, articles_presse_public, membres_equipe_admin, compagnie_presentation_sections_admin, partners_admin, messages_contact_admin, content_versions_detailed, analytics_summary, popular_tags, categories_hierarchy
+  - **Tests de sécurité** : 13/13 PASSED (4 vues publiques accessibles, 7 vues admin bloquées, 2 tables filtrées)
+  - **Documentation complète** : `doc/SUPABASE-VIEW-SECURITY/README.md`
+
 - **Normalisation `spectacles.status` (9-12 déc. 2025)** : Normalisation des valeurs de statut vers des tokens anglais canoniques.
   - **Valeurs canoniques** : `'draft'`, `'published'`, `'archived'` (exclusivement)
   - **Migration DML** : `20251209120000_normalize_spectacles_status_to_english.sql` (⚠️ modifie les données en place)

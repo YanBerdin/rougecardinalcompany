@@ -346,9 +346,15 @@ export type TeamMemberFormValues = z.infer<typeof TeamMemberFormSchema>;
 ### Security Rules (36/36 tables have RLS)
 
 - ALL tables use Row Level Security
-- Public tables: `published_at IS NOT NULL` (read-only)
+- Public tables: `published_at IS NOT NULL` OR `active = true` (read-only)
 - Admin tables: `(select public.is_admin())` for all operations
 - SECURITY INVOKER views require GRANT permissions on base tables
+- **Recent RLS fixes (Dec 31, 2025)**:
+  - `membres_equipe`: Public access limited to `active = true` rows only
+  - `compagnie_presentation_sections`: Public access limited to `active = true` rows only
+  - All 11 public views enforced with SECURITY INVOKER via migration 20251231020000
+  - 7 admin views (*_admin) access revoked from anon role
+  - Complete security test suite: 13/13 PASSED
 
 ### Type Safety Pattern
 

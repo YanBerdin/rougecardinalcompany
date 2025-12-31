@@ -2,12 +2,16 @@
 /**
  * Test script to verify SECURITY INVOKER views work correctly
  * after migration 20251022160000_fix_all_views_security_invoker.sql
+ * 
+ * Usage:
+ *   DOTENV_CONFIG_PATH=.env.local pnpm exec tsx scripts/test-views-security-invoker.ts
  */
-import * as dotenv from "dotenv";
+
+// CRITICAL: Load env vars BEFORE any T3 Env import
+import 'dotenv/config';
+
 import { createClient } from '@supabase/supabase-js';
 import { env } from '../lib/env';
-
-dotenv.config();
 
 const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY;

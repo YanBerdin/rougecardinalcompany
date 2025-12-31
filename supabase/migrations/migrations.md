@@ -175,6 +175,43 @@ pnpm add next@16.0.7
   - 🛠️ Impact local : aucune action requise — la suppression est idempotente et la base locale est propre.
   - 🔎 Action recommandée : garder la migration pour tracer le contrôle cloud-local ; si vous voulez forcer l'état sur le cloud, appliquez la migration via la CLI/SQL Editor. Voir `scripts/check-extension.ts` pour un contrôle programmatique.
 
+- ~~`20251231000000_fix_communiques_presse_public_security_invoker.sql`~~ — **\[SUPPRIMÉE]** Migration obsolète en conflit avec schéma déclaratif
+  - **Raison de suppression**: Le schéma déclaratif (`supabase/schemas/41_*.sql`) contient déjà `with (security_invoker = true)` pour toutes les vues
+  - **Problème**: Cette migration recréait les vues SANS la directive `security_invoker`, annulant le schéma déclaratif
+  - **Solution**: Migration supprimée le 2025-12-31, schéma déclaratif seule source de vérité
+  - **Note**: Les vues sont correctement définies en SECURITY INVOKER dans les fichiers de schéma déclaratif depuis octobre 2025
+
+- `20251231010000_fix_base_tables_rls_revoke_admin_views_anon.sql` — **SECURITY FIX: Restrict base tables RLS for admin views**
+  - **Contexte**: Les vues admin SECURITY INVOKER exposent les données si les tables de base ont `using(true)`
+  - **Problème**: `anon` peut accéder aux données via les vues admin car `membres_equipe` et `compagnie_presentation_sections` sont publiquement lisibles
+  - **Solution**:
+    - Politiques SELECT tables de base : `using (active = true)` pour public
+    - Politiques SELECT admin séparées : `using (is_admin())` pour voir les inactifs
+    - REVOKE SELECT sur vues `*_admin` pour rôle `anon`
+  - ✅ **Intégré au schéma déclaratif** : `04_table_membres_equipe.sql`, `07c_table_compagnie_presentation.sql`
+  - 📝 **Known Caveat** : RLS policies changes non détectées par migra diff
+
+- `20251231020000_enforce_security_invoker_all_views_final.sql` — **SECURITY FIX: Force SECURITY INVOKER on all views**
+  - **Contexte**: Supabase Security Advisor signale `SECURITY DEFINER` sur `communiques_presse_dashboard` et autres vues
+  - **Problème**: Migration snapshot `20250918000002_apply_declarative_schema_complete.sql` (septembre 2025) recrée les vues SANS `security_invoker`, annulant le schéma déclaratif
+  - **Solution**:
+    - Utilise `ALTER VIEW ... SET (security_invoker = true)` sur toutes les vues publiques
+    - Migration exécutée EN DERNIER (timestamp `20251231020000`) pour override la snapshot
+    - Schéma déclaratif reste la source de vérité pour les définitions de vues
+  - **Vues mises à jour** (11 total):
+    - `communiques_presse_dashboard`, `communiques_presse_public`, `articles_presse_public`
+    - `spectacles_public`, `spectacles_admin`
+    - `membres_equipe_admin`, `compagnie_presentation_sections_admin`, `partners_admin`
+    - `messages_contact_admin`, `content_versions_detailed`, `analytics_summary`
+    - `popular_tags`, `categories_hierarchy`
+  - ✅ **Intégré au schéma déclaratif** : Tous les fichiers `supabase/schemas/*.sql` contiennent déjà `WITH (security_invoker = true)`
+  - 📝 **Migration conservée** pour :
+    - Historique de correctif
+    - Cohérence avec Supabase Cloud
+    - Garantir SECURITY INVOKER même après la snapshot de septembre 2025
+  - ✅ **Tests** : 13/13 tests passés (local + cloud) - toutes les vues en SECURITY INVOKER
+  - 📝 **Known Caveat** : `security_invoker` attribute changes non détectées par migra diff
+
 ## 📌 Post-Mortem : Incident pg_net (Décembre 2025)
 
 > **Résumé** : L'extension `pg_net` a causé une exécution partielle de migration, laissant la fonction `reorder_hero_slides` non créée.
@@ -572,12 +609,10 @@ Suite à la finalisation de la campagne de sécurité (Round 17, CI passed), 3 f
   - ⚡ **Avantage performance** : Évite l'évaluation RLS (amélioration théorique des temps de requête)
   - 📊 **Portée** : Affecte uniquement les requêtes anonymes (role `anon`) sur les articles presse publiés
 
-- `20251022120000_fix_articles_presse_public_security_invoker.sql` — **SECURITY FIX : View security_invoker** : Correction de la vue `articles_presse_public` pour utiliser `SECURITY INVOKER` au lieu de `SECURITY DEFINER`, éliminant le risque d'escalade de privilèges.
-  - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/08_table_articles_presse.sql` (22 oct. 2025)
-  - 📝 **Migration manuelle requise** : Known caveat - "security invoker on views" n'est PAS capturé par `supabase db diff`
-  - 🔐 **Impact sécurité** : CRITIQUE - Évite que les requêtes s'exécutent avec les privilèges du créateur (superuser)
-  - ✅ **Principe moindre privilège** : Les requêtes s'exécutent maintenant avec les privilèges de l'utilisateur qui requête
-  - 🎯 **Conformité** : Suit les instructions Declarative Schema (hotfix + sync schéma déclaratif)
+- ~~`20251022120000_fix_articles_presse_public_security_invoker.sql`~~ — **\[SUPPRIMÉE]** Migration obsolète
+  - **Raison**: Schéma déclaratif déjà correct avec `security_invoker = true` depuis oct. 2025
+  - **Supprimée**: 2025-12-31
+  - **Note**: Vue déjà correctement définie dans `supabase/schemas/08_table_articles_presse.sql`
 
 - `20251022140000_grant_select_articles_presse_anon.sql` — **FIX : Base table permissions for SECURITY INVOKER view** : Ajout du GRANT SELECT sur la table `articles_presse` pour les rôles anon/authenticated. Résout le problème d'affichage vide des articles après migration SECURITY INVOKER.
   - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/08_table_articles_presse.sql` (22 oct. 2025)
@@ -591,7 +626,10 @@ Suite à la finalisation de la campagne de sécurité (Round 17, CI passed), 3 f
   - ⚡ **Impact** : Anon users can now query articles_presse_public view successfully
   - 🎯 **Security** : Proper RLS enforcement with row-level filtering
 
-- `20251022160000_fix_all_views_security_invoker.sql` — **SECURITY FIX : Mass conversion SECURITY DEFINER → SECURITY INVOKER** : Conversion de 10 vues de SECURITY DEFINER vers SECURITY INVOKER pour éliminer les risques d'escalade de privilèges.
+- ~~`20251022160000_fix_all_views_security_invoker.sql`~~ — **\[SUPPRIMÉE]** Migration obsolète
+  - **Raison**: Schéma déclaratif déjà correct avec `security_invoker = true` pour toutes les vues
+  - **Supprimée**: 2025-12-31
+  - **Note**: Vues déjà correctement définies dans `supabase/schemas/41_*.sql`
   - ✅ **Intégré au schéma déclaratif** : 7 fichiers schemas mis à jour (41_views_*, 13_analytics_*, 14_categories_*, 15_content_versioning.sql, 10_tables_system.sql)
   - 🔐 **Root cause** : PostgreSQL views default to SECURITY DEFINER = execution with creator privileges (postgres superuser)
   - ⚡ **Impact** : Views now run with querying user's privileges, proper RLS enforcement

@@ -21,13 +21,21 @@ comment on column public.membres_equipe.image_url is 'URL externe de l image du 
 -- Row Level Security
 alter table public.membres_equipe enable row level security;
 
--- Tout le monde peut voir les membres d'équipe
-drop policy if exists "Membres equipe are viewable by everyone" on public.membres_equipe;
-create policy "Membres equipe are viewable by everyone"
+-- Public users see only active members
+drop policy if exists "Active team members are viewable by everyone" on public.membres_equipe;
+create policy "Active team members are viewable by everyone"
 on public.membres_equipe
 for select
 to anon, authenticated
-using ( true );
+using ( active = true );
+
+-- Admins see ALL members (including inactive)
+drop policy if exists "Admins can view all team members" on public.membres_equipe;
+create policy "Admins can view all team members"
+on public.membres_equipe
+for select
+to authenticated
+using ( (select public.is_admin()) );
 
 -- Seuls les admins peuvent gérer les membres d'équipe
 drop policy if exists "Admins can create membres equipe" on public.membres_equipe;
