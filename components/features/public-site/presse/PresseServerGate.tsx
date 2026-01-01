@@ -8,18 +8,27 @@ import {
 import { fetchDisplayToggle } from "@/lib/dal/site-config";
 
 export default async function PresseServerGate() {
-  // ✅ Check media kit toggle
-  const mediaKitToggleResult = await fetchDisplayToggle(
-    "display_toggle_presse_articles"
-  );
+  // ✅ Check display toggles
+  const [mediaKitToggleResult, pressReleasesToggleResult] = await Promise.all([
+    fetchDisplayToggle("display_toggle_media_kit"),
+    fetchDisplayToggle("display_toggle_presse_articles"),
+  ]);
 
   const showMediaKit =
     mediaKitToggleResult.success &&
     mediaKitToggleResult.data?.value.enabled !== false;
 
+  const showPressReleases =
+    pressReleasesToggleResult.success &&
+    pressReleasesToggleResult.data?.value.enabled !== false;
+
+  const maxPressReleases = pressReleasesToggleResult.success
+    ? pressReleasesToggleResult.data?.value.max_items ?? 12
+    : 12;
+
   const [pressReleasesResult, mediaArticlesResult, mediaKitResult] =
     await Promise.all([
-      fetchPressReleases(),
+      showPressReleases ? fetchPressReleases(maxPressReleases) : Promise.resolve({ success: true, data: [] }),
       fetchMediaArticles(),
       showMediaKit ? fetchMediaKit() : Promise.resolve({ success: true, data: [] }),
     ]);

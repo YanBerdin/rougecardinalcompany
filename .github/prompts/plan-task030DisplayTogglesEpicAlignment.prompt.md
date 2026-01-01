@@ -38,7 +38,30 @@ Aligner TASK030 Display Toggles avec l'Epic 14.7-back-office.md :
 | `display_toggle_home_hero` | Hero homepage |
 | `display_toggle_home_about` | À propos homepage |
 | `display_toggle_home_spectacles` | Prochains Spectacles homepage |
-| `display_toggle_presse_articles` | Articles presse (extension) |
+| ~~`display_toggle_presse_articles`~~ | ⚠️ Renommé en `display_toggle_media_kit` (1er janvier 2026) |
+
+### ⚠️ CORRECTION Presse Toggles (1er janvier 2026)
+
+**Contexte** : Confusion initiale sur la fonction du toggle `display_toggle_presse_articles`.
+
+**Problème identifié** :
+- Le toggle `display_toggle_presse_articles` contrôlait la section **Kit Média**, pas les articles/communiqués
+- Besoin d'un toggle séparé pour la section **Communiqués de Presse**
+
+**Solution appliquée** :
+1. Migration `20260101220000_fix_presse_toggles.sql` : Transformation des clés legacy
+   - `public:presse:media_kit_enabled` → `display_toggle_media_kit` (contrôle Kit Média)
+   - `public:presse:communiques_enabled` → `display_toggle_presse_articles` (contrôle Communiqués)
+2. Fix `PresseView.tsx` : Masquage complet des sections quand toggles désactivés
+3. Scripts utilitaires créés :
+   - `scripts/check-presse-toggles.ts` — Vérification de l'état des toggles
+   - `scripts/toggle-presse.ts` — Activation/désactivation rapide pour tests
+
+**Toggles Presse finaux** (2 au lieu de 1) :
+| Key | Description | Category |
+|-----|-------------|----------|
+| `display_toggle_media_kit` | Afficher la section Kit Média | `presse_display` |
+| `display_toggle_presse_articles` | Afficher la section Communiqués de Presse | `presse_display` |
 
 ### Toggles à CRÉER (5)
 | Key | Description | Category |
@@ -279,22 +302,138 @@ rm -rf .github/prompts/plan-TASK030:-Display\ Toggles/
 
 ---
 
+### Phase 11 : Fix Presse Toggles - Séparation Kit Média / Communiqués (1er janvier 2026)
+
+**Contexte** : Le toggle `display_toggle_presse_articles` initial contrôlait en réalité la section Kit Média, pas les communiqués de presse. Cette confusion nécessitait un refactoring pour séparer les deux fonctionnalités.
+
+#### 11.1 Migration fix_presse_toggles
+**Fichier** : `supabase/migrations/20260101220000_fix_presse_toggles.sql`
+
+**Action** : Transformer les clés legacy en nouveaux toggles
+```sql
+-- Transform public:presse:media_kit_enabled → display_toggle_media_kit
+update public.configurations_site
+set 
+  key = 'display_toggle_media_kit',
+  category = 'presse_display',
+  description = 'Afficher la section Kit Média sur la page Presse.',
+  value = jsonb_build_object('enabled', coalesce((value)::boolean, true), 'max_items', null)
+where key = 'public:presse:media_kit_enabled';
+
+-- Transform public:presse:communiques_enabled → display_toggle_presse_articles
+update public.configurations_site
+set 
+  key = 'display_toggle_presse_articles',
+  category = 'presse_display',
+  description = 'Afficher la section Communiqués de Presse sur la page Presse.',
+  value = jsonb_build_object('enabled', coalesce((value)::boolean, true), 'max_items', 12)
+where key = 'public:presse:communiques_enabled';
+```
+
+**Commande** :
+```bash
+pnpm dlx supabase db push --linked
+```
+
+#### 11.2 PresseServerGate.tsx
+**Fichier** : `components/features/public-site/presse/PresseServerGate.tsx`
+
+**Action** : Utiliser les 2 toggles indépendants
+```typescript
+const [mediaKitToggleResult, pressReleasesToggleResult] = await Promise.all([
+  fetchDisplayToggle("display_toggle_media_kit"),
+  fetchDisplayToggle("display_toggle_presse_articles"),
+]);
+
+const showMediaKit = mediaKitToggleResult.success && 
+  mediaKitToggleResult.data?.value.enabled !== false;
+
+const showPressReleases = pressReleasesToggleResult.success && 
+  pressReleasesToggleResult.data?.value.enabled !== false;
+
+// Fetch data conditionally
+const [pressReleasesResult, mediaKitResult] = await Promise.all([
+  showPressReleases ? fetchPressReleases() : Promise.resolve({ success: true, data: [] }),
+  showMediaKit ? fetchMediaKit() : Promise.resolve({ success: true, data: [] }),
+]);
+```
+
+#### 11.3 PresseView.tsx
+**Fichier** : `components/features/public-site/presse/PresseView.tsx`
+
+**Action** : Masquer complètement les sections désactivées (y compris titres)
+```tsx
+{/* Communiqués de Presse */}
+{pressReleases.length > 0 && (
+  <section className="py-20">
+    <h2>Communiqués de Presse</h2>
+    {/* ... */}
+  </section>
+)}
+
+{/* Kit Média */}
+{mediaKit.length > 0 && (
+  <section className="py-20">
+    <h2>Kit Média</h2>
+    {/* ... */}
+  </section>
+)}
+```
+
+#### 11.4 Scripts utilitaires
+**Créer** :
+1. `scripts/check-presse-toggles.ts` — Vérifier l'état des toggles presse
+2. `scripts/toggle-presse.ts` — Activer/désactiver rapidement pour tests
+
+**Commandes disponibles** :
+```bash
+# Vérifier l'état
+pnpm exec tsx scripts/check-presse-toggles.ts
+
+# Activer tout
+pnpm exec tsx scripts/toggle-presse.ts enable-all
+
+# Désactiver tout
+pnpm exec tsx scripts/toggle-presse.ts disable-all
+
+# Activer uniquement Kit Média
+pnpm exec tsx scripts/toggle-presse.ts enable-media-kit
+
+# Activer uniquement Communiqués
+pnpm exec tsx scripts/toggle-presse.ts enable-press-releases
+```
+
+---
+
 ### Phase 11 : Tests de validation
 
 ```bash
-# 1. Vérifier les toggles en base
-psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -c \
-  "SELECT key, category, value->>'enabled' FROM configurations_site WHERE key LIKE 'display_toggle%' ORDER BY key;"
+# 1. Vérifier les toggles en base (10 toggles attendus)
+pnpm exec tsx scripts/check-presse-toggles.ts
 
 # 2. Tester l'admin UI
 # Naviguer vers /admin/site-config
-# Vérifier que les 9 toggles sont listés (4 existants + 5 nouveaux)
+# Vérifier que les 10 toggles sont listés dans 5 sections :
+#   - Home (6 toggles)
+#   - Agenda (1 toggle)
+#   - Contact (1 toggle)  
+#   - Presse (2 toggles) ← NOUVELLE SECTION
 
 # 3. Tester le rendu public
 # - Homepage : Hero, About, Spectacles, À la Une, Partners, Newsletter
 # - Agenda : Newsletter inline form
 # - Contact : Newsletter Card
-# - Presse : Articles grid
+# - Presse : Communiqués de Presse + Kit Média (sections masquées si désactivées)
+
+# 4. Tester les toggles presse
+pnpm exec tsx scripts/toggle-presse.ts disable-all
+# → Vérifier que les sections Communiqués et Kit Média disparaissent complètement
+
+pnpm exec tsx scripts/toggle-presse.ts enable-media-kit
+# → Vérifier que seul Kit Média s'affiche
+
+pnpm exec tsx scripts/toggle-presse.ts enable-all
+# → Vérifier que les deux sections s'affichent
 ```
 
 ---
@@ -320,18 +459,23 @@ psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -c \
 | `lib/actions/site-config-actions.ts` | CLEANUP compagnie paths | 9 | ✅ Déjà OK (pas de refs) |
 | `components/features/admin/site-config/ToggleCard.tsx` | CLEANUP compagnie names | 9 | ✅ Déjà OK (pas de refs) |
 | `.github/prompts/plan-TASK030:-Display Toggles/` | DELETE folder | 10 | ✅ Supprimé |
+| `supabase/migrations/20260101220000_fix_presse_toggles.sql` | CREATE (fix presse) | 11 | ✅ Appliqué (1er jan) |
+| `components/features/public-site/presse/PresseView.tsx` | FIX hide sections | 11 | ✅ Fait (1er jan) |
+| `components/features/public-site/presse/PresseServerGate.tsx` | UPDATE dual toggles | 11 | ✅ Fait (1er jan) |
+| `scripts/check-presse-toggles.ts` | CREATE (verification) | 11 | ✅ Créé (1er jan) |
+| `scripts/toggle-presse.ts` | CREATE (utility) | 11 | ✅ Créé (1er jan) |
 
 ---
 
 ## ✅ TASK030 - Statut Final : COMPLET
 
-**Toutes les phases (1-10) ont été implémentées avec succès.**
+**Toutes les phases (1-11) ont été implémentées avec succès.**
 
 ### Résumé d'implémentation
 
 **Infrastructure (Phases 1-2)** :
-- ✅ 4 migrations créées et appliquées
-- ✅ 9 display toggles en base de données
+- ✅ 5 migrations créées et appliquées (dont 1 fix presse 1er janvier)
+- ✅ 10 display toggles en base de données (9 initiaux + 1 media_kit)
 - ✅ RLS policies configurées (public read, admin write)
 - ✅ Indexes créés pour performance
 
@@ -348,6 +492,11 @@ psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -c \
 - ✅ AgendaContainer avec newsletter inline + toggle
 - ✅ ContactContainer avec newsletter card + toggle
 
+**Public Site Presse (Phase 11 - 1er janvier)** :
+- ✅ PresseServerGate utilise 2 toggles indépendants (media_kit + presse_articles)
+- ✅ PresseView masque complètement les sections désactivées (titres inclus)
+- ✅ Scripts utilitaires pour tests (check + toggle)
+
 **Cleanup (Phases 8-10)** :
 - ✅ Aucune référence public:compagnie:* dans le code
 - ✅ Seed migration correcte (pas d'INSERT compagnie)
@@ -355,13 +504,15 @@ psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -c \
 
 ### État final validé
 
-**Base de données** : 9 display toggles
+**Base de données** : 10 display toggles
 - 6× home_display (hero, about, spectacles, a_la_une, partners, newsletter)
 - 1× agenda_display (newsletter)
 - 1× contact_display (newsletter)
-- 1× presse_display (articles)
+- 2× presse_display (media_kit, presse_articles)
 
-**Commit** : `b4d92f4` - 35 fichiers modifiés (+1378/-1283 lignes)
+**Commits** :
+- `b4d92f4` - 35 fichiers modifiés (+1378/-1283 lignes) - TASK030 phases 1-10
+- *(à venir)* - Phase 11 fix presse toggles + masquage sections
 
 **Documentation** : supabase/schemas/README.md + plan-task030DisplayTogglesEpicAlignment.prompt.md
 
@@ -379,6 +530,7 @@ psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -c \
 | `display_toggle_home_newsletter` | Homepage | Newsletter | `home_display` |
 | `display_toggle_agenda_newsletter` | Agenda | Newsletter CTA | `agenda_display` |
 | `display_toggle_contact_newsletter` | Contact | Newsletter Card | `contact_display` |
-| `display_toggle_presse_articles` | Presse | Articles Grid | `presse_display` |
+| `display_toggle_media_kit` | Presse | Kit Média | `presse_display` |
+| `display_toggle_presse_articles` | Presse | Communiqués de Presse | `presse_display` |
 
-**Total** : 9 toggles alignés avec Epic 14.7-back-office.md
+**Total** : 10 toggles alignés avec Epic 14.7-back-office.md (9 initiaux + 1 ajouté 1er janvier)
