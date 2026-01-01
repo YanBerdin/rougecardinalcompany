@@ -322,6 +322,126 @@ const thumbnail = await sharp(buffer)
   .toBuffer();
 ```
 
+### Display Toggles Pattern (TASK030 - Complete)
+
+**Architecture**: Centralized configuration system for controlling visibility of UI sections across public pages.
+
+**Database Table**: `public.configurations_site`
+```sql
+create table public.configurations_site (
+  id bigint generated always as identity primary key,
+  key text unique not null,
+  value jsonb not null,  -- { "enabled": boolean, "max_items": number | null }
+  description text,
+  category text,         -- e.g., "home_display", "presse_display"
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+```
+
+**RLS Policies**:
+- Public: Read-only access to all toggles
+- Admin: Full CRUD access via `is_admin()` check
+
+**10 Display Toggles by Category**:
+
+| Category | Toggles | Description |
+| -------- | ------- | ----------- |
+| `home_display` | hero, about, spectacles, a_la_une, partners, newsletter | Homepage sections (6 toggles) |
+| `agenda_display` | newsletter | Agenda newsletter inline form (1 toggle) |
+| `contact_display` | newsletter | Contact newsletter card (1 toggle) |
+| `presse_display` | media_kit, presse_articles | Media Kit + Press Releases sections (2 toggles) |
+
+**DAL Pattern** (`lib/dal/site-config.ts`):
+```typescript
+export async function fetchDisplayToggle(
+  key: string
+): Promise<DALResult<DisplayToggleDTO | null>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("configurations_site")
+    .select("key, value, description, category")
+    .eq("key", key)
+    .single();
+
+  if (error) {
+    if (error.code === "PGRST116") {
+      return { success: true, data: null }; // Not found
+    }
+    return { success: false, error: error.message };
+  }
+
+  return { success: true, data };
+}
+```
+
+**Server Component Usage**:
+```typescript
+// components/features/public-site/presse/PresseServerGate.tsx
+const mediaKitToggle = await fetchDisplayToggle("display_toggle_media_kit");
+const pressReleasesToggle = await fetchDisplayToggle("display_toggle_presse_articles");
+
+const showMediaKit = mediaKitToggle.success && 
+  mediaKitToggle.data?.value?.enabled !== false;
+
+const showPressReleases = pressReleasesToggle.success && 
+  pressReleasesToggle.data?.value?.enabled !== false;
+
+// Conditional data fetching
+const [pressReleasesResult, mediaKitResult] = await Promise.all([
+  showPressReleases ? fetchPressReleases() : Promise.resolve({ success: true, data: [] }),
+  showMediaKit ? fetchMediaKit() : Promise.resolve({ success: true, data: [] }),
+]);
+```
+
+**View Component Conditional Rendering**:
+```typescript
+// components/features/public-site/presse/PresseView.tsx
+{pressReleases.length > 0 && (
+  <section>
+    <h2>Communiqués de Presse</h2>
+    {/* content */}
+  </section>
+)}
+
+{mediaKit.length > 0 && (
+  <section>
+    <h2>Kit Média</h2>
+    {/* content */}
+  </section>
+)}
+```
+
+**Admin Management**:
+- Route: `/admin/site-config`
+- UI: Toggle switches with Server Actions
+- Real-time updates: `revalidatePath()` after mutations
+- Organized by section: Home, Presse, Agenda, Contact
+
+**Utility Scripts** (Presse toggles):
+```bash
+# Check toggle status
+pnpm exec tsx scripts/check-presse-toggles.ts
+
+# Enable/disable for testing
+pnpm exec tsx scripts/toggle-presse.ts enable-all
+pnpm exec tsx scripts/toggle-presse.ts disable-all
+pnpm exec tsx scripts/toggle-presse.ts enable-media-kit
+pnpm exec tsx scripts/toggle-presse.ts enable-press-releases
+```
+
+**Key Migrations**:
+1. `20260101160100_seed_display_toggles.sql` — Initial 9 toggles
+2. `20260101170000_cleanup_and_add_epic_toggles.sql` — Epic alignment
+3. `20260101220000_fix_presse_toggles.sql` — Split Media Kit + Press Releases (Phase 11)
+
+**Critical Rules**:
+- ✅ Toggles control BOTH data fetching AND rendering
+- ✅ Default to `enabled: true` when toggle not found
+- ✅ Hide entire sections (including titles) when disabled
+- ✅ Use conditional Promise.all to avoid fetching disabled data
+- ✅ Separate toggles for independent features (Media Kit ≠ Press Releases)
+
 ### Schemas Pattern (Server vs UI)
 
 ```typescript
@@ -1210,6 +1330,30 @@ memory-bank/
 
 - `.github/prompts/plan-teamMemberFormMigration.prompt.md` - Team CRUD migration to Server Actions + dedicated pages (`/new`, `/[id]/edit`)
 - `.github/prompts/plan.dalSolidRefactoring.prompt.md` - DAL SOLID refactoring (17 modules, 92% compliance target)
+- `.github/prompts/plan-task030DisplayTogglesEpicAlignment.prompt.md` - Display Toggles Epic alignment (10 toggles, Presse fix Phase 11)
+
+**Display Toggles Implementation (January 2026)**:
+
+Complete implementation of TASK030 across 11 phases:
+
+1. **Database Foundation** (Phases 1-8):
+   - `configurations_site` table with RLS policies
+   - 10 display toggles across 5 categories (home, agenda, contact, presse)
+   - Epic alignment: Newsletter, Partners, À la Une sections
+
+2. **Presse Toggles Fix** (Phase 11 - Jan 1, 2026):
+   - Split into 2 independent toggles: `display_toggle_media_kit` + `display_toggle_presse_articles`
+   - Migration `20260101220000_fix_presse_toggles.sql` with idempotent transformation
+   - Component fixes: PresseServerGate (dual fetches) + PresseView (conditional sections)
+   - Utility scripts: `check-presse-toggles.ts` + `toggle-presse.ts` (4 modes)
+
+3. **Admin Interface**:
+   - Route: `/admin/site-config`
+   - 5 sections: Home (6), Presse (2), Agenda (1), Contact (1)
+   - Server Actions with immediate revalidation
+
+**Commits**:
+- `b27059f` - feat(presse): separate Media Kit and Press Releases toggles + hide disabled sections
 
 **Next.js 16 Migration (December 2025)**:
 

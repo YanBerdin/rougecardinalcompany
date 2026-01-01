@@ -2,7 +2,7 @@
 
 **Generated:** 12/22/2025, 10:00:00 AM
 **Root Path:** `memory-bank/architecture`
-**Last Updated:** Added hydration fix wrappers (AboutContentFormWrapper.tsx, TeamMemberFormClient.tsx) and commit message
+**Last Updated:** Added TASK030 Phase 11 scripts (check-presse-toggles.ts, toggle-presse.ts) - 2026-01-02
 
 ```bash
 ├── 📁 .github
@@ -38,6 +38,9 @@
 │   │   │   │   │   └── 📄 page.tsx
 │   │   │   │   ├── 📁 tags
 │   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 site-config
+│   │   │   │   ├── 📄 loading.tsx
 │   │   │   │   └── 📄 page.tsx
 │   │   │   ├── 📁 spectacles
 │   │   │   │   ├── 📁 [id]
@@ -181,6 +184,11 @@
 │   │   │   │   ├── 📄 MediaUploadDialog.tsx
 │   │   │   │   ├── 📄 index.ts
 │   │   │   │   └── 📄 types.ts
+│   │   │   ├── 📁 site-config
+│   │   │   │   ├── 📄 DisplayTogglesContainer.tsx
+│   │   │   │   ├── 📄 DisplayTogglesView.tsx
+│   │   │   │   ├── 📄 ToggleCard.tsx
+│   │   │   │   └── 📄 types.ts
 │   │   │   ├── 📁 spectacles
 │   │   │   │   ├── 📄 SortableHeader.tsx
 │   │   │   │   ├── 📄 SpectacleForm.tsx
@@ -283,6 +291,7 @@
 │   │   ├── 📄 AdminDashboardSkeleton.tsx
 │   │   ├── 📄 AdminSpectaclesSkeleton.tsx
 │   │   ├── 📄 AdminTeamSkeleton.tsx
+│   │   ├── 📄 DisplayTogglesSkeleton.tsx
 │   │   ├── 📄 HeroSlidesSkeleton.tsx
 │   │   ├── 📄 StatsCardsSkeleton.tsx
 │   │   ├── 📄 UsersManagementSkeleton.tsx
@@ -359,6 +368,7 @@
 │   │   ├── 📄 media-folders-actions.ts
 │   │   ├── 📄 media-tags-actions.ts
 │   │   ├── 📄 newsletter-server.ts
+│   │   ├── 📄 site-config-actions.ts
 │   │   └── 📄 types.ts
 │   ├── 📁 api
 │   │   └── 📄 helpers.ts
@@ -391,6 +401,7 @@
 │   │   ├── 📄 media.ts
 │   │   ├── 📄 newsletter-subscriber.ts
 │   │   ├── 📄 presse.ts
+│   │   ├── 📄 site-config.ts
 │   │   ├── 📄 spectacles.ts
 │   │   └── 📄 team.ts
 │   ├── 📁 email
@@ -422,6 +433,7 @@
 │   │   ├── 📄 index.ts
 │   │   ├── 📄 media.ts
 │   │   ├── 📄 presse.ts
+│   │   ├── 📄 site-config.ts
 │   │   ├── 📄 spectacles.ts
 │   │   └── 📄 team.ts
 │   ├── 📁 tables
@@ -464,6 +476,7 @@
 │   │   │   ├── 📝 TASK011-integration-home-hero-slides.md
 │   │   │   ├── 📝 TASK012-integration-ui-compagnie-stats.md
 │   │   │   ├── 📝 TASK013-seeds-nouvelles-tables.md
+│   │   │   ├── 📝 TASK014-backoffice-toggles-centralises.md
 │   │   │   ├── 📝 TASK019-fix-spectacles-archives.md
 │   │   │   ├── 📝 TASK020-alignement-ui-presse.md
 │   │   │   ├── 📝 TASK021-admin-backoffice-spectacles.md
@@ -485,16 +498,18 @@
 │   │   │   ├── 📝 TASK026B-db-functions-compliance.md
 │   │   │   ├── 📝 TASK027B-security-definer-rationale.md
 │   │   │   ├── 📝 TASK028B-cleanup-obsolete-scripts.md
+│   │   │   ├── 📝 TASK029-media-library.md
+│   │   │   ├── 📝 TASK030-display-toggles.md
+│   │   │   ├── 📝 TASK030A-display-toggles.md
 │   │   │   ├── 📝 TASK032-user-role-management-FINAL.md
-│   │   │   └── 📝 TASK032-user-role-management.md
+│   │   │   ├── 📝 TASK032-user-role-management.md
+│   │   │   ├── 📝 TASK048-t3-env-implementation.md
+│   │   │   └── 📝 TASK049-database-security-rls-security-invoker.md
 │   │   ├── 📝 RESOLVED_db_reconstruction_2025-11-18.md
-│   │   ├── 📝 TASK014-backoffice-toggles-centralises.md
 │   │   ├── 📝 TASK023-partners-management.md
 │   │   ├── 📝 TASK024-press-management.md
 │   │   ├── 📝 TASK027-company-content-management.md
 │   │   ├── 📝 TASK028-content-versioning-ui.md
-│   │   ├── 📝 TASK029-media-library.md
-│   │   ├── 📝 TASK030-display-toggles.md
 │   │   ├── 📝 TASK031-analytics-dashboard.md
 │   │   ├── 📝 TASK033-audit-logs-viewer.md
 │   │   ├── 📝 TASK034-performance-optimization.md
@@ -506,7 +521,6 @@
 │   │   ├── 📝 TASK040-documentation.md
 │   │   ├── 📝 TASK046-rate-limiting-handlers.md
 │   │   ├── 📝 TASK047-newsletter-schema-extraction.md
-│   │   ├── 📝 TASK048-t3-env-implementation.md
 │   │   ├── 📝 _archived_TASK025-communications-dashboard.md
 │   │   ├── 📝 _index.md
 │   │   ├── 📝 _issues_preview.md
@@ -550,8 +564,13 @@
 │   ├── 📄 check-existing-profile.js
 │   ├── 📄 check-extension.ts
 │   ├── 📄 check-migration-applied.ts
+│   ├── 📄 check-presse-toggles.ts
 │   ├── 📄 check-security-advisors.js
+│   ├── 📄 check-security-advisors.ts
 │   ├── 📄 check-security-audit.sh
+│   ├── 📄 check-storage-buckets.ts
+│   ├── 📄 check-storage-paths.ts
+│   ├── 📄 check-views-security.ts
 │   ├── 📄 create-admin-user.ts
 │   ├── 📄 create_issues.sh
 │   ├── 📄 delete-test-user.js
@@ -566,12 +585,17 @@
 │   ├── 📄 test-email-integration.ts
 │   ├── 📄 test-env-validation.ts
 │   ├── 📄 test-profile-insertion.js
+│   ├── 📄 test-rate-limit.ts
 │   ├── 📄 test-spectacles-crud.ts
 │   ├── 📄 test-spectacles-dal.ts
 │   ├── 📄 test-ssrf-validation.ts
 │   ├── 📄 test-team-server-actions.ts
+│   ├── 📄 test-thumbnail-direct.ts
+│   ├── 📄 test-thumbnail-generation.ts
 │   ├── 📄 test-views-security-invoker.ts
-│   └── 📄 test-webhooks.ts
+│   ├── 📄 test-webhooks.ts
+│   ├── 📄 toggle-presse.ts
+│   └── 📄 validate-media-folders.ts
 ├── 📁 supabase
 │   ├── 📁 .branches
 │   │   └── 📄 _current_branch
@@ -599,9 +623,7 @@
 │   │   ├── 📄 20250930122000_seed_configurations_site.sql
 │   │   ├── 📄 20251002120000_seed_communiques_presse_et_media_kit.sql
 │   │   ├── 📄 20251022000001_create_medias_storage_bucket.sql
-│   │   ├── 📄 20251022120000_fix_articles_presse_public_security_invoker.sql
 │   │   ├── 📄 20251022140000_grant_select_articles_presse_anon.sql
-│   │   ├── 📄 20251022160000_fix_all_views_security_invoker.sql
 │   │   ├── 📄 20251024214802_reorder_team_members.sql
 │   │   ├── 📄 20251024214930_grant_select_membres_equipe.sql
 │   │   ├── 📄 20251027000000_create_is_admin_function.sql
@@ -628,8 +650,16 @@
 │   │   ├── 📄 20251227203314_add_media_tags_folders.sql
 │   │   ├── 📄 20251227223934_fix_storage_path_urls_in_views.sql
 │   │   ├── 📄 20251227225607_restore_medias_folder_id.sql
-│   │   ├── 📄 20251228145621_add_thumbnail_support_phase3.sql
+│   │   ├── 📄 20251228140000_add_thumbnail_support.sql
 │   │   ├── 📄 20251228220350_fix_media_tags_folders_rls_granular.sql
+│   │   ├── 📄 20251230120000_sync_media_folders_with_storage.sql
+│   │   ├── 📄 20251231010000_fix_base_tables_rls_revoke_admin_views_anon.sql
+│   │   ├── 📄 20251231020000_enforce_security_invoker_all_views_final.sql
+│   │   ├── 📄 20260101160000_add_display_toggles_metadata_columns.sql
+│   │   ├── 📄 20260101160100_seed_display_toggles.sql
+│   │   ├── 📄 20260101170000_cleanup_and_add_epic_toggles.sql
+│   │   ├── 📄 20260101180000_fix_cleanup_display_toggles_no_compagnie.sql
+│   │   ├── 📄 20260101220000_fix_presse_toggles.sql
 │   │   ├── 📝 ROUND_7B_ANALYSIS.md
 │   │   ├── 📝 migrations.md
 │   │   └── 📄 sync_existing_profiles.sql

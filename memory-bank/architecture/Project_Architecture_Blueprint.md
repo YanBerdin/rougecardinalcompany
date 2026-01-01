@@ -105,6 +105,20 @@ Version: v2.7
 
 Résumé: ce document analyse la base de code existante et formalise le modèle d'architecture, les patterns observés et les recommandations pour l'évolution et l'extensibilité. Il s'appuie sur l'organisation actuelle (Next.js 16, TypeScript strict, Supabase, React 19) et couvre les composantes clés, la sécurité RLS, les modèles d'accès aux données, les tests et le déploiement.
 
+**Mise à jour v2.8 (1er janvier 2026) — Display Toggles System (TASK030 Complete):**
+
+- **10 toggles opérationnels** : Système complet pour contrôler la visibilité des sections publiques
+- **Catégories** : home_display (6), agenda_display (1), contact_display (1), presse_display (2)
+- **Phase 11 Fix** : Split presse toggle en 2 indépendants (Media Kit + Communiqués de Presse)
+- **Migration idempotente** : Transformation des legacy keys avec DO blocks
+- **Pattern architectural** :
+  - Server Component : Fetch toggle via `fetchDisplayToggle(key)` from DAL
+  - Conditional rendering : `{showSection && (...)}`
+  - Client forms : Progressive enhancement avec Server Actions
+- **Scripts admin** : check-presse-toggles.ts, toggle-presse.ts (4 modes)
+- **Admin UI** : Interface de gestion dans `/admin/site-config` (à venir)
+- **Documentation** : `.github/prompts/plan-task030DisplayTogglesEpicAlignment.prompt.md`
+
 **Mise à jour v2.7 (30 décembre 2025) — Media Library Storage/Folders Sync:**
 
 - **Folders/Storage Architecture**: Synchronisation `media_folders.slug` ↔ Storage bucket paths (medias/{slug}/)

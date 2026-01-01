@@ -145,6 +145,23 @@ pnpm add next@16.0.7
   - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/07d_table_home_hero.sql`
 
 - `20251126001251_add_alt_text_to_home_hero_slides.sql` — **A11Y + CRUD : Hero Slides enhancements**
+
+---
+
+## Migrations récentes (janvier 2026)
+
+- `20260101220000_fix_presse_toggles.sql` — **TASK030 Phase 11 : Split presse toggle into 2 independent toggles**
+  - 🎯 **Objectif** : Créer 2 toggles indépendants pour Presse (Media Kit + Communiqués)
+  - **Root cause** : Migration 20260101210000 échouée (toggle original n'existait pas)
+  - **Legacy keys transformées** :
+    - `public:presse:media_kit_enabled` → `display_toggle_media_kit`
+    - `public:presse:communiques_enabled` → `display_toggle_presse_articles`
+  - **Pattern** : DO blocks avec existence checks (idempotent)
+  - **Composants** : PresseServerGate (dual toggles), PresseView (conditional sections)
+  - **Scripts** : check-presse-toggles.ts + toggle-presse.ts (4 modes)
+  - ✅ **Intégré au schéma déclaratif** : Toggles system complete (10 toggles)
+  - 📝 **Documentation** : `.github/prompts/plan-task030DisplayTogglesEpicAlignment.prompt.md`
+  - 📦 **Commit** : b27059f — "feat(presse): separate Media Kit and Press Releases toggles + hide disabled sections"
   - **Colonne `alt_text`** : texte alternatif pour accessibilité (max 125 caractères, contrainte CHECK)
   - **Fonction `reorder_hero_slides(jsonb)`** : ⚠️ **PARTIELLEMENT ÉCHOUÉE** - voir `20251204133540`
     - Authorization : `is_admin()` check explicite

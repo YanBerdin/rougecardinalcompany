@@ -32,6 +32,24 @@ Fournir un guide unique qui décrit l'organisation des dossiers, conventions et 
 
 ---
 
+0) Display Toggles System — TASK030 Complete (Jan 2026)
+
+- **10 toggles finaux** : 6 home, 1 agenda, 1 contact, 2 presse
+- **Phase 11 (1er jan 2026)** : Split presse toggle en 2 indépendants (Media Kit + Communiqués)
+- **Migration 20260101220000** : Transformation idempotente des legacy keys
+  - `public:presse:media_kit_enabled` → `display_toggle_media_kit`
+  - `public:presse:communiques_enabled` → `display_toggle_presse_articles`
+- **Composants** :
+  - `PresseServerGate.tsx` : Dual independent toggle fetches
+  - `PresseView.tsx` : Conditional section rendering (hide entire sections when disabled)
+- **Scripts utilitaires** :
+  - `scripts/check-presse-toggles.ts` : Verification utility
+  - `scripts/toggle-presse.ts` : Testing utility (enable-all, disable-all, enable-media-kit, enable-press-releases)
+- **Admin UI** : Display Toggles management interface in backoffice
+- **Documentation** : `.github/prompts/plan-task030DisplayTogglesEpicAlignment.prompt.md`
+- **Commit** : b27059f — "feat(presse): separate Media Kit and Press Releases toggles + hide disabled sections"
+- Effet : Contrôle granulaire de la visibilité des sections publiques, aligné avec Epic 14.7-back-office
+
 1) SOLID & Server Actions Refactoring (Dec 2025)
 
 - **Compliance achieved**: 78%→98% pattern compliance (0/6 files with violations)
