@@ -1,4 +1,5 @@
 import { fetchCompanyStats, fetchHomeAboutContent } from "@/lib/dal/home-about";
+import { fetchDisplayToggle } from "@/lib/dal/site-config";
 import { AboutView } from "./AboutView";
 import type { StatItem, AboutContent } from "./types";
 import { Users, Heart, Award } from "lucide-react";
@@ -10,6 +11,12 @@ const iconByKey: Record<string, React.ElementType> = {
 };
 
 export async function AboutContainer() {
+  // Check display toggle
+  const toggleResult = await fetchDisplayToggle("display_toggle_home_about");
+  if (!toggleResult.success || !toggleResult.data?.value?.enabled) {
+    return null;
+  }
+
   // TODO: remove - artificial delay to visualize Suspense skeletons
   await new Promise((resolve) => setTimeout(resolve, 1500));
 

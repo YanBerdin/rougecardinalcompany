@@ -39,7 +39,11 @@ const CONTACT_REASONS: ContactReason[] = [
   { value: "autre", label: "Autre" },
 ];
 
-export function ContactPageView() {
+interface ContactPageViewProps {
+  showNewsletter?: boolean;
+}
+
+export function ContactPageView({ showNewsletter = true }: ContactPageViewProps) {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -436,7 +440,7 @@ export function ContactPageView() {
               </Card>
 
               {/* Newsletter */}
-              {/** Form (de react-hook-form) n'accepte pas onSubmit. Wrapper attend un objet UseFormReturn. => balise <form> native  */}
+              {showNewsletter && (
               <Card id="newsletter">
                 <CardHeader>
                   <CardTitle>Newsletter</CardTitle>
@@ -480,6 +484,7 @@ export function ContactPageView() {
                   )}
                 </CardContent>
               </Card>
+              )}
             </div>
           </div>
         </div>

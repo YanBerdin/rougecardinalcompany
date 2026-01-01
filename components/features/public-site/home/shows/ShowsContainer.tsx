@@ -1,4 +1,5 @@
 import { fetchFeaturedShows } from "@/lib/dal/home-shows";
+import { fetchDisplayToggle } from "@/lib/dal/site-config";
 import { ShowsView } from "./ShowsView";
 import type { Show } from "./types";
 
@@ -6,7 +7,15 @@ export async function ShowsContainer() {
   // TODO: remove - artificial delay to visualize Suspense skeletons
   await new Promise((resolve) => setTimeout(resolve, 1500));
 
-  const result = await fetchFeaturedShows(3);
+  // ✅ Check toggle - uses `public:home:spectacles`
+  const toggleResult = await fetchDisplayToggle("display_toggle_home_spectacles");
+
+  if (!toggleResult.success || !toggleResult.data?.value.enabled) {
+    return null; // Section désactivée
+  }
+
+  const maxItems = toggleResult.data.value.max_items ?? 6;
+  const result = await fetchFeaturedShows(maxItems);
 
   const records = result.success ? result.data : [];
 

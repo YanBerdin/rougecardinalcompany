@@ -1,16 +1,27 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useNewsletterSubscribe } from "@/lib/hooks/useNewsletterSubscribe";
 import { AgendaView } from "./AgendaView";
 import type { Event, EventType } from "./types";
 
 type Props = {
   events: Event[];
   eventTypes: EventType[];
+  showNewsletterSection?: boolean;
 };
 
-export default function AgendaClientContainer({ events, eventTypes }: Props) {
+export default function AgendaClientContainer({ events, eventTypes, showNewsletterSection = false }: Props) {
   const [filterType, setFilterType] = useState<string>("all");
+
+  const {
+    email,
+    isSubscribed,
+    isLoading: newsletterLoading,
+    errorMessage,
+    handleEmailChange,
+    handleSubmit,
+  } = useNewsletterSubscribe({ source: "agenda" });
 
   const filteredEvents = useMemo(() => {
     if (filterType === "all") return events;
@@ -57,6 +68,13 @@ export default function AgendaClientContainer({ events, eventTypes }: Props) {
       setFilterType={setFilterType}
       generateCalendarFile={generateCalendarFile}
       loading={false}
+      showNewsletterSection={showNewsletterSection}
+      newsletterEmail={email}
+      newsletterIsSubscribed={isSubscribed}
+      newsletterIsLoading={newsletterLoading}
+      newsletterErrorMessage={errorMessage}
+      onNewsletterEmailChange={handleEmailChange}
+      onNewsletterSubmit={handleSubmit}
     />
   );
 }

@@ -5,13 +5,23 @@ import {
   fetchPressReleases,
   fetchMediaKit,
 } from "@/lib/dal/presse";
+import { fetchDisplayToggle } from "@/lib/dal/site-config";
 
 export default async function PresseServerGate() {
+  // ✅ Check media kit toggle
+  const mediaKitToggleResult = await fetchDisplayToggle(
+    "display_toggle_presse_articles"
+  );
+
+  const showMediaKit =
+    mediaKitToggleResult.success &&
+    mediaKitToggleResult.data?.value.enabled !== false;
+
   const [pressReleasesResult, mediaArticlesResult, mediaKitResult] =
     await Promise.all([
       fetchPressReleases(),
       fetchMediaArticles(),
-      fetchMediaKit(),
+      showMediaKit ? fetchMediaKit() : Promise.resolve({ success: true, data: [] }),
     ]);
 
   // Handle errors gracefully with fallback empty arrays
@@ -23,7 +33,7 @@ export default async function PresseServerGate() {
     : [];
   const mediaKitRows = mediaKitResult.success ? mediaKitResult.data : [];
 
-  // Map DTO -> MediaKitItem pour l'UI (icône optionnelle)
+  // Map DTO → MediaKitItem pour l'UI (icône optionnelle)
   const mediaKit: MediaKitItem[] = mediaKitRows.map((r) => ({
     type: r.type,
     description: r.description,

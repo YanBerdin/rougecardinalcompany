@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { NewsletterForm } from "@/components/features/public-site/home/newsletter";
 import { AgendaViewProps } from "./types";
 import { AgendaSkeleton } from "@/components/skeletons/agenda-skeleton";
 
@@ -29,6 +30,13 @@ export function AgendaView({
   setFilterType,
   generateCalendarFile,
   loading = false,
+  showNewsletterSection = false,
+  newsletterEmail = "",
+  newsletterIsSubscribed = false,
+  newsletterIsLoading = false,
+  newsletterErrorMessage = null,
+  onNewsletterEmailChange,
+  onNewsletterSubmit,
 }: AgendaViewProps) {
   if (loading) {
     return <AgendaSkeleton />;
@@ -202,28 +210,29 @@ export function AgendaView({
         </div>
       </section>
 
-      {/* CTA - MAINTENANT ROUGE COMME "RESTEZ INFORMÉ" */}
-      <section className="py-20 hero-gradient">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold mb-6 text-white">
-            Ne Manquez Rien
-          </h2>
-          <p className="text-xl text-white/90 mb-8">
-            Inscrivez-vous à notre newsletter pour être informé en
-            avant-première de nos prochaines représentations et événements.
-          </p>
-          <Button
-            variant="outline"
-            size="lg"
-            className="bg-white/30 border-white/30 text-white backdrop-blur-md hover:bg-white hover:text-black transition-all duration-300 shadow-lg border"
-            asChild
-          >
-            <Link href="/contact#newsletter">
-              S&apos;abonner aux actualités
-            </Link>
-          </Button>
-        </div>
-      </section>
+      {/* Newsletter CTA Section */}
+      {showNewsletterSection && !newsletterIsSubscribed && (
+        <section className="py-16 hero-gradient">
+          <div className="container max-w-2xl text-center">
+            <h2 className="text-2xl font-bold text-white mb-4">
+              Ne Manquez Rien
+            </h2>
+            <p className="text-white/80 mb-6">
+              Inscrivez-vous pour recevoir les dernières actualités
+            </p>
+            {onNewsletterEmailChange && onNewsletterSubmit && (
+              <NewsletterForm
+                email={newsletterEmail}
+                isLoading={newsletterIsLoading}
+                isSubscribed={newsletterIsSubscribed}
+                errorMessage={newsletterErrorMessage}
+                onEmailChange={onNewsletterEmailChange}
+                onSubmit={onNewsletterSubmit}
+              />
+            )}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

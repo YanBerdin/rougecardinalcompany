@@ -91,7 +91,10 @@ drop table if exists public.configurations_site cascade;
 create table public.configurations_site (
   key text primary key,
   value jsonb not null,
-  updated_at timestamptz default now() not null
+  description text,
+  category text,
+  updated_at timestamptz default now() not null,
+  updated_by uuid references auth.users(id) on delete set null
 );
 
 -- Audit logs

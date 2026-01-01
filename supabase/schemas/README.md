@@ -68,6 +68,16 @@ Note RLS: les nouvelles tables co‑localisent leurs politiques (dans le même f
 
 ---
 
+## 🆕 Mises à jour récentes (janvier 2026)
+
+- **Display Toggles - Correction Migration Cleanup (1er jan. 2026)** : Résolution incohérence entre plan TASK030 et implémentation réelle.
+  - **Problème identifié** : Le plan TASK030 mentionnait 3 toggles compagnie à supprimer (`display_toggle_compagnie_values`, `display_toggle_compagnie_presentation`, `display_toggle_compagnie_stats`) mais ces clés n'ont jamais été créées par le seed initial (`20260101160100_seed_display_toggles.sql`).
+  - **Migration cleanup incorrecte** : `20260101170000_cleanup_and_add_epic_toggles.sql` contenait des DELETE pour ces clés inexistantes (aucun impact fonctionnel, 0 rows affected).
+  - **Migration corrective** : `20260101180000_fix_cleanup_display_toggles_no_compagnie.sql` (documentation only, verification des 9 toggles corrects).
+  - **État final** : 9 display toggles corrects en base (4 home + 1 presse + 2 newsletter + 2 Epic additions).
+  - **Composants concernés** : `AboutContainer.tsx` utilise correctement `display_toggle_home_about` ✅.
+  - **Action requise** : Mettre à jour le plan TASK030 pour refléter la réalité (toggles compagnie jamais créés).
+
 ## 🆕 Mises à jour récentes (décembre 2025)
 
 - **Corrections RLS & SECURITY INVOKER (31 déc. 2025)** : Résolution complète des politiques RLS et enforcement SECURITY INVOKER sur toutes les vues.
