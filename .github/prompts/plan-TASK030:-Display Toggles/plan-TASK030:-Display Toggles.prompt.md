@@ -51,6 +51,8 @@ create table public.configurations_site (
 );
 ```
 
+> **Note Sécurité** : Toutes les vues créées pour ce système doivent utiliser `WITH (security_invoker = true)` conformément au guide `.github/prompts/plan-fixRlsBaseTablesAdminViewsSecurity/database-view-security-guide.md` (décembre 2025).
+
 ### Toggles à Implémenter
 
 > ⚠️ **Note**: Les clés `public:home:*` existent déjà dans le seed. Seules les clés `public:compagnie:*` sont à créer.
@@ -76,10 +78,14 @@ create table public.configurations_site (
 -- supabase/migrations/[timestamp]_migrate_display_toggles.sql
 
 -- ============================================
--- STEP 1: Add metadata columns (idempotent)
+-- STEP 1: Verify metadata columns (already present in 10_tables_system.sql)
 -- ============================================
+-- ✅ NOTE: Les colonnes description, category, updated_by existent déjà dans le schéma
+-- ✅ NOTE: Cette section est conservée pour compatibilité avec anciennes versions
+
 do $$
 begin
+  -- Vérification que les colonnes existent (normalement déjà présentes)
   if not exists (
     select 1 from information_schema.columns 
     where table_schema = 'public' 
@@ -87,6 +93,7 @@ begin
       and column_name = 'description'
   ) then
     alter table public.configurations_site add column description text;
+    raise notice 'Column description added (unexpected - should exist in schema)';
   end if;
 
   if not exists (
@@ -96,6 +103,7 @@ begin
       and column_name = 'category'
   ) then
     alter table public.configurations_site add column category text;
+    raise notice 'Column category added (unexpected - should exist in schema)';
   end if;
 
   if not exists (
@@ -106,6 +114,7 @@ begin
   ) then
     alter table public.configurations_site 
       add column updated_by uuid references auth.users(id) on delete set null;
+    raise notice 'Column updated_by added (unexpected - should exist in schema)';
   end if;
 end;
 $$;
@@ -956,12 +965,35 @@ async function testToggleUpdate() {
 
 ---
 
+## � Sécurité et Conformité
+
+### Checklist Sécurité (Basée sur Audits Décembre 2025)
+
+- [ ] **RLS Policies** : Conformes au pattern établi dans `10_tables_system.sql`
+  - ✅ Public read : `key like 'public:%'` OR `(select public.is_admin())`
+  - ✅ Admin full access : `(select public.is_admin())` pour INSERT/UPDATE/DELETE
+- [ ] **SECURITY INVOKER** : Si vues créées, utiliser `WITH (security_invoker = true)`
+  - Référence : `.github/prompts/plan-fixRlsBaseTablesAdminViewsSecurity/database-view-security-guide.md`
+- [ ] **DAL Pattern** : `DALResult<T>`, pas de `revalidatePath()` dans DAL
+- [ ] **Server Actions** : `requireAdmin()` explicite + `revalidatePath()` dans actions uniquement
+- [ ] **TypeScript** : Pas de `any`, types stricts, validation Zod
+- [ ] **Tests Sécurité** : Script pour tester accès anon vs admin
+
+### Références Audits
+
+- Audit RLS complet : 31 décembre 2025 (36/36 tables protégées)
+- SECURITY INVOKER enforcement : 31 décembre 2025 (11 vues sécurisées)
+- Tests passés : 13/13 ✅ (`scripts/check-views-security.ts`)
+
+---
+
 ## 📚 Références
 
 ### Documentation Interne
 
 - `.github/instructions/crud-server-actions-pattern.instructions.md`
 - `.github/instructions/dal-solid-principles.instructions.md`
+- `.github/prompts/plan-fixRlsBaseTablesAdminViewsSecurity/database-view-security-guide.md`
 - `supabase/schemas/README.md`
 - `memory-bank/systemPatterns.md`
 
