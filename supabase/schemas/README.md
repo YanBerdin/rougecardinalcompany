@@ -16,7 +16,7 @@ Ce dossier contient le schéma déclaratif de la base de données selon les inst
 ### Conformité Instructions ✅
 
 | Instruction | Statut | Détail |
-|-------------|--------|--------|
+| ------------- | -------- | -------- |
 | **RLS Policies** | ✅ 100% | 36/36 tables protégées (25 principales + 11 liaison) |
 | **Functions** | ✅ 100% | SECURITY INVOKER, search_path défini |
 | **SQL Style** | ✅ 100% | Lowercase, snake_case, commentaires |
@@ -189,7 +189,7 @@ Pour rappel, la migration générée est `supabase/migrations/20250918000002_app
 ### Tables avec Protection RLS (24/24) ✅
 
 | Table | Lecture | Écriture | Particularités |
-|-------|---------|----------|----------------|
+| ------------- | -------- | -------- | ---------------- |
 | **profiles** | Publique | Propriétaire uniquement | Auto-création profil |
 | **medias** | Publique | Uploadeur ou admin | Gestion fichiers |
 | **spectacles** | Si public=true | Créateur ou admin | Visibilité contrôlée. Spectacles archivés publics (status='archive', public=true) |
@@ -220,7 +220,7 @@ Pour rappel, la migration générée est `supabase/migrations/20250918000002_app
 ### Tables de Liaison avec Protection RLS (11/11) ✅
 
 | Table | Lecture | Écriture | Particularités |
-|-------|---------|----------|----------------|
+| ------------- | -------- | -------- | ---------------- |
 | **spectacles_membres_equipe** | Publique | Admin uniquement | Casting des spectacles |
 | **spectacles_medias** | Publique | Admin uniquement | Médias des spectacles |
 | **articles_medias** | Publique | Admin uniquement | Médias des articles |
@@ -348,7 +348,7 @@ supabase migration new update_existing_data
 ## � Métriques de Conformité
 
 | Métrique | Valeur | Statut |
-|----------|--------|--------|
+| ------------- | -------- | -------- |
 | **Tables avec RLS** | 36/36 (100%) | ✅ |
 | **Tables principales** | 25/25 (100%) | ✅ |
 | **Tables de liaison** | 11/11 (100%) | ✅ |
@@ -365,7 +365,7 @@ supabase migration new update_existing_data
 ### Erreurs Communes
 
 | Erreur | Solution |
-|--------|----------|
+| ------------- | -------- |
 | `relation does not exist` | Vérifier l'ordre des fichiers |
 | `permission denied` | Vérifier les politiques RLS |
 | `function is not immutable` | Marquer les fonctions pure IMMUTABLE |
@@ -422,7 +422,7 @@ Le schéma déclaratif Rouge Cardinal Company est **production-ready** avec :
 ### Couverture Versioning
 
 | Entité | Triggers Versioning | Restauration Supportée | Notes |
-|--------|---------------------|-------------------------|-------|
+| ------------- | -------- | -------- | ---------------- |
 | spectacles | Oui | Oui | publish/unpublish détecté |
 | articles_presse | Oui | Oui | publish/unpublish via published_at |
 | communiques_presse | Oui | Oui | Flag `public` |

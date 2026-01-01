@@ -1,10 +1,93 @@
 # Active Context
 
-**Current Focus (2025-12-30)**: TASK029 Media Library - Storage/Folders Sync Finalized ✅
+**Current Focus (2026-01-01)**: Database Security - RLS & SECURITY INVOKER Fixes Completed ✅
 
 ---
 
-## Latest Updates (2025-12-30)
+## Latest Updates (2026-01-01)
+
+### Database Security - RLS & SECURITY INVOKER Fixes - COMPLETED ✅
+
+**Résolution complète des politiques RLS et enforcement SECURITY INVOKER sur toutes les vues.**
+
+#### Commits du 31 décembre 2025
+
+1. **`35daa55` - fix(security): enforce RLS active filter and SECURITY INVOKER on all views**
+   - Migration `20251231010000_fix_base_tables_rls_revoke_admin_views_anon.sql` : Fix RLS policies sur tables de base + révocation accès anon aux vues admin
+   - Migration `20251231020000_enforce_security_invoker_all_views_final.sql` : Force SECURITY INVOKER sur 11 vues via ALTER VIEW
+   - Schémas déclaratifs synchronisés : `04_table_membres_equipe.sql`, `07c_table_compagnie_presentation.sql`
+   - Tests de sécurité : 13/13 PASSED (4 vues publiques accessibles, 7 vues admin bloquées, 2 tables filtrées)
+   - Documentation complète : `doc/SUPABASE-VIEW-SECURITY/README.md`
+   - Nettoyage : 7 fichiers obsolètes supprimés, 3 migrations obsolètes retirées
+
+#### Problème Résolu
+
+**Alerte Supabase Security Advisor** : SECURITY DEFINER détecté sur `communiques_presse_dashboard`
+
+**Cause Racine** :
+
+- Migration snapshot `20250918000002` (septembre 2025) recréait les vues SANS `security_invoker`
+- Annulait les définitions du schéma déclaratif
+- Tables de base `membres_equipe` et `compagnie_presentation_sections` exposaient TOUT avec `using (true)`
+
+**Solution Implémentée** :
+
+1. **RLS Base Tables** :
+   - `membres_equipe` : Policy publique `using (active = true)`, policy admin `using (is_admin())`
+   - `compagnie_presentation_sections` : Policy publique `using (active = true)`, policy admin `using (is_admin())`
+   - Révocation SELECT sur 7 vues `*_admin` pour rôle `anon`
+
+2. **SECURITY INVOKER Enforcement** :
+   - Utilisation de `ALTER VIEW ... SET (security_invoker = true)` sur 11 vues
+   - Migration exécutée EN DERNIER pour override la snapshot
+   - Vues corrigées : communiques_presse_dashboard, communiques_presse_public, articles_presse_public, membres_equipe_admin, compagnie_presentation_sections_admin, partners_admin, messages_contact_admin, content_versions_detailed, analytics_summary, popular_tags, categories_hierarchy
+
+#### Architecture Sécurité
+
+```bash
+SECURITY INVOKER Pattern (MANDATORY)
+├── Exécution avec privilèges de l'utilisateur appelant
+├── Respect des politiques RLS
+├── Aucune escalade de privilèges
+└── All views: WITH (security_invoker = true)
+
+RLS Filtering Pattern
+├── Public tables: active = true (read-only)
+├── Admin tables: (select public.is_admin())
+└── 36/36 tables protégées
+```
+
+#### Tests de Sécurité
+
+**Script** : `scripts/check-views-security.ts`
+
+**Résultats** : 13/13 PASSED ✅
+
+- 4 vues publiques accessibles (communiques_presse_public, articles_presse_public, popular_tags, categories_hierarchy)
+- 7 vues admin bloquées pour anon (42501 errors)
+- 2 tables de base filtrées (membres_equipe: 5 actifs, compagnie_presentation_sections: 6 actifs)
+
+#### Documentation
+
+- ✅ `doc/SUPABASE-VIEW-SECURITY/README.md` - État final et guide de vérification
+- ✅ `supabase/migrations/migrations.md` - Migrations documentées
+- ✅ `supabase/schemas/README.md` - Section corrections RLS ajoutée
+- ✅ `.github/copilot-instructions.md` - Règles de sécurité mises à jour
+- ✅ Fichiers obsolètes supprimés (7 documents d'audit)
+
+#### Migrations Supprimées (Obsolètes)
+
+Marquées `reverted` sur cloud pour synchronisation historique :
+
+- `20251231000000_fix_communiques_presse_public_security_invoker.sql`
+- `20251022120000_fix_articles_presse_public_security_invoker.sql`
+- `20251022160000_fix_all_views_security_invoker.sql`
+
+**Raison** : Recréaient les vues sans `security_invoker`, conflictant avec le schéma déclaratif.
+
+---
+
+## Previous Updates (2025-12-30)
 
 ### Media Library Storage/Folders Synchronization - FINALIZED ✅
 
