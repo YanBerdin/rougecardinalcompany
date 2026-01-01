@@ -308,18 +308,62 @@ psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -c \
 | `components/features/admin/site-config/types.ts` | ADD agenda/contact props | - | ✅ Fix UI |
 | `components/features/admin/site-config/DisplayTogglesContainer.tsx` | ADD agenda/contact fetch | - | ✅ Fix UI |
 | `components/features/admin/site-config/DisplayTogglesView.tsx` | ADD agenda/contact sections | - | ✅ Fix UI |
-| `components/features/public-site/home/news/NewsContainer.tsx` | UPDATE key | 3 | ⏳ À faire |
-| `components/features/public-site/home/partners/PartnersContainer.tsx` | VERIFY key | 4 | ⏳ À vérifier |
-| `components/features/public-site/home/newsletter/NewsletterContainer.tsx` | VERIFY key | 5 | ⏳ À vérifier |
-| `components/features/public-site/agenda/AgendaContainer.tsx` | ADD toggle + pass prop | 6 | ⏳ À faire |
-| `components/features/public-site/agenda/AgendaClientContainer.tsx` | ADD hook + pass props | 6 | ⏳ À faire |
-| `components/features/public-site/agenda/AgendaView.tsx` | REPLACE CTA with NewsletterForm | 6 | ⏳ À faire |
-| `components/features/public-site/contact/ContactServerGate.tsx` | ADD toggle + pass prop | 7 | ⏳ À faire |
-| `components/features/public-site/contact/ContactPageView.tsx` | ADD prop + conditional render | 7 | ⏳ À faire |
-| `supabase/migrations/20260101160100_seed_display_toggles.sql` | UPDATE seeds | 8 | ⏳ À faire |
-| `lib/actions/site-config-actions.ts` | CLEANUP compagnie paths | 9 | ⏳ À faire |
-| `components/features/admin/site-config/ToggleCard.tsx` | CLEANUP compagnie names | 9 | ⏳ À faire |
-| `.github/prompts/plan-TASK030:-Display Toggles/` | DELETE folder | 10 | ⏳ À faire |
+| `components/features/public-site/home/news/NewsContainer.tsx` | UPDATE key | 3 | ✅ Déjà fait |
+| `components/features/public-site/home/partners/PartnersContainer.tsx` | VERIFY key | 4 | ✅ Vérifié OK |
+| `components/features/public-site/home/newsletter/NewsletterContainer.tsx` | VERIFY key | 5 | ✅ Vérifié OK |
+| `components/features/public-site/agenda/AgendaContainer.tsx` | ADD toggle + pass prop | 6 | ✅ Déjà fait |
+| `components/features/public-site/agenda/AgendaClientContainer.tsx` | ADD hook + pass props | 6 | ✅ Déjà fait |
+| `components/features/public-site/agenda/AgendaView.tsx` | REPLACE CTA with NewsletterForm | 6 | ✅ Déjà fait |
+| `components/features/public-site/contact/ContactServerGate.tsx` | ADD toggle + pass prop | 7 | ✅ Déjà fait |
+| `components/features/public-site/contact/ContactPageView.tsx` | ADD prop + conditional render | 7 | ✅ Déjà fait |
+| `supabase/migrations/20260101160100_seed_display_toggles.sql` | UPDATE seeds | 8 | ✅ Déjà OK (pas d'INSERT compagnie) |
+| `lib/actions/site-config-actions.ts` | CLEANUP compagnie paths | 9 | ✅ Déjà OK (pas de refs) |
+| `components/features/admin/site-config/ToggleCard.tsx` | CLEANUP compagnie names | 9 | ✅ Déjà OK (pas de refs) |
+| `.github/prompts/plan-TASK030:-Display Toggles/` | DELETE folder | 10 | ✅ Supprimé |
+
+---
+
+## ✅ TASK030 - Statut Final : COMPLET
+
+**Toutes les phases (1-10) ont été implémentées avec succès.**
+
+### Résumé d'implémentation
+
+**Infrastructure (Phases 1-2)** :
+- ✅ 4 migrations créées et appliquées
+- ✅ 9 display toggles en base de données
+- ✅ RLS policies configurées (public read, admin write)
+- ✅ Indexes créés pour performance
+
+**Admin UI (Fix UI)** :
+- ✅ Route /admin/site-config créée
+- ✅ 5 sections affichées correctement (Home, Compagnie, Presse, Agenda, Contact)
+- ✅ Toggle switches avec Server Actions + revalidation
+- ✅ Fix sections Agenda et Contact manquantes
+
+**Public Site (Phases 3-7)** :
+- ✅ NewsContainer utilise display_toggle_home_a_la_une
+- ✅ PartnersContainer utilise display_toggle_home_partners
+- ✅ NewsletterContainer utilise display_toggle_home_newsletter
+- ✅ AgendaContainer avec newsletter inline + toggle
+- ✅ ContactContainer avec newsletter card + toggle
+
+**Cleanup (Phases 8-10)** :
+- ✅ Aucune référence public:compagnie:* dans le code
+- ✅ Seed migration correcte (pas d'INSERT compagnie)
+- ✅ Ancien plan supprimé
+
+### État final validé
+
+**Base de données** : 9 display toggles
+- 6× home_display (hero, about, spectacles, a_la_une, partners, newsletter)
+- 1× agenda_display (newsletter)
+- 1× contact_display (newsletter)
+- 1× presse_display (articles)
+
+**Commit** : `b4d92f4` - 35 fichiers modifiés (+1378/-1283 lignes)
+
+**Documentation** : supabase/schemas/README.md + plan-task030DisplayTogglesEpicAlignment.prompt.md
 
 ---
 
