@@ -2,7 +2,6 @@ import type { DisplayToggleDTO } from "@/lib/schemas/site-config";
 
 export interface DisplayTogglesViewProps {
     homeToggles: DisplayToggleDTO[];
-    compagnieToggles: DisplayToggleDTO[];
     presseToggles: DisplayToggleDTO[];
     agendaToggles: DisplayToggleDTO[];
     contactToggles: DisplayToggleDTO[];

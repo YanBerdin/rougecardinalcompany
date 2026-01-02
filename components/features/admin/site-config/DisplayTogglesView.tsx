@@ -17,7 +17,6 @@ import type { DisplayTogglesViewProps } from "./types";
 
 export function DisplayTogglesView({
     homeToggles: initialHomeToggles,
-    compagnieToggles: initialCompagnieToggles,
     presseToggles: initialPresseToggles,
     agendaToggles: initialAgendaToggles,
     contactToggles: initialContactToggles,
@@ -27,9 +26,6 @@ export function DisplayTogglesView({
 
     // ✅ Local state synced with props
     const [homeToggles, setHomeToggles] = useState(initialHomeToggles);
-    const [compagnieToggles, setCompagnieToggles] = useState(
-        initialCompagnieToggles
-    );
     const [presseToggles, setPresseToggles] = useState(initialPresseToggles);
     const [agendaToggles, setAgendaToggles] = useState(initialAgendaToggles);
     const [contactToggles, setContactToggles] = useState(initialContactToggles);
@@ -38,10 +34,6 @@ export function DisplayTogglesView({
     useEffect(() => {
         setHomeToggles(initialHomeToggles);
     }, [initialHomeToggles]);
-
-    useEffect(() => {
-        setCompagnieToggles(initialCompagnieToggles);
-    }, [initialCompagnieToggles]);
 
     useEffect(() => {
         setPresseToggles(initialPresseToggles);

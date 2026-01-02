@@ -3,16 +3,12 @@ import { DisplayTogglesView } from "./DisplayTogglesView";
 
 export async function DisplayTogglesContainer() {
     const homeResult = await fetchDisplayTogglesByCategory("home_display");
-    const compagnieResult = await fetchDisplayTogglesByCategory(
-        "compagnie_display"
-    );
     const presseResult = await fetchDisplayTogglesByCategory("presse_display");
     const agendaResult = await fetchDisplayTogglesByCategory("agenda_display");
     const contactResult = await fetchDisplayTogglesByCategory("contact_display");
 
     if (
         !homeResult.success ||
-        !compagnieResult.success ||
         !presseResult.success ||
         !agendaResult.success ||
         !contactResult.success
@@ -29,7 +25,6 @@ export async function DisplayTogglesContainer() {
     return (
         <DisplayTogglesView
             homeToggles={homeResult.data}
-            compagnieToggles={compagnieResult.data}
             presseToggles={presseResult.data}
             agendaToggles={agendaResult.data}
             contactToggles={contactResult.data}
