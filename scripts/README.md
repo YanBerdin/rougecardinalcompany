@@ -157,6 +157,168 @@ SUPABASE_SECRET_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ---
 
+### 🔐 Audit de Sécurité (TASK036)
+
+Ces scripts valident la conformité aux standards de sécurité OWASP et aux bonnes pratiques Next.js/Supabase.
+
+#### audit-secrets-management.ts
+
+**Description** : Audit complet de la gestion des secrets et variables d'environnement.
+
+**Utilisation** :
+
+```bash
+pnpm exec tsx scripts/audit-secrets-management.ts
+```
+
+**Tests couverts (4/4)** :
+
+| Test | Description |
+| ------ | ------------- |
+| Test 1 | Détection de secrets hardcodés dans le code |
+| Test 2 | Validation T3 Env (lib/env.ts) |
+| Test 3 | Vérification .gitignore (exclusion .env*) |
+| Test 4 | Scan historique Git (pas de secrets commités) |
+
+**Fonctionnalités** :
+
+- ✅ Exclut les templates légitimes (.env.example, .env.*.template)
+- ✅ Accepte les patterns .env*.local (équivalent .env.local)
+- ✅ Scan récursif du code source
+- ✅ Validation Zod des variables d'environnement
+
+**Résultat attendu** : 4/4 tests passed ✅
+
+---
+
+#### audit-cookie-flags.ts
+
+**Description** : Audit statique de la configuration des cookies Supabase (analyse de code).
+
+**Utilisation** :
+
+```bash
+pnpm exec tsx scripts/audit-cookie-flags.ts
+```
+
+**Tests couverts (4 analyses)** :
+
+| Analyse | Description |
+| ------ | ------------- |
+| 1 | Validation pattern getAll/setAll dans supabase/server.ts |
+| 2 | Détection @supabase/ssr dans proxy.ts |
+| 3 | Documentation auth présente |
+| 4 | Flags attendus (httpOnly, secure, sameSite) |
+
+**Fonctionnalités** :
+
+- ✅ Vérifie pattern cookies recommandé (getAll/setAll, PAS get/set/remove)
+- ✅ Valide usage @supabase/ssr
+- ✅ Détecte flags de sécurité manquants
+- ⚠️ Analyse statique uniquement (voir test-cookie-security.ts pour tests runtime)
+
+**Note** : Complément avec `test-cookie-security.ts` pour validation complète.
+
+---
+
+#### test-cookie-security.ts ✅ RECOMMANDÉ
+
+**Description** : Test d'intégration des cookies avec validation runtime (requiert serveur dev).
+
+**Utilisation** :
+
+```bash
+# Démarrer le serveur dev
+pnpm dev
+
+# Dans un autre terminal
+pnpm exec tsx scripts/test-cookie-security.ts
+```
+
+**Tests couverts (3/3)** :
+
+| Test | Description |
+| ------ | ------------- |
+| Test 1 | Serveur dev actif (http://localhost:3000) |
+| Test 2 | Pages publiques sans cookies (pas d'auth requise) |
+| Test 3 | Configuration @supabase/ssr validée |
+
+**Fonctionnalités** :
+
+- ✅ Validation runtime des cookies HTTP
+- ✅ Inspection réelle des flags de sécurité
+- ✅ Instructions manuelles pour DevTools
+- ✅ Teste pages publiques (/, /agenda, /spectacles)
+
+**Avantages** :
+
+- 🔍 Détecte problèmes invisibles à l'analyse statique
+- 🔍 Valide comportement réel du navigateur
+- 🔍 Complémente audit-cookie-flags.ts
+
+**Résultat attendu** : 3/3 tests passed ✅
+
+---
+
+#### test-env-validation.ts
+
+**Description** : Validation complète de la configuration T3 Env avec chargement .env.local.
+
+**Utilisation** :
+
+```bash
+pnpm exec tsx scripts/test-env-validation.ts
+```
+
+**Tests couverts (6/6)** :
+
+| Test | Description |
+| ------ | ------------- |
+| Test 1 | Chargement dotenv (.env.local puis .env) |
+| Test 2 | Variables serveur (6 requises) |
+| Test 3 | Variables client (3 requises) |
+| Test 4 | Variables optionnelles (email dev) |
+| Test 5 | Validation Zod schemas |
+| Test 6 | Import lib/env.ts sans erreur |
+
+**Fonctionnalités** :
+
+- ✅ Charge .env.local automatiquement (dotenv)
+- ✅ Validation runtime des schémas Zod
+- ✅ Détection variables manquantes
+- ✅ Test des variables optionnelles (RESEND_EMAIL_DEV_REDIRECT)
+
+**Configuration Requise** : Fichier `.env.local` avec variables Supabase/Resend
+
+**Résultat attendu** : 6/6 tests passed ✅
+
+---
+
+### 📊 Résumé TASK036 Audit de Sécurité
+
+**Documentation complète** : Voir `doc/TASK036-SECURITY-AUDIT-SUMMARY.md`
+
+**Résultats globaux** :
+
+- ✅ OWASP Top 10 : 8/10 contrôles implémentés
+- ✅ Production readiness : 85%
+- ✅ Security headers : 6/6 configurés (next.config.ts)
+- ✅ RLS : 36/36 tables protégées
+- ✅ SECURITY INVOKER : 11/11 vues sécurisées
+
+**Commande rapide - Audit complet** :
+
+```bash
+# Exécuter les 4 audits en séquence
+pnpm exec tsx scripts/audit-secrets-management.ts && \
+pnpm exec tsx scripts/audit-cookie-flags.ts && \
+pnpm exec tsx scripts/test-env-validation.ts && \
+echo "⚠️ Démarrez 'pnpm dev' puis exécutez:" && \
+echo "pnpm exec tsx scripts/test-cookie-security.ts"
+```
+
+---
+
 ## 🔧 Configuration Générale
 
 ### Prérequis
@@ -346,8 +508,11 @@ npx supabase gen types typescript --project-id yvtrlvmbofklefxcxrzv > lib/databa
 ## 📚 Documentation
 
 - `doc/rls-policies-troubleshooting.md` - Guide de dépannage détaillé
-- [Code-Cleanup-Auth-Session-2025-10-13.md](./doc/Code-Cleanup-Auth-Session-2025-10-13.md) - Session de nettoyage et optimisation
-- [Architecture-Update-Auth-Cleanup-2025-10-13.md](./doc/Architecture-Update-Auth-Cleanup-2025-10-13.md) - Mise à jour de l'architecture
+- `doc/OWASP-AUDIT-RESULTS.md` - Audit OWASP Top 10 (2021) complet
+- `doc/PRODUCTION-READINESS-CHECKLIST.md` - Checklist pré-déploiement (85%)
+- `doc/TASK036-SECURITY-AUDIT-SUMMARY.md` - Résumé exécutif audit sécurité
+- `doc/Code-Cleanup-Auth-Session-2025-10-13.md` - Session de nettoyage et optimisation
+- `doc/Architecture-Update-Auth-Cleanup-2025-10-13.md` - Mise à jour de l'architecture
 
 ---
 
@@ -448,8 +613,45 @@ main().catch(console.error);
 - 0 TypeScript errors
 - Pattern helpers standardisé pour futures routes
 
+### 2026-01-03 : TASK036 Security Audit Completion (35%→100%)
+
+**Audit de Sécurité OWASP Top 10** :
+
+- ✅ **4 scripts d'audit créés** :
+  - `audit-secrets-management.ts` - Validation secrets/T3 Env (4/4 tests)
+  - `audit-cookie-flags.ts` - Analyse statique cookies (4 checks)
+  - `test-cookie-security.ts` - Tests d'intégration cookies (3/3 tests)
+  - `test-env-validation.ts` - Validation T3 Env runtime (6/6 tests)
+
+- ✅ **Documentation créée** :
+  - `doc/OWASP-AUDIT-RESULTS.md` - Audit complet 8/10 contrôles (588 lignes)
+  - `doc/PRODUCTION-READINESS-CHECKLIST.md` - Checklist 85% (661 lignes)
+  - `doc/TASK036-SECURITY-AUDIT-SUMMARY.md` - Résumé exécutif (528 lignes)
+
+- ✅ **Security headers ajoutés** (next.config.ts) :
+  - Content-Security-Policy (CSP avec Supabase)
+  - Strict-Transport-Security (HSTS 2 ans)
+  - X-Frame-Options (DENY)
+  - X-Content-Type-Options (nosniff)
+  - Referrer-Policy (strict-origin-when-cross-origin)
+  - Permissions-Policy (restrictive)
+
+**Subtasks complétées** :
+- 1.6: Cookie flags (approche duale: statique + intégration)
+- 1.7: Documentation OWASP audit
+- 1.8: Secrets management (corrections false positives)
+- 1.10: Production readiness checklist
+
+**Résultats** :
+- Production readiness: 85% ✅
+- OWASP compliance: 8/10 contrôles ✅
+- RLS: 36/36 tables protégées ✅
+- SECURITY INVOKER: 11/11 vues sécurisées ✅
+
+**Next steps** : Backup docs, HTTPS validation, CSP tuning, content seeding
+
 ---
 
-**Dernière mise à jour** : 13 novembre 2025  
+**Dernière mise à jour** : 3 janvier 2026  
 **Mainteneur** : YanBerdin  
 **Contact** : yandevformation@gmail.com
