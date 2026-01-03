@@ -170,6 +170,25 @@ pnpm add next@16.0.7
   - **Fonction `restore_content_version`** : Mise à jour pour support `home_hero_slides`
   - ✅ **Intégré aux schémas déclaratifs** : `07d_table_home_hero.sql` + `63b_reorder_hero_slides.sql`
 
+- `20260103120000_fix_communiques_presse_dashboard_admin_access.sql` — **SECURITY HOTFIX: restreindre l'accès admin à la vue `communiques_presse_dashboard`**
+  - 🎯 **Objectif** : empêcher les utilisateurs authentifiés non-admin d'interroger la vue dashboard admin en ajoutant un garde explicite `WHERE (select public.is_admin()) = true` lors de la recréation de la vue. La vue reste `security_invoker = true`.
+  - 🔐 **Motif** : test automatisé a révélé qu'un utilisateur authentifié avec `app_metadata.role = 'user'` pouvait interroger la vue (regression). Correction appliquée localement via migration hotfix et synchronisée dans le schéma déclaratif (`supabase/schemas/41_views_communiques.sql`).
+  - ⚠️ **Destructive** : la migration utilise `drop view ... cascade` suivi d'une recréation. Avant d'appliquer en production, prendre un backup / snapshot et vérifier les objets dépendants.
+  - ✅ **Statut local** : appliquée localement avec `pnpm dlx supabase db push --local` lors de la vérification; tests authentifiés doivent être relancés côté Cloud après push.
+  - ▶️ **Étapes recommandées pour Cloud** :
+    1. Commit & push les changements (migration + schéma déclaratif) dans le repo.
+    2. Prendre un backup ou plan de restauration sur Supabase Cloud.
+    3. Exécuter `pnpm dlx supabase db push` depuis le repo (le CLI poussera les migrations non appliquées vers le projet lié).
+    4. Relancer la suite de tests (notamment `scripts/test-views-security-authenticated.ts`) contre l'environnement Cloud.
+  - 📝 **Notes** : la condition `public.is_admin()` est gardée pour compatibilité avec les autres RLS; surveiller la performance si la fonction est appelée sur de larges scans.
+
+- `20260103123000_revoke_authenticated_on_communiques_dashboard.sql` — **SECURITY: revoke grant on admin view**
+  - 🎯 **Objectif** : supprimer un `grant select` historique sur la vue admin `communiques_presse_dashboard` qui permettait au rôle `authenticated` d'interroger la vue directement, contournant certaines RLS.
+  - 🔐 **Motif** : après application du hotfix de recréation de la vue, des tests automatisés ont montré qu'un utilisateur authentifié non-admin pouvait encore accéder à la vue en raison d'un `GRANT` antérieur. Cette migration révoque explicitement ce droit.
+  - ✅ **Opération** : `revoke select on public.communiques_presse_dashboard from authenticated;` (non-destructive)
+  - ✅ **Statut Cloud** : appliquée sur Supabase Cloud; tests authentifiés ré-exécutés et validés (admin view denied to non-admin).
+  - ▶️ **Remarque opérationnelle** : les droits (GRANT/REVOKE) sont gérés via migrations historiques; vérifier les anciens commits/migrations qui réintroduiraient un `GRANT` lors de futurs rollbacks ou snapshot restores.
+
 - `20251123170231_create_messages_contact_admin_view.sql` — **SECURITY FIX : Deploy missing messages_contact_admin view** : Création de la vue `messages_contact_admin` définie dans le schéma déclaratif mais absente de la base de données. Résout l'alerte Security Advisor "SECURITY DEFINER view" (faux positif - vue configurée avec `security_invoker = true`).
   - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/10_tables_system.sql`
   - 🔐 **Sécurité** : Vue avec `security_invoker = true` (pas de privilèges élevés)

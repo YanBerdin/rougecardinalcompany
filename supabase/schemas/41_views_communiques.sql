@@ -101,9 +101,10 @@ left join public.evenements as e on cp.evenement_id = e.id
 left join public.profiles as p on cp.created_by = p.user_id
 left join public.communiques_categories as cc on cp.id = cc.communique_id
 left join public.communiques_tags as ct on cp.id = ct.communique_id
+where (select public.is_admin()) = true
 group by cp.id, pdf_m.filename, pdf_m.size_bytes, im.filename, cp.image_url,
          s.title, e.date_debut, p.display_name
 order by cp.created_at desc;
 
 comment on view public.communiques_presse_dashboard is 
-'Vue dashboard admin pour la gestion des communiqués avec statistiques et gestion des images. SECURITY INVOKER: Runs with querying user privileges (not definer), protected by RLS on base tables.';
+'Vue dashboard admin pour la gestion des communiqués avec statistiques et gestion des images. accès réservé aux administrateurs uniquement. SECURITY INVOKER: runs with querying user privileges (not definer); rely on rls policies on base tables.';

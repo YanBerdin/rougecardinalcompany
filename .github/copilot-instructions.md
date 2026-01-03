@@ -123,6 +123,15 @@ const { data: { user } } = await supabase.auth.getUser();
 
 ### 5. Server Actions Architecture
 
+### note de sécurité : vues admin et rls
+
+- récent : des migrations de hotfix ont été appliquées pour corriger une exposition d'une vue admin (`communiques_presse_dashboard`).
+- règle importante : ne jamais accorder `select` globalement au rôle `authenticated` pour des vues ou tables contenant des données admin. Préférez :
+  - ajouter un garde explicite dans la définition de la vue, par exemple `where (select public.is_admin()) = true`, et
+  - créer une migration `revoke select on <view> from authenticated;` si nécessaire.
+- lors d'un push de migration, si vous rencontrez un mismatch d'historique, réparez l'historique distant et exécutez `supabase db pull` avant de re-pusher les fichiers locaux.
+
+
 **Pattern**: Validation + Auth + DAL + Revalidation
 
 ```typescript

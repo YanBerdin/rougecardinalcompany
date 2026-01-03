@@ -1,10 +1,104 @@
 # Active Context
 
-**Current Focus (2026-01-01)**: Database Security - RLS & SECURITY INVOKER Fixes Completed ✅
+**Current Focus (2026-01-03)**: Security Hotfix - Admin View Exposure & Documentation Updates ✅
 
 ---
 
-## Latest Updates (2026-01-01)
+## Latest Updates (2026-01-03)
+
+### Security Hotfix - Admin View RLS Guard & Documentation ✅
+
+**Correction urgente d'une exposition de vue admin et mise à jour complète de la documentation.**
+
+#### Problème Identifié
+
+**Test automatisé révèle regression** : Vue `communiques_presse_dashboard` accessible aux utilisateurs authentifiés non-admin
+
+**Cause Racine** :
+
+- Vue créée avec `SECURITY INVOKER` mais **sans garde admin explicite** dans la clause WHERE
+- Un GRANT historique `SELECT to authenticated` permettait l'accès direct
+- Snapshot migration `20260103004430_remote_schema.sql` documentait l'état vulnérable
+
+**Solution Implémentée** :
+
+1. **Migration Hotfix** `20260103120000_fix_communiques_presse_dashboard_admin_access.sql`
+   - Recréation de la vue avec garde explicite : `WHERE (select public.is_admin()) = true`
+   - Vue reste en `SECURITY INVOKER` mais filtre les données au niveau SQL
+   - Migration **destructive** (DROP CASCADE) avec warnings complets
+   - Appliquée localement ET sur Cloud avec succès
+
+2. **Migration Revoke** `20260103123000_revoke_authenticated_on_communiques_dashboard.sql`
+   - Révocation explicite du privilège SELECT pour le rôle `authenticated`
+   - Non-destructive, safe pour production
+   - Appliquée sur Cloud après tests locaux
+
+3. **Synchronisation Schéma Déclaratif**
+   - `supabase/schemas/41_views_communiques.sql` mis à jour avec le garde admin
+   - Source de vérité pour futures générations de migrations
+   - Cohérent avec les migrations appliquées
+
+4. **Documentation Complète**
+   - `supabase/schemas/README.md` — Guide déclaratif avec règles RLS/views
+   - `scripts/README.md` — Section migrations de sécurité + bonnes pratiques
+   - `.github/copilot-instructions.md` — Note sécurité pour AI agents
+   - `supabase/migrations/migrations.md` — Entrées migrations hotfix détaillées
+
+#### Tests de Sécurité
+
+**Script** : `scripts/test-views-security-authenticated.ts`
+
+**Résultats Cloud (après hotfix)** :
+```
+✅ articles_presse_public: 0 rows
+✅ communiques_presse_public: 0 rows
+✅ popular_tags: 0 rows
+✅ categories_hierarchy: 5 rows
+✅ Admin view correctly denied to non-admin
+✅ Authenticated non-admin tests passed
+```
+
+#### Workflow Migration Cloud
+
+1. **Détection regression** : Test automatisé révèle accès non-admin à vue admin
+2. **Investigation** : Inspection migration snapshot + user metadata
+3. **Hotfix local** : Création migration + update schéma déclaratif
+4. **Push tentative** : Mismatch historique migrations détecté
+5. **Réparation historique** : Repair remote migration history via CLI
+6. **Pull remote** : Synchronisation schema distant → local (`20260103004430_remote_schema.sql`)
+7. **Push migrations** : Application hotfix + revoke sur Cloud
+8. **Vérification** : Re-run tests authenticated → SUCCESS
+
+#### Documentation Technique
+
+**Pattern Sécurité Views Admin** :
+```sql
+create or replace view public.my_admin_view
+with (security_invoker = true)
+as
+select *
+from public.sensitive_table
+where (select public.is_admin()) = true; -- ✅ MANDATORY GUARD
+```
+
+**Règles Strictes** :
+
+- ❌ JAMAIS `GRANT SELECT to authenticated` sur vues admin
+- ✅ TOUJOURS garde explicite `WHERE (select public.is_admin()) = true`
+- ✅ TOUJOURS `WITH (security_invoker = true)`
+- ✅ TOUJOURS tests avec utilisateurs non-admin avant production
+
+#### Commits
+
+- `(pending commit)` — docs: add schemas README and security notes for recent RLS/view migrations
+  - 3 fichiers documentés : `supabase/schemas/README.md`, `scripts/README.md`, `.github/copilot-instructions.md`
+  - Section migrations de sécurité ajoutée
+  - Bonnes pratiques RLS/views documentées
+  - Guidance AI agents mise à jour
+
+---
+
+## Previous Updates (2026-01-01)
 
 ### Database Security - RLS & SECURITY INVOKER Fixes - COMPLETED ✅
 

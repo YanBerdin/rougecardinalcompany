@@ -1,3 +1,41 @@
+# Schéma déclaratif (supabase/schemas)
+
+Ce dossier contient la source de vérité déclarative du schéma de la base de données utilisée par Supabase. Suivez ces règles lorsqu'il faut modifier la structure des tables, vues, fonctions ou politiques RLS.
+
+Principes clés
+
+- modifier uniquement les fichiers `.sql` dans `supabase/schemas/` pour que `supabase db diff` et le workflow déclaratif restent cohérents.
+- nommer les fichiers pour forcer l'ordre d'exécution si nécessaire (lexicographic order).
+- ne pas exécuter de DML (insert/update/delete) dans ces fichiers : gardez la déclaration du schéma pure.
+
+RLS & vues
+
+- toutes les nouvelles tables doivent activer `row level security`.
+- pour les vues admin, utilisez `security invoker` et ajoutez un filtre explicite s'appuyant sur la fonction `public.is_admin()` dans la définition de la vue :
+
+```sql
+create view public.my_admin_view
+as
+select * from public.sensitive_table
+where (select public.is_admin()) = true;
+```
+
+- n'accordez jamais `grant select to authenticated` sur des vues admin ; préférez des politiques RLS et des gardes dans la vue.
+
+Migrations de sécurité récentes
+
+- `supabase/migrations/20260103120000_fix_communiques_presse_dashboard_admin_access.sql` — hotfix : recréation de la vue admin avec garde `is_admin()`.
+- `supabase/migrations/20260103123000_revoke_authenticated_on_communiques_dashboard.sql` — révocation du SELECT au rôle `authenticated` sur la vue admin.
+
+Bonnes pratiques opérationnelles
+
+- avant de pousser une migration critique : exécuter les scripts de vérification (`scripts/check-views-security.ts`, `scripts/test-views-security-authenticated.ts`).
+- en cas de mismatch d'historique de migrations, réparer l'historique distant puis `supabase db pull` avant de re-pusher.
+
+Contact & support
+
+- Pour questions sur le schéma ou les migrations : voir `supabase/migrations/migrations.md` et contacter l'équipe infra (mainteneur : `yandevformation@gmail.com`).
+
 # 📊 Schéma Déclaratif Rouge Cardinal Company
 
 Ce dossier contient le schéma déclaratif de la base de données selon les instructions **Declarative Database Schema Management** de Supabase.

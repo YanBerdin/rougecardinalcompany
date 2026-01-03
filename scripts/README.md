@@ -19,7 +19,7 @@ pnpm exec tsx scripts/test-team-server-actions.ts
 **Tests couverts (7 tests)** :
 
 | Test | Description |
-|------|-------------|
+| ------ | ------------- |
 | Test 1 | Toggle to inactive (false) |
 | Test 2 | Toggle to active (true) |
 | Test 3 | Idempotence check (set true twice) |
@@ -56,7 +56,7 @@ pnpm exec tsx scripts/test-team-active-dal.ts
 Les scripts suivants testaient des API Routes qui ont été supprimées lors de la migration vers Server Actions (décembre 2025). Ils sont archivés dans `scripts/Archived-tests/` :
 
 | Script archivé | API Route supprimée | Remplacement |
-|----------------|---------------------|--------------|
+| ---------------- | --------------------- | -------------- |
 | `test-active-endpoint.ts` | `/api/admin/team/[id]/active` | `test-team-server-actions.ts` |
 | `test-active-endpoint-service.ts` | `/api/admin/team/[id]/active` | `test-team-server-actions.ts` |
 | `test-active-endpoint.sh` | `/api/admin/team/[id]/active` | `test-team-server-actions.ts` |
@@ -220,7 +220,18 @@ pnpm run check-logs
 
 ---
 
-## 🔐 Sécurité
+  ## 🔐 Migrations récentes de sécurité
+
+- `20260103120000_fix_communiques_presse_dashboard_admin_access.sql` — correction urgente : recréation de la vue `communiques_presse_dashboard` avec un garde explicite `where (select public.is_admin()) = true` pour s'assurer que seules les sessions admin peuvent voir les lignes de cette vue.
+- `20260103123000_revoke_authenticated_on_communiques_dashboard.sql` — révocation explicite du privilège `select` pour le rôle `authenticated` sur la vue admin afin d'éviter toute ré-exposition par des snapshots historiques.
+
+  Remarques et bonnes pratiques :
+
+- Toujours exécuter les scripts de vérification RLS avant/pour valider une migration de sécurité : `pnpm exec tsx scripts/test-views-security-authenticated.ts` et `pnpm exec tsx scripts/check-views-security.ts`.
+- En cas de conflit d'historique de migrations lors d'un `supabase db push`, réparer l'historique distant avant d'appliquer les migrations (voir `migrations.md`).
+- Ne pas ajouter de `grant select to authenticated` sur des vues admin ; préférer un filtre `where (select public.is_admin()) = true` dans la définition de la vue.
+
+  ## 📝 Changelog
 
 ### Service Role Key
 
@@ -380,7 +391,7 @@ main().catch(console.error);
 
 ---
 
-## 📝 Changelog
+## 📝 Changelog bis
 
 ### 2025-11-13 : Refactoring API Routes + DAL avec HttpStatus Constants
 

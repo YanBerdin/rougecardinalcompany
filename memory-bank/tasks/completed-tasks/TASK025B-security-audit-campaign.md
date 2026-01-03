@@ -50,7 +50,7 @@ Après résolution des 3 problèmes initiaux (RLS, SECURITY INVOKER, performance
 ### Subtasks
 
 | ID | Description | Status | Updated | Notes |
-|----|-------------|--------|---------|-------|
+| ---- | ------------- | -------- | --------- | ------- |
 | 1.1 | Audit initial objets database | Complete | 2025-10-26 | 73 objets identifiés |
 | 1.2 | Identification vulnérabilités critiques | Complete | 2025-10-26 | storage.objects CRITICAL |
 | 2.1 | Round 12: Fix storage.objects | Complete | 2025-10-26 | ALL PRIVILEGES → explicit |

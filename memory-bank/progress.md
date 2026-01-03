@@ -1,5 +1,82 @@
 # Progress
 
+## Security Hotfix - Admin View RLS Guard - COMPLETED (2026-01-03)
+
+### Objectif
+
+Corriger exposition vue admin `communiques_presse_dashboard` et mettre à jour documentation sécurité.
+
+### Résultats
+
+| Feature | État |
+| ------- | ---- |
+| Migration hotfix recréation vue admin | ✅ Applied (cloud + local) |
+| Migration revoke GRANT authenticated | ✅ Applied (cloud) |
+| Schéma déclaratif synchronisé | ✅ Updated |
+| Tests sécurité authenticated | ✅ PASSED |
+| Documentation (3 fichiers) | ✅ Created/Updated |
+| Analyse cohérence migrations | ✅ Completed |
+
+### Migrations Créées
+
+1. **`20260103120000_fix_communiques_presse_dashboard_admin_access.sql`**
+   - DROP CASCADE + recréation vue avec garde `WHERE (select public.is_admin()) = true`
+   - Vue reste `SECURITY INVOKER` mais filtre SQL ajouté
+   - Migration destructive avec warnings complets
+
+2. **`20260103123000_revoke_authenticated_on_communiques_dashboard.sql`**
+   - Révocation GRANT SELECT du rôle `authenticated` sur vue admin
+   - Non-destructive, safe pour production
+
+3. **`20260103004430_remote_schema.sql`**
+   - Snapshot pull distant (état avant hotfix)
+   - Documente état vulnérable historique
+
+### Documentation Mise à Jour
+
+- `supabase/schemas/README.md` — Guide déclaratif + règles RLS/views
+- `scripts/README.md` — Section migrations de sécurité
+- `.github/copilot-instructions.md` — Note sécurité AI agents
+- `supabase/migrations/migrations.md` — Entrées migrations détaillées
+
+### Tests de Sécurité
+
+**Script** : `scripts/test-views-security-authenticated.ts`
+
+```bash
+✅ articles_presse_public: 0 rows
+✅ communiques_presse_public: 0 rows
+✅ popular_tags: 0 rows
+✅ categories_hierarchy: 5 rows
+✅ Admin view correctly denied to non-admin
+✅ Authenticated non-admin tests passed
+```
+
+### Workflow Cloud
+
+1. Détection regression → Investigation
+2. Hotfix local → Mismatch historique migrations
+3. Réparation historique → Pull remote schema
+4. Push migrations → Tests Cloud → SUCCESS ✅
+
+### Pattern Sécurité
+
+```sql
+create or replace view public.admin_view
+with (security_invoker = true)
+as
+select * from public.table
+where (select public.is_admin()) = true;
+```
+
+**Règles** :
+- ❌ Jamais `GRANT SELECT to authenticated` sur vues admin
+- ✅ Toujours garde `WHERE is_admin()` dans définition
+- ✅ Toujours `SECURITY INVOKER`
+- ✅ Tests avec utilisateurs non-admin avant production
+
+---
+
 ## Database Security - RLS & SECURITY INVOKER Fixes - COMPLETED (2025-12-31)
 
 ### Objectif

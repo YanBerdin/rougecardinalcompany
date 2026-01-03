@@ -25,6 +25,7 @@
 - `TASK015` Stratégie seeds cloud (sécurisée) + synchronisation
 - `TASK016` Option: modélisation `partners.type` si requis par le design
 - `TASK017` Retrait des délais artificiels (1200-1500ms) des containers
+- `TASK036` Security Audit (35% complete - RLS/views/deps done, cookies/OWASP/production pending)
 
 ## Terminé
 
