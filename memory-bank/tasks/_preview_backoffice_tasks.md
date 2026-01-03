@@ -23,7 +23,7 @@ Ce fichier est une prévisualisation consolidée des 20 tâches générées à p
 | TASK033 | Audit Logs Viewer           | Pending | 2025-10-16 | 2025-10-16 | Browse and filter system activity logs                   | `memory-bank/tasks/TASK033-audit-logs-viewer.md`           | #13 |
 | TASK034 | Performance Optimization    | Pending | 2025-10-16 | 2025-10-16 | Optimize queries, caching, and performance               | `memory-bank/tasks/TASK034-performance-optimization.md`    | #14 |
 | TASK035 | Testing Suite               | Pending | 2025-10-16 | 2025-10-16 | Unit, integration and E2E tests for admin flows          | `memory-bank/tasks/TASK035-testing-suite.md`               | #15 |
-| TASK036 | Security Audit              | Pending | 2025-10-16 | 2025-10-16 | Review RLS policies, dependency scans, auth tests        | `memory-bank/tasks/TASK036-security-audit.md`              | #16 |
+| TASK036 | Security Audit              | Completed | 2025-10-16 | 2026-01-03 | OWASP Top 10 audit (8/10), 4 scripts, 3 docs, 85% production ready | `memory-bank/tasks/TASK036-security-audit.md`              | #16 |
 | TASK037 | Accessibility Compliance    | Pending | 2025-10-16 | 2025-10-16 | WCAG 2.1 AA validation and fixes                         | `memory-bank/tasks/TASK037-accessibility-compliance.md`    | #17 |
 | TASK038 | Responsive Testing          | Pending | 2025-10-16 | 2025-10-16 | Cross-device and cross-browser validation                | `memory-bank/tasks/TASK038-responsive-testing.md`          | #18 |
 | TASK039 | Production Deployment       | Pending | 2025-10-16 | 2025-10-16 | CI/CD, env setup, monitoring, migrations                 | `memory-bank/tasks/TASK039-production-deployment.md`       | #19 |

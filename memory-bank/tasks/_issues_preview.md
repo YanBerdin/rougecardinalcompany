@@ -82,8 +82,11 @@ Ce fichier liste les titres et descriptions extraites des fichiers de tâches `T
 15. TASK035 — UI localization
     - Résumé: Support langue FR/EN et gestion des traductions.
 
-16. TASK036 — Notifications & Email templates
-    - Résumé: Notifications admin et modèles d'email (Resend integration).
+16. **TASK036 — Security Audit** ✅
+
+- **Résumé**: Audit de sécurité OWASP Top 10 complet (35%→100%). 4 scripts d'audit créés (cookie flags, secrets, T3 Env validation), 3 documents générés (OWASP results, production checklist, executive summary), 6 security headers configurés, 85% production ready.
+- **État**: Completed (3 jan 2026)
+- **Issue**: #16 (PENDING)
 
 17. TASK037 — Data retention & purge
     - Résumé: Politique de conservation des données et procédures de purge.

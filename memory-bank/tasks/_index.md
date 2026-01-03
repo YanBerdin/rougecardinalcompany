@@ -25,7 +25,6 @@
 - `TASK015` Stratégie seeds cloud (sécurisée) + synchronisation
 - `TASK016` Option: modélisation `partners.type` si requis par le design
 - `TASK017` Retrait des délais artificiels (1200-1500ms) des containers
-- `TASK036` Security Audit (35% complete - RLS/views/deps done, cookies/OWASP/production pending)
 
 ## Terminé
 
@@ -66,3 +65,4 @@
 - `TASK030` Display Toggles Epic Alignment - Completed on 2026-01-01 (10 toggles across 5 categories, Phase 11 Presse fix: split into Media Kit + Press Releases, migration 20260101220000, component fixes, utility scripts, commit b27059f)
 - `TASK029` Media Library Complete Implementation - Completed on 2025-12-29, Finalized on 2025-12-30 (7 phases: Foundation (duplicate SHA-256), Tags & Folders (hierarchical), Bulk Operations (move/tag/delete), Rate Limiting (10/min), Thumbnails (Sharp 300x300), Animations (reduced-motion), Accessibility (WCAG 2.1 AA), Usage Tracking (7 tables, bulk optimization); **Storage/Folders Sync**: auto-assign folder_id via getFolderIdFromPath(), 9 base folders seeded, "Uploads génériques" UX, dynamic stats; 3 tables created, 6 migrations, 4 DAL modules (3500+ lines), 8 UI components, 15 RLS policies, 8 bugs resolved, branch feat-MediaLibrary pushed)
 - `TASK049` Database Security - RLS & SECURITY INVOKER Fixes - Completed on 2025-12-31 (2 migrations: fix RLS policies active filter + enforce SECURITY INVOKER on 11 views, 13/13 security tests passed, 7 obsolete docs deleted, 3 obsolete migrations removed, complete documentation in doc/SUPABASE-VIEW-SECURITY/, schémas déclaratifs synchronisés, commit 35daa55)
+- `TASK036` Security Audit - Completed on 2026-01-03 (OWASP Top 10 audit 35%→100%: 4 audit scripts created (audit-cookie-flags.ts, audit-secrets-management.ts, test-cookie-security.ts, test-env-validation.ts with 4+4+3+6 tests), 3 documentation files (OWASP-AUDIT-RESULTS.md 8/10 controls, PRODUCTION-READINESS-CHECKLIST.md 85% ready, TASK036-SECURITY-AUDIT-SUMMARY.md executive summary), 6 security headers added to next.config.ts (CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy), subtasks 1.6/1.7/1.8/1.10 completed, dual testing approach (static + integration), T3 Env validation, secrets management audit, production readiness 85%, commit 79ea5b8)

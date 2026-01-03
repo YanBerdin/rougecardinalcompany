@@ -637,12 +637,14 @@ main().catch(console.error);
   - Permissions-Policy (restrictive)
 
 **Subtasks complétées** :
+
 - 1.6: Cookie flags (approche duale: statique + intégration)
 - 1.7: Documentation OWASP audit
 - 1.8: Secrets management (corrections false positives)
 - 1.10: Production readiness checklist
 
 **Résultats** :
+
 - Production readiness: 85% ✅
 - OWASP compliance: 8/10 contrôles ✅
 - RLS: 36/36 tables protégées ✅
