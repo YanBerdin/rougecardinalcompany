@@ -1,10 +1,136 @@
 # Active Context
 
-**Current Focus (2026-01-03)**: TASK036 Security Audit Completion (35%→100%) ✅
+**Current Focus (2026-01-03)**: TASK033 Audit Logs Viewer Implementation ✅
 
 ---
 
 ## Latest Updates (2026-01-03)
+
+### TASK033 - Audit Logs Viewer Implementation ✅ COMPLETE
+
+**Interface admin complète pour visualiser, filtrer et exporter les logs d'audit avec rétention automatique de 90 jours.**
+
+#### Caractéristiques Implémentées
+
+1. **Rétention Automatique 90 Jours**
+   - Colonne `expires_at` avec valeur par défaut `now() + 90 days`
+   - Fonction `cleanup_expired_audit_logs()` SECURITY DEFINER
+   - Index sur `expires_at` pour cleanup efficace
+
+2. **Résolution Email via auth.users**
+   - Fonction RPC `get_audit_logs_with_email()` avec LEFT JOIN
+   - Affichage email utilisateur dans le tableau
+   - Support NULL pour utilisateurs supprimés
+
+3. **Filtres Avancés (5 types)**
+   - Action (INSERT/UPDATE/DELETE) via dropdown
+   - Table (toutes les tables avec logs) via dropdown
+   - Date Range (picker français avec calendar + popover)
+   - Search (record_id + table_name avec Enter key)
+   - Reset button pour clear tous les filtres
+
+4. **Export CSV**
+   - Server Action `exportAuditLogsCSV` limite 10,000 rows
+   - Colonnes: Date, User Email, Action, Table, Record ID, IP Address
+   - Download automatique côté client via Blob
+
+5. **UI Responsive**
+   - Table avec 6 colonnes + pagination
+   - JSON detail modal avec tabs (old_values / new_values)
+   - react18-json-view avec syntaxe highlighting
+   - Badge couleurs par action (INSERT=green, UPDATE=yellow, DELETE=red)
+   - French date formatting via date-fns
+
+6. **Sécurité Multi-Couches**
+   - RLS policies: `(select public.is_admin())`
+   - RPC function: explicit `is_admin()` check
+   - DAL functions: `requireAdmin()` calls
+   - Server Actions: `requireAdmin()` before export
+
+#### Fichiers Créés/Modifiés
+
+**Database** (2 schémas):
+
+- `supabase/schemas/20_audit_logs_retention.sql`
+- `supabase/schemas/42_rpc_audit_logs.sql`
+
+**Backend** (3 fichiers):
+
+- `lib/schemas/audit-logs.ts` — Zod validation
+- `lib/dal/audit-logs.ts` — fetchAuditLogs + fetchAuditTableNames
+- `app/(admin)/admin/audit-logs/actions.ts` — exportAuditLogsCSV
+
+**Frontend** (9 composants):
+
+- `components/ui/date-range-picker.tsx` — Custom date picker
+- `components/features/admin/audit-logs/types.ts`
+- `components/features/admin/audit-logs/AuditLogsSkeleton.tsx`
+- `components/features/admin/audit-logs/AuditLogsContainer.tsx` — Server Component
+- `components/features/admin/audit-logs/AuditLogsView.tsx` — Client avec state management
+- `components/features/admin/audit-logs/AuditLogFilters.tsx`
+- `components/features/admin/audit-logs/AuditLogsTable.tsx`
+- `components/features/admin/audit-logs/AuditLogDetailModal.tsx`
+- `components/features/admin/audit-logs/index.ts`
+
+**Pages** (2):
+
+- `app/(admin)/admin/audit-logs/page.tsx`
+- `app/(admin)/admin/audit-logs/loading.tsx`
+
+**Admin** (1 modification):
+
+- `components/admin/AdminSidebar.tsx` — Ajout link "Audit Logs"
+
+**Testing** (2 scripts):
+
+- `scripts/test-audit-logs-schema.ts` — Validation DB schema
+- `scripts/test-audit-logs.ts` — Tests intégration (disabled server-only imports)
+
+**Migration**:
+
+- `supabase/migrations/20260103183217_audit_logs_retention_and_rpc.sql` (192 lignes) ✅ Applied
+
+#### Problèmes Résolus
+
+1. **Missing Popover Component**
+   - Symptôme: Build fail "Cannot find module '@/components/ui/popover'"
+   - Solution: `pnpm dlx shadcn@latest add popover`
+
+2. **Pre-Existing CSS Error** (line 3129)
+   - Symptôme: "Parsing CSS failed" at `--spacing(8)`
+   - Cause: `components/ui/calendar.tsx` invalid Tailwind syntax
+   - Solution: Changed `[--cell-size:--spacing(8)]` → `[--cell-size:2rem]`
+
+3. **Migration Not Applied**
+   - Symptôme: Test script shows `expires_at` missing
+   - Cause: `supabase db diff` generates but doesn't apply
+   - Solution: `pnpm dlx supabase db reset`
+
+#### État de Validation
+
+**Automated Tests**:
+
+- [x] TypeScript compilation passes (0 errors)
+- [x] Production build successful ✅
+- [x] Migration generated (192 lines SQL)
+- [x] Migration applied via db reset
+- [x] Schema verification script created
+
+**Manual Testing** (Pending):
+
+- [ ] Login as admin user
+- [ ] Navigate to `/admin/audit-logs`
+- [ ] Test all 5 filter types
+- [ ] Test pagination
+- [ ] Test JSON detail modal
+- [ ] Test CSV export
+- [ ] Verify non-admin blocked
+
+**Next Step**: Manual UI testing at http://localhost:3001/admin/audit-logs
+
+---
+
+## Previous Updates (2026-01-03)
 
 ### TASK036 - Security Audit Completion (35%→100%) ✅
 

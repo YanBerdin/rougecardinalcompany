@@ -99,6 +99,188 @@ const apiKey = process.env.RESEND_API_KEY;
 
 - `lib/site-config.ts` — Utilise `env.EMAIL_FROM`, `env.NEXT_PUBLIC_SITE_URL`
 
+### Audit Logs Viewer Pattern (Jan 2026)
+
+**Pattern complet** pour interface admin d'audit logs avec rétention automatique, filtres avancés et export CSV paginé.
+
+#### Architecture URL-Based State Management
+
+```bash
+Audit Logs Viewer
+├── Page (Server Component)
+│   ├── Receives searchParams from URL
+│   └── Passes to Container
+├── Container (Server Component)
+│   ├── Parses searchParams → AuditLogFilter
+│   ├── Fetches data via DAL with filters
+│   └── Passes initialFilters to View
+└── View (Client Component)
+    ├── useState(initialFilters) + useEffect sync
+    ├── handleFilterChange → router.push() with query params
+    └── CSV export uses local filters state
+```
+
+#### DAL Pattern (RPC Function)
+
+```typescript
+// lib/dal/audit-logs.ts
+export async function fetchAuditLogs(
+  filters: AuditLogFilter
+): Promise<DALResult<AuditLogsResponse>> {
+  const validated = AuditLogFilterSchema.parse(filters);
+  
+  const { data, error } = await supabase.rpc('get_audit_logs_with_email', {
+    p_action: validated.action,
+    p_table_name: validated.table_name,
+    // ... all filter params
+  });
+  
+  if (error) return { success: false, error: error.message };
+  return { success: true, data: { logs, totalCount } };
+}
+```
+
+#### CSV Export Pagination Pattern
+
+```typescript
+// app/(admin)/admin/audit-logs/actions.ts
+export async function exportAuditLogsCSV(filters: AuditLogFilter) {
+  const PAGE_SIZE = 100; // Max allowed by Zod schema
+  const allLogs: AuditLogDTO[] = [];
+  
+  // First page
+  const firstResult = await fetchAuditLogs({ ...filters, page: 1, limit: PAGE_SIZE });
+  allLogs.push(...firstResult.data.logs);
+  
+  // Remaining pages
+  const maxPages = Math.min(
+    Math.ceil(totalCount / PAGE_SIZE),
+    Math.ceil(MAX_EXPORT_ROWS / PAGE_SIZE)
+  );
+  
+  for (let page = 2; page <= maxPages; page++) {
+    const result = await fetchAuditLogs({ ...filters, page });
+    allLogs.push(...result.data.logs);
+  }
+  
+  return stringify(allLogs.slice(0, MAX_EXPORT_ROWS), { header: true });
+}
+```
+
+#### Skeleton Loader Pattern
+
+```typescript
+// AuditLogsView.tsx
+const [isInitialLoading, setIsInitialLoading] = useState(true);
+
+useEffect(() => {
+  const timer = setTimeout(() => setIsInitialLoading(false), 800);
+  return () => clearTimeout(timer);
+}, []);
+
+const handleRefresh = () => {
+  startTransition(() => {
+    setTimeout(() => router.refresh(), 500); // Visible feedback
+  });
+};
+
+return (
+  {(isPending || isInitialLoading) ? (
+    <Skeleton className="h-[400px] w-full" />
+  ) : (
+    <Table />
+  )}
+);
+```
+
+#### Responsive Table Pattern
+
+```typescript
+// Horizontal scroll with negative margins compensation
+<div className="overflow-x-auto -mx-3 sm:-mx-4 md:-mx-6 px-3 sm:px-4 md:px-6">
+  <Table />
+</div>
+
+// Adaptive padding
+<Card className="p-3 sm:p-4 md:p-6">
+
+// Mobile-optimized buttons
+<Button className="flex-1 sm:flex-none min-w-[120px]">
+```
+
+#### Database Retention Pattern
+
+```sql
+-- Auto-expiration column
+alter table logs_audit 
+add column expires_at timestamptz default (now() + interval '90 days');
+
+create index idx_audit_logs_expires_at on logs_audit (expires_at);
+
+-- Cleanup function (cron job)
+create function cleanup_expired_audit_logs() returns void as $$
+begin
+  delete from public.logs_audit where expires_at < now();
+end;
+$$ language plpgsql security definer;
+```
+
+#### RPC Function Pattern (Email Resolution)
+
+```sql
+create function get_audit_logs_with_email(
+  p_action text default null,
+  p_table_name text default null,
+  -- ... filters
+  p_page integer default 1,
+  p_limit integer default 50
+) returns table(...) as $$
+declare
+  v_offset integer;
+begin
+  -- Admin-only guard
+  if not (select public.is_admin()) then
+    raise exception 'Permission denied';
+  end if;
+  
+  v_offset := (p_page - 1) * p_limit;
+  
+  return query
+  with filtered_logs as (
+    select al.*, au.email as user_email
+    from public.logs_audit al
+    left join auth.users au on al.user_id = au.id
+    where (p_action is null or al.action = p_action)
+      and (p_table_name is null or al.table_name = p_table_name)
+      -- ... all filters
+  ),
+  total as (select count(*) from filtered_logs)
+  select *, (select count from total) as total_count
+  from filtered_logs
+  order by created_at desc
+  limit p_limit offset v_offset;
+end;
+$$ language plpgsql security definer set search_path = '';
+```
+
+#### Key Benefits
+
+- **URL-based state** : SSR-compatible, shareable links, browser back/forward
+- **Paginated export** : Respects Zod validation while supporting large exports
+- **Skeleton loader** : Improved perceived performance
+- **Responsive design** : Mobile-first with adaptive layouts
+- **Multi-layer security** : RLS + RPC guard + DAL auth checks
+
+#### Files Modified (TASK033)
+
+- 2 database schemas (retention + RPC)
+- 1 migration (192 lines)
+- 3 backend files (schemas, DAL, actions)
+- 10 frontend components (UI + features)
+- 2 pages (route + loading)
+- 1 admin sidebar link
+- 2 test scripts (cloud verification)
+
 ### Media Library Pattern (Dec 2025)
 
 **Pattern complet** pour gestion de médias avec organisation, thumbnails, usage tracking et accessibilité.

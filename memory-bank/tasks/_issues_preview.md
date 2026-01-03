@@ -73,7 +73,14 @@ Ce fichier liste les titres et descriptions extraites des fichiers de tâches `T
     - **Etat**: Completed (23 nov 2025)
     - **Issue**: [#12](https://github.com/YanBerdin/rougecardinalcompany/issues/12) (CLOSED)
 
-13. TASK033 — Bulk import/export
+13. **TASK033 — Audit Logs Viewer Interface** ✅
+    - **Résumé**: Interface admin complète pour visualiser, filtrer et exporter les logs d'audit. Rétention automatique 90 jours, résolution email via RPC, 5 types de filtres, export CSV jusqu'à 10k lignes (pagination automatique), UI responsive avec skeleton loader, synchronisation filtres via URL.
+    - **Etat**: Completed (3 jan 2026)
+    - **Issue**: [#13](https://github.com/YanBerdin/rougecardinalcompany/issues/13) (OPEN → À FERMER)
+    - **Migration**: 20260103183217_audit_logs_retention_and_rpc.sql (192 lignes, appliquée cloud)
+    - **Fixes**: CSV export pagination (100 rows/batch), responsive mobile, skeleton loader, filter sync URL
+
+14. TASK034 — Bulk import/export
     - Résumé: Import CSV / export JSON pour contenu et partenaires.
 
 14. TASK034 — Editorial workflow

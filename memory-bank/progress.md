@@ -1,5 +1,190 @@
 # Progress
 
+## TASK033 - Audit Logs Viewer Interface - COMPLETED (2026-01-03)
+
+### Objectif
+
+Interface admin complète pour visualiser, filtrer et exporter les logs d'audit système avec rétention automatique de 90 jours.
+
+### Résultats
+
+| Feature | État |
+| ------- | ---- |
+| Database schema (retention + RPC) | ✅ 100% |
+| Backend layer (DAL + Server Actions) | ✅ 100% |
+| Frontend UI (9 components) | ✅ 100% |
+| Migration deployed (local + cloud) | ✅ 100% |
+| CSV export fix (pagination) | ✅ 100% |
+| Responsive UI (mobile + skeleton) | ✅ 100% |
+| Filter synchronization (URL-based) | ✅ 100% |
+| Production build | ✅ PASSED |
+
+### Fonctionnalités Implémentées
+
+#### 1. Rétention Automatique 90 Jours
+
+- Colonne `expires_at` avec valeur par défaut `now() + 90 days`
+- Index `idx_audit_logs_expires_at` pour cleanup efficace
+- Fonction `cleanup_expired_audit_logs()` pour purge automatique
+
+#### 2. Résolution Email via auth.users
+
+- Fonction RPC `get_audit_logs_with_email()` avec LEFT JOIN
+- Performance optimisée avec index sur user_id
+- Support NULL pour utilisateurs supprimés
+
+#### 3. Filtres Avancés (5 types)
+
+- Action (INSERT/UPDATE/DELETE) via dropdown
+- Table name via dropdown dynamique
+- Date range via DateRangePicker (date-fns)
+- Search (record_id/table_name) via input
+- Reset button pour clear tous les filtres
+- **Synchronisation via URL searchParams** (SSR-compatible)
+
+#### 4. Export CSV
+
+- Server Action `exportAuditLogsCSV` limite 10,000 rows
+- **Pagination automatique** : 100 rows/batch (respecte Zod max)
+- Download automatique côté client via Blob
+- Préserve tous les filtres actifs
+
+#### 5. UI Responsive
+
+- Table avec 6 colonnes + pagination
+- Modal JSON detail avec react18-json-view
+- **Skeleton loader** : 800ms initial + 500ms refresh
+- **Mobile-optimized** : overflow-x-auto, adaptive padding
+- French date formatting via date-fns
+
+#### 6. Sécurité Multi-Couches
+
+- RLS policies: `(select public.is_admin())`
+- RPC function: explicit admin check (defense-in-depth)
+- DAL functions: `requireAdmin()` before queries
+- Server Actions: `requireAdmin()` before export
+
+### Fichiers Créés
+
+**Database** (2 schémas + 1 migration):
+
+- `supabase/schemas/20_audit_logs_retention.sql`
+- `supabase/schemas/42_rpc_audit_logs.sql`
+- `supabase/migrations/20260103183217_audit_logs_retention_and_rpc.sql` (192 lignes)
+
+**Backend** (3 fichiers):
+
+- `lib/schemas/audit-logs.ts` — Zod validation (Server + UI schemas)
+- `lib/dal/audit-logs.ts` — fetchAuditLogs + fetchAuditTableNames
+- `app/(admin)/admin/audit-logs/actions.ts` — exportAuditLogsCSV
+
+**Frontend** (9 composants + 1 UI helper):
+
+- `components/ui/date-range-picker.tsx` — Custom date picker
+- `components/features/admin/audit-logs/types.ts`
+- `components/features/admin/audit-logs/AuditLogsSkeleton.tsx`
+- `components/features/admin/audit-logs/AuditLogsContainer.tsx` — Server (parse URL)
+- `components/features/admin/audit-logs/AuditLogsView.tsx` — Client (state + skeleton)
+- `components/features/admin/audit-logs/AuditLogFilters.tsx`
+- `components/features/admin/audit-logs/AuditLogsTable.tsx`
+- `components/features/admin/audit-logs/AuditLogDetailModal.tsx`
+- `components/features/admin/audit-logs/index.ts`
+
+**Pages** (2):
+
+- `app/(admin)/admin/audit-logs/page.tsx` — Route avec searchParams
+- `app/(admin)/admin/audit-logs/loading.tsx`
+
+**Admin** (1 modification):
+
+- `components/admin/AdminSidebar.tsx` — Ajout link "Audit Logs"
+
+**Testing** (2 scripts):
+
+- `scripts/test-audit-logs-cloud.ts` — Cloud verification (3 tests)
+
+### Problèmes Résolus
+
+#### 1. CSV Export Validation Error
+
+**Symptôme** : `[ERR_AUDIT_002] Too big: expected number to be <=100`
+
+**Cause** : `AuditLogFilterSchema` limite `limit: z.coerce.number().max(100)` pour pagination, mais export tentait 10,000 lignes.
+
+**Solution** : Pagination automatique dans `exportAuditLogsCSV()`
+
+- Fetch en batches de 100 rows (respecte validation)
+- Loop jusqu'à MAX_EXPORT_ROWS (10,000) ou totalCount
+- Concatenate tous les résultats
+
+#### 2. Responsive Mobile
+
+**Symptôme** : Table déborde, boutons trop petits, padding excessif.
+
+**Solution** :
+
+- `overflow-x-auto -mx-3 sm:-mx-4 md:-mx-6` sur table wrapper
+- Padding adaptatif : `p-3 sm:p-4 md:p-6`
+- Boutons : `min-w-[120px] flex-1 sm:flex-none`
+- Layout vertical : `space-y-3` au lieu de flex-row
+
+#### 3. Skeleton Loader Invisible
+
+**Symptôme** : `isPending` trop rapide, skeleton jamais visible.
+
+**Solution** :
+
+- Timeout 800ms initial load (`isInitialLoading` state)
+- Timeout 500ms sur refresh/filtres pour visible feedback
+- Condition : `{(isPending || isInitialLoading) ? <Skeleton /> : <Table />}`
+
+#### 4. Filtres ne modifient pas l'affichage
+
+**Symptôme** : Filtres modifient CSV mais pas table (Container fetch toujours `{ page: 1, limit: 50 }`).
+
+**Solution** : URL-based state management
+
+- Page passe `searchParams` au Container
+- Container parse `searchParams → AuditLogFilter`
+- View reçoit `initialFilters` et sync avec `useEffect`
+- `handleFilterChange` construit URL avec `router.push()`
+
+### Cloud Deployment
+
+**Migration** : `20260103183217_audit_logs_retention_and_rpc.sql`
+
+**Applied** :
+
+- ✅ Local : `supabase db reset`
+- ✅ Cloud : `supabase db push`
+
+**Verification Tests** (3/3 passed):
+
+- ✅ `expires_at` column working (sample: 2026-04-03)
+- ✅ RPC function protected (admin-only)
+- ✅ Cleanup function working (0 deleted)
+
+### Documentation
+
+- `doc/TASK033-AUDIT-LOGS-IMPLEMENTATION-SUMMARY.md` (528 lignes)
+- `.github/prompts/plan-TASK033-audit-logs-viewer.prompt.md` (status: COMPLETED)
+- Migration logs : `supabase/migrations/migrations.md`
+
+### Conclusion
+
+TASK033 est **100% complet et production-ready** :
+
+- ✅ Database schema deployed (local + cloud)
+- ✅ Backend layer (DAL + Server Actions)
+- ✅ Frontend UI (responsive + accessible)
+- ✅ CSV export functional (pagination fix)
+- ✅ Filter synchronization (URL-based)
+- ✅ Build passes (TypeScript + ESLint)
+
+**Next Steps** : Aucune — Feature complète et déployée ✅
+
+---
+
 ## TASK036 - Security Audit Completion (35%→100%) - COMPLETED (2026-01-03)
 
 ### Objectif

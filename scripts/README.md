@@ -125,6 +125,41 @@ pnpm exec tsx scripts/set-admin-role.ts yandevformation@gmail.com
 
 ---
 
+#### test-audit-logs-cloud.ts
+
+**Description** : Vérifie le déploiement cloud de la migration TASK033 (Audit Logs Viewer).
+
+**Utilisation** :
+
+```bash
+pnpm exec tsx scripts/test-audit-logs-cloud.ts
+```
+
+**Tests couverts (3 tests)** :
+
+| Test | Description |
+| ------ | ------------- |
+| Test 1 | Vérification colonne `expires_at` (90 jours) |
+| Test 2 | Fonction RPC `get_audit_logs_with_email()` protégée (admin-only) |
+| Test 3 | Fonction `cleanup_expired_audit_logs()` fonctionnelle |
+
+**Résultats attendus** :
+
+- ✅ expires_at présent avec date future (~90 jours)
+- ⚠️ RPC bloqué pour utilisateurs non-admin (expected behavior)
+- ✅ Cleanup exécuté (0 deleted si aucun log expiré)
+
+**Configuration Requise** :
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**Note** : Ce script valide le déploiement cloud de la migration `20260103183217_audit_logs_retention_and_rpc.sql`.
+
+---
+
 ### check-email-logs.ts
 
 **Description** : Vérifie les logs d'emails et de messages de contact dans la base de données Supabase.

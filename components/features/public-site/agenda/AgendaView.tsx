@@ -212,7 +212,7 @@ export function AgendaView({
 
       {/* Newsletter CTA Section */}
       {showNewsletterSection && !newsletterIsSubscribed && (
-        <section className="py-16 hero-gradient">
+        <section className="py-16 px-4 hero-gradient justify-center flex">
           <div className="container max-w-2xl text-center">
             <h2 className="text-2xl font-bold text-white mb-4">
               Ne Manquez Rien

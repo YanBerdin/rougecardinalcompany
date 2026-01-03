@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -15,6 +14,7 @@ import {
   LayoutDashboard,
   Bug,
   ToggleLeft,
+  ScrollText,
 } from "lucide-react";
 import {
   Sidebar,
@@ -90,6 +90,11 @@ const otherItems = [
     title: "Affichage Sections",
     href: "/admin/site-config",
     icon: ToggleLeft,
+  },
+  {
+    title: "Audit Logs",
+    href: "/admin/audit-logs",
+    icon: ScrollText,
   },
   {
     title: "Paramètres",

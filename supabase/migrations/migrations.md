@@ -2,7 +2,29 @@
 
 Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutées en complément du schéma déclaratif.
 
-## 🔐 Sécurité : Vérification des vulnérabilités
+## � Dernières Migrations
+
+### 2026-01-03 - TASK033 Audit Logs Viewer
+
+**Migration** : `20260103183217_audit_logs_retention_and_rpc.sql` (192 lignes)
+
+**Objectif** : Système complet d'audit logs avec rétention automatique, résolution email et filtres avancés.
+
+**Composants** :
+
+- Colonne `expires_at` sur `logs_audit` avec valeur par défaut `now() + interval '90 days'`
+- Index `idx_audit_logs_expires_at` pour cleanup efficace
+- Fonction `cleanup_expired_audit_logs()` pour purge automatique (cron job)
+- Fonction RPC `get_audit_logs_with_email()` pour filtres avancés + résolution email
+- RLS policies admin-only avec `is_admin()` guard
+
+**Statut** : ✅ Appliqué localement + cloud  
+**Tests** : 3/3 passed (expires_at, RPC, cleanup)  
+**Documentation** : `doc/TASK033-AUDIT-LOGS-IMPLEMENTATION-SUMMARY.md`
+
+---
+
+## �🔐 Sécurité : Vérification des vulnérabilités
 
 ### Procédure de vérification
 
