@@ -1,6 +1,6 @@
 # \[TASK014] - Back‑office: toggles centralisés (Agenda/Accueil/Contact)
 
-**Status:** Pending  
+**Status:** ✅ **Completed**
 **Added:** 17 septembre 2025  
 **Updated:** 17 septembre 2025
 
@@ -26,7 +26,7 @@ Centraliser dans le back‑office les toggles d’affichage de la section Newsle
 ### Subtasks
 
 | ID | Description | Status | Updated | Notes |
-|----|-------------|--------|---------|-------|
+| ---- | ------------- | -------- | --------- | ------- |
 | 4.1 | Modèle/config pour stocker les toggles | Not Started | 17-09-2025 | RLS admin |
 | 4.2 | UI Back‑office (switches) | Not Started | 17-09-2025 | shadcn/ui |
 | 4.3 | Lecture côté front + cohérence | Not Started | 17-09-2025 | ISR/revalidate |

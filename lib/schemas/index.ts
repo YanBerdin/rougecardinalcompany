@@ -40,6 +40,15 @@ export {
     type AboutContentDTO,
 } from "./home-content";
 
+// Site Config
+export {
+    DisplayToggleInputSchema,
+    DisplayToggleFormSchema,
+    type DisplayToggleDTO,
+    type DisplayToggleInput,
+    type DisplayToggleFormValues,
+} from "./site-config";
+
 // Presse
 export {
     PressReleaseSchema,

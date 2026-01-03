@@ -2,13 +2,15 @@ import {
   fetchUpcomingEvents,
   fetchEventTypes,
 } from "@/lib/dal/agenda";
+import { fetchDisplayToggle } from "@/lib/dal/site-config";
 import type { Event as AgendaEvent, EventType as EventTypeOption } from "./types";
 import AgendaClientContainer from "./AgendaClientContainer";
 
 export default async function AgendaContainer() {
-  const [eventsResult, typesResult] = await Promise.all([
+  const [eventsResult, typesResult, newsletterToggleResult] = await Promise.all([
     fetchUpcomingEvents(12),
     fetchEventTypes(),
+    fetchDisplayToggle("display_toggle_agenda_newsletter"),
   ]);
 
   // Handle DALResult - graceful degradation
@@ -20,5 +22,14 @@ export default async function AgendaContainer() {
     ? (typesResult.data ?? [])
     : [{ value: "all", label: "Tous les événements" }];
 
-  return <AgendaClientContainer events={events} eventTypes={eventTypes} />;
+  const showNewsletterSection = newsletterToggleResult.success &&
+    newsletterToggleResult.data?.value?.enabled !== false;
+
+  return (
+    <AgendaClientContainer
+      events={events}
+      eventTypes={eventTypes}
+      showNewsletterSection={showNewsletterSection}
+    />
+  );
 }

@@ -65,17 +65,18 @@ export function PresseView({
       </section>
 
       {/* Communiqués de Presse */}
-      <section className="py-20">
-        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Communiqués de Presse</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Les dernières actualités officielles de la compagnie
-            </p>
-          </div>
+      {pressReleases.length > 0 && (
+        <section className="py-20">
+          <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl font-bold mb-4">Communiqués de Presse</h2>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Les dernières actualités officielles de la compagnie
+              </p>
+            </div>
 
-          <div className="flex flex-wrap justify-center gap-8">
-            {pressReleases.map((release, index) => (
+            <div className="flex flex-wrap justify-center gap-8">
+              {pressReleases.map((release, index) => (
               <Card
                 key={release.id}
                 className={`card-hover animate-fade-in-up w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm flex flex-col`}
@@ -107,9 +108,10 @@ export function PresseView({
                 </CardContent>
               </Card>
             ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Revue de Presse */}
       <section className="py-20 bg-muted/30">
@@ -197,17 +199,18 @@ export function PresseView({
       </section>
 
       {/* Kit Média */}
-      <section className="py-20">
-        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Kit Média</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Ressources haute qualité pour vos publications
-            </p>
-          </div>
+      {mediaKit.length > 0 && (
+        <section className="py-20">
+          <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl font-bold mb-4">Kit Média</h2>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Ressources haute qualité pour vos publications
+              </p>
+            </div>
 
-          <div className="flex flex-wrap justify-center gap-8">
-            {mediaKit.map((item, index) => {
+            <div className="flex flex-wrap justify-center gap-8">
+              {mediaKit.map((item, index) => {
               const Icon = item.icon ?? FileText;
               return (
                 <Card
@@ -238,9 +241,10 @@ export function PresseView({
                 </Card>
               );
             })}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Accréditation */}
       <section className="py-20 hero-gradient">

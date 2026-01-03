@@ -1,15 +1,16 @@
-import { fetchNewsletterSettings } from "@/lib/dal/home-newsletter";
+import { fetchDisplayToggle } from "@/lib/dal/site-config";
 import { NewsletterClientContainer } from "./NewsletterClientContainer";
 
 export async function NewsletterContainer() {
   // TODO: remove - artificial delay to visualize Suspense skeletons
   await new Promise((resolve) => setTimeout(resolve, 1500));
 
-  const result = await fetchNewsletterSettings();
+  // ✅ Check toggle
+  const toggleResult = await fetchDisplayToggle("display_toggle_home_newsletter");
 
-  // Default to enabled if fetch fails or returns enabled
-  const settings = result.success ? result.data : { enabled: true };
-  if (!settings.enabled) return null;
+  if (!toggleResult.success || !toggleResult.data?.value.enabled) {
+    return null; // Section désactivée
+  }
 
   return <NewsletterClientContainer />;
 }

@@ -14,6 +14,7 @@ import {
   Search,
   LayoutDashboard,
   Bug,
+  ToggleLeft,
 } from "lucide-react";
 import {
   Sidebar,
@@ -85,6 +86,11 @@ const homepageItems = [
 ];
 
 const otherItems = [
+  {
+    title: "Affichage Sections",
+    href: "/admin/site-config",
+    icon: ToggleLeft,
+  },
   {
     title: "Paramètres",
     href: "/admin/settings",

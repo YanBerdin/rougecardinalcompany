@@ -1,5 +1,78 @@
 # Progress
 
+## Database Security - RLS & SECURITY INVOKER Fixes - COMPLETED (2025-12-31)
+
+### Objectif
+
+Résoudre l'alerte Supabase Security Advisor concernant SECURITY DEFINER et corriger les politiques RLS trop permissives.
+
+### Résultats
+
+| Feature | État |
+| ------- | ---- |
+| Migration RLS base tables | ✅ Applied (cloud + local) |
+| Migration SECURITY INVOKER enforcement | ✅ Applied (cloud + local) |
+| Tests de sécurité | ✅ 13/13 PASSED |
+| Documentation SUPABASE-VIEW-SECURITY | ✅ Created |
+| Schémas déclaratifs synchronisés | ✅ Updated |
+| Migrations obsolètes retirées | ✅ 3 removed |
+| Fichiers documentation obsolètes | ✅ 7 deleted |
+
+### Migrations Créées
+
+1. **`20251231010000_fix_base_tables_rls_revoke_admin_views_anon.sql`**
+   - Fix RLS policies : `membres_equipe` et `compagnie_presentation_sections` avec filtre `active = true` pour public
+   - Policies admin séparées avec `using (is_admin())`
+   - Révocation SELECT sur 7 vues `*_admin` pour rôle `anon`
+
+2. **`20251231020000_enforce_security_invoker_all_views_final.sql`**
+   - Force SECURITY INVOKER sur 11 vues via `ALTER VIEW ... SET (security_invoker = true)`
+   - Résout le problème de migration snapshot qui recréait les vues sans security_invoker
+   - Exécuté EN DERNIER pour override la snapshot
+
+### Architecture Sécurité
+
+**Pattern SECURITY INVOKER** :
+
+- ✅ Exécution avec privilèges de l'utilisateur appelant
+- ✅ Respect des politiques RLS
+- ✅ Aucune escalade de privilèges
+- ✅ Toutes les vues : `WITH (security_invoker = true)`
+
+**Pattern RLS Filtering** :
+
+- ✅ Tables publiques : `active = true` (read-only)
+- ✅ Tables admin : `(select public.is_admin())`
+- ✅ 36/36 tables protégées par RLS
+
+### Tests de Sécurité
+
+**Script** : `scripts/check-views-security.ts`
+
+```bash
+📋 Testing PUBLIC views (should be accessible to anon): 4/4 ✅
+📋 Testing ADMIN views (should be BLOCKED for anon): 7/7 ✅
+📋 Testing BASE TABLES with active filter: 2/2 ✅
+📊 Summary: 13/13 PASSED ✅
+```
+
+### Documentation
+
+- `doc/SUPABASE-VIEW-SECURITY/README.md` - État final et guide de vérification
+- `doc/SUPABASE-VIEW-SECURITY/database-view-security-guide.md` - Guide complet de sécurité PostgreSQL
+- `.github/prompts/plan-fixRlsBaseTablesAdminViewsSecurity/` - Plan d'exécution et checklist
+- `supabase/migrations/migrations.md` - Migrations documentées
+- `supabase/schemas/README.md` - Section corrections RLS ajoutée
+
+### Commits
+
+- `35daa55` - fix(security): enforce RLS active filter and SECURITY INVOKER on all views
+  - 25 files changed, 2254 insertions, 11170 deletions
+  - Migrations appliquées avec succès (local + cloud)
+  - Tests passés : 13/13 ✅
+
+---
+
 ## TASK029 - Media Library - Storage/Folders Sync FINALIZED (2025-12-30)
 
 ### Updates 30 décembre 2025

@@ -16,7 +16,7 @@ Ce dossier contient le schéma déclaratif de la base de données selon les inst
 ### Conformité Instructions ✅
 
 | Instruction | Statut | Détail |
-|-------------|--------|--------|
+| ------------- | -------- | -------- |
 | **RLS Policies** | ✅ 100% | 36/36 tables protégées (25 principales + 11 liaison) |
 | **Functions** | ✅ 100% | SECURITY INVOKER, search_path défini |
 | **SQL Style** | ✅ 100% | Lowercase, snake_case, commentaires |
@@ -68,7 +68,30 @@ Note RLS: les nouvelles tables co‑localisent leurs politiques (dans le même f
 
 ---
 
+## 🆕 Mises à jour récentes (janvier 2026)
+
+- **Display Toggles - Correction Migration Cleanup (1er jan. 2026)** : Résolution incohérence entre plan TASK030 et implémentation réelle.
+  - **Problème identifié** : Le plan TASK030 mentionnait 3 toggles compagnie à supprimer (`display_toggle_compagnie_values`, `display_toggle_compagnie_presentation`, `display_toggle_compagnie_stats`) mais ces clés n'ont jamais été créées par le seed initial (`20260101160100_seed_display_toggles.sql`).
+  - **Migration cleanup incorrecte** : `20260101170000_cleanup_and_add_epic_toggles.sql` contenait des DELETE pour ces clés inexistantes (aucun impact fonctionnel, 0 rows affected).
+  - **Migration corrective** : `20260101180000_fix_cleanup_display_toggles_no_compagnie.sql` (documentation only, verification des 9 toggles corrects).
+  - **État final** : 9 display toggles corrects en base (4 home + 1 presse + 2 newsletter + 2 Epic additions).
+  - **Composants concernés** : `AboutContainer.tsx` utilise correctement `display_toggle_home_about` ✅.
+  - **Action requise** : Mettre à jour le plan TASK030 pour refléter la réalité (toggles compagnie jamais créés).
+
 ## 🆕 Mises à jour récentes (décembre 2025)
+
+- **Corrections RLS & SECURITY INVOKER (31 déc. 2025)** : Résolution complète des politiques RLS et enforcement SECURITY INVOKER sur toutes les vues.
+  - **Migration RLS** : `20251231010000_fix_base_tables_rls_revoke_admin_views_anon.sql`
+    - Fix politiques RLS `membres_equipe` : lecture publique limitée à `active = true`
+    - Fix politiques RLS `compagnie_presentation_sections` : lecture publique limitée à `active = true`
+    - Révocation accès anon aux 7 vues admin (*_admin)
+    - Schémas déclaratifs mis à jour : `04_table_membres_equipe.sql`, `07c_table_compagnie_presentation.sql`
+  - **Migration SECURITY INVOKER** : `20251231020000_enforce_security_invoker_all_views_final.sql`
+    - Force SECURITY INVOKER sur 11 vues publiques via `ALTER VIEW ... SET (security_invoker = true)`
+    - Résout le problème de migration snapshot qui recréait les vues sans security_invoker
+    - Vues corrigées : communiques_presse_dashboard, communiques_presse_public, articles_presse_public, membres_equipe_admin, compagnie_presentation_sections_admin, partners_admin, messages_contact_admin, content_versions_detailed, analytics_summary, popular_tags, categories_hierarchy
+  - **Tests de sécurité** : 13/13 PASSED (4 vues publiques accessibles, 7 vues admin bloquées, 2 tables filtrées)
+  - **Documentation complète** : `doc/SUPABASE-VIEW-SECURITY/README.md`
 
 - **Normalisation `spectacles.status` (9-12 déc. 2025)** : Normalisation des valeurs de statut vers des tokens anglais canoniques.
   - **Valeurs canoniques** : `'draft'`, `'published'`, `'archived'` (exclusivement)
@@ -176,7 +199,7 @@ Pour rappel, la migration générée est `supabase/migrations/20250918000002_app
 ### Tables avec Protection RLS (24/24) ✅
 
 | Table | Lecture | Écriture | Particularités |
-|-------|---------|----------|----------------|
+| ------------- | -------- | -------- | ---------------- |
 | **profiles** | Publique | Propriétaire uniquement | Auto-création profil |
 | **medias** | Publique | Uploadeur ou admin | Gestion fichiers |
 | **spectacles** | Si public=true | Créateur ou admin | Visibilité contrôlée. Spectacles archivés publics (status='archive', public=true) |
@@ -207,7 +230,7 @@ Pour rappel, la migration générée est `supabase/migrations/20250918000002_app
 ### Tables de Liaison avec Protection RLS (11/11) ✅
 
 | Table | Lecture | Écriture | Particularités |
-|-------|---------|----------|----------------|
+| ------------- | -------- | -------- | ---------------- |
 | **spectacles_membres_equipe** | Publique | Admin uniquement | Casting des spectacles |
 | **spectacles_medias** | Publique | Admin uniquement | Médias des spectacles |
 | **articles_medias** | Publique | Admin uniquement | Médias des articles |
@@ -335,7 +358,7 @@ supabase migration new update_existing_data
 ## � Métriques de Conformité
 
 | Métrique | Valeur | Statut |
-|----------|--------|--------|
+| ------------- | -------- | -------- |
 | **Tables avec RLS** | 36/36 (100%) | ✅ |
 | **Tables principales** | 25/25 (100%) | ✅ |
 | **Tables de liaison** | 11/11 (100%) | ✅ |
@@ -352,7 +375,7 @@ supabase migration new update_existing_data
 ### Erreurs Communes
 
 | Erreur | Solution |
-|--------|----------|
+| ------------- | -------- |
 | `relation does not exist` | Vérifier l'ordre des fichiers |
 | `permission denied` | Vérifier les politiques RLS |
 | `function is not immutable` | Marquer les fonctions pure IMMUTABLE |
@@ -409,7 +432,7 @@ Le schéma déclaratif Rouge Cardinal Company est **production-ready** avec :
 ### Couverture Versioning
 
 | Entité | Triggers Versioning | Restauration Supportée | Notes |
-|--------|---------------------|-------------------------|-------|
+| ------------- | -------- | -------- | ---------------- |
 | spectacles | Oui | Oui | publish/unpublish détecté |
 | articles_presse | Oui | Oui | publish/unpublish via published_at |
 | communiques_presse | Oui | Oui | Flag `public` |

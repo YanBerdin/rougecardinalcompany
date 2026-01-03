@@ -60,8 +60,10 @@ Ce fichier liste les titres et descriptions extraites des fichiers de tâches `T
     - État: Completed (2025-12-29)
     - Issue: [#9](https://github.com/YanBerdin/rougecardinalcompany/issues/9) (OPEN) — fermer ou lier la PR.
 
-10. TASK030 — Display toggles
-    - Résumé: Basculer affichage de sections publiques (shows, news, partners).
+10. **TASK030 — Display toggles** ✅
+    - **Résumé**: Système complet de toggles d'affichage pour sections publiques. 10 toggles sur 5 catégories (home, agenda, contact, presse). Phase 11 : Split presse en 2 toggles indépendants (Media Kit + Communiqués). Migration idempotente, scripts utilitaires, documentation complète.
+    - **État**: Completed (1er jan 2026)
+    - **Issue**: [#10](https://github.com/YanBerdin/rougecardinalcompany/issues/10) (OPEN) — fermer ou lier la PR.
 
 11. TASK031 — Access controls for content
     - Résumé: Rôles et permissions pour accès éditeur/admin.

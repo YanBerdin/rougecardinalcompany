@@ -30,4 +30,11 @@ export interface AgendaViewProps {
   setFilterType: (value: string) => void;
   generateCalendarFile: (event: Event) => void;
   loading?: boolean;
+  showNewsletterSection?: boolean;
+  newsletterEmail?: string;
+  newsletterIsSubscribed?: boolean;
+  newsletterIsLoading?: boolean;
+  newsletterErrorMessage?: string | null;
+  onNewsletterEmailChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onNewsletterSubmit?: (e: React.FormEvent) => void;
 }
