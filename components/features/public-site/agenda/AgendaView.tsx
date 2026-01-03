@@ -8,6 +8,7 @@ import {
   ExternalLink,
   Download,
   Filter,
+  Mail,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -212,24 +213,31 @@ export function AgendaView({
 
       {/* Newsletter CTA Section */}
       {showNewsletterSection && !newsletterIsSubscribed && (
-        <section className="py-16 px-4 hero-gradient justify-center flex">
-          <div className="container max-w-2xl text-center">
-            <h2 className="text-2xl font-bold text-white mb-4">
-              Ne Manquez Rien
-            </h2>
-            <p className="text-white/80 mb-6">
-              Inscrivez-vous pour recevoir les dernières actualités
-            </p>
-            {onNewsletterEmailChange && onNewsletterSubmit && (
-              <NewsletterForm
-                email={newsletterEmail}
-                isLoading={newsletterIsLoading}
-                isSubscribed={newsletterIsSubscribed}
-                errorMessage={newsletterErrorMessage}
-                onEmailChange={onNewsletterEmailChange}
-                onSubmit={onNewsletterSubmit}
-              />
-            )}
+        <section className="py-20 hero-gradient">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div className="animate-fade-in-up">
+              <Mail className="h-12 w-12 text-white mx-auto mb-6" />
+              <h2 className="text-3xl font-bold text-white mb-4">
+                Restez Informé
+              </h2>
+              <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+                Inscrivez-vous à notre newsletter pour recevoir nos actualités,
+                invitations aux premières et offres exclusives.
+              </p>
+              {newsletterErrorMessage && (
+                <p className="text-red-200 text-sm mb-4">{newsletterErrorMessage}</p>
+              )}
+              {onNewsletterEmailChange && onNewsletterSubmit && (
+                <NewsletterForm
+                  email={newsletterEmail}
+                  isLoading={newsletterIsLoading}
+                  isSubscribed={newsletterIsSubscribed}
+                  errorMessage={newsletterErrorMessage}
+                  onEmailChange={onNewsletterEmailChange}
+                  onSubmit={onNewsletterSubmit}
+                />
+              )}
+            </div>
           </div>
         </section>
       )}

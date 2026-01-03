@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { toast } from "sonner";
 
 interface UseNewsletterSubscriptionReturn {
   email: string;
@@ -21,6 +22,14 @@ export function useNewsletterSubscribe({
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newEmail = e.target.value;
@@ -33,6 +42,9 @@ export function useNewsletterSubscribe({
 
     if (!email.trim()) {
       setErrorMessage("L'email est requis");
+      toast.error("Email requis", {
+        description: "Veuillez saisir une adresse email valide.",
+      });
       return;
     }
 
@@ -52,17 +64,40 @@ export function useNewsletterSubscribe({
         throw new Error(data.error || "Erreur lors de l'inscription");
       }
 
-      if (data.status === "subscribed") {
+      if (!isMountedRef.current) return;
+
+      if (data.data?.status === "subscribed") {
         setIsSubscribed(true);
         setEmail("");
+        
+        // Vérifier si l'email de confirmation a échoué
+        if (data.data.warning) {
+          toast.warning("Inscription enregistrée", {
+            description: "Votre inscription a été enregistrée, mais l'email de confirmation n'a pas pu être envoyé. Vous recevrez nos actualités dès que notre système sera configuré.",
+            duration: 7000,
+          });
+        } else {
+          toast.success("Inscription réussie !", {
+            description: "Vous recevrez bientôt nos actualités et invitations privilégiées.",
+            duration: 5000,
+          });
+        }
       }
     } catch (error) {
       console.error("Newsletter error:", error);
-      setErrorMessage(
-        error instanceof Error ? error.message : "Erreur lors de l'inscription"
-      );
+      const errorMsg = error instanceof Error ? error.message : "Erreur lors de l'inscription";
+      
+      if (!isMountedRef.current) return;
+      
+      setErrorMessage(errorMsg);
+      toast.error("Échec de l'inscription", {
+        description: errorMsg,
+        duration: 5000,
+      });
     } finally {
-      setIsLoading(false);
+      if (isMountedRef.current) {
+        setIsLoading(false);
+      }
     }
   };
 
