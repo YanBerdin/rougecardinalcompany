@@ -4,6 +4,13 @@
  * Usage: pnpm tsx scripts/test-env-validation.ts
  */
 
+import { config } from 'dotenv';
+import { resolve } from 'path';
+
+// Load .env.local first (highest priority), then .env
+config({ path: resolve(process.cwd(), '.env.local') });
+config({ path: resolve(process.cwd(), '.env') });
+
 console.log("🧪 Testing T3 Env validation...\n");
 
 try {
