@@ -49,14 +49,13 @@
 **Script** : `scripts/test-views-security-authenticated.ts`
 
 **Résultats Cloud (après hotfix)** :
-```
+
 ✅ articles_presse_public: 0 rows
 ✅ communiques_presse_public: 0 rows
 ✅ popular_tags: 0 rows
 ✅ categories_hierarchy: 5 rows
 ✅ Admin view correctly denied to non-admin
 ✅ Authenticated non-admin tests passed
-```
 
 #### Workflow Migration Cloud
 
@@ -72,6 +71,7 @@
 #### Documentation Technique
 
 **Pattern Sécurité Views Admin** :
+
 ```sql
 create or replace view public.my_admin_view
 with (security_invoker = true)

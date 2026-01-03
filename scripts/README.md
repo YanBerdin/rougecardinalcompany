@@ -153,7 +153,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ
 SUPABASE_SECRET_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
-**Troubleshooting** : Voir [scripts-troubleshooting.md](../doc/scripts-troubleshooting.md)
+**Troubleshooting** : Voir `doc/rls-policies-troubleshooting.md`
 
 ---
 
@@ -220,7 +220,7 @@ pnpm run check-logs
 
 ---
 
-  ## 🔐 Migrations récentes de sécurité
+## 🔐 Migrations récentes de sécurité
 
 - `20260103120000_fix_communiques_presse_dashboard_admin_access.sql` — correction urgente : recréation de la vue `communiques_presse_dashboard` avec un garde explicite `where (select public.is_admin()) = true` pour s'assurer que seules les sessions admin peuvent voir les lignes de cette vue.
 - `20260103123000_revoke_authenticated_on_communiques_dashboard.sql` — révocation explicite du privilège `select` pour le rôle `authenticated` sur la vue admin afin d'éviter toute ré-exposition par des snapshots historiques.
@@ -309,13 +309,13 @@ Pour voir les logs en temps réel dans Supabase :
 3. Mettre à jour `.env.local` avec les nouvelles clés
 4. Redémarrer l'application : `pnpm dev`
 
-**Guide complet** : [scripts-troubleshooting.md](../doc/scripts-troubleshooting.md) (section "Legacy API keys")
+**Guide complet** : `doc/rls-policies-troubleshooting.md` (section "Legacy API keys")
 
 ### "No contact messages found" avec des données dans la table
 
 **Cause** : RLS activé, clé anon utilisée au lieu de service_role
 
-**Solution** : Voir [scripts-troubleshooting.md](../doc/scripts-troubleshooting.md)
+**Solution** : Voir `doc/rls-policies-troubleshooting.md`
 
 ### "Missing Supabase environment variables"
 
@@ -345,9 +345,9 @@ npx supabase gen types typescript --project-id yvtrlvmbofklefxcxrzv > lib/databa
 
 ## 📚 Documentation
 
-- [scripts-troubleshooting.md](../doc/scripts-troubleshooting.md) - Guide de dépannage détaillé
-- [Code-Cleanup-Auth-Session-2025-10-13.md](../doc/Code-Cleanup-Auth-Session-2025-10-13.md) - Session de nettoyage et optimisation
-- [Architecture-Update-Auth-Cleanup-2025-10-13.md](../doc/Architecture-Update-Auth-Cleanup-2025-10-13.md) - Mise à jour de l'architecture
+- `doc/rls-policies-troubleshooting.md` - Guide de dépannage détaillé
+- [Code-Cleanup-Auth-Session-2025-10-13.md](./doc/Code-Cleanup-Auth-Session-2025-10-13.md) - Session de nettoyage et optimisation
+- [Architecture-Update-Auth-Cleanup-2025-10-13.md](./doc/Architecture-Update-Auth-Cleanup-2025-10-13.md) - Mise à jour de l'architecture
 
 ---
 

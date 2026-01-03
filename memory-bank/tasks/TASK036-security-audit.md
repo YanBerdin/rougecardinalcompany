@@ -25,7 +25,7 @@ Audit should include RLS checks, secrets management, dependency scanning, and an
 
 ### Subtasks
 
-| ID  | Description           | Status      | Updated    | Notes                |
+| ID | Description | Status | Updated | Notes |
 | --- | --------------------- | ----------- | ---------- | -------------------- |
 | 1.1 | RLS policies review (all 36 tables) | Complete | 2025-12-31 | ✅ SECURITY INVOKER enforced |
 | 1.2 | Security view audit (anon invoker) | Complete | 2025-12-31 | ✅ 13/13 tests passed |

@@ -70,6 +70,7 @@ where (select public.is_admin()) = true;
 ```
 
 **Règles** :
+
 - ❌ Jamais `GRANT SELECT to authenticated` sur vues admin
 - ✅ Toujours garde `WHERE is_admin()` dans définition
 - ✅ Toujours `SECURITY INVOKER`

@@ -104,7 +104,7 @@ Implémenter le système CRUD complet pour la gestion des spectacles dans le bac
 ### Subtasks
 
 | ID | Description | Status | Updated | Notes |
-|----|-------------|--------|---------|-------|
+| ---- | ------------- | -------- | --------- | ------- |
 | 1.1 | Create DAL functions | Complete | 2025-11-16 | ✅ All functions Clean Code compliant |
 | 1.2 | Build API endpoints | Complete | 2025-11-16 | ✅ 5 endpoints functional |
 | 1.3 | Create UI components | Complete | 2025-11-16 | ✅ 7 components implemented |
@@ -121,7 +121,7 @@ Implémenter le système CRUD complet pour la gestion des spectacles dans le bac
 
 **Symptom** :
 
-```
+```bash
 performAuthenticatedInsert error: {
   code: '42501',
   details: null,
