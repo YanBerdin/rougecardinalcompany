@@ -9,6 +9,9 @@ import { sendContactNotification } from "@/lib/email/actions";
 import { createContactMessage } from "@/lib/dal/contact";
 import { parseFullName } from "@/lib/api/helpers";
 import type { ActionResult } from "@/lib/actions/types";
+import { recordRequest } from "@/lib/utils/rate-limit";
+import { getClientIP } from "@/lib/utils/get-client-ip";
+import { headers } from "next/headers";
 
 type ContactSubmissionResult = ActionResult<{
     status: "sent";
@@ -18,6 +21,26 @@ type ContactSubmissionResult = ActionResult<{
 export async function handleContactSubmission(
     input: unknown
 ): Promise<ContactSubmissionResult> {
+    // 1. Rate-limiting AVANT validation
+    const headersList = await headers();
+    const clientIP = getClientIP(headersList);
+    const rateLimitKey = `contact:${clientIP}`;
+    
+    const rateLimit = recordRequest(
+        rateLimitKey,
+        5, // max 5 requêtes
+        15 * 60 * 1000 // fenêtre de 15 minutes
+    );
+
+    if (!rateLimit.success) {
+        console.warn(`[Contact] Rate limit exceeded for IP: ${clientIP}`);
+        return {
+            success: false,
+            error: `Trop de tentatives. Veuillez réessayer dans ${Math.ceil((rateLimit.resetAt.getTime() - Date.now()) / 60000)} minutes.`,
+        };
+    }
+
+    // 2. Validation des données
     const validation = ContactEmailSchema.safeParse(input);
 
     if (!validation.success) {
@@ -41,7 +64,14 @@ export async function handleContactSubmission(
         consent: contactData.consent,
     };
 
-    const dalResult = await createContactMessage(dalInput);
+    const dalResult = await createContactMessage({
+        ...dalInput,
+        metadata: {
+            ip: clientIP,
+            user_agent: headersList.get("user-agent") || "unknown",
+            rate_limit_remaining: rateLimit.remaining,
+        },
+    });
     if (!dalResult.success) {
         console.error("[Contact] Database error:", dalResult.error);
     }

@@ -1,5 +1,84 @@
 # Progress
 
+## TASK046 - Rate-Limiting Handlers - COMPLETED (2026-01-04)
+
+### Objectif
+
+Protection des endpoints publics (Contact Form + Newsletter) contre spam et abus via rate-limiting in-memory.
+
+### Résultats
+
+| Feature | État |
+| ------- | ---- |
+| Contact Form rate-limiting (5 req/15min) | ✅ 100% |
+| Newsletter rate-limiting (3 req/1h) | ✅ 100% |
+| IP extraction helper | ✅ 100% |
+| Metadata enrichment (contact) | ✅ 100% |
+| HTTP-based tests (2 scripts) | ✅ 100% |
+| Documentation (2 fichiers) | ✅ 100% |
+| TypeScript compilation | ✅ PASSED |
+| Production build | ✅ PASSED |
+
+### Tests Validés
+
+#### Contact Form
+
+✅ Requête 1-5/5: OK (200)
+✅ Requête 6/6: BLOQUÉ (429) "Trop de tentatives. Veuillez réessayer dans 15 minutes."
+
+#### Newsletter
+
+✅ Requête 1-3/3: OK (200)
+✅ Requête 4/4: BLOQUÉ (429) "Trop de tentatives d'inscription. Veuillez réessayer dans 60 minutes."
+
+### Fichiers Créés/Modifiés
+
+**Backend** (5):
+
+- `lib/utils/rate-limit.ts` — Sliding window algorithm Map-based
+- `lib/utils/get-client-ip.ts` — Robust IP extraction (X-Forwarded-For → X-Real-IP → unknown)
+- `lib/actions/contact-server.ts` — Rate-limiting + metadata enrichment
+- `lib/actions/newsletter-server.ts` — Email normalization + rate-limiting
+- `lib/dal/contact.ts` — Signature extended pour `metadata?: Record<string, unknown>`
+
+**Testing** (2):
+
+- `scripts/test-rate-limit-contact.ts` — HTTP-based automated testing
+- `scripts/test-rate-limit-newsletter.ts` — Unique email generation avec Date.now()
+
+**Documentation** (2):
+
+- `doc/RATE-LIMITING.md` — Architecture, configuration, monitoring, Redis migration path
+- `doc/RATE-LIMITING-TESTING.md` — Automated tests, curl examples, edge cases
+
+**Migration**:
+
+- `supabase/migrations/20260104035600_add_metadata_to_messages_contact.sql` — Ajout colonne metadata
+
+### Problèmes Résolus
+
+1. **TypeScript Metadata Type Error**
+   - Symptôme: "metadata" property doesn't exist in ContactMessageInput
+   - Solution: Spread operator `{ ...dalInput, metadata: {...} }` au lieu d'assignation directe
+
+2. **Server-only Module Import Error**
+   - Symptôme: "This module cannot be imported from a Client Component module"
+   - Solution: Pivot vers HTTP-based testing (fetch contre localhost:3000)
+
+3. **Rate-limit Persistence Across Tests**
+   - Symptôme: Newsletter test bloquait toutes les requêtes (email statique)
+   - Solution: Génération email unique avec `Date.now()` timestamp
+
+### Phase 2 Considerations (Production)
+
+- Migration Redis via Upstash pour scaling multi-instances
+- Dashboard monitoring (Grafana/Prometheus)
+- IP whitelist pour sources de confiance
+- Limites dynamiques selon profil utilisateur
+- Intégration CAPTCHA après échecs répétés
+
+---
+
 ## TASK033 - Audit Logs Viewer Interface - COMPLETED (2026-01-03)
 
 ### Objectif

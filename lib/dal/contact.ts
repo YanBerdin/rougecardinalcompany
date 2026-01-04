@@ -16,7 +16,7 @@ import {
 // =============================================================================
 
 export async function createContactMessage(
-  input: ContactMessageInput
+  input: ContactMessageInput & { metadata?: Record<string, unknown> }
 ): Promise<DALResult<{ ok: true }>> {
   const validatedInput = ContactMessageSchema.parse(input);
 
@@ -30,7 +30,7 @@ export async function createContactMessage(
     reason: validatedInput.reason,
     message: validatedInput.message,
     consent: validatedInput.consent,
-    metadata: {},
+    metadata: input.metadata || {},
   } as const;
 
   //? RGPD: Utilise .insert() sans .select() pour éviter les blocages RLS

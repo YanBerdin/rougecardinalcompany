@@ -8,6 +8,7 @@ import {
     type NewsletterSubscriberInput,
 } from "@/lib/dal/newsletter-subscriber";
 import type { ActionResult } from "@/lib/actions/types";
+import { recordRequest } from "@/lib/utils/rate-limit";
 
 type NewsletterSubscriptionResult = ActionResult<{
     status: "subscribed";
@@ -17,6 +18,30 @@ type NewsletterSubscriptionResult = ActionResult<{
 export async function handleNewsletterSubscription(
     input: unknown
 ): Promise<NewsletterSubscriptionResult> {
+    // 1. Validation email MINIMALE (pour normaliser la clé)
+    if (!input || typeof input !== "object" || !("email" in input) || typeof input.email !== "string") {
+        return { success: false, error: "Email requis" };
+    }
+    const normalizedEmail = input.email.toLowerCase().trim();
+
+    // 2. Rate-limiting AVANT validation complète
+    const rateLimitKey = `newsletter:${normalizedEmail}`;
+    
+    const rateLimit = recordRequest(
+        rateLimitKey,
+        3, // max 3 requêtes
+        60 * 60 * 1000 // fenêtre de 1 heure
+    );
+
+    if (!rateLimit.success) {
+        console.warn(`[Newsletter] Rate limit exceeded for email: ${normalizedEmail}`);
+        return {
+            success: false,
+            error: `Trop de tentatives d'inscription. Veuillez réessayer dans ${Math.ceil((rateLimit.resetAt.getTime() - Date.now()) / 60000)} minutes.`,
+        };
+    }
+
+    // 3. Validation complète APRÈS rate-limiting
     const validation = NewsletterSubscriptionSchema.safeParse(input);
 
     if (!validation.success) {

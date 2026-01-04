@@ -1,6 +1,48 @@
 # Active Context
 
-**Current Focus (2026-01-03)**: TASK033 Audit Logs Viewer Implementation ✅
+**Current Focus (2026-01-04)**: TASK046 Rate-Limiting Implementation ✅ COMPLETE
+
+---
+
+## Latest Updates (2026-01-04)
+
+### TASK046 - Rate-Limiting Handlers ✅ COMPLETE
+
+**Implémentation complète du rate-limiting pour Contact Form (5 req/15min par IP) et Newsletter (3 req/1h par email).**
+
+#### Tests Validés
+
+- ✅ **Contact Form**: 5 requêtes passent, 6ème bloquée avec message "Trop de tentatives. Veuillez réessayer dans 15 minutes."
+- ✅ **Newsletter**: 3 requêtes passent, 4ème bloquée avec message "Trop de tentatives d'inscription. Veuillez réessayer dans 60 minutes."
+- ✅ **TypeScript compilation**: Exit code 0
+- ✅ **Production build**: PASSED
+
+#### Fichiers Implémentés
+
+**Backend** (5 fichiers):
+
+- `lib/utils/rate-limit.ts` — In-memory sliding window algorithm
+- `lib/utils/get-client-ip.ts` — IP extraction avec fallbacks
+- `lib/actions/contact-server.ts` — Rate-limiting + metadata enrichment
+- `lib/actions/newsletter-server.ts` — Email-based rate-limiting
+- `lib/dal/contact.ts` — Modified signature pour metadata
+
+**Testing** (2 scripts):
+
+- `scripts/test-rate-limit-contact.ts` — HTTP-based testing (validated ✅)
+- `scripts/test-rate-limit-newsletter.ts` — HTTP-based with unique emails (validated ✅)
+
+**Documentation** (2 fichiers):
+
+- `doc/RATE-LIMITING.md` — Technical architecture
+- `doc/RATE-LIMITING-TESTING.md` — Testing guide with curl examples
+
+#### Migration Database
+
+**Migration**: `supabase/migrations/20260104035600_add_metadata_to_messages_contact.sql`
+
+- Ajout colonne `metadata JSONB` dans `messages_contact`
+- Stockage IP, user-agent, rate_limit_remaining
 
 ---
 

@@ -1,5 +1,9 @@
 # Plan de Résolution - TASK046: Rate-limiting handlers contact/newsletter
 
+**Status:** ✅ Complete  
+**Completed:** 2026-01-04  
+**Tests:** ✅ Contact (5/6) + Newsletter (3/4) validated
+
 ## 📋 Analyse du Contexte
 
 ### État Actuel
@@ -716,16 +720,28 @@ UPSTASH_REDIS_REST_TOKEN=...
 
 ---
 
-**Status**: 🟢 **PLAN READY FOR EXECUTION**  
+**Status**: 🟢 **PLAN COMPLETE - IMPLEMENTED**  
 **Risk Level**: 🟢 **LOW** (code changes localisés, tests existants)  
-**Estimated Completion**: ~2h45 développement + 30min review
+**Implementation Date**: 2026-01-04  
+**Estimated Time**: ~2h45 développement + 30min review  
+**Actual Time**: ~2h30 (légèrement sous estimation)
 
 ---
 
-## 📝 Changelog Plan
+## 📝 Changelog Implementation
 
 | Date | Modification |
 |------|-------------|
+| 2026-01-04 | ✅ **IMPLEMENTATION COMPLETE** |
+| 2026-01-04 | ✅ Création `lib/utils/get-client-ip.ts` |
+| 2026-01-04 | ✅ Modification `lib/actions/contact-server.ts` avec rate-limiting |
+| 2026-01-04 | ✅ Modification `lib/actions/newsletter-server.ts` avec rate-limiting |
+| 2026-01-04 | ✅ Modification `lib/dal/contact.ts` pour metadata |
+| 2026-01-04 | ✅ Création `scripts/test-rate-limit-contact.ts` |
+| 2026-01-04 | ✅ Création `scripts/test-rate-limit-newsletter.ts` |
+| 2026-01-04 | ✅ Création `doc/RATE-LIMITING.md` |
+| 2026-01-04 | ✅ Création `doc/RATE-LIMITING-TESTING.md` |
+| 2026-01-04 | ✅ Mise à jour `memory-bank/tasks/TASK046-rate-limiting-handlers.md` |
 | 2026-01-04 | ✅ Ajout Phase 0 Audit (vérif metadata, tests handlers) |
 | 2026-01-04 | ✅ Correction signature `getClientIP()` → `ReadonlyHeaders` |
 | 2026-01-04 | ✅ Fix ordre Newsletter: rate-limit AVANT validation complète |
