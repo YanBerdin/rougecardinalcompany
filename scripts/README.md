@@ -145,7 +145,7 @@ pnpm exec tsx scripts/test-rate-limit-newsletter.ts
 ✅ Requête 4/4: BLOQUÉ (429) "Trop de tentatives d'inscription. Veuillez réessayer dans 60 minutes."
 ```
 
-**Documentation complète** : 
+**Documentation complète** :
 
 - Architecture : `doc/RATE-LIMITING.md`
 - Tests manuels : `doc/RATE-LIMITING-TESTING.md`

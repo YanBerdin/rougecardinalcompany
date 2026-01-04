@@ -12,7 +12,6 @@
 
 ## En Cours
 
-- `TASK046` Rate-limiting handlers contact/newsletter (middleware ou inside handler)
 - `TASK047` Extraire `NewsletterSubscriptionSchema` vers `lib/schemas/newsletter.ts`
 
 ## En Attente
@@ -28,6 +27,7 @@
 
 ## Terminé
 
+- `TASK046` Rate-limiting handlers contact/newsletter - Completed on 2026-01-04
 - `TASK000` Configuration initiale du projet - Completed on 2025-08-15
 - `TASK001` Section Spectacles et Productions - Completed on 2025-10-01 (UI + DAL + archive toggle)
 - `TASK011` Intégration `home_hero_slides` (fetch + rendu + fenêtre visibilité) - Completed on 2025-09-23
