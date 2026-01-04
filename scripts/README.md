@@ -67,7 +67,92 @@ Les scripts suivants testaient des API Routes qui ont été supprimées lors de 
 
 ---
 
-### 🔐 Administration & Sécurité
+### �️ Tests Rate-Limiting (TASK046)
+
+Ces scripts testent l'implémentation du rate-limiting pour les endpoints publics (Contact Form + Newsletter).
+
+#### test-rate-limit-contact.ts ✅ RECOMMANDÉ
+
+**Description** : Test automatisé du rate-limiting du formulaire de contact (5 req/15min par IP).
+
+**Utilisation** :
+
+```bash
+# Démarrer le serveur dev
+pnpm dev
+
+# Dans un autre terminal
+pnpm exec tsx scripts/test-rate-limit-contact.ts
+```
+
+**Tests couverts (2 tests)** :
+
+| Test | Description |
+| ------ | ------------- |
+| Test 1 | 5 requêtes consécutives (doivent passer) |
+| Test 2 | 6ème requête (doit être bloquée avec HTTP 429) |
+
+**Avantages** :
+
+- ✅ HTTP-based testing (fetch contre localhost:3000)
+- ✅ Simulation IP via header X-Forwarded-For
+- ✅ Validation messages d'erreur user-friendly
+- ✅ Tests rapides (~3 secondes total)
+
+**Résultat attendu** :
+
+```
+✅ Requête 1-5/5: OK (200)
+✅ Requête 6/6: BLOQUÉ (429) "Trop de tentatives. Veuillez réessayer dans X minutes."
+```
+
+**Note** : Redémarrer le serveur dev pour réinitialiser le rate-limit.
+
+---
+
+#### test-rate-limit-newsletter.ts ✅ RECOMMANDÉ
+
+**Description** : Test automatisé du rate-limiting de l'inscription newsletter (3 req/1h par email).
+
+**Utilisation** :
+
+```bash
+# Démarrer le serveur dev
+pnpm dev
+
+# Dans un autre terminal
+pnpm exec tsx scripts/test-rate-limit-newsletter.ts
+```
+
+**Tests couverts (2 tests)** :
+
+| Test | Description |
+| ------ | ------------- |
+| Test 1 | 3 requêtes consécutives (doivent passer) |
+| Test 2 | 4ème requête (doit être bloquée avec HTTP 429) |
+
+**Avantages** :
+
+- ✅ Email unique par test run (Date.now() timestamp)
+- ✅ Validation normalisation email (lowercase)
+- ✅ Pas de collision rate-limit entre tests
+- ✅ Tests rapides (~2 secondes total)
+
+**Résultat attendu** :
+
+```
+✅ Requête 1-3/3: OK (200)
+✅ Requête 4/4: BLOQUÉ (429) "Trop de tentatives d'inscription. Veuillez réessayer dans 60 minutes."
+```
+
+**Documentation complète** : 
+
+- Architecture : `doc/RATE-LIMITING.md`
+- Tests manuels : `doc/RATE-LIMITING-TESTING.md`
+
+---
+
+### �🔐 Administration & Sécurité
 
 #### check-admin-status.ts
 
