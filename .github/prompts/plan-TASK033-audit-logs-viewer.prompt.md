@@ -1381,6 +1381,5 @@ import { ScrollText } from "lucide-react";
 - **Pattern Admin UI:** users
 - **Instructions RLS:** Create-RLS-policies.instructions.md
 - **Instructions Functions:** Database_Create_functions.instructions.md
-```
 
 ---
