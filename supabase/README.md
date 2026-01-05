@@ -139,7 +139,7 @@ const supabase = createClient(url, "hardcoded-service-key");
 
 ## Architecture recommandée
 
-```
+```bash
 supabase/
   server.ts      # Client standard (RLS-aware)
   admin.ts       # Client admin (bypass RLS) ← VOUS ÊTES ICI

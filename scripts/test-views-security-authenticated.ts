@@ -98,23 +98,46 @@ async function signInAndTest(email: string, password: string) {
         }
     }
 
-    // ADMIN view should be denied
-    try {
-        const { data, error } = await authClient.from('communiques_presse_dashboard').select('id').limit(1);
-        if (error) {
-            if (error.message.includes('permission denied')) {
-                console.log('   ✅ Admin view correctly denied to non-admin');
+    // ADMIN views should be denied (7 views total)
+    console.log('\n🔒 Testing admin views access (should be denied):\n');
+    
+    const adminViews = [
+        'communiques_presse_dashboard',
+        'membres_equipe_admin',
+        'compagnie_presentation_sections_admin',
+        'partners_admin',
+        'content_versions_detailed',
+        'messages_contact_admin',
+        'analytics_summary',
+    ];
+
+    for (const viewName of adminViews) {
+        try {
+            // Use '*' to avoid issues with views that don't have 'id' column (e.g., analytics_summary)
+            const { data, error } = await authClient.from(viewName).select('*').limit(1);
+            
+            if (error) {
+                // Expected: permission denied (42501 code)
+                if (error.message.includes('permission denied') || error.code === '42501') {
+                    console.log(`   ✅ ${viewName}: correctly denied`);
+                } else {
+                    console.error(`   ❌ ${viewName}: unexpected error - ${error.message}`);
+                    allPassed = false;
+                }
             } else {
-                console.error('   ❌ Unexpected error on admin view:', error.message);
-                allPassed = false;
+                // NOT EXPECTED: view returned data or empty array
+                if (Array.isArray(data) && data.length === 0) {
+                    console.error(`   ❌ ${viewName}: SECURITY ISSUE - returns empty array instead of permission denied`);
+                    allPassed = false;
+                } else {
+                    console.error(`   ❌ ${viewName}: CRITICAL SECURITY ISSUE - accessible to non-admin! Data:`, data);
+                    allPassed = false;
+                }
             }
-        } else {
-            console.error('   ❌ Security issue: admin view accessible to non-admin!', data);
+        } catch (err) {
+            console.error(`   ❌ ${viewName}: exception -`, err);
             allPassed = false;
         }
-    } catch (err) {
-        console.error('   ❌ Exception testing admin view:', err);
-        allPassed = false;
     }
 
     console.log('\n' + '='.repeat(60));

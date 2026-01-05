@@ -86,6 +86,10 @@ order by
 
 comment on view public.messages_contact_admin is 'Vue pour l administration: suivi des messages, latences, association presse.';
 
+alter view public.messages_contact_admin owner to admin_views_owner;
+revoke all on public.messages_contact_admin from anon, authenticated;
+grant select on public.messages_contact_admin to service_role;
+
 -- Site configuration
 drop table if exists public.configurations_site cascade;
 create table public.configurations_site (

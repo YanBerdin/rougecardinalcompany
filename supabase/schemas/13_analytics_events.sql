@@ -118,3 +118,7 @@ group by event_type, entity_type, date_trunc('day', created_at)
 order by event_date desc, total_events desc;
 
 comment on view public.analytics_summary is 'Vue résumé des statistiques analytiques sur 30 jours. SECURITY INVOKER: Runs with querying user privileges, protected by RLS on base tables.';
+
+alter view public.analytics_summary owner to admin_views_owner;
+revoke all on public.analytics_summary from anon, authenticated;
+grant select on public.analytics_summary to service_role;

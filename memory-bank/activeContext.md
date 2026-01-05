@@ -1,6 +1,165 @@
 # Active Context
 
-**Current Focus (2026-01-04)**: TASK046 Rate-Limiting Implementation ✅ COMPLETE
+**Current Focus (2026-01-05)**: 🚨 CRITICAL SECURITY HOTFIX - SECURITY DEFINER Views Fixed ✅
+
+---
+
+## 🔴 CRITICAL HOTFIX (2026-01-05 13:00 UTC)
+
+### Security Vulnerability: SECURITY DEFINER Views Bypassing RLS
+
+**Migration**: `20260105130000_fix_security_definer_views.sql`  
+**Severity**: 🔴 CRITICAL - RLS Bypass
+
+**Problem**: Two views executing with owner privileges instead of caller privileges, **completely bypassing RLS policies**:
+
+1. ❌ `communiques_presse_public`
+2. ❌ `communiques_presse_dashboard`
+
+**Fix**: Recreated both views with explicit `WITH (security_invoker = true)`
+
+**Validation**: ✅ All 13 views now SECURITY INVOKER  
+**Status**: ✅ Applied locally + cloud, all tests passing
+
+**Documentation**:
+
+- `doc/ADMIN-VIEWS-SECURITY-HARDENING-SUMMARY.md` (updated)
+- `supabase/migrations/migrations.md` (documented)
+
+---
+
+## Latest Updates (2026-01-05)
+
+### TASK037 - Admin Views Security Hardening ✅ COMPLETE
+
+**Correction critique de la vulnérabilité où les vues admin retournaient des tableaux vides au lieu d'erreurs "permission denied".**
+
+#### Problème Initial
+
+- 7 vues admin (`*_admin`, `*_dashboard`) retournaient `[]` pour les utilisateurs non-admin
+- Impossible de distinguer entre "pas de données" et "pas de permission"
+- Causé par les `DEFAULT PRIVILEGES` de Supabase qui auto-accordent SELECT même avec REVOKE explicite
+
+#### Solution Implémentée
+
+**Pattern Role-Based Isolation** :
+
+1. Création du rôle `admin_views_owner` (NOLOGIN NOINHERIT)
+2. Transfert de ownership des 7 vues admin
+3. REVOKE explicite sur anon/authenticated
+4. GRANT SELECT uniquement pour service_role
+5. Modification des DEFAULT PRIVILEGES pour prévenir futurs auto-grants
+
+#### Migration Applied
+
+**Migration**: `20260105120000_admin_views_security_hardening.sql`
+
+- ✅ Applied to local database (`db reset`)
+- ✅ Applied to cloud database (`db push --linked`)
+- ✅ Idempotent (IF NOT EXISTS, graceful notices)
+- **Critical Fix**: Added `GRANT CREATE ON SCHEMA public` to resolve permission error
+
+#### Files Modified
+
+**Declarative Schemas** (5 fichiers):
+
+```sql
+-- Pattern applied to all admin views
+alter view public.<view_name> owner to admin_views_owner;
+revoke all on public.<view_name> from anon, authenticated;
+grant select on public.<view_name> to service_role;
+```
+
+1. `supabase/schemas/41_views_communiques.sql` — communiques_presse_dashboard
+2. `supabase/schemas/41_views_admin_content_versions.sql` — membres_equipe_admin, compagnie_presentation_sections_admin, partners_admin
+3. `supabase/schemas/15_content_versioning.sql` — content_versions_detailed
+4. `supabase/schemas/10_tables_system.sql` — messages_contact_admin
+5. `supabase/schemas/13_analytics_events.sql` — analytics_summary
+
+**Validation Scripts**:
+
+- `scripts/check-admin-views-owner.ts` — Validates ownership (NEW)
+- `scripts/test-views-security-authenticated.ts` — Extended to test 7 admin views
+- `scripts/check-views-security.ts` — Validates anon access (existing)
+
+**Documentation**:
+
+- `doc/ADMIN-VIEWS-SECURITY-HARDENING-SUMMARY.md` — Complete implementation guide
+- `memory-bank/tasks/TASK037-admin-views-security-hardening.md` — Task tracking
+- `supabase/migrations/migrations.md` — Migration documentation
+
+#### Tests Validés
+
+**Authenticated Non-Admin User** (`test-views-security-authenticated.ts`):
+
+- ✅ 4 public views accessible (as expected)
+- ✅ 7 admin views correctly denied with error 42501
+- ✅ 0 empty array vulnerabilities detected
+- ✅ 13/13 tests PASSED
+
+**Anonymous Users** (`check-views-security.ts`):
+
+- ✅ 4 public views accessible
+- ✅ 7 admin views blocked (error 42501)
+- ✅ 2 base tables enforce active=true filter
+- ✅ 13/13 tests PASSED
+
+#### Affected Views (7 Total)
+
+| View | Before | After |
+| ------ | -------- | ------- |
+| `communiques_presse_dashboard` | Empty array [] | Error 42501 ✅ |
+| `membres_equipe_admin` | Empty array [] | Error 42501 ✅ |
+| `compagnie_presentation_sections_admin` | Empty array [] | Error 42501 ✅ |
+| `partners_admin` | Empty array [] | Error 42501 ✅ |
+| `content_versions_detailed` | Empty array [] | Error 42501 ✅ |
+| `messages_contact_admin` | Empty array [] | Error 42501 ✅ |
+| `analytics_summary` | Empty array [] | Error 42501 ✅ |
+
+#### Security Layers (Defense in Depth)
+
+Cette implémentation ajoute **Layer 4** aux mécanismes existants :
+
+1. **RLS Policies** (Layer 1): Row Level Security sur tables
+2. **SECURITY INVOKER** (Layer 2): Vues exécutées avec privilèges utilisateur
+3. **Base Table Grants** (Layer 3): GRANTs minimaux sur tables de base
+4. **View Ownership Isolation** (Layer 4): **NEW** — Prévention auto-grants Supabase
+
+#### Lessons Learned
+
+1. **DEFAULT PRIVILEGES Override Explicit REVOKEs**
+   - Solution: Dedicated ownership role excluded from defaults
+
+2. **Schema CREATE Permission Required**
+   - `ALTER VIEW owner` requires `GRANT CREATE ON SCHEMA`
+   - Not just role membership
+
+3. **Empty Arrays Are Silent Security Failures**
+   - Proper errors improve observability and security posture
+
+4. **Test All View Types**
+   - Aggregate views may not have `id` columns
+   - Use flexible `select('*')` in generic tests
+
+#### Maintenance Guidelines
+
+**Pour nouvelles vues admin** :
+
+```sql
+-- Toujours appliquer ce pattern dans les schemas déclaratifs
+create or replace view public.new_admin_view as ...;
+alter view public.new_admin_view owner to admin_views_owner;
+revoke all on public.new_admin_view from anon, authenticated;
+grant select on public.new_admin_view to service_role;
+```
+
+**Scripts de validation mensuels** :
+
+```bash
+pnpm exec tsx scripts/check-views-security.ts
+pnpm exec tsx scripts/test-views-security-authenticated.ts
+pnpm exec tsx scripts/check-admin-views-owner.ts
+```
 
 ---
 

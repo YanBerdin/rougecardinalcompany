@@ -11,7 +11,7 @@
  * Usage:
  *   pnpm exec tsx scripts/check-security-advisors.ts
  */
-
+import 'dotenv/config';
 import { createClient } from '@supabase/supabase-js';
 import { env } from '../lib/env';
 

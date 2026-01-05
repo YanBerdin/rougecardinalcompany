@@ -5,7 +5,7 @@ dotenv.config()
 import { createClient } from '@supabase/supabase-js'
 
 // Configuration pour la base de données locale
-const supabaseUrl = 'http://127.0.0.1:54322'
+const supabaseUrl = NEXT_PUBLIC_SUPABASE_URL
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY
 
 const supabase = createClient(supabaseUrl, supabaseKey, {

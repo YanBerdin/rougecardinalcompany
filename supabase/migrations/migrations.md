@@ -4,6 +4,117 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## � Dernières Migrations
 
+### 2026-01-05 - CRITICAL: Fix SECURITY DEFINER Views
+
+**Migration** : `20260105130000_fix_security_definer_views.sql` (170 lignes)
+
+**Sévérité** : 🔴 **CRITIQUE** - Vulnérabilité RLS Bypass
+
+**Problème Détecté** : Deux vues critiques fonctionnaient en mode `SECURITY DEFINER`, exécutant les requêtes avec les privilèges du propriétaire de la vue (postgres/admin_views_owner) au lieu de l'utilisateur appelant, **contournant ainsi les politiques Row-Level Security**.
+
+**Vues Affectées** :
+
+1. ❌ `communiques_presse_public` (vue publique)
+2. ❌ `communiques_presse_dashboard` (vue admin)
+
+**Risques de Sécurité** :
+
+- **Bypass RLS** : Les utilisateurs pouvaient voir des lignes non autorisées car les vérifications RLS s'exécutaient avec les droits du propriétaire (large accès)
+- **Escalade de privilèges** : Accès indirect à des lectures/écritures normalement interdites
+- **Violation principe du moindre privilège** : La vue exposait plus de données que prévu
+- **Comportement inattendu** : Les développeurs supposaient que les policies RLS étaient appliquées par utilisateur
+
+**Solution Appliquée** :
+
+```sql
+-- Force SECURITY INVOKER mode on both views
+create or replace view public.communiques_presse_public
+with (security_invoker = true)  -- ✅ Run with caller privileges
+as
+-- ... (view definition)
+
+create or replace view public.communiques_presse_dashboard
+with (security_invoker = true)  -- ✅ Run with caller privileges
+as
+-- ... (admin guard: where (select public.is_admin()) = true)
+```
+
+**Validation Post-Migration** :
+
+```sql
+-- Both views now show SECURITY INVOKER ✅
+✅ communiques_presse_dashboard (admin_views_owner)
+✅ communiques_presse_public (postgres)
+```
+
+**Schémas Déclaratifs Synchronisés** : ✅ `supabase/schemas/41_views_communiques.sql`
+
+**Statut** : ✅ Appliqué localement + cloud, validé  
+**Détection** : Analyse Supabase Security Advisor + user report  
+**Impact** : Rétablit l'isolation sécurisée des données par utilisateur
+
+---
+
+### 2026-01-05 - Admin Views Security Hardening
+
+**Migration** : `20260105120000_admin_views_security_hardening.sql` (97 lignes)
+
+**Objectif** : Sécuriser strictement les vues admin en créant un rôle dédié `admin_views_owner` pour isoler les vues du système de DEFAULT PRIVILEGES de Supabase qui accorde automatiquement des privilèges à `anon` et `authenticated`.
+
+**Problème Identifié** : Le test `test-views-security-authenticated.ts` révélait que la vue `communiques_presse_dashboard` retournait un tableau vide `[]` au lieu d'une erreur `permission denied` pour les utilisateurs authentifiés non-admin. La cause : les DEFAULT PRIVILEGES de Supabase accordent automatiquement `ALL` aux rôles `anon`/`authenticated` lors de la création de vues dans le schéma `public`.
+
+**Solution** :
+
+1. **Rôle Dédié** : Création du rôle `admin_views_owner` (nologin) pour propriété des vues admin
+2. **Transfer Ownership** : 7 vues admin transférées à `admin_views_owner`
+3. **Revoke Explicit** : `REVOKE ALL` sur les 7 vues pour `anon` et `authenticated`
+4. **Grant Service Role** : `GRANT SELECT` uniquement à `service_role` (admin backend)
+5. **DEFAULT PRIVILEGES** : Modification pour que les futures vues créées par `admin_views_owner` ne reçoivent PAS de grants automatiques
+
+**Vues Concernées** (7) :
+
+- `communiques_presse_dashboard` (41_views_communiques.sql)
+- `membres_equipe_admin` (41_views_admin_content_versions.sql)
+- `compagnie_presentation_sections_admin` (41_views_admin_content_versions.sql)
+- `partners_admin` (41_views_admin_content_versions.sql)
+- `content_versions_detailed` (15_content_versioning.sql)
+- `messages_contact_admin` (10_tables_system.sql)
+- `analytics_summary` (13_analytics_events.sql)
+
+**Schémas Déclaratifs Mis à Jour** (5 fichiers) :
+
+Chaque vue admin a maintenant ces lignes après sa définition :
+
+```sql
+alter view public.<view_name> owner to admin_views_owner;
+revoke all on public.<view_name> from anon, authenticated;
+grant select on public.<view_name> to service_role;
+```
+
+**Scripts de Validation** :
+
+- `scripts/check-admin-views-owner.ts` — Vérifie l'ownership des 7 vues
+- `scripts/test-views-security-authenticated.ts` — Teste les 7 vues avec assertion stricte `permission denied`
+
+**Tests Automatisés** :
+
+```bash
+# Vérifier ownership
+pnpm exec tsx scripts/check-admin-views-owner.ts
+
+# Test sécurité authenticated (7 vues bloquées)
+pnpm exec tsx scripts/test-views-security-authenticated.ts
+
+# Test sécurité anon existant
+pnpm exec tsx scripts/check-views-security.ts
+```
+
+**Statut** : ✅ Migration créée, schémas mis à jour, scripts créés  
+**Référence** : `.github/prompts/plan-adminViewsSecurityHardening.prompt.md`  
+**Décision** : Architecture rôle dédié pour isolation permanente des vues admin
+
+---
+
 ### 2026-01-03 - TASK033 Audit Logs Viewer
 
 **Migration** : `20260103183217_audit_logs_retention_and_rpc.sql` (192 lignes)

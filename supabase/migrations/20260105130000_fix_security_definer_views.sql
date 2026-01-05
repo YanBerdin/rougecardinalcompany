@@ -1,11 +1,29 @@
--- Vues Communiqués de presse dépendantes des relations
--- Ordre: 41 - après 11_tables_relations.sql
+-- CRITICAL SECURITY FIX: Convert SECURITY DEFINER views to SECURITY INVOKER
+-- 
+-- Problem: Two views were running with SECURITY DEFINER mode, bypassing RLS:
+--   1. communiques_presse_public (public view)
+--   2. communiques_presse_dashboard (admin view)
+--
+-- Impact: 
+--   - SECURITY DEFINER runs queries with view owner's privileges (postgres/admin_views_owner)
+--   - Bypasses Row-Level Security policies intended for querying users
+--   - Violates principle of least privilege
+--   - Potential unauthorized data exposure
+--
+-- Solution: Force SECURITY INVOKER mode on both views
+--   - Queries run with caller's privileges
+--   - RLS policies properly enforced per-user
+--   - Aligns with security architecture documented in schemas/
 
--- Vue publique communiqués
--- SECURITY: Explicitly set SECURITY INVOKER to run with querying user's privileges
+-- ============================================================================
+-- FIX 1: communiques_presse_public (PUBLIC VIEW)
+-- ============================================================================
+
+-- Drop and recreate is safer than ALTER for reloptions
 drop view if exists public.communiques_presse_public cascade;
+
 create or replace view public.communiques_presse_public
-with (security_invoker = true)
+with (security_invoker = true)  -- ✅ CRITICAL: Run with caller privileges
 as
 select 
   cp.id,
@@ -66,11 +84,14 @@ order by cp.ordre_affichage asc, cp.date_publication desc;
 comment on view public.communiques_presse_public is 
 'Vue publique optimisée pour l''espace presse professionnel avec URLs de téléchargement, images et catégories. Exclut les communiqués sans PDF principal. SECURITY INVOKER: Runs with querying user privileges (not definer).';
 
--- Vue dashboard admin
--- SECURITY: Explicitly set SECURITY INVOKER to run with querying user's privileges
+-- ============================================================================
+-- FIX 2: communiques_presse_dashboard (ADMIN VIEW)
+-- ============================================================================
+
 drop view if exists public.communiques_presse_dashboard cascade;
+
 create or replace view public.communiques_presse_dashboard
-with (security_invoker = true)
+with (security_invoker = true)  -- ✅ CRITICAL: Run with caller privileges
 as
 select 
   cp.id,
@@ -101,7 +122,7 @@ left join public.evenements as e on cp.evenement_id = e.id
 left join public.profiles as p on cp.created_by = p.user_id
 left join public.communiques_categories as cc on cp.id = cc.communique_id
 left join public.communiques_tags as ct on cp.id = ct.communique_id
-where (select public.is_admin()) = true
+where (select public.is_admin()) = true  -- ✅ Admin guard enforced per caller
 group by cp.id, pdf_m.filename, pdf_m.size_bytes, im.filename, cp.image_url,
          s.title, e.date_debut, p.display_name
 order by cp.created_at desc;
@@ -109,11 +130,31 @@ order by cp.created_at desc;
 comment on view public.communiques_presse_dashboard is 
 'Vue dashboard admin pour la gestion des communiqués avec statistiques et gestion des images. accès réservé aux administrateurs uniquement. SECURITY INVOKER: runs with querying user privileges (not definer); rely on rls policies on base tables.';
 
--- Security: Transfer ownership to dedicated admin role
+-- Restore ownership to admin_views_owner (from TASK037)
 alter view public.communiques_presse_dashboard owner to admin_views_owner;
 
--- Security: Revoke automatic grants from public roles
+-- Restore security configuration (from TASK037)
 revoke all on public.communiques_presse_dashboard from anon, authenticated;
-
--- Security: Explicit grant to service_role for admin backend
 grant select on public.communiques_presse_dashboard to service_role;
+
+-- ============================================================================
+-- VERIFICATION QUERY (for manual testing)
+-- ============================================================================
+
+-- After migration, run this to verify:
+-- SELECT 
+--   c.relname AS view_name,
+--   CASE 
+--     WHEN EXISTS (
+--       SELECT 1 FROM pg_options_to_table(c.reloptions) 
+--       WHERE option_name = 'security_invoker' AND option_value = 'true'
+--     ) THEN 'SECURITY INVOKER ✅'
+--     ELSE 'SECURITY DEFINER ❌'
+--   END AS security_mode
+-- FROM pg_class c
+-- JOIN pg_namespace n ON n.oid = c.relnamespace
+-- WHERE c.relkind = 'v'
+--   AND n.nspname = 'public'
+--   AND c.relname IN ('communiques_presse_public', 'communiques_presse_dashboard');
+--
+-- Expected result: Both views should show 'SECURITY INVOKER ✅'
