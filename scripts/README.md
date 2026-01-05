@@ -154,6 +154,89 @@ pnpm exec tsx scripts/test-rate-limit-newsletter.ts
 
 ### �🔐 Administration & Sécurité
 
+#### check-admin-views-owner.ts ✅ TASK037
+
+**Description** : Validation automatique de la propriété des vues admin (isolation de sécurité).
+
+**Utilisation** :
+
+```bash
+pnpm exec tsx scripts/check-admin-views-owner.ts
+```
+
+**Tests couverts (7 vues admin)** :
+
+| Vue | Owner Attendu | Fichier Schéma |
+| --- | ------------- | -------------- |
+| `communiques_presse_dashboard` | admin_views_owner | `41_views_communiques.sql` |
+| `membres_equipe_admin` | admin_views_owner | `41_views_admin_content_versions.sql` |
+| `compagnie_presentation_sections_admin` | admin_views_owner | `41_views_admin_content_versions.sql` |
+| `partners_admin` | admin_views_owner | `41_views_admin_content_versions.sql` |
+| `content_versions_detailed` | admin_views_owner | `15_content_versioning.sql` |
+| `messages_contact_admin` | admin_views_owner | `10_tables_system.sql` |
+| `analytics_summary` | admin_views_owner | `13_analytics_events.sql` |
+
+**Validation** :
+
+- ✅ Interroge `pg_class` pour ownership effective
+- ✅ Échoue si ownership incorrecte (sécurité critique)
+- ✅ Compatible CI/CD security gates
+
+**Cas d'usage** :
+
+- Post-migration validation (20260105120000)
+- Audit régulier de la configuration de sécurité
+- Détection drift entre schémas déclaratifs et base de données
+
+**Références** :
+
+- Migration : `20260105120000_admin_views_security_hardening.sql`
+- Migration hotfix : `20260105130000_fix_security_definer_views.sql`
+- Task : TASK037
+- Doc : `doc/ADMIN-VIEWS-SECURITY-HARDENING-SUMMARY.md`
+
+---
+
+#### test-views-security-authenticated.ts ✅ TASK037 (Extended)
+
+**Description** : Test de sécurité des vues pour utilisateurs authentifiés non-admin (détection empty array vulnerability).
+
+**Utilisation** :
+
+```bash
+pnpm exec tsx scripts/test-views-security-authenticated.ts
+```
+
+**Tests couverts (13 vues totales)** :
+
+| Catégorie | Nombre | Comportement Attendu |
+| --------- | ------ | --------------------- |
+| **Vues Admin** | 7 | Erreur 42501 (permission denied) |
+| **Vues Publiques** | 4 | Données accessibles |
+| **Tables Publiques** | 2 | Filtre `active = true` automatique |
+
+**Assertions Critiques** :
+
+- ✅ Vues admin : erreur PostgreSQL 42501 (pas de tableau vide)
+- ✅ Vues publiques : données accessibles
+- ❌ Tableaux vides sur vues admin : échec critique (mauvaise configuration)
+
+**Security Vulnerability Detection** :
+
+```typescript
+if (!error || error.code !== '42501') {
+  throw new Error(`🚨 SECURITY: ${viewName} returned ${data?.length ?? 0} rows instead of error`);
+}
+```
+
+**Références** :
+
+- Migration : `20260105120000_admin_views_security_hardening.sql`
+- Pattern : Role-Based View Ownership Isolation
+- Task : TASK037
+
+---
+
 #### check-admin-status.ts
 
 **Description** : Vérifie le statut admin d'un utilisateur et affiche les métadonnées complètes.
@@ -167,6 +250,43 @@ pnpm exec tsx scripts/check-admin-status.ts
 # Vérifier un utilisateur spécifique
 pnpm exec tsx scripts/check-admin-status.ts yandevformation@gmail.com
 ```
+
+---
+
+#### check-views-security.ts ✅ TASK037
+
+**Description** : Test de sécurité des vues pour utilisateurs anonymes (validation RLS + SECURITY INVOKER).
+
+**Utilisation** :
+
+```bash
+pnpm exec tsx scripts/check-views-security.ts
+```
+
+**Tests couverts (13 tests)** :
+
+| Catégorie | Nombre | Comportement Attendu |
+| --------- | ------ | --------------------- |
+| **Vues Admin** | 7 | Bloquées (erreur 42501) |
+| **Vues Publiques** | 4 | Accessibles |
+| **Tables Publiques** | 2 | Filtre `active = true` |
+
+**Validation SECURITY INVOKER** :
+
+- ✅ Toutes les vues (13/13) doivent être `security_invoker = true`
+- ❌ Aucune vue ne doit avoir `SECURITY DEFINER` (bypass RLS)
+
+**Cas d'usage** :
+
+- Validation post-migration (TASK037)
+- CI/CD security gates
+- Détection vulnérabilités RLS bypass
+
+**Références** :
+
+- Migration hotfix : `20260105130000_fix_security_definer_views.sql`
+- Pattern : SECURITY INVOKER enforcement
+- Task : TASK037
 
 **Fonctionnalités** :
 

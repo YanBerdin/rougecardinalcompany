@@ -99,6 +99,146 @@ const apiKey = process.env.RESEND_API_KEY;
 
 - `lib/site-config.ts` — Utilise `env.EMAIL_FROM`, `env.NEXT_PUBLIC_SITE_URL`
 
+### Admin Views Security Hardening Pattern (Jan 2026)
+
+**Pattern de sécurité multi-couches** pour isolation stricte des vues admin avec rôle dédié.
+
+#### Problème Résolu
+
+**Vulnérabilité** : Vues admin retournaient tableaux vides `[]` au lieu d'erreur `permission denied` pour utilisateurs non-admin.
+
+**Cause** : DEFAULT PRIVILEGES Supabase accordent automatiquement `SELECT` aux rôles `anon`/`authenticated` lors de la création de vues dans le schéma `public`, même avec REVOKE explicite.
+
+#### Architecture Role-Based Isolation
+
+```sql
+-- Création rôle dédié (hors DEFAULT PRIVILEGES)
+create role admin_views_owner nologin noinherit;
+
+-- Membership pour opérations (postgres/service_role)
+grant admin_views_owner to postgres, service_role;
+
+-- Permission schéma pour ALTER VIEW...OWNER
+grant usage, create on schema public to admin_views_owner;
+
+-- Transfert ownership (7 vues admin)
+alter view public.communiques_presse_dashboard owner to admin_views_owner;
+alter view public.membres_equipe_admin owner to admin_views_owner;
+-- ...
+
+-- Révocation stricte
+revoke all on public.communiques_presse_dashboard from anon, authenticated;
+
+-- Grant minimal service_role uniquement
+grant select on public.communiques_presse_dashboard to service_role;
+
+-- Modification DEFAULT PRIVILEGES pour futures vues
+alter default privileges for role admin_views_owner in schema public
+  revoke all on tables from anon, authenticated;
+```
+
+#### Pattern Schéma Déclaratif
+
+```sql
+-- supabase/schemas/41_views_communiques.sql
+
+-- 1. Définition vue avec is_admin() guard
+create or replace view public.communiques_presse_dashboard
+with (security_invoker = true) as
+select * from public.communiques_presse
+where (select public.is_admin());
+
+-- 2. Configuration sécurité (4 lignes pattern)
+alter view public.communiques_presse_dashboard owner to admin_views_owner;
+revoke all on public.communiques_presse_dashboard from anon, authenticated;
+grant select on public.communiques_presse_dashboard to service_role;
+comment on view public.communiques_presse_dashboard is 'Admin dashboard view';
+```
+
+#### CRITICAL: SECURITY INVOKER Enforcement
+
+**Vulnérabilité RLS Bypass** : Vues avec `SECURITY DEFINER` exécutent avec privilèges owner, bypassant complètement les RLS policies.
+
+**Solution** : Toujours utiliser `WITH (security_invoker = true)` pour exécution avec privilèges caller.
+
+```sql
+-- ✅ CORRECT : Respecte RLS
+create or replace view public.my_view
+with (security_invoker = true) as
+select * from public.my_table;
+
+-- ❌ DANGEREUX : Bypass RLS (défaut PostgreSQL)
+create or replace view public.my_view as
+select * from public.my_table;
+```
+
+**Validation** :
+
+```sql
+-- Vérifier toutes les vues
+select schemaname, viewname, viewowner,
+       coalesce((reloptions::text[] && '{security_invoker=true}'), false) as is_invoker
+from pg_views
+where schemaname = 'public';
+```
+
+#### Tests de Validation
+
+```typescript
+// scripts/test-views-security-authenticated.ts
+
+const adminViews = [
+  'communiques_presse_dashboard',
+  'membres_equipe_admin',
+  'compagnie_presentation_sections_admin',
+  'partners_admin',
+  'messages_contact_admin',
+  'content_versions_detailed',
+  'analytics_summary'
+];
+
+for (const viewName of adminViews) {
+  const { data, error } = await supabase.from(viewName).select('*');
+  
+  // ✅ DOIT retourner erreur 42501 (permission denied)
+  if (!error || error.code !== '42501') {
+    throw new Error(`Security vulnerability: ${viewName} returned ${data?.length ?? 0} rows`);
+  }
+}
+```
+
+#### Security Layers (Defense in Depth)
+
+1. **RLS Policies** (Layer 1): Row Level Security sur tables de base
+2. **SECURITY INVOKER** (Layer 2): Vues exécutées avec privilèges caller (13/13 vues)
+3. **Base Table Grants** (Layer 3): GRANTs minimaux sur tables de base
+4. **View Ownership Isolation** (Layer 4): Rôle dédié `admin_views_owner` hors DEFAULT PRIVILEGES
+
+#### Vues Admin Concernées (7)
+
+| Vue | Owner | Fichier Schéma |
+| ----- | ------- | ---------------- |
+| `communiques_presse_dashboard` | admin_views_owner | `41_views_communiques.sql` |
+| `membres_equipe_admin` | admin_views_owner | `41_views_admin_content_versions.sql` |
+| `compagnie_presentation_sections_admin` | admin_views_owner | `41_views_admin_content_versions.sql` |
+| `partners_admin` | admin_views_owner | `41_views_admin_content_versions.sql` |
+| `content_versions_detailed` | admin_views_owner | `15_content_versioning.sql` |
+| `messages_contact_admin` | admin_views_owner | `10_tables_system.sql` |
+| `analytics_summary` | admin_views_owner | `13_analytics_events.sql` |
+
+#### Migrations
+
+- `20260105120000_admin_views_security_hardening.sql` — Création rôle + ownership transfer
+- `20260105130000_fix_security_definer_views.sql` — CRITICAL hotfix SECURITY INVOKER
+
+#### Références
+
+- Task: `memory-bank/tasks/TASK037-admin-views-security-hardening.md`
+- Plan: `.github/prompts/plan-adminViewsSecurityHardening.prompt.md`
+- Doc: `doc/ADMIN-VIEWS-SECURITY-HARDENING-SUMMARY.md`
+
+---
+
 ### Audit Logs Viewer Pattern (Jan 2026)
 
 **Pattern complet** pour interface admin d'audit logs avec rétention automatique, filtres avancés et export CSV paginé.

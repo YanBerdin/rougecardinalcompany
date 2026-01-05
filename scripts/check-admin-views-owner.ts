@@ -10,16 +10,14 @@
  * 
  * Usage: pnpm exec tsx scripts/check-admin-views-owner.ts
  */
+//!Error: This module cannot be imported from a Client Component module. It should only be used from a Server Component.
+import 'dotenv/config';
 
 import { createClient } from "@supabase/supabase-js";
+import { env } from "../lib/env";
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SERVICE_ROLE_KEY = process.env.SUPABASE_SECRET_KEY!;
-
-if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
-  console.error("❌ Missing environment variables");
-  process.exit(1);
-}
+const SUPABASE_URL = env.NEXT_PUBLIC_SUPABASE_URL;
+const SERVICE_ROLE_KEY = env.SUPABASE_SECRET_KEY;
 
 const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   auth: { persistSession: false },

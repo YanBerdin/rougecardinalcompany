@@ -9,6 +9,7 @@
  * 
  * Run with: pnpm exec tsx scripts/test-ssrf-validation.ts
  */
+import 'dotenv/config';
 
 import { validateImageUrl } from "../lib/utils/validate-image-url";
 

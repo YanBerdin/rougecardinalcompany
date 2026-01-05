@@ -144,7 +144,7 @@ end $$;
 
 ### Local Database (`pnpm dlx supabase db reset`)
 
-```
+```bash
 Applying migration 20260105120000_admin_views_security_hardening.sql...
 NOTICE (00000): Role admin_views_owner created
 Finished supabase db reset on branch master.
@@ -154,7 +154,7 @@ Finished supabase db reset on branch master.
 
 ### Cloud Database (`pnpm dlx supabase db push --linked`)
 
-```
+```bash
 Applying migration 20260105120000_admin_views_security_hardening.sql...
 NOTICE (00000): Role admin_views_owner already exists
 NOTICE (00000): role "postgres" has already been granted membership...
@@ -302,11 +302,11 @@ For each new admin view:
 2. Add view name to `scripts/check-admin-views-owner.ts` `expectedViews` array
 3. Run tests:
 
-   ```bash
+```bash
    pnpm exec tsx scripts/test-views-security-authenticated.ts
    pnpm exec tsx scripts/check-views-security.ts
    pnpm exec tsx scripts/check-admin-views-owner.ts
-   ```
+```
 
 ### Monitoring
 

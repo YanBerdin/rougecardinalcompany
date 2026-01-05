@@ -1,5 +1,89 @@
 # Progress
 
+## TASK037 - Admin Views Security Hardening - COMPLETED (2026-01-05)
+
+### Objectif
+
+Correction critique de la vulnérabilité où les vues admin retournaient des tableaux vides au lieu d'erreurs "permission denied" pour les utilisateurs non-admin.
+
+### Résultats
+
+| Feature | État |
+| ------- | ---- |
+| Rôle `admin_views_owner` créé | ✅ 100% |
+| Ownership de 7 vues admin transférée | ✅ 100% |
+| DEFAULT PRIVILEGES modifiés | ✅ 100% |
+| CRITICAL SECURITY DEFINER hotfix | ✅ 100% |
+| 5 schémas déclaratifs mis à jour | ✅ 100% |
+| Scripts de validation (2) | ✅ 100% |
+| Tests de sécurité (13/13 PASSED) | ✅ 100% |
+| Documentation (3 fichiers) | ✅ 100% |
+
+### Tests Validés
+
+#### Authenticated Non-Admin Users
+
+✅ 7 vues admin bloquées avec erreur 42501
+✅ 4 vues publiques accessibles
+✅ 0 vulnérabilités "empty array" détectées
+
+#### CRITICAL Security Hotfix
+
+✅ 13/13 vues en mode SECURITY INVOKER
+✅ 0 vues avec SECURITY DEFINER (bypass RLS éliminé)
+✅ Validation cloud confirmée
+
+### Fichiers Créés/Modifiés
+
+**Migrations** (2):
+
+- `supabase/migrations/20260105120000_admin_views_security_hardening.sql` — Création rôle + ownership transfer
+- `supabase/migrations/20260105130000_fix_security_definer_views.sql` — CRITICAL hotfix SECURITY INVOKER
+
+**Schémas déclaratifs** (5):
+
+- `supabase/schemas/41_views_communiques.sql` — 1 vue admin
+- `supabase/schemas/41_views_admin_content_versions.sql` — 4 vues admin
+- `supabase/schemas/10_tables_system.sql` — 1 vue admin
+- `supabase/schemas/13_analytics_events.sql` — 1 vue admin
+- `supabase/schemas/15_content_versioning.sql` — 1 vue admin
+
+**Scripts** (2):
+
+- `scripts/check-admin-views-owner.ts` — Validation ownership (NEW)
+- `scripts/test-views-security-authenticated.ts` — Étendu à 7 vues admin
+
+**Documentation** (3):
+
+- `doc/ADMIN-VIEWS-SECURITY-HARDENING-SUMMARY.md` — Guide complet
+- `memory-bank/tasks/TASK037-admin-views-security-hardening.md` — Task tracking
+- `supabase/migrations/migrations.md` — Documentation migrations
+
+### Problèmes Résolus
+
+1. **Empty Array Vulnerability**
+   - Symptôme: Vues admin retournaient `[]` au lieu d'erreur permission denied
+   - Cause: DEFAULT PRIVILEGES Supabase accordent SELECT même avec REVOKE explicite
+   - Solution: Rôle `admin_views_owner` isolé des DEFAULT PRIVILEGES
+
+2. **CRITICAL SECURITY DEFINER Bypass**
+   - Symptôme: 2 vues exécutaient avec privilèges owner, bypassant RLS
+   - Vues affectées: `communiques_presse_public`, `communiques_presse_dashboard`
+   - Solution: Hotfix migration recréant vues avec `security_invoker = true`
+
+3. **Permission Errors (Cloud Migration)**
+   - Symptôme: "must be able to SET ROLE" + "permission denied for schema public"
+   - Solution: `GRANT admin_views_owner TO postgres/service_role` + `GRANT CREATE ON SCHEMA`
+
+### Security Layers (Defense in Depth)
+
+- **Layer 1** : RLS Policies sur tables de base
+- **Layer 2** : SECURITY INVOKER sur toutes les vues (13/13)
+- **Layer 3** : GRANTs minimaux sur tables de base
+- **Layer 4** : Ownership isolation via `admin_views_owner` (NEW)
+
+---
+
 ## TASK046 - Rate-Limiting Handlers - COMPLETED (2026-01-04)
 
 ### Objectif

@@ -1335,6 +1335,12 @@ memory-bank/
 - `memory-bank/activeContext.md` - Recent changes and current focus
 - `.github/instructions/nextjs-supabase-auth-2025.instructions.md` - Auth patterns (CANONICAL)
 
+**Security Implementations**:
+
+- `doc/ADMIN-VIEWS-SECURITY-HARDENING-SUMMARY.md` - Admin views isolation pattern (TASK037, Jan 2026)
+- `memory-bank/tasks/TASK037-admin-views-security-hardening.md` - Security hardening task details
+- `.github/prompts/plan-adminViewsSecurityHardening.prompt.md` - Implementation plan
+
 **Migration Guides**:
 
 - `.github/prompts/plan-teamMemberFormMigration.prompt.md` - Team CRUD migration to Server Actions + dedicated pages (`/new`, `/[id]/edit`)

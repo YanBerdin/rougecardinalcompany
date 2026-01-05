@@ -8,12 +8,8 @@
  * 3. Basic data retrieval works
  */
 
-import { config } from 'dotenv';
-import { resolve } from 'path';
 import { createClient } from '@supabase/supabase-js';
-
-// Load environment variables
-config({ path: resolve(process.cwd(), '.env.local') });
+import { env } from '../lib/env';
 
 const COLORS = {
   reset: '\x1b[0m',
@@ -33,21 +29,10 @@ async function main() {
   log('yellow', '   TASK033 - Database Schema Verification');
   log('yellow', '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SECRET_KEY;
-  
-  if (!supabaseUrl || !supabaseKey) {
-    log('red', '❌ Missing environment variables');
-    log('yellow', 'Make sure .env.local contains:');
-    log('blue', '   NEXT_PUBLIC_SUPABASE_URL');
-    log('blue', '   SUPABASE_SECRET_KEY');
-    process.exit(1);
-  }
-  
   // Create service role client (bypasses RLS for testing)
   const supabase = createClient(
-    supabaseUrl,
-    supabaseKey,
+    env.NEXT_PUBLIC_SUPABASE_URL,
+    env.SUPABASE_SECRET_KEY,
     {
       auth: { persistSession: false }
     }

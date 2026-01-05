@@ -8,11 +8,13 @@
  * 3. CSV export action
  * 4. RLS policies (admin vs anon access)
  */
-
+//!Error: This module cannot be imported from a Client Component module. It should only be used from a Server Component.
+import 'dotenv/config';
+import { env } from "../lib/env";
 import { createClient } from "@supabase/supabase-js";
 import { fetchAuditLogs, fetchAuditTableNames } from "../lib/dal/audit-logs.ts";
 import { exportAuditLogsCSV } from "../app/(admin)/admin/audit-logs/actions";
-import { env } from "../lib/env";
+
 
 const SUPABASE_URL = env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = env.SUPABASE_SECRET_KEY;
