@@ -13,6 +13,9 @@
 ## En Cours
 
 - `TASK047` Extraire `NewsletterSubscriptionSchema` vers `lib/schemas/newsletter.ts`
+- `TASK050` Database Backup & Recovery Strategy (P0) — newly created
+- `TASK051` Error Monitoring & Alerting (P0) — newly created
+- `TASK053` Data Retention Automation (P1) — newly created
 
 ## En Attente
 
