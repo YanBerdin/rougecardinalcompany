@@ -7,31 +7,16 @@
   - TASK027 (Company Content Management)
   - TASK028 (Content Versioning UI)
   - TASK035 (Testing Suite)
-  - TASK036 (Security Audit) - 35% → besoin finalisation
+  - TASK036 (Security Audit) - ✅ 100% Complete (2026-01-03)
+  - TASK033 (Audit Logs Viewer) - ✅ Complete (2026-01-03)
+  - TASK046 (Rate-Limiting) - ✅ Complete (2026-01-04)
 ```
 
 ---
 
 ## 🎯 PLAN RÉVISÉ - TASKS RESTANTES
 
-### Phase 1: Finalisation Sécurité (CRITIQUE) - 3-5 jours
-
-```yaml
-priority: p0 (bloquant production)
-status: partial (4/10 subtasks completed) -> finalize remaining subtasks
-
-task036: security audit - finalisation
-├─ already done: subtasks 1.6, 1.7, 1.8, 1.10
-├─ remaining: 1.1, 1.2, 1.3, 1.4, 1.5, 1.9 (to be validated and scheduled)
-└─ action: enumerate and assign remaining subtasks before starting phase 1 work
-
-estimated: 3-5 jours
-blocking: task039, task050
-```
-
----
-
-### Phase 2: Infrastructure Critique (NOUVEAU) - 1 semaine
+### Phase 1: Infrastructure Critique (P0) - 1 semaine
 
 ```yaml
 Priority: P0 (Manquant dans plan initial)
@@ -61,21 +46,21 @@ Bloquant pour: TASK039
 
 ---
 
-### Phase 3: Stabilité & Protection (IMPORTANT) - 1 semaine
+### Phase 2: Stabilité & Protection (IMPORTANT) - 0.5-1 jour
 
-note: `TASK046 (Rate-limiting)` and `TASK033 (Audit Logs Viewer)` are marked completed in project records (2026-01-04 and 2026-01-03 respectively) and are therefore not listed as open work here. They remain as references.
+note: `TASK046 (Rate-limiting)`, `TASK033 (Audit Logs Viewer)`, and `TASK036 (Security Audit)` are marked completed in project records (2026-01-04, 2026-01-03, and 2026-01-03 respectively) and are therefore not listed as open work here.
 
 ```yaml
-priority: p1 (important before production)
+priority: p1 (validation / smoke tests)
 
-# open items (if any additional protective work required, add here)
-estimated: 0.5-1 jour (validation / smoke tests)
-depends_on: task036
+# validation of completed security/protection tasks
+estimated: 0.5-1 jour (integration testing)
+depends_on: task050, task051 (from phase 1)
 ```
 
 ---
 
-### Phase 4: Performance & Observability - 1 semaine
+### Phase 3: Performance & Observability - 1 semaine
 
 ```yaml
 Priority: P1 (Important pour UX)
@@ -104,7 +89,7 @@ Bloquant pour: TASK039
 
 ---
 
-### Phase 5: Contenus Publics (FONCTIONNEL) - 1-2 semaines
+### Phase 4: Contenus Publics (FONCTIONNEL) - 1-2 semaines
 
 ```yaml
 Priority: P2 (Fonctionnalités publiques)
@@ -133,7 +118,7 @@ Bloquant pour: TASK039
 
 ---
 
-### Phase 6: Qualité & Conformité (PRÉ-PRODUCTION) - 1 semaine
+### Phase 5: Qualité & Conformité (PRÉ-PRODUCTION) - 1 semaine
 
 ```yaml
 Priority: P2 (Conformité réglementaire)
@@ -182,7 +167,7 @@ Bloquant pour: TASK039
 
 ---
 
-### Phase 7: Déploiement Final (RELEASE) - 1 semaine
+### Phase 6: Déploiement Final (RELEASE) - 1 semaine
 
 ```yaml
 Priority: P0 (Orchestration finale)
@@ -214,15 +199,17 @@ Bloquant pour: Launch
 ## 📊 TIMELINE ESTIMÉE
 
 ```yaml
-Phase 1 (Sécurité):        1 semaine  (TASK036 finalization)
-Phase 2 (Infrastructure):  1 semaine  (TASK050, TASK051)
-Phase 3 (Stabilité):       1 semaine  (TASK046, TASK033)
-Phase 4 (Performance):     1 semaine  (TASK034, TASK031)
-Phase 5 (Contenus):        1-2 sem.   (TASK024, TASK023)
-Phase 6 (Conformité):      1 semaine  (TASK053, TASK047, TASK037, TASK038)
-Phase 7 (Déploiement):     1 semaine  (TASK039, TASK040)
+Phase 1 (Infrastructure):  1 semaine  (TASK050, TASK051)
+Phase 2 (Stabilité):       0.5-1 jour (Validation/smoke tests)
+Phase 3 (Performance):     1 semaine  (TASK034, TASK031)
+Phase 4 (Contenus):        1-2 sem.   (TASK024, TASK023)
+Phase 5 (Conformité):      1 semaine  (TASK053, TASK047, TASK037, TASK038)
+Phase 6 (Déploiement):     1 semaine  (TASK039, TASK040)
 
-TOTAL: 5-6 semaines réalistes (avec 1 dev full-time) — corrections appliquées: TASK033/TASK046 sont complétées, TASK047 repositionnée
+TOTAL: 4.5-5.5 semaines réalistes (avec 1 dev full-time)
+
+Note: TASK033, TASK036, TASK046 complétées (2026-01-03/04)
+Gain de temps: ~1.5 semaines vs estimation initiale
 ```
 
 ---
@@ -622,12 +609,11 @@ graph TD
 ## ✅ CHECKLIST DE CRÉATION
 
 ```yaml
-☐ Créer TASK050-database-backup-recovery.md
-☐ Créer TASK051-error-monitoring-alerting.md
-☐ Créer TASK053-data-retention-automation.md
-☐ Mettre à jour memory-bank/tasks/_index.md
+☑ Créer TASK050-database-backup-recovery.md
+☑ Créer TASK051-error-monitoring-alerting.md
+☑ Créer TASK053-data-retention-automation.md
+☑ Mettre à jour memory-bank/tasks/_index.md
 ☐ Mettre à jour memory-bank/activeContext.md
-☐ Créer issues GitHub (#50, #51, #53)
 ☐ Ajouter dans projects board (colonnes: Not Started)
 ```
 
@@ -641,14 +627,13 @@ graph TD
 2. **TASK051** (P0) : Error Monitoring & Alerting → **Bloquant production**
 3. **TASK053** (P1) : Data Retention Automation → **Conformité RGPD**
 
-**Estimation totale restante** : **7-8 semaines** (1 dev full-time)
+**Estimation totale restante** : **5-6 semaines réalistes** (1 dev full-time) — corrections appliquées: TASK033/TASK046 sont complétées, TASK047 repositionnée
 
 **Ordre d'exécution recommandé** :
 
 ```
-TASK036 (finalize) → TASK050 → TASK051 → TASK046 → TASK033
-→ TASK034 → TASK031 → TASK024 → TASK023 → TASK053 → TASK047
+TASK036 (finalize) → TASK050 → TASK051 → TASK034 → TASK031 → TASK024 → TASK023 → TASK053 → TASK047
 → TASK037 → TASK038 → TASK039 → TASK040
 ```
 
-**Next action** : Créer les 3 fichiers de tasks + mettre à jour l'index ✅
+**Next action (done)** : les 3 fichiers TASK050/051/053 ont été créés et `memory-bank/tasks/_index.md` mis à jour.
