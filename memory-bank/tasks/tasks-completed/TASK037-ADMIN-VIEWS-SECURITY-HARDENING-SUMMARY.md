@@ -148,15 +148,7 @@ grant select on public.<view_name> to service_role;
 
 ### 3. Validation & Test Scripts
 
-#### `scripts/check-admin-views-owner.ts`
-
 Validates all 7 admin views have correct ownership:
-
-```bash
-pnpm exec tsx scripts/check-admin-views-owner.ts
-```
-
-Expected output:
 
 ```bash
 ✅ All 7 admin views owned by admin_views_owner
@@ -177,6 +169,18 @@ pnpm exec tsx scripts/test-views-security-authenticated.ts
 - Strict assertion for "permission denied" error (code 42501)
 - Detects empty array vulnerability
 
+##### ✅ Validation Manuelle (Alternative)
+
+Pour vérifier l'ownership et SECURITY INVOKER des vues admin, exécutez dans Supabase SQL Editor :
+
+```bash
+SELECT schemaname, viewname, viewowner,  CASE WHEN c.reloptions::text LIKE '%security_invoker=true%'   THEN '✅ SECURITY INVOKER' ELSE '❌ SECURITY DEFINER' END as security_modeFROM pg_views vJOIN pg_class c ON c.relname = v.viewnameWHERE v.schemaname = 'public'AND (viewname LIKE '%_admin' OR viewname LIKE '%_dashboard')ORDER BY v.viewname;
+```
+
+> [!NOTE]
+> Résultat attendu :
+> Toutes les vues doivent afficher admin_views_owner + ✅ SECURITY INVOKER
+
 #### `scripts/check-views-security.ts`
 
 Validates anon access is properly blocked:
@@ -196,7 +200,7 @@ pnpm exec tsx scripts/check-views-security.ts
 
 ### Local Database (`db reset`)
 
-```
+```bash
 Applying migration 20260105120000_admin_views_security_hardening.sql...
 NOTICE (00000): Role admin_views_owner created
 Finished supabase db reset on branch master.
@@ -204,7 +208,7 @@ Finished supabase db reset on branch master.
 
 ### Cloud Database (`db push`)
 
-```
+```bash
 Applying migration 20260105120000_admin_views_security_hardening.sql...
 NOTICE (00000): Role admin_views_owner already exists
 NOTICE (00000): role "postgres" has already been granted membership in role "admin_views_owner"
@@ -216,7 +220,7 @@ Finished supabase db push.
 
 #### Authenticated Non-Admin User
 
-```
+```bash
 🧪 Running view tests as authenticated non-admin: test.user@rougecardinal.local
 
    ✅ articles_presse_public: 0 rows
@@ -240,7 +244,7 @@ Finished supabase db push.
 
 #### Anonymous Users
 
-```
+```bash
 📋 Testing ADMIN views (should be BLOCKED for anon):
 
    ✅ Access denied: 42501 - communiques_presse_dashboard
@@ -270,7 +274,7 @@ Finished supabase db push.
 
 PostgreSQL requires `CREATE` privilege on a schema to alter the owner of objects within that schema. Without this grant, the migration fails with:
 
-```
+```bash
 ERROR: permission denied for schema public (SQLSTATE 42501)
 ```
 
@@ -347,7 +351,6 @@ Run validation scripts periodically:
 
 ```bash
 # Check view ownership
-pnpm exec tsx scripts/check-admin-views-owner.ts
 
 # Test authenticated non-admin access
 pnpm exec tsx scripts/test-views-security-authenticated.ts
@@ -355,6 +358,26 @@ pnpm exec tsx scripts/test-views-security-authenticated.ts
 # Test anon access + RLS policies
 pnpm exec tsx scripts/check-views-security.ts
 ```
+
+#### ✅ Validation Manuelle (Alternative)
+
+Pour vérifier l'ownership et SECURITY INVOKER des vues admin, exécutez dans Supabase SQL Editor :
+
+```bash
+-- Vérification manuelle dans Supabase SQL Editor
+SELECT schemaname, viewname, viewowner,
+  CASE WHEN c.reloptions::text LIKE '%security_invoker=true%' 
+  THEN '✅ SECURITY INVOKER' ELSE '❌ SECURITY DEFINER' END as security_mode
+FROM pg_views v
+JOIN pg_class c ON c.relname = v.viewname
+WHERE v.schemaname = 'public'
+AND (v.viewname LIKE '%_admin' OR v.viewname LIKE '%_dashboard')
+ORDER BY v.viewname;
+```
+
+> [!NOTE]
+> Résultat attendu :
+> Toutes les vues doivent afficher admin_views_owner + ✅ SECURITY INVOKER
 
 ---
 

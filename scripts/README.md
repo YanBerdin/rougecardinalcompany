@@ -154,52 +154,6 @@ pnpm exec tsx scripts/test-rate-limit-newsletter.ts
 
 ### �🔐 Administration & Sécurité
 
-#### check-admin-views-owner.ts ✅ TASK037
-
-**Description** : Validation automatique de la propriété des vues admin (isolation de sécurité).
-
-**Utilisation** :
-
-```bash
-pnpm exec tsx scripts/check-admin-views-owner.ts
-```
-
-**Tests couverts (7 vues admin)** :
-
-| Vue | Owner Attendu | Fichier Schéma |
-| --- | ------------- | -------------- |
-| `communiques_presse_dashboard` | admin_views_owner | `41_views_communiques.sql` |
-| `membres_equipe_admin` | admin_views_owner | `41_views_admin_content_versions.sql` |
-| `compagnie_presentation_sections_admin` | admin_views_owner | `41_views_admin_content_versions.sql` |
-| `partners_admin` | admin_views_owner | `41_views_admin_content_versions.sql` |
-| `content_versions_detailed` | admin_views_owner | `15_content_versioning.sql` |
-| `messages_contact_admin` | admin_views_owner | `10_tables_system.sql` |
-| `analytics_summary` | admin_views_owner | `13_analytics_events.sql` |
-
-**Validation** :
-
-- ✅ Interroge `pg_class` pour ownership effective
-- ✅ Échoue si ownership incorrecte (sécurité critique)
-- ✅ Compatible CI/CD security gates
-
-**Cas d'usage** :
-
-- Post-migration validation (20260105120000)
-- Audit régulier de la configuration de sécurité
-- Détection drift entre schémas déclaratifs et base de données
-
-**Références** :
-
-- Migration : `20260105120000_admin_views_security_hardening.sql`
-- Migration hotfix : `20260105130000_fix_security_definer_views.sql`
-- Task : TASK037
-- Doc : `doc/ADMIN-VIEWS-SECURITY-HARDENING-SUMMARY.md`
-
----
-
-#### test-views-security-authenticated.ts ✅ TASK037 (Extended)
-
-**Description** : Test de sécurité des vues pour utilisateurs authentifiés non-admin (détection empty array vulnerability).
 
 **Utilisation** :
 
@@ -303,7 +257,7 @@ SUPABASE_SECRET_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 **Exemple de sortie** :
 
-```
+```bash
 📧 User: yandevformation@gmail.com
    ID: 4ea792b9-4cd9-4363-98aa-641fad96ee16
    ✅ Email Confirmed: Yes
@@ -311,6 +265,26 @@ SUPABASE_SECRET_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
    📋 user_metadata: {"email":"yandevformation@gmail.com","role":"admin"}
    ✅ Admin in app_metadata: Yes
 ```
+
+##### ✅ Validation Manuelle (Alternative)
+
+Pour vérifier l'ownership et SECURITY INVOKER des vues admin, exécutez dans Supabase SQL Editor :
+
+```bash
+-- Vérification manuelle dans Supabase SQL Editor
+SELECT schemaname, viewname, viewowner,
+  CASE WHEN c.reloptions::text LIKE '%security_invoker=true%' 
+  THEN '✅ SECURITY INVOKER' ELSE '❌ SECURITY DEFINER' END as security_mode
+FROM pg_views v
+JOIN pg_class c ON c.relname = v.viewname
+WHERE v.schemaname = 'public'
+AND (v.viewname LIKE '%_admin' OR v.viewname LIKE '%_dashboard')
+ORDER BY v.viewname;
+```
+
+> [!NOTE]
+> Résultat attendu :
+> Toutes les vues doivent afficher admin_views_owner + ✅ SECURITY INVOKER
 
 #### set-admin-role.ts
 

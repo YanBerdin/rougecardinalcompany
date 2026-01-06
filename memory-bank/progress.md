@@ -50,7 +50,6 @@ Correction critique de la vulnérabilité où les vues admin retournaient des ta
 
 **Scripts** (2):
 
-- `scripts/check-admin-views-owner.ts` — Validation ownership (NEW)
 - `scripts/test-views-security-authenticated.ts` — Étendu à 7 vues admin
 
 **Documentation** (3):

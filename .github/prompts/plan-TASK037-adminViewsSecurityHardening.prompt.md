@@ -98,14 +98,39 @@ pnpm dlx supabase db push --linked
 # ou
 pnpm dlx supabase db push --linked --dry-run
 
-# 2. Vérifier propriétaire des vues
-
-# 3. Test sécurité authenticated (7 vues bloquées)
+# 2. Test sécurité authenticated (7 vues bloquées)
+# Test utilisateur authentifié non-admin
 pnpm exec tsx scripts/test-views-security-authenticated.ts
 
-# 4. Test sécurité anon existant
+# 3. Test sécurité anon existant
 pnpm exec tsx scripts/check-views-security.ts
+
+# 4. (Optionnel) Vérifier ownership manuellement dans Supabase SQL Editor:
+# SELECT schemaname, viewname, viewowner
+# FROM pg_views
+# WHERE schemaname = 'public'
+# AND (viewname LIKE '%_admin' OR viewname LIKE '%_dashboard');
 ```
+
+### ✅ Validation Manuelle (Alternative)
+
+Pour vérifier l'ownership et SECURITY INVOKER des vues admin, exécutez dans Supabase SQL Editor :
+
+```bash
+-- Vérification manuelle dans Supabase SQL Editor
+SELECT schemaname, viewname, viewowner,
+  CASE WHEN c.reloptions::text LIKE '%security_invoker=true%' 
+  THEN '✅ SECURITY INVOKER' ELSE '❌ SECURITY DEFINER' END as security_mode
+FROM pg_views v
+JOIN pg_class c ON c.relname = v.viewname
+WHERE v.schemaname = 'public'
+AND (v.viewname LIKE '%_admin' OR v.viewname LIKE '%_dashboard')
+ORDER BY v.viewname;
+```
+
+> [!NOTE]
+> Résultat attendu :
+> Toutes les vues doivent afficher admin_views_owner + ✅ SECURITY INVOKER
 
 ## Décisions prises
 

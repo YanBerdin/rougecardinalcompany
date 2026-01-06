@@ -93,25 +93,62 @@ grant select on public.<view_name> to service_role;
 
 **Scripts de Validation** :
 
-- `scripts/check-admin-views-owner.ts` — Vérifie l'ownership des 7 vues
 - `scripts/test-views-security-authenticated.ts` — Teste les 7 vues avec assertion stricte `permission denied`
 
 **Tests Automatisés** :
 
 ```bash
-# Vérifier ownership
-pnpm exec tsx scripts/check-admin-views-owner.ts
-
 # Test sécurité authenticated (7 vues bloquées)
+# Test utilisateur authentifié non-admin
 pnpm exec tsx scripts/test-views-security-authenticated.ts
 
 # Test sécurité anon existant
 pnpm exec tsx scripts/check-views-security.ts
 ```
 
+**Vérification Ownership (Optionnelle)** :
+
+```sql
+-- Exécuter dans Supabase SQL Editor
+SELECT 
+  v.schemaname,
+  v.viewname,
+  v.viewowner,
+  CASE 
+    WHEN c.reloptions::text LIKE '%security_invoker=true%' 
+    THEN '✅ SECURITY INVOKER' 
+    ELSE '❌ SECURITY DEFINER' 
+  END as security_mode
+FROM pg_views v
+JOIN pg_class c ON c.relname = v.viewname
+WHERE v.schemaname = 'public'
+AND (v.viewname LIKE '%_admin' OR v.viewname LIKE '%_dashboard')
+ORDER BY v.viewname;
+```
+
 **Statut** : ✅ Migration créée, schémas mis à jour, scripts créés  
 **Référence** : `.github/prompts/plan-adminViewsSecurityHardening.prompt.md`  
 **Décision** : Architecture rôle dédié pour isolation permanente des vues admin
+
+#### ✅ Validation Manuelle (Alternative)
+
+Pour vérifier l'ownership et SECURITY INVOKER des vues admin, exécutez dans Supabase SQL Editor :
+
+```bash
+-- Vérification manuelle dans Supabase SQL Editor
+SELECT schemaname, viewname, viewowner,
+  CASE WHEN c.reloptions::text LIKE '%security_invoker=true%' 
+  THEN '✅ SECURITY INVOKER' ELSE '❌ SECURITY DEFINER' END as security_mode
+FROM pg_views v
+JOIN pg_class c ON c.relname = v.viewname
+WHERE v.schemaname = 'public'
+AND (v.viewname LIKE '%_admin' OR v.viewname LIKE '%_dashboard')
+ORDER BY v.viewname;
+```
+
+> [!NOTE]
+> Résultat attendu :
+> Toutes les vues doivent afficher admin_views_owner + ✅ SECURITY INVOKER
 
 ---
 

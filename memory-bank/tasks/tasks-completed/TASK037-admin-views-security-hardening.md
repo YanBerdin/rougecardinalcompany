@@ -43,12 +43,6 @@ Fixed critical security vulnerability where admin views were returning empty arr
    - Grants access to service_role only
    - Modifies DEFAULT PRIVILEGES for future views
 
-2. **Validation Script** (`scripts/check-admin-views-owner.ts`)
-   - 144 lines
-   - Queries `pg_views` to validate ownership
-   - Checks all 7 expected admin views
-   - Formatted table output with ✅/❌ status
-
 3. **Documentation** (`doc/ADMIN-VIEWS-SECURITY-HARDENING-SUMMARY.md`)
    - Comprehensive implementation summary
    - Technical details and lessons learned
@@ -190,7 +184,25 @@ pnpm exec tsx scripts/check-views-security.ts
 - ✅ 2 base tables enforce active=true filter
 - ✅ 13/13 tests passed
 
----
+#### ✅ Validation Manuelle (Alternative)
+
+Pour vérifier l'ownership et SECURITY INVOKER des vues admin, exécutez dans Supabase SQL Editor :
+
+```bash
+-- Vérification manuelle dans Supabase SQL Editor
+SELECT schemaname, viewname, viewowner,
+  CASE WHEN c.reloptions::text LIKE '%security_invoker=true%' 
+  THEN '✅ SECURITY INVOKER' ELSE '❌ SECURITY DEFINER' END as security_mode
+FROM pg_views v
+JOIN pg_class c ON c.relname = v.viewname
+WHERE v.schemaname = 'public'
+AND (v.viewname LIKE '%_admin' OR v.viewname LIKE '%_dashboard')
+ORDER BY v.viewname;
+```
+
+> [!NOTE]
+> Résultat attendu :
+> Toutes les vues doivent afficher admin_views_owner + ✅ SECURITY INVOKER
 
 ## 🔒 Security Impact
 
@@ -299,13 +311,20 @@ grant select on public.new_admin_view to service_role;
 For each new admin view:
 
 1. Add view name to `scripts/test-views-security-authenticated.ts` `adminViews` array
-2. Add view name to `scripts/check-admin-views-owner.ts` `expectedViews` array
-3. Run tests:
+2. Run tests:
 
 ```bash
    pnpm exec tsx scripts/test-views-security-authenticated.ts
    pnpm exec tsx scripts/check-views-security.ts
-   pnpm exec tsx scripts/check-admin-views-owner.ts
+```
+
+3. (Optional) Verify ownership manually in Supabase SQL Editor:
+
+```sql
+   SELECT schemaname, viewname, viewowner
+   FROM pg_views
+   WHERE schemaname = 'public'
+   AND (viewname LIKE '%_admin' OR viewname LIKE '%_dashboard');
 ```
 
 ### Monitoring
@@ -318,9 +337,6 @@ pnpm exec tsx scripts/check-views-security.ts
 
 # Authenticated user test
 pnpm exec tsx scripts/test-views-security-authenticated.ts
-
-# Ownership validation
-pnpm exec tsx scripts/check-admin-views-owner.ts
 ```
 
 ---
@@ -381,7 +397,6 @@ pnpm exec tsx scripts/check-admin-views-owner.ts
 - [x] Migration created and applied to local database
 - [x] Migration applied to cloud database (project: yvtrlvmbofklefxcxrzv)
 - [x] All 5 declarative schemas updated with security configuration
-- [x] Validation script created (check-admin-views-owner.ts)
 - [x] Test script extended to cover all 7 admin views
 - [x] Documentation updated (migrations.md)
 - [x] Implementation summary created (ADMIN-VIEWS-SECURITY-HARDENING-SUMMARY.md)

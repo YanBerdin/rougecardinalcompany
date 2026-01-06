@@ -78,7 +78,6 @@ grant select on public.<view_name> to service_role;
 
 **Validation Scripts**:
 
-- `scripts/check-admin-views-owner.ts` — Validates ownership (NEW)
 - `scripts/test-views-security-authenticated.ts` — Extended to test 7 admin views
 - `scripts/check-views-security.ts` — Validates anon access (existing)
 
@@ -158,7 +157,6 @@ grant select on public.new_admin_view to service_role;
 ```bash
 pnpm exec tsx scripts/check-views-security.ts
 pnpm exec tsx scripts/test-views-security-authenticated.ts
-pnpm exec tsx scripts/check-admin-views-owner.ts
 ```
 
 ---
