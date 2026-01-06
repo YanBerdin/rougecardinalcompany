@@ -300,7 +300,7 @@ This ensures any new admin views created under this role will NOT have automatic
 | `compagnie_presentation_sections_admin` | Company sections with all fields | id, title, content, active, order_index, icon, created_at, updated_at | `admin_views_owner` |
 | `partners_admin` | Partners with all fields | id, name, description, logo_url, website_url, is_active, display_order, created_at, updated_at | `admin_views_owner` |
 | `content_versions_detailed` | Content versioning with metadata | id, table_name, record_id, version_number, created_at, created_by, action, changes | `admin_views_owner` |
-| `messages_contact_admin` | Contact messages with all fields | id, name, email, subject, message, consent_rgpd, created_at | `admin_views_owner` |
+| `messages_contact_admin` | Contact messages with all fields | id, name, email, subject, message, consent, created_at | `admin_views_owner` |
 | `analytics_summary` | Analytics aggregation (30 days) | event_type, entity_type, event_date, total_events, unique_users, unique_sessions | `admin_views_owner` |
 
 ---

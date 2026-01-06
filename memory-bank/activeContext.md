@@ -1,6 +1,39 @@
 # Active Context
 
-**Current Focus (2026-01-05)**: 🚨 CRITICAL SECURITY HOTFIX - SECURITY DEFINER Views Fixed ✅
+**Current Focus (2026-01-06)**: 🔒 RLS WITH CHECK (true) Vulnerabilities Fixed ✅
+
+---
+
+## 🟡 SECURITY FIX (2026-01-06 19:30 UTC)
+
+### RLS Policy WITH CHECK (true) Vulnerabilities - 4 Tables Fixed
+
+**Migration**: `20260106190617_fix_rls_policy_with_check_true_vulnerabilities.sql`  
+**Severity**: 🟡 MEDIUM - Security + RGPD + Data Integrity
+
+**Problem**: 4 public tables allowed unrestricted INSERT via `WITH CHECK (true)`:
+
+1. ❌ `abonnes_newsletter` — No email validation → spam risk
+2. ❌ `messages_contact` — No RGPD consent check → compliance risk
+3. ❌ `logs_audit` — Direct INSERT possible → audit trail falsification
+4. ❌ `analytics_events` — No type validation → data pollution
+
+**Fix Applied**:
+
+1. **Newsletter**: Email regex + anti-duplicate policy
+2. **Contact**: RGPD consent + required fields validation
+3. **Audit Logs**: SECURITY DEFINER trigger (only system can write)
+4. **Analytics**: Event type + entity type whitelists
+
+**Validation**: ✅ 13/13 tests passed (local + cloud)  
+**Bug Fix**: `event_date` column removed (didn't exist, used `created_at` with default now())  
+**Status**: ✅ Applied locally + cloud, all tests passing
+
+**Documentation**:
+
+- `doc/fix-analytics-event-date-bug.md` (bug resolution)
+- `supabase/migrations/migrations.md` (documented)
+- `scripts/README.md` (updated test docs)
 
 ---
 
@@ -25,6 +58,63 @@
 
 - `doc/ADMIN-VIEWS-SECURITY-HARDENING-SUMMARY.md` (updated)
 - `supabase/migrations/migrations.md` (documented)
+
+---
+
+## Latest Updates (2026-01-06)
+
+### RLS WITH CHECK Vulnerabilities Fixed ✅ COMPLETE
+
+**Correction des 4 tables publiques qui autorisaient INSERT sans validation.**
+
+#### Problème Détecté
+
+- `abonnes_newsletter`: Pas de validation email → spam + données invalides
+- `messages_contact`: Pas de validation RGPD → données personnelles sans consent
+- `logs_audit`: INSERT direct possible → falsification audit trail
+- `analytics_events`: Pas de validation types → pollution données analytics
+
+#### Solution Implémentée
+
+1. **Newsletter**: Email regex + anti-duplicate case-insensitive
+2. **Contact**: RGPD consent obligatoire + validation champs requis
+3. **Audit Logs**: Conversion `audit_trigger()` en SECURITY DEFINER + REVOKE INSERT direct
+4. **Analytics**: Whitelists pour event_type et entity_type
+
+#### Bug Corrigé
+
+- **`event_date` inexistant**: Le plan référençait une colonne qui n'existe pas
+- **Solution**: Suppression des 3 checks sur `event_date`, utilisation de `created_at` avec default now()
+- **Documentation**: `doc/fix-analytics-event-date-bug.md`
+
+#### Migration Applied
+
+**Migration**: `20260106190617_fix_rls_policy_with_check_true_vulnerabilities.sql`
+
+- ✅ Applied to local database
+- ✅ Applied to cloud database
+- ✅ 13/13 tests passed
+
+#### Files Modified
+
+**Declarative Schemas** (3 fichiers):
+
+- `supabase/schemas/10_tables_system.sql` — newsletter + contact + audit
+- `supabase/schemas/02b_functions_core.sql` — audit_trigger SECURITY DEFINER
+- `supabase/schemas/62_rls_advanced_tables.sql` — analytics
+
+**Scripts** (4 fichiers):
+
+- `scripts/test-rls-policy-with-check-validation.ts` — 13 tests automatisés
+- `scripts/test-rls-cloud.ts` — Tests cloud
+- `scripts/debug-rls-errors.ts` — Debug des erreurs RLS
+- `scripts/check-rls-policies.ts` — Vérification policies
+
+**Documentation** (3 fichiers):
+
+- `doc/fix-analytics-event-date-bug.md` — Bug resolution
+- `supabase/migrations/migrations.md` — Migration docs
+- `scripts/README.md` — Updated test docs
 
 ---
 

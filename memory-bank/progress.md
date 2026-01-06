@@ -1,5 +1,97 @@
 # Progress
 
+## RLS WITH CHECK Vulnerabilities Fix - COMPLETED (2026-01-06)
+
+### Objectif
+
+Correction des 4 tables publiques qui autorisaient INSERT sans validation via `WITH CHECK (true)`, exposant l'application à spam, données invalides et falsification des logs d'audit.
+
+### Résultats
+
+| Feature | État |
+| ------- | ---- |
+| Newsletter email validation | ✅ 100% |
+| Contact RGPD + fields validation | ✅ 100% |
+| Audit logs SECURITY DEFINER | ✅ 100% |
+| Analytics event types whitelist | ✅ 100% |
+| Bug event_date corrigé | ✅ 100% |
+| Tests automatisés (13/13) | ✅ PASSED |
+| Documentation | ✅ 100% |
+
+### Tests Validés
+
+#### Local Database
+
+✅ 4 tests newsletter (email invalide, vide, duplicate, valide)
+✅ 5 tests contact (sans consent, email invalide, message court, téléphone invalide, valide)
+✅ 1 test audit logs (INSERT direct bloqué)
+✅ 3 tests analytics (event type invalide, entity type invalide, valide)
+✅ **13/13 tests PASSED**
+
+#### Cloud Database
+
+✅ Même suite de tests
+✅ **13/13 tests PASSED**
+
+### Bug Corrigé
+
+**`event_date` column inexistante** :
+
+- Plan référençait `event_date` qui n'existe pas dans `analytics_events`
+- Colonne réelle: `created_at` avec `default now()`
+- Solution: Suppression des 3 checks temporels (inutiles avec default now())
+- Documentation: `doc/fix-analytics-event-date-bug.md`
+
+### Fichiers Créés/Modifiés
+
+**Migration** (1):
+
+- `supabase/migrations/20260106190617_fix_rls_policy_with_check_true_vulnerabilities.sql`
+
+**Schémas déclaratifs** (3):
+
+- `supabase/schemas/10_tables_system.sql` — Newsletter + Contact + Audit
+- `supabase/schemas/02b_functions_core.sql` — audit_trigger SECURITY DEFINER
+- `supabase/schemas/62_rls_advanced_tables.sql` — Analytics
+
+**Scripts** (4):
+
+- `scripts/test-rls-policy-with-check-validation.ts` — 13 tests automatisés
+- `scripts/test-rls-cloud.ts` — Tests cloud
+- `scripts/debug-rls-errors.ts` — Debug erreurs RLS
+- `scripts/check-rls-policies.ts` — Vérification policies
+
+**SQL Helpers** (2):
+
+- `scripts/check-policies.sql` — Query psql local
+- `scripts/check-cloud-policies.sql` — Query psql cloud
+
+**Documentation** (3):
+
+- `doc/fix-analytics-event-date-bug.md` — Bug resolution
+- `supabase/migrations/migrations.md` — Migration docs
+- `scripts/README.md` — Test docs updated
+
+### Problèmes Résolus
+
+1. **WITH CHECK (true) Vulnerability**
+   - Symptôme: INSERT sans validation possible sur 4 tables publiques
+   - Risque: Spam, données invalides, falsification audit trail
+   - Solution: Policies avec validation stricte + SECURITY DEFINER pour audit
+
+2. **event_date Bug**
+   - Symptôme: Plan référençait colonne inexistante
+   - Cause: Schéma non vérifié avant écriture migration
+   - Solution: Suppression checks temporels, utilisation `created_at` avec default
+
+### Defense in Depth
+
+- **Layer 1**: App layer (Zod + rate limiting)
+- **Layer 2**: DB layer (RLS policies avec validation)
+- **Layer 3**: Audit integrity (SECURITY DEFINER trigger)
+
+---
+
 ## TASK037 - Admin Views Security Hardening - COMPLETED (2026-01-05)
 
 ### Objectif

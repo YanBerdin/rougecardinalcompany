@@ -135,14 +135,9 @@ for select
 to authenticated
 using ( (select public.is_admin()) );
 
--- Tout le monde peut s'abonner à la newsletter (insertion uniquement)
--- L'API gère les doublons côté serveur avec ON CONFLICT DO NOTHING
-drop policy if exists "Anyone can subscribe to newsletter" on public.abonnes_newsletter;
-create policy "Anyone can subscribe to newsletter"
-on public.abonnes_newsletter
-for insert
-to anon, authenticated
-with check ( true );
+-- NOTE: Newsletter INSERT policy removed from declarative schema
+-- Managed by migration: 20260106190617_fix_rls_policy_with_check_true_vulnerabilities.sql
+-- Policy name: "Validated newsletter subscription"
 
 -- Seuls les admins peuvent modifier les abonnements
 drop policy if exists "Admins can update newsletter subscriptions" on public.abonnes_newsletter;
@@ -177,13 +172,9 @@ for select
 to authenticated
 using ( (select public.is_admin()) );
 
--- Tout le monde peut envoyer un message de contact
-drop policy if exists "Anyone can send contact messages" on public.messages_contact;
-create policy "Anyone can send contact messages"
-on public.messages_contact
-for insert
-to anon, authenticated
-with check ( true );
+-- NOTE: Contact INSERT policy removed from declarative schema
+-- Managed by migration: 20260106190617_fix_rls_policy_with_check_true_vulnerabilities.sql
+-- Policy name: "Validated contact submission"
 
 -- Seuls les admins peuvent modifier les messages
 drop policy if exists "Admins can update contact messages" on public.messages_contact;
@@ -272,13 +263,16 @@ for select
 to authenticated
 using ( (select public.is_admin()) );
 
--- Le système peut insérer des logs (via triggers)
+-- INSERT restreint au trigger SECURITY DEFINER uniquement
+-- Les utilisateurs n'ont PAS de droit INSERT direct pour éviter falsification
+-- Voir audit_trigger() dans 02b_functions_core.sql (SECURITY DEFINER)
 drop policy if exists "System can insert audit logs" on public.logs_audit;
-create policy "System can insert audit logs"
-on public.logs_audit
-for insert
-to anon, authenticated
-with check ( true );
+-- NO INSERT POLICY - Access via SECURITY DEFINER trigger only
+
+comment on table public.logs_audit is 
+'Audit trail table. INSERT restricted to SECURITY DEFINER trigger only. 
+Direct user INSERT blocked to prevent log falsification. 
+14 tables use trg_audit trigger for automatic logging.';
 
 -- Seuls les super-admins peuvent modifier/supprimer les logs (rare)
 drop policy if exists "Super admins can update audit logs" on public.logs_audit;

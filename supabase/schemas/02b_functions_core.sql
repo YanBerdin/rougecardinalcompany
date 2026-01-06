@@ -56,10 +56,31 @@ comment on function public.update_updated_at_column() is
 'Generic trigger function to automatically update updated_at column. Uses SECURITY INVOKER since it only modifies the current row being processed and doesn''t need elevated privileges.';
 
 -- Fonction d'audit générique
+/*
+ * Security Model: SECURITY DEFINER
+ * 
+ * Rationale:
+ *   1. Audit logs must be written by triggers only, not by users directly
+ *   2. Function needs INSERT permission on logs_audit regardless of caller
+ *   3. SECURITY INVOKER requires granting INSERT to all users (insecure)
+ *   4. Legitimate use case: Automatic audit trail for all table modifications
+ * 
+ * Risks Evaluated:
+ *   - Authorization: Function is ONLY called by database triggers (no direct call)
+ *   - Input validation: All inputs come from trigger context (OLD/NEW records)
+ *   - Privilege escalation: Limited to INSERT on logs_audit only
+ *   - Concurrency: No race conditions (each trigger execution is atomic)
+ *   - Data integrity: Single INSERT per trigger execution
+ * 
+ * Validation:
+ *   - Tested: Triggers fire correctly on INSERT/UPDATE/DELETE
+ *   - Tested: Direct function call blocked by lack of trigger context
+ *   - Tested: Users cannot INSERT directly into logs_audit after revoke
+ */
 create or replace function public.audit_trigger()
 returns trigger
 language plpgsql
-security invoker
+security definer  -- ✅ CHANGED: Bypass RLS to INSERT logs (system-only)
 set search_path = ''
 as $$
 declare
@@ -121,7 +142,7 @@ end;
 $$;
 
 comment on function public.audit_trigger() is 
-'Generic audit trigger that logs all DML operations with user context and metadata. Uses SECURITY INVOKER to maintain user context for auditing - the audit log should reflect the actual user performing the operation, not an elevated service account. Includes robust error handling for missing headers or auth context.';
+'Generic audit trigger that logs all DML operations with user context and metadata. Uses SECURITY DEFINER to bypass RLS and prevent direct user INSERTs into logs_audit, ensuring audit trail integrity. User context is still captured via auth.uid() and request headers. Includes robust error handling for missing headers or auth context. Migration 20260106190617 revokes INSERT grants from anon/authenticated.';
 
 -- Helper pour recherche full-text français
 create or replace function public.to_tsvector_french(text)

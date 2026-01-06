@@ -2,7 +2,119 @@
 
 Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutées en complément du schéma déclaratif.
 
-## � Dernières Migrations
+## 📋 Dernières Migrations
+
+### 2026-01-06 - FIX: RLS Policy WITH CHECK (true) Vulnerabilities
+
+**Migration** : `20260106190617_fix_rls_policy_with_check_true_vulnerabilities.sql` (304 lignes)
+
+**Sévérité** : 🟡 **MEDIUM** - Sécurité + Conformité RGPD + Data Integrity
+
+**Problème Détecté** : 4 tables publiques autorisaient des INSERT sans validation grâce à `WITH CHECK (true)`, exposant l'application à du spam, des données invalides et une falsification potentielle des logs d'audit.
+
+**Tables Affectées** :
+
+| Table | Vulnérabilité | Risque |
+| ------- | --------------- | -------- |
+| `abonnes_newsletter` | Pas de validation email | Spam + données invalides + RGPD |
+| `messages_contact` | Pas de validation RGPD | Spam + données personnelles sans consent |
+| `logs_audit` | INSERT direct possible | Falsification audit trail |
+| `analytics_events` | Pas de validation types | Pollution données analytics |
+
+**Solution Appliquée** :
+
+#### 1. Newsletter - Validation Email + Anti-Duplicate
+
+```sql
+create policy "Validated newsletter subscription"
+on public.abonnes_newsletter for insert
+with check (
+  email ~* '^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$'
+  and not exists (
+    select 1 from public.abonnes_newsletter 
+    where lower(email) = lower(abonnes_newsletter.email)
+  )
+);
+```
+
+**Défense en profondeur** : App layer (Zod + rate limiting 3 req/h) + DB layer (regex + duplicate check)
+
+#### 2. Contact - Validation RGPD + Champs Requis
+
+```sql
+create policy "Validated contact submission"
+on public.messages_contact for insert
+with check (
+  firstname is not null and firstname <> ''
+  and lastname is not null and lastname <> ''
+  and email is not null and email <> ''
+  and consent = true  -- RGPD mandatory
+  and email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
+  and (phone is null or phone ~* '^\+?[0-9\s\-\(\)]{10,}$')
+  and length(message) between 10 and 5000
+);
+```
+
+**Défense en profondeur** : App layer (Zod + rate limiting 5 req/15min/IP) + DB layer (validation complète)
+
+#### 3. Audit Logs - SECURITY DEFINER Trigger (CRITICAL)
+
+**Changement majeur** : Conversion de `audit_trigger()` de `SECURITY INVOKER` → `SECURITY DEFINER`
+
+```sql
+-- Trigger SECURITY DEFINER (bypass RLS pour INSERT logs)
+create or replace function public.audit_trigger()
+security definer  -- ✅ CHANGED
+```
+
+**Impact** :
+
+- ✅ Fonction trigger bypasse RLS pour INSERT dans `logs_audit`
+- ✅ Revoke INSERT direct pour `authenticated` et `anon`
+- ✅ Seuls les triggers système peuvent écrire les logs
+- ✅ Audit trail integrity garantie (zéro risque falsification)
+
+**14 tables avec trigger d'audit** : profiles, medias, membres_equipe, lieux, spectacles, evenements, articles_presse, partners, abonnes_newsletter, messages_contact, configurations_site, communiques_presse, contacts_presse, home_about_content
+
+#### 4. Analytics - Validation Types
+
+```sql
+create policy "Validated analytics events INSERT"
+on public.analytics_events for insert
+with check (
+  event_type in ('view', 'click', 'share', 'download')
+  and entity_type in ('spectacle', 'article', 'communique', 'evenement')
+  -- Note: created_at uses default now() automatically
+);
+```
+
+**Validation Post-Migration** :
+
+Script de test : `scripts/test-rls-policy-with-check-validation.ts`
+
+```bash
+pnpm exec tsx scripts/test-rls-policy-with-check-validation.ts
+# Résultat attendu : 13/13 tests passed
+```
+
+**Tests automatisés** :
+
+- Newsletter (4 tests) : email invalide, vide, duplicate, valide
+- Contact (5 tests) : sans consent, email invalide, message court, téléphone invalide, valide
+- Audit logs (1 test) : INSERT direct bloqué (42501)
+- Analytics (3 tests) : event type invalide, entity type invalide, valide
+
+**Schémas Déclaratifs Synchronisés** :
+
+- ✅ `supabase/schemas/10_tables_system.sql` (newsletter + contact + audit)
+- ✅ `supabase/schemas/02b_functions_core.sql` (audit_trigger SECURITY DEFINER)
+- ✅ `supabase/schemas/62_rls_advanced_tables.sql` (analytics)
+
+**Statut** : ✅ Appliqué localement + cloud (2026-01-06), validé 13/13 tests  
+**Référence** : `.github/prompts/plan-fix-rls-policy-vulnerabilities.prompt.md`  
+**Note** : Bug `event_date` corrigé - voir `doc/fix-analytics-event-date-bug.md`
+
+---
 
 ### 2026-01-05 - CRITICAL: Fix SECURITY DEFINER Views
 

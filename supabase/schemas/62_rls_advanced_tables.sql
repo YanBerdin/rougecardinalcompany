@@ -12,13 +12,9 @@ for select
 to authenticated
 using ( (select public.is_admin()) );
 
--- Tout le monde peut insérer des événements analytiques
-drop policy if exists "Anyone can insert analytics events" on public.analytics_events;
-create policy "Anyone can insert analytics events"
-on public.analytics_events
-for insert
-to anon, authenticated
-with check ( true );
+-- NOTE: Analytics INSERT policy removed from declarative schema
+-- Managed by migration: 20260106190617_fix_rls_policy_with_check_true_vulnerabilities.sql
+-- Policy name: "Validated analytics collection"
 
 -- Seuls les admins peuvent modifier/supprimer
 drop policy if exists "Admins can update analytics events" on public.analytics_events;

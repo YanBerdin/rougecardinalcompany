@@ -150,10 +150,7 @@ pnpm exec tsx scripts/test-rate-limit-newsletter.ts
 - Architecture : `doc/RATE-LIMITING.md`
 - Tests manuels : `doc/RATE-LIMITING-TESTING.md`
 
----
-
 ### �🔐 Administration & Sécurité
-
 
 **Utilisation** :
 
@@ -188,6 +185,61 @@ if (!error || error.code !== '42501') {
 - Migration : `20260105120000_admin_views_security_hardening.sql`
 - Pattern : Role-Based View Ownership Isolation
 - Task : TASK037
+
+---
+
+### 🔒 Tests Sécurité RLS (Row Level Security)
+
+#### test-rls-policy-with-check-validation.ts ✅ RECOMMANDÉ (Migration 20260106190617)
+
+**Description** : Test automatisé des corrections RLS pour les 4 tables publiques vulnérables ayant `WITH CHECK (true)`.
+
+**Utilisation** :
+
+```bash
+pnpm exec tsx scripts/test-rls-policy-with-check-validation.ts
+```
+
+**Tables Testées (4)** :
+
+| Table | Tests | Validation |
+| ----- | ----- | ---------- |
+| `abonnes_newsletter` | 4 tests | Email regex + anti-duplicate |
+| `messages_contact` | 5 tests | RGPD consent + champs requis |
+| `logs_audit` | 1 test | INSERT restreint au trigger SECURITY DEFINER |
+| `analytics_events` | 3 tests | Event types whitelist (created_at auto) |
+
+**Tests Couverts (13 tests)** :
+
+1. Newsletter email invalide → bloqué (42501/23514)
+2. Newsletter email vide → bloqué (42501/23514)
+3. Newsletter email valide → accepté
+4. Newsletter duplicate case-insensitive → bloqué (42501/23505)
+5. Contact sans consent → bloqué (42501/23514)
+6. Contact email invalide → bloqué (42501/23514)
+7. Contact message < 10 chars → bloqué (42501/23514)
+8. Contact téléphone invalide → bloqué (42501/23514)
+9. Contact formulaire valide → accepté
+10. Audit logs INSERT direct → bloqué (42501)
+11. Analytics event type invalide → bloqué (42501/23514)
+12. Analytics entity type invalide → bloqué (42501/23514)
+13. Analytics event valide → accepté
+
+**Avantages** :
+
+- ✅ Validation défense en profondeur (app + DB)
+- ✅ Tests RGPD compliance (consent obligatoire)
+- ✅ Tests anti-spam (email regex, duplicates)
+- ✅ Tests audit trail integrity (INSERT via trigger uniquement)
+- ✅ Tests analytics data quality (types whitelistés)
+
+**Résultat attendu** : 13/13 tests passed
+
+**Références** :
+
+- Migration : `20260106190617_fix_rls_policy_with_check_true_vulnerabilities.sql`
+- Plan : `.github/prompts/plan-fix-rls-policy-vulnerabilities.prompt.md`
+- Schémas : `10_tables_system.sql`, `02b_functions_core.sql`, `62_rls_advanced_tables.sql`
 
 ---
 
