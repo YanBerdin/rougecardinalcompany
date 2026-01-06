@@ -30,6 +30,8 @@
 
 ## Terminé
 
+- `RLS-FIX-NEWSLETTER` Newsletter infinite recursion hotfix - Completed on 2026-01-06
+- `RLS-FIX` RLS WITH CHECK vulnerabilities fix - Completed on 2026-01-06
 - `TASK046` Rate-limiting handlers contact/newsletter - Completed on 2026-01-04
 - `TASK000` Configuration initiale du projet - Completed on 2025-08-15
 - `TASK001` Section Spectacles et Productions - Completed on 2025-10-01 (UI + DAL + archive toggle)

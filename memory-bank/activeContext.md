@@ -37,6 +37,55 @@
 
 ---
 
+## 🔴 CRITICAL HOTFIX (2026-01-06 23:50 UTC)
+
+### Newsletter Infinite Recursion Fix - Two-Part Hotfix
+
+**Migrations**:
+
+- `20260106232619_fix_newsletter_infinite_recursion.sql` (partial fix)
+- `20260106235000_fix_newsletter_select_for_duplicate_check.sql` (complete fix)
+
+**Severity**: 🔴 CRITICAL - Production Broken
+
+**Problem 1 - Infinite Recursion**: The newsletter INSERT policy caused infinite recursion:
+
+```sql
+-- ❌ BEFORE: Ambiguous table reference
+and not exists (
+  select 1 from public.abonnes_newsletter 
+  where lower(email) = lower(abonnes_newsletter.email)
+)
+```
+
+**Fix 1**: Added table alias to disambiguate:
+
+```sql
+-- ✅ AFTER: Explicit alias
+and not exists (
+  select 1 from public.abonnes_newsletter existing
+  where lower(existing.email) = lower(abonnes_newsletter.email)
+)
+```
+
+**Problem 2 - SELECT Policy Blocking**: The `NOT EXISTS` subquery needed SELECT permission, but anon users were blocked by admin-only policy.
+
+**Fix 2**: Split SELECT policy into two:
+
+1. Permissive policy for duplicate checking (all roles)
+2. Admin policy for viewing full subscriber details
+
+**Validation**: ✅ All tests passing
+
+- ✅ Valid email insertion works
+- ✅ Duplicate email blocked  
+- ✅ Invalid email blocked
+- ✅ No infinite recursion
+
+**Status**: ✅ Applied locally, tests passing
+
+---
+
 ## 🔴 CRITICAL HOTFIX (2026-01-05 13:00 UTC)
 
 ### Security Vulnerability: SECURITY DEFINER Views Bypassing RLS

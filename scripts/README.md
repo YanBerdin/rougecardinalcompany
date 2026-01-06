@@ -188,6 +188,49 @@ if (!error || error.code !== '42501') {
 
 ---
 
+#### test-newsletter-recursion-fix-direct.ts ✅ HOTFIX (Migration 20260106232619 + 20260106235000)
+
+**Description** : Test automatisé du hotfix newsletter (récursion infinie + SELECT policy). Utilise direct Supabase client (anon key) pour tester les policies RLS.
+
+**Utilisation** :
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321 \
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=eyJhbGciOi... \
+SUPABASE_SECRET_KEY=eyJhbGciOi... \
+pnpm exec tsx scripts/test-newsletter-recursion-fix-direct.ts
+```
+
+**Tests couverts (3 tests)** :
+
+| Test | Description |
+| ------ | ------------- |
+| Test 1 | Valid email insertion (as anon) |
+| Test 2 | Duplicate email blocked (42501) |
+| Test 3 | Invalid email blocked (42501) |
+
+**Avantages** :
+
+- ✅ Tests direct des RLS policies (pas d'API route)
+- ✅ Valide le fix récursion infinie
+- ✅ Valide le fix SELECT policy
+- ✅ Tests rapides (~1 seconde)
+
+**Résultat attendu** :
+
+```bash
+✅ Test 1 PASSED: Valid email inserted
+✅ Test 2 PASSED: Duplicate blocked (42501)
+✅ Test 3 PASSED: Invalid email blocked (42501)
+```
+
+**Migrations testées** :
+
+- `20260106232619_fix_newsletter_infinite_recursion.sql` — Table alias fix
+- `20260106235000_fix_newsletter_select_for_duplicate_check.sql` — SELECT policy split
+
+---
+
 ### 🔒 Tests Sécurité RLS (Row Level Security)
 
 #### test-rls-policy-with-check-validation.ts ✅ RECOMMANDÉ (Migration 20260106190617)

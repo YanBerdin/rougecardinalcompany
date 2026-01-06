@@ -14,7 +14,7 @@
         "next-env.d.ts": true,
        // "**/*.md": true,
         "**/doc-perso/**": true,
-        "**/doc/**": true
+       // "**/doc/**": true
     },
     "workbench.colorCustomizations": {
         "editorBracketHighlight.foreground1": "#fac928",

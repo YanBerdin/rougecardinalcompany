@@ -116,6 +116,103 @@ pnpm exec tsx scripts/test-rls-policy-with-check-validation.ts
 
 ---
 
+### 2026-01-06 - CRITICAL HOTFIX: Newsletter Infinite Recursion (Part 1)
+
+**Migration** : `20260106232619_fix_newsletter_infinite_recursion.sql` (44 lignes)
+
+**Sévérité** : 🔴 **CRITICAL** - Production Broken
+
+**Problème Détecté** : Newsletter subscription endpoint failing with infinite recursion error in production:
+
+```bash
+[ERR_NEWSLETTER_001] createNewsletterSubscriber: infinite recursion detected in policy for relation "abonnes_newsletter"
+POST /api/newsletter 422 in 2.0s
+```
+
+**Root Cause** : The `NOT EXISTS` subquery in the INSERT policy referenced the same table without table alias, causing PostgreSQL to enter infinite recursion:
+
+```sql
+-- ❌ BEFORE: Ambiguous table reference
+and not exists (
+  select 1 from public.abonnes_newsletter 
+  where lower(email) = lower(abonnes_newsletter.email)
+)
+```
+
+**Solution Applied** :
+
+```sql
+-- ✅ AFTER: Explicit table alias
+and not exists (
+  select 1 from public.abonnes_newsletter existing
+  where lower(existing.email) = lower(abonnes_newsletter.email)
+)
+```
+
+**Status** : ✅ Applied locally  
+**Note** : Partial fix - revealed secondary issue with SELECT policy (see migration 20260106235000)
+
+---
+
+### 2026-01-06 - CRITICAL HOTFIX: Newsletter SELECT Policy (Part 2)
+
+**Migration** : `20260106235000_fix_newsletter_select_for_duplicate_check.sql` (85 lignes)
+
+**Sévérité** : 🔴 **CRITICAL** - Production Broken (sequel to 20260106232619)
+
+**Problème Détecté** : After fixing infinite recursion, INSERT still failed with RLS policy violation:
+
+```bash
+ERROR: new row violates row-level security policy for table "abonnes_newsletter"
+Error code: 42501
+```
+
+**Root Cause** : The `NOT EXISTS` subquery needs SELECT permission on `abonnes_newsletter`, but anon users were blocked by admin-only SELECT policy:
+
+```sql
+-- ❌ BEFORE: Overly restrictive SELECT policy
+create policy "Admins can view newsletter subscribers"
+on public.abonnes_newsletter for select
+to authenticated
+using ((select public.is_admin()));
+```
+
+Since `anon` users couldn't SELECT, the duplicate check subquery failed → entire INSERT failed.
+
+**Solution Applied** : Split SELECT policy into two:
+
+```sql
+-- ✅ Policy 1: Permissive for duplicate checking
+create policy "Anyone can check email existence for duplicates"
+on public.abonnes_newsletter for select
+to anon, authenticated
+using (true);
+
+-- ✅ Policy 2: Admin-only for full details
+create policy "Admins can view full newsletter subscriber details"
+on public.abonnes_newsletter for select
+to authenticated
+using ((select public.is_admin()));
+```
+
+**Defense in Depth** :
+
+- SELECT policy is permissive BUT application layer (DAL) enforces admin-only access to sensitive columns
+- `is_admin()` function remains the authorization source of truth
+- Only email column exposed in practice (needed for duplicate check)
+
+**Validation** : All tests passing ✅
+
+- Valid email insertion works
+- Duplicate email blocked
+- Invalid email blocked
+- No infinite recursion
+
+**Status** : ✅ Applied locally  
+**Declarative Schema Updated** : `supabase/schemas/10_tables_system.sql` NOTE comment references this migration
+
+---
+
 ### 2026-01-05 - CRITICAL: Fix SECURITY DEFINER Views
 
 **Migration** : `20260105130000_fix_security_definer_views.sql` (170 lignes)

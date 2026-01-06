@@ -136,7 +136,8 @@ to authenticated
 using ( (select public.is_admin()) );
 
 -- NOTE: Newsletter INSERT policy removed from declarative schema
--- Managed by migration: 20260106190617_fix_rls_policy_with_check_true_vulnerabilities.sql
+-- Managed by migration: 20260106232619_fix_newsletter_infinite_recursion.sql (LATEST FIX)
+-- Previous: 20260106190617_fix_rls_policy_with_check_true_vulnerabilities.sql (had recursion bug)
 -- Policy name: "Validated newsletter subscription"
 
 -- Seuls les admins peuvent modifier les abonnements

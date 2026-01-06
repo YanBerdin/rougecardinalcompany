@@ -1,5 +1,64 @@
 # Progress
 
+## Newsletter Infinite Recursion Hotfix - COMPLETED (2026-01-06)
+
+### Objectif
+
+Corriger l'erreur critique de récursion infinie bloquant les inscriptions newsletter en production.
+
+### Résultats
+
+| Feature | État |
+| ------- | ---- |
+| Infinite recursion fix | ✅ 100% |
+| SELECT policy fix | ✅ 100% |
+| Valid email insertion | ✅ WORKS |
+| Duplicate blocking | ✅ WORKS |
+| Invalid email blocking | ✅ WORKS |
+
+### Problèmes Résolus
+
+> **1. Infinite Recursion (Migration 20260106232619)**
+
+- Symptôme: `infinite recursion detected in policy for relation "abonnes_newsletter"`
+- Cause: Subquery sans alias de table
+- Solution: Ajout alias `existing` pour désambiguïser
+
+> **2. SELECT Policy Blocking (Migration 20260106235000)**
+
+- Symptôme: Error 42501 - new row violates RLS policy
+- Cause: Subquery `NOT EXISTS` nécessite SELECT, mais anon bloqué par policy admin-only
+- Solution: Split en 2 policies (permissive pour duplicate check + admin pour full details)
+
+### Fichiers Créés/Modifiés
+
+**Migrations** (2):
+
+- `supabase/migrations/20260106232619_fix_newsletter_infinite_recursion.sql`
+- `supabase/migrations/20260106235000_fix_newsletter_select_for_duplicate_check.sql`
+
+**Schémas déclaratifs** (1):
+
+- `supabase/schemas/10_tables_system.sql` — NOTE updated to reference hotfix
+
+**Scripts** (1):
+
+- `scripts/test-newsletter-recursion-fix-direct.ts` — Direct Supabase client test
+
+**Documentation** (2):
+
+- `supabase/migrations/migrations.md` — Hotfix documented
+- `memory-bank/activeContext.md` — Critical hotfix section
+
+### Defense in Depth
+
+- **Layer 1**: Application (Zod validation + rate limiting)
+- **Layer 2**: RLS INSERT policy (email regex + anti-duplicate)
+- **Layer 3**: RLS SELECT policy (permissive for duplicate check, restrictive for admin data)
+- **Layer 4**: DAL enforces admin-only access to sensitive columns
+
+---
+
 ## RLS WITH CHECK Vulnerabilities Fix - COMPLETED (2026-01-06)
 
 ### Objectif
