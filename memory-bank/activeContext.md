@@ -1,6 +1,60 @@
 # Active Context
 
-**Current Focus (2026-01-06)**: 🔒 RLS WITH CHECK (true) Vulnerabilities Fixed ✅
+**Current Focus (2026-01-07)**: 🔒 Newsletter Infinite Recursion - FINAL FIX ✅
+
+---
+
+## 🔴 FINAL FIX (2026-01-07 12:00 UTC)
+
+### Newsletter Infinite Recursion - Complete Solution
+
+**Migrations**:
+
+- `20260107120000_fix_newsletter_remove_duplicate_select_policy.sql`
+- `20260107130000_fix_newsletter_remove_not_exists_from_policy.sql`
+
+**Severity**: 🔴 CRITICAL - Production Fixed
+
+**Problem**: Malgré les fixes précédents (alias + split SELECT), l'erreur `infinite recursion detected in policy` persistait.
+
+**Root Cause**: Le `NOT EXISTS` subquery dans la policy INSERT cause une récursion infinie car :
+
+1. INSERT déclenche l'évaluation de la policy INSERT
+2. La policy contient `NOT EXISTS (SELECT 1 FROM abonnes_newsletter ...)`
+3. Ce SELECT déclenche l'évaluation des policies SELECT sur la même table
+4. PostgreSQL entre en boucle infinie
+
+**Solution Finale**: Supprimer complètement le NOT EXISTS de la policy RLS
+
+```sql
+-- ✅ FINAL: Policy simplifiée sans subquery
+create policy "Validated newsletter subscription"
+on public.abonnes_newsletter for insert
+to anon, authenticated
+with check (
+  email ~* '^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$'
+);
+```
+
+**Defense in Depth (Nouvelle Architecture)**:
+
+- **DB Layer**: Contrainte UNIQUE sur email → bloque doublons
+- **DB Layer**: Regex email dans RLS policy
+- **App Layer**: Rate limiting (3 req/h) + Zod validation
+
+**Validation**: ✅ 13/13 tests passed on Cloud
+
+```bash
+pnpm exec tsx scripts/test-rls-cloud.ts
+# 13/13 tests passed ✅
+```
+
+**Status**: ✅ Applied Cloud + Local (2026-01-07)
+
+**Migrations Superseded**:
+
+- ⚠️ `20260106232619_fix_newsletter_infinite_recursion.sql` — Insuffisant
+- ⚠️ `20260106235000_fix_newsletter_select_for_duplicate_check.sql` — Insuffisant
 
 ---
 
@@ -20,7 +74,7 @@
 
 **Fix Applied**:
 
-1. **Newsletter**: Email regex + anti-duplicate policy
+1. **Newsletter**: Email regex validation (anti-duplicate via UNIQUE constraint)
 2. **Contact**: RGPD consent + required fields validation
 3. **Audit Logs**: SECURITY DEFINER trigger (only system can write)
 4. **Analytics**: Event type + entity type whitelists
@@ -34,50 +88,6 @@
 - `doc/fix-analytics-event-date-bug.md` (bug resolution)
 - `supabase/migrations/migrations.md` (documented)
 - `scripts/README.md` (updated test docs)
-
----
-
-## 🔴 CRITICAL HOTFIX (2026-01-06 23:50 UTC)
-
-### Newsletter Infinite Recursion Fix - Two-Part Hotfix
-
-**Migrations**:
-
-- `20260106232619_fix_newsletter_infinite_recursion.sql` (partial fix)
-- `20260106235000_fix_newsletter_select_for_duplicate_check.sql` (complete fix)
-
-**Severity**: 🔴 CRITICAL - Production Broken
-
-**Problem 1 - Infinite Recursion**: The newsletter INSERT policy caused infinite recursion:
-
-```sql
--- ❌ BEFORE: Ambiguous table reference
-and not exists (
-  select 1 from public.abonnes_newsletter 
-  where lower(email) = lower(abonnes_newsletter.email)
-)
-```
-
-**Fix 1**: Added table alias to disambiguate:
-
-```sql
--- ✅ AFTER: Explicit alias
-and not exists (
-  select 1 from public.abonnes_newsletter existing
-  where lower(existing.email) = lower(abonnes_newsletter.email)
-)
-```
-
-**Problem 2 - SELECT Policy Blocking**: The `NOT EXISTS` subquery needed SELECT permission, but anon users were blocked by admin-only policy.
-
-**Fix 2**: Split SELECT policy into two:
-
-1. Permissive policy for duplicate checking (all roles)
-2. Admin policy for viewing full subscriber details
-
-**Validation**: ✅ All tests passing
-
-- ✅ Valid email insertion works
 - ✅ Duplicate email blocked  
 - ✅ Invalid email blocked
 - ✅ No infinite recursion

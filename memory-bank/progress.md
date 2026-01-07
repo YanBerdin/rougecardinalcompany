@@ -1,61 +1,70 @@
 # Progress
 
-## Newsletter Infinite Recursion Hotfix - COMPLETED (2026-01-06)
+## Newsletter Infinite Recursion - FINAL FIX (2026-01-07)
 
 ### Objectif
 
-Corriger l'erreur critique de récursion infinie bloquant les inscriptions newsletter en production.
+Corriger définitivement l'erreur critique de récursion infinie bloquant les inscriptions newsletter en production.
 
 ### Résultats
 
 | Feature | État |
 | ------- | ---- |
 | Infinite recursion fix | ✅ 100% |
-| SELECT policy fix | ✅ 100% |
 | Valid email insertion | ✅ WORKS |
-| Duplicate blocking | ✅ WORKS |
+| Duplicate blocking | ✅ WORKS (via UNIQUE constraint) |
 | Invalid email blocking | ✅ WORKS |
+| Cloud tests (13/13) | ✅ PASSED |
 
-### Problèmes Résolus
+### Root Cause Analysis
 
-> **1. Infinite Recursion (Migration 20260106232619)**
+Le `NOT EXISTS` subquery dans la policy INSERT causait une récursion infinie car :
+1. INSERT déclenche l'évaluation de la policy INSERT
+2. La policy INSERT contient `NOT EXISTS (SELECT 1 FROM abonnes_newsletter ...)`
+3. Ce SELECT déclenche l'évaluation des policies SELECT sur la même table
+4. PostgreSQL entre en boucle infinie lors de l'évaluation des policies
 
-- Symptôme: `infinite recursion detected in policy for relation "abonnes_newsletter"`
-- Cause: Subquery sans alias de table
-- Solution: Ajout alias `existing` pour désambiguïser
+**Les fixes précédents (alias, split SELECT) étaient insuffisants.**
 
-> **2. SELECT Policy Blocking (Migration 20260106235000)**
+### Solution Finale
 
-- Symptôme: Error 42501 - new row violates RLS policy
-- Cause: Subquery `NOT EXISTS` nécessite SELECT, mais anon bloqué par policy admin-only
-- Solution: Split en 2 policies (permissive pour duplicate check + admin pour full details)
+> **Supprimer le NOT EXISTS de la policy RLS**
+
+```sql
+-- Policy INSERT simplifiée (sans subquery)
+create policy "Validated newsletter subscription"
+on public.abonnes_newsletter for insert
+to anon, authenticated
+with check (
+  email ~* '^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$'
+);
+```
 
 ### Fichiers Créés/Modifiés
 
-**Migrations** (2):
+**Migrations** (4 total, 2 superseded):
 
-- `supabase/migrations/20260106232619_fix_newsletter_infinite_recursion.sql`
-- `supabase/migrations/20260106235000_fix_newsletter_select_for_duplicate_check.sql`
+- `20260106232619_fix_newsletter_infinite_recursion.sql` — ⚠️ SUPERSEDED
+- `20260106235000_fix_newsletter_select_for_duplicate_check.sql` — ⚠️ SUPERSEDED
+- `20260107120000_fix_newsletter_remove_duplicate_select_policy.sql` — Remove redundant SELECT policy
+- `20260107130000_fix_newsletter_remove_not_exists_from_policy.sql` — ✅ FINAL FIX
 
 **Schémas déclaratifs** (1):
 
-- `supabase/schemas/10_tables_system.sql` — NOTE updated to reference hotfix
-
-**Scripts** (1):
-
-- `scripts/test-newsletter-recursion-fix-direct.ts` — Direct Supabase client test
+- `supabase/schemas/10_tables_system.sql` — Policies newsletter mises à jour
 
 **Documentation** (2):
 
-- `supabase/migrations/migrations.md` — Hotfix documented
+- `supabase/migrations/migrations.md` — Complete fix documented
 - `memory-bank/activeContext.md` — Critical hotfix section
 
-### Defense in Depth
+### Defense in Depth (Nouvelle Architecture)
 
-- **Layer 1**: Application (Zod validation + rate limiting)
-- **Layer 2**: RLS INSERT policy (email regex + anti-duplicate)
-- **Layer 3**: RLS SELECT policy (permissive for duplicate check, restrictive for admin data)
-- **Layer 4**: DAL enforces admin-only access to sensitive columns
+- **Layer 1 (DB)**: Contrainte UNIQUE sur email (`abonnes_email_unique`) → bloque doublons
+- **Layer 2 (DB)**: Validation regex email dans la policy RLS
+- **Layer 3 (App)**: Rate limiting (3 req/h) via TASK046
+- **Layer 4 (App)**: Validation Zod côté serveur
+- **Layer 5 (App)**: DAL enforces admin-only access to sensitive columns
 
 ---
 

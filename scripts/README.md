@@ -188,46 +188,56 @@ if (!error || error.code !== '42501') {
 
 ---
 
-#### test-newsletter-recursion-fix-direct.ts ✅ HOTFIX (Migration 20260106232619 + 20260106235000)
+#### test-newsletter-recursion-fix-direct.ts (Legacy - voir test-rls-cloud.ts)
 
-**Description** : Test automatisé du hotfix newsletter (récursion infinie + SELECT policy). Utilise direct Supabase client (anon key) pour tester les policies RLS.
+**Description** : Test legacy du hotfix newsletter. Remplacé par `test-rls-cloud.ts` qui inclut tous les tests RLS.
+
+---
+
+#### test-rls-cloud.ts ✅ RECOMMANDÉ (Migration 20260107130000)
+
+**Description** : Test complet des policies RLS sur Cloud. Inclut les tests newsletter avec le fix final (sans NOT EXISTS).
 
 **Utilisation** :
 
 ```bash
-NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321 \
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=eyJhbGciOi... \
-SUPABASE_SECRET_KEY=eyJhbGciOi... \
-pnpm exec tsx scripts/test-newsletter-recursion-fix-direct.ts
+pnpm exec tsx scripts/test-rls-cloud.ts
 ```
 
-**Tests couverts (3 tests)** :
+**Tests couverts (13 tests)** :
 
-| Test | Description |
-| ------ | ------------- |
-| Test 1 | Valid email insertion (as anon) |
-| Test 2 | Duplicate email blocked (42501) |
-| Test 3 | Invalid email blocked (42501) |
+| Catégorie | Tests | Description |
+| --------- | ----- | ----------- |
+| Newsletter | 4 | Email valide, invalide, vide, duplicate (via UNIQUE) |
+| Contact | 5 | RGPD consent, email, message, téléphone, valide |
+| Audit Logs | 1 | INSERT direct bloqué |
+| Analytics | 3 | Event types whitelist |
 
 **Avantages** :
 
-- ✅ Tests direct des RLS policies (pas d'API route)
-- ✅ Valide le fix récursion infinie
-- ✅ Valide le fix SELECT policy
-- ✅ Tests rapides (~1 seconde)
+- ✅ Tests Cloud database (pas local)
+- ✅ Valide le fix final récursion infinie (20260107130000)
+- ✅ Valide la défense en profondeur (UNIQUE + regex)
+- ✅ Tests rapides (~3 secondes)
 
 **Résultat attendu** :
 
 ```bash
-✅ Test 1 PASSED: Valid email inserted
-✅ Test 2 PASSED: Duplicate blocked (42501)
-✅ Test 3 PASSED: Invalid email blocked (42501)
+📊 TEST SUMMARY
+============================================================
+Total tests: 13
+✅ Passed: 13
+❌ Failed: 0
+
+🎉 All tests passed!
 ```
 
 **Migrations testées** :
 
-- `20260106232619_fix_newsletter_infinite_recursion.sql` — Table alias fix
-- `20260106235000_fix_newsletter_select_for_duplicate_check.sql` — SELECT policy split
+- `20260107120000_fix_newsletter_remove_duplicate_select_policy.sql` — Remove redundant SELECT
+- `20260107130000_fix_newsletter_remove_not_exists_from_policy.sql` — ✅ FINAL FIX
+
+**Note** : Les migrations 20260106* sont superseded mais conservées pour l'historique Cloud.
 
 ---
 
