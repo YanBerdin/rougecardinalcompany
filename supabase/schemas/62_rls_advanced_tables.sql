@@ -35,21 +35,15 @@ using ( (select public.is_admin()) );
 -- ---- CATEGORIES ----
 alter table public.categories enable row level security;
 
--- Tout le monde peut voir les catégories actives
+-- Vue combinée: catégories actives publiques OU admin voit tout
 drop policy if exists "Active categories are viewable by everyone" on public.categories;
-create policy "Active categories are viewable by everyone"
+drop policy if exists "Admins can view all categories" on public.categories;
+drop policy if exists "View categories (active OR admin)" on public.categories;
+create policy "View categories (active OR admin)"
 on public.categories
 for select
 to anon, authenticated
-using ( is_active = true );
-
--- Les admins peuvent voir toutes les catégories
-drop policy if exists "Admins can view all categories" on public.categories;
-create policy "Admins can view all categories"
-on public.categories
-for select
-to authenticated
-using ( (select public.is_admin()) );
+using ( is_active = true or (select public.is_admin()) );
 
 -- Seuls les admins peuvent gérer les catégories
 drop policy if exists "Admins can create categories" on public.categories;

@@ -160,6 +160,91 @@ order by tablename, indexname;
 
 ---
 
+### 2026-01-07 - PERF: Fusion Policies RLS Dupliquées (Categories)
+
+**Migration**: `20260107140000_fix_categories_duplicate_select_policies.sql` (36 lignes)
+
+**Sévérité**: 🟢 **LOW RISK** - Performance (optimisation RLS)
+
+**Statut**: ✅ **DÉPLOYÉ** (2026-01-07 14:00 UTC)
+
+**Validation**: ✅ 26/26 tests sécurité (13 vues + 13 RLS)
+
+**Source**: Audit post-optimisation identifiant politiques RLS dupliquées sur `categories` causant overhead CPU.
+
+**Problème Identifié**:
+
+La table `public.categories` avait **2 politiques SELECT permissives** pour le même rôle `authenticated`:
+
+1. `"Active categories are viewable by everyone"` - `using (is_active = true)`
+2. `"Admins can view all categories"` - `using ((select public.is_admin()))`
+
+**Impact Performance**:
+
+- PostgreSQL évalue **les deux politiques** pour chaque SELECT sur `categories`
+- Overhead CPU inutile : les politiques permissives sont combinées avec OR (toutes deux sont évaluées)
+- Ambiguïté : règles qui se chevauchent peuvent accorder un accès plus large que prévu
+- Complexité maintenance : modifications nécessitent updates sur 2 politiques
+
+**Solution Appliquée**:
+
+**Avant** (2 politiques évaluées):
+
+```sql
+-- Politique 1 : Utilisateurs anonymes et authentifiés
+create policy "Active categories are viewable by everyone"
+on public.categories for select
+to anon, authenticated
+using ( is_active = true );
+
+-- Politique 2 : Admins seulement
+create policy "Admins can view all categories"
+on public.categories for select
+to authenticated
+using ( (select public.is_admin()) );
+```
+
+**Après** (1 seule politique avec logique OR combinée):
+
+```sql
+drop policy if exists "Active categories are viewable by everyone" on public.categories;
+drop policy if exists "Admins can view all categories" on public.categories;
+
+create policy "View categories (active OR admin)"
+on public.categories
+for select
+to anon, authenticated
+using ( is_active = true or (select public.is_admin()) );
+```
+
+**Bénéfices**:
+
+- ✅ Réduction overhead : 1 seule évaluation RLS au lieu de 2 par requête SELECT
+- ✅ Logique plus claire : condition explicite `(active OR admin)` au lieu de 2 politiques implicites
+- ✅ Maintenance simplifiée : modifications en un seul endroit
+- ✅ Cohérence : suit le même pattern que Phase 3 de l'optimisation globale (6 autres tables)
+
+**Tests de Validation**:
+
+```bash
+# Vérification locale
+psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" \
+  -c "\d+ public.categories" | grep "Policies:" -A 10
+
+# Tests sécurité
+pnpm exec tsx scripts/check-views-security.ts  # ✅ 13/13 passed
+pnpm exec tsx scripts/test-rls-cloud.ts        # ✅ 13/13 passed
+```
+
+**Fichiers Modifiés**:
+
+- `supabase/schemas/62_rls_advanced_tables.sql` — Politique fusionnée dans schéma déclaratif
+- `supabase/migrations/20260107140000_fix_categories_duplicate_select_policies.sql` — Migration DDL
+
+**Documentation Complète**: Cette entrée
+
+---
+
 ### 2026-01-06 - FIX: RLS Policy WITH CHECK (true) Vulnerabilities
 
 **Migration** : `20260106190617_fix_rls_policy_with_check_true_vulnerabilities.sql` (304 lignes)
