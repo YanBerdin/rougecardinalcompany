@@ -19,6 +19,7 @@ Corriger définitivement l'erreur critique de récursion infinie bloquant les in
 ### Root Cause Analysis
 
 Le `NOT EXISTS` subquery dans la policy INSERT causait une récursion infinie car :
+
 1. INSERT déclenche l'évaluation de la policy INSERT
 2. La policy INSERT contient `NOT EXISTS (SELECT 1 FROM abonnes_newsletter ...)`
 3. Ce SELECT déclenche l'évaluation des policies SELECT sur la même table

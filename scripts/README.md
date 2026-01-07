@@ -4,6 +4,42 @@ Ce dossier contient des scripts d'administration pour gérer et surveiller l'app
 
 ## 📋 Liste des Scripts
 
+### 🚀 Performance & Optimisation
+
+#### check_unused_indexes.sql (SQL) ✅ NOUVEAU (2026-01-07)
+
+**Description**: Identifie les index inutilisés en production via `pg_stat_user_indexes` pour optimiser l'espace disque et les performances.
+
+**Utilisation**:
+
+```bash
+# Sur le cloud Supabase
+pnpm dlx supabase db remote shell --linked
+# Puis dans psql:
+\i scripts/check_unused_indexes.sql
+
+# Ou en une commande:
+psql "<PRODUCTION_DB_URL>" -f scripts/check_unused_indexes.sql
+```
+
+**Output Attendu**:
+
+| schemaname | tablename | indexname | idx_scan |
+| ------------ | ----------- | ----------- | ---------- |
+| public | old_table | idx_unused_column | 0 |
+
+**Utilisation des Résultats**:
+
+1. **Validation pré-DROP**: Attendre 7-14 jours après déploiement migration pour statistiques représentatives
+2. **Analyse**: `idx_scan = 0` indique index jamais utilisé (candidat à suppression)
+3. **Action**: Décommenter les `DROP INDEX` correspondants dans la migration de performance
+
+**Contexte**: Créé suite au rapport Supabase Advisors (2026-01-07) identifiant ~30 index inutilisés. Fait partie de la migration `20260107123000_performance_indexes_rls_policies.sql`.
+
+**Note**: Ne PAS exécuter sur DB locale (pas de statistiques d'usage significatives).
+
+---
+
 ### 🧪 Tests DAL (Data Access Layer)
 
 #### test-team-server-actions.ts (TypeScript) ✅ RECOMMANDÉ

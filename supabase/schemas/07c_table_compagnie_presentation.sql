@@ -37,19 +37,17 @@ create index if not exists idx_compagnie_presentation_sections_kind on public.co
 -- RLS
 alter table public.compagnie_presentation_sections enable row level security;
 
--- Public users see only active sections
+-- Policies: public active sections OR admins can view all
 drop policy if exists "Active presentation sections are viewable by everyone" on public.compagnie_presentation_sections;
-create policy "Active presentation sections are viewable by everyone"
+drop policy if exists "Admins can view all presentation sections" on public.compagnie_presentation_sections;
+
+create policy "View presentation sections (public active OR admin all)"
   on public.compagnie_presentation_sections for select
   to anon, authenticated
-  using ( active = true );
-
--- Admins see ALL sections (including inactive)
-drop policy if exists "Admins can view all presentation sections" on public.compagnie_presentation_sections;
-create policy "Admins can view all presentation sections"
-  on public.compagnie_presentation_sections for select
-  to authenticated
-  using ( (select public.is_admin()) );
+  using (
+    active = true
+    or (select public.is_admin())
+  );
 
 -- Écriture réservée admin
 -- Gestion admin (politiques granulaires)

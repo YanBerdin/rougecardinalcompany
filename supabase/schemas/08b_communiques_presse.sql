@@ -71,21 +71,18 @@ comment on column public.contacts_presse.notes is 'Notes internes sur les intera
 -- ---- COMMUNIQUES PRESSE ----
 alter table public.communiques_presse enable row level security;
 
--- Les communiqués publics sont visibles par tous
+-- Combined policy: public press releases OR admins
 drop policy if exists "Public press releases are viewable by everyone" on public.communiques_presse;
-create policy "Public press releases are viewable by everyone"
+drop policy if exists "Admins can view all press releases" on public.communiques_presse;
+
+create policy "View press releases (public OR admin all)"
 on public.communiques_presse
 for select
 to anon, authenticated
-using ( public = true );
-
--- Les admins voient tous les communiqués
-drop policy if exists "Admins can view all press releases" on public.communiques_presse;
-create policy "Admins can view all press releases"
-on public.communiques_presse
-for select
-to authenticated
-using ( (select public.is_admin()) );
+using (
+  public = true
+  or (select public.is_admin())
+);
 
 -- Seuls les admins peuvent gérer les communiqués
 drop policy if exists "Admins can create press releases" on public.communiques_presse;

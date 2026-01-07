@@ -59,6 +59,7 @@ Ce dossier contient le schéma déclaratif de la base de données selon les inst
 | **Functions** | ✅ 100% | SECURITY INVOKER, search_path défini |
 | **SQL Style** | ✅ 100% | Lowercase, snake_case, commentaires |
 | **Schema Structure** | ✅ 100% | Ordre lexicographique respecté |
+| **Performance** | ✅ Optimisé | 24 index FK + RLS initPlan (2026-01-07) |
 
 ---
 

@@ -67,3 +67,40 @@ create index if not exists idx_messages_contact_contact_presse on public.message
 create index if not exists idx_messages_contact_status_actifs on public.messages_contact(status) where status in ('nouveau','en_cours');
 -- Index partiel pour recherche des messages avec consentement explicite (ex: export ciblé)
 create index if not exists idx_messages_contact_consent_true on public.messages_contact(id) where consent = true;
+
+-- ===== FK COVERING INDEXES (performance plan 2026-01-07) =====
+-- relations vers medias.id (haute fréquence d'accès)
+create index if not exists idx_articles_presse_og_image_media_id on public.articles_presse (og_image_media_id);
+create index if not exists idx_compagnie_presentation_sections_image_media_id on public.compagnie_presentation_sections (image_media_id);
+create index if not exists idx_home_about_content_image_media_id on public.home_about_content (image_media_id);
+create index if not exists idx_home_hero_slides_image_media_id on public.home_hero_slides (image_media_id);
+create index if not exists idx_membres_equipe_photo_media_id on public.membres_equipe (photo_media_id);
+create index if not exists idx_partners_logo_media_id on public.partners (logo_media_id);
+create index if not exists idx_spectacles_og_image_media_id on public.spectacles (og_image_media_id);
+
+-- tables de jonction media
+create index if not exists idx_articles_medias_media_id on public.articles_medias (media_id);
+create index if not exists idx_communiques_medias_media_id on public.communiques_medias (media_id);
+create index if not exists idx_spectacles_medias_media_id on public.spectacles_medias (media_id);
+
+-- relations category (categories.id)
+create index if not exists idx_articles_categories_category_id on public.articles_categories (category_id);
+create index if not exists idx_communiques_categories_category_id on public.communiques_categories (category_id);
+create index if not exists idx_spectacles_categories_category_id on public.spectacles_categories (category_id);
+
+-- relations tags (tags.id)
+create index if not exists idx_articles_tags_tag_id on public.articles_tags (tag_id);
+create index if not exists idx_communiques_tags_tag_id on public.communiques_tags (tag_id);
+create index if not exists idx_spectacles_tags_tag_id on public.spectacles_tags (tag_id);
+
+-- relations user/admin (created_by/updated_by audit)
+create index if not exists idx_categories_created_by on public.categories (created_by);
+create index if not exists idx_configurations_site_updated_by on public.configurations_site (updated_by);
+create index if not exists idx_contacts_presse_created_by on public.contacts_presse (created_by);
+create index if not exists idx_seo_redirects_created_by on public.seo_redirects (created_by);
+create index if not exists idx_tags_created_by on public.tags (created_by);
+
+-- relations event/team
+create index if not exists idx_communiques_presse_evenement_id on public.communiques_presse (evenement_id);
+create index if not exists idx_evenements_lieu_id on public.evenements (lieu_id);
+create index if not exists idx_spectacles_membres_equipe_membre_id on public.spectacles_membres_equipe (membre_id);

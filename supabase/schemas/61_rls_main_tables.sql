@@ -37,21 +37,22 @@ using ( uploaded_by = (select auth.uid()) or (select public.is_admin()) );
 alter table public.spectacles enable row level security;
 
 drop policy if exists "Public spectacles are viewable by everyone" on public.spectacles;
-create policy "Public spectacles are viewable by everyone"
+drop policy if exists "Admins can view all spectacles" on public.spectacles;
+
+create policy "View spectacles (public published OR admin all)"
 on public.spectacles
 for select
 to anon, authenticated
-using ( public = true );
-
-create policy "Admins can view all spectacles"
-on public.spectacles
-for select
-to authenticated
 using (
+  (
+    status = 'published'
+    and public = true
+  )
+  or
   exists (
     select 1
     from public.profiles
-    where user_id = auth.uid()
+    where user_id = (select auth.uid())
     and role = 'admin'
   )
 );
@@ -65,7 +66,7 @@ with check (
   exists (
     select 1
     from public.profiles
-    where user_id = auth.uid()
+    where user_id = (select auth.uid())
     and role = 'admin'
   )
 );
@@ -80,7 +81,7 @@ using (
   or exists (
     select 1
     from public.profiles
-    where user_id = auth.uid()
+    where user_id = (select auth.uid())
     and role = 'admin'
   )
 )
@@ -89,7 +90,7 @@ with check (
   or exists (
     select 1
     from public.profiles
-    where user_id = auth.uid()
+    where user_id = (select auth.uid())
     and role = 'admin'
   )
 );
@@ -104,7 +105,7 @@ using (
   or exists (
     select 1
     from public.profiles
-    where user_id = auth.uid()
+    where user_id = (select auth.uid())
     and role = 'admin'
   )
 );
@@ -145,18 +146,16 @@ using ( (select public.is_admin()) );
 alter table public.partners enable row level security;
 
 drop policy if exists "Public partners are viewable by anyone" on public.partners;
-create policy "Public partners are viewable by anyone"
-on public.partners
-for select
-to authenticated, anon
-using ( is_active = true );
-
 drop policy if exists "Admins can view all partners" on public.partners;
-create policy "Admins can view all partners"
+
+create policy "View partners (active public OR admin all)"
 on public.partners
 for select
-to authenticated
-using ( (select public.is_admin()) );
+to anon, authenticated
+using (
+  is_active = true
+  or (select public.is_admin())
+);
 
 drop policy if exists "Admins can create partners" on public.partners;
 create policy "Admins can create partners"

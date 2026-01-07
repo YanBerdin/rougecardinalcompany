@@ -71,26 +71,23 @@ alter table public.home_hero_slides
       (cta_secondary_enabled = true and cta_secondary_label is not null and cta_secondary_url is not null)
     );
 
--- Index
 create index if not exists idx_home_hero_slides_active_order on public.home_hero_slides(active, position) where active = true;
 create index if not exists idx_home_hero_slides_schedule on public.home_hero_slides(starts_at, ends_at) where active = true;
-
--- RLS
-alter table public.home_hero_slides enable row level security;
-
--- Lecture publique (slides actifs + fenêtre valide)
+-- policies: public active slides OR admins can view all
 drop policy if exists "Home hero slides are viewable by everyone" on public.home_hero_slides;
-create policy "Home hero slides are viewable by everyone"
+drop policy if exists "Admins can view all home hero slides" on public.home_hero_slides;
+
+create policy "View home hero slides (public active OR admin all)"
   on public.home_hero_slides for select
   to anon, authenticated
   using (
-    active = true
-    and (starts_at is null or starts_at <= now())
-    and (ends_at is null or ends_at >= now())
+    (
+      active = true
+      and (starts_at is null or starts_at <= now())
+      and (ends_at is null or ends_at >= now())
+    )
+    or (select public.is_admin())
   );
-
--- Admins can view all slides (including inactive)
-drop policy if exists "Admins can view all home hero slides" on public.home_hero_slides;
 create policy "Admins can view all home hero slides"
   on public.home_hero_slides for select
   to authenticated
