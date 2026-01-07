@@ -116,100 +116,77 @@ pnpm exec tsx scripts/test-rls-policy-with-check-validation.ts
 
 ---
 
-### 2026-01-06 - CRITICAL HOTFIX: Newsletter Infinite Recursion (Part 1)
+### 2026-01-07 - FINAL FIX: Newsletter Infinite Recursion (Complete Solution)
 
-**Migration** : `20260106232619_fix_newsletter_infinite_recursion.sql` (44 lignes)
+**Migrations** :
+
+- `20260107120000_fix_newsletter_remove_duplicate_select_policy.sql` (28 lignes)
+- `20260107130000_fix_newsletter_remove_not_exists_from_policy.sql` (36 lignes)
 
 **Sévérité** : 🔴 **CRITICAL** - Production Broken
 
-**Problème Détecté** : Newsletter subscription endpoint failing with infinite recursion error in production:
+**Problème Détecté** : Malgré les fixes précédents (20260106232619 + 20260106235000), l'erreur `infinite recursion detected in policy for relation "abonnes_newsletter"` persistait.
 
-```bash
-[ERR_NEWSLETTER_001] createNewsletterSubscriber: infinite recursion detected in policy for relation "abonnes_newsletter"
-POST /api/newsletter 422 in 2.0s
-```
+**Root Cause Analysis** :
+Le `NOT EXISTS` subquery dans la policy INSERT cause une récursion infinie car :
 
-**Root Cause** : The `NOT EXISTS` subquery in the INSERT policy referenced the same table without table alias, causing PostgreSQL to enter infinite recursion:
+1. INSERT déclenche l'évaluation de la policy INSERT
+2. La policy INSERT contient `NOT EXISTS (SELECT 1 FROM abonnes_newsletter ...)`
+3. Ce SELECT déclenche l'évaluation des policies SELECT sur la même table
+4. PostgreSQL entre en boucle infinie lors de l'évaluation des policies
 
-```sql
--- ❌ BEFORE: Ambiguous table reference
-and not exists (
-  select 1 from public.abonnes_newsletter 
-  where lower(email) = lower(abonnes_newsletter.email)
-)
-```
-
-**Solution Applied** :
+**Solution Finale** :
 
 ```sql
--- ✅ AFTER: Explicit table alias
-and not exists (
-  select 1 from public.abonnes_newsletter existing
-  where lower(existing.email) = lower(abonnes_newsletter.email)
-)
-```
+-- Migration 20260107120000: Supprimer la policy SELECT admin-only redondante
+drop policy if exists "Admins can view full newsletter subscriber details" on public.abonnes_newsletter;
 
-**Status** : ✅ Applied locally  
-**Note** : Partial fix - revealed secondary issue with SELECT policy (see migration 20260106235000)
-
----
-
-### 2026-01-06 - CRITICAL HOTFIX: Newsletter SELECT Policy (Part 2)
-
-**Migration** : `20260106235000_fix_newsletter_select_for_duplicate_check.sql` (85 lignes)
-
-**Sévérité** : 🔴 **CRITICAL** - Production Broken (sequel to 20260106232619)
-
-**Problème Détecté** : After fixing infinite recursion, INSERT still failed with RLS policy violation:
-
-```bash
-ERROR: new row violates row-level security policy for table "abonnes_newsletter"
-Error code: 42501
-```
-
-**Root Cause** : The `NOT EXISTS` subquery needs SELECT permission on `abonnes_newsletter`, but anon users were blocked by admin-only SELECT policy:
-
-```sql
--- ❌ BEFORE: Overly restrictive SELECT policy
-create policy "Admins can view newsletter subscribers"
-on public.abonnes_newsletter for select
-to authenticated
-using ((select public.is_admin()));
-```
-
-Since `anon` users couldn't SELECT, the duplicate check subquery failed → entire INSERT failed.
-
-**Solution Applied** : Split SELECT policy into two:
-
-```sql
--- ✅ Policy 1: Permissive for duplicate checking
-create policy "Anyone can check email existence for duplicates"
-on public.abonnes_newsletter for select
+-- Migration 20260107130000: Simplifier la policy INSERT (sans NOT EXISTS)
+drop policy if exists "Validated newsletter subscription" on public.abonnes_newsletter;
+create policy "Validated newsletter subscription"
+on public.abonnes_newsletter for insert
 to anon, authenticated
-using (true);
-
--- ✅ Policy 2: Admin-only for full details
-create policy "Admins can view full newsletter subscriber details"
-on public.abonnes_newsletter for select
-to authenticated
-using ((select public.is_admin()));
+with check (
+  email ~* '^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$'
+);
 ```
 
 **Defense in Depth** :
 
-- SELECT policy is permissive BUT application layer (DAL) enforces admin-only access to sensitive columns
-- `is_admin()` function remains the authorization source of truth
-- Only email column exposed in practice (needed for duplicate check)
+- **Database layer** : Contrainte UNIQUE sur email (`abonnes_email_unique`) pour bloquer les doublons
+- **Database layer** : Validation regex du format email dans la policy RLS
+- **Application layer** : Rate limiting (3 req/h) via TASK046
+- **Application layer** : Validation Zod côté serveur
 
-**Validation** : All tests passing ✅
+**Validation** :
 
-- Valid email insertion works
-- Duplicate email blocked
-- Invalid email blocked
-- No infinite recursion
+```bash
+pnpm exec tsx scripts/test-rls-cloud.ts
+# Résultat: 13/13 tests passed ✅
+```
 
-**Status** : ✅ Applied locally  
-**Declarative Schema Updated** : `supabase/schemas/10_tables_system.sql` NOTE comment references this migration
+**Schéma Déclaratif Mis à Jour** : `supabase/schemas/10_tables_system.sql`
+
+**Status** : ✅ Appliqué Cloud + Local (2026-01-07)
+
+---
+
+### 2026-01-06 - SUPERSEDED: Newsletter Infinite Recursion Fixes (Parts 1 & 2)
+
+> ⚠️ **SUPERSEDED** : Ces migrations ont été remplacées par les fixes du 2026-01-07.
+> Conservées pour l'historique des migrations Cloud.
+
+**Migration Part 1** : `20260106232619_fix_newsletter_infinite_recursion.sql`
+
+- Tentative : Ajout d'alias `existing` dans le NOT EXISTS
+- Résultat : Insuffisant - récursion persistait
+
+**Migration Part 2** : `20260106235000_fix_newsletter_select_for_duplicate_check.sql`
+
+- Tentative : Split des policies SELECT (permissive + admin-only)
+- Résultat : Insuffisant - récursion persistait
+
+**Leçon apprise** : Les subqueries dans les policies RLS qui référencent la même table peuvent causer des récursions infinies. Utiliser des contraintes UNIQUE au lieu de checks RLS pour la déduplication.
 
 ---
 

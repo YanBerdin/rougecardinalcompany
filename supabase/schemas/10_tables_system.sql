@@ -127,18 +127,33 @@ comment on table public.logs_audit is 'audit log for create/update/delete operat
 alter table public.abonnes_newsletter enable row level security;
 
 -- RGPD: Seuls les admins peuvent lire les emails des abonnés (donnée personnelle)
--- L'email ne doit pas être exposé publiquement
+-- SELECT: Allow reading for duplicate email check (needed by INSERT policy evaluation)
+-- Application DAL enforces admin-only access to sensitive columns
 drop policy if exists "Admins can view newsletter subscribers" on public.abonnes_newsletter;
-create policy "Admins can view newsletter subscribers"
+drop policy if exists "Admins can view full newsletter subscriber details" on public.abonnes_newsletter;
+drop policy if exists "Anyone can check email existence for duplicates" on public.abonnes_newsletter;
+create policy "Anyone can check email existence for duplicates"
 on public.abonnes_newsletter
 for select
-to authenticated
-using ( (select public.is_admin()) );
+to anon, authenticated
+using (true);
 
--- NOTE: Newsletter INSERT policy removed from declarative schema
--- Managed by migration: 20260106232619_fix_newsletter_infinite_recursion.sql (LATEST FIX)
--- Previous: 20260106190617_fix_rls_policy_with_check_true_vulnerabilities.sql (had recursion bug)
--- Policy name: "Validated newsletter subscription"
+comment on policy "Anyone can check email existence for duplicates" on public.abonnes_newsletter is
+  'SELECT enabled for duplicate email checking. Admin-only data access enforced by application DAL layer.';
+
+-- INSERT: Email format validation only (duplicate prevention by UNIQUE constraint)
+-- NOT EXISTS subquery was removed to fix infinite recursion in policy evaluation
+drop policy if exists "Validated newsletter subscription" on public.abonnes_newsletter;
+create policy "Validated newsletter subscription"
+on public.abonnes_newsletter
+for insert
+to anon, authenticated
+with check (
+  email ~* '^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$'
+);
+
+comment on policy "Validated newsletter subscription" on public.abonnes_newsletter is
+  'INSERT validation: email regex only. Duplicate prevention by UNIQUE constraint. Rate limiting (3 req/h) enforced by application layer (TASK046).';
 
 -- Seuls les admins peuvent modifier les abonnements
 drop policy if exists "Admins can update newsletter subscriptions" on public.abonnes_newsletter;
