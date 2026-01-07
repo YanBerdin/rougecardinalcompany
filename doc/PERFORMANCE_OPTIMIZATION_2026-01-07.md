@@ -2,6 +2,31 @@
 
 Résumé des actions réalisées et instructions pour la validation en production.
 
+## 🔄 Corrections Supplémentaires (2026-01-07 14:00 UTC)
+
+### Categories Table - Duplicate SELECT Policies Fixed
+
+**Migration**: `20260107140000_fix_categories_duplicate_select_policies.sql`
+
+**Problème**: Détecté lors de l'audit post-déploiement - la table `categories` avait échappé à la Phase 3 de l'optimisation et conservait 2 politiques SELECT permissives :
+
+- `"Active categories are viewable by everyone"` - `using (is_active = true)`  
+- `"Admins can view all categories"` - `using ((select public.is_admin()))`
+
+**Impact**: CPU overhead à chaque requête SELECT (évaluation de 2 politiques au lieu d'1)
+
+**Solution**: Fusion en 1 seule politique avec logique OR
+
+```sql
+create policy "View categories (active OR admin)"
+using ( is_active = true or (select public.is_admin()) );
+```
+
+**Validation**: ✅ 26/26 tests sécurité (13 vues + 13 RLS)  
+**Déployé**: 2026-01-07 14:00 UTC (local + cloud)
+
+---
+
 ## Actions réalisées (automatiques dans repo)
 
 - Ajout de 24 index couvrants FK dans `supabase/schemas/40_indexes.sql`.

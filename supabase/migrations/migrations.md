@@ -4,6 +4,75 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-01-07 - PERF: Fix Duplicate RLS Policies on Categories
+
+**Migration**: `20260107140000_fix_categories_duplicate_select_policies.sql`
+
+**Sévérité**: 🟢 **LOW RISK** - Performance (réduction overhead RLS)
+
+**Source**: Audit post-déploiement de `20260107123000` - table `categories` détectée avec 2 politiques SELECT permissives pour le même rôle.
+
+**Problème Détecté**:
+
+La table `public.categories` avait **2 politiques SELECT permissives** évaluées à chaque requête :
+
+```sql
+-- Policy 1
+create policy "Active categories are viewable by everyone"
+on public.categories for select
+to anon, authenticated
+using ( is_active = true );
+
+-- Policy 2  
+create policy "Admins can view all categories"
+on public.categories for select
+to authenticated
+using ( (select public.is_admin()) );
+```
+
+**Impact**:
+
+- CPU overhead : PostgreSQL évalue les 2 politiques pour chaque SELECT (même si l'une suffit)
+- Ambiguïté : Logique de permission répartie entre 2 règles
+- Maintenance : Modifications nécessitent 2 changements synchronisés
+
+**Solution Appliquée**:
+
+Fusion des 2 politiques en **1 seule avec logique OR** :
+
+```sql
+drop policy if exists "Active categories are viewable by everyone" on public.categories;
+drop policy if exists "Admins can view all categories" on public.categories;
+
+create policy "View categories (active OR admin)"
+on public.categories
+for select
+to anon, authenticated
+using ( is_active = true or (select public.is_admin()) );
+```
+
+**Validation**:
+
+- ✅ **26/26 tests sécurité** (13 vues + 13 RLS WITH CHECK)
+- ✅ Tests locaux PASSED
+- ✅ Tests cloud PASSED
+
+**Déploiement**:
+
+- Date : 2026-01-07 14:00 UTC
+- Environnement : Local + Cloud
+- Rollback : Aucun problème détecté
+
+**Pattern Appliqué**: Suit Phase 3 de l'optimisation performance (6 autres tables optimisées de la même manière).
+
+**Fichiers Modifiés**:
+
+- Schema déclaratif : `supabase/schemas/62_rls_advanced_tables.sql`
+- Migration : `20260107140000_fix_categories_duplicate_select_policies.sql`
+- Documentation : `migrations.md`, `schemas/README.md`
+
+---
+
 ### 2026-01-07 - PERF: Optimisation Index FK + RLS Policies
 
 **Migration**: `20260107123000_performance_indexes_rls_policies.sql` (267 lignes)
