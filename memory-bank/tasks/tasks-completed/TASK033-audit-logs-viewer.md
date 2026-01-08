@@ -1,4 +1,4 @@
-# \[TASK033] - Audit Logs Viewer
+# TASK033 - Audit Logs Viewer
 
 **Status:** Completed  
 **Added:** 2025-10-16  

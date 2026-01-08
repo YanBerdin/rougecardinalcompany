@@ -243,7 +243,7 @@ Mettre à jour la section stack technique :
 - [X] progress.md mis à jour
 - [X] systemPatterns.md mis à jour
 - [X] techContext.md mis à jour
-- [ ] Commit de documentation effectué (en attente)
+- [X] Commit de documentation effectué (en attente)
 
 ---
 

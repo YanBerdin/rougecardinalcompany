@@ -1,4 +1,4 @@
-# \[TASK024] - Press Management
+# TASK024 - Press Management
 
 **Status:** Pending  
 **Added:** 2025-10-16  

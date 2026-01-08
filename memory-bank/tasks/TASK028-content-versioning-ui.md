@@ -1,4 +1,4 @@
-# \[TASK028] - Content Versioning UI
+# TASK028 - Content Versioning UI
 
 **Status:** Pending  
 **Added:** 2025-10-16  

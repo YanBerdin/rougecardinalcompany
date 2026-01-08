@@ -1,4 +1,4 @@
-# `[TASK021C]` - Nettoyage Architecture Auth et Optimisation Performance
+# TASK021C - Nettoyage Architecture Auth et Optimisation Performance
 
 **Status:** Completed
 **Added:** 13 octobre 2025

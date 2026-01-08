@@ -1,4 +1,4 @@
-# [TASK024] - Scripts Admin Email et Documentation Clés Supabase
+# TASK024 - Scripts Admin Email et Documentation Clés Supabase
 
 **Status:** Completed
 **Added:** 13 octobre 2025

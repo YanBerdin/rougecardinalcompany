@@ -1,4 +1,4 @@
-# Production Readiness Checklist - Rouge Cardinal Company
+# TASK036 - Production Readiness Checklist - Rouge Cardinal Company
 
 **Project:** Rouge Cardinal Company (Theatre Website)  
 **Stack:** Next.js 16 + Supabase + TypeScript + Tailwind  

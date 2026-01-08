@@ -1,4 +1,4 @@
-# \[TASK013\] - Seeds init**Overall Status:** Completed - 100%
+# TASK013 - Seeds init**Overall Status:** Completed - 100%
 
 ## Subtasks
 

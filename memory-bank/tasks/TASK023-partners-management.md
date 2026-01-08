@@ -1,4 +1,4 @@
-# \[TASK023] - Partners Management
+# TASK023 - Partners Management
 
 **Status:** Pending  
 **Added:** 2025-10-16  

@@ -1,4 +1,4 @@
-# [TASK019] - Fix spectacles archivés (approche public=true)
+# TASK019 - Fix spectacles archivés (approche public=true)
 
 **Status:** Completed  
 **Added:** 1er octobre 2025  

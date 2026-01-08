@@ -1,4 +1,4 @@
-# \[TASK029] - Media Library
+# TASK029 - Media Library
 
 **Status:** Completed ✅
 **Added:** 2025-10-16  

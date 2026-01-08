@@ -1,4 +1,4 @@
-# \[TASK032] - Admin User Invitation System
+# TASK032 - Admin User Invitation System
 
 **Status:** Completed  
 **Added:** 2025-10-16  

@@ -1,4 +1,4 @@
-# Audit de Sécurité TASK036 - Résumé Exécutif
+# TASK036 - Audit de Sécurité TASK036 - Résumé Exécutif
 
 **Date de complétion :** 2026-01-03  
 **Statut :** ✅ 100% Terminé (10/10 sous-tâches)  

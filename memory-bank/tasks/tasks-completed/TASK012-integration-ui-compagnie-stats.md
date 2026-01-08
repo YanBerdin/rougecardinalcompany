@@ -1,4 +1,4 @@
-# [TASK012] - Intégration UI des `compagnie_stats`
+# TASK012 - Intégration UI des `compagnie_stats`
 
 **Status:** Completed  
 **Added:** 17 septembre 2025  

@@ -1,4 +1,4 @@
-# \[TASK027] - Company Content Management
+# TASK027 - Company Content Management
 
 **Status:** Pending  
 **Added:** 2025-10-16  

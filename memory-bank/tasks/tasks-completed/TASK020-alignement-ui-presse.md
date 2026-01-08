@@ -1,4 +1,4 @@
-# [TASK020] - Alignement UI press releases (flexbox pattern)
+# TASK020 - Alignement UI press releases (flexbox pattern)
 
 **Status:** Completed  
 **Added:** 1er octobre 2025  

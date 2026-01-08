@@ -1,4 +1,4 @@
-# \[TASK040] - Documentation
+# TASK040 - Documentation
 
 **Status:** Pending  
 **Added:** 2025-10-16  

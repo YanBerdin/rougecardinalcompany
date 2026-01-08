@@ -1,4 +1,4 @@
-# [TASK011] - Intégration home_hero_slides (fetch + rendu)
+# TASK011 - Intégration home_hero_slides (fetch + rendu)
 
 **Status:** Completed  
 **Added:** 17 septembre 2025  

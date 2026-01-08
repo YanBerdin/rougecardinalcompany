@@ -1,4 +1,4 @@
-# \[TASK032] - User Role Management
+# TASK032 - User Role Management
 
 **Status:** Pending  
 **Added:** 2025-10-16  

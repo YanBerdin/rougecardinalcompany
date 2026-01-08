@@ -1,4 +1,4 @@
-# \[TASK034] - Performance Optimization
+# TASK034 - Performance Optimization
 
 **Status:** Pending  
 **Added:** 2025-10-16  
