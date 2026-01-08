@@ -1,6 +1,18 @@
 # System Patterns
 
-**Last Updated**: 2025-12-30
+**Last Updated**: 2026-01-08
+
+## Database Infrastructure
+
+- **SGBD** : PostgreSQL 17.6.1.063 (Supabase Cloud)
+- **Hébergement** : Supabase Cloud
+- **Dernière mise à jour** : 2026-01-08 (upgrade depuis 17.4.1.069)
+- **Extensions actives** : pgcrypto, pg_trgm, unaccent, citext
+- **Historique versions Postgres** :
+  - 2026-01-08 : Upgrade vers 17.6.1.063 (correctifs sécurité)
+  - Précédent : 17.4.1.069
+
+---
 
 Architecture et patterns observés dans le projet:
 

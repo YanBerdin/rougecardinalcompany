@@ -1,6 +1,6 @@
 # Tech Context
 
-**Last Updated**: 2025-12-30
+**Last Updated**: 2026-01-08
 
 Versions et dépendances clés observées dans le dépôt:
 
@@ -20,10 +20,12 @@ Structure principale:
 - `lib/` — utilitaires, DAL, schemas, constants, hooks, actions, **env.ts**
 - `supabase/` — scripts, migrations, server client helpers
 
-## Mises à jour récentes (Dec 2025)
+## Mises à jour récentes
 
 | Date | Changement | Impact |
 | ------ | ------------ | -------- |
+| 2026-01-08 | Postgres Upgrade | 17.4.1.069 → 17.6.1.063 (correctifs sécurité) |
+| 2026-01-07 | Performance Optimization | 24 FK indexes + RLS initPlan + policies merge |
 | 2025-12-30 | Storage/Folders Sync | `getFolderIdFromPath()`, 9 base folders, dynamic stats |
 | 2025-12-29 | TASK029 Media Library Complete | 7 phases, 4 DAL modules, 15 RLS policies |
 | 2025-12-20 | T3 Env Implementation | Type-safe env vars, ~100 lignes code supprimées |
@@ -43,6 +45,26 @@ Outils et commandes utiles:
 
 ## Stack Technologique
 
+### Backend / Database
+
+| Technologie | Version | Dernière MAJ |
+| ------------- | --------- | -------------- |
+| PostgreSQL (Supabase) | **17.6.1.063** | 2026-01-08 |
+| Supabase JS Client | @supabase/supabase-js | - |
+| Supabase SSR | @supabase/ssr | - |
+
+**Historique versions Postgres** :
+
+- 2026-01-08 : Upgrade vers 17.6.1.063 (correctifs sécurité)
+- Précédent : 17.4.1.069
+
+**Extensions actives** :
+
+- pgcrypto (cryptographic functions)
+- pg_trgm (trigram indexing for fuzzy search)
+- unaccent (remove accents for search)
+- citext (case-insensitive text)
+
 ### Frontend
 
 - **Framework**: Next.js **16.0.10** (App Router, Turbopack default) — security update 2025-12-13
@@ -52,9 +74,9 @@ Outils et commandes utiles:
   - shadcn/ui pour les composants
 - **State Management**: React Hooks + Context API
 
-### Backend
+### Backend / Services
 
-- **Base de données**: Supabase (PostgreSQL)
+- **Base de données**: Supabase (PostgreSQL **17.6.1.063**)
 - **Authentification**: Supabase Auth (avec `@supabase/ssr` + `getClaims()`)
 - **API**: Server Components + DAL `lib/dal/*` (server-only) via Supabase Client
 - **Email Service**: Resend API avec React Email templates

@@ -1,5 +1,78 @@
 # Progress
 
+## Postgres Upgrade to 17.6.1.063 (2026-01-08)
+
+### Objectif
+
+Mettre à jour Postgres sur Supabase Cloud pour appliquer les correctifs de sécurité disponibles (alerte Advisors WARN).
+
+### Résultats
+
+| Phase | État |
+| ----- | ---- |
+| Synchronisation locale | ✅ 100% |
+| Upgrade cloud | ✅ 100% |
+| Validation lint | ✅ 100% |
+| Tests RLS (36 tables) | ✅ 100% |
+| Tests views sécurisées | ✅ 100% |
+
+### Détails de l'upgrade
+
+| Élément | Avant | Après |
+| ------- | ----- | ----- |
+| Version Postgres | 17.4.1.069 | 17.6.1.063 |
+| Durée downtime | - | ~15 minutes |
+| Migrations | 66 fichiers | 66 fichiers |
+| Tables RLS | 36/36 | 36/36 ✅ |
+| Extensions | 4 actives | 4 actives ✅ |
+
+### Validations Passées
+
+**Synchronisation** :
+
+- ✅ `pnpm db:pull` - Schéma synchronisé (No changes)
+- ✅ 66 migrations présentes
+
+**Tests Qualité** :
+
+- ✅ `pnpm db:lint` - No schema errors found
+- ✅ All view security tests passed
+- ✅ All views properly secured with SECURITY INVOKER
+
+**Tests Sécurité** :
+
+- ✅ `scripts/test-rls-cloud.ts` - 36 tables protégées
+- ✅ `scripts/check-views-security.ts` - Vues admin isolées
+
+**Extensions Préservées** :
+
+- ✅ pgcrypto
+- ✅ pg_trgm
+- ✅ unaccent
+- ✅ citext
+
+### Fichiers Modifiés
+
+**Plan** (1):
+
+- `.github/prompts/plan-upgrade-postgres-supabase.prompt.md` — Tracking complet
+
+**Documentation** (2):
+
+- `memory-bank/activeContext.md` — Upgrade details
+- `memory-bank/progress.md` — Cette entrée
+
+### Impact
+
+- ✅ Correctifs de sécurité PostgreSQL appliqués
+- ✅ Aucune interruption de service notable
+- ✅ Pas de régression fonctionnelle détectée
+- ✅ RLS et views restent sécurisées
+
+**Type de mise à jour** : Maintenance infrastructure (WARN → résolu)
+
+---
+
 ## Newsletter Infinite Recursion - FINAL FIX (2026-01-07)
 
 ### Objectif

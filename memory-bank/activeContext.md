@@ -1,10 +1,89 @@
 # Active Context
 
-**Current Focus (2026-01-07)**: ✅ Performance Optimization Complete + Categories RLS Fix
+**Current Focus (2026-01-08)**: ✅ Postgres Upgrade to 17.6.1.063 + Documentation
+
+---
+
+## 🔄 POSTGRES UPGRADE (2026-01-08)
+
+### Mise à jour Postgres Supabase
+
+**Migration Infrastructure**: Upgrade de la version Postgres sur Supabase Cloud  
+**Durée**: ~15 minutes
+
+**Upgrade Details**:
+
+- **Version source**: 17.4.1.069
+- **Version cible**: 17.6.1.063
+- **Motif**: Correctifs de sécurité disponibles (alerte Advisors WARN)
+- **Type**: Maintenance infrastructure
+
+**Validation** ✅:
+
+- ✅ `pnpm db:pull` - Schéma synchronisé (66 migrations)
+- ✅ `pnpm db:lint` - Aucune erreur schéma
+- ✅ `scripts/test-rls-cloud.ts` - 36 tables protégées
+- ✅ `scripts/check-views-security.ts` - Vues admin isolées
+
+**Impact**:
+
+- ✅ Correctifs de sécurité appliqués
+- ✅ Aucune interruption de service notable
+- ✅ Toutes les validations RLS/views passées
+- ✅ Extensions préservées (pgcrypto, pg_trgm, unaccent, citext)
+
+**Status**: ✅ Upgrade complet + validations passées (2026-01-08)
+
+**Plan**: `.github/prompts/plan-upgrade-postgres-supabase.prompt.md`
 
 ---
 
 ## 🟢 PERFORMANCE FIX (2026-01-07 14:00 UTC)
+
+### Categories Table - Duplicate RLS Policies Fixed
+
+**Migration**: `20260107140000_fix_categories_duplicate_select_policies.sql`  
+**Severity**: 🟢 LOW RISK - Performance Optimization
+
+**Problem**: Table `public.categories` had 2 permissive SELECT policies causing unnecessary CPU overhead:
+
+1. ❌ "Active categories are viewable by everyone" - `using (is_active = true)`
+2. ❌ "Admins can view all categories" - `using ((select public.is_admin()))`
+
+Both policies evaluated for **every SELECT query**, even though one would suffice.
+
+**Solution**: Merged into single policy with OR logic
+
+```sql
+create policy "View categories (active OR admin)"
+on public.categories for select
+to anon, authenticated
+using ( is_active = true or (select public.is_admin()) );
+```
+
+**Impact**:
+
+- ✅ Single RLS evaluation instead of two per query
+- ✅ Clearer permission logic in one place
+- ✅ Follows Phase 3 optimization pattern (6 other tables)
+
+**Validation**: ✅ 26/26 tests passed (13 views + 13 RLS WITH CHECK)  
+**Status**: ✅ Deployed to production + local (2026-01-07 14:00 UTC)
+
+**Files Modified**:
+
+- Schema: `supabase/schemas/62_rls_advanced_tables.sql`
+- Migration: `20260107140000_fix_categories_duplicate_select_policies.sql`  
+- Docs: `migrations.md`, `schemas/README.md`, `PERFORMANCE_OPTIMIZATION_2026-01-07.md`
+
+**Git Commits**:
+
+- `79f5c55` - Performance optimization (24 FK indexes + RLS initPlan)
+- `b0d497b` - Categories RLS policies merge
+
+---
+
+## 🟢 PERFORMANCE FIX (2026-01-07 14:00 UTC) bis
 
 ### Categories Table - Duplicate RLS Policies Fixed
 
