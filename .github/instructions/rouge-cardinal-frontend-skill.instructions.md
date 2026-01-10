@@ -8,7 +8,7 @@ This skill guides creation of distinctive, production-grade frontend interfaces 
 ## Project Context
 
 Rouge Cardinal Company is a professional theater company website built with:
-- **Frontend**: Next.js 15.4.5 with App Router
+- **Frontend**: Next.js 16 with App Router
 - **Styling**: Tailwind CSS + shadcn/ui
 - **Database**: Supabase (Auth + PostgreSQL)
 - **Deployment**: Vercel
@@ -130,11 +130,15 @@ Body/UI: Geist Sans (already configured)
 ### Buttons & CTAs
 
 **Primary CTA** (Cardinal Red):
+
 ```tsx
-<button className="liquid-glass-black">
-  Réserver des places
-</button>
+<Button
+  variant="default" 
+  size="lg" 
+  asChild>
+</Button>
 ```
+
 - Filled cardinal red background
 - White text with text-shadow
 - Medium rounded corners (--radius: 0.5rem)
@@ -142,11 +146,16 @@ Body/UI: Geist Sans (already configured)
 - **Use for**: Booking, donations, press kit downloads
 
 **Secondary CTA** (Outlined):
+
 ```tsx
-<button className="nav-link-glass">
-  En savoir plus
-</button>
+<Button
+  variant="outline"
+  size="lg"
+  className="bg-white/30 border-white/50 text-white backdrop-blur-md hover:bg-white hover:text-black transition-all duration-300 shadow-lg"
+  asChild>
+</Button>
 ```
+
 - Subtle border with hover fill
 - Glassmorphism effect on hover
 - **Use for**: Alternative actions, navigation
@@ -160,9 +169,9 @@ Body/UI: Geist Sans (already configured)
 
 **Standard Card Pattern**:
 ```tsx
-<div className="liquid-glass card-hover">
+<Card className="">
   {/* Content with generous padding */}
-</div>
+</Card>
 ```
 
 **Hover Behaviors**:
@@ -185,6 +194,7 @@ Body/UI: Geist Sans (already configured)
 - Maintains logo stability (no floating animations)
 
 **Navigation Links**:
+
 ```tsx
 <Link className="nav-link-glass">
   Spectacles
@@ -259,18 +269,57 @@ overflow: hidden (on parent)
 ### Show/Production Cards
 
 **Structure**:
+
 ```tsx
-<div className="liquid-glass card-hover">
-  <img /> {/* 16:9 or 4:3 aspect ratio */}
-  <div className="p-6 space-y-4">
-    <h3 className="text-2xl font-bold">Titre</h3>
-    <p className="text-muted-foreground">Description</p>
-    <div className="flex gap-3">
-      <PrimaryCTA />
-      <SecondaryCTA />
-    </div>
-  </div>
-</div>
+            <Card
+              key={item.id}
+              className={`card-hover animate-fade-in-up w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm flex flex-col`}
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              <div className="relative overflow-hidden rounded-t-lg">
+                <div
+                  className="h-48 bg-cover bg-center transition-transform duration-300 hover:scale-105"
+                  style={{ backgroundImage: `url(${item.image})` }}
+                />
+                <div className="absolute top-4 left-4">
+                  <span className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium">
+                    {item.category}
+                  </span>
+                </div>
+              </div>
+
+              <CardContent className="p-6 flex flex-col flex-1">
+                <div className="flex items-center card-date text-sm mb-3">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  {new Date(item.date).toLocaleDateString("fr-FR", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </div>
+
+                <h3 className="text-xl font-semibold mb-3 hover:text-primary transition-colors card-title">
+                  <Link href={`/actualites/${item.id}`}>{item.title}</Link>
+                </h3>
+                <p className="leading-relaxed card-text">
+                  {item.short_description}
+                </p>
+              </CardContent>
+
+              <CardFooter className="mt-auto">
+                <Button
+                  variant="outline-primary"
+                  size="lg"
+                  className=""
+                  asChild
+                >
+                  <Link href={`/actualites/${item.id}`}>
+                    Lire la suite
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </CardFooter>
+            </Card>
 ```
 
 **Visual Hierarchy**:

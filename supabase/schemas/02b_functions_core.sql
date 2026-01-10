@@ -74,13 +74,14 @@ comment on function public.update_updated_at_column() is
  * 
  * Validation:
  *   - Tested: Triggers fire correctly on INSERT/UPDATE/DELETE
+ *   - Tested: Tables without 'id' column (configurations_site) work correctly
  *   - Tested: Direct function call blocked by lack of trigger context
  *   - Tested: Users cannot INSERT directly into logs_audit after revoke
  */
 create or replace function public.audit_trigger()
 returns trigger
 language plpgsql
-security definer  -- ✅ CHANGED: Bypass RLS to INSERT logs (system-only)
+security definer
 set search_path = ''
 as $$
 declare
@@ -88,8 +89,9 @@ declare
   xff_text text;
   ua_text text;
   user_id_uuid uuid := null;
-  record_id_text text;
+  record_id_text text := null;
 begin
+  -- Parse request headers for IP and user agent
   begin
     headers_json := coalesce(current_setting('request.headers', true), '{}')::json;
   exception when others then
@@ -106,28 +108,45 @@ begin
     ua_text := null;
   end if;
 
+  -- Get authenticated user ID
   begin
     user_id_uuid := nullif(auth.uid(), '')::uuid;
   exception when others then
     user_id_uuid := null;
   end;
 
+  -- Extract record identifier (handle tables without 'id' column)
+  -- Priority: id > key > uuid > null
   begin
-    if tg_op in ('insert','update') then
-      record_id_text := coalesce(new.id::text, null);
+    if tg_op in ('insert', 'update') then
+      record_id_text := coalesce(
+        (to_json(new) ->> 'id'),
+        (to_json(new) ->> 'key'),
+        (to_json(new) ->> 'uuid'),
+        null
+      );
     else
-      record_id_text := coalesce(old.id::text, null);
+      record_id_text := coalesce(
+        (to_json(old) ->> 'id'),
+        (to_json(old) ->> 'key'),
+        (to_json(old) ->> 'uuid'),
+        null
+      );
     end if;
   exception when others then
     record_id_text := null;
   end;
 
+  -- Insert audit log entry
   insert into public.logs_audit (
     user_id, action, table_name, record_id, old_values, new_values, ip_address, user_agent, created_at
   ) values (
-    user_id_uuid, tg_op, tg_table_name, record_id_text,
+    user_id_uuid,
+    tg_op,
+    tg_table_name,
+    record_id_text,
     case when tg_op = 'delete' then row_to_json(old) else null end,
-    case when tg_op in ('insert','update') then row_to_json(new) else null end,
+    case when tg_op in ('insert', 'update') then row_to_json(new) else null end,
     case when xff_text is not null then nullif(xff_text, '')::inet else null end,
     ua_text,
     now()
@@ -142,7 +161,7 @@ end;
 $$;
 
 comment on function public.audit_trigger() is 
-'Generic audit trigger that logs all DML operations with user context and metadata. Uses SECURITY DEFINER to bypass RLS and prevent direct user INSERTs into logs_audit, ensuring audit trail integrity. User context is still captured via auth.uid() and request headers. Includes robust error handling for missing headers or auth context. Migration 20260106190617 revokes INSERT grants from anon/authenticated.';
+'Generic audit trigger that logs all DML operations with user context and metadata. Uses SECURITY DEFINER to bypass RLS and prevent direct user INSERTs into logs_audit. Handles tables with different primary key columns (id, key, uuid). Migration 20260110011128 fixes support for tables without id column.';
 
 -- Helper pour recherche full-text français
 create or replace function public.to_tsvector_french(text)

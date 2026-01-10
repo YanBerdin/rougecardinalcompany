@@ -1,6 +1,65 @@
 # Active Context
 
-**Current Focus (2026-01-08)**: ✅ Postgres Upgrade to 17.6.1.063 + Documentation
+**Current Focus (2026-01-10)**: ✅ Audit Trigger Fix - Tables Sans id Column + Documentation
+
+---
+
+## 🔴 CRITICAL FIX (2026-01-10 01:11 UTC)
+
+### Audit Trigger - Support Tables Without `id` Column
+
+**Migration**: `20260110011128_fix_audit_trigger_no_id_column.sql`  
+**Severity**: 🔴 HIGH - Bug bloquant tous les display toggles
+
+**Problem**: Fonction `audit_trigger()` accédait directement à `new.id`, causant erreur sur table `configurations_site`
+
+```sql
+-- ❌ Code problématique (02b_functions_core.sql ligne ~119)
+record_id_text := coalesce(new.id::text, null);
+```
+
+**Error Impact**:
+
+- ❌ `[ERR_CONFIG_003] record "new" has no field "id"` sur tous les toggles
+- ❌ Table `configurations_site` utilise `key` (text) comme PK, pas `id`
+- ❌ Admin incapable de modifier les configurations du site
+
+**Solution**: JSON operator avec fallback chain
+
+```sql
+-- ✅ Code corrigé
+record_id_text := coalesce(
+  (to_json(new) ->> 'id'),    -- Tables avec id column
+  (to_json(new) ->> 'key'),   -- Tables comme configurations_site
+  (to_json(new) ->> 'uuid'),  -- Tables avec uuid
+  null
+);
+```
+
+**Validation**: ✅ 10/10 display toggles fonctionnels  
+**Status**: ✅ Déployé sur production (2026-01-10 01:11 UTC)
+
+**Impact Collatéral**:
+
+- ⚠️ `db reset --linked` exécuté par erreur sur production durant le fix
+- ✅ Admin user recréé via `scripts/create-admin-user.ts`
+- ✅ Data integrity vérifiée : 16 spectacles, 2 hero slides, 3 partners, 5 team
+
+**Files Modified**:
+
+- Migration: `20260110011128_fix_audit_trigger_no_id_column.sql`
+- Schema: `supabase/schemas/02b_functions_core.sql` (ligne ~119)
+- Nouveau script: `scripts/check-cloud-data.ts`
+- Package: `package.json` (ajout `check:cloud`)
+- Docs: 7 fichiers (migrations.md, schemas/README.md, memory-bank/*, copilot-instructions.md)
+
+**Pattern Appliqué**: JSON operator safe field access pour fonctions génériques
+
+**Leçons Apprises**:
+
+- ⚠️ `db reset --linked` affecte la production - utiliser avec extrême prudence
+- ✅ JSON operators (`to_json(record) ->> 'field'`) permettent l'accès sécurisé aux champs dynamiques
+- ✅ Scripts de vérification data integrity critiques après opérations destructrices
 
 ---
 

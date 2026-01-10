@@ -4,6 +4,74 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-01-10 - FIX: Audit Trigger Support for Tables Without `id` Column
+
+**Migration**: `20260110011128_fix_audit_trigger_no_id_column.sql`
+
+**Sévérité**: 🟠 **MEDIUM** - Bug critique affectant tous les display toggles
+
+**Source**: Erreur `[ERR_CONFIG_003] record "new" has no field "id"` rapportée sur tous les toggles de configuration.
+
+**Problème Détecté**:
+
+La fonction `audit_trigger()` (utilisée par 14 tables) accédait directement au champ `new.id` :
+
+```sql
+-- ❌ Code problématique (ligne ~119 de 02b_functions_core.sql)
+record_id_text := coalesce(new.id::text, null);
+```
+
+**Impact**:
+
+- ❌ Table `configurations_site` utilise `key` (text) comme PK, pas `id`
+- ❌ Toute opération INSERT/UPDATE/DELETE sur toggles échouait avec erreur PostgreSQL
+- ❌ Admin incapable de modifier les configurations du site
+
+**Solution Appliquée**:
+
+Utilisation de l'opérateur JSON avec fallback chain pour supporter tous les types de PK :
+
+```sql
+-- ✅ Code corrigé
+record_id_text := coalesce(
+  (to_json(new) ->> 'id'),    -- Tables avec id column
+  (to_json(new) ->> 'key'),   -- Tables comme configurations_site
+  (to_json(new) ->> 'uuid'),  -- Tables avec uuid
+  null
+);
+```
+
+**Validation**:
+
+- ✅ Toggles testés sur cloud : WORKING (10 toggles across 5 categories)
+- ✅ Schema déclaratif synchronisé : `supabase/schemas/02b_functions_core.sql`
+- ✅ Admin user recréé après reset accidentel
+- ✅ Vérification data integrity : 16 spectacles, 2 hero slides, 3 partners, 5 team members
+- ✅ Script créé : `check-cloud-data.ts` pour validation post-reset
+
+**Déploiement**:
+
+- Date : 2026-01-10 01:11 UTC
+- Environnement : ~~Local~~ + Cloud (accidental `db reset --linked` on production)
+- Rollback : Aucun rollback nécessaire (fix validé)
+
+**Pattern Appliqué**: JSON operator safe field access pour fonctions génériques
+
+**Fichiers Modifiés**:
+
+- Migration : `20260110011128_fix_audit_trigger_no_id_column.sql`
+- Schema déclaratif : `supabase/schemas/02b_functions_core.sql` (line ~119)
+- Nouveau script : `scripts/check-cloud-data.ts`
+- Documentation : `migrations.md`, `scripts/README.md`, `memory-bank/`
+
+**Leçons Apprises**:
+
+- ⚠️ `db reset --linked` affecte la production - utiliser avec extrême prudence
+- ✅ JSON operators (`to_json(record) ->> 'field'`) permettent l'accès sécurisé aux champs dynamiques
+- ✅ Scripts de vérification data integrity critiques après opérations destructrices
+
+---
+
 ### 2026-01-07 - PERF: Fix Duplicate RLS Policies on Categories
 
 **Migration**: `20260107140000_fix_categories_duplicate_select_policies.sql`

@@ -109,6 +109,17 @@ Note RLS: les nouvelles tables co‑localisent leurs politiques (dans le même f
 
 ## 🆕 Mises à jour récentes (janvier 2026)
 
+- **Fix Audit Trigger - Tables Sans `id` Column (10 jan. 2026)** : Correction de la fonction `audit_trigger()` pour supporter les tables utilisant d'autres colonnes comme PK.
+  - **Migration** : `20260110011128_fix_audit_trigger_no_id_column.sql`
+  - **Problème** : La fonction `audit_trigger()` accédait directement à `new.id`, causant l'erreur `[ERR_CONFIG_003] record "new" has no field "id"` sur la table `configurations_site` qui utilise `key` (text) comme PK.
+  - **Impact** : 14 tables avec audit triggers (profiles, medias, spectacles, etc.), mais seule `configurations_site` échouait (display toggles inutilisables).
+  - **Solution** : Utilisation de l'opérateur JSON avec fallback chain : `to_json(new) ->> 'id'` → `to_json(new) ->> 'key'` → `to_json(new) ->> 'uuid'` → `null`
+  - **Pattern appliqué** : JSON operator safe field access pour fonctions génériques (trigger functions)
+  - **Schéma déclaratif** : `02b_functions_core.sql` ligne ~119 mise à jour avec la logique JSON operator
+  - **Validation** : 10 display toggles testés OK sur cloud, admin interface fonctionnelle
+  - **Script créé** : `scripts/check-cloud-data.ts` pour vérification data integrity post-reset
+  - **Leçons** : ⚠️ `db reset --linked` affecte production (reset accidentel effectué pendant le fix)
+
 - **Display Toggles - Correction Migration Cleanup (1er jan. 2026)** : Résolution incohérence entre plan TASK030 et implémentation réelle.
   - **Problème identifié** : Le plan TASK030 mentionnait 3 toggles compagnie à supprimer (`display_toggle_compagnie_values`, `display_toggle_compagnie_presentation`, `display_toggle_compagnie_stats`) mais ces clés n'ont jamais été créées par le seed initial (`20260101160100_seed_display_toggles.sql`).
   - **Migration cleanup incorrecte** : `20260101170000_cleanup_and_add_epic_toggles.sql` contenait des DELETE pour ces clés inexistantes (aucun impact fonctionnel, 0 rows affected).

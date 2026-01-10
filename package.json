@@ -10,6 +10,7 @@
     "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"!doc-perso/**\"",
     "lint:md:fix": "markdownlint-cli2 --fix \"**/*.md\" \"#node_modules\" \"!doc-perso/**\"",
     "lint:all": "pnpm lint && pnpm lint:md",
+    "check:audit-secrets": "tsx scripts/audit-secrets-management.ts",
     "db:reset": "pnpm dlx supabase db reset --yes && ./scripts/post-reset.sh",
     "db:push": "./scripts/supabase-env.sh db push --linked",
     "db:pull": "./scripts/supabase-env.sh db pull",
@@ -40,9 +41,10 @@
     "check:storage": "tsx scripts/check-storage-paths.ts",
     "check:buckets": "tsx scripts/check-storage-buckets.ts",
     "check:extension": "tsx scripts/check-extension.ts",
-    "check:presse": "tsx scripts/check-presse-toggles.ts",
-    "audit:secrets": "tsx scripts/audit-secrets-management.ts",
-    "toggle:presse": "tsx scripts/toggle-presse.ts"
+    "check:toggles-all": "tsx scripts/check-display-toggles.ts",
+    "check:toggles-media_kit-presse_articles": "tsx scripts/check-presse-toggles.ts",
+    "check:toggles-presse_articles": "tsx scripts/toggle-presse.ts",
+    "check:cloud": "tsx scripts/check-cloud-data.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

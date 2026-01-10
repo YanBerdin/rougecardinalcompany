@@ -1,25 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
-import * as dotenv from 'dotenv';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { scriptEnv } from './lib/env.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// Load environment variables
-dotenv.config({ path: join(__dirname, '..', '.env.local') });
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SECRET_KEY; // Use service role key for admin access
-
-if (!supabaseUrl || !supabaseKey) {
-    console.error('❌ Variables d\'environnement manquantes');
-    console.error('NEXT_PUBLIC_SUPABASE_URL:', !!supabaseUrl);
-    console.error('SUPABASE_SECRET_KEY:', !!supabaseKey);
-    process.exit(1);
-}
-
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(scriptEnv.NEXT_PUBLIC_SUPABASE_URL, scriptEnv.SUPABASE_SECRET_KEY);
 
 async function checkPresseToggles() {
     console.log('🔍 Vérification des toggles presse_display...\n');

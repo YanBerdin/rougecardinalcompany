@@ -254,7 +254,7 @@ Après un `pnpm dlx supabase db reset` :
 ### 🔑 Identifiants Admin (Par Défaut)
 
 | Champ | Valeur |
-|-------|---------|
+| ------- | --------- |
 | **📧 Email** | `yandevformation@gmail.com` |
 | **🔒 Mot de passe** | `AdminRouge2025!` |
 | **🔐 Rôle** | `admin` |

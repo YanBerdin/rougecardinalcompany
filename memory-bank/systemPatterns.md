@@ -111,6 +111,56 @@ const apiKey = process.env.RESEND_API_KEY;
 
 - `lib/site-config.ts` — Utilise `env.EMAIL_FROM`, `env.NEXT_PUBLIC_SITE_URL`
 
+### JSON Operator Safe Field Access Pattern (Jan 2026)
+
+**Pattern pour trigger functions génériques** supportant tables avec différentes colonnes de clé primaire (id, key, uuid).
+
+#### Problème Résolu
+
+**Erreur** : `[ERR_CONFIG_003] record "new" has no field "id"` sur fonction `audit_trigger()` appliquée à 14 tables.
+
+**Cause** : Accès direct `new.id::text` échoue si la table n'a pas de colonne `id` (ex: `configurations_site` utilise `key`).
+
+#### Solution : JSON Operator avec Fallback Chain
+
+```sql
+-- ❌ Pattern direct field access (fragile)
+record_id_text := coalesce(new.id::text, null);  -- Erreur si pas de colonne id
+
+-- ✅ Pattern JSON operator (robuste)
+record_id_text := coalesce(
+  (to_json(new) ->> 'id'),    -- Tables avec id column
+  (to_json(new) ->> 'key'),   -- Tables comme configurations_site
+  (to_json(new) ->> 'uuid'),  -- Tables avec uuid
+  null                        -- Fallback si aucune colonne trouvée
+);
+```
+
+#### Avantages
+
+- **Flexible** : Supporte tous types de PK (bigint, text, uuid)
+- **Safe** : Retourne `NULL` si champ absent (pas d'erreur PostgreSQL)
+- **Generic** : Une fonction pour toutes les tables
+- **Maintainable** : Facile d'ajouter nouveaux types PK dans le fallback
+
+#### Cas d'usage
+
+- **Trigger functions génériques** : audit_trigger(), updated_at_trigger(), etc.
+- **Fonctions SECURITY DEFINER** : Accès dynamique à records sans connaître structure exacte
+- **Vues dynamiques** : Construction de requêtes sur tables hétérogènes
+
+#### Fichiers impactés
+
+- `supabase/schemas/02b_functions_core.sql` (ligne ~119)
+- `supabase/migrations/20260110011128_fix_audit_trigger_no_id_column.sql`
+- Tables supportées : 14 tables avec audit_trigger (profiles, medias, spectacles, configurations_site, etc.)
+
+#### Migration associée
+
+- **Date** : 2026-01-10 01:11 UTC
+- **Commit** : `fix(db): [ERR_CONFIG_003] audit_trigger no id column`
+- **Validation** : 10/10 display toggles fonctionnels après fix
+
 ### Admin Views Security Hardening Pattern (Jan 2026)
 
 **Pattern de sécurité multi-couches** pour isolation stricte des vues admin avec rôle dédié.

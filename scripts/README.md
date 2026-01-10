@@ -186,6 +186,16 @@ pnpm exec tsx scripts/test-rate-limit-newsletter.ts
 - Architecture : `doc/RATE-LIMITING.md`
 - Tests manuels : `doc/RATE-LIMITING-TESTING.md`
 
+#### check-cloud-data.ts ✅ NOUVEAU (2026-01-10)
+
+**Description**: Vérifie l'intégrité des données sur la base de données cloud Supabase après un reset ou une migration critique.
+
+**Utilisation**: `pnpm check:cloud` ou `pnpm exec tsx scripts/check-cloud-data.ts`
+
+**Vérifications**: Admin profile, Spectacles (≥16), Hero Slides (≥2), Partners (≥3), Team Members (≥5)
+
+**Contexte**: Créé suite à un `db reset --linked` accidentel sur production (10 janvier 2026).
+
 ### �🔐 Administration & Sécurité
 
 **Utilisation** :

@@ -1182,6 +1182,46 @@ with check (auth.uid() = user_id);
 
 **Default Pattern**: `SECURITY INVOKER` with empty `search_path`
 
+**JSON Operator Pattern (Jan 2026)**: Pour trigger functions génériques, utiliser JSON operators pour accéder aux champs dynamiquement (supporte tables avec différentes colonnes PK : id, key, uuid).
+
+```sql
+-- ✅ PATTERN JSON OPERATOR (recommandé pour fonctions génériques)
+create or replace function public.audit_trigger()
+returns trigger
+language plpgsql
+security definer  -- Bypass RLS pour écriture dans audit_logs
+set search_path = ''
+as $$
+declare
+  record_id_text text;
+begin
+  -- JSON operator avec fallback chain (supporte id/key/uuid)
+  record_id_text := coalesce(
+    (to_json(new) ->> 'id'),    -- Tables avec id column
+    (to_json(new) ->> 'key'),   -- Tables comme configurations_site
+    (to_json(new) ->> 'uuid'),  -- Tables avec uuid
+    null
+  );
+  
+  insert into public.audit_logs (table_name, record_id, operation, user_id)
+  values (tg_table_name::text, record_id_text, tg_op, auth.uid());
+  
+  return new;
+end;
+$$;
+
+-- ❌ PATTERN DIRECT FIELD ACCESS (fragile, éviter)
+-- record_id_text := coalesce(new.id::text, null);  -- Erreur si pas de colonne id
+```
+
+**Cas d'usage JSON operator**:
+
+- ✅ Trigger functions génériques (audit_trigger, updated_at_trigger)
+- ✅ Fonctions SECURITY DEFINER accédant à tables hétérogènes
+- ✅ Vues dynamiques sur tables avec PK différentes
+
+**Template fonction standard**:
+
 ```sql
 -- Template for Supabase functions
 create or replace function public.get_user_profile(profile_id bigint)

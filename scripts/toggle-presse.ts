@@ -1,22 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
-import * as dotenv from 'dotenv';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { scriptEnv } from './lib/env.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-dotenv.config({ path: join(__dirname, '..', '.env.local') });
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SECRET_KEY;
-
-if (!supabaseUrl || !supabaseKey) {
-    console.error('❌ Variables d\'environnement manquantes');
-    process.exit(1);
-}
-
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(scriptEnv.NEXT_PUBLIC_SUPABASE_URL, scriptEnv.SUPABASE_SECRET_KEY);
 
 async function togglePresseToggles(mediaKitEnabled: boolean, pressReleasesEnabled: boolean) {
     console.log('🔧 Configuration des toggles presse...\n');

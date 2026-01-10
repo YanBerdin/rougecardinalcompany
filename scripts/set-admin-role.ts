@@ -2,7 +2,7 @@
  * Add admin role to a user
  * Usage: pnpm exec tsx scripts/set-admin-role.ts [email]
  */
-
+import 'dotenv/config';
 import { config } from "dotenv";
 
 // Load environment variables

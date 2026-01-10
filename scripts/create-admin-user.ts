@@ -3,7 +3,7 @@
  * Script pour créer l'utilisateur admin initial
  * Usage: pnpm exec tsx scripts/create-admin-user.ts
  */
-
+import 'dotenv/config';
 import { createClient } from '@supabase/supabase-js';
 import { env } from '../lib/env';
 
