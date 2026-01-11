@@ -53,7 +53,7 @@ Le Memory Bank nécessitait une mise à jour pour refléter :
 **Modifications** :
 
 - Ajout TASK023 : Nettoyage architecture auth et optimisation performance
-- Ajout TASK024 : Scripts admin email et documentation clés Supabase
+- Ajout TASK024B : Scripts admin email et documentation clés Supabase
 
 **Lignes ajoutées** : 2 nouvelles tâches
 
@@ -72,7 +72,7 @@ Le Memory Bank nécessitait une mise à jour pour refléter :
 - Lessons Learned : 5 leçons clés
 - Related Files : 15+ fichiers affectés
 
-#### TASK024-admin-email-scripts.md
+#### TASK024B-admin-email-scripts.md
 
 **Contenu** : 220+ lignes
 
@@ -90,7 +90,7 @@ Le Memory Bank nécessitait une mise à jour pour refléter :
 ### Modifications Memory Bank
 
 - **Fichiers core modifiés** : 3 (activeContext.md, progress.md, tasks/\_index.md)
-- **Tâches créées** : 2 (TASK023, TASK024)
+- **Tâches créées** : 2 (TASK023, TASK024B)
 - **Lignes ajoutées Memory Bank** : ~90 lignes
 - **Lignes nouvelles tâches** : ~400 lignes
 - **Total documentation** : ~490 lignes nouvelles
@@ -146,7 +146,7 @@ Le Memory Bank nécessitait une mise à jour pour refléter :
 - [x] Mise à jour progress.md
 - [x] Mise à jour tasks/\_index.md
 - [x] Création TASK023
-- [x] Création TASK024
+- [x] Création TASK024B
 - [x] Création ce document récapitulatif
 
 ### Court Terme
@@ -171,7 +171,7 @@ Le Memory Bank nécessitait une mise à jour pour refléter :
 - `memory-bank/systemPatterns.md`
 - `memory-bank/tasks/_index.md`
 - `memory-bank/tasks/TASK023-auth-cleanup-and-optimization.md`
-- `memory-bank/tasks/TASK024-admin-email-scripts.md`
+- `memory-bank/tasks/TASK024B-admin-email-scripts.md`
 
 ### Documentation Projet
 

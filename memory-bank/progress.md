@@ -1,5 +1,83 @@
 # Progress
 
+## Database Reset Fix - medias.folder_id Restoration (2026-01-11)
+
+### Objectif
+
+Corriger l'erreur `column medias.folder_id does not exist` qui cassait la page Media Library après tout `db reset`.
+
+### Résultats
+
+| Phase | État |
+| ----- | ---- |
+| Root cause identifiée | ✅ 100% |
+| Migration créée | ✅ 100% |
+| Schema déclaratif mis à jour | ✅ 100% |
+| Test db reset local | ✅ 100% |
+| Cloud push | ⏳ En attente |
+
+### Root Cause
+
+La migration `20260103183217_audit_logs_retention_and_rpc.sql` (générée par `db pull`) contenait :
+
+```sql
+-- ❌ Code problématique
+alter table "public"."medias" drop column "folder_id";
+```
+
+Cette migration s'exécutait APRÈS les migrations qui ajoutaient `folder_id`, le supprimant systématiquement.
+
+### Solution Appliquée
+
+1. **Nouvelle migration** : `20260111120000_restore_medias_folder_id_final.sql`
+   - Ajoute `folder_id` avec `ADD COLUMN IF NOT EXISTS`
+   - Recrée la FK vers `media_folders`
+   - Recrée l'index `medias_folder_id_idx`
+   - Auto-assigne `folder_id` basé sur `storage_path` prefix
+
+2. **Schéma déclaratif mis à jour** :
+   - `03_table_medias.sql` : Ajout `folder_id bigint` dans CREATE TABLE
+   - `04_table_media_tags_folders.sql` : Ajout FK + index après création de `media_folders`
+
+### Validations Passées
+
+**Local** :
+
+- ✅ `pnpm dlx supabase db reset` → folder_id présent
+- ✅ Query `SELECT column_name FROM information_schema.columns WHERE table_name='medias' AND column_name='folder_id'` → 1 row
+
+**Cloud** :
+
+- ⏳ Migration prête à pousser via `pnpm dlx supabase db push`
+
+### Fichiers Modifiés
+
+**Migration** (1):
+
+- `supabase/migrations/20260111120000_restore_medias_folder_id_final.sql`
+
+**Schema Déclaratif** (2):
+
+- `supabase/schemas/03_table_medias.sql` (ajout folder_id column)
+- `supabase/schemas/04_table_media_tags_folders.sql` (ajout FK + index)
+
+**Documentation** (4):
+
+- `supabase/migrations/migrations.md`
+- `supabase/schemas/README.md`
+- `memory-bank/activeContext.md`
+- `memory-bank/progress.md`
+
+### Impact
+
+- ✅ `db reset` local/cloud fonctionnel avec Media Library
+- ✅ Schéma déclaratif = source de vérité
+- ✅ Pattern documenté pour éviter récurrence
+
+**Type de fix** : Bug critique → Production ready après `db push`
+
+---
+
 ## Audit Trigger Fix - Tables Sans id Column (2026-01-10)
 
 ### Objectif

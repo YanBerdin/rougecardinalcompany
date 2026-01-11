@@ -2,7 +2,7 @@
     // Use the TypeScript version installed in the workspace
     "typescript.tsdk": "node_modules/typescript/lib",
     "files.watcherExclude": {
-        "**/*.md": true,
+       // "**/*.md": true,
         "**/doc/**": true,
         "**/doc-perso/**": true
     },

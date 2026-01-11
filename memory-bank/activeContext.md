@@ -1,6 +1,59 @@
 # Active Context
 
-**Current Focus (2026-01-10)**: ✅ Audit Trigger Fix - Tables Sans id Column + Documentation
+**Current Focus (2026-01-11)**: ✅ Database Reset Fix - medias.folder_id Restoration
+
+---
+
+## 🔴 CRITICAL FIX (2026-01-11)
+
+### medias.folder_id - Restoration After Accidental Drop
+
+**Migration**: `20260111120000_restore_medias_folder_id_final.sql`  
+**Severity**: 🔴 CRITICAL - Media Library cassée après db reset
+
+**Problem**: Migration `20260103183217_audit_logs_retention_and_rpc.sql` (générée par `db pull`) supprimait `folder_id`
+
+```sql
+-- ❌ Code problématique (20260103183217)
+alter table "public"."medias" drop column "folder_id";
+```
+
+**Error Impact**:
+
+- ❌ `/admin/media/library` → "column medias.folder_id does not exist"
+- ❌ Tout `db reset` (local ou cloud) cassait la Media Library
+- ❌ FK et index également supprimés
+
+**Solution**: Migration finale + schéma déclaratif mis à jour
+
+```sql
+-- ✅ Migration 20260111120000
+alter table public.medias add column if not exists folder_id bigint;
+alter table public.medias add constraint medias_folder_id_fkey ...;
+create index if not exists medias_folder_id_idx on public.medias(folder_id);
+update public.medias set folder_id = ... where folder_id is null;
+```
+
+**Schema Déclaratif** :
+
+- `03_table_medias.sql` : Ajout `folder_id bigint` dans la définition
+- `04_table_media_tags_folders.sql` : Ajout FK + index après création de `media_folders`
+
+**Validation**: ✅ `db reset` local fonctionne avec folder_id  
+**Status**: ✅ Local OK, Cloud à pousser via `db push`
+
+**Files Modified**:
+
+- Migration: `20260111120000_restore_medias_folder_id_final.sql`
+- Schema: `supabase/schemas/03_table_medias.sql`
+- Schema: `supabase/schemas/04_table_media_tags_folders.sql`
+- Docs: `migrations.md`, `activeContext.md`, `progress.md`
+
+**Leçons Apprises**:
+
+- ⚠️ Migrations générées par `db pull` peuvent contenir des DROP COLUMN inattendus
+- ✅ Vérifier les diffs avant commit
+- ✅ Schéma déclaratif = source de vérité pour db reset
 
 ---
 

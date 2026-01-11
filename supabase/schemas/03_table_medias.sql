@@ -10,7 +10,7 @@ create table public.medias (
   size_bytes bigint,
   alt_text text,
   file_hash char(64),
-  -- folder_id will be added by migration 20251227203314_add_media_tags_folders.sql
+  folder_id bigint,  -- FK added by 04_table_media_tags_folders.sql after media_folders exists
   thumbnail_path text,
   metadata jsonb default '{}'::jsonb,
   uploaded_by uuid null,
@@ -37,7 +37,8 @@ where thumbnail_path is not null;
 create index if not exists idx_medias_storage_path_prefix 
 on public.medias (split_part(storage_path, '/', 1));
 
--- NOTE: medias_folder_id_idx index will be created by migration 20251227203314_add_media_tags_folders.sql after folder_id column is added
+-- NOTE: medias_folder_id_idx index and FK constraint are created in 04_table_media_tags_folders.sql
+-- (media_folders must exist first for the FK reference)
 
 -- =============================================================================
 -- HELPER FUNCTIONS

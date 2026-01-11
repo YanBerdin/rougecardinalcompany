@@ -4,6 +4,82 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-01-11 - FIX: Restore medias.folder_id After Accidental Drop
+
+**Migration**: `20260111120000_restore_medias_folder_id_final.sql`
+
+**Sévérité**: 🔴 **CRITICAL** - Colonne requise pour Media Library (TASK029)
+
+**Source**: Erreur `column medias.folder_id does not exist` après `db reset` (local ou cloud).
+
+**Problème Détecté**:
+
+La migration `20260103183217_audit_logs_retention_and_rpc.sql` (générée par `db pull`) contenait un `DROP COLUMN folder_id` :
+
+```sql
+-- ❌ Code problématique (20260103183217)
+alter table "public"."medias" drop column "folder_id";
+```
+
+**Impact**:
+
+- ❌ Page `/admin/media/library` cassée après tout `db reset`
+- ❌ Colonne `folder_id` supprimée après les migrations qui l'ajoutaient
+- ❌ FK et index également supprimés
+
+**Solution Appliquée**:
+
+Nouvelle migration finale + mise à jour du schéma déclaratif :
+
+```sql
+-- ✅ Migration 20260111120000
+alter table public.medias
+  add column if not exists folder_id bigint;
+
+alter table public.medias
+  add constraint medias_folder_id_fkey
+  foreign key (folder_id) references public.media_folders(id)
+  on delete set null not valid;
+
+create index if not exists medias_folder_id_idx on public.medias(folder_id);
+
+-- Auto-assign folder_id from storage_path prefix
+update public.medias m
+set folder_id = (
+  select f.id from public.media_folders f
+  where f.slug = split_part(m.storage_path, '/', 1)
+)
+where m.folder_id is null;
+```
+
+**Validation**:
+
+- ✅ `db reset` local : folder_id présent après reset
+- ✅ Schéma déclaratif mis à jour : `03_table_medias.sql` + `04_table_media_tags_folders.sql`
+- ✅ FK et index recréés
+- ✅ Auto-assignment folder_id basé sur storage_path prefix
+
+**Déploiement**:
+
+- Date : 2026-01-11
+- Environnement : Local (cloud à pousser via `db push`)
+- Rollback : Aucun nécessaire
+
+**Fichiers Modifiés**:
+
+- Migration : `20260111120000_restore_medias_folder_id_final.sql`
+- Schema déclaratif : `supabase/schemas/03_table_medias.sql` (ajout folder_id column)
+- Schema déclaratif : `supabase/schemas/04_table_media_tags_folders.sql` (ajout FK + index)
+- Documentation : `migrations.md`, `schemas/README.md`, `memory-bank/`
+
+**Leçons Apprises**:
+
+- ⚠️ Les migrations générées par `db pull` peuvent contenir des `DROP COLUMN` inattendus
+- ✅ Toujours vérifier les diffs avant de committer une migration générée
+- ✅ Le schéma déclaratif doit refléter l'état final souhaité pour que `db reset` fonctionne
+
+---
+
 ### 2026-01-10 - FIX: Audit Trigger Support for Tables Without `id` Column
 
 **Migration**: `20260110011128_fix_audit_trigger_no_id_column.sql`

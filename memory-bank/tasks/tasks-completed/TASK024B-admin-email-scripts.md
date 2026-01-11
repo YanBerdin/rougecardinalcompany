@@ -1,4 +1,4 @@
-# TASK024 - Scripts Admin Email et Documentation Clés Supabase
+# TASK024B - Scripts Admin Email et Documentation Clés Supabase
 
 **Status:** Completed
 **Added:** 13 octobre 2025
@@ -122,7 +122,7 @@ Créer un script admin pour vérifier les logs email (newsletter + contact messa
 #### **Révélation: Format Simplified**
 
 - User informe: "j'ai remplacé SUPABASE_SERVICE_ROLE_KEY par SUPABASE_SECRET_KEY et le test passe"
-- Configuration user: `SUPABASE_SECRET_KEY=sb_secret_SZA6wkY0dcsDrHaNyW4wCg_caG3YPPQ`
+- Configuration user: `SUPABASE_SECRET_KEY=sb_secret_SZA6...`
 - Format court `sb_secret_...` ≠ format JWT long `eyJ...`
 
 #### **Découverte majeure: Deux formats valides**

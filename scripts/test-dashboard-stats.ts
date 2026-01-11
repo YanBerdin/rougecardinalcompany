@@ -1,5 +1,5 @@
 #!/usr/bin/env tsx
-
+//TODO fix env errors 
 /**
  * Test script for dashboard statistics
  *

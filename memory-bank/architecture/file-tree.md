@@ -488,7 +488,7 @@
 │   │   │   ├── 📝 TASK022-REVIEW.md
 │   │   │   ├── 📝 TASK022-implementation-summary.md
 │   │   │   ├── 📝 TASK022-team-management.md
-│   │   │   ├── 📝 TASK024-admin-email-scripts.md
+│   │   │   ├── 📝 TASK024B-admin-email-scripts.md
 │   │   │   ├── 📝 TASK025-rls-security-performance-fixes.md
 │   │   │   ├── 📝 TASK025B-security-audit-campaign.md
 │   │   │   ├── 📝 TASK026-COMPLIANCE-FIXES.md

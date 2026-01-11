@@ -116,3 +116,17 @@ create trigger media_folders_updated_at_trigger
 before update on public.media_folders
 for each row
 execute function public.update_media_folders_updated_at();
+
+-- =============================================================================
+-- FOREIGN KEY: medias.folder_id → media_folders.id
+-- Added here because media_folders must exist first (ordering: 03 → 04)
+-- =============================================================================
+
+alter table public.medias
+add constraint medias_folder_id_fkey
+foreign key (folder_id) references public.media_folders(id) on delete set null;
+
+comment on column public.medias.folder_id is 'Référence au dossier (auto-assigned from storage_path prefix)';
+
+-- Index for folder_id lookups (performance for RLS and queries)
+create index if not exists medias_folder_id_idx on public.medias(folder_id);

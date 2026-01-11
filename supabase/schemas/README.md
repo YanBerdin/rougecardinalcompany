@@ -109,6 +109,15 @@ Note RLS: les nouvelles tables co‑localisent leurs politiques (dans le même f
 
 ## 🆕 Mises à jour récentes (janvier 2026)
 
+- **Fix Database Reset - medias.folder_id Restoration (11 jan. 2026)** : Restauration de la colonne `folder_id` supprimée par erreur par une migration générée.
+  - **Migration** : `20260111120000_restore_medias_folder_id_final.sql`
+  - **Problème** : La migration `20260103183217_audit_logs_retention_and_rpc.sql` (générée par `db pull`) contenait un `DROP COLUMN folder_id` qui supprimait la colonne après que les migrations précédentes l'avaient créée.
+  - **Impact** : Page `/admin/media/library` cassée après tout `db reset` (local ou cloud) avec erreur "column medias.folder_id does not exist".
+  - **Solution** : Nouvelle migration finale + mise à jour du schéma déclaratif (`03_table_medias.sql` et `04_table_media_tags_folders.sql`).
+  - **Schéma déclaratif** : `03_table_medias.sql` inclut maintenant `folder_id bigint`, et `04_table_media_tags_folders.sql` ajoute la FK + index.
+  - **Validation** : `db reset` local fonctionne avec folder_id présent.
+  - **Leçons** : ⚠️ Vérifier les migrations générées par `db pull` avant commit - elles peuvent contenir des `DROP COLUMN` inattendus.
+
 - **Fix Audit Trigger - Tables Sans `id` Column (10 jan. 2026)** : Correction de la fonction `audit_trigger()` pour supporter les tables utilisant d'autres colonnes comme PK.
   - **Migration** : `20260110011128_fix_audit_trigger_no_id_column.sql`
   - **Problème** : La fonction `audit_trigger()` accédait directement à `new.id`, causant l'erreur `[ERR_CONFIG_003] record "new" has no field "id"` sur la table `configurations_site` qui utilise `key` (text) comme PK.
