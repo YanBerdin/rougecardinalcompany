@@ -1,5 +1,5 @@
 #!/usr/bin/env tsx
-//TODO fix env errors 
+
 /**
  * Test script for dashboard statistics
  *
@@ -17,8 +17,12 @@ import { env } from "../lib/env";
 dotenv.config({ path: resolve(process.cwd(), ".env.local") });
 
 // Configuration
-const SUPABASE_URL = env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_SERVICE_KEY = env.SUPABASE_SECRET_KEY;
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SECRET_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+  throw new Error("Missing required environment variables: NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SECRET_KEY");
+}
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
