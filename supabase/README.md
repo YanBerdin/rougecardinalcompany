@@ -99,7 +99,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000  # ou https://votre-domaine.com
 
 ## Rotation des clés
 
-En cas de compromission de `SUPABASE_SECRET_KEY` :
+En cas de compromission (Leaked) de `SUPABASE_SECRET_KEY` :
 
 1. Générez une nouvelle clé via Supabase Dashboard (Settings → API → "Rotate service role key")
 2. Mettez à jour `.env.local` localement

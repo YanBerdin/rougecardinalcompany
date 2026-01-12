@@ -2,11 +2,9 @@
 
 Ce dossier contient des scripts d'administration pour gérer et surveiller l'application Rouge Cardinal Company.
 
-## 📋 Liste des Scripts
+## 🩺 Diagnostic Admin (Janvier 2026)
 
-### 🩺 Diagnostic Admin (Janvier 2026)
-
-#### check-admin-status.ts (TypeScript) ✅ RECOMMANDÉ
+### check-admin-status.ts (TypeScript) ✅ RECOMMANDÉ
 
 **Description**: Script de diagnostic pour vérifier l'accès aux vues admin avec SERVICE_ROLE. Teste directement les permissions sur `communiques_presse_dashboard` et `analytics_summary`.
 
@@ -54,7 +52,7 @@ Accès vues admin: OK ✅
 
 ---
 
-#### check-existing-profile.js (JavaScript)
+### check-existing-profile.js (JavaScript)
 
 **Description**: Vérifie qu'un profil utilisateur existe dans la table `profiles` avec le rôle admin.
 
@@ -78,7 +76,7 @@ node scripts/check-existing-profile.js
 
 ---
 
-#### diagnose-admin-views.js (JavaScript)
+### diagnose-admin-views.js (JavaScript)
 
 **Description**: Diagnostic complet des vues admin incluant `is_admin()`, RLS policies, et permissions.
 
@@ -111,8 +109,6 @@ node scripts/diagnose-admin-views.js
 **Note**: Nécessite `SUPABASE_SECRET_KEY` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY`.
 
 ---
-
-## 📋 Liste des Scripts
 
 ### 🚀 Performance & Optimisation
 
@@ -306,7 +302,7 @@ pnpm exec tsx scripts/test-rate-limit-newsletter.ts
 
 **Contexte**: Créé suite à un `db reset --linked` accidentel sur production (10 janvier 2026).
 
-### �🔐 Administration & Sécurité
+## �🔐 Administration & Sécurité
 
 **Utilisation** :
 
@@ -344,13 +340,13 @@ if (!error || error.code !== '42501') {
 
 ---
 
-#### test-newsletter-recursion-fix-direct.ts (Legacy - voir test-rls-cloud.ts)
+### test-newsletter-recursion-fix-direct.ts (Legacy - voir test-rls-cloud.ts)
 
 **Description** : Test legacy du hotfix newsletter. Remplacé par `test-rls-cloud.ts` qui inclut tous les tests RLS.
 
 ---
 
-#### test-rls-cloud.ts ✅ RECOMMANDÉ (Migration 20260107130000)
+### test-rls-cloud.ts ✅ RECOMMANDÉ (Migration 20260107130000)
 
 **Description** : Test complet des policies RLS sur Cloud. Inclut les tests newsletter avec le fix final (sans NOT EXISTS).
 
@@ -547,7 +543,7 @@ ORDER BY v.viewname;
 > Résultat attendu :
 > Toutes les vues doivent afficher admin_views_owner + ✅ SECURITY INVOKER
 
-#### set-admin-role.ts
+### set-admin-role.ts
 
 **Description** : Ajoute le rôle admin à un utilisateur via l'API Supabase.
 
@@ -565,7 +561,7 @@ pnpm exec tsx scripts/set-admin-role.ts yandevformation@gmail.com
 
 ---
 
-#### test-audit-logs-cloud.ts
+### test-audit-logs-cloud.ts
 
 **Description** : Vérifie le déploiement cloud de la migration TASK033 (Audit Logs Viewer).
 
@@ -696,7 +692,7 @@ pnpm exec tsx scripts/audit-cookie-flags.ts
 
 ---
 
-#### test-cookie-security.ts ✅ RECOMMANDÉ
+### test-cookie-security.ts ✅ RECOMMANDÉ
 
 **Description** : Test d'intégration des cookies avec validation runtime (requiert serveur dev).
 
@@ -735,7 +731,7 @@ pnpm exec tsx scripts/test-cookie-security.ts
 
 ---
 
-#### test-env-validation.ts
+### test-env-validation.ts
 
 **Description** : Validation complète de la configuration T3 Env avec chargement .env.local.
 
@@ -1026,8 +1022,6 @@ async function main() {
 
 main().catch(console.error);
 ```
-
----
 
 ---
 
