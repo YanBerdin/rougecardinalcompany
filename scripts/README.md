@@ -4,6 +4,116 @@ Ce dossier contient des scripts d'administration pour gérer et surveiller l'app
 
 ## 📋 Liste des Scripts
 
+### 🩺 Diagnostic Admin (Janvier 2026)
+
+#### check-admin-status.ts (TypeScript) ✅ RECOMMANDÉ
+
+**Description**: Script de diagnostic pour vérifier l'accès aux vues admin avec SERVICE_ROLE. Teste directement les permissions sur `communiques_presse_dashboard` et `analytics_summary`.
+
+**Utilisation**:
+
+```bash
+pnpm check:admin-status
+# ou
+pnpm exec tsx scripts/check-admin-status.ts
+```
+
+**Tests couverts (3 vérifications)**:
+
+| Test | Description |
+| ------ | ------------- |
+| Test 1 | Accès `communiques_presse_dashboard` via service_role |
+| Test 2 | Accès `analytics_summary` via service_role |
+| Test 3 | Vérification configuration sécurité (pg_views) |
+
+**Avantages**:
+
+- ✅ Utilise `SUPABASE_SECRET_KEY` (service_role) pour bypass RLS
+- ✅ Teste directement les vues admin (pas d'authentification utilisateur)
+- ✅ Confirme que le pattern TASK037 est correctement appliqué
+- ✅ Messages clairs et explicites (pg_views = comportement normal)
+
+**Configuration Requise**:
+
+```bash
+SUPABASE_SECRET_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**Résultat attendu**:
+
+```
+✅ communiques_presse_dashboard: X ligne(s)
+✅ analytics_summary: X ligne(s)
+ℹ️  pg_views non accessible via API Supabase (comportement normal)
+Accès vues admin: OK ✅
+```
+
+**Contexte**: Créé pour valider que les vues admin suivent le pattern TASK037 (SECURITY INVOKER + GRANT service_role only). Les vues admin ne doivent JAMAIS être accessibles via le rôle `authenticated`.
+
+**Voir aussi**: `/admin/debug-auth` page (utilise `createAdminClient()` de la même manière)
+
+---
+
+#### check-existing-profile.js (JavaScript)
+
+**Description**: Vérifie qu'un profil utilisateur existe dans la table `profiles` avec le rôle admin.
+
+**Utilisation**:
+
+```bash
+pnpm check:admin-profile
+# ou
+node scripts/check-existing-profile.js
+```
+
+**Tests**: Récupère le profil pour un `user_id` spécifique et affiche `display_name`, `role`.
+
+**Avantages**:
+
+- ✅ Utilise service_role pour bypass RLS
+- ✅ Confirme que le profil admin existe avant d'autres diagnostics
+- ✅ Affiche toutes les colonnes du profil
+
+**Note**: Modifier la variable `userId` dans le script pour tester différents utilisateurs.
+
+---
+
+#### diagnose-admin-views.js (JavaScript)
+
+**Description**: Diagnostic complet des vues admin incluant `is_admin()`, RLS policies, et permissions.
+
+**Utilisation**:
+
+```bash
+pnpm diagnose:admin-views
+# ou
+node scripts/diagnose-admin-views.js
+```
+
+**Tests couverts (6 vérifications)**:
+
+| Test | Description |
+| ------ | ------------- |
+| Test 1 | Vérification profil avec service role |
+| Test 2 | Test `is_admin()` avec service role |
+| Test 3 | Test vues admin avec service role |
+| Test 4 | Vérification policies RLS |
+| Test 5 | Vérification définition `is_admin()` |
+| Test 6 | Résumé et recommandations |
+
+**Avantages**:
+
+- ✅ Diagnostic exhaustif en une commande
+- ✅ Affiche les définitions SQL des fonctions
+- ✅ Recommandations automatiques en cas d'erreur
+- ✅ Teste avec service_role ET anon (comparaison)
+
+**Note**: Nécessite `SUPABASE_SECRET_KEY` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY`.
+
+---
+
+## 📋 Liste des Scripts
+
 ### 🚀 Performance & Optimisation
 
 #### check_unused_indexes.sql (SQL) ✅ NOUVEAU (2026-01-07)
