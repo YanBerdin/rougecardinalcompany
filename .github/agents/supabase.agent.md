@@ -1,16 +1,16 @@
 ---
 description: 'Agent expert Supabase pour générer du code conforme et auditer la conformité aux standards officiels.'
 tools:
-  - execute
-  - read
-  - edit
-  - search
-  - web
-  - agent
-  - todo
-  - github/*
-  - next-devtools/*
-  - supabase/*
+  - #execute
+  - #read
+  - #edit
+  - #search
+  - #web
+  - #agent
+  - #todo
+  - #github/*
+  - #next-devtools/*
+  - #supabase/*
 ---
 
 # Supabase Expert Agent
