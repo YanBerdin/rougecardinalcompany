@@ -326,8 +326,8 @@ Backup strategy must cover:
 
 **Status:** Not Started  
 **Priority:** P0 (Critical)  
-**Added:** 2026-01-06  
-**Updated:** 2026-01-06
+**Added:** 2026-01-05  
+**Updated:** 2026-01-13
 
 ## Original Request
 
@@ -336,48 +336,70 @@ Setup comprehensive error monitoring, alerting, and incident response procedures
 ## Context
 
 Current state:
-- No centralized error tracking
+- No centralized error tracking (dispersed logs, console.log usage)
 - No error boundaries in React components
 - No automated alerts for critical errors
-- No incident response procedures
+- No incident response procedures documented
+- MTTR (Mean Time To Recovery) unknown and untracked
+
+Production requirements:
+- Fast incident detection and notification
+- Graceful error handling (user experience)
+- Detailed error context for debugging
+- Clear escalation procedures
 
 ## Thought Process
 
-Error monitoring strategy:
-1. **Sentry integration** for error tracking + performance
-2. **React error boundaries** for graceful degradation
-3. **Alert thresholds** for critical errors (rate-based)
-4. **Notification channels** (Slack/email for on-call)
+Error monitoring strategy must cover 4 layers:
+1. **Sentry integration** for centralized error tracking + performance monitoring
+2. **React error boundaries** for graceful UI degradation
+3. **Alert thresholds** for critical errors (rate-based triggers)
+4. **Notification channels** (Slack/email for on-call response)
 
 ## Implementation Plan
 
 ### Phase 1: Sentry Integration (1 day)
-- Create Sentry project (supabase.com/docs/guides/integrations/sentry)
-- Add @sentry/nextjs package
-- Configure DSN in environment variables
-- Setup source maps upload in CI/CD
+- Create Sentry project (Next.js template)
+- Add `@sentry/nextjs` package
+- Configure DSN in environment variables (T3 Env)
+- Setup source maps upload in CI/CD (Vercel integration)
+- Add release tagging for version tracking
+- Test error capture on staging
 
 ### Phase 2: Error Boundaries (1 day)
-- Create RootErrorBoundary component
-- Create PageErrorBoundary component
-- Create ComponentErrorBoundary (granular)
-- Add custom error context (user, route, action)
+- Create `RootErrorBoundary` component (app-level catch-all)
+- Create `PageErrorBoundary` component (route-level)
+- Create `ComponentErrorBoundary` (granular, reusable)
+- Add custom error context to Sentry:
+  - User ID (if authenticated)
+  - Current route/pathname
+  - Server Action name (if applicable)
+  - Request ID for tracing
+- Implement fallback UI components (user-friendly error states)
 
 ### Phase 3: Alert Configuration (1 day)
-- Configure alert thresholds:
-  - Critical: >10 errors/min (P0 alert)
-  - High: >50 errors/hour (P1 alert)
-  - DB connection failures (immediate alert)
+- Configure alert thresholds in Sentry:
+  - **Critical (P0)**: >10 errors/min → immediate alert
+  - **High (P1)**: >50 errors/hour → urgent alert
+  - **DB connection failures** → immediate alert
+  - **Auth failures spike** → security alert
 - Setup notification channels:
-  - Slack webhook for critical alerts
-  - Email for high-priority alerts
-- Test alert delivery (dry-run)
+  - Slack webhook for critical/high alerts
+  - Email for daily digest and P1 alerts
+- Configure alert rules (deduplication, rate limits)
+- Test alert delivery (simulate error scenarios)
 
 ### Phase 4: Incident Response (1 day)
-- Write incident response runbook
-- Define error severity levels (P0/P1/P2/P3)
-- Document escalation procedures
-- Create error triage workflow
+- Write incident response runbook:
+  - Detection → Triage → Mitigation → Resolution → Postmortem
+- Define error severity levels:
+  - **P0**: Service down, data loss risk → 15min response
+  - **P1**: Major feature broken → 1h response
+  - **P2**: Minor feature degraded → 4h response
+  - **P3**: Cosmetic/low impact → Next sprint
+- Document escalation procedures (who to contact)
+- Create error triage workflow (Sentry → Slack → Action)
+- Setup on-call rotation (if applicable)
 
 ## Progress Tracking
 
@@ -387,44 +409,59 @@ Error monitoring strategy:
 
 | ID | Description | Status | Updated | Notes |
 |----|-------------|--------|---------|-------|
-| 1.1 | Create Sentry project | Not Started | - | DSN config |
-| 1.2 | Install @sentry/nextjs | Not Started | - | Package |
-| 1.3 | Configure source maps upload | Not Started | - | CI/CD |
-| 2.1 | Create RootErrorBoundary | Not Started | - | App-level |
-| 2.2 | Create PageErrorBoundary | Not Started | - | Page-level |
-| 2.3 | Add custom error context | Not Started | - | User/route |
-| 3.1 | Configure alert thresholds | Not Started | - | Rate-based |
-| 3.2 | Setup Slack webhook | Not Started | - | Critical alerts |
-| 3.3 | Test alert delivery | Not Started | - | Dry-run |
-| 4.1 | Write incident runbook | Not Started | - | Operations |
-| 4.2 | Define severity levels | Not Started | - | P0/P1/P2/P3 |
+| 1.1 | Create Sentry project | Not Started | - | Next.js template |
+| 1.2 | Install @sentry/nextjs | Not Started | - | Package + config |
+| 1.3 | Configure DSN in T3 Env | Not Started | - | SENTRY_DSN env var |
+| 1.4 | Setup source maps upload | Not Started | - | Vercel CI integration |
+| 2.1 | Create RootErrorBoundary | Not Started | - | App-level catch-all |
+| 2.2 | Create PageErrorBoundary | Not Started | - | Route-level |
+| 2.3 | Create ComponentErrorBoundary | Not Started | - | Reusable wrapper |
+| 2.4 | Add custom error context | Not Started | - | User/route/action |
+| 3.1 | Configure alert thresholds | Not Started | - | P0: >10/min, P1: >50/h |
+| 3.2 | Setup Slack webhook | Not Started | - | Critical alerts channel |
+| 3.3 | Setup email notifications | Not Started | - | Daily digest + P1 |
+| 3.4 | Test alert delivery | Not Started | - | Simulate errors |
+| 4.1 | Write incident response runbook | Not Started | - | Detection → Postmortem |
+| 4.2 | Define severity levels (P0-P3) | Not Started | - | Response time SLAs |
+| 4.3 | Document escalation procedures | Not Started | - | Contact list + workflow |
 
 ## Dependencies
 
-- **Depends on:** TASK034 (Performance Optimization) - baseline metrics
-- **Blocks:** TASK039 (Production Deployment) - mandatory observability
+- **Depends on:** TASK034 (Performance Optimization) - baseline metrics for anomaly detection
+- **Blocks:** TASK039 (Production Deployment) - mandatory observability before launch
 
 ## Acceptance Criteria
 
 - [ ] Sentry DSN configured in all environments (dev/staging/prod)
 - [ ] Error boundaries implemented (3 levels: root/page/component)
-- [ ] Source maps uploaded to Sentry (CI/CD automated)
-- [ ] Alert thresholds configured (critical: >10/min, high: >50/hour)
+- [ ] Source maps uploaded to Sentry (CI/CD automated via Vercel)
+- [ ] Custom error context captured (user ID, route, action name)
+- [ ] Alert thresholds configured (P0: >10/min, P1: >50/hour)
 - [ ] Notification channels tested (Slack webhook + email)
 - [ ] Incident response runbook written and reviewed
-- [ ] Error severity levels documented (P0/P1/P2/P3)
+- [ ] Error severity levels documented (P0/P1/P2/P3 with SLAs)
+- [ ] Test error successfully captured and alerted in staging
+
+## Estimation
+
+3-4 jours (4 phases × 1 jour)
 
 ## References
 
-- Sentry Next.js docs: https://docs.sentry.io/platforms/javascript/guides/nextjs/
+- Sentry Next.js SDK: https://docs.sentry.io/platforms/javascript/guides/nextjs/
+- Sentry + Vercel integration: https://vercel.com/integrations/sentry
 - React Error Boundaries: https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary
 - Incident response best practices: https://response.pagerduty.com/
+- Error boundary patterns: https://kentcdodds.com/blog/use-react-error-boundary-to-handle-errors-in-react
 
 ## Progress Log
 
-### 2026-01-06
-- Task created (critical observability requirement)
-- Estimated effort: 3-4 days
+### 2026-01-05
+- Task created (critical observability requirement for production)
+
+### 2026-01-13
+- Task documentation completed with full implementation plan
+- Estimated effort: 3-4 days across 4 phases
 ```
 
 ---
@@ -631,7 +668,7 @@ graph TD
 
 **Ordre d'exécution recommandé** :
 
-```
+```bash
 TASK036 (finalize) → TASK050 → TASK051 → TASK034 → TASK031 → TASK024 → TASK023 → TASK053 → TASK047
 → TASK037 → TASK038 → TASK039 → TASK040
 ```

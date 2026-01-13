@@ -63,9 +63,9 @@ Error monitoring strategy must cover 4 layers:
 
 - Setup span deduplication (avoid duplicates with browserTracingIntegration):
 
-```typescript
-shouldCreateSpanForRequest: (url) => !url.startsWith(`${SUPABASE_URL}/rest`)
-```
+  ```typescript
+  shouldCreateSpanForRequest: (url) => !url.startsWith(`${SUPABASE_URL}/rest`)
+  ```
 
 - Setup source maps upload in CI/CD (Vercel integration)
 - Add release tagging for version tracking
