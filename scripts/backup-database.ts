@@ -28,7 +28,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { spawn } from "child_process";
-import { createWriteStream, createReadStream, statSync, unlinkSync } from "fs";
+import { createWriteStream, readFileSync, statSync, unlinkSync } from "fs";
 import { createGzip } from "zlib";
 import { pipeline } from "stream/promises";
 import dotenv from "dotenv";
@@ -70,6 +70,10 @@ const ENV = validateEnv();
  */
 async function createDatabaseDump(outputPath: string): Promise<void> {
     console.log("📦 Starting pg_dump (custom format)...");
+    
+    // Log sanitized connection info (hide password)
+    const sanitizedUrl = ENV.dbUrl.replace(/:[^:@]+@/, ':***@');
+    console.log(`   Database: ${sanitizedUrl}`);
 
     return new Promise((resolve, reject) => {
         const pgDump = spawn("pg_dump", [
@@ -110,6 +114,7 @@ async function createDatabaseDump(outputPath: string): Promise<void> {
 
 /**
  * Upload dump to Supabase Storage bucket 'backups'
+ * Uses Buffer instead of Stream for Node.js 18+ compatibility
  */
 async function uploadToStorage(
     filePath: string,
@@ -122,7 +127,8 @@ async function uploadToStorage(
 
     console.log(`📤 Uploading ${fileName} to Storage...`);
 
-    const fileBuffer = createReadStream(filePath);
+    // Read file as Buffer (required for Node.js 18+ fetch compatibility)
+    const fileBuffer = readFileSync(filePath);
     const { data, error } = await supabase.storage
         .from("backups")
         .upload(fileName, fileBuffer, {
