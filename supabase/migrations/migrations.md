@@ -4,6 +4,41 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-01-14 - FEAT: Add Backups Storage Bucket (TASK050)
+
+**Migration**: `20260114152153_add_backups_storage_bucket.sql`
+
+**Sévérité**: 🟢 **LOW RISK** - Nouvelle fonctionnalité (pas de modification existante)
+
+**Source**: TASK050 - Database Backup & Recovery Strategy
+
+**Ajouts**:
+
+1. **Bucket Storage `backups`**:
+   - Bucket privé (public = false)
+   - Limite: 500 MB par fichier
+   - Accès: service_role uniquement
+
+2. **3 Politiques RLS Storage**:
+   - `service_role can upload backups` (INSERT)
+   - `service_role can read backups` (SELECT)
+   - `service_role can delete backups` (DELETE)
+
+**Validation**:
+
+- ✅ Migration appliquée sur production: 2026-01-14
+- ✅ Workflow GitHub Actions testé avec succès
+- ✅ Premier backup créé et uploadé
+
+**Fichiers Associés**:
+
+- Script: `scripts/backup-database.ts`
+- Workflow: `.github/workflows/backup-database.yml`
+- Schema déclaratif: `supabase/schemas/02c_storage_buckets.sql`
+- Runbook: `memory-bank/tasks/TASK050_RUNBOOK_PITR_restore.md`
+
+---
+
 ### 2026-01-11 - FIX: Restore medias.folder_id After Accidental Drop
 
 **Migration**: `20260111120000_restore_medias_folder_id_final.sql`

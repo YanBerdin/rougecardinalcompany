@@ -146,6 +146,66 @@ psql "<PRODUCTION_DB_URL>" -f scripts/check_unused_indexes.sql
 
 ---
 
+### 💾 Backup & Recovery (TASK050)
+
+#### backup-database.ts (TypeScript) ✅ OPÉRATIONNEL
+
+**Description**: Script de sauvegarde automatisée de la base de données. Exécute pg_dump, compresse avec gzip, et upload vers Supabase Storage (bucket `backups`). Inclut rotation automatique des anciens backups (conserve les 4 derniers).
+
+**Utilisation**:
+
+```bash
+# Exécution manuelle
+pnpm exec tsx scripts/backup-database.ts
+
+# Via GitHub Actions (automatique chaque dimanche à 3h UTC)
+# Voir .github/workflows/backup-database.yml
+```
+
+**Configuration Requise**:
+
+```bash
+# IMPORTANT: Utiliser le connection pooler (port 6543)
+SUPABASE_DB_URL=postgresql://postgres.PROJECT_REF:[password]@aws-0-eu-west-3.pooler.supabase.com:6543/postgres
+SUPABASE_SECRET_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+```
+
+**Secrets GitHub Actions** (3 requis):
+
+| Secret | Description |
+| ------ | ----------- |
+| `SUPABASE_DB_URL` | URL connection pooler (port 6543, PAS 5432) |
+| `SUPABASE_SECRET_KEY` | Service role key |
+| `NEXT_PUBLIC_SUPABASE_URL` | URL du projet Supabase |
+
+**Format du backup**:
+
+- Nom: `backup-YYYYMMDD-HHMMSS.dump.gz`
+- Format: pg_dump custom + gzip compression (level 9)
+- Destination: bucket `backups` (private, service_role only)
+
+**Workflow GitHub Actions**:
+
+- **Fichier**: `.github/workflows/backup-database.yml`
+- **Schedule**: Chaque dimanche à 03:00 UTC (`0 3 * * 0`)
+- **Trigger manuel**: Possible via Actions UI
+- **Rétention**: 4 derniers backups conservés
+
+**Points clés d'implémentation**:
+
+- ✅ Utilise `readFileSync` (Buffer) au lieu de `createReadStream` (Stream) pour compatibilité Node.js 18+
+- ✅ Pas de dépendance T3 Env (validation manuelle des env vars)
+- ✅ Connection pooler obligatoire pour GitHub Actions (port 6543)
+
+**Restauration**:
+
+Voir le runbook complet: `memory-bank/tasks/TASK050_RUNBOOK_PITR_restore.md`
+
+**Contexte**: Créé pour TASK050 (Database Backup & Recovery Strategy). Première exécution réussie: 2026-01-14.
+
+---
+
 ### 🧪 Tests DAL (Data Access Layer)
 
 #### test-team-server-actions.ts (TypeScript) ✅ RECOMMANDÉ

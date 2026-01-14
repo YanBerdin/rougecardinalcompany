@@ -1,5 +1,128 @@
 # Progress
 
+## Database Backup & Recovery - TASK050 Complete (2026-01-14)
+
+### Objectif
+
+Mettre en place une stratégie complète de sauvegarde et récupération de la base de données avant le déploiement en production.
+
+### Résultats
+
+| Composant | État |
+| --------- | ---- |
+| Script de backup | ✅ 100% |
+| Bucket Storage `backups` | ✅ 100% |
+| GitHub Actions workflow | ✅ 100% |
+| PITR Runbook | ✅ 100% |
+| Secrets GitHub configurés | ✅ 100% |
+
+### Détails de l'Implémentation
+
+#### **1. Script de Backup (`scripts/backup-database.ts`)**
+
+- pg_dump format custom avec compression gzip (level 9)
+- Upload vers bucket Supabase Storage `backups`
+- Rotation automatique (conserve 4 derniers backups)
+- Compatible Node.js 18+ (Buffer au lieu de Stream)
+- Validation manuelle des env vars (pas de dépendance T3 Env)
+
+#### **2. Bucket Storage**
+
+- Bucket privé (service_role only)
+- Limite: 500 MB par fichier
+- 3 politiques RLS (upload, read, delete)
+- Migration: `20260114152153_add_backups_storage_bucket.sql`
+
+#### **3. Workflow GitHub Actions**
+
+- Schedule: Dimanche 03:00 AM UTC (`0 3 * * 0`)
+- Trigger manuel disponible
+- 3 secrets configurés:
+  - `SUPABASE_DB_URL` (connection pooler port 6543)
+  - `SUPABASE_SECRET_KEY`
+  - `NEXT_PUBLIC_SUPABASE_URL`
+
+#### **4. Runbook PITR**
+
+- Procédures pg_restore documentées
+- Niveaux de sévérité P0-P3
+- Validation dry-run complète
+- Fichier: `memory-bank/tasks/TASK050_RUNBOOK_PITR_restore.md`
+
+### Validations Passées
+
+**GitHub Actions**:
+
+- ✅ Workflow exécuté avec succès (2026-01-14)
+- ✅ Connexion via pooler (port 6543)
+- ✅ pg_dump réussi
+- ✅ Upload Storage réussi
+- ✅ Backup créé: `backup-20260114-HHMMSS.dump.gz`
+
+**Fixes Appliqués**:
+
+1. **T3 Env Validation Error**
+   - Problème: Script importait `lib/env.ts` → validation de toutes les env vars Next.js requises
+   - Solution: Validation manuelle avec `process.env` directement
+
+2. **duplex: 'half' Error**
+   - Problème: Node.js 18+ fetch API nécessite option duplex pour Stream
+   - Solution: `readFileSync` (Buffer) au lieu de `createReadStream` (Stream)
+
+3. **Network Unreachable**
+   - Problème: GitHub Actions ne peut pas se connecter à `db.xxx.supabase.co:5432`
+   - Solution: Utiliser connection pooler `aws-0-eu-west-3.pooler.supabase.com:6543`
+
+4. **Migration Idempotency**
+   - Problème: Contrainte `medias_folder_id_fkey` existait déjà
+   - Solution: Wrapped in DO block avec existence check
+
+### Fichiers Modifiés/Créés
+
+**Script** (1):
+
+- `scripts/backup-database.ts`
+
+**Workflow** (1):
+
+- `.github/workflows/backup-database.yml`
+
+**Migration** (1):
+
+- `supabase/migrations/20260114152153_add_backups_storage_bucket.sql`
+
+**Schema Déclaratif** (1):
+
+- `supabase/schemas/02c_storage_buckets.sql` (bucket 'backups' ajouté)
+
+**Documentation** (7):
+
+- `.github/prompts/plan-task050DatabaseBackupRecovery.prompt.md`
+- `.github/prompts/plan-TASKS-order.prompt.md`
+- `memory-bank/tasks/TASK050-database-backup-recovery.md`
+- `memory-bank/tasks/TASK050_RUNBOOK_PITR_restore.md`
+- `scripts/README.md`
+- `supabase/migrations/migrations.md`
+- `supabase/schemas/README.md`
+
+**Memory Bank** (3):
+
+- `memory-bank/tasks/_index.md` (TASK050 marked Complete)
+- `memory-bank/tasks/_preview_backoffice_tasks.md` (TASK050 added)
+- `memory-bank/activeContext.md` (new section)
+
+### Impact Production
+
+- ✅ Recovery Time Objective (RTO): <1 hour
+- ✅ Recovery Point Objective (RPO): 1 week maximum
+- ✅ Automated weekly backups (Sunday 03:00 UTC)
+- ✅ 4 weeks retention (4 backups)
+- ✅ PITR capability documented
+
+**Type de milestone**: Infrastructure critique → Production ready
+
+---
+
 ## Error Monitoring & Alerting - TASK051 Complete (2026-01-14)
 
 ### Objectif

@@ -1,6 +1,69 @@
 # Active Context
 
-**Current Focus (2026-01-14)**: ✅ Error Monitoring & Alerting Production Ready (TASK051)
+**Current Focus (2026-01-14)**: ✅ Database Backup & Recovery Production Ready (TASK050 + TASK051)
+
+---
+
+## ✅ TASK050 Complete (2026-01-14)
+
+### Database Backup & Recovery Strategy - Production Ready
+
+**Status**: ✅ Complete - All 4 components operational  
+**Workflow**: `.github/workflows/backup-database.yml`  
+**Next Scheduled Run**: Sunday 2026-01-19 03:00 UTC
+
+**Components Delivered**:
+
+1. **Backup Script** (`scripts/backup-database.ts`)
+   - ✅ pg_dump custom format with gzip compression (level 9)
+   - ✅ Upload to Supabase Storage bucket `backups`
+   - ✅ Automatic rotation (keeps last 4 backups)
+   - ✅ Node.js 18+ compatible (Buffer-based upload)
+
+2. **Storage Bucket** (`backups`)
+   - ✅ Private bucket (service_role only access)
+   - ✅ 500 MB file size limit
+   - ✅ 3 RLS policies (upload, read, delete)
+   - ✅ Migration: `20260114152153_add_backups_storage_bucket.sql`
+
+3. **GitHub Actions Workflow**
+   - ✅ Weekly schedule: Sunday 03:00 AM UTC (`0 3 * * 0`)
+   - ✅ Manual trigger available
+   - ✅ 3 secrets configured: `SUPABASE_DB_URL`, `SUPABASE_SECRET_KEY`, `NEXT_PUBLIC_SUPABASE_URL`
+   - ✅ Connection pooler configuration (port 6543, NOT 5432)
+
+4. **PITR Restoration Runbook**
+   - ✅ Complete runbook: `memory-bank/tasks/TASK050_RUNBOOK_PITR_restore.md`
+   - ✅ pg_restore procedures documented
+   - ✅ Severity levels (P0-P3) defined
+
+**Critical Implementation Details**:
+
+- **Connection Pooler**: MUST use port 6543 for GitHub Actions
+
+  ```bash
+  postgresql://postgres.PROJECT_REF:[password]@aws-0-eu-west-3.pooler.supabase.com:6543/postgres
+  ```
+
+- **Node.js 18+ Compatibility**: `readFileSync` (Buffer) instead of `createReadStream` (Stream)
+- **T3 Env Bypass**: Script uses `process.env` directly (manual validation) to avoid Next.js dependency in CI
+
+**Validation**:
+
+- ✅ GitHub Actions workflow executed successfully (2026-01-14)
+- ✅ Backup uploaded to Storage: `backup-20260114-HHMMSS.dump.gz`
+- ✅ Connection pooler tested and working
+- ✅ Buffer-based upload working (no duplex error)
+
+**Files Created/Modified**:
+
+- Script: `scripts/backup-database.ts`
+- Workflow: `.github/workflows/backup-database.yml`
+- Migration: `supabase/migrations/20260114152153_add_backups_storage_bucket.sql`
+- Schema: `supabase/schemas/02c_storage_buckets.sql` (bucket 'backups' added)
+- Docs: 7 files updated (plan, RUNBOOK, task, migrations.md, schemas/README.md, scripts/README.md)
+
+**Retention**: 4 weeks (last 4 backups kept)
 
 ---
 

@@ -13,7 +13,6 @@
 ## En Cours
 
 - `TASK047` Extraire `NewsletterSubscriptionSchema` vers `lib/schemas/newsletter.ts`
-- `TASK050` Database Backup & Recovery Strategy (P0) — newly created
 - `TASK053` Data Retention Automation (P1) — newly created
 
 ## En Attente
@@ -72,3 +71,4 @@
 - `TASK037` Admin Views Security Hardening - ✅ Complete on 2026-01-05 (Fixed empty array vulnerability: created admin_views_owner role, transferred ownership of 7 admin views, updated 5 declarative schemas, migration 20260105120000 applied to local + cloud, 3 validation scripts created/updated, 13/13 security tests passed, comprehensive documentation, production ready)
 - `RLS-FIX` RLS WITH CHECK (true) Vulnerabilities - ✅ Complete on 2026-01-06 (Fixed 4 public tables: newsletter email validation + anti-duplicate, contact RGPD consent + fields, audit logs SECURITY DEFINER trigger, analytics event/entity type whitelists; bug event_date fixed; migration 20260106190617 applied local + cloud; 13/13 tests passed)
 - `TASK051` Error Monitoring & Alerting (P0) - ✅ Complete on 2026-01-14 (4 phases: Sentry Integration (DSN + 4 config files + Supabase integration), Error Boundaries (3 levels + error.tsx), Alert Configuration (P0/P1 rules + email notifications tested <2min), Incident Response (runbook + severity levels); SENTRY_AUTH_TOKEN configured in GitHub secrets; production-ready)
+- `TASK050` Database Backup & Recovery Strategy (P0) - ✅ Complete on 2026-01-14 (4 components: backup-database.ts script with pg_dump + gzip compression, Storage bucket 'backups' with RLS policies, GitHub Actions weekly workflow (Sunday 3:00 AM UTC), PITR restoration runbook; Connection pooler port 6543 configuration, Node.js 18+ Buffer compatibility, rotation keeps 4 backups; migration 20260114152153, workflow tested successfully, 3 GitHub secrets configured, production-ready)

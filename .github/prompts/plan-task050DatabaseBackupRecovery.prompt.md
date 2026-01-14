@@ -1,5 +1,7 @@
 # Plan : TASK050 - Stratégie Backup & Recovery (Final)
 
+**Status**: ✅ **COMPLETED** (2026-01-14)
+
 **TL;DR** : Exports hebdomadaires `pg_dump` via GitHub Actions, stockés dans bucket privé Supabase Storage avec rétention 4 semaines, notifications d'échec par email GitHub. Tests dry-run sur instance locale.
 
 ## Steps
@@ -45,10 +47,13 @@
 
 ## Secrets GitHub Requis
 
-| Secret | Description |
-|--------|-------------|
-| `SUPABASE_DB_URL` | `postgresql://postgres:[password]@db.yvtrlvmbofklefxcxrzv.supabase.co:5432/postgres` |
-| `SUPABASE_SERVICE_ROLE_KEY` | Clé service-role pour upload Storage |
+| Secret | Description | Status |
+|--------|-------------|--------|
+| `SUPABASE_DB_URL` | `postgresql://postgres.yvtrlvmbofklefxcxrzv:[password]@aws-0-eu-west-3.pooler.supabase.com:6543/postgres` | ✅ Configuré |
+| `SUPABASE_SECRET_KEY` | Clé service-role pour upload Storage | ✅ Configuré |
+| `NEXT_PUBLIC_SUPABASE_URL` | URL du projet Supabase | ✅ Configuré |
+
+> **Note**: Utiliser l'URL du **connection pooler** (port 6543) pour contourner les restrictions réseau GitHub Actions.
 
 ## Fichiers à Créer/Modifier
 
