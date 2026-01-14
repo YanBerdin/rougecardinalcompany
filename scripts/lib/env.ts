@@ -23,6 +23,9 @@ dotenv.config({ path: join(__dirname, "..", "..", ".env.local") });
 const scriptEnvSchema = z.object({
     NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
     SUPABASE_SECRET_KEY: z.string().min(1),
+    // Optional: for backup scripts
+    SUPABASE_DB_URL: z.string().url().optional(),
+    TEST_DB_URL: z.string().url().optional(),
 });
 
 type ScriptEnv = z.infer<typeof scriptEnvSchema>;
@@ -31,6 +34,8 @@ function validateScriptEnv(): ScriptEnv {
     const result = scriptEnvSchema.safeParse({
         NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
         SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
+        SUPABASE_DB_URL: process.env.SUPABASE_DB_URL,
+        TEST_DB_URL: process.env.TEST_DB_URL,
     });
 
     if (!result.success) {
