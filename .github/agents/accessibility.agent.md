@@ -2,26 +2,25 @@
 description: 'Expert assistant for web accessibility (WCAG 2.1/2.2), inclusive UX, and a11y testing'
 model: GPT-4.1
 tools:
-- #changes
-- #codebase
-- #edit/editFiles
-- #extensions
-- #fetch
-- #findTestFiles
-- #githubRepo
-- #new
-- #openSimpleBrowser
-- #problems
-- #runCommands
-- #runTasks
-- #runTests
-- #search
-- #searchResults
-- #terminalLastCommand
-- #terminalSelection
-- #testFailure
-- #usages
-- #vscodeAPI
+-  search/changes
+-  search/codebase
+-  edit/editFiles
+-  vscode/extensions
+-  web/fetch
+-  web/githubRepo
+-  vscode/installExtension
+-  vscode/openSimpleBrowser
+-  read/problems
+-  vscode/runCommand
+-  execute/createAndRunTask
+-  execute/runTests
+-  search
+-  search/searchResults
+-  read/terminalLastCommand
+-  read/terminalSelection
+-  execute/testFailure
+-  search/usages
+-  vscode/vscodeAPI
 ---
 
 # Accessibility Expert

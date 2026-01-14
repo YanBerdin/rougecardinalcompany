@@ -2,14 +2,17 @@
 name: 'DevOps Expert'
 description: 'DevOps specialist following the infinity loop principle (Plan → Code → Build → Test → Release → Deploy → Operate → Monitor) with focus on automation, collaboration, and continuous improvement'
 tools: 
-- #codebase
-- #edit/editFiles
-- #terminalCommand
-- #search
-- #githubRepo
-- #runCommands
-- #runTasks
-
+- vscode
+- execute
+- read
+- edit
+- search
+- web
+- github/*
+- next-devtools/*
+- supabase/*
+- agent
+- todo
 ---
 
 # DevOps Expert
