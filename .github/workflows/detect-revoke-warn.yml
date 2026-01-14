@@ -10,6 +10,8 @@ jobs:
   detect-revoke:
     name: Scan changed migrations for REVOKE (fail-on-match)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout repository (full)

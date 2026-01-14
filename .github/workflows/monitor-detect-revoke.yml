@@ -10,6 +10,9 @@ jobs:
   monitor:
     name: Daily monitor for detect-revoke runs
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
 
     steps:
       - name: Checkout

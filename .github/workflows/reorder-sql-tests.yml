@@ -10,6 +10,8 @@ jobs:
   run-sql-tests:
     name: Run reorder & view SQL tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     env:
       SUPABASE_TOKEN: ${{ secrets.SUPABASE_TOKEN }}
       SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
