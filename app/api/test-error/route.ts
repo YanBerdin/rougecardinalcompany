@@ -1,6 +1,7 @@
+/*TODO: ⚠️ Remove this endpoint before production ⚠️
 import * as Sentry from "@sentry/nextjs";
 import { NextRequest, NextResponse } from "next/server";
-
+*/
 /**
  * Test endpoint for Sentry alert validation
  * 
@@ -13,6 +14,7 @@ import { NextRequest, NextResponse } from "next/server";
  * 
  * ⚠️ WARNING: Remove this endpoint before production deployment!
  */
+/*
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const count = parseInt(searchParams.get("count") || "1");
@@ -84,7 +86,7 @@ export async function GET(request: NextRequest) {
         );
     }
 }
-
+*/
 /**
  * POST endpoint for batch error testing
  * 
@@ -96,6 +98,7 @@ export async function GET(request: NextRequest) {
  *   "delay": 100
  * }
  */
+/*
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
@@ -155,3 +158,4 @@ export async function POST(request: NextRequest) {
         );
     }
 }
+*/
