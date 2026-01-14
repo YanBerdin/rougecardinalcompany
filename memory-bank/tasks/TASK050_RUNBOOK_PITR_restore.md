@@ -50,7 +50,7 @@ Si PITR est désactivé, prenez immédiatement un dump logique pour pouvoir rest
 Utilisez `pg_dump` en vous basant sur l'URL de connexion (dans `.env.local` : `TEST_DB_URL` ou votre `SUPABASE_DB_URL`). Exemple :
 
 ```bash
-export DATABASE_URL="postgresql://postgres:password@db.yvtrlvmbofklefxcxrzv.supabase.co:5432/postgres"
+export DATABASE_URL="postgresql://postgres:password@db.yvtrlvmijuufklefxcxrzv.supabase.co:5432/postgres"
 pg_dump --format=custom --file=backup_$(date -u +%Y%m%dT%H%M%SZ).dump "$DATABASE_URL"
 ```
 
