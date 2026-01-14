@@ -108,7 +108,8 @@ async function checkAdminStatus() {
   console.log("\n" + "=".repeat(60));
   console.log("📝 Résumé:");
   console.log("=".repeat(60));
-  console.log(`Service Role: ${serviceRoleKey.substring(0, 20)}...`);
+  // console.log(`Service Role: ${serviceRoleKey.substring(0, 20)}...`);
+  console.log(`Service Role: Configuré ✅`);
   console.log(
     `Accès vues admin: ${!dashboardError && !analyticsError ? "OK ✅" : "BLOQUÉ ❌"}`
   );
