@@ -1,6 +1,69 @@
 # Active Context
 
-**Current Focus (2026-01-11)**: ✅ Database Reset Fix - medias.folder_id Restoration
+**Current Focus (2026-01-14)**: ✅ Error Monitoring & Alerting Production Ready (TASK051)
+
+---
+
+## ✅ TASK051 Complete (2026-01-14)
+
+### Error Monitoring & Alerting - Production Ready
+
+**Status**: ✅ Complete - All 4 phases validated  
+**Sentry Project**: `rouge-cardinal-test` (Organization: `none-a26`)  
+**Dashboard**: https://none-a26.sentry.io/
+
+**Phases Completed**:
+
+1. **Phase 1: Sentry Integration** (2026-01-13)
+   - ✅ DSN configured: `https://c15837983554fbbd57b4de964d3deb46@o4510703440822272.ingest.de.sentry.io/4510703730425936`
+   - ✅ 4 config files: client, server, edge, instrumentation
+   - ✅ Supabase integration with span deduplication
+   - ✅ Source maps upload configured (next.config.ts)
+
+2. **Phase 2: Error Boundaries** (2026-01-13)
+   - ✅ RootErrorBoundary (app-level)
+   - ✅ PageErrorBoundary (route-level)
+   - ✅ ComponentErrorBoundary (reusable)
+   - ✅ app/error.tsx + app/global-error.tsx
+
+3. **Phase 3: Alert Configuration** (2026-01-14)
+   - ✅ P0 Alert Rule: >10 errors/min → Email (Critical)
+   - ✅ Email notifications tested: <2min delivery
+   - ✅ Test endpoint: `/api/test-error` (15 errors → P0 triggered)
+   - ✅ Slack integration skipped (user preference: email-only)
+   - ✅ Daily Digest configured with Low severity
+
+4. **Phase 4: Incident Response** (2026-01-13)
+   - ✅ Runbook created: `doc/sentry/incident-response-runbook.md`
+   - ✅ Severity levels (P0-P3) with SLAs
+   - ✅ Escalation procedures documented
+
+**GitHub Secrets**:
+
+- ✅ `SENTRY_AUTH_TOKEN` configured (2026-01-14)
+  - Generated in Sentry → Settings → Auth Tokens
+  - Scopes: `project:releases`, `org:read`
+  - Added to GitHub → Settings → Secrets and variables → Actions
+  - Used in `.github/workflows/*.yml` for release tracking
+
+**Files Created**:
+
+- Config: `sentry.client.config.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`, `instrumentation.ts`
+- Error Boundaries: `components/error-boundaries/` (3 components + index)
+- Utils: `lib/sentry/capture-error.ts`, `lib/sentry/index.ts`
+- Pages: `app/error.tsx`, `app/global-error.tsx`
+- Test: `app/api/test-error/route.ts`
+- Docs: `doc/sentry/sentry-alerts-configuration.md`, `doc/sentry/sentry-testing-guide.md`, `doc/sentry/incident-response-runbook.md`
+
+**Production Readiness**:
+
+- ✅ Error capture working (3 errors in dashboard)
+- ✅ P0 alert tested and validated
+- ✅ Email delivery <2min
+- ✅ Source maps configured for CI/CD
+- 🧹 **TODO before production**: Remove/disable `/api/test-error`, filter test errors (`tag:test=true`)
+
+**Blocks Resolved**: TASK039 (Production Deployment) now unblocked
 
 ---
 

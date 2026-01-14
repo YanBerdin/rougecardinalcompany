@@ -29,6 +29,7 @@ Ce fichier est une prévisualisation consolidée des 20 tâches générées à p
 | TASK039 | Production Deployment       | Pending | 2025-10-16 | 2025-10-16 | CI/CD, env setup, monitoring, migrations                 | `memory-bank/tasks/TASK039-production-deployment.md`       | #19 |
 | TASK040 | Documentation               | Pending | 2025-10-16 | 2025-10-16 | Admin guides, technical docs and runbooks                | `memory-bank/tasks/TASK040-documentation.md`               | #20 |
 | TASK046 | Rate-limiting handlers contact/newsletter | Completed | 2025-12-13 | 2026-01-04 | Add rate-limiting to public handlers to prevent abuse (contact/newsletter) | `memory-bank/tasks/completed-tasks/TASK046-rate-limiting-handlers.md` | - |
+| TASK051 | Error Monitoring & Alerting | Completed | 2025-10-16 | 2026-01-14 | Sentry integration, error boundaries, P0/P1 alerts, incident response runbook | `memory-bank/tasks/TASK051-error-monitoring-alerting.md` | - |
 
 ---
 

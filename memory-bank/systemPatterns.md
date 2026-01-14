@@ -111,6 +111,114 @@ const apiKey = process.env.RESEND_API_KEY;
 
 - `lib/site-config.ts` — Utilise `env.EMAIL_FROM`, `env.NEXT_PUBLIC_SITE_URL`
 
+### Sentry Error Monitoring Pattern (Jan 2026)
+
+**Pattern complet de monitoring d'erreurs** avec alertes P0/P1, error boundaries multi-niveaux et incident response.
+
+#### Configuration Multi-Runtime
+
+```typescript
+// sentry.client.config.ts (Browser)
+import * as Sentry from "@sentry/nextjs";
+import { supabaseIntegration } from "@supabase/sentry-js-integration";
+import { env } from "@/lib/env";
+
+Sentry.init({
+  dsn: env.NEXT_PUBLIC_SENTRY_DSN,
+  environment: env.NEXT_PUBLIC_SENTRY_ENVIRONMENT,
+  tracesSampleRate: 0.1,
+  replaysSessionSampleRate: 0.1,
+  integrations: [
+    supabaseIntegration(SupabaseClient, Sentry, { tracing: true }),
+  ],
+});
+
+// sentry.server.config.ts (Node.js)
+// sentry.edge.config.ts (Edge Runtime)
+// Similar configuration adapted per runtime
+```
+
+#### Error Boundary Hierarchy
+
+```typescript
+// 3 levels: Root → Page → Component
+
+// 1. Root Error Boundary (app-level)
+<RootErrorBoundary>
+  <ThemeProvider>
+    {children}
+  </ThemeProvider>
+</RootErrorBoundary>
+
+// 2. Page Error Boundary (route-level)
+<PageErrorBoundary route="/admin/team">
+  <TeamManagement />
+</PageErrorBoundary>
+
+// 3. Component Error Boundary (reusable)
+<ComponentErrorBoundary name="UserList">
+  <UserList users={users} />
+</ComponentErrorBoundary>
+```
+
+#### Custom Error Context
+
+```typescript
+// lib/sentry/capture-error.ts
+export function captureWithContext(
+  error: Error,
+  context: {
+    userId?: string;
+    route?: string;
+    action?: string;
+    metadata?: Record<string, unknown>;
+  }
+) {
+  Sentry.withScope((scope) => {
+    if (context.userId) scope.setUser({ id: context.userId });
+    if (context.route) scope.setTag("route", context.route);
+    if (context.action) scope.setTag("action", context.action);
+    if (context.metadata) scope.setContext("metadata", context.metadata);
+    
+    Sentry.captureException(error);
+  });
+}
+```
+
+#### Alert Configuration
+
+| Alert | Condition | Severity | Notification | Response Time |
+| ------- | ----------- | ---------- | -------------- | --------------- |
+| **P0** | >10 errors/min | Critical | Email <2min | 15 min |
+| **P1** | >50 errors/hour | Warning | Email | 1 hour |
+| Daily Digest | >1 error/24h | Low | Email | Next day |
+
+#### Production Readiness Checklist
+
+- ✅ Sentry DSN configuré via T3 Env
+- ✅ 4 runtime configs (client, server, edge, instrumentation)
+- ✅ Supabase integration avec span deduplication
+- ✅ Source maps upload (next.config.ts)
+- ✅ Error boundaries (3 niveaux)
+- ✅ P0 alert tested (<2min email delivery)
+- ✅ GitHub SENTRY_AUTH_TOKEN configured
+- ✅ Incident response runbook documented
+
+#### Fichiers impactés
+
+- `sentry.client.config.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`, `instrumentation.ts` — Core configs
+- `components/error-boundaries/` — React error boundaries (Root, Page, Component)
+- `lib/sentry/capture-error.ts` — Custom context helpers
+- `app/error.tsx`, `app/global-error.tsx` — Next.js error pages
+- `doc/sentry/` — Alert configuration, testing guide, incident response runbook
+
+#### Références
+
+- **Documentation** : `doc/sentry/sentry-alerts-configuration.md`
+- **Tests** : `doc/sentry/sentry-testing-guide.md`
+- **Runbook** : `doc/sentry/incident-response-runbook.md`
+- **TASK** : `memory-bank/tasks/TASK051-error-monitoring-alerting.md`
+
 ### JSON Operator Safe Field Access Pattern (Jan 2026)
 
 **Pattern pour trigger functions génériques** supportant tables avec différentes colonnes de clé primaire (id, key, uuid).

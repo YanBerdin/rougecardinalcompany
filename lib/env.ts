@@ -34,6 +34,14 @@ export const env = createEnv({
     TEST_DB_URL: z.string().url().optional(),
 
     // ============================================================================
+    // 📊 ERROR MONITORING (Sentry - Optional)
+    // ============================================================================
+    SENTRY_DSN: z.string().url().optional(),
+    SENTRY_ORG: z.string().optional(),
+    SENTRY_PROJECT: z.string().optional(),
+    SENTRY_AUTH_TOKEN: z.string().optional(),
+
+    // ============================================================================
     // 🤖 MCP TOOLS & CI/CD (External tooling only)
     // ============================================================================
     // These variables are used by MCP Supabase tools and CI/CD pipelines.
@@ -59,6 +67,7 @@ export const env = createEnv({
     NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY: z.string().min(1),
     NEXT_PUBLIC_SITE_URL: z.string().url(),
+    NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
   },
 
   /**
@@ -74,6 +83,10 @@ export const env = createEnv({
     EMAIL_DEV_REDIRECT: process.env.EMAIL_DEV_REDIRECT,
     EMAIL_DEV_REDIRECT_TO: process.env.EMAIL_DEV_REDIRECT_TO,
     TEST_DB_URL: process.env.TEST_DB_URL,
+    SENTRY_DSN: process.env.SENTRY_DSN,
+    SENTRY_ORG: process.env.SENTRY_ORG,
+    SENTRY_PROJECT: process.env.SENTRY_PROJECT,
+    SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
     SUPABASE_PROJECT_REF: process.env.SUPABASE_PROJECT_REF,
     SUPABASE_ACCESS_TOKEN: process.env.SUPABASE_ACCESS_TOKEN,
     GITHUB_TOKEN: process.env.GITHUB_TOKEN,
@@ -85,6 +98,7 @@ export const env = createEnv({
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY:
       process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY,
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+    NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
   },
 
   /**
