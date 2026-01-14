@@ -62,20 +62,10 @@ jobs:
       - name: Execute backup script
         run: pnpm exec tsx scripts/backup-database.ts
         env:
-          # Backup-specific environment variables
+          # Only 3 environment variables needed (no T3 Env dependency)
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY }}
-          
-          # Required dummy values for T3 Env validation
-          NEXT_PUBLIC_SITE_URL: "https://rougecardinal.example"
-          RESEND_API_KEY: "re_dummy_backup_workflow"
-          EMAIL_FROM: "backup@example.com"
-          EMAIL_CONTACT: "contact@example.com"
-          
-          # Skip T3 Env validation - we only need backup-related vars
-          SKIP_ENV_VALIDATION: "1"
       
       - name: Report success
         if: success()

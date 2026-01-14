@@ -19,6 +19,11 @@
  * OUTPUTS:
  *   - backup-YYYYMMDD-HHMMSS.dump.gz in bucket 'backups'
  *   - Console logs with timestamp, size, upload status
+ * 
+ * NOTE:
+ *   This script uses process.env directly instead of T3 Env to avoid
+ *   validation issues in GitHub Actions context where only backup-related
+ *   variables are available.
  */
 
 import { createClient } from "@supabase/supabase-js";
@@ -27,21 +32,43 @@ import { createWriteStream, createReadStream, statSync, unlinkSync } from "fs";
 import { createGzip } from "zlib";
 import { pipeline } from "stream/promises";
 import dotenv from "dotenv";
-import { env } from "../lib/env";
 
+// Load .env.local for local execution
 dotenv.config({ path: ".env.local" });
+
+/**
+ * Validate required environment variables
+ * Using process.env directly to avoid T3 Env validation in CI context
+ */
+function validateEnv(): {
+    dbUrl: string;
+    supabaseUrl: string;
+    secretKey: string;
+} {
+    const dbUrl = process.env.SUPABASE_DB_URL ?? process.env.TEST_DB_URL;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const secretKey = process.env.SUPABASE_SECRET_KEY;
+
+    const missing: string[] = [];
+
+    if (!dbUrl) missing.push("SUPABASE_DB_URL or TEST_DB_URL");
+    if (!supabaseUrl) missing.push("NEXT_PUBLIC_SUPABASE_URL");
+    if (!secretKey) missing.push("SUPABASE_SECRET_KEY");
+
+    if (missing.length > 0) {
+        throw new Error(`Missing required environment variables: ${missing.join(", ")}`);
+    }
+
+    return { dbUrl: dbUrl!, supabaseUrl: supabaseUrl!, secretKey: secretKey! };
+}
+
+// Validate and get environment variables
+const ENV = validateEnv();
 
 /**
  * Execute pg_dump and compress output
  */
 async function createDatabaseDump(outputPath: string): Promise<void> {
-    // ✅ T3 Env: Use validated env object instead of process.env
-    const dbUrl = env.SUPABASE_DB_URL ?? env.TEST_DB_URL;
-
-    if (!dbUrl) {
-        throw new Error("SUPABASE_DB_URL or TEST_DB_URL environment variable required");
-    }
-
     console.log("📦 Starting pg_dump (custom format)...");
 
     return new Promise((resolve, reject) => {
@@ -50,7 +77,7 @@ async function createDatabaseDump(outputPath: string): Promise<void> {
             "--verbose",
             "--no-owner",
             "--no-privileges",
-            dbUrl,
+            ENV.dbUrl,
         ]);
 
         const gzip = createGzip({ level: 9 });
@@ -89,8 +116,8 @@ async function uploadToStorage(
     fileName: string
 ): Promise<void> {
     const supabase = createClient(
-        env.NEXT_PUBLIC_SUPABASE_URL,
-        env.SUPABASE_SECRET_KEY
+        ENV.supabaseUrl,
+        ENV.secretKey
     );
 
     console.log(`📤 Uploading ${fileName} to Storage...`);
@@ -120,8 +147,8 @@ async function uploadToStorage(
  */
 async function rotateOldBackups(): Promise<void> {
     const supabase = createClient(
-        env.NEXT_PUBLIC_SUPABASE_URL,
-        env.SUPABASE_SECRET_KEY
+        ENV.supabaseUrl,
+        ENV.secretKey
     );
 
     console.log("🗑️  Checking for old backups to rotate...");
