@@ -142,7 +142,7 @@ Après avoir configuré les alertes dans Sentry UI, testez :
 - [ ] Test simple : `curl http://localhost:3000/api/test-error`
 - [ ] Erreur visible dans dashboard Sentry
 
-### Phase 2: Intégration Slack
+### Phase 2: Intégration Slack (Non implémenté)
 
 - [ ] Slack integration activée
 - [ ] Webhook configuré pour `#incidents`
