@@ -6,15 +6,34 @@
 alter table public.medias
   add column if not exists folder_id bigint;
 
--- Add foreign key constraint to media_folders
-alter table public.medias
-  add constraint medias_folder_id_fkey
-  foreign key (folder_id) references public.media_folders(id)
-  on delete set null
-  not valid;
+-- Add foreign key constraint to media_folders (idempotent)
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'medias_folder_id_fkey'
+      and conrelid = 'public.medias'::regclass
+  ) then
+    alter table public.medias
+      add constraint medias_folder_id_fkey
+      foreign key (folder_id) references public.media_folders(id)
+      on delete set null
+      not valid;
+  end if;
+end $$;
 
--- Validate the constraint
-alter table public.medias validate constraint medias_folder_id_fkey;
+-- Validate the constraint (if it exists)
+do $$
+begin
+  if exists (
+    select 1 from pg_constraint
+    where conname = 'medias_folder_id_fkey'
+      and conrelid = 'public.medias'::regclass
+      and convalidated = false
+  ) then
+    alter table public.medias validate constraint medias_folder_id_fkey;
+  end if;
+end $$;
 
 -- Add index for performance
 create index if not exists medias_folder_id_idx on public.medias(folder_id);

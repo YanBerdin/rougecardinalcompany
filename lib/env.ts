@@ -34,6 +34,13 @@ export const env = createEnv({
     TEST_DB_URL: z.string().url().optional(),
 
     // ============================================================================
+    // 🗄️ DATABASE BACKUP (TASK050 - GitHub Actions)
+    // ============================================================================
+    // PostgreSQL connection string for pg_dump backups
+    // Only required in CI/CD context, not for Next.js runtime
+    SUPABASE_DB_URL: z.string().url().optional(),
+
+    // ============================================================================
     // 📊 ERROR MONITORING (Sentry - Optional)
     // ============================================================================
     SENTRY_DSN: z.string().url().optional(),
@@ -83,6 +90,7 @@ export const env = createEnv({
     EMAIL_DEV_REDIRECT: process.env.EMAIL_DEV_REDIRECT,
     EMAIL_DEV_REDIRECT_TO: process.env.EMAIL_DEV_REDIRECT_TO,
     TEST_DB_URL: process.env.TEST_DB_URL,
+    SUPABASE_DB_URL: process.env.SUPABASE_DB_URL,
     SENTRY_DSN: process.env.SENTRY_DSN,
     SENTRY_ORG: process.env.SENTRY_ORG,
     SENTRY_PROJECT: process.env.SENTRY_PROJECT,

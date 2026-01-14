@@ -1,0 +1,95 @@
+name: Weekly Database Backup
+
+# TASK050: Automated database backup strategy
+# 
+# SCHEDULE:
+#   - Every Sunday at 3:00 AM UTC
+#   - Manual trigger via workflow_dispatch
+# 
+# STORAGE:
+#   - Uploads to Supabase Storage bucket 'backups'
+#   - Retention: 4 weeks (automated rotation in script)
+# 
+# NOTIFICATIONS:
+#   - GitHub sends email on workflow failure (default)
+#   - Check Actions tab for execution history
+# 
+# REQUIRED SECRETS:
+#   - SUPABASE_DB_URL: PostgreSQL connection string
+#   - SUPABASE_SECRET_KEY: Service role key for Storage upload
+#   - NEXT_PUBLIC_SUPABASE_URL: Supabase project URL
+
+on:
+  schedule:
+    # Every Sunday at 3:00 AM UTC (cron: minute hour day month weekday)
+    - cron: '0 3 * * 0'
+  
+  workflow_dispatch:
+    # Allow manual trigger from GitHub Actions UI
+
+jobs:
+  backup:
+    name: Create Database Backup
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+        contents: read
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Install PostgreSQL client tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-16
+          pg_dump --version
+      
+      - name: Create .env.local from secrets
+        run: |
+          cat > .env.local << EOF
+          SUPABASE_DB_URL=${{ secrets.SUPABASE_DB_URL }}
+          SUPABASE_SECRET_KEY=${{ secrets.SUPABASE_SECRET_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY }}
+          NEXT_PUBLIC_SITE_URL=https://example.com
+          RESEND_API_KEY=dummy
+          EMAIL_FROM=dummy@example.com
+          EMAIL_CONTACT=dummy@example.com
+          EOF
+      
+      - name: Execute backup script
+        run: pnpm exec tsx scripts/backup-database.ts
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      
+      - name: Report success
+        if: success()
+        run: |
+          echo "✅ Backup completed successfully at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          echo "📦 Backup uploaded to Supabase Storage bucket 'backups'"
+          echo "🔄 Old backups rotated (keeping last 4)"
+      
+      - name: Report failure
+        if: failure()
+        run: |
+          echo "❌ Backup failed at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          echo "📧 GitHub will send email notification to repository admins"
+          echo "🔍 Check workflow logs for error details"
+          exit 1

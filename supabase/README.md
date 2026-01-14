@@ -152,3 +152,85 @@ lib/
 ```
 
 Toute logique admin doit passer par le Data Access Layer (`lib/dal/*`) qui utilise `createAdminClient()` de façon sécurisée.
+
+## Backup & Recovery (TASK050)
+
+### Stratégie de sauvegarde automatisée
+
+Le projet implémente une stratégie de backup multi-niveaux :
+
+1. **Content Versioning** (existant) : Triggers sur tables métier pour versioning granulaire
+2. **Weekly Backups** (TASK050) : Dumps PostgreSQL hebdomadaires via GitHub Actions
+
+### Configuration des backups hebdomadaires
+
+**Stockage** : Bucket Supabase Storage `backups` (privé, service_role uniquement)  
+**Fréquence** : Dimanche 3h00 UTC (hebdomadaire)  
+**Rétention** : 4 derniers dumps (4 semaines)  
+**Format** : `pg_dump --format=custom` compressé en gzip
+
+**Fichiers impliqués** :
+
+- `.github/workflows/backup-database.yml` — Workflow GitHub Actions
+- `scripts/backup-database.ts` — Script d'export et upload
+- `supabase/schemas/02c_storage_buckets.sql` — Bucket `backups` avec RLS policies
+- `memory-bank/tasks/TASK050_RUNBOOK_PITR_restore.md` — Runbook de restauration
+
+### Exécution manuelle
+
+```bash
+# Local (nécessite pg_dump v16+)
+pnpm exec tsx scripts/backup-database.ts
+
+# Via GitHub Actions UI
+# Actions → Weekly Database Backup → Run workflow
+```
+
+### Restauration d'un backup
+
+```bash
+# 1. Lister les backups disponibles
+supabase storage list backups
+
+# 2. Télécharger un dump spécifique
+supabase storage download backups/backup-YYYYMMDD-HHMMSS.dump.gz
+
+# 3. Décompresser
+gunzip backup-YYYYMMDD-HHMMSS.dump.gz
+
+# 4. Restaurer sur environnement local/staging
+supabase start  # Local
+pg_restore --verbose --clean --no-owner \
+  --dbname="postgresql://postgres:postgres@localhost:54322/postgres" \
+  backup-YYYYMMDD-HHMMSS.dump
+
+# 5. Valider les données critiques
+psql "postgresql://postgres:postgres@localhost:54322/postgres" -c "
+  select 'spectacles', count(*) from public.spectacles;
+  select 'membres_equipe', count(*) from public.membres_equipe;
+  select 'medias', count(*) from public.medias;
+"
+```
+
+**⚠️ Avertissement** : Ne jamais restaurer directement en production sans test préalable en staging.
+
+### Secrets GitHub requis
+
+Pour que le workflow fonctionne, configurer ces secrets dans Settings → Secrets :
+
+| Secret | Description |
+| -------- | ------------- |
+| `SUPABASE_DB_URL` | `postgresql://postgres:[password]@db.xxx.supabase.co:5432/postgres` |
+| `SUPABASE_SECRET_KEY` | Clé service-role |
+| `NEXT_PUBLIC_SUPABASE_URL` | URL du projet |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY` | Clé publishable |
+
+### Monitoring
+
+- **GitHub Actions** : [Actions tab](https://github.com/yandevpro/rougecardinalcompany/actions/workflows/backup-database.yml)
+- **Notifications** : Email automatique aux admins GitHub en cas d'échec
+- **Durée typique** : 5-10 minutes par backup
+
+### Documentation complète
+
+Voir le runbook complet : `memory-bank/tasks/TASK050_RUNBOOK_PITR_restore.md`

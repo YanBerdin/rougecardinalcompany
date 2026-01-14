@@ -99,6 +99,57 @@ psql "$STAGING_DATABASE_URL" -c "select count(*) from spectacles;"
 psql "$STAGING_DATABASE_URL" -c "select now();"
 ```
 
+### 6) Résultats du test dry-run (À compléter après exécution)
+
+**Date du test**: _À renseigner_  
+**Environnement**: `supabase start` (local development)  
+**Dump testé**: _Nom du fichier backup_YYYYMMDD-HHMMSS.dump.gz_
+
+**Procédure exécutée**:
+
+```bash
+# 1. Télécharger le dump depuis Storage
+supabase storage download --bucket backups backup-YYYYMMDD-HHMMSS.dump.gz
+
+# 2. Décompresser
+gunzip backup-YYYYMMDD-HHMMSS.dump.gz
+
+# 3. Démarrer environnement local
+supabase start
+
+# 4. Restaurer le dump
+pg_restore --verbose --clean --no-owner \
+  --dbname="postgresql://postgres:postgres@localhost:54322/postgres" \
+  backup-YYYYMMDD-HHMMSS.dump
+
+# 5. Valider les données critiques
+psql "postgresql://postgres:postgres@localhost:54322/postgres" << SQL
+select 'spectacles', count(*) from public.spectacles;
+select 'membres_equipe', count(*) from public.membres_equipe;
+select 'medias', count(*) from public.medias;
+select 'communiques_presse', count(*) from public.communiques_presse;
+select 'home_hero_slides', count(*) from public.home_hero_slides;
+SQL
+```
+
+**Résultats attendus**:
+
+| Table | Count local | Count restauré | ✅/❌ |
+| ------- | ------------- | ---------------- | ------- |
+| spectacles | _X_ | _Y_ | À tester |
+| membres_equipe | _X_ | _Y_ | À tester |
+| medias | _X_ | _Y_ | À tester |
+| communiques_presse | _X_ | _Y_ | À tester |
+| home_hero_slides | _X_ | _Y_ | À tester |
+
+**Problèmes rencontrés**: _À documenter_
+
+**Notes**:
+
+- Les counts doivent correspondre au snapshot du dump
+- Vérifier que les RLS policies sont correctement restaurées
+- Valider que les triggers/functions sont fonctionnels
+
 b) Option B : restauration PITR via API (si supporté par le projet)
 
 L'API peut accepter une requête restore-pitr. Exemple (ne pas lancer en production sans vérification) :
@@ -131,7 +182,59 @@ Remplacez `recovery_time_target_unix` par le timestamp Unix ciblé et `target_pr
 - [ ] Runbook et contacts (Supabase support) documentés
 - [ ] Automatiser export périodique supplémentaire si besoin
 
-Notes complémentaires
+### 9) GitHub Actions - Backup automatisé (TASK050)
+
+**Workflow**: `.github/workflows/backup-database.yml`
+
+**Schedule**: Dimanche 3h00 UTC (hebdomadaire)
+
+**Fonctionnement**:
+
+1. Exécute `pg_dump --format=custom` avec compression gzip
+2. Upload vers bucket Supabase Storage `backups`
+3. Rotation automatique : garde les 4 derniers dumps (4 semaines)
+4. Notification email automatique en cas d'échec
+
+**Secrets GitHub requis**:
+
+| Secret | Description | Exemple |
+| -------- | ------------- | --------- |
+| `SUPABASE_DB_URL` | PostgreSQL connection string | `postgresql://postgres:[pwd]@db.xxx.supabase.co:5432/postgres` |
+| `SUPABASE_SECRET_KEY` | Service role key | `eyJhbGc...` |
+| `NEXT_PUBLIC_SUPABASE_URL` | Project URL | `https://xxx.supabase.co` |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY` | Publishable key | `eyJhbGc...` |
+
+**Exécution manuelle**:
+
+```bash
+# Local (requires pg_dump v16+)
+pnpm exec tsx scripts/backup-database.ts
+
+# Via GitHub UI
+# Actions → Weekly Database Backup → Run workflow
+```
+
+**Monitoring**:
+
+- Vérifier exécution : [Actions tab](https://github.com/yandevpro/rougecardinalcompany/actions)
+- Email automatique si échec (admins GitHub)
+- Durée typique : 5-10 minutes
+
+**Récupération d'un backup**:
+
+```bash
+# 1. Lister les backups disponibles
+supabase storage list backups
+
+# 2. Télécharger un dump spécifique
+supabase storage download backups/backup-YYYYMMDD-HHMMSS.dump.gz
+
+# 3. Décompresser et restaurer (voir section 5a ci-dessus)
+gunzip backup-YYYYMMDD-HHMMSS.dump.gz
+pg_restore --clean --no-owner --dbname="$STAGING_URL" backup-YYYYMMDD-HHMMSS.dump
+```
+
+### Notes complémentaires
 
 - `supabase db dump` (CLI) peut être utile pour exports ponctuels mais ne remplace pas PITR.
 - Les APIs de gestion Supabase évoluent : préférez le Dashboard pour l'activation initiale, et utilisez l'API pour automatiser l'inventaire et les vérifications.
