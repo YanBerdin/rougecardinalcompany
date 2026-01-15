@@ -125,27 +125,6 @@ export function LogoCloud({
                     </div>
                 </div>
             </div>
-
-            <style jsx>{`
-        @keyframes infinite-scroll {
-          from {
-            transform: translateX(0);
-          }
-          to {
-            transform: translateX(-50%);
-          }
-        }
-
-        .animate-infinite-scroll {
-          animation: infinite-scroll linear infinite;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .animate-infinite-scroll {
-            animation: none;
-          }
-        }
-      `}</style>
         </section>
     );
 }

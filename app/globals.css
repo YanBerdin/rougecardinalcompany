@@ -759,6 +759,15 @@
   }
 }
 
+@keyframes infinite-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 .animate-fade-in-up {
   animation: fade-in-up 0.6s ease-out;
 }
@@ -769,6 +778,10 @@
 
 .animate-shimmer {
   animation: shimmer 2s infinite;
+}
+
+.animate-infinite-scroll {
+  animation: infinite-scroll linear infinite;
 }
 
 /* Scroll smooth */
