@@ -34,7 +34,7 @@ Reference these guidelines when:
 | 7 | JavaScript Performance | LOW-MEDIUM | `js-` |
 | 8 | Advanced Patterns | LOW | `advanced-` |
 
-## Quick Reference : `./rules/*`
+## Quick Reference from `.github/skills/react-best-practices`
 
 ### 1. Eliminating Waterfalls (CRITICAL)
 
@@ -124,4 +124,7 @@ Each rule file contains:
 
 ## Full Compiled Document
 
-For the complete guide with all rules expanded: `.github/agents/react-best-practices.agent.md`
+For the complete guide with all rules expanded:
+
+- `.github/skills/react-best-practices/rules`
+- `.github/agents/react-best-practices.agent.md`

@@ -29,7 +29,7 @@ Actuellement, le schéma de validation newsletter est défini dans `lib/schemas/
 ### Fichiers impactés
 
 | Fichier | Action |
-|---------|--------|
+| --------- | -------- |
 | `lib/schemas/contact.ts` | Retirer `NewsletterSubscriptionSchema` |
 | `lib/schemas/newsletter.ts` | **Créer** avec le schéma |
 | `lib/schemas/index.ts` | Ajouter export |
@@ -51,7 +51,7 @@ Actuellement, le schéma de validation newsletter est défini dans `lib/schemas/
 ### Subtasks
 
 | ID | Description | Status | Updated | Notes |
-|----|-------------|--------|---------|-------|
+| ---- | ------------- | -------- | --------- | ------- |
 | 1.1 | Créer `lib/schemas/newsletter.ts` | Not Started | - | |
 | 1.2 | Exporter dans `lib/schemas/index.ts` | Not Started | - | |
 | 1.3 | Retirer de `lib/schemas/contact.ts` | Not Started | - | |
