@@ -20,12 +20,10 @@ export async function PartnersContainer() {
   const records = result.success ? result.data : [];
 
   const partners: Partner[] = records.map((r) => ({
-    id: r.id,
+    id: Number(r.id),
     name: r.name,
-    type: "",
-    description: r.description ?? "",
     logo: r.logo_url ?? "",
-    website: r.website_url ?? "#",
+    website: r.website_url ?? undefined,
   }));
 
   return <PartnersView partners={partners} isLoading={false} />;
