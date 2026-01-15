@@ -1,2 +1,2 @@
 export { LogoCloud } from "./LogoCloud";
-export type { Partner } from "./types";
+export type { Partner, LogoCloudProps } from "./types";

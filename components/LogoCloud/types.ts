@@ -14,5 +14,6 @@ export interface LogoCloudProps {
   speed?: "slow" | "normal" | "fast";
   pauseOnHover?: boolean;
   linkable?: boolean;
+  twoRows?: boolean;
   className?: string;
 }

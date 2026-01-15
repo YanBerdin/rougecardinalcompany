@@ -1,37 +1,51 @@
 "use client";
 
-export function PartnersSkeleton() {
-  return (
-    <div className="relative overflow-hidden bg-background">
-      <section className="py-12 md:py-16 lg:py-20">
-        <div className="container mx-auto px-4">
-          {/* En-tête skeleton */}
-          <div className="text-center mb-10 md:mb-14">
-            <div className="h-10 bg-muted animate-pulse rounded mb-4 max-w-md mx-auto" />
-            <div className="h-6 bg-muted animate-pulse rounded max-w-2xl mx-auto" />
-          </div>
-
-          {/* Bande de logos skeleton horizontale */}
-          <div className="relative overflow-hidden">
-            {/* Gradients de masquage */}
-            <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-background to-transparent z-10" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-background to-transparent z-10" />
-
-            {/* Rangée de rectangles animés */}
-            <div className="flex gap-8 md:gap-12 lg:gap-16">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-center flex-shrink-0 backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-xl p-4 animate-pulse"
-                  style={{ minWidth: "150px", maxWidth: "200px", height: "80px" }}
-                >
-                  <div className="w-full h-12 bg-muted rounded" />
-                </div>
-              ))}
+function SkeletonRow() {
+    return (
+        <div className="flex overflow-hidden mb-4 md:mb-6">
+            <div className="flex gap-6">
+                {Array.from({ length: 8 }).map((_, i) => (
+                    <div
+                        key={i}
+                        className="flex items-center justify-center flex-shrink-0 backdrop-blur-sm bg-white/10 dark:bg-black/20 border border-border/30 rounded-xl px-6 py-4 animate-pulse"
+                        style={{ minWidth: "180px", height: "80px" }}
+                    >
+                        <div className="w-full h-12 bg-muted/50 rounded" />
+                    </div>
+                ))}
             </div>
-          </div>
         </div>
-      </section>
-    </div>
-  );
+    );
+}
+
+export function PartnersSkeleton() {
+    return (
+        <section className="relative overflow-hidden bg-background py-16 md:py-20 lg:py-24">
+            {/* En-tête skeleton */}
+            <div className="max-w-7xl mx-auto px-6 text-center mb-12 md:mb-16">
+                <div className="inline-flex h-6 w-32 bg-muted/30 animate-pulse rounded-full mb-6" />
+                <div className="h-12 bg-muted animate-pulse rounded mb-6 max-w-md mx-auto" />
+                <div className="h-6 bg-muted/70 animate-pulse rounded max-w-2xl mx-auto" />
+            </div>
+
+            {/* Marquee skeleton avec masque */}
+            <div
+                className="relative"
+                style={{
+                    maskImage:
+                        "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
+                    WebkitMaskImage:
+                        "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
+                }}
+            >
+                <SkeletonRow />
+                <SkeletonRow />
+            </div>
+
+            {/* Message skeleton */}
+            <div className="text-center mt-10 md:mt-14">
+                <div className="h-4 bg-muted/50 animate-pulse rounded max-w-xs mx-auto" />
+            </div>
+        </section>
+    );
 }

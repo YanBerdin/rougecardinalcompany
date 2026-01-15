@@ -2,8 +2,51 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import type { LogoCloudProps, Partner } from "./types";
+
+interface LogoCardProps {
+    partner: Partner;
+    linkable: boolean;
+    index: number;
+}
+
+function LogoCard({ partner, linkable, index }: LogoCardProps) {
+    const content = (
+        <Image
+            src={partner.logo}
+            alt={partner.name}
+            width={partner.width || 150}
+            height={partner.height || 60}
+            className="w-auto h-10 md:h-12 lg:h-14 object-contain"
+            loading="lazy"
+        />
+    );
+
+    const cardClasses =
+        "flex items-center justify-center px-6 py-4 mx-3 rounded-xl bg-zinc-900/50 border border-zinc-800/50 min-w-[180px] h-20 hover:bg-zinc-800/80 transition-all duration-300 grayscale hover:grayscale-0 opacity-70 hover:opacity-100";
+
+    if (linkable && partner.website) {
+        return (
+            <Link
+                key={`${partner.name}-${index}`}
+                href={partner.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cardClasses}
+                aria-label={`Visiter le site de ${partner.name}`}
+            >
+                {content}
+            </Link>
+        );
+    }
+
+    return (
+        <div key={`${partner.name}-${index}`} className={cardClasses}>
+            {content}
+        </div>
+    );
+}
 
 export function LogoCloud({
     partners,
@@ -12,15 +55,11 @@ export function LogoCloud({
     speed = "normal",
     pauseOnHover = true,
     linkable = false,
+    twoRows = false,
     className = "",
 }: LogoCloudProps) {
     const [isPaused, setIsPaused] = useState(false);
-    const scrollerRef = useRef<HTMLDivElement>(null);
 
-    // Dupliquer les logos pour un défilement infini
-    const duplicatedPartners = [...partners, ...partners];
-
-    // Vitesses d'animation
     const speedMap = {
         slow: "60s",
         normal: "40s",
@@ -28,102 +67,79 @@ export function LogoCloud({
     };
 
     const animationDuration = speedMap[speed];
+    const reverseAnimationDuration = speed === "normal" ? "45s" : animationDuration;
 
-    useEffect(() => {
-        if (scrollerRef.current) {
-            const scrollerContent = scrollerRef.current.querySelector(
-                "[data-scroller-content]"
-            );
-            if (scrollerContent) {
-                const items = Array.from(scrollerContent.children);
-                items.forEach((item) => {
-                    const duplicatedItem = item.cloneNode(true);
-                    scrollerContent.appendChild(duplicatedItem);
-                });
-            }
-        }
-    }, []);
+    const row1 = twoRows ? partners.slice(0, Math.ceil(partners.length / 2)) : partners;
+    const row2 = twoRows ? partners.slice(Math.ceil(partners.length / 2)) : [];
 
     return (
-        <section className={`py-12 md:py-16 lg:py-20 ${className}`}>
-            <div className="container mx-auto px-4">
-                {/* En-tête */}
-                <div className="text-center mb-10 md:mb-14">
+        <section className={`py-12 md:py-16 lg:py-20 overflow-hidden ${className}`}>
+            <div className="max-w-7xl mx-auto px-6 text-center mb-12 md:mb-16">
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 tracking-tight">
+                    {title}
+                </h2>
+                {subtitle && (
+                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                        {subtitle}
+                    </p>
+                )}
+            </div>
 
-                    <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-                        {title}
-                    </h2>
-                    {subtitle && (
-                        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                            {subtitle}
-                        </p>
-                    )}
-                </div>
-
-                {/* Conteneur de défilement */}
-                <div
-                    ref={scrollerRef}
-                    className="relative overflow-hidden"
-                    onMouseEnter={() => pauseOnHover && setIsPaused(true)}
-                    onMouseLeave={() => pauseOnHover && setIsPaused(false)}
-                >
-                    {/* Gradients de masquage */}
-                    <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-background to-transparent z-10" />
-                    <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-background to-transparent z-10" />
-
-                    {/* Bande de défilement */}
-                    <div
-                        data-scroller-content
-                        className="flex gap-8 md:gap-12 lg:gap-16 animate-infinite-scroll"
-                        style={{
-                            animationDuration,
-                            animationPlayState: isPaused ? "paused" : "running",
-                        }}
-                    >
-                        {duplicatedPartners.map((partner, index) => {
-                            const content = (
-                                <Image
-                                    src={partner.logo}
-                                    alt={partner.name}
-                                    width={partner.width || 150}
-                                    height={partner.height || 60}
-                                    className="w-auto h-12 md:h-14 lg:h-16 object-contain"
-                                    loading="lazy"
-                                />
-                            );
-
-                            const wrapperClasses =
-                                "flex items-center justify-center flex-shrink-0 grayscale hover:grayscale-0 opacity-60 hover:opacity-100 transition-all duration-300 hover:scale-105 backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-xl p-4";
-                            const wrapperStyle = { minWidth: "150px", maxWidth: "200px" };
-
-                            if (linkable && partner.website) {
-                                return (
-                                    <Link
-                                        key={`${partner.name}-${index}`}
-                                        href={partner.website}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className={wrapperClasses}
-                                        style={wrapperStyle}
-                                        aria-label={`Visiter le site de ${partner.name}`}
-                                    >
-                                        {content}
-                                    </Link>
-                                );
-                            }
-
-                            return (
-                                <div
-                                    key={`${partner.name}-${index}`}
-                                    className={wrapperClasses}
-                                    style={wrapperStyle}
-                                >
-                                    {content}
-                                </div>
-                            );
-                        })}
+            <div
+                className="relative marquee-container"
+                onMouseEnter={() => pauseOnHover && setIsPaused(true)}
+                onMouseLeave={() => pauseOnHover && setIsPaused(false)}
+                style={{
+                    ["--animation-duration" as string]: animationDuration,
+                    ["--reverse-animation-duration" as string]: reverseAnimationDuration,
+                    ["--animation-state" as string]: isPaused ? "paused" : "running",
+                }}
+            >
+                {/* Row 1 */}
+                <div className="flex overflow-hidden mb-6">
+                    <div className="logo-cloud-track">
+                        {row1.map((partner, idx) => (
+                            <LogoCard
+                                key={`r1-1-${partner.id || idx}`}
+                                partner={partner}
+                                linkable={linkable}
+                                index={idx}
+                            />
+                        ))}
+                        {row1.map((partner, idx) => (
+                            <LogoCard
+                                key={`r1-2-${partner.id || idx}`}
+                                partner={partner}
+                                linkable={linkable}
+                                index={idx + row1.length}
+                            />
+                        ))}
                     </div>
                 </div>
+
+                {/* Row 2 (only if twoRows is true and we have items) */}
+                {twoRows && row2.length > 0 && (
+                    <div className="flex overflow-hidden">
+                        <div className="logo-cloud-track-reverse">
+                            {row2.map((partner, idx) => (
+                                <LogoCard
+                                    key={`r2-1-${partner.id || idx}`}
+                                    partner={partner}
+                                    linkable={linkable}
+                                    index={idx}
+                                />
+                            ))}
+                            {row2.map((partner, idx) => (
+                                <LogoCard
+                                    key={`r2-2-${partner.id || idx}`}
+                                    partner={partner}
+                                    linkable={linkable}
+                                    index={idx + row2.length}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         </section>
     );
