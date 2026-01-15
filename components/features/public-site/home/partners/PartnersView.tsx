@@ -3,7 +3,7 @@
 import { LogoCloud } from "@/components/LogoCloud";
 import type { PartnersViewProps } from "./types";
 import { PartnersSkeleton } from "@/components/skeletons/partners-skeleton";
-import { LogoCloudModel } from "@/components/LogoCloudModel/LogoCloud";
+import { LogoCloudModel } from "@/components/LogoCloudModel/LogoCloudModel";
 
 function ThankYouMessage() {
     return (
