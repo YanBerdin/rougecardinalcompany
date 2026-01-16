@@ -34,7 +34,7 @@ Même processus qu'Unsplash :
 
 **Exemple de bonne URL** :
 
-```
+```bash
 https://images.pexels.com/photos/123456/photo.jpg
 ```
 

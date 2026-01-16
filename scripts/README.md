@@ -69,7 +69,7 @@ SUPABASE_SECRET_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 **Résultat attendu**:
 
-```
+```yml
 ✅ communiques_presse_dashboard: X ligne(s)
 ✅ analytics_summary: X ligne(s)
 ℹ️  pg_views non accessible via API Supabase (comportement normal)
@@ -358,7 +358,7 @@ pnpm exec tsx scripts/test-rate-limit-contact.ts
 
 **Résultat attendu** :
 
-```
+```yml
 ✅ Requête 1-5/5: OK (200)
 ✅ Requête 6/6: BLOQUÉ (429) "Trop de tentatives. Veuillez réessayer dans X minutes."
 ```
@@ -397,7 +397,7 @@ pnpm exec tsx scripts/test-rate-limit-newsletter.ts
 
 **Résultat attendu** :
 
-```
+```yml
 ✅ Requête 1-3/3: OK (200)
 ✅ Requête 4/4: BLOQUÉ (429) "Trop de tentatives d'inscription. Veuillez réessayer dans 60 minutes."
 ```

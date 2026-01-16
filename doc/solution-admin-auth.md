@@ -157,7 +157,7 @@ Si `profile_role` est `NULL`, réexécuter le script `create-admin-user.ts`.
 
 ### Schéma d'authentification
 
-```
+```bash
 ┌─────────────────────────────────────────────────────────┐
 │                    Nouvelle inscription                  │
 │                                                          │

@@ -65,7 +65,7 @@ Le projet utilise le **schéma déclaratif** de Supabase :
 
 #### Structure des schemas
 
-```
+```bash
 supabase/schemas/
 ├── 01_extensions.sql              # Extensions PostgreSQL
 ├── 02a_policies_tables.sql        # Tables principales
@@ -196,7 +196,7 @@ SELECT user_id, role FROM public.profiles WHERE role = 'admin';
 
 ## 📁 Structure du projet
 
-```
+```bash
 rougecardinalcompany/
 ├── app/                           # Next.js App Router
 │   ├── (admin)/                   # Route group : zone admin

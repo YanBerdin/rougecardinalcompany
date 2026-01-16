@@ -6,9 +6,9 @@
 
 ## Steps
 
-1. **Créer le script d'export** [scripts/backup-database.ts](scripts/) : Exécute `pg_dump --format=custom`, compresse en gzip, upload vers bucket `backups` via Supabase Storage, supprime les dumps > 4 semaines (rotation automatique).
+1. **Créer le script d'export** [scripts/backup-database.ts](../../scripts/backup-database.ts) : Exécute `pg_dump --format=custom`, compresse en gzip, upload vers bucket `backups` via Supabase Storage, supprime les dumps > 4 semaines (rotation automatique).
 
-2. **Configurer le bucket Storage** : Ajouter bucket `backups` dans [supabase/schemas/02c_storage_buckets.sql](supabase/schemas/02c_storage_buckets.sql) avec policies restrictives (service_role uniquement, pas de public access).
+2. **Configurer le bucket Storage** : Ajouter bucket `backups` dans [supabase/schemas/02c_storage_buckets.sql](../../supabase/schemas/02c_storage_buckets.sql) avec policies restrictives (service_role uniquement, pas de public access).
 
 3. **Créer le workflow GitHub Actions** [.github/workflows/backup-database.yml](@/.github/workflows/) : Schedule `cron: '0 3 * * 0'` (dimanche 3h UTC), secrets `SUPABASE_DB_URL` + `SUPABASE_SERVICE_ROLE_KEY`, job ~5-10 min, échec = email automatique GitHub.
 
