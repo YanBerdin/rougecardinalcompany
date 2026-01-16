@@ -105,6 +105,7 @@ Fournir un guide unique qui décrit l'organisation des dossiers, conventions et 
 
 ---
 
+```bash
 - app/
   - (admin)/admin/* : pages admin (force-dynamic, revalidate=0 where required)
   - (marketing)/* : pages publiques
@@ -143,6 +144,7 @@ scripts/
   └─ test-*.ts                # Various test scripts
 
 ## Conventions et règles de design
+```
 
 ---
 

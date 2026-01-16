@@ -1,6 +1,6 @@
 # File Tree: rougecardinalcompany
 
-**Generated:** 12/22/2025, 10:00:00 AM
+**Generated:** 16/01/2026, 10:00:00 AM
 **Root Path:** `memory-bank/architecture`
 **Last Updated:** Added TASK030 Phase 11 scripts (check-presse-toggles.ts, toggle-presse.ts) - 2026-01-02
 
@@ -10,18 +10,15 @@
 │   ├── 📁 instructions
 │   ├── 📁 prompts
 │   ├── 📁 workflows
-│   │   ├── ⚙️ detect-revoke-warn.yml
-│   │   ├── ⚙️ invitation-email-test.yml
-│   │   ├── ⚙️ monitor-detect-revoke.yml
-│   │   └── ⚙️ reorder-sql-tests.yml
-│   ├── 📝 SECRETS_EXAMPLES.md
 │   └── 📝 copilot-instructions.md
 ├── 📁 __tests__
-│   └── 📁 emails
-│       └── 📄 invitation-email.test.tsx
 ├── 📁 app
 │   ├── 📁 (admin)
 │   │   ├── 📁 admin
+│   │   │   ├── 📁 audit-logs
+│   │   │   │   ├── 📄 actions.ts
+│   │   │   │   ├── 📄 loading.tsx
+│   │   │   │   └── 📄 page.tsx
 │   │   │   ├── 📁 debug-auth
 │   │   │   │   └── 📄 page.tsx
 │   │   │   ├── 📁 home
@@ -108,7 +105,11 @@
 │   │   │   └── 📄 route.ts
 │   │   ├── 📁 newsletter
 │   │   │   └── 📄 route.ts
+│   │   ├── 📁 sentry-example-api
+│   │   │   └── 📄 route.ts
 │   │   ├── 📁 test-email
+│   │   │   └── 📄 route.ts
+│   │   ├── 📁 test-error
 │   │   │   └── 📄 route.ts
 │   │   └── 📁 webhooks
 │   │       └── 📁 resend
@@ -133,15 +134,27 @@
 │   │   └── 📄 page.tsx
 │   ├── 📁 debug-auth-before-admin
 │   │   └── 📄 page.tsx
+│   ├── 📁 sentry-example-page
+│   │   └── 📄 page.tsx
 │   ├── 📁 test-connection
 │   │   └── 📄 page.tsx
+│   ├── 📄 error.tsx
 │   ├── 📄 favicon.ico
+│   ├── 📄 global-error.tsx
 │   ├── 📄 global.d.ts
 │   ├── 🎨 globals.css
 │   ├── 📄 layout.tsx
 │   ├── 🖼️ opengraph-image.png
 │   └── 🖼️ twitter-image.png
 ├── 📁 components
+│   ├── 📁 LogoCloud
+│   │   ├── 📄 LogoCloud.tsx
+│   │   ├── 📝 README.md
+│   │   ├── 📄 index.ts
+│   │   └── 📄 types.ts
+│   ├── 📁 LogoCloudModel
+│   │   ├── 📄 BrandLogos.tsx
+│   │   └── 📄 LogoCloudModel.tsx
 │   ├── 📁 admin
 │   │   ├── 📁 dashboard
 │   │   │   ├── 📄 DashboardStatsContainer.tsx
@@ -154,8 +167,22 @@
 │   │   └── 📄 TeamPageToasts.tsx
 │   ├── 📁 auth
 │   │   └── 📄 SetupAccountForm.tsx
+│   ├── 📁 error-boundaries
+│   │   ├── 📄 ComponentErrorBoundary.tsx
+│   │   ├── 📄 PageErrorBoundary.tsx
+│   │   ├── 📄 RootErrorBoundary.tsx
+│   │   └── 📄 index.ts
 │   ├── 📁 features
 │   │   ├── 📁 admin
+│   │   │   ├── 📁 audit-logs
+│   │   │   │   ├── 📄 AuditLogDetailModal.tsx
+│   │   │   │   ├── 📄 AuditLogFilters.tsx
+│   │   │   │   ├── 📄 AuditLogsContainer.tsx
+│   │   │   │   ├── 📄 AuditLogsSkeleton.tsx
+│   │   │   │   ├── 📄 AuditLogsTable.tsx
+│   │   │   │   ├── 📄 AuditLogsView.tsx
+│   │   │   │   ├── 📄 index.ts
+│   │   │   │   └── 📄 types.ts
 │   │   │   ├── 📁 home
 │   │   │   │   ├── 📄 AboutContentContainer.tsx
 │   │   │   │   ├── 📄 AboutContentForm.tsx
@@ -307,11 +334,6 @@
 │   │   ├── 📄 shows-skeleton.tsx
 │   │   └── 📄 spectacles-skeleton.tsx
 │   ├── 📁 tutorial
-│   │   ├── 📄 code-block.tsx
-│   │   ├── 📄 connect-supabase-steps.tsx
-│   │   ├── 📄 fetch-data-steps.tsx
-│   │   ├── 📄 sign-up-user-steps.tsx
-│   │   └── 📄 tutorial-step.tsx
 │   ├── 📁 ui
 │   │   ├── 📄 alert-dialog.tsx
 │   │   ├── 📄 alert.tsx
@@ -319,13 +341,17 @@
 │   │   ├── 📄 badge.tsx
 │   │   ├── 📄 breadcrumb.tsx
 │   │   ├── 📄 button.tsx
+│   │   ├── 📄 calendar.tsx
 │   │   ├── 📄 card.tsx
 │   │   ├── 📄 checkbox.tsx
+│   │   ├── 📄 date-range-picker.tsx
 │   │   ├── 📄 dialog.tsx
 │   │   ├── 📄 dropdown-menu.tsx
 │   │   ├── 📄 form.tsx
 │   │   ├── 📄 input.tsx
 │   │   ├── 📄 label.tsx
+│   │   ├── 📄 pagination.tsx
+│   │   ├── 📄 popover.tsx
 │   │   ├── 📄 progress.tsx
 │   │   ├── 📄 scroll-area.tsx
 │   │   ├── 📄 select.tsx
@@ -347,10 +373,10 @@
 │   ├── 📄 login-form.tsx
 │   ├── 📄 logout-button.tsx
 │   ├── 📄 sign-up-form.tsx
+│   ├── 📄 test-toast-button.tsx
 │   ├── 📄 theme-switcher.tsx
 │   └── 📄 update-password-form.tsx
 ├── 📁 doc
-├── 📁 doc-perso
 ├── 📁 emails
 │   ├── 📁 utils
 │   │   ├── 📄 components.utils.tsx
@@ -387,6 +413,7 @@
 │   │   ├── 📄 admin-home-hero.ts
 │   │   ├── 📄 admin-users.ts
 │   │   ├── 📄 agenda.ts
+│   │   ├── 📄 audit-logs.ts
 │   │   ├── 📄 compagnie-presentation.ts
 │   │   ├── 📄 compagnie.ts
 │   │   ├── 📄 contact.ts
@@ -426,6 +453,7 @@
 │   ├── 📁 schemas
 │   │   ├── 📄 admin-users.ts
 │   │   ├── 📄 agenda.ts
+│   │   ├── 📄 audit-logs.ts
 │   │   ├── 📄 compagnie.ts
 │   │   ├── 📄 contact.ts
 │   │   ├── 📄 dashboard.ts
@@ -436,11 +464,15 @@
 │   │   ├── 📄 site-config.ts
 │   │   ├── 📄 spectacles.ts
 │   │   └── 📄 team.ts
+│   ├── 📁 sentry
+│   │   ├── 📄 capture-error.ts
+│   │   └── 📄 index.ts
 │   ├── 📁 tables
 │   │   ├── 📄 spectacle-table-helpers.ts
 │   │   └── 📄 user-table-helpers.ts
 │   ├── 📁 utils
 │   │   ├── 📄 file-hash.ts
+│   │   ├── 📄 get-client-ip.ts
 │   │   ├── 📄 rate-limit.ts
 │   │   └── 📄 validate-image-url.ts
 │   ├── 📄 database.types.ts
@@ -449,295 +481,12 @@
 │   ├── 📄 site-config.ts
 │   └── 📄 utils.ts
 ├── 📁 memory-bank
-│   ├── 📁 architecture
-│   │   ├── 📝 Email_Service_Architecture.md
-│   │   ├── 📝 Project_Architecture_Blueprint.md
-│   │   ├── 📝 Project_Folders_Structure_Blueprint_v5.md
-│   │   ├── 📝 dev-email-redirect.md
-│   │   └── 📝 file-tree.md
-│   ├── 📁 changes
-│   │   └── 📝 2025-11-11-layouts-admin-sidebar.md
-│   ├── 📁 epics
-│   │   ├── 📁 details
-│   │   │   ├── 📝 14.1-page-accueil(Home).md
-│   │   │   ├── 📝 14.2-page-presentation-companie.md
-│   │   │   ├── 📝 14.3-page-spectacles-(événements).md
-│   │   │   ├── 📝 14.4-page-agenda.md
-│   │   │   ├── 📝 14.5-page-presse.md
-│   │   │   ├── 📝 14.6-contact-newsletter.md
-│   │   │   └── 📝 14.7-back‑office.md
-│   │   └── ⚙️ epics-map.yaml
-│   ├── 📁 procedures
-│   │   ├── 📝 admin-management.md
-│   │   └── 📝 admin-user-registration.md
-│   ├── 📁 tasks
-│   │   ├── 📁 completed-tasks
-│   │   │   ├── 📝 TASK007-update-memory-bank.md
-│   │   │   ├── 📝 TASK011-integration-home-hero-slides.md
-│   │   │   ├── 📝 TASK012-integration-ui-compagnie-stats.md
-│   │   │   ├── 📝 TASK013-seeds-nouvelles-tables.md
-│   │   │   ├── 📝 TASK014-backoffice-toggles-centralises.md
-│   │   │   ├── 📝 TASK019-fix-spectacles-archives.md
-│   │   │   ├── 📝 TASK020-alignement-ui-presse.md
-│   │   │   ├── 📝 TASK021-admin-backoffice-spectacles.md
-│   │   │   ├── 📝 TASK021-admin-spectacles-crud.md
-│   │   │   ├── 📝 TASK021-content-management-crud.md
-│   │   │   ├── 📝 TASK021-documentation-docker.md
-│   │   │   ├── 📝 TASK021B-documentation-supabase-cli.md
-│   │   │   ├── 📝 TASK021C-auth-cleanup-and-optimization.md
-│   │   │   ├── 📝 TASK022-REVIEW.md
-│   │   │   ├── 📝 TASK022-implementation-summary.md
-│   │   │   ├── 📝 TASK022-team-management.md
-│   │   │   ├── 📝 TASK024B-admin-email-scripts.md
-│   │   │   ├── 📝 TASK025-rls-security-performance-fixes.md
-│   │   │   ├── 📝 TASK025B-security-audit-campaign.md
-│   │   │   ├── 📝 TASK026-COMPLIANCE-FIXES.md
-│   │   │   ├── 📝 TASK026-FINAL-STATUS.md
-│   │   │   ├── 📝 TASK026-homepage-content-management.md
-│   │   │   ├── 📝 TASK026B-cloud-fix-procedure.md
-│   │   │   ├── 📝 TASK026B-db-functions-compliance.md
-│   │   │   ├── 📝 TASK027B-security-definer-rationale.md
-│   │   │   ├── 📝 TASK028B-cleanup-obsolete-scripts.md
-│   │   │   ├── 📝 TASK029-media-library.md
-│   │   │   ├── 📝 TASK030-display-toggles.md
-│   │   │   ├── 📝 TASK030A-display-toggles.md
-│   │   │   ├── 📝 TASK032-user-role-management-FINAL.md
-│   │   │   ├── 📝 TASK032-user-role-management.md
-│   │   │   ├── 📝 TASK048-t3-env-implementation.md
-│   │   │   └── 📝 TASK049-database-security-rls-security-invoker.md
-│   │   ├── 📝 RESOLVED_db_reconstruction_2025-11-18.md
-│   │   ├── 📝 TASK023-partners-management.md
-│   │   ├── 📝 TASK024-press-management.md
-│   │   ├── 📝 TASK027-company-content-management.md
-│   │   ├── 📝 TASK028-content-versioning-ui.md
-│   │   ├── 📝 TASK031-analytics-dashboard.md
-│   │   ├── 📝 TASK033-audit-logs-viewer.md
-│   │   ├── 📝 TASK034-performance-optimization.md
-│   │   ├── 📝 TASK035-testing-suite.md
-│   │   ├── 📝 TASK036-security-audit.md
-│   │   ├── 📝 TASK037-accessibility-compliance.md
-│   │   ├── 📝 TASK038-responsive-testing.md
-│   │   ├── 📝 TASK039-production-deployment.md
-│   │   ├── 📝 TASK040-documentation.md
-│   │   ├── 📝 TASK046-rate-limiting-handlers.md
-│   │   ├── 📝 TASK047-newsletter-schema-extraction.md
-│   │   ├── 📝 _archived_TASK025-communications-dashboard.md
-│   │   ├── 📝 _index.md
-│   │   ├── 📝 _issues_preview.md
-│   │   └── 📝 _preview_backoffice_tasks.md
-│   ├── 📝 Memory-Bank-Update-Session-2025-10-13.md
-│   ├── 📝 Memory-Bank-Update-Session-2025-10-26.md
-│   ├── 📝 activeContext.md
-│   ├── 📝 productContext.md
-│   ├── 📝 progress.md
-│   ├── 📝 projectbrief.md
-│   ├── 📝 systemPatterns.md
-│   └── 📝 techContext.md
 ├── 📁 public
-│   └── 🖼️ logo-florian.png
 ├── 📁 scripts
-│   ├── 📁 Archived-tests
-│   │   ├── 📄 quick-test-active.sh
-│   │   ├── 📄 test-active-endpoint-service.ts
-│   │   ├── 📄 test-active-endpoint.sh
-│   │   ├── 📄 test-active-endpoint.ts
-│   │   └── 📄 test-spectacles-endpoints.ts
-│   ├── 📁 Test_fetchMediaArticles
-│   │   ├── 📝 README.md
-│   │   ├── 📄 apply-migration-articles-view.ts
-│   │   ├── 📄 check-chapo-excerpt.ts
-│   │   ├── 📄 check-rls-policies.ts
-│   │   ├── 📄 test-chapo-and-excerpt-separate.ts
-│   │   ├── 📄 test-dal-pattern.ts
-│   │   ├── 📄 test-public-view.ts
-│   │   ├── 📄 test-rls-articles copy.ts
-│   │   └── 📄 test-rls-articles.ts
-│   ├── 📁 test-invitation-email
-│   │   ├── 📄 generate-invite-link.js
-│   │   ├── 📄 test-complete-flow.js
-│   │   ├── 📄 test-invitation-flow.js
-│   │   ├── 📄 test-invitation-link-flow.js
-│   │   ├── 📄 test-local-invitation.js
-│   │   └── 📄 test-redirect-flow.js
-│   ├── 📝 README.md
-│   ├── 📄 check-email-logs.ts
-│   ├── 📄 check-existing-profile.js
-│   ├── 📄 check-extension.ts
-│   ├── 📄 check-migration-applied.ts
-│   ├── 📄 check-presse-toggles.ts
-│   ├── 📄 check-security-advisors.js
-│   ├── 📄 check-security-advisors.ts
-│   ├── 📄 check-security-audit.sh
-│   ├── 📄 check-storage-buckets.ts
-│   ├── 📄 check-storage-paths.ts
-│   ├── 📄 check-views-security.ts
-│   ├── 📄 create-admin-user.ts
-│   ├── 📄 create_issues.sh
-│   ├── 📄 delete-test-user.js
-│   ├── 📄 find-auth-user.js
-│   ├── 📄 post-reset.sh
-│   ├── 📄 rebuild-cloud-schema.sh
-│   ├── 📄 seed-admin.ts
-│   ├── 📄 set-admin-role.ts
-│   ├── 📄 supabase-env.sh
-│   ├── 📄 test-all-dal-functions.ts
-│   ├── 📄 test-dashboard-stats.ts
-│   ├── 📄 test-email-integration.ts
-│   ├── 📄 test-env-validation.ts
-│   ├── 📄 test-profile-insertion.js
-│   ├── 📄 test-rate-limit.ts
-│   ├── 📄 test-spectacles-crud.ts
-│   ├── 📄 test-spectacles-dal.ts
-│   ├── 📄 test-ssrf-validation.ts
-│   ├── 📄 test-team-server-actions.ts
-│   ├── 📄 test-thumbnail-direct.ts
-│   ├── 📄 test-thumbnail-generation.ts
-│   ├── 📄 test-views-security-invoker.ts
-│   ├── 📄 test-webhooks.ts
-│   ├── 📄 toggle-presse.ts
-│   └── 📄 validate-media-folders.ts
 ├── 📁 supabase
 │   ├── 📁 .branches
-│   │   └── 📄 _current_branch
 │   ├── 📁 migrations
-│   │   ├── 📁 archived
-│   │   │   ├── 📄 20251118125945_normalize_spectacles_status.sql
-│   │   │   ├── 📄 20251118130000_normalize_spectacles_status.sql
-│   │   │   ├── 📄 20251123143116_fix_restore_content_version_published_at.sql
-│   │   │   ├── 📄 20251209120000_normalize_spectacles_status_to_english.sql
-│   │   │   ├── 📄 20251217100000_cleanup_spectacles_backup.sql
-│   │   │   └── 📝 supabase-view-security-invoker-caveat.md
-│   │   ├── 📄 20250918000000_fix_spectacles_versioning_trigger.sql
-│   │   ├── 📄 20250918000002_apply_declarative_schema_complete.sql
-│   │   ├── 📄 20250918031500_seed_home_hero_slides.sql
-│   │   ├── 📄 20250918094530_seed_core_content.sql
-│   │   ├── 📄 20250918095610_seed_compagnie_values.sql
-│   │   ├── 📄 20250918101020_seed_events_press_articles.sql
-│   │   ├── 📄 20250918102240_seed_team_and_presentation.sql
-│   │   ├── 📄 20250921110000_seed_compagnie_presentation_sections.sql
-│   │   ├── 📄 20250921112900_add_home_about_content.sql
-│   │   ├── 📄 20250921113000_seed_home_about_content.sql
-│   │   ├── 📄 20250926153000_seed_spectacles.sql
-│   │   ├── 📄 20250930120000_seed_lieux.sql
-│   │   ├── 📄 20250930121000_seed_categories_tags.sql
-│   │   ├── 📄 20250930122000_seed_configurations_site.sql
-│   │   ├── 📄 20251002120000_seed_communiques_presse_et_media_kit.sql
-│   │   ├── 📄 20251022000001_create_medias_storage_bucket.sql
-│   │   ├── 📄 20251022140000_grant_select_articles_presse_anon.sql
-│   │   ├── 📄 20251024214802_reorder_team_members.sql
-│   │   ├── 📄 20251024214930_grant_select_membres_equipe.sql
-│   │   ├── 📄 20251027000000_create_is_admin_function.sql
-│   │   ├── 📄 20251027020000_restore_basic_grants_for_rls.sql
-│   │   ├── 📄 20251027021000_restore_remaining_grants.sql
-│   │   ├── 📄 20251027021500_restore_views_grants.sql
-│   │   ├── 📄 20251027022000_fix_logs_audit_grants.sql
-│   │   ├── 📄 20251027022500_grant_execute_all_trigger_functions.sql
-│   │   ├── 📄 20251115150000_fix_reorder_team_members_search_path.sql
-│   │   ├── 📄 20251119000000_seed_admin_user.sql
-│   │   ├── 📄 20251120120000_move_extensions_to_schema.sql
-│   │   ├── 📄 20251120231121_create_user_invitations.sql
-│   │   ├── 📄 20251120231146_create_pending_invitations.sql
-│   │   ├── 📄 20251121184519_allow_admin_insert_profiles.sql
-│   │   ├── 📄 20251121185458_allow_admin_update_profiles.sql
-│   │   ├── 📄 20251123150000_remote_schema.sql
-│   │   ├── 📄 20251123170231_create_messages_contact_admin_view.sql
-│   │   ├── 📄 20251126001251_add_alt_text_to_home_hero_slides.sql
-│   │   ├── 📄 20251126215129_fix_hero_slides_admin_select_policy.sql
-│   │   ├── 📄 20251204133540_create_reorder_hero_slides_function.sql
-│   │   ├── 📄 20251205220000_refactor_hero_slides_cta_dual_buttons.sql
-│   │   ├── 📄 20251209120000_normalize_spectacles_status_to_english.sql
-│   │   ├── 📄 20251222120000_add_media_file_hash.sql
-│   │   ├── 📄 20251227203314_add_media_tags_folders.sql
-│   │   ├── 📄 20251227223934_fix_storage_path_urls_in_views.sql
-│   │   ├── 📄 20251227225607_restore_medias_folder_id.sql
-│   │   ├── 📄 20251228140000_add_thumbnail_support.sql
-│   │   ├── 📄 20251228220350_fix_media_tags_folders_rls_granular.sql
-│   │   ├── 📄 20251230120000_sync_media_folders_with_storage.sql
-│   │   ├── 📄 20251231010000_fix_base_tables_rls_revoke_admin_views_anon.sql
-│   │   ├── 📄 20251231020000_enforce_security_invoker_all_views_final.sql
-│   │   ├── 📄 20260101160000_add_display_toggles_metadata_columns.sql
-│   │   ├── 📄 20260101160100_seed_display_toggles.sql
-│   │   ├── 📄 20260101170000_cleanup_and_add_epic_toggles.sql
-│   │   ├── 📄 20260101180000_fix_cleanup_display_toggles_no_compagnie.sql
-│   │   ├── 📄 20260101220000_fix_presse_toggles.sql
-│   │   ├── 📝 ROUND_7B_ANALYSIS.md
-│   │   ├── 📝 migrations.md
-│   │   └── 📄 sync_existing_profiles.sql
-│   ├── 📁 reconstruction_database_plan
-│   │   ├── 📝 RECONSTRUCTION_PLAN.md
-│   │   └── 📝 RECONSTRUCTION_SUCCESS.md
-│   ├── 📁 schemas
-│   │   ├── 📄 01_extensions.sql
-│   │   ├── 📄 02_table_profiles.sql
-│   │   ├── 📄 02b_functions_core.sql
-│   │   ├── 📄 02c_storage_buckets.sql
-│   │   ├── 📄 03_table_medias.sql
-│   │   ├── 📄 04_table_media_tags_folders.sql
-│   │   ├── 📄 04_table_membres_equipe.sql
-│   │   ├── 📄 05_profiles_auto_sync.sql
-│   │   ├── 📄 05_table_lieux.sql
-│   │   ├── 📄 06_table_spectacles.sql
-│   │   ├── 📄 07_table_evenements.sql
-│   │   ├── 📄 07b_table_compagnie_content.sql
-│   │   ├── 📄 07c_table_compagnie_presentation.sql
-│   │   ├── 📄 07d_table_home_hero.sql
-│   │   ├── 📄 07e_table_home_about.sql
-│   │   ├── 📄 08_table_articles_presse.sql
-│   │   ├── 📄 08b_communiques_presse.sql
-│   │   ├── 📄 09_table_partners.sql
-│   │   ├── 📄 10_tables_system.sql
-│   │   ├── 📄 10b_tables_user_management.sql
-│   │   ├── 📄 11_tables_relations.sql
-│   │   ├── 📄 12_evenements_recurrence.sql
-│   │   ├── 📄 13_analytics_events.sql
-│   │   ├── 📄 14_categories_tags.sql
-│   │   ├── 📄 15_content_versioning.sql
-│   │   ├── 📄 16_seo_metadata.sql
-│   │   ├── 📄 20_functions_core.sql
-│   │   ├── 📄 21_functions_auth_sync.sql
-│   │   ├── 📄 30_triggers.sql
-│   │   ├── 📄 40_indexes.sql
-│   │   ├── 📄 41_views_admin_content_versions.sql
-│   │   ├── 📄 41_views_communiques.sql
-│   │   ├── 📄 50_constraints.sql
-│   │   ├── 📄 60_rls_profiles.sql
-│   │   ├── 📄 61_rls_main_tables.sql
-│   │   ├── 📄 62_rls_advanced_tables.sql
-│   │   ├── 📄 63_reorder_team_members.sql
-│   │   ├── 📄 63b_reorder_hero_slides.sql
-│   │   └── 📝 README.md
-│   ├── 📁 scripts
-│   │   ├── 📝 allowed_exposed_objects.README.md
-│   │   ├── 📄 allowed_exposed_objects.txt
-│   │   ├── 📄 analyze_remaining_grants.sh
-│   │   ├── 📄 audit_grants.sql
-│   │   ├── 📄 audit_grants_filtered.sql
-│   │   ├── 📄 check_rls_coverage.sh
-│   │   ├── 📄 check_rls_policies.sql
-│   │   ├── 📄 diagnose_admin_access.sql
-│   │   ├── 📄 quick_check_all_grants.sql
-│   │   ├── 📄 test_rls_anon_access.sql
-│   │   ├── 📄 verify_policies_applied.sql
-│   │   └── 📄 verify_rls_policies.sql
-│   ├── 📁 snippets
-│   ├── 📁 tests
-│   │   ├── 📄 20251025_test_reorder_and_views.sql
-│   │   ├── 📝 README.md
-│   │   ├── 📄 ci-run.sh
-│   │   ├── 📄 run_audit_grants.sh
-│   │   └── 📄 run_reorder_tests.sh
-│   ├── 📝 README.md
-│   ├── 📄 admin.ts
-│   ├── 📄 client.ts
-│   ├── 📄 middleware.ts
-│   └── 📄 server.ts
-├── 📁 swark-output
-│   ├── 📝 2025-11-11__15-47-43__diagram.md
-│   ├── 📝 2025-11-11__15-47-43__log.md
-│   ├── 📝 2025-11-11__15-51-52__diagram.md
-│   ├── 📝 2025-11-11__15-51-52__log.md
-│   ├── 📝 2025-11-11__15-52-57__diagram.md
-│   └── 📝 2025-11-11__15-52-57__log.md
+│   └── 📁 seschemaseds
 ├── ⚙️ .env.example
 ├── ⚙️ .gitignore
 ├── ⚙️ .markdownlint.jsonc

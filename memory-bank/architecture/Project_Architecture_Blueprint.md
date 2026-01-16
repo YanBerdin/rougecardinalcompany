@@ -1,18 +1,95 @@
 # Project Architecture Blueprint — Rouge Cardinal Company
 
-Date: 2025-12-30
+**Généré le:** 2026-01-16  
+**Version:** 2.0 (Comprehensive Edition)  
+**Type de projet:** Application web Next.js 16 + Supabase  
+**Pattern architectural:** Clean Architecture + Feature-Based Organization
 
-Décrire l'architecture globale de l'application Rouge Cardinal Company : patterns d'accès aux données, organisation des routes, Server/Client split, sécurité (Supabase/RLS), et bonnes pratiques opérationnelles (CI, tests, migrations).
+---
 
-## Résumé exécutif
+## 1. Architecture Detection & Analysis
 
-- Framework principal : Next.js 16 (App Router) avec React 19.
-- Langage : TypeScript (strict). Conventions Clean Code (max 300 lignes/fichier, fonctions courtes).
-- Base de données : Supabase (Postgres) avec RLS, migrations déclaratives dans `supabase/schemas`.
-- Auth : Supabase optimized JWT Signing Keys; utiliser `getClaims()` pour checks rapides.
-- Mutations internes : Server Actions (colocées sous `app/actions` ou `lib/actions`) — API Routes conservées uniquement pour clients externes ou webhooks.
-- DAL : centralisé sous `lib/dal/*` (server-only, retourne `DALResult<T>`, ne fait pas de revalidatePath).
-- **Environment Variables** : Type-safe validation avec T3 Env (@t3-oss/env-nextjs) dans `lib/env.ts`; accès UNIQUEMENT via `import { env } from '@/lib/env'`, JAMAIS `process.env.*` directement.
+### Technologies Détectées
+
+**Frontend Stack:**
+
+- **Framework:** Next.js 16.0.10 (App Router, React 19, Turbopack)
+- **Language:** TypeScript 5.7+ (strict mode)
+- **UI Framework:** Tailwind CSS + shadcn/ui
+- **State Management:** React Server Components (default), Client hooks pour interactivité
+- **Forms:** react-hook-form + Zod validation
+
+**Backend Stack:**
+
+- **Database:** Supabase (PostgreSQL 15+)
+- **ORM/Query:** Supabase Client (JavaScript SDK)
+- **Auth:** Supabase Auth (JWT Signing Keys, optimized avec `getClaims()`)
+- **Email:** Resend (React Email templates)
+- **File Storage:** Supabase Storage (avec duplicate detection SHA-256)
+
+**DevOps & Tooling:**
+
+- **Package Manager:** pnpm
+- **Linting:** ESLint + Markdown linting
+- **Type Safety:** TypeScript strict + T3 Env pour environment variables
+- **Migrations:** Supabase Declarative Schema (`supabase/schemas/`)
+- **Monitoring:** Sentry (optionnel)
+
+### Pattern Architectural Détecté
+
+**Clean Architecture avec Feature-Based Organization:**
+
+```bash
+┌─────────────────────────────────────────────────────────────┐
+│                     PRESENTATION LAYER                      │
+│  app/ (Routes + Server Components) + components/ (UI)       │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐       │
+│  │   (admin)    │  │  (marketing) │  │   api/       │       │
+│  │  Route Group │  │ Route Group  │  │Route Handlers│       │
+│  └──────────────┘  └──────────────┘  └──────────────┘       │
+└─────────────────────────────────────────────────────────────┘
+                          ↓
+┌─────────────────────────────────────────────────────────────┐
+│                   APPLICATION LAYER                         │
+│            lib/actions/ (Server Actions)                    │
+│  ┌────────────────────────────────────────────────────┐     │
+│  │ Validation (Zod) → Auth Guards → DAL → Revalidate  │     │
+│  └────────────────────────────────────────────────────┘     │
+└─────────────────────────────────────────────────────────────┘
+                          ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    DATA ACCESS LAYER                        │
+│              lib/dal/ (server-only)                         │
+│  ┌────────────────────────────────────────────────────┐     │
+│  │ Supabase Client → DB Queries → DALResult<T>        │     │
+│  └────────────────────────────────────────────────────┘     │
+└─────────────────────────────────────────────────────────────┘
+                          ↓
+┌─────────────────────────────────────────────────────────────┐
+│                     DATABASE LAYER                          │
+│         Supabase PostgreSQL + RLS Policies                  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Principes architecturaux observés:**
+
+- **Séparation stricte des responsabilités:** Présentation / Application / DAL / Database
+- **Server-first:** Server Components par défaut, Client Components uniquement pour interactivité
+- **Type-safe:** Validation runtime (Zod) + TypeScript strict + T3 Env
+- **Security by default:** RLS policies + explicit auth guards + defense in depth
+- **Performance:** Optimized Supabase auth (`getClaims()`), caching, lazy loading
+
+---
+
+## 2. Résumé Exécutif
+
+**Framework principal:** Next.js 16 (App Router) avec React 19  
+**Langage:** TypeScript (strict mode) avec conventions Clean Code (max 300 lignes/fichier, fonctions ≤30 lignes)  
+**Base de données:** Supabase (PostgreSQL) avec Row Level Security (RLS) sur 36/36 tables  
+**Auth:** Supabase optimized JWT Signing Keys; utiliser `getClaims()` (2-5ms) pour checks rapides  
+**Mutations internes:** Server Actions (colocées sous `app/*/actions.ts` ou `lib/actions`) — API Routes réservées pour clients externes/webhooks  
+**DAL:** Centralisé sous `lib/dal/*` (server-only, retourne `DALResult<T>`, JAMAIS de `revalidatePath`)  
+**Environment Variables:** Type-safe validation avec T3 Env (@t3-oss/env-nextjs) dans `lib/env.ts`; accès UNIQUEMENT via `import { env } from '@/lib/env'`
 
 ## Principes architecturaux
 
