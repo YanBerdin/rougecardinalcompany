@@ -4,6 +4,47 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-01-16 - PERF: Partial Index on spectacles.slug (TASK034)
+
+**Migration**: `20260116145628_optimize_spectacles_slug_index.sql`
+
+**Sévérité**: 🟢 **LOW RISK** - Performance (nouvel index partiel, pas de modification de données)
+
+**Source**: TASK034 Phase 4 - Performance Optimization
+
+**Changements**:
+
+1. **Drop ancien index complet**:
+
+   ```sql
+   drop index if exists public.idx_spectacles_slug;
+   ```
+
+2. **Création index partiel optimisé**:
+
+   ```sql
+   create index if not exists idx_spectacles_slug_published
+   on public.spectacles(slug)
+   where status = 'published';
+   ```
+
+**Raison**: L'index complet sur `spectacles.slug` indexait toutes les lignes (draft, archived, published). L'index partiel ne couvre que les spectacles publiés, réduisant la taille de l'index et accélérant les requêtes publiques les plus fréquentes.
+
+**Validation**:
+
+- ✅ Migration appliquée localement: 2026-01-16
+- ✅ Migration appliquée sur cloud: 2026-01-16
+- ✅ Schema déclaratif synchronisé: `supabase/schemas/06_table_spectacles.sql`
+
+**Fichiers Associés**:
+
+- Migration: `20260116145628_optimize_spectacles_slug_index.sql`
+- Schema: `supabase/schemas/06_table_spectacles.sql`
+- Task: `memory-bank/tasks/TASK034-performance-optimization.md`
+- Plan: `.github/prompts/plan-TASK034-performanceOptimization.prompt.md`
+
+---
+
 ### 2026-01-14 - FEAT: Add Backups Storage Bucket (TASK050)
 
 **Migration**: `20260114152153_add_backups_storage_bucket.sql`

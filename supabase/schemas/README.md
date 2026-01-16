@@ -109,6 +109,14 @@ Note RLS: les nouvelles tables co‑localisent leurs politiques (dans le même f
 
 ## 🆕 Mises à jour récentes (janvier 2026)
 
+- **PERF: Partial Index on spectacles.slug (16 jan. 2026)** : Index partiel pour optimiser les requêtes publiques sur les spectacles.
+  - **Migration** : `20260116145628_optimize_spectacles_slug_index.sql`
+  - **Source** : TASK034 Phase 4 - Performance Optimization
+  - **Changement** : Remplacement de l'index complet `idx_spectacles_slug` par un index partiel `idx_spectacles_slug_published WHERE status='published'`
+  - **Impact** : Réduction taille index, accélération requêtes pages publiques (seuls les spectacles publiés sont indexés)
+  - **Schéma déclaratif** : `06_table_spectacles.sql` mis à jour avec le nouvel index partiel
+  - **Validation** : Migration appliquée local + cloud le 2026-01-16
+
 - **Fix Database Reset - medias.folder_id Restoration (11 jan. 2026)** : Restauration de la colonne `folder_id` supprimée par erreur par une migration générée.
   - **Migration** : `20260111120000_restore_medias_folder_id_final.sql`
   - **Problème** : La migration `20260103183217_audit_logs_retention_and_rpc.sql` (générée par `db pull`) contenait un `DROP COLUMN folder_id` qui supprimait la colonne après que les migrations précédentes l'avaient créée.

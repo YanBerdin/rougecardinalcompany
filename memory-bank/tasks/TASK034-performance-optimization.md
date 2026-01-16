@@ -235,7 +235,9 @@ export async function updateSpectacle(id: string, data: unknown) {
 **Phase 4 - Index Partiel:**
 
 - Created partial index on spectacles.slug WHERE status='published'
-- Migration: `20260116XXXXXX_optimize_spectacles_slug_index.sql`
+- Migration: `20260116145628_optimize_spectacles_slug_index.sql`
+- Migration applied LOCAL: 2026-01-16
+- Migration applied CLOUD: 2026-01-16 ✅
 - Lookup query performance: ~20% improvement
 
 **Phase 5 - Streaming Presse:**
