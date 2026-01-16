@@ -4,9 +4,6 @@ import { PartnersView } from "./PartnersView";
 import type { Partner } from "./types";
 
 export async function PartnersContainer() {
-  // TODO: remove - artificial delay to visualize Suspense skeletons
-  await new Promise((resolve) => setTimeout(resolve, 1500));
-
   // ✅ Check toggle
   const toggleResult = await fetchDisplayToggle("display_toggle_home_partners");
 

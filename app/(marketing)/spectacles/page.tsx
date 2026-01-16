@@ -3,7 +3,8 @@ import { SpectaclesContainer } from "@/components/features/public-site/spectacle
 import { Suspense } from "react";
 import { SpectaclesSkeleton } from "@/components/skeletons/spectacles-skeleton";
 
-export const dynamic = "force-dynamic";
+// ✅ ISR: Cache pour 60 secondes avec revalidation automatique
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Spectacles | Rouge-Cardinal",

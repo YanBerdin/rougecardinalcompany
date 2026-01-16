@@ -1,6 +1,7 @@
 "use server";
 
 import "server-only";
+import { cache } from "react";
 import { createClient } from "@/supabase/server";
 import { type DALResult, bytesToHuman } from "@/lib/dal/helpers";
 
@@ -148,134 +149,143 @@ function mapMediaKitRow(row: SupabaseMediaRow): MediaKitItemDTO {
 
 /**
  * Fetch public press releases
+ *
+ * Wrapped with React cache() for intra-request deduplication.
+ *
  * @param limit Optional limit on results
  * @returns Press releases ordered by publication date
  */
-export async function fetchPressReleases(
-  limit?: number
-): Promise<DALResult<PressRelease[]>> {
-  try {
-    const supabase = await createClient();
+export const fetchPressReleases = cache(
+  async (limit?: number): Promise<DALResult<PressRelease[]>> => {
+    try {
+      const supabase = await createClient();
 
-    let query = supabase
-      .from("communiques_presse")
-      .select(
-        "id, title, description, date_publication, image_url, ordre_affichage, public, file_size_bytes"
-      )
-      .eq("public", true)
-      .order("date_publication", { ascending: false });
+      let query = supabase
+        .from("communiques_presse")
+        .select(
+          "id, title, description, date_publication, image_url, ordre_affichage, public, file_size_bytes"
+        )
+        .eq("public", true)
+        .order("date_publication", { ascending: false });
 
-    if (typeof limit === "number") {
-      query = query.limit(limit);
-    }
+      if (typeof limit === "number") {
+        query = query.limit(limit);
+      }
 
-    const { data, error } = await query;
+      const { data, error } = await query;
 
-    if (error) {
-      console.error("[DAL] fetchPressReleases error:", error);
+      if (error) {
+        console.error("[DAL] fetchPressReleases error:", error);
+        return {
+          success: false,
+          error: `[ERR_PRESSE_001] Failed to fetch press releases: ${error.message}`,
+        };
+      }
+
+      const releases = (data ?? []).map(mapPressReleaseRow);
+      return { success: true, data: releases };
+    } catch (err: unknown) {
+      console.error("[DAL] fetchPressReleases unexpected error:", err);
       return {
         success: false,
-        error: `[ERR_PRESSE_001] Failed to fetch press releases: ${error.message}`,
+        error:
+          err instanceof Error ? err.message : "[ERR_PRESSE_002] Unknown error",
       };
     }
-
-    const releases = (data ?? []).map(mapPressReleaseRow);
-    return { success: true, data: releases };
-  } catch (err: unknown) {
-    console.error("[DAL] fetchPressReleases unexpected error:", err);
-    return {
-      success: false,
-      error:
-        err instanceof Error ? err.message : "[ERR_PRESSE_002] Unknown error",
-    };
   }
-}
+);
 
 /**
  * Fetch media articles from public view
+ *
+ * Wrapped with React cache() for intra-request deduplication.
+ *
  * @param limit Optional limit on results
  * @returns Media articles ordered by publication date
  */
-export async function fetchMediaArticles(
-  limit?: number
-): Promise<DALResult<MediaArticle[]>> {
-  try {
-    const supabase = await createClient();
+export const fetchMediaArticles = cache(
+  async (limit?: number): Promise<DALResult<MediaArticle[]>> => {
+    try {
+      const supabase = await createClient();
 
-    let query = supabase
-      .from("articles_presse_public")
-      .select(
-        "id, title, author, type, chapo, excerpt, source_publication, source_url, published_at"
-      )
-      .order("published_at", { ascending: false, nullsFirst: false });
+      let query = supabase
+        .from("articles_presse_public")
+        .select(
+          "id, title, author, type, chapo, excerpt, source_publication, source_url, published_at"
+        )
+        .order("published_at", { ascending: false, nullsFirst: false });
 
-    if (typeof limit === "number") {
-      query = query.limit(limit);
-    }
+      if (typeof limit === "number") {
+        query = query.limit(limit);
+      }
 
-    const { data, error } = await query;
+      const { data, error } = await query;
 
-    if (error) {
-      console.error("[DAL] fetchMediaArticles error:", error);
+      if (error) {
+        console.error("[DAL] fetchMediaArticles error:", error);
+        return {
+          success: false,
+          error: `[ERR_PRESSE_003] Failed to fetch media articles: ${error.message}`,
+        };
+      }
+
+      const articles = (data ?? []).map(mapMediaArticleRow);
+      return { success: true, data: articles };
+    } catch (err: unknown) {
+      console.error("[DAL] fetchMediaArticles unexpected error:", err);
       return {
         success: false,
-        error: `[ERR_PRESSE_003] Failed to fetch media articles: ${error.message}`,
+        error:
+          err instanceof Error ? err.message : "[ERR_PRESSE_004] Unknown error",
       };
     }
-
-    const articles = (data ?? []).map(mapMediaArticleRow);
-    return { success: true, data: articles };
-  } catch (err: unknown) {
-    console.error("[DAL] fetchMediaArticles unexpected error:", err);
-    return {
-      success: false,
-      error:
-        err instanceof Error ? err.message : "[ERR_PRESSE_004] Unknown error",
-    };
   }
-}
+);
 
 /**
  * Fetch media kit items (logos, photos, press kits)
+ *
+ * Wrapped with React cache() for intra-request deduplication.
+ *
  * @param limit Optional limit on results
  * @returns Media kit items ordered by storage path
  */
-export async function fetchMediaKit(
-  limit?: number
-): Promise<DALResult<MediaKitItemDTO[]>> {
-  try {
-    const supabase = await createClient();
+export const fetchMediaKit = cache(
+  async (limit?: number): Promise<DALResult<MediaKitItemDTO[]>> => {
+    try {
+      const supabase = await createClient();
 
-    let query = supabase
-      .from("medias")
-      .select("storage_path, filename, mime, size_bytes, alt_text, metadata")
-      .or(
-        "storage_path.like.press-kit/%,storage_path.like.photos/%,storage_path.like.dossiers/%"
-      )
-      .order("storage_path", { ascending: true });
+      let query = supabase
+        .from("medias")
+        .select("storage_path, filename, mime, size_bytes, alt_text, metadata")
+        .or(
+          "storage_path.like.press-kit/%,storage_path.like.photos/%,storage_path.like.dossiers/%"
+        )
+        .order("storage_path", { ascending: true });
 
-    if (typeof limit === "number") {
-      query = query.limit(limit);
-    }
+      if (typeof limit === "number") {
+        query = query.limit(limit);
+      }
 
-    const { data, error } = await query;
+      const { data, error } = await query;
 
-    if (error) {
-      console.error("[DAL] fetchMediaKit error:", error);
+      if (error) {
+        console.error("[DAL] fetchMediaKit error:", error);
+        return {
+          success: false,
+          error: `[ERR_PRESSE_005] Failed to fetch media kit: ${error.message}`,
+        };
+      }
+
+      const items = (data ?? []).map(mapMediaKitRow);
+      return { success: true, data: items };
+    } catch (err: unknown) {
+      console.error("[DAL] fetchMediaKit unexpected error:", err);
       return {
         success: false,
-        error: `[ERR_PRESSE_005] Failed to fetch media kit: ${error.message}`,
+        error:
+          err instanceof Error ? err.message : "[ERR_PRESSE_006] Unknown error",
       };
     }
-
-    const items = (data ?? []).map(mapMediaKitRow);
-    return { success: true, data: items };
-  } catch (err: unknown) {
-    console.error("[DAL] fetchMediaKit unexpected error:", err);
-    return {
-      success: false,
-      error:
-        err instanceof Error ? err.message : "[ERR_PRESSE_006] Unknown error",
-    };
   }
-}
+);

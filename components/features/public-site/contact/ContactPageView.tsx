@@ -68,7 +68,7 @@ export function ContactPageView({ showNewsletter = true }: ContactPageViewProps)
   } = useNewsletterSubscribe({ source: "contact" });
 
   useEffect(() => {
-    const t = setTimeout(() => setIsInitialLoading(false), 600); // artificial delay (TODO: remove)
+    const t = setTimeout(() => setIsInitialLoading(false), 600); //TODO: artificial delay (TODO: remove)
     return () => clearTimeout(t);
   }, []);
 

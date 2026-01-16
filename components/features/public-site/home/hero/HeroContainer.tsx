@@ -4,9 +4,6 @@ import { HeroClient } from "./HeroClient";
 import { HeroSlide } from "./types";
 
 export async function HeroContainer() {
-  // TODO: remove - artificial delay to visualize Suspense skeletons
-  await new Promise((resolve) => setTimeout(resolve, 1500));
-
   // Check display toggle
   const toggleResult = await fetchDisplayToggle("display_toggle_home_hero");
   if (!toggleResult.success || !toggleResult.data?.value?.enabled) {

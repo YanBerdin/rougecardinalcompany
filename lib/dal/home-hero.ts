@@ -1,6 +1,7 @@
 "use server";
 
 import "server-only";
+import { cache } from "react";
 import { createClient } from "@/supabase/server";
 import { type DALResult } from "@/lib/dal/helpers";
 
@@ -77,40 +78,42 @@ function filterActiveSlides(
 
 /**
  * Fetch active hero slides filtered by date range
- * @returns Active slides ordered by position
+ *
+ * Wrapped with React cache() for intra-request deduplication.
+ * ISR (revalidate=60) on marketing pages provides cross-request caching.
  */
-export async function fetchActiveHomeHeroSlides(): Promise<
-  DALResult<HomeHeroSlideRecord[]>
-> {
-  try {
-    const supabase = await createClient();
+export const fetchActiveHomeHeroSlides = cache(
+  async (): Promise<DALResult<HomeHeroSlideRecord[]>> => {
+    try {
+      const supabase = await createClient();
 
-    const { data, error } = await supabase
-      .from("home_hero_slides")
-      .select(
-        "title, subtitle, description, image_url, cta_primary_enabled, cta_primary_label, cta_primary_url, cta_secondary_enabled, cta_secondary_label, cta_secondary_url, position, active, starts_at, ends_at"
-      )
-      .order("position", { ascending: true });
+      const { data, error } = await supabase
+        .from("home_hero_slides")
+        .select(
+          "title, subtitle, description, image_url, cta_primary_enabled, cta_primary_label, cta_primary_url, cta_secondary_enabled, cta_secondary_label, cta_secondary_url, position, active, starts_at, ends_at"
+        )
+        .order("position", { ascending: true });
 
-    if (error) {
-      console.error("[DAL] fetchActiveHomeHeroSlides error:", JSON.stringify(error, null, 2));
-      console.error("[DAL] Error details - code:", error.code, "message:", error.message, "hint:", error.hint);
+      if (error) {
+        console.error("[DAL] fetchActiveHomeHeroSlides error:", JSON.stringify(error, null, 2));
+        console.error("[DAL] Error details - code:", error.code, "message:", error.message, "hint:", error.hint);
+        return {
+          success: false,
+          error: `[ERR_HOME_HERO_001] Failed to fetch hero slides: ${error.message}`,
+        };
+      }
+
+      const now = new Date();
+      const filteredSlides = filterActiveSlides(data ?? [], now);
+
+      return { success: true, data: filteredSlides };
+    } catch (err: unknown) {
+      console.error("[DAL] fetchActiveHomeHeroSlides unexpected error:", err);
       return {
         success: false,
-        error: `[ERR_HOME_HERO_001] Failed to fetch hero slides: ${error.message}`,
+        error:
+          err instanceof Error ? err.message : "[ERR_HOME_HERO_002] Unknown error",
       };
     }
-
-    const now = new Date();
-    const filteredSlides = filterActiveSlides(data ?? [], now);
-
-    return { success: true, data: filteredSlides };
-  } catch (err: unknown) {
-    console.error("[DAL] fetchActiveHomeHeroSlides unexpected error:", err);
-    return {
-      success: false,
-      error:
-        err instanceof Error ? err.message : "[ERR_HOME_HERO_002] Unknown error",
-    };
   }
-}
+);

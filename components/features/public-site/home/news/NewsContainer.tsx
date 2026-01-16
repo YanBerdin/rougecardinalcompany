@@ -4,9 +4,6 @@ import { NewsView } from "./NewsView";
 import type { NewsItem } from "./types";
 
 export async function NewsContainer() {
-  // TODO: remove - artificial delay to visualize Suspense skeletons
-  await new Promise((resolve) => setTimeout(resolve, 1500));
-
   // ✅ Check toggle
   const toggleResult = await fetchDisplayToggle("display_toggle_home_a_la_une");
 

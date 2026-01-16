@@ -46,8 +46,10 @@ comment on column public.spectacles.image_url is
 comment on column public.spectacles.awards is 
 'Liste des prix et distinctions (array, d''où le pluriel conforme au type)';
 
--- ✅ Index pour performance
-create index if not exists idx_spectacles_slug on public.spectacles(slug);
+-- ✅ Index pour performance - partial index for published spectacles
+create index if not exists idx_spectacles_slug_published 
+  on public.spectacles(slug) 
+  where status = 'published';
 create index if not exists idx_spectacles_status on public.spectacles(status);
 create index if not exists idx_spectacles_public on public.spectacles(public);
 create index if not exists idx_spectacles_search_vector on public.spectacles using gin(search_vector);

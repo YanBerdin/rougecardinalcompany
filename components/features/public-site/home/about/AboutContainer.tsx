@@ -17,9 +17,6 @@ export async function AboutContainer() {
     return null;
   }
 
-  // TODO: remove - artificial delay to visualize Suspense skeletons
-  await new Promise((resolve) => setTimeout(resolve, 1500));
-
   const statsResult = await fetchCompanyStats();
   const records = statsResult.success ? statsResult.data : [];
   const stats: StatItem[] = records.map((r) => ({

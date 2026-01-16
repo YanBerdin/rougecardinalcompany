@@ -202,12 +202,51 @@ NEW_OPTIONAL_VAR=optional_value
 
 4. Update local `.env.local` and test
 
+## � Exception: Scripts CLI (`scripts/*.ts`)
+
+**Les scripts CLI utilisent `process.env` avec `dotenv/config`** — PAS T3 Env.
+
+### Pourquoi ?
+
+1. **T3 Env est conçu pour Next.js** — Il s'intègre avec le runtime Next.js (client/server separation, SSR)
+2. **Scripts hors contexte Next.js** — Exécutés via `tsx` directement
+3. **Convention du projet** — Cohérence avec les autres scripts existants
+
+### Pattern pour scripts
+
+```typescript
+#!/usr/bin/env tsx
+import 'dotenv/config';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const secretKey = process.env.SUPABASE_SECRET_KEY;
+
+if (!supabaseUrl || !secretKey) {
+  console.error('❌ Missing required environment variables');
+  process.exit(1);
+}
+
+// ... script logic
+```
+
+### Résumé par contexte
+
+| Contexte | Méthode |
+| ---------- | -------- |
+| `app/`, `lib/`, `components/` | `import { env } from '@/lib/env'` (T3 Env) |
+| `scripts/*.ts` | `import 'dotenv/config'` + `process.env.*` |
+| `supabase/functions/` | `Deno.env.get()` |
+
+---
+
 ## 📖 References
 
 - T3 Env Documentation: https://env.t3.gg
 - Project Implementation: `lib/env.ts`
 - Test Script: `scripts/test-env-validation.ts`
 - Memory Bank: `memory-bank/systemPatterns.md` (T3 Env section)
+- Scripts Convention: `scripts/README.md`
 
 ## 🎯 Phase Completion Status
 

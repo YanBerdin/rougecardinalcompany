@@ -7,6 +7,10 @@ import {
 } from "@/lib/dal/presse";
 import { fetchDisplayToggle } from "@/lib/dal/site-config";
 
+/**
+ * ✅ Server Component optimized for streaming
+ * Fetches all data in parallel for optimal performance
+ */
 export default async function PresseServerGate() {
   // ✅ Check display toggles
   const [mediaKitToggleResult, pressReleasesToggleResult] = await Promise.all([
@@ -26,11 +30,16 @@ export default async function PresseServerGate() {
     ? pressReleasesToggleResult.data?.value.max_items ?? 12
     : 12;
 
+  // ✅ Fetch all data in parallel - fast!
   const [pressReleasesResult, mediaArticlesResult, mediaKitResult] =
     await Promise.all([
-      showPressReleases ? fetchPressReleases(maxPressReleases) : Promise.resolve({ success: true, data: [] }),
+      showPressReleases
+        ? fetchPressReleases(maxPressReleases)
+        : Promise.resolve({ success: true, data: [] }),
       fetchMediaArticles(),
-      showMediaKit ? fetchMediaKit() : Promise.resolve({ success: true, data: [] }),
+      showMediaKit
+        ? fetchMediaKit()
+        : Promise.resolve({ success: true, data: [] }),
     ]);
 
   // Handle errors gracefully with fallback empty arrays
@@ -42,7 +51,7 @@ export default async function PresseServerGate() {
     : [];
   const mediaKitRows = mediaKitResult.success ? mediaKitResult.data : [];
 
-  // Map DTO → MediaKitItem pour l'UI (icône optionnelle)
+  // Map DTO → MediaKitItem pour l'UI
   const mediaKit: MediaKitItem[] = mediaKitRows.map((r) => ({
     type: r.type,
     description: r.description,

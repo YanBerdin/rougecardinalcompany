@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
+    "analyze": "echo 'Bundle analysis with Turbopack: Use Chrome DevTools > Network > JS filter or Coverage tab. For detailed analysis, run: NEXT_TURBOPACK_TRACING=1 next build'",
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -35,6 +36,7 @@
     "test:cookies": "tsx scripts/test-cookie-security.ts",
     "test:ssrf": "tsx scripts/test-ssrf-validation.ts",
     "test:audit-logs": "tsx scripts/test-audit-logs-schema.ts",
+    "test:dal": "tsx scripts/test-all-dal-functions.ts",
     "check:views": "tsx scripts/check-views-security.ts",
     "check:views:auth": "tsx scripts/test-views-security-authenticated.ts",
     "check:views:invoker": "tsx scripts/test-views-security-invoker.ts",

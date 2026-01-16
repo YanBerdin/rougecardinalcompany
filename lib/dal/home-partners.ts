@@ -1,6 +1,7 @@
 "use server";
 
 import "server-only";
+import { cache } from "react";
 import { createClient } from "@/supabase/server";
 import { type DALResult } from "@/lib/dal/helpers";
 
@@ -20,14 +21,16 @@ export type PartnerRecord = {
 
 /**
  * Fetch active partners for homepage display
+ *
+ * Wrapped with React cache() for intra-request deduplication.
+ *
  * @param limit Maximum number of partners to return
  * @returns Active partners ordered by display order
  */
-export async function fetchActivePartners(
-  limit = 12
-): Promise<DALResult<PartnerRecord[]>> {
-  try {
-    const supabase = await createClient();
+export const fetchActivePartners = cache(
+  async (limit = 12): Promise<DALResult<PartnerRecord[]>> => {
+    try {
+      const supabase = await createClient();
 
     const { data, error } = await supabase
       .from("partners")
@@ -57,4 +60,5 @@ export async function fetchActivePartners(
           : "[ERR_HOME_PARTNERS_002] Unknown error",
     };
   }
-}
+  }
+);

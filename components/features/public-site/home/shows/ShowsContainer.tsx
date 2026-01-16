@@ -4,9 +4,6 @@ import { ShowsView } from "./ShowsView";
 import type { Show } from "./types";
 
 export async function ShowsContainer() {
-  // TODO: remove - artificial delay to visualize Suspense skeletons
-  await new Promise((resolve) => setTimeout(resolve, 1500));
-
   // ✅ Check toggle - uses `public:home:spectacles`
   const toggleResult = await fetchDisplayToggle("display_toggle_home_spectacles");
 

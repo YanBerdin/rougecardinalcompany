@@ -1,6 +1,7 @@
 "use server";
 
 import "server-only";
+import { cache } from "react";
 import { createClient } from "@/supabase/server";
 import { requireAdmin } from "@/lib/auth/is-admin";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -28,6 +29,9 @@ import {
 /**
  * Fetches all spectacles from the database
  *
+ * Wrapped with React cache() for intra-request deduplication.
+ * ISR (revalidate=60) on marketing pages provides cross-request caching.
+ *
  * By default, only public spectacles are returned. Invalid rows that fail
  * Zod validation are filtered out and logged.
  *
@@ -41,45 +45,45 @@ import {
  * // Get all spectacles including private (admin)
  * const allSpectacles = await fetchAllSpectacles(true);
  */
-export async function fetchAllSpectacles(
-  includePrivate = false
-): Promise<SpectacleSummary[]> {
-  try {
-    const supabase = await createClient();
-    let query = supabase
-      .from("spectacles")
-      .select(
-        "id, title, slug, short_description, image_url, premiere, public, genre, duration_minutes, casting, status, awards"
-      )
-      .order("premiere", { ascending: false });
+export const fetchAllSpectacles = cache(
+  async (includePrivate = false): Promise<SpectacleSummary[]> => {
+    try {
+      const supabase = await createClient();
+      let query = supabase
+        .from("spectacles")
+        .select(
+          "id, title, slug, short_description, image_url, premiere, public, genre, duration_minutes, casting, status, awards"
+        )
+        .order("premiere", { ascending: false });
 
-    if (!includePrivate) {
-      query = query.eq("public", true);
-    }
+      if (!includePrivate) {
+        query = query.eq("public", true);
+      }
 
-    const { data, error } = await query;
+      const { data, error } = await query;
 
-    if (error) {
-      console.error("fetchAllSpectacles error:", error);
+      if (error) {
+        console.error("fetchAllSpectacles error:", error);
+        return [];
+      }
+
+      const rows = (data as SpectacleSummary[]) || [];
+
+      // Validate each row with Zod; log invalid rows and filter them out
+      const validRows: SpectacleSummary[] = [];
+      for (const r of rows) {
+        const parsed = SpectacleDbSchema.partial().safeParse(r as unknown);
+        if (parsed.success) validRows.push(r);
+        else console.error("fetchAllSpectacles: invalid row:", parsed.error);
+      }
+
+      return validRows;
+    } catch (err) {
+      console.error("fetchAllSpectacles exception:", err);
       return [];
     }
-
-    const rows = (data as SpectacleSummary[]) || [];
-
-    // Validate each row with Zod; log invalid rows and filter them out
-    const validRows: SpectacleSummary[] = [];
-    for (const r of rows) {
-      const parsed = SpectacleDbSchema.partial().safeParse(r as unknown);
-      if (parsed.success) validRows.push(r);
-      else console.error("fetchAllSpectacles: invalid row:", parsed.error);
-    }
-
-    return validRows;
-  } catch (err) {
-    console.error("fetchAllSpectacles exception:", err);
-    return [];
   }
-}
+);
 
 /**
  * Fetches a single spectacle by ID
@@ -93,40 +97,52 @@ export async function fetchAllSpectacles(
  *   console.log(`Found: ${spectacle.title}`);
  * }
  */
-export async function fetchSpectacleById(
-  id: number
-): Promise<SpectacleDb | null> {
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("spectacles")
-      .select("*")
-      .eq("id", id)
-      .single();
+/**
+ * Fetches a spectacle by ID
+ *
+ * Wrapped with React cache() for intra-request deduplication.
+ *
+ * @param id - Spectacle ID
+ * @returns Spectacle record or null if not found
+ */
+export const fetchSpectacleById = cache(
+  async (id: number): Promise<SpectacleDb | null> => {
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from("spectacles")
+        .select(
+          "id, title, slug, status, description, short_description, genre, duration_minutes, casting, premiere, image_url, public, awards, created_by, created_at, updated_at"
+        )
+        .eq("id", id)
+        .single();
 
-    if (error) {
-      // PGRST116 = Not found (0 rows) - this is expected for non-existent IDs
-      if (error.code !== "PGRST116") {
-        console.error("fetchSpectacleById error:", error);
+      if (error) {
+        // PGRST116 = Not found (0 rows) - this is expected for non-existent IDs
+        if (error.code !== "PGRST116") {
+          console.error("fetchSpectacleById error:", error);
+        }
+        return null;
       }
+
+      const parsed = SpectacleDbSchema.safeParse(data as unknown);
+      if (!parsed.success) {
+        console.error("fetchSpectacleById: invalid row:", parsed.error);
+        return null;
+      }
+
+      return parsed.data;
+    } catch (err) {
+      console.error("fetchSpectacleById exception:", err);
       return null;
     }
-
-    const parsed = SpectacleDbSchema.safeParse(data as unknown);
-    if (!parsed.success) {
-      console.error("fetchSpectacleById: invalid row:", parsed.error);
-      return null;
-    }
-
-    return parsed.data;
-  } catch (err) {
-    console.error("fetchSpectacleById exception:", err);
-    return null;
   }
-}
+);
 
 /**
  * Fetches a spectacle by slug
+ *
+ * Wrapped with React cache() for intra-request deduplication.
  *
  * @param slug - Spectacle slug (URL-friendly identifier)
  * @returns Spectacle record or null if not found
@@ -134,55 +150,59 @@ export async function fetchSpectacleById(
  * @example
  * const spectacle = await fetchSpectacleBySlug("hamlet-2025");
  */
-export async function fetchSpectacleBySlug(
-  slug: string
-): Promise<SpectacleDb | null> {
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("spectacles")
-      .select("*")
-      .eq("slug", slug)
-      .single();
+export const fetchSpectacleBySlug = cache(
+  async (slug: string): Promise<SpectacleDb | null> => {
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from("spectacles")
+        .select(
+          "id, title, slug, status, description, short_description, genre, duration_minutes, casting, premiere, image_url, public, awards, created_by, created_at, updated_at"
+        )
+        .eq("slug", slug)
+        .single();
 
-    if (error) {
-      console.error("fetchSpectacleBySlug error:", error);
+      if (error) {
+        console.error("fetchSpectacleBySlug error:", error);
+        return null;
+      }
+
+      const parsed = SpectacleDbSchema.safeParse(data as unknown);
+      if (!parsed.success) {
+        console.error("fetchSpectacleBySlug: invalid row:", parsed.error);
+        return null;
+      }
+
+      return parsed.data;
+    } catch (err) {
+      console.error("fetchSpectacleBySlug exception:", err);
       return null;
     }
-
-    const parsed = SpectacleDbSchema.safeParse(data as unknown);
-    if (!parsed.success) {
-      console.error("fetchSpectacleBySlug: invalid row:", parsed.error);
-      return null;
-    }
-
-    return parsed.data;
-  } catch (err) {
-    console.error("fetchSpectacleBySlug exception:", err);
-    return null;
   }
-}
+);
 
 /**
  * Fetches all distinct genres used in spectacles
+ *
+ * Wrapped with React cache() for intra-request deduplication.
  * Returns sorted array of non-null genres
  *
  * @example
  * const genres = await fetchDistinctGenres();
  * // ["Comédie", "Drame", "Tragédie"]
  */
-export async function fetchDistinctGenres(): Promise<string[]> {
+export const fetchDistinctGenres = cache(async (): Promise<string[]> => {
   try {
     const supabase = await createClient();
 
     const { data, error } = await supabase
-      .from('spectacles')
-      .select('genre')
-      .not('genre', 'is', null)
-      .order('genre');
+      .from("spectacles")
+      .select("genre")
+      .not("genre", "is", null)
+      .order("genre");
 
     if (error) {
-      console.error('[DAL] fetchDistinctGenres error:', error);
+      console.error("[DAL] fetchDistinctGenres error:", error);
       return [];
     }
 
@@ -190,17 +210,17 @@ export async function fetchDistinctGenres(): Promise<string[]> {
     const uniqueGenres = Array.from(
       new Set(
         data
-          .map(item => item.genre)
+          .map((item) => item.genre)
           .filter((genre): genre is string => Boolean(genre && genre.trim()))
       )
     );
 
-    return uniqueGenres.sort((a, b) => a.localeCompare(b, 'fr'));
+    return uniqueGenres.sort((a, b) => a.localeCompare(b, "fr"));
   } catch (error) {
-    console.error('[DAL] fetchDistinctGenres exception:', error);
+    console.error("[DAL] fetchDistinctGenres exception:", error);
     return [];
   }
-}
+});
 
 // ============================================================================
 // CREATE Operation

@@ -1,5 +1,6 @@
 "use server";
 import "server-only";
+import { cache } from "react";
 import { createClient } from "@/supabase/server";
 import { type DALResult } from "@/lib/dal/helpers";
 
@@ -24,80 +25,86 @@ export type TeamMemberRecord = {
 };
 
 // ============================================================================
-// DAL Functions
+// DAL Functions (wrapped with React cache for intra-request deduplication)
 // ============================================================================
 
 /**
  * Fetch active company values
+ *
+ * Wrapped with React cache() for intra-request deduplication.
+ *
  * @param limit - Maximum number of values to return (default: 12)
  */
-export async function fetchCompagnieValues(
-  limit = 12
-): Promise<DALResult<CompagnieValueRecord[]>> {
-  try {
-    const supabase = await createClient();
+export const fetchCompagnieValues = cache(
+  async (limit = 12): Promise<DALResult<CompagnieValueRecord[]>> => {
+    try {
+      const supabase = await createClient();
 
-    const { data, error } = await supabase
-      .from("compagnie_values")
-      .select("id, key, title, description, position, active")
-      .eq("active", true)
-      .order("position", { ascending: true })
-      .limit(limit);
+      const { data, error } = await supabase
+        .from("compagnie_values")
+        .select("id, key, title, description, position, active")
+        .eq("active", true)
+        .order("position", { ascending: true })
+        .limit(limit);
 
-    if (error) {
-      console.error("[DAL] fetchCompagnieValues error:", error);
+      if (error) {
+        console.error("[DAL] fetchCompagnieValues error:", error);
+        return {
+          success: false,
+          error: `[ERR_COMPAGNIE_001] Failed to fetch values: ${error.message}`,
+        };
+      }
+
+      return { success: true, data: data ?? [] };
+    } catch (err: unknown) {
+      console.error("[DAL] fetchCompagnieValues exception:", err);
       return {
         success: false,
-        error: `[ERR_COMPAGNIE_001] Failed to fetch values: ${error.message}`,
+        error: `[ERR_COMPAGNIE_002] ${err instanceof Error ? err.message : "Unknown error"}`,
       };
     }
-
-    return { success: true, data: data ?? [] };
-  } catch (err: unknown) {
-    console.error("[DAL] fetchCompagnieValues exception:", err);
-    return {
-      success: false,
-      error: `[ERR_COMPAGNIE_002] ${err instanceof Error ? err.message : "Unknown error"}`,
-    };
   }
-}
+);
 
 /**
  * Fetch active team members for public display
+ *
+ * Wrapped with React cache() for intra-request deduplication.
+ *
  * @param limit - Maximum number of members to return (default: 12)
  */
-export async function fetchTeamMembers(
-  limit = 12
-): Promise<DALResult<TeamMemberRecord[]>> {
-  try {
-    const supabase = await createClient();
+export const fetchTeamMembers = cache(
+  async (limit = 12): Promise<DALResult<TeamMemberRecord[]>> => {
+    try {
+      const supabase = await createClient();
 
-    const { data, error } = await supabase
-      .from("membres_equipe")
-      .select(
-        "id, name, role, description, image_url, photo_media_id, ordre, active"
-      )
-      .eq("active", true)
-      .order("ordre", { ascending: true })
-      .limit(limit);
+      const { data, error } = await supabase
+        .from("membres_equipe")
+        .select(
+          "id, name, role, description, image_url, photo_media_id, ordre, active"
+        )
+        .eq("active", true)
+        .order("ordre", { ascending: true })
+        .limit(limit);
 
-    if (error) {
-      console.error("[DAL] fetchTeamMembers error:", error);
+      if (error) {
+        console.error("[DAL] fetchTeamMembers error:", error);
+        return {
+          success: false,
+          error: `[ERR_COMPAGNIE_003] Failed to fetch team: ${error.message}`,
+        };
+      }
+
+      return { success: true, data: data ?? [] };
+    } catch (err: unknown) {
+      console.error("[DAL] fetchTeamMembers exception:", err);
       return {
         success: false,
-        error: `[ERR_COMPAGNIE_003] Failed to fetch team: ${error.message}`,
+        error: `[ERR_COMPAGNIE_004] ${err instanceof Error ? err.message : "Unknown error"}`,
       };
     }
-
-    return { success: true, data: data ?? [] };
-  } catch (err: unknown) {
-    console.error("[DAL] fetchTeamMembers exception:", err);
-    return {
-      success: false,
-      error: `[ERR_COMPAGNIE_004] ${err instanceof Error ? err.message : "Unknown error"}`,
-    };
   }
-}
+);
 
 // ============================================================================
 // Legacy Exports (backward compatibility)

@@ -1,5 +1,6 @@
 "use server";
 import "server-only";
+import { cache } from "react";
 import { createClient } from "@/supabase/server";
 import {
   EventSchema,
@@ -83,101 +84,109 @@ function mapRowToEventDTO(row: SupabaseEventRow): AgendaEvent {
 
 /**
  * Fetch upcoming events from agenda
+ *
+ * Wrapped with React cache() for intra-request deduplication.
+ *
  * @param limit - Maximum number of events to return (default: 10)
  * @returns DALResult with array of AgendaEvent
  */
-export async function fetchUpcomingEvents(
-  limit = 10
-): Promise<DALResult<AgendaEvent[]>> {
-  try {
-    const supabase = await createClient();
+export const fetchUpcomingEvents = cache(
+  async (limit = 10): Promise<DALResult<AgendaEvent[]>> => {
+    try {
+      const supabase = await createClient();
 
-    const { data, error } = await supabase
-      .from("evenements")
-      .select(
-        `id, date_debut, start_time, status, ticket_url, image_url, type_array,
+      const { data, error } = await supabase
+        .from("evenements")
+        .select(
+          `id, date_debut, start_time, status, ticket_url, image_url, type_array,
          spectacles (title, image_url),
          lieux (nom, adresse, ville, code_postal)`
-      )
-      .gte("date_debut", new Date().toISOString())
-      .order("date_debut", { ascending: true })
-      .limit(limit);
+        )
+        .gte("date_debut", new Date().toISOString())
+        .order("date_debut", { ascending: true })
+        .limit(limit);
 
-    if (error) {
-      console.error("[DAL] fetchUpcomingEvents error:", error);
+      if (error) {
+        console.error("[DAL] fetchUpcomingEvents error:", error);
+        return {
+          success: false,
+          error: `[ERR_AGENDA_001] Failed to fetch events: ${error.message}`,
+        };
+      }
+
+      const events = (data ?? []).map((row) =>
+        mapRowToEventDTO(row as SupabaseEventRow)
+      );
+
+      return { success: true, data: events };
+    } catch (err: unknown) {
+      console.error("[DAL] fetchUpcomingEvents exception:", err);
       return {
         success: false,
-        error: `[ERR_AGENDA_001] Failed to fetch events: ${error.message}`,
+        error: `[ERR_AGENDA_002] ${err instanceof Error ? err.message : "Unknown error"}`,
       };
     }
-
-    const events = (data ?? []).map((row) =>
-      mapRowToEventDTO(row as SupabaseEventRow)
-    );
-
-    return { success: true, data: events };
-  } catch (err: unknown) {
-    console.error("[DAL] fetchUpcomingEvents exception:", err);
-    return {
-      success: false,
-      error: `[ERR_AGENDA_002] ${err instanceof Error ? err.message : "Unknown error"}`,
-    };
   }
-}
+);
 
 /**
  * Fetch distinct event types from database
+ *
+ * Wrapped with React cache() for intra-request deduplication.
+ *
  * @returns DALResult with array of EventTypeOption for filters
  */
-export async function fetchEventTypes(): Promise<DALResult<EventTypeOption[]>> {
-  try {
-    const supabase = await createClient();
+export const fetchEventTypes = cache(
+  async (): Promise<DALResult<EventTypeOption[]>> => {
+    try {
+      const supabase = await createClient();
 
-    const { data, error } = await supabase
-      .from("evenements")
-      .select("type_array")
-      .not("type_array", "is", null)
-      .limit(200);
+      const { data, error } = await supabase
+        .from("evenements")
+        .select("type_array")
+        .not("type_array", "is", null)
+        .limit(200);
 
-    if (error) {
-      console.error("[DAL] fetchEventTypes error:", error);
+      if (error) {
+        console.error("[DAL] fetchEventTypes error:", error);
+        return {
+          success: false,
+          error: `[ERR_AGENDA_003] Failed to fetch event types: ${error.message}`,
+        };
+      }
+
+      // Extract unique types from arrays
+      const typeSet = new Set<string>();
+      for (const row of data ?? []) {
+        for (const t of row.type_array ?? []) {
+          typeSet.add(t);
+        }
+      }
+
+      const values = Array.from(typeSet);
+      const baseTypes =
+        values.length > 0
+          ? values
+          : ["Spectacle", "Première", "Rencontre", "Atelier"];
+
+      const options: EventTypeOption[] = [
+        { value: "all", label: "Tous les événements" },
+        ...baseTypes.map((v) => ({
+          value: v,
+          label: v + (v.endsWith("s") ? "" : "s"),
+        })),
+      ];
+
+      return { success: true, data: options };
+    } catch (err: unknown) {
+      console.error("[DAL] fetchEventTypes exception:", err);
       return {
         success: false,
-        error: `[ERR_AGENDA_003] Failed to fetch event types: ${error.message}`,
+        error: `[ERR_AGENDA_004] ${err instanceof Error ? err.message : "Unknown error"}`,
       };
     }
-
-    // Extract unique types from arrays
-    const typeSet = new Set<string>();
-    for (const row of data ?? []) {
-      for (const t of row.type_array ?? []) {
-        typeSet.add(t);
-      }
-    }
-
-    const values = Array.from(typeSet);
-    const baseTypes =
-      values.length > 0
-        ? values
-        : ["Spectacle", "Première", "Rencontre", "Atelier"];
-
-    const options: EventTypeOption[] = [
-      { value: "all", label: "Tous les événements" },
-      ...baseTypes.map((v) => ({
-        value: v,
-        label: v + (v.endsWith("s") ? "" : "s"),
-      })),
-    ];
-
-    return { success: true, data: options };
-  } catch (err: unknown) {
-    console.error("[DAL] fetchEventTypes exception:", err);
-    return {
-      success: false,
-      error: `[ERR_AGENDA_004] ${err instanceof Error ? err.message : "Unknown error"}`,
-    };
   }
-}
+);
 
 // ============================================================================
 // Legacy Exports (backward compatibility)

@@ -1,5 +1,6 @@
 "use server";
 import "server-only";
+import { cache } from "react";
 import { createClient } from "@/supabase/server";
 import { requireAdmin } from "@/lib/auth/is-admin";
 import type { Database } from "@/lib/database.types";
@@ -32,6 +33,7 @@ const ReorderSchema = z
 /**
  * Fetches all team members from the database
  *
+ * Wrapped with React cache() for intra-request deduplication.
  * By default, only active members are returned. Invalid rows that fail
  * Zod validation are filtered out and logged.
  *
@@ -45,48 +47,50 @@ const ReorderSchema = z
  * Get all members including inactive
  * const allMembers = await fetchAllTeamMembers(true);
  */
-export async function fetchAllTeamMembers(
-  includeInactive = false
-): Promise<TeamRow[]> {
-  try {
-    const supabase = await createClient();
-    let query = supabase
-      .from("membres_equipe")
-      .select("*")
-      .order("ordre", { ascending: true });
+export const fetchAllTeamMembers = cache(
+  async (includeInactive = false): Promise<TeamRow[]> => {
+    try {
+      const supabase = await createClient();
+      let query = supabase
+        .from("membres_equipe")
+        .select("*")
+        .order("ordre", { ascending: true });
 
-    if (!includeInactive) {
-      // By default, exclude deactivated (active = false) members so that
-      // it immediately hides the member from lists unless the user explicitly requests inactive members.
-      query = query.eq("active", true);
-    }
+      if (!includeInactive) {
+        // By default, exclude deactivated (active = false) members so that
+        // it immediately hides the member from lists unless the user explicitly requests inactive members.
+        query = query.eq("active", true);
+      }
 
-    const { data, error } = await query;
+      const { data, error } = await query;
 
-    if (error) {
-      console.error("fetchAllTeamMembers error:", error);
+      if (error) {
+        console.error("fetchAllTeamMembers error:", error);
+        return [];
+      }
+
+      const rows = (data as TeamRow[]) || [];
+
+      // Validate each row with Zod; log invalid rows and filter them out
+      const validRows: TeamRow[] = [];
+      for (const r of rows) {
+        const parsed = TeamMemberDbSchema.safeParse(r as unknown);
+        if (parsed.success) validRows.push(parsed.data as TeamRow);
+        else console.error("fetchAllTeamMembers: invalid row:", parsed.error);
+      }
+
+      return validRows;
+    } catch (err) {
+      console.error("fetchAllTeamMembers exception:", err);
       return [];
     }
-
-    const rows = (data as TeamRow[]) || [];
-
-    // Validate each row with Zod; log invalid rows and filter them out
-    const validRows: TeamRow[] = [];
-    for (const r of rows) {
-      const parsed = TeamMemberDbSchema.safeParse(r as unknown);
-      if (parsed.success) validRows.push(parsed.data as TeamRow);
-      else console.error("fetchAllTeamMembers: invalid row:", parsed.error);
-    }
-
-    return validRows;
-  } catch (err) {
-    console.error("fetchAllTeamMembers exception:", err);
-    return [];
   }
-}
+);
 
 /**
  * Fetches a single team member by ID
+ *
+ * Wrapped with React cache() for intra-request deduplication.
  *
  * @param id - Team member ID
  * @returns Team member record or null if not found or invalid
@@ -97,35 +101,40 @@ export async function fetchAllTeamMembers(
  *   console.log(`Found: ${member.nom}`);
  * }
  */
-export async function fetchTeamMemberById(id: number): Promise<TeamRow | null> {
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("membres_equipe")
-      .select("*")
-      .eq("id", id)
-      .single();
+export const fetchTeamMemberById = cache(
+  async (id: number): Promise<TeamRow | null> => {
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from("membres_equipe")
+        .select("*")
+        .eq("id", id)
+        .single();
 
-    if (error) {
-      // PGRST116 = "not found" - expected behavior, not an error
-      if (error.code !== "PGRST116") {
-        console.error("[ERR_TEAM_010] fetchTeamMemberById error:", error);
+      if (error) {
+        // PGRST116 = "not found" - expected behavior, not an error
+        if (error.code !== "PGRST116") {
+          console.error("[ERR_TEAM_010] fetchTeamMemberById error:", error);
+        }
+        return null;
       }
+
+      const parsed = TeamMemberDbSchema.safeParse(data as unknown);
+      if (!parsed.success) {
+        console.error(
+          "[ERR_TEAM_011] fetchTeamMemberById: invalid row:",
+          parsed.error
+        );
+        return null;
+      }
+
+      return parsed.data as TeamRow;
+    } catch (err) {
+      console.error("[ERR_TEAM_012] fetchTeamMemberById exception:", err);
       return null;
     }
-
-    const parsed = TeamMemberDbSchema.safeParse(data as unknown);
-    if (!parsed.success) {
-      console.error("[ERR_TEAM_011] fetchTeamMemberById: invalid row:", parsed.error);
-      return null;
-    }
-
-    return parsed.data as TeamRow;
-  } catch (err) {
-    console.error("[ERR_TEAM_012] fetchTeamMemberById exception:", err);
-    return null;
   }
-}
+);
 
 /**
  * Creates or updates a team member

@@ -2,6 +2,36 @@
 
 Ce dossier contient des scripts d'administration pour gérer et surveiller l'application Rouge Cardinal Company.
 
+## ⚠️ Convention Variables d'Environnement (T3 Env)
+
+**Les scripts CLI utilisent `process.env` avec `dotenv/config`** — PAS T3 Env.
+
+T3 Env est conçu pour le runtime Next.js (client/server separation, SSR). Les scripts sont exécutés via `tsx` directement, hors du contexte Next.js.
+
+| Contexte | Méthode |
+| ---------- | -------- |
+| `app/`, `lib/`, `components/` | `import { env } from '@/lib/env'` (T3 Env) |
+| `scripts/*.ts` | `import 'dotenv/config'` + `process.env.*` |
+| `supabase/functions/` | `Deno.env.get()` |
+
+**Pattern standard dans les scripts** :
+
+```typescript
+#!/usr/bin/env tsx
+import 'dotenv/config';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const secretKey = process.env.SUPABASE_SECRET_KEY;
+
+if (!supabaseUrl || !secretKey) {
+  console.error('❌ Missing required environment variables');
+  process.exit(1);
+}
+```
+
+**Voir aussi** : `.github/prompts/plan-feat-t3-env.prompt/t3_env_guide.md`
+
 ## 🩺 Diagnostic Admin (Janvier 2026)
 
 ### check-admin-status.ts (TypeScript) ✅ RECOMMANDÉ
@@ -207,6 +237,31 @@ Voir le runbook complet: `memory-bank/tasks/TASK050_RUNBOOK_PITR_restore.md`
 ---
 
 ### 🧪 Tests DAL (Data Access Layer)
+
+#### test-all-dal-functions-doc.ts (TypeScript) ✅ DOCUMENTATION
+
+**Description** : Script de documentation listant toutes les fonctions DAL wrappées avec React cache(). Ne peut pas exécuter les tests directement (restriction server-only), mais fournit une liste organisée et des approches de test alternatives.
+
+**Utilisation** :
+
+```bash
+pnpm exec tsx scripts/test-all-dal-functions.ts
+```
+
+**Sortie** :
+
+- Liste des 21 fonctions DAL organisées par 12 fichiers
+- Recommandations pour les tests alternatifs :
+  - `pnpm exec tsc --noEmit` - Validation TypeScript
+  - `pnpm dev` - Tests manuels via serveur de développement
+  - Visites de pages - Vérifier la fonctionnalité
+  - Monitoring des logs - Détecter les erreurs runtime
+
+**Contexte** : Les modules DAL utilisent le package `server-only` qui empêche l'import direct hors du contexte Next.js. Ce script sert de référence pour le suivi des fonctions optimisées avec React cache().
+
+**Voir aussi** : `.github/prompts/plan-TASK034-performanceOptimization.prompt.md` (Phase 8)
+
+---
 
 #### test-team-server-actions.ts (TypeScript) ✅ RECOMMANDÉ
 

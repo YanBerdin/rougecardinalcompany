@@ -11,17 +11,28 @@
  * Migration: 20260106190617_fix_rls_policy_with_check_true_vulnerabilities.sql
  * 
  * Usage:
- *   pnpm exec tsx scripts/test-rls-policy-with-check-validation.ts
+ *   pnpm exec tsx scripts/test-rls-policy-with-check-validation.ts [--local]
+ * 
+ * Options:
+ *   --local  Force local Supabase (127.0.0.1:54321) instead of cloud
+ * 
+ * Default: Uses cloud database from .env.local
  */
 import 'dotenv/config';
 import { createClient } from "@supabase/supabase-js";
 
-// Use local Supabase for testing (not cloud from .env.local)
+const USE_LOCAL = process.argv.includes('--local');
+
 const LOCAL_SUPABASE_URL = "http://127.0.0.1:54321";
 const LOCAL_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0";
 
-const supabaseUrl = LOCAL_SUPABASE_URL;
-const anonKey = LOCAL_ANON_KEY;
+const supabaseUrl = USE_LOCAL 
+    ? LOCAL_SUPABASE_URL 
+    : process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+const anonKey = USE_LOCAL 
+    ? LOCAL_ANON_KEY 
+    : process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY;
 
 if (!supabaseUrl || !anonKey) {
     console.error("❌ Missing environment variables");

@@ -29,7 +29,7 @@ export function AuditLogsView({
     const [isExporting, setIsExporting] = useState(false);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
 
-    // Simulate initial loading to show skeleton
+    // Simulate initial loading to show skeleton //TODO: remove after testing
     useEffect(() => {
         const timer = setTimeout(() => {
             setIsInitialLoading(false);

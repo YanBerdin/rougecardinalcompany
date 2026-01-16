@@ -1,6 +1,7 @@
 "use server";
 
 import "server-only";
+import { cache } from "react";
 import { createClient } from "@/supabase/server";
 import { type DALResult } from "@/lib/dal/helpers";
 
@@ -69,14 +70,16 @@ function mapShowsWithDates(
 
 /**
  * Fetch featured shows with their upcoming event dates
+ *
+ * Wrapped with React cache() for intra-request deduplication.
+ *
  * @param limit Maximum number of shows to return
  * @returns Shows with dates ordered by premiere
  */
-export async function fetchFeaturedShows(
-  limit = 3
-): Promise<DALResult<ShowWithDates[]>> {
-  try {
-    const supabase = await createClient();
+export const fetchFeaturedShows = cache(
+  async (limit = 3): Promise<DALResult<ShowWithDates[]>> => {
+    try {
+      const supabase = await createClient();
 
     const { data: shows, error } = await supabase
       .from("spectacles")
@@ -123,4 +126,5 @@ export async function fetchFeaturedShows(
           : "[ERR_HOME_SHOWS_002] Unknown error",
     };
   }
-}
+  }
+);

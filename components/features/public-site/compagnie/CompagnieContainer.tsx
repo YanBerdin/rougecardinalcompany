@@ -3,9 +3,6 @@ import { fetchCompagnieValues, fetchTeamMembers } from "@/lib/dal/compagnie";
 import { fetchCompagniePresentationSections } from "@/lib/dal/compagnie-presentation";
 
 export async function CompagnieContainer() {
-  // TODO: remove artificial delay used for skeleton validation
-  await new Promise((r) => setTimeout(r, 1500));
-
   const [sectionsResult, valuesResult, teamResult] = await Promise.all([
     fetchCompagniePresentationSections(),
     fetchCompagnieValues(12),

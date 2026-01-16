@@ -3,6 +3,9 @@
  * Vérifie si l'extension `pg_net` est installée sur la base distante
  * Usage: pnpm exec tsx scripts/check-extension.ts
  */
+
+//TODO: ❌ Impossible d'interroger pg_extension via Supabase client. Détails: Could not find the table 'public.pg_extension' in the schema cache
+
 import { createClient } from '@supabase/supabase-js';
 import * as dotenv from 'dotenv';
 import { resolve } from 'path';

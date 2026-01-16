@@ -1,5 +1,6 @@
 "use server";
 import "server-only";
+import { cache } from "react";
 import { createClient } from "@/supabase/server";
 import { requireAdmin } from "@/lib/auth/is-admin";
 import type { DisplayToggleDTO } from "@/lib/schemas/site-config";
@@ -7,51 +8,59 @@ import type { DALResult } from "./helpers";
 
 /**
  * Fetch display toggle by key
- * @param key - Config key (e.g., "public:home:newsletter")
+ *
+ * Wrapped with React cache() for intra-request deduplication.
+ * If called multiple times with the same key in the same request,
+ * the database query runs only once.
+ *
+ * @param key - Config key (e.g., "display_toggle_home_hero")
  * @returns Display toggle configuration
  */
-export async function fetchDisplayToggle(
-  key: string
-): Promise<DALResult<DisplayToggleDTO | null>> {
-  const supabase = await createClient();
+export const fetchDisplayToggle = cache(
+  async (key: string): Promise<DALResult<DisplayToggleDTO | null>> => {
+    const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from("configurations_site")
-    .select("*")
-    .eq("key", key)
-    .maybeSingle();
+    const { data, error } = await supabase
+      .from("configurations_site")
+      .select("key, value, description, category, updated_at, updated_by")
+      .eq("key", key)
+      .maybeSingle();
 
-  if (error) {
-    console.error("[DAL] fetchDisplayToggle error:", error);
-    return { success: false, error: `[ERR_CONFIG_001] ${error.message}` };
+    if (error) {
+      console.error("[DAL] fetchDisplayToggle error:", error);
+      return { success: false, error: `[ERR_CONFIG_001] ${error.message}` };
+    }
+
+    return { success: true, data };
   }
-
-  return { success: true, data };
-}
+);
 
 /**
  * Fetch all display toggles by category
+ *
+ * Wrapped with React cache() for intra-request deduplication.
+ *
  * @param category - Category filter (e.g., "home_display")
  * @returns Array of display toggles
  */
-export async function fetchDisplayTogglesByCategory(
-  category: string
-): Promise<DALResult<DisplayToggleDTO[]>> {
-  const supabase = await createClient();
+export const fetchDisplayTogglesByCategory = cache(
+  async (category: string): Promise<DALResult<DisplayToggleDTO[]>> => {
+    const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from("configurations_site")
-    .select("*")
-    .eq("category", category)
-    .order("key", { ascending: true });
+    const { data, error } = await supabase
+      .from("configurations_site")
+      .select("key, value, description, category, updated_at, updated_by")
+      .eq("category", category)
+      .order("key", { ascending: true });
 
-  if (error) {
-    console.error("[DAL] fetchDisplayTogglesByCategory error:", error);
-    return { success: false, error: `[ERR_CONFIG_002] ${error.message}` };
+    if (error) {
+      console.error("[DAL] fetchDisplayTogglesByCategory error:", error);
+      return { success: false, error: `[ERR_CONFIG_002] ${error.message}` };
+    }
+
+    return { success: true, data: data ?? [] };
   }
-
-  return { success: true, data: data ?? [] };
-}
+);
 
 /**
  * Update display toggle

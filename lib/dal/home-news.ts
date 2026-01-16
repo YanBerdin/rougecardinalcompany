@@ -1,6 +1,7 @@
 "use server";
 
 import "server-only";
+import { cache } from "react";
 import { createClient } from "@/supabase/server";
 import { type DALResult } from "@/lib/dal/helpers";
 
@@ -53,14 +54,16 @@ function filterRecentReleases(
 
 /**
  * Fetch featured press releases from the last 30 days
+ *
+ * Wrapped with React cache() for intra-request deduplication.
+ *
  * @param limit Maximum number of releases to return
  * @returns Recent press releases ordered by publication date
  */
-export async function fetchFeaturedPressReleases(
-  limit = 3
-): Promise<DALResult<PressReleaseRecord[]>> {
-  try {
-    const supabase = await createClient();
+export const fetchFeaturedPressReleases = cache(
+  async (limit = 3): Promise<DALResult<PressReleaseRecord[]>> => {
+    try {
+      const supabase = await createClient();
 
     const { data, error } = await supabase
       .from("communiques_presse")
@@ -92,4 +95,5 @@ export async function fetchFeaturedPressReleases(
           : "[ERR_HOME_NEWS_002] Unknown error",
     };
   }
-}
+  }
+);

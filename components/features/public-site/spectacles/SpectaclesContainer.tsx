@@ -4,13 +4,9 @@ import { fetchAllSpectacles } from "@/lib/dal/spectacles";
 /**
  * Server Container for Spectacles page
  * - Fetches data via server-only DAL (Supabase)
- * - Adds a tiny artificial delay to visualize skeletons (TODO: remove)
  * - Maps DB data to the presentational view props
  */
 export async function SpectaclesContainer() {
-  // TODO: remove artificial delay used for skeleton validation
-  await new Promise((r) => setTimeout(r, 1200));
-
   const spectacles = await fetchAllSpectacles();
 
   // DEBUG: Log the raw data to understand what we're working with

@@ -109,7 +109,7 @@ const nextConfig: NextConfig = {
 
 // Sentry configuration
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
-export default withSentryConfig(nextConfig, {
+const sentryConfig = withSentryConfig(nextConfig, {
   org: "none-a26",
   project: "rouge-cardinal-test",
 
@@ -130,3 +130,5 @@ export default withSentryConfig(nextConfig, {
     },
   },
 });
+
+export default sentryConfig;

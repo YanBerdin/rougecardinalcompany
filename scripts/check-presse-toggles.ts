@@ -1,5 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { scriptEnv } from './lib/env.js';
+import dotenv from 'dotenv';
+
+dotenv.config({ path: '.env.local' });
 
 const supabase = createClient(scriptEnv.NEXT_PUBLIC_SUPABASE_URL, scriptEnv.SUPABASE_SECRET_KEY);
 

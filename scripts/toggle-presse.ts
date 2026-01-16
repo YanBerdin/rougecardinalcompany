@@ -1,3 +1,4 @@
+//TODO: ❌ ommand failed with exit code 1.
 import { createClient } from '@supabase/supabase-js';
 import { scriptEnv } from './lib/env.js';
 

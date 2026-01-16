@@ -1,6 +1,7 @@
 "use server";
 
 import "server-only";
+import { cache } from "react";
 import { createClient } from "@/supabase/server";
 import { type DALResult } from "@/lib/dal/helpers";
 
@@ -47,22 +48,29 @@ const DEFAULT_ABOUT: HomeAboutContentDTO = {
 // FETCH COMPANY STATS
 // =============================================================================
 
-export async function fetchCompanyStats(): Promise<DALResult<CompanyStatRecord[]>> {
-  const supabase = await createClient();
+/**
+ * Fetch company statistics for the About section
+ *
+ * Wrapped with React cache() for intra-request deduplication.
+ */
+export const fetchCompanyStats = cache(
+  async (): Promise<DALResult<CompanyStatRecord[]>> => {
+    const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from("compagnie_stats")
-    .select("id, key, label, value, position, active")
-    .eq("active", true)
-    .order("position", { ascending: true });
+    const { data, error } = await supabase
+      .from("compagnie_stats")
+      .select("id, key, label, value, position, active")
+      .eq("active", true)
+      .order("position", { ascending: true });
 
-  if (error) {
-    console.error("[ERR_HOME_ABOUT_001] fetchCompanyStats:", error.message);
-    return { success: false, error: `[ERR_HOME_ABOUT_001] ${error.message}` };
+    if (error) {
+      console.error("[ERR_HOME_ABOUT_001] fetchCompanyStats:", error.message);
+      return { success: false, error: `[ERR_HOME_ABOUT_001] ${error.message}` };
+    }
+
+    return { success: true, data: data ?? [] };
   }
-
-  return { success: true, data: data ?? [] };
-}
+);
 
 // =============================================================================
 // HELPERS
@@ -89,47 +97,54 @@ function resolvePublicUrl(
 // FETCH HOME ABOUT CONTENT
 // =============================================================================
 
-export async function fetchHomeAboutContent(): Promise<DALResult<HomeAboutContentDTO>> {
-  const supabase = await createClient();
+/**
+ * Fetch home about section content
+ *
+ * Wrapped with React cache() for intra-request deduplication.
+ */
+export const fetchHomeAboutContent = cache(
+  async (): Promise<DALResult<HomeAboutContentDTO>> => {
+    const supabase = await createClient();
 
-  const { data: aboutRow, error: aboutErr } = await supabase
-    .from("home_about_content")
-    .select(
-      "title,intro1,intro2,image_url,image_media_id,mission_title,mission_text"
-    )
-    .eq("active", true)
-    .order("position", { ascending: true })
-    .limit(1)
-    .maybeSingle();
-
-  if (aboutErr) {
-    console.error("[ERR_HOME_ABOUT_002] fetchHomeAboutContent:", aboutErr.message);
-    return { success: false, error: `[ERR_HOME_ABOUT_002] ${aboutErr.message}` };
-  }
-
-  if (!aboutRow) {
-    return { success: true, data: DEFAULT_ABOUT };
-  }
-
-  let mediaPublicUrl: string | null = null;
-  if (aboutRow.image_media_id) {
-    const { data: mediaRow } = await supabase
-      .from("medias")
-      .select("storage_path")
-      .eq("id", aboutRow.image_media_id)
+    const { data: aboutRow, error: aboutErr } = await supabase
+      .from("home_about_content")
+      .select(
+        "title,intro1,intro2,image_url,image_media_id,mission_title,mission_text"
+      )
+      .eq("active", true)
+      .order("position", { ascending: true })
+      .limit(1)
       .maybeSingle();
-    mediaPublicUrl = resolvePublicUrl(supabase, mediaRow?.storage_path);
-  }
 
-  return {
-    success: true,
-    data: {
-      title: aboutRow.title ?? DEFAULT_ABOUT.title,
-      intro1: aboutRow.intro1 ?? DEFAULT_ABOUT.intro1,
-      intro2: aboutRow.intro2 ?? DEFAULT_ABOUT.intro2,
-      imageUrl: mediaPublicUrl || aboutRow.image_url || DEFAULT_ABOUT.imageUrl,
-      missionTitle: aboutRow.mission_title ?? DEFAULT_ABOUT.missionTitle,
-      missionText: aboutRow.mission_text ?? DEFAULT_ABOUT.missionText,
-    },
-  };
-}
+    if (aboutErr) {
+      console.error("[ERR_HOME_ABOUT_002] fetchHomeAboutContent:", aboutErr.message);
+      return { success: false, error: `[ERR_HOME_ABOUT_002] ${aboutErr.message}` };
+    }
+
+    if (!aboutRow) {
+      return { success: true, data: DEFAULT_ABOUT };
+    }
+
+    let mediaPublicUrl: string | null = null;
+    if (aboutRow.image_media_id) {
+      const { data: mediaRow } = await supabase
+        .from("medias")
+        .select("storage_path")
+        .eq("id", aboutRow.image_media_id)
+        .maybeSingle();
+      mediaPublicUrl = resolvePublicUrl(supabase, mediaRow?.storage_path);
+    }
+
+    return {
+      success: true,
+      data: {
+        title: aboutRow.title ?? DEFAULT_ABOUT.title,
+        intro1: aboutRow.intro1 ?? DEFAULT_ABOUT.intro1,
+        intro2: aboutRow.intro2 ?? DEFAULT_ABOUT.intro2,
+        imageUrl: mediaPublicUrl || aboutRow.image_url || DEFAULT_ABOUT.imageUrl,
+        missionTitle: aboutRow.mission_title ?? DEFAULT_ABOUT.missionTitle,
+        missionText: aboutRow.mission_text ?? DEFAULT_ABOUT.missionText,
+      },
+    };
+  }
+);

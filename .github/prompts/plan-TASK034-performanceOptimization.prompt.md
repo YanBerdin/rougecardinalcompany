@@ -2,6 +2,23 @@
 
 Optimiser les performances DB/frontend : suppression délais artificiels, SELECT * → colonnes, ISR avec client anon, bundle analysis, revalidateTag, React cache(), index slug, et streaming Presse.
 
+## Phases Overview
+
+| Phase | Description | Impact | Statut | Date |
+|-------|-------------|--------|--------|------|
+| 1 | Supprimer délais artificiels | 🔥 Très élevé (5-8s gain) | ✅ **Complet** | 2026-01-16 |
+| 2 | SELECT * → colonnes explicites | 🔶 Élevé (bande passante) | ✅ **Complet** | 2026-01-16 |
+| 3 | ISR sur pages publiques | 🔶 Élevé (cache cross-request) | ✅ **Complet** | 2026-01-16 |
+| 4 | Index partiel spectacles.slug | 🔷 Moyen (lookup query) | ✅ **Complet** | 2026-01-16 |
+| 5 | Streaming Presse page | 🔷 Moyen (TTI) | ✅ **Complet** | 2026-01-16 |
+| 6 | Bundle analyzer | 🔷 Moyen (identification) | ✅ **Complet** | 2026-01-16 |
+| 7 | revalidateTag + unstable_cache | 🔶 Élevé (granular cache) | ✅ **Complet** | 2026-01-16 |
+| 8 | React cache() intra-request | 🔶 Élevé (déduplication) | ✅ **Complet** | 2026-01-16 |
+
+**Légende Impact**: 🔥 Très élevé | 🔶 Élevé | 🔷 Moyen
+
+**✅ TASK034 COMPLET** - Toutes les 8 phases d'optimisation performance implémentées (2026-01-16)
+
 ## Steps
 
 ### 1. Supprimer les délais artificiels (~20 fichiers containers)
@@ -226,6 +243,27 @@ export const fetchPublishedSpectacles = unstable_cache(
 | `fetchPublishedSpectacles` | unstable_cache() | Pages publiques, invalidation admin |
 | `fetchActiveHomeHeroSlides` | unstable_cache() | Homepage hit rate élevé |
 | `fetchCompanyStats` | React cache() | Appelé 1× par page admin |
+
+---
+
+## Phase 8 Status: ✅ COMPLETE (2026-01-16)
+
+**React cache() wrapper implementation completed:**
+- 12 DAL files modified
+- 21 read functions wrapped with cache()
+- TypeScript compilation: ✅ Clean
+- Test script created: `scripts/test-all-dal-functions.ts`
+
+**Files wrapped:**
+- site-config.ts (2), compagnie.ts (2), home-about.ts (2)
+- home-shows.ts (1), home-news.ts (1), home-partners.ts (1)
+- home-hero.ts (1), spectacles.ts (4), presse.ts (3)
+- agenda.ts (2), team.ts (2), compagnie-presentation.ts (1)
+
+**Benefits:**
+- Intra-request deduplication for frequently called DAL functions
+- Compatible with cookies() (unlike unstable_cache)
+- Combined with ISR (revalidate=60) for cross-request caching
 
 ---
 

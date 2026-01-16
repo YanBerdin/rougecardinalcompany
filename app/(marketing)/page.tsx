@@ -4,10 +4,9 @@
 //import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Suspense } from "react";
 
-export const dynamic = "force-dynamic";
-//import { ConnectSupabaseSteps } from "@/components/tutorial/connect-supabase-steps";
-//import { SignUpUserSteps } from "@/components/tutorial/sign-up-user-steps";
-//import { hasEnvVars } from "@/lib/utils";
+// ✅ ISR: Cache pour 60 secondes avec revalidation automatique
+export const revalidate = 60;
+
 import {
   HeroContainer,
   NewsContainer,
