@@ -271,9 +271,234 @@ record_id_text := coalesce(
 
 ### Admin Views Security Hardening Pattern (Jan 2026)
 
-**Pattern de sécurité multi-couches** pour isolation stricte des vues admin avec rôle dédié.
+**Pattern de sécurité renforcée** pour isoler les vues admin avec ownership dédié et prévention de la vulnérabilité empty array.
 
 #### Problème Résolu
+
+**Vulnérabilité** : RLS bypass via empty array (`auth.uid() = any('{}'::uuid[])`) permettait aux utilisateurs authentifiés non-admin d'accéder aux vues admin.
+
+**Cause** : Ownership des vues admin par `postgres` (super-user) avec GRANT `SELECT` au rôle `authenticated`.
+
+#### Solution : Admin Views Owner Role
+
+**Création du rôle dédié** :
+
+```sql
+-- Migration 20260105120000_admin_views_security_hardening.sql
+create role admin_views_owner nologin;
+
+-- Transfert ownership des 7 vues admin
+alter view configurations_site_dashboard owner to admin_views_owner;
+alter view medias_admin owner to admin_views_owner;
+alter view spectacles_dashboard owner to admin_views_owner;
+-- ... (4 autres vues)
+
+-- Révocation accès authenticated (sauf tables publiques sous-jacentes)
+revoke select on configurations_site_dashboard from authenticated;
+revoke select on medias_admin from authenticated;
+-- ... (5 autres vues)
+```
+
+#### Bénéfices
+
+- **Zero Trust** : Aucun accès par défaut aux vues admin
+- **Defense in Depth** : RLS + ownership + GRANT (3 niveaux)
+- **Principe du moindre privilège** : Role dédié sans login
+- **Audit trail** : Propriété claire des objets admin
+
+#### Fichiers Impactés
+
+**Migration** (1):
+
+- `supabase/migrations/20260105120000_admin_views_security_hardening.sql`
+
+**Schémas Déclaratifs** (5):
+
+- `supabase/schemas/09b_views_admin_configurations_site.sql`
+- `supabase/schemas/09f_views_admin_medias.sql`
+- `supabase/schemas/09h_views_admin_spectacles.sql`
+- `supabase/schemas/09i_views_admin_press_releases.sql`
+- `supabase/schemas/09j_views_admin_events.sql`
+
+**Scripts de Validation** (3):
+
+- `scripts/test-admin-access.ts` (13/13 tests passed)
+- `scripts/check-admin-views-grants.ts`
+- `scripts/validate-admin-views-isolation.ts`
+
+#### Références
+
+- **Documentation** : `doc/ADMIN-VIEWS-SECURITY-HARDENING-SUMMARY.md`
+- **Plan** : `.github/prompts/plan-adminViewsSecurityHardening.prompt.md`
+- **TASK** : `memory-bank/tasks/TASK037-admin-views-security-hardening.md`
+
+---
+
+### LogoCloud Marquee Pattern (Jan 2026)
+
+**Pattern de composant générique réutilisable** pour affichage de logos avec animation marquee infinie (deux rangées).
+
+#### Architecture
+
+**Separation of Concerns** :
+
+- **Generic Component** (`components/LogoCloud/`) : Logique d'affichage réutilisable
+- **Model Component** (`components/LogoCloudModel/`) : Données spécifiques (partners logos)
+
+#### Composant Générique
+
+```typescript
+// components/LogoCloud/LogoCloud.tsx
+import { Logo } from './types';
+
+interface LogoCloudProps {
+  logos: Logo[];
+  title?: string;
+  description?: string;
+}
+
+export function LogoCloud({ logos, title, description }: LogoCloudProps) {
+  const row1 = logos.slice(0, Math.ceil(logos.length / 2));
+  const row2 = logos.slice(Math.ceil(logos.length / 2));
+
+  return (
+    <section>
+      {title && <h2>{title}</h2>}
+      {description && <p>{description}</p>}
+      <div className="marquee-container">
+        {/* Row 1: Left to Right */}
+        <div className="marquee-row">
+          {row1.concat(row1).map((logo, i) => (
+            <img key={i} src={logo.src} alt={logo.alt} />
+          ))}
+        </div>
+        {/* Row 2: Right to Left */}
+        <div className="marquee-row reverse">
+          {row2.concat(row2).map((logo, i) => (
+            <img key={i} src={logo.src} alt={logo.alt} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+```
+
+#### Animation CSS
+
+```css
+/* Pure CSS animation - no JavaScript */
+.marquee-row {
+  display: flex;
+  animation: scroll-left 40s linear infinite;
+}
+
+.marquee-row.reverse {
+  animation: scroll-right 40s linear infinite;
+}
+
+@keyframes scroll-left {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes scroll-right {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+/* Respect user motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .marquee-row {
+    animation: none;
+  }
+}
+```
+
+#### Modèle Spécifique (Partners)
+
+```typescript
+// components/LogoCloudModel/BrandLogos.tsx
+export const partnerLogos: Logo[] = [
+  { src: '/partners/logo-1.png', alt: 'Partner 1' },
+  { src: '/partners/logo-2.png', alt: 'Partner 2' },
+  // ...
+];
+
+// components/LogoCloudModel/LogoCloudModel.tsx
+import { LogoCloud } from '@/components/LogoCloud';
+import { partnerLogos } from './BrandLogos';
+
+export function PartnersLogoCloud() {
+  return (
+    <LogoCloud
+      logos={partnerLogos}
+      title="Nos Partenaires"
+      description="Ils nous font confiance"
+    />
+  );
+}
+```
+
+#### Bénéfices
+
+- **Performance** : Animation CSS pure (no JavaScript overhead)
+- **Réutilisable** : Generic component pour autres sections (sponsors, clients, etc.)
+- **Accessible** : `prefers-reduced-motion` support, alt text requis
+- **Maintenable** : Séparation données/logique/présentation
+- **Smooth UX** : Infinite scroll fluide (no lag, no jumps)
+
+#### Cas d'Usage
+
+- ✅ Partners/Sponsors sections
+- ✅ Client logos showcase
+- ✅ Technology stack display
+- ✅ Awards/Certifications gallery
+
+#### Migration Depuis 3D Flip Cards
+
+**Before** (problématique) :
+
+- Heavy 3D CSS transforms (`rotateY`, `perspective`)
+- JavaScript event handlers for flip animation
+- Performance lag on mobile devices
+- Accessibility issues (no motion preferences)
+
+**After** (optimisé) :
+
+- Pure CSS marquee animation
+- No JavaScript required
+- Smooth on all devices
+- Motion-safe by default
+
+#### Fichiers Créés
+
+**Generic Component** (4):
+
+- `components/LogoCloud/LogoCloud.tsx`
+- `components/LogoCloud/types.ts`
+- `components/LogoCloud/README.md`
+- `components/LogoCloud/index.ts`
+
+**Model Component** (2):
+
+- `components/LogoCloudModel/LogoCloudModel.tsx`
+- `components/LogoCloudModel/BrandLogos.tsx`
+
+#### Commits
+
+- `ea86302` — feat(partners): refactor LogoCloud component with two-row marquee animation
+- `0d75c61` — refactor(partners): replace 3D flip cards with LogoCloud infinite scroll
+- `114e2e5` — chore(style): move animation to css file
+- `987d2ee` — fix(logocloudmodel): change naming
+
+---
+
+## Database Infrastructure - Problème Résolu
+
+**Pattern de sécurité multi-couches** pour isolation stricte des vues admin avec rôle dédié.
+
+### Problème Résolu
 
 **Vulnérabilité** : Vues admin retournaient tableaux vides `[]` au lieu d'erreur `permission denied` pour utilisateurs non-admin.
 

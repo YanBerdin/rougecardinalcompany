@@ -1,6 +1,6 @@
 # Tech Context
 
-**Last Updated**: 2026-01-08
+**Last Updated**: 2026-01-16
 
 Versions et dépendances clés observées dans le dépôt:
 
@@ -10,20 +10,26 @@ Versions et dépendances clés observées dans le dépôt:
 - Tailwind CSS: ^3.4.x
 - Supabase: client/server integration via `@supabase/ssr` and `@supabase/supabase-js` patterns
 - **@t3-oss/env-nextjs**: **0.13.10** (type-safe env validation, added 2025-12-20)
+- **@sentry/nextjs**: **8.47.0** (error monitoring & alerting, added 2026-01-13)
 - **Sharp**: Image processing for thumbnails (300x300 JPEG)
 - **Zod**: **4.1.12** (runtime validation)
 
 Structure principale:
 
 - `app/` — App Router, pages et layouts
-- `components/` — composants réutilisables (ui/, features/)
-- `lib/` — utilitaires, DAL, schemas, constants, hooks, actions, **env.ts**
+- `components/` — composants réutilisables (ui/, features/, LogoCloud/, LogoCloudModel/)
+- `lib/` — utilitaires, DAL, schemas, constants, hooks, actions, **env.ts**, **sentry/**
 - `supabase/` — scripts, migrations, server client helpers
 
 ## Mises à jour récentes
 
 | Date | Changement | Impact |
 | ------ | ------------ | -------- |
+| 2026-01-16 | Architecture Blueprints v6 | Documentation complète TASK029-TASK051, patterns documentés |
+| 2026-01-16 | LogoCloud Refactoring | Animation marquee CSS-only, component générique réutilisable |
+| 2026-01-14 | Database Backup & Recovery (TASK050) | pg_dump automation, GitHub Actions workflow, PITR runbook |
+| 2026-01-14 | Error Monitoring & Alerting (TASK051) | Sentry integration, 3-level boundaries, P0/P1 alerts |
+| 2026-01-10 | Audit Trigger JSON Operator Fix | Support tables hétérogènes (id/key/uuid) |
 | 2026-01-08 | Postgres Upgrade | 17.4.1.069 → 17.6.1.063 (correctifs sécurité) |
 | 2026-01-07 | Performance Optimization | 24 FK indexes + RLS initPlan + policies merge |
 | 2025-12-30 | Storage/Folders Sync | `getFolderIdFromPath()`, 9 base folders, dynamic stats |
@@ -101,6 +107,30 @@ Outils et commandes utiles:
 - **Actions**: `lib/actions/media-actions.ts` → `uploadMediaImage(formData, folder)`
 - **Types**: `lib/actions/types.ts` → `ActionResult<T>` discriminated union
 - **Delete**: `deleteMediaImage(mediaId)` avec cleanup Storage
+
+### LogoCloud Marquee Pattern (Jan 2026)
+
+**Composant générique réutilisable** pour affichage de logos avec animation marquee infinie.
+
+- **Generic Component**: `components/LogoCloud/` — Logique d'affichage réutilisable
+  - `LogoCloud.tsx` — Main component with two-row marquee
+  - `types.ts` — TypeScript types for logos
+  - `README.md` — Component documentation
+  - `index.ts` — Barrel exports
+
+- **Model Component**: `components/LogoCloudModel/` — Partners-specific model
+  - `LogoCloudModel.tsx` — Consumes LogoCloud with BrandLogos data
+  - `BrandLogos.tsx` — Partners logos static data
+
+**Features**:
+
+- ✅ Pure CSS animation (no JavaScript overhead)
+- ✅ Two-row infinite scroll (opposite directions)
+- ✅ Accessibility: `prefers-reduced-motion` support, alt text required
+- ✅ Performance: smooth on all devices, no lag
+- ✅ Reusable: works for sponsors, clients, tech stack, awards, etc.
+
+**Migration**: Replaced heavy 3D flip cards with lightweight marquee
 
 ### Déploiement
 

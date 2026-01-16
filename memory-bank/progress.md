@@ -1,5 +1,116 @@
 # Progress
 
+## Architecture Documentation & Partners UI - Updates Complete (2026-01-16)
+
+### Objectif
+
+Mettre à jour la documentation d'architecture (blueprints v6) et refactoriser l'UI des partenaires pour une meilleure performance et accessibilité.
+
+### Résultats
+
+| Composant | État |
+| --------- | ---- |
+| Project Folders Structure Blueprint v6 | ✅ 100% |
+| Architecture Blueprint enrichment | ✅ 100% |
+| file-tree.md consolidation | ✅ 100% |
+| LogoCloud refactoring | ✅ 100% |
+
+### Détails de l'Implémentation
+
+#### **1. Architecture Blueprints v6**
+
+**Project_Folders_Structure_Blueprint_v6.md** (+208 lignes):
+
+- Structure complète incluant TASK029-TASK051
+- Patterns DAL SOLID, Server Actions, Media Library documentés
+- Organisation composants features/admin et features/public-site
+
+**Project_Architecture_Blueprint.md** (+97 lignes):
+
+- **T3 Env Pattern**: Validation type-safe avec `@t3-oss/env-nextjs`
+- **Sentry Error Monitoring Pattern**: 4 runtimes, 3 levels boundaries, alerting P0/P1
+- **JSON Operator Safe Field Access Pattern**: Support tables hétérogènes (id/key/uuid)
+- **Admin Views Security Hardening Pattern**: Isolation admin views
+
+**file-tree.md** (-345 lignes):
+
+- Suppression contenu obsolète
+- Ajout scripts TASK030 Phase 11 (check-presse-toggles.ts, toggle-presse.ts)
+- Synchronisation avec structure réelle
+
+#### **2. Partners LogoCloud Refactoring**
+
+**Migration**: 3D Flip Cards → Infinite Scroll Marquee
+
+**Nouveaux composants**:
+
+- `components/LogoCloud/` — Generic reusable component
+  - `LogoCloud.tsx` — Main component with two-row marquee
+  - `types.ts` — TypeScript types for logos
+  - `README.md` — Component documentation
+  - `index.ts` — Barrel exports
+
+- `components/LogoCloudModel/` — Partners-specific model
+  - `LogoCloudModel.tsx` — Consumes LogoCloud with BrandLogos data
+  - `BrandLogos.tsx` — Partners logos static data
+
+**Améliorations techniques**:
+
+- ✅ Animation CSS pure (no JavaScript overhead)
+- ✅ Two-row marquee with infinite scroll
+- ✅ Performance: suppression 3D transforms lourds
+- ✅ Accessibilité: motion-safe media queries
+- ✅ Responsive: design fluide mobile/desktop
+
+**Commits**:
+
+- `ea86302` — feat(partners): refactor LogoCloud component with two-row marquee animation
+- `0d75c61` — refactor(partners): replace 3D flip cards with LogoCloud infinite scroll
+- `114e2e5` — chore(style): move animation to css file
+- `987d2ee` — fix(logocloudmodel): change naming
+
+### Fichiers Modifiés/Créés
+
+**Architecture Blueprints** (4):
+
+- `memory-bank/architecture/Project_Folders_Structure_Blueprint_v6.md` (new)
+- `memory-bank/architecture/Project_Architecture_Blueprint.md` (updated)
+- `memory-bank/architecture/Project_Folders_Structure_Blueprint_v5.md` (updated)
+- `memory-bank/architecture/file-tree.md` (consolidated)
+
+**LogoCloud Components** (7):
+
+- `components/LogoCloud/LogoCloud.tsx` (new)
+- `components/LogoCloud/types.ts` (new)
+- `components/LogoCloud/README.md` (new)
+- `components/LogoCloud/index.ts` (new)
+- `components/LogoCloudModel/LogoCloudModel.tsx` (new)
+- `components/LogoCloudModel/BrandLogos.tsx` (new)
+- `components/features/public-site/home/PartnersSection.tsx` (refactored)
+
+**Documentation** (1):
+
+- `.github/prompts/plan-TASK034-performanceOptimization.prompt.md` (new)
+
+### Impact
+
+**Documentation**:
+
+- ✅ Blueprint v6 reflète l'état complet du projet (TASK029-TASK051)
+- ✅ Patterns récents documentés (T3 Env, Sentry, JSON Operators)
+- ✅ Source de vérité synchronisée avec codebase
+
+**Performance & UX**:
+
+- ✅ Animation fluide sans lag (CSS-only marquee)
+- ✅ Design moderne et professionnel
+- ✅ Meilleure accessibilité (reduced-motion support)
+- ✅ Component générique réutilisable
+
+**Type de milestone**: Documentation + UX improvement
+
+---
+
 ## Database Backup & Recovery - TASK050 Complete (2026-01-14)
 
 ### Objectif

@@ -1,6 +1,8 @@
 # Active Context
 
-**Current Focus (2026-01-14)**: ✅ Database Backup & Recovery Production Ready (TASK050 + TASK051)
+**Current Focus (2026-01-16)**: ✅ Architecture Documentation Update + Partners UI Refactoring Complete
+
+**Last Major Updates**: Database Backup & Recovery + Error Monitoring Production Ready (TASK050 + TASK051)
 
 ---
 
@@ -127,6 +129,62 @@
 - 🧹 **TODO before production**: Remove/disable `/api/test-error`, filter test errors (`tag:test=true`)
 
 **Blocks Resolved**: TASK039 (Production Deployment) now unblocked
+
+---
+
+## 📐 ARCHITECTURE UPDATE (2026-01-16)
+
+### Project Folders Structure Blueprint v6
+
+**Migration**: v5 → v6  
+**Status**: ✅ Complete  
+**Files Updated**: 4
+
+**Changes**:
+
+1. **New Blueprint Created**
+   - `Project_Folders_Structure_Blueprint_v6.md` (208 nouvelles lignes)
+   - Structure complète incluant tous les nouveaux composants TASK029-TASK051
+   - Mise à jour des patterns DAL, Server Actions, Media Library
+
+2. **Architecture Blueprint Enriched**
+   - `Project_Architecture_Blueprint.md` enrichi (+97 lignes)
+   - Ajout sections T3 Env Pattern, Sentry Error Monitoring Pattern
+   - Documentation JSON Operator Safe Field Access Pattern
+   - Mise à jour Admin Views Security Hardening Pattern
+
+3. **file-tree.md Consolidated**
+   - Suppression 345 lignes obsolètes
+   - Ajout scripts TASK030 Phase 11 (check-presse-toggles.ts, toggle-presse.ts)
+   - Structure synchronisée avec réalité du projet
+
+**Commit**: `a237fa7` - chore(doc): update folder and architecture blueprint
+
+### Partners LogoCloud Refactoring
+
+**Migration**: 3D Flip Cards → Infinite Scroll Marquee  
+**Status**: ✅ Complete  
+**Commits**: 4 (ea86302, 114e2e5, 114e2e5, 0d75c61)
+
+**Changes**:
+
+1. **New Component Architecture**
+   - `components/LogoCloud/` — Composant réutilisable générique
+   - `components/LogoCloudModel/` — Modèle spécifique partenaires
+   - Two-row marquee animation avec Tailwind CSS
+
+2. **Performance Improvements**
+   - Suppression 3D transforms lourds (CSS flip cards)
+   - Animation CSS pure (no JavaScript)
+   - Infinite scroll fluide (no performance lag)
+
+3. **Code Organization**
+   - Animation CSS séparée dans fichier dédié
+   - Types TypeScript pour logos
+   - README.md avec documentation
+
+**Pattern**: Composant générique réutilisable → Modèle spécifique  
+**Impact UX**: Animation fluide + design moderne + meilleure accessibilité
 
 ---
 
