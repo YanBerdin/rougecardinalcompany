@@ -1,8 +1,9 @@
 # TASK047 - Extraire NewsletterSubscriptionSchema
 
-**Status:** En Cours  
+**Status:** Complete  
 **Added:** 2025-12-13  
-**Updated:** 2026-01-17
+**Updated:** 2026-01-17  
+**Completed:** 2026-01-17
 
 ## Original Request
 
@@ -47,7 +48,68 @@ Actuellement, le schéma de validation newsletter est défini dans `lib/schemas/
 
 ## Progress Tracking
 
-**Overall Status:** Not Started - 0%
+**Overall Status:** Complete - 100%
+
+### Subtasks
+
+| ID | Description | Status | Updated | Notes |
+| --- | ----------- | ------ | ------- | ----- |
+| 1 | Créer `lib/schemas/newsletter.ts` | Complete | 2026-01-17 | ✅ Fichier créé avec schéma et types |
+| 2 | Mettre à jour barrel exports | Complete | 2026-01-17 | ✅ `lib/schemas/index.ts` modifié |
+| 3 | Mettre à jour imports consommateurs | Complete | 2026-01-17 | ✅ `newsletter-server.ts` mis à jour |
+| 4 | Nettoyer `contact.ts` | Complete | 2026-01-17 | ✅ Schéma newsletter retiré |
+| 5 | Tests validation | Complete | 2026-01-17 | ✅ TypeScript, build, tests schéma |
+
+## Progress Log
+
+### 2026-01-17 - Implémentation complète
+
+**Actions effectuées :**
+
+1. ✅ **Phase 1** - Création `lib/schemas/newsletter.ts`
+   - Schéma extrait avec `.default()` values préservés
+   - Commit: `165f5fa` - "feat(schemas): create newsletter.ts schema file"
+
+2. ✅ **Phase 2-3** - Mise à jour imports
+   - Barrel export modifié dans `lib/schemas/index.ts`
+   - Import mis à jour dans `lib/actions/newsletter-server.ts`
+   - Commit: `ac8867b` - "refactor(schemas): update newsletter schema imports"
+
+3. ✅ **Phase 4** - Nettoyage
+   - Schéma newsletter retiré de `lib/schemas/contact.ts` (lignes 65-77)
+   - Commit: `dd75761` - "refactor(schemas): remove newsletter schema from contact.ts"
+
+**Tests de validation :**
+
+- ✅ TypeScript: `pnpm tsc --noEmit` → 0 erreurs
+- ✅ Build Next.js: `pnpm build` → ✓ Compiled successfully
+- ✅ Schema validation: Email valide/invalide testé
+- ✅ Defaults appliqués: `consent: true`, `source: "website"`
+- ✅ Barrel exports: Import via `@/lib/schemas` fonctionne
+- ✅ Contact schemas toujours disponibles
+
+**Résultat :**
+
+```bash
+lib/schemas/
+├── contact.ts (ContactMessage uniquement ✅)
+├── newsletter.ts (Newsletter dédié ✅)
+├── index.ts (exports newsletter ✅)
+```
+
+**Impact :**
+
+- 0 régression détectée
+- Architecture cohérente avec pattern existant
+- Préparé pour évolutions futures (unsubscribe, preferences)
+
+**Commits :**
+
+- `165f5fa` - Create newsletter.ts schema file
+- `ac8867b` - Update newsletter schema imports
+- `dd75761` - Remove newsletter schema from contact.ts
+
+**Durée totale :** ~25 minutes (estimation initiale : 30 min)
 
 ### Subtasks
 
