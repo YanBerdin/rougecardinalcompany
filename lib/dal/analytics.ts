@@ -264,7 +264,7 @@ export const fetchAdminActivitySummary = cache(
 
             const { data, error } = await supabase
                 .from("logs_audit")
-                .select("operation, table_name, created_at, user_id")
+                .select("action, table_name, created_at, user_id")
                 .gte("created_at", filter.startDate.toISOString())
                 .lte("created_at", filter.endDate.toISOString())
                 .order("created_at", { ascending: false })
@@ -280,8 +280,8 @@ export const fetchAdminActivitySummary = cache(
             for (const row of data ?? []) {
                 if (row.user_id) uniqueAdmins.add(row.user_id);
 
-                const count = operationCounts.get(row.operation) ?? 0;
-                operationCounts.set(row.operation, count + 1);
+                const count = operationCounts.get(row.action) ?? 0;
+                operationCounts.set(row.action, count + 1);
             }
 
             // Find top operation
@@ -296,7 +296,7 @@ export const fetchAdminActivitySummary = cache(
 
             // Format recent actions (top 10)
             const recentActions = (data ?? []).slice(0, 10).map((row) => ({
-                operation: row.operation,
+                operation: row.action,
                 tableName: row.table_name,
                 timestamp: new Date(row.created_at),
                 userId: row.user_id ?? undefined,

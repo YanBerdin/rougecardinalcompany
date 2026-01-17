@@ -120,7 +120,8 @@ export async function exportAnalyticsCSV(filter: AnalyticsFilter): Promise<Expor
             );
         }
 
-        const csv = sections.join("\n");
+        // Prepend UTF-8 BOM for proper encoding in Excel/LibreOffice
+        const csv = "\uFEFF" + sections.join("\n");
 
         return { success: true, data: csv };
     } catch (error) {
