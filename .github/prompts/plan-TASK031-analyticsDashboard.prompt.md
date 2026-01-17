@@ -1,4 +1,7 @@
-## Plan : Analytics Dashboard Admin (TASK031)
+# Plan : Analytics Dashboard Admin (TASK031)
+
+**Status:** ✅ COMPLETED (2026-01-16)  
+**TASK031 :** `memory-bank/tasks/tasks-completed/TASK031-analytics-dashboard.md`
 
 Tableau de bord analytique admin avec métriques de trafic, visualisations temps-série, intégration Sentry et export CSV/JSON, en réutilisant l'infrastructure `analytics_events` existante et le pattern Container/View du projet.
 

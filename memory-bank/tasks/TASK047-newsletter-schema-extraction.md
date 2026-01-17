@@ -2,7 +2,7 @@
 
 **Status:** En Cours  
 **Added:** 2025-12-13  
-**Updated:** 2025-12-13
+**Updated:** 2026-01-17
 
 ## Original Request
 
@@ -30,18 +30,19 @@ Actuellement, le schéma de validation newsletter est défini dans `lib/schemas/
 
 | Fichier | Action |
 | --------- | -------- |
-| `lib/schemas/contact.ts` | Retirer `NewsletterSubscriptionSchema` |
+| `lib/schemas/contact.ts` | Retirer `NewsletterSubscriptionSchema` (lignes 65-77) |
 | `lib/schemas/newsletter.ts` | **Créer** avec le schéma |
-| `lib/schemas/index.ts` | Ajouter export |
-| `lib/actions/newsletter-server.ts` | Mettre à jour import |
-| `app/api/newsletter/route.ts` | Mettre à jour import (si applicable) |
+| `lib/schemas/index.ts` | Modifier exports (rediriger vers newsletter.ts) |
+| `lib/actions/newsletter-server.ts` | Mettre à jour import (ligne 4) |
+
+**Note :** `app/api/newsletter/route.ts` et `app/actions/newsletter.actions.ts` n'importent pas directement le schéma (ils utilisent `handleNewsletterSubscription()`).
 
 ## Implementation Plan
 
-1. Créer `lib/schemas/newsletter.ts` avec `NewsletterSubscriptionSchema` + types
-2. Mettre à jour `lib/schemas/index.ts` (barrel export)
+1. Créer `lib/schemas/newsletter.ts` avec `NewsletterSubscriptionSchema` + types (avec `.default()` values)
+2. Modifier `lib/schemas/index.ts` (rediriger export depuis newsletter.ts au lieu de contact.ts)
 3. Retirer le schéma de `lib/schemas/contact.ts`
-4. Mettre à jour les imports dans les fichiers consommateurs
+4. Mettre à jour l'import dans `lib/actions/newsletter-server.ts`
 5. Vérifier build + lint
 
 ## Progress Tracking
@@ -52,10 +53,10 @@ Actuellement, le schéma de validation newsletter est défini dans `lib/schemas/
 
 | ID | Description | Status | Updated | Notes |
 | ---- | ------------- | -------- | --------- | ------- |
-| 1.1 | Créer `lib/schemas/newsletter.ts` | Not Started | - | |
-| 1.2 | Exporter dans `lib/schemas/index.ts` | Not Started | - | |
-| 1.3 | Retirer de `lib/schemas/contact.ts` | Not Started | - | |
-| 1.4 | Mettre à jour imports | Not Started | - | |
+| 1.1 | Créer `lib/schemas/newsletter.ts` | Not Started | - | Avec `.default(true)` et `.default("website")` |
+| 1.2 | Modifier exports dans `lib/schemas/index.ts` | Not Started | - | Rediriger vers newsletter.ts |
+| 1.3 | Retirer de `lib/schemas/contact.ts` | Not Started | - | Lignes 65-77 |
+| 1.4 | Mettre à jour import dans `newsletter-server.ts` | Not Started | - | Ligne 4 |
 | 1.5 | Vérifier build + lint | Not Started | - | |
 
 ## Progress Log
@@ -65,8 +66,15 @@ Actuellement, le schéma de validation newsletter est défini dans `lib/schemas/
 - Task créée suite à la factorisation Newsletter
 - Schéma actuellement dans `lib/schemas/contact.ts`
 
+### 2026-01-17
+
+- Plan mis à jour avec schéma exact (avec `.default()` values)
+- Confirmé : seul `lib/actions/newsletter-server.ts` importe directement le schéma
+- Export barrel existe déjà dans index.ts, nécessite modification (pas ajout)
+
 ## References
 
-- `lib/schemas/contact.ts` — Fichier source actuel
-- `lib/actions/newsletter-server.ts` — Consommateur principal
-- `lib/schemas/index.ts` — Barrel exports
+- `lib/schemas/contact.ts` — Fichier source actuel (lignes 65-77)
+- `lib/actions/newsletter-server.ts` — Consommateur principal (ligne 4)
+- `lib/schemas/index.ts` — Barrel exports (lignes 133-144)
+- `.github/prompts/plan-TASK047-Extraction-NewsletterSubscriptionSchema.prompt.md` — Plan détaillé
