@@ -44,7 +44,7 @@ export function AdminActivityCard({ activity, isLoading }: AdminActivityCardProp
             </CardHeader>
             <CardContent>
                 {/* Summary Stats */}
-                <div className="grid grid-cols-3 gap-4 mb-4">
+                <div className="grid grid-cols-1 gap-4 mb-4 sm:grid-cols-3">
                     <div className="flex flex-col">
                         <span className="text-sm text-muted-foreground">Actions Totales</span>
                         <span className="text-2xl font-bold">{activity.totalActions}</span>
@@ -70,7 +70,7 @@ export function AdminActivityCard({ activity, isLoading }: AdminActivityCardProp
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Opération</TableHead>
-                                    <TableHead>Table</TableHead>
+                                    <TableHead className="hidden sm:table-cell">Table</TableHead>
                                     <TableHead className="text-right">Date</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -80,7 +80,7 @@ export function AdminActivityCard({ activity, isLoading }: AdminActivityCardProp
                                         <TableCell>
                                             <Badge variant="outline">{action.operation}</Badge>
                                         </TableCell>
-                                        <TableCell className="font-mono text-sm">{action.tableName}</TableCell>
+                                        <TableCell className="hidden font-mono text-sm sm:table-cell">{action.tableName}</TableCell>
                                         <TableCell className="text-right text-sm text-muted-foreground">
                                             {format(action.timestamp, "dd/MM HH:mm", { locale: fr })}
                                         </TableCell>

@@ -134,17 +134,17 @@ export function AnalyticsDashboard({
             {/* Header */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
-                    <p className="text-muted-foreground">
+                    <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Analytics</h1>
+                    <p className="text-sm text-muted-foreground sm:text-base">
                         Tableau de bord analytique avec métriques de trafic et visualisations
                     </p>
                 </div>
 
                 <div className="flex gap-2">
-                    <Button variant="outline" onClick={handleExportCSV} disabled={isRefreshing}>
+                    <Button variant="outline" size="sm" onClick={handleExportCSV} disabled={isRefreshing} className="flex-1 sm:flex-none">
                         Export CSV
                     </Button>
-                    <Button variant="outline" onClick={handleExportJSON} disabled={isRefreshing}>
+                    <Button variant="outline" size="sm" onClick={handleExportJSON} disabled={isRefreshing} className="flex-1 sm:flex-none">
                         Export JSON
                     </Button>
                 </div>
@@ -203,7 +203,7 @@ export function AnalyticsDashboard({
             </Card>
 
             {/* Two-column layout for tables and cards */}
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid gap-6 lg:grid-cols-2">
                 {/* Top Pages Table */}
                 <Card>
                     <CardHeader>

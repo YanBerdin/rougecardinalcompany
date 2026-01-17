@@ -39,7 +39,7 @@ export function SentryErrorsCard({ metrics, isLoading }: SentryErrorsCardProps) 
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="grid gap-4 md:grid-cols-4">
+                <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
                     {/* P0 Critical */}
                     <div className="flex flex-col gap-2">
                         <div className="flex items-center gap-2">
