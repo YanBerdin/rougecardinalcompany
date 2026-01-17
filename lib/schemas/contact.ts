@@ -60,17 +60,3 @@ export const ContactEmailSchema = z.object({
 });
 
 export type ContactEmailInput = z.infer<typeof ContactEmailSchema>;
-
-// =============================================================================
-// NEWSLETTER SUBSCRIPTION SCHEMA
-// =============================================================================
-
-export const NewsletterSubscriptionSchema = z.object({
-    email: z.string().email("Email invalide"),
-    consent: z.boolean().optional().default(true),
-    source: z.string().optional().default("website"),
-});
-
-export type NewsletterSubscription = z.infer<
-    typeof NewsletterSubscriptionSchema
->;
