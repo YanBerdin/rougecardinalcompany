@@ -15,6 +15,7 @@ import {
   Bug,
   ToggleLeft,
   ScrollText,
+  BarChart3,
 } from "lucide-react";
 import {
   Sidebar,
@@ -86,6 +87,11 @@ const homepageItems = [
 ];
 
 const otherItems = [
+  {
+    title: "Analytics",
+    href: "/admin/analytics",
+    icon: BarChart3,
+  },
   {
     title: "Affichage Sections",
     href: "/admin/site-config",

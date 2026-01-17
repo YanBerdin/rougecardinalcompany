@@ -122,3 +122,26 @@ comment on view public.analytics_summary is 'Vue résumé des statistiques analy
 alter view public.analytics_summary owner to admin_views_owner;
 revoke all on public.analytics_summary from anon, authenticated;
 grant select on public.analytics_summary to service_role;
+
+-- Vue pour statistiques sur 90 jours (rétention étendue pour le dashboard analytics)
+-- SECURITY: Explicitly set SECURITY INVOKER to run with querying user's privileges
+create or replace view public.analytics_summary_90d
+with (security_invoker = true)
+as
+select 
+  event_type,
+  entity_type,
+  date_trunc('day', created_at) as event_date,
+  count(*) as total_events,
+  count(distinct user_id) as unique_users,
+  count(distinct session_id) as unique_sessions
+from public.analytics_events 
+where created_at >= current_date - interval '90 days'
+group by event_type, entity_type, date_trunc('day', created_at)
+order by event_date desc, total_events desc;
+
+comment on view public.analytics_summary_90d is 'Vue résumé des statistiques analytiques sur 90 jours pour le dashboard admin. SECURITY INVOKER: Runs with querying user privileges, protected by RLS on base tables.';
+
+alter view public.analytics_summary_90d owner to admin_views_owner;
+revoke all on public.analytics_summary_90d from anon, authenticated;
+grant select on public.analytics_summary_90d to service_role;

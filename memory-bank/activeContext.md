@@ -1,8 +1,54 @@
 # Active Context
 
-**Current Focus (2026-01-16)**: ✅ TASK034 COMPLETE - All 8 Phases Performance Optimization
+**Current Focus (2026-01-17)**: ✅ TASK031 COMPLETE - Analytics Dashboard Admin
 
-**Last Major Updates**: Performance Optimization (8/8 Phases) + Architecture Documentation + Partners UI Refactoring (TASK034 + TASK050 + TASK051)
+**Last Major Updates**: Analytics Dashboard (TASK031) + Performance Optimization (TASK034) + Database Backup (TASK050)
+
+---
+
+## ✅ TASK031 Analytics Dashboard - COMPLETE (2026-01-17)
+
+### Implementation Summary
+
+| Component | Status | Details |
+| --------- | ------ | ------- |
+| shadcn Chart | ✅ | Recharts via `pnpm dlx shadcn add chart` |
+| SQL Migration | ✅ | `analytics_summary_90d` view (90-day retention) |
+| Zod Schemas | ✅ | 12+ schemas in `lib/schemas/analytics.ts` |
+| DAL Functions | ✅ | 5 cached functions with `cache()` |
+| Sentry API | ✅ | `lib/services/sentry-api.ts` (14d limit) |
+| Components | ✅ | 8 files (Container, Dashboard, Cards, Charts) |
+| Export Actions | ✅ | CSV multi-section + JSON with metadata |
+| Sidebar Nav | ✅ | Analytics entry with BarChart3 icon |
+
+### Key Files Created
+
+```bash
+lib/schemas/analytics.ts          # Zod schemas
+lib/dal/analytics.ts              # DAL with cache()
+lib/services/sentry-api.ts        # Sentry REST API client
+app/(admin)/admin/analytics/
+  page.tsx                        # Server Component
+  actions.ts                      # Export Server Actions
+components/features/admin/analytics/
+  AnalyticsContainer.tsx          # Server fetching
+  AnalyticsDashboard.tsx          # Client UI
+  MetricCard.tsx                  # Stats cards
+  PageviewsChart.tsx              # Time-series chart
+  TopPagesTable.tsx               # Top pages ranking
+  AnalyticsFilters.tsx            # Date range + export
+  SentryErrorsCard.tsx            # Sentry errors display
+  AdminActivityCard.tsx           # Audit log activity
+  types.ts                        # Component props
+scripts/test-sentry-api.ts        # API integration test
+```
+
+### Sentry API Limitation
+
+⚠️ **Important**: Sentry API only supports `statsPeriod` values: `''` (24h), `'24h'`, `'14d'`  
+❌ `'30d'` and `'90d'` are NOT supported - returns 400 error
+
+Date filters 7/30/90 days work for pageviews, top pages, admin activity - only Sentry limited to 14 days.
 
 ---
 

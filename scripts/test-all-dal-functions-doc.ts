@@ -31,7 +31,7 @@
 console.log("📚 DAL Functions Test Documentation\n");
 console.log("=".repeat(80));
 console.log("\n⚠️  Direct execution not supported due to server-only restriction\n");
-console.log("This file documents the 21 DAL functions wrapped with cache():\n");
+console.log("This file documents the 26 DAL functions wrapped with cache():\n");
 
 const dalFunctions = [
   {
@@ -114,6 +114,16 @@ const dalFunctions = [
     file: "lib/dal/compagnie-presentation.ts",
     functions: [
       "fetchCompagniePresentationSections()",
+    ],
+  },
+  {
+    file: "lib/dal/analytics.ts",
+    functions: [
+      "fetchPageviewsTimeSeries(filter: AnalyticsFilter)",
+      "fetchTopPages(filter: AnalyticsFilter)",
+      "fetchMetricsSummary(filter: AnalyticsFilter)",
+      "fetchAdminActivitySummary(filter: AnalyticsFilter)",
+      "fetchSentryErrorMetrics()",
     ],
   },
 ];

@@ -1,5 +1,46 @@
 # Progress
 
+## TASK031 COMPLETE - Analytics Dashboard Admin (2026-01-17)
+
+### Implementation Summary
+
+✅ **ALL 8 STEPS COMPLETE** - Dashboard analytique admin entièrement implémenté
+
+| Step | Description | Status |
+| ---- | ----------- | ------ |
+| 1 | shadcn Chart component | ✅ Installed |
+| 2 | SQL Migration 90d view | ✅ Applied (local + cloud) |
+| 3 | Zod schemas | ✅ 12+ schemas created |
+| 4 | DAL analytics | ✅ 5 cached functions |
+| 5 | Sentry API integration | ✅ Working (14d limit) |
+| 6 | Components (8 files) | ✅ Complete |
+| 7 | Export Server Actions | ✅ CSV + JSON |
+| 8 | Sidebar navigation | ✅ Added |
+
+### Key Deliverables
+
+- **Dashboard URL**: `/admin/analytics`
+- **Features**: Pageviews chart, Top pages, Metrics summary, Sentry errors, Admin activity
+- **Export**: CSV (multi-section) + JSON (full metadata)
+- **Date Filters**: 7d, 30d, 90d (Sentry limited to 14d)
+- **Granularity**: Auto (hour ≤7d, day >7d)
+
+### Files Created/Modified
+
+| Type | Count | Files |
+| ---- | ----- | ----- |
+| Migration | 1 | `20260116232648_analytics_summary_90days.sql` |
+| Schema | 1 | `lib/schemas/analytics.ts` |
+| DAL | 1 | `lib/dal/analytics.ts` |
+| Service | 1 | `lib/services/sentry-api.ts` |
+| Page | 1 | `app/(admin)/admin/analytics/page.tsx` |
+| Actions | 1 | `app/(admin)/admin/analytics/actions.ts` |
+| Components | 9 | `components/features/admin/analytics/*` |
+| Script | 1 | `scripts/test-sentry-api.ts` |
+| Schema update | 1 | `supabase/schemas/13_analytics_events.sql` |
+
+---
+
 ## TASK034 COMPLETE - Full Performance Optimization (2026-01-16)
 
 ### Statut Global

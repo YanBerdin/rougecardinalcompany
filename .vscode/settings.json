@@ -49,5 +49,8 @@
                 "copilot/claude-opus-4.5",
             ]
         }
-    }
+    },
+    "markdown.validate.ignoredLinks": [
+        "lib/dal/analytics.ts"
+    ]
 }

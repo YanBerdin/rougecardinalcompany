@@ -128,6 +128,31 @@ async function testViews() {
     allPassed = false;
   }
   
+  // Test 6: analytics_summary_90d (ADMIN-ONLY - should be denied for anon)
+  console.log('\n6️⃣ Testing analytics_summary_90d view (admin-only)...');
+  try {
+    const { error: analytics90dError } = await supabase
+      .from('analytics_summary_90d')
+      .select('event_date, event_type, total_events')
+      .limit(5);
+    
+    if (analytics90dError) {
+      // This is EXPECTED for anon role - it's an admin-only view
+      if (analytics90dError.message.includes('permission denied')) {
+        console.log('   ✅ Correctly denied: admin-only view not accessible to anon');
+      } else {
+        console.error('   ❌ Unexpected error:', analytics90dError.message);
+        allPassed = false;
+      }
+    } else {
+      console.error('   ❌ Security issue: admin view should NOT be accessible to anon!');
+      allPassed = false;
+    }
+  } catch (error) {
+    console.error('   ❌ Exception:', error);
+    allPassed = false;
+  }
+  
   console.log('\n' + '='.repeat(60));
   if (allPassed) {
     console.log('✅ All view security tests passed!');

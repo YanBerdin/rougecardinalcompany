@@ -4,6 +4,41 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-01-17 - FEAT: Analytics Summary 90 Days View (TASK031)
+
+**Migration**: `20260116232648_analytics_summary_90days.sql`
+
+**Sévérité**: 🟢 **LOW RISK** - Nouvelle vue (pas de modification de données existantes)
+
+**Source**: TASK031 - Analytics Dashboard
+
+**Ajouts**:
+
+1. **Vue `analytics_summary_90d`**:
+   - Extension de la rétention à 90 jours (vs 30 jours pour `analytics_summary`)
+   - SECURITY INVOKER pour respecter RLS
+   - Agrégation par event_type, entity_type, date
+
+2. **Permissions**:
+   - Owner: `admin_views_owner`
+   - REVOKE: anon, authenticated
+   - GRANT: service_role uniquement
+
+**Validation**:
+
+- ✅ Migration appliquée localement: 2026-01-17
+- ✅ Migration appliquée sur cloud: 2026-01-17
+- ✅ Schema déclaratif synchronisé: `supabase/schemas/13_analytics_events.sql`
+
+**Fichiers Associés**:
+
+- Migration: `20260116232648_analytics_summary_90days.sql`
+- Schema: `supabase/schemas/13_analytics_events.sql`
+- Task: `memory-bank/tasks/TASK031-analytics-dashboard.md`
+- Plan: `.github/prompts/plan-TASK031-analyticsDashboard.prompt.md`
+
+---
+
 ### 2026-01-16 - PERF: Partial Index on spectacles.slug (TASK034)
 
 **Migration**: `20260116145628_optimize_spectacles_slug_index.sql`

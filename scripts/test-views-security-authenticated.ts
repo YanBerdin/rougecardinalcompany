@@ -109,6 +109,7 @@ async function signInAndTest(email: string, password: string) {
         'content_versions_detailed',
         'messages_contact_admin',
         'analytics_summary',
+        'analytics_summary_90d',
     ];
 
     for (const viewName of adminViews) {

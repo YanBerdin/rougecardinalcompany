@@ -97,6 +97,20 @@ async function main() {
       query: () =>
         client.from("membres_equipe").select("*").eq("active", true).limit(3),
     },
+    {
+      name: "fetchAnalyticsSummary90d (admin view)",
+      query: () =>
+        client.from("analytics_summary_90d").select("*").limit(3),
+    },
+    {
+      name: "fetchPageviewsTimeSeries",
+      query: () =>
+        client
+          .from("analytics_events")
+          .select("id, event_type, page_path, created_at")
+          .eq("event_type", "pageview")
+          .limit(5),
+    },
   ];
 
   let passed = 0;

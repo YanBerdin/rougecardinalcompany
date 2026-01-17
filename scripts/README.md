@@ -236,6 +236,64 @@ Voir le runbook complet: `memory-bank/tasks/TASK050_RUNBOOK_PITR_restore.md`
 
 ---
 
+### 📊 Analytics & Monitoring (TASK031)
+
+#### test-sentry-api.ts (TypeScript) ✅ OPÉRATIONNEL (2026-01-17)
+
+**Description**: Script de test de l'intégration Sentry API pour le dashboard Analytics. Vérifie la connexion, récupère les erreurs non résolues des 14 derniers jours, et affiche les métriques.
+
+**Utilisation**:
+
+```bash
+pnpm exec tsx scripts/test-sentry-api.ts
+```
+
+**Configuration Requise**:
+
+```bash
+# Dans .env.local
+SENTRY_ORG=rouge-cardinal-company
+SENTRY_PROJECT=javascript-nextjs
+SENTRY_AUTH_TOKEN=sntryu_xxxxx...  # API Token (pas Release token!)
+```
+
+**Output Attendu**:
+
+```bash
+🧪 Test Sentry API Integration
+✅ Sentry API Integration Test PASSED
+
+📊 Results:
+  - Unresolved issues: 4
+  - Time period: 14d
+  - Organization: rouge-cardinal-company
+  - Project: javascript-nextjs
+
+📋 Issue Titles:
+  - [SENTRY-2P] Error: Route "/admin/analytics" used...
+  - [SENTRY-2N] FetchError: server error...
+```
+
+**Limitations Sentry API**:
+
+| Paramètre | Valeurs autorisées |
+| --------- | ------------------ |
+| `statsPeriod` | `''` (24h default), `'24h'`, `'14d'` |
+| `statsPeriod` | ❌ `'30d'`, `'90d'` non supportés |
+
+**Tokens Sentry** (différence critique):
+
+| Type | Format | Usage |
+| ---- | ------ | ----- |
+| **Release Token** | `sntrys_eyJ...` | CI/CD upload sourcemaps |
+| **API Token** | `sntryu_xxxxx...` | REST API (dashboard) ✅ |
+
+**Scopes API Token requis**: `project:read`, `org:read`, `event:read`
+
+**Contexte**: Créé pour TASK031 (Analytics Dashboard). Le dashboard admin utilise cette API pour afficher les erreurs Sentry en temps réel.
+
+---
+
 ### 🧪 Tests DAL (Data Access Layer)
 
 #### test-all-dal-functions-doc.ts (TypeScript) ✅ DOCUMENTATION

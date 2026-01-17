@@ -12,6 +12,7 @@
   - TASK046 (Rate-Limiting) - ✅ Complete (2026-01-04)
   - TASK050 (Database Backup & Recovery) - ✅ Complete (2026-01-14)
   - TASK051 (Error Monitoring & Alerting) - ✅ Complete (2026-01-14)
+  - TASK031 (Analytics Dashboard) - ✅ Complete (2026-01-17)
 ```
 
 ---
@@ -77,14 +78,15 @@ Estimated: 3-4 jours
 Dépend de: TASK036, TASK046
 Bloquant pour: TASK031, TASK051
 
-TASK031: Analytics Dashboard
-├─ Define metrics (pageviews, errors, performance)
-├─ DAL aggregated queries (time-series)
-├─ Dashboard UI (charts + date filters)
-└─ Export options (CSV, JSON)
+✅ TASK031: Analytics Dashboard (Complete 2026-01-17)
+├─ ✅ Define metrics (pageviews, errors, performance)
+├─ ✅ DAL aggregated queries (time-series)
+├─ ✅ Dashboard UI (charts + date filters 7/30/90d)
+├─ ✅ Sentry API integration (14d limit)
+└─ ✅ Export options (CSV, JSON)
 
-Estimated: 2-3 jours
-Dépend de: TASK034, TASK033
+Completed: 2026-01-17
+Dépendait de: TASK034, TASK033
 Bloquant pour: TASK039
 ```
 
