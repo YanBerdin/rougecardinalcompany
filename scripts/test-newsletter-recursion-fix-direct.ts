@@ -3,6 +3,7 @@
  * Direct Supabase test without env validation
  */
 
+import "dotenv/config";
 import { createClient } from "@supabase/supabase-js";
 
 async function testNewsletterPolicy() {
