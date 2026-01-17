@@ -136,13 +136,17 @@ export {
 export {
     ContactMessageSchema,
     ContactEmailSchema,
-    NewsletterSubscriptionSchema,
     ContactReasonEnum,
     type ContactMessageInput,
     type ContactEmailInput,
-    type NewsletterSubscription,
     type ContactReason,
 } from "./contact";
+
+// Newsletter
+export {
+    NewsletterSubscriptionSchema,
+    type NewsletterSubscription,
+} from "./newsletter";
 
 // Analytics
 export {

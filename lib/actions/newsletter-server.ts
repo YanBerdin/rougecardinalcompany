@@ -1,7 +1,7 @@
 "use server";
 
 import "server-only";
-import { NewsletterSubscriptionSchema } from "@/lib/schemas/contact";
+import { NewsletterSubscriptionSchema } from "@/lib/schemas/newsletter";
 import { sendNewsletterConfirmation } from "@/lib/email/actions";
 import {
     createNewsletterSubscriber,
@@ -26,7 +26,7 @@ export async function handleNewsletterSubscription(
 
     // 2. Rate-limiting AVANT validation complète
     const rateLimitKey = `newsletter:${normalizedEmail}`;
-    
+
     const rateLimit = recordRequest(
         rateLimitKey,
         3, // max 3 requêtes
