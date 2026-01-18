@@ -1,8 +1,62 @@
 # Active Context
 
-**Current Focus (2026-01-17)**: ✅ TASK031 COMPLETE - Analytics Dashboard Admin
+**Current Focus (2026-01-18)**: ✅ TASK053 COMPLETE - Data Retention Automation (RGPD)
 
-**Last Major Updates**: Analytics Dashboard (TASK031) + Performance Optimization (TASK034) + Database Backup (TASK050)
+**Last Major Updates**: Data Retention (TASK053) + Analytics Dashboard (TASK031) + Performance Optimization (TASK034) + Database Backup (TASK050)
+
+---
+
+## ✅ TASK053 Data Retention Automation - COMPLETE (2026-01-18)
+
+### Implementation Summary
+
+| Component | Status | Details |
+| --------- | ------ | ------- |
+| SQL Tables | ✅ | `data_retention_config` + `data_retention_audit` |
+| SQL Functions | ✅ | 4 SECURITY DEFINER functions |
+| Monitoring Views | ✅ | `data_retention_monitoring` + `data_retention_stats` |
+| DAL | ✅ | 12 functions in `lib/dal/data-retention.ts` |
+| Zod Schemas | ✅ | 8 schemas in `lib/schemas/data-retention.ts` |
+| Edge Function | ✅ | `scheduled-cleanup` (first Edge Function in project) |
+| Migration | ✅ | `20260117234007_task053_data_retention.sql` (698 lines) |
+| Tests | ✅ | 8/8 tests passed locally |
+| RGPD Doc | ✅ | `doc/rgpd-data-retention-policy.md` |
+
+### Key Files Created
+
+```bash
+supabase/schemas/
+  21_data_retention_tables.sql    # Tables config + audit
+  22_data_retention_functions.sql # 4 SECURITY DEFINER functions
+  41_views_retention.sql          # Monitoring views
+lib/dal/data-retention.ts         # 12 DAL functions
+lib/schemas/data-retention.ts     # 8 Zod schemas
+supabase/functions/scheduled-cleanup/
+  index.ts                        # Edge Function
+  deno.json                       # Deno config
+scripts/test-data-retention.ts    # 8 tests
+doc/rgpd-data-retention-policy.md # RGPD documentation
+```
+
+### Configured Tables (5)
+
+| Table | Retention | Date Column | Status |
+| ------- | ----------- | ------------- | -------- |
+| logs_audit | 90 days | expires_at | ✅ |
+| abonnes_newsletter | 90 days | unsubscribed_at | ✅ |
+| messages_contact | 365 days | created_at | ✅ |
+| analytics_events | 90 days | created_at | ✅ |
+| data_retention_audit | 365 days | executed_at | ✅ |
+
+### Deployment Pending
+
+```bash
+# Deploy Edge Function to production
+pnpm dlx supabase functions deploy scheduled-cleanup
+
+# Configure CRON_SECRET in Supabase Dashboard
+# Schedule: 0 2 * * * (daily 2:00 AM UTC)
+```
 
 ---
 

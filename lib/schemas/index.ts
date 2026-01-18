@@ -177,3 +177,21 @@ export {
     type AnalyticsEvent,
     type AnalyticsSummaryRow,
 } from "./analytics";
+
+// Data Retention (TASK053)
+export {
+    RetentionConfigSchema,
+    RetentionAuditSchema,
+    RetentionMonitoringSchema,
+    RetentionConfigFormSchema,
+    UpdateRetentionConfigSchema,
+    CleanupResultSchema,
+    RetentionHealthSchema,
+    type RetentionConfigDTO,
+    type RetentionAuditDTO,
+    type RetentionMonitoringDTO,
+    type RetentionConfigFormValues,
+    type UpdateRetentionConfigInput,
+    type CleanupResultDTO,
+    type RetentionHealthDTO,
+} from "./data-retention";

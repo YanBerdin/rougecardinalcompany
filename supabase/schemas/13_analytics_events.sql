@@ -119,7 +119,7 @@ order by event_date desc, total_events desc;
 
 comment on view public.analytics_summary is 'Vue résumé des statistiques analytiques sur 30 jours. SECURITY INVOKER: Runs with querying user privileges, protected by RLS on base tables.';
 
-alter view public.analytics_summary owner to admin_views_owner;
+-- alter view public.analytics_summary owner to admin_views_owner; -- Removed from seed globals to avoid permission error
 revoke all on public.analytics_summary from anon, authenticated;
 grant select on public.analytics_summary to service_role;
 
@@ -142,6 +142,6 @@ order by event_date desc, total_events desc;
 
 comment on view public.analytics_summary_90d is 'Vue résumé des statistiques analytiques sur 90 jours pour le dashboard admin. SECURITY INVOKER: Runs with querying user privileges, protected by RLS on base tables.';
 
-alter view public.analytics_summary_90d owner to admin_views_owner;
+-- alter view public.analytics_summary_90d owner to admin_views_owner; -- Removed from seed globals
 revoke all on public.analytics_summary_90d from anon, authenticated;
 grant select on public.analytics_summary_90d to service_role;

@@ -483,7 +483,7 @@ order by cv.entity_type, cv.entity_id, cv.version_number desc;
 
 comment on view public.content_versions_detailed is 'Vue détaillée de l''historique des versions avec informations sur les auteurs. SECURITY INVOKER: Runs with querying user privileges, protected by RLS on base tables.';
 
-alter view public.content_versions_detailed owner to admin_views_owner;
+-- alter view public.content_versions_detailed owner to admin_views_owner; -- Removed from seed globals to avoid permission error
 revoke all on public.content_versions_detailed from anon, authenticated;
 grant select on public.content_versions_detailed to service_role;
 

@@ -20,3 +20,6 @@ begin
   end if;
 end
 $$;
+
+-- Grant usage on public schema to admin_views_owner
+grant usage on schema public to admin_views_owner;

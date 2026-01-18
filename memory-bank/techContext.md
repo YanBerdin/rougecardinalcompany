@@ -1,6 +1,6 @@
 # Tech Context
 
-**Last Updated**: 2026-01-16
+**Last Updated**: 2026-01-18
 
 Versions et dépendances clés observées dans le dépôt:
 
@@ -13,18 +13,21 @@ Versions et dépendances clés observées dans le dépôt:
 - **@sentry/nextjs**: **8.47.0** (error monitoring & alerting, added 2026-01-13)
 - **Sharp**: Image processing for thumbnails (300x300 JPEG)
 - **Zod**: **4.1.12** (runtime validation)
+- **Deno**: Edge Functions runtime (first function: `scheduled-cleanup`, added 2026-01-18)
 
 Structure principale:
 
 - `app/` — App Router, pages et layouts
 - `components/` — composants réutilisables (ui/, features/, LogoCloud/, LogoCloudModel/)
 - `lib/` — utilitaires, DAL, schemas, constants, hooks, actions, **env.ts**, **sentry/**
-- `supabase/` — scripts, migrations, server client helpers
+- `supabase/` — scripts, migrations, server client helpers, **functions/** (Edge Functions)
 
 ## Mises à jour récentes
 
 | Date | Changement | Impact |
 | ------ | ------------ | -------- |
+| 2026-01-18 | Data Retention Automation (TASK053) | First Edge Function, RGPD compliance, 5 tables configured |
+| 2026-01-17 | Analytics Dashboard (TASK031) | Admin metrics, Sentry integration, CSV/JSON export |
 | 2026-01-16 | Architecture Blueprints v6 | Documentation complète TASK029-TASK051, patterns documentés |
 | 2026-01-16 | LogoCloud Refactoring | Animation marquee CSS-only, component générique réutilisable |
 | 2026-01-14 | Database Backup & Recovery (TASK050) | pg_dump automation, GitHub Actions workflow, PITR runbook |
@@ -48,6 +51,7 @@ Outils et commandes utiles:
 - Scripts locaux: `supabase/scripts/*` pour audit et diagnostics
 - CI: GitHub Actions (workflows ajoutés pour audit, détection REVOKE, monitoring)
 - **Env validation**: `pnpm tsx scripts/test-env-validation.ts`
+- **Edge Functions**: `supabase functions deploy <name>`, `supabase functions serve`
 
 ## Stack Technologique
 

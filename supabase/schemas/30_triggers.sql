@@ -26,7 +26,8 @@ BEGIN
     'public.profiles', 'public.medias', 'public.membres_equipe', 'public.lieux',
     'public.spectacles', 'public.evenements', 'public.articles_presse', 
     'public.partners', 'public.abonnes_newsletter', 'public.messages_contact', 'public.configurations_site',
-    'public.communiques_presse', 'public.contacts_presse', 'public.home_about_content'
+    'public.communiques_presse', 'public.contacts_presse', 'public.home_about_content',
+    'public.data_retention_config'  -- Added for TASK053
   ])
   LOOP
     EXECUTE format('drop trigger if exists trg_update_updated_at on %s;', tbl);

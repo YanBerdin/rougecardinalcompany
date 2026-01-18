@@ -121,7 +121,7 @@ lib/schemas/
 | 1.4 | Mettre à jour import dans `newsletter-server.ts` | Not Started | - | Ligne 4 |
 | 1.5 | Vérifier build + lint | Not Started | - | |
 
-## Progress Log
+## Progress Log bis
 
 ### 2025-12-13
 

@@ -32,6 +32,7 @@ Ce fichier est une prévisualisation consolidée des 20 tâches générées à p
 | TASK047 | Newsletter Schema Extraction | Completed | 2025-12-13 | 2026-01-17 | Extract NewsletterSubscriptionSchema to dedicated file | `memory-bank/tasks/TASK047-newsletter-schema-extraction.md` | - |
 | TASK050 | Database Backup & Recovery Strategy | Completed | 2026-01-14 | 2026-01-14 | Weekly automated database backups with pg_dump, Storage upload, rotation, PITR runbook | `memory-bank/tasks/TASK050-database-backup-recovery.md` | - |
 | TASK051 | Error Monitoring & Alerting | Completed | 2025-10-16 | 2026-01-14 | Sentry integration, error boundaries, P0/P1 alerts, incident response runbook | `memory-bank/tasks/TASK051-error-monitoring-alerting.md` | - |
+| TASK053 | Data Retention Automation | Completed | 2026-01-17 | 2026-01-18 | RGPD compliance: 4 migrations, Edge Function, pg_cron daily 2AM UTC, 5 tables configured | `memory-bank/tasks/tasks-completed/TASK053-data-retention-automation.md` | - |
 
 ---
 

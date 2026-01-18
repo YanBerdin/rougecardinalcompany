@@ -4,6 +4,102 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-01-18 - FEAT: Data Retention Automation (TASK053)
+
+**Migration**: `20260117234007_task053_data_retention.sql`
+
+**Sévérité**: 🟢 **LOW RISK** - Nouvelles tables et fonctions (pas de modification existante)
+
+**Source**: TASK053 - Data Retention Automation (RGPD Compliance)
+
+**Ajouts**:
+
+1. **2 Tables de configuration et audit**:
+   - `data_retention_config` - Configuration centralisée des politiques de rétention
+   - `data_retention_audit` - Historique des opérations de purge
+
+2. **4 Fonctions SECURITY DEFINER**:
+   - `cleanup_expired_data(text)` - Purge générique basée sur config
+   - `cleanup_unsubscribed_newsletter()` - Purge spécifique newsletter
+   - `cleanup_old_contact_messages()` - Purge messages contact traités
+   - `check_retention_health()` - Health check pour alertes
+
+3. **2 Vues de monitoring**:
+   - `data_retention_monitoring` - Dashboard admin état des jobs
+   - `data_retention_stats` - Statistiques agrégées
+
+4. **RLS Policies**:
+   - Admin-only pour `data_retention_config` (all operations)
+   - Admin read-only pour `data_retention_audit`
+
+5. **Configuration initiale (5 tables)**:
+   - `logs_audit` (90j, expires_at)
+   - `abonnes_newsletter` (90j, unsubscribed_at)
+   - `messages_contact` (365j, created_at)
+   - `analytics_events` (90j, created_at)
+   - `data_retention_audit` (365j, executed_at)
+
+**Validation**:
+
+- ✅ Migration appliquée localement: 2026-01-18
+- ✅ Migration appliquée sur cloud: 2026-01-18
+- ✅ Schema déclaratif synchronisé: 3 fichiers (21, 22, 41)
+- ✅ Edge Function deployed: `scheduled-cleanup`
+- ✅ pg_cron job configuré: Job ID 1, daily 2:00 AM UTC
+- ✅ Security fixes appliqués: 2 migrations supplémentaires
+
+**Fichiers Associés**:
+
+- Migration: `20260117234007_task053_data_retention.sql`
+- Schemas: `supabase/schemas/21_data_retention_tables.sql`, `22_data_retention_functions.sql`, `41_views_retention.sql`
+- DAL: `lib/dal/data-retention.ts`
+- Edge Function: `supabase/functions/scheduled-cleanup/index.ts`
+- Task: `memory-bank/tasks/tasks-completed/TASK053-data-retention-automation.md`
+- Plan: `.github/prompts/plan-TASK053-data-retention-automation.prompt.md`
+- RGPD Doc: `doc/rgpd-data-retention-policy.md`
+
+---
+
+### 2026-01-18 - FIX: Security Advisor Issues (TASK053 Post-Deploy)
+
+**Migrations**:
+
+- `20260118004644_seed_data_retention_config.sql`
+- `20260118010000_restore_insert_policies_dropped_by_task053.sql`
+- `20260118012000_fix_security_definer_views_and_merge_policies.sql`
+
+**Sévérité**: 🟠 **MEDIUM** - Correctifs sécurité suite audit Supabase Security Advisors
+
+**Source**: TASK053 déploiement - corrections post-audit sécurité
+
+**Changements**:
+
+1. **Seed configuration** (`20260118004644`):
+   - Configuration initiale des 5 tables de rétention
+   - DML non capturé par `db diff` (seed séparé)
+
+2. **Restore INSERT policies** (`20260118010000`):
+   - `messages_contact`: Politique INSERT restaurée
+   - `analytics_events`: Politique INSERT restaurée
+   - `home_hero_slides`: RLS re-enabled
+   - `communiques_presse_dashboard`: SELECT revoked from anon
+
+3. **Fix SECURITY DEFINER views** (`20260118012000`):
+   - 4 vues converties en SECURITY INVOKER:
+     - `communiques_presse_public`
+     - `communiques_presse_dashboard`
+     - `data_retention_monitoring`
+     - `data_retention_stats`
+   - `home_hero_slides`: Merge des politiques SELECT redondantes
+
+**Validation**:
+
+- ✅ Migrations appliquées sur cloud: 2026-01-18
+- ✅ Security Advisors re-check: All fixed (sauf Leaked Password - manual Dashboard)
+- ✅ Schema déclaratif synchronisé
+
+---
+
 ### 2026-01-17 - FEAT: Analytics Summary 90 Days View (TASK031)
 
 **Migration**: `20260116232648_analytics_summary_90days.sql`

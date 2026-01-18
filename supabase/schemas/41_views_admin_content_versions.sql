@@ -38,7 +38,7 @@ left join lateral (
 
 comment on view public.membres_equipe_admin is 'Vue d''administration des membres avec métadonnées de versioning (dernière version et total). SECURITY INVOKER: Runs with querying user privileges, protected by RLS on base tables.';
 
-alter view public.membres_equipe_admin owner to admin_views_owner;
+-- alter view public.membres_equipe_admin owner to admin_views_owner; -- Removed from seed globals to avoid permission error
 revoke all on public.membres_equipe_admin from anon, authenticated;
 grant select on public.membres_equipe_admin to service_role;
 
@@ -83,7 +83,7 @@ left join lateral (
 
 comment on view public.compagnie_presentation_sections_admin is 'Vue administration sections présentation avec métadonnées de versioning. SECURITY INVOKER: Runs with querying user privileges, protected by RLS on base tables.';
 
-alter view public.compagnie_presentation_sections_admin owner to admin_views_owner;
+-- alter view public.compagnie_presentation_sections_admin owner to admin_views_owner; -- Removed from seed globals to avoid permission error
 revoke all on public.compagnie_presentation_sections_admin from anon, authenticated;
 grant select on public.compagnie_presentation_sections_admin to service_role;
 
@@ -119,6 +119,6 @@ left join lateral (
 
 comment on view public.partners_admin is 'Vue administration partenaires incluant métadonnées versioning. SECURITY INVOKER: Runs with querying user privileges, protected by RLS on base tables.';
 
-alter view public.partners_admin owner to admin_views_owner;
+-- alter view public.partners_admin owner to admin_views_owner; -- Removed from seed globals to avoid permission error
 revoke all on public.partners_admin from anon, authenticated;
 grant select on public.partners_admin to service_role;

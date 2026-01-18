@@ -13,6 +13,7 @@
   - TASK050 (Database Backup & Recovery) - ✅ Complete (2026-01-14)
   - TASK051 (Error Monitoring & Alerting) - ✅ Complete (2026-01-14)
   - TASK031 (Analytics Dashboard) - ✅ Complete (2026-01-17)
+  - TASK053 (Data Retention Automation) - ✅ Complete (2026-01-18)
 ```
 
 ---
@@ -126,15 +127,16 @@ Bloquant pour: TASK039
 ```yaml
 Priority: P2 (Conformité réglementaire)
 
-🟡 TASK053: Data Retention Automation (NOUVEAU)
-├─ Newsletter unsubscribers: auto-delete after 90j (configurable)
-├─ Audit logs: retention 1 year
-├─ Contact messages: configurable retention
-└─ Setup cron job (pg_cron or Edge Function)
+✅ TASK053: Data Retention Automation (Complete 2026-01-18)
+├─ ✅ data_retention_config + data_retention_audit tables
+├─ ✅ 4 SECURITY DEFINER cleanup functions
+├─ ✅ Edge Function scheduled-cleanup (Deno)
+├─ ✅ pg_cron job: daily 2:00 AM UTC
+└─ ✅ RGPD documentation complète
 
-Estimated: 1-2 jours
-Depends_on: task033 (completed) — can be implemented in parallel
-Blocking: task037, task039
+Completed: 2026-01-18
+Dépendait de: TASK033 (completed)
+Débloque: TASK037, TASK039
 
 TASK047: Newsletter Schema Extraction
 ├─ Create lib/schemas/newsletter.ts

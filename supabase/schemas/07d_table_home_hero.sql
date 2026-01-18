@@ -73,9 +73,14 @@ alter table public.home_hero_slides
 
 create index if not exists idx_home_hero_slides_active_order on public.home_hero_slides(active, position) where active = true;
 create index if not exists idx_home_hero_slides_schedule on public.home_hero_slides(starts_at, ends_at) where active = true;
--- policies: public active slides OR admins can view all
+
+-- SELECT policy: Combined public+admin access in single policy (performance optimization)
+-- anon: sees active slides within schedule
+-- authenticated admin: sees all via is_admin() OR clause
+-- authenticated non-admin: sees active slides within schedule
 drop policy if exists "Home hero slides are viewable by everyone" on public.home_hero_slides;
 drop policy if exists "Admins can view all home hero slides" on public.home_hero_slides;
+drop policy if exists "View home hero slides (public active OR admin all)" on public.home_hero_slides;
 
 create policy "View home hero slides (public active OR admin all)"
   on public.home_hero_slides for select
@@ -88,10 +93,9 @@ create policy "View home hero slides (public active OR admin all)"
     )
     or (select public.is_admin())
   );
-create policy "Admins can view all home hero slides"
-  on public.home_hero_slides for select
-  to authenticated
-  using ((select public.is_admin()));
+
+-- NOTE: "Admins can view all home hero slides" policy REMOVED (redundant)
+-- The combined policy above already handles admin access via the OR clause
 
 -- Gestion admin (politiques granulaires)
 drop policy if exists "Admins can insert home hero slides" on public.home_hero_slides;

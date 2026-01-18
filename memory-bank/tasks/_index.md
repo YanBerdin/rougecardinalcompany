@@ -12,7 +12,7 @@
 
 ## En Cours
 
-- `TASK053` Data Retention Automation (P1) — newly created
+> _(aucune tâche en cours)_
 
 ## En Attente
 
@@ -74,3 +74,4 @@
 - `TASK050` Database Backup & Recovery Strategy (P0) - ✅ Complete on 2026-01-14 (4 components: backup-database.ts script with pg_dump + gzip compression, Storage bucket 'backups' with RLS policies, GitHub Actions weekly workflow (Sunday 3:00 AM UTC), PITR restoration runbook; Connection pooler port 6543 configuration, Node.js 18+ Buffer compatibility, rotation keeps 4 backups; migration 20260114152153, workflow tested successfully, 3 GitHub secrets configured, production-ready)
 - `TASK031` Analytics Dashboard - ✅ Complete on 2026-01-17 (8 steps implemented: shadcn Chart component, analytics_summary_90d view, Zod schemas (12+), DAL with 5 cached functions, Sentry API integration (14d limit), Dashboard UI (6 sub-components), CSV/JSON export Server Actions, sidebar navigation; date filters 7/30/90 days, production-ready)
 - `TASK047` Newsletter Schema Extraction - ✅ Complete on 2026-01-17 (Extracted NewsletterSubscriptionSchema from contact.ts to dedicated newsletter.ts file, updated barrel exports, 3 commits: create/refactor/cleanup, TypeScript + build + schema validation tests passed, ~25 min execution time)
+- `TASK053` Data Retention Automation - ✅ Complete on 2026-01-18 (Automated RGPD-compliant data retention: 3 SQL schemas (21_tables, 22_functions, 41_views), DAL with 12 functions, 8 Zod schemas, Edge Function scheduled-cleanup (first in project), migration 20260117234007 (698 lines), 8/8 tests passed, 5 tables configured (logs_audit 90d, abonnes_newsletter 90d, messages_contact 365d, analytics_events 90d, data_retention_audit 365d), RGPD documentation complete)

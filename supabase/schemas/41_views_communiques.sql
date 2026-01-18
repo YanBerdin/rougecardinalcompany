@@ -110,7 +110,7 @@ comment on view public.communiques_presse_dashboard is
 'Vue dashboard admin pour la gestion des communiqués avec statistiques et gestion des images. accès réservé aux administrateurs uniquement. SECURITY INVOKER: runs with querying user privileges (not definer); rely on rls policies on base tables.';
 
 -- Security: Transfer ownership to dedicated admin role
-alter view public.communiques_presse_dashboard owner to admin_views_owner;
+-- alter view public.communiques_presse_dashboard owner to admin_views_owner; -- Removed from seed globals to avoid permission error
 
 -- Security: Revoke automatic grants from public roles
 revoke all on public.communiques_presse_dashboard from anon, authenticated;

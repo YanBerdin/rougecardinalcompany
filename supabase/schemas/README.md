@@ -26,6 +26,8 @@ Migrations de sécurité récentes
 
 - `supabase/migrations/20260103120000_fix_communiques_presse_dashboard_admin_access.sql` — hotfix : recréation de la vue admin avec garde `is_admin()`.
 - `supabase/migrations/20260103123000_revoke_authenticated_on_communiques_dashboard.sql` — révocation du SELECT au rôle `authenticated` sur la vue admin.
+- `supabase/migrations/20260118010000_restore_insert_policies_dropped_by_task053.sql` — restauration des INSERT policies sur `messages_contact` et `analytics_events`, ré-activation RLS sur `home_hero_slides`, révocation grants `communiques_presse_dashboard`.
+- `supabase/migrations/20260118012000_fix_security_definer_views_and_merge_policies.sql` — conversion de 4 vues en SECURITY INVOKER (`communiques_presse_public`, `data_retention_recent_audit`, `data_retention_monitoring`, `data_retention_stats`) + fusion des policies SELECT redondantes sur `home_hero_slides`.
 
 Bonnes pratiques opérationnelles
 
@@ -72,7 +74,9 @@ supabase/schemas/
 ├── 02c_storage_buckets.sql        # Buckets Supabase Storage (medias, backups) + RLS policies
 ├── 02_table_profiles.sql          # Table des profils + RLS
 ├── 03_table_medias.sql            # Table des médias + RLS
+├── 04_table_media_tags_folders.sql # Tags et dossiers médias + RLS
 ├── 04_table_membres_equipe.sql    # Table membres équipe + RLS
+├── 05_profiles_auto_sync.sql      # Trigger sync auth.users → profiles
 ├── 05_table_lieux.sql             # Table des lieux + RLS
 ├── 06_table_spectacles.sql        # Table des spectacles + RLS
 ├── 07_table_evenements.sql        # Table des événements + RLS (billeterie, horaires, types)
@@ -84,22 +88,30 @@ supabase/schemas/
 ├── 08b_communiques_presse.sql     # Table communiqués presse + RLS + contacts presse
 ├── 09_table_partners.sql          # Table des partenaires + RLS
 ├── 10_tables_system.sql           # Tables système + RLS (config, logs, newsletter, contact)
+├── 10b_tables_user_management.sql # Invitations utilisateurs + RLS
 ├── 11_tables_relations.sql        # Tables de liaison many-to-many + RLS
 ├── 12_evenements_recurrence.sql   # Gestion de récurrence événements + RLS
-├── 13_analytics_events.sql        # Table analytics événements + RLS
+├── 13_analytics_events.sql        # Table analytics événements + RLS + vue 90d
 ├── 14_categories_tags.sql         # Système de catégories et tags + RLS
-├── 15_content_versioning.sql      # Système de versioning du contenu + RLS (spectacles, articles, communiqués, événements, membres, partners, valeurs, stats, sections présentation)
+├── 15_content_versioning.sql      # Système de versioning du contenu + RLS
 ├── 16_seo_metadata.sql            # Métadonnées SEO et redirections + RLS
+├── 20_audit_logs_retention.sql    # Rétention logs audit (expires_at) + cleanup function
 ├── 20_functions_core.sql          # (Shim) — déplacées en 02b_functions_core.sql
+├── 21_data_retention_tables.sql   # 🆕 TASK053: Tables config + audit rétention
 ├── 21_functions_auth_sync.sql     # Fonctions sync auth.users
+├── 22_data_retention_functions.sql # 🆕 TASK053: Fonctions purge SECURITY DEFINER
 ├── 30_triggers.sql                # Déclencheurs (audit, search, update_at)
 ├── 40_indexes.sql                 # Index et optimisations RLS
 ├── 41_views_admin_content_versions.sql # Vues tardives: admin contenu/versioning
 ├── 41_views_communiques.sql       # Vues tardives: communiqués (public + dashboard)
-├── 50_constraints.sql             # Contraintes et validations (PDF obligatoire, formats URL, types événements)
+├── 41_views_retention.sql         # 🆕 TASK053: Vues monitoring rétention
+├── 42_rpc_audit_logs.sql          # RPC pour audit logs viewer
+├── 50_constraints.sql             # Contraintes et validations
 ├── 60_rls_profiles.sql            # Politiques RLS pour profils
 ├── 61_rls_main_tables.sql         # Politiques RLS tables principales
 ├── 62_rls_advanced_tables.sql     # Politiques RLS tables avancées
+├── 63_reorder_team_members.sql    # Fonction réordonnancement équipe
+├── 63b_reorder_hero_slides.sql    # Fonction réordonnancement hero slides
 └── README.md                      # Cette documentation
 ```
 
@@ -108,6 +120,19 @@ Note RLS: les nouvelles tables co‑localisent leurs politiques (dans le même f
 ---
 
 ## 🆕 Mises à jour récentes (janvier 2026)
+
+- **TASK053: Data Retention Automation (18 jan. 2026)** : Système complet d'automatisation de rétention des données RGPD/CNIL.
+  - **Migration** : `20260117234007_task053_data_retention.sql` (698 lignes)
+  - **Nouveaux schémas déclaratifs** :
+    - `21_data_retention_tables.sql` : Tables `data_retention_config` (5 lignes pré-seedées) + `data_retention_audit`
+    - `22_data_retention_functions.sql` : Fonctions SECURITY DEFINER (`purge_expired_data`, `purge_table_with_audit`, `get_retention_statistics`)
+    - `41_views_retention.sql` : Vues de monitoring (`retention_config_status`, `retention_audit_summary`, `tables_with_expirable_data`)
+  - **Tables configurées** : logs_audit (90d), abonnes_newsletter (90d), messages_contact (365d), analytics_events (90d), data_retention_audit (365d)
+  - **Edge Function** : `supabase/functions/scheduled-cleanup/index.ts` - Première Edge Function Deno du projet
+  - **DAL** : `lib/dal/data-retention.ts` - 12 fonctions avec `requireAdmin()`
+  - **Schemas Zod** : `lib/schemas/data-retention.ts` - 8 schemas (RetentionConfig, RetentionAudit, RetentionStats...)
+  - **Tests** : 8/8 passés localement
+  - **Conformité** : RGPD Art. 17 (droit à l'effacement), CNIL (durées minimales recommandées)
 
 - **PERF: Partial Index on spectacles.slug (16 jan. 2026)** : Index partiel pour optimiser les requêtes publiques sur les spectacles.
   - **Migration** : `20260116145628_optimize_spectacles_slug_index.sql`
@@ -174,17 +199,33 @@ Note RLS: les nouvelles tables co‑localisent leurs politiques (dans le même f
   - **Contraintes CHECK** : Cohérence entre enabled/label/url pour chaque CTA
   - **Pattern idempotent** : DO blocks avec vérification `information_schema.columns` et `pg_constraint`
 
+## 🆕 Mises à jour récentes (janvier 2026) bis
+
+- **TASK053 Data Retention Automation (17-18 jan. 2026)** : Système de rétention RGPD/CNIL automatisé.
+  - **Tables** : `data_retention_config`, `data_retention_audit` — configuration et audit des purges
+  - **Vues** : `data_retention_monitoring`, `data_retention_stats`, `data_retention_recent_audit` — toutes en SECURITY INVOKER
+  - **Fonction** : `process_data_retention()` — purge batch avec rate-limiting et audit
+  - **Edge Function** : `scheduled-cleanup` — appelée par pg_cron daily à 02:00 UTC
+  - **Migrations** : `20260117213601_data_retention_core.sql`, `20260117213602_data_retention_seed.sql`
+
+- **Security Hardening (18 jan. 2026)** : Corrections sécurité suite au déploiement TASK053.
+  - **INSERT policies restaurées** : `messages_contact` et `analytics_events` (supprimées accidentellement par db diff)
+  - **RLS réactivé** : `home_hero_slides`
+  - **Vues SECURITY INVOKER** : 4 vues converties (`communiques_presse_public`, data retention views)
+  - **Policies fusionnées** : Suppression de la policy admin SELECT redondante sur `home_hero_slides`
+  - **Migrations** : `20260118010000_restore_insert_policies_dropped_by_task053.sql`, `20260118012000_fix_security_definer_views_and_merge_policies.sql`
+
 ## 🆕 Mises à jour récentes (novembre 2025)
 
 - **TASK026 Clean Code & TypeScript Conformity (27 nov. 2025)** : Refactoring architectural pour conformité aux standards Clean Code & TypeScript du projet.
 
 - **Hero Slides - A11Y & CRUD Enhancements (26 nov. 2025)** : Améliorations accessibilité et fonctionnalités CRUD pour les slides Hero.
-  - **`07d_table_home_hero.sql`** : Ajout colonne `alt_text` (texte alternatif, max 125 caractères) + contrainte CHECK + policy RLS admin SELECT
+  - **`07d_table_home_hero.sql`** : Ajout colonne `alt_text` (texte alternatif, max 125 caractères) + contrainte CHECK
   - **`63b_reorder_hero_slides.sql`** : Nouvelle fonction SECURITY DEFINER pour réordonner les slides
     - Authorization : `is_admin()` check explicite (defense-in-depth)
     - Concurrency : Advisory lock `pg_advisory_xact_lock`
     - Input validation : Structure JSONB array
-  - **Policy RLS** : `Admins can view all home hero slides` - permet aux admins de voir les slides inactifs
+  - **Policy RLS unifiée** : Remplace l'ancienne policy séparée "Admins can view all home hero slides" - désormais fusionnée dans "Public users can view active slides, admins can view all" (mise à jour jan. 2026)
 
 - **TASK021 - Spectacles CRUD RLS Corrections** : Corrections finales des politiques RLS pour les spectacles suite à l'implémentation complète du CRUD admin.
   - **Issue #1 - RLS 42501 Error** : Résolution du problème d'insertion spectacles causé par un profil admin manquant

@@ -2,7 +2,19 @@
 description: "Expert Next.js 16 developer with DAL SOLID principles, Server Actions patterns, Supabase Auth optimization, and production-ready TypeScript patterns"
 model: "Claude Opus 4.5"
 tools:
- ['vscode', 'execute', 'read', 'agent', 'edit', 'search', 'web', 'github/*', 'next-devtools/*', 'playwright/browser_click', 'playwright/browser_close', 'playwright/browser_console_messages', 'playwright/browser_install', 'playwright/browser_network_requests', 'playwright/browser_run_code', 'playwright/browser_snapshot', 'playwright/browser_tabs', 'shadcn/*', 'supabase/*', 'todo']
+- vscode
+- execute
+- read
+- edit
+- search
+- web
+- github/*
+- next-devtools/init
+- playwright/browser_install
+- shadcn/*
+- supabase/*
+- agent
+- todo
 ---
 
 # Expert Next.js 16 Developer (Production Edition)

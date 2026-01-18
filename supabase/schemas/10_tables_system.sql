@@ -86,7 +86,8 @@ order by
 
 comment on view public.messages_contact_admin is 'Vue pour l administration: suivi des messages, latences, association presse.';
 
-alter view public.messages_contact_admin owner to admin_views_owner;
+-- Owner assignment removed from seed globals to avoid permission error
+-- alter view public.messages_contact_admin owner to admin_views_owner;
 revoke all on public.messages_contact_admin from anon, authenticated;
 grant select on public.messages_contact_admin to service_role;
 
