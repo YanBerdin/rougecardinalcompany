@@ -223,7 +223,27 @@ Deno.serve(async (req: Request) => {
         // (audit trail exists in database)
         const statusCode = failureCount === CLEANUP_TABLES.length ? 500 : 200;
 
-        return new Response(JSON.stringify(summary, null, 2), {
+        // Sanitize response: remove sensitive error details
+        const sanitizedResults: Record<string, { status: string; deleted?: number }> = {};
+        for (const [table, result] of Object.entries(results)) {
+            sanitizedResults[table] = {
+                status: result.status,
+                deleted: "deleted" in result ? result.deleted : undefined,
+            };
+        }
+
+        const publicSummary = {
+            timestamp: summary.timestamp,
+            duration_ms: summary.duration_ms,
+            total_deleted: summary.total_deleted,
+            tables_processed: summary.tables_processed,
+            success_count: summary.success_count,
+            failure_count: summary.failure_count,
+            results: sanitizedResults,
+            has_health_issues: (postHealthData?.length ?? 0) > 0,
+        };
+
+        return new Response(JSON.stringify(publicSummary, null, 2), {
             status: statusCode,
             headers: {
                 "Content-Type": "application/json",
@@ -234,15 +254,20 @@ Deno.serve(async (req: Request) => {
         // 7. Global Error Handler
         // =====================================================
 
+        // Log full error details server-side only
         logError("Unhandled exception in cleanup job", error);
+        if (error instanceof Error && error.stack) {
+            console.error("[ERROR] Stack trace:", error.stack);
+        }
 
         const totalTime = Date.now() - startTime;
 
+        // Return generic error message (no sensitive details)
         return new Response(
             JSON.stringify(
                 {
                     error: "Cleanup job failed",
-                    message: error instanceof Error ? error.message : String(error),
+                    message: "An unexpected error occurred during the cleanup process. Please check server logs for details.",
                     duration_ms: totalTime,
                     timestamp: new Date().toISOString(),
                 },
