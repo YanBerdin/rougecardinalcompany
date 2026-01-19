@@ -534,7 +534,7 @@ Mettre en place une stratégie complète de sauvegarde et récupération de la b
 
 **Documentation** (7):
 
-- `.github/prompts/plan-task050DatabaseBackupRecovery.prompt.md`
+- `.github/prompts/plan-TASK050-DatabaseBackupRecovery.prompt.md`
 - `.github/prompts/plan-TASKS-order.prompt.md`
 - `memory-bank/tasks/TASK050-database-backup-recovery.md`
 - `memory-bank/tasks/TASK050_RUNBOOK_PITR_restore.md`
@@ -1678,7 +1678,7 @@ pnpm exec tsx scripts/test-cookie-security.ts  # Terminal 2
 ### Documentation Updated
 
 - ✅ `scripts/README.md` - New section "🔐 Audit de Sécurité (TASK036)"
-- ✅ `.github/prompts/plan-task036SecurityAuditCompletion.prompt.md` - Complete with results
+- ✅ `.github/prompts/plan-TASK036-SecurityAuditCompletion.prompt.md` - Complete with results
 - ✅ `memory-bank/tasks/_issues_preview.md` - TASK036 corrected
 - ✅ `memory-bank/tasks/_index.md` - TASK036 moved to Completed
 - ✅ `memory-bank/tasks/_preview_backoffice_tasks.md` - Status updated
