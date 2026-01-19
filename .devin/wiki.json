@@ -1,0 +1,303 @@
+{
+    "repo_notes": [
+        {
+            "content": ""
+        }
+    ],
+    "pages": [
+        {
+            "title": "Overview",
+            "purpose": "High-level introduction to the Rouge Cardinal Company web application, its purpose, tech stack, and key architectural decisions",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "Getting Started",
+            "purpose": "Guide developers through initial setup and common development tasks",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "Prerequisites and Installation",
+            "purpose": "List dependencies, tech stack versions, and installation steps",
+            "parent": "Getting Started",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "Development Scripts",
+            "purpose": "Document pnpm scripts for development, testing, building, and database operations",
+            "parent": "Getting Started",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "Environment Configuration",
+            "purpose": "Explain T3 Env setup, required environment variables, and configuration validation",
+            "parent": "Getting Started",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "Architecture",
+            "purpose": "Comprehensive overview of the application's architectural patterns and design principles",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "System Overview",
+            "purpose": "High-level system architecture diagram and component relationships",
+            "parent": "Architecture",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "Clean Architecture and DAL Pattern",
+            "purpose": "Explain the four-layer Clean Architecture (Presentation, Application, DAL, Database) and 92% SOLID compliance in DAL modules",
+            "parent": "Architecture",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "Frontend Architecture",
+            "purpose": "Document Next.js App Router, route groups, Server Components vs Client Components, and rendering strategies",
+            "parent": "Architecture",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "Backend Architecture",
+            "purpose": "Explain Supabase integration, Server Actions pattern, and backend service architecture",
+            "parent": "Architecture",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "Security Architecture",
+            "purpose": "Document defense-in-depth security model with seven layers from network to audit",
+            "parent": "Architecture",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "Database",
+            "purpose": "Complete guide to PostgreSQL schema, RLS policies, and database patterns",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "Schema Management",
+            "purpose": "Explain declarative schema approach in supabase/schemas/ and migration workflow",
+            "parent": "Database",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "Core System Tables",
+            "purpose": "Document system tables: abonnes_newsletter, messages_contact, configurations_site, analytics_events, logs_audit",
+            "parent": "Database",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "Content Tables",
+            "purpose": "Document content tables: spectacles, articles_presse, communiques_presse, membres_equipe, partners, home_hero_slides, home_about_content",
+            "parent": "Database",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "Media and Classification System",
+            "purpose": "Explain media, media_tags, media_folders, categories, tags tables and many-to-many relationships",
+            "parent": "Database",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "Row Level Security (RLS)",
+            "purpose": "Document RLS policies on all 36 tables, policy patterns (public/admin/restrictive), and admin_views_owner role",
+            "parent": "Database",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "Content Versioning System",
+            "purpose": "Explain content_versions table, automatic versioning triggers on 9 tables, and restore workflow",
+            "parent": "Database",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "Views and Database Functions",
+            "purpose": "Document views (SECURITY INVOKER vs admin_views_owner), RPC functions (reorder, cleanup), and aggregation patterns",
+            "parent": "Database",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "Data Access Layer (DAL)",
+            "purpose": "Comprehensive guide to the DAL layer, SOLID principles, and data access patterns",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "DAL Architecture and Principles",
+            "purpose": "Explain DAL SOLID pattern, 92% compliance, server-only modules, and architectural rules (no revalidatePath, no email imports)",
+            "parent": "Data Access Layer (DAL)",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "DAL Modules Overview",
+            "purpose": "List and describe all DAL modules in lib/dal/, their responsibilities, and key functions",
+            "parent": "Data Access Layer (DAL)",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "DALResult Pattern and Error Handling",
+            "purpose": "Explain DALResult<T> discriminated union, toDALResult helper, and error handling conventions",
+            "parent": "Data Access Layer (DAL)",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "Type Mapping and DTOs",
+            "purpose": "Document dual Zod schema pattern (client: number, server: bigint), DTO conversion, and type safety strategies",
+            "parent": "Data Access Layer (DAL)",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "Frontend Development",
+            "purpose": "Guide to building UI components, handling forms, and implementing frontend features",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "Page Structure and Routing",
+            "purpose": "Explain App Router structure, (admin) and (marketing) route groups, and file organization",
+            "parent": "Frontend Development",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "Server Components and Server Actions",
+            "purpose": "Document Server Components (default), Server Actions pattern, and cache revalidation strategies",
+            "parent": "Frontend Development",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "Client Components and Interactivity",
+            "purpose": "Explain 'use client' directive, when to use Client Components, and hydration patterns",
+            "parent": "Frontend Development",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "Form Handling and Validation",
+            "purpose": "Document react-hook-form integration, Zod schema validation, dual schema pattern, and form submission flow",
+            "parent": "Frontend Development",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        },
+        {
+            "title": "Styling and Theming",
+            "purpose": "Explain Tailwind CSS configuration, CSS variables for theming, dark mode, and glass-morphism effects",
+            "parent": "Frontend Development",
+            "page_notes": [
+                {
+                    "content": ""
+                }
+            ]
+        }
+    ]
+}
