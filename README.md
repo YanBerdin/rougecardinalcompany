@@ -1,3 +1,109 @@
+![Rouge Cardinal](public/logo-florian.png)
+
+# Rouge Cardinal Company — Site web
+
+> Plateforme web officielle de la compagnie de théâtre Rouge Cardinal : vitrine publique, médiathèque, espace presse et back‑office d'administration.
+
+## Table des matières
+
+- [Aperçu](#aper%C3%A7u)
+- [Fonctionnalités principales](#fonctionnalit%C3%A9s-principales)
+- [Architecture & conventions](#architecture--conventions)
+- [Démarrage rapide](#d%C3%A9marrage-rapide)
+- [Commandes utiles](#commandes-utiles)
+- [Déploiement et migrations](#d%C3%A9ploiement-et-migrations)
+- [Documentation & ressources](#documentation--ressources)
+
+## Aperçu
+
+Ce dépôt contient le site web de la compagnie Rouge Cardinal construit avec Next.js (app router) et Supabase. Le projet privilégie une approche "server‑first" :
+
+- pages et layouts dans `app/`
+- composants UI réutilisables dans `components/`
+- accès base de données centralisé dans `lib/dal/` (DAL, server‑only)
+- schémas déclaratifs et migrations Supabase sous `supabase/`
+
+## Fonctionnalités principales
+
+- Site public : pages spectacles, presse, partenaires, agenda
+- Back‑office : CRUD pour contenus (Server Actions + revalidatePath)
+- Médiathèque avancée (tags, dossiers, thumbnails)
+- RGPD : automatisation de rétention des données (Edge Function)
+- Monitoring & Sentry pour la supervision des erreurs
+
+## Architecture & conventions
+
+- Next.js 16 + React 19 (App Router)
+- TypeScript strict, Zod pour validation runtime
+- `lib/dal/*` : pattern DAL SOLID (retourne `DALResult<T>`, `"use server"`, `import "server-only"`)
+- Auth Supabase optimisée : utiliser `getClaims()` pour checks rapides
+- Cookies Supabase : pattern `getAll` / `setAll` via `@supabase/ssr`
+- Clean Code : fonctions courtes, fichiers < 300 lignes, pas de commentaires inutiles
+
+> [!note]
+> Pour les règles détaillées (migrations, RLS, Server Actions, patterns DAL), consultez le dossier `doc/` et les fichiers sous `.github/instructions/`.
+
+## Démarrage rapide
+
+Prérequis : Node.js 20+, pnpm, Supabase CLI (pour migrations locales)
+
+1. installer les dépendances
+
+```bash
+pnpm install
+```
+
+2. démarrer l'environnement de développement
+
+```bash
+pnpm dev
+# ou (si vous utilisez turbopack) : pnpm dev
+```
+
+3. valider les variables d'environnement (T3 Env)
+
+```bash
+pnpm exec tsx scripts/test-env-validation.ts
+```
+
+## Commandes utiles
+
+- Linter : `pnpm lint`
+- Tests unitaires / scripts : `pnpm test` ou `pnpm exec tsx scripts/<script>.ts`
+- Build : `pnpm build`
+- Start production (local) : `pnpm start`
+
+## Déploiement et migrations
+
+- Déploiement recommandé : Vercel (frontend) + Supabase (DB + Storage + Edge Functions)
+- Migrations/schéma déclaratif : modifier `supabase/schemas/` puis générer migration avec :
+
+```bash
+pnpm dlx supabase db diff -f <migration_name>
+pnpm dlx supabase db push
+```
+
+- Pour déployer les Edge Functions Supabase :
+
+```bash
+pnpm dlx supabase functions deploy <function-name>
+```
+
+> [!warning]
+> Ne pas modifier directement `supabase/migrations/` sauf pour correctifs d'urgence. Suivre la politique déclarative décrite dans `.github/instructions/Declarative_Database_Schema.instructions.md`.
+
+## Documentation & ressources
+
+- Documentation interne et notes d'architecture : `memory-bank/`
+- Guides et consignes opérationnelles : `doc/` (ex. `nextjs.instructions.md`)
+- Migrations et SQL : `supabase/schemas/` et `supabase/migrations/`
+
+Si vous avez besoin d'aide pour lancer le projet, exécuter une migration ou préparer un déploiement, dites‑moi ce que vous voulez faire et je vous guide pas à pas.
+
+---
+
+Fichier créé automatiquement par un assistant — modification bienvenue pour adapter le ton ou ajouter des badges.
+
 # The Rouge Cardinal Company 🎭
 
 ## Vue d'ensemble
@@ -144,8 +250,6 @@ pnpm dev
 
 L'application sera accessible sur http://localhost:3000
 
-**⚠️ IMPORTANT** : Ce projet utilise une **base Supabase remote** (pas de Supabase local).
-
 ### Gestion de la base de données
 
 ```bash
@@ -205,6 +309,9 @@ pnpm exec tsx scripts/create-admin-user.ts
 
 > [!NOTE]
 > L'application suit les meilleures pratiques Next.js 15 avec un emphasis sur la sécurité, la performance et l'expérience utilisateur professionnelle.
+
+---
+
 > [!NOTE]
 > Useful information that users should know, even when skimming content.
 
