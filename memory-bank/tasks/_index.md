@@ -19,7 +19,7 @@
 - `TASK005` Optimisation SEO et meta-tags dynamiques
 - `TASK007` Tests automatisés et monitoring
 - `TASK008` Configuration des redirections vers billetterie externe
-- `TASK009` Gestion des partenaires et mécènes
+- `TASK009` Gestion des partenaires et mécènes - ✅ Merged into TASK023
 - `TASK010` Mise en place des toggles d'affichage dans le back-office
 - `TASK015` Stratégie seeds cloud (sécurisée) + synchronisation
 - `TASK016` Option: modélisation `partners.type` si requis par le design

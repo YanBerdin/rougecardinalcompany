@@ -16,6 +16,7 @@ import {
   ToggleLeft,
   ScrollText,
   BarChart3,
+  Handshake,
 } from "lucide-react";
 import {
   Sidebar,
@@ -83,6 +84,11 @@ const homepageItems = [
     title: "La compagnie Section",
     href: "/admin/home/about",
     icon: FileText,
+  },
+  {
+    title: "Partenaires",
+    href: "/admin/partners",
+    icon: Handshake,
   },
 ];
 

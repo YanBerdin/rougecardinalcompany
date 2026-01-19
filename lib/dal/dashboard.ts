@@ -19,7 +19,7 @@ import {
 export async function fetchDashboardStats(): Promise<DALResult<DashboardStats>> {
   const supabase = await createClient();
 
-  const [teamResult, showsResult, eventsResult, mediaResult] =
+  const [teamResult, showsResult, eventsResult, mediaResult, partnersResult] =
     await Promise.all([
       supabase
         .from("membres_equipe")
@@ -27,6 +27,7 @@ export async function fetchDashboardStats(): Promise<DALResult<DashboardStats>> 
       supabase.from("spectacles").select("*", { count: "exact", head: true }),
       supabase.from("evenements").select("*", { count: "exact", head: true }),
       supabase.from("medias").select("*", { count: "exact", head: true }),
+      supabase.from("partners").select("*", { count: "exact", head: true }),
     ]);
 
   const errors = [
@@ -34,6 +35,7 @@ export async function fetchDashboardStats(): Promise<DALResult<DashboardStats>> 
     { name: "spectacles", error: showsResult.error },
     { name: "evenements", error: eventsResult.error },
     { name: "medias", error: mediaResult.error },
+    { name: "partners", error: partnersResult.error },
   ].filter((item) => item.error !== null);
 
   if (errors.length > 0) {
@@ -49,6 +51,7 @@ export async function fetchDashboardStats(): Promise<DALResult<DashboardStats>> 
     showsCount: showsResult.count ?? 0,
     eventsCount: eventsResult.count ?? 0,
     mediaCount: mediaResult.count ?? 0,
+    partnersCount: partnersResult.count ?? 0,
   };
 
   return { success: true, data: DashboardStatsSchema.parse(stats) };

@@ -57,14 +57,21 @@ async function checkCloudData() {
 
   // 4. Vérifier les partners
   console.log("\n📝 4. Partners (seeds):");
-  const { count: partnersCount, error: partnersError } = await supabase
+  const { data: partnersData, count: partnersCount, error: partnersError } = await supabase
     .from("partners")
-    .select("*", { count: "exact", head: true });
+    .select("id, name, logo_url, logo_media_id, is_active", { count: "exact" });
 
   if (partnersError) {
     console.error("❌ Erreur:", partnersError.message);
   } else {
     console.log(`   - Nombre de partners: ${partnersCount || 0}`);
+    if (partnersData && partnersData.length > 0) {
+      console.log("   - Exemples:");
+      partnersData.slice(0, 3).forEach(p => {
+        const logoSource = p.logo_media_id ? "media_library" : (p.logo_url ? "external_url" : "none");
+        console.log(`     • ${p.name} (active: ${p.is_active}, logo: ${logoSource})`);
+      });
+    }
   }
 
   // 5. Vérifier les membres équipe

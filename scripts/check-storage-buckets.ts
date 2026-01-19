@@ -1,9 +1,10 @@
 //TODO: ❌ Invalid environment variables - to be fixed before production use
 import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
+import { resolve } from "path";
 import { env } from "../lib/env";
 
-dotenv.config({ path: ".env.local" });
+dotenv.config({ path: resolve(process.cwd(), ".env.local") });
 
 const supabase = createClient(
   env.NEXT_PUBLIC_SUPABASE_URL,

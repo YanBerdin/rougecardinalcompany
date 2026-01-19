@@ -17,6 +17,7 @@ export const DashboardStatsSchema = z.object({
   showsCount: z.number().int().nonnegative(),
   eventsCount: z.number().int().nonnegative(),
   mediaCount: z.number().int().nonnegative(),
+  partnersCount: z.number().int().nonnegative(),
 });
 
 // =============================================================================

@@ -62,6 +62,15 @@ async function main() {
         client.from("partners").select("*").eq("is_active", true).limit(3),
     },
     {
+      name: "fetchActivePartners (with media join)",
+      query: () =>
+        client
+          .from("partners")
+          .select("id, name, logo_url, logo_media_id, media:logo_media_id(storage_path)")
+          .eq("is_active", true)
+          .limit(3),
+    },
+    {
       name: "fetchNewsletterSettings",
       query: () =>
         client

@@ -4,6 +4,38 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-01-19 - FEAT: Partners Management (TASK023)
+
+**Migration**: `20260118234945_add_partners_media_folder.sql`
+
+**Sévérité**: 🟢 **LOW RISK** - DML seed (pas de modification de schéma)
+
+**Source**: TASK023 - Partners Management
+
+**Ajouts**:
+
+1. **Dossier média `partners`**:
+   - Entrée dans `media_folders` pour les logos partenaires
+   - Slug: `partners`, Name: `Partenaires`
+   - Utilisé par `ImageUploadWithMediaLibrary` (uploadFolder: `partners`)
+
+**Validation**:
+
+- ✅ Migration appliquée localement: 2026-01-18
+- ✅ Migration appliquée sur cloud: 2026-01-19
+- ✅ Dossier visible dans validate-media-folders.ts
+
+**Fichiers Associés**:
+
+- Migration: `20260118234945_add_partners_media_folder.sql`
+- DAL: `lib/dal/admin-partners.ts`, `lib/dal/home-partners.ts`
+- Schemas: `lib/schemas/partners.ts`
+- UI: `components/features/admin/partners/`
+- Task: `memory-bank/tasks/TASK023-partners-management.md`
+- Plan: `.github/prompts/plan-partnersManagement.prompt.md`
+
+---
+
 ### 2026-01-18 - FEAT: Data Retention Automation (TASK053)
 
 **Migration**: `20260117234007_task053_data_retention.sql`

@@ -40,11 +40,13 @@ async function fetchDashboardStats() {
     { count: showsCount, error: showsError },
     { count: eventsCount, error: eventsError },
     { count: mediaCount, error: mediaError },
+    { count: partnersCount, error: partnersError },
   ] = await Promise.all([
     supabase.from("membres_equipe").select("*", { count: "exact", head: true }),
     supabase.from("spectacles").select("*", { count: "exact", head: true }),
     supabase.from("evenements").select("*", { count: "exact", head: true }),
     supabase.from("medias").select("*", { count: "exact", head: true }),
+    supabase.from("partners").select("*", { count: "exact", head: true }),
   ]);
 
   // Check for individual errors
@@ -53,6 +55,7 @@ async function fetchDashboardStats() {
     { name: "spectacles", error: showsError },
     { name: "evenements", error: eventsError },
     { name: "medias", error: mediaError },
+    { name: "partners", error: partnersError },
   ].filter((item) => item.error !== null);
 
   if (errors.length > 0) {
@@ -66,6 +69,7 @@ async function fetchDashboardStats() {
     showsCount: showsCount || 0,
     eventsCount: eventsCount || 0,
     mediaCount: mediaCount || 0,
+    partnersCount: partnersCount || 0,
   };
 }
 
