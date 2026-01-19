@@ -1,8 +1,52 @@
 # Active Context
 
-**Current Focus (2026-01-18)**: ✅ TASK053 COMPLETE - Data Retention Automation (RGPD)
+**Current Focus (2026-01-19)**: ✅ TASK023 COMPLETE - Partners Management
 
-**Last Major Updates**: Data Retention (TASK053) + Analytics Dashboard (TASK031) + Performance Optimization (TASK034) + Database Backup (TASK050)
+**Last Major Updates**: Partners Management (TASK023) + Data Retention (TASK053) + Analytics Dashboard (TASK031) + Database Backup (TASK050)
+
+---
+
+## ✅ TASK023 Partners Management - COMPLETE (2026-01-19)
+
+### Implementation Summary
+
+| Component | Status | Details |
+| --------- | ------ | ------- |
+| Migration | ✅ | `20260118234945_add_partners_media_folder.sql` |
+| DAL Admin | ✅ | `lib/dal/admin-partners.ts` (6 functions) |
+| DAL Public | ✅ | `lib/dal/home-partners.ts` (Media Library join) |
+| Schemas | ✅ | `lib/schemas/partners.ts` (Server + UI) |
+| Server Actions | ✅ | `app/(admin)/admin/partners/actions.ts` |
+| Admin Pages | ✅ | List + New + Edit with drag-and-drop |
+| Dashboard | ✅ | `partnersCount` added (5 cards total) |
+| Test Scripts | ✅ | 3 scripts updated |
+
+### Key Files Created
+
+```bash
+lib/dal/admin-partners.ts           # CRUD + reorder (6 functions)
+lib/dal/home-partners.ts            # Public with buildMediaUrl()
+lib/schemas/partners.ts             # Server + UI schemas
+app/(admin)/admin/partners/
+  page.tsx                          # List with DnD
+  actions.ts                        # Server Actions
+  new/page.tsx                      # Create form
+  [id]/edit/page.tsx                # Edit form
+components/features/admin/partners/
+  PartnersContainer.tsx             # Server Component
+  PartnersView.tsx                  # Client with @dnd-kit/core
+  PartnerForm.tsx                   # ImageFieldGroup
+supabase/migrations/
+  20260118234945_add_partners_media_folder.sql
+```
+
+### Key Patterns Applied
+
+- **BigInt → Number**: DTO conversion for JSON serialization
+- **Logo Priority**: `buildMediaUrl(storage_path) ?? logo_url ?? null`
+- **Column Names**: `is_active` (not `active`), `storage_path` (not `url`)
+- **Drag-and-Drop**: @dnd-kit/core for reordering
+- **Dashboard Integration**: 5th stat card with Handshake icon
 
 ---
 

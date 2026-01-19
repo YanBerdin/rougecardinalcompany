@@ -14,6 +14,7 @@
   - TASK051 (Error Monitoring & Alerting) - ✅ Complete (2026-01-14)
   - TASK031 (Analytics Dashboard) - ✅ Complete (2026-01-17)
   - TASK053 (Data Retention Automation) - ✅ Complete (2026-01-18)
+  - TASK023 (Partners Management) - ✅ Complete (2026-01-19)
 ```
 
 ---
@@ -109,15 +110,16 @@ Estimated: 4-5 jours
 Dépend de: TASK036, TASK046
 Bloquant pour: TASK039
 
-TASK023: Partners Management
-├─ Confirm partners schema (logo_url, display_order)
-├─ DAL methods (persistence + ordering)
-├─ Admin UI (list, upload, drag-to-reorder)
-└─ Persist ordering + revalidate fragments
+✅ TASK023: Partners Management (Complete 2026-01-19)
+├─ ✅ DAL admin-partners.ts + home-partners.ts (Media Library join)
+├─ ✅ Schemas partners.ts (Server + UI, bigint→number)
+├─ ✅ Admin UI with @dnd-kit/core drag-and-drop reordering
+├─ ✅ Migration 20260118234945_add_partners_media_folder.sql
+└─ ✅ Dashboard stats + test scripts updated
 
-Estimated: 3-4 jours
-Dépend de: TASK029 ✅ (Media Library completed)
-Bloquant pour: TASK039
+Completed: 2026-01-19
+Dépendait de: TASK029 ✅ (Media Library completed)
+Débloque: TASK039
 ```
 
 ---

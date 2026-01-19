@@ -1,5 +1,52 @@
 # Progress
 
+## TASK023 COMPLETE - Partners Management (2026-01-19)
+
+### Implementation Summary
+
+✅ **ALL COMPONENTS COMPLETE** - CRUD admin partenaires avec drag-and-drop et Media Library
+
+| Component | Description | Status |
+| --------- | ----------- | ------ |
+| Migration | Media folder `partners` | ✅ |
+| DAL Admin | 6 functions (CRUD + reorder) | ✅ |
+| DAL Public | Media Library join | ✅ |
+| Schemas | Server + UI (bigint→number) | ✅ |
+| Server Actions | Validation + revalidatePath | ✅ |
+| Admin Pages | List + New + Edit | ✅ |
+| Drag-and-Drop | @dnd-kit/core | ✅ |
+| Dashboard | partnersCount (5 cards) | ✅ |
+| Test Scripts | 3 scripts updated | ✅ |
+
+### Key Deliverables
+
+- **Admin URL**: `/admin/partners`
+- **Features**: CRUD, drag-and-drop reorder, Media Library logos, dashboard stats
+- **Migration**: `20260118234945_add_partners_media_folder.sql`
+- **Sidebar**: Handshake icon added
+
+### Files Created/Modified
+
+| Type | Count | Files |
+| ---- | ----- | ----- |
+| DAL | 2 | `admin-partners.ts`, `home-partners.ts` |
+| Schemas | 1 | `partners.ts` |
+| Pages | 3 | `page.tsx`, `new/page.tsx`, `[id]/edit/page.tsx` |
+| Components | 3 | `PartnersContainer`, `PartnersView`, `PartnerForm` |
+| Actions | 1 | `app/(admin)/admin/partners/actions.ts` |
+| Migration | 1 | `20260118234945_add_partners_media_folder.sql` |
+| Dashboard | 2 | `dashboard.ts`, `DashboardStatsContainer.tsx` |
+| Scripts | 3 | `test-dashboard-stats.ts`, `test-all-dal-functions.ts`, `check-cloud-data.ts` |
+
+### Commit
+
+```bash
+feat(admin): implement Partners Management CRUD (TASK023)
+Closes #3
+```
+
+---
+
 ## TASK053 COMPLETE - Data Retention Automation (2026-01-18)
 
 ### Implementation Summary
