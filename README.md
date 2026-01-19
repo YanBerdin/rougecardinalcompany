@@ -334,3 +334,5 @@ pnpm exec tsx scripts/create-admin-user.ts
 
 > [!CAUTION]
 > Advises about risks or negative outcomes of certain action.
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/YanBerdin/rougecardinalcompany)
