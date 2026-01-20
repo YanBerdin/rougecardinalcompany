@@ -38,23 +38,21 @@ alter table public.spectacles enable row level security;
 
 drop policy if exists "Public spectacles are viewable by everyone" on public.spectacles;
 drop policy if exists "Admins can view all spectacles" on public.spectacles;
+drop policy if exists "View spectacles (public published OR admin all)" on public.spectacles;
 
-create policy "View spectacles (public published OR admin all)"
+create policy "View spectacles (public published/archived OR admin all)"
 on public.spectacles
 for select
 to anon, authenticated
 using (
   (
-    status = 'published'
-    and public = true
+    -- Public spectacles: published OR archived (for "Nos Créations Passées")
+    public = true
+    and status in ('published', 'archived')
   )
   or
-  exists (
-    select 1
-    from public.profiles
-    where user_id = (select auth.uid())
-    and role = 'admin'
-  )
+  -- Admins can see everything
+  (select public.is_admin())
 );
 
 drop policy if exists "Authenticated users can create spectacles" on public.spectacles;

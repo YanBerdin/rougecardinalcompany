@@ -1,8 +1,67 @@
 # Active Context
 
-**Current Focus (2026-01-19)**: ✅ TASK023 COMPLETE - Partners Management
+**Current Focus (2026-01-20)**: ✅ HOTFIX RLS - Spectacles Archived + Display Toggles Fallback
 
-**Last Major Updates**: Partners Management (TASK023) + Data Retention (TASK053) + Analytics Dashboard (TASK031) + Database Backup (TASK050)
+**Last Major Updates**: RLS Fix Spectacles (2026-01-20) + Partners Management (TASK023) + Data Retention (TASK053) + Analytics Dashboard (TASK031)
+
+---
+
+## ✅ HOTFIX: RLS Spectacles + Display Toggles (2026-01-20)
+
+### Problème Identifié
+
+Page publique `/spectacles` affichait "0 créations depuis 2008" sur Chrome (utilisateur anonyme) mais "11 créations depuis 2008" sur Edge (session admin).
+
+Homepage vide sur Chrome (pas de Hero affiché).
+
+### Root Cause Analysis
+
+| Symptôme | Cause | Solution |
+| -------- | ----- | -------- |
+| Spectacles archivés invisibles | RLS policy: `status = 'published'` excluait `'archived'` | Migration: `status IN ('published', 'archived')` |
+| Homepage Hero absent | RLS `configurations_site`: toggle inaccessible aux anon users | DAL fallback: `{ enabled: true }` si toggle absent |
+
+### Corrections Appliquées
+
+> **1. Migration RLS Spectacles**
+
+```sql
+-- 20260120183000_fix_spectacles_rls_include_archived.sql
+create policy "View spectacles (public published/archived OR admin all)"
+on public.spectacles for select
+to anon, authenticated
+using (
+  (public = true and status in ('published', 'archived'))
+  or (select public.is_admin())
+);
+```
+
+> **2. DAL Fallback Display Toggles**
+
+```typescript
+// lib/dal/site-config.ts
+if (!data && key.startsWith("display_toggle_")) {
+  return {
+    success: true,
+    data: { key, value: { enabled: true, max_items: null }, ... }
+  };
+}
+```
+
+### Validation
+
+- ✅ Migration locale: `pnpm dlx supabase db reset`
+- ✅ Migration remote: `pnpm dlx supabase db push`
+- ✅ Test Chrome incognito: 11 créations passées affichées
+- ✅ Test Homepage: Hero visible
+
+### Fichiers Modifiés
+
+| Fichier | Modification |
+| ------- | ------------ |
+| `supabase/migrations/20260120183000_fix_spectacles_rls_include_archived.sql` | Nouvelle migration |
+| `supabase/schemas/61_rls_main_tables.sql` | RLS policy spectacles |
+| `lib/dal/site-config.ts` | Fallback display toggles |
 
 ---
 

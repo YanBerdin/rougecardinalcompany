@@ -1,5 +1,40 @@
 # Progress
 
+## HOTFIX: RLS Spectacles + Display Toggles Fallback (2026-01-20)
+
+### Issue Report
+
+- **Reporter**: User
+- **Browser**: Chrome (anonymous) vs Edge (admin session)
+- **Pages Affected**: `/spectacles` (archived shows), Homepage (Hero section)
+
+### Root Cause
+
+| Issue | Cause | Impact |
+| ----- | ----- | ------ |
+| Archived spectacles not showing | RLS `status = 'published'` excluded `'archived'` | "0 créations depuis 2008" on Chrome |
+| Homepage Hero missing | `display_toggle_home_hero` RLS blocked anon users | Empty homepage |
+
+### Resolution
+
+| Fix | File | Status |
+| --- | ---- | ------ |
+| RLS policy include archived | `20260120183000_fix_spectacles_rls_include_archived.sql` | ✅ Applied |
+| DAL fallback for toggles | `lib/dal/site-config.ts` | ✅ Applied |
+| Schema update | `61_rls_main_tables.sql` | ✅ Synced |
+
+### Deployment
+
+- ✅ Local: `pnpm dlx supabase db reset --yes`
+- ✅ Remote: `pnpm dlx supabase db push`
+- ✅ Verification: Chrome incognito shows 11 spectacles + Hero
+
+### Cleanup
+
+- ✅ Debug route `/api/debug/home` supprimée (créée pendant investigation)
+
+---
+
 ## TASK023 COMPLETE - Partners Management (2026-01-19)
 
 ### Implementation Summary

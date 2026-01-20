@@ -31,6 +31,21 @@ export const fetchDisplayToggle = cache(
       return { success: false, error: `[ERR_CONFIG_001] ${error.message}` };
     }
 
+    // if the toggle is missing (data == null) and it's a display toggle,
+    // return a sensible default so public pages don't break for anonymous users
+    if (!data && key.startsWith("display_toggle_")) {
+      const defaultData = {
+        key,
+        value: { enabled: true, max_items: null },
+        description: "default: enabled for display toggles when not configured",
+        category: "home_display",
+        updated_at: null,
+        updated_by: null,
+      } as unknown as DisplayToggleDTO;
+
+      return { success: true, data: defaultData };
+    }
+
     return { success: true, data };
   }
 );

@@ -4,6 +4,44 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-01-20 - FIX: RLS Spectacles Include Archived Status
+
+**Migration**: `20260120183000_fix_spectacles_rls_include_archived.sql`
+
+**Sévérité**: 🟢 **LOW RISK** - Correction de politique RLS existante
+
+**Problème**:
+
+- La section "Nos Créations Passées" sur `/spectacles` affichait 0 spectacles pour les utilisateurs anonymes (Chrome sans session)
+- Edge avec session admin affichait correctement les 11 spectacles archivés
+- Cause: La RLS policy n'autorisait que `status = 'published'`, excluant `status = 'archived'`
+
+**Corrections**:
+
+1. **RLS Policy spectacles**:
+   - Avant: `public = true AND status = 'published'`
+   - Après: `public = true AND status IN ('published', 'archived')`
+
+**Validation**:
+
+- ✅ Migration appliquée localement: 2026-01-20 (db reset)
+- ✅ Migration appliquée sur cloud: 2026-01-20 (db push)
+- ✅ Test Chrome incognito: 11 créations passées affichées
+
+**Fichiers Associés**:
+
+- Migration: `20260120183000_fix_spectacles_rls_include_archived.sql`
+- Schema: `supabase/schemas/61_rls_main_tables.sql`
+- DAL: `lib/dal/spectacles.ts` (fetchAllSpectacles)
+
+**Correction connexe (DAL site-config.ts)**:
+
+- Ajout d'un fallback dans `fetchDisplayToggle()` pour les toggles manquants
+- Les toggles `display_toggle_*` retournent `{ enabled: true }` par défaut si absents de la DB
+- Résout le problème de homepage vide pour utilisateurs anonymes
+
+---
+
 ### 2026-01-19 - FEAT: Partners Management (TASK023)
 
 **Migration**: `20260118234945_add_partners_media_folder.sql`

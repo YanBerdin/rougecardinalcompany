@@ -121,6 +121,15 @@ Note RLS: les nouvelles tables co‑localisent leurs politiques (dans le même f
 
 ## 🆕 Mises à jour récentes (janvier 2026)
 
+- **FIX: RLS Spectacles Include Archived Status (20 jan. 2026)** : Correction de la politique RLS pour inclure les spectacles archivés.
+  - **Migration** : `20260120183000_fix_spectacles_rls_include_archived.sql`
+  - **Problème** : La section "Nos Créations Passées" sur `/spectacles` affichait 0 spectacles pour les utilisateurs anonymes (Chrome sans session) alors que Edge avec session admin affichait correctement les 11 spectacles archivés.
+  - **Cause** : La RLS policy n'autorisait que `status = 'published'`, excluant `status = 'archived'` pour le public.
+  - **Solution** : Mise à jour de la policy spectacles pour autoriser `status IN ('published', 'archived')` aux utilisateurs anonymes.
+  - **Schéma déclaratif** : `61_rls_main_tables.sql` mis à jour avec la nouvelle policy.
+  - **Validation** : Migration appliquée local + cloud le 2026-01-20, test Chrome incognito OK.
+  - **Fix connexe DAL** : Ajout d'un fallback dans `lib/dal/site-config.ts` pour retourner `{ enabled: true }` par défaut si un toggle `display_toggle_*` est absent de la base (résout homepage vide pour utilisateurs anonymes).
+
 - **TASK053: Data Retention Automation (18 jan. 2026)** : Système complet d'automatisation de rétention des données RGPD/CNIL.
   - **Migration** : `20260117234007_task053_data_retention.sql` (698 lignes)
   - **Nouveaux schémas déclaratifs** :
