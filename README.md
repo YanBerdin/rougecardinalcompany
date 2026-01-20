@@ -30,25 +30,85 @@ La couche intermédiaire applique les principes de Clean Architecture avec une D
 Les intégrations externes (Sentry, Resend) sont gérées au niveau des Server Actions. L’automatisation CI/CD inclut des backups hebdomadaires via GitHub Actions, audits de sécurité continus et couverture de tests (RLS, rate-limiting, CRUD).
 
 ```mermaid
-flowchart LR
-  subgraph Client
-    Browser[Web Browser]
-  end
-  subgraph NextJS["Next.js 16 App Router"]
-    Public[Public Site Routes]
-    Admin[Admin Backoffice Routes]
-    ServerActions[Server Actions]
-  end
-  subgraph Server["Server-side Layer"]
-    DAL[Data Access Layer (lib/dal)]
-    Business[Business Logic]
-    Integrations[Sentry / Resend / Edge Functions]
-  end
-  subgraph Supabase["Supabase Backend"]
-    Postgres[(PostgreSQL 17.6)]
-    Auth[Auth]
-    Storage[Storage Buckets]
-  end
+flowchart TB
+    %% --- Client Layer ---
+    subgraph ClientLayer ["Client Layer"]
+        CL1["Web Browser"]
+        CL2["Public Site UI\nMarketing Page"]
+        CL3["Admin Backoffice UI\n/admin"]
+        CL1 --> CL2
+        CL1 --> CL3
+    end
+
+    %% --- Next.js Application ---
+    subgraph NextApp ["Next.js Application"]
+        %% Top-level routes
+        R1["Public-facing Routes\nHome, Speakers, Agenda,\nPrices, Contact, Campfire"]
+        R2["Admin Routes\nDashboard, Consent Mgmt,\nMedia Library, Analytics"]
+
+        %% Server components / edge
+        SC1["Server Components\nDefault Rendering"]
+        SL1["Server-side Layer\nMiddleware + Cache\nRevalidation"]
+
+        %% Business logic
+        BL1["Business Logic\nEmail Service\nEvent Integrations\nSend Templates"]
+
+        %% Data access layer
+        DAL1["Data Access Layer\nSupabase Client\nRLS (Row-Level Security)\nDAL/Domain Patterns"]
+
+        %% API routes
+        API1["API Routes\n/api/webhook\n/api/contact\n/api/admin/checkin\n/api/supabase/webhook"]
+
+        %% Test schemas
+        TS1["Test Schemas\nValidation Layer\nZod/schemas/*"]
+
+        %% App Router
+        AR1["App Router\n/app/*"]
+
+        %% Internal wiring
+        R1 --> SC1
+        R2 --> SC1
+        SC1 --> SL1
+        SL1 --> BL1
+        BL1 --> DAL1
+        AR1 --> API1
+        TS1 --> BL1
+        TS1 --> API1
+    end
+
+    %% --- External services / Email ---
+    subgraph EmailService ["Email Service & 3rd Party"]
+        ES1["Email Provider\nTransactional Delivery\nEvent Webhook Events"]
+        ES2["Organisation Webhook\ncaptation/captation"]
+        ES1 --> ES2
+        API1 --> ES1
+    end
+
+    %% --- Supabase Backend ---
+    subgraph SupabaseBackend ["Supabase Backend"]
+        SB1["Edge Functions\nonDeleteCleanup"]
+        SB2["Supabase Auth\nJWT / Signing Keys + RLS"]
+        SB3["PostgreSQL / RLS DB\nTables & Views\nRLS Enabled"]
+        SB4["Storage Backend\nmedia, backups"]
+
+        SB1 --> SB3
+        SB2 --> SB3
+        SB3 --> SB4
+    end
+
+    %% --- CI/CD Pipeline ---
+    subgraph CICD ["CI/CD Pipeline"]
+        CI1["GitHub Actions\nVelocity Analysis\nSecurity Checks\nDB Migrations"]
+        CI2["Test Scripts\ndashboard: CRUD\nRLS, Rate Limiting"]
+        CI1 --> CI2
+    end
+
+    %% Cross-system flows
+    DAL1 --> SB3
+    API1 --> SB1
+    CI1 --> SB3
+    CI1 --> SB4
+
   ```
 
   Browser -->|requests| Public
