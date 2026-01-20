@@ -1,4 +1,4 @@
-//TODO: ❌ Invalid environment variables - to be fixed before production use
+import 'dotenv/config';
 import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
 import { env } from "../lib/env";

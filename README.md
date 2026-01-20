@@ -31,86 +31,70 @@ Les intégrations externes (Sentry, Resend) sont gérées au niveau des Server A
 
 ```mermaid
 flowchart TB
-    %% --- Client Layer ---
-    subgraph ClientLayer ["Client Layer"]
-        CL1["Web Browser"]
-        CL2["Public Site UI\nMarketing Page"]
-        CL3["Admin Backoffice UI\n/admin"]
-        CL1 --> CL2
-        CL1 --> CL3
-    end
+  %% Layer 1 - Presentation
+  subgraph L1["Layer 1 : Presentation Layer"]
+    WB["Web Browser"]
+    PUBP["Public Pages<br/>(marketing) route group"]
+    ADMP["Admin Pages<br/>(admin) route group"]
+    WB --> PUBP
+    WB --> ADMP
+  end
 
-    %% --- Next.js Application ---
-    subgraph NextApp ["Next.js Application"]
-        %% Top-level routes
-        R1["Public-facing Routes\nHome, Speakers, Agenda,\nPrices, Contact, Campfire"]
-        R2["Admin Routes\nDashboard, Consent Mgmt,\nMedia Library, Analytics"]
+  %% Layer 2 - Application
+  subgraph L2["Layer 2 : Application Layer"]
+    MIDDLE["middleware<br/>Auth + Rate limiting"]
+    APIR["API Routes<br/>app/api/*"]
+    SA["Server Actions<br/>app/lib/actions"]
+    PUBP --> MIDDLE
+    ADMP --> MIDDLE
+    MIDDLE --> APIR
+    MIDDLE --> SA
+  end
 
-        %% Server components / edge
-        SC1["Server Components\nDefault Rendering"]
-        SL1["Server-side Layer\nMiddleware + Cache\nRevalidation"]
+  %% Layer 3 - Data Access
+  subgraph L3["Layer 3 : Data Access Layer"]
+    DBMODS["lib/db/<br/>server only modules<br/>(DAL & Result pattern)"]
+    SCHEMA["lib/schema/*<br/>Zod validation"]
+    HELPERS["lib/db/helpers<br/>toDAL/result, error codes"]
+    CAPTURE["capture exceptions"]
+    LOGERR["log errors"]
+    SENTRY_INT["Sentry<br/>error monitoring"]
+    DBMODS --> SCHEMA
+    DBMODS --> HELPERS
+    APIR --> DBMODS
+    SA --> DBMODS
+    DBMODS -.-> CAPTURE
+    CAPTURE -.-> LOGERR
+    CAPTURE -.-> SENTRY_INT
+    SA -->|send email| RESEND["Resend API<br/>email delivery"]
+    SA -->|log errors| LOGERR
+  end
 
-        %% Business logic
-        BL1["Business Logic\nEmail Service\nEvent Integrations\nSend Templates"]
+  %% Layer 4 - Database & Services
+  subgraph L4["Layer 4 : Database & Services"]
+    EDGE["Edge Functions<br/>scheduled-cleanup"]
+    PG["Supabase Postgres<br/>~12 tables with RLS"]
+    STORAGE["Supabase Storage<br/>media, backups buckets"]
+    AUTH["Supabase Auth<br/>JWT via GoTrue"]
+    EDGE --- PG
+    DBMODS --> PG
+    DBMODS --> STORAGE
+    DBMODS --> AUTH
+  end
 
-        %% Data access layer
-        DAL1["Data Access Layer\nSupabase Client\nRLS (Row-Level Security)\nDAL/Domain Patterns"]
+  %% External Services
+  subgraph EXTS["External Services"]
+    RESEND_EXT["Resend API<br/>Email delivery"]
+    SENTRY_EXT["Sentry<br/>Error monitoring"]
+  end
 
-        %% API routes
-        API1["API Routes\n/api/webhook\n/api/contact\n/api/admin/checkin\n/api/supabase/webhook"]
+  %% External connections
+  SA --> RESEND_EXT
+  LOGERR --> SENTRY_EXT
+  DBMODS --> SENTRY_EXT
+```
 
-        %% Test schemas
-        TS1["Test Schemas\nValidation Layer\nZod/schemas/*"]
-
-        %% App Router
-        AR1["App Router\n/app/*"]
-
-        %% Internal wiring
-        R1 --> SC1
-        R2 --> SC1
-        SC1 --> SL1
-        SL1 --> BL1
-        BL1 --> DAL1
-        AR1 --> API1
-        TS1 --> BL1
-        TS1 --> API1
-    end
-
-    %% --- External services / Email ---
-    subgraph EmailService ["Email Service & 3rd Party"]
-        ES1["Email Provider\nTransactional Delivery\nEvent Webhook Events"]
-        ES2["Organisation Webhook\ncaptation/captation"]
-        ES1 --> ES2
-        API1 --> ES1
-    end
-
-    %% --- Supabase Backend ---
-    subgraph SupabaseBackend ["Supabase Backend"]
-        SB1["Edge Functions\nonDeleteCleanup"]
-        SB2["Supabase Auth\nJWT / Signing Keys + RLS"]
-        SB3["PostgreSQL / RLS DB\nTables & Views\nRLS Enabled"]
-        SB4["Storage Backend\nmedia, backups"]
-
-        SB1 --> SB3
-        SB2 --> SB3
-        SB3 --> SB4
-    end
-
-    %% --- CI/CD Pipeline ---
-    subgraph CICD ["CI/CD Pipeline"]
-        CI1["GitHub Actions\nVelocity Analysis\nSecurity Checks\nDB Migrations"]
-        CI2["Test Scripts\ndashboard: CRUD\nRLS, Rate Limiting"]
-        CI1 --> CI2
-    end
-
-    %% Cross-system flows
-    DAL1 --> SB3
-    API1 --> SB1
-    CI1 --> SB3
-    CI1 --> SB4
-
-  ```
-
+```mermaid
   Browser -->|requests| Public
   Browser -->|admin requests| Admin
   Public --> ServerActions
@@ -120,7 +104,8 @@ flowchart TB
   ServerActions --> Integrations
   Integrations --> Sentry
   Integrations --> Resend
-  DAL --> Storage
+  DAL --> Storage`
+```
 
 Toutes les décisions clés incluent : rendu server-first (RSC par défaut), revalidatePath() uniquement dans Server Actions, RLS comme frontière de sécurité primaire, pattern DALResult pour gestion d’erreurs, et T3 Env pour configuration typée.
 

@@ -1,4 +1,4 @@
-//TODO: ❌ Invalid environment variables - to be fixed before production use
+import 'dotenv/config';
 import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
 import { resolve } from "path";
@@ -15,7 +15,7 @@ async function checkBuckets() {
   console.log("🔍 Vérification des buckets Storage...\n");
 
   const { data, error } = await supabase.storage.listBuckets();
-  
+
   if (error) {
     console.error("❌ Erreur:", error);
     return;
@@ -28,7 +28,7 @@ async function checkBuckets() {
 
   // Test public access to medias bucket
   console.log("\n🔓 Test accès public au bucket 'medias':");
-  
+
   // List all files at root level
   const { data: rootFiles, error: rootError } = await supabase.storage
     .from("medias")
