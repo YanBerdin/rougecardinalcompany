@@ -48,7 +48,7 @@ export function HeroView({
       ))}
 
       {/* Content */}
-      <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 text-center text-chart-6 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="animate-fade-in-up">
           <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
             {slides[currentSlide].title}
@@ -56,7 +56,7 @@ export function HeroView({
           <p className="text-xl md:text-2xl mb-4 text-gray-200">
             {slides[currentSlide].subtitle}
           </p>
-          <p className="text-lg mb-8 text-gray-300 max-w-2xl mx-auto">
+          <p className="text-lg mb-8 text-gray-200 max-w-2xl mx-auto">
             {slides[currentSlide].description}
           </p>
 
@@ -76,7 +76,7 @@ export function HeroView({
               <Button
                 variant="outline"
                 size="lg"
-                className="bg-white/30 border-white/50 text-white backdrop-blur-md hover:bg-white hover:text-black transition-all duration-300 shadow-lg"
+                className="bg-white/30 border-white/50 text-chart-6 backdrop-blur-md hover:bg-chart-6 hover:text-black transition-all duration-300 shadow-lg"
                 asChild
               >
                 <Link href={slides[currentSlide].ctaSecondaryUrl || "/agenda"}>
@@ -95,7 +95,7 @@ export function HeroView({
           onPauseAutoPlay();
           onPrevSlide();
         }}
-        className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/30 hover:bg-black/50 text-white p-3 rounded-full transition-all duration-200 backdrop-blur-md"
+        className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/30 hover:bg-black/50 text-chart-6 p-3 rounded-full transition-all duration-200 backdrop-blur-md"
         aria-label="Slide précédent"
       >
         <ArrowRight className="h-6 w-6 rotate-180" />
@@ -106,7 +106,7 @@ export function HeroView({
           onPauseAutoPlay();
           onNextSlide();
         }}
-        className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/30 hover:bg-black/50 text-white p-3 rounded-full transition-all duration-200 backdrop-blur-sm"
+        className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/30 hover:bg-black/50 text-chart-6 p-3 rounded-full transition-all duration-200 backdrop-blur-sm"
         aria-label="Slide suivant"
       >
         <ArrowRight className="h-6 w-6" />
@@ -126,8 +126,8 @@ export function HeroView({
           >
             <span
               className={`block w-3 h-3 rounded-full transition-all duration-200 ${index === currentSlide
-                  ? "bg-white scale-110"
-                  : "bg-white/50 hover:bg-white/75 scale-95"
+                ? "bg-chart-6 scale-110"
+                : "bg-chart-6/50 hover:bg-chart-6/75 scale-95"
                 }`}
             />
           </button>
@@ -135,17 +135,17 @@ export function HeroView({
       </div>
 
       {/* Swipe Indicator */}
-      <div className="absolute bottom-8 right-8 text-white/70 text-sm hidden sm:block">
+      <div className="absolute bottom-8 right-8 text-chart-6/70  text-sm hidden sm:block">
         <div className="flex items-center space-x-2">
           <span>Glissez pour naviguer</span>
           <div className="flex space-x-1">
-            <div className="w-2 h-2 bg-white/50 rounded-full animate-pulse" />
+            <div className="w-2 h-2 bg-chart-6/50 rounded-full animate-pulse" />
             <div
-              className="w-2 h-2 bg-white/50 rounded-full animate-pulse"
+              className="w-2 h-2 bg-chart-6/50 rounded-full animate-pulse"
               style={{ animationDelay: "0.2s" }}
             />
             <div
-              className="w-2 h-2 bg-white/50 rounded-full animate-pulse"
+              className="w-2 h-2 bg-chart-6/50 rounded-full animate-pulse"
               style={{ animationDelay: "0.4s" }}
             />
           </div>

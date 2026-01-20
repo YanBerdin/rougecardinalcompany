@@ -1,47 +1,205 @@
-![Rouge Cardinal](public/logo-florian.png)
-
 # Rouge Cardinal Company — Site web
 
 > Plateforme web officielle de la compagnie de théâtre Rouge Cardinal : vitrine publique, médiathèque, espace presse et back‑office d'administration.
 
-## Table des matières
+## Purpose and Scope
 
-- [Aperçu](#aper%C3%A7u)
-- [Fonctionnalités principales](#fonctionnalit%C3%A9s-principales)
-- [Architecture & conventions](#architecture--conventions)
-- [Démarrage rapide](#d%C3%A9marrage-rapide)
-- [Commandes utiles](#commandes-utiles)
-- [Déploiement et migrations](#d%C3%A9ploiement-et-migrations)
-- [Documentation & ressources](#documentation--ressources)
+Rouge Cardinal Company est une application web pour une compagnie de théâtre conçue pour :
 
-## Aperçu
+- présenter l’identité, l’équipe, les productions et partenaires
+- gérer et afficher spectacles, événements et calendriers avec réordonnancement drag-and-drop
+- fournir un espace presse professionnel
+- gérer abonnements newsletter et formulaires de contact avec limitation de débit
+- offrir une interface d’administration sécurisée avec versioning automatique
+- suivre les événements analytiques et la santé via Sentry
+- automatiser la rétention RGPD
+- gérer une médiathèque complète avec déduplication SHA‑256, tags, dossiers et suivi d’usage.
 
-Ce dépôt contient le site web de la compagnie Rouge Cardinal construit avec Next.js (app router) et Supabase. Le projet privilégie une approche "server‑first" :
+**Le système sert trois groupes d’utilisateurs :**
 
-- pages et layouts dans `app/`
-- composants UI réutilisables dans `components/`
-- accès base de données centralisé dans `lib/dal/` (DAL, server‑only)
-- schémas déclaratifs et migrations Supabase sous `supabase/`
+- visiteurs anonymes
+- utilisateurs authentifiés
+- administrateurs, avec contrôle d’accès via Row Level Security (RLS) et une architecture de défense en profondeur sur sept couches.
 
-## Fonctionnalités principales
+## System Architecture
 
-- Site public : pages spectacles, presse, partenaires, agenda
-- Back‑office : CRUD pour contenus (Server Actions + revalidatePath)
-- Médiathèque avancée (tags, dossiers, thumbnails)
-- RGPD : automatisation de rétention des données (Edge Function)
-- Monitoring & Sentry pour la supervision des erreurs
+L’application suit le pattern App Router de Next.js 16 avec séparation stricte entre groupes de routes publiques (marketing) et protégées (admin).
 
-## Architecture & conventions
+La couche intermédiaire applique les principes de Clean Architecture avec une Data Access Layer (DAL) côté serveur, interfaçant exclusivement Supabase (PostgreSQL 17.6, Auth, Storage).
 
-- Next.js 16 + React 19 (App Router)
-- TypeScript strict, Zod pour validation runtime
-- `lib/dal/*` : pattern DAL SOLID (retourne `DALResult<T>`, `"use server"`, `import "server-only"`)
-- Auth Supabase optimisée : utiliser `getClaims()` pour checks rapides
-- Cookies Supabase : pattern `getAll` / `setAll` via `@supabase/ssr`
-- Clean Code : fonctions courtes, fichiers < 300 lignes, pas de commentaires inutiles
+Les intégrations externes (Sentry, Resend) sont gérées au niveau des Server Actions. L’automatisation CI/CD inclut des backups hebdomadaires via GitHub Actions, audits de sécurité continus et couverture de tests (RLS, rate-limiting, CRUD).
 
-> [!note]
-> Pour les règles détaillées (migrations, RLS, Server Actions, patterns DAL), consultez le dossier `doc/` et les fichiers sous `.github/instructions/`.
+```mermaid
+flowchart LR
+  subgraph Client
+    Browser[Web Browser]
+  end
+  subgraph NextJS["Next.js 16 App Router"]
+    Public[Public Site Routes]
+    Admin[Admin Backoffice Routes]
+    ServerActions[Server Actions]
+  end
+  subgraph Server["Server-side Layer"]
+    DAL[Data Access Layer (lib/dal)]
+    Business[Business Logic]
+    Integrations[Sentry / Resend / Edge Functions]
+  end
+  subgraph Supabase["Supabase Backend"]
+    Postgres[(PostgreSQL 17.6)]
+    Auth[Auth]
+    Storage[Storage Buckets]
+  end
+  ```
+
+  Browser -->|requests| Public
+  Browser -->|admin requests| Admin
+  Public --> ServerActions
+  Admin --> ServerActions
+  ServerActions --> DAL
+  DAL --> Postgres
+  ServerActions --> Integrations
+  Integrations --> Sentry
+  Integrations --> Resend
+  DAL --> Storage
+
+Toutes les décisions clés incluent : rendu server-first (RSC par défaut), revalidatePath() uniquement dans Server Actions, RLS comme frontière de sécurité primaire, pattern DALResult pour gestion d’erreurs, et T3 Env pour configuration typée.
+
+## Core Technologies
+
+- **Frontend :** Next.js 16 (App Router), React 19, TypeScript 5.7+, Tailwind CSS 3.4, shadcn/ui (Radix).
+
+- **Backend / BaaS :** Supabase (PostgreSQL 17.6.1.063, Auth, Storage, Edge Functions).
+
+- **Email :** Resend avec React Email templates.
+
+- **Validation :** Zod 3.24.1+.
+
+- **Error monitoring :** Sentry 8.47.0.
+
+- **Image processing :** Sharp pour thumbnails.
+
+- **Package manager :** pnpm.
+
+Chaque technologie est utilisée pour un but précis dans la pile (UI, stockage, authentification, envoi d’emails, monitoring, etc.).
+
+## Application Structure
+
+**Arborescence principale (extraits) :**
+
+lib/dal/ — Data Access Layer.
+
+components/features/ — composants par feature.
+
+app/ — Next.js App Router (public-site/, admin/, api/).
+
+Routes publiques : Home, Spectacles, Agenda, Presse, Contact, Compagnie.
+
+Routes admin : Dashboard, Content Mgmt, Media Library, Analytics.
+
+API routes : /api/contact, /api/newsletter, /api/webhooks/resend.
+
+**Le pattern de mapping route → feature :** chaque page app/\[route]/page.tsx correspond à un module feature sous components/features/public-site/\[feature]/ et à un module DAL lib/dal/\[feature].ts.
+
+## Data Architecture
+
+La base contient 36 tables PostgreSQL organisées en groupes logiques : types de contenu, contenu homepage, gestion médias (déduplication SHA‑256, 9 dossiers de base), tables système (newsletter, contact, analytics, audit logs), configuration (toggles), versioning (9 tables suivies), et sécurité (RLS sur toutes les tables, 7 vues admin-only).
+
+La médiathèque suit une organisation par dossiers reflétant les buckets Storage et suit l’usage des médias sur 7 types d’entités. La rétention automatisée gère la conformité RGPD (ex. logs d’audit 90 jours, messages contact 365 jours).
+
+## Security Architecture
+
+La sécurité est organisée en sept couches de défense en profondeur : réseau, middleware, server actions, RLS, fonctions DB, stockage, audit/monitoring. Les contrôles incluent DDoS/SSL via Vercel Edge, Next.js middleware avec getClaims() pour vérification JWT (2–5 ms), rate limiting LRU, guards requireAdmin(), Zod validation, RLS sur 36 tables avec politiques publiques/admin/restrictives, SECURITY DEFINER pour fonctions de rétention, Storage RLS (medias public read, backups service_role only), et audit triggers immuables sur 14 tables avec Sentry pour alertes P0/P1.
+
+```mermaid
+flowchart TB
+  subgraph SevenLayerSecurity
+    L1[Layer 1 Network Vercel Edge]
+    L2[Layer 2 Middleware Next.js]
+    L3[Layer 3 Server Actions Guards]
+    L4[Layer 4 Database RLS]
+    L5[Layer 5 Database Functions]
+    L6[Layer 6 Storage RLS]
+    L7[Layer 7 Audit & Monitoring]
+  end
+  ```
+
+  L1 --> L2 --> L3 --> L4 --> L5 --> L6 --> L7
+
+**🔒 Principes appliqués :**
+
+- zero trust
+- least privilege
+- defense in depth
+- auditabilité
+- fail-secure.
+
+## Declarative Schema Management
+
+Le schéma est géré de manière déclarative via fichiers SQL numérotés dans supabase/schemas/ (01–62). Organisation typique :
+
+- 01_extensions.sql (extensions pgcrypto, pg_trgm)
+
+- 02_table_profiles.sql … 10_tables_system.sql (définitions + RLS)
+
+- 02b_functions_core.sql (fonctions core comme is_admin())
+
+- 02c_storage_buckets.sql (buckets Storage)
+
+- 15_content_versioning.sql (versioning)
+
+- 40_indexes.sql, 50_constraints.sql, 60-62_rls_*.sql (politiques legacy)
+
+**Workflow :** modifier fichiers → supabase db diff -f migration_name → review → supabase db push.
+
+## Container / View Pattern
+
+**Frontend** sépare strictement Server Components (Containers) et Client Components (Views) :
+
+**Container (Server Component) :** async, pas de "use client", appelle DAL, gère erreurs/loading, passe props sérialisables.
+
+**View (Client Component) :** "use client", pure présentation, interactions via callbacks, pas d’accès DB direct.
+
+Exemple de structure pour presse : PresseContainer.tsx (server) → PresseView.tsx (client).
+
+## Email Service Architecture
+
+Emails transactionnels via Resend et templates React Email. Architecture en couches :
+
+**Template Layer :** composants React Email (emails/) avec wrapper email-layout.tsx.
+
+**Action Layer :** lib/email/actions.ts (Server Actions : sendEmail(), sendNewsletterConfirmation(), sendContactNotification()).
+
+**API Layer :** endpoints REST pour newsletter, contact, webhooks.
+
+**Validation Layer :** Zod schemas (lib/email/schemas.ts).
+
+**Pattern d’avertissement :** les opérations DB critiques sont effectuées en premier ; si l’envoi d’email échoue, l’opération retourne un succès avec warning plutôt que rollback complet.
+
+## Content Versioning System
+
+Les changements de contenu sont automatiquement versionnés via triggers DB. La table content_versions stocke des snapshots JSONB à chaque INSERT/UPDATE.
+
+**Entités suivies (9 types) :** spectacle, article_presse, communique_presse, evenement, membre_equipe, partner, compagnie_value, compagnie_stat, compagnie_presentation_section.
+
+**Types de changement :** create, update, publish/unpublish, restore. Fonction de restauration : SELECT public.restore_content_version(version_id); qui restaure et crée une nouvelle version avec change_type = 'restore'.
+
+## Key Development Patterns
+
+**DAL - SOLID :** lib/dal/* centralise les requêtes, modules server-only, 92% de conformité SOLID, retour systématique DALResult<T> (union discriminée) pour éviter exceptions non gérées.
+
+**Server Actions + Warning Pattern :** mutations et uploads via Server Actions ; DB d’abord, notifications ensuite ; revalidatePath() uniquement dans Server Actions ; rollback de stockage si insertion metadata échoue.
+
+**React Cache :** fonctions DAL en lecture enveloppées par cache() pour déduplication intra-request ; ISR (revalidate = 60) pour pages publiques.
+
+**Suspense & Progressive Rendering :** utilisation de <Suspense> et fallback skeletons pour rendu progressif et streaming sur pages publiques.
+
+Exemple de DALResult type et usage illustré dans lib/dal/presse.ts (pattern toDALResult).
+
+## Project Status
+
+**Fonctionnalités complétées :** site public (home, shows, press, company, agenda, contact), RLS sur 36 tables, dashboard admin avec gestion d’équipe et upload média, intégration email, système de versioning pour 9 types d’entités, gestion déclarative du schéma et migrations automatisées.
+
+**Phase actuelle :** Phase 1 — site public et infrastructure fondationnels complétés ; extension des capacités admin pour autres types de contenu en cours (état octobre 2025). Réalisations récentes incluent résolution d’issues RLS, TASK022 Team Management, implémentation Storage bucket RLS, et simplification de l’architecture d’authentification.
 
 ## Démarrage rapide
 
@@ -102,42 +260,7 @@ Si vous avez besoin d'aide pour lancer le projet, exécuter une migration ou pr�
 
 ---
 
-Fichier créé automatiquement par un assistant — modification bienvenue pour adapter le ton ou ajouter des badges.
-
-# The Rouge Cardinal Company 🎭
-
-## Vue d'ensemble
-
-**Rouge Cardinal** est un site web vitrine pour une compagnie de théâtre professionnelle. Il s'agit d'un projet **from-scratch** visant à présenter la compagnie, ses productions, et faciliter la gestion de contenu via un back-office sécurisé.
-
-## Architecture Technique
-
-- **Frontend** : Next.js 16 + Tailwind CSS + TypeScript
-- **Backend** : Supabase (PostgreSQL + Auth + Storage + API)
-- **Architecture** : App Router avec séparation Server/Client Components
-- **Sécurité** : RLS (Row Level Security) sur 100% des tables, validation Zod, Server Actions
-
-## Fonctionnalités Principales
-
-### 1. Présentation Institutionnelle
-
-- Page d'accueil avec hero carousel, statistiques, valeurs
-- Page "La Compagnie" avec histoire, équipe, mission
-- Partenaires affichés avec logos
-
-### 2. Gestion des Spectacles
-
-- Catalogue de productions (actuelles/archivées)
-- Événements avec billetterie externe
-- Galerie médias (photos, vidéos)
-
-### 3. Espace Presse
-
-- **Communiqués de presse** : PDFs officiels émis par la compagnie
-- **Articles de presse** : Revue de presse (critiques externes)
-- Kit média professionnel avec téléchargements
-
-### Installation
+## Installation
 
 ```bash
 # cloner et installer
@@ -280,35 +403,8 @@ pnpm exec tsx scripts/create-admin-user.ts
 1. **JWT claims** : `app_metadata.role = 'admin'` (vérifié par middleware)
 2. **Profil DB** : `public.profiles.role = 'admin'` (vérifié par RLS)
 
-**Les deux doivent être synchronisés** pour que l'authentification fonctionne.
-
-## 🔒 Corrections de Sécurité Récentes
-
-### Novembre 2024 - Corrections Appliquées
-
-**✅ Vue messages_contact_admin** : Changement de `SECURITY DEFINER` vers `SECURITY INVOKER`
-
-- **Problème** : Risque d'escalade de privilèges et contournement des RLS
-- **Solution** : Vue maintenant sécurisée avec `security_invoker = true`
-- **Impact** : Protection renforcée des données sensibles
-
-**✅ Fonction restore_content_version** : Correction référence colonne inexistante
-
-- **Problème** : Référence à `published_at` dans table `spectacles` (colonne supprimée)
-- **Solution** : Utilisation du champ `public` (boolean) correct
-- **Impact** : Restauration de versions fonctionnelle
-
-**Validation** : Toutes les corrections validées par `supabase db lint --linked` ✅
-
-## 📚 Documentation
-
-- [Guide de développement](./doc/guide-developpement.md) - Setup complet et workflow
-- [Troubleshooting Admin Auth](./doc/troubleshooting-admin-auth.md) - Résolution problèmes auth
-- [Schémas déclaratifs](./supabase/schemas/README.md) - Structure de la base
-- [Progress](`./doc/progress.md`) - État d'avancement du projet
-
-> [!NOTE]
-> L'application suit les meilleures pratiques Next.js 15 avec un emphasis sur la sécurité, la performance et l'expérience utilisateur professionnelle.
+> [!IMPORTANT]
+> **Les deux doivent être synchronisés** pour que l'authentification fonctionne.
 
 ---
 
