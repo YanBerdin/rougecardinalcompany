@@ -6,9 +6,12 @@
       "type": "http",
       "url": "https://api.githubcopilot.com/mcp/"
     },
-     "next-devtools": {
+    "next-devtools": {
       "command": "npx",
-      "args": ["-y", "next-devtools-mcp@latest"]
+      "args": [
+        "-y",
+        "next-devtools-mcp@latest"
+      ]
     },
     "playwright": {
       "command": "npx",
@@ -36,6 +39,12 @@
       "args": [
         "shadcn@latest",
         "mcp"
+      ]
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "chrome-devtools-mcp@latest"
       ]
     }
   }
