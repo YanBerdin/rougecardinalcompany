@@ -248,6 +248,54 @@ components/features/admin/presse/
 
 ## 🔧 Corrections appliquées (Session Jan 21, 2026)
 
+### Corrections Validation Zod (champs optionnels)
+
+**Problème:** Formulaires soumettent des empty strings (`""`) mais schémas serveur attendaient `null`
+
+**Symptômes:**
+- Erreur création communiqué : "Too small: expected string to have >=1 characters" (slug, image_url)
+- Erreur création article : "Too small: expected string to have >=1 characters" (slug)
+
+**Solution:** Transformer empty strings → `null` dans schemas serveur
+
+**Fichiers modifiés:**
+- `lib/schemas/press-release.ts` — PressReleaseInputSchema
+  - `slug`: retiré `.min(1)`, ajouté `.transform(val => val === "" ? null : val)`
+  - `description`: ajouté `.transform(val => val === "" ? null : val)`
+  - `image_url`: ajouté `.or(z.literal(""))` + `.transform(val => val === "" ? null : val)`
+
+- `lib/schemas/press-article.ts` — ArticleInputSchema
+  - `slug`: retiré `.min(1)`, ajouté `.transform(val => val === "" ? null : val)`
+  - `author`, `chapo`, `excerpt`, `source_publication`: ajoutés `.transform(val => val === "" ? null : val)`
+  - `source_url`: ajouté `.or(z.literal(""))` + `.transform(val => val === "" ? null : val)`
+
+**Validation:** TypeScript 0 erreurs après modifications
+
+### Correction Trigger Slug (communiques_presse)
+
+**Problème:** Database trigger error lors création communiqué : `[ERR_PRESS_RELEASE_001] record 'new' has no field 'name'`
+
+**Cause:** Fonction `set_slug_if_empty()` ne gérait pas la table `communiques_presse`
+
+**Solution:** Ajout case pour `communiques_presse` dans trigger function
+
+**Fichiers modifiés:**
+- `supabase/schemas/16_seo_metadata.sql` (lignes 123-124) — Fonction `set_slug_if_empty()`
+  - Ajouté : `elsif TG_TABLE_NAME = 'communiques_presse' and NEW.title is not null then`
+  - Ajouté : `NEW.slug := public.generate_slug(NEW.title);`
+
+**Migration:**
+- Générée : `20260121205257_fix_communiques_slug_trigger.sql`
+- Appliquée locale : ✅ `supabase db reset`
+- Appliquée remote : ✅ `supabase db push`
+
+**Tables supportées par trigger:**
+- `spectacles` → utilise `NEW.title`
+- `articles_presse` → utilise `NEW.title`
+- `communiques_presse` → utilise `NEW.title` ✅ **AJOUTÉ**
+- `categories` → utilise `NEW.name`
+- `tags` → utilise `NEW.name`
+
 ### Corrections PressContact (noms de colonnes français)
 
 **Fichiers modifiés:**

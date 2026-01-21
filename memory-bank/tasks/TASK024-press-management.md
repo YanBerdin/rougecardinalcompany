@@ -65,6 +65,16 @@ Press items may include attachments (PDFs) and rich text. Ensure storage handlin
 - ✅ TypeScript validation: 0 errors
 - ✅ Browser test: Preview page displays correctly
 
+### 2026-01-21 (Validation Fixes)
+
+- ✅ Fixed PressReleaseInputSchema: empty string → null transforms for `slug`, `description`, `image_url`
+- ✅ Fixed ArticleInputSchema: empty string → null transforms for `slug`, `author`, `chapo`, `excerpt`, `source_publication`, `source_url`
+- ✅ Fixed `set_slug_if_empty()` trigger: added support for `communiques_presse` table
+- ✅ Generated migration `20260121205257_fix_communiques_slug_trigger.sql`
+- ✅ Applied migration to local database (`db reset`)
+- ✅ Applied migration to remote database (`db push`)
+- ✅ Verified TypeScript compilation: 0 errors
+
 ## Documentation
 
 - **Summary**: `doc/TASK024-press-management-summary.md`
