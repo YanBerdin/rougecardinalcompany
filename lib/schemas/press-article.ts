@@ -5,13 +5,13 @@ import { z } from "zod";
  */
 export const ArticleInputSchema = z.object({
     title: z.string().min(1, "Le titre est requis").max(255),
-    author: z.string().max(100).optional().nullable(),
+    author: z.string().max(100).optional().nullable().transform(val => val === "" ? null : val),
     type: z.enum(["Article", "Critique", "Interview", "Portrait"]).optional().nullable(),
-    slug: z.string().min(1).max(255).optional().nullable(),
-    chapo: z.string().optional().nullable(),
-    excerpt: z.string().optional().nullable(),
-    source_publication: z.string().max(100).optional().nullable(),
-    source_url: z.string().url("URL invalide").optional().nullable(),
+    slug: z.string().max(255).optional().nullable().transform(val => val === "" ? null : val),
+    chapo: z.string().optional().nullable().transform(val => val === "" ? null : val),
+    excerpt: z.string().optional().nullable().transform(val => val === "" ? null : val),
+    source_publication: z.string().max(100).optional().nullable().transform(val => val === "" ? null : val),
+    source_url: z.string().url("URL invalide").optional().nullable().or(z.literal("")).transform(val => val === "" ? null : val),
     published_at: z.coerce.date().optional().nullable(),
 });
 

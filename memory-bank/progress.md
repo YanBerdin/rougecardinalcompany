@@ -29,6 +29,33 @@
 | PressContact column names | DAL, Actions, Forms, View | `nom_media` → `media`, `active` → `actif` |
 | Preview page properties | `preview/page.tsx` | `titre` → `title`, `extrait` → `description` |
 
+### Validation Fixes (2026-01-21)
+
+**Problème** : Erreurs Zod lors de création communiqués/articles avec champs optionnels vides
+
+**Symptômes** :
+
+- "Too small: expected string to have >=1 characters" sur `slug`, `image_url`, `description`
+- "[ERR_PRESS_RELEASE_001] record 'new' has no field 'name'" lors création communiqué
+
+**Solutions appliquées** :
+
+| Composant | Correction | Fichier |
+| --------- | ---------- | ------- |
+| **Zod PressRelease** | `.transform(val => val === "" ? null : val)` | `lib/schemas/press-release.ts` |
+| Champs modifiés | `slug`, `description`, `image_url` | - |
+| **Zod Article** | `.transform(val => val === "" ? null : val)` | `lib/schemas/press-article.ts` |
+| Champs modifiés | `slug`, `author`, `chapo`, `excerpt`, `source_publication`, `source_url` | - |
+| **Trigger slug** | Ajout case `communiques_presse` avec `NEW.title` | `supabase/schemas/16_seo_metadata.sql` |
+| **Migration** | Trigger fix + vues recréées | `20260121205257_fix_communiques_slug_trigger.sql` |
+
+**Validation** :
+
+- ✅ TypeScript: 0 erreurs
+- ✅ Local: `db reset` appliqué
+- ✅ Remote: `db push` appliqué
+- ✅ Test création: communiqué + article fonctionnels
+
 ### Files Created/Modified
 
 | Type | Count | Files |

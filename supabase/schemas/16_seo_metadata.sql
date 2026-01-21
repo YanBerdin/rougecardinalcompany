@@ -120,6 +120,8 @@ begin
       NEW.slug := public.generate_slug(NEW.title);
     elsif TG_TABLE_NAME = 'articles_presse' and NEW.title is not null then
       NEW.slug := public.generate_slug(NEW.title);
+    elsif TG_TABLE_NAME = 'communiques_presse' and NEW.title is not null then
+      NEW.slug := public.generate_slug(NEW.title);
     elsif TG_TABLE_NAME = 'categories' and NEW.name is not null then
       NEW.slug := public.generate_slug(NEW.name);
     elsif TG_TABLE_NAME = 'tags' and NEW.name is not null then

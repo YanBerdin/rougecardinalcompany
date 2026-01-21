@@ -5,10 +5,10 @@ import { z } from "zod";
  */
 export const PressReleaseInputSchema = z.object({
     title: z.string().min(1, "Le titre est requis").max(200),
-    slug: z.string().min(1).max(255).optional().nullable(),
-    description: z.string().optional().nullable(),
+    slug: z.string().max(255).optional().nullable().transform(val => val === "" ? null : val),
+    description: z.string().optional().nullable().transform(val => val === "" ? null : val),
     date_publication: z.coerce.date(),
-    image_url: z.string().url("URL invalide").optional().nullable(),
+    image_url: z.string().url("URL invalide").optional().nullable().or(z.literal("")).transform(val => val === "" ? null : val),
     spectacle_id: z.coerce.bigint().optional().nullable(),
     evenement_id: z.coerce.bigint().optional().nullable(),
     public: z.boolean().default(false),

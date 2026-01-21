@@ -1,7 +1,6 @@
 ---
 description: 'Agent expert Supabase pour générer du code conforme et auditer la conformité aux standards officiels.'
 tools:
-- vscode
 - vscode/runCommand
 - execute/getTerminalOutput
 - execute

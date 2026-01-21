@@ -4,6 +4,71 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-01-21 - FIX: Validation Zod + Trigger Slug (TASK024)
+
+**Migration**: `20260121205257_fix_communiques_slug_trigger.sql`
+
+**Sévérité**: 🟢 **LOW RISK** - Correction trigger + schémas validation
+
+**Problème Zod**:
+
+- Formulaires (communiqués/articles) soumettent des chaînes vides `""` pour champs optionnels
+- Schémas serveur attendaient `null` pour ces champs
+- Erreurs: "Too small: expected string to have >=1 characters" sur `slug`, `image_url`, `description`, etc.
+
+**Problème Trigger**:
+
+- Fonction `set_slug_if_empty()` ne gérait pas la table `communiques_presse`
+- Erreur lors création communiqué: `[ERR_PRESS_RELEASE_001] record 'new' has no field 'name'`
+- Trigger utilisait `NEW.name` mais la table utilise `NEW.title`
+
+**Corrections**:
+
+1. **Schéma PressReleaseInputSchema** (`lib/schemas/press-release.ts`):
+   - `slug`: Ajout `.transform(val => val === "" ? null : val)`
+   - `description`: Ajout `.transform(val => val === "" ? null : val)`
+   - `image_url`: Ajout `.transform(val => val === "" ? null : val)`
+
+2. **Schéma ArticleInputSchema** (`lib/schemas/press-article.ts`):
+   - `slug`: Retrait `.min(1)` + ajout `.transform(val => val === "" ? null : val)`
+   - `author`: Ajout `.transform(val => val === "" ? null : val)`
+   - `chapo`: Ajout `.transform(val => val === "" ? null : val)`
+   - `excerpt`: Ajout `.transform(val => val === "" ? null : val)`
+   - `source_publication`: Ajout `.transform(val => val === "" ? null : val)`
+   - `source_url`: Ajout `.or(z.literal(""))` + `.transform(val => val === "" ? null : val)`
+
+3. **Trigger `set_slug_if_empty()`** (`supabase/schemas/16_seo_metadata.sql`):
+
+   ```sql
+   -- Ajout case communiques_presse
+   elsif TG_TABLE_NAME = 'communiques_presse' and NEW.title is not null then
+     NEW.slug := public.generate_slug(NEW.title);
+   ```
+
+**Tables supportées par le trigger**:
+
+- `spectacles` → utilise `NEW.title`
+- `articles_presse` → utilise `NEW.title`
+- `communiques_presse` → utilise `NEW.title` ✅ **AJOUTÉ**
+- `categories` → utilise `NEW.name`
+- `tags` → utilise `NEW.name`
+
+**Validation**:
+
+- ✅ TypeScript: 0 erreurs
+- ✅ Local: `pnpm dlx supabase db reset`
+- ✅ Remote: `pnpm dlx supabase db push`
+- ✅ Test création communiqué: slug généré automatiquement
+- ✅ Test création article: champs optionnels fonctionnels
+
+**Fichiers Modifiés**:
+
+- Schemas: `lib/schemas/press-release.ts`, `lib/schemas/press-article.ts`
+- Schema déclaratif: `supabase/schemas/16_seo_metadata.sql` (lignes 123-124)
+- Migration: `20260121205257_fix_communiques_slug_trigger.sql`
+
+---
+
 ### 2026-01-20 - FIX: RLS Spectacles Include Archived Status
 
 **Migration**: `20260120183000_fix_spectacles_rls_include_archived.sql`

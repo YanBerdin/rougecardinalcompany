@@ -115,11 +115,23 @@ supabase/schemas/
 └── README.md                      # Cette documentation
 ```
 
-Note RLS: les nouvelles tables co‑localisent leurs politiques (dans le même fichier que la table). Des fichiers RLS globaux (60–62) restent en place pour les tables historiques; convergence vers un modèle 100% co‑localisé en cours.
+**Note RLS**: les nouvelles tables co‑localisent leurs politiques (dans le même fichier que la table). Des fichiers RLS globaux (60–62) restent en place pour les tables historiques; convergence vers un modèle 100% co‑localisé en cours.
 
 ---
 
 ## 🆕 Mises à jour récentes (janvier 2026)
+
+- **FIX: Validation Zod + Trigger Slug (21 jan. 2026)** : Corrections transformations empty string et support communiques_presse.
+  - **Problème Zod** : Formulaires soumettent `""` mais schemas serveur attendaient `null` pour champs optionnels
+  - **Symptômes** : Erreurs "Too small: expected string to have >=1 characters" sur `slug`, `image_url`, `description`
+  - **Solution Zod** : Ajout `.transform(val => val === "" ? null : val)` sur tous les champs optionnels
+  - **Schemas modifiés** :
+    - `lib/schemas/press-release.ts` : `slug`, `description`, `image_url`
+    - `lib/schemas/press-article.ts` : `slug`, `author`, `chapo`, `excerpt`, `source_publication`, `source_url`
+  - **Problème Trigger** : `set_slug_if_empty()` ne gérait pas `communiques_presse` (erreur `[ERR_PRESS_RELEASE_001]`)
+  - **Solution Trigger** : Ajout case `communiques_presse` avec `NEW.title`
+  - **Migration** : `20260121205257_fix_communiques_slug_trigger.sql`
+  - **Validation** : TypeScript 0 erreurs, création communiqué fonctionnelle
 
 - **FIX: RLS Spectacles Include Archived Status (20 jan. 2026)** : Correction de la politique RLS pour inclure les spectacles archivés.
   - **Migration** : `20260120183000_fix_spectacles_rls_include_archived.sql`
@@ -385,7 +397,7 @@ Pour rappel, la migration générée est `supabase/migrations/20250918000002_app
 
 Selon votre gestionnaire de paquets :
 
-Avec pnpm
+Avec pnpm **sur base locale** Supabase :
 
 ```bash
 # Arrêter l'environnement local
@@ -419,8 +431,10 @@ pnpm dlx supabase db diff -f check_schema
 
 ### 3. Migrations de Données Séparées
 
-Les opérations DML (INSERT/UPDATE/DELETE) ne sont **pas** dans le schéma déclaratif.
-Créer des migrations séparées pour les données :
+> [!WARNING]
+> Les opérations DML (INSERT/UPDATE/DELETE) ne sont **pas** dans le schéma déclaratif.
+>
+> Créer des migrations séparées pour les données :
 
 ```bash
 supabase migration new seed_initial_data

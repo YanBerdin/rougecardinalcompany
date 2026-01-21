@@ -1,8 +1,95 @@
 # Active Context
 
-**Current Focus (2026-01-21)**: ✅ LCP Optimization Phase 1 Complete
+**Current Focus (2026-01-21)**: ✅ LCP Optimization Phase 1 Complete + Validation Fixes
 
-**Last Major Updates**: LCP Optimization (2026-01-21) + RLS Fix Spectacles (2026-01-20) + Partners Management (TASK023) + Data Retention (TASK053)
+**Last Major Updates**: Validation Zod + Trigger Fix (2026-01-21) + LCP Optimization (2026-01-21) + RLS Fix Spectacles (2026-01-20) + Partners Management (TASK023) + Data Retention (TASK053)
+
+---
+
+## ✅ TASK024 Validation Fixes (2026-01-21)
+
+### Problème
+
+Échec création communiqués/articles avec erreurs Zod sur champs optionnels vides :
+
+**Erreurs Zod** :
+
+- "Too small: expected string to have >=1 characters" sur `slug`, `image_url`, `description`
+- Schemas serveur attendaient `null` mais formulaires soumettaient `""`
+
+**Erreur Database** :
+
+- "[ERR_PRESS_RELEASE_001] record 'new' has no field 'name'"
+- Trigger `set_slug_if_empty()` ne gérait pas table `communiques_presse`
+
+### Solutions Appliquées
+
+> **1. Schemas Zod - Transformation empty string → null**
+
+**PressRelease** (`lib/schemas/press-release.ts`) :
+
+```typescript
+// Champs modifiés avec .transform()
+slug: z.string().max(255).optional().nullable()
+  .transform(val => val === "" ? null : val)
+
+description: z.string().optional().nullable()
+  .transform(val => val === "" ? null : val)
+
+image_url: z.string().url("URL invalide").optional().nullable()
+  .or(z.literal(""))
+  .transform(val => val === "" ? null : val)
+```
+
+**Article** (`lib/schemas/press-article.ts`) :
+
+```typescript
+// Champs modifiés avec .transform()
+slug: z.string().max(255).optional().nullable()
+  .transform(val => val === "" ? null : val)
+
+author: z.string().max(100).optional().nullable()
+  .transform(val => val === "" ? null : val)
+
+// Idem pour: chapo, excerpt, source_publication, source_url
+```
+
+> **2. Trigger Database - Support communiques_presse**
+
+**Migration** : `20260121205257_fix_communiques_slug_trigger.sql`
+
+```sql
+-- Ajout dans set_slug_if_empty() (16_seo_metadata.sql)
+elsif TG_TABLE_NAME = 'communiques_presse' and NEW.title is not null then
+  NEW.slug := public.generate_slug(NEW.title);
+```
+
+**Tables supportées** :
+
+- `spectacles` → `NEW.title`
+- `articles_presse` → `NEW.title`
+- `communiques_presse` → `NEW.title` ✅ **AJOUTÉ**
+- `categories` → `NEW.name`
+- `tags` → `NEW.name`
+
+### Validation
+
+| Test | Résultat |
+| ---- | -------- |
+| TypeScript compilation | ✅ 0 erreurs |
+| Migration locale | ✅ `db reset` appliqué |
+| Migration remote | ✅ `db push` appliqué |
+| Test création communiqué | ✅ Slug généré automatiquement |
+| Test création article | ✅ Champs optionnels fonctionnels |
+
+### Fichiers Modifiés
+
+| Fichier | Modification |
+| ------- | ------------ |
+| `lib/schemas/press-release.ts` | 3 champs avec `.transform()` |
+| `lib/schemas/press-article.ts` | 6 champs avec `.transform()` |
+| `supabase/schemas/16_seo_metadata.sql` | Ajout case `communiques_presse` |
+| `supabase/migrations/20260121205257_fix_communiques_slug_trigger.sql` | Migration générée |
 
 ---
 
