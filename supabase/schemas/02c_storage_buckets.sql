@@ -27,8 +27,8 @@ values (
   'medias',
   'medias',
   true,  -- Public read access
-  5242880,  -- 5MB max file size
-  array['image/jpeg', 'image/png', 'image/webp', 'image/avif']
+  10485760,  -- 10MB max file size (increased for PDF support)
+  array['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'application/pdf']  -- PDF support for press releases
 )
 on conflict (id) do update set
   public = excluded.public,

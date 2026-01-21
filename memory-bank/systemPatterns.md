@@ -24,11 +24,11 @@ Architecture et patterns observés dans le projet:
 - **ImageFieldGroup Pattern (Dec 2025)**: Composant réutilisable pour champs image avec validation SSRF intégrée.
 - **Upload Générique Pattern (Dec 2025)**: `uploadMediaImage(formData, folder)` configurable par entité.
 - **T3 Env Pattern (Dec 2025)**: Variables d'environnement type-safe avec validation Zod au démarrage via `lib/env.ts`.
-- Sécurité: combinaison GRANT (table-level) + RLS (policies) requise — ne pas considérer RLS comme substitut au GRANT.
-- Migrations: `supabase/migrations/` est la source de vérité pour les modifications appliquées en base; `supabase/schemas/` sert de documentation/declarative reference.
-- Tests & CI: vérifier explicitement que les roles `anon` et `authenticated` peuvent accéder aux DTO nécessaires (tests d'intégration DAL).
+- **Sécurité**: combinaison GRANT (table-level) + RLS (policies) requise — ne pas considérer RLS comme substitut au GRANT.
+- **Migrations**: `supabase/migrations/` est la source de vérité pour les modifications appliquées en base; `supabase/schemas/` sert de documentation/declarative reference.
+- **Tests & CI**: vérifier explicitement que les roles `anon` et `authenticated` peuvent accéder aux DTO nécessaires (tests d'intégration DAL).
 
-Conventions importantes:
+**Conventions importantes**:
 
 1. Tous les changements de schéma doivent être accompagnés d'une migration.
 2. Les migrations dangereuses (REVOKE massifs) doivent être revues et, si nécessaire, déplacées vers `supabase/migrations/legacy-migrations`.

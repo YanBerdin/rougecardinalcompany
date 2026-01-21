@@ -1,7 +1,7 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { env } from "@/lib/env";
+import { env } from "../../../lib/env";
 
 /**
  * Creates a Supabase client with service-role privileges for admin operations.

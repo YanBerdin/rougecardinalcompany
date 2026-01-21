@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, FileText, Calendar, Image as ImageIcon, Settings } from "lucide-react";
+import { Users, FileText, Calendar, Image as ImageIcon, Settings, Newspaper } from "lucide-react";
 
 interface CardItem {
     title: string;
@@ -14,6 +14,7 @@ const items: CardItem[] = [
     { title: "Gérer l'équipe", description: "Membres, rôles et profils", href: "/admin/team", icon: <Users className="h-5 w-5" /> },
     { title: "Spectacles", description: "Créer et modifier les spectacles", href: "/admin/spectacles", icon: <FileText className="h-5 w-5" /> },
     { title: "Événements", description: "Calendrier et billetterie", href: "/admin/events", icon: <Calendar className="h-5 w-5" /> },
+    { title: "Presse", description: "Communiqués, articles et contacts", href: "/admin/presse", icon: <Newspaper className="h-5 w-5" /> },
     { title: "Médias", description: "Gérer images et vidéos", href: "/admin/media", icon: <ImageIcon className="h-5 w-5" /> },
     { title: "Utilisateurs", description: "Comptes et permissions", href: "/admin/users", icon: <Users className="h-5 w-5" /> },
     { title: "Réglages", description: "Configuration du site", href: "/admin/settings", icon: <Settings className="h-5 w-5" /> },

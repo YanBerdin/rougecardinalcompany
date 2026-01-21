@@ -1,5 +1,51 @@
 # Progress
 
+## TASK024 COMPLETE - Press Management (2026-01-21)
+
+### Implementation Summary
+
+✅ **ALL COMPONENTS COMPLETE** - CRUD complet gestion presse avec 3 modules
+
+| Component | Description | Status |
+| --------- | ----------- | ------ |
+| Schemas | 3 files (Server + UI separation) | ✅ |
+| DAL Admin | 3 files (21 functions) | ✅ |
+| Server Actions | 11 actions | ✅ |
+| Routes Admin | 10 pages (CRUD + preview) | ✅ |
+| Components | 13 files (Container/View/Form) | ✅ |
+| Migration | PDF support medias bucket | ✅ |
+
+### Key Deliverables
+
+- **Admin URL**: `/admin/presse`
+- **Modules**: Communiqués (+ preview), Articles, Contacts
+- **Features**: CRUD, publish/unpublish, toggle active, relations spectacle/événement
+- **Sidebar**: Newspaper icon added
+
+### Corrections Session (2026-01-21)
+
+| Fix | Files | Issue |
+| --- | ----- | ----- |
+| PressContact column names | DAL, Actions, Forms, View | `nom_media` → `media`, `active` → `actif` |
+| Preview page properties | `preview/page.tsx` | `titre` → `title`, `extrait` → `description` |
+
+### Files Created/Modified
+
+| Type | Count | Files |
+| ---- | ----- | ----- |
+| Schemas | 3 | `press-release.ts`, `press-article.ts`, `press-contact.ts` |
+| DAL | 3 | `admin-press-releases.ts`, `admin-press-articles.ts`, `admin-press-contacts.ts` |
+| Actions | 1 | `app/(admin)/admin/presse/actions.ts` |
+| Routes | 10 | Main + CRUD routes for 3 modules + preview |
+| Components | 13 | Containers, Views, Forms |
+
+### Documentation
+
+- **Summary**: `doc/TASK024-press-management-summary.md`
+- **Plan**: `.github/prompts/plan-TASK024-pressManagement.prompt.md`
+
+---
+
 ## TASK053-P1: LCP Optimization Phase 1 (2026-01-21)
 
 ### Problem

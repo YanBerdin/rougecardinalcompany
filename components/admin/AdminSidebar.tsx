@@ -64,7 +64,7 @@ const contentItems = [
   },
   {
     title: "Presse",
-    href: "/admin/press",
+    href: "/admin/presse",
     icon: FileText,
   },
   {
