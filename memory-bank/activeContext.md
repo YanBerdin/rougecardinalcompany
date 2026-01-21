@@ -1746,7 +1746,7 @@ Media Library System
 
 #### Workflow complet
 
-```
+```bash
 1. User selects file
    ↓
 2. computeFileHash() → SHA-256 (with progress bar if >2MB)
@@ -2618,7 +2618,7 @@ pnpx @next/codemod@canary upgrade latest
 
 ### Architecture Pattern - 4 Layers
 
-```
+```bash
 ┌─────────────────────────────────────────────────────────────────┐
 │  Presentation (Client Components)                               │
 │  └── Form.tsx uses UI schema (number for IDs)                  │

@@ -16,7 +16,7 @@
 
 Architecture et patterns observés dans le projet:
 
-- App Router Next.js (app/) pour pages et layouts.
+- App Router Next.js 16 (app/) pour pages et layouts.
 - Pattern **Smart/Dumb** components: containers server-side pour la data, composants clients pour l'interactivité.
 - DAL pattern recommandé: `lib/dal/` pour centraliser l'accès à la base (server-only modules).
 - **DAL SOLID Pattern (Nov 2025)**: Tous les DAL retournent `DALResult<T>`, helpers centralisés dans `lib/dal/helpers/`.
