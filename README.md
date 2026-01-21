@@ -94,19 +94,6 @@ flowchart TB
   DBMODS --> SENTRY_EXT
 ```
 
-```mermaid
-  Browser -->|requests| Public
-  Browser -->|admin requests| Admin
-  Public --> ServerActions
-  Admin --> ServerActions
-  ServerActions --> DAL
-  DAL --> Postgres
-  ServerActions --> Integrations
-  Integrations --> Sentry
-  Integrations --> Resend
-  DAL --> Storage`
-```
-
 Toutes les décisions clés incluent : rendu server-first (RSC par défaut), revalidatePath() uniquement dans Server Actions, RLS comme frontière de sécurité primaire, pattern DALResult pour gestion d’erreurs, et T3 Env pour configuration typée.
 
 ## Core Technologies

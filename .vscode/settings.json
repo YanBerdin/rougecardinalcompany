@@ -2,8 +2,8 @@
     // Use the TypeScript version installed in the workspace
     "typescript.tsdk": "node_modules/typescript/lib",
     "files.watcherExclude": {
-       // "**/*.md": true,
-        "**/doc/**": true,
+        // "**/*.md": true,
+        // "**/doc/**": true,
         "**/doc-perso/**": true
     },
     "search.exclude": {
@@ -12,9 +12,9 @@
         "out/**": true,
         "build/**": true,
         "next-env.d.ts": true,
-       // "**/*.md": true,
+        // "**/*.md": true,
         "**/doc-perso/**": true,
-       // "**/doc/**": true
+        // "**/doc/**": true
     },
     "workbench.colorCustomizations": {
         "editorBracketHighlight.foreground1": "#fac928",

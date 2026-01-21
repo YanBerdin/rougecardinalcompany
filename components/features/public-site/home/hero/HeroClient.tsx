@@ -3,10 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { HeroView } from "./HeroView";
 import { HeroSlide } from "./types";
-import { HeroSkeleton } from "@/components/skeletons/hero-skeleton";
 
 export function HeroClient({ initialSlides }: { initialSlides: HeroSlide[] }) {
-  const [isLoading] = useState(false);
   const [slides, setSlides] = useState<HeroSlide[]>(initialSlides);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
@@ -36,7 +34,7 @@ export function HeroClient({ initialSlides }: { initialSlides: HeroSlide[] }) {
   }, []);
 
   useEffect(() => {
-    if (isAutoPlaying && !isLoading && slides.length > 1) {
+    if (isAutoPlaying && slides.length > 1) {
       autoPlayRef.current = setInterval(nextSlide, 6000);
     } else {
       if (autoPlayRef.current) clearInterval(autoPlayRef.current);
@@ -44,7 +42,7 @@ export function HeroClient({ initialSlides }: { initialSlides: HeroSlide[] }) {
     return () => {
       if (autoPlayRef.current) clearInterval(autoPlayRef.current);
     };
-  }, [isAutoPlaying, nextSlide, isLoading, slides.length]);
+  }, [isAutoPlaying, nextSlide, slides.length]);
 
   const pauseAutoPlay = useCallback(() => {
     setIsAutoPlaying(false);
@@ -53,7 +51,6 @@ export function HeroClient({ initialSlides }: { initialSlides: HeroSlide[] }) {
 
   const handleTouchStart = useCallback(
     (e: React.TouchEvent | React.MouseEvent) => {
-      if (isLoading) return;
       pauseAutoPlay();
       isDragging.current = true;
       if ("touches" in e) {
@@ -63,23 +60,23 @@ export function HeroClient({ initialSlides }: { initialSlides: HeroSlide[] }) {
         e.preventDefault();
       }
     },
-    [pauseAutoPlay, isLoading]
+    [pauseAutoPlay]
   );
 
   const handleTouchMove = useCallback(
     (e: React.TouchEvent | React.MouseEvent) => {
-      if (!isDragging.current || isLoading) return;
+      if (!isDragging.current) return;
       if ("touches" in e) {
         touchEndX.current = e.touches[0].clientX;
       } else {
         touchEndX.current = e.clientX;
       }
     },
-    [isLoading]
+    []
   );
 
   const handleTouchEnd = useCallback(() => {
-    if (!isDragging.current || isLoading) return;
+    if (!isDragging.current) return;
     isDragging.current = false;
     const deltaX = touchStartX.current - touchEndX.current;
     const minSwipeDistance = 50;
@@ -89,12 +86,9 @@ export function HeroClient({ initialSlides }: { initialSlides: HeroSlide[] }) {
     }
     touchStartX.current = 0;
     touchEndX.current = 0;
-  }, [nextSlide, prevSlide, isLoading]);
+  }, [nextSlide, prevSlide]);
 
-  if (isLoading) return <HeroSkeleton />;
-
-  // Aucun slide côté BDD -> afficher un squelette pour éviter le crash
-  if (!slides || slides.length === 0) return <HeroSkeleton />;
+  if (!slides || slides.length === 0) return null;
 
   return (
     <HeroView

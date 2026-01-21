@@ -1,10 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HeroProps } from "./types";
-// import { HeroSkeleton } from "@/components/skeletons/hero-skeleton";
 
 export function HeroView({
   slides,
@@ -32,17 +32,25 @@ export function HeroView({
       onMouseUp={onTouchEnd}
       onMouseLeave={onTouchEnd}
     >
-      {/* Background Images */}
+      {/* Background Images - Optimized with next/image for LCP */}
       {slides.map((slide, index) => (
         <div
           key={index}
           className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? "opacity-100" : "opacity-0"
             }`}
         >
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${slide.image})` }}
-          />
+          {slide.image && (
+            <Image
+              src={slide.image}
+              alt={slide.title || "Hero slide"}
+              fill
+              sizes="100vw"
+              className="object-cover"
+              priority={index === 0}
+              fetchPriority={index === 0 ? "high" : "auto"}
+              loading={index === 0 ? "eager" : "lazy"}
+            />
+          )}
           <div className="absolute inset-0 bg-black/50" />
         </div>
       ))}

@@ -24,6 +24,7 @@
 - `TASK015` Stratégie seeds cloud (sécurisée) + synchronisation
 - `TASK016` Option: modélisation `partners.type` si requis par le design
 - `TASK017` Retrait des délais artificiels (1200-1500ms) des containers
+- `TASK054` LCP Optimization Phase 2 (CDN, BlurHash, srcset) - Optional improvements for <1000ms LCP
 
 ## Terminé
 
@@ -75,3 +76,4 @@
 - `TASK031` Analytics Dashboard - ✅ Complete on 2026-01-17 (8 steps implemented: shadcn Chart component, analytics_summary_90d view, Zod schemas (12+), DAL with 5 cached functions, Sentry API integration (14d limit), Dashboard UI (6 sub-components), CSV/JSON export Server Actions, sidebar navigation; date filters 7/30/90 days, production-ready)
 - `TASK047` Newsletter Schema Extraction - ✅ Complete on 2026-01-17 (Extracted NewsletterSubscriptionSchema from contact.ts to dedicated newsletter.ts file, updated barrel exports, 3 commits: create/refactor/cleanup, TypeScript + build + schema validation tests passed, ~25 min execution time)
 - `TASK053` Data Retention Automation - ✅ Complete on 2026-01-18 (Automated RGPD-compliant data retention: 3 SQL schemas (21_tables, 22_functions, 41_views), DAL with 12 functions, 8 Zod schemas, Edge Function scheduled-cleanup (first in project), migration 20260117234007 (698 lines), 8/8 tests passed, 5 tables configured (logs_audit 90d, abonnes_newsletter 90d, messages_contact 365d, analytics_events 90d, data_retention_audit 365d), RGPD documentation complete)
+- `TASK053-P1` LCP Optimization Phase 1 - ✅ Complete on 2026-01-21 (Hero image optimization: background-image CSS → next/image with priority/fetchPriority/eager, removed manual preload (handled by next/image), LCP improved from ~3200ms (dev) to ~1650ms (prod) = -48%, TTFB improved from 298ms to 46-61ms = -80%, CLS maintained at 0.00)

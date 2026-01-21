@@ -1,5 +1,41 @@
 # Progress
 
+## TASK053-P1: LCP Optimization Phase 1 (2026-01-21)
+
+### Problem
+
+Homepage LCP ~3200ms due to CSS `background-image` on Hero (not optimized by Next.js).
+
+### Solution
+
+| Fix | Description |
+| ----- | ------------- |
+| `next/image` | Replace CSS background with `<Image>` component |
+| `priority={index === 0}` | First slide gets preload automatically |
+| `fetchPriority="high"` | Browser hint for early download |
+| Remove manual preload | `next/image` handles it (was causing warning) |
+
+### Performance Results (Production)
+
+| Metric | Before | After | Change |
+| -------- | -------- | ------- | -------- |
+| **LCP** | 3200ms | 1650ms | **-48%** ⚡ |
+| **TTFB** | 298ms | 46-61ms | **-80%** ⚡ |
+| **CLS** | 0.00 | 0.00 | ✅ |
+
+### Files Modified
+
+| File | Change |
+| ------ | -------- |
+| `components/features/public-site/home/hero/HeroView.tsx` | CSS → next/image + priority |
+| `components/features/public-site/home/hero/HeroContainer.tsx` | Removed manual preload |
+
+### Related
+
+- **TASK054**: Phase 2 optional improvements (CDN caching, BlurHash, srcset)
+
+---
+
 ## HOTFIX: RLS Spectacles + Display Toggles Fallback (2026-01-20)
 
 ### Issue Report
