@@ -121,6 +121,25 @@ supabase/schemas/
 
 ## 🆕 Mises à jour récentes (janvier 2026)
 
+- **FEAT: Media Library Integration Press (22 jan. 2026)** : Intégration ImageFieldGroup dans les formulaires presse.
+  - **Colonnes ajoutées** :
+    - `articles_presse.image_url` (text) — URL externe vers image
+    - `articles_presse.og_image_media_id` (bigint) — Image SEO/Open Graph via Media Library (existait déjà en DB)
+    - `communiques_presse.image_media_id` (bigint) — Image principale via Media Library
+  - **Index** : `idx_communiques_presse_image_media_id`
+  - **Security Fix** : `communiques_presse_dashboard` converti de VIEW à FUNCTION SECURITY DEFINER
+    - Avant : VIEW retournait array vide pour non-admins (faille sécurité)
+    - Après : FUNCTION lève `permission denied: admin access required`
+  - **Schémas modifiés** :
+    - `08_table_articles_presse.sql` : Ajout colonnes image
+    - `08b_communiques_presse.sql` : Ajout `image_media_id`
+    - `40_indexes.sql` : Ajout index FK
+    - `41_views_communiques.sql` : Conversion VIEW → FUNCTION
+  - **Migrations** :
+    - `20260121231253_add_press_media_library_integration.sql`
+    - `20260122000000_fix_communiques_presse_dashboard_security.sql`
+  - **Validation** : 8/8 tests sécurité passent (`pnpm test:views:auth:local`)
+
 - **FIX: Validation Zod + Trigger Slug (21 jan. 2026)** : Corrections transformations empty string et support communiques_presse.
   - **Problème Zod** : Formulaires soumettent `""` mais schemas serveur attendaient `null` pour champs optionnels
   - **Symptômes** : Erreurs "Too small: expected string to have >=1 characters" sur `slug`, `image_url`, `description`

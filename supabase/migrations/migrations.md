@@ -4,6 +4,68 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-01-22 - FEAT: Media Library Integration Press (TASK024 Phase 6)
+
+**Migrations**:
+
+- `20260121231253_add_press_media_library_integration.sql`
+- `20260122000000_fix_communiques_presse_dashboard_security.sql`
+
+**Sévérité**: 🟡 **MEDIUM RISK** - Modification de schéma + conversion VIEW → FUNCTION
+
+**Source**: TASK024 Phase 6 - Media Library Integration for Press module
+
+**Ajouts Base de Données**:
+
+1. **Colonnes `articles_presse`**:
+   - `image_url text` — URL externe vers une image
+   - `og_image_media_id bigint references medias(id)` — existait déjà, maintenant exposé dans forms
+
+2. **Colonnes `communiques_presse`**:
+   - `image_media_id bigint references medias(id)` — Image principale via Media Library
+   - Index: `idx_communiques_presse_image_media_id`
+
+3. **Security Fix `communiques_presse_dashboard`**:
+   - **Problème**: VIEW avec `WHERE is_admin()` retournait array vide pour non-admins (pas de permission denied)
+   - **Solution**: Conversion en FUNCTION SECURITY DEFINER avec check explicite
+   - **Comportement**: Lève `permission denied: admin access required` pour non-admins
+
+**Fichiers Frontend Modifiés**:
+
+| Fichier | Modification |
+| --------- | ------------- |
+| `PressReleaseNewForm.tsx` | FormProvider + ImageFieldGroup |
+| `PressReleaseEditForm.tsx` | FormProvider + ImageFieldGroup |
+| `ArticleNewForm.tsx` | FormProvider + ImageFieldGroup |
+| `ArticleEditForm.tsx` | FormProvider + ImageFieldGroup |
+| `lib/schemas/press-release.ts` | Ajout `image_media_id` |
+| `lib/schemas/press-article.ts` | Ajout `image_url`, `og_image_media_id` |
+| `lib/dal/admin-press-releases.ts` | Queries/mutations avec `image_media_id` |
+| `lib/dal/admin-press-articles.ts` | Queries/mutations avec `image_url`, `og_image_media_id` |
+| `lib/utils/press-utils.ts` | **NOUVEAU** - Utilitaires form data (clean, success messages) |
+
+**Schémas Déclaratifs Mis à Jour**:
+
+- `08_table_articles_presse.sql` — Colonnes image
+- `08b_communiques_presse.sql` — Colonne `image_media_id`
+- `40_indexes.sql` — Index FK
+- `41_views_communiques.sql` — FUNCTION au lieu de VIEW
+
+**Validation**:
+
+- ✅ TypeScript: 0 erreurs
+- ✅ Local: `pnpm db:reset`
+- ✅ Tests sécurité: 8/8 passent (`pnpm test:views:auth:local`)
+- ✅ Vues PUBLIC accessibles (4/4)
+- ✅ Vues ADMIN bloquées (8/8)
+
+**Scripts de Test Ajoutés**:
+
+- `pnpm test:views:auth:local` — Test sécurité vues (DB locale)
+- `pnpm test:views:auth:remote` — Test sécurité vues (DB production)
+
+---
+
 ### 2026-01-21 - FIX: Validation Zod + Trigger Slug (TASK024)
 
 **Migration**: `20260121205257_fix_communiques_slug_trigger.sql`

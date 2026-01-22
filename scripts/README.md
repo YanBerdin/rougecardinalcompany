@@ -34,6 +34,39 @@ if (!supabaseUrl || !secretKey) {
 
 ## 🩺 Diagnostic Admin (Janvier 2026)
 
+### test-views-security-authenticated.ts (TypeScript) ✅ NOUVEAU (2026-01-22)
+
+**Description**: Teste la sécurité des vues en tant qu'utilisateur authentifié NON-admin. Vérifie que les vues PUBLIC sont accessibles et que les vues ADMIN sont bloquées.
+
+**Utilisation**:
+
+```bash
+# DB locale (utilise les clés Supabase locales standard)
+pnpm test:views:auth:local
+
+# DB remote (utilise les variables d'environnement .env)
+pnpm test:views:auth:remote
+```
+
+**Tests couverts (8 vérifications)**:
+
+| Type | Vue/Fonction | Comportement attendu |
+| ------ | ------------- | ---------------------- |
+| PUBLIC | `articles_presse_public` | ✅ Accessible |
+| PUBLIC | `communiques_presse_public` | ✅ Accessible |
+| PUBLIC | `popular_tags` | ✅ Accessible |
+| PUBLIC | `categories_hierarchy` | ✅ Accessible |
+| ADMIN | `communiques_presse_dashboard()` | ❌ Permission denied |
+| ADMIN | `membres_equipe_admin` | ❌ Permission denied |
+| ADMIN | `analytics_summary` | ❌ Permission denied |
+| ADMIN | (6 autres vues admin) | ❌ Permission denied |
+
+**Note**: Les clés locales sont les clés standard Supabase (identiques pour tous les projets locaux). Pour les obtenir: `pnpm dlx supabase status`.
+
+**Contexte**: Créé pour valider TASK024 Phase 6 (Media Library Integration) et la conversion de `communiques_presse_dashboard` en FUNCTION SECURITY DEFINER.
+
+---
+
 ### check-admin-status.ts (TypeScript) ✅ RECOMMANDÉ
 
 **Description**: Script de diagnostic pour vérifier l'accès aux vues admin avec SERVICE_ROLE. Teste directement les permissions sur `communiques_presse_dashboard` et `analytics_summary`.

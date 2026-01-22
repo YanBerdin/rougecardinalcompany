@@ -2,7 +2,46 @@
 
 **Objectif** : Migrer les formulaires de gestion presse (communiqués/articles) vers `ImageFieldGroup` avec Media Library, en réutilisant `og_image_media_id` existant pour les articles et en ajoutant `image_media_id` pour les communiqués.
 
-**Scope** : 4 formulaires (2 communiqués + 2 articles), 2 schemas Zod, 2 modules DAL, 1 migration DB
+**Scope** : 4 formulaires (2 communiqués + 2 articles), 2 schemas Zod, 2 modules DAL, 2 migrations DB
+
+> **✅ IMPLÉMENTÉ (Jan 22, 2026)** : Phase 6 complète - Media Library Integration for Press module.
+
+---
+
+## ✅ Statut d'implémentation (Phase 6 - Jan 22, 2026)
+
+### Database
+- ✅ `articles_presse` : Colonnes `image_url` et `og_image_media_id` ajoutées
+- ✅ `communiques_presse` : Colonne `image_media_id` ajoutée
+- ✅ Index `idx_communiques_presse_image_media_id` créé
+- ✅ `communiques_presse_dashboard` : Converti de VIEW à FUNCTION SECURITY DEFINER
+- ✅ Schémas déclaratifs mis à jour : `08_table_articles_presse.sql`, `08b_communiques_presse.sql`, `41_views_communiques.sql`
+
+### Forms
+- ✅ `ArticleNewForm.tsx` : FormProvider + ImageFieldGroup ajoutés
+- ✅ `ArticleEditForm.tsx` : FormProvider + ImageFieldGroup ajoutés
+- ✅ `PressReleaseNewForm.tsx` : FormProvider + ImageFieldGroup ajoutés
+- ✅ `PressReleaseEditForm.tsx` : FormProvider + ImageFieldGroup ajoutés
+- ✅ `lib/utils/press-utils.ts` : Utilitaires de nettoyage form data (cleanPressReleaseFormData, cleanArticleFormData)
+
+### Schemas Zod
+- ✅ `lib/schemas/press-release.ts` : `image_media_id` ajouté (bigint server / number UI)
+- ✅ `lib/schemas/press-article.ts` : `image_url` + `og_image_media_id` ajoutés
+
+### DAL
+- ✅ `lib/dal/admin-press-releases.ts` : Champ `image_media_id` ajouté aux queries/mutations
+- ✅ `lib/dal/admin-press-articles.ts` : Champs `image_url` + `og_image_media_id` ajoutés
+
+### Security
+- ✅ `communiques_presse_dashboard()` : SECURITY DEFINER + check explicite `is_admin()`
+- ✅ Non-admins reçoivent `permission denied` au lieu d'un array vide
+- ✅ 8/8 tests de sécurité passent (`pnpm test:views:auth:local`)
+
+### Migrations
+- ✅ `20260121231253_add_press_media_library_integration.sql`
+- ✅ `20260122000000_fix_communiques_presse_dashboard_security.sql`
+
+---
 
 > **⚠️ NOTE IMPORTANTE (Jan 21, 2026)** : Les schemas actuels ont été corrigés pour transformer les empty strings en `null` dans les champs optionnels. Lors de l'implémentation de Media Library, **conserver ces transformations** pour éviter les erreurs de validation Zod. Voir corrections détaillées dans `plan-TASK024-pressManagement.prompt.md` section "Corrections Validation Zod".
 
