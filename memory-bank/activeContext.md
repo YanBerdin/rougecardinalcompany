@@ -1,8 +1,66 @@
 # Active Context
 
-**Current Focus (2026-01-21)**: ✅ LCP Optimization Phase 1 Complete + Validation Fixes
+**Current Focus (2026-01-22)**: ✅ Security Fixes Complete (RLS, SECURITY INVOKER, entity_type whitelist)
 
-**Last Major Updates**: Validation Zod + Trigger Fix (2026-01-21) + LCP Optimization (2026-01-21) + RLS Fix Spectacles (2026-01-20) + Partners Management (TASK023) + Data Retention (TASK053)
+**Last Major Updates**: Security Session (2026-01-22) + Validation Zod + Trigger Fix (2026-01-21) + LCP Optimization (2026-01-21) + RLS Fix Spectacles (2026-01-20)
+
+---
+
+## ✅ Security Fixes Session (2026-01-22)
+
+### Problèmes Identifiés
+
+**1. Supabase Security Warnings** :
+
+- `home_hero_slides` : RLS non activé
+- Vues presse utilisant `SECURITY DEFINER` au lieu de `SECURITY INVOKER`
+- Policies INSERT manquantes sur `messages_contact` et `analytics_events`
+
+**2. Whitelist entity_type absente** :
+
+- Test `4.3 Invalid entity_type blocked` échouait (12/13 tests)
+- La migration `20260122150000` avait accidentellement supprimé la whitelist `entity_type`
+
+### Corrections Appliquées
+
+| Migration | Description | Statut |
+| --------- | ----------- | ------ |
+| `20260122142356` | Enable RLS on `home_hero_slides` | ✅ Applied |
+| `20260122143405` | SECURITY INVOKER on press views | ✅ Applied |
+| `20260122150000` | Restore INSERT policies with whitelists | ✅ Applied |
+
+### Whitelist Analytics Events
+
+```sql
+create policy "Validated analytics collection"
+on public.analytics_events for insert
+to anon, authenticated
+with check (
+  event_type in ('view', 'click', 'share', 'download')
+  and entity_type in ('spectacle', 'article', 'communique', 'evenement', 'media', 'partner', 'team')
+  and (entity_id is null or entity_id::text ~ '^\d+$')
+  and (session_id is null or session_id::text ~ '^[a-f0-9-]{36}$')
+  and (user_agent is null or length(user_agent) <= 500)
+);
+```
+
+### Validation
+
+| Test | Résultat |
+| ---- | -------- |
+| Tests RLS cloud | ✅ **13/13 PASS** |
+| Invalid event_type blocked | ✅ |
+| Invalid entity_type blocked | ✅ |
+| Contact form validation | ✅ |
+| Audit logs protection | ✅ |
+
+### Note Technique
+
+La correction de la whitelist `entity_type` a nécessité une application manuelle via Supabase Dashboard SQL Editor car :
+
+- La migration `20260122150000` avait déjà été appliquée au cloud AVANT correction
+- Erreur `permission denied for schema supabase_migrations` empêchait `db push`
+- Sur un **nouveau projet Supabase**, les migrations s'appliqueront correctement dans l'ordre chronologique
 
 ---
 

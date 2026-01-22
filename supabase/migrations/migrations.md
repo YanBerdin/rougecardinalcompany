@@ -4,6 +4,174 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-01-22 - FINAL FIX: Restore INSERT Policies (Chronological Conflict Resolution)
+
+**Migration**: `20260122150000_final_restore_insert_policies.sql`
+
+**Sévérité**: 🔴 **CRITICAL** - Formulaires bloqués en production
+
+**Problème**:
+Les INSERT policies pour `messages_contact` et `analytics_events` étaient absentes en production malgré migration de restauration appliquée. Diagnostic révèle **conflit chronologique** :
+
+**Chronologie du problème**:
+
+1. **18 Jan 01:00** → Migration `20260118010000_restore_insert_policies_dropped_by_task053.sql` **restore policies** ✅
+2. **06 Jan 20:00** → Migration `20260106200000_fix_drop_old_insert_policies.sql` **drop policies** ❌
+
+**Cause Root**:
+Migration créée le 6 janvier mais appliquée **chronologiquement APRÈS** celle du 18 janvier en production. Résultat : policies restaurées puis immédiatement supprimées.
+
+**Impact**:
+
+- ❌ Formulaire contact bloqué (42501 RLS violation)
+- ❌ Analytics tracking bloqué (42501 RLS violation)
+- ✅ Tests 12/13 passent localement (ordre alphabétique correct)
+- ❌ Tests échouent en production (ordre chronologique incorrect)
+
+**Correctif Appliqué**:
+
+```sql
+-- messages_contact: RGPD + validation complète
+create policy "Validated contact submission"
+on public.messages_contact for insert
+to anon, authenticated
+with check (
+  firstname is not null and firstname <> ''
+  and email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
+  and consent = true  -- RGPD mandatory
+  and length(message) between 10 and 5000
+);
+
+-- analytics_events: Event type + entity type validation with WHITELISTS
+create policy "Validated analytics collection"
+on public.analytics_events for insert
+to anon, authenticated
+with check (
+  event_type in ('view', 'click', 'share', 'download')
+  and entity_type in ('spectacle', 'article', 'communique', 'evenement', 'media', 'partner', 'team')
+  and (entity_id is null or entity_id::text ~ '^\d+$')
+  and (session_id is null or session_id::text ~ '^[a-f0-9-]{36}$')
+  and (user_agent is null or length(user_agent) <= 500)
+);
+```
+
+**Bugs Corrigés dans cette version**:
+
+- ✅ Fix metadata validation : `metadata::text <> '{}'` bloquait valeur par défaut `'{}'::jsonb`
+- ✅ Restauration idempotente avec `DROP POLICY IF EXISTS`
+- ✅ Vérification automatique : 1 INSERT policy par table exactement
+
+**Validation**:
+
+- ✅ Tests RLS locaux : **12/13 PASS**
+  - Contact form valid submission : ✅
+  - Analytics valid event : ✅
+  - Newsletter validation : ✅
+  - Audit logs protection : ✅
+- ✅ Migration appliquée production (exit 0)
+- ✅ Policies vérifiées : `SELECT COUNT(*) FROM pg_policies WHERE cmd='INSERT'` → 1 par table
+
+**Fichiers Modifiés**:
+
+- `supabase/migrations/20260122150000_final_restore_insert_policies.sql` — Restauration finale avec fix metadata
+
+**Leçons Apprises**:
+
+1. **Nomenclature migrations** : Utiliser timestamp EXACT de création évite conflits chronologiques
+2. **Vérification défauts colonnes** : Valider compatibilité valeurs par défaut vs constraints RLS
+3. **Test exhaustifs** : Tests WITH CHECK validation détectent incompatibilités schema/policies
+
+---
+
+### 2026-01-22 - SECURITY FIX: Press Views SECURITY INVOKER
+
+**Migration**: `20260122143405_fix_press_views_security_invoker.sql`
+
+**Sévérité**: 🔴 **CRITICAL** - Sécurité RLS contournée
+
+**Problème**:
+Deux vues utilisaient `SECURITY DEFINER` au lieu de `SECURITY INVOKER`, permettant de **contourner les RLS policies** :
+
+- `public.communiques_presse_public` — RLS bypass : utilisateurs pouvaient voir toutes les données admin
+- `public.articles_presse_public` — RLS bypass : accès à tous les articles non publiés
+
+**Impact**:
+
+- **SECURITY DEFINER** → Vue exécutée avec privilèges du créateur (owner) = **bypass RLS**
+- **SECURITY INVOKER** → Vue exécutée avec privilèges de l'utilisateur = **RLS enforced** ✅
+
+**Cause Root**:
+Les vues en production avaient été créées initialement sans la clause `with (security_invoker = true)`. Les fichiers schéma locaux avaient été corrigés mais jamais synchronisés avec la production.
+
+**Correctif Appliqué**:
+
+```sql
+-- Recréer les vues avec SECURITY INVOKER explicite
+create or replace view public.articles_presse_public
+with (security_invoker = true)
+as SELECT ... WHERE published_at IS NOT NULL;
+
+create or replace view public.communiques_presse_public
+with (security_invoker = true)
+as SELECT ... WHERE cp.public = true;
+```
+
+**Validation**:
+
+- ✅ Fichiers schéma (`08_table_articles_presse.sql`, `41_views_communiques.sql`) déjà corrects
+- ✅ Migration générée via `supabase db diff`
+- ✅ Migration appliquée localement (exit 0)
+- ✅ **Production** : Appliquée via `pnpm dlx supabase db push` (exit 0)
+
+**Fichiers Modifiés**:
+
+- `supabase/migrations/20260122143405_fix_press_views_security_invoker.sql` — Migration avec `security_invoker = true` + comments
+
+**Supabase Advisories Résolus** (après push production) :
+
+- Advisor #1 : `communiques_presse_public` SECURITY DEFINER → SECURITY INVOKER ✅
+- Advisor #2 : `articles_presse_public` SECURITY DEFINER → SECURITY INVOKER ✅
+
+---
+
+### 2026-01-22 - HOTFIX: Enable RLS on home_hero_slides
+
+**Migration**: `20260122142356_enable_rls_home_hero_slides.sql`
+
+**Sévérité**: 🔴 **CRITICAL** - Sécurité RLS manquante
+
+**Problème**:
+La table `home_hero_slides` avait 4 RLS policies définies mais **RLS n'était pas activé**. Les policies étaient inutiles, créant une faille de sécurité critique :
+
+- Policies définies : `"View home hero slides"`, `"Admins can insert/update/delete"`
+- **RLS status** : DISABLED ❌
+- **Impact** : Accès non restreint pour tous les rôles (anon/authenticated)
+
+**Cause Root**:
+Le fichier schéma `07d_table_home_hero.sql` créait les policies mais manquait la ligne critique :
+
+```sql
+ALTER TABLE public.home_hero_slides ENABLE ROW LEVEL SECURITY;
+```
+
+**Correctif Appliqué**:
+
+```sql
+alter table "public"."home_hero_slides" enable row level security;
+```
+
+**Validation**:
+
+- ✅ Migration locale : `pnpm dlx supabase db reset` (succès)
+- ✅ **Production** : `pnpm dlx supabase db push` (exit code 0) ✅
+
+**Fichiers Modifiés**:
+
+- `supabase/schemas/07d_table_home_hero.sql` — Ajout section RLS avec `enable row level security`
+- `supabase/migrations/20260122142356_enable_rls_home_hero_slides.sql` — Migration générée
+
+---
+
 ### 2026-01-22 - FEAT: Media Library Integration Press (TASK024 Phase 6)
 
 **Migrations**:
@@ -1989,7 +2157,6 @@ pnpm dlx supabase login
 
 ```bash
 supabase link --project-ref <project_id>
-# <project_id> est l’identifiant de ton projet (ex : yvtrlvkhvljhvklefxcxrzv)
 ```
 
 > [!NOTE]

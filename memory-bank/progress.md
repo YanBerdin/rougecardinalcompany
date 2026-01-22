@@ -1,5 +1,42 @@
 # Progress
 
+## Security Fixes Session (2026-01-22)
+
+### Summary
+
+✅ **ALL SECURITY ISSUES RESOLVED** - RLS, SECURITY INVOKER, Whitelists
+
+| Fix | Migration | Status |
+| --- | --------- | ------ |
+| RLS `home_hero_slides` | `20260122142356` | ✅ Applied |
+| SECURITY INVOKER press views | `20260122143405` | ✅ Applied |
+| INSERT policies restoration | `20260122150000` | ✅ Applied |
+| Entity type whitelist (manual) | Dashboard SQL | ✅ Applied |
+
+### Test Results
+
+| Test Suite | Before | After |
+| ---------- | ------ | ----- |
+| RLS Cloud Tests | 12/13 | **13/13** ✅ |
+
+### Whitelists Implemented
+
+| Field | Allowed Values |
+| ----- | -------------- |
+| `event_type` | `view`, `click`, `share`, `download` |
+| `entity_type` | `spectacle`, `article`, `communique`, `evenement`, `media`, `partner`, `team` |
+
+### Files Modified
+
+| File | Change |
+| ---- | ------ |
+| `supabase/migrations/20260122142356_enable_rls_home_hero_slides.sql` | New migration |
+| `supabase/migrations/20260122143405_fix_press_views_security_invoker.sql` | New migration |
+| `supabase/migrations/20260122150000_final_restore_insert_policies.sql` | Updated with whitelist |
+| `supabase/schemas/62_rls_advanced_tables.sql` | Schema sync |
+
+---
+
 ## TASK024 COMPLETE - Press Management (2026-01-21)
 
 ### Implementation Summary

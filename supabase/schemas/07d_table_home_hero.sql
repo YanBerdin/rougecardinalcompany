@@ -74,6 +74,13 @@ alter table public.home_hero_slides
 create index if not exists idx_home_hero_slides_active_order on public.home_hero_slides(active, position) where active = true;
 create index if not exists idx_home_hero_slides_schedule on public.home_hero_slides(starts_at, ends_at) where active = true;
 
+-- =============================================================================
+-- ROW LEVEL SECURITY
+-- =============================================================================
+
+-- CRITICAL: Enable RLS to enforce policies (without this, policies are inert)
+alter table public.home_hero_slides enable row level security;
+
 -- SELECT policy: Combined public+admin access in single policy (performance optimization)
 -- anon: sees active slides within schedule
 -- authenticated admin: sees all via is_admin() OR clause
