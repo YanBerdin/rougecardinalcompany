@@ -13,6 +13,8 @@ export const ArticleInputSchema = z.object({
     source_publication: z.string().max(100).optional().nullable().transform(val => val === "" ? null : val),
     source_url: z.string().url("URL invalide").optional().nullable().or(z.literal("")).transform(val => val === "" ? null : val),
     published_at: z.coerce.date().optional().nullable(),
+    image_url: z.string().url("URL invalide").optional().nullable().or(z.literal("")).transform(val => val === "" ? null : val),
+    og_image_media_id: z.coerce.bigint().optional().nullable(),
 });
 
 export type ArticleInput = z.infer<typeof ArticleInputSchema>;
@@ -30,6 +32,8 @@ export const ArticleFormSchema = z.object({
     source_publication: z.string().max(100).optional().or(z.literal("")),
     source_url: z.string().url("URL invalide").optional().or(z.literal("")),
     published_at: z.string().optional().or(z.literal("")),
+    image_url: z.string().url("URL invalide").optional().or(z.literal("")),
+    og_image_media_id: z.number().int().positive().optional().nullable(),
 });
 
 export type ArticleFormValues = z.infer<typeof ArticleFormSchema>;
@@ -48,6 +52,8 @@ export type ArticleDTO = {
     source_publication: string | null;
     source_url: string | null;
     published_at: string | null;
+    image_url: string | null;
+    og_image_media_id: number | null;
     created_at: string;
     updated_at: string;
     // Relations

@@ -13,6 +13,8 @@ create table public.articles_presse (
   source_publication text,
   source_url text,
   published_at timestamptz,
+  image_url text, -- URL externe vers une image
+  og_image_media_id bigint references public.medias(id) on delete set null, -- Image SEO/Open Graph via Media Library
   created_at timestamptz default now() not null,
   updated_at timestamptz default now() not null,
   search_vector tsvector

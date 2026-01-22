@@ -10,6 +10,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form } from "@/components/ui/form";
+import { ImageFieldGroup } from "@/components/features/admin/media";
+import { cleanArticleFormData, getArticleSuccessMessage } from "@/lib/utils/press-utils";
 import {
     Select,
     SelectContent,
@@ -36,20 +39,35 @@ export function ArticleNewForm() {
             type: "Article",
             chapo: "",
             excerpt: "",
+            image_url: "",
+            og_image_media_id: undefined,
         },
     });
 
+    // Pattern 1: Image validation state (optional for articles)
+    const [isImageValidated, setIsImageValidated] = useState<boolean | null>(null);
+
     const onSubmit = async (data: ArticleFormValues) => {
+        // Pattern 1: Image validation gate (if image provided)
+        if (isImageValidated !== true && (data.image_url || data.og_image_media_id)) {
+            toast.error("Veuillez attendre la validation de l'image");
+            return;
+        }
+
         setIsPending(true);
 
         try {
-            const result = await createArticleAction(data);
+            // Pattern 4: Clean form data (number → bigint conversions)
+            const cleanedData = cleanArticleFormData(data);
+            const result = await createArticleAction(cleanedData);
 
             if (!result.success) {
                 throw new Error(result.error);
             }
 
-            toast.success("Article créé");
+            // Pattern 5: Contextualized success message
+            const successMessage = getArticleSuccessMessage(false, data.title);
+            toast.success("Article créé", successMessage);
             router.push("/admin/presse");
             router.refresh();
         } catch (error) {
@@ -60,8 +78,9 @@ export function ArticleNewForm() {
     };
 
     return (
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <Card>
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <Card>
                 <CardHeader>
                     <CardTitle>Informations de l'article</CardTitle>
                 </CardHeader>
@@ -164,6 +183,16 @@ export function ArticleNewForm() {
                             disabled={isPending}
                         />
                     </div>
+
+                    {/* Pattern 3: ImageFieldGroup for Open Graph image */}
+                    <ImageFieldGroup
+                        form={form}
+                        imageUrlField="image_url"
+                        imageMediaIdField="og_image_media_id"
+                        label="Image de l'article (Open Graph)"
+                        uploadFolder="presse"
+                        onValidationChange={(isValid) => setIsImageValidated(isValid)}
+                    />
                 </CardContent>
             </Card>
 
@@ -180,6 +209,7 @@ export function ArticleNewForm() {
                     {isPending ? "Création..." : "Créer"}
                 </Button>
             </div>
-        </form>
+            </form>
+        </Form>
     );
 }

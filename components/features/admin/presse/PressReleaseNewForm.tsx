@@ -11,6 +11,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Form } from "@/components/ui/form";
+import { AlertCircle } from "lucide-react";
 import {
     Select,
     SelectContent,
@@ -18,9 +21,11 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { ImageFieldGroup } from "@/components/features/admin/media";
 import { createPressReleaseAction } from "@/app/(admin)/admin/presse/actions";
 import { fetchSpectaclesForSelect, fetchEvenementsForSelect } from "@/lib/dal/admin-press-releases";
 import { PressReleaseFormSchema, type PressReleaseFormValues } from "@/lib/schemas/press-release";
+import { cleanPressReleaseFormData, getPressReleaseSuccessMessage } from "@/lib/utils/press-utils";
 import type { SelectOptionDTO } from "@/lib/schemas/press-release";
 
 export function PressReleaseNewForm() {
@@ -28,6 +33,7 @@ export function PressReleaseNewForm() {
     const [isPending, setIsPending] = useState(false);
     const [spectacles, setSpectacles] = useState<SelectOptionDTO[]>([]);
     const [evenements, setEvenements] = useState<SelectOptionDTO[]>([]);
+    const [isImageValidated, setIsImageValidated] = useState<boolean | null>(null);
 
     const form = useForm<PressReleaseFormValues>({
         resolver: zodResolver(PressReleaseFormSchema),
@@ -37,10 +43,45 @@ export function PressReleaseNewForm() {
             description: "",
             date_publication: new Date().toISOString().split("T")[0],
             image_url: "",
+            image_media_id: undefined,
             public: false,
             ordre_affichage: 0,
         },
     });
+
+    // Warning progressif
+    const isPublic = form.watch("public");
+    const imageUrl = form.watch("image_url");
+    const imageMediaId = form.watch("image_media_id");
+    const [showPublicWarning, setShowPublicWarning] = useState(false);
+
+    useEffect(() => {
+        if (isPublic) {
+            const title = form.getValues("title");
+            const description = form.getValues("description");
+            const datePublication = form.getValues("date_publication");
+
+            const hasImage = imageUrl || imageMediaId;
+            const isIncomplete =
+                !title ||
+                !description ||
+                !datePublication ||
+                !hasImage ||
+                (imageUrl && isImageValidated !== true);
+
+            setShowPublicWarning(Boolean(isIncomplete));
+        } else {
+            setShowPublicWarning(false);
+        }
+    }, [
+        isPublic,
+        imageUrl,
+        imageMediaId,
+        isImageValidated,
+        form.watch("title"),
+        form.watch("description"),
+        form.watch("date_publication"),
+    ]);
 
     // Load dropdowns
     useEffect(() => {
@@ -56,16 +97,35 @@ export function PressReleaseNewForm() {
     }, []);
 
     const onSubmit = async (data: PressReleaseFormValues) => {
+        // Validation critique : image doit être validée si URL externe fournie
+        if (data.image_url && data.image_url !== "") {
+            if (isImageValidated !== true) {
+                toast.error("Image non validée", {
+                    description: "Veuillez vérifier que l'URL de l'image est accessible.",
+                });
+                return;
+            }
+        }
+
+        // Validation critique : publication publique nécessite une image
+        if (data.public && !data.image_url && !data.image_media_id) {
+            toast.error("Image requise", {
+                description: "Un communiqué visible publiquement doit avoir une image.",
+            });
+            return;
+        }
+
         setIsPending(true);
 
         try {
-            const result = await createPressReleaseAction(data);
+            const cleanData = cleanPressReleaseFormData(data);
+            const result = await createPressReleaseAction(cleanData);
 
             if (!result.success) {
                 throw new Error(result.error);
             }
 
-            toast.success("Communiqué créé");
+            toast.success("Communiqué créé", getPressReleaseSuccessMessage(false, data.title));
             form.reset();
             router.push("/admin/presse");
             router.refresh();
@@ -77,7 +137,20 @@ export function PressReleaseNewForm() {
     };
 
     return (
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                {/* Warning progressif */}
+            {showPublicWarning && (
+                <Alert className="border-yellow-500 bg-yellow-50 text-yellow-900 dark:bg-yellow-900/10 dark:text-yellow-500">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Publication incomplète</AlertTitle>
+                    <AlertDescription>
+                        Certains champs requis sont manquants pour la publication publique.
+                        Le communiqué sera sauvegardé mais non visible publiquement.
+                    </AlertDescription>
+                </Alert>
+            )}
+
             <Card>
                 <CardHeader>
                     <CardTitle>Informations générales</CardTitle>
@@ -127,16 +200,17 @@ export function PressReleaseNewForm() {
                         />
                     </div>
 
-                    <div>
-                        <Label htmlFor="image_url">URL image externe</Label>
-                        <Input
-                            id="image_url"
-                            type="url"
-                            {...form.register("image_url")}
-                            disabled={isPending}
-                            placeholder="https://example.com/image.jpg"
-                        />
-                    </div>
+                    {/* Image avec ImageFieldGroup */}
+                    <ImageFieldGroup
+                        form={form}
+                        imageUrlField="image_url"
+                        imageMediaIdField="image_media_id"
+                        label="Image du communiqué"
+                        showUpload={true}
+                        uploadFolder="presse"
+                        description="Image principale affichée dans le kit média (recommandé : 1200x630px)"
+                        onValidationChange={(isValid) => setIsImageValidated(isValid)}
+                    />
                 </CardContent>
             </Card>
 
@@ -215,6 +289,7 @@ export function PressReleaseNewForm() {
                     {isPending ? "Création..." : "Créer"}
                 </Button>
             </div>
-        </form>
+            </form>
+        </Form>
     );
 }

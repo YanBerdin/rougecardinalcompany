@@ -27,6 +27,8 @@ export async function fetchAllArticlesAdmin(): Promise<DALResult<ArticleDTO[]>> 
       source_publication,
       source_url,
       published_at,
+      image_url,
+      og_image_media_id,
       created_at,
       updated_at
     `
@@ -48,6 +50,8 @@ export async function fetchAllArticlesAdmin(): Promise<DALResult<ArticleDTO[]>> 
         source_publication: article.source_publication,
         source_url: article.source_url,
         published_at: article.published_at,
+        image_url: article.image_url,
+        og_image_media_id: article.og_image_media_id ? Number(article.og_image_media_id) : null,
         created_at: article.created_at,
         updated_at: article.updated_at,
     }));
@@ -78,6 +82,8 @@ export async function fetchArticleById(
       source_publication,
       source_url,
       published_at,
+      image_url,
+      og_image_media_id,
       created_at,
       updated_at
     `
@@ -103,6 +109,8 @@ export async function fetchArticleById(
         source_publication: data.source_publication,
         source_url: data.source_url,
         published_at: data.published_at,
+        image_url: data.image_url,
+        og_image_media_id: data.og_image_media_id ? Number(data.og_image_media_id) : null,
         created_at: data.created_at,
         updated_at: data.updated_at,
     };
@@ -131,6 +139,8 @@ export async function createArticle(
             source_publication: input.source_publication,
             source_url: input.source_url,
             published_at: input.published_at,
+            image_url: input.image_url,
+            og_image_media_id: input.og_image_media_id?.toString(),
         })
         .select()
         .single();
@@ -168,6 +178,8 @@ export async function updateArticle(
             source_publication: input.source_publication,
             source_url: input.source_url,
             published_at: input.published_at,
+            image_url: input.image_url,
+            og_image_media_id: input.og_image_media_id?.toString(),
         })
         .eq("id", id.toString())
         .select()

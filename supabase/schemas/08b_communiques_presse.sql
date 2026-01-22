@@ -9,8 +9,9 @@ create table public.communiques_presse (
   description text, -- Résumé/description 
   date_publication date not null,
   
-  -- Image externe (URLs)
+  -- Image externe (URLs) et Media Library
   image_url text, -- URL externe vers une image (alternative aux médias stockés)
+  image_media_id bigint references public.medias(id) on delete set null, -- Image via Media Library
   
   -- Relations avec autres entités (optionnel)
   spectacle_id bigint references public.spectacles(id) on delete set null,
@@ -35,6 +36,7 @@ comment on table public.communiques_presse is 'Communiqués de presse profession
 comment on column public.communiques_presse.title is 'Titre du communiqué (harmonisé avec articles_presse)';
 comment on column public.communiques_presse.description is 'Description/résumé affiché dans la liste et kit média';
 comment on column public.communiques_presse.image_url is 'URL externe vers une image (alternative aux médias stockés)';
+comment on column public.communiques_presse.image_media_id is 'Image principale via Media Library (prioritaire sur image_url)';
 comment on column public.communiques_presse.ordre_affichage is 'Ordre d''affichage personnalisé dans le kit média (0 = premier)';
 comment on column public.communiques_presse.file_size_bytes is 'Taille du fichier pour affichage utilisateur (ex: "312 KB")';
 

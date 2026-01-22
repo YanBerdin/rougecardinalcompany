@@ -11,6 +11,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Form } from "@/components/ui/form";
+import { AlertTriangle } from "lucide-react";
+import { ImageFieldGroup } from "@/components/features/admin/media";
+import { cleanPressReleaseFormData, getPressReleaseSuccessMessage } from "@/lib/utils/press-utils";
 import {
     Select,
     SelectContent,
@@ -41,12 +46,35 @@ export function PressReleaseEditForm({ release }: PressReleaseEditFormProps) {
             description: release.description ?? "",
             date_publication: release.date_publication.split("T")[0],
             image_url: release.image_url ?? "",
+            image_media_id: release.image_media_id ?? undefined,
             spectacle_id: release.spectacle_id ?? undefined,
             evenement_id: release.evenement_id ?? undefined,
             public: release.public,
             ordre_affichage: release.ordre_affichage,
         },
     });
+
+    // Pattern 1: Image validation state (initialized from existing data)
+    const [isImageValidated, setIsImageValidated] = useState<boolean | null>(
+        release.image_url || release.image_media_id ? true : null
+    );
+
+    // Pattern 2: Progressive warning state
+    const [showPublicWarning, setShowPublicWarning] = useState(false);
+
+    // Pattern 2: Progressive validation logic
+    useEffect(() => {
+        const subscription = form.watch((value) => {
+            const { public: isPublic, image_url, image_media_id } = value;
+
+            if (isPublic && !image_url && !image_media_id && isImageValidated !== true) {
+                setShowPublicWarning(true);
+            } else {
+                setShowPublicWarning(false);
+            }
+        });
+        return () => subscription.unsubscribe();
+    }, [form, isImageValidated]);
 
     useEffect(() => {
         async function loadOptions() {
@@ -61,16 +89,31 @@ export function PressReleaseEditForm({ release }: PressReleaseEditFormProps) {
     }, []);
 
     const onSubmit = async (data: PressReleaseFormValues) => {
+        // Pattern 1: Image validation gate
+        if (isImageValidated !== true && (data.image_url || data.image_media_id)) {
+            toast.error("Veuillez attendre la validation de l'image");
+            return;
+        }
+
+        // Pattern 1: Public releases require image
+        if (data.public && !data.image_url && !data.image_media_id) {
+            toast.error("Les communiqués publics nécessitent une image");
+            return;
+        }
+
         setIsPending(true);
 
         try {
-            const result = await updatePressReleaseAction(String(release.id), data);
+            // Pattern 4: Clean form data (number → bigint conversions)
+            const cleanedData = cleanPressReleaseFormData(data);
+            const result = await updatePressReleaseAction(String(release.id), cleanedData);
 
             if (!result.success) {
                 throw new Error(result.error);
             }
 
-            toast.success("Communiqué mis à jour");
+            // Pattern 5: Contextualized success message
+            toast.success("Communiqué mis à jour", getPressReleaseSuccessMessage(true, data.title));
             router.push("/admin/presse");
             router.refresh();
         } catch (error) {
@@ -81,7 +124,18 @@ export function PressReleaseEditForm({ release }: PressReleaseEditFormProps) {
     };
 
     return (
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                {/* Pattern 2: Progressive validation warning */}
+            {showPublicWarning && (
+                <Alert className="border-yellow-500 bg-yellow-50 text-yellow-900 dark:bg-yellow-900/10 dark:text-yellow-500">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertDescription>
+                        Les communiqués publics nécessitent une image.
+                    </AlertDescription>
+                </Alert>
+            )}
+
             <Card>
                 <CardHeader>
                     <CardTitle>Informations générales</CardTitle>
@@ -130,15 +184,14 @@ export function PressReleaseEditForm({ release }: PressReleaseEditFormProps) {
                         />
                     </div>
 
-                    <div>
-                        <Label htmlFor="image_url">URL image externe</Label>
-                        <Input
-                            id="image_url"
-                            type="url"
-                            {...form.register("image_url")}
-                            disabled={isPending}
-                        />
-                    </div>
+                    {/* Pattern 3: ImageFieldGroup with validation callback */}
+                    <ImageFieldGroup
+                        form={form}
+                        imageUrlField="image_url"
+                        imageMediaIdField="image_media_id"
+                        uploadFolder="presse"
+                        onValidationChange={(isValid) => setIsImageValidated(isValid)}
+                    />
                 </CardContent>
             </Card>
 
@@ -219,6 +272,7 @@ export function PressReleaseEditForm({ release }: PressReleaseEditFormProps) {
                     {isPending ? "Mise à jour..." : "Mettre à jour"}
                 </Button>
             </div>
-        </form>
+            </form>
+        </Form>
     );
 }

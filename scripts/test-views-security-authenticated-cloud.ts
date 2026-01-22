@@ -1,47 +1,17 @@
 #!/usr/bin/env tsx
-/**
+/*
  * Test views as an authenticated non-admin user.
- * Verifies that PUBLIC views are accessible and ADMIN views are blocked.
- * 
- * @description
- * This script creates a test user (non-admin), signs in, and tests:
- * 1. PUBLIC views (articles_presse_public, communiques_presse_public, etc.) - should be accessible
- * 2. ADMIN views and functions - should return permission denied
- * 
- * @usage
- * Local DB (default):
- *   pnpm test:views:auth:local
- *   # or directly:
- *   pnpm exec tsx scripts/test-views-security-authenticated.ts
- * 
- * Remote DB (production):
- *   pnpm test:views:auth:remote
- *   # or directly:
- *   REMOTE=1 pnpm exec tsx scripts/test-views-security-authenticated.ts
- * 
- * @requires
- * - Local: `pnpm dlx supabase start` must be running
- * - Remote: .env file with NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY, SUPABASE_SECRET_KEY
- * 
- * @note
- * Local keys are the default Supabase local development keys.
- * They are identical for all Supabase projects and can be obtained via `pnpm dlx supabase status`.
+ * Usage:
+ *   DOTENV_CONFIG_PATH=.env pnpm exec tsx scripts/test-views-security-authenticated.ts
  */
 import 'dotenv/config';
 
 import { createClient } from '@supabase/supabase-js';
 import { env } from '../lib/env';
 
-const LOCAL_SUPABASE_URL = 'http://127.0.0.1:54321';
-const LOCAL_PUBLISHABLE_KEY = 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH';
-const LOCAL_SECRET_KEY = 'sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz';
-
-const isRemote = process.env.REMOTE === '1';
-const url = isRemote ? env.NEXT_PUBLIC_SUPABASE_URL : LOCAL_SUPABASE_URL;
-const anonKey = isRemote ? env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY : LOCAL_PUBLISHABLE_KEY;
-const serviceKey = isRemote ? env.SUPABASE_SECRET_KEY : LOCAL_SECRET_KEY;
-
-console.log(`\n🔌 Testing against: ${isRemote ? 'REMOTE (production)' : 'LOCAL (http://127.0.0.1:54321)'}\n`);
+const url = env.NEXT_PUBLIC_SUPABASE_URL;
+const anonKey = env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY;
+const serviceKey = env.SUPABASE_SECRET_KEY;
 
 const adminClient = createClient(url, serviceKey);
 const anonClient = createClient(url, anonKey);
@@ -132,6 +102,7 @@ async function signInAndTest(email: string, password: string) {
     console.log('\n🔒 Testing admin views access (should be denied):\n');
     
     const adminViews = [
+        'communiques_presse_dashboard',
         'membres_equipe_admin',
         'compagnie_presentation_sections_admin',
         'partners_admin',
@@ -140,32 +111,6 @@ async function signInAndTest(email: string, password: string) {
         'analytics_summary',
         'analytics_summary_90d',
     ];
-
-    // Test function-based admin endpoint separately (communiques_presse_dashboard is now a function)
-    try {
-        const { data, error } = await authClient.rpc('communiques_presse_dashboard');
-        
-        if (error) {
-            // Expected: permission denied or explicit error message
-            if (error.message.includes('permission denied') || error.message.includes('admin access required')) {
-                console.log(`   ✅ communiques_presse_dashboard (function): correctly denied`);
-            } else {
-                console.error(`   ❌ communiques_presse_dashboard (function): unexpected error - ${error.message}`);
-                allPassed = false;
-            }
-        } else {
-            // NOT EXPECTED: function returned data
-            console.error(`   ❌ communiques_presse_dashboard (function): SECURITY ISSUE - returns ${Array.isArray(data) ? data.length + ' rows' : 'data'} instead of permission denied`);
-            allPassed = false;
-        }
-    } catch (err: any) {
-        if (err.message && (err.message.includes('permission denied') || err.message.includes('admin access required'))) {
-            console.log(`   ✅ communiques_presse_dashboard (function): correctly denied`);
-        } else {
-            console.error(`   ❌ communiques_presse_dashboard (function) exception:`, err.message || err);
-            allPassed = false;
-        }
-    }
 
     for (const viewName of adminViews) {
         try {

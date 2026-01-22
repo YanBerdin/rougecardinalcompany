@@ -38,6 +38,7 @@ create index if not exists idx_communiques_presse_public on public.communiques_p
 create index if not exists idx_communiques_presse_ordre on public.communiques_presse(ordre_affichage, date_publication desc);
 create index if not exists idx_communiques_presse_spectacle_id on public.communiques_presse(spectacle_id);
 create index if not exists idx_communiques_presse_created_by on public.communiques_presse(created_by);
+create index if not exists idx_communiques_presse_image_media_id on public.communiques_presse(image_media_id);
 
 -- Index pour contacts presse
 create index if not exists idx_contacts_presse_media on public.contacts_presse(media);

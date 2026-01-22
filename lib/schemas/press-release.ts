@@ -9,6 +9,7 @@ export const PressReleaseInputSchema = z.object({
     description: z.string().optional().nullable().transform(val => val === "" ? null : val),
     date_publication: z.coerce.date(),
     image_url: z.string().url("URL invalide").optional().nullable().or(z.literal("")).transform(val => val === "" ? null : val),
+    image_media_id: z.coerce.bigint().optional().nullable(),
     spectacle_id: z.coerce.bigint().optional().nullable(),
     evenement_id: z.coerce.bigint().optional().nullable(),
     public: z.boolean().default(false),
@@ -26,6 +27,7 @@ export const PressReleaseFormSchema = z.object({
     description: z.string().optional().or(z.literal("")),
     date_publication: z.string().min(1, "La date de publication est requise"),
     image_url: z.string().url("URL invalide").optional().or(z.literal("")),
+    image_media_id: z.number().int().positive().optional().nullable(),
     spectacle_id: z.number().int().positive().optional().nullable(),
     evenement_id: z.number().int().positive().optional().nullable(),
     public: z.boolean(),
@@ -44,6 +46,7 @@ export type PressReleaseDTO = {
     description: string | null;
     date_publication: string;
     image_url: string | null;
+    image_media_id: number | null;
     spectacle_id: number | null;
     evenement_id: number | null;
     public: boolean;
