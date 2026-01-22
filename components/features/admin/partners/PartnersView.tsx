@@ -26,6 +26,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+    DialogClose,
+} from "@/components/ui/dialog";
+import {
     Plus,
     Pencil,
     Trash2,
@@ -122,6 +131,7 @@ function SortablePartnerCard({
                         size="icon"
                         onClick={() => onEdit(partner)}
                         title="Éditer"
+                        aria-label="Éditer le partenaire"
                     >
                         <Pencil className="h-4 w-4" />
                     </Button>
@@ -130,6 +140,7 @@ function SortablePartnerCard({
                         size="icon"
                         onClick={() => onDelete(partner.id)}
                         title="Supprimer"
+                        aria-label="Supprimer le partenaire"
                         className="text-destructive hover:text-destructive"
                     >
                         <Trash2 className="h-4 w-4" />
@@ -143,6 +154,8 @@ function SortablePartnerCard({
 export function PartnersView({ initialPartners }: PartnersViewProps) {
     const router = useRouter();
     const [partners, setPartners] = useState(initialPartners);
+    const [deleteCandidate, setDeleteCandidate] = useState<number | null>(null);
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
     // Sync local state with server props
     useEffect(() => {
@@ -194,9 +207,14 @@ export function PartnersView({ initialPartners }: PartnersViewProps) {
         [partners, router]
     );
 
+    const requestDelete = useCallback((id: number) => {
+        setDeleteCandidate(id);
+        setOpenDeleteDialog(true);
+    }, []);
+
     const handleDelete = useCallback(
         async (id: number) => {
-            if (!confirm("Supprimer ce partenaire ?")) return;
+            setOpenDeleteDialog(false);
 
             try {
                 const result = await deletePartnerAction(String(id));
@@ -215,9 +233,11 @@ export function PartnersView({ initialPartners }: PartnersViewProps) {
                             error instanceof Error ? error.message : "Erreur inconnue",
                     }
                 );
+            } finally {
+                setDeleteCandidate(null);
             }
         },
-        [router]
+        [router, deleteCandidate]
     );
 
     const handleEdit = useCallback(
@@ -276,13 +296,40 @@ export function PartnersView({ initialPartners }: PartnersViewProps) {
                                     key={partner.id.toString()}
                                     partner={partner}
                                     onEdit={handleEdit}
-                                    onDelete={handleDelete}
+                                    onDelete={requestDelete}
                                 />
                             ))}
                         </SortableContext>
                     </DndContext>
                 </div>
             )}
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Confirmer la suppression</DialogTitle>
+                        <DialogDescription>
+                            Voulez-vous vraiment supprimer ce partenaire ? Cette action est irréversible.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setOpenDeleteDialog(false)}
+                        >
+                            Annuler
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={() => deleteCandidate && handleDelete(deleteCandidate)}
+                        >
+                            Supprimer
+                        </Button>
+                    </DialogFooter>
+                    <DialogClose />
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

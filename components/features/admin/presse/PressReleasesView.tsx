@@ -6,23 +6,37 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, Eye, Send } from "lucide-react";
+import { Badge } from "@/components/ui/badge"; import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+    DialogClose,
+} from "@/components/ui/dialog"; import { Plus, Pencil, Trash2, Eye, Send } from "lucide-react";
 import { deletePressReleaseAction, publishPressReleaseAction, unpublishPressReleaseAction } from "@/app/(admin)/admin/presse/actions";
 import type { PressReleasesViewProps } from "./types";
 
 export function PressReleasesView({ initialReleases }: PressReleasesViewProps) {
     const router = useRouter();
     const [releases, setReleases] = useState(initialReleases);
+    const [deleteCandidate, setDeleteCandidate] = useState<string | null>(null);
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
     // ✅ CRITICAL: Sync local state when props change (after router.refresh())
     useEffect(() => {
         setReleases(initialReleases);
     }, [initialReleases]);
 
+    const requestDelete = useCallback((id: string) => {
+        setDeleteCandidate(id);
+        setOpenDeleteDialog(true);
+    }, []);
+
     const handleDelete = useCallback(
         async (id: string) => {
-            if (!confirm("Supprimer ce communiqué de presse ?")) return;
+            setOpenDeleteDialog(false);
 
             try {
                 const result = await deletePressReleaseAction(id);
@@ -94,27 +108,30 @@ export function PressReleasesView({ initialReleases }: PressReleasesViewProps) {
 
                             <div className="flex gap-2">
                                 <Link href={`/admin/presse/communiques/${release.id}/preview`}>
-                                    <Button variant="ghost" size="icon">
+                                    <Button variant="ghost" size="icon" title="Prévisualiser" aria-label="Prévisualiser le communiqué">
                                         <Eye className="h-4 w-4" />
                                     </Button>
                                 </Link>
                                 <Button
-                                    variant="ghost"
+                                    variant="destructive"
                                     size="icon"
                                     onClick={() => handlePublish(release.id, release.public)}
                                     title={release.public ? "Dépublier" : "Publier"}
+                                    aria-label={release.public ? "Dépublier le communiqué" : "Publier le communiqué"}
                                 >
                                     <Send className="h-4 w-4" />
                                 </Button>
                                 <Link href={`/admin/presse/communiques/${release.id}/edit`}>
-                                    <Button variant="ghost" size="icon">
+                                    <Button variant="ghost" size="icon" title="Modifier" aria-label="Modifier le communiqué">
                                         <Pencil className="h-4 w-4" />
                                     </Button>
                                 </Link>
                                 <Button
-                                    variant="ghost"
+                                    variant="destructive"
                                     size="icon"
-                                    onClick={() => handleDelete(release.id)}
+                                    onClick={() => requestDelete(release.id)}
+                                    title="Supprimer"
+                                    aria-label="Supprimer le communiqué"
                                 >
                                     <Trash2 className="h-4 w-4" />
                                 </Button>
@@ -123,6 +140,35 @@ export function PressReleasesView({ initialReleases }: PressReleasesViewProps) {
                     </Card>
                 ))}
             </div>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Confirmer la suppression</DialogTitle>
+                        <DialogDescription>
+                            Voulez-vous vraiment supprimer ce communiqué de presse ? Cette action est irréversible.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setOpenDeleteDialog(false)}
+                            title="Annuler la suppression"
+                        >
+                            Annuler
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={() => deleteCandidate && handleDelete(deleteCandidate)}
+                            title="Confirmer la suppression du communiqué"
+                        >
+                            Supprimer
+                        </Button>
+                    </DialogFooter>
+                    <DialogClose />
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

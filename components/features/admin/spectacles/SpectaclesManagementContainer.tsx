@@ -150,6 +150,7 @@ export default function SpectaclesManagementContainer({
               variant="outline"
               onClick={cancelDelete}
               disabled={isDeleting}
+              title="Annuler la suppression"
             >
               Annuler
             </Button>
@@ -157,6 +158,7 @@ export default function SpectaclesManagementContainer({
               variant="destructive"
               onClick={handleDelete}
               disabled={isDeleting}
+              title="Confirmer la suppression du spectacle"
             >
               {isDeleting ? "Suppression..." : "Supprimer"}
             </Button>

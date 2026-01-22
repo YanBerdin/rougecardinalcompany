@@ -454,6 +454,7 @@ export function UsersManagementView({ users }: UsersManagementViewProps) {
                           size="icon"
                           onClick={() => openDeleteDialog(user.id, user.email)}
                           disabled={loading === user.id}
+                          title="Supprimer l'utilisateur"
                           className="h-8 w-8 sm:h-9 sm:w-9 hover:bg-red-100 hover:text-red-700"
                           aria-label={`Supprimer ${user.email}`}
                         >

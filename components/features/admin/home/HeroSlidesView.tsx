@@ -81,7 +81,8 @@ function SortableSlide({ slide, index, onEdit, onDelete }: SortableSlideProps) {
                             variant="destructive"
                             size="icon"
                             onClick={() => onDelete(slide.id)}
-                            aria-label="Delete slide"
+                            title="Supprimer le slide"
+                            aria-label="Supprimer le slide"
                             className="h-9 w-9 shrink-0"
                         >
                             <Trash2 className="h-4 w-4" />
@@ -89,7 +90,8 @@ function SortableSlide({ slide, index, onEdit, onDelete }: SortableSlideProps) {
                         <Button
                             variant="outline"
                             onClick={() => onEdit(slide)}
-                            aria-label="Editer le slide"
+                            title="Modifier le slide"
+                            aria-label="Modifier le slide"
                             className="flex-1 texte-sm md:text-md h-9 gap-2"
                         >
                             <Pencil className="h-4 w-4 ml-2" /> Modifier

@@ -45,6 +45,8 @@ export function MediaTagsView({ initialTags }: MediaTagsViewProps) {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingTag, setEditingTag] = useState<MediaTagDTO | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [deleteCandidate, setDeleteCandidate] = useState<MediaTagDTO | null>(null);
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
     // Sync local state with props changes
     useEffect(() => {
@@ -61,12 +63,18 @@ export function MediaTagsView({ initialTags }: MediaTagsViewProps) {
         setIsFormOpen(true);
     }, []);
 
+    const requestDelete = useCallback((tag: MediaTagDTO) => {
+        setDeleteCandidate(tag);
+        setOpenDeleteDialog(true);
+    }, []);
+
     const handleDelete = useCallback(
-        async (tag: MediaTagDTO) => {
-            if (!confirm(`Supprimer le tag "${tag.name}" ?`)) return;
+        async () => {
+            if (!deleteCandidate) return;
+            setOpenDeleteDialog(false);
 
             try {
-                const result = await deleteMediaTagAction(tag.id);
+                const result = await deleteMediaTagAction(deleteCandidate.id);
 
                 if (!result.success) {
                     throw new Error(result.error);
@@ -78,9 +86,11 @@ export function MediaTagsView({ initialTags }: MediaTagsViewProps) {
                 toast.error(
                     error instanceof Error ? error.message : "Erreur lors de la suppression"
                 );
+            } finally {
+                setDeleteCandidate(null);
             }
         },
-        [router]
+        [router, deleteCandidate]
     );
 
     const handleFormSuccess = useCallback(() => {
@@ -173,7 +183,7 @@ export function MediaTagsView({ initialTags }: MediaTagsViewProps) {
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => handleDelete(tag)}
+                                        onClick={() => requestDelete(tag)}
                                         className="text-red-600 hover:text-red-700 hover:bg-red-50 h-10 min-w-[56px] px-3"
                                         aria-label={`Supprimer ${tag.name}`}
                                     >
@@ -232,7 +242,7 @@ export function MediaTagsView({ initialTags }: MediaTagsViewProps) {
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    onClick={() => handleDelete(tag)}
+                                                    onClick={() => requestDelete(tag)}
                                                     title="Supprimer"
                                                     className="h-8 w-8 sm:h-9 sm:w-9 hover:bg-red-100 hover:text-red-700"
                                                     aria-label={`Supprimer ${tag.name}`}

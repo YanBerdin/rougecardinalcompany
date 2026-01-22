@@ -8,6 +8,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, Mail, Phone } from "lucide-react";
 import { deletePressContactAction, togglePressContactActiveAction } from "@/app/(admin)/admin/presse/actions";
 import type { PressContactsViewProps } from "./types";
@@ -15,14 +24,21 @@ import type { PressContactsViewProps } from "./types";
 export function PressContactsView({ initialContacts }: PressContactsViewProps) {
   const router = useRouter();
   const [contacts, setContacts] = useState(initialContacts);
+  const [deleteCandidate, setDeleteCandidate] = useState<string | null>(null);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
   useEffect(() => {
     setContacts(initialContacts);
   }, [initialContacts]);
 
+  const requestDelete = useCallback((id: string) => {
+    setDeleteCandidate(id);
+    setOpenDeleteDialog(true);
+  }, []);
+
   const handleDelete = useCallback(
     async (id: string) => {
-      if (!confirm("Supprimer ce contact ?")) return;
+      setOpenDeleteDialog(false);
 
       try {
         const result = await deletePressContactAction(id);
@@ -117,16 +133,19 @@ export function PressContactsView({ initialContacts }: PressContactsViewProps) {
                 <Switch
                   checked={contact.actif}
                   onCheckedChange={() => handleToggleActive(contact.id, contact.actif)}
+                  aria-label={contact.actif ? "Désactiver le contact" : "Activer le contact"}
                 />
                 <Link href={`/admin/presse/contacts/${contact.id}/edit`}>
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="icon" title="Modifier" aria-label="Modifier le contact">
                     <Pencil className="h-4 w-4" />
                   </Button>
                 </Link>
                 <Button
-                  variant="ghost"
+                  variant="destructive"
                   size="icon"
-                  onClick={() => handleDelete(contact.id)}
+                  onClick={() => requestDelete(contact.id)}
+                  title="Supprimer"
+                  aria-label="Supprimer le contact"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -135,6 +154,35 @@ export function PressContactsView({ initialContacts }: PressContactsViewProps) {
           </Card>
         ))}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmer la suppression</DialogTitle>
+            <DialogDescription>
+              Voulez-vous vraiment supprimer ce contact presse ? Cette action est irréversible.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setOpenDeleteDialog(false)}
+              title="Annuler la suppression"
+            >
+              Annuler
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => deleteCandidate && handleDelete(deleteCandidate)}
+              title="Confirmer la suppression du contact"
+            >
+              Supprimer
+            </Button>
+          </DialogFooter>
+          <DialogClose />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

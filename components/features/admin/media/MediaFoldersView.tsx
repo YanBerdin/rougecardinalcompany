@@ -54,6 +54,8 @@ export function MediaFoldersView({ initialFolders }: MediaFoldersViewProps) {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingFolder, setEditingFolder] = useState<MediaFolderDTO | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [deleteCandidate, setDeleteCandidate] = useState<MediaFolderDTO | null>(null);
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
     // Sync local state with props changes
     useEffect(() => {
@@ -70,12 +72,18 @@ export function MediaFoldersView({ initialFolders }: MediaFoldersViewProps) {
         setIsFormOpen(true);
     }, []);
 
+    const requestDelete = useCallback((folder: MediaFolderDTO) => {
+        setDeleteCandidate(folder);
+        setOpenDeleteDialog(true);
+    }, []);
+
     const handleDelete = useCallback(
-        async (folder: MediaFolderDTO) => {
-            if (!confirm(`Supprimer le dossier "${folder.name}" ?`)) return;
+        async () => {
+            if (!deleteCandidate) return;
+            setOpenDeleteDialog(false);
 
             try {
-                const result = await deleteMediaFolderAction(folder.id);
+                const result = await deleteMediaFolderAction(deleteCandidate.id);
 
                 if (!result.success) {
                     throw new Error(result.error);
@@ -87,9 +95,11 @@ export function MediaFoldersView({ initialFolders }: MediaFoldersViewProps) {
                 toast.error(
                     error instanceof Error ? error.message : "Erreur lors de la suppression"
                 );
+            } finally {
+                setDeleteCandidate(null);
             }
         },
-        [router]
+        [router, deleteCandidate]
     );
 
     const handleFormSuccess = useCallback(() => {
@@ -181,8 +191,8 @@ export function MediaFoldersView({ initialFolders }: MediaFoldersViewProps) {
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => handleDelete(folder)}
-                                        className= "hover:text-red-700 hover:bg-red-50 h-10 min-w-[56px] px-3"
+                                        onClick={() => requestDelete(folder)}
+                                        className="hover:text-red-700 hover:bg-red-50 h-10 min-w-[56px] px-3"
                                         aria-label={`Supprimer ${folder.name}`}
                                     >
                                         <Trash2 className="h-5 w-5 mr-2" /> Supprimer
@@ -228,7 +238,7 @@ export function MediaFoldersView({ initialFolders }: MediaFoldersViewProps) {
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    onClick={() => handleDelete(folder)}
+                                                    onClick={() => requestDelete(folder)}
                                                     title="Supprimer"
                                                     className="h-8 w-8 sm:h-9 sm:w-9 hover:bg-red-100 hover:text-red-700"
                                                     aria-label={`Supprimer ${folder.name}`}

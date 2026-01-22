@@ -7,6 +7,15 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, ExternalLink } from "lucide-react";
 import { deleteArticleAction } from "@/app/(admin)/admin/presse/actions";
 import type { ArticlesViewProps } from "./types";
@@ -14,14 +23,21 @@ import type { ArticlesViewProps } from "./types";
 export function ArticlesView({ initialArticles }: ArticlesViewProps) {
   const router = useRouter();
   const [articles, setArticles] = useState(initialArticles);
+  const [deleteCandidate, setDeleteCandidate] = useState<string | null>(null);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
   useEffect(() => {
     setArticles(initialArticles);
   }, [initialArticles]);
 
+  const requestDelete = useCallback((id: string) => {
+    setDeleteCandidate(id);
+    setOpenDeleteDialog(true);
+  }, []);
+
   const handleDelete = useCallback(
     async (id: string) => {
-      if (!confirm("Supprimer cet article ?")) return;
+      setOpenDeleteDialog(false);
 
       try {
         const result = await deleteArticleAction(id);
@@ -77,20 +93,22 @@ export function ArticlesView({ initialArticles }: ArticlesViewProps) {
               <div className="flex gap-2">
                 {article.source_url && (
                   <a href={article.source_url} target="_blank" rel="noopener noreferrer">
-                    <Button variant="ghost" size="icon">
+                    <Button variant="ghost" size="icon" title="Voir l'article source" aria-label="Voir l'article source">
                       <ExternalLink className="h-4 w-4" />
                     </Button>
                   </a>
                 )}
                 <Link href={`/admin/presse/articles/${article.id}/edit`}>
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="icon" title="Modifier" aria-label="Modifier l'article">
                     <Pencil className="h-4 w-4" />
                   </Button>
                 </Link>
                 <Button
-                  variant="ghost"
+                  variant="destructive"
                   size="icon"
-                  onClick={() => handleDelete(article.id)}
+                  onClick={() => requestDelete(article.id)}
+                  title="Supprimer"
+                  aria-label="Supprimer l'article"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -99,6 +117,35 @@ export function ArticlesView({ initialArticles }: ArticlesViewProps) {
           </Card>
         ))}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmer la suppression</DialogTitle>
+            <DialogDescription>
+              Voulez-vous vraiment supprimer cet article ? Cette action est irréversible.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setOpenDeleteDialog(false)}
+              title="Annuler la suppression"
+            >
+              Annuler
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => deleteCandidate && handleDelete(deleteCandidate)}
+              title="Confirmer la suppression de l'article"
+            >
+              Supprimer
+            </Button>
+          </DialogFooter>
+          <DialogClose />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
