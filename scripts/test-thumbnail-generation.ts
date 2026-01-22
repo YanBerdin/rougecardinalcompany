@@ -14,10 +14,14 @@ import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
+import { getLocalCredentials, validateLocalOnly } from './utils/supabase-local-credentials';
 
-const SUPABASE_URL = 'http://127.0.0.1:54321';
-const SUPABASE_ANON_KEY = 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH';
-const SUPABASE_SERVICE_KEY = 'sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz';
+// Get local credentials from .env.local (with safe defaults for testing)
+const { url: SUPABASE_URL, publishableKey: SUPABASE_ANON_KEY, serviceKey: SUPABASE_SERVICE_KEY } = 
+    getLocalCredentials({ silent: true });
+
+// Security: ensure we're using localhost
+validateLocalOnly(SUPABASE_URL);
 
 // Create test image with sharp
 async function createTestImage(): Promise<Buffer> {

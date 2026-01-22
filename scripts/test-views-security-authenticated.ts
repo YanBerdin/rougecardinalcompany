@@ -31,15 +31,29 @@ import 'dotenv/config';
 
 import { createClient } from '@supabase/supabase-js';
 import { env } from '../lib/env';
-
-const LOCAL_SUPABASE_URL = 'http://127.0.0.1:54321';
-const LOCAL_PUBLISHABLE_KEY = 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH';
-const LOCAL_SECRET_KEY = 'sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz';
+import { getLocalCredentials, validateLocalOnly } from './utils/supabase-local-credentials';
 
 const isRemote = process.env.REMOTE === '1';
-const url = isRemote ? env.NEXT_PUBLIC_SUPABASE_URL : LOCAL_SUPABASE_URL;
-const anonKey = isRemote ? env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY : LOCAL_PUBLISHABLE_KEY;
-const serviceKey = isRemote ? env.SUPABASE_SECRET_KEY : LOCAL_SECRET_KEY;
+
+let url: string;
+let anonKey: string;
+let serviceKey: string;
+
+if (isRemote) {
+    // Remote: use production credentials from .env
+    url = env.NEXT_PUBLIC_SUPABASE_URL;
+    anonKey = env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY;
+    serviceKey = env.SUPABASE_SECRET_KEY;
+} else {
+    // Local: use credentials from .env.local (with safe defaults for testing)
+    const localCreds = getLocalCredentials({ silent: true });
+    url = localCreds.url;
+    anonKey = localCreds.publishableKey;
+    serviceKey = localCreds.serviceKey;
+    
+    // Security: validate we're really using localhost
+    validateLocalOnly(url);
+}
 
 console.log(`\n🔌 Testing against: ${isRemote ? 'REMOTE (production)' : 'LOCAL (http://127.0.0.1:54321)'}\n`);
 
@@ -129,8 +143,10 @@ async function signInAndTest(email: string, password: string) {
     }
 
     // ADMIN views should be denied (7 views total)
-    console.log('\n🔒 Testing admin views access (should be denied):\n');
-    
+    // ✅ COMPORTEMENT ATTENDU : Les vues admin doivent retourner "permission denied" (42501)
+    // ✅ SÉCURITÉ : Si une vue admin retourne des données, c'est une FAILLE DE SÉCURITÉ
+    console.log('\n🔒 Testing admin views access (should be denied - EXPECTED BEHAVIOR):\n');
+
     const adminViews = [
         'membres_equipe_admin',
         'compagnie_presentation_sections_admin',
@@ -144,7 +160,7 @@ async function signInAndTest(email: string, password: string) {
     // Test function-based admin endpoint separately (communiques_presse_dashboard is now a function)
     try {
         const { data, error } = await authClient.rpc('communiques_presse_dashboard');
-        
+
         if (error) {
             // Expected: permission denied or explicit error message
             if (error.message.includes('permission denied') || error.message.includes('admin access required')) {
@@ -171,7 +187,7 @@ async function signInAndTest(email: string, password: string) {
         try {
             // Use '*' to avoid issues with views that don't have 'id' column (e.g., analytics_summary)
             const { data, error } = await authClient.from(viewName).select('*').limit(1);
-            
+
             if (error) {
                 // Expected: permission denied (42501 code)
                 if (error.message.includes('permission denied') || error.code === '42501') {
@@ -198,10 +214,15 @@ async function signInAndTest(email: string, password: string) {
 
     console.log('\n' + '='.repeat(60));
     if (allPassed) {
-        console.log('✅ Authenticated non-admin tests passed');
+        console.log('✅ All security tests passed');
+        console.log('   • Public views: accessible ✅');
+        console.log('   • Admin views: correctly denied (permission denied) ✅');
+        console.log('\n💡 Note: "permission denied" errors are EXPECTED and indicate');
+        console.log('   proper security enforcement (RLS + SECURITY INVOKER).');
         process.exit(0);
     } else {
-        console.log('❌ Some authenticated tests failed');
+        console.log('❌ Some security tests failed - REVIEW REQUIRED');
+        console.log('   Check for views that should be denied but return data.');
         process.exit(1);
     }
 }

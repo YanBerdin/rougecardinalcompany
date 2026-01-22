@@ -20,19 +20,22 @@
  */
 import 'dotenv/config';
 import { createClient } from "@supabase/supabase-js";
+import { getLocalCredentials, validateLocalOnly } from "./utils/supabase-local-credentials";
 
 const USE_LOCAL = process.argv.includes('--local');
 
-const LOCAL_SUPABASE_URL = "http://127.0.0.1:54321";
-const LOCAL_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0";
+let supabaseUrl: string;
+let anonKey: string;
 
-const supabaseUrl = USE_LOCAL 
-    ? LOCAL_SUPABASE_URL 
-    : process.env.NEXT_PUBLIC_SUPABASE_URL;
-
-const anonKey = USE_LOCAL 
-    ? LOCAL_ANON_KEY 
-    : process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY;
+if (USE_LOCAL) {
+    const { url, publishableKey } = getLocalCredentials({ silent: true });
+    validateLocalOnly(url);
+    supabaseUrl = url;
+    anonKey = publishableKey;
+} else {
+    supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!;
+}
 
 if (!supabaseUrl || !anonKey) {
     console.error("❌ Missing environment variables");

@@ -99,10 +99,11 @@ async function signInAndTest(email: string, password: string) {
     }
 
     // ADMIN views should be denied (7 views total)
-    console.log('\n🔒 Testing admin views access (should be denied):\n');
-    
+    // ✅ COMPORTEMENT ATTENDU : Les vues admin doivent retourner "permission denied" (42501)
+    // ✅ SÉCURITÉ : Si une vue admin retourne des données, c'est une FAILLE DE SÉCURITÉ
+    console.log('\n🔒 Testing admin views access (should be denied - EXPECTED BEHAVIOR):\n');
+
     const adminViews = [
-        'communiques_presse_dashboard',
         'membres_equipe_admin',
         'compagnie_presentation_sections_admin',
         'partners_admin',
@@ -112,11 +113,37 @@ async function signInAndTest(email: string, password: string) {
         'analytics_summary_90d',
     ];
 
+    // Test function-based admin endpoint separately (communiques_presse_dashboard is now a function)
+    try {
+        const { data, error } = await authClient.rpc('communiques_presse_dashboard');
+
+        if (error) {
+            // Expected: permission denied or explicit error message
+            if (error.message.includes('permission denied') || error.message.includes('admin access required')) {
+                console.log(`   ✅ communiques_presse_dashboard (function): correctly denied`);
+            } else {
+                console.error(`   ❌ communiques_presse_dashboard (function): unexpected error - ${error.message}`);
+                allPassed = false;
+            }
+        } else {
+            // NOT EXPECTED: function returned data
+            console.error(`   ❌ communiques_presse_dashboard (function): SECURITY ISSUE - returns ${Array.isArray(data) ? data.length + ' rows' : 'data'} instead of permission denied`);
+            allPassed = false;
+        }
+    } catch (err: any) {
+        if (err.message && (err.message.includes('permission denied') || err.message.includes('admin access required'))) {
+            console.log(`   ✅ communiques_presse_dashboard (function): correctly denied`);
+        } else {
+            console.error(`   ❌ communiques_presse_dashboard (function) exception:`, err.message || err);
+            allPassed = false;
+        }
+    }
+
     for (const viewName of adminViews) {
         try {
             // Use '*' to avoid issues with views that don't have 'id' column (e.g., analytics_summary)
             const { data, error } = await authClient.from(viewName).select('*').limit(1);
-            
+
             if (error) {
                 // Expected: permission denied (42501 code)
                 if (error.message.includes('permission denied') || error.code === '42501') {
@@ -143,10 +170,15 @@ async function signInAndTest(email: string, password: string) {
 
     console.log('\n' + '='.repeat(60));
     if (allPassed) {
-        console.log('✅ Authenticated non-admin tests passed');
+        console.log('✅ All security tests passed');
+        console.log('   • Public views: accessible ✅');
+        console.log('   • Admin views: correctly denied (permission denied) ✅');
+        console.log('\n💡 Note: "permission denied" errors are EXPECTED and indicate');
+        console.log('   proper security enforcement (RLS + SECURITY INVOKER).');
         process.exit(0);
     } else {
-        console.log('❌ Some authenticated tests failed');
+        console.log('❌ Some security tests failed - REVIEW REQUIRED');
+        console.log('   Check for views that should be denied but return data.');
         process.exit(1);
     }
 }

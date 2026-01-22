@@ -32,6 +32,81 @@ if (!supabaseUrl || !secretKey) {
 
 **Voir aussi** : `.github/prompts/plan-feat-t3-env.prompt/t3_env_guide.md`
 
+## 👤 Admin User Management
+
+### create-admin-user-local.ts (TypeScript) ✅ NOUVEAU (2026-01-22)
+
+**Description**: Crée l'utilisateur admin initial dans la base de données **locale** Supabase. Utilise des variables d'environnement `.env.local` pour sécuriser les credentials.
+
+**Configuration**:
+
+```bash
+# 1. Créer le fichier .env.local depuis l'exemple
+cp .env.local.example .env.local
+
+# 2. Obtenir le service key local
+supabase status | grep "service_role key"
+
+# 3. Éditer .env.local avec les valeurs
+# SUPABASE_LOCAL_URL=http://127.0.0.1:54321
+# SUPABASE_LOCAL_SERVICE_KEY=<service_key_from_status>
+```
+
+**Utilisation**:
+
+```bash
+# Démarrer Supabase local d'abord
+pnpm dlx supabase start
+
+# Créer l'admin local
+pnpm exec tsx scripts/create-admin-user-local.ts
+```
+
+**Différences avec create-admin-user.ts**:
+
+| Script | Environnement | URL | Service Key |
+| -------- | --------------- | ----- | ------------- |
+| `create-admin-user.ts` | **Remote** | `.env` variable | `.env` variable |
+| `create-admin-user-local.ts` | **Local** | `.env.local` variable | `.env.local` variable |
+
+**Credentials créés**:
+
+- Email: `yandevformation@gmail.com`
+- Password: `AdminRouge2025!`
+- Role: `admin`
+- Display Name: `Administrateur`
+
+**Studio URL**: http://127.0.0.1:54323/project/default/auth/users
+
+**Pattern upsert**: Utilise `.upsert()` pour éviter les conflits si l'utilisateur existe déjà.
+
+**⚠️ Sécurité**: Les credentials sont stockés dans `.env.local` (gitignored). Voir `.env.local.example` pour la configuration.
+
+**Contexte**: Créé le 2026-01-22 après découverte que le script original créait l'admin sur la base remote au lieu de la base locale. Mis à jour le même jour pour retirer les credentials hardcodés.
+
+---
+
+### create-admin-user.ts (TypeScript) ✅ OPÉRATIONNEL
+
+**Description**: Crée l'utilisateur admin initial dans la base de données **remote** (production). Utilise les variables d'environnement `.env.local`.
+
+**Utilisation**:
+
+```bash
+pnpm exec tsx scripts/create-admin-user.ts
+```
+
+**Configuration Requise**:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+SUPABASE_SECRET_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**⚠️ Important**: Ce script crée l'utilisateur en **production**. Pour la base locale, utiliser `create-admin-user-local.ts`.
+
+---
+
 ## 🩺 Diagnostic Admin (Janvier 2026)
 
 ### test-views-security-authenticated.ts (TypeScript) ✅ NOUVEAU (2026-01-22)
@@ -62,6 +137,8 @@ pnpm test:views:auth:remote
 | ADMIN | (6 autres vues admin) | ❌ Permission denied |
 
 **Note**: Les clés locales sont les clés standard Supabase (identiques pour tous les projets locaux). Pour les obtenir: `pnpm dlx supabase status`.
+
+**Mise à jour 2026-01-22**: Scripts corrigés pour utiliser `.rpc('communiques_presse_dashboard')` au lieu de `.from()` suite à la conversion VIEW → FUNCTION SECURITY DEFINER.
 
 **Contexte**: Créé pour valider TASK024 Phase 6 (Media Library Integration) et la conversion de `communiques_presse_dashboard` en FUNCTION SECURITY DEFINER.
 

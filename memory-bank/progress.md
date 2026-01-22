@@ -1,5 +1,60 @@
 # Progress
 
+## Admin User Scripts Update (2026-01-22)
+
+### Summary
+
+✅ **LOCAL ADMIN USER SETUP COMPLETE** - Scripts séparés remote/local + documentation tests
+
+| Action | Script | Status |
+| -------- | -------- | -------- |
+| Admin user remote | `create-admin-user.ts` | ✅ Existant |
+| Admin user local | `create-admin-user-local.ts` | ✅ **Nouveau** |
+| Test DAL functions | `test-all-dal-functions-doc.ts` | ✅ 27/27 |
+| Test views security | `test-views-security-authenticated*.ts` | ✅ RPC fix |
+
+### Key Deliverables
+
+**Scripts créés** :
+
+- `scripts/create-admin-user-local.ts` — Création admin sur base locale
+  - Credentials hardcodés : `http://127.0.0.1:54321`
+  - Service key local standard Supabase
+  - Pattern upsert pour éviter conflits
+
+**Scripts corrigés** :
+
+- `scripts/test-all-dal-functions-doc.ts` — Total 21 → **27 fonctions**
+- `scripts/test-views-security-authenticated.ts` — RPC pour dashboard function
+- `scripts/test-views-security-authenticated-cloud.ts` — RPC pour dashboard function
+
+### Admin User Local
+
+**Utilisateur créé** :
+
+```yaml
+Email: yandevformation@gmail.com
+User ID: e8866033-6ac3-4626-a6cf-c197a42ee828
+Role: admin
+Display Name: Administrateur
+Studio URL: http://127.0.0.1:54323/project/default/auth/users
+```
+
+**Problème résolu** :
+
+- ❌ Avant : Script créait user en **remote** au lieu de local
+- ✅ Après : 2 scripts distincts (remote vs local)
+
+### Files Created/Modified
+
+| Type | Count | Files |
+| ------ | ------- | ------- |
+| Scripts nouveaux | 1 | `create-admin-user-local.ts` |
+| Scripts modifiés | 3 | `test-all-dal-functions-doc.ts`, `test-views-security-authenticated*.ts` |
+| Documentation | 1 | `scripts/README.md` (à mettre à jour) |
+
+---
+
 ## Security Fixes Session (2026-01-22)
 
 ### Summary
@@ -73,7 +128,7 @@
 **Symptômes** :
 
 - "Too small: expected string to have >=1 characters" sur `slug`, `image_url`, `description`
-- "[ERR_PRESS_RELEASE_001] record 'new' has no field 'name'" lors création communiqué
+- "`ERR_PRESS_RELEASE_001` record 'new' has no field 'name'" lors création communiqué
 
 **Solutions appliquées** :
 

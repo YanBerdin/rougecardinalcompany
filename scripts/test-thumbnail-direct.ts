@@ -7,9 +7,14 @@
 
 import { createClient } from '@supabase/supabase-js';
 import sharp from 'sharp';
+import { getLocalCredentials, validateLocalOnly } from './utils/supabase-local-credentials';
 
-const SUPABASE_URL = 'http://127.0.0.1:54321';
-const SUPABASE_SERVICE_KEY = 'sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz';
+// Get local credentials from .env.local (with safe defaults for testing)
+const { url: SUPABASE_URL, serviceKey: SUPABASE_SERVICE_KEY } = 
+    getLocalCredentials({ silent: true });
+
+// Security: ensure we're using localhost
+validateLocalOnly(SUPABASE_URL);
 
 const THUMBNAIL_SIZE = 300;
 const THUMBNAIL_QUALITY = 80;

@@ -2,7 +2,7 @@
 /**
  * Test documentation for all DAL read functions wrapped with React cache()
  * 
- * Purpose: Document all 21 public DAL read functions that were wrapped
+ * Purpose: Document all 27 public DAL read functions that were wrapped
  * with React cache() in Phase 8 of TASK034 Performance Optimization.
  * 
  * ⚠️ LIMITATION: This script CANNOT be executed directly because DAL modules
@@ -31,7 +31,7 @@
 console.log("📚 DAL Functions Test Documentation\n");
 console.log("=".repeat(80));
 console.log("\n⚠️  Direct execution not supported due to server-only restriction\n");
-console.log("This file documents the 26 DAL functions wrapped with cache():\n");
+console.log("This file documents the 27 DAL functions wrapped with cache():\n");
 
 const dalFunctions = [
   {

@@ -77,7 +77,7 @@ La correction de la whitelist `entity_type` a nécessité une application manuel
 
 **Erreur Database** :
 
-- "[ERR_PRESS_RELEASE_001] record 'new' has no field 'name'"
+- "`ERR_PRESS_RELEASE_001` record 'new' has no field 'name'"
 - Trigger `set_slug_if_empty()` ne gérait pas table `communiques_presse`
 
 ### Solutions Appliquées
@@ -1018,8 +1018,119 @@ pnpm exec tsx scripts/test-rls-cloud.ts
 
 ### RLS Policy WITH CHECK (true) Vulnerabilities - 4 Tables Fixed
 
-**Migration**: `20260106190617_fix_rls_policy_with_check_true_vulnerabilities.sql`  
-**Severity**: 🟡 MEDIUM - Security + RGPD + Data Integrity
+## Admin User Scripts Update (2026-01-22)
+
+### create-admin-user-local.ts Creation
+
+**Problème** : Le script `create-admin-user.ts` pointait vers la base **remote** (via `env.NEXT_PUBLIC_SUPABASE_URL`), pas la base locale.
+
+**Impact** :
+
+- Utilisateur créé en remote mais pas en local
+- Studio local (http://127.0.0.1:54323) affichait 0 utilisateurs
+- Impossible de tester l'admin localement
+
+**Solution** :
+
+- **Nouveau script** : `scripts/create-admin-user-local.ts`
+  - Utilise variables d'environnement `.env.local` (obligatoire)
+  - Configuration sécurisée via template `.env.local.example`
+  - Validation stricte : erreur si credentials manquants
+- **Utilitaire** : `scripts/utils/supabase-local-credentials.ts`
+  - Centralise le chargement sécurisé des credentials
+  - Validation localhost-only systématique
+  - AUCUN fallback hardcodé (force .env.local)
+- **Pattern upsert** : `.upsert()` au lieu de `.insert()` pour éviter conflits
+
+**Résultat** :
+
+```bash
+pnpm exec tsx scripts/create-admin-user-local.ts
+# ✅ User created: e8866033-6ac3-4626-a6cf-c197a42ee828
+# ✅ Profile created/updated: admin, Administrateur
+```
+
+**Scripts disponibles** :
+
+| Script | Environnement |
+| -------- | --------------- |
+| `create-admin-user.ts` | Remote (production) |
+| `create-admin-user-local.ts` | Local (dev) |
+
+### Test Scripts Documentation Fix
+
+**test-all-dal-functions-doc.ts** :
+
+- Correction totaux : 21 → **27 fonctions** avec `cache()`
+- Vérification grep : 27 fonctions confirmées
+- Script documente uniquement les fonctions **publiques** avec cache (TASK034)
+
+**test-views-security-authenticated.ts** :
+
+- Fix `communiques_presse_dashboard` : VIEW → FUNCTION
+- Utilise `.rpc()` au lieu de `.from()`
+- Messages améliorés pour "permission denied" attendu
+- Versions locale + cloud synchronisées
+
+---
+
+## Whitelists Entity Type / Event Type (2026-01-22)
+
+### Verification Request (activeContext.md Line 1039)
+
+**User Request**: "Vérifier whitelists pour event_type et entity_type"  
+**Reference**: activeContext.md line 1039 (TASK043 - RGPD Validation)
+
+**Status BEFORE Verification**:
+
+| Component | Status |
+| --------- | -------- |
+| `event_type` whitelist | ✅ Implemented |
+| `entity_type` whitelist | ❌ **MISSING** |
+
+**Investigation**:
+
+1. Migration `20260122150000_final_restore_insert_policies.sql` HAD whitelist
+2. BUT: Used `entity_type is not null` instead of full whitelist
+3. Test 4.3 "Invalid entity_type blocked" was FAILING (12/13 tests)
+
+**Fix Applied (Manual SQL + Migration)**:
+
+```sql
+-- ✅ CORRECT whitelist
+create policy "Validated analytics collection"
+on public.analytics_events for insert
+to anon, authenticated
+with check (
+  event_type in ('view', 'click', 'share', 'download')
+  and entity_type in ('spectacle', 'article', 'communique', 'evenement', 'media', 'partner', 'team')
+  and (entity_id is null or entity_id::text ~ '^\d+$')
+  and (session_id is null or session_id::text ~ '^[a-f0-9-]{36}$')
+  and (user_agent is null or length(user_agent) <= 500)
+);
+```
+
+**Migration Created**: `20260122151500_fix_entity_type_whitelist.sql`
+
+**Deployment**:
+
+- ✅ Local: Applied via `db reset`
+- ✅ Cloud: Applied manually via Supabase Dashboard SQL Editor
+- ❌ Cloud push blocked: Permission error on `supabase_migrations.schema_migrations`
+
+**Validation**:
+
+- ✅ Local tests: **13/13 PASS**
+- ✅ Cloud tests: **13/13 PASS**
+- ✅ Both local and cloud have identical whitelist
+
+**Status**: ✅ **COMPLETE** - Whitelists fully implemented
+
+---
+
+## RGPD Validation Fixes (2026-01-06)
+
+### Fix 1: RLS Policy WITH CHECK Vulnerabilities
 
 **Problem**: 4 public tables allowed unrestricted INSERT via `WITH CHECK (true)`:
 
