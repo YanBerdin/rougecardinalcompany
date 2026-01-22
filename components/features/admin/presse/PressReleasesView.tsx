@@ -74,18 +74,111 @@ export function PressReleasesView({ initialReleases }: PressReleasesViewProps) {
     );
 
     return (
-        <div>
-            <div className="flex justify-between items-center mb-6">
-                <p className="text-gray-600">{releases.length} communiqué(s)</p>
+        <div className="space-y-4">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <p className="text-sm text-muted-foreground">
+                    {releases.length} communiqué{releases.length > 1 ? "s" : ""}
+                </p>
                 <Link href="/admin/presse/communiques/new">
-                    <Button>
+                    <Button className="w-full sm:w-auto">
                         <Plus className="h-4 w-4 mr-2" />
-                        Nouveau communiqué
+                        <span className="hidden sm:inline">Nouveau communiqué</span>
+                        <span className="sm:hidden">Nouveau</span>
                     </Button>
                 </Link>
             </div>
 
-            <div className="space-y-4">
+            {/* 
+              MOBILE VIEW (Cards) 
+              Visible only on small screens (< 640px)
+            */}
+            <div className="grid grid-cols-1 gap-4 sm:hidden">
+                {releases.map((release) => (
+                    <div
+                        key={release.id}
+                        className="bg-card rounded-lg border shadow-sm p-4 space-y-4"
+                    >
+                        {/* Header: Title and Status */}
+                        <div className="flex justify-between items-start gap-2">
+                            <div className="space-y-1 flex-1 min-w-0">
+                                <h3 className="font-semibold text-base leading-tight text-foreground line-clamp-2">
+                                    {release.title}
+                                </h3>
+                                <p className="text-sm text-muted-foreground">
+                                    {new Date(release.date_publication).toLocaleDateString("fr-FR")}
+                                </p>
+                            </div>
+                            <Badge
+                                variant={release.public ? "default" : "secondary"}
+                                className="flex-shrink-0"
+                            >
+                                {release.public ? "Publié" : "Draft"}
+                            </Badge>
+                        </div>
+
+                        {/* Body: Spectacle info */}
+                        {release.spectacle_titre && (
+                            <p className="text-sm text-muted-foreground">
+                                Spectacle: {release.spectacle_titre}
+                            </p>
+                        )}
+
+                        {/* Footer: Actions */}
+                        <div className="flex items-center justify-between pt-3 border-t gap-2">
+                            <div className="flex gap-1">
+                                <Link href={`/admin/presse/communiques/${release.id}/preview`}>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        title="Prévisualiser"
+                                        aria-label="Prévisualiser le communiqué"
+                                    >
+                                        <Eye className="h-4 w-4" />
+                                    </Button>
+                                </Link>
+                                <Button
+                                    variant={release.public ? "secondary" : "default"}
+                                    size="sm"
+                                    onClick={() => handlePublish(release.id, release.public)}
+                                    title={release.public ? "Dépublier" : "Publier"}
+                                    aria-label={release.public ? "Dépublier le communiqué" : "Publier le communiqué"}
+                                >
+                                    <Send className="h-4 w-4 mr-1" />
+                                    {release.public ? "Dépublier" : "Publier"}
+                                </Button>
+                            </div>
+                            <div className="flex gap-1">
+                                <Link href={`/admin/presse/communiques/${release.id}/edit`}>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        title="Modifier"
+                                        aria-label="Modifier le communiqué"
+                                    >
+                                        <Pencil className="h-4 w-4" />
+                                    </Button>
+                                </Link>
+                                <Button
+                                    variant="ghost-destructive"
+                                    size="icon"
+                                    onClick={() => requestDelete(release.id)}
+                                    title="Supprimer"
+                                    aria-label="Supprimer le communiqué"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* 
+              DESKTOP VIEW (Cards) 
+              Visible only on larger screens (>= 640px)
+            */}
+            <div className="hidden sm:block space-y-4">
                 {releases.map((release) => (
                     <Card key={release.id}>
                         <CardContent className="flex items-center justify-between p-4">
@@ -112,8 +205,13 @@ export function PressReleasesView({ initialReleases }: PressReleasesViewProps) {
                                         <Eye className="h-4 w-4" />
                                     </Button>
                                 </Link>
+                                <Link href={`/admin/presse/communiques/${release.id}/edit`}>
+                                    <Button variant="ghost" size="icon" title="Modifier" aria-label="Modifier le communiqué">
+                                        <Pencil className="h-4 w-4" />
+                                    </Button>
+                                </Link>
                                 <Button
-                                    variant="destructive"
+                                    variant={release.public ? "ghost-destructive" : "ghost"}
                                     size="icon"
                                     onClick={() => handlePublish(release.id, release.public)}
                                     title={release.public ? "Dépublier" : "Publier"}
@@ -121,13 +219,8 @@ export function PressReleasesView({ initialReleases }: PressReleasesViewProps) {
                                 >
                                     <Send className="h-4 w-4" />
                                 </Button>
-                                <Link href={`/admin/presse/communiques/${release.id}/edit`}>
-                                    <Button variant="ghost" size="icon" title="Modifier" aria-label="Modifier le communiqué">
-                                        <Pencil className="h-4 w-4" />
-                                    </Button>
-                                </Link>
                                 <Button
-                                    variant="destructive"
+                                    variant="ghost-destructive"
                                     size="icon"
                                     onClick={() => requestDelete(release.id)}
                                     title="Supprimer"

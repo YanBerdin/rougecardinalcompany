@@ -75,18 +75,113 @@ export function PressContactsView({ initialContacts }: PressContactsViewProps) {
   );
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <p className="text-gray-600">{contacts.length} contact(s)</p>
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <p className="text-sm text-muted-foreground">
+          {contacts.length} contact{contacts.length > 1 ? "s" : ""}
+        </p>
         <Link href="/admin/presse/contacts/new">
-          <Button>
+          <Button className="w-full sm:w-auto">
             <Plus className="h-4 w-4 mr-2" />
-            Nouveau contact
+            <span className="hidden sm:inline">Nouveau contact</span>
+            <span className="sm:hidden">Nouveau</span>
           </Button>
         </Link>
       </div>
 
-      <div className="space-y-4">
+      {/* 
+        MOBILE VIEW (Cards) 
+        Visible only on small screens (< 640px)
+      */}
+      <div className="grid grid-cols-1 gap-4 sm:hidden">
+        {contacts.map((contact) => (
+          <div
+            key={contact.id}
+            className="bg-card rounded-lg border shadow-sm p-4 space-y-3"
+          >
+            {/* Header: Name and Status */}
+            <div className="flex justify-between items-start gap-2">
+              <div className="space-y-1 flex-1 min-w-0">
+                <h3 className="font-semibold text-base leading-tight text-foreground">
+                  {contact.prenom} {contact.nom}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {contact.fonction} - {contact.media}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {!contact.actif && <Badge variant="secondary">Inactif</Badge>}
+                <Switch
+                  checked={contact.actif}
+                  onCheckedChange={() => handleToggleActive(contact.id, contact.actif)}
+                  aria-label={contact.actif ? "Désactiver le contact" : "Activer le contact"}
+                />
+              </div>
+            </div>
+
+            {/* Body: Contact info */}
+            <div className="space-y-2">
+              <a
+                href={`mailto:${contact.email}`}
+                className="text-sm text-muted-foreground flex items-center gap-2 hover:underline"
+              >
+                <Mail className="h-4 w-4" />
+                <span className="truncate">{contact.email}</span>
+              </a>
+              {contact.telephone && (
+                <a
+                  href={`tel:${contact.telephone}`}
+                  className="text-sm text-muted-foreground flex items-center gap-2 hover:underline"
+                >
+                  <Phone className="h-4 w-4" />
+                  {contact.telephone}
+                </a>
+              )}
+            </div>
+
+            {/* Specialties */}
+            {contact.specialites && contact.specialites.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {contact.specialites.map((tag: string) => (
+                  <Badge key={tag} variant="outline" className="text-xs">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
+
+            {/* Footer: Actions */}
+            <div className="flex items-center justify-end pt-3 border-t gap-2">
+              <Link href={`/admin/presse/contacts/${contact.id}/edit`}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  title="Modifier"
+                  aria-label="Modifier le contact"
+                >
+                  <Pencil className="h-4 w-4 mr-1" />
+                </Button>
+              </Link>
+              <Button
+                variant="ghost-destructive"
+                size="icon"
+                onClick={() => requestDelete(contact.id)}
+                title="Supprimer"
+                aria-label="Supprimer le contact"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* 
+        DESKTOP VIEW (Cards) 
+        Visible only on larger screens (>= 640px)
+      */}
+      <div className="hidden sm:block space-y-4">
         {contacts.map((contact) => (
           <Card key={contact.id}>
             <CardContent className="flex items-center justify-between p-4">
@@ -141,7 +236,7 @@ export function PressContactsView({ initialContacts }: PressContactsViewProps) {
                   </Button>
                 </Link>
                 <Button
-                  variant="destructive"
+                  variant="ghost-destructive"
                   size="icon"
                   onClick={() => requestDelete(contact.id)}
                   title="Supprimer"

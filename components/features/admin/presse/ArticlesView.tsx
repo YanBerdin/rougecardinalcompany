@@ -56,18 +56,105 @@ export function ArticlesView({ initialArticles }: ArticlesViewProps) {
   );
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <p className="text-gray-600">{articles.length} article(s)</p>
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <p className="text-sm text-muted-foreground">
+          {articles.length} article{articles.length > 1 ? "s" : ""}
+        </p>
         <Link href="/admin/presse/articles/new">
-          <Button>
+          <Button className="w-full sm:w-auto">
             <Plus className="h-4 w-4 mr-2" />
-            Nouvel article
+            <span className="hidden sm:inline">Nouvel article</span>
+            <span className="sm:hidden">Nouveau</span>
           </Button>
         </Link>
       </div>
 
-      <div className="space-y-4">
+      {/* 
+        MOBILE VIEW (Cards) 
+        Visible only on small screens (< 640px)
+      */}
+      <div className="grid grid-cols-1 gap-4 sm:hidden">
+        {articles.map((article) => (
+          <div
+            key={article.id}
+            className="bg-card rounded-lg border shadow-sm p-4 space-y-3"
+          >
+            {/* Header: Title and Type */}
+            <div className="flex justify-between items-start gap-2">
+              <h3 className="font-semibold text-base leading-tight text-foreground line-clamp-2 flex-1">
+                {article.title}
+              </h3>
+              {article.type && (
+                <Badge variant="outline" className="flex-shrink-0">
+                  {article.type}
+                </Badge>
+              )}
+            </div>
+
+            {/* Body: Author and Source */}
+            <div className="space-y-1">
+              {article.author && (
+                <p className="text-sm text-muted-foreground">
+                  Par {article.author}
+                </p>
+              )}
+              {article.source_publication && (
+                <p className="text-xs text-muted-foreground">
+                  Source: {article.source_publication}
+                </p>
+              )}
+            </div>
+
+            {/* Footer: Actions */}
+            <div className="flex items-center justify-between pt-3 border-t gap-2">
+              {article.source_url ? (
+                <a href={article.source_url} target="_blank" rel="noopener noreferrer">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    title="Voir l'article source"
+                    aria-label="Voir l'article source"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-1" />
+                    Source
+                  </Button>
+                </a>
+              ) : (
+                <div />
+              )}
+              <div className="flex gap-1">
+                <Link href={`/admin/presse/articles/${article.id}/edit`}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    title="Modifier"
+                    aria-label="Modifier l'article"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <Button
+                  variant="ghost-destructive"
+                  size="icon"
+                  onClick={() => requestDelete(article.id)}
+                  title="Supprimer"
+                  aria-label="Supprimer l'article"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* 
+        DESKTOP VIEW (Cards) 
+        Visible only on larger screens (>= 640px)
+      */}
+      <div className="hidden sm:block space-y-4">
         {articles.map((article) => (
           <Card key={article.id}>
             <CardContent className="flex items-center justify-between p-4">
@@ -104,7 +191,7 @@ export function ArticlesView({ initialArticles }: ArticlesViewProps) {
                   </Button>
                 </Link>
                 <Button
-                  variant="destructive"
+                  variant="ghost-destructive"
                   size="icon"
                   onClick={() => requestDelete(article.id)}
                   title="Supprimer"

@@ -5,16 +5,16 @@ tools:
 - vscode
 - execute
 - read
+- agent
 - edit
 - search
 - web
-- chrome-devtools/*
 - github/*
+- chrome-devtools/*
 - next-devtools/init
-- playwright/browser_install
+- playwright/*
 - shadcn/*
 - supabase/*
-- agent
 - todo
 ---
 
