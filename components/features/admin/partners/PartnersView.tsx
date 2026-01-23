@@ -136,12 +136,11 @@ function SortablePartnerCard({
                         <Pencil className="h-4 w-4" />
                     </Button>
                     <Button
-                        variant="ghost"
+                        variant="ghost-destructive"
                         size="icon"
                         onClick={() => onDelete(partner.id)}
                         title="Supprimer"
                         aria-label="Supprimer le partenaire"
-                        className="text-destructive hover:text-destructive"
                     >
                         <Trash2 className="h-4 w-4" />
                     </Button>
