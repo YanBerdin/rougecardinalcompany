@@ -20,10 +20,16 @@ export default function PressePage() {
             <h1 className="text-3xl font-bold mb-6">Gestion Presse</h1>
 
             <Tabs defaultValue="releases" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="releases">Communiqués de presse</TabsTrigger>
-                    <TabsTrigger value="articles">Articles de presse</TabsTrigger>
-                    <TabsTrigger value="contacts">Contacts presse</TabsTrigger>
+                <TabsList className="flex flex-col sm:grid sm:grid-cols-3 w-full h-auto gap-1 sm:gap-0">
+                    <TabsTrigger value="releases" className="w-full justify-center text-sm py-2.5">
+                        Communiqués
+                    </TabsTrigger>
+                    <TabsTrigger value="articles" className="w-full justify-center text-sm py-2.5">
+                        Articles
+                    </TabsTrigger>
+                    <TabsTrigger value="contacts" className="w-full justify-center text-sm py-2.5">
+                        Contacts
+                    </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="releases" className="mt-6">

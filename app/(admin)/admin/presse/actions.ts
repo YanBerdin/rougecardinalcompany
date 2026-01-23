@@ -129,7 +129,7 @@ export async function publishPressReleaseAction(
     try {
         const validated = PublishPressReleaseSchema.parse({
             id: BigInt(id),
-            is_public: true,
+            public: true,
         });
         const result = await publishPressRelease(validated.id);
 
@@ -158,7 +158,7 @@ export async function unpublishPressReleaseAction(
     try {
         const validated = PublishPressReleaseSchema.parse({
             id: BigInt(id),
-            is_public: false,
+            public: false,
         });
         const result = await unpublishPressRelease(validated.id);
 
