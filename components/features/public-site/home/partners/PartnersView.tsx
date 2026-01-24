@@ -3,7 +3,7 @@
 import { LogoCloud } from "@/components/LogoCloud";
 import type { PartnersViewProps } from "./types";
 import { PartnersSkeleton } from "@/components/skeletons/partners-skeleton";
-import { LogoCloudModel } from "@/components/LogoCloudModel/LogoCloudModel";
+// import { LogoCloudModel } from "@/components/LogoCloudModel/LogoCloudModel";
 /*
 function ThankYouMessage() {
     return (
@@ -66,7 +66,7 @@ export function PartnersView({ partners, isLoading }: PartnersViewProps) {
     const showTwoRows = partners.length >= 6;
 
     return (
-        <section className="relative overflow-hidden bg-background">
+        <section className="relative z-10 overflow-hidden py-12 md:py-8 lg:py-12">
             <LogoCloud
                 partners={partners}
                 title="Nos Partenaires"
@@ -76,7 +76,7 @@ export function PartnersView({ partners, isLoading }: PartnersViewProps) {
                 linkable={true}
                 twoRows={showTwoRows}
             />
-            <LogoCloudModel />
+            { /*<LogoCloudModel />*/}
             { /*<ThankYouMessage />*/}
         </section>
     );

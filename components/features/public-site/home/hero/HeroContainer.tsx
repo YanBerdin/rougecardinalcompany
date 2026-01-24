@@ -1,7 +1,10 @@
+import { Suspense } from "react";
 import { fetchActiveHomeHeroSlides } from "@/lib/dal/home-hero";
 import { fetchDisplayToggle } from "@/lib/dal/site-config";
 import { HeroClient } from "./HeroClient";
 import { HeroSlide } from "./types";
+import { PartnersContainer } from "../partners";
+import { PartnersSkeleton } from "@/components/skeletons/partners-skeleton";
 
 export async function HeroContainer() {
   // Check display toggle
@@ -29,5 +32,14 @@ export async function HeroContainer() {
     ctaSecondaryUrl: r.cta_secondary_url ?? undefined,
   }));
 
-  return <HeroClient initialSlides={slides} />;
+  return (
+    <div className="relative">
+      <HeroClient initialSlides={slides} />
+      <div className="absolute bottom-0 left-0 right-0">
+        <Suspense fallback={<PartnersSkeleton />}>
+          <PartnersContainer />
+        </Suspense>
+      </div>
+    </div>
+  );
 }

@@ -18,13 +18,13 @@ function LogoCard({ partner, linkable, index }: LogoCardProps) {
             alt={partner.name}
             width={partner.width || 150}
             height={partner.height || 60}
-            className="w-auto h-14 md:h-16 object-contain rounded-sm"
+            className="w-auto h-10 md:h-12 lg:h-12 object-contain rounded-sm"
             loading="lazy"
         />
     );
 
     const cardClasses =
-        "flex items-center justify-center px-5 py-4 mx-5 bg-card/40 backdrop-blur-sm border border-primary/10 min-w-[200px] h-24 hover:bg-card hover:border-primary/30 transition-all duration-500 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative after:absolute after:inset-0 after:border after:border-primary/0 hover:after:border-primary/5 after:transition-all after:duration-500 group rounded-md";
+        "flex items-center justify-center px-3 py-2 mx-0 md:px-5 md:py-4 md:mx-3 bg-card/40 backdrop-blur-sm min-w-[100px] lg:min-w-[140px] h-14 xl:h-16 hover:bg-card transition-all duration-500 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative group rounded-md";
 
     if (linkable && partner.website) {
         return (
@@ -76,8 +76,9 @@ export function LogoCloud({
     const shouldScroll = partners.length >= 6;
 
     return (
-        <section className={`py-16 md:py-24 lg:py-32 overflow-hidden bg-background relative ${className}`}>
-            <div className="max-w-7xl mx-auto px-6 text-center mb-16 md:mb-24 relative">
+        <section className={`py-4 md:py-6 lg:py-6 overflow-hidden relative ${className}`}>
+
+            {/*<div className="max-w-7xl mx-auto px-6 text-center mb-16 md:mb-24 relative">
                 <div className="flex flex-col items-center gap-4 mb-2">
                     <span className="h-px w-12 bg-primary/40 block" />
                     <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-foreground uppercase">
@@ -90,11 +91,17 @@ export function LogoCloud({
                     </p>
                 )}
             </div>
+*/}
+            <div className="max-w-7xl mx-auto px-6 text-center mb-4">
 
+                <p className="text-xs lg:text-sm xl:text-md text-zinc-400 max-w-2xl mx-auto">
+                    Nos soutiens et partenaires institutionnels nous accompagnent.
+                </p>
+            </div>
             {shouldScroll ? (
                 /* Mode défilement : pour 6+ logos */
                 <div
-                    className="relative marquee-container before:absolute before:left-0 before:top-0 before:z-10 before:h-full before:w-40 before:bg-gradient-to-r before:from-background before:to-transparent after:absolute after:right-0 after:top-0 after:z-10 after:h-full after:w-40 after:bg-gradient-to-l after:from-background after:to-transparent"
+                    className="relative marquee-container before:absolute before:left-0 before:top-0 before:z-10 before:h-full before:w-40 before:bg-gradient-to-r before:from-black/30 before:to-transparent after:absolute after:right-0 after:top-0 after:z-10 after:h-full after:w-40 after:bg-gradient-to-l after:from-black/30 after:to-transparent"
                     onMouseEnter={() => pauseOnHover && setIsPaused(true)}
                     onMouseLeave={() => pauseOnHover && setIsPaused(false)}
                     style={{
@@ -152,7 +159,7 @@ export function LogoCloud({
             ) : (
                 /* Mode statique centré : pour moins de 6 logos */
                 <div className="max-w-7xl mx-auto px-6">
-                    <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
+                    <div className="flex  items-center justify-center max-sm:gap-2 sm:gap-4 md:gap-12">
                         {partners.map((partner, idx) => (
                             <LogoCard
                                 key={`static-${partner.id || idx}`}
@@ -164,8 +171,6 @@ export function LogoCloud({
                     </div>
                 </div>
             )}
-
-            <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/10 to-transparent" />
         </section>
     );
 }

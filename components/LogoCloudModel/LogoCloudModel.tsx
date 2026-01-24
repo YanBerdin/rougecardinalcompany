@@ -1,4 +1,4 @@
-
+//TODO: to be deleted once LogoCloud is fully functional
 import React from 'react';
 import { BrandLogos } from './BrandLogos';
 
