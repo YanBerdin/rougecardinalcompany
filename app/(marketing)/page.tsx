@@ -28,18 +28,19 @@ export default function Home() {
       <Suspense fallback={<HeroSkeleton />}>
         <HeroContainer />
       </Suspense>
-      <Suspense fallback={<NewsSkeleton />}>
-        <NewsContainer />
-      </Suspense>
-      <Suspense fallback={<AboutSkeleton />}>
-        <AboutContainer />
-      </Suspense>
       <Suspense fallback={<ShowsSkeleton />}>
         <ShowsContainer />
+      </Suspense>
+      <Suspense fallback={<NewsSkeleton />}>
+        <NewsContainer />
       </Suspense>
       <Suspense fallback={<NewsletterSkeleton />}>
         <NewsletterContainer />
       </Suspense>
+      <Suspense fallback={<AboutSkeleton />}>
+        <AboutContainer />
+      </Suspense>
+
       <Suspense fallback={<PartnersSkeleton />}>
         <PartnersContainer />
       </Suspense>

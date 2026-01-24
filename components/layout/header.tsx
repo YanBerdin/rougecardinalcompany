@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 //import type { ReactNode } from "react";
@@ -27,7 +27,15 @@ interface HeaderProps {
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isLight, setIsLight] = useState(true);
   const pathname = usePathname();
+
+  // Helper pour la couleur du texte du header (logo + navigation)
+  const headerTextColor = useMemo(() => {
+    if (isScrolled) return "text-foreground font-bold";
+    if (pathname === "/" && isLight) return "text-sidebar-primary-foreground font-bold";
+    return "text-foreground font-bold";
+  }, [isScrolled, pathname, isLight]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -35,6 +43,49 @@ export default function Header() {
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const updateTheme = () => {
+      const hasDarkClass = document.documentElement.classList.contains("dark");
+      setIsLight(!hasDarkClass);
+    };
+
+    let themeUpdateTimeout: number | null = null;
+
+    const scheduleUpdateTheme = () => {
+      if (themeUpdateTimeout !== null) {
+        window.clearTimeout(themeUpdateTimeout);
+      }
+      themeUpdateTimeout = window.setTimeout(() => {
+        updateTheme();
+      }, 50);
+    };
+
+    updateTheme();
+
+    const observer = new MutationObserver(() => {
+      scheduleUpdateTheme();
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+
+    const mql = window.matchMedia("(prefers-color-scheme: dark)");
+    const mqlListener = () => {
+      scheduleUpdateTheme();
+    };
+    if (mql.addEventListener) mql.addEventListener("change", mqlListener);
+    else mql.addListener(mqlListener);
+
+    return () => {
+      if (themeUpdateTimeout !== null) {
+        window.clearTimeout(themeUpdateTimeout);
+      }
+      observer.disconnect();
+      if (mql.removeEventListener) mql.removeEventListener("change", mqlListener);
+      else mql.removeListener(mqlListener);
+    };
   }, []);
 
   return (
@@ -58,7 +109,9 @@ export default function Header() {
               className="logo-image"
               priority
             />
-            <span className="logo-text whitespace-nowrap">Rouge Cardinal</span>
+            <span className={cn("logo-text whitespace-nowrap", headerTextColor)}>
+              Rouge Cardinal
+            </span>
           </Link>
 
           {/* Navigation Desktop */}
@@ -69,11 +122,7 @@ export default function Header() {
                 href={item.href}
                 className={cn(
                   "nav-link-glass text-xs sm:text-sm md:text-md px-2 lg:px-3 py-1 font-medium whitespace-nowrap transition-all duration-300 relative z-10",
-                  pathname === item.href
-                    ? "text-primary font-bold active"
-                    : isScrolled
-                      ? "text-foreground font-bold"
-                      : "text-foreground font-bold"
+                  pathname === item.href ? "text-primary font-bold active" : headerTextColor
                 )}
               >
                 {item.name}
@@ -86,7 +135,7 @@ export default function Header() {
             {/* Auth Component */}
             {/*<div className="ml-4">{authContent}</div>*/}
 
-            <ThemeSwitcher />
+            <ThemeSwitcher iconClassName={headerTextColor} />
           </div>
 
           {/* Mobile menu button */}
@@ -96,10 +145,8 @@ export default function Header() {
               size="sm"
               onClick={() => setIsOpen(!isOpen)}
               className={cn(
-                "nav-link-glass ripple-effect",
-                isScrolled
-                  ? "text-foreground hover:text-accent"
-                  : "text-foreground hover:text-accent"
+                "nav-link-glass ripple-effect hover:text-accent",
+                headerTextColor
               )}
             >
               {isOpen ? (
@@ -123,7 +170,7 @@ export default function Header() {
                     "block px-4 py-3 text-base font-medium transition-all duration-300 nav-link-glass",
                     pathname === navigation[index].href
                       ? "text-primary bg-primary/10 font-bold border border-primary/20 active"
-                      : "text-foreground"
+                      : headerTextColor
                   )}
                   onClick={() => setIsOpen(false)}
                   style={{
@@ -142,7 +189,7 @@ export default function Header() {
 
               {/*<div className="px-4 pt-4">{authContent}</div>*/}
               <div className="px-2 lg:px-3 space-y-2 nav-link-glass">
-                <ThemeSwitcher />
+                <ThemeSwitcher iconClassName={headerTextColor} />
               </div>
             </div>
           </div>

@@ -19,7 +19,7 @@ export function NewsletterForm({
       <div className="flex gap-3">
         <Input
           type="email"
-          placeholder="Votre adresse email"
+          placeholder="Votre email pour ne rien manquer"
           value={email}
           onChange={onEmailChange}
           required
@@ -38,7 +38,7 @@ export function NewsletterForm({
         <p className="text-red-200 text-sm mt-3">{errorMessage}</p>
       )}
       <p className="text-white/70 text-sm mt-4">
-        Nous respectons votre vie privée. Pas de spam, désinscription facile.
+        Nous respectons votre vie privée. Pas de spam, désinscription en 1 clic.
       </p>
     </form>
   );

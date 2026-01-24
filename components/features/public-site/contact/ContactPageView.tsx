@@ -478,7 +478,7 @@ export function ContactPageView({ showNewsletter = true }: ContactPageViewProps)
                         </p>
                       )}
                       <p className="text-xs text-muted-foreground">
-                        Pas de spam. Désinscription facile.
+                        Pas de spam. Désinscription en 1 clic.
                       </p>
                     </form>
                   )}

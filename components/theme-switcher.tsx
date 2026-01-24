@@ -12,7 +12,11 @@ import { Laptop, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
-const ThemeSwitcher = () => {
+interface ThemeSwitcherProps {
+  iconClassName?: string;
+}
+
+const ThemeSwitcher = ({ iconClassName = "text-sidebar-foreground" }: ThemeSwitcherProps) => {
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
 
@@ -35,19 +39,19 @@ const ThemeSwitcher = () => {
             <Sun
               key="light"
               size={ICON_SIZE}
-              className={"text-foreground"}
+              className={iconClassName}
             />
           ) : theme === "dark" ? (
             <Moon
               key="dark"
               size={ICON_SIZE}
-              className={"text-foreground"}
+              className={iconClassName}
             />
           ) : (
             <Laptop
               key="system"
               size={ICON_SIZE}
-              className={"text-foreground"}
+              className={iconClassName}
             />
           )}
         </Button>

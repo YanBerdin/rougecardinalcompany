@@ -12,7 +12,7 @@ import Image from "next/image";
 
 export default function Footer() {
   return (
-    <footer className="bg-muted/50 border-t">
+    <footer className="bg-background border-t">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Logo et Description */}
@@ -23,9 +23,9 @@ export default function Footer() {
                 alt="Rouge-Cardinal Logo"
                 width={32}
                 height={32}
-                className="h-8 w-auto object-contain"
+                className="h-8 w-auto object-contain rounded-md mb-2"
               />
-              <span className="logo-text">Rouge-Cardinal</span>
+              <span className="logo-text brightness-125">Rouge-Cardinal</span>
             </Link>
             <p className="text-muted-foreground mb-4 max-w-md">
               Compagnie de théâtre passionnée par les arts de la scène, nous
@@ -63,7 +63,7 @@ export default function Footer() {
 
           {/* Navigation */}
           <div>
-            <h3 className="font-semibold mb-4 text-primary">Navigation</h3>
+            <h3 className="font-semibold mb-4 text-secondary-foreground">Navigation</h3>
             <ul className="space-y-2">
               <li>
                 <Link
@@ -110,7 +110,7 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h3 className="font-semibold mb-4 text-primary">Contact</h3>
+            <h3 className="font-semibold mb-4 text-secondary-foreground">Contact</h3>
             <ul className="space-y-3">
               <li className="flex items-center space-x-2 text-muted-foreground">
                 <Mail className="h-4 w-4 text-primary" />
