@@ -5,7 +5,7 @@ import { AboutProps } from "./types";
 
 export function AboutView({ stats, content }: AboutProps) {
   return (
-    <section className="py-20 pt-16">
+    <section className="py-20 pt-16 bg-card">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Content */}

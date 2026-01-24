@@ -25,7 +25,7 @@ export default function Footer() {
                 height={32}
                 className="h-8 w-auto object-contain rounded-md mb-2"
               />
-              <span className="logo-text brightness-125">Rouge-Cardinal</span>
+              <span className="logo-text whitespace-nowrap text-secondary-foreground">Rouge Cardinal</span>
             </Link>
             <p className="text-muted-foreground mb-4 max-w-md">
               Compagnie de théâtre passionnée par les arts de la scène, nous
