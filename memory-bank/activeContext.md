@@ -3106,7 +3106,7 @@ Phase 1 — Vitrine + Schéma déclaratif finalisé. Documentation technique com
     - ✅ RLS Policies : Une policy par opération, SELECT/USING, INSERT/WITH CHECK, UPDATE/USING+WITH CHECK, DELETE/USING
     - ✅ Migrations : Nommage YYYYMMDDHHmmss_description.sql, headers metadata, commentaires, SQL lowercase
     - ✅ Declarative Schema : Modifications dans supabase/schemas/, migrations générées via supabase db diff
-    - ✅ Next.js 15 Backend : await headers()/cookies(), Server Components, Client Components pour interactivité, Server Actions 'use server'
+    - ✅ Next.js 16 Backend : await headers()/cookies(), Server Components, Client Components pour interactivité, Server Actions 'use server'
     - ✅ Supabase Auth : @supabase/ssr, pattern cookies getAll/setAll, getClaims() pour checks rapides
 
   - **Workflow Invitation Complet** :

@@ -2326,7 +2326,7 @@ export const config = {
 - Blueprint : `memory-bank/architecture/Project_Architecture_Blueprint_v3.md`
 - Commit : 6a2c7d8 "feat(architecture): Complete route groups migration"
 
-### Server Actions Layer Pattern (Next.js 15)
+### Server Actions Layer Pattern (Next.js 16)
 
 **Introduced**: 27 novembre 2025 - Clean Code & TypeScript Conformity
 

@@ -25,7 +25,7 @@ Rouge Cardinal Company est un site web pour une compagnie de théâtre professio
 
 ### Stack Technique
 
-- Frontend: Next.js 15.4.5 avec App Router
+- Frontend: Next.js 16 avec App Router
 - Base de données: Supabase
 - UI: Tailwind CSS + shadcn/ui
 - Authentification: Supabase Auth

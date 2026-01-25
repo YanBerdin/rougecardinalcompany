@@ -356,7 +356,7 @@ L'application sera accessible sur http://localhost:3000
 - Tests et scripts de validation
 
 > [!NOTE]
-> L'application suit les meilleures pratiques Next.js 15 avec un emphasis sur la sécurité, la performance et l'expérience utilisateur professionnelle.
+> L'application suit les meilleures pratiques Next.js 16 avec un emphasis sur la sécurité, la performance et l'expérience utilisateur professionnelle.
 
 ## 🚀 Quick Start
 

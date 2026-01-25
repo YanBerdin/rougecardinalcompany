@@ -69,9 +69,9 @@ if (!existsSync(serverPath)) {
   }
   
   if (checks.usesAwaitCookies) {
-    details.push('   ✓ Awaits cookies() (Next.js 15+ compatible)');
+    details.push('   ✓ Awaits cookies() (Next.js 16+ compatible)');
   } else {
-    errors.push('   ✗ Missing await cookies() (Next.js 15+ required)');
+    errors.push('   ✗ Missing await cookies() (Next.js 16+ required)');
   }
   
   // Check for deprecated patterns

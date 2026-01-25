@@ -87,7 +87,7 @@ type DALError = {
 **Points forts :**
 
 - ✅ Pattern de référence parfait
-- ✅ Next.js 15 async params pattern
+- ✅ Next.js 16 async params pattern
 - ✅ Gestion d'erreurs comprehensive
 - ✅ HttpStatus constants systématiques
 - ✅ Type safety optimal

@@ -2,17 +2,17 @@
 applyTo: "**"
 ---
 
-# Next.js 15 - Règles d'implémentation Server Actions & API Routes
+# Next.js 16 - Règles d'implémentation Server Actions & API Routes
 
 > Instructions pour agents IA (GitHub Copilot, Claude Code, Cursor, etc.)
-> Version: Next.js 15 / React 19
+> Version: Next.js 16 / React 19
 > Date: Octobre 2024
 
 ---
 
 ## 🎯 OBJECTIF
 
-Respecter les bonnes pratiques Next.js 15 pour Server Actions, API Routes et Server Components. Éviter les antipatterns courants et les mythes sur le parallélisme.
+Respecter les bonnes pratiques Next.js 16 pour Server Actions, API Routes et Server Components. Éviter les antipatterns courants et les mythes sur le parallélisme.
 
 ---
 
@@ -660,9 +660,9 @@ graph TD
 ## 📖 RESSOURCES
 
 ```md
-- Next.js 15 Docs - Server Actions: 'https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations'
+- Next.js 16 Docs - Server Actions: 'https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations'
 - React 19 - useActionState: 'https://react.dev/reference/react/useActionState'
-- Next.js 15 - Route Handlers: 'https://nextjs.org/docs/app/building-your-application/routing/route-handlers'
+- Next.js 16 - Route Handlers: 'https://nextjs.org/docs/app/building-your-application/routing/route-handlers'
 - Zod validation: 'https://zod.dev/'
 ```
 
@@ -745,4 +745,4 @@ const [users, posts, comments] = await Promise.all([
 
 **Version:** 1.0.0  
 **Dernière mise à jour:** Octobre 2024  
-**Compatible:** Next.js 15.x, React 19.x
+**Compatible:** Next.js 16.x, React 19.x

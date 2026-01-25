@@ -1355,7 +1355,7 @@ if (!claims) redirect("/login");
 
 ### Internal Guides
 
-- `.github/instructions/nextjs.instructions.md` - Next.js 15 best practices
+- `.github/instructions/nextjs.instructions.md` - Next.js 16 best practices
 - `.github/instructions/dal-solid-principles.instructions.md` - DAL SOLID rules
 - `.github/instructions/crud-server-actions-pattern.instructions.md` - CRUD patterns
 - `.github/instructions/nextjs-supabase-auth-2025.instructions.md` - Auth optimization

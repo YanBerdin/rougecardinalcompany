@@ -594,7 +594,7 @@ export function EventForm({ event, spectacles, lieux }: EventFormProps) {
 
 **5.4. EventFormFields.tsx** (Champs texte/dates)
 
-```typescript
+```ts
 "use client";
 
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";

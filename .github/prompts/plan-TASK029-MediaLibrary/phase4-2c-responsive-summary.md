@@ -223,7 +223,7 @@ pnpm build
 
 - **Guide Clean Code**: `.github/instructions/1-clean-code.instructions.md`
 - **TypeScript Guide**: `.github/instructions/2-typescript.instructions.md`
-- **Next.js 15 Best Practices**: `.github/instructions/nextjs.instructions.md`
+- **Next.js 16 Best Practices**: `.github/instructions/nextjs.instructions.md`
 - **Copilot Instructions**: `.github/copilot-instructions.md` (Section "Route Groups & Layouts")
 
 ---

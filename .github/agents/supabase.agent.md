@@ -590,7 +590,7 @@ export async function createClient() {
 **Middleware optimisé :**
 
 ```typescript
-// proxy.ts (Next.js 16) ou middleware.ts (Next.js 15)
+// proxy.ts (Next.js 16) ou middleware.ts (Next.js 16)
 import 'dotenv/config';
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
@@ -661,7 +661,7 @@ SUPABASE_SECRET_KEY=sbp_xxx...
 ✅ AUTH-CHK-002: Cookies getAll/setAll uniquement
 ✅ AUTH-CHK-003: Middleware avec getClaims()
 ✅ AUTH-CHK-004: Nouvelles API keys (PUBLISHABLE/SECRET)
-✅ AUTH-CHK-005: cookies() await dans Next.js 15+
+✅ AUTH-CHK-005: cookies() await dans Next.js 16+
 ✅ AUTH-CHK-006: T3 Env utilisé (pas process.env)
 ✅ AUTH-CHK-006: Pas de getUser() pour simple check auth
 ```
@@ -1014,7 +1014,7 @@ Avant de valider tout code généré ou audit :
 ✅ cookies: getAll/setAll uniquement
 ✅ getClaims() dans middleware
 ✅ Nouvelles env vars (PUBLISHABLE/SECRET)
-✅ await cookies() (Next.js 15+)
+✅ await cookies() (Next.js 16+)
 ```
 
 ### T3 Env (Variables d'environnement)

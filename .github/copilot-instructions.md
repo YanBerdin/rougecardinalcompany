@@ -785,12 +785,12 @@ order by
   s.created_at desc;
 ```
 
-### Next.js 15 Backend Requirements
+### Next.js 16 Backend Requirements
 
 **Based on**: `.github/instructions/nextjs15-backend-with-supabase.instructions.md`
 
 ```typescript
-// ✅ ALWAYS await headers() and cookies() in Next.js 15
+// ✅ ALWAYS await headers() and cookies() in Next.js 16
 import { headers, cookies } from "next/headers";
 
 export default async function ServerComponent() {
@@ -849,7 +849,7 @@ const { data: { user } } = await supabase.auth.getUser();
 }
 ```
 
-## Next.js 15 & React 19 Best Practices
+## Next.js 16 & React 19 Best Practices
 
 **Based on**: `.github/instructions/nextjs.instructions.md` + `.github/instructions/next-backend.instructions.md`
 
@@ -893,7 +893,7 @@ export function Button() {
 3. **Webhooks/OAuth callbacks** → **API Route**
 4. **Initial page data fetching** → **Server Component**
 
-### Critical Next.js 15 Rules
+### Critical 16 Rules
 
 - **NEVER use `next/dynamic` with `{ ssr: false }` in Server Components**
 - **ALWAYS await `headers()` and `cookies()` calls**

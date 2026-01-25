@@ -8,7 +8,7 @@ Utilisez ce bloc comme sommaire rapide. Les documents détaillés restent dans `
 
 Principaux points consolidés :
 
-- Next.js 15 (App Router) : privilégier Server Components pour les lectures et SEO; n'utiliser `"use client"` que pour l'interactivité.
+- Next.js 16 (App Router) : privilégier Server Components pour les lectures et SEO; n'utiliser `"use client"` que pour l'interactivité.
 - Data Access Layer (DAL) server-only : tous les accès en lecture centralisés dans `lib/dal/*`, modules marqués `server-only` et validés avec Zod.
 - **DAL SOLID Pattern (Nov 2025)** : 17/17 modules DAL utilisent `DALResult<T>`, helpers centralisés dans `lib/dal/helpers/`, `revalidatePath()` uniquement dans Server Actions, props colocalisées avec composants.
 - Supabase Auth optimisé : utiliser `@supabase/ssr`, cookies via `getAll()`/`setAll()`, et `supabase.auth.getClaims()` pour checks rapides; réserver `getUser()` aux usages nécessitant l'objet complet.

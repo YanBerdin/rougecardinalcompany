@@ -15,7 +15,7 @@ import {
 
 // NOTE: Types AgendaEvent and EventTypeOption should be imported directly 
 // from '@/components/features/public-site/agenda/types' or '@/lib/schemas/agenda'
-// Server files cannot re-export types in Next.js 15
+// Server files cannot re-export types in Next.js 16
 
 // ============================================================================
 // Internal Types (Supabase response shape)
