@@ -18,13 +18,13 @@ export function PresseView({
   return (
     <div className="pt-16">
       {/* Hero Section */}
-      <section className="py-20 hero-gradient text-white">
+      <section className="py-20 hero-gradient">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fade-in-up">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fade-in-up text-sidebar-primary-foreground">
             Espace Presse
           </h1>
           <p
-            className="text-xl md:text-2xl opacity-90 animate-fade-in"
+            className="text-xl md:text-2xl opacity-90 animate-fade-in text-sidebar-primary-foreground"
             style={{ animationDelay: "0.2s" }}
           >
             Ressources et actualités pour les médias
@@ -77,44 +77,44 @@ export function PresseView({
 
             <div className="flex flex-wrap justify-center gap-8">
               {pressReleases.map((release, index) => (
-              <Card
-                key={release.id}
-                className={`card-hover animate-fade-in-up w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm flex flex-col`}
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <CardHeader>
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant="outline">
-                      {new Date(release.date).toLocaleDateString("fr-FR")}
-                    </Badge>
-                    <span className="text-sm text-muted-foreground">
-                      {release.fileSize}
-                    </span>
-                  </div>
-                  <CardTitle className="text-lg">{release.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="flex-1 flex flex-col">
-                  <p className="text-muted-foreground mb-4 text-sm leading-relaxed flex-1">
-                    {release.description}
-                  </p>
-                  <Button
-                    variant="outline-primary"
-                    className="w-full mt-auto" asChild>
-                    <Link href={release.fileUrl} download>
-                      <Download className="mr-2 h-4 w-4" />
-                      Télécharger le PDF
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+                <Card
+                  key={release.id}
+                  className={`card-hover animate-fade-in-up w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm flex flex-col`}
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <CardHeader>
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge variant="outline">
+                        {new Date(release.date).toLocaleDateString("fr-FR")}
+                      </Badge>
+                      <span className="text-sm text-muted-foreground">
+                        {release.fileSize}
+                      </span>
+                    </div>
+                    <CardTitle className="text-lg">{release.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex-1 flex flex-col">
+                    <p className="text-muted-foreground mb-4 text-sm leading-relaxed flex-1">
+                      {release.description}
+                    </p>
+                    <Button
+                      variant="outline-primary"
+                      className="w-full mt-auto" asChild>
+                      <Link href={release.fileUrl} download>
+                        <Download className="mr-2 h-4 w-4" />
+                        Télécharger le PDF
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
         </section>
       )}
 
       {/* Revue de Presse */}
-      <section className="py-20 bg-muted/30">
+      <section className="py-20 bg-card">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold mb-4">Revue de Presse</h2>
@@ -211,36 +211,36 @@ export function PresseView({
 
             <div className="flex flex-wrap justify-center gap-8">
               {mediaKit.map((item, index) => {
-              const Icon = item.icon ?? FileText;
-              return (
-                <Card
-                  key={index}
-                  className={`card-hover animate-fade-in-up text-center w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm flex flex-col`}
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  <CardContent className="p-6 flex flex-col flex-1">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-lg mb-4 mx-auto">
-                      <Icon className="h-8 w-8 text-primary" />
-                    </div>
+                const Icon = item.icon ?? FileText;
+                return (
+                  <Card
+                    key={index}
+                    className={`card-hover animate-fade-in-up text-center w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm flex flex-col`}
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
+                    <CardContent className="p-6 flex flex-col flex-1">
+                      <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-lg mb-4 mx-auto">
+                        <Icon className="h-8 w-8 text-primary" />
+                      </div>
 
-                    <h3 className="text-xl font-semibold mb-3">{item.type}</h3>
-                    <p className="text-muted-foreground mb-4">
-                      {item.description}
-                    </p>
-                    <p className="text-sm text-muted-foreground mb-6">
-                      Taille : {item.fileSize}
-                    </p>
+                      <h3 className="text-xl font-semibold mb-3">{item.type}</h3>
+                      <p className="text-muted-foreground mb-4">
+                        {item.description}
+                      </p>
+                      <p className="text-sm text-muted-foreground mb-6">
+                        Taille : {item.fileSize}
+                      </p>
 
-                    <Button variant="outline-primary" className="w-full mt-auto" asChild>
-                      <Link href={item.fileUrl} download>
-                        <Download className="mr-2 h-4 w-4" />
-                        Télécharger
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                      <Button variant="outline-primary" className="w-full mt-auto" asChild>
+                        <Link href={item.fileUrl} download>
+                          <Download className="mr-2 h-4 w-4" />
+                          Télécharger
+                        </Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -249,18 +249,18 @@ export function PresseView({
       {/* Accréditation */}
       <section className="py-20 hero-gradient">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold mb-6 text-white">
+          <h2 className="text-3xl font-bold mb-6 text-sidebar-primary-foreground">
             Demande d&apos;Accréditation
           </h2>
-          <p className="text-xl text-white/90 mb-8">
+          <p className="text-xl text-sidebar-primary-foreground/90 mb-8">
             Journalistes et critiques, demandez votre accréditation pour nos
             spectacles
           </p>
-          <div className="space-y-4 text-white/90 mb-8">
+          <div className="space-y-4 text-sidebar-primary-foreground/90 mb-8">
             <p>
               Pour toute demande d&apos;accréditation, merci d&apos;envoyer un
               email à
-              <strong className="text-white"> presse@rouge-cardinal.fr</strong>{" "}
+              <strong className="text-sidebar-primary-foreground"> presse@rouge-cardinal.fr</strong>{" "}
               en précisant :
             </p>
             <ul className="text-left max-w-md mx-auto space-y-2">
@@ -273,7 +273,7 @@ export function PresseView({
           <Button
             variant="outline"
             size="lg"
-            className="bg-white/30 border-white/50 text-white backdrop-blur-md hover:bg-white hover:text-black transition-all duration-300 shadow-lg border"
+            className="bg-white/30 border-white/50 text-sidebar-primary-foreground backdrop-blur-md hover:bg-text-sidebar-primary-foreground hover:text-black transition-all duration-300 shadow-lg border"
             asChild
           >
             <Link href="mailto:presse@rouge-cardinal.fr?subject=Demande%20d%27accr%C3%A9ditation">

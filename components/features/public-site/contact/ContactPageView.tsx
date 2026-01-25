@@ -142,9 +142,9 @@ export function ContactPageView({ showNewsletter = true }: ContactPageViewProps)
   }
 
   return (
-    <div className="pt-16">
+    <div className="pt-16 bg-muted/30">
       {/* Hero Section */}
-      <section className="py-20 hero-gradient text-white">
+      <section className="py-20 hero-gradient text-sidebar-primary-foreground">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fade-in-up">
             Contact
@@ -380,7 +380,7 @@ export function ContactPageView({ showNewsletter = true }: ContactPageViewProps)
               </Card>
 
               {/* Horaires */}
-              <Card>
+              {/*<Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Clock className="mr-2 h-5 w-5" />
@@ -403,7 +403,7 @@ export function ContactPageView({ showNewsletter = true }: ContactPageViewProps)
                     </div>
                   </div>
                 </CardContent>
-              </Card>
+              </Card>*/}
 
               {/* Contacts spécialisés */}
               <Card>
