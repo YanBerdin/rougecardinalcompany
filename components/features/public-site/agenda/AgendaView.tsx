@@ -46,7 +46,7 @@ export function AgendaView({
   return (
     <div className="pt-16">
       {/* Hero Section */}
-      <section className="py-20 hero-gradient text-white">
+      <section className="py-20 hero-gradient text-sidebar-primary-foreground">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fade-in-up">
             Agenda
@@ -61,12 +61,12 @@ export function AgendaView({
       </section>
 
       {/* Filtres */}
-      <section className="py-8 border-b">
+      <section className="py-8 border-b ">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center space-x-4">
             <Filter className="h-5 w-5 text-muted-foreground" />
             <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger className="w-64">
+              <SelectTrigger className="w-64  bg-card">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

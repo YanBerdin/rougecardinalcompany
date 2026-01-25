@@ -159,8 +159,8 @@ export function CompagnieView({
 
         if (section.kind === "team") {
           return (
-            <section key={section.id} className="py-20">
-              <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+            <section key={section.id} className="py-20 bg-card">
+              <div className="max-w-screen-xl mx-auto px-4 sm:px-4 lg:px-4">
                 <div className="text-center mb-16">
                   {section.title && (
                     <h2 className="text-3xl font-bold mb-4">{section.title}</h2>
@@ -171,35 +171,37 @@ export function CompagnieView({
                     </p>
                   )}
                 </div>
-                <div className="flex flex-wrap justify-center gap-8">
+                <div className="flex flex-wrap justify-center gap-x-8 gap-y-16">
                   {team.map((member, index) => (
-                    <Card
+                    <div
                       key={index}
-                      className="card-hover animate-fade-in-up w-full md:w-[calc(50%-1rem)] lg:w-[calc(25%-1.5rem)] max-w-xs"
+                      className="flex flex-col items-center text-center animate-fade-in-up group w-full sm:w-[calc(50%-1rem)] md:w-[calc(33.333%-1.5rem)] lg:w-[calc(25%-1.5rem)] xl:w-[calc(19%-1.5rem)]"
                       style={{ animationDelay: `${index * 0.1}s` }}
                     >
-                      <div className="relative overflow-hidden rounded-t-lg">
-                        <div
-                          className="h-64 bg-cover bg-center transition-transform duration-300 hover:scale-105"
-                          style={{ backgroundImage: `url(${member.image})` }}
-                        />
+                      <div className="relative mb-6">
+                        <div className="w-32 h-32 rounded-full ring-4 ring-amber-500/20 group-hover:ring-primary transition-all duration-500 p-1.5 flex items-center justify-center">
+                          <div
+                            className="w-full h-full rounded-full bg-cover bg-center shadow-inner"
+                            style={{ backgroundImage: `url(${member.image})` }}
+                          />
+                        </div>
                       </div>
-                      <CardContent className="p-6">
-                        <h3 className="text-xl font-semibold mb-2">
+                      <div className="space-y-1">
+                        <h3 className="text-lg font-bold tracking-tight">
                           {member.name}
                         </h3>
                         {member.role && (
-                          <p className="text-primary font-medium mb-3">
+                          <p className="text-primary text-xs font-semibold uppercase tracking-widest">
                             {member.role}
                           </p>
                         )}
                         {member.description && (
-                          <p className="text-muted-foreground text-sm leading-relaxed">
+                          <p className="text-muted-foreground text-xs leading-relaxed max-w-[200px] mt-3 mx-auto">
                             {member.description}
                           </p>
                         )}
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
