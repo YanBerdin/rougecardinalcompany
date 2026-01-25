@@ -92,12 +92,14 @@ export function SpectaclesView({
                         <span className="text-sm card-date">
                           Première :{" "}
                           {new Date(show.premiere).toLocaleDateString("fr-FR")}
+                          {/*
                           <span className="ml-2 text-xs text-muted-foreground">
                             Année :{" "}
                             {show.premiere
                               ? new Date(show.premiere).getFullYear()
                               : "-"}
                           </span>
+                          */}
                         </span>
                       </div>
 
@@ -143,7 +145,7 @@ export function SpectaclesView({
       </section>
 
       {/* Archives */}
-      <section className="py-20 bg-muted/30">
+      <section className="py-20 bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold mb-4">Nos Créations Passées</h2>

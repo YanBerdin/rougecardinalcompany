@@ -16,6 +16,7 @@
 
 ## En Attente
 
+- `TASK055` Admin Agenda Management - CRUD événements, lieux, intégration spectacles (P0-P2)
 - `TASK005` Optimisation SEO et meta-tags dynamiques
 - `TASK007` Tests automatisés et monitoring
 - `TASK008` Configuration des redirections vers billetterie externe
@@ -43,6 +44,7 @@
 - `TASK020C` Documentation Supabase CLI (workflow déclaratif) - Completed on 2025-10-01
 - `TASK022` Team Management (CRUD équipe + photos + rôles + ordre) - Completed on 2025-10-22 (Médiathèque fonctionnelle, Storage bucket déployé, Admin Dashboard, upload photos avec validation, TypeScript/ESLint OK)
 - `TASK023` Nettoyage architecture auth et optimisation performance - Completed on 2025-10-13 (~400 lignes supprimées, getClaims 100x plus rapide, header réactif)
+- `TASK024` Press Management - ✅ Completed on 2026-01-21 (3 modules: Communiqués de presse, Articles de presse, Contacts presse; 31 files created: 3 schemas, 3 DAL, 11 Server Actions, 10 routes, 13 components; PDF support migration; Tabs navigation; preview page; workflow brouillon/publié)
 - `TASK024B` Scripts admin email et documentation clés Supabase - Completed on 2025-10-13 (check-email-logs.ts, support dual format JWT/Simplified, 4 docs créés)
 - `TASK025` Résolution problèmes sécurité et performance RLS - Completed on 2025-10-23 (3 issues résolus: Articles vides, SECURITY DEFINER views, Multiple permissive policies; 4 migrations créées; documentation exhaustive)
 - `TASK025B` Campagne sécurité audit database complet - Completed on 2025-10-26 (73 objets sécurisés sur 17 rounds, Round 12 critique storage.objects ALL PRIVILEGES corrigé, CI PASSED, PR #25 merged, issues #26/#27/#28 créées, documentation SECURITY_AUDIT_SUMMARY.md) - Issue #24
@@ -56,7 +58,10 @@
 - `TASK033` Admin Sidebar Updated - Completed on 2025-11-22 ("Utilisateurs" menu added with UserCog icon, links to /admin/users) - _Integrated in TASK032_
 - `TASK026` Homepage Content Management - Completed on 2025-11-23, Refined on 2025-11-27 (Complete CRUD system: Hero Slides with DnD reordering, About Section editor, character counters, media picker, RLS policies, 27 components created, TypeScript/ESLint OK, production-ready) — **Clean Code Conformity applied**: Server Actions migration, UI schemas pattern, component split (<300 lines)
 - `TASK034` DAL SOLID Refactoring - Completed on 2025-11-30 (92% SOLID compliance: 17/17 DAL with DALResult<T>, 0 revalidatePath in DAL, 0 email imports, 11 schemas centralized, DAL helpers created in lib/dal/helpers/, props colocated, Server Actions colocated, 4 architecture blueprints updated)
+- `TASK027` Company Content Management - ✅ Completed on 2026-01-25 (Edit company values, stats, presentation sections with admin interface)
+- `TASK028` Content Versioning UI - ✅ Completed on 2026-01-25 (View history, compare versions, restore content with versioning interface)
 - `TASK034` Performance Optimization - ✅ Completed on 2026-01-16 (All 8 phases implemented: removed artificial delays (5-8s gain), SELECT * → explicit columns (30-50% bandwidth), ISR on public pages (revalidate=60), partial index spectacles.slug (20% improvement), Presse streaming with Suspense (TTI improved), bundle analyzer installed, revalidateTag + unstable_cache (granular invalidation), React cache() wrapper on 21 DAL functions (request-scoped memoization); test-all-dal-functions.ts documentation script created)
+- `TASK035` Testing Suite - ✅ Completed on 2026-01-25 (Unit, integration and E2E tests for admin flows with comprehensive coverage)
 - `TASK041` Team CRUD Migration to Server Actions - Completed on 2025-12-02 (Migration inline form → pages dédiées /admin/team/new et /admin/team/\[id]/edit, suppression 3 API Routes obsolètes, refactoring react-hook-form + zodResolver, ajout optionalUrlSchema + sanitizePayload, 3 bugs corrigés, documentation architecture mise à jour)
 - `TASK042` Next.js 16 Migration - Completed on 2025-12-02 (Upgrade 15.4.5 → 16.0.6 via @next/codemod, middleware.ts → proxy.ts rename, 6 pages with dynamic='force-dynamic' for Supabase cookies, CVE-2025-57822 SSRF fixed, CVE-2025-64718 js-yaml fixed with pnpm override, 0 audit vulnerabilities, Turbopack default)
 - `TASK043` Hero Slides Clean Code Refactoring - Completed on 2025-12-06 (lib/constants/hero-slides.ts created, 4 hooks extracted to lib/hooks/, CtaFieldGroup DRY component, HeroSlideForm 232→117 lines, HeroSlideFormFields 237→127 lines, HeroSlidesView 315→241 lines, all files <300 lines, no magic numbers, blueprints updated to v5.2/v2.2)

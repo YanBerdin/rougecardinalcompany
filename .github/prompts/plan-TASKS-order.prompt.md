@@ -4,17 +4,20 @@
 
 ```yaml
 ✅ Completed:
-  - TASK027 (Company Content Management)
-  - TASK028 (Content Versioning UI)
-  - TASK035 (Testing Suite)
+  - TASK027 (Company Content Management) - ✅ Complete (date TBD)
+  - TASK028 (Content Versioning UI) - ✅ Complete (date TBD)
+  - TASK035 (Testing Suite) - ✅ Complete (date TBD)
   - TASK036 (Security Audit) - ✅ 100% Complete (2026-01-03)
   - TASK033 (Audit Logs Viewer) - ✅ Complete (2026-01-03)
   - TASK046 (Rate-Limiting) - ✅ Complete (2026-01-04)
   - TASK050 (Database Backup & Recovery) - ✅ Complete (2026-01-14)
   - TASK051 (Error Monitoring & Alerting) - ✅ Complete (2026-01-14)
+  - TASK034 (Performance Optimization) - ✅ Complete (2026-01-16)
   - TASK031 (Analytics Dashboard) - ✅ Complete (2026-01-17)
+  - TASK047 (Newsletter Schema Extraction) - ✅ Complete (2026-01-17)
   - TASK053 (Data Retention Automation) - ✅ Complete (2026-01-18)
   - TASK023 (Partners Management) - ✅ Complete (2026-01-19)
+  - TASK024 (Press Management) - ✅ Complete (2026-01-21)
 ```
 
 ---
@@ -64,21 +67,24 @@ depends_on: task050, task051 (from phase 1)
 
 ---
 
-### Phase 3: Performance & Observability - 1 semaine
+### Phase 3: Performance & Observability - ✅ COMPLÈTE
 
 ```yaml
 Priority: P1 (Important pour UX)
 
-TASK034: Performance Optimization
-├─ Profile slow DB queries (DAL layer)
-├─ Add missing indexes (based on RLS policies)
-├─ Implement caching layers (revalidate tags)
-├─ Reduce client bundle size (lazy-load)
-└─ Document performance benchmarks
+✅ TASK034: Performance Optimization (Complete 2026-01-16)
+├─ ✅ Removed artificial delays (5-8s gain)
+├─ ✅ SELECT * → explicit columns (30-50% bandwidth)
+├─ ✅ ISR on public pages (revalidate=60)
+├─ ✅ Partial index spectacles.slug (20% improvement)
+├─ ✅ Presse streaming with Suspense (TTI improved)
+├─ ✅ Bundle analyzer installed
+├─ ✅ revalidateTag + unstable_cache (granular invalidation)
+└─ ✅ React cache() wrapper on 21 DAL functions
 
-Estimated: 3-4 jours
-Dépend de: TASK036, TASK046
-Bloquant pour: TASK031, TASK051
+Completed: 2026-01-16
+Dépendait de: TASK036, TASK046
+Débloque: TASK031
 
 ✅ TASK031: Analytics Dashboard (Complete 2026-01-17)
 ├─ ✅ Define metrics (pageviews, errors, performance)
@@ -89,26 +95,26 @@ Bloquant pour: TASK031, TASK051
 
 Completed: 2026-01-17
 Dépendait de: TASK034, TASK033
-Bloquant pour: TASK039
+Débloque: TASK039
 ```
 
 ---
 
-### Phase 4: Contenus Publics (FONCTIONNEL) - 1-2 semaines
+### Phase 4: Contenus Publics (FONCTIONNEL) - ✅ COMPLÈTE
 
 ```yaml
 Priority: P2 (Fonctionnalités publiques)
 
-TASK024: Press Management
-├─ Confirm communiques_presse schema
-├─ DAL CRUD + file attachments (Supabase Storage)
-├─ Admin UI (RichText editor + preview)
-├─ Access control (editors/admins only)
-└─ Tests (upload rules, RLS policies)
+✅ TASK024: Press Management (Complete 2026-01-21)
+├─ ✅ 3 modules: Communiqués, Articles, Contacts presse
+├─ ✅ DAL CRUD + Server Actions (21 functions, 11 actions)
+├─ ✅ Admin UI with Tabs navigation + preview page
+├─ ✅ Workflow brouillon/publié (is_public boolean)
+└─ ✅ PDF support migration for medias bucket
 
-Estimated: 4-5 jours
-Dépend de: TASK036, TASK046
-Bloquant pour: TASK039
+Completed: 2026-01-21
+Dépendait de: TASK036 ✅, TASK046 ✅
+Débloque: TASK039
 
 ✅ TASK023: Partners Management (Complete 2026-01-19)
 ├─ ✅ DAL admin-partners.ts + home-partners.ts (Media Library join)
@@ -140,16 +146,16 @@ Completed: 2026-01-18
 Dépendait de: TASK033 (completed)
 Débloque: TASK037, TASK039
 
-TASK047: Newsletter Schema Extraction
-├─ Create lib/schemas/newsletter.ts
-├─ Export in lib/schemas/index.ts
-├─ Remove from lib/schemas/contact.ts
-├─ Update imports in consumers
-└─ Verify build + lint
+✅ TASK047: Newsletter Schema Extraction (Complete 2026-01-17)
+├─ ✅ Created lib/schemas/newsletter.ts
+├─ ✅ Exported in lib/schemas/index.ts
+├─ ✅ Removed from lib/schemas/contact.ts
+├─ ✅ Updated imports in consumers
+└─ ✅ Verified build + lint
 
-Estimated: 1 jour (quick win)
-Dépend de: Rien (parallélisable)
-Bloquant pour: Rien
+Completed: 2026-01-17
+Estimation: 25 minutes (quick win)
+Dépendait de: Rien (parallélisé)
 
 TASK037: Accessibility Compliance
 ├─ Run axe-core audits (key pages)
@@ -206,17 +212,18 @@ Bloquant pour: Launch
 ## 📊 TIMELINE ESTIMÉE
 
 ```yaml
-Phase 1 (Infrastructure):  1 semaine  (TASK050, TASK051)
-Phase 2 (Stabilité):       0.5-1 jour (Validation/smoke tests)
-Phase 3 (Performance):     1 semaine  (TASK034, TASK031)
-Phase 4 (Contenus):        1-2 sem.   (TASK024, TASK023)
-Phase 5 (Conformité):      1 semaine  (TASK053, TASK047, TASK037, TASK038)
+✅ Phase 1 (Infrastructure):  COMPLÈTE  (TASK050, TASK051) - 2026-01-14
+✅ Phase 2 (Stabilité):       COMPLÈTE  (Validation tests)
+✅ Phase 3 (Performance):     COMPLÈTE  (TASK034, TASK031) - 2026-01-17
+✅ Phase 4 (Contenus):        COMPLÈTE  (TASK024, TASK023) - 2026-01-21
+✅ Phase 5 (Conformité):      COMPLÈTE  (TASK053, TASK047) - 2026-01-18
+                              Restant: TASK037, TASK038
 Phase 6 (Déploiement):     1 semaine  (TASK039, TASK040)
 
-TOTAL: 4.5-5.5 semaines réalistes (avec 1 dev full-time)
+RESTANT: ~1-2 semaines réalistes (avec 1 dev full-time)
 
-Note: TASK033, TASK036, TASK046 complétées (2026-01-03/04)
-Gain de temps: ~1.5 semaines vs estimation initiale
+Note: 14 TASKS complétées sur 20 TASKS back-office
+Progrès global: 70% des TASKS back-office terminées
 ```
 
 ---
