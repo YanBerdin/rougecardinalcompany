@@ -59,7 +59,7 @@ const contentItems = [
   },
   {
     title: "Événements",
-    href: "/admin/events",
+    href: "/admin/agenda",
     icon: Calendar,
   },
   {
