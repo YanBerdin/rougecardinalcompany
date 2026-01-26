@@ -28,15 +28,13 @@ export const fetchAllEventsAdmin = cache(
         start_time,
         end_time,
         status,
-        notes,
         ticket_url,
-        tags,
         capacity,
         price_cents,
         created_at,
         updated_at,
-        spectacles (titre),
-        lieux_evenements (nom, ville)
+        spectacles (title),
+        lieux (nom, ville)
       `
             )
             .order("date_debut", { ascending: false });
@@ -47,12 +45,12 @@ export const fetchAllEventsAdmin = cache(
 
         const events: EventDTO[] = (data ?? []).map((row) => {
             const spectacle = Array.isArray(row.spectacles) ? row.spectacles[0] : row.spectacles;
-            const lieu = Array.isArray(row.lieux_evenements) ? row.lieux_evenements[0] : row.lieux_evenements;
+            const lieu = Array.isArray(row.lieux) ? row.lieux[0] : row.lieux;
 
             return {
                 id: row.id,
                 spectacle_id: row.spectacle_id,
-                spectacle_titre: spectacle?.titre,
+                spectacle_titre: spectacle?.title,
                 lieu_id: row.lieu_id,
                 lieu_nom: lieu?.nom,
                 lieu_ville: lieu?.ville,
@@ -61,9 +59,7 @@ export const fetchAllEventsAdmin = cache(
                 start_time: row.start_time,
                 end_time: row.end_time,
                 status: row.status,
-                notes: row.notes,
                 ticket_url: row.ticket_url,
-                tags: row.tags ?? [],
                 capacity: row.capacity,
                 price_cents: row.price_cents,
                 created_at: row.created_at,
@@ -95,15 +91,13 @@ export const fetchEventByIdAdmin = cache(
         start_time,
         end_time,
         status,
-        notes,
         ticket_url,
-        tags,
         capacity,
         price_cents,
         created_at,
         updated_at,
-        spectacles (titre),
-        lieux_evenements (nom, ville)
+        spectacles (title),
+        lieux (nom, ville)
       `
             )
             .eq("id", id)
@@ -117,12 +111,12 @@ export const fetchEventByIdAdmin = cache(
         }
 
         const spectacle = Array.isArray(data.spectacles) ? data.spectacles[0] : data.spectacles;
-        const lieu = Array.isArray(data.lieux_evenements) ? data.lieux_evenements[0] : data.lieux_evenements;
+        const lieu = Array.isArray(data.lieux) ? data.lieux[0] : data.lieux;
 
         const event: EventDTO = {
             id: data.id,
             spectacle_id: data.spectacle_id,
-            spectacle_titre: spectacle?.titre,
+            spectacle_titre: spectacle?.title,
             lieu_id: data.lieu_id,
             lieu_nom: lieu?.nom,
             lieu_ville: lieu?.ville,
@@ -131,9 +125,7 @@ export const fetchEventByIdAdmin = cache(
             start_time: data.start_time,
             end_time: data.end_time,
             status: data.status,
-            notes: data.notes,
             ticket_url: data.ticket_url,
-            tags: data.tags ?? [],
             capacity: data.capacity,
             price_cents: data.price_cents,
             created_at: data.created_at,
@@ -166,15 +158,13 @@ export async function createEvent(
       start_time,
       end_time,
       status,
-      notes,
       ticket_url,
-      tags,
       capacity,
       price_cents,
       created_at,
       updated_at,
-      spectacles (titre),
-      lieux_evenements (nom, ville)
+      spectacles (title),
+      lieux (nom, ville)
     `
         )
         .single();
@@ -184,12 +174,12 @@ export async function createEvent(
     }
 
     const spectacle = Array.isArray(data.spectacles) ? data.spectacles[0] : data.spectacles;
-    const lieu = Array.isArray(data.lieux_evenements) ? data.lieux_evenements[0] : data.lieux_evenements;
+    const lieu = Array.isArray(data.lieux) ? data.lieux[0] : data.lieux;
 
     const event: EventDTO = {
         id: data.id,
         spectacle_id: data.spectacle_id,
-        spectacle_titre: spectacle?.titre,
+        spectacle_titre: spectacle?.title,
         lieu_id: data.lieu_id,
         lieu_nom: lieu?.nom,
         lieu_ville: lieu?.ville,
@@ -198,9 +188,7 @@ export async function createEvent(
         start_time: data.start_time,
         end_time: data.end_time,
         status: data.status,
-        notes: data.notes,
         ticket_url: data.ticket_url,
-        tags: data.tags ?? [],
         capacity: data.capacity,
         price_cents: data.price_cents,
         created_at: data.created_at,
@@ -234,15 +222,13 @@ export async function updateEvent(
       start_time,
       end_time,
       status,
-      notes,
       ticket_url,
-      tags,
       capacity,
       price_cents,
       created_at,
       updated_at,
-      spectacles (titre),
-      lieux_evenements (nom, ville)
+      spectacles (title),
+      lieux (nom, ville)
     `
         )
         .single();
@@ -252,12 +238,12 @@ export async function updateEvent(
     }
 
     const spectacle = Array.isArray(data.spectacles) ? data.spectacles[0] : data.spectacles;
-    const lieu = Array.isArray(data.lieux_evenements) ? data.lieux_evenements[0] : data.lieux_evenements;
+    const lieu = Array.isArray(data.lieux) ? data.lieux[0] : data.lieux;
 
     const event: EventDTO = {
         id: data.id,
         spectacle_id: data.spectacle_id,
-        spectacle_titre: spectacle?.titre,
+        spectacle_titre: spectacle?.title,
         lieu_id: data.lieu_id,
         lieu_nom: lieu?.nom,
         lieu_ville: lieu?.ville,
@@ -266,9 +252,7 @@ export async function updateEvent(
         start_time: data.start_time,
         end_time: data.end_time,
         status: data.status,
-        notes: data.notes,
         ticket_url: data.ticket_url,
-        tags: data.tags ?? [],
         capacity: data.capacity,
         price_cents: data.price_cents,
         created_at: data.created_at,
@@ -295,18 +279,22 @@ export async function deleteEvent(id: bigint): Promise<DALResult<null>> {
 }
 
 /**
- * Fetch all lieux (helper for select - Phase 1)
+ * Fetch all lieux (helper for select)
+ * 
+ * Note: Utilise la table 'lieux' (pas 'lieux_evenements').
+ * Retourne tous les lieux pour le select dans le formulaire événement.
  */
 export const fetchAllLieux = cache(async (): Promise<DALResult<LieuDTO[]>> => {
     await requireAdmin();
     const supabase = await createClient();
 
     const { data, error } = await supabase
-        .from("lieux_evenements")
+        .from("lieux")
         .select("id, nom, ville, adresse")
         .order("nom", { ascending: true });
 
     if (error) {
+        console.error("[ERR_AGENDA_006] Failed to fetch lieux:", error);
         return dalError(`[ERR_AGENDA_006] ${error.message}`);
     }
 

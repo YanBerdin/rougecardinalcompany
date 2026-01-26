@@ -11,16 +11,35 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import type { EventDTO } from "@/lib/schemas/admin-agenda";
+
+// Type Client (BigInt → Number pour sérialisation JSON)
+type EventClientDTO = {
+    id: number;
+    spectacle_id: number;
+    spectacle_titre?: string;
+    lieu_id: number | null;
+    lieu_nom?: string;
+    lieu_ville?: string;
+    date_debut: string;
+    date_fin: string | null;
+    start_time: string;
+    end_time: string | null;
+    status: "scheduled" | "cancelled" | "completed";
+    ticket_url: string | null;
+    capacity: number | null;
+    price_cents: number | null;
+    created_at: string;
+    updated_at: string;
+};
 
 interface EventsTableProps {
-    events: EventDTO[];
-    onEdit: (id: bigint) => void;
-    onDelete: (id: bigint) => void;
+    events: EventClientDTO[];
+    onEdit: (id: number) => void;
+    onDelete: (id: number) => void;
 }
 
 export function EventsTable({ events, onEdit, onDelete }: EventsTableProps) {
-    const [sortField, setSortField] = useState<keyof EventDTO>("date_debut");
+    const [sortField, setSortField] = useState<keyof EventClientDTO>("date_debut");
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
     const sortedEvents = useMemo(() => {
@@ -35,7 +54,7 @@ export function EventsTable({ events, onEdit, onDelete }: EventsTableProps) {
         });
     }, [events, sortField, sortOrder]);
 
-    const handleSort = (field: keyof EventDTO) => {
+    const handleSort = (field: keyof EventClientDTO) => {
         if (sortField === field) {
             setSortOrder(sortOrder === "asc" ? "desc" : "asc");
         } else {
@@ -44,7 +63,7 @@ export function EventsTable({ events, onEdit, onDelete }: EventsTableProps) {
         }
     };
 
-    const getStatusBadge = (status: EventDTO["status"]) => {
+    const getStatusBadge = (status: EventClientDTO["status"]) => {
         const variants = {
             scheduled: "default",
             cancelled: "destructive",

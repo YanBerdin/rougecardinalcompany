@@ -1,6 +1,28 @@
 # Plan : Interface Admin Agenda (TASK055 - Phase 1 MVP)
 
+✅ **IMPLÉMENTÉ** (2026-01-26) avec fix BigInt serialization
+
 Créer l'interface CRUD admin pour la gestion des événements avec DAL dédié, Server Actions, pages dédiées (`/new`, `/[id]/edit`), et composants Select avec recherche. CRUD Lieux différé en Phase 2.
+
+## ⚠️ BigInt Serialization Fix (Post-Implementation)
+
+**Problème rencontré** : "Do not know how to serialize a BigInt" lors de l'update d'événements.
+
+**Cause** : React Server Actions serialisent leur contexte d'exécution. Créer des `BigInt` dans les Server Actions (même temporairement) provoque une erreur de sérialisation.
+
+**Solution finale** :
+1. ✅ `ActionResult` simplifié : Ne retourne JAMAIS de data (seulement `{success: true/false}`)
+2. ✅ Validation avec `EventFormSchema` (number IDs) au lieu de `EventInputSchema` (bigint IDs)
+3. ✅ Type `EventDataTransport` pour IDs en string (pas BigInt) avant passage au DAL
+4. ✅ Conversion format (datetime-local→ISO8601, HH:MM→HH:MM:SS) APRÈS validation dans Server Action
+5. ✅ `router.refresh()` côté client pour récupérer les données mises à jour (évite retour de data)
+
+**Pattern flux de données** :
+```bash
+Form (number IDs) → Action (valide + convertit string IDs) → DAL (convertit BigInt en interne) → router.refresh()
+```
+
+Voir commit détaillé : `.git-commit-bigint-fix.md`
 
 ## Steps
 
@@ -86,30 +108,33 @@ export const EventInputSchema = z.object({
   start_time: z.string().regex(/^\d{2}:\d{2}:\d{2}$/), // HH:MM:SS
   end_time: z.string().regex(/^\d{2}:\d{2}:\d{2}$/).nullable().optional(),
   status: z.enum(["scheduled", "cancelled", "completed"]).default("scheduled"),
-  notes: z.string().max(2000).nullable().optional(),
   ticket_url: z.string().url().nullable().optional(),
-  tags: z.array(z.string()).default([]),
   capacity: z.number().int().positive().nullable().optional(),
   price_cents: z.number().int().nonnegative().nullable().optional(),
 });
 export type EventInput = z.infer<typeof EventInputSchema>;
 
 // ✅ Schéma UI (pour formulaires React Hook Form) — utilise number
+// ⚠️ IMPORTANT: Validé dans Server Actions pour éviter BigInt serialization
 export const EventFormSchema = z.object({
   spectacle_id: z.number().int().positive({ message: "Spectacle requis" }),
   lieu_id: z.number().int().positive().nullable().optional(),
-  date_debut: z.string().datetime(),
-  date_fin: z.string().datetime().nullable().optional(),
+  date_debut: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/), // datetime-local format
+  date_fin: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/).nullable().optional(),
   start_time: z.string().regex(/^\d{2}:\d{2}$/), // HH:MM pour input type="time"
   end_time: z.string().regex(/^\d{2}:\d{2}$/).nullable().optional(),
   status: z.enum(["scheduled", "cancelled", "completed"]).default("scheduled"),
-  notes: z.string().max(2000).nullable().optional(),
   ticket_url: z.string().url().nullable().optional(),
-  tags: z.array(z.string()).default([]),
   capacity: z.number().int().positive().nullable().optional(),
   price_cents: z.number().int().nonnegative().nullable().optional(),
 });
 export type EventFormValues = z.infer<typeof EventFormSchema>;
+
+// ✅ Type intermédiaire pour transport Server Action → DAL (IDs en string)
+type EventDataTransport = Omit<EventInput, 'spectacle_id' | 'lieu_id'> & {
+  spectacle_id: string;
+  lieu_id: string | null;
+};
 
 // ✅ DTO (retourné par le DAL)
 export type EventDTO = {
@@ -117,14 +142,13 @@ export type EventDTO = {
   spectacle_id: bigint;
   spectacle_titre?: string; // Join depuis spectacles
   lieu_id: bigint | null;
-  lieu_nom?: string; // Join depuis lieux_evenements
+  lieu_nom?: string; // Join depuis lieux
   lieu_ville?: string;
   date_debut: string; // ISO 8601
   date_fin: string | null;
   start_time: string; // HH:MM:SS
   end_time: string | null;
   status: "scheduled" | "cancelled" | "completed";
-  notes: string | null;
   ticket_url: string | null;
   tags: string[];
   capacity: number | null;
@@ -156,31 +180,66 @@ export type LieuDTO = {
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createEvent, updateEvent, deleteEvent } from "@/lib/dal/admin-agenda";
-import { EventInputSchema } from "@/lib/schemas/admin-agenda";
-import type { ActionResult } from "@/lib/actions/types";
+import { EventFormSchema } from "@/lib/schemas/admin-agenda-ui"; // ⚠️ UI schema, not server!
+import type { EventInput } from "@/lib/schemas/admin-agenda";
+
+// ✅ Type simplifié sans données - évite problèmes de sérialisation BigInt
+export type ActionResult =
+  | { success: true }
+  | { success: false; error: string };
+
+/**
+ * Type intermédiaire pour le transport de données
+ * IDs en string avant conversion BigInt dans le DAL
+ */
+type EventDataTransport = Omit<EventInput, 'spectacle_id' | 'lieu_id'> & {
+  spectacle_id: string;
+  lieu_id: string | null;
+};
 
 /**
  * CREATE Event
+ * ⚠️ PATTERN: Validate UI schema → Convert format → DAL → Never return data
  */
-export async function createEventAction(input: unknown): Promise<ActionResult<EventDTO>> {
+export async function createEventAction(input: unknown): Promise<ActionResult> {
   try {
-    // 1. Validation Zod
-    const validated = EventInputSchema.parse(input);
+    // 1. Validation avec schéma UI (number IDs) - Pas de BigInt ici !
+    const validated = EventFormSchema.parse(input);
     
-    // 2. Appel DAL
-    const result = await createEvent(validated);
+    // 2. Préparer les données pour le DAL (format serveur, mais IDs en string)
+    const eventData: EventDataTransport = {
+      spectacle_id: String(validated.spectacle_id),
+      lieu_id: validated.lieu_id !== null && validated.lieu_id !== undefined 
+        ? String(validated.lieu_id) 
+        : null,
+      date_debut: `${validated.date_debut}:00.000Z`, // datetime-local → ISO 8601
+      date_fin: validated.date_fin ? `${validated.date_fin}:00.000Z` : null,
+      start_time: `${validated.start_time}:00`, // HH:MM → HH:MM:SS
+      end_time: validated.end_time ? `${validated.end_time}:00` : null,
+      status: validated.status,
+      ticket_url: validated.ticket_url ?? null,
+      capacity: validated.capacity ?? null,
+      price_cents: validated.price_cents ?? null,
+    };
+    
+    // 3. Appel DAL (qui convertira string → bigint en interne)
+    const result = await createEvent(eventData as unknown as EventInput);
     if (!result.success) {
       return { success: false, error: result.error ?? "Create failed" };
     }
     
-    // 3. ✅ Revalidation UNIQUEMENT ICI (pas dans DAL)
+    // 4. ✅ Revalidation UNIQUEMENT ICI (pas dans DAL)
     revalidatePath("/admin/agenda");
-    revalidatePath("/agenda"); // Page publique
+    revalidatePath("/agenda");
     
-    return { success: true, data: result.data };
+    // 5. ✅ Ne pas retourner de données - évite sérialisation BigInt
+    return { success: true };
   } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      return { success: false, error: "Validation échouée", details: err.issues };
+      return {
+        success: false,
+        error: `Validation échouée: ${err.issues.map(i => i.message).join(", ")}`,
+      };
     }
     return { 
       success: false, 
@@ -191,24 +250,70 @@ export async function createEventAction(input: unknown): Promise<ActionResult<Ev
 
 /**
  * UPDATE Event
+ * ⚠️ PATTERN: Same as create - validate UI schema, convert, never return data
  */
 export async function updateEventAction(
   id: string, 
   input: unknown
-): Promise<ActionResult<EventDTO>> {
+): Promise<ActionResult> {
   try {
-    const validated = EventInputSchema.partial().parse(input);
-    const result = await updateEvent(BigInt(id), validated);
+    // 1. Validation avec schéma UI (number IDs)
+    const validated = EventFormSchema.partial().parse(input);
+    
+    // 2. Préparer les données (format serveur, IDs en string)
+    const eventData: Partial<EventDataTransport> = {};
+    
+    if (validated.spectacle_id !== undefined) {
+      eventData.spectacle_id = String(validated.spectacle_id);
+    }
+    if (validated.lieu_id !== undefined) {
+      eventData.lieu_id = validated.lieu_id !== null ? String(validated.lieu_id) : null;
+    }
+    if (validated.date_debut !== undefined) {
+      eventData.date_debut = `${validated.date_debut}:00.000Z`;
+    }
+    if (validated.date_fin !== undefined) {
+      eventData.date_fin = validated.date_fin ? `${validated.date_fin}:00.000Z` : null;
+    }
+    if (validated.start_time !== undefined) {
+      eventData.start_time = `${validated.start_time}:00`;
+    }
+    if (validated.end_time !== undefined) {
+      eventData.end_time = validated.end_time ? `${validated.end_time}:00` : null;
+    }
+    if (validated.status !== undefined) {
+      eventData.status = validated.status;
+    }
+    if (validated.ticket_url !== undefined) {
+      eventData.ticket_url = validated.ticket_url ?? null;
+    }
+    if (validated.capacity !== undefined) {
+      eventData.capacity = validated.capacity ?? null;
+    }
+    if (validated.price_cents !== undefined) {
+      eventData.price_cents = validated.price_cents ?? null;
+    }
+    
+    // 3. Appel DAL avec ID converti en bigint
+    const result = await updateEvent(BigInt(id), eventData as Partial<EventInput>);
     
     if (!result.success) {
       return { success: false, error: result.error ?? "Update failed" };
     }
     
+    // 4. Revalidation
     revalidatePath("/admin/agenda");
     revalidatePath("/agenda");
     
-    return { success: true, data: result.data };
+    // 5. ✅ Ne pas retourner de données - évite sérialisation BigInt
+    return { success: true };
   } catch (err: unknown) {
+    if (err instanceof z.ZodError) {
+      return {
+        success: false,
+        error: `Validation échouée: ${err.issues.map(i => i.message).join(", ")}`,
+      };
+    }
     return { 
       success: false, 
       error: err instanceof Error ? err.message : "Erreur inconnue" 
@@ -221,6 +326,7 @@ export async function updateEventAction(
  */
 export async function deleteEventAction(id: string): Promise<ActionResult> {
   try {
+    // ✅ Conversion string → bigint pour le DAL
     const result = await deleteEvent(BigInt(id));
     
     if (!result.success) {

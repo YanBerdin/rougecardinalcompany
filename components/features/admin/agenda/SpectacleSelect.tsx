@@ -23,12 +23,12 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 import type { UseFormReturn } from "react-hook-form";
-import type { EventFormValues } from "@/lib/schemas/admin-agenda";
-import type { SpectacleSummary } from "@/lib/schemas/spectacles";
+import type { EventFormValues } from "@/lib/schemas/admin-agenda-ui";
+import type { SpectacleClientDTO } from "@/lib/types/admin-agenda-client";
 
 interface SpectacleSelectProps {
     form: UseFormReturn<EventFormValues>;
-    spectacles: SpectacleSummary[];
+    spectacles: SpectacleClientDTO[];
 }
 
 export function SpectacleSelect({ form, spectacles }: SpectacleSelectProps) {

@@ -4,12 +4,31 @@ import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { deleteEventAction } from "@/app/(admin)/admin/agenda/actions";
-import type { EventDTO } from "@/lib/schemas/admin-agenda";
+import { deleteEventAction } from "@/app/(admin)/admin/agenda/actions-client";
 import { EventsTable } from "./EventsTable";
 
+// Type Client (BigInt → Number pour sérialisation JSON)
+type EventClientDTO = {
+    id: number;
+    spectacle_id: number;
+    spectacle_titre?: string;
+    lieu_id: number | null;
+    lieu_nom?: string;
+    lieu_ville?: string;
+    date_debut: string;
+    date_fin: string | null;
+    start_time: string;
+    end_time: string | null;
+    status: "scheduled" | "cancelled" | "completed";
+    ticket_url: string | null;
+    capacity: number | null;
+    price_cents: number | null;
+    created_at: string;
+    updated_at: string;
+};
+
 interface EventsViewProps {
-    initialEvents: EventDTO[];
+    initialEvents: EventClientDTO[];
 }
 
 export function EventsView({ initialEvents }: EventsViewProps) {
@@ -22,7 +41,7 @@ export function EventsView({ initialEvents }: EventsViewProps) {
     }, [initialEvents]);
 
     const handleDelete = useCallback(
-        async (id: bigint) => {
+        async (id: number) => {
             if (!confirm("Supprimer cet événement ?")) return;
 
             try {
@@ -42,7 +61,7 @@ export function EventsView({ initialEvents }: EventsViewProps) {
     );
 
     const handleEdit = useCallback(
-        (id: bigint) => {
+        (id: number) => {
             router.push(`/admin/agenda/${id}/edit`);
         },
         [router]

@@ -1,8 +1,14 @@
-import type {
-    EventDTO,
-    LieuDTO,
-    EventFormValues,
-} from "@/lib/schemas/admin-agenda";
-import type { SpectacleSummary } from "@/lib/schemas/spectacles";
+/**
+ * Types pour les composants admin agenda
+ * ⚠️ IMPORTANT : N'importe QUE des types client-safe (sans BigInt)
+ */
 
-export type { EventDTO, LieuDTO, EventFormValues, SpectacleSummary };
+// Re-exports depuis types client-safe
+export type {
+    EventClientDTO,
+    SpectacleClientDTO,
+    LieuClientDTO,
+} from "@/lib/types/admin-agenda-client";
+
+// Re-export du schéma UI uniquement
+export type { EventFormValues } from "@/lib/schemas/admin-agenda-ui";

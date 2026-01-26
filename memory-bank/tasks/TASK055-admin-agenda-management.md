@@ -1,26 +1,57 @@
 # TASK055 - Admin Agenda Management
 
-**Status:** Ready to Start  
+**Status:** Complete (Phase 1 & 2)  
 **Added:** 2026-01-25  
-**Updated:** 2026-01-25  
+**Updated:** 2026-01-26  
 **Priority:** High  
 **Epic:** Milestone 2 - Admin Backoffice
 
 ## Audit Status
 
-✅ **Plan validé** - Conformité 98/100 (2026-01-25)
+✅ **Implémentation complète** - Phase 1 & 2 terminées (2026-01-26)
 
 - Architecture Next.js 16 (RSC, force-dynamic) ✅
 - SOLID principles (DAL < 30 lignes) ✅  
 - Server Actions pattern (validation → DAL → revalidate) ✅
 - Clean Code (composants < 300 lignes) ✅
 - Type safety (schémas Server/UI séparés) ✅
+- BigInt serialization fix (ActionResult simplifié) ✅
 
-**Améliorations intégrées** :
+## ⚠️ BigInt Serialization Fix (Post-Implementation)
 
-- Error Boundary (`error.tsx`) pour gestion erreurs React
-- parseInt radix explicite (`parseInt(val, 10)`)
-- Section tests RLS policies
+**Problème rencontré** : "Do not know how to serialize a BigInt" lors de l'update d'événements sans modification.
+
+**Cause** : React Server Actions sérialisent leur contexte d'exécution. Créer des `BigInt` durant la validation (via `EventInputSchema` avec `z.coerce.bigint()`) provoquait une erreur même si les valeurs n'étaient pas retournées explicitement.
+
+**Solution finale** :
+
+1. ✅ `ActionResult` simplifié : Ne retourne JAMAIS de data (seulement `{success: true/false}`)
+2. ✅ Validation avec `EventFormSchema` (number IDs) au lieu de `EventInputSchema` (bigint IDs)
+3. ✅ Type `EventDataTransport` pour IDs en string avant passage au DAL
+4. ✅ Conversion format (datetime-local→ISO8601, HH:MM→HH:MM:SS) APRÈS validation dans Server Action
+5. ✅ `router.refresh()` côté client pour récupérer données mises à jour (évite retour data avec BigInt)
+
+**Pattern flux de données** :
+
+```bash
+Form (EventFormValues - number) 
+  → Server Action (validate UI schema, convert to EventDataTransport - string) 
+    → DAL (convert string→bigint internally) 
+      → ActionResult {success: true/false only} 
+        → router.refresh() (fetch updated data via Server Component)
+```
+
+**Impact** :
+
+- ✅ Aucune valeur BigInt n'existe dans le scope des Server Actions
+- ✅ Validation Zod ne crée que des `number`, jamais de `bigint`
+- ✅ TypeScript strict (pas de `any`, types explicites `EventDataTransport`)
+- ✅ Séparation claire UI layer (number) vs Server layer (bigint)
+
+**Commits** :
+
+- fix(admin-agenda): resolve BigInt serialization error in Server Actions
+- Voir détail complet : `.git-commit-bigint-fix.md`
 
 ## Original Request
 
@@ -138,32 +169,36 @@ Tables Supabase existantes :
 
 ## Acceptance Criteria
 
-### Phase 1 (MVP)
+### Phase 1 (MVP) ✅ COMPLETE
 
-- [ ] Liste des événements dans `/admin/agenda`
-- [ ] Création d'un événement avec sélection spectacle/lieu
-- [ ] Édition d'un événement existant
-- [ ] Suppression avec confirmation
-- [ ] Validation Zod côté serveur et client
-- [ ] RLS policies respectées (is_admin())
-- [ ] Revalidation du cache après mutations
-- [ ] Navigation dans sidebar admin
+- [x] Liste des événements dans `/admin/agenda`
+- [x] Création d'un événement avec sélection spectacle/lieu
+- [x] Édition d'un événement existant
+- [x] Suppression avec confirmation
+- [x] Validation Zod côté serveur et client
+- [x] RLS policies respectées (is_admin())
+- [x] Revalidation du cache après mutations
+- [x] Navigation dans sidebar admin
+- [x] Fix BigInt serialization error
 
-### Phase 2
+### Phase 2 ✅ COMPLETE
 
-- [ ] CRUD complet des lieux
-- [ ] Sélecteur de lieu dans formulaire événement
-- [ ] Géolocalisation optionnelle
+- [x] CRUD complet des lieux
+- [x] Sélecteur de lieu dans formulaire événement
+- [x] Géolocalisation optionnelle (latitude/longitude)
+- [x] Correction join table (lieux au lieu de lieux_evenements)
 
-### Phase 3
+### Phase 3 ✅ COMPLETE
 
-- [ ] Intégration fluide avec gestion spectacles
-- [ ] Affichage du statut spectacle dans la liste
+- [x] Intégration fluide avec gestion spectacles
+- [x] Affichage du statut spectacle dans la liste
 
-### Phase 4
+### Phase 4 (Future)
 
 - [ ] Vue calendrier fonctionnelle
 - [ ] Export CSV des événements
+- [ ] Drag & Drop réorganisation
+- [ ] Filtres avancés
 
 ## Dependencies
 
@@ -208,8 +243,24 @@ Tables `evenements` et `lieux` ont déjà les policies admin:
 
 ## Progress Log
 
-### 2026-01-25
+### 2026-01-26 (BigInt Fix & Documentation)
 
+- **Fixed** : BigInt serialization error dans Server Actions
+- **Refactored** : ActionResult simplifié (no data return)
+- **Refactored** : Server Actions validant avec EventFormSchema (UI) au lieu de EventInputSchema (Server)
+- **Added** : Type `EventDataTransport` pour transport avec IDs en string
+- **Updated** : Conversion format déplacée dans Server Actions (datetime-local→ISO8601, HH:MM→HH:MM:SS)
+- **Updated** : EventForm simplifié (envoie raw form data)
+- **Updated** : Plan TASK055 avec détails du fix BigInt
+- **Tested** : Update/Create événements fonctionnels sans erreur
+
+### 2026-01-25 (Phase 1 & 2 Implementation)
+
+- **Phase 1 Complete** : CRUD Events avec DAL, Server Actions, pages dédiées
+- **Phase 2 Complete** : CRUD Lieux avec interface complète
+- **Fixed** : Correction join `lieux_evenements` → `lieux` (table correcte)
+- **Added** : Combobox Spectacle/Lieu avec recherche
+- **Added** : EventsTable avec tri, EventForm validation
 - Task created from epic request
 - Analyzed existing public agenda implementation
 - Defined 4-phase implementation plan

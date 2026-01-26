@@ -9,9 +9,7 @@ export const EventInputSchema = z.object({
     start_time: z.string().regex(/^\d{2}:\d{2}:\d{2}$/), // HH:MM:SS
     end_time: z.string().regex(/^\d{2}:\d{2}:\d{2}$/).nullable().optional(),
     status: z.enum(["scheduled", "cancelled", "completed"]).default("scheduled"),
-    notes: z.string().max(2000).nullable().optional(),
     ticket_url: z.string().url().nullable().optional(),
-    tags: z.array(z.string()).default([]),
     capacity: z.number().int().positive().nullable().optional(),
     price_cents: z.number().int().nonnegative().nullable().optional(),
 });
@@ -20,14 +18,12 @@ export type EventInput = z.infer<typeof EventInputSchema>;
 // ✅ Schéma UI (pour formulaires React Hook Form) — utilise number
 export const EventFormSchema = z.object({
     spectacle_id: z.number().int().positive({ message: "Spectacle requis" }),
-    date_debut: z.string().datetime(),
+    date_debut: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/), // Format datetime-local: YYYY-MM-DDTHH:mm
     start_time: z.string().regex(/^\d{2}:\d{2}$/), // HH:MM pour input type="time"
     status: z.enum(["scheduled", "cancelled", "completed"]), // Requis (pas de default pour éviter undefined)
-    tags: z.array(z.string()), // Requis (pas de default pour éviter undefined)
     lieu_id: z.number().int().positive().nullable().optional(),
-    date_fin: z.string().datetime().nullable().optional(),
+    date_fin: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/).nullable().optional(),
     end_time: z.string().regex(/^\d{2}:\d{2}$/).nullable().optional(),
-    notes: z.string().max(2000).nullable().optional(),
     ticket_url: z.string().url().nullable().optional(),
     capacity: z.number().int().positive().nullable().optional(),
     price_cents: z.number().int().nonnegative().nullable().optional(),
@@ -40,16 +36,14 @@ export type EventDTO = {
     spectacle_id: bigint;
     spectacle_titre?: string; // Join depuis spectacles
     lieu_id: bigint | null;
-    lieu_nom?: string; // Join depuis lieux_evenements
+    lieu_nom?: string; // Join depuis lieux
     lieu_ville?: string;
     date_debut: string; // ISO 8601
     date_fin: string | null;
     start_time: string; // HH:MM:SS
     end_time: string | null;
     status: "scheduled" | "cancelled" | "completed";
-    notes: string | null;
     ticket_url: string | null;
-    tags: string[];
     capacity: number | null;
     price_cents: number | null;
     created_at: string;
@@ -63,3 +57,4 @@ export type LieuDTO = {
     ville: string | null;
     adresse: string | null;
 };
+

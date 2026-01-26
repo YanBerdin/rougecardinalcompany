@@ -28,6 +28,15 @@ export {
     type LieuDTO,
 } from "./admin-agenda";
 
+// Admin Lieux
+export {
+    LieuInputSchema,
+    LieuFormSchema,
+    type LieuInput,
+    type LieuFormValues,
+    type LieuDTO as LieuDTOFull,
+} from "./admin-lieux";
+
 // Compagnie
 export {
     ValueSchema,

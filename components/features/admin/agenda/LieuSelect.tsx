@@ -24,11 +24,12 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 import type { UseFormReturn } from "react-hook-form";
-import type { EventFormValues, LieuDTO } from "@/lib/schemas/admin-agenda";
+import type { EventFormValues } from "@/lib/schemas/admin-agenda-ui";
+import type { LieuClientDTO } from "@/lib/types/admin-agenda-client";
 
 interface LieuSelectProps {
     form: UseFormReturn<EventFormValues>;
-    lieux: LieuDTO[];
+    lieux: LieuClientDTO[];
 }
 
 export function LieuSelect({ form, lieux }: LieuSelectProps) {
@@ -41,7 +42,7 @@ export function LieuSelect({ form, lieux }: LieuSelectProps) {
                     <FormLabel>Lieu</FormLabel>
                     {lieux.length === 0 && (
                         <FormDescription>
-                            Aucun lieu disponible. Le CRUD Lieux sera implémenté en Phase 2.
+                            Aucun lieu disponible. Créez des lieux dans la section <a href="/admin/lieux" className="underline">Lieux</a>.
                         </FormDescription>
                     )}
                     <Popover>

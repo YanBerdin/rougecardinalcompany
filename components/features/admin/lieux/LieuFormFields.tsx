@@ -6,108 +6,29 @@ import {
     FormLabel,
     FormControl,
     FormMessage,
+    FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+// import { Textarea } from "@/components/ui/textarea";
 import type { UseFormReturn } from "react-hook-form";
-import type { EventFormValues } from "@/lib/schemas/admin-agenda-ui";
+import type { LieuFormValues } from "@/lib/schemas/admin-lieux";
 
-interface EventFormFieldsProps {
-    form: UseFormReturn<EventFormValues>;
+interface LieuFormFieldsProps {
+    form: UseFormReturn<LieuFormValues>;
 }
 
-export function EventFormFields({ form }: EventFormFieldsProps) {
+export function LieuFormFields({ form }: LieuFormFieldsProps) {
     return (
         <>
-            <div className="grid grid-cols-2 gap-4">
-                <FormField
-                    control={form.control}
-                    name="date_debut"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Date début *</FormLabel>
-                            <FormControl>
-                                <Input type="datetime-local" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                <FormField
-                    control={form.control}
-                    name="date_fin"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Date fin</FormLabel>
-                            <FormControl>
-                                <Input
-                                    type="datetime-local"
-                                    {...field}
-                                    value={field.value ?? ""}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-                <FormField
-                    control={form.control}
-                    name="start_time"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Heure début *</FormLabel>
-                            <FormControl>
-                                <Input type="time" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                <FormField
-                    control={form.control}
-                    name="end_time"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Heure fin</FormLabel>
-                            <FormControl>
-                                <Input type="time" {...field} value={field.value ?? ""} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-            </div>
-
             <FormField
                 control={form.control}
-                name="status"
+                name="nom"
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Statut</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                                <SelectTrigger>
-                                    <SelectValue />
-                                </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                                <SelectItem value="scheduled">Programmé</SelectItem>
-                                <SelectItem value="cancelled">Annulé</SelectItem>
-                                <SelectItem value="completed">Terminé</SelectItem>
-                            </SelectContent>
-                        </Select>
+                        <FormLabel>Nom *</FormLabel>
+                        <FormControl>
+                            <Input placeholder="Théâtre de la Ville" {...field} />
+                        </FormControl>
                         <FormMessage />
                     </FormItem>
                 )}
@@ -115,14 +36,13 @@ export function EventFormFields({ form }: EventFormFieldsProps) {
 
             <FormField
                 control={form.control}
-                name="ticket_url"
+                name="adresse"
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>URL Billetterie</FormLabel>
+                        <FormLabel>Adresse</FormLabel>
                         <FormControl>
                             <Input
-                                type="url"
-                                placeholder="https://..."
+                                placeholder="123 rue de la République"
                                 {...field}
                                 value={field.value ?? ""}
                             />
@@ -135,20 +55,15 @@ export function EventFormFields({ form }: EventFormFieldsProps) {
             <div className="grid grid-cols-2 gap-4">
                 <FormField
                     control={form.control}
-                    name="capacity"
+                    name="ville"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Capacité</FormLabel>
+                            <FormLabel>Ville</FormLabel>
                             <FormControl>
                                 <Input
-                                    type="number"
+                                    placeholder="Paris"
                                     {...field}
                                     value={field.value ?? ""}
-                                    onChange={(e) =>
-                                        field.onChange(
-                                            e.target.value ? parseInt(e.target.value) : null
-                                        )
-                                    }
                                 />
                             </FormControl>
                             <FormMessage />
@@ -158,22 +73,108 @@ export function EventFormFields({ form }: EventFormFieldsProps) {
 
                 <FormField
                     control={form.control}
-                    name="price_cents"
+                    name="code_postal"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Prix (centimes)</FormLabel>
+                            <FormLabel>Code postal</FormLabel>
+                            <FormControl>
+                                <Input
+                                    placeholder="75001"
+                                    {...field}
+                                    value={field.value ?? ""}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            </div>
+
+            <FormField
+                control={form.control}
+                name="pays"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Pays</FormLabel>
+                        <FormControl>
+                            <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
+
+            <FormField
+                control={form.control}
+                name="capacite"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Capacité</FormLabel>
+                        <FormControl>
+                            <Input
+                                type="number"
+                                placeholder="200"
+                                {...field}
+                                value={field.value ?? ""}
+                                onChange={(e) =>
+                                    field.onChange(e.target.value ? parseInt(e.target.value) : null)
+                                }
+                            />
+                        </FormControl>
+                        <FormDescription>Nombre de places assises</FormDescription>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+                <FormField
+                    control={form.control}
+                    name="latitude"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Latitude</FormLabel>
                             <FormControl>
                                 <Input
                                     type="number"
+                                    step="0.000001"
+                                    placeholder="48.8566"
                                     {...field}
                                     value={field.value ?? ""}
                                     onChange={(e) =>
                                         field.onChange(
-                                            e.target.value ? parseInt(e.target.value) : null
+                                            e.target.value ? parseFloat(e.target.value) : null
                                         )
                                     }
                                 />
                             </FormControl>
+                            <FormDescription>Coordonnées GPS (optionnel)</FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <FormField
+                    control={form.control}
+                    name="longitude"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Longitude</FormLabel>
+                            <FormControl>
+                                <Input
+                                    type="number"
+                                    step="0.000001"
+                                    placeholder="2.3522"
+                                    {...field}
+                                    value={field.value ?? ""}
+                                    onChange={(e) =>
+                                        field.onChange(
+                                            e.target.value ? parseFloat(e.target.value) : null
+                                        )
+                                    }
+                                />
+                            </FormControl>
+                            <FormDescription>Coordonnées GPS (optionnel)</FormDescription>
                             <FormMessage />
                         </FormItem>
                     )}

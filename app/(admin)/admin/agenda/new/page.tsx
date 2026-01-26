@@ -17,11 +17,34 @@ async function NewEventFormData() {
         fetchAllLieux(),
     ]);
 
-    if (!lieuxResult.success) {
-        throw new Error(lieuxResult.error);
-    }
+    // Gestion gracieuse si lieux non disponibles (Phase 2)
+    const lieux = lieuxResult.success ? lieuxResult.data : [];
 
-    return <EventForm spectacles={spectacles} lieux={lieuxResult.data} />;
+    // Convertir BigInt → Number pour sérialisation JSON (Server → Client)
+    const lieuxForClient = lieux.map(l => ({
+        id: Number(l.id),
+        nom: l.nom,
+        ville: l.ville,
+        adresse: l.adresse,
+    }));
+
+    // Convertir spectacles bigint → number pour sérialisation
+    const spectaclesForClient = spectacles.map(s => ({
+        id: Number(s.id),
+        title: s.title,
+        slug: s.slug,
+        short_description: s.short_description,
+        image_url: s.image_url,
+        premiere: s.premiere,
+        public: s.public,
+        genre: s.genre,
+        duration_minutes: s.duration_minutes,
+        casting: s.casting,
+        status: s.status,
+        awards: s.awards,
+    }));
+
+    return <EventForm spectacles={spectaclesForClient} lieux={lieuxForClient} />;
 }
 
 export default function NewEventPage() {
