@@ -50,7 +50,7 @@ export default function InvitationEmail({
           href={invitationUrl}
           style={{
             backgroundColor: "#4F46E5",
-            color: "#ffffff",
+            color: "#f7f7f7",
             padding: "12px 24px",
             borderRadius: "6px",
             textDecoration: "none",

@@ -14,7 +14,7 @@
 
 ---
 
-### Architecture et patterns observés dans le projet:
+### Architecture et patterns observés dans le projet
 
 - App Router Next.js 16 (app/) pour pages et layouts.
 - Pattern **Smart/Dumb** components: containers server-side pour la data, composants clients pour l'interactivité.
@@ -135,16 +135,16 @@ export async function createEvent(input: unknown) {
 
 #### Solution: Three-Layer Type System
 
-```
+```bash
 ┌─────────────────────────────────────────────────────┐
 │  UI Layer (Client)                                  │
-│  └─ number IDs (EventFormSchema, LieuFormSchema)   │
-│                     ↓                                │
+│  └─ number IDs (EventFormSchema, LieuFormSchema)    │
+│                     ↓                               │
 │  Transport Layer (Server Actions)                   │
-│  └─ string IDs (EventDataTransport)                │
-│                     ↓                                │
+│  └─ string IDs (EventDataTransport)                 │
+│                     ↓                               │
 │  DAL Layer (Server-Only)                            │
-│  └─ bigint IDs (EventInputSchema)                  │
+│  └─ bigint IDs (EventInputSchema)                   │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -206,7 +206,7 @@ const form = useForm<EventFormValues>({
 #### Règles Critiques (Apply Project-Wide)
 
 | Layer | Type | Schema | Used In |
-|-------|------|--------|---------|
+| ------- | ------ | -------- | --------- |
 | **UI** | `number` | `EventFormSchema` | React Hook Form, Client Components |
 | **Transport** | `string` | Custom validation | Server Actions (Action → DAL) |
 | **DAL** | `bigint` | `EventInputSchema` | Database operations, DAL functions |

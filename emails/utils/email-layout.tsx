@@ -25,7 +25,7 @@ export const EmailLayout = (
       <Head />
       <Body
         style={{
-          backgroundColor: "#ffffff",
+          backgroundColor: "#f7f7f7",
           fontFamily:
             "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
         }}
