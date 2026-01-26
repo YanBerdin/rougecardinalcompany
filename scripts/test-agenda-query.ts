@@ -1,11 +1,25 @@
+#!/usr/bin/env tsx
+/**
+ * Test Agenda Query - Debug script for evenements table joins
+ * 
+ * Usage: pnpm exec tsx scripts/test-agenda-query.ts
+ */
+
+import 'dotenv/config';
 import { createClient } from '@supabase/supabase-js';
-import { env } from '../lib/env';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const secretKey = process.env.SUPABASE_SECRET_KEY;
+
+if (!supabaseUrl || !secretKey) {
+  console.error('❌ Missing required environment variables:');
+  console.error('   NEXT_PUBLIC_SUPABASE_URL');
+  console.error('   SUPABASE_SECRET_KEY');
+  process.exit(1);
+}
 
 async function testQuery() {
-  const supabase = createClient(
-    env.NEXT_PUBLIC_SUPABASE_URL,
-    env.SUPABASE_SECRET_KEY
-  );
+  const supabase = createClient(supabaseUrl!, secretKey!);
 
   // Test 1: Basic query on evenements
   console.log('\n=== Test 1: Simple evenements query ===');
@@ -27,7 +41,7 @@ async function testQuery() {
       spectacle_id,
       lieu_id,
       date_debut,
-      spectacles (titre),
+      spectacles (title),
       lieux (nom, ville)
     `);
   console.log('Events with lieux count:', eventsWithLieux?.length);

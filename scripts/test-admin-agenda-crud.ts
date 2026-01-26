@@ -176,7 +176,7 @@ async function runTests() {
       const { data, error } = await supabase
         .from('evenements')
         .update({
-          status: 'completed',
+          status: 'confirmed', // Valid status from evenements_status_check constraint
           capacity: 120,
         })
         .eq('id', testEventId)
@@ -186,7 +186,7 @@ async function runTests() {
       if (error) throw error;
       if (!data) throw new Error('No data returned');
       
-      const updated = data.status === 'completed' && data.capacity === 120;
+      const updated = data.status === 'confirmed' && data.capacity === 120;
       
       results.push({
         test: 'Update Event',
@@ -196,11 +196,11 @@ async function runTests() {
           : '❌ Update verification failed',
       });
       console.log(updated 
-        ? `✅ Success: Updated status to 'completed' and capacity to 120`
+        ? `✅ Success: Updated status to 'confirmed' and capacity to 120`
         : '❌ Update verification failed'
       );
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Unknown error';
+      const message = err instanceof Error ? err.message : JSON.stringify(err);
       results.push({
         test: 'Update Event',
         passed: false,
