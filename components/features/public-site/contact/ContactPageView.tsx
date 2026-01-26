@@ -67,11 +67,6 @@ export function ContactPageView({ showNewsletter = true }: ContactPageViewProps)
     handleSubmit: onNewsletterSubmit,
   } = useNewsletterSubscribe({ source: "contact" });
 
-  useEffect(() => {
-    const t = setTimeout(() => setIsInitialLoading(false), 600); //TODO: artificial delay (TODO: remove)
-    return () => clearTimeout(t);
-  }, []);
-
   const onInputChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
