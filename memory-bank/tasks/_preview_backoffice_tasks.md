@@ -24,7 +24,7 @@ Ce fichier est une prévisualisation consolidée des 20 tâches générées à p
 | TASK034 | Performance Optimization    | Completed | 2025-10-16 | 2026-01-16 | 8 phases: artificial delays removal, explicit SELECT, ISR, indexes, Suspense, cache() | `memory-bank/tasks/tasks-completed/TASK034-performance-optimization.md`    | #14 CLOSED |
 | TASK035 | Testing Suite               | Completed | 2025-10-16 | 2026-01-25 | Unit, integration and E2E tests for admin flows          | `memory-bank/tasks/tasks-completed/TASK035-testing-suite.md`               | #15 CLOSED |
 | TASK036 | Security Audit              | Completed | 2025-10-16 | 2026-01-03 | OWASP Top 10 audit (8/10), 4 scripts, 3 docs, 85% production ready | `memory-bank/tasks/tasks-completed/TASK036-security-audit.md`              | #16 CLOSED |
-| TASK037 | Accessibility Compliance    | Pending | 2025-10-16 | 2025-10-16 | WCAG 2.1 AA validation and fixes                         | `memory-bank/tasks/TASK037-accessibility-compliance.md`    | #17 |
+| TASK037 | Admin Views Security Hardening | Completed | 2025-10-16 | 2026-01-03 | Admin views isolation, GRANT revokes, security audits | `memory-bank/tasks/tasks-completed/TASK037-admin-views-security-hardening.md` | #17 CLOSED |
 | TASK038 | Responsive Testing          | Pending | 2025-10-16 | 2025-10-16 | Cross-device and cross-browser validation                | `memory-bank/tasks/TASK038-responsive-testing.md`          | #18 |
 | TASK039 | Production Deployment       | Pending | 2025-10-16 | 2025-10-16 | CI/CD, env setup, monitoring, migrations                 | `memory-bank/tasks/TASK039-production-deployment.md`       | #19 |
 | TASK040 | Documentation               | Pending | 2025-10-16 | 2025-10-16 | Admin guides, technical docs and runbooks                | `memory-bank/tasks/TASK040-documentation.md`               | #20 |
@@ -33,6 +33,9 @@ Ce fichier est une prévisualisation consolidée des 20 tâches générées à p
 | TASK050 | Database Backup & Recovery Strategy | Completed | 2026-01-14 | 2026-01-14 | Weekly automated database backups with pg_dump, Storage upload, rotation, PITR runbook | `memory-bank/tasks/TASK050-database-backup-recovery.md` | - |
 | TASK051 | Error Monitoring & Alerting | Completed | 2025-10-16 | 2026-01-14 | Sentry integration, error boundaries, P0/P1 alerts, incident response runbook | `memory-bank/tasks/TASK051-error-monitoring-alerting.md` | - |
 | TASK053 | Data Retention Automation | Completed | 2026-01-17 | 2026-01-18 | RGPD compliance: 4 migrations, Edge Function, pg_cron daily 2AM UTC, 5 tables configured | `memory-bank/tasks/tasks-completed/TASK053-data-retention-automation.md` | - |
+| TASK048 | T3 Env Implementation | Completed | 2025-12-20 | 2025-12-20 | Type-safe environment variables with Zod validation | `memory-bank/tasks/tasks-completed/TASK048-t3-env-implementation.md` | - |
+| TASK049 | Database Security RLS SECURITY INVOKER | Completed | 2025-12-31 | 2025-12-31 | 11 public views enforced with SECURITY INVOKER, GRANT permissions fixed | `memory-bank/tasks/tasks-completed/TASK049-database-security-rls-security-invoker.md` | - |
+| TASK055 | Admin Agenda Management | Completed | 2026-01-26 | 2026-01-26 | Phase 1 Events + Phase 2 Lieux CRUD, BigInt serialization fix pattern | `memory-bank/tasks/tasks-completed/TASK055-admin-agenda-management.md` | - |
 
 ---
 

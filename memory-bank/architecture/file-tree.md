@@ -1,11 +1,13 @@
 # File Tree: rougecardinalcompany
 
-**Generated:** 16/01/2026, 10:00:00 AM
-**Root Path:** `memory-bank/architecture`
-**Last Updated:** Added TASK030 Phase 11 scripts (check-presse-toggles.ts, toggle-presse.ts) - 2026-01-02
+**Generated:** 1/26/2026, 4:21:16 PM
+**Root Path:** `/home/yandev/projets/rougecardinalcompany`
 
 ```bash
+├── 📁 .devin
+│   └── ⚙️ wiki.json
 ├── 📁 .github
+│   ├── 📁 agents
 │   ├── 📁 copilot
 │   ├── 📁 instructions
 │   ├── 📁 prompts
@@ -15,6 +17,19 @@
 ├── 📁 app
 │   ├── 📁 (admin)
 │   │   ├── 📁 admin
+│   │   │   ├── 📁 agenda
+│   │   │   │   ├── 📁 [id]
+│   │   │   │   │   └── 📁 edit
+│   │   │   │   │       └── 📄 page.tsx
+│   │   │   │   ├── 📁 new
+│   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   ├── 📄 actions-client.ts
+│   │   │   │   ├── 📄 actions.ts
+│   │   │   │   ├── 📄 loading.tsx
+│   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 analytics
+│   │   │   │   ├── 📄 actions.ts
+│   │   │   │   └── 📄 page.tsx
 │   │   │   ├── 📁 audit-logs
 │   │   │   │   ├── 📄 actions.ts
 │   │   │   │   ├── 📄 loading.tsx
@@ -28,6 +43,15 @@
 │   │   │   │   └── 📁 hero
 │   │   │   │       ├── 📄 home-hero-actions.ts
 │   │   │   │       └── 📄 page.tsx
+│   │   │   ├── 📁 lieux
+│   │   │   │   ├── 📁 [id]
+│   │   │   │   │   └── 📁 edit
+│   │   │   │   │       └── 📄 page.tsx
+│   │   │   │   ├── 📁 new
+│   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   ├── 📄 actions.ts
+│   │   │   │   ├── 📄 loading.tsx
+│   │   │   │   └── 📄 page.tsx
 │   │   │   ├── 📁 media
 │   │   │   │   ├── 📁 folders
 │   │   │   │   │   └── 📄 page.tsx
@@ -35,6 +59,37 @@
 │   │   │   │   │   └── 📄 page.tsx
 │   │   │   │   ├── 📁 tags
 │   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 partners
+│   │   │   │   ├── 📁 [id]
+│   │   │   │   │   └── 📁 edit
+│   │   │   │   │       └── 📄 page.tsx
+│   │   │   │   ├── 📁 new
+│   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   ├── 📄 actions.ts
+│   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 presse
+│   │   │   │   ├── 📁 articles
+│   │   │   │   │   ├── 📁 [id]
+│   │   │   │   │   │   └── 📁 edit
+│   │   │   │   │   │       └── 📄 page.tsx
+│   │   │   │   │   └── 📁 new
+│   │   │   │   │       └── 📄 page.tsx
+│   │   │   │   ├── 📁 communiques
+│   │   │   │   │   ├── 📁 [id]
+│   │   │   │   │   │   ├── 📁 edit
+│   │   │   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   │   │   └── 📁 preview
+│   │   │   │   │   │       └── 📄 page.tsx
+│   │   │   │   │   └── 📁 new
+│   │   │   │   │       └── 📄 page.tsx
+│   │   │   │   ├── 📁 contacts
+│   │   │   │   │   ├── 📁 [id]
+│   │   │   │   │   │   └── 📁 edit
+│   │   │   │   │   │       └── 📄 page.tsx
+│   │   │   │   │   └── 📁 new
+│   │   │   │   │       └── 📄 page.tsx
+│   │   │   │   ├── 📄 actions.ts
 │   │   │   │   └── 📄 page.tsx
 │   │   │   ├── 📁 site-config
 │   │   │   │   ├── 📄 loading.tsx
@@ -134,7 +189,7 @@
 │   │   └── 📄 page.tsx
 │   ├── 📁 debug-auth-before-admin
 │   │   └── 📄 page.tsx
-│   ├── 📁 sentry-example-page
+│   ├── 📁 sentry-example-page (deleted)
 │   │   └── 📄 page.tsx
 │   ├── 📁 test-connection
 │   │   └── 📄 page.tsx
@@ -174,6 +229,25 @@
 │   │   └── 📄 index.ts
 │   ├── 📁 features
 │   │   ├── 📁 admin
+│   │   │   ├── 📁 agenda
+│   │   │   │   ├── 📄 EventForm.tsx
+│   │   │   │   ├── 📄 EventFormFields.tsx
+│   │   │   │   ├── 📄 EventsContainer.tsx
+│   │   │   │   ├── 📄 EventsTable.tsx
+│   │   │   │   ├── 📄 EventsView.tsx
+│   │   │   │   ├── 📄 LieuSelect.tsx
+│   │   │   │   ├── 📄 SpectacleSelect.tsx
+│   │   │   │   └── 📄 types.ts
+│   │   │   ├── 📁 analytics
+│   │   │   │   ├── 📄 AdminActivityCard.tsx
+│   │   │   │   ├── 📄 AnalyticsContainer.tsx
+│   │   │   │   ├── 📄 AnalyticsDashboard.tsx
+│   │   │   │   ├── 📄 AnalyticsFilters.tsx
+│   │   │   │   ├── 📄 MetricCard.tsx
+│   │   │   │   ├── 📄 PageviewsChart.tsx
+│   │   │   │   ├── 📄 SentryErrorsCard.tsx
+│   │   │   │   ├── 📄 TopPagesTable.tsx
+│   │   │   │   └── 📄 types.ts
 │   │   │   ├── 📁 audit-logs
 │   │   │   │   ├── 📄 AuditLogDetailModal.tsx
 │   │   │   │   ├── 📄 AuditLogFilters.tsx
@@ -194,6 +268,13 @@
 │   │   │   │   ├── 📄 HeroSlidesContainer.tsx
 │   │   │   │   ├── 📄 HeroSlidesErrorBoundary.tsx
 │   │   │   │   └── 📄 HeroSlidesView.tsx
+│   │   │   ├── 📁 lieux
+│   │   │   │   ├── 📄 LieuForm.tsx
+│   │   │   │   ├── 📄 LieuFormFields.tsx
+│   │   │   │   ├── 📄 LieuxContainer.tsx
+│   │   │   │   ├── 📄 LieuxTable.tsx
+│   │   │   │   ├── 📄 LieuxView.tsx
+│   │   │   │   └── 📄 types.ts
 │   │   │   ├── 📁 media
 │   │   │   │   ├── 📄 ImageFieldGroup.tsx
 │   │   │   │   ├── 📄 MediaBulkActions.tsx
@@ -210,6 +291,24 @@
 │   │   │   │   ├── 📄 MediaTagsView.tsx
 │   │   │   │   ├── 📄 MediaUploadDialog.tsx
 │   │   │   │   ├── 📄 index.ts
+│   │   │   │   └── 📄 types.ts
+│   │   │   ├── 📁 partners
+│   │   │   │   ├── 📄 PartnerForm.tsx
+│   │   │   │   ├── 📄 PartnersContainer.tsx
+│   │   │   │   └── 📄 PartnersView.tsx
+│   │   │   ├── 📁 presse
+│   │   │   │   ├── 📄 ArticleEditForm.tsx
+│   │   │   │   ├── 📄 ArticleNewForm.tsx
+│   │   │   │   ├── 📄 ArticlesContainer.tsx
+│   │   │   │   ├── 📄 ArticlesView.tsx
+│   │   │   │   ├── 📄 PressContactEditForm.tsx
+│   │   │   │   ├── 📄 PressContactNewForm.tsx
+│   │   │   │   ├── 📄 PressContactsContainer.tsx
+│   │   │   │   ├── 📄 PressContactsView.tsx
+│   │   │   │   ├── 📄 PressReleaseEditForm.tsx
+│   │   │   │   ├── 📄 PressReleaseNewForm.tsx
+│   │   │   │   ├── 📄 PressReleasesContainer.tsx
+│   │   │   │   ├── 📄 PressReleasesView.tsx
 │   │   │   │   └── 📄 types.ts
 │   │   │   ├── 📁 site-config
 │   │   │   │   ├── 📄 DisplayTogglesContainer.tsx
@@ -330,6 +429,7 @@
 │   │   ├── 📄 news-skeleton.tsx
 │   │   ├── 📄 newsletter-skeleton.tsx
 │   │   ├── 📄 partners-skeleton.tsx
+│   │   ├── 📄 presse-sections-skeleton.tsx
 │   │   ├── 📄 presse-skeleton.tsx
 │   │   ├── 📄 shows-skeleton.tsx
 │   │   └── 📄 spectacles-skeleton.tsx
@@ -343,7 +443,9 @@
 │   │   ├── 📄 button.tsx
 │   │   ├── 📄 calendar.tsx
 │   │   ├── 📄 card.tsx
+│   │   ├── 📄 chart.tsx
 │   │   ├── 📄 checkbox.tsx
+│   │   ├── 📄 command.tsx
 │   │   ├── 📄 date-range-picker.tsx
 │   │   ├── 📄 dialog.tsx
 │   │   ├── 📄 dropdown-menu.tsx
@@ -409,15 +511,23 @@
 │   │   │   ├── 📄 index.ts
 │   │   │   ├── 📄 serialize.ts
 │   │   │   └── 📄 slug.ts
+│   │   ├── 📄 admin-agenda.ts
 │   │   ├── 📄 admin-home-about.ts
 │   │   ├── 📄 admin-home-hero.ts
+│   │   ├── 📄 admin-lieux.ts
+│   │   ├── 📄 admin-partners.ts
+│   │   ├── 📄 admin-press-articles.ts
+│   │   ├── 📄 admin-press-contacts.ts
+│   │   ├── 📄 admin-press-releases.ts
 │   │   ├── 📄 admin-users.ts
 │   │   ├── 📄 agenda.ts
+│   │   ├── 📄 analytics.ts
 │   │   ├── 📄 audit-logs.ts
 │   │   ├── 📄 compagnie-presentation.ts
 │   │   ├── 📄 compagnie.ts
 │   │   ├── 📄 contact.ts
 │   │   ├── 📄 dashboard.ts
+│   │   ├── 📄 data-retention.ts
 │   │   ├── 📄 home-about.ts
 │   │   ├── 📄 home-hero.ts
 │   │   ├── 📄 home-news.ts
@@ -451,15 +561,25 @@
 │   ├── 📁 plugins
 │   │   └── 📄 touch-hitbox-plugin.js
 │   ├── 📁 schemas
+│   │   ├── 📄 admin-agenda-ui.ts
+│   │   ├── 📄 admin-agenda.ts
+│   │   ├── 📄 admin-lieux.ts
 │   │   ├── 📄 admin-users.ts
 │   │   ├── 📄 agenda.ts
+│   │   ├── 📄 analytics.ts
 │   │   ├── 📄 audit-logs.ts
 │   │   ├── 📄 compagnie.ts
 │   │   ├── 📄 contact.ts
 │   │   ├── 📄 dashboard.ts
+│   │   ├── 📄 data-retention.ts
 │   │   ├── 📄 home-content.ts
 │   │   ├── 📄 index.ts
 │   │   ├── 📄 media.ts
+│   │   ├── 📄 newsletter.ts
+│   │   ├── 📄 partners.ts
+│   │   ├── 📄 press-article.ts
+│   │   ├── 📄 press-contact.ts
+│   │   ├── 📄 press-release.ts
 │   │   ├── 📄 presse.ts
 │   │   ├── 📄 site-config.ts
 │   │   ├── 📄 spectacles.ts
@@ -467,12 +587,17 @@
 │   ├── 📁 sentry
 │   │   ├── 📄 capture-error.ts
 │   │   └── 📄 index.ts
+│   ├── 📁 services
+│   │   └── 📄 sentry-api.ts
 │   ├── 📁 tables
 │   │   ├── 📄 spectacle-table-helpers.ts
 │   │   └── 📄 user-table-helpers.ts
+│   ├── 📁 types
+│   │   └── 📄 admin-agenda-client.ts
 │   ├── 📁 utils
 │   │   ├── 📄 file-hash.ts
 │   │   ├── 📄 get-client-ip.ts
+│   │   ├── 📄 press-utils.ts
 │   │   ├── 📄 rate-limit.ts
 │   │   └── 📄 validate-image-url.ts
 │   ├── 📄 database.types.ts
@@ -481,29 +606,202 @@
 │   ├── 📄 site-config.ts
 │   └── 📄 utils.ts
 ├── 📁 memory-bank
+│   ├── 📁 architecture
+│   │   ├── 📝 Email_Service_Architecture.md
+│   │   ├── 📝 Project_Architecture_Blueprint.md
+│   │   ├── 📝 Project_Folders_Structure_Blueprint_v6.md
+│   │   ├── 📝 dev-email-redirect.md
+│   │   └── 📝 file-tree.md
+│   ├── 📁 changes
+│   │   └── 📝 2025-11-11-layouts-admin-sidebar.md
+│   ├── 📁 epics
+│   │   └── ⚙️ epics-map.yaml
+│   ├── 📁 procedures
+│   ├── 📁 tasks
+│   │   └── 📁 tasks-completed
 ├── 📁 public
+│   └── 🖼️ logo-florian.png
 ├── 📁 scripts
+│   ├── 📁 Test_fetchMediaArticles
+│   │   ├── 📝 README.md
+│   │   ├── 📄 apply-migration-articles-view.ts
+│   │   ├── 📄 check-chapo-excerpt.ts
+│   │   ├── 📄 check-rls-policies.ts
+│   │   ├── 📄 test-chapo-and-excerpt-separate.ts
+│   │   ├── 📄 test-dal-pattern.ts
+│   │   ├── 📄 test-public-view.ts
+│   │   ├── 📄 test-rls-articles copy.ts
+│   │   └── 📄 test-rls-articles.ts
+│   ├── 📁 lib
+│   │   └── 📄 env.ts
+│   ├── 📁 test-invitation-email
+│   │   ├── 📄 generate-invite-link.js
+│   │   ├── 📄 test-complete-flow.js
+│   │   ├── 📄 test-invitation-flow.js
+│   │   ├── 📄 test-invitation-link-flow.js
+│   │   ├── 📄 test-local-invitation.js
+│   │   └── 📄 test-redirect-flow.js
+│   ├── 📁 utils
+│   │   └── 📄 supabase-local-credentials.ts
+│   ├── 📝 README.md
+│   ├── 📄 audit-cookie-flags.ts
+│   ├── 📄 audit-secrets-management.ts
+│   ├── 📄 backup-database.ts
+│   ├── 📄 check-admin-status.ts
+│   ├── 📄 check-cloud-data.ts
+│   ├── 📄 check-cloud-policies.sql
+│   ├── 📄 check-display-toggles.ts
+│   ├── 📄 check-email-logs.ts
+│   ├── 📄 check-existing-profile.js
+│   ├── 📄 check-extension.ts
+│   ├── 📄 check-migration-applied.ts
+│   ├── 📄 check-policies.sql
+│   ├── 📄 check-presse-toggles.ts
+│   ├── 📄 check-rls-policies.ts
+│   ├── 📄 check-security-advisors.js
+│   ├── 📄 check-security-advisors.ts
+│   ├── 📄 check-security-audit.sh
+│   ├── 📄 check-storage-buckets.ts
+│   ├── 📄 check-storage-paths.ts
+│   ├── 📄 check-view-permissions.js
+│   ├── 📄 check-views-security.ts
+│   ├── 📄 check_unused_indexes.sql
+│   ├── 📄 create-admin-user-local.ts
+│   ├── 📄 create-admin-user.ts
+│   ├── 📄 create_issues.sh
+│   ├── 📄 debug-rls-errors.ts
+│   ├── 📄 delete-test-user.js
+│   ├── 📄 deploy-edge-function.sh
+│   ├── 📄 diagnose-admin-views.js
+│   ├── 📄 find-auth-user.js
+│   ├── 📄 inspect-user.ts
+│   ├── 📄 post-reset.sh
+│   ├── 📄 rebuild-cloud-schema.sh
+│   ├── 📄 seed-admin.ts
+│   ├── 📄 set-admin-role.ts
+│   ├── 📄 supabase-env.sh
+│   ├── 📄 test-admin-agenda-crud.ts
+│   ├── 📄 test-agenda-query.ts
+│   ├── 📄 test-all-dal-functions-doc.ts
+│   ├── 📄 test-all-dal-functions.ts
+│   ├── 📄 test-audit-logs-cloud.ts
+│   ├── 📄 test-audit-logs-schema.ts
+│   ├── 📄 test-audit-logs.ts
+│   ├── 📄 test-cookie-security.ts
+│   ├── 📄 test-dashboard-stats.ts
+│   ├── 📄 test-data-retention.ts
+│   ├── 📄 test-email-integration.ts
+│   ├── 📄 test-env-validation.ts
+│   ├── 📄 test-newsletter-recursion-fix-direct.ts
+│   ├── 📄 test-newsletter-recursion-fix.ts
+│   ├── 📄 test-profile-insertion.js
+│   ├── 📄 test-rate-limit-contact.ts
+│   ├── 📄 test-rate-limit-newsletter.ts
+│   ├── 📄 test-rate-limit.ts
+│   ├── 📄 test-rls-cloud.ts
+│   ├── 📄 test-rls-policy-with-check-validation.ts
+│   ├── 📄 test-sentry-api.ts
+│   ├── 📄 test-spectacles-crud.ts
+│   ├── 📄 test-spectacles-dal.ts
+│   ├── 📄 test-ssrf-validation.ts
+│   ├── 📄 test-team-server-actions.ts
+│   ├── 📄 test-thumbnail-direct.ts
+│   ├── 📄 test-thumbnail-generation.ts
+│   ├── 📄 test-views-security-authenticated-cloud.ts
+│   ├── 📄 test-views-security-authenticated.ts
+│   ├── 📄 test-views-security-invoker.ts
+│   ├── 📄 test-webhooks.ts
+│   ├── 📄 toggle-presse.ts
+│   └── 📄 validate-media-folders.ts
 ├── 📁 supabase
 │   ├── 📁 .branches
+│   │   └── 📄 _current_branch
+│   ├── 📁 functions
+│   │   └── 📁 scheduled-cleanup
+│   │       ├── ⚙️ deno.json
+│   │       └── 📄 index.ts
 │   ├── 📁 migrations
-│   └── 📁 seschemaseds
+│   │   ├── 📁 archived
+│   │   ├── 📝 migrations.md
+│   │   └── 📄 migrations.md
+│   ├── 📁 schemas
+│   │   ├── 📄 01_extensions.sql
+│   │   ├── 📄 02_table_profiles.sql
+│   │   ├── 📄 02b_functions_core.sql
+│   │   ├── 📄 02c_storage_buckets.sql
+│   │   ├── 📄 03_table_medias.sql
+│   │   ├── 📄 04_table_media_tags_folders.sql
+│   │   ├── 📄 04_table_membres_equipe.sql
+│   │   ├── 📄 05_profiles_auto_sync.sql
+│   │   ├── 📄 05_table_lieux.sql
+│   │   ├── 📄 06_table_spectacles.sql
+│   │   ├── 📄 07_table_evenements.sql
+│   │   ├── 📄 07b_table_compagnie_content.sql
+│   │   ├── 📄 07c_table_compagnie_presentation.sql
+│   │   ├── 📄 07d_table_home_hero.sql
+│   │   ├── 📄 07e_table_home_about.sql
+│   │   ├── 📄 08_table_articles_presse.sql
+│   │   ├── 📄 08b_communiques_presse.sql
+│   │   ├── 📄 09_table_partners.sql
+│   │   ├── 📄 10_tables_system.sql
+│   │   ├── 📄 10b_tables_user_management.sql
+│   │   ├── 📄 11_tables_relations.sql
+│   │   ├── 📄 12_evenements_recurrence.sql
+│   │   ├── 📄 13_analytics_events.sql
+│   │   ├── 📄 14_categories_tags.sql
+│   │   ├── 📄 15_content_versioning.sql
+│   │   ├── 📄 16_seo_metadata.sql
+│   │   ├── 📄 20_audit_logs_retention.sql
+│   │   ├── 📄 20_functions_core.sql
+│   │   ├── 📄 21_data_retention_tables.sql
+│   │   ├── 📄 21_functions_auth_sync.sql
+│   │   ├── 📄 22_data_retention_functions.sql
+│   │   ├── 📄 30_triggers.sql
+│   │   ├── 📄 40_indexes.sql
+│   │   ├── 📄 41_views_admin_content_versions.sql
+│   │   ├── 📄 41_views_communiques.sql
+│   │   ├── 📄 41_views_retention.sql
+│   │   ├── 📄 42_rpc_audit_logs.sql
+│   │   ├── 📄 50_constraints.sql
+│   │   ├── 📄 60_rls_profiles.sql
+│   │   ├── 📄 61_rls_main_tables.sql
+│   │   ├── 📄 62_rls_advanced_tables.sql
+│   │   ├── 📄 63_reorder_team_members.sql
+│   │   ├── 📄 63b_reorder_hero_slides.sql
+│   │   └── 📝 README.md
+│   ├── 📁 scripts
+│   ├── 📁 snippets
+│   ├── 📁 tests
+│   ├── 📝 CLI-Supabase-Cloud.md
+│   ├── 📝 CLI-Supabase-Local.md
+│   ├── 📝 README.md
+│   ├── 📄 admin.ts
+│   ├── 📄 client.ts
+│   ├── 📄 middleware.ts
+│   └── 📄 server.ts
 ├── ⚙️ .env.example
+├── ⚙️ .env.test.local
 ├── ⚙️ .gitignore
 ├── ⚙️ .markdownlint.jsonc
-├── 📝 COMMIT_MESSAGE_HYDRATION_FIX.txt
 ├── 📝 README.md
 ├── 📝 TESTING_RESEND.md
 ├── 📄 check_spectacles_rls.sql
 ├── ⚙️ components.json
 ├── 📄 eslint.config.mjs
 ├── 📄 inspect-tables.sql
+├── 📄 instrumentation.ts
 ├── 📄 next.config.ts
 ├── ⚙️ package.json
 ├── ⚙️ pnpm-lock.yaml
 ├── 📄 postcss.config.mjs
 ├── 📄 proxy.ts
+├── 📄 sentry.client.config.ts
+├── 📄 sentry.edge.config.ts
+├── 📄 sentry.server.config.ts
 ├── 📄 supabase_public_data.sql
 ├── 📄 tailwind.config.ts
 ├── 📄 test-email-simple.js
 └── ⚙️ tsconfig.json
 ```
+
+---

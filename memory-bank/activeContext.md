@@ -1,8 +1,147 @@
 # Active Context
 
-**Current Focus (2026-01-22)**: ✅ Security Fixes Complete (RLS, SECURITY INVOKER, entity_type whitelist)
+**Current Focus (2026-01-26)**: ✅ TASK055 Phase 2 Complete - Lieux Management CRUD + BigInt Serialization Fix
 
-**Last Major Updates**: Security Session (2026-01-22) + Validation Zod + Trigger Fix (2026-01-21) + LCP Optimization (2026-01-21) + RLS Fix Spectacles (2026-01-20)
+**Last Major Updates**: TASK055 Phase 2 (2026-01-26) + Security Session (2026-01-22) + Validation Zod + Trigger Fix (2026-01-21) + LCP Optimization (2026-01-21) + RLS Fix Spectacles (2026-01-20)
+
+---
+
+## ✅ TASK055 Phase 2: Lieux Management CRUD (2026-01-26)
+
+### Summary
+
+✅ **COMPLETE LIEUX CRUD IMPLEMENTATION** - 5 DAL functions, dedicated pages, BigInt serialization fix
+
+| Component | Status | Files |
+| --------- | ------ | ----- |
+| DAL Lieux | ✅ | `lib/dal/admin-lieux.ts` (5 functions) |
+| Schemas | ✅ | Server (bigint) + UI (number) separation |
+| Server Actions | ✅ | `/admin/lieux/actions.ts` (5 actions) |
+| Admin Pages | ✅ | List, /new, /\[id]/edit |
+| UI Components | ✅ | Container, View, Form, FormFields |
+| Integration | ✅ | LieuSelect combobox in EventForm |
+| BigInt Fix | ✅ | ActionResult simplified, EventDataTransport |
+
+### Critical Fix: BigInt Serialization Error
+
+**Problem**: Clicking "Mettre à jour" without modifying fields caused "Do not know how to serialize a BigInt" error.
+
+**Root Cause**: React Server Actions serialize execution context. When `z.coerce.bigint()` created BigInt values during validation, React failed to serialize them even if not explicitly returned.
+
+**Solution Architecture**:
+
+```bash
+// ✅ CORRECT Pattern (After Fix)
+EventForm (Client)                Server Action              DAL
+   │                                   │                      │
+   │ EventFormValues (number IDs)      │                      │
+   ├──────────────────────────────────►│                      │
+   │                        1. Validate with                  │
+   │                           EventFormSchema (number)       │
+   │                        2. Convert to                     │
+   │                           EventDataTransport (string)    │
+   │                                   ├─────────────────────►│
+   │                                   │         3. DAL converts
+   │                                   │            string → bigint
+   │                        4. Return ActionResult            │
+   │                           (success only, no data)        │
+   │◄──────────────────────────────────┤                      │
+   5. router.refresh()                 │                      │
+```
+
+### Key Changes
+
+**Schemas** (`lib/schemas/admin-lieux.ts`):
+
+- ✅ Fixed TypeScript resolver error: Removed `z.coerce` (unknown type issue)
+- ✅ `pays` field required in UI schema (no `.default()`, handled in `defaultValues`)
+- ✅ Server schema uses `bigint`, UI schema uses `number`
+
+**Server Actions** (`app/(admin)/admin/agenda/actions.ts`):
+
+- ✅ Simplified `ActionResult<T>` to never return data (only `{success: true/false}`)
+- ✅ Created `EventDataTransport` type (IDs as `string`, not `bigint`)
+- ✅ Validate with `EventFormSchema` (number IDs) instead of `EventInputSchema`
+- ✅ Convert datetime-local→ISO8601 and HH:MM→HH:MM:SS AFTER validation
+- ✅ Removed helper function `formValuesToEventInput` (converted BigInt too early)
+
+**DAL** (`lib/dal/admin-lieux.ts`):
+
+- ✅ 5 CRUD functions with `cache()`, `requireAdmin()`, `DALResult<T>`
+- ✅ Error codes: `[ERR_LIEUX_001]` to `[ERR_LIEUX_005]`
+- ✅ Follows SOLID pattern (< 30 lines per function)
+
+**UI Components**:
+
+- ✅ `LieuForm.tsx` - React Hook Form with `LieuFormSchema` (number IDs)
+- ✅ `LieuFormFields.tsx` - 8 fields (nom, adresse, ville, code_postal, pays, etc.)
+- ✅ `LieuxView.tsx` - Table view with edit/delete actions
+- ✅ `LieuxContainer.tsx` - Server Component fetches data
+- ✅ `LieuSelect.tsx` - Combobox with search for event forms
+
+### Admin Sidebar
+
+**Updated**: Added "Lieux" menu item with MapPin icon linking to `/admin/agenda/lieux`
+
+### Validation
+
+| Test | Result |
+| ---- | ------ |
+| TypeScript compilation | ✅ 0 errors |
+| Build production | ✅ Success |
+| Create lieu | ✅ Working |
+| Update lieu (no changes) | ✅ **Fixed** (BigInt error resolved) |
+| Update lieu (with changes) | ✅ Working |
+| Delete lieu | ✅ Working |
+| EventForm integration | ✅ LieuSelect working |
+| Scripts | ✅ `test-admin-agenda-crud.ts` created |
+
+### Files Created/Modified
+
+| Type | Count | Files |
+| ---- | ----- | ----- |
+| DAL | 1 | `lib/dal/admin-lieux.ts` |
+| Schemas | 1 | `lib/schemas/admin-lieux.ts` |
+| Server Actions | 2 | `app/(admin)/admin/lieux/actions.ts`, `agenda/actions.ts` (fixed) |
+| Admin Pages | 3 | List, /new, /\[id]/edit |
+| Components | 6 | Container, View, Form, FormFields, LieuSelect, types.ts |
+| Types | 1 | `lib/types/admin-agenda-client.ts` |
+| Scripts | 2 | `test-admin-agenda-crud.ts`, `test-agenda-query.ts` |
+| Sidebar | 1 | `components/admin/AdminSidebar.tsx` |
+| Documentation | 3 | Task file, plan, scripts README |
+
+### Data Flow Pattern (Established)
+
+```typescript
+// ✅ Pattern to follow for ALL CRUD operations with bigint IDs
+Form (number) → Action (FormSchema with number) → 
+  DataTransport (string IDs) → DAL (converts string→bigint internally) → 
+  ActionResult {success: true/false} → router.refresh() → 
+  Server Component re-renders with fresh data
+```
+
+### Documentation
+
+- ✅ **Task**: `memory-bank/tasks/tasks-completed/TASK055-admin-agenda-management.md`
+- ✅ **BigInt Fix**: `memory-bank/tasks/tasks-completed/TASK055-bigint-fix.md`
+- ✅ **Plan**: `.github/prompts/plan-TASK055-AdminAgenda.prompt.md`
+- ✅ **Scripts**: `scripts/README.md` (updated with test-admin-agenda-crud.ts)
+
+### Impact on Architecture
+
+**Critical Learning**: This BigInt serialization fix establishes a **project-wide pattern** for handling database IDs:
+
+1. **Never use `z.coerce.bigint()` in Server Action validation**
+2. **Always separate Server schemas (bigint) from UI schemas (number)**
+3. **Create transport types with string IDs for Action→DAL communication**
+4. **ActionResult should NEVER return data containing BigInt**
+5. **Use `router.refresh()` instead of returning data from Server Actions**
+
+This pattern must be applied to:
+
+- ✅ Lieux CRUD (done)
+- ✅ Events CRUD (fixed)
+- 🔄 Future: All admin CRUD interfaces with bigint IDs
 
 ---
 

@@ -16,7 +16,6 @@
 
 ## En Attente
 
-- `TASK055` Admin Agenda Management - CRUD événements, lieux, intégration spectacles (P0-P2)
 - `TASK005` Optimisation SEO et meta-tags dynamiques
 - `TASK007` Tests automatisés et monitoring
 - `TASK008` Configuration des redirections vers billetterie externe
@@ -82,3 +81,4 @@
 - `TASK047` Newsletter Schema Extraction - ✅ Complete on 2026-01-17 (Extracted NewsletterSubscriptionSchema from contact.ts to dedicated newsletter.ts file, updated barrel exports, 3 commits: create/refactor/cleanup, TypeScript + build + schema validation tests passed, ~25 min execution time)
 - `TASK053` Data Retention Automation - ✅ Complete on 2026-01-18 (Automated RGPD-compliant data retention: 3 SQL schemas (21_tables, 22_functions, 41_views), DAL with 12 functions, 8 Zod schemas, Edge Function scheduled-cleanup (first in project), migration 20260117234007 (698 lines), 8/8 tests passed, 5 tables configured (logs_audit 90d, abonnes_newsletter 90d, messages_contact 365d, analytics_events 90d, data_retention_audit 365d), RGPD documentation complete)
 - `TASK053-P1` LCP Optimization Phase 1 - ✅ Complete on 2026-01-21 (Hero image optimization: background-image CSS → next/image with priority/fetchPriority/eager, removed manual preload (handled by next/image), LCP improved from ~3200ms (dev) to ~1650ms (prod) = -48%, TTFB improved from 298ms to 46-61ms = -80%, CLS maintained at 0.00)
+\n- `TASK055` Admin Agenda Management - ✅ Complete on 2026-01-26 (Phase 1: Events CRUD - 8 DAL functions, dedicated pages, spectacle/lieu selects, date/time handling; Phase 2: Lieux CRUD - 5 DAL functions, dedicated pages, combobox integration; **BigInt Serialization Fix**: ActionResult simplified {success only}, EventDataTransport pattern (string IDs), strict type separation Server (bigint) vs UI (number), project-wide pattern established for all CRUD with bigint IDs; 38 files created/modified, 2128+ lines added, SOLID compliance maintained)

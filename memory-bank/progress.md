@@ -1,5 +1,66 @@
 # Progress
 
+## TASK055 Phase 2: Lieux Management CRUD (2026-01-26)
+
+### Summary
+
+✅ **LIEUX CRUD COMPLETE** - 5 DAL functions, dedicated pages, BigInt serialization fix
+
+| Deliverable | Status | Details |
+| ----------- | ------ | ------- |
+| DAL Lieux | ✅ | 5 functions: fetchAll, fetchById, create, update, delete |
+| Schemas | ✅ | Server (bigint) + UI (number) separation |
+| Server Actions | ✅ | 5 actions with ActionResult<T> simplified |
+| Admin Pages | ✅ | List + /new + /\[id]/edit |
+| Components | ✅ | 6 files (Container, View, Form, FormFields, LieuSelect, types) |
+| BigInt Fix | ✅ | **CRITICAL** - EventDataTransport pattern established |
+| Sidebar | ✅ | MapPin icon added |
+| Scripts | ✅ | test-admin-agenda-crud.ts + test-agenda-query.ts |
+| Documentation | ✅ | 3 files updated |
+
+### Critical Fix: BigInt Serialization
+
+**Problem**: "Do not know how to serialize a BigInt" error when updating events without changes.
+
+**Root Cause**: `z.coerce.bigint()` in Server Actions created BigInt during validation, React couldn't serialize.
+
+**Solution**:
+
+- Validate with `EventFormSchema` (number IDs) not `EventInputSchema` (bigint)
+- Create `EventDataTransport` type with string IDs for Action→DAL communication
+- DAL converts string→bigint internally (server-only context)
+- `ActionResult` simplified to `{success: true/false}` only (never return data)
+- Use `router.refresh()` to fetch updated data via Server Component
+
+**Pattern Established** (Project-Wide):
+
+```typescript
+Form (number) → Action (FormSchema) → DataTransport (string) → 
+  DAL (bigint) → ActionResult {success only} → router.refresh()
+```
+
+### Files Created/Modified
+
+| Type | Count | Key Files |
+| ---- | ----- | --------- |
+| DAL | 2 | `admin-lieux.ts` (new), `admin-agenda.ts` (fixed) |
+| Schemas | 2 | `admin-lieux.ts` (new), `admin-agenda.ts` (fixed) |
+| Actions | 2 | `/lieux/actions.ts` (new), `/agenda/actions.ts` (fixed) |
+| Pages | 3 | `/admin/lieux/**` (list, new, edit) |
+| Components | 6 | Lieux UI + LieuSelect integration |
+| Types | 1 | `admin-agenda-client.ts` (EventClientDTO, etc.) |
+| Scripts | 2 | CRUD validation + query testing |
+
+### Impact
+
+**Architecture**: Established project-wide pattern for handling bigint IDs in Server Actions
+
+**SOLID Compliance**: DAL functions < 30 lines, error codes `[ERR_LIEUX_*]`, `DALResult<T>` pattern
+
+**Type Safety**: Strict separation Server (bigint) vs UI (number) vs Transport (string)
+
+---
+
 ## Admin User Scripts Update (2026-01-22)
 
 ### Summary
