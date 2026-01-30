@@ -172,9 +172,56 @@
 - [ ] Performance optimization (lazy loading thresholds)
 - [ ] Error handling refinement
 
+## Remote Testing (2026-01-30)
+
+### New Remote Test Scripts
+
+Two additional test scripts created for testing on **Supabase Cloud (production)**:
+
+#### test-thumbnail-generation-remote.ts
+
+- **Target**: `https://yvtrlvmbofklefxcxrzv.supabase.co`
+- **Tests**: Happy Path + Pattern Warning
+- **Security**: Auto-validation remote URL, cleanup guarantees
+- **Status**: ✅ PASSED
+
+**Results**:
+
+- Thumbnail generated: 300x300 JPEG
+- Storage upload: SUCCESS (cloud)
+- Database update: SUCCESS (cloud)
+- Pattern Warning: VALIDATED
+- Cleanup: COMPLETE
+
+#### test-thumbnail-direct-remote.ts
+
+- **Target**: `https://yvtrlvmbofklefxcxrzv.supabase.co`
+- **Method**: Direct DAL function testing (bypass API)
+- **Duration**: ~3 seconds
+- **Status**: ✅ PASSED
+
+**Results**:
+
+- Original: 3120 bytes → Thumbnail: 809 bytes (74% reduction)
+- Format: JPEG, Dimensions: 300x300
+- Storage: `uploads/` → `thumbnails/`
+- Database: `thumbnail_path` updated correctly
+
+### Test Coverage Summary
+
+| Test Script | Environment | Method | Status |
+| ------------ | ------------- | -------- | -------- |
+| `test-thumbnail-generation.ts` | Local | Complete workflow | ✅ PASSED |
+| `test-thumbnail-direct.ts` | Local | Direct DAL | ✅ PASSED |
+| `test-thumbnail-generation-remote.ts` | **Cloud** | Complete workflow | ✅ PASSED |
+| `test-thumbnail-direct-remote.ts` | **Cloud** | Direct DAL | ✅ PASSED |
+
+**Total**: 4/4 tests passing on both environments
+
 ## References
 
-- **Test Script**: `scripts/test-thumbnail-direct.ts`
+- **Test Script (Local)**: `scripts/test-thumbnail-direct.ts`
+- **Test Script (Remote)**: `scripts/test-thumbnail-direct-remote.ts`
 - **Implementation Guide**: `doc/phase3-thumbnails-implementation.md`
 - **Summary**: `doc/phase3-thumbnails-summary.md`
 - **Compliance Report**: `doc/phase3-compliance-report.md`
@@ -182,5 +229,6 @@
 
 ---
 
-**Conclusion**: Phase 3 core functionality validated ✅  
-**Status**: Ready for manual UI testing and Phase 4
+**Conclusion**: Phase 3 validated on both local AND production environments ✅  
+**Status**: Ready for manual UI testing and Phase 4  
+**Updated**: 2026-01-30 (added remote tests)

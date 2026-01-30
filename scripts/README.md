@@ -86,6 +86,125 @@ pnpm exec tsx scripts/create-admin-user-local.ts
 
 ---
 
+## 🖼️ Media Library - Thumbnail Tests (Phase 3)
+
+### test-thumbnail-generation.ts ✅ LOCAL
+
+**Description**: Test complet de la génération de thumbnails sur la base de données **locale**. Valide le workflow complet : upload → thumbnail → vérification → cleanup.
+
+**Target**: Base locale Supabase (`http://127.0.0.1:54321`)
+
+**Tests effectués**:
+
+1. **Happy Path**: Génération réussie de thumbnail 300x300
+2. **Pattern Warning**: Validation du comportement non-bloquant (upload réussit même si thumbnail échoue)
+
+**Utilisation**:
+
+```bash
+# 1. Démarrer Supabase local
+pnpm dlx supabase start
+
+# 2. Lancer les tests
+pnpm exec tsx scripts/test-thumbnail-generation.ts
+```
+
+**Résultats attendus**:
+
+- ✅ Image uploadée (800x600, 3120 bytes)
+- ✅ Thumbnail généré (300x300, 809 bytes = 74% réduction)
+- ✅ Storage: `uploads/` → `thumbnails/`
+- ✅ Database: `thumbnail_path` mis à jour
+- ✅ Cleanup automatique
+
+---
+
+### test-thumbnail-direct.ts ✅ LOCAL
+
+**Description**: Test direct des fonctions DAL de génération de thumbnails (bypass HTTP API). Version locale.
+
+**Target**: Base locale Supabase (`http://127.0.0.1:54321`)
+
+**Avantages**:
+
+- Pas besoin d'authentification admin
+- Test unitaire des fonctions de génération
+- Plus rapide (~2 secondes)
+
+**Utilisation**:
+
+```bash
+pnpm dlx supabase start
+pnpm exec tsx scripts/test-thumbnail-direct.ts
+```
+
+**Workflow testé**:
+
+1. Création image test (sharp)
+2. Upload vers Storage local
+3. Génération thumbnail directe (DAL)
+4. Vérification format JPEG 300x300
+5. Vérification database update
+6. Cleanup complet
+
+---
+
+### test-thumbnail-generation-remote.ts ⚠️ REMOTE
+
+**Description**: Test complet de la génération de thumbnails sur **Supabase Cloud (production)**.
+
+**Target**: Base remote Supabase (URL depuis `.env.local`)
+
+**⚠️ Sécurité**:
+
+- Validation automatique que l'URL est bien remote (bloque si localhost)
+- Affiche `⚠️ REMOTE TESTING MODE`
+- Cleanup automatique de toutes les données de test
+
+**Utilisation**:
+
+```bash
+pnpm exec tsx scripts/test-thumbnail-generation-remote.ts
+```
+
+**Variables requises** (`.env.local`):
+
+- `NEXT_PUBLIC_SUPABASE_URL` (URL cloud)
+- `SUPABASE_SECRET_KEY` (clé de service cloud)
+
+**Tests effectués**:
+
+1. Happy Path sur production
+2. Pattern Warning sur production
+3. Cleanup systématique
+
+---
+
+### test-thumbnail-direct-remote.ts ⚠️ REMOTE
+
+**Description**: Test direct des fonctions DAL sur **Supabase Cloud**. Version remote du test direct.
+
+**Target**: Base remote Supabase (URL depuis `.env.local`)
+
+**Utilisation**:
+
+```bash
+pnpm exec tsx scripts/test-thumbnail-direct-remote.ts
+```
+
+**Résultats identiques aux tests locaux**:
+
+- Génération thumbnail 300x300 JPEG
+- Réduction de taille : 74% (3120 → 809 bytes)
+- Upload vers Storage cloud
+- Update database cloud
+- Vérification complète
+- Cleanup systématique
+
+**Date de création**: 2026-01-30
+
+---
+
 ### create-admin-user.ts (TypeScript) ✅ OPÉRATIONNEL
 
 **Description**: Crée l'utilisateur admin initial dans la base de données **remote** (production). Utilise les variables d'environnement `.env.local`.

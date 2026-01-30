@@ -1,5 +1,89 @@
 # Progress
 
+## TASK029 Phase 3: Thumbnail Remote Testing (2026-01-30)
+
+### Summary
+
+✅ **REMOTE THUMBNAIL TESTS COMPLETE** - 4/4 tests passing (local + cloud)
+
+| Deliverable | Status | Details |
+| ----------- | ------ | ------- |
+| Local Tests | ✅ | 2 scripts: generation + direct |
+| Remote Tests | ✅ | **NEW**: 2 scripts for Supabase Cloud |
+| Security | ✅ | Auto-validation remote URL, cleanup guarantees |
+| Documentation | ✅ | README.md + phase3-test-results.md updated |
+
+### Scripts Created
+
+**Remote Testing Scripts** (2026-01-30):
+
+1. **`test-thumbnail-generation-remote.ts`**
+   - Target: Supabase Cloud (production)
+   - Tests: Happy Path + Pattern Warning
+   - Security: Validates remote URL, blocks localhost
+   - Cleanup: Automatic deletion of test data
+
+2. **`test-thumbnail-direct-remote.ts`**
+   - Target: Supabase Cloud (production)
+   - Method: Direct DAL function testing
+   - Duration: ~3 seconds
+   - Results: 74% size reduction (3120 → 809 bytes)
+
+### Test Results
+
+**All 4 Tests Passing**:
+
+| Test Script | Environment | Status | Duration |
+| ------------ | ------------- | -------- | -------- |
+| `test-thumbnail-generation.ts` | Local | ✅ | ~2s |
+| `test-thumbnail-direct.ts` | Local | ✅ | ~2s |
+| `test-thumbnail-generation-remote.ts` | Cloud | ✅ | ~3s |
+| `test-thumbnail-direct-remote.ts` | Cloud | ✅ | ~3s |
+
+### Features Validated
+
+**Local Environment**:
+
+- ✅ Thumbnail generation 300x300 JPEG
+- ✅ Storage: uploads/ → thumbnails/
+- ✅ Database: thumbnail_path update
+- ✅ Pattern Warning (non-blocking)
+- ✅ Automatic cleanup
+
+**Production Environment**:
+
+- ✅ Same results on Supabase Cloud
+- ✅ Security validation (blocks localhost)
+- ✅ Remote storage upload successful
+- ✅ Remote database update successful
+- ✅ Complete cleanup guaranteed
+
+### Technical Details
+
+**Environment Variables**:
+
+| Environment | URL Variable | Key Variable |
+| ------------ | -------------- | ------------- |
+| Local | `SUPABASE_LOCAL_URL` | `SUPABASE_LOCAL_SERVICE_KEY` |
+| Remote | `NEXT_PUBLIC_SUPABASE_URL` | `SUPABASE_SECRET_KEY` |
+
+**Security Measures**:
+
+- Auto-detection of environment (local vs remote)
+- Explicit warnings when running remote tests
+- Validation prevents accidental remote operations
+- Systematic cleanup of all test data
+
+### Impact
+
+**Testing Coverage**: Phase 3 thumbnails now validated on both environments (100% coverage)
+
+**Quality Assurance**: Identical behavior confirmed between local dev and production
+
+**Documentation**: Complete guide in `scripts/README.md` for both environments
+
+---
+
 ## TASK055 Phase 2: Lieux Management CRUD (2026-01-26)
 
 ### Summary
