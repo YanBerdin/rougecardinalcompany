@@ -1,8 +1,219 @@
 # Active Context
 
-**Current Focus (2026-01-26)**: ✅ TASK055 Phase 2 Complete - Lieux Management CRUD + BigInt Serialization Fix
+**Current Focus (2026-01-30)**: ✅ TASK029 Thumbnail Generation Bug Fix & Backfill - 7/11 thumbnails regenerated in production
 
-**Last Major Updates**: TASK055 Phase 2 (2026-01-26) + Security Session (2026-01-22) + Validation Zod + Trigger Fix (2026-01-21) + LCP Optimization (2026-01-21) + RLS Fix Spectacles (2026-01-20)
+**Last Major Updates**: Thumbnail Fix (2026-01-30) + TASK055 Phase 2 (2026-01-26) + Security Session (2026-01-22) + Validation Zod + Trigger Fix (2026-01-21) + LCP Optimization (2026-01-21)
+
+---
+
+## ✅ TASK029: Thumbnail Generation Bug Fix & Backfill (2026-01-30)
+
+### Summary
+
+✅ **THUMBNAIL NULL PROBLEM RESOLVED** - 3 bugs fixed in media-actions.ts, 4 utility scripts created, 7 thumbnails regenerated in production
+
+| Component | Status | Details |
+| --------- | ------ | ------- |
+| Bug Diagnosis | ✅ | 3 bugs identified in `lib/actions/media-actions.ts` |
+| Code Fixes | ✅ | HTTP check + type conversion + T3 Env migration |
+| Utility Scripts | ✅ | 4 scripts created (check + regenerate local/remote) |
+| Documentation | ✅ | 4 files: README, flow, diagnostic, debug-and-fix |
+| Production Fix | ✅ | 7/11 thumbnails regenerated (4 seed errors expected) |
+| TASK056 Created | ✅ | Replace seed data with valid files (low priority) |
+
+### Problem Statement
+
+**Observation**: All 15 media in production had `thumbnail_path = NULL` despite thumbnail system implementation (TASK029 Phase 3).
+
+**Verification via Supabase MCP**:
+
+```sql
+SELECT id, filename, thumbnail_path FROM medias WHERE thumbnail_path IS NOT NULL;
+-- Result: 0 rows (all NULL)
+```
+
+### Root Causes
+
+#### 1. Code Bugs in `lib/actions/media-actions.ts` (ligne 164-184)
+
+**Bug #1**: No HTTP status verification after fetch()
+
+```typescript
+// ❌ BEFORE
+await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/admin/media/thumbnail`, {...})
+// No response.ok check → API errors 400/500 silently ignored
+
+// ✅ AFTER
+const response = await fetch(...)
+if (!response.ok) {
+  throw new Error(`Thumbnail generation failed (${response.status})`)
+}
+```
+
+**Bug #2**: Type mismatch for `mediaId` parameter
+
+```typescript
+// ❌ BEFORE
+body: JSON.stringify({ mediaId: result.data.mediaId }) // string
+
+// API expects:
+// ThumbnailRequestSchema = z.object({ mediaId: z.number().int().positive() })
+
+// ✅ AFTER
+body: JSON.stringify({ mediaId: parseInt(result.data.mediaId, 10) })
+```
+
+**Bug #3**: Direct `process.env` instead of T3 Env
+
+```typescript
+// ❌ BEFORE
+process.env.NEXT_PUBLIC_SITE_URL // Peut être undefined
+
+// ✅ AFTER
+import { env } from '@/lib/env'
+env.NEXT_PUBLIC_SITE_URL // Type-safe, validated at build
+```
+
+#### 2. Media Uploaded Before System Implementation
+
+15 media uploaded between 2026-01-10 and 2026-01-28, system implemented on 2026-01-22 → no automatic trigger.
+
+### Solutions Implemented
+
+#### Code Fixes
+
+**File**: `lib/actions/media-actions.ts` (lines 1-6, 164-184)
+
+- ✅ Added `import { env } from '@/lib/env'`
+- ✅ Added HTTP response status verification
+- ✅ Added `parseInt()` conversion for mediaId
+- ✅ Added success logging with thumbnail path
+
+#### Utility Scripts Created
+
+**1. `check-thumbnails-db.ts`** (LOCAL)
+
+- Lists all media with thumbnail status (✅ with / ❌ without)
+- Shows statistics (total, with, without)
+- Command: `pnpm thumbnails:check`
+
+**2. `check-storage-files.ts`** (LOCAL)
+
+- Verifies if files exist physically in Storage
+- Tests specific paths (press-kit, photos, uploads)
+- Result: 4 seed data files NOT FOUND
+
+**3. `regenerate-all-thumbnails.ts`** (LOCAL ONLY)
+
+- Regenerates thumbnails for local database
+- Security: `validateLocalOnly()` prevents remote execution
+- Supported: JPG/PNG/WebP, skips SVG/PDF/video
+- Command: `pnpm thumbnails:regenerate:local`
+
+**4. `regenerate-all-thumbnails-remote.ts`** (REMOTE/PRODUCTION)
+
+- Regenerates thumbnails for production database
+- **DRY-RUN by default** (requires `--apply` flag)
+- Security: anti-localhost check, 3-second confirmation
+- Batch processing: 10 at a time with 1s delay
+- Commands:
+  - `pnpm thumbnails:regenerate:remote` (dry-run)
+  - `pnpm thumbnails:regenerate:remote:apply` (real)
+
+### Production Regeneration Results (2026-01-30)
+
+**Execution**: `pnpm thumbnails:regenerate:remote:apply`
+
+**Results**:
+
+- ✅ **7 thumbnails generated successfully**:
+  - ID 15: 3 - Le drapier.png
+  - ID 14: Capture d'écran instagram.jpeg
+  - ID 13: maison-etudiante.paris.jpeg
+  - ID 12: Buell_Logo.png
+  - ID 11: 298A44E3-7D13.PNG
+  - ID 10: logo-florian.png
+  - ID 9: 404 Github.jpeg
+- ⏭️ **4 files skipped** (2 SVG + 2 PDF, expected)
+- ❌ **4 errors** (seed data files not found → TASK056 created)
+
+**Database Verification via MCP**:
+
+```sql
+SELECT id, filename, thumbnail_path FROM medias WHERE thumbnail_path IS NOT NULL;
+-- Result: 7 rows (7/11 JPG/PNG successfully generated)
+```
+
+### Documentation Created
+
+**1. `scripts/README-thumbnails.md`**
+
+- Complete guide for 4 utility scripts
+- Usage examples, scenarios, security warnings
+- LOCAL vs REMOTE comparison table
+
+**2. `doc/thumbnail-flow.md`**
+
+- Mermaid flowchart: Upload → DAL → API → Sharp → Storage → DB → UI
+- 10+ code links with line numbers
+- Parameters: 300x300, quality 80%, _thumb.jpg suffix
+
+**3. `doc/diagnostic-thumbnails-null.md`**
+
+- Root cause analysis (2 causes: bugs + pre-implementation uploads)
+- Bug details, validation, action plan
+- Updated with LOCAL/REMOTE script distinction
+
+**4. `doc/THUMBNAIL-GENERATION-DEBUG-AND-FIX.md`**
+
+- Consolidated debug & fix documentation
+- Complete timeline, lessons learned, references
+
+### Package.json Scripts Added
+
+```json
+{
+  "thumbnails:check": "tsx scripts/check-thumbnails-db.ts",
+  "thumbnails:check-storage": "tsx scripts/check-storage-files.ts",
+  "thumbnails:regenerate:local": "tsx scripts/regenerate-all-thumbnails.ts",
+  "thumbnails:regenerate:remote": "tsx scripts/regenerate-all-thumbnails-remote.ts",
+  "thumbnails:regenerate:remote:apply": "tsx scripts/regenerate-all-thumbnails-remote.ts --apply"
+}
+```
+
+### TASK056 Created
+
+**Title**: Remplacer les données de seed par des fichiers valides
+
+**Priority**: Low (data quality for demos)
+
+**Problem**: 4 seed data files (IDs 2, 4, 5, 6) don't exist physically in Storage:
+
+- `rouge-cardinal-logo-vertical.png`
+- `spectacle-scene-1.jpg`
+- `spectacle-scene-2.jpg`
+- `equipe-artistique.jpg`
+
+**Options**:
+
+1. Upload real files (RECOMMENDED)
+2. Delete orphan records
+3. Use placeholders
+
+### Lessons Learned
+
+1. **Always verify HTTP response status** after fetch() calls
+2. **Type conversions required** when crossing Server Action boundary (string → number)
+3. **T3 Env pattern** prevents runtime errors from missing env vars
+4. **Separate scripts** for LOCAL vs REMOTE with security checks
+5. **Dry-run mode critical** for production database operations
+6. **Non-blocking patterns**: upload succeeds even if thumbnail fails
+
+### Next Steps
+
+- [ ] Commit all changes (media-actions.ts + 4 scripts + 4 docs + TASK056)
+- [ ] Verify thumbnails display in `/admin/media` UI
+- [ ] Consider TASK056 for seed data replacement (low priority)
 
 ---
 

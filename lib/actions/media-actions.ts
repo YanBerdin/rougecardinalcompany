@@ -2,6 +2,7 @@
 
 import "server-only";
 import { revalidatePath } from "next/cache";
+import { env } from "@/lib/env";
 import { createClient } from "@/supabase/server";
 import { requireAdmin } from "@/lib/auth/is-admin";
 import { uploadMedia, deleteMedia, findMediaByHash, getMediaPublicUrl } from "@/lib/dal/media";
@@ -160,17 +161,26 @@ export async function uploadMediaImage(
     let thumbnailWarning: string | undefined;
 
     try {
-      await fetch(
-        `${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/api/admin/media/thumbnail`,
+      const response = await fetch(
+        `${env.NEXT_PUBLIC_SITE_URL}/api/admin/media/thumbnail`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            mediaId: result.data.mediaId,
+            mediaId: parseInt(result.data.mediaId, 10), // ✅ Convert string to number
             storagePath: result.data.storagePath,
           }),
         }
       );
+
+      // ✅ CRITICAL: Verify HTTP status
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+
+      const responseData = await response.json();
+      console.log("[uploadMediaImage] Thumbnail generated:", responseData.thumbPath);
     } catch (thumbnailError) {
       console.warn(
         "[uploadMediaImage] Thumbnail generation failed (non-critical):",

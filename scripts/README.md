@@ -465,7 +465,255 @@ Voir le runbook complet: `memory-bank/tasks/TASK050_RUNBOOK_PITR_restore.md`
 
 ---
 
-### 📊 Analytics & Monitoring (TASK031)
+### �️ Thumbnail Management & Diagnostics (TASK029)
+
+#### check-thumbnails-db.ts (TypeScript) ✅ LOCAL
+
+**Description**: Liste tous les médias de la base de données **locale** avec leur statut de thumbnail (✅ avec / ❌ sans). Affiche les statistiques globales et les détails par média.
+
+**Target**: Base locale Supabase (`http://127.0.0.1:54321`)
+
+**Utilisation**:
+
+```bash
+# Via npm script (recommandé)
+pnpm thumbnails:check
+
+# Ou directement
+pnpm exec tsx scripts/check-thumbnails-db.ts
+```
+
+**Output attendu**:
+
+```yaml
+📊 Media Thumbnails Status (LOCAL DB)
+========================================
+
+ID: 15 | 3 - Le drapier.png
+Storage: spectacles/1769621372382-3---Le-drapier.png
+Thumbnail: ✅ spectacles/1769621372382-3---Le-drapier_thumb.jpg
+Created: 2026-01-28 17:29:38
+
+...
+
+📊 Statistics:
+Total media: 15
+With thumbnails: 7
+Without thumbnails: 8
+```
+
+**Informations affichées**:
+
+- ID du média
+- Nom du fichier
+- Chemin Storage
+- Status thumbnail (✅ / ❌)
+- Date de création
+- Statistiques globales
+
+**Contexte**: Créé pour diagnostiquer les thumbnails NULL après TASK029. Utile pour vérifier l'état des thumbnails avant/après régénération.
+
+---
+
+#### check-storage-files.ts (TypeScript) ✅ LOCAL
+
+**Description**: Vérifie si les fichiers référencés dans la base de données existent physiquement dans le Storage Supabase. Teste des chemins spécifiques pour détecter les seed data manquantes.
+
+**Target**: Base locale Supabase + Storage bucket `media`
+
+**Utilisation**:
+
+```bash
+# Via npm script (recommandé)
+pnpm thumbnails:check-storage
+
+# Ou directement
+pnpm exec tsx scripts/check-storage-files.ts
+```
+
+**Output attendu**:
+
+```yaml
+🔍 Checking Storage Files
+========================================
+
+Testing: press-kit/logos/rouge-cardinal-logo-vertical.png
+Result: ❌ NOT FOUND
+
+Testing: photos/spectacle-scene-1.jpg
+Result: ❌ NOT FOUND
+
+...
+```
+
+**Chemins testés** (configurable dans le script):
+
+- `press-kit/logos/` - Logos de presse
+- `photos/` - Photos spectacles et équipe
+- `uploads/` - Uploads génériques
+
+**Résultat**: Identifie les fichiers manquants (seed data jamais uploadées physiquement).
+
+**Contexte**: Créé pour diagnostiquer pourquoi 4 médias échouaient lors de la régénération de thumbnails. Révélé que les fichiers de seed n'existent pas dans le Storage.
+
+---
+
+#### regenerate-all-thumbnails.ts (TypeScript) ✅ LOCAL ONLY
+
+**Description**: Régénère les thumbnails pour tous les médias de la base de données **locale** qui n'en ont pas. Processus batch avec téléchargement, génération Sharp, upload et mise à jour DB.
+
+**Target**: Base locale Supabase UNIQUEMENT
+
+**Sécurité**: `validateLocalOnly(SUPABASE_URL)` empêche toute exécution sur base remote.
+
+**Utilisation**:
+
+```bash
+# Via npm script (recommandé)
+pnpm thumbnails:regenerate:local
+
+# Ou directement
+pnpm exec tsx scripts/regenerate-all-thumbnails.ts
+```
+
+**Variables requises** (`.env.local`):
+
+- `SUPABASE_LOCAL_URL` (http://127.0.0.1:54321)
+- `SUPABASE_LOCAL_SERVICE_KEY` (clé service locale)
+
+**Workflow**:
+
+1. ✅ Validation sécurité (reject si remote URL)
+2. ✅ Récupère médias sans thumbnails
+3. ✅ Pour chaque média JPG/PNG/WebP :
+   - Télécharge original depuis Storage
+   - Génère thumbnail 300x300 JPEG (Sharp, qualité 80%)
+   - Upload thumbnail dans Storage (suffixe `_thumb.jpg`)
+   - Met à jour `medias.thumbnail_path`
+4. ⏭️ Ignore SVG/PDF/vidéo automatiquement
+5. ❌ Rapporte erreurs (fichiers manquants, etc.)
+
+**Output attendu**:
+
+```yaml
+
+🏠 LOCAL DATABASE Thumbnail Regeneration
+==========================================
+
+📡 Target: http://127.0.0.1:54321
+📊 Found 8 media without thumbnails
+
+Processing rouge-cardinal-logo-horizontal.svg... ⏭️  Skipped (image/svg+xml)
+Processing spectacle-scene-1.jpg... ❌ Download failed: {}
+Processing logo-florian.png... ✅ uploads/1768237573156-logo-florian_thumb.jpg
+
+📊 Results:
+   ✅ Success: 4
+   ⏭️  Skipped: 2
+   ❌ Errors: 2
+```
+
+**Formats supportés**: JPG, PNG, WebP  
+**Formats ignorés**: SVG, PDF, vidéo
+
+**Contexte**: Créé pour backfiller les thumbnails des médias uploadés avant l'implémentation du système automatique (TASK029).
+
+---
+
+#### regenerate-all-thumbnails-remote.ts (TypeScript) ⚠️ REMOTE (PRODUCTION)
+
+**Description**: Régénère les thumbnails pour tous les médias de la base de données **REMOTE (production)**. **DRY-RUN par défaut** avec flag `--apply` requis pour modifications réelles.
+
+**Target**: Base remote Supabase (production)
+
+**Sécurité**:
+
+- ✅ Anti-localhost check (rejette si URL contient localhost/127.0.0.1)
+- ✅ **DRY-RUN par défaut** : aucune modification sans `--apply`
+- ✅ Confirmation 3 secondes avant exécution en mode apply
+- ✅ Batch processing : 10 médias à la fois avec délai 1s (rate limiting)
+
+**Utilisation**:
+
+```bash
+# Simulation (DRY-RUN, recommandé en premier)
+pnpm thumbnails:regenerate:remote
+# Ou
+pnpm exec tsx scripts/regenerate-all-thumbnails-remote.ts
+
+# Application réelle (après validation dry-run)
+pnpm thumbnails:regenerate:remote:apply
+# Ou
+pnpm exec tsx scripts/regenerate-all-thumbnails-remote.ts --apply
+```
+
+**Variables requises** (`.env.local`):
+
+- `NEXT_PUBLIC_SUPABASE_URL` (URL production)
+- `SUPABASE_SECRET_KEY` (clé service production)
+
+**Workflow DRY-RUN**:
+
+```yaml
+🌍 REMOTE DATABASE Thumbnail Regeneration
+==========================================
+
+📡 Target: https://xxx.supabase.co
+⚠️  Mode: DRY RUN (simulation only, no changes)
+📊 Found 15 media without thumbnails
+
+📦 Batch 1/2
+Processing logo.svg... ⏭️  Skipped (image/svg+xml)
+Processing photo.jpg... [DRY RUN] uploads/photo_thumb.jpg
+
+📦 Batch 2/2
+...
+
+📊 Results:
+   ✅ Would generate: 11
+   ⏭️  Skipped: 4
+   ❌ Errors: 0
+```
+
+**Workflow --apply** (production):
+
+```yaml
+⚠️  Mode: APPLY (changes WILL be made to production)
+   Proceeding in 3 seconds...
+
+Processing photo.jpg... ✅ uploads/1768095683261-photo_thumb.jpg
+
+📊 Results:
+   ✅ Success: 11
+   ⏭️  Skipped: 4
+   ❌ Errors: 0
+```
+
+**Résultats réels** (exécution 2026-01-30):
+
+- ✅ 7 thumbnails générés avec succès
+- ⏭️ 4 fichiers ignorés (2 SVG + 2 PDF)
+- ❌ 4 erreurs (seed data files not found)
+
+**⚠️ IMPORTANT**:
+
+- Toujours exécuter dry-run en premier
+- Vérifier les logs avant --apply
+- Confirmer que les URLs de production sont correctes
+- Ne jamais exécuter sur localhost (protection automatique)
+
+**Contexte**: Créé pour résoudre le problème des 15 médias avec `thumbnail_path = NULL` en production après implémentation TASK029. Voir `doc/THUMBNAIL-GENERATION-DEBUG-AND-FIX.md` pour détails complets.
+
+**Voir aussi**:
+
+- `scripts/README-thumbnails.md` — Documentation complète des 4 scripts
+- `doc/thumbnail-flow.md` — Diagramme du flow de génération
+- `doc/diagnostic-thumbnails-null.md` — Analyse root cause
+- `doc/THUMBNAIL-GENERATION-DEBUG-AND-FIX.md` — Rapport complet debug & fix
+
+---
+
+### �📊 Analytics & Monitoring (TASK031)
 
 #### test-sentry-api.ts (TypeScript) ✅ OPÉRATIONNEL (2026-01-17)
 
