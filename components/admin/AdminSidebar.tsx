@@ -17,6 +17,7 @@ import {
   ScrollText,
   BarChart3,
   Handshake,
+  MapPin,
 } from "lucide-react";
 import {
   Sidebar,
@@ -59,8 +60,13 @@ const contentItems = [
   },
   {
     title: "Événements",
-    href: "/admin/events",
+    href: "/admin/agenda",
     icon: Calendar,
+  },
+  {
+    title: "Lieux",
+    href: "/admin/lieux",
+    icon: MapPin,
   },
   {
     title: "Presse",

@@ -37,7 +37,7 @@ Refactoring complet du Data Access Layer pour atteindre 92% de conformité SOLID
 ### Métriques finales
 
 | Critère | Avant | Après | Cible |
-|---------|-------|-------|-------|
+| --------- | ------- | ------- | ------- |
 | DAL avec DALResult | 0/17 | 17/17 | 100% |
 | revalidatePath dans DAL | ~12 | 0 | 0 |
 | Imports email dans DAL | 3 | 0 | 0 |

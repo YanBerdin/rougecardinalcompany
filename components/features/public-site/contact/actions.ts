@@ -31,9 +31,6 @@ export async function submitContactAction(formData: FormData) {
     } as const;
   }
 
-  //TODO: Remove Artificial delay for skeleton testing
-  await new Promise((r) => setTimeout(r, 1500));
-
   // Persistance en base (priorité RGPD)
   const dalResult = await createContactMessage(parsed.data as ContactMessageInput);
   if (!dalResult.success) {

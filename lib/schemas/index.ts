@@ -18,6 +18,25 @@ export {
     type EventFilter,
 } from "./agenda";
 
+// Admin Agenda
+export {
+    EventInputSchema,
+    EventFormSchema,
+    type EventInput,
+    type EventFormValues,
+    type EventDTO,
+    type LieuDTO,
+} from "./admin-agenda";
+
+// Admin Lieux
+export {
+    LieuInputSchema,
+    LieuFormSchema,
+    type LieuInput,
+    type LieuFormValues,
+    type LieuDTO as LieuDTOFull,
+} from "./admin-lieux";
+
 // Compagnie
 export {
     ValueSchema,

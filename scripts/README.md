@@ -731,6 +731,77 @@ pnpm exec tsx scripts/test-rls-policy-with-check-validation.ts
 
 ---
 
+### 📅 Tests Admin Agenda (TASK055)
+
+#### test-admin-agenda-crud.ts ✅ NOUVEAU (2026-01-26)
+
+**Description**: Test complet des opérations CRUD pour les événements et lieux de l'agenda admin. Valide le fix BigInt serialization et l'intégrité des données.
+
+**Utilisation**:
+
+```bash
+pnpm exec tsx scripts/test-admin-agenda-crud.ts
+pnpm exec tsx scripts/test-agenda-query.ts
+```
+
+**Configuration Requise**:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+SUPABASE_SECRET_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**Tests couverts (6 tests)**:
+
+| Test | Description |
+| ------ | ------------- |
+| Test 1 | Fetch all events (admin) |
+| Test 2 | Fetch all lieux |
+| Test 3 | Create test event |
+| Test 4 | Update test event |
+| Test 5 | Delete test event |
+| Test 6 | BigInt handling validation |
+
+**Avantages**:
+
+- ✅ Teste le cycle de vie complet CRUD
+- ✅ Valide le fix BigInt serialization (aucune erreur attendue)
+- ✅ Vérifie l'intégrité des relations spectacles/lieux
+- ✅ Cleanup automatique (suppression du test event)
+- ✅ Tests rapides (~2-3 secondes)
+
+**Résultat attendu**:
+
+```bash
+📊 TEST SUMMARY
+============================================================
+Total tests: 6
+✅ Passed: 6
+❌ Failed: 0
+
+🎉 All tests passed!
+✅ TASK055 CRUD operations working correctly
+✅ BigInt serialization fix validated
+```
+
+**Contexte**:
+
+Créé pour valider TASK055 Phase 1 & 2 (Admin Agenda Management). Teste spécifiquement le fix BigInt serialization qui permettait une erreur "Do not know how to serialize a BigInt" lors des updates via Server Actions.
+
+**Pattern testé**:
+
+```bash
+Form (number) → Server Action (EventFormSchema) → DAL (bigint) → ActionResult {success only} → router.refresh()
+```
+
+**Références**:
+
+- Task: `memory-bank/tasks/TASK055-admin-agenda-management.md`
+- Plan: `.github/prompts/plan-TASK055-AdminAgenda.prompt.md`
+- Fix détaillé: `.git-commit-bigint-fix.md`
+
+---
+
 #### check-admin-status.ts
 
 **Description** : Vérifie le statut admin d'un utilisateur et affiche les métadonnées complètes.

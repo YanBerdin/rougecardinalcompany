@@ -1,9 +1,9 @@
 # Project Architecture Blueprint — Rouge Cardinal Company
 
-**Généré le:** 2026-01-16  
-**Version:** 2.0 (Comprehensive Edition)  
+**Généré le:** 2026-01-26  
+**Version:** 3.1 (BigInt Pattern Edition)  
 **Type de projet:** Application web Next.js 16 + Supabase  
-**Pattern architectural:** Clean Architecture + Feature-Based Organization
+**Pattern architectural:** Clean Architecture + Feature-Based + SOLID DAL Pattern
 
 ---
 
@@ -13,31 +13,31 @@
 
 **Frontend Stack:**
 
-- **Framework:** Next.js 16.0.10 (App Router, React 19, Turbopack)
-- **Language:** TypeScript 5.7+ (strict mode)
-- **UI Framework:** Tailwind CSS + shadcn/ui
+- **Framework:** Next.js 16.0.10 (App Router, React 19.2, Turbopack stable)
+- **Language:** TypeScript 5.x (strict mode, tsconfig strict enabled)
+- **UI Framework:** Tailwind CSS 3.x + shadcn/ui (45+ components)
 - **State Management:** React Server Components (default), Client hooks pour interactivité
-- **Forms:** react-hook-form + Zod validation
+- **Forms:** react-hook-form v7 + @hookform/resolvers + Zod validation
 
 **Backend Stack:**
 
-- **Database:** Supabase (PostgreSQL 15+)
-- **ORM/Query:** Supabase Client (JavaScript SDK)
-- **Auth:** Supabase Auth (JWT Signing Keys, optimized avec `getClaims()`)
-- **Email:** Resend (React Email templates)
-- **File Storage:** Supabase Storage (avec duplicate detection SHA-256)
+- **Database:** Supabase PostgreSQL 15+ (36 tables with RLS)
+- **ORM/Query:** Supabase Client v2 (@supabase/ssr)
+- **Auth:** Supabase Auth (JWT Signing Keys optimized, ~2-5ms avec `getClaims()`)
+- **Email:** Resend v4 (React Email templates, Warning Pattern)
+- **File Storage:** Supabase Storage (SHA-256 duplicate detection, 9 folders)
 
 **DevOps & Tooling:**
 
-- **Package Manager:** pnpm
-- **Linting:** ESLint + Markdown linting
-- **Type Safety:** TypeScript strict + T3 Env pour environment variables
-- **Migrations:** Supabase Declarative Schema (`supabase/schemas/`)
-- **Monitoring:** Sentry (optionnel)
+- **Package Manager:** pnpm v9+
+- **Linting:** ESLint 9 + markdownlint-cli2
+- **Type Safety:** TypeScript strict + **T3 Env** (@t3-oss/env-nextjs) pour env vars
+- **Migrations:** Supabase Declarative Schema (`supabase/schemas/` source of truth)
+- **Monitoring:** Sentry v10 (optionnel)
 
 ### Pattern Architectural Détecté
 
-**Clean Architecture avec Feature-Based Organization:**
+**Clean Architecture avec Feature-Based Organization + SOLID DAL Pattern:**
 
 ```bash
 ┌─────────────────────────────────────────────────────────────┐
@@ -46,28 +46,36 @@
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐       │
 │  │   (admin)    │  │  (marketing) │  │   api/       │       │
 │  │  Route Group │  │ Route Group  │  │Route Handlers│       │
+│  │  AppSidebar  │  │ Header+Footer│  │   Webhooks   │       │
 │  └──────────────┘  └──────────────┘  └──────────────┘       │
 └─────────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────────┐
 │                   APPLICATION LAYER                         │
-│            lib/actions/ (Server Actions)                    │
+│        lib/actions/ (Server Actions - 15+ modules)          │
 │  ┌────────────────────────────────────────────────────┐     │
-│  │ Validation (Zod) → Auth Guards → DAL → Revalidate  │     │
+│  │ Zod Validation → requireAdmin() → DAL Call →       │     │
+│  │ revalidatePath() → Email/SMS (Warning Pattern) →   │     │
+│  │ Return ActionResult<T>                             │     │
 │  └────────────────────────────────────────────────────┘     │
 └─────────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────────┐
-│                    DATA ACCESS LAYER                        │
-│              lib/dal/ (server-only)                         │
+│                    DATA ACCESS LAYER (29 modules)           │
+│      lib/dal/ ("use server" + import "server-only")         │
 │  ┌────────────────────────────────────────────────────┐     │
-│  │ Supabase Client → DB Queries → DALResult<T>        │     │
+│  │ requireAdmin() → Supabase Client → DB Query →      │     │
+│  │ Error Handling → DALResult<T> (success|error)      │     │
+│  │ ❌ NO revalidatePath() ❌ NO email imports          │     │
 │  └────────────────────────────────────────────────────┘     │
+│  📁 Helpers: error.ts, format.ts, slug.ts, folder.ts        │
 └─────────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────────┐
 │                     DATABASE LAYER                          │
-│         Supabase PostgreSQL + RLS Policies                  │
+│   Supabase PostgreSQL 15+ (36 tables, 100% RLS enabled)    │
+│   🔒 Security: Public views (SECURITY INVOKER) vs           │
+│                Admin views (revoked from anon role)         │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -75,36 +83,348 @@
 
 - **Séparation stricte des responsabilités:** Présentation / Application / DAL / Database
 - **Server-first:** Server Components par défaut, Client Components uniquement pour interactivité
-- **Type-safe:** Validation runtime (Zod) + TypeScript strict + T3 Env
-- **Security by default:** RLS policies + explicit auth guards + defense in depth
-- **Performance:** Optimized Supabase auth (`getClaims()`), caching, lazy loading
+- **Type-safe:** Validation runtime (Zod) + TypeScript strict + **T3 Env** (validation env vars)
+- **Security by default:** RLS policies + explicit auth guards + defense in depth + Admin Views Security Hardening (TASK037)
+- **Performance:** Optimized Supabase auth (`getClaims()` ~2-5ms), React `cache()`, Suspense streaming
+- **SOLID Compliance:** 92% sur DAL (29 modules), pattern `DALResult<T>`, functions < 30 lines
+- **Warning Pattern:** Email/SMS failures ne rollback jamais les opérations DB critiques
 
 ---
 
 ## 2. Résumé Exécutif
 
-**Framework principal:** Next.js 16 (App Router) avec React 19  
-**Langage:** TypeScript (strict mode) avec conventions Clean Code (max 300 lignes/fichier, fonctions ≤30 lignes)  
-**Base de données:** Supabase (PostgreSQL) avec Row Level Security (RLS) sur 36/36 tables  
-**Auth:** Supabase optimized JWT Signing Keys; utiliser `getClaims()` (2-5ms) pour checks rapides  
-**Mutations internes:** Server Actions (colocées sous `app/*/actions.ts` ou `lib/actions`) — API Routes réservées pour clients externes/webhooks  
-**DAL:** Centralisé sous `lib/dal/*` (server-only, retourne `DALResult<T>`, JAMAIS de `revalidatePath`)  
-**Environment Variables:** Type-safe validation avec T3 Env (@t3-oss/env-nextjs) dans `lib/env.ts`; accès UNIQUEMENT via `import { env } from '@/lib/env'`
+**Framework principal:** Next.js 16.0.10 (App Router) avec React 19.2 + Turbopack (stable)  
+**Langage:** TypeScript 5.x (strict mode) avec conventions Clean Code (max 300 lignes/fichier, fonctions ≤30 lignes)  
+**Base de données:** Supabase PostgreSQL 15+ avec Row Level Security (RLS) sur **36/36 tables** (100% coverage)  
+**Auth:** Supabase JWT Signing Keys optimized; `getClaims()` ~2-5ms (vs `getUser()` ~300ms)  
+**Mutations internes:** **Server Actions** (lib/actions/ + app/(admin)/*/actions.ts) — API Routes réservées pour webhooks/clients externes  
+**DAL:** 29 modules sous `lib/dal/` ("use server" + import "server-only", retourne `DALResult<T>`, ❌ NO revalidatePath/email)  
+**Environment Variables:** **T3 Env** (@t3-oss/env-nextjs) dans `lib/env.ts` — validation Zod runtime + types TypeScript  
+**Media Library:** Complete implementation (TASK029) — Storage/Folders sync, 9 base folders, thumbnail generation (Sharp)  
+**Display Toggles:** 10 toggles centralisés (TASK030) — configurations_site table, admin UI, conditional rendering  
+**Lieux Management:** CRUD complet (TASK055 Phase 2) — admin interface, DAL, Server Actions, dedicated pages, BigInt serialization fix
 
 ## Principes architecturaux
 
 - Séparation nette des responsabilités :
   - Lecture & rendu initial → Server Components (app/ pages & containers).
-  - Mutations → Server Actions → app/actions ou lib/actions (validation Zod, requireAuth, DAL call, revalidatePath()).
+  - Mutations → Server Actions → lib/actions/ ou app/(admin)/*/actions.ts (validation Zod, requireAdmin, DAL call, revalidatePath()).
   - Accès DB encapsulé → `lib/dal/*.ts` ("use server" + `import 'server-only'`).
 
-- Pattern dual-schema :
-  - Schémas SERVER (BDD) utilisent `z.coerce.bigint()` pour les IDs.
-  - Schémas UI (forms) utilisent `number` pour les inputs (évite casting dangereux dans react-hook-form).
+- Pattern dual-schema (résout problème bigint/number) :
+  - Schémas **SERVER** (BDD) utilisent `z.coerce.bigint()` pour les IDs PostgreSQL.
+  - Schémas **UI** (forms) utilisent `z.number()` pour react-hook-form (évite casting `as unknown as Resolver<>`).
 
 - Révalidation / cache :
-  - `revalidatePath()` ou `revalidateTag()` appelés uniquement dans les Server Actions après mutations.
-  - Pages admin sensibles exportent `export const dynamic = 'force-dynamic'` et `export const revalidate = 0` où nécessaire.
+  - `revalidatePath()` ou `revalidateTag()` appelés **UNIQUEMENT** dans les Server Actions après mutations.
+  - Pages admin sensibles exportent `export const dynamic = 'force-dynamic'` et `export const revalidate = 0`.
+  - DAL read functions wrapped with React `cache()` pour deduplication intra-request.
+
+- Warning Pattern (Email/SMS) :
+  - Email/SMS failures **ne rollback jamais** les opérations DB critiques.
+  - Server Actions catch silencieusement email errors, retournent `{ success: true, warning: "..." }`.
+  - User toujours notifié du succès DB, avec avertissement si email failed.
+
+- T3 Env pattern :
+  - **JAMAIS** `process.env.VARIABLE` direct — utiliser `import { env } from '@/lib/env'`.
+  - Validation Zod à la compilation + runtime check.
+  - Client variables préfixées `NEXT_PUBLIC_*`, server variables protégées.
+
+## 2.1 T3 Env — Type-Safe Environment Variables
+
+**Package:** `@t3-oss/env-nextjs` v0.11+  
+**Location:** `lib/env.ts` (centralized configuration)  
+**Purpose:** Runtime validation + TypeScript types pour env vars
+
+**Architecture:**
+
+```typescript
+// lib/env.ts
+import { createEnv } from "@t3-oss/env-nextjs";
+import { z } from "zod";
+
+export const env = createEnv({
+  /**
+   * Server-side environment variables schema
+   * ⚠️ Ne pas inclure les variables NEXT_PUBLIC_* ici
+   */
+  server: {
+    // Supabase (Server-only)
+    SUPABASE_SECRET_KEY: z.string().min(1),
+    
+    // Email (Resend)
+    RESEND_API_KEY: z.string().min(1),
+    EMAIL_FROM: z.string().email(),
+    EMAIL_CONTACT: z.string().email(),
+    
+    // Development redirect
+    EMAIL_DEV_REDIRECT: z.enum(["true", "false"]).default("false"),
+    EMAIL_DEV_REDIRECT_TO: z.string().email().optional(),
+    
+    // Database backup (CI/CD only)
+    SUPABASE_DB_URL: z.string().url().optional(),
+    
+    // Monitoring (Sentry - Optional)
+    SENTRY_DSN: z.string().url().optional(),
+    SENTRY_ORG: z.string().optional(),
+    SENTRY_PROJECT: z.string().optional(),
+    SENTRY_AUTH_TOKEN: z.string().optional(),
+  },
+
+  /**
+   * Client-side environment variables schema
+   * MUST be prefixed with NEXT_PUBLIC_
+   */
+  client: {
+    NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY: z.string().min(1),
+    NEXT_PUBLIC_SITE_URL: z.string().url().optional(),
+  },
+
+  /**
+   * Runtime environment variables (Next.js specific)
+   */
+  runtimeEnv: {
+    // Server
+    SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    EMAIL_FROM: process.env.EMAIL_FROM,
+    EMAIL_CONTACT: process.env.EMAIL_CONTACT,
+    EMAIL_DEV_REDIRECT: process.env.EMAIL_DEV_REDIRECT,
+    EMAIL_DEV_REDIRECT_TO: process.env.EMAIL_DEV_REDIRECT_TO,
+    SUPABASE_DB_URL: process.env.SUPABASE_DB_URL,
+    SENTRY_DSN: process.env.SENTRY_DSN,
+    SENTRY_ORG: process.env.SENTRY_ORG,
+    SENTRY_PROJECT: process.env.SENTRY_PROJECT,
+    SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
+    
+    // Client (auto-bundled by Next.js)
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY,
+    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+  },
+
+  /**
+   * Skip validation during build (optional)
+   */
+  skipValidation: !!process.env.SKIP_ENV_VALIDATION,
+});
+```
+
+**Pattern d'utilisation (OBLIGATOIRE):**
+
+```typescript
+// ❌ WRONG: Direct process.env access
+const apiKey = process.env.RESEND_API_KEY;  // No type safety, no validation
+
+// ✅ CORRECT: T3 Env import
+import { env } from '@/lib/env';
+
+const apiKey = env.RESEND_API_KEY;  // ✅ Type-safe, validated at startup
+const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;  // ✅ Works in client too
+```
+
+**Avantages:**
+
+- ✅ **Type Safety:** Autocomplete + erreurs TypeScript si env var manquante
+- ✅ **Runtime Validation:** App crash au démarrage si env vars invalides (fail fast)
+- ✅ **Zod Validation:** Email format, URL format, enum values, etc.
+- ✅ **Client/Server Separation:** Variables client préfixées `NEXT_PUBLIC_*`
+- ✅ **Default Values:** `.default()` pour variables optionnelles
+- ✅ **Transformations:** `.transform()` pour convertir types (e.g., "true" → boolean)
+
+**Règles strictes:**
+
+- ⚠️ **JAMAIS** `process.env.VARIABLE` direct dans le code applicatif
+- ⚠️ **TOUJOURS** importer `env` de `@/lib/env`
+- ⚠️ Ajouter nouvelles env vars dans `lib/env.ts` + `.env.local` + `.env.example`
+- ⚠️ Variables client DOIVENT être préfixées `NEXT_PUBLIC_*`
+
+---
+
+### 2.2. BigInt Serialization Pattern (TASK055, Jan 2026)
+
+**Problème critique découvert:**
+
+React Server Actions ne peuvent pas sérialiser les valeurs `BigInt` retournées après validation Zod avec `z.coerce.bigint()`. Erreur type:
+
+```bash
+TypeError: Do not know how to serialize a BigInt
+    at JSON.stringify()
+```
+
+**Cause racine:**
+
+```typescript
+// ❌ BROKEN: Zod validation avec bigint dans Server Action
+const EventInputSchema = z.object({
+  lieu_id: z.coerce.bigint(),  // ← Crée un BigInt
+  // ...
+});
+
+export async function createEventAction(input: unknown) {
+  const validated = EventInputSchema.parse(input);  // validated.lieu_id est BigInt
+  const result = await createEvent(validated);
+  return { success: true, data: result };  // ❌ Crash: result.lieu_id est BigInt
+}
+```
+
+> **Solution: Three-Layer Type System**
+
+```bash
+┌────────────────────────────────────────────────────────────────┐
+│                     DATA FLOW ARCHITECTURE                      │
+├────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  UI Layer (Client Components)                                  │
+│  ├─ Forms: number IDs (EventFormSchema, LieuFormSchema)        │
+│  ├─ React Hook Form: validates with number                     │
+│  └─ Type: EventFormValues (lieu_id: number)                    │
+│                           │                                      │
+│                           ▼                                      │
+│  Transport Layer (Server Actions)                               │
+│  ├─ Never validate with z.coerce.bigint()                      │
+│  ├─ Use EventDataTransport (lieu_id: string)                   │
+│  ├─ Manual conversion: BigInt(validated.lieu_id)               │
+│  └─ ActionResult: { success: true } ONLY (no data)             │
+│                           │                                      │
+│                           ▼                                      │
+│  DAL Layer (Server-Only)                                        │
+│  ├─ EventInputSchema (lieu_id: z.coerce.bigint())              │
+│  ├─ Database operations with bigint                            │
+│  ├─ Returns DALResult<EventDTO> (id: bigint)                   │
+│  └─ NEVER exposed to Client Components                         │
+│                                                                 │
+└────────────────────────────────────────────────────────────────┘
+```
+
+**Implementation Pattern (OBLIGATOIRE):**
+
+```typescript
+// ✅ STEP 1: Separate Server/UI Schemas
+// lib/schemas/admin-events.ts
+
+// Server Schema (DAL/Database)
+export const EventInputSchema = z.object({
+  titre: z.string().min(1),
+  lieu_id: z.coerce.bigint(),  // ✅ bigint for database
+  // ...
+});
+export type EventInput = z.infer<typeof EventInputSchema>;
+
+// UI Schema (React Hook Form)
+export const EventFormSchema = z.object({
+  titre: z.string().min(1),
+  lieu_id: z.number().int().positive(),  // ✅ number for forms
+  // ...
+});
+export type EventFormValues = z.infer<typeof EventFormSchema>;
+
+// Transport Type (Server Action → DAL)
+export interface EventDataTransport {
+  titre: string;
+  lieu_id: string;  // ✅ string to avoid BigInt serialization
+  // ...
+}
+
+// ✅ STEP 2: Server Action (NO BigInt Validation)
+// app/(admin)/admin/agenda/actions.ts
+export async function createEventAction(input: unknown): Promise<ActionResult> {
+  try {
+    // ❌ NEVER: const validated = EventInputSchema.parse(input)
+    
+    // ✅ Validate with transport schema
+    const transportSchema = z.object({
+      titre: z.string().min(1),
+      lieu_id: z.string().regex(/^\d+$/),  // ✅ Validate string format
+      // ...
+    });
+    const validated: EventDataTransport = transportSchema.parse(input);
+    
+    // ✅ Manual BigInt conversion
+    const eventData: EventInput = {
+      ...validated,
+      lieu_id: BigInt(validated.lieu_id),  // ✅ Convert here
+    };
+    
+    const result = await createEvent(eventData);
+    if (!result.success) return result;
+    
+    revalidatePath('/admin/agenda');
+    return { success: true };  // ✅ NO data (prevents BigInt serialization)
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+// ✅ STEP 3: DAL Function (Uses bigint)
+// lib/dal/admin-events.ts
+export async function createEvent(
+  input: EventInput  // ✅ bigint IDs
+): Promise<DALResult<EventDTO>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('agenda_evenements')
+    .insert(input)  // ✅ Supabase handles bigint
+    .select()
+    .single();
+  
+  if (error) return { success: false, error: error.message };
+  return { success: true, data };  // ✅ Never returned to client
+}
+
+// ✅ STEP 4: Client Component (Uses number)
+// components/features/admin/agenda/EventForm.tsx
+const form = useForm<EventFormValues>({
+  resolver: zodResolver(EventFormSchema),  // ✅ UI schema
+  defaultValues: event ? {
+    lieu_id: Number(event.lieu_id),  // ✅ Convert bigint → number
+    // ...
+  } : {},
+});
+
+const onSubmit = async (data: EventFormValues) => {
+  // ✅ FormData contains number IDs, Server Action converts to string
+  const result = await createEventAction(data);
+  if (result.success) {
+    router.refresh();  // ✅ Fetch fresh data via Server Component
+  }
+};
+```
+
+**CRITICAL RULES (Apply Project-Wide):**
+
+1. ✅ **Server Schemas:** Use `z.coerce.bigint()` for database IDs
+2. ✅ **UI Schemas:** Use `z.number().int().positive()` for form IDs
+3. ✅ **Transport Types:** Use `string` IDs in Server Actions
+4. ✅ **ActionResult:** Return `{ success: true/false }` ONLY, NEVER return data
+5. ✅ **Data Refresh:** Use `router.refresh()` to fetch updated data via Server Component
+6. ✅ **Manual Conversion:** `BigInt(stringId)` in Server Action before DAL call
+7. ✅ **Type Safety:** Maintain strict separation (bigint/number/string)
+
+**Testing Pattern:**
+
+```typescript
+// scripts/test-admin-agenda-crud.ts
+async function testBigIntSerialization() {
+  const eventData: EventFormValues = {
+    titre: "Test Event",
+    lieu_id: 1,  // ✅ number in form
+  };
+  
+  const result = await createEventAction(eventData);
+  console.log(result);  // ✅ { success: true } (no BigInt)
+}
+```
+
+**Impact:**
+
+- ✅ Pattern applied to **ALL** CRUD with bigint IDs (events, lieux, future entities)
+- ✅ Prevents serialization errors at build/runtime
+- ✅ Maintains type safety across layers
+- ✅ Documentation: `memory-bank/tasks/tasks-completed/TASK055-bigint-fix.md`
+
+---
 
 ## Organisation des dossiers (rappel synthétique)
 
@@ -175,12 +495,24 @@ Fin
 ## Project Architecture Blueprint — Rouge Cardinal Company
 
 Generated: 30 November 2025  
-Updated: 30 December 2025  
+Updated: 7 January 2026  
 Source: `doc/prompts-github/architecture-blueprint-generator.prompt.md`  
 Repository branch: `master`  
-Version: v2.7
+Version: v2.9
 
 Résumé: ce document analyse la base de code existante et formalise le modèle d'architecture, les patterns observés et les recommandations pour l'évolution et l'extensibilité. Il s'appuie sur l'organisation actuelle (Next.js 16, TypeScript strict, Supabase, React 19) et couvre les composantes clés, la sécurité RLS, les modèles d'accès aux données, les tests et le déploiement.
+
+**Mise à jour v2.9 (5 janvier 2026) — Admin Views Security Hardening (TASK037):**
+
+- **🔴 CRITICAL HOTFIX**: Correction vulnérabilité RLS bypass sur vues PostgreSQL
+- **Vulnérabilité**: Vues en mode `SECURITY DEFINER` (défaut PostgreSQL) exécutaient requêtes avec privilèges du propriétaire, bypassant RLS
+- **Impact**: 2 vues affectées (`communiques_presse_public`, `communiques_presse_dashboard`)
+- **Fix appliqué**: Migration `20260105130000_fix_security_definer_views.sql` — Ajout explicite `with (security_invoker = true)` sur toutes les vues
+- **7 vues admin isolées**: Ownership transféré à rôle dédié `admin_views_owner` (pas de grants auto)
+- **11 vues publiques** : `SECURITY INVOKER` mode explicite + `grant select to anon, authenticated`
+- **Validation**: Script `test-admin-views-security.ts` — 13/13 tests PASSED
+- **RLS enforcement**: 100% des accès passent par RLS policies (pas de bypass)
+- **Documentation**: `memory-bank/tasks/tasks-completed/TASK037-ADMIN-VIEWS-SECURITY-HARDENING-SUMMARY.md`
 
 **Mise à jour v2.8 (1er janvier 2026) — Display Toggles System (TASK030 Complete):**
 
@@ -193,7 +525,7 @@ Résumé: ce document analyse la base de code existante et formalise le modèle 
   - Conditional rendering : `{showSection && (...)}`
   - Client forms : Progressive enhancement avec Server Actions
 - **Scripts admin** : check-presse-toggles.ts, toggle-presse.ts (4 modes)
-- **Admin UI** : Interface de gestion dans `/admin/site-config` (à venir)
+- **Admin UI** : Interface de gestion dans `/admin/site-config`
 - **Documentation** : `.github/prompts/plan-task030DisplayTogglesEpicAlignment.prompt.md`
 
 **Mise à jour v2.7 (30 décembre 2025) — Media Library Storage/Folders Sync:**
@@ -515,61 +847,126 @@ export async function createSomethingAction(input: unknown): Promise<ActionResul
 }
 ```
 
-### 4.2 DAL (`lib/dal/`)
+### 4.2 DAL (`lib/dal/`) — 29 Modules Data Access Layer
 
-**Fichiers actuels (21 modules):**
+**Architecture SOLID (92% compliance):**
 
-- `admin-home-hero.ts` — Hero Slides CRUD (fetch, create, update, delete, reorder)
-- `admin-home-about.ts` — About section CRUD
-- `admin-users.ts` — User invitation and management
-- `agenda.ts`, `compagnie.ts`, `compagnie-presentation.ts`, `contact.ts`
-- `dashboard.ts`, `home-about.ts`, `home-hero.ts`, `home-news.ts`
-- `home-newsletter.ts`, `home-partners.ts`, `home-shows.ts`
-- `presse.ts`, `spectacles.ts`, `team.ts`
-- `media.ts` — Media CRUD centralisé (Storage/DB operations)
-- `media-tags.ts` — Tags management
-- `media-folders.ts` — Folders management + `getFolderIdFromPath()` helper
-- `media-usage.ts` — Usage tracking across public pages
+- **S**ingle Responsibility: 1 fichier = 1 table/entité, DB operations ONLY
+- **O**pen/Closed: Extensible via validation, pas de logique hard-codée
+- **L**iskov Substitution: Interface `DALResult<T>` cohérente
+- **I**nterface Segregation: Dépendances minimales (Supabase + Auth uniquement)
+- **D**ependency Inversion: AUCUNE dépendance Next.js/email/SMS
+
+**Modules DAL complets (29 fichiers, ~7,310 lignes):**
+
+**Admin Features (14 modules):**
+
+1. `admin-agenda.ts` — Événements agenda CRUD
+2. `admin-home-hero.ts` — Hero Slides CRUD (fetch, create, update, delete, reorder)
+3. `admin-home-about.ts` — About sections CRUD
+4. `admin-lieux.ts` — **Lieux CRUD (TASK055 Phase 2)** — 5 fonctions avec cache(), requireAdmin(), DALResult<T>
+5. `admin-partners.ts` — Partenaires CRUD
+6. `admin-press-articles.ts` — Articles presse CRUD
+7. `admin-press-contacts.ts` — Contacts presse CRUD
+8. `admin-press-releases.ts` — Communiqués presse CRUD
+9. `admin-users.ts` — Utilisateurs CRUD + invitation email
+10. `audit-logs.ts` — Logs d'audit (surveillance actions admin)
+11. `dashboard.ts` — Dashboard statistics
+12. `data-retention.ts` — RGPD data retention policies (TASK047)
+13. `site-config.ts` — **Display Toggles (TASK030)** — 10 toggles centralisés
+14. `analytics.ts` — Analytics data aggregation
+
+**Public Features (11 modules):**
+
+15. `agenda.ts` — Agenda événements public
+16. `compagnie.ts` — Compagnie data
+17. `compagnie-presentation.ts` — Présentation compagnie
+18. `contact.ts` — Messages contact
+19. `home-about.ts` — About public
+20. `home-hero.ts` — Hero public
+21. `home-news.ts` — Actualités ("À la Une")
+22. `home-newsletter.ts` — Newsletter subscriptions
+23. `home-partners.ts` — Partenaires public
+24. `home-shows.ts` — Spectacles homepage
+25. `presse.ts` — Presse public (articles, releases, media kit)
+26. `spectacles.ts` — Spectacles CRUD + public views
+27. `team.ts` — Team members
+
+**Media Library (3 modules — TASK029 Complete):**
+
+28. `media.ts` — **Media CRUD centralisé** (Storage/DB operations, SHA-256 duplicate detection)
+29. `media-folders.ts` — **Folders management** (9 base folders, `getFolderIdFromPath()` helper)
+30. `media-usage.ts` — **Usage tracking** (spectacles, presse, team, etc.)
+31. `media-tags.ts` — Tags management (junction table)
 
 **DAL Helpers (`lib/dal/helpers/`):**
 
-- `error.ts` — `DALResult<T>` type et `handleError()`
-- `format.ts` — Utilitaires de formatage
-- `slug.ts` — Génération de slugs
+- `error.ts` — `DALResult<T>` type, `dalSuccess()`, `dalError()`, `toDALResult()`
+- `format.ts` — Formatage dates, strings, slugs
+- `slug.ts` — Génération slugs uniques (`generateUniqueSlug()`)
+- `folder.ts` — **Media folders** (`getFolderIdFromPath()`, Storage/Folders sync)
 - `index.ts` — Barrel exports
 
-**Pattern obligatoire:**
+**Pattern DAL Standard (TASK055 Lieux exemple):**
 
 ```typescript
 "use server";
 import "server-only";
+import { cache } from "react";
 import { createClient } from "@/supabase/server";
 import { requireAdmin } from "@/lib/auth/is-admin";
-import { type DALResult } from "./helpers";
+import type { DALResult } from "@/lib/dal/helpers";
+import { dalSuccess, dalError } from "@/lib/dal/helpers";
+import type { LieuInput, LieuDTO } from "@/lib/schemas/admin-lieux";
 
-export async function createSomething(input: ValidatedInput): Promise<DALResult<SomeDTO>> {
-  try {
-    await requireAdmin();  // Auth check
-    
+/**
+ * Fetch all lieux (admin)
+ * @returns DALResult with array of LieuDTO
+ */
+export const fetchAllLieuxAdmin = cache(async (): Promise<DALResult<LieuDTO[]>> => {
+    await requireAdmin();
+
     const supabase = await createClient();
     const { data, error } = await supabase
-      .from("table")
-      .insert(input)
-      .select()
-      .single();
+        .from("lieux")
+        .select("*")
+        .order("nom", { ascending: true });
 
     if (error) {
-      console.error("[ERR_ENTITY_001] Failed:", error);
-      return { success: false, error: `[ERR_ENTITY_001] ${error.message}` };
+        console.error("[ERR_LIEUX_001] Failed to fetch lieux:", error);
+        return dalError("[ERR_LIEUX_001] Failed to fetch lieux");
     }
 
-    // NO revalidatePath() here — handled by Server Actions
-    // NO email imports here — handled by Server Actions
-    return { success: true, data };
-  } catch (error: unknown) {
-    return { success: false, error: error instanceof Error ? error.message : "Unknown" };
-  }
+    return dalSuccess(data ?? []);
+});
+
+/**
+ * Create lieu
+ * @param input - LieuInput data
+ * @returns DALResult with created LieuDTO
+ */
+export async function createLieu(input: LieuInput): Promise<DALResult<LieuDTO>> {
+    await requireAdmin();
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+        .from("lieux")
+        .insert(input)
+        .select()
+        .single();
+
+    if (error) {
+        console.error("[ERR_LIEUX_003] Failed to create lieu:", error);
+        return dalError("[ERR_LIEUX_003] Failed to create lieu");
+    }
+
+    return dalSuccess(data);
 }
+
+// ✅ Functions < 30 lines
+// ✅ Error codes [ERR_LIEUX_001] to [ERR_LIEUX_005]
+// ❌ NO revalidatePath() — handled in Server Actions
+// ❌ NO email imports — handled in Server Actions
 ```
 
 **Règles SOLID enforced:**
@@ -577,9 +974,11 @@ export async function createSomething(input: ValidatedInput): Promise<DALResult<
 - ✅ `"use server"` directive (top of file)
 - ✅ `import "server-only"` (security boundary)
 - ✅ Returns `DALResult<T>` (never throws)
-- ✅ Error codes `[ERR_ENTITY_NNN]` format
-- ❌ NO `revalidatePath()` imports
-- ❌ NO `@/lib/email` imports
+- ✅ Error codes `[ERR_ENTITY_NNN]` format (001-005 par module)
+- ✅ Functions < 30 lines (SOLID compliance)
+- ✅ React `cache()` wrapper pour read functions (deduplication)
+- ❌ NO `revalidatePath()` imports (Dependency Inversion violation)
+- ❌ NO `@/lib/email` imports (Single Responsibility violation)
 
 ### 4.3 Constants (`lib/constants/`)
 
@@ -1063,6 +1462,120 @@ FeatureContainer.tsx   (Server Component)
 - Supabase JWT Signing Keys + `getClaims()` pour checks rapides (~2-5ms). `getUser()` réservé aux cas nécessitant full user data (~300ms).
 - RLS: policies fines, une policy par opération (select/insert/update/delete) et spécification `to authenticated, anon` selon besoin.
 
+### Admin Views Security Pattern (TASK037 - Janvier 2026)
+
+**Problème original:** Les vues admin (suffixe `_admin`) retournaient des arrays vides au lieu d'erreurs "permission denied" pour les utilisateurs non-admin, causé par les `DEFAULT PRIVILEGES` Supabase qui auto-accordaient `SELECT` aux rôles `anon` et `authenticated`.
+
+> **Solution: Role-Based Isolation**
+
+Création du rôle dédié `admin_views_owner` pour isoler les vues admin des grants automatiques:
+
+```sql
+-- 1. Create dedicated admin role
+create role admin_views_owner nologin noinherit;
+grant usage on schema public to admin_views_owner;
+grant create on schema public to admin_views_owner;
+grant admin_views_owner to postgres, service_role;
+
+-- 2. Transfer ownership (7 vues admin)
+alter view public.communiques_presse_dashboard owner to admin_views_owner;
+alter view public.membres_equipe_admin owner to admin_views_owner;
+alter view public.compagnie_presentation_sections_admin owner to admin_views_owner;
+alter view public.partners_admin owner to admin_views_owner;
+alter view public.content_versions_detailed owner to admin_views_owner;
+alter view public.messages_contact_admin owner to admin_views_owner;
+alter view public.analytics_summary owner to admin_views_owner;
+
+-- 3. Explicitly revoke anon/authenticated access
+revoke all on public.<admin_view> from anon, authenticated;
+
+-- 4. Grant service_role only
+grant select on public.<admin_view> to service_role;
+
+-- 5. Prevent future automatic grants
+alter default privileges for role admin_views_owner in schema public 
+  revoke all on tables from anon, authenticated;
+```
+
+**🔴 CRITICAL HOTFIX (2026-01-05 13:00):** Migration `20260105130000_fix_security_definer_views.sql`
+
+**Vulnérabilité détectée:** Deux vues (`communiques_presse_public`, `communiques_presse_dashboard`) s'exécutaient en mode `SECURITY DEFINER` (comportement par défaut PostgreSQL), bypassant les RLS policies en utilisant les privilèges du propriétaire de la vue au lieu de l'appelant.
+
+**Fix appliqué:**
+
+```sql
+-- ❌ VULNERABLE (mode DEFINER implicite)
+create view communiques_presse_public as ...;
+
+-- ✅ SECURE (mode INVOKER explicite)
+create view communiques_presse_public
+with (security_invoker = true)  -- Runs with caller's privileges
+as ...;
+```
+
+**Vérification:**
+
+```sql
+-- Query to check all views security mode
+SELECT relname, 
+  CASE WHEN EXISTS (
+    SELECT 1 FROM pg_options_to_table(reloptions) 
+    WHERE option_name = 'security_invoker' AND option_value = 'true'
+  ) THEN 'SECURITY INVOKER ✅' ELSE 'SECURITY DEFINER ❌' END
+FROM pg_class 
+WHERE relkind = 'v' AND relname LIKE '%communiques%';
+```
+
+**Impact:**
+
+- ✅ 7 vues admin correctement isolées avec ownership `admin_views_owner`
+- ✅ 11 vues publiques avec `SECURITY INVOKER` explicit enforcement
+- ✅ RLS policies respectées pour tous les accès (pas de bypass)
+- ✅ Default privileges configurés pour bloquer futurs grants auto
+
+**Fichiers schema affectés (5):**
+
+- `supabase/schemas/41_views_communiques.sql`
+- `supabase/schemas/41_views_admin_content_versions.sql`
+- `supabase/schemas/15_content_versioning.sql`
+- `supabase/schemas/10_tables_system.sql`
+- `supabase/schemas/13_analytics_events.sql`
+
+**Pattern pour nouvelles vues:**
+
+```sql
+-- Admin view (restricted access)
+create view public.new_admin_view
+with (security_invoker = true)  -- CRITICAL: Explicit INVOKER mode
+as
+  select * from some_table where (select public.is_admin()) = true;
+
+alter view public.new_admin_view owner to admin_views_owner;
+revoke all on public.new_admin_view from anon, authenticated;
+grant select on public.new_admin_view to service_role;
+
+-- Public view (unrestricted read)
+create view public.new_public_view
+with (security_invoker = true)  -- CRITICAL: Explicit INVOKER mode
+as
+  select * from some_table where published_at is not null;
+
+grant select on public.new_public_view to anon, authenticated;
+```
+
+**Tests de validation:**
+
+```bash
+# Verify admin view isolation
+pnpm exec tsx scripts/test-admin-views-security.ts
+
+# Expected results:
+# ✅ Anon user: Empty array → Permission denied error (403)
+# ✅ Authenticated user: Empty array → Permission denied error (403)
+# ✅ Admin user: Full data access
+# ✅ Service role: Full data access
+```
+
 7.2 Validation
 
 - Zod utilisé à la frontière des Server Actions et dans DAL (defense-in-depth).
@@ -1412,6 +1925,6 @@ export function FeatureForm({ onSuccess }: { onSuccess: () => void }) {
 
 Maintenir ce document à jour: exécuter le générateur chaque fois qu'une refonte structurelle (nouveau route group, changement DAL/Server Actions majeur, migration de provider critique) est effectuée.
 
-Dernière mise à jour: 30 décembre 2025 (v2.7)
+Dernière mise à jour: 7 janvier 2026 (v2.9)
 
 End of file

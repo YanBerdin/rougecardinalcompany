@@ -41,7 +41,7 @@ export async function DashboardStatsContainer() {
           title="Événements"
           value={stats.eventsCount}
           icon={<Calendar className="h-4 w-4" aria-hidden />}
-          href="/admin/evenements"
+          href="/admin/agenda"
         />
         <StatsCard
           title="Médias"

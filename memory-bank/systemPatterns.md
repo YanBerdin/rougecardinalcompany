@@ -1,6 +1,6 @@
 # System Patterns
 
-**Last Updated**: 2026-01-08
+**Last Updated**: 2026-01-26
 
 ## Database Infrastructure
 
@@ -14,7 +14,7 @@
 
 ---
 
-Architecture et patterns observés dans le projet:
+### Architecture et patterns observés dans le projet
 
 - App Router Next.js 16 (app/) pour pages et layouts.
 - Pattern **Smart/Dumb** components: containers server-side pour la data, composants clients pour l'interactivité.
@@ -110,6 +110,131 @@ const apiKey = process.env.RESEND_API_KEY;
 #### Fichiers impactés
 
 - `lib/site-config.ts` — Utilise `env.EMAIL_FROM`, `env.NEXT_PUBLIC_SITE_URL`
+
+---
+
+### BigInt Serialization Pattern (Jan 2026)
+
+**Pattern critique** pour gérer les IDs PostgreSQL `bigint` dans React Server Actions sans erreurs de sérialisation.
+
+#### Problème
+
+React Server Actions ne peuvent pas sérialiser les valeurs `BigInt`:
+
+```typescript
+// ❌ BROKEN: Zod validation avec bigint
+const EventSchema = z.object({
+  lieu_id: z.coerce.bigint(),  // ← Crée un BigInt
+});
+
+export async function createEvent(input: unknown) {
+  const validated = EventSchema.parse(input);  // validated.lieu_id est BigInt
+  return { success: true, data: validated };  // ❌ TypeError: Cannot serialize BigInt
+}
+```
+
+#### Solution: Three-Layer Type System
+
+```bash
+┌─────────────────────────────────────────────────────┐
+│  UI Layer (Client)                                  │
+│  └─ number IDs (EventFormSchema, LieuFormSchema)    │
+│                     ↓                               │
+│  Transport Layer (Server Actions)                   │
+│  └─ string IDs (EventDataTransport)                 │
+│                     ↓                               │
+│  DAL Layer (Server-Only)                            │
+│  └─ bigint IDs (EventInputSchema)                   │
+└─────────────────────────────────────────────────────┘
+```
+
+#### Pattern Complet
+
+```typescript
+// ✅ STEP 1: Separate Server/UI Schemas
+// lib/schemas/admin-events.ts
+
+// Server Schema (DAL/Database)
+export const EventInputSchema = z.object({
+  titre: z.string().min(1),
+  lieu_id: z.coerce.bigint(),  // ✅ bigint for database
+});
+export type EventInput = z.infer<typeof EventInputSchema>;
+
+// UI Schema (React Hook Form)
+export const EventFormSchema = z.object({
+  titre: z.string().min(1),
+  lieu_id: z.number().int().positive(),  // ✅ number for forms
+});
+export type EventFormValues = z.infer<typeof EventFormSchema>;
+
+// Transport Type (Server Action → DAL)
+export interface EventDataTransport {
+  titre: string;
+  lieu_id: string;  // ✅ string to avoid BigInt serialization
+}
+
+// ✅ STEP 2: Server Action (NO BigInt Validation)
+export async function createEventAction(input: unknown): Promise<ActionResult> {
+  const transportSchema = z.object({
+    titre: z.string().min(1),
+    lieu_id: z.string().regex(/^\d+$/),  // ✅ Validate string format
+  });
+  const validated: EventDataTransport = transportSchema.parse(input);
+  
+  // ✅ Manual BigInt conversion
+  const eventData: EventInput = {
+    ...validated,
+    lieu_id: BigInt(validated.lieu_id),  // ✅ Convert here, not in Zod
+  };
+  
+  const result = await createEvent(eventData);
+  if (!result.success) return result;
+  
+  return { success: true };  // ✅ NO data (prevents BigInt serialization)
+}
+
+// ✅ STEP 3: Client Component (Uses number)
+const form = useForm<EventFormValues>({
+  resolver: zodResolver(EventFormSchema),  // ✅ UI schema
+  defaultValues: event ? {
+    lieu_id: Number(event.lieu_id),  // ✅ Convert bigint → number
+  } : {},
+});
+```
+
+#### Règles Critiques (Apply Project-Wide)
+
+| Layer | Type | Schema | Used In |
+| ------- | ------ | -------- | --------- |
+| **UI** | `number` | `EventFormSchema` | React Hook Form, Client Components |
+| **Transport** | `string` | Custom validation | Server Actions (Action → DAL) |
+| **DAL** | `bigint` | `EventInputSchema` | Database operations, DAL functions |
+
+**Critical Rules:**
+
+1. ✅ **Server Schemas:** Use `z.coerce.bigint()` for database IDs
+2. ✅ **UI Schemas:** Use `z.number().int().positive()` for form IDs
+3. ✅ **Transport Types:** Use `string` IDs in Server Actions
+4. ✅ **ActionResult:** Return `{ success: true/false }` ONLY, NEVER return data
+5. ✅ **Data Refresh:** Use `router.refresh()` to fetch updated data via Server Component
+6. ✅ **Manual Conversion:** `BigInt(stringId)` in Server Action before DAL call
+
+#### Fichiers impactés
+
+- `lib/schemas/admin-events.ts` — Dual schemas (Server: bigint, UI: number)
+- `lib/schemas/admin-lieux.ts` — Dual schemas (Server: bigint, UI: number)
+- `app/(admin)/admin/agenda/actions.ts` — EventDataTransport pattern
+- `app/(admin)/admin/lieux/actions.ts` — LieuDataTransport pattern
+- `components/features/admin/agenda/EventForm.tsx` — Uses EventFormSchema
+- `components/features/admin/lieux/LieuForm.tsx` — Uses LieuFormSchema
+
+#### Documentation
+
+- Détails techniques: `memory-bank/tasks/tasks-completed/TASK055-bigint-fix.md`
+- Architecture: `memory-bank/architecture/Project_Architecture_Blueprint.md` (Section 2.2)
+
+---
 
 ### Sentry Error Monitoring Pattern (Jan 2026)
 

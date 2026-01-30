@@ -273,7 +273,7 @@ export function PresseView({
           <Button
             variant="outline"
             size="lg"
-            className="bg-white/30 border-white/50 text-sidebar-primary-foreground backdrop-blur-md hover:bg-text-sidebar-primary-foreground hover:text-black transition-all duration-300 shadow-lg border"
+            className="bg-white/30 border-white/50 text-sidebar-primary-foreground backdrop-blur-md hover:bg-sidebar-primary-foreground transition-all duration-300 shadow-lg border"
             asChild
           >
             <Link href="mailto:presse@rouge-cardinal.fr?subject=Demande%20d%27accr%C3%A9ditation">

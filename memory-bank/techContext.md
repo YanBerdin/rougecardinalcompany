@@ -1,6 +1,6 @@
 # Tech Context
 
-**Last Updated**: 2026-01-18
+**Last Updated**: 2026-01-26
 
 Versions et dépendances clés observées dans le dépôt:
 
@@ -26,6 +26,7 @@ Structure principale:
 
 | Date | Changement | Impact |
 | ------ | ------------ | -------- |
+| 2026-01-26 | Admin Agenda Management (TASK055) | Phase 1 Events + Phase 2 Lieux CRUD, BigInt serialization fix pattern |
 | 2026-01-18 | Data Retention Automation (TASK053) | First Edge Function, RGPD compliance, 5 tables configured |
 | 2026-01-17 | Analytics Dashboard (TASK031) | Admin metrics, Sentry integration, CSV/JSON export |
 | 2026-01-16 | Architecture Blueprints v6 | Documentation complète TASK029-TASK051, patterns documentés |

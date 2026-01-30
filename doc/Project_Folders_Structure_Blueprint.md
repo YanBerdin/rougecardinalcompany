@@ -1,0 +1,114 @@
+# Project Folders Structure Blueprint
+
+Date: 2026-01-26
+Repository: Rouge Cardinal Company — Next.js + TypeScript + Supabase
+
+## 1. Détection rapide du projet
+
+- Tech principales détectées:
+  - Next.js 16 (App Router) + React 19
+  - TypeScript (strict)
+  - Supabase (Postgres) + `@supabase/ssr`
+  - TailwindCSS + shadcn/ui patterns
+  - Numerous tooling: Playwright, Sentry, Turbopack, pnpm
+- Structure générale: monorepo-like single app with clear feature folders (`app/`, `components/`, `lib/`, `scripts/`, `doc/`, `supabase/`).
+
+## 2. Principles d'organisation
+
+- « Server-first »: données et logique côté serveur (Server Components, DAL in `lib/dal/`, `server-only`).
+- Feature-based layout: `components/features/...` and `app/(admin)/...` route groups for admin vs marketing.
+- DAL boundary: all DB access in `lib/dal/*` (return `DALResult<T>`), no direct DB access from client components.
+- Zod split schemas: Server schemas (bigint) vs UI schemas (number) when necessary.
+
+## 3. Arborescence importante (niveau 3)
+
+- app/
+  - (admin)/           # admin route group and pages
+    - admin/
+      - team/
+      - agenda/
+      - spectacles/
+  - (marketing)/       # public marketing pages
+  - layout.tsx
+  - globals.css
+- components/
+  - features/
+    - admin/
+      - agenda/
+      - team/
+    - public-site/
+  - ui/                # shadcn/ui-like shared UI primitives
+  - auth-button.tsx, login-form.tsx, ...
+- lib/
+  - dal/               # server-only data access (21+ modules)
+    - admin-agenda.ts
+    - admin-lieux.ts
+  - schemas/            # zod schemas (server + UI variants)
+  - actions/            # server actions helpers
+  - helpers/            # shared utilities (error codes, formatting)
+- scripts/
+  - many test and maintenance scripts (TypeScript via `tsx`)
+  - `test-*` and `check-*` scripts for CI and local checks
+- supabase/
+  - schemas/            # declarative SQL schemas
+  - migrations/         # timestamped migration files
+- doc/
+  - architecture and operational runbooks
+  - prompts-github/     # internal prompt templates
+- public/               # static assets
+
+## 4. File placement & conventions
+
+- Server-only modules: place in `lib/dal/` and add `"use server"` + `import "server-only"` at top.
+- Server Actions: colocated within `app/(admin)/.../actions.ts` following CRUD pattern and revalidatePath usage.
+- UI schemas: `lib/schemas/*-ui.ts` using `z.number()` for form bindings; Server schemas use `z.coerce.bigint()`.
+- Components: PascalCase filenames, one component per file when exported default.
+- Tests/scripts: place in `scripts/` as `tsx` files callable from `package.json`.
+
+## 5. Naming & patterns
+
+- Files: Components `PascalCase.tsx`, utils `camelCase.ts`, db modules `kebab-case.ts` in `lib/dal/` when domain-specific.
+- Tables: snake_case (Postgres), columns singular names, id columns `id bigint generated always as identity`.
+- Env access: T3 Env helper is preferred; scripts using `process.env` + `dotenv` for CLI tools.
+
+## 6. Development workflow (common tasks)
+
+- Start dev: `pnpm dev` (Turbopack)
+- Database diff / migrations: use `./scripts/supabase-env.sh db diff --linked` wrappers
+- Run admin agenda tests: `pnpm exec tsx scripts/test-admin-agenda-crud.ts`
+- Linting: `pnpm lint` and `pnpm lint:md`
+
+## 7. Build & output
+
+- Build: `pnpm build` → Next.js build outputs (server bundles, static assets) managed by Next.js.
+- Output: `next build` artifacts served by `next start` in production; static assets in `public/`.
+
+## 8. Extension templates (how to add a new feature)
+
+- New feature `foo` (admin + public):
+  1. Create DAL stub `lib/dal/foo.ts` with `DALResult<T>` pattern and `import "server-only"`.
+  2. Create schemas `lib/schemas/foo-server.ts` and `lib/schemas/foo-ui.ts` (bigint vs number).
+  3. Add Server Actions `app/(admin)/admin/foo/actions.ts` for create/update/delete with `revalidatePath()` on success.
+  4. Add Server Component page `app/(admin)/admin/foo/page.tsx` and Client `components/features/admin/foo/View.tsx` with useEffect sync of props.
+  5. Add scripts and tests under `scripts/` (e.g., `test-admin-foo-crud.ts`).
+
+## 9. Recommendations & maintenance
+
+- Keep DAL functions < 30 lines where possible and return `DALResult<T>` rather than throwing.
+- Keep UI schemas separate from Server schemas to avoid BigInt serialization issues.
+- Enforce `server-only` on DAL modules to prevent accidental client imports.
+- Document new migrations under `supabase/schemas/` and generate migrations via the CLI (follow declarative schema workflow).
+
+## 10. Where to find things (quick links)
+
+- App routes & Server Actions: `app/(admin)/admin/**`
+- Shared UI components: `components/ui/` and `components/features/`
+- Data Access Layer: `lib/dal/`
+- Zod schemas: `lib/schemas/`
+- Scripts & tests: `scripts/`
+- Supabase migrations & schemas: `supabase/schemas/` and `supabase/migrations/`
+- Documentation: `doc/` and `memory-bank/`
+
+---
+
+_Last updated: 2026-01-26 — generated by repository analysis._

@@ -24,7 +24,7 @@ function LogoCard({ partner, linkable, index }: LogoCardProps) {
     );
 
     const cardClasses =
-        "flex items-center justify-center px-3 py-2 mx-0 md:px-5 md:py-4 md:mx-3 bg-card/40 backdrop-blur-sm min-w-[100px] lg:min-w-[140px] h-14 xl:h-16 hover:bg-card transition-all duration-500 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative group rounded-md";
+        "flex items-center justify-center px-2 py-2 mx-0 md:px-2 md:py-4 md:mx-3 bg-card/40 backdrop-blur-sm min-w-[100px] lg:min-w-[120px] h-14 xl:h-16 hover:bg-card transition-all duration-500 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative group rounded-md";
 
     if (linkable && partner.website) {
         return (
@@ -94,7 +94,7 @@ export function LogoCloud({
 */}
             <div className="max-w-7xl mx-auto px-6 text-center mb-4">
 
-                <p className="text-xs lg:text-sm xl:text-md text-zinc-400 max-w-2xl mx-auto">
+                <p className="text-sm lg:text-md xl:text-lg text-muted-foreground max-w-2xl mx-auto">
                     Nos soutiens et partenaires institutionnels nous accompagnent.
                 </p>
             </div>

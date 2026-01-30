@@ -5,16 +5,17 @@ tools:
 - vscode
 - execute
 - read
-- agent
 - edit
 - search
 - web
-- github/*
 - chrome-devtools/*
+- gemini-design-mcp/*
+- github/*
 - next-devtools/init
 - playwright/*
 - shadcn/*
 - supabase/*
+- agent
 - todo
 ---
 
