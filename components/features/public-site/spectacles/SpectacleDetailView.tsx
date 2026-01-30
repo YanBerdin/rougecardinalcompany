@@ -274,7 +274,6 @@ export function SpectacleDetailView({ spectacle }: SpectacleDetailViewProps) {
                         </div>
                     </div>
                 </div>
-
             </section>
         </main >
     );
