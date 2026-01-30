@@ -8,6 +8,12 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SpectaclesViewProps } from "./types";
 import { SpectaclesSkeleton } from "@/components/skeletons/spectacles-skeleton";
+import type { CurrentShow, ArchivedShow } from "@/lib/schemas/spectacles";
+
+// Helper to get spectacle URL (fallback to ID if slug is missing)
+const getSpectacleUrl = (show: CurrentShow | ArchivedShow): string => {
+  return `/spectacles/${show.slug || show.id}`;
+};
 
 export function SpectaclesView({
   currentShows,
@@ -104,7 +110,7 @@ export function SpectaclesView({
                       </div>
 
                       <h3 className="text-2xl font-bold mb-4 hover:text-primary transition-colors card-title">
-                        <Link href={`/spectacles/${show.id}`}>
+                        <Link href={getSpectacleUrl(show)}>
                           {show.title}
                         </Link>
                       </h3>
@@ -127,10 +133,10 @@ export function SpectaclesView({
 
                     <div className="flex space-x-3">
                       <Button variant="default" className="flex-1" asChild>
-                        <Link href={`/spectacles/${show.id}`}>Réserver</Link>
+                        <Link href={getSpectacleUrl(show)}>Réserver</Link>
                       </Button>
                       <Button variant="outline" asChild className="btn-outline">
-                        <Link href={`/spectacles/${show.id}`}>
+                        <Link href={getSpectacleUrl(show)}>
                           Détails
                           <ArrowRight className="ml-2 h-4 w-4" />
                         </Link>
@@ -188,7 +194,7 @@ export function SpectaclesView({
 
                 <CardContent className="p-6">
                   <h3 className="text-xl font-semibold mb-3 hover:text-primary transition-colors card-title">
-                    <Link href={`/spectacles/${show.id}`}>{show.title}</Link>
+                    <Link href={getSpectacleUrl(show)}>{show.title}</Link>
                   </h3>
                   <p className="text-sm leading-relaxed mb-4 card-text">
                     {show.description}
@@ -201,7 +207,7 @@ export function SpectaclesView({
                     className="w-full btn-outline px-4 py-2 rounded-lg"
                     asChild
                   >
-                    <Link href={`/spectacles/${show.id}`}>
+                    <Link href={getSpectacleUrl(show)}>
                       Voir les détails
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>

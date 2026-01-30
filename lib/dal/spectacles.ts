@@ -140,39 +140,65 @@ export const fetchSpectacleById = cache(
 );
 
 /**
- * Fetches a spectacle by slug
+ * Fetches a spectacle by slug or ID
  *
  * Wrapped with React cache() for intra-request deduplication.
  *
- * @param slug - Spectacle slug (URL-friendly identifier)
+ * @param slugOrId - Spectacle slug (URL-friendly identifier) or numeric ID as string
  * @returns Spectacle record or null if not found
  *
  * @example
- * const spectacle = await fetchSpectacleBySlug("hamlet-2025");
+ * const spectacle1 = await fetchSpectacleBySlug("hamlet-2025");
+ * const spectacle2 = await fetchSpectacleBySlug("123"); // Fallback to ID
  */
 export const fetchSpectacleBySlug = cache(
-  async (slug: string): Promise<SpectacleDb | null> => {
+  async (slugOrId: string): Promise<SpectacleDb | null> => {
     try {
       const supabase = await createClient();
-      const { data, error } = await supabase
+      
+      // Check if slugOrId is a number (ID fallback)
+      const isNumeric = /^\d+$/.test(slugOrId);
+      
+      console.log("[fetchSpectacleBySlug] Input:", slugOrId, "| isNumeric:", isNumeric);
+      
+      let query = supabase
         .from("spectacles")
         .select(
           "id, title, slug, status, description, short_description, genre, duration_minutes, casting, premiere, image_url, public, awards, created_by, created_at, updated_at"
-        )
-        .eq("slug", slug)
-        .single();
+        );
+      
+      if (isNumeric) {
+        // Search by ID as fallback
+        const id = parseInt(slugOrId, 10);
+        console.log("[fetchSpectacleBySlug] Querying by ID:", id);
+        query = query.eq("id", id);
+      } else {
+        // Search by slug (primary method)
+        console.log("[fetchSpectacleBySlug] Querying by slug:", slugOrId);
+        query = query.eq("slug", slugOrId);
+      }
+      
+      const { data, error } = await query.single();
 
       if (error) {
-        console.error("fetchSpectacleBySlug error:", error);
+        console.error("[fetchSpectacleBySlug] Supabase error:", {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+        });
         return null;
       }
+
+      console.log("[fetchSpectacleBySlug] Raw data received:", data);
 
       const parsed = SpectacleDbSchema.safeParse(data as unknown);
       if (!parsed.success) {
-        console.error("fetchSpectacleBySlug: invalid row:", parsed.error);
+        console.error("[fetchSpectacleBySlug] Validation failed:", parsed.error.issues);
         return null;
       }
 
+      console.log("[fetchSpectacleBySlug] Success! Returning spectacle:", parsed.data.title);
       return parsed.data;
     } catch (err) {
       console.error("fetchSpectacleBySlug exception:", err);
