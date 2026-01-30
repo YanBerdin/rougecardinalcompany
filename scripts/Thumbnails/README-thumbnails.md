@@ -261,9 +261,9 @@ SUPABASE_SECRET_KEY=...
 
 ## 📝 Références
 
-- [doc/thumbnail-flow.md](../doc/thumbnail-flow.md) — Diagramme du flux complet
-- [doc/diagnostic-thumbnails-null.md](../doc/diagnostic-thumbnails-null.md) — Diagnostic NULL thumbnails
-- [Phase 4.3 Summary](../.github/prompts/plan-TASK029-MediaLibrary/phase4.3-implementation-summary.md) — Implémentation
+- [doc/Thumbnail/thumbnail-flow.md](../../doc/Thumbnail/thumbnail-flow.md) — Diagramme du flux complet
+- [doc/Thumbnail/diagnostic-thumbnails-null.md](../../doc/Thumbnail/diagnostic-thumbnails-null.md) — Diagnostic NULL thumbnails
+- [Phase 4.3 Summary](../../.github/prompts/plan-TASK029-MediaLibrary/phase4.3-implementation-summary.md) — Implémentation
 
 ---
 

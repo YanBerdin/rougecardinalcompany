@@ -181,8 +181,8 @@ const SUPPORTED_TYPES = [
 
 ## 📝 Documentation associée
 
-- [doc/thumbnail-flow.md](./thumbnail-flow.md) — Diagramme Mermaid du flux complet
-- [.github/prompts/plan-TASK029-MediaLibrary/phase4.3-implementation-summary.md](../.github/prompts/plan-TASK029-MediaLibrary/phase4.3-implementation-summary.md) — Implémentation Phase 4.3
+- [doc/thumbnail-flow.md](./diagnostic-thumbnails-null.md) — Diagramme Mermaid du flux complet
+- [.github/prompts/plan-TASK029-MediaLibrary/phase4.3-implementation-summary.md](../../.github/prompts/plan-TASK029-MediaLibrary/phase4.3-implementation-summary.md) — Implémentation Phase 4.3
 
 ---
 

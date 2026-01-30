@@ -140,6 +140,7 @@ pnpm exec tsx scripts/check-thumbnails-db.ts
 ```
 
 **Output** :
+
 ```yaml
 📊 Media Thumbnails Status (LOCAL DB)
 ========================================
@@ -251,15 +252,15 @@ ORDER BY created_at DESC;
 
 **7 médias avec thumbnails générés** :
 
-| ID  | Filename                                           | Thumbnail Path                         |
-| --- | -------------------------------------------------- | -------------------------------------- |
-| 15  | 3 - Le drapier.png                                 | spectacles/..._thumb.jpg               |
-| 14  | Capture d'écran_27-1-2026_16120_www.instagram.com.jpeg | spectacles/..._thumb.jpg               |
-| 13  | maison-etudiante.paris.jpeg                        | partners/..._thumb.jpg                 |
-| 12  | Buell_Logo-700x245 - Copie.png                     | partners/..._thumb.jpg                 |
-| 11  | 298A44E3-7D13-4CD4-9D43-8C2D9D1EAF8A.PNG           | team/..._thumb.jpg                     |
-| 10  | logo-florian.png                                   | uploads/..._thumb.jpg                  |
-| 9   | 404 Github.jpeg                                    | uploads/..._thumb.jpg                  |
+| ID  | Filename                                                   | Thumbnail Path           |
+| --- | ---------------------------------------------------------- | ------------------------ |
+| 15  | 3 - Le drapier.png                                         | spectacles/..._thumb.jpg |
+| 14  | Capture d'écran_27-1-2026_16120_www.instagram.com.jpeg     | spectacles/..._thumb.jpg |
+| 13  | maison-etudiante.paris.jpeg                                | partners/..._thumb.jpg   |
+| 12  | Buell_Logo-700x245 - Copie.png                             | partners/..._thumb.jpg   |
+| 11  | 298A44E3-7D13-4CD4-9D43-8C2D9D1EAF8A.PNG                   | team/..._thumb.jpg       |
+| 10  | logo-florian.png                                           | uploads/..._thumb.jpg    |
+| 9   | 404 Github.jpeg                                            | uploads/..._thumb.jpg    |
 
 **4 fichiers ignorés (attendu)** : 2 SVG + 2 PDF (non concernés par les thumbnails)
 
