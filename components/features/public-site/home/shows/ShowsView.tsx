@@ -68,7 +68,7 @@ export function ShowsView({ shows }: ShowsViewProps) {
               <CardFooter className="pt-0 mt-auto">
                 <div className="flex space-x-2 w-full">
                   <Button
-                    variant="outline-primary"
+                    variant="secondary"
                     size="lg"
                     className="flex-1"
                     asChild

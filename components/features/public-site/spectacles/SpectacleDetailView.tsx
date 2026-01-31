@@ -64,9 +64,9 @@ export function SpectacleDetailView({ spectacle }: SpectacleDetailViewProps) {
                 aria-labelledby="spectacle-genre"
             >
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h2 id="spectacle-genre" className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in-up">
+                    <h1 id="spectacle-genre" className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in-up">
                         {spectacle.genre}
-                    </h2>
+                    </h1>
                     {spectacle.short_description && (
                         <p
                             className="text-xl md:text-2xl italic leading-relaxed opacity-90 animate-fade-in max-w-3xl mx-auto"
@@ -152,7 +152,7 @@ export function SpectacleDetailView({ spectacle }: SpectacleDetailViewProps) {
                                     </Button>
 
                                     <Button
-                                        variant="outline"
+                                        variant="secondary"
                                         size="default"
                                         asChild
                                     >
@@ -166,7 +166,7 @@ export function SpectacleDetailView({ spectacle }: SpectacleDetailViewProps) {
                                 {/* Lien secondaire : Retour */}
                                 <div>
                                     <Button
-                                        variant="ghost"
+                                        variant="outline"
                                         size="default"
                                         asChild
                                     >

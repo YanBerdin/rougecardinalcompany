@@ -59,7 +59,7 @@ export function NewsView({ news }: NewsViewProps) {
 
               <CardFooter className="mt-auto">
                 <Button
-                  variant="outline-primary"
+                  variant="secondary"
                   size="lg"
                   className=""
                   asChild

@@ -74,7 +74,7 @@ export function TeamMemberCard({
             </Button>
           )}
           <Button
-            variant="outline"
+            variant="secondary"
             onClick={onEdit}
             className="w-full sm:w-auto"
           >

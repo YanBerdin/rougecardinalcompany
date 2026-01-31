@@ -48,7 +48,7 @@ export function AgendaView({
       {/* Hero Section */}
       <section className="py-20 hero-gradient text-sidebar-primary-foreground">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fade-in-up">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in-up">
             Agenda
           </h1>
           <p
@@ -171,7 +171,7 @@ export function AgendaView({
                       {/* Actions */}
                       <div className="flex flex-col justify-center space-y-3">
                         {event.ticketUrl && (
-                          <Button variant="default" className="w-full" asChild>
+                          <Button variant="default" asChild>
                             <Link
                               href={event.ticketUrl}
                               target="_blank"
@@ -186,8 +186,8 @@ export function AgendaView({
                         )}
 
                         <Button
-                          variant="outline"
-                          className="w-full"
+                          variant="secondary"
+                       
                           onClick={() => generateCalendarFile(event)}
                         >
                           <Download className="mr-2 h-4 w-4" />

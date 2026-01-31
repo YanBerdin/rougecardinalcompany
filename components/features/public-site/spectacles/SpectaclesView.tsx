@@ -36,7 +36,7 @@ export function SpectaclesView({
       {/* Hero Section */}
       <section className="py-20 hero-gradient text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fade-in-up">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in-up">
             Nos Spectacles
           </h1>
           <p
@@ -135,7 +135,7 @@ export function SpectaclesView({
                       <Button variant="default" className="flex-1" asChild>
                         <Link href={getSpectacleUrl(show)}>Réserver</Link>
                       </Button>
-                      <Button variant="outline" asChild className="btn-outline">
+                      <Button variant="secondary" asChild className="btn-outline">
                         <Link href={getSpectacleUrl(show)}>
                           Détails
                           <ArrowRight className="ml-2 h-4 w-4" />
@@ -203,7 +203,7 @@ export function SpectaclesView({
 
                 <CardFooter>
                   <Button
-                    variant="outline-primary"
+                    variant="secondary"
                     className="w-full btn-outline px-4 py-2 rounded-lg"
                     asChild
                   >

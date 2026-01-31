@@ -167,7 +167,7 @@ export async function uploadMediaImage(
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            mediaId: parseInt(result.data.mediaId, 10), // ✅ Convert string to number
+            mediaId: result.data.mediaId,
             storagePath: result.data.storagePath,
           }),
         }

@@ -11,14 +11,6 @@ import {
 } from "@/lib/schemas/press-release";
 
 /**
- * Build public URL from storage_path
- */
-function buildMediaUrl(storagePath: string | null): string | null {
-    if (!storagePath) return null;
-    return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/medias/${storagePath}`;
-}
-
-/**
  * Map database record to PressReleaseDTO
  * Handles spectacle/evenement which can be arrays or objects from Supabase joins
  */

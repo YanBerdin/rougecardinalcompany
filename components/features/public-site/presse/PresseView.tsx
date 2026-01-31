@@ -20,7 +20,7 @@ export function PresseView({
       {/* Hero Section */}
       <section className="py-20 hero-gradient">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fade-in-up text-sidebar-primary-foreground">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in-up text-sidebar-primary-foreground">
             Espace Presse
           </h1>
           <p
@@ -98,7 +98,7 @@ export function PresseView({
                       {release.description}
                     </p>
                     <Button
-                      variant="outline-primary"
+                      variant="secondary"
                       className="w-full mt-auto" asChild>
                       <Link href={release.fileUrl} download>
                         <Download className="mr-2 h-4 w-4" />
@@ -179,7 +179,7 @@ export function PresseView({
                     </div>
 
                     <div className="flex items-center justify-center lg:justify-end">
-                      <Button variant="outline" asChild>
+                      <Button variant="secondary" asChild>
                         <Link
                           href={article.source_url}
                           target="_blank"
@@ -231,7 +231,7 @@ export function PresseView({
                         Taille : {item.fileSize}
                       </p>
 
-                      <Button variant="outline-primary" className="w-full mt-auto" asChild>
+                      <Button variant="secondary" className="w-full mt-auto" asChild>
                         <Link href={item.fileUrl} download>
                           <Download className="mr-2 h-4 w-4" />
                           Télécharger

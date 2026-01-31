@@ -37,7 +37,7 @@ export function CompagnieView({
             >
               <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 {section.title && (
-                  <h1 className="max-sm:text-4xl text-5xl md:text-6xl xl:text-7xl font-bold mb-6 animate-fade-in-up">
+                  <h1 className="text-4xl md:text-5xl lg:text-6xl  font-bold mb-6 animate-fade-in-up">
                     {section.title}
                   </h1>
                 )}

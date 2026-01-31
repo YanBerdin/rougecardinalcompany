@@ -36,7 +36,7 @@ export default function CardsDashboard() {
                     </CardHeader>
                     <CardContent>
                         <div className="flex justify-end">
-                            <Button asChild size="sm">
+                            <Button asChild variant="secondary">
                                 <Link href={it.href}>Accéder</Link>
                             </Button>
                         </div>
