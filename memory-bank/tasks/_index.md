@@ -26,6 +26,7 @@
 - `TASK017` Retrait des délais artificiels (1200-1500ms) des containers
 - `TASK054` LCP Optimization Phase 2 (CDN, BlurHash, srcset) - Optional improvements for <1000ms LCP
 - `TASK056` Remplacer les données de seed par des fichiers valides - Low Priority (4 images manquantes dans Storage, thumbnails échouées)
+- `TASK057` Spectacle Landscape Photos Integration - Système de gestion de 2 photos paysage par spectacle (colonne type, vues, RLS, DAL, Admin UI, Public display)
 
 ## Terminé
 

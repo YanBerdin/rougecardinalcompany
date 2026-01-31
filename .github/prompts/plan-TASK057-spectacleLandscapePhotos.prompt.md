@@ -585,6 +585,13 @@ Ajouter nouvelle entrée:
 | 2026-01-31 14:00:00 | add_landscape_photos_to_spectacles | Système photos paysage spectacles (colonne type, constraints, vues, RLS) | ✅ Applied | Cloud + Local | Workflow declarative schema |
 ```
 
+### `memory-bank/tasks/TASK057-spectacle-landscape-photos.md`
+
+mettre à jour l'état de progression dans la section "Implementation Steps" au fur et à mesure de l'avancement des étapes.
+
+### `.github/prompts/plan-TASK057-spectacleLandscapePhotos.prompt.md`
+mettre à jour l'état de progression de ce plan détaillé en fonction des modifications apportées au code une fois l'implémentation accomplie.
+
 ## Résumé technique
 
 **Database**: Contraintes doubles (`CHECK` + `UNIQUE`) pour garantie stricte max 2 photos  
