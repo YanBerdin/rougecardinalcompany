@@ -60,13 +60,14 @@ export function SpectacleDetailView({ spectacle }: SpectacleDetailViewProps) {
 
             {/* Hero Section */}
             <section
-                className="py-12 hero-gradient text-sidebar-primary-foreground"
+                className="py-8 sm:py-12 md:py-14 lg:py-16 hero-gradient text-sidebar-primary-foreground"
                 aria-labelledby="spectacle-genre"
             >
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h1 id="spectacle-genre" className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in-up">
+                    <h1 id="spectacle-genre" className="text-4xl sm:text-5xl lg:text-6xl font-bold animate-fade-in-up">
                         {spectacle.genre}
                     </h1>
+                    {/*
                     {spectacle.short_description && (
                         <p
                             className="text-xl md:text-2xl italic leading-relaxed opacity-90 animate-fade-in max-w-3xl mx-auto"
@@ -75,20 +76,72 @@ export function SpectacleDetailView({ spectacle }: SpectacleDetailViewProps) {
                             {spectacle.short_description}
                         </p>
                     )}
+                    */}
+                </div>
+            </section>
+
+            {/* Informations Pratiques - Horizontal Bar */}
+            <section className="bg-card border-y border-border/50 py-4" aria-label="Informations pratiques">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+                        {/* Comédiens */}
+                        <div className="flex items-center gap-3">
+                            <Users className="h-5 w-5 text-accent-foreground flex-shrink-0 bg-background rounded-2xl" aria-hidden="true" />
+                            <div className="flex-1">
+                                <p className="ml-1 text-xs text-muted-foreground uppercase tracking-wide">Comédiens</p>
+                                <Badge variant="outline" className="mt-1 text-xs sm:text-sm">
+                                    {spectacle.casting ? `${spectacle.casting} comédien${spectacle.casting > 1 ? 's' : ''}` : "Non précisé"}
+                                </Badge>
+                            </div>
+                        </div>
+
+                        {/* Durée */}
+                        <div className="flex items-center gap-3">
+                            <Clock className="h-5 w-5 text-accent-foreground flex-shrink-0 bg-background rounded-2xl" aria-hidden="true" />
+                            <div className="flex-1">
+                                <p className="ml-1 text-xs text-muted-foreground uppercase tracking-wide">Durée</p>
+                                <Badge variant="outline" className="mt-1 text-xs sm:text-sm">
+                                    {formatDuration(spectacle.duration_minutes)}
+                                </Badge>
+                            </div>
+                        </div>
+
+                        {/* Première */}
+                        <div className="flex items-center gap-3">
+                            <Calendar className="h-5 w-5 text-accent-foreground flex-shrink-0 bg-background rounded-2xl" aria-hidden="true" />
+                            <div className="flex-1">
+                                <p className="ml-1 text-xs text-muted-foreground uppercase tracking-wide">Première</p>
+                                <Badge variant="outline" className="mt-1 text-xs sm:text-sm">
+                                    {formatDate(spectacle.premiere)}
+                                </Badge>
+                            </div>
+                        </div>
+
+                        {/* Lieu */}
+                        <div className="flex items-center gap-3">
+                            <MapPin className="h-5 w-5 text-accent-foreground flex-shrink-0 bg-background rounded-2xl" aria-hidden="true" />
+                            <div className="flex-1">
+                                <p className="ml-1 text-xs text-muted-foreground uppercase tracking-wide">Lieu</p>
+                                <Badge variant="outline" className="mt-1 text-xs sm:text-sm">
+                                    À venir
+                                </Badge>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
             {/* Content Section */}
             <section
-                className="pt-8 md:pt-16 pb-16 md:pb-24 bg-card"
+                className="pt-2 md:pt-8 lg:pt-12 pb-16 md:pb-24 bg-card"
                 aria-labelledby="synopsis"
             >
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 ">
-                    <div className="grid grid-cols-1 md:grid-cols-5 gap-16">
+                <div className="max-w-7xl mx-auto px-4 xl:px-0 ">
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-8 md:gap-12 lg:gap-16">
 
                         {/* Affiche Column */}
-                        <div className="md:col-span-2">
-                            <div className="group  aspect-[2/3] rounded-lg overflow-hidden shadow-2xl border-4 border-white/80 dark:border-gray-800/80 transition-all hover:shadow-[0_25px_70px_rgba(173,0,0,0.4)] hover:scale-[1.02] sticky top-20">
+                        <div className="md:col-span-2 max-sm:p-8 md:p-2 lg:p-0">
+                            <div className="group aspect-[2/3] rounded-lg overflow-hidden shadow-2xl border-4 border-white/80 dark:border-gray-800/80 transition-all hover:shadow-[0_25px_70px_rgba(173,0,0,0.4)] hover:scale-[1.02] sticky top-20">
                                 {spectacle.image_url ? (
                                     <Image
                                         src={spectacle.image_url}
@@ -113,14 +166,14 @@ export function SpectacleDetailView({ spectacle }: SpectacleDetailViewProps) {
                         </div>
 
                         {/* Synopsis Column */}
-                        <div className="md:col-span-2 space-y-6">
+                        <div className="md:col-span-3 space-y-6">
 
-                            <h1 id="spectacle-title" className="text-4xl md:text-5xl lg:text-5xl font-bold mb-6 animate-fade-in-up">
+                            <h2 id="spectacle-title" className="text-2xl md:text-3xl lg:text-4xl font-bold mb-6 animate-fade-in-up">
                                 {spectacle.title}
-                            </h1>
+                            </h2>
                             {spectacle.short_description && (
                                 <p
-                                    className="text-xl md:text-2xl italic leading-relaxed opacity-90 animate-fade-in max-w-3xl mx-auto"
+                                    className="max-sm:text-lg text-xl md:text-2xl italic leading-relaxed opacity-90 animate-fade-in max-w-3xl mx-auto"
                                     style={{ animationDelay: "0.2s" }}
                                 >
                                     {spectacle.short_description}
@@ -128,19 +181,19 @@ export function SpectacleDetailView({ spectacle }: SpectacleDetailViewProps) {
                             )}
 
                             <div className="prose prose-lg max-w-none text-foreground/90 leading-relaxed">
-                                <p className="text-lg whitespace-pre-line first-letter:text-7xl first-letter:font-bold first-letter:text-primary first-letter:mr-2 first-letter:float-left first-letter:leading-[0.8]">
+                                <p className="max-sm:text-sm text-md lg:text-lg whitespace-pre-line first-letter:text-7xl first-letter:font-bold first-letter:text-primary first-letter:mr-2 first-letter:float-left first-letter:leading-[0.8]">
                                     {spectacle.description || spectacle.short_description}
                                 </p>
                             </div>
 
                             {/* Call to Actions */}
-                            <div className="flex flex-col gap-4 pt-6">
+                            <div className="flex flex-col gap-4 pt-4 md:pt-6">
                                 {/* CTA Principaux : Réserver + Voir les dates */}
-                                <div className="flex flex-wrap gap-3">
+                                <div className="flex flex-col sm:flex-row flex-wrap gap-3">
                                     <Button
                                         variant="default"
-                                        size="default"
-                                        className="shadow-lg hover:shadow-xl transition-all touch-action-manipulation"
+                                        size="lg"
+                                        className="shadow-lg hover:shadow-xl transition-all touch-action-manipulation w-full sm:w-auto"
                                         asChild
                                     >
                                         <Link
@@ -153,7 +206,8 @@ export function SpectacleDetailView({ spectacle }: SpectacleDetailViewProps) {
 
                                     <Button
                                         variant="secondary"
-                                        size="default"
+                                        size="lg"
+                                        className="w-full sm:w-auto"
                                         asChild
                                     >
                                         <Link href="/agenda" aria-label="Consulter l'agenda des représentations">
@@ -167,7 +221,8 @@ export function SpectacleDetailView({ spectacle }: SpectacleDetailViewProps) {
                                 <div>
                                     <Button
                                         variant="outline"
-                                        size="default"
+                                        size="lg"
+                                        className="w-full sm:w-auto"
                                         asChild
                                     >
                                         <Link
@@ -211,66 +266,6 @@ export function SpectacleDetailView({ spectacle }: SpectacleDetailViewProps) {
                                     </CardContent>
                                 </Card>
                             )}
-                        </div>
-
-                        {/* Informations Pratiques - Compact Badges */}
-                        <div className="md:col-span-1 space-y-3">
-
-
-                            {/* Genre */}
-                            <div className="flex items-center gap-2">
-                                <Play className="h-5 w-5 text-primary flex-shrink-0" fill="currentColor" aria-hidden="true" />
-                                <div className="flex-1">
-                                    <p className="text-sm text-muted-foreground uppercase tracking-wide">Genre</p>
-                                    <Badge variant="outline" className="mt-1">
-                                        {spectacle.genre || "Non précisé"}
-                                    </Badge>
-                                </div>
-                            </div>
-
-                            {/* Comédiens */}
-                            <div className="flex items-center gap-2">
-                                <Users className="h-5 w-5 text-primary flex-shrink-0" aria-hidden="true" />
-                                <div className="flex-1">
-                                    <p className="text-sm text-muted-foreground uppercase tracking-wide">Comédiens</p>
-                                    <Badge variant="outline" className="mt-1">
-                                        {spectacle.casting ? `${spectacle.casting} comédien${spectacle.casting > 1 ? 's' : ''}` : "Non précisé"}
-                                    </Badge>
-                                </div>
-                            </div>
-
-                            {/* Durée */}
-                            <div className="flex items-center gap-2">
-                                <Clock className="h-5 w-5 text-primary flex-shrink-0" aria-hidden="true" />
-                                <div className="flex-1">
-                                    <p className="text-sm text-muted-foreground uppercase tracking-wide">Durée</p>
-                                    <Badge variant="outline" className="mt-1">
-                                        {formatDuration(spectacle.duration_minutes)}
-                                    </Badge>
-                                </div>
-                            </div>
-
-                            {/* Première */}
-                            <div className="flex items-center gap-2">
-                                <Calendar className="h-5 w-5 text-primary flex-shrink-0" aria-hidden="true" />
-                                <div className="flex-1">
-                                    <p className="text-sm text-muted-foreground uppercase tracking-wide">Première</p>
-                                    <Badge variant="outline" className="mt-1">
-                                        {formatDate(spectacle.premiere)}
-                                    </Badge>
-                                </div>
-                            </div>
-
-                            {/* Lieu */}
-                            <div className="flex items-center gap-2">
-                                <MapPin className="h-5 w-5 text-primary flex-shrink-0" aria-hidden="true" />
-                                <div className="flex-1">
-                                    <p className="text-sm text-muted-foreground uppercase tracking-wide">Lieu</p>
-                                    <Badge variant="outline" className="mt-1">
-                                        À venir
-                                    </Badge>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>

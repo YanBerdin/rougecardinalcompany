@@ -10,24 +10,24 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-primary brightness-125 text-primary-foreground hover:bg-muted-foreground hover:text-muted shadow-sm",
+          "bg-primary brightness-[1.15] font-semibold whitespace-nowrap text-primary-foreground hover:bg-muted-foreground hover:text-muted shadow-sm",
         destructive:
-          "bg-background border border-input hover:bg-card hover:text-destructive shadow-sm",
+          "bg-background font-semibold whitespace-nowrap border border-input hover:bg-card hover:text-destructive shadow-sm",
         outline:
-          "bg-background border border-input hover:bg-accent hover:text-accent-foreground shadow-sm",
+          "bg-background font-semibold whitespace-nowrap border border-input hover:bg-accent hover:text-accent-foreground shadow-sm",
         "outline-primary":
-          "bg-background border border-primary shadow-sm hover:bg-background text-foreground hover:border hover:border-primary-foreground",
+          "bg-background font-semibold whitespace-nowrap border border-primary shadow-sm hover:bg-background text-foreground hover:border hover:border-primary-foreground",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-muted-foreground hover:text-muted shadow-sm",
+          "bg-secondary font-semibold whitespace-nowrap text-secondary-foreground hover:bg-muted-foreground hover:text-muted shadow-sm",
         ghost:
-          "text-foreground hover:bg-secondary/80 hover:text-accent-foreground",
+          "text-foreground font-semibold whitespace-nowrap hover:bg-secondary/80 hover:text-accent-foreground",
         "ghost-destructive":
-          "text-foreground hover:bg-destructive-foreground hover:text-destructive",
+          "text-foreground font-semibold whitespace-nowrap hover:bg-destructive-foreground hover:text-destructive",
         link: "text-primary underline-offset-4",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
-        sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
+        sm: "h-8 rounded-md rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
         lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
         xl: "h-12 rounded-md px-8 has-[>svg]:px-6",
         icon: "size-9",
