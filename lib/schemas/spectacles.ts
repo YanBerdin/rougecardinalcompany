@@ -148,3 +148,42 @@ export const ArchivedShowSchema = z.object({
 
 export type CurrentShow = z.infer<typeof CurrentShowSchema>;
 export type ArchivedShow = z.infer<typeof ArchivedShowSchema>;
+
+// =============================================================================
+// SPECTACLE LANDSCAPE PHOTOS SCHEMAS
+// =============================================================================
+
+/**
+ * DTO Schema for landscape photos (returned by DAL)
+ */
+export const SpectaclePhotoDTOSchema = z.object({
+  spectacle_id: z.coerce.bigint(),
+  media_id: z.coerce.bigint(),
+  ordre: z.number().int().min(0).max(1),
+  storage_path: z.string(),
+  alt_text: z.string().nullable(),
+});
+
+export type SpectaclePhotoDTO = z.infer<typeof SpectaclePhotoDTOSchema>;
+
+/**
+ * Server Input Schema (bigint for database)
+ */
+export const AddPhotoInputSchema = z.object({
+  spectacle_id: z.coerce.bigint(),
+  media_id: z.coerce.bigint(),
+  ordre: z.number().int().min(0).max(1),
+  type: z.literal("landscape"),
+});
+
+export type AddPhotoInput = z.infer<typeof AddPhotoInputSchema>;
+
+/**
+ * UI Form Schema (number for forms)
+ */
+export const PhotoFormSchema = z.object({
+  media_id: z.number().int().positive(),
+  ordre: z.number().int().min(0).max(1),
+});
+
+export type PhotoFormValues = z.infer<typeof PhotoFormSchema>;

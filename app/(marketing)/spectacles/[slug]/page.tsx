@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { fetchSpectacleBySlug } from "@/lib/dal/spectacles";
+import { fetchSpectacleLandscapePhotos } from "@/lib/dal/spectacle-photos";
 import { SpectacleDetailView } from "@/components/features/public-site/spectacles/SpectacleDetailView";
 
 export const dynamic = "force-dynamic";
@@ -51,7 +52,17 @@ export default async function SpectacleDetailPage({
         notFound();
     }
 
-    return <SpectacleDetailView spectacle={spectacle} />;
+    // Fetch landscape photos (sequential since we need spectacle.id)
+    const landscapePhotos = await fetchSpectacleLandscapePhotos(
+        BigInt(spectacle.id)
+    );
+
+    return (
+        <SpectacleDetailView
+            spectacle={spectacle}
+            landscapePhotos={landscapePhotos}
+        />
+    );
 }
 
 

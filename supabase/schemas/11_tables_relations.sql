@@ -16,8 +16,16 @@ create table public.spectacles_medias (
   spectacle_id bigint not null references public.spectacles(id) on delete cascade,
   media_id bigint not null references public.medias(id) on delete cascade,
   ordre smallint default 0,
-  primary key (spectacle_id, media_id)
+  type text not null default 'gallery',
+  primary key (spectacle_id, media_id),
+  unique (spectacle_id, type, ordre),
+  check (type in ('poster', 'landscape', 'gallery')),
+  check (case when type = 'landscape' then ordre in (0, 1) else true end)
 );
+
+comment on table public.spectacles_medias is 'Relations spectacles-médias avec types: poster (affiche), landscape (photos synopsis max 2), gallery (galerie)';
+comment on column public.spectacles_medias.type is 'Type de média: poster (affiche), landscape (photos synopsis max 2 avec ordre 0-1), gallery (autres)';
+comment on column public.spectacles_medias.ordre is 'Ordre d''affichage : 0-1 pour landscape, libre pour gallery';
 
 -- Articles <-> Medias
 drop table if exists public.articles_medias cascade;
