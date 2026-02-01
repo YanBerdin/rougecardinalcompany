@@ -6,7 +6,7 @@
   // Allow multiple top-level headings in long instruction docs
   "MD025": false,
   // Allow files that start with non-h1 metadata lines (front matter or YAML-like headers)
-  "MD041": false,
+  //"MD041": false,
   // Keep duplicate-heading checking but only for siblings
   "MD024": {
     "siblings_only": true
