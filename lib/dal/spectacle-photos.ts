@@ -159,20 +159,15 @@ export async function addSpectaclePhoto(
     try {
         await requireAdmin();
 
-        // Validate input
-        const validated = AddPhotoInputSchema.parse({
-            spectacle_id: spectacleId,
-            media_id: mediaId,
-            ordre,
-            type: "landscape",
-        });
+        // ✅ No re-validation needed - Server Action already validated with AddPhotoInputSchema
+        // DAL receives bigint directly, uses them for database operations
 
         const supabase = await createClient();
 
         // Check constraint: max 2 landscape photos
         const existingCount = await countLandscapePhotos(
             supabase,
-            validated.spectacle_id,
+            spectacleId,
         );
         if (existingCount >= 2) {
             return {
@@ -186,10 +181,10 @@ export async function addSpectaclePhoto(
         const { data, error } = await supabase
             .from("spectacles_medias")
             .insert({
-                spectacle_id: validated.spectacle_id,
-                media_id: validated.media_id,
-                ordre: validated.ordre,
-                type: validated.type,
+                spectacle_id: Number(spectacleId),  // Supabase expects number for int8
+                media_id: Number(mediaId),
+                ordre,
+                type: "landscape",
             })
             .select(
                 "spectacle_id, media_id, ordre, medias(storage_path, alt_text)",

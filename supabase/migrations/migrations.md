@@ -4,6 +4,30 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-02-01 - FEAT: Photos Paysage Spectacles (TASK057)
+
+**Migrations**:
+
+- `20260201093000_fix_entity_type_whitelist.sql` - Ajout 'spectacle_photo' dans whitelist entity_type
+- `20260201100000_add_landscape_photos_to_spectacles.sql` - Système complet photos paysage
+
+**Impact**: 🟢 **Feature** - Nouvelle fonctionnalité admin
+
+**Changements**:
+
+- Ajout colonne `type` dans `spectacles_medias` (valeurs: 'poster', 'landscape', 'gallery')
+- CHECK constraints: `type IN ('poster', 'landscape', 'gallery')`, `ordre IN (0, 1)` pour landscape
+- Contrainte UNIQUE: `(spectacle_id, type, ordre)`
+- Index: `idx_spectacles_medias_type_ordre`
+- Vues: `spectacles_landscape_photos_public` + `spectacles_landscape_photos_admin`
+- RLS policies: Policies existantes suffisantes
+
+**Application**: ✅ Appliquée via Supabase MCP (cloud)
+
+**BigInt Fix**: Pattern TASK055 appliqué - validation avec `z.number()` puis conversion `BigInt()` après validation
+
+---
+
 ### 2026-01-22 - FINAL FIX: Restore INSERT Policies (Chronological Conflict Resolution)
 
 **Migration**: `20260122150000_final_restore_insert_policies.sql`

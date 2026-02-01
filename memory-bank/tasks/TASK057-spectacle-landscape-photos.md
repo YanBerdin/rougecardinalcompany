@@ -1,6 +1,6 @@
 # `TASK057` - Spectacle Landscape Photos Integration
 
-**Status:** Not Started  
+**Status:** Completed  
 **Added:** 2026-02-01  
 **Updated:** 2026-02-01  
 **Priority:** Medium  
@@ -45,33 +45,34 @@ Implémenter la gestion et l'affichage de 2 photos format paysage par spectacle,
 
 ## Progress Tracking
 
-**Overall Status:** Not Started - 0%
+**Overall Status:** Completed - 100%
 
 ### Implementation Steps
 
 | Step | Description | Status | Updated | Notes |
 | ------ | ------------- | -------- | --------- | ------- |
-| 0 | Migration workflow (stop/diff/start/push) | Not Started | - | Declarative schema workflow mandatory |
-| 1 | Database migration (schema + views) | Not Started | - | 11_tables_relations.sql + 41_views_spectacle_photos.sql |
-| 2 | DAL creation (spectacle-photos.ts) | Not Started | - | READ cache() de "react" + MUTATIONS DALResult<T> |
-| 3 | Zod schemas (Server + UI separation) | Not Started | - | bigint vs number, suffixe Schema pour constantes |
-| 4 | Server Actions (try/catch mandatory) | Not Started | - | add/delete/swap avec "use server" + revalidatePath |
-| 5 | Admin component (SpectaclePhotoManager) | Not Started | - | Grid 2 slots + MediaLibraryPicker |
-| 6 | Form integration (SpectacleForm) | Not Started | - | After ImageFieldGroup, spectacleId required |
-| 7 | Public page fetch (sequential) | Not Started | - | Need spectacle.id before photos |
-| 8 | Public display (SpectacleDetailView) | Not Started | - | LandscapePhotoCard + getMediaPublicUrl |
+| 0 | Migration workflow (stop/diff/start/push) | Completed | 2026-02-01 | Applied to cloud via MCP |
+| 1 | Database migration (schema + views) | Completed | 2026-02-01 | fix_entity_type_whitelist + add_landscape_photos |
+| 2 | DAL creation (spectacle-photos.ts) | Completed | 2026-02-01 | READ cache() + MUTATIONS DALResult<T> |
+| 3 | Zod schemas (Server + UI separation) | Completed | 2026-02-01 | TASK055 BigInt pattern applied |
+| 4 | Server Actions (try/catch mandatory) | Completed | 2026-02-01 | add/delete/swap + API route for photos |
+| 5 | Admin component (SpectaclePhotoManager) | Completed | 2026-02-01 | Client-side fetch via API route |
+| 6 | Form integration (SpectacleForm) | Completed | 2026-02-01 | After ImageFieldGroup |
+| 7 | Public page fetch (sequential) | Completed | 2026-02-01 | fetchSpectacleLandscapePhotos |
+| 8 | Public display (SpectacleDetailView) | Completed | 2026-02-01 | LandscapePhotoCard component |
 
 ### Compliance Checklist
 
-- [ ] **Migration Workflow**: stop → diff → start → push --linked
-- [ ] **Table `medias`**: Utiliser `medias` (pas `media`), colonne `storage_path` (pas `url`)
-- [ ] **RLS Policies**: Policies existantes suffisantes, pas de duplication
-- [ ] **DAL SOLID**: `cache` de "react" autorisé, NO `next/cache` (revalidatePath/Tag)
-- [ ] **Server Actions**: `"use server"` directive + try/catch avec Zod 422, generic 500
-- [ ] **Schema Separation**: Server bigint, UI number, suffixe `Schema` pour constantes Zod
-- [ ] **URL Construction**: `getMediaPublicUrl(storage_path)` via env.NEXT_PUBLIC_SUPABASE_URL
-- [ ] **Performance**: loading="lazy", React cache(), index DB
-- [ ] **Documentation**: supabase/README.md + migrations/migrations.md
+- [x] **Migration Workflow**: stop → diff → start → push --linked
+- [x] **Table `medias`**: Utiliser `medias` (pas `media`), colonne `storage_path` (pas `url`)
+- [x] **RLS Policies**: Policies existantes suffisantes, pas de duplication
+- [x] **DAL SOLID**: `cache` de "react" autorisé, NO `next/cache` (revalidatePath/Tag)
+- [x] **Server Actions**: `"use server"` directive + try/catch avec Zod 422, generic 500
+- [x] **Schema Separation**: Server bigint, UI number, suffixe `Schema` pour constantes Zod
+- [x] **URL Construction**: `getMediaPublicUrl(storage_path)` via env.NEXT_PUBLIC_SUPABASE_URL
+- [x] **Performance**: loading="lazy", React cache(), index DB
+- [x] **BigInt Fix**: Applied TASK055 pattern (number validation, BigInt conversion after)
+- [x] **Documentation**: supabase/README.md + migrations/migrations.md
 
 ## Architecture Decisions
 

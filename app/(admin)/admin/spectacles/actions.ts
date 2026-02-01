@@ -178,12 +178,15 @@ export async function deleteSpectacleAction(
  */
 export async function addPhotoAction(
     input: unknown
-): Promise<ActionResult<SpectaclePhotoDTO>> {
+): Promise<ActionResult> {
     try {
+        // ✅ TASK055 Pattern: Validate with number schema (not bigint)
         const validated = AddPhotoInputSchema.parse(input);
+
+        // ✅ Convert to BigInt AFTER validation (isolated scope)
         const result = await addSpectaclePhoto(
-            validated.spectacle_id,
-            validated.media_id,
+            BigInt(validated.spectacle_id),
+            BigInt(validated.media_id),
             validated.ordre
         );
 
@@ -197,7 +200,7 @@ export async function addPhotoAction(
         revalidatePath("/admin/spectacles");
         revalidatePath("/spectacles/[slug]", "page");
 
-        return { success: true, data: result.data };
+        return { success: true }; // ✅ NO data (prevents BigInt serialization)
     } catch (error) {
         if (error instanceof z.ZodError) {
             return {
@@ -225,7 +228,7 @@ export async function addPhotoAction(
 export async function deletePhotoAction(
     spectacleId: string,
     mediaId: string
-): Promise<ActionResult<null>> {
+): Promise<ActionResult> {
     try {
         const result = await deleteSpectaclePhoto(
             BigInt(spectacleId),
@@ -242,7 +245,7 @@ export async function deletePhotoAction(
         revalidatePath("/admin/spectacles");
         revalidatePath("/spectacles/[slug]", "page");
 
-        return { success: true, data: null };
+        return { success: true }; // ✅ NO data (prevents BigInt serialization)
     } catch (error) {
         return {
             success: false,
@@ -262,7 +265,7 @@ export async function deletePhotoAction(
  */
 export async function swapPhotosAction(
     spectacleId: string
-): Promise<ActionResult<SpectaclePhotoDTO[]>> {
+): Promise<ActionResult> {
     try {
         const result = await swapPhotoOrder(BigInt(spectacleId));
 
@@ -276,7 +279,7 @@ export async function swapPhotosAction(
         revalidatePath("/admin/spectacles");
         revalidatePath("/spectacles/[slug]", "page");
 
-        return { success: true, data: result.data };
+        return { success: true }; // ✅ NO data (prevents BigInt serialization)
     } catch (error) {
         return {
             success: false,

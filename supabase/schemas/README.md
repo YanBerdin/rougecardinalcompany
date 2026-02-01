@@ -119,6 +119,22 @@ supabase/schemas/
 
 ---
 
+## 🆕 Mises à jour récentes (février 2026)
+
+- **FEAT: Photos Paysage Spectacles - TASK057 (1 fév. 2026)** : Système de gestion de 2 photos paysage par spectacle.
+  - **Migrations** : `20260201093000_fix_entity_type_whitelist.sql` + `20260201100000_add_landscape_photos_to_spectacles.sql`
+  - **Modifications BDD** :
+    - Colonne `type` dans `spectacles_medias` (valeurs: 'poster', 'landscape', 'gallery')
+    - CHECK constraints: type valide + ordre 0/1 pour landscape
+    - Contrainte UNIQUE: `(spectacle_id, type, ordre)`
+    - Index: `idx_spectacles_medias_type_ordre`
+    - Vues: `spectacles_landscape_photos_public` + `spectacles_landscape_photos_admin`
+  - **Code** : DAL `lib/dal/spectacle-photos.ts`, API route `/api/spectacles/[id]/photos`, Admin `SpectaclePhotoManager`
+  - **Pattern** : TASK055 BigInt Serialization (validation number, conversion BigInt après)
+  - **Validation** : TypeScript 0 erreurs, tests manuels OK
+
+---
+
 ## 🆕 Mises à jour récentes (janvier 2026)
 
 - **FEAT: Media Library Integration Press (22 jan. 2026)** : Intégration ImageFieldGroup dans les formulaires presse.

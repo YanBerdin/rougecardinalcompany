@@ -36,6 +36,7 @@ Ce fichier est une prévisualisation consolidée des 20 tâches générées à p
 | TASK048 | T3 Env Implementation | Completed | 2025-12-20 | 2025-12-20 | Type-safe environment variables with Zod validation | `memory-bank/tasks/tasks-completed/TASK048-t3-env-implementation.md` | - |
 | TASK049 | Database Security RLS SECURITY INVOKER | Completed | 2025-12-31 | 2025-12-31 | 11 public views enforced with SECURITY INVOKER, GRANT permissions fixed | `memory-bank/tasks/tasks-completed/TASK049-database-security-rls-security-invoker.md` | - |
 | TASK055 | Admin Agenda Management | Completed | 2026-01-26 | 2026-01-26 | Phase 1 Events + Phase 2 Lieux CRUD, BigInt serialization fix pattern | `memory-bank/tasks/tasks-completed/TASK055-admin-agenda-management.md` | - |
+| TASK057 | Spectacle Landscape Photos Integration | Completed | 2026-02-01 | 2026-02-01 | 2 photos paysage par spectacle, TASK055 BigInt pattern, migrations MCP, Admin UI | `memory-bank/tasks/TASK057-spectacle-landscape-photos.md` | - |
 
 ---
 

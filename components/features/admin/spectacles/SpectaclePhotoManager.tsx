@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import Image from "next/image";
 import { ArrowLeftRight, Upload, ImagePlus, Trash2 } from "lucide-react";
@@ -16,7 +16,7 @@ import {
 import { MediaLibraryPicker } from "@/components/features/admin/media/MediaLibraryPicker";
 import { MediaUploadDialog } from "@/components/features/admin/media/MediaUploadDialog";
 import { env } from "@/lib/env";
-import type { SpectaclePhotoDTO } from "@/lib/schemas/spectacles";
+import type { SpectaclePhotoTransport } from "@/lib/schemas/spectacles";
 
 // ============================================================================
 // Types
@@ -24,12 +24,12 @@ import type { SpectaclePhotoDTO } from "@/lib/schemas/spectacles";
 
 interface SpectaclePhotoManagerProps {
     spectacleId: number;
-    initialPhotos?: SpectaclePhotoDTO[];
+    // ✅ No initialPhotos - fetches data client-side via API route
 }
 
 interface PhotoSlot {
     ordre: number;
-    photo: SpectaclePhotoDTO | null;
+    photo: SpectaclePhotoTransport | null;  // ✅ Transport type with string IDs
 }
 
 // ============================================================================
@@ -49,7 +49,6 @@ function getMediaPublicUrl(storagePath: string): string {
 
 export function SpectaclePhotoManager({
     spectacleId,
-    initialPhotos = [],
 }: SpectaclePhotoManagerProps) {
     const [photos, setPhotos] = useState<PhotoSlot[]>([
         { ordre: 0, photo: null },
@@ -60,28 +59,33 @@ export function SpectaclePhotoManager({
     const [showLibrary, setShowLibrary] = useState(false);
     const [showUpload, setShowUpload] = useState(false);
 
-    // Sync local state with props (only update if data actually changed)
-    useEffect(() => {
-        const slots: PhotoSlot[] = [
-            {
-                ordre: 0,
-                photo: initialPhotos.find((p) => p.ordre === 0) ?? null,
-            },
-            {
-                ordre: 1,
-                photo: initialPhotos.find((p) => p.ordre === 1) ?? null,
-            },
-        ];
+    // ✅ Fetch photos from API route (bigint→string already converted)
+    const fetchPhotos = useCallback(async () => {
+        try {
+            const response = await fetch(`/api/spectacles/${spectacleId}/photos`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch photos');
+            }
 
-        // Only update if photos actually changed (compare media_ids)
-        const hasChanged =
-            slots[0].photo?.media_id !== photos[0].photo?.media_id ||
-            slots[1].photo?.media_id !== photos[1].photo?.media_id;
+            const data: SpectaclePhotoTransport[] = await response.json();
 
-        if (hasChanged) {
+            // Map to PhotoSlot format
+            const slots: PhotoSlot[] = [
+                { ordre: 0, photo: data.find(p => p.ordre === 0) ?? null },
+                { ordre: 1, photo: data.find(p => p.ordre === 1) ?? null },
+            ];
+
             setPhotos(slots);
+        } catch (error) {
+            console.error('[SpectaclePhotoManager] fetchPhotos error:', error);
+            toast.error('Erreur lors du chargement des photos');
         }
-    }, [initialPhotos, photos]);
+    }, [spectacleId]);
+
+    // Fetch on mount
+    useEffect(() => {
+        fetchPhotos();
+    }, [fetchPhotos]);
 
     // ========================================================================
     // Handlers
@@ -105,8 +109,8 @@ export function SpectaclePhotoManager({
 
         try {
             const actionResult = await addPhotoAction({
-                spectacle_id: BigInt(spectacleId),
-                media_id: BigInt(result.id),
+                spectacle_id: spectacleId, // ✅ number - Zod converts to bigint
+                media_id: result.id,        // ✅ number - Zod converts to bigint
                 ordre: selectedSlot,
                 type: "landscape",
             });
@@ -116,7 +120,7 @@ export function SpectaclePhotoManager({
             }
 
             toast.success("Photo ajoutée avec succès");
-            window.location.reload(); // Simple refresh for now
+            await fetchPhotos();  // ✅ Refresh data via API
         } catch (error) {
             toast.error(
                 error instanceof Error ? error.message : "Erreur lors de l'ajout"
@@ -127,15 +131,18 @@ export function SpectaclePhotoManager({
         }
     };
 
-    const handleDelete = async (photo: SpectaclePhotoDTO) => {
+    const handleDelete = async (ordre: number) => {
+        const photo = photos.find((p) => p.ordre === ordre)?.photo;
+        if (!photo) return;
         if (!confirm("Supprimer cette photo ?")) return;
 
         setIsPending(true);
 
         try {
+            // ✅ photo has string IDs - pass them directly
             const result = await deletePhotoAction(
-                String(photo.spectacle_id),
-                String(photo.media_id)
+                photo.spectacle_id,  // already string
+                photo.media_id       // already string
             );
 
             if (!result.success) {
@@ -143,7 +150,7 @@ export function SpectaclePhotoManager({
             }
 
             toast.success("Photo supprimée");
-            window.location.reload();
+            await fetchPhotos();  // ✅ Refresh data via API
         } catch (error) {
             toast.error(
                 error instanceof Error ? error.message : "Erreur lors de la suppression"
@@ -164,7 +171,7 @@ export function SpectaclePhotoManager({
             }
 
             toast.success("Ordre inversé");
-            window.location.reload();
+            await fetchPhotos();  // ✅ Refresh data via API
         } catch (error) {
             toast.error(
                 error instanceof Error ? error.message : "Erreur lors de l'inversion"
@@ -192,10 +199,12 @@ export function SpectaclePhotoManager({
                                 </Badge>
                                 {slot.photo && (
                                     <Button
+                                        type="button"
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => handleDelete(slot.photo!)}
+                                        onClick={() => handleDelete(slot.ordre)}
                                         disabled={isPending}
+                                        className="text-destructive hover:text-destructive"
                                     >
                                         <Trash2 className="h-4 w-4" />
                                     </Button>
@@ -223,6 +232,7 @@ export function SpectaclePhotoManager({
 
                             <div className="flex gap-2">
                                 <Button
+                                    type="button"
                                     variant="outline"
                                     size="sm"
                                     onClick={() => handleSelectFromLibrary(slot.ordre)}
@@ -233,6 +243,7 @@ export function SpectaclePhotoManager({
                                     Bibliothèque
                                 </Button>
                                 <Button
+                                    type="button"
                                     variant="outline"
                                     size="sm"
                                     onClick={() => handleUpload(slot.ordre)}
@@ -249,8 +260,7 @@ export function SpectaclePhotoManager({
             </div>
 
             {hasAllPhotos && (
-                <Button
-                    variant="secondary"
+                <Button type="button" variant="secondary"
                     onClick={handleSwap}
                     disabled={isPending}
                     className="w-full"
