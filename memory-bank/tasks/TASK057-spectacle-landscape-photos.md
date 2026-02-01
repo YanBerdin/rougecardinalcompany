@@ -6,6 +6,7 @@
 **Priority:** Medium  
 **Category:** Content Management  
 **Related Epic:** 14.7 Back-office Administration
+**Plan:** `.github/prompts/plan-TASK057-spectacleLandscapePhotos.prompt.md` ✅ Vérifié
 
 ## Overview
 
@@ -24,20 +25,21 @@ Implémenter la gestion et l'affichage de 2 photos format paysage par spectacle,
 ### Database Changes
 
 - **Table**: `spectacles_medias` (modification existante)
-- **New Column**: `type` TEXT DEFAULT 'gallery'
-- **New Constraint**: UNIQUE `(spectacle_id, type, ordre)` au lieu de `(spectacle_id, media_id)`
-- **CHECK Constraints**: 
+- **New Column**: `type` TEXT DEFAULT 'gallery' NOT NULL
+- **New Constraint**: UNIQUE `(spectacle_id, type, ordre)` (ajouté, PK existante préservée)
+- **CHECK Constraints**:
   - `type IN ('poster', 'landscape', 'gallery')`
   - `ordre IN (0, 1)` pour type='landscape'
 - **Index**: `idx_spectacles_medias_type_ordre` sur `(spectacle_id, type, ordre)`
-- **Views**: 2 vues (public + admin) pour photos landscape
-- **RLS Policies**: 4 policies séparées (SELECT/INSERT/UPDATE/DELETE) + GRANT statements
+- **Views**: Nouveau fichier `41_views_spectacle_photos.sql` (public + admin)
+- **RLS Policies**: Policies existantes dans `11_tables_relations.sql` suffisantes (pas de nouvelles)
 
 ### Code Changes
 
-- **DAL**: Nouveau module `lib/dal/spectacle-photos.ts` (READ avec cache, MUTATIONS avec DALResult)
-- **Schemas**: Extension `lib/schemas/spectacles.ts` (Server bigint + UI number)
-- **Server Actions**: 3 actions dans `app/(admin)/admin/spectacles/actions.ts` (add/delete/swap)
+- **DAL**: Nouveau module `lib/dal/spectacle-photos.ts` (READ avec `cache` de "react", MUTATIONS avec DALResult)
+- **Schemas**: Extension `lib/schemas/spectacles.ts` (Server bigint + UI number, nommage avec suffixe Schema)
+- **Server Actions**: 3 actions dans `app/(admin)/admin/spectacles/actions.ts` (add/delete/swap avec `"use server"`)
+- **Utility**: `lib/utils/media-url.ts` - `getMediaPublicUrl(storagePath)` pour construire URLs
 - **Admin Component**: `SpectaclePhotoManager.tsx` (2 slots grid, MediaLibraryPicker, swap button)
 - **Public Display**: Intégration dans `SpectacleDetailView.tsx` (2 encarts dans synopsis)
 
@@ -50,23 +52,24 @@ Implémenter la gestion et l'affichage de 2 photos format paysage par spectacle,
 | Step | Description | Status | Updated | Notes |
 | ------ | ------------- | -------- | --------- | ------- |
 | 0 | Migration workflow (stop/diff/start/push) | Not Started | - | Declarative schema workflow mandatory |
-| 1 | Database migration (schema + views + RLS) | Not Started | - | 11_tables_relations.sql + 4 policies + GRANT |
-| 2 | DAL creation (spectacle-photos.ts) | Not Started | - | READ cache() + MUTATIONS DALResult<T> |
-| 3 | Zod schemas (Server + UI separation) | Not Started | - | bigint vs number pattern |
-| 4 | Server Actions (try/catch mandatory) | Not Started | - | add/delete/swap avec revalidatePath |
+| 1 | Database migration (schema + views) | Not Started | - | 11_tables_relations.sql + 41_views_spectacle_photos.sql |
+| 2 | DAL creation (spectacle-photos.ts) | Not Started | - | READ cache() de "react" + MUTATIONS DALResult<T> |
+| 3 | Zod schemas (Server + UI separation) | Not Started | - | bigint vs number, suffixe Schema pour constantes |
+| 4 | Server Actions (try/catch mandatory) | Not Started | - | add/delete/swap avec "use server" + revalidatePath |
 | 5 | Admin component (SpectaclePhotoManager) | Not Started | - | Grid 2 slots + MediaLibraryPicker |
 | 6 | Form integration (SpectacleForm) | Not Started | - | After ImageFieldGroup, spectacleId required |
 | 7 | Public page fetch (sequential) | Not Started | - | Need spectacle.id before photos |
-| 8 | Public display (SpectacleDetailView) | Not Started | - | LandscapePhotoCard inline component |
+| 8 | Public display (SpectacleDetailView) | Not Started | - | LandscapePhotoCard + getMediaPublicUrl |
 
 ### Compliance Checklist
 
 - [ ] **Migration Workflow**: stop → diff → start → push --linked
-- [ ] **RLS Policies**: 4 separate policies (SELECT/INSERT/UPDATE/DELETE)
-- [ ] **GRANT Statements**: Access to spectacles_medias, media, spectacles
-- [ ] **DAL SOLID**: Forbidden imports (NO next/cache, NO email)
-- [ ] **Server Actions**: Try/catch with Zod 422, generic 500
-- [ ] **Schema Separation**: Server bigint, UI number
+- [ ] **Table `medias`**: Utiliser `medias` (pas `media`), colonne `storage_path` (pas `url`)
+- [ ] **RLS Policies**: Policies existantes suffisantes, pas de duplication
+- [ ] **DAL SOLID**: `cache` de "react" autorisé, NO `next/cache` (revalidatePath/Tag)
+- [ ] **Server Actions**: `"use server"` directive + try/catch avec Zod 422, generic 500
+- [ ] **Schema Separation**: Server bigint, UI number, suffixe `Schema` pour constantes Zod
+- [ ] **URL Construction**: `getMediaPublicUrl(storage_path)` via env.NEXT_PUBLIC_SUPABASE_URL
 - [ ] **Performance**: loading="lazy", React cache(), index DB
 - [ ] **Documentation**: supabase/README.md + migrations/migrations.md
 
@@ -77,10 +80,11 @@ Implémenter la gestion et l'affichage de 2 photos format paysage par spectacle,
 - **Pattern choisi**: Réutilisation `spectacles_medias` avec colonne `type`
 - **Raison**: Éviter duplication table, extension naturelle pour futur carousel
 - **Constraint**: max 2 photos via CHECK + UNIQUE composite key
+- **PK préservée**: `(spectacle_id, media_id)` reste la clé primaire
 
 ### DAL Pattern
 
-- **READ Operations**: `cache()` wrapper, return `Promise<T[]>`, graceful `[]` on error
+- **READ Operations**: `cache()` de "react" (pas next/cache), return `Promise<T[]>`, graceful `[]` on error
 - **MUTATIONS**: `requireAdmin()`, return `DALResult<T>` avec status codes
 - **Alignement**: Pattern identique à `lib/dal/spectacles.ts`
 
@@ -178,7 +182,7 @@ ALTER TABLE spectacles_medias DROP COLUMN type;
 ## Risks & Mitigation
 
 | Risk | Impact | Mitigation |
-|------|--------|------------|
+| ------ | -------- | ------------ |
 | Migration breaks existing spectacles_medias | High | Test locally first, verify constraint compatibility |
 | Performance degradation on public pages | Medium | React cache() + lazy loading + index DB |
 | Admin UX complexity (2 slots management) | Low | Simple grid layout + clear visual feedback |
