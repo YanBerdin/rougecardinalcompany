@@ -4,12 +4,32 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-02-02 - REFACTOR: Suppression swap photo order (TASK057)
+
+**Migration**: `20260202004924_drop_swap_spectacle_photo_order.sql`
+
+**Impact**: 🟡 **Refactor** - Suppression fonctionnalité swap
+
+**Contexte**:
+La fonctionnalité "Inverser les photos" a été supprimée car incompatible avec la CHECK constraint `ordre IN (0, 1)`. Le swap atomique nécessitait une valeur temporaire (-1) impossible avec cette contrainte.
+
+**Changements**:
+
+- DROP `swap_spectacle_photo_order` SQL function
+- Suppression `swapPhotosAction` Server Action
+- Suppression `swapPhotoOrder` DAL function
+- Suppression bouton UI "Inverser les photos"
+
+**Application**: ✅ Appliquée via `supabase db push --linked`
+
+---
+
 ### 2026-02-01 - FEAT: Photos Paysage Spectacles (TASK057)
 
 **Migrations**:
 
 - `20260201093000_fix_entity_type_whitelist.sql` - Ajout 'spectacle_photo' dans whitelist entity_type
-- `20260201100000_add_landscape_photos_to_spectacles.sql` - Système complet photos paysage
+- `20260201135511_add_landscape_photos_to_spectacles.sql` - Système complet photos paysage
 
 **Impact**: 🟢 **Feature** - Nouvelle fonctionnalité admin
 
@@ -22,7 +42,7 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 - Vues: `spectacles_landscape_photos_public` + `spectacles_landscape_photos_admin`
 - RLS policies: Policies existantes suffisantes
 
-**Application**: ✅ Appliquée via Supabase MCP (cloud)
+**Application**: ✅ Appliquée via `supabase db push --linked`
 
 **BigInt Fix**: Pattern TASK055 appliqué - validation avec `z.number()` puis conversion `BigInt()` après validation
 

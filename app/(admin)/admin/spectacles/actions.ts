@@ -11,7 +11,6 @@ import {
 import {
     addSpectaclePhoto,
     deleteSpectaclePhoto,
-    swapPhotoOrder,
 } from "@/lib/dal/spectacle-photos";
 import { validateImageUrl } from "@/lib/utils/validate-image-url";
 import { AddPhotoInputSchema } from "@/lib/schemas/spectacles";
@@ -183,10 +182,10 @@ export async function addPhotoAction(
         // ✅ TASK055 Pattern: Validate with number schema (not bigint)
         const validated = AddPhotoInputSchema.parse(input);
 
-        // ✅ Convert to BigInt AFTER validation (isolated scope)
+        // ✅ Pass validated data directly to DAL (no BigInt conversion here)
         const result = await addSpectaclePhoto(
-            BigInt(validated.spectacle_id),
-            BigInt(validated.media_id),
+            validated.spectacle_id,
+            validated.media_id,
             validated.ordre
         );
 
@@ -230,49 +229,16 @@ export async function deletePhotoAction(
     mediaId: string
 ): Promise<ActionResult> {
     try {
+        // ✅ TASK055 Pattern: Pass strings directly, DAL converts to BigInt
         const result = await deleteSpectaclePhoto(
-            BigInt(spectacleId),
-            BigInt(mediaId)
+            spectacleId,
+            mediaId
         );
 
         if (!result.success) {
             return {
                 success: false,
                 error: result.error ?? "Failed to delete photo",
-            };
-        }
-
-        revalidatePath("/admin/spectacles");
-        revalidatePath("/spectacles/[slug]", "page");
-
-        return { success: true }; // ✅ NO data (prevents BigInt serialization)
-    } catch (error) {
-        return {
-            success: false,
-            error: error instanceof Error ? error.message : "Unknown error",
-        };
-    }
-}
-
-/**
- * Swap the order of landscape photos (0 ↔ 1)
- *
- * @param spectacleId - Spectacle ID (string for form compatibility)
- * @returns ActionResult with updated photos or error
- *
- * @example
- * const result = await swapPhotosAction("123");
- */
-export async function swapPhotosAction(
-    spectacleId: string
-): Promise<ActionResult> {
-    try {
-        const result = await swapPhotoOrder(BigInt(spectacleId));
-
-        if (!result.success) {
-            return {
-                success: false,
-                error: result.error ?? "Failed to swap photos",
             };
         }
 

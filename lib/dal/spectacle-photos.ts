@@ -140,34 +140,33 @@ export const fetchSpectacleLandscapePhotosAdmin = cache(
 /**
  * Adds a landscape photo to a spectacle
  *
- * @param spectacleId - Spectacle ID (bigint)
- * @param mediaId - Media ID (bigint)
+ * @param spectacleId - Spectacle ID (number, converted internally to bigint)
+ * @param mediaId - Media ID (number, converted internally to bigint)
  * @param ordre - Display order (0 or 1)
- * @returns DALResult with created photo or error
+ * @returns DALResult with null data or error (UI fetches via API after success)
  *
  * @example
- * const result = await addSpectaclePhoto(BigInt(123), BigInt(456), 0);
+ * const result = await addSpectaclePhoto(123, 456, 0);
  * if (result.success) {
- *   console.log("Photo added:", result.data);
+ *   // UI will fetch fresh data via API route
  * }
  */
 export async function addSpectaclePhoto(
-    spectacleId: bigint,
-    mediaId: bigint,
+    spectacleId: number,
+    mediaId: number,
     ordre: number,
-): Promise<DALResult<SpectaclePhotoDTO>> {
+): Promise<DALResult<null>> {
     try {
         await requireAdmin();
 
-        // ✅ No re-validation needed - Server Action already validated with AddPhotoInputSchema
-        // DAL receives bigint directly, uses them for database operations
-
+        // ✅ No BigInt needed - spectacleId and mediaId are already numbers
         const supabase = await createClient();
 
         // Check constraint: max 2 landscape photos
+        // countLandscapePhotos expects bigint for .eq() - pass BigInt here in isolated scope
         const existingCount = await countLandscapePhotos(
             supabase,
-            spectacleId,
+            BigInt(spectacleId),
         );
         if (existingCount >= 2) {
             return {
@@ -177,19 +176,15 @@ export async function addSpectaclePhoto(
             };
         }
 
-        // Insert photo
-        const { data, error } = await supabase
+        // Insert photo (no .select() needed - we don't return data)
+        const { error } = await supabase
             .from("spectacles_medias")
             .insert({
-                spectacle_id: Number(spectacleId),  // Supabase expects number for int8
-                media_id: Number(mediaId),
+                spectacle_id: spectacleId,  // number - Supabase handles it
+                media_id: mediaId,          // number - Supabase handles it
                 ordre,
                 type: "landscape",
-            })
-            .select(
-                "spectacle_id, media_id, ordre, medias(storage_path, alt_text)",
-            )
-            .single();
+            });
 
         if (error) {
             return {
@@ -199,16 +194,9 @@ export async function addSpectaclePhoto(
             };
         }
 
-        // Transform response to DTO
-        const photoDTO: SpectaclePhotoDTO = {
-            spectacle_id: data.spectacle_id,
-            media_id: data.media_id,
-            ordre: data.ordre,
-            storage_path: (data.medias as any)?.storage_path ?? "",
-            alt_text: (data.medias as any)?.alt_text ?? null,
-        };
-
-        return { success: true, data: photoDTO };
+        // ✅ NO data return (prevents BigInt serialization)
+        // UI will fetch fresh data via API route after success
+        return { success: true, data: null };
     } catch (error) {
         return {
             success: false,
@@ -221,27 +209,31 @@ export async function addSpectaclePhoto(
 /**
  * Deletes a landscape photo from a spectacle
  *
- * @param spectacleId - Spectacle ID (bigint)
- * @param mediaId - Media ID (bigint)
+ * @param spectacleId - Spectacle ID (string, converted internally to bigint)
+ * @param mediaId - Media ID (string, converted internally to bigint)
  * @returns DALResult with null data or error
  *
  * @example
- * const result = await deleteSpectaclePhoto(BigInt(123), BigInt(456));
+ * const result = await deleteSpectaclePhoto("123", "456");
  */
 export async function deleteSpectaclePhoto(
-    spectacleId: bigint,
-    mediaId: bigint,
+    spectacleId: string,
+    mediaId: string,
 ): Promise<DALResult<null>> {
     try {
         await requireAdmin();
+
+        // ✅ Parse as number (Supabase queries expect number, not BigInt)
+        const spectacleIdNum = Number(spectacleId);
+        const mediaIdNum = Number(mediaId);
 
         const supabase = await createClient();
 
         const { error } = await supabase
             .from("spectacles_medias")
             .delete()
-            .eq("spectacle_id", spectacleId)
-            .eq("media_id", mediaId)
+            .eq("spectacle_id", spectacleIdNum)
+            .eq("media_id", mediaIdNum)
             .eq("type", "landscape");
 
         if (error) {
@@ -253,59 +245,6 @@ export async function deleteSpectaclePhoto(
         }
 
         return { success: true, data: null };
-    } catch (error) {
-        return {
-            success: false,
-            error: getErrorMessage(error),
-            status: HttpStatus.INTERNAL_SERVER_ERROR,
-        };
-    }
-}
-
-/**
- * Swaps the order of two landscape photos (0 ↔ 1)
- *
- * @param spectacleId - Spectacle ID (bigint)
- * @returns DALResult with updated photos or error
- *
- * @example
- * const result = await swapPhotoOrder(BigInt(123));
- */
-export async function swapPhotoOrder(
-    spectacleId: bigint,
-): Promise<DALResult<SpectaclePhotoDTO[]>> {
-    try {
-        await requireAdmin();
-
-        const supabase = await createClient();
-
-        // Verify we have exactly 2 photos
-        const existingCount = await countLandscapePhotos(supabase, spectacleId);
-        if (existingCount !== 2) {
-            return {
-                success: false,
-                error: "[ERR_PHOTO_004] Need exactly 2 photos to swap",
-                status: HttpStatus.BAD_REQUEST,
-            };
-        }
-
-        // Swap using UPDATE with CASE (atomic operation)
-        const { error } = await supabase.rpc("swap_spectacle_photo_order", {
-            p_spectacle_id: spectacleId,
-        });
-
-        if (error) {
-            return {
-                success: false,
-                error: `[ERR_PHOTO_005] Failed to swap photos: ${error.message}`,
-                status: HttpStatus.INTERNAL_SERVER_ERROR,
-            };
-        }
-
-        // Fetch updated photos
-        const photos = await fetchSpectacleLandscapePhotosAdmin(spectacleId);
-
-        return { success: true, data: photos };
     } catch (error) {
         return {
             success: false,

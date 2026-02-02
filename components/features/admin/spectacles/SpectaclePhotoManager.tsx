@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import Image from "next/image";
-import { ArrowLeftRight, Upload, ImagePlus, Trash2 } from "lucide-react";
+import { Upload, ImagePlus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
     addPhotoAction,
     deletePhotoAction,
-    swapPhotosAction,
 } from "@/app/(admin)/admin/spectacles/actions";
 import { MediaLibraryPicker } from "@/components/features/admin/media/MediaLibraryPicker";
 import { MediaUploadDialog } from "@/components/features/admin/media/MediaUploadDialog";
@@ -160,27 +159,6 @@ export function SpectaclePhotoManager({
         }
     };
 
-    const handleSwap = async () => {
-        setIsPending(true);
-
-        try {
-            const result = await swapPhotosAction(String(spectacleId));
-
-            if (!result.success) {
-                throw new Error(result.error);
-            }
-
-            toast.success("Ordre inversé");
-            await fetchPhotos();  // ✅ Refresh data via API
-        } catch (error) {
-            toast.error(
-                error instanceof Error ? error.message : "Erreur lors de l'inversion"
-            );
-        } finally {
-            setIsPending(false);
-        }
-    };
-
     // ========================================================================
     // Render
     // ========================================================================
@@ -258,17 +236,6 @@ export function SpectaclePhotoManager({
                     </Card>
                 ))}
             </div>
-
-            {hasAllPhotos && (
-                <Button type="button" variant="secondary"
-                    onClick={handleSwap}
-                    disabled={isPending}
-                    className="w-full"
-                >
-                    <ArrowLeftRight className="h-4 w-4 mr-2" />
-                    Inverser l&apos;ordre des photos
-                </Button>
-            )}
 
             {!hasAllPhotos && (
                 <Alert>

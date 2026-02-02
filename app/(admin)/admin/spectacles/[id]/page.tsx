@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { fetchSpectacleById } from "@/lib/dal/spectacles";
 import { translateStatus } from "@/lib/i18n/status";
 import Image from "next/image";
-
+//TODO: ajouter landscape-photos dans cette vue
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -64,7 +64,7 @@ export default async function SpectacleDetailPage({ params }: Props) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link href="/admin/spectacles">
-            <Button variant="ghost" size="icon">
+            <Button variant="outline" size="icon">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>

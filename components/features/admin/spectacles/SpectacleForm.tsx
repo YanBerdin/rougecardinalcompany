@@ -312,7 +312,7 @@ export default function SpectacleForm({
                       />
                       <Button
                         type="button"
-                        variant="outline"
+                        variant="secondary"
                         size="sm"
                         onClick={() => {
                           setIsCreatingNewGenre(false);
@@ -561,7 +561,7 @@ export default function SpectacleForm({
         <div className="flex gap-4">
           <Button
             type="button"
-            variant="outline"
+            variant="secondary"
             onClick={() => router.back()}
             disabled={isSubmitting}
           >
