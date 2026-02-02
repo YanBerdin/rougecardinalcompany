@@ -10,6 +10,8 @@ create table public.spectacles (
   slug text,
   status text not null default 'draft',
   description text,
+  paragraph_2 text,
+  paragraph_3 text,
   short_description text,
   genre text,
   duration_minutes integer,
@@ -36,6 +38,12 @@ comment on column public.spectacles.status is
 UI translations to French are handled by translateStatus() helper in application code.
 Historical note: Legacy French values (brouillon, actuellement, archive, etc.) were 
 normalized to English tokens in migration 20251209120000_normalize_spectacles_status_to_english.sql';
+
+comment on column public.spectacles.paragraph_2 is 
+'Paragraphe supplémentaire 1 - Contenu narratif additionnel affiché après Photo 1 dans SpectacleDetailView';
+
+comment on column public.spectacles.paragraph_3 is 
+'Paragraphe supplémentaire 2 - Contenu narratif additionnel affiché après Photo 2 dans SpectacleDetailView';
 
 comment on column public.spectacles.casting is 
 'Nombre d''interprètes au plateau (anciennement `cast`)';

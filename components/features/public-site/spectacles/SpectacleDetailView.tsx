@@ -270,9 +270,27 @@ export function SpectacleDetailView({
                                 </p>
                             </div>
 
-                            {/* Photo 2 - after description */}
+                            {/* Paragraphe supplémentaire 1 (après description, avant Photo 2) */}
+                            {spectacle.paragraph_2 && (
+                                <div className="prose prose-lg max-w-none text-foreground/90 leading-relaxed mt-6">
+                                    <p className="max-sm:text-sm text-md lg:text-lg whitespace-pre-line">
+                                        {spectacle.paragraph_2}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Photo 2 - repositionnée après paragraph_2 */}
                             {landscapePhotos[1] && (
                                 <LandscapePhotoCard photo={landscapePhotos[1]} />
+                            )}
+
+                            {/* Paragraphe supplémentaire 2 (après Photo 2, avant CTAs) */}
+                            {spectacle.paragraph_3 && (
+                                <div className="prose prose-lg max-w-none text-foreground/90 leading-relaxed mt-6">
+                                    <p className="max-sm:text-sm text-md lg:text-lg whitespace-pre-line">
+                                        {spectacle.paragraph_3}
+                                    </p>
+                                </div>
                             )}
 
                             {/* Call to Actions */}

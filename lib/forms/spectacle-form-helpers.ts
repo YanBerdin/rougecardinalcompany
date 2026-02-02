@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { CreateSpectacleInput } from "@/lib/schemas/spectacles";
 
 // ============================================================================
 // Date Formatting Helpers
@@ -62,10 +63,12 @@ export const spectacleFormSchema = z.object({
   slug: z.string().optional(),
   status: z.enum(["draft", "published", "archived"]).optional(),
   description: z.string().optional(),
+  paragraph_2: z.string().optional(),
+  paragraph_3: z.string().optional(),
   short_description: z.string().max(500).optional(),
-  genre: z.string().max(100).optional().transform((val) => val ? normalizeGenre(val) : val),
-  duration_minutes: z.coerce.number().int().positive().optional(),
-  casting: z.coerce.number().int().positive().optional(),
+  genre: z.string().max(100).optional(),
+  duration_minutes: z.union([z.number().int().positive(), z.string()]).optional(),
+  casting: z.union([z.number().int().positive(), z.string()]).optional(),
   premiere: z.string().optional(),
   image_url: z.string().url().optional().or(z.literal("")),
   public: z.boolean().optional(),
@@ -185,20 +188,34 @@ function transformSlugField(
   return cleanData;
 }
 
+/**
+ * Normalize genre field using normalizeGenre helper
+ */
+function transformGenreField(
+  cleanData: Record<string, unknown>
+): Record<string, unknown> {
+  if (cleanData.genre && typeof cleanData.genre === "string") {
+    cleanData.genre = normalizeGenre(cleanData.genre);
+  }
+
+  return cleanData;
+}
+
 export function cleanSpectacleFormData(
   data: SpectacleFormValues
-): Record<string, unknown> {
+): Omit<CreateSpectacleInput, 'id'> {
   let cleanData = cleanEmptyValues(data);
   cleanData = transformNumberFields(cleanData);
   cleanData = transformDateFields(cleanData);
   cleanData = transformSlugField(cleanData);
+  cleanData = transformGenreField(cleanData);
 
   // Ensure boolean fields always have a value
   if (cleanData.public === undefined) {
     cleanData.public = false;
   }
 
-  return cleanData;
+  return cleanData as Omit<CreateSpectacleInput, 'id'>;
 }
 
 // ============================================================================

@@ -10,6 +10,8 @@ export const SpectacleDbSchema = z.object({
   slug: z.string().nullable(),
   status: z.string().nullable(),
   description: z.string().nullable(),
+  paragraph_2: z.string().nullable(),
+  paragraph_3: z.string().nullable(),
   short_description: z.string().nullable(),
   genre: z.string().nullable(),
   duration_minutes: z.number().int().positive().nullable(),
@@ -41,6 +43,8 @@ export const CreateSpectacleSchema = z.object({
     .optional()
     .default("draft"),
   description: z.string().optional(),
+  paragraph_2: z.string().optional(),
+  paragraph_3: z.string().optional(),
   short_description: z.string().max(500, "Short description too long").optional(),
   genre: z.string().max(100).optional(),
   duration_minutes: z

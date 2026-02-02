@@ -112,7 +112,7 @@ export const fetchSpectacleById = cache(
       const { data, error } = await supabase
         .from("spectacles")
         .select(
-          "id, title, slug, status, description, short_description, genre, duration_minutes, casting, premiere, image_url, public, awards, created_by, created_at, updated_at"
+          "id, title, slug, status, description, paragraph_2, paragraph_3, short_description, genre, duration_minutes, casting, premiere, image_url, public, awards, created_by, created_at, updated_at"
         )
         .eq("id", id)
         .single();
@@ -164,7 +164,7 @@ export const fetchSpectacleBySlug = cache(
       let query = supabase
         .from("spectacles")
         .select(
-          "id, title, slug, status, description, short_description, genre, duration_minutes, casting, premiere, image_url, public, awards, created_by, created_at, updated_at"
+          "id, title, slug, status, description, paragraph_2, paragraph_3, short_description, genre, duration_minutes, casting, premiere, image_url, public, awards, created_by, created_at, updated_at"
         );
       
       if (isNumeric) {

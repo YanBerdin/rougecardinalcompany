@@ -47,7 +47,148 @@ components/features/admin/spectacles/
 
 ## Étapes d'implémentation
 
-### 0. Workflow migration (OBLIGATOIRE)
+### ✅ PHASE 0 : Refactoring SpectacleForm (COMPLÉTÉ)
+
+**Status**: ✅ Terminé - 2 février 2026
+
+**Fichiers créés**:
+- `components/features/admin/spectacles/SpectacleFormFields.tsx` (154 lignes)
+- `components/features/admin/spectacles/SpectacleFormMetadata.tsx` (281 lignes)
+- `components/features/admin/spectacles/SpectacleFormImageSection.tsx` (47 lignes)
+
+**Fichier principal refactorisé**:
+- `components/features/admin/spectacles/SpectacleForm.tsx` : 578 lignes → 233 lignes ✅
+
+**Résultat**: Clean Code compliance respectée (tous fichiers < 300 lignes)
+
+### ✅ PHASE 1 : Backend complet (COMPLÉTÉ)
+
+**Status**: ✅ Terminé - 2 février 2026
+
+#### 1.1 Schema déclaratif modifié
+
+**Fichier**: `supabase/schemas/06_table_spectacles.sql`
+
+```sql
+-- Ajouté après description:
+  paragraph_2 text,
+  paragraph_3 text,
+
+-- Commentaires ajoutés:
+comment on column public.spectacles.paragraph_2 is 
+'Paragraphe supplémentaire 1 - Contenu narratif additionnel affiché après Photo 1 dans SpectacleDetailView';
+
+comment on column public.spectacles.paragraph_3 is 
+'Paragraphe supplémentaire 2 - Contenu narratif additionnel affiché après Photo 2 dans SpectacleDetailView';
+```
+
+#### 1.2 Schémas Zod étendus
+
+**Fichier**: `lib/schemas/spectacles.ts`
+
+```typescript
+// SpectacleDbSchema
+paragraph_2: z.string().nullable(),
+paragraph_3: z.string().nullable(),
+
+// CreateSpectacleSchema
+paragraph_2: z.string().optional(),
+paragraph_3: z.string().optional(),
+```
+
+#### 1.3 Schéma formulaire étendu
+
+**Fichier**: `lib/forms/spectacle-form-helpers.ts`
+
+```typescript
+// spectacleFormSchema
+paragraph_2: z.string().optional(),
+paragraph_3: z.string().optional(),
+
+// transformGenreField() ajoutée
+// Transformation genre déplacée du schéma vers cleanSpectacleFormData
+```
+
+**Ajustements TypeScript**:
+- ❌ Retrait de `.transform()` sur champs `genre`, `duration_minutes`, `casting`
+- ✅ Utilisation de `z.union([z.number(), z.string()]).optional()` pour champs numériques
+- ✅ Transformation déplacée dans pipeline `cleanSpectacleFormData`
+- ✅ Return type de `cleanSpectacleFormData`: `Omit<CreateSpectacleInput, 'id'>`
+- ✅ TypeScript validation: 0 erreurs ✅
+
+#### 1.4 DAL modifié
+
+**Fichier**: `lib/dal/spectacles.ts`
+
+```typescript
+// fetchSpectacleById - Select étendu (ligne ~115)
+.select("id, title, slug, status, description, paragraph_2, paragraph_3, ...")
+
+// fetchSpectacleBySlug - Select étendu (ligne ~168)  
+.select("id, title, slug, status, description, paragraph_2, paragraph_3, ...")
+
+// fetchAllSpectacles - NON MODIFIÉ (optimisation listes)
+```
+
+#### 1.5 Vue publique modifiée
+
+**Fichier**: `components/features/public-site/spectacles/SpectacleDetailView.tsx`
+
+```tsx
+{/* Description principale (first-letter stylisé) */}
+<div className="prose ...">...</div>
+
+{/* ✅ Paragraph 2 - NOUVEAU */}
+{spectacle.paragraph_2 && (
+  <div className="prose prose-lg max-w-none text-foreground/90 leading-relaxed mt-6">
+    <p className="max-sm:text-sm text-md lg:text-lg whitespace-pre-line">
+      {spectacle.paragraph_2}
+    </p>
+  </div>
+)}
+
+{/* ✅ Photo 2 - REPOSITIONNÉ après paragraph_2 */}
+{landscapePhotos[1] && <LandscapePhotoCard photo={landscapePhotos[1]} />}
+
+{/* ✅ Paragraph 3 - NOUVEAU */}
+{spectacle.paragraph_3 && (
+  <div className="prose prose-lg max-w-none text-foreground/90 leading-relaxed mt-6">
+    <p className="max-sm:text-sm text-md lg:text-lg whitespace-pre-line">
+      {spectacle.paragraph_3}
+    </p>
+  </div>
+)}
+```
+
+**Flow visuel final**: Description → Photo1 → Paragraph_2 → Photo2 → Paragraph_3 → CTAs ✅
+
+#### 1.6 Formulaire admin modifié
+
+**Fichier**: `components/features/admin/spectacles/SpectacleFormFields.tsx`
+
+```tsx
+{/* 6 FormFields au total */}
+- title
+- slug
+- short_description
+- description
+- paragraph_2 (Textarea, min-h-32, "Optionnel - Aucune limite de caractères")
+- paragraph_3 (Textarea, min-h-32, "Optionnel - Aucune limite de caractères")
+```
+
+**Fichier**: `components/features/admin/spectacles/SpectacleForm.tsx`
+
+```typescript
+// defaultValues étendus (lignes 57-73)
+paragraph_2: defaultValues?.paragraph_2 ?? "",
+paragraph_3: defaultValues?.paragraph_3 ?? "",
+```
+
+### 🔄 PHASE 2 : Migration Database (EN COURS)
+
+**Status**: ⏳ À exécuter
+
+#### Workflow migration (OBLIGATOIRE)
 
 **CRITIQUE**: Respecter le workflow Declarative Schema
 
@@ -372,7 +513,7 @@ CTAs
 
 ### Fallback
 - ✅ Graceful si `paragraph_2`/`paragraph_3` null/undefined
-- ✅ Layout préservé (Photo 1 → Desc → [P2] → Photo 2 → [P3])
+- ✅ Layout préservé (Photo 1 → Desc → P2 → Photo 2 → P3)
 - ✅ Pas de crash si champs absents (migration non appliquée)
 
 ## Migration & Rollback
@@ -468,4 +609,31 @@ Créer fichier TASK avec structure standard et mettre à jour progression.
 **Public UI**: Rendu conditionnel, repositionnement Photo 2 entre paragraph_2 et paragraph_3  
 **Validation**: Pas de limite caractères, pas de condition si public = true  
 **Pattern**: Aligné sur `home_about_content` (intro1/intro2 séparés)
+
+---
+
+### ✅ PHASE 2 : Migration Database (COMPLÉTÉ)
+
+**Status**: ✅ Terminé - 2 février 2026
+
+#### Workflow exécuté
+
+1. ✅ **Arrêt DB locale**: `pnpm dlx supabase stop`
+2. ✅ **Génération migration**: `pnpm dlx supabase db diff -f add_spectacle_paragraphs`
+   - Migration créée: `supabase/migrations/20260202200333_add_spectacle_paragraphs.sql`
+3. ✅ **Correction security_invoker**: Migration manuelle (bug migra)
+   - Views corrigées: `articles_presse_public`, `communiques_presse_public`, `spectacles_landscape_photos_admin`, `spectacles_landscape_photos_public`
+   - Ajout `with (security_invoker = true)` sur les 4 vues recréées
+4. ✅ **Application migration locale**: `pnpm dlx supabase db reset`
+   - Migration 20260202200333 appliquée avec succès
+5. ✅ **Vérification colonnes**: `paragraph_2 text`, `paragraph_3 text` présentes
+6. ✅ **Vérification vues**: Les 4 vues ont bien `security_invoker = true`
+7. ✅ **Push migration cloud**: `pnpm dlx supabase db push --linked`
+   - Migration appliquée sur base de données production Supabase
+
+#### Résultat
+
+✅ **Migration complète**: Local + Cloud  
+✅ **Sécurité**: Toutes les vues ont security_invoker (pas de régression RLS)  
+✅ **Validation**: Colonnes présentes dans `public.spectacles`
 ```
