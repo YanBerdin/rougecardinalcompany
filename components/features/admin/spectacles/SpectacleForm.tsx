@@ -23,6 +23,7 @@ import {
   getSpectacleSuccessMessage,
 } from "@/lib/forms/spectacle-form-helpers";
 import { ImageFieldGroup } from "@/components/features/admin/media";
+import { SpectaclePhotoManager } from "./SpectaclePhotoManager";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -43,6 +44,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -309,7 +312,7 @@ export default function SpectacleForm({
                       />
                       <Button
                         type="button"
-                        variant="outline"
+                        variant="secondary"
                         size="sm"
                         onClick={() => {
                           setIsCreatingNewGenre(false);
@@ -513,6 +516,23 @@ export default function SpectacleForm({
           onValidationChange={setIsImageValidated}
         />
 
+        {/* Photos paysage (2 max) - Only for existing spectacles */}
+        {spectacleId ? (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Label>Photos du spectacle (2 maximum)</Label>
+              <Badge variant="secondary">Optionnel</Badge>
+            </div>
+            <SpectaclePhotoManager spectacleId={spectacleId} />
+          </div>
+        ) : (
+          <Alert>
+            <AlertDescription>
+              Enregistrez d&apos;abord ce spectacle pour ajouter des photos paysage.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Public Checkbox */}
         <FormField
           control={form.control}
@@ -541,7 +561,7 @@ export default function SpectacleForm({
         <div className="flex gap-4">
           <Button
             type="button"
-            variant="outline"
+            variant="secondary"
             onClick={() => router.back()}
             disabled={isSubmitting}
           >

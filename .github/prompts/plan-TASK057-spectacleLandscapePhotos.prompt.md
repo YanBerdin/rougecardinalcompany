@@ -172,11 +172,8 @@ export async function deleteSpectaclePhoto(
   // Admin only (requireAdmin)
 }
 
-export async function swapPhotoOrder(
-  spectacleId: number
-): Promise<DALResult<SpectaclePhotoDTO[]>> {
-  // Admin only, swap 0↔1 via UPDATE avec CASE
-}
+// ❌ SUPPRIMÉ: swapPhotoOrder - Incompatible avec CHECK constraint ordre IN (0, 1)
+// La fonction swap nécessitait une valeur temporaire (-1) impossible avec cette contrainte
 ```
 
 **Pattern DAL SOLID** (aligné sur `spectacles.ts`):
@@ -317,44 +314,108 @@ export async function deletePhotoAction(
   }
 }
 
-export async function swapPhotosAction(spectacleId: string): Promise<ActionResult> {
+// ❌ SUPPRIMÉ: swapPhotosAction - Incompatible avec CHECK constraint ordre IN (0, 1)
+// Migration 20260202004924_drop_swap_spectacle_photo_order.sql appliquée
+```
+
+### 4.5. API Route pour fetch admin photos (BigInt → string conversion)
+
+**Fichier**: `app/api/spectacles/[id]/photos/route.ts`
+
+**Pattern**: GET endpoint pour éviter la sérialisation BigInt dans Server Components
+
+**Raison d'être**:
+- Server Actions ne peuvent pas retourner `bigint` (erreur "Cannot serialize BigInt")
+- SpectaclePhotoManager est un Client Component qui doit fetch les photos
+- API Route convertit `bigint` → `string` pour JSON serialization
+
+**Structure**:
+```typescript
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const result = await swapPhotoOrder(BigInt(spectacleId));
+    const { id } = await params;
     
-    if (!result.success) {
-      return { success: false, error: result.error, status: result.status };
-    }
+    // Fetch via DAL (retourne bigint)
+    const photos = await fetchSpectacleLandscapePhotosAdmin(Number(id));
     
-    revalidatePath('/admin/spectacles');
-    revalidatePath(`/spectacles/[slug]`, 'page');
+    // Convertir bigint → string pour JSON
+    const serialized = photos.map(photo => ({
+      ...photo,
+      spectacle_id: photo.spectacle_id.toString(),
+      media_id: photo.media_id.toString(),
+    }));
     
-    return { success: true, data: result.data };
+    return NextResponse.json({ data: serialized });
   } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Erreur inconnue",
-      status: 500,
-    };
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
   }
 }
+```
+
+**Conversion Types**:
+```typescript
+// Type retourné par API (string IDs)
+export type SerializedSpectaclePhoto = Omit<SpectaclePhotoDTO, 'spectacle_id' | 'media_id'> & {
+  spectacle_id: string;
+  media_id: string;
+};
 ```
 
 ### 5. Implémenter SpectaclePhotoManager (Admin)
 
 **Fichier**: `components/features/admin/spectacles/SpectaclePhotoManager.tsx`
 
+**Pattern**: Client Component avec **client-side fetch via API Route** (évite BigInt serialization)
+
 **Structure**:
 - Client Component (`"use client"`)
-- Props: `spectacleId: number`, `initialPhotos?: SpectaclePhotoDTO[]`
-- État: `photos`, `isPending`, `selectedSlot` (0 ou 1)
+- Props: `spectacleId: number`
+- État: `photos: SerializedSpectaclePhoto[]`, `isPending`, `isLoading`, `selectedSlot` (0 ou 1)
+- **Fetch initial**: `useEffect` avec `fetch('/api/spectacles/${spectacleId}/photos')`
 - UI: 2 slots côte-à-côte (grid 2 colonnes), chaque slot:
   - Preview image si présente (aspect 16:9, max-h-40)
   - Bouton "Choisir" → ouvre `MediaLibraryPicker`
   - Bouton "Upload" → ouvre `MediaUploadDialog`
   - Bouton "Supprimer" si photo présente
-- Bouton global "Inverser l'ordre ⇄" si 2 photos présentes
+- ❌ PAS de bouton swap (supprimé - incompatible avec CHECK constraint)
 - Toast notifications pour feedback utilisateur
-- `useEffect` pour sync `photos` avec `initialPhotos` (pattern CRUD standard)
+- **Refresh**: Appel API après add/delete pour re-fetch état actuel
+
+**Pattern BigInt**:
+```typescript
+'use client';
+
+import { useEffect, useState } from 'react';
+import type { SerializedSpectaclePhoto } from '@/app/api/spectacles/[id]/photos/route';
+
+interface Props {
+  spectacleId: number;
+}
+
+export function SpectaclePhotoManager({ spectacleId }: Props) {
+  const [photos, setPhotos] = useState<SerializedSpectaclePhoto[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Client-side fetch via API Route (évite BigInt serialization)
+  useEffect(() => {
+    async function loadPhotos() {
+      const res = await fetch(`/api/spectacles/${spectacleId}/photos`);
+      const { data } = await res.json();
+      setPhotos(data);
+      setIsLoading(false);
+    }
+    loadPhotos();
+  }, [spectacleId]);
+  
+  // ... reste de la logique
+}
+```
 
 ### 6. Intégrer dans SpectacleForm
 
@@ -521,7 +582,7 @@ export function getMediaPublicUrl(storagePath: string): string {
 - ✅ Toast notifications (succès/erreur)
 - ✅ Preview images avec alt text affiché
 - ✅ Double choix (bibliothèque + upload direct)
-- ✅ Bouton swap simple (pas de drag-and-drop complexe)
+- ❌ Pas de swap (supprimé - incompatible avec CHECK constraint ordre IN (0, 1))
 - ✅ Disabled state pendant `isPending`
 
 ### Fallback
@@ -583,11 +644,11 @@ ALTER TABLE public.spectacles_medias DROP COLUMN IF EXISTS type;
 
 - [ ] Admin peut ajouter 2 photos landscape max
 - [ ] Admin ne peut pas ajouter 3ème photo (constraint violation)
-- [ ] Bouton swap inverse correctement ordre 0↔1
+- ❌ ~~Bouton swap inverse correctement ordre 0↔1~~ (fonctionnalité supprimée)
 - [ ] Photos s'affichent correctement sur page publique
 - [ ] Suppression photo fonctionne + revalidate
 - [ ] Fallback graceful si aucune photo
-- [ ] Performance: fetch parallèle < 500ms
+- [ ] Performance: fetch séquentiel < 500ms (pas parallèle - besoin spectacle.id)
 - [ ] RLS: anon ne peut pas modifier `spectacles_medias`
 
 ## Documentation post-déploiement
@@ -597,28 +658,49 @@ ALTER TABLE public.spectacles_medias DROP COLUMN IF EXISTS type;
 Ajouter dans "Mises à jour récentes (février 2026)":
 
 ```markdown
-- **FEAT: Photos Paysage Spectacles (1 fév. 2026)** : Système de gestion de 2 photos paysage par spectacle.
-  - **Migration** : `20260201140000_add_landscape_photos_to_spectacles.sql`
+- **FEAT: Photos Paysage Spectacles - TASK057 (1-2 fév. 2026)** : Système de gestion de 2 photos paysage par spectacle.
+  - **Migrations** (appliquées via MCP Supabase):
+    - `20260201093000_fix_entity_type_whitelist.sql` — Whitelist 'spectacle_photo' dans entity_type_enum
+    - `20260201135511_add_landscape_photos_to_spectacles.sql` — Colonne type, constraints, vues
+    - `20260202004924_drop_swap_spectacle_photo_order.sql` — Suppression fonction swap
+    - `20260202010000_fix_views_security_invoker.sql` — Fix SECURITY DEFINER → SECURITY INVOKER
   - **Modifications** :
     - Ajout colonne `type` dans `spectacles_medias` (valeurs: 'poster', 'landscape', 'gallery')
     - Modification contrainte UNIQUE: `(spectacle_id, type, ordre)` au lieu de `(spectacle_id, media_id)`
     - CHECK constraints: type IN ('poster', 'landscape', 'gallery'), ordre landscape IN (0, 1)
     - Index: `idx_spectacles_medias_type_ordre` sur `(spectacle_id, type, ordre)`
-    - Vues publique + admin pour photos landscape
-    - 4 RLS policies + GRANT statements
-  - **DAL** : Nouveau module `lib/dal/spectacle-photos.ts` (READ avec cache, MUTATIONS avec DALResult)
-  - **Admin UI** : Composant `SpectaclePhotoManager` avec double choix (bibliothèque + upload) + swap
-  - **Public UI** : Photos intégrées dans synopsis (`SpectacleDetailView`)
-  - **Validation** : Tests locaux + cloud, TypeScript 0 erreurs
+    - Vues publique + admin pour photos landscape (fichier `41_views_spectacle_photos.sql`)
+    - Policies RLS existantes suffisantes (pas de nouvelles policies)
+  - **Code Changes**:
+    - DAL: `lib/dal/spectacle-photos.ts` (READ avec cache, MUTATIONS avec DALResult)
+    - Schemas: `SpectaclePhotoDTO`, `AddPhotoInputSchema` (number, pas bigint)
+    - Server Actions: add/delete photos dans `spectacles/actions.ts` (swap supprimé)
+    - **API Route**: `/api/spectacles/[id]/photos` (bigint→string conversion pour JSON)
+    - Admin: `SpectaclePhotoManager` avec **client-side fetch via API**
+    - Public: `LandscapePhotoCard` dans `SpectacleDetailView`
+    - Utils: `lib/utils/media-url.ts` (getMediaPublicUrl helper)
+  - **BigInt Serialization Fix** (TASK055 pattern):
+    - `AddPhotoInputSchema` utilise `z.number()` au lieu de `z.coerce.bigint()`
+    - Server Action convertit en BigInt APRÈS validation Zod
+    - DAL reçoit bigint directement, pas de re-validation
+    - API Route convertit bigint→string pour éviter erreur "Cannot serialize BigInt"
+  - **Admin UI**: `SpectaclePhotoManager` fetch client-side via API + MediaLibraryPicker
+  - **Public UI**: Photos intégrées dans synopsis (`SpectacleDetailView`)
+  - **Validation**: TypeScript 0 erreurs, tests manuels OK, cloud déployé via MCP
 ```
 
 ### `supabase/migrations/migrations.md`
 
-Ajouter nouvelle entrée:
+Ajouter nouvelles entrées:
 
 ```markdown
-| 2026-01-31 14:00:00 | add_landscape_photos_to_spectacles | Système photos paysage spectacles (colonne type, constraints, vues, RLS) | ✅ Applied | Cloud + Local | Workflow declarative schema |
+| 2026-02-01 09:30:00 | fix_entity_type_whitelist | Ajout 'spectacle_photo' dans whitelist entity_type | ✅ Applied | Cloud + Local | Declarative schema |
+| 2026-02-01 13:55:11 | add_landscape_photos_to_spectacles | Système photos paysage spectacles (colonne type, constraints, vues) | ✅ Applied | Cloud + Local | Declarative schema |
+| 2026-02-02 00:49:24 | drop_swap_spectacle_photo_order | Suppression fonction swap (incompatible CHECK constraint) | ✅ Applied | Cloud + Local | Refactor |
+| 2026-02-02 01:00:00 | fix_views_security_invoker | Fix 4 vues SECURITY DEFINER → SECURITY INVOKER (RLS bypass) | ✅ Applied | Cloud + Local | Security Fix |
 ```
+
+### `supabase/schemas/README.md`
 
 ### `memory-bank/tasks/TASK057-spectacle-landscape-photos.md`
 
@@ -627,17 +709,79 @@ mettre à jour l'état de progression dans la section "Implementation Steps" au 
 ### `.github/prompts/plan-TASK057-spectacleLandscapePhotos.prompt.md`
 mettre à jour l'état de progression de ce plan détaillé en fonction des modifications apportées au code une fois l'implémentation accomplie.
 
+### mettre à jour l'état de progression dans :
+
+- _index.md
+- _preview_backoffice_tasks.md
+- supabase/README.md
+
+## Problèmes rencontrés et solutions
+
+### 1. Erreur "Cannot serialize BigInt" (2 fév. 2026)
+
+**Problème**: Server Actions retournaient des objets avec `bigint`, non sérialisables en JSON.
+
+**Tentatives de fix**:
+- Tentative 1: Conversion `.map()` des IDs → Échoue (duplicate key violation)
+- Tentative 2: Refactor `swapPhotoOrder` SQL avec valeur temporaire → Échoue (CHECK constraint violation)
+- Tentative 3: Modification CHECK constraint → Jugé trop risqué
+
+**Solution finale**: 
+- ❌ Suppression complète de la fonctionnalité swap
+- ✅ Application du pattern TASK055 BigInt sur add/delete actions:
+  - Validation Zod avec `z.number().int().positive()` (UI)
+  - Conversion `BigInt()` APRÈS validation (Server)
+  - Pas de sérialisation BigInt dans retours Server Actions
+
+**Migrations**:
+- `20260202004924_drop_swap_spectacle_photo_order.sql` (suppression fonction SQL)
+
+**Code supprimé**:
+- `swapPhotoOrder()` dans DAL
+- `swapPhotosAction()` dans Server Actions
+- Bouton "Inverser" dans SpectaclePhotoManager UI
+
+---
+
+### 2. Vues SECURITY DEFINER → RLS Bypass (2 fév. 2026)
+
+**Problème**: Migration `20260202004924_drop_swap_spectacle_photo_order.sql` a recréé 4 vues **SANS** la clause `security_invoker = true`, permettant de contourner les RLS policies.
+
+**Cause**: Bug migra (outil de diff Supabase) - ne préserve pas `with (security_invoker = true)` lors de recréation vues.
+
+**Détection**: Supabase Advisors (4 ERROR advisories).
+
+**Solution**:
+- Migration `20260202010000_fix_views_security_invoker.sql`
+- Ajout explicite `with (security_invoker = true)` aux 4 vues:
+  - `articles_presse_public`
+  - `communiques_presse_public`
+  - `spectacles_landscape_photos_public`
+  - `spectacles_landscape_photos_admin`
+
+**Validation**:
+- ✅ Supabase Advisors: 4 ERROR → 0 ERROR
+- ✅ Tests RLS: 6/6 tests passent (`scripts/test-views-security-invoker.ts`)
+- ✅ Schémas déclaratifs déjà corrects (pas de modification nécessaire)
+
+**Leçon**: Toujours inspecter migrations générées par `supabase db diff` pour vérifier préservation clauses critiques.
+
+---
+
 ## Résumé technique
 
 **Database**: Contraintes doubles (`CHECK` + `UNIQUE`) pour garantie stricte max 2 photos  
 **Migration**: Workflow declarative schema (stop → diff → start → push --linked), format `YYYYMMDDHHmmss_*.sql`  
-**Déploiement Cloud**: `pnpm dlx supabase db push --linked` après validation locale  
-**Documentation**: Mise à jour `supabase/README.md` + `supabase/migrations/migrations.md` post-déploiement  
+**Migrations réelles**: 4 migrations appliquées via MCP (fix_entity_type_whitelist, add_landscape_photos, drop_swap, fix_views_security_invoker)  
+**Déploiement Cloud**: Migrations appliquées via MCP Supabase (`db push --linked`)  
+**Documentation**: `supabase/README.md` + `migrations/migrations.md` + `TASK057-spectacle-landscape-photos.md` + `_index.md` + `_preview_backoffice_tasks.md`  
 **RLS**: Policies existantes dans `11_tables_relations.sql` suffisantes (pas de nouvelles policies nécessaires)  
-**Vues**: Nouveau fichier `41_views_spectacle_photos.sql` avec vues public + admin  
-**Admin UX**: Double choix (bibliothèque + upload) + bouton swap simple  
+**Vues**: Nouveau fichier `41_views_spectacle_photos.sql` avec vues public + admin + SECURITY INVOKER enforced  
+**API Route**: `/api/spectacles/[id]/photos` pour conversion bigint→string (évite serialization error)  
+**Admin UX**: SpectaclePhotoManager avec **client-side fetch via API** + MediaLibraryPicker - ❌ swap supprimé  
 **Performance**: `loading="lazy"` pour photos below-fold, fetch séquentiel optimisé, React cache, index DB  
 **Fallback**: Graceful degradation si `landscape_photos` vide ou erreur DAL  
-**Security**: `requireAdmin()` dans DAL, CHECK constraints DB, validation Zod stricte, try/catch Server Actions  
+**Security**: `requireAdmin()` dans DAL, CHECK constraints DB, validation Zod stricte, try/catch Server Actions, SECURITY INVOKER vues  
+**BigInt Pattern**: TASK055 appliqué (validation `z.number()`, conversion `BigInt()` après, API Route serialize bigint→string)  
 **DAL SOLID**: Imports restreints (`cache` de "react" autorisé, NO `next/cache`), helpers @internal si > 30 lignes  
-**URL Media**: Utiliser `getPublicUrl(storage_path)` pour construire URLs (pas de colonne `url` dans table `medias`)
+**URL Media**: `getMediaPublicUrl(storage_path)` via `lib/utils/media-url.ts` (pas de colonne `url` dans table `medias`)

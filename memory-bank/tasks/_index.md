@@ -26,10 +26,10 @@
 - `TASK017` Retrait des délais artificiels (1200-1500ms) des containers
 - `TASK054` LCP Optimization Phase 2 (CDN, BlurHash, srcset) - Optional improvements for <1000ms LCP
 - `TASK056` Remplacer les données de seed par des fichiers valides - Low Priority (4 images manquantes dans Storage, thumbnails échouées)
-- `TASK057` Spectacle Landscape Photos Integration - Système de gestion de 2 photos paysage par spectacle (colonne type, vues, RLS, DAL, Admin UI, Public display)
 
 ## Terminé
 
+- `TASK057` Spectacle Landscape Photos Integration - Completed on 2026-02-01 (2 photos paysage par spectacle, BigInt fix TASK055 pattern, migrations cloud via MCP, DAL + Server Actions + API route, Admin UI avec MediaLibraryPicker, Public display dans SpectacleDetailView)
 - `RLS-FIX-NEWSLETTER` Newsletter infinite recursion hotfix - Completed on 2026-01-06
 - `RLS-FIX` RLS WITH CHECK vulnerabilities fix - Completed on 2026-01-06
 - `TASK046` Rate-limiting handlers contact/newsletter - Completed on 2026-01-04

@@ -4,6 +4,93 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-02-02 - SECURITY FIX: Views SECURITY INVOKER
+
+**Migration**: `20260202010000_fix_views_security_invoker.sql`
+
+**Sévérité**: 🔴 **CRITICAL** - 4 vues contournaient les RLS policies
+
+**Problème**:
+Migration `20260202004924_drop_swap_spectacle_photo_order.sql` a recréé 4 vues **SANS** la clause `security_invoker = true`, causant un bypass des RLS policies (détecté par Supabase Security Advisors).
+
+**Vues corrigées**:
+
+- `articles_presse_public` — SECURITY DEFINER → SECURITY INVOKER ✅
+- `communiques_presse_public` — SECURITY DEFINER → SECURITY INVOKER ✅
+- `spectacles_landscape_photos_public` — SECURITY DEFINER → SECURITY INVOKER ✅
+- `spectacles_landscape_photos_admin` — SECURITY DEFINER → SECURITY INVOKER ✅
+
+**Cause Root**:
+Bug connu de `migra` (outil de diff Supabase) : `supabase db diff` ne préserve pas la clause `with (security_invoker = true)` lors de la recréation de vues.
+
+**Correctif Appliqué**:
+
+```sql
+-- Pattern appliqué aux 4 vues
+create view public.view_name
+with (security_invoker = true)  -- ✅ Clause explicite
+as SELECT ...
+```
+
+**Impact Sécurité**:
+
+- **AVANT** : Vues exécutées avec privilèges du créateur (superuser) → RLS bypass ❌
+- **APRÈS** : Vues exécutées avec privilèges de l'utilisateur → RLS enforced ✅
+
+**Validation**:
+
+- ✅ Migration appliquée cloud : `supabase db push --linked` (exit 0)
+- ✅ Supabase Advisors : 4 ERROR → 0 ERROR
+- ✅ Schémas déclaratifs déjà corrects (aucune modification nécessaire)
+
+**Application**: ✅ Appliquée via `supabase db push --linked`
+
+---
+
+### 2026-02-02 - REFACTOR: Suppression swap photo order (TASK057)
+
+**Migration**: `20260202004924_drop_swap_spectacle_photo_order.sql`
+
+**Impact**: 🟡 **Refactor** - Suppression fonctionnalité swap
+
+**Contexte**:
+La fonctionnalité "Inverser les photos" a été supprimée car incompatible avec la CHECK constraint `ordre IN (0, 1)`. Le swap atomique nécessitait une valeur temporaire (-1) impossible avec cette contrainte.
+
+**Changements**:
+
+- DROP `swap_spectacle_photo_order` SQL function
+- Suppression `swapPhotosAction` Server Action
+- Suppression `swapPhotoOrder` DAL function
+- Suppression bouton UI "Inverser les photos"
+
+**Application**: ✅ Appliquée via `supabase db push --linked`
+
+---
+
+### 2026-02-01 - FEAT: Photos Paysage Spectacles (TASK057)
+
+**Migrations**:
+
+- `20260201093000_fix_entity_type_whitelist.sql` - Ajout 'spectacle_photo' dans whitelist entity_type
+- `20260201135511_add_landscape_photos_to_spectacles.sql` - Système complet photos paysage
+
+**Impact**: 🟢 **Feature** - Nouvelle fonctionnalité admin
+
+**Changements**:
+
+- Ajout colonne `type` dans `spectacles_medias` (valeurs: 'poster', 'landscape', 'gallery')
+- CHECK constraints: `type IN ('poster', 'landscape', 'gallery')`, `ordre IN (0, 1)` pour landscape
+- Contrainte UNIQUE: `(spectacle_id, type, ordre)`
+- Index: `idx_spectacles_medias_type_ordre`
+- Vues: `spectacles_landscape_photos_public` + `spectacles_landscape_photos_admin`
+- RLS policies: Policies existantes suffisantes
+
+**Application**: ✅ Appliquée via `supabase db push --linked`
+
+**BigInt Fix**: Pattern TASK055 appliqué - validation avec `z.number()` puis conversion `BigInt()` après validation
+
+---
+
 ### 2026-01-22 - FINAL FIX: Restore INSERT Policies (Chronological Conflict Resolution)
 
 **Migration**: `20260122150000_final_restore_insert_policies.sql`

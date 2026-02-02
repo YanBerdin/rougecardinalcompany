@@ -106,6 +106,36 @@ En cas de compromission (Leaked) de `SUPABASE_SECRET_KEY` :
 3. Mettez à jour les secrets dans votre environnement de production (Vercel/Netlify/etc.)
 4. Supprimez l'ancienne clé du dashboard
 
+## 📋 Mises à jour récentes (février 2026)
+
+### TASK057 - Photos Paysage Spectacles (1 fév. 2026)
+
+Système de gestion de 2 photos paysage par spectacle intégrées dans le synopsis.
+
+**Migrations appliquées**:
+
+- `20260201093000_fix_entity_type_whitelist.sql`
+- `20260201100000_add_landscape_photos_to_spectacles.sql`
+
+**Modifications base de données**:
+
+- Colonne `type` dans `spectacles_medias` (valeurs: 'poster', 'landscape', 'gallery')
+- CHECK constraints: type valide + ordre 0/1 pour landscape
+- Contrainte UNIQUE: `(spectacle_id, type, ordre)`
+- Index: `idx_spectacles_medias_type_ordre`
+- Vues: `spectacles_landscape_photos_public` + `spectacles_landscape_photos_admin`
+
+**Code ajouté**:
+
+- DAL: `lib/dal/spectacle-photos.ts` (READ avec cache, MUTATIONS avec DALResult)
+- Schemas: Extension `lib/schemas/spectacles.ts` (SpectaclePhotoDTO, AddPhotoInputSchema)
+- Server Actions: add/delete/swap dans `app/(admin)/admin/spectacles/actions.ts`
+- API Route: `/api/spectacles/[id]/photos` (conversion bigint→string)
+- Admin: `SpectaclePhotoManager` avec MediaLibraryPicker
+- Public: `LandscapePhotoCard` dans `SpectacleDetailView`
+
+**Pattern appliqué**: TASK055 BigInt Serialization (validation number, conversion BigInt après)
+
 ## Best Practices
 
 ### ✅ BON

@@ -148,3 +148,56 @@ export const ArchivedShowSchema = z.object({
 
 export type CurrentShow = z.infer<typeof CurrentShowSchema>;
 export type ArchivedShow = z.infer<typeof ArchivedShowSchema>;
+
+// =============================================================================
+// SPECTACLE LANDSCAPE PHOTOS SCHEMAS
+// =============================================================================
+
+/**
+ * DTO Schema for landscape photos (returned by DAL)
+ */
+export const SpectaclePhotoDTOSchema = z.object({
+  spectacle_id: z.coerce.bigint(),
+  media_id: z.coerce.bigint(),
+  ordre: z.number().int().min(0).max(1),
+  storage_path: z.string(),
+  alt_text: z.string().nullable(),
+});
+
+export type SpectaclePhotoDTO = z.infer<typeof SpectaclePhotoDTOSchema>;
+
+/**
+ * Transport Schema for Client Components (bigint→string)
+ * Used when passing photos as props from Server to Client Components
+ */
+export interface SpectaclePhotoTransport {
+  spectacle_id: string;  // bigint→string
+  media_id: string;      // bigint→string
+  ordre: number;
+  storage_path: string;
+  alt_text: string | null;
+}
+
+/**
+ * UI Input Schema for photo actions (number for forms)
+ * Uses number to avoid BigInt serialization issues in React Server Actions
+ * Server Action converts to BigInt AFTER validation
+ */
+export const AddPhotoInputSchema = z.object({
+  spectacle_id: z.number().int().positive(),
+  media_id: z.number().int().positive(),
+  ordre: z.number().int().min(0).max(1),
+  type: z.literal("landscape"),
+});
+
+export type AddPhotoInput = z.infer<typeof AddPhotoInputSchema>;
+
+/**
+ * UI Form Schema (number for forms)
+ */
+export const PhotoFormSchema = z.object({
+  media_id: z.number().int().positive(),
+  ordre: z.number().int().min(0).max(1),
+});
+
+export type PhotoFormValues = z.infer<typeof PhotoFormSchema>;

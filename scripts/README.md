@@ -226,6 +226,33 @@ SUPABASE_SECRET_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ---
 
+### test-views-security-invoker.ts (TypeScript) ✅ NOUVEAU (2026-02-02)
+
+**Description**: Teste la sécurité des vues après correction SECURITY INVOKER. Vérifie que les 4 vues corrigées (articles_presse_public, communiques_presse_public, spectacles_landscape_photos_public/admin) respectent les RLS policies.
+
+**Utilisation**:
+
+```bash
+pnpm exec tsx scripts/test-views-security-invoker.ts
+```
+
+**Tests couverts (6 vérifications)**:
+
+| Type | Vue | Comportement attendu |
+| ------ | ---- | ---------------------- |
+| PUBLIC | `articles_presse_public` | ✅ Accessible anon |
+| PUBLIC | `communiques_presse_public` | ✅ Accessible anon |
+| PUBLIC | `popular_tags` | ✅ Accessible anon |
+| PUBLIC | `categories_hierarchy` | ✅ Accessible anon |
+| ADMIN | `analytics_summary` | ❌ Denied to anon |
+| ADMIN | `analytics_summary_90d` | ❌ Denied to anon |
+
+**Contexte**: Créé suite à la détection par Supabase Security Advisors de 4 vues utilisant SECURITY DEFINER au lieu de SECURITY INVOKER. Migration `20260202010000_fix_views_security_invoker.sql` appliquée pour corriger.
+
+**Validation**: 6/6 tests passent avec SECURITY INVOKER correctement appliqué.
+
+---
+
 ## 🩺 Diagnostic Admin (Janvier 2026)
 
 ### test-views-security-authenticated.ts (TypeScript) ✅ NOUVEAU (2026-01-22)

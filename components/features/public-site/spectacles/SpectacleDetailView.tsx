@@ -17,13 +17,46 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import type { SpectacleDb } from "@/lib/schemas/spectacles";
+import { env } from "@/lib/env";
+import type { SpectacleDb, SpectaclePhotoDTO } from "@/lib/schemas/spectacles";
 
 interface SpectacleDetailViewProps {
     spectacle: SpectacleDb;
+    landscapePhotos?: SpectaclePhotoDTO[];
 }
 
-export function SpectacleDetailView({ spectacle }: SpectacleDetailViewProps) {
+/**
+ * Build public URL from storage_path
+ */
+function getMediaPublicUrl(storagePath: string): string {
+    return `${env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/medias/${storagePath}`;
+}
+
+/**
+ * Landscape Photo Card Component
+ */
+function LandscapePhotoCard({ photo }: { photo: SpectaclePhotoDTO }) {
+    const imageUrl = getMediaPublicUrl(photo.storage_path);
+
+    return (
+        <div className="relative aspect-[16/9] rounded-lg overflow-hidden shadow-lg my-6 group">
+            <Image
+                src={imageUrl}
+                alt={photo.alt_text ?? "Photo du spectacle"}
+                fill
+                loading="lazy"
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                sizes="(max-width: 768px) 90vw, 40vw"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        </div>
+    );
+}
+
+export function SpectacleDetailView({
+    spectacle,
+    landscapePhotos = [],
+}: SpectacleDetailViewProps) {
     const formatDate = (dateString: string | null) => {
         if (!dateString) return "Non définie";
         return new Date(dateString).toLocaleDateString("fr-FR", {
@@ -129,6 +162,7 @@ export function SpectacleDetailView({ spectacle }: SpectacleDetailViewProps) {
                         </div>
                     </div>
                 </div>
+
             </section>
 
             {/* Content Section */}
@@ -167,7 +201,52 @@ export function SpectacleDetailView({ spectacle }: SpectacleDetailViewProps) {
 
                         {/* Synopsis Column */}
                         <div className="md:col-span-3 space-y-6">
+                            {/* CTA Principaux : Réserver + Voir les dates */}
+                            <div className="flex flex-col sm:flex-row flex-wrap gap-3">
+                                <Button
+                                    variant="default"
+                                    size="lg"
+                                    className="shadow-lg hover:shadow-xl transition-all touch-action-manipulation w-full sm:w-auto"
+                                    asChild
+                                >
+                                    <Link
+                                        href="/contact?subject=reservation"
+                                        aria-label={`Réserver des places pour ${spectacle.title}`}
+                                    >
+                                        <Ticket className="mr-2 h-4 w-4" /> Réserver
+                                    </Link>
+                                </Button>
 
+                                <Button
+                                    variant="secondary"
+                                    size="lg"
+                                    className="w-full sm:w-auto"
+                                    asChild
+                                >
+                                    <Link href="/agenda" aria-label="Consulter l'agenda des représentations">
+                                        <Calendar className="mr-2 h-4 w-4" />
+                                        Agenda
+                                    </Link>
+                                </Button>
+
+                                {/* Lien secondaire : Retour */}
+                                <div>
+                                    <Button
+                                        variant="outline"
+                                        size="lg"
+                                        className="w-full sm:w-auto"
+                                        asChild
+                                    >
+                                        <Link
+                                            href="/spectacles"
+                                            aria-label="Retourner à la page listant tous les spectacles"
+                                        >
+                                            <ArrowLeft className="mr-2 h-4 w-4" />
+                                            Retour
+                                        </Link>
+                                    </Button>
+                                </div>
+                            </div>
                             <h2 id="spectacle-title" className="text-2xl md:text-3xl lg:text-4xl font-bold mb-6 animate-fade-in-up">
                                 {spectacle.title}
                             </h2>
@@ -180,11 +259,21 @@ export function SpectacleDetailView({ spectacle }: SpectacleDetailViewProps) {
                                 </p>
                             )}
 
+                            {/* Photo 1 - after short_description */}
+                            {landscapePhotos[0] && (
+                                <LandscapePhotoCard photo={landscapePhotos[0]} />
+                            )}
+
                             <div className="prose prose-lg max-w-none text-foreground/90 leading-relaxed">
                                 <p className="max-sm:text-sm text-md lg:text-lg whitespace-pre-line first-letter:text-7xl first-letter:font-bold first-letter:text-primary first-letter:mr-2 first-letter:float-left first-letter:leading-[0.8]">
                                     {spectacle.description || spectacle.short_description}
                                 </p>
                             </div>
+
+                            {/* Photo 2 - after description */}
+                            {landscapePhotos[1] && (
+                                <LandscapePhotoCard photo={landscapePhotos[1]} />
+                            )}
 
                             {/* Call to Actions */}
                             <div className="flex flex-col gap-4 pt-4 md:pt-6">

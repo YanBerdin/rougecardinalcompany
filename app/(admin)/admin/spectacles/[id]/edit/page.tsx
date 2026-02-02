@@ -55,7 +55,7 @@ export default async function EditSpectaclePage({ params }: Props) {
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Link href={`/admin/spectacles/${spectacle.id}`}>
-          <Button variant="ghost" size="icon">
+          <Button variant="outline" size="icon">
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
