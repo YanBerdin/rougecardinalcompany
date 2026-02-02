@@ -1,22 +1,17 @@
 ---
 description: 'Agent expert Supabase pour générer du code conforme et auditer la conformité aux standards officiels.'
 tools:
-- vscode/runCommand
-- execute/getTerminalOutput
+- vscode
 - execute
-- execute/runTask
-- execute/runInTerminal
-- execute/runTests
 - read
-- agent
 - edit
 - search
 - web
 - github/*
 - next-devtools/*
 - supabase/*
+- agent
 - todo
-- supabase/*
 ---
 
 # Supabase Expert Agent

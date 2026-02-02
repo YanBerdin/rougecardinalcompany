@@ -162,6 +162,7 @@ export function SpectacleDetailView({
                         </div>
                     </div>
                 </div>
+
             </section>
 
             {/* Content Section */}
@@ -200,7 +201,52 @@ export function SpectacleDetailView({
 
                         {/* Synopsis Column */}
                         <div className="md:col-span-3 space-y-6">
+                            {/* CTA Principaux : Réserver + Voir les dates */}
+                            <div className="flex flex-col sm:flex-row flex-wrap gap-3">
+                                <Button
+                                    variant="default"
+                                    size="lg"
+                                    className="shadow-lg hover:shadow-xl transition-all touch-action-manipulation w-full sm:w-auto"
+                                    asChild
+                                >
+                                    <Link
+                                        href="/contact?subject=reservation"
+                                        aria-label={`Réserver des places pour ${spectacle.title}`}
+                                    >
+                                        <Ticket className="mr-2 h-4 w-4" /> Réserver
+                                    </Link>
+                                </Button>
 
+                                <Button
+                                    variant="secondary"
+                                    size="lg"
+                                    className="w-full sm:w-auto"
+                                    asChild
+                                >
+                                    <Link href="/agenda" aria-label="Consulter l'agenda des représentations">
+                                        <Calendar className="mr-2 h-4 w-4" />
+                                        Agenda
+                                    </Link>
+                                </Button>
+
+                                {/* Lien secondaire : Retour */}
+                                <div>
+                                    <Button
+                                        variant="outline"
+                                        size="lg"
+                                        className="w-full sm:w-auto"
+                                        asChild
+                                    >
+                                        <Link
+                                            href="/spectacles"
+                                            aria-label="Retourner à la page listant tous les spectacles"
+                                        >
+                                            <ArrowLeft className="mr-2 h-4 w-4" />
+                                            Retour
+                                        </Link>
+                                    </Button>
+                                </div>
+                            </div>
                             <h2 id="spectacle-title" className="text-2xl md:text-3xl lg:text-4xl font-bold mb-6 animate-fade-in-up">
                                 {spectacle.title}
                             </h2>

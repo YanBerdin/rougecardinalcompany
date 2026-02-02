@@ -4,6 +4,49 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-02-02 - SECURITY FIX: Views SECURITY INVOKER
+
+**Migration**: `20260202010000_fix_views_security_invoker.sql`
+
+**Sévérité**: 🔴 **CRITICAL** - 4 vues contournaient les RLS policies
+
+**Problème**:
+Migration `20260202004924_drop_swap_spectacle_photo_order.sql` a recréé 4 vues **SANS** la clause `security_invoker = true`, causant un bypass des RLS policies (détecté par Supabase Security Advisors).
+
+**Vues corrigées**:
+
+- `articles_presse_public` — SECURITY DEFINER → SECURITY INVOKER ✅
+- `communiques_presse_public` — SECURITY DEFINER → SECURITY INVOKER ✅
+- `spectacles_landscape_photos_public` — SECURITY DEFINER → SECURITY INVOKER ✅
+- `spectacles_landscape_photos_admin` — SECURITY DEFINER → SECURITY INVOKER ✅
+
+**Cause Root**:
+Bug connu de `migra` (outil de diff Supabase) : `supabase db diff` ne préserve pas la clause `with (security_invoker = true)` lors de la recréation de vues.
+
+**Correctif Appliqué**:
+
+```sql
+-- Pattern appliqué aux 4 vues
+create view public.view_name
+with (security_invoker = true)  -- ✅ Clause explicite
+as SELECT ...
+```
+
+**Impact Sécurité**:
+
+- **AVANT** : Vues exécutées avec privilèges du créateur (superuser) → RLS bypass ❌
+- **APRÈS** : Vues exécutées avec privilèges de l'utilisateur → RLS enforced ✅
+
+**Validation**:
+
+- ✅ Migration appliquée cloud : `supabase db push --linked` (exit 0)
+- ✅ Supabase Advisors : 4 ERROR → 0 ERROR
+- ✅ Schémas déclaratifs déjà corrects (aucune modification nécessaire)
+
+**Application**: ✅ Appliquée via `supabase db push --linked`
+
+---
+
 ### 2026-02-02 - REFACTOR: Suppression swap photo order (TASK057)
 
 **Migration**: `20260202004924_drop_swap_spectacle_photo_order.sql`
