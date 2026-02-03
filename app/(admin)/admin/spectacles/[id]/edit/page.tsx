@@ -42,6 +42,8 @@ export default async function EditSpectaclePage({ params }: Props) {
     slug: spectacle.slug || undefined,
     status: spectacle.status as "draft" | "published" | "archived" | undefined,
     description: spectacle.description || undefined,
+    paragraph_2: spectacle.paragraph_2 || undefined,
+    paragraph_3: spectacle.paragraph_3 || undefined,
     short_description: spectacle.short_description || undefined,
     genre: spectacle.genre || undefined,
     duration_minutes: spectacle.duration_minutes || undefined,
@@ -52,19 +54,22 @@ export default async function EditSpectaclePage({ params }: Props) {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Link href={`/admin/spectacles/${spectacle.id}`}>
-          <Button variant="outline" size="icon">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </Link>
+    <div className="space-y-6 lg:ml-16">
+      <div className="flex items-center gap-1 md:gap-6 lg:gap-12">
+
         <div>
           <h1 className="text-3xl font-bold">Éditer : {spectacle.title}</h1>
           <p className="text-muted-foreground mt-2">
             Modifiez les informations du spectacle
           </p>
         </div>
+
+        <Link href={`/admin/spectacles/${spectacle.id}`}>
+          <Button variant="outline" size="default">
+            <ArrowLeft className="h-4 w-4" />
+            Retour
+          </Button>
+        </Link>
       </div>
 
       <div className="max-w-2xl">

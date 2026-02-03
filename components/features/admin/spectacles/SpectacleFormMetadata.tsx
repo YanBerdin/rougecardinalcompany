@@ -40,7 +40,7 @@ interface SpectacleFormMetadataProps {
 export function SpectacleFormMetadata({
     form,
     isPublic,
-    currentStatus,
+    currentStatus, //? not used yet, but could be useful for future logic
     existingGenres = [],
 }: SpectacleFormMetadataProps) {
     const [isCreatingNewGenre, setIsCreatingNewGenre] = useState(false);
@@ -149,8 +149,8 @@ export function SpectacleFormMetadata({
                                                 >
                                                     <Check
                                                         className={`mr-2 h-4 w-4 ${field.value === genre
-                                                                ? "opacity-100"
-                                                                : "opacity-0"
+                                                            ? "opacity-100"
+                                                            : "opacity-0"
                                                             }`}
                                                     />
                                                     {genre}

@@ -65,6 +65,8 @@ export const CreateSpectacleSchema = z.object({
     .nullable()
     .optional(),
   image_url: z.string().url("Invalid URL format").optional(),
+  landscape_photo_1_id: z.number().int().positive().optional(),
+  landscape_photo_2_id: z.number().int().positive().optional(),
   public: z.boolean().default(false),
   awards: z.array(z.string()).optional(),
 });

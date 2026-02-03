@@ -5,9 +5,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { fetchSpectacleById } from "@/lib/dal/spectacles";
+import { fetchSpectacleLandscapePhotosAdmin } from "@/lib/dal/spectacle-photos";
 import { translateStatus } from "@/lib/i18n/status";
+import { env } from "@/lib/env";
 import Image from "next/image";
-//TODO: ajouter landscape-photos dans cette vue
+
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -40,6 +42,9 @@ export default async function SpectacleDetailPage({ params }: Props) {
     notFound();
   }
 
+  // Fetch landscape photos
+  const landscapePhotos = await fetchSpectacleLandscapePhotosAdmin(BigInt(spectacleId));
+
   function formatDate(dateString: string | null): string {
     if (!dateString) return "Non définie";
     try {
@@ -62,23 +67,26 @@ export default async function SpectacleDetailPage({ params }: Props) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href="/admin/spectacles">
-            <Button variant="outline" size="icon">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </Link>
-          <div>
+        <div className="flex flex-col items-start gap-4">
             <h1 className="text-3xl font-bold">{spectacle.title}</h1>
             <p className="text-muted-foreground mt-1">{spectacle.slug}</p>
-          </div>
+
         </div>
-        <Link href={`/admin/spectacles/${spectacle.id}/edit`}>
-          <Button>
-            <Pencil className="h-4 w-4 mr-2" />
-            Éditer
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href="/admin/spectacles">
+            <Button variant="outline" size="default" className="gap-2" title="Retour">
+              <ArrowLeft className="h-4 w-4" />
+              <span className="hidden sm:inline">Retour</span>
+            </Button>
+          </Link>
+
+          <Link href={`/admin/spectacles/${spectacle.id}/edit`}>
+            <Button variant="default" size="default" className="gap-2" title="Éditer">
+              <Pencil className="h-4 w-4" />
+              <span className="hidden sm:inline">Éditer</span>
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="grid gap-6">
@@ -108,6 +116,26 @@ export default async function SpectacleDetailPage({ params }: Props) {
             <h2 className="text-lg font-semibold mb-2">Description</h2>
             <p className="text-muted-foreground whitespace-pre-wrap">
               {spectacle.description}
+            </p>
+          </div>
+        )}
+
+        {/* Paragraph 2 */}
+        {spectacle.paragraph_2 && (
+          <div>
+            <h2 className="text-lg font-semibold mb-2">Paragraphe supplémentaire 1</h2>
+            <p className="text-muted-foreground whitespace-pre-wrap">
+              {spectacle.paragraph_2}
+            </p>
+          </div>
+        )}
+
+        {/* Paragraph 3 */}
+        {spectacle.paragraph_3 && (
+          <div>
+            <h2 className="text-lg font-semibold mb-2">Paragraphe supplémentaire 2</h2>
+            <p className="text-muted-foreground whitespace-pre-wrap">
+              {spectacle.paragraph_3}
             </p>
           </div>
         )}
@@ -156,12 +184,45 @@ export default async function SpectacleDetailPage({ params }: Props) {
           <div>
             <h2 className="text-lg font-semibold mb-2">Image</h2>
             <Image
-              width={400}
-              height={300}
+              width={300}
+              height={600}
               src={spectacle.image_url}
               alt={spectacle.title}
-              className="rounded-lg max-w-md"
+              className="rounded-lg w-full max-w-sm mx-auto sm:max-w-md md:max-w-lg lg:max-w-2xl object-cover aspect-[3/4]"
+              style={{ height: "auto" }}
+              sizes="(max-width: 640px) 100vw, 400px"
+              priority
             />
+          </div>
+        )}
+
+        {/* Landscape Photos */}
+        {landscapePhotos.length > 0 && (
+          <div>
+            <h2 className="text-lg font-semibold mb-2">Photos paysage (paragraphe 2/3)</h2>
+            <div className="grid gap-4 md:grid-cols-2">
+              {landscapePhotos.map((photo) => {
+                const imageUrl = `${env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/medias/${photo.storage_path}`;
+                return (
+                  <div key={photo.media_id.toString()} className="space-y-2">
+                    <div className="relative aspect-[16/9] rounded-lg overflow-hidden shadow-lg w-full">
+                      <Image
+                        src={imageUrl}
+                        alt={photo.alt_text ?? `Photo paysage ${photo.ordre + 1}`}
+                        fill
+                        className="object-cover w-full h-auto"
+                        sizes="(max-width: 640px) 100vw, 600px"
+                        style={{ borderRadius: '0.75rem' }}
+                      />
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Photo {photo.ordre + 1}
+                      {photo.alt_text && ` - ${photo.alt_text}`}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 
@@ -196,3 +257,4 @@ export default async function SpectacleDetailPage({ params }: Props) {
     </div>
   );
 }
+

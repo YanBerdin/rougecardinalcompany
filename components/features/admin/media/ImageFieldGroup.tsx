@@ -211,7 +211,7 @@ export function ImageFieldGroup<TForm extends FieldValues>({
                 const errorMessage = result.error ?? "Image invalide";
                 setValidationError(errorMessage);
                 lastValidatedUrlRef.current = null; // Reset on error
-                
+
                 // Notify parent of validation failure
                 onValidationChange?.(false);
             } else {
@@ -259,7 +259,7 @@ export function ImageFieldGroup<TForm extends FieldValues>({
                                 {showMediaLibrary && (
                                     <Button
                                         type="button"
-                                        variant="outline"
+                                        variant="secondary"
                                         onClick={() => setIsMediaPickerOpen(true)}
                                     >
                                         <Library className="h-4 w-4 mr-2" />
@@ -270,7 +270,7 @@ export function ImageFieldGroup<TForm extends FieldValues>({
                                 {showUpload && (
                                     <Button
                                         type="button"
-                                        variant="outline"
+                                        variant="secondary"
                                         onClick={() => setIsUploadOpen(true)}
                                     >
                                         <Upload className="h-4 w-4 mr-2" />
@@ -301,7 +301,7 @@ export function ImageFieldGroup<TForm extends FieldValues>({
                                             {imageUrl && (
                                                 <Button
                                                     type="button"
-                                                    variant="ghost"
+                                                    variant="outline"
                                                     size="sm"
                                                     onClick={handleClearUrl}
                                                     title="Effacer l'URL"
@@ -329,7 +329,7 @@ export function ImageFieldGroup<TForm extends FieldValues>({
                             {/* Image preview - only show validated images */}
                             {imageUrl && (
                                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 border rounded-lg bg-muted/50">
-                                    <div className="relative h-20 w-32 rounded overflow-hidden shrink-0 bg-muted">
+                                    <div className="relative h-50 w-32 rounded overflow-hidden shrink-0 bg-muted">
                                         {isValidating ? (
                                             <div className="h-full w-full flex items-center justify-center">
                                                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
