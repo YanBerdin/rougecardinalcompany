@@ -12,6 +12,7 @@ create table public.home_about_content (
   intro2 text not null,
   image_url text,
   image_media_id bigint null references public.medias(id) on delete set null,
+  alt_text varchar(125), -- texte alternatif image pour accessibilité
   mission_title text not null,
   mission_text text not null,
   position smallint not null default 0, -- pour préparer plusieurs variantes si besoin
