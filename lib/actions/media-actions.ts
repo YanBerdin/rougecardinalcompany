@@ -2,7 +2,8 @@
 
 import "server-only";
 import { revalidatePath } from "next/cache";
-import { env } from "@/lib/env";
+import { cookies } from "next/headers";
+import { env } from "@/lib/env"
 import { createClient } from "@/supabase/server";
 import { requireAdmin } from "@/lib/auth/is-admin";
 import { uploadMedia, deleteMedia, findMediaByHash, getMediaPublicUrl } from "@/lib/dal/media";
@@ -381,6 +382,147 @@ export async function updateMediaMetadataAction(
     return {
       success: false,
       error: error instanceof Error ? error.message : "Erreur mise à jour",
+    };
+  }
+}
+
+// =============================================================================
+// REGENERATE THUMBNAIL ACTION
+// =============================================================================
+
+export interface RegenerateThumbnailResult {
+  success: boolean;
+  data?: {
+    thumbPath: string;
+  };
+  error?: string;
+}
+
+/**
+ * Regenerate thumbnail for existing media
+ * 
+ * USE CASE:
+ * - Media uploaded before Phase 3 (Thumbnails Implementation)
+ * - Media selected from library via MediaLibraryPicker (no auto-generation)
+ * - Failed thumbnail generation during upload (Pattern Warning)
+ * 
+ * PATTERN:
+ * - Non-destructive: Only updates medias.thumbnail_path column
+ * - Idempotent: Can be called multiple times safely
+ * - Revalidates /admin/media after success
+ * 
+ * @param mediaId - Media ID (string for form compatibility)
+ * @returns Success status with thumbnail path or error
+ */
+export async function regenerateThumbnailAction(
+  mediaId: string
+): Promise<RegenerateThumbnailResult> {
+  try {
+    // 1. Authorization check
+    await requireAdmin();
+
+    // 2. Validate mediaId
+    const mediaIdNum = Number(mediaId);
+    if (!mediaIdNum || isNaN(mediaIdNum)) {
+      return {
+        success: false,
+        error: "ID média invalide",
+      };
+    }
+
+    // 3. Fetch media info from database
+    const supabase = await createClient();
+    const { data: media, error } = await supabase
+      .from("medias")
+      .select("id, filename, storage_path, mime")
+      .eq("id", mediaIdNum)
+      .single();
+
+    if (error || !media) {
+      console.error("[regenerateThumbnailAction] Media not found:", {
+        mediaId,
+        mediaIdNum,
+        error: error?.message,
+      });
+      return {
+        success: false,
+        error: "Média non trouvé",
+      };
+    }
+
+    // 4. Validate mime is image
+    if (!media.mime?.startsWith("image/")) {
+      return {
+        success: false,
+        error: `Type de fichier non supporté: ${media.mime} (images uniquement)`,
+      };
+    }
+
+    // 5. Call thumbnail API route (forward cookies for auth)
+    const cookieStore = await cookies();
+    const cookieHeader = cookieStore
+      .getAll()
+      .map((c) => `${c.name}=${c.value}`)
+      .join("; ");
+
+    const response = await fetch(
+      `${env.NEXT_PUBLIC_SITE_URL}/api/admin/media/thumbnail`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Cookie: cookieHeader,
+        },
+        body: JSON.stringify({
+          mediaId: Number(media.id),
+          storagePath: media.storage_path,
+        }),
+      }
+    );
+
+    // 6. Verify HTTP status
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(
+        `[regenerateThumbnailAction] API Error (HTTP ${response.status}):`,
+        errorText
+      );
+      return {
+        success: false,
+        error: `Erreur serveur: HTTP ${response.status}`,
+      };
+    }
+
+    // 7. Parse response
+    const responseData = await response.json();
+
+    if (!responseData.success || !responseData.thumbPath) {
+      return {
+        success: false,
+        error: responseData.error || "Erreur lors de la génération du thumbnail",
+      };
+    }
+
+    console.log(
+      `[regenerateThumbnailAction] Thumbnail generated for media ${media.id}:`,
+      responseData.thumbPath
+    );
+
+    // 8. Revalidate admin media pages
+    revalidatePath("/admin/media");
+    revalidatePath("/admin/media/library");
+
+    return {
+      success: true,
+      data: {
+        thumbPath: responseData.thumbPath,
+      },
+    };
+  } catch (error) {
+    console.error("[regenerateThumbnailAction] Error:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Erreur inconnue",
     };
   }
 }

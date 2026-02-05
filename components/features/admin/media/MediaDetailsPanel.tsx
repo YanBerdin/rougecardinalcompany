@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { X, Save, Trash2, Eye } from "lucide-react";
+import { X, Save, Trash2, Eye, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -30,7 +30,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { updateMediaMetadataAction, deleteMediaImage } from "@/lib/actions/media-actions";
+import { updateMediaMetadataAction, deleteMediaImage, regenerateThumbnailAction } from "@/lib/actions/media-actions";
 import { MediaItemExtendedDTOSchema, type MediaItemExtendedDTO, type MediaFolderDTO, type MediaTagDTO } from "@/lib/schemas/media";
 import { getMediaPublicUrl } from "@/lib/dal/media";
 import { cn } from "@/lib/utils";
@@ -63,6 +63,7 @@ export function MediaDetailsPanel({
     const [isUpdating, setIsUpdating] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [isRegenerating, setIsRegenerating] = useState(false);
     const [selectedTagsToAdd, setSelectedTagsToAdd] = useState<number[]>([]);
     const [selectedTagsToRemove, setSelectedTagsToRemove] = useState<number[]>([]);
     const [publicUrl, setPublicUrl] = useState<string | null>(null);
@@ -110,13 +111,13 @@ export function MediaDetailsPanel({
         try {
             // Calculer les nouveaux tag_ids : (assignés - à retirer) + à ajouter
             const currentTagIds = new Set(assignedTagIds);
-            
+
             // Retirer les tags sélectionnés pour suppression
             selectedTagsToRemove.forEach(id => currentTagIds.delete(id));
-            
+
             // Ajouter les tags sélectionnés pour ajout
             selectedTagsToAdd.forEach(id => currentTagIds.add(id));
-            
+
             const finalTagIds = Array.from(currentTagIds);
 
             const result = await updateMediaMetadataAction(media.id, {
@@ -157,6 +158,26 @@ export function MediaDetailsPanel({
             toast.error(error instanceof Error ? error.message : "Erreur suppression");
         } finally {
             setIsDeleting(false);
+        }
+    };
+
+    const handleRegenerateThumbnail = async () => {
+        if (!media) return;
+        
+        setIsRegenerating(true);
+        try {
+            const result = await regenerateThumbnailAction(String(media.id));
+
+            if (!result.success) {
+                throw new Error(result.error);
+            }
+
+            toast.success("Thumbnail régénéré avec succès");
+            onUpdate();
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Erreur génération thumbnail");
+        } finally {
+            setIsRegenerating(false);
         }
     };
 
@@ -233,7 +254,7 @@ export function MediaDetailsPanel({
                                     <p className="text-sm text-muted-foreground">{fileSize}</p>
                                 </div>
                             </div>
-                            
+
                             {/* Phase 4.3: Public usage indicator */}
                             {media.is_used_public && (
                                 <div className="rounded-md bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 p-3">
@@ -290,7 +311,7 @@ export function MediaDetailsPanel({
                             {/* Tags */}
                             <div className="space-y-3">
                                 <Label>Tags</Label>
-                                
+
                                 {/* Tags déjà attribués */}
                                 {assignedTags.length > 0 && (
                                     <div className="space-y-2">
@@ -353,6 +374,19 @@ export function MediaDetailsPanel({
                         </form>
 
                         <Separator />
+
+                        {/* Regenerate Thumbnail (only for images without thumbnail) */}
+                        {media.mime?.startsWith("image/") && !media.thumbnail_path && (
+                            <Button
+                                variant="outline"
+                                className="w-full"
+                                onClick={handleRegenerateThumbnail}
+                                disabled={isUpdating || isDeleting || isRegenerating}
+                            >
+                                <RefreshCw className={`mr-2 h-4 w-4 ${isRegenerating ? "animate-spin" : ""}`} />
+                                {isRegenerating ? "Génération..." : "Générer thumbnail"}
+                            </Button>
+                        )}
 
                         {/* Delete */}
                         <Button

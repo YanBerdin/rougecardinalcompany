@@ -73,6 +73,21 @@ export async function checkMediaUsagePublic(
             locations.push("spectacles");
         }
 
+        // Check spectacles_medias (photos paysage - public spectacles only)
+        const { data: spectaclePhotos } = await supabase
+            .from("spectacles_medias")
+            .select(`
+                id,
+                spectacles!inner(id, public)
+            `)
+            .eq("media_id", mediaId)
+            .eq("spectacles.public", true)
+            .limit(1);
+
+        if (spectaclePhotos && spectaclePhotos.length > 0) {
+            locations.push("spectacle_photos");
+        }
+
         // Check articles_presse (published only)
         const { data: articles } = await supabase
             .from("articles_presse")
@@ -85,12 +100,12 @@ export async function checkMediaUsagePublic(
             locations.push("press_articles");
         }
 
-        // Check partners (active only)
+        // Check partners (is_active only)
         const { data: partners } = await supabase
             .from("partners")
             .select("id")
             .eq("logo_media_id", mediaId)
-            .eq("active", true)
+            .eq("is_active", true)
             .limit(1);
 
         if (partners && partners.length > 0) {
@@ -142,50 +157,62 @@ export async function bulkCheckMediaUsagePublic(
         });
     });
 
+    // Convert bigint[] to number[] for Supabase compatibility
+    const numericIds = mediaIds.map((id) => Number(id));
+
     try {
         // Batch check all tables
-        const [heroSlides, aboutContent, teamMembers, spectacles, articles, partners, sections] =
+        const [heroSlides, aboutContent, teamMembers, spectacles, spectaclePhotos, articles, partners, sections] =
             await Promise.all([
                 supabase
                     .from("home_hero_slides")
                     .select("image_media_id")
-                    .in("image_media_id", mediaIds)
+                    .in("image_media_id", numericIds)
                     .eq("active", true),
 
                 supabase
                     .from("home_about_content")
                     .select("image_media_id")
-                    .in("image_media_id", mediaIds)
+                    .in("image_media_id", numericIds)
                     .eq("active", true),
 
                 supabase
                     .from("membres_equipe")
                     .select("photo_media_id")
-                    .in("photo_media_id", mediaIds)
+                    .in("photo_media_id", numericIds)
                     .eq("active", true),
 
                 supabase
                     .from("spectacles")
                     .select("og_image_media_id")
-                    .in("og_image_media_id", mediaIds)
+                    .in("og_image_media_id", numericIds)
                     .eq("active", true),
+
+                supabase
+                    .from("spectacles_medias")
+                    .select(`
+                        media_id,
+                        spectacles!inner(id, public)
+                    `)
+                    .in("media_id", numericIds)
+                    .eq("spectacles.public", true),
 
                 supabase
                     .from("articles_presse")
                     .select("og_image_media_id")
-                    .in("og_image_media_id", mediaIds)
+                    .in("og_image_media_id", numericIds)
                     .not("published_at", "is", null),
 
                 supabase
                     .from("partners")
                     .select("logo_media_id")
-                    .in("logo_media_id", mediaIds)
-                    .eq("active", true),
+                    .in("logo_media_id", numericIds)
+                    .eq("is_active", true),
 
                 supabase
                     .from("compagnie_presentation_sections")
                     .select("image_media_id")
-                    .in("image_media_id", mediaIds)
+                    .in("image_media_id", numericIds)
                     .eq("active", true),
             ]);
 
@@ -223,6 +250,15 @@ export async function bulkCheckMediaUsagePublic(
             if (existing) {
                 existing.is_used_public = true;
                 existing.usage_locations.push("spectacles");
+            }
+        });
+
+        spectaclePhotos.data?.forEach((row) => {
+            const key = String(row.media_id);
+            const existing = usageMap.get(key);
+            if (existing) {
+                existing.is_used_public = true;
+                existing.usage_locations.push("spectacle_photos");
             }
         });
 

@@ -768,6 +768,43 @@ mettre à jour l'état de progression de ce plan détaillé en fonction des modi
 
 ---
 
+### 3. Media Usage Tracking manquant (5 fév. 2026)
+
+**Problème**: Les photos de spectacles (uploadées via `SpectaclePhotoManager`) n'affichaient pas l'indicateur "Utilisé sur le site" (Eye badge) ni "Optimized" (thumbnail) dans la bibliothèque média.
+
+**Cause**: Le plan TASK057 n'incluait pas l'intégration avec le système de tracking d'usage (`lib/dal/media-usage.ts`) implémenté dans TASK029 Phase 4.3.
+
+**Solution**:
+- Modification de `lib/dal/media-usage.ts` pour vérifier la table `spectacles_medias`
+- Ajout de la requête avec jointure `spectacles!inner()` pour filtrer les spectacles actifs
+- Location ajoutée: `"spectacle_photos"` dans `checkMediaUsagePublic()` et `bulkCheckMediaUsagePublic()`
+
+**Code ajouté**:
+```typescript
+// Check spectacles_medias (photos paysage - active spectacles only)
+const { data: spectaclePhotos } = await supabase
+    .from("spectacles_medias")
+    .select(`id, spectacles!inner(id, active)`)
+    .eq("media_id", mediaId)
+    .eq("spectacles.active", true)
+    .limit(1);
+
+if (spectaclePhotos && spectaclePhotos.length > 0) {
+    locations.push("spectacle_photos");
+}
+```
+
+**Fichiers modifiés**:
+- `lib/dal/media-usage.ts` (+35 lignes)
+
+**Bonus fix**: Ajout d'un bouton "Générer thumbnail" dans `MediaDetailsPanel.tsx` + Server Action `regenerateThumbnailAction` pour régénérer les thumbnails des médias existants.
+
+**Documentation**: `.github/prompts/plan-TASK029-MediaLibrary/phase4.3-spectacle-photos-tracking-fix.md`
+
+**Leçon**: Lors de l'ajout d'une nouvelle table de jonction avec `medias`, **toujours** mettre à jour `lib/dal/media-usage.ts` pour inclure le tracking d'usage.
+
+---
+
 ## Résumé technique
 
 **Database**: Contraintes doubles (`CHECK` + `UNIQUE`) pour garantie stricte max 2 photos  
@@ -784,4 +821,6 @@ mettre à jour l'état de progression de ce plan détaillé en fonction des modi
 **Security**: `requireAdmin()` dans DAL, CHECK constraints DB, validation Zod stricte, try/catch Server Actions, SECURITY INVOKER vues  
 **BigInt Pattern**: TASK055 appliqué (validation `z.number()`, conversion `BigInt()` après, API Route serialize bigint→string)  
 **DAL SOLID**: Imports restreints (`cache` de "react" autorisé, NO `next/cache`), helpers @internal si > 30 lignes  
-**URL Media**: `getMediaPublicUrl(storage_path)` via `lib/utils/media-url.ts` (pas de colonne `url` dans table `medias`)
+**URL Media**: `getMediaPublicUrl(storage_path)` via `lib/utils/media-url.ts` (pas de colonne `url` dans table `medias`)  
+**Media Usage Tracking**: `lib/dal/media-usage.ts` mis à jour pour inclure `spectacles_medias` (fix 5 fév. 2026)  
+**Thumbnail Regeneration**: `regenerateThumbnailAction` + bouton UI dans `MediaDetailsPanel.tsx` (fix 5 fév. 2026)
