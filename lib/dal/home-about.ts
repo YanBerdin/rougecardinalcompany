@@ -76,17 +76,15 @@ export const fetchCompanyStats = cache(
 // HELPERS
 // =============================================================================
 
+const STORAGE_BUCKET = "medias";
+
 function resolvePublicUrl(
   supabase: Awaited<ReturnType<typeof createClient>>,
   storagePath?: string | null
 ): string | null {
   if (!storagePath) return null;
-  const firstSlash = storagePath.indexOf("/");
-  if (firstSlash <= 0 || firstSlash === storagePath.length - 1) return null;
-  const bucket = storagePath.slice(0, firstSlash);
-  const key = storagePath.slice(firstSlash + 1);
   try {
-    const { data } = supabase.storage.from(bucket).getPublicUrl(key);
+    const { data } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(storagePath);
     return data?.publicUrl ?? null;
   } catch {
     return null;
