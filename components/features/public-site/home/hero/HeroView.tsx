@@ -170,17 +170,6 @@ export function HeroView({
           }}
         />
       </div>
-
-      <style jsx>{`
-        @keyframes progress {
-          from {
-            width: 0%;
-          }
-          to {
-            width: 100%;
-          }
-        }
-      `}</style>
     </section>
   );
 }
