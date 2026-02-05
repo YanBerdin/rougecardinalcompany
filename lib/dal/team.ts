@@ -166,7 +166,7 @@ export async function upsertTeamMember(
     await requireAdmin();
 
     // Validate input
-    const validated = UpsertTeamMemberSchema.safeParse(payload as unknown);
+    const validated = await UpsertTeamMemberSchema.safeParseAsync(payload as unknown);
     if (!validated.success) {
       console.error("upsertTeamMember: invalid payload:", validated.error);
       return { success: false, error: "Invalid payload" };

@@ -12,7 +12,6 @@ import {
     addSpectaclePhoto,
     deleteSpectaclePhoto,
 } from "@/lib/dal/spectacle-photos";
-import { validateImageUrl } from "@/lib/utils/validate-image-url";
 import { AddPhotoInputSchema } from "@/lib/schemas/spectacles";
 import type {
     CreateSpectacleInput,
@@ -50,17 +49,6 @@ export async function createSpectacleAction(
     input: CreateSpectacleInput
 ): Promise<ActionResult<SpectacleDb>> {
     try {
-        // Validate external image URL if provided
-        if (input.image_url) {
-            const urlValidation = await validateImageUrl(input.image_url);
-            if (!urlValidation.valid) {
-                return {
-                    success: false,
-                    error: urlValidation.error || "URL d'image invalide ou non autorisée",
-                };
-            }
-        }
-
         const result = await createSpectacle(input);
 
         if (!result.success) {
@@ -95,17 +83,6 @@ export async function updateSpectacleAction(
     input: UpdateSpectacleInput
 ): Promise<ActionResult<SpectacleDb>> {
     try {
-        // Validate external image URL if provided
-        if (input.image_url) {
-            const urlValidation = await validateImageUrl(input.image_url);
-            if (!urlValidation.valid) {
-                return {
-                    success: false,
-                    error: urlValidation.error || "URL d'image invalide ou non autorisée",
-                };
-            }
-        }
-
         const result = await updateSpectacle(input);
 
         if (!result.success) {

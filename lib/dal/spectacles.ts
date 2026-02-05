@@ -259,7 +259,7 @@ export const fetchDistinctGenres = cache(async (): Promise<string[]> => {
 async function validateCreateInput(
   input: CreateSpectacleInput
 ): Promise<DALResult<CreateSpectacleInput>> {
-  const validated = CreateSpectacleSchema.safeParse(input as unknown);
+  const validated = await CreateSpectacleSchema.safeParseAsync(input as unknown);
   if (!validated.success) {
     console.error("createSpectacle: invalid input:", validated.error);
     return {
@@ -426,7 +426,7 @@ export async function createSpectacle(
 async function validateUpdateInput(
   input: UpdateSpectacleInput
 ): Promise<DALResult<UpdateSpectacleInput>> {
-  const validated = UpdateSpectacleSchema.safeParse(input as unknown);
+  const validated = await UpdateSpectacleSchema.safeParseAsync(input as unknown);
   if (!validated.success) {
     console.error("updateSpectacle: invalid input:", validated.error);
     return {

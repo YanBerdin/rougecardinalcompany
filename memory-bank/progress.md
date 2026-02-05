@@ -1,5 +1,66 @@
 # Progress
 
+## Image URL Validation Refactor - Async Correction (2026-02-05)
+
+### Summary
+
+✅ **ASYNC VALIDATION FIX COMPLETE** - 17 functions corrected across 11 files
+
+| Deliverable | Status | Details |
+| ----------- | ------ | ------- |
+| Error Diagnosis | ✅ | "Encountered Promise" error analyzed |
+| DAL Corrections | ✅ | 6 functions: `.parse()` → `.parseAsync()` |
+| Actions Corrections | ✅ | 11 functions: `.parse()` → `.parseAsync()` |
+| TypeScript Validation | ✅ | 0 errors after all corrections |
+| Documentation | ✅ | Refactor plan updated with troubleshooting |
+
+### Problem
+
+After implementing `addImageUrlValidation()` with async refinements, all forms using image URL validation threw runtime error: **"Encountered Promise during synchronous parse. Use .parseAsync() instead."**
+
+**Root Cause**: Zod schemas with `.superRefine()` async callbacks require async parsing methods, but many functions still used synchronous `.parse()` or `.safeParse()`.
+
+### Solution
+
+Systematic conversion to async parsing for all affected schemas:
+
+**Pattern**:
+```typescript
+// ❌ BEFORE (synchronous)
+const validated = Schema.parse(input);
+const validated = Schema.safeParse(input);
+
+// ✅ AFTER (asynchronous)
+const validated = await Schema.parseAsync(input);
+const validated = await Schema.safeParseAsync(input);
+```
+
+### Files Modified
+
+**17 functions across 11 files**:
+
+- **6 DAL functions**: `spectacles.ts` (2), `team.ts` (1), `admin-home-hero.ts` (2), `admin-home-about.ts` (1)
+- **11 Server Actions**: `presse/actions.ts` (4), `team/actions.ts` (2), `home-about-actions.ts` (1), `home-hero-actions.ts` (2), `partners/actions.ts` (2)
+
+### Testing Process
+
+User manually tested each admin form:
+1. Spectacles edit → Fixed spectacles DAL
+2. Press releases edit → Fixed presse actions
+3. Team new page → Fixed team actions
+4. Proactive fixes → home hero/about, partners
+
+All TypeScript compilations: ✅ `pnpm tsc --noEmit` → 0 errors
+
+### Documentation
+
+Updated `.github/prompts/image-validation-refactor.md`:
+- Added troubleshooting section
+- Listed all 17 corrected functions
+- Added migration guide for async validation
+
+---
+
 ## TASK029 Phase 3: Thumbnail Remote Testing (2026-01-30)
 
 ### Summary

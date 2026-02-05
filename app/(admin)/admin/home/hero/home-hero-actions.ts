@@ -10,26 +10,14 @@ import {
   deleteHeroSlide,
   reorderHeroSlides,
 } from "@/lib/dal/admin-home-hero";
-import { validateImageUrl } from "@/lib/utils/validate-image-url";
 
 export type ActionResult<T = unknown> = { success: true; data?: T } | { success: false; error: string };
 
 export async function createHeroSlideAction(input: unknown): Promise<ActionResult> {
   try {
-    const validated = HeroSlideInputSchema.parse(input);
-    
-    // Validate external image URL if provided
-    if (validated.image_url) {
-      const urlValidation = await validateImageUrl(validated.image_url);
-      if (!urlValidation.valid) {
-        return {
-          success: false,
-          error: urlValidation.error || "URL d'image invalide ou non autorisée",
-        };
-      }
-    }
-    
-    const result = await createHeroSlide(validated as HeroSlideInput);
+    const validated: HeroSlideInput = await HeroSlideInputSchema.parseAsync(input);
+
+    const result = await createHeroSlide(validated);
 
     if (!result.success) return { success: false, error: result.error ?? "create failed" };
 
@@ -47,20 +35,9 @@ export async function createHeroSlideAction(input: unknown): Promise<ActionResul
 export async function updateHeroSlideAction(id: string | number, input: unknown): Promise<ActionResult> {
   try {
     const slideId = typeof id === "string" ? Number(id) : Number(id);
-    const validated = HeroSlideInputSchema.partial().parse(input);
-    
-    // Validate external image URL if provided
-    if (validated.image_url) {
-      const urlValidation = await validateImageUrl(validated.image_url);
-      if (!urlValidation.valid) {
-        return {
-          success: false,
-          error: urlValidation.error || "URL d'image invalide ou non autorisée",
-        };
-      }
-    }
-    
-    const result = await updateHeroSlide(slideId, validated as Partial<HeroSlideInput>);
+    const validated: Partial<HeroSlideInput> = await HeroSlideInputSchema.partial().parseAsync(input);
+
+    const result = await updateHeroSlide(slideId, validated);
 
     if (!result.success) return { success: false, error: result.error ?? "update failed" };
 
@@ -91,8 +68,8 @@ export async function deleteHeroSlideAction(id: string | number): Promise<Action
 
 export async function reorderHeroSlidesAction(order: unknown): Promise<ActionResult<null>> {
   try {
-    const validated = ReorderInputSchema.parse(order);
-    const result = await reorderHeroSlides(validated as ReorderInput);
+    const validated: ReorderInput = ReorderInputSchema.parse(order);
+    const result = await reorderHeroSlides(validated);
 
     if (!result.success) return { success: false, error: result.error ?? "reorder failed" };
 

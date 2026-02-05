@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { addImageUrlValidation } from "@/lib/utils/image-validation-refinements";
 
 /**
  * Server Schema - Uses bigint for database IDs
@@ -6,6 +7,7 @@ import { z } from "zod";
 export const PartnerInputSchema = z.object({
     name: z.string().min(1, "Le nom est requis").max(100),
     website_url: z.string().url("URL invalide").optional().nullable(),
+    logo_url: addImageUrlValidation(z.string().url()).optional().nullable().or(z.literal("")),
     logo_media_id: z.coerce.bigint().optional().nullable(),
     display_order: z.number().int().min(0).default(0),
     active: z.boolean().default(true),

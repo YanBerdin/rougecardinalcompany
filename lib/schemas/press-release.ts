@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { addImageUrlValidation } from "@/lib/utils/image-validation-refinements";
 
 /**
  * Server Schema - Uses bigint for database IDs
@@ -8,7 +9,7 @@ export const PressReleaseInputSchema = z.object({
     slug: z.string().max(255).optional().nullable().transform(val => val === "" ? null : val),
     description: z.string().optional().nullable().transform(val => val === "" ? null : val),
     date_publication: z.coerce.date(),
-    image_url: z.string().url("URL invalide").optional().nullable().or(z.literal("")).transform(val => val === "" ? null : val),
+    image_url: addImageUrlValidation(z.string().url("URL invalide")).optional().nullable().or(z.literal("")).transform((val: string | null | undefined) => val === "" ? null : val),
     image_media_id: z.coerce.bigint().optional().nullable(),
     spectacle_id: z.coerce.bigint().optional().nullable(),
     evenement_id: z.coerce.bigint().optional().nullable(),

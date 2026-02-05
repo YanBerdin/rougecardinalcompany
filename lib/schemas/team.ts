@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { addImageUrlValidation } from "@/lib/utils/image-validation-refinements";
 
 // Admin Zod schemas for Team Management (TASK022)
 // Use database types via lib/database.types.ts when necessary for runtime checks
@@ -25,9 +26,7 @@ export const CreateTeamMemberInputSchema = z.object({
   name: z.string().min(1).max(200),
   role: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
-  image_url: z
-    .string()
-    .url()
+  image_url: addImageUrlValidation(z.string().url())
     .nullable()
     .optional()
     .or(z.literal("")),
@@ -40,9 +39,7 @@ export const UpdateTeamMemberInputSchema = z.object({
   name: z.string().min(1).max(200).optional(),
   role: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
-  image_url: z
-    .string()
-    .url()
+  image_url: addImageUrlValidation(z.string().url())
     .nullable()
     .optional()
     .or(z.literal("")),

@@ -64,7 +64,7 @@ export async function updateAboutContent(
   try {
     await requireAdmin();
 
-    const validated = AboutContentInputSchema.parse(input);
+    const validated = await AboutContentInputSchema.parseAsync(input);
 
     const supabase = await createClient();
     const { data, error } = await supabase

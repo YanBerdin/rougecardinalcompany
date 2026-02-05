@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { addImageUrlValidation } from "@/lib/utils/image-validation-refinements";
 
 /**
  * Database schema for spectacles table
@@ -64,7 +65,7 @@ export const CreateSpectacleSchema = z.object({
     .datetime({ message: "Invalid datetime format" })
     .nullable()
     .optional(),
-  image_url: z.string().url("Invalid URL format").optional(),
+  image_url: addImageUrlValidation(z.string().url("Invalid URL format")).optional(),
   landscape_photo_1_id: z.number().int().positive().optional(),
   landscape_photo_2_id: z.number().int().positive().optional(),
   public: z.boolean().default(false),

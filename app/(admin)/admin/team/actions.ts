@@ -18,7 +18,6 @@ import {
   setTeamMemberActive,
   hardDeleteTeamMember,
 } from "@/lib/dal/team";
-import { validateImageUrl } from "@/lib/utils/validate-image-url";
 
 // Use centralized ActionResult<T> from @/lib/actions/types
 import type { ActionResult } from "@/lib/actions/types";
@@ -31,19 +30,7 @@ export async function createTeamMember(
 ): Promise<ActionResponse<TeamMemberDb>> {
   try {
     const validated: CreateTeamMemberInput =
-      CreateTeamMemberInputSchema.parse(input);
-
-    // Validate external image URL if provided
-    if (validated.image_url) {
-      const urlValidation = await validateImageUrl(validated.image_url);
-      if (!urlValidation.valid) {
-        return {
-          success: false,
-          error: urlValidation.error || "URL d'image invalide ou non autorisée",
-          status: 400,
-        };
-      }
-    }
+      await CreateTeamMemberInputSchema.parseAsync(input);
 
     const result = await upsertTeamMember(validated);
 
@@ -73,19 +60,7 @@ export async function updateTeamMember(
     }
 
     const validated: UpdateTeamMemberInput =
-      UpdateTeamMemberInputSchema.parse(updateInput);
-
-    // Validate external image URL if provided
-    if (validated.image_url) {
-      const urlValidation = await validateImageUrl(validated.image_url);
-      if (!urlValidation.valid) {
-        return {
-          success: false,
-          error: urlValidation.error || "URL d'image invalide ou non autorisée",
-          status: 400,
-        };
-      }
-    }
+      await UpdateTeamMemberInputSchema.parseAsync(updateInput);
 
     const existing = await fetchTeamMemberById(teamMemberId);
 

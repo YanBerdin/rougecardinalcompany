@@ -25,7 +25,7 @@ export async function createPartnerAction(
     input: unknown
 ): Promise<ActionResult> {
     try {
-        const validated: PartnerInput = PartnerInputSchema.parse(input);
+        const validated: PartnerInput = await PartnerInputSchema.parseAsync(input);
         const result = await createPartner(validated);
 
         if (!result.success) {
@@ -52,7 +52,7 @@ export async function updatePartnerAction(
     input: unknown
 ): Promise<ActionResult> {
     try {
-        const validated = PartnerInputSchema.partial().parse(input);
+        const validated = await PartnerInputSchema.partial().parseAsync(input);
         const result = await updatePartner(BigInt(id), validated);
 
         if (!result.success) {

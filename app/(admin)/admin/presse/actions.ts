@@ -49,7 +49,7 @@ export async function createPressReleaseAction(
     input: unknown
 ): Promise<ActionResult> {
     try {
-        const validated: PressReleaseInput = PressReleaseInputSchema.parse(input);
+        const validated: PressReleaseInput = await PressReleaseInputSchema.parseAsync(input);
         const result = await createPressRelease(validated);
 
         if (!result.success) {
@@ -76,7 +76,7 @@ export async function updatePressReleaseAction(
     input: unknown
 ): Promise<ActionResult> {
     try {
-        const validated = PressReleaseInputSchema.partial().parse(input);
+        const validated = await PressReleaseInputSchema.partial().parseAsync(input);
         const result = await updatePressRelease(BigInt(id), validated);
 
         if (!result.success) {
@@ -189,7 +189,7 @@ export async function createArticleAction(
     input: unknown
 ): Promise<ActionResult> {
     try {
-        const validated: ArticleInput = ArticleInputSchema.parse(input);
+        const validated: ArticleInput = await ArticleInputSchema.parseAsync(input);
         const result = await createArticle(validated);
 
         if (!result.success) {
@@ -216,7 +216,7 @@ export async function updateArticleAction(
     input: unknown
 ): Promise<ActionResult> {
     try {
-        const validated = ArticleInputSchema.partial().parse(input);
+        const validated = await ArticleInputSchema.partial().parseAsync(input);
         const result = await updateArticle(BigInt(id), validated);
 
         if (!result.success) {

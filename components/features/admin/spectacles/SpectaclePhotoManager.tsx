@@ -148,7 +148,7 @@ export function SpectaclePhotoManager({
                 throw new Error(result.error);
             }
 
-            toast.success("Photo supprimée");
+            toast.success("Photo supprimée"); //TODO AlertDialog confirmation + success toast
             await fetchPhotos();  // ✅ Refresh data via API
         } catch (error) {
             toast.error(

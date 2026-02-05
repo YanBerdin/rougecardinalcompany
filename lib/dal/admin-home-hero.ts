@@ -163,7 +163,7 @@ export async function createHeroSlide(
     try {
         await requireAdmin();
 
-        const validated = HeroSlideInputSchema.parse(input);
+        const validated = await HeroSlideInputSchema.parseAsync(input);
 
         const supabase = await createClient();
 
@@ -212,7 +212,7 @@ export async function updateHeroSlide(
     try {
         await requireAdmin();
 
-        const validated = HeroSlideInputSchema.partial().parse(input);
+        const validated = await HeroSlideInputSchema.partial().parseAsync(input);
 
         const supabase = await createClient();
 

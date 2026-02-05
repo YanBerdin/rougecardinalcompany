@@ -1,8 +1,85 @@
 # Active Context
 
-**Current Focus (2026-01-30)**: ✅ TASK029 Thumbnail Generation Bug Fix & Backfill - 7/11 thumbnails regenerated in production
+**Current Focus (2026-02-05)**: ✅ Image URL Validation Refactor Complete - Async refinements + 17 functions corrected
 
-**Last Major Updates**: Thumbnail Fix (2026-01-30) + TASK055 Phase 2 (2026-01-26) + Security Session (2026-01-22) + Validation Zod + Trigger Fix (2026-01-21) + LCP Optimization (2026-01-21)
+**Last Major Updates**: Validation Async Fix (2026-02-05) + Thumbnail Fix (2026-01-30) + TASK055 Phase 2 (2026-01-26) + Security Session (2026-01-22)
+
+---
+
+## ✅ Image URL Validation Refactor - Async Correction (2026-02-05)
+
+### Summary
+
+✅ **ASYNC VALIDATION COMPLETELY IMPLEMENTED** - All `.parse()` calls converted to `.parseAsync()` for schemas with async refinements
+
+| Component | Status | Details |
+| --------- | ------ | ------- |
+| DAL Functions | ✅ | 6 functions corrected (spectacles, team, home hero, home about) |
+| Server Actions | ✅ | 11 functions corrected (presse, team, home, partners) |
+| TypeScript | ✅ | 0 errors after all corrections |
+| Documentation | ✅ | Refactor plan updated with troubleshooting section |
+
+### Problem Statement
+
+**Initial Error**: "Encountered Promise during synchronous parse. Use .parseAsync() instead."
+
+**Root Cause**: The `addImageUrlValidation()` refinement uses async operations (`.superRefine()` with `await validateImageUrl()`), but many DAL functions and Server Actions still used synchronous `.parse()` or `.safeParse()`.
+
+### Solution Implemented
+
+Systematic conversion of all Zod parsing to async methods when using schemas with `addImageUrlValidation()`:
+
+#### 6 DAL Functions Corrected
+
+| File | Function | Change |
+|------|----------|--------|
+| `lib/dal/spectacles.ts` | `validateCreateInput` | `.safeParse()` → `.safeParseAsync()` |
+| `lib/dal/spectacles.ts` | `validateUpdateInput` | `.safeParse()` → `.safeParseAsync()` |
+| `lib/dal/team.ts` | `upsertTeamMember` | `.safeParse()` → `.safeParseAsync()` |
+| `lib/dal/admin-home-hero.ts` | `createHeroSlide` | `.parse()` → `.parseAsync()` |
+| `lib/dal/admin-home-hero.ts` | `updateHeroSlide` | `.parse()` → `.parseAsync()` |
+| `lib/dal/admin-home-about.ts` | `updateAboutContent` | `.parse()` → `.parseAsync()` |
+
+#### 11 Server Actions Corrected
+
+| File | Function | Change |
+|------|----------|--------|
+| `app/(admin)/admin/presse/actions.ts` | `createPressReleaseAction` | `.parse()` → `.parseAsync()` |
+| `app/(admin)/admin/presse/actions.ts` | `updatePressReleaseAction` | `.partial().parse()` → `.partial().parseAsync()` |
+| `app/(admin)/admin/presse/actions.ts` | `createArticleAction` | `.parse()` → `.parseAsync()` |
+| `app/(admin)/admin/presse/actions.ts` | `updateArticleAction` | `.partial().parse()` → `.partial().parseAsync()` |
+| `app/(admin)/admin/team/actions.ts` | `createTeamMember` | `.parse()` → `.parseAsync()` |
+| `app/(admin)/admin/team/actions.ts` | `updateTeamMember` | `.parse()` → `.parseAsync()` |
+| `app/(admin)/admin/home/about/home-about-actions.ts` | `updateAboutContentAction` | `.parse()` → `.parseAsync()` |
+| `app/(admin)/admin/home/hero/home-hero-actions.ts` | `createHeroSlideAction` | `.parse()` → `.parseAsync()` |
+| `app/(admin)/admin/home/hero/home-hero-actions.ts` | `updateHeroSlideAction` | `.partial().parse()` → `.partial().parseAsync()` |
+| `app/(admin)/admin/partners/actions.ts` | `createPartnerAction` | `.parse()` → `.parseAsync()` |
+| `app/(admin)/admin/partners/actions.ts` | `updatePartnerAction` | `.partial().parse()` → `.partial().parseAsync()` |
+
+### Testing Process
+
+User tested each admin form sequentially and reported errors:
+
+1. **Spectacles edit page** (`/admin/spectacles/3/edit`) → Fixed DAL functions
+2. **Press releases edit** (`/admin/presse/communiques/9/edit`) → Fixed presse actions
+3. **Team new page** (`/admin/team/new`) → Fixed team actions
+4. **Proactive fixes** → Fixed home hero/about and partners actions
+
+All TypeScript compilations passed: `pnpm tsc --noEmit` → ✅ 0 errors
+
+### Documentation Updates
+
+**Updated file**: `.github/prompts/image-validation-refactor.md`
+
+- Added troubleshooting section with error explanation
+- Added complete list of 17 corrected functions (6 DAL + 11 actions)
+- Added table showing all corrections with file names and function names
+
+### Next Steps
+
+- [ ] Manual testing of all admin forms to confirm no remaining errors
+- [ ] Verify partners page (not yet manually tested)
+- [ ] Consider adding automated tests for async validation
 
 ---
 

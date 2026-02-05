@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { addImageUrlValidation } from "@/lib/utils/image-validation-refinements";
 
 // =============================================================================
 // SERVER SCHEMAS (with bigint for database operations)
@@ -55,7 +56,7 @@ export const HeroSlideInputSchema = z.object({
             return t === "" ? undefined : t;
         }
         return val;
-    }, z.string().url("Invalid URL format").optional()),
+    }, addImageUrlValidation(z.string().url("Invalid URL format")).optional()),
     image_media_id: z.coerce.number().int().positive().optional(),
     alt_text: z.string().min(1, "Alt text required for accessibility").max(125, "Alt text max 125 characters"),
 
@@ -115,7 +116,7 @@ export const AboutContentInputSchema = z.object({
     intro2: z.string().min(1, "Second intro paragraph required").max(1000, "Intro 2 max 1000 characters"),
     mission_title: z.string().min(1, "Mission title required").max(80, "Mission title max 80 characters"),
     mission_text: z.string().min(1, "Mission text required").max(4000, "Mission text max 4000 characters"),
-    image_url: z.string().url("Invalid URL format").optional(),
+    image_url: addImageUrlValidation(z.string().url("Invalid URL format")).optional(),
     image_media_id: z.coerce.number().int().positive().optional(),
     alt_text: z.string().max(125, "Alt text max 125 characters").optional(),
 });
