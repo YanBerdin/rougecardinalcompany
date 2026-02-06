@@ -23,6 +23,7 @@ import type { SpectacleDb, SpectaclePhotoDTO } from "@/lib/schemas/spectacles";
 interface SpectacleDetailViewProps {
     spectacle: SpectacleDb;
     landscapePhotos?: SpectaclePhotoDTO[];
+    venue?: { nom: string; ville: string | null } | null;
 }
 
 /**
@@ -56,6 +57,7 @@ function LandscapePhotoCard({ photo }: { photo: SpectaclePhotoDTO }) {
 export function SpectacleDetailView({
     spectacle,
     landscapePhotos = [],
+    venue = null,
 }: SpectacleDetailViewProps) {
     const formatDate = (dateString: string | null) => {
         if (!dateString) return "Non définie";
@@ -98,7 +100,7 @@ export function SpectacleDetailView({
                 {/* Informations Pratiques - Horizontal Bar */}
                 <section className="flex justify-between max-w-7xl mx-auto" aria-label="Informations pratiques">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="grid max-sm:grid-cols-2 grid-cols-3 md:grid-cols-5 gap-8">
+                        <div className="grid max-sm:grid-cols-2 grid-cols-3 md:grid-cols-6 gap-8">
                             {/* Genre */}
                             <div className="flex items-center gap-3">
                                 <Star className="h-5 w-5 text-primary-foreground/80 flex-shrink-0" aria-hidden="true" />
@@ -149,7 +151,14 @@ export function SpectacleDetailView({
                                 <div className="flex-1">
                                     <p className="ml-1 text-xs text-primary-foreground uppercase tracking-wide font-medium">Lieu</p>
                                     <Badge variant="outline" className="mt-1 text-xs sm:text-sm backdrop-blur-md bg-white/20 dark:bg-black/30 border-white/30 dark:border-white/20 text-sidebar-primary-foreground font-semibold shadow-lg">
-                                        À venir
+                                        {venue ? (
+                                            <>
+                                                {venue.nom}
+                                                {venue.ville && ` - ${venue.ville}`}
+                                            </>
+                                        ) : (
+                                            "À venir"
+                                        )}
                                     </Badge>
                                 </div>
                             </div>

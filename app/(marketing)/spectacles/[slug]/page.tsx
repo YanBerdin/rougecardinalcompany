@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { fetchSpectacleBySlug } from "@/lib/dal/spectacles";
+import { fetchSpectacleBySlug, fetchSpectacleNextVenue } from "@/lib/dal/spectacles";
 import { fetchSpectacleLandscapePhotos } from "@/lib/dal/spectacle-photos";
 import { SpectacleDetailView } from "@/components/features/public-site/spectacles/SpectacleDetailView";
 
@@ -52,15 +52,17 @@ export default async function SpectacleDetailPage({
         notFound();
     }
 
-    // Fetch landscape photos (sequential since we need spectacle.id)
-    const landscapePhotos = await fetchSpectacleLandscapePhotos(
-        BigInt(spectacle.id)
-    );
+    // Fetch landscape photos and venue in parallel
+    const [landscapePhotos, venue] = await Promise.all([
+        fetchSpectacleLandscapePhotos(BigInt(spectacle.id)),
+        fetchSpectacleNextVenue(spectacle.id),
+    ]);
 
     return (
         <SpectacleDetailView
             spectacle={spectacle}
             landscapePhotos={landscapePhotos}
+            venue={venue}
         />
     );
 }

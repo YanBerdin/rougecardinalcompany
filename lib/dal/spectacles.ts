@@ -27,6 +27,59 @@ import {
 // ============================================================================
 
 /**
+ * Fetches the venue (lieu) for the next upcoming event of a spectacle
+ *
+ * Returns the venue name and city from the next scheduled event.
+ * If no future events exist, returns null.
+ *
+ * @param spectacleId - Spectacle ID
+ * @returns Venue name and city or null if no upcoming events
+ *
+ * @example
+ * const venue = await fetchSpectacleNextVenue(123);
+ * if (venue) {
+ *   console.log(`Next show at: ${venue.nom}, ${venue.ville}`);
+ * }
+ */
+export const fetchSpectacleNextVenue = cache(
+  async (spectacleId: number): Promise<{ nom: string; ville: string | null } | null> => {
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from("evenements")
+        .select("lieux(nom, ville)")
+        .eq("spectacle_id", spectacleId)
+        .not("lieux", "is", null)
+        .gte("date_debut", new Date().toISOString())
+        .order("date_debut", { ascending: true })
+        .limit(1)
+        .single();
+
+      if (error) {
+        // PGRST116 = Not found (no upcoming events) - this is expected
+        if (error.code !== "PGRST116") {
+          console.error("fetchSpectacleNextVenue error:", error);
+        }
+        return null;
+      }
+
+      const lieu = Array.isArray(data.lieux) ? data.lieux[0] : data.lieux;
+      if (!lieu || !lieu.nom) {
+        return null;
+      }
+
+      return {
+        nom: lieu.nom,
+        ville: lieu.ville ?? null,
+      };
+    } catch (err) {
+      console.error("fetchSpectacleNextVenue exception:", err);
+      return null;
+    }
+  }
+);
+
+/**
  * Fetches all spectacles from the database
  *
  * Wrapped with React cache() for intra-request deduplication.
