@@ -1,1 +1,1 @@
-../../.agents/skills/web-design-guidelines
+../../.github/skills/web-design-guidelines
