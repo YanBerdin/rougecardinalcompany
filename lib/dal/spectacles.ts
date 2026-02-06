@@ -155,18 +155,18 @@ export const fetchSpectacleBySlug = cache(
   async (slugOrId: string): Promise<SpectacleDb | null> => {
     try {
       const supabase = await createClient();
-      
+
       // Check if slugOrId is a number (ID fallback)
       const isNumeric = /^\d+$/.test(slugOrId);
-      
+
       console.log("[fetchSpectacleBySlug] Input:", slugOrId, "| isNumeric:", isNumeric);
-      
+
       let query = supabase
         .from("spectacles")
         .select(
           "id, title, slug, status, description, paragraph_2, paragraph_3, short_description, genre, duration_minutes, casting, premiere, image_url, public, awards, created_by, created_at, updated_at"
         );
-      
+
       if (isNumeric) {
         // Search by ID as fallback
         const id = parseInt(slugOrId, 10);
@@ -177,7 +177,7 @@ export const fetchSpectacleBySlug = cache(
         console.log("[fetchSpectacleBySlug] Querying by slug:", slugOrId);
         query = query.eq("slug", slugOrId);
       }
-      
+
       const { data, error } = await query.single();
 
       if (error) {

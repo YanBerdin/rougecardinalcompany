@@ -118,7 +118,7 @@ export function HeroSlideForm({ open, onClose, onSuccess, slide }: HeroSlideForm
                                 disabled={isPending}
                                 className="w-full sm:w-auto h-10 sm:h-9"
                             >
-                                Cancel
+                                Annuler
                             </Button>
                             <Button 
                                 type="submit" 

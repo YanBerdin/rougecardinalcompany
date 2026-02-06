@@ -13,7 +13,7 @@ export default function EditTeamMemberLoading() {
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-4">
-                <Button variant="ghost" size="icon" disabled>
+                <Button variant="outline" size="icon" disabled>
                     <ArrowLeft className="h-4 w-4" />
                     <span className="sr-only">Retour à la liste</span>
                 </Button>

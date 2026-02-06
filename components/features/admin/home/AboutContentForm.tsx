@@ -192,7 +192,7 @@ export function AboutContentForm({ content }: AboutContentFormProps) {
                                         onClick={() => router.back()}
                                         disabled={isPending}
                                     >
-                                        Cancel
+                                        Annuler
                                     </Button>
                                     <Button type="submit" disabled={isPending}>
                                         {isPending ? "Saving..." : "Save Changes"}

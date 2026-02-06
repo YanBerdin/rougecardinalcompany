@@ -124,7 +124,7 @@ export function MediaLibraryView({
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold">Bibliothèque</h1>
+                    <h1 className="text-3xl font-bold">Médiathèque</h1>
                     <p className="text-muted-foreground mt-1">
                         {filteredMedia.length} média{filteredMedia.length > 1 ? "s" : ""}
                         {filteredMedia.length !== media.length && ` (sur ${media.length})`}
@@ -133,7 +133,7 @@ export function MediaLibraryView({
                 <div className="flex items-center gap-3">
                     <Button
                         size="lg"
-                        variant={selectionMode ? "default" : "outline"}
+                        variant={selectionMode ? "default" : "secondary"}
                         onClick={() => {
                             setSelectionMode(!selectionMode);
                             setSelectedIds([]);
@@ -163,6 +163,7 @@ export function MediaLibraryView({
 
                     <Button
                         size="lg"
+                        variant="default"
                         onClick={handleUpload}
                         className="h-11 px-5 text-base font-medium"
                         aria-label="Téléverser de nouveaux médias"
