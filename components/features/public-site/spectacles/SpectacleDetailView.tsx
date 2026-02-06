@@ -47,7 +47,7 @@ function LandscapePhotoCard({ photo }: { photo: SpectaclePhotoDTO }) {
                 fill
                 loading="lazy"
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
-                sizes="(max-width: 768px) 90vw, 40vw"
+                sizes="(max-width: 600px) 70vw, 40vw"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
@@ -92,93 +92,85 @@ export function SpectacleDetailView({
                 Aller au contenu principal
             </a>
 
-            {/* Hero Section */}
-            <section
-                className="py-8 hero-gradient text-sidebar-primary-foreground"
-                aria-labelledby="spectacle-genre"
-            >
-                {/* Informations Pratiques - Horizontal Bar */}
-                <section className="flex justify-between max-w-7xl mx-auto" aria-label="Informations pratiques">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="grid max-sm:grid-cols-2 grid-cols-3 md:grid-cols-6 gap-8">
-                            {/* Genre */}
-                            <div className="flex items-center gap-3">
-                                <Star className="h-5 w-5 text-primary-foreground/80 flex-shrink-0" aria-hidden="true" />
-                                <div className="flex-1">
-                                    <p className="ml-1 text-xs text-primary-foreground uppercase tracking-wide font-medium">Genre</p>
-                                    <Badge id="spectacle-genre" variant="outline" className="mt-1 text-xs sm:text-sm backdrop-blur-md bg-white/20 dark:bg-black/30 border-white/30 dark:border-white/20 text-sidebar-primary-foreground font-semibold shadow-lg">
-                                        {spectacle.genre}
-                                    </Badge>
-                                </div>
+            {/* Informations Pratiques - Horizontal Bar */}
+            <section className="py-8 lg:py-12 bg-card flex justify-between" aria-label="Informations pratiques">
+                <div className="max-w-7xl mx-auto max-sm:px-6 px-4">
+                    <div className="grid max-sm:grid-cols-2 grid-cols-3 md:grid-cols-4 lg:grid-cols-5 max-lg:gap-6">
+                        {/* Genre */}
+                        <div className="flex items-center gap-3">
+                            <Star className="h-4 w-4 flex-shrink-0 text-primary" aria-hidden="true" />
+                            <div className="flex-1">
+                                <p className="ml-1 text-xs uppercase tracking-wide font-medium">Genre</p>
+                                <Badge id="spectacle-genre" variant="outline" className="mt-1 text-xs sm:text-sm shadow-lg">
+                                    {spectacle.genre}
+                                </Badge>
                             </div>
+                        </div>
 
-                            {/* Comédiens */}
-                            <div className="flex items-center gap-3">
-                                <Users className="h-5 w-5 text-sidebar-primary-foreground/80 flex-shrink-0" aria-hidden="true" />
-                                <div className="flex-1">
-                                    <p className="ml-1 text-xs text-primary-foreground uppercase tracking-wide font-medium">Comédiens</p>
-                                    <Badge variant="outline" className="mt-1 text-xs sm:text-sm backdrop-blur-md bg-white/20 dark:bg-black/30 border-white/30 dark:border-white/20 text-sidebar-primary-foreground font-semibold shadow-lg">
-                                        {spectacle.casting ? `${spectacle.casting} comédien${spectacle.casting > 1 ? 's' : ''}` : "Non précisé"}
-                                    </Badge>
-                                </div>
+                        {/* Comédiens */}
+                        <div className="flex items-center gap-3">
+                            <Users className="h-4 w-4 flex-shrink-0 text-primary" aria-hidden="true" />
+                            <div className="flex-1">
+                                <p className="ml-1 text-xs uppercase tracking-wide font-medium">Comédiens</p>
+                                <Badge variant="outline" className="mt-1 text-xs sm:text-sm font-semibold shadow-lg">
+                                    {spectacle.casting ? `${spectacle.casting} comédien${spectacle.casting > 1 ? 's' : ''}` : "Non précisé"}
+                                </Badge>
                             </div>
+                        </div>
 
-                            {/* Durée */}
-                            <div className="flex items-center gap-3">
-                                <Clock className="h-5 w-5 text-sidebar-primary-foreground/80 flex-shrink-0" aria-hidden="true" />
-                                <div className="flex-1">
-                                    <p className="ml-1 text-xs text-primary-foreground uppercase tracking-wide font-medium">Durée</p>
-                                    <Badge variant="outline" className="mt-1 text-xs sm:text-sm backdrop-blur-md bg-white/20 dark:bg-black/30 border-white/30 dark:border-white/20 text-sidebar-primary-foreground font-semibold shadow-lg">
-                                        {formatDuration(spectacle.duration_minutes)}
-                                    </Badge>
-                                </div>
+                        {/* Durée */}
+                        <div className="flex items-center gap-3">
+                            <Clock className="h-4 w-4 flex-shrink-0 text-primary" aria-hidden="true" />
+                            <div className="flex-1">
+                                <p className="ml-1 text-xs uppercase tracking-wide font-medium">Durée</p>
+                                <Badge variant="outline" className="mt-1 text-xs sm:text-sm font-semibold shadow-lg">
+                                    {formatDuration(spectacle.duration_minutes)}
+                                </Badge>
                             </div>
+                        </div>
 
-                            {/* Première */}
-                            <div className="flex items-center gap-3">
-                                <Calendar className="h-5 w-5 text-sidebar-primary-foreground/80 flex-shrink-0" aria-hidden="true" />
-                                <div className="flex-1">
-                                    <p className="ml-1 text-xs text-primary-foreground uppercase tracking-wide font-medium">Première</p>
-                                    <Badge variant="outline" className="mt-1 text-xs sm:text-sm backdrop-blur-md bg-white/20 dark:bg-black/30 border-white/30 dark:border-white/20 text-sidebar-primary-foreground font-semibold shadow-lg">
-                                        {formatDate(spectacle.premiere)}
-                                    </Badge>
-                                </div>
+                        {/* Première */}
+                        <div className="flex items-center gap-3">
+                            <Calendar className="h-4 w-4 flex-shrink-0 text-primary" aria-hidden="true" />
+                            <div className="flex-1">
+                                <p className="ml-1 text-xs uppercase tracking-wide font-medium">Première</p>
+                                <Badge variant="outline" className="mt-1 text-xs sm:text-sm font-semibold shadow-lg">
+                                    {formatDate(spectacle.premiere)}
+                                </Badge>
                             </div>
+                        </div>
 
-                            {/* Lieu */}
-                            <div className="flex items-center gap-3">
-                                <MapPin className="h-5 w-5 text-sidebar-primary-foreground/80 flex-shrink-0" aria-hidden="true" />
-                                <div className="flex-1">
-                                    <p className="ml-1 text-xs text-primary-foreground uppercase tracking-wide font-medium">Lieu</p>
-                                    <Badge variant="outline" className="mt-1 text-xs sm:text-sm backdrop-blur-md bg-white/20 dark:bg-black/30 border-white/30 dark:border-white/20 text-sidebar-primary-foreground font-semibold shadow-lg">
-                                        {venue ? (
-                                            <>
-                                                {venue.nom}
-                                                {venue.ville && ` - ${venue.ville}`}
-                                            </>
-                                        ) : (
-                                            "À venir"
-                                        )}
-                                    </Badge>
-                                </div>
+                        {/* Lieu */}
+                        <div className="flex items-center gap-3">
+                            <MapPin className="h-4 w-4 flex-shrink-0 text-primary" aria-hidden="true" />
+                            <div className="flex-1">
+                                <p className="ml-1 text-xs uppercase tracking-wide font-medium">Lieu</p>
+                                <Badge variant="outline" className="mt-1 text-xs sm:text-sm font-semibold shadow-lg">
+                                    {venue ? (
+                                        <>
+                                            {venue.nom}
+                                            {venue.ville && ` - ${venue.ville}`}
+                                        </>
+                                    ) : (
+                                        "À venir"
+                                    )}
+                                </Badge>
                             </div>
                         </div>
                     </div>
-
-                </section>
+                </div>
             </section>
-
 
             {/* Content Section */}
             <section
-                className="pt-2 md:pt-8 lg:pt-16 pb-16 md:pb-24 bg-card"
+                className="pt-2 md:pt-8 pb-16 md:pb-24 bg-card"
                 aria-labelledby="synopsis"
             >
                 <div className="max-w-7xl mx-auto px-4 xl:px-0 ">
                     <div className="grid grid-cols-1 md:grid-cols-5 gap-8 md:gap-12 lg:gap-16">
 
                         {/* Affiche Column */}
-                        <div className="md:col-span-2 max-sm:p-8 md:p-2 lg:p-0">
+                        <div className="md:col-span-2 p-4 md:p-2 lg:p-0">
                             <div className="group aspect-[2/3] rounded-lg overflow-hidden shadow-2xl border-4 border-white/80 dark:border-gray-800/80 transition-all hover:shadow-[0_25px_70px_rgba(173,0,0,0.4)] hover:scale-[1.02] sticky top-20">
                                 {spectacle.image_url ? (
                                     <Image
@@ -187,7 +179,7 @@ export function SpectacleDetailView({
                                         fill
                                         className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
                                         priority
-                                        sizes="(max-width: 768px) 80vw, 30vw"
+                                        sizes="(max-width: 600px) 80vw, 30vw"
                                     />
                                 ) : (
                                     <div className="absolute inset-0 hero-gradient flex items-center justify-center">
@@ -384,5 +376,3 @@ export function SpectacleDetailView({
         </main >
     );
 }
-
-
