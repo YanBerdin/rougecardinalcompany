@@ -161,6 +161,7 @@ export function PressReleaseEditForm({ release }: PressReleaseEditFormProps) {
                             id="slug"
                             {...form.register("slug")}
                             disabled={isPending}
+                            placeholder="⚠️ Laissez vide pour génération automatique ⚠️"
                         />
                     </div>
 

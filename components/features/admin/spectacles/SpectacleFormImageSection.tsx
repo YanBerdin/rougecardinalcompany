@@ -35,7 +35,7 @@ export function SpectacleFormImageSection({
                 description={
                     isPublic
                         ? "⚠️ Image OBLIGATOIRE et doit être validée. Cliquez sur « Vérifier » avant d'enregistrer."
-                        : "⚠️ Toute URL doit être validée avant enregistrement. Laissez vide ou cliquez sur « Vérifier »."
+                        : "⚠️ Toute URL doit être validée avant enregistrement. ⚠️ Laissez vide ou cliquez sur « Vérifier »."
                 }
                 onValidationChange={onValidationChange}
             />

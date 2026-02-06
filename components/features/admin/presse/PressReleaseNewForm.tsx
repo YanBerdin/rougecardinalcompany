@@ -176,7 +176,7 @@ export function PressReleaseNewForm() {
                             id="slug"
                             {...form.register("slug")}
                             disabled={isPending}
-                            placeholder="url-friendly-identifier"
+                            placeholder="⚠️ Laissez vide pour génération automatique⚠️"
                         />
                     </div>
 

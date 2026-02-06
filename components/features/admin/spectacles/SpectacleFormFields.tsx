@@ -48,7 +48,7 @@ export function SpectacleFormFields({
                         <FormLabel>Slug</FormLabel>
                         <FormControl>
                             <Input
-                                placeholder="⚠️ Laissez vide pour génération automatique"
+                                placeholder="⚠️ Laissez vide pour génération automatique ⚠️"
                                 {...field}
                             />
                         </FormControl>

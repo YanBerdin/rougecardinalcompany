@@ -105,6 +105,7 @@ export function ArticleNewForm() {
                             id="slug"
                             {...form.register("slug")}
                             disabled={isPending}
+                            placeholder="⚠️ Laissez vide pour génération automatique ⚠️"
                         />
                     </div>
 

@@ -110,6 +110,7 @@ export function ArticleEditForm({ article }: ArticleEditFormProps) {
                             id="slug"
                             {...form.register("slug")}
                             disabled={isPending}
+                            placeholder="⚠️ Laissez vide pour génération automatique ⚠️"
                         />
                     </div>
 
