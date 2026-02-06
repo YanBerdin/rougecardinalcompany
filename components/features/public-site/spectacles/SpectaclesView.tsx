@@ -58,20 +58,20 @@ export function SpectaclesView({
             </p>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-12">
+          <div className="flex flex-wrap justify-center gap-8">
             {currentShows.map((show, index) => (
               <Card
                 key={show.id}
-                className={`card-hover animate-fade-in-up overflow-hidden w-full lg:w-[calc(50%-1.5rem)] max-w-2xl`}
+                className={`card-hover animate-fade-in-up overflow-hidden w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm`}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 h-full">
-                  <div className="relative">
+                <div className="flex flex-col h-full">
+                  <div className="relative aspect-[2/3]">
                     <div
-                      className="h-64 md:h-full bg-cover bg-center"
+                      className="absolute inset-0 bg-cover bg-center"
                       style={{ backgroundImage: `url(${show.image})` }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black/60 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                     <div className="absolute top-4 left-4">
                       <Badge className="bg-primary text-primary-foreground">
                         {show.status}
@@ -87,55 +87,49 @@ export function SpectaclesView({
                         </Badge>
                       </div>
                     )}
+                    <div className="absolute bottom-4 right-4">
+                      <span className="text-sm text-primary font-medium card-meta bg-white/90 dark:bg-black/80 px-2 py-1 rounded">
+                        {show.genre}
+                      </span>
+                    </div>
                   </div>
 
-                  <CardContent className="p-6 flex flex-col justify-between">
-                    <div>
+                  <CardContent className="p-6 flex flex-col flex-1">
+                    <div className="mb-auto">
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm text-primary font-medium card-meta">
-                          {show.genre}
-                        </span>
-                        <span className="text-sm card-date">
+                        <span className="text-xs card-date text-muted-foreground">
                           Première :{" "}
                           {new Date(show.premiere).toLocaleDateString("fr-FR")}
-                          {/*
-                          <span className="ml-2 text-xs text-muted-foreground">
-                            Année :{" "}
-                            {show.premiere
-                              ? new Date(show.premiere).getFullYear()
-                              : "-"}
-                          </span>
-                          */}
                         </span>
                       </div>
 
-                      <h3 className="text-2xl font-bold mb-4 hover:text-primary transition-colors card-title">
+                      <h3 className="text-xl font-bold mb-3 hover:text-primary transition-colors card-title">
                         <Link href={getSpectacleUrl(show)}>
                           {show.title}
                         </Link>
                       </h3>
 
-                      <p className="mb-6 leading-relaxed card-text">
+                      <p className="text-sm mb-4 leading-relaxed card-text line-clamp-3">
                         {show.description}
                       </p>
 
-                      <div className="grid grid-cols-2 gap-4 text-sm mb-6 card-meta">
+                      <div className="flex gap-4 text-xs mb-4 card-meta text-muted-foreground">
                         <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-2 text-primary" />
+                          <Clock className="h-3 w-3 mr-1 text-primary" />
                           {show.duration_minutes}
                         </div>
                         <div className="flex items-center">
-                          <Users className="h-4 w-4 mr-2 text-primary" />
+                          <Users className="h-3 w-3 mr-1 text-primary" />
                           {show.cast} comédiens
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex space-x-3">
-                      <Button variant="default" className="flex-1" asChild>
+                    <div className="flex flex-col space-y-2 mt-4">
+                      <Button variant="default" className="w-full" asChild>
                         <Link href={getSpectacleUrl(show)}>Réserver</Link>
                       </Button>
-                      <Button variant="secondary" asChild className="btn-outline">
+                      <Button variant="secondary" asChild className="btn-outline w-full">
                         <Link href={getSpectacleUrl(show)}>
                           Détails
                           <ArrowRight className="ml-2 h-4 w-4" />
@@ -164,55 +158,59 @@ export function SpectaclesView({
             {displayedArchivedShows.map((show, index) => (
               <Card
                 key={show.id}
-                className={`card-hover animate-fade-in-up overflow-hidden w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm`}
+                className={`card-hover animate-fade-in-up overflow-hidden w-full md:w-[calc(50%-1rem)] lg:w-[calc(25%-1.5rem)] max-w-xs`}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <div className="relative">
-                  <div
-                    className="h-48 bg-cover bg-center"
-                    style={{ backgroundImage: `url(${show.image})` }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  <div className="absolute top-4 left-4">
-                    <Badge variant="secondary">
-                      {show.premiere
-                        ? new Date(show.premiere).getFullYear()
-                        : "-"}
-                    </Badge>
-                  </div>
-                  {show.awards.length > 0 && (
-                    <div className="absolute bottom-4 left-4">
-                      <Badge className="bg-yellow-500 text-yellow-900 text-xs">
-                        {show.awards[0]}
+                <div className="flex flex-col h-full">
+                  <div className="relative aspect-[2/3]">
+                    <div
+                      className="absolute inset-0 bg-cover bg-center"
+                      style={{ backgroundImage: `url(${show.image})` }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                    <div className="absolute top-4 left-4">
+                      <Badge variant="secondary">
+                        {show.premiere
+                          ? new Date(show.premiere).getFullYear()
+                          : "-"}
                       </Badge>
                     </div>
-                  )}
-                  <div className="absolute bottom-4 right-4 text-white text-sm card-meta">
-                    {show.genre}
+                    {show.awards.length > 0 && (
+                      <div className="absolute bottom-4 left-4">
+                        <Badge className="bg-yellow-500 text-yellow-900 text-xs">
+                          {show.awards[0]}
+                        </Badge>
+                      </div>
+                    )}
+                    <div className="absolute bottom-4 right-4">
+                      <span className="text-xs card-meta bg-white/90 dark:bg-black/80 px-2 py-1 rounded text-foreground">
+                        {show.genre}
+                      </span>
+                    </div>
                   </div>
+
+                  <CardContent className="p-5 flex-1 flex flex-col">
+                    <h3 className="text-lg font-semibold mb-2 hover:text-primary transition-colors card-title">
+                      <Link href={getSpectacleUrl(show)}>{show.title}</Link>
+                    </h3>
+                    <p className="text-xs leading-relaxed mb-4 card-text line-clamp-3 flex-1">
+                      {show.description}
+                    </p>
+                  </CardContent>
+
+                  <CardFooter className="p-5 pt-0">
+                    <Button
+                      variant="secondary"
+                      className="w-full btn-outline"
+                      asChild
+                    >
+                      <Link href={getSpectacleUrl(show)}>
+                        Voir les détails
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </CardFooter>
                 </div>
-
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold mb-3 hover:text-primary transition-colors card-title">
-                    <Link href={getSpectacleUrl(show)}>{show.title}</Link>
-                  </h3>
-                  <p className="text-sm leading-relaxed mb-4 card-text">
-                    {show.description}
-                  </p>
-                </CardContent>
-
-                <CardFooter>
-                  <Button
-                    variant="secondary"
-                    className="w-full btn-outline px-4 py-2 rounded-lg"
-                    asChild
-                  >
-                    <Link href={getSpectacleUrl(show)}>
-                      Voir les détails
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                </CardFooter>
               </Card>
             ))}
           </div>
