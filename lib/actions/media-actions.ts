@@ -162,13 +162,23 @@ export async function uploadMediaImage(
     let thumbnailWarning: string | undefined;
 
     try {
+      // Get cookies for auth forwarding to API route
+      const cookieStore = await cookies();
+      const cookieHeader = cookieStore
+        .getAll()
+        .map((c) => `${c.name}=${c.value}`)
+        .join("; ");
+
       const response = await fetch(
         `${env.NEXT_PUBLIC_SITE_URL}/api/admin/media/thumbnail`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Cookie: cookieHeader,
+          },
           body: JSON.stringify({
-            mediaId: result.data.mediaId,
+            mediaId: Number(result.data.mediaId),
             storagePath: result.data.storagePath,
           }),
         }
