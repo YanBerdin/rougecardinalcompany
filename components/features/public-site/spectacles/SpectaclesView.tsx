@@ -34,16 +34,16 @@ export function SpectaclesView({
   return (
     <div className="pt-16">
       {/* Hero Section */}
-      <section className="py-20 hero-gradient text-white">
+      <section className="py-16 hero-gradient text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in-up">
-            Nos Spectacles
+            À l&apos;Affiche
           </h1>
           <p
             className="text-xl md:text-2xl opacity-90 animate-fade-in"
             style={{ animationDelay: "0.2s" }}
           >
-            Découvrez notre univers artistique
+            Nos créations actuellement en représentation
           </p>
         </div>
       </section>
@@ -51,12 +51,6 @@ export function SpectaclesView({
       {/* Spectacles Actuels */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">À l&apos;Affiche</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Nos créations actuellement en représentation
-            </p>
-          </div>
 
           <div className="flex flex-wrap justify-center gap-12">
             {currentShows.map((show, index) => (
@@ -74,7 +68,7 @@ export function SpectaclesView({
                     <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black/60 to-transparent" />
                     <div className="absolute top-4 left-4">
                       <Badge className="bg-primary text-primary-foreground">
-                        {show.status}
+                        {show.genre}
                       </Badge>
                     </div>
                     {show.awards.length > 0 && (
@@ -92,10 +86,7 @@ export function SpectaclesView({
                   <CardContent className="p-6 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm text-primary font-medium card-meta">
-                          {show.genre}
-                        </span>
-                        <span className="text-sm card-date">
+                        <span className="text-sm text-primary font-medium card-date">
                           Première :{" "}
                           {new Date(show.premiere).toLocaleDateString("fr-FR")}
                           {/*
