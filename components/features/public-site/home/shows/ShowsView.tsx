@@ -79,7 +79,7 @@ export function ShowsView({ shows }: ShowsViewProps) {
                     variant="outline"
                     size="lg"
                     asChild
-                    className="btn-outline"
+                    className="flex-1"
                   >
                     <Link href={`/spectacles/${show.slug}`}>Détails</Link>
                   </Button>

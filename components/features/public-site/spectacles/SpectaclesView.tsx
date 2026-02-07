@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Clock, Users, ArrowRight } from "lucide-react"; // Calendar, MapPin, non utilisés
+import { Clock, Users, ArrowRight, Play } from "lucide-react"; // Calendar, MapPin, non utilisés
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -34,13 +34,13 @@ export function SpectaclesView({
   return (
     <div className="pt-16">
       {/* Hero Section */}
-      <section className="py-16 hero-gradient text-white">
+      <section className="py-8 lg:py-12 hero-gradient text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in-up">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 animate-fade-in-up">
             À l&apos;Affiche
           </h1>
           <p
-            className="text-xl md:text-2xl opacity-90 animate-fade-in"
+            className="text-lg md:text-xl opacity-90 animate-fade-in"
             style={{ animationDelay: "0.2s" }}
           >
             Nos créations actuellement en représentation
@@ -49,91 +49,65 @@ export function SpectaclesView({
       </section>
 
       {/* Spectacles Actuels */}
-      <section className="py-20">
+      <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-          <div className="flex flex-wrap justify-center gap-12">
+          <div className="flex flex-wrap justify-center gap-8">
             {currentShows.map((show, index) => (
               <Card
                 key={show.id}
-                className={`card-hover animate-fade-in-up overflow-hidden w-full lg:w-[calc(50%-1.5rem)] max-w-2xl`}
+                className={`card-hover animate-fade-in-up overflow-hidden w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm group border-0 shadow-none bg-transparent hover:bg-card`}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 h-full">
-                  <div className="relative">
+                <Link href={getSpectacleUrl(show)} className="block">
+                  <div className="relative aspect-[3/4] overflow-hidden rounded-lg shadow-md">
                     <div
-                      className="h-64 md:h-full bg-cover bg-center"
+                      className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-105"
                       style={{ backgroundImage: `url(${show.image})` }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black/60 to-transparent" />
-                    <div className="absolute top-4 left-4">
-                      <Badge className="bg-primary text-primary-foreground">
-                        {show.genre}
-                      </Badge>
-                    </div>
-                    {show.awards.length > 0 && (
-                      <div className="absolute bottom-4 left-4">
-                        <Badge
-                          variant="secondary"
-                          className="bg-yellow-500 text-yellow-900"
-                        >
-                          {show.awards[0]}
-                        </Badge>
-                      </div>
-                    )}
-                  </div>
 
-                  <CardContent className="p-6 flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm text-primary font-medium card-date">
-                          Première :{" "}
-                          {new Date(show.premiere).toLocaleDateString("fr-FR")}
-                          {/*
-                          <span className="ml-2 text-xs text-muted-foreground">
-                            Année :{" "}
-                            {show.premiere
-                              ? new Date(show.premiere).getFullYear()
-                              : "-"}
+                    {/* Hover overlay with buttons */}
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                      <div className="flex flex-col gap-3 px-6 w-full">
+                        <Button variant="default"
+                          size="lg" className="w-full" asChild>
+                          <span>
+                            Je réserve
+                            <ArrowRight className="ml-2 h-4 w-4" />
                           </span>
-                          */}
-                        </span>
-                      </div>
 
-                      <h3 className="text-2xl font-bold mb-4 hover:text-primary transition-colors card-title">
-                        <Link href={getSpectacleUrl(show)}>
-                          {show.title}
-                        </Link>
-                      </h3>
-
-                      <p className="mb-6 leading-relaxed card-text">
-                        {show.description}
-                      </p>
-
-                      <div className="grid grid-cols-2 gap-4 text-sm mb-6 card-meta">
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-2 text-primary" />
-                          {show.duration_minutes}
-                        </div>
-                        <div className="flex items-center">
-                          <Users className="h-4 w-4 mr-2 text-primary" />
-                          {show.cast} comédiens
-                        </div>
+                        </Button>
+                        <Button variant="outline"
+                          size="lg" className="w-full bg-white/40 border-white text-chart-6 hover:bg-chart-6 hover:text-black shadow-lg" asChild>
+                          <span>
+                            Détails
+                            <Play className="ml-2 h-5 w-5" />
+                          </span>
+                        </Button>
                       </div>
                     </div>
+                  </div>
+                </Link>
 
-                    <div className="flex space-x-3">
-                      <Button variant="default" className="flex-1" asChild>
-                        <Link href={getSpectacleUrl(show)}>Réserver</Link>
-                      </Button>
-                      <Button variant="secondary" asChild className="btn-outline">
-                        <Link href={getSpectacleUrl(show)}>
-                          Détails
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </Link>
-                      </Button>
-                    </div>
-                  </CardContent>
+                {/* Badges */}
+                <div className="flex flex-wrap gap-2 justify-center pt-4">
+                  <Badge className="bg-primary text-primary-foreground">
+                    {show.genre}
+                  </Badge>
+                  {show.awards.length > 0 && (
+                    <Badge className="bg-yellow-500 text-yellow-900">
+                      {show.awards[0]}
+                    </Badge>
+                  )}
+                </div>
+
+                {/* Card Footer */}
+                <div className="py-2 text-center">
+                  <h3 className="text-xl font-bold text-foreground line-clamp-2">
+                    {show.title}
+                  </h3>
+                  <p className="text-md text-foreground font-semibold mt-1">
+                    Première : {new Date(show.premiere).toLocaleDateString("fr-FR")}
+                  </p>
                 </div>
               </Card>
             ))}
@@ -145,65 +119,46 @@ export function SpectaclesView({
       <section className="py-20 bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Nos Créations Passées</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Nos Créations Passées</h2>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
               15 ans de créations théâtrales qui ont marqué notre parcours
             </p>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-8">
+          <div className="flex flex-wrap justify-center gap-12">
             {displayedArchivedShows.map((show, index) => (
               <Card
                 key={show.id}
-                className={`card-hover animate-fade-in-up overflow-hidden w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm`}
+                className={`card-hover animate-fade-in-up overflow-hidden w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] xl:w-[calc(25%-1.125rem)] max-w-xs group border-0 shadow-none bg-transparent`}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <div className="relative">
-                  <div
-                    className="h-48 bg-cover bg-center"
-                    style={{ backgroundImage: `url(${show.image})` }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  <div className="absolute top-4 left-4">
-                    <Badge variant="secondary">
-                      {show.premiere
-                        ? new Date(show.premiere).getFullYear()
-                        : "-"}
-                    </Badge>
+                <Link href={getSpectacleUrl(show)} className="block">
+                  <div className="relative aspect-[2/3] overflow-hidden rounded-lg shadow-md">
+                    <div
+                      className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                      style={{ backgroundImage: `url(${show.image})` }}
+                    />
                   </div>
-                  {show.awards.length > 0 && (
-                    <div className="absolute bottom-4 left-4">
-                      <Badge className="bg-yellow-500 text-yellow-900 text-xs">
-                        {show.awards[0]}
-                      </Badge>
-                    </div>
-                  )}
-                  <div className="absolute bottom-4 right-4 text-white text-sm card-meta">
+                </Link>
+
+                {/* Badges */}
+                <div className="flex flex-wrap gap-2 justify-center pt-4">
+                  <Badge className="bg-primary text-primary-foreground text-xs">
                     {show.genre}
-                  </div>
+                  </Badge>
+                  {show.awards.length > 0 && (
+                    <Badge className="bg-yellow-500 text-yellow-900 hover:bg-yellow-500/90 text-xs">
+                      {show.awards[0]}
+                    </Badge>
+                  )}
                 </div>
 
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold mb-3 hover:text-primary transition-colors card-title">
-                    <Link href={getSpectacleUrl(show)}>{show.title}</Link>
+                {/* Card Footer */}
+                <div className="py-2 text-center">
+                  <h3 className="text-xl font-bold text-foreground line-clamp-1">
+                    {show.title}
                   </h3>
-                  <p className="text-sm leading-relaxed mb-4 card-text">
-                    {show.description}
-                  </p>
-                </CardContent>
-
-                <CardFooter>
-                  <Button
-                    variant="secondary"
-                    className="w-full btn-outline px-4 py-2 rounded-lg"
-                    asChild
-                  >
-                    <Link href={getSpectacleUrl(show)}>
-                      Voir les détails
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                </CardFooter>
+                </div>
               </Card>
             ))}
           </div>
@@ -229,16 +184,6 @@ export function SpectaclesView({
                 />
               </Button>
             )}
-            {/* Debug info - TODO: remove in production */}
-            {/*
-            }
-                        {process.env.NODE_ENV === 'development' && (
-                            <div className="mt-4 text-xs text-muted-foreground">
-                                Debug: {archivedShows.length} spectacles archivés | Seuil: 6 | Bouton visible: {hasMoreArchivedShows ? 'Oui' : 'Non'}
-                            </div>
-                        )}
-            */
-            }
           </div>
         </div>
       </section>
