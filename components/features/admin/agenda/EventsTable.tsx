@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Table,
@@ -11,6 +10,9 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { SortableHeader } from "@/components/ui/sortable-header";
+import type { SortState } from "@/components/ui/sortable-header";
+import { getEventStatusBadge } from "@/lib/tables/event-table-helpers";
 
 // Type Client (BigInt → Number pour sérialisation JSON)
 type EventClientDTO = {
@@ -32,81 +34,60 @@ type EventClientDTO = {
     updated_at: string;
 };
 
+// Sortable fields
+export type EventSortField = "spectacle_titre" | "date_debut" | "lieu_nom" | "status";
+export type EventSortState = SortState<EventSortField>;
+
 interface EventsTableProps {
     events: EventClientDTO[];
     onEdit: (id: number) => void;
     onDelete: (id: number) => void;
+    sortState: EventSortState | null;
+    onSort: (field: EventSortField) => void;
 }
 
-export function EventsTable({ events, onEdit, onDelete }: EventsTableProps) {
-    const [sortField, setSortField] = useState<keyof EventClientDTO>("date_debut");
-    const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-
-    const sortedEvents = useMemo(() => {
-        return [...events].sort((a, b) => {
-            const aVal = a[sortField];
-            const bVal = b[sortField];
-
-            if (aVal === null || bVal === null || aVal === undefined || bVal === undefined) return 0;
-
-            const comparison = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
-            return sortOrder === "asc" ? comparison : -comparison;
-        });
-    }, [events, sortField, sortOrder]);
-
-    const handleSort = (field: keyof EventClientDTO) => {
-        if (sortField === field) {
-            setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-        } else {
-            setSortField(field);
-            setSortOrder("asc");
-        }
-    };
-
-    const getStatusBadge = (status: EventClientDTO["status"]) => {
-        const variants = {
-            scheduled: "default",
-            cancelled: "destructive",
-            completed: "secondary",
-        } as const;
-
-        const labels = {
-            scheduled: "Programmé",
-            cancelled: "Annulé",
-            completed: "Terminé",
-        };
-
-        return <Badge variant={variants[status]}>{labels[status]}</Badge>;
-    };
-
+export function EventsTable({ events, onEdit, onDelete, sortState, onSort }: EventsTableProps) {
     return (
         <Table>
             <TableHeader>
                 <TableRow>
-                    <TableHead
-                        onClick={() => handleSort("spectacle_titre")}
-                        className="cursor-pointer"
-                    >
-                        Spectacle
+                    <TableHead>
+                        <SortableHeader
+                            field="spectacle_titre"
+                            label="Spectacle"
+                            currentSort={sortState}
+                            onSort={onSort}
+                        />
                     </TableHead>
-                    <TableHead
-                        onClick={() => handleSort("date_debut")}
-                        className="cursor-pointer"
-                    >
-                        Date
+                    <TableHead>
+                        <SortableHeader
+                            field="date_debut"
+                            label="Date"
+                            currentSort={sortState}
+                            onSort={onSort}
+                        />
                     </TableHead>
-                    <TableHead
-                        onClick={() => handleSort("lieu_nom")}
-                        className="cursor-pointer"
-                    >
-                        Lieu
+                    <TableHead>
+                        <SortableHeader
+                            field="lieu_nom"
+                            label="Lieu"
+                            currentSort={sortState}
+                            onSort={onSort}
+                        />
                     </TableHead>
-                    <TableHead>Statut</TableHead>
+                    <TableHead>
+                        <SortableHeader
+                            field="status"
+                            label="Statut"
+                            currentSort={sortState}
+                            onSort={onSort}
+                        />
+                    </TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {sortedEvents.map((event) => (
+                {events.map((event) => (
                     <TableRow key={String(event.id)}>
                         <TableCell className="font-medium">
                             {event.spectacle_titre}
@@ -126,7 +107,7 @@ export function EventsTable({ events, onEdit, onDelete }: EventsTableProps) {
                                 </span>
                             )}
                         </TableCell>
-                        <TableCell>{getStatusBadge(event.status)}</TableCell>
+                        <TableCell>{getEventStatusBadge(event.status)}</TableCell>
                         <TableCell className="text-right space-x-2">
                             <Button
                                 size="sm"

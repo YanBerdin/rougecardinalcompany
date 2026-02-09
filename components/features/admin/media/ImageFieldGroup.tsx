@@ -270,7 +270,7 @@ export function ImageFieldGroup<TForm extends FieldValues>({
                                 {showUpload && (
                                     <Button
                                         type="button"
-                                        variant="secondary"
+                                        variant="outline"
                                         onClick={() => setIsUploadOpen(true)}
                                     >
                                         <Upload className="h-4 w-4 mr-2" />

@@ -211,14 +211,14 @@ export function SpectaclePhotoManager({
                             <div className="flex gap-2">
                                 <Button
                                     type="button"
-                                    variant="outline"
+                                    variant="secondary"
                                     size="sm"
                                     onClick={() => handleSelectFromLibrary(slot.ordre)}
                                     disabled={isPending || slot.photo !== null}
                                     className="flex-1"
                                 >
                                     <ImagePlus className="h-4 w-4 mr-2" />
-                                    Bibliothèque
+                                    Médiathèque
                                 </Button>
                                 <Button
                                     type="button"
@@ -229,7 +229,7 @@ export function SpectaclePhotoManager({
                                     className="flex-1"
                                 >
                                     <Upload className="h-4 w-4 mr-2" />
-                                    Upload
+                                    Téléverser
                                 </Button>
                             </div>
                         </CardContent>

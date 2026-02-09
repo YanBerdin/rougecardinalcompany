@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { deleteEventAction } from "@/app/(admin)/admin/agenda/actions-client";
 import { EventsTable } from "./EventsTable";
+import type { EventSortField, EventSortState } from "./EventsTable";
+import { sortEvents, getNextSortState } from "@/lib/tables/event-table-helpers";
 
 // Type Client (BigInt → Number pour sérialisation JSON)
 type EventClientDTO = {
@@ -34,11 +36,22 @@ interface EventsViewProps {
 export function EventsView({ initialEvents }: EventsViewProps) {
     const router = useRouter();
     const [events, setEvents] = useState(initialEvents);
+    const [sortState, setSortState] = useState<EventSortState | null>(null);
 
     // ✅ CRITIQUE : Sync local state when props change
     useEffect(() => {
         setEvents(initialEvents);
     }, [initialEvents]);
+
+    // Sort events based on current sort state
+    const sortedEvents = useMemo(() => {
+        if (!sortState) return events;
+        return sortEvents(events, sortState);
+    }, [events, sortState]);
+
+    const handleSort = useCallback((field: EventSortField) => {
+        setSortState((currentSort) => getNextSortState(currentSort, field));
+    }, []);
 
     const handleDelete = useCallback(
         async (id: number) => {
@@ -76,9 +89,11 @@ export function EventsView({ initialEvents }: EventsViewProps) {
                 </Button>
             </div>
             <EventsTable
-                events={events}
+                events={sortedEvents}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                sortState={sortState}
+                onSort={handleSort}
             />
         </div>
     );

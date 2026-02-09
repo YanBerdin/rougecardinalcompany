@@ -191,6 +191,7 @@ export function PressReleaseEditForm({ release }: PressReleaseEditFormProps) {
                         imageUrlField="image_url"
                         imageMediaIdField="image_media_id"
                         uploadFolder="presse"
+                        showUpload={true}
                         onValidationChange={(isValid) => setIsImageValidated(isValid)}
                     />
                 </CardContent>
