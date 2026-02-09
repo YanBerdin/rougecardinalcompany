@@ -49,11 +49,15 @@ Ce fichier liste les titres et descriptions extraites des fichiers de tâches `T
 7. TASK026 — Homepage content management
    - Résumé: Panneau pour éditer contenus d'accueil (hero, news, shows).
 
-7. TASK027 — Company content management
-   - Résumé: Page de la compagnie: équipe, histoire, textes légaux.
+7b. **TASK027 — Company content management** ✅
+    - **Résumé**: Gestion complète du contenu compagnie (valeurs, stats, sections présentation). UI admin intégrée dans `/admin/home/about/` avec AboutContentForm. DAL : `compagnie.ts` + `compagnie-presentation.ts`. Media Library + versioning automatique.
+    - **État**: Completed (25 jan 2026)
+    - **Issue**: N/A (implémentation intégrée)
 
-8. TASK028 — Content versioning UI
-   - Résumé: Interface pour versionner et restaurer anciennes versions de contenu.
+7c. **TASK028 — Content versioning UI** ✅
+    - **Résumé**: Système automatique de versioning pour tout le contenu. Backend : triggers auto sur `content_versions` table (JSONB snapshots). UI : métadonnées intégrées dans vues admin (`last_version_number`, `last_change_type`, `total_versions`). Zero configuration pour nouvelles tables.
+    - **État**: Completed (25 jan 2026)
+    - **Issue**: N/A (architecture database-level)
 
 9. TASK029 — Media library ✅
     - Résumé: Gestion des médias (upload, tags, transformations, storage).

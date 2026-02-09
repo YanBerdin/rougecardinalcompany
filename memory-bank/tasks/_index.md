@@ -20,7 +20,7 @@
 - `TASK007` Tests automatisés et monitoring
 - `TASK008` Configuration des redirections vers billetterie externe
 - `TASK009` Gestion des partenaires et mécènes - ✅ Merged into TASK023
-- `TASK010` Mise en place des toggles d'affichage dans le back-office
+- `TASK010` Mise en place des toggles d'affichage dans le back-office - ✅ Merged into TASK030
 - `TASK015` Stratégie seeds cloud (sécurisée) + synchronisation
 - `TASK016` Option: modélisation `partners.type` si requis par le design
 - `TASK017` Retrait des délais artificiels (1200-1500ms) des containers
@@ -38,6 +38,7 @@
 - `TASK011` Intégration `home_hero_slides` (fetch + rendu + fenêtre visibilité) - Completed on 2025-09-23
 - `TASK012` Intégration UI des `compagnie_stats` (accueil/compagnie) - Completed on 2025-09-23
 - `TASK013` Écriture et exécution des scripts de seed (valeurs, stats, sections, hero) - Completed on 2025-09-23
+- `TASK014` Toggles centralisés (Agenda/Accueil/Contact newsletter) - ✅ Implemented via TASK030 on 2026-01-01 (10 display toggles, configurations_site table, admin UI, DAL site-config.ts)
 - `TASK018` Intégration système d'emailing (newsletter, contacts) - Completed on 2025-12-13 (factorisation handlers, DAL idempotent, Server Actions)
 - `TASK019` Fix spectacles archivés (public=true approach) - Completed on 2025-10-01
 - `TASK020` Alignement UI press releases (flexbox pattern) - Completed on 2025-10-01

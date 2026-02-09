@@ -4272,8 +4272,8 @@ async function runTest(
 - #3 : TASK023 - Partners Management
 - #4 : TASK024 - Press Management
 - #6 : TASK026 - Homepage Content Management
-- #7 : TASK027 - Company Content Management
-- #8 : TASK028 - Content Versioning UI
+- ✅ #7 : TASK027 - Company Content Management (TERMINÉ 25 jan 2026)
+- ✅ #8 : TASK028 - Content Versioning UI (TERMINÉ 25 jan 2026)
 - #9 : TASK029 - Media Library
 - #10 : TASK030 - Display Toggles
 - #11 : TASK031 - Access Controls for Content
@@ -4294,6 +4294,8 @@ async function runTest(
 - ✅ Issue #26 : TASK026B - Database Functions Compliance (15 nov 2025)
 - ✅ Issue #27 : TASK027B - SECURITY DEFINER Rationale Headers (fermée 15 nov 2025)
 - ✅ Issue #28 : TASK028B - Cleanup Obsolete Scripts (26 oct 2025 - fermée 15 nov 2025)
+- ✅ Issue #7 : TASK027 - Company Content Management (fermée 25 jan 2026)
+- ✅ Issue #8 : TASK028 - Content Versioning UI (fermée 25 jan 2026)
 
 1. **Gestion d'équipe** :
    - ✅ Hard-delete endpoint (fait)
