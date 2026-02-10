@@ -98,7 +98,7 @@ export function PressContactsView({ initialContacts }: PressContactsViewProps) {
         {contacts.map((contact) => (
           <div
             key={contact.id}
-            className="bg-card rounded-lg border shadow-sm p-4 space-y-3"
+            className="bg-card rounded-lg border shadow-sm p-4 space-y-3 hover:bg-card/60 transition-colors"
           >
             {/* Header: Name and Status */}
             <div className="flex justify-between items-start gap-2">
@@ -183,7 +183,7 @@ export function PressContactsView({ initialContacts }: PressContactsViewProps) {
       */}
       <div className="hidden sm:block space-y-4">
         {contacts.map((contact) => (
-          <Card key={contact.id}>
+          <Card key={contact.id} className="hover:bg-card/60 transition-colors">
             <CardContent className="flex items-center justify-between p-4">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">

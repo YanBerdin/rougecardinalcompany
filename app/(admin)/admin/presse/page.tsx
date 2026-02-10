@@ -21,13 +21,13 @@ export default function PressePage() {
 
             <Tabs defaultValue="releases" className="w-full">
                 <TabsList className="flex flex-col sm:grid sm:grid-cols-3 w-full h-auto gap-1 sm:gap-0">
-                    <TabsTrigger value="releases" className="w-full justify-center text-sm py-2.5">
+                    <TabsTrigger value="releases" className="hover:text-popover-foreground hover:bg-card w-full justify-center text-sm py-2.5">
                         Communiqués
                     </TabsTrigger>
-                    <TabsTrigger value="articles" className="w-full justify-center text-sm py-2.5">
+                    <TabsTrigger value="articles" className="hover:text-popover-foreground hover:bg-card w-full justify-center text-sm py-2.5">
                         Articles
                     </TabsTrigger>
-                    <TabsTrigger value="contacts" className="w-full justify-center text-sm py-2.5">
+                    <TabsTrigger value="contacts" className="hover:text-popover-foreground hover:bg-card w-full justify-center text-sm py-2.5">
                         Contacts
                     </TabsTrigger>
                 </TabsList>

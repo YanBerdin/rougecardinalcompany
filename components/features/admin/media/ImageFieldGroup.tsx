@@ -256,6 +256,17 @@ export function ImageFieldGroup<TForm extends FieldValues>({
                         <div className="space-y-3">
                             {/* Action buttons row */}
                             <div className="flex flex-wrap gap-2">
+                                {showUpload && (
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => setIsUploadOpen(true)}
+                                    >
+                                        <Upload className="h-4 w-4 mr-2" />
+                                        Téléverser
+                                    </Button>
+                                )}
+
                                 {showMediaLibrary && (
                                     <Button
                                         type="button"
@@ -267,16 +278,6 @@ export function ImageFieldGroup<TForm extends FieldValues>({
                                     </Button>
                                 )}
 
-                                {showUpload && (
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={() => setIsUploadOpen(true)}
-                                    >
-                                        <Upload className="h-4 w-4 mr-2" />
-                                        Téléverser
-                                    </Button>
-                                )}
                             </div>
 
                             {/* External URL input */}

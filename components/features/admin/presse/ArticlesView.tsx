@@ -79,7 +79,7 @@ export function ArticlesView({ initialArticles }: ArticlesViewProps) {
         {articles.map((article) => (
           <div
             key={article.id}
-            className="bg-card rounded-lg border shadow-sm p-4 space-y-3"
+            className="bg-card rounded-lg border shadow-sm p-4 space-y-3 hover:bg-card/60 transition-colors"
           >
             {/* Header: Title and Type */}
             <div className="flex justify-between items-start gap-2">
@@ -156,7 +156,7 @@ export function ArticlesView({ initialArticles }: ArticlesViewProps) {
       */}
       <div className="hidden sm:block space-y-4">
         {articles.map((article) => (
-          <Card key={article.id}>
+          <Card key={article.id} className="hover:bg-card/60  transition-colors">
             <CardContent className="flex items-center justify-between p-4">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">

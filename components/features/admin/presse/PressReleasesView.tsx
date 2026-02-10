@@ -97,7 +97,7 @@ export function PressReleasesView({ initialReleases }: PressReleasesViewProps) {
                 {releases.map((release) => (
                     <div
                         key={release.id}
-                        className="bg-card rounded-lg border shadow-sm p-4 space-y-4"
+                        className="bg-card rounded-lg border shadow-sm p-4 space-y-4 hover:bg-card/60  transition-colors"
                     >
                         {/* Header: Title and Status */}
                         <div className="flex justify-between items-start gap-2">
@@ -138,7 +138,7 @@ export function PressReleasesView({ initialReleases }: PressReleasesViewProps) {
                                     </Button>
                                 </Link>
                                 <Button
-                                    variant={release.public ? "secondary" : "default"}
+                                    variant={release.public ? "ghost-destructive" : "outline"}
                                     size="sm"
                                     onClick={() => handlePublish(release.id, release.public)}
                                     title={release.public ? "Dépublier" : "Publier"}
@@ -180,7 +180,7 @@ export function PressReleasesView({ initialReleases }: PressReleasesViewProps) {
             */}
             <div className="hidden sm:block space-y-4">
                 {releases.map((release) => (
-                    <Card key={release.id}>
+                    <Card key={release.id} className="hover:bg-card/60  transition-colors">
                         <CardContent className="flex items-center justify-between p-4">
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2">

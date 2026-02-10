@@ -24,7 +24,7 @@ export default function CardsDashboard() {
     return (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {items.map((it) => (
-                <Card key={it.href} className="hover:shadow-md transition-shadow">
+                <Card key={it.href} className="hover:shadow-md transition-shadow hover:bg-card/20 transition-colors">
                     <CardHeader className="flex items-start justify-between gap-4 pb-2">
                         <div>
                             <CardTitle className="text-sm font-medium">{it.title}</CardTitle>
