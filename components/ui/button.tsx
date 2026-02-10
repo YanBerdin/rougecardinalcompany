@@ -22,7 +22,7 @@ const buttonVariants = cva(
         ghost:
           "text-foreground font-semibold whitespace-nowrap hover:bg-secondary/80 hover:text-accent-foreground shadow-lg",
         "ghost-destructive":
-          "text-foreground font-semibold whitespace-nowrap hover:bg-destructive-foreground hover:text-destructive",
+          "text-foreground font-semibold whitespace-nowrap hover:bg-chart-6 hover:text-destructive",
         link: "text-primary underline-offset-4",
       },
       size: {
