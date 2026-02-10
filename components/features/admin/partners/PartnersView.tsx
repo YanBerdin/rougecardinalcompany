@@ -78,12 +78,98 @@ function SortablePartnerCard({
     };
 
     return (
-        <Card ref={setNodeRef} style={style} className="group">
-            <CardContent className="flex items-center gap-4 p-4">
+        <Card ref={setNodeRef} style={style} className="group hover:bg-card/50">
+            {/* 
+              MOBILE VIEW 
+              Visible only on small screens (< 640px)
+            */}
+            <CardContent className="flex flex-col gap-4 p-4 sm:hidden">
+                {/* Header: Drag handle + Logo + Name */}
+                <div className="flex items-center gap-3">
+                    <button
+                        {...attributes}
+                        {...listeners}
+                        className="cursor-grab touch-none active:cursor-grabbing p-2 -m-2"
+                        aria-label="Glisser pour réorganiser"
+                    >
+                        <GripVertical className="h-6 w-6 text-muted-foreground" />
+                    </button>
+
+                    {partner.logo_url ? (
+                        <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-md border bg-muted">
+                            <Image
+                                src={partner.logo_url}
+                                alt={partner.name}
+                                fill
+                                className="object-contain p-1"
+                            />
+                        </div>
+                    ) : (
+                        <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-md border bg-muted text-xs text-muted-foreground">
+                            No logo
+                        </div>
+                    )}
+
+                    <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-base truncate">
+                                {partner.name}
+                            </h3>
+                            {!partner.active && (
+                                <Badge variant="secondary" className="text-xs">
+                                    Inactif
+                                </Badge>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Body: Website URL */}
+                {partner.website_url && (
+                    <a
+                        href={partner.website_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-muted-foreground hover:text-chart-3 flex items-center gap-1"
+                    >
+                        <ExternalLink className="h-4 w-4 flex-shrink-0" />
+                        <span className="truncate">{partner.website_url}</span>
+                    </a>
+                )}
+
+                {/* Footer: Actions */}
+                <div className="flex items-center justify-end gap-2 pt-2 border-t">
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => onEdit(partner)}
+                        className="h-10 min-w-[56px] px-3"
+                        aria-label={`Modifier ${partner.name}`}
+                    >
+                        <Pencil className="h-5 w-5 mr-2" /> Modifier
+                    </Button>
+                    <Button
+                        variant="ghost-destructive"
+                        size="sm"
+                        onClick={() => onDelete(partner.id)}
+                        className="h-10 min-w-[56px] px-3"
+                        aria-label={`Supprimer ${partner.name}`}
+                    >
+                        <Trash2 className="h-5 w-5 mr-2" /> Supprimer
+                    </Button>
+                </div>
+            </CardContent>
+
+            {/* 
+              DESKTOP VIEW 
+              Visible only on larger screens (>= 640px)
+            */}
+            <CardContent className="hidden sm:flex items-center gap-4 p-4">
                 <button
                     {...attributes}
                     {...listeners}
                     className="cursor-grab touch-none active:cursor-grabbing"
+                    aria-label="Glisser pour réorganiser"
                 >
                     <GripVertical className="h-5 w-5 text-muted-foreground" />
                 </button>
@@ -117,7 +203,7 @@ function SortablePartnerCard({
                             href={partner.website_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm text-muted-foreground hover:text-primary flex items-center gap-1 truncate"
+                            className="text-sm text-muted-foreground hover:text-chart-3 flex items-center gap-1 truncate"
                         >
                             <span className="truncate">{partner.website_url}</span>
                             <ExternalLink className="h-3 w-3 flex-shrink-0" />
@@ -131,7 +217,8 @@ function SortablePartnerCard({
                         size="icon"
                         onClick={() => onEdit(partner)}
                         title="Éditer"
-                        aria-label="Éditer le partenaire"
+                        className="h-8 w-8 sm:h-9 sm:w-9"
+                        aria-label={`Modifier ${partner.name}`}
                     >
                         <Pencil className="h-4 w-4" />
                     </Button>
@@ -140,7 +227,8 @@ function SortablePartnerCard({
                         size="icon"
                         onClick={() => onDelete(partner.id)}
                         title="Supprimer"
-                        aria-label="Supprimer le partenaire"
+                        className="h-8 w-8 sm:h-9 sm:w-9"
+                        aria-label={`Supprimer ${partner.name}`}
                     >
                         <Trash2 className="h-4 w-4" />
                     </Button>
@@ -247,17 +335,17 @@ export function PartnersView({ initialPartners }: PartnersViewProps) {
     );
 
     return (
-        <div className="space-y-6 p-6">
-            <div className="flex items-center justify-between">
+        <div className="space-y-6 p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 lg:mb-12">
                 <div>
-                    <h1 className="text-3xl font-bold">Partenaires</h1>
-                    <p className="text-muted-foreground">
+                    <h1 className="text-2xl sm:text-3xl font-bold">Partenaires</h1>
+                    <p className="text-sm sm:text-base text-muted-foreground">
                         Gérez les logos et liens des partenaires affichés sur la page
                         d&apos;accueil
                     </p>
                 </div>
                 <Link href="/admin/partners/new">
-                    <Button>
+                    <Button className="w-full sm:w-auto">
                         <Plus className="mr-2 h-4 w-4" />
                         Nouveau partenaire
                     </Button>
@@ -277,8 +365,9 @@ export function PartnersView({ initialPartners }: PartnersViewProps) {
                     </CardContent>
                 </Card>
             ) : (
-                <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">
+                <div className="space-y-3 sm:space-y-2">
+                    <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-2">
+                        <GripVertical className="h-4 w-4 inline-block" />
                         Glissez-déposez pour réorganiser l&apos;ordre d&apos;affichage
                     </p>
                     <DndContext
@@ -290,14 +379,16 @@ export function PartnersView({ initialPartners }: PartnersViewProps) {
                             items={partners.map((p) => p.id.toString())}
                             strategy={verticalListSortingStrategy}
                         >
-                            {partners.map((partner) => (
-                                <SortablePartnerCard
-                                    key={partner.id.toString()}
-                                    partner={partner}
-                                    onEdit={handleEdit}
-                                    onDelete={requestDelete}
-                                />
-                            ))}
+                            <div className="space-y-3 sm:space-y-2">
+                                {partners.map((partner) => (
+                                    <SortablePartnerCard
+                                        key={partner.id.toString()}
+                                        partner={partner}
+                                        onEdit={handleEdit}
+                                        onDelete={requestDelete}
+                                    />
+                                ))}
+                            </div>
                         </SortableContext>
                     </DndContext>
                 </div>
