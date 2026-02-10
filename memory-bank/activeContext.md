@@ -1,8 +1,45 @@
 # Active Context
 
-**Current Focus (2026-02-05)**: ✅ Image URL Validation Refactor Complete - Async refinements + 17 functions corrected
+**Current Focus (2026-02-10)**: 🔄 TASK038 Responsive Testing - Plan review complete, Phase 0 (instrumentation) pending
 
-**Last Major Updates**: Validation Async Fix (2026-02-05) + Thumbnail Fix (2026-01-30) + TASK055 Phase 2 (2026-01-26) + Security Session (2026-01-22)
+**Last Major Updates**: TASK038 Plan Review (2026-02-10) + Validation Async Fix (2026-02-05) + Thumbnail Fix (2026-01-30)
+
+---
+
+## 🔄 TASK038 Responsive Testing - Plan Review (2026-02-10)
+
+### Summary
+
+✅ **PLAN REVIEWED** - 5 gaps identified, Phase 0 (Instrumentation) added
+
+| Component | Status | Details |
+| --------- | ------ | ------- |
+| Playwright Package | ✅ | `@playwright/test ^1.57.0` installed |
+| playwright.config.ts | ❌ | File missing, needs creation |
+| tests/ directory | ❌ | Directory missing, needs creation |
+| data-testid attributes | ❌ | 0 found in components (15 in docs only) |
+| CI workflow | ❌ | `.github/workflows/playwright.yml` missing |
+
+### Gaps Identified
+
+1. **No `data-testid` in components** - Tests will fail without selectors
+2. **No `tests/` directory** - Playwright never configured
+3. **Auth setup not detailed** - Supabase strategy needed for admin tests
+4. **Timeline underestimated** - Added 4h for Phase 0
+
+### Plan Updates Made
+
+- **Phase 0 added**: Instrumentation des Composants (4h)
+- **Timeline**: 20h → 24h (3 jours)
+- **Status**: Draft → Reviewed
+- **Priority order**: Phase 0 → Phase 1 → Phase 5 (public first, more stable)
+
+### Next Steps
+
+- [ ] Execute Phase 0: Add `data-testid` to key components
+- [ ] Create `playwright.config.ts` with device matrix
+- [ ] Create `tests/` directory structure
+- [ ] Setup auth fixture for Supabase
 
 ---
 

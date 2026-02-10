@@ -1,7 +1,8 @@
 # Plan TASK038 - Responsive Testing & Validation
 
 **Créé:** 2026-02-09  
-**Statut:** Draft  
+**Mis à jour:** 2026-02-10  
+**Statut:** Reviewed  
 **Priorité:** High (Production Readiness)
 
 ---
@@ -212,7 +213,42 @@ export type DeviceSize = keyof typeof DEVICE_MATRIX[DeviceCategory];
 
 ---
 
-## 4. Plan d'Implémentation (8 Phases)
+## 4. Plan d'Implémentation (9 Phases)
+
+### Phase 0: Instrumentation des Composants (4h) ⚠️ PRÉ-REQUIS
+
+**Objectif:** Ajouter les attributs `data-testid` nécessaires aux tests Playwright
+
+**Analyse (2026-02-10):** L'audit du codebase révèle que **0 composant** ne contient de `data-testid`. Les 15 occurrences trouvées sont uniquement dans la documentation (prompts, plans). Les tests Playwright échoueront sans ces attributs.
+
+**Composants à instrumenter:**
+
+| Composant | Fichier | Attribut à ajouter |
+|-----------|---------|--------------------|
+| AppSidebar | `components/admin/AdminSidebar.tsx` | `data-testid="app-sidebar"` |
+| SidebarTrigger | `components/admin/AdminSidebar.tsx` | `data-testid="sidebar-trigger"` |
+| DashboardStatsContainer | `components/features/admin/dashboard/` | `data-testid="stats-grid"` |
+| Header mobile menu | `components/layout/Header.tsx` | `data-testid="mobile-menu-btn"` |
+| Hero slides | `components/features/public-site/home/Hero.tsx` | `data-testid="hero-image"` |
+| Media Library grid | `components/features/admin/media/` | `data-testid="media-grid"` |
+| Tables (générique) | `components/ui/table.tsx` | `data-testid="data-table"` |
+| Forms (générique) | Pattern à définir | `data-testid="form-{name}"` |
+
+**Tasks:**
+
+- [ ] Ajouter `data-testid` au Sidebar admin (AppSidebar + trigger)
+- [ ] Ajouter `data-testid` au Dashboard stats grid
+- [ ] Ajouter `data-testid` au Header public (mobile menu button)
+- [ ] Ajouter `data-testid` aux Hero slides
+- [ ] Ajouter `data-testid` à la Media Library grid
+- [ ] Documenter la convention de nommage `data-testid`
+
+**Deliverables:**
+
+- Composants instrumentés avec `data-testid`
+- Convention documentée dans `.github/instructions/playwright-tests.instructions.md`
+
+---
 
 ### Phase 1: Setup & Infrastructure (2h)
 
@@ -720,7 +756,8 @@ export default {
 
 | Phase | Duration | Priority | Dependencies |
 |-------|----------|----------|--------------|
-| 1. Setup | 2h | P0 | None |
+| **0. Instrumentation** | **4h** | **P0** | **None** |
+| 1. Setup | 2h | P0 | Phase 0 |
 | 2. Dashboard | 3h | P0 | Phase 1 |
 | 3. Forms | 4h | P1 | Phase 1 |
 | 4. Tables | 3h | P1 | Phase 1 |
@@ -729,7 +766,7 @@ export default {
 | 7. A11y | 2h | P1 | Phase 1 |
 | 8. CI/CD | 1h | P0 | Phase 1-7 |
 
-**Total:** 20h (2.5 jours)
+**Total:** 24h (3 jours)
 
 **Resources:**
 
@@ -757,9 +794,10 @@ export default {
 ### Immediate (Cette semaine)
 
 1. ✅ Valider plan avec équipe
-2. ✅ Installer Playwright
-3. ✅ Configurer device matrix
-4. ✅ Créer fixtures et helpers
+2. ⏳ **Phase 0: Instrumenter les composants avec data-testid**
+3. ⏳ Installer Playwright
+4. ⏳ Configurer device matrix
+5. ⏳ Créer fixtures et helpers
 
 ### Short-term (2 semaines)
 

@@ -112,7 +112,7 @@ export function EventsTable({ events, onEdit, onDelete, sortState, onSort }: Eve
                                 <Pencil className="h-5 w-5 mr-2" /> Modifier
                             </Button>
                             <Button
-                                variant="ghost-destructive"
+                                variant="destructive"
                                 size="sm"
                                 onClick={() => onDelete(event.id)}
                                 className="h-10 min-w-[56px] px-3"

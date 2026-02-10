@@ -83,7 +83,7 @@ function SortableSlide({ slide, index, onEdit, onDelete }: SortableSlideProps) {
                             onClick={() => onDelete(slide.id)}
                             title="Supprimer le slide"
                             aria-label="Supprimer le slide"
-                            className="h-9 w-9 shrink-0"
+                            className="h-9 w-9 shrink-0 hover:bg-red-100"
                         >
                             <Trash2 className="h-4 w-4" />
                         </Button>

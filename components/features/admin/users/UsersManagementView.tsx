@@ -163,20 +163,20 @@ export function UsersManagementView({ users }: UsersManagementViewProps) {
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <p className="text-sm text-muted-foreground">
-            {users.length} utilisateur{users.length > 1 ? "s" : ""} au total
+            {users.length} administrateur{users.length > 1 ? "s" : ""} au total
           </p>
           <Button size="sm" onClick={() => router.push("/admin/users/invite")}>
             <UserPlus className="mr-2 h-4 w-4" />
-            Inviter un utilisateur
+            Inviter un administrateur
           </Button>
         </div>
 
         {users.length === 0 ? (
           <div className="py-6 text-center text-muted-foreground border rounded-lg">
             <Mail className="mx-auto h-12 w-12 mb-4 opacity-50" />
-            <p className="text-lg font-medium">Aucun utilisateur trouvé</p>
+            <p className="text-lg font-medium">Aucun administrateur trouvé</p>
             <p className="text-sm mt-2">
-              Invitez votre premier utilisateur pour commencer
+              Invitez votre premier administrateur pour commencer
             </p>
           </div>
         ) : (
@@ -286,11 +286,11 @@ export function UsersManagementView({ users }: UsersManagementViewProps) {
                   {/* Footer: Actions */}
                   <div className="flex items-center justify-end pt-3 border-t mt-3">
                     <Button
-                      variant="ghost"
+                      variant="ghost-destructive"
                       size="sm"
                       onClick={() => openDeleteDialog(user.id, user.email)}
                       disabled={loading === user.id}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50 h-10 min-w-[56px] px-3"
+                      className="text-red-600 hover:text-red-700 hover:bg-red-100 h-10 min-w-[56px] px-3"
                       aria-label={`Supprimer ${user.email}`}
                     >
                       <Trash2 className="h-5 w-5 mr-2" />

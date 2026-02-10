@@ -112,6 +112,7 @@ export function LieuFormFields({ form }: LieuFormFieldsProps) {
                         <FormControl>
                             <Input
                                 type="number"
+                                min="1"
                                 placeholder="200"
                                 {...field}
                                 value={field.value ?? ""}

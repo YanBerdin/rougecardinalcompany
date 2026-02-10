@@ -112,7 +112,9 @@ export function TeamManagementContainer({ initialMembers }: Props) {
       </div>
 
       <div className="flex justify-end">
-        <Button asChild>
+        <Button
+        variant="default"
+        asChild>
           <Link href="/admin/team/new">
             <Plus className="mr-2 h-4 w-4" />
             Ajouter un membre

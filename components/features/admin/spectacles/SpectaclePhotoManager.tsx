@@ -178,11 +178,12 @@ export function SpectaclePhotoManager({
                                 {slot.photo && (
                                     <Button
                                         type="button"
-                                        variant="ghost"
-                                        size="sm"
+                                        variant="destructive"
+                                        size="icon"
+                                        title="Supprimer cette photo"
                                         onClick={() => handleDelete(slot.ordre)}
                                         disabled={isPending}
-                                        className="text-destructive hover:text-destructive"
+                                        className=""
                                     >
                                         <Trash2 className="h-4 w-4" />
                                     </Button>

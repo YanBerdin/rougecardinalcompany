@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect, useTransition, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { AuditLogFilters } from "./AuditLogFilters";
 import { AuditLogsTable } from "./AuditLogsTable";
+import type { AuditLogSortField, AuditLogSortState } from "./AuditLogsTable";
 import { AuditLogDetailModal } from "./AuditLogDetailModal";
 import type { AuditLogsViewProps } from "./types";
 import type { AuditLogDTO, AuditLogFilter } from "@/lib/schemas/audit-logs";
+import { sortAuditLogs, getNextSortState } from "@/lib/tables/audit-log-table-helpers";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download, RefreshCw } from "lucide-react";
@@ -18,7 +20,8 @@ export function AuditLogsView({
     initialLogs,
     initialTotalCount,
     initialFilters,
-    tableNames
+    tableNames,
+    users
 }: AuditLogsViewProps) {
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
@@ -28,6 +31,7 @@ export function AuditLogsView({
     const [selectedLog, setSelectedLog] = useState<AuditLogDTO | null>(null);
     const [isExporting, setIsExporting] = useState(false);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
+    const [sortState, setSortState] = useState<AuditLogSortState | null>(null);
 
     // Simulate initial loading to show skeleton //TODO: remove after testing
     useEffect(() => {
@@ -43,6 +47,16 @@ export function AuditLogsView({
         setTotalCount(initialTotalCount);
         setFilters(initialFilters);
     }, [initialLogs, initialTotalCount, initialFilters]);
+
+    // Sort logs based on current sort state
+    const sortedLogs = useMemo(() => {
+        if (!sortState) return logs;
+        return sortAuditLogs(logs, sortState);
+    }, [logs, sortState]);
+
+    const handleSort = useCallback((field: AuditLogSortField) => {
+        setSortState((currentSort) => getNextSortState(currentSort, field));
+    }, []);
 
     const handleFilterChange = (newFilters: AuditLogFilter) => {
         setFilters(newFilters);
@@ -97,11 +111,12 @@ export function AuditLogsView({
     };
 
     return (
-        <Card className="p-3 sm:p-4 md:p-6">
+        <Card className="p-3 sm:p-1 md:p-6">
             <div className="mb-3 sm:mb-4 space-y-3">
                 <AuditLogFilters
                     filters={filters}
                     tableNames={tableNames}
+                    users={users}
                     onFilterChange={handleFilterChange}
                     isLoading={isPending || isInitialLoading}
                 />
@@ -142,11 +157,13 @@ export function AuditLogsView({
             ) : (
                 <div className="overflow-x-auto -mx-3 sm:-mx-4 md:-mx-6 px-3 sm:px-4 md:px-6">
                     <AuditLogsTable
-                        logs={logs}
+                        logs={sortedLogs}
                         totalCount={totalCount}
                         filters={filters}
                         onFilterChange={handleFilterChange}
                         onRowClick={setSelectedLog}
+                        sortState={sortState}
+                        onSort={handleSort}
                     />
                 </div>
             )}

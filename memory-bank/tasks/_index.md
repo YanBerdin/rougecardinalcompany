@@ -12,7 +12,7 @@
 
 ## En Cours
 
-> _(aucune tâche en cours)_
+- `TASK038` Responsive Testing & Validation - Plan reviewed, Phase 0 (instrumentation) pending
 
 ## En Attente
 

@@ -79,6 +79,10 @@ export function LieuForm({ lieu }: LieuFormProps) {
                 <LieuFormFields form={form} />
 
                 <div className="flex gap-4">
+                    <Button type="button" variant="secondary" onClick={() => router.back()}>
+                        Annuler
+                    </Button>
+
                     <Button type="submit" disabled={isPending}>
                         {isPending
                             ? "Enregistrement..."
@@ -86,9 +90,7 @@ export function LieuForm({ lieu }: LieuFormProps) {
                                 ? "Mettre à jour"
                                 : "Créer"}
                     </Button>
-                    <Button type="button" variant="outline" onClick={() => router.back()}>
-                        Annuler
-                    </Button>
+
                 </div>
             </form>
         </Form>

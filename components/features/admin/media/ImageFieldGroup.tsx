@@ -287,7 +287,7 @@ export function ImageFieldGroup<TForm extends FieldValues>({
                                         <Link2 className="h-4 w-4 shrink-0" />
                                         <span>Ou saisir une URL externe</span>
                                     </div>
-                                    <div className="flex flex-col sm:flex-row gap-2">
+                                    <div className="flex flex-col-2 sm:flex-row gap-2">
                                         <div className="relative flex-1 min-w-0">
                                             <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                             <Input
@@ -303,12 +303,12 @@ export function ImageFieldGroup<TForm extends FieldValues>({
                                                 <Button
                                                     type="button"
                                                     variant="outline"
-                                                    size="sm"
+                                                    size="icon"
                                                     onClick={handleClearUrl}
                                                     title="Effacer l'URL"
                                                     className="shrink-0"
                                                 >
-                                                    <X className="h-4 w-4" />
+                                                    <X />
                                                 </Button>
                                             )}
                                             {isValidating && (

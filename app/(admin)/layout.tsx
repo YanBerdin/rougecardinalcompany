@@ -62,7 +62,7 @@ export default async function AdminLayout({
             <ThemeSwitcher />
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-6 max-sm:p-6 p-4">
+        <div className="flex flex-1 flex-col gap-6 max-sm:p-2 p-4">
           {children}
         </div>
       </SidebarInset>

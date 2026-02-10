@@ -17,6 +17,7 @@ import { Search, X } from "lucide-react";
 export function AuditLogFilters({
     filters,
     tableNames,
+    users,
     onFilterChange,
     isLoading
 }: AuditLogFiltersProps) {
@@ -36,7 +37,7 @@ export function AuditLogFilters({
     };
 
     return (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
             {/* Action Filter */}
             <Select
                 value={filters.action ?? "all"}
@@ -85,6 +86,31 @@ export function AuditLogFilters({
                 </SelectContent>
             </Select>
 
+            {/* User Filter */}
+            <Select
+                value={filters.user_id ?? "all"}
+                onValueChange={(value) =>
+                    onFilterChange({
+                        ...filters,
+                        user_id: value === "all" ? undefined : value,
+                        page: 1,
+                    })
+                }
+                disabled={isLoading}
+            >
+                <SelectTrigger>
+                    <SelectValue placeholder="Utilisateur" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all">Tous les utilisateurs</SelectItem>
+                    {users.map((user) => (
+                        <SelectItem key={user.user_id} value={user.user_id}>
+                            {user.user_email}
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+
             {/* Date Range Filter */}
             <DateRangePicker
                 from={filters.date_from}
@@ -100,9 +126,10 @@ export function AuditLogFilters({
             />
 
             {/* Search Input */}
-            <div className="flex gap-2 lg:col-span-2">
+            <div className="flex gap-2 sm:col-span-2 md:col-span-3 lg:col-span-3">
                 <Input
                     placeholder="Rechercher (record_id, table)..."
+                    title="Rechercher dans les logs"
                     value={localSearch}
                     onChange={(e) => setLocalSearch(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleApplySearch()}
@@ -111,6 +138,8 @@ export function AuditLogFilters({
                 <Button
                     onClick={handleApplySearch}
                     size="icon"
+                    variant="default"
+                    title="Appliquer la recherche"
                     disabled={isLoading}
                 >
                     <Search className="h-4 w-4" />
@@ -118,10 +147,11 @@ export function AuditLogFilters({
                 <Button
                     onClick={handleReset}
                     size="icon"
-                    variant="ghost"
+                    variant="outline"
+                    title="Réinitialiser les filtres"
                     disabled={isLoading}
                 >
-                    <X className="h-4 w-4" />
+                    <X />
                 </Button>
             </div>
         </div>

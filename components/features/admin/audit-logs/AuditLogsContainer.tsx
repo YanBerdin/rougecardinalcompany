@@ -1,4 +1,4 @@
-import { fetchAuditLogs, fetchAuditTableNames } from "@/lib/dal/audit-logs";
+import { fetchAuditLogs, fetchAuditTableNames, fetchDistinctAuditUsers } from "@/lib/dal/audit-logs";
 import { AuditLogsView } from "./AuditLogsView";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
@@ -29,9 +29,10 @@ export async function AuditLogsContainer({ searchParams }: AuditLogsContainerPro
         search: searchParams.search as string | undefined,
     };
 
-    const [logsResult, tablesResult] = await Promise.all([
+    const [logsResult, tablesResult, usersResult] = await Promise.all([
         fetchAuditLogs(filters),
         fetchAuditTableNames(),
+        fetchDistinctAuditUsers(),
     ]);
 
     if (!logsResult.success) {
@@ -45,6 +46,7 @@ export async function AuditLogsContainer({ searchParams }: AuditLogsContainerPro
     }
 
     const tableNames = tablesResult.success ? tablesResult.data : [];
+    const users = usersResult.success ? usersResult.data : [];
 
     return (
         <AuditLogsView
@@ -52,6 +54,7 @@ export async function AuditLogsContainer({ searchParams }: AuditLogsContainerPro
             initialTotalCount={logsResult.data.totalCount}
             initialFilters={filters}
             tableNames={tableNames}
+            users={users}
         />
     );
 }

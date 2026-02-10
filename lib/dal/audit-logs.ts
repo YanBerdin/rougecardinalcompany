@@ -16,7 +16,13 @@ const AUDIT_ERROR_CODES = {
     INVALID_FILTERS: "ERR_AUDIT_002",
     UNEXPECTED: "ERR_AUDIT_003",
     TABLE_NAMES_FAILED: "ERR_AUDIT_004",
+    USERS_FAILED: "ERR_AUDIT_005",
 } as const;
+
+export interface AuditUserOption {
+    user_id: string;
+    user_email: string;
+}
 
 /**
  * Fetch audit logs with user email resolution and advanced filtering
@@ -89,6 +95,64 @@ export async function fetchAuditTableNames(): Promise<DALResult<string[]>> {
 
         const uniqueTables = [...new Set(data?.map((row) => row.table_name) ?? [])];
         return { success: true, data: uniqueTables };
+    } catch (error) {
+        return {
+            success: false,
+            error: `[${AUDIT_ERROR_CODES.UNEXPECTED}] ${error instanceof Error ? error.message : "Unknown"}`,
+        };
+    }
+}
+
+/**
+ * Get distinct users from audit logs (for filter dropdown)
+ * Returns users with both user_id and resolved email from auth.users
+ */
+export async function fetchDistinctAuditUsers(): Promise<DALResult<AuditUserOption[]>> {
+    try {
+        const supabase = await createClient();
+
+        // Get distinct user_ids from audit logs, then join with auth.users
+        const { data, error } = await supabase
+            .from("logs_audit")
+            .select("user_id")
+            .not("user_id", "is", null);
+
+        if (error) {
+            return {
+                success: false,
+                error: `[${AUDIT_ERROR_CODES.USERS_FAILED}] ${error.message}`,
+            };
+        }
+
+        // Get unique user IDs
+        const uniqueUserIds = [...new Set(data?.map((row) => row.user_id).filter(Boolean) ?? [])];
+
+        if (uniqueUserIds.length === 0) {
+            return { success: true, data: [] };
+        }
+
+        // Fetch user emails from auth.users
+        const { data: users, error: usersError } = await supabase.auth.admin.listUsers();
+
+        if (usersError) {
+            return {
+                success: false,
+                error: `[${AUDIT_ERROR_CODES.USERS_FAILED}] ${usersError.message}`,
+            };
+        }
+
+        // Map user_id to email
+        const userOptions: AuditUserOption[] = uniqueUserIds
+            .map((userId) => {
+                const user = users.users.find((u) => u.id === userId);
+                return {
+                    user_id: userId,
+                    user_email: user?.email ?? "Utilisateur inconnu",
+                };
+            })
+            .sort((a, b) => a.user_email.localeCompare(b.user_email));
+
+        return { success: true, data: userOptions };
     } catch (error) {
         return {
             success: false,

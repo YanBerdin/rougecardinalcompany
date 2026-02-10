@@ -111,7 +111,7 @@ export default function SpectaclesTable({
                 <Pencil className="h-5 w-5 mr-2" /> Éditer
               </Button>
               <Button
-                variant="ghost-destructive"
+                variant="destructive"
                 size="sm"
                 onClick={() => onDelete(spectacle.id)}
                 className="h-10 min-w-[56px] px-3"
