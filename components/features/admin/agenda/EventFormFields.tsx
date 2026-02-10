@@ -141,6 +141,7 @@ export function EventFormFields({ form }: EventFormFieldsProps) {
                             <FormControl>
                                 <Input
                                     type="number"
+                                    min="1"
                                     {...field}
                                     value={field.value ?? ""}
                                     onChange={(e) =>
@@ -160,17 +161,23 @@ export function EventFormFields({ form }: EventFormFieldsProps) {
                     name="price_cents"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Prix (centimes)</FormLabel>
+                            <FormLabel>Prix (€)</FormLabel>
                             <FormControl>
                                 <Input
                                     type="number"
+                                    min="0"
+                                    step="0.01"
+                                    placeholder="0.00"
                                     {...field}
-                                    value={field.value ?? ""}
-                                    onChange={(e) =>
+                                    // Conversion centimes → euros pour affichage
+                                    value={field.value !== null && field.value !== undefined ? (field.value / 100).toFixed(2) : ""}
+                                    // Conversion euros → centimes pour stockage
+                                    onChange={(e) => {
+                                        const euros = parseFloat(e.target.value);
                                         field.onChange(
-                                            e.target.value ? parseInt(e.target.value) : null
-                                        )
-                                    }
+                                            !isNaN(euros) && e.target.value ? Math.round(euros * 100) : null
+                                        );
+                                    }}
                                 />
                             </FormControl>
                             <FormMessage />

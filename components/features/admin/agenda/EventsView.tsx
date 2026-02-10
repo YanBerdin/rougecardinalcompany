@@ -82,8 +82,8 @@ export function EventsView({ initialEvents }: EventsViewProps) {
 
     return (
         <div className="container py-8">
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold">Gestion Agenda</h1>
+            <div className="flex justify-between items-center mb-6 lg:mb-12 flex-wrap gap-4">
+                <h1 className="text-3xl font-bold whitespace-nowrap">Gestion Agenda</h1>
                 <Button onClick={() => router.push("/admin/agenda/new")}>
                     Nouvel Événement
                 </Button>

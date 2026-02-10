@@ -93,28 +93,28 @@ export default function SpectaclesTable({
             {/* Footer: Actions */}
             <div className="flex items-center justify-end gap-2 pt-2 border-t mt-2">
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
                 onClick={() => onView(spectacle.id)}
-                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-10 min-w-[56px] px-3"
+                className="h-10 min-w-[56px] px-3"
                 aria-label={`Voir ${spectacle.title}`}
               >
                 <Eye className="h-5 w-5 mr-2" /> Détails
               </Button>
               <Button
-                variant="ghost"
+                variant="secondary"
                 size="sm"
                 onClick={() => onEdit(spectacle.id)}
-                className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 h-10 min-w-[56px] px-3"
+                className="h-10 min-w-[56px] px-3"
                 aria-label={`Éditer ${spectacle.title}`}
               >
                 <Pencil className="h-5 w-5 mr-2" /> Éditer
               </Button>
               <Button
-                variant="ghost"
+                variant="ghost-destructive"
                 size="sm"
                 onClick={() => onDelete(spectacle.id)}
-                className="text-red-600 hover:text-red-700 hover:bg-red-50 h-10 min-w-[56px] px-3"
+                className="h-10 min-w-[56px] px-3"
                 aria-label={`Supprimer ${spectacle.title}`}
               >
                 <Trash2 className="h-5 w-5 mr-2" /> Supprimer
@@ -131,7 +131,7 @@ export default function SpectaclesTable({
       <div className="hidden sm:block rounded-md bg-card border ">
         <Table>
           <TableHeader>
-            <TableRow className="bg-muted/80">
+            <TableRow className="bg-muted">
               <TableHead className="w-[20%]">
                 <SortableHeader
                   field="title"
@@ -221,7 +221,7 @@ export default function SpectaclesTable({
                       size="icon"
                       onClick={() => onView(spectacle.id)}
                       title="Voir le détail"
-                      className="h-8 w-8 sm:h-9 sm:w-9 hover:bg-blue-100 hover:text-blue-700"
+                      className="h-8 w-8 sm:h-9 sm:w-9"
                       aria-label={`Voir ${spectacle.title}`}
                     >
                       <Eye className="h-4 w-4" />
@@ -231,17 +231,17 @@ export default function SpectaclesTable({
                       size="icon"
                       onClick={() => onEdit(spectacle.id)}
                       title="Modifier"
-                      className="h-8 w-8 sm:h-9 sm:w-9 hover:bg-amber-100 hover:text-amber-700"
+                      className="h-8 w-8 sm:h-9 sm:w-9"
                       aria-label={`Éditer ${spectacle.title}`}
                     >
                       <Pencil className="h-4 w-4" />
                     </Button>
                     <Button
-                      variant="ghost"
+                      variant="ghost-destructive"
                       size="icon"
                       onClick={() => onDelete(spectacle.id)}
                       title="Supprimer"
-                      className="h-8 w-8 sm:h-9 sm:w-9 hover:bg-red-100 hover:text-red-700"
+                      className="h-8 w-8 sm:h-9 sm:w-9"
                       aria-label={`Supprimer ${spectacle.title}`}
                     >
                       <Trash2 className="h-4 w-4" />
