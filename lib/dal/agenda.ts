@@ -29,13 +29,13 @@ type SupabaseEventRow = {
   ticket_url?: string | null;
   image_url?: string | null;
   type_array?: string[] | null;
-  spectacles?: { title?: string | null; image_url?: string | null }[] | null;
+  spectacles?: { title?: string | null; image_url?: string | null } | null;
   lieux?: {
     nom?: string | null;
     adresse?: string | null;
     ville?: string | null;
     code_postal?: string | null;
-  }[] | null;
+  } | null;
 };
 
 // ============================================================================
@@ -46,8 +46,8 @@ type SupabaseEventRow = {
  * Build address string from lieu parts
  */
 function buildAddress(lieu?: SupabaseEventRow["lieux"]): string {
-  if (!lieu?.[0]) return "";
-  const { adresse, code_postal, ville } = lieu[0];
+  if (!lieu) return "";
+  const { adresse, code_postal, ville } = lieu;
   const cityPart = [code_postal, ville].filter(Boolean).join(" ");
   return [adresse, cityPart].filter(Boolean).join(", ");
 }
@@ -60,17 +60,17 @@ function mapRowToEventDTO(row: SupabaseEventRow): AgendaEvent {
 
   const rawEvent = {
     id: row.id,
-    title: row.spectacles?.[0]?.title ?? "Événement",
+    title: row.spectacles?.title ?? "Événement",
     date: toISODateString(dateDebut),
     time: formatTime(dateDebut, row.start_time),
-    venue: row.lieux?.[0]?.nom ?? "Lieu à venir",
+    venue: row.lieux?.nom ?? "Lieu à venir",
     address: buildAddress(row.lieux),
     type: row.type_array?.[0] ?? "Spectacle",
     status: row.status ?? "programmé",
     ticketUrl: row.ticket_url ?? null,
     image:
       row.image_url ||
-      row.spectacles?.[0]?.image_url ||
+      row.spectacles?.image_url ||
       "/opengraph-image.png",
   };
 
