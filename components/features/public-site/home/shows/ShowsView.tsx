@@ -7,7 +7,7 @@ import { ShowsViewProps } from "./types";
 
 export function ShowsView({ shows }: ShowsViewProps) {
   return (
-    <section className="py-20 bg-card">
+    <section className="py-20 bg-card/40">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold mb-4">Prochains Spectacles</h2>

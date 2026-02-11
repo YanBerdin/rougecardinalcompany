@@ -29,7 +29,7 @@ type SupabaseEventRow = {
   ticket_url?: string | null;
   image_url?: string | null;
   type_array?: string[] | null;
-  spectacles?: { title?: string | null; image_url?: string | null } | null;
+  spectacles?: { title?: string | null; slug?: string | null; image_url?: string | null } | null;
   lieux?: {
     nom?: string | null;
     adresse?: string | null;
@@ -61,6 +61,7 @@ function mapRowToEventDTO(row: SupabaseEventRow): AgendaEvent {
   const rawEvent = {
     id: row.id,
     title: row.spectacles?.title ?? "Événement",
+    spectacleSlug: row.spectacles?.slug ?? null,
     date: toISODateString(dateDebut),
     time: formatTime(dateDebut, row.start_time),
     venue: row.lieux?.nom ?? "Lieu à venir",
@@ -99,7 +100,7 @@ export const fetchUpcomingEvents = cache(
         .from("evenements")
         .select(
           `id, date_debut, start_time, status, ticket_url, image_url, type_array,
-         spectacles (title, image_url),
+         spectacles (title, slug, image_url),
          lieux (nom, adresse, ville, code_postal)`
         )
         .gte("date_debut", new Date().toISOString())

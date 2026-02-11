@@ -16,6 +16,7 @@ import { z } from "zod";
 export const EventSchema = z.object({
     id: z.number(),
     title: z.string(),
+    spectacleSlug: z.string().nullable(),
     date: z.string(), // ISO date string yyyy-mm-dd
     time: z.string(), // HH:mm format
     venue: z.string(),

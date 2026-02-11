@@ -33,7 +33,7 @@ export function CompagnieView({
           return (
             <section
               key={section.id}
-              className="py-20 hero-gradient text-white"
+              className="py-16 hero-gradient text-chart-6"
             >
               <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 {section.title && (

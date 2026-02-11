@@ -9,6 +9,7 @@ import {
   Download,
   Filter,
   Mail,
+  Info,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -46,7 +47,7 @@ export function AgendaView({
   return (
     <div className="pt-16">
       {/* Hero Section */}
-      <section className="py-20 hero-gradient text-sidebar-primary-foreground">
+      <section className="py-16 hero-gradient text-chart-6">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in-up">
             Agenda
@@ -122,20 +123,24 @@ export function AgendaView({
                       {/* Info principale */}
                       <div className="lg:col-span-2">
                         <div className="flex items-start justify-between mb-4">
-                          <h3 className="text-xl font-bold hover:text-primary transition-colors card-title">
-                            {event.title}
-                          </h3>
+                          {event.spectacleSlug ? (
+                            <Link
+                              href={`/spectacles/${event.spectacleSlug}`}
+                              className="text-xl font-bold hover:text-primary transition-colors card-title group"
+                            >
+                              {event.title}
+                              <ExternalLink className="inline-block ml-2 h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </Link>
+                          ) : (
+                            <h3 className="text-xl font-bold card-title">
+                              {event.title}
+                            </h3>
+                          )}
                           <Badge
                             variant="outline"
-                            className={
-                              event.status === "Bientôt complet"
-                                ? "border-orange-500 text-orange-600"
-                                : event.status === "Gratuit"
-                                  ? "border-green-500 text-green-600"
-                                  : ""
-                            }
+                            className="text-md h-6 p-4"
                           >
-                            {event.status}
+                            {event.type}
                           </Badge>
                         </div>
 
@@ -170,6 +175,7 @@ export function AgendaView({
 
                       {/* Actions */}
                       <div className="flex flex-col justify-center space-y-3">
+
                         {event.ticketUrl && (
                           <Button variant="default" asChild>
                             <Link
@@ -192,6 +198,14 @@ export function AgendaView({
                           <Download className="mr-2 h-4 w-4" />
                           Ajouter au calendrier
                         </Button>
+
+                        <Button variant="outline" asChild>
+                          <Link href={`/agenda/${event.id}`}>
+                            <Info className="mr-2 h-4 w-4" />
+                            Détails de l&apos;événement
+                          </Link>
+                        </Button>
+
                       </div>
                     </div>
                   </CardContent>

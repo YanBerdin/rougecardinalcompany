@@ -34,13 +34,13 @@ export function SpectaclesView({
   return (
     <div className="pt-16">
       {/* Hero Section */}
-      <section className="py-8 lg:py-12 hero-gradient text-white">
+      <section className="py-8 lg:py-12 hero-gradient text-chart-6">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-6 animate-fade-in-up">
             À l&apos;Affiche
           </h1>
           <p
-            className="text-lg md:text-xl opacity-90 animate-fade-in"
+            className="text-lg text-chart-6 md:text-xl opacity-90 animate-fade-in"
             style={{ animationDelay: "0.2s" }}
           >
             Nos créations actuellement en représentation

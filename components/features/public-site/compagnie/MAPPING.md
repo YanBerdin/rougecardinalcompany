@@ -242,5 +242,4 @@ When modifying the team member data flow:
 ---
 
 **Last Updated:** 17 octobre 2025  
-**Author:** AI Assistant (verification and documentation)  
 **Status:** ✅ Production-ready with documented TODO for Media Library enhancement

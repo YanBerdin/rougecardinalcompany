@@ -18,13 +18,13 @@ export function PresseView({
   return (
     <div className="pt-16">
       {/* Hero Section */}
-      <section className="py-20 hero-gradient">
+      <section className="py-16 hero-gradient">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in-up text-sidebar-primary-foreground">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in-up text-chart-6">
             Espace Presse
           </h1>
           <p
-            className="text-xl md:text-2xl opacity-90 animate-fade-in text-sidebar-primary-foreground"
+            className="text-xl md:text-2xl opacity-90 animate-fade-in text-chart-6"
             style={{ animationDelay: "0.2s" }}
           >
             Ressources et actualités pour les médias
