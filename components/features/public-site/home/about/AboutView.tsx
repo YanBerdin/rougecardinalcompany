@@ -37,8 +37,8 @@ export function AboutView({ stats, content }: AboutProps) {
 
             <Button size="lg" asChild className="cta-blur-button">
               <Link href="/compagnie">
+                <ArrowRight className="h-5 w-5" />
                 Découvrir notre histoire
-                <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
           </div>

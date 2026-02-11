@@ -73,8 +73,8 @@ export function HeroView({
             {slides[currentSlide].ctaPrimaryEnabled && slides[currentSlide].ctaPrimaryLabel && (
               <Button variant="default" size="lg" asChild>
                 <Link href={slides[currentSlide].ctaPrimaryUrl || "/spectacles"}>
+                  <ArrowRight className="h-5 w-5" />
                   {slides[currentSlide].ctaPrimaryLabel}
-                  <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
             )}
@@ -88,8 +88,9 @@ export function HeroView({
                 asChild
               >
                 <Link href={slides[currentSlide].ctaSecondaryUrl || "/agenda"}>
+                  <Play className="h-5 w-5" />
                   {slides[currentSlide].ctaSecondaryLabel}
-                  <Play className="ml-2 h-5 w-5" />
+
                 </Link>
               </Button>
             )}

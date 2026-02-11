@@ -51,7 +51,7 @@ export function SpectaclesView({
       {/* Spectacles Actuels */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap justify-center gap-8">
+          <div className="flex flex-wrap justify-center gap-16">
             {currentShows.map((show, index) => (
               <Card
                 key={show.id}
@@ -71,16 +71,16 @@ export function SpectaclesView({
                         <Button variant="default"
                           size="lg" className="w-full" asChild>
                           <span>
+                            <ArrowRight className="h-4 w-4" />
                             Je réserve
-                            <ArrowRight className="ml-2 h-4 w-4" />
                           </span>
 
                         </Button>
                         <Button variant="outline"
                           size="lg" className="w-full bg-white/40 border-white text-chart-6 hover:bg-chart-6 hover:text-black shadow-lg" asChild>
                           <span>
+                            <Play className="h-5 w-5" />
                             Détails
-                            <Play className="ml-2 h-5 w-5" />
                           </span>
                         </Button>
                       </div>
@@ -125,7 +125,7 @@ export function SpectaclesView({
             </p>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-12">
+          <div className="flex flex-wrap justify-center gap-16">
             {displayedArchivedShows.map((show, index) => (
               <Card
                 key={show.id}
@@ -178,10 +178,11 @@ export function SpectaclesView({
                 className="cta-blur-button"
                 onClick={() => setShowAllArchived(!showAllArchived)}
               >
-                {showAllArchived ? "Voir moins" : "Voir toutes nos créations"}
                 <ArrowRight
-                  className={`ml-2 h-5 w-5 transition-transform ${showAllArchived ? "rotate-180" : ""}`}
+                  className={`h-5 w-5 transition-transform ${showAllArchived ? "rotate-180" : ""}`}
                 />
+                {showAllArchived ? "Voir moins" : "Voir toutes nos créations"}
+
               </Button>
             )}
           </div>

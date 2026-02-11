@@ -177,17 +177,16 @@ export function AgendaView({
                               target="_blank"
                               rel="noopener noreferrer"
                             >
+                              <ExternalLink className="h-4 w-4" />
                               {event.type === "Atelier"
                                 ? "S&apos;inscrire"
                                 : "Réserver"}
-                              <ExternalLink className="ml-2 h-4 w-4" />
                             </Link>
                           </Button>
                         )}
 
                         <Button
                           variant="secondary"
-                       
                           onClick={() => generateCalendarFile(event)}
                         >
                           <Download className="mr-2 h-4 w-4" />

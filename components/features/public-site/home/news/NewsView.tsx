@@ -15,7 +15,7 @@ export function NewsView({ news }: NewsViewProps) {
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold mb-4">À la Une</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Suivez l&apos;actualité de la compagnie Rouge-Cardinal
           </p>
         </div>
@@ -65,8 +65,8 @@ export function NewsView({ news }: NewsViewProps) {
                   asChild
                 >
                   <Link href={`/actualites/${item.id}`}>
+                    <ArrowRight className="h-4 w-4" />
                     Lire la suite
-                    <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
               </CardFooter>
@@ -82,8 +82,8 @@ export function NewsView({ news }: NewsViewProps) {
             className="cta-blur-button"
           >
             <Link href="/actualites">
+              <ArrowRight className="h-5 w-5" />
               Voir toutes les actualités
-              <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </Button>
         </div>
