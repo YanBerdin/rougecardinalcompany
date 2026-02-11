@@ -432,7 +432,7 @@ export function MediaDetailsPanel({
                         <AlertDialogAction
                             onClick={handleDelete}
                             disabled={isDeleting}
-                            className="h-11 px-6 text-base bg-destructive text-destructive-foreground hover:bg-red-200 hover:text-destructive"
+                            className="h-11 px-6 text-base bg-destructive text-destructive-foreground hover:bg-red-500/20 hover:text-destructive"
                         >
                             {isDeleting ? "Suppression..." : "Supprimer"}
                         </AlertDialogAction>

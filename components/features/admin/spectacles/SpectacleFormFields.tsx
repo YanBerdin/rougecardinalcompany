@@ -53,7 +53,7 @@ export function SpectacleFormFields({
                             />
                         </FormControl>
                         <FormDescription>
-                            Laissez vide pour génération automatique depuis le titre
+                            ⚠️ Génération automatique depuis le titre
                         </FormDescription>
                         <FormMessage />
                     </FormItem>

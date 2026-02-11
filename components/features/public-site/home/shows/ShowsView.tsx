@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ShowsViewProps } from "./types";
 
@@ -16,40 +16,51 @@ export function ShowsView({ shows }: ShowsViewProps) {
           </p>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-8 mb-12">
+        <div className="flex flex-wrap justify-center gap-16 mb-12">
           {shows.map((show, index) => (
             <Card
               key={show.id}
-              className={`card-hover animate-fade-in-up overflow-hidden w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm flex flex-col`}
+              className={`card-hover animate-fade-in-up overflow-hidden w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm group border-0 shadow-none bg-transparent hover:bg-card`}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className="relative">
-                <div
-                  className="h-48 bg-cover bg-center"
-                  style={{ backgroundImage: `url(${show.image})` }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                <div className="absolute bottom-4 left-4 text-white card-meta">
-                  <div className="text-sm opacity-90">
-                    {show.dates && show.dates.length > 0
-                      ? `${show.dates.length} dates`
-                      : "Dates à venir"}
+              <Link href={`/spectacles/${show.slug}`} className="block">
+                <div className="relative aspect-[3/4] overflow-hidden rounded-lg shadow-md">
+                  <div
+                    className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-105"
+                    style={{ backgroundImage: `url(${show.image})` }}
+                  />
+
+                  {/* Hover overlay with buttons */}
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <div className="flex flex-col gap-3 px-6 w-full">
+                      <Button variant="default" size="lg" className="w-full" asChild>
+                        <span>
+                          <ArrowRight className="h-4 w-4" />
+                          Je réserve
+                        </span>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className="w-full bg-white/40 border-white text-chart-6 hover:bg-chart-6 hover:text-black shadow-lg"
+                        asChild
+                      >
+                        <span>
+                          <Play className="h-5 w-5" />
+                          Détails
+                        </span>
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </Link>
 
-              <CardContent className="p-6 flex flex-col flex-1">
-                <h3 className="text-xl font-semibold mb-3 hover:text-primary transition-colors card-title">
-                  <Link href={`/spectacles/${show.slug}`}>{show.title}</Link>
-                </h3>
-                <p className="mb-4 text-sm leading-relaxed card-text">
-                  {show.short_description}
-                </p>
-
+              {/* Badges */}
+              <div className="flex flex-wrap gap-2 justify-center pt-4">
                 {show.dates && show.dates.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-3">
+                  <>
                     {show.dates.slice(0, 3).map((date, i) => (
-                      <Badge key={i} variant="outline" className="font-normal">
+                      <Badge key={i} className="bg-primary text-primary-foreground">
                         {new Date(date).toLocaleDateString("fr-FR", {
                           day: "numeric",
                           month: "short",
@@ -57,34 +68,28 @@ export function ShowsView({ shows }: ShowsViewProps) {
                       </Badge>
                     ))}
                     {show.dates.length > 3 && (
-                      <Badge variant="outline" className="font-normal">
-                        +{show.dates.length - 3}
+                      <Badge className="bg-primary/80 text-primary-foreground">
+                        +{show.dates.length - 3} dates
                       </Badge>
                     )}
-                  </div>
+                  </>
                 )}
-              </CardContent>
+                {(!show.dates || show.dates.length === 0) && (
+                  <Badge className="bg-muted text-muted-foreground">
+                    Dates à venir
+                  </Badge>
+                )}
+              </div>
 
-              <CardFooter className="pt-0 mt-auto">
-                <div className="flex space-x-2 w-full">
-                  <Button
-                    variant="secondary"
-                    size="lg"
-                    className="flex-1"
-                    asChild
-                  >
-                    <Link href={`/spectacles/${show.slug}`}>Réserver</Link>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    asChild
-                    className="flex-1"
-                  >
-                    <Link href={`/spectacles/${show.slug}`}>Détails</Link>
-                  </Button>
-                </div>
-              </CardFooter>
+              {/* Card Footer */}
+              <div className="py-2 text-center">
+                <h3 className="text-xl font-bold text-foreground line-clamp-2">
+                  {show.title}
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                  {show.short_description}
+                </p>
+              </div>
             </Card>
           ))}
         </div>
