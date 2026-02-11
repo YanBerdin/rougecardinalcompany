@@ -26,6 +26,7 @@ type SupabaseShowRow = {
   image_url?: string | null;
   premiere?: string | null;
   public?: boolean | null;
+  status?: string | null;
 };
 
 type SupabaseEventRow = {
@@ -81,50 +82,51 @@ export const fetchFeaturedShows = cache(
     try {
       const supabase = await createClient();
 
-    const { data: shows, error } = await supabase
-      .from("spectacles")
-      .select("id, title, slug, short_description, image_url, premiere, public")
-      .eq("public", true)
-      .order("premiere", { ascending: false })
-      .limit(limit);
+      const { data: shows, error } = await supabase
+        .from("spectacles")
+        .select("id, title, slug, short_description, image_url, premiere, public, status")
+        .eq("public", true)
+        .neq("status", "archived")
+        .order("premiere", { ascending: false })
+        .limit(limit);
 
-    if (error) {
-      console.error("[DAL] fetchFeaturedShows error:", error);
+      if (error) {
+        console.error("[DAL] fetchFeaturedShows error:", error);
+        return {
+          success: false,
+          error: `[ERR_HOME_SHOWS_001] Failed to fetch shows: ${error.message}`,
+        };
+      }
+
+      const ids = (shows ?? []).map((s) => s.id);
+      if (ids.length === 0) {
+        return { success: true, data: [] };
+      }
+
+      const { data: events, error: eventsError } = await supabase
+        .from("evenements")
+        .select("spectacle_id, date_debut")
+        .in("spectacle_id", ids)
+        .order("date_debut", { ascending: true });
+
+      if (eventsError) {
+        console.error("[DAL] fetchFeaturedShows events error:", eventsError);
+        // Continue with empty events - non-blocking error
+      }
+
+      const eventsByShow = buildEventsByShowMap(events ?? []);
+      const showsWithDates = mapShowsWithDates(shows ?? [], eventsByShow);
+
+      return { success: true, data: showsWithDates };
+    } catch (err: unknown) {
+      console.error("[DAL] fetchFeaturedShows unexpected error:", err);
       return {
         success: false,
-        error: `[ERR_HOME_SHOWS_001] Failed to fetch shows: ${error.message}`,
+        error:
+          err instanceof Error
+            ? err.message
+            : "[ERR_HOME_SHOWS_002] Unknown error",
       };
     }
-
-    const ids = (shows ?? []).map((s) => s.id);
-    if (ids.length === 0) {
-      return { success: true, data: [] };
-    }
-
-    const { data: events, error: eventsError } = await supabase
-      .from("evenements")
-      .select("spectacle_id, date_debut")
-      .in("spectacle_id", ids)
-      .order("date_debut", { ascending: true });
-
-    if (eventsError) {
-      console.error("[DAL] fetchFeaturedShows events error:", eventsError);
-      // Continue with empty events - non-blocking error
-    }
-
-    const eventsByShow = buildEventsByShowMap(events ?? []);
-    const showsWithDates = mapShowsWithDates(shows ?? [], eventsByShow);
-
-    return { success: true, data: showsWithDates };
-  } catch (err: unknown) {
-    console.error("[DAL] fetchFeaturedShows unexpected error:", err);
-    return {
-      success: false,
-      error:
-        err instanceof Error
-          ? err.message
-          : "[ERR_HOME_SHOWS_002] Unknown error",
-    };
-  }
   }
 );
