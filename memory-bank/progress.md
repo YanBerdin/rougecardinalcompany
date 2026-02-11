@@ -1,5 +1,51 @@
 # Progress
 
+## Audit Trigger Bugfix - tg_op + auth.uid() (2026-02-11)
+
+### Summary
+
+✅ **CRITICAL BUGFIX DEPLOYED** - Two bugs causing all audit logs to show "Système" instead of user email
+
+| Deliverable | Status | Details |
+| ----------- | ------ | ------- |
+| Bug 1 Identified | ✅ | tg_op case sensitivity (lowercase vs UPPERCASE) |
+| Bug 2 Identified | ✅ | auth.uid() type mismatch (nullif uuid/text) |
+| Migration Created | ✅ | `20260211005525_fix_audit_trigger_tg_op_case.sql` |
+| Schema Updated | ✅ | `02b_functions_core.sql` synchronized |
+| Local Deployed | ✅ | `supabase db reset` |
+| Cloud Deployed | ✅ | MCP `apply_migration` (2 calls) |
+| User Validated | ✅ | "parfait l'adresse email est affichée" |
+
+### Problem
+
+**User Report**: All audit logs showed "Système" in the Utilisateur column instead of the user's email.
+
+**Investigation**: 146+ logs had `user_id = NULL` but IP was captured → trigger was firing but user capture was broken.
+
+### Root Causes
+
+1. **tg_op Case**: PostgreSQL `tg_op` returns `'INSERT'` (UPPERCASE) but code compared `'insert'` (lowercase) → conditional never matched → `record_id` and `new_values` always NULL
+
+2. **auth.uid() Type**: `nullif(auth.uid(), '')::uuid` compares `uuid` type with `text ''` → PostgreSQL throws `invalid input syntax for type uuid: ""` → caught by `exception when others` → `user_id := null`
+
+### Solution
+
+```sql
+-- FIX 1: Uppercase comparisons
+if tg_op in ('INSERT', 'UPDATE') then ...
+
+-- FIX 2: Direct uuid assignment  
+user_id_uuid := auth.uid();  -- auth.uid() returns uuid natively
+```
+
+### Files Modified
+
+- `supabase/migrations/20260211005525_fix_audit_trigger_tg_op_case.sql` (new)
+- `supabase/schemas/02b_functions_core.sql` (updated)
+- `supabase/migrations/migrations.md` (documented)
+
+---
+
 ## TASK038 Responsive Testing - Plan Review (2026-02-10)
 
 ### Summary

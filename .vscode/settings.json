@@ -2,8 +2,6 @@
     // Use the TypeScript version installed in the workspace
     "typescript.tsdk": "node_modules/typescript/lib",
     "files.watcherExclude": {
-        // "**/*.md": true,
-        // "**/doc/**": true,
         "**/doc-perso/**": true
     },
     "search.exclude": {
@@ -12,7 +10,6 @@
         "out/**": true,
         "build/**": true,
         "next-env.d.ts": true,
-        // "**/*.md": true,
         "**/doc-perso/**": true,
         // "**/doc/**": true
     },
@@ -47,6 +44,7 @@
                 "copilot/gpt-5-mini",
                 "copilot/grok-code-fast-1",
                 "copilot/claude-opus-4.5",
+                "copilot/claude-opus-4.6",
             ]
         }
     },

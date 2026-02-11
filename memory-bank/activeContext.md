@@ -1,8 +1,71 @@
 # Active Context
 
-**Current Focus (2026-02-10)**: 🔄 TASK038 Responsive Testing - Plan review complete, Phase 0 (instrumentation) pending
+**Current Focus (2026-02-11)**: 🔄 TASK038 Responsive Testing - Plan review complete, Phase 0 (instrumentation) pending
 
-**Last Major Updates**: TASK038 Plan Review (2026-02-10) + Validation Async Fix (2026-02-05) + Thumbnail Fix (2026-01-30)
+**Last Major Updates**: ✅ Audit Trigger Bugfix (2026-02-11) + TASK038 Plan Review (2026-02-10) + Validation Async Fix (2026-02-05)
+
+---
+
+## ✅ Audit Trigger Bugfix - tg_op + auth.uid() (2026-02-11)
+
+### Summary
+
+✅ **TWO CRITICAL BUGS FIXED** in `audit_trigger()` function — All audit logs now correctly capture `user_id`, `record_id`, and `new_values`
+
+| Bug | Root Cause | Impact | Status |
+|-----|-----------|--------|--------|
+| tg_op case | Code compared lowercase ('insert') but PostgreSQL returns UPPERCASE ('INSERT') | `record_id` + `new_values` always NULL | ✅ Fixed |
+| auth.uid() type mismatch | `nullif(auth.uid(), '')::uuid` compares uuid with text '' → crash | `user_id` always NULL ("Système" displayed) | ✅ Fixed |
+
+### Problem Statement
+
+**User Report**: "Dans AuditLogsView, la colonne Utilisateur affiche 'Système' pour toutes les lignes"
+
+**Investigation Findings**:
+- ALL 146+ audit logs had `user_id = NULL`
+- IP address WAS being captured → trigger was firing
+- JWT propagation was CORRECT (not the problem as initially suspected)
+
+### Root Cause Analysis
+
+**Bug 1: tg_op Case Sensitivity**
+```sql
+-- ❌ BEFORE: Never matched (tg_op = 'INSERT' not 'insert')
+if tg_op in ('insert', 'update') then
+  record_id_text := ...  -- Never executed → NULL
+
+-- ✅ AFTER: Correct uppercase comparison
+if tg_op in ('INSERT', 'UPDATE') then
+```
+
+**Bug 2: auth.uid() Type Mismatch**
+```sql
+-- ❌ BEFORE: Compares uuid with text, crashes silently
+user_id_uuid := nullif(auth.uid(), '')::uuid;
+-- ERROR: invalid input syntax for type uuid: ""
+-- Caught by exception when others → user_id := null
+
+-- ✅ AFTER: auth.uid() returns uuid natively
+user_id_uuid := auth.uid();
+```
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `supabase/migrations/20260211005525_fix_audit_trigger_tg_op_case.sql` | New migration with both fixes + SECURITY DEFINER header |
+| `supabase/schemas/02b_functions_core.sql` | Declarative schema updated |
+| `supabase/migrations/migrations.md` | Documentation added |
+
+### Deployment
+
+- ✅ Applied to **local** via `supabase db reset`
+- ✅ Applied to **cloud** via MCP `apply_migration` (2 migrations)
+- ✅ **User confirmed**: "parfait l'adresse email est affichée"
+
+### Next Steps
+
+- None — Fix complete and deployed
 
 ---
 

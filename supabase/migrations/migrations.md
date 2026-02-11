@@ -4,6 +4,44 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-02-11 - BUGFIX: Audit trigger tg_op case sensitivity
+
+**Migration**: `20260211005525_fix_audit_trigger_tg_op_case.sql`
+
+**Sévérité**: 🔴 **CRITICAL** — Tous les logs d'audit avaient `record_id = NULL` et `new_values = NULL`
+
+**Problème**:
+Deux bugs dans `audit_trigger()` :
+
+1. **tg_op case sensitivity** : PostgreSQL `tg_op` retourne TOUJOURS en MAJUSCULES ('INSERT', 'UPDATE', 'DELETE'), mais le code comparait en minuscules. Résultat : `record_id` et `new_values` systématiquement NULL.
+
+2. **auth.uid() type mismatch** : `nullif(auth.uid(), '')::uuid` compare `uuid` avec `text`, provoquant `invalid input syntax for type uuid: ""`. L'erreur était avalée par `exception when others` → `user_id` toujours NULL.
+
+**Cause Root**:
+```sql
+-- ❌ AVANT
+if tg_op in ('insert', 'update') then ...  -- JAMAIS vrai (tg_op = 'INSERT')
+user_id_uuid := nullif(auth.uid(), '')::uuid;  -- ERROR: uuid vs text
+
+-- ✅ APRÈS
+if tg_op in ('INSERT', 'UPDATE') then ...  -- Correct
+user_id_uuid := auth.uid();  -- auth.uid() retourne uuid nativement
+```
+
+**Impact**:
+- **AVANT** : Tous les logs d'audit avec `record_id = NULL`, `new_values = NULL`, `user_id = NULL` (affiché "Système")
+- **APRÈS** : `record_id`, `new_values`, `old_values` ET `user_id` correctement capturés
+
+**Validation**:
+- ✅ Testé localement : INSERT, UPDATE, DELETE capturent `record_id` et values
+- ✅ Tables sans colonne `id` (configurations_site) fonctionnent correctement
+- ✅ Intégré au schéma déclaratif : `supabase/schemas/02b_functions_core.sql`
+- 📝 Migration conservée pour l'historique et la cohérence avec Supabase Cloud
+
+**Application**: ✅ Appliquée via MCP `apply_migration` le 2026-02-11
+
+---
+
 ### 2026-02-02 - SECURITY FIX: Views SECURITY INVOKER
 
 **Migration**: `20260202010000_fix_views_security_invoker.sql`

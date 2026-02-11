@@ -77,6 +77,7 @@ comment on function public.update_updated_at_column() is
  *   - Tested: Tables without 'id' column (configurations_site) work correctly
  *   - Tested: Direct function call blocked by lack of trigger context
  *   - Tested: Users cannot INSERT directly into logs_audit after revoke
+ *   - Tested: tg_op UPPERCASE comparisons produce correct record_id and new_values
  */
 create or replace function public.audit_trigger()
 returns trigger
@@ -108,17 +109,18 @@ begin
     ua_text := null;
   end if;
 
-  -- Get authenticated user ID
+  -- Get authenticated user ID (auth.uid() returns uuid or NULL natively)
   begin
-    user_id_uuid := nullif(auth.uid(), '')::uuid;
+    user_id_uuid := auth.uid();
   exception when others then
     user_id_uuid := null;
   end;
 
   -- Extract record identifier (handle tables without 'id' column)
   -- Priority: id > key > uuid > null
+  -- NOTE: tg_op returns UPPERCASE ('INSERT', 'UPDATE', 'DELETE')
   begin
-    if tg_op in ('insert', 'update') then
+    if tg_op in ('INSERT', 'UPDATE') then
       record_id_text := coalesce(
         (to_json(new) ->> 'id'),
         (to_json(new) ->> 'key'),
@@ -145,14 +147,14 @@ begin
     tg_op,
     tg_table_name,
     record_id_text,
-    case when tg_op = 'delete' then row_to_json(old) else null end,
-    case when tg_op in ('insert', 'update') then row_to_json(new) else null end,
+    case when tg_op = 'DELETE' then row_to_json(old) else null end,
+    case when tg_op in ('INSERT', 'UPDATE') then row_to_json(new) else null end,
     case when xff_text is not null then nullif(xff_text, '')::inet else null end,
     ua_text,
     now()
   );
 
-  if tg_op = 'delete' then
+  if tg_op = 'DELETE' then
     return old;
   else
     return new;
@@ -161,7 +163,7 @@ end;
 $$;
 
 comment on function public.audit_trigger() is 
-'Generic audit trigger that logs all DML operations with user context and metadata. Uses SECURITY DEFINER to bypass RLS and prevent direct user INSERTs into logs_audit. Handles tables with different primary key columns (id, key, uuid). Migration 20260110011128 fixes support for tables without id column.';
+'Generic audit trigger that logs all DML operations with user context and metadata. Uses SECURITY DEFINER to bypass RLS and prevent direct user INSERTs into logs_audit. Handles tables with different primary key columns (id, key, uuid). FIX 20260110011128: support tables without id column. FIX 20260211005525: tg_op case sensitivity (UPPERCASE). FIX 20260211: auth.uid() type mismatch (nullif uuid/text).';
 
 -- Helper pour recherche full-text français
 create or replace function public.to_tsvector_french(text)
