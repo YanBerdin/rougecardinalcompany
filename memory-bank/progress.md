@@ -1,5 +1,264 @@
 # Progress
 
+## Agenda Navigation Enhancement - Spectacle & Event Detail Links (2026-02-12)
+
+### Summary
+
+✅ **CRITICAL BUGFIX + NAVIGATION FEATURES DEPLOYED** — Many-to-one Supabase relations corrected, spectacle and event detail links added
+
+| Deliverable | Status | Details |
+| ----------- | ------ | ------- |
+| Many-to-one Bug Identified | ✅ | Spectacles/lieux treated as arrays instead of objects |
+| Type Correction | ✅ | `SupabaseEventRow` updated (removed array notation) |
+| Mapping Fix | ✅ | Removed all `[0]` array access from spectacle/lieu fields |
+| Spectacle Slug Added | ✅ | `spectacleSlug` field added to EventSchema |
+| Title Link Implemented | ✅ | Event title links to `/spectacles/:slug` |
+| Event Button Added | ✅ | "Détails de l'événement" button links to `/agenda/:id` |
+| UI Enhancements | ✅ | Badge shows type, hero styling improved |
+| Committed | ✅ | 2 commits (fdcb983 + a80dbc0), 12 files changed |
+
+### Problem
+
+**User Report**: "Dans AgendaView, event.title renvoie 'Événement' plutôt que de renvoyer le titre du spectacle lié à l'événement"
+
+**Investigation**:
+- In Supabase, many-to-one relations (`evenement → spectacle`, `evenement → lieu`) return **a single object**, not an array
+- Code was incorrectly treating these as arrays: `spectacles?.[0]?.title`
+- This caused the title to always be `undefined`, falling back to "Événement"
+- Same issue affected venue name
+
+### Root Cause
+
+**Incorrect Type Definition**:
+```typescript
+// ❌ BEFORE: Wrong array type for many-to-one
+type SupabaseEventRow = {
+  spectacles?: { title?: string | null; image_url?: string | null }[] | null;
+  //                                                                  ^^ Wrong!
+  lieux?: { nom?: string | null; ... }[] | null;
+  //                                     ^^ Wrong!
+};
+
+// Code attempted array access
+title: row.spectacles?.[0]?.title ?? "Événement"  // Always undefined!
+                    // ^^^ Array access on object → undefined
+```
+
+**Supabase Behavior**:
+- **Many-to-one**: Returns single object (e.g., `{ title: "Le Drapier" }`)
+- **One-to-many**: Returns array (e.g., `[{ name: "Actor 1" }, { name: "Actor 2" }]`)
+
+### Solution
+
+**1. Type Correction** (`lib/dal/agenda.ts`):
+```typescript
+// ✅ AFTER: Correct object type
+type SupabaseEventRow = {
+  spectacles?: { 
+    title?: string | null; 
+    slug?: string | null;      // NEW: Added for navigation
+    image_url?: string | null 
+  } | null;  // Object, not array!
+  
+  lieux?: {
+    nom?: string | null;
+    adresse?: string | null;
+    ville?: string | null;
+    code_postal?: string | null;
+  } | null;  // Object, not array!
+};
+```
+
+**2. Mapping Correction** (`lib/dal/agenda.ts`):
+```typescript
+// Helper function
+function buildAddress(lieu?: SupabaseEventRow["lieux"]): string {
+  if (!lieu) return "";  // Changed from !lieu?.[0]
+  const { adresse, code_postal, ville } = lieu;  // Direct access
+  // ...
+}
+
+// Event mapping
+const rawEvent = {
+  title: row.spectacles?.title ?? "Événement",      // No [0]!
+  spectacleSlug: row.spectacles?.slug ?? null,       // NEW
+  venue: row.lieux?.nom ?? "Lieu à venir",           // No [0]!
+  image: row.image_url || row.spectacles?.image_url || "/opengraph-image.png",
+};
+```
+
+**3. Query Update** (`lib/dal/agenda.ts`):
+```typescript
+const { data, error } = await supabase
+  .from("evenements")
+  .select(
+    `id, date_debut, start_time, status, ticket_url, image_url, type_array,
+     spectacles (title, slug, image_url),  // Added slug
+     lieux (nom, adresse, ville, code_postal)`
+  )
+```
+
+**4. Schema Enhancement** (`lib/schemas/agenda.ts`):
+```typescript
+export const EventSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  spectacleSlug: z.string().nullable(),  // NEW: For spectacle navigation
+  date: z.string(),
+  time: z.string(),
+  venue: z.string(),
+  address: z.string(),
+  type: z.string(),
+  status: z.string(),
+  ticketUrl: z.string().nullable(),
+  image: z.string(),
+});
+```
+
+**5. UI Implementation** (`components/features/public-site/agenda/AgendaView.tsx`):
+
+**Spectacle Link**:
+```tsx
+{event.spectacleSlug ? (
+  <Link
+    href={`/spectacles/${event.spectacleSlug}`}
+    className="text-xl font-bold hover:text-primary transition-colors card-title group"
+  >
+    {event.title}
+    <ExternalLink className="inline-block ml-2 h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+  </Link>
+) : (
+  <h3 className="text-xl font-bold card-title">
+    {event.title}
+  </h3>
+)}
+```
+
+**Event Detail Button**:
+```tsx
+<Button variant="outline" asChild>
+  <Link href={`/agenda/${event.id}`}>
+    <Info className="mr-2 h-4 w-4" />
+    Détails de l'événement
+  </Link>
+</Button>
+```
+
+### Files Modified
+
+**Core Changes**:
+- `lib/dal/agenda.ts` (+5/-5 lines) - Type fix, slug fetch, mapping correction
+- `lib/schemas/agenda.ts` (+1 line) - Added `spectacleSlug` field
+- `components/features/public-site/agenda/AgendaView.tsx` (+38/-24 lines) - Title link, event button, UI refinements
+
+**Minor UI Updates**:
+- `components/LogoCloud/LogoCloud.tsx` - Hero gradient styling
+- `components/features/public-site/compagnie/CompagnieView.tsx` - Text color
+- `components/features/public-site/contact/ContactPageView.tsx` - Hero gradient
+- `components/features/public-site/home/about/AboutView.tsx` - Hero gradient
+- `components/features/public-site/home/shows/ShowsView.tsx` - Hero gradient
+- `components/features/public-site/presse/PresseView.tsx` - Hero gradient
+- `components/features/public-site/spectacles/SpectaclesView.tsx` - Hero gradient
+
+### Validation Results
+
+| Test Case | Before | After |
+|-----------|--------|-------|
+| Event title field | "Événement" (generic) | Actual spectacle title ✅ |
+| Venue name field | "Lieu à venir" (fallback) | Actual venue name ✅ |
+| Click event title | No link | Navigates to `/spectacles/:slug` ✅ |
+| Event detail button | Not present | Links to `/agenda/:id` ✅ |
+| Badge content | Event status | Event type ✅ |
+| TypeScript build | N/A | 0 errors ✅ |
+
+### Navigation Flow
+
+```mermaid
+flowchart LR
+    A[Agenda Page] -->|Click Title| B[Spectacle Detail]
+    A -->|Click Button| C[Event Detail]
+    A -->|Click Ticket| D[External Booking]
+    A -->|Click Calendar| E[Download .ics]
+```
+
+### UX Improvements
+
+1. **Correct Information Display**
+   - Event titles show actual spectacle names
+   - Venue names show actual locations
+
+2. **Enhanced Navigation**
+   - Click title → Spectacle detail page (cast, description, media)
+   - Click button → Event detail page (specific date/time, venue info)
+
+3. **Visual Feedback**
+   - ExternalLink icon appears on title hover
+   - Button with Info icon for event details
+
+4. **Better Context**
+   - Badge shows event type (Spectacle, Première, Atelier, Rencontre)
+   - Helps users filter visually
+
+### Commits
+
+**Commit 1** - Type fix:
+```bash
+commit fdcb983
+fix(dal/agenda): correct many-to-one relation types for spectacles and lieux
+
+- Change SupabaseEventRow type: spectacles and lieux are objects, not arrays
+- Fix buildAddress() to access lieu properties directly
+- Fix mapRowToEventDTO() to access spectacles.title without array indexing
+- Resolves issue where event.title displayed 'Événement' instead of actual show title
+
+1 file changed, 7 insertions(+), 7 deletions(-)
+```
+
+**Commit 2** - Navigation features:
+```bash
+commit a80dbc0
+feat(agenda): add spectacle detail link and event detail button
+
+- Add spectacleSlug field to Event schema for navigation
+- Update DAL to fetch spectacle slug from database
+- Make event title clickable link to spectacle detail page
+- Add 'Détails de l'événement' button linking to /agenda/:id
+- Update event badge to display event type instead of status
+- Improve hero section styling (py-16, text-chart-6)
+- Minor UI refinements across multiple view components
+
+11 files changed, 48 insertions(+), 32 deletions(-)
+```
+
+### Architecture Pattern Established
+
+**Supabase Relation Type Mapping**:
+
+| Database Relation | Supabase Returns | TypeScript Type |
+|-------------------|------------------|------------------|
+| Many-to-one (`evenement → spectacle`) | Single object | `{ ... } \| null` |
+| Many-to-one (`evenement → lieu`) | Single object | `{ ... } \| null` |
+| One-to-many (`spectacle → evenements`) | Array | `{ ... }[] \| null` |
+
+**Access Pattern**:
+```typescript
+// ✅ Many-to-one: Direct property access
+row.spectacle?.title
+row.lieu?.nom
+
+// ✅ One-to-many: Array iteration
+row.evenements?.map(e => e.date)
+```
+
+### Next Steps
+
+- [ ] Create event detail page at `/app/(marketing)/agenda/[id]/page.tsx`
+- [ ] Implement event detail view with full information
+- [ ] Consider adding spectacle preview card on hover
+- [ ] Add breadcrumb navigation on detail pages
+
+---
+
 ## Spectacles Slug Bugfix - Auto-generation & Manual Entry (2026-02-12)
 
 ### Summary
