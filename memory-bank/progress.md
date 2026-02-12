@@ -1,5 +1,90 @@
 # Progress
 
+## Spectacles Slug Bugfix - Auto-generation & Manual Entry (2026-02-12)
+
+### Summary
+
+✅ **CRITICAL BUGFIX DEPLOYED** - Slug auto-generation on update + improved manual slug normalization
+
+| Deliverable | Status | Details |
+| ----------- | ------ | ------- |
+| Bug 1 Identified | ✅ | Missing auto-generation in `updateSpectacle()` |
+| Bug 2 Identified | ✅ | Incomplete slug normalization in `transformSlugField()` |
+| DAL Helper Created | ✅ | `prepareUpdateDataWithSlug()` (19 lines) |
+| Normalization Enhanced | ✅ | Multiple dashes + empty string handling |
+| Form Description Updated | ✅ | Clarified behavior in SpectacleFormFields.tsx |
+| Tests Validated | ✅ | Empty slug, manual slug, special chars |
+| Committed | ✅ | `a60f3bb` - 6 files changed, 50 insertions(+) |
+
+### Problem
+
+**User Report**: "Lorsque je modifie un titre de spectacle et que je vide le champ Slug, un nouveau slug n'est pas généré automatiquement. Si j'essaie de le faire manuellement, le nouveau slug n'est pas enregistré."
+
+**Investigation**: 
+- `createSpectacle()` had auto-generation: `slug: generateSlug(validatedData.title)`
+- `updateSpectacle()` lacked this logic → empty slug saved as NULL
+- Manual slugs normalized partially but kept empty strings and multiple dashes
+
+### Root Causes
+
+1. **No Auto-generation on Update**: `updateSpectacle()` had no logic to generate slug when empty, unlike `createSpectacle()`
+
+2. **Incomplete Normalization**: `transformSlugField()` cleaned spaces/special chars but didn't handle multiple dashes or convert empty results to `undefined`
+
+### Solution
+
+**DAL Helper** (`lib/dal/spectacles.ts`):
+```typescript
+function prepareUpdateDataWithSlug(
+  updateData: Partial<CreateSpectacleInput>,
+  existing: SpectacleDb
+): Partial<CreateSpectacleInput> {
+  const hasEmptySlug = !updateData.slug || updateData.slug.trim() === "";
+  
+  if (!hasEmptySlug) return updateData; // Keep manual slug
+  
+  const titleForSlug = updateData.title || existing.title;
+  return { ...updateData, slug: generateSlug(titleForSlug) };
+}
+```
+
+**Enhanced Normalization** (`lib/forms/spectacle-form-helpers.ts`):
+```typescript
+const normalized = cleanData.slug
+  .toLowerCase().trim()
+  .replace(/\s+/g, "-")
+  .replace(/[^a-z0-9-]/g, "")
+  .replace(/-+/g, "-")              // NEW: Multiple dashes → single
+  .replace(/^-+|-+$/g, "");         // NEW: Remove leading/trailing
+
+cleanData.slug = normalized === "" ? undefined : normalized;
+```
+
+### Files Modified
+
+- `lib/dal/spectacles.ts` (+38 lines) - `prepareUpdateDataWithSlug()` helper + updated `updateSpectacle()`
+- `lib/forms/spectacle-form-helpers.ts` (+9 lines) - Enhanced `transformSlugField()`
+- `components/features/admin/spectacles/SpectacleFormFields.tsx` (+2 lines) - Clarified description
+
+### Validation Results
+
+| Test Case | Before | After |
+|-----------|--------|-------|
+| Clear slug field | ❌ Saved NULL | ✅ Auto-generated from title |
+| Enter "Mon Slug" | ❌ Not saved | ✅ Saved as "mon-slug" |
+| Enter "Mon--Slug---Test" | ❌ "mon--slug---test" | ✅ "mon-slug-test" |
+| Update title + clear slug | ❌ NULL | ✅ Generated from new title |
+
+### Commit
+
+```bash
+commit a60f3bb9c71f50722324e920a6c99d8f3b3bf323
+fix(spectacles): auto-generate slug on update when empty + improve manual slug normalization
+6 files changed, 50 insertions(+), 9 deletions(-)
+```
+
+---
+
 ## Audit Trigger Bugfix - tg_op + auth.uid() (2026-02-11)
 
 ### Summary

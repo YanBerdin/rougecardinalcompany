@@ -65,7 +65,7 @@ export default async function SpectacleDetailPage({ params }: Props) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-card p-8">
       <div className="flex items-center justify-between">
         <div className="flex flex-col items-start gap-4">
             <h1 className="text-3xl font-bold">{spectacle.title}</h1>
@@ -184,11 +184,11 @@ export default async function SpectacleDetailPage({ params }: Props) {
           <div>
             <h2 className="text-lg font-semibold mb-2">Image</h2>
             <Image
-              width={300}
-              height={600}
+              width={150}
+              height={300}
               src={spectacle.image_url}
               alt={spectacle.title}
-              className="rounded-lg w-full max-w-sm mx-auto sm:max-w-md md:max-w-lg lg:max-w-2xl object-cover aspect-[3/4]"
+              className="rounded-lg w-full max-w-sm mx-auto sm:max-w-md md:max-w-md lg:max-w-lg object-cover aspect-[3/4]"
               style={{ height: "auto" }}
               sizes="(max-width: 640px) 100vw, 400px"
               priority
@@ -215,7 +215,7 @@ export default async function SpectacleDetailPage({ params }: Props) {
                         style={{ borderRadius: '0.75rem' }}
                       />
                     </div>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm md:text-md text-muted-foreground">
                       Photo {photo.ordre + 1}
                       {photo.alt_text && ` - ${photo.alt_text}`}
                     </p>
@@ -242,10 +242,10 @@ export default async function SpectacleDetailPage({ params }: Props) {
 
         {/* Metadata */}
         <div className="pt-4 border-t">
-          <h3 className="font-medium text-sm text-muted-foreground mb-2">
+          <h3 className="font-medium text-sm md:text-md text-muted-foreground mb-2">
             Métadonnées
           </h3>
-          <div className="text-sm text-muted-foreground space-y-1">
+          <div className="text-sm md:text-md text-muted-foreground space-y-1">
             <p>Créé le : {formatDate(spectacle.created_at)}</p>
             <p>Mis à jour le : {formatDate(spectacle.updated_at)}</p>
             {spectacle.created_by && (
