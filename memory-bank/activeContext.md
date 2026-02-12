@@ -1,8 +1,130 @@
 # Active Context
 
-**Current Focus (2026-02-12)**: ✅ Agenda Navigation Enhancement - Many-to-one relations fixed + spectacle/event detail links added
+**Current Focus (2026-02-12)**: ✅ Homepage Featured Shows Filter Fix - Archived spectacles excluded from "Prochains Spectacles"
 
-**Last Major Updates**: ✅ Agenda Navigation (2026-02-12) + Spectacles Slug Bugfix (2026-02-12) + Audit Trigger Bugfix (2026-02-11)
+**Last Major Updates**: ✅ Homepage Filter Fix (2026-02-12) + Agenda Navigation (2026-02-12) + Spectacles Slug Bugfix (2026-02-12) + Audit Trigger Bugfix (2026-02-11)
+
+---
+
+## ✅ Homepage Featured Shows Filter Fix - Archived Spectacles Excluded (2026-02-12)
+
+### Summary
+
+✅ **CRITICAL FILTER BUGFIX** — Archived spectacles no longer appear in homepage "Prochains Spectacles" section
+
+| Component | Status | Details |
+|-----------|--------|--------|
+| Bug Identified | ✅ | "La Danse des Ombres" (archived) displayed on homepage |
+| Filter Added | ✅ | `.neq("status", "archived")` added to DAL query |
+| Type Updated | ✅ | `status` field added to `SupabaseShowRow` type |
+| Committed | ✅ | `6beb68a` - 1 file changed, 43 insertions(+), 41 deletions(-) |
+
+### Problem Statement
+
+**User Report**: "Pourquoi dans ShowsView le spectacle 'La Danse des Ombres' est affiché alors qu'il fait partie des spectacles archivés ?"
+
+**Investigation Findings**:
+- Spectacle has `public = true` AND `status = 'archived'`
+- `SpectaclesContainer.tsx` (spectacles page) correctly filters: `.filter((s) => s.public && s.status !== "archived")`
+- `fetchFeaturedShows()` (homepage DAL) only filtered: `.eq("public", true)` ❌ Missing archive filter!
+
+### Root Cause Analysis
+
+**Incomplete Filter in Homepage DAL**
+```typescript
+// ❌ BEFORE: Only filtered by public flag
+const { data: shows, error } = await supabase
+  .from("spectacles")
+  .select("id, title, slug, short_description, image_url, premiere, public")
+  .eq("public", true)  // ❌ No status check!
+  .order("premiere", { ascending: false })
+  .limit(limit);
+
+// ✅ AFTER: Filters both public AND archived status
+const { data: shows, error } = await supabase
+  .from("spectacles")
+  .select("id, title, slug, short_description, image_url, premiere, public, status")
+  .eq("public", true)
+  .neq("status", "archived")  // ✅ Excludes archived shows
+  .order("premiere", { ascending: false })
+  .limit(limit);
+```
+
+**Why It Happened**:
+- `SpectaclesContainer.tsx` was implementing the correct filter at the component level
+- `fetchFeaturedShows()` was missing this filter at the DAL level
+- Result: Archived shows with `public = true` appeared on homepage but not on spectacles page (inconsistent)
+
+### Solution Implemented
+
+**File Modified**: `lib/dal/home-shows.ts`
+
+**Changes**:
+1. Added `status` field to `SupabaseShowRow` type definition
+2. Added `status` to `.select()` query fields
+3. Added `.neq("status", "archived")` filter to exclude archived spectacles
+
+**Code Changes**:
+```typescript
+// Type update
+type SupabaseShowRow = {
+  id: number;
+  title: string;
+  slug?: string | null;
+  short_description?: string | null;
+  image_url?: string | null;
+  premiere?: string | null;
+  public?: boolean | null;
+  status?: string | null;  // ✅ NEW
+};
+
+// Query update
+.select("id, title, slug, short_description, image_url, premiere, public, status")  // Added status
+.eq("public", true)
+.neq("status", "archived")  // ✅ NEW FILTER
+```
+
+### Validation Results
+
+| Test Case | Before | After |
+|-----------|--------|-------|
+| "La Danse des Ombres" on homepage | ❌ Displayed | ✅ Hidden (archived) |
+| Current shows on homepage | ✅ Displayed | ✅ Displayed |
+| Filter consistency homepage vs spectacles page | ❌ Different | ✅ Same logic |
+| TypeScript compilation | 0 errors | 0 errors ✅ |
+
+### Business Logic Alignment
+
+**Homepage "Prochains Spectacles"**: Now matches spectacles page "À l'Affiche" filter
+
+| Filter Criterion | Homepage (ShowsContainer) | Spectacles Page (SpectaclesContainer) |
+|------------------|---------------------------|----------------------------------------|
+| Public shows only | ✅ `public = true` | ✅ `public = true` |
+| Exclude archived | ✅ `status != 'archived'` | ✅ `status != 'archived'` |
+| Current shows | ✅ Yes | ✅ Current section |
+| Archived shows | ✅ Hidden | ✅ Separate "Nos Créations Passées" section |
+
+### Commit Details
+
+```bash
+commit 6beb68a
+fix(home-shows): exclude archived shows from featured shows section
+
+- Add .neq('status', 'archived') filter to prevent archived shows from appearing in 'Prochains Spectacles'
+- Add status field to SupabaseShowRow type and select query
+- Fixes issue where 'La Danse des Ombres' appeared on homepage despite being archived
+
+1 file changed, 43 insertions(+), 41 deletions(-)
+lib/dal/home-shows.ts
+```
+
+### Impact
+
+**User Experience**: Homepage now consistently shows only current/upcoming spectacles (no archived shows)
+
+**Data Integrity**: Archive status properly respected across all public pages
+
+**Maintenance**: Filter logic centralized in DAL (single source of truth)
 
 ---
 
