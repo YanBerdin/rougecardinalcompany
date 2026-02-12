@@ -531,10 +531,44 @@ async function performSpectacleUpdate(
 }
 
 /**
+ * Prepares update data with auto-generated slug if empty
+ * @internal
+ */
+function prepareUpdateDataWithSlug(
+  updateData: Partial<CreateSpectacleInput>,
+  existing: SpectacleDb
+): Partial<CreateSpectacleInput> {
+  const hasEmptySlug = !updateData.slug || updateData.slug.trim() === "";
+  
+  // console.log("[prepareUpdateDataWithSlug] Input slug:", updateData.slug);
+  // console.log("[prepareUpdateDataWithSlug] hasEmptySlug:", hasEmptySlug);
+  
+  if (!hasEmptySlug) {
+    // console.log("[prepareUpdateDataWithSlug] Keeping manual slug:", updateData.slug);
+    return updateData;
+  }
+
+  const titleForSlug = updateData.title || existing.title;
+  //const generatedSlug = generateSlug(titleForSlug);
+  
+  //console.log("[prepareUpdateDataWithSlug] Auto-generating slug:", generatedSlug, "from title:", titleForSlug);
+  
+//   return {
+//    ...updateData,
+//    slug: generateSlug,
+
+  return {
+    ...updateData,
+    slug: generateSlug(titleForSlug),
+  };
+}
+
+/**
  * Updates an existing spectacle
  *
  * Validates input with Zod and requires admin permissions.
  * Only updates provided fields (partial update).
+ * If slug is empty, auto-generates from title.
  *
  * @param input - Partial spectacle data with required id
  * @returns DALResult with the updated spectacle or error details
@@ -566,7 +600,9 @@ export async function updateSpectacle(
       };
     }
 
-    const updateResult = await performSpectacleUpdate(id, updateData);
+    const finalUpdateData = prepareUpdateDataWithSlug(updateData, existing);
+
+    const updateResult = await performSpectacleUpdate(id, finalUpdateData);
     if (!updateResult.success) return updateResult;
 
     return updateResult;

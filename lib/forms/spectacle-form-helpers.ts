@@ -178,11 +178,16 @@ function transformSlugField(
   cleanData: Record<string, unknown>
 ): Record<string, unknown> {
   if (cleanData.slug && typeof cleanData.slug === "string") {
-    cleanData.slug = cleanData.slug
+    const normalized = cleanData.slug
       .toLowerCase()
       .trim()
       .replace(/\s+/g, "-")
-      .replace(/[^a-z0-9-]/g, "");
+      .replace(/[^a-z0-9-]/g, "")
+      .replace(/-+/g, "-")  // Replace multiple dashes with single dash
+      .replace(/^-+|-+$/g, "");  // Remove leading/trailing dashes
+    
+    // If normalized slug is empty, remove it (will trigger auto-generation)
+    cleanData.slug = normalized === "" ? undefined : normalized;
   }
 
   return cleanData;

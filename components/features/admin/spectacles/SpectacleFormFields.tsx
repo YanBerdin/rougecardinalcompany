@@ -53,7 +53,7 @@ export function SpectacleFormFields({
                             />
                         </FormControl>
                         <FormDescription>
-                            ⚠️ Génération automatique depuis le titre
+                            ⚠️ Si titre modifié → Vider le champ Slug pour une génération automatique à partir du titre. <br/>⚠️ Sinon, assurez-vous que le slug est unique (lettres, chiffres, tirets, → sans espace).
                         </FormDescription>
                         <FormMessage />
                     </FormItem>

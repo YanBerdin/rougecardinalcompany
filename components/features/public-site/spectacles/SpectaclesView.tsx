@@ -129,7 +129,7 @@ export function SpectaclesView({
             {displayedArchivedShows.map((show, index) => (
               <Card
                 key={show.id}
-                className={`card-hover animate-fade-in-up overflow-hidden w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] xl:w-[calc(25%-1.125rem)] max-w-xs group border-0 shadow-none bg-transparent`}
+                className={`card-hover animate-fade-in-up overflow-hidden w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] xl:w-[calc(25%-1.125rem)] max-w-xs group border-0 shadow-none bg-transparent hover:bg-secondary`}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <Link href={getSpectacleUrl(show)} className="block">

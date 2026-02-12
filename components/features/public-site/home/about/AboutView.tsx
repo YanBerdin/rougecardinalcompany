@@ -5,7 +5,7 @@ import { AboutProps } from "./types";
 
 export function AboutView({ stats, content }: AboutProps) {
   return (
-    <section className="py-20 pt-16 bg-card/40">
+    <section className="py-20 pt-16 bg-card/90">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Content */}
@@ -54,7 +54,7 @@ export function AboutView({ stats, content }: AboutProps) {
             </div>
 
             {/* Floating Card */}
-            <div className="absolute -bottom-6 -left-6 bg-background p-6 rounded-xl shadow-lg border max-w-xs">
+            <div className="absolute -bottom-6 -left-6 bg-background p-4 rounded-xl shadow-lg border max-w-xs">
               <h3 className="font-semibold mb-2 text-card-foreground">
                 {content.missionTitle}
               </h3>
