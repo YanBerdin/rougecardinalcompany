@@ -8,7 +8,7 @@ import {
   ExternalLink,
   Download,
   Filter,
-  Mail,
+  CheckCircle,
   Info,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -45,7 +45,7 @@ export function AgendaView({
   }
 
   return (
-    <div className="pt-16">
+    <div className="pt-16 bg-card/60">
       {/* Hero Section */}
       <section className="py-16 hero-gradient text-chart-6">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -62,7 +62,7 @@ export function AgendaView({
       </section>
 
       {/* Filtres */}
-      <section className="py-8 border-b bg-muted/30">
+      <section className="py-8 border-b">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center space-x-4">
             <Filter className="h-5 w-5 text-muted-foreground" />
@@ -83,7 +83,7 @@ export function AgendaView({
       </section>
 
       {/* Liste des événements */}
-      <section className="py-12">
+      <section className="py-12 bg-card/60">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="space-y-6">
             {events.map((event, index) => (
@@ -224,36 +224,62 @@ export function AgendaView({
         </div>
       </section>
 
+      <div className="w-full h-16 bg-card/60"></div>
+
       {/* Newsletter CTA Section */}
-      {showNewsletterSection && !newsletterIsSubscribed && (
-        <section className="py-20 hero-gradient">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div className="animate-fade-in-up">
-              <Mail className="h-12 w-12 text-white mx-auto mb-6" />
-              <h2 className="text-3xl font-bold text-white mb-4">
-                Restez Informé
-              </h2>
-              <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-                Inscrivez-vous à notre newsletter pour recevoir nos actualités,
-                invitations aux premières et offres exclusives.
-              </p>
-              {newsletterErrorMessage && (
-                <p className="text-red-200 text-sm mb-4">{newsletterErrorMessage}</p>
-              )}
-              {onNewsletterEmailChange && onNewsletterSubmit && (
-                <NewsletterForm
-                  email={newsletterEmail}
-                  isLoading={newsletterIsLoading}
-                  isSubscribed={newsletterIsSubscribed}
-                  errorMessage={newsletterErrorMessage}
-                  onEmailChange={onNewsletterEmailChange}
-                  onSubmit={onNewsletterSubmit}
-                />
+      {showNewsletterSection && (
+        <section className="py-16 bg-card/60 hero-gradient">
+          <div className="max-w-6xl mx-auto grid grid-cols-1 gap-x-8 lg:gap-y-6 lg:grid-cols-[3fr_2fr] px-4">
+            {/* Colonne gauche */}
+            <dl className="flex gap-6 mx-auto">
+              <div className="flex flex-col items-center lg:items-start">
+                <p className="text-md lg:text-lg text-white/80">
+                  Dernier acte
+                </p>
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-white leading-tight">
+                  Restez dans les coulisses
+                </h2>
+                <div className="h-px w-24 xl:w-72 bg-white/40 my-6"></div>
+              </div>
+            </dl>
+
+            {/* Colonne droite */}
+            <div className="flex mx-auto items-start text-center lg:text-left lg:mt-4">
+              {newsletterIsSubscribed ? (
+                <div className="animate-fade-in text-center lg:text-left">
+                  <CheckCircle className="h-16 w-16 text-white mx-auto lg:mx-0 mb-6" />
+                  <h3 className="text-3xl font-bold text-white mb-4">
+                    Merci pour votre inscription !
+                  </h3>
+                  <p className="text-xl text-white/90">
+                    Vous recevrez bientôt nos actualités et nos invitations privilégiées.
+                  </p>
+                </div>
+              ) : (
+                <div className="animate-fade-in-up">
+                  {newsletterErrorMessage && (
+                    <p className="text-red-200 text-sm mb-4">{newsletterErrorMessage}</p>
+                  )}
+                  {onNewsletterEmailChange && onNewsletterSubmit && (
+                    <NewsletterForm
+                      email={newsletterEmail}
+                      isLoading={newsletterIsLoading}
+                      isSubscribed={newsletterIsSubscribed}
+                      errorMessage={newsletterErrorMessage}
+                      onEmailChange={onNewsletterEmailChange}
+                      onSubmit={onNewsletterSubmit}
+                    />
+                  )}
+                  <p className="text-white/70 text-sm mt-4">
+                    Nous respectons votre vie privée. Désinscription en 1 clic.
+                  </p>
+                </div>
               )}
             </div>
           </div>
         </section>
       )}
+       <div className="w-full h-16 bg-card/60"></div>
     </div>
   );
 }
