@@ -1,3 +1,4 @@
+/*
 import { env } from "./env";
 
 export const SITE_CONFIG = {
@@ -28,3 +29,4 @@ export const WEBSITE_URL =
   env.NODE_ENV === "production"
     ? SITE_CONFIG.SERVER.PROD_URL
     : SITE_CONFIG.SERVER.DEV_URL;
+*/

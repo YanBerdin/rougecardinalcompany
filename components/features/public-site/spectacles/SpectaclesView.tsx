@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Clock, Users, ArrowRight, Play } from "lucide-react"; // Calendar, MapPin, non utilisés
+import { ArrowRight, Play } from "lucide-react"; // Clock, Users, Calendar, MapPin, non utilisés
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -138,6 +138,23 @@ export function SpectaclesView({
                       className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
                       style={{ backgroundImage: `url(${show.image})` }}
                     />
+
+                    {/* Hover overlay with button */}
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                      <div className="flex flex-col gap-3 px-6 w-full">
+                        <Button
+                          variant="outline"
+                          size="lg"
+                          className="w-full bg-white/40 border-white text-chart-6 hover:bg-chart-6 hover:text-black shadow-lg"
+                          asChild
+                        >
+                          <span>
+                            <Play className="h-5 w-5" />
+                            Détails
+                          </span>
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </Link>
 

@@ -10,7 +10,7 @@ export function ShowsView({ shows }: ShowsViewProps) {
     <section className="py-16 bg-card/90">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-4">Prochains Spectacles</h2>
+          <h2 className="text-4xl font-bold mb-4">Prochains Événements</h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Découvrez notre programmation et réservez vos places
           </p>
@@ -57,6 +57,11 @@ export function ShowsView({ shows }: ShowsViewProps) {
 
               {/* Badges */}
               <div className="flex flex-wrap gap-2 justify-center pt-4">
+                {show.genre && (
+                  <Badge className="bg-primary text-primary-foreground">
+                    {show.genre}
+                  </Badge>
+                )}
                 {show.dates && show.dates.length > 0 && (
                   <>
                     {show.dates.slice(0, 3).map((date, i) => (

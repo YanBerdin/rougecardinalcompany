@@ -22,6 +22,7 @@ export async function ShowsContainer() {
     short_description: r.short_description ?? "",
     image: r.image_url ?? "",
     slug: r.slug ?? String(r.id),
+    genre: r.genre ?? null,
     dates: r.dates ?? [],
   }));
 

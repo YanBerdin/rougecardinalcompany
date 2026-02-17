@@ -4,6 +4,7 @@ export interface Show {
   short_description: string;
   image: string;
   slug: string;
+  genre?: string | null;
   dates?: string[];
 }
 

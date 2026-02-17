@@ -4,12 +4,13 @@
  * Usage: pnpm tsx scripts/test-env-validation.ts
  */
 
+/*
 console.log("🧪 Testing T3 Env validation...\n");
 
 try {
   // Test 1: Import env config
   console.log("📦 Test 1: Loading env config...");
-  const { env } = await import("../lib/env");
+  const { env } = await import("@/lib/env");
   console.log("✅ Env config loaded successfully\n");
 
   // Test 2: Validate required server vars
@@ -102,3 +103,6 @@ try {
   console.error("\n💡 Fix the issues above and try again.");
   process.exit(1);
 }
+
+export {};
+*/

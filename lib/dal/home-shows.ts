@@ -12,6 +12,7 @@ export type ShowRecord = {
   short_description: string | null;
   image_url: string | null;
   premiere: string | null;
+  genre: string | null;
 };
 
 export type ShowWithDates = ShowRecord & {
@@ -25,6 +26,7 @@ type SupabaseShowRow = {
   short_description?: string | null;
   image_url?: string | null;
   premiere?: string | null;
+  genre?: string | null;
   public?: boolean | null;
   status?: string | null;
 };
@@ -61,6 +63,7 @@ function mapShowsWithDates(
     short_description: show.short_description ?? null,
     image_url: show.image_url ?? null,
     premiere: show.premiere ?? null,
+    genre: show.genre ?? null,
     dates: eventsByShow.get(show.id) ?? [],
   }));
 }
@@ -84,7 +87,7 @@ export const fetchFeaturedShows = cache(
 
       const { data: shows, error } = await supabase
         .from("spectacles")
-        .select("id, title, slug, short_description, image_url, premiere, public, status")
+        .select("id, title, slug, short_description, image_url, premiere, genre, public, status")
         .eq("public", true)
         .neq("status", "archived")
         .order("premiere", { ascending: false })
