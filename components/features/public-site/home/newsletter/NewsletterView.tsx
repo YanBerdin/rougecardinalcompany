@@ -72,7 +72,7 @@ export function NewsletterView({
   return (
     <section className="py-16 hero-gradient">
 
-      <div className="max-w-6xl mx-auto grid grid-cols-1 gap-x-8 lg:gap-y-6 lg:grid-cols-[3fr_2fr] px-4">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 gap-x-8 lg:gap-y-6 lg:grid-cols-[3fr_2fr] max-sm:px-4">
         {/* Colonne gauche */}
         <dl className="flex gap-6 mx-auto">
           <div className="flex flex-col items-center lg:items-start">

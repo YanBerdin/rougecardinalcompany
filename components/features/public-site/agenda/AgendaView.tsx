@@ -45,7 +45,7 @@ export function AgendaView({
   }
 
   return (
-    <div className="pt-16 bg-card/60">
+    <div className="pt-16 bg-card/30">
       {/* Hero Section */}
       <section className="py-16 hero-gradient text-chart-6">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -62,9 +62,9 @@ export function AgendaView({
       </section>
 
       {/* Filtres */}
-      <section className="py-8 border-b">
+      <section className="py-16 bg-card/30">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 pb-8">
             <Filter className="h-5 w-5 text-muted-foreground" />
             <Select value={filterType} onValueChange={setFilterType}>
               <SelectTrigger className="w-64  bg-card">
@@ -80,10 +80,10 @@ export function AgendaView({
             </Select>
           </div>
         </div>
-      </section>
 
-      {/* Liste des événements */}
-      <section className="py-12 bg-card/60">
+
+        {/* Liste des événements */}
+
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="space-y-6">
             {events.map((event, index) => (
@@ -118,7 +118,7 @@ export function AgendaView({
                   </div>
 
                   {/* Contenu */}
-                  <CardContent className="md:col-span-3 lg:col-span-4 p-6">
+                  <CardContent className="md:col-span-3 lg:col-span-4 p-6 bg-card">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
                       {/* Info principale */}
                       <div className="lg:col-span-2">
@@ -224,11 +224,11 @@ export function AgendaView({
         </div>
       </section>
 
-      <div className="w-full h-16 bg-card/60"></div>
+      <div className="w-full h-16 bg-card/30"></div>
 
       {/* Newsletter CTA Section */}
       {showNewsletterSection && (
-        <section className="py-16 bg-card/60 hero-gradient">
+        <section className="py-16 hero-gradient">
           <div className="max-w-6xl mx-auto grid grid-cols-1 gap-x-8 lg:gap-y-6 lg:grid-cols-[3fr_2fr] px-4">
             {/* Colonne gauche */}
             <dl className="flex gap-6 mx-auto">
@@ -279,7 +279,7 @@ export function AgendaView({
           </div>
         </section>
       )}
-       <div className="w-full h-16 bg-card/60"></div>
+      <div className="w-full h-16 bg-card/30"></div>
     </div>
   );
 }
