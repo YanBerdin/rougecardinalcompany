@@ -114,3 +114,7 @@ try {
 - Cannot test native mobile apps (use React Native Testing Library instead)
 - May have issues with complex authentication flows
 - Some modern frameworks may require specific configuration
+
+## References
+
+[E2E_Tests_QuickReference_RCC](../../../e2e-tests/E2E_Tests_QuickReference_RCC.md)

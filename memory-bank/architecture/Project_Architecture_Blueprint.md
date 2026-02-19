@@ -1,913 +1,759 @@
-# Project Architecture Blueprint — Rouge Cardinal Company
+# Project Architecture Blueprint - Rouge Cardinal Company
 
-**Généré le:** 2026-01-26  
-**Version:** 3.1 (BigInt Pattern Edition)  
-**Type de projet:** Application web Next.js 16 + Supabase  
-**Pattern architectural:** Clean Architecture + Feature-Based + SOLID DAL Pattern
+**Généré le :** 2026-02-07
+**Version :** 4.0 (Comprehensive Edition)
+**Type de projet :** Application web Next.js 16 + Supabase
+**Pattern architectural :** Clean Architecture + Feature-Based Organization + SOLID DAL
+
+---
+
+## Table des matières
+
+1. [Architecture Detection & Analysis](#1-architecture-detection--analysis)
+2. [Vue d'ensemble architecturale](#2-vue-densemble-architecturale)
+3. [Visualisation architecturale (C4)](#3-visualisation-architecturale-c4)
+4. [Composants architecturaux](#4-composants-architecturaux)
+5. [Couches et dépendances](#5-couches-et-dépendances)
+6. [Architecture des données](#6-architecture-des-données)
+7. [Préoccupations transversales](#7-préoccupations-transversales)
+8. [Communication & APIs](#8-communication--apis)
+9. [Patterns React / Next.js](#9-patterns-react--nextjs)
+10. [Patterns d'implémentation](#10-patterns-dimplémentation)
+11. [Architecture de test](#11-architecture-de-test)
+12. [Architecture de déploiement](#12-architecture-de-déploiement)
+13. [Extensibilité & évolution](#13-extensibilité--évolution)
+14. [Exemples de code](#14-exemples-de-code)
+15. [Architectural Decision Records](#15-architectural-decision-records)
+16. [Governance architecturale](#16-governance-architecturale)
+17. [Guide pour nouveaux développements](#17-guide-pour-nouveaux-développements)
 
 ---
 
 ## 1. Architecture Detection & Analysis
 
-### Technologies Détectées
+### 1.1 Technologies détectées
 
-**Frontend Stack:**
+| Couche | Technologies | Version |
+|--------|-------------|---------|
+| **Framework** | Next.js (App Router, Turbopack dev) | 16.1.5 |
+| **Runtime** | React + React DOM | 19.2.0 |
+| **Langage** | TypeScript (strict mode) | 5.x |
+| **Validation** | Zod | 4.1.0 |
+| **Base de données** | Supabase PostgreSQL (Cloud) | 17.6.1.063 |
+| **Auth** | Supabase Auth (JWT Signing Keys, `getClaims()` ~2-5ms) | @supabase/ssr |
+| **UI Framework** | Tailwind CSS + tailwindcss-animate + touch-hitbox plugin | 3.4.1 |
+| **Composants UI** | shadcn/ui (33 composants), Radix UI (13+ primitives) | — |
+| **Forms** | react-hook-form + @hookform/resolvers | 7.65.0 + 5.2.2 |
+| **Email** | React Email + Resend SDK | v4 |
+| **Images** | Sharp (thumbnails 300×300 JPEG) | 0.34.5 |
+| **DnD** | @dnd-kit/core + @dnd-kit/sortable | — |
+| **Charts** | Recharts | 2.15.4 |
+| **Icons** | Lucide React | — |
+| **Dates** | date-fns | 4.1.0 |
+| **Env** | T3 Env (@t3-oss/env-nextjs) | 0.13.10 |
+| **Monitoring** | Sentry (client + server + edge + instrumentation) | @sentry/nextjs 10 |
+| **Package Manager** | pnpm | 9+ |
+| **Linting** | ESLint 9 + markdownlint-cli2 | — |
+| **E2E Testing** | Playwright | — |
 
-- **Framework:** Next.js 16.0.10 (App Router, React 19.2, Turbopack stable)
-- **Language:** TypeScript 5.x (strict mode, tsconfig strict enabled)
-- **UI Framework:** Tailwind CSS 3.x + shadcn/ui (45+ components)
-- **State Management:** React Server Components (default), Client hooks pour interactivité
-- **Forms:** react-hook-form v7 + @hookform/resolvers + Zod validation
+### 1.2 Extensions PostgreSQL
 
-**Backend Stack:**
+`pgcrypto`, `unaccent`, `pg_trgm`, `citext` - installées dans le schéma `extensions`.
 
-- **Database:** Supabase PostgreSQL 15+ (36 tables with RLS)
-- **ORM/Query:** Supabase Client v2 (@supabase/ssr)
-- **Auth:** Supabase Auth (JWT Signing Keys optimized, ~2-5ms avec `getClaims()`)
-- **Email:** Resend v4 (React Email templates, Warning Pattern)
-- **File Storage:** Supabase Storage (SHA-256 duplicate detection, 9 folders)
+### 1.3 Pattern architectural détecté
 
-**DevOps & Tooling:**
+**Clean Architecture + Feature-Based Organization + SOLID DAL Pattern :**
 
-- **Package Manager:** pnpm v9+
-- **Linting:** ESLint 9 + markdownlint-cli2
-- **Type Safety:** TypeScript strict + **T3 Env** (@t3-oss/env-nextjs) pour env vars
-- **Migrations:** Supabase Declarative Schema (`supabase/schemas/` source of truth)
-- **Monitoring:** Sentry v10 (optionnel)
-
-### Pattern Architectural Détecté
-
-**Clean Architecture avec Feature-Based Organization + SOLID DAL Pattern:**
-
-```bash
-┌─────────────────────────────────────────────────────────────┐
-│                     PRESENTATION LAYER                      │
-│  app/ (Routes + Server Components) + components/ (UI)       │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐       │
-│  │   (admin)    │  │  (marketing) │  │   api/       │       │
-│  │  Route Group │  │ Route Group  │  │Route Handlers│       │
-│  │  AppSidebar  │  │ Header+Footer│  │   Webhooks   │       │
-│  └──────────────┘  └──────────────┘  └──────────────┘       │
-└─────────────────────────────────────────────────────────────┘
-                          ↓
-┌─────────────────────────────────────────────────────────────┐
-│                   APPLICATION LAYER                         │
-│        lib/actions/ (Server Actions - 15+ modules)          │
-│  ┌────────────────────────────────────────────────────┐     │
-│  │ Zod Validation → requireAdmin() → DAL Call →       │     │
-│  │ revalidatePath() → Email/SMS (Warning Pattern) →   │     │
-│  │ Return ActionResult<T>                             │     │
-│  └────────────────────────────────────────────────────┘     │
-└─────────────────────────────────────────────────────────────┘
-                          ↓
-┌─────────────────────────────────────────────────────────────┐
-│                    DATA ACCESS LAYER (29 modules)           │
-│      lib/dal/ ("use server" + import "server-only")         │
-│  ┌────────────────────────────────────────────────────┐     │
-│  │ requireAdmin() → Supabase Client → DB Query →      │     │
-│  │ Error Handling → DALResult<T> (success|error)      │     │
-│  │ ❌ NO revalidatePath() ❌ NO email imports          │     │
-│  └────────────────────────────────────────────────────┘     │
-│  📁 Helpers: error.ts, format.ts, slug.ts, folder.ts        │
-└─────────────────────────────────────────────────────────────┘
-                          ↓
-┌─────────────────────────────────────────────────────────────┐
-│                     DATABASE LAYER                          │
-│   Supabase PostgreSQL 15+ (36 tables, 100% RLS enabled)    │
-│   🔒 Security: Public views (SECURITY INVOKER) vs           │
-│                Admin views (revoked from anon role)         │
-└─────────────────────────────────────────────────────────────┘
-```
-
-**Principes architecturaux observés:**
-
-- **Séparation stricte des responsabilités:** Présentation / Application / DAL / Database
-- **Server-first:** Server Components par défaut, Client Components uniquement pour interactivité
-- **Type-safe:** Validation runtime (Zod) + TypeScript strict + **T3 Env** (validation env vars)
-- **Security by default:** RLS policies + explicit auth guards + defense in depth + Admin Views Security Hardening (TASK037)
-- **Performance:** Optimized Supabase auth (`getClaims()` ~2-5ms), React `cache()`, Suspense streaming
-- **SOLID Compliance:** 92% sur DAL (29 modules), pattern `DALResult<T>`, functions < 30 lines
-- **Warning Pattern:** Email/SMS failures ne rollback jamais les opérations DB critiques
+- **4 couches strictes** : Présentation → Application (Server Actions) → DAL → Database
+- **Feature-based** : Composants, DAL, schémas organisés par domaine métier
+- **SOLID DAL** : 92% compliance, `DALResult<T>`, fonctions &lt; 30 lignes, aucune dépendance Next.js
+- **Server-first** : Server Components par défaut, Client Components uniquement pour l'interactivité
+- **Warning Pattern** : Échecs email/SMS ne rollback jamais les opérations DB
 
 ---
 
-## 2. Résumé Exécutif
+## 2. Vue d'ensemble architecturale
 
-**Framework principal:** Next.js 16.0.10 (App Router) avec React 19.2 + Turbopack (stable)  
-**Langage:** TypeScript 5.x (strict mode) avec conventions Clean Code (max 300 lignes/fichier, fonctions ≤30 lignes)  
-**Base de données:** Supabase PostgreSQL 15+ avec Row Level Security (RLS) sur **36/36 tables** (100% coverage)  
-**Auth:** Supabase JWT Signing Keys optimized; `getClaims()` ~2-5ms (vs `getUser()` ~300ms)  
-**Mutations internes:** **Server Actions** (lib/actions/ + app/(admin)/*/actions.ts) — API Routes réservées pour webhooks/clients externes  
-**DAL:** 29 modules sous `lib/dal/` ("use server" + import "server-only", retourne `DALResult<T>`, ❌ NO revalidatePath/email)  
-**Environment Variables:** **T3 Env** (@t3-oss/env-nextjs) dans `lib/env.ts` — validation Zod runtime + types TypeScript  
-**Media Library:** Complete implementation (TASK029) — Storage/Folders sync, 9 base folders, thumbnail generation (Sharp)  
-**Display Toggles:** 10 toggles centralisés (TASK030) — configurations_site table, admin UI, conditional rendering  
-**Lieux Management:** CRUD complet (TASK055 Phase 2) — admin interface, DAL, Server Actions, dedicated pages, BigInt serialization fix
+### 2.1 Résumé exécutif
 
-## Principes architecturaux
+| Dimension | Détail |
+|-----------|--------|
+| **Routes** | 14 sections admin (~30+ pages), 9 pages publiques, 10 API Routes |
+| **DAL** | 31 modules (`lib/dal/`) + 5 helpers |
+| **Server Actions** | 11 fichiers colocalisés + 5 fichiers centralisés (`lib/actions/`) |
+| **Schemas Zod** | 15+ modules dual Server (bigint) / UI (number) |
+| **Tables DB** | 36 tables, 100% RLS, 45 fichiers de schéma déclaratif |
+| **Migrations** | 93 fichiers SQL (sept 2025 → fév 2026) |
+| **Composants UI** | 33 shadcn/ui + 12 features admin + 6 features publiques |
+| **Scripts** | 87 scripts de test/audit/maintenance |
+| **Sentry** | Multi-runtime (client/server/edge/instrumentation) |
+| **Security Headers** | CSP + HSTS + X-Frame-Options + 3 autres (OWASP A05) |
 
-- Séparation nette des responsabilités :
-  - Lecture & rendu initial → Server Components (app/ pages & containers).
-  - Mutations → Server Actions → lib/actions/ ou app/(admin)/*/actions.ts (validation Zod, requireAdmin, DAL call, revalidatePath()).
-  - Accès DB encapsulé → `lib/dal/*.ts` ("use server" + `import 'server-only'`).
+### 2.2 Principes directeurs
 
-- Pattern dual-schema (résout problème bigint/number) :
-  - Schémas **SERVER** (BDD) utilisent `z.coerce.bigint()` pour les IDs PostgreSQL.
-  - Schémas **UI** (forms) utilisent `z.number()` pour react-hook-form (évite casting `as unknown as Resolver<>`).
-
-- Révalidation / cache :
-  - `revalidatePath()` ou `revalidateTag()` appelés **UNIQUEMENT** dans les Server Actions après mutations.
-  - Pages admin sensibles exportent `export const dynamic = 'force-dynamic'` et `export const revalidate = 0`.
-  - DAL read functions wrapped with React `cache()` pour deduplication intra-request.
-
-- Warning Pattern (Email/SMS) :
-  - Email/SMS failures **ne rollback jamais** les opérations DB critiques.
-  - Server Actions catch silencieusement email errors, retournent `{ success: true, warning: "..." }`.
-  - User toujours notifié du succès DB, avec avertissement si email failed.
-
-- T3 Env pattern :
-  - **JAMAIS** `process.env.VARIABLE` direct — utiliser `import { env } from '@/lib/env'`.
-  - Validation Zod à la compilation + runtime check.
-  - Client variables préfixées `NEXT_PUBLIC_*`, server variables protégées.
-
-## 2.1 T3 Env — Type-Safe Environment Variables
-
-**Package:** `@t3-oss/env-nextjs` v0.11+  
-**Location:** `lib/env.ts` (centralized configuration)  
-**Purpose:** Runtime validation + TypeScript types pour env vars
-
-**Architecture:**
-
-```typescript
-// lib/env.ts
-import { createEnv } from "@t3-oss/env-nextjs";
-import { z } from "zod";
-
-export const env = createEnv({
-  /**
-   * Server-side environment variables schema
-   * ⚠️ Ne pas inclure les variables NEXT_PUBLIC_* ici
-   */
-  server: {
-    // Supabase (Server-only)
-    SUPABASE_SECRET_KEY: z.string().min(1),
-    
-    // Email (Resend)
-    RESEND_API_KEY: z.string().min(1),
-    EMAIL_FROM: z.string().email(),
-    EMAIL_CONTACT: z.string().email(),
-    
-    // Development redirect
-    EMAIL_DEV_REDIRECT: z.enum(["true", "false"]).default("false"),
-    EMAIL_DEV_REDIRECT_TO: z.string().email().optional(),
-    
-    // Database backup (CI/CD only)
-    SUPABASE_DB_URL: z.string().url().optional(),
-    
-    // Monitoring (Sentry - Optional)
-    SENTRY_DSN: z.string().url().optional(),
-    SENTRY_ORG: z.string().optional(),
-    SENTRY_PROJECT: z.string().optional(),
-    SENTRY_AUTH_TOKEN: z.string().optional(),
-  },
-
-  /**
-   * Client-side environment variables schema
-   * MUST be prefixed with NEXT_PUBLIC_
-   */
-  client: {
-    NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
-    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY: z.string().min(1),
-    NEXT_PUBLIC_SITE_URL: z.string().url().optional(),
-  },
-
-  /**
-   * Runtime environment variables (Next.js specific)
-   */
-  runtimeEnv: {
-    // Server
-    SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
-    RESEND_API_KEY: process.env.RESEND_API_KEY,
-    EMAIL_FROM: process.env.EMAIL_FROM,
-    EMAIL_CONTACT: process.env.EMAIL_CONTACT,
-    EMAIL_DEV_REDIRECT: process.env.EMAIL_DEV_REDIRECT,
-    EMAIL_DEV_REDIRECT_TO: process.env.EMAIL_DEV_REDIRECT_TO,
-    SUPABASE_DB_URL: process.env.SUPABASE_DB_URL,
-    SENTRY_DSN: process.env.SENTRY_DSN,
-    SENTRY_ORG: process.env.SENTRY_ORG,
-    SENTRY_PROJECT: process.env.SENTRY_PROJECT,
-    SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
-    
-    // Client (auto-bundled by Next.js)
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY,
-    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
-  },
-
-  /**
-   * Skip validation during build (optional)
-   */
-  skipValidation: !!process.env.SKIP_ENV_VALIDATION,
-});
-```
-
-**Pattern d'utilisation (OBLIGATOIRE):**
-
-```typescript
-// ❌ WRONG: Direct process.env access
-const apiKey = process.env.RESEND_API_KEY;  // No type safety, no validation
-
-// ✅ CORRECT: T3 Env import
-import { env } from '@/lib/env';
-
-const apiKey = env.RESEND_API_KEY;  // ✅ Type-safe, validated at startup
-const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;  // ✅ Works in client too
-```
-
-**Avantages:**
-
-- ✅ **Type Safety:** Autocomplete + erreurs TypeScript si env var manquante
-- ✅ **Runtime Validation:** App crash au démarrage si env vars invalides (fail fast)
-- ✅ **Zod Validation:** Email format, URL format, enum values, etc.
-- ✅ **Client/Server Separation:** Variables client préfixées `NEXT_PUBLIC_*`
-- ✅ **Default Values:** `.default()` pour variables optionnelles
-- ✅ **Transformations:** `.transform()` pour convertir types (e.g., "true" → boolean)
-
-**Règles strictes:**
-
-- ⚠️ **JAMAIS** `process.env.VARIABLE` direct dans le code applicatif
-- ⚠️ **TOUJOURS** importer `env` de `@/lib/env`
-- ⚠️ Ajouter nouvelles env vars dans `lib/env.ts` + `.env.local` + `.env.example`
-- ⚠️ Variables client DOIVENT être préfixées `NEXT_PUBLIC_*`
+1. **Server Components par défaut** — Client uniquement pour interactivité
+2. **Mutations → Server Actions** — `revalidatePath()` uniquement ici, jamais dans le DAL
+3. **DAL = server-only** — Retourne `DALResult<T>`, aucune dépendance Next.js/email
+4. **Dual Zod Schemas** — Server (bigint) vs UI (number) pour éviter sérialisation BigInt
+5. **Three-Layer BigInt** — UI (number) → Transport (string) → DAL (bigint)
+6. **Type-safe env** — T3 Env, jamais `process.env` direct
+7. **RLS + Auth guards** — Defense in depth (DB + application)
+8. **Clean Code** — Max 30 lignes/fonction, 300 lignes/fichier, 5 params/fonction
+9. **Warning Pattern** — Échecs email ne cassent jamais les opérations DB
+10. **React `cache()`** — Deduplication intra-request sur toutes les fonctions DAL read
 
 ---
 
-### 2.2. BigInt Serialization Pattern (TASK055, Jan 2026)
+## 3. Visualisation architecturale (C4)
 
-**Problème critique découvert:**
+### 3.1 Niveau 1 - System Context
 
-React Server Actions ne peuvent pas sérialiser les valeurs `BigInt` retournées après validation Zod avec `z.coerce.bigint()`. Erreur type:
+```mermaid
+C4Context
+    title System Context — Rouge Cardinal Company
+
+    Person(visitor, "Visiteur", "Consulte le site public")
+    Person(admin, "Administrateur", "Gère le contenu via backoffice")
+
+    System(rcc, "Site Rouge Cardinal", "Next.js 16 + Supabase")
+
+    System_Ext(supabase, "Supabase Cloud", "PostgreSQL 17 + Auth + Storage")
+    System_Ext(resend, "Resend", "Envoi d emails transactionnels")
+    System_Ext(sentry, "Sentry EU", "Monitoring et error tracking")
+
+    Rel(visitor, rcc, "Consulte spectacles, agenda, contact", "HTTPS")
+    Rel(admin, rcc, "CRUD contenu, medias, config", "HTTPS")
+    Rel(rcc, supabase, "Auth, DB, Storage", "HTTPS")
+    Rel(rcc, resend, "Emails newsletter, contact, invitation", "HTTPS")
+    Rel(rcc, sentry, "Erreurs, traces, replays", "HTTPS tunnel /monitoring")
+```
+
+### 3.2 Niveau 2 — Container
+
+```mermaid
+flowchart TB
+    visitor(["👤 Visiteur"])
+    admin(["👤 Administrateur"])
+
+    subgraph app["Application Next.js 16"]
+        proxy["proxy.ts\nJWT refresh + admin route protection"]
+        marketing["Zone Marketing\n(marketing)/ — 9 pages SSR"]
+        backoffice["Zone Admin\n(admin)/ — ~30 pages CRUD"]
+        api["API Routes\napp/api/ — 10 endpoints"]
+        actions["Server Actions\nlib/actions/ + colocated\nMutations + revalidatePath"]
+        dal["Data Access Layer\nlib/dal/ (31 modules)\nserver-only, DALResult, cache()"]
+        schemas["Schemas Zod\nlib/schemas/ (15+ modules)\nDual Server/UI validation"]
+        email["Email Service\nlib/email/ + emails/\nReact Email + Resend"]
+    end
+
+    supabase(["Supabase Cloud\nPostgreSQL 17 + Auth + Storage"])
+    resend(["Resend API"])
+    sentry(["Sentry EU"])
+
+    visitor --> proxy
+    admin --> proxy
+    proxy --> marketing
+    proxy --> backoffice
+    proxy --> api
+    marketing --> dal
+    backoffice --> actions
+    actions --> dal
+    dal --> supabase
+    email --> resend
+    app --> sentry
+```
+
+### 3.3 Niveau 3 — Component (Data Flow)
+
+```mermaid
+flowchart TB
+    subgraph Browser["Browser"]
+        UI["Client Component\n(react-hook-form + UI Schema)"]
+    end
+
+    subgraph NextJS["Next.js Server"]
+        SA["Server Action\n(Zod validation + requireAdmin)"]
+        SC["Server Component\n(async data fetching)"]
+        API["API Route\n(webhooks, external)"]
+    end
+
+    subgraph DAL["Data Access Layer"]
+        DALMOD["lib/dal/*.ts\n(server-only, cache, DALResult)"]
+        HELPERS["lib/dal/helpers/\n(error, format, slug, serialize, folder)"]
+    end
+
+    subgraph DB["Supabase Cloud"]
+        PG["PostgreSQL 17\n(36 tables, RLS 100%)"]
+        STORAGE["Storage\n(medias bucket, 9 folders)"]
+        AUTH["Auth\n(JWT Signing Keys)"]
+    end
+
+    UI -->|"submit form\n(number IDs)"| SA
+    SA -->|"BigInt conversion\n+ DAL call"| DALMOD
+    SC -->|"fetch data\n(read path)"| DALMOD
+    API -->|"validate + delegate"| DALMOD
+    DALMOD --> HELPERS
+    DALMOD -->|"SQL queries"| PG
+    DALMOD -->|"file operations"| STORAGE
+    SA -->|"revalidatePath()"| SC
+    SA -->|"ActionResult"| UI
+    SC -->|"props (SSR)"| UI
+    AUTH -->|"getClaims() ~2-5ms"| SA
+```
+
+### 3.4 Architecture High-Level (ASCII)
 
 ```bash
-TypeError: Do not know how to serialize a BigInt
-    at JSON.stringify()
++---------------------------------------------------------------------+
+|                           BROWSER                                   |
++---------------------------------------------------------------------+
+                                |
+                                v
++---------------------------------------------------------------------+
+|  PROXY MIDDLEWARE (proxy.ts)                                        |
+|  JWT claims validation via getClaims() (~2-5ms)                     |
+|  Admin route protection (/admin/*, /api/admin/*)                    |
+|  Delegates to supabase/middleware.ts (session refresh)              |
++---------------------------------------------------------------------+
+                                |
+        +-----------------------+----------------------
+        v                       v                       v
++---------------+   +-------------------+   +-------------------+
+|  (marketing)  |   |     (admin)       |   |      api/         |
+|  Public pages |   |   Backoffice      |   |   API Routes      |
+|  9 pages SSR  |   |   14 sections     |   |   10 endpoints    |
+|  Suspense     |   |   ~30+ pages      |   |   newsletter,     |
+|  streaming    |   |   11 actions.ts   |   |   contact, media  |
++---------------+   +-------------------+   +-------------------+
+        |                       |                       |
+        +-----------------------+-----------------------+
+                                |
+                                v
++---------------------------------------------------------------------+
+|  SERVER ACTIONS (lib/actions/ + app/(admin)/admin/*/actions.ts)     |
+|  Zod validation -> requireAdmin() -> DAL call -> revalidatePath()   |
+|  Returns ActionResult<T> (NO BigInt in return)                      |
++---------------------------------------------------------------------+
+                                |
+                                v
++---------------------------------------------------------------------+
+|  DATA ACCESS LAYER (lib/dal/, 31 modules + helpers/)                |
+|  "use server" + import "server-only" + React cache()                | 
+|  requireAdmin() -> Supabase Client -> DB Query -> DALResult<T>      |
+|  NO revalidatePath   NO email imports   NO throws                   |
+|  Helpers: error.ts, format.ts, slug.ts, serialize.ts, folder.ts     |
++---------------------------------------------------------------------+
+                                |
+                                v
++---------------------------------------------------------------------+
+|  SUPABASE CLOUD (PostgreSQL 17.6.1.063)                             |
+|  36 tables (100% RLS) - 45 schema files - 93 migrations             |
+|  11 public views (SECURITY INVOKER) - 7 admin views (isolated)      |
+|  Storage bucket "medias" - 9 base folders                           |
+|  Extensions: pgcrypto, unaccent, pg_trgm, citext                    |
++---------------------------------------------------------------------+
 ```
-
-**Cause racine:**
-
-```typescript
-// ❌ BROKEN: Zod validation avec bigint dans Server Action
-const EventInputSchema = z.object({
-  lieu_id: z.coerce.bigint(),  // ← Crée un BigInt
-  // ...
-});
-
-export async function createEventAction(input: unknown) {
-  const validated = EventInputSchema.parse(input);  // validated.lieu_id est BigInt
-  const result = await createEvent(validated);
-  return { success: true, data: result };  // ❌ Crash: result.lieu_id est BigInt
-}
-```
-
-> **Solution: Three-Layer Type System**
-
-```bash
-┌────────────────────────────────────────────────────────────────┐
-│                     DATA FLOW ARCHITECTURE                      │
-├────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  UI Layer (Client Components)                                  │
-│  ├─ Forms: number IDs (EventFormSchema, LieuFormSchema)        │
-│  ├─ React Hook Form: validates with number                     │
-│  └─ Type: EventFormValues (lieu_id: number)                    │
-│                           │                                      │
-│                           ▼                                      │
-│  Transport Layer (Server Actions)                               │
-│  ├─ Never validate with z.coerce.bigint()                      │
-│  ├─ Use EventDataTransport (lieu_id: string)                   │
-│  ├─ Manual conversion: BigInt(validated.lieu_id)               │
-│  └─ ActionResult: { success: true } ONLY (no data)             │
-│                           │                                      │
-│                           ▼                                      │
-│  DAL Layer (Server-Only)                                        │
-│  ├─ EventInputSchema (lieu_id: z.coerce.bigint())              │
-│  ├─ Database operations with bigint                            │
-│  ├─ Returns DALResult<EventDTO> (id: bigint)                   │
-│  └─ NEVER exposed to Client Components                         │
-│                                                                 │
-└────────────────────────────────────────────────────────────────┘
-```
-
-**Implementation Pattern (OBLIGATOIRE):**
-
-```typescript
-// ✅ STEP 1: Separate Server/UI Schemas
-// lib/schemas/admin-events.ts
-
-// Server Schema (DAL/Database)
-export const EventInputSchema = z.object({
-  titre: z.string().min(1),
-  lieu_id: z.coerce.bigint(),  // ✅ bigint for database
-  // ...
-});
-export type EventInput = z.infer<typeof EventInputSchema>;
-
-// UI Schema (React Hook Form)
-export const EventFormSchema = z.object({
-  titre: z.string().min(1),
-  lieu_id: z.number().int().positive(),  // ✅ number for forms
-  // ...
-});
-export type EventFormValues = z.infer<typeof EventFormSchema>;
-
-// Transport Type (Server Action → DAL)
-export interface EventDataTransport {
-  titre: string;
-  lieu_id: string;  // ✅ string to avoid BigInt serialization
-  // ...
-}
-
-// ✅ STEP 2: Server Action (NO BigInt Validation)
-// app/(admin)/admin/agenda/actions.ts
-export async function createEventAction(input: unknown): Promise<ActionResult> {
-  try {
-    // ❌ NEVER: const validated = EventInputSchema.parse(input)
-    
-    // ✅ Validate with transport schema
-    const transportSchema = z.object({
-      titre: z.string().min(1),
-      lieu_id: z.string().regex(/^\d+$/),  // ✅ Validate string format
-      // ...
-    });
-    const validated: EventDataTransport = transportSchema.parse(input);
-    
-    // ✅ Manual BigInt conversion
-    const eventData: EventInput = {
-      ...validated,
-      lieu_id: BigInt(validated.lieu_id),  // ✅ Convert here
-    };
-    
-    const result = await createEvent(eventData);
-    if (!result.success) return result;
-    
-    revalidatePath('/admin/agenda');
-    return { success: true };  // ✅ NO data (prevents BigInt serialization)
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-}
-
-// ✅ STEP 3: DAL Function (Uses bigint)
-// lib/dal/admin-events.ts
-export async function createEvent(
-  input: EventInput  // ✅ bigint IDs
-): Promise<DALResult<EventDTO>> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('agenda_evenements')
-    .insert(input)  // ✅ Supabase handles bigint
-    .select()
-    .single();
-  
-  if (error) return { success: false, error: error.message };
-  return { success: true, data };  // ✅ Never returned to client
-}
-
-// ✅ STEP 4: Client Component (Uses number)
-// components/features/admin/agenda/EventForm.tsx
-const form = useForm<EventFormValues>({
-  resolver: zodResolver(EventFormSchema),  // ✅ UI schema
-  defaultValues: event ? {
-    lieu_id: Number(event.lieu_id),  // ✅ Convert bigint → number
-    // ...
-  } : {},
-});
-
-const onSubmit = async (data: EventFormValues) => {
-  // ✅ FormData contains number IDs, Server Action converts to string
-  const result = await createEventAction(data);
-  if (result.success) {
-    router.refresh();  // ✅ Fetch fresh data via Server Component
-  }
-};
-```
-
-**CRITICAL RULES (Apply Project-Wide):**
-
-1. ✅ **Server Schemas:** Use `z.coerce.bigint()` for database IDs
-2. ✅ **UI Schemas:** Use `z.number().int().positive()` for form IDs
-3. ✅ **Transport Types:** Use `string` IDs in Server Actions
-4. ✅ **ActionResult:** Return `{ success: true/false }` ONLY, NEVER return data
-5. ✅ **Data Refresh:** Use `router.refresh()` to fetch updated data via Server Component
-6. ✅ **Manual Conversion:** `BigInt(stringId)` in Server Action before DAL call
-7. ✅ **Type Safety:** Maintain strict separation (bigint/number/string)
-
-**Testing Pattern:**
-
-```typescript
-// scripts/test-admin-agenda-crud.ts
-async function testBigIntSerialization() {
-  const eventData: EventFormValues = {
-    titre: "Test Event",
-    lieu_id: 1,  // ✅ number in form
-  };
-  
-  const result = await createEventAction(eventData);
-  console.log(result);  // ✅ { success: true } (no BigInt)
-}
-```
-
-**Impact:**
-
-- ✅ Pattern applied to **ALL** CRUD with bigint IDs (events, lieux, future entities)
-- ✅ Prevents serialization errors at build/runtime
-- ✅ Maintains type safety across layers
-- ✅ Documentation: `memory-bank/tasks/tasks-completed/TASK055-bigint-fix.md`
 
 ---
 
-## Organisation des dossiers (rappel synthétique)
+## 4. Composants architecturaux
 
-- `app/` : routes, layouts, groupe `(admin)` et `(marketing)`.
-- `components/` : UI partagé et features (split smart/dumb).
-- `lib/` :
-  - `lib/dal/` — DAL server-only
-  - `lib/actions/` — shared server handlers (contact-server.ts, newsletter-server.ts, uploads-server.ts)
-  - `lib/schemas/` — Zod schemas (barrel)
-  - `lib/email/` — envois d'email (sendNewsletterConfirmation, sendContactNotification)
-  - `lib/api/helpers.ts` — ApiResponse, HttpStatus, utilitaires (isUniqueViolation)
-- `emails/` : templates React Email + layout
-- `supabase/schemas/` & `supabase/migrations/` : source of truth DB schema
+### 4.1 Structure des routes
 
-## Data flow exemples
+#### Zone Admin — `app/(admin)/admin/`
 
-1) Inscription newsletter (public)
+| Section | Route | Server Actions colocalisées |
+|---------|-------|-----------------------------|
+| Dashboard | `/admin` | — |
+| Home Hero | `/admin/home/hero` | `home-hero-actions.ts` |
+| Home About | `/admin/home/about` | `home-about-actions.ts` |
+| Équipe | `/admin/team` (+`/new`, `/[id]/edit`) | `actions.ts` |
+| Spectacles | `/admin/spectacles` (+`/new`, `/[id]/edit`) | `actions.ts` |
+| Agenda | `/admin/agenda` | `actions.ts` |
+| Lieux | `/admin/lieux` (+`/new`, `/[id]/edit`) | `actions.ts` |
+| Presse | `/admin/presse` | `actions.ts` |
+| Partenaires | `/admin/partners` | `actions.ts` |
+| Médias | `/admin/media` | — (uses `lib/actions/`) |
+| Utilisateurs | `/admin/users` | `actions.ts` |
+| Config Site | `/admin/site-config` | — (uses `lib/actions/`) |
+| Analytics | `/admin/analytics` | — |
+| Debug Auth | `/admin/debug-auth` | — |
 
-- Client form → `POST /api/newsletter` (route existante) ou Server Action `app/actions/newsletter.actions.ts`.
-- Route/Action appelle `lib/actions/newsletter-server.ts` (validate Zod → `lib/dal/newsletter-subscriber.ts` → send email non bloquant → return ActionResult).
-- DAL gère `unique_violation` comme succès idempotent.
+#### Zone Marketing - `app/(marketing)/`
 
-2) Edition backoffice (Hero slides)
+| Page | Route | Dynamic |
+|------|-------|---------|
+| Homepage | `/` | `force-dynamic` (ISR `revalidate=60`) |
+| Spectacles | `/spectacles` | `force-dynamic` |
+| Spectacle détail | `/spectacles/[slug]` | Dynamic segment |
+| Agenda | `/agenda` | `force-dynamic` |
+| Compagnie | `/compagnie` | `force-dynamic` |
+| Presse | `/presse` | `force-dynamic` |
+| Contact | `/contact` | — |
+| Mentions légales | `/mentions-legales` | Static |
+| CGU | `/cgu` | Static |
 
-- Server Component fetch initial data via DAL (`lib/dal/home-hero.ts`)
-- Client form uses UI schema + `app/actions/home-hero-actions.ts` Server Action for create/update (Server Action validates, calls DAL, revalidatePath on success).
+#### API Routes — `app/api/`
 
-## Sécurité et auth
+| Endpoint | Méthode | Usage |
+|----------|---------|-------|
+| `/api/contact` | POST | Formulaire contact public |
+| `/api/newsletter` | POST | Inscription newsletter |
+| `/api/newsletter/unsubscribe` | GET | Désinscription |
+| `/api/admin/media/search` | GET | Recherche interactive médias |
+| `/api/admin/media/thumbnail` | GET | Génération thumbnail (Sharp) |
+| `/api/admin/spectacles/[id]/photos` | POST/DELETE | Photos spectacles |
+| `/api/webhooks/stripe` | POST | Webhooks (réservé) |
+| `/api/sentry-example-api` | GET | Test Sentry |
+| `/api/debug-auth` | GET | Diagnostics auth |
+| `/api/test-connection` | GET | Test connexion DB |
 
-- Toujours valider côté serveur (Zod) pour toutes les entrées externes.
-- Utiliser `requireAdmin()` / guards dans les Server Actions avant DAL ops.
-- Supabase : préférer `getClaims()` (fast local JWT verify) dans middleware et Server Components; `getUser()` uniquement si besoin du profil complet.
-- Cookies : usage `getAll` / `setAll` pattern via `@supabase/ssr`.
+### 4.2 Layouts (3 niveaux)
 
-## CI / Tests / Migration
-
-- Tests DAL : scripts/tests (ex: `scripts/test-team-server-actions.ts`) à intégrer au pipeline CI pour valider mutations idempotentes.
-- Migrations : workflow déclaratif (`supabase db diff` → migration files) et `supabase/schemas` as source of truth.
-
-## Operational considerations
-
-- **Rate limiting**:
-  - ✅ **Media uploads**: 10 uploads/min via `lib/utils/rate-limit.ts` (LRU cache, client IP)
-  - TODO: Ajouter throttle sur `handleContactSubmission()` et `handleNewsletterSubscription()` (middleware ou inside handler)
-- **Monitoring**: tracer erreurs email et échecs DAL; normaliser logs avec codes d'erreur `[ERR_ENTITY_NNN]`.
-- **Key rotation**: planifier rotation périodique des JWT signing keys dans Supabase.
-- **Media Library** (TASK029 complété 29/12/2025, mis à jour 30/12/2025):
-  - **Système complet**: Tags, folders, bulk operations, usage tracking, thumbnails, accessibility
-  - **Folders/Storage sync** (v2.7): Synchronisation automatique `media_folders.slug` ↔ `storage_path` prefix (medias/{slug}/)
-  - **9 base folders**: equipe, home-about, home-hero, spectacles, partenaires, presse, compagnie, agenda, autres
-  - **Auto-assign folder**: `getFolderIdFromPath()` helper auto-détecte folder_id lors de l'upload
-  - **UI improvements**: "Uploads génériques" au lieu de "Racine", AlertDialog pour confirmations delete, stats dynamiques
-  - **Usage tracking**: Scanne 7 tables publiques (hero_slides, sections_apropos, membres_equipe, spectacles, partenaires, sections_compagnie, articles_presse)
-  - **Eye badge indicator**: Emerald badge sur médias utilisés sur pages publiques
-  - **Performance**: SHA-256 duplicate detection évite stockage doublons; bulk usage tracking via Map optimization (~2-5ms par média)
-  - **Thumbnails**: Génération 300x300 JPEG via Sharp (lazy-loaded)
-  - **Pattern Warning**: Génération thumbnails en masse NON recommandée (charge serveur Sharp); préférer génération à la demande via API Route ou lors de upload initial
-  - **Security**: 15 RLS policies granulaires (3 tables × 5 policies: SELECT, INSERT, UPDATE, DELETE, SELECT admin-only)
-  - **Accessibility**: WCAG 2.1 AA compliance — keyboard navigation (Space/Enter), ARIA attributes, screen reader support, reduced-motion animations
-
-## Annexes & références
-
-- Voir `memory-bank/architecture/Project_Folders_Structure_Blueprint_v5.md` pour mapping fichiers et recommandations d'extraction de schémas.
-- Voir `.github/instructions/nextjs-supabase-auth-2025.instructions.md` pour patterns auth.
-
-Fin
-
-## Project Architecture Blueprint — Rouge Cardinal Company
-
-Generated: 30 November 2025  
-Updated: 7 January 2026  
-Source: `doc/prompts-github/architecture-blueprint-generator.prompt.md`  
-Repository branch: `master`  
-Version: v2.9
-
-Résumé: ce document analyse la base de code existante et formalise le modèle d'architecture, les patterns observés et les recommandations pour l'évolution et l'extensibilité. Il s'appuie sur l'organisation actuelle (Next.js 16, TypeScript strict, Supabase, React 19) et couvre les composantes clés, la sécurité RLS, les modèles d'accès aux données, les tests et le déploiement.
-
-**Mise à jour v2.9 (5 janvier 2026) — Admin Views Security Hardening (TASK037):**
-
-- **🔴 CRITICAL HOTFIX**: Correction vulnérabilité RLS bypass sur vues PostgreSQL
-- **Vulnérabilité**: Vues en mode `SECURITY DEFINER` (défaut PostgreSQL) exécutaient requêtes avec privilèges du propriétaire, bypassant RLS
-- **Impact**: 2 vues affectées (`communiques_presse_public`, `communiques_presse_dashboard`)
-- **Fix appliqué**: Migration `20260105130000_fix_security_definer_views.sql` — Ajout explicite `with (security_invoker = true)` sur toutes les vues
-- **7 vues admin isolées**: Ownership transféré à rôle dédié `admin_views_owner` (pas de grants auto)
-- **11 vues publiques** : `SECURITY INVOKER` mode explicite + `grant select to anon, authenticated`
-- **Validation**: Script `test-admin-views-security.ts` — 13/13 tests PASSED
-- **RLS enforcement**: 100% des accès passent par RLS policies (pas de bypass)
-- **Documentation**: `memory-bank/tasks/tasks-completed/TASK037-ADMIN-VIEWS-SECURITY-HARDENING-SUMMARY.md`
-
-**Mise à jour v2.8 (1er janvier 2026) — Display Toggles System (TASK030 Complete):**
-
-- **10 toggles opérationnels** : Système complet pour contrôler la visibilité des sections publiques
-- **Catégories** : home_display (6), agenda_display (1), contact_display (1), presse_display (2)
-- **Phase 11 Fix** : Split presse toggle en 2 indépendants (Media Kit + Communiqués de Presse)
-- **Migration idempotente** : Transformation des legacy keys avec DO blocks
-- **Pattern architectural** :
-  - Server Component : Fetch toggle via `fetchDisplayToggle(key)` from DAL
-  - Conditional rendering : `{showSection && (...)}`
-  - Client forms : Progressive enhancement avec Server Actions
-- **Scripts admin** : check-presse-toggles.ts, toggle-presse.ts (4 modes)
-- **Admin UI** : Interface de gestion dans `/admin/site-config`
-- **Documentation** : `.github/prompts/plan-task030DisplayTogglesEpicAlignment.prompt.md`
-
-**Mise à jour v2.7 (30 décembre 2025) — Media Library Storage/Folders Sync:**
-
-- **Folders/Storage Architecture**: Synchronisation `media_folders.slug` ↔ Storage bucket paths (medias/{slug}/)
-- **9 Base Folders**: equipe, home-about, home-hero, spectacles, partenaires, presse, compagnie, agenda, autres
-- **Auto-assign folder**: Nouveau helper `getFolderIdFromPath()` dans DAL pour auto-détection du folder_id lors de l'upload
-- **UI Improvements**: Renommage "Racine" → "Uploads génériques", AlertDialog pour delete confirmation, stats dynamiques (`fetchMediaStats()`)
-- **Migration sync**: Placeholder migration 20251228140000, migration 20251230120000_sync_media_folders_with_storage
-- **Scripts fixes**: test-dashboard-stats (import path), test-spectacles-crud (status 'published'), test-thumbnail-generation (direct Supabase client)
-- **Folder select dropdown**: Sélection du folder avant upload dans MediaLibraryView
-- **Slug field warning**: Warning UI dans MediaFoldersView concernant la synchronisation Storage path
-
-**Mise à jour v2.6 (29 décembre 2025) — TASK029 Media Library Complete:**
-
-- **Media Library System**: 7 phases complétées (Foundation, Tags/Folders, Bulk Ops, Rate Limit, Thumbnails, Animations, Accessibility, Usage Tracking)
-- **Architecture**: 3 tables créées (media_tags, media_folders, media_tag_assignments), 5 migrations, 4 DAL modules (3500+ lignes)
-- **UI Components**: 8 composants majeurs (Card, Upload, Picker, Tags, Folders, Bulk, Details, Library)
-- **Security**: 15 RLS policies granulaires (3 tables × 5 policies each)
-- **Accessibility**: 100% WCAG 2.1 AA compliance (keyboard nav, ARIA, screen readers, reduced-motion)
-- **Performance**: SHA-256 duplicate detection, bulk usage tracking avec Map optimization, rate limiting (10 uploads/min)
-- **Quality**: 7 bugs critiques résolus (Phase 4.3), conformité CRUD Pattern + DAL SOLID + Clean Code
-
-**Mise à jour v2.5 (22 décembre 2025) — React Hook Form Hydration Fixes:**
-
-- **Hydration Pattern**: Client Component wrappers with next/dynamic + ssr:false for forms
-- **Files Created**: AboutContentFormWrapper.tsx, TeamMemberFormClient.tsx
-- **Forms Fixed**: About content, Team member (new/edit)
-- **DALResult Safety**: UsersManagementContainer now checks result.success
-- **Zero Hydration Errors**: All admin forms load client-side only
-- **Next.js 16 Compliant**: ssr:false pattern in Client Components (required)
-
-**Mise à jour v2.4 (20 décembre 2025) — SOLID & Server Actions Refactoring:**
-
-- **Compliance**: Pattern compliance 78%→98% (0/6 files with violations)
-- **lib/dal/media.ts**: NEW centralized Storage/DB operations (234 lines)
-- **Code Quality**: Average function length 45→22 lines (51% reduction)
-- **Duplication**: Eliminated 120+ lines of duplicate Storage helpers
-- **DAL Layer**: All helpers converted to DALResult<T> pattern
-- **Server Actions**: All files with "server-only" directive + proper revalidatePath()
-- **Type Safety**: Discriminated unions for error handling, type guards instead of assertions
-
-**Mise à jour v2.3 (20 décembre 2025) — T3 Env Integration:**
-
-- **Environment Variables**: Type-safe validation avec @t3-oss/env-nextjs v0.13.10
-- **lib/env.ts**: Configuration centrale avec validation Zod au démarrage
-- **Pattern hasEnvVars supprimé**: ~100 lignes de code manuel nettoyées
-- **Validation runtime**: Fail fast si variables requises manquantes
-- **Type safety**: Full TypeScript inference pour toutes les variables env
-- **Security**: Séparation client/server enforced (NEXT_PUBLIC_* uniquement dans client section)
-
-**Mise à jour v2.2 (6 décembre 2025) — Clean Code Refactoring:**
-
-- **Constants extraction**: `lib/constants/hero-slides.ts` (LIMITS, DEFAULTS, CONFIGS)
-- **Hooks extraction**: 4 hooks extraits (useHeroSlideForm, useHeroSlideFormSync, useHeroSlidesDnd, useHeroSlidesDelete)
-- **DRY components**: CtaFieldGroup composant config-driven
-- **File size compliance**: Tous fichiers < 300 lignes
-
-**Mise à jour v2 (30 novembre 2025) — SOLID Refactoring:**
-
-- **DAL uniformisé**: 17/17 fichiers utilisent `DALResult<T>` depuis `lib/dal/helpers/`
-- **DAL helpers**: Utilitaires extraits dans `lib/dal/helpers/` (error, format, slug)
-- **Schemas centralisés**: 11 fichiers dans `lib/schemas/` avec barrel exports
-- **lib/types/ supprimé**: Props colocalisées avec les features
-- **Email/revalidatePath**: Supprimés du DAL, uniquement dans Server Actions
-- **Error codes**: Standardisés `[ERR_ENTITY_NNN]` dans tous les DAL
-- **SOLID compliance**: Score 92% (objectif était 90%)
-
-**Mise à jour v2.2 (6 décembre 2025) — Clean Code Refactoring:**
-
-- **lib/constants/ créé**: Nouveau `lib/constants/hero-slides.ts` avec `HERO_SLIDE_LIMITS`, `HERO_SLIDE_DEFAULTS`, `ANIMATION_CONFIG`, `DRAG_CONFIG`
-- **Hooks extraits**: 4 nouveaux hooks dans `lib/hooks/`: `useHeroSlideForm.ts`, `useHeroSlideFormSync.ts`, `useHeroSlidesDnd.ts`, `useHeroSlidesDelete.ts`
-- **CtaFieldGroup component**: Nouveau composant DRY `components/features/admin/home/CtaFieldGroup.tsx` pour champs CTA
-- **Fichiers < 300 lignes**: `HeroSlideForm.tsx` (117 lignes), `HeroSlideFormFields.tsx` (127 lignes), `HeroSlidesView.tsx` (241 lignes)
-- **Pattern hooks extraction**: Extraction de logique dans hooks custom quand composant > 300 lignes
-
-**Mise à jour v2.1 (4 décembre 2025) — API Routes Cleanup:**
-
-- **API Routes dépréciées supprimées**: 11 routes admin supprimées (hero, spectacles, invite-user)
-- **Server Actions consolidées**: `invite/actions.ts` fusionné dans `users/actions.ts`
-- **1 seule API admin conservée**: `/api/admin/media/search` (recherche interactive)
-- **Scripts de test archivés**: `test-home-hero-api.ts`, `test-spectacles-api.ts` → `doc-perso/scripts-archived/`
-
-## 1. Détection et analyse du projet
-
-- Principaux frameworks et technologies détectés:
-  - Next.js 16 (app/ router, Server Components, Server Actions)
-  - React 19
-  - TypeScript 5.x (mode strict)
-  - Supabase (Postgres) avec RLS, schémas déclaratifs (38 fichiers) et migrations
-  - React Email + Tailwind pour templates d'email
-  - React Hook Form 7.x + Zod 4.x pour validation
-  - @dnd-kit pour drag & drop (réordonnancement Hero Slides)
-  - Radix UI pour composants accessibles
-  - Sharp pour génération de thumbnails
-  - @t3-oss/env-nextjs v0.13.10 pour validation env type-safe
-  - pnpm / tsx pour scripts de développement/test
-  - GitHub Actions pour CI légère (workflows ajoutés)
-
-- Organisation observable:
-  - Structure feature-based: `components/features/*`, `lib/dal/*`, `lib/schemas/*`
-  - Route groups: `app/(admin)` et `app/(marketing)` pour séparation des layouts
-  - **Server Actions** colocalisées avec routes: `app/(admin)/admin/.../actions.ts`
-  - **DAL** (Data Access Layer) dans `lib/dal/*` (21 modules) avec `lib/dal/helpers/` pour utilitaires partagés
-  - **Schemas Zod** centralisés dans `lib/schemas/*` (11 fichiers avec barrel exports)
-  - **Props colocation**: Props des composants colocalisées avec features (ex: `components/features/admin/media/types.ts`)
-  - **Environment Variables**: Type-safe via `lib/env.ts` (T3 Env)
-  - Emails centralisés sous `emails/` avec utilitaires dans `emails/utils`
-  - Migrations et schémas Supabase sous `supabase/schemas` et `supabase/migrations`
-
-## 2. Vue d'ensemble de l'architecture
-
-Approche principale: application monolithique modulée (feature-based) servant des Server Components par défaut et utilisant une architecture en 4 couches : Présentation → Server Actions → DAL → Database.
-
-Principes directeurs:
-
-- **Server Components par défaut**; Client Components uniquement pour l'interactivité
-- **Server Actions** (colocalisées `app/(admin)/admin/.../actions.ts`) pour toutes les mutations avec `revalidatePath()`
-- **DAL** (`lib/dal/*`) pour l'accès DB uniquement — retourne `DALResult<T>`, pas de revalidation
-- **DAL Helpers** (`lib/dal/helpers/`) pour utilitaires partagés (error, format, slug)
-- **Dual Zod schemas**: Server schemas (bigint) vs UI schemas (number pour JSON) dans `lib/schemas/`
-- **Error codes standardisés**: Format `[ERR_ENTITY_NNN]` dans tous les fichiers DAL
-- Validation runtime à chaque frontière (Zod) + typage TypeScript strict
-- RLS (Row-Level Security) activé et considéré premier mécanisme de sécurité côté DB
-- **Clean Code**: max 300 lignes par fichier, split des formulaires en sous-composants
-- **Constants centralisées**: `lib/constants/` pour éviter les magic numbers (LIMITS, DEFAULTS, CONFIG)
-- **Hooks extraction**: Logique complexe extraite dans `lib/hooks/` (DnD, form state, delete dialog)
-- **Props colocation**: Props interfaces avec leurs composants, pas dans lib/types/
-
-Boundaries:
-
-- Frontend public (`app/(marketing)`) vs backoffice (`app/(admin)`)
-- Boundary serveur/DB: `lib/dal` exécute `createServerClient()`/`createAdminClient()` et utilise `"use server"` + `import "server-only"`
-- Boundary mutations: Server Actions (colocalisées) gèrent la revalidation après appel DAL
-
-## 3. Visualisation architecturale (textuelle)
-
-### High-level Architecture
-
-```bash
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                              BROWSER                                        │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           NEXT.JS APP                                       │
-│  ┌─────────────────────────────────────────────────────────────────────────┐│
-│  │              Middleware (supabase/middleware.ts)                        ││
-│  │              - JWT claims validation via getClaims() (~2-5ms)           ││
-│  │              - Admin route protection (/admin/*, /api/admin/*)          ││
-│  └─────────────────────────────────────────────────────────────────────────┘│
-│                                    │                                        │
-│          ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐      │
-│          │  (marketing)    │  │   (admin)       │  │   api/          │      │
-│          │  Public pages   │  │   Backoffice    │  │   API Routes    │      │
-│          │  - spectacles   │  │   - home/hero   │  │   (minimales)   │      │
-│          │  - compagnie    │  │   - users       │  │   - newsletter  │      │
-│          │  - contact      │  │   - team        │  │   - contact     │      │
-│          │  - agenda       │  │   - spectacles  │  │   - media/search│      │
-│          │  - presse       │  │                 │  │                 │      │
-│          └─────────────────┘  └─────────────────┘  └─────────────────┘      │
-│                                    │                                        │
-│  ┌─────────────────────────────────────────────────────────────────────────┐│
-│  │  LAYER: Server Actions (app/(admin)/admin/.../actions.ts)               ││
-│  │  - Colocated with routes                                                ││
-│  │  - Zod validation (UI schema → Server schema)                           ││
-│  │  - Calls DAL functions                                                  ││
-│  │  - revalidatePath() on success                                          ││
-│  │  - Email sending (if needed)                                            ││
-│  │  - Returns ActionResult<T>                                              ││
-│  └─────────────────────────────────────────────────────────────────────────┘│
-│                                    │                                        │
-│  ┌─────────────────────────────────────────────────────────────────────────┐│
-│  │  LAYER: Data Access Layer (lib/dal/)                                    ││
-│  │  - "use server" + import "server-only"                                  ││
-│  │  - requireAdmin() auth check                                            ││
-│  │  - Database operations only                                             ││
-│  │  - Returns DALResult<T> (from lib/dal/helpers/)                         ││
-│  │  - Error codes [ERR_ENTITY_NNN]                                         ││
-│  │  - NO revalidatePath() — NO email imports                               ││
-│  └─────────────────────────────────────────────────────────────────────────┘│
-│                                    │                                        │
-│  ┌─────────────────────────────────────────────────────────────────────────┐│
-│  │  LAYER: Supabase Client (supabase/server.ts)                            ││
-│  │  - createClient() for user-scoped operations                            ││
-│  │  - createAdminClient() for service-role operations                      ││
-│  └─────────────────────────────────────────────────────────────────────────┘│
-└─────────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         SUPABASE (Postgres)                                 │
-│  - RLS policies (37 schema files)                                           │
-│  - Database functions (is_admin(), reorder_hero_slides(), etc.)             │
-│  - Storage buckets (media)                                                  │
-└─────────────────────────────────────────────────────────────────────────────┘
+```text
+app/layout.tsx                    <- Root: HTML shell + ThemeProvider + Toaster + RootErrorBoundary
+  |-- app/(admin)/layout.tsx      <- Admin: requireAdmin() + SidebarProvider + AppSidebar + Breadcrumb
+  +-- app/(marketing)/layout.tsx  <- Public: Header + Footer + skip-link + landmarks
 ```
 
-### Component Architecture (Admin Home Feature)
+### 4.3 Structure des composants features
 
-```bash
-app/(admin)/admin/home/hero/page.tsx
-  ├── export const dynamic = 'force-dynamic'
-  ├── export const revalidate = 0
-  └── <HeroSlidesContainer />
+#### Pattern Admin systématique (12 domaines)
 
-lib/constants/
-  └── hero-slides.ts
-        ├── HERO_SLIDE_LIMITS (title: 80, subtitle: 120, description: 500, etc.)
-        ├── HERO_SLIDE_DEFAULTS (initial form values)
-        ├── ANIMATION_CONFIG (Framer Motion settings)
-        └── DRAG_CONFIG (dnd-kit configuration)
-
-lib/hooks/
-  ├── useHeroSlideForm.ts (53 lines) — Form state + submission logic
-  ├── useHeroSlideFormSync.ts (38 lines) — Props/form sync via useEffect
-  ├── useHeroSlidesDnd.ts (73 lines) — Drag & drop with @dnd-kit
-  └── useHeroSlidesDelete.ts (61 lines) — Delete confirmation dialog
-
-components/features/admin/home/
-  ├── HeroSlidesContainer.tsx (Server Component)
-  │     └── fetchAllHeroSlides() → <HeroSlidesView slides={data} />
-  │
-  ├── HeroSlidesView.tsx (~241 lines, Client Component)
-  │     ├── useHeroSlidesDnd() — Extracted DnD logic
-  │     ├── useHeroSlidesDelete() — Extracted delete logic
-  │     ├── useEffect(() => setSlides(props), [props])  ← CRITICAL for re-render
-  │     └── <HeroSlideForm />
-  │
-  ├── HeroSlideForm.tsx (~117 lines)
-  │     ├── useHeroSlideForm() — Extracted form logic
-  │     ├── useHeroSlideFormSync() — Extracted sync logic
-  │     ├── <HeroSlideFormFields form={form} />
-  │     └── <HeroSlideImageSection form={form} />
-  │
-  ├── HeroSlideFormFields.tsx (~127 lines) — Text fields + CtaFieldGroup
-  │     └── <CtaFieldGroup /> — DRY CTA Primary/Secondary
-  │
-  ├── CtaFieldGroup.tsx (~130 lines) — Config-driven CTA fields
-  │     └── CTA_CONFIGS for Primary/Secondary field mapping
-  │
-  └── HeroSlideImageSection.tsx (85 lines) — Image picker
+```text
+components/features/admin/{feature}/
+  |-- {Feature}Container.tsx       <- Server Component (data fetching via DAL)
+  |-- {Feature}View.tsx            <- Client Component (state + useEffect sync)
+  |-- {Feature}Form.tsx            <- Client form (react-hook-form, max 300 lignes)
+  |-- {Feature}FormFields.tsx      <- Extracted: text fields (si form > 300 lignes)
+  |-- {Feature}ImageSection.tsx    <- Extracted: image picker
+  |-- types.ts                     <- Props interfaces colocalisées
+  +-- index.ts                     <- Barrel exports
 ```
 
-### Data Flow (Mutation)
+**Domaines admin :** `agenda`, `analytics`, `audit-logs`, `home`, `lieux`, `media` (16 fichiers), `partners`, `presse`, `site-config`, `spectacles`, `team` (6 fichiers), `users`
+
+#### Pattern Public systématique (6 domaines)
+
+Chaque feature publique suit un pattern uniforme de **5 fichiers** :
 
 ```bash
-User clicks "Save" in HeroSlideForm
-         │
-         ▼
-form.handleSubmit(onSubmit)
-         │
-         ▼
-createHeroSlideAction(data)      ← lib/actions/home-hero-actions.ts
-  ├── HeroSlideInputSchema.parse(data)  ← Server schema validation
-  ├── createHeroSlide(validated)        ← DAL call
-  │         │
-  │         ▼
-  │   lib/dal/admin-home-hero.ts
-  │     ├── requireAdmin()
-  │     ├── HeroSlideInputSchema.parse()  ← Defense in depth
-  │     ├── generateUniqueSlug()
-  │     └── supabase.from().insert()
-  │         │
-  │         ▼
-  │   Returns DALResult<HeroSlideDTO>
-  │
-  ├── revalidatePath('/admin/home/hero')
-  ├── revalidatePath('/')
-  └── return ActionResult
-         │
-         ▼
-onSuccess() → router.refresh()
-         │
-         ▼
-Server Component re-fetches → new props → useEffect syncs state
+components/features/public-site/{feature}/
+  |-- {Feature}Container.tsx          <- Server (async, DAL fetch)
+  |-- {Feature}View.tsx               <- Dumb (présentation pure)
+  |-- hooks.ts                        <- Client-side hooks
+  |-- types.ts                        <- Props interfaces
+  +-- index.ts                        <- Barrel
 ```
 
-## 4. Composants architecturaux détaillés
+**Homepage — 6 sous-sections :** `hero/`, `about/`, `newsletter/`, `partners/`, `shows/`, `news/` — chacune suit ce pattern.
 
-### 4.1 Server Actions (colocalisées avec routes)
+**Autres pages :** `agenda/`, `compagnie/`, `contact/`, `presse/`, `spectacles/`
 
-**Localisation:** `app/(admin)/admin/<feature>/actions.ts`
+### 4.4 Data Access Layer (31 modules)
 
-**Fichiers actuels:**
+**Admin (14 modules) :**
 
-- `app/(admin)/admin/home/hero/home-hero-actions.ts` — CRUD Hero Slides
-- `app/(admin)/admin/home/about/home-about-actions.ts` — Update About content
-- `app/(admin)/admin/users/actions.ts` — User management + invite email
-- `app/(admin)/admin/team/actions.ts` — Team management
-- `app/(admin)/admin/spectacles/actions.ts` — Spectacles CRUD
+| Module | Domaine | Fonctions types |
+|--------|---------|-----------------|
+| `admin-agenda.ts` | Événements | `fetchEventsAdmin`, `createEvent`, `updateEvent`, `deleteEvent` |
+| `admin-home-hero.ts` | Hero Slides | `fetchAllHeroSlides`, `createHeroSlide`, `reorderHeroSlides` |
+| `admin-home-about.ts` | About sections | `fetchAboutSections`, `updateAboutSection` |
+| `admin-lieux.ts` | Lieux | `fetchAllLieuxAdmin`, `createLieu`, `updateLieu`, `deleteLieu` |
+| `admin-partners.ts` | Partenaires | CRUD complet |
+| `admin-press-articles.ts` | Articles presse | CRUD |
+| `admin-press-contacts.ts` | Contacts presse | CRUD |
+| `admin-press-releases.ts` | Communiqués | CRUD |
+| `admin-users.ts` | Utilisateurs | CRUD + invitation |
+| `audit-logs.ts` | Logs d'audit | `fetchAuditLogs`, `createAuditLog` |
+| `dashboard.ts` | Dashboard | `fetchDashboardStats` |
+| `data-retention.ts` | RGPD | `fetchRetentionPolicies`, `executeRetention` |
+| `site-config.ts` | Display Toggles | `fetchDisplayToggle`, `updateDisplayToggle` |
+| `analytics.ts` | Analytics | `fetchAnalyticsData` |
 
-**Pattern obligatoire:**
+**Public (13 modules) :**
+
+`agenda.ts`, `compagnie.ts`, `compagnie-presentation.ts`, `contact.ts`, `home-about.ts`, `home-hero.ts`, `home-news.ts`, `home-newsletter.ts`, `home-partners.ts`, `home-shows.ts`, `presse.ts`, `spectacles.ts`, `team.ts`
+
+**Media Library (4 modules) :**
+
+`media.ts` (CRUD centralisé, SHA-256 dedup), `media-folders.ts` (9 folders, `getFolderIdFromPath()`), `media-tags.ts` (junction table), `media-usage.ts` (tracking 7 tables)
+
+**DAL Helpers (`lib/dal/helpers/`, 5 fichiers) :**
+
+| Fichier | Exports |
+|---------|---------|
+| `error.ts` | `DALResult<T>`, `dalSuccess()`, `dalError()`, `toDALResult()` |
+| `format.ts` | Formatage dates, strings |
+| `slug.ts` | `generateUniqueSlug()` |
+| `serialize.ts` | BigInt vers number (DTO conversion) |
+| `folder.ts` | `getFolderIdFromPath()` (Storage/Folders sync) |
+
+### 4.5 Schemas Zod (15+ modules)
+
+Chaque feature dispose de schemas duaux :
+
+- **Server Schema** : `z.coerce.bigint()` pour IDs PostgreSQL
+- **UI Schema** : `z.number().int().positive()` pour react-hook-form
+- **Transport Type** (si BigInt) : `string` pour Server Actions
+
+Modules : `admin-events.ts`, `admin-lieux.ts`, `admin-users.ts`, `agenda.ts`, `compagnie.ts`, `contact.ts`, `dashboard.ts`, `home-content.ts`, `media.ts`, `presse.ts`, `spectacles.ts`, `team.ts`, `index.ts` (barrel)
+
+### 4.6 Hooks (`lib/hooks/`, 9 hooks)
+
+| Hook | Lignes | Fonction |
+|------|--------|----------|
+| `useHeroSlideForm.ts` | 53 | Form state + submission |
+| `useHeroSlideFormSync.ts` | 38 | Props/form sync via useEffect |
+| `useHeroSlidesDnd.ts` | 73 | Drag and drop @dnd-kit |
+| `useHeroSlidesDelete.ts` | 61 | Delete confirmation dialog |
+| `use-debounce.ts` | — | Value debouncing |
+| `use-mobile.ts` | — | Mobile viewport detection |
+| `useContactForm.ts` | — | Contact form logic |
+| `useMediaUpload.ts` | — | Media upload state |
+| `useNewsletterSubscribe.ts` | — | Newsletter inscription |
+
+### 4.7 API Helpers (`lib/api/helpers.ts`, 136 lignes)
+
+| Export | Rôle |
+|--------|------|
+| `HttpStatus` | Constantes HTTP (200, 201, 400, 401, 403, 404, 409, 422, 500) |
+| `PostgresError` | Codes erreur PG (unique/foreign key/not null violation) |
+| `ApiResponse.success/error/validationError` | Wrappers `NextResponse.json()` typés |
+| `parseNumericId(id)` | Validation ID numérique positif |
+| `parseBoolean(value)` | Parse booléen multi-format |
+| `withAdminAuth(handler)` | Wrapper auth admin pour API Routes |
+| `parseFullName(name)` | Split nom complet en prénom/nom |
+| `isUniqueViolation(error)` | Type guard erreur unicité PG |
+
+### 4.8 Action Result Types (`lib/actions/types.ts`)
 
 ```typescript
-"use server";
-import "server-only";
-import { revalidatePath } from "next/cache";
-import { SomeInputSchema } from "@/lib/schemas/feature";
-import { createSomething } from "@/lib/dal/feature";
+type ActionResult<T = unknown> =
+  | { success: true; data?: T }
+  | { success: false; error: string; status?: number; details?: unknown };
+```
 
-export type ActionResult<T> = { success: true; data?: T } | { success: false; error: string };
+Type guards exportés : `isActionSuccess()`, `isActionError()`
 
-export async function createSomethingAction(input: unknown): Promise<ActionResult> {
-  try {
-    const validated = SomeInputSchema.parse(input);  // Zod validation
-    const result = await createSomething(validated);  // DAL call
-    
-    if (!result.success) return { success: false, error: result.error ?? "failed" };
-    
-    revalidatePath("/admin/feature");  // Cache invalidation
-    revalidatePath("/");               // Public page if affected
-    
-    return { success: true, data: result.data };
-  } catch (err: unknown) {
-    return { success: false, error: err instanceof Error ? err.message : "Unknown error" };
-  }
+---
+
+## 5. Couches et dépendances
+
+```bash
+PRESENTATION (app/, components/)
+    |  imports
+APPLICATION (lib/actions/, app/*/actions.ts)
+    |  imports
+DATA ACCESS (lib/dal/)
+    |  imports
+INFRASTRUCTURE (supabase/, lib/email/)
+```
+
+**Règles de dépendance strictes :**
+
+| Règle | Enforcement |
+|-------|-------------|
+| DAL ne dépend pas de Next.js | `import "server-only"` + code review |
+| DAL ne fait pas de `revalidatePath()` | Convention + instructions Copilot |
+| DAL ne fait pas d'imports email | Single Responsibility |
+| Server Actions = seul endroit pour `revalidatePath()` | Convention CRUD pattern |
+| Composants Client n'importent jamais le DAL | `"use server"` boundary |
+| Env vars toujours via `lib/env.ts` (T3 Env) | Convention + instructions |
+
+### ActionResult vs DALResult
+
+| Type | Couche | BigInt autorisé | `revalidatePath()` |
+|------|--------|-----------------|---------------------|
+| `DALResult<T>` | DAL | Oui | Non |
+| `ActionResult<T>` | Server Actions | Non (sérialisé) | Oui |
+
+---
+
+## 6. Architecture des données
+
+### 6.1 Modèle de domaine
+
+```mermaid
+erDiagram
+    PROFILES ||--o{ MEMBRES_EQUIPE : manages
+    SPECTACLES ||--o{ EVENEMENTS : "a lieu"
+    EVENEMENTS }o--|| LIEUX : "se deroule a"
+    SPECTACLES ||--o{ SPECTACLE_PHOTOS : contains
+    MEDIAS ||--o{ MEDIA_TAG_ASSIGNMENTS : tagged
+    MEDIA_TAGS ||--o{ MEDIA_TAG_ASSIGNMENTS : assigns
+    MEDIAS }o--|| MEDIA_FOLDERS : "range dans"
+    HOME_HERO_SLIDES }o--|| MEDIAS : "image de"
+    PARTENAIRES }o--|| MEDIAS : logo
+    ARTICLES_PRESSE }o--|| MEDIAS : image
+    CONFIGURATIONS_SITE ||--|| DISPLAY_TOGGLES : controls
+    ABONNES_NEWSLETTER ||--|| AUDIT_LOGS : tracked
+```
+
+### 6.2 Tables principales (36, 100% RLS)
+
+| Catégorie | Tables |
+|-----------|--------|
+| **Auth** | `profiles` |
+| **Contenu** | `spectacles`, `home_hero_slides`, `sections_apropos`, `sections_compagnie`, `compagnie_presentation_sections` |
+| **Événements** | `agenda_evenements`, `lieux`, `evenement_recurrences` |
+| **Presse** | `articles_presse`, `communiques_presse`, `contacts_presse`, `media_kit` |
+| **Partenaires** | `partenaires` |
+| **Équipe** | `membres_equipe` |
+| **Médias** | `medias`, `media_tags`, `media_folders`, `media_tag_assignments` |
+| **Newsletter** | `abonnes_newsletter` |
+| **Contact** | `messages_contact` |
+| **Système** | `configurations_site`, `analytics_events`, `audit_logs`, `content_versions`, `data_retention_policies`, `seo_metadata` |
+
+### 6.3 Schémas déclaratifs (45 fichiers)
+
+Organisés par préfixe numérique dans `supabase/schemas/` :
+
+| Plage | Domaine |
+|-------|---------|
+| `01-02` | Extensions, profiles, fonctions core, storage |
+| `03-04` | Médias, tags, équipe |
+| `05-09` | Contenu principal (lieux, spectacles, événements, compagnie, presse, partenaires) |
+| `10-16` | Système, relations, récurrence, analytics, versioning, SEO |
+| `20-22` | Audit logs, rétention RGPD |
+| `30-42` | Triggers, index, vues |
+| `50-63` | Contraintes, RLS policies, fonctions spécialisées |
+
+### 6.4 Vues PostgreSQL
+
+| Type | Nombre | Security Mode | Accès |
+|------|--------|---------------|-------|
+| **Vues publiques** | 11 | `SECURITY INVOKER` explicite | `anon`, `authenticated` |
+| **Vues admin** | 7 | Owner `admin_views_owner` | `service_role` uniquement |
+
+### 6.5 BigInt Three-Layer Serialization
+
+```bash
+UI Layer (Client)          Transport Layer (Actions)     DAL Layer (Server)
+─────────────────          ────────────────────────      ──────────────────
+zod: z.number()            zod: z.string()               zod: z.coerce.bigint()
+type: number               type: string                  type: bigint
+
+EventFormValues            EventDataTransport            EventInput
+{ lieu_id: 42 }            { lieu_id: "42" }             { lieu_id: 42n }
+
+react-hook-form            Server Action receives         DAL converts:
+submits number             string (JSON-safe)             BigInt(validated.lieu_id)
+```
+
+---
+
+## 7. Préoccupations transversales
+
+### 7.1 Authentification & Autorisation
+
+| Mécanisme | Usage | Latence |
+|-----------|-------|---------|
+| `getClaims()` | Vérification JWT locale (middleware, Server Components) | ~2-5ms |
+| `getUser()` | Données utilisateur complètes (profil) | ~300ms |
+| `requireAdmin()` | Guard dans DAL + Server Actions | ~2-5ms |
+| `is_admin()` (SQL) | Fonction DB pour RLS policies | inline |
+| Cookies `getAll/setAll` | Pattern `@supabase/ssr` exclusif | — |
+
+**4 clients Supabase :**
+
+| Client | Fichier | Usage |
+|--------|---------|-------|
+| Server | `supabase/server.ts` | Server Components, Server Actions (user-scoped) |
+| Client | `supabase/client.ts` | Client Components (browser) |
+| Middleware | `supabase/middleware.ts` | Session refresh dans `proxy.ts` |
+| Admin | `supabase/admin.ts` | Service role (scripts, fonctions admin) |
+
+### 7.2 Error Handling & Resilience
+
+**3 niveaux d'Error Boundaries :**
+
+| Niveau | Fichier | Scope |
+|--------|---------|-------|
+| Root | `components/error-boundaries/RootErrorBoundary.tsx` | App entière |
+| Page | `components/error-boundaries/PageErrorBoundary.tsx` | Par page |
+| Component | `components/error-boundaries/ComponentErrorBoundary.tsx` | Par composant |
+
+**Pattern Error :**
+
+- DAL : retourne `dalError()` (jamais throw)
+- Server Actions : `try/catch` puis `ActionResult<T>`
+- API Routes : `ApiResponse.error()` avec codes HTTP
+- Client : `toast.error()` (Sonner) + error boundaries
+
+**Warning Pattern (email) :**
+
+```typescript
+const contactId = await createContactMessage(data);
+try {
+  await sendEmail(data);
+} catch (emailError) {
+  console.error("Email failed:", emailError);
+}
+return { success: true, id: contactId };
+```
+
+### 7.3 Monitoring — Sentry Multi-Runtime
+
+| Runtime | Config | Particularités |
+|---------|--------|----------------|
+| **Client** | `sentry.client.config.ts` | Supabase integration (tracing + breadcrumbs), Browser Tracing, Session Replay (10% sessions, 100% erreurs), masquage texte + blocage média |
+| **Server** | `sentry.server.config.ts` | `beforeSend` supprime headers sensibles (`authorization`, `cookie`, `x-api-key`) |
+| **Edge** | `sentry.edge.config.ts` | Minimal |
+| **Instrumentation** | `instrumentation.ts` | `onRequestError` enrichi (routerKind, routePath, URL, method) + tag runtime |
+
+**Tunnel anti ad-blockers** : route `/monitoring` dans `next.config.ts`
+
+**Filtrage client** : Ignore `ResizeObserver`, erreurs hydratation dev, bug Turbopack `transformAlgorithm`
+
+### 7.4 Validation - Zod partout
+
+| Couche | Validation |
+|--------|-----------|
+| **Env vars** | T3 Env (`lib/env.ts`) — Zod runtime au démarrage |
+| **Form (client)** | UI Schema + `zodResolver` (react-hook-form) |
+| **Server Action** | Transport Schema (string IDs) |
+| **DAL** | Server Schema (bigint IDs) — defense in depth |
+| **API Route** | Zod parse body/params + `ApiResponse.validationError()` |
+
+### 7.5 Configuration Management
+
+| Source | Fichier | Contenu |
+|--------|---------|---------|
+| **T3 Env** | `lib/env.ts` | 14 server + 4 client vars, Zod validated |
+| **Site Config** | `lib/site-config.ts` | SEO, email, server URL, maker info, auth redirects |
+| **Constants** | `lib/constants/hero-slides.ts` | Limites, défauts, animation config, DnD config |
+| **Display Toggles** | Table `configurations_site` | 10 toggles (home x6, agenda x1, contact x1, presse x2) |
+| **TypeScript** | `tsconfig.json` | Strict mode, path aliases (`@/*`) |
+| **Tailwind** | `tailwind.config.ts` | HSL CSS variables (shadcn/ui), custom plugins |
+
+### 7.6 Security Headers (OWASP A05)
+
+Configurés dans `next.config.ts`, appliqués sur `/:path*` :
+
+| Header | Valeur | Protection |
+|--------|--------|------------|
+| **Content-Security-Policy** | `default-src 'self'`; script/style/img/connect-src whitelistés | XSS, injection |
+| **Strict-Transport-Security** | `max-age=63072000; includeSubDomains; preload` | Downgrade HTTPS |
+| **X-Frame-Options** | `DENY` | Clickjacking |
+| **X-Content-Type-Options** | `nosniff` | MIME sniffing |
+| **Referrer-Policy** | `strict-origin-when-cross-origin` | Fuite referrer |
+| **Permissions-Policy** | `camera=(), microphone=(), geolocation=()` | APIs browser |
+
+**CSP connect-src** : `'self'`, domaine Supabase, `*.ingest.de.sentry.io`
+
+> **Note** : `script-src` contient encore `'unsafe-inline' 'unsafe-eval'` — TODO pour production : utiliser nonces ou hashes.
+
+---
+
+## 8. Communication & APIs
+
+### 8.1 Communication interne
+
+| Pattern | Usage |
+|---------|-------|
+| **Server Actions** | Mutations (POST/PUT/DELETE) depuis le frontend Next.js |
+| **Server Components** | Lectures (GET) avec accès DAL direct |
+| **`router.refresh()`** | Re-fetch Server Component après mutation |
+| **`revalidatePath()`** | Invalidation cache ISR |
+| **`revalidateTag()`** | Invalidation sélective par tag |
+
+### 8.2 Communication externe
+
+| Endpoint | Direction | Protocole |
+|----------|-----------|-----------|
+| Supabase DB | Out | HTTPS (PostgREST) |
+| Supabase Auth | Out | HTTPS (GoTrue) |
+| Supabase Storage | Out | HTTPS (S3-compatible) |
+| Resend API | Out | HTTPS |
+| Sentry | Out | HTTPS (tunnel `/monitoring`) |
+| API Routes | In | HTTPS (webhooks, external clients) |
+
+### 8.3 Handler Factorization Pattern
+
+Pour les endpoints contactables par API Route ET Server Action, la logique est factorisée :
+
+```bash
+app/api/newsletter/route.ts     --+
+                                  +--> lib/actions/newsletter-server.ts --> lib/dal/
+app/actions/newsletter.actions.ts --+
+```
+
+Fichiers factorisés : `newsletter-server.ts`, `contact-server.ts`, `uploads-server.ts`
+
+---
+
+## 9. Patterns React / Next.js
+
+### 9.1 Server Components (défaut)
+
+- Fonctions `async` avec accès DAL direct
+- `Suspense` + skeletons pour streaming
+- Pages admin : `export const dynamic = 'force-dynamic'` + `export const revalidate = 0`
+- Homepage : ISR `revalidate = 60` avec 5 conteneurs Suspense
+
+### 9.2 Client Components
+
+- Marqués `'use client'`
+- Synchronisation props vers state via `useEffect` (post `router.refresh()`)
+- **Hydration pattern** : `next/dynamic` + `ssr: false` pour forms complexes (DANS Client Components uniquement)
+
+### 9.3 Container/View Split
+
+Chaque feature suit `Smart Container -> Dumb View` :
+
+```typescript
+// Container (Server)
+export async function TeamContainer() {
+  const result = await fetchTeamMembers();
+  if (!result.success) return <ErrorState />;
+  return <TeamView initialMembers={result.data} />;
+}
+
+// View (Client)
+"use client";
+export function TeamView({ initialMembers }: Props) {
+  const [members, setMembers] = useState(initialMembers);
+  useEffect(() => setMembers(initialMembers), [initialMembers]);
+  // ...handlers calling Server Actions + router.refresh()
 }
 ```
 
-### 4.2 DAL (`lib/dal/`) — 29 Modules Data Access Layer
+### 9.4 Homepage Streaming Architecture
 
-**Architecture SOLID (92% compliance):**
+```text
+app/(marketing)/page.tsx (revalidate=60)
+  +-- Suspense fallback={<HeroSkeleton />}
+  |     +-- HeroContainer -> HeroView -> HeroClient (carrousel interactif)
+  +-- Suspense fallback={<AboutSkeleton />}
+  |     +-- AboutContainer -> AboutView
+  +-- Suspense fallback={<ShowsSkeleton />}
+  |     +-- ShowsContainer -> ShowsView
+  +-- Suspense fallback={<NewsSkeleton />}
+  |     +-- NewsContainer -> NewsView
+  +-- Suspense fallback={<PartnersSkeleton />}
+  |     +-- PartnersContainer -> PartnersView
+  +-- NewsletterClientContainer -> NewsletterView
+```
 
-- **S**ingle Responsibility: 1 fichier = 1 table/entité, DB operations ONLY
-- **O**pen/Closed: Extensible via validation, pas de logique hard-codée
-- **L**iskov Substitution: Interface `DALResult<T>` cohérente
-- **I**nterface Segregation: Dépendances minimales (Supabase + Auth uniquement)
-- **D**ependency Inversion: AUCUNE dépendance Next.js/email/SMS
+### 9.5 Display Toggles Pattern
 
-**Modules DAL complets (29 fichiers, ~7,310 lignes):**
+10 toggles centralisés dans `configurations_site` contrôlent la visibilité des sections publiques :
 
-**Admin Features (14 modules):**
+```typescript
+const toggle = await fetchDisplayToggle("display_toggle_hero");
+const showHero = toggle.success && toggle.data?.value?.enabled !== false;
 
-1. `admin-agenda.ts` — Événements agenda CRUD
-2. `admin-home-hero.ts` — Hero Slides CRUD (fetch, create, update, delete, reorder)
-3. `admin-home-about.ts` — About sections CRUD
-4. `admin-lieux.ts` — **Lieux CRUD (TASK055 Phase 2)** — 5 fonctions avec cache(), requireAdmin(), DALResult<T>
-5. `admin-partners.ts` — Partenaires CRUD
-6. `admin-press-articles.ts` — Articles presse CRUD
-7. `admin-press-contacts.ts` — Contacts presse CRUD
-8. `admin-press-releases.ts` — Communiqués presse CRUD
-9. `admin-users.ts` — Utilisateurs CRUD + invitation email
-10. `audit-logs.ts` — Logs d'audit (surveillance actions admin)
-11. `dashboard.ts` — Dashboard statistics
-12. `data-retention.ts` — RGPD data retention policies (TASK047)
-13. `site-config.ts` — **Display Toggles (TASK030)** — 10 toggles centralisés
-14. `analytics.ts` — Analytics data aggregation
+const heroData = showHero
+  ? await fetchHeroSlides()
+  : { success: true, data: [] };
+```
 
-**Public Features (11 modules):**
+---
 
-15. `agenda.ts` — Agenda événements public
-16. `compagnie.ts` — Compagnie data
-17. `compagnie-presentation.ts` — Présentation compagnie
-18. `contact.ts` — Messages contact
-19. `home-about.ts` — About public
-20. `home-hero.ts` — Hero public
-21. `home-news.ts` — Actualités ("À la Une")
-22. `home-newsletter.ts` — Newsletter subscriptions
-23. `home-partners.ts` — Partenaires public
-24. `home-shows.ts` — Spectacles homepage
-25. `presse.ts` — Presse public (articles, releases, media kit)
-26. `spectacles.ts` — Spectacles CRUD + public views
-27. `team.ts` — Team members
+## 10. Patterns d'implémentation
 
-**Media Library (3 modules — TASK029 Complete):**
-
-28. `media.ts` — **Media CRUD centralisé** (Storage/DB operations, SHA-256 duplicate detection)
-29. `media-folders.ts` — **Folders management** (9 base folders, `getFolderIdFromPath()` helper)
-30. `media-usage.ts` — **Usage tracking** (spectacles, presse, team, etc.)
-31. `media-tags.ts` — Tags management (junction table)
-
-**DAL Helpers (`lib/dal/helpers/`):**
-
-- `error.ts` — `DALResult<T>` type, `dalSuccess()`, `dalError()`, `toDALResult()`
-- `format.ts` — Formatage dates, strings, slugs
-- `slug.ts` — Génération slugs uniques (`generateUniqueSlug()`)
-- `folder.ts` — **Media folders** (`getFolderIdFromPath()`, Storage/Folders sync)
-- `index.ts` — Barrel exports
-
-**Pattern DAL Standard (TASK055 Lieux exemple):**
+### 10.1 DAL Standard
 
 ```typescript
 "use server";
@@ -915,1016 +761,498 @@ import "server-only";
 import { cache } from "react";
 import { createClient } from "@/supabase/server";
 import { requireAdmin } from "@/lib/auth/is-admin";
-import type { DALResult } from "@/lib/dal/helpers";
 import { dalSuccess, dalError } from "@/lib/dal/helpers";
-import type { LieuInput, LieuDTO } from "@/lib/schemas/admin-lieux";
+import type { DALResult } from "@/lib/dal/helpers";
 
-/**
- * Fetch all lieux (admin)
- * @returns DALResult with array of LieuDTO
- */
-export const fetchAllLieuxAdmin = cache(async (): Promise<DALResult<LieuDTO[]>> => {
+export const fetchAllItems = cache(
+  async (): Promise<DALResult<ItemDTO[]>> => {
     await requireAdmin();
-
     const supabase = await createClient();
     const { data, error } = await supabase
-        .from("lieux")
-        .select("*")
-        .order("nom", { ascending: true });
+      .from("items")
+      .select("*")
+      .order("created_at", { ascending: false });
 
     if (error) {
-        console.error("[ERR_LIEUX_001] Failed to fetch lieux:", error);
-        return dalError("[ERR_LIEUX_001] Failed to fetch lieux");
+      console.error("[ERR_ITEMS_001] Fetch failed:", error);
+      return dalError("[ERR_ITEMS_001] Fetch failed");
     }
-
     return dalSuccess(data ?? []);
-});
-
-/**
- * Create lieu
- * @param input - LieuInput data
- * @returns DALResult with created LieuDTO
- */
-export async function createLieu(input: LieuInput): Promise<DALResult<LieuDTO>> {
-    await requireAdmin();
-
-    const supabase = await createClient();
-    const { data, error } = await supabase
-        .from("lieux")
-        .insert(input)
-        .select()
-        .single();
-
-    if (error) {
-        console.error("[ERR_LIEUX_003] Failed to create lieu:", error);
-        return dalError("[ERR_LIEUX_003] Failed to create lieu");
-    }
-
-    return dalSuccess(data);
-}
-
-// ✅ Functions < 30 lines
-// ✅ Error codes [ERR_LIEUX_001] to [ERR_LIEUX_005]
-// ❌ NO revalidatePath() — handled in Server Actions
-// ❌ NO email imports — handled in Server Actions
+  }
+);
 ```
 
-**Règles SOLID enforced:**
-
-- ✅ `"use server"` directive (top of file)
-- ✅ `import "server-only"` (security boundary)
-- ✅ Returns `DALResult<T>` (never throws)
-- ✅ Error codes `[ERR_ENTITY_NNN]` format (001-005 par module)
-- ✅ Functions < 30 lines (SOLID compliance)
-- ✅ React `cache()` wrapper pour read functions (deduplication)
-- ❌ NO `revalidatePath()` imports (Dependency Inversion violation)
-- ❌ NO `@/lib/email` imports (Single Responsibility violation)
-
-### 4.3 Constants (`lib/constants/`)
-
-**Fichiers actuels:**
-
-- `hero-slides.ts` — Constantes pour Hero Slides feature
-
-**Pattern obligatoire:**
+### 10.2 Server Action Standard
 
 ```typescript
-// lib/constants/hero-slides.ts
-
-// Validation limits (no magic numbers in components)
-export const HERO_SLIDE_LIMITS = {
-  TITLE_MAX_LENGTH: 80,
-  SUBTITLE_MAX_LENGTH: 120,
-  DESCRIPTION_MAX_LENGTH: 500,
-  CTA_LABEL_MAX_LENGTH: 30,
-  CTA_URL_MAX_LENGTH: 500,
-} as const;
-
-// Form default values
-export const HERO_SLIDE_DEFAULTS = {
-  title: "",
-  subtitle: "",
-  description: "",
-  is_active: true,
-  // ...
-} as const;
-
-// Animation configuration (Framer Motion)
-export const ANIMATION_CONFIG = {
-  duration: 0.2,
-  ease: "easeInOut",
-} as const;
-
-// Drag configuration (dnd-kit)
-export const DRAG_CONFIG = {
-  activationConstraint: {
-    distance: 8,
-  },
-} as const;
-```
-
-**Règles de nommage:**
-
-- `*_LIMITS` — Longueurs max pour validation
-- `*_DEFAULTS` — Valeurs par défaut formulaires
-- `*_CONFIG` — Objets de configuration
-
-### 4.4 Hooks (`lib/hooks/`)
-
-**Fichiers actuels (9 hooks):**
-
-**Hero Slides (Clean Code extraction):**
-
-- `useHeroSlideForm.ts` (53 lines) — Form state, isPending, handleSubmit
-- `useHeroSlideFormSync.ts` (38 lines) — Sync form with props via useEffect
-- `useHeroSlidesDnd.ts` (73 lines) — Drag & drop avec @dnd-kit, sensors, handleDragEnd
-- `useHeroSlidesDelete.ts` (61 lines) — Delete dialog state, handleDelete
-
-**General:**
-
-- `use-debounce.ts` — Value debouncing
-- `use-mobile.ts` — Mobile viewport detection
-- `useContactForm.ts` — Contact form logic
-- `useMediaUpload.ts` — Media upload state
-- `useNewsletterSubscribe.ts` — Newsletter subscription
-
-**Pattern extraction hook:**
-
-```typescript
-// lib/hooks/useHeroSlidesDnd.ts
-"use client";
-
-import { useState } from "react";
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from "@dnd-kit/core";
-import { DRAG_CONFIG } from "@/lib/constants/hero-slides";
-
-export function useHeroSlidesDnd(
-  slides: HeroSlideDTO[],
-  onReorder: (slides: HeroSlideDTO[]) => Promise<void>
-) {
-  const [isReordering, setIsReordering] = useState(false);
-  
-  const sensors = useSensors(
-    useSensor(PointerSensor, DRAG_CONFIG),
-    useSensor(KeyboardSensor)
-  );
-  
-  const handleDragEnd = async (event: DragEndEvent) => {
-    // ... reorder logic
-  };
-  
-  return { sensors, handleDragEnd, isReordering };
-}
-```
-
-**Règles d'extraction:**
-
-- Extraire quand composant > 300 lignes
-- Extraire quand logique réutilisable
-- Hook max ~70-80 lignes
-- Nommage: `use<Feature><Action>.ts`
-
-### 4.5 Schemas (`lib/schemas/`)
-
-**Fichiers actuels (11 fichiers + barrel):**
-
-- `admin-users.ts` — `UpdateUserRoleSchema`, `InviteUserSchema`, `UserRoleEnum`
-- `agenda.ts` — `EventSchema`, `EventFilterSchema`
-- `compagnie.ts` — `ValueSchema`, `TeamMemberSchema`
-- `contact.ts` — `ContactMessageSchema`, `ContactEmailSchema`, `NewsletterSubscriptionSchema`
-
-### 4.6 Environment Variables (`lib/env.ts`) 🆕
-
-#### **T3 Env Type-Safe Configuration (v0.13.10)**
-
-Fichier central pour la validation type-safe des variables d'environnement avec Zod runtime validation.
-
-**Configuration structure:**
-
-```typescript
-// lib/env.ts
-import { createEnv } from "@t3-oss/env-nextjs";
-import { z } from "zod";
-
-export const env = createEnv({
-  server: {
-    // Variables server-only (sensibles)
-    SUPABASE_SECRET_KEY: z.string().min(1),
-    RESEND_API_KEY: z.string().min(1),
-    EMAIL_FROM: z.string().email(),
-    EMAIL_CONTACT: z.string().email(),
-    EMAIL_DEV_REDIRECT: z
-      .string()
-      .default("false")
-      .transform(val => val === "true"), // boolean transform
-    // ... optional MCP/CI variables
-  },
-  client: {
-    // Variables client-accessible (publiques)
-    // ⚠️ NEXT_PUBLIC_* MUST be in client section only
-    NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
-    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY: z.string().min(1),
-    NEXT_PUBLIC_SITE_URL: z.string().url(),
-  },
-  runtimeEnv: {
-    // Manual destructuring for Edge Runtime compatibility
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY: 
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY,
-    // ... all variables
-  },
-  skipValidation: !!process.env.SKIP_ENV_VALIDATION, // Docker builds
-  emptyStringAsUndefined: true,
-});
-```
-
-**Variables validées (14 au total):**
-
-**Server-only (sensibles):**
-
-- `SUPABASE_SECRET_KEY` — Clé secrète Supabase (admin access)
-- `RESEND_API_KEY` — Clé API Resend pour emails
-- `EMAIL_FROM` — Email expéditeur (format validé)
-- `EMAIL_CONTACT` — Email contact (format validé)
-- `EMAIL_DEV_REDIRECT` — Boolean transform (dev email redirection)
-- `EMAIL_DEV_REDIRECT_TO` — Email de redirection dev (optionnel)
-- MCP/CI optionnels : `SUPABASE_PROJECT_REF`, `GITHUB_TOKEN`, etc.
-
-**Client-accessible (publiques):**
-
-- `NEXT_PUBLIC_SUPABASE_URL` — URL Supabase (format URL validé)
-- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY` — Clé publique Supabase
-- `NEXT_PUBLIC_SITE_URL` — URL du site (format URL validé)
-
-**Règles d'utilisation:**
-
-> [!CAUTION]
-> **Règle critique ⚠️** :
->
-> - TOUJOURS utiliser `import { env } from '@/lib/env'`
-> - JAMAIS accéder directement à `process.env.*`
-> - NEXT_PUBLIC_* variables DOIVENT être dans la section `client` uniquement
-
-**Pattern d'import:**
-
-```typescript
-// ✅ CORRECT
-import { env } from '@/lib/env';
-
-const apiKey = env.RESEND_API_KEY;
-const siteUrl = env.NEXT_PUBLIC_SITE_URL;
-
-// ❌ INCORRECT
-const apiKey = process.env.RESEND_API_KEY;
-```
-
-**Bénéfices:**
-
-1. **Fail Fast** — App crash au démarrage si variables requises manquantes
-2. **Type Safety** — Full TypeScript inference (autocomplete `env.*`)
-3. **Security** — Séparation client/server enforced par Zod
-4. **Documentation** — Single source of truth pour toutes les variables
-5. **Testing** — `SKIP_ENV_VALIDATION=1` pour CI/Docker builds
-6. **Code Cleanup** — ~100 lignes de code `hasEnvVars` supprimées
-
-**Fichiers migrés (12 au total):**
-
-- `lib/site-config.ts` — Utilise `env.EMAIL_FROM`, `env.NEXT_PUBLIC_SITE_URL`
-- `lib/resend.ts` — Utilise `env.RESEND_API_KEY`
-- `supabase/server.ts, client.ts, admin.ts` — Utilise `env` pour credentials
-- `lib/dal/admin-users.ts` — Utilise `env.NEXT_PUBLIC_SITE_URL`
-- `scripts/create-admin-user.ts, seed-admin.ts` — Imports `env` (pas dotenv)
-- `app/api/admin/media/search/route.ts`
-- `app/api/debug-auth/route.ts`
-
-**Validation script:**
-
-```bash
-# Test de validation (sans .env.local, doit échouer)
-pnpm tsx scripts/test-env-validation.ts
-
-# Build avec skip validation (Docker/CI)
-SKIP_ENV_VALIDATION=1 pnpm build
-```
-
-**Commits:**
-
-- `feat(env): implement T3 Env validation (Phases 1-3)` — Core migration
-- `feat(env): complete T3 Env migration (Phases 4-7)` — Final cleanup
-
-### 4.7 Media Library Architecture (v2.7) 🆕
-
-#### Storage/Folders Synchronization Pattern
-
-L'architecture Media Library utilise un pattern de synchronisation entre les folders de la base de données (`media_folders`) et les préfixes de chemins dans le Storage bucket.
-
-**Principe:**
-
-```bash
-media_folders.slug ↔ storage_path prefix (medias/{slug}/)
-```
-
-**9 base folders créés par migration:**
-
-| Folder Name | Slug | Storage Path Prefix |
-| ------------- | ------ | --------------------- |
-| Équipe | `equipe` | `medias/equipe/` |
-| Home - Hero | `home-hero` | `medias/home-hero/` |
-| Home - À propos | `home-about` | `medias/home-about/` |
-| Spectacles | `spectacles` | `medias/spectacles/` |
-| Partenaires | `partenaires` | `medias/partenaires/` |
-| Presse | `presse` | `medias/presse/` |
-| Compagnie | `compagnie` | `medias/compagnie/` |
-| Agenda | `agenda` | `medias/agenda/` |
-| Uploads génériques | `autres` | `medias/autres/` |
-
-**Auto-assign folder helper:**
-
-```typescript
-// lib/dal/media-folders.ts
-export async function getFolderIdFromPath(
-  storagePath: string
-): Promise<DALResult<bigint | null>> {
-  // Extract first segment from path (medias/{slug}/filename.jpg → {slug})
-  const match = storagePath.match(/^medias\/([^/]+)\//);
-  if (!match) return { success: true, data: null };
-
-  const slug = match[1];
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("media_folders")
-    .select("id")
-    .eq("slug", slug)
-    .single();
-
-  if (error || !data) return { success: true, data: null };
-  return { success: true, data: BigInt(data.id) };
-}
-```
-
-**Upload flow avec auto-assign:**
-
-```bash
-User selects folder "Équipe" in dropdown
-         │
-         ▼
-uploadMedia() constructs path: medias/equipe/{uuid}_{filename}
-         │
-         ▼
-getFolderIdFromPath() extracts "equipe" → queries media_folders
-         │
-         ▼
-INSERT INTO medias WITH folder_id automatically linked
-```
-
-**UI Components:**
-
-- `MediaLibraryView.tsx` — Folder select dropdown avant upload
-- `MediaFoldersView.tsx` — CRUD folders avec warning slug ↔ Storage sync
-- `MediaDetailsPanel.tsx` — AlertDialog pour delete confirmation
-- `MediaCard.tsx` — Folder location display, usage indicator (Eye badge)
-
-**Stats dynamiques:**
-
-```typescript
-// lib/dal/media.ts
-export async function fetchMediaStats(): Promise<DALResult<MediaStatsDTO>> {
-  // Returns real-time counts: medias, tags, folders, storage usage
-}
-```
-
-**Tables et RLS:**
-
-```sql
--- 3 tables avec 15 RLS policies (5 per table)
-media_tags      → SELECT(all), SELECT(admin), INSERT, UPDATE, DELETE
-media_folders   → SELECT(all), SELECT(admin), INSERT, UPDATE, DELETE  
-media_tag_assignments → SELECT(all), SELECT(admin), INSERT, UPDATE, DELETE
-```
-
-**Migrations clés:**
-
-- `20251228140000_add_thumbnail_support` — Thumbnail support
-- `20251228220350_fix_media_tags_folders_rls_granular` — Granular RLS
-- `20251230120000_sync_media_folders_with_storage` — 9 base folders + folder_id restore
-
-### 4.8 Schemas (`lib/schemas/`)
-
-**Fichiers actuels (11 fichiers + barrel):**
-
-- `dashboard.ts` — `DashboardStatsSchema`
-- `home-content.ts` — Hero Slides + About schemas (Server + UI)
-- `media.ts` — `MediaItemSchema`, `MediaSelectResultSchema`, constants
-- `presse.ts` — `PressReleaseSchema`, `MediaArticleSchema`
-- `spectacles.ts` — `SpectacleSchema`, `CurrentShowSchema`, `ArchivedShowSchema`
-- `team.ts` — `TeamMemberSchema`, `SetActiveBodySchema`
-- `index.ts` — Barrel exports pour tous les schemas
-
-**Pattern dual schemas:**
-
-```typescript
-// =============================================================================
-// SERVER SCHEMAS (with bigint for database operations)
-// =============================================================================
-export const HeroSlideInputSchema = z.object({
-  title: z.string().min(1).max(80),
-  image_media_id: z.coerce.bigint().optional(),  // ← bigint for DB
-  // ...
-});
-export type HeroSlideInput = z.infer<typeof HeroSlideInputSchema>;
-
-// DTO type for API responses
-export interface HeroSlideDTO {
-  id: bigint;
-  // ...
-}
-
-// =============================================================================
-// UI FORM SCHEMAS (with number for JSON serialization)
-// =============================================================================
-export const HeroSlideFormSchema = z.object({
-  title: z.string().min(1).max(80),
-  image_media_id: z.number().int().positive().optional(),  // ← number for JSON
-  // ...
-});
-export type HeroSlideFormValues = z.infer<typeof HeroSlideFormSchema>;
-```
-
-### 4.9 Emails (`emails/`)
-
-- Templates: React Email components; wrapper unique `<Tailwind>` pour compatibilité
-- Envoi: `lib/email/actions.ts` contient gate `EMAIL_DEV_REDIRECT` pour redirection en environnement dev/test
-
-### 4.10 Admin UI Components
-
-**Structure par feature** (`components/features/admin/`):
-
-- `home/` — 9 fichiers: Hero Slides + About management
-- `users/` — User invitation and management
-- `team/` — Team member CRUD (5 fichiers):
-  - `TeamManagementContainer.tsx` — Server Component, fetches data
-  - `TeamMemberList.tsx` — Card grid with actions
-  - `TeamMemberCard.tsx` — Individual member card
-  - `TeamMemberForm.tsx` — React Hook Form + zodResolver
-  - `TeamMemberFormWrapper.tsx` — Bridge with `sanitizePayload()` for DB constraints
-- `media/` — Media library management (13 fichiers):
-  - `MediaLibraryView.tsx` — Main view avec folder select dropdown
-  - `MediaCard.tsx` — Card avec folder location + usage indicator
-  - `MediaUploadDialog.tsx` — Upload avec folder selection + SHA-256 duplicate detection
-  - `MediaDetailsPanel.tsx` — Details + AlertDialog delete confirmation
-  - `MediaBulkActions.tsx` — Bulk operations (delete, move, tag)
-  - `MediaFoldersView.tsx` — Folders CRUD avec slug/Storage warning
-  - `MediaTagsView.tsx` — Tags CRUD
-  - `MediaLibraryPicker.tsx` — Picker intégré aux forms
-- `spectacles/` — Shows management
-
-**Component hierarchy pattern:**
-
-```bash
-FeatureContainer.tsx   (Server Component)
-  └── FeatureView.tsx  (Client Component with state)
-        ├── FeatureForm.tsx (~200 lines max)
-        │     ├── FeatureFormFields.tsx  (extracted if > 300 lines)
-        │     └── FeatureImageSection.tsx
-        └── FeatureList.tsx
-```
-
-## 5. Couches et dépendances
-
-```bash
-┌───────────────────────────────────────────────────────────────┐
-│   PRESENTATION LAYER                                           │
-│   app/, components/                                            │
-│   - Server Components (fetching, rendering)                    │
-│   - Client Components (interactivity, forms)                   │
-└───────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌───────────────────────────────────────────────────────────────┐
-│  APPLICATION LAYER                                            │
-│  lib/actions/                                                 │
-│  - Server Actions (mutations)                                 │
-│  - Zod validation (UI → Server schema)                        │
-│  - Cache invalidation (revalidatePath)                        │
-│  - ActionResult<T> response pattern                           │
-└───────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌───────────────────────────────────────────────────────────────┐
-│  DATA ACCESS LAYER                                            │
-│  lib/dal/                                                     │
-│  - server-only modules                                        │
-│  - Auth guards (requireAdmin)                                 │
-│  - Database operations (Supabase client)                      │
-│  - DALResult<T> response pattern                              │
-│  - NO revalidation                                            │
-└───────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌───────────────────────────────────────────────────────────────┐
-│  INFRASTRUCTURE LAYER                                         │
-│  supabase/schemas/, supabase/migrations/                      │
-│  - Postgres tables with RLS                                   │
-│  - Database functions                                         │
-│  - Storage buckets                                            │
-└───────────────────────────────────────────────────────────────┘
-```
-
-**Règles de dépendance:**
-
-- Couche supérieure dépend de couche inférieure uniquement
-- DAL ne dépend pas des composants UI
-- Server Actions ne contiennent pas de logique DB directe
-- **revalidatePath() UNIQUEMENT dans Server Actions, JAMAIS dans DAL**
-
-## 6. Architecture des données
-
-- Modèle de données principal: tables Postgres avec RLS; 38 fichiers de schémas déclaratifs
-- Tables principales: `profiles`, `membres_equipe`, `spectacles`, `home_hero_slides`, `home_about`, `medias`, `media_tags`, `media_folders`, `media_tag_assignments`
-- Accès: DAL retourne DTOs minimalistes; éviter d'exposer colonnes sensibles
-- Transactions & upserts: pattern `upsert(..., { onConflict: 'user_id' })` pour gérer trigger `on_auth_user_created`
-- Indexation: recommander index sur colonnes utilisées dans policies (e.g., `user_id` dans `profiles`, `file_hash` unique dans `medias`)
-- Fonctions DB: `is_admin()`, `reorder_hero_slides()` pour opérations complexes
-- SHA-256 duplicate detection: `file_hash` unique partial index pour éviter stockage doublons
-
-## 7. Cross-cutting concerns
-
-7.1 Auth & Authorization
-
-- Supabase JWT Signing Keys + `getClaims()` pour checks rapides (~2-5ms). `getUser()` réservé aux cas nécessitant full user data (~300ms).
-- RLS: policies fines, une policy par opération (select/insert/update/delete) et spécification `to authenticated, anon` selon besoin.
-
-### Admin Views Security Pattern (TASK037 - Janvier 2026)
-
-**Problème original:** Les vues admin (suffixe `_admin`) retournaient des arrays vides au lieu d'erreurs "permission denied" pour les utilisateurs non-admin, causé par les `DEFAULT PRIVILEGES` Supabase qui auto-accordaient `SELECT` aux rôles `anon` et `authenticated`.
-
-> **Solution: Role-Based Isolation**
-
-Création du rôle dédié `admin_views_owner` pour isoler les vues admin des grants automatiques:
-
-```sql
--- 1. Create dedicated admin role
-create role admin_views_owner nologin noinherit;
-grant usage on schema public to admin_views_owner;
-grant create on schema public to admin_views_owner;
-grant admin_views_owner to postgres, service_role;
-
--- 2. Transfer ownership (7 vues admin)
-alter view public.communiques_presse_dashboard owner to admin_views_owner;
-alter view public.membres_equipe_admin owner to admin_views_owner;
-alter view public.compagnie_presentation_sections_admin owner to admin_views_owner;
-alter view public.partners_admin owner to admin_views_owner;
-alter view public.content_versions_detailed owner to admin_views_owner;
-alter view public.messages_contact_admin owner to admin_views_owner;
-alter view public.analytics_summary owner to admin_views_owner;
-
--- 3. Explicitly revoke anon/authenticated access
-revoke all on public.<admin_view> from anon, authenticated;
-
--- 4. Grant service_role only
-grant select on public.<admin_view> to service_role;
-
--- 5. Prevent future automatic grants
-alter default privileges for role admin_views_owner in schema public 
-  revoke all on tables from anon, authenticated;
-```
-
-**🔴 CRITICAL HOTFIX (2026-01-05 13:00):** Migration `20260105130000_fix_security_definer_views.sql`
-
-**Vulnérabilité détectée:** Deux vues (`communiques_presse_public`, `communiques_presse_dashboard`) s'exécutaient en mode `SECURITY DEFINER` (comportement par défaut PostgreSQL), bypassant les RLS policies en utilisant les privilèges du propriétaire de la vue au lieu de l'appelant.
-
-**Fix appliqué:**
-
-```sql
--- ❌ VULNERABLE (mode DEFINER implicite)
-create view communiques_presse_public as ...;
-
--- ✅ SECURE (mode INVOKER explicite)
-create view communiques_presse_public
-with (security_invoker = true)  -- Runs with caller's privileges
-as ...;
-```
-
-**Vérification:**
-
-```sql
--- Query to check all views security mode
-SELECT relname, 
-  CASE WHEN EXISTS (
-    SELECT 1 FROM pg_options_to_table(reloptions) 
-    WHERE option_name = 'security_invoker' AND option_value = 'true'
-  ) THEN 'SECURITY INVOKER ✅' ELSE 'SECURITY DEFINER ❌' END
-FROM pg_class 
-WHERE relkind = 'v' AND relname LIKE '%communiques%';
-```
-
-**Impact:**
-
-- ✅ 7 vues admin correctement isolées avec ownership `admin_views_owner`
-- ✅ 11 vues publiques avec `SECURITY INVOKER` explicit enforcement
-- ✅ RLS policies respectées pour tous les accès (pas de bypass)
-- ✅ Default privileges configurés pour bloquer futurs grants auto
-
-**Fichiers schema affectés (5):**
-
-- `supabase/schemas/41_views_communiques.sql`
-- `supabase/schemas/41_views_admin_content_versions.sql`
-- `supabase/schemas/15_content_versioning.sql`
-- `supabase/schemas/10_tables_system.sql`
-- `supabase/schemas/13_analytics_events.sql`
-
-**Pattern pour nouvelles vues:**
-
-```sql
--- Admin view (restricted access)
-create view public.new_admin_view
-with (security_invoker = true)  -- CRITICAL: Explicit INVOKER mode
-as
-  select * from some_table where (select public.is_admin()) = true;
-
-alter view public.new_admin_view owner to admin_views_owner;
-revoke all on public.new_admin_view from anon, authenticated;
-grant select on public.new_admin_view to service_role;
-
--- Public view (unrestricted read)
-create view public.new_public_view
-with (security_invoker = true)  -- CRITICAL: Explicit INVOKER mode
-as
-  select * from some_table where published_at is not null;
-
-grant select on public.new_public_view to anon, authenticated;
-```
-
-**Tests de validation:**
-
-```bash
-# Verify admin view isolation
-pnpm exec tsx scripts/test-admin-views-security.ts
-
-# Expected results:
-# ✅ Anon user: Empty array → Permission denied error (403)
-# ✅ Authenticated user: Empty array → Permission denied error (403)
-# ✅ Admin user: Full data access
-# ✅ Service role: Full data access
-```
-
-7.2 Validation
-
-- Zod utilisé à la frontière des Server Actions et dans DAL (defense-in-depth).
-
-7.3 Logging & Monitoring
-
-- Logs applicatifs côté serveur (erreurs + codes) et instrumentation recommandée (Sentry/Datadog) pour erreurs critiques et latences DB.
-
-7.4 Error handling
-
-- Pattern: throw early, ActionResponse shape for server actions, traduction d'erreurs pour UI.
-
-## 8. Communication et APIs
-
-- Interne: Server Actions pour mutations initiées par l'app; API Routes pour webhooks et clients externes.
-- Versioning: API Routes versionnées (ex: `/api/v1/...`) si ouverture publique.
-
-## 9. Patterns spécifiques (React / Next.js)
-
-### Server Components
-
-- Par défaut pour data fetching et rendu initial
-- Ne pas utiliser `next/dynamic` avec `{ ssr: false }` dans Server Components
-- Utiliser Suspense pour le streaming
-
-### Client Components
-
-- Marqués avec `'use client'`
-- Pour interactivité, state, event handlers
-- **CRITIQUE**: Synchroniser état local avec props via `useEffect`
-
-```typescript
-"use client";
-export function FeatureView({ initialData }: Props) {
-  const [data, setData] = useState(initialData);
-  
-  // ✅ CRITICAL: Sync state when props change (after router.refresh())
-  useEffect(() => {
-    setData(initialData);
-  }, [initialData]);
-  
-  // ...
-}
-```
-
-### Server Actions
-
-- Directive `'use server'` (lowercase) + `import "server-only"`
-- Validation + auth + DAL + revalidatePath
-- Retour ActionResult<T> standardisé
-
-### Forms
-
-- React Hook Form + zodResolver
-- **Utiliser UI schema** (number) dans le form, Server Action convertit en bigint
-- **Max 300 lignes** par fichier form — splitter si nécessaire
-
-### Page Admin Pattern
-
-```typescript
-// app/(admin)/admin/feature/page.tsx
-export const dynamic = 'force-dynamic';  // ✅ Force re-fetch
-export const revalidate = 0;             // ✅ Disable cache
-
-export default function FeaturePage() {
-  return <FeatureContainer />;
-}
-```
-
-## 10. Patterns d'implémentation
-
-### Clean Code Rules (Enforced)
-
-- Max 30 lignes par fonction
-- Max 5 paramètres par fonction
-- Max 300 lignes par fichier
-- Max 10 sous-fichiers par dossier
-- Une responsabilité par fichier
-
-### Component Naming
-
-- `*Container.tsx` — Server Components (async, data fetching)
-- `*View.tsx` — Client Components with state management
-- `*Form.tsx` — Form dialogs (max 300 lines)
-- `*FormFields.tsx` — Extracted text input fields
-- `*ImageSection.tsx` — Extracted image picker sections
-
-### DAL Naming
-
-- `admin-*.ts` — Admin-only operations
-- `<feature>.ts` — Public feature data access
-- Functions: `fetch*`, `create*`, `update*`, `delete*`, `reorder*`
-
-### Server Actions Naming
-
-- `<feature>-actions.ts`
-- Functions: `create*Action`, `update*Action`, `delete*Action`
-
-## 11. Tests
-
-- Stratégie actuelle: tests isolés pour rendu d'email (`__tests__/emails/invitation-email.test.tsx`) exécutés via `tsx` in script.
-- Recommandation: intégrer Vitest/Jest et exécuter `pnpm tsc --noEmit`, lint, et tests dans CI matrix; ajouter tests d'intégration pour DAL via un environnement Postgres (Supabase local) ou mocks.
-
-## 12. Déploiement
-
-- Environnements: dev/local (supabase local), staging, production (Supabase Cloud).
-- Migrations: workflow declarative schema -> stop supabase local -> `supabase db diff -f name` -> push migrations. Ne pas modifier migrations manuellement sauf hotfix.
-
-## 13. Extensibilité
-
-### Pour ajouter une nouvelle feature CRUD
-
-1. **Créer schemas** `lib/schemas/<feature>.ts`:
-   - Server schema avec `z.coerce.bigint()` pour IDs
-   - UI schema avec `z.number()` pour form IDs
-   - DTO types pour réponses API
-
-2. **Créer DAL** `lib/dal/<feature>.ts`:
-   - Marquer avec `import "server-only"`
-   - Ajouter auth check avec `requireAdmin()`
-   - Implémenter CRUD fonctions retournant `DALResult<T>`
-   - **PAS de revalidatePath() ici**
-
-3. **Créer Server Actions** `lib/actions/<feature>-actions.ts`:
-   - Marquer avec `"use server"` et `import "server-only"`
-   - Valider input avec Zod
-   - Appeler fonctions DAL
-   - Appeler `revalidatePath()` sur succès
-   - Retourner `ActionResult<T>`
-
-4. **Créer composants** `components/features/admin/<feature>/`:
-   - `<Feature>Container.tsx` — Server Component, fetch data from DAL
-   - `<Feature>View.tsx` — Client Component avec `useState` + `useEffect` sync
-   - `<Feature>Form.tsx` — Client form dialog (max 300 lines)
-   - Split form si > 300 lignes: `*FormFields.tsx`, `*ImageSection.tsx`
-
-5. **Créer route** `app/(admin)/admin/<feature>/page.tsx`:
-   - Ajouter `export const dynamic = 'force-dynamic'`
-   - Ajouter `export const revalidate = 0`
-   - Render Container component
-
-6. **Ajouter tests** sous `__tests__/` et inclure dans CI
-
-## 14. Exemples de code (patterns)
-
-### Server Action pattern (complet)
-
-```typescript
-// lib/actions/feature-actions.ts
 "use server";
 import "server-only";
 import { revalidatePath } from "next/cache";
-import { FeatureInputSchema } from "@/lib/schemas/feature";
-import { createFeature } from "@/lib/dal/feature";
 
-export type ActionResult<T = unknown> = 
-  | { success: true; data?: T } 
-  | { success: false; error: string };
-
-export async function createFeatureAction(input: unknown): Promise<ActionResult> {
+export async function createItemAction(
+  input: unknown
+): Promise<ActionResult> {
   try {
-    // 1. Zod validation (coerces number → bigint for IDs)
-    const validated = FeatureInputSchema.parse(input);
-    
-    // 2. DAL call
-    const result = await createFeature(validated);
-    if (!result.success) {
-      return { success: false, error: result.error ?? "create failed" };
-    }
-    
-    // 3. Cache invalidation (ONLY here, not in DAL)
-    revalidatePath("/admin/feature");
-    revalidatePath("/");
-    
-    return { success: true, data: result.data };
+    const validated = ItemInputSchema.parse(input);
+    const result = await createItem(validated);
+    if (!result.success) return { success: false, error: result.error };
+    revalidatePath("/admin/items");
+    return { success: true };
   } catch (err: unknown) {
-    return { success: false, error: err instanceof Error ? err.message : "Unknown error" };
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Unknown",
+    };
   }
 }
 ```
 
-### Client View pattern (avec useEffect sync)
+### 10.3 Form avec UI Schema
 
 ```typescript
-// components/features/admin/feature/FeatureView.tsx
+"use client";
+const form = useForm<ItemFormValues>({
+  resolver: zodResolver(ItemFormSchema),
+});
+
+const onSubmit = async (data: ItemFormValues) => {
+  const result = await createItemAction(data);
+  if (result.success) {
+    toast.success("Créé");
+    onSuccess();
+  } else {
+    toast.error(result.error);
+  }
+};
+```
+
+### 10.4 Clean Code Enforced
+
+| Règle | Limite |
+|-------|--------|
+| Lignes par fonction | Max 30 |
+| Paramètres par fonction | Max 5 |
+| Lignes par fichier | Max 300 |
+| Sous-fichiers par dossier | Max 10 |
+| Responsabilité par fichier | Une seule |
+
+### 10.5 Naming Conventions
+
+| Type | Convention | Exemple |
+|------|-----------|---------|
+| Container | `{Feature}Container.tsx` | `TeamManagementContainer.tsx` |
+| View | `{Feature}View.tsx` | `TeamMemberList.tsx` |
+| Form | `{Feature}Form.tsx` | `TeamMemberForm.tsx` |
+| Form fields | `{Feature}FormFields.tsx` | `HeroSlideFormFields.tsx` |
+| DAL admin | `admin-{feature}.ts` | `admin-lieux.ts` |
+| DAL public | `{feature}.ts` | `spectacles.ts` |
+| Actions | `{feature}-actions.ts` ou `actions.ts` | `home-hero-actions.ts` |
+| Schema | `{feature}.ts` | `admin-events.ts` |
+| Hook | `use{Feature}{Action}.ts` | `useHeroSlidesDnd.ts` |
+| Error codes | `[ERR_{ENTITY}_{NNN}]` | `[ERR_LIEUX_003]` |
+
+---
+
+## 11. Architecture de test
+
+### 11.1 Scripts de test autonomes (87 fichiers)
+
+Exécutés via `pnpm exec tsx scripts/<name>.ts` :
+
+| Catégorie | Exemples | Nombre |
+|-----------|----------|--------|
+| **Sécurité / Audit** | `audit-cookie-flags.ts`, `audit-secrets-management.ts`, `check-security-audit.sh`, `test-ssrf-validation.ts` | ~15 |
+| **RLS / Policies** | `check-rls-policies.ts`, `test-rls-cloud.ts`, `test-views-security-*.ts` | ~6 |
+| **DAL / CRUD** | `test-all-dal-functions.ts`, `test-spectacles-crud.ts`, `test-team-server-actions.ts` | ~8 |
+| **Email** | `test-email-integration.ts`, `check-email-logs.ts` | ~4 |
+| **Media / Thumbnails** | `generate-missing-thumbnails.ts`, `regenerate-all-thumbnails*.ts`, `validate-media-folders.ts` | ~10 |
+| **Database admin** | `backup-database.ts`, `seed-admin.ts`, `set-admin-role.ts` | ~8 |
+| **Performance** | `test-dashboard-stats.ts`, `test-data-retention.ts` | ~5 |
+| **Monitoring** | `test-sentry-api.ts`, `test-rate-limit*.ts`, `test-env-validation.ts` | ~6 |
+| **Toggles** | `check-display-toggles.ts`, `toggle-presse.ts` (4 modes) | 3 |
+| **Utilitaires** | `diagnose-admin-views.js`, `inspect-user.ts` | ~5 |
+
+### 11.2 Tests E2E
+
+- Framework : Playwright (`e2e-tests/`)
+- Guide rapide : `E2E_Tests_QuickReference_RCC.md`
+
+### 11.3 Tests unitaires
+
+- Email templates : `__tests__/emails/invitation-email.test.tsx`
+- Exécution : `pnpm exec tsx` (pas de test runner global configuré)
+
+### 11.4 Recommandations
+
+- Intégrer Vitest/Jest pour tests unitaires DAL + Server Actions
+- CI matrix : `tsc --noEmit` + `lint` + `test`
+- Tests d'intégration DAL via Supabase local (déjà possible avec `supabase start`)
+
+---
+
+## 12. Architecture de déploiement
+
+### 12.1 Environnements
+
+| Env | Database | Build |
+|-----|----------|-------|
+| **Local** | Supabase CLI (`supabase start`) | `pnpm dev` (Turbopack) |
+| **Production** | Supabase Cloud (PostgreSQL 17.6.1.063) | `pnpm build` |
+
+### 12.2 Workflow migrations
+
+```bash
+# Normal
+supabase stop
+# Editer supabase/schemas/*.sql
+supabase db diff -f migration_name
+supabase start
+
+# Hotfix production
+touch supabase/migrations/$(date +%Y%m%d%H%M%S)_fix.sql
+supabase db push
+# PUIS mettre a jour supabase/schemas/ (source of truth)
+```
+
+### 12.3 Configuration runtime
+
+- `proxy.ts` : Middleware Next.js 16 (renommé depuis `middleware.ts`)
+- `instrumentation.ts` : Hook Next.js `register()` pour Sentry
+- `SKIP_ENV_VALIDATION=1` : Pour builds Docker/CI sans env vars
+
+---
+
+## 13. Extensibilité & évolution
+
+### 13.1 Ajouter une nouvelle feature CRUD
+
+1. **Schema** : `lib/schemas/{feature}.ts` (Server + UI + DTO)
+2. **DAL** : `lib/dal/{feature}.ts` (`server-only`, `cache()`, `DALResult<T>`)
+3. **Actions** : `app/(admin)/admin/{feature}/actions.ts` (`revalidatePath()`)
+4. **Composants** : `components/features/admin/{feature}/` (Container, View, Form)
+5. **Route** : `app/(admin)/admin/{feature}/page.tsx` (`force-dynamic`)
+6. **DB** : `supabase/schemas/XX_{feature}.sql` + `supabase db diff`
+7. **Tests** : `scripts/test-{feature}-*.ts`
+
+### 13.2 Ajouter une page publique
+
+1. **DAL** : `lib/dal/{page}.ts` (read-only, `cache()`)
+2. **Composants** : `components/features/public-site/{page}/` (Container + View + hooks + types + index)
+3. **Route** : `app/(marketing)/{page}/page.tsx` (`force-dynamic` si Supabase)
+4. **Display Toggle** : Ajouter dans `configurations_site` si visibilité contrôlable
+
+### 13.3 Ajouter un Display Toggle
+
+1. Migration seed dans `configurations_site` avec `key`, `value: { enabled: true }`, `category`
+2. Fetch dans Server Component via `fetchDisplayToggle(key)`
+3. Conditionner le data fetching ET le rendering
+4. Ajouter switch dans `/admin/site-config`
+
+### 13.4 Ajouter une vue PostgreSQL
+
+```sql
+-- Vue publique
+create view public.new_public_view
+with (security_invoker = true)
+as select * from some_table where published_at is not null;
+grant select on public.new_public_view to anon, authenticated;
+
+-- Vue admin
+create view public.new_admin_view
+with (security_invoker = true)
+as select * from some_table where (select public.is_admin()) = true;
+alter view public.new_admin_view owner to admin_views_owner;
+revoke all on public.new_admin_view from anon, authenticated;
+grant select on public.new_admin_view to service_role;
+```
+
+---
+
+## 14. Exemples de code
+
+### 14.1 Server Action complet (avec BigInt handling)
+
+```typescript
+"use server";
+import "server-only";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+import { createEvent } from "@/lib/dal/admin-agenda";
+import type { ActionResult } from "@/lib/actions/types";
+
+const TransportSchema = z.object({
+  titre: z.string().min(1),
+  lieu_id: z.string().regex(/^\d+$/),
+});
+
+export async function createEventAction(
+  input: unknown
+): Promise<ActionResult> {
+  try {
+    const validated = TransportSchema.parse(input);
+    const eventData = {
+      ...validated,
+      lieu_id: BigInt(validated.lieu_id),
+    };
+    const result = await createEvent(eventData);
+    if (!result.success)
+      return { success: false, error: result.error };
+    revalidatePath("/admin/agenda");
+    return { success: true };
+  } catch (err: unknown) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Unknown",
+    };
+  }
+}
+```
+
+### 14.2 Client View avec useEffect sync
+
+```typescript
 "use client";
 import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { deleteFeatureAction } from "@/lib/actions/feature-actions";
-import type { FeatureDTO } from "@/lib/schemas/feature";
 
-interface ViewProps {
-  initialItems: FeatureDTO[];
+interface ItemViewProps {
+  initialItems: ItemDTO[];
 }
 
-export function FeatureView({ initialItems }: ViewProps) {
+export function ItemView({ initialItems }: ItemViewProps) {
   const router = useRouter();
   const [items, setItems] = useState(initialItems);
 
-  // ✅ CRITICAL: Sync local state when props change (after router.refresh())
   useEffect(() => {
     setItems(initialItems);
   }, [initialItems]);
 
-  const handleDelete = useCallback(async (id: bigint) => {
-    if (!confirm("Supprimer?")) return;
+  const handleDelete = useCallback(
+    async (id: bigint) => {
+      const result = await deleteItemAction(String(id));
+      if (result.success) {
+        toast.success("Supprimé");
+        router.refresh();
+      } else {
+        toast.error(result.error);
+      }
+    },
+    [router]
+  );
 
-    const result = await deleteFeatureAction(String(id));
-    
-    if (!result.success) {
-      toast.error(result.error);
-      return;
-    }
-    
-    toast.success("Supprimé");
-    router.refresh();  // Triggers Server Component re-fetch
-  }, [router]);
-
-  return (/* UI */);
+  return <div>{/* ...UI */}</div>;
 }
 ```
 
-### Form with UI Schema pattern
+### 14.3 Media Upload avec SHA-256 dedup
 
 ```typescript
-// components/features/admin/feature/FeatureForm.tsx
-"use client";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-// ✅ Use UI schema (number IDs), NOT server schema (bigint)
-import { FeatureFormSchema, type FeatureFormValues } from "@/lib/schemas/feature";
-import { createFeatureAction } from "@/lib/actions/feature-actions";
+// lib/dal/media.ts (extrait)
+const fileHash = await computeSHA256(buffer);
+const { data: existing } = await supabase
+  .from("medias")
+  .select("id")
+  .eq("file_hash", fileHash)
+  .single();
 
-export function FeatureForm({ onSuccess }: { onSuccess: () => void }) {
-  const form = useForm<FeatureFormValues>({
-    resolver: zodResolver(FeatureFormSchema),  // ✅ No type casting needed
-  });
+if (existing) return dalSuccess(existing);
 
-  const onSubmit = async (data: FeatureFormValues) => {
-    // Server Action validates with server schema (coerces number → bigint)
-    const result = await createFeatureAction(data);
-    
-    if (result.success) {
-      toast.success("Créé");
-      onSuccess();  // Parent calls router.refresh()
-    } else {
-      toast.error(result.error);
-    }
-  };
-
-  return <form onSubmit={form.handleSubmit(onSubmit)}>{/* fields */}</form>;
-}
+const { error: uploadError } = await supabase.storage
+  .from("medias")
+  .upload(storagePath, buffer, { contentType: mimeType });
 ```
 
-## 15. Records de décisions architecturales (ADR) — aperçu
+### 14.4 Display Toggle conditionnel
 
-- Choix d'utiliser Next.js 16 App Router et Server Components pour prioriser SSR et sécurité
-- Migration vers JWT Signing Keys pour Supabase (`getClaims()` central) pour latence d'auth ~2-5ms
-- **Novembre 2025**: Séparation Server Actions / DAL pour résoudre les problèmes de re-render
-  - `revalidatePath()` uniquement dans Server Actions (pas dans DAL)
-  - Pattern `useEffect` sync dans Client Components pour synchroniser état après `router.refresh()`
-- **Novembre 2025**: Dual Zod schemas (Server vs UI) pour éviter les erreurs de sérialisation bigint/JSON
-- **Novembre 2025**: Split des formulaires > 300 lignes en sous-composants (`*FormFields.tsx`, `*ImageSection.tsx`)
-- **Novembre 2025**: Migration Team CRUD vers le pattern Server Actions complet
-  - Suppression API Routes `/api/admin/team/` (3 fichiers) au profit de Server Actions colocalisées
-  - Migration inline form → pages dédiées (`/admin/team/new`, `/admin/team/[id]/edit`)
-  - Ajout `TeamMemberFormWrapper.tsx` avec `sanitizePayload()` (empty string → null) pour contrainte DB
-  - Ajout helper `optionalUrlSchema` pour champs URL acceptant chaînes vides
-- **Décembre 2025**: T3 Env (@t3-oss/env-nextjs) pour validation type-safe des variables d'environnement
-  - Suppression du pattern manuel `hasEnvVars` (~100 lignes)
-  - Fail fast au démarrage si variables requises manquantes
-  - Séparation client/server enforced
-- **Décembre 2025**: Media Library System (TASK029) - Architecture complète
-  - 3 nouvelles tables: `media_tags`, `media_folders`, `media_tag_assignments`
-  - 15 RLS policies granulaires (5 par table)
-  - SHA-256 duplicate detection pour éviter stockage doublons
-  - Pattern Warning: thumbnails générés à la demande (pas en masse)
-- **Décembre 2025**: Storage/Folders Synchronization
-  - `media_folders.slug` synchronisé avec préfixes de chemins Storage (`medias/{slug}/`)
-  - 9 base folders créés par migration pour correspondre aux contextes d'utilisation
-  - `getFolderIdFromPath()` helper auto-détecte folder_id lors de l'upload
-  - UI warning dans MediaFoldersView concernant la création de nouveaux folders
+```typescript
+// Server Component
+const toggle = await fetchDisplayToggle("display_toggle_media_kit");
+const showMediaKit =
+  toggle.success && toggle.data?.value?.enabled !== false;
 
-## 16. Governance & qualité
-
-- Recommandations automatiques:
-  - CI: ajouter `pnpm tsc --noEmit`, `pnpm lint` et `pnpm test` au workflow principal.
-  - PR template: checklist RLS/DB/migrations, tests, types.
-
-## 17. Guide pratique pour nouveaux développements
-
-### Workflow recommandé (CRUD feature)
-
-1. **Créer schemas** (`lib/schemas/<feature>.ts`)
-   - Server schema (bigint IDs)
-   - UI schema (number IDs)
-   - DTO types
-
-2. **Créer DAL** (`lib/dal/<feature>.ts`)
-   - `import "server-only"`
-   - `requireAdmin()` auth check
-   - CRUD functions → `DALResult<T>`
-   - **NO revalidatePath()**
-
-3. **Créer Server Actions** (`lib/actions/<feature>-actions.ts`)
-   - `"use server"` + `import "server-only"`
-   - Zod validation → DAL call → `revalidatePath()` → `ActionResult<T>`
-
-4. **Créer composants** (`components/features/admin/<feature>/`)
-   - `Container.tsx` (Server) — fetch from DAL
-   - `View.tsx` (Client) — `useState` + `useEffect` sync + `router.refresh()`
-   - `Form.tsx` (Client) — React Hook Form + UI schema + max 300 lines
-
-5. **Créer route** (`app/(admin)/admin/<feature>/page.tsx`)
-   - `dynamic = 'force-dynamic'`
-   - `revalidate = 0`
-
-6. **Tests** — `__tests__/` ou co-located
-
-### Common Pitfalls à éviter
-
-| ❌ Anti-pattern | ✅ Solution |
-| ----------------- | ------------- |
-| `revalidatePath()` dans DAL | Déplacer dans Server Action |
-| `useState(props)` sans `useEffect` | Ajouter `useEffect(() => setState(props), [props])` |
-| UI schema avec `bigint` | Utiliser `z.number()` pour form IDs |
-| Type casting `as unknown as Resolver<>` | Utiliser UI schema correspondant au form type |
-| Form > 300 lignes | Split en `*FormFields.tsx`, `*ImageSection.tsx` |
-| API Route pour mutation interne | Utiliser Server Action |
-
-## Annexes & références bis
-
-- Fichiers clefs:
-  - `lib/actions/*` — Server Actions
-  - `lib/dal/*` — DAL (21 modules)
-  - `lib/schemas/*` — Zod schemas (Server + UI)
-  - `lib/env.ts` — T3 Env type-safe configuration
-  - `components/features/admin/*` — Admin UI components
-  - `emails/*` — Email templates
-  - `supabase/schemas/*` — Declarative schema (38 files)
-  - `supabase/migrations/*` — Generated migrations
-  - `.github/instructions/crud-server-actions-pattern.instructions.md` — CRUD pattern v1.1
-  - `.github/workflows/*` — CI
+const mediaKitResult = showMediaKit
+  ? await fetchMediaKit()
+  : { success: true, data: [] };
+```
 
 ---
 
-Maintenir ce document à jour: exécuter le générateur chaque fois qu'une refonte structurelle (nouveau route group, changement DAL/Server Actions majeur, migration de provider critique) est effectuée.
+## 15. Architectural Decision Records
 
-Dernière mise à jour: 7 janvier 2026 (v2.9)
+### ADR-001 : Next.js 16 App Router + Server Components
 
-End of file
+**Contexte :** Besoin SSR, SEO, performance pour site théâtral.
+**Décision :** Next.js 16 avec App Router, Server Components par défaut.
+**Conséquences :** SSR natif, streaming via Suspense, mais complexité BigInt serialization.
+
+### ADR-002 : Séparation Server Actions / DAL (Nov 2025)
+
+**Contexte :** `revalidatePath()` dans API Routes ne déclenchait pas de re-render.
+**Décision :** Server Actions pour mutations + `revalidatePath()`, DAL pour DB uniquement.
+**Conséquences :** Re-render fiable, mais nécessite `useEffect` sync dans Client Components.
+
+### ADR-003 : Dual Zod Schemas (Nov 2025)
+
+**Contexte :** `bigint` non sérialisable par `JSON.stringify()`.
+**Décision :** Schemas Server (bigint) / UI (number) / Transport (string).
+**Conséquences :** Type safety préservée, mais 3 types par feature avec IDs.
+
+### ADR-004 : T3 Env (Déc 2025)
+
+**Contexte :** Accès `process.env` non typé, erreurs runtime silencieuses.
+**Décision :** `@t3-oss/env-nextjs` avec validation Zod au démarrage.
+**Conséquences :** Fail fast si variables manquantes, 100 lignes de code supprimées.
+
+### ADR-005 : JWT Signing Keys + getClaims()
+
+**Contexte :** `getUser()` ~300ms par appel, problème de latence en middleware.
+**Décision :** Migration vers JWT Signing Keys, utilisation de `getClaims()` (~2-5ms).
+**Conséquences :** Auth 100x plus rapide, dépendance réseau réduite.
+
+### ADR-006 : Admin Views Security Hardening (Jan 2026)
+
+**Contexte :** Vues `SECURITY DEFINER` (défaut PG) bypassaient les RLS.
+**Décision :** Role dédié `admin_views_owner`, `SECURITY INVOKER` explicite sur toutes les vues.
+**Conséquences :** 18 vues sécurisées, aucun bypass possible.
+
+### ADR-007 : Media Library Architecture (Déc 2025)
+
+**Contexte :** Besoin de gestion médias avec tags, folders, thumbnails, dedup.
+**Décision :** 4 tables, 4 DAL modules, SHA-256 dedup, 9 folders synchronisés avec Storage.
+**Conséquences :** Système complet, 15 RLS policies, WCAG 2.1 AA.
+
+### ADR-008 : Display Toggles (Jan 2026)
+
+**Contexte :** Besoin de contrôler la visibilité des sections sans code deploy.
+**Décision :** 10 toggles en table `configurations_site` avec admin UI.
+**Conséquences :** Contrôle granulaire, fetch conditionnel, zero downtime.
+
+### ADR-009 : Sentry Multi-Runtime (Production)
+
+**Contexte :** Monitoring erreurs / performance sur tous les runtimes Next.js.
+**Décision :** Configuration 4 runtimes (client/server/edge/instrumentation), tunnel anti-adblock.
+**Conséquences :** Couverture complète, headers sensibles supprimés côté serveur.
+
+### ADR-010 : Next.js 16 Migration (Déc 2025)
+
+**Contexte :** Upgrade Next.js 15 vers 16 pour Turbopack stable et fixes sécurité.
+**Décision :** Migration avec `middleware.ts` vers `proxy.ts`, `export const dynamic` sur pages Supabase.
+**Conséquences :** Résolution CVE-2025-57822, CVE-2025-64718, Turbopack default.
+
+---
+
+## 16. Governance architecturale
+
+### 16.1 Vérification automatisée
+
+| Outil | Scope |
+|-------|-------|
+| TypeScript `strict` | Types, nullability, imports |
+| ESLint 9 | Code style, patterns |
+| markdownlint-cli2 | Documentation |
+| T3 Env | Variables d'environnement au démarrage |
+| RLS policies | Sécurité DB (100% coverage) |
+
+### 16.2 Instructions Copilot (17 fichiers)
+
+`.github/instructions/` contient les règles pour tous les agents IA :
+Clean Code, TypeScript, CRUD patterns, DAL SOLID, Supabase Auth, RLS, migrations, accessibilité, sécurité OWASP, edge functions, etc.
+
+### 16.3 Checklist PR
+
+- [ ] RLS policies pour nouvelles tables
+- [ ] Schéma déclaratif mis à jour
+- [ ] Migration générée via `supabase db diff`
+- [ ] `DALResult<T>` pour tout nouveau module DAL
+- [ ] `revalidatePath()` uniquement dans Server Actions
+- [ ] Fichiers &lt; 300 lignes
+- [ ] Types Zod Server + UI si IDs bigint
+
+---
+
+## 17. Guide pour nouveaux développements
+
+### 17.1 Workflow recommandé
+
+```bash
+# 1. Schema DB
+supabase/schemas/XX_new_feature.sql
+
+# 2. Schemas Zod
+lib/schemas/new-feature.ts
+
+# 3. DAL
+lib/dal/new-feature.ts
+
+# 4. Server Actions
+app/(admin)/admin/new-feature/actions.ts
+
+# 5. Composants
+components/features/admin/new-feature/
+  Container.tsx
+  View.tsx
+  Form.tsx
+  types.ts
+
+# 6. Route
+app/(admin)/admin/new-feature/page.tsx
+
+# 7. Migration
+supabase stop && supabase db diff -f add_new_feature && supabase start
+
+# 8. Tests
+scripts/test-new-feature-crud.ts
+```
+
+### 17.2 Commandes de développement
+
+```bash
+pnpm dev                           # Dev server (Turbopack)
+pnpm build                         # Build production
+pnpm lint                          # ESLint
+pnpm lint:md                       # Markdown lint
+pnpm exec tsx scripts/<name>.ts    # Executer un script
+supabase start                     # DB locale
+supabase db diff -f <name>         # Generer migration
+```
+
+### 17.3 Anti-patterns à éviter
+
+| Anti-pattern | Solution |
+|--------------|----------|
+| `revalidatePath()` dans DAL | Déplacer dans Server Action |
+| `useState(props)` sans `useEffect` | Ajouter `useEffect(() => setState(props), [props])` |
+| UI schema avec `bigint` | Utiliser `z.number()` pour forms |
+| `as unknown as Resolver<>` | Utiliser UI schema matching |
+| Form > 300 lignes | Split en sous-composants |
+| API Route pour mutation interne | Utiliser Server Action |
+| `process.env.*` direct | Utiliser `import { env } from '@/lib/env'` |
+| `throw` dans DAL | Retourner `dalError()` |
+| `getUser()` pour simple auth check | Utiliser `getClaims()` |
+| Vue sans `SECURITY INVOKER` | Toujours ajouter `with (security_invoker = true)` |
+
+---
+
+## Historique des versions
+
+| Version | Date | Changements majeurs |
+|---------|------|---------------------|
+| 4.0 | 2026-02-07 | Réécriture complète : C4 Mermaid diagrams, 17 sections template, Sentry multi-runtime, 87 scripts, security headers, 31 DAL modules, ADR complets, Next.js 16.1.5 |
+| 3.1 | 2026-01-26 | BigInt Pattern Edition |
+| 2.9 | 2026-01-07 | Admin Views Security Hardening (TASK037) |
+| 2.8 | 2026-01-01 | Display Toggles System (TASK030) |
+| 2.7 | 2025-12-30 | Media Library Storage/Folders Sync |
+| 2.6 | 2025-12-29 | TASK029 Media Library |
+| 2.5 | 2025-12-22 | React Hook Form Hydration Fixes |
+| 2.4 | 2025-12-20 | SOLID et Server Actions Refactoring |
+| 2.3 | 2025-12-20 | T3 Env Integration |
+| 2.0 | 2025-11-30 | SOLID DAL Refactoring (17 modules, 92% compliance) |
+| 1.0 | 2025-11-30 | Version initiale |
+
+---
+
+Maintenir ce document a jour lors de chaque refonte structurelle (nouveau route group, changement DAL/Server Actions majeur, migration de provider critique).
+
+**Source :** `doc/prompts-github/architecture-blueprint-generator.prompt.md`
+**Branche :** `master`

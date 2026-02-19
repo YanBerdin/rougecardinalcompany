@@ -16,9 +16,7 @@ e2e/
         └── [feature].spec.ts       # Spécifications des tests
 ```
 
-Placer le dossier `e2e/` à la racine du projet, au même niveau que `app/` et `lib/`.
-
-> 📁 Le fichier de référence (`E2E_Tests_QuickReference_RCC.md`) reste dans `__tests__/e2e-tests/`. Le code des tests E2E se trouve dans `e2e/` à la racine.
+> 📁 Le fichier de référence (`E2E_Tests_QuickReference_RCC.md`) est dans `./e2e-tests/`. Le code des tests E2E se trouve dans `./e2e-tests/` à la racine.
 
 ---
 
