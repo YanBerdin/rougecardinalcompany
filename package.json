@@ -140,7 +140,10 @@
       "js-yaml": ">=4.1.1",
       "lodash": ">=4.17.23",
       "@types/react": "19.2.7",
-      "@types/react-dom": "19.2.3"
+      "@types/react-dom": "19.2.3",
+      "markdownlint-cli2>markdown-it": ">=14.1.1",
+      "schema-utils>ajv": ">=8.18.0",
+      "glob>minimatch": ">=10.2.1"
     }
   }
 }
