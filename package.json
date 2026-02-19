@@ -115,7 +115,6 @@
     "zod": "^4.1.0"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.3",
     "@eslint/markdown": "^7.4.0",
     "@playwright/test": "^1.57.0",
     "@types/node": "^20",
@@ -123,7 +122,7 @@
     "@types/react-dom": "19.2.3",
     "autoprefixer": "^10.4.20",
     "eslint": "^9",
-    "eslint-config-next": "16.0.6",
+    "eslint-config-next": "16.1.6",
     "markdownlint-cli2": "^0.18.1",
     "node-fetch": "^3.3.2",
     "postcss": "^8",
@@ -143,7 +142,7 @@
       "@types/react-dom": "19.2.3",
       "markdownlint-cli2>markdown-it": ">=14.1.1",
       "schema-utils>ajv": ">=8.18.0",
-      "glob>minimatch": ">=10.2.1"
+      "minimatch": ">=10.2.1"
     }
   }
 }
