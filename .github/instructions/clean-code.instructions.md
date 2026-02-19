@@ -5,7 +5,6 @@ description: APPLY Clean Code principles WHENEVER writing code
 
 # Code Quality
 
-- Write no comments
 - Use strict types only
 - Disallow untyped values
 - Use explicit constants, never magic numbers
