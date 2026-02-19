@@ -1,6 +1,6 @@
 ---
 description: "Expert Next.js 16 developer with DAL SOLID principles, Server Actions patterns, Supabase Auth optimization, and production-ready TypeScript patterns"
-model: "Claude Opus 4.5"
+model: "Claude Opus 4.6"
 tools:
 - vscode/extensions
 - vscode/getProjectSetupInfo
@@ -167,6 +167,7 @@ tools:
 - supabase/restore_project
 - supabase/search_docs
 - todo
+- vscode.mermaid-chat-features/renderMermaidDiagram
 ---
 
 # Expert Next.js 16 Developer (Production Edition)

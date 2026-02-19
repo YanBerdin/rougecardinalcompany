@@ -216,7 +216,7 @@ components/
     sidebar.tsx
 
 lib/
-  dal/                    # Server-only data access (17 modules)
+  dal/                    # Server-only data access (31 modules + 5 helpers)
     helpers/              # Centralized DAL utilities
       error.ts           # DALResult<T> type + toDALResult()
       format.ts          # Formatting helpers
@@ -224,7 +224,7 @@ lib/
       index.ts           # Barrel exports
     team.ts
     home.ts
-  schemas/               # Zod schemas (11 files)
+  schemas/               # Zod schemas (15+ modules)
     team.ts              # Server + UI schemas
     media.ts             # Media validation
     index.ts             # Barrel exports
@@ -239,7 +239,7 @@ app/(admin)/admin/
 
 ### DAL SOLID Pattern (Nov 2025)
 
-**ALL 21+ DAL modules follow this pattern** (92% SOLID compliance):
+**ALL 31+ DAL modules follow this pattern** (92% SOLID compliance):
 
 ```typescript
 // lib/dal/helpers/error.ts
@@ -330,6 +330,115 @@ const thumbnail = await sharp(buffer)
   .jpeg({ quality: 80 })
   .toBuffer();
 ```
+
+### Upload Security Hardening (Feb 2026)
+
+**Architecture**: Server-side validation pipeline with magic bytes verification, filename sanitization, and 7-format support.
+
+**Supported Formats** (7):
+| Format | MIME Type | Magic Bytes |
+| ------ | --------- | ----------- |
+| JPEG | image/jpeg | `FF D8 FF` |
+| PNG | image/png | `89 50 4E 47` |
+| WebP | image/webp | `52 49 46 46...57 45 42 50` |
+| AVIF | image/avif | `...66 74 79 70 61 76 69 66` |
+| GIF | image/gif | `47 49 46 38` |
+| SVG | image/svg+xml | `3C 73 76 67` or `3C 3F 78 6D 6C` |
+| PDF | application/pdf | `25 50 44 46` |
+
+**Validation Pipeline**:
+```typescript
+// lib/utils/mime-verify.ts
+export async function verifyFileMime(file: File): Promise<AllowedUploadMimeType | null>
+
+// lib/actions/media-actions.ts — validateFile()
+// 1. Size check: MAX_FILE_SIZE = 10 * 1024 * 1024 (10MB)
+// 2. Magic bytes verification via verifyFileMime()
+// 3. Filename sanitization via sanitizeFilename()
+```
+
+**Key Files**:
+- `lib/utils/mime-verify.ts` — Magic bytes verification (64 octets, 7 formats)
+- `lib/schemas/media.ts` — `AllowedUploadMimeType`, `ALLOWED_UPLOAD_MIME_TYPES`, `isAllowedUploadMimeType()`
+- `lib/dal/media.ts` — `sanitizeFilename()` (path traversal + special chars + 100 chars max)
+
+**Critical Rules**:
+- ✅ NEVER trust `file.type` (client-controlled) — always verify magic bytes server-side
+- ✅ ALWAYS sanitize filenames before storage (prevent path traversal)
+- ✅ Max 10MB aligned with Supabase Storage bucket configuration
+- ✅ SVG treated as text (XML parse check), not binary magic bytes only
+
+### BigInt Three-Layer Serialization Pattern (Jan 2026)
+
+**Architecture**: Three-layer type system for handling PostgreSQL `bigint` IDs across React boundaries without serialization errors.
+
+```bash
+┌─────────────────────────────────────────────────────┐
+│  UI Layer (Client)                                  │
+│  └─ number IDs (FeatureFormSchema)                  │
+│                     ↓                               │
+│  Transport Layer (Server Actions)                   │
+│  └─ string IDs (FeatureDataTransport)               │
+│                     ↓                               │
+│  DAL Layer (Server-Only)                            │
+│  └─ bigint IDs (FeatureInputSchema)                 │
+└─────────────────────────────────────────────────────┘
+```
+
+**Critical Rules**:
+- ✅ **UI Schema**: `z.number().int().positive()` for form IDs
+- ✅ **Transport**: `string` IDs in Server Actions (avoid BigInt serialization error)
+- ✅ **Server Schema**: `z.coerce.bigint()` for database IDs
+- ✅ **ActionResult**: Return `{ success: true/false }` ONLY, NEVER return data containing BigInt
+- ✅ **Data Refresh**: Use `router.refresh()` to fetch updated data via Server Component
+- ✅ **Manual Conversion**: `BigInt(stringId)` in Server Action before DAL call
+
+### Sentry Error Monitoring Pattern (Jan 2026)
+
+**Architecture**: Multi-runtime error monitoring with 3-level error boundaries.
+
+**Configuration**: 4 runtime configs (`sentry.client.config.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`, `instrumentation.ts`)
+
+**Error Boundary Hierarchy**:
+1. **Root** (`app/global-error.tsx`) — Catches unhandled app-level errors
+2. **Page** (`app/error.tsx`) — Catches route-level errors
+3. **Component** (`components/error-boundaries/`) — Reusable granular boundaries
+
+**Alert Levels**:
+| Alert | Condition | Response Time |
+| ----- | --------- | ------------- |
+| P0 | >10 errors/min | 15 min |
+| P1 | >50 errors/hour | 1 hour |
+
+**Key Rules**:
+- ✅ Sentry DSN configured via T3 Env (never hardcoded)
+- ✅ Supabase integration with span deduplication
+- ✅ Source maps upload via `next.config.ts`
+- ✅ `@sentry/nextjs 10` multi-runtime
+
+### React `cache()` Deduplication Pattern
+
+**Architecture**: Use React `cache()` on all DAL read functions to deduplicate intra-request database calls.
+
+```typescript
+import { cache } from "react";
+
+export const fetchTeamMembers = cache(async (): Promise<DALResult<TeamMemberDTO[]>> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("membres_equipe")
+    .select("id, name, role, active")
+    .eq("active", true);
+
+  if (error) return { success: false, error: error.message };
+  return { success: true, data: data ?? [] };
+});
+```
+
+**Critical Rules**:
+- ✅ Wrap ALL DAL read functions with `cache()` for request-level deduplication
+- ✅ Multiple Server Components calling the same DAL function → single DB query
+- ✅ `cache()` scope is per-request (automatically invalidated between requests)
 
 ### Display Toggles Pattern (TASK030 - Complete)
 
@@ -478,12 +587,19 @@ export type TeamMemberFormValues = z.infer<typeof TeamMemberFormSchema>;
 - Public tables: `published_at IS NOT NULL` OR `active = true` (read-only)
 - Admin tables: `(select public.is_admin())` for all operations
 - SECURITY INVOKER views require GRANT permissions on base tables
+- **GRANT + RLS Combined Model**: Never consider RLS as substitute for GRANT. Always set explicit GRANT then RLS as defense-in-depth.
 - **Recent RLS fixes (Dec 31, 2025)**:
   - `membres_equipe`: Public access limited to `active = true` rows only
   - `compagnie_presentation_sections`: Public access limited to `active = true` rows only
   - All 11 public views enforced with SECURITY INVOKER via migration 20251231020000
   - 7 admin views (*_admin) access revoked from anon role
   - Complete security test suite: 13/13 PASSED
+- **Admin Views Security Hardening (TASK037, Jan 2026)**:
+  - Dedicated `admin_views_owner` role owns all 7 admin views
+  - `REVOKE SELECT` from `authenticated` and `anon` on admin views
+  - Admin-only access enforced via `WHERE (select public.is_admin()) = true` inside view definitions
+  - Pattern: views grant NO direct access, RLS on base tables + `is_admin()` guard in view SQL
+  - Reference: `doc/ADMIN-VIEWS-SECURITY-HARDENING-SUMMARY.md`
 
 ### Type Safety Pattern
 
@@ -1089,7 +1205,7 @@ const authenticatedUserFromDatabase = await getCurrentUser();
 const teamMemberCreationFormData = extractFormData(request);
 
 // ✅ Explicit constants, no magic numbers
-const MAX_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 const SESSION_DURATION_DAYS = 7;
 
 // ✅ Fail fast with early returns
@@ -1370,7 +1486,7 @@ memory-bank/
 
 **Architecture Documentation**:
 
-- `memory-bank/architecture/Project_Architecture_Blueprint.md` - Current architecture (v2, Nov 2025)
+- `memory-bank/architecture/Project_Architecture_Blueprint.md` - Current architecture (v4, Feb 2026)
 - `memory-bank/architecture/Project_Folders_Structure_Blueprint_v5.md` - Folder structure reference
 - `memory-bank/activeContext.md` - Recent changes and current focus
 - `.github/instructions/nextjs-supabase-auth-2025.instructions.md` - Auth patterns (CANONICAL)
@@ -1384,7 +1500,7 @@ memory-bank/
 **Migration Guides**:
 
 - `.github/prompts/plan-teamMemberFormMigration.prompt.md` - Team CRUD migration to Server Actions + dedicated pages (`/new`, `/[id]/edit`)
-- `.github/prompts/plan.dalSolidRefactoring.prompt.md` - DAL SOLID refactoring (17 modules, 92% compliance target)
+- `.github/prompts/plan.dalSolidRefactoring.prompt.md` - DAL SOLID refactoring (31 modules + 5 helpers, 92% compliance)
 - `.github/prompts/plan-task030DisplayTogglesEpicAlignment.prompt.md` - Display Toggles Epic alignment (10 toggles, Presse fix Phase 11)
 
 **Display Toggles Implementation (January 2026)**:
@@ -1412,7 +1528,7 @@ Complete implementation of TASK030 across 11 phases:
 
 **Next.js 16 Migration (December 2025)**:
 
-The project was upgraded from Next.js 15.4.5 to 16.0.10 with the following key changes:
+The project was upgraded from Next.js 15.4.5 to 16.1.5 with the following key changes:
 
 1. **Middleware renamed**: `middleware.ts` → `proxy.ts` (Next.js 16 convention)
 2. **Turbopack default**: Now the default bundler in development
