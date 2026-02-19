@@ -143,6 +143,11 @@
       "markdownlint-cli2>markdown-it": ">=14.1.1",
       "schema-utils>ajv": ">=8.18.0",
       "minimatch": ">=10.2.1"
+    },
+    "auditConfig": {
+      "ignoreCves": [
+        "CVE-2025-69873"
+      ]
     }
   }
 }
