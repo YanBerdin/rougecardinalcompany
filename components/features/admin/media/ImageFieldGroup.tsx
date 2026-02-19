@@ -330,17 +330,18 @@ export function ImageFieldGroup<TForm extends FieldValues>({
                             {/* Image preview - only show validated images */}
                             {imageUrl && (
                                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 border rounded-lg bg-muted/50">
-                                    <div className="relative h-50 w-32 rounded overflow-hidden shrink-0 bg-muted">
+                                    <div className="relative h-50 max-w-44 rounded overflow-hidden shrink-0 bg-muted">
                                         {isValidating ? (
                                             <div className="h-full w-full flex items-center justify-center">
                                                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                                             </div>
                                         ) : validationSuccess ? (
-                                            /* eslint-disable-next-line @next/next/no-img-element */
-                                            <img
+                                            <Image
                                                 src={imageUrl}
                                                 alt={altText ?? "Preview"}
                                                 className="h-full w-full object-cover"
+                                                width={450}
+                                                height={300}
                                                 onError={handleImageError}
                                             />
                                         ) : validationError ? (
