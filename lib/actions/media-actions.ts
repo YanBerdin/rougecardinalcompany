@@ -8,6 +8,7 @@ import { createClient } from "@/supabase/server";
 import { requireAdmin } from "@/lib/auth/is-admin";
 import { uploadMedia, deleteMedia, findMediaByHash, getMediaPublicUrl } from "@/lib/dal/media";
 import { recordRequest } from "@/lib/utils/rate-limit";
+import { verifyFileMime } from "@/lib/utils/mime-verify";
 import type { MediaUploadResult } from "./types";
 
 /**
@@ -38,9 +39,12 @@ const ALLOWED_MIME_TYPES = [
   "image/png",
   "image/webp",
   "image/avif",
+  "image/gif",
+  "image/svg+xml",
+  "application/pdf",
 ] as const;
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 // =============================================================================
 // VALIDATION HELPERS
@@ -50,18 +54,29 @@ type ValidationResult =
   | { success: true; file: File }
   | { success: false; error: string };
 
-function validateFile(formData: FormData): ValidationResult {
+async function validateFile(formData: FormData): Promise<ValidationResult> {
   const file = formData.get("file");
 
   if (!file || !(file instanceof File)) {
     return { success: false, error: "Aucun fichier fourni" };
   }
 
+  // Size check before reading bytes
   if (file.size > MAX_FILE_SIZE) {
-    return { success: false, error: "Fichier trop volumineux (max 5MB)" };
+    return { success: false, error: "Fichier trop volumineux (max 10MB)" };
   }
 
-  if (!ALLOWED_MIME_TYPES.includes(file.type as any)) {
+  // Real MIME verification via magic bytes (ignores client-controlled file.type)
+  const detectedMime = await verifyFileMime(file);
+
+  if (!detectedMime) {
+    return {
+      success: false,
+      error: "Format de fichier non reconnu ou non supporté. Acceptés : JPEG, PNG, WebP, AVIF, GIF, SVG, PDF",
+    };
+  }
+
+  if (!ALLOWED_MIME_TYPES.includes(detectedMime)) {
     return {
       success: false,
       error: `Format non supporté. Acceptés: ${ALLOWED_MIME_TYPES.join(", ")}`,
@@ -97,7 +112,7 @@ export async function uploadMediaImage(
     await requireAdmin();
 
     // 1. Validation
-    const validation = validateFile(formData);
+    const validation = await validateFile(formData);
     if (!validation.success) {
       return { success: false, error: validation.error };
     }

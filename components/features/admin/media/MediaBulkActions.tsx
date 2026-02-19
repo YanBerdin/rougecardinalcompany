@@ -209,54 +209,55 @@ export function MediaBulkActions({
     return (
         <>
             <div
-                className="fixed bottom-0 md:bottom-6 left-0 md:left-1/2 md:-translate-x-1/2 right-0 md:right-auto z-40 bg-card/95 backdrop-blur-md border-t md:border md:rounded-xl shadow-2xl p-4 md:p-6 md:min-w-[700px] md:max-w-[90vw] transition-all duration-200"
+                className="fixed bottom-0 md:bottom-60 left-0 md:left-1/2 md:-translate-x-1/2 right-0 md:right-auto z-40 bg-card/95 backdrop-blur-md border-t md:border md:rounded-xl shadow-2xl p-3 md:p-6 md:min-w-[700px] md:max-w-[90vw] transition-all duration-200 max-h-[85vh] overflow-y-auto"
                 role="toolbar"
                 aria-label="Actions de sélection multiple"
             >
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
-                    {/* Selected count */}
-                    <div className="flex flex-col gap-2">
-                        <div className="flex items-center justify-between md:justify-start gap-3">
+                <div className="flex flex-col gap-3">
+                    {/* Rangée 1 : sélection + déplacer + supprimer */}
+                    <div className="flex flex-wrap items-center gap-2 md:gap-3">
+                        {/* Badge sélectionné + annuler */}
+                        <div className="flex items-center gap-2 shrink-0">
                             <Badge
-                                variant="default"
-                                className="text-sm md:text-base font-semibold px-3 md:px-4 py-1.5 md:py-2 bg-primary text-primary-foreground"
+                                variant="secondary"
+                                className="text-sm font-semibold px-3 py-1.5"
                                 aria-live="polite"
                             >
                                 {count} sélectionné{count > 1 ? "s" : ""}
                             </Badge>
                             <Button
-                                variant="ghost"
+                                variant="outline-destructive"
                                 size="icon"
+                                title="Annuler la sélection"
                                 onClick={onClearSelection}
-                                className="h-9 w-9 md:h-10 md:w-10 text-foreground hover:bg-muted hover:text-foreground focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                                className="h-9 w-9 text-foreground hover:bg-muted hover:text-foreground focus:ring-2 focus:ring-primary focus:ring-offset-2 shrink-0"
                                 aria-label="Annuler la sélection"
                             >
-                                <X className="h-4 w-4 md:h-5 md:w-5" />
+                                <X className="h-4 w-4" />
                                 <span className="sr-only">Annuler la sélection</span>
                             </Button>
                         </div>
 
                         {/* Source folders info */}
                         {sourceFolders.length > 0 && (
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <Folder className="h-3 w-3 flex-shrink-0" aria-hidden="true" />
-                                <span className="truncate" title={sourceFolders.join(", ")}>
+                            <div className="sm:flex items-center gap-1.5 text-xs text-muted-foreground shrink-0">
+                                <Folder className="h-3 w-3 shrink-0" aria-hidden="true" />
+                                <span className="truncate max-w-[120px]" title={sourceFolders.join(", ")}>
                                     {sourceFolders.length === 1
                                         ? sourceFolders[0]
-                                        : `${sourceFolders.length} dossiers différents`
+                                        : `${sourceFolders.length} dossiers`
                                     }
                                 </span>
                             </div>
                         )}
-                    </div>
 
-                    {/* Actions */}
-                    <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-3">
-                        {/* Move to folder */}
-                        <div className="flex items-center gap-2">
+                        <div className="hidden md:block w-px h-7 bg-border shrink-0" aria-hidden="true" />
+
+                        {/* Déplacer vers un dossier */}
+                        <div className="flex items-center gap-2 shrink min-w-0">
                             <Select value={selectedFolder} onValueChange={setSelectedFolder}>
                                 <SelectTrigger
-                                    className="flex-1 md:w-40 lg:w-48 h-10 md:h-11 text-sm md:text-base bg-muted/50 border focus:ring-2 focus:ring-primary"
+                                    className="md:w-h-40 lg:w-48 h-9 text-sm bg-muted/50 border focus:ring-2 focus:ring-primary"
                                     aria-label="Sélectionner un dossier de destination"
                                 >
                                     <SelectValue placeholder="Déplacer vers..." />
@@ -271,105 +272,147 @@ export function MediaBulkActions({
                                 </SelectContent>
                             </Select>
                             <Button
-                                size="default"
-                                variant="secondary"
+                                size="sm"
+                                variant="default"
+                                title="Déplacer"
                                 onClick={handleBulkMove}
                                 disabled={!selectedFolder || isPending}
-                                className="h-10 md:h-11 px-3 md:px-4 text-sm md:text-base font-medium whitespace-nowrap"
+                                className="h-9 px-3 text-sm font-medium whitespace-nowrap shrink-0"
                                 aria-label={`Déplacer ${count} média${count > 1 ? 's' : ''} vers le dossier sélectionné`}
                             >
-                                <FolderOpen className="mr-1.5 md:mr-2 h-4 w-4 md:h-5 md:w-5" />
+                                <FolderOpen className="h-4 w-4 sm:mr-1.5" />
                                 <span className="hidden sm:inline">Déplacer</span>
                             </Button>
                         </div>
 
+                        {/* Supprimer */}
+                        <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => setShowDeleteDialog(true)}
+                            disabled={isPending}
+                            className="h-9 px-3 text-sm font-medium whitespace-nowrap shrink-0 ml-auto"
+                            aria-label={`Supprimer ${count} média${count > 1 ? 's' : ''} sélectionné${count > 1 ? 's' : ''}`}
+                            title={`Supprimer ${count} média${count > 1 ? 's' : ''} sélectionné${count > 1 ? 's' : ''}`}
+                        >
+                            <Trash2 className="h-4 w-4 sm:mr-1.5" />
+                            <span className="hidden sm:inline">Supprimer</span>
+                        </Button>
+                    </div>
+
+                    {/* Rangée 2 : tags (toujours sur sa propre ligne) */}
+                    <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-4 border-t pt-2">
                         {/* Add & Remove tags */}
-                        <div className="hidden lg:flex flex-col gap-2">
+                        <div className="flex flex-col gap-2 w-full">
                             {/* Add tags section */}
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                                 <span className="text-xs text-muted-foreground whitespace-nowrap">Ajouter:</span>
                                 <div
-                                    className="flex flex-wrap gap-1.5 max-w-xs"
+                                    className="flex flex-wrap gap-1.5 flex-1 min-w-0"
                                     role="group"
                                     aria-label="Sélection de tags à ajouter"
                                 >
                                     {addableTags.slice(0, 3).map((tag) => (
                                         <Badge
                                             key={tag.id}
-                                            variant={selectedTagsToAdd.includes(tag.id) ? "default" : "outline"}
-                                            className="cursor-pointer px-2.5 py-1 text-xs font-medium transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary border-foreground/20"
-                                            onClick={() => toggleTagToAdd(tag.id)}
-                                            onKeyDown={(e) => {
+                                            variant="secondary"
+                                            className="cursor-pointer px-2.5 py-1 text-xs font-medium transition-all hover:scale-95 hover:bg-card focus:outline-none focus:ring-2 focus:ring-primary border-foreground/20"
+                                            onClick={async () => {
+                                                setIsPending(true);
+                                                try {
+                                                    const result = await bulkTagMediaAction(selectedIds, [tag.id]);
+                                                    if (!result.success) throw new Error(result.error);
+                                                    toast.success(`Tag '${tag.name}' ajouté à ${count} média${count > 1 ? "s" : ""}`);
+                                                    onSuccess();
+                                                    onClearSelection();
+                                                } catch (error) {
+                                                    toast.error(error instanceof Error ? error.message : "Erreur ajout tag");
+                                                } finally {
+                                                    setIsPending(false);
+                                                }
+                                            }}
+                                            onKeyDown={async (e) => {
                                                 if (e.key === ' ' || e.key === 'Enter') {
                                                     e.preventDefault();
-                                                    toggleTagToAdd(tag.id);
+                                                    setIsPending(true);
+                                                    try {
+                                                        const result = await bulkTagMediaAction(selectedIds, [tag.id]);
+                                                        if (!result.success) throw new Error(result.error);
+                                                        toast.success(`Tag '${tag.name}' ajouté à ${count} média${count > 1 ? "s" : ""}`);
+                                                        onSuccess();
+                                                        onClearSelection();
+                                                    } catch (error) {
+                                                        toast.error(error instanceof Error ? error.message : "Erreur ajout tag");
+                                                    } finally {
+                                                        setIsPending(false);
+                                                    }
                                                 }
                                             }}
                                             tabIndex={0}
-                                            role="checkbox"
-                                            aria-checked={selectedTagsToAdd.includes(tag.id)}
+                                            role="button"
                                             aria-label={`Ajouter tag ${tag.name}`}
+                                            aria-disabled={isPending}
                                         >
                                             {tag.name}
                                         </Badge>
                                     ))}
                                 </div>
-                                <Button
-                                    size="default"
-                                    variant="secondary"
-                                    onClick={handleBulkTag}
-                                    disabled={selectedTagsToAdd.length === 0 || isPending}
-                                    className="h-9 px-3 text-xs font-medium whitespace-nowrap"
-                                    aria-label={`Ajouter ${selectedTagsToAdd.length} tag${selectedTagsToAdd.length > 1 ? 's' : ''} à ${count} média${count > 1 ? 's' : ''}`}
-                                >
-                                    <Tag className="mr-1.5 h-3.5 w-3.5" />
-                                    +
-                                </Button>
                             </div>
 
                             {/* Remove tags section */}
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                                 <span className="text-xs text-muted-foreground whitespace-nowrap">Retirer:</span>
                                 {removableTags.length > 0 ? (
-                                    <>
-                                        <div
-                                            className="flex flex-wrap gap-1.5 max-w-xs"
-                                            role="group"
-                                            aria-label="Sélection de tags à retirer"
-                                        >
-                                            {removableTags.slice(0, 3).map((tag) => (
-                                                <Badge
-                                                    key={tag.id}
-                                                    variant={selectedTagsToRemove.includes(tag.id) ? "destructive" : "outline"}
-                                                    className="cursor-pointer px-2.5 py-1 text-xs font-medium transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-destructive border-foreground/20"
-                                                    onClick={() => toggleTagToRemove(tag.id)}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === ' ' || e.key === 'Enter') {
-                                                            e.preventDefault();
-                                                            toggleTagToRemove(tag.id);
+                                    <div
+                                        className="flex flex-wrap gap-1.5 flex-1 min-w-0"
+                                        role="group"
+                                        aria-label="Sélection de tags à retirer"
+                                    >
+                                        {removableTags.slice(0, 3).map((tag) => (
+                                            <Badge
+                                                key={tag.id}
+                                                variant="destructive"
+                                                className="cursor-pointer px-2.5 py-1 text-xs font-medium transition-all hover:scale-105 hover:bg-card-foreground focus:outline-none focus:ring-2 focus:ring-destructive border-foreground/20"
+                                                onClick={async () => {
+                                                    setIsPending(true);
+                                                    try {
+                                                        const result = await bulkUntagMediaAction(selectedIds, [tag.id]);
+                                                        if (!result.success) throw new Error(result.error);
+                                                        toast.success(`Tag '${tag.name}' retiré de ${count} média${count > 1 ? "s" : ""}`);
+                                                        onSuccess();
+                                                        onClearSelection();
+                                                    } catch (error) {
+                                                        toast.error(error instanceof Error ? error.message : "Erreur retrait tag");
+                                                    } finally {
+                                                        setIsPending(false);
+                                                    }
+                                                }}
+                                                onKeyDown={async (e) => {
+                                                    if (e.key === ' ' || e.key === 'Enter') {
+                                                        e.preventDefault();
+                                                        setIsPending(true);
+                                                        try {
+                                                            const result = await bulkUntagMediaAction(selectedIds, [tag.id]);
+                                                            if (!result.success) throw new Error(result.error);
+                                                            toast.success(`Tag '${tag.name}' retiré de ${count} média${count > 1 ? "s" : ""}`);
+                                                            onSuccess();
+                                                            onClearSelection();
+                                                        } catch (error) {
+                                                            toast.error(error instanceof Error ? error.message : "Erreur retrait tag");
+                                                        } finally {
+                                                            setIsPending(false);
                                                         }
-                                                    }}
-                                                    tabIndex={0}
-                                                    role="checkbox"
-                                                    aria-checked={selectedTagsToRemove.includes(tag.id)}
-                                                    aria-label={`Retirer tag ${tag.name}`}
-                                                >
-                                                    {tag.name}
-                                                </Badge>
-                                            ))}
-                                        </div>
-                                        <Button
-                                            size="default"
-                                            variant="destructive"
-                                            onClick={handleBulkUntag}
-                                            disabled={selectedTagsToRemove.length === 0 || isPending}
-                                            className="h-9 px-3 text-xs font-medium whitespace-nowrap"
-                                            aria-label={`Retirer ${selectedTagsToRemove.length} tag${selectedTagsToRemove.length > 1 ? 's' : ''} de ${count} média${count > 1 ? 's' : ''}`}
-                                        >
-                                            <X className="mr-1.5 h-3.5 w-3.5" />
-                                            -
-                                        </Button>
-                                    </>
+                                                    }
+                                                }}
+                                                tabIndex={0}
+                                                role="button"
+                                                aria-label={`Retirer tag ${tag.name}`}
+                                                aria-disabled={isPending}
+                                            >
+                                                {tag.name}
+                                            </Badge>
+                                        ))}
+                                    </div>
                                 ) : (
                                     <span className="text-xs text-muted-foreground italic">
                                         Aucun tag sur les médias sélectionnés
@@ -377,26 +420,13 @@ export function MediaBulkActions({
                                 )}
                             </div>
                         </div>
-
-                        {/* Delete */}
-                        <Button
-                            size="default"
-                            variant="destructive"
-                            onClick={() => setShowDeleteDialog(true)}
-                            disabled={isPending}
-                            className="h-10 md:h-11 px-3 md:px-4 text-sm md:text-base font-medium whitespace-nowrap"
-                            aria-label={`Supprimer ${count} média${count > 1 ? 's' : ''} sélectionné${count > 1 ? 's' : ''}`}
-                        >
-                            <Trash2 className="mr-1.5 md:mr-2 h-4 w-4 md:h-5 md:w-5" />
-                            <span className="hidden sm:inline">Supprimer</span>
-                        </Button>
                     </div>
                 </div>
             </div>
 
             {/* Delete Confirmation Dialog */}
             <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-                <AlertDialogContent className="max-w-md">
+                <AlertDialogContent className="max-w-lg bg-card">
                     <AlertDialogHeader>
                         <AlertDialogTitle className="text-xl font-semibold">
                             Confirmer la suppression
@@ -404,9 +434,9 @@ export function MediaBulkActions({
                         <AlertDialogDescription asChild>
                             <div className="space-y-3">
                                 <p className="text-base">
-                                    Êtes-vous sûr de vouloir supprimer définitivement <strong>{count} média{count > 1 ? "s" : ""}</strong> ?
+                                    Êtes-vous sûr de vouloir supprimer définitivement <br /><strong>{count} média{count > 1 ? "s" : ""}</strong> ?
                                 </p>
-                                
+
                                 {/* Phase 4.3: Warning for used media */}
                                 {usedMediaCount > 0 && (
                                     <div className="rounded-md bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 p-3">
@@ -426,8 +456,8 @@ export function MediaBulkActions({
                                         )}
                                     </div>
                                 )}
-                                
-                                <p className="text-sm">
+
+                                <p className="text-sm md:text-md">
                                     <span className="text-destructive font-medium">Cette action est irréversible.</span>
                                 </p>
                             </div>
@@ -443,7 +473,7 @@ export function MediaBulkActions({
                         <AlertDialogAction
                             onClick={handleBulkDelete}
                             disabled={isPending}
-                            className="h-11 px-6 text-base bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            className="h-11 px-6 text-base bg-destructive text-destructive-foreground hover:bg-red-500/20 hover:text-destructive"
                             aria-label={`Confirmer la suppression de ${count} média${count > 1 ? 's' : ''}`}
                         >
                             {isPending ? "Suppression..." : "Supprimer"}

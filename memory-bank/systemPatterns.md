@@ -1928,9 +1928,59 @@ export async function createNewsletterSubscriber(
 - ✅ **Graceful Degradation** : Erreur email ne fait pas échouer l'opération
 - ✅ **Idempotence** : Newsletter gère les doublons comme succès
 
-### Upload Générique Pattern (Dec 2025)
+### Upload Générique Pattern (Dec 2025 — Security Hardened Feb 2026)
 
-**Pattern** : Actions d'upload configurables par folder pour toutes les entités.
+**Pattern** : Actions d'upload configurables par folder pour toutes les entités, avec validation côté serveur robuste (magic bytes, taille, sanitisation filename).
+
+#### Sécurité (ajoutée 2026-02-18)
+
+**3 protections côté serveur** :
+
+1. **Magic bytes MIME** — détection réelle du format (résiste au spoofing `file.type`)
+2. **Taille max 10MB** — vérifiée avant lecture bytes
+3. **Sanitisation filename** — path traversal, chars spéciaux, longueur 100 chars
+
+```typescript
+// lib/utils/mime-verify.ts
+export async function verifyFileMime(file: File): Promise<AllowedUploadMimeType | null> {
+  const bytes = new Uint8Array(await file.slice(0, 64).arrayBuffer());
+  return detectMimeFromBytes(bytes);
+}
+// Supporte: image/jpeg, image/png, image/webp, image/avif, image/gif, image/svg+xml, application/pdf
+```
+
+```typescript
+// lib/dal/media.ts
+const MAX_FILENAME_LENGTH = 100;
+
+function sanitizeFilename(rawFilename: string): string {
+  const basename = rawFilename.split(/[\/\\]/).pop() ?? "upload";
+  const cleaned = basename
+    .replace(/[^a-zA-Z0-9._-]/g, "-")  // whitelist
+    .replace(/^-+|-+$/g, "")           // trim
+    .slice(0, MAX_FILENAME_LENGTH);
+  return cleaned || "upload";
+}
+// Appliqué dans generateStoragePath() ET createMediaRecord() (champ filename BDD)
+```
+
+#### Formats Acceptés (7 types MIME)
+
+```typescript
+// lib/schemas/media.ts
+export const ALLOWED_IMAGE_MIME_TYPES = [
+  "image/jpeg", "image/png", "image/webp", "image/avif", "image/gif", "image/svg+xml",
+] as const;
+
+export const ALLOWED_DOCUMENT_MIME_TYPES = ["application/pdf"] as const;
+
+export const ALLOWED_UPLOAD_MIME_TYPES = [...ALLOWED_IMAGE_MIME_TYPES, ...ALLOWED_DOCUMENT_MIME_TYPES] as const;
+export type AllowedUploadMimeType = (typeof ALLOWED_UPLOAD_MIME_TYPES)[number];
+
+export const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
+
+export function isAllowedUploadMimeType(mime: string): mime is AllowedUploadMimeType { ... }
+```
 
 #### Structure
 
@@ -1939,6 +1989,7 @@ export async function createNewsletterSubscriber(
 "use server";
 import "server-only";
 import { requireAdmin } from "@/lib/auth/guards";
+import { verifyFileMime } from "@/lib/utils/mime-verify";
 import type { ActionResult } from "./types";
 
 export async function uploadMediaImage(
@@ -1947,18 +1998,16 @@ export async function uploadMediaImage(
 ): Promise<ActionResult<{ url: string; mediaId: bigint }>> {
   await requireAdmin();
   
-  const file = formData.get("file") as File;
-  // Validation MIME + size
-  // Upload to Supabase Storage
-  // Insert metadata in medias table
-  // Return URL + ID
-}
-
-export async function deleteMediaImage(
-  mediaId: bigint
-): Promise<ActionResult<void>> {
-  await requireAdmin();
-  // Delete from Storage + medias table
+  // 1. Size check (avant lecture bytes)
+  if (file.size > MAX_FILE_SIZE) return { success: false, error: "..." };
+  
+  // 2. Magic bytes verification
+  const detectedMime = await verifyFileMime(file);
+  if (!detectedMime) return { success: false, error: "Format non reconnu" };
+  
+  // 3. Upload to Supabase Storage (avec sanitizeFilename appliqué dans DAL)
+  // 4. Insert metadata in medias table (filename sanitisé)
+  // 5. Return URL + ID
 }
 ```
 

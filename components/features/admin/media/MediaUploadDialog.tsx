@@ -19,9 +19,9 @@ import { Loader2, Upload, CheckCircle2, Info } from "lucide-react";
 import Image from "next/image";
 import type { MediaUploadDialogProps } from "./types";
 import {
-    ALLOWED_IMAGE_MIME_TYPES,
+    ALLOWED_UPLOAD_MIME_TYPES,
     MAX_UPLOAD_SIZE_BYTES,
-    isAllowedImageMimeType,
+    isAllowedUploadMimeType,
 } from "./types";
 import { computeFileHash, type HashProgress } from "@/lib/utils/file-hash";
 
@@ -52,14 +52,14 @@ export function MediaUploadDialog({
 
         if (file.size > MAX_UPLOAD_SIZE_BYTES) {
             toast.error("Fichier trop volumineux", {
-                description: "L'image ne doit pas dépasser 5MB",
+                description: "Le fichier ne doit pas dépasser 10MB",
             });
             return;
         }
 
-        if (!isAllowedImageMimeType(file.type)) {
+        if (!isAllowedUploadMimeType(file.type)) {
             toast.error("Format non supporté", {
-                description: "Formats acceptés : JPEG, PNG, WebP, AVIF",
+                description: "Formats acceptés : JPEG, PNG, WebP, AVIF, GIF, SVG, PDF",
             });
             return;
         }
@@ -165,21 +165,21 @@ export function MediaUploadDialog({
     };
 
     const isProcessing = phase !== "idle";
-    const acceptFormats = ALLOWED_IMAGE_MIME_TYPES.join(",");
+    const acceptFormats = ALLOWED_UPLOAD_MIME_TYPES.join(",");
 
     return (
         <Dialog open={open} onOpenChange={(val) => !val && handleClose()}>
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                    <DialogTitle>Téléverser une image</DialogTitle>
+                    <DialogTitle>Téléverser un fichier</DialogTitle>
                     <DialogDescription>
-                        Formats acceptés : JPEG, PNG, WebP, AVIF (max 5MB)
+                        Formats acceptés : JPEG, PNG, WebP, AVIF, GIF, SVG, PDF (max 10MB)
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="media-upload">Sélectionner une image</Label>
+                        <Label htmlFor="media-upload">Sélectionner un fichier</Label>
                         <Input
                             id="media-upload"
                             ref={fileInputRef}

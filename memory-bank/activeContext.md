@@ -1,8 +1,105 @@
 # Active Context
 
-**Current Focus (2026-02-12)**: ✅ Homepage Featured Shows Filter Fix - Archived spectacles excluded from "Prochains Spectacles"
+**Current Focus (2026-02-18)**: ✅ Upload Pipeline Security Hardening + Format Expansion (GIF, SVG, PDF)
 
-**Last Major Updates**: ✅ Homepage Filter Fix (2026-02-12) + Agenda Navigation (2026-02-12) + Spectacles Slug Bugfix (2026-02-12) + Audit Trigger Bugfix (2026-02-11)
+**Last Major Updates**: ✅ Upload Security Hardening (2026-02-18) + Homepage Filter Fix (2026-02-12) + Agenda Navigation (2026-02-12) + Spectacles Slug Bugfix (2026-02-12)
+
+---
+
+## ✅ Upload Pipeline Security Hardening + Format Expansion (2026-02-18)
+
+### Summary
+
+✅ **SECURITY AUDIT — 3 POINTS CORRIGÉS + FORMATS ÉTENDUS** — Validation upload côté serveur robuste, taille 10MB, sanitisation filename, GIF/SVG/PDF ajoutés.
+
+| Composant | Statut | Détails |
+|-----------|--------|---------|
+| Magic bytes MIME | ✅ | `verifyFileMime()` — détection réelle, résistante au spoofing |
+| Taille max 10MB | ✅ | Vérification avant lecture bytes (`file.size > MAX_FILE_SIZE`) |
+| Sanitisation filename | ✅ | `sanitizeFilename()` — path traversal + chars spéciaux + 100 chars |
+| Formats étendus | ✅ | GIF, SVG, PDF ajoutés (total: 7 types MIME) |
+| Cohérence URL externe | ✅ | AVIF ajouté dans `validate-image-url.ts` |
+| Types TypeScript | ✅ | `AllowedUploadMimeType` / `ALLOWED_UPLOAD_MIME_TYPES` exportés |
+| MediaUploadDialog | ✅ | UI mise à jour (10MB, 7 formats, accept élargi) |
+| Documentation | ✅ | `actions_readme.md` mis à jour |
+| Commit | ✅ | `3a64cdb` — 14 files changed |
+
+### Audit Initial (3 Points)
+
+**Point 1 — MIME côté serveur** : `file.type` venait du browser (client-contrôlé) → spoofing possible  
+**Point 2 — Taille max** : Limit était 5MB alors que le bucket Supabase autorisait 10MB  
+**Point 3 — Sanitisation filename** : `input.file.name` brut stocké en BDD (path traversal + chars spéciaux)
+
+### Solutions Implémentées
+
+#### `lib/utils/mime-verify.ts` *(nouveau fichier)*
+
+```typescript
+// Détection MIME par magic bytes (64 premiers octets)
+export async function verifyFileMime(file: File): Promise<AllowedUploadMimeType | null>
+
+// Signatures supportées:
+// JPEG:  FF D8 FF
+// PNG:   89 50 4E 47 0D 0A 1A 0A
+// WebP:  52 49 46 46 ... 57 45 42 50
+// AVIF:  (ftyp box avec avif/avis/av01)
+// GIF:   47 49 46 38 (37|39) 61
+// SVG:   "<svg" ou "<?xml" avec gestion BOM UTF-8
+// PDF:   25 50 44 46 2D ("%PDF-")
+```
+
+#### `lib/dal/media.ts`
+
+```typescript
+const MAX_FILENAME_LENGTH = 100;
+
+function sanitizeFilename(rawFilename: string): string {
+  const basename = rawFilename.split(/[\/\\]/).pop() ?? "upload"; // path traversal
+  const cleaned = basename
+    .replace(/[^a-zA-Z0-9._-]/g, "-")   // whitelist chars
+    .replace(/^-+|-+$/g, "")            // trim dashes
+    .slice(0, MAX_FILENAME_LENGTH);
+  return cleaned || "upload";
+}
+// Utilisé dans generateStoragePath() ET createMediaRecord() (champ filename en BDD)
+```
+
+#### `lib/schemas/media.ts` — Types étendus
+
+```typescript
+export const ALLOWED_IMAGE_MIME_TYPES = [
+  "image/jpeg", "image/png", "image/webp", "image/avif", "image/gif", "image/svg+xml",
+] as const;
+
+export const ALLOWED_DOCUMENT_MIME_TYPES = ["application/pdf"] as const;
+
+export const ALLOWED_UPLOAD_MIME_TYPES = [...ALLOWED_IMAGE_MIME_TYPES, ...ALLOWED_DOCUMENT_MIME_TYPES] as const;
+
+export const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
+
+export function isAllowedUploadMimeType(mime: string): mime is AllowedUploadMimeType { ... }
+```
+
+### Fichiers Modifiés
+
+| Fichier | Modification |
+|---------|--------------|
+| `lib/utils/mime-verify.ts` | ✅ Nouveau fichier — magic bytes 7 formats |
+| `lib/actions/media-actions.ts` | `validateFile` async, magic bytes, 7 MIME types, 10MB |
+| `lib/dal/media.ts` | `sanitizeFilename()` ajouté, utilisé dans path + BDD |
+| `lib/schemas/media.ts` | 3 constantes séparées, types `AllowedDocumentMimeType` / `AllowedUploadMimeType`, type guard |
+| `lib/schemas/index.ts` | Nouveaux exports |
+| `lib/utils/validate-image-url.ts` | `image/avif` ajouté (cohérence) |
+| `components/features/admin/media/types.ts` | Exports `ALLOWED_UPLOAD_MIME_TYPES` + nouveaux types |
+| `components/features/admin/media/MediaUploadDialog.tsx` | UI: 10MB, 7 formats, `accept` élargi |
+| `lib/actions/actions_readme.md` | Section Validation mise à jour |
+
+### Validation
+
+- TypeScript: **0 erreurs** (confirmé `get_errors` sur tous les fichiers modifiés)
+- Commits: `3a64cdb`
+
+---
 
 ---
 

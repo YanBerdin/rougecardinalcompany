@@ -344,7 +344,7 @@ export function MediaDetailsPanel({
                                                     key={tag.id}
                                                     variant={selectedTagsToAdd.includes(tag.id) ? "default" : "outline"}
                                                     className={cn(
-                                                        "cursor-pointer transition-all hover:scale-105",
+                                                        "cursor-pointer transition-all hover:scale-95",
                                                         selectedTagsToAdd.includes(tag.id) && "ring-2 ring-primary"
                                                     )}
                                                     onClick={() => toggleTag(tag.id)}

@@ -1,6 +1,52 @@
 # Progress
 
-## Homepage Featured Shows Filter Fix - Archived Spectacles Excluded (2026-02-12)
+## Upload Pipeline Security Hardening + Format Expansion (2026-02-18)
+
+### Summary
+
+✅ **SECURITY HARDENING COMPLET** — Validation upload côté serveur robuste, magic bytes, 10MB, sanitisation filename, 7 formats (GIF/SVG/PDF ajoutés)
+
+| Livrable | Statut | Détails |
+| --------- | ------ | ------- |
+| Magic bytes MIME | ✅ | `verifyFileMime()` — 7 formats, 64 octets |
+| Taille max 10MB | ✅ | `MAX_FILE_SIZE = 10 * 1024 * 1024` |
+| Sanitisation filename | ✅ | `sanitizeFilename()` — path traversal + chars + 100 chars |
+| Formats GIF / SVG / PDF | ✅ | Extension de JPEG/PNG/WebP/AVIF |
+| Cohérence URL externe | ✅ | AVIF ajouté dans `validate-image-url.ts` |
+| Types TypeScript | ✅ | `AllowedUploadMimeType`, `ALLOWED_UPLOAD_MIME_TYPES`, `isAllowedUploadMimeType` |
+| UI MediaUploadDialog | ✅ | Labels 10MB, 7 formats, `accept` élargi |
+| Documentation | ✅ | `actions_readme.md` section Validation mise à jour |
+| TypeScript 0 erreurs | ✅ | `get_errors` confirmé |
+| Commits | ✅ | `3a64cdb` — 14 files changed |
+
+### Problèmes Résolus
+
+**Audit initial (3 points)**:
+1. **MIME spoofing** : `file.type` client-contrôlé accepté sans vérification réelle → corrigé par magic bytes
+2. **Taille** : 5MB en code vs 10MB autorisé par bucket Supabase → aligné à 10MB
+3. **Filename** : `input.file.name` brut en BDD (path traversal + chars spéciaux) → `sanitizeFilename()`
+
+**Incohérence formats** :
+- Upload : JPEG/PNG/WebP/AVIF (4 types)
+- URL externe : JPEG/PNG/WebP/SVG/GIF (5 types, sans AVIF)
+- Après : 7 types alignés dans upload + AVIF ajouté URL externe
+
+### Fichiers Clés
+
+```bash
+lib/utils/mime-verify.ts          # NOUVEAU — magic bytes 7 formats
+lib/actions/media-actions.ts      # validateFile async, 10MB, magic bytes
+lib/dal/media.ts                  # sanitizeFilename() + utilisation BDD
+lib/schemas/media.ts              # 3 constantes, 2 nouveaux types, type guard
+lib/schemas/index.ts              # Exports étendus
+lib/utils/validate-image-url.ts   # + image/avif
+components/features/admin/media/types.ts         # Re-exports étendus
+components/features/admin/media/MediaUploadDialog.tsx  # UI 10MB + 7 formats
+lib/actions/actions_readme.md     # Documentation mise à jour
+```
+
+---
+
 
 ### Summary
 

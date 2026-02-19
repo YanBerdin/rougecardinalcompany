@@ -32,9 +32,9 @@ Your primary directive is to ensure all code you generate, review, or refactor i
   // TODO: Ensure API_KEY is securely configured in your environment.
   ```
 
-  ```python
-  # BAD: Hardcoded secret
-  api_key = "sk_this_is_a_very_bad_idea_12345" 
+  ```ts
+  // BAD: Hardcoded secret
+  const apiKey = "sk_this_is_a_very_bad_idea_12345";
   ```
 
 ### 3. A03: Injection

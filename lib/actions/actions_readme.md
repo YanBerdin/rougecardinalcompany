@@ -96,8 +96,10 @@ function uploadMediaImage(
 
 **Validation**:
 
-- File size: Max 5MB
-- MIME types: `image/jpeg`, `image/png`, `image/webp`, `image/avif`
+- File size: Max 10MB (rejected before disk write)
+- MIME types: `image/jpeg`, `image/png`, `image/webp`, `image/avif`, `image/gif`, `image/svg+xml`, `application/pdf`
+- MIME verification: Server-side magic bytes detection (prevents MIME spoofing)
+- Filename: Sanitized — path traversal removed, special chars replaced, capped at 100 chars
 - Authentication: Requires admin role
 
 **Example**:

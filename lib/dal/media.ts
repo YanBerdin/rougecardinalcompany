@@ -40,13 +40,31 @@ export interface MediaRecord {
 
 const BUCKET_NAME = "medias";
 
+const MAX_FILENAME_LENGTH = 100;
+
 // =============================================================================
 // HELPER FUNCTIONS (< 30 lines each)
 // =============================================================================
 
+/**
+ * Sanitizes an uploaded filename:
+ *  - Extracts basename only (prevents path traversal e.g. ../../etc/passwd)
+ *  - Strips characters outside a-z A-Z 0-9 . - _
+ *  - Trims leading/trailing dashes
+ *  - Clamps to MAX_FILENAME_LENGTH
+ */
+function sanitizeFilename(rawFilename: string): string {
+    const basename = rawFilename.split(/[\/\\]/).pop() ?? "upload";
+    const cleaned = basename
+        .replace(/[^a-zA-Z0-9._-]/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, MAX_FILENAME_LENGTH);
+    return cleaned || "upload";
+}
+
 function generateStoragePath(folder: string, filename: string): string {
     const timestamp = Date.now();
-    const sanitizedFilename = filename.replace(/[^a-zA-Z0-9._-]/g, "-");
+    const sanitizedFilename = sanitizeFilename(filename);
     return `${folder}/${timestamp}-${sanitizedFilename}`;
 }
 
@@ -119,7 +137,7 @@ async function createMediaRecord(
         .from("medias")
         .insert({
             storage_path: storagePath,
-            filename: input.file.name,
+            filename: sanitizeFilename(input.file.name),
             mime: input.file.type,
             size_bytes: input.file.size,
             file_hash: input.fileHash,

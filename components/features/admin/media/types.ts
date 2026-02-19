@@ -17,13 +17,18 @@ export type {
     MediaUploadInput,
     ExternalUrlInput,
     AllowedImageMimeType,
+    AllowedDocumentMimeType,
+    AllowedUploadMimeType,
 } from "@/lib/schemas/media";
 
 // Re-export constants and type guards
 export {
     ALLOWED_IMAGE_MIME_TYPES,
+    ALLOWED_DOCUMENT_MIME_TYPES,
+    ALLOWED_UPLOAD_MIME_TYPES,
     MAX_UPLOAD_SIZE_BYTES,
     isAllowedImageMimeType,
+    isAllowedUploadMimeType,
 } from "@/lib/schemas/media";
 
 // =============================================================================

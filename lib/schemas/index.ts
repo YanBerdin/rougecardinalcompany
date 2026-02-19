@@ -130,8 +130,11 @@ export {
     MediaUploadInputSchema,
     ExternalUrlInputSchema,
     ALLOWED_IMAGE_MIME_TYPES,
+    ALLOWED_DOCUMENT_MIME_TYPES,
+    ALLOWED_UPLOAD_MIME_TYPES,
     MAX_UPLOAD_SIZE_BYTES,
     isAllowedImageMimeType,
+    isAllowedUploadMimeType,
     type MediaItem,
     type MediaSelectResult,
     type MediaSearchItem,
@@ -139,6 +142,8 @@ export {
     type MediaUploadInput,
     type ExternalUrlInput,
     type AllowedImageMimeType,
+    type AllowedDocumentMimeType,
+    type AllowedUploadMimeType,
 } from "./media";
 
 // Admin Users

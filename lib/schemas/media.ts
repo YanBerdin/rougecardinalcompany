@@ -17,14 +17,35 @@ export const ALLOWED_IMAGE_MIME_TYPES = [
     "image/png",
     "image/webp",
     "image/avif",
+    "image/gif",
+    "image/svg+xml",
 ] as const;
 
 export type AllowedImageMimeType = (typeof ALLOWED_IMAGE_MIME_TYPES)[number];
 
 /**
- * Maximum file size for uploads (5MB)
+ * Allowed MIME types for document uploads (non-image)
  */
-export const MAX_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024;
+export const ALLOWED_DOCUMENT_MIME_TYPES = [
+    "application/pdf",
+] as const;
+
+export type AllowedDocumentMimeType = (typeof ALLOWED_DOCUMENT_MIME_TYPES)[number];
+
+/**
+ * Combined list of all upload-allowed MIME types (images + documents)
+ */
+export const ALLOWED_UPLOAD_MIME_TYPES = [
+    ...ALLOWED_IMAGE_MIME_TYPES,
+    ...ALLOWED_DOCUMENT_MIME_TYPES,
+] as const;
+
+export type AllowedUploadMimeType = (typeof ALLOWED_UPLOAD_MIME_TYPES)[number];
+
+/**
+ * Maximum file size for uploads (10MB)
+ */
+export const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024;
 
 // =============================================================================
 // SCHEMAS
@@ -75,7 +96,7 @@ export const MediaPickerModeSchema = z.enum(["upload", "library", "external-url"
  */
 export const MediaUploadInputSchema = z.object({
     filename: z.string().min(1).max(255),
-    mime: z.enum(ALLOWED_IMAGE_MIME_TYPES),
+    mime: z.enum(ALLOWED_UPLOAD_MIME_TYPES),
     size_bytes: z.number().int().positive().max(MAX_UPLOAD_SIZE_BYTES),
     alt_text: z.string().max(500).optional(),
 });
@@ -284,10 +305,20 @@ export type BulkDelete = z.infer<typeof BulkDeleteSchema>;
 // =============================================================================
 
 /**
- * Type guard for allowed MIME types
+/**
+ * Type guard for allowed image MIME types
  */
 export function isAllowedImageMimeType(
     mime: string
 ): mime is AllowedImageMimeType {
     return ALLOWED_IMAGE_MIME_TYPES.includes(mime as AllowedImageMimeType);
+}
+
+/**
+ * Type guard for all upload-allowed MIME types (images + documents)
+ */
+export function isAllowedUploadMimeType(
+    mime: string
+): mime is AllowedUploadMimeType {
+    return ALLOWED_UPLOAD_MIME_TYPES.includes(mime as AllowedUploadMimeType);
 }

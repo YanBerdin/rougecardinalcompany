@@ -122,24 +122,27 @@ export function MediaLibraryView({
             </div>
 
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3">
+                {/* Titre + compteur */}
                 <div>
-                    <h1 className="text-3xl font-bold">Médiathèque</h1>
-                    <p className="text-muted-foreground mt-1">
+                    <h1 className="text-2xl md:text-3xl font-bold">Médiathèque</h1>
+                    <p className="text-muted-foreground mt-1 text-sm md:text-md">
                         {filteredMedia.length} média{filteredMedia.length > 1 ? "s" : ""}
                         {filteredMedia.length !== media.length && ` (sur ${media.length})`}
                     </p>
                 </div>
-                <div className="flex items-center gap-3">
+
+                {/* Actions — s'enroulent proprement sur mobile */}
+                <div className="flex flex-wrap items-center gap-2">
                     <Button
-                        size="lg"
+                        size="sm"
                         variant={selectionMode ? "default" : "secondary"}
                         onClick={() => {
                             setSelectionMode(!selectionMode);
                             setSelectedIds([]);
                         }}
                         className={cn(
-                            "h-11 px-5 text-base font-medium transition-all",
+                            "h-9 px-4 text-sm font-medium transition-all",
                             selectionMode && "ring-2 ring-primary ring-offset-2"
                         )}
                         aria-pressed={selectionMode}
@@ -149,7 +152,10 @@ export function MediaLibraryView({
                     </Button>
 
                     <Select value={uploadFolder} onValueChange={setUploadFolder}>
-                        <SelectTrigger className="w-[160px] h-11">
+                        <SelectTrigger
+                            className="w-[180px] h-9 text-sm"
+                            aria-label="Dossier d'upload"
+                        >
                             <SelectValue placeholder="Dossier d'upload" />
                         </SelectTrigger>
                         <SelectContent>
@@ -162,13 +168,13 @@ export function MediaLibraryView({
                     </Select>
 
                     <Button
-                        size="lg"
+                        size="sm"
                         variant="default"
                         onClick={handleUpload}
-                        className="h-11 px-5 text-base font-medium"
+                        className="h-9 px-4 text-sm font-medium"
                         aria-label="Téléverser de nouveaux médias"
                     >
-                        <Upload className="mr-2 h-5 w-5" />
+                        <Upload className="mr-1.5 h-4 w-4" />
                         Upload
                     </Button>
                 </div>
