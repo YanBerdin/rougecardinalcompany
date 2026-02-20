@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.4"
+    PostgrestVersion: "14.1"
   }
   graphql_public: {
     Tables: {
@@ -199,6 +199,7 @@ export type Database = {
           created_at: string
           excerpt: string | null
           id: number
+          image_url: string | null
           keywords: string[] | null
           meta_description: string | null
           meta_title: string | null
@@ -220,6 +221,7 @@ export type Database = {
           created_at?: string
           excerpt?: string | null
           id?: never
+          image_url?: string | null
           keywords?: string[] | null
           meta_description?: string | null
           meta_title?: string | null
@@ -241,6 +243,7 @@ export type Database = {
           created_at?: string
           excerpt?: string | null
           id?: never
+          image_url?: string | null
           keywords?: string[] | null
           meta_description?: string | null
           meta_title?: string | null
@@ -394,13 +397,6 @@ export type Database = {
             foreignKeyName: "communiques_categories_communique_id_fkey"
             columns: ["communique_id"]
             isOneToOne: false
-            referencedRelation: "communiques_presse_dashboard"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "communiques_categories_communique_id_fkey"
-            columns: ["communique_id"]
-            isOneToOne: false
             referencedRelation: "communiques_presse_public"
             referencedColumns: ["id"]
           },
@@ -434,13 +430,6 @@ export type Database = {
             foreignKeyName: "communiques_medias_communique_id_fkey"
             columns: ["communique_id"]
             isOneToOne: false
-            referencedRelation: "communiques_presse_dashboard"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "communiques_medias_communique_id_fkey"
-            columns: ["communique_id"]
-            isOneToOne: false
             referencedRelation: "communiques_presse_public"
             referencedColumns: ["id"]
           },
@@ -462,6 +451,7 @@ export type Database = {
           evenement_id: number | null
           file_size_bytes: number | null
           id: number
+          image_media_id: number | null
           image_url: string | null
           ordre_affichage: number | null
           public: boolean | null
@@ -478,6 +468,7 @@ export type Database = {
           evenement_id?: number | null
           file_size_bytes?: number | null
           id?: never
+          image_media_id?: number | null
           image_url?: string | null
           ordre_affichage?: number | null
           public?: boolean | null
@@ -494,6 +485,7 @@ export type Database = {
           evenement_id?: number | null
           file_size_bytes?: number | null
           id?: never
+          image_media_id?: number | null
           image_url?: string | null
           ordre_affichage?: number | null
           public?: boolean | null
@@ -508,6 +500,13 @@ export type Database = {
             columns: ["evenement_id"]
             isOneToOne: false
             referencedRelation: "evenements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communiques_presse_image_media_id_fkey"
+            columns: ["image_media_id"]
+            isOneToOne: false
+            referencedRelation: "medias"
             referencedColumns: ["id"]
           },
           {
@@ -538,13 +537,6 @@ export type Database = {
             columns: ["communique_id"]
             isOneToOne: false
             referencedRelation: "communiques_presse"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "communiques_tags_communique_id_fkey"
-            columns: ["communique_id"]
-            isOneToOne: false
-            referencedRelation: "communiques_presse_dashboard"
             referencedColumns: ["id"]
           },
           {
@@ -697,18 +689,27 @@ export type Database = {
       }
       configurations_site: {
         Row: {
+          category: string | null
+          description: string | null
           key: string
           updated_at: string
+          updated_by: string | null
           value: Json
         }
         Insert: {
+          category?: string | null
+          description?: string | null
           key: string
           updated_at?: string
+          updated_by?: string | null
           value: Json
         }
         Update: {
+          category?: string | null
+          description?: string | null
           key?: string
           updated_at?: string
+          updated_by?: string | null
           value?: Json
         }
         Relationships: []
@@ -806,6 +807,75 @@ export type Database = {
         }
         Relationships: []
       }
+      data_retention_audit: {
+        Row: {
+          error_message: string | null
+          executed_at: string
+          execution_time_ms: number | null
+          id: number
+          metadata: Json | null
+          rows_deleted: number
+          status: string
+          table_name: string
+        }
+        Insert: {
+          error_message?: string | null
+          executed_at?: string
+          execution_time_ms?: number | null
+          id?: never
+          metadata?: Json | null
+          rows_deleted?: number
+          status: string
+          table_name: string
+        }
+        Update: {
+          error_message?: string | null
+          executed_at?: string
+          execution_time_ms?: number | null
+          id?: never
+          metadata?: Json | null
+          rows_deleted?: number
+          status?: string
+          table_name?: string
+        }
+        Relationships: []
+      }
+      data_retention_config: {
+        Row: {
+          created_at: string
+          date_column: string
+          description: string | null
+          enabled: boolean
+          id: number
+          last_run_at: string | null
+          retention_days: number
+          table_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date_column: string
+          description?: string | null
+          enabled?: boolean
+          id?: never
+          last_run_at?: string | null
+          retention_days: number
+          table_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date_column?: string
+          description?: string | null
+          enabled?: boolean
+          id?: never
+          last_run_at?: string | null
+          retention_days?: number
+          table_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       evenements: {
         Row: {
           capacity: number | null
@@ -897,6 +967,7 @@ export type Database = {
       home_about_content: {
         Row: {
           active: boolean
+          alt_text: string | null
           created_at: string
           id: number
           image_media_id: number | null
@@ -912,6 +983,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          alt_text?: string | null
           created_at?: string
           id?: never
           image_media_id?: number | null
@@ -927,6 +999,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          alt_text?: string | null
           created_at?: string
           id?: never
           image_media_id?: number | null
@@ -1076,6 +1149,7 @@ export type Database = {
         Row: {
           action: string
           created_at: string
+          expires_at: string | null
           id: number
           ip_address: unknown
           new_values: Json | null
@@ -1088,6 +1162,7 @@ export type Database = {
         Insert: {
           action: string
           created_at?: string
+          expires_at?: string | null
           id?: number
           ip_address?: unknown
           new_values?: Json | null
@@ -1100,6 +1175,7 @@ export type Database = {
         Update: {
           action?: string
           created_at?: string
+          expires_at?: string | null
           id?: number
           ip_address?: unknown
           new_values?: Json | null
@@ -1111,44 +1187,162 @@ export type Database = {
         }
         Relationships: []
       }
+      media_folders: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: number
+          name: string
+          parent_id: number | null
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: never
+          name: string
+          parent_id?: number | null
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: never
+          name?: string
+          parent_id?: number | null
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_folders_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "media_folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_item_tags: {
+        Row: {
+          created_at: string
+          media_id: number
+          tag_id: number
+        }
+        Insert: {
+          created_at?: string
+          media_id: number
+          tag_id: number
+        }
+        Update: {
+          created_at?: string
+          media_id?: number
+          tag_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_item_tags_media_id_fkey"
+            columns: ["media_id"]
+            isOneToOne: false
+            referencedRelation: "medias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_item_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "media_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_tags: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          id: number
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: never
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: never
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       medias: {
         Row: {
           alt_text: string | null
           created_at: string
+          file_hash: string | null
           filename: string | null
+          folder_id: number | null
           id: number
           metadata: Json | null
           mime: string | null
           size_bytes: number | null
           storage_path: string
+          thumbnail_path: string | null
           updated_at: string
           uploaded_by: string | null
         }
         Insert: {
           alt_text?: string | null
           created_at?: string
+          file_hash?: string | null
           filename?: string | null
+          folder_id?: number | null
           id?: never
           metadata?: Json | null
           mime?: string | null
           size_bytes?: number | null
           storage_path: string
+          thumbnail_path?: string | null
           updated_at?: string
           uploaded_by?: string | null
         }
         Update: {
           alt_text?: string | null
           created_at?: string
+          file_hash?: string | null
           filename?: string | null
+          folder_id?: number | null
           id?: never
           metadata?: Json | null
           mime?: string | null
           size_bytes?: number | null
           storage_path?: string
+          thumbnail_path?: string | null
           updated_at?: string
           uploaded_by?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "medias_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "media_folders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       membres_equipe: {
         Row: {
@@ -1489,13 +1683,15 @@ export type Database = {
           meta_description: string | null
           meta_title: string | null
           og_image_media_id: number | null
+          paragraph_2: string | null
+          paragraph_3: string | null
           premiere: string | null
           public: boolean | null
           schema_type: string | null
           search_vector: unknown
           short_description: string | null
           slug: string | null
-          status: string | null
+          status: string
           title: string
           updated_at: string
         }
@@ -1513,13 +1709,15 @@ export type Database = {
           meta_description?: string | null
           meta_title?: string | null
           og_image_media_id?: number | null
+          paragraph_2?: string | null
+          paragraph_3?: string | null
           premiere?: string | null
           public?: boolean | null
           schema_type?: string | null
           search_vector?: unknown
           short_description?: string | null
           slug?: string | null
-          status?: string | null
+          status?: string
           title: string
           updated_at?: string
         }
@@ -1537,13 +1735,15 @@ export type Database = {
           meta_description?: string | null
           meta_title?: string | null
           og_image_media_id?: number | null
+          paragraph_2?: string | null
+          paragraph_3?: string | null
           premiere?: string | null
           public?: boolean | null
           schema_type?: string | null
           search_vector?: unknown
           short_description?: string | null
           slug?: string | null
-          status?: string | null
+          status?: string
           title?: string
           updated_at?: string
         }
@@ -1592,16 +1792,19 @@ export type Database = {
           media_id: number
           ordre: number | null
           spectacle_id: number
+          type: string
         }
         Insert: {
           media_id: number
           ordre?: number | null
           spectacle_id: number
+          type?: string
         }
         Update: {
           media_id?: number
           ordre?: number | null
           spectacle_id?: number
+          type?: string
         }
         Relationships: [
           {
@@ -1776,6 +1979,17 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_summary_90d: {
+        Row: {
+          entity_type: string | null
+          event_date: string | null
+          event_type: string | null
+          total_events: number | null
+          unique_sessions: number | null
+          unique_users: number | null
+        }
+        Relationships: []
+      }
       articles_presse_public: {
         Row: {
           author: string | null
@@ -1827,29 +2041,6 @@ export type Database = {
           parent_id: number | null
           path: number[] | null
           slug: string | null
-        }
-        Relationships: []
-      }
-      communiques_presse_dashboard: {
-        Row: {
-          created_at: string | null
-          createur: string | null
-          date_publication: string | null
-          description: string | null
-          evenement_date: string | null
-          id: number | null
-          image_filename: string | null
-          image_url: string | null
-          nb_categories: number | null
-          nb_tags: number | null
-          ordre_affichage: number | null
-          pdf_filename: string | null
-          pdf_size_kb: number | null
-          public: boolean | null
-          slug: string | null
-          spectacle_titre: string | null
-          title: string | null
-          updated_at: string | null
         }
         Relationships: []
       }
@@ -1939,6 +2130,58 @@ export type Database = {
           id: number | null
           snapshot_size: number | null
           version_number: number | null
+        }
+        Relationships: []
+      }
+      data_retention_monitoring: {
+        Row: {
+          config_created_at: string | null
+          config_updated_at: string | null
+          date_column: string | null
+          description: string | null
+          enabled: boolean | null
+          health_status: string | null
+          id: number | null
+          last_deleted_count: number | null
+          last_error: string | null
+          last_execution: string | null
+          last_execution_ms: number | null
+          last_metadata: Json | null
+          last_run_at: string | null
+          last_status: string | null
+          next_run_estimated: string | null
+          retention_days: number | null
+          table_name: string | null
+        }
+        Relationships: []
+      }
+      data_retention_recent_audit: {
+        Row: {
+          error_message: string | null
+          executed_at: string | null
+          execution_time_ms: number | null
+          id: number | null
+          metadata: Json | null
+          rows_deleted: number | null
+          status: string | null
+          table_name: string | null
+          time_ago: string | null
+        }
+        Relationships: []
+      }
+      data_retention_stats: {
+        Row: {
+          avg_execution_ms: number | null
+          executions_24h: number | null
+          executions_30d: number | null
+          executions_7d: number | null
+          last_executed_at: string | null
+          max_execution_ms: number | null
+          rows_deleted_24h: number | null
+          rows_deleted_30d: number | null
+          rows_deleted_7d: number | null
+          success_rate_pct: number | null
+          table_name: string | null
         }
         Relationships: []
       }
@@ -2057,8 +2300,96 @@ export type Database = {
         }
         Relationships: []
       }
+      spectacles_landscape_photos_admin: {
+        Row: {
+          alt_text: string | null
+          created_at: string | null
+          media_id: number | null
+          mime: string | null
+          ordre: number | null
+          spectacle_id: number | null
+          storage_path: string | null
+          type: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spectacles_medias_media_id_fkey"
+            columns: ["media_id"]
+            isOneToOne: false
+            referencedRelation: "medias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spectacles_medias_spectacle_id_fkey"
+            columns: ["spectacle_id"]
+            isOneToOne: false
+            referencedRelation: "spectacles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spectacles_landscape_photos_public: {
+        Row: {
+          alt_text: string | null
+          media_id: number | null
+          ordre: number | null
+          spectacle_id: number | null
+          storage_path: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spectacles_medias_media_id_fkey"
+            columns: ["media_id"]
+            isOneToOne: false
+            referencedRelation: "medias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spectacles_medias_spectacle_id_fkey"
+            columns: ["spectacle_id"]
+            isOneToOne: false
+            referencedRelation: "spectacles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      check_retention_health: {
+        Args: never
+        Returns: {
+          issue: string
+          severity: string
+          table_name: string
+        }[]
+      }
+      cleanup_expired_audit_logs: { Args: never; Returns: number }
+      cleanup_expired_data: { Args: { p_table_name: string }; Returns: Json }
+      cleanup_old_contact_messages: { Args: never; Returns: Json }
+      cleanup_unsubscribed_newsletter: { Args: never; Returns: Json }
+      communiques_presse_dashboard: {
+        Args: never
+        Returns: {
+          created_at: string
+          createur: string
+          date_publication: string
+          description: string
+          evenement_date: string
+          id: number
+          image_filename: string
+          image_url: string
+          nb_categories: number
+          nb_tags: number
+          ordre_affichage: number
+          pdf_filename: string
+          pdf_size_kb: number
+          public: boolean
+          slug: string
+          spectacle_titre: string
+          title: string
+          updated_at: string
+        }[]
+      }
       create_content_version: {
         Args: {
           p_change_summary?: string
@@ -2069,7 +2400,38 @@ export type Database = {
         }
         Returns: number
       }
+      extract_folder_from_path: {
+        Args: { storage_path: string }
+        Returns: string
+      }
       generate_slug: { Args: { input_text: string }; Returns: string }
+      get_audit_logs_with_email: {
+        Args: {
+          p_action?: string
+          p_date_from?: string
+          p_date_to?: string
+          p_limit?: number
+          p_page?: number
+          p_search?: string
+          p_table_name?: string
+          p_user_id?: string
+        }
+        Returns: {
+          action: string
+          created_at: string
+          expires_at: string
+          id: number
+          ip_address: unknown
+          new_values: Json
+          old_values: Json
+          record_id: string
+          table_name: string
+          total_count: number
+          user_agent: string
+          user_email: string
+          user_id: string
+        }[]
+      }
       get_current_timestamp: { Args: never; Returns: string }
       is_admin: { Args: never; Returns: boolean }
       reorder_hero_slides: { Args: { order_data: Json }; Returns: undefined }

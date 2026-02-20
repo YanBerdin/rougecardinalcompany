@@ -66,6 +66,10 @@ export default function SpectaclesManagementContainer({
     router.push(`/admin/spectacles/${id}`);
   }
 
+  function handleGallery(id: number): void {
+    router.push(`/admin/spectacles/${id}#gallery`);
+  }
+
   function handleEdit(id: number): void {
     router.push(`/admin/spectacles/${id}/edit`);
   }
@@ -129,6 +133,7 @@ export default function SpectaclesManagementContainer({
       <SpectaclesTable
         spectacles={sortedSpectacles}
         onView={handleView}
+        onGallery={handleGallery}
         onEdit={handleEdit}
         onDelete={requestDelete}
         sortState={sortState}

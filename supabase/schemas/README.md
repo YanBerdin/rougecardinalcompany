@@ -24,6 +24,7 @@ where (select public.is_admin()) = true;
 
 Migrations de sécurité récentes
 
+- `supabase/migrations/20260220130000_fix_spectacle_admin_views_security.sql` — hotfix : ajout garde `is_admin()` sur `spectacles_landscape_photos_admin` (`41_views_spectacle_photos.sql`) et `spectacles_gallery_photos_admin` (`42_views_spectacle_gallery.sql`) + REVOKE anon (pattern TASK037). Appliquée le 2026-02-20.
 - `supabase/migrations/20260103120000_fix_communiques_presse_dashboard_admin_access.sql` — hotfix : recréation de la vue admin avec garde `is_admin()`.
 - `supabase/migrations/20260103123000_revoke_authenticated_on_communiques_dashboard.sql` — révocation du SELECT au rôle `authenticated` sur la vue admin.
 - `supabase/migrations/20260118010000_restore_insert_policies_dropped_by_task053.sql` — restauration des INSERT policies sur `messages_contact` et `analytics_events`, ré-activation RLS sur `home_hero_slides`, révocation grants `communiques_presse_dashboard`.

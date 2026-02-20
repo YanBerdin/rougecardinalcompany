@@ -34,7 +34,7 @@
 ### 1.1 Technologies détectées
 
 | Couche | Technologies | Version |
-|--------|-------------|---------|
+| -------- | ------------- | --------- |
 | **Framework** | Next.js (App Router, Turbopack dev) | 16.1.5 |
 | **Runtime** | React + React DOM | 19.2.0 |
 | **Langage** | TypeScript (strict mode) | 5.x |
@@ -47,6 +47,7 @@
 | **Email** | React Email + Resend SDK | v4 |
 | **Images** | Sharp (thumbnails 300×300 JPEG) | 0.34.5 |
 | **DnD** | @dnd-kit/core + @dnd-kit/sortable | — |
+| **Carousel** | embla-carousel-react + embla-carousel-autoplay | ^8.5.1 |
 | **Charts** | Recharts | 2.15.4 |
 | **Icons** | Lucide React | — |
 | **Dates** | date-fns | 4.1.0 |
@@ -77,7 +78,7 @@
 ### 2.1 Résumé exécutif
 
 | Dimension | Détail |
-|-----------|--------|
+| ----------- | -------- |
 | **Routes** | 14 sections admin (~30+ pages), 9 pages publiques, 10 API Routes |
 | **DAL** | 31 modules (`lib/dal/`) + 5 helpers |
 | **Server Actions** | 11 fichiers colocalisés + 5 fichiers centralisés (`lib/actions/`) |
@@ -263,7 +264,7 @@ flowchart TB
 #### Zone Admin — `app/(admin)/admin/`
 
 | Section | Route | Server Actions colocalisées |
-|---------|-------|-----------------------------|
+| --------- | ------- | ----------------------------- |
 | Dashboard | `/admin` | — |
 | Home Hero | `/admin/home/hero` | `home-hero-actions.ts` |
 | Home About | `/admin/home/about` | `home-about-actions.ts` |
@@ -282,7 +283,7 @@ flowchart TB
 #### Zone Marketing - `app/(marketing)/`
 
 | Page | Route | Dynamic |
-|------|-------|---------|
+| ------ | ------- | --------- |
 | Homepage | `/` | `force-dynamic` (ISR `revalidate=60`) |
 | Spectacles | `/spectacles` | `force-dynamic` |
 | Spectacle détail | `/spectacles/[slug]` | Dynamic segment |
@@ -296,7 +297,7 @@ flowchart TB
 #### API Routes — `app/api/`
 
 | Endpoint | Méthode | Usage |
-|----------|---------|-------|
+| ---------- | --------- | ------- |
 | `/api/contact` | POST | Formulaire contact public |
 | `/api/newsletter` | POST | Inscription newsletter |
 | `/api/newsletter/unsubscribe` | GET | Désinscription |
@@ -355,7 +356,7 @@ components/features/public-site/{feature}/
 **Admin (14 modules) :**
 
 | Module | Domaine | Fonctions types |
-|--------|---------|-----------------|
+| -------- | --------- | ----------------- |
 | `admin-agenda.ts` | Événements | `fetchEventsAdmin`, `createEvent`, `updateEvent`, `deleteEvent` |
 | `admin-home-hero.ts` | Hero Slides | `fetchAllHeroSlides`, `createHeroSlide`, `reorderHeroSlides` |
 | `admin-home-about.ts` | About sections | `fetchAboutSections`, `updateAboutSection` |
@@ -382,7 +383,7 @@ components/features/public-site/{feature}/
 **DAL Helpers (`lib/dal/helpers/`, 5 fichiers) :**
 
 | Fichier | Exports |
-|---------|---------|
+| -------- | -------- |
 | `error.ts` | `DALResult<T>`, `dalSuccess()`, `dalError()`, `toDALResult()` |
 | `format.ts` | Formatage dates, strings |
 | `slug.ts` | `generateUniqueSlug()` |
@@ -402,7 +403,7 @@ Modules : `admin-events.ts`, `admin-lieux.ts`, `admin-users.ts`, `agenda.ts`, `c
 ### 4.6 Hooks (`lib/hooks/`, 9 hooks)
 
 | Hook | Lignes | Fonction |
-|------|--------|----------|
+| ------ | -------- | ---------- |
 | `useHeroSlideForm.ts` | 53 | Form state + submission |
 | `useHeroSlideFormSync.ts` | 38 | Props/form sync via useEffect |
 | `useHeroSlidesDnd.ts` | 73 | Drag and drop @dnd-kit |
@@ -416,7 +417,7 @@ Modules : `admin-events.ts`, `admin-lieux.ts`, `admin-users.ts`, `agenda.ts`, `c
 ### 4.7 API Helpers (`lib/api/helpers.ts`, 136 lignes)
 
 | Export | Rôle |
-|--------|------|
+| -------- | ------ |
 | `HttpStatus` | Constantes HTTP (200, 201, 400, 401, 403, 404, 409, 422, 500) |
 | `PostgresError` | Codes erreur PG (unique/foreign key/not null violation) |
 | `ApiResponse.success/error/validationError` | Wrappers `NextResponse.json()` typés |
@@ -453,7 +454,7 @@ INFRASTRUCTURE (supabase/, lib/email/)
 **Règles de dépendance strictes :**
 
 | Règle | Enforcement |
-|-------|-------------|
+| ------- | ------------- |
 | DAL ne dépend pas de Next.js | `import "server-only"` + code review |
 | DAL ne fait pas de `revalidatePath()` | Convention + instructions Copilot |
 | DAL ne fait pas d'imports email | Single Responsibility |
@@ -464,7 +465,7 @@ INFRASTRUCTURE (supabase/, lib/email/)
 ### ActionResult vs DALResult
 
 | Type | Couche | BigInt autorisé | `revalidatePath()` |
-|------|--------|-----------------|---------------------|
+| ------ | -------- | ----------------- | --------------------- |
 | `DALResult<T>` | DAL | Oui | Non |
 | `ActionResult<T>` | Server Actions | Non (sérialisé) | Oui |
 
@@ -493,7 +494,7 @@ erDiagram
 ### 6.2 Tables principales (36, 100% RLS)
 
 | Catégorie | Tables |
-|-----------|--------|
+| ----------- | -------- |
 | **Auth** | `profiles` |
 | **Contenu** | `spectacles`, `home_hero_slides`, `sections_apropos`, `sections_compagnie`, `compagnie_presentation_sections` |
 | **Événements** | `agenda_evenements`, `lieux`, `evenement_recurrences` |
@@ -510,7 +511,7 @@ erDiagram
 Organisés par préfixe numérique dans `supabase/schemas/` :
 
 | Plage | Domaine |
-|-------|---------|
+| ------- | --------- |
 | `01-02` | Extensions, profiles, fonctions core, storage |
 | `03-04` | Médias, tags, équipe |
 | `05-09` | Contenu principal (lieux, spectacles, événements, compagnie, presse, partenaires) |
@@ -522,7 +523,7 @@ Organisés par préfixe numérique dans `supabase/schemas/` :
 ### 6.4 Vues PostgreSQL
 
 | Type | Nombre | Security Mode | Accès |
-|------|--------|---------------|-------|
+| ------ | -------- | --------------- | ------- |
 | **Vues publiques** | 11 | `SECURITY INVOKER` explicite | `anon`, `authenticated` |
 | **Vues admin** | 7 | Owner `admin_views_owner` | `service_role` uniquement |
 
@@ -548,7 +549,7 @@ submits number             string (JSON-safe)             BigInt(validated.lieu_
 ### 7.1 Authentification & Autorisation
 
 | Mécanisme | Usage | Latence |
-|-----------|-------|---------|
+| ----------- | ------- | --------- |
 | `getClaims()` | Vérification JWT locale (middleware, Server Components) | ~2-5ms |
 | `getUser()` | Données utilisateur complètes (profil) | ~300ms |
 | `requireAdmin()` | Guard dans DAL + Server Actions | ~2-5ms |
@@ -558,7 +559,7 @@ submits number             string (JSON-safe)             BigInt(validated.lieu_
 **4 clients Supabase :**
 
 | Client | Fichier | Usage |
-|--------|---------|-------|
+| -------- | -------- | ------- |
 | Server | `supabase/server.ts` | Server Components, Server Actions (user-scoped) |
 | Client | `supabase/client.ts` | Client Components (browser) |
 | Middleware | `supabase/middleware.ts` | Session refresh dans `proxy.ts` |
@@ -569,7 +570,7 @@ submits number             string (JSON-safe)             BigInt(validated.lieu_
 **3 niveaux d'Error Boundaries :**
 
 | Niveau | Fichier | Scope |
-|--------|---------|-------|
+| -------- | -------- | ------- |
 | Root | `components/error-boundaries/RootErrorBoundary.tsx` | App entière |
 | Page | `components/error-boundaries/PageErrorBoundary.tsx` | Par page |
 | Component | `components/error-boundaries/ComponentErrorBoundary.tsx` | Par composant |
@@ -596,7 +597,7 @@ return { success: true, id: contactId };
 ### 7.3 Monitoring — Sentry Multi-Runtime
 
 | Runtime | Config | Particularités |
-|---------|--------|----------------|
+| -------- | -------- | ---------------- |
 | **Client** | `sentry.client.config.ts` | Supabase integration (tracing + breadcrumbs), Browser Tracing, Session Replay (10% sessions, 100% erreurs), masquage texte + blocage média |
 | **Server** | `sentry.server.config.ts` | `beforeSend` supprime headers sensibles (`authorization`, `cookie`, `x-api-key`) |
 | **Edge** | `sentry.edge.config.ts` | Minimal |
@@ -609,7 +610,7 @@ return { success: true, id: contactId };
 ### 7.4 Validation - Zod partout
 
 | Couche | Validation |
-|--------|-----------|
+| -------- | ----------- |
 | **Env vars** | T3 Env (`lib/env.ts`) — Zod runtime au démarrage |
 | **Form (client)** | UI Schema + `zodResolver` (react-hook-form) |
 | **Server Action** | Transport Schema (string IDs) |
@@ -619,7 +620,7 @@ return { success: true, id: contactId };
 ### 7.5 Configuration Management
 
 | Source | Fichier | Contenu |
-|--------|---------|---------|
+| -------- | -------- | --------- |
 | **T3 Env** | `lib/env.ts` | 14 server + 4 client vars, Zod validated |
 | **Site Config** | `lib/site-config.ts` | SEO, email, server URL, maker info, auth redirects |
 | **Constants** | `lib/constants/hero-slides.ts` | Limites, défauts, animation config, DnD config |
@@ -632,7 +633,7 @@ return { success: true, id: contactId };
 Configurés dans `next.config.ts`, appliqués sur `/:path*` :
 
 | Header | Valeur | Protection |
-|--------|--------|------------|
+| -------- | -------- | ------------ |
 | **Content-Security-Policy** | `default-src 'self'`; script/style/img/connect-src whitelistés | XSS, injection |
 | **Strict-Transport-Security** | `max-age=63072000; includeSubDomains; preload` | Downgrade HTTPS |
 | **X-Frame-Options** | `DENY` | Clickjacking |
@@ -651,7 +652,7 @@ Configurés dans `next.config.ts`, appliqués sur `/:path*` :
 ### 8.1 Communication interne
 
 | Pattern | Usage |
-|---------|-------|
+| -------- | ------- |
 | **Server Actions** | Mutations (POST/PUT/DELETE) depuis le frontend Next.js |
 | **Server Components** | Lectures (GET) avec accès DAL direct |
 | **`router.refresh()`** | Re-fetch Server Component après mutation |
@@ -661,7 +662,7 @@ Configurés dans `next.config.ts`, appliqués sur `/:path*` :
 ### 8.2 Communication externe
 
 | Endpoint | Direction | Protocole |
-|----------|-----------|-----------|
+| -------- | --------- | --------- |
 | Supabase DB | Out | HTTPS (PostgREST) |
 | Supabase Auth | Out | HTTPS (GoTrue) |
 | Supabase Storage | Out | HTTPS (S3-compatible) |
@@ -829,7 +830,7 @@ const onSubmit = async (data: ItemFormValues) => {
 ### 10.4 Clean Code Enforced
 
 | Règle | Limite |
-|-------|--------|
+| ------- | ------- |
 | Lignes par fonction | Max 30 |
 | Paramètres par fonction | Max 5 |
 | Lignes par fichier | Max 300 |
@@ -839,7 +840,7 @@ const onSubmit = async (data: ItemFormValues) => {
 ### 10.5 Naming Conventions
 
 | Type | Convention | Exemple |
-|------|-----------|---------|
+| ------ | ----------- | --------- |
 | Container | `{Feature}Container.tsx` | `TeamManagementContainer.tsx` |
 | View | `{Feature}View.tsx` | `TeamMemberList.tsx` |
 | Form | `{Feature}Form.tsx` | `TeamMemberForm.tsx` |
@@ -860,7 +861,7 @@ const onSubmit = async (data: ItemFormValues) => {
 Exécutés via `pnpm exec tsx scripts/<name>.ts` :
 
 | Catégorie | Exemples | Nombre |
-|-----------|----------|--------|
+| ----------- | ---------- | -------- |
 | **Sécurité / Audit** | `audit-cookie-flags.ts`, `audit-secrets-management.ts`, `check-security-audit.sh`, `test-ssrf-validation.ts` | ~15 |
 | **RLS / Policies** | `check-rls-policies.ts`, `test-rls-cloud.ts`, `test-views-security-*.ts` | ~6 |
 | **DAL / CRUD** | `test-all-dal-functions.ts`, `test-spectacles-crud.ts`, `test-team-server-actions.ts` | ~8 |
@@ -895,7 +896,7 @@ Exécutés via `pnpm exec tsx scripts/<name>.ts` :
 ### 12.1 Environnements
 
 | Env | Database | Build |
-|-----|----------|-------|
+| ----- | ---------- | ------- |
 | **Local** | Supabase CLI (`supabase start`) | `pnpm dev` (Turbopack) |
 | **Production** | Supabase Cloud (PostgreSQL 17.6.1.063) | `pnpm build` |
 
@@ -1140,6 +1141,12 @@ const mediaKitResult = showMediaKit
 **Décision :** Migration avec `middleware.ts` vers `proxy.ts`, `export const dynamic` sur pages Supabase.
 **Conséquences :** Résolution CVE-2025-57822, CVE-2025-64718, Turbopack default.
 
+### ADR-011 : Embla Carousel Gallery (Fév 2026)
+
+**Contexte :** Affichage d'une galerie de photos par spectacle avec carousel interactif (navigation, autoplay, mobile).
+**Décision :** `embla-carousel-react` + `Autoplay` plugin, branching 0/1/2+ images, scale tween `TWEEN_FACTOR_BASE = 0.40`, keyboard scopé au conteneur. Vue SQL dédiée `spectacles_gallery_photos_public` + vue admin avec guard `is_admin()`.
+**Conséquences :** Carousel WCAG 2.2, performance `prefers-reduced-motion` JS-native, helper `buildMediaPublicUrl` centralisé dans `lib/dal/helpers/media-url.ts`.
+
 ---
 
 ## 16. Governance architecturale
@@ -1147,7 +1154,7 @@ const mediaKitResult = showMediaKit
 ### 16.1 Vérification automatisée
 
 | Outil | Scope |
-|-------|-------|
+| ------- | ------- |
 | TypeScript `strict` | Types, nullability, imports |
 | ESLint 9 | Code style, patterns |
 | markdownlint-cli2 | Documentation |
@@ -1220,7 +1227,7 @@ supabase db diff -f <name>         # Generer migration
 ### 17.3 Anti-patterns à éviter
 
 | Anti-pattern | Solution |
-|--------------|----------|
+| -------------- | ---------- |
 | `revalidatePath()` dans DAL | Déplacer dans Server Action |
 | `useState(props)` sans `useEffect` | Ajouter `useEffect(() => setState(props), [props])` |
 | UI schema avec `bigint` | Utiliser `z.number()` pour forms |
@@ -1237,7 +1244,7 @@ supabase db diff -f <name>         # Generer migration
 ## Historique des versions
 
 | Version | Date | Changements majeurs |
-|---------|------|---------------------|
+| --------- | ------ | --------------------- |
 | 4.0 | 2026-02-07 | Réécriture complète : C4 Mermaid diagrams, 17 sections template, Sentry multi-runtime, 87 scripts, security headers, 31 DAL modules, ADR complets, Next.js 16.1.5 |
 | 3.1 | 2026-01-26 | BigInt Pattern Edition |
 | 2.9 | 2026-01-07 | Admin Views Security Hardening (TASK037) |

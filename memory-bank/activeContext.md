@@ -1,8 +1,77 @@
 # Active Context
 
-**Current Focus (2026-02-18)**: ✅ Upload Pipeline Security Hardening + Format Expansion (GIF, SVG, PDF)
+**Current Focus (2026-02-20)**: ✅ Embla Carousel Spectacle Gallery + Security Fix admin views
 
-**Last Major Updates**: ✅ Upload Security Hardening (2026-02-18) + Homepage Filter Fix (2026-02-12) + Agenda Navigation (2026-02-12) + Spectacles Slug Bugfix (2026-02-12)
+**Last Major Updates**: ✅ Embla Carousel Gallery (2026-02-20) + Security Fix admin views (2026-02-20) + Upload Security Hardening (2026-02-18) + Homepage Filter Fix (2026-02-12)
+
+---
+
+## ✅ Embla Carousel Spectacle Gallery + Security Fix admin views (2026-02-20)
+
+### Summary
+
+✅ **FEATURE COMPLÈTE + HOTFIX SÉCURITÉ** — Carousel gallery interactif sur les pages spectacles (Embla + scale tween), gestion admin drag & drop, et correction des guards `is_admin()` manquants sur les vues admin spectacles.
+
+| Composant | Statut | Détails |
+| --------- | ------ | ------- |
+| Vue SQL gallery public | ✅ | `spectacles_gallery_photos_public` (SECURITY INVOKER) |
+| Vue SQL gallery admin | ✅ | `spectacles_gallery_photos_admin` + guard `is_admin()` |
+| Vue SQL landscape admin | ✅ | `spectacles_landscape_photos_admin` + guard `is_admin()` ajouté (hotfix) |
+| Helper `buildMediaPublicUrl` | ✅ | `lib/dal/helpers/media-url.ts` — sync, T3 Env |
+| Schémas Zod gallery | ✅ | `GalleryPhotoDTOSchema`, `GalleryPhotoTransport`, `AddGalleryPhotoInputSchema` |
+| DAL fonctions lecture | ✅ | `fetchSpectacleGalleryPhotos()` + `fetchSpectacleGalleryPhotosAdmin()` |
+| DAL fonctions CRUD | ✅ | `addSpectacleGalleryPhoto`, `deleteSpectacleGalleryPhoto`, `reorderSpectacleGalleryPhotos` |
+| `SpectacleCarousel.tsx` | ✅ | 0/1/2+ branching, scale tween (0.40), autoplay, WCAG, keyboard scoped |
+| `SpectacleDetailView.tsx` | ✅ | Section galerie ajoutée (après awards, avant CTAs finaux) |
+| Page `[slug]/page.tsx` | ✅ | `fetchSpectacleGalleryPhotos` dans `Promise.all` |
+| `SpectacleGalleryManager.tsx` | ✅ | Admin : ajout/suppression/drag-drop reorder (@dnd-kit) |
+| API Route gallery admin | ✅ | `app/api/admin/spectacles/[id]/gallery-photos/route.ts` |
+| Server Actions gallery | ✅ | `addGalleryPhotoAction`, `deleteGalleryPhotoAction`, `reorderGalleryPhotosAction` |
+| Migration sécurité | ✅ | `20260220130000` — applied remote 2026-02-20 |
+
+### Comportement `SpectacleCarousel.tsx`
+
+- **0 images** → rend `null` (section invisible)
+- **1 image** → `<SingleImage>` sans contrôles (pas de flèches/dots)
+- **2+ images** → `<MultiImageCarousel>` complet
+
+**Fonctionnalités** : navigation flèches (44×44px WCAG), dots cliquables, autoplay 5s, swipe tactile, keyboard ArrowLeft/Right scopé au conteneur, `role="region"` + `aria-roledescription="carousel"`, `prefers-reduced-motion` (désactive autoplay + transitions), `priority` image 0.
+
+**Divergences notables** (voir plan v3 D1–D8) :
+
+- `TWEEN_FACTOR_BASE = 0.40` (plan dit 0.28)
+- Slide width : `flex-[0_0_72%]` (pas de valeur dans plan v2)
+- Counter X/Y non implémenté (jugé superflu)
+- `<h2>Galerie</h2>` commenté (décision design)
+- 6 fichiers modifiés (plan disait 5 — `actions.ts` manquait dans le décompte)
+
+### Hotfix sécurité — vues admin spectacles
+
+**Problème** : `spectacles_landscape_photos_admin` dans `41_views_spectacle_photos.sql` avait été créée avant TASK037 sans guard `is_admin()`. La vue `spectacles_gallery_photos_admin` créée par la migration `20260220120000` avait également une définition sans guard. Tout utilisateur `authenticated` pouvait lire les métadonnées admin.
+
+**Correction** : Migration `20260220130000_fix_spectacle_admin_views_security.sql` — recrée les deux vues avec `WHERE (select public.is_admin()) = true` + `REVOKE SELECT from anon` + `GRANT SELECT to authenticated`. Pattern TASK037 strictement appliqué.
+
+### Fichiers Créés (6)
+
+| Fichier | Description |
+| --------- | ------------- |
+| `supabase/schemas/42_views_spectacle_gallery.sql` | Vues SQL public + admin gallery |
+| `supabase/migrations/20260220120000_add_gallery_photos_views.sql` | Migration vues gallery |
+| `lib/dal/helpers/media-url.ts` | Helper `buildMediaPublicUrl` centralisé |
+| `components/features/public-site/spectacles/SpectacleCarousel.tsx` | Composant carousel |
+| `components/features/admin/spectacles/SpectacleGalleryManager.tsx` | Admin gallery UI |
+| `app/api/admin/spectacles/[id]/gallery-photos/route.ts` | API Route admin gallery |
+
+### Fichiers Modifiés (6)
+
+| Fichier | Modification |
+| --------- | ------------- |
+| `lib/dal/helpers/index.ts` | Export `buildMediaPublicUrl` |
+| `lib/schemas/spectacles.ts` | Ajout schemas Zod gallery |
+| `lib/dal/spectacle-photos.ts` | Fonctions fetch/CRUD gallery |
+| `components/features/public-site/spectacles/SpectacleDetailView.tsx` | Section galerie |
+| `app/(marketing)/spectacles/[slug]/page.tsx` | fetch gallery dans Promise.all |
+| `app/(admin)/admin/spectacles/actions.ts` | Server Actions gallery |
 
 ---
 
@@ -13,7 +82,7 @@
 ✅ **SECURITY AUDIT — 3 POINTS CORRIGÉS + FORMATS ÉTENDUS** — Validation upload côté serveur robuste, taille 10MB, sanitisation filename, GIF/SVG/PDF ajoutés.
 
 | Composant | Statut | Détails |
-|-----------|--------|---------|
+| ----------- | -------- | --------- |
 | Magic bytes MIME | ✅ | `verifyFileMime()` — détection réelle, résistante au spoofing |
 | Taille max 10MB | ✅ | Vérification avant lecture bytes (`file.size > MAX_FILE_SIZE`) |
 | Sanitisation filename | ✅ | `sanitizeFilename()` — path traversal + chars spéciaux + 100 chars |
@@ -32,7 +101,7 @@
 
 ### Solutions Implémentées
 
-#### `lib/utils/mime-verify.ts` *(nouveau fichier)*
+#### `lib/utils/mime-verify.ts` **(nouveau fichier)**
 
 ```typescript
 // Détection MIME par magic bytes (64 premiers octets)
@@ -83,7 +152,7 @@ export function isAllowedUploadMimeType(mime: string): mime is AllowedUploadMime
 ### Fichiers Modifiés
 
 | Fichier | Modification |
-|---------|--------------|
+| --------- | -------------- |
 | `lib/utils/mime-verify.ts` | ✅ Nouveau fichier — magic bytes 7 formats |
 | `lib/actions/media-actions.ts` | `validateFile` async, magic bytes, 7 MIME types, 10MB |
 | `lib/dal/media.ts` | `sanitizeFilename()` ajouté, utilisé dans path + BDD |
@@ -110,7 +179,7 @@ export function isAllowedUploadMimeType(mime: string): mime is AllowedUploadMime
 ✅ **CRITICAL FILTER BUGFIX** — Archived spectacles no longer appear in homepage "Prochains Spectacles" section
 
 | Component | Status | Details |
-|-----------|--------|--------|
+| ----------- | -------- | -------- |
 | Bug Identified | ✅ | "La Danse des Ombres" (archived) displayed on homepage |
 | Filter Added | ✅ | `.neq("status", "archived")` added to DAL query |
 | Type Updated | ✅ | `status` field added to `SupabaseShowRow` type |
@@ -121,13 +190,15 @@ export function isAllowedUploadMimeType(mime: string): mime is AllowedUploadMime
 **User Report**: "Pourquoi dans ShowsView le spectacle 'La Danse des Ombres' est affiché alors qu'il fait partie des spectacles archivés ?"
 
 **Investigation Findings**:
+
 - Spectacle has `public = true` AND `status = 'archived'`
 - `SpectaclesContainer.tsx` (spectacles page) correctly filters: `.filter((s) => s.public && s.status !== "archived")`
 - `fetchFeaturedShows()` (homepage DAL) only filtered: `.eq("public", true)` ❌ Missing archive filter!
 
 ### Root Cause Analysis
 
-**Incomplete Filter in Homepage DAL**
+> **Incomplete Filter in Homepage DAL**
+
 ```typescript
 // ❌ BEFORE: Only filtered by public flag
 const { data: shows, error } = await supabase
@@ -148,6 +219,7 @@ const { data: shows, error } = await supabase
 ```
 
 **Why It Happened**:
+
 - `SpectaclesContainer.tsx` was implementing the correct filter at the component level
 - `fetchFeaturedShows()` was missing this filter at the DAL level
 - Result: Archived shows with `public = true` appeared on homepage but not on spectacles page (inconsistent)
@@ -157,11 +229,13 @@ const { data: shows, error } = await supabase
 **File Modified**: `lib/dal/home-shows.ts`
 
 **Changes**:
+
 1. Added `status` field to `SupabaseShowRow` type definition
 2. Added `status` to `.select()` query fields
 3. Added `.neq("status", "archived")` filter to exclude archived spectacles
 
 **Code Changes**:
+
 ```typescript
 // Type update
 type SupabaseShowRow = {
@@ -184,7 +258,7 @@ type SupabaseShowRow = {
 ### Validation Results
 
 | Test Case | Before | After |
-|-----------|--------|-------|
+| ----------- | -------- | ------- |
 | "La Danse des Ombres" on homepage | ❌ Displayed | ✅ Hidden (archived) |
 | Current shows on homepage | ✅ Displayed | ✅ Displayed |
 | Filter consistency homepage vs spectacles page | ❌ Different | ✅ Same logic |
@@ -195,7 +269,7 @@ type SupabaseShowRow = {
 **Homepage "Prochains Spectacles"**: Now matches spectacles page "À l'Affiche" filter
 
 | Filter Criterion | Homepage (ShowsContainer) | Spectacles Page (SpectaclesContainer) |
-|------------------|---------------------------|----------------------------------------|
+| ------------------ | --------------------------- | ---------------------------------------- |
 | Public shows only | ✅ `public = true` | ✅ `public = true` |
 | Exclude archived | ✅ `status != 'archived'` | ✅ `status != 'archived'` |
 | Current shows | ✅ Yes | ✅ Current section |
@@ -232,7 +306,7 @@ lib/dal/home-shows.ts
 ✅ **TWO CRITICAL FIXES + NAVIGATION FEATURES** — Many-to-one Supabase relations corrected, spectacle and event detail links added to agenda
 
 | Component | Status | Details |
-|-----------|--------|--------|
+| ----------- | -------- | ------- |
 | Many-to-one Relations Fix | ✅ | Spectacles and lieux changed from arrays to objects |
 | Spectacle Detail Link | ✅ | Event title links to /spectacles/:slug |
 | Event Detail Button | ✅ | "Détails de l'événement" button links to /agenda/:id |
@@ -244,13 +318,15 @@ lib/dal/home-shows.ts
 **User Report**: "Dans AgendaView, event.title renvoie 'Événement' plutôt que de renvoyer le titre du spectacle lié à l'événement"
 
 **Investigation Findings**:
+
 - Supabase many-to-one relations return **a single object**, not an array
 - Code was treating `spectacles` and `lieux` as arrays: `spectacles?.[0]?.title`
 - This caused `spectacles?.[0]` to always be `undefined` → fallback to "Événement"
 
 ### Root Cause Analysis
 
-**Bug: Array Access on Object Type**
+> **Bug: Array Access on Object Type**
+
 ```typescript
 // ❌ BEFORE: Treated many-to-one as array
 type SupabaseEventRow = {
@@ -276,11 +352,13 @@ venue: row.lieux?.nom ?? "Lieu à venir"         // ✅ Works!
 #### 1. Fixed Many-to-One Relations (`lib/dal/agenda.ts`)
 
 **Type Correction**:
+
 - Changed `spectacles` from array to object type
 - Changed `lieux` from array to object type
 - Added `slug` field to spectacles for navigation
 
 **Mapping Correction**:
+
 - Removed array access `[0]` from all spectacle/lieu references
 - Updated `buildAddress()` to work with object instead of array
 - Added spectacle slug to query: `spectacles (title, slug, image_url)`
@@ -288,6 +366,7 @@ venue: row.lieux?.nom ?? "Lieu à venir"         // ✅ Works!
 #### 2. Added Spectacle Detail Link (`components/features/public-site/agenda/AgendaView.tsx`)
 
 **Title as Link**:
+
 ```tsx
 {event.spectacleSlug ? (
   <Link
@@ -307,6 +386,7 @@ venue: row.lieux?.nom ?? "Lieu à venir"         // ✅ Works!
 #### 3. Added Event Detail Button (`components/features/public-site/agenda/AgendaView.tsx`)
 
 **New Button**:
+
 ```tsx
 <Button variant="outline" asChild>
   <Link href={`/agenda/${event.id}`}>
@@ -321,6 +401,7 @@ venue: row.lieux?.nom ?? "Lieu à venir"         // ✅ Works!
 #### 4. Schema Updates (`lib/schemas/agenda.ts`)
 
 **New Field**:
+
 ```typescript
 export const EventSchema = z.object({
   id: z.number(),
@@ -334,7 +415,7 @@ export const EventSchema = z.object({
 ### Files Modified
 
 | File | Changes |
-|------|--------|
+| ------ | -------- |
 | `lib/dal/agenda.ts` | Type fix (spectacles/lieux), slug fetch, mapping correction |
 | `lib/schemas/agenda.ts` | Added `spectacleSlug` field |
 | `components/features/public-site/agenda/AgendaView.tsx` | Title link, event button, badge type, hero styling |
@@ -343,7 +424,7 @@ export const EventSchema = z.object({
 ### Validation
 
 | Test | Result |
-|------|--------|
+| ------ | -------- |
 | Event title displays spectacle name | ✅ Fixed (was showing "Événement") |
 | Click title navigates to spectacle | ✅ Working |
 | Event detail button present | ✅ Working |
@@ -353,12 +434,14 @@ export const EventSchema = z.object({
 ### Commits
 
 **Commit 1** (`fdcb983`):
+
 ```bash
 fix(dal/agenda): correct many-to-one relation types for spectacles and lieux
 1 file changed, 7 insertions(+), 7 deletions(-)
 ```
 
 **Commit 2** (`a80dbc0`):
+
 ```bash
 feat(agenda): add spectacle detail link and event detail button
 11 files changed, 48 insertions(+), 32 deletions(-)
@@ -386,7 +469,7 @@ feat(agenda): add spectacle detail link and event detail button
 ✅ **TWO CRITICAL BUGS FIXED** in spectacles slug handling — Auto-generation now works when clearing field, manual slugs properly saved
 
 | Bug | Root Cause | Impact | Status |
-|-----|-----------|--------|--------|
+| ----- | ----------- | -------- | -------- |
 | Missing auto-generation on update | `updateSpectacle()` had no slug generation logic unlike `createSpectacle()` | Clearing slug field did not regenerate from title | ✅ Fixed |
 | Manual slug cleaning incomplete | `transformSlugField()` kept empty strings, didn't clean multiple dashes | Manual slugs not normalized properly | ✅ Fixed |
 
@@ -395,13 +478,15 @@ feat(agenda): add spectacle detail link and event detail button
 **User Report**: "Lorsque je modifie un titre de spectacle et que je vide le champ Slug, un nouveau slug n'est pas généré automatiquement. Si j'essaie de le faire manuellement, le nouveau slug n'est pas enregistré."
 
 **Investigation Findings**:
+
 - `createSpectacle()` HAD auto-generation logic: `slug: generateSlug(validatedData.title)` when slug empty
 - `updateSpectacle()` LACKED this logic: passed empty slug directly to database
 - `transformSlugField()` cleaned spaces/special chars but kept empty strings
 
 ### Root Cause Analysis
 
-**Bug 1: No Auto-generation in Update**
+> **Bug 1: No Auto-generation in Update**
+
 ```typescript
 // ❌ BEFORE: No slug handling in updateSpectacle()
 const { id, ...updateData } = validationResult.data;
@@ -413,7 +498,8 @@ const finalUpdateData = prepareUpdateDataWithSlug(updateData, existing);
 const updateResult = await performSpectacleUpdate(id, finalUpdateData);
 ```
 
-**Bug 2: Incomplete Slug Normalization**
+> **Bug 2: Incomplete Slug Normalization**
+
 ```typescript
 // ❌ BEFORE: Multiple dashes and empty results not handled
 cleanData.slug = cleanData.slug
@@ -435,7 +521,7 @@ cleanData.slug = normalized === "" ? undefined : normalized;
 ### Files Modified
 
 | File | Changes |
-|------|---------|
+| ------ | --------- |
 | `lib/dal/spectacles.ts` | Added `prepareUpdateDataWithSlug()` helper (19 lines) |
 | `lib/forms/spectacle-form-helpers.ts` | Enhanced `transformSlugField()` normalization |
 | `components/features/admin/spectacles/SpectacleFormFields.tsx` | Updated description for clarity |
@@ -484,7 +570,7 @@ function transformSlugField(cleanData: Record<string, unknown>) {
 ### Validation
 
 | Test Case | Before | After |
-|-----------|--------|-------|
+| ----------- | -------- | ------- |
 | Clear slug field | ❌ Saved NULL, no generation | ✅ Auto-generated from title |
 | Enter "Mon Slug" | ❌ Not saved | ✅ Saved as "mon-slug" |
 | Enter "Mon--Slug---Test" | ❌ Saved "mon--slug---test" | ✅ Saved as "mon-slug-test" |
@@ -501,7 +587,7 @@ fix(spectacles): auto-generate slug on update when empty + improve manual slug n
 ### Behavior Matrix
 
 | Action | Result |
-|--------|--------|
+| -------- | -------- |
 | Clear slug during edit | Generates slug from current/updated title |
 | Enter manual slug with spaces | Normalized to lowercase with dashes |
 | Enter slug with special chars | Special chars removed, only a-z0-9- kept |
@@ -521,7 +607,7 @@ fix(spectacles): auto-generate slug on update when empty + improve manual slug n
 ✅ **TWO CRITICAL BUGS FIXED** in `audit_trigger()` function — All audit logs now correctly capture `user_id`, `record_id`, and `new_values`
 
 | Bug | Root Cause | Impact | Status |
-|-----|-----------|--------|--------|
+| ----- | ----------- | -------- | -------- |
 | tg_op case | Code compared lowercase ('insert') but PostgreSQL returns UPPERCASE ('INSERT') | `record_id` + `new_values` always NULL | ✅ Fixed |
 | auth.uid() type mismatch | `nullif(auth.uid(), '')::uuid` compares uuid with text '' → crash | `user_id` always NULL ("Système" displayed) | ✅ Fixed |
 
@@ -530,13 +616,15 @@ fix(spectacles): auto-generate slug on update when empty + improve manual slug n
 **User Report**: "Dans AuditLogsView, la colonne Utilisateur affiche 'Système' pour toutes les lignes"
 
 **Investigation Findings**:
+
 - ALL 146+ audit logs had `user_id = NULL`
 - IP address WAS being captured → trigger was firing
 - JWT propagation was CORRECT (not the problem as initially suspected)
 
 ### Root Cause Analysis
 
-**Bug 1: tg_op Case Sensitivity**
+> **Bug 1: tg_op Case Sensitivity**
+
 ```sql
 -- ❌ BEFORE: Never matched (tg_op = 'INSERT' not 'insert')
 if tg_op in ('insert', 'update') then
@@ -546,7 +634,8 @@ if tg_op in ('insert', 'update') then
 if tg_op in ('INSERT', 'UPDATE') then
 ```
 
-**Bug 2: auth.uid() Type Mismatch**
+> **Bug 2: auth.uid() Type Mismatch**
+
 ```sql
 -- ❌ BEFORE: Compares uuid with text, crashes silently
 user_id_uuid := nullif(auth.uid(), '')::uuid;
@@ -560,7 +649,7 @@ user_id_uuid := auth.uid();
 ### Files Modified
 
 | File | Changes |
-|------|---------|
+| ------ | --------- |
 | `supabase/migrations/20260211005525_fix_audit_trigger_tg_op_case.sql` | New migration with both fixes + SECURITY DEFINER header |
 | `supabase/schemas/02b_functions_core.sql` | Declarative schema updated |
 | `supabase/migrations/migrations.md` | Documentation added |
@@ -640,7 +729,7 @@ Systematic conversion of all Zod parsing to async methods when using schemas wit
 #### 6 DAL Functions Corrected
 
 | File | Function | Change |
-|------|----------|--------|
+| ------ | ---------- | -------- |
 | `lib/dal/spectacles.ts` | `validateCreateInput` | `.safeParse()` → `.safeParseAsync()` |
 | `lib/dal/spectacles.ts` | `validateUpdateInput` | `.safeParse()` → `.safeParseAsync()` |
 | `lib/dal/team.ts` | `upsertTeamMember` | `.safeParse()` → `.safeParseAsync()` |
@@ -651,7 +740,7 @@ Systematic conversion of all Zod parsing to async methods when using schemas wit
 #### 11 Server Actions Corrected
 
 | File | Function | Change |
-|------|----------|--------|
+| ------ | ---------- | -------- |
 | `app/(admin)/admin/presse/actions.ts` | `createPressReleaseAction` | `.parse()` → `.parseAsync()` |
 | `app/(admin)/admin/presse/actions.ts` | `updatePressReleaseAction` | `.partial().parse()` → `.partial().parseAsync()` |
 | `app/(admin)/admin/presse/actions.ts` | `createArticleAction` | `.parse()` → `.parseAsync()` |

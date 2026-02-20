@@ -1,762 +1,574 @@
-# Embla Carousel Implementation - Spectacles Multi-Image Gallery
+# Embla Carousel Implementation - Spectacles Gallery
 
-**Date:** 2026-01-31  
-**Status:** READY FOR IMPLEMENTATION  
-**Database Table:** `spectacles_medias` (existing, no migration needed)
-
----
-
-## 📋 Summary
-
-Implementation of Embla Carousel for displaying multiple images per spectacle using the **existing** `spectacles_medias` junction table. This document supersedes the original implementation plan which incorrectly referenced a non-existent `spectacles_media` table.
-
-**Key Updates:**
-- ✅ Uses existing `spectacles_medias` table (confirmed via TypeScript types)
-- ✅ No SQL migration required
-- ✅ Table already has `ordre` column for image ordering
-- ✅ RLS policies already configured
+**Date:** 2026-02-20 (v2) — **Audit implémentation :** 2026-02 (v3)
+**Status:** ✅ IMPLÉMENTÉ — Audit de conformité réalisé post-implémentation
+**Database Table:** `spectacles_medias` (existante, colonne `type` = `'gallery'`)
 
 ---
 
-## 🗂️ Database Schema (Existing)
+## 📋 Résumé
 
-### Table: `spectacles_medias`
+Ajout d'un carousel Embla pour afficher les images de type `gallery` associées à chaque spectacle via la table de jonction `spectacles_medias`. Le carousel s'insère comme une **nouvelle section** dans le composant existant `SpectacleDetailView` (379 lignes), sans remplacer la structure actuelle (info bar, affiche, synopsis, photos paysage, awards, CTAs).
 
-**Location:** Already defined in `supabase/schemas/11_tables_relations.sql`
+---
+
+## ⚠️ Divergences corrigées (v1 → v2)
+
+| # | Problème dans le plan v1 | Correction v2 |
+| --- | --- | --- |
+| 1 | Colonne `type` ignorée dans le schéma SQL | Ajout du filtre `type = 'gallery'` à toutes les requêtes |
+| 2 | Types TS générés obsolètes (manque `type`) | Pré-requis : `supabase gen types typescript` avant implémentation |
+| 3 | Modification de `fetchSpectacleBySlug` | Création d'une fonction séparée `fetchSpectacleGalleryPhotos()` (pattern existant landscape) |
+| 4 | Remplacement complet de `SpectacleDetailView` | Le carousel est une **section ajoutée**, pas un remplacement |
+| 5 | Helper `buildMediaUrl` utilise `process.env` | Utiliser T3 Env (`env.NEXT_PUBLIC_SUPABASE_URL`) — cohérent avec le pattern inline existant |
+| 6 | Pas de vue SQL pour gallery | Création de `spectacles_gallery_photos_public` (miroir du pattern landscape) |
+| 7 | Pas d'admin pour images gallery | Phase 5 : extension `SpectaclePhotoManager` ou composant dédié |
+| 8 | Pas de schéma Zod pour gallery photos | Nouveaux schémas `GalleryPhotoDTOSchema` + `AddGalleryPhotoInputSchema` |
+| 9 | Keyboard handler global (`window`) | Scope au conteneur carousel uniquement (évite conflits avec d'autres composants) |
+
+---
+
+## 🗂️ Database Schema (Existant — AUCUNE migration de table)
+
+### Table: `spectacles_medias` (complète)
+
+**Fichier:** `supabase/schemas/11_tables_relations.sql`
 
 ```sql
--- ✅ EXISTING TABLE - NO CHANGES NEEDED
+-- ✅ TABLE EXISTANTE — 3 types: poster, landscape, gallery
 create table public.spectacles_medias (
   spectacle_id bigint not null references public.spectacles(id) on delete cascade,
-  media_id bigint not null references public.medias(id) on delete cascade,
-  ordre smallint default 0,
-  primary key (spectacle_id, media_id)
+  media_id     bigint not null references public.medias(id) on delete cascade,
+  ordre        smallint default 0,
+  type         text not null default 'gallery',
+  primary key (spectacle_id, media_id),
+  unique (spectacle_id, type, ordre),
+  check (type in ('poster', 'landscape', 'gallery')),
+  check (case when type = 'landscape' then ordre in (0, 1) else true end)
 );
 ```
 
-### TypeScript Types (Confirmed)
+**Points clés :**
 
-```typescript
-// ✅ ALREADY GENERATED in lib/database.types.ts
-spectacles_medias: {
-  Row: {
-    media_id: number
-    ordre: number | null
-    spectacle_id: number
-  }
-  Insert: {
-    media_id: number
-    ordre?: number | null
-    spectacle_id: number
-  }
-  Update: {
-    media_id?: number
-    ordre?: number | null
-    spectacle_id?: number
-  }
-  Relationships: [
-    {
-      foreignKeyName: "spectacles_medias_media_id_fkey"
-      columns: ["media_id"]
-      isOneToOne: false
-      referencedRelation: "medias"
-      referencedColumns: ["id"]
-    },
-    {
-      foreignKeyName: "spectacles_medias_spectacle_id_fkey"
-      columns: ["spectacle_id"]
-      isOneToOne: false
-      referencedRelation: "spectacles"
-      referencedColumns: ["id"]
-    },
-  ]
-}
-```
+- La colonne `type` détermine l'usage : `poster` (affiche), `landscape` (max 2, intercalées dans le texte), `gallery` (carousel illimité)
+- La contrainte `unique (spectacle_id, type, ordre)` empêche les doublons d'ordre par type
+- La contrainte `check` limite landscape à 2 slots (0, 1) mais laisse gallery libre
+- RLS déjà configurée (SELECT public, INSERT/UPDATE/DELETE admin)
 
-### RLS Policies (Existing)
+### ⚠️ Pré-requis : Régénérer les types TypeScript
 
-**File:** `supabase/schemas/11_tables_relations.sql`
+Les types dans `lib/database.types.ts` **ne contiennent pas la colonne `type`**. Avant toute implémentation :
 
-```sql
--- ✅ EXISTING POLICIES - NO CHANGES NEEDED
-alter table public.spectacles_medias enable row level security;
-
-create policy "Spectacle media relations are viewable by everyone"
-on public.spectacles_medias for select
-to anon, authenticated
-using ( true );
-
--- Admin policies for INSERT/UPDATE/DELETE already defined
+```bash
+pnpm dlx supabase gen types typescript --linked > lib/database.types.ts
 ```
 
 ---
 
-## 📦 Phase 1: Installation & Dependencies
+## � Divergences réalité vs plan (v3 — post-implémentation)
 
-### 1.1 Install Embla Carousel
+Audit réalisé après implémentation complète. Voici les écarts entre le plan v2 et le code effectivement livré :
+
+| # | Section | Plan v2 | Réalité implémentée |
+| --- | --- | --- | --- |
+| D1 | Phase 2.4 | `addSpectacleGalleryPhoto(spectacleId: bigint, mediaId: bigint, ordre: number)` | **`(spectacleId: number, mediaId: number, ordre: number)`** — Supabase client accepte `number` directement |
+| D2 | Phase 2.4 | `deleteSpectacleGalleryPhoto(spectacleId: bigint, mediaId: bigint)` | **`(spectacleId: string, mediaId: string)`** — conversion interne via `Number()` (cohérent avec landscape `deleteSpectaclePhoto`) |
+| D3 | Phase 3.1 | Counter X/Y prévu | **Non implémenté** — jugé superflu dans l'UI finale |
+| D4 | Phase 3.1 | Largeur slide non spécifiée | **`flex-[0_0_72%]`** — réglage fin UX post-test |
+| D5 | Phase 3.1 | Scale tween non prévu | **Scale tween Embla ajouté** (`TWEEN_FACTOR_BASE = 0.28`) — effet profondeur sur slides latéraux |
+| D6 | Phase 3.2 | `<h2>Galerie</h2>` affiché | **Heading commenté** : `{/* <h2>Galerie</h2> */}` — décision design, la section se fond dans la page |
+| D7 | Architecture | "Fichiers modifiés (5)" | **6 fichiers modifiés** — `actions.ts` manquait dans le décompte |
+| D8 | Slot SQL | Slot 42 réservé à `42_views_spectacle_gallery.sql` | **Conflit de nommage** : `42_rpc_audit_logs.sql` et `42_views_spectacle_gallery.sql` coexistent tous les deux au slot 42 dans le repo (migration appliquée, conflit cosmétique sans impact runtime) |
+
+---
+
+## �📦 Phase 0 : Pré-requis
+
+### 0.1 Régénérer les types TypeScript
+
+```bash
+pnpm dlx supabase gen types typescript --linked > lib/database.types.ts
+```
+
+Vérifier que `spectacles_medias.Row` contient bien `type: string`.
+
+### 0.2 Installer Embla Carousel
 
 ```bash
 pnpm add embla-carousel-react embla-carousel-autoplay
 ```
 
-**Dependencies:**
+**Dépendances :**
+
 - `embla-carousel-react@^8.5.1`
 - `embla-carousel-autoplay@^8.5.1`
 
-**Estimated time:** 5 minutes
+**Temps estimé :** 10 minutes
 
 ---
 
-## 🔧 Phase 2: DAL Extensions
+## 🗄️ Phase 1 : Vue SQL pour gallery photos publiques
 
-### 2.1 Media URL Helper
+### 1.1 Créer la vue déclarative
 
-**File:** `lib/dal/helpers/media-url.ts` (new file)
+**Fichier:** `supabase/schemas/42_views_spectacle_gallery.sql` (nouveau)
+
+```sql
+-- Vues pour les photos gallery des spectacles
+-- Ordre: 42 - Dépend des tables spectacles, medias, spectacles_medias
+
+-- ===== VUE PUBLIQUE =====
+
+drop view if exists public.spectacles_gallery_photos_public cascade;
+create or replace view public.spectacles_gallery_photos_public
+with (security_invoker=on) as
+select
+  sm.spectacle_id,
+  sm.media_id,
+  sm.ordre,
+  m.storage_path,
+  m.alt_text
+from public.spectacles_medias sm
+inner join public.medias m on sm.media_id = m.id
+inner join public.spectacles s on sm.spectacle_id = s.id
+where sm.type = 'gallery'
+  and s.public = true
+order by sm.spectacle_id, sm.ordre asc;
+
+comment on view public.spectacles_gallery_photos_public is
+  'Photos galerie des spectacles publics (type gallery, ordonnées par ordre croissant)';
+
+-- ===== VUE ADMIN =====
+
+drop view if exists public.spectacles_gallery_photos_admin cascade;
+create or replace view public.spectacles_gallery_photos_admin
+with (security_invoker=on) as
+select
+  sm.spectacle_id,
+  sm.media_id,
+  sm.ordre,
+  sm.type,
+  m.storage_path,
+  m.alt_text,
+  m.mime,
+  m.created_at
+from public.spectacles_medias sm
+inner join public.medias m on sm.media_id = m.id
+where sm.type = 'gallery'
+order by sm.spectacle_id, sm.ordre asc;
+
+comment on view public.spectacles_gallery_photos_admin is
+  'Vue admin pour gestion photos galerie spectacles (inclut métadonnées media)';
+
+-- ===== GRANTS =====
+-- Les GRANT sur spectacles_medias, medias et spectacles existent déjà (41_views)
+```
+
+### 1.2 Générer la migration
+
+```bash
+pnpm dlx supabase stop
+pnpm dlx supabase db diff -f add_gallery_photos_views
+pnpm dlx supabase start
+```
+
+**Temps estimé :** 20 minutes
+
+---
+
+## 🔧 Phase 2 : DAL & Schémas
+
+### 2.1 Helper media URL centralisé
+
+**Fichier:** `lib/dal/helpers/media-url.ts` (nouveau)
+
+- Fonction synchrone `buildMediaPublicUrl(storagePath: string | null): string | null`
+- Utilise `env.NEXT_PUBLIC_SUPABASE_URL` (T3 Env) — pas `process.env` directement
+- Nettoie les leading slashes
+- Exporter depuis `lib/dal/helpers/index.ts`
+
+**Refactoring optionnel (scope séparé) :** Remplacer les 5 implémentations inline dupliquées :
+
+- `components/features/public-site/spectacles/SpectacleDetailView.tsx` L32
+- `components/features/admin/spectacles/SpectaclePhotoManager.tsx` L43
+- `lib/dal/media.ts` L331 (version async, garder comme alternative)
+- `lib/dal/home-partners.ts` L21 (utilise `process.env` direct — non conforme T3 Env)
+- `lib/dal/admin-partners.ts` L16 (idem)
+
+### 2.2 Schémas Zod pour gallery photos
+
+**Fichier:** `lib/schemas/spectacles.ts` (étendre, à la suite des schémas landscape existants)
 
 ```typescript
+// SPECTACLE GALLERY PHOTOS SCHEMAS
+// =============================================================================
+
 /**
- * Build public URL for media storage path
- * @param storagePath - Relative path in medias bucket (e.g., "spectacles/image.jpg")
- * @returns Full public URL or null if path is null/empty
+ * DTO Schema for gallery photos (returned by DAL via view)
  */
-export function buildMediaUrl(storagePath: string | null): string | null {
-  if (!storagePath) return null;
-  
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  if (!supabaseUrl) {
-    console.warn('[buildMediaUrl] NEXT_PUBLIC_SUPABASE_URL not defined');
-    return null;
-  }
-  
-  // Remove leading slash if present
-  const cleanPath = storagePath.startsWith('/') 
-    ? storagePath.slice(1) 
-    : storagePath;
-  
-  return `${supabaseUrl}/storage/v1/object/public/medias/${cleanPath}`;
-}
-```
+export const GalleryPhotoDTOSchema = z.object({
+  spectacle_id: z.coerce.bigint(),
+  media_id: z.coerce.bigint(),
+  ordre: z.number().int().min(0),  // pas de max contrairement à landscape
+  storage_path: z.string(),
+  alt_text: z.string().nullable(),
+});
 
-**Estimated time:** 15 minutes
+export type GalleryPhotoDTO = z.infer<typeof GalleryPhotoDTOSchema>;
 
-### 2.2 Update SpectacleDetailDTO
-
-**File:** `lib/types/spectacle.ts`
-
-```typescript
-// ✅ ADD THIS TYPE
-export interface SpectacleImage {
-  id: number;
-  url: string;
-  alt: string | null;
+/**
+ * Transport Schema for Client Components (bigint→string)
+ */
+export interface GalleryPhotoTransport {
+  spectacle_id: string;
+  media_id: string;
   ordre: number;
+  storage_path: string;
+  alt_text: string | null;
 }
 
-// ✅ UPDATE EXISTING DTO
-export interface SpectacleDetailDTO {
-  // ... existing fields
-  image_url: string | null;
-  
-  // ✅ NEW: Multiple images from spectacles_medias
-  images: SpectacleImage[];
-}
+/**
+ * UI Input Schema for gallery photo actions
+ */
+export const AddGalleryPhotoInputSchema = z.object({
+  spectacle_id: z.number().int().positive(),
+  media_id: z.number().int().positive(),
+  ordre: z.number().int().min(0),
+  type: z.literal("gallery"),
+});
+
+export type AddGalleryPhotoInput = z.infer<typeof AddGalleryPhotoInputSchema>;
 ```
 
-**Estimated time:** 10 minutes
+### 2.3 Fonction DAL dédiée
 
-### 2.3 Extend fetchSpectacleBySlug
+**Fichier:** `lib/dal/spectacle-photos.ts` (étendre — ajouter des fonctions gallery)
 
-**File:** `lib/dal/spectacles.ts`
+Créer une nouvelle fonction `fetchSpectacleGalleryPhotos(spectacleId: bigint)` qui :
 
-```typescript
-import { buildMediaUrl } from './helpers/media-url';
+- Requête la vue `spectacles_gallery_photos_public`
+- Valide avec `GalleryPhotoDTOSchema.safeParse()`
+- Retourne `GalleryPhotoDTO[]` (array vide si erreur — graceful degradation)
+- Wrappée avec `cache()` pour déduplication intra-request
 
-export async function fetchSpectacleBySlug(
-  slug: string
-): Promise<SpectacleDetailDTO | null> {
-  const supabase = await createClient();
-  
-  // ✅ ADD JOIN with spectacles_medias and medias
-  const { data, error } = await supabase
-    .from('spectacles')
-    .select(`
-      *,
-      spectacles_medias (
-        ordre,
-        medias (
-          id,
-          storage_path,
-          alt_text
-        )
-      )
-    `)
-    .eq('slug', slug)
-    .eq('status', 'published')
-    .single();
-  
-  if (error || !data) {
-    console.error('[fetchSpectacleBySlug] Error:', error);
-    return null;
-  }
-  
-  // ✅ MAP spectacles_medias to SpectacleImage[]
-  const images: SpectacleImage[] = (data.spectacles_medias || [])
-    .map((sm: any) => {
-      const media = sm.medias;
-      if (!media) return null;
-      
-      return {
-        id: media.id,
-        url: buildMediaUrl(media.storage_path) || '',
-        alt: media.alt_text,
-        ordre: sm.ordre ?? 0,
-      };
-    })
-    .filter((img): img is SpectacleImage => img !== null && img.url !== '')
-    .sort((a, b) => a.ordre - b.ordre);
-  
-  return {
-    ...data,
-    images,
-  };
-}
-```
+**Pattern identique** à `fetchSpectacleLandscapePhotos` existante (L35-60 du même fichier).
 
-**Key Points:**
-- ✅ Uses existing `spectacles_medias` table
-- ✅ Joins with `medias` to get `storage_path` and `alt_text`
-- ✅ Sorts by `ordre` column (ascending)
-- ✅ Filters out images with invalid URLs
-- ✅ Preserves existing `image_url` field for fallback
+**NE PAS modifier `fetchSpectacleBySlug`** — le pattern du projet est de faire des appels parallèles séparés dans la page Server Component.
 
-**Estimated time:** 30 minutes
+### 2.4 Fonctions DAL admin (CRUD gallery)
+
+**Fichier:** `lib/dal/spectacle-photos.ts` (étendre)
+
+- `fetchSpectacleGalleryPhotosAdmin(spectacleId: bigint)` — vue admin
+- `addSpectacleGalleryPhoto(spectacleId: number, mediaId: number, ordre: number)` — insert `type: 'gallery'` ⚠️ **Implémenté avec `number` (pas `bigint`) — Supabase client l'accepte directement (voir D1)**
+- `deleteSpectacleGalleryPhoto(spectacleId: string, mediaId: string)` — delete avec filtre `type: 'gallery'`, conversion `Number()` interne ⚠️ **Implémenté avec `string` (voir D2)**
+- `reorderSpectacleGalleryPhotos(spectacleId: bigint, orderedMediaIds: bigint[])` — réordonnancement ✅ Conforme
+
+**Temps estimé :** 1 heure
 
 ---
 
-## 🎨 Phase 3: UI Components
+## 🎨 Phase 3 : Composant Carousel (Client Component)
 
-### 3.1 SpectacleCarousel Component
+### 3.1 `SpectacleCarousel.tsx`
 
-**File:** `components/features/public-site/spectacles/SpectacleCarousel.tsx`
+**Fichier:** `components/features/public-site/spectacles/SpectacleCarousel.tsx` (nouveau)
+
+**Props :**
 
 ```typescript
-'use client';
-
-import { useCallback, useEffect, useState } from 'react';
-import useEmblaCarousel from 'embla-carousel-react';
-import Autoplay from 'embla-carousel-autoplay';
-import Image from 'next/image';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
-
-interface SpectacleImage {
-  id: number;
-  url: string;
-  alt: string | null;
-  ordre: number;
-}
-
 interface SpectacleCarouselProps {
-  images: SpectacleImage[];
+  images: Array<{ url: string; alt: string | null }>;
   title: string;
-  autoplayDelay?: number;
-}
-
-export function SpectacleCarousel({
-  images,
-  title,
-  autoplayDelay = 5000,
-}: SpectacleCarouselProps) {
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [canScrollPrev, setCanScrollPrev] = useState(false);
-  const [canScrollNext, setCanScrollNext] = useState(false);
-
-  const [emblaRef, emblaApi] = useEmblaCarousel(
-    { loop: true, align: 'center' },
-    [Autoplay({ delay: autoplayDelay, stopOnInteraction: true })]
-  );
-
-  const scrollPrev = useCallback(() => {
-    if (emblaApi) emblaApi.scrollPrev();
-  }, [emblaApi]);
-
-  const scrollNext = useCallback(() => {
-    if (emblaApi) emblaApi.scrollNext();
-  }, [emblaApi]);
-
-  const scrollTo = useCallback(
-    (index: number) => {
-      if (emblaApi) emblaApi.scrollTo(index);
-    },
-    [emblaApi]
-  );
-
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return;
-    setSelectedIndex(emblaApi.selectedScrollSnap());
-    setCanScrollPrev(emblaApi.canScrollPrev());
-    setCanScrollNext(emblaApi.canScrollNext());
-  }, [emblaApi]);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-    onSelect();
-    emblaApi.on('select', onSelect);
-    emblaApi.on('reInit', onSelect);
-    return () => {
-      emblaApi.off('select', onSelect);
-      emblaApi.off('reInit', onSelect);
-    };
-  }, [emblaApi, onSelect]);
-
-  // ✅ KEYBOARD NAVIGATION
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'ArrowLeft') {
-        event.preventDefault();
-        scrollPrev();
-      } else if (event.key === 'ArrowRight') {
-        event.preventDefault();
-        scrollNext();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [scrollPrev, scrollNext]);
-
-  // ✅ HANDLE 0 IMAGES
-  if (images.length === 0) {
-    return (
-      <div className="flex h-96 items-center justify-center rounded-lg bg-muted">
-        <p className="text-muted-foreground">Aucune image disponible</p>
-      </div>
-    );
-  }
-
-  // ✅ HANDLE 1 IMAGE (no carousel)
-  if (images.length === 1) {
-    return (
-      <div className="relative aspect-[2/3] w-full overflow-hidden rounded-lg">
-        <Image
-          src={images[0].url}
-          alt={images[0].alt || title}
-          fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className="object-cover"
-          priority
-        />
-      </div>
-    );
-  }
-
-  // ✅ CAROUSEL FOR 2+ IMAGES
-  return (
-    <div className="group relative" role="region" aria-roledescription="carousel">
-      {/* Embla Container */}
-      <div className="overflow-hidden" ref={emblaRef}>
-        <div className="flex">
-          {images.map((image, index) => (
-            <div
-              key={image.id}
-              className="min-w-0 flex-[0_0_100%]"
-              role="group"
-              aria-roledescription="slide"
-              aria-label={`${index + 1} sur ${images.length}`}
-            >
-              <div className="relative aspect-[2/3] w-full">
-                <Image
-                  src={image.url}
-                  alt={image.alt || `${title} - Image ${index + 1}`}
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  className="object-cover"
-                  priority={index === 0}
-                  loading={index === 0 ? 'eager' : 'lazy'}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Navigation Buttons */}
-      <button
-        onClick={scrollPrev}
-        disabled={!canScrollPrev}
-        aria-label="Image précédente"
-        className={cn(
-          'absolute left-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-background/80 p-2 opacity-0 shadow-lg backdrop-blur-sm transition-opacity hover:bg-background group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-30',
-          'focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
-        )}
-      >
-        <ChevronLeft className="h-6 w-6" />
-      </button>
-
-      <button
-        onClick={scrollNext}
-        disabled={!canScrollNext}
-        aria-label="Image suivante"
-        className={cn(
-          'absolute right-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-background/80 p-2 opacity-0 shadow-lg backdrop-blur-sm transition-opacity hover:bg-background group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-30',
-          'focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
-        )}
-      >
-        <ChevronRight className="h-6 w-6" />
-      </button>
-
-      {/* Dots Indicators */}
-      <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-2">
-        {images.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => scrollTo(index)}
-            aria-label={`Aller à l'image ${index + 1}`}
-            className={cn(
-              'h-2 w-2 rounded-full transition-all',
-              selectedIndex === index
-                ? 'w-4 bg-primary'
-                : 'bg-background/50 hover:bg-background/80'
-            )}
-          />
-        ))}
-      </div>
-
-      {/* Counter */}
-      <div className="absolute right-4 top-4 z-10 rounded-full bg-background/80 px-3 py-1 text-sm backdrop-blur-sm">
-        {selectedIndex + 1} / {images.length}
-      </div>
-    </div>
-  );
+  autoplayDelay?: number;  // default 5000
 }
 ```
 
-**Features:**
-- ✅ Keyboard navigation (ArrowLeft/ArrowRight)
-- ✅ Swipe gestures (mobile)
-- ✅ Autoplay with stop on interaction
-- ✅ Prev/Next buttons (visible on hover)
-- ✅ Dot indicators
-- ✅ Image counter (X/Y)
-- ✅ Accessibility (ARIA labels, roles)
-- ✅ Single image handling (no carousel UI)
-- ✅ Zero images handling (placeholder)
-- ✅ Next.js Image optimization (priority for first, lazy for rest)
+**Comportement :**
 
-**Estimated time:** 1.5 hours
+- **0 images** → ne rend rien (pas de placeholder — la section n'apparaît tout simplement pas)
+- **1 image** → affichage simple sans UI carousel (pas de flèches, dots, counter)
+- **2+ images** → carousel Embla complet
 
-### 3.2 Update SpectacleDetailView
+**Fonctionnalités :**
 
-**File:** `components/features/public-site/spectacles/SpectacleDetailView.tsx`
+- Navigation flèches (Prev/Next), visibles au hover, 44×44px min (WCAG target size) ✅
+- Dots indicateurs cliquables (44×44px hitbox) ✅
+- ~~Counter X/Y~~ **Non implémenté** — supprimé (voir D3)
+- Autoplay avec arrêt à l'interaction ✅
+- Swipe tactile (mobile) ✅
+- Keyboard : ArrowLeft/ArrowRight **scoped au conteneur** (pas `window`) ✅
+- `role="region"` + `aria-roledescription="carousel"` sur le conteneur ✅
+- Chaque slide : `role="group"` + `aria-roledescription="slide"` + `aria-label` ✅
+- `prefers-reduced-motion` : désactive autoplay ET transitions ✅
+- Next.js `Image` : `priority` pour slide 1, `lazy` pour les suivantes ✅
+- Aspect ratio `16/9` (photos gallery horizontales, pas portrait comme l'affiche) ✅
+- **Scale tween Embla (ajout non prévu)** : `TWEEN_FACTOR_BASE = 0.28` — l'image centrale est à pleine taille, les latérales réduites proportionnellement (voir D5)
+- **Largeur slide** : `flex-[0_0_72%]` — les slides voisins sont partiellement visibles (voir D4)
+
+**Temps estimé :** 1h30
+
+### 3.2 Intégration dans `SpectacleDetailView.tsx`
+
+**Fichier:** `components/features/public-site/spectacles/SpectacleDetailView.tsx` (modifier)
+
+**Stratégie : AJOUT d'une section, pas remplacement.**
+
+Ajouter une nouvelle section "Galerie" **après** le bloc awards et **avant** les CTAs finaux, dans la colonne synopsis (col-span-3). Le carousel ne s'affiche que si `galleryPhotos.length > 0`.
+
+> ⚠️ **Implémenté :** Le heading h2 "Galerie" est **commenté** dans le code livré : `{/* <h2 className="text-2xl font-bold mb-4">Galerie</h2> */}` — décision design post-implémentation (voir D6).
+
+**Nouvelle prop :**
 
 ```typescript
-import { SpectacleCarousel } from './SpectacleCarousel';
-import type { SpectacleDetailDTO } from '@/lib/types/spectacle';
-
 interface SpectacleDetailViewProps {
-  spectacle: SpectacleDetailDTO;
-}
-
-export function SpectacleDetailView({ spectacle }: SpectacleDetailViewProps) {
-  // ✅ FALLBACK LOGIC: images[] → image_url → empty
-  const carouselImages = spectacle.images.length > 0
-    ? spectacle.images
-    : spectacle.image_url
-    ? [
-        {
-          id: 0,
-          url: spectacle.image_url,
-          alt: spectacle.title,
-          ordre: 0,
-        },
-      ]
-    : [];
-
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="grid gap-8 lg:grid-cols-2">
-        {/* Text Section */}
-        <div className="space-y-6">
-          <h1 className="text-4xl font-bold">{spectacle.title}</h1>
-          
-          {spectacle.short_description && (
-            <p className="text-xl text-muted-foreground">
-              {spectacle.short_description}
-            </p>
-          )}
-
-          {spectacle.description && (
-            <div className="prose prose-lg max-w-none">
-              {spectacle.description}
-            </div>
-          )}
-
-          {/* Metadata */}
-          <div className="flex flex-wrap gap-4 text-sm">
-            {spectacle.genre && (
-              <div>
-                <span className="font-semibold">Genre:</span> {spectacle.genre}
-              </div>
-            )}
-            {spectacle.duration_minutes && (
-              <div>
-                <span className="font-semibold">Durée:</span>{' '}
-                {spectacle.duration_minutes} min
-              </div>
-            )}
-            {spectacle.casting && (
-              <div>
-                <span className="font-semibold">Casting:</span>{' '}
-                {spectacle.casting} personnes
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* ✅ CAROUSEL SECTION - Below main section on mobile, right side on desktop */}
-        <div className="order-first lg:order-last">
-          <SpectacleCarousel
-            images={carouselImages}
-            title={spectacle.title}
-            autoplayDelay={5000}
-          />
-        </div>
-      </div>
-    </div>
-  );
+  spectacle: SpectacleDb;                   // inchangé
+  landscapePhotos?: SpectaclePhotoDTO[];    // inchangé
+  galleryPhotos?: GalleryPhotoDTO[];        // ✅ NOUVEAU
+  venue?: { nom: string; ville: string | null } | null;  // inchangé
 }
 ```
 
-**Layout:**
-- ✅ **Mobile (< 1024px):** Carousel ABOVE text section (`order-first`)
-- ✅ **Desktop (≥ 1024px):** Carousel RIGHT of text section (`lg:order-last`)
-- ✅ **Fallback chain:** `images[]` → `image_url` → empty array
+**Placement dans le layout existant :**
 
-**Estimated time:** 30 minutes
+```bash
+Colonne synopsis (md:col-span-3)
+├── CTAs (Réserver, Agenda, Retour)
+├── h1 Titre
+├── short_description
+├── LandscapePhoto 1
+├── description (paragraph 1)
+├── paragraph_2
+├── LandscapePhoto 2
+├── paragraph_3
+├── CTAs (Réserver, Agenda, Retour)
+├── Awards Widget
+├── ✅ NOUVEAU: Galerie Carousel (si galleryPhotos.length > 0)
+│   ├── h2 "Galerie"
+│   └── <SpectacleCarousel />
+```
+
+**Construction des URLs :** Réutiliser `getMediaPublicUrl()` existant (inline L32) pour mapper `storage_path` → URL complète avant de passer au carousel.
+
+**Temps estimé :** 30 minutes
+
+### 3.3 Mise à jour de la page Server Component
+
+**Fichier:** `app/(marketing)/spectacles/[slug]/page.tsx` (modifier)
+
+Ajouter `fetchSpectacleGalleryPhotos` dans le `Promise.all` existant :
+
+```typescript
+// Fetch landscape photos, gallery photos and venue in parallel
+const [landscapePhotos, galleryPhotos, venue] = await Promise.all([
+  fetchSpectacleLandscapePhotos(BigInt(spectacle.id)),
+  fetchSpectacleGalleryPhotos(BigInt(spectacle.id)),
+  fetchSpectacleNextVenue(spectacle.id),
+]);
+
+return (
+  <SpectacleDetailView
+    spectacle={spectacle}
+    landscapePhotos={landscapePhotos}
+    galleryPhotos={galleryPhotos}
+    venue={venue}
+  />
+);
+```
+
+**Temps estimé :** 10 minutes
 
 ---
 
-## 🎨 Phase 4: CSS Styles
+## 🎨 Phase 4 : CSS
 
-### 4.1 Embla Carousel Styles
+### 4.1 Styles Embla (optionnel)
 
-**File:** `app/globals.css` (append)
+Le composant utilise des classes Tailwind inline (pas de classes `.embla__*`). Ajouter uniquement dans `app/globals.css` le support `prefers-reduced-motion` si non couvert par Tailwind :
 
 ```css
-/* ============================================
-   EMBLA CAROUSEL - Spectacles Gallery
-   ============================================ */
-
-.embla {
-  overflow: hidden;
-}
-
-.embla__container {
-  display: flex;
-}
-
-.embla__slide {
-  flex: 0 0 100%;
-  min-width: 0;
-}
-
-/* Smooth image transitions */
-.embla__slide img {
-  transition: transform 0.2s ease-in-out;
-}
-
-.embla__slide:hover img {
-  transform: scale(1.02);
-}
-
-/* Reduced motion support */
+/* Embla Carousel — reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .embla__slide img {
-    transition: none;
-  }
-  
-  .embla__slide:hover img {
-    transform: none;
+  [aria-roledescription="carousel"] img {
+    transition: none !important;
   }
 }
 ```
 
-**Estimated time:** 15 minutes
+> ✅ **Statut Phase 4 :** Le CSS spécifique carousel n'a pas été ajouté dans `globals.css`. Le composant gère `prefers-reduced-motion` directement en JavaScript (`window.matchMedia`). De plus, `globals.css` contient déjà `* { animation-duration: 0.01ms !important }` dans son bloc `prefers-reduced-motion` générique, qui couvre les animations CSS résiduelles. **Phase 4 considérée couverte.**
+
+**Temps estimé :** 5 minutes
 
 ---
 
-## 🧪 Phase 5: Testing
+## 🛠️ Phase 5 : Admin Gallery Management
 
-### 5.1 Manual Test Checklist
+### 5.1 Nouveau composant ou extension
 
-**Test Scenarios:**
+**Option A (recommandée) :** Créer `SpectacleGalleryManager.tsx` séparé
 
-- [ ] **0 images:** Placeholder "Aucune image disponible" displayed
-- [ ] **1 image:** Single image shown without carousel UI
-- [ ] **3+ images:** Full carousel with navigation
-- [ ] **Keyboard navigation:** ArrowLeft/ArrowRight work
-- [ ] **Buttons:** Prev/Next buttons visible on hover
-- [ ] **Dots:** Click dots to jump to image
-- [ ] **Autoplay:** Slides change every 5 seconds
-- [ ] **Autoplay stop:** Stops after user interaction
-- [ ] **Responsive:** Layout works on mobile/tablet/desktop
-- [ ] **Image loading:** First image priority, others lazy
-- [ ] **Accessibility:** Screen reader announces current slide
-- [ ] **Fallback:** Legacy `image_url` used if no `spectacles_medias`
+- Pattern identique à `SpectaclePhotoManager.tsx` (276 lignes)
+- Mais sans limite de 2 slots — liste dynamique avec ajout/suppression/réordonnancement
+- Réutilise `MediaLibraryPicker` et `MediaUploadDialog` existants
+- Utilise `@dnd-kit` pour le drag & drop (déjà installé dans le projet)
 
-### 5.2 Database Verification
+**Option B :** Étendre `SpectaclePhotoManager.tsx` avec un onglet/section "Gallery"
+
+- Risque de dépasser 300 lignes → nécessite split
+
+### 5.2 Server Actions admin
+
+**Fichier:** `app/(admin)/admin/spectacles/actions.ts` (étendre)
+
+Ajouter :
+
+- `addGalleryPhotoAction(input: unknown): Promise<ActionResult>`
+- `deleteGalleryPhotoAction(spectacleId: string, mediaId: string): Promise<ActionResult>`
+- `reorderGalleryPhotosAction(spectacleId: string, orderedMediaIds: string[]): Promise<ActionResult>`
+
+Pattern identique aux actions landscape existantes (`addPhotoAction`, `deletePhotoAction`).
+
+### 5.3 API Route admin (pour fetch client-side)
+
+**Fichier:** `app/api/admin/spectacles/[id]/gallery-photos/route.ts` (nouveau)
+
+Un GET endpoint pour que le `SpectacleGalleryManager` (Client Component) puisse charger les photos gallery. Pattern identique à l'API route landscape existante.
+
+---
+
+## 🧪 Phase 6 : Tests & Vérification
+
+### 6.1 Checklist manuelle
+
+**Public :**
+
+- [ ] 0 images gallery → section "Galerie" masquée
+- [ ] 1 image gallery → affichage simple sans flèches/dots
+- [ ] 3+ images → carousel complet avec navigation
+- [ ] Keyboard : ArrowLeft/Right dans le carousel (sans affecter le reste de la page)
+- [ ] Swipe tactile sur mobile
+- [ ] Autoplay fonctionne puis s'arrête à l'interaction
+- [ ] Photos landscape toujours intercalées dans le texte (pas de régression)
+- [ ] Affiche (image_url) toujours dans la colonne gauche (pas de régression)
+
+**Admin :**
+
+- [ ] Ajout d'images gallery via MediaLibraryPicker
+- [ ] Suppression d'images gallery
+- [ ] Réordonnancement par drag & drop
+- [ ] Les photos landscape existantes ne sont pas affectées
+
+**Accessibilité :**
+
+- [ ] Screen reader annonce "carousel" et "slide X sur Y"
+- [ ] Boutons 44×44px minimum
+- [ ] `prefers-reduced-motion` désactive les animations
+- [ ] Contraste des overlays suffisant (dots, counter, boutons)
+
+### 6.2 Requête SQL de vérification
 
 ```sql
--- ✅ Verify spectacles_medias data
-SELECT 
-  s.id,
+-- Vérifier les photos gallery d'un spectacle
+select
   s.slug,
   s.title,
-  COUNT(sm.media_id) as image_count,
-  ARRAY_AGG(m.storage_path ORDER BY sm.ordre) as image_paths
-FROM spectacles s
-LEFT JOIN spectacles_medias sm ON sm.spectacle_id = s.id
-LEFT JOIN medias m ON m.id = sm.media_id
-WHERE s.slug = 'le-petit-prince'  -- Replace with your test spectacle
-GROUP BY s.id, s.slug, s.title;
+  sm.type,
+  sm.ordre,
+  m.storage_path,
+  m.alt_text
+from public.spectacles s
+join public.spectacles_medias sm on sm.spectacle_id = s.id
+join public.medias m on sm.media_id = m.id
+where sm.type = 'gallery'
+order by s.slug, sm.ordre;
 ```
 
-**Expected output:**
-```
-id | slug           | title         | image_count | image_paths
----+----------------+---------------+-------------+---------------------------
-42 | le-petit-prince| Le Petit Prince| 3          | {spectacles/img1.jpg, ...}
+### 6.3 Build & lint
+
+```bash
+pnpm lint
+pnpm build
 ```
 
-**Estimated time:** 1 hour
+**Temps estimé :** 1 heure
 
 ---
 
-## 📊 Summary
+## 📊 Estimation totale
 
-### Time Estimation
-
-| Phase | Duration | Status |
-|-------|----------|--------|
-| Phase 1: Installation | 5 min | ⏳ Pending |
-| Phase 2: DAL Extensions | 55 min | ⏳ Pending |
-| Phase 3: UI Components | 2 hours | ⏳ Pending |
-| Phase 4: CSS Styles | 15 min | ⏳ Pending |
-| Phase 5: Testing | 1 hour | ⏳ Pending |
-| **Total** | **~4 hours** | |
-
-### Architecture Benefits
-
-**✅ No Database Migration Required**
-- Uses existing `spectacles_medias` table
-- RLS policies already configured
-- TypeScript types already generated
-
-**✅ Backward Compatible**
-- Preserves existing `spectacle.image_url` field
-- Fallback chain: `images[]` → `image_url` → placeholder
-- Existing spectacles without `spectacles_medias` continue to work
-
-**✅ Performance Optimized**
-- Next.js Image component (automatic optimization)
-- Priority loading for first image
-- Lazy loading for subsequent images
-- Responsive `sizes` attribute
-
-**✅ Accessibility First**
-- Keyboard navigation (ArrowLeft/Right)
-- ARIA labels and roles
-- Screen reader support
-- Reduced motion support
-
-**✅ User Experience**
-- Autoplay with stop on interaction
-- Swipe gestures (mobile)
-- Hover-to-show buttons (desktop)
-- Visual indicators (dots + counter)
+| Phase | Durée | Description |
+| ------- | ------- | ------------- |
+| Phase 0 | 10 min | Pré-requis (types TS + install Embla) |
+| Phase 1 | 20 min | Vue SQL gallery + migration |
+| Phase 2 | 1h | DAL + Schémas Zod + helper URL |
+| Phase 3 | 2h10 | Carousel + intégration SpectacleDetailView + page |
+| Phase 4 | 5 min | CSS reduced motion |
+| Phase 5 | 2h | Admin gallery management |
+| Phase 6 | 1h | Tests & vérification |
+| **Total** | **~6h30** | |
 
 ---
 
-## 🚀 Deployment Checklist
+## 🏗️ Architecture : fichiers créés / modifiés
 
-### Before Deployment
+### Fichiers créés (6)
 
-- [ ] Verify `spectacles_medias` table exists in production
-- [ ] Confirm RLS policies are active
-- [ ] Test with real production data
-- [ ] Validate TypeScript compilation (`pnpm tsc --noEmit`)
-- [ ] Run build (`pnpm build`)
+| Fichier | Description |
+| --------- | ------------- |
+| `supabase/schemas/42_views_spectacle_gallery.sql` | Vues SQL public + admin |
+| `supabase/migrations/YYYYMMDDHHMMSS_add_gallery_photos_views.sql` | Migration auto-générée |
+| `lib/dal/helpers/media-url.ts` | Helper URL centralisé (T3 Env) |
+| `components/features/public-site/spectacles/SpectacleCarousel.tsx` | Composant carousel |
+| `components/features/admin/spectacles/SpectacleGalleryManager.tsx` | Admin gallery UI |
+| `app/api/admin/spectacles/[id]/gallery-photos/route.ts` | API route admin gallery |
 
-### After Deployment
+### Fichiers modifiés (6) ⚠️ **Le plan disait 5 — actions.ts manquait dans le décompte (voir D7)**
 
-- [ ] Monitor image loading performance
-- [ ] Verify autoplay works correctly
-- [ ] Test keyboard navigation on production
-- [ ] Check mobile swipe gestures
-- [ ] Validate accessibility with screen reader
-- [ ] Confirm fallback to `image_url` works
-
----
-
-## 📝 Migration from Legacy `image_url`
-
-If you want to migrate existing spectacles from single `image_url` to multi-image `spectacles_medias`:
-
-### Step 1: Create Media Records
-
-```sql
--- Insert existing image_url as media record
-INSERT INTO medias (storage_path, filename, mime, alt_text, created_at)
-SELECT 
-  'spectacles/' || slug || '.jpg',  -- Adjust based on actual storage
-  title || '.jpg',
-  'image/jpeg',
-  title,
-  NOW()
-FROM spectacles
-WHERE image_url IS NOT NULL
-  AND image_url != ''
-  AND NOT EXISTS (
-    SELECT 1 FROM spectacles_medias sm WHERE sm.spectacle_id = spectacles.id
-  );
-```
-
-### Step 2: Link to Spectacles
-
-```sql
--- Create spectacles_medias entries
-INSERT INTO spectacles_medias (spectacle_id, media_id, ordre)
-SELECT 
-  s.id,
-  m.id,
-  0  -- First image
-FROM spectacles s
-JOIN medias m ON m.alt_text = s.title  -- Adjust join condition
-WHERE s.image_url IS NOT NULL
-  AND s.image_url != ''
-  AND NOT EXISTS (
-    SELECT 1 FROM spectacles_medias sm WHERE sm.spectacle_id = s.id
-  );
-```
-
-**⚠️ Note:** Adjust SQL based on your actual storage paths and linking logic.
+| Fichier | Modification |
+| --------- | ------------- |
+| `lib/dal/helpers/index.ts` | Export `buildMediaPublicUrl` ✅ |
+| `lib/schemas/spectacles.ts` | Ajout `GalleryPhotoDTOSchema`, `GalleryPhotoTransport`, `AddGalleryPhotoInputSchema` ✅ |
+| `lib/dal/spectacle-photos.ts` | Ajout `fetchSpectacleGalleryPhotos`, `addSpectacleGalleryPhoto`, etc. ✅ |
+| `components/features/public-site/spectacles/SpectacleDetailView.tsx` | Ajout section Galerie ✅ |
+| `app/(marketing)/spectacles/[slug]/page.tsx` | Ajout fetch gallery dans Promise.all ✅ |
+| `app/(admin)/admin/spectacles/actions.ts` | Ajout gallery Server Actions ✅ |
 
 ---
 
-## 🔗 References
+## 📝 Décisions d'architecture
 
-### Documentation
+| Décision | Choix | Raison |
+| ---------- | ------- | -------- |
+| Modifier `fetchSpectacleBySlug` ? | **NON** | Le pattern existant sépare les fetches (parallel dans la page). Modifier casserait tous les appelants. |
+| Vue SQL ou join direct ? | **Vue SQL** | Cohérence avec le pattern landscape (`spectacles_landscape_photos_public`). Plus propre et réutilisable. |
+| Remplacer `SpectacleDetailView` ? | **NON** | Le composant actuel (379 lignes) a un layout riche. Le carousel est une section ajoutée. |
+| Aspect ratio carousel ? | **16/9** | Les photos gallery sont horizontales (contrairement à l'affiche en 2/3 portrait). |
+| Autoplay ? | **Oui, avec stop** | Standard UX, mais désactivé en `prefers-reduced-motion` (WCAG). |
+| Scope keyboard events ? | **Conteneur** | Évite les conflits avec d'autres composants/navigation. |
+| Admin : composant séparé ou extension ? | **Composant séparé** | `SpectaclePhotoManager` est déjà 276 lignes. Le fusionner dépasserait 300 lignes (Clean Code). |
+| Helper media URL : sync ou async ? | **Sync** | 4/5 implémentations existantes sont sync. La version async de `lib/dal/media.ts` reste disponible. |
+
+---
+
+## 🔗 Références projet
+
+| Fichier | Rôle |
+| --------- | ------ |
+| `supabase/schemas/11_tables_relations.sql` | Table `spectacles_medias` (schema source of truth) |
+| `supabase/schemas/41_views_spectacle_photos.sql` | Vues landscape (pattern à suivre) |
+| `lib/dal/spectacle-photos.ts` | DAL landscape (pattern à reproduire) |
+| `lib/schemas/spectacles.ts` | Schémas Zod existants (landscape + gallery) |
+| `components/features/public-site/spectacles/SpectacleDetailView.tsx` | Composant à étendre |
+| `components/features/admin/spectacles/SpectaclePhotoManager.tsx` | Admin landscape (pattern) |
+| `app/(marketing)/spectacles/[slug]/page.tsx` | Page Server Component |
+
+### Documentation externe
+
 - [Embla Carousel Documentation](https://www.embla-carousel.com/)
 - [Next.js Image Component](https://nextjs.org/docs/app/api-reference/components/image)
-- [WCAG 2.1 Carousel Guidelines](https://www.w3.org/WAI/tutorials/carousels/)
-
-### Project Files
-- Database Schema: `supabase/schemas/11_tables_relations.sql`
-- TypeScript Types: `lib/database.types.ts`
-- Existing Component: `components/features/public-site/spectacles/SpectacleDetailView.tsx`
+- [WCAG 2.1 Carousel Pattern](https://www.w3.org/WAI/tutorials/carousels/)
 
 ---
 
-**Last Updated:** 2026-01-31  
-**Author:** AI Assistant  
-**Status:** Ready for Implementation ✅
+**Mis à jour :** 2026-02-20 (v2) → 2026-02 (v3 — audit post-implémentation)
+**Statut :** ✅ IMPLÉMENTÉ — Toutes les phases livrées (voir divergences D1–D8)

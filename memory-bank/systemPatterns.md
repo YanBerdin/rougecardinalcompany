@@ -1,6 +1,6 @@
 # System Patterns
 
-**Last Updated**: 2026-01-26
+**Last Updated**: 2026-02-20
 
 ## Database Infrastructure
 
@@ -24,6 +24,8 @@
 - **ImageFieldGroup Pattern (Dec 2025)**: Composant réutilisable pour champs image avec validation SSRF intégrée.
 - **Upload Générique Pattern (Dec 2025)**: `uploadMediaImage(formData, folder)` configurable par entité.
 - **T3 Env Pattern (Dec 2025)**: Variables d'environnement type-safe avec validation Zod au démarrage via `lib/env.ts`.
+- **Embla Carousel Pattern (Feb 2026)**: Carousel galerie spectacle avec branching 0/1/2+, scale tween, autoplay, WCAG (44px targets, `prefers-reduced-motion`).
+- **`buildMediaPublicUrl` Helper Pattern (Feb 2026)**: Helper sync centralisé dans `lib/dal/helpers/media-url.ts` pour construire les URLs publiques Supabase Storage (T3 Env, évite les doublons).
 - **Sécurité**: combinaison GRANT (table-level) + RLS (policies) requise — ne pas considérer RLS comme substitut au GRANT.
 - **Migrations**: `supabase/migrations/` est la source de vérité pour les modifications appliquées en base; `supabase/schemas/` sert de documentation/declarative reference.
 - **Tests & CI**: vérifier explicitement que les roles `anon` et `authenticated` peuvent accéder aux DTO nécessaires (tests d'intégration DAL).
@@ -456,6 +458,99 @@ revoke select on medias_admin from authenticated;
 - **Documentation** : `doc/ADMIN-VIEWS-SECURITY-HARDENING-SUMMARY.md`
 - **Plan** : `.github/prompts/plan-adminViewsSecurityHardening.prompt.md`
 - **TASK** : `memory-bank/tasks/TASK037-admin-views-security-hardening.md`
+
+---
+
+### Embla Carousel Pattern (Feb 2026)
+
+**Pattern de carousel galerie** pour les pages spectacles — affichage conditionnel selon le nombre d'images, scale tween Embla, accessibilité WCAG 2.2.
+
+#### Architecture de branchement (0/1/2+ images)
+
+```typescript
+// SpectacleCarousel.tsx — branching logique de rendu
+export function SpectacleCarousel({ images, title }: SpectacleCarouselProps) {
+  if (images.length === 0) return null;                   // 0 → invisible
+  if (images.length === 1) return <SingleImage />;        // 1 → simple, pas de contrôles
+  return <MultiImageCarousel />;                          // 2+ → carousel complet
+}
+```
+
+#### Paramètres techniques
+
+| Paramètre | Valeur | Description |
+| ----------- | -------- | ------------- |
+| `TWEEN_FACTOR_BASE` | `0.40` | Scale des slides latéraux |
+| Slide width | `flex-[0_0_72%]` | Slides voisins partiellement visibles |
+| Autoplay delay | `5000ms` | Default, stop on interaction |
+| Nav buttons | `h-11 w-11` (44px) | WCAG 2.2 target size |
+| Aspect ratio | `16/9` | Photos gallery horizontales |
+
+#### Accessibilité WCAG 2.2
+
+- `role="region"` + `aria-roledescription="carousel"` sur le conteneur
+- Chaque slide : `role="group"` + `aria-roledescription="slide"` + `aria-label`
+- Keyboard : ArrowLeft/Right **scopé au conteneur** (pas `window`)
+- `prefers-reduced-motion` : désactive autoplay ET transitions (JS `window.matchMedia`)
+- `priority` image 0, `lazy` images suivantes (Next.js Image)
+- Boutons de navigation : 44×44px minimum (WCAG 2.2 target size)
+
+#### Intégration dans la page spectacle
+
+```typescript
+// app/(marketing)/spectacles/[slug]/page.tsx
+const [landscapePhotos, galleryPhotos, venue] = await Promise.all([
+  fetchSpectacleLandscapePhotos(BigInt(spectacle.id)),
+  fetchSpectacleGalleryPhotos(BigInt(spectacle.id)),  // ← NOUVEAU
+  fetchSpectacleNextVenue(spectacle.id),
+]);
+```
+
+**Règle** : `fetchSpectacleBySlug` n'est JAMAIS modifié pour ajouter des fetches — pattern parallèle séparé dans la page.
+
+#### Vue SQL admin — pattern is_admin()
+
+```sql
+-- spectacles_gallery_photos_admin (Security INVOKER + guard explicite)
+create view public.spectacles_gallery_photos_admin
+as
+select ... from public.spectacles_medias sm
+join public.medias m on sm.media_id = m.id
+where sm.type = 'gallery'
+  and (select public.is_admin()) = true;  -- ← OBLIGATOIRE pattern TASK037
+
+grant select on public.spectacles_gallery_photos_admin to authenticated;
+revoke select on public.spectacles_gallery_photos_admin from anon;
+```
+
+#### Fichiers de référence
+
+- `components/features/public-site/spectacles/SpectacleCarousel.tsx` (389 lignes)
+- `lib/dal/spectacle-photos.ts` — `fetchSpectacleGalleryPhotos`, fonctions CRUD
+- `lib/dal/helpers/media-url.ts` — `buildMediaPublicUrl`
+- `supabase/schemas/42_views_spectacle_gallery.sql`
+- Plan : `.github/prompts/plan-embla_caroussel_implementation.md`
+
+---
+
+### `buildMediaPublicUrl` Helper Pattern (Feb 2026)
+
+**Helper centralisé sync** pour construire les URLs publiques Supabase Storage sans duplication.
+
+```typescript
+// lib/dal/helpers/media-url.ts
+import { env } from "@/lib/env";
+
+/**
+ * Construit l'URL publique d'un fichier Supabase Storage.
+ * Sync (4/5 usages dans le projet sont sync).
+ */
+export function buildMediaPublicUrl(storagePath: string): string {
+  return `${env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/media/${storagePath}`;
+}
+```
+
+**Règle** : Utiliser `buildMediaPublicUrl` (sync) pour les cas habituels. La version async `getMediaPublicUrl()` dans `lib/dal/media.ts` reste disponible pour les cas nécessitant l'URL signée.
 
 ---
 

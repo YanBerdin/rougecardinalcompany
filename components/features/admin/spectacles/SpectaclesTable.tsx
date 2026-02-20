@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, Pencil, Trash2, Calendar, Clock, Tag } from "lucide-react";
+import { Eye, Images, Pencil, Trash2, Calendar, Clock, Tag } from "lucide-react";
 import type { SpectacleSummary } from "@/lib/schemas/spectacles";
 import {
   formatSpectacleDate,
@@ -26,15 +26,9 @@ interface SpectaclesTableProps {
   onView: (id: number) => void;
   onEdit: (id: number) => void;
   onDelete: (id: number) => void;
+  onGallery: (id: number) => void;
   sortState: SpectacleSortState | null;
   onSort: (field: SortField) => void;
-}
-
-interface SpectaclesTableProps {
-  spectacles: SpectacleSummary[];
-  onView: (id: number) => void;
-  onEdit: (id: number) => void;
-  onDelete: (id: number) => void;
 }
 
 export default function SpectaclesTable({
@@ -42,6 +36,7 @@ export default function SpectaclesTable({
   onView,
   onEdit,
   onDelete,
+  onGallery,
   sortState,
   onSort,
 }: SpectaclesTableProps) {
@@ -91,21 +86,30 @@ export default function SpectaclesTable({
             </div>
 
             {/* Footer: Actions */}
-            <div className="flex items-center justify-end gap-2 pt-2 border-t mt-2">
+            <div className="flex flex-col items-stretch gap-2 pt-2 border-t mt-2">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => onView(spectacle.id)}
-                className="h-10 min-w-[56px] px-3"
+                className="h-10 w-full px-3"
                 aria-label={`Voir ${spectacle.title}`}
               >
                 <Eye className="h-5 w-5 mr-2" /> Détails
               </Button>
               <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onGallery(spectacle.id)}
+                className="h-10 w-full px-3"
+                aria-label={`Gérer la galerie de ${spectacle.title}`}
+              >
+                <Images className="h-5 w-5 mr-2" /> Galerie
+              </Button>
+              <Button
                 variant="secondary"
                 size="sm"
                 onClick={() => onEdit(spectacle.id)}
-                className="h-10 min-w-[56px] px-3"
+                className="h-10 w-full px-3"
                 aria-label={`Éditer ${spectacle.title}`}
               >
                 <Pencil className="h-5 w-5 mr-2" /> Éditer
@@ -114,7 +118,7 @@ export default function SpectaclesTable({
                 variant="destructive"
                 size="sm"
                 onClick={() => onDelete(spectacle.id)}
-                className="h-10 min-w-[56px] px-3"
+                className="h-10 w-full px-3"
                 aria-label={`Supprimer ${spectacle.title}`}
               >
                 <Trash2 className="h-5 w-5 mr-2" /> Supprimer
@@ -175,7 +179,7 @@ export default function SpectaclesTable({
                   onSort={onSort}
                 />
               </TableHead>
-              <TableHead className=" w-[18%]">
+              <TableHead className="w-[18%]">
                 <SortableHeader
                   field="public"
                   label="Visibilité"
@@ -211,7 +215,7 @@ export default function SpectaclesTable({
                 <TableCell className="hidden xl:table-cell">
                   {formatSpectacleDate(spectacle.premiere)}
                 </TableCell>
-                <TableCell className="">
+                <TableCell>
                   {getVisibilityBadge(spectacle.public)}
                 </TableCell>
                 <TableCell className="text-right">
@@ -225,6 +229,16 @@ export default function SpectaclesTable({
                       aria-label={`Voir ${spectacle.title}`}
                     >
                       <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onGallery(spectacle.id)}
+                      title="Gérer la galerie"
+                      className="h-8 w-8 sm:h-9 sm:w-9"
+                      aria-label={`Gérer la galerie de ${spectacle.title}`}
+                    >
+                      <Images className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="ghost"

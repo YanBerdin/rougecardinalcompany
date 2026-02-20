@@ -3,6 +3,7 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { requireAdmin } from "@/lib/auth/is-admin";
 import {
     createSpectacle,
     updateSpectacle,
@@ -11,8 +12,14 @@ import {
 import {
     addSpectaclePhoto,
     deleteSpectaclePhoto,
+    addSpectacleGalleryPhoto,
+    deleteSpectacleGalleryPhoto,
+    reorderSpectacleGalleryPhotos,
 } from "@/lib/dal/spectacle-photos";
-import { AddPhotoInputSchema } from "@/lib/schemas/spectacles";
+import {
+    AddPhotoInputSchema,
+    AddGalleryPhotoInputSchema,
+} from "@/lib/schemas/spectacles";
 import type {
     CreateSpectacleInput,
     UpdateSpectacleInput,
@@ -223,6 +230,127 @@ export async function deletePhotoAction(
         revalidatePath("/spectacles/[slug]", "page");
 
         return { success: true }; // ✅ NO data (prevents BigInt serialization)
+    } catch (error) {
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : "Unknown error",
+        };
+    }
+}
+
+// ============================================================================
+// Gallery Photo Actions
+// ============================================================================
+
+/**
+ * Add a gallery photo to a spectacle
+ *
+ * @param input - Gallery photo data (spectacle_id, media_id, ordre, type)
+ * @returns ActionResult indicating success or failure
+ */
+export async function addGalleryPhotoAction(
+    input: unknown
+): Promise<ActionResult> {
+    try {
+        const validated = AddGalleryPhotoInputSchema.parse(input);
+
+        const result = await addSpectacleGalleryPhoto(
+            validated.spectacle_id,
+            validated.media_id,
+            validated.ordre
+        );
+
+        if (!result.success) {
+            return {
+                success: false,
+                error: result.error ?? "Failed to add gallery photo",
+            };
+        }
+
+        revalidatePath("/admin/spectacles");
+        revalidatePath("/spectacles/[slug]", "page");
+
+        return { success: true };
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            return {
+                success: false,
+                error: "Validation failed: " + error.issues[0]?.message,
+            };
+        }
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : "Unknown error",
+        };
+    }
+}
+
+/**
+ * Delete a gallery photo from a spectacle
+ *
+ * @param spectacleId - Spectacle ID (string for form compatibility)
+ * @param mediaId - Media ID (string for form compatibility)
+ * @returns ActionResult indicating success or failure
+ */
+export async function deleteGalleryPhotoAction(
+    spectacleId: string,
+    mediaId: string
+): Promise<ActionResult> {
+    try {
+        await requireAdmin(); // defense-in-depth: vérifier auth au niveau action ET DAL
+        const result = await deleteSpectacleGalleryPhoto(
+            spectacleId,
+            mediaId
+        );
+
+        if (!result.success) {
+            return {
+                success: false,
+                error: result.error ?? "Failed to delete gallery photo",
+            };
+        }
+
+        revalidatePath("/admin/spectacles");
+        revalidatePath("/spectacles/[slug]", "page");
+
+        return { success: true };
+    } catch (error) {
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : "Unknown error",
+        };
+    }
+}
+
+/**
+ * Reorder gallery photos for a spectacle
+ *
+ * @param spectacleId - Spectacle ID (string)
+ * @param orderedMediaIds - Media IDs in desired display order (string[])
+ * @returns ActionResult indicating success or failure
+ */
+export async function reorderGalleryPhotosAction(
+    spectacleId: string,
+    orderedMediaIds: string[]
+): Promise<ActionResult> {
+    try {
+        await requireAdmin(); // defense-in-depth: vérifier auth au niveau action ET DAL
+        const result = await reorderSpectacleGalleryPhotos(
+            BigInt(spectacleId),
+            orderedMediaIds.map((id) => BigInt(id))
+        );
+
+        if (!result.success) {
+            return {
+                success: false,
+                error: result.error ?? "Failed to reorder gallery photos",
+            };
+        }
+
+        revalidatePath("/admin/spectacles");
+        revalidatePath("/spectacles/[slug]", "page");
+
+        return { success: true };
     } catch (error) {
         return {
             success: false,

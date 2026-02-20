@@ -208,3 +208,46 @@ export const PhotoFormSchema = z.object({
 });
 
 export type PhotoFormValues = z.infer<typeof PhotoFormSchema>;
+
+// =============================================================================
+// SPECTACLE GALLERY PHOTOS SCHEMAS
+// =============================================================================
+
+/**
+ * DTO Schema for gallery photos (returned by DAL via view)
+ * No max order constraint — gallery supports unlimited photos
+ */
+export const GalleryPhotoDTOSchema = z.object({
+  spectacle_id: z.coerce.bigint(),
+  media_id: z.coerce.bigint(),
+  ordre: z.number().int().min(0),
+  storage_path: z.string(),
+  alt_text: z.string().nullable(),
+});
+
+export type GalleryPhotoDTO = z.infer<typeof GalleryPhotoDTOSchema>;
+
+/**
+ * Transport Schema for Client Components (bigint→string)
+ * Used when passing gallery photos as props from Server to Client Components
+ */
+export interface GalleryPhotoTransport {
+  spectacle_id: string;  // bigint→string
+  media_id: string;      // bigint→string
+  ordre: number;
+  storage_path: string;
+  alt_text: string | null;
+}
+
+/**
+ * UI Input Schema for adding a gallery photo (number for forms)
+ * Server Action converts to Number before DAL call
+ */
+export const AddGalleryPhotoInputSchema = z.object({
+  spectacle_id: z.number().int().positive(),
+  media_id: z.number().int().positive(),
+  ordre: z.number().int().min(0),
+  type: z.literal("gallery"),
+});
+
+export type AddGalleryPhotoInput = z.infer<typeof AddGalleryPhotoInputSchema>;

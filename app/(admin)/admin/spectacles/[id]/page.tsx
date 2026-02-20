@@ -9,6 +9,7 @@ import { fetchSpectacleLandscapePhotosAdmin } from "@/lib/dal/spectacle-photos";
 import { translateStatus } from "@/lib/i18n/status";
 import { env } from "@/lib/env";
 import Image from "next/image";
+import { SpectacleGalleryManager } from "@/components/features/admin/spectacles/SpectacleGalleryManager";
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -66,24 +67,23 @@ export default async function SpectacleDetailPage({ params }: Props) {
 
   return (
     <div className="space-y-6 bg-card p-8">
-      <div className="flex items-center justify-between">
+      <div className="flex max-sm:flex-col items-start justify-between gap-6">
         <div className="flex flex-col items-start gap-4">
-            <h1 className="text-3xl font-bold">{spectacle.title}</h1>
-            <p className="text-muted-foreground mt-1">{spectacle.slug}</p>
-
+          <h1 className="text-2xl md:text-3xl font-bold">{spectacle.title}</h1>
+          <p className="text-muted-foreground mt-1">Slug : {spectacle.slug}</p>
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="flex items-center gap-2 shrink-0">
           <Link href="/admin/spectacles">
             <Button variant="outline" size="default" className="gap-2" title="Retour">
               <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">Retour</span>
+              Retour
             </Button>
           </Link>
-
           <Link href={`/admin/spectacles/${spectacle.id}/edit`}>
             <Button variant="default" size="default" className="gap-2" title="Éditer">
               <Pencil className="h-4 w-4" />
-              <span className="hidden sm:inline">Éditer</span>
+              Éditer
             </Button>
           </Link>
         </div>
@@ -96,7 +96,7 @@ export default async function SpectacleDetailPage({ params }: Props) {
             {spectacle.public ? "Public" : "Privé"}
           </Badge>
           {spectacle.status && (
-            <Badge variant="outline">{getStatusLabel(spectacle.status)}</Badge>
+            <Badge variant="outline" className="py-1 px-3">{getStatusLabel(spectacle.status)}</Badge>
           )}
         </div>
 
@@ -225,6 +225,12 @@ export default async function SpectacleDetailPage({ params }: Props) {
             </div>
           </div>
         )}
+
+        {/* Gallery Photos Manager */}
+        <div id="gallery">
+          <h2 className="text-lg font-semibold mb-2">Galerie photos (carrousel)</h2>
+          <SpectacleGalleryManager spectacleId={spectacleId} />
+        </div>
 
         {/* Awards */}
         {spectacle.awards && spectacle.awards.length > 0 && (

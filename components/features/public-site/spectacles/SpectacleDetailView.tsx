@@ -18,11 +18,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { env } from "@/lib/env";
-import type { SpectacleDb, SpectaclePhotoDTO } from "@/lib/schemas/spectacles";
+import type { SpectacleDb, SpectaclePhotoDTO, GalleryPhotoDTO } from "@/lib/schemas/spectacles";
+import { SpectacleCarousel } from "./SpectacleCarousel";
 
 interface SpectacleDetailViewProps {
     spectacle: SpectacleDb;
     landscapePhotos?: SpectaclePhotoDTO[];
+    galleryPhotos?: GalleryPhotoDTO[];
     venue?: { nom: string; ville: string | null } | null;
 }
 
@@ -57,6 +59,7 @@ function LandscapePhotoCard({ photo }: { photo: SpectaclePhotoDTO }) {
 export function SpectacleDetailView({
     spectacle,
     landscapePhotos = [],
+    galleryPhotos = [],
     venue = null,
 }: SpectacleDetailViewProps) {
     const formatDate = (dateString: string | null) => {
@@ -325,7 +328,7 @@ export function SpectacleDetailView({
                                     <Button
                                         variant="outline"
                                         size="lg"
-                                        className="w-full sm:w-auto"
+                                        className="w-full sm:w-auto mb-8"
                                         asChild
                                     >
                                         <Link
@@ -369,9 +372,45 @@ export function SpectacleDetailView({
                                     </CardContent>
                                 </Card>
                             )}
+
+                            {/* Gallery Carousel */}
+                            {/* 
+                             {galleryPhotos && galleryPhotos.length > 0 && (
+                                <div className="mt-8">
+                            */}
+                            {/* <h2 className="text-2xl font-bold mb-4">Galerie</h2>
+                            */}
+                            {/*
+                                            <SpectacleCarousel
+                                        images={galleryPhotos.map((photo) => ({
+                                            url: getMediaPublicUrl(photo.storage_path),
+                                            alt: photo.alt_text,
+                                        }))}
+                                        title={spectacle.title}
+                                    />
+                                </div>
+                            )}
+                            */}
+
                         </div>
                     </div>
+                    {/* Gallery Carousel */}
+                    <div className="mt-16">
+                        {galleryPhotos && galleryPhotos.length > 0 && (
+                            <div className="mt-8">
+                                {/* <h2 className="text-2xl font-bold mb-4">Galerie</h2> */}
+                                <SpectacleCarousel
+                                    images={galleryPhotos.map((photo) => ({
+                                        url: getMediaPublicUrl(photo.storage_path),
+                                        alt: photo.alt_text,
+                                    }))}
+                                    title={spectacle.title}
+                                />
+                            </div>
+                        )}
+                    </div>
                 </div>
+
             </section>
         </main >
     );

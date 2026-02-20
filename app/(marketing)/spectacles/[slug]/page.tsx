@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { fetchSpectacleBySlug, fetchSpectacleNextVenue } from "@/lib/dal/spectacles";
-import { fetchSpectacleLandscapePhotos } from "@/lib/dal/spectacle-photos";
+import { fetchSpectacleLandscapePhotos, fetchSpectacleGalleryPhotos } from "@/lib/dal/spectacle-photos";
 import { SpectacleDetailView } from "@/components/features/public-site/spectacles/SpectacleDetailView";
 
 export const dynamic = "force-dynamic";
@@ -52,9 +52,10 @@ export default async function SpectacleDetailPage({
         notFound();
     }
 
-    // Fetch landscape photos and venue in parallel
-    const [landscapePhotos, venue] = await Promise.all([
+    // Fetch landscape photos, gallery photos, and venue in parallel
+    const [landscapePhotos, galleryPhotos, venue] = await Promise.all([
         fetchSpectacleLandscapePhotos(BigInt(spectacle.id)),
+        fetchSpectacleGalleryPhotos(BigInt(spectacle.id)),
         fetchSpectacleNextVenue(spectacle.id),
     ]);
 
@@ -62,6 +63,7 @@ export default async function SpectacleDetailPage({
         <SpectacleDetailView
             spectacle={spectacle}
             landscapePhotos={landscapePhotos}
+            galleryPhotos={galleryPhotos}
             venue={venue}
         />
     );

@@ -1,6 +1,6 @@
 import { redirect, notFound } from "next/navigation";
 import { createClient } from "@/supabase/server";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Images } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import SpectacleForm from "@/components/features/admin/spectacles/SpectacleForm";
@@ -55,21 +55,29 @@ export default async function EditSpectaclePage({ params }: Props) {
 
   return (
     <div className="space-y-6 lg:ml-16">
-      <div className="flex items-center gap-1 md:gap-6 lg:gap-12">
-
+      <div className="flex max-sm:flex-col items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Éditer : {spectacle.title}</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">Éditer : {spectacle.title}</h1>
           <p className="text-muted-foreground mt-2">
             Modifiez les informations du spectacle
           </p>
         </div>
 
-        <Link href={`/admin/spectacles/${spectacle.id}`}>
-          <Button variant="outline" size="default">
-            <ArrowLeft className="h-4 w-4" />
-            Retour
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2 shrink-0">
+          <Link href={`/admin/spectacles/${spectacle.id}#gallery`}>
+            <Button variant="default" size="default"
+              title="Gérer la galerie de photos du spectacle">
+              <Images className="h-4 w-4" />
+              Galerie
+            </Button>
+          </Link>
+          <Link href={`/admin/spectacles/${spectacle.id}`}>
+            <Button variant="outline" size="default">
+              <ArrowLeft className="h-4 w-4" />
+              Retour
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="max-w-2xl">

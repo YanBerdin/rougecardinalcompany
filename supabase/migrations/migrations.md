@@ -4,6 +4,39 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-02-20 - SECURITY FIX: is_admin() guard on spectacle admin views
+
+**Migration**: `20260220130000_fix_spectacle_admin_views_security.sql`
+
+**Sévérité**: 🟠 **MAJOR** — Vues admin accessibles par n'importe quel utilisateur `authenticated`
+
+**Problème**:
+Deux vues admin exposaient des métadonnées techniques (mime, created_at, ordre) à tout utilisateur authentifié :
+
+- `spectacles_landscape_photos_admin` — créée avant TASK037 (janv. 2026), aucun guard `is_admin()`
+- `spectacles_gallery_photos_admin` — créée en `20260220120000_add_gallery_photos_views.sql`, guard omis lors de l'implémentation
+
+Sans le filtre `WHERE (select public.is_admin()) = true`, la vue SECURITY INVOKER repose uniquement sur les RLS des tables de base, qui accordent `SELECT` à tous les utilisateurs `authenticated` sur `spectacles_medias` et `medias`.
+
+**Correction**:
+
+```sql
+-- Pattern TASK037 appliqué aux deux vues
+where sm.type = 'landscape'   -- ou 'gallery'
+  and (select public.is_admin()) = true
+```
+
+Plus `revoke select on ... from anon;` en défense-en-profondeur.
+
+**Schémas déclaratifs synchronisés**:
+
+- ✅ `supabase/schemas/41_views_spectacle_photos.sql` — guard + REVOKE + GRANT `authenticated` seulement
+- ✅ `supabase/schemas/42_views_spectacle_gallery.sql` — déjà corrigé (session précédente)
+
+**Application**: ✅ Appliquée via `pnpm dlx supabase db push --linked` le 2026-02-20
+
+---
+
 ### 2026-02-11 - BUGFIX: Audit trigger tg_op case sensitivity
 
 **Migration**: `20260211005525_fix_audit_trigger_tg_op_case.sql`
@@ -18,6 +51,7 @@ Deux bugs dans `audit_trigger()` :
 2. **auth.uid() type mismatch** : `nullif(auth.uid(), '')::uuid` compare `uuid` avec `text`, provoquant `invalid input syntax for type uuid: ""`. L'erreur était avalée par `exception when others` → `user_id` toujours NULL.
 
 **Cause Root**:
+
 ```sql
 -- ❌ AVANT
 if tg_op in ('insert', 'update') then ...  -- JAMAIS vrai (tg_op = 'INSERT')
@@ -29,10 +63,12 @@ user_id_uuid := auth.uid();  -- auth.uid() retourne uuid nativement
 ```
 
 **Impact**:
+
 - **AVANT** : Tous les logs d'audit avec `record_id = NULL`, `new_values = NULL`, `user_id = NULL` (affiché "Système")
 - **APRÈS** : `record_id`, `new_values`, `old_values` ET `user_id` correctement capturés
 
 **Validation**:
+
 - ✅ Testé localement : INSERT, UPDATE, DELETE capturent `record_id` et values
 - ✅ Tables sans colonne `id` (configurations_site) fonctionnent correctement
 - ✅ Intégré au schéma déclaratif : `supabase/schemas/02b_functions_core.sql`

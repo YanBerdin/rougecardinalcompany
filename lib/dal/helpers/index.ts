@@ -25,3 +25,6 @@ export {
     toMediaFolderDTO,
     toMediaItemExtendedDTO,
 } from "./serialize";
+
+// Media URL builder (T3 Env — never process.env)
+export { buildMediaPublicUrl } from "./media-url";
