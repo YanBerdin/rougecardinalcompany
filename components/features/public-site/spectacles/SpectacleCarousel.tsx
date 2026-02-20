@@ -289,7 +289,7 @@ function MultiImageCarousel({
                             role="group"
                             aria-roledescription="slide"
                             aria-label={`Slide ${index + 1} sur ${images.length}`}
-                            className="min-w-0 flex-[0_0_62%] pl-0"
+                            className="min-w-0 max-sm:flex-[0_0_90%] flex-[0_0_62%] pl-0"
                         >
                             {/* data-embla-tween: receives the scale() transform */}
                             <div

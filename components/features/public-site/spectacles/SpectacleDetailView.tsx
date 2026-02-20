@@ -395,7 +395,7 @@ export function SpectacleDetailView({
                         </div>
                     </div>
                     {/* Gallery Carousel */}
-                    <div className="mt-16">
+                    <div className="max-sm:mt-8 mt-16">
                         {galleryPhotos && galleryPhotos.length > 0 && (
                             <div className="mt-8">
                                 {/* <h2 className="text-2xl font-bold mb-4">Galerie</h2> */}
