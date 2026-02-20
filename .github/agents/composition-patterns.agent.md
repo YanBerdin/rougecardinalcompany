@@ -1,4 +1,5 @@
 ---
+name: 'React Composition Patterns'
 description: 'This document outlines composition patterns for building flexible, maintainable React components. It emphasizes avoiding boolean prop proliferation by using compound components, lifting state, and composing internals. These patterns make codebases easier for both humans and AI agents to work with as they scale.'
 model: Claude Sonnet 4.6 (copilot)
 tools:

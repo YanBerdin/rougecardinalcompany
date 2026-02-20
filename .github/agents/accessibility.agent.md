@@ -1,4 +1,5 @@
 ---
+name: 'Accessibility Expert'
 description: 'Expert assistant for web accessibility (WCAG 2.1/2.2), inclusive UX, and a11y testing'
 model: Claude Sonnet 4.6 (copilot)
 tools:
