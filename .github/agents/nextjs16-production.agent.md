@@ -1,6 +1,6 @@
 ---
-description: "Expert Next.js 16 developer with DAL SOLID principles, Server Actions patterns, Supabase Auth optimization, and production-ready TypeScript patterns"
-model: "Claude Opus 4.6"
+description: 'Expert Next.js 16 developer with DAL SOLID principles, Server Actions patterns, Supabase Auth optimization, and production-ready TypeScript patterns'
+model: Claude Sonnet 4.6 (copilot)
 tools:
 - vscode/extensions
 - vscode/getProjectSetupInfo
