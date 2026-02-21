@@ -25,6 +25,7 @@ const ALLOWED_HOSTNAMES: ReadonlyMap<string, string> = new Map([
     // Add your Supabase project hostname here
     // Format: [hostname_to_match, canonical_hostname_to_use]
     ["images.unsplash.com", "images.unsplash.com"],
+    ["plus.unsplash.com", "plus.unsplash.com"],
     ["unsplash.com", "unsplash.com"],
     ["images.pexels.com", "images.pexels.com"],
     ["dummyimage.com", "dummyimage.com"],

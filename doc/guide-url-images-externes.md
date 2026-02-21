@@ -55,6 +55,7 @@ Pour toute source d'image, l'URL doit :
 Consultez `next.config.ts` → `images.remotePatterns` pour la liste des domaines autorisés :
 
 - `images.unsplash.com`
+- `plus.unsplash.com`
 - `unsplash.com`
 - `images.pexels.com`
 - `dummyimage.com`
@@ -98,4 +99,69 @@ En cas de problème avec une URL, vérifiez :
 
 ---
 
-**Dernière mise à jour** : 8 décembre 2025
+## ➕ Ajouter un nouveau domaine autorisé
+
+> ⚠️ **À faire à chaque nouveau domaine source d'images.** Il y a **3 fichiers à modifier** et il faut les maintenir synchronisés.
+
+### Symptôme à reconnaître
+
+L'erreur suivante dans le formulaire signifie que le domaine n'est pas dans l'allowlist :
+
+```
+Hostname not allowed: mon-nouveau-domaine.com. Only Supabase Storage URLs are permitted.
+```
+
+### Étape 1 — `lib/utils/validate-image-url.ts`
+
+C'est la **validation SSRF côté serveur** (la plus critique). Ajouter une ligne dans la `Map` `ALLOWED_HOSTNAMES` :
+
+```typescript
+// Avant
+const ALLOWED_HOSTNAMES: ReadonlyMap<string, string> = new Map([
+    ["images.unsplash.com", "images.unsplash.com"],
+    // ...
+]);
+
+// Après
+const ALLOWED_HOSTNAMES: ReadonlyMap<string, string> = new Map([
+    ["images.unsplash.com", "images.unsplash.com"],
+    ["mon-nouveau-domaine.com", "mon-nouveau-domaine.com"], // ← ajouter ici
+    // ...
+]);
+```
+
+> Le format est `["hostname_entrant", "hostname_canonique"]`. En pratique les deux valeurs sont identiques sauf cas particulier de réécriture.
+
+### Étape 2 — `next.config.ts`
+
+C'est l'autorisation pour le composant `<Image>` de Next.js. Ajouter une entrée dans `images.remotePatterns` :
+
+```typescript
+{
+  protocol: "https",
+  hostname: "mon-nouveau-domaine.com",
+  port: "",
+  pathname: "/**",
+},
+```
+
+### Étape 3 — Ce fichier (`doc/guide-url-images-externes.md`)
+
+Tenir à jour la section **Domaines autorisés** ci-dessus pour que la documentation reste la source de vérité.
+
+### Étape 4 — Mettre à jour le script de test (optionnel mais recommandé)
+
+Le script `scripts/test-ssrf-validation.ts` contient une liste de domaines autorisés à tester. Ajouter le nouveau domaine dans la liste des cas "doit passer" pour éviter les régressions.
+
+### Checklist rapide
+
+```
+□ lib/utils/validate-image-url.ts  → ALLOWED_HOSTNAMES Map
+□ next.config.ts                   → images.remotePatterns
+□ doc/guide-url-images-externes.md → section "Domaines autorisés"
+□ scripts/test-ssrf-validation.ts  → cas de test (optionnel)
+```
+
+---
+
+**Dernière mise à jour** : 21 février 2026
