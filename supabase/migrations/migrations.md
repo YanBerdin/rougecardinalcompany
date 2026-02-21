@@ -4,6 +4,61 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-02-21 - BUGFIX: Contrainte image_url membres_equipe + allowlist plus.unsplash.com
+
+#### fix(db) — Relaxation contrainte `membres_equipe_image_url_format`
+
+**Migration**: `20260221100000_fix_membres_equipe_image_url_constraint.sql`
+**Commit**: `803cd21`
+
+**Problème**:
+La contrainte PostgreSQL `membres_equipe_image_url_format` imposait la présence d'une extension de fichier (`.jpg`, `.png`, `.webp`, etc.) dans l'URL. Les URLs CDN d'Unsplash (ex. `https://images.unsplash.com/photo-xxx?w=800&q=80`) n'ont pas d'extension, provoquant :
+
+```bash
+new row for relation "membres_equipe" violates check constraint "membres_equipe_image_url_format"
+```
+
+**Cause Root**:
+Le regex exigeait `\.(jpg|jpeg|png|webp|gif|avif|svg)(\?.*)?` avant les query params. La validation d'extension est déjà faite correctement au niveau application (magic bytes). La contrainte DB était redondante et trop stricte.
+
+**Correction**:
+
+```sql
+-- ❌ AVANT (extension obligatoire)
+'^https?://[A-Za-z0-9._~:/?#%\-@!$&''()*+,;=]+\.(jpg|jpeg|png|webp|gif|avif|svg)(\?.*)?$'
+
+-- ✅ APRÈS (format https seul, extension facultative)
+'^https?://[A-Za-z0-9._~:/?#%\-@!$&''()*+,;=]+'
+```
+
+**Schéma déclaratif synchronisé**: ✅ `supabase/schemas/50_constraints.sql`
+**Application**: ✅ Appliquée via `pnpm dlx supabase db push --linked` le 2026-02-21
+
+---
+
+#### fix(ssrf) — Ajout `plus.unsplash.com` dans l'allowlist SSRF
+
+**Commit**: `99a1383`
+
+**Problème**:
+`plus.unsplash.com` (sous-domaine premium d'Unsplash) n'était pas dans la `ALLOWED_HOSTNAMES` Map de `lib/utils/validate-image-url.ts`, provoquant :
+
+```bash
+Hostname not allowed: plus.unsplash.com. Only Supabase Storage URLs are permitted.
+```
+
+**Fichiers modifiés** (3) :
+
+| Fichier | Modification |
+| ------- | ------------ |
+| `lib/utils/validate-image-url.ts` | `plus.unsplash.com` ajouté dans `ALLOWED_HOSTNAMES` |
+| `next.config.ts` | `plus.unsplash.com` ajouté dans `images.remotePatterns` |
+| `doc/guide-url-images-externes.md` | Procédure d'ajout domaine + liste à jour |
+
+**Rappel pattern** : Pour ajouter un nouveau domaine aux 3 endroits, suivre la procédure documentée dans `doc/guide-url-images-externes.md` § "➕ Ajouter un nouveau domaine autorisé".
+
+---
+
 ### 2026-02-20 - SECURITY FIX: is_admin() guard on spectacle admin views
 
 **Migration**: `20260220130000_fix_spectacle_admin_views_security.sql`

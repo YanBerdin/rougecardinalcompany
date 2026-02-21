@@ -1,8 +1,43 @@
 # Active Context
 
-**Current Focus (2026-02-20)**: ✅ Embla Carousel Spectacle Gallery + Security Fix admin views
+**Current Focus (2026-02-21)**: ✅ Bugfix contrainte image_url membres_equipe + allowlist plus.unsplash.com
 
-**Last Major Updates**: ✅ Embla Carousel Gallery (2026-02-20) + Security Fix admin views (2026-02-20) + Upload Security Hardening (2026-02-18) + Homepage Filter Fix (2026-02-12)
+**Last Major Updates**: ✅ Unsplash CDN fixes (2026-02-21) + Embla Carousel Gallery (2026-02-20) + Security Fix admin views (2026-02-20) + Upload Security Hardening (2026-02-18) + Homepage Filter Fix (2026-02-12)
+
+---
+
+## ✅ Bugfix URL images Unsplash — contrainte DB + allowlist SSRF (2026-02-21)
+
+### Summary
+
+✅ **DEUX CORRECTIFS** — Contrainte PostgreSQL trop stricte sur `membres_equipe.image_url` + hostname `plus.unsplash.com` manquant dans l'allowlist SSRF.
+
+| Composant | Statut | Détails |
+| --------- | ------ | ------- |
+| Contrainte `membres_equipe_image_url_format` | ✅ | Regex relaxé — extension facultative |
+| Migration `20260221100000` | ✅ | Applied remote via `supabase db push --linked` |
+| `lib/utils/validate-image-url.ts` | ✅ | `plus.unsplash.com` ajouté dans `ALLOWED_HOSTNAMES` |
+| `next.config.ts` | ✅ | `plus.unsplash.com` ajouté dans `images.remotePatterns` |
+| `doc/guide-url-images-externes.md` | ✅ | Procédure ajout domaine + liste mise à jour |
+| Commits | ✅ | `803cd21` (db) + `99a1383` (ssrf) |
+
+### Détail des correctifs
+
+**Correctif 1 — Contrainte DB** (`803cd21`) :
+
+- Erreur : `violates check constraint "membres_equipe_image_url_format"` lors de la sauvegarde d'une URL Unsplash CDN
+- Cause : regex imposait `.jpg/.png/...` dans l'URL — les URLs CDN `?w=800&q=80` n'ont pas d'extension
+- Fix : regex simplifié en `^https?://[...]+` (extension facultative, validation laissée à la couche app)
+- Schéma déclaratif sync : `supabase/schemas/50_constraints.sql`
+
+**Correctif 2 — Allowlist SSRF** (`99a1383`) :
+
+- Erreur : `Hostname not allowed: plus.unsplash.com` dans `AboutContentForm.tsx`
+- Cause : `plus.unsplash.com` (Unsplash Premium) absent de `ALLOWED_HOSTNAMES` dans `validate-image-url.ts`
+- Fix : ajout dans les 3 fichiers (`validate-image-url.ts`, `next.config.ts`, doc)
+- Procédure documentée dans `doc/guide-url-images-externes.md`
+
+---
 
 ---
 

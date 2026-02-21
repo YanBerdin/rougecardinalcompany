@@ -1,5 +1,44 @@
 # Progress
 
+## Bugfix URL images Unsplash — contrainte DB + allowlist SSRF (2026-02-21)
+
+### Summary
+
+✅ **DEUX CORRECTIFS** — Contrainte PostgreSQL trop stricte + hostname `plus.unsplash.com` manquant dans l'allowlist SSRF.
+
+| Livrable | Statut | Détails |
+| --------- | ------ | ------- |
+| Contrainte `membres_equipe_image_url_format` relaxée | ✅ | Extension de fichier rendue facultative dans le regex |
+| Migration `20260221100000` appliquée | ✅ | Remote via `supabase db push --linked` |
+| `lib/utils/validate-image-url.ts` mis à jour | ✅ | `plus.unsplash.com` dans `ALLOWED_HOSTNAMES` |
+| `next.config.ts` mis à jour | ✅ | `plus.unsplash.com` dans `images.remotePatterns` |
+| `doc/guide-url-images-externes.md` enrichi | ✅ | Procédure complète d'ajout de domaine |
+| Commits | ✅ | `803cd21` + `99a1383` |
+
+### Fichiers Clés
+
+```bash
+supabase/schemas/50_constraints.sql                    # Regex contrainte relaxé
+supabase/migrations/20260221100000_fix_membres_equipe_image_url_constraint.sql
+lib/utils/validate-image-url.ts                        # + plus.unsplash.com
+next.config.ts                                         # + plus.unsplash.com
+doc/guide-url-images-externes.md                       # Procédure + liste domaines
+```
+
+### Problèmes Résolus
+
+**Erreur 1** : `new row for relation "membres_equipe" violates check constraint "membres_equipe_image_url_format"`
+
+- URLs Unsplash CDN (ex. `photo-xxx?w=800&q=80`) sans extension rejetées par le regex DB
+- La validation d'extension est faite au niveau app (magic bytes) — la contrainte DB était redondante
+
+**Erreur 2** : `Hostname not allowed: plus.unsplash.com. Only Supabase Storage URLs are permitted.`
+
+- `plus.unsplash.com` (Unsplash Premium) absent de l'allowlist SSRF
+- Fix aligné sur le pattern CodeQL-compliant existant
+
+---
+
 ## Embla Carousel Spectacle Gallery + Security Fix admin views (2026-02-20)
 
 ### Summary
