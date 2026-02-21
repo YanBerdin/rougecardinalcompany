@@ -10,21 +10,24 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Laptop, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 interface ThemeSwitcherProps {
   iconClassName?: string;
 }
 
 const ThemeSwitcher = ({ iconClassName = "text-sidebar-foreground" }: ThemeSwitcherProps) => {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    (callback) => {
+      window.addEventListener("load", callback);
+      return () => window.removeEventListener("load", callback);
+    },
+    () => true,
+    () => false,
+  );
   const { theme, setTheme } = useTheme();
 
-  // useEffect only runs on the client, so now we can safely show the UI
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
+  // Only render on the client to avoid hydration mismatch
   if (!mounted) {
     return null;
   }

@@ -94,7 +94,7 @@ export function DisplayTogglesView({
             {/* Homepage Toggles */}
             <Card>
                 <CardHeader>
-                    <CardTitle>Page d'Accueil</CardTitle>
+                    <CardTitle>Page d&apos;Accueil</CardTitle>
                     <CardDescription>
                         Sections affichées sur la homepage
                     </CardDescription>

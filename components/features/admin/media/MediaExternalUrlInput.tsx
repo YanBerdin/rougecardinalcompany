@@ -9,6 +9,19 @@ import type { MediaExternalUrlInputProps } from "./types";
 
 type ValidationStatus = "idle" | "validating" | "valid" | "invalid";
 
+function StatusIcon({ status }: { status: ValidationStatus }) {
+    switch (status) {
+        case "validating":
+            return <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />;
+        case "valid":
+            return <CheckCircle className="h-4 w-4 text-green-500" />;
+        case "invalid":
+            return <AlertCircle className="h-4 w-4 text-destructive" />;
+        default:
+            return <ExternalLink className="h-4 w-4 text-muted-foreground" />;
+    }
+}
+
 /**
  * MediaExternalUrlInput - External URL mode for media picker
  * Allows entering an external image URL with validation
@@ -78,19 +91,6 @@ export function MediaExternalUrlInput({
         validateUrl(value);
     };
 
-    const StatusIcon = () => {
-        switch (validationStatus) {
-            case "validating":
-                return <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />;
-            case "valid":
-                return <CheckCircle className="h-4 w-4 text-green-500" />;
-            case "invalid":
-                return <AlertCircle className="h-4 w-4 text-destructive" />;
-            default:
-                return <ExternalLink className="h-4 w-4 text-muted-foreground" />;
-        }
-    };
-
     return (
         <div className="space-y-3">
             <div className="space-y-2">
@@ -107,7 +107,7 @@ export function MediaExternalUrlInput({
                             className="pr-10"
                         />
                         <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                            <StatusIcon />
+                            <StatusIcon status={validationStatus} />
                         </div>
                     </div>
                     <Button

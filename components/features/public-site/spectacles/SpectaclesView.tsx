@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Play } from "lucide-react"; // Clock, Users, Calendar, MapPin, non utilisés
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SpectaclesViewProps } from "./types";
 import { SpectaclesSkeleton } from "@/components/skeletons/spectacles-skeleton";

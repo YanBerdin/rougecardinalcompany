@@ -2,6 +2,7 @@
 
 import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Home, RefreshCw } from "lucide-react";
 
@@ -37,10 +38,10 @@ export default function Error({ error, reset }: ErrorProps) {
                         Réessayer
                     </Button>
                     <Button variant="outline" asChild>
-                        <a href="/">
+                        <Link href="/">
                             <Home className="mr-2 h-4 w-4" />
                             Accueil
-                        </a>
+                        </Link>
                     </Button>
                 </div>
                 {process.env.NODE_ENV === "development" && (

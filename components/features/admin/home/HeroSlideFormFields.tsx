@@ -128,7 +128,7 @@ export function HeroSlideActiveToggle({ form }: HeroSlideActiveToggleProps) {
                     <div className="space-y-0.5">
                         <FormLabel className="text-sm sm:text-base">Activer</FormLabel>
                         <div className="text-xs sm:text-sm text-muted-foreground">
-                            Afficher ce slide sur la page d'accueil
+                            Afficher ce slide sur la page d&lsquo;accueil
                         </div>
                     </div>
                     <FormControl>

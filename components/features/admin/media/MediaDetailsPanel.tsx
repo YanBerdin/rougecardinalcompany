@@ -230,7 +230,7 @@ export function MediaDetailsPanel({
                                 />
                             ) : (
                                 <div className="flex items-center justify-center h-full text-muted-foreground">
-                                    <p className="text-sm">Chargement de l'aperçu...</p>
+                                    <p className="text-sm">Chargement de l&apos;aperçu...</p>
                                 </div>
                             )}
                         </div>

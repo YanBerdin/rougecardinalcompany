@@ -103,7 +103,7 @@ export function MediaCard({
       role="button"
       tabIndex={0}
       aria-label={`${isSelected ? "Désélectionner" : "Sélectionner"} ${media.filename}`}
-      aria-selected={isSelected}
+      aria-pressed={isSelected}
     >
       {/* Selection Checkbox */}
       {selectionMode && (

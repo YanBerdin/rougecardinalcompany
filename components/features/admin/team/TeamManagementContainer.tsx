@@ -231,7 +231,7 @@ export function TeamManagementContainer({ initialMembers }: Props) {
                 hardDeleteCandidate && handleHardDeleteMember(hardDeleteCandidate)
               }
             >
-              Supprimer définitivement
+              Supprimer
             </Button>
           </DialogFooter>
           <DialogClose />

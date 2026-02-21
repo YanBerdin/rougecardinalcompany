@@ -14,23 +14,23 @@ const LogoCard: React.FC<LogoCardProps> = ({ logo }) => (
 
 export const LogoCloudModel: React.FC = () => {
   const row1 = [
-    <BrandLogos.Walmart />,
-    <BrandLogos.Microsoft />,
-    <BrandLogos.Airbnb />,
-    <BrandLogos.FedEx />,
-    <BrandLogos.Google />,
-    <BrandLogos.Amazon />,
-    <BrandLogos.HubSpot />
+    <BrandLogos.Walmart key="walmart" />,
+    <BrandLogos.Microsoft key="microsoft" />,
+    <BrandLogos.Airbnb key="airbnb" />,
+    <BrandLogos.FedEx key="fedex" />,
+    <BrandLogos.Google key="google" />,
+    <BrandLogos.Amazon key="amazon" />,
+    <BrandLogos.HubSpot key="hubspot" />
   ];
 
   const row2 = [
-    <BrandLogos.Huawei />,
-    <BrandLogos.BookMyShow />,
-    <BrandLogos.Adobe />,
-    <BrandLogos.Shopify />,
-    <BrandLogos.Ola />,
-    <BrandLogos.Huawei />,
-    <BrandLogos.BookMyShow />
+    <BrandLogos.Huawei key="huawei-1" />,
+    <BrandLogos.BookMyShow key="bookmyshow-1" />,
+    <BrandLogos.Adobe key="adobe" />,
+    <BrandLogos.Shopify key="shopify" />,
+    <BrandLogos.Ola key="ola" />,
+    <BrandLogos.Huawei key="huawei-2" />,
+    <BrandLogos.BookMyShow key="bookmyshow-2" />
   ];
 
   return (

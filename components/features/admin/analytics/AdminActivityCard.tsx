@@ -40,7 +40,7 @@ export function AdminActivityCard({ activity, isLoading }: AdminActivityCardProp
                     <Activity className="h-5 w-5" />
                     Activité Admin
                 </CardTitle>
-                <CardDescription>Actions récentes dans le panneau d'administration</CardDescription>
+                <CardDescription>Actions récentes dans le panneau d&apos;administration</CardDescription>
             </CardHeader>
             <CardContent>
                 {/* Summary Stats */}

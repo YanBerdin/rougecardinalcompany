@@ -82,7 +82,7 @@ export function ArticleNewForm() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <Card>
                 <CardHeader>
-                    <CardTitle>Informations de l'article</CardTitle>
+                    <CardTitle>Informations de l&apos;article</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div>

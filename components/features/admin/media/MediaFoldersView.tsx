@@ -364,7 +364,7 @@ function MediaFolderFormDialog({
                             {folder ? "Modifier le dossier" : "Créer un dossier"}
                         </DialogTitle>
                         <DialogDescription>
-                            Les dossiers permettent d'organiser vos médias en hiérarchie
+                            Les dossiers permettent d&lsquo;organiser vos médias en hiérarchie
                         </DialogDescription>
                     </DialogHeader>
 

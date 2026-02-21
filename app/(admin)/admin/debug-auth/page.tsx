@@ -63,7 +63,7 @@ export default async function AdminDebugAuthPage() {
 
   // Test 7: Vues admin-only (IMPORTANT: Utiliser adminClient avec service_role)
   const adminClient = await createAdminClient();
-  
+
   const { data: dashboardData, error: dashboardError } = await adminClient
     .from("communiques_presse_dashboard")
     .select("id, title")
@@ -111,10 +111,10 @@ export default async function AdminDebugAuthPage() {
               {allCookies.filter(
                 (c) => c.name.includes("supabase") || c.name.includes("sb-")
               ).length === 0 && (
-                <li className="text-destructive">
-                  ❌ Aucun cookie d&apos;authentification trouvé
-                </li>
-              )}
+                  <li className="text-destructive">
+                    ❌ Aucun cookie d&apos;authentification trouvé
+                  </li>
+                )}
             </ul>
           </div>
         </div>
@@ -406,13 +406,13 @@ export default async function AdminDebugAuthPage() {
                 <div className="bg-muted p-3 rounded text-xs mb-3">
                   <p className="font-semibold mb-2">Pattern correct (TASK037):</p>
                   <code className="block text-amber-600 dark:text-amber-400">
-                    // ❌ INCORRECT<br />
-                    const supabase = await createClient();<br />
-                    await supabase.from(&apos;vue_admin&apos;).select();<br />
-                    <br />
-                    // ✅ CORRECT<br />
-                    const adminClient = await createAdminClient();<br />
-                    await adminClient.from(&apos;vue_admin&apos;).select();
+                    {`// ❌ INCORRECT
+                  const supabase = await createClient();
+                  await supabase.from('vue_admin').select();
+                  
+                  // ✅ CORRECT
+                  const adminClient = await createAdminClient();
+                  await adminClient.from('vue_admin').select();`}
                   </code>
                 </div>
                 <p className="text-muted-foreground mb-3">

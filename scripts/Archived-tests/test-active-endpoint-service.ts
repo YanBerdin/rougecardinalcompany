@@ -150,7 +150,7 @@ async function main() {
   results.push(await testEndpoint("Object value", memberId, { active: { value: true } }, 422));
 
   // Invalid IDs (should return 400)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any //TODO: Remove 'any' when we have a better way to test invalid types
+  //TODO: Remove 'any' when we have a better way to test invalid types
   results.push(await testEndpoint("Invalid ID (non-numeric)", "abc" as any, { active: true }, 400));
   results.push(await testEndpoint("Invalid ID (negative)", -1, { active: true }, 400));
   results.push(await testEndpoint("Invalid ID (zero)", 0, { active: true }, 400));
