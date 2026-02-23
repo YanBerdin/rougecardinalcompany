@@ -13,6 +13,7 @@ Cross-device and cross-browser validation to ensure responsive behavior across d
 Use Playwright and BrowserStack (optional) to run device matrix tests. Focus on admin UI usability on tablets and mobiles.
 
 **Audit findings (2026-02-10):**
+
 - Playwright `@playwright/test ^1.57.0` installed but NOT configured (no `playwright.config.ts`)
 - No `tests/` directory exists
 - **0 `data-testid`** attributes in components (15 found in docs only)
@@ -27,6 +28,7 @@ Use Playwright and BrowserStack (optional) to run device matrix tests. Focus on 
 - Fix UI breakpoints and touch targets.
 
 **Revised Plan (9 Phases, 24h):**
+
 1. **Phase 0 (4h)** - Instrumentation: Add `data-testid` attributes to components
 2. **Phase 1 (2h)** - Setup: playwright.config.ts, fixtures, helpers
 3. **Phase 2 (3h)** - Admin Dashboard tests
