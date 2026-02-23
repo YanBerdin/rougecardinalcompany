@@ -79,12 +79,12 @@ export function AboutContentForm({ content }: AboutContentFormProps) {
         <>
             <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                    <h2 className="text-2xl font-bold">About Section Content</h2>
+                    <h2 className="text-3xl md:text-4xl font-bold">Section - A propos - Page d&apos;accueil</h2>
                 </div>
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Edit About Content</CardTitle>
+                        <CardTitle>Modifier le contenu </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <Form {...form}>
@@ -94,12 +94,12 @@ export function AboutContentForm({ content }: AboutContentFormProps) {
                                     name="title"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Section Title *</FormLabel>
+                                            <FormLabel>Titre de la section *</FormLabel>
                                             <FormControl>
-                                                <Input {...field} maxLength={80} placeholder="About Rouge Cardinal" />
+                                                <Input {...field} maxLength={80} placeholder="À propos de Rouge Cardinal" />
                                             </FormControl>
                                             <FormDescription>
-                                                {field.value.length}/80 characters
+                                                {field.value.length}/80 caractères
                                             </FormDescription>
                                             <FormMessage />
                                         </FormItem>
@@ -111,12 +111,12 @@ export function AboutContentForm({ content }: AboutContentFormProps) {
                                     name="intro1"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Introduction Paragraph 1 *</FormLabel>
+                                            <FormLabel>Paragraphe d&apos;introduction 1 *</FormLabel>
                                             <FormControl>
                                                 <Textarea {...field} maxLength={1000} rows={4} />
                                             </FormControl>
                                             <FormDescription>
-                                                {watchIntro1.length}/1000 characters
+                                                {watchIntro1.length}/1000 caractères
                                             </FormDescription>
                                             <FormMessage />
                                         </FormItem>
@@ -128,12 +128,12 @@ export function AboutContentForm({ content }: AboutContentFormProps) {
                                     name="intro2"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Introduction Paragraph 2 *</FormLabel>
+                                            <FormLabel>Paragraphe d&apos;introduction 2 *</FormLabel>
                                             <FormControl>
                                                 <Textarea {...field} maxLength={1000} rows={4} />
                                             </FormControl>
                                             <FormDescription>
-                                                {watchIntro2.length}/1000 characters
+                                                {watchIntro2.length}/1000 caractères
                                             </FormDescription>
                                             <FormMessage />
                                         </FormItem>
@@ -145,12 +145,12 @@ export function AboutContentForm({ content }: AboutContentFormProps) {
                                     name="mission_title"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Mission Section Title *</FormLabel>
+                                            <FormLabel>Titre de la section Mission *</FormLabel>
                                             <FormControl>
-                                                <Input {...field} maxLength={80} placeholder="Our Mission" />
+                                                <Input {...field} maxLength={80} placeholder="Notre Mission" />
                                             </FormControl>
                                             <FormDescription>
-                                                {field.value.length}/80 characters
+                                                {field.value.length}/80 caractères
                                             </FormDescription>
                                             <FormMessage />
                                         </FormItem>
@@ -162,12 +162,12 @@ export function AboutContentForm({ content }: AboutContentFormProps) {
                                     name="mission_text"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Mission Text *</FormLabel>
+                                            <FormLabel>Texte de la mission *</FormLabel>
                                             <FormControl>
                                                 <Textarea {...field} maxLength={4000} rows={8} />
                                             </FormControl>
                                             <FormDescription>
-                                                {watchMissionText.length}/4000 characters
+                                                {watchMissionText.length}/4000 caractères
                                             </FormDescription>
                                             <FormMessage />
                                         </FormItem>
@@ -180,7 +180,7 @@ export function AboutContentForm({ content }: AboutContentFormProps) {
                                     imageUrlField="image_url"
                                     imageMediaIdField="image_media_id"
                                     altTextField="alt_text"
-                                    label="Section Image"
+                                    label="Image de la section"
                                     showUpload={true}
                                     uploadFolder="home-about"
                                 />
@@ -195,7 +195,7 @@ export function AboutContentForm({ content }: AboutContentFormProps) {
                                         Annuler
                                     </Button>
                                     <Button type="submit" disabled={isPending}>
-                                        {isPending ? "Saving..." : "Save Changes"}
+                                        {isPending ? "Enregistrement..." : "Enregistrer les modifications"}
                                     </Button>
                                 </div>
                             </form>

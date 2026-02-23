@@ -19,7 +19,7 @@ export default function MediaTagsPage() {
     return (
         <div className="container mx-auto py-8">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold">Tags Media</h1>
+                <h1 className="text-3xl md:text-4xl font-bold">Tags Media</h1>
                 <p className="text-muted-foreground mt-2">
                     Gérez les tags pour catégoriser vos médias
                 </p>

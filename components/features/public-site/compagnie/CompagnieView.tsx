@@ -37,7 +37,7 @@ export function CompagnieView({
             >
               <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 {section.title && (
-                  <h1 className="text-4xl md:text-5xl lg:text-6xl  font-bold mb-6 animate-fade-in-up">
+                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in-up">
                     {section.title}
                   </h1>
                 )}
@@ -61,14 +61,14 @@ export function CompagnieView({
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
                   <div className="animate-fade-in-up">
                     {section.title && (
-                      <h2 className="text-2xl xl:text-3xl font-bold mb-6">
+                      <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
                         {section.title}
                       </h2>
                     )}
                     {section.content?.map((p: string, i: number) => (
                       <p
                         key={i}
-                        className={`text-lg xl:text-xl text-muted-foreground ${i < (section.content?.length || 0) - 1 ? "mb-4" : ""} leading-relaxed`}
+                        className={`text-md md:text-lg xl:text-xl text-muted-foreground ${i < (section.content?.length || 0) - 1 ? "mb-4" : ""} leading-relaxed`}
                       >
                         {p}
                       </p>
@@ -118,12 +118,12 @@ export function CompagnieView({
               <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-16">
                   {section.title && (
-                    <h2 className="max-sm:text-2xl text-3xl font-bold mb-4">
+                    <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
                       {section.title}
                     </h2>
                   )}
                   {section.subtitle && (
-                    <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                    <p className="text-md md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto">
                       {section.subtitle}
                     </p>
                   )}
@@ -163,7 +163,7 @@ export function CompagnieView({
               <div className="max-w-screen-xl mx-auto px-4 sm:px-4 lg:px-4">
                 <div className="text-center mb-16">
                   {section.title && (
-                    <h2 className="text-3xl font-bold mb-4">{section.title}</h2>
+                    <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">{section.title}</h2>
                   )}
                   {section.subtitle && (
                     <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -214,17 +214,17 @@ export function CompagnieView({
             <section key={section.id} className="py-20 hero-gradient">
               <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 {section.title && (
-                  <h2 className="text-3xl font-bold mb-6 text-white">
+                  <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-white">
                     {section.title}
                   </h2>
                 )}
                 {section.content?.[0] && (
-                  <p className="text-xl text-white/90 mb-8 leading-relaxed">
+                  <p className="text-xl md:text-2xl lg:text-2xl text-white/90 mb-8 leading-relaxed">
                     {section.content[0]}
                   </p>
                 )}
                 {section.content?.[1] && (
-                  <p className="text-lg text-white/80 leading-relaxed">
+                  <p className="text-lg md:text-xl lg:text-xl text-white/80 leading-relaxed">
                     {section.content[1]}
                   </p>
                 )}

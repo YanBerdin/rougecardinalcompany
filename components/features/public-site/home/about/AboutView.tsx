@@ -10,8 +10,8 @@ export function AboutView({ stats, content }: AboutProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Content */}
           <div className="animate-fade-in-up">
-            <h2 className="text-4xl font-bold mb-6">{content.title}</h2>
-            <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">{content.title}</h2>
+            <p className="text-lg md:text-xl text-muted-foreground mb-6 leading-relaxed">
               {content.intro1}
             </p>
             <p className="text-lg text-muted-foreground mb-8 leading-relaxed">

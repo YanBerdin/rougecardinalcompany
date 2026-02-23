@@ -28,7 +28,7 @@ export default function MediaLibraryPage() {
     return (
         <div className="container mx-auto py-8">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold">Médiathèque</h1>
+                <h1 className="text-3xl md:text-4xl font-bold">Médiathèque</h1>
                 <p className="text-muted-foreground mt-2">
                     Gérez vos médias, tags et dossiers
                 </p>

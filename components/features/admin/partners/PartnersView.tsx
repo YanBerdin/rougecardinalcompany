@@ -338,7 +338,7 @@ export function PartnersView({ initialPartners }: PartnersViewProps) {
         <div className="space-y-6 p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 lg:mb-12">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold">Partenaires</h1>
+                    <h1 className="text-3xl md:text-4xl font-bold">Partenaires</h1>
                     <p className="text-sm sm:text-base text-muted-foreground">
                         Gérez les logos et liens des partenaires affichés sur la page
                         d&apos;accueil

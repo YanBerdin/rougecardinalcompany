@@ -53,7 +53,7 @@ export function AgendaView({
             Agenda
           </h1>
           <p
-            className="text-xl md:text-2xl opacity-90 animate-fade-in"
+            className="text-xl md:text-2xl lg:text-3xl opacity-90 animate-fade-in"
             style={{ animationDelay: "0.2s" }}
           >
             Retrouvez-nous sur scène
@@ -234,9 +234,9 @@ export function AgendaView({
             <dl className="flex gap-6 mx-auto">
               <div className="flex flex-col items-center lg:items-start">
                 <p className="text-md lg:text-lg text-white/80">
-                  Dernier acte
+                  Dernier acte : Newsletter
                 </p>
-                <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-white leading-tight">
+                <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight">
                   Restez dans les coulisses
                 </h2>
                 <div className="h-px w-24 xl:w-72 bg-white/40 my-6"></div>

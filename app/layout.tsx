@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Geist, Playfair } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 import { RootErrorBoundary } from "@/components/error-boundaries";
@@ -22,13 +22,19 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
+const playfair = Playfair({
+  variable: "--font-playfair",
+  display: "swap",
+  subsets: ["latin"],
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" suppressHydrationWarning>
+    <html lang="fr" suppressHydrationWarning className={`${playfair.variable}`}>
       <body
         className={`${geistSans.className} antialiased`}
         suppressHydrationWarning

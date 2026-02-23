@@ -69,7 +69,7 @@ export function PresseView({
         <section className="py-20">
           <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold mb-4">Communiqués de Presse</h2>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">Communiqués de Presse</h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
                 Les dernières actualités officielles de la compagnie
               </p>
@@ -117,7 +117,7 @@ export function PresseView({
       <section className="py-20 bg-card">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Revue de Presse</h2>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">Revue de Presse</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Ce que les médias disent de Rouge-Cardinal
             </p>
@@ -203,7 +203,7 @@ export function PresseView({
         <section className="py-20">
           <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold mb-4">Kit Média</h2>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">Kit Média</h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
                 Ressources haute qualité pour vos publications
               </p>
@@ -247,16 +247,16 @@ export function PresseView({
       )}
 
       {/* Accréditation */}
-      <section className="py-20 hero-gradient">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold mb-6 text-sidebar-primary-foreground">
+      <section className="py-16 hero-gradient">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-sidebar-primary-foreground">
             Demande d&apos;Accréditation
           </h2>
-          <p className="text-xl text-sidebar-primary-foreground/90 mb-8">
+          <p className="text-xl md:text-2xl text-sidebar-primary-foreground/90 mb-8">
             Journalistes et critiques, demandez votre accréditation pour nos
             spectacles
           </p>
-          <div className="space-y-4 text-sidebar-primary-foreground/90 mb-8">
+          <div className="text-md md:text-lg lg:text-xl space-y-4 text-sidebar-primary-foreground/90 mb-8">
             <p>
               Pour toute demande d&apos;accréditation, merci d&apos;envoyer un
               email à

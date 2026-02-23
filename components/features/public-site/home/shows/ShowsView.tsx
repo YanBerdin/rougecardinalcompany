@@ -10,8 +10,8 @@ export function ShowsView({ shows }: ShowsViewProps) {
     <section className="py-16 bg-card/90">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-4">Prochains Événements</h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">Prochains Événements</h2>
+          <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
             Découvrez notre programmation et réservez vos places
           </p>
         </div>
@@ -20,7 +20,7 @@ export function ShowsView({ shows }: ShowsViewProps) {
           {shows.map((show, index) => (
             <Card
               key={show.id}
-              className={`card-hover animate-fade-in-up overflow-hidden w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm group border-0 shadow-none bg-transparent hover:bg-secondary`}
+              className={`card-hover animate-fade-in-up overflow-hidden w-full md:w-[calc(50%-1rem)]  max-w-md group border-0 shadow-none bg-transparent hover:bg-secondary`}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <Link href={`/spectacles/${show.slug}`} className="block">

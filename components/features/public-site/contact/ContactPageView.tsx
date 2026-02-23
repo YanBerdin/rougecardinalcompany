@@ -126,12 +126,12 @@ export function ContactPageView({ showNewsletter = true }: ContactPageViewProps)
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="animate-fade-in">
             <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-6" />
-            <h1 className="text-3xl font-bold mb-4">Message Envoyé !</h1>
-            <p className="text-xl text-muted-foreground mb-6">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">Message Envoyé !</h1>
+            <p className="text-xl md:text-2xl text-muted-foreground mb-6">
               Merci pour votre message. Nous vous répondrons dans les plus brefs
               délais.
             </p>
-            <p className="text-muted-foreground mb-8">
+            <p className="text-md md:text-lg lg:text-xl text-muted-foreground mb-8">
               Un accusé de réception a été envoyé à votre adresse email.
             </p>
             <Button onClick={onResetForm}>Envoyer un autre message</Button>
@@ -146,7 +146,7 @@ export function ContactPageView({ showNewsletter = true }: ContactPageViewProps)
       {/* Hero Section */}
       <section className="py-16 hero-gradient text-chart-6">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fade-in-up">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in-up">
             Contact
           </h1>
           <p

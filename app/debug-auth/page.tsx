@@ -37,7 +37,7 @@ export default async function DebugAuthPage() {
 
   return (
     <div className="container mx-auto p-8 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-8">
+      <h1 className="text-3xl md:text-4xl font-bold mb-8">
         🔍 Diagnostic d&apos;Authentification Serveur
       </h1>
 

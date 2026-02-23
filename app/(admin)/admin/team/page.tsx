@@ -26,7 +26,7 @@ export default async function AdminTeamPage() {
         <TeamPageToasts />
       </Suspense>
       <div>
-        <h1 className="text-3xl font-bold">Gestion de l&apos;équipe</h1>
+        <h1 className="text-3xl md:text-4xl font-bold">Gestion de l&apos;équipe</h1>
         <p className="text-muted-foreground mt-2">
           Gérez les membres de votre compagnie : artistes, techniciens,
           administration

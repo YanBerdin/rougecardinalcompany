@@ -158,6 +158,12 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Apply Playfair font to h1/h2 in marketing layout only */
+  .marketing-content h1,
+  .marketing-content h2 {
+    font-family: var(--font-playfair), serif;
+  }
 }
 
 @layer components {

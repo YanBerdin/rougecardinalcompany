@@ -17,7 +17,7 @@ export const revalidate = 0;
 export default function PressePage() {
     return (
         <div className="container mx-auto py-8">
-            <h1 className="text-3xl font-bold mb-6">Gestion Presse</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-6">Gestion Presse</h1>
 
             <Tabs defaultValue="releases" className="w-full">
                 <TabsList className="flex flex-col sm:grid sm:grid-cols-3 w-full h-auto gap-1 sm:gap-0">

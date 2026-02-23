@@ -56,14 +56,14 @@ export function HeroView({
       ))}
 
       {/* Content */}
-      <div className="relative z-10 text-center text-chart-6 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 text-center text-chart-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="animate-fade-in-up">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
             {slides[currentSlide].title}
           </h1>
-          <p className="text-xl md:text-2xl mb-4 text-gray-200">
+          <h2 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-4 text-gray-200">
             {slides[currentSlide].subtitle}
-          </p>
+          </h2>
           <p className="text-lg mb-8 text-gray-200 max-w-2xl mx-auto">
             {slides[currentSlide].description}
           </p>

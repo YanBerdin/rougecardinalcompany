@@ -134,7 +134,7 @@ export function AnalyticsDashboard({
             {/* Header */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Analytics</h1>
+                    <h1 className="text-3xl md:text-4xl font-bold tracking-tight ">Analytics</h1>
                     <p className="text-sm text-muted-foreground sm:text-base">
                         Tableau de bord analytique avec métriques de trafic et visualisations
                     </p>
