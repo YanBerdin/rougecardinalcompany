@@ -92,82 +92,84 @@ export function DisplayTogglesView({
             <Separator />
 
             {/* Homepage Toggles */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Page d&apos;Accueil</CardTitle>
-                    <CardDescription>
-                        Sections affichées sur la homepage
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    {homeToggles.map((toggle) => (
-                        <ToggleCard
-                            key={toggle.key}
-                            toggle={toggle}
-                            onToggle={handleToggle}
-                            isUpdating={updatingKey === toggle.key}
-                        />
-                    ))}
-                </CardContent>
-            </Card>
+            <section className="space-y-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Page d&apos;Accueil</CardTitle>
+                        <CardDescription>
+                            Sections affichées sur la homepage
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {homeToggles.map((toggle) => (
+                            <ToggleCard
+                                key={toggle.key}
+                                toggle={toggle}
+                                onToggle={handleToggle}
+                                isUpdating={updatingKey === toggle.key}
+                            />
+                        ))}
+                    </CardContent>
+                </Card>
 
-            {/* Presse Toggles */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Page Presse</CardTitle>
-                    <CardDescription>Sections affichées sur la page presse</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    {presseToggles.map((toggle) => (
-                        <ToggleCard
-                            key={toggle.key}
-                            toggle={toggle}
-                            onToggle={handleToggle}
-                            isUpdating={updatingKey === toggle.key}
-                        />
-                    ))}
-                </CardContent>
-            </Card>
+                {/* Presse Toggles */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Page Presse</CardTitle>
+                        <CardDescription>Sections affichées sur la page presse</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {presseToggles.map((toggle) => (
+                            <ToggleCard
+                                key={toggle.key}
+                                toggle={toggle}
+                                onToggle={handleToggle}
+                                isUpdating={updatingKey === toggle.key}
+                            />
+                        ))}
+                    </CardContent>
+                </Card>
 
-            {/* Agenda Toggles */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Page Agenda</CardTitle>
-                    <CardDescription>
-                        Sections affichées sur la page agenda
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    {agendaToggles.map((toggle) => (
-                        <ToggleCard
-                            key={toggle.key}
-                            toggle={toggle}
-                            onToggle={handleToggle}
-                            isUpdating={updatingKey === toggle.key}
-                        />
-                    ))}
-                </CardContent>
-            </Card>
+                {/* Agenda Toggles */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Page Agenda</CardTitle>
+                        <CardDescription>
+                            Sections affichées sur la page agenda
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {agendaToggles.map((toggle) => (
+                            <ToggleCard
+                                key={toggle.key}
+                                toggle={toggle}
+                                onToggle={handleToggle}
+                                isUpdating={updatingKey === toggle.key}
+                            />
+                        ))}
+                    </CardContent>
+                </Card>
 
-            {/* Contact Toggles */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Page Contact</CardTitle>
-                    <CardDescription>
-                        Sections affichées sur la page contact
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    {contactToggles.map((toggle) => (
-                        <ToggleCard
-                            key={toggle.key}
-                            toggle={toggle}
-                            onToggle={handleToggle}
-                            isUpdating={updatingKey === toggle.key}
-                        />
-                    ))}
-                </CardContent>
-            </Card>
+                {/* Contact Toggles */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Page Contact</CardTitle>
+                        <CardDescription>
+                            Sections affichées sur la page contact
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {contactToggles.map((toggle) => (
+                            <ToggleCard
+                                key={toggle.key}
+                                toggle={toggle}
+                                onToggle={handleToggle}
+                                isUpdating={updatingKey === toggle.key}
+                            />
+                        ))}
+                    </CardContent>
+                </Card>
+            </section>
         </div>
     );
 }

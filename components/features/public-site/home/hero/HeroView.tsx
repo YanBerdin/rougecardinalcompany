@@ -51,17 +51,32 @@ export function HeroView({
               loading={index === 0 ? "eager" : "lazy"}
             />
           )}
-          <div className="absolute inset-0 bg-black/50" />
+          {/* Dark overlay */}
+          <div className="absolute inset-0 bg-black/60 " />
         </div>
+
       ))}
 
       {/* Content */}
       <div className="relative z-10 text-center text-chart-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Decorative line */}
+        <div
+          className="w-24 h-px bg-white mx-auto mb-8"
+        />
+
+        {/* Subtitle */}
+        {/* //TODO Dynamic Date */}
+        <h4
+          className="text-lg md:text-xl tracking-[0.25em] uppercase text-gold mb-6"
+        >
+          saison 2025 – 2026
+        </h4>
+        {/* Title */}
         <div className="animate-fade-in-up">
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
+          <h1 className="text-gold-gradient text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-loose">
             {slides[currentSlide].title}
           </h1>
-          <h2 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-4 text-gray-200">
+          <h2 className="text-5xl md:text-7xl lg:text-8xl italic font-medium mb-4 text-gray-200">
             {slides[currentSlide].subtitle}
           </h2>
           <p className="text-lg mb-8 text-gray-200 max-w-2xl mx-auto">
@@ -171,6 +186,6 @@ export function HeroView({
           }}
         />
       </div>
-    </section>
+    </section >
   );
 }

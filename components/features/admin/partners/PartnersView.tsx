@@ -326,6 +326,7 @@ export function PartnersView({ initialPartners }: PartnersViewProps) {
         },
         [router, deleteCandidate]
     );
+//TODO: React Hook useCallback has an unnecessary dependency: 'deleteCandidate'. Either exclude it or remove the dependency array.
 
     const handleEdit = useCallback(
         (partner: PartnerDTO) => {

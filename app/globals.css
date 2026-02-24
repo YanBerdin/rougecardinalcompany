@@ -30,9 +30,10 @@
     --chart-1: 0 100% 33.9216%; /* #ad0000 */
     --chart-2: 0 84.739% 51.1765%; /* #ec1919 */
     --chart-3: 0 100% 71.5686%; /* #ff6e6e */
-    --chart-4: 41.0526 65.5172% 94.3137%; /* #faf4e7 */
+    --chart-4: 0 0% 10.9804%; /* #1C1C1C */
     --chart-5: 0 0% 83.1373%; /* #D4D4D4 */
     --chart-6: 0 0% 97%; /* #f7f7f7 vs 0 0% 100% #FFFFFF  */
+    --chart-7: 0 0% 97%; /* #0a0a0a */
 
     --sidebar: 41.0526 65.5172% 94.3137%; /* #faf4e7 */
     --sidebar-foreground: 0 0% 10.9804%; /* #1C1C1C */
@@ -104,9 +105,10 @@
     --chart-1: 4.64, 79.74%, 55.49%; /* #e84133 */
     --chart-2: 0 84.739% 51.1765%; /* #ec1919 */
     --chart-3: 0 100% 71.5686%; /* #ff6e6e */
-    --chart-4: 41.0526 65.5172% 94.3137%; /* #faf4e7 */
+    --chart-4: 0 0% 10.9804%; /* #1C1C1C */
     --chart-5: 0 0% 25.8824%; /* #424242 */
     --chart-6: 0 0% 97%; /* #f7f7f7 vs 0 0% 100% #FFFFFF */
+    --chart-7: 0 0% 9%; /* #0a0a0a */
     --sidebar: 0 0% 10.9804%; /* #1C1C1C */
     --sidebar-foreground: 41.0526 65.5172% 94.3137%; /* #faf4e7 */
     --sidebar-primary: 0 100% 33.9216%; /* #ad0000 */
@@ -159,9 +161,10 @@
     @apply bg-background text-foreground;
   }
 
-  /* Apply Playfair font to h1/h2 in marketing layout only */
+  /* Apply Playfair font to h1/h2/h4 in marketing layout only */
   .marketing-content h1,
-  .marketing-content h2 {
+  .marketing-content h2,
+  .marketing-content h4 {
     font-family: var(--font-playfair), serif;
   }
 }

@@ -95,7 +95,7 @@ export function LogoCloud({
 */}
             <div className="max-w-7xl mx-auto px-6 text-center mb-4">
 
-                <p className="text-sm lg:text-md xl:text-lg text-chart-6/70 max-w-2xl mx-auto">
+                <p className="text-xs lg:text-sm xl:text-md text-chart-6/70 max-w-2xl mx-auto">
                     Nos soutiens et partenaires institutionnels nous accompagnent.
                 </p>
             </div>

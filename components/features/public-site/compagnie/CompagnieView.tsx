@@ -159,7 +159,7 @@ export function CompagnieView({
 
         if (section.kind === "team") {
           return (
-            <section key={section.id} className="py-20 bg-card">
+            <section key={section.id} className="py-20 bg-chart-7">
               <div className="max-w-screen-xl mx-auto px-4 sm:px-4 lg:px-4">
                 <div className="text-center mb-16">
                   {section.title && (
@@ -187,16 +187,16 @@ export function CompagnieView({
                         </div>
                       </div>
                       <div className="space-y-1">
-                        <h3 className="text-lg font-bold tracking-tight">
+                        <h3 className="text-xl font-bold tracking-tight">
                           {member.name}
                         </h3>
                         {member.role && (
-                          <p className="text-primary text-xs font-semibold uppercase tracking-widest">
+                          <p className="text-primary text-sm font-semibold uppercase tracking-widest">
                             {member.role}
                           </p>
                         )}
                         {member.description && (
-                          <p className="text-muted-foreground text-xs leading-relaxed max-w-[200px] mt-3 mx-auto">
+                          <p className="text-muted-foreground text-sm leading-relaxed max-w-[200px] mt-3 mx-auto">
                             {member.description}
                           </p>
                         )}

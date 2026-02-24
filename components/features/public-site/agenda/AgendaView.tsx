@@ -45,7 +45,7 @@ export function AgendaView({
   }
 
   return (
-    <div className="pt-16 bg-card/30">
+    <div className="pt-16 bg-chart-7">
       {/* Hero Section */}
       <section className="py-16 hero-gradient text-chart-6">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -53,7 +53,7 @@ export function AgendaView({
             Agenda
           </h1>
           <p
-            className="text-xl md:text-2xl lg:text-3xl opacity-90 animate-fade-in"
+            className="text-lg md:text-xl lg:text-2xl opacity-90 animate-fade-in"
             style={{ animationDelay: "0.2s" }}
           >
             Retrouvez-nous sur scène
@@ -62,7 +62,7 @@ export function AgendaView({
       </section>
 
       {/* Filtres */}
-      <section className="py-16 bg-card/30">
+      <section className="py-16  bg-chart-7">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center space-x-4 pb-8">
             <Filter className="h-5 w-5 text-muted-foreground" />
@@ -224,7 +224,7 @@ export function AgendaView({
         </div>
       </section>
 
-      <div className="w-full h-16 bg-card/30"></div>
+      <div className="w-full h-16 bg-chart-7"></div>
 
       {/* Newsletter CTA Section */}
       {showNewsletterSection && (
@@ -279,7 +279,7 @@ export function AgendaView({
           </div>
         </section>
       )}
-      <div className="w-full h-16 bg-card/30"></div>
+      <div className="w-full h-16 bg-chart-7"></div>
     </div>
   );
 }

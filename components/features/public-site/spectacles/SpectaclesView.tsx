@@ -49,7 +49,7 @@ export function SpectaclesView({
       </section>
 
       {/* Spectacles Actuels lg:w-[calc(33.333%-1.33rem)] */}
-      <section className="py-16">
+      <section className="py-16 bg-chart-7">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap justify-center gap-16">
             {currentShows.map((show, index) => (
@@ -116,10 +116,10 @@ export function SpectaclesView({
       </section>
 
       {/* Archives */}
-      <section className="py-20 bg-card">
+      <section className="py-20 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Nos Créations Passées</h2>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">Nos Créations Passées</h2>
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
               15 ans de créations théâtrales qui ont marqué notre parcours
             </p>

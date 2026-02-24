@@ -142,7 +142,7 @@ export function ContactPageView({ showNewsletter = true }: ContactPageViewProps)
   }
 
   return (
-    <div className="pt-16 bg-background">
+    <div className="pt-16 bg-chart-7">
       {/* Hero Section */}
       <section className="py-16 hero-gradient text-chart-6">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

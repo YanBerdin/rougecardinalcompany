@@ -8,7 +8,7 @@ export function ToggleCard({ toggle, onToggle, isUpdating }: ToggleCardProps) {
     const sectionName = getSectionName(toggle.key);
 
     return (
-        <div className="flex items-center justify-between space-x-2 rounded-lg border p-4">
+        <div className="flex items-center justify-between space-x-2 rounded-lg border p-4 bg-chart-7 hover:shadow-lg hover:bg-background/50 transition-colors duration-300">
             <div className="flex-1 space-y-0.5">
                 <Label htmlFor={toggle.key} className="text-base font-medium">
                     {sectionName}
