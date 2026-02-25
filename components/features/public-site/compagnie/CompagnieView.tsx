@@ -33,17 +33,17 @@ export function CompagnieView({
           return (
             <section
               key={section.id}
-              className="py-16 hero-gradient text-chart-6"
+              className="py-16 hero-gradient"
             >
               <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 {section.title && (
-                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in-up">
+                  <h1 className="text-4xl md:text-5xl lg:text-6xl text-white font-bold mb-6 animate-fade-in-up">
                     {section.title}
                   </h1>
                 )}
                 {section.subtitle && (
                   <p
-                    className="max-sm:text-lg text-xl md:text-2xl opacity-90 animate-fade-in"
+                    className="max-sm:text-lg text-xl md:text-2xl text-white/80 opacity-90 animate-fade-in"
                     style={{ animationDelay: "0.2s" }}
                   >
                     {section.subtitle}
@@ -56,14 +56,14 @@ export function CompagnieView({
 
         if (section.kind === "history") {
           return (
-            <section key={section.id} className="py-20">
+            <section key={section.id} className="py-24 bg-chart-7">
               <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
                   <div className="animate-fade-in-up">
                     {section.title && (
-                      <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+                      <h3 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-6">
                         {section.title}
-                      </h2>
+                      </h3>
                     )}
                     {section.content?.map((p: string, i: number) => (
                       <p
@@ -90,9 +90,9 @@ export function CompagnieView({
 
         if (section.kind === "quote" && section.quote) {
           return (
-            <section key={section.id} className="pt-0 -mt-12">
+            <section key={section.id} className="pt-0 -mt-12 bg-chart-7">
               <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="bg-muted/30 rounded-2xl p-8 mb-16">
+                <div className="bg-card rounded-2xl p-8">
                   <div className="flex items-start space-x-4">
                     <Quote className="h-8 w-8 text-primary flex-shrink-0 mt-1" />
                     <div>
@@ -106,6 +106,7 @@ export function CompagnieView({
                       )}
                     </div>
                   </div>
+                  <div className="w-full h-24 bg-chart-7"></div>
                 </div>
               </div>
             </section>
@@ -114,13 +115,13 @@ export function CompagnieView({
 
         if (section.kind === "values") {
           return (
-            <section key={section.id} className="py-20 bg-muted/30">
+            <section key={section.id} className="py-24 bg-muted/30">
               <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-16">
                   {section.title && (
-                    <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
+                    <h3 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">
                       {section.title}
-                    </h2>
+                    </h3>
                   )}
                   {section.subtitle && (
                     <p className="text-md md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -141,9 +142,9 @@ export function CompagnieView({
                           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-lg mb-4">
                             <Icon className="h-8 w-8 text-primary" />
                           </div>
-                          <h3 className="text-xl font-semibold mb-3">
+                          <h4 className="text-2xl font-semibold mb-3">
                             {value.title}
-                          </h3>
+                          </h4>
                           <p className="text-muted-foreground">
                             {value.description}
                           </p>
@@ -159,14 +160,14 @@ export function CompagnieView({
 
         if (section.kind === "team") {
           return (
-            <section key={section.id} className="py-20 bg-chart-7">
+            <section key={section.id} className="py-24 bg-chart-7">
               <div className="max-w-screen-xl mx-auto px-4 sm:px-4 lg:px-4">
                 <div className="text-center mb-16">
                   {section.title && (
-                    <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">{section.title}</h2>
+                    <h3 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">{section.title}</h3>
                   )}
                   {section.subtitle && (
-                    <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                    <p className="text-lg md:text-xl lg:text-xl text-muted-foreground max-w-2xl mx-auto">
                       {section.subtitle}
                     </p>
                   )}
@@ -211,15 +212,15 @@ export function CompagnieView({
 
         if (section.kind === "mission") {
           return (
-            <section key={section.id} className="py-20 hero-gradient">
+            <section key={section.id} className="py-24 hero-gradient">
               <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 {section.title && (
-                  <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-white">
+                  <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-white">
                     {section.title}
-                  </h2>
+                  </h3>
                 )}
                 {section.content?.[0] && (
-                  <p className="text-xl md:text-2xl lg:text-2xl text-white/90 mb-8 leading-relaxed">
+                  <p className="text-xl md:text-2xl lg:text-2xl text-white/80 mb-8 leading-relaxed">
                     {section.content[0]}
                   </p>
                 )}

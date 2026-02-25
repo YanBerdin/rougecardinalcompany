@@ -70,7 +70,7 @@ export function NewsletterView({
   }
 
   return (
-    <section className="py-16 hero-gradient">
+    <section className="py-24 hero-gradient">
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 gap-x-8 lg:gap-y-6 lg:grid-cols-[3fr_2fr] max-sm:px-4">
         {/* Colonne gauche */}
@@ -79,9 +79,9 @@ export function NewsletterView({
             <p className="text-md md:text-lg lg:text-xl text-white/80 ">
               Dernier acte : Newsletter
             </p>
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight">
+            <h3 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-white leading-tight">
               Restez dans les coulisses
-            </h2>
+            </h3>
             <div className="h-px w-24 xl:w-72 bg-white/40 my-6"></div>
           </div>
         </dl>

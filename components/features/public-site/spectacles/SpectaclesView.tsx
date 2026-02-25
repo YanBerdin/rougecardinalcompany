@@ -34,13 +34,13 @@ export function SpectaclesView({
   return (
     <div className="pt-16">
       {/* Hero Section */}
-      <section className="py-8 lg:py-12 hero-gradient text-chart-6">
+      <section className="py-8 lg:py-12 hero-gradient">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in-up">
+          <h1 className="text-white text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in-up">
             À l&apos;Affiche
           </h1>
           <p
-            className="text-lg md:text-xl lg:text-2xl text-chart-6 opacity-90 animate-fade-in"
+            className="text-lg md:text-xl lg:text-2xl text-white/80 opacity-90 animate-fade-in"
             style={{ animationDelay: "0.2s" }}
           >
             Nos créations actuellement en représentation
@@ -116,10 +116,10 @@ export function SpectaclesView({
       </section>
 
       {/* Archives */}
-      <section className="py-20 bg-background">
+      <section className="py-20 bg-chart-7/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">Nos Créations Passées</h2>
+            <h3 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">Nos Créations Passées</h3>
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
               15 ans de créations théâtrales qui ont marqué notre parcours
             </p>
@@ -129,7 +129,7 @@ export function SpectaclesView({
             {displayedArchivedShows.map((show, index) => (
               <Card
                 key={show.id}
-                className={`card-hover animate-fade-in-up overflow-hidden w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] xl:w-[calc(25%-1.125rem)] max-w-xs group border-0 shadow-none bg-transparent hover:bg-secondary`}
+                className={`card-hover animate-fade-in-up overflow-hidden w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] xl:w-[calc(25%-1.125rem)] max-w-xs group border-0 shadow-none bg-transparent`}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <Link href={getSpectacleUrl(show)} className="block">

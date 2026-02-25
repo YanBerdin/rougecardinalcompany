@@ -142,15 +142,15 @@ export function ContactPageView({ showNewsletter = true }: ContactPageViewProps)
   }
 
   return (
-    <div className="pt-16 bg-chart-7">
+    <div className="pt-16">
       {/* Hero Section */}
-      <section className="py-16 hero-gradient text-chart-6">
+      <section className="py-16 hero-gradient">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in-up">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl text-white font-bold mb-6 animate-fade-in-up">
             Contact
           </h1>
           <p
-            className="text-xl md:text-2xl opacity-90 animate-fade-in"
+            className="text-xl md:text-2xl text-white/80 opacity-90 animate-fade-in"
             style={{ animationDelay: "0.2s" }}
           >
             Échangeons autour de nos projets
@@ -158,14 +158,14 @@ export function ContactPageView({ showNewsletter = true }: ContactPageViewProps)
         </div>
       </section>
 
-      <div className="py-20">
+      <div className="py-24 bg-chart-7/50">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {/* Formulaire de contact */}
             <div className="lg:col-span-2">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-2xl">Écrivez-nous</CardTitle>
+                  <CardTitle className="text-2xl md:text-3xl">Écrivez-nous</CardTitle>
                   <p className="text-muted-foreground">
                     Remplissez ce formulaire et nous vous répondrons rapidement.
                   </p>

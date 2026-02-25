@@ -20,11 +20,11 @@ export function PresseView({
       {/* Hero Section */}
       <section className="py-16 hero-gradient">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in-up text-chart-6">
-            Espace Presse
+          <h1 className="text-5xl lg:text-6xl font-bold mb-6 animate-fade-in-up text-white">
+            Espace Média
           </h1>
           <p
-            className="text-xl md:text-2xl opacity-90 animate-fade-in text-chart-6"
+            className="text-lg md:text-xl lg:text-2xl opacity-90 animate-fade-in text-white/80"
             style={{ animationDelay: "0.2s" }}
           >
             Ressources et actualités pour les médias
@@ -33,7 +33,7 @@ export function PresseView({
       </section>
 
       {/* Contact Presse */}
-      <section className="py-12 bg-muted/30">
+      <section className="pt-24 bg-chart-7">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <Card>
             <CardContent className="p-6">
@@ -64,61 +64,12 @@ export function PresseView({
         </div>
       </section>
 
-      {/* Communiqués de Presse */}
-      {pressReleases.length > 0 && (
-        <section className="py-20">
-          <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">Communiqués de Presse</h2>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Les dernières actualités officielles de la compagnie
-              </p>
-            </div>
-
-            <div className="flex flex-wrap justify-center gap-8">
-              {pressReleases.map((release, index) => (
-                <Card
-                  key={release.id}
-                  className={`card-hover animate-fade-in-up w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm flex flex-col`}
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  <CardHeader>
-                    <div className="flex items-center justify-between mb-2">
-                      <Badge variant="outline">
-                        {new Date(release.date).toLocaleDateString("fr-FR")}
-                      </Badge>
-                      <span className="text-sm text-muted-foreground">
-                        {release.fileSize}
-                      </span>
-                    </div>
-                    <CardTitle className="text-lg">{release.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex-1 flex flex-col">
-                    <p className="text-muted-foreground mb-4 text-sm leading-relaxed flex-1">
-                      {release.description}
-                    </p>
-                    <Button
-                      variant="secondary"
-                      className="w-full mt-auto" asChild>
-                      <Link href={release.fileUrl} download>
-                        <Download className="mr-2 h-4 w-4" />
-                        Télécharger le PDF
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
       {/* Revue de Presse */}
-      <section className="py-20 bg-card">
+      <section className="py-24 bg-chart-7">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">Revue de Presse</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <h3 className="text-3xl md:text-3xl lg:text-4xl font-bold mb-4">Revue de Presse</h3>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
               Ce que les médias disent de Rouge-Cardinal
             </p>
           </div>
@@ -198,13 +149,99 @@ export function PresseView({
         </div>
       </section>
 
-      {/* Kit Média */}
-      {mediaKit.length > 0 && (
-        <section className="py-20">
+      {/* Communiqués de Presse */}
+      {pressReleases.length > 0 && (
+        <section className="py-24">
           <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">Kit Média</h2>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              <h3 className="text-3xl md:text-3xl lg:text-4xl font-bold mb-4">Communiqués de Presse</h3>
+              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+                Les dernières actualités officielles de la compagnie
+              </p>
+            </div>
+
+            <div className="flex flex-wrap justify-center gap-8">
+              {pressReleases.map((release, index) => (
+                <Card
+                  key={release.id}
+                  className={`card-hover animate-fade-in-up w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm flex flex-col`}
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <CardHeader>
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge variant="outline">
+                        {new Date(release.date).toLocaleDateString("fr-FR")}
+                      </Badge>
+                      <span className="text-sm text-muted-foreground">
+                        {release.fileSize}
+                      </span>
+                    </div>
+                    <CardTitle className="text-lg">{release.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex-1 flex flex-col">
+                    <p className="text-muted-foreground mb-4 text-sm leading-relaxed flex-1">
+                      {release.description}
+                    </p>
+                    <Button
+                      variant="secondary"
+                      className="w-full mt-auto" asChild>
+                      <Link href={release.fileUrl} download>
+                        <Download className="mr-2 h-4 w-4" />
+                        Télécharger le PDF
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Accréditation */}
+      <section className="py-24 hero-gradient">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h3 className="text-3xl lg:text-4xl font-semibold mb-6 text-white animate-fade-in-up">
+            Demande d&apos;Accréditation
+          </h3>
+          <p className="text-lg md:text-xl lg:text-2xl text-white/80 mb-8">
+            Journalistes et critiques, demandez votre accréditation pour nos
+            spectacles
+          </p>
+          <div className="text-md md:text-lg lg:text-xl space-y-4 text-white/80 mb-8">
+            <p>
+              Pour toute demande d&apos;accréditation, merci d&apos;envoyer un
+              email à
+              <strong className="text-white"> presse@rouge-cardinal.fr</strong>{" "}
+              en précisant :
+            </p>
+            <ul className="text-left max-w-md mx-auto space-y-2">
+              <li>• Votre nom et média</li>
+              <li>• Le spectacle qui vous intéresse</li>
+              <li>• La date souhaitée</li>
+              <li>• Votre carte de presse</li>
+            </ul>
+          </div>
+          <Button
+            variant="outline"
+            size="lg"
+            className="bg-white/30 border-white/50 text-white backdrop-blur-md hover:bg-sidebar-primary-foreground hover:text-primary transition-all duration-300 shadow-lg border"
+            asChild
+          >
+            <Link href="mailto:presse@rouge-cardinal.fr?subject=Demande%20d%27accr%C3%A9ditation">
+              Faire une demande
+            </Link>
+          </Button>
+        </div>
+      </section>
+
+      {/* Kit Média */}
+      {mediaKit.length > 0 && (
+        <section className="py-24 bg-chart-7">
+          <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h3 className="text-3xl lg:text-4xl font-bold mb-4">Kit Média</h3>
+              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
                 Ressources haute qualité pour vos publications
               </p>
             </div>
@@ -246,42 +283,7 @@ export function PresseView({
         </section>
       )}
 
-      {/* Accréditation */}
-      <section className="py-16 hero-gradient">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-sidebar-primary-foreground">
-            Demande d&apos;Accréditation
-          </h2>
-          <p className="text-xl md:text-2xl text-sidebar-primary-foreground/90 mb-8">
-            Journalistes et critiques, demandez votre accréditation pour nos
-            spectacles
-          </p>
-          <div className="text-md md:text-lg lg:text-xl space-y-4 text-sidebar-primary-foreground/90 mb-8">
-            <p>
-              Pour toute demande d&apos;accréditation, merci d&apos;envoyer un
-              email à
-              <strong className="text-sidebar-primary-foreground"> presse@rouge-cardinal.fr</strong>{" "}
-              en précisant :
-            </p>
-            <ul className="text-left max-w-md mx-auto space-y-2">
-              <li>• Votre nom et média</li>
-              <li>• Le spectacle qui vous intéresse</li>
-              <li>• La date souhaitée</li>
-              <li>• Votre carte de presse</li>
-            </ul>
-          </div>
-          <Button
-            variant="outline"
-            size="lg"
-            className="bg-white/30 border-white/50 text-sidebar-primary-foreground backdrop-blur-md hover:bg-sidebar-primary-foreground hover:text-black transition-all duration-300 shadow-lg border"
-            asChild
-          >
-            <Link href="mailto:presse@rouge-cardinal.fr?subject=Demande%20d%27accr%C3%A9ditation">
-              Faire une demande
-            </Link>
-          </Button>
-        </div>
-      </section>
     </div>
   );
 }
+//TODO: <Link href="mailto:presse@rouge-cardinal.fr?subject=Demande%20d%27accr%C3%A9ditation"> dynamic

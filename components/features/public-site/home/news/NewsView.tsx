@@ -11,10 +11,10 @@ export function NewsView({ news }: NewsViewProps) {
   }
 
   return (
-    <section className="py-20 bg-background">
+    <section className="py-24 bg-background">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">À la Une</h2>
+          <h3 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">À la Une</h3>
           <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
             Suivez l&apos;actualité de la compagnie Rouge-Cardinal
           </p>

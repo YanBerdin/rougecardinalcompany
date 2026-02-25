@@ -122,7 +122,7 @@ export default function Header() {
                 href={item.href}
                 className={cn(
                   "nav-link-glass text-xs sm:text-sm md:text-md px-2 lg:px-3 py-1 font-medium whitespace-nowrap transition-all duration-300 relative z-10",
-                  pathname === item.href ? "text-primary font-bold active" : headerTextColor
+                  pathname === item.href ? "text-primary active" : headerTextColor
                 )}
               >
                 {item.name}

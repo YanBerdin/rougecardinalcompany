@@ -88,12 +88,12 @@ export function SpectacleDetailView({
             aria-label={`Détails du spectacle ${spectacle.title}`}
         >
             {/* Skip to content link for keyboard navigation */}
-            <a
+            <Link
                 href="#spectacle-title"
                 className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:font-bold"
             >
                 Aller au contenu principal
-            </a>
+            </Link>
 
             {/* Informations Pratiques - Horizontal Bar */}
             <section className="py-8 lg:py-12 bg-card flex justify-between" aria-label="Informations pratiques">

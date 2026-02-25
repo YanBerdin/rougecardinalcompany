@@ -69,32 +69,41 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        cardinal: {
+          DEFAULT: "#A60303",
+          dark: "#5E0202",
+          light: "#C42727",
+        },
+        ecru: {
+          DEFAULT: "#F2EDE4",
+          dark: "#E5DFD4",
+          light: "#FAF7F0",
+        },
+        night: {
+          DEFAULT: "#070707",
+          light: "#1A1A1A",
+          lighter: "#27201f",
+        },
+        alabaster: {
+          DEFAULT: "#f6f2e6",
+          dark: "#ede8d9",
+          darker: "#e4dfc8",
+        },
+        gold: {
+          DEFAULT: "hsl(var(--gold))",
+          light: "hsl(var(--gold-light))",
+          dark: "hsl(var(--gold-dark))",
+        },
+        curtain: {
+          DEFAULT: "hsl(var(--curtain))",
+          deep: "hsl(var(--curtain-deep))",
+        },
       },
       borderRadius: {
         xl: "calc(var(--radius) + 4px)",
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
-      },
-      cardinal: {
-        DEFAULT: "#A60303",
-        dark: "#5E0202",
-        light: "#C42727",
-      },
-      ecru: {
-        DEFAULT: "#F2EDE4",
-        dark: "#E5DFD4",
-        light: "#FAF7F0",
-      },
-      night: {
-        DEFAULT: "#070707",
-        light: "#1A1A1A",
-        lighter: "#27201f",
-      },
-      alabaster: {
-        DEFAULT: "#f6f2e6",
-        dark: "#ede8d9",
-        darker: "#e4dfc8",
       },
       backgroundImage: {
         "gradient-cardinal":

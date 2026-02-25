@@ -23,7 +23,7 @@ export function HeroView({
   }
   return (
     <section
-      className="relative h-screen flex items-center justify-center overflow-hidden select-none"
+      className="relative h-screen flex items-center justify-center overflow-hidden select-none "
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
@@ -45,14 +45,14 @@ export function HeroView({
               alt={slide.title || "Hero slide"}
               fill
               sizes="100vw"
-              className="object-cover"
+              className="object-cover blur-[1px]"
               priority={index === 0}
               fetchPriority={index === 0 ? "high" : "auto"}
               loading={index === 0 ? "eager" : "lazy"}
             />
           )}
           {/* Dark overlay */}
-          <div className="absolute inset-0 bg-black/60 " />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.55),rgba(0,0,0,0.85))]" />
         </div>
 
       ))}
@@ -61,25 +61,25 @@ export function HeroView({
       <div className="relative z-10 text-center text-chart-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Decorative line */}
         <div
-          className="w-24 h-px bg-white mx-auto mb-8"
+          className="w-24 h-px bg-gold mx-auto mb-8"
         />
 
         {/* Subtitle */}
         {/* //TODO Dynamic Date */}
         <h4
-          className="text-lg md:text-xl tracking-[0.25em] uppercase text-gold mb-6"
+          className="text-lg md:text-2xl tracking-[0.25em] uppercase text-gold mb-6"
         >
           saison 2025 – 2026
         </h4>
         {/* Title */}
         <div className="animate-fade-in-up">
-          <h1 className="text-gold-gradient text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-loose">
+          <h1 className=" text-chart-6 text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-loose">
             {slides[currentSlide].title}
           </h1>
-          <h2 className="text-5xl md:text-7xl lg:text-8xl italic font-medium mb-4 text-gray-200">
+          <h2 className="text-5xl md:text-7xl lg:text-8xl italic font-medium mb-4 text-gold-gradient ">
             {slides[currentSlide].subtitle}
           </h2>
-          <p className="text-lg mb-8 text-gray-200 max-w-2xl mx-auto">
+          <p className="text-lg mb-8 text-chart-6 max-w-2xl mx-auto">
             {slides[currentSlide].description}
           </p>
 

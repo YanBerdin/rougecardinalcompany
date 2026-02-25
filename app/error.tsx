@@ -27,7 +27,7 @@ export default function Error({ error, reset }: ErrorProps) {
         <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
             <div className="max-w-md text-center">
                 <AlertTriangle className="mx-auto mb-4 h-16 w-16 text-amber-500" />
-                <h1 className="mb-2 text-2xl font-bold">Une erreur est survenue</h1>
+                <h1 className="mb-2 text-5xl font-bold">Une erreur est survenue</h1>
                 <p className="mb-6 text-muted-foreground">
                     Nous sommes désolés, quelque chose s&apos;est mal passé. Veuillez
                     réessayer.
@@ -37,7 +37,7 @@ export default function Error({ error, reset }: ErrorProps) {
                         <RefreshCw className="mr-2 h-4 w-4" />
                         Réessayer
                     </Button>
-                    <Button variant="outline" asChild>
+                    <Button variant="secondary" asChild>
                         <Link href="/">
                             <Home className="mr-2 h-4 w-4" />
                             Accueil

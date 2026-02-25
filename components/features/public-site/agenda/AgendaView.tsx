@@ -45,15 +45,15 @@ export function AgendaView({
   }
 
   return (
-    <div className="pt-16 bg-chart-7">
+    <div className="pt-16">
       {/* Hero Section */}
-      <section className="py-16 hero-gradient text-chart-6">
+      <section className="py-16 hero-gradient">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in-up">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl text-white font-bold mb-6 animate-fade-in-up">
             Agenda
           </h1>
           <p
-            className="text-lg md:text-xl lg:text-2xl opacity-90 animate-fade-in"
+            className="text-lg md:text-xl lg:text-2xl text-white/80 opacity-90 animate-fade-in"
             style={{ animationDelay: "0.2s" }}
           >
             Retrouvez-nous sur scène
@@ -83,7 +83,6 @@ export function AgendaView({
 
 
         {/* Liste des événements */}
-
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="space-y-6">
             {events.map((event, index) => (
@@ -236,9 +235,9 @@ export function AgendaView({
                 <p className="text-md lg:text-lg text-white/80">
                   Dernier acte : Newsletter
                 </p>
-                <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight">
+                <h3 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-white leading-tight">
                   Restez dans les coulisses
-                </h2>
+                </h3>
                 <div className="h-px w-24 xl:w-72 bg-white/40 my-6"></div>
               </div>
             </dl>
@@ -279,7 +278,7 @@ export function AgendaView({
           </div>
         </section>
       )}
-      <div className="w-full h-16 bg-chart-7"></div>
+      <div className="w-full h-32 bg-chart-7"></div>
     </div>
   );
 }

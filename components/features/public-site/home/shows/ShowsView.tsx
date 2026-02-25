@@ -7,10 +7,10 @@ import { ShowsViewProps } from "./types";
 
 export function ShowsView({ shows }: ShowsViewProps) {
   return (
-    <section className="py-16 bg-chart-7">
+    <section className="py-24 bg-chart-7">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">Prochains Événements</h2>
+          <h3 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">Prochains Événements</h3>
           <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
             Découvrez notre programmation et réservez vos places
           </p>
