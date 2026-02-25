@@ -116,7 +116,7 @@ Utiliser la clé **service_role** qui bypass les politiques RLS pour les scripts
 
 1. Allez sur votre dashboard Supabase :
 
-   ```bash
+```bash
    https://supabase.com/dashboard/project/yvtrlvmbofklefxcxrzv/settings/api
    ```
 

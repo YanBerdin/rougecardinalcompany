@@ -4,7 +4,9 @@
 > **Conformité** : 100% Clean Code + TypeScript Strict
 
 ## Problème Initial
+
 Double validation des URLs d'images:
+
 - **Client**: ImageFieldGroup appelle validateImageUrl() avec debounce (UX feedback)
 - **Serveur**: 4 modules validatent à nouveau avant DB (home, team, spectacles)
 - **Gap**: Press et Partners manquent de validation serveur
@@ -12,6 +14,7 @@ Double validation des URLs d'images:
 **Résultat**: 2 appels réseau pour valider la même URL + validation serveur incohérente
 
 ## Solution Implémentée
+
 Consolidation de la validation serveur dans les schemas Zod via custom refinement réutilisable, économisant un appel réseau au submit tout en maintenant la validation UX client.
 
 ---
@@ -19,6 +22,7 @@ Consolidation de la validation serveur dans les schemas Zod via custom refinemen
 ## Architecture
 
 ### Avant
+
 ```yaml
 Form Input → Client validateImageUrl() [debounce]
                         ↓
@@ -30,6 +34,7 @@ Form Input → Client validateImageUrl() [debounce]
 ```
 
 ### Après
+
 ```yaml
 Form Input → Client validateImageUrl() [debounce pour UX]
                         ↓
@@ -48,17 +53,21 @@ Form Input → Client validateImageUrl() [debounce pour UX]
 ## Implémentation Réelle (5 Phases)
 
 ### Phase 1: Créer Refinement Zod Réutilisable ✅
-**Fichiers**: 
+
+**Fichiers**:
+
 - `lib/utils/image-validation-server.ts` (CRÉÉ - Server Actions)
 - `lib/utils/image-validation-refinements.ts` (CRÉÉ - Helper non-server)
 
 **Architecture** : Séparation en 2 fichiers pour respecter les contraintes Next.js 16 :
+
 - ✅ Fichier `"use server"` avec fonctions async uniquement
 - ✅ Fichier helper sans `"use server"` pour construction de schema
 
 **Implémentation finale** :
 
 **Fichier 1 : `image-validation-server.ts`** (Server Actions)
+
 ```typescript
 "use server";
 import { validateImageUrl, type ImageValidationResult } from "./validate-image-url";
@@ -98,6 +107,7 @@ export async function imageUrlRefinementError(
 ```
 
 **Fichier 2 : `image-validation-refinements.ts`** (Helper)
+
 ```typescript
 import { z } from "zod";
 import { imageUrlRefinement, imageUrlRefinementError } from "./image-validation-server";
@@ -119,6 +129,7 @@ export function addImageUrlValidation<TSchema extends z.ZodString>(
 ```
 
 **Points clés implémentation réelle** :
+
 - ✅ **Séparation obligatoire** : Next.js 16 exige que tous les exports d'un fichier `"use server"` soient des fonctions async
 - ✅ `image-validation-server.ts` : fonctions async avec `"use server"`
 - ✅ `image-validation-refinements.ts` : helper **sans** `"use server"` (pas une Server Action)
@@ -136,6 +147,7 @@ export function addImageUrlValidation<TSchema extends z.ZodString>(
 - ✅ Gestion explicite des erreurs avec types `unknown`
 
 ### Phase 2: Intégrer Refinements dans Schemas ✅
+
 Modifier schemas d'input (pas form schemas) pour ajouter refinement:
 
 | Schéma | Field | Status | Notes |
@@ -166,11 +178,13 @@ export const HeroSlideInputSchema = z.object({
 ```
 
 **Corrections TypeScript appliquées** :
+
 - ✅ Typage explicite des paramètres `val` dans les `.transform()` de `press-article.ts` et `press-release.ts`
   - Avant : `.transform(val => val === "" ? null : val)` ❌
   - Après : `.transform((val: string | null | undefined) => val === "" ? null : val)` ✅
 
 ### Phase 3: Supprimer Validation Dupliquée dans Server Actions ✅
+
 Éliminer les blocs `validateImageUrl()` manuels:
 
 | Fichier | Fonctions | Status | Corrections supplémentaires |
@@ -199,6 +213,7 @@ const result = await createHeroSlide(validated);
 ```
 
 **Fichiers modifiés** :
+
 - `home-hero-actions.ts` : 3 assertions remplacées par déclarations
 - `home-about-actions.ts` : 1 assertion remplacée par déclaration
 - `team/actions.ts` : Déjà conforme (utilisait déjà des déclarations)
@@ -206,6 +221,7 @@ const result = await createHeroSlide(validated);
 Le schema `.parse()` valide automatiquement via refinement, éliminant la double validation.
 
 ### Phase 4: Ajouter Validation Manquante à Press & Partners ✅
+
 Assurer que press/actions.ts et partners/actions.ts valident via schema (rien de spécial - juste le .parse()).
 
 **Résultat** : Les refinements dans les schemas (Phase 2) gèrent la validation automatiquement.
@@ -215,13 +231,16 @@ Assurer que press/actions.ts et partners/actions.ts valident via schema (rien de
 - ✅ `partners.ts` : `logo_url` validé via `PartnerInputSchema` (validation manquante ajoutée)
 
 ### Phase 5: Tests & Vérification ✅
+
 **TypeScript Validation** :
+
 ```bash
 pnpm tsc --noEmit
 # ✅ Aucune erreur liée au refactor
 ```
 
 **Vérifications effectuées** :
+
 - ✅ Tous les schemas importent correctement `addImageUrlValidation`
 - ✅ Aucune validation manuelle restante dans les Server Actions
 - ✅ Typage strict respecté (pas de `any`, pas de `as` dangereux)
@@ -229,6 +248,7 @@ pnpm tsc --noEmit
 - ✅ Conformité TypeScript (paramètres typés, génériques descriptifs)
 
 **Tests manuels recommandés** :
+
 - [ ] Tester chaque form avec URLs valides et invalides
 - [ ] Vérifier erreurs sont cohérentes client/serveur
 - [ ] Confirmer pas de double hit réseau au submit
@@ -278,6 +298,7 @@ components/
 ## Points Clés d'Implémentation Réelle
 
 ### Async Refinement dans Zod (Implémentation Finale)
+
 ```typescript
 // ✅ Pattern utilisé : superRefine pour messages détaillés
 export function addImageUrlValidation<TSchema extends z.ZodString>(
@@ -297,31 +318,37 @@ export function addImageUrlValidation<TSchema extends z.ZodString>(
 ```
 
 **Choix techniques** :
+
 - ✅ `.superRefine()` au lieu de `.refine()` pour messages d'erreur riches
 - ✅ Type de retour inféré (Zod v4 ne supporte pas `z.ZodEffects`)
 - ✅ Typage explicite des paramètres callback pour TypeScript strict
 - ✅ Async supporté nativement par Zod (le `.parse()` reste async dans Server Actions)
 
 ### Error Messages
+
 Tous les messages d'erreur viennent de `validateImageUrl()`:
+
 - ✅ Client voit le même message que serveur
 - ✅ Cohérence UX améliorée
 - ✅ Debugging plus facile
 - ✅ Messages détaillés : SSRF, format invalide, erreur réseau
 
 ### ImageFieldGroup.tsx
+
 **Aucun changement effectué** - reste comme est pour UX rapide.
 L'appel `validateImageUrl` du composant est du feedback utilisateur, pas de validation fonctionnelle.
 
 ### Conformité Clean Code & TypeScript
 
 **Clean Code** :
+
 - ✅ Pas de commentaires inline (code auto-explicatif)
 - ✅ Fonctions < 30 lignes
 - ✅ Variables avec noms descriptifs (`imageUrlRefinement`, `imageUrlRefinementError`)
 - ✅ Types explicites partout
 
 **TypeScript Strict** :
+
 - ✅ Génériques descriptifs : `TSchema` (pas `T`)
 - ✅ Paramètres typés explicitement
 - ✅ Pas de type assertions dangereuses (`as`)
@@ -334,6 +361,7 @@ L'appel `validateImageUrl` du composant est du feedback utilisateur, pas de vali
 ## Vérification End-to-End
 
 **Test manuel pour chaque form:**
+
 1. Entrer image URL valide → InputField valide en temps réel ✓
 2. Cliquer Soumettre → Pas d'erreur serveur ✓
 3. Entrer image URL invalide → InputField montre erreur avec détails ✓
@@ -341,6 +369,7 @@ L'appel `validateImageUrl` du composant est du feedback utilisateur, pas de vali
 5. Vérifier Network tab → Pas de double validateImageUrl call au submit ✓
 
 **Vérifier pas de régression:**
+
 - Spectacles publiés sans image ne sont pas acceptés
 - Press releases requirent image validée
 - Partner images sont validées avant save
@@ -361,7 +390,8 @@ L'appel `validateImageUrl` du composant est du feedback utilisateur, pas de vali
 ## Résumé Final des Changements
 
 ### Fichiers Modifiés
-- **2 fichiers créés** : 
+
+- **2 fichiers créés** :
   - `lib/utils/image-validation-server.ts` (52 lignes - Server Actions)
   - `lib/utils/image-validation-refinements.ts` (21 lignes - Helper)
 - **10 fichiers modifiés** :
@@ -372,18 +402,21 @@ L'appel `validateImageUrl` du composant est du feedback utilisateur, pas de vali
   - **11 Server Actions** : `presse/actions.ts` (4), `team/actions.ts` (2), `home-about-actions.ts` (1), `home-hero-actions.ts` (2), `partners/actions.ts` (2)
 
 ### Statistiques de Code
+
 - **~100 lignes supprimées** (validation dupliquée dans Server Actions)
 - **~73 lignes ajoutées** (refinements réutilisables : 52 + 21)
 - **~30 lignes modifiées** (corrections TypeScript dans schemas/actions)
 - **Net : ~43 lignes ajoutées** (code plus maintenable et type-safe)
 
 ### Contraintes Next.js 16 Respectées
+
 - ✅ **Séparation obligatoire** : fichiers `"use server"` avec exports async uniquement
 - ✅ Build Turbopack sans erreur : `Server Actions must be async functions`
 - ✅ TypeScript strict : 0 erreur de compilation
 - ✅ **Validation async** : tous les DAL utilisent `.parseAsync()` / `.safeParseAsync()` (5 fichiers corrigés)
 
 ### DAL Corrigés pour Validation Async
+
 | Fichier DAL | Fonction | Changement |
 |------------|----------|------------|
 | `lib/dal/spectacles.ts` | `validateCreateInput` | `.safeParse()` → `.safeParseAsync()` |
@@ -394,6 +427,7 @@ L'appel `validateImageUrl` du composant est du feedback utilisateur, pas de vali
 | `lib/dal/admin-home-about.ts` | `updateAboutContent` | `.parse()` → `.parseAsync()` |
 
 ### Server Actions Corrigés pour Validation Async
+
 | Fichier Server Action | Fonction | Changement |
 |----------------------|----------|------------|
 | `app/(admin)/admin/presse/actions.ts` | `createPressReleaseAction` | `.parse()` → `.parseAsync()` |
@@ -409,6 +443,7 @@ L'appel `validateImageUrl` du composant est du feedback utilisateur, pas de vali
 | `app/(admin)/admin/partners/actions.ts` | `updatePartnerAction` | `.partial().parse()` → `.partial().parseAsync()` |
 
 ### Améliorations
+
 - ✅ **Zéro changement UX** (client-side validation intact)
 - ✅ **Un appel réseau économisé** par form submission
 - ✅ **100% TypeScript strict** (pas de `any`, pas de `as` dangereux)
@@ -419,6 +454,7 @@ L'appel `validateImageUrl` du composant est du feedback utilisateur, pas de vali
 - ✅ **Next.js 16 compliant** (séparation Server Actions / helpers)
 
 ### Impact Performance
+
 - **Avant** : 2 appels `validateImageUrl()` (client debounce + serveur action)
 - **Après** : 1 appel `validateImageUrl()` (client debounce pour UX uniquement, serveur via schema)
 - **Économie** : ~300-500ms par form submission (selon latence réseau)
@@ -448,12 +484,14 @@ const validated = await MySchema.safeParseAsync(input);
 **Fichiers corrigés** :
 
 **6 fichiers DAL** :
+
 - `lib/dal/spectacles.ts` : `validateCreateInput`, `validateUpdateInput`
 - `lib/dal/team.ts` : `upsertTeamMember`
 - `lib/dal/admin-home-hero.ts` : `createHeroSlide`, `updateHeroSlide`
 - `lib/dal/admin-home-about.ts` : `updateAboutContent`
 
 **11 Server Actions** :
+
 - `app/(admin)/admin/presse/actions.ts` : `createPressReleaseAction`, `updatePressReleaseAction`, `createArticleAction`, `updateArticleAction`
 - `app/(admin)/admin/team/actions.ts` : `createTeamMember`, `updateTeamMember`
 - `app/(admin)/admin/home/about/home-about-actions.ts` : `updateAboutContentAction`

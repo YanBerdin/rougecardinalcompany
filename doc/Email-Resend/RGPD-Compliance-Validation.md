@@ -65,7 +65,7 @@
 ### Schéma Déclaratif (`Declarative_Database_Schema.Instructions.md`)
 
 | Règle | Statut | Détail |
-|-------|--------|--------|
+| ------- | -------- | -------- |
 | Modifications dans `supabase/schemas/` | ✅ | `10_tables_system.sql` |
 | Pas de modification directe dans `migrations/` | ✅ | Aucune migration manuelle |
 | État final désiré | ✅ | Politiques RLS représentent l'état souhaité |
@@ -75,7 +75,7 @@
 ### Politiques RLS (`Create_RLS_policies.Instructions.md`)
 
 | Règle | Statut | Détail |
-|-------|--------|--------|
+| ------- | -------- | -------- |
 | SQL valide | ✅ | Syntaxe PostgreSQL correcte |
 | Séparation opérations (SELECT/INSERT/UPDATE/DELETE) | ✅ | 4 policies distinctes par table |
 | SELECT avec USING uniquement | ✅ | Pas de WITH CHECK |

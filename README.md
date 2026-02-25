@@ -1,8 +1,8 @@
-# Rouge Cardinal Company — Site web
+# Rouge Cardinal - Site web
 
-> Plateforme web officielle de la compagnie de théâtre Rouge Cardinal : vitrine publique, médiathèque, espace presse et back‑office d'administration.
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/YanBerdin/rougecardinalcompany)
 
-## Purpose and Scope
+Plateforme web officielle de la compagnie de théâtre Rouge Cardinal : vitrine publique, médiathèque, espace presse et back-office d'administration.
 
 Rouge Cardinal Company est une application web pour une compagnie de théâtre conçue pour :
 
@@ -21,446 +21,277 @@ Rouge Cardinal Company est une application web pour une compagnie de théâtre c
 - utilisateurs authentifiés
 - administrateurs, avec contrôle d’accès via Row Level Security (RLS) et une architecture de défense en profondeur sur sept couches.
 
-## System Architecture
+---
 
-L’application suit le pattern App Router de Next.js 16 avec séparation stricte entre groupes de routes publiques (marketing) et protégées (admin).
+## Table des matières
 
-La couche intermédiaire applique les principes de Clean Architecture avec une Data Access Layer (DAL) côté serveur, interfaçant exclusivement Supabase (PostgreSQL 17.6, Auth, Storage).
+1. [Présentation](#présentation)
+2. [Stack technique](#stack-technique)
+3. [Architecture](#architecture)
+4. [Sécurité](#sécurité)
+5. [Installation](#installation)
+6. [Commandes utiles](#commandes-utiles)
+7. [Déploiement et migrations](#déploiement-et-migrations)
+8. [État du projet](#état-du-projet)
 
-Les intégrations externes (Sentry, Resend) sont gérées au niveau des Server Actions. L’automatisation CI/CD inclut des backups hebdomadaires via GitHub Actions, audits de sécurité continus et couverture de tests (RLS, rate-limiting, CRUD).
+---
+
+## Présentation
+
+Rouge Cardinal Company est une application web full-stack conçue pour :
+
+- Présenter l'identité, l'équipe, les productions et partenaires de la compagnie
+- Gérer et afficher spectacles, événements et calendriers avec réordonnancement drag-and-drop
+- Fournir un espace presse professionnel (communiqués, articles, kit média)
+- Gérer les abonnements newsletter et les formulaires de contact avec limitation de débit
+- Offrir une interface d'administration sécurisée avec versioning automatique du contenu
+- Suivre les événements analytiques et la santé applicative via Sentry
+- Gérer une médiathèque complète avec déduplication SHA-256, tags, dossiers et suivi d'usage
+- Automatiser la rétention RGPD
+
+**Trois groupes d'utilisateurs :**
+
+- Visiteurs anonymes
+- Utilisateurs authentifiés
+- Administrateurs — contrôle d'accès via Row Level Security (RLS) et architecture de défense en profondeur sur sept couches
+
+---
+
+## Stack technique
+
+| Couche | Technologie | Version |
+| -------- | ------------- | --------- |
+| **Framework** | Next.js (App Router, Turbopack) | 16.1.5 |
+| **Runtime** | React + React DOM | 19.2.0 |
+| **Langage** | TypeScript (strict mode) | 5.x |
+| **UI** | Tailwind CSS + shadcn/ui (Radix) | 3.4.1 |
+| **Base de données** | Supabase PostgreSQL | 17.6.1.063 |
+| **Auth** | Supabase Auth — `getClaims()` ~2-5ms | @supabase/ssr |
+| **Validation** | Zod | 4.1.0 |
+| **Email** | React Email + Resend SDK | v4 |
+| **Formulaires** | react-hook-form + @hookform/resolvers | 7.65.0 |
+| **Monitoring** | Sentry (client + server + edge) | @sentry/nextjs 10 |
+| **Env** | T3 Env (@t3-oss/env-nextjs) | 0.13.10 |
+| **Images** | Sharp (thumbnails 300×300 JPEG) | 0.34.5 |
+| **DnD** | @dnd-kit/core + @dnd-kit/sortable | — |
+| **Package manager** | pnpm | 9+ |
+
+**Extensions PostgreSQL actives :** `pgcrypto`, `pg_trgm`, `unaccent`, `citext`
+
+---
+
+## Architecture
+
+L'application suit le pattern App Router de Next.js avec une séparation stricte entre routes publiques `(marketing)` et protégées `(admin)`.
+
+La couche intermédiaire applique les principes de Clean Architecture avec une Data Access Layer (DAL) serveur-only interfaçant exclusivement Supabase (PostgreSQL, Auth, Storage).
 
 ```mermaid
 flowchart TB
-  %% Layer 1 - Presentation
-  subgraph L1["Layer 1 : Presentation Layer"]
-    WB["Web Browser"]
-    PUBP["Public Pages<br/>(marketing) route group"]
-    ADMP["Admin Pages<br/>(admin) route group"]
-    WB --> PUBP
-    WB --> ADMP
+  subgraph L1["Présentation"]
+    PUBP["Pages publiques\n(marketing)/"]
+    ADMP["Pages admin\n(admin)/"]
   end
 
-  %% Layer 2 - Application
-  subgraph L2["Layer 2 : Application Layer"]
-    MIDDLE["middleware<br/>Auth + Rate limiting"]
-    APIR["API Routes<br/>app/api/*"]
-    SA["Server Actions<br/>app/lib/actions"]
-    PUBP --> MIDDLE
-    ADMP --> MIDDLE
-    MIDDLE --> APIR
-    MIDDLE --> SA
+  subgraph L2["Application"]
+    MIDDLE["Middleware\nAuth + Rate limiting"]
+    SA["Server Actions\nlib/actions/*"]
+    APIR["API Routes\napp/api/*"]
   end
 
-  %% Layer 3 - Data Access
-  subgraph L3["Layer 3 : Data Access Layer"]
-    DBMODS["lib/db/<br/>server only modules<br/>(DAL & Result pattern)"]
-    SCHEMA["lib/schema/*<br/>Zod validation"]
-    HELPERS["lib/db/helpers<br/>toDAL/result, error codes"]
-    CAPTURE["capture exceptions"]
-    LOGERR["log errors"]
-    SENTRY_INT["Sentry<br/>error monitoring"]
-    DBMODS --> SCHEMA
-    DBMODS --> HELPERS
-    APIR --> DBMODS
-    SA --> DBMODS
-    DBMODS -.-> CAPTURE
-    CAPTURE -.-> LOGERR
-    CAPTURE -.-> SENTRY_INT
-    SA -->|send email| RESEND["Resend API<br/>email delivery"]
-    SA -->|log errors| LOGERR
+  subgraph L3["Data Access"]
+    DAL["lib/dal/ — 31 modules\nserver-only · DALResult<T> · cache()"]
+    SCHEMA["lib/schemas/*\nZod validation"]
   end
 
-  %% Layer 4 - Database & Services
-  subgraph L4["Layer 4 : Database & Services"]
-    EDGE["Edge Functions<br/>scheduled-cleanup"]
-    PG["Supabase Postgres<br/>~12 tables with RLS"]
-    STORAGE["Supabase Storage<br/>media, backups buckets"]
-    AUTH["Supabase Auth<br/>JWT via GoTrue"]
-    EDGE --- PG
-    DBMODS --> PG
-    DBMODS --> STORAGE
-    DBMODS --> AUTH
+  subgraph L4["Infrastructure"]
+    PG["Supabase PostgreSQL\n36 tables · RLS 100%"]
+    STORAGE["Supabase Storage\nbucket medias + backups"]
+    AUTH["Supabase Auth\nJWT via GoTrue"]
   end
 
-  %% External Services
-  subgraph EXTS["External Services"]
-    RESEND_EXT["Resend API<br/>Email delivery"]
-    SENTRY_EXT["Sentry<br/>Error monitoring"]
-  end
-
-  %% External connections
-  SA --> RESEND_EXT
-  LOGERR --> SENTRY_EXT
-  DBMODS --> SENTRY_EXT
+  PUBP & ADMP --> MIDDLE
+  MIDDLE --> SA & APIR
+  SA & APIR --> DAL
+  DAL --> SCHEMA
+  DAL --> PG & STORAGE & AUTH
 ```
 
-Toutes les décisions clés incluent : rendu server-first (RSC par défaut), revalidatePath() uniquement dans Server Actions, RLS comme frontière de sécurité primaire, pattern DALResult pour gestion d’erreurs, et T3 Env pour configuration typée.
+**Chiffres clés :**
 
-## Core Technologies
+- 14 sections admin (~30 pages), 9 pages publiques, 10 API Routes
+- 31 modules DAL + 5 helpers
+- 36 tables PostgreSQL, 100% RLS, 45 fichiers de schéma déclaratif
+- 93 migrations SQL (sept. 2025 → fév. 2026)
+- 87 scripts de test/audit/maintenance
 
-- **Frontend :** Next.js 16 (App Router), React 19, TypeScript 5.7+, Tailwind CSS 3.4, shadcn/ui (Radix).
+---
 
-- **Backend / BaaS :** Supabase (PostgreSQL 17.6.1.063, Auth, Storage, Edge Functions).
+## Sécurité
 
-- **Email :** Resend avec React Email templates.
-
-- **Validation :** Zod 3.24.1+.
-
-- **Error monitoring :** Sentry 8.47.0.
-
-- **Image processing :** Sharp pour thumbnails.
-
-- **Package manager :** pnpm.
-
-Chaque technologie est utilisée pour un but précis dans la pile (UI, stockage, authentification, envoi d’emails, monitoring, etc.).
-
-## Application Structure
-
-**Arborescence principale (extraits) :**
-
-lib/dal/ — Data Access Layer.
-
-components/features/ — composants par feature.
-
-app/ — Next.js App Router (public-site/, admin/, api/).
-
-Routes publiques : Home, Spectacles, Agenda, Presse, Contact, Compagnie.
-
-Routes admin : Dashboard, Content Mgmt, Media Library, Analytics.
-
-API routes : /api/contact, /api/newsletter, /api/webhooks/resend.
-
-**Le pattern de mapping route → feature :** chaque page app/\[route]/page.tsx correspond à un module feature sous components/features/public-site/\[feature]/ et à un module DAL lib/dal/\[feature].ts.
-
-## Data Architecture
-
-La base contient 36 tables PostgreSQL organisées en groupes logiques : types de contenu, contenu homepage, gestion médias (déduplication SHA‑256, 9 dossiers de base), tables système (newsletter, contact, analytics, audit logs), configuration (toggles), versioning (9 tables suivies), et sécurité (RLS sur toutes les tables, 7 vues admin-only).
-
-La médiathèque suit une organisation par dossiers reflétant les buckets Storage et suit l’usage des médias sur 7 types d’entités. La rétention automatisée gère la conformité RGPD (ex. logs d’audit 90 jours, messages contact 365 jours).
-
-## Security Architecture
-
-La sécurité est organisée en sept couches de défense en profondeur : réseau, middleware, server actions, RLS, fonctions DB, stockage, audit/monitoring. Les contrôles incluent DDoS/SSL via Vercel Edge, Next.js middleware avec getClaims() pour vérification JWT (2–5 ms), rate limiting LRU, guards requireAdmin(), Zod validation, RLS sur 36 tables avec politiques publiques/admin/restrictives, SECURITY DEFINER pour fonctions de rétention, Storage RLS (medias public read, backups service_role only), et audit triggers immuables sur 14 tables avec Sentry pour alertes P0/P1.
+La sécurité est organisée en sept couches de défense en profondeur :
 
 ```mermaid
 flowchart TB
-  subgraph SevenLayerSecurity
-    L1[Layer 1 Network Vercel Edge]
-    L2[Layer 2 Middleware Next.js]
-    L3[Layer 3 Server Actions Guards]
-    L4[Layer 4 Database RLS]
-    L5[Layer 5 Database Functions]
-    L6[Layer 6 Storage RLS]
-    L7[Layer 7 Audit & Monitoring]
-  end
-  ```
+  L1["1 · Réseau — Vercel Edge, DDoS/SSL"]
+  L2["2 · Middleware — JWT via getClaims() ~2-5ms"]
+  L3["3 · Server Actions — requireAdmin(), Zod"]
+  L4["4 · RLS PostgreSQL — 36 tables"]
+  L5["5 · Fonctions DB — SECURITY DEFINER rétention"]
+  L6["6 · Storage RLS — medias public · backups service_role"]
+  L7["7 · Audit & Monitoring — triggers immuables · Sentry P0/P1"]
 
   L1 --> L2 --> L3 --> L4 --> L5 --> L6 --> L7
-
-**🔒 Principes appliqués :**
-
-- zero trust
-- least privilege
-- defense in depth
-- auditabilité
-- fail-secure.
-
-## Declarative Schema Management
-
-Le schéma est géré de manière déclarative via fichiers SQL numérotés dans supabase/schemas/ (01–62). Organisation typique :
-
-- 01_extensions.sql (extensions pgcrypto, pg_trgm)
-
-- 02_table_profiles.sql … 10_tables_system.sql (définitions + RLS)
-
-- 02b_functions_core.sql (fonctions core comme is_admin())
-
-- 02c_storage_buckets.sql (buckets Storage)
-
-- 15_content_versioning.sql (versioning)
-
-- 40_indexes.sql, 50_constraints.sql, 60-62_rls_*.sql (politiques legacy)
-
-**Workflow :** modifier fichiers → supabase db diff -f migration_name → review → supabase db push.
-
-## Container / View Pattern
-
-**Frontend** sépare strictement Server Components (Containers) et Client Components (Views) :
-
-**Container (Server Component) :** async, pas de "use client", appelle DAL, gère erreurs/loading, passe props sérialisables.
-
-**View (Client Component) :** "use client", pure présentation, interactions via callbacks, pas d’accès DB direct.
-
-Exemple de structure pour presse : PresseContainer.tsx (server) → PresseView.tsx (client).
-
-## Email Service Architecture
-
-Emails transactionnels via Resend et templates React Email. Architecture en couches :
-
-**Template Layer :** composants React Email (emails/) avec wrapper email-layout.tsx.
-
-**Action Layer :** lib/email/actions.ts (Server Actions : sendEmail(), sendNewsletterConfirmation(), sendContactNotification()).
-
-**API Layer :** endpoints REST pour newsletter, contact, webhooks.
-
-**Validation Layer :** Zod schemas (lib/email/schemas.ts).
-
-**Pattern d’avertissement :** les opérations DB critiques sont effectuées en premier ; si l’envoi d’email échoue, l’opération retourne un succès avec warning plutôt que rollback complet.
-
-## Content Versioning System
-
-Les changements de contenu sont automatiquement versionnés via triggers DB. La table content_versions stocke des snapshots JSONB à chaque INSERT/UPDATE.
-
-**Entités suivies (9 types) :** spectacle, article_presse, communique_presse, evenement, membre_equipe, partner, compagnie_value, compagnie_stat, compagnie_presentation_section.
-
-**Types de changement :** create, update, publish/unpublish, restore. Fonction de restauration : SELECT public.restore_content_version(version_id); qui restaure et crée une nouvelle version avec change_type = 'restore'.
-
-## Key Development Patterns
-
-**DAL - SOLID :** lib/dal/* centralise les requêtes, modules server-only, 92% de conformité SOLID, retour systématique DALResult<T> (union discriminée) pour éviter exceptions non gérées.
-
-**Server Actions + Warning Pattern :** mutations et uploads via Server Actions ; DB d’abord, notifications ensuite ; revalidatePath() uniquement dans Server Actions ; rollback de stockage si insertion metadata échoue.
-
-**React Cache :** fonctions DAL en lecture enveloppées par cache() pour déduplication intra-request ; ISR (revalidate = 60) pour pages publiques.
-
-**Suspense & Progressive Rendering :** utilisation de <Suspense> et fallback skeletons pour rendu progressif et streaming sur pages publiques.
-
-Exemple de DALResult type et usage illustré dans lib/dal/presse.ts (pattern toDALResult).
-
-## Project Status
-
-**Fonctionnalités complétées :** site public (home, shows, press, company, agenda, contact), RLS sur 36 tables, dashboard admin avec gestion d’équipe et upload média, intégration email, système de versioning pour 9 types d’entités, gestion déclarative du schéma et migrations automatisées.
-
-**Phase actuelle :** Phase 1 — site public et infrastructure fondationnels complétés ; extension des capacités admin pour autres types de contenu en cours (état octobre 2025). Réalisations récentes incluent résolution d’issues RLS, TASK022 Team Management, implémentation Storage bucket RLS, et simplification de l’architecture d’authentification.
-
-## Démarrage rapide
-
-Prérequis : Node.js 20+, pnpm, Supabase CLI (pour migrations locales)
-
-1. installer les dépendances
-
-```bash
-pnpm install
 ```
 
-2. démarrer l'environnement de développement
+**Principes appliqués :** zero trust · least privilege · defense in depth · auditabilité · fail-secure
 
-```bash
-pnpm dev
-# ou (si vous utilisez turbopack) : pnpm dev
-```
+**Headers de sécurité (OWASP A05) :** CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
 
-3. valider les variables d'environnement (T3 Env)
-
-```bash
-pnpm exec tsx scripts/test-env-validation.ts
-```
-
-## Commandes utiles
-
-- Linter : `pnpm lint`
-- Tests unitaires / scripts : `pnpm test` ou `pnpm exec tsx scripts/<script>.ts`
-- Build : `pnpm build`
-- Start production (local) : `pnpm start`
-
-## Déploiement et migrations
-
-- Déploiement recommandé : Vercel (frontend) + Supabase (DB + Storage + Edge Functions)
-- Migrations/schéma déclaratif : modifier `supabase/schemas/` puis générer migration avec :
-
-```bash
-pnpm dlx supabase db diff -f <migration_name>
-pnpm dlx supabase db push
-```
-
-- Pour déployer les Edge Functions Supabase :
-
-```bash
-pnpm dlx supabase functions deploy <function-name>
-```
-
-> [!warning]
-> Ne pas modifier directement `supabase/migrations/` sauf pour correctifs d'urgence. Suivre la politique déclarative décrite dans `.github/instructions/Declarative_Database_Schema.instructions.md`.
-
-## Documentation & ressources
-
-- Documentation interne et notes d'architecture : `memory-bank/`
-- Guides et consignes opérationnelles : `doc/` (ex. `nextjs.instructions.md`)
-- Migrations et SQL : `supabase/schemas/` et `supabase/migrations/`
-
-Si vous avez besoin d'aide pour lancer le projet, exécuter une migration ou préparer un déploiement, dites‑moi ce que vous voulez faire et je vous guide pas à pas.
+> [!NOTE]
+> `script-src` contient encore `'unsafe-inline'` et `'unsafe-eval'`
+> TODO pour la production : migrer vers nonces ou hashes.
 
 ---
 
 ## Installation
 
-```bash
-# cloner et installer
-git clone https://github.com/YanBerdin/rougecardinalcompany.git
-cd rougecardinalcompany
-pnpm install
-```
-
-# configurer les variables d'environnement
-
-```bash
-cp .env.example .env.local
-# éditez .env.local avec vos credentials Supabase
-```
-
-> **Note (dev only)**: si vous testez les invitations localement et que votre fournisseur d'email (ex. Resend en test-mode) limite les destinataires, activez la redirection d'email de développement dans `.env.local`.
-
-```bash
-EMAIL_DEV_REDIRECT=true
-EMAIL_DEV_REDIRECT_TO=your-dev-email@example.com
-```
-
-Lorsque `EMAIL_DEV_REDIRECT` est `true`, les emails d'invitation seront envoyés à l'adresse définie par `EMAIL_DEV_REDIRECT_TO` (utile pour tests locaux). Assurez-vous de désactiver cette option en production.
-
-## Créer l'utilisateur admin initial
-
-```bash
-pnpm exec tsx scripts/create-admin-user.ts
-```
-
-## Démarrer le serveur dev
-
-```bash
-pnpm dev
-```
-
-L'application sera accessible sur http://localhost:3000
-
-- Validation input côté serveur
-- Protection XSS/CSRF/IDOR
-
-### Performance & UX
-
-- Suspense + Skeletons pour chargement progressif
-- Images optimisées avec Next.js Image
-- Accessibilité WCAG 2.5.5 (target size 44px minimum)
-- SEO avec meta-tags dynamiques et sitemap
-
-## Base de Données
-
-- **25 tables principales** + **11 tables de liaison**
-- Schéma déclaratif dans schemas
-- Versioning automatique des contenus
-- Triggers et fonctions pour audit et intégrité
-
-## État du Projet
-
-- Architecture mature avec patterns documentés
-- Focus sur la sécurité et l'accessibilité
-- Intégration email (Resend) et analytics
-- Tests et scripts de validation
-
-> [!NOTE]
-> L'application suit les meilleures pratiques Next.js 16 avec un emphasis sur la sécurité, la performance et l'expérience utilisateur professionnelle.
-
-## 🚀 Quick Start
-
 ### Prérequis
 
 - Node.js 20+
 - pnpm 8+
-- Compte Supabase (projet remote configuré)
+- Supabase CLI (pour les migrations locales)
+- Un projet Supabase configuré
 
-### Installation
+### Étapes
 
 ```bash
-# Cloner et installer
+# 1. Cloner et installer
 git clone https://github.com/YanBerdin/rougecardinalcompany.git
 cd rougecardinalcompany
 pnpm install
-```
 
-### Configuration des variables d'environnement
-
-```bash
+# 2. Configurer les variables d'environnement
 cp .env.example .env.local
-# Éditez .env.local avec vos credentials Supabase
-```
+# Éditez .env.local avec vos credentials Supabase et Resend
 
-> **Note (dev only)**: si vous testez les invitations localement et que votre fournisseur d'email (ex. Resend en test-mode) limite les destinataires, activez la redirection d'email de développement dans `.env.local`.
+# 3. Valider les variables d'environnement (T3 Env)
+pnpm exec tsx scripts/test-env-validation.ts
 
-```bash
-EMAIL_DEV_REDIRECT=true
-EMAIL_DEV_REDIRECT_TO=your-dev-email@example.com
-```
-
-Lorsque `EMAIL_DEV_REDIRECT` est `true`, les emails d'invitation seront envoyés à l'adresse définie par `EMAIL_DEV_REDIRECT_TO` (utile pour tests locaux). Assurez-vous de désactiver cette option en production.
-
-### Créer l'utilisateur admin initial
-
-```bash
+# 4. Créer l'utilisateur admin initial
 pnpm exec tsx scripts/create-admin-user.ts
-```
 
-### Démarrer le serveur dev
-
-```bash
+# 5. Démarrer le serveur de développement
 pnpm dev
 ```
 
-L'application sera accessible sur http://localhost:3000
+L'application sera disponible sur [http://localhost:3000](http://localhost:3000).
 
-### Gestion de la base de données
-
-```bash
-# Linker le projet remote
-pnpm dlx supabase link --project-ref YOUR_PROJECT_ID
-
-# Modifier le schéma déclaratif
-code supabase/schemas/02a_policies_tables.sql
-
-# Générer une migration
-pnpm dlx supabase db diff --linked -f nom_migration
-
-# Pousser vers remote
-pnpm dlx supabase db push
-```
-
-### Authentification Admin
-
-Si vous ne pouvez pas accéder aux pages `/admin` :
-
-```bash
-# Vérifier/créer l'utilisateur admin
-pnpm exec tsx scripts/create-admin-user.ts
-```
-
-**Architecture à double couche** :
-
-1. **JWT claims** : `app_metadata.role = 'admin'` (vérifié par middleware)
-2. **Profil DB** : `public.profiles.role = 'admin'` (vérifié par RLS)
-
-> [!IMPORTANT]
-> **Les deux doivent être synchronisés** pour que l'authentification fonctionne.
+> [!NOTE]
+> si vous testez les invitations localement
+> avec Resend en mode test, activez la redirection d'email dans `.env.local` :
+>
+>```env
+>EMAIL_DEV_REDIRECT=true
+>EMAIL_DEV_REDIRECT_TO=your-dev-email@example.com
+>```
+>
+> [!CAUTION]
+> Désactivez cette option avant tout déploiement en production.
 
 ---
 
-> [!NOTE]
-> Useful information that users should know, even when skimming content.
+## Commandes utiles
 
--
+```bash
+# Développement
+pnpm dev            # Serveur dev (Turbopack)
+pnpm build          # Build production
+pnpm start          # Serveur production local
 
-> [!TIP]
-> Helpful advice for doing things better or more easily.
+# Qualité
+pnpm lint           # ESLint
+pnpm lint:md        # Markdownlint
 
--
+# Scripts
+pnpm exec tsx scripts/<nom-du-script>.ts
+
+# Base de données (Supabase CLI)
+pnpm dlx supabase start          # Démarrer la DB locale
+pnpm dlx supabase db diff -f <nom>  # Générer une migration
+pnpm dlx supabase db push           # Appliquer les migrations
+```
+
+---
+
+## Déploiement et migrations
+
+**Déploiement recommandé :** Vercel (frontend) + Supabase Cloud (DB + Storage + Edge Functions)
+
+### Workflow migrations (schéma déclaratif)
 
 > [!IMPORTANT]
-> Key information users need to know to achieve their goal.
+> Ne jamais modifier directement `supabase/migrations/`.
+>
+> La source de vérité est `supabase/schemas/`.
 
--
+```bash
+# Modifier le schéma
+code supabase/schemas/XX_feature.sql
 
-> [!WARNING]
-> Urgent info that needs immediate user attention to avoid problems.
+# Générer et appliquer la migration
+pnpm dlx supabase db diff -f nom_migration
+pnpm dlx supabase db push
+```
 
--
+### Edge Functions
 
-> [!CAUTION]
-> Advises about risks or negative outcomes of certain action.
+```bash
+pnpm dlx supabase functions deploy <function-name>
+```
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/YanBerdin/rougecardinalcompany)
+---
+
+## État du projet
+
+| Fonctionnalité | Statut |
+| --- | --- |
+| Site public (home, spectacles, presse, compagnie, agenda, contact) | ✅ Complet |
+| RLS sur 36 tables | ✅ Complet |
+| Dashboard admin (équipe, médias, partenaires, presse, config) | ✅ Complet |
+| Intégration email (Resend + React Email) | ✅ Complet |
+| Versioning contenu (9 types d'entités) | ✅ Complet |
+| Médiathèque (SHA-256, tags, dossiers, thumbnails) | ✅ Complet |
+| Rétention RGPD automatisée (Edge Function) | ✅ Complet |
+| Monitoring Sentry multi-runtime | ✅ Complet |
+| Backups automatiques (GitHub Actions hebdomadaire) | ✅ Complet |
+| Tests E2E Playwright | 🔄 En cours (Phase 0) |
+| Déploiement production | 🔄 En cours |
+
+**Phase actuelle :** Infrastructure et site public finalisés. Extension des capacités admin en cours.
+
+---
+
+## Documentation interne
+
+- Architecture détaillée :
+  - `memory-bank/`
+  - `memory-bank/architecture/Project_Architecture_Blueprint.md`
+  - `memory-bank/architecture/Email_Service_Architecture.md`
+  - `memory-bank/architecture/Project_Folders_Structure_Blueprint.md`
+  - `memory-bank/systemPatterns.md`
+- Guides opérationnels :
+  - `memory-bank/procedures/admin-user-registration.md`
+  - `doc/`
+  - `memory-bank/architecture/dev-email-redirect.md`
+  - `memory-bank/guide-url-images-externes.md`
+  - `memory-bank/rate-limiting-media-upload.md`
+- Schémas SQL : `supabase/schemas/`
+  - `supabase/CLI-Supabase-Cloud.md`
+  - `supabase/CLI-Supabase-Local.md`
+  - `supabase/README.md`
+  - `supabase/schemas/README.md`
+- Scripts de test/audit :
+  - `scripts/`
+  - `scripts/README.md`
+  - `doc/Email-Resend/TESTING_RESEND.md`
