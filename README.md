@@ -188,14 +188,16 @@ pnpm dev
 L'application sera disponible sur [http://localhost:3000](http://localhost:3000).
 
 > [!NOTE]
-> si vous testez les invitations localement
+> Pour tester les invitations par email et les notifications
 > avec Resend en mode test, activez la redirection d'email dans `.env.local` :
 >
 >```env
->EMAIL_DEV_REDIRECT=true
->EMAIL_DEV_REDIRECT_TO=your-dev-email@example.com
+> EMAIL_DEV_REDIRECT=true
+> EMAIL_DEV_REDIRECT_TO=your-dev-email@example.com
 >```
->
+
+---
+
 > [!CAUTION]
 > Désactivez cette option avant tout déploiement en production.
 
