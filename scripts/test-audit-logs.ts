@@ -8,16 +8,18 @@
  * 3. CSV export action
  * 4. RLS policies (admin vs anon access)
  */
-//!Error: This module cannot be imported from a Client Component module. It should only be used from a Server Component.
-import 'dotenv/config';
-import { env } from "../lib/env";
+
+import { config } from 'dotenv';
+import { resolve } from 'path';
 import { createClient } from "@supabase/supabase-js";
 import { fetchAuditLogs, fetchAuditTableNames } from "../lib/dal/audit-logs.ts";
 import { exportAuditLogsCSV } from "../app/(admin)/admin/audit-logs/actions";
 
+// Load .env.local BEFORE any module that reads process.env (e.g. T3 Env)
+config({ path: resolve(process.cwd(), '.env.local') });
 
-const SUPABASE_URL = env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_SERVICE_KEY = env.SUPABASE_SECRET_KEY;
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SECRET_KEY;
 
 const COLORS = {
   reset: '\x1b[0m',
@@ -36,7 +38,7 @@ async function testDatabaseSchema() {
   log('cyan', '\n🔍 TEST 1: Database Schema Verification');
   
   try {
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+    const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_KEY!);
     
     // Check expires_at column exists
     const { data: columns, error: colError } = await supabase
