@@ -1,8 +1,47 @@
 # Active Context
 
-**Current Focus (2026-02-21)**: ✅ Bugfix contrainte image_url membres_equipe + allowlist plus.unsplash.com
+**Current Focus (2026-02-26)**: ✅ fix/audit-logs-violations — 7 corrections qualité code TASK033 + fix scripts test
 
-**Last Major Updates**: ✅ Unsplash CDN fixes (2026-02-21) + Embla Carousel Gallery (2026-02-20) + Security Fix admin views (2026-02-20) + Upload Security Hardening (2026-02-18) + Homepage Filter Fix (2026-02-12)
+**Last Major Updates**: ✅ Audit Logs Violations Fix (2026-02-26) + Unsplash CDN fixes (2026-02-21) + Embla Carousel Gallery (2026-02-20) + Security Fix admin views (2026-02-20) + Upload Security Hardening (2026-02-18)
+
+---
+
+## ✅ fix/audit-logs-violations — Corrections qualité code TASK033 (2026-02-26)
+
+### Summary
+
+✅ **7 CORRECTIONS** sur 6 fichiers + fix 2 scripts de test, branche dédiée `fix/audit-logs-violations`.
+
+| Fichier | Correction | Statut |
+| ------- | ---------- | ------ |
+| `lib/utils/audit-log-filters.ts` | Nouveau fichier — parsing `searchParams` extrait en util réutilisable | ✅ |
+| `AuditLogsContainer.tsx` | Remplacement 20 lignes parsing inline par `parseAuditLogFilters()` | ✅ |
+| `AuditLogsView.tsx` | Suppression `isInitialLoading` (800ms fake), 2× `setTimeout(500ms)`, import `Skeleton` inutilisé | ✅ |
+| `AuditLogsTable.tsx` | Accessibilité clavier WCAG 2.2 SC 2.1.1 : `role="button"`, `tabIndex`, `onKeyDown`, `aria-label` | ✅ |
+| `AuditLogDetailModal.tsx` | `log.old_values!` / `log.new_values!` → `?? {}` (suppression non-null assertions) | ✅ |
+| `AuditLogsSkeleton.tsx` | `key={i}` → clés sémantiques `skeleton-column-${i}` / `skeleton-row-${i}` | ✅ |
+| `scripts/test-audit-logs-cloud.ts` | TEST 2 : RPC → requête directe `logs_audit`, `dotenv/config` (T3 Env retiré) | ✅ |
+| `scripts/test-audit-logs-schema.ts` | T3 Env crash fix (`process.env`), TEST 2+4 : RPC → requête directe | ✅ |
+| `package.json` | Ajout `test:audit-logs:cloud`, `test:audit-logs:dal`, `test:backup` | ✅ |
+
+### Commits (branche `fix/audit-logs-violations`)
+
+| Hash | Description |
+| ---- | ----------- |
+| `35cb28e` | `fix(audit-logs): correct 7 code quality violations` |
+| `8db8641` | `fix(test): replace RPC call with direct table query in test-audit-logs-cloud` |
+| `71680de` | `fix(test): replace T3 Env import and RPC calls in test-audit-logs-schema` |
+| `b74723e` | `chore(scripts): add test:audit-logs:cloud, test:audit-logs:dal and test:backup to package.json` |
+
+### Raison technique — RPC inutilisable headlessly
+
+`get_audit_logs_with_email` appelle `(select public.is_admin())` → `auth.uid()` → retourne `null` sans session JWT → permission refusée même avec `SUPABASE_SECRET_KEY`. Solution : requêtes directes sur `logs_audit` via service role (bypass RLS).
+
+### Raison technique — T3 Env inutilisable dans scripts
+
+`@t3-oss/env-nextjs` valide toutes les variables synchroniquement à l'initialisation du module (ESM `import` hoisté avant le corps du script). Les scripts CLI doivent utiliser `dotenv/config` + `process.env` directement.
+
+---
 
 ---
 
