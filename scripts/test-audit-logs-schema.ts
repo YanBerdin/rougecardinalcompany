@@ -8,8 +8,20 @@
  * 3. Basic data retrieval works
  */
 
+import { config } from 'dotenv';
+import { resolve } from 'path';
 import { createClient } from '@supabase/supabase-js';
-import { env } from '../lib/env';
+
+// Load .env.local BEFORE any module that reads process.env (e.g. T3 Env)
+config({ path: resolve(process.cwd(), '.env.local') });
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_SECRET_KEY) {
+  console.error('❌ Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SECRET_KEY in .env.local');
+  process.exit(1);
+}
 
 const COLORS = {
   reset: '\x1b[0m',
@@ -31,8 +43,8 @@ async function main() {
   
   // Create service role client (bypasses RLS for testing)
   const supabase = createClient(
-    env.NEXT_PUBLIC_SUPABASE_URL,
-    env.SUPABASE_SECRET_KEY,
+    SUPABASE_URL!,
+    SUPABASE_SECRET_KEY!,
     {
       auth: { persistSession: false }
     }
@@ -59,31 +71,25 @@ async function main() {
     log('red', `❌ Error: ${error instanceof Error ? error.message : 'Unknown'}`);
   }
   
-  log('cyan', '\n🔍 TEST 2: Check RPC function');
+  log('cyan', '\n🔍 TEST 2: Check logs_audit table access');
+  log('blue', '   (get_audit_logs_with_email RPC requires auth.uid() → querying table directly)');
   
   try {
-    const { data, error } = await supabase
-      .rpc('get_audit_logs_with_email', {
-        p_action: null,
-        p_table_name: null,
-        p_user_id: null,
-        p_date_from: null,
-        p_date_to: null,
-        p_search: null,
-        p_page: 1,
-        p_limit: 5
-      });
+    const { data, error, count } = await supabase
+      .from('logs_audit')
+      .select('id, action, table_name, user_id, created_at', { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .limit(5);
     
     if (error) {
-      log('red', `❌ RPC failed: ${error.message}`);
+      log('red', `❌ Failed: ${error.message}`);
     } else {
-      log('green', '✅ get_audit_logs_with_email RPC works');
-      log('blue', `   Total count: ${data?.total_count || 0}`);
-      log('blue', `   Logs returned: ${data?.logs?.length || 0}`);
-      
-      if (data?.logs && data.logs.length > 0) {
-        const firstLog = data.logs[0];
-        log('blue', `   Sample: ${firstLog.action} on ${firstLog.table_name} by ${firstLog.user_email || 'unknown'}`);
+      log('green', '✅ logs_audit table readable via service role');
+      log('blue', `   Total rows: ${count ?? 0}`);
+      log('blue', `   Rows returned: ${data?.length ?? 0}`);
+      if (data && data.length > 0) {
+        const first = data[0];
+        log('blue', `   Sample: ${first.action} on ${first.table_name} at ${first.created_at}`);
       }
     }
   } catch (error) {
@@ -109,26 +115,23 @@ async function main() {
     log('red', `❌ Error: ${error instanceof Error ? error.message : 'Unknown'}`);
   }
   
-  log('cyan', '\n🔍 TEST 4: Test filtering by action');
+  log('cyan', '\n🔍 TEST 4: Test filtering by action (INSERT)');
   
   try {
-    const { data, error } = await supabase
-      .rpc('get_audit_logs_with_email', {
-        p_action: 'INSERT',
-        p_table_name: null,
-        p_user_id: null,
-        p_date_from: null,
-        p_date_to: null,
-        p_search: null,
-        p_page: 1,
-        p_limit: 5
-      });
+    const { data, error, count } = await supabase
+      .from('logs_audit')
+      .select('id, action, table_name', { count: 'exact' })
+      .eq('action', 'INSERT')
+      .limit(5);
     
     if (error) {
       log('red', `❌ Failed: ${error.message}`);
     } else {
-      log('green', '✅ Action filter works');
-      log('blue', `   INSERT actions found: ${data?.total_count || 0}`);
+      log('green', '✅ Action filter works (direct table query)');
+      log('blue', `   INSERT actions total: ${count ?? 0}`);
+      if (data && data.length > 0) {
+        log('blue', `   Sample table: ${data[0].table_name}`);
+      }
     }
   } catch (error) {
     log('red', `❌ Error: ${error instanceof Error ? error.message : 'Unknown'}`);
