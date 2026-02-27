@@ -8,26 +8,7 @@ import { deleteEventAction } from "@/app/(admin)/admin/agenda/actions-client";
 import { EventsTable } from "./EventsTable";
 import type { EventSortField, EventSortState } from "./EventsTable";
 import { sortEvents, getNextSortState } from "@/lib/tables/event-table-helpers";
-
-// Type Client (BigInt → Number pour sérialisation JSON)
-type EventClientDTO = {
-    id: number;
-    spectacle_id: number;
-    spectacle_titre?: string;
-    lieu_id: number | null;
-    lieu_nom?: string;
-    lieu_ville?: string;
-    date_debut: string;
-    date_fin: string | null;
-    start_time: string;
-    end_time: string | null;
-    status: "scheduled" | "cancelled" | "completed";
-    ticket_url: string | null;
-    capacity: number | null;
-    price_cents: number | null;
-    created_at: string;
-    updated_at: string;
-};
+import type { EventClientDTO } from "@/lib/types/admin-agenda-client";
 
 interface EventsViewProps {
     initialEvents: EventClientDTO[];

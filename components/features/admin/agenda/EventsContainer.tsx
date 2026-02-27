@@ -5,14 +5,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export async function EventsContainer() {
     const result = await fetchAllEventsAdmin();
-    
-    // Debug: log any errors
+
+
     if (!result.success) {
         console.error("[EventsContainer] Error fetching events:", result.error);
-    } else {
-        console.log("[EventsContainer] Fetched events count:", result.data.length);
+        // Debug: log any errors
+        // } else {
+        //    console.log("[EventsContainer]  // Fetched events count:", result.data.length);
     }
-    
+
     const events = result.success ? result.data : [];
 
     // Convertir BigInt → Number pour sérialisation JSON (Server → Client)
