@@ -15,14 +15,11 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import type { UseFormReturn } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 import type { EventFormValues } from "@/lib/schemas/admin-agenda-ui";
 
-interface EventFormFieldsProps {
-    form: UseFormReturn<EventFormValues>;
-}
-
-export function EventFormFields({ form }: EventFormFieldsProps) {
+export function EventFormFields() {
+    const form = useFormContext<EventFormValues>();
     return (
         <>
             <div className="grid grid-cols-2 gap-4">
@@ -33,7 +30,7 @@ export function EventFormFields({ form }: EventFormFieldsProps) {
                         <FormItem>
                             <FormLabel>Date début *</FormLabel>
                             <FormControl>
-                                <Input type="datetime-local" {...field} />
+                                <Input type="datetime-local" aria-required="true" required {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -67,7 +64,7 @@ export function EventFormFields({ form }: EventFormFieldsProps) {
                         <FormItem>
                             <FormLabel>Heure début *</FormLabel>
                             <FormControl>
-                                <Input type="time" {...field} />
+                                <Input type="time" aria-required="true" required {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
