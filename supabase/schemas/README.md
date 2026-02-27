@@ -24,6 +24,7 @@ where (select public.is_admin()) = true;
 
 Migrations de sécurité récentes
 
+- `supabase/migrations/20260227210418_fix_analytics_events_insert_policy.sql` — hotfix : correction policy RLS INSERT `analytics_events` : ajout `'page_view'` dans les event_types autorisés + `entity_type IS NULL` permis explicitement. Deux policies granulaires anon/authenticated remplacent l'ancienne policy combinée. Déclaratif : `62_rls_advanced_tables.sql` (NOTE ajoutée). Appliquée le 2026-02-27.
 - `supabase/migrations/20260220130000_fix_spectacle_admin_views_security.sql` — hotfix : ajout garde `is_admin()` sur `spectacles_landscape_photos_admin` (`41_views_spectacle_photos.sql`) et `spectacles_gallery_photos_admin` (`42_views_spectacle_gallery.sql`) + REVOKE anon (pattern TASK037). Appliquée le 2026-02-20.
 - `supabase/migrations/20260103120000_fix_communiques_presse_dashboard_admin_access.sql` — hotfix : recréation de la vue admin avec garde `is_admin()`.
 - `supabase/migrations/20260103123000_revoke_authenticated_on_communiques_dashboard.sql` — révocation du SELECT au rôle `authenticated` sur la vue admin.

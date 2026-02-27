@@ -1,5 +1,6 @@
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer";
+import { PageViewTracker } from "@/components/features/analytics/PageViewTracker";
 import type { Metadata } from "next";
 // Import globals.css pour Tailwind
 import "../globals.css";
@@ -22,6 +23,7 @@ export default function MarketingLayout({
 }) {
   return (
     <div className="min-h-screen flex flex-col marketing-content">
+      <PageViewTracker />
       <Header />
       <main className="flex-1">
         {children}

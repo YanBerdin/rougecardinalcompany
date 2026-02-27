@@ -1,8 +1,39 @@
 # Active Context
 
-**Current Focus (2026-02-27)**: ✅ Bugfix Analytics Export JSON (non planifié) + Analytics en cours (Visiteurs Uniques fix, infrastructure tracking)
+**Current Focus (2026-02-27)**: ✅ Analytics TASK031-FIX complet — audit qualité (7 corrections) + bugfix DAL session_id + infrastructure tracking + export JSON client-side
 
-**Last Major Updates**: ✅ Bugfix Analytics Export JSON (2026-02-27) + Audit Logs Violations Fix (2026-02-26) + Unsplash CDN fixes (2026-02-21) + Embla Carousel Gallery (2026-02-20) + Upload Security Hardening (2026-02-18)
+**Last Major Updates**: ✅ Analytics TASK031-FIX (2026-02-27) + Audit Logs Violations Fix (2026-02-26) + Unsplash CDN fixes (2026-02-21) + Embla Carousel Gallery (2026-02-20) + Upload Security Hardening (2026-02-18)
+
+---
+
+## ✅ TASK031-FIX Analytics — Audit qualité + Bugfixes (2026-02-27)
+
+### Summary
+
+✅ **COMPLET** — Corrections audit qualité du dashboard analytics (7 corrections plan.) + 2 bugfixes + infrastructure tracking.
+
+### Corrections audit (7 planifiées)
+
+| Fichier | Correction | Statut |
+| ------- | ---------- | ------ |
+| `types.ts` | `import type { ReactNode }` | ✅ |
+| `SentryErrorsCard.tsx` | Suppression `cn` local, import `@/lib/utils` | ✅ |
+| `AdminActivityCard.tsx` | Clé stable composite | ✅ |
+| `AnalyticsDashboard.tsx` | `handleExport(format)` + `useTransition` | ✅ |
+| Tous composants | `aria-hidden="true"` icônes décoratives | ✅ |
+| `PageviewsChart.tsx` | `role="img"` + import `Tooltip` supprimé | ✅ |
+
+### Bugfix export JSON (commit d71163b)
+`exportAnalyticsJSON` SA supprimée. JSON construit client-side (sérialisation RSC défaillante avec `Date`).
+
+### Bugfix DAL uniqueVisitors = 0
+`user_id` -> `session_id` dans 3 fonctions DAL (`fetchPageviewsTimeSeries`, `fetchTopPages`, `fetchMetricsSummary`).
+
+### Infrastructure tracking
+- `PageViewTracker.tsx` client component (sessionStorage UUID)
+- `app/actions/analytics.actions.ts` : Server Action `trackPageView`
+- `app/(marketing)/layout.tsx` : `<PageViewTracker />` ajouté
+- Migration RLS `20260227210418` : policies anon + authenticated
 
 ---
 

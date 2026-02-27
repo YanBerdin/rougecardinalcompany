@@ -3,12 +3,13 @@ export interface ContactFormData {
   lastName: string;
   email: string;
   phone: string;
-  subject: string;
+  // subject: string; // TODO redundant with reason
   reason: string;
   message: string;
   consent: boolean;
 }
-
+//? TODO redundant with reason ? 
+// //TODO: redundant with ContactFormData --- IGNORE ---
 export interface ContactReason {
   value: string;
   label: string;

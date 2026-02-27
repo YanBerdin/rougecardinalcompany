@@ -60,7 +60,7 @@ export const fetchPageviewsTimeSeries = cache(
 
             const { data, error } = await supabase
                 .from("analytics_events")
-                .select("created_at, user_id, session_id")
+                .select("created_at, session_id")
                 .eq("event_type", "page_view")
                 .gte("created_at", filter.startDate.toISOString())
                 .lte("created_at", filter.endDate.toISOString())
@@ -71,7 +71,8 @@ export const fetchPageviewsTimeSeries = cache(
             }
 
             // Aggregate data client-side (Supabase doesn't support date_trunc in JS SDK directly)
-            const aggregated = new Map<string, { views: number; users: Set<string>; sessions: Set<string> }>();
+            // session_id is used for both uniqueVisitors and sessions (user_id is NULL for anon visitors)
+            const aggregated = new Map<string, { views: number; sessions: Set<string> }>();
 
             for (const row of data ?? []) {
                 const timestamp = new Date(row.created_at);
@@ -86,21 +87,21 @@ export const fetchPageviewsTimeSeries = cache(
                 }
 
                 if (!aggregated.has(key)) {
-                    aggregated.set(key, { views: 0, users: new Set(), sessions: new Set() });
+                    aggregated.set(key, { views: 0, sessions: new Set() });
                 }
 
                 const bucket = aggregated.get(key)!;
                 bucket.views++;
-                if (row.user_id) bucket.users.add(row.user_id);
                 if (row.session_id) bucket.sessions.add(row.session_id);
             }
 
             // Convert to array and sort
+            // uniqueVisitors = distinct session_ids (best proxy for anonymous unique visitors)
             const timeSeriesData = Array.from(aggregated.entries())
-                .map(([timestamp, { views, users, sessions }]) => ({
+                .map(([timestamp, { views, sessions }]) => ({
                     timestamp: new Date(timestamp),
                     views,
-                    uniqueVisitors: users.size,
+                    uniqueVisitors: sessions.size,
                     sessions: sessions.size,
                 }))
                 .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
@@ -138,7 +139,7 @@ export const fetchTopPages = cache(
 
             const { data, error } = await supabase
                 .from("analytics_events")
-                .select("pathname, user_id, session_id")
+                .select("pathname, session_id")
                 .eq("event_type", "page_view")
                 .not("pathname", "is", null)
                 .gte("created_at", filter.startDate.toISOString())
@@ -149,6 +150,7 @@ export const fetchTopPages = cache(
             }
 
             // Aggregate by pathname
+            // session_id is used for uniqueVisitors (user_id is NULL for anon visitors)
             const pageStats = new Map<string, { views: number; visitors: Set<string> }>();
 
             for (const row of data ?? []) {
@@ -160,7 +162,7 @@ export const fetchTopPages = cache(
 
                 const stats = pageStats.get(row.pathname)!;
                 stats.views++;
-                if (row.user_id) stats.visitors.add(row.user_id);
+                if (row.session_id) stats.visitors.add(row.session_id);
             }
 
             // Convert to array, sort by views, take top 10
@@ -201,7 +203,7 @@ export const fetchMetricsSummary = cache(
 
             const { data, error } = await supabase
                 .from("analytics_events")
-                .select("event_type, user_id, session_id")
+                .select("event_type, session_id")
                 .gte("created_at", filter.startDate.toISOString())
                 .lte("created_at", filter.endDate.toISOString());
 
@@ -209,12 +211,12 @@ export const fetchMetricsSummary = cache(
                 return dalError(`Failed to fetch metrics summary: ${error.message}`);
             }
 
-            const uniqueUsers = new Set<string>();
+            // session_id is used for both uniqueVisitors and sessions
+            // user_id is NULL for anonymous visitors (not stored in trackPageView)
             const uniqueSessions = new Set<string>();
             const eventTypeCounts = new Map<string, number>();
 
             for (const row of data ?? []) {
-                if (row.user_id) uniqueUsers.add(row.user_id);
                 if (row.session_id) uniqueSessions.add(row.session_id);
 
                 const count = eventTypeCounts.get(row.event_type) ?? 0;
@@ -233,7 +235,7 @@ export const fetchMetricsSummary = cache(
 
             const metrics = MetricsSummarySchema.parse({
                 totalViews: data?.length ?? 0,
-                uniqueVisitors: uniqueUsers.size,
+                uniqueVisitors: uniqueSessions.size,
                 totalSessions: uniqueSessions.size,
                 topEventType,
             });

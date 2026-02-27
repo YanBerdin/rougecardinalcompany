@@ -12,9 +12,12 @@ for select
 to authenticated
 using ( (select public.is_admin()) );
 
--- NOTE: Analytics INSERT policy removed from declarative schema
--- Managed by migration: 20260106190617_fix_rls_policy_with_check_true_vulnerabilities.sql
--- Policy name: "Validated analytics collection"
+-- NOTE: Analytics INSERT policies managed by hotfix migrations (not in declarative schema)
+-- Latest migration: 20260227210418_fix_analytics_events_insert_policy.sql
+-- Policies: "Anon can insert validated analytics events" (to anon)
+--           "Authenticated users can insert validated analytics events" (to authenticated)
+-- Reason: INSERT policy requires NULL entity_type guard + 'page_view' event type
+--         which is a known caveat for migra diff tool (data validation logic).
 
 -- Seuls les admins peuvent modifier/supprimer
 drop policy if exists "Admins can update analytics events" on public.analytics_events;

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type {
     PageviewsSeries,
     TopPages,
@@ -28,7 +29,7 @@ export interface MetricCardProps {
         value: number;
         label: string;
     };
-    icon?: React.ReactNode;
+    icon?: ReactNode;
 }
 
 /**

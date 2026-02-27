@@ -28,9 +28,9 @@ export function MetricCard({
                 {trend && (
                     <div className="flex items-center gap-1 mt-2 text-xs">
                         {trend.value >= 0 ? (
-                            <TrendingUp className="h-3 w-3 text-green-500" />
+                            <TrendingUp className="h-3 w-3 text-green-500" aria-hidden="true" />
                         ) : (
-                            <TrendingDown className="h-3 w-3 text-red-500" />
+                            <TrendingDown className="h-3 w-3 text-red-500" aria-hidden="true" />
                         )}
                         <span className={trend.value >= 0 ? "text-green-500" : "text-red-500"}>
                             {Math.abs(trend.value)}%

@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { AnalyticsDashboard } from "./AnalyticsDashboard";
+import { AnalyticsDashboardClient } from "./AnalyticsDashboardNoSSR";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
     fetchPageviewsTimeSeries,
@@ -75,7 +75,7 @@ export async function AnalyticsContainer() {
 
     return (
         <Suspense fallback={<DashboardSkeleton />}>
-            <AnalyticsDashboard
+            <AnalyticsDashboardClient
                 initialPageviewsSeries={pageviewsSeries}
                 initialTopPages={topPages}
                 initialMetrics={metrics}

@@ -24,7 +24,7 @@ export function AdminActivityCard({ activity, isLoading }: AdminActivityCardProp
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                        <Activity className="h-5 w-5" />
+                        <Activity className="h-5 w-5" aria-hidden="true" />
                         Activité Admin
                     </CardTitle>
                     <CardDescription>Chargement...</CardDescription>
@@ -37,7 +37,7 @@ export function AdminActivityCard({ activity, isLoading }: AdminActivityCardProp
         <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                    <Activity className="h-5 w-5" />
+                    <Activity className="h-5 w-5" aria-hidden="true" />
                     Activité Admin
                 </CardTitle>
                 <CardDescription>Actions récentes dans le panneau d&apos;administration</CardDescription>
@@ -75,8 +75,8 @@ export function AdminActivityCard({ activity, isLoading }: AdminActivityCardProp
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {activity.recentActions.map((action, index) => (
-                                    <TableRow key={index}>
+                                {activity.recentActions.map((action) => (
+                                    <TableRow key={`${action.tableName}-${action.operation}-${action.timestamp.getTime()}`}>
                                         <TableCell>
                                             <Badge variant="outline">{action.operation}</Badge>
                                         </TableCell>

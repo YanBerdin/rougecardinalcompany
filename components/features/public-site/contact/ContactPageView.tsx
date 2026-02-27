@@ -52,7 +52,7 @@ export function ContactPageView({ showNewsletter = true }: ContactPageViewProps)
     lastName: "",
     email: "",
     phone: "",
-    subject: "", // TODO redundant with reason
+    //subject: "", // TODO redundant with reason
     reason: "",
     message: "",
     consent: false,
@@ -83,7 +83,7 @@ export function ContactPageView({ showNewsletter = true }: ContactPageViewProps)
       lastName: "",
       email: "",
       phone: "",
-      subject: "",
+      //subject: "", // TODO redundant with reason
       reason: "",
       message: "",
       consent: false,

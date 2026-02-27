@@ -1,6 +1,6 @@
 "use client";
 
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, ResponsiveContainer } from "recharts";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
@@ -16,14 +16,6 @@ export function PageviewsChart({ data, isLoading }: PageviewsChartProps) {
         return (
             <div className="h-80 flex items-center justify-center">
                 <p className="text-muted-foreground">Chargement...</p>
-            </div>
-        );
-    }
-
-    if (data.data.length === 0) {
-        return (
-            <div className="h-80 flex items-center justify-center">
-                <p className="text-muted-foreground">Aucune donnée disponible</p>
             </div>
         );
     }
@@ -55,6 +47,7 @@ export function PageviewsChart({ data, isLoading }: PageviewsChartProps) {
     };
 
     return (
+        <div role="img" aria-label="Graphique des pages vues par période">
         <ChartContainer config={chartConfig} className="h-80">
             <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
@@ -101,5 +94,6 @@ export function PageviewsChart({ data, isLoading }: PageviewsChartProps) {
                 </LineChart>
             </ResponsiveContainer>
         </ChartContainer>
+    </div>
     );
 }

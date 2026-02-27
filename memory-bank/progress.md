@@ -1,5 +1,44 @@
 # Progress
 
+## TASK031-FIX Analytics — Audit qualité + Bugfixes complets (2026-02-27)
+
+### Summary
+
+✅ **COMPLET** — Audit qualité 7 corrections + 2 bugfixes additionnels + infrastructure tracking déployée.
+
+| Livrable | Statut | Détails |
+| -------- | ------ | ------- |
+| `types.ts` : `import type { ReactNode }` | ✅ | Suppression `React.ReactNode` |
+| `SentryErrorsCard.tsx` : `cn` local → `@/lib/utils` | ✅ | DRY |
+| `AdminActivityCard.tsx` : clé stable | ✅ | `tableName-operation-timestamp` |
+| `AnalyticsDashboard.tsx` : `handleExport(format)` | ✅ | CSV + JSON factorisés |
+| `AnalyticsDashboard.tsx` : `useTransition` | ✅ | Remplace `useState` + `setTimeout` |
+| Icônes décoratives : `aria-hidden="true"` | ✅ | Tous les composants analytics |
+| `PageviewsChart.tsx` : `role="img"` + suppression import mort | ✅ | WCAG 2.2 AA |
+| Bugfix export JSON client-side | ✅ | Commit `d71163b` |
+| Bugfix DAL `uniqueVisitors` : `session_id` | ✅ | 3 fonctions DAL corrigées |
+| `PageViewTracker` + `trackPageView` Server Action | ✅ | Infrastructure tracking |
+| Migration RLS `20260227210418` | ✅ | `page_view` + `entity_type IS NULL` |
+| `pnpm lint` 0 erreurs | ✅ | Confirmé |
+
+### Fichiers Modifiés
+
+```bash
+components/features/admin/analytics/types.ts
+components/features/admin/analytics/SentryErrorsCard.tsx
+components/features/admin/analytics/AdminActivityCard.tsx
+components/features/admin/analytics/AnalyticsDashboard.tsx   # + export JSON client-side
+components/features/admin/analytics/MetricCard.tsx
+components/features/admin/analytics/PageviewsChart.tsx
+lib/dal/analytics.ts                                          # user_id → session_id
+app/(marketing)/layout.tsx                                    # PageViewTracker ajouté
+components/features/analytics/PageViewTracker.tsx             # NOUVEAU
+app/actions/analytics.actions.ts                              # NOUVEAU (trackPageView)
+supabase/migrations/20260227210418_fix_analytics_events_insert_policy.sql  # NOUVEAU
+```
+
+---
+
 ## Bugfix Analytics Export JSON — génération côté client (2026-02-27)
 
 ### Summary

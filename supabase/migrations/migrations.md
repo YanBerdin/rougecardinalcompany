@@ -4,6 +4,28 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-02-27 - BUGFIX: RLS INSERT policy analytics_events (entity_type NULL + page_view)
+
+#### fix(db) — Correction policy RLS INSERT `analytics_events` granulaire anon/authenticated
+
+**Migration**: `20260227210418_fix_analytics_events_insert_policy.sql`
+**Commit**: à commiter
+
+**Problème**:
+L'ancienne policy `"Validated analytics collection"` refusait les inserts avec `entity_type = NULL` car l'opérateur SQL `IN` appliqué à NULL évalue à NULL/false. De plus, `'page_view'` n'était pas inclus dans les types d'événements autorisés, bloquant le tracking de navigation.
+
+**Correction**:
+Suppression de l'ancienne policy. Création de 2 policies granulaires (une pour `anon`, une pour `authenticated`) :
+
+- `event_type IN ('page_view', 'view', 'click', 'share', 'download')`
+- `entity_type IS NULL OR entity_type IN ('spectacle', 'communique', 'media', 'membre')` (null explicitement permis)
+- Validation optionnelle : `session_id` (regex UUID 36 chars), `entity_id` (entier positif), `user_agent` (max 500 chars)
+
+**Schéma déclaratif synchronisé**: ✅ `supabase/schemas/62_rls_advanced_tables.sql` — NOTE ajoutée indiquant que les INSERT policies sont gérées par hotfix migrations
+**Application**: ✅ Appliquée via `pnpm dlx supabase db push --linked` le 2026-02-27
+
+---
+
 ### 2026-02-21 - BUGFIX: Contrainte image_url membres_equipe + allowlist plus.unsplash.com
 
 #### fix(db) — Relaxation contrainte `membres_equipe_image_url_format`
