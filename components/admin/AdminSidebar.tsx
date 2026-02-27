@@ -59,7 +59,7 @@ const contentItems = [
     icon: FileText,
   },
   {
-    title: "Événements",
+    title: "Agenda",
     href: "/admin/agenda",
     icon: Calendar,
   },

@@ -94,11 +94,11 @@ export function EventForm({ event, spectacles, lieux }: EventFormProps) {
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <SpectacleSelect form={form} spectacles={spectacles} />
+                <SpectacleSelect spectacles={spectacles} />
 
-                <LieuSelect form={form} lieux={lieux} />
+                <LieuSelect lieux={lieux} />
 
-                <EventFormFields form={form} />
+                <EventFormFields />
 
                 <div className="flex gap-2">
                     <Button type="button" variant="secondary" onClick={() => router.back()}>

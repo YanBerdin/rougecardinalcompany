@@ -23,16 +23,16 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
-import type { UseFormReturn } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 import type { EventFormValues } from "@/lib/schemas/admin-agenda-ui";
 import type { LieuClientDTO } from "@/lib/types/admin-agenda-client";
 
 interface LieuSelectProps {
-    form: UseFormReturn<EventFormValues>;
     lieux: LieuClientDTO[];
 }
 
-export function LieuSelect({ form, lieux }: LieuSelectProps) {
+export function LieuSelect({ lieux }: LieuSelectProps) {
+    const form = useFormContext<EventFormValues>();
     return (
         <FormField
             control={form.control}

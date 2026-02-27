@@ -13,26 +13,7 @@ import {
 import { SortableHeader } from "@/components/ui/sortable-header";
 import type { SortState } from "@/components/ui/sortable-header";
 import { getEventStatusBadge } from "@/lib/tables/event-table-helpers";
-
-// Type Client (BigInt → Number pour sérialisation JSON)
-type EventClientDTO = {
-    id: number;
-    spectacle_id: number;
-    spectacle_titre?: string;
-    lieu_id: number | null;
-    lieu_nom?: string;
-    lieu_ville?: string;
-    date_debut: string;
-    date_fin: string | null;
-    start_time: string;
-    end_time: string | null;
-    status: "scheduled" | "cancelled" | "completed";
-    ticket_url: string | null;
-    capacity: number | null;
-    price_cents: number | null;
-    created_at: string;
-    updated_at: string;
-};
+import type { EventClientDTO } from "@/lib/types/admin-agenda-client";
 
 // Sortable fields
 export type EventSortField = "spectacle_titre" | "date_debut" | "lieu_nom" | "status";

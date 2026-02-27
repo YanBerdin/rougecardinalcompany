@@ -22,16 +22,16 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
-import type { UseFormReturn } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 import type { EventFormValues } from "@/lib/schemas/admin-agenda-ui";
 import type { SpectacleClientDTO } from "@/lib/types/admin-agenda-client";
 
 interface SpectacleSelectProps {
-    form: UseFormReturn<EventFormValues>;
     spectacles: SpectacleClientDTO[];
 }
 
-export function SpectacleSelect({ form, spectacles }: SpectacleSelectProps) {
+export function SpectacleSelect({ spectacles }: SpectacleSelectProps) {
+    const form = useFormContext<EventFormValues>();
     return (
         <FormField
             control={form.control}
@@ -45,6 +45,7 @@ export function SpectacleSelect({ form, spectacles }: SpectacleSelectProps) {
                                 <Button
                                     variant="outline"
                                     role="combobox"
+                                    aria-required="true"
                                     className={cn(
                                         "justify-between",
                                         !field.value && "text-muted-foreground"
