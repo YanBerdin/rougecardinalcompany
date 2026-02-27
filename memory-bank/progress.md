@@ -1,5 +1,41 @@
 # Progress
 
+## Bugfix Analytics Export JSON — génération côté client (2026-02-27)
+
+### Summary
+
+✅ **BUGFIX NON PLANIFIÉ** — L'export JSON du dashboard analytics produisait un fichier vide. Root cause : sérialisation RSC défaillante via Server Action. Fix : génération JSON côté client depuis l'état React existant.
+
+| Livrable | Statut | Détails |
+| -------- | ------ | ------- |
+| `exportAnalyticsJSON` Server Action supprimée | ✅ | Fonction obsolète retirée de `actions.ts` |
+| `triggerDownload()` helper ajouté | ✅ | Gestion propre des téléchargements + `URL.revokeObjectURL` |
+| `handleExportJSON()` côté client | ✅ | Construit le JSON depuis l'état React — aucun re-fetch |
+| `handleExport()` refactorisé | ✅ | Délègue JSON à `handleExportJSON`, CSV reste via Server Action |
+| `useTransition` pour le refresh | ✅ | Remplace `setIsRefreshing` — `isPending` automatique via React 19 |
+| TypeScript 0 erreurs | ✅ | Confirmé |
+
+### Root Cause
+
+`exportAnalyticsJSON` était une Server Action qui re-fetchait toutes les données et retournait une grande string JSON. La couche de sérialisation RSC (ou les objets `Date` dans le spread `...timeSeriesResult.data` incluant `startDate`/`endDate`) causait l'arrivée du résultat vide/corrompu côté client.
+
+### Solution
+
+JSON généré **client-side** depuis l'état React déjà disponible — aucun aller-retour serveur nécessaire. Helper `toISO()` gère à la fois `Date` et `string` (RSC peut sérialiser `Date` en `string`).
+
+### Fichiers Modifiés
+
+```bash
+app/(admin)/admin/analytics/actions.ts              # Suppression exportAnalyticsJSON (dead code)
+components/features/admin/analytics/AnalyticsDashboard.tsx  # triggerDownload + handleExportJSON client-side
+```
+
+### Commit
+
+- [`fix(analytics): move JSON export client-side to fix empty file bug`](https://github.com)
+
+---
+
 ## fix/audit-logs-violations — 7 corrections qualité code TASK033 (2026-02-26)
 
 ### Summary

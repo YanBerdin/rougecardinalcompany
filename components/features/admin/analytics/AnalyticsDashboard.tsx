@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { BarChart3, Users, Eye, Activity } from "lucide-react";
@@ -12,7 +12,7 @@ import { TopPagesTable } from "./TopPagesTable";
 import { AnalyticsFilters } from "./AnalyticsFilters";
 import { SentryErrorsCard } from "./SentryErrorsCard";
 import { AdminActivityCard } from "./AdminActivityCard";
-import { exportAnalyticsCSV, exportAnalyticsJSON } from "@/app/(admin)/admin/analytics/actions";
+import { exportAnalyticsCSV } from "@/app/(admin)/admin/analytics/actions";
 import type { AnalyticsDashboardProps } from "./types";
 
 /**
@@ -28,7 +28,7 @@ export function AnalyticsDashboard({
     initialSentryErrors,
 }: AnalyticsDashboardProps) {
     const router = useRouter();
-    const [isRefreshing, setIsRefreshing] = useState(false);
+    const [isRefreshing, startRefreshTransition] = useTransition();
 
     // Local state synchronized with props
     const [pageviewsSeries, setPageviewsSeries] = useState(initialPageviewsSeries);
@@ -55,18 +55,85 @@ export function AnalyticsDashboard({
 
 
     // Handle date range change
-    const handleDateRangeChange = async (startDate: Date, endDate: Date) => {
-        setIsRefreshing(true);
-
+    const handleDateRangeChange = (_startDate: Date, _endDate: Date) => {
         // TODO: Implement date range filter via Server Actions
-        // For now, just refresh the page
-        router.refresh();
-
-        setTimeout(() => setIsRefreshing(false), 1000);
+        startRefreshTransition(() => {
+            router.refresh();
+        });
     };
 
-    // Handle export actions
-    const handleExportCSV = async () => {
+    // Helper: trigger a file download from a string
+    const triggerDownload = (content: string, filename: string, mimeType: string) => {
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", filename);
+        link.style.visibility = "hidden";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
+
+    // Handle JSON export client-side (no Server Action — data already in state)
+    const handleExportJSON = () => {
+        try {
+            const toISO = (d: Date | string): string =>
+                d instanceof Date ? d.toISOString() : String(d);
+
+            const exportData = {
+                exportDate: new Date().toISOString(),
+                filter: {
+                    startDate: toISO(pageviewsSeries.startDate),
+                    endDate: toISO(pageviewsSeries.endDate),
+                    granularity: pageviewsSeries.granularity,
+                },
+                metrics,
+                topPages,
+                timeSeries: {
+                    granularity: pageviewsSeries.granularity,
+                    startDate: toISO(pageviewsSeries.startDate),
+                    endDate: toISO(pageviewsSeries.endDate),
+                    data: pageviewsSeries.data.map((point) => ({
+                        timestamp: toISO(point.timestamp),
+                        views: point.views,
+                        uniqueVisitors: point.uniqueVisitors,
+                        sessions: point.sessions,
+                    })),
+                },
+                adminActivity: adminActivity
+                    ? {
+                        totalActions: adminActivity.totalActions,
+                        uniqueAdmins: adminActivity.uniqueAdmins,
+                        topOperation: adminActivity.topOperation,
+                        recentActions: adminActivity.recentActions.map((action) => ({
+                            operation: action.operation,
+                            tableName: action.tableName,
+                            timestamp: toISO(action.timestamp),
+                            userId: action.userId,
+                        })),
+                    }
+                    : null,
+            };
+
+            const json = JSON.stringify(exportData, null, 2);
+            triggerDownload(json, `analytics-export-${Date.now()}.json`, "application/json;charset=utf-8;");
+            toast.success("Export JSON réussi");
+        } catch (error) {
+            toast.error("Erreur lors de l'export JSON", {
+                description: error instanceof Error ? error.message : "Unknown error",
+            });
+        }
+    };
+
+    // Handle CSV export (Server Action needed for csv-stringify library)
+    const handleExport = async (exportFormat: "csv" | "json") => {
+        if (exportFormat === "json") {
+            handleExportJSON();
+            return;
+        }
+
         try {
             const result = await exportAnalyticsCSV({
                 startDate: pageviewsSeries.startDate,
@@ -78,51 +145,10 @@ export function AnalyticsDashboard({
                 throw new Error(result.error);
             }
 
-            // Download CSV
-            const blob = new Blob([result.data], { type: "text/csv;charset=utf-8;" });
-            const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", `analytics-export-${Date.now()}.csv`);
-            link.style.visibility = "hidden";
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
+            triggerDownload(result.data, `analytics-export-${Date.now()}.csv`, "text/csv;charset=utf-8;");
             toast.success("Export CSV réussi");
         } catch (error) {
             toast.error("Erreur lors de l'export CSV", {
-                description: error instanceof Error ? error.message : "Unknown error",
-            });
-        }
-    };
-
-    const handleExportJSON = async () => {
-        try {
-            const result = await exportAnalyticsJSON({
-                startDate: pageviewsSeries.startDate,
-                endDate: pageviewsSeries.endDate,
-                granularity: pageviewsSeries.granularity,
-            });
-
-            if (!result.success) {
-                throw new Error(result.error);
-            }
-
-            // Download JSON
-            const blob = new Blob([result.data], { type: "application/json;charset=utf-8;" });
-            const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", `analytics-export-${Date.now()}.json`);
-            link.style.visibility = "hidden";
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            toast.success("Export JSON réussi");
-        } catch (error) {
-            toast.error("Erreur lors de l'export JSON", {
                 description: error instanceof Error ? error.message : "Unknown error",
             });
         }
@@ -141,10 +167,10 @@ export function AnalyticsDashboard({
                 </div>
 
                 <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={handleExportCSV} disabled={isRefreshing} className="flex-1 sm:flex-none">
+                    <Button variant="outline" size="sm" onClick={() => handleExport("csv")} disabled={isRefreshing} className="flex-1 sm:flex-none">
                         Export CSV
                     </Button>
-                    <Button variant="outline" size="sm" onClick={handleExportJSON} disabled={isRefreshing} className="flex-1 sm:flex-none">
+                    <Button variant="outline" size="sm" onClick={() => handleExport("json")} disabled={isRefreshing} className="flex-1 sm:flex-none">
                         Export JSON
                     </Button>
                 </div>
@@ -164,28 +190,28 @@ export function AnalyticsDashboard({
                     title="Total Vues"
                     value={metrics.totalViews.toLocaleString()}
                     description="Nombre total de pages vues"
-                    icon={<Eye className="h-4 w-4 text-muted-foreground" />}
+                    icon={<Eye className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
                 />
 
                 <MetricCard
                     title="Visiteurs Uniques"
                     value={metrics.uniqueVisitors.toLocaleString()}
                     description="Visiteurs distincts"
-                    icon={<Users className="h-4 w-4 text-muted-foreground" />}
+                    icon={<Users className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
                 />
 
                 <MetricCard
                     title="Sessions"
                     value={metrics.totalSessions.toLocaleString()}
                     description="Nombre de sessions"
-                    icon={<Activity className="h-4 w-4 text-muted-foreground" />}
+                    icon={<Activity className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
                 />
 
                 <MetricCard
                     title="Événement Principal"
                     value={metrics.topEventType ?? "N/A"}
                     description="Type d'événement le plus fréquent"
-                    icon={<BarChart3 className="h-4 w-4 text-muted-foreground" />}
+                    icon={<BarChart3 className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
                 />
             </div>
 

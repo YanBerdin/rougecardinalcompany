@@ -1,8 +1,37 @@
 # Active Context
 
-**Current Focus (2026-02-26)**: ✅ fix/audit-logs-violations — 7 corrections qualité code TASK033 + fix scripts test
+**Current Focus (2026-02-27)**: ✅ Bugfix Analytics Export JSON (non planifié) + Analytics en cours (Visiteurs Uniques fix, infrastructure tracking)
 
-**Last Major Updates**: ✅ Audit Logs Violations Fix (2026-02-26) + Unsplash CDN fixes (2026-02-21) + Embla Carousel Gallery (2026-02-20) + Security Fix admin views (2026-02-20) + Upload Security Hardening (2026-02-18)
+**Last Major Updates**: ✅ Bugfix Analytics Export JSON (2026-02-27) + Audit Logs Violations Fix (2026-02-26) + Unsplash CDN fixes (2026-02-21) + Embla Carousel Gallery (2026-02-20) + Upload Security Hardening (2026-02-18)
+
+---
+
+## ✅ Bugfix Analytics Export JSON — génération côté client (2026-02-27)
+
+### Summary
+
+✅ **BUGFIX NON PLANIFIÉ** — Export JSON du dashboard analytics produisait un fichier vide.
+
+**Root cause** : `exportAnalyticsJSON` était une Server Action retournant une grande string JSON. La couche de sérialisation RSC échouait silencieusement avec les objets `Date` dans le spread `...timeSeriesResult.data`.
+
+**Symptôme** : export CSV fonctionnait, export JSON → fichier vide.
+
+| Composant | Modification | Statut |
+| --------- | ------------ | ------ |
+| `exportAnalyticsJSON` Server Action | Supprimée (dead code après fix) | ✅ |
+| `triggerDownload()` helper | Ajouté dans AnalyticsDashboard.tsx — gère `URL.revokeObjectURL` | ✅ |
+| `handleExportJSON()` | Construit le JSON côté client depuis l'état React existant — aucun re-fetch | ✅ |
+| `handleExport()` | Refactorisé : CSV → Server Action, JSON → client-side | ✅ |
+| `useTransition` | Remplace `setIsRefreshing` (React 19) | ✅ |
+
+### Décision architecturale
+
+JSON export est maintenant **100% client-side** depuis l'état React déjà disponible dans le composant. Le CSV conserve la Server Action car il utilise `csv-stringify` (lib Node.js côté serveur).
+
+### Fichiers Modifiés
+
+- `app/(admin)/admin/analytics/actions.ts` — suppression `exportAnalyticsJSON`
+- `components/features/admin/analytics/AnalyticsDashboard.tsx` — logique export client-side
 
 ---
 
