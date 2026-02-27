@@ -75,31 +75,27 @@ async function main() {
     log('red', `❌ Error: ${error instanceof Error ? error.message : 'Unknown'}`);
   }
   
-  log('cyan', '\n🔍 TEST 2: Check RPC function on CLOUD');
+  log('cyan', '\n🔍 TEST 2: Check logs_audit table access on CLOUD');
+  log('blue', '   (Note: get_audit_logs_with_email RPC requires auth.uid() → cannot be called');
+  log('blue', '    from a service-role-only context. Querying table directly instead.)');
   
   try {
-    const { data, error } = await supabase
-      .rpc('get_audit_logs_with_email', {
-        p_action: null,
-        p_table_name: null,
-        p_user_id: null,
-        p_date_from: null,
-        p_date_to: null,
-        p_search: null,
-        p_page: 1,
-        p_limit: 5
-      });
+    const { data, error, count } = await supabase
+      .from('logs_audit')
+      .select('id, action, table_name, created_at, expires_at', { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .limit(5);
     
     if (error) {
-      log('red', `❌ RPC failed: ${error.message}`);
+      log('red', `❌ Table query failed: ${error.message}`);
     } else {
-      log('green', '✅ get_audit_logs_with_email RPC works on cloud');
-      log('blue', `   Total count: ${data?.total_count || 0}`);
-      log('blue', `   Logs returned: ${data?.logs?.length || 0}`);
+      log('green', '✅ logs_audit table is accessible via service role');
+      log('blue', `   Total rows: ${count ?? 0}`);
+      log('blue', `   Rows returned: ${data?.length ?? 0}`);
       
-      if (data?.logs && data.logs.length > 0) {
-        const firstLog = data.logs[0];
-        log('blue', `   Sample: ${firstLog.action} on ${firstLog.table_name} by ${firstLog.user_email || 'unknown'}`);
+      if (data && data.length > 0) {
+        const firstLog = data[0];
+        log('blue', `   Sample: ${firstLog.action} on ${firstLog.table_name} at ${firstLog.created_at}`);
       }
     }
   } catch (error) {

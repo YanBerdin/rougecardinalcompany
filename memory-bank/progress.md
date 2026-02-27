@@ -1,5 +1,38 @@
 # Progress
 
+## fix/audit-logs-violations — 7 corrections qualité code TASK033 (2026-02-26)
+
+### Summary
+
+✅ **7 CORRECTIONS** sur 6 fichiers + 2 scripts de test corrigés, branche `fix/audit-logs-violations`, 4 commits.
+
+| Livrable | Statut |
+| -------- | ------ |
+| `lib/utils/audit-log-filters.ts` créé (parsing searchParams) | ✅ |
+| `AuditLogsContainer.tsx` simplifié (20 lignes → 1 appel) | ✅ |
+| `AuditLogsView.tsx` : fake loading supprimé (800ms + 2×500ms setTimeout) | ✅ |
+| `AuditLogsTable.tsx` : accessibilité clavier WCAG 2.2 | ✅ |
+| `AuditLogDetailModal.tsx` : non-null assertions → `?? {}` | ✅ |
+| `AuditLogsSkeleton.tsx` : clés sémantiques | ✅ |
+| Scripts test-audit-logs corrigés (T3 Env + RPC) | ✅ |
+| `pnpm lint` 0 erreurs | ✅ |
+
+### Fichiers Clés
+
+```bash
+lib/utils/audit-log-filters.ts                          # NOUVEAU — util parsing
+components/features/admin/audit-logs/AuditLogsContainer.tsx
+components/features/admin/audit-logs/AuditLogsView.tsx
+components/features/admin/audit-logs/AuditLogsTable.tsx
+components/features/admin/audit-logs/AuditLogDetailModal.tsx
+components/features/admin/audit-logs/AuditLogsSkeleton.tsx
+scripts/test-audit-logs-cloud.ts                        # Fix RPC + dotenv
+scripts/test-audit-logs-schema.ts                       # Fix T3 Env + RPC
+package.json                                            # +3 scripts npm
+```
+
+---
+
 ## Bugfix URL images Unsplash — contrainte DB + allowlist SSRF (2026-02-21)
 
 ### Summary

@@ -1309,13 +1309,15 @@ pnpm exec tsx scripts/set-admin-role.ts yandevformation@gmail.com
 
 ---
 
-### test-audit-logs-cloud.ts
+### test-audit-logs-cloud.ts ✅ CLOUD
 
-**Description** : Vérifie le déploiement cloud de la migration TASK033 (Audit Logs Viewer).
+**Description** : Vérifie le déploiement cloud de la migration TASK033 (Audit Logs Viewer). Corrigé le 2026-02-26 — utilise `dotenv/config` au lieu de T3 Env, requête directe sur `logs_audit` au lieu du RPC.
 
 **Utilisation** :
 
 ```bash
+pnpm test:audit-logs:cloud
+# ou
 pnpm exec tsx scripts/test-audit-logs-cloud.ts
 ```
 
@@ -1323,24 +1325,87 @@ pnpm exec tsx scripts/test-audit-logs-cloud.ts
 
 | Test | Description |
 | ------ | ------------- |
-| Test 1 | Vérification colonne `expires_at` (90 jours) |
-| Test 2 | Fonction RPC `get_audit_logs_with_email()` protégée (admin-only) |
+| Test 1 | Vérification colonne `expires_at` (~90 jours) |
+| Test 2 | Accès direct table `logs_audit` via service role (remplace RPC) |
 | Test 3 | Fonction `cleanup_expired_audit_logs()` fonctionnelle |
 
 **Résultats attendus** :
 
-- ✅ expires_at présent avec date future (~90 jours)
-- ⚠️ RPC bloqué pour utilisateurs non-admin (expected behavior)
-- ✅ Cleanup exécuté (0 deleted si aucun log expiré)
+- ✅ `expires_at` présent avec date future
+- ✅ `logs_audit` lisible via service role (bypass RLS)
+- ✅ Cleanup exécuté sans erreur
 
 **Configuration Requise** :
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+SUPABASE_SECRET_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
-**Note** : Ce script valide le déploiement cloud de la migration `20260103183217_audit_logs_retention_and_rpc.sql`.
+**Pourquoi requête directe et non RPC** : `get_audit_logs_with_email` appelle `(select public.is_admin())` qui lit `auth.uid()`. La service role key bypasse RLS mais ne crée pas de session → `auth.uid()` retourne `null` → accès refusé même avec `SUPABASE_SECRET_KEY`.
+
+---
+
+### test-audit-logs-schema.ts ✅ CLOUD
+
+**Description** : Vérifie le schéma de la table `logs_audit` (colonne `expires_at`, noms de tables, filtres). Script de référence TASK033 — corrigé le 2026-02-26 (T3 Env + RPC).
+
+**Utilisation** :
+
+```bash
+pnpm test:audit-logs
+# ou
+pnpm exec tsx scripts/test-audit-logs-schema.ts
+```
+
+**Tests couverts (4 tests)** :
+
+| Test | Description |
+| ------ | ------------- |
+| Test 1 | Colonne `expires_at` présente et peuplée |
+| Test 2 | Accès direct `logs_audit` via service role (600 lignes attendues) |
+| Test 3 | Noms de tables distinctes dans les logs (14 tables) |
+| Test 4 | Filtre par action `INSERT` fonctionnel |
+
+**Configuration Requise** :
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+SUPABASE_SECRET_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**Note** : Utilise `dotenv/config` + `process.env` directement (PAS T3 Env) — convention obligatoire pour tous les scripts CLI.
+
+---
+
+### test-audit-logs.ts ✅ CLOUD
+
+**Description** : Tests d'intégration DAL + CSV export + RLS policies pour l'Audit Logs Viewer (TASK033). Importe directement les fonctions DAL.
+
+**Utilisation** :
+
+```bash
+pnpm test:audit-logs:dal
+# ou
+pnpm exec tsx scripts/test-audit-logs.ts
+```
+
+**Tests couverts** :
+
+| Test | Description |
+| ------ | ------------- |
+| 1 | Schéma DB (`expires_at`, RPC) |
+| 2 | `fetchAuditLogs()` — DAL function |
+| 3 | `fetchAuditTableNames()` — DAL function |
+| 4 | `exportAuditLogsCSV` — Server Action |
+| 5 | RLS policies (admin vs anon access) |
+
+**Configuration Requise** :
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+SUPABASE_SECRET_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
 
 ---
 

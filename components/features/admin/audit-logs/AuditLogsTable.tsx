@@ -78,8 +78,12 @@ export function AuditLogsTable({
                 {logs.map((log) => (
                     <div
                         key={log.id}
-                        className="bg-card rounded-lg border shadow-sm p-4 space-y-4 cursor-pointer hover:border-primary/50 transition-colors"
+                        className="bg-card rounded-lg border shadow-sm p-4 space-y-4 cursor-pointer hover:border-primary/50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                        role="button"
+                        tabIndex={0}
                         onClick={() => onRowClick(log)}
+                        onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onRowClick(log)}
+                        aria-label={`Log ${log.action} sur ${log.table_name}`}
                     >
                         {/* Header: Action Badge + Date */}
                         <div className="flex justify-between items-start gap-4">
@@ -179,8 +183,11 @@ export function AuditLogsTable({
                         {logs.map((log) => (
                             <TableRow
                                 key={log.id}
-                                className="cursor-pointer hover:bg-background/50"
+                                className="cursor-pointer hover:bg-background/50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
+                                tabIndex={0}
                                 onClick={() => onRowClick(log)}
+                                onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onRowClick(log)}
+                                aria-label={`Log ${log.action} sur ${log.table_name}`}
                             >
                                 <TableCell className="text-sm text-muted-foreground">
                                     {formatDistanceToNow(new Date(log.created_at), {

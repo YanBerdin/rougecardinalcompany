@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { Download, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { exportAuditLogsCSV } from "@/app/(admin)/admin/audit-logs/actions";
-import { Skeleton } from "@/components/ui/skeleton";
 
 export function AuditLogsView({
     initialLogs,
@@ -30,16 +29,7 @@ export function AuditLogsView({
     const [filters, setFilters] = useState<AuditLogFilter>(initialFilters);
     const [selectedLog, setSelectedLog] = useState<AuditLogDTO | null>(null);
     const [isExporting, setIsExporting] = useState(false);
-    const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [sortState, setSortState] = useState<AuditLogSortState | null>(null);
-
-    // Simulate initial loading to show skeleton //TODO: remove after testing
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setIsInitialLoading(false);
-        }, 800);
-        return () => clearTimeout(timer);
-    }, []);
 
     // ✅ CRITIQUE: Sync local state when props change (after router.refresh())
     useEffect(() => {
@@ -73,17 +63,13 @@ export function AuditLogsView({
         if (newFilters.search) params.set('search', newFilters.search);
 
         startTransition(() => {
-            setTimeout(() => {
-                router.push(`/admin/audit-logs?${params.toString()}`);
-            }, 500);
+            router.push(`/admin/audit-logs?${params.toString()}`);
         });
     };
 
     const handleRefresh = () => {
         startTransition(() => {
-            setTimeout(() => {
-                router.refresh();
-            }, 500);
+            router.refresh();
         });
     };
 
@@ -118,17 +104,17 @@ export function AuditLogsView({
                     tableNames={tableNames}
                     users={users}
                     onFilterChange={handleFilterChange}
-                    isLoading={isPending || isInitialLoading}
+                    isLoading={isPending}
                 />
                 <div className="flex flex-wrap gap-2">
                     <Button
                         variant="outline"
                         size="sm"
                         onClick={handleRefresh}
-                        disabled={isPending || isInitialLoading}
+                        disabled={isPending}
                         className="flex-1 sm:flex-none min-w-[120px]"
                     >
-                        <RefreshCw className={`mr-2 h-4 w-4 ${(isPending || isInitialLoading) ? "animate-spin" : ""}`} />
+                        <RefreshCw className={`mr-2 h-4 w-4 ${isPending ? "animate-spin" : ""}`} />
                         <span className="hidden sm:inline">Rafraîchir</span>
                         <span className="sm:hidden">Refresh</span>
                     </Button>
@@ -136,7 +122,7 @@ export function AuditLogsView({
                         variant="outline"
                         size="sm"
                         onClick={handleExport}
-                        disabled={isExporting || isInitialLoading}
+                        disabled={isExporting}
                         className="flex-1 sm:flex-none min-w-[120px]"
                     >
                         <Download className="mr-2 h-4 w-4" />
@@ -145,28 +131,17 @@ export function AuditLogsView({
                 </div>
             </div>
 
-            {(isPending || isInitialLoading) ? (
-                <div className="space-y-4">
-                    <Skeleton className="h-12 w-full rounded-md" />
-                    <Skeleton className="h-[400px] w-full rounded-md" />
-                    <div className="flex flex-col sm:flex-row justify-between gap-3">
-                        <Skeleton className="h-10 w-full sm:w-32 rounded-md" />
-                        <Skeleton className="h-10 w-full sm:w-48 rounded-md" />
-                    </div>
-                </div>
-            ) : (
-                <div className="overflow-x-auto -mx-3 sm:-mx-4 md:-mx-6 px-3 sm:px-4 md:px-6">
-                    <AuditLogsTable
-                        logs={sortedLogs}
-                        totalCount={totalCount}
-                        filters={filters}
-                        onFilterChange={handleFilterChange}
-                        onRowClick={setSelectedLog}
-                        sortState={sortState}
-                        onSort={handleSort}
-                    />
-                </div>
-            )}
+            <div className="overflow-x-auto -mx-3 sm:-mx-4 md:-mx-6 px-3 sm:px-4 md:px-6">
+                <AuditLogsTable
+                    logs={sortedLogs}
+                    totalCount={totalCount}
+                    filters={filters}
+                    onFilterChange={handleFilterChange}
+                    onRowClick={setSelectedLog}
+                    sortState={sortState}
+                    onSort={handleSort}
+                />
+            </div>
 
             {selectedLog && (
                 <AuditLogDetailModal

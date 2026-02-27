@@ -61,7 +61,7 @@ export function AuditLogDetailModal({ log, open, onClose }: AuditLogDetailModalP
                                     Anciennes valeurs
                                     {hasOldValues && (
                                         <Badge variant="secondary" className="ml-2">
-                                            {Object.keys(log.old_values!).length}
+                                            {Object.keys(log.old_values ?? {}).length}
                                         </Badge>
                                     )}
                                 </TabsTrigger>
@@ -69,7 +69,7 @@ export function AuditLogDetailModal({ log, open, onClose }: AuditLogDetailModalP
                                     Nouvelles valeurs
                                     {hasNewValues && (
                                         <Badge variant="secondary" className="ml-2">
-                                            {Object.keys(log.new_values!).length}
+                                            {Object.keys(log.new_values ?? {}).length}
                                         </Badge>
                                     )}
                                 </TabsTrigger>

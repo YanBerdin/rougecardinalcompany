@@ -71,8 +71,8 @@ export function EventForm({ event, spectacles, lieux }: EventFormProps) {
         setIsPending(true);
 
         try {
-            // ✅ Envoyer les données au format UI (sans transformation)
-            // La Server Action s'occupera de la conversion vers le format serveur
+            // ✅ Envoyer les données brutes au format UI
+            // La Server Action convertira vers le format serveur
             const result = isEditMode && eventIdForAction !== null
                 ? await updateEventAction(String(eventIdForAction), data)
                 : await createEventAction(data);
