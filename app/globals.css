@@ -723,11 +723,6 @@
   }
 }
 
-/* Scroll smooth */
-html {
-  scroll-behavior: smooth;
-}
-
 /* Logo styling - STABILISÉ */
 .logo-container {
   display: flex;

@@ -33,6 +33,7 @@
     "test:rls:debug-rls-errors": "tsx scripts/debug-rls-errors.ts",
     "test:newsletter:recursion": "tsx scripts/test-newsletter-recursion-fix-direct.ts",
     "test:rate-limit": "tsx scripts/test-rate-limit.ts",
+    "test:partners": "tsx scripts/test-admin-partners.ts",
     "test:rate-limit:contact": "tsx scripts/test-rate-limit-contact.ts",
     "test:rate-limit:newsletter": "tsx scripts/test-rate-limit-newsletter.ts",
     "test:cookies": "tsx scripts/test-cookie-security.ts",

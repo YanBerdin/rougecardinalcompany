@@ -1,4 +1,5 @@
 # E2E Tests - Quick Reference (Rouge Cardinal Company)
+>
 > Playwright end-to-end tests with Page Object pattern
 > Adapté pour projet monolithique Next.js 16 + Supabase
 
@@ -366,6 +367,7 @@ e2e/tests/
 ## Bonnes pratiques spécifiques au projet
 
 ### Server Actions & revalidatePath
+
 Après une mutation (create/update/delete), attendre la navigation ou le toast de confirmation avant de vérifier l'état — les Server Actions appellent `revalidatePath()` qui peut induire un délai de re-rendu.
 
 ```ts
@@ -377,9 +379,11 @@ await teamPage.expectMemberVisible('Marie Martin');
 ```
 
 ### Display Toggles (TASK030)
+
 Certaines sections publiques sont conditionnelles. Tester avec et sans toggle activé si la feature est couverte.
 
 ### BigInt IDs
+
 Les IDs dans les URLs sont des `bigint` côté DB. Dans les Page Objects, les extraire depuis l'URL avec `page.url()` si nécessaire — ne pas hard-coder d'IDs.
 
 ---
