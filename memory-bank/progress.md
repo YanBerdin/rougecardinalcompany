@@ -1,5 +1,54 @@
 # Progress
 
+## TASK064 — Admin Partners Audit Fix (2026-02-28)
+
+### Summary
+
+✅ **COMPLET** — 18 étapes : 16 violations d'audit corrigées (2 CRITIQUES, 6 HAUTES, 4 MOYENNES, 4 BASSES) + 3 post-fix. Refactoring par couche DAL → Actions → Schemas → UI. Commit `3fd1bf7` sur branche `fix/admin-partners-audit-violations`.
+
+| Livrable | Statut | Détails |
+| -------- | ------ | ------- |
+| `mapToPartnerDTO()` extrait | ✅ | Suppression `buildMediaUrl()` local → `buildMediaPublicUrl` (T3 Env) |
+| `dalSuccess`/`dalError` + codes erreur | ✅ | 6 codes `[ERR_PARTNER_001]` à `[ERR_PARTNER_006]` |
+| Validation Zod `.parseAsync()` | ✅ | Async superRefine obligatoire + `PARTNER_SELECT_FIELDS` |
+| `cache()` React sur lectures | ✅ | Déduplication intra-request |
+| Fonctions < 30 lignes | ✅ | `getNextDisplayOrder()` + `buildPartnerUpdatePayload()` extraits |
+| `import "server-only"` + ActionResult simplifié | ✅ | BigInt Three-Layer Pattern |
+| `PartnerDTO` → `interface` | ✅ | Convention TS projet |
+| `SortablePartnerCard.tsx` extrait | ✅ | 427→228 lignes View, nouveau composant 194L |
+| `types.ts` colocalisé | ✅ | 3 interfaces props |
+| `useCallback` dependency fix | ✅ | `deleteCandidate` retiré des deps |
+| Cast `Resolver<>` supprimé | ✅ | `.default()` retiré du FormSchema |
+| `<Link>` + `<Button>` WCAG fix | ✅ | Éléments interactifs imbriqués corrigés |
+| `dynamic = "force-dynamic"` page edit | ✅ | + `revalidate = 0` |
+| Suspense inutile retiré | ✅ | Container simplifié |
+| Script test 6/6 | ✅ | `pnpm test:partners` |
+| Hydration DndContext | ✅ | `id="partners-dnd-context"` |
+| `<Image>` `sizes` prop | ✅ | `56px` mobile, `64px` desktop |
+| CSP + scroll-behavior | ✅ | Google Fonts autorisé, CSS → data attribute |
+
+### Fichiers Modifiés
+
+```bash
+lib/dal/admin-partners.ts                                     # DAL refactoring complet (258L)
+lib/schemas/partners.ts                                       # interface DTO, suppression .default()
+app/(admin)/admin/partners/actions.ts                         # server-only, .parseAsync(), ActionResult
+app/(admin)/admin/partners/[id]/edit/page.tsx                 # dynamic + revalidate
+components/features/admin/partners/PartnersView.tsx           # 228L (extraction SortablePartnerCard, DnD id)
+components/features/admin/partners/PartnersContainer.tsx      # Suspense retiré
+components/features/admin/partners/PartnerForm.tsx            # 186L (cast supprimé, Link fix)
+components/features/admin/partners/SortablePartnerCard.tsx    # NOUVEAU — 194L
+components/features/admin/partners/types.ts                   # NOUVEAU — interfaces colocalisées
+scripts/test-admin-partners.ts                                # NOUVEAU — 6 tests DAL validation
+next.config.ts                                                # CSP Google Fonts
+app/globals.css                                               # scroll-behavior supprimé
+app/layout.tsx                                                # data-scroll-behavior ajouté
+package.json                                                  # script test:partners
+.github/prompts/plan-adminPartnersAuditFix.prompt.md          # Plan synchronisé
+```
+
+---
+
 ## TASK063 — Media Admin Audit Violations Fix (2026-02-28)
 
 ### Summary

@@ -1,8 +1,32 @@
 # Active Context
 
-**Current Focus (2026-02-28)**: ✅ Refactoring audit conformité `components/features/admin/media/` — 12 étapes, 28 fichiers modifiés, 0 erreurs lint, build OK. Branche `refactor/media-admin-audit-violations` (commit `5db3b25`).
+**Current Focus (2026-02-28)**: ✅ Audit conformité `admin/partners` — 18 étapes, 16 violations corrigées + 3 post-fix, 18 fichiers modifiés (+988/-465), build OK. Branche `fix/admin-partners-audit-violations` (commit `3fd1bf7`).
 
-**Last Major Updates**: ✅ Media Admin Audit Violations Fix (2026-02-28) + Admin Lieux Audit Fix (2026-02-28) + Admin Home Audit Fix (2026-02-28) + Analytics TASK031-FIX (2026-02-27) + Audit Logs Violations Fix (2026-02-26)
+**Last Major Updates**: ✅ Admin Partners Audit Fix (2026-02-28) + Media Admin Audit Violations Fix (2026-02-28) + Admin Lieux Audit Fix (2026-02-28) + Admin Home Audit Fix (2026-02-28) + Analytics TASK031-FIX (2026-02-27) + Audit Logs Violations Fix (2026-02-26)
+
+---
+
+## ✅ TASK064 — Admin Partners Audit Fix (2026-02-28)
+
+### Summary
+
+✅ **COMPLET** — 18 étapes exécutées : 16 violations d'audit corrigées (2 CRITIQUES, 6 HAUTES, 4 MOYENNES, 4 BASSES) + 3 correctifs post-déploiement. Refactoring par couche DAL → Actions → Schemas → UI.
+
+### Corrections par couche
+
+| Couche | Étapes | Corrections clés |
+| ------ | ------ | ---------------- |
+| **DAL** (`admin-partners.ts`) | 1-5 | `mapToPartnerDTO()`, `dalSuccess`/`dalError` + codes `[ERR_PARTNER_NNN]`, `.parseAsync()`, `cache()`, fonctions < 30 lignes (`getNextDisplayOrder`, `buildPartnerUpdatePayload`) |
+| **Actions** (`actions.ts`) | 6 | `import "server-only"`, `ActionResult` sans `data` (BigInt Three-Layer) |
+| **Schemas** (`partners.ts`) | 7 | `PartnerDTO` → `interface`, suppression `.default()` FormSchema |
+| **UI** | 8-14 | `SortablePartnerCard.tsx` extrait (427→228L), `types.ts` colocalisé, `useCallback` dep fix, cast `Resolver<>` supprimé, `<Link>+<Button>` WCAG fix, `dynamic`+`revalidate` page edit, Suspense inutile retiré |
+| **Tests** | 15 | `scripts/test-admin-partners.ts` 6/6 (`pnpm test:partners`) |
+| **Post-fix** | 16-18 | Hydration DndContext `id=`, `<Image>` `sizes` prop, CSP Google Fonts + `scroll-behavior` CSS → data attribute |
+
+### Fichiers modifiés/créés
+
+- **12 modifiés** : `lib/dal/admin-partners.ts` (258L), `lib/schemas/partners.ts`, `app/(admin)/admin/partners/actions.ts` (123L), `app/(admin)/admin/partners/[id]/edit/page.tsx`, `components/features/admin/partners/PartnersView.tsx` (228L), `PartnersContainer.tsx`, `PartnerForm.tsx` (186L), `next.config.ts`, `app/globals.css`, `app/layout.tsx`, `package.json`, plan `.prompt.md`
+- **3 créés** : `SortablePartnerCard.tsx` (194L), `types.ts`, `scripts/test-admin-partners.ts`
 
 ---
 
