@@ -1,5 +1,6 @@
 "use server";
 
+import "server-only";
 import { createContactMessage } from "@/lib/dal/contact";
 import { sendContactNotification } from "@/lib/email/actions";
 import {
@@ -24,18 +25,18 @@ export async function submitContactAction(formData: FormData) {
 
   const parsed = ContactMessageSchema.safeParse(shape);
   if (!parsed.success) {
+    const firstError = parsed.error.issues[0];
     return {
       ok: false,
-      error: "Invalid input",
-      issues: parsed.error.format(),
-    } as const;
+      error: firstError?.message ?? "Données invalides",
+    };
   }
 
   // Persistance en base (priorité RGPD)
   const dalResult = await createContactMessage(parsed.data as ContactMessageInput);
   if (!dalResult.success) {
     console.error("[Contact Action] DAL error:", dalResult.error);
-    return { ok: false, error: "Database error" } as const;
+    return { ok: false, error: "Database error" };
   }
 
   // Envoi notification email admin
@@ -55,5 +56,5 @@ export async function submitContactAction(formData: FormData) {
     // Ne pas échouer l'action si l'email échoue (message déjà en BDD)
   }
 
-  return { ok: true } as const;
+  return { ok: true };
 }
