@@ -1,8 +1,43 @@
 # Active Context
 
-**Current Focus (2026-02-28)**: ✅ Audit conformité `components/features/admin/lieux` — 7 violations corrigées (DRY, types stricts, a11y, imports inutilisés)
+**Current Focus (2026-02-28)**: ✅ Refactoring audit conformité `components/features/admin/media/` — 12 étapes, 28 fichiers modifiés, 0 erreurs lint, build OK. Branche `refactor/media-admin-audit-violations` (commit `5db3b25`).
 
-**Last Major Updates**: ✅ Admin Lieux Audit Fix (2026-02-28) + Admin Home Audit Fix (2026-02-28) + Analytics TASK031-FIX (2026-02-27) + Audit Logs Violations Fix (2026-02-26) + Unsplash CDN fixes (2026-02-21) + Embla Carousel Gallery (2026-02-20)
+**Last Major Updates**: ✅ Media Admin Audit Violations Fix (2026-02-28) + Admin Lieux Audit Fix (2026-02-28) + Admin Home Audit Fix (2026-02-28) + Analytics TASK031-FIX (2026-02-27) + Audit Logs Violations Fix (2026-02-26)
+
+---
+
+## ✅ TASK063 — Media Admin Audit Violations Fix (2026-02-28)
+
+### Summary
+
+Refactoring complet de `components/features/admin/media/` selon le plan `.github/prompts/plan-fixAdminMediaAuditViolations.prompt.md`. 12 étapes exécutées, 28 fichiers modifiés (18 nouveaux + 10 modifiés), 2342 insertions, 1455 suppressions. Committed sur branche dédiée `refactor/media-admin-audit-violations` (SHA `5db3b25`).
+
+### Corrections majeures
+
+| # | Type | Détail |
+| --- | ------ | -------- |
+| 1 | DRY | `formatFileSize` → `lib/utils/format.ts` |
+| 2 | Extraction | `MediaFolderFormDialog` + `MediaTagFormDialog` |
+| 3 | DRY | `BulkTagSelector` + `TagActionBadge` extraits de `MediaBulkActions` |
+| 4 | a11y | `aria-required` + `aria-label` sur éléments interactifs |
+| 5 | Constantes | `constants.ts` — magic numbers supprimés |
+| 6-9 | Split | `MediaDetailsPanel` → `details/`, `ImageFieldGroup` → `image-field/`, `MediaCard` → Thumbnail+Footer |
+| 10 | Hook | `useMediaLibraryState` extrait de `MediaLibraryView` (135 lignes) |
+| 11 | Barrel | `index.ts` mis à jour |
+| 12 | Lint/Build | 2 bugs React Hooks corrigés + `BulkDeleteDialog` extraction |
+
+### Bugs lint corrigés (découverts à l'étape 12)
+
+- `react-hooks/rules-of-hooks` : `useCallback` conditionnel (après `return null`) → remplacé par fonctions `async` classiques
+- `react-hooks/set-state-in-effect` : `setState` dans `useEffect` → pattern **derived state** pendant le render
+- `BulkDeleteDialog.tsx` extrait → `MediaBulkActions` 324→267 lignes (respecte limite 300)
+
+### Résultat
+
+- ✅ Tous les fichiers `media/` < 300 lignes
+- ✅ `pnpm lint` : 0 erreurs
+- ✅ `pnpm build` : `✓ Compiled successfully`
+- ✅ Commit `5db3b25`, 28 fichiers, branche `refactor/media-admin-audit-violations`
 
 ---
 
