@@ -17,7 +17,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, ExternalLink } from "lucide-react";
-import { deleteArticleAction } from "@/app/(admin)/admin/presse/actions";
+import { deleteArticleAction } from "@/app/(admin)/admin/presse/press-articles-actions";
 import type { ArticlesViewProps } from "./types";
 
 export function ArticlesView({ initialArticles }: ArticlesViewProps) {

@@ -18,7 +18,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, Mail, Phone } from "lucide-react";
-import { deletePressContactAction, togglePressContactActiveAction } from "@/app/(admin)/admin/presse/actions";
+import { deletePressContactAction, togglePressContactActiveAction } from "@/app/(admin)/admin/presse/press-contacts-actions";
 import type { PressContactsViewProps } from "./types";
 
 export function PressContactsView({ initialContacts }: PressContactsViewProps) {

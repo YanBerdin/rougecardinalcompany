@@ -1,9 +1,10 @@
 "use server";
 import "server-only";
 
+import { cache } from "react";
 import { createClient } from "@/supabase/server";
 import { requireAdmin } from "@/lib/auth/is-admin";
-import { type DALResult } from "@/lib/dal/helpers";
+import { dalSuccess, dalError, type DALResult } from "@/lib/dal/helpers";
 import {
     type PressContactDTO,
     type PressContactInput,
@@ -12,9 +13,8 @@ import {
 /**
  * Fetch all press contacts (admin only)
  */
-export async function fetchAllPressContacts(): Promise<
-    DALResult<PressContactDTO[]>
-> {
+export const fetchAllPressContacts = cache(
+    async (): Promise<DALResult<PressContactDTO[]>> => {
     await requireAdmin();
 
     const supabase = await createClient();
@@ -43,7 +43,7 @@ export async function fetchAllPressContacts(): Promise<
         .order("nom", { ascending: true });
 
     if (error) {
-        return { success: false, error: error.message };
+        return dalError(`[ERR_PRESS_CONTACT_010] ${error.message}`);
     }
 
     const contacts: PressContactDTO[] = (data ?? []).map((contact) => ({
@@ -65,15 +65,15 @@ export async function fetchAllPressContacts(): Promise<
         updated_at: contact.updated_at,
     }));
 
-    return { success: true, data: contacts };
-}
+    return dalSuccess(contacts);
+    }
+);
 
 /**
  * Fetch single press contact by ID
  */
-export async function fetchPressContactById(
-    id: bigint
-): Promise<DALResult<PressContactDTO | null>> {
+export const fetchPressContactById = cache(
+    async (id: bigint): Promise<DALResult<PressContactDTO | null>> => {
     await requireAdmin();
 
     const supabase = await createClient();
@@ -104,9 +104,9 @@ export async function fetchPressContactById(
 
     if (error) {
         if (error.code === "PGRST116") {
-            return { success: true, data: null };
+            return dalSuccess(null);
         }
-        return { success: false, error: error.message };
+        return dalError(`[ERR_PRESS_CONTACT_011] ${error.message}`);
     }
 
     const contact: PressContactDTO = {
@@ -128,8 +128,9 @@ export async function fetchPressContactById(
         updated_at: data.updated_at,
     };
 
-    return { success: true, data: contact };
-}
+    return dalSuccess(contact);
+    }
+);
 
 /**
  * Create new press contact
@@ -163,14 +164,14 @@ export async function createPressContact(
         .single();
 
     if (error) {
-        return { success: false, error: `[ERR_PRESS_CONTACT_001] ${error.message}` };
+        return dalError(`[ERR_PRESS_CONTACT_001] ${error.message}`);
     }
 
     if (!data) {
-        return { success: false, error: "[ERR_PRESS_CONTACT_001] Failed to create press contact" };
+        return dalError("[ERR_PRESS_CONTACT_001] Failed to create press contact");
     }
 
-    return { success: true, data };
+    return dalSuccess(data);
 }
 
 /**
@@ -204,14 +205,14 @@ export async function updatePressContact(
         .single();
 
     if (error) {
-        return { success: false, error: `[ERR_PRESS_CONTACT_002] ${error.message}` };
+        return dalError(`[ERR_PRESS_CONTACT_002] ${error.message}`);
     }
 
     if (!data) {
-        return { success: false, error: "[ERR_PRESS_CONTACT_002] Failed to update press contact" };
+        return dalError("[ERR_PRESS_CONTACT_002] Failed to update press contact");
     }
 
-    return { success: true, data };
+    return dalSuccess(data);
 }
 
 /**
@@ -229,10 +230,10 @@ export async function deletePressContact(
         .eq("id", id.toString());
 
     if (error) {
-        return { success: false, error: `[ERR_PRESS_CONTACT_003] ${error.message}` };
+        return dalError(`[ERR_PRESS_CONTACT_003] ${error.message}`);
     }
 
-    return { success: true, data: null };
+    return dalSuccess(null);
 }
 
 /**
@@ -253,12 +254,12 @@ export async function togglePressContactActive(
         .single();
 
     if (error) {
-        return { success: false, error: `[ERR_PRESS_CONTACT_004] ${error.message}` };
+        return dalError(`[ERR_PRESS_CONTACT_004] ${error.message}`);
     }
 
     if (!data) {
-        return { success: false, error: "[ERR_PRESS_CONTACT_004] Failed to toggle active status" };
+        return dalError("[ERR_PRESS_CONTACT_004] Failed to toggle active status");
     }
 
-    return { success: true, data };
+    return dalSuccess(data);
 }

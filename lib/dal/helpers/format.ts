@@ -59,6 +59,37 @@ export function toISODateString(d: Date): string {
  * bytesToHuman(1536) // "1.5 KB"
  * bytesToHuman(null) // "—"
  */
+// ============================================================================
+// Locale Formatting
+// ============================================================================
+
+/**
+ * Format a date string to French locale (e.g., "28 février 2026")
+ *
+ * @param dateString - ISO date string or null
+ * @param fallback - String to return when dateString is null/invalid
+ * @returns Formatted French date string
+ *
+ * @example
+ * formatDateFr("2026-02-28") // "28 février 2026"
+ * formatDateFr(null) // "Non définie"
+ */
+export function formatDateFr(
+    dateString: string | null,
+    fallback = "Non définie"
+): string {
+    if (!dateString) return fallback;
+    try {
+        return new Date(dateString).toLocaleDateString("fr-FR", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+        });
+    } catch {
+        return fallback;
+    }
+}
+
 export function bytesToHuman(size: number | null | undefined): string {
     if (size == null || Number.isNaN(size)) return "—";
     const units = ["B", "KB", "MB", "GB", "TB"] as const;

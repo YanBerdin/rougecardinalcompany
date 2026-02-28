@@ -20,7 +20,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { updateArticleAction } from "@/app/(admin)/admin/presse/actions";
+import { updateArticleAction } from "@/app/(admin)/admin/presse/press-articles-actions";
 import { ArticleFormSchema, type ArticleFormValues, type ArticleDTO } from "@/lib/schemas/press-article";
 
 interface ArticleEditFormProps {
@@ -53,7 +53,7 @@ export function ArticleEditForm({ article }: ArticleEditFormProps) {
         article.image_url || article.og_image_media_id ? true : null
     );
 
-    const onSubmit: React.FormEventHandler<HTMLFormElement> = form.handleSubmit(async (data: ArticleFormValues) => {
+    const onSubmit = async (data: ArticleFormValues) => {
         // Pattern 1: Image validation gate (if image provided)
         if (isImageValidated !== true && (data.image_url || data.og_image_media_id)) {
             toast.error("Veuillez attendre la validation de l'image");
@@ -80,11 +80,11 @@ export function ArticleEditForm({ article }: ArticleEditFormProps) {
         } finally {
             setIsPending(false);
         }
-    });
+    };
 
     return (
         <Form {...form}>
-            <form onSubmit={onSubmit} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <Card>
                 <CardHeader>
                     <CardTitle>Informations de l&apos;article</CardTitle>

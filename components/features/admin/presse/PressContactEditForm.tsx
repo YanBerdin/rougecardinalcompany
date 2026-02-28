@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { updatePressContactAction } from "@/app/(admin)/admin/presse/actions";
+import { updatePressContactAction } from "@/app/(admin)/admin/presse/press-contacts-actions";
 import { PressContactFormSchema, type PressContactFormValues, type PressContactDTO } from "@/lib/schemas/press-contact";
 
 interface PressContactEditFormProps {

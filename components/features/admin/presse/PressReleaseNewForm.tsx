@@ -22,17 +22,14 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { ImageFieldGroup } from "@/components/features/admin/media";
-import { createPressReleaseAction } from "@/app/(admin)/admin/presse/actions";
-import { fetchSpectaclesForSelect, fetchEvenementsForSelect } from "@/lib/dal/admin-press-releases";
+import { createPressReleaseAction } from "@/app/(admin)/admin/presse/press-releases-actions";
 import { PressReleaseFormSchema, type PressReleaseFormValues } from "@/lib/schemas/press-release";
 import { cleanPressReleaseFormData, getPressReleaseSuccessMessage } from "@/lib/utils/press-utils";
 import type { SelectOptionDTO } from "@/lib/schemas/press-release";
 
-export function PressReleaseNewForm() {
+export function PressReleaseNewForm({ spectacles = [], evenements = [] }: { spectacles?: SelectOptionDTO[]; evenements?: SelectOptionDTO[] }) {
     const router = useRouter();
     const [isPending, setIsPending] = useState(false);
-    const [spectacles, setSpectacles] = useState<SelectOptionDTO[]>([]);
-    const [evenements, setEvenements] = useState<SelectOptionDTO[]>([]);
     const [isImageValidated, setIsImageValidated] = useState<boolean | null>(null);
 
     const form = useForm<PressReleaseFormValues>({
@@ -53,6 +50,9 @@ export function PressReleaseNewForm() {
     const isPublic = form.watch("public");
     const imageUrl = form.watch("image_url");
     const imageMediaId = form.watch("image_media_id");
+    const watchedTitle = form.watch("title");
+    const watchedDescription = form.watch("description");
+    const watchedDatePublication = form.watch("date_publication");
     const [showPublicWarning, setShowPublicWarning] = useState(false);
 
     useEffect(() => {
@@ -78,23 +78,10 @@ export function PressReleaseNewForm() {
         imageUrl,
         imageMediaId,
         isImageValidated,
-        form.watch("title"),
-        form.watch("description"),
-        form.watch("date_publication"),
+        watchedTitle,
+        watchedDescription,
+        watchedDatePublication,
     ]);
-
-    // Load dropdowns
-    useEffect(() => {
-        async function loadOptions() {
-            const [spectaclesRes, evenementsRes] = await Promise.all([
-                fetchSpectaclesForSelect(),
-                fetchEvenementsForSelect(),
-            ]);
-            if (spectaclesRes.success) setSpectacles(spectaclesRes.data);
-            if (evenementsRes.success) setEvenements(evenementsRes.data);
-        }
-        loadOptions();
-    }, []);
 
     const onSubmit = async (data: PressReleaseFormValues) => {
         // Validation critique : image doit être validée si URL externe fournie

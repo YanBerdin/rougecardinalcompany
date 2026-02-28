@@ -1,20 +1,44 @@
 "use server";
 import "server-only";
 
+import { cache } from "react";
 import { createClient } from "@/supabase/server";
 import { requireAdmin } from "@/lib/auth/is-admin";
-import { type DALResult } from "@/lib/dal/helpers";
+import { dalSuccess, dalError, type DALResult } from "@/lib/dal/helpers";
 import {
     type PressReleaseDTO,
     type PressReleaseInput,
-    type SelectOptionDTO,
 } from "@/lib/schemas/press-release";
+
+// ============================================================================
+// Internal types
+// ============================================================================
+
+interface RawPressReleaseRow {
+    id: number;
+    title: string;
+    slug: string;
+    description: string | null;
+    date_publication: string;
+    image_url: string | null;
+    image_media_id: number | null;
+    spectacle_id: number | null;
+    evenement_id: number | null;
+    public: boolean;
+    ordre_affichage: number;
+    file_size_bytes: number | null;
+    created_by: string | null;
+    created_at: string;
+    updated_at: string;
+    spectacle: { title: string } | null | Array<unknown>;
+    evenement: { spectacles: { title: string } } | null | Array<unknown>;
+}
 
 /**
  * Map database record to PressReleaseDTO
  * Handles spectacle/evenement which can be arrays or objects from Supabase joins
  */
-function mapToPressReleaseDTO(release: any): PressReleaseDTO {
+function mapToPressReleaseDTO(release: RawPressReleaseRow): PressReleaseDTO {
     return {
         id: Number(release.id),
         title: release.title,
@@ -43,9 +67,8 @@ function mapToPressReleaseDTO(release: any): PressReleaseDTO {
 /**
  * Fetch all press releases (admin view - includes drafts)
  */
-export async function fetchAllPressReleasesAdmin(): Promise<
-    DALResult<PressReleaseDTO[]>
-> {
+export const fetchAllPressReleasesAdmin = cache(
+    async (): Promise<DALResult<PressReleaseDTO[]>> => {
     await requireAdmin();
 
     const supabase = await createClient();
@@ -75,20 +98,20 @@ export async function fetchAllPressReleasesAdmin(): Promise<
         .order("date_publication", { ascending: false });
 
     if (error) {
-        return { success: false, error: error.message };
+        return dalError(`[ERR_PRESS_RELEASE_010] ${error.message}`);
     }
 
     const releases: PressReleaseDTO[] = (data ?? []).map(mapToPressReleaseDTO);
 
-    return { success: true, data: releases };
-}
+    return dalSuccess(releases);
+    }
+);
 
 /**
  * Fetch single press release by ID
  */
-export async function fetchPressReleaseById(
-    id: bigint
-): Promise<DALResult<PressReleaseDTO | null>> {
+export const fetchPressReleaseById = cache(
+    async (id: bigint): Promise<DALResult<PressReleaseDTO | null>> => {
     await requireAdmin();
 
     const supabase = await createClient();
@@ -120,16 +143,17 @@ export async function fetchPressReleaseById(
 
     if (error) {
         if (error.code === "PGRST116") {
-            return { success: true, data: null };
+            return dalSuccess(null);
         }
-        return { success: false, error: error.message };
+        return dalError(`[ERR_PRESS_RELEASE_011] ${error.message}`);
     }
 
     // Use helper to handle spectacle/evenement arrays/objects
-    const release = mapToPressReleaseDTO(data);
+    const release = mapToPressReleaseDTO(data as unknown as RawPressReleaseRow);
 
-    return { success: true, data: release };
-}
+    return dalSuccess(release);
+    }
+);
 
 /**
  * Create new press release
@@ -161,14 +185,14 @@ export async function createPressRelease(
         .single();
 
     if (error) {
-        return { success: false, error: `[ERR_PRESS_RELEASE_001] ${error.message}` };
+        return dalError(`[ERR_PRESS_RELEASE_001] ${error.message}`);
     }
 
     if (!data) {
-        return { success: false, error: "[ERR_PRESS_RELEASE_001] Failed to create press release" };
+        return dalError("[ERR_PRESS_RELEASE_001] Failed to create press release");
     }
 
-    return { success: true, data: mapToPressReleaseDTO(data) };
+    return dalSuccess(mapToPressReleaseDTO(data as unknown as RawPressReleaseRow));
 }
 
 /**
@@ -200,14 +224,14 @@ export async function updatePressRelease(
         .single();
 
     if (error) {
-        return { success: false, error: `[ERR_PRESS_RELEASE_002] ${error.message}` };
+        return dalError(`[ERR_PRESS_RELEASE_002] ${error.message}`);
     }
 
     if (!data) {
-        return { success: false, error: "[ERR_PRESS_RELEASE_002] Failed to update press release" };
+        return dalError("[ERR_PRESS_RELEASE_002] Failed to update press release");
     }
 
-    return { success: true, data: mapToPressReleaseDTO(data) };
+    return dalSuccess(mapToPressReleaseDTO(data as unknown as RawPressReleaseRow));
 }
 
 /**
@@ -225,10 +249,10 @@ export async function deletePressRelease(
         .eq("id", id.toString());
 
     if (error) {
-        return { success: false, error: `[ERR_PRESS_RELEASE_003] ${error.message}` };
+        return dalError(`[ERR_PRESS_RELEASE_003] ${error.message}`);
     }
 
-    return { success: true, data: null };
+    return dalSuccess(null);
 }
 
 /**
@@ -248,14 +272,14 @@ export async function publishPressRelease(
         .single();
 
     if (error) {
-        return { success: false, error: `[ERR_PRESS_RELEASE_004] ${error.message}` };
+        return dalError(`[ERR_PRESS_RELEASE_004] ${error.message}`);
     }
 
     if (!data) {
-        return { success: false, error: "[ERR_PRESS_RELEASE_004] Failed to publish press release" };
+        return dalError("[ERR_PRESS_RELEASE_004] Failed to publish press release");
     }
 
-    return { success: true, data: mapToPressReleaseDTO(data) };
+    return dalSuccess(mapToPressReleaseDTO(data as unknown as RawPressReleaseRow));
 }
 
 /**
@@ -275,66 +299,12 @@ export async function unpublishPressRelease(
         .single();
 
     if (error) {
-        return { success: false, error: `[ERR_PRESS_RELEASE_005] ${error.message}` };
+        return dalError(`[ERR_PRESS_RELEASE_005] ${error.message}`);
     }
 
     if (!data) {
-        return { success: false, error: "[ERR_PRESS_RELEASE_005] Failed to unpublish press release" };
+        return dalError("[ERR_PRESS_RELEASE_005] Failed to unpublish press release");
     }
 
-    return { success: true, data: mapToPressReleaseDTO(data) };
-}
-
-/**
- * Fetch spectacles for select dropdown
- */
-export async function fetchSpectaclesForSelect(): Promise<
-    DALResult<SelectOptionDTO[]>
-> {
-    await requireAdmin();
-
-    const supabase = await createClient();
-    const { data, error } = await supabase
-        .from("spectacles")
-        .select("id, titre")
-        .eq("active", true)
-        .order("titre", { ascending: true });
-
-    if (error) {
-        return { success: false, error: error.message };
-    }
-
-    const options: SelectOptionDTO[] = (data ?? []).map((item) => ({
-        id: Number(item.id),
-        titre: item.titre,
-    }));
-
-    return { success: true, data: options };
-}
-
-/**
- * Fetch evenements for select dropdown
- */
-export async function fetchEvenementsForSelect(): Promise<
-    DALResult<SelectOptionDTO[]>
-> {
-    await requireAdmin();
-
-    const supabase = await createClient();
-    const { data, error } = await supabase
-        .from("evenements")
-        .select("id, titre")
-        .eq("active", true)
-        .order("titre", { ascending: true });
-
-    if (error) {
-        return { success: false, error: error.message };
-    }
-
-    const options: SelectOptionDTO[] = (data ?? []).map((item) => ({
-        id: Number(item.id),
-        titre: item.titre,
-    }));
-
-    return { success: true, data: options };
+    return dalSuccess(mapToPressReleaseDTO(data as unknown as RawPressReleaseRow));
 }

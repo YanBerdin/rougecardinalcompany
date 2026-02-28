@@ -41,8 +41,8 @@
  * }
  * ```
  */
-export type ActionResult<T> =
-    | { success: true; data: T }
+export type ActionResult<T = void> =
+    | (T extends void ? { success: true } : { success: true; data: T })
     | { success: false; error: string };
 
 // =============================================================================
@@ -101,7 +101,7 @@ export type MediaUploadResult = ActionResult<MediaUploadData>;
  */
 export function isActionSuccess<T>(
     result: ActionResult<T>
-): result is { success: true; data: T } {
+): result is T extends void ? { success: true } : { success: true; data: T } {
     return result.success === true;
 }
 

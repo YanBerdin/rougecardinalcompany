@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { fetchPressReleaseById } from "@/lib/dal/admin-press-releases";
+import { formatDateFr } from "@/lib/dal/helpers";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,15 +27,6 @@ export default async function PressReleasePreviewPage({ params }: PageProps) {
     }
 
     const release = result.data;
-
-    const formatDate = (dateString: string | null) => {
-        if (!dateString) return "Non définie";
-        return new Date(dateString).toLocaleDateString("fr-FR", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-        });
-    };
 
     return (
         <div className="container mx-auto py-8 max-w-4xl">
@@ -75,7 +67,7 @@ export default async function PressReleasePreviewPage({ params }: PageProps) {
                     <CardTitle className="text-2xl">{release.title}</CardTitle>
                     <div className="flex items-center gap-2 text-muted-foreground">
                         <Calendar className="h-4 w-4" />
-                        <span>{formatDate(release.date_publication)}</span>
+                        <span>{formatDateFr(release.date_publication)}</span>
                     </div>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -125,11 +117,11 @@ export default async function PressReleasePreviewPage({ params }: PageProps) {
                         </div>
                         <div>
                             <dt className="text-muted-foreground">Créé le</dt>
-                            <dd>{formatDate(release.created_at)}</dd>
+                            <dd>{formatDateFr(release.created_at)}</dd>
                         </div>
                         <div>
                             <dt className="text-muted-foreground">Modifié le</dt>
-                            <dd>{formatDate(release.updated_at)}</dd>
+                            <dd>{formatDateFr(release.updated_at)}</dd>
                         </div>
                     </dl>
                 </CardContent>

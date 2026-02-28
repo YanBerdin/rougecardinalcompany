@@ -14,7 +14,7 @@ export {
 } from "./error";
 
 // Formatting utilities
-export { formatTime, toISODateString, bytesToHuman } from "./format";
+export { formatTime, toISODateString, bytesToHuman, formatDateFr } from "./format";
 
 // Slug generation
 export { generateSlug, generateUniqueSlug } from "./slug";

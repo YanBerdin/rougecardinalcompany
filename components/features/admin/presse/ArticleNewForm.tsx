@@ -20,7 +20,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { createArticleAction } from "@/app/(admin)/admin/presse/actions";
+import { createArticleAction } from "@/app/(admin)/admin/presse/press-articles-actions";
 import { ArticleFormSchema, type ArticleFormValues } from "@/lib/schemas/press-article";
 
 export function ArticleNewForm() {

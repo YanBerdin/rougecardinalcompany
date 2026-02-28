@@ -1,15 +1,17 @@
 "use server";
 import "server-only";
 
+import { cache } from "react";
 import { createClient } from "@/supabase/server";
 import { requireAdmin } from "@/lib/auth/is-admin";
-import { type DALResult } from "@/lib/dal/helpers";
+import { dalSuccess, dalError, type DALResult } from "@/lib/dal/helpers";
 import { type ArticleDTO, type ArticleInput } from "@/lib/schemas/press-article";
 
 /**
  * Fetch all articles (admin view)
  */
-export async function fetchAllArticlesAdmin(): Promise<DALResult<ArticleDTO[]>> {
+export const fetchAllArticlesAdmin = cache(
+    async (): Promise<DALResult<ArticleDTO[]>> => {
     await requireAdmin();
 
     const supabase = await createClient();
@@ -36,7 +38,7 @@ export async function fetchAllArticlesAdmin(): Promise<DALResult<ArticleDTO[]>> 
         .order("published_at", { ascending: false, nullsFirst: false });
 
     if (error) {
-        return { success: false, error: error.message };
+        return dalError(`[ERR_ARTICLE_010] ${error.message}`);
     }
 
     const articles: ArticleDTO[] = (data ?? []).map((article) => ({
@@ -56,15 +58,15 @@ export async function fetchAllArticlesAdmin(): Promise<DALResult<ArticleDTO[]>> 
         updated_at: article.updated_at,
     }));
 
-    return { success: true, data: articles };
-}
+    return dalSuccess(articles);
+    }
+);
 
 /**
  * Fetch single article by ID
  */
-export async function fetchArticleById(
-    id: bigint
-): Promise<DALResult<ArticleDTO | null>> {
+export const fetchArticleById = cache(
+    async (id: bigint): Promise<DALResult<ArticleDTO | null>> => {
     await requireAdmin();
 
     const supabase = await createClient();
@@ -93,9 +95,9 @@ export async function fetchArticleById(
 
     if (error) {
         if (error.code === "PGRST116") {
-            return { success: true, data: null };
+            return dalSuccess(null);
         }
-        return { success: false, error: error.message };
+        return dalError(`[ERR_ARTICLE_011] ${error.message}`);
     }
 
     const article: ArticleDTO = {
@@ -115,8 +117,9 @@ export async function fetchArticleById(
         updated_at: data.updated_at,
     };
 
-    return { success: true, data: article };
-}
+    return dalSuccess(article);
+    }
+);
 
 /**
  * Create new article
@@ -146,14 +149,14 @@ export async function createArticle(
         .single();
 
     if (error) {
-        return { success: false, error: `[ERR_ARTICLE_001] ${error.message}` };
+        return dalError(`[ERR_ARTICLE_001] ${error.message}`);
     }
 
     if (!data) {
-        return { success: false, error: "[ERR_ARTICLE_001] Failed to create article" };
+        return dalError("[ERR_ARTICLE_001] Failed to create article");
     }
 
-    return { success: true, data };
+    return dalSuccess(data);
 }
 
 /**
@@ -186,14 +189,14 @@ export async function updateArticle(
         .single();
 
     if (error) {
-        return { success: false, error: `[ERR_ARTICLE_002] ${error.message}` };
+        return dalError(`[ERR_ARTICLE_002] ${error.message}`);
     }
 
     if (!data) {
-        return { success: false, error: "[ERR_ARTICLE_002] Failed to update article" };
+        return dalError("[ERR_ARTICLE_002] Failed to update article");
     }
 
-    return { success: true, data };
+    return dalSuccess(data);
 }
 
 /**
@@ -209,8 +212,8 @@ export async function deleteArticle(id: bigint): Promise<DALResult<null>> {
         .eq("id", id.toString());
 
     if (error) {
-        return { success: false, error: `[ERR_ARTICLE_003] ${error.message}` };
+        return dalError(`[ERR_ARTICLE_003] ${error.message}`);
     }
 
-    return { success: true, data: null };
+    return dalSuccess(null);
 }

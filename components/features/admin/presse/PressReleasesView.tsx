@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge"; import {
     DialogFooter,
     DialogClose,
 } from "@/components/ui/dialog"; import { Plus, Pencil, Trash2, Eye, Send } from "lucide-react";
-import { deletePressReleaseAction, publishPressReleaseAction, unpublishPressReleaseAction } from "@/app/(admin)/admin/presse/actions";
+import { deletePressReleaseAction, publishPressReleaseAction, unpublishPressReleaseAction } from "@/app/(admin)/admin/presse/press-releases-actions";
 import type { PressReleasesViewProps } from "./types";
 
 export function PressReleasesView({ initialReleases }: PressReleasesViewProps) {

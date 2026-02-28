@@ -23,20 +23,19 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { updatePressReleaseAction } from "@/app/(admin)/admin/presse/actions";
-import { fetchSpectaclesForSelect, fetchEvenementsForSelect } from "@/lib/dal/admin-press-releases";
+import { updatePressReleaseAction } from "@/app/(admin)/admin/presse/press-releases-actions";
 import { PressReleaseFormSchema, type PressReleaseFormValues, type PressReleaseDTO } from "@/lib/schemas/press-release";
 import type { SelectOptionDTO } from "@/lib/schemas/press-release";
 
 interface PressReleaseEditFormProps {
     release: PressReleaseDTO;
+    spectacles?: SelectOptionDTO[];
+    evenements?: SelectOptionDTO[];
 }
 
-export function PressReleaseEditForm({ release }: PressReleaseEditFormProps) {
+export function PressReleaseEditForm({ release, spectacles = [], evenements = [] }: PressReleaseEditFormProps) {
     const router = useRouter();
     const [isPending, setIsPending] = useState(false);
-    const [spectacles, setSpectacles] = useState<SelectOptionDTO[]>([]);
-    const [evenements, setEvenements] = useState<SelectOptionDTO[]>([]);
 
     const form = useForm<PressReleaseFormValues>({
         resolver: zodResolver(PressReleaseFormSchema),
@@ -75,18 +74,6 @@ export function PressReleaseEditForm({ release }: PressReleaseEditFormProps) {
         });
         return () => subscription.unsubscribe();
     }, [form, isImageValidated]);
-
-    useEffect(() => {
-        async function loadOptions() {
-            const [spectaclesRes, evenementsRes] = await Promise.all([
-                fetchSpectaclesForSelect(),
-                fetchEvenementsForSelect(),
-            ]);
-            if (spectaclesRes.success) setSpectacles(spectaclesRes.data);
-            if (evenementsRes.success) setEvenements(evenementsRes.data);
-        }
-        loadOptions();
-    }, []);
 
     const onSubmit = async (data: PressReleaseFormValues) => {
         // Pattern 1: Image validation gate
