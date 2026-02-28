@@ -11,12 +11,8 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { SortableHeader } from "@/components/ui/sortable-header";
-import type { SortState } from "@/components/ui/sortable-header";
 import type { LieuClientDTO } from "@/lib/schemas/admin-lieux";
-
-// Sortable fields
-export type LieuSortField = "nom" | "ville" | "capacite";
-export type LieuSortState = SortState<LieuSortField>;
+import type { LieuSortField, LieuSortState } from "@/lib/tables/lieu-table-helpers";
 
 interface LieuxTableProps {
     lieux: LieuClientDTO[];

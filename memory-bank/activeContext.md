@@ -1,8 +1,32 @@
 # Active Context
 
-**Current Focus (2026-02-28)**: ✅ Audit conformité `components/features/admin/home` — 3 corrections appliquées (unsafe assertion, types ErrorBoundary, i18n)
+**Current Focus (2026-02-28)**: ✅ Audit conformité `components/features/admin/lieux` — 7 violations corrigées (DRY, types stricts, a11y, imports inutilisés)
 
-**Last Major Updates**: ✅ Admin Home Audit Fix (2026-02-28) + Analytics TASK031-FIX (2026-02-27) + Audit Logs Violations Fix (2026-02-26) + Unsplash CDN fixes (2026-02-21) + Embla Carousel Gallery (2026-02-20) + Upload Security Hardening (2026-02-18)
+**Last Major Updates**: ✅ Admin Lieux Audit Fix (2026-02-28) + Admin Home Audit Fix (2026-02-28) + Analytics TASK031-FIX (2026-02-27) + Audit Logs Violations Fix (2026-02-26) + Unsplash CDN fixes (2026-02-21) + Embla Carousel Gallery (2026-02-20)
+
+---
+
+## ✅ Audit conformité admin/lieux — Corrections (2026-02-28)
+
+### Summary
+
+Audit complet de `components/features/admin/lieux` (6 fichiers composants + DAL + schemas + actions + helpers) suivi de la correction des 7 violations détectées. 14 points de conformité déjà valides, 0 erreur TypeScript ni ESLint après corrections.
+
+### Corrections appliquées (7)
+
+| # | Fichier | Violation | Correction |
+| --- | --------- | ----------- | ------------ |
+| 1 | `admin-lieux.ts` (schemas) | `Record<string, any>` dans `LieuDTO` et `LieuClientDTO` | → `Record<string, unknown>` |
+| 2 | `actions.ts` | `LieuClientDTO` redéfini localement | Supprimé, import depuis `@/lib/schemas/admin-lieux` |
+| 3 | `actions.ts` | `ActionResult<T>` redéfini localement | Supprimé, import depuis `@/lib/actions/types` |
+| 4 | `LieuxContainer.tsx`, `edit/page.tsx`, `actions.ts` | Mapping `bigint→number` dupliqué x3 | `toClientDTO()` exporté par les schemas, utilisé partout |
+| 5 | `LieuxTable.tsx` | `LieuSortField`/`LieuSortState` redéfinis (déjà dans helpers) | Import depuis `@/lib/tables/lieu-table-helpers` |
+| 6 | `LieuxContainer.tsx` | `Suspense`, `Skeleton`, `LieuClientDTO` inutilisés | Supprimés + `role="alert"` sur div erreur |
+| 7 | `LieuFormFields.tsx` | Champ `nom` requis sans `aria-required` | Ajouté `aria-required="true"` sur l'Input |
+
+### Fichiers conformés avant audit (14/21)
+
+Architecture, patterns CRUD Server Actions, useEffect sync props, router.refresh(), BigInt 3-layer, DAL SOLID (cache, requireAdmin, dalSuccess/dalError, codes erreurs), schémas UI/Server séparés, limites 300 lignes respectées, formulaire split en sous-composants.
 
 ---
 

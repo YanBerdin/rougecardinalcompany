@@ -40,7 +40,7 @@ export type LieuDTO = {
     latitude: number | null;
     longitude: number | null;
     capacite: number | null;
-    metadata: Record<string, any>;
+    metadata: Record<string, unknown>;
     created_at: string;
     updated_at: string;
 };
@@ -56,7 +56,25 @@ export type LieuClientDTO = {
     latitude: number | null;
     longitude: number | null;
     capacite: number | null;
-    metadata: Record<string, any>;
+    metadata: Record<string, unknown>;
     created_at: string;
     updated_at: string;
 };
+
+/** Convert LieuDTO (bigint) → LieuClientDTO (number) for client serialization */
+export function toClientDTO(lieu: LieuDTO): LieuClientDTO {
+    return {
+        id: Number(lieu.id),
+        nom: lieu.nom,
+        adresse: lieu.adresse,
+        ville: lieu.ville,
+        code_postal: lieu.code_postal,
+        pays: lieu.pays,
+        latitude: lieu.latitude,
+        longitude: lieu.longitude,
+        capacite: lieu.capacite,
+        metadata: lieu.metadata,
+        created_at: lieu.created_at,
+        updated_at: lieu.updated_at,
+    };
+}

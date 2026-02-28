@@ -2,9 +2,9 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { fetchLieuByIdAdmin } from "@/lib/dal/admin-lieux";
 import { LieuForm } from "@/components/features/admin/lieux/LieuForm";
+import { toClientDTO } from "@/lib/schemas/admin-lieux";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Metadata } from "next";
-import type { LieuClientDTO } from "@/lib/schemas/admin-lieux";
 
 export const metadata: Metadata = {
     title: "Modifier Lieu | Admin",
@@ -24,23 +24,7 @@ async function EditLieuFormData({ id }: { id: string }) {
         notFound();
     }
 
-    // ✅ Convertir bigint → number pour le client
-    const lieuForClient: LieuClientDTO = {
-        id: Number(lieuResult.data.id),
-        nom: lieuResult.data.nom,
-        adresse: lieuResult.data.adresse,
-        ville: lieuResult.data.ville,
-        code_postal: lieuResult.data.code_postal,
-        pays: lieuResult.data.pays,
-        latitude: lieuResult.data.latitude,
-        longitude: lieuResult.data.longitude,
-        capacite: lieuResult.data.capacite,
-        metadata: lieuResult.data.metadata,
-        created_at: lieuResult.data.created_at,
-        updated_at: lieuResult.data.updated_at,
-    };
-
-    return <LieuForm lieu={lieuForClient} />;
+    return <LieuForm lieu={toClientDTO(lieuResult.data)} />;
 }
 
 export default async function EditLieuPage({ params }: EditLieuPageProps) {

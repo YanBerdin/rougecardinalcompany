@@ -26,7 +26,7 @@ export function LieuFormFields({ form }: LieuFormFieldsProps) {
                     <FormItem>
                         <FormLabel>Nom *</FormLabel>
                         <FormControl>
-                            <Input placeholder="Théâtre de la Ville" {...field} />
+                            <Input placeholder="Théâtre de la Ville" aria-required="true" {...field} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>

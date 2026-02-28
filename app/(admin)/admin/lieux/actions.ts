@@ -3,45 +3,8 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createLieu, updateLieu, deleteLieu } from "@/lib/dal/admin-lieux";
-import { LieuInputSchema, type LieuDTO } from "@/lib/schemas/admin-lieux";
-
-export type ActionResult<T = unknown> =
-    | { success: true; data?: T }
-    | { success: false; error: string };
-
-// ✅ Client DTO (number au lieu de bigint pour sérialisation JSON)
-export type LieuClientDTO = {
-    id: number;
-    nom: string;
-    adresse: string | null;
-    ville: string | null;
-    code_postal: string | null;
-    pays: string;
-    latitude: number | null;
-    longitude: number | null;
-    capacite: number | null;
-    metadata: Record<string, any>;
-    created_at: string;
-    updated_at: string;
-};
-
-// ✅ Helper pour convertir LieuDTO → LieuClientDTO
-function toClientDTO(lieu: LieuDTO): LieuClientDTO {
-    return {
-        id: Number(lieu.id),
-        nom: lieu.nom,
-        adresse: lieu.adresse,
-        ville: lieu.ville,
-        code_postal: lieu.code_postal,
-        pays: lieu.pays,
-        latitude: lieu.latitude,
-        longitude: lieu.longitude,
-        capacite: lieu.capacite,
-        metadata: lieu.metadata,
-        created_at: lieu.created_at,
-        updated_at: lieu.updated_at,
-    };
-}
+import { LieuInputSchema, toClientDTO, type LieuClientDTO } from "@/lib/schemas/admin-lieux";
+import type { ActionResult } from "@/lib/actions/types";
 
 /**
  * CREATE Lieu
@@ -115,7 +78,7 @@ export async function updateLieuAction(
 /**
  * DELETE Lieu
  */
-export async function deleteLieuAction(id: string): Promise<ActionResult> {
+export async function deleteLieuAction(id: string): Promise<ActionResult<null>> {
     try {
         const result = await deleteLieu(BigInt(id));
 
@@ -126,7 +89,7 @@ export async function deleteLieuAction(id: string): Promise<ActionResult> {
         revalidatePath("/admin/lieux");
         revalidatePath("/admin/agenda");
 
-        return { success: true };
+        return { success: true, data: null };
     } catch (err: unknown) {
         return {
             success: false,

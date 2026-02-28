@@ -1,5 +1,37 @@
 # Progress
 
+## Audit conformité admin/lieux — 7 corrections (2026-02-28)
+
+### Summary
+
+✅ **COMPLET** — Audit + fix de `components/features/admin/lieux`. 7 violations corrigées, 0 erreur TypeScript/ESLint.
+
+| Livrable | Statut | Détails |
+| -------- | ------ | ------- |
+| `Record<string, any>` → `unknown` | ✅ | `LieuDTO` + `LieuClientDTO` dans schemas |
+| `LieuClientDTO` dupliqué supprimé | ✅ | Import unique depuis `lib/schemas/admin-lieux` |
+| `ActionResult<T>` dupliqué supprimé | ✅ | Import depuis `lib/actions/types` |
+| `toClientDTO()` centralisé | ✅ | Exporté par schemas, 3 usages refactorisés (Container, edit/page, actions) |
+| Types sort dupliqués | ✅ | Source unique dans `lieu-table-helpers.ts`, import dans Table + View |
+| Imports inutilisés Container | ✅ | `Suspense`/`Skeleton`/`LieuClientDTO` supprimés, `role="alert"` ajouté |
+| `aria-required="true"` champ nom | ✅ | WCAG 2.2 AA conformité formulaire |
+| TypeScript 0 erreurs | ✅ | Confirmé |
+| ESLint 0 erreurs (11 warnings pré-existants) | ✅ | Confirmé |
+
+### Fichiers modifiés
+
+```bash
+lib/schemas/admin-lieux.ts                              # any→unknown, toClientDTO() exporté
+app/(admin)/admin/lieux/actions.ts                      # Suppression duplicata ActionResult + LieuClientDTO + toClientDTO
+components/features/admin/lieux/LieuxContainer.tsx      # Import toClientDTO, suppression imports inutilisés, role="alert"
+app/(admin)/admin/lieux/[id]/edit/page.tsx               # Import toClientDTO, mapping inline supprimé
+components/features/admin/lieux/LieuxTable.tsx           # Import sort types depuis helpers
+components/features/admin/lieux/LieuxView.tsx            # Import sort types depuis helpers
+components/features/admin/lieux/LieuFormFields.tsx       # aria-required="true" sur champ nom
+```
+
+---
+
 ## TASK031-FIX Analytics — Audit qualité + Bugfixes complets (2026-02-27)
 
 ### Summary

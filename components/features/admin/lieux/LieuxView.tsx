@@ -8,8 +8,8 @@ import { Plus } from "lucide-react";
 import { deleteLieuAction } from "@/app/(admin)/admin/lieux/actions";
 import type { LieuClientDTO } from "@/lib/schemas/admin-lieux";
 import { LieuxTable } from "./LieuxTable";
-import type { LieuSortField, LieuSortState } from "./LieuxTable";
 import { sortLieux, getNextSortState } from "@/lib/tables/lieu-table-helpers";
+import type { LieuSortField, LieuSortState } from "@/lib/tables/lieu-table-helpers";
 
 interface LieuxViewProps {
     initialLieux: LieuClientDTO[];
