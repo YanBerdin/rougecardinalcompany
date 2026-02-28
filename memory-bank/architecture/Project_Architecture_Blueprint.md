@@ -332,7 +332,7 @@ components/features/admin/{feature}/
   +-- index.ts                     <- Barrel exports
 ```
 
-**Domaines admin :** `agenda`, `analytics`, `audit-logs`, `home`, `lieux`, `media` (16 fichiers), `partners`, `presse`, `site-config`, `spectacles`, `team` (6 fichiers), `users`
+**Domaines admin :** `agenda`, `analytics`, `audit-logs`, `home`, `lieux`, `media` (32 fichiers — inclut `details/`, `image-field/`, `hooks/`), `partners`, `presse`, `site-config`, `spectacles`, `team` (6 fichiers), `users`
 
 #### Pattern Public systématique (6 domaines)
 
