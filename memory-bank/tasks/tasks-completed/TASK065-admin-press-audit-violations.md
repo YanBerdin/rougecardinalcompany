@@ -1,8 +1,8 @@
 # TASK065 - Admin Press Audit Violations Fix
 
-**Status:** Pending
+**Status:** Completed
 **Added:** 2026-02-28
-**Updated:** 2026-02-28
+**Updated:** 2026-03-01
 
 ## Original Request
 
@@ -58,26 +58,26 @@ Branche : `fix/admin-press-audit-violations`
 
 ## Progress Tracking
 
-**Overall Status:** Not Started - 0%
+**Overall Status:** Completed - 100%
 
 ### Subtasks
 
 | ID | Description | Status | Updated | Notes |
 | --- | --- | --- | --- | --- |
-| 1 | Ajouter `import "server-only"` dans actions.ts | Not Started | - | P0 |
-| 2 | Migrer imports DAL → props Server Component | Not Started | - | P0 — pages new/edit + 2 forms |
-| 3 | Remplacer `any` par `RawPressReleaseRow` | Not Started | - | P0 |
-| 4 | Split actions.ts → 3 fichiers | Not Started | - | P1 — 368→3×~120L |
-| 5 | Split admin-press-releases.ts → select-options | Not Started | - | P1 — 341→~280 + ~80 |
-| 6 | Ajouter `cache()` sur lectures DAL | Not Started | - | P1 — 4 fichiers |
-| 7 | Migrer `dalSuccess`/`dalError` | Not Started | - | P1 — 4 fichiers DAL |
-| 8 | Utiliser `ActionResult<T>` partagé | Not Started | - | P1 — supprimer définition locale |
-| 9 | Codes erreur fetch (série 010+) | Not Started | - | P1 — 8 fonctions |
-| 10 | Harmoniser `.parseAsync()` | Not Started | - | P1 — articles + contacts actions |
-| 11 | Unifier pattern onSubmit ArticleEditForm | Not Started | - | P2 |
-| 12 | Extraire formatDateFr dans helpers | Not Started | - | P2 |
-| 13 | Corriger form.watch() deps useEffect | Not Started | - | P2 |
-| 14 | Validation finale (lint + build + grep) | Not Started | - | Gate |
+| 1 | Ajouter `import "server-only"` dans actions.ts | Complete | 2026-02-28 | P0 — ajouté dans les 3 nouveaux fichiers actions |
+| 2 | Migrer imports DAL → props Server Component | Complete | 2026-02-28 | P0 — pages new/edit passent spectacles/evenements en props |
+| 3 | Remplacer `any` par `RawPressReleaseRow` | Complete | 2026-02-28 | P0 — interface typée dans admin-press-releases.ts |
+| 4 | Split actions.ts → 3 fichiers | Complete | 2026-02-28 | P1 — press-releases-actions.ts, press-articles-actions.ts, press-contacts-actions.ts |
+| 5 | Split admin-press-releases.ts → select-options | Complete | 2026-02-28 | P1 — admin-press-select-options.ts créé |
+| 6 | Ajouter `cache()` sur lectures DAL | Complete | 2026-02-28 | P1 — 4 fichiers DAL wrappés |
+| 7 | Migrer `dalSuccess`/`dalError` | Complete | 2026-02-28 | P1 — 4 fichiers DAL migrés |
+| 8 | Utiliser `ActionResult<T>` partagé | Complete | 2026-02-28 | P1 — définition locale supprimée, import lib/actions/types + fix conditional data |
+| 9 | Codes erreur fetch (série 010+) | Complete | 2026-02-28 | P1 — 8 fonctions avec codes [ERR_*_01N] |
+| 10 | Harmoniser `.parseAsync()` | Complete | 2026-02-28 | P1 — articles + contacts actions migrés |
+| 11 | Unifier pattern onSubmit ArticleEditForm | Complete | 2026-02-28 | P2 — pattern standard appliqué |
+| 12 | Extraire formatDateFr dans helpers | Complete | 2026-02-28 | P2 — ajouté dans lib/dal/helpers/format.ts |
+| 13 | Corriger form.watch() deps useEffect | Complete | 2026-02-28 | P2 — dépendances stabilisées PressReleaseNewForm |
+| 14 | Validation finale (lint + build + grep) | Complete | 2026-02-28 | Gate — 0 erreurs lint, build OK |
 
 ## Progress Log
 
@@ -87,3 +87,12 @@ Branche : `fix/admin-press-audit-violations`
 - Discovery phase completed: 29 files analyzed, 12 violations identified
 - Plan drafted and reviewed: 14 steps across 4 phases
 - Key findings: `actions.ts` is 368 lines (confirmed), shared `ActionResult<T>` exists in `lib/actions/types.ts` but unused, `types.ts` already has optional spectacles/evenements props, 17 other DAL files use `cache()` but press DALs don't
+
+### 2026-02-28 (implémentation complète)
+
+- **Phase 1 (P0)** : `import "server-only"` ajouté dans les 3 nouveaux fichiers actions, imports DAL migrés hors Client Components (spectacles/evenements passés en props depuis Server Components new/edit), `any` remplacé par `RawPressReleaseRow` interface
+- **Phase 2 (P1)** : `actions.ts` (368L) splitté en `press-releases-actions.ts` + `press-articles-actions.ts` + `press-contacts-actions.ts`, ancien `actions.ts` supprimé ; `admin-press-releases.ts` (341L) allégé avec extraction `admin-press-select-options.ts` ; `cache()` React ajouté sur toutes les lectures DAL (4 fichiers) ; `dalSuccess`/`dalError` helpers adoptés ; `ActionResult<T>` partagé depuis `lib/actions/types.ts` (fix: `data` conditionnel avec `T extends void`) ; codes erreur `[ERR_PRESS_*]` ajoutés ; `.parseAsync()` harmonisé
+- **Phase 3 (P2)** : Pattern `onSubmit` unifié dans `ArticleEditForm.tsx`, `formatDateFr` extrait dans `lib/dal/helpers/format.ts`, dépendances `form.watch()` stabilisées dans `PressReleaseNewForm.tsx`
+- **Phase 4** : `pnpm lint` 0 erreurs, `pnpm build` compiled successfully, grep validations OK, `wc -l` tous fichiers < 300 lignes
+- **Commit** : `1ff52a3` sur branche `fix/admin-press-audit-violations`, 23 fichiers modifiés
+- Score conformité : ~75% → ≥95%

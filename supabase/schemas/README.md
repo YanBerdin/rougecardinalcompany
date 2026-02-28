@@ -123,6 +123,20 @@ supabase/schemas/
 
 ## 🆕 Mises à jour récentes (février 2026)
 
+- **FIX: Contact RLS INSERT Policy + Serialization Error (28 fév. 2026)** : Restauration de la politique RLS INSERT sur `messages_contact` et correction de l'erreur de sérialisation du formulaire de contact.
+  - **Root cause** : La migration `20260201135511_add_landscape_photos_to_spectacles.sql` avait supprimé la politique `"Validated contact submission"` sans la recréer (DROP / CREATE implicite).
+  - **Migration hotfix** : `20260228231707_restore_contact_insert_policy.sql` — recrée la politique INSERT pour `anon` et `authenticated`.
+  - **Schéma déclaratif** : `10_tables_system.sql` synchronisé — la politique `"Validated contact submission"` est désormais définie in extenso (plus un simple commentaire).
+  - **Fix sérialisation** : `ZodFormattedError` remplacé par plain string dans `components/features/public-site/contact/actions.ts` (React 19 Flight protocol ne sérialise pas les objets Zod).
+  - **Commits** : `c108e3b` (hotfix migration + serialization fix), `d5248eb` (schema sync + migrations.md)
+  - **Validation** : `supabase db push --linked` OK, formulaire contact fonctionnel
+
+- **TASK065: Admin Press Audit Violations Fix (28 fév. 2026)** : Correction de 12 violations d'audit sur la feature admin presse.
+  - **14 étapes** en 4 phases : P0 critiques (server-only, imports DAL, any→interface), P1 majeures (split actions/DAL, cache(), dalSuccess/dalError, codes erreur, ActionResult partagé, parseAsync), P2 mineures (onSubmit, formatDateFr, form.watch deps)
+  - **Fichiers modifiés** : 23 fichiers (3 DAL, 3 actions, 4 components, 3 pages, helpers, types)
+  - **Score conformité** : ~75% → ≥95%
+  - **Commit** : `1ff52a3` sur branche `fix/admin-press-audit-violations`
+
 - **FEAT: Photos Paysage Spectacles - TASK057 (1 fév. 2026)** : Système de gestion de 2 photos paysage par spectacle.
   - **Migrations** : `20260201093000_fix_entity_type_whitelist.sql` + `20260201100000_add_landscape_photos_to_spectacles.sql`
   - **Modifications BDD** :

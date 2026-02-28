@@ -1,8 +1,54 @@
 # Active Context
 
-**Current Focus (2026-02-28)**: ✅ Audit conformité `admin/partners` — 18 étapes, 16 violations corrigées + 3 post-fix, 18 fichiers modifiés (+988/-465), build OK. Branche `fix/admin-partners-audit-violations` (commit `3fd1bf7`).
+**Current Focus (2026-03-01)**: ✅ TASK065 Admin Press Audit Violations Fix — 14 étapes, 12 violations corrigées, 23 fichiers, score ~75%→≥95%. Branche `fix/admin-press-audit-violations` (commit `1ff52a3`). + fix(contact): restauration politique RLS INSERT `messages_contact` + correction sérialisation ZodFormattedError (commits `c108e3b`, `d5248eb`).
 
-**Last Major Updates**: ✅ Admin Partners Audit Fix (2026-02-28) + Media Admin Audit Violations Fix (2026-02-28) + Admin Lieux Audit Fix (2026-02-28) + Admin Home Audit Fix (2026-02-28) + Analytics TASK031-FIX (2026-02-27) + Audit Logs Violations Fix (2026-02-26)
+**Last Major Updates**: ✅ TASK065 Admin Press Audit Fix (2026-02-28) + Contact RLS/Serialization Fix (2026-02-28) + Admin Partners Audit Fix (2026-02-28) + Media Admin Audit Violations Fix (2026-02-28) + Admin Lieux Audit Fix (2026-02-28) + Admin Home Audit Fix (2026-02-28) + Analytics TASK031-FIX (2026-02-27)
+
+---
+
+## ✅ TASK065 — Admin Press Audit Violations Fix (2026-02-28)
+
+### Summary
+
+✅ **COMPLET** — 14 étapes exécutées : 12 violations d'audit corrigées (3 P0, 6 P1, 3 P2) sur la feature admin presse. Score conformité ~75% → ≥95%. Commit `1ff52a3` sur branche `fix/admin-press-audit-violations`, 23 fichiers modifiés.
+
+### Corrections par phase
+
+| Phase | Étapes | Corrections clés |
+| ----- | ------ | ---------------- |
+| **P0 critiques** | 1-3 | `import "server-only"` dans 3 actions, imports DAL migrés hors Client Components (props depuis Server Components), `any` → `RawPressReleaseRow` interface |
+| **P1 majeures** | 4-10 | Split `actions.ts` (368L) → 3 fichiers par entité, extraction `admin-press-select-options.ts`, `cache()` sur 4 DAL, `dalSuccess`/`dalError` + codes `[ERR_PRESS_*]`, `ActionResult<T>` conditionnel (fix `data?`), `.parseAsync()` harmonisé |
+| **P2 mineures** | 11-13 | Pattern `onSubmit` unifié `ArticleEditForm`, `formatDateFr` extrait dans `lib/dal/helpers/format.ts`, `form.watch()` dépendances stabilisées |
+| **Validation** | 14 | `pnpm lint` 0 erreurs, `pnpm build` OK, grep + `wc -l` < 300L |
+
+### Fichiers modifiés/créés
+
+- **DAL** : `admin-press-releases.ts` (réécriture), `admin-press-articles.ts`, `admin-press-contacts.ts`, `admin-press-select-options.ts` (nouveau)
+- **Actions** : `press-releases-actions.ts`, `press-articles-actions.ts`, `press-contacts-actions.ts` (3 nouveaux), ancien `actions.ts` supprimé
+- **Components** : `PressReleaseNewForm.tsx`, `PressReleaseEditForm.tsx`, `ArticleEditForm.tsx` refactorisés
+- **Pages** : `communiques/new/page.tsx`, `communiques/[id]/edit/page.tsx` — fetch options dans Server Component
+- **Types** : `ActionResult<T>` conditionnel dans `lib/actions/types.ts`
+- **Helpers** : `formatDateFr` dans `lib/dal/helpers/format.ts`
+
+---
+
+## ✅ fix(contact) — Restauration RLS INSERT + Correction sérialisation (2026-02-28)
+
+### Summary
+
+✅ **COMPLET** — Deux bugs corrigés sur le formulaire de contact public.
+
+### Bug 1 : Erreur sérialisation `Form submission error {}`
+
+- **Root cause** : `ZodFormattedError` (objet complexe) retourné dans l'état du formulaire. React 19 Flight protocol ne sérialise pas les objets Zod.
+- **Fix** : Remplacement par plain string dans `components/features/public-site/contact/actions.ts`
+
+### Bug 2 : Erreur database `{ok: false, error: 'Database error'}`
+
+- **Root cause** : Migration `20260201135511_add_landscape_photos_to_spectacles.sql` avait supprimé la politique RLS `"Validated contact submission"` (DROP implicite de toutes les policies sur `messages_contact`).
+- **Fix** : Hotfix migration `20260228231707_restore_contact_insert_policy.sql` — recrée la politique INSERT pour `anon` et `authenticated`.
+- **Schema sync** : Politique définie in extenso dans `supabase/schemas/10_tables_system.sql` (était un simple commentaire, violation SCH-004).
+- **Commits** : `c108e3b` (hotfix + serialization), `d5248eb` (schema sync + migrations.md)
 
 ---
 

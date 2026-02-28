@@ -1,5 +1,75 @@
 # Progress
 
+## TASK065 — Admin Press Audit Violations Fix (2026-02-28)
+
+### Summary
+
+✅ **COMPLET** — 14 étapes : 12 violations d'audit corrigées (3 P0, 6 P1, 3 P2) sur la feature admin presse. Score ~75% → ≥95%. Commit `1ff52a3` sur branche `fix/admin-press-audit-violations`.
+
+| Livrable | Statut | Détails |
+| -------- | ------ | ------- |
+| `import "server-only"` dans actions | ✅ | 3 nouveaux fichiers actions |
+| Imports DAL migrés hors Client Components | ✅ | Props depuis Server Components (new/edit pages) |
+| `any` → `RawPressReleaseRow` interface | ✅ | admin-press-releases.ts |
+| Split `actions.ts` → 3 fichiers | ✅ | press-releases, press-articles, press-contacts |
+| `admin-press-select-options.ts` extrait | ✅ | fetchSpectaclesForSelect + fetchEvenementsForSelect |
+| `cache()` React sur lectures DAL | ✅ | 4 fichiers DAL wrappés |
+| `dalSuccess`/`dalError` + codes erreur | ✅ | Codes `[ERR_PRESS_*]` série 010+ |
+| `ActionResult<T>` partagé conditionnel | ✅ | Fix `data?` optionnel quand `T extends void` |
+| `.parseAsync()` harmonisé | ✅ | Articles + contacts actions |
+| Pattern `onSubmit` unifié | ✅ | ArticleEditForm.tsx |
+| `formatDateFr` extrait | ✅ | `lib/dal/helpers/format.ts` |
+| `form.watch()` deps fix | ✅ | PressReleaseNewForm.tsx |
+| `pnpm lint` 0 erreurs | ✅ | Confirmé |
+| `pnpm build` OK | ✅ | Compiled successfully |
+
+### Fichiers Modifiés
+
+```bash
+lib/dal/admin-press-releases.ts                                # Réécriture complète (cache, dalSuccess/dalError, RawPressReleaseRow)
+lib/dal/admin-press-articles.ts                                # cache(), dalSuccess/dalError, codes erreur
+lib/dal/admin-press-contacts.ts                                # cache(), dalSuccess/dalError, codes erreur
+lib/dal/admin-press-select-options.ts                          # NOUVEAU — fetchSpectaclesForSelect + fetchEvenementsForSelect
+lib/dal/helpers/format.ts                                      # formatDateFr ajouté
+lib/actions/types.ts                                           # ActionResult<T> conditionnel (data? quand T extends void)
+app/(admin)/admin/presse/communiques/press-releases-actions.ts # NOUVEAU
+app/(admin)/admin/presse/articles/press-articles-actions.ts    # NOUVEAU
+app/(admin)/admin/presse/contacts/press-contacts-actions.ts    # NOUVEAU
+app/(admin)/admin/presse/communiques/new/page.tsx              # Fetch options Server Component
+app/(admin)/admin/presse/communiques/[id]/edit/page.tsx        # Fetch options Server Component
+components/features/admin/presse/communiques/PressReleaseNewForm.tsx  # Props, form.watch fix
+components/features/admin/presse/communiques/PressReleaseEditForm.tsx # Props, onSubmit
+components/features/admin/presse/articles/ArticleEditForm.tsx  # onSubmit pattern
+app/(admin)/admin/presse/actions.ts                            # SUPPRIMÉ (remplacé par 3 fichiers)
+```
+
+---
+
+## fix(contact) — Restauration RLS INSERT + Correction sérialisation (2026-02-28)
+
+### Summary
+
+✅ **COMPLET** — 2 bugs corrigés sur le formulaire de contact public + conformité schéma déclaratif.
+
+| Livrable | Statut | Détails |
+| -------- | ------ | ------- |
+| Fix sérialisation `ZodFormattedError` | ✅ | Plain string dans actions.ts (React 19 Flight) |
+| Hotfix migration RLS INSERT | ✅ | `20260228231707_restore_contact_insert_policy.sql` |
+| Schema sync `10_tables_system.sql` | ✅ | Politique définie in extenso (SCH-004) |
+| `migrations.md` documenté | ✅ | Section février 2026 ajoutée |
+| `supabase db push --linked` | ✅ | Déployé sur cloud |
+
+### Root Cause
+
+La migration `20260201135511_add_landscape_photos_to_spectacles.sql` avait recréé la table `messages_contact` avec RLS activé mais sans restaurer la politique `"Validated contact submission"` (INSERT). Résultat : `new row violates row-level security policy`.
+
+### Commits
+
+- `c108e3b` — hotfix migration + serialization fix
+- `d5248eb` — schema sync + migrations.md documentation
+
+---
+
 ## TASK064 — Admin Partners Audit Fix (2026-02-28)
 
 ### Summary
