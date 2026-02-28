@@ -1,7 +1,5 @@
-import { Suspense } from "react";
 import { fetchAllPartnersAdmin } from "@/lib/dal/admin-partners";
 import { PartnersView } from "./PartnersView";
-import { Skeleton } from "@/components/ui/skeleton";
 
 export async function PartnersContainer() {
     const result = await fetchAllPartnersAdmin();
@@ -18,9 +16,5 @@ export async function PartnersContainer() {
         );
     }
 
-    return (
-        <Suspense fallback={<Skeleton className="h-96 w-full" />}>
-            <PartnersView initialPartners={result.data} />
-        </Suspense>
-    );
+    return <PartnersView initialPartners={result.data} />;
 }

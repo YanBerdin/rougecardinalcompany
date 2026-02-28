@@ -2,6 +2,9 @@ import { notFound } from "next/navigation";
 import { fetchPartnerById } from "@/lib/dal/admin-partners";
 import { PartnerForm } from "@/components/features/admin/partners/PartnerForm";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export const metadata = {
     title: "Éditer Partenaire | Admin",
 };

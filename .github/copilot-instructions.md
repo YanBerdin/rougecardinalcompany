@@ -179,6 +179,7 @@ pnpm test:resend           # Test email integration
 # Admin Scripts
 pnpm exec tsx scripts/test-admin-access.ts    # Security validation
 pnpm exec tsx scripts/check-email-logs.ts     # Email audit
+pnpm test:partners                             # Partners DAL validation (6 tests)
 ```
 
 ### Debugging Workflows
@@ -1525,6 +1526,24 @@ Complete implementation of TASK030 across 11 phases:
 
 **Commits**:
 - `b27059f` - feat(presse): separate Media Kit and Press Releases toggles + hide disabled sections
+
+**Audit Conformité Admin Features (February 2026)**:
+
+Série de refactorings audit qualité sur les features admin, alignés sur les patterns DAL SOLID, Clean Code et WCAG :
+
+1. **TASK033-FIX** Audit Logs — 7 corrections + 2 scripts test (branche `fix/audit-logs-violations`)
+2. **TASK031-FIX** Analytics — 7 corrections + 2 bugfixes + infrastructure tracking
+3. **TASK063** Media Admin — 12 étapes, 28 fichiers (branche `refactor/media-admin-audit-violations`, commit `5db3b25`)
+4. **TASK064** Admin Partners — 18 étapes, 16 violations + 3 post-fix (branche `fix/admin-partners-audit-violations`, commit `3fd1bf7`)
+
+**Pattern commun** :
+- `mapToXxxDTO()` extraction dans DAL + `buildMediaPublicUrl` (T3 Env)
+- `dalSuccess`/`dalError` + codes erreur `[ERR_XXX_NNN]`
+- `.parseAsync()` Zod (async superRefine)
+- `cache()` React sur lectures DAL
+- Extraction composants > 300 lignes + `types.ts` colocalisé
+- `import "server-only"` + `ActionResult` sans `data` (BigInt Three-Layer)
+- Scripts test de validation non-régression (`pnpm test:partners`, `pnpm test:audit-logs:dal`)
 
 **Next.js 16 Migration (December 2025)**:
 

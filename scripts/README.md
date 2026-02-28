@@ -1196,6 +1196,73 @@ Form (number) → Server Action (EventFormSchema) → DAL (bigint) → ActionRes
 
 ---
 
+### 🤝 Tests Admin Partners (TASK064)
+
+#### test-admin-partners.ts ✅ NOUVEAU (2026-02-28)
+
+**Description**: Validation non-régression du DAL partners après audit fix. Valide l'absence de `process.env` direct, les codes d'erreur `[ERR_PARTNER_NNN]`, et l'intégrité des données.
+
+**Utilisation**:
+
+```bash
+pnpm test:partners
+# ou
+pnpm exec tsx scripts/test-admin-partners.ts
+```
+
+**Configuration Requise**:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+SUPABASE_SECRET_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**Tests couverts (6 tests)**:
+
+| Test | Description |
+| ------ | ------------- |
+| Test 1 | Fetch all partners (admin) |
+| Test 2 | Fetch existing partner by ID |
+| Test 3 | Fetch non-existent partner (returns null) |
+| Test 4 | No direct `process.env` in DAL (uses `buildMediaPublicUrl`) |
+| Test 5 | Error codes follow `[ERR_PARTNER_NNN]` format |
+| Test 6 | No `Resolver<>` cast in PartnerForm |
+
+**Avantages**:
+
+- ✅ Teste les opérations de lecture DAL (fetchAll, fetchById)
+- ✅ Valide la conformité T3 Env (pas de `process.env` direct)
+- ✅ Vérifie les codes d'erreur structurés `[ERR_PARTNER_001]` à `[ERR_PARTNER_006]`
+- ✅ Confirme la suppression du cast dangereux `as Resolver<>`
+- ✅ Tests rapides (~1-2 secondes)
+
+**Résultat attendu**:
+
+```bash
+🧪 Admin Partners – Audit Fix Validation
+============================================================
+
+✅ All 6 tests passed
+```
+
+**Contexte**:
+
+Créé pour valider TASK064 (Admin Partners Audit Fix). Teste les 18 étapes de refactoring du DAL, des Server Actions, des schemas et de l'UI partners.
+
+**Pattern testé**:
+
+```bash
+DAL: mapToPartnerDTO() + dalSuccess/dalError + cache() + .parseAsync()
+UI: SortablePartnerCard extraction + types.ts colocalisé + Resolver<> supprimé
+```
+
+**Références**:
+
+- Task: `memory-bank/tasks/tasks-completed/TASK064-admin-partners-audit-fix.md`
+- Plan: `.github/prompts/plan-adminPartnersAuditFix.prompt.md`
+
+---
+
 #### check-admin-status.ts
 
 **Description** : Vérifie le statut admin d'un utilisateur et affiche les métadonnées complètes.

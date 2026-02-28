@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm, type Resolver } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -19,24 +19,20 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { ImageFieldGroup } from "@/components/features/admin/media/ImageFieldGroup";
-import { PartnerFormSchema, type PartnerFormValues, type PartnerDTO } from "@/lib/schemas/partners";
+import { PartnerFormSchema, type PartnerFormValues } from "@/lib/schemas/partners";
 import {
     createPartnerAction,
     updatePartnerAction,
 } from "@/app/(admin)/admin/partners/actions";
 import { ArrowLeft, Save } from "lucide-react";
-import Link from "next/link";
-
-interface PartnerFormProps {
-    partner?: PartnerDTO;
-}
+import type { PartnerFormProps } from "./types";
 
 export function PartnerForm({ partner }: PartnerFormProps) {
     const router = useRouter();
     const [isPending, setIsPending] = useState(false);
 
     const form = useForm<PartnerFormValues>({
-        resolver: zodResolver(PartnerFormSchema) as Resolver<PartnerFormValues>,
+        resolver: zodResolver(PartnerFormSchema),
         defaultValues: partner
             ? {
                 name: partner.name,
@@ -169,12 +165,15 @@ export function PartnerForm({ partner }: PartnerFormProps) {
                 </Card>
 
                 <div className="flex items-center gap-4">
-                    <Link href="/admin/partners">
-                        <Button type="button" variant="outline" disabled={isPending}>
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Retour
-                        </Button>
-                    </Link>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        disabled={isPending}
+                        onClick={() => router.push("/admin/partners")}
+                    >
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Retour
+                    </Button>
                     <Button type="submit" disabled={isPending}>
                         <Save className="mr-2 h-4 w-4" />
                         {isPending ? "Enregistrement..." : partner ? "Mettre à jour" : "Créer"}

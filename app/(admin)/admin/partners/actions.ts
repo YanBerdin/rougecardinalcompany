@@ -1,4 +1,5 @@
 "use server";
+import "server-only";
 
 import { revalidatePath } from "next/cache";
 import {
@@ -35,7 +36,7 @@ export async function createPartnerAction(
         revalidatePath("/admin/partners");
         revalidatePath("/"); // Homepage partners section
 
-        return { success: true, data: result.data };
+        return { success: true };
     } catch (error: unknown) {
         return {
             success: false,
@@ -62,7 +63,7 @@ export async function updatePartnerAction(
         revalidatePath("/admin/partners");
         revalidatePath("/"); // Homepage partners section
 
-        return { success: true, data: result.data };
+        return { success: true };
     } catch (error: unknown) {
         return {
             success: false,
