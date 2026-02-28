@@ -1768,6 +1768,17 @@ pnpm add next@16.0.7
 
 ---
 
+## Migrations récentes (février 2026)
+
+- `20260228231707_restore_contact_insert_policy.sql` — **Hotfix : restauration policy INSERT messages_contact**
+  - 🎯 **Objectif** : Restaurer la policy RLS INSERT `"Validated contact submission"` droppée accidentellement
+  - **Root cause** : Migration `20260201135511_add_landscape_photos_to_spectacles.sql` ligne 3 drop la policy sans la recréer
+  - **Impact** : Formulaire de contact public bloqué (toutes les insertions refusées par RLS)
+  - **Pattern** : Drop idempotent + CREATE POLICY avec validation champs, email regex, RGPD, anti-abus
+  - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/10_tables_system.sql`
+  - 📝 **Migration conservée** pour l'historique et la cohérence avec Supabase Cloud
+  - 📦 **Commit** : c108e3b — "fix(contact): restore RLS INSERT policy and fix serialization error"
+
 ## Migrations récentes (janvier 2026)
 
 - `20260101220000_fix_presse_toggles.sql` — **TASK030 Phase 11 : Split presse toggle into 2 independent toggles**

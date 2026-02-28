@@ -189,9 +189,32 @@ for select
 to authenticated
 using ( (select public.is_admin()) );
 
--- NOTE: Contact INSERT policy removed from declarative schema
--- Managed by migration: 20260106190617_fix_rls_policy_with_check_true_vulnerabilities.sql
--- Policy name: "Validated contact submission"
+-- Public INSERT: validation des champs, consentement RGPD, format email/téléphone
+-- Historique : créée par 20260106190617, droppée accidentellement par 20260201135511,
+--              restaurée par hotfix 20260228231707. Désormais gérée dans ce schéma déclaratif.
+drop policy if exists "Validated contact submission" on public.messages_contact;
+create policy "Validated contact submission"
+on public.messages_contact
+for insert
+to anon, authenticated
+with check (
+  -- Champs requis non vides
+  firstname is not null and firstname <> ''
+  and lastname is not null and lastname <> ''
+  and email is not null and email <> ''
+  and reason is not null
+  and message is not null and message <> ''
+  and consent = true  -- RGPD obligatoire
+
+  -- Validation format email
+  and email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
+
+  -- Téléphone optionnel mais validé si présent
+  and (phone is null or phone ~* '^\+?[0-9\s\-\(\)]{10,}$')
+
+  -- Limites longueur message (anti-abus)
+  and length(message) between 10 and 5000
+);
 
 -- Seuls les admins peuvent modifier les messages
 drop policy if exists "Admins can update contact messages" on public.messages_contact;
