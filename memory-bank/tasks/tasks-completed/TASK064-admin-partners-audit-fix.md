@@ -4,13 +4,13 @@
 **Added:** 2026-02-28  
 **Updated:** 2026-02-28  
 **Branch:** `fix/admin-partners-audit-violations`  
-**Plan:** `.github/prompts/plan-adminPartnersAuditFix.prompt.md`
+**Plan:** `.github/prompts/plan-fix-adminPartnersAudit.prompt.md`
 
 ---
 
 ## Original Request
 
-> "éxécute `.github/prompts/plan-adminPartnersAuditFix.prompt.md`"  
+> "éxécute `.github/prompts/plan-fix-adminPartnersAudit.prompt.md`"  
 > "rédige une TASK correspondante au plan et commit l'implémentation sur une branche dédiée"
 
 ---
@@ -105,7 +105,7 @@ Le plan identifiait 16 violations d'audit sur la feature `admin/partners` (2 CRI
 - `app/globals.css` — `scroll-behavior: smooth` supprimé
 - `app/layout.tsx` — `data-scroll-behavior="smooth"` ajouté sur `<html>`
 - `package.json` — script `test:partners` ajouté
-- `.github/prompts/plan-adminPartnersAuditFix.prompt.md` — Plan synchronisé avec implémentation
+- `.github/prompts/plan-fix-adminPartnersAudit.prompt.md` — Plan synchronisé avec implémentation
 
 ### Créés (3)
 

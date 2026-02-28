@@ -1259,7 +1259,7 @@ UI: SortablePartnerCard extraction + types.ts colocalisé + Resolver<> supprimé
 **Références**:
 
 - Task: `memory-bank/tasks/tasks-completed/TASK064-admin-partners-audit-fix.md`
-- Plan: `.github/prompts/plan-adminPartnersAuditFix.prompt.md`
+- Plan: `.github/prompts/plan-fix-adminPartnersAudit.prompt.md`
 
 ---
 

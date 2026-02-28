@@ -44,7 +44,7 @@ next.config.ts                                                # CSP Google Fonts
 app/globals.css                                               # scroll-behavior supprimé
 app/layout.tsx                                                # data-scroll-behavior ajouté
 package.json                                                  # script test:partners
-.github/prompts/plan-adminPartnersAuditFix.prompt.md          # Plan synchronisé
+.github/prompts/plan-fix-adminPartnersAudit.prompt.md          # Plan synchronisé
 ```
 
 ---

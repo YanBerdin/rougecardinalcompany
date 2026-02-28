@@ -16,6 +16,7 @@
 
 ## En Attente
 
+- `TASK065` Admin Press Audit Violations Fix — 12 violations (3 P0, 6 P1, 3 P2), 14 étapes, ~28 fichiers
 - `TASK005` Optimisation SEO et meta-tags dynamiques
 - `TASK007` Tests automatisés et monitoring
 - `TASK008` Configuration des redirections vers billetterie externe
