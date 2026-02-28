@@ -1,5 +1,55 @@
 # Progress
 
+## TASK063 — Media Admin Audit Violations Fix (2026-02-28)
+
+### Summary
+
+✅ **COMPLET** — Refactoring complet de `components/features/admin/media/` selon 12 étapes. 28 fichiers modifiés (18 créés + 10 modifiés). 0 erreur ESLint, build compilé. Commit `5db3b25` sur branche `refactor/media-admin-audit-violations`.
+
+| Livrable | Statut | Détails |
+| ---------- | ------ | -------- |
+| `formatFileSize` → `lib/utils/format.ts` | ✅ | DRY, suppression duplication |
+| `MediaFolderFormDialog.tsx` créé | ✅ | Dialog création/édition dossier |
+| `MediaTagFormDialog.tsx` créé | ✅ | Dialog création/édition tag |
+| `BulkTagSelector` + `TagActionBadge` extraits | ✅ | DRY depuis `MediaBulkActions` |
+| `aria-required` + `aria-label` | ✅ | WCAG 2.2 AA |
+| `constants.ts` — plus de magic numbers | ✅ | `MAX_VISIBLE_TAGS`, débounces |
+| `MediaDetailsPanel` split → `details/` | ✅ | 4 sous-composants |
+| `ImageFieldGroup` split → `image-field/` | ✅ | 3 sous-composants |
+| `MediaCard` split → Thumbnail + Footer | ✅ | `MediaCardThumbnail` + `MediaCardFooter` |
+| `useMediaLibraryState` hook (135L) | ✅ | Extrait de `MediaLibraryView` |
+| `index.ts` barrel mis à jour | ✅ | Nouveaux exports ajoutés |
+| React Hooks lint bugs corrigés (2) | ✅ | useCallback→async, derived state |
+| `BulkDeleteDialog.tsx` extrait | ✅ | MediaBulkActions 324→267 lignes |
+| `pnpm lint` 0 erreurs | ✅ | Confirmé |
+| `pnpm build` compilé | ✅ | `✓ Compiled successfully` |
+| Commit `5db3b25` (28 fichiers) | ✅ | Branche `refactor/media-admin-audit-violations` |
+
+### Fichiers créés
+
+```bash
+lib/utils/format.ts
+components/features/admin/media/constants.ts
+components/features/admin/media/MediaFolderFormDialog.tsx
+components/features/admin/media/MediaTagFormDialog.tsx
+components/features/admin/media/BulkTagSelector.tsx
+components/features/admin/media/BulkDeleteDialog.tsx           # Extrait en étape 12
+components/features/admin/media/TagActionBadge.tsx
+components/features/admin/media/MediaCardThumbnail.tsx         # 166L
+components/features/admin/media/MediaCardFooter.tsx            # 76L
+components/features/admin/media/details/MediaPreview.tsx       # 26L
+components/features/admin/media/details/MediaFileInfo.tsx      # 46L
+components/features/admin/media/details/MediaEditForm.tsx      # 174L
+components/features/admin/media/details/MediaDetailActions.tsx # 107L
+components/features/admin/media/hooks/useMediaLibraryState.ts  # 135L
+components/features/admin/media/image-field/ImageSourceActions.tsx   # 96L
+components/features/admin/media/image-field/ImagePreviewSection.tsx  # 94L
+components/features/admin/media/image-field/ImageAltTextField.tsx    # 55L
+.github/prompts/plan-fixAdminMediaAuditViolations.prompt.md
+```
+
+---
+
 ## Audit conformité admin/lieux — 7 corrections (2026-02-28)
 
 ### Summary

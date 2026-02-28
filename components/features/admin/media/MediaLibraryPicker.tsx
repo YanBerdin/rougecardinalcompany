@@ -1,5 +1,6 @@
 "use client";
 import { useState, useCallback, useEffect } from "react";
+import { SEARCH_DEBOUNCE_MS } from "./constants";
 import {
     Dialog,
     DialogContent,
@@ -85,7 +86,7 @@ export function MediaLibraryPicker({
         const timer = setTimeout(() => {
             setCurrentPage(1);
             fetchMedia(query, 1);
-        }, 300);
+        }, SEARCH_DEBOUNCE_MS);
 
         return () => clearTimeout(timer);
     }, [query, open, fetchMedia]);
@@ -233,4 +234,4 @@ export function MediaLibraryPicker({
     );
 }
 
-export default MediaLibraryPicker;
+// Named export only — see `export function MediaLibraryPicker` above

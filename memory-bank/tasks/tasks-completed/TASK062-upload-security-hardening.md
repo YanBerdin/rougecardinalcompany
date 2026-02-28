@@ -7,6 +7,7 @@
 ## Original Request
 
 Audit de sécurité de la validation à l'upload avec 3 questions :
+
 1. Le type MIME est-il vérifié côté serveur (pas seulement l'extension) ?
 2. La taille maximale est-elle bien 10Mo (rejetée avant écriture disque) ?
 3. Le nom de fichier est-il sanitisé (suppression path, caractères spéciaux) ?
@@ -39,7 +40,7 @@ Puis follow-up : "les seuls formats acceptés sont JPEG, PNG, WebP, AVIF ?" → 
 
 ### Subtasks
 
-| ID   | Description | Status | Updated | Notes |
+| ID | Description | Status | Updated | Notes |
 | ---- | ----------- | ------ | ------- | ----- |
 | 62.1 | Magic bytes MIME verification | Complete | 2026-02-18 | 7 formats, 64 octets |
 | 62.2 | Taille max 10MB | Complete | 2026-02-18 | Vérifié avant lecture bytes |
@@ -55,11 +56,13 @@ Puis follow-up : "les seuls formats acceptés sont JPEG, PNG, WebP, AVIF ?" → 
 ### 2026-02-18 — Session 1 : Audit Sécurité
 
 **Problèmes identifiés** :
+
 - `file.type` client-contrôlé sans vérification côté serveur → MIME spoofing
 - Limite 5MB vs 10MB autorisé par bucket Supabase
 - `input.file.name` stocké brut en BDD
 
 **Fichiers créés/modifiés** :
+
 - `lib/utils/mime-verify.ts` — NOUVEAU : `detectMimeFromBytes()`, `verifyFileMime()`, 7 détecteurs individuels
 - `lib/actions/media-actions.ts` — `validateFile` rendu async, `verifyFileMime` appelé, MAX_FILE_SIZE = 10MB
 - `lib/dal/media.ts` — `sanitizeFilename()` ajouté, utilisé dans `generateStoragePath()` et `createMediaRecord()`
@@ -70,18 +73,21 @@ Puis follow-up : "les seuls formats acceptés sont JPEG, PNG, WebP, AVIF ?" → 
 **Déclencheur** : Question "les seuls formats acceptés sont JPEG, PNG, WebP, AVIF ?"
 
 **Incohérence découverte** :
+
 - Upload : JPEG/PNG/WebP/AVIF (4 types)
 - URL externe : JPEG/PNG/WebP/SVG/GIF (5 types, AVIF absent)
 
 **Décision** (via multi-select utilisateur) : garder existants + ajouter GIF + SVG + PDF
 
 **Modifications** :
+
 - `lib/schemas/media.ts` : split en `ALLOWED_IMAGE_MIME_TYPES` (6) + `ALLOWED_DOCUMENT_MIME_TYPES` (PDF) + `ALLOWED_UPLOAD_MIME_TYPES` (union), type guard `isAllowedUploadMimeType`
 - `lib/utils/mime-verify.ts` : ajout GIF/SVG/PDF, 64 octets, type de retour `AllowedUploadMimeType`
 - `lib/utils/validate-image-url.ts` : AVIF ajouté
 - `lib/schemas/index.ts` : nouveaux exports
 
 **Notes techniques** :
+
 - SVG : 64 octets nécessaires (déclaration XML peut commencer par BOM UTF-8 `EF BB BF`)
 - `<?xml` accepté pour SVG — volontairement large (admin-only)
 - PDF testé avant SVG pour éviter faux positifs

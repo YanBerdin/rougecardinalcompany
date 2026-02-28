@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Trash2, FolderOpen, Tag, X, Folder } from "lucide-react";
+import { Trash2, FolderOpen, X, Folder } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -11,16 +11,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import type { MediaFolderDTO, MediaTagDTO, MediaItemExtendedDTO } from "@/lib/schemas/media";
 import { toast } from "sonner";
 import {
     bulkDeleteMediaAction,
@@ -28,7 +19,8 @@ import {
     bulkTagMediaAction,
     bulkUntagMediaAction
 } from "@/lib/actions/media-bulk-actions";
-import type { MediaFolderDTO, MediaTagDTO, MediaItemExtendedDTO } from "@/lib/schemas/media";
+import { BulkTagSelector } from "./BulkTagSelector";
+import { BulkDeleteDialog } from "./BulkDeleteDialog";
 
 interface MediaBulkActionsProps {
     selectedMedia: MediaItemExtendedDTO[]; // Changed from selectedIds to full media objects
@@ -48,9 +40,6 @@ export function MediaBulkActions({
     const [isPending, setIsPending] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [selectedFolder, setSelectedFolder] = useState<string>("");
-    const [selectedTagsToAdd, setSelectedTagsToAdd] = useState<number[]>([]);
-    const [selectedTagsToRemove, setSelectedTagsToRemove] = useState<number[]>([]);
-
     const count = selectedMedia.length;
     const selectedIds = selectedMedia.map(m => m.id);
 
@@ -94,24 +83,35 @@ export function MediaBulkActions({
         return null;
     }
 
-    const handleBulkDelete = async () => {
+    type BulkActionResult = { success: boolean; error?: string };
+    const executeBulkAction = async (
+        action: () => Promise<BulkActionResult>,
+        successMessage: string,
+        errorMessage: string,
+        onCleanup?: () => void,
+    ) => {
         setIsPending(true);
         try {
-            const result = await bulkDeleteMediaAction(selectedIds);
-
-            if (!result.success) {
-                throw new Error(result.error);
-            }
-
-            toast.success(`${count} média${count > 1 ? "s" : ""} supprimé${count > 1 ? "s" : ""}`);
+            const result = await action();
+            if (!result.success) throw new Error(result.error);
+            toast.success(successMessage);
+            onCleanup?.();
             onSuccess();
             onClearSelection();
         } catch (error) {
-            toast.error(error instanceof Error ? error.message : "Erreur suppression");
+            toast.error(error instanceof Error ? error.message : errorMessage);
         } finally {
             setIsPending(false);
-            setShowDeleteDialog(false);
         }
+    };
+
+    const handleBulkDelete = async () => {
+        await executeBulkAction(
+            () => bulkDeleteMediaAction(selectedIds),
+            `${count} média${count > 1 ? "s" : ""} supprimé${count > 1 ? "s" : ""}`,
+            "Erreur suppression",
+        );
+        setShowDeleteDialog(false);
     };
 
     const handleBulkMove = async () => {
@@ -119,90 +119,30 @@ export function MediaBulkActions({
             toast.error("Sélectionnez un dossier");
             return;
         }
-
-        setIsPending(true);
-        try {
-            const folderId = selectedFolder === "root" ? null : Number(selectedFolder);
-            const result = await bulkMoveMediaAction(selectedIds, folderId);
-
-            if (!result.success) {
-                throw new Error(result.error);
-            }
-
-            toast.success(`${count} média${count > 1 ? "s" : ""} déplacé${count > 1 ? "s" : ""}`);
-            setSelectedFolder("");
-            onSuccess();
-            onClearSelection();
-        } catch (error) {
-            toast.error(error instanceof Error ? error.message : "Erreur déplacement");
-        } finally {
-            setIsPending(false);
-        }
-    };
-
-    const handleBulkTag = async () => {
-        if (selectedTagsToAdd.length === 0) {
-            toast.error("Sélectionnez au moins un tag à ajouter");
-            return;
-        }
-
-        setIsPending(true);
-        try {
-            const result = await bulkTagMediaAction(selectedIds, selectedTagsToAdd);
-
-            if (!result.success) {
-                throw new Error(result.error);
-            }
-
-            toast.success(`Tags ajoutés à ${count} média${count > 1 ? "s" : ""}`);
-            setSelectedTagsToAdd([]);
-            onSuccess();
-            onClearSelection();
-        } catch (error) {
-            toast.error(error instanceof Error ? error.message : "Erreur ajout tags");
-        } finally {
-            setIsPending(false);
-        }
-    };
-
-    const handleBulkUntag = async () => {
-        if (selectedTagsToRemove.length === 0) {
-            toast.error("Sélectionnez au moins un tag à retirer");
-            return;
-        }
-
-        setIsPending(true);
-        try {
-            const result = await bulkUntagMediaAction(selectedIds, selectedTagsToRemove);
-
-            if (!result.success) {
-                throw new Error(result.error);
-            }
-
-            toast.success(`Tags retirés de ${count} média${count > 1 ? "s" : ""}`);
-            setSelectedTagsToRemove([]);
-            onSuccess();
-            onClearSelection();
-        } catch (error) {
-            toast.error(error instanceof Error ? error.message : "Erreur retrait tags");
-        } finally {
-            setIsPending(false);
-        }
-    };
-
-    const toggleTagToAdd = (tagId: number) => {
-        setSelectedTagsToAdd((prev) =>
-            prev.includes(tagId)
-                ? prev.filter((id) => id !== tagId)
-                : [...prev, tagId]
+        const folderId = selectedFolder === "root" ? null : Number(selectedFolder);
+        await executeBulkAction(
+            () => bulkMoveMediaAction(selectedIds, folderId),
+            `${count} média${count > 1 ? "s" : ""} déplacé${count > 1 ? "s" : ""}`,
+            "Erreur déplacement",
+            () => setSelectedFolder(""),
         );
     };
 
-    const toggleTagToRemove = (tagId: number) => {
-        setSelectedTagsToRemove((prev) =>
-            prev.includes(tagId)
-                ? prev.filter((id) => id !== tagId)
-                : [...prev, tagId]
+    const handleAddTagQuick = async (tagId: number) => {
+        const tag = tags.find(t => t.id === tagId);
+        await executeBulkAction(
+            () => bulkTagMediaAction(selectedIds, [tagId]),
+            `Tag '${tag?.name}' ajouté à ${count} média${count > 1 ? "s" : ""}`,
+            "Erreur ajout tag",
+        );
+    };
+
+    const handleRemoveTagQuick = async (tagId: number) => {
+        const tag = tags.find(t => t.id === tagId);
+        await executeBulkAction(
+            () => bulkUntagMediaAction(selectedIds, [tagId]),
+            `Tag '${tag?.name}' retiré de ${count} média${count > 1 ? "s" : ""}`,
+            "Erreur retrait tag",
         );
     };
 
@@ -300,187 +240,28 @@ export function MediaBulkActions({
                         </Button>
                     </div>
 
-                    {/* Rangée 2 : tags (toujours sur sa propre ligne) */}
+                    {/* Rangée 2 : tags */}
                     <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-4 border-t pt-2">
-                        {/* Add & Remove tags */}
-                        <div className="flex flex-col gap-2 w-full">
-                            {/* Add tags section */}
-                            <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-xs text-muted-foreground whitespace-nowrap">Ajouter:</span>
-                                <div
-                                    className="flex flex-wrap gap-1.5 flex-1 min-w-0"
-                                    role="group"
-                                    aria-label="Sélection de tags à ajouter"
-                                >
-                                    {addableTags.slice(0, 3).map((tag) => (
-                                        <Badge
-                                            key={tag.id}
-                                            variant="secondary"
-                                            className="cursor-pointer px-2.5 py-1 text-xs font-medium transition-all hover:scale-95 hover:bg-card focus:outline-none focus:ring-2 focus:ring-primary border-foreground/20"
-                                            onClick={async () => {
-                                                setIsPending(true);
-                                                try {
-                                                    const result = await bulkTagMediaAction(selectedIds, [tag.id]);
-                                                    if (!result.success) throw new Error(result.error);
-                                                    toast.success(`Tag '${tag.name}' ajouté à ${count} média${count > 1 ? "s" : ""}`);
-                                                    onSuccess();
-                                                    onClearSelection();
-                                                } catch (error) {
-                                                    toast.error(error instanceof Error ? error.message : "Erreur ajout tag");
-                                                } finally {
-                                                    setIsPending(false);
-                                                }
-                                            }}
-                                            onKeyDown={async (e) => {
-                                                if (e.key === ' ' || e.key === 'Enter') {
-                                                    e.preventDefault();
-                                                    setIsPending(true);
-                                                    try {
-                                                        const result = await bulkTagMediaAction(selectedIds, [tag.id]);
-                                                        if (!result.success) throw new Error(result.error);
-                                                        toast.success(`Tag '${tag.name}' ajouté à ${count} média${count > 1 ? "s" : ""}`);
-                                                        onSuccess();
-                                                        onClearSelection();
-                                                    } catch (error) {
-                                                        toast.error(error instanceof Error ? error.message : "Erreur ajout tag");
-                                                    } finally {
-                                                        setIsPending(false);
-                                                    }
-                                                }
-                                            }}
-                                            tabIndex={0}
-                                            role="button"
-                                            aria-label={`Ajouter tag ${tag.name}`}
-                                            aria-disabled={isPending}
-                                        >
-                                            {tag.name}
-                                        </Badge>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Remove tags section */}
-                            <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-xs text-muted-foreground whitespace-nowrap">Retirer:</span>
-                                {removableTags.length > 0 ? (
-                                    <div
-                                        className="flex flex-wrap gap-1.5 flex-1 min-w-0"
-                                        role="group"
-                                        aria-label="Sélection de tags à retirer"
-                                    >
-                                        {removableTags.slice(0, 3).map((tag) => (
-                                            <Badge
-                                                key={tag.id}
-                                                variant="destructive"
-                                                className="cursor-pointer px-2.5 py-1 text-xs font-medium transition-all hover:scale-105 hover:bg-card-foreground focus:outline-none focus:ring-2 focus:ring-destructive border-foreground/20"
-                                                onClick={async () => {
-                                                    setIsPending(true);
-                                                    try {
-                                                        const result = await bulkUntagMediaAction(selectedIds, [tag.id]);
-                                                        if (!result.success) throw new Error(result.error);
-                                                        toast.success(`Tag '${tag.name}' retiré de ${count} média${count > 1 ? "s" : ""}`);
-                                                        onSuccess();
-                                                        onClearSelection();
-                                                    } catch (error) {
-                                                        toast.error(error instanceof Error ? error.message : "Erreur retrait tag");
-                                                    } finally {
-                                                        setIsPending(false);
-                                                    }
-                                                }}
-                                                onKeyDown={async (e) => {
-                                                    if (e.key === ' ' || e.key === 'Enter') {
-                                                        e.preventDefault();
-                                                        setIsPending(true);
-                                                        try {
-                                                            const result = await bulkUntagMediaAction(selectedIds, [tag.id]);
-                                                            if (!result.success) throw new Error(result.error);
-                                                            toast.success(`Tag '${tag.name}' retiré de ${count} média${count > 1 ? "s" : ""}`);
-                                                            onSuccess();
-                                                            onClearSelection();
-                                                        } catch (error) {
-                                                            toast.error(error instanceof Error ? error.message : "Erreur retrait tag");
-                                                        } finally {
-                                                            setIsPending(false);
-                                                        }
-                                                    }
-                                                }}
-                                                tabIndex={0}
-                                                role="button"
-                                                aria-label={`Retirer tag ${tag.name}`}
-                                                aria-disabled={isPending}
-                                            >
-                                                {tag.name}
-                                            </Badge>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <span className="text-xs text-muted-foreground italic">
-                                        Aucun tag sur les médias sélectionnés
-                                    </span>
-                                )}
-                            </div>
-                        </div>
+                        <BulkTagSelector
+                            addableTags={addableTags}
+                            removableTags={removableTags}
+                            isPending={isPending}
+                            onAddTag={handleAddTagQuick}
+                            onRemoveTag={handleRemoveTagQuick}
+                        />
                     </div>
                 </div>
             </div>
 
-            {/* Delete Confirmation Dialog */}
-            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-                <AlertDialogContent className="max-w-lg bg-card">
-                    <AlertDialogHeader>
-                        <AlertDialogTitle className="text-xl font-semibold">
-                            Confirmer la suppression
-                        </AlertDialogTitle>
-                        <AlertDialogDescription asChild>
-                            <div className="space-y-3">
-                                <p className="text-base">
-                                    Êtes-vous sûr de vouloir supprimer définitivement <br /><strong>{count} média{count > 1 ? "s" : ""}</strong> ?
-                                </p>
-
-                                {/* Phase 4.3: Warning for used media */}
-                                {usedMediaCount > 0 && (
-                                    <div className="rounded-md bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 p-3">
-                                        <p className="text-sm text-amber-800 dark:text-amber-200 font-medium flex items-center gap-2">
-                                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                            </svg>
-                                            Attention
-                                        </p>
-                                        <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-                                            <strong>{usedMediaCount}</strong> média{usedMediaCount > 1 ? "s sont utilisés" : " est utilisé"} sur le site public.
-                                        </p>
-                                        {uniqueLocations.length > 0 && (
-                                            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                                                Emplacements : {uniqueLocations.join(", ")}
-                                            </p>
-                                        )}
-                                    </div>
-                                )}
-
-                                <p className="text-sm md:text-md">
-                                    <span className="text-destructive font-medium">Cette action est irréversible.</span>
-                                </p>
-                            </div>
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel
-                            disabled={isPending}
-                            className="h-11 px-6 text-base"
-                        >
-                            Annuler
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={handleBulkDelete}
-                            disabled={isPending}
-                            className="h-11 px-6 text-base bg-destructive text-destructive-foreground hover:bg-red-500/20 hover:text-destructive"
-                            aria-label={`Confirmer la suppression de ${count} média${count > 1 ? 's' : ''}`}
-                        >
-                            {isPending ? "Suppression..." : "Supprimer"}
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            <BulkDeleteDialog
+                open={showDeleteDialog}
+                onOpenChange={setShowDeleteDialog}
+                count={count}
+                usedMediaCount={usedMediaCount}
+                uniqueLocations={uniqueLocations}
+                isPending={isPending}
+                onConfirm={handleBulkDelete}
+            />
         </>
     );
 }

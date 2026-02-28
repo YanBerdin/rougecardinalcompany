@@ -1,29 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { UseFormReturn, FieldValues, Path, PathValue } from "react-hook-form";
-import Image from "next/image";
+import { URL_VALIDATION_DEBOUNCE_MS } from "./constants";
+import { UseFormReturn, FieldValues, Path, PathValue, FieldError } from "react-hook-form";
 import {
-    FormControl,
     FormField,
     FormItem,
     FormLabel,
-    FormMessage,
-    FormDescription,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
-    ImageIcon,
-    Loader2,
-    CheckCircle2,
-    XCircle,
-    Library,
-    Link2,
-    X,
-    Upload,
-    AlertCircle,
-} from "lucide-react";
 import { toast } from "sonner";
 import {
     MediaLibraryPicker,
@@ -31,11 +15,9 @@ import {
     type MediaSelectResult,
 } from "@/components/features/admin/media";
 import { validateImageUrl } from "@/lib/utils/validate-image-url";
-
-const IMAGE_ALT_MAX_LENGTH = 125;
-
-const PLACEHOLDER_IMAGE_DATA_URI =
-    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='80' viewBox='0 0 128 80'%3E%3Crect fill='%23f3f4f6' width='128' height='80'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%239ca3af' font-family='system-ui' font-size='12'%3EImage%3C/text%3E%3C/svg%3E";
+import { ImageSourceActions } from "./image-field/ImageSourceActions";
+import { ImagePreviewSection } from "./image-field/ImagePreviewSection";
+import { ImageAltTextField } from "./image-field/ImageAltTextField";
 
 interface ImageFieldGroupProps<TForm extends FieldValues> {
     form: UseFormReturn<TForm>;
@@ -106,10 +88,10 @@ export function ImageFieldGroup<TForm extends FieldValues>({
         setValidationSuccess(null);
         onValidationChange?.(null);
 
-        // Debounce validation (1 second after user stops typing)
+        // Debounce validation
         debounceTimerRef.current = setTimeout(() => {
             handleValidateUrl();
-        }, 1000);
+        }, URL_VALIDATION_DEBOUNCE_MS);
 
         return () => {
             if (debounceTimerRef.current) {
@@ -235,12 +217,6 @@ export function ImageFieldGroup<TForm extends FieldValues>({
         }
     };
 
-    const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-        const target = e.currentTarget;
-        target.src = PLACEHOLDER_IMAGE_DATA_URI;
-        target.onerror = null; // Prevent infinite loop if placeholder fails
-    };
-
     return (
         <>
             <FormField
@@ -252,167 +228,38 @@ export function ImageFieldGroup<TForm extends FieldValues>({
                             {label}{" "}
                             {required && <span className="text-destructive">*</span>}
                         </FormLabel>
-
                         <div className="space-y-3">
-                            {/* Action buttons row */}
-                            <div className="flex flex-wrap gap-2">
-                                {showUpload && (
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={() => setIsUploadOpen(true)}
-                                    >
-                                        <Upload className="h-4 w-4 mr-2" />
-                                        Téléverser
-                                    </Button>
-                                )}
-
-                                {showMediaLibrary && (
-                                    <Button
-                                        type="button"
-                                        variant="secondary"
-                                        onClick={() => setIsMediaPickerOpen(true)}
-                                    >
-                                        <Library className="h-4 w-4 mr-2" />
-                                        Médiathèque
-                                    </Button>
-                                )}
-
-                            </div>
-
-                            {/* External URL input */}
-                            {showExternalUrl && (
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                        <Link2 className="h-4 w-4 shrink-0" />
-                                        <span>Ou saisir une URL externe</span>
-                                    </div>
-                                    <div className="flex flex-col-2 sm:flex-row gap-2">
-                                        <div className="relative flex-1 min-w-0">
-                                            <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                            <Input
-                                                type="url"
-                                                placeholder="https://example.com/image.jpg"
-                                                className="pl-9 w-full"
-                                                value={imageUrl ?? ""}
-                                                onChange={(e) => handleUrlChange(e.target.value)}
-                                            />
-                                        </div>
-                                        <div className="flex gap-2 shrink-0">
-                                            {imageUrl && (
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    size="icon"
-                                                    onClick={handleClearUrl}
-                                                    title="Effacer l'URL"
-                                                    className="shrink-0"
-                                                >
-                                                    <X />
-                                                </Button>
-                                            )}
-                                            {isValidating && (
-                                                <div className="flex items-center gap-2 px-3 text-sm text-muted-foreground">
-                                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                                    <span className="hidden sm:inline">Vérification...</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                    {imageUrl && !isValidating && (
-                                        <p className="text-xs text-muted-foreground">
-                                            💡 L&apos;URL sera validée automatiquement
-                                        </p>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* Image preview - only show validated images */}
-                            {imageUrl && (
-                                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 border rounded-lg bg-muted/50">
-                                    <div className="relative h-50 max-w-44 rounded overflow-hidden shrink-0 bg-muted">
-                                        {isValidating ? (
-                                            <div className="h-full w-full flex items-center justify-center">
-                                                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                                            </div>
-                                        ) : validationSuccess ? (
-                                            <Image
-                                                src={imageUrl}
-                                                alt={altText ?? "Preview"}
-                                                className="h-full w-full object-cover"
-                                                width={450}
-                                                height={300}
-                                                onError={handleImageError}
-                                            />
-                                        ) : validationError ? (
-                                            <div className="h-full w-full flex flex-col items-center justify-center gap-1 p-2">
-                                                <XCircle className="h-6 w-6 text-destructive" />
-                                                <span className="text-xs text-center text-destructive">Non autorisée</span>
-                                            </div>
-                                        ) : (
-                                            <div className="h-full w-full flex flex-col items-center justify-center gap-1 p-2">
-                                                <AlertCircle className="h-6 w-6 text-muted-foreground" />
-                                                <span className="text-xs text-center text-muted-foreground">En attente</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="flex-1 min-w-0 text-sm text-muted-foreground break-all">
-                                        {imageUrl}
-                                    </div>
-                                </div>
-                            )}
+                            <ImageSourceActions
+                                imageUrl={imageUrl}
+                                isValidating={isValidating}
+                                showUpload={showUpload}
+                                showMediaLibrary={showMediaLibrary}
+                                showExternalUrl={showExternalUrl}
+                                onUploadClick={() => setIsUploadOpen(true)}
+                                onLibraryClick={() => setIsMediaPickerOpen(true)}
+                                onUrlChange={handleUrlChange}
+                                onClearUrl={handleClearUrl}
+                            />
+                            <ImagePreviewSection
+                                imageUrl={imageUrl}
+                                altText={altText}
+                                isValidating={isValidating}
+                                validationError={validationError}
+                                validationSuccess={validationSuccess}
+                                imageError={imageError as FieldError | undefined}
+                                description={description}
+                            />
                         </div>
-
-                        {validationError && (
-                            <p className="text-sm text-destructive flex items-center gap-1">
-                                <XCircle className="h-4 w-4" />
-                                {validationError}
-                            </p>
-                        )}
-
-                        {validationSuccess && (
-                            <p className="text-sm text-green-600 flex items-center gap-1">
-                                <CheckCircle2 className="h-4 w-4" />
-                                Image valide : {validationSuccess}
-                            </p>
-                        )}
-
-                        {imageError && (
-                            <p className="text-sm font-medium text-destructive">
-                                {imageError.message as string}
-                            </p>
-                        )}
-
-                        {description && <FormDescription>{description}</FormDescription>}
                     </FormItem>
                 )}
             />
 
             {showAltText && altTextField && (
-                <FormField
-                    control={form.control}
-                    name={altTextField}
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>
-                                {altTextLabel}{" "}
-                                {required && <span className="text-destructive">*</span>}
-                            </FormLabel>
-                            <FormControl>
-                                <Input
-                                    {...field}
-                                    value={(field.value as string) ?? ""}
-                                    maxLength={IMAGE_ALT_MAX_LENGTH}
-                                    placeholder="Décrivez l'image pour l'accessibilité"
-                                />
-                            </FormControl>
-                            <FormDescription>
-                                {((field.value as string) ?? "").length}/{IMAGE_ALT_MAX_LENGTH}{" "}
-                                caractères
-                            </FormDescription>
-                            <FormMessage />
-                        </FormItem>
-                    )}
+                <ImageAltTextField
+                    form={form}
+                    altTextField={altTextField}
+                    altTextLabel={altTextLabel}
+                    required={required}
                 />
             )}
 
@@ -435,3 +282,4 @@ export function ImageFieldGroup<TForm extends FieldValues>({
         </>
     );
 }
+

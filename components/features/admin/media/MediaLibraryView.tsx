@@ -4,9 +4,7 @@
  */
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { Upload, Search, Filter, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,9 +19,9 @@ import {
 import { MediaDetailsPanel } from "./MediaDetailsPanel";
 import { MediaBulkActions } from "./MediaBulkActions";
 import { MediaCard } from "./MediaCard";
-import { MediaUploadDialog } from "./MediaUploadDialog"; // ✅ AJOUT
+import { MediaUploadDialog } from "./MediaUploadDialog";
+import { useMediaLibraryState } from "./hooks/useMediaLibraryState";
 import type { MediaItemExtendedDTO, MediaTagDTO, MediaFolderDTO } from "@/lib/schemas/media";
-import type { MediaSelectResult } from "./types"; // ✅ AJOUT
 
 interface MediaLibraryViewProps {
     initialMedia: MediaItemExtendedDTO[];
@@ -36,75 +34,31 @@ export function MediaLibraryView({
     availableTags,
     availableFolders,
 }: MediaLibraryViewProps) {
-    const router = useRouter();
-    const [media, setMedia] = useState(initialMedia);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [selectedFolder, setSelectedFolder] = useState<string>("all");
-    const [selectedTag, setSelectedTag] = useState<string>("all");
-    const [selectedMedia, setSelectedMedia] = useState<MediaItemExtendedDTO | null>(null);
-    const [selectedIds, setSelectedIds] = useState<number[]>([]);
-    const [selectionMode, setSelectionMode] = useState(false);
-    const [isUploadOpen, setIsUploadOpen] = useState(false);
-    const [uploadFolder, setUploadFolder] = useState<string>("uploads");
-
-    // Sync state when props change (after router.refresh())
-    useEffect(() => {
-        setMedia(initialMedia);
-    }, [initialMedia]);
-
-    // Filter media based on search and filters
-    const filteredMedia = useMemo(() => {
-        return media.filter((item) => {
-            // Search filter
-            const matchesSearch =
-                !searchQuery ||
-                item.filename?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                item.alt_text?.toLowerCase().includes(searchQuery.toLowerCase());
-
-            // Folder filter
-            const matchesFolder =
-                selectedFolder === "all" ||
-                (selectedFolder === "root" && item.folder_id === null) ||
-                item.folder_id === Number(selectedFolder);
-
-            // Tag filter
-            const matchesTag =
-                selectedTag === "all" ||
-                item.tags.some((tag) => tag.id === Number(selectedTag));
-
-            return matchesSearch && matchesFolder && matchesTag;
-        });
-    }, [media, searchQuery, selectedFolder, selectedTag]);
-
-    const handleUpload = useCallback(() => {
-        setIsUploadOpen(true);
-    }, []);
-
-    const handleUploadSuccess = useCallback((result: MediaSelectResult) => {
-        if (result.error) {
-            toast.error("Erreur d'upload", { description: result.error });
-            return;
-        }
-
-        toast.success("Image uploadée avec succès");
-        router.refresh(); // Recharger la liste des médias
-    }, [router]);
-
-    const toggleSelection = useCallback((mediaId: number) => {
-        setSelectedIds((prev) =>
-            prev.includes(mediaId)
-                ? prev.filter((id) => id !== mediaId)
-                : [...prev, mediaId]
-        );
-    }, []);
-
-    const handleCardClick = useCallback((item: MediaItemExtendedDTO) => {
-        if (selectionMode) {
-            toggleSelection(item.id);
-        } else {
-            setSelectedMedia(item);
-        }
-    }, [selectionMode, toggleSelection]);
+    const router = useRouter(); // Used for back navigation only
+    const {
+        media,
+        searchQuery,
+        setSearchQuery,
+        selectedFolder,
+        setSelectedFolder,
+        selectedTag,
+        setSelectedTag,
+        selectedMedia,
+        setSelectedMedia,
+        selectedIds,
+        selectionMode,
+        isUploadOpen,
+        setIsUploadOpen,
+        uploadFolder,
+        setUploadFolder,
+        filteredMedia,
+        handleUploadSuccess,
+        handleCardClick,
+        toggleSelectionMode,
+        clearSelection,
+        handleBulkSuccess,
+        handleDetailUpdate,
+    } = useMediaLibraryState({ initialMedia, availableTags, availableFolders });
 
     return (
         <div className="space-y-6">
@@ -137,10 +91,7 @@ export function MediaLibraryView({
                     <Button
                         size="sm"
                         variant={selectionMode ? "default" : "secondary"}
-                        onClick={() => {
-                            setSelectionMode(!selectionMode);
-                            setSelectedIds([]);
-                        }}
+                        onClick={toggleSelectionMode}
                         className={cn(
                             "h-9 px-4 text-sm font-medium transition-all",
                             selectionMode && "ring-2 ring-primary ring-offset-2"
@@ -170,7 +121,7 @@ export function MediaLibraryView({
                     <Button
                         size="sm"
                         variant="default"
-                        onClick={handleUpload}
+                        onClick={() => setIsUploadOpen(true)}
                         className="h-9 px-4 text-sm font-medium"
                         aria-label="Téléverser de nouveaux médias"
                     >
@@ -259,11 +210,8 @@ export function MediaLibraryView({
                     selectedMedia={media.filter(m => selectedIds.includes(m.id))}
                     folders={availableFolders}
                     tags={availableTags}
-                    onClearSelection={() => setSelectedIds([])}
-                    onSuccess={() => {
-                        router.refresh();
-                        setSelectedIds([]);
-                    }}
+                    onClearSelection={clearSelection}
+                    onSuccess={handleBulkSuccess}
                 />
             )}
 
@@ -274,10 +222,7 @@ export function MediaLibraryView({
                     folders={availableFolders}
                     tags={availableTags}
                     onClose={() => setSelectedMedia(null)}
-                    onUpdate={() => {
-                        router.refresh();
-                        setSelectedMedia(null);
-                    }}
+                    onUpdate={handleDetailUpdate}
                 />
             )}
 
