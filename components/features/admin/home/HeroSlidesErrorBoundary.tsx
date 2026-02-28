@@ -1,6 +1,7 @@
 "use client";
 
-import { Component, ReactNode } from "react";
+import { Component } from "react";
+import type { ReactNode, ErrorInfo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
@@ -24,8 +25,8 @@ export class HeroSlidesErrorBoundary extends Component<Props, State> {
         return { hasError: true, error };
     }
 
-  componentDidCatch(error: Error, errorInfo: Record<string, unknown>) {
-    console.error("[HeroSlides] Error caught:", error, errorInfo);
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("[ERR_HERO_SLIDES_001] Error caught in HeroSlides boundary:", error, errorInfo);
   }    render() {
         if (this.state.hasError) {
             return (

@@ -241,7 +241,7 @@ function EmptySlidesPlaceholder({ isVisible }: EmptySlidesPlaceholderProps) {
     return (
         <Card>
             <CardContent className="py-8 sm:py-12 text-center text-muted-foreground">
-                <p className="text-sm sm:text-base">No hero slides yet. Create your first slide!</p>
+                <p className="text-sm sm:text-base">Aucun slide pour le moment. Créez votre premier slide !</p>
             </CardContent>
         </Card>
     );

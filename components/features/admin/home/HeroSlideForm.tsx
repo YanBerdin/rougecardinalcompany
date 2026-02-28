@@ -38,7 +38,7 @@ export function HeroSlideForm({ open, onClose, onSuccess, slide }: HeroSlideForm
         setIsPending(true);
 
         try {
-            const payload = { ...formData } as unknown;
+            const payload = { ...formData };
             const result = slide
                 ? await updateHeroSlideAction(String(slide.id), payload)
                 : await createHeroSlideAction(payload);
@@ -74,10 +74,10 @@ export function HeroSlideForm({ open, onClose, onSuccess, slide }: HeroSlideForm
         const errorEntries = Object.entries(form.formState.errors);
         if (errorEntries.length > 0) {
             const [fieldName, fieldError] = errorEntries[0];
-            const errorMessage = (fieldError as { message?: string })?.message ?? "Validation failed";
+            const errorMessage = (fieldError as { message?: string })?.message ?? "Erreur de validation";
             toast.error(`${fieldName}: ${errorMessage}`);
         } else {
-            toast.error("Please fix validation errors");
+            toast.error("Veuillez corriger les erreurs de validation");
         }
     };
 

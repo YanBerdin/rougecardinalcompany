@@ -1,8 +1,39 @@
 # Active Context
 
-**Current Focus (2026-02-27)**: ✅ Analytics TASK031-FIX complet — audit qualité (7 corrections) + bugfix DAL session_id + infrastructure tracking + export JSON client-side
+**Current Focus (2026-02-28)**: ✅ Audit conformité `components/features/admin/home` — 3 corrections appliquées (unsafe assertion, types ErrorBoundary, i18n)
 
-**Last Major Updates**: ✅ Analytics TASK031-FIX (2026-02-27) + Audit Logs Violations Fix (2026-02-26) + Unsplash CDN fixes (2026-02-21) + Embla Carousel Gallery (2026-02-20) + Upload Security Hardening (2026-02-18)
+**Last Major Updates**: ✅ Admin Home Audit Fix (2026-02-28) + Analytics TASK031-FIX (2026-02-27) + Audit Logs Violations Fix (2026-02-26) + Unsplash CDN fixes (2026-02-21) + Embla Carousel Gallery (2026-02-20) + Upload Security Hardening (2026-02-18)
+
+---
+
+## ✅ Audit conformité admin/home — Corrections (2026-02-28)
+
+### Summary
+
+Audit de conformité du dossier `components/features/admin/home` (10 fichiers) suivi de corrections des violations détectées. L'audit initial avait faussement signalé `AboutContentFormWrapper.tsx` comme violation critique — corrigé après analyse : le pattern `next/dynamic` + `ssr: false` dans un **Client Component** est un pattern projet documenté (Architecture Blueprint §9.2, systemPatterns.md) pour résoudre les hydration mismatches React Hook Form.
+
+### Corrections appliquées (3)
+
+| Fichier | Violation | Correction |
+| ------- | --------- | ---------- |
+| `HeroSlideForm.tsx` | `as unknown` assertion unsafe (ligne 42) | Supprimé — `HeroSlideFormValues` est assignable à `unknown` |
+| `HeroSlideForm.tsx` | Texte anglais validation errors | Traduit en français |
+| `HeroSlidesErrorBoundary.tsx` | `ReactNode` importé comme valeur, `errorInfo: Record<string, unknown>`, `console.error` sans code erreur | `import type { ReactNode, ErrorInfo }`, type `ErrorInfo`, code `[ERR_HERO_SLIDES_001]` |
+| `HeroSlidesView.tsx` | Texte anglais `EmptySlidesPlaceholder` | Traduit : "Aucun slide pour le moment. Créez votre premier slide !" |
+
+### Fichiers conformes (7/10 déjà OK)
+
+- ✅ `AboutContentFormWrapper.tsx` — Pattern Hydration documenté
+- ✅ `AboutContentContainer.tsx` — Server Component + Suspense
+- ✅ `AboutContentForm.tsx` — 210 lignes (sous limite 300)
+- ✅ `HeroSlidesContainer.tsx` — Server Component pattern
+- ✅ `HeroSlideFormFields.tsx` — Sub-component extraction
+- ✅ `CtaFieldGroup.tsx` — Config-driven pattern
+- ✅ `HeroSlidePreview.tsx` — Pure presentation
+
+### Note d'audit
+
+Le pattern `next/dynamic` + `ssr: false` est **autorisé** dans les Client Components (`"use client"`) pour résoudre les hydration mismatches de React Hook Form. Il est **interdit** uniquement dans les Server Components (nextjs.instructions.md §2.1).
 
 ---
 
@@ -24,12 +55,15 @@
 | `PageviewsChart.tsx` | `role="img"` + import `Tooltip` supprimé | ✅ |
 
 ### Bugfix export JSON (commit d71163b)
+
 `exportAnalyticsJSON` SA supprimée. JSON construit client-side (sérialisation RSC défaillante avec `Date`).
 
 ### Bugfix DAL uniqueVisitors = 0
+
 `user_id` -> `session_id` dans 3 fonctions DAL (`fetchPageviewsTimeSeries`, `fetchTopPages`, `fetchMetricsSummary`).
 
 ### Infrastructure tracking
+
 - `PageViewTracker.tsx` client component (sessionStorage UUID)
 - `app/actions/analytics.actions.ts` : Server Action `trackPageView`
 - `app/(marketing)/layout.tsx` : `<PageViewTracker />` ajouté
