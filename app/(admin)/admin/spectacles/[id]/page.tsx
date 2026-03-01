@@ -1,5 +1,5 @@
-import { redirect, notFound } from "next/navigation";
-import { createClient } from "@/supabase/server";
+import { notFound } from "next/navigation";
+import { requireAdmin } from "@/lib/auth/is-admin";
 import { ArrowLeft, Pencil } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { fetchSpectacleById } from "@/lib/dal/spectacles";
 import { fetchSpectacleLandscapePhotosAdmin } from "@/lib/dal/spectacle-photos";
 import { translateStatus } from "@/lib/i18n/status";
-import { env } from "@/lib/env";
+import { formatSpectacleDetailDate } from "@/lib/tables/spectacle-table-helpers";
+import { buildMediaPublicUrl } from "@/lib/dal/helpers/media-url";
 import Image from "next/image";
 import { SpectacleGalleryManager } from "@/components/features/admin/spectacles/SpectacleGalleryManager";
 
@@ -22,13 +23,7 @@ interface Props {
 }
 
 export default async function SpectacleDetailPage({ params }: Props) {
-  const supabase = await createClient();
-
-  // Check admin authentication
-  const { data, error } = await supabase.auth.getClaims();
-  if (error || !data?.claims || data.claims.user_metadata.role !== "admin") {
-    redirect("/auth/login");
-  }
+  await requireAdmin();
 
   // Parse and validate ID
   const { id } = await params;
@@ -45,25 +40,6 @@ export default async function SpectacleDetailPage({ params }: Props) {
 
   // Fetch landscape photos
   const landscapePhotos = await fetchSpectacleLandscapePhotosAdmin(BigInt(spectacleId));
-
-  function formatDate(dateString: string | null): string {
-    if (!dateString) return "Non définie";
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString("fr-FR", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-    } catch {
-      return "Date invalide";
-    }
-  }
-
-  function getStatusLabel(status: string | null): string {
-    // delegate to central helper (handles null/legacy tokens)
-    return translateStatus(status);
-  }
 
   return (
     <div className="space-y-6 bg-card p-8">
@@ -96,7 +72,7 @@ export default async function SpectacleDetailPage({ params }: Props) {
             {spectacle.public ? "Public" : "Privé"}
           </Badge>
           {spectacle.status && (
-            <Badge variant="outline" className="py-1 px-3">{getStatusLabel(spectacle.status)}</Badge>
+            <Badge variant="outline" className="py-1 px-3">{translateStatus(spectacle.status)}</Badge>
           )}
         </div>
 
@@ -174,7 +150,7 @@ export default async function SpectacleDetailPage({ params }: Props) {
               <h3 className="font-medium text-sm text-muted-foreground">
                 Date de première
               </h3>
-              <p>{formatDate(spectacle.premiere)}</p>
+              <p>{formatSpectacleDetailDate(spectacle.premiere)}</p>
             </div>
           )}
         </div>
@@ -202,7 +178,7 @@ export default async function SpectacleDetailPage({ params }: Props) {
             <h2 className="text-lg font-semibold mb-2">Photos paysage (paragraphe 2/3)</h2>
             <div className="grid gap-4 md:grid-cols-2">
               {landscapePhotos.map((photo) => {
-                const imageUrl = `${env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/medias/${photo.storage_path}`;
+                const imageUrl = buildMediaPublicUrl(photo.storage_path) ?? "";
                 return (
                   <div key={photo.media_id.toString()} className="space-y-2">
                     <div className="relative aspect-[16/9] rounded-lg overflow-hidden shadow-lg w-full">
@@ -252,8 +228,8 @@ export default async function SpectacleDetailPage({ params }: Props) {
             Métadonnées
           </h3>
           <div className="text-sm md:text-md text-muted-foreground space-y-1">
-            <p>Créé le : {formatDate(spectacle.created_at)}</p>
-            <p>Mis à jour le : {formatDate(spectacle.updated_at)}</p>
+            <p>Créé le : {formatSpectacleDetailDate(spectacle.created_at)}</p>
+            <p>Mis à jour le : {formatSpectacleDetailDate(spectacle.updated_at)}</p>
             {spectacle.created_by && (
               <p>ID créateur : {spectacle.created_by}</p>
             )}

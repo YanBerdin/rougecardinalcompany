@@ -20,16 +20,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { SortableHeader } from "./SortableHeader";
-
-interface SpectaclesTableProps {
-  spectacles: SpectacleSummary[];
-  onView: (id: number) => void;
-  onEdit: (id: number) => void;
-  onDelete: (id: number) => void;
-  onGallery: (id: number) => void;
-  sortState: SpectacleSortState | null;
-  onSort: (field: SortField) => void;
-}
+import type { SpectaclesTableProps } from "./types";
 
 export default function SpectaclesTable({
   spectacles,

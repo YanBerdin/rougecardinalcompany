@@ -9,38 +9,29 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
     addPhotoAction,
     deletePhotoAction,
-} from "@/app/(admin)/admin/spectacles/actions";
+} from "@/app/(admin)/admin/spectacles/spectacle-photo-actions";
 import { MediaLibraryPicker } from "@/components/features/admin/media/MediaLibraryPicker";
 import { MediaUploadDialog } from "@/components/features/admin/media/MediaUploadDialog";
-import { env } from "@/lib/env";
+import { buildMediaPublicUrl } from "@/lib/dal/helpers/media-url";
 import type { SpectaclePhotoTransport } from "@/lib/schemas/spectacles";
 
 // ============================================================================
 // Types
 // ============================================================================
 
-interface SpectaclePhotoManagerProps {
-    spectacleId: number;
-    // ✅ No initialPhotos - fetches data client-side via API route
-}
-
-interface PhotoSlot {
-    ordre: number;
-    photo: SpectaclePhotoTransport | null;  // ✅ Transport type with string IDs
-}
-
-// ============================================================================
-// Helper Functions
-// ============================================================================
-
-/**
- * Build public URL from storage_path
- */
-function getMediaPublicUrl(storagePath: string): string {
-    return `${env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/medias/${storagePath}`;
-}
+import type { SpectaclePhotoManagerProps, PhotoSlot } from "./types";
 
 // ============================================================================
 // Component
@@ -57,6 +48,7 @@ export function SpectaclePhotoManager({
     const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
     const [showLibrary, setShowLibrary] = useState(false);
     const [showUpload, setShowUpload] = useState(false);
+    const [deleteTarget, setDeleteTarget] = useState<{ ordre: number } | null>(null);
 
     // ✅ Fetch photos from API route (bigint→string already converted)
     const fetchPhotos = useCallback(async () => {
@@ -76,7 +68,6 @@ export function SpectaclePhotoManager({
 
             setPhotos(slots);
         } catch (error) {
-            console.error('[SpectaclePhotoManager] fetchPhotos error:', error);
             toast.error('Erreur lors du chargement des photos');
         }
     }, [spectacleId]);
@@ -130,34 +121,43 @@ export function SpectaclePhotoManager({
         }
     };
 
-    const handleDelete = async (ordre: number) => {
-        const photo = photos.find((p) => p.ordre === ordre)?.photo;
-        if (!photo) return;
-        if (!confirm("Supprimer cette photo ?")) return;
+    const handleDelete = useCallback((ordre: number): void => {
+        setDeleteTarget({ ordre });
+    }, []);
+
+    const handleDeleteConfirm = useCallback(async (): Promise<void> => {
+        if (deleteTarget === null) return;
+
+        const photo = photos.find((p) => p.ordre === deleteTarget.ordre)?.photo;
+        if (!photo) {
+            setDeleteTarget(null);
+            return;
+        }
 
         setIsPending(true);
 
         try {
-            // ✅ photo has string IDs - pass them directly
             const result = await deletePhotoAction(
-                photo.spectacle_id,  // already string
-                photo.media_id       // already string
+                photo.spectacle_id,
+                photo.media_id
             );
 
             if (!result.success) {
                 throw new Error(result.error);
             }
 
-            toast.success("Photo supprimée"); //TODO AlertDialog confirmation + success toast
-            await fetchPhotos();  // ✅ Refresh data via API
+            toast.success("Photo supprimée");
+            setDeleteTarget(null);
+            await fetchPhotos();
         } catch (error) {
             toast.error(
                 error instanceof Error ? error.message : "Erreur lors de la suppression"
             );
+            setDeleteTarget(null);
         } finally {
             setIsPending(false);
         }
-    };
+    }, [deleteTarget, photos, fetchPhotos]);
 
     // ========================================================================
     // Render
@@ -181,6 +181,7 @@ export function SpectaclePhotoManager({
                                         variant="destructive"
                                         size="icon"
                                         title="Supprimer cette photo"
+                                        aria-label={`Supprimer photo ${slot.ordre + 1}`}
                                         onClick={() => handleDelete(slot.ordre)}
                                         disabled={isPending}
                                         className=""
@@ -193,7 +194,7 @@ export function SpectaclePhotoManager({
                             {slot.photo ? (
                                 <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
                                     <Image
-                                        src={getMediaPublicUrl(slot.photo.storage_path)}
+                                        src={buildMediaPublicUrl(slot.photo.storage_path) ?? ""}
                                         alt={slot.photo.alt_text ?? `Photo ${slot.ordre + 1}`}
                                         fill
                                         className="object-cover"
@@ -270,6 +271,32 @@ export function SpectaclePhotoManager({
                     onSelect={handleMediaSelected}
                 />
             )}
+
+            {/* AlertDialog : confirmation de suppression */}
+            <AlertDialog
+                open={deleteTarget !== null}
+                onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Supprimer cette photo ?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            La photo sera définitivement retirée du spectacle.
+                            Cette action est irréversible.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isPending}>Annuler</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleDeleteConfirm}
+                            disabled={isPending}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            {isPending ? "Suppression…" : "Supprimer"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

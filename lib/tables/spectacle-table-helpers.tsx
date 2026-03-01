@@ -1,6 +1,5 @@
 import type { SpectacleSummary } from "@/lib/schemas/spectacles";
 import { Badge } from "@/components/ui/badge";
-import React from "react";
 import { capitalizeWords } from "@/lib/forms/spectacle-form-helpers";
 import { translateStatus } from "@/lib/i18n/status";
 import type { SortState } from "@/components/ui/sortable-header";
@@ -9,33 +8,15 @@ export const STATUS_VARIANTS: Record<
   string,
   "default" | "secondary" | "outline"
 > = {
-  "en cours": "default",
-  "terminé": "secondary",
-  "projet": "outline",
-  "draft": "outline",
-  "brouillon": "outline",
-  "published": "default",
-  "archived": "secondary",
-  "archive": "secondary",
-  "a l'affiche": "default",
-  "en preparation": "outline",
-  "annulé": "secondary",
-  "actuellement": "default",
+  draft: "outline",
+  published: "default",
+  archived: "secondary",
 };
 
 export const STATUS_LABELS: Record<string, string> = {
-  "en cours": "En cours",
-  "terminé": "Terminé",
-  "projet": "Projet",
-  "draft": "Brouillon",
-  "brouillon": "Brouillon",
-  "published": "Actuellement",
-  "archived": "Archivé",
-  "archive": "Archive",
-  "a l'affiche": "À l'affiche",
-  "en preparation": "En préparation",
-  "annulé": "Annulé",
-  "actuellement": "Actuellement",
+  draft: "Brouillon",
+  published: "Publié",
+  archived: "Archivé",
 };
 
 export function formatSpectacleDate(dateString: string | null): string {
@@ -49,6 +30,21 @@ export function formatSpectacleDate(dateString: string | null): string {
     });
   } catch {
     return "—";
+  }
+}
+
+export function formatSpectacleDetailDate(dateString: string | null): string {
+  if (!dateString) return "Non définie";
+
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("fr-FR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  } catch {
+    return "Date invalide";
   }
 }
 
@@ -167,7 +163,7 @@ export function getNextSortState(
 
 export function getStatusBadge(
   status: string | null
-): React.ReactElement | null {
+) {
   if (!status) return null;
 
   // Normalize status for display (handle old underscore format)
@@ -178,13 +174,13 @@ export function getStatusBadge(
   // Use central translate helper to show the french label
   const label = translateStatus(normalizedStatus) || capitalizeWords(normalizedStatus);
 
-  return React.createElement(Badge, { variant }, label);
+  return <Badge variant={variant}>{label}</Badge>;
 }
 
-export function getVisibilityBadge(isPublic: boolean): React.ReactElement {
-  return React.createElement(
-    Badge,
-    { variant: isPublic ? "default" : "secondary" },
-    isPublic ? "Public" : "Privé"
+export function getVisibilityBadge(isPublic: boolean) {
+  return (
+    <Badge variant={isPublic ? "default" : "secondary"}>
+      {isPublic ? "Public" : "Privé"}
+    </Badge>
   );
 }

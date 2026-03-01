@@ -1,5 +1,4 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/supabase/server";
+import { requireAdmin } from "@/lib/auth/is-admin";
 import { fetchAllSpectacles } from "@/lib/dal/spectacles";
 import SpectaclesManagementContainer from "@/components/features/admin/spectacles/SpectaclesManagementContainer";
 
@@ -8,13 +7,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function AdminSpectaclesPage() {
-  const supabase = await createClient();
-
-  // Check admin authentication
-  const { data, error } = await supabase.auth.getClaims();
-  if (error || !data?.claims || data.claims.user_metadata.role !== "admin") {
-    redirect("/auth/login");
-  }
+  await requireAdmin();
 
   // Fetch all spectacles (including private)
   const spectacles = await fetchAllSpectacles(true);

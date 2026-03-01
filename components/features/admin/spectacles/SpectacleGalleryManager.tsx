@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "sonner";
-import Image from "next/image";
 import {
     DndContext,
     closestCenter,
@@ -17,13 +16,10 @@ import {
     rectSortingStrategy,
     arrayMove,
     sortableKeyboardCoordinates,
-    useSortable,
 } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, ImagePlus, Plus, Trash2, Upload } from "lucide-react";
+import { ImagePlus, Plus, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -46,10 +42,10 @@ import {
     addGalleryPhotoAction,
     deleteGalleryPhotoAction,
     reorderGalleryPhotosAction,
-} from "@/app/(admin)/admin/spectacles/actions";
+} from "@/app/(admin)/admin/spectacles/spectacle-photo-actions";
 import { MediaLibraryPicker } from "@/components/features/admin/media/MediaLibraryPicker";
 import { MediaUploadDialog } from "@/components/features/admin/media/MediaUploadDialog";
-import { env } from "@/lib/env";
+import { SortableGalleryCard } from "@/components/features/admin/spectacles/SortableGalleryCard";
 import type { GalleryPhotoTransport } from "@/lib/schemas/spectacles";
 
 // ============================================================================
@@ -62,102 +58,7 @@ const DRAG_ACTIVATION_DISTANCE_PX = 8;
 // Types
 // ============================================================================
 
-interface SpectacleGalleryManagerProps {
-    spectacleId: number;
-}
-
-interface SortablePhotoCardProps {
-    photo: GalleryPhotoTransport;
-    isPending: boolean;
-    onDelete: (photo: GalleryPhotoTransport) => void;
-}
-
-// ============================================================================
-// Helper
-// ============================================================================
-
-function getMediaPublicUrl(storagePath: string): string {
-    return `${env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/medias/${storagePath}`;
-}
-
-// ============================================================================
-// Sub-component: draggable photo card
-// ============================================================================
-
-function SortablePhotoCard({
-    photo,
-    isPending,
-    onDelete,
-}: SortablePhotoCardProps): React.JSX.Element {
-    const {
-        attributes,
-        listeners,
-        setNodeRef,
-        transform,
-        transition,
-        isDragging,
-    } = useSortable({ id: photo.media_id });
-
-    const dragStyle = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-        opacity: isDragging ? 0.5 : 1,
-        zIndex: isDragging ? 50 : undefined,
-    };
-
-    return (
-        <Card
-            ref={setNodeRef}
-            style={dragStyle}
-            className={
-                isDragging
-                    ? "shadow-lg ring-2 ring-primary/20"
-                    : "hover:border-primary/50 transition-colors"
-            }
-        >
-            <CardContent className="p-3 space-y-2">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <div
-                            className="cursor-grab active:cursor-grabbing p-1 rounded-md hover:bg-muted transition-colors"
-                            {...attributes}
-                            {...listeners}
-                            role="button"
-                            tabIndex={0}
-                            aria-label="Glisser pour réordonner"
-                            title="Glisser pour réordonner"
-                        >
-                            <GripVertical className="h-5 w-5 text-muted-foreground" />
-                        </div>
-                        <Badge variant="secondary">#{photo.ordre + 1}</Badge>
-                    </div>
-                    <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        title="Supprimer cette photo"
-                        aria-label={`Supprimer photo ${photo.ordre + 1}`}
-                        onClick={() => onDelete(photo)}
-                        disabled={isPending}
-                        className="h-8 w-8"
-                    >
-                        <Trash2 className="h-4 w-4" />
-                    </Button>
-                </div>
-
-                <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
-                    <Image
-                        src={getMediaPublicUrl(photo.storage_path)}
-                        alt={photo.alt_text ?? `Photo galerie ${photo.ordre + 1}`}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    />
-                </div>
-            </CardContent>
-        </Card>
-    );
-}
+import type { SpectacleGalleryManagerProps } from "./types";
 
 // ============================================================================
 // Main Component
@@ -195,7 +96,6 @@ export function SpectacleGalleryManager({
             const json = await response.json() as { success: true; data: GalleryPhotoTransport[] };
             setPhotos(json.data);
         } catch (error) {
-            console.error("[GalleryManager] fetchPhotos error:", error);
             toast.error("Erreur lors du chargement de la galerie");
         }
     }, [spectacleId]);
@@ -277,7 +177,6 @@ export function SpectacleGalleryManager({
         const newIndex = photos.findIndex((p) => String(p.media_id) === String(over.id));
 
         if (oldIndex === -1 || newIndex === -1) {
-            console.error("[GalleryManager] drag item not found — oldIndex:", oldIndex, "newIndex:", newIndex);
             return;
         }
 
@@ -287,15 +186,12 @@ export function SpectacleGalleryManager({
 
             try {
                 const orderedIds = reordered.map((p) => p.media_id);
-                console.log("[GalleryManager] reorder → spectacleId:", spectacleId, "ids:", orderedIds);
-
                 const result = await reorderGalleryPhotosAction(
                     String(spectacleId),
                     orderedIds,
                 );
 
                 if (!result.success) {
-                    console.error("[GalleryManager] reorder failed:", result.error);
                     toast.error(result.error ?? "Erreur lors du réordonnancement");
                     await fetchPhotos();
                     return;
@@ -304,7 +200,6 @@ export function SpectacleGalleryManager({
                 toast.success("Ordre mis à jour");
                 await fetchPhotos();
             } catch (err) {
-                console.error("[GalleryManager] reorder exception:", err);
                 toast.error(
                     err instanceof Error ? err.message : "Erreur lors du réordonnancement"
                 );
@@ -379,7 +274,7 @@ export function SpectacleGalleryManager({
                     >
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             {photos.map((photo) => (
-                                <SortablePhotoCard
+                                <SortableGalleryCard
                                     key={photo.media_id}
                                     photo={photo}
                                     isPending={isPending}

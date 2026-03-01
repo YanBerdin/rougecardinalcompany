@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Loader2, AlertCircle } from "lucide-react";
@@ -19,7 +19,6 @@ import {
   type SpectacleFormValues,
   cleanSpectacleFormData,
   formatDateForInput,
-  getSpectacleSuccessMessage,
 } from "@/lib/forms/spectacle-form-helpers";
 import { SpectacleFormFields } from "./SpectacleFormFields";
 import { SpectacleFormMetadata } from "./SpectacleFormMetadata";
@@ -27,13 +26,7 @@ import { SpectacleFormImageSection } from "./SpectacleFormImageSection";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
-interface SpectacleFormProps {
-  defaultValues?: Partial<SpectacleFormValues>;
-  spectacleId?: number;
-  onSuccess?: () => void;
-  existingGenres?: string[];
-}
+import type { SpectacleFormProps } from "./types";
 
 export default function SpectacleForm({
   defaultValues,
@@ -80,6 +73,13 @@ export default function SpectacleForm({
   const imageUrl = form.watch("image_url");
   const [showPublicWarning, setShowPublicWarning] = useState(false);
 
+  // Watch fields used in the progressive validation useEffect deps
+  const [watchedGenre, watchedPremiere, watchedShortDesc, watchedDesc] =
+    useWatch({
+      control: form.control,
+      name: ["genre", "premiere", "short_description", "description"],
+    });
+
   // Show progressive validation warning when public=true
   useEffect(() => {
     if (isPublic) {
@@ -106,10 +106,10 @@ export default function SpectacleForm({
     currentStatus,
     imageUrl,
     isImageValidated,
-    form.watch("genre"),
-    form.watch("premiere"),
-    form.watch("short_description"),
-    form.watch("description"),
+    watchedGenre,
+    watchedPremiere,
+    watchedShortDesc,
+    watchedDesc,
   ]);
 
   async function onSubmit(data: SpectacleFormValues) {
@@ -150,12 +150,13 @@ export default function SpectacleForm({
         return;
       }
 
-      const successAction = isEditing
-        ? "Spectacle mis à jour"
-        : "Spectacle créé";
       toast.success(
-        successAction,
-        getSpectacleSuccessMessage(isEditing, data.title)
+        isEditing ? "Spectacle mis à jour" : "Spectacle créé",
+        {
+          description: `« ${data.title} » a été ${
+            isEditing ? "mis à jour" : "créé"
+          } avec succès.`,
+        }
       );
 
       if (onSuccess) {
@@ -165,7 +166,6 @@ export default function SpectacleForm({
         router.refresh();
       }
     } catch (error) {
-      console.error("Submit error:", error);
       toast.error("Erreur", {
         description:
           error instanceof Error
@@ -199,7 +199,6 @@ export default function SpectacleForm({
         <SpectacleFormMetadata
           form={form}
           isPublic={isPublic}
-          currentStatus={currentStatus}
           existingGenres={existingGenres}
         />
 

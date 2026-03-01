@@ -12,11 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { SpectacleFormValues } from "@/lib/forms/spectacle-form-helpers";
-
-interface SpectacleFormFieldsProps {
-    form: UseFormReturn<SpectacleFormValues>;
-    isPublic: boolean;
-}
+import type { SpectacleFormFieldsProps } from "./types";
 
 export function SpectacleFormFields({
     form,
