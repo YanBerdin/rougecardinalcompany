@@ -151,7 +151,8 @@
       "@types/react-dom": "19.2.3",
       "markdownlint-cli2>markdown-it": ">=14.1.1",
       "schema-utils>ajv": ">=8.18.0",
-      "minimatch": ">=10.2.3"
+      "minimatch": ">=10.2.3",
+      "terser-webpack-plugin>serialize-javascript": ">=7.0.3"
     },
     "auditConfig": {
       "ignoreCves": [
