@@ -1,5 +1,39 @@
 # Progress
 
+## AUDIT-SPECTACLES — Admin Spectacles Audit Remediation (2026-03-01)
+
+### Summary
+
+✅ **COMPLET** — 15 violations corrigées en 13 étapes sur la feature `admin/spectacles`. Branche `fix/admin-spectacles-audit-remediation`, commit `f2c6059`, 19 fichiers changés (+795/-531 lignes).
+
+| Livrable | Statut | Détails |
+| -------- | ------ | ------- |
+| SEC-01/02 : `requireAdmin()` dans actions + pages | ✅ | 6 actions + 4 pages |
+| NEXT-01 : `dynamic`/`revalidate` | ✅ | 2 pages admin |
+| CLEAN-01 : 8 `console.error/log` supprimés | ✅ | Aucun restant |
+| CLEAN-02a : split `spectacle-photo-actions.ts` | ✅ | 5 photo actions isolées |
+| CLEAN-02b : `SortableGalleryCard.tsx` extrait | ✅ | `buildMediaPublicUrl` intégré |
+| UX-01 : `confirm()` → `AlertDialog` shadcn/ui | ✅ | `SpectaclePhotoManager` |
+| CLEAN-03/TS-01 : bloc mort + prop inutilisée | ✅ | Supprimés |
+| DRY-01 : `formatSpectacleDetailDate` centralisé | ✅ | Dans `spectacle-table-helpers.tsx` |
+| ARCH-01 : `types.ts` colocalisé (9 interfaces) | ✅ | Tous composants importent `./types` |
+| CLEAN-04 : STATUS 12 entries → 3 canoniques | ✅ | draft/published/archived |
+| ARCH-02 : `.ts` → `.tsx` + JSX natif | ✅ | Plus de `React.createElement` |
+| CLEAN-05 + PERF-01 : toast inliné + `useWatch` | ✅ | `getSpectacleSuccessMessage` supprimé |
+| `pnpm lint` 0 erreurs | ✅ | 3 warnings pré-existants |
+| `tsc --noEmit` 0 erreurs | ✅ | Fix `JSX.Element` namespace appliqué |
+
+### Fichiers créés / renommés
+
+```bash
+components/features/admin/spectacles/types.ts                       # NOUVEAU
+components/features/admin/spectacles/SortableGalleryCard.tsx        # NOUVEAU
+app/(admin)/admin/spectacles/spectacle-photo-actions.ts             # NOUVEAU
+lib/tables/spectacle-table-helpers.ts → spectacle-table-helpers.tsx # RENOMMÉ
+```
+
+---
+
 ## fix(security): Dependabot #26 — serialize-javascript RCE (2026-03-01)
 
 ### Summary

@@ -1,8 +1,66 @@
 # Active Context
 
-**Current Focus (2026-03-01)**: ✅ fix(security) Dependabot #26 — `serialize-javascript <=7.0.2` RCE (GHSA-5c6j-r48x-rmvq / HIGH) corrigé via override pnpm `terser-webpack-plugin>serialize-javascript: >=7.0.3`. `pnpm audit` → 0 vulnérabilités. Commit `59be53f`.
+**Current Focus (2026-03-01)**: ✅ AUDIT-SPECTACLES — Plan de remédiation admin/spectacles (13 étapes, 15 violations) 100% complété. `types.ts` colocalisé, `spectacle-table-helpers.tsx` JSX natif, `useWatch`, toast inliné. Commit `f2c6059` branche `fix/admin-spectacles-audit-remediation`.
 
-**Last Major Updates**: ✅ Dependabot #26 serialize-javascript RCE fix (2026-03-01) + Site-Config Audit Fix (2026-03-01) + TASK065 Admin Press Audit Fix (2026-02-28) + Contact RLS/Serialization Fix (2026-02-28) + Admin Partners Audit Fix (2026-02-28) + Media Admin Audit Violations Fix (2026-02-28) + Admin Lieux Audit Fix (2026-02-28) + Analytics TASK031-FIX (2026-02-27)
+**Last Major Updates**: ✅ Admin Spectacles Audit Remediation (2026-03-01) + Dependabot #26 serialize-javascript RCE fix (2026-03-01) + Site-Config Audit Fix (2026-03-01) + TASK065 Admin Press Audit Fix (2026-02-28) + Contact RLS/Serialization Fix (2026-02-28) + Admin Partners Audit Fix (2026-02-28) + Media Admin Audit Violations Fix (2026-02-28) + Admin Lieux Audit Fix (2026-02-28)
+
+---
+
+## ✅ AUDIT-SPECTACLES — Admin Spectacles Audit Remediation (2026-03-01)
+
+### Summary
+
+✅ **COMPLET** — Plan de remédiation `plan-adminSpectaclesAuditRemediation.prompt.md` exécuté intégralement sur branche `fix/admin-spectacles-audit-remediation`. 15 violations corrigées en 13 étapes, 19 fichiers modifiés/créés. `pnpm lint` 0 erreurs, `tsc --noEmit` 0 erreurs. Commit `f2c6059`.
+
+### Violations corrigées (15)
+
+| Fix | Violation | Correction |
+|-----|-----------|------------|
+| SEC-01 | `requireAdmin()` absent dans 6 actions Server | Ajouté en tête de chaque action |
+| SEC-02 | `requireAdmin()` absent dans 4 pages admin | Ajouté en tête de chaque page |
+| NEXT-01 | `dynamic`/`revalidate` manquants sur 2 pages | `force-dynamic` + `revalidate=0` |
+| CLEAN-01 | 8 `console.error/log` debug en production | Supprimés |
+| CLEAN-02a | `actions.ts` 500+ lignes (photos mélangées) | Split → `spectacle-photo-actions.ts` |
+| CLEAN-02b | Composant `SpectacleGalleryManager` trop long | Extraction `SortableGalleryCard.tsx` |
+| UX-01 | `confirm()` natif dans `SpectaclePhotoManager` | Remplacé par `AlertDialog` shadcn/ui |
+| CLEAN-03 | Bloc commenté en production dans `ManagementContainer` | Supprimé |
+| TS-01 | Prop `currentStatus` inutilisée dans `SpectacleFormMetadata` | Supprimée de l'interface + appels |
+| DRY-01 | `formatSpectacleDetailDate` dupliquée | Centralisée dans `spectacle-table-helpers.tsx` |
+| ARCH-01 | 9 interfaces définies localement dans chaque composant | `types.ts` colocalisé créé |
+| CLEAN-04 | 12 entrées STATUS_VARIANTS/LABELS legacy | Réduit à 3 canoniques (draft/published/archived) |
+| ARCH-02 | `.ts` avec `React.createElement(Badge, ...)` | Renommé `→ .tsx` + JSX natif |
+| CLEAN-05 | `getSpectacleSuccessMessage` helper trivial | Inliné dans toast, helper supprimé |
+| PERF-01 | `form.watch()` dans deps `useEffect` (re-subscribe/render) | Remplacé par `useWatch` hook |
+
+### Fichiers créés
+
+```bash
+components/features/admin/spectacles/types.ts           # NOUVEAU — 9 interfaces colocalisées
+components/features/admin/spectacles/SortableGalleryCard.tsx  # NOUVEAU — extrait de GalleryManager
+app/(admin)/admin/spectacles/spectacle-photo-actions.ts # NOUVEAU — 5 photo actions
+.github/prompts/plan-adminSpectaclesAuditRemediation.prompt.md  # Plan source
+```
+
+### Fichiers modifiés majeurs
+
+```bash
+lib/tables/spectacle-table-helpers.tsx  # Renommé .ts→.tsx, JSX natif, STATUS 12→3, DRY-01
+components/features/admin/spectacles/SpectacleForm.tsx  # useWatch, toast inliné
+components/features/admin/spectacles/SpectaclePhotoManager.tsx  # AlertDialog, buildMediaPublicUrl
+app/(admin)/admin/spectacles/*/page.tsx (4 pages)  # requireAdmin() + dynamic/revalidate
+# + 9 composants: import interfaces depuis ./types
+```
+
+### Résultats validation
+
+| Check | Résultat |
+|-------|----------|
+| `pnpm lint` | ✅ 0 erreurs, 3 warnings pré-existants |
+| `tsc --noEmit` | ✅ 0 erreurs (après fix `JSX.Element` namespace) |
+| `console.log/error` grep | ✅ Aucun |
+| `confirm(` grep | ✅ Aucun |
+| `form.watch` dans deps | ✅ Aucun |
+| Interfaces locales dans `.tsx` | ✅ Aucune |
 
 ---
 
