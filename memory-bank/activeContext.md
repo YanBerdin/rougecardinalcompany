@@ -15,7 +15,7 @@
 ### Violations corrigées (13)
 
 | Fix | Type | Correction |
-|-----|------|------------|
+| ----- | ------ | ------------ |
 | DAL-01 | Critique | `team.ts` > 300 lignes → split `team-hard-delete.ts` + `team-reorder.ts` |
 | DAL-02 | Critique | DAL retournait données brutes → `DALResult<T>` + `dalSuccess`/`dalError` |
 | DAL-03 | Critique | Codes d'erreur disparates → `[ERR_TEAM_001–052]` standardisés |
@@ -55,7 +55,7 @@ scripts/test-team-server-actions.ts           # 7 tests intégration DAL (exista
 ### Validation
 
 | Check | Résultat |
-|-------|----------|
+| ------- | ---------- |
 | `pnpm build` | ✅ 0 erreurs (4e tentative après 5 build failures résolus) |
 | `pnpm lint` | ✅ 0 erreurs, 3 warnings pré-existants dans fichiers non liés |
 
@@ -70,7 +70,7 @@ scripts/test-team-server-actions.ts           # 7 tests intégration DAL (exista
 ### Violations corrigées (15)
 
 | Fix | Violation | Correction |
-|-----|-----------|------------|
+| ----- | ----------- | ------------ |
 | SEC-01 | `requireAdmin()` absent dans 6 actions Server | Ajouté en tête de chaque action |
 | SEC-02 | `requireAdmin()` absent dans 4 pages admin | Ajouté en tête de chaque page |
 | NEXT-01 | `dynamic`/`revalidate` manquants sur 2 pages | `force-dynamic` + `revalidate=0` |
@@ -109,7 +109,7 @@ app/(admin)/admin/spectacles/*/page.tsx (4 pages)  # requireAdmin() + dynamic/re
 ### Résultats validation
 
 | Check | Résultat |
-|-------|----------|
+| ------- | ---------- |
 | `pnpm lint` | ✅ 0 erreurs, 3 warnings pré-existants |
 | `tsc --noEmit` | ✅ 0 erreurs (après fix `JSX.Element` namespace) |
 | `console.log/error` grep | ✅ Aucun |
