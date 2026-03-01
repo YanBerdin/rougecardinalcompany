@@ -24,10 +24,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-
-interface SpectaclesManagementContainerProps {
-  initialSpectacles: SpectacleSummary[];
-}
+import type { SpectaclesManagementContainerProps } from "./types";
 
 export default function SpectaclesManagementContainer({
   initialSpectacles,
@@ -49,15 +46,7 @@ export default function SpectaclesManagementContainer({
   function handleSort(field: SortField): void {
     setSortState((currentSort) => getNextSortState(currentSort, field));
   }
-  /*
-  const openDeleteDialog = deleteCandidate !== null;
 
-  function setOpenDeleteDialog(open: boolean): void {
-    if (!open) {
-      setDeleteCandidate(null);
-    }
-  }
-  */
   function handleCreate(): void {
     router.push("/admin/spectacles/new");
   }
@@ -106,7 +95,6 @@ export default function SpectaclesManagementContainer({
       setDeleteCandidate(null);
       router.refresh();
     } catch (error) {
-      console.error("Delete error:", error);
       toast.error("Erreur", {
         description: error instanceof Error ? error.message : "Impossible de supprimer le spectacle"
       });

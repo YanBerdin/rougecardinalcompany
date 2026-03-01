@@ -7,13 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { SpectacleFormValues } from "@/lib/forms/spectacle-form-helpers";
-
-interface SpectacleFormImageSectionProps {
-    form: UseFormReturn<SpectacleFormValues>;
-    isPublic: boolean;
-    spectacleId?: number;
-    onValidationChange: (isValid: boolean | null) => void;
-}
+import type { SpectacleFormImageSectionProps } from "./types";
 
 export function SpectacleFormImageSection({
     form,

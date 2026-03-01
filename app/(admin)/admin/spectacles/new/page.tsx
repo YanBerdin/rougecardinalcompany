@@ -1,19 +1,15 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/supabase/server";
+import { requireAdmin } from "@/lib/auth/is-admin";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import SpectacleForm from "@/components/features/admin/spectacles/SpectacleForm";
 import { fetchDistinctGenres } from "@/lib/dal/spectacles";
 
-export default async function NewSpectaclePage() {
-  const supabase = await createClient();
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-  // Check admin authentication
-  const { data, error } = await supabase.auth.getClaims();
-  if (error || !data?.claims || data.claims.user_metadata.role !== "admin") {
-    redirect("/auth/login");
-  }
+export default async function NewSpectaclePage() {
+  await requireAdmin();
 
   // Load existing genres for the form
   const existingGenres = await fetchDistinctGenres();

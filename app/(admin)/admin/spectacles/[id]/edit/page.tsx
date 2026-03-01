@@ -1,10 +1,13 @@
-import { redirect, notFound } from "next/navigation";
-import { createClient } from "@/supabase/server";
+import { notFound } from "next/navigation";
+import { requireAdmin } from "@/lib/auth/is-admin";
 import { ArrowLeft, Images } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import SpectacleForm from "@/components/features/admin/spectacles/SpectacleForm";
 import { fetchSpectacleById, fetchDistinctGenres } from "@/lib/dal/spectacles";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -12,13 +15,7 @@ interface Props {
 
 export default async function EditSpectaclePage({ params }: Props) {
   const { id } = await params;
-  const supabase = await createClient();
-
-  // Check admin authentication
-  const { data, error } = await supabase.auth.getClaims();
-  if (error || !data?.claims || data.claims.user_metadata.role !== "admin") {
-    redirect("/auth/login");
-  }
+  await requireAdmin();
 
   // Parse and validate ID
   const spectacleId = parseInt(id, 10);

@@ -29,18 +29,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { SpectacleFormValues } from "@/lib/forms/spectacle-form-helpers";
 import { normalizeGenre } from "@/lib/forms/spectacle-form-helpers";
-
-interface SpectacleFormMetadataProps {
-    form: UseFormReturn<SpectacleFormValues>;
-    isPublic: boolean;
-    currentStatus: string;
-    existingGenres?: string[];
-}
+import type { SpectacleFormMetadataProps } from "./types";
 
 export function SpectacleFormMetadata({
     form,
     isPublic,
-    currentStatus, //? not used yet, but could be useful for future logic
     existingGenres = [],
 }: SpectacleFormMetadataProps) {
     const [isCreatingNewGenre, setIsCreatingNewGenre] = useState(false);
