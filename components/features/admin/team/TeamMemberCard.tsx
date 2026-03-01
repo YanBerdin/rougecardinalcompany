@@ -1,26 +1,19 @@
 "use client";
 import Image from "next/image";
-import { TeamMemberDb } from "@/lib/schemas/team";
+import type { TeamMemberCardProps } from "./types";
+import { DEFAULT_TEAM_MEMBER_AVATAR } from "./types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trash2 } from "lucide-react";
 
-interface Props {
-  member: TeamMemberDb;
-  onEdit?: () => void;
-  onDesactivate?: () => void;
-  onRequestReactivate?: () => void;
-  onHardDelete?: () => void;
-}
-
 export function TeamMemberCard({
   member,
   onEdit,
-  onDesactivate,
+  onDeactivate,
   onRequestReactivate,
   onHardDelete,
-}: Props) {
-  const imgSrc = member.image_url || "/logo-florian.png";
+}: TeamMemberCardProps) {
+  const imgSrc = member.image_url || DEFAULT_TEAM_MEMBER_AVATAR;
 
   return (
     <Card
@@ -59,7 +52,7 @@ export function TeamMemberCard({
           {member.active ? (
             <Button
               variant="destructive"
-              onClick={onDesactivate}
+              onClick={onDeactivate}
               className="w-full sm:w-auto"
             >
               Désactiver
@@ -85,5 +78,3 @@ export function TeamMemberCard({
     </Card>
   );
 }
-
-export default TeamMemberCard;

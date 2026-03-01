@@ -1,8 +1,8 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { createClient } from "@/supabase/server";
+import { requireAdminPageAccess } from "@/lib/auth/is-admin";
 import { fetchTeamMemberById } from "@/lib/dal/team";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,13 +29,7 @@ interface EditTeamMemberPageProps {
 export default async function EditTeamMemberPage({
     params,
 }: EditTeamMemberPageProps) {
-    const supabase = await createClient();
-
-    // Auth check
-    const { data, error } = await supabase.auth.getClaims();
-    if (error || !data?.claims || data.claims.user_metadata.role !== "admin") {
-        redirect("/auth/login");
-    }
+    await requireAdminPageAccess();
 
     // Parse and validate ID
     const { id } = await params;
@@ -44,12 +38,13 @@ export default async function EditTeamMemberPage({
         redirect("/admin/team?error=invalid_id");
     }
 
-    // Fetch member via DAL
-    const member = await fetchTeamMemberById(memberId);
-    if (!member) {
+    // Fetch member via DAL — unwrap DALResult
+    const memberResult = await fetchTeamMemberById(memberId);
+    if (!memberResult.success || !memberResult.data) {
         // Member was deleted or doesn't exist - redirect to list with message
         redirect("/admin/team?deleted=true");
     }
+    const member = memberResult.data;
 
     return (
         <div className="space-y-6">

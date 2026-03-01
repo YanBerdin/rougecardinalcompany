@@ -105,12 +105,10 @@ export {
     CreateTeamMemberInputSchema,
     UpdateTeamMemberInputSchema,
     ReorderTeamMembersInputSchema,
-    SetActiveBodySchema,
     type TeamMemberDb,
     type CreateTeamMemberInput,
     type UpdateTeamMemberInput,
     type ReorderTeamMembersInput,
-    type SetActiveBody,
 } from "./team";
 
 // Dashboard

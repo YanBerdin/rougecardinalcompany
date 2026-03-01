@@ -1,24 +1,23 @@
-// Auth / env UI is rendered in the admin layout to keep it unique across admin pages
-import { redirect } from "next/navigation";
+import type { Metadata } from "next";
 import { Suspense } from "react";
-import { createClient } from "@/supabase/server";
+import { requireAdminPageAccess } from "@/lib/auth/is-admin";
 import { fetchAllTeamMembers } from "@/lib/dal/team";
-import TeamManagementContainer from "@/components/features/admin/team/TeamManagementContainer";
+import { TeamManagementContainer } from "@/components/features/admin/team/TeamManagementContainer";
 import { TeamPageToasts } from "@/components/admin/TeamPageToasts";
+
+export const metadata: Metadata = {
+  title: "Gestion de l'équipe | Admin",
+};
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function AdminTeamPage() {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase.auth.getClaims();
-  if (error || !data?.claims || data.claims.user_metadata.role !== "admin") {
-    redirect("/auth/login");
-  }
+  await requireAdminPageAccess();
 
   // Fetch ALL members (including inactive) for client-side filtering
-  const members = await fetchAllTeamMembers(true);
+  const membersResult = await fetchAllTeamMembers(true);
+  const members = membersResult.success ? membersResult.data : [];
 
   return (
     <div className="space-y-6">

@@ -60,30 +60,6 @@ export type ReorderTeamMembersInput = z.infer<
 >;
 
 // =============================================================================
-// SET ACTIVE BODY SCHEMA (API Route validation)
-// =============================================================================
-
-/**
- * Schema for toggling team member active status
- * Accepts boolean, string "true"/"false", or number 0/1
- */
-export const SetActiveBodySchema = z.object({
-  active: z
-    .union([
-      z.boolean(),
-      z.enum(["true", "false"]),
-      z.number().int().min(0).max(1),
-    ])
-    .transform((val) => {
-      if (typeof val === "boolean") return val;
-      if (typeof val === "string") return val === "true";
-      return val === 1;
-    }),
-});
-
-export type SetActiveBody = z.infer<typeof SetActiveBodySchema>;
-
-// =============================================================================
 // UI FORM SCHEMA (for react-hook-form + Next.js form components)
 // =============================================================================
 

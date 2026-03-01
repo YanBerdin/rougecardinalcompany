@@ -13,17 +13,20 @@ import {
 } from "@/lib/schemas/team";
 import {
   upsertTeamMember,
-  reorderTeamMembers,
   fetchTeamMemberById,
   setTeamMemberActive,
-  hardDeleteTeamMember,
 } from "@/lib/dal/team";
+import { hardDeleteTeamMember } from "@/lib/dal/team-hard-delete";
+import { reorderTeamMembers } from "@/lib/dal/team-reorder";
 
 // Use centralized ActionResult<T> from @/lib/actions/types
 import type { ActionResult } from "@/lib/actions/types";
 
 // Extended type for team actions that need HTTP status codes
 type ActionResponse<T> = ActionResult<T> & { status?: number; details?: unknown };
+
+/** Zod schema replacing the isValidTeamMemberId helper — accepts unknown input */
+const TeamMemberIdSchema = z.coerce.number().int().positive();
 
 export async function createTeamMember(
   input: unknown
@@ -51,26 +54,26 @@ export async function createTeamMember(
 }
 
 export async function updateTeamMember(
-  teamMemberId: number,
+  teamMemberId: unknown,
   updateInput: unknown
 ): Promise<ActionResponse<TeamMemberDb>> {
   try {
-    if (!isValidTeamMemberId(teamMemberId)) {
+    const idParsed = TeamMemberIdSchema.safeParse(teamMemberId);
+    if (!idParsed.success) {
       return { success: false, error: "Invalid id", status: 400 };
     }
 
     const validated: UpdateTeamMemberInput =
       await UpdateTeamMemberInputSchema.parseAsync(updateInput);
 
-    const existing = await fetchTeamMemberById(teamMemberId);
-
-    if (!existing) {
+    const existingResult = await fetchTeamMemberById(idParsed.data);
+    if (!existingResult.success || existingResult.data === null) {
       return { success: false, error: "Team member not found", status: 404 };
     }
 
     const result = await upsertTeamMember({
       ...validated,
-      id: teamMemberId,
+      id: idParsed.data,
     });
 
     revalidatePath("/admin/team");
@@ -113,15 +116,21 @@ export async function reorderTeamMembersAction(
 }
 
 export async function setTeamMemberActiveAction(
-  teamMemberId: number,
-  isActiveStatus: boolean
+  teamMemberId: unknown,
+  isActiveStatus: unknown
 ): Promise<ActionResponse<null>> {
   try {
-    if (!isValidTeamMemberId(teamMemberId)) {
+    const idParsed = TeamMemberIdSchema.safeParse(teamMemberId);
+    if (!idParsed.success) {
       return { success: false, error: "Invalid team member id", status: 400 };
     }
 
-    const result = await setTeamMemberActive(teamMemberId, isActiveStatus);
+    const activeParsed = z.boolean().safeParse(isActiveStatus);
+    if (!activeParsed.success) {
+      return { success: false, error: "Invalid active status", status: 400 };
+    }
+
+    const result = await setTeamMemberActive(idParsed.data, activeParsed.data);
     revalidatePath("/admin/team");
 
     if (!result?.success) {
@@ -144,14 +153,15 @@ export async function setTeamMemberActiveAction(
  * The member must be deactivated before deletion.
  */
 export async function hardDeleteTeamMemberAction(
-  teamMemberId: number
+  teamMemberId: unknown
 ): Promise<ActionResponse<null>> {
   try {
-    if (!isValidTeamMemberId(teamMemberId)) {
+    const idParsed = TeamMemberIdSchema.safeParse(teamMemberId);
+    if (!idParsed.success) {
       return { success: false, error: "Invalid team member id", status: 400 };
     }
 
-    const result = await hardDeleteTeamMember(teamMemberId);
+    const result = await hardDeleteTeamMember(idParsed.data);
 
     if (!result?.success) {
       return {
@@ -167,41 +177,6 @@ export async function hardDeleteTeamMemberAction(
     return handleActionError(error, "hardDeleteTeamMemberAction");
   }
 }
-
-/**
- * @deprecated Use `uploadMediaImage(formData, folder)` from `@/lib/actions` instead.
- * This wrapper keeps the old API for backwards compatibility while ensuring
- * the exported symbol is an async Server Action (required by Next.js).
- */
-/*
-export async function uploadTeamMemberPhoto(
-  photoFormData: FormData
-): Promise<ActionResponse<{ mediaId: number; publicUrl: string }>> {
-  try {
-    const actions = await import("@/lib/actions");
-    const result = await actions.uploadMediaImage(photoFormData, "team");
-
-    if (!result.success) {
-      return { success: false, error: result.error ?? "Upload failed" };
-    }
-
-    return {
-      success: true,
-      data: {
-        mediaId: result.data.mediaId,
-        publicUrl: result.data.publicUrl,
-      },
-    };
-  } catch (error: unknown) {
-    return handleActionError(error, "uploadTeamMemberPhoto");
-  }
-}
-*/
-function isValidTeamMemberId(teamMemberId: number): boolean {
-  return Number.isFinite(teamMemberId) && teamMemberId > 0;
-}
-
-// Helper functions removed - now using centralized lib/actions/media-actions
 
 function handleActionError(
   error: unknown,

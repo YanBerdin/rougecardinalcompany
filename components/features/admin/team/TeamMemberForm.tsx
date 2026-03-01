@@ -3,12 +3,11 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import {
   TeamMemberFormSchema,
   type TeamMemberFormValues,
-  type TeamMemberDb,
 } from "@/lib/schemas/team";
+import type { TeamMemberFormProps } from "./types";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -21,12 +20,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { ImageFieldGroup } from "@/components/features/admin/media";
-
-interface TeamMemberFormProps {
-  member?: TeamMemberDb | null;
-  onSubmit: (data: TeamMemberFormValues) => Promise<void>;
-  onCancel?: () => void;
-}
 
 export function TeamMemberForm({
   member,
@@ -74,6 +67,7 @@ export function TeamMemberForm({
                   <Input 
                     {...field} 
                     placeholder="Nom du membre"
+                    aria-required="true"
                     className="h-10 sm:h-11 text-base"
                   />
                 </FormControl>
@@ -155,5 +149,3 @@ export function TeamMemberForm({
     </>
   );
 }
-
-export default TeamMemberForm;
