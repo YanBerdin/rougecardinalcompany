@@ -1,5 +1,42 @@
 # Progress
 
+## fix(security): Dependabot #26 — serialize-javascript RCE (2026-03-01)
+
+### Summary
+
+✅ **COMPLET** — Vulnérabilité HIGH (`GHSA-5c6j-r48x-rmvq`) corrigée via override pnpm. `pnpm audit` → **No known vulnerabilities found**. Commit `59be53f` pushé sur `master`.
+
+| Livrable | Statut | Détails |
+| -------- | ------ | ------- |
+| Override `terser-webpack-plugin>serialize-javascript: >=7.0.3` | ✅ | `package.json` section `pnpm.overrides` |
+| `pnpm install` + `pnpm-lock.yaml` mis à jour | ✅ | `serialize-javascript 7.0.3` installé |
+| `pnpm audit` 0 vulnérabilités | ✅ | No known vulnerabilities found |
+| Commit `59be53f` + push `master` | ✅ | Dependabot #26 fermé automatiquement |
+
+### Détails Vulnérabilité
+
+| Champ | Valeur |
+| ----- | ------ |
+| Advisory | GHSA-5c6j-r48x-rmvq |
+| CVSSv4 | HIGH |
+| Type | RCE via `RegExp.flags` et `Date.prototype.toISOString()` |
+| Package vulnérable | `serialize-javascript <=7.0.2` |
+| Fix | `>=7.0.3` |
+| Chemin | `@sentry/nextjs > @sentry/webpack-plugin > webpack > terser-webpack-plugin > serialize-javascript` |
+
+### Fichiers Modifiés
+
+```bash
+package.json       # + "terser-webpack-plugin>serialize-javascript": ">=7.0.3"
+pnpm-lock.yaml     # serialize-javascript 7.0.2 → 7.0.3
+```
+
+### Note
+
+GitHub Dependabot re-scanne le lock file de façon asynchrone après le push — l'alerte #26 disparaît en quelques minutes une fois `serialize-javascript 7.0.3` détecté dans `pnpm-lock.yaml`.
+
+---
+
 ## Audit conformité admin/site-config (2026-03-01)
 
 ### Summary

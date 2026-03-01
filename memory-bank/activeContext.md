@@ -1,8 +1,36 @@
 # Active Context
 
-**Current Focus (2026-03-01)**: ✅ Audit conformité admin/site-config — 8 violations corrigées (1 CRITIQUE, 2 HAUTES, 3 MOYENNES, 2 BASSES), nouveau composant `ToggleSection.tsx` extrait, 0 erreurs TypeScript/ESLint.
+**Current Focus (2026-03-01)**: ✅ fix(security) Dependabot #26 — `serialize-javascript <=7.0.2` RCE (GHSA-5c6j-r48x-rmvq / HIGH) corrigé via override pnpm `terser-webpack-plugin>serialize-javascript: >=7.0.3`. `pnpm audit` → 0 vulnérabilités. Commit `59be53f`.
 
-**Last Major Updates**: ✅ Site-Config Audit Fix (2026-03-01) + TASK065 Admin Press Audit Fix (2026-02-28) + Contact RLS/Serialization Fix (2026-02-28) + Admin Partners Audit Fix (2026-02-28) + Media Admin Audit Violations Fix (2026-02-28) + Admin Lieux Audit Fix (2026-02-28) + Admin Home Audit Fix (2026-02-28) + Analytics TASK031-FIX (2026-02-27)
+**Last Major Updates**: ✅ Dependabot #26 serialize-javascript RCE fix (2026-03-01) + Site-Config Audit Fix (2026-03-01) + TASK065 Admin Press Audit Fix (2026-02-28) + Contact RLS/Serialization Fix (2026-02-28) + Admin Partners Audit Fix (2026-02-28) + Media Admin Audit Violations Fix (2026-02-28) + Admin Lieux Audit Fix (2026-02-28) + Analytics TASK031-FIX (2026-02-27)
+
+---
+
+## ✅ fix(security) Dependabot #26 — serialize-javascript RCE (2026-03-01)
+
+### Summary
+
+✅ **COMPLET** — Vulnérabilité **HIGH** `serialize-javascript <=7.0.2` (RCE via `RegExp.flags` / `Date.prototype.toISOString()`, advisory GHSA-5c6j-r48x-rmvq) corrigée par override pnpm ciblé. `pnpm audit` retourne **No known vulnerabilities found**. Commit `59be53f` pushé sur `master`.
+
+### Chemin de la vulnérabilité
+
+```
+@sentry/nextjs > @sentry/webpack-plugin > webpack > terser-webpack-plugin > serialize-javascript@7.0.2
+```
+
+### Fix appliqué
+
+```json
+// package.json — pnpm.overrides
+"terser-webpack-plugin>serialize-javascript": ">=7.0.3"
+```
+
+### Fichiers modifiés
+
+```bash
+package.json       # + override terser-webpack-plugin>serialize-javascript
+pnpm-lock.yaml     # serialize-javascript 7.0.2 → 7.0.3
+```
 
 ---
 
