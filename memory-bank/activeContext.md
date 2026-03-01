@@ -1,8 +1,23 @@
 # Active Context
 
-**Current Focus (2026-03-01)**: ✅ TASK066-audit-admin-team-violations — Plan de remédiation admin/team (13 violations, ~84%→~95%) 100% complété. `types.ts` colocalisé, DAL splitté, re-export "use server" fix, `requireAdminPageAccess()`, Switch shadcn, `onDeactivate` typo. `pnpm build` ✅ `pnpm lint` ✅.
+**Current Focus (2026-03-02)**: ✅ TASK067-audit-admin-users-feature — Audit conformité admin/users (13 violations, ~60%→~95%) + audit 8 scripts utilitaires (20 violations mineures) + 6 scripts ajoutés à package.json. `pnpm build` ✅ `tsc --noEmit` ✅.
 
-**Last Major Updates**: ✅ Admin Team Audit Remediation (2026-03-01) + Admin Spectacles Audit Remediation (2026-03-01) + Dependabot #26 serialize-javascript RCE fix (2026-03-01) + Site-Config Audit Fix (2026-03-01) + TASK065 Admin Press Audit Fix (2026-02-28) + Contact RLS/Serialization Fix (2026-02-28) + Admin Partners Audit Fix (2026-02-28)
+**Last Major Updates**: ✅ Admin Users Audit + Scripts (2026-03-02) + Admin Team Audit Remediation (2026-03-01) + Admin Spectacles Audit Remediation (2026-03-01) + Dependabot #26 serialize-javascript RCE fix (2026-03-01) + Site-Config Audit Fix (2026-03-01) + TASK065 Admin Press Audit Fix (2026-02-28) + Contact RLS/Serialization Fix (2026-02-28) + Admin Partners Audit Fix (2026-02-28)
+
+---
+
+## ✅ TASK067 — Audit conformité admin/users feature + scripts (2026-03-02)
+
+### Summary
+
+✅ **COMPLET** — Audit complet de `components/features/admin/users` (10 fichiers) + 8 scripts utilitaires. 13 violations feature corrigées (score ~60%→~95%), 6 sous-composants extraits (View 548→191 lignes). 8 scripts audités (20 violations mineures non bloquantes), 6 scripts ajoutés à package.json. Branche `fix/admin-users-audit-violations`.
+
+### Points clés
+
+- **Feature** : 13 violations (2 CRITIQUES : page.tsx dynamic/revalidate + actions.ts server-only ; 4 HAUTES : DRY schemas/badge/catch ; 5 MOYENNES : split View 548→191 lignes ; 2 BASSES : types.ts + a11y)
+- **Extraction** : 6 sous-composants (UserStatusBadge, UserMobileCard, UserDeleteDialog, UserRoleChangeDialog, UserDesktopTable, types.ts)
+- **Scripts** : 8 scripts audités, 20 violations mineures (hardcoded IDs, catch sans `:unknown`, double imports dotenv). Non bloquantes pour scripts CLI.
+- **package.json** : +6 scripts npm (`db:init-admin:local`, `admin:delete-test-user`, `admin:find-user`, `admin:inspect-user`, `admin:set-role`, `test:profile-insertion`)
 
 ---
 

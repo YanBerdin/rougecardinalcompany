@@ -1,5 +1,40 @@
 # Progress
 
+## TASK067 — Audit conformité admin/users feature + scripts (2026-03-02)
+
+### Summary
+
+✅ **COMPLET** — 13 violations corrigées sur `components/features/admin/users` (score ~60%→~95%), 6 sous-composants extraits (View 548→191 lignes). 8 scripts utilitaires audités (20 violations mineures), 6 scripts ajoutés à package.json. Branche `fix/admin-users-audit-violations`.
+
+| Livrable | Statut | Détails |
+| -------- | ------ | ------- |
+| NEXT-01 : `dynamic`/`revalidate` page.tsx | ✅ | Exports ajoutés |
+| SEC-01 : `import "server-only"` actions.ts | ✅ | Ajouté |
+| TS-01 : `catch (error: unknown)` | ✅ | Corrigé dans actions.ts |
+| DRY-01 : `ROLE_LABELS` dupliqué | ✅ | Extrait dans types.ts |
+| DRY-02 : StatusBadge dupliqué | ✅ | UserStatusBadge.tsx extrait |
+| DRY-03 : InviteUserForm schema local | ✅ | InviteUserSchema partagé |
+| CLEAN-01→05 : View 548→191 lignes | ✅ | 5 sous-composants extraits |
+| ARCH-01 : types.ts colocalisé | ✅ | ROLE_LABELS, UserRole, interfaces |
+| A11Y-01 : AlertDialog vérifié | ✅ | OK aria déjà présent |
+| 8 scripts audités | ✅ | 20 violations mineures documentées |
+| 6 scripts ajoutés package.json | ✅ | db:init-admin:local, admin:*, test:profile-insertion |
+| `tsc --noEmit` 0 erreurs | ✅ | TypeScript strict |
+
+### Fichiers créés
+
+```bash
+components/features/admin/users/types.ts            # Props + ROLE_LABELS colocalisés
+components/features/admin/users/UserStatusBadge.tsx  # Badge réutilisable
+components/features/admin/users/UserMobileCard.tsx   # Carte mobile extraite
+components/features/admin/users/UserDeleteDialog.tsx # Dialog suppression extrait
+components/features/admin/users/UserRoleChangeDialog.tsx # Dialog rôle extrait
+components/features/admin/users/UserDesktopTable.tsx # Table desktop extraite
+memory-bank/tasks/TASK067-audit-admin-users-feature.md # Documentation complète
+```
+
+---
+
 ## AUDIT-SPECTACLES — Admin Spectacles Audit Remediation (2026-03-01)
 
 ### Summary
