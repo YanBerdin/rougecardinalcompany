@@ -70,6 +70,12 @@
     "check:cloud": "tsx scripts/check-cloud-data.ts",
     "check:admin-status": "tsx scripts/check-admin-status.ts",
     "check:admin-profile": "node scripts/check-existing-profile.js",
+    "db:init-admin:local": "tsx scripts/create-admin-user-local.ts",
+    "admin:delete-test-user": "node scripts/delete-test-user.js",
+    "admin:find-user": "node scripts/find-auth-user.js",
+    "admin:inspect-user": "tsx scripts/inspect-user.ts",
+    "admin:set-role": "tsx scripts/set-admin-role.ts",
+    "test:profile-insertion": "node scripts/test-profile-insertion.js",
     "diagnose:admin-views": "node scripts/diagnose-admin-views.js"
   },
   "dependencies": {
