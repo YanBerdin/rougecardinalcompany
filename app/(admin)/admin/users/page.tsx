@@ -8,6 +8,10 @@ export const metadata: Metadata = {
   description: "Administration des utilisateurs et des invitations",
 };
 
+// ✅ OBLIGATOIRE : Force le re-fetch à chaque visite (CRUD pattern)
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default function UsersPage() {
   return (
     <div className="flex-1 space-y-4 p-2 pt-6">

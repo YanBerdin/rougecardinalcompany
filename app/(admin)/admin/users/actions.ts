@@ -1,5 +1,6 @@
 "use server";
 
+import "server-only";
 import { revalidatePath } from "next/cache";
 import {
   updateUserRole as updateUserRoleDAL,
@@ -76,23 +77,39 @@ export async function updateUserRole(input: {
   userId: string;
   role: "user" | "editor" | "admin";
 }): Promise<ActionResult> {
-  const result = await updateUserRoleDAL(input);
+  try {
+    const result = await updateUserRoleDAL(input);
 
-  if (!result.success) {
-    return { success: false, error: result.error ?? "Update failed" };
+    if (!result.success) {
+      return { success: false, error: result.error ?? "Update failed" };
+    }
+
+    revalidatePath("/admin/users");
+    return { success: true };
+  } catch (error: unknown) {
+    console.error("[updateUserRole] Unexpected error:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Erreur inattendue",
+    };
   }
-
-  revalidatePath("/admin/users");
-  return { success: true };
 }
 
 export async function deleteUser(userId: string): Promise<ActionResult> {
-  const result = await deleteUserDAL(userId);
+  try {
+    const result = await deleteUserDAL(userId);
 
-  if (!result.success) {
-    return { success: false, error: result.error ?? "Delete failed" };
+    if (!result.success) {
+      return { success: false, error: result.error ?? "Delete failed" };
+    }
+
+    revalidatePath("/admin/users");
+    return { success: true };
+  } catch (error: unknown) {
+    console.error("[deleteUser] Unexpected error:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Erreur inattendue",
+    };
   }
-
-  revalidatePath("/admin/users");
-  return { success: true };
 }

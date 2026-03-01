@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,25 +32,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { inviteUser } from "@/app/(admin)/admin/users/actions";
-
-const inviteUserSchema = z.object({
-  email: z
-    .string()
-    .min(1, { message: "L'email est requis" })
-    .email({ message: "Email invalide" }),
-  role: z.enum(["user", "editor", "admin"], {
-    message: "Rôle invalide",
-  }),
-  displayName: z.string().optional(),
-});
-
-type InviteUserFormData = z.infer<typeof inviteUserSchema>;
-
-const roleLabels = {
-  user: "Utilisateur",
-  editor: "Éditeur",
-  admin: "Administrateur",
-} as const;
+import { InviteUserSchema, type InviteUserInput } from "@/lib/schemas/admin-users";
+import { ROLE_LABELS } from "./types";
 
 const roleDescriptions = {
   user: "Accès en lecture seule au contenu public",
@@ -63,8 +45,8 @@ export function InviteUserForm() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<InviteUserFormData>({
-    resolver: zodResolver(inviteUserSchema),
+  const form = useForm<InviteUserInput>({
+    resolver: zodResolver(InviteUserSchema),
     defaultValues: {
       email: "",
       role: "user",
@@ -72,7 +54,7 @@ export function InviteUserForm() {
     },
   });
 
-  async function onSubmit(data: InviteUserFormData) {
+  async function onSubmit(data: InviteUserInput) {
     setIsSubmitting(true);
     try {
       const result = await inviteUser(data);
@@ -92,7 +74,7 @@ export function InviteUserForm() {
           description: result.error,
         });
       }
-    } catch (error) {
+    } catch (error: unknown) {
       toast.error("Erreur inattendue", {
         description:
           error instanceof Error ? error.message : "Erreur inconnue",
@@ -152,7 +134,7 @@ export function InviteUserForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {Object.entries(roleLabels).map(([value, label]) => (
+                      {Object.entries(ROLE_LABELS).map(([value, label]) => (
                         <SelectItem key={value} value={value}>
                           <div className="flex flex-col py-1">
                             <span className="text-sm sm:text-base">{label}</span>
