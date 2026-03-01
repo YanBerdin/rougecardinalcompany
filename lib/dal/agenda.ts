@@ -6,16 +6,12 @@ import {
   EventSchema,
   type Event as AgendaEvent,
   type EventType as EventTypeOption,
-} from "@/components/features/public-site/agenda/types";
+} from "@/lib/schemas/agenda";
 import {
   type DALResult,
   formatTime,
   toISODateString,
 } from "@/lib/dal/helpers";
-
-// NOTE: Types AgendaEvent and EventTypeOption should be imported directly 
-// from '@/components/features/public-site/agenda/types' or '@/lib/schemas/agenda'
-// Server files cannot re-export types in Next.js 16
 
 // ============================================================================
 // Internal Types (Supabase response shape)

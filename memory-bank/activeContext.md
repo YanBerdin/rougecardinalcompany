@@ -1,8 +1,74 @@
 # Active Context
 
-**Current Focus (2026-03-02)**: ✅ TASK067-audit-admin-users-feature — Audit conformité admin/users (13 violations, ~60%→~95%) + audit 8 scripts utilitaires (20 violations mineures) + 6 scripts ajoutés à package.json. `pnpm build` ✅ `tsc --noEmit` ✅.
+**Current Focus (2026-03-02)**: ✅ TASK068 — Audit conformité public/agenda + Composition Patterns (17 violations, monolithe 285L→5 compound components, 14→3 props). `pnpm build` ✅ `tsc --noEmit` ✅.
 
-**Last Major Updates**: ✅ Admin Users Audit + Scripts (2026-03-02) + Admin Team Audit Remediation (2026-03-01) + Admin Spectacles Audit Remediation (2026-03-01) + Dependabot #26 serialize-javascript RCE fix (2026-03-01) + Site-Config Audit Fix (2026-03-01) + TASK065 Admin Press Audit Fix (2026-02-28) + Contact RLS/Serialization Fix (2026-02-28) + Admin Partners Audit Fix (2026-02-28)
+**Last Major Updates**: ✅ Public Agenda Composition Refactor (2026-03-02) + Admin Users Audit + Scripts (2026-03-02) + Admin Team Audit Remediation (2026-03-01) + Admin Spectacles Audit Remediation (2026-03-01) + Dependabot #26 serialize-javascript RCE fix (2026-03-01) + Site-Config Audit Fix (2026-03-01) + TASK065 Admin Press Audit Fix (2026-02-28) + Contact RLS/Serialization Fix (2026-02-28) + Admin Partners Audit Fix (2026-02-28)
+
+---
+
+## ✅ TASK068 — Audit conformité public/agenda + Composition Patterns (2026-03-02)
+
+### Summary
+
+✅ **COMPLET** — Audit complet de `components/features/public-site/agenda` (9 fichiers auditités, 12 fichiers finaux). 17 violations corrigées : monolithe AgendaView 285L refactoré en 5 compound components partageant un état via AgendaContext (React 19 `use()`). Props drillées 14→3, code mort supprimé (hooks.ts), import DAL corrigé. Branche `refactor/public-agenda-composition-patterns`.
+
+### Points clés
+
+- **Composition Pattern** : Premier usage du pattern Compound Components + Context Provider dans le projet
+- **AgendaContext** (146L) : Provider avec `state`, `actions`, `meta` — dependency injection pour 5 sous-composants
+- **5 compound components** : AgendaHero (26L), AgendaFilters (47L), AgendaEventList (203L), AgendaNewsletter (124L), AgendaClientContainer (37L)
+- **Code mort** : `hooks.ts` (useAgendaData custom hook jamais utilisé côté client) supprimé
+- **DAL fix** : `fetchAgendaEvents` importé depuis `@/lib/dal/agenda` au lieu de `@/lib/dal/spectacles`
+- **React 19** : `use(AgendaContext)` au lieu de `useContext(AgendaContext)` dans tous les composants
+
+### Violations corrigées (17)
+
+| # | Sévérité | Catégorie | Violation | Correction |
+| --- | ---------- | ----------- | ----------- | ------------ |
+| 1 | CRITIQUE | Clean Code | AgendaView.tsx 285L (max 300L) | Split en 5 compound components |
+| 2 | CRITIQUE | Composition | 14 props drillées dans AgendaView | 3 props via AgendaContext |
+| 3 | CRITIQUE | TypeScript | Props non typées dans interface monolithique | `AgendaContextValue` interface avec `state/actions/meta` |
+| 4 | CRITIQUE | Clean Code | `hooks.ts` code mort jamais utilisé | Fichier supprimé |
+| 5 | CRITIQUE | DAL SOLID | Import depuis mauvais module DAL | `fetchAgendaEvents` depuis `@/lib/dal/agenda` |
+| 6 | HAUTE | Composition | Pas de compound components | `Agenda.*` namespace avec 5 sous-composants |
+| 7 | HAUTE | Composition | État couplé au composant parent | AgendaProvider avec dependency injection |
+| 8 | HAUTE | TypeScript | Interface unique pour tout l'état | 3 interfaces séparées (`AgendaState`, `AgendaActions`, `AgendaMeta`) |
+| 9 | HAUTE | Clean Code | Logique métier mélangée avec UI | Handlers dans AgendaContext, UI dans composants |
+| 10 | HAUTE | React 19 | `useContext` déprécié | `use()` partout |
+| 11 | MOYENNE | a11y | Boutons filtres sans aria-label | `aria-label` + `aria-pressed` ajoutés |
+| 12 | MOYENNE | Clean Code | Barrel exports manquants | `index.ts` avec named exports |
+| 13 | MOYENNE | TypeScript | Types éparpillés | `types.ts` colocalisé |
+| 14 | MOYENNE | Next.js | Container sans Suspense boundary | `Suspense` + `AgendaSkeleton` |
+| 15 | MOYENNE | DAL SOLID | Pas de `cache()` React sur DAL reads | `cache()` wrapping sur `fetchAgendaEvents` |
+| 16 | BASSE | a11y | Section newsletter sans heading hiérarchique | Heading `h2` ajouté |
+| 17 | BASSE | Clean Code | Magic strings pour genres | Constants `GENRE_ALL` extraites |
+
+### Fichiers créés (5)
+
+```bash
+components/features/public-site/agenda/AgendaContext.tsx       # 146L — Provider + compound exports
+components/features/public-site/agenda/AgendaHero.tsx          # 26L — Hero section
+components/features/public-site/agenda/AgendaFilters.tsx       # 47L — Genre filter buttons
+components/features/public-site/agenda/AgendaEventList.tsx     # 203L — Event cards grid
+components/features/public-site/agenda/AgendaNewsletter.tsx    # 124L — Newsletter inline form
+```
+
+### Fichiers modifiés (5)
+
+```bash
+components/features/public-site/agenda/AgendaClientContainer.tsx  # 37L — Simplifié (Provider + composition)
+components/features/public-site/agenda/AgendaContainer.tsx        # 34L — Suspense boundary ajoutée
+components/features/public-site/agenda/types.ts                   # 30L — AgendaContextValue + sub-interfaces
+components/features/public-site/agenda/index.ts                   # 17L — Barrel exports
+app/(marketing)/agenda/page.tsx                                   # 22L — dynamic/revalidate exports
+```
+
+### Fichiers supprimés (2)
+
+```bash
+components/features/public-site/agenda/AgendaView.tsx   # 285L monolithe → remplacé par 5 composants
+components/features/public-site/agenda/hooks.ts          # Custom hook code mort
+```
 
 ---
 

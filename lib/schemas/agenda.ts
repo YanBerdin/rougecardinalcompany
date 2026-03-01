@@ -25,7 +25,9 @@ export const EventSchema = z.object({
     status: z.string(),
     ticketUrl: z.string().nullable(),
     image: z.string(),
-});/**
+});
+
+/**
  * Event type filter option schema
  */
 export const EventTypeSchema = z.object({

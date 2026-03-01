@@ -1,5 +1,45 @@
 # Progress
 
+## TASK068 — Audit conformité public/agenda + Composition Patterns (2026-03-02)
+
+### Summary
+
+✅ **COMPLET** — 17 violations corrigées sur `components/features/public-site/agenda`. Monolithe AgendaView (285L, 14 props drillées) refactoré en 5 compound components via AgendaContext Provider (React 19 `use()`). Code mort hooks.ts supprimé, import DAL corrigé, barrel exports ajoutés. Total feature : 960L / 12 fichiers. Branche `refactor/public-agenda-composition-patterns`.
+
+| Livrable | Statut | Détails |
+| -------- | ------ | ------- |
+| COMP-01 : AgendaContext Provider | ✅ | 146L, state/actions/meta dependency injection |
+| COMP-02 : AgendaHero compound | ✅ | 26L, hero section isolée |
+| COMP-03 : AgendaFilters compound | ✅ | 47L, genre filter buttons avec aria-pressed |
+| COMP-04 : AgendaEventList compound | ✅ | 203L, event cards grid + empty state |
+| COMP-05 : AgendaNewsletter compound | ✅ | 124L, newsletter inline form |
+| CLEAN-01 : hooks.ts code mort | ✅ | Fichier supprimé |
+| CLEAN-02 : AgendaView monolithe | ✅ | 285L supprimées, remplacé par 5 composants |
+| DAL-01 : Import DAL corrigé | ✅ | `@/lib/dal/agenda` au lieu de `@/lib/dal/spectacles` |
+| REACT19-01 : `use()` vs `useContext()` | ✅ | React 19 pattern dans tous les composants |
+| TS-01 : types.ts colocalisé | ✅ | 3 interfaces séparées (State/Actions/Meta) |
+| BARREL-01 : index.ts exports | ✅ | Named exports pour tous composants |
+| A11Y-01 : aria-label + aria-pressed | ✅ | Boutons filtres genre accessibles |
+
+### Fichiers créés (5)
+
+```bash
+components/features/public-site/agenda/AgendaContext.tsx       # 146L — Provider + Agenda.* compound
+components/features/public-site/agenda/AgendaHero.tsx          # 26L — Hero section
+components/features/public-site/agenda/AgendaFilters.tsx       # 47L — Genre filter buttons
+components/features/public-site/agenda/AgendaEventList.tsx     # 203L — Event cards grid
+components/features/public-site/agenda/AgendaNewsletter.tsx    # 124L — Newsletter inline form
+```
+
+### Fichiers supprimés (2)
+
+```bash
+components/features/public-site/agenda/AgendaView.tsx  # 285L monolithe
+components/features/public-site/agenda/hooks.ts         # Custom hook code mort
+```
+
+---
+
 ## TASK067 — Audit conformité admin/users feature + scripts (2026-03-02)
 
 ### Summary

@@ -1,9 +1,9 @@
 /**
  * @file Agenda Types
- * @description Types for agenda feature components
+ * @description Types and re-exports for the agenda feature
  *
  * Schemas are centralized in lib/schemas/agenda.ts
- * This file only contains ViewProps interfaces
+ * This file re-exports schemas and defines composition-specific interfaces
  */
 
 // Re-export schemas and types from centralized location
@@ -14,27 +14,17 @@ export {
   type EventType,
 } from "@/lib/schemas/agenda";
 
-// =============================================================================
-// VIEW PROPS
-// =============================================================================
-
 import type { Event, EventType } from "@/lib/schemas/agenda";
 
+// =============================================================================
+// COMPOSITION PROPS
+// =============================================================================
+
 /**
- * Props for the AgendaView component
+ * Props for the AgendaClientContainer composition root
  */
-export interface AgendaViewProps {
-  events: Event[];
-  eventTypes: EventType[];
-  filterType: string;
-  setFilterType: (value: string) => void;
-  generateCalendarFile: (event: Event) => void;
-  loading?: boolean;
-  showNewsletterSection?: boolean;
-  newsletterEmail?: string;
-  newsletterIsSubscribed?: boolean;
-  newsletterIsLoading?: boolean;
-  newsletterErrorMessage?: string | null;
-  onNewsletterEmailChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onNewsletterSubmit?: (e: React.FormEvent) => void;
+export interface AgendaClientContainerProps {
+  readonly events: Event[];
+  readonly eventTypes: EventType[];
+  readonly showNewsletterSection?: boolean;
 }

@@ -1,80 +1,37 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useNewsletterSubscribe } from "@/lib/hooks/useNewsletterSubscribe";
-import { AgendaView } from "./AgendaView";
-import type { Event, EventType } from "./types";
+/**
+ * @file AgendaClientContainer
+ * @description Composition root for the agenda feature.
+ * Wraps compound components with AgendaProvider.
+ */
 
-type Props = {
-  events: Event[];
-  eventTypes: EventType[];
-  showNewsletterSection?: boolean;
-};
+import { AgendaProvider } from "./AgendaContext";
+import { AgendaHero } from "./AgendaHero";
+import { AgendaFilters } from "./AgendaFilters";
+import { AgendaEventList } from "./AgendaEventList";
+import { AgendaNewsletter } from "./AgendaNewsletter";
+import type { AgendaClientContainerProps } from "./types";
 
-export default function AgendaClientContainer({ events, eventTypes, showNewsletterSection = false }: Props) {
-  const [filterType, setFilterType] = useState<string>("all");
-
-  const {
-    email,
-    isSubscribed,
-    isLoading: newsletterLoading,
-    errorMessage,
-    handleEmailChange,
-    handleSubmit,
-  } = useNewsletterSubscribe({ source: "agenda" });
-
-  const filteredEvents = useMemo(() => {
-    if (filterType === "all") return events;
-    return events.filter((e) => e.type === filterType);
-  }, [events, filterType]);
-
-  const generateCalendarFile = (event: Event) => {
-    const startDate = new Date(`${event.date}T${event.time.replace("h", ":")}`);
-    const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000);
-    const formatDate = (date: Date) =>
-      date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
-    const icsContent = [
-      "BEGIN:VCALENDAR",
-      "VERSION:2.0",
-      "PRODID:-//Rouge-Cardinal//FR",
-      "BEGIN:VEVENT",
-      `UID:${event.id}@rouge-cardinal.fr`,
-      `DTSTAMP:${formatDate(new Date())}`,
-      `DTSTART:${formatDate(startDate)}`,
-      `DTEND:${formatDate(endDate)}`,
-      `SUMMARY:${event.title}`,
-      `DESCRIPTION:${event.title} - Compagnie Rouge-Cardinal`,
-      `LOCATION:${event.venue}, ${event.address}`,
-      "END:VEVENT",
-      "END:VCALENDAR",
-    ].join("\r\n");
-
-    const blob = new Blob([icsContent], { type: "text/calendar" });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${event.title.replace(/\s+/g, "-")}.ics`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-  };
-
+export default function AgendaClientContainer({
+  events,
+  eventTypes,
+  showNewsletterSection = false,
+}: AgendaClientContainerProps): React.JSX.Element {
   return (
-    <AgendaView
-      events={filteredEvents}
-      eventTypes={eventTypes}
-      filterType={filterType}
-      setFilterType={setFilterType}
-      generateCalendarFile={generateCalendarFile}
-      loading={false}
-      showNewsletterSection={showNewsletterSection}
-      newsletterEmail={email}
-      newsletterIsSubscribed={isSubscribed}
-      newsletterIsLoading={newsletterLoading}
-      newsletterErrorMessage={errorMessage}
-      onNewsletterEmailChange={handleEmailChange}
-      onNewsletterSubmit={handleSubmit}
-    />
+    <AgendaProvider events={events} eventTypes={eventTypes}>
+      <div className="pt-16">
+        <AgendaHero />
+        <section className="py-16 bg-chart-7">
+          <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+            <AgendaFilters />
+            <AgendaEventList />
+          </div>
+        </section>
+        <div className="w-full h-16 bg-chart-7" aria-hidden="true" />
+        {showNewsletterSection && <AgendaNewsletter />}
+        <div className="w-full h-32 bg-chart-7" aria-hidden="true" />
+      </div>
+    </AgendaProvider>
   );
 }
