@@ -1,5 +1,35 @@
 # Progress
 
+## Audit conformité admin/site-config (2026-03-01)
+
+### Summary
+
+✅ **COMPLET** — 8 violations corrigées (1 CRITIQUE, 2 HAUTES, 3 MOYENNES, 2 BASSES) sur `components/features/admin/site-config` + `lib/actions/site-config-actions.ts`. Composant `ToggleSection.tsx` extrait (DRY). 0 erreurs TypeScript/ESLint.
+
+| Livrable | Statut | Détails |
+| -------- | ------ | ------- |
+| Suppression `console.log` debug | ✅ | `DisplayTogglesContainer.tsx` |
+| Extraction `ToggleSection.tsx` (DRY) | ✅ | 4 Card blocs → config SECTIONS + composition |
+| Consolidation 4 `useEffect` → 1 | ✅ | `Record<string, DTO[]>` state unique |
+| `getPathsForToggle` 10 entrées + ADMIN_PATH | ✅ | Revalidation complète tous toggles |
+| `SECTION_NAMES` 10 entrées module-level | ✅ | `ToggleCard.tsx` |
+| Types retour explicites `React.JSX.Element` | ✅ | Tous composants |
+| Accessibilité WCAG `aria-labelledby` + contextuel | ✅ | Sections, switch, spinner |
+| Types `ToggleSectionConfig` + `ToggleSectionProps` | ✅ | `types.ts` colocalisé |
+
+### Fichiers Modifiés
+
+```bash
+components/features/admin/site-config/DisplayTogglesContainer.tsx  # console.log supprimé
+components/features/admin/site-config/DisplayTogglesView.tsx       # Refactoring majeur (4 useEffect→1, SECTIONS config, ToggleSection)
+components/features/admin/site-config/ToggleCard.tsx               # SECTION_NAMES 10 entrées, aria-label contextuel, aria-hidden spinner
+components/features/admin/site-config/ToggleSection.tsx            # NOUVEAU — composant composition DRY
+components/features/admin/site-config/types.ts                     # ToggleSectionConfig + ToggleSectionProps ajoutés
+lib/actions/site-config-actions.ts                                 # getPathsForToggle 10 entrées, ADMIN_PATH, fallback ??
+```
+
+---
+
 ## TASK065 — Admin Press Audit Violations Fix (2026-02-28)
 
 ### Summary

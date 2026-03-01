@@ -8,13 +8,14 @@ export async function DisplayTogglesContainer() {
     const contactResult = await fetchDisplayTogglesByCategory("contact_display");
 
     // Debug log
+    /*
     console.log("[DisplayTogglesContainer] Results:", {
         home: homeResult.success ? homeResult.data?.length : homeResult.error,
         presse: presseResult.success ? presseResult.data?.length : presseResult.error,
         agenda: agendaResult.success ? agendaResult.data?.length : agendaResult.error,
         contact: contactResult.success ? contactResult.data?.length : contactResult.error,
     });
-
+    */
     if (
         !homeResult.success ||
         !presseResult.success ||

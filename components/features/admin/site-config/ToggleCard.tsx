@@ -4,7 +4,24 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
 import type { ToggleCardProps } from "./types";
 
-export function ToggleCard({ toggle, onToggle, isUpdating }: ToggleCardProps) {
+const SECTION_NAMES: Record<string, string> = {
+    "public:home:newsletter": "Newsletter",
+    "public:home:partners": "Partenaires",
+    "public:home:spectacles": "Spectacles à la une",
+    "public:home:news": "Actualités",
+    "public:home:hero": "Hero Banner",
+    "public:home:about": "À propos",
+    "public:presse:media_kit": "Kit Média",
+    "public:presse:presse_articles": "Communiqués de Presse",
+    "public:agenda:newsletter": "Newsletter Agenda",
+    "public:contact:newsletter": "Newsletter Contact",
+};
+
+function getSectionName(key: string): string {
+    return SECTION_NAMES[key] ?? key;
+}
+
+export function ToggleCard({ toggle, onToggle, isUpdating }: ToggleCardProps): React.JSX.Element {
     const sectionName = getSectionName(toggle.key);
 
     return (
@@ -18,35 +35,25 @@ export function ToggleCard({ toggle, onToggle, isUpdating }: ToggleCardProps) {
                         {toggle.description}
                     </p>
                 )}
-                <div className="mt-2 flex gap-2">
-                    {toggle.value.max_items && (
+                {toggle.value.max_items && (
+                    <div className="mt-2 flex gap-2">
                         <Badge variant="outline">Max: {toggle.value.max_items}</Badge>
-                    )}
-                </div>
+                    </div>
+                )}
             </div>
 
             <div className="flex items-center gap-2">
-                {isUpdating && <Loader2 className="h-4 w-4 animate-spin" />}
+                {isUpdating && (
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                )}
                 <Switch
                     id={toggle.key}
                     checked={toggle.value.enabled}
                     onCheckedChange={(checked) => onToggle(toggle.key, checked)}
                     disabled={isUpdating}
-                    aria-label={`Toggle ${sectionName}`}
+                    aria-label={`${toggle.value.enabled ? "Désactiver" : "Activer"} ${sectionName}`}
                 />
             </div>
         </div>
     );
-}
-
-function getSectionName(key: string): string {
-    const names: Record<string, string> = {
-        "public:home:newsletter": "Newsletter",
-        "public:home:partners": "Partenaires",
-        "public:home:spectacles": "Spectacles à la une",
-        "public:home:news": "Actualités",
-        "public:presse:media_kit": "Kit Média",
-    };
-
-    return names[key] || key;
 }
