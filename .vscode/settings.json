@@ -49,6 +49,7 @@
         }
     },
     "markdown.validate.ignoredLinks": [
-        "lib/dal/analytics.ts"
+        "lib/dal/analytics.ts",
+        "components/features/admin/team/TeamManagementContainer.tsx"
     ]
 }

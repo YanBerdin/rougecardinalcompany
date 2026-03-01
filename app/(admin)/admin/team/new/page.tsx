@@ -1,8 +1,7 @@
-import { Metadata } from "next";
-import { redirect } from "next/navigation";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { createClient } from "@/supabase/server";
+import { requireAdminPageAccess } from "@/lib/auth/is-admin";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -22,12 +21,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function NewTeamMemberPage() {
-    const supabase = await createClient();
-
-    const { data, error } = await supabase.auth.getClaims();
-    if (error || !data?.claims || data.claims.user_metadata.role !== "admin") {
-        redirect("/auth/login");
-    }
+    await requireAdminPageAccess();
 
     return (
         <div className="space-y-6">

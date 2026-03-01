@@ -29,6 +29,7 @@
 
 ## Terminé
 
+- `TASK066-audit-admin-team-violations` Admin Team Audit Violations Fix — Completed on 2026-03-01 (13 violations corrigées, ~84%→~95%, plan-fixAdminTeamAuditViolations.prompt.md, 9/10 étapes, pnpm build ✅ pnpm lint ✅ — 4 déviations du plan documentées dans TASK066-audit-admin-team-violations.md)
 - `AUDIT-TRIGGER-FIX` Audit Trigger Bugfix (tg_op + auth.uid()) - Completed on 2026-02-11 (Two critical bugs fixed: tg_op case sensitivity causing record_id/new_values NULL + auth.uid() type mismatch causing user_id NULL; Migration 20260211005525 applied local + cloud via MCP; User validated: email now displays instead of "Système")
 - `TASK057` Spectacle Landscape Photos Integration - Completed on 2026-02-01 (2 photos paysage par spectacle, BigInt fix TASK055 pattern, migrations cloud via MCP, DAL + Server Actions + API route, Admin UI avec MediaLibraryPicker, Public display dans SpectacleDetailView)
 - `RLS-FIX-NEWSLETTER` Newsletter infinite recursion hotfix - Completed on 2026-01-06

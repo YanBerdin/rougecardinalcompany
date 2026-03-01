@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import type { TeamMemberDb } from "@/lib/schemas/team";
-import TeamMemberList from "./TeamMemberList";
+import { TeamMemberList } from "./TeamMemberList";
+import type { TeamManagementContainerProps } from "./types";
 import {
   setTeamMemberActiveAction,
   hardDeleteTeamMemberAction,
@@ -19,24 +19,22 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
 
-interface Props {
-  initialMembers: TeamMemberDb[];
-}
-
-export function TeamManagementContainer({ initialMembers }: Props) {
+export function TeamManagementContainer({ initialMembers }: TeamManagementContainerProps) {
   const router = useRouter();
-  const [members, setMembers] = useState<TeamMemberDb[]>(initialMembers || []);
-  const [showInactive, setShowInactiveTeamMember] = useState(false);
+  const [members, setMembers] = useState<TeamManagementContainerProps["initialMembers"]>(initialMembers || []);
+  const [showInactive, setShowInactive] = useState(false);
 
   // Dialogs state
-  const [deleteCandidate, setDeactivateTeamMember] = useState<number | null>(
+  const [deactivateCandidate, setDeactivateCandidate] = useState<number | null>(
     null
   );
-  const [openDeleteDialog, setOpenDeactivateDialog] = useState(false);
+  const [isDeactivateDialogOpen, setIsDeactivateDialogOpen] = useState(false);
   const [reactivateCandidate, setReactivateCandidate] = useState<number | null>(
     null
   );
@@ -52,23 +50,23 @@ export function TeamManagementContainer({ initialMembers }: Props) {
   }, [initialMembers]);
 
   function requestDeactivateTeamMember(id: number) {
-    setDeactivateTeamMember(id);
-    setOpenDeactivateDialog(true);
+    setDeactivateCandidate(id);
+    setIsDeactivateDialogOpen(true);
   }
 
   async function handleDeactivateTeamMember(id: number) {
-    setOpenDeactivateDialog(false);
+    setIsDeactivateDialogOpen(false);
     const res = await setTeamMemberActiveAction(id, false);
     if (res.success) {
       setMembers((prev) =>
         prev.map((m) => (m.id === id ? { ...m, active: false } : m))
       );
-      setShowInactiveTeamMember(true);
+      setShowInactive(true);
       toast.success("Membre désactivé");
     } else {
       toast.error("Erreur lors de la désactivation");
     }
-    setDeactivateTeamMember(null);
+    setDeactivateCandidate(null);
   }
 
   async function handleReactivateTeamMember(id: number) {
@@ -97,18 +95,15 @@ export function TeamManagementContainer({ initialMembers }: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4 justify-between">
-        <div />
-        <div className="flex items-center gap-2">
-          <label className="text-sm">Afficher inactifs</label>
-          <input
-            type="checkbox"
-            checked={showInactive}
-            onChange={(e) => {
-              setShowInactiveTeamMember(e.currentTarget.checked);
-            }}
-          />
-        </div>
+      <div className="flex items-center gap-2 justify-end">
+        <Label htmlFor="show-inactive" className="text-sm cursor-pointer">
+          Afficher inactifs
+        </Label>
+        <Switch
+          id="show-inactive"
+          checked={showInactive}
+          onCheckedChange={setShowInactive}
+        />
       </div>
 
       <div className="flex justify-end">
@@ -139,7 +134,7 @@ export function TeamManagementContainer({ initialMembers }: Props) {
       />
 
       {/* Deactivate Dialog */}
-      <Dialog open={openDeleteDialog} onOpenChange={setOpenDeactivateDialog}>
+      <Dialog open={isDeactivateDialogOpen} onOpenChange={setIsDeactivateDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirmer la désactivation</DialogTitle>
@@ -151,14 +146,14 @@ export function TeamManagementContainer({ initialMembers }: Props) {
           <DialogFooter>
             <Button
               variant="outline-primary"
-              onClick={() => setOpenDeactivateDialog(false)}
+              onClick={() => setIsDeactivateDialogOpen(false)}
             >
               Annuler
             </Button>
             <Button
               variant="destructive"
               onClick={() =>
-                deleteCandidate && handleDeactivateTeamMember(deleteCandidate)
+                deactivateCandidate && handleDeactivateTeamMember(deactivateCandidate)
               }
             >
               Désactiver
@@ -242,5 +237,3 @@ export function TeamManagementContainer({ initialMembers }: Props) {
     </div>
   );
 }
-
-export default TeamManagementContainer;

@@ -1,8 +1,63 @@
 # Active Context
 
-**Current Focus (2026-03-01)**: ✅ AUDIT-SPECTACLES — Plan de remédiation admin/spectacles (13 étapes, 15 violations) 100% complété. `types.ts` colocalisé, `spectacle-table-helpers.tsx` JSX natif, `useWatch`, toast inliné. Commit `f2c6059` branche `fix/admin-spectacles-audit-remediation`.
+**Current Focus (2026-03-01)**: ✅ TASK066-audit-admin-team-violations — Plan de remédiation admin/team (13 violations, ~84%→~95%) 100% complété. `types.ts` colocalisé, DAL splitté, re-export "use server" fix, `requireAdminPageAccess()`, Switch shadcn, `onDeactivate` typo. `pnpm build` ✅ `pnpm lint` ✅.
 
-**Last Major Updates**: ✅ Admin Spectacles Audit Remediation (2026-03-01) + Dependabot #26 serialize-javascript RCE fix (2026-03-01) + Site-Config Audit Fix (2026-03-01) + TASK065 Admin Press Audit Fix (2026-02-28) + Contact RLS/Serialization Fix (2026-02-28) + Admin Partners Audit Fix (2026-02-28) + Media Admin Audit Violations Fix (2026-02-28) + Admin Lieux Audit Fix (2026-02-28)
+**Last Major Updates**: ✅ Admin Team Audit Remediation (2026-03-01) + Admin Spectacles Audit Remediation (2026-03-01) + Dependabot #26 serialize-javascript RCE fix (2026-03-01) + Site-Config Audit Fix (2026-03-01) + TASK065 Admin Press Audit Fix (2026-02-28) + Contact RLS/Serialization Fix (2026-02-28) + Admin Partners Audit Fix (2026-02-28)
+
+---
+
+## ✅ TASK066-audit-admin-team-violations — Admin Team Audit Violations Fix (2026-03-01)
+
+### Summary
+
+✅ **COMPLET** — Plan `.github/prompts/plan-fixAdminTeamAuditViolations.prompt.md` exécuté en 2 sessions (9/10 étapes, étape bonus `useConfirmDialog` non prioritaire). 13 violations corrigées, score ~84%→~95%. `pnpm build` ✅ 0 TypeScript errors, `pnpm lint` ✅ 0 erreurs ESLint.
+
+### Violations corrigées (13)
+
+| Fix | Type | Correction |
+|-----|------|------------|
+| DAL-01 | Critique | `team.ts` > 300 lignes → split `team-hard-delete.ts` + `team-reorder.ts` |
+| DAL-02 | Critique | DAL retournait données brutes → `DALResult<T>` + `dalSuccess`/`dalError` |
+| DAL-03 | Critique | Codes d'erreur disparates → `[ERR_TEAM_001–052]` standardisés |
+| SEC-01 | Critique | Pages admin sans auth guard → `requireAdminPageAccess()` créé + appliqué sur 3 pages |
+| ACTION-01 | Majeur | Params Server Actions non typés → `unknown` + Zod validation |
+| PROPS-01 | Majeur | Interfaces props dupliquées dans chaque composant → `types.ts` colocalisé |
+| NAMING-01 | Majeur | `onDesactivate` (faute orthographe) → `onDeactivate` |
+| STATE-01 | Majeur | États `deleteCandidate`/`openDeleteDialog` mal nommés → `deactivateCandidate`/`isDeactivateDialogOpen` |
+| UI-01 | Mineur | Checkbox native → `Switch` shadcn/ui + `Label` associé |
+| SCHEMA-01 | Mineur | `SetActiveBodySchema` vestige API Route supprimé |
+| EXPORT-01 | Mineur | `export default` → named exports dans 4 composants |
+| A11Y-01 | Mineur | Input sans `aria-required` → `aria-required="true"` |
+| TYPO-01 | Mineur | `setShowInactiveTeamMember` → `setShowInactive` |
+
+### Déviations du plan (importantes à retenir)
+
+1. **Re-exports "use server" interdits** : `team.ts` ne peut pas ré-exporter depuis `team-hard-delete.ts` — Next.js interdit les exports non-async dans les fichiers `"use server"`. Fix : `actions.ts` importe directement depuis les fichiers splittés.
+2. **DALResult unwrap manquant** : `validateTeamMemberForDeletion` dans `team-hard-delete.ts` devait être mis à jour après migration `fetchTeamMemberById → DALResult<T>`. Le fichier était créé avant la migration.
+3. **edit/page.tsx : réécriture complète** : `multi_replace_string_in_file` échoué silencieusement → réécriture intégrale.
+4. **Bonus étape 10 non implémentée** : `useConfirmDialog` hook marqué optionnel, sauté.
+
+### Fichiers créés
+
+```bash
+components/features/admin/team/types.ts       # Props colocalisées
+lib/dal/team-hard-delete.ts                   # hardDeleteTeamMember + 3 helpers privés
+lib/dal/team-reorder.ts                       # reorderTeamMembers + ReorderSchema
+scripts/test-team-server-actions.ts           # 7 tests intégration DAL (existait déjà)
+```
+
+### Package.json
+
+```json
+"test:team": "tsx scripts/test-team-server-actions.ts"
+```
+
+### Validation
+
+| Check | Résultat |
+|-------|----------|
+| `pnpm build` | ✅ 0 erreurs (4e tentative après 5 build failures résolus) |
+| `pnpm lint` | ✅ 0 erreurs, 3 warnings pré-existants dans fichiers non liés |
 
 ---
 

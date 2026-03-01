@@ -1,14 +1,6 @@
 "use client";
-import { TeamMemberDb } from "@/lib/schemas/team";
-import TeamMemberCard from "./TeamMemberCard";
-
-interface Props {
-  members: TeamMemberDb[];
-  onEditMember?: (id: number) => void;
-  onDeactivateMember?: (id: number) => void;
-  onReactivateMember?: (id: number) => void;
-  onHardDeleteMember?: (id: number) => void;
-}
+import type { TeamMemberListProps } from "./types";
+import { TeamMemberCard } from "./TeamMemberCard";
 
 export function TeamMemberList({
   members,
@@ -16,7 +8,7 @@ export function TeamMemberList({
   onDeactivateMember,
   onReactivateMember,
   onHardDeleteMember,
-}: Props) {
+}: TeamMemberListProps) {
   if (!members || members.length === 0) {
     return (
       <div className="py-8 sm:py-12 text-center text-muted-foreground border rounded-lg bg-card">
@@ -35,7 +27,7 @@ export function TeamMemberList({
           key={m.id}
           member={m}
           onEdit={() => onEditMember?.(m.id)}
-          onDesactivate={() => onDeactivateMember?.(m.id)}
+          onDeactivate={() => onDeactivateMember?.(m.id)}
           onRequestReactivate={() => onReactivateMember?.(m.id)}
           onHardDelete={() => onHardDeleteMember?.(m.id)}
         />
@@ -43,5 +35,3 @@ export function TeamMemberList({
     </div>
   );
 }
-
-export default TeamMemberList;

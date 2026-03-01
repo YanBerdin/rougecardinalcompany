@@ -6,29 +6,16 @@ import { requireAdmin } from "@/lib/auth/is-admin";
 import type { Database } from "@/lib/database.types";
 import { TeamMemberDbSchema } from "@/lib/schemas/team";
 import { z } from "zod";
-import { HttpStatus } from "@/lib/api/helpers";
 import {
   type DALResult,
+  dalSuccess,
+  dalError,
   getErrorMessage,
 } from "@/lib/dal/helpers";
 
 type TeamRow = Database["public"]["Tables"]["membres_equipe"]["Row"];
 
 const UpsertTeamMemberSchema = TeamMemberDbSchema.partial();
-
-const ReorderItemSchema = z.object({
-  id: z.number().int().positive(),
-  ordre: z.number().int(),
-});
-const ReorderSchema = z
-  .array(ReorderItemSchema)
-  .min(1)
-  .refine((arr) => new Set(arr.map((i) => i.id)).size === arr.length, {
-    message: "Duplicate id in updates",
-  })
-  .refine((arr) => new Set(arr.map((i) => i.ordre)).size === arr.length, {
-    message: "Duplicate ordre in updates",
-  });
 
 /**
  * Fetches all team members from the database
@@ -48,7 +35,7 @@ const ReorderSchema = z
  * const allMembers = await fetchAllTeamMembers(true);
  */
 export const fetchAllTeamMembers = cache(
-  async (includeInactive = false): Promise<TeamRow[]> => {
+  async (includeInactive = false): Promise<DALResult<TeamRow[]>> => {
     try {
       const supabase = await createClient();
       let query = supabase
@@ -57,21 +44,18 @@ export const fetchAllTeamMembers = cache(
         .order("ordre", { ascending: true });
 
       if (!includeInactive) {
-        // By default, exclude deactivated (active = false) members so that
-        // it immediately hides the member from lists unless the user explicitly requests inactive members.
         query = query.eq("active", true);
       }
 
       const { data, error } = await query;
 
       if (error) {
-        console.error("fetchAllTeamMembers error:", error);
-        return [];
+        console.error("[ERR_TEAM_001] fetchAllTeamMembers error:", error);
+        return dalError(`[ERR_TEAM_001] ${getErrorMessage(error)}`);
       }
 
       const rows = (data as TeamRow[]) || [];
 
-      // Validate each row with Zod; log invalid rows and filter them out
       const validRows: TeamRow[] = [];
       for (const r of rows) {
         const parsed = TeamMemberDbSchema.safeParse(r as unknown);
@@ -79,10 +63,10 @@ export const fetchAllTeamMembers = cache(
         else console.error("fetchAllTeamMembers: invalid row:", parsed.error);
       }
 
-      return validRows;
+      return dalSuccess(validRows);
     } catch (err) {
-      console.error("fetchAllTeamMembers exception:", err);
-      return [];
+      console.error("[ERR_TEAM_002] fetchAllTeamMembers exception:", err);
+      return dalError(`[ERR_TEAM_002] ${getErrorMessage(err)}`);
     }
   }
 );
@@ -102,7 +86,7 @@ export const fetchAllTeamMembers = cache(
  * }
  */
 export const fetchTeamMemberById = cache(
-  async (id: number): Promise<TeamRow | null> => {
+  async (id: number): Promise<DALResult<TeamRow | null>> => {
     try {
       const supabase = await createClient();
       const { data, error } = await supabase
@@ -112,26 +96,22 @@ export const fetchTeamMemberById = cache(
         .single();
 
       if (error) {
-        // PGRST116 = "not found" - expected behavior, not an error
         if (error.code !== "PGRST116") {
           console.error("[ERR_TEAM_010] fetchTeamMemberById error:", error);
         }
-        return null;
+        return dalSuccess(null);
       }
 
       const parsed = TeamMemberDbSchema.safeParse(data as unknown);
       if (!parsed.success) {
-        console.error(
-          "[ERR_TEAM_011] fetchTeamMemberById: invalid row:",
-          parsed.error
-        );
-        return null;
+        console.error("[ERR_TEAM_011] fetchTeamMemberById: invalid row:", parsed.error);
+        return dalError("[ERR_TEAM_011] Invalid row from database");
       }
 
-      return parsed.data as TeamRow;
+      return dalSuccess(parsed.data as TeamRow);
     } catch (err) {
       console.error("[ERR_TEAM_012] fetchTeamMemberById exception:", err);
-      return null;
+      return dalError(`[ERR_TEAM_012] ${getErrorMessage(err)}`);
     }
   }
 );
@@ -165,18 +145,13 @@ export async function upsertTeamMember(
   try {
     await requireAdmin();
 
-    // Validate input
     const validated = await UpsertTeamMemberSchema.safeParseAsync(payload as unknown);
     if (!validated.success) {
-      console.error("upsertTeamMember: invalid payload:", validated.error);
-      return { success: false, error: "Invalid payload" };
+      console.error("[ERR_TEAM_020] upsertTeamMember: invalid payload:", validated.error);
+      return dalError("[ERR_TEAM_020] Invalid payload");
     }
 
     const supabase = await createClient();
-
-    // If payload contains an id, perform an update. Otherwise perform an insert.
-    // This avoids sending an explicit `id` value to INSERT when the column is
-    // defined as GENERATED ALWAYS (Postgres will reject non-default values).
     const { id, ...rest } = payload as Partial<TeamRow>;
     let data: unknown = null;
     let error: unknown = null;
@@ -201,20 +176,20 @@ export async function upsertTeamMember(
     }
 
     if (error) {
-      console.error("upsertTeamMember error:", error);
-      return { success: false, error: getErrorMessage(error) };
+      console.error("[ERR_TEAM_021] upsertTeamMember error:", error);
+      return dalError(`[ERR_TEAM_021] ${getErrorMessage(error)}`);
     }
 
     const parsed = TeamMemberDbSchema.safeParse(data as unknown);
     if (!parsed.success) {
-      console.error("upsertTeamMember: invalid response:", parsed.error);
-      return { success: false, error: "Invalid response from database" };
+      console.error("[ERR_TEAM_022] upsertTeamMember: invalid response:", parsed.error);
+      return dalError("[ERR_TEAM_022] Invalid response from database");
     }
 
-    return { success: true, data: parsed.data as TeamRow };
+    return dalSuccess(parsed.data as TeamRow);
   } catch (err: unknown) {
     console.error("upsertTeamMember exception:", err);
-    return { success: false, error: getErrorMessage(err) };
+    return dalError(getErrorMessage(err));
   }
 }
 
@@ -242,10 +217,9 @@ export async function setTeamMemberActive(
   try {
     await requireAdmin();
 
-    // Validate inputs
     const idCheck = z.number().int().positive().safeParse(id);
     if (!idCheck.success) {
-      return { success: false, error: "Invalid id" };
+      return dalError("[ERR_TEAM_030] Invalid id");
     }
 
     const supabase = await createClient();
@@ -255,199 +229,13 @@ export async function setTeamMemberActive(
       .eq("id", id);
 
     if (error) {
-      console.error("setTeamMemberActive error:", error);
-      return { success: false, error: getErrorMessage(error) };
+      console.error("[ERR_TEAM_031] setTeamMemberActive error:", error);
+      return dalError(`[ERR_TEAM_031] ${getErrorMessage(error)}`);
     }
 
-    return { success: true, data: { id, active } };
+    return dalSuccess({ id, active });
   } catch (err: unknown) {
     console.error("setTeamMemberActive exception:", err);
-    return { success: false, error: getErrorMessage(err) };
+    return dalError(getErrorMessage(err));
   }
-}
-
-/**
- * Reorders team members by updating their display order
- *
- * Uses a single atomic RPC call to the database to prevent partial updates.
- * Validates that all IDs and order values are unique.
- *
- * @param updates - Array of id/ordre pairs to update
- * @returns DALResult indicating success or validation error
- *
- * @example
- * const result = await reorderTeamMembers([
- *   { id: 1, ordre: 2 },
- *   { id: 2, ordre: 1 },
- *   { id: 3, ordre: 3 }
- * ]);
- */
-export async function reorderTeamMembers(
-  updates: { id: number; ordre: number }[]
-): Promise<DALResult<null>> {
-  try {
-    await requireAdmin();
-    const supabase = await createClient();
-
-    // Validate updates payload
-    const validated = ReorderSchema.safeParse(updates as unknown);
-    if (!validated.success) {
-      console.error("reorderTeamMembers: invalid updates:", validated.error);
-      return { success: false, error: "Invalid reorder payload" };
-    }
-
-    // Use a single atomic DB-side operation via RPC function to avoid partial updates
-    // The PL/pgSQL function `reorder_team_members(jsonb)` is added as a migration and
-    // applies the updates in a single atomic statement with validation.
-    const { error } = await supabase.rpc("reorder_team_members", {
-      items: validated.data,
-    });
-
-    if (error) {
-      console.error("reorderTeamMembers rpc error:", error);
-      return { success: false, error: getErrorMessage(error) };
-    }
-
-    return { success: true, data: null };
-  } catch (err: unknown) {
-    console.error("reorderTeamMembers exception:", err);
-    return { success: false, error: getErrorMessage(err) };
-  }
-}
-
-/**
- * Permanently deletes a team member from the database (RGPD compliance).
- *
- * CRITICAL: This operation is irreversible. The team member must be inactive
- * before deletion to prevent accidental data loss.
- *
- * @param id - Team member ID to delete
- * @returns Response indicating success or failure
- */
-export async function hardDeleteTeamMember(
-  id: number
-): Promise<DALResult<null>> {
-  try {
-    await requireAdmin();
-
-    const validationResult = await validateTeamMemberForDeletion(id);
-    if (!validationResult.success) {
-      return validationResult;
-    }
-
-    const deletionResult = await performTeamMemberDeletion(id);
-    if (!deletionResult.success) {
-      return deletionResult;
-    }
-
-    // Note: revalidatePath moved to Server Action (SOLID DIP compliance)
-    return { success: true, data: null };
-  } catch (error: unknown) {
-    return handleHardDeleteError(error);
-  }
-}
-
-// ============================================================================
-// Hard Delete Helpers
-// ============================================================================
-
-/**
- * Validates team member eligibility for deletion
- *
- * Checks:
- * - Member exists in database
- * - Member is not currently active (must be deactivated first)
- *
- * @param id - Team member ID to validate
- * @returns DALResult with success status or error details
- *
- * @example
- * const result = await validateTeamMemberForDeletion(123);
- * if (!result.success) {
- *   console.error(result.error);
- * }
- */
-async function validateTeamMemberForDeletion(
-  id: number
-): Promise<DALResult<null>> {
-  const member = await fetchTeamMemberById(id);
-
-  if (!member) {
-    return {
-      success: false,
-      error: "Team member not found",
-      status: HttpStatus.NOT_FOUND,
-    };
-  }
-
-  if (member.active) {
-    return {
-      success: false,
-      error: "Cannot delete active team member. Deactivate first.",
-      status: HttpStatus.BAD_REQUEST,
-    };
-  }
-
-  return { success: true, data: null };
-}
-
-/**
- * Performs the actual database deletion of a team member
- *
- * CRITICAL: This operation is irreversible. Validation should be
- * performed before calling this function.
- *
- * @param id - Team member ID to delete
- * @returns DALResult with success status or error details
- *
- * @example
- * const result = await performTeamMemberDeletion(123);
- * if (result.success) {
- *   console.log('Member deleted successfully');
- * }
- */
-async function performTeamMemberDeletion(id: number): Promise<DALResult<null>> {
-  const supabase = await createClient();
-  const { error: deleteError } = await supabase
-    .from("membres_equipe")
-    .delete()
-    .eq("id", id);
-
-  if (deleteError) {
-    console.error("[DAL] Error deleting team member:", deleteError);
-    return {
-      success: false,
-      error: "Failed to delete team member",
-      status: HttpStatus.INTERNAL_SERVER_ERROR,
-    };
-  }
-
-  return { success: true, data: null };
-}
-
-/**
- * Handles errors during hard delete operations
- *
- * Provides user-friendly error messages and appropriate HTTP status codes
- * based on the error type.
- *
- * @param error - Error object caught during deletion
- * @returns DALResult with error details and appropriate status code
- */
-function handleHardDeleteError(error: unknown): DALResult<null> {
-  console.error("[DAL] hardDeleteTeamMember error:", error);
-
-  if (error instanceof Error && error.message.includes("Forbidden")) {
-    return {
-      success: false,
-      error: "Insufficient permissions",
-      status: HttpStatus.FORBIDDEN,
-    };
-  }
-
-  return {
-    success: false,
-    error: "Internal error during deletion",
-    status: HttpStatus.INTERNAL_SERVER_ERROR,
-  };
 }
