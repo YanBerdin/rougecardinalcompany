@@ -4,58 +4,50 @@ import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { updateDisplayToggleAction } from "@/lib/actions/site-config-actions";
-import { ToggleCard } from "./ToggleCard";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
+import { ToggleSection } from "./ToggleSection";
 import { Separator } from "@/components/ui/separator";
-import type { DisplayTogglesViewProps } from "./types";
+import type { DisplayTogglesViewProps, ToggleSectionConfig } from "./types";
+import type { DisplayToggleDTO } from "@/lib/schemas/site-config";
+
+const SECTIONS: ToggleSectionConfig[] = [
+    { id: "home", title: "Page d'Accueil", description: "Sections affichées sur la homepage" },
+    { id: "presse", title: "Page Presse", description: "Sections affichées sur la page presse" },
+    { id: "agenda", title: "Page Agenda", description: "Sections affichées sur la page agenda" },
+    { id: "contact", title: "Page Contact", description: "Sections affichées sur la page contact" },
+];
 
 export function DisplayTogglesView({
     homeToggles: initialHomeToggles,
     presseToggles: initialPresseToggles,
     agendaToggles: initialAgendaToggles,
     contactToggles: initialContactToggles,
-}: DisplayTogglesViewProps) {
+}: DisplayTogglesViewProps): React.JSX.Element {
     const router = useRouter();
     const [updatingKey, setUpdatingKey] = useState<string | null>(null);
 
-    // ✅ Local state synced with props
-    const [homeToggles, setHomeToggles] = useState(initialHomeToggles);
-    const [presseToggles, setPresseToggles] = useState(initialPresseToggles);
-    const [agendaToggles, setAgendaToggles] = useState(initialAgendaToggles);
-    const [contactToggles, setContactToggles] = useState(initialContactToggles);
+    const [togglesBySection, setTogglesBySection] = useState<Record<string, DisplayToggleDTO[]>>({
+        home: initialHomeToggles,
+        presse: initialPresseToggles,
+        agenda: initialAgendaToggles,
+        contact: initialContactToggles,
+    });
 
-    // ✅ CRITIQUE: Sync local state when props change (after router.refresh())
+    // Sync local state when props change (after router.refresh())
     useEffect(() => {
-        setHomeToggles(initialHomeToggles);
-    }, [initialHomeToggles]);
-
-    useEffect(() => {
-        setPresseToggles(initialPresseToggles);
-    }, [initialPresseToggles]);
-
-    useEffect(() => {
-        setAgendaToggles(initialAgendaToggles);
-    }, [initialAgendaToggles]);
-
-    useEffect(() => {
-        setContactToggles(initialContactToggles);
-    }, [initialContactToggles]);
+        setTogglesBySection({
+            home: initialHomeToggles,
+            presse: initialPresseToggles,
+            agenda: initialAgendaToggles,
+            contact: initialContactToggles,
+        });
+    }, [initialHomeToggles, initialPresseToggles, initialAgendaToggles, initialContactToggles]);
 
     const handleToggle = useCallback(
-        async (key: string, enabled: boolean) => {
+        async (key: string, enabled: boolean): Promise<void> => {
             setUpdatingKey(key);
 
             try {
-                const result = await updateDisplayToggleAction({
-                    key,
-                    enabled,
-                });
+                const result = await updateDisplayToggleAction({ key, enabled });
 
                 if (!result.success) {
                     throw new Error(result.error);
@@ -65,11 +57,10 @@ export function DisplayTogglesView({
                     description: `Section ${enabled ? "activée" : "désactivée"}`,
                 });
 
-                router.refresh(); // ✅ Déclenche re-fetch Server Component
-            } catch (error) {
+                router.refresh();
+            } catch (error: unknown) {
                 toast.error("Erreur", {
-                    description:
-                        error instanceof Error ? error.message : "Erreur inconnue",
+                    description: error instanceof Error ? error.message : "Erreur inconnue",
                 });
             } finally {
                 setUpdatingKey(null);
@@ -91,85 +82,17 @@ export function DisplayTogglesView({
 
             <Separator />
 
-            {/* Homepage Toggles */}
-            <section className="space-y-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Page d&apos;Accueil</CardTitle>
-                        <CardDescription>
-                            Sections affichées sur la homepage
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        {homeToggles.map((toggle) => (
-                            <ToggleCard
-                                key={toggle.key}
-                                toggle={toggle}
-                                onToggle={handleToggle}
-                                isUpdating={updatingKey === toggle.key}
-                            />
-                        ))}
-                    </CardContent>
-                </Card>
-
-                {/* Presse Toggles */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Page Presse</CardTitle>
-                        <CardDescription>Sections affichées sur la page presse</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        {presseToggles.map((toggle) => (
-                            <ToggleCard
-                                key={toggle.key}
-                                toggle={toggle}
-                                onToggle={handleToggle}
-                                isUpdating={updatingKey === toggle.key}
-                            />
-                        ))}
-                    </CardContent>
-                </Card>
-
-                {/* Agenda Toggles */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Page Agenda</CardTitle>
-                        <CardDescription>
-                            Sections affichées sur la page agenda
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        {agendaToggles.map((toggle) => (
-                            <ToggleCard
-                                key={toggle.key}
-                                toggle={toggle}
-                                onToggle={handleToggle}
-                                isUpdating={updatingKey === toggle.key}
-                            />
-                        ))}
-                    </CardContent>
-                </Card>
-
-                {/* Contact Toggles */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Page Contact</CardTitle>
-                        <CardDescription>
-                            Sections affichées sur la page contact
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        {contactToggles.map((toggle) => (
-                            <ToggleCard
-                                key={toggle.key}
-                                toggle={toggle}
-                                onToggle={handleToggle}
-                                isUpdating={updatingKey === toggle.key}
-                            />
-                        ))}
-                    </CardContent>
-                </Card>
-            </section>
+            <div className="space-y-6">
+                {SECTIONS.map((section) => (
+                    <ToggleSection
+                        key={section.id}
+                        config={section}
+                        toggles={togglesBySection[section.id] ?? []}
+                        updatingKey={updatingKey}
+                        onToggle={handleToggle}
+                    />
+                ))}
+            </div>
         </div>
     );
 }

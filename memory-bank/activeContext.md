@@ -1,8 +1,34 @@
 # Active Context
 
-**Current Focus (2026-03-01)**: ✅ TASK065 Admin Press Audit Violations Fix — 14 étapes, 12 violations corrigées, 23 fichiers, score ~75%→≥95%. Branche `fix/admin-press-audit-violations` (commit `1ff52a3`). + fix(contact): restauration politique RLS INSERT `messages_contact` + correction sérialisation ZodFormattedError (commits `c108e3b`, `d5248eb`).
+**Current Focus (2026-03-01)**: ✅ Audit conformité admin/site-config — 8 violations corrigées (1 CRITIQUE, 2 HAUTES, 3 MOYENNES, 2 BASSES), nouveau composant `ToggleSection.tsx` extrait, 0 erreurs TypeScript/ESLint.
 
-**Last Major Updates**: ✅ TASK065 Admin Press Audit Fix (2026-02-28) + Contact RLS/Serialization Fix (2026-02-28) + Admin Partners Audit Fix (2026-02-28) + Media Admin Audit Violations Fix (2026-02-28) + Admin Lieux Audit Fix (2026-02-28) + Admin Home Audit Fix (2026-02-28) + Analytics TASK031-FIX (2026-02-27)
+**Last Major Updates**: ✅ Site-Config Audit Fix (2026-03-01) + TASK065 Admin Press Audit Fix (2026-02-28) + Contact RLS/Serialization Fix (2026-02-28) + Admin Partners Audit Fix (2026-02-28) + Media Admin Audit Violations Fix (2026-02-28) + Admin Lieux Audit Fix (2026-02-28) + Admin Home Audit Fix (2026-02-28) + Analytics TASK031-FIX (2026-02-27)
+
+---
+
+## ✅ Audit conformité admin/site-config — Corrections (2026-03-01)
+
+### Summary
+
+✅ **COMPLET** — Audit complet de `components/features/admin/site-config` (4 composants + schemas + DAL + actions) suivi de la correction de 8 violations détectées. 6 fichiers modifiés + 1 créé. 0 erreur TypeScript/ESLint après corrections.
+
+### Violations détectées et corrigées (8)
+
+| # | Sévérité | Violation | Fichier | Correction |
+| --- | -------- | --------- | ------- | ---------- |
+| 1 | CRITIQUE | `console.log` debug en production | `DisplayTogglesContainer.tsx` | Supprimé |
+| 2 | HAUTE | 4 blocs Card identiques (DRY) | `DisplayTogglesView.tsx` | Extraction `ToggleSection.tsx` + config `SECTIONS` |
+| 3 | HAUTE | Fonction render ~80 lignes (max 30) | `DisplayTogglesView.tsx` | Réduite ~50 lignes via composition |
+| 4 | MOYENNE | `getPathsForToggle` incomplet (5/10 toggles) | `site-config-actions.ts` | 10 toggles + `ADMIN_PATH` constant + fallback `??` |
+| 5 | MOYENNE | `getSectionName` entrées manquantes | `ToggleCard.tsx` | 10 entrées, const module-level |
+| 6 | MOYENNE | 4 `useEffect` séparés au lieu d'1 | `DisplayTogglesView.tsx` | `Record<string, DTO[]>` + 1 seul useEffect consolidé |
+| 7 | BASSE | Types retour implicites | Tous composants | `React.JSX.Element` explicite |
+| 8 | BASSE | `aria-labelledby` manquant, `aria-label` non contextuel | `ToggleCard.tsx`, `ToggleSection.tsx` | `aria-labelledby` sections, `aria-label` "Activer/Désactiver X", `aria-hidden` spinner |
+
+### Fichiers modifiés/créés
+
+- **Modifiés** : `DisplayTogglesContainer.tsx`, `DisplayTogglesView.tsx`, `ToggleCard.tsx`, `types.ts`, `lib/actions/site-config-actions.ts`
+- **Créé** : `ToggleSection.tsx` (nouveau composant composition DRY)
 
 ---
 

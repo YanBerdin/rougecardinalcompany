@@ -43,13 +43,20 @@ export async function updateDisplayToggleAction(
  * Map toggle keys to affected paths for revalidation
  */
 function getPathsForToggle(key: string): string[] {
+    const ADMIN_PATH = "/admin/site-config";
+
     const pathMap: Record<string, string[]> = {
-        "public:home:newsletter": ["/"],
-        "public:home:partners": ["/"],
-        "public:home:spectacles": ["/"],
-        "public:home:news": ["/"],
-        "public:presse:media_kit": ["/presse"],
+        "public:home:hero": ["/", ADMIN_PATH],
+        "public:home:about": ["/", ADMIN_PATH],
+        "public:home:newsletter": ["/", ADMIN_PATH],
+        "public:home:partners": ["/", ADMIN_PATH],
+        "public:home:spectacles": ["/", ADMIN_PATH],
+        "public:home:news": ["/", ADMIN_PATH],
+        "public:presse:media_kit": ["/presse", ADMIN_PATH],
+        "public:presse:presse_articles": ["/presse", ADMIN_PATH],
+        "public:agenda:newsletter": ["/agenda", ADMIN_PATH],
+        "public:contact:newsletter": ["/contact", ADMIN_PATH],
     };
 
-    return pathMap[key] || [];
+    return pathMap[key] ?? [ADMIN_PATH];
 }
