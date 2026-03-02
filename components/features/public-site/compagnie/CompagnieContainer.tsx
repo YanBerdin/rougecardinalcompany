@@ -1,15 +1,16 @@
+import type { ReactElement } from "react";
 import { CompagnieView } from "./CompagnieView";
 import { fetchCompagnieValues, fetchTeamMembers } from "@/lib/dal/compagnie";
 import { fetchCompagniePresentationSections } from "@/lib/dal/compagnie-presentation";
+import { DEFAULT_ITEMS_LIMIT, FALLBACK_MEMBER_IMAGE } from "./constants";
 
-export async function CompagnieContainer() {
+export async function CompagnieContainer(): Promise<ReactElement> {
   const [sectionsResult, valuesResult, teamResult] = await Promise.all([
     fetchCompagniePresentationSections(),
-    fetchCompagnieValues(12),
-    fetchTeamMembers(12),
+    fetchCompagnieValues(DEFAULT_ITEMS_LIMIT),
+    fetchTeamMembers(DEFAULT_ITEMS_LIMIT),
   ]);
 
-  // Handle errors gracefully with fallback empty arrays
   const sections = sectionsResult.success ? sectionsResult.data : [];
   const values = valuesResult.success ? valuesResult.data : [];
   const team = teamResult.success ? teamResult.data : [];
@@ -25,7 +26,7 @@ export async function CompagnieContainer() {
         name: m.name,
         role: m.role,
         description: m.description,
-        image: m.image_url ?? "/logo-florian.png",
+        image: m.image_url ?? FALLBACK_MEMBER_IMAGE,
       }))}
       loading={false}
     />

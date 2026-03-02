@@ -1,5 +1,56 @@
 # Progress
 
+## TASK069 — Audit conformité public/compagnie (2026-03-02)
+
+### Summary
+
+✅ **COMPLET** — 17 violations corrigées sur `components/features/public-site/compagnie`. Monolithe CompagnieView (242L, 6 blocs if/else) refactoré en 6 composants section via `SECTION_RENDERERS` map. Dead code supprimé (hooks.ts 102L, fonctions legacy, casts `as unknown as`), fallback déplacé dans DAL, WCAG 2.2 AA corrigé (hérarchie titres, next/image, aria-labelledby), architecture alignée (force-dynamic). Branche `refactor/public-compagnie-audit-violations`.
+
+| Livrable | Statut | Détails |
+| -------- | ------ | ------- |
+| CLEAN-01 : hooks.ts 102L supprimé | ✅ | Dead code éliminé |
+| CLEAN-02 : Fonctions *Legacy supprimées | ✅ | 0 consommateurs |
+| CLEAN-03 : LucideIconMap commenté supprimé | ✅ | 14L commentaires morts |
+| CLEAN-04 : data/presentation.ts supprimé | ✅ | Déplacé vers DAL |
+| COMP-01 : SECTION_RENDERERS map | ✅ | Record<string, ComponentType> |
+| COMP-02 : 6 composants section extraits | ✅ | SectionHero…SectionMission (23–33L) |
+| COMP-03 : CompagnieView 242L→49L | ✅ | Réduction 80% |
+| DAL-01 : Fallback déplacé vers lib/dal/fallback/ | ✅ | Inversion de dépendance |
+| DAL-02 : 3 casts `as unknown as` supprimés | ✅ | Typage direct |
+| DAL-03 : getDefaultSections() helper extrait | ✅ | Fonction < 30L |
+| A11Y-01 : Hiérarchie titres h3→h2 | ✅ | WCAG 1.3.1 (4 sections) |
+| A11Y-02 : next/image avec alt descriptif | ✅ | WCAG 1.1.1 SectionHistory + SectionTeam |
+| A11Y-03 : aria-labelledby | ✅ | WCAG 1.3.1/4.1.2 (6 sections) |
+| TS-01 : ReactElement return types | ✅ | CompagnieView + Container + 6 sections |
+| CONST-01 : constants.ts (4 magic numbers) | ✅ | DEFAULT_ITEMS_LIMIT, ANIMATION_*, FALLBACK_MEMBER_IMAGE |
+| ARCH-01 : force-dynamic + revalidate=0 | ✅ | Cohérent avec pages marketing Supabase SSR |
+| GATE-01 : pnpm lint 0 erreurs | ✅ | 3 warnings pré-existants admin uniquement |
+| GATE-02 : pnpm build exit 0 | ✅ | /compagnie correctement en ƒ Dynamic |
+
+### Fichiers créés (9)
+
+```bash
+components/features/public-site/compagnie/constants.ts
+components/features/public-site/compagnie/sections/types.ts
+components/features/public-site/compagnie/sections/SectionHero.tsx          # 23L
+components/features/public-site/compagnie/sections/SectionHistory.tsx       # 31L
+components/features/public-site/compagnie/sections/SectionQuote.tsx         # 27L
+components/features/public-site/compagnie/sections/SectionValues.tsx        # 32L
+components/features/public-site/compagnie/sections/SectionTeam.tsx          # 33L
+components/features/public-site/compagnie/sections/SectionMission.tsx       # 27L
+lib/dal/fallback/compagnie-presentation-fallback.ts
+```
+
+### Fichiers supprimés (3)
+
+```bash
+components/features/public-site/compagnie/hooks.ts
+components/features/public-site/compagnie/data/presentation.ts
+components/features/public-site/compagnie/data/
+```
+
+---
+
 ## TASK068 — Audit conformité public/agenda + Composition Patterns (2026-03-02)
 
 ### Summary

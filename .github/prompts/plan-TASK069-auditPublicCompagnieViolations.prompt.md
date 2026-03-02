@@ -1,5 +1,9 @@
 # Plan : Audit conformité public/compagnie (TASK069)
 
+> **Statut** : ✅ COMPLÉTÉ — 2026-03-02  
+> **Branche** : `refactor/public-compagnie-audit-violations`  
+> **Lint** : 0 erreurs | **Build** : exit code 0
+
 **TL;DR** — Refactorer le monolithe `CompagnieView.tsx` (242L) en 6 composants de section avec un `SECTION_RENDERERS` map, corriger 3 violations WCAG (titres, alt text, landmarks), nettoyer le dead code (hooks.ts, fonctions Legacy, commentaires morts), déplacer le fallback dans la couche DAL, et aligner l'architecture (force-dynamic). 17 violations identifiées, 8 phases, ~20 fichiers impactés.
 
 Le pattern `SECTION_RENDERERS` est **nouveau** dans le projet (aucune implémentation existante). Il est préféré aux sous-dossiers par section (pattern Home) car les sections compagnie sont **pilotées dynamiquement par la DB** via un `sections.map()` — un mapping statique type→composant est plus adapté qu'une arborescence Container/View par section.
