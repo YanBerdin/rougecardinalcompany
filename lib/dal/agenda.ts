@@ -6,16 +6,12 @@ import {
   EventSchema,
   type Event as AgendaEvent,
   type EventType as EventTypeOption,
-} from "@/components/features/public-site/agenda/types";
+} from "@/lib/schemas/agenda";
 import {
   type DALResult,
   formatTime,
   toISODateString,
 } from "@/lib/dal/helpers";
-
-// NOTE: Types AgendaEvent and EventTypeOption should be imported directly 
-// from '@/components/features/public-site/agenda/types' or '@/lib/schemas/agenda'
-// Server files cannot re-export types in Next.js 16
 
 // ============================================================================
 // Internal Types (Supabase response shape)
@@ -24,6 +20,7 @@ import {
 type SupabaseEventRow = {
   id: number;
   date_debut: string;
+  date_fin?: string | null;
   start_time?: string | null;
   status?: string | null;
   ticket_url?: string | null;
@@ -96,14 +93,18 @@ export const fetchUpcomingEvents = cache(
     try {
       const supabase = await createClient();
 
+      const today = new Date().toISOString();
+
       const { data, error } = await supabase
         .from("evenements")
         .select(
-          `id, date_debut, start_time, status, ticket_url, image_url, type_array,
+          `id, date_debut, date_fin, start_time, status, ticket_url, image_url, type_array,
          spectacles (title, slug, image_url),
          lieux (nom, adresse, ville, code_postal)`
         )
-        .gte("date_debut", new Date().toISOString())
+        // Afficher les événements dont la date de fin est >= aujourd'hui,
+        // ou dont la date de début est >= aujourd'hui si date_fin est null.
+        .or(`date_fin.gte.${today},and(date_fin.is.null,date_debut.gte.${today})`)
         .order("date_debut", { ascending: true })
         .limit(limit);
 

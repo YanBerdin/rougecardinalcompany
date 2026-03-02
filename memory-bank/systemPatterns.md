@@ -1,6 +1,6 @@
 # System Patterns
 
-**Last Updated**: 2026-02-20
+**Last Updated**: 2026-03-02
 
 ## Database Infrastructure
 
@@ -26,6 +26,7 @@
 - **T3 Env Pattern (Dec 2025)**: Variables d'environnement type-safe avec validation Zod au démarrage via `lib/env.ts`.
 - **Embla Carousel Pattern (Feb 2026)**: Carousel galerie spectacle avec branching 0/1/2+, scale tween, autoplay, WCAG (44px targets, `prefers-reduced-motion`).
 - **`buildMediaPublicUrl` Helper Pattern (Feb 2026)**: Helper sync centralisé dans `lib/dal/helpers/media-url.ts` pour construire les URLs publiques Supabase Storage (T3 Env, évite les doublons).
+- **Compound Components Composition Pattern (Mar 2026)**: Pattern Context Provider + compound sub-components pour features publiques complexes. État partagé via `state/actions` dependency injection, React 19 `use()`, barrel exports `Agenda.*`. Premier usage : `public-site/agenda` (TASK068).
 - **Sécurité**: combinaison GRANT (table-level) + RLS (policies) requise — ne pas considérer RLS comme substitut au GRANT.
 - **Migrations**: `supabase/migrations/` est la source de vérité pour les modifications appliquées en base; `supabase/schemas/` sert de documentation/declarative reference.
 - **Tests & CI**: vérifier explicitement que les roles `anon` et `authenticated` peuvent accéder aux DTO nécessaires (tests d'intégration DAL).
@@ -36,6 +37,57 @@
 2. Les migrations dangereuses (REVOKE massifs) doivent être revues et, si nécessaire, déplacées vers `supabase/migrations/legacy-migrations`.
 3. Les scripts d'audit doivent être alignés avec le modèle de sécurité (ne pas considérer un GRANT comme "exposé" quand il est requis pour RLS).
 4. **Variables d'environnement** : Accès UNIQUEMENT via `import { env } from '@/lib/env'`, JAMAIS `process.env.*` directement.
+
+## Compound Components Composition Pattern (Mar 2026)
+
+**Pattern** pour les features publiques complexes nécessitant un état partagé entre plusieurs composants enfants, sans prop drilling.
+
+### Principe
+
+Remplacer un monolithe Client Component (>200L, >5 props drillées) par :
+
+1. **Context Provider** (`FeatureContext.tsx`) — expose `state`, `actions` via React Context
+2. **Compound sub-components** — consomment le contexte via React 19 `use()`
+3. **Barrel exports** — namespace `Feature.*` pour composition explicite
+
+### Structure type
+
+```bash
+components/features/public-site/[feature]/
+  [Feature]Context.tsx          # Provider + compound namespace export (Agenda.*)
+  [Feature]Hero.tsx             # Compound sub-component (use(FeatureContext))
+  [Feature]Filters.tsx          # Compound sub-component
+  [Feature]EventList.tsx        # Compound sub-component
+  [Feature]Newsletter.tsx       # Compound sub-component
+  [Feature]ClientContainer.tsx  # Composition: <Agenda.Provider> + <Agenda.*>
+  [Feature]Container.tsx        # Server Component: DAL fetch + Suspense
+  types.ts                      # FeatureContextValue (State/Actions interfaces)
+  index.ts                      # Barrel named exports
+```
+
+### Context Interface (dependency injection)
+
+```typescript
+interface FeatureContextValue {
+  state: FeatureState;       // Données réactives (events, selectedGenre, etc.)
+  actions: FeatureActions;   // Handlers (setSelectedGenre, etc.)
+}
+```
+
+### Règles
+
+- **React 19** : `use(FeatureContext)` au lieu de `useContext(FeatureContext)` dans tous les sous-composants
+- **Pas de prop drilling** : les sous-composants accèdent à l'état via le contexte, pas via des props
+- **Provider wrapping** : le ClientContainer wrap les sous-composants dans le Provider
+- **Server Component** : le Container fait le fetch DAL et passe les données initiales au ClientContainer
+- **Barrel exports** : `index.ts` exporte tous les composants publics par nom
+
+### Référence d'implémentation
+
+Premier usage : `components/features/public-site/agenda` (TASK068)
+
+- AgendaView 285L monolithe → 5 compound components (960L total / 12 fichiers)
+- 14 props drillées → 3 props (initialEvents, showNewsletter, displayToggle)
 
 ## DAL SOLID Architecture (Nov 2025)
 
