@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, Clock, MapPin, Pencil, Trash2 } from "lucide-react";
+import { Calendar, Clock, Eye, MapPin, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Table,
@@ -21,13 +21,14 @@ export type EventSortState = SortState<EventSortField>;
 
 interface EventsTableProps {
     events: EventClientDTO[];
+    onView: (id: number) => void;
     onEdit: (id: number) => void;
     onDelete: (id: number) => void;
     sortState: EventSortState | null;
     onSort: (field: EventSortField) => void;
 }
 
-export function EventsTable({ events, onEdit, onDelete, sortState, onSort }: EventsTableProps) {
+export function EventsTable({ events, onView, onEdit, onDelete, sortState, onSort }: EventsTableProps) {
     if (events.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center p-8 text-center border rounded-md bg-card text-muted-foreground">
@@ -83,6 +84,15 @@ export function EventsTable({ events, onEdit, onDelete, sortState, onSort }: Eve
 
                         {/* Footer: Actions */}
                         <div className="flex items-center justify-end gap-2 pt-2 border-t mt-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => onView(event.id)}
+                                className="h-10 min-w-[56px] px-3"
+                                aria-label={`Voir ${event.spectacle_titre}`}
+                            >
+                                <Eye className="h-5 w-5 mr-2" /> Voir
+                            </Button>
                             <Button
                                 variant="secondary"
                                 size="sm"
@@ -173,6 +183,16 @@ export function EventsTable({ events, onEdit, onDelete, sortState, onSort }: Eve
                                 <TableCell>{getEventStatusBadge(event.status)}</TableCell>
                                 <TableCell className="text-right">
                                     <div className="flex items-center justify-end gap-2 sm:gap-3">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => onView(event.id)}
+                                            title="Voir"
+                                            className="h-8 w-8 sm:h-9 sm:w-9"
+                                            aria-label={`Voir ${event.spectacle_titre}`}
+                                        >
+                                            <Eye className="h-4 w-4" />
+                                        </Button>
                                         <Button
                                             variant="ghost"
                                             size="icon"

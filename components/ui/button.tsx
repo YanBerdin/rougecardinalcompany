@@ -10,21 +10,21 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-primary font-semibold whitespace-nowrap text-primary-foreground hover:bg-chart-6 hover:text-black transition-all duration-300 shadow-lg",
+          "bg-primary font-semibold whitespace-nowrap text-primary-foreground hover:bg-chart-6 hover:text-black transition-all duration-300 shadow-md hover:shadow-sm",
         destructive:
-          "bg-background font-semibold whitespace-nowrap border border-input hover:bg-red-500/20 hover:text-destructive shadow-lg",
+          "bg-background font-semibold whitespace-nowrap border border-input hover:bg-red-500/20 hover:text-destructive shadow-md hover:shadow-sm",
         outline:
-          "bg-background font-semibold whitespace-nowrap border border-input hover:bg-accent hover:text-accent-foreground shadow-lg",
+          "bg-background font-semibold whitespace-nowrap border border-input hover:bg-accent hover:text-accent-foreground shadow-md hover:shadow-sm",
         "outline-primary":
-          "bg-background font-semibold whitespace-nowrap border border-primary shadow-lg hover:bg-background text-foreground hover:border hover:border-primary-foreground",
+          "bg-background font-semibold whitespace-nowrap border border-primary shadow-md hover:shadow-sm hover:bg-background text-foreground hover:border hover:border-primary-foreground",
         "outline-destructive":
-          "bg-background font-semibold whitespace-nowrap border border-input shadow-lg hover:bg-red-500/20 hover:text-destructive hover:border hover:border-primary-foreground",
+          "bg-background font-semibold whitespace-nowrap border border-input shadow-md hover:shadow-sm hover:bg-red-500/20 hover:text-destructive hover:border hover:border-primary-foreground",
         secondary:
-          "bg-secondary font-semibold whitespace-nowrap text-secondary-foreground hover:bg-muted-foreground hover:text-muted shadow-lg",
+          "bg-secondary font-semibold whitespace-nowrap text-secondary-foreground hover:bg-muted-foreground hover:text-muted shadow-md hover:shadow-sm",
         ghost:
-          "text-foreground font-semibold whitespace-nowrap hover:bg-secondary/80 hover:text-accent-foreground shadow-lg",
+          "text-foreground font-semibold whitespace-nowrap hover:bg-secondary/80 hover:text-accent-foreground shadow-md hover:shadow-sm",
         "ghost-destructive":
-          "text-foreground font-semibold whitespace-nowrap hover:bg-red-500/20 hover:text-destructive",
+          "text-foreground font-semibold whitespace-nowrap hover:bg-red-500/20 shadow-md hover:shadow-sm hover:text-destructive",
         link: "text-primary underline-offset-4",
       },
       size: {
