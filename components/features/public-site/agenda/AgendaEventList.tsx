@@ -189,7 +189,7 @@ export function AgendaEventList(): React.JSX.Element {
     }
 
     return (
-        <ul className="space-y-6 list-none">
+        <ul role="list" className="space-y-6 list-none">
             {state.filteredEvents.map((event, index) => (
                 <li key={event.id}>
                     <AgendaEventCard

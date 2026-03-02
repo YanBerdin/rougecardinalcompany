@@ -8,7 +8,7 @@
 
 | Livrable | Statut | Détails |
 | -------- | ------ | ------- |
-| COMP-01 : AgendaContext Provider | ✅ | 146L, state/actions/meta dependency injection |
+| COMP-01 : AgendaContext Provider | ✅ | 147L, state/actions dependency injection |
 | COMP-02 : AgendaHero compound | ✅ | 26L, hero section isolée |
 | COMP-03 : AgendaFilters compound | ✅ | 47L, genre filter buttons avec aria-pressed |
 | COMP-04 : AgendaEventList compound | ✅ | 203L, event cards grid + empty state |
@@ -17,7 +17,7 @@
 | CLEAN-02 : AgendaView monolithe | ✅ | 285L supprimées, remplacé par 5 composants |
 | DAL-01 : Import DAL corrigé | ✅ | `@/lib/dal/agenda` au lieu de `@/lib/dal/spectacles` |
 | REACT19-01 : `use()` vs `useContext()` | ✅ | React 19 pattern dans tous les composants |
-| TS-01 : types.ts colocalisé | ✅ | 3 interfaces séparées (State/Actions/Meta) |
+| TS-01 : types.ts colocalisé | ✅ | 2 interfaces séparées (State/Actions) |
 | BARREL-01 : index.ts exports | ✅ | Named exports pour tous composants |
 | A11Y-01 : aria-label + aria-pressed | ✅ | Boutons filtres genre accessibles |
 

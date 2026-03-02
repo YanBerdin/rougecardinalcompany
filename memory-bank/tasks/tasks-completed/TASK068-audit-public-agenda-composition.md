@@ -73,11 +73,11 @@ Migration vers une architecture **Compound Components** conforme aux React Compo
 | ---- | ---------------------------------------- | -------- | ---------- | ------------------------------------------------------------------ |
 | 68.1 | Audit complet (17 violations identifiées) | Complete | 2026-03-02 | Audit multi-instructions |
 | 68.2 | Cataloguer violations par sévérité | Complete | 2026-03-02 | 5 critiques, 5 hautes, 5 moyennes, 2 basses |
-| 68.3 | Créer AgendaContext.tsx | Complete | 2026-03-02 | 146 lignes, Provider + context + ICS util |
+| 68.3 | Créer AgendaContext.tsx | Complete | 2026-03-02 | 147 lignes, Provider + context + ICS util |
 | 68.4 | Créer AgendaHero.tsx | Complete | 2026-03-02 | 26 lignes, pure presentation |
 | 68.5 | Créer AgendaFilters.tsx | Complete | 2026-03-02 | 47 lignes, shadcn Select + context |
-| 68.6 | Créer AgendaEventList.tsx | Complete | 2026-03-02 | 203 lignes, 5 sub-components internes + next/image |
-| 68.7 | Créer AgendaNewsletter.tsx | Complete | 2026-03-02 | 124 lignes, autonome via useNewsletterSubscribe |
+| 68.6 | Créer AgendaEventList.tsx | Complete | 2026-03-02 | 204 lignes, 5 sub-components internes + next/image |
+| 68.7 | Créer AgendaNewsletter.tsx | Complete | 2026-03-02 | 125 lignes, autonome via useNewsletterSubscribe |
 | 68.8 | Réécrire AgendaClientContainer.tsx | Complete | 2026-03-02 | 81→37 lignes, 14→3 props |
 | 68.9 | Mettre à jour types.ts | Complete | 2026-03-02 | -AgendaViewProps (11 props), +AgendaClientContainerProps (3 props) |
 | 68.10 | Mettre à jour index.ts | Complete | 2026-03-02 | Barrel exports mis à jour |
@@ -116,7 +116,7 @@ Migration vers une architecture **Compound Components** conforme aux React Compo
 | - | ----------- | --------- | ---------- |
 | M1 | Composition | AgendaClientContainer 81 lignes, 14 props vers 1 enfant | Composition root 37 lignes, 3 props |
 | M2 | Clean Code | > 5 params (14 props AgendaViewProps) | 3 props via AgendaClientContainerProps |
-| M3 | A11y | Pas de sémantique `<ul>`/`<li>` pour la liste | `<ul role="list">` + `<li>` |
+| M3 | A11y | Pas de sémantique `<ul>`/`<li>` pour la liste | `<ul role="list" className="list-none">` + `<li>` (fix post-audit : `role="list"` ajouté après vérification) |
 | M4 | A11y | Pas de `role="status"` pour état vide | Ajouté avec message accessible |
 | M5 | A11y | `<label>` manquant pour Select | `<label className="sr-only">` + `aria-label` |
 
@@ -162,11 +162,11 @@ page.tsx (+revalidate=0)
 
 | Fichier | Lignes | Rôle |
 | ------- | ------ | ---- |
-| `AgendaContext.tsx` | 146 | Provider + context + ICS calendar utilities |
+| `AgendaContext.tsx` | 147 | Provider + context + ICS calendar utilities |
 | `AgendaHero.tsx` | 26 | Hero section (pure JSX, pas de "use client") |
 | `AgendaFilters.tsx` | 47 | Select filter via context |
-| `AgendaEventList.tsx` | 203 | Event list avec 5 sub-components internes |
-| `AgendaNewsletter.tsx` | 124 | Newsletter CTA autonome |
+| `AgendaEventList.tsx` | 204 | Event list avec 5 sub-components internes |
+| `AgendaNewsletter.tsx` | 125 | Newsletter CTA autonome |
 
 ### Modifiés (6)
 

@@ -26,7 +26,7 @@
 - **T3 Env Pattern (Dec 2025)**: Variables d'environnement type-safe avec validation Zod au démarrage via `lib/env.ts`.
 - **Embla Carousel Pattern (Feb 2026)**: Carousel galerie spectacle avec branching 0/1/2+, scale tween, autoplay, WCAG (44px targets, `prefers-reduced-motion`).
 - **`buildMediaPublicUrl` Helper Pattern (Feb 2026)**: Helper sync centralisé dans `lib/dal/helpers/media-url.ts` pour construire les URLs publiques Supabase Storage (T3 Env, évite les doublons).
-- **Compound Components Composition Pattern (Mar 2026)**: Pattern Context Provider + compound sub-components pour features publiques complexes. État partagé via `state/actions/meta` dependency injection, React 19 `use()`, barrel exports `Agenda.*`. Premier usage : `public-site/agenda` (TASK068).
+- **Compound Components Composition Pattern (Mar 2026)**: Pattern Context Provider + compound sub-components pour features publiques complexes. État partagé via `state/actions` dependency injection, React 19 `use()`, barrel exports `Agenda.*`. Premier usage : `public-site/agenda` (TASK068).
 - **Sécurité**: combinaison GRANT (table-level) + RLS (policies) requise — ne pas considérer RLS comme substitut au GRANT.
 - **Migrations**: `supabase/migrations/` est la source de vérité pour les modifications appliquées en base; `supabase/schemas/` sert de documentation/declarative reference.
 - **Tests & CI**: vérifier explicitement que les roles `anon` et `authenticated` peuvent accéder aux DTO nécessaires (tests d'intégration DAL).
@@ -46,7 +46,7 @@
 
 Remplacer un monolithe Client Component (>200L, >5 props drillées) par :
 
-1. **Context Provider** (`FeatureContext.tsx`) — expose `state`, `actions`, `meta` via React Context
+1. **Context Provider** (`FeatureContext.tsx`) — expose `state`, `actions` via React Context
 2. **Compound sub-components** — consomment le contexte via React 19 `use()`
 3. **Barrel exports** — namespace `Feature.*` pour composition explicite
 
@@ -61,7 +61,7 @@ components/features/public-site/[feature]/
   [Feature]Newsletter.tsx       # Compound sub-component
   [Feature]ClientContainer.tsx  # Composition: <Agenda.Provider> + <Agenda.*>
   [Feature]Container.tsx        # Server Component: DAL fetch + Suspense
-  types.ts                      # FeatureContextValue (State/Actions/Meta interfaces)
+  types.ts                      # FeatureContextValue (State/Actions interfaces)
   index.ts                      # Barrel named exports
 ```
 
@@ -71,7 +71,6 @@ components/features/public-site/[feature]/
 interface FeatureContextValue {
   state: FeatureState;       // Données réactives (events, selectedGenre, etc.)
   actions: FeatureActions;   // Handlers (setSelectedGenre, etc.)
-  meta: FeatureMeta;         // Constantes dérivées (genres uniques, display toggle, etc.)
 }
 ```
 

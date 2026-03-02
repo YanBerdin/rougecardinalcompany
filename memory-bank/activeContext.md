@@ -15,7 +15,7 @@
 ### Points clés
 
 - **Composition Pattern** : Premier usage du pattern Compound Components + Context Provider dans le projet
-- **AgendaContext** (146L) : Provider avec `state`, `actions`, `meta` — dependency injection pour 5 sous-composants
+- **AgendaContext** (147L) : Provider avec `state`, `actions` — dependency injection pour 5 sous-composants
 - **5 compound components** : AgendaHero (26L), AgendaFilters (47L), AgendaEventList (203L), AgendaNewsletter (124L), AgendaClientContainer (37L)
 - **Code mort** : `hooks.ts` (useAgendaData custom hook jamais utilisé côté client) supprimé
 - **DAL fix** : `fetchAgendaEvents` importé depuis `@/lib/dal/agenda` au lieu de `@/lib/dal/spectacles`
@@ -27,12 +27,12 @@
 | --- | ---------- | ----------- | ----------- | ------------ |
 | 1 | CRITIQUE | Clean Code | AgendaView.tsx 285L (max 300L) | Split en 5 compound components |
 | 2 | CRITIQUE | Composition | 14 props drillées dans AgendaView | 3 props via AgendaContext |
-| 3 | CRITIQUE | TypeScript | Props non typées dans interface monolithique | `AgendaContextValue` interface avec `state/actions/meta` |
+| 3 | CRITIQUE | TypeScript | Props non typées dans interface monolithique | `AgendaContextValue` interface avec `state/actions` |
 | 4 | CRITIQUE | Clean Code | `hooks.ts` code mort jamais utilisé | Fichier supprimé |
 | 5 | CRITIQUE | DAL SOLID | Import depuis mauvais module DAL | `fetchAgendaEvents` depuis `@/lib/dal/agenda` |
 | 6 | HAUTE | Composition | Pas de compound components | `Agenda.*` namespace avec 5 sous-composants |
 | 7 | HAUTE | Composition | État couplé au composant parent | AgendaProvider avec dependency injection |
-| 8 | HAUTE | TypeScript | Interface unique pour tout l'état | 3 interfaces séparées (`AgendaState`, `AgendaActions`, `AgendaMeta`) |
+| 8 | HAUTE | TypeScript | Interface unique pour tout l'état | 2 interfaces séparées (`AgendaState`, `AgendaActions`) |
 | 9 | HAUTE | Clean Code | Logique métier mélangée avec UI | Handlers dans AgendaContext, UI dans composants |
 | 10 | HAUTE | React 19 | `useContext` déprécié | `use()` partout |
 | 11 | MOYENNE | a11y | Boutons filtres sans aria-label | `aria-label` + `aria-pressed` ajoutés |
