@@ -16,6 +16,7 @@
 
 ## En Attente
 
+- `TASK070` Admin Compagnie CRUD (Valeurs, Stats, Présentation) — Page tabulée `/admin/compagnie`, 3 DAL + 3 Actions + 14 composants, plan enrichi audité
 - `TASK005` Optimisation SEO et meta-tags dynamiques
 - `TASK007` Tests automatisés et monitoring
 - `TASK008` Configuration des redirections vers billetterie externe
