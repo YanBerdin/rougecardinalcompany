@@ -106,26 +106,4 @@ export const fetchTeamMembers = cache(
   }
 );
 
-// ============================================================================
-// Legacy Exports (backward compatibility)
-// ============================================================================
 
-/**
- * @deprecated Use fetchCompagnieValues() with DALResult instead
- */
-export async function fetchCompagnieValuesLegacy(
-  limit = 12
-): Promise<CompagnieValueRecord[]> {
-  const result = await fetchCompagnieValues(limit);
-  return result.success ? (result.data ?? []) : [];
-}
-
-/**
- * @deprecated Use fetchTeamMembers() with DALResult instead
- */
-export async function fetchTeamMembersLegacy(
-  limit = 12
-): Promise<TeamMemberRecord[]> {
-  const result = await fetchTeamMembers(limit);
-  return result.success ? (result.data ?? []) : [];
-}

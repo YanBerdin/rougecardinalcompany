@@ -1,8 +1,81 @@
 # Active Context
 
-**Current Focus (2026-03-02)**: ✅ TASK068 — Audit conformité public/agenda + Composition Patterns (17 violations, monolithe 285L→5 compound components, 14→3 props). `pnpm build` ✅ `tsc --noEmit` ✅.
+**Current Focus (2026-03-02)**: ✅ TASK069 — Audit conformité public/compagnie (17 violations, monolithe 242L→49L via SECTION_RENDERERS, 6 composants section, WCAG 2.2 AA, force-dynamic). `pnpm lint` 0 erreurs ✅ `pnpm build` exit 0 ✅.
 
-**Last Major Updates**: ✅ Public Agenda Composition Refactor (2026-03-02) + Admin Users Audit + Scripts (2026-03-02) + Admin Team Audit Remediation (2026-03-01) + Admin Spectacles Audit Remediation (2026-03-01) + Dependabot #26 serialize-javascript RCE fix (2026-03-01) + Site-Config Audit Fix (2026-03-01) + TASK065 Admin Press Audit Fix (2026-02-28) + Contact RLS/Serialization Fix (2026-02-28) + Admin Partners Audit Fix (2026-02-28)
+**Last Major Updates**: ✅ Public Compagnie Audit Refactor (2026-03-02) + Public Agenda Composition Refactor (2026-03-02) + Admin Users Audit + Scripts (2026-03-02) + Admin Team Audit Remediation (2026-03-01) + Admin Spectacles Audit Remediation (2026-03-01) + Dependabot #26 serialize-javascript RCE fix (2026-03-01) + Site-Config Audit Fix (2026-03-01) + TASK065 Admin Press Audit Fix (2026-02-28) + Contact RLS/Serialization Fix (2026-02-28) + Admin Partners Audit Fix (2026-02-28)
+
+---
+
+## ✅ TASK069 — Audit conformité public/compagnie (2026-03-02)
+
+### Summary
+
+✅ **COMPLET** — 17 violations corrigées sur `components/features/public-site/compagnie`. Monolithe `CompagnieView.tsx` (242L, 6 blocs if/else) refactoré en 6 composants de section via `SECTION_RENDERERS` map (Open/Closed Principle). Dead code supprimé, fallback déplacé dans DAL, WCAG 2.2 AA corrigé, architecture alignée. Branche `refactor/public-compagnie-audit-violations`.
+
+### Points clés
+
+- **SECTION_RENDERERS map** : Premier usage de ce pattern dans le projet — `Record<string, ComponentType<SectionRendererProps>>` pilote le rendu dynamique des 6 sections
+- **CompagnieView.tsx** : 242L → 49L (réduction 80%)
+- **6 composants section** : SectionHero (23L), SectionHistory (31L), SectionQuote (27L), SectionValues (32L), SectionTeam (33L), SectionMission (27L)
+- **constants.ts** : 4 magic numbers extraits (DEFAULT_ITEMS_LIMIT, ANIMATION_DELAY_STEP, ANIMATION_BASE_DELAY, FALLBACK_MEMBER_IMAGE)
+- **WCAG 2.2 AA** : h3→h2 corrigé dans 4 sections, `<Image>` next/image avec alt descriptif, `aria-labelledby` sur toutes les sections
+- **DAL** : 3 casts `as unknown as` supprimés, fallback déplacé vers `lib/dal/fallback/`, `getDefaultSections()` helper extrait
+- **Architecture** : ISR `revalidate=60` → `force-dynamic` + `revalidate=0`
+
+### Violations corrigées (17)
+
+| # | Sévérité | Catégorie | Violation | Correction |
+| --- | ---------- | ----------- | ----------- | ------------ |
+| 1 | CRITIQUE | Clean Code | CompagnieView.tsx 242L | Refactoré 49L via SECTION_RENDERERS map |
+| 2 | CRITIQUE | Clean Code | hooks.ts 100% commenté (102L) | Fichier supprimé |
+| 3 | CRITIQUE | Clean Code | Bloc LucideIconMap commenté ~14L | Supprimé + import inutilisé retiré |
+| 4 | CRITIQUE | Composition | 6 blocs if/else dans .map() | SECTION_RENDERERS map (Open/Closed) |
+| 5 | CRITIQUE | a11y | Hiérarchie titres sautée h1→h3 | h3→h2 dans 4 sections (WCAG 1.3.1) |
+| 6 | HAUTE | a11y | background-image sans alt | `<Image>` next/image avec alt=“…” |
+| 7 | HAUTE | a11y | Sections sans landmarks aria | aria-labelledby + id sur 6 sections |
+| 8 | HAUTE | DAL SOLID | Fallback dans couche UI | Déplacé vers lib/dal/fallback/ |
+| 9 | HAUTE | DAL SOLID | 3 casts `as unknown as` | Supprimés, fallback typé directement |
+| 10 | HAUTE | Architecture | ISR revalidate=60 | force-dynamic + revalidate=0 |
+| 11 | MOYENNE | Clean Code | fetchCompagniePresentationSections 49L | getDefaultSections() helper extrait |
+| 12 | MOYENNE | Clean Code | Magic numbers (12, 0.1, “0.2s”, image path) | constants.ts avec 4 constantes |
+| 13 | MOYENNE | Clean Code | Fonctions *Legacy dans compagnie.ts | fetchCompagnieValuesLegacy + fetchTeamMembersLegacy supprimées |
+| 14 | MOYENNE | Clean Code | data/presentation.ts couche UI avec fallback | Supprimé, déplacé dans DAL |
+| 15 | BASSE | TypeScript | Return types manquants CompagnieView + Container | ReactElement ajouté |
+| 16 | BASSE | TypeScript | Return types manquants sur 6 sections | ReactElement sur chacun |
+| 17 | BASSE | Clean Code | Commentaires TODO et Server Component périmés | Supprimés |
+
+### Fichiers créés (9)
+
+```bash
+components/features/public-site/compagnie/constants.ts                  # 4 constantes extraites
+components/features/public-site/compagnie/sections/types.ts             # SectionRendererProps interface
+components/features/public-site/compagnie/sections/SectionHero.tsx      # 23L
+components/features/public-site/compagnie/sections/SectionHistory.tsx   # 31L (next/image)
+components/features/public-site/compagnie/sections/SectionQuote.tsx     # 27L
+components/features/public-site/compagnie/sections/SectionValues.tsx    # 32L
+components/features/public-site/compagnie/sections/SectionTeam.tsx      # 33L (next/image)
+components/features/public-site/compagnie/sections/SectionMission.tsx   # 27L
+lib/dal/fallback/compagnie-presentation-fallback.ts                     # Fallback déplacé depuis UI
+```
+
+### Fichiers modifiés (7)
+
+```bash
+components/features/public-site/compagnie/CompagnieView.tsx   # 242L → 49L, SECTION_RENDERERS map
+components/features/public-site/compagnie/CompagnieContainer.tsx  # constants + Promise<ReactElement>
+components/features/public-site/compagnie/index.ts            # exports nettoyés + sections ajoutées
+lib/dal/compagnie-presentation.ts                             # 0 cast, getDefaultSections() extrait
+lib/dal/compagnie.ts                                          # fonctions *Legacy supprimées
+app/(marketing)/compagnie/page.tsx                            # force-dynamic + revalidate=0
+```
+
+### Fichiers supprimés (3)
+
+```bash
+components/features/public-site/compagnie/hooks.ts              # 102L dead code
+components/features/public-site/compagnie/data/presentation.ts  # Déplacé vers DAL
+components/features/public-site/compagnie/data/              # Dossier supprimé
+```
 
 ---
 

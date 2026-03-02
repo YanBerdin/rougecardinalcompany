@@ -3,8 +3,9 @@ import { Suspense } from "react";
 import { CompagnieContainer } from "@/components/features/public-site/compagnie/CompagnieContainer";
 import { CompagnieSkeleton } from "@/components/skeletons/compagnie-skeleton";
 
-// ✅ ISR: Cache pour 60 secondes avec revalidation automatique
-export const revalidate = 60;
+// ✅ force-dynamic: page utilise createClient() Supabase SSR (cookies)
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: "Notre Compagnie | Rouge-Cardinal",
@@ -15,8 +16,6 @@ export const metadata: Metadata = {
 export default function CompagniePage() {
   return (
     <Suspense fallback={<CompagnieSkeleton />}>
-      {/* Server Component */}
-      {/* TODO: retirer les délais artificiels une fois l'UX validée */}
       <CompagnieContainer />
     </Suspense>
   );

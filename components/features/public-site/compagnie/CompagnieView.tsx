@@ -1,27 +1,31 @@
-import { Quote, Star } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { CompagnieViewProps } from "./types";
+import type { ComponentType, ReactElement } from "react";
 import { CompagnieSkeleton } from "@/components/skeletons/compagnie-skeleton";
-// import * as LucideIcons from 'lucide-react';
-/*const LucideIconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-    Star,
-    Heart,
-    Award,
-    Users,
-    Globe,
-    Shield,
-    Rocket,
-    Book,
-    Briefcase,
+import type { CompagnieViewProps } from "./types";
+import {
+  SectionHero,
+  SectionHistory,
+  SectionQuote,
+  SectionValues,
+  SectionTeam,
+  SectionMission,
+  type SectionRendererProps,
+} from "./sections";
+
+const SECTION_RENDERERS: Record<string, ComponentType<SectionRendererProps>> = {
+  hero: SectionHero,
+  history: SectionHistory,
+  quote: SectionQuote,
+  values: SectionValues,
+  team: SectionTeam,
+  mission: SectionMission,
 };
-*/
 
 export function CompagnieView({
   sections,
   values,
   team,
   loading = false,
-}: CompagnieViewProps) {
+}: CompagnieViewProps): ReactElement {
   if (loading) {
     return <CompagnieSkeleton />;
   }
@@ -29,213 +33,17 @@ export function CompagnieView({
   return (
     <div className="pt-16">
       {sections.map((section) => {
-        if (section.kind === "hero") {
-          return (
-            <section
-              key={section.id}
-              className="py-16 hero-gradient"
-            >
-              <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                {section.title && (
-                  <h1 className="text-4xl md:text-5xl lg:text-6xl text-white font-bold mb-6 animate-fade-in-up">
-                    {section.title}
-                  </h1>
-                )}
-                {section.subtitle && (
-                  <p
-                    className="max-sm:text-lg text-xl md:text-2xl text-white/80 opacity-90 animate-fade-in"
-                    style={{ animationDelay: "0.2s" }}
-                  >
-                    {section.subtitle}
-                  </p>
-                )}
-              </div>
-            </section>
-          );
-        }
-
-        if (section.kind === "history") {
-          return (
-            <section key={section.id} className="py-24 bg-chart-7">
-              <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
-                  <div className="animate-fade-in-up">
-                    {section.title && (
-                      <h3 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-6">
-                        {section.title}
-                      </h3>
-                    )}
-                    {section.content?.map((p: string, i: number) => (
-                      <p
-                        key={i}
-                        className={`text-md md:text-lg xl:text-xl text-muted-foreground ${i < (section.content?.length || 0) - 1 ? "mb-4" : ""} leading-relaxed`}
-                      >
-                        {p}
-                      </p>
-                    ))}
-                  </div>
-                  {section.image && (
-                    <div className="animate-fade-in max-md:p-2">
-                      <div
-                        className="aspect-[8/5] rounded-2xl bg-cover bg-center shadow-2xl"
-                        style={{ backgroundImage: `url(${section.image})` }}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-            </section>
-          );
-        }
-
-        if (section.kind === "quote" && section.quote) {
-          return (
-            <section key={section.id} className="pt-0 -mt-12 bg-chart-7">
-              <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="bg-card rounded-2xl p-8">
-                  <div className="flex items-start space-x-4">
-                    <Quote className="h-8 w-8 text-primary flex-shrink-0 mt-1" />
-                    <div>
-                      <blockquote className="text-lg xl:text-xl italic text-muted-foreground mb-4">
-                        {section.quote.text}
-                      </blockquote>
-                      {section.quote.author && (
-                        <cite className="text-primary font-semibold">
-                          {section.quote.author}
-                        </cite>
-                      )}
-                    </div>
-                  </div>
-                  <div className="w-full h-24 bg-chart-7"></div>
-                </div>
-              </div>
-            </section>
-          );
-        }
-
-        if (section.kind === "values") {
-          return (
-            <section key={section.id} className="py-24 bg-muted/30">
-              <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-16">
-                  {section.title && (
-                    <h3 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">
-                      {section.title}
-                    </h3>
-                  )}
-                  {section.subtitle && (
-                    <p className="text-md md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto">
-                      {section.subtitle}
-                    </p>
-                  )}
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                  {values.map((value, index) => {
-                    const Icon = Star; // Default icon since values don't have icon property
-                    return (
-                      <Card
-                        key={index}
-                        className="text-center card-hover animate-fade-in-up"
-                        style={{ animationDelay: `${index * 0.1}s` }}
-                      >
-                        <CardContent className="p-6">
-                          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-lg mb-4">
-                            <Icon className="h-8 w-8 text-primary" />
-                          </div>
-                          <h4 className="text-2xl font-semibold mb-3">
-                            {value.title}
-                          </h4>
-                          <p className="text-muted-foreground">
-                            {value.description}
-                          </p>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-              </div>
-            </section>
-          );
-        }
-
-        if (section.kind === "team") {
-          return (
-            <section key={section.id} className="py-24 bg-chart-7">
-              <div className="max-w-screen-xl mx-auto px-4 sm:px-4 lg:px-4">
-                <div className="text-center mb-16">
-                  {section.title && (
-                    <h3 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">{section.title}</h3>
-                  )}
-                  {section.subtitle && (
-                    <p className="text-lg md:text-xl lg:text-xl text-muted-foreground max-w-2xl mx-auto">
-                      {section.subtitle}
-                    </p>
-                  )}
-                </div>
-                <div className="flex flex-wrap justify-center gap-x-8 gap-y-16">
-                  {team.map((member, index) => (
-                    <div
-                      key={index}
-                      className="flex flex-col items-center text-center animate-fade-in-up group w-full sm:w-[calc(50%-1rem)] md:w-[calc(33.333%-1.5rem)] lg:w-[calc(25%-1.5rem)] xl:w-[calc(19%-1.5rem)]"
-                      style={{ animationDelay: `${index * 0.1}s` }}
-                    >
-                      <div className="relative mb-6">
-                        <div className="w-32 h-32 rounded-full ring-4 ring-amber-500/20 group-hover:ring-primary transition-all duration-500 p-1.5 flex items-center justify-center">
-                          <div
-                            className="w-full h-full rounded-full bg-cover bg-center shadow-inner"
-                            style={{ backgroundImage: `url(${member.image})` }}
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-1">
-                        <h3 className="text-xl font-bold tracking-tight">
-                          {member.name}
-                        </h3>
-                        {member.role && (
-                          <p className="text-primary text-sm font-semibold uppercase tracking-widest">
-                            {member.role}
-                          </p>
-                        )}
-                        {member.description && (
-                          <p className="text-muted-foreground text-sm leading-relaxed max-w-[200px] mt-3 mx-auto">
-                            {member.description}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </section>
-          );
-        }
-
-        if (section.kind === "mission") {
-          return (
-            <section key={section.id} className="py-24 hero-gradient">
-              <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                {section.title && (
-                  <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-white">
-                    {section.title}
-                  </h3>
-                )}
-                {section.content?.[0] && (
-                  <p className="text-xl md:text-2xl lg:text-2xl text-white/80 mb-8 leading-relaxed">
-                    {section.content[0]}
-                  </p>
-                )}
-                {section.content?.[1] && (
-                  <p className="text-lg md:text-xl lg:text-xl text-white/80 leading-relaxed">
-                    {section.content[1]}
-                  </p>
-                )}
-              </div>
-            </section>
-          );
-        }
-
-        return null;
+        const Renderer = SECTION_RENDERERS[section.kind];
+        if (!Renderer) return null;
+        return (
+          <Renderer
+            key={section.id}
+            section={section}
+            values={values}
+            team={team}
+          />
+        );
       })}
     </div>
   );
-}
+} 
