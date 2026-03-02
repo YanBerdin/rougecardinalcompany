@@ -48,18 +48,18 @@ L'audit suit le même pattern que TASK063/064/065/066 : lecture de chaque fichie
 
 ### Fichiers audités (10)
 
-| Fichier                       | Lignes | Verdict |
-| ----------------------------- | ------ | ------- |
-| UsersManagementContainer.tsx  | 16     | ✅ OK   |
-| UsersManagementView.tsx       | 191    | ✅ OK (was 548) |
-| InviteUserForm.tsx            | 210    | ✅ OK   |
-| UserDesktopTable.tsx          | 177    | ✅ OK (extracted) |
-| UserMobileCard.tsx            | 119    | ✅ OK (extracted) |
-| UserRoleChangeDialog.tsx      | 79     | ✅ OK (extracted) |
-| UserDeleteDialog.tsx          | 54     | ✅ OK (extracted) |
-| UserStatusBadge.tsx           | 34     | ✅ OK (extracted) |
-| types.ts                      | ~40    | ✅ OK (created) |
-| index.ts                      | ~10    | ✅ OK   |
+| Fichier                       | Lignes | Verdict            |
+| ----------------------------- | ------ | ------------------ |
+| UsersManagementContainer.tsx  | 16     | ✅ OK              |
+| UsersManagementView.tsx       | 191    | ✅ OK (was 548)    |
+| InviteUserForm.tsx            | 210    | ✅ OK              |
+| UserDesktopTable.tsx          | 177    | ✅ OK (extracted)  |
+| UserMobileCard.tsx            | 119    | ✅ OK (extracted)  |
+| UserRoleChangeDialog.tsx      | 79     | ✅ OK (extracted)  |
+| UserDeleteDialog.tsx          | 54     | ✅ OK (extracted)  |
+| UserStatusBadge.tsx           | 34     | ✅ OK (extracted)  |
+| types.ts                      | ~40    | ✅ OK (created)    |
+| index.ts                      | ~10    | ✅ OK              |
 
 ### Violations corrigées (13)
 

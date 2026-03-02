@@ -14,7 +14,7 @@
 ## 📊 Field Mapping Table
 
 | Database Field (`TeamMemberRecord`) | View Field (`TeamMember`) | Mapping Logic | Notes |
-|-------------------------------------|---------------------------|---------------|-------|
+| ------------------------------------- | --------------------------- | --------------- | ------- |
 | `id: number` | ❌ Not exposed | Omitted | ID not needed in public view |
 | `name: string` | `name: string` | Direct mapping | Required field, always present |
 | `role: string \| null` | `role: string \| null` | **Preserve null** | Optional, nullable in view |
@@ -49,7 +49,7 @@ team.map((m) => ({
 ### Current Behavior
 
 | Scenario | Database State | View Result | Explanation |
-|----------|----------------|-------------|-------------|
+| ---------- | ---------------- | ------------- | ------------- |
 | **External URL** | `image_url: "https://..."`, `photo_media_id: null` | `image: "https://..."` | Uses external URL directly |
 | **No image** | `image_url: null`, `photo_media_id: null` | `image: "/logo-florian.png"` | Falls back to default placeholder |
 | **Media Library (TODO)** | `image_url: null`, `photo_media_id: 42` | `image: "/logo-florian.png"` | ⚠️ **NOT YET IMPLEMENTED** - should lookup medias table |
@@ -199,7 +199,7 @@ export type TeamMember = z.infer<typeof TeamMemberSchema>;
 ### Type Alignment
 
 | Aspect | Status | Details |
-|--------|--------|---------|
+| -------- | -------- | --------- |
 | **Nullability** | ✅ Aligned | `role` and `description` are nullable in both DB and view |
 | **Field types** | ✅ Aligned | All common fields use same types (string, number, boolean) |
 | **Virtual field** | ✅ Documented | `image` mapping clearly documented with TODO for Media Library |
