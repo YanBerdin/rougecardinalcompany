@@ -1,18 +1,16 @@
+import type { ContactReason } from "@/lib/schemas/contact";
+
 export interface ContactFormData {
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
-  // subject: string; // TODO redundant with reason
-  reason: string;
+  reason: ContactReason | "";
   message: string;
   consent: boolean;
 }
-//? TODO redundant with reason ? 
-// //TODO: redundant with ContactFormData --- IGNORE ---
-export interface ContactReason {
-  value: string;
+
+export interface ContactReasonOption {
+  value: ContactReason;
   label: string;
 }
-
-// Note: ContactInfo and view prop interface removed; the view owns its internal state.

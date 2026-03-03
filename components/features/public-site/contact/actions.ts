@@ -1,23 +1,41 @@
 "use server";
 
 import "server-only";
+import { headers } from "next/headers";
 import { createContactMessage } from "@/lib/dal/contact";
 import { sendContactNotification } from "@/lib/email/actions";
-import {
-  ContactMessageSchema,
-  type ContactMessageInput,
-} from "@/lib/schemas/contact";
+import { ContactMessageSchema } from "@/lib/schemas/contact";
+import { recordRequest } from "@/lib/utils/rate-limit";
+import { getClientIP } from "@/lib/utils/get-client-ip";
+import type { ActionResult } from "@/lib/actions/types";
 
-export async function submitContactAction(formData: FormData) {
-  // Extract and validate
+const MAX_CONTACT_REQUESTS = 5;
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
+
+export async function submitContactAction(
+  formData: FormData,
+): Promise<ActionResult> {
+  const headersList = await headers();
+  const clientIP = getClientIP(headersList);
+
+  const rateCheck = recordRequest(
+    `contact:${clientIP}`,
+    MAX_CONTACT_REQUESTS,
+    RATE_LIMIT_WINDOW_MS,
+  );
+  if (!rateCheck.success) {
+    return { success: false, error: "Trop de messages envoyés. Réessayez plus tard." };
+  }
+
+  const rawPhone = formData.get("phone");
   const shape = {
     firstName: String(formData.get("firstName") ?? "").trim(),
     lastName: String(formData.get("lastName") ?? "").trim(),
     email: String(formData.get("email") ?? "").trim(),
-    phone: (() => {
-      const v = formData.get("phone");
-      return typeof v === "string" && v.trim().length > 0 ? v.trim() : null;
-    })(),
+    phone:
+      typeof rawPhone === "string" && rawPhone.trim().length > 0
+        ? rawPhone.trim()
+        : null,
     reason: String(formData.get("reason") ?? "autre"),
     message: String(formData.get("message") ?? "").trim(),
     consent: String(formData.get("consent") ?? "false") === "true",
@@ -27,34 +45,29 @@ export async function submitContactAction(formData: FormData) {
   if (!parsed.success) {
     const firstError = parsed.error.issues[0];
     return {
-      ok: false,
+      success: false,
       error: firstError?.message ?? "Données invalides",
     };
   }
 
-  // Persistance en base (priorité RGPD)
-  const dalResult = await createContactMessage(parsed.data as ContactMessageInput);
+  const dalResult = await createContactMessage(parsed.data);
   if (!dalResult.success) {
     console.error("[Contact Action] DAL error:", dalResult.error);
-    return { ok: false, error: "Database error" };
+    return { success: false, error: "Erreur serveur. Réessayez plus tard." };
   }
 
-  // Envoi notification email admin
-  // Note: Le schéma API attend 'name' et 'subject', mais la DAL a 'firstName'/'lastName'
-  // On reconstruit le format attendu par sendContactNotification
   try {
     await sendContactNotification({
       name: `${parsed.data.firstName} ${parsed.data.lastName}`.trim(),
       email: parsed.data.email,
-      subject: "Message depuis le formulaire de contact", // TODO: Extraire le sujet si présent dans message
+      subject: "Message depuis le formulaire de contact",
       message: parsed.data.message,
-      phone: parsed.data.phone || undefined,
+      phone: parsed.data.phone ?? undefined,
       reason: parsed.data.reason,
     });
-  } catch (emailError) {
+  } catch (emailError: unknown) {
     console.error("[Contact Action] Email notification failed:", emailError);
-    // Ne pas échouer l'action si l'email échoue (message déjà en BDD)
   }
 
-  return { ok: true };
+  return { success: true };
 }

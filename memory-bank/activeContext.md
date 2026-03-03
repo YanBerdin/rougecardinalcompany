@@ -1,8 +1,61 @@
 # Active Context
 
-**Current Focus (2026-03-03)**: ✅ TASK070 — Admin Compagnie CRUD (page tabulée `/admin/compagnie`, 2 onglets Présentation/Valeurs, Stats→Home, 3×DAL, 3×Actions, 14+ composants, 5 migrations). Commit `8455837` sur branche `feat/task070-admin-compagnie`.
+**Current Focus (2026-03-03)**: ✅ TASK071 — Audit conformité public/contact (12 violations corrigées, monolithe 495L→58L+4 sous-composants, rate limiting OWASP, WCAG 2.2 AA complet, bug NewsletterCard fix, `tsc --noEmit` 0 erreurs). Branche `docs/task071-contact-audit-memory-bank`.
 
-**Last Major Updates**: ✅ TASK070 Admin Compagnie CRUD (2026-03-03) + Public Compagnie Audit Refactor (2026-03-02) + Public Agenda Composition Refactor (2026-03-02) + Admin Users Audit + Scripts (2026-03-02) + Admin Team Audit Remediation (2026-03-01) + Admin Spectacles Audit Remediation (2026-03-01) + Dependabot #26 serialize-javascript RCE fix (2026-03-01) + Site-Config Audit Fix (2026-03-01) + TASK065 Admin Press Audit Fix (2026-02-28)
+**Last Major Updates**: ✅ TASK071 Audit public/contact (2026-03-03) + TASK070 Admin Compagnie CRUD (2026-03-03) + Public Compagnie Audit Refactor (2026-03-02) + Public Agenda Composition Refactor (2026-03-02) + Admin Users Audit + Scripts (2026-03-02) + Admin Team Audit Remediation (2026-03-01) + Admin Spectacles Audit Remediation (2026-03-01) + Dependabot #26 serialize-javascript RCE fix (2026-03-01) + Site-Config Audit Fix (2026-03-01) + TASK065 Admin Press Audit Fix (2026-02-28)
+
+---
+
+## ✅ TASK071 — Audit conformité public/contact (2026-03-03)
+
+### Summary
+
+✅ **COMPLET** — 12 violations corrigées sur `components/features/public-site/contact`. Monolithe `ContactPageView.tsx` (495L) refactoré en slim orchestrator (58L) + 4 sous-composants extraits. Rate limiting OWASP ajouté (5 req/15 min per IP). WCAG 2.2 AA complet (aria-required, role="alert", role="status", consent validation). Bug NewsletterCard disabled state corrigé. Dead code supprimé (`contact-hooks.ts`). `tsc --noEmit` = 0 erreurs. Branche `docs/task071-contact-audit-memory-bank`.
+
+### Points clés
+
+- **Monolithe 495L→58L** : `ContactPageView.tsx` réduit à un slim orchestrator avec `useCallback` handlers
+- **4 sous-composants extraits** : `ContactForm.tsx` (~230L), `ContactSuccessView.tsx` (~35L), `ContactInfoSidebar.tsx` (~103L), `NewsletterCard.tsx` (~81L)
+- **Rate limiting OWASP** : `recordRequest(key, 5, 900000)` dans `actions.ts` — 5 requêtes max par fenêtre de 15 minutes par IP
+- **TypeScript strict** : `ActionResult` return type, `updateField<TField extends keyof ContactFormData>` type-safe updater, `checked === true` type guard, suppression cast `as`
+- **WCAG 2.2 AA** : `aria-required="true"` sur champs obligatoires, `role="alert"` sur erreurs, `role="status"` sur succès, `aria-busy` pendant loading, `noValidate` sur form, `aria-hidden="true"` sur icônes décoratives, consent validé côté submit
+- **Dead code** : `contact-hooks.ts` supprimé (100% commenté), TODO abandonné retiré
+- **Bug fix** : `NewsletterCard` disabled state référençait mauvais loading state
+- **contact-types.ts** : Réécrit avec `ContactFormData` et `ContactReasonOption` basés sur `ContactReason` du schema Zod
+- **Email_Service_Architecture.md** : Section 7.2 `useContactForm` supprimée (pattern obsolète remplacé par Server Actions)
+
+### Architecture après refactoring
+
+```bash
+components/features/public-site/contact/
+  ContactPageContainer.tsx    # Inchangé — Suspense wrapper
+  ContactServerGate.tsx       # Inchangé — fetch feature flag
+  ContactPageView.tsx         # 495L → 58L slim orchestrator
+  ContactForm.tsx             # NOUVEAU — ~230L, type-safe, WCAG complet
+  ContactSuccessView.tsx      # NOUVEAU — ~35L, role="status"
+  ContactInfoSidebar.tsx      # NOUVEAU — ~103L, showNewsletter prop
+  NewsletterCard.tsx           # NOUVEAU — ~81L, bug fix disabled state
+  actions.ts                  # Rate limiting + ActionResult ajoutés
+  contact-types.ts            # Réécrit — ContactFormData + ContactReasonOption
+  contact-hooks.ts            # SUPPRIMÉ — 100% dead code
+```
+
+### Violations corrigées (12)
+
+| # | Sévérité | Catégorie | Violation | Correction |
+| --- | ---------- | ----------- | ----------- | ------------ |
+| 1 | CRITIQUE | Clean Code | contact-hooks.ts 100% commenté (dead code) | Fichier supprimé |
+| 2 | CRITIQUE | Clean Code | TODO abandonné dans ContactPageView | Retiré lors du refactoring |
+| 3 | CRITIQUE | Composition | ContactPageView.tsx 495L monolithe | 58L orchestrator + 4 sous-composants |
+| 4 | CRITIQUE | Composition | Pas d'extraction composants réutilisables | ContactForm, ContactSuccessView, ContactInfoSidebar, NewsletterCard |
+| 5 | HAUTE | OWASP | Pas de rate limiting sur Server Action contact | `recordRequest(key, 5, 900000)` + `getClientIP()` |
+| 6 | HAUTE | TypeScript | Return type `void` implicite sur Server Action | `ActionResult` explicite |
+| 7 | HAUTE | TypeScript | Cast `as ContactReason` unsafe | `ContactReasonEnum.parse()` Zod runtime validation |
+| 8 | HAUTE | TypeScript | Pas de type guard sur `checked` | `checked === true` explicit guard |
+| 9 | HAUTE | a11y | aria-required manquant sur champs obligatoires | `aria-required="true"` sur 5 champs |
+| 10 | HAUTE | a11y | Pas de role="alert" sur messages d'erreur | `role="alert"` sur container erreur |
+| 11 | HAUTE | a11y | Consent non validé côté submit | Validation explicit avec message d'erreur |
+| 12 | MOYENNE | Bug | NewsletterCard disabled state mauvais | Fix référence loading state correct |
 
 ---
 

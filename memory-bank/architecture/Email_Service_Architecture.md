@@ -7,6 +7,13 @@ Objectif
 -----
 Décrire l'architecture de l'envoi d'emails (transactionnels et notifications) : intégration Resend, templates React Email, gestion des erreurs, webhooks, tests et conformité RGPD.
 
+## Mise à jour TASK071 — Contact Form migration (3 mars 2026)
+
+- **Supprimé** : Section 7.2 `useContactForm` hook (pattern obsolète `fetch("/api/contact")` + `Partial<ContactMessage>`)
+- **Remplacé par** : Server Action (`actions.ts`) avec rate limiting OWASP + état inline dans `ContactForm.tsx` (~230L)
+- **Fichier supprimé** : `lib/hooks/useContactForm.ts` (100% dead code)
+- Diagramme mermaid et arborescence fichiers mis à jour
+
 ## Mise à jour T3 Env (20 décembre 2025)
 
 Suite à l'implémentation de T3 Env pour la validation type-safe des variables d'environnement :
@@ -170,7 +177,7 @@ flowchart TD
   Validation --> Resend["Resend API\n• Email sending\n• Tracking\n• Webhooks\n• Analytics"]
   ServerAction --> DAL["DAL Layer\n(lib/dal/)\n• NO email imports!\n• DB operations only"]
   DAL --> Supabase["Supabase DB\n• Newsletter DB\n• Contact DB\n• Logging"]
-  ServerAction --> Hooks["Custom Hooks\n• useNewsletter\n• useContactForm\n• Error handling"]
+  ServerAction --> Hooks["Custom Hooks\n• useNewsletter\n• Error handling"]
 ```
 
 ### 2.2 Règle SOLID: Email uniquement dans Server Actions
@@ -217,8 +224,7 @@ project-root/
 │   ├── schemas/
 │   │   └── contact.ts                   # Schémas Zod email (centralisés)
 │   ├── hooks/
-│   │   ├── useNewsletterSubscribe.ts    # Hook newsletter client
-│   │   └── useContactForm.ts            # Hook formulaire contact
+│   │   └── useNewsletterSubscribe.ts    # Hook newsletter client
 │   └── dal/
 │       ├── home-newsletter.ts           # DAL newsletter (NO email imports!)
 │       └── contact.ts                   # DAL contact (NO email imports!)
@@ -922,115 +928,17 @@ export function useNewsletterSubscribe({
 - Gestion loading, error, success states
 - Reset après soumission réussie
 
-### 7.2 useContactForm Hook
+### 7.2 Contact Form (Server Action Pattern)
 
-```typescript
-// lib/hooks/useContactForm.ts
-"use client";
-
-import { useState } from "react";
-import type { ContactMessage } from "@/lib/email/schemas";
-
-interface UseContactFormReturn {
-  formData: Partial<ContactMessage>;
-  isLoading: boolean;
-  error: string | null;
-  success: boolean;
-  handleChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => void;
-  handleSubmit: (e: React.FormEvent) => Promise<void>;
-  reset: () => void;
-}
-
-export function useContactForm(): UseContactFormReturn {
-  const [formData, setFormData] = useState<Partial<ContactMessage>>({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
-    phone: "",
-    reason: "general",
-  });
-  
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Erreur lors de l'envoi");
-      }
-
-      setSuccess(true);
-      setFormData({
-        name: "",
-        email: "",
-        subject: "",
-        message: "",
-        phone: "",
-        reason: "general",
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Une erreur est survenue");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const reset = () => {
-    setFormData({
-      name: "",
-      email: "",
-      subject: "",
-      message: "",
-      phone: "",
-      reason: "general",
-    });
-    setError(null);
-    setSuccess(false);
-  };
-
-  return {
-    formData,
-    isLoading,
-    error,
-    success,
-    handleChange,
-    handleSubmit,
-    reset,
-  };
-}
-```
-
-**Responsabilités**:
-
-- Gestion état formulaire contact complet
-- HandleChange générique pour tous les champs
-- Appel API contact
-- Gestion states (loading, error, success)
-- Reset formulaire après succès
+> **Note (TASK071, Mars 2026)** : Le hook `useContactForm` a été supprimé lors de l'audit conformité TASK071.
+> Le formulaire de contact utilise désormais :
+>
+> - **Server Action** (`actions.ts`) avec rate limiting OWASP (5 req/15 min) et `ActionResult` return type
+> - **État inline** dans `ContactForm.tsx` avec `useState` + `updateField<TField extends keyof ContactFormData>` type-safe
+> - **Validation Zod** côté serveur (`ContactMessageSchema`) au lieu de `Partial<ContactMessage>`
+> - **WCAG 2.2 AA** : `aria-required`, `role="alert"`, consent validation on submit
+>
+> Voir `components/features/public-site/contact/ContactForm.tsx` (~230 lignes) et `actions.ts` pour l'implémentation actuelle.
 
 ## 8. Intégration avec la DAL Existante
 
