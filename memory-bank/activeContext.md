@@ -1,8 +1,31 @@
 # Active Context
 
-**Current Focus (2026-03-03)**: ✅ TASK072 — Audit conformité public/home (7 étapes, 6 sous-modules, ~34 fichiers : 5 hooks.ts dead code supprimés, hero constants extraites, carousel a11y WCAG complet, ShowCard focus-within, SRP Hero↔Partners, 4 monolithes splittés, NewsletterContext zero prop drilling, withDisplayToggle helper, fix cascading AgendaNewsletter). Branche `refactor/task072-audit-home-public-site`.
+**Current Focus (2026-03-03)**: ✅ BUGFIX-HOME-NEWS — Correction double bug section "À la Une" homepage : DAL interrogeait `communiques_presse` au lieu de `articles_presse`, filtre 30 jours masquait les anciens articles, liens `/actualites` inexistants (404). 5 fichiers corrigés, branche `fix/home-news-articles-presse`.
 
-**Last Major Updates**: ✅ TASK072 Audit public/home (2026-03-03) + TASK071 Audit public/contact (2026-03-03) + TASK070 Admin Compagnie CRUD (2026-03-03) + Public Compagnie Audit Refactor (2026-03-02) + Public Agenda Composition Refactor (2026-03-02) + Admin Users Audit + Scripts (2026-03-02) + Admin Team Audit Remediation (2026-03-01) + Admin Spectacles Audit Remediation (2026-03-01) + Dependabot #26 serialize-javascript RCE fix (2026-03-01) + Site-Config Audit Fix (2026-03-01) + TASK065 Admin Press Audit Fix (2026-02-28)
+**Last Major Updates**: ✅ BUGFIX-HOME-NEWS (2026-03-03) + TASK072 Audit public/home (2026-03-03) + TASK071 Audit public/contact (2026-03-03) + TASK070 Admin Compagnie CRUD (2026-03-03) + Public Compagnie Audit Refactor (2026-03-02) + Public Agenda Composition Refactor (2026-03-02) + Admin Users Audit + Scripts (2026-03-02) + Admin Team Audit Remediation (2026-03-01) + Admin Spectacles Audit Remediation (2026-03-01) + Dependabot #26 serialize-javascript RCE fix (2026-03-01) + Site-Config Audit Fix (2026-03-01) + TASK065 Admin Press Audit Fix (2026-02-28)
+
+---
+
+## ✅ BUGFIX-HOME-NEWS — Section "À la Une" : articles_presse + liens /presse (2026-03-03)
+
+### Summary
+
+✅ **COMPLET** — Correction de deux bugs dans la section "À la Une" de la homepage.
+
+**Bug 1 — Seulement 1 article affiché au lieu de 4 :**
+`lib/dal/home-news.ts` interrogeait `communiques_presse` (communiqués PDF internes) au lieu de `articles_presse` (revue de presse externe). De plus, `filterRecentReleases(30)` éliminait tout article de plus de 30 jours.
+
+**Bug 2 — Liens `/actualites` → 404 :**
+`NewsView.tsx` et `NewsCard.tsx` pointaient vers `/actualites` et `/actualites/${id}`, route inexistante.
+
+**Corrections** :
+- DAL : requête sur `articles_presse` (`.not("published_at", "is", null)`), suppression filtre temporel, nouveau type `FeaturedArticleRecord`
+- `NewsItem` : ajout `source_url`, `source_publication`
+- `NewsContainer` : mapping adapté (`chapo/excerpt → short_description`, `published_at → date`)
+- `NewsView` : CTA `/actualites` → `/presse`
+- `NewsCard` : liens → `source_url` externe (`target=_blank` + `sr-only`) ou fallback `/presse`, image conditionnelle, badge = `source_publication`
+
+Branche `fix/home-news-articles-presse`, commit `1344ae5`, 5 fichiers, 100 insertions / 88 suppressions, tsc ✅ lint ✅.
 
 ---
 

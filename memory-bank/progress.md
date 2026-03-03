@@ -1,5 +1,23 @@
 # Progress
 
+## BUGFIX-HOME-NEWS — Section "À la Une" articles_presse (2026-03-03)
+
+**Context** : Double bug dans la section "À la Une" homepage. (1) DAL `home-news.ts` interrogeait `communiques_presse` au lieu de `articles_presse` + filtre 30 jours masquant les anciens articles → seulement 1 résultat affiché au lieu de 4. (2) Liens `/actualites` dans `NewsView` et `NewsCard` → 404 (route inexistante).
+
+**Corrections** :
+
+| # | Fichier | Changement |
+| --- | --------- | ------------ |
+| 1 | `lib/dal/home-news.ts` | `communiques_presse` → `articles_presse`, suppression `filterRecentReleases`, nouveau type `FeaturedArticleRecord`, export renommé `fetchFeaturedArticles` |
+| 2 | `home/news/types.ts` | Ajout `source_url: string` et `source_publication: string` dans `NewsItem` |
+| 3 | `home/news/NewsContainer.tsx` | Import `fetchFeaturedArticles`, mapping `chapo/excerpt → short_description`, `published_at → date`, `source_url`, `source_publication` |
+| 4 | `home/news/NewsView.tsx` | CTA `/actualites` → `/presse` |
+| 5 | `home/news/NewsCard.tsx` | Liens → `source_url` (externe `target=_blank`, `sr-only`) ou fallback `/presse`, image conditionnelle, badge = `source_publication ?? category` |
+
+**Branches** : TASK072 mergé fast-forward dans `master` et pushé. Branche `fix/home-news-articles-presse`, commit `1344ae5`, tsc ✅ lint ✅.
+
+---
+
 ## TASK072 — Audit Public Home (2026-03-03)
 
 **Context** : Audit conformité de `components/features/public-site/home/` (6 sous-modules : hero, about, news, shows, newsletter, partners) contre toutes les instructions projet. Plan en 7 étapes, 22 sous-tâches. 2 étapes skipped (7.2 compound carousel, 7.5 remove use client). Fix cascading non planifié sur AgendaNewsletter. TASK072.
