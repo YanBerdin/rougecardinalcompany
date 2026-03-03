@@ -18,5 +18,4 @@ export interface AboutContent {
 export interface AboutProps {
   stats: StatItem[];
   content: AboutContent;
-  isLoading?: boolean;
 }

@@ -1,8 +1,69 @@
 # Active Context
 
-**Current Focus (2026-03-03)**: ✅ TASK071 — Audit conformité public/contact (12 violations corrigées, monolithe 495L→58L+4 sous-composants, rate limiting OWASP, WCAG 2.2 AA complet, bug NewsletterCard fix, `tsc --noEmit` 0 erreurs). Branche `docs/task071-contact-audit-memory-bank`.
+**Current Focus (2026-03-03)**: ✅ TASK072 — Audit conformité public/home (7 étapes, 6 sous-modules, ~34 fichiers : 5 hooks.ts dead code supprimés, hero constants extraites, carousel a11y WCAG complet, ShowCard focus-within, SRP Hero↔Partners, 4 monolithes splittés, NewsletterContext zero prop drilling, withDisplayToggle helper, fix cascading AgendaNewsletter). Branche `refactor/task072-audit-home-public-site`.
 
-**Last Major Updates**: ✅ TASK071 Audit public/contact (2026-03-03) + TASK070 Admin Compagnie CRUD (2026-03-03) + Public Compagnie Audit Refactor (2026-03-02) + Public Agenda Composition Refactor (2026-03-02) + Admin Users Audit + Scripts (2026-03-02) + Admin Team Audit Remediation (2026-03-01) + Admin Spectacles Audit Remediation (2026-03-01) + Dependabot #26 serialize-javascript RCE fix (2026-03-01) + Site-Config Audit Fix (2026-03-01) + TASK065 Admin Press Audit Fix (2026-02-28)
+**Last Major Updates**: ✅ TASK072 Audit public/home (2026-03-03) + TASK071 Audit public/contact (2026-03-03) + TASK070 Admin Compagnie CRUD (2026-03-03) + Public Compagnie Audit Refactor (2026-03-02) + Public Agenda Composition Refactor (2026-03-02) + Admin Users Audit + Scripts (2026-03-02) + Admin Team Audit Remediation (2026-03-01) + Admin Spectacles Audit Remediation (2026-03-01) + Dependabot #26 serialize-javascript RCE fix (2026-03-01) + Site-Config Audit Fix (2026-03-01) + TASK065 Admin Press Audit Fix (2026-02-28)
+
+---
+
+## ✅ TASK072 — Audit conformité public/home (2026-03-03)
+
+### Summary
+
+✅ **COMPLET** — Plan de remédiation en 7 étapes sur `components/features/public-site/home/` (6 sous-modules, ~34 fichiers). 5 hooks.ts dead code supprimés + types.ts commenté. 4 constantes extraites (hero/constants.ts). Carousel a11y WCAG complet (ARIA, keyboard, pause/play, reduced-motion). ShowsView hover-only fix avec `group-focus-within`. SRP Hero↔Partners découplé. 4 monolithes splittés en sous-composants (HeroView 192→62L, AboutView 75→12L, NewsView 94→41L, ShowsView 117→37L). NewsletterContext élimine prop drilling 8 props. withDisplayToggle RSC helper créé. Fix cascading AgendaNewsletter non planifié. 2 sous-étapes SKIPPED (7.2 compound carousel, 7.5 remove use client). Bilan : 22 modifiés, 6 supprimés, 14 créés, net -983 lignes. Build/lint/tsc ✅. Branche `refactor/task072-audit-home-public-site`.
+
+### Points clés
+
+- **Dead code purge** : 5 fichiers hooks.ts (hero, about, news, shows, partners) + home/types.ts = ~604L supprimées
+- **Constants extraction** : `hero/constants.ts` avec AUTO_PLAY_INTERVAL_MS, PAUSE_AFTER_INTERACTION_MS, MIN_SWIPE_DISTANCE_PX, CURRENT_SEASON_LABEL (Option C variante)
+- **Carousel a11y** : role="region", aria-roledescription, aria-live, aria-current dots, keyboard ArrowLeft/Right, pause/play button, prefers-reduced-motion
+- **ShowCard a11y** : `group-focus-within:opacity-100` remplace hover-only overlay
+- **SRP Hero↔Partners** : PartnersContainer retiré de HeroContainer → `page.tsx` avec Suspense
+- **Splitting** : HeroView→5 sous-composants (HeroSlideBackground, HeroCTA, HeroNavigation, HeroIndicators, HeroProgressBar)
+- **NewsletterContext** : Provider + useNewsletterContext = zéro prop drilling, `source` prop
+- **withDisplayToggle** : RSC helper 32L dans `lib/utils/`
+- **Fix cascading** : AgendaNewsletter.tsx ← NewsletterProvider source="agenda" (non planifié)
+- **Skipped** : 7.2 compound carousel (step 6 suffisant), 7.5 remove "use client" HeroView (7.2 non implémenté)
+
+### Architecture après refactoring
+
+```
+components/features/public-site/home/
+├── hero/
+│   ├── HeroContainer.tsx (29L) ← SRP strict
+│   ├── HeroClient.tsx (160L) ← a11y keyboard, pause/play, reduced-motion
+│   ├── HeroView.tsx (62L) ← orchestrateur 5 sous-composants
+│   ├── HeroSlideBackground.tsx (42L) ← NEW
+│   ├── HeroCTA.tsx (60L) ← NEW
+│   ├── HeroNavigation.tsx (65L) ← NEW
+│   ├── HeroIndicators.tsx (76L) ← NEW
+│   ├── HeroProgressBar.tsx (22L) ← NEW
+│   ├── constants.ts (16L) ← NEW
+│   └── types.ts
+├── about/
+│   ├── AboutView.tsx (12L) ← slim wrapper
+│   ├── AboutContent.tsx (62L) ← NEW
+│   └── types.ts
+├── news/
+│   ├── NewsView.tsx (41L) ← section + grid
+│   ├── NewsCard.tsx (64L) ← NEW
+│   └── types.ts
+├── shows/
+│   ├── ShowsView.tsx (37L) ← section + grid
+│   ├── ShowCard.tsx (92L) ← NEW focus-within
+│   └── types.ts
+├── newsletter/
+│   ├── NewsletterView.tsx (65L) ← slim layout
+│   ├── NewsletterClientContainer.tsx (28L) ← Provider wrapper
+│   ├── NewsletterContext.tsx (59L) ← NEW
+│   ├── NewsletterForm.tsx (49L) ← NEW
+│   └── types.ts
+└── partners/ (inchangé)
+
+lib/utils/with-display-toggle.tsx (32L) ← NEW RSC helper
+agenda/AgendaNewsletter.tsx (101L) ← fix cascading
+app/(marketing)/page.tsx (49L) ← Partners Suspense
+```
 
 ---
 

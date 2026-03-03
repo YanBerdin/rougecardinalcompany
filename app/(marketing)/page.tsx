@@ -1,7 +1,3 @@
-//import { DeployButton } from "@/components/deploy-button";
-//import { EnvVarWarning } from "@/components/env-var-warning";
-//import { AuthButton } from "@/components/auth-button";
-//import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Suspense } from "react";
 
 // ✅ ISR: Cache pour 60 secondes avec revalidation automatique
@@ -13,19 +9,29 @@ import {
   AboutContainer,
   ShowsContainer,
   NewsletterContainer,
+  PartnersContainer,
 } from "@/components/features/public-site/home";
 import { HeroSkeleton } from "@/components/skeletons/hero-skeleton";
 import { NewsSkeleton } from "@/components/skeletons/news-skeleton";
 import { AboutSkeleton } from "@/components/skeletons/about-skeleton";
 import { ShowsSkeleton } from "@/components/skeletons/shows-skeleton";
 import { NewsletterSkeleton } from "@/components/skeletons/newsletter-skeleton";
+import { PartnersSkeleton } from "@/components/skeletons/partners-skeleton";
 
 export default function Home() {
   return (
     <main className="space-y-0">
-      <Suspense fallback={<HeroSkeleton />}>
-        <HeroContainer />
-      </Suspense>
+      {/* Hero + Partners en overlay au bas du hero */}
+      <div className="relative">
+        <Suspense fallback={<HeroSkeleton />}>
+          <HeroContainer />
+        </Suspense>
+        <div className="absolute bottom-0 left-0 right-0 z-10">
+          <Suspense fallback={<PartnersSkeleton />}>
+            <PartnersContainer />
+          </Suspense>
+        </div>
+      </div>
       <Suspense fallback={<ShowsSkeleton />}>
         <ShowsContainer />
       </Suspense>
@@ -38,16 +44,6 @@ export default function Home() {
       <Suspense fallback={<AboutSkeleton />}>
         <AboutContainer />
       </Suspense>
-
-      <div className="flex-1 w-full flex flex-col gap-20 items-center">
-        {/* <div className="flex-1 flex flex-col gap-20 max-w-5xl p-5">
-           <main className="flex-1 flex flex-col gap-6 px-4">
-           <h2 className="font-medium text-xl mb-4">Next steps</h2>
-            {hasEnvVars ? <SignUpUserSteps /> : <ConnectSupabaseSteps />}
-          </main>
-        </div>
-        */}
-      </div>
     </main>
   );
 }

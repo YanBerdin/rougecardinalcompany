@@ -10,5 +10,4 @@ export interface Show {
 
 export interface ShowsViewProps {
   shows: Show[];
-  isLoading?: boolean;
 }

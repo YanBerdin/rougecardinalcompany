@@ -23,6 +23,8 @@ export interface HeroProps {
   onNextSlide: () => void;
   onGoToSlide: (index: number) => void;
   onPauseAutoPlay: () => void;
+  onToggleAutoPlay: () => void;
+  onKeyDown: (e: React.KeyboardEvent) => void;
   onTouchStart: (e: React.TouchEvent | React.MouseEvent) => void;
   onTouchMove: (e: React.TouchEvent | React.MouseEvent) => void;
   onTouchEnd: () => void;

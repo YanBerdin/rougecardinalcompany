@@ -1,10 +1,9 @@
 import Link from "next/link";
-import { Calendar, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { NewsViewProps } from "./types";
+import { NewsCard } from "./NewsCard";
 
-// Composant pour afficher les actualités "À la Une"
 export function NewsView({ news }: NewsViewProps) {
   if (news.length === 0) {
     return null;
@@ -14,7 +13,9 @@ export function NewsView({ news }: NewsViewProps) {
     <section className="py-24 bg-background">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h3 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">À la Une</h3>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">
+            À la Une
+          </h2>
           <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
             Suivez l&apos;actualité de la compagnie Rouge-Cardinal
           </p>
@@ -22,67 +23,14 @@ export function NewsView({ news }: NewsViewProps) {
 
         <div className="flex flex-wrap justify-center gap-8 mb-12">
           {news.map((item, index) => (
-            <Card
-              key={item.id}
-              className={`card-hover animate-fade-in-up w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.33rem)] max-w-sm flex flex-col`}
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <div className="relative overflow-hidden rounded-t-lg">
-                <div
-                  className="h-48 bg-cover bg-center transition-transform duration-300 hover:scale-105"
-                  style={{ backgroundImage: `url(${item.image})` }}
-                />
-                <div className="absolute top-4 left-4">
-                  <span className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium">
-                    {item.category}
-                  </span>
-                </div>
-              </div>
-
-              <CardContent className="p-6 flex flex-col flex-1">
-                <div className="flex items-center card-date text-sm mb-3">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  {new Date(item.date).toLocaleDateString("fr-FR", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </div>
-
-                <h3 className="text-xl font-semibold mb-3 hover:text-primary transition-colors card-title">
-                  <Link href={`/actualites/${item.id}`}>{item.title}</Link>
-                </h3>
-                <p className="leading-relaxed card-text">
-                  {item.short_description}
-                </p>
-              </CardContent>
-
-              <CardFooter className="mt-auto">
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  className=""
-                  asChild
-                >
-                  <Link href={`/actualites/${item.id}`}>
-                    <ArrowRight className="h-4 w-4" />
-                    Lire la suite
-                  </Link>
-                </Button>
-              </CardFooter>
-            </Card>
+            <NewsCard key={item.id} item={item} index={index} />
           ))}
         </div>
 
         <div className="text-center">
-          <Button
-            variant="default"
-            size="lg"
-            asChild
-            className="cta-blur-button"
-          >
+          <Button variant="default" size="lg" asChild className="cta-blur-button">
             <Link href="/actualites">
-              <ArrowRight className="h-5 w-5" />
+              <ArrowRight className="h-5 w-5" aria-hidden="true" />
               Voir toutes les actualités
             </Link>
           </Button>

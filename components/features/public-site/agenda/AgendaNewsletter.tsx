@@ -7,8 +7,11 @@
  */
 
 import { CheckCircle } from "lucide-react";
-import { useNewsletterSubscribe } from "@/lib/hooks/useNewsletterSubscribe";
-import { NewsletterForm } from "@/components/features/public-site/home/newsletter";
+import {
+    NewsletterForm,
+    NewsletterProvider,
+    useNewsletterContext,
+} from "@/components/features/public-site/home/newsletter";
 
 // ============================================================================
 // Internal Sub-Components (not exported)
@@ -50,21 +53,8 @@ function SubscribedConfirmation(): React.JSX.Element {
     );
 }
 
-interface SubscribeFormSectionProps {
-    readonly email: string;
-    readonly isLoading: boolean;
-    readonly errorMessage: string | null;
-    readonly onEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    readonly onSubmit: (e?: React.FormEvent) => Promise<void>;
-}
-
-function SubscribeFormSection({
-    email,
-    isLoading,
-    errorMessage,
-    onEmailChange,
-    onSubmit,
-}: SubscribeFormSectionProps): React.JSX.Element {
+function AgendaSubscribeSection(): React.JSX.Element {
+    const { errorMessage } = useNewsletterContext();
     return (
         <div className="animate-fade-in-up">
             {errorMessage && (
@@ -72,14 +62,7 @@ function SubscribeFormSection({
                     {errorMessage}
                 </p>
             )}
-            <NewsletterForm
-                email={email}
-                isLoading={isLoading}
-                isSubscribed={false}
-                errorMessage={errorMessage}
-                onEmailChange={onEmailChange}
-                onSubmit={onSubmit}
-            />
+            <NewsletterForm />
             <p className="text-white/70 text-sm mt-4">
                 Nous respectons votre vie privée. Désinscription en 1 clic.
             </p>
@@ -91,16 +74,8 @@ function SubscribeFormSection({
 // Exported Compound Component
 // ============================================================================
 
-export function AgendaNewsletter(): React.JSX.Element {
-    const {
-        email,
-        isSubscribed,
-        isLoading,
-        errorMessage,
-        handleEmailChange,
-        handleSubmit,
-    } = useNewsletterSubscribe({ source: "agenda" });
-
+function AgendaNewsletterInner(): React.JSX.Element {
+    const { isSubscribed } = useNewsletterContext();
     return (
         <section className="py-16 hero-gradient" aria-labelledby="newsletter-heading">
             <div className="max-w-6xl mx-auto grid grid-cols-1 gap-x-8 lg:gap-y-6 lg:grid-cols-[3fr_2fr] px-4">
@@ -109,16 +84,18 @@ export function AgendaNewsletter(): React.JSX.Element {
                     {isSubscribed ? (
                         <SubscribedConfirmation />
                     ) : (
-                        <SubscribeFormSection
-                            email={email}
-                            isLoading={isLoading}
-                            errorMessage={errorMessage}
-                            onEmailChange={handleEmailChange}
-                            onSubmit={handleSubmit}
-                        />
+                        <AgendaSubscribeSection />
                     )}
                 </div>
             </div>
         </section>
+    );
+}
+
+export function AgendaNewsletter(): React.JSX.Element {
+    return (
+        <NewsletterProvider source="agenda">
+            <AgendaNewsletterInner />
+        </NewsletterProvider>
     );
 }

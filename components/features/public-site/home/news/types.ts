@@ -5,10 +5,8 @@ export interface NewsItem {
   date: string;
   image: string;
   category: string;
-  premiere?: string;
 }
 
 export interface NewsViewProps {
   news: NewsItem[];
-  isLoading?: boolean;
 }

@@ -1,19 +1,9 @@
-export interface NewsletterFormProps {
-  email: string;
-  isLoading: boolean;
-  isSubscribed: boolean;
-  errorMessage?: string | null;
-  onEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onSubmit: (e: React.FormEvent) => void;
-}
+/** NewsletterForm reads its data from NewsletterContext — no props needed. */
+export type NewsletterFormProps = Record<string, never>;
 
 export interface NewsletterViewProps {
   isSubscribed: boolean;
   isInitialLoading: boolean;
-  email: string;
-  isLoading: boolean;
-  errorMessage?: string | null;
-  onEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onSubmit: (e: React.FormEvent) => void;
+  errorMessage: string | null;
   children?: React.ReactNode;
 }

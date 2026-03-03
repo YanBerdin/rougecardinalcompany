@@ -1,5 +1,73 @@
 # Progress
 
+## TASK072 — Audit Public Home (2026-03-03)
+
+**Context** : Audit conformité de `components/features/public-site/home/` (6 sous-modules : hero, about, news, shows, newsletter, partners) contre toutes les instructions projet. Plan en 7 étapes, 22 sous-tâches. 2 étapes skipped (7.2 compound carousel, 7.5 remove use client). Fix cascading non planifié sur AgendaNewsletter. TASK072.
+
+**Violations corrigées** :
+
+| # | Catégorie | Violation | Correction |
+| --- | ----------- | ----------- | ------------ |
+| 1 | Clean Code | 5 hooks.ts dead code (hero, about, news, shows, partners) | Fichiers supprimés (~604L) |
+| 2 | Clean Code | home/types.ts 100% commenté | Fichier supprimé |
+| 3 | Clean Code | Magic numbers carousel (5000, 2000, 50) | `hero/constants.ts` avec 4 constantes nommées |
+| 4 | Clean Code | HeroView.tsx 192L monolithe | 62L orchestrateur + 5 sous-composants |
+| 5 | Clean Code | AboutView.tsx 75L monolithe | 12L wrapper + AboutContent.tsx 62L |
+| 6 | Clean Code | NewsView.tsx 94L monolithe | 41L section + NewsCard.tsx 64L |
+| 7 | Clean Code | ShowsView.tsx 117L monolithe | 37L section + ShowCard.tsx 92L |
+| 8 | a11y | Carousel pas navigable clavier | ArrowLeft/Right, pause/play button |
+| 9 | a11y | Pas de role="region" carousel | role="region", aria-roledescription="carousel" |
+| 10 | a11y | Pas d'aria-live carousel | aria-live="polite" (off quand autoplay) |
+| 11 | a11y | Dots sans aria-current | aria-current="step" sur dot actif |
+| 12 | a11y | Pas de prefers-reduced-motion | autoplay désactivé si reduced-motion |
+| 13 | a11y | ShowCard overlay hover-only | group-focus-within:opacity-100 |
+| 14 | SRP | HeroContainer inclut PartnersContainer | Partners extrait vers page.tsx Suspense |
+| 15 | Composition | Newsletter 8 props drilling | NewsletterContext + useNewsletterContext |
+| 16 | DRY | Display toggle pattern dupliqué | withDisplayToggle RSC helper 32L |
+| 17 | Cascading | AgendaNewsletter.tsx sans NewsletterProvider | Fix wrapping NewsletterProvider source="agenda" |
+
+**Fichiers livrés** :
+
+| Fichier | Action | Lignes | Rôle |
+| --------- | -------- | -------- | ------ |
+| `hero/constants.ts` | Créé | 16 | 4 constantes nommées |
+| `hero/HeroSlideBackground.tsx` | Créé | 42 | Background image |
+| `hero/HeroCTA.tsx` | Créé | 60 | Call-to-action buttons |
+| `hero/HeroNavigation.tsx` | Créé | 65 | Prev/Next arrows |
+| `hero/HeroIndicators.tsx` | Créé | 76 | Dots avec aria-current |
+| `hero/HeroProgressBar.tsx` | Créé | 22 | Barre de progression |
+| `about/AboutContent.tsx` | Créé | 62 | Contenu section about |
+| `news/NewsCard.tsx` | Créé | 64 | Carte actualité |
+| `shows/ShowCard.tsx` | Créé | 92 | Carte spectacle focus-within |
+| `newsletter/NewsletterContext.tsx` | Créé | 59 | Context + Provider |
+| `newsletter/NewsletterForm.tsx` | Créé | 49 | Form isolé |
+| `lib/utils/with-display-toggle.tsx` | Créé | 32 | RSC helper |
+| `hero/HeroView.tsx` | Modifié | 192→62 | Orchestrateur slim |
+| `hero/HeroClient.tsx` | Modifié | +63 | a11y keyboard + pause/play |
+| `hero/HeroContainer.tsx` | Modifié | 18→29 | SRP décoiffé Partners |
+| `about/AboutView.tsx` | Modifié | 75→12 | Wrapper slim |
+| `news/NewsView.tsx` | Modifié | 94→41 | Section + grid |
+| `shows/ShowsView.tsx` | Modifié | 117→37 | Section + grid |
+| `newsletter/NewsletterView.tsx` | Modifié | 111→65 | Slim context consumer |
+| `newsletter/NewsletterClientContainer.tsx` | Modifié | →28 | Provider wrapper |
+| `app/(marketing)/page.tsx` | Modifié | +Suspense | Partners Suspense |
+| `agenda/AgendaNewsletter.tsx` | Modifié | +wrap | NewsletterProvider |
+| `hero/hooks.ts` | Supprimé | — | Dead code |
+| `about/hooks.ts` | Supprimé | — | Dead code |
+| `news/hooks.ts` | Supprimé | — | Dead code |
+| `shows/hooks.ts` | Supprimé | — | Dead code |
+| `partners/hooks.ts` | Supprimé | — | Dead code |
+| `home/types.ts` | Supprimé | — | Dead code |
+
+**Memory-bank synchronisé** :
+
+- `activeContext.md` : TASK072 ajouté comme current focus
+- `progress.md` : Journal mis à jour (cette entrée)
+- `tasks/_index.md` : TASK072 marqué Completed
+- `tasks/tasks-completed/TASK072-audit-home-public-site.md` : Fichier de tâche créé
+
+---
+
 ## TASK071 — Audit Public Contact (2026-03-03)
 
 **Context** : Audit conformité de `components/features/public-site/contact` contre toutes les instructions projet (.github/instructions/). 12 violations identifiées et corrigées en une session. TASK071.

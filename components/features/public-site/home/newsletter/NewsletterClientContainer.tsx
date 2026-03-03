@@ -1,39 +1,28 @@
 "use client";
 
-import { NewsletterView, NewsletterForm } from "./NewsletterView";
-import { useNewsletterSubscribe } from "./hooks";
+import { NewsletterView } from "./NewsletterView";
+import { NewsletterForm } from "./NewsletterForm";
+import { NewsletterProvider, useNewsletterContext } from "./NewsletterContext";
+
+function NewsletterViewInner() {
+    const { isSubscribed, isInitialLoading, errorMessage } =
+        useNewsletterContext();
+
+    return (
+        <NewsletterView
+            isSubscribed={isSubscribed}
+            isInitialLoading={isInitialLoading}
+            errorMessage={errorMessage}
+        >
+            {!isSubscribed && !isInitialLoading && <NewsletterForm />}
+        </NewsletterView>
+    );
+}
 
 export function NewsletterClientContainer() {
-  const {
-    email,
-    isSubscribed,
-    isLoading,
-    isInitialLoading,
-    errorMessage,
-    handleEmailChange,
-    handleSubmit,
-  } = useNewsletterSubscribe();
-
-  return (
-    <NewsletterView
-      isSubscribed={isSubscribed}
-      isInitialLoading={isInitialLoading}
-      errorMessage={errorMessage}
-      email={email}
-      isLoading={isLoading}
-      onEmailChange={handleEmailChange}
-      onSubmit={handleSubmit}
-    >
-      {!isSubscribed && !isInitialLoading && (
-        <NewsletterForm
-          email={email}
-          isLoading={isLoading}
-          isSubscribed={isSubscribed}
-          errorMessage={errorMessage}
-          onEmailChange={handleEmailChange}
-          onSubmit={handleSubmit}
-        />
-      )}
-    </NewsletterView>
-  );
+    return (
+        <NewsletterProvider>
+            <NewsletterViewInner />
+        </NewsletterProvider>
+    );
 }
