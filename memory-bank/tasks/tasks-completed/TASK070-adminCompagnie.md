@@ -91,41 +91,41 @@ Voir plan détaillé : `.github/prompts/plan-TASK070-adminCompagnie.prompt.md` (
 
 ### Subtasks
 
-| ID    | Description                                                    | Status    | Updated    | Notes                                                                       |
+| ID | Description | Status | Updated | Notes |
 | ----- | -------------------------------------------------------------- | --------- | ---------- | --------------------------------------------------------------------------- |
-| 70.A1 | Migration alt_text sur compagnie_presentation_sections         | Complete  | 2026-03-02 | ✅ `20260302184850` + schéma déclaratif `07c` + 4 hotfix migrations position |
-| 70.A2 | Schemas : alt_text + suppression Stats de compagnie-admin.ts   | Complete  | 2026-03-02 | ✅ Stats jamais créés ici (directement dans home-content.ts)                 |
-| 70.A3 | DAL Presentation : alt_text + suppression fonctions Stats      | Complete  | 2026-03-02 | ✅ 2 DAL séparés dès le départ : presentation (230L) + values (194L)        |
-| 70.A4 | Actions Compagnie : vérification alt_text                      | Complete  | 2026-03-06 | ✅ Presentation = UPDATE-only (42L). Values = CRUD+reorder (129L)           |
-| 70.A5 | Page admin/compagnie : 2 onglets (suppression Chiffres clés)   | Complete  | 2026-03-02 | ✅ Ordre : Présentation (défaut) + Valeurs. `sm:grid-cols-2`               |
-| 70.A6a| PresentationForm : kind/slug en hidden fields                  | Complete  | 2026-03-05 | ✅ slug hidden, kind affiché en Badge read-only                             |
-| 70.A6b| PresentationFormFields : SHOW_IMAGE_URL + ImageFieldGroup      | Complete  | 2026-03-05 | ✅ `"history"` ajouté à SHOW_IMAGE_URL                                     |
-| 70.B1 | Schemas HomeStat* dans home-content.ts                         | Complete  | 2026-03-03 | ✅ +46 lignes : Input, Form, DTO, ReorderSchema                            |
-| 70.B2 | DAL admin-home-stats.ts (5 fonctions + cache)                  | Complete  | 2026-03-03 | ✅ 196 lignes, CRUD + reorder + cache()                                    |
-| 70.B3 | Actions home-stats-actions.ts (4 actions + revalidate)         | Complete  | 2026-03-03 | ✅ 123 lignes dans lib/actions/ (pas colocalisé)                           |
-| 70.B4 | Composants Stats déplacés vers admin/home/                     | Complete  | 2026-03-04 | ✅ Créés neufs : StatsContainer, StatsView, StatForm, types.ts             |
-| 70.B5 | Page admin/home/about : section Stats                          | Complete  | 2026-03-04 | ✅ Separator + section aria-labelledby="stats-heading"                     |
-| 70.C1 | Suppression fichiers Stats obsolètes                           | Complete  | 2026-03-06 | ✅ N/A — Stats jamais construites dans compagnie (architecture correcte dès v2) |
-| 70.C2 | Vérification sidebar (aucun changement attendu)                | Complete  | 2026-03-04 | ✅ "Compagnie" ajouté + 3 renommages labels (Contenu→Pages, etc.)          |
-| 70.C3 | Script test home-stats                                         | Complete  | 2026-03-05 | ✅ 2 scripts : test-admin-compagnie.ts (257L) + test-home-stats.ts (172L)  |
-| 70.C4 | Vérification manuelle navigateur (5 points)                    | Complete  | 2026-03-06 | ✅ Bugs position trouvés et corrigés via 4 hotfix migrations               |
-| 70.E1 | Schemas admin Values (inchangé depuis v1)                      | Complete  | 2026-03-02 | ✅ CompagnieValueInput/Form/DTO + ReorderSchema dans compagnie-admin.ts    |
-| 70.E2 | DAL admin-compagnie-values.ts (inchangé depuis v1)             | Complete  | 2026-03-02 | ✅ 194 lignes, CRUD + reorder + cache()                                   |
-| 70.E3 | Actions Values (inchangé depuis v1)                            | Complete  | 2026-03-02 | ✅ 4 actions (create, update, delete, reorder) en 129 lignes              |
-| 70.E4 | UI Onglet Valeurs (Container+View+Form)                        | Complete  | 2026-03-04 | ✅ ValuesContainer, ValuesView, ValueForm + ContentArrayField              |
+| 70.A1 | Migration alt_text sur compagnie_presentation_sections | Complete | 2026-03-02 | ✅ `20260302184850` + schéma déclaratif `07c` + 4 hotfix migrations position |
+| 70.A2 | Schemas : alt_text + suppression Stats de compagnie-admin.ts | Complete | 2026-03-02 | ✅ Stats jamais créés ici (directement dans home-content.ts) |
+| 70.A3 | DAL Presentation : alt_text + suppression fonctions Stats | Complete | 2026-03-02 | ✅ 2 DAL séparés dès le départ : presentation (230L) + values (194L) |
+| 70.A4 | Actions Compagnie : vérification alt_text | Complete | 2026-03-06 | ✅ Presentation = UPDATE-only (42L). Values = CRUD+reorder (129L) |
+| 70.A5 | Page admin/compagnie : 2 onglets (suppression Chiffres clés) | Complete | 2026-03-02 | ✅ Ordre : Présentation (défaut) + Valeurs. `sm:grid-cols-2` |
+| 70.A6a | PresentationForm : kind/slug en hidden fields | Complete | 2026-03-05 | ✅ slug hidden, kind affiché en Badge read-only |
+| 70.A6b | PresentationFormFields : SHOW_IMAGE_URL + ImageFieldGroup | Complete | 2026-03-05 | ✅ `"history"` ajouté à SHOW_IMAGE_URL |
+| 70.B1 | Schemas HomeStat* dans home-content.ts | Complete | 2026-03-03 | ✅ +46 lignes : Input, Form, DTO, ReorderSchema |
+| 70.B2 | DAL admin-home-stats.ts (5 fonctions + cache) | Complete | 2026-03-03 | ✅ 196 lignes, CRUD + reorder + cache() |
+| 70.B3 | Actions home-stats-actions.ts (4 actions + revalidate) | Complete | 2026-03-03 | ✅ 123 lignes dans lib/actions/ (pas colocalisé) |
+| 70.B4 | Composants Stats déplacés vers admin/home/ | Complete | 2026-03-04 | ✅ Créés neufs : StatsContainer, StatsView, StatForm, types.ts |
+| 70.B5 | Page admin/home/about : section Stats | Complete | 2026-03-04 | ✅ Separator + section aria-labelledby="stats-heading" |
+| 70.C1 | Suppression fichiers Stats obsolètes | Complete | 2026-03-06 | ✅ N/A — Stats jamais construites dans compagnie (architecture correcte dès v2) |
+| 70.C2 | Vérification sidebar (aucun changement attendu) | Complete | 2026-03-04 | ✅ "Compagnie" ajouté + 3 renommages labels (Contenu→Pages, etc.) |
+| 70.C3 | Script test home-stats | Complete | 2026-03-05 | ✅ 2 scripts : test-admin-compagnie.ts (257L) + test-home-stats.ts (172L) |
+| 70.C4 | Vérification manuelle navigateur (5 points) | Complete | 2026-03-06 | ✅ Bugs position trouvés et corrigés via 4 hotfix migrations |
+| 70.E1 | Schemas admin Values (inchangé depuis v1) | Complete | 2026-03-02 | ✅ CompagnieValueInput/Form/DTO + ReorderSchema dans compagnie-admin.ts |
+| 70.E2 | DAL admin-compagnie-values.ts (inchangé depuis v1) | Complete | 2026-03-02 | ✅ 194 lignes, CRUD + reorder + cache() |
+| 70.E3 | Actions Values (inchangé depuis v1) | Complete | 2026-03-02 | ✅ 4 actions (create, update, delete, reorder) en 129 lignes |
+| 70.E4 | UI Onglet Valeurs (Container+View+Form) | Complete | 2026-03-04 | ✅ ValuesContainer, ValuesView, ValueForm + ContentArrayField |
 
 ### Travail supplémentaire (hors plan)
 
-| ID     | Description                          | Status   | Updated    | Notes                                                          |
+| ID | Description | Status | Updated | Notes |
 | ------ | ------------------------------------ | -------- | ---------- | -------------------------------------------------------------- |
-| 70.X1  | Reorder Values (schema+DAL+action)   | Complete | 2026-03-03 | Pattern standard CRUD avec position                             |
-| 70.X2  | Reorder Home Stats (schema+DAL+action)| Complete | 2026-03-03 | Pattern standard CRUD avec position                             |
-| 70.X3  | 2 sous-pages read-only               | Complete | 2026-03-04 | presentation/page.tsx (136L) + valeurs/page.tsx (92L)          |
-| 70.X4  | 4 migrations hotfix position         | Complete | 2026-03-05 | hero, mission, history, quote-history — fix Zod `.default(0)`  |
-| 70.X5  | Fix Zod `.default(0)` → `.optional()`| Complete | 2026-03-05 | Bug critique : `.partial()` ne neutralise pas `.default()`     |
-| 70.X6  | Fix slug `.optional().or(z.literal(""))` | Complete | 2026-03-05 | Sections sans slug (mission) rejetées par validation        |
-| 70.X7  | ContentArrayField.tsx                | Complete | 2026-03-04 | 106 lignes — éditeur de champs `text[]`                        |
-| 70.X8  | Sidebar renommages labels            | Complete | 2026-03-04 | Contenu→Pages, 2 sous-items renommés                           |
+| 70.X1 | Reorder Values (schema+DAL+action) | Complete | 2026-03-03 | Pattern standard CRUD avec position |
+| 70.X2 | Reorder Home Stats (schema+DAL+action) | Complete | 2026-03-03 | Pattern standard CRUD avec position |
+| 70.X3 | 2 sous-pages read-only | Complete | 2026-03-04 | presentation/page.tsx (136L) + valeurs/page.tsx (92L) |
+| 70.X4 | 4 migrations hotfix position | Complete | 2026-03-05 | hero, mission, history, quote-history — fix Zod `.default(0)` |
+| 70.X5 | Fix Zod `.default(0)` → `.optional()` | Complete | 2026-03-05 | Bug critique : `.partial()` ne neutralise pas `.default()` |
+| 70.X6 | Fix slug `.optional().or(z.literal(""))` | Complete | 2026-03-05 | Sections sans slug (mission) rejetées par validation |
+| 70.X7 | ContentArrayField.tsx | Complete | 2026-03-04 | 106 lignes — éditeur de champs `text[]` |
+| 70.X8 | Sidebar renommages labels | Complete | 2026-03-04 | Contenu→Pages, 2 sous-items renommés |
 
 ## Progress Log
 

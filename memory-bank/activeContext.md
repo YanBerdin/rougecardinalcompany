@@ -18,7 +18,7 @@
 - **Présentation = UPDATE-only** : Les 6 sections sont fixes en DB — seul `updatePresentationSectionAction` exposé (42L), kind/slug en hidden fields
 - **ContentArrayField** : Composant custom (106L) pour éditer les champs `text[]` (tableaux de paragraphes, valeurs)
 - **Sous-pages read-only** : `/admin/compagnie/presentation` (136L) et `/admin/compagnie/valeurs` (92L) en Server Components
-- **Stats→Home** : `StatsContainer/View/Form` ajoutés dans `/admin/home/about` ; revalidation `/ ` + `/admin/home/about`
+- **Stats→Home** : `StatsContainer/View/Form` ajoutés dans `/admin/home/about` ; revalidation `/` + `/admin/home/about`
 - **Bug Zod critique** : `.partial()` ne neutralise PAS `.default(0)` → position réinitialisée à 0 à chaque update. Fix : remplacer `.default(0)` par `.optional()` sur `position` + `active`
 - **4 migrations hotfix** position : hero(0/10/20/30/40/50), mission(30), history(20), quote-history(25)
 - **Sidebar** : Entrée "Compagnie" ajoutée (Building2 icon) + 3 renommages
