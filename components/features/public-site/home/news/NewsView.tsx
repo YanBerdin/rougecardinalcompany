@@ -29,7 +29,7 @@ export function NewsView({ news }: NewsViewProps) {
 
         <div className="text-center">
           <Button variant="default" size="lg" asChild className="cta-blur-button">
-            <Link href="/actualites">
+            <Link href="/presse">
               <ArrowRight className="h-5 w-5" aria-hidden="true" />
               Voir toutes les actualités
             </Link>

@@ -4,6 +4,8 @@ export interface NewsItem {
   short_description: string;
   date: string;
   image: string;
+  source_url: string;
+  source_publication: string;
   category: string;
 }
 
