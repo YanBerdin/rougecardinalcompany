@@ -1,611 +1,389 @@
-## Plan : Admin Compagnie — CRUD page /compagnie
+## Plan v2 : Admin Compagnie + Stats → Home — Réorganisation architecturale
 
-> **Audit conformité** : Vérifié vs instructions projet (DAL SOLID, Clean Code, CRUD Server Actions, BigInt Three-Layer, TypeScript Strict, WCAG 2.2 AA).
-> **Patterns de référence** : `lib/dal/admin-partners.ts`, `lib/schemas/partners.ts`, `app/(admin)/admin/presse/page.tsx`, `app/(admin)/admin/presse/press-articles-actions.ts`, `components/features/admin/presse/PressReleasesContainer.tsx`.
-
-Page unique tabulée à `/admin/compagnie` (pattern `app/(admin)/admin/presse/page.tsx`) avec 3 onglets pour gérer `compagnie_values`, `compagnie_stats` et `compagnie_presentation_sections`. Chaque onglet encapsule un Container Server + View Client + Form Client suivant le pattern de `components/features/admin/presse/`. Le DAL existant est public-only — les DAL admin avec `requireAdmin()` sont à créer. Les 3 tables ont déjà le RLS configuré pour l'admin (vérifié dans `supabase/schemas/07b_table_compagnie_content.sql` et `07c_table_compagnie_presentation.sql`).
-
-**Steps**
-
-### Étape 1 — Schemas admin (`lib/schemas/compagnie-admin.ts`)
-
-Créer un fichier de schémas dédié admin avec la séparation Server / UI / DTO (pattern `lib/schemas/partners.ts`) :
-
-**1a. CompagnieValue (table `compagnie_values`)** :
-
-```typescript
-// Server Schema — bigint IDs, utilisé dans DAL
-export const CompagnieValueInputSchema = z.object({
-  key: z.string().min(1).max(80),
-  title: z.string().min(1, "Le titre est requis").max(80),
-  description: z.string().min(1, "La description est requise"),
-  position: z.number().int().min(0).default(0),
-  active: z.boolean().default(true),
-});
-export type CompagnieValueInput = z.infer<typeof CompagnieValueInputSchema>;
-
-// UI Schema — sans key (auto-généré par generateSlug(title) dans le DAL)
-export const CompagnieValueFormSchema = z.object({
-  title: z.string().min(1, "Le titre est requis").max(80),
-  description: z.string().min(1, "La description est requise"),
-  position: z.number().int().min(0),
-  active: z.boolean(),
-});
-export type CompagnieValueFormValues = z.infer<typeof CompagnieValueFormSchema>;
-
-// DTO — number IDs pour sérialisation JSON
-export interface CompagnieValueDTO {
-  id: number;
-  key: string;
-  title: string;
-  description: string;
-  position: number;
-  active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-```
-
-**1b. CompagnieStat (table `compagnie_stats`)** — même structure :
-
-```typescript
-export const CompagnieStatInputSchema = z.object({
-  key: z.string().min(1).max(80),
-  label: z.string().min(1, "Le label est requis").max(80),
-  value: z.string().min(1, "La valeur est requise").max(20), // souplesse "15+", "8"
-  position: z.number().int().min(0).default(0),
-  active: z.boolean().default(true),
-});
-export type CompagnieStatInput = z.infer<typeof CompagnieStatInputSchema>;
-
-export const CompagnieStatFormSchema = z.object({
-  label: z.string().min(1, "Le label est requis").max(80),
-  value: z.string().min(1, "La valeur est requise").max(20),
-  position: z.number().int().min(0),
-  active: z.boolean(),
-});
-export type CompagnieStatFormValues = z.infer<typeof CompagnieStatFormSchema>;
-
-export interface CompagnieStatDTO {
-  id: number;
-  key: string;
-  label: string;
-  value: string;
-  position: number;
-  active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-```
-
-**1c. PresentationSection (table `compagnie_presentation_sections`)** :
-
-```typescript
-const SECTION_KINDS = ["hero", "history", "quote", "values", "team", "mission", "custom"] as const;
-
-export const PresentationSectionInputSchema = z.object({
-  slug: z.string().min(1).max(80),
-  kind: z.enum(SECTION_KINDS),
-  title: z.string().optional().nullable(),
-  subtitle: z.string().optional().nullable(),
-  content: z.array(z.string()).optional().nullable(),
-  quote_text: z.string().optional().nullable(),
-  quote_author: z.string().optional().nullable(),
-  image_url: addImageUrlValidation(z.string().url()).optional().nullable().or(z.literal("")),
-  image_media_id: z.coerce.bigint().optional().nullable(),
-  position: z.number().int().min(0).default(0),
-  active: z.boolean().default(true),
-});
-export type PresentationSectionInput = z.infer<typeof PresentationSectionInputSchema>;
-
-export const PresentationSectionFormSchema = z.object({
-  slug: z.string().min(1).max(80),
-  kind: z.enum(SECTION_KINDS),
-  title: z.string().optional().or(z.literal("")),
-  subtitle: z.string().optional().or(z.literal("")),
-  content: z.array(z.string()).optional(),
-  quote_text: z.string().optional().or(z.literal("")),
-  quote_author: z.string().optional().or(z.literal("")),
-  image_url: z.string().url().optional().or(z.literal("")),
-  image_media_id: z.number().int().positive().optional().nullable(), // number, pas bigint
-  position: z.number().int().min(0),
-  active: z.boolean(),
-});
-export type PresentationSectionFormValues = z.infer<typeof PresentationSectionFormSchema>;
-
-export interface PresentationSectionDTO {
-  id: number;
-  slug: string;
-  kind: typeof SECTION_KINDS[number];
-  title: string | null;
-  subtitle: string | null;
-  content: string[] | null;
-  quote_text: string | null;
-  quote_author: string | null;
-  image_url: string | null;
-  image_media_id: number | null;
-  position: number;
-  active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-```
-
-**1d. Reorder Schemas** (pattern `ReorderPartnersSchema` dans `partners.ts`) :
-
-```typescript
-export const ReorderCompagnieValuesSchema = z.object({
-  items: z.array(z.object({
-    id: z.coerce.bigint(),
-    position: z.number().int().min(0),
-  })),
-});
-export type ReorderCompagnieValuesInput = z.infer<typeof ReorderCompagnieValuesSchema>;
-
-// Idem pour Stats et PresentationSections
-export const ReorderCompagnieStatsSchema = z.object({ /* même structure */ });
-export const ReorderPresentationSectionsSchema = z.object({ /* même structure */ });
-```
-
-**Imports requis** : `import { z } from "zod"`, `import { addImageUrlValidation } from "@/lib/utils/image-validation-refinements"`.
-
-**Export** : `SECTION_KINDS` en tant que constante nommée pour réutilisation dans les forms.
+> **TASK070** — Ce plan corrige l'architecture initiale (v1) qui plaçait les Stats (Chiffres clés) sous `admin/compagnie` alors qu'elles alimentent exclusivement la **homepage** (`/`). Le plan est découpé en 3 parties indépendantes : **A** — Admin Compagnie (2 onglets), **B** — Stats → Admin Home, **C** — Nettoyage et vérification.
+>
+> **Décision clé** : La table `compagnie_stats` conserve son nom en base. Seuls les identifiants TypeScript changent (`CompagnieStat*` → `HomeStat*`). Aucune migration de renommage de table n'est nécessaire.
 
 ---
 
-### Étape 2 — DAL admin (3 fichiers dans `lib/dal/`)
+## Bilan d'implémentation (post-mortem)
 
-Pattern de référence : `lib/dal/admin-partners.ts` (259 lignes, SOLID complet).
+> **Statut final** : Implémenté — 39 fichiers (3626 insertions, 622 suppressions)
+> **Date** : 2026-03-02 → 2026-03-06
 
-**Squelette commun** (chaque fichier) :
+### Déviations par rapport au plan
 
-```typescript
-"use server";
-import "server-only";
-import { cache } from "react";
-import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
-import { type DALResult, dalSuccess, dalError } from "@/lib/dal/helpers";
-```
+| # | Étape plan | Déviation | Raison |
+|---|-----------|-----------|--------|
+| 1 | A4 — Actions Presentation CRUD | **UPDATE-ONLY** : `createPresentationSectionAction` et `deletePresentationSectionAction` supprimés | Les sections présentation sont fixées en DB (6 sections), pas d'ajout/suppression en admin |
+| 2 | A5 — Onglets | Ordre inversé : **Présentation** (défaut) + Valeurs | UX : la présentation est consultée plus souvent |
+| 3 | C2 — Sidebar "aucun changement" | **3 renommages** : "Contenu"→"Pages", "Accueil Slides"→"Accueil - Slides", "La compagnie Section"→"Accueil - La compagnie" | Meilleure lisibilité du menu |
 
-**2a.** `lib/dal/admin-compagnie-values.ts` (~120 lignes estimées) :
+### Travail supplémentaire (hors plan)
 
-```
-// ─── Types ─────────────────
-interface RawValueRow { id: unknown; key: string; title: string; description: string; position: number; active: boolean; created_at: string; updated_at: string; }
+| # | Ajout | Fichiers | Raison |
+|---|-------|----------|--------|
+| 1 | **Reorder Values** | `ReorderCompagnieValuesSchema` + `reorderCompagnieValues` DAL + `reorderCompagnieValuesAction` | Fonctionnalité Standard CRUD du projet |
+| 2 | **Reorder Home Stats** | `ReorderHomeStatsSchema` + `reorderHomeStats` DAL + `reorderHomeStatsAction` | Fonctionnalité Standard CRUD du projet |
+| 3 | **2 sous-pages lecture seule** | `compagnie/presentation/page.tsx` (136L) + `compagnie/valeurs/page.tsx` (92L) | Pages Server Component pour consultation rapide |
+| 4 | **4 migrations hotfix position** | `20260302200002`, `20260302210000`, `20260303120000`, `20260303130000` | Bug Zod `.default(0)` + `.partial()` qui réinitialisait les positions |
+| 5 | **Fix Zod position** | `.default(0)` → `.optional()` dans schemas server | `.partial()` ne neutralise pas `.default()` — valeur 0 toujours générée |
+| 6 | **Fix Zod slug** | `.min(1)` → `.optional().or(z.literal(""))` | Sections sans slug (ex: mission) rejetées par la validation |
+| 7 | **2 scripts de test** | `test-admin-compagnie.ts` (257L) + `test-home-stats.ts` (172L) | Plan prévoyait 1 seul script |
+| 8 | **ContentArrayField.tsx** | 106 lignes — éditeur de champs `text[]` | Nécessaire pour `content` (tableau de paragraphes) |
 
-// ─── Constants ─────────────
-const VALUE_SELECT_FIELDS = "id, key, title, description, position, active, created_at, updated_at";
+### Leçons apprises
 
-// ─── Private helpers ───────
-function mapToCompagnieValueDTO(raw: RawValueRow): CompagnieValueDTO
-  → retourne { ...raw, id: Number(raw.id) }
-
-async function getNextPosition(supabase, table: "compagnie_values"): Promise<number>
-  → SELECT position ORDER BY position DESC LIMIT 1, return +1
-
-// ─── Exports ───────────────
-export const fetchAllCompagnieValuesAdmin = cache(async (): Promise<DALResult<CompagnieValueDTO[]>>)
-  → requireAdmin() → SELECT VALUE_SELECT_FIELDS sans filtre active, ORDER BY position
-  → dalError("[ERR_COMPAGNIE_V01]") | dalSuccess(data.map(mapToCompagnieValueDTO))
-
-export async function createCompagnieValue(input: CompagnieValueInput): Promise<DALResult<CompagnieValueDTO>>
-  → requireAdmin() → CompagnieValueInputSchema.parseAsync(input)
-  → auto-calcul position via getNextPosition() si non fourni
-  → auto-génération key via generateSlug(input.title) si key absent
-  → INSERT .select(VALUE_SELECT_FIELDS).single()
-  → dalError("[ERR_COMPAGNIE_V02]") | dalSuccess(mapToCompagnieValueDTO(data))
-
-export async function updateCompagnieValue(id: bigint, input: Partial<CompagnieValueInput>): Promise<DALResult<CompagnieValueDTO>>
-  → requireAdmin() → CompagnieValueInputSchema.partial().parseAsync(input)
-  → UPDATE .eq("id", id.toString()).select(VALUE_SELECT_FIELDS).single()
-  → dalError("[ERR_COMPAGNIE_V03]") | dalSuccess(mapToCompagnieValueDTO(data))
-
-export async function deleteCompagnieValue(id: bigint): Promise<DALResult<void>>
-  → requireAdmin() → DELETE .eq("id", id.toString())
-  → dalError("[ERR_COMPAGNIE_V04]") | dalSuccess(undefined)
-
-export async function reorderCompagnieValues(input: ReorderCompagnieValuesInput): Promise<DALResult<void>>
-  → requireAdmin() → Promise.all(input.items.map(update position))
-  → dalError("[ERR_COMPAGNIE_V05]") | dalSuccess(undefined)
-```
-
-**2b.** `lib/dal/admin-compagnie-stats.ts` (~120 lignes) — même 6 fonctions pour `compagnie_stats` :
-
-```
-// Codes erreur : [ERR_COMPAGNIE_S01] à [ERR_COMPAGNIE_S05]
-// Fonctions : fetchAllCompagnieStatsAdmin, createCompagnieStat, updateCompagnieStat, deleteCompagnieStat, reorderCompagnieStats
-// Helper : mapToCompagnieStatDTO
-// Constante : STAT_SELECT_FIELDS = "id, key, label, value, position, active, created_at, updated_at"
-```
-
-**2c.** `lib/dal/admin-compagnie-presentation.ts` (~150 lignes, plus complexe — media join) :
-
-```
-// ─── Types ─────────────────
-type RawMediaData = { storage_path: string } | { storage_path: string }[] | null;
-interface RawPresentationRow { id: unknown; slug: string; kind: string; ... ; image_media_id: unknown; media: RawMediaData; ... }
-
-// ─── Constants ─────────────
-const SECTION_SELECT_FIELDS = `id, slug, kind, title, subtitle, content, quote_text, quote_author, image_url, image_media_id, position, active, created_at, updated_at, media:image_media_id ( storage_path )`;
-
-// ─── Private helpers ───────
-function mapToPresentationSectionDTO(raw: RawPresentationRow): PresentationSectionDTO
-  → id: Number(raw.id), image_media_id: Number(raw.image_media_id) ou null
-  → image_url: buildMediaPublicUrl(storagePath) ?? raw.image_url ?? null
-
-// ─── Exports ───────────────
-export const fetchAllPresentationSectionsAdmin = cache(async (): Promise<DALResult<PresentationSectionDTO[]>>)
-  → requireAdmin() → SELECT SECTION_SELECT_FIELDS ORDER BY position
-  → dalError("[ERR_COMPAGNIE_P01]") | dalSuccess(mapToPresentationSectionDTO each)
-
-export async function createPresentationSection(input: PresentationSectionInput): ...
-  → PresentationSectionInputSchema.parseAsync(input) → INSERT
-  → dalError("[ERR_COMPAGNIE_P02]") | dalSuccess(...)
-
-export async function updatePresentationSection(id: bigint, input: Partial<PresentationSectionInput>): ...
-  → dalError("[ERR_COMPAGNIE_P03]") | dalSuccess(...)
-
-export async function deletePresentationSection(id: bigint): ...
-  → dalError("[ERR_COMPAGNIE_P04]") | dalSuccess(undefined)
-
-export async function reorderPresentationSections(input: ReorderPresentationSectionsInput): ...
-  → dalError("[ERR_COMPAGNIE_P05]") | dalSuccess(undefined)
-```
-
-**Règles DAL à respecter** (checklist `dal-solid-principles.instructions.md`) :
-- ✅ `"use server"` + `import "server-only"` en tête de chaque fichier
-- ✅ `requireAdmin()` au début de chaque fonction
-- ✅ `dalSuccess()` / `dalError()` — jamais de `{ success: false, error: ... }` brut
-- ✅ `cache()` sur toutes les fonctions de lecture (fetch)
-- ✅ Codes erreur `[ERR_COMPAGNIE_Vxx]`, `[ERR_COMPAGNIE_Sxx]`, `[ERR_COMPAGNIE_Pxx]`
-- ✅ `.parseAsync()` pour validation (pas `.parse()`)
-- ✅ Fonctions < 30 lignes
-- ✅ `mapToDTO()` helper privé avec `Number()` pour bigint→number
-- ✅ Constante `SELECT_FIELDS` nommée
-- ✅ `buildMediaPublicUrl()` pour résolution image media (présentation only)
-- ✅ `getNextPosition()` helper pour auto-incrémentation à la création
+1. **Zod `.partial()` + `.default()`** : Ne JAMAIS combiner. `.partial()` rend le champ optionnel mais `.default()` fournit toujours une valeur → le champ n'est jamais absent. Utiliser `.optional()` à la place.
+2. **Présentation = edit-only** : Les sections de présentation étant fixées en base (6 sections avec kind+slug prédéfinis), le CRUD complet n'est pas nécessaire. Un simple UPDATE suffit.
+3. **Reorder systématique** : Tout CRUD avec position devrait inclure le reorder dès le départ.
 
 ---
 
-### Étape 3 — Server Actions (3 fichiers colocalisés dans `app/(admin)/admin/compagnie/`)
+## Partie A — Admin Compagnie : Valeurs + Présentation (2 onglets)
 
-**CORRECTION vs plan initial** : Splitter en **3 fichiers** (pas 1 unique) pour respecter la limite 300 lignes.
-Pattern de référence : `app/(admin)/admin/presse/press-articles-actions.ts` (3 fichiers séparés dans le même dossier).
+### Étape A1 — Migration DB : ajout `alt_text` sur `compagnie_presentation_sections`
 
-**Squelette commun** (chaque fichier) :
+Créer une migration manuelle dans `supabase/migrations/` (hotfix pattern car `alt_text` est un ajout de colonne simple).
 
-```typescript
-"use server";
-import "server-only";
-import { revalidatePath } from "next/cache";
-import { type ActionResult } from "@/lib/actions/types";
+```sql
+-- YYYYMMDDHHmmss_add_alt_text_to_compagnie_presentation.sql
+alter table public.compagnie_presentation_sections
+  add column alt_text text;
+
+comment on column public.compagnie_presentation_sections.alt_text
+  is 'Texte alternatif pour l''image de la section (accessibilité WCAG 2.2)';
 ```
 
-**3a.** `app/(admin)/admin/compagnie/compagnie-values-actions.ts` (~100 lignes) :
+Mettre à jour le schéma déclaratif correspondant dans [supabase/schemas/07c_table_compagnie_presentation.sql](supabase/schemas/07c_table_compagnie_presentation.sql) pour y ajouter la colonne `alt_text text` en fin de table.
 
-```typescript
-import { CompagnieValueInputSchema, type CompagnieValueInput } from "@/lib/schemas/compagnie-admin";
-import { createCompagnieValue, updateCompagnieValue, deleteCompagnieValue, reorderCompagnieValues } from "@/lib/dal/admin-compagnie-values";
-import { generateSlug } from "@/lib/dal/helpers";
-
-export async function createCompagnieValueAction(input: unknown): Promise<ActionResult> {
-  try {
-    // 1. Valider avec schéma UI (sans key), puis construire l'input Server avec key = generateSlug(title)
-    const form = await CompagnieValueFormSchema.parseAsync(input);
-    const serverInput: CompagnieValueInput = { ...form, key: generateSlug(form.title) };
-    // 2. Appel DAL
-    const result = await createCompagnieValue(serverInput);
-    if (!result.success) return { success: false, error: result.error };
-    // 3. Revalidation
-    revalidatePath("/admin/compagnie");
-    revalidatePath("/compagnie");
-    return { success: true }; // ✅ Pas de data (BigInt Three-Layer)
-  } catch (error: unknown) {
-    return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
-  }
-}
-
-export async function updateCompagnieValueAction(id: string, input: unknown): Promise<ActionResult> {
-  try {
-    const validated = await CompagnieValueInputSchema.partial().parseAsync(input);
-    const result = await updateCompagnieValue(BigInt(id), validated); // BigInt conversion
-    if (!result.success) return { success: false, error: result.error };
-    revalidatePath("/admin/compagnie");
-    revalidatePath("/compagnie");
-    return { success: true };
-  } catch (error: unknown) {
-    return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
-  }
-}
-
-export async function deleteCompagnieValueAction(id: string): Promise<ActionResult> {
-  try {
-    const result = await deleteCompagnieValue(BigInt(id));
-    if (!result.success) return { success: false, error: result.error };
-    revalidatePath("/admin/compagnie");
-    revalidatePath("/compagnie");
-    return { success: true };
-  } catch (error: unknown) {
-    return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
-  }
-}
-
-export async function reorderCompagnieValuesAction(input: unknown): Promise<ActionResult> {
-  try {
-    const validated = await ReorderCompagnieValuesSchema.parseAsync(input);
-    const result = await reorderCompagnieValues(validated);
-    if (!result.success) return { success: false, error: result.error };
-    revalidatePath("/admin/compagnie");
-    revalidatePath("/compagnie");
-    return { success: true };
-  } catch (error: unknown) {
-    return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
-  }
-}
-```
-
-**3b.** `app/(admin)/admin/compagnie/compagnie-stats-actions.ts` (~100 lignes) — même structure, 4 actions.
-
-**3c.** `app/(admin)/admin/compagnie/compagnie-presentation-actions.ts` (~100 lignes) — même structure, 4 actions.
-
-**Règles Server Actions à respecter** :
-- ✅ `"use server"` + `import "server-only"` en tête
-- ✅ `ActionResult` (void, sans `data`) — règle BigInt Three-Layer
-- ✅ `.parseAsync()` pour validation Zod
-- ✅ `BigInt(id)` pour conversion string→bigint avant appel DAL
-- ✅ `revalidatePath("/admin/compagnie")` + `revalidatePath("/compagnie")` sur succès
-- ✅ try/catch avec `error instanceof Error ? error.message : "Unknown error"`
-- ✅ Chaque fichier < 300 lignes
+**Fichiers impactés** :
+- `supabase/migrations/YYYYMMDDHHmmss_add_alt_text_to_compagnie_presentation.sql` (nouveau)
+- `supabase/schemas/07c_table_compagnie_presentation.sql` (ajout colonne)
 
 ---
 
-### Étape 4 — Composants UI (`components/features/admin/compagnie/`)
+### Étape A2 — Schemas : ajout `alt_text` dans les schemas Presentation
 
-Structure des fichiers (< 300 lignes chacun, clean code) :
+Modifier [lib/schemas/compagnie-admin.ts](lib/schemas/compagnie-admin.ts) :
 
-**4a. Onglet Valeurs** (pattern `PressReleasesContainer.tsx` + `PressReleasesView.tsx`) :
+1. **Supprimer** tous les schemas Stats (`CompagnieStatInputSchema`, `CompagnieStatFormSchema`, `CompagnieStatDTO`, etc.) — ils seront recréés dans `home-content.ts` à l'étape B1.
+2. **Ajouter** `alt_text` au `PresentationSectionInputSchema` (server : `z.string().nullable().optional()`).
+3. **Ajouter** `alt_text` au `PresentationSectionFormSchema` (UI : `z.string().optional()`).
+4. **Ajouter** `alt_text` au type `PresentationSectionDTO`.
 
-- `ValuesContainer.tsx` (~30 lignes) — **Server Component** :
-  - Import `fetchAllCompagnieValuesAdmin` depuis DAL
-  - Appelle le DAL, gère l'erreur avec `<div className="text-red-600">`
-  - **Conversion bigint→string** dans le Container (pattern `PressReleasesContainer.tsx`) :
-    ```typescript
-    const valuesForClient = result.data.map((v) => ({
-      ...v,
-      id: String(v.id), // ← OBLIGATOIRE pour Client Component
-    }));
-    return <ValuesView initialValues={valuesForClient} />;
-    ```
-  - Note : les ValuesDTO utilisent déjà `id: number` grâce à `mapToDTO()`, donc la conversion String est pour le transport JSON vers le client
-
-- `ValuesView.tsx` (~200 lignes) — **Client** `"use client"` :
-  - `useState(initialValues)` + `useEffect(() => setValues(initialValues), [initialValues])` — sync props/state CRITIQUE
-  - Handlers CRUD : `handleCreate`, `handleEdit`, `handleDelete` — appellent Server Actions directement
-  - `router.refresh()` après succès (déclenche re-fetch Server Component)
-  - `handleEdit` utilise données locales (pas de fetch supplémentaire)
-  - Dialog form : ouvre `ValueForm` dans un `<Dialog>`
-  - Tableau ou grille de cartes avec : titre, description (tronquée), position, toggle active, boutons edit/delete
-  - Bouton "Ajouter une valeur" en haut
-
-- `ValueForm.tsx` (~150 lignes) — **Client** :
-  - `useForm<CompagnieValueFormValues>` + `zodResolver(CompagnieValueFormSchema)` — pas de cast `as unknown as Resolver<>`
-  - Dialog modal avec champs : title (Input), description (Textarea), position (Input type number), active (Switch/Toggle)
-  - Le `key` n'apparaît PAS dans le formulaire — il est déduit du titre dans l'action
-  - `isPending` state + disable bouton submit
-  - `onSuccess()` callback → parent ferme dialog + `router.refresh()`
-  - `form.reset()` après succès
-  - `defaultValues` depuis `item` prop (map DTO→form values)
-
-**4b. Onglet Chiffres clés** (même pattern) :
-
-- `StatsContainer.tsx` (~30 lignes) — même pattern
-- `StatsView.tsx` (~200 lignes) — Client View : liste + CRUD handlers
-- `StatForm.tsx` (~130 lignes) — Client Form : champs label (Input), value (Input, string libre "15+"), position (Input number), active (Switch)
-
-**4c. Onglet Sections Présentation** (plus complexe — content text[] + image + kind-dependent fields) :
-
-- `PresentationContainer.tsx` (~30 lignes) — Server Component, même pattern
-
-- `PresentationView.tsx` (~200 lignes) — Client View :
-  - Liste des sections avec badge `kind` (utiliser `<Badge variant="outline">`)
-  - CRUD handlers identiques
-  - Affiche titre, kind, position, statut active
-  - Boutons edit/delete par section
-
-- `PresentationForm.tsx` (~250 lignes) — Client Form :
-  - `useForm<PresentationSectionFormValues>` + `zodResolver(PresentationSectionFormSchema)`
-  - Conditional fields selon `kind` :
-    - `hero` / `mission` / `history` : title, subtitle, content[] (via ContentArrayField), image (via MediaLibraryPicker)
-    - `quote` : quote_text (Textarea), quote_author (Input)
-    - `values` / `team` : title, subtitle seulement (info "données gérées dans d'autres onglets")
-    - `custom` : tous les champs
-  - Le `slug` est auto-généré depuis title (via `generateSlug`) ou éditable en mode avancé
-  - Si > 250 lignes → splitter :
-
-- `PresentationFormFields.tsx` (~100 lignes) — Sous-composant : champs communs (kind `<Select>`, title, subtitle, position, active)
-
-- `ContentArrayField.tsx` (~80 lignes) — **Nouveau composant** :
-  - Édition de `text[]` avec liste de `<Textarea>` + boutons Ajouter/Supprimer paragraphe
-  - Pattern custom (pas de `useFieldArray` — react-hook-form `setValue` direct)
-  - **Accessibilité WCAG 2.2** :
-    - Chaque textarea : `<label htmlFor={`paragraph-${index}`}>Paragraphe {index + 1}</label>`
-    - Bouton supprimer : `aria-label={`Supprimer le paragraphe ${index + 1}`}`
-    - Bouton ajouter : texte explicite "Ajouter un paragraphe"
-    - Focus management : après ajout, focus sur le nouveau textarea
-  - Props : `value: string[]`, `onChange: (value: string[]) => void`, `label?: string`
-
-- `types.ts` (~40 lignes) — Props interfaces colocalisées :
-  ```typescript
-  export interface ValuesViewProps { initialValues: (CompagnieValueDTO & { id: string })[]; }
-  export interface StatsViewProps { initialStates: (CompagnieStatDTO & { id: string })[]; }
-  export interface PresentationViewProps { initialSections: (PresentationSectionDTO & { id: string })[]; }
-  export interface ValueFormProps { open: boolean; onClose: () => void; onSuccess: () => void; item?: CompagnieValueDTO | null; }
-  // etc.
-  ```
-
-- `index.ts` — barrel exports
+**Fichiers impactés** :
+- [lib/schemas/compagnie-admin.ts](lib/schemas/compagnie-admin.ts) (modification)
 
 ---
 
-### Étape 5 — Page admin et route
+### Étape A3 — DAL Presentation : ajouter `alt_text` dans les requêtes
 
-`app/(admin)/admin/compagnie/page.tsx` (~65 lignes) :
+Modifier [lib/dal/admin-compagnie.ts](lib/dal/admin-compagnie.ts) :
 
-```typescript
-import { Suspense } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ValuesContainer } from "@/components/features/admin/compagnie/ValuesContainer";
-import { StatsContainer } from "@/components/features/admin/compagnie/StatsContainer";
-import { PresentationContainer } from "@/components/features/admin/compagnie/PresentationContainer";
-import { Skeleton } from "@/components/ui/skeleton";
+1. **Supprimer** les fonctions relatives aux Stats (`fetchCompagnieStats`, `createCompagnieStat`, `updateCompagnieStat`, `deleteCompagnieStat`, `reorderCompagnieStats`) — elles seront recréées dans un nouveau DAL à l'étape B2.
+2. **Ajouter** `alt_text` dans les `select()` des fonctions Presentation (`fetchPresentationSections`, `createPresentationSection`, `updatePresentationSection`).
+3. **Ajouter** `alt_text` dans les `insert()` / `update()` des mutations Presentation.
 
-export const metadata = {
-  title: "Gestion Compagnie | Admin",
-  description: "Gestion des valeurs, chiffres clés et sections de présentation",
-};
+**Fichiers impactés** :
+- [lib/dal/admin-compagnie.ts](lib/dal/admin-compagnie.ts) (modification)
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+---
 
-export default function CompagniePage() {
-  return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl md:text-4xl font-bold mb-6">Gestion Compagnie</h1>
-      <Tabs defaultValue="values" className="w-full">
-        {/* ✅ Classes responsive identiques à presse/page.tsx */}
-        <TabsList className="flex flex-col sm:grid sm:grid-cols-3 w-full h-auto gap-1 sm:gap-0">
-          <TabsTrigger value="values" className="hover:text-popover-foreground hover:bg-card w-full justify-center text-sm py-2.5">
-            Valeurs
-          </TabsTrigger>
-          <TabsTrigger value="stats" className="hover:text-popover-foreground hover:bg-card w-full justify-center text-sm py-2.5">
-            Chiffres clés
-          </TabsTrigger>
-          <TabsTrigger value="presentation" className="hover:text-popover-foreground hover:bg-card w-full justify-center text-sm py-2.5">
-            Présentation
-          </TabsTrigger>
-        </TabsList>
+### Étape A4 — Actions Compagnie : supprimer les actions Stats
 
-        <TabsContent value="values" className="mt-6">
-          <Suspense fallback={<LoadingSkeleton />}>
-            <ValuesContainer />
-          </Suspense>
-        </TabsContent>
-        <TabsContent value="stats" className="mt-6">
-          <Suspense fallback={<LoadingSkeleton />}>
-            <StatsContainer />
-          </Suspense>
-        </TabsContent>
-        <TabsContent value="presentation" className="mt-6">
-          <Suspense fallback={<LoadingSkeleton />}>
-            <PresentationContainer />
-          </Suspense>
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
-}
+Modifier [lib/actions/compagnie-stats-actions.ts](lib/actions/compagnie-stats-actions.ts) :
 
-function LoadingSkeleton() {
-  return (
-    <div className="space-y-4">
-      {Array.from({ length: 5 }, (_, i) => (
-        <Skeleton key={`skeleton-${i}`} className="h-20 w-full" />
-      ))}
-    </div>
-  );
-}
+Ce fichier sera **supprimé en entier** à l'étape C1. Pour l'instant, ne rien modifier — les actions Stats continuent de fonctionner tant que la partie B n'est pas terminée.
+
+Modifier [lib/actions/compagnie-admin-actions.ts](lib/actions/compagnie-admin-actions.ts) (si existant) :
+
+- Vérifier que les actions Presentation passent bien `alt_text` au DAL.
+
+**Fichiers impactés** :
+- Actions Compagnie existantes (vérification uniquement)
+
+---
+
+### Étape A5 — Page admin/compagnie : passer de 3 à 2 onglets
+
+Modifier [app/(admin)/admin/compagnie/page.tsx](app/(admin)/admin/compagnie/page.tsx) :
+
+1. **Supprimer** l'onglet "Chiffres clés" du composant `Tabs`.
+2. Garder uniquement les 2 onglets : **Valeurs** et **Présentation**.
+3. **Supprimer** l'import de `StatsContainer` (ou composant Stats équivalent).
+
+**Fichiers impactés** :
+- [app/(admin)/admin/compagnie/page.tsx](app/(admin)/admin/compagnie/page.tsx) (modification)
+
+---
+
+### Étape A6 — PresentationForm : champs cachés + ImageFieldGroup pour images
+
+#### A6a — PresentationForm.tsx : `kind` et `slug` en hidden fields
+
+Modifier [components/features/admin/compagnie/PresentationForm.tsx](components/features/admin/compagnie/PresentationForm.tsx) :
+
+1. **Supprimer** le `<Select>` pour `kind` et le `<Input>` pour `slug` du rendu visible.
+2. **Conserver** les valeurs dans le state du formulaire (elles sont transmises au Server Action via `form.getValues()`).
+3. Le formulaire ne doit plus afficher ni permettre la modification de `kind` et `slug`. Ces valeurs sont fixées à la création et ne changent jamais.
+4. Optionnel : afficher le `kind` en lecture seule (badge ou texte) pour contexte visuel, si pertinent UX.
+
+#### A6b — PresentationFormFields.tsx : ImageFieldGroup + `"history"` dans SHOW_IMAGE_URL
+
+Modifier [components/features/admin/compagnie/PresentationFormFields.tsx](components/features/admin/compagnie/PresentationFormFields.tsx) :
+
+1. **Modifier** la constante `SHOW_IMAGE_URL` : `["hero", "custom"]` → `["hero", "history", "custom"]`.
+   Cela permet au kind `"history"` d'afficher le champ image dans le formulaire admin, aligné avec le rendu public `SectionHistory.tsx` qui affiche déjà `section.image`.
+2. **Supprimer** le champ `<Input type="url">` pour `image_url` (lignes ~130-145).
+3. **Ajouter** le composant `ImageFieldGroup` avec les props :
+   - `form={form}`
+   - `imageUrlField="image_url"`
+   - `imageMediaIdField="image_media_id"`
+   - `altTextField="alt_text"`
+   - `uploadFolder="about"`
+   - `label="Image de section"`
+   - `description="Sélectionnez une image depuis la médiathèque"`
+4. Importer `ImageFieldGroup` depuis `@/components/features/admin/media/ImageFieldGroup`.
+
+**Fichiers impactés** :
+- [components/features/admin/compagnie/PresentationForm.tsx](components/features/admin/compagnie/PresentationForm.tsx) (suppression kind/slug visibles)
+- [components/features/admin/compagnie/PresentationFormFields.tsx](components/features/admin/compagnie/PresentationFormFields.tsx) (SHOW_IMAGE_URL + ImageFieldGroup)
+
+---
+
+## Partie B — Stats (Chiffres clés) → Admin Home About
+
+### Étape B1 — Schemas : créer HomeStat* dans home-content.ts
+
+Modifier [lib/schemas/home-content.ts](lib/schemas/home-content.ts) :
+
+1. **Ajouter** `HomeStatInputSchema` (server) — identique à l'ancien `CompagnieStatInputSchema` mais avec le préfixe `HomeStat`. Champs : `label` (string), `value` (string), `icon` (string nullable optional), `position` (bigint coerce), `active` (boolean).
+2. **Ajouter** `HomeStatFormSchema` (UI) — `position` en `z.number().int().positive()`.
+3. **Ajouter** type `HomeStatDTO` — `id: bigint`, `label: string`, `value: string`, `icon: string | null`, `position: number`, `active: boolean`, `created_at: string`, `updated_at: string`.
+4. **Exporter** les 3 (`HomeStatInputSchema`, `HomeStatFormSchema`, `HomeStatDTO`).
+
+**Fichiers impactés** :
+- [lib/schemas/home-content.ts](lib/schemas/home-content.ts) (ajout)
+
+---
+
+### Étape B2 — DAL : créer admin-home-stats.ts
+
+Créer [lib/dal/admin-home-stats.ts](lib/dal/admin-home-stats.ts) :
+
+1. Header : `"use server"` + `import "server-only"`.
+2. Imports : `createClient`, `requireAdmin`, `cache`, `dalSuccess`, `dalError` depuis les helpers DAL.
+3. **Fonctions** (toutes wrappées dans `cache()` pour les lectures) :
+   - `fetchHomeStats()` → `select('id, label, value, icon, position, active')` depuis `compagnie_stats` → `order('position')` → retourne `DALResult<HomeStatDTO[]>`.
+   - `createHomeStat(input: HomeStatInput)` → `insert()` + `select().single()` → `DALResult<HomeStatDTO>`.
+   - `updateHomeStat(id: bigint, input: Partial<HomeStatInput>)` → `update().eq('id', id)` + `select().single()` → `DALResult<HomeStatDTO>`.
+   - `deleteHomeStat(id: bigint)` → `delete().eq('id', id)` → `DALResult<null>`.
+   - `reorderHomeStats(orderedIds: bigint[])` → boucle `update().eq('id', id).set({ position })` → `DALResult<null>`.
+4. **Codes d'erreur** : `[ERR_HOME_S01]` fetch, `[ERR_HOME_S02]` create, `[ERR_HOME_S03]` update, `[ERR_HOME_S04]` delete, `[ERR_HOME_S05]` reorder.
+5. **Table DB** : `compagnie_stats` (nom inchangé en base).
+
+**Fichiers impactés** :
+- [lib/dal/admin-home-stats.ts](lib/dal/admin-home-stats.ts) (nouveau)
+
+---
+
+### Étape B3 — Actions : créer home-stats-actions.ts
+
+Créer [lib/actions/home-stats-actions.ts](lib/actions/home-stats-actions.ts) :
+
+1. Header : `"use server"` + `import "server-only"`.
+2. Import des fonctions DAL depuis `@/lib/dal/admin-home-stats`.
+3. Import `HomeStatInputSchema` depuis `@/lib/schemas/home-content`.
+4. **4 actions** (pattern `ActionResult` sans `data` — BigInt Three-Layer) :
+   - `createHomeStatAction(input: unknown): Promise<ActionResult>` — parse + create + `revalidatePath("/admin/home/about")` + `revalidatePath("/")`.
+   - `updateHomeStatAction(id: string, input: unknown): Promise<ActionResult>` — parse + `BigInt(id)` + update + revalidate.
+   - `deleteHomeStatAction(id: string): Promise<ActionResult>` — `BigInt(id)` + delete + revalidate.
+   - `reorderHomeStatsAction(orderedIds: string[]): Promise<ActionResult>` — `orderedIds.map(BigInt)` + reorder + revalidate.
+5. **Revalidation paths** : `/admin/home/about` + `/` (homepage consomme les stats).
+
+**Fichiers impactés** :
+- [lib/actions/home-stats-actions.ts](lib/actions/home-stats-actions.ts) (nouveau)
+
+---
+
+### Étape B4 — Composants : déplacer et renommer Stats
+
+Déplacer les composants Stats de `components/features/admin/compagnie/` vers `components/features/admin/home/` :
+
+1. **Déplacer** `StatsContainer.tsx` → `components/features/admin/home/StatsContainer.tsx`.
+   - Mettre à jour les imports DAL : `@/lib/dal/admin-compagnie` → `@/lib/dal/admin-home-stats`.
+   - Mettre à jour les imports schemas : `CompagnieStat*` → `HomeStat*`.
+   - Mettre à jour les imports actions : `@/lib/actions/compagnie-stats-actions` → `@/lib/actions/home-stats-actions`.
+2. **Déplacer** `StatsView.tsx` → `components/features/admin/home/StatsView.tsx`.
+   - Renommer types props : `CompagnieStatDTO` → `HomeStatDTO`.
+   - Mettre à jour les imports actions.
+3. **Déplacer** `StatForm.tsx` → `components/features/admin/home/StatForm.tsx`.
+   - Renommer schema : `CompagnieStatFormSchema` → `HomeStatFormSchema`.
+   - Renommer type : `CompagnieStatFormValues` → `HomeStatFormValues`.
+   - Mettre à jour les imports actions.
+4. Si un fichier `types.ts` existe dans le dossier compagnie pour les Stats, le migrer aussi.
+
+**Fichiers impactés** :
+- `components/features/admin/compagnie/StatsContainer.tsx` → supprimé
+- `components/features/admin/compagnie/StatsView.tsx` → supprimé
+- `components/features/admin/compagnie/StatForm.tsx` → supprimé
+- `components/features/admin/home/StatsContainer.tsx` (nouveau)
+- `components/features/admin/home/StatsView.tsx` (nouveau)
+- `components/features/admin/home/StatForm.tsx` (nouveau)
+
+---
+
+### Étape B5 — Page admin/home/about : intégrer la section Stats
+
+Modifier [app/(admin)/admin/home/about/page.tsx](app/(admin)/admin/home/about/page.tsx) :
+
+1. **Ajouter** une deuxième `<section>` après le contenu "À propos" existant.
+2. Séparer avec `<Separator />` (shadcn/ui).
+3. Titre `<h2>` : "Chiffres clés" ou "Statistiques".
+4. **Importer** et rendre `<StatsContainer />` depuis `@/components/features/admin/home/StatsContainer`.
+5. Wraper dans `<Suspense fallback={<StatsSkeletonLoader />}>` si nécessaire.
+
+**Structure résultante** :
+
+```bash
+<main>
+  <h1>Page d'accueil — À propos</h1>
+
+  <section>
+    <h2>Contenu À propos</h2>
+    <AboutContainer />  <!-- existant -->
+  </section>
+
+  <Separator />
+
+  <section>
+    <h2>Chiffres clés</h2>
+    <StatsContainer />  <!-- nouveau -->
+  </section>
+</main>
+```
+
+**Fichiers impactés** :
+- [app/(admin)/admin/home/about/page.tsx](app/(admin)/admin/home/about/page.tsx) (modification)
+
+---
+
+## Partie C — Nettoyage et vérification
+
+### Étape C1 — Suppression des fichiers obsolètes
+
+Supprimer les fichiers Stats devenus obsolètes après les parties A et B :
+
+1. `lib/actions/compagnie-stats-actions.ts` — remplacé par `home-stats-actions.ts`.
+2. Anciens composants Stats dans `components/features/admin/compagnie/` (StatsContainer, StatsView, StatForm) — s'ils n'ont pas été déplacés proprement (git mv).
+3. Vérifier qu'aucun import cassé ne subsiste (`grep -r "compagnie-stats" lib/` + `grep -r "CompagnieStat" components/`).
+
+**Commandes de vérification** :
+
+```bash
+grep -rn "compagnie-stats-actions" lib/ components/ app/
+grep -rn "CompagnieStat" lib/ components/ app/
+grep -rn "StatsContainer" components/features/admin/compagnie/
 ```
 
 ---
 
-### Étape 6 — Sidebar navigation
+### Étape C2 — Sidebar : vérification (aucun changement attendu)
 
-Modifier `components/admin/AdminSidebar.tsx` :
+Vérifier que la sidebar admin contient bien les deux entrées distinctes :
 
-1. Importer `Building2` depuis `lucide-react`
-2. Ajouter dans le groupe `contentItems` : `{ title: "Compagnie", href: "/admin/compagnie", icon: Building2 }`
-3. Position recommandée : après "Presse" et avant "Médiathèque"
+- **"Compagnie"** → `/admin/compagnie` (2 onglets : Valeurs + Présentation)
+- **"À propos"** ou **"Accueil - À propos"** → `/admin/home/about` (contenu About + Stats)
 
-**Note** : "La compagnie Section" existe déjà dans `homepageItems` (lien vers `/admin/home/about`). C'est un concept différent — "La compagnie Section" gère uniquement le bloc About de la page d'accueil, tandis que "/admin/compagnie" gère les 3 tables de contenu compagnie. Le nommage "Compagnie" dans `contentItems` est cohérent avec "Spectacles", "Presse" etc.
+Aucune modification de sidebar n'est nécessaire — les deux routes existent déjà.
 
----
-
-### Étape 7 — Skeletons
-
-Utiliser le pattern inline `LoadingSkeleton` directement dans `page.tsx` (pattern `presse/page.tsx`) — pas besoin d'un fichier skeleton séparé car chaque `TabsContent` utilise le même composant. Si des squelettes spécialisés deviennent nécessaires ultérieurement (ex: grille de cartes), créer `components/skeletons/CompagnieSkeleton.tsx` avec :
-- `ValuesListSkeleton` — grille de Cards placeholder
-- `StatsListSkeleton` — idem
-- `PresentationListSkeleton` — liste de cartes avec badge placeholder
+**Fichier à vérifier** : `components/admin/sidebar.tsx` ou équivalent.
 
 ---
 
-### Étape 8 — Script de test DAL
+### Étape C3 — Scripts de test
 
-Créer `scripts/test-admin-compagnie.ts` (pattern `scripts/test-admin-partners.ts`) :
+Créer ou adapter un script de validation :
 
-- Utilise `dotenv/config` pour charger les variables d'env (pas T3 Env dans les scripts)
-- Utilise `createClient` avec `SUPABASE_SERVICE_ROLE_KEY` pour bypasser RLS/requireAdmin
-- Teste les 3 DAL admin (values, stats, presentation)
-- Pour chaque entité : fetch all → create → update → delete → fetch all (vérifier le retour)
-- Vérifie les codes erreur et les types DTO
-- Affichage résultats avec `console.log` formaté (✅/❌)
-- Commande : `pnpm exec tsx scripts/test-admin-compagnie.ts`
-- Ajouter à `package.json` : `"test:compagnie": "tsx scripts/test-admin-compagnie.ts"`
+```bash
+# scripts/test-home-stats.ts
+# 1. Vérifie que fetchHomeStats() retourne des données
+# 2. Vérifie les types HomeStatDTO
+# 3. Teste CRUD create/read/update/delete
+```
 
----
-
-### Étape 9 — Vérification manuelle navigateur
-
-Parcours de validation :
-1. Naviguer vers `/admin/compagnie` — vérifier que les 3 onglets s'affichent
-2. **Onglet Valeurs** : créer, modifier, supprimer une valeur. Vérifier que `/compagnie` met à jour
-3. **Onglet Stats** : créer, modifier, supprimer un stat. Vérifier sur `/compagnie`
-4. **Onglet Présentation** : modifier le hero (title/subtitle), modifier une section history (content[]), tester kind=quote (quote_text/author), ajouter une section custom avec image (via `MediaLibraryPicker`)
-5. Tester le toggle `active` — vérifier que la section disparaît du public
-6. Tester la position — vérifier l'ordre sur `/compagnie`
-7. Vérifier l'accessibilité clavier : navigation tabs, focus trap dans les dialogs, labels des champs, `ContentArrayField` (ajout/suppression paragraphes au clavier)
+Commande : `pnpm exec tsx scripts/test-home-stats.ts`
 
 ---
 
-**Vérification**
+### Étape C4 — Vérification manuelle navigateur
 
-1. `pnpm exec tsx scripts/test-admin-compagnie.ts` — toutes les opérations CRUD passent
-2. `pnpm build` — pas d'erreur TypeScript
-3. `pnpm lint` — pas de warnings
-4. Navigation manuelle `/admin/compagnie` — les 3 onglets fonctionnent
-5. Mutations → `router.refresh()` → données fraîches visibles immédiatement
-6. `/compagnie` public reflète les changements admin
-7. `types.ts` vérifié — aucun type `any`, aucun cast `as unknown as Resolver<>`
-
----
-
-**Decisions**
-
-- **Page unique tabulée** (choix utilisateur) plutôt que sous-routes séparées — évite la multiplication de routes et centralise la gestion
-- **Champ position numérique** dans le form — pas de DnD, simplicité
-- **`ContentArrayField` custom** pour `text[]` — multi-textareas dynamique car le pattern comma-separated existant ne convient pas aux paragraphes longs
-- **3 fichiers d'actions** (pas 1 unique) — `compagnie-values-actions.ts`, `compagnie-stats-actions.ts`, `compagnie-presentation-actions.ts` — respect de la limite 300 lignes (12 actions dans un seul fichier dépasserait)
-- **3 DAL séparés** plutôt qu'un seul — respect du SRP (1 fichier = 1 table)
-- **Schémas dans un seul fichier** `compagnie-admin.ts` — les 3 entités sont liées à la même feature admin (fichier ~200 lignes, sous la limite)
-- **Sidebar dans `contentItems`** — cohérent avec la position de "Spectacles", "Presse" etc. (distinct de "La compagnie Section" dans `homepageItems`)
-- **`LoadingSkeleton` inline** dans `page.tsx` — pattern identique à `presse/page.tsx`
-- **`buildMediaPublicUrl()`** pour résolution images media dans le DAL présentation — cohérent avec `admin-partners.ts`
+1. `/admin/compagnie` → 2 onglets seulement (Valeurs, Présentation).
+2. `/admin/compagnie` → Onglet Présentation → `kind` et `slug` **non visibles** dans le formulaire d'édition.
+3. `/admin/compagnie` → Onglet Présentation → `ImageFieldGroup` visible pour kinds `hero`, `history`, `custom` avec sélecteur médiathèque + champ alt_text.
+4. `/admin/home/about` → Section "Chiffres clés" visible avec CRUD Stats fonctionnel.
+4. `/` (homepage) → Les stats s'affichent correctement (aucune régression).
+5. Tester le reorder des Stats dans `/admin/home/about`.
 
 ---
 
-**Corrections appliquées suite à l'audit de conformité** :
+## Vérification — Checklist globale
 
-| # | Gravité | Correction |
-|---|---------|------------|
-| 1 | CRITIQUE | Split actions en 3 fichiers (pas 1 unique → dépassement 300 lignes) |
-| 2 | CRITIQUE | Ajout `cache()` explicite sur toutes les fonctions fetch DAL |
-| 3 | CRITIQUE | Utilisation `dalSuccess()`/`dalError()` au lieu d'objets bruts |
-| 4 | HAUTE | Ajout fonctions reorder dans Étape 2 (manquaient au DAL) |
-| 5 | HAUTE | Ajout `buildMediaPublicUrl()` pour présentation |
-| 6 | HAUTE | Ajout constantes `SELECT_FIELDS` dans chaque DAL |
-| 7 | HAUTE | Ajout `getNextPosition()` helper dans DAL |
-| 8 | HAUTE | Ajout conversion bigint→string dans Container |
-| 9 | MOYENNE | Ajout `ReorderSchemas` dans le fichier schemas |
-| 10 | MOYENNE | Classes responsive TabsList dans page.tsx |
-| 11 | BASSE | Clarification sidebar "Compagnie" vs "La compagnie Section" |
+### Partie A (Compagnie)
+- [x] Migration `alt_text` appliquée (`20260302184850`)
+- [x] Schéma déclaratif mis à jour (`07c_table_compagnie_presentation.sql`)
+- [x] Schemas Presentation incluent `alt_text`
+- [x] Schemas Stats supprimés de `compagnie-admin.ts` (jamais créés ici — Stats directement dans `home-content.ts`)
+- [x] DAL Presentation inclut `alt_text` dans select/insert/update (`admin-compagnie-presentation.ts`)
+- [x] DAL Stats supprimé de `admin-compagnie.ts` (N/A — Stats jamais dans ce fichier, DAL séparés dès le départ)
+- [x] Page admin/compagnie : 2 onglets seulement (Présentation + Valeurs)
+- [x] PresentationForm : `kind` et `slug` cachés (slug hidden, kind en Badge read-only)
+- [x] PresentationFormFields : `SHOW_IMAGE_URL` inclut `"history"`
+- [x] PresentationFormFields utilise `ImageFieldGroup`
+- [x] Champ `alt_text` visible dans le formulaire Presentation
+- [x] **BONUS** : Presentation simplifiée en UPDATE-only (pas de create/delete)
+- [x] **BONUS** : Reorder Values (schema + DAL + action)
+- [x] **BONUS** : 4 migrations hotfix position + fix Zod `.optional()`
+- [x] **BONUS** : ContentArrayField.tsx pour édition `text[]`
+- [x] **BONUS** : 2 sous-pages lecture seule (presentation/ + valeurs/)
+
+### Partie B (Stats → Home)
+- [x] Schemas `HomeStat*` dans `home-content.ts` (+ `ReorderHomeStatsSchema`)
+- [x] DAL `admin-home-stats.ts` créé avec 5 fonctions + `cache()`
+- [x] Actions `home-stats-actions.ts` créé avec 4 actions (CRUD + reorder)
+- [x] Revalidation paths : `/admin/home/about` + `/`
+- [x] Composants Stats créés dans `components/features/admin/home/` (créés neufs, pas déplacés)
+- [x] Imports corrects (DAL, schemas, actions)
+- [x] Page `admin/home/about` affiche la section Stats avec `<Separator />`
+- [x] `<Suspense>` boundary sur StatsContainer
+- [x] **BONUS** : Reorder Home Stats (schema + DAL + action)
+
+### Partie C (Nettoyage)
+- [x] `compagnie-stats-actions.ts` supprimé (N/A — jamais créé, Stats construites directement dans home-stats-actions.ts)
+- [x] Aucun import orphelin (vérifié à la compilation)
+- [x] Sidebar vérifiée (Compagnie + Accueil - La compagnie) + 3 renommages labels
+- [x] Scripts test : 2 scripts créés (`test-admin-compagnie.ts` + `test-home-stats.ts`)
+- [x] Vérification navigateur effectuée (bugs trouvés et corrigés pendant le développement)
+
+---
+
+## Decisions
+
+| # | Décision | Justification |
+|---|----------|---------------|
+| 1 | Table `compagnie_stats` conserve son nom en DB | Évite une migration de renommage risquée. Seuls les identifiants TS changent. |
+| 2 | Stats → `admin/home/about` (pas nouvelle route) | La page existe déjà et gère le contenu About de la homepage. Stats complète logiquement cette page. |
+| 3 | `alt_text` ajouté par migration manuelle (hotfix pattern) | Ajout de colonne simple, compatible avec le workflow déclaratif (schéma mis à jour en parallèle). |
+| 4 | ImageFieldGroup remplace Input URL | Pattern standard du projet pour toutes les images admin. Le composant gère médiathèque + upload + alt_text. |
+| 5 | Missions non incluses dans ce plan | Les missions ont leur propre route/feature. Hors scope TASK070. |
+| 6 | Partie A, B, C sont indépendantes | Peuvent être implémentées dans n'importe quel ordre ou en parallèle par branches séparées. |
+| 7 | `ActionResult` sans `data` (BigInt Three-Layer) | Pattern obligatoire du projet — `router.refresh()` après mutation pour rafraîchir les données. |
+| 8 | Codes erreur `[ERR_HOME_S0x]` | Convention DAL SOLID du projet — chaque module a son propre préfixe d'erreur. |
+| 9 | `kind` et `slug` cachés dans PresentationForm | Ces champs sont fixés à la création et ne doivent jamais être modifiés par l'admin. Retirés du rendu visible. |
+| 10 | `"history"` ajouté à `SHOW_IMAGE_URL` | `SectionHistory.tsx` affiche une image — l'admin doit pouvoir la configurer via `ImageFieldGroup`. |
+| 11 | **Presentation = UPDATE-only** (ajout implémentation) | Les 6 sections sont fixées en DB avec kind+slug prédéfinis. Pas de create/delete en admin. |
+| 12 | **Reorder systématique** (ajout implémentation) | Tout CRUD avec `position` inclut reorder pour cohérence avec le pattern du projet. |
+| 13 | **`.default(0)` → `.optional()`** (ajout implémentation) | Bug critique : Zod `.partial()` ne neutralise pas `.default()`. Appliqué à `position` et `active`. |
+| 14 | **Slug `.optional().or(z.literal(""))`** (ajout implémentation) | Certaines sections (mission) n'ont pas de slug. La validation `.min(1)` les rejetait. |
+| 15 | **Ordre Présentation > Valeurs** (ajout implémentation) | Onglet Présentation en défaut car consulté plus fréquemment par l'admin. |

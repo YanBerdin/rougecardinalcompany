@@ -1,4 +1,6 @@
 import { AboutContentContainer } from "@/components/features/admin/home/AboutContentContainer";
+import { StatsContainer } from "@/components/features/admin/home/StatsContainer";
+import { Separator } from "@/components/ui/separator";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -10,8 +12,20 @@ export const metadata = {
 
 export default function AboutContentPage() {
     return (
-        <div className="container mx-auto py-8">
+        <div className="container mx-auto py-8 space-y-8">
             <AboutContentContainer />
+
+            <Separator />
+
+            <section aria-labelledby="stats-heading">
+                <h2
+                    id="stats-heading"
+                    className="mb-4 text-xl font-semibold"
+                >
+                    Chiffres clés
+                </h2>
+                <StatsContainer />
+            </section>
         </div>
     );
 }
