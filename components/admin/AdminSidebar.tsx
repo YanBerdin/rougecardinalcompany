@@ -18,6 +18,7 @@ import {
   BarChart3,
   Handshake,
   MapPin,
+  Building2,
 } from "lucide-react";
 import {
   Sidebar,
@@ -74,6 +75,11 @@ const contentItems = [
     icon: FileText,
   },
   {
+    title: "Compagnie",
+    href: "/admin/compagnie",
+    icon: Building2,
+  },
+  {
     title: "Médiathèque",
     href: "/admin/media",
     icon: ImageIcon,
@@ -82,12 +88,12 @@ const contentItems = [
 
 const homepageItems = [
   {
-    title: "Accueil Slides",
+    title: "Accueil - Slides",
     href: "/admin/home/hero",
     icon: ImageIcon,
   },
   {
-    title: "La compagnie Section",
+    title: "Accueil - La compagnie",
     href: "/admin/home/about",
     icon: FileText,
   },
@@ -189,7 +195,7 @@ export default function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Contenu</SidebarGroupLabel>
+          <SidebarGroupLabel>Pages</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {contentItems.map((item) => {

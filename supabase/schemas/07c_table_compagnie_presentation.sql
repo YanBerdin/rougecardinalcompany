@@ -16,6 +16,7 @@ create table public.compagnie_presentation_sections (
   quote_author text,   -- auteur citation
   image_url text,      -- image illustrative optionnelle (fallback)
   image_media_id bigint null references public.medias(id) on delete set null, -- media stocké prioritaire
+  alt_text text,       -- texte alternatif pour l'accessibilité WCAG 2.2
   position smallint not null default 0, -- ordre général sur la page
   active boolean not null default true,
   created_at timestamptz not null default now(),
@@ -29,6 +30,7 @@ comment on column public.compagnie_presentation_sections.content is 'Liste ordon
 comment on column public.compagnie_presentation_sections.quote_text is 'Texte de la citation si kind = quote.';
 comment on column public.compagnie_presentation_sections.position is 'Ordre global croissant d affichage.';
 comment on column public.compagnie_presentation_sections.image_media_id is 'Référence vers un media (prioritaire sur image_url).';
+comment on column public.compagnie_presentation_sections.alt_text is 'Texte alternatif pour l''image de la section (accessibilité WCAG 2.2).';
 
 -- Index
 create index if not exists idx_compagnie_presentation_sections_active_order on public.compagnie_presentation_sections(active, position) where active = true;

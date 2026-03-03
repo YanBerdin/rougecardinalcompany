@@ -244,3 +244,49 @@ export const AboutContentFormSchema = z.object({
 });
 
 export type AboutContentFormValues = z.infer<typeof AboutContentFormSchema>;
+
+// =============================================================================
+// HOME STATS (Chiffres clés — table: compagnie_stats)
+// =============================================================================
+
+/** Server schema — bigint pour IDs Postgres */
+export const HomeStatInputSchema = z.object({
+    label: z.string().min(1, "Le label est requis").max(80),
+    value: z.string().min(1, "La valeur est requise").max(20),
+    icon: z.string().nullable().optional(),
+    position: z.coerce.bigint(),
+    active: z.boolean().default(true),
+});
+export type HomeStatInput = z.infer<typeof HomeStatInputSchema>;
+
+/** UI schema — number pour react-hook-form */
+export const HomeStatFormSchema = z.object({
+    label: z.string().min(1, "Le label est requis").max(80),
+    value: z.string().min(1, "La valeur est requise").max(20),
+    icon: z.string().optional(),
+    position: z.number().int().positive().optional(),
+    active: z.boolean(),
+});
+export type HomeStatFormValues = z.infer<typeof HomeStatFormSchema>;
+
+/** DTO — JSON-sérialisable (number IDs) */
+export interface HomeStatDTO {
+    id: number;
+    label: string;
+    value: string;
+    icon: string | null;
+    position: number;
+    active: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+export const ReorderHomeStatsSchema = z.object({
+    items: z.array(
+        z.object({
+            id: z.coerce.bigint(),
+            position: z.number().int().min(0),
+        })
+    ),
+});
+export type ReorderHomeStatsInput = z.infer<typeof ReorderHomeStatsSchema>;
