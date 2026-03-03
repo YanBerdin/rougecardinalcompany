@@ -1,5 +1,49 @@
 # Progress
 
+## TASK071 — Audit Public Contact (2026-03-03)
+
+**Context** : Audit conformité de `components/features/public-site/contact` contre toutes les instructions projet (.github/instructions/). 12 violations identifiées et corrigées en une session. TASK071.
+
+**12 violations corrigées** :
+
+| # | Catégorie | Violation | Correction |
+| --- | ----------- | ----------- | ------------ |
+| 1 | Clean Code | `contact-hooks.ts` 100% commenté (dead code) | Fichier supprimé |
+| 2 | Clean Code | TODO abandonné dans ContactPageView | Retiré lors du refactoring |
+| 3 | Composition | `ContactPageView.tsx` 495L monolithe | 58L orchestrator + 4 sous-composants |
+| 4 | Composition | Pas d'extraction composants réutilisables | ContactForm, ContactSuccessView, ContactInfoSidebar, NewsletterCard |
+| 5 | OWASP | Pas de rate limiting sur Server Action contact | `recordRequest(key, 5, 900000)` + `getClientIP()` |
+| 6 | TypeScript | Return type `void` implicite sur Server Action | `ActionResult` return type |
+| 7 | TypeScript | Cast `as ContactReason` unsafe | `ContactReasonEnum.parse()` Zod runtime validation |
+| 8 | TypeScript | Pas de type guard sur `checked` | `checked === true` explicit guard |
+| 9 | a11y | aria-required manquant sur champs obligatoires | `aria-required="true"` sur 5 champs |
+| 10 | a11y | Pas de role="alert" sur messages d'erreur | `role="alert"` sur container erreur |
+| 11 | a11y | Consent non validé côté submit | Validation explicite avec message d'erreur |
+| 12 | Bug | NewsletterCard disabled state incorrect | Fix référence loading state correct |
+
+**Fichiers livrés** :
+
+| Fichier | Action | Lignes | Rôle |
+| --------- | -------- | -------- | ------ |
+| `ContactForm.tsx` | Créé | ~230 | Formulaire type-safe WCAG 2.2 AA |
+| `ContactSuccessView.tsx` | Créé | ~35 | État succès avec role="status" |
+| `ContactInfoSidebar.tsx` | Créé | ~103 | Sidebar contact + newsletter conditionnelle |
+| `NewsletterCard.tsx` | Créé | ~81 | Newsletter card, bug fix disabled state |
+| `ContactPageView.tsx` | Modifié | 495→58 | Slim orchestrator |
+| `actions.ts` | Modifié | — | Rate limiting + ActionResult |
+| `contact-types.ts` | Réécrit | — | ContactFormData + ContactReasonOption |
+| `contact-hooks.ts` | Supprimé | — | 100% dead code |
+| `Email_Service_Architecture.md` | Modifié | — | Section 7.2 useContactForm supprimée |
+
+**Memory-bank synchronisé** :
+
+- `activeContext.md` : TASK071 ajouté comme current focus
+- `progress.md` : Journal mis à jour (cette entrée)
+- `tasks/_index.md` : TASK071 marqué Completed
+- `tasks/tasks-completed/TASK071-audit-public-contact.md` : Fichier de tâche créé
+
+---
+
 ## TASK070 — Admin Compagnie CRUD (2026-03-03)
 
 ### Summary
