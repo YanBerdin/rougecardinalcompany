@@ -1,5 +1,83 @@
 # Progress
 
+## TASK070 — Admin Compagnie CRUD (2026-03-03)
+
+### Summary
+
+✅ **COMPLET** — Page tabulée `/admin/compagnie` (Présentation update-only + Valeurs CRUD+reorder). Stats (Chiffres clés) déplacées vers `/admin/home/about`. Bug Zod `.partial()+.default()` découvert et corrigé via 4 migrations hotfix. Branche `feat/task070-admin-compagnie`, commit `8455837`, 39 fichiers, 3737 insertions.
+
+| Livrable | Statut | Détails |
+| -------- | ------ | ------- |
+| A1 : Migration alt_text | ✅ | `20260302184850_add_alt_text_to_compagnie_presentation.sql` |
+| A2 : Schemas compagnie-admin.ts | ✅ | 142L : Presentation + Values (Server+UI+DTO) |
+| A3 : DAL Presentation + Values | ✅ | 230L + 194L, cache(), DALResult<T>, reorder |
+| A4 : Server Actions | ✅ | UPDATE-only Presentation (42L) + CRUD Values (129L) |
+| A5 : Page /admin/compagnie tabulée | ✅ | 67L, 2 onglets Présentation (défaut) + Valeurs |
+| A6a : PresentationForm hidden fields | ✅ | kind=Badge readonly, slug hidden, update-only guard |
+| A6b : ImageFieldGroup + SHOW_IMAGE_URL | ✅ | "history" ajouté, ImageFieldGroup dans PresentationForm |
+| E1-E4 : Valeurs CRUD complet | ✅ | ValuesContainer + ValuesView + ValueForm + ContentArrayField |
+| BONUS : Sous-pages read-only | ✅ | /presentation (136L) + /valeurs (92L) Server Components |
+| BONUS : ContentArrayField | ✅ | 106L, éditeur custom pour champs text[] |
+| B1 : HomeStat schemas | ✅ | Input/Form/DTO/Reorder ajoutés dans home-content.ts (+46L) |
+| B2 : DAL admin-home-stats | ✅ | 196L, 5 fonctions, cache(), table compagnie_stats |
+| B3 : Server Actions home-stats | ✅ | 123L dans lib/actions/, CRUD+reorder, revalidation / + /admin/home/about |
+| B4 : Composants StatsContainer/View/Form | ✅ | 22L + 151L + 153L + types.ts 14L |
+| B5 : Page home/about modifiée | ✅ | +16L, section Stats avec Separator + aria-labelledby |
+| C2 : Sidebar enrichie | ✅ | Compagnie+Building2 ajouté, 3 renommages |
+| C3 : Scripts test | ✅ | test-admin-compagnie.ts (257L) + test-home-stats.ts (172L) |
+| BUG : Position reset fix | ✅ | .default(0)→.optional(), 4 migrations hotfix position |
+| DOCS : Plan prompt + Task file | ✅ | Bilan d'implémentation, 15 décisions, 100% progress |
+
+### Fichiers créés (27)
+
+```bash
+app/(admin)/admin/compagnie/page.tsx
+app/(admin)/admin/compagnie/compagnie-presentation-actions.ts
+app/(admin)/admin/compagnie/compagnie-values-actions.ts
+app/(admin)/admin/compagnie/presentation/page.tsx
+app/(admin)/admin/compagnie/valeurs/page.tsx
+components/features/admin/compagnie/ContentArrayField.tsx
+components/features/admin/compagnie/PresentationContainer.tsx
+components/features/admin/compagnie/PresentationForm.tsx
+components/features/admin/compagnie/PresentationFormFields.tsx
+components/features/admin/compagnie/PresentationView.tsx
+components/features/admin/compagnie/ValueForm.tsx
+components/features/admin/compagnie/ValuesContainer.tsx
+components/features/admin/compagnie/ValuesView.tsx
+components/features/admin/compagnie/index.ts
+components/features/admin/compagnie/types.ts
+components/features/admin/home/StatForm.tsx
+components/features/admin/home/StatsContainer.tsx
+components/features/admin/home/StatsView.tsx
+components/features/admin/home/types.ts
+lib/actions/home-stats-actions.ts
+lib/dal/admin-compagnie-presentation.ts
+lib/dal/admin-compagnie-values.ts
+lib/dal/admin-home-stats.ts
+lib/schemas/compagnie-admin.ts
+scripts/test-admin-compagnie.ts
+scripts/test-home-stats.ts
+supabase/migrations/20260302184850_add_alt_text_to_compagnie_presentation.sql
+supabase/migrations/20260302200002_fix_hero_section_position.sql
+supabase/migrations/20260302210000_fix_mission_section_position.sql
+supabase/migrations/20260303120000_fix_history_section_position.sql
+supabase/migrations/20260303130000_fix_quote_history_position.sql
+```
+
+### Fichiers modifiés (8)
+
+```bash
+app/(admin)/admin/home/about/page.tsx          # +16L section Stats
+components/admin/AdminSidebar.tsx              # Compagnie + 3 renommages
+lib/schemas/home-content.ts                   # +46L HomeStat schemas
+memory-bank/tasks/tasks-completed/TASK070-adminCompagnie.md  # Completed 100%
+.github/prompts/plan-TASK070-adminCompagnie.prompt.md        # Bilan + checklist
+package.json                                  # +2 scripts test
+supabase/schemas/07c_table_compagnie_presentation.sql        # alt_text ajouté
+```
+
+---
+
 ## TASK069 — Audit conformité public/compagnie (2026-03-02)
 
 ### Summary

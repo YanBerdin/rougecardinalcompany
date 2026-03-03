@@ -1,8 +1,74 @@
 # Active Context
 
-**Current Focus (2026-03-02)**: ✅ TASK069 — Audit conformité public/compagnie (17 violations, monolithe 242L→49L via SECTION_RENDERERS, 6 composants section, WCAG 2.2 AA, force-dynamic). `pnpm lint` 0 erreurs ✅ `pnpm build` exit 0 ✅.
+**Current Focus (2026-03-03)**: ✅ TASK070 — Admin Compagnie CRUD (page tabulée `/admin/compagnie`, 2 onglets Présentation/Valeurs, Stats→Home, 3×DAL, 3×Actions, 14+ composants, 5 migrations). Commit `8455837` sur branche `feat/task070-admin-compagnie`.
 
-**Last Major Updates**: ✅ Public Compagnie Audit Refactor (2026-03-02) + Public Agenda Composition Refactor (2026-03-02) + Admin Users Audit + Scripts (2026-03-02) + Admin Team Audit Remediation (2026-03-01) + Admin Spectacles Audit Remediation (2026-03-01) + Dependabot #26 serialize-javascript RCE fix (2026-03-01) + Site-Config Audit Fix (2026-03-01) + TASK065 Admin Press Audit Fix (2026-02-28) + Contact RLS/Serialization Fix (2026-02-28) + Admin Partners Audit Fix (2026-02-28)
+**Last Major Updates**: ✅ TASK070 Admin Compagnie CRUD (2026-03-03) + Public Compagnie Audit Refactor (2026-03-02) + Public Agenda Composition Refactor (2026-03-02) + Admin Users Audit + Scripts (2026-03-02) + Admin Team Audit Remediation (2026-03-01) + Admin Spectacles Audit Remediation (2026-03-01) + Dependabot #26 serialize-javascript RCE fix (2026-03-01) + Site-Config Audit Fix (2026-03-01) + TASK065 Admin Press Audit Fix (2026-02-28)
+
+---
+
+## ✅ TASK070 — Admin Compagnie CRUD (2026-03-03)
+
+### Summary
+
+✅ **COMPLET** — Page `/admin/compagnie` avec 2 onglets (Présentation update-only, Valeurs CRUD+reorder). Stats (Chiffres clés) déplacées vers `/admin/home/about`. 3 DAL modules, 3 Server Actions files, 14 composants, 5 migrations (dont 4 hotfiles position reset). Bug critique Zod `.partial()+.default()` découvert et corrigé. Commit `8455837`, branche `feat/task070-admin-compagnie`. **39 fichiers**, 3737 insertions, 622 suppressions.
+
+### Points clés
+
+- **Page tabulée** : `/admin/compagnie` avec 2 onglets — `Présentation` (défaut, update-only) + `Valeurs` (CRUD + reorder DnD)
+- **Présentation = UPDATE-only** : Les 6 sections sont fixes en DB — seul `updatePresentationSectionAction` exposé (42L), kind/slug en hidden fields
+- **ContentArrayField** : Composant custom (106L) pour éditer les champs `text[]` (tableaux de paragraphes, valeurs)
+- **Sous-pages read-only** : `/admin/compagnie/presentation` (136L) et `/admin/compagnie/valeurs` (92L) en Server Components
+- **Stats→Home** : `StatsContainer/View/Form` ajoutés dans `/admin/home/about` ; revalidation `/ ` + `/admin/home/about`
+- **Bug Zod critique** : `.partial()` ne neutralise PAS `.default(0)` → position réinitialisée à 0 à chaque update. Fix : remplacer `.default(0)` par `.optional()` sur `position` + `active`
+- **4 migrations hotfix** position : hero(0/10/20/30/40/50), mission(30), history(20), quote-history(25)
+- **Sidebar** : Entrée "Compagnie" ajoutée (Building2 icon) + 3 renommages
+- **Pattern BigInt Three-Layer** : `number` (UI) → `string` (transport) → `bigint` (DAL)
+
+### Architecture créée
+
+```bash
+# Routes
+app/(admin)/admin/compagnie/page.tsx                      # Page tabulée 2 onglets
+app/(admin)/admin/compagnie/compagnie-presentation-actions.ts  # UPDATE-only (42L)
+app/(admin)/admin/compagnie/compagnie-values-actions.ts    # CRUD+reorder (129L)
+app/(admin)/admin/compagnie/presentation/page.tsx          # Read-only Server Component
+app/(admin)/admin/compagnie/valeurs/page.tsx               # Read-only Server Component
+
+# DAL
+lib/dal/admin-compagnie-presentation.ts   # 230L, cache(), UPDATE helpers
+lib/dal/admin-compagnie-values.ts          # 194L, cache(), CRUD+reorder
+lib/dal/admin-home-stats.ts               # 196L, cache(), CRUD+reorder
+
+# Schemas
+lib/schemas/compagnie-admin.ts            # 142L : Presentation + Values schemas
+lib/schemas/home-content.ts               # +46L : HomeStat Input/Form/DTO/Reorder
+
+# Composants compagnie (9)
+components/features/admin/compagnie/
+  PresentationContainer.tsx / PresentationView.tsx / PresentationForm.tsx
+  PresentationFormFields.tsx / ContentArrayField.tsx  # text[] éditeur custom
+  ValuesContainer.tsx / ValuesView.tsx / ValueForm.tsx
+  index.ts / types.ts
+
+# Composants home stats (4)
+components/features/admin/home/
+  StatsContainer.tsx / StatsView.tsx / StatForm.tsx / types.ts
+
+# Scripts test
+scripts/test-admin-compagnie.ts   # 257L
+scripts/test-home-stats.ts        # 172L
+
+# Migrations
+supabase/migrations/20260302184850_add_alt_text_to_compagnie_presentation.sql
+supabase/migrations/20260302200002_fix_hero_section_position.sql
+supabase/migrations/20260302210000_fix_mission_section_position.sql
+supabase/migrations/20260303120000_fix_history_section_position.sql
+supabase/migrations/20260303130000_fix_quote_history_position.sql
+```
+
+### Leçon clé — Zod `.partial()` + `.default()`
+
+Ne jamais combiner ces deux modificateurs. `.partial()` rend le champ optionnel mais `.default()` fournit toujours une valeur si le champ est absent — le champ n'est donc jamais réellement absent. Utiliser `.optional()` seul pour les champs `position`/`active` dans les schemas server.
 
 ---
 

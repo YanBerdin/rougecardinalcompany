@@ -16,7 +16,6 @@
 
 ## En Attente
 
-- `TASK070` Admin Compagnie CRUD (Valeurs, Stats, Présentation) — Page tabulée `/admin/compagnie`, 3 DAL + 3 Actions + 14 composants, plan enrichi audité
 - `TASK005` Optimisation SEO et meta-tags dynamiques
 - `TASK007` Tests automatisés et monitoring
 - `TASK008` Configuration des redirections vers billetterie externe
@@ -100,3 +99,4 @@
 - `TASK067` Audit conformité admin/users feature + scripts — ✅ Completed on 2026-03-02 (13 violations feature corrigées ~60%→~95%, 6 sous-composants extraits View 548→191 lignes, types.ts+InviteUserSchema partagés ; 8 scripts audités (20 violations mineures), 6 scripts ajoutés à package.json ; branche fix/admin-team-audit-violations)
 - `TASK068` Audit conformité public/agenda + Composition Patterns — Completed on 2026-03-02 (17 violations corrigées, monolithe 285L→5 compound components, 14→3 props, hooks.ts code mort supprimé, DAL import fix, branche refactor/public-agenda-composition-patterns)
 - `TASK069` Audit conformité public/compagnie - Completed on 2026-03-02 (17 violations corrigées : monolithe 242L→49L SECTION_RENDERERS map, 6 composants section, WCAG 2.2 AA, force-dynamic, fallback DAL, 0 cast `as unknown as`. Branche `refactor/public-compagnie-audit-violations`)
+- `TASK070` Admin Compagnie CRUD — Completed on 2026-03-03 (Page tabulée `/admin/compagnie` Présentation+Valeurs, Stats→Home, 3 DAL + 3 Actions + 14 composants, 5 migrations, bug Zod `.partial()+.default()` corrigé, commit `8455837` branche `feat/task070-admin-compagnie`)
