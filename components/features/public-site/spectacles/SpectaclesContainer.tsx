@@ -1,19 +1,14 @@
 import { SpectaclesView } from "./SpectaclesView";
 import { fetchAllSpectacles, fetchTicketUrlsForSpectacles } from "@/lib/dal/spectacles";
 
-/**
- * Server Container for Spectacles page
- * - Fetches data via server-only DAL (Supabase)
- * - Maps DB data to the presentational view props
- */
+const MAX_CURRENT_SHOWS = 6;
+
 export async function SpectaclesContainer() {
   const spectacles = await fetchAllSpectacles();
 
-  // Improved logic: separate current shows from archives based on status
-  // Current shows: public status and not archived
   const currentFiltered = spectacles
     .filter((s) => s.public && s.status !== "archived")
-    .slice(0, 6);
+    .slice(0, MAX_CURRENT_SHOWS);
 
   // Batch-fetch ticket URLs for current shows (avoids N+1)
   const currentIds = currentFiltered.map((s) => s.id);

@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import { Ticket, Calendar, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,7 +23,7 @@ export function SpectacleCTABar({
     agendaLabel = "Agenda",
     backLabel = "Retour",
     wrapperClassName = "",
-}: SpectacleCTABarProps) {
+}: SpectacleCTABarProps): React.ReactNode {
     return (
         <div className={`flex flex-col sm:flex-row flex-wrap gap-3 ${wrapperClassName}`}>
             <Button

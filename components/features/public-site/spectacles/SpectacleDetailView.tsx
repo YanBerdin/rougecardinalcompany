@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -34,7 +35,7 @@ export function SpectacleDetailView({
     galleryPhotos = [],
     venue = null,
     ticketUrl = null,
-}: SpectacleDetailViewProps) {
+}: SpectacleDetailViewProps): React.ReactNode {
     const awards = spectacle.awards || [];
     const hasAwards = awards.length > 0;
 

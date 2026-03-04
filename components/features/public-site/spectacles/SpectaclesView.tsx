@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Play, Ticket } from "lucide-react"; // Clock, Users, Calendar, MapPin, non utilisés
@@ -10,7 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { SpectaclesViewProps } from "./types";
 import type { CurrentShow, ArchivedShow } from "@/lib/schemas/spectacles";
 
-// Helper to get spectacle URL (fallback to ID if slug is missing)
+const MAX_INITIAL_ARCHIVED_SHOWS = 6;
+
 const getSpectacleUrl = (show: CurrentShow | ArchivedShow): string => {
   return `/spectacles/${show.slug || show.id}`;
 };
@@ -18,14 +19,13 @@ const getSpectacleUrl = (show: CurrentShow | ArchivedShow): string => {
 export function SpectaclesView({
   currentShows,
   archivedShows,
-}: SpectaclesViewProps) {
+}: SpectaclesViewProps): React.ReactNode {
   const [showAllArchived, setShowAllArchived] = useState(false);
 
-  // Display initially 6 archived shows, then all if requested (adjusted for current content)
   const displayedArchivedShows = showAllArchived
     ? archivedShows
-    : archivedShows.slice(0, 6);
-  const hasMoreArchivedShows = archivedShows.length > 6;
+    : archivedShows.slice(0, MAX_INITIAL_ARCHIVED_SHOWS);
+  const hasMoreArchivedShows = archivedShows.length > MAX_INITIAL_ARCHIVED_SHOWS;
 
   return (
     <div className="pt-16">

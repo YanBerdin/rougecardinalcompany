@@ -1,3 +1,4 @@
+import React from "react";
 import Image from "next/image";
 import { buildMediaPublicUrl } from "@/lib/dal/helpers";
 import type { SpectaclePhotoDTO } from "@/lib/schemas/spectacles";
@@ -10,7 +11,7 @@ interface LandscapePhotoCardProps {
  * Carte photo en format paysage (16/9) avec effet zoom au survol.
  * Utilisée pour illustrer le détail d'un spectacle.
  */
-export function LandscapePhotoCard({ photo }: LandscapePhotoCardProps) {
+export function LandscapePhotoCard({ photo }: LandscapePhotoCardProps): React.ReactNode {
     const imageUrl = buildMediaPublicUrl(photo.storage_path) ?? "";
 
     return (
