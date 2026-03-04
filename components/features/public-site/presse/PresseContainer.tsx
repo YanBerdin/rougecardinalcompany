@@ -6,7 +6,6 @@ import PresseServerGate from "./PresseServerGate";
 export default function PresseContainer() {
   return (
     <Suspense fallback={<PresseSkeleton />}>
-      {/* Gate serveur avec petit délai artificiel // TODO: remove */}
       <PresseServerGate />
     </Suspense>
   );

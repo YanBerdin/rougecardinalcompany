@@ -7,7 +7,7 @@ export function SectionMission({ section }: SectionRendererProps): ReactElement 
         <section id={section.kind} aria-labelledby={headingId} className="py-24 hero-gradient">
             <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 {section.title && (
-                    <h2 id={headingId} className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-white">
+                    <h2 id={headingId} className="text-3xl md:text-4xl lg:text-5xl font-bold font-sans mb-6 text-white">
                         {section.title}
                     </h2>
                 )}

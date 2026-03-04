@@ -3,35 +3,14 @@
 import "server-only";
 import { cache } from "react";
 import { createClient } from "@/supabase/server";
-import { type DALResult, bytesToHuman } from "@/lib/dal/helpers";
-
-interface PressRelease {
-  id: number;
-  title: string;
-  description: string;
-  date: string; // ISO string yyyy-mm-dd
-  fileUrl: string; // fallback '#'
-  fileSize: string; // ex: '312 KB' ou '—'
-}
-
-interface MediaArticle {
-  id: number;
-  title: string;
-  author: string;
-  type: "Article" | "Critique" | "Interview" | "Portrait";
-  chapo: string;
-  excerpt: string;
-  source_publication: string;
-  source_url: string;
-  published_at: string; // ISO string
-}
-
-interface MediaKitItemDTO {
-  type: string; // ex: "Logo", "Photo", "Dossier de presse", "PDF"
-  description: string;
-  fileSize: string;
-  fileUrl: string;
-}
+import {
+  type DALResult,
+  bytesToHuman,
+  dalSuccess,
+  dalError,
+  buildMediaPublicUrl,
+} from "@/lib/dal/helpers";
+import type { PressRelease, MediaArticle, MediaKitItem } from "@/lib/schemas/presse";
 
 interface MediaMetadata {
   type?: string;
@@ -100,7 +79,7 @@ function getMediaType(metadata: MediaMetadata | null): string {
   return "Document";
 }
 
-function mapPressReleaseRow(row: CommuniquePresseRow): PressRelease {
+function mapToPressReleaseDTO(row: CommuniquePresseRow): PressRelease {
   return {
     id: Number(row.id),
     title: String(row.title),
@@ -114,7 +93,7 @@ function mapPressReleaseRow(row: CommuniquePresseRow): PressRelease {
   };
 }
 
-function mapMediaArticleRow(row: ArticlePresseRow): MediaArticle {
+function mapToMediaArticleDTO(row: ArticlePresseRow): MediaArticle {
   return {
     id: Number(row.id),
     title: String(row.title ?? ""),
@@ -128,12 +107,12 @@ function mapMediaArticleRow(row: ArticlePresseRow): MediaArticle {
   };
 }
 
-function mapMediaKitRow(row: SupabaseMediaRow): MediaKitItemDTO {
+function mapToMediaKitDTO(row: SupabaseMediaRow): MediaKitItem {
   const metadata = row.metadata as MediaMetadata | null;
   const externalUrl = metadata?.external_url;
   const fileUrl = externalUrl
     ? String(externalUrl)
-    : `/storage/v1/object/public/${row.storage_path}`;
+    : buildMediaPublicUrl(row.storage_path) ?? "#";
 
   return {
     type: getMediaType(metadata),
@@ -176,21 +155,18 @@ export const fetchPressReleases = cache(
 
       if (error) {
         console.error("[DAL] fetchPressReleases error:", error);
-        return {
-          success: false,
-          error: `[ERR_PRESSE_001] Failed to fetch press releases: ${error.message}`,
-        };
+        return dalError(
+          `[ERR_PRESSE_001] Failed to fetch press releases: ${error.message}`
+        );
       }
 
-      const releases = (data ?? []).map(mapPressReleaseRow);
-      return { success: true, data: releases };
+      const releases = (data ?? []).map(mapToPressReleaseDTO);
+      return dalSuccess(releases);
     } catch (err: unknown) {
       console.error("[DAL] fetchPressReleases unexpected error:", err);
-      return {
-        success: false,
-        error:
-          err instanceof Error ? err.message : "[ERR_PRESSE_002] Unknown error",
-      };
+      return dalError(
+        err instanceof Error ? err.message : "[ERR_PRESSE_002] Unknown error"
+      );
     }
   }
 );
@@ -223,21 +199,18 @@ export const fetchMediaArticles = cache(
 
       if (error) {
         console.error("[DAL] fetchMediaArticles error:", error);
-        return {
-          success: false,
-          error: `[ERR_PRESSE_003] Failed to fetch media articles: ${error.message}`,
-        };
+        return dalError(
+          `[ERR_PRESSE_003] Failed to fetch media articles: ${error.message}`
+        );
       }
 
-      const articles = (data ?? []).map(mapMediaArticleRow);
-      return { success: true, data: articles };
+      const articles = (data ?? []).map(mapToMediaArticleDTO);
+      return dalSuccess(articles);
     } catch (err: unknown) {
       console.error("[DAL] fetchMediaArticles unexpected error:", err);
-      return {
-        success: false,
-        error:
-          err instanceof Error ? err.message : "[ERR_PRESSE_004] Unknown error",
-      };
+      return dalError(
+        err instanceof Error ? err.message : "[ERR_PRESSE_004] Unknown error"
+      );
     }
   }
 );
@@ -251,7 +224,7 @@ export const fetchMediaArticles = cache(
  * @returns Media kit items ordered by storage path
  */
 export const fetchMediaKit = cache(
-  async (limit?: number): Promise<DALResult<MediaKitItemDTO[]>> => {
+  async (limit?: number): Promise<DALResult<MediaKitItem[]>> => {
     try {
       const supabase = await createClient();
 
@@ -271,21 +244,18 @@ export const fetchMediaKit = cache(
 
       if (error) {
         console.error("[DAL] fetchMediaKit error:", error);
-        return {
-          success: false,
-          error: `[ERR_PRESSE_005] Failed to fetch media kit: ${error.message}`,
-        };
+        return dalError(
+          `[ERR_PRESSE_005] Failed to fetch media kit: ${error.message}`
+        );
       }
 
-      const items = (data ?? []).map(mapMediaKitRow);
-      return { success: true, data: items };
+      const items = (data ?? []).map(mapToMediaKitDTO);
+      return dalSuccess(items);
     } catch (err: unknown) {
       console.error("[DAL] fetchMediaKit unexpected error:", err);
-      return {
-        success: false,
-        error:
-          err instanceof Error ? err.message : "[ERR_PRESSE_006] Unknown error",
-      };
+      return dalError(
+        err instanceof Error ? err.message : "[ERR_PRESSE_006] Unknown error"
+      );
     }
   }
 );

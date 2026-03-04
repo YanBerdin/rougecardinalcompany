@@ -1,5 +1,6 @@
 import { PresseView } from "./PresseView";
-import type { MediaKitItem } from "./types";
+
+const DEFAULT_MAX_PRESS_RELEASES = 12;
 import {
   fetchMediaArticles,
   fetchPressReleases,
@@ -27,8 +28,8 @@ export default async function PresseServerGate() {
     pressReleasesToggleResult.data?.value.enabled !== false;
 
   const maxPressReleases = pressReleasesToggleResult.success
-    ? pressReleasesToggleResult.data?.value.max_items ?? 12
-    : 12;
+    ? pressReleasesToggleResult.data?.value.max_items ?? DEFAULT_MAX_PRESS_RELEASES
+    : DEFAULT_MAX_PRESS_RELEASES;
 
   // ✅ Fetch all data in parallel - fast!
   const [pressReleasesResult, mediaArticlesResult, mediaKitResult] =
@@ -42,22 +43,13 @@ export default async function PresseServerGate() {
         : Promise.resolve({ success: true, data: [] }),
     ]);
 
-  // Handle errors gracefully with fallback empty arrays
   const pressReleases = pressReleasesResult.success
     ? pressReleasesResult.data
     : [];
   const mediaArticles = mediaArticlesResult.success
     ? mediaArticlesResult.data
     : [];
-  const mediaKitRows = mediaKitResult.success ? mediaKitResult.data : [];
-
-  // Map DTO → MediaKitItem pour l'UI
-  const mediaKit: MediaKitItem[] = mediaKitRows.map((r) => ({
-    type: r.type,
-    description: r.description,
-    fileSize: r.fileSize,
-    fileUrl: r.fileUrl,
-  }));
+  const mediaKit = mediaKitResult.success ? mediaKitResult.data : [];
 
   return (
     <PresseView

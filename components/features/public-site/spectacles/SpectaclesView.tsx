@@ -102,7 +102,7 @@ export function SpectaclesView({
 
                 {/* Card Footer */}
                 <div className="py-2 text-center">
-                  <h3 className="text-xl font-bold text-foreground line-clamp-2">
+                  <h3 className="text-xl font-bold font-sans text-foreground line-clamp-2">
                     {show.title}
                   </h3>
                   <p className="text-md text-foreground font-semibold mt-1">
@@ -119,7 +119,7 @@ export function SpectaclesView({
       <section className="py-20 bg-chart-7/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h3 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">Nos Créations Passées</h3>
+            <h2 className="text-3xl md:text-4xl font-sans lg:text-5xl font-semibold mb-4">Nos Créations Passées</h2>
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
               15 ans de créations théâtrales qui ont marqué notre parcours
             </p>
@@ -172,7 +172,7 @@ export function SpectaclesView({
 
                 {/* Card Footer */}
                 <div className="py-2 text-center">
-                  <h3 className="text-xl font-bold text-foreground line-clamp-1">
+                  <h3 className="text-xl font-bold font-sans text-foreground line-clamp-1">
                     {show.title}
                   </h3>
                 </div>

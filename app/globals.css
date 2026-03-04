@@ -173,10 +173,12 @@
     @apply border-border;
   }
 
-  /* Apply Playfair font to h1/h2/h4 in marketing layout only */
-  .marketing-content h1,
-  .marketing-content h2,
-  .marketing-content h4 {
+  /* Apply Playfair font to h1/h2/h4 in marketing layout only.
+     Use className="font-sans" (or any font-* class) on an element to opt out. */
+  .marketing-content h1:not([class*="font-"]),
+  .marketing-content h2:not([class*="font-"]),
+  .marketing-content h3:not([class*="font-"]),
+  .marketing-content h4:not([class*="font-"]) {
     font-family: var(--font-playfair), serif;
   }
 }
