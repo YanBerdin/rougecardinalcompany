@@ -1,4 +1,15 @@
-//TODO: ❌ ommand failed with exit code 1.
+// ommand failed with exit code 1. without arguments, the script will print usage instructions and exit with code 1.
+//* This is intentional to prevent accidental toggling without specifying the desired state.
+// To enable or disable the toggles, you must provide one of the following arguments:
+// - enable-all: Activates both the Media Kit and Press Releases sections.
+// - disable-all: Deactivates both sections.
+// - enable-media-kit: Activates only the Media Kit section.
+// - enable-press-releases: Activates only the Press Releases section.
+// Usage examples:
+//   pnpm exec tsx scripts/toggle-presse.ts enable-all
+//   pnpm exec tsx scripts/toggle-presse.ts disable-all
+//   pnpm exec tsx scripts/toggle-presse.ts enable-media-kit
+//   pnpm exec tsx scripts/toggle-presse.ts enable-press-releases
 import { createClient } from '@supabase/supabase-js';
 import { scriptEnv } from './lib/env.js';
 
