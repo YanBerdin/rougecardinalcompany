@@ -173,10 +173,26 @@
     @apply border-border;
   }
 
-  /* Apply Playfair font to h1/h2/h4 in marketing layout only */
-  .marketing-content h1,
-  .marketing-content h2,
-  .marketing-content h4 {
+  /* Apply Playfair font to h1/h2/h3/h4 in marketing layout only.
+     Use className="font-sans", "font-geist", "font-mono" or "font-serif" to opt out.
+     Uses [class~=] (whole-word match) to avoid false positives with font-weight
+     classes like font-bold, font-semibold, font-medium, etc. */
+  .marketing-content
+    h1:not([class~="font-sans"]):not([class~="font-geist"]):not(
+      [class~="font-mono"]
+    ):not([class~="font-serif"]),
+  .marketing-content
+    h2:not([class~="font-sans"]):not([class~="font-geist"]):not(
+      [class~="font-mono"]
+    ):not([class~="font-serif"]),
+  .marketing-content
+    h3:not([class~="font-sans"]):not([class~="font-geist"]):not(
+      [class~="font-mono"]
+    ):not([class~="font-serif"]),
+  .marketing-content
+    h4:not([class~="font-sans"]):not([class~="font-geist"]):not(
+      [class~="font-mono"]
+    ):not([class~="font-serif"]) {
     font-family: var(--font-playfair), serif;
   }
 }

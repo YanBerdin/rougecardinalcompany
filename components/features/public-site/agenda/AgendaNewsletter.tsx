@@ -24,12 +24,12 @@ function NewsletterHeading(): React.JSX.Element {
                 <p className="text-md lg:text-lg text-white/80">
                     Newsletter
                 </p>
-                <h3
+                <h2
                     id="newsletter-heading"
-                    className="text-3xl md:text-4xl lg:text-5xl font-semibold text-white leading-tight"
+                    className="text-3xl md:text-4xl lg:text-5xl font-semibold font-sans text-white leading-tight"
                 >
                     Restez dans les coulisses
-                </h3>
+                </h2>
                 <div className="h-px w-24 xl:w-72 bg-white/40 my-6" aria-hidden="true" />
             </div>
         </div>
@@ -43,9 +43,9 @@ function SubscribedConfirmation(): React.JSX.Element {
                 className="h-16 w-16 text-white mx-auto lg:mx-0 mb-6"
                 aria-hidden="true"
             />
-            <h3 className="text-3xl font-bold text-white mb-4">
+            <h2 className="text-3xl font-bold font-sans text-white mb-4">
                 Merci pour votre inscription !
-            </h3>
+            </h2>
             <p className="text-xl text-white/90">
                 Vous recevrez bientôt nos actualités et nos invitations privilégiées.
             </p>

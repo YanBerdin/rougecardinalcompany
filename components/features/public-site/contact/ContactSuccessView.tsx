@@ -13,7 +13,7 @@ export function ContactSuccessView({ onReset }: ContactSuccessViewProps): React.
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="animate-fade-in" role="status">
           <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-6" aria-hidden="true" />
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold font-sans mb-4">
             Message Envoyé !
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground mb-6">

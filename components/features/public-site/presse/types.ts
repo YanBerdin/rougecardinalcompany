@@ -31,5 +31,4 @@ export interface PresseViewProps {
   pressReleases: PressRelease[];
   mediaArticles: MediaArticle[];
   mediaKit: MediaKitItem[];
-  loading?: boolean;
 }
