@@ -6,6 +6,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import type { EmblaCarouselType } from "embla-carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { usePrefersReducedMotion } from "@/lib/hooks/use-prefers-reduced-motion";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -365,26 +366,3 @@ function MultiImageCarousel({
 
 // ---------------------------------------------------------------------------
 // Hook: prefers-reduced-motion
-// ---------------------------------------------------------------------------
-
-function usePrefersReducedMotion(): boolean {
-    const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => {
-        if (typeof window === "undefined") return false;
-        return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    });
-
-    useEffect(() => {
-        const mediaQuery = window.matchMedia(
-            "(prefers-reduced-motion: reduce)",
-        );
-
-        const handler = (event: MediaQueryListEvent): void => {
-            setPrefersReducedMotion(event.matches);
-        };
-
-        mediaQuery.addEventListener("change", handler);
-        return () => mediaQuery.removeEventListener("change", handler);
-    }, []);
-
-    return prefersReducedMotion;
-}

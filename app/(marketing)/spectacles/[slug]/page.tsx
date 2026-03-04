@@ -1,10 +1,9 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { fetchSpectacleBySlug, fetchSpectacleNextVenue } from "@/lib/dal/spectacles";
+import { fetchSpectacleBySlug, fetchSpectacleNextVenue, fetchSpectacleTicketUrl } from "@/lib/dal/spectacles";
 import { fetchSpectacleLandscapePhotos, fetchSpectacleGalleryPhotos } from "@/lib/dal/spectacle-photos";
 import { SpectacleDetailView } from "@/components/features/public-site/spectacles/SpectacleDetailView";
 
-export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
 interface SpectacleDetailPageProps {
@@ -52,11 +51,12 @@ export default async function SpectacleDetailPage({
         notFound();
     }
 
-    // Fetch landscape photos, gallery photos, and venue in parallel
-    const [landscapePhotos, galleryPhotos, venue] = await Promise.all([
+    // Fetch landscape photos, gallery photos, venue, and ticket URL in parallel
+    const [landscapePhotos, galleryPhotos, venue, ticketUrl] = await Promise.all([
         fetchSpectacleLandscapePhotos(BigInt(spectacle.id)),
         fetchSpectacleGalleryPhotos(BigInt(spectacle.id)),
         fetchSpectacleNextVenue(spectacle.id),
+        fetchSpectacleTicketUrl(spectacle.id),
     ]);
 
     return (
@@ -65,6 +65,7 @@ export default async function SpectacleDetailPage({
             landscapePhotos={landscapePhotos}
             galleryPhotos={galleryPhotos}
             venue={venue}
+            ticketUrl={ticketUrl}
         />
     );
 }

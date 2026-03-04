@@ -1,9 +1,8 @@
 ---
 name: 'React Composition Patterns'
 description: 'This document outlines composition patterns for building flexible, maintainable React components. It emphasizes avoiding boolean prop proliferation by using compound components, lifting state, and composing internals. These patterns make codebases easier for both humans and AI agents to work with as they scale.'
-model: copilot
+
 tools:
-- vscode/installExtension
 - vscode/getProjectSetupInfo
 - vscode/installExtension
 - vscode/newWorkspace
@@ -11,19 +10,20 @@ tools:
 - vscode/runCommand
 - vscode/askQuestions
 - vscode/vscodeAPI
+- vscode/extensions
+- execute/runNotebookCell
+- execute/testFailure
 - execute/getTerminalOutput
 - execute/awaitTerminal
 - execute/killTerminal
 - execute/createAndRunTask
-- execute/runNotebookCell
-- execute/testFailure
 - execute/runInTerminal
-- read/terminalSelection
-- read/terminalLastCommand
 - read/getNotebookSummary
 - read/problems
 - read/readFile
 - read/readNotebookCellOutput
+- read/terminalSelection
+- read/terminalLastCommand
 - agent/runSubagent
 - edit/createDirectory
 - edit/createFile
@@ -39,6 +39,32 @@ tools:
 - search/usages
 - web/fetch
 - web/githubRepo
+- chrome-devtools/click
+- chrome-devtools/close_page
+- chrome-devtools/drag
+- chrome-devtools/emulate
+- chrome-devtools/evaluate_script
+- chrome-devtools/fill
+- chrome-devtools/fill_form
+- chrome-devtools/get_console_message
+- chrome-devtools/get_network_request
+- chrome-devtools/handle_dialog
+- chrome-devtools/hover
+- chrome-devtools/list_console_messages
+- chrome-devtools/list_network_requests
+- chrome-devtools/list_pages
+- chrome-devtools/navigate_page
+- chrome-devtools/new_page
+- chrome-devtools/performance_analyze_insight
+- chrome-devtools/performance_start_trace
+- chrome-devtools/performance_stop_trace
+- chrome-devtools/press_key
+- chrome-devtools/resize_page
+- chrome-devtools/select_page
+- chrome-devtools/take_screenshot
+- chrome-devtools/take_snapshot
+- chrome-devtools/upload_file
+- chrome-devtools/wait_for
 - github/add_comment_to_pending_review
 - github/add_issue_comment
 - github/assign_copilot_to_issue
@@ -79,32 +105,6 @@ tools:
 - github/sub_issue_write
 - github/update_pull_request
 - github/update_pull_request_branch
-- chrome-devtools/click
-- chrome-devtools/close_page
-- chrome-devtools/drag
-- chrome-devtools/emulate
-- chrome-devtools/evaluate_script
-- chrome-devtools/fill
-- chrome-devtools/fill_form
-- chrome-devtools/get_console_message
-- chrome-devtools/get_network_request
-- chrome-devtools/handle_dialog
-- chrome-devtools/hover
-- chrome-devtools/list_console_messages
-- chrome-devtools/list_network_requests
-- chrome-devtools/list_pages
-- chrome-devtools/navigate_page
-- chrome-devtools/new_page
-- chrome-devtools/performance_analyze_insight
-- chrome-devtools/performance_start_trace
-- chrome-devtools/performance_stop_trace
-- chrome-devtools/press_key
-- chrome-devtools/resize_page
-- chrome-devtools/select_page
-- chrome-devtools/take_screenshot
-- chrome-devtools/take_snapshot
-- chrome-devtools/upload_file
-- chrome-devtools/wait_for
 - playwright/browser_click
 - playwright/browser_close
 - playwright/browser_console_messages
@@ -134,8 +134,8 @@ tools:
 - shadcn/list_items_in_registries
 - shadcn/search_items_in_registries
 - shadcn/view_items_in_registries
-- todo
 - vscode.mermaid-chat-features/renderMermaidDiagram
+- todo
 ---
 
 # React Composition Patterns
@@ -145,7 +145,7 @@ Engineering
 January 2026
 
 > **Note:**  
-> This document is mainly for agents and LLMs to follow when maintaining,  
+> This document is mainly for agents and LLMs to follow when maintaining
 > generating, or refactoring React codebases using composition. Humans  
 > may also find it useful, but guidance here is optimized for automation  
 > and consistency by AI-assisted workflows.

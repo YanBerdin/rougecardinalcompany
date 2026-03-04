@@ -12,5 +12,4 @@ import type { CurrentShow, ArchivedShow } from "@/lib/schemas/spectacles";
 export interface SpectaclesViewProps {
   currentShows: CurrentShow[];
   archivedShows: ArchivedShow[];
-  loading?: boolean;
 }

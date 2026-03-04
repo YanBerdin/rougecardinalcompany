@@ -112,7 +112,7 @@ function EventCardMeta({ event }: { readonly event: Event }): React.JSX.Element 
 
 function EventCardActions({ event }: { readonly event: Event }): React.JSX.Element {
     const { actions } = useAgendaContext();
-    const ticketLabel = event.type === "Atelier" ? "S'inscrire" : "Réserver";
+    const ticketLabel = event.type === "Atelier" ? "M'inscrire" : "Réserver mes billets";
 
     return (
         <div className="flex flex-col justify-center space-y-3">

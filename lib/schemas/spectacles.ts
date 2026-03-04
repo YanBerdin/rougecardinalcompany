@@ -123,13 +123,10 @@ export const CurrentShowSchema = z.object({
   duration_minutes: z.string(),
   cast: z.number(),
   premiere: z.string(),
-  public: z.boolean(),
-  created_by: z.string().optional(),
-  created_at: z.string(),
-  updated_at: z.string(),
   image: z.string(),
   status: z.string(),
   awards: z.array(z.string()),
+  ticketUrl: z.string().nullable().optional(),
 });
 
 /**

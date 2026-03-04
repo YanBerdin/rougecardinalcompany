@@ -80,6 +80,89 @@ export const fetchSpectacleNextVenue = cache(
 );
 
 /**
+ * Fetches the ticket URL for the next upcoming event of a spectacle
+ *
+ * Returns the ticket_url from the closest future event that has one.
+ * If no future event with a ticket_url exists, returns null.
+ *
+ * @param spectacleId - Spectacle ID
+ * @returns ticket URL string or null
+ */
+export const fetchSpectacleTicketUrl = cache(
+  async (spectacleId: number): Promise<string | null> => {
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from("evenements")
+        .select("ticket_url")
+        .eq("spectacle_id", spectacleId)
+        .not("ticket_url", "is", null)
+        .gte("date_debut", new Date().toISOString())
+        .order("date_debut", { ascending: true })
+        .limit(1)
+        .single();
+
+      if (error) {
+        if (error.code !== "PGRST116") {
+          console.error("fetchSpectacleTicketUrl error:", error);
+        }
+        return null;
+      }
+
+      return data.ticket_url ?? null;
+    } catch (err) {
+      console.error("fetchSpectacleTicketUrl exception:", err);
+      return null;
+    }
+  }
+);
+
+/**
+ * Fetches ticket URLs for multiple spectacles in a single query
+ *
+ * For each spectacle, returns the ticket_url from the closest future event
+ * that has a ticket_url. Uses a batch approach to avoid N+1 queries.
+ *
+ * @param spectacleIds - Array of spectacle IDs
+ * @returns Map of spectacle ID → ticket URL (only includes spectacles with a ticket URL)
+ */
+export const fetchTicketUrlsForSpectacles = cache(
+  async (spectacleIds: number[]): Promise<Map<number, string>> => {
+    const result = new Map<number, string>();
+
+    if (spectacleIds.length === 0) return result;
+
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from("evenements")
+        .select("spectacle_id, ticket_url, date_debut")
+        .in("spectacle_id", spectacleIds)
+        .not("ticket_url", "is", null)
+        .gte("date_debut", new Date().toISOString())
+        .order("date_debut", { ascending: true });
+
+      if (error) {
+        console.error("fetchTicketUrlsForSpectacles error:", error);
+        return result;
+      }
+
+      // Keep only the first (nearest) ticket_url per spectacle
+      for (const row of data ?? []) {
+        if (row.spectacle_id != null && row.ticket_url && !result.has(row.spectacle_id)) {
+          result.set(row.spectacle_id, row.ticket_url);
+        }
+      }
+
+      return result;
+    } catch (err) {
+      console.error("fetchTicketUrlsForSpectacles exception:", err);
+      return result;
+    }
+  }
+);
+
+/**
  * Fetches all spectacles from the database
  *
  * Wrapped with React cache() for intra-request deduplication.
@@ -212,8 +295,6 @@ export const fetchSpectacleBySlug = cache(
       // Check if slugOrId is a number (ID fallback)
       const isNumeric = /^\d+$/.test(slugOrId);
 
-      console.log("[fetchSpectacleBySlug] Input:", slugOrId, "| isNumeric:", isNumeric);
-
       let query = supabase
         .from("spectacles")
         .select(
@@ -223,11 +304,9 @@ export const fetchSpectacleBySlug = cache(
       if (isNumeric) {
         // Search by ID as fallback
         const id = parseInt(slugOrId, 10);
-        console.log("[fetchSpectacleBySlug] Querying by ID:", id);
         query = query.eq("id", id);
       } else {
         // Search by slug (primary method)
-        console.log("[fetchSpectacleBySlug] Querying by slug:", slugOrId);
         query = query.eq("slug", slugOrId);
       }
 
@@ -243,15 +322,12 @@ export const fetchSpectacleBySlug = cache(
         return null;
       }
 
-      console.log("[fetchSpectacleBySlug] Raw data received:", data);
-
       const parsed = SpectacleDbSchema.safeParse(data as unknown);
       if (!parsed.success) {
         console.error("[fetchSpectacleBySlug] Validation failed:", parsed.error.issues);
         return null;
       }
 
-      console.log("[fetchSpectacleBySlug] Success! Returning spectacle:", parsed.data.title);
       return parsed.data;
     } catch (err) {
       console.error("fetchSpectacleBySlug exception:", err);
@@ -539,10 +615,10 @@ function prepareUpdateDataWithSlug(
   existing: SpectacleDb
 ): Partial<CreateSpectacleInput> {
   const hasEmptySlug = !updateData.slug || updateData.slug.trim() === "";
-  
+
   // console.log("[prepareUpdateDataWithSlug] Input slug:", updateData.slug);
   // console.log("[prepareUpdateDataWithSlug] hasEmptySlug:", hasEmptySlug);
-  
+
   if (!hasEmptySlug) {
     // console.log("[prepareUpdateDataWithSlug] Keeping manual slug:", updateData.slug);
     return updateData;
@@ -550,12 +626,12 @@ function prepareUpdateDataWithSlug(
 
   const titleForSlug = updateData.title || existing.title;
   //const generatedSlug = generateSlug(titleForSlug);
-  
+
   //console.log("[prepareUpdateDataWithSlug] Auto-generating slug:", generatedSlug, "from title:", titleForSlug);
-  
-//   return {
-//    ...updateData,
-//    slug: generateSlug,
+
+  //   return {
+  //    ...updateData,
+  //    slug: generateSlug,
 
   return {
     ...updateData,

@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function HeroSlidesSkeleton() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 bg-chart-7">
       {/* Header skeleton */}
       <div className="flex justify-between items-center">
         <Skeleton className="h-8 w-48" />

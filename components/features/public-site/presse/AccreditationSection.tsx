@@ -38,7 +38,7 @@ export function AccreditationSection() {
           className="bg-white/30 border-white/50 text-white backdrop-blur-md hover:bg-sidebar-primary-foreground hover:text-primary transition-all duration-300 shadow-lg border"
           asChild
         >
-          <Link href="mailto:presse@rouge-cardinal.fr?subject=Demande%20d%27accr%C3%A9ditation">
+          <Link href="/contact" aria-label="Faire une demande d'accréditation presse">
             Faire une demande
           </Link>
         </Button>

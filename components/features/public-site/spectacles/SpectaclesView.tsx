@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Play } from "lucide-react"; // Clock, Users, Calendar, MapPin, non utilisés
+import { ArrowRight, Play, Ticket } from "lucide-react"; // Clock, Users, Calendar, MapPin, non utilisés
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SpectaclesViewProps } from "./types";
-import { SpectaclesSkeleton } from "@/components/skeletons/spectacles-skeleton";
 import type { CurrentShow, ArchivedShow } from "@/lib/schemas/spectacles";
 
 // Helper to get spectacle URL (fallback to ID if slug is missing)
@@ -18,7 +18,6 @@ const getSpectacleUrl = (show: CurrentShow | ArchivedShow): string => {
 export function SpectaclesView({
   currentShows,
   archivedShows,
-  loading = false,
 }: SpectaclesViewProps) {
   const [showAllArchived, setShowAllArchived] = useState(false);
 
@@ -27,9 +26,6 @@ export function SpectaclesView({
     ? archivedShows
     : archivedShows.slice(0, 6);
   const hasMoreArchivedShows = archivedShows.length > 6;
-  if (loading) {
-    return <SpectaclesSkeleton />;
-  }
 
   return (
     <div className="pt-16">
@@ -58,35 +54,38 @@ export function SpectaclesView({
                 className={`card-hover animate-fade-in-up overflow-hidden w-full md:w-[calc(50%-1rem)]  max-w-md group border-0 shadow-none bg-transparent hover:bg-card`}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <Link href={getSpectacleUrl(show)} className="block">
-                  <div className="relative aspect-[3/4] overflow-hidden rounded-lg shadow-md">
-                    <div
-                      className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-105"
-                      style={{ backgroundImage: `url(${show.image})` }}
+                <div className="relative aspect-[3/4] overflow-hidden rounded-lg shadow-md">
+                  <Link href={getSpectacleUrl(show)} className="block absolute inset-0 z-0">
+                    <Image
+                      src={show.image || "/opengraph-image.png"}
+                      alt={`Affiche du spectacle ${show.title}`}
+                      fill
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     />
+                  </Link>
 
-                    {/* Hover overlay with buttons */}
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                      <div className="flex flex-col gap-3 px-6 w-full">
-                        <Button variant="default"
-                          size="lg" className="w-full" asChild>
-                          <span>
-                            <ArrowRight className="h-4 w-4" />
-                            Je réserve
-                          </span>
-
-                        </Button>
-                        <Button variant="outline"
-                          size="lg" className="w-full bg-white/40 border-white text-chart-6 hover:bg-chart-6 hover:text-black shadow-lg" asChild>
-                          <span>
-                            <Play className="h-5 w-5" />
-                            Détails
-                          </span>
-                        </Button>
-                      </div>
+                  {/* Hover overlay with links — outside the image Link to avoid nested anchors */}
+                  <div className="absolute inset-0 z-10 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none group-hover:pointer-events-auto">
+                    <div className="flex flex-col gap-3 px-6 w-full">
+                      <Link
+                        href={show.ticketUrl ?? getSpectacleUrl(show)}
+                        {...(show.ticketUrl ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                        className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground w-full"
+                      >
+                        <Ticket className="h-4 w-4" aria-hidden="true" />
+                        Réserver mes billets
+                      </Link>
+                      <Link
+                        href={getSpectacleUrl(show)}
+                        className="inline-flex items-center justify-center gap-2 rounded-md bg-white/40 border border-white px-4 py-2 text-sm font-medium text-chart-6 w-full"
+                      >
+                        <Play className="h-5 w-5" aria-hidden="true" />
+                        Détails
+                      </Link>
                     </div>
                   </div>
-                </Link>
+                </div>
 
                 {/* Badges */}
                 <div className="flex flex-wrap gap-2 justify-center pt-4">
@@ -105,9 +104,11 @@ export function SpectaclesView({
                   <h3 className="text-xl font-bold font-sans text-foreground line-clamp-2">
                     {show.title}
                   </h3>
-                  <p className="text-md text-foreground font-semibold mt-1">
-                    Première : {new Date(show.premiere).toLocaleDateString("fr-FR")}
-                  </p>
+                  {show.premiere && (
+                    <p className="text-md text-foreground font-semibold mt-1">
+                      Première : {new Date(show.premiere).toLocaleDateString("fr-FR")}
+                    </p>
+                  )}
                 </div>
               </Card>
             ))}
@@ -134,25 +135,21 @@ export function SpectaclesView({
               >
                 <Link href={getSpectacleUrl(show)} className="block">
                   <div className="relative aspect-[2/3] overflow-hidden rounded-lg shadow-md">
-                    <div
-                      className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                      style={{ backgroundImage: `url(${show.image})` }}
+                    <Image
+                      src={show.image || "/opengraph-image.png"}
+                      alt={`Affiche du spectacle ${show.title}`}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     />
 
                     {/* Hover overlay with button */}
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                       <div className="flex flex-col gap-3 px-6 w-full">
-                        <Button
-                          variant="outline"
-                          size="lg"
-                          className="w-full bg-white/40 border-white text-chart-6 hover:bg-chart-6 hover:text-black shadow-lg"
-                          asChild
-                        >
-                          <span>
-                            <Play className="h-5 w-5" />
-                            Détails
-                          </span>
-                        </Button>
+                        <span className="inline-flex items-center justify-center gap-2 rounded-md bg-white/40 border border-white px-4 py-2 text-sm font-medium text-chart-6 w-full">
+                          <Play className="h-5 w-5" aria-hidden="true" />
+                          Détails
+                        </span>
                       </div>
                     </div>
                   </div>
