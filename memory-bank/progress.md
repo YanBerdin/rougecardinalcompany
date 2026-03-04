@@ -1,5 +1,46 @@
 # Progress
 
+## TASK074 — Audit Feature public-site/spectacles (2026-03-04)
+
+**Context** : Audit `components/features/public-site/spectacles` contre toutes les instructions projet. 16 violations corrigées sur 4 niveaux de sévérité + pipeline `ticket_url` depuis `evenements` (hors scope). Documentation audit et plan mis à jour en v1.1 avec divergences annotées.
+
+**Violations corrigées** :
+
+| # | Sévérité | Violation | Correction |
+| --- | --- | --- | --- |
+| 3.1 | CRITICAL | Conflit `force-dynamic` + `revalidate = 60` | `dynamic` supprimé, ISR conservé |
+| 3.2 | CRITICAL | 5 `console.log` actifs en production (DAL) | Supprimés, `console.error` conservés |
+| 3.3 | MAJOR | `backgroundImage` CSS au lieu de `next/image` | `<Image fill>` + sizes + alt text |
+| 3.4 | MAJOR | `hooks.ts` 100% commenté (129 lignes) | Fichier supprimé |
+| 3.5 | MAJOR | `getMediaPublicUrl` duplique `buildMediaPublicUrl` | Remplacé par helper centralisé |
+| 3.6 | MAJOR | `formatDate`/`formatDuration` inline | 2 nouveaux helpers dans spectacle-table-helpers |
+| 3.7 | MAJOR | Blocs CTA dupliqués | `SpectacleCTABar.tsx` extrait (⚠️ props enrichies) |
+| 3.8 | MAJOR | `<Button asChild>` dans `<Link>` — HTML invalide | Liens `<Link>` indépendants (⚠️ divergence totale) |
+| 3.9 | MAJOR | Mapping `premiere → created_at` sémantiquement faux | Champs inutiles supprimés du schema + container |
+| 3.10 | MINOR | Prop `loading` redondante avec Suspense | Supprimée (types + view + container) |
+| 3.11 | MINOR | 4 blocs code commenté (DEBUG) | Supprimés |
+| 3.12 | MINOR | Espaces parasites dans `<main>` | Corrigés |
+| 3.13 | MINOR | `new Date(show.premiere)` sans guard | Guard conditionnel ajouté |
+| 3.14 | SUGGESTION | `usePrefersReducedMotion` local au carousel | Extrait vers `lib/hooks/` |
+| 3.15 | SUGGESTION | `LandscapePhotoCard` inline dans détail | Fichier dédié créé |
+| — | HORS SCOPE | Pas de `ticket_url` sur les CTA | Pipeline complet evenements→DAL→containers→CTA |
+
+**Fichiers livrés** :
+
+| Fichier | Action | Notes |
+| --- | --- | --- |
+| `spectacles/SpectacleCTABar.tsx` | Créé | Props : title, ticketUrl?, agendaLabel?, backLabel? |
+| `spectacles/LandscapePhotoCard.tsx` | Créé | Carte photo paysage |
+| `lib/hooks/use-prefers-reduced-motion.ts` | Créé | Hook partagé |
+| `doc/TASK074-audit-public-spectacles.md` | Créé v1.1 | Document audit complet avec divergences |
+| `.github/prompts/plan-auditPublicSpectacles.prompt.md` | Créé v1.1 | Plan annoté post-implémentation |
+| `spectacles/hooks.ts` | **Supprimé** | Dead code 129L |
+| `SpectaclesView.tsx` + `SpectacleDetailView.tsx` + `SpectacleCarousel.tsx` + `SpectaclesContainer.tsx` + `types.ts` + `index.ts` + `[slug]/page.tsx` + `lib/dal/spectacles.ts` + `lib/schemas/spectacles.ts` + `lib/tables/spectacle-table-helpers.tsx` + `home/shows/ShowCard.tsx` + `home/shows/ShowsContainer.tsx` + `home/shows/types.ts` | Modifiés | — |
+
+**Branches** : `refactor/task074-audit-public-spectacles`, commit `ba6dd70`, 27 fichiers, +1422/-509 lignes. Build ✅ Lint ✅.
+
+---
+
 ## BUGFIX-HOME-NEWS — Section "À la Une" articles_presse (2026-03-03)
 
 **Context** : Double bug dans la section "À la Une" homepage. (1) DAL `home-news.ts` interrogeait `communiques_presse` au lieu de `articles_presse` + filtre 30 jours masquant les anciens articles → seulement 1 résultat affiché au lieu de 4. (2) Liens `/actualites` dans `NewsView` et `NewsCard` → 404 (route inexistante).

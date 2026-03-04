@@ -1,6 +1,6 @@
 # Audit Feature — `components/features/public-site/spectacles`
 
-> **Date** : Juillet 2025  
+> **Date** : Mars 2026  
 > **Branche** : `refactor/task074-audit-public-spectacles`  
 > **Auditeur** : GitHub Copilot (React Composition Patterns mode)  
 > **Version** : 1.1 — Mise à jour post-implémentation
@@ -10,8 +10,8 @@
 ## Historique des versions
 
 | Version | Date | Changements |
- |--------- | ------ | ------------ |
-| 1.1 | Juillet 2025 | Mise à jour post-implémentation : statuts de correction, divergences annotées, ajout section ticket_url, scores de conformité mis à jour |
+| --------- | ------ | ------------ |
+| 1.1 | Mars 2026 | Mise à jour post-implémentation : statuts de correction, divergences annotées, ajout section ticket_url, scores de conformité mis à jour |
 | 1.0 | Juillet 2025 | Audit initial — 16 violations identifiées |
 
 ---
@@ -300,7 +300,7 @@ Le plan prévoyait de remplacer les `<Button asChild>` par des `<span>` stylés 
 **Implémentation réelle** : Restructuration complète des cartes dans `SpectaclesView.tsx` ET `ShowCard.tsx` (hors périmètre initial) avec un pattern de liens indépendants :
 
 | Aspect | Plan initial | Implémentation réelle |
-|--------|-------------|----------------------|
+| -------- | ------------- | ---------------------- |
 | Approche | `<span>` stylés dans `<Link>` wrapper | Liens `<Link>` indépendants dans overlay hover |
 | Label principal | "Découvrir" | "Réserver mes billets" |
 | Icône | `ArrowRight` | `Ticket` + `Play` |

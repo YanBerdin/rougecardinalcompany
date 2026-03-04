@@ -1,8 +1,32 @@
 # Active Context
 
-**Current Focus (2026-03-03)**: ✅ BUGFIX-HOME-NEWS — Correction double bug section "À la Une" homepage : DAL interrogeait `communiques_presse` au lieu de `articles_presse`, filtre 30 jours masquait les anciens articles, liens `/actualites` inexistants (404). 5 fichiers corrigés, branche `fix/home-news-articles-presse`.
+**Current Focus (2026-03-04)**: ✅ TASK074 — Audit feature public-site/spectacles : 16 violations corrigées (2 CRITICAL, 7 MAJOR, 4 MINOR, 2 SUGGESTIONS) + pipeline `ticket_url` depuis `evenements` hors scope initial. Documentation audit v1.1 + plan v1.1 avec divergences annotées. Branch `refactor/task074-audit-public-spectacles`, commit `ba6dd70`, mergé sur master.
 
-**Last Major Updates**: ✅ BUGFIX-HOME-NEWS (2026-03-03) + TASK072 Audit public/home (2026-03-03) + TASK071 Audit public/contact (2026-03-03) + TASK070 Admin Compagnie CRUD (2026-03-03) + Public Compagnie Audit Refactor (2026-03-02) + Public Agenda Composition Refactor (2026-03-02) + Admin Users Audit + Scripts (2026-03-02) + Admin Team Audit Remediation (2026-03-01) + Admin Spectacles Audit Remediation (2026-03-01) + Dependabot #26 serialize-javascript RCE fix (2026-03-01) + Site-Config Audit Fix (2026-03-01) + TASK065 Admin Press Audit Fix (2026-02-28)
+**Last Major Updates**: ✅ TASK074 Audit public/spectacles (2026-03-04) + BUGFIX-HOME-NEWS (2026-03-03) + TASK072 Audit public/home (2026-03-03) + TASK071 Audit public/contact (2026-03-03) + TASK070 Admin Compagnie CRUD (2026-03-03) + Public Compagnie Audit Refactor (2026-03-02) + Public Agenda Composition Refactor (2026-03-02) + Admin Users Audit + Scripts (2026-03-02) + Admin Team Audit Remediation (2026-03-01) + Admin Spectacles Audit Remediation (2026-03-01)
+
+---
+
+## ✅ TASK074 — Audit Feature public-site/spectacles (2026-03-04)
+
+### Summary
+
+✅ **COMPLET** — Audit de `components/features/public-site/spectacles` + pipeline `ticket_url`.
+
+**16 violations corrigées** :
+
+- **2 CRITICAL** : conflit `force-dynamic`/`revalidate` (ISR restauré), 5 `console.log` supprimés du DAL
+- **7 MAJOR** : `backgroundImage` CSS → `next/image` (alt + WebP + lazy), fichier mort `hooks.ts` purgé (129L), `buildMediaPublicUrl` centralisé, helpers format date/durée créés dans spectacle-table-helpers, `SpectacleCTABar.tsx` extrait, HTML nesting `<a>/<button>` → liens `<Link>` indépendants, mapping sémantique `premiere→created_at` supprimé
+- **4 MINOR** : prop `loading` redondante, 4 blocs code commenté, espaces `<main>`, guard `new Date()`
+- **2 SUGGESTIONS** : `usePrefersReducedMotion` extrait vers `lib/hooks/`, `LandscapePhotoCard.tsx` extrait
+
+**Travaux hors-scope** : Pipeline complet `evenements.ticket_url` → 2 fonctions DAL → `SpectaclesContainer` (batch) + `[slug]/page.tsx` (single) → `SpectacleCTABar` + `ShowCard` (liens externes `target="_blank"`)
+
+**⚠️ Divergences majeures** :
+
+- §3.7 `SpectacleCTABar` : props enrichies `ticketUrl?` + `wrapperClassName?` (non planifiées)
+- §3.8 HTML nesting : liens `<Link>` indépendants au lieu de `<span>` planifiés ; 2 labels distincts "Réserver mes billets" + "Détails" ; périmètre élargi à `ShowCard.tsx` (home)
+
+Branch `refactor/task074-audit-public-spectacles`, commit `ba6dd70`, 27 fichiers, +1422/-509L, build/lint ✅
 
 ---
 
@@ -19,6 +43,7 @@
 `NewsView.tsx` et `NewsCard.tsx` pointaient vers `/actualites` et `/actualites/${id}`, route inexistante.
 
 **Corrections** :
+
 - DAL : requête sur `articles_presse` (`.not("published_at", "is", null)`), suppression filtre temporel, nouveau type `FeaturedArticleRecord`
 - `NewsItem` : ajout `source_url`, `source_publication`
 - `NewsContainer` : mapping adapté (`chapo/excerpt → short_description`, `published_at → date`)
