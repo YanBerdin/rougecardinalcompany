@@ -1,5 +1,5 @@
 import { SpectaclesView } from "./SpectaclesView";
-import { fetchAllSpectacles } from "@/lib/dal/spectacles";
+import { fetchAllSpectacles, fetchTicketUrlsForSpectacles } from "@/lib/dal/spectacles";
 
 /**
  * Server Container for Spectacles page
@@ -9,24 +9,17 @@ import { fetchAllSpectacles } from "@/lib/dal/spectacles";
 export async function SpectaclesContainer() {
   const spectacles = await fetchAllSpectacles();
 
-  // DEBUG: Log the raw data to understand what we're working with
-  //TODO: remove in production
-  /*
-    console.log('=== DEBUG SPECTACLES CONTAINER ===');
-    console.log('Total spectacles fetched:', spectacles.length);
-    console.log('All spectacles status/public:', spectacles.map(s => ({
-        title: s.title,
-        status: s.status,
-        public: s.public
-    })));
-    */
-
   // Improved logic: separate current shows from archives based on status
   // Current shows: public status and not archived
-  const currentShows = spectacles
+  const currentFiltered = spectacles
     .filter((s) => s.public && s.status !== "archived")
-    .slice(0, 6)
-    .map((s) => ({
+    .slice(0, 6);
+
+  // Batch-fetch ticket URLs for current shows (avoids N+1)
+  const currentIds = currentFiltered.map((s) => s.id);
+  const ticketUrls = await fetchTicketUrlsForSpectacles(currentIds);
+
+  const currentShows = currentFiltered.map((s) => ({
       id: s.id,
       title: s.title,
       slug: s.slug ?? undefined,
@@ -36,12 +29,10 @@ export async function SpectaclesContainer() {
         s.duration_minutes != null ? `${s.duration_minutes} min` : "—",
       cast: s.casting ?? 0,
       premiere: s.premiere ?? "",
-      public: s.public,
-      created_at: s.premiere ?? "",
-      updated_at: s.premiere ?? "",
       image: s.image_url ?? "/opengraph-image.png",
       status: s.status ?? "—",
       awards: s.awards ?? [],
+      ticketUrl: ticketUrls.get(s.id) ?? null,
     }));
 
   // Archived shows: all shows with 'archived' status (regardless of public flag)
@@ -58,19 +49,10 @@ export async function SpectaclesContainer() {
       awards: s.awards ?? [],
     }));
 
-  // DEBUG: Log the filtered results
-  /*
-    console.log('Current shows count:', currentShows.length);
-    console.log('Archived shows count:', archivedShows.length);
-    console.log('Archived shows details:', archivedShows.map(s => ({ title: s.title, id: s.id })));
-    console.log('=== END DEBUG ===');
-    */
-
   return (
     <SpectaclesView
       currentShows={currentShows}
       archivedShows={archivedShows}
-      loading={false}
     />
   );
 }

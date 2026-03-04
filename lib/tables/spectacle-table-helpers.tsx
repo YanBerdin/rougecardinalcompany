@@ -52,6 +52,25 @@ export function formatSpectacleDuration(minutes: number | null): string {
   return minutes ? `${minutes} min` : "—";
 }
 
+export function formatSpectaclePremiereShort(dateString: string | null): string {
+  if (!dateString) return "Non définie";
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
+  } catch {
+    return "Date invalide";
+  }
+}
+
+export function formatDurationHumanReadable(minutes: number | null): string {
+  if (!minutes) return "Non précisée";
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (hours === 0) return `${mins}min`;
+  if (mins === 0) return `${hours}h`;
+  return `${hours}h ${mins}min`;
+}
+
 export function removeSpectacleFromList(
   spectacles: SpectacleSummary[],
   id: number

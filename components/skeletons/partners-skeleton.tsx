@@ -2,7 +2,7 @@
 
 function SkeletonRow() {
     return (
-        <div className="flex overflow-hidden mb-4 md:mb-6">
+        <div className="flex overflow-hidden mb-4 md:mb-6 bg-chart-7">
             <div className="flex gap-6">
                 {Array.from({ length: 8 }).map((_, i) => (
                     <div

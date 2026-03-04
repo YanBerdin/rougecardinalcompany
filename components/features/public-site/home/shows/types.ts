@@ -6,6 +6,7 @@ export interface Show {
   slug: string;
   genre?: string | null;
   dates?: string[];
+  ticketUrl?: string | null;
 }
 
 export interface ShowsViewProps {

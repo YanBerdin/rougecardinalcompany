@@ -8,52 +8,24 @@ import {
     Calendar,
     Award,
     Play,
-    Ticket,
-    // ArrowRight,
-    ArrowLeft,
     Star,
     MapPin,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { env } from "@/lib/env";
+import { buildMediaPublicUrl } from "@/lib/dal/helpers";
+import { formatSpectaclePremiereShort, formatDurationHumanReadable } from "@/lib/tables/spectacle-table-helpers";
 import type { SpectacleDb, SpectaclePhotoDTO, GalleryPhotoDTO } from "@/lib/schemas/spectacles";
 import { SpectacleCarousel } from "./SpectacleCarousel";
+import { SpectacleCTABar } from "./SpectacleCTABar";
+import { LandscapePhotoCard } from "./LandscapePhotoCard";
 
 interface SpectacleDetailViewProps {
     spectacle: SpectacleDb;
     landscapePhotos?: SpectaclePhotoDTO[];
     galleryPhotos?: GalleryPhotoDTO[];
     venue?: { nom: string; ville: string | null } | null;
-}
-
-/**
- * Build public URL from storage_path
- */
-function getMediaPublicUrl(storagePath: string): string {
-    return `${env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/medias/${storagePath}`;
-}
-
-/**
- * Landscape Photo Card Component
- */
-function LandscapePhotoCard({ photo }: { photo: SpectaclePhotoDTO }) {
-    const imageUrl = getMediaPublicUrl(photo.storage_path);
-
-    return (
-        <div className="relative aspect-[16/9] rounded-lg overflow-hidden shadow-lg my-6 group">
-            <Image
-                src={imageUrl}
-                alt={photo.alt_text ?? "Photo du spectacle"}
-                fill
-                loading="lazy"
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                sizes="(max-width: 600px) 70vw, 40vw"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        </div>
-    );
+    ticketUrl?: string | null;
 }
 
 export function SpectacleDetailView({
@@ -61,30 +33,14 @@ export function SpectacleDetailView({
     landscapePhotos = [],
     galleryPhotos = [],
     venue = null,
+    ticketUrl = null,
 }: SpectacleDetailViewProps) {
-    const formatDate = (dateString: string | null) => {
-        if (!dateString) return "Non définie";
-        return new Date(dateString).toLocaleDateString("fr-FR", {
-            day: "numeric",
-            month: "long",
-        });
-    };
-
-    const formatDuration = (minutes: number | null) => {
-        if (!minutes) return "Non précisée";
-        const hours = Math.floor(minutes / 60);
-        const mins = minutes % 60;
-        if (hours === 0) return `${mins}min`;
-        if (mins === 0) return `${hours}h`;
-        return `${hours}h ${mins}min`;
-    };
-
     const awards = spectacle.awards || [];
     const hasAwards = awards.length > 0;
 
     return (
         <main
-            className=" bg-background text-foreground font-sans selection:bg-primary selection:text-primary-foreground pt-16"
+            className="bg-background text-foreground font-sans selection:bg-primary selection:text-primary-foreground pt-16"
             aria-label={`Détails du spectacle ${spectacle.title}`}
         >
             {/* Skip to content link for keyboard navigation */}
@@ -127,7 +83,7 @@ export function SpectacleDetailView({
                             <div className="flex-1">
                                 <p className="ml-1 text-xs uppercase tracking-wide font-medium">Durée</p>
                                 <Badge variant="outline" className="mt-1 text-xs sm:text-sm font-semibold shadow-lg">
-                                    {formatDuration(spectacle.duration_minutes)}
+                                    {formatDurationHumanReadable(spectacle.duration_minutes)}
                                 </Badge>
                             </div>
                         </div>
@@ -138,7 +94,7 @@ export function SpectacleDetailView({
                             <div className="flex-1">
                                 <p className="ml-1 text-xs uppercase tracking-wide font-medium">Première</p>
                                 <Badge variant="outline" className="mt-1 text-xs sm:text-sm font-semibold shadow-lg">
-                                    {formatDate(spectacle.premiere)}
+                                    {formatSpectaclePremiereShort(spectacle.premiere)}
                                 </Badge>
                             </div>
                         </div>
@@ -200,53 +156,9 @@ export function SpectacleDetailView({
 
                         {/* Synopsis Column */}
                         <div className="md:col-span-3 space-y-6">
-                            {/* CTA Principaux : Réserver + Voir les dates */}
-                            <div className="flex flex-col sm:flex-row flex-wrap gap-3">
-                                <Button
-                                    variant="default"
-                                    size="lg"
-                                    className="shadow-lg hover:shadow-xl transition-all touch-action-manipulation w-full sm:w-auto"
-                                    asChild
-                                >
-                                    <Link
-                                        href="/contact?subject=reservation"
-                                        aria-label={`Réserver des places pour ${spectacle.title}`}
-                                    >
-                                        <Ticket className="mr-2 h-4 w-4" /> Réserver
-                                    </Link>
-                                </Button>
-
-                                <Button
-                                    variant="secondary"
-                                    size="lg"
-                                    className="w-full sm:w-auto"
-                                    asChild
-                                >
-                                    <Link href="/agenda" aria-label="Consulter l'agenda des représentations">
-                                        <Calendar className="mr-2 h-4 w-4" />
-                                        Agenda
-                                    </Link>
-                                </Button>
-
-                                {/* Lien secondaire : Retour */}
-                                <div>
-                                    <Button
-                                        variant="outline"
-                                        size="lg"
-                                        className="w-full sm:w-auto"
-                                        asChild
-                                    >
-                                        <Link
-                                            href="/spectacles"
-                                            aria-label="Retourner à la page listant tous les spectacles"
-                                        >
-                                            <ArrowLeft className="mr-2 h-4 w-4" />
-                                            Retour
-                                        </Link>
-                                    </Button>
-                                </div>
-                            </div>
-                            <h1 id="spectacle-title" className="text-2xl md:text-3xl lg:text-4xl font-bold mb-6 animate-fade-in-up">
+                            {/* CTA Principaux : Réserver + Agenda + Retour */}
+                            <SpectacleCTABar title={spectacle.title} ticketUrl={ticketUrl} />
+                            <h1 id="spectacle-title" className="text-2xl md:text-3xl lg:text-4xl font-bold font-sans mb-6 animate-fade-in-up">
                                 {spectacle.title}
                             </h1>
                             {spectacle.short_description && (
@@ -293,53 +205,13 @@ export function SpectacleDetailView({
                             )}
 
                             {/* Call to Actions */}
-                            <div className="flex flex-col gap-4 pt-4 md:pt-6">
-                                {/* CTA Principaux : Réserver + Voir les dates */}
-                                <div className="flex flex-col sm:flex-row flex-wrap gap-3">
-                                    <Button
-                                        variant="default"
-                                        size="lg"
-                                        className="shadow-lg hover:shadow-xl transition-all touch-action-manipulation w-full sm:w-auto"
-                                        asChild
-                                    >
-                                        <Link
-                                            href="/contact?subject=reservation"
-                                            aria-label={`Réserver des places pour ${spectacle.title}`}
-                                        >
-                                            <Ticket className="mr-2 h-4 w-4" /> Réserver
-                                        </Link>
-                                    </Button>
-
-                                    <Button
-                                        variant="secondary"
-                                        size="lg"
-                                        className="w-full sm:w-auto"
-                                        asChild
-                                    >
-                                        <Link href="/agenda" aria-label="Consulter l'agenda des représentations">
-                                            <Calendar className="mr-2 h-4 w-4" />
-                                            Voir les dates
-                                        </Link>
-                                    </Button>
-                                </div>
-
-                                {/* Lien secondaire : Retour */}
-                                <div>
-                                    <Button
-                                        variant="outline"
-                                        size="lg"
-                                        className="w-full sm:w-auto mb-8"
-                                        asChild
-                                    >
-                                        <Link
-                                            href="/spectacles"
-                                            aria-label="Retourner à la page listant tous les spectacles"
-                                        >
-                                            <ArrowLeft className="mr-2 h-4 w-4" />
-                                            Tous les spectacles
-                                        </Link>
-                                    </Button>
-                                </div>
+                            <div className="pt-4 md:pt-6">
+                                <SpectacleCTABar
+                                    title={spectacle.title}
+                                    ticketUrl={ticketUrl}
+                                    agendaLabel="Voir les dates"
+                                    backLabel="Tous les spectacles"
+                                />
                             </div>
 
                             {/* Awards Widget */}
@@ -374,24 +246,6 @@ export function SpectacleDetailView({
                             )}
 
                             {/* Gallery Carousel */}
-                            {/* 
-                             {galleryPhotos && galleryPhotos.length > 0 && (
-                                <div className="mt-8">
-                            */}
-                            {/* <h2 className="text-2xl font-bold mb-4">Galerie</h2>
-                            */}
-                            {/*
-                                            <SpectacleCarousel
-                                        images={galleryPhotos.map((photo) => ({
-                                            url: getMediaPublicUrl(photo.storage_path),
-                                            alt: photo.alt_text,
-                                        }))}
-                                        title={spectacle.title}
-                                    />
-                                </div>
-                            )}
-                            */}
-
                         </div>
                     </div>
                     {/* Gallery Carousel */}
@@ -401,7 +255,7 @@ export function SpectacleDetailView({
                                 {/* <h2 className="text-2xl font-bold mb-4">Galerie</h2> */}
                                 <SpectacleCarousel
                                     images={galleryPhotos.map((photo) => ({
-                                        url: getMediaPublicUrl(photo.storage_path),
+                                        url: buildMediaPublicUrl(photo.storage_path) ?? "",
                                         alt: photo.alt_text,
                                     }))}
                                     title={spectacle.title}
@@ -412,6 +266,6 @@ export function SpectacleDetailView({
                 </div>
 
             </section>
-        </main >
+        </main>
     );
 }

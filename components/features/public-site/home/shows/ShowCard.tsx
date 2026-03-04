@@ -1,8 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Play } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Play, Ticket } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Show } from "./types";
 
@@ -12,13 +10,15 @@ interface ShowCardProps {
 }
 
 export function ShowCard({ show, index }: ShowCardProps) {
+  const spectacleUrl = `/spectacles/${show.slug}`;
+
   return (
-    <Card
-      className="card-hover animate-fade-in-up overflow-hidden w-full md:w-[calc(50%-1rem)] max-w-md group border-0 shadow-none bg-transparent"
+    <div
+      className="card-hover animate-fade-in-up overflow-hidden w-full md:w-[calc(50%-1rem)] max-w-md group"
       style={{ animationDelay: `${index * 0.1}s` }}
     >
-      <Link href={`/spectacles/${show.slug}`} className="block">
-        <div className="relative aspect-[3/4] overflow-hidden rounded-lg shadow-md">
+      <div className="relative aspect-[3/4] overflow-hidden rounded-lg shadow-md">
+        <Link href={spectacleUrl} className="block absolute inset-0 z-0">
           <Image
             src={show.image}
             alt={show.title}
@@ -26,31 +26,29 @@ export function ShowCard({ show, index }: ShowCardProps) {
             sizes="(max-width: 768px) 100vw, 50vw"
             className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
           />
+        </Link>
 
-          {/* Overlay — visible au survol ET au focus clavier */}
-          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-            <div className="flex flex-col gap-3 px-6 w-full">
-              <Button variant="default" size="lg" className="w-full" asChild>
-                <span>
-                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                  Je réserve
-                </span>
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                className="w-full bg-white/40 border-white text-chart-6 hover:bg-chart-6 hover:text-black shadow-lg"
-                asChild
-              >
-                <span>
-                  <Play className="h-5 w-5" aria-hidden="true" />
-                  Détails
-                </span>
-              </Button>
-            </div>
+        {/* Hover overlay — outside the image Link to avoid nested anchors */}
+        <div className="absolute inset-0 z-10 bg-black/60 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none group-hover:pointer-events-auto">
+          <div className="flex flex-col gap-3 px-6 w-full">
+            <Link
+              href={show.ticketUrl ?? spectacleUrl}
+              {...(show.ticketUrl ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground w-full"
+            >
+              <Ticket className="h-4 w-4" aria-hidden="true" />
+              Réserver mes billets
+            </Link>
+            <Link
+              href={spectacleUrl}
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-white/40 border border-white px-4 py-2 text-sm font-medium text-chart-6 w-full"
+            >
+              <Play className="h-5 w-5" aria-hidden="true" />
+              Détails
+            </Link>
           </div>
         </div>
-      </Link>
+      </div>
 
       {/* Badges */}
       <div className="flex flex-wrap gap-2 justify-center pt-4">
@@ -81,12 +79,12 @@ export function ShowCard({ show, index }: ShowCardProps) {
       {/* Titre */}
       <div className="py-2 text-center">
         <h3 className="text-xl font-bold text-foreground line-clamp-2">
-          <Link href={`/spectacles/${show.slug}`}>{show.title}</Link>
+          <Link href={spectacleUrl}>{show.title}</Link>
         </h3>
         <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
           {show.short_description}
         </p>
       </div>
-    </Card>
+    </div>
   );
 }

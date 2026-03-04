@@ -481,23 +481,6 @@ export default function TestConnectionPage() {
                     <CardContent>
                       <div className="space-y-2">
                         <div>
-                          <span className="font-medium">Public:</span>{" "}
-                          {spectacle.public ? "Oui" : "Non"}
-                        </div>
-                        <div>
-                          <span className="font-medium">Date création:</span>{" "}
-                          {spectacle.created_at
-                            ? new Date(spectacle.created_at).toLocaleDateString(
-                              "fr-FR",
-                              {
-                                day: "numeric",
-                                month: "long",
-                                year: "numeric",
-                              }
-                            )
-                            : "-"}
-                        </div>
-                        <div>
                           <span className="font-medium">Durée:</span>
                           {"duration_minutes" in spectacle &&
                             spectacle.duration_minutes
