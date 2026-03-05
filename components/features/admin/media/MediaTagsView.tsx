@@ -17,6 +17,16 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import type { MediaTagDTO } from "@/lib/schemas/media";
 import { deleteMediaTagAction } from "@/lib/actions/media-tags-actions";
 import { MediaTagFormDialog } from "./MediaTagFormDialog";
@@ -158,19 +168,19 @@ export function MediaTagsView({ initialTags }: MediaTagsViewProps) {
                                 {/* Footer: Actions */}
                                 <div className="flex items-center justify-end gap-2 pt-2 border-t mt-2">
                                     <Button
-                                        variant="ghost"
+                                        variant="secondary"
                                         size="sm"
                                         onClick={() => handleEdit(tag)}
-                                        className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 h-10 min-w-[56px] px-3"
+                                        className="h-10 min-w-[56px] px-3"
                                         aria-label={`Éditer ${tag.name}`}
                                     >
                                         <Edit className="h-5 w-5 mr-2" /> Éditer
                                     </Button>
                                     <Button
-                                        variant="ghost"
+                                        variant="destructive"
                                         size="sm"
                                         onClick={() => requestDelete(tag)}
-                                        className="text-red-600 hover:text-red-700 hover:bg-red-50 h-10 min-w-[56px] px-3"
+                                        className="bg-card h-10 min-w-[56px] px-3"
                                         aria-label={`Supprimer ${tag.name}`}
                                     >
                                         <Trash2 className="h-5 w-5 mr-2" /> Supprimer
@@ -185,7 +195,7 @@ export function MediaTagsView({ initialTags }: MediaTagsViewProps) {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="w-[25%]">Nom</TableHead>
+                                    <TableHead className="w-[25%] pl-2">Nom</TableHead>
                                     <TableHead className="hidden md:table-cell w-[35%]">Description</TableHead>
                                     <TableHead className="w-[20%]">Couleur</TableHead>
                                     <TableHead className="text-right w-[20%]">Actions</TableHead>
@@ -216,21 +226,21 @@ export function MediaTagsView({ initialTags }: MediaTagsViewProps) {
                                         <TableCell className="text-right">
                                             <div className="flex items-center justify-end gap-2">
                                                 <Button
-                                                    variant="ghost"
+                                                    variant="outline"
                                                     size="icon"
                                                     onClick={() => handleEdit(tag)}
                                                     title="Modifier"
-                                                    className="h-8 w-8 sm:h-9 sm:w-9 hover:bg-amber-100 hover:text-amber-700"
+                                                    className="bg-card h-8 w-8 sm:h-9 sm:w-9"
                                                     aria-label={`Éditer ${tag.name}`}
                                                 >
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
                                                 <Button
-                                                    variant="ghost"
+                                                    variant="destructive"
                                                     size="icon"
                                                     onClick={() => requestDelete(tag)}
                                                     title="Supprimer"
-                                                    className="h-8 w-8 sm:h-9 sm:w-9 hover:bg-red-100 hover:text-red-700"
+                                                    className="bg-card h-8 w-8 sm:h-9 sm:w-9"
                                                     aria-label={`Supprimer ${tag.name}`}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
@@ -253,6 +263,28 @@ export function MediaTagsView({ initialTags }: MediaTagsViewProps) {
                 isSubmitting={isSubmitting}
                 setIsSubmitting={setIsSubmitting}
             />
+
+            <AlertDialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Supprimer le tag</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Êtes-vous sûr de vouloir supprimer le tag{" "}
+                            <strong>&quot;{deleteCandidate?.name}&quot;</strong> ?
+                            Cette action est irréversible.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel className="bg-secondary text-secondary-foreground hover:bg-muted-foreground hover:text-muted">Annuler</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleDelete}
+                            className="bg-destructive text-destructive-foreground hover:bg-red-500/20 hover:text-destructive"
+                        >
+                            Supprimer
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

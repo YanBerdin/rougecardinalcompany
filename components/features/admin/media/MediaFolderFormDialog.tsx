@@ -165,7 +165,7 @@ export function MediaFolderFormDialog({
                                 required
                                 aria-required="true"
                                 maxLength={100}
-                                placeholder="ex: spectacles, press"
+                                placeholder="⚠️ Laissez vide pour génération automatique ⚠️"
                                 className="font-mono text-sm"
                             />
                             <p className="text-xs text-muted-foreground mt-1">

@@ -10,7 +10,7 @@ import {
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { ImageFieldGroup } from "@/components/features/admin/media";
+import { ImageField } from "@/components/features/admin/media";
 import type { HeroSlideFormValues, HeroSlideDTO } from "@/lib/schemas/home-content";
 import { createHeroSlideAction, updateHeroSlideAction } from "@/app/(admin)/admin/home/hero/home-hero-actions";
 import { HeroSlideFormFields, HeroSlideActiveToggle } from "./HeroSlideFormFields";
@@ -95,7 +95,7 @@ export function HeroSlideForm({ open, onClose, onSuccess, slide }: HeroSlideForm
                     <form onSubmit={handleValidatedSubmit} className="space-y-4 overflow-x-hidden">
                         <HeroSlideFormFields form={form} />
 
-                        <ImageFieldGroup
+                        <ImageField.Provider
                             form={form}
                             imageUrlField="image_url"
                             imageMediaIdField="image_media_id"
@@ -104,7 +104,11 @@ export function HeroSlideForm({ open, onClose, onSuccess, slide }: HeroSlideForm
                             required
                             showUpload={true}
                             uploadFolder="home-hero"
-                        />
+                        >
+                            <ImageField.SourceActions />
+                            <ImageField.Preview />
+                            <ImageField.AltText />
+                        </ImageField.Provider>
 
                         <CtaFieldGroup form={form} ctaType="primary" />
                         <CtaFieldGroup form={form} ctaType="secondary" />

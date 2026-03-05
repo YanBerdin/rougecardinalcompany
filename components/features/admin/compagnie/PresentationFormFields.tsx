@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ContentArrayField } from "./ContentArrayField";
-import { ImageFieldGroup } from "@/components/features/admin/media/ImageFieldGroup";
+import { ImageField } from "@/components/features/admin/media";
 import type { PresentationSectionFormValues } from "@/lib/schemas/compagnie-admin";
 
 const SHOW_TITLE = ["hero", "history", "values", "team", "mission", "custom"];
@@ -123,7 +123,7 @@ export function PresentationFormFields() {
             )}
 
             {SHOW_IMAGE_URL.includes(kind) && (
-                <ImageFieldGroup
+                <ImageField.Provider
                     form={form}
                     imageUrlField="image_url"
                     imageMediaIdField="image_media_id"
@@ -131,7 +131,11 @@ export function PresentationFormFields() {
                     uploadFolder="about"
                     label="Image de section"
                     description="Sélectionnez une image depuis la médiathèque"
-                />
+                >
+                    <ImageField.SourceActions />
+                    <ImageField.Preview />
+                    <ImageField.AltText />
+                </ImageField.Provider>
             )}
         </div>
     );

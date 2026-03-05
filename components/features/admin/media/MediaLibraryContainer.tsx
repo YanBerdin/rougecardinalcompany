@@ -5,6 +5,7 @@
 import { listMediaItemsAction } from "@/lib/actions/media-actions";
 import { listMediaTagsAction } from "@/lib/actions/media-tags-actions";
 import { listMediaFoldersAction } from "@/lib/actions/media-folders-actions";
+import { MediaLibraryProvider } from "./MediaLibraryProvider";
 import { MediaLibraryViewClient } from "./MediaLibraryViewClient";
 
 export async function MediaLibraryContainer() {
@@ -45,10 +46,12 @@ export async function MediaLibraryContainer() {
     }
 
     return (
-        <MediaLibraryViewClient
+        <MediaLibraryProvider
             initialMedia={mediaResult.data ?? []}
             availableTags={tagsResult.data ?? []}
             availableFolders={foldersResult.data ?? []}
-        />
+        >
+            <MediaLibraryViewClient />
+        </MediaLibraryProvider>
     );
 }

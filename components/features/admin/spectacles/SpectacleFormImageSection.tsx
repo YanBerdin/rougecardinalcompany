@@ -1,7 +1,7 @@
 "use client";
 
 import { UseFormReturn } from "react-hook-form";
-import { ImageFieldGroup } from "@/components/features/admin/media";
+import { ImageField } from "@/components/features/admin/media";
 import { SpectaclePhotoManager } from "./SpectaclePhotoManager";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -18,21 +18,23 @@ export function SpectacleFormImageSection({
     return (
         <>
             {/* Image URL with validation state tracking */}
-            <ImageFieldGroup
+            <ImageField.Provider
                 form={form}
                 imageUrlField="image_url"
                 label={`Image du spectacle${isPublic ? " *" : ""}`}
                 showMediaLibrary={true}
                 showUpload={true}
                 uploadFolder="spectacles"
-                showAltText={false}
                 description={
                     isPublic
                         ? "⚠️ Image OBLIGATOIRE et doit être validée. Cliquez sur « Vérifier » avant d'enregistrer."
                         : "⚠️ Toute URL doit être validée avant enregistrement. ⚠️ Laissez vide ou cliquez sur « Vérifier »."
                 }
                 onValidationChange={onValidationChange}
-            />
+            >
+                <ImageField.SourceActions />
+                <ImageField.Preview />
+            </ImageField.Provider>
 
             {/* Photos paysage (2 max) - Only for existing spectacles */}
             {spectacleId ? (

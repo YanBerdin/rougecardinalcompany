@@ -1,12 +1,13 @@
+"use client";
+
 import Image from "next/image";
-import type { MediaItemExtendedDTO } from "@/lib/schemas/media";
+import { useMediaDetailsContext } from "../MediaDetailsContext";
 
-interface MediaPreviewProps {
-    media: MediaItemExtendedDTO;
-    publicUrl: string | null;
-}
+export function MediaPreview() {
+    const { state, meta } = useMediaDetailsContext();
+    const { publicUrl } = state;
+    const { media } = meta;
 
-export function MediaPreview({ media, publicUrl }: MediaPreviewProps) {
     return (
         <div className="aspect-video rounded-md overflow-hidden bg-muted relative">
             {publicUrl ? (

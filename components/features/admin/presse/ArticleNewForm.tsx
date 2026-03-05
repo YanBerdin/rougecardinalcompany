@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
-import { ImageFieldGroup } from "@/components/features/admin/media";
+import { ImageField } from "@/components/features/admin/media";
 import { cleanArticleFormData, getArticleSuccessMessage } from "@/lib/utils/press-utils";
 import {
     Select,
@@ -185,15 +185,19 @@ export function ArticleNewForm() {
                         />
                     </div>
 
-                    {/* Pattern 3: ImageFieldGroup for Open Graph image */}
-                    <ImageFieldGroup
+                    {/* Pattern 3: ImageField for Open Graph image */}
+                    <ImageField.Provider
                         form={form}
                         imageUrlField="image_url"
                         imageMediaIdField="og_image_media_id"
                         label="Image de l'article (Open Graph)"
                         uploadFolder="presse"
                         onValidationChange={(isValid) => setIsImageValidated(isValid)}
-                    />
+                    >
+                        <ImageField.SourceActions />
+                        <ImageField.Preview />
+                        <ImageField.AltText />
+                    </ImageField.Provider>
                 </CardContent>
             </Card>
 

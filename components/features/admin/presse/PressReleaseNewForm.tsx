@@ -21,7 +21,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { ImageFieldGroup } from "@/components/features/admin/media";
+import { ImageField } from "@/components/features/admin/media";
 import { createPressReleaseAction } from "@/app/(admin)/admin/presse/press-releases-actions";
 import { PressReleaseFormSchema, type PressReleaseFormValues } from "@/lib/schemas/press-release";
 import { cleanPressReleaseFormData, getPressReleaseSuccessMessage } from "@/lib/utils/press-utils";
@@ -187,8 +187,8 @@ export function PressReleaseNewForm({ spectacles = [], evenements = [] }: { spec
                         />
                     </div>
 
-                    {/* Image avec ImageFieldGroup */}
-                    <ImageFieldGroup
+                    {/* Image avec ImageField */}
+                    <ImageField.Provider
                         form={form}
                         imageUrlField="image_url"
                         imageMediaIdField="image_media_id"
@@ -197,7 +197,10 @@ export function PressReleaseNewForm({ spectacles = [], evenements = [] }: { spec
                         uploadFolder="presse"
                         description="Image principale affichée dans le kit média (recommandé : 1200x630px)"
                         onValidationChange={(isValid) => setIsImageValidated(isValid)}
-                    />
+                    >
+                        <ImageField.SourceActions />
+                        <ImageField.Preview />
+                    </ImageField.Provider>
                 </CardContent>
             </Card>
 

@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Form } from "@/components/ui/form";
 import { AlertTriangle } from "lucide-react";
-import { ImageFieldGroup } from "@/components/features/admin/media";
+import { ImageField } from "@/components/features/admin/media";
 import { cleanPressReleaseFormData, getPressReleaseSuccessMessage } from "@/lib/utils/press-utils";
 import {
     Select,
@@ -172,15 +172,18 @@ export function PressReleaseEditForm({ release, spectacles = [], evenements = []
                         />
                     </div>
 
-                    {/* Pattern 3: ImageFieldGroup with validation callback */}
-                    <ImageFieldGroup
+                    {/* Pattern 3: ImageField with validation callback */}
+                    <ImageField.Provider
                         form={form}
                         imageUrlField="image_url"
                         imageMediaIdField="image_media_id"
                         uploadFolder="presse"
                         showUpload={true}
                         onValidationChange={(isValid) => setIsImageValidated(isValid)}
-                    />
+                    >
+                        <ImageField.SourceActions />
+                        <ImageField.Preview />
+                    </ImageField.Provider>
                 </CardContent>
             </Card>
 
