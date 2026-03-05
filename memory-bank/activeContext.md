@@ -1,8 +1,29 @@
 # Active Context
 
-**Current Focus (2026-03-04)**: ✅ TASK074 — Audit feature public-site/spectacles : 16 violations corrigées (2 CRITICAL, 7 MAJOR, 4 MINOR, 2 SUGGESTIONS) + pipeline `ticket_url` depuis `evenements` hors scope initial. Documentation audit v1.1 + plan v1.1 avec divergences annotées. Branch `refactor/task074-audit-public-spectacles`, commit `ba6dd70`, mergé sur master.
+**Current Focus (2026-03-05)**: ✅ TASK075 — Refactoring Media Admin : React Composition Patterns. 4 phases implémentées (bug fixes AlertDialog manquants + MediaLibraryContext + MediaDetailsContext + ImageField compound component). 10 consommateurs migrés, `ImageFieldGroup.tsx` supprimé. Build/lint/tsc ✅. Branch `refactor/task075-media-admin-composition-patterns`, commit `55f21ce`, pushé sur origin.
 
-**Last Major Updates**: ✅ TASK074 Audit public/spectacles (2026-03-04) + BUGFIX-HOME-NEWS (2026-03-03) + TASK072 Audit public/home (2026-03-03) + TASK071 Audit public/contact (2026-03-03) + TASK070 Admin Compagnie CRUD (2026-03-03) + Public Compagnie Audit Refactor (2026-03-02) + Public Agenda Composition Refactor (2026-03-02) + Admin Users Audit + Scripts (2026-03-02) + Admin Team Audit Remediation (2026-03-01) + Admin Spectacles Audit Remediation (2026-03-01)
+**Last Major Updates**: ✅ TASK075 Media Admin Composition Patterns (2026-03-05) + TASK074 Audit public/spectacles (2026-03-04) + BUGFIX-HOME-NEWS (2026-03-03) + TASK072 Audit public/home (2026-03-03) + TASK071 Audit public/contact (2026-03-03) + TASK070 Admin Compagnie CRUD (2026-03-03) + Public Compagnie Audit Refactor (2026-03-02) + Public Agenda Composition Refactor (2026-03-02) + Admin Users Audit + Scripts (2026-03-02) + Admin Team Audit Remediation (2026-03-01) + Admin Spectacles Audit Remediation (2026-03-01)
+
+---
+
+## ✅ TASK075 — Refactoring Media Admin : React Composition Patterns (2026-03-05)
+
+### Summary
+
+✅ **COMPLET** — Migration du module `components/features/admin/media/` vers les React Composition Patterns.
+
+**Audit initial** : Score 2/8 règles conformes, 4 violations (Boolean Prop Proliferation, Compound Components, Generic Context Interfaces, Lift State into Providers).
+
+**4 phases implémentées** :
+
+- **Phase 1 — Bug fixes** : Suppression paramètre fantôme `availableTags` dans `useMediaLibraryState`, fix dépendances `useEffect`, ajout `<AlertDialog>` manquant dans `MediaFoldersView.tsx` et `MediaTagsView.tsx` (bouton "Supprimer" non fonctionnel sur les deux pages).
+- **Phase 2 — MediaLibrary Context** : `MediaLibraryContext.tsx` (interface `{ state, actions, meta }`) + `MediaLibraryProvider.tsx`. 9 props éliminées du prop drilling entre `Container → View → sous-composants`.
+- **Phase 3 — MediaDetails Context** : `MediaDetailsContext.tsx` + `MediaDetailsProvider.tsx`. 8+ props éliminées dans `MediaDetailsPanel` et ses 4 sous-composants `details/`.
+- **Phase 4 — ImageField Compound Component** : `image-field/` (Context + Provider + 3 sous-composants renommés + barrel) + `ImageField.tsx` API compound `{ Provider, SourceActions, Preview, AltText }`. 10 consommateurs migrés. `ImageFieldGroup.tsx` supprimé.
+
+**Quality gates** : `pnpm build` ✅ / `pnpm lint` ✅ / `pnpm run type-check` ✅
+
+Branch `refactor/task075-media-admin-composition-patterns`, commit `55f21ce`, 36 fichiers, +1542/-636L, pushé sur origin.
 
 ---
 

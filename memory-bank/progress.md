@@ -1,5 +1,46 @@
 # Progress
 
+## TASK075 — Refactoring Media Admin : React Composition Patterns (2026-03-05)
+
+**Context** : Audit + refactoring complet de `components/features/admin/media/` contre les instructions React Composition Patterns. Score initial 2/8 règles conformes (Boolean Prop Proliferation, pas de Compound Components, pas de Generic Context Interfaces, pas de Lift State into Providers). 2 bugs critiques découverts en phase 1 (dialogs de confirmation non affichés). 4 phases implémentées, 36 fichiers, +1542/-636 lignes.
+
+**Violations corrigées** :
+
+| # | Règle | Violation initiale | Correction |
+| --- | --- | --- | --- |
+| 1 | No Boolean Prop Proliferation | `ImageField` passait 4 booleans + ref + prop drilling multi-niveaux | Compound API `{ Provider, SourceActions, Preview, AltText }` |
+| 2 | Compound Components | Aucun compound component dans tout le module | `ImageField` + `MediaLibraryProvider` + `MediaDetailsProvider` |
+| 3 | Generic Context Interfaces | Pas de contexte dans le module | Interfaces typées `{ state, actions, meta }` créées |
+| 4 | Lift State into Providers | État éparpillé, prop drilling profond | State + logique dans 2 Providers dédiés |
+| BUG-A | Fonctionnel | `MediaFoldersView` — bouton "Supprimer" sans `<AlertDialog>` en JSX | `AlertDialog` complet avec `AlertDialogAction destructive` ajouté |
+| BUG-B | Fonctionnel | `MediaTagsView` — même bug `<AlertDialog>` manquant | Idem |
+| BUG-C | Paramètre fantôme | `availableTags` passé mais jamais utilisé dans `useMediaLibraryState` | Supprimé du hook + Container + View |
+| BUG-D | `useEffect` deps | `useEffect` avec deps manquantes dans `ImageFieldGroup.tsx` | Corrigé (puis fichier supprimé en Phase 4) |
+
+**Fichiers livrés** :
+
+| Fichier | Action | Notes |
+| --- | --- | --- |
+| `media/MediaLibraryContext.tsx` | Créé | Interface `{ state, actions, meta }` |
+| `media/MediaLibraryProvider.tsx` | Créé | Contient toute la logique de `useMediaLibraryState` |
+| `media/MediaDetailsContext.tsx` | Créé | Interface typed pour le panneau de détails |
+| `media/MediaDetailsProvider.tsx` | Créé | State + actions du panneau détails |
+| `media/image-field/ImageFieldContext.tsx` | Créé | Context compound component |
+| `media/image-field/ImageFieldProvider.tsx` | Créé | Provider compound |
+| `media/image-field/ImageFieldAltText.tsx` | Créé | Renommé depuis `ImageAltTextField` |
+| `media/image-field/ImageFieldPreview.tsx` | Créé | Renommé depuis `ImagePreviewSection` |
+| `media/image-field/ImageFieldSourceActions.tsx` | Créé | Renommé depuis `ImageSourceActions` |
+| `media/image-field/index.ts` | Créé | Barrel `ImageField + sous-composants` |
+| `media/ImageField.tsx` | Créé | API compound `{ Provider, SourceActions, Preview, AltText }` |
+| `media/ImageFieldGroup.tsx` | **Supprimé** | Remplacé par compound component |
+| `MediaFoldersView.tsx` + `MediaTagsView.tsx` + `MediaLibraryContainer.tsx` + `MediaLibraryView.tsx` + `MediaDetailsPanel.tsx` + `details/MediaEditForm.tsx` + `details/MediaFileMeta.tsx` + `details/MediaPreviewSection.tsx` + `details/MediaUsageSection.tsx` + 10 consommateurs ImageField | Modifiés | Migration contexts + compound API |
+
+**10 consommateurs migrés** : `HeroSlideForm`, `AboutContentForm`, `PresentationFormFields`, `PartnerForm`, `TeamMemberForm`, `ArticleEditForm`, `ArticleNewForm`, `PressReleaseEditForm`, `PressReleaseNewForm`, `SpectacleFormImageSection`.
+
+**Branch** : `refactor/task075-media-admin-composition-patterns`, commit `55f21ce`, 36 fichiers, +1542/-636L, pushé sur origin. Build ✅ Lint ✅ tsc ✅.
+
+---
+
 ## TASK074 — Audit Feature public-site/spectacles (2026-03-04)
 
 **Context** : Audit `components/features/public-site/spectacles` contre toutes les instructions projet. 16 violations corrigées sur 4 niveaux de sévérité + pipeline `ticket_url` depuis `evenements` (hors scope). Documentation audit et plan mis à jour en v1.1 avec divergences annotées.
