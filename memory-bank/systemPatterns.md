@@ -1,6 +1,6 @@
 # System Patterns
 
-**Last Updated**: 2026-03-02
+**Last Updated**: 2026-03-06
 
 ## Database Infrastructure
 
@@ -21,12 +21,16 @@
 - DAL pattern recommandé: `lib/dal/` pour centraliser l'accès à la base (server-only modules).
 - **DAL SOLID Pattern (Nov 2025)**: Tous les DAL retournent `DALResult<T>`, helpers centralisés dans `lib/dal/helpers/`.
 - **Handler Factorization Pattern (Dec 2025)**: Logique partagée dans `lib/actions/*-server.ts`, réutilisée par API Routes et Server Actions.
-- **ImageFieldGroup Pattern (Dec 2025)**: Composant réutilisable pour champs image avec validation SSRF intégrée.
-- **Upload Générique Pattern (Dec 2025)**: `uploadMediaImage(formData, folder)` configurable par entité.
+- **ImageField Compound Component Pattern (Mar 2026)**: Remplace `ImageFieldGroup` (supprimé). API composable `ImageField.Provider / .SourceActions / .Preview / .AltText`. 10 consommateurs migrés.
+- **Upload Générique Pattern (Dec 2025, hardened Feb 2026)**: `uploadMediaImage(formData, folder)` configurable par entité, magic bytes MIME, sanitize filename.
 - **T3 Env Pattern (Dec 2025)**: Variables d'environnement type-safe avec validation Zod au démarrage via `lib/env.ts`.
 - **Embla Carousel Pattern (Feb 2026)**: Carousel galerie spectacle avec branching 0/1/2+, scale tween, autoplay, WCAG (44px targets, `prefers-reduced-motion`).
 - **`buildMediaPublicUrl` Helper Pattern (Feb 2026)**: Helper sync centralisé dans `lib/dal/helpers/media-url.ts` pour construire les URLs publiques Supabase Storage (T3 Env, évite les doublons).
-- **Compound Components Composition Pattern (Mar 2026)**: Pattern Context Provider + compound sub-components pour features publiques complexes. État partagé via `state/actions` dependency injection, React 19 `use()`, barrel exports `Agenda.*`. Premier usage : `public-site/agenda` (TASK068).
+- **Compound Components Composition Pattern (Mar 2026)**: Pattern `{ state, actions, meta }` Context Provider + compound sub-components. Utilisé dans 6 features : agenda (public), media library (admin), media details (admin), ImageField (admin), newsletter (public), compagnie (public). React 19 `use()` dans les sous-composants.
+- **`requireAdmin()` / `requireAdminPageAccess()` Auth Guard Pattern (Mar 2026)**: Guards standards pour Server Actions (`requireAdmin()` throws) et pages admin (`requireAdminPageAccess()` redirects). Définis dans `lib/auth/is-admin.ts`.
+- **`dalSuccess()` / `dalError()` Factory Pattern (Mar 2026)**: Fonctions factory type-safe pour `DALResult<T>`, avec `HttpStatusCode` optionnel. Remplacent les littéraux `{ success: true, data }` dans 20+ DAL.
+- **`withDisplayToggle` RSC Helper (Mar 2026)**: Async RSC helper qui skip rendu + fetch si toggle DB désactivé. `lib/utils/with-display-toggle.tsx`.
+- **`SECTION_RENDERERS` Map Pattern (Mar 2026)**: `Record<string, ComponentType>` pour dispatch de sections par `kind`, élimine switch/if-else. Premier usage : `public-site/compagnie`.
 - **Sécurité**: combinaison GRANT (table-level) + RLS (policies) requise — ne pas considérer RLS comme substitut au GRANT.
 - **Migrations**: `supabase/migrations/` est la source de vérité pour les modifications appliquées en base; `supabase/schemas/` sert de documentation/declarative reference.
 - **Tests & CI**: vérifier explicitement que les roles `anon` et `authenticated` peuvent accéder aux DTO nécessaires (tests d'intégration DAL).
@@ -40,37 +44,36 @@
 
 ## Compound Components Composition Pattern (Mar 2026)
 
-**Pattern** pour les features publiques complexes nécessitant un état partagé entre plusieurs composants enfants, sans prop drilling.
+**Pattern** pour les features complexes (publiques ET admin) nécessitant un état partagé entre plusieurs composants enfants, sans prop drilling.
 
 ### Principe
 
 Remplacer un monolithe Client Component (>200L, >5 props drillées) par :
 
-1. **Context Provider** (`FeatureContext.tsx`) — expose `state`, `actions` via React Context
+1. **Context Provider** (`FeatureContext.tsx`) — expose `{ state, actions, meta }` via React Context
 2. **Compound sub-components** — consomment le contexte via React 19 `use()`
 3. **Barrel exports** — namespace `Feature.*` pour composition explicite
 
 ### Structure type
 
 ```bash
-components/features/public-site/[feature]/
-  [Feature]Context.tsx          # Provider + compound namespace export (Agenda.*)
-  [Feature]Hero.tsx             # Compound sub-component (use(FeatureContext))
-  [Feature]Filters.tsx          # Compound sub-component
-  [Feature]EventList.tsx        # Compound sub-component
-  [Feature]Newsletter.tsx       # Compound sub-component
-  [Feature]ClientContainer.tsx  # Composition: <Agenda.Provider> + <Agenda.*>
+components/features/[public-site|admin]/[feature]/
+  [Feature]Context.tsx          # Context definition (interface { state, actions, meta })
+  [Feature]Provider.tsx         # Provider with state logic (useState, useMemo, useCallback)
+  [Feature]SubComponent.tsx     # Compound sub-component (use(FeatureContext))
+  [Feature]ClientContainer.tsx  # Composition: <Provider> + sub-components
   [Feature]Container.tsx        # Server Component: DAL fetch + Suspense
-  types.ts                      # FeatureContextValue (State/Actions interfaces)
+  types.ts                      # State/Actions/Meta interfaces
   index.ts                      # Barrel named exports
 ```
 
-### Context Interface (dependency injection)
+### Context Interface (tri-part `{ state, actions, meta }`)
 
 ```typescript
 interface FeatureContextValue {
-  state: FeatureState;       // Données réactives (events, selectedGenre, etc.)
-  actions: FeatureActions;   // Handlers (setSelectedGenre, etc.)
+  state: FeatureState;       // Données réactives (query, filters, selectedItem, etc.)
+  actions: FeatureActions;   // Handlers (setQuery, handleClick, handleDelete, etc.)
+  meta: FeatureMeta;         // Données statiques/read-only (availableTags, folders, etc.)
 }
 ```
 
@@ -81,13 +84,18 @@ interface FeatureContextValue {
 - **Provider wrapping** : le ClientContainer wrap les sous-composants dans le Provider
 - **Server Component** : le Container fait le fetch DAL et passe les données initiales au ClientContainer
 - **Barrel exports** : `index.ts` exporte tous les composants publics par nom
+- **useMemo** : `contextValue` wrappé dans `useMemo` pour éviter re-renders superflus
 
-### Référence d'implémentation
+### Implémentations
 
-Premier usage : `components/features/public-site/agenda` (TASK068)
-
-- AgendaView 285L monolithe → 5 compound components (960L total / 12 fichiers)
-- 14 props drillées → 3 props (initialEvents, showNewsletter, displayToggle)
+| Feature | Scope | Context | Sub-components | Props éliminées | TASK |
+| ------- | ----- | ------- | -------------- | --------------- | ---- |
+| **Agenda** | public | `AgendaContext` | Hero, Filters, EventList, Newsletter | 14 → 3 | TASK068 |
+| **Media Library** | admin | `MediaLibraryContext` | View, Upload, Card, BulkActions | 9+ props | TASK075 |
+| **Media Details** | admin | `MediaDetailsContext` | EditForm, Actions, FileInfo, Preview | 8+ props | TASK075 |
+| **ImageField** | admin | `ImageFieldContext` | SourceActions, Preview, AltText | 4 booleans + ref | TASK075 |
+| **Newsletter** | public | `NewsletterContext` | Form, Card | 8 props | TASK072 |
+| **Compagnie** | public | `SECTION_RENDERERS` map | 6 section components | switch/if-else | TASK069 |
 
 ## DAL SOLID Architecture (Nov 2025)
 
@@ -1216,21 +1224,48 @@ export async function createMediaTagAction(input: unknown): Promise<ActionResult
 }
 ```
 
-#### UI Components Hierarchy
+#### UI Components Hierarchy (updated Mar 2026 — Composition Patterns)
 
 ```bash
 MediaLibraryContainer (Server) — Fetches initial data
-  └─ MediaLibraryView (Client) — State management + useEffect sync
-      ├─ MediaUploadDialog (Client) — 3-phase upload
-      ├─ MediaTagsView (Client) — Tags CRUD
-      ├─ MediaFoldersView (Client) — Folders tree
-      ├─ MediaBulkActions (Client) — Bulk operations toolbar
-      ├─ MediaDetailsPanel (Client) — Metadata editor
-      └─ MediaCard[] (Client) — Grid of cards
-          ├─ Checkbox (multi-select)
-          ├─ Thumbnail (lazy-loaded)
-          ├─ Eye badge (usage indicator)
-          └─ Keyboard handlers (Space/Enter)
+  └─ MediaLibraryProvider (Client) — Context { state, actions, meta }
+      └─ MediaLibraryView (Client) — Consumes context via use()
+          ├─ MediaUploadDialog (Client) — 3-phase upload
+          ├─ MediaTagsView (Client) — Tags CRUD + AlertDialog
+          ├─ MediaFoldersView (Client) — Folders tree + AlertDialog
+          ├─ MediaBulkActions (Client) — Bulk operations toolbar
+          ├─ MediaDetailsProvider (Client) — Context { state, actions, meta }
+          │   └─ MediaDetailsPanel (Client) — Consumes context via use()
+          │       ├─ MediaPreview (Client)
+          │       ├─ MediaEditForm (Client)
+          │       ├─ MediaFileInfo (Client)
+          │       └─ MediaDetailActions (Client)
+          └─ MediaCard[] (Client) — Grid of cards
+              ├─ Thumbnail (lazy-loaded)
+              ├─ Footer (filename + badges)
+              └─ Keyboard handlers (Space/Enter)
+```
+
+#### MediaLibraryContext Pattern (TASK075)
+
+```typescript
+// components/features/admin/media/MediaLibraryContext.tsx
+interface MediaLibraryContextValue {
+  state: MediaLibraryState;     // search, selectedFolder/Tag/Media, selectionMode, filteredMedia
+  actions: MediaLibraryActions;  // setSearch, handleCardClick, handleUpload, handleBulk*
+  meta: MediaLibraryMeta;        // availableTags, availableFolders
+}
+```
+
+#### MediaDetailsContext Pattern (TASK075)
+
+```typescript
+// components/features/admin/media/MediaDetailsContext.tsx
+interface MediaDetailsContextValue {
+  state: MediaDetailsState;     // isUpdating, isDeleting, isRegenerating, publicUrl, form
+  actions: MediaDetailsActions;  // handleUpdate, handleDelete, handleRegenerateThumbnail, onClose
+  meta: MediaDetailsMeta;        // media item, folders, tags
+}
 ```
 
 #### Schémas Dual Pattern (Server vs UI)
@@ -1375,15 +1410,18 @@ if (!checkRateLimit(ip, 10)) {
 }
 ```
 
-#### Conformité Patterns Projet
+#### Conformité Patterns Projet (updated Mar 2026)
 
 - ✅ **CRUD Server Actions Pattern** — Toutes mutations via Server Actions avec revalidatePath
-- ✅ **DAL SOLID Pattern** — DALResult<T> partout, helpers centralisés, pas de revalidatePath dans DAL
+- ✅ **DAL SOLID Pattern** — `dalSuccess()/dalError()` partout, helpers centralisés, pas de revalidatePath dans DAL
 - ✅ **Dual Schema Pattern** — Server (bigint) vs UI (number) pour éviter casting dangereux
-- ✅ **Clean Code** — Fichiers <300 lignes (exceptions justifiées pour DAL complets)
+- ✅ **Clean Code** — Fichiers <300 lignes (monolithes splittés dans campagne audit)
 - ✅ **TypeScript Strict** — Aucun `any`, type guards, interfaces extensibles
 - ✅ **Declarative Schema** — Migrations générées via `supabase db diff`
 - ✅ **RLS Granular** — 15 policies (3 tables × 5: select anon/auth, insert/update/delete admin)
+- ✅ **Composition Patterns** — Context Providers + compound sub-components (MediaLibrary, MediaDetails, ImageField)
+- ✅ **requireAdmin()** — Auth guard dans toutes les Server Actions et pages admin
+- ✅ **AlertDialog** — Confirmations destructives via shadcn AlertDialog (pas window.confirm)
 
 #### Métriques
 
@@ -1405,37 +1443,69 @@ if (!checkRateLimit(ip, 10)) {
 - `lib/dal/*` — Accès uniquement via `env` (pas `process.env`)
 - `scripts/*` — Imports `env` (pas dotenv)
 
-### DALResult<T> Pattern
+### DALResult<T> Pattern (updated Mar 2026)
 
-**Pattern unifié** pour tous les modules DAL (17/17 compliant):
+**Pattern unifié** pour tous les modules DAL (20+ compliant):
 
 ```typescript
 // lib/dal/helpers/error.ts
-export type DALResult<T> = 
-  | { success: true; data: T }
-  | { success: false; error: string };
 
+// Type definitions (readonly for safety)
+export type DALSuccess<T> = { readonly success: true; readonly data: T };
+export type DALError = { readonly success: false; readonly error: string; readonly status?: HttpStatusCode };
+export type DALResult<T> = DALSuccess<T> | DALError;
+
+// ✅ Factory functions (Mar 2026 — preferred over object literals)
+export function dalSuccess<T>(data: T): DALSuccess<T> {
+  return { success: true, data };
+}
+
+export function dalError(error: string, status?: HttpStatusCode): DALError {
+  return { success: false, error, ...(status && { status }) };
+}
+
+// Safe error extraction
+export function getErrorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  return String(err);
+}
+
+// Legacy helper (still exported for backward compat)
 export function toDALResult<T>(
   data: T | null,
   error: Error | null
 ): DALResult<T> {
-  if (error) {
-    return { success: false, error: error.message };
-  }
-  if (data === null) {
-    return { success: false, error: "No data returned" };
-  }
-  return { success: true, data };
+  if (error) return dalError(error.message);
+  if (data === null) return dalError("No data returned");
+  return dalSuccess(data);
 }
 ```
 
-### DAL Helpers Structure
+**Usage** :
+
+```typescript
+// ✅ PREFERRED (Mar 2026+)
+import { dalSuccess, dalError } from "@/lib/dal/helpers";
+
+export async function fetchItems(): Promise<DALResult<Item[]>> {
+  const { data, error } = await supabase.from("items").select("*");
+  if (error) return dalError(`[ERR_ITEM_001] ${error.message}`);
+  return dalSuccess(data ?? []);
+}
+
+// ❌ LEGACY (still works but verbose)
+if (error) return { success: false, error: error.message };
+return { success: true, data };
+```
+
+### DAL Helpers Structure (updated Mar 2026)
 
 ```bash
 lib/dal/helpers/
-├── error.ts      # DALResult<T> + toDALResult()
-├── format.ts     # formatDate(), etc.
+├── error.ts      # DALResult<T>, dalSuccess(), dalError(), getErrorMessage(), toDALResult()
+├── format.ts     # formatDate(), formatDateFr()
 ├── slug.ts       # generateSlug()
+├── media-url.ts  # buildMediaPublicUrl() (sync, T3 Env)
 └── index.ts      # Barrel exports
 ```
 
@@ -1851,130 +1921,110 @@ export function CtaFieldGroup({ form, type }: Props) {
 }
 ```
 
-#### ImageFieldGroup Pattern (Dec 2025)
+#### ImageField Compound Component Pattern (Mar 2026, replaces ImageFieldGroup)
 
-**Pattern** : Composant générique réutilisable pour tous les champs image admin avec validation SSRF.
+**Pattern** : Compound component API composable pour tous les champs image admin, remplaçant `ImageFieldGroup.tsx` (supprimé).
 
 **Problème résolu** :
 
-- Code dupliqué dans 4 formulaires admin (HeroSlide, Spectacle, TeamMember, AboutContent)
-- Validation URL externe inconsistante (risque SSRF dans SpectacleForm)
-- Gestion preview/fallback répétée
+- `ImageFieldGroup` utilisait 4 booleans (`showMediaLibrary`, `showExternalUrl`, `showAltText`, `required`) + prop drilling multi-niveaux
+- Non conforme aux Composition Patterns (pas de contexte, pas de composabilité)
 
 **Solution** :
 
-**Composant** : `components/features/admin/media/ImageFieldGroup.tsx`
+**Compound API** : `components/features/admin/media/ImageField.tsx`
 
 ```typescript
-interface ImageFieldGroupProps<TForm extends FieldValues> {
-  form: UseFormReturn<TForm>;
-  imageUrlField: Path<TForm>;
-  imageMediaIdField?: Path<TForm>;
-  altTextField?: Path<TForm>;
-  label?: string;
-  required?: boolean;
-  showMediaLibrary?: boolean;
-  showExternalUrl?: boolean;
-  showAltText?: boolean;
-}
+export const ImageField = {
+  Provider: ImageFieldProvider,     // Context + state management
+  SourceActions: ImageFieldSourceActions,  // MediaLibrary picker + URL input
+  Preview: ImageFieldPreview,       // Image preview with fallback
+  AltText: ImageFieldAltText,       // Alt text field (accessibility)
+};
+```
 
-export function ImageFieldGroup<TForm extends FieldValues>({
-  form,
-  imageUrlField,
-  imageMediaIdField,
-  altTextField,
-  label = "Image",
-  required = false,
-  showMediaLibrary = true,
-  showExternalUrl = true,
-  showAltText = true,
-}: ImageFieldGroupProps<TForm>) {
-  // Encapsulates:
-  // - MediaLibraryPicker integration
-  // - validateImageUrl() SSRF protection
-  // - Preview image with fallback placeholder
-  // - Alt text field (optional)
+**Context** : `image-field/ImageFieldContext.tsx` — interface `{ state, actions, meta }`
+
+```typescript
+interface ImageFieldContextValue {
+  state: {
+    imageUrl: string;
+    isValidating: boolean;
+    validationError: string | null;
+  };
+  actions: {
+    handleMediaSelect: (media: MediaDTO) => void;
+    handleUrlChange: (url: string) => void;
+    handleClear: () => void;
+  };
+  meta: {
+    label: string;
+    required: boolean;
+    form: UseFormReturn<any>;
+    imageUrlField: string;
+    imageMediaIdField?: string;
+  };
 }
 ```
 
 **Usage** :
 
 ```tsx
-// Dans n'importe quel formulaire admin
-<ImageFieldGroup
-  form={form}
-  imageUrlField="image_url"
-  imageMediaIdField="image_media_id"
-  altTextField="alt_text"
-  label="Image du spectacle"
-  required
-/>
+// Composable — chaque sous-composant est optionnel
+<ImageField.Provider form={form} imageUrlField="image_url" imageMediaIdField="image_media_id" label="Image">
+  <ImageField.SourceActions />
+  <ImageField.Preview />
+  <ImageField.AltText altTextField="alt_text" />
+</ImageField.Provider>
+
+// Minimal (pas de alt text)
+<ImageField.Provider form={form} imageUrlField="image_url" label="Photo">
+  <ImageField.SourceActions />
+  <ImageField.Preview />
+</ImageField.Provider>
 ```
 
-**Fonctionnalités** :
+**10 consommateurs migrés** :
 
-- ✅ **SSRF Protection** : `validateImageUrl()` avec hostname allowlist
-- ✅ **MediaLibraryPicker** : Sélection depuis la bibliothèque Supabase
-- ✅ **External URL** : Saisie URL externe avec validation + aide exemple Unsplash
-- ✅ **Preview** : Affichage avec fallback SVG placeholder
-- ✅ **Alt Text** : Champ accessibilité optionnel
-- ✅ **Type-safe** : Génériques TypeScript pour typage formulaire strict
-- ✅ **Validation State** : Warning visuel si URL non validée
-- ✅ **HTML Detection** : Message d'erreur spécifique si URL pointe vers page web
+- `HeroSlideForm`, `AboutContentForm`, `PresentationFormFields`, `PartnerForm`, `TeamMemberForm`
+- `ArticleEditForm`, `ArticleNewForm`, `PressReleaseEditForm`, `PressReleaseNewForm`, `SpectacleFormImageSection`
 
-**Validation Conditionnelle (Dec 2025)** :
+**Fichiers** :
 
-Pattern pour rendre l'image obligatoire selon une condition :
-
-```typescript
-// Schema Zod avec superRefine
-export const spectacleFormSchema = z.object({
-  image_url: z.string().url().optional().or(z.literal("")),
-  public: z.boolean().optional(),
-}).superRefine((data, ctx) => {
-  if (data.public && (!data.image_url || data.image_url === "")) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ["image_url"],
-      message: "Une image est requise pour un spectacle visible publiquement",
-    });
-  }
-});
-
-// Validation côté client dans onSubmit
-if (data.public && (!data.image_url || data.image_url === "")) {
-  toast.error("Image requise", {
-    description: "Un spectacle visible publiquement doit avoir une image."
-  });
-  return;
-}
-
-// UI dynamique avec form.watch()
-<ImageFieldGroup
-  label={`Image${form.watch("public") ? " *" : ""}`}
-  description={
-    form.watch("public") 
-      ? "⚠️ Image OBLIGATOIRE pour un spectacle visible publiquement."
-      : "Image optionnelle."
-  }
-/>
+```bash
+components/features/admin/media/
+  ImageField.tsx                    # Compound namespace export
+  image-field/
+    ImageFieldContext.tsx            # Context definition
+    ImageFieldProvider.tsx           # State management + validation
+    ImageFieldSourceActions.tsx      # MediaLibrary + URL input
+    ImageFieldPreview.tsx            # Preview with fallback
+    ImageFieldAltText.tsx            # Alt text accessibility
+    index.ts                        # Barrel exports
+  ImageFieldGroup.tsx               # ❌ SUPPRIMÉ (remplacé)
 ```
 
-**Formulaires migrés** :
+**Fonctionnalités conservées** :
 
-- `HeroSlideForm.tsx` — Hero slides homepage
-- `SpectacleForm.tsx` — Gestion spectacles (SSRF + validation conditionnelle)
-- `TeamMemberForm.tsx` — Membres équipe
-- `AboutContentForm.tsx` — Section À propos
+- SSRF Protection via `validateImageUrl()` avec hostname allowlist
+- MediaLibraryPicker intégration
+- External URL avec validation
+- Preview avec fallback SVG placeholder
+- Alt text champ accessibilité
+- Type-safe génériques TypeScript
 
-#### Clean Code Compliance Checklist
+#### Clean Code Compliance Checklist (updated Mar 2026)
 
 - ✅ Max 30 lignes par fonction
-- ✅ Max 300 lignes par fichier
+- ✅ Max 300 lignes par fichier (monolithes splittés dans campagne audit)
 - ✅ Aucun commentaire (code auto-documenté)
-- ✅ Aucun magic number (constantes nommées)
-- ✅ DRY (pas de duplication)
-- ✅ Aucun console.log
+- ✅ Aucun magic number (constantes nommées dans `lib/constants/`)
+- ✅ DRY (pas de duplication — helpers centralisés, compound components)
+- ✅ Aucun console.log (supprimés dans campagne audit, `console.error` conservés)
+- ✅ `types.ts` colocalisé à côté des composants
+- ✅ `AlertDialog` pour confirmations destructives (jamais `window.confirm()`)
+- ✅ Dead code purgé (hooks.ts commentés supprimés)
+- ✅ `requireAdmin()` dans toutes les Server Actions admin
 
 ### Handler Factorization Pattern (Dec 2025)
 
@@ -2254,6 +2304,185 @@ export default function AdminLayout({ children }) {
 
 - [web.dev/articles/bfcache](https://web.dev/articles/bfcache) — Documentation officielle Google
 - Section "Mettre à jour des données obsolètes ou sensibles après la restauration de bfcache"
+
+---
+
+### `requireAdmin()` Auth Guard Pattern (Mar 2026)
+
+**Pattern** : Guards d'autorisation admin standards, définis dans `lib/auth/is-admin.ts`.
+
+#### Trois variantes
+
+```typescript
+// lib/auth/is-admin.ts
+
+// 1. Boolean check (pour logique conditionnelle)
+export async function isAdmin(): Promise<boolean>
+
+// 2. Throw guard (pour Server Actions / DAL)
+export async function requireAdmin(): Promise<void>
+// → throws "Unauthorized: admin required" si non-admin
+
+// 3. Redirect guard (pour pages admin Server Component)
+export async function requireAdminPageAccess(): Promise<void>
+// → redirect("/auth/login") si non-admin
+```
+
+#### Usage
+
+```typescript
+// Server Action
+export async function deleteFeatureAction(id: string): Promise<ActionResult> {
+  await requireAdmin(); // throws if not admin
+  // ...
+}
+
+// Admin page Server Component
+export default async function AdminTeamPage() {
+  await requireAdminPageAccess(); // redirects if not admin
+  const result = await fetchTeamMembers();
+  // ...
+}
+```
+
+**Adopté par** : AUDIT-SPECTACLES et toutes les tâches d'audit admin suivantes. Remplace les patterns `withAdminAuth()` wrapper et les vérifications inline.
+
+---
+
+### `withDisplayToggle` RSC Helper Pattern (Mar 2026)
+
+**Pattern** : Async RSC helper qui skip le rendu ET le data-fetch si un toggle DB est désactivé.
+
+**Fichier** : `lib/utils/with-display-toggle.tsx`
+
+```typescript
+export async function withDisplayToggle(
+  toggleKey: string,
+  renderFn: () => ReactNode | Promise<ReactNode>
+): Promise<ReactNode | null> {
+  const toggle = await fetchDisplayToggle(toggleKey);
+  if (toggle && !toggle.enabled) return null; // Skip render + fetch
+  return renderFn(); // Only fetch data + render if enabled
+}
+```
+
+**Usage dans une page** :
+
+```tsx
+// app/(marketing)/page.tsx
+export default async function HomePage() {
+  return (
+    <>
+      <HeroContainer />
+      {await withDisplayToggle("agenda_accueil", () => <AgendaContainer />)}
+      {await withDisplayToggle("newsletter_accueil", () => <NewsletterContainer />)}
+    </>
+  );
+}
+```
+
+**Avantages** : Si toggle désactivé, aucun fetch DAL n'est exécuté (vs approach naïve qui fetch puis masque côté client).
+
+---
+
+### `SECTION_RENDERERS` Map-Based Dispatch Pattern (Mar 2026)
+
+**Pattern** : `Record<string, ComponentType>` pour dispatch de sections par clé, éliminant switch/if-else chains.
+
+**Fichier** : `components/features/public-site/compagnie/CompagnieView.tsx`
+
+```typescript
+const SECTION_RENDERERS: Record<string, ComponentType<SectionRendererProps>> = {
+  hero: SectionHero,
+  history: SectionHistory,
+  quote: SectionQuote,
+  values: SectionValues,
+  team: SectionTeam,
+  mission: SectionMission,
+};
+
+export function CompagnieView({ sections }: CompagnieViewProps) {
+  return (
+    <>
+      {sections.map((section) => {
+        const Renderer = SECTION_RENDERERS[section.kind];
+        if (!Renderer) return null;
+        return <Renderer key={section.id} section={section} />;
+      })}
+    </>
+  );
+}
+```
+
+**Avantages** : Ajout de nouvelles sections = 1 ligne dans le map + 1 composant. Élimine les monolithes (242L → 49L pour CompagnieView).
+
+---
+
+### `ToggleSection` Admin Component Pattern (Mar 2026)
+
+**Pattern** : Composant DRY pour sections de toggles dans l'admin site-config.
+
+**Fichier** : `components/features/admin/site-config/ToggleSection.tsx`
+
+```typescript
+interface ToggleSectionProps {
+  config: ToggleSectionConfig;  // { title, description, toggleKeys[] }
+  toggles: ToggleMap;
+  updatingKey: string | null;
+  onToggle: (key: string, enabled: boolean) => void;
+}
+
+export function ToggleSection({ config, toggles, updatingKey, onToggle }: ToggleSectionProps)
+```
+
+**Types** : `components/features/admin/site-config/types.ts` — `ToggleSectionConfig`, `ToggleCardProps`, `DisplayTogglesViewProps`.
+
+---
+
+### `formatDateFr` Helper (Mar 2026)
+
+**Pattern** : Formatage de date ISO en français avec fallback.
+
+**Fichier** : `lib/dal/helpers/format.ts`
+
+```typescript
+export function formatDateFr(
+  dateString: string | null,
+  fallback = "Non définie"
+): string {
+  if (!dateString) return fallback;
+  try {
+    return new Intl.DateTimeFormat("fr-FR", {
+      day: "numeric", month: "long", year: "numeric"
+    }).format(new Date(dateString));
+  } catch {
+    return fallback;
+  }
+}
+```
+
+Re-exporté via `lib/dal/helpers/index.ts`.
+
+---
+
+### Audit Remediation Campaign Patterns Summary (Feb-Mar 2026)
+
+**Campagne d'audit systématique** sur 14 features (TASK063-TASK075 + AUDIT-*), établissant des standards récurrents :
+
+#### Standards appliqués uniformément
+
+| Standard | Description | Enforcement |
+| -------- | ----------- | ----------- |
+| **requireAdmin()** | Auth guard dans toutes les Server Actions admin | `lib/auth/is-admin.ts` |
+| **force-dynamic / revalidate** | ISR (`revalidate = 60`) ou `force-dynamic`, jamais les deux | Pages publiques / admin |
+| **console.log suppression** | Zéro `console.log` en production, `console.error` conservés | DAL + components |
+| **types.ts colocalisé** | Props interfaces dans `types.ts` à côté des composants | `components/features/*/types.ts` |
+| **AlertDialog** | `AlertDialog` shadcn pour confirmations destructives, jamais `window.confirm()` | Toutes les actions de suppression |
+| **Dead code purge** | `hooks.ts` mort supprimé, code commenté supprimé | 8+ fichiers hooks.ts purgés |
+| **WCAG 2.2 AA** | `aria-label`, `aria-required`, keyboard navigation, `focus:ring-2` | Tous les formulaires |
+| **SRP splitting** | Monolithes >300L splittés en sous-composants | CompagnieView 242→49L, MediaDetails 324→267L, etc. |
+| **dalSuccess/dalError** | Factory functions au lieu de littéraux | 20+ DAL migrés |
+| **cache() wrapper** | `React.cache()` sur les DAL read-only fréquemment appelés | 21 fonctions DAL |
 
 ## Patterns Architecturaux
 
