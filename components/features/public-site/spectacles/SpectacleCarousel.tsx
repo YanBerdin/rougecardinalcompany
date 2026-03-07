@@ -335,16 +335,14 @@ function MultiImageCarousel({
                 </div>
 
                 <div
-                    role="tablist"
-                    aria-label="Sélectionner une slide"
+                    role="group"
+                    aria-label="Navigation slides"
                     className="flex items-center gap-1"
                 >
                     {scrollSnaps.map((_, index) => (
                         <button
                             key={index}
                             type="button"
-                            role="tab"
-                            aria-selected={index === selectedIndex}
                             aria-label={`Aller à la slide ${index + 1}`}
                             aria-current={index === selectedIndex ? "true" : undefined}
                             onClick={() => scrollTo(index)}

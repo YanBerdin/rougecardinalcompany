@@ -21,7 +21,7 @@ export function ShowCard({ show, index }: ShowCardProps) {
         <Link href={spectacleUrl} className="block absolute inset-0 z-0">
           <Image
             src={show.image}
-            alt={show.title}
+            alt={show.image ? `Affiche du spectacle ${show.title}` : `Image par défaut – affiche non disponible pour ${show.title}`}
             fill
             sizes="(max-width: 768px) 100vw, 50vw"
             className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
@@ -29,19 +29,23 @@ export function ShowCard({ show, index }: ShowCardProps) {
         </Link>
 
         {/* Hover overlay — outside the image Link to avoid nested anchors */}
-        <div className="absolute inset-0 z-10 bg-black/60 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none group-hover:pointer-events-auto">
+        {/* pointer-events-none kept for mouse (so image link stays clickable when invisible) */}
+        {/* group-focus-within:pointer-events-auto enables click when keyboard-focused */}
+        <div className="absolute inset-0 z-10 bg-black/60 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto">
           <div className="flex flex-col gap-3 px-6 w-full">
             <Link
               href={show.ticketUrl ?? spectacleUrl}
               {...(show.ticketUrl ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-              className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground w-full"
+              aria-label={`Réserver des billets pour ${show.title}${show.ticketUrl ? " (s'ouvre dans un nouvel onglet)" : ""}`}
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground w-full focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-1 focus-visible:outline-none"
             >
               <Ticket className="h-4 w-4" aria-hidden="true" />
               Réserver mes billets
             </Link>
             <Link
               href={spectacleUrl}
-              className="inline-flex items-center justify-center gap-2 rounded-md bg-white/40 border border-white px-4 py-2 text-sm font-medium text-chart-6 w-full"
+              aria-label={`Voir les détails de ${show.title}`}
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-white/40 border border-white px-4 py-2 text-sm font-medium text-chart-6 w-full focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-1 focus-visible:outline-none"
             >
               <Play className="h-5 w-5" aria-hidden="true" />
               Détails

@@ -30,6 +30,7 @@ export function ContactInfoSidebar({
               <Link
                 href="mailto:contact@rouge-cardinal.fr"
                 className="text-muted-foreground hover:text-primary"
+                aria-label="Envoyer un email à contact@rouge-cardinal.fr"
               >
                 contact@rouge-cardinal.fr
               </Link>
@@ -43,6 +44,7 @@ export function ContactInfoSidebar({
               <Link
                 href="tel:+33123456789"
                 className="text-muted-foreground hover:text-primary"
+                aria-label="Appeler le +33 1 23 45 67 89"
               >
                 +33 1 23 45 67 89
               </Link>

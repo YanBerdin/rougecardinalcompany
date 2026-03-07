@@ -30,7 +30,7 @@ export function AgendaFilters(): React.JSX.Element {
                     value={state.filterType}
                     onValueChange={actions.setFilterType}
                 >
-                    <SelectTrigger className="w-64 bg-card" aria-label="Filtrer par type d'événement">
+                    <SelectTrigger id="event-type-filter" className="w-64 bg-card" aria-label="Filtrer par type d'événement">
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>

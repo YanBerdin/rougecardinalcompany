@@ -1,6 +1,7 @@
 /**
  * @file ContactPresseSection — Contact et informations pratiques pour les médias
  */
+import { Mail, Phone } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 export function ContactPresseSection() {
@@ -18,8 +19,24 @@ export function ContactPresseSection() {
                   <p>
                     <strong>Marie Dubois</strong> - Directrice artistique
                   </p>
-                  <p>📧 presse@rouge-cardinal.fr</p>
-                  <p>📱 +33 6 12 34 56 78</p>
+                  <p className="flex items-center gap-2">
+                    <Mail className="inline h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                    <a
+                      href="mailto:presse@rouge-cardinal.fr"
+                      className="hover:text-primary underline-offset-4 hover:underline"
+                    >
+                      presse@rouge-cardinal.fr
+                    </a>
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <Phone className="inline h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                    <a
+                      href="tel:+33612345678"
+                      className="hover:text-primary underline-offset-4 hover:underline"
+                    >
+                      +33 6 12 34 56 78
+                    </a>
+                  </p>
                 </div>
               </div>
               <div>

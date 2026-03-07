@@ -59,7 +59,7 @@ export function RevueDePresse({ mediaArticles }: RevueDePresseSectionProps) {
                       </span>
                     </div>
 
-                    <h2 className="text-xl font-semibold font-sans mb-2 hover:text-primary transition-colors">
+                    <h2 className="text-xl font-semibold font-sans mb-2">
                       {article.title}
                     </h2>
 
@@ -86,7 +86,7 @@ export function RevueDePresse({ mediaArticles }: RevueDePresseSectionProps) {
                         href={article.source_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        aria-label={`Lire l'article : ${article.title}`}
+                        aria-label={`Lire l'article : ${article.title} (s'ouvre dans un nouvel onglet)`}
                       >
                         <ExternalLink
                           className="mr-2 h-4 w-4"

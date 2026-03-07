@@ -30,13 +30,13 @@ export function SpectaclesView({
   return (
     <div className="pt-16">
       {/* Hero Section */}
-      <section className="py-8 lg:py-12 hero-gradient">
+      <section className="py-8 lg:py-12 hero-gradient" aria-labelledby="spectacles-hero-heading">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-white text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in-up">
+          <h1 id="spectacles-hero-heading" className="text-white text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in-up">
             À l&apos;Affiche
           </h1>
           <p
-            className="text-lg md:text-xl lg:text-2xl text-white/80 opacity-90 animate-fade-in"
+            className="text-lg md:text-xl lg:text-2xl text-white/90 opacity-90 animate-fade-in"
             style={{ animationDelay: "0.2s" }}
           >
             Nos créations actuellement en représentation
@@ -45,7 +45,7 @@ export function SpectaclesView({
       </section>
 
       {/* Spectacles Actuels lg:w-[calc(33.333%-1.33rem)] */}
-      <section className="py-16 bg-chart-7">
+      <section className="py-16 bg-chart-7" aria-label="Spectacles actuels">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap justify-center gap-16">
             {currentShows.map((show, index) => (
@@ -66,19 +66,22 @@ export function SpectaclesView({
                   </Link>
 
                   {/* Hover overlay with links — outside the image Link to avoid nested anchors */}
-                  <div className="absolute inset-0 z-10 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none group-hover:pointer-events-auto">
+                  {/* pointer-events-none kept for mouse; group-focus-within enables keyboard access */}
+                  <div className="absolute inset-0 z-10 bg-black/60 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto">
                     <div className="flex flex-col gap-3 px-6 w-full">
                       <Link
                         href={show.ticketUrl ?? getSpectacleUrl(show)}
                         {...(show.ticketUrl ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                        className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground w-full"
+                        aria-label={`Réserver des billets pour ${show.title}${show.ticketUrl ? " (s'ouvre dans un nouvel onglet)" : ""}`}
+                        className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground w-full focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-1 focus-visible:outline-none"
                       >
                         <Ticket className="h-4 w-4" aria-hidden="true" />
                         Réserver mes billets
                       </Link>
                       <Link
                         href={getSpectacleUrl(show)}
-                        className="inline-flex items-center justify-center gap-2 rounded-md bg-white/40 border border-white px-4 py-2 text-sm font-medium text-chart-6 w-full"
+                        aria-label={`Voir les détails de ${show.title}`}
+                        className="inline-flex items-center justify-center gap-2 rounded-md bg-white/40 border border-white px-4 py-2 text-sm font-medium text-chart-6 w-full focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-1 focus-visible:outline-none"
                       >
                         <Play className="h-5 w-5" aria-hidden="true" />
                         Détails
@@ -117,10 +120,10 @@ export function SpectaclesView({
       </section>
 
       {/* Archives */}
-      <section className="py-20 bg-chart-7/60">
+      <section className="py-20 bg-chart-7/60" aria-labelledby="spectacles-archives-heading">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-sans lg:text-5xl font-semibold mb-4">Nos Créations Passées</h2>
+            <h2 id="spectacles-archives-heading" className="text-3xl md:text-4xl font-sans lg:text-5xl font-semibold mb-4">Nos Créations Passées</h2>
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
               15 ans de créations théâtrales qui ont marqué notre parcours
             </p>

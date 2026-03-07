@@ -39,9 +39,11 @@ export function NewsletterForm() {
                 variant="outline"
                 size="lg"
                 disabled={isLoading}
-                className="bg-chart-6 border-white/30 hover:text-white hover:backdrop-blur-md hover:bg-white/30 text-red-800 hover:scale-95 active:scale-100 transition-all duration-200 shadow-lg whitespace-nowrap disabled:opacity-50 disabled:hover:scale-90"
+                className="touch-hitbox bg-chart-6 border-white/30 hover:text-white hover:backdrop-blur-md hover:bg-white/30 text-red-800 transition-all duration-200 shadow-lg whitespace-nowrap disabled:opacity-50"
             >
-                {isLoading ? "Inscription..." : "S'inscrire"}
+                <span className="inline-flex items-center hover:scale-95 active:scale-100 disabled:hover:scale-90 transition-transform">
+                    {isLoading ? "Inscription..." : "S'inscrire"}
+                </span>
             </Button>
         </form>
     );

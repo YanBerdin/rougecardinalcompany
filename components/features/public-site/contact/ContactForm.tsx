@@ -173,7 +173,7 @@ export function ContactForm({ onSuccess }: ContactFormProps): React.JSX.Element 
               value={formData.reason}
               onValueChange={(value) => updateField("reason", value as ContactFormData["reason"])}
             >
-              <SelectTrigger aria-required="true">
+              <SelectTrigger id="reason" aria-required="true">
                 <SelectValue placeholder="Sélectionnez un motif" />
               </SelectTrigger>
               <SelectContent>
@@ -230,7 +230,8 @@ export function ContactForm({ onSuccess }: ContactFormProps): React.JSX.Element 
               <>
                 <div
                   className="w-4 h-4 border-2 border-border border-t-transparent rounded-full animate-spin mr-2"
-                  aria-hidden="true"
+                  role="img"
+                  aria-label="Chargement en cours"
                 />
                 Envoi en cours...
               </>

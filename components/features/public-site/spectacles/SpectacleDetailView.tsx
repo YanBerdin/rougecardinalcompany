@@ -131,7 +131,7 @@ export function SpectacleDetailView({
 
                         {/* Affiche Column */}
                         <div className="md:col-span-2 p-4 md:p-2 lg:p-0">
-                            <div className="group aspect-[2/3] rounded-lg overflow-hidden shadow-2xl border-4 border-white/80 dark:border-gray-800/80 transition-all hover:shadow-[0_25px_70px_rgba(173,0,0,0.4)] hover:scale-[1.02] sticky top-20">
+                            <div className="group aspect-[2/3] rounded-lg overflow-hidden shadow-2xl border-4 border-white/80 dark:border-gray-800/80 transition-all hover:shadow-[0_25px_70px_rgba(173,0,0,0.4)] sticky top-20">
                                 {spectacle.image_url ? (
                                     <Image
                                         src={spectacle.image_url}

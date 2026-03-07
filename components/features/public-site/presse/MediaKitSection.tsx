@@ -40,7 +40,7 @@ export function MediaKitSection({ mediaKit }: MediaKitSectionProps) {
                       aria-hidden="true"
                     />
                   </div>
-                  <h2 className="text-xl font-semibold mb-3">{item.type}</h2>
+                  <h3 className="text-xl font-semibold mb-3">{item.type}</h3>
                   <p className="text-muted-foreground mb-4">
                     {item.description}
                   </p>

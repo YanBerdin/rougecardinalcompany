@@ -22,7 +22,7 @@ export function HeroNavigation({
       {/* Bouton pause / lecture */}
       <button
         onClick={onToggleAutoPlay}
-        className="absolute top-4 right-4 z-30 bg-black/30 hover:bg-black/50 text-chart-6 p-2 rounded-full transition-all duration-200 backdrop-blur-md"
+        className="absolute top-4 right-4 z-30 bg-black/30 hover:bg-black/50 text-chart-6 p-3 rounded-full transition-all duration-200 backdrop-blur-md"
         aria-label={
           isAutoPlaying
             ? "Mettre en pause le défilement automatique"

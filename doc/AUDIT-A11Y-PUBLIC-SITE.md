@@ -321,7 +321,7 @@ Le titre de chaque article (`<h2>`) a un `hover:text-primary`. Cela suggère que
 ## ✅ Points Forts (Bonnes Pratiques)
 
 | # | Domaine | Détails |
-|---|---------|---------|
+| --- | -------- | -------- |
 | 1 | **Carrousel Hero** | Excellent : `role="region"`, `aria-roledescription="carousel"`, navigation clavier Arrow L/R, `aria-live="polite"` pour annonces, `prefers-reduced-motion` respecté via `matchMedia`, bouton pause/lecture avec `aria-pressed`, indicateurs avec `aria-label` et `aria-current` |
 | 2 | **Formulaire Contact** | Exemplaire : `htmlFor`+`id` sur tous les champs, `aria-required="true"`, `role="alert"` sur les erreurs, `<span aria-hidden="true">*</span>` pour les astérisques visuels, `noValidate` pour validation custom |
 | 3 | **NewsletterCard** | Excellente : `aria-invalid`, `aria-describedby` conditionnel pour les erreurs, `aria-busy` sur le bouton, `sr-only` label, `autoComplete="email"` |
@@ -342,14 +342,14 @@ Le titre de chaque article (`<h2>`) a un `hover:text-primary`. Cela suggère que
 ### Priorité 1 — Bloquant (sprint courant)
 
 | ID | Action | Fichier(s) | Effort |
-|----|--------|------------|--------|
+| ---- | -------- | ------------ | -------- |
 | C1 | Rendre les overlays de cartes spectacles accessibles au clavier | `ShowCard.tsx`, `SpectaclesView.tsx` | M |
 | C2 | Remplacer emojis par icônes + transformer en liens `mailto:`/`tel:` | `ContactPresseSection.tsx` | S |
 
 ### Priorité 2 — Important (prochain sprint)
 
 | ID | Action | Fichier(s) | Effort |
-|----|--------|------------|--------|
+| ---- | -------- | ------------ | -------- |
 | M1 | Appliquer pattern touch-hitbox sur bouton newsletter | `NewsletterForm.tsx` | S |
 | M2 | Ajouter `id` sur SelectTrigger pour association label | `AgendaFilters.tsx`, `ContactForm.tsx` | S |
 | M3 | Ajouter `aria-labelledby` sur 4 sections Home | `AboutView.tsx`, `NewsView.tsx`, `ShowsView.tsx`, `NewsletterView.tsx` | S |
@@ -360,7 +360,7 @@ Le titre de chaque article (`<h2>`) a un `hover:text-primary`. Cela suggère que
 ### Priorité 3 — Amélioration (backlog)
 
 | ID | Action | Effort |
-|----|--------|--------|
+| ---- | -------- | -------- |
 | m1–m11 | Corrections mineures listées ci-dessus | S–M par item |
 
 ---
