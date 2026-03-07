@@ -1,5 +1,35 @@
 # Progress
 
+## BUGFIX — DAL press select options + RLS display_toggle visibility (2026-03-07)
+
+**Context** : Deux bugfixes indépendants commités sur la branche TASK075.
+
+**DAL admin-press-select-options.ts** :
+
+| # | Problème | Était | Corrigé en |
+| --- | --- | --- | --- |
+| 1 | Colonne select spectacles | `"id, titre"` | `"id, title"` |
+| 2 | Filtre spectacles | `.eq("active", true)` | `.neq("status", "archived")` |
+| 3 | Ordre spectacles | `.order("titre")` | `.order("title")` |
+| 4 | Map spectacles | `item.titre` | `item.title` |
+| 5 | Colonne select événements | `"id, titre"` | `"id, date_debut, spectacles(title)"` |
+| 6 | Filtre événements | `.eq("active", true)` | `.neq("status", "cancelled")` |
+| 7 | Ordre événements | `.order("titre")` | `.order("date_debut")` |
+| 8 | Label événements | plain titre | `"Spectacle — date"` via join |
+| 9 | Cast TypeScript | `as { title: string } \| null` | `as unknown as { title: string } \| null` |
+
+**RLS display_toggle visibility** :
+
+- **Root cause** : policy SELECT `configurations_site` n'autorisait que `key LIKE 'public:%'` → display toggles (préfixe `display_toggle_*`) filtrés à 100% pour anon
+- **Impact** : sections hero/about/spectacles/partners/newsletter invisibles sur pages publiques (masqué par fallback `{ enabled: true }` dans DAL)
+- **Fix** : `OR key LIKE 'display_toggle_%'` ajouté à la policy + GRANT SELECT ajouté pour anon/authenticated
+- **Migrations** : `20260304000000` (GRANT) + `20260304010000` (RLS policy)
+- **Vérification** : `SET ROLE anon` → 10/10 display toggles visibles
+
+Commits : `a307ae3` (DAL fix, 3 fichiers) + `16e545d` (RLS fix, 7 fichiers). Branch `refactor/task075-media-admin-composition-patterns`.
+
+---
+
 ## TASK075 — Refactoring Media Admin : React Composition Patterns (2026-03-05)
 
 **Context** : Audit + refactoring complet de `components/features/admin/media/` contre les instructions React Composition Patterns. Score initial 2/8 règles conformes (Boolean Prop Proliferation, pas de Compound Components, pas de Generic Context Interfaces, pas de Lift State into Providers). 2 bugs critiques découverts en phase 1 (dialogs de confirmation non affichés). 4 phases implémentées, 36 fichiers, +1542/-636 lignes.

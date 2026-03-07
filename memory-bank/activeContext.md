@@ -1,8 +1,26 @@
 # Active Context
 
-**Current Focus (2026-03-05)**: ✅ TASK075 — Refactoring Media Admin : React Composition Patterns. 4 phases implémentées (bug fixes AlertDialog manquants + MediaLibraryContext + MediaDetailsContext + ImageField compound component). 10 consommateurs migrés, `ImageFieldGroup.tsx` supprimé. Build/lint/tsc ✅. Branch `refactor/task075-media-admin-composition-patterns`, commit `55f21ce`, pushé sur origin.
+**Current Focus (2026-03-07)**: TASK075 branch — 2 hotfixes supplémentaires : (1) DAL `admin-press-select-options.ts` aligné sur le vrai schéma DB (colonnes `title`/`status`/`date_debut` au lieu de `titre`/`active`), join spectacles pour label événements "Spectacle — date" ; (2) Fix GRANT + RLS `configurations_site` — display toggles invisibles pour anon (policy n'autorisait que `public:%`, corrigé avec `display_toggle_%`). 2 migrations hotfix appliquées en remote. Branch `refactor/task075-media-admin-composition-patterns`, commits `a307ae3` + `16e545d`.
 
-**Last Major Updates**: ✅ TASK075 Media Admin Composition Patterns (2026-03-05) + TASK074 Audit public/spectacles (2026-03-04) + BUGFIX-HOME-NEWS (2026-03-03) + TASK072 Audit public/home (2026-03-03) + TASK071 Audit public/contact (2026-03-03) + TASK070 Admin Compagnie CRUD (2026-03-03) + Public Compagnie Audit Refactor (2026-03-02) + Public Agenda Composition Refactor (2026-03-02) + Admin Users Audit + Scripts (2026-03-02) + Admin Team Audit Remediation (2026-03-01) + Admin Spectacles Audit Remediation (2026-03-01)
+**Last Major Updates**: ✅ BUGFIX RLS display_toggle visibility (2026-03-07) + BUGFIX DAL press select options (2026-03-07) + TASK075 Media Admin Composition Patterns (2026-03-05) + TASK074 Audit public/spectacles (2026-03-04) + BUGFIX-HOME-NEWS (2026-03-03) + TASK072 Audit public/home (2026-03-03) + TASK071 Audit public/contact (2026-03-03) + TASK070 Admin Compagnie CRUD (2026-03-03)
+
+---
+
+## BUGFIX — DAL press select options + RLS display_toggle visibility (2026-03-07)
+
+### Summary
+
+**BUGFIX #1 — DAL admin-press-select-options** :
+Les requêtes `fetchSpectaclesForSelect` et `fetchEvenementsForSelect` utilisaient des colonnes françaises (`titre`) au lieu des colonnes réelles (`title`), un filtre `active=true` au lieu de `status != archived/cancelled`, et un tri/label incorrect. Événements affichent désormais "Spectacle — date" via join `spectacles(title)`. TypeScript cast `as unknown as` ajouté pour le join Supabase.
+
+Commit `a307ae3`, 3 fichiers.
+
+**BUGFIX #2 — RLS display_toggle visibility** :
+Les display toggles (`display_toggle_*`) étaient filtrés à 100% par RLS pour les visiteurs anon — la policy SELECT n'autorisait que `key LIKE 'public:%'`. Corrigé avec `OR key LIKE 'display_toggle_%'`. Le fallback `{ enabled: true }` dans le DAL masquait le bug mais **overridait l'intention admin** (désactiver un toggle n'avait aucun effet côté public).
+
+Migrations : `20260304000000_fix_configurations_site_grants.sql` (GRANT) + `20260304010000_fix_rls_display_toggles_visibility.sql` (RLS policy). Schéma déclaratif `10_tables_system.sql` synchronisé. Vérifié : `SET ROLE anon` → 10/10 display toggles visibles.
+
+Commit `16e545d`, 7 fichiers.
 
 ---
 

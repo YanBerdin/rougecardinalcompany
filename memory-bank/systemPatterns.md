@@ -32,6 +32,7 @@
 - **`withDisplayToggle` RSC Helper (Mar 2026)**: Async RSC helper qui skip rendu + fetch si toggle DB désactivé. `lib/utils/with-display-toggle.tsx`.
 - **`SECTION_RENDERERS` Map Pattern (Mar 2026)**: `Record<string, ComponentType>` pour dispatch de sections par `kind`, élimine switch/if-else. Premier usage : `public-site/compagnie`.
 - **Sécurité**: combinaison GRANT (table-level) + RLS (policies) requise — ne pas considérer RLS comme substitut au GRANT.
+- **RLS display_toggle Pattern (Mar 2026)**: Les clés `display_toggle_*` dans `configurations_site` doivent être lisibles par anon+authenticated. La policy SELECT doit inclure `key like 'display_toggle_%'` en plus de `key like 'public:%'`. GRANT SELECT requis. Le fallback `{ enabled: true }` dans le DAL ne doit pas masquer un bug RLS.
 - **Migrations**: `supabase/migrations/` est la source de vérité pour les modifications appliquées en base; `supabase/schemas/` sert de documentation/declarative reference.
 - **Tests & CI**: vérifier explicitement que les roles `anon` et `authenticated` peuvent accéder aux DTO nécessaires (tests d'intégration DAL).
 
