@@ -18,7 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
-import { ImageFieldGroup } from "@/components/features/admin/media/ImageFieldGroup";
+import { ImageField } from "@/components/features/admin/media";
 import { PartnerFormSchema, type PartnerFormValues } from "@/lib/schemas/partners";
 import {
     createPartnerAction,
@@ -127,18 +127,19 @@ export function PartnerForm({ partner }: PartnerFormProps) {
                             )}
                         />
 
-                        <ImageFieldGroup
+                        <ImageField.Provider
                             form={form}
                             imageUrlField="logo_url"
                             imageMediaIdField="logo_media_id"
                             label="Logo"
                             description="Logo du partenaire (format carré recommandé)"
-                            showAltText={false}
                             showMediaLibrary={true}
-                            showExternalUrl={false}
                             showUpload={true}
                             uploadFolder="partners"
-                        />
+                        >
+                            <ImageField.SourceActions showExternalUrl={false} />
+                            <ImageField.Preview />
+                        </ImageField.Provider>
 
                         <FormField
                             control={form.control}

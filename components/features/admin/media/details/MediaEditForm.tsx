@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { UseFormReturn } from "react-hook-form";
 import { Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,36 +14,18 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import type { MediaItemExtendedDTO, MediaFolderDTO, MediaTagDTO } from "@/lib/schemas/media";
+import { useMediaDetailsContext } from "../MediaDetailsContext";
 
 export type MetadataFormValues = {
     alt_text?: string | null;
     folder_id?: number | null;
 };
 
-interface MediaEditFormProps {
-    form: UseFormReturn<MetadataFormValues>;
-    folders: MediaFolderDTO[];
-    tags: MediaTagDTO[];
-    media: MediaItemExtendedDTO;
-    onSubmit: (
-        data: MetadataFormValues,
-        tagsToAdd: number[],
-        tagsToRemove: number[],
-    ) => Promise<void>;
-    isUpdating: boolean;
-    isDeleting: boolean;
-}
-
-export function MediaEditForm({
-    form,
-    folders,
-    tags,
-    media,
-    onSubmit,
-    isUpdating,
-    isDeleting,
-}: MediaEditFormProps) {
+export function MediaEditForm() {
+    const { state, actions, meta } = useMediaDetailsContext();
+    const { form, isUpdating, isDeleting } = state;
+    const { handleUpdate } = actions;
+    const { media, folders, tags } = meta;
     const [lastMediaId, setLastMediaId] = useState(media.id);
     const [selectedTagsToAdd, setSelectedTagsToAdd] = useState<number[]>([]);
     const [selectedTagsToRemove, setSelectedTagsToRemove] = useState<number[]>([]);
@@ -61,7 +42,7 @@ export function MediaEditForm({
     const availableTags = tags.filter(tag => !assignedTagIds.includes(tag.id));
 
     const handleFormSubmit = (data: MetadataFormValues) => {
-        return onSubmit(data, selectedTagsToAdd, selectedTagsToRemove);
+        return handleUpdate(data, selectedTagsToAdd, selectedTagsToRemove);
     };
 
     return (

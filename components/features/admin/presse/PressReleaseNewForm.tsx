@@ -21,7 +21,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { ImageFieldGroup } from "@/components/features/admin/media";
+import { ImageField } from "@/components/features/admin/media";
 import { createPressReleaseAction } from "@/app/(admin)/admin/presse/press-releases-actions";
 import { PressReleaseFormSchema, type PressReleaseFormValues } from "@/lib/schemas/press-release";
 import { cleanPressReleaseFormData, getPressReleaseSuccessMessage } from "@/lib/utils/press-utils";
@@ -57,15 +57,11 @@ export function PressReleaseNewForm({ spectacles = [], evenements = [] }: { spec
 
     useEffect(() => {
         if (isPublic) {
-            const title = form.getValues("title");
-            const description = form.getValues("description");
-            const datePublication = form.getValues("date_publication");
-
             const hasImage = imageUrl || imageMediaId;
             const isIncomplete =
-                !title ||
-                !description ||
-                !datePublication ||
+                !watchedTitle ||
+                !watchedDescription ||
+                !watchedDatePublication ||
                 !hasImage ||
                 (imageUrl && isImageValidated !== true);
 
@@ -127,155 +123,158 @@ export function PressReleaseNewForm({ spectacles = [], evenements = [] }: { spec
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 {/* Warning progressif */}
-            {showPublicWarning && (
-                <Alert className="border-yellow-500 bg-yellow-50 text-yellow-900 dark:bg-yellow-900/10 dark:text-yellow-500">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Publication incomplète</AlertTitle>
-                    <AlertDescription>
-                        Certains champs requis sont manquants pour la publication publique.
-                        Le communiqué sera sauvegardé mais non visible publiquement.
-                    </AlertDescription>
-                </Alert>
-            )}
+                {showPublicWarning && (
+                    <Alert className="border-yellow-500 bg-yellow-50 text-yellow-900 dark:bg-yellow-900/10 dark:text-yellow-500">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertTitle>Publication incomplète</AlertTitle>
+                        <AlertDescription>
+                            Certains champs requis sont manquants pour la publication publique.
+                            Le communiqué sera sauvegardé mais non visible publiquement.
+                        </AlertDescription>
+                    </Alert>
+                )}
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Informations générales</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div>
-                        <Label htmlFor="title">Titre *</Label>
-                        <Input
-                            id="title"
-                            {...form.register("title")}
-                            disabled={isPending}
-                        />
-                        {form.formState.errors.title && (
-                            <p className="text-red-600 text-sm mt-1">
-                                {form.formState.errors.title.message}
-                            </p>
-                        )}
-                    </div>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Informations générales</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div>
+                            <Label htmlFor="title">Titre *</Label>
+                            <Input
+                                id="title"
+                                {...form.register("title")}
+                                disabled={isPending}
+                            />
+                            {form.formState.errors.title && (
+                                <p className="text-red-600 text-sm mt-1">
+                                    {form.formState.errors.title.message}
+                                </p>
+                            )}
+                        </div>
 
-                    <div>
-                        <Label htmlFor="slug">Slug</Label>
-                        <Input
-                            id="slug"
-                            {...form.register("slug")}
-                            disabled={isPending}
-                            placeholder="⚠️ Laissez vide pour génération automatique⚠️"
-                        />
-                    </div>
+                        <div>
+                            <Label htmlFor="slug">Slug</Label>
+                            <Input
+                                id="slug"
+                                {...form.register("slug")}
+                                disabled={isPending}
+                                placeholder="⚠️ Laissez vide pour génération automatique⚠️"
+                            />
+                        </div>
 
-                    <div>
-                        <Label htmlFor="description">Description</Label>
-                        <Textarea
-                            id="description"
-                            {...form.register("description")}
-                            disabled={isPending}
-                            rows={6}
-                        />
-                    </div>
+                        <div>
+                            <Label htmlFor="description">Description</Label>
+                            <Textarea
+                                id="description"
+                                {...form.register("description")}
+                                disabled={isPending}
+                                rows={6}
+                            />
+                        </div>
 
-                    <div>
-                        <Label htmlFor="date_publication">Date de publication *</Label>
-                        <Input
-                            id="date_publication"
-                            type="date"
-                            {...form.register("date_publication")}
-                            disabled={isPending}
-                        />
-                    </div>
+                        <div>
+                            <Label htmlFor="date_publication">Date de publication *</Label>
+                            <Input
+                                id="date_publication"
+                                type="date"
+                                {...form.register("date_publication")}
+                                disabled={isPending}
+                            />
+                        </div>
 
-                    {/* Image avec ImageFieldGroup */}
-                    <ImageFieldGroup
-                        form={form}
-                        imageUrlField="image_url"
-                        imageMediaIdField="image_media_id"
-                        label="Image du communiqué"
-                        showUpload={true}
-                        uploadFolder="presse"
-                        description="Image principale affichée dans le kit média (recommandé : 1200x630px)"
-                        onValidationChange={(isValid) => setIsImageValidated(isValid)}
-                    />
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader>
-                    <CardTitle>Liaisons contextuelles</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div>
-                        <Label htmlFor="spectacle_id">Spectacle associé</Label>
-                        <Select
-                            onValueChange={(value) => form.setValue("spectacle_id", value ? Number(value) : undefined)}
-                            disabled={isPending}
+                        {/* Image avec ImageField */}
+                        <ImageField.Provider
+                            form={form}
+                            imageUrlField="image_url"
+                            imageMediaIdField="image_media_id"
+                            label="Image du communiqué"
+                            showUpload={true}
+                            uploadFolder="presse"
+                            description="Image principale affichée dans le kit média (recommandé : 1200x630px)"
+                            onValidationChange={(isValid) => setIsImageValidated(isValid)}
                         >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Sélectionner un spectacle (optionnel)" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {spectacles.map((s) => (
-                                    <SelectItem key={s.id} value={String(s.id)}>
-                                        {s.titre}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
+                            <ImageField.SourceActions />
+                            <ImageField.Preview />
+                        </ImageField.Provider>
+                    </CardContent>
+                </Card>
 
-                    <div>
-                        <Label htmlFor="evenement_id">Événement associé</Label>
-                        <Select
-                            onValueChange={(value) => form.setValue("evenement_id", value ? Number(value) : undefined)}
-                            disabled={isPending}
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Sélectionner un événement (optionnel)" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {evenements.map((e) => (
-                                    <SelectItem key={e.id} value={String(e.id)}>
-                                        {e.titre}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </CardContent>
-            </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Liaisons contextuelles</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div>
+                            <Label htmlFor="spectacle_id">Spectacle associé</Label>
+                            <Select
+                                onValueChange={(value) => form.setValue("spectacle_id", value ? Number(value) : undefined)}
+                                disabled={isPending}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Sélectionner un spectacle (optionnel)" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {spectacles.map((s) => (
+                                        <SelectItem key={s.id} value={String(s.id)}>
+                                            {s.titre}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Publication</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex items-center space-x-2">
-                        <Switch
-                            id="public"
-                            checked={form.watch("public")}
-                            onCheckedChange={(checked) => form.setValue("public", checked)}
-                            disabled={isPending}
-                        />
-                        <Label htmlFor="public">Publier immédiatement</Label>
-                    </div>
-                </CardContent>
-            </Card>
+                        <div>
+                            <Label htmlFor="evenement_id">Événement associé</Label>
+                            <Select
+                                onValueChange={(value) => form.setValue("evenement_id", value ? Number(value) : undefined)}
+                                disabled={isPending}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Sélectionner un événement (optionnel)" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {evenements.map((e) => (
+                                        <SelectItem key={e.id} value={String(e.id)}>
+                                            {e.titre}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </CardContent>
+                </Card>
 
-            <div className="flex gap-2 justify-end">
-                <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => router.back()}
-                    disabled={isPending}
-                >
-                    Annuler
-                </Button>
-                <Button type="submit" disabled={isPending}>
-                    {isPending ? "Création..." : "Créer"}
-                </Button>
-            </div>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Publication</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex items-center space-x-2">
+                            <Switch
+                                id="public"
+                                checked={form.watch("public")}
+                                onCheckedChange={(checked) => form.setValue("public", checked)}
+                                disabled={isPending}
+                            />
+                            <Label htmlFor="public">Publier immédiatement</Label>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <div className="flex gap-2 justify-end">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => router.back()}
+                        disabled={isPending}
+                    >
+                        Annuler
+                    </Button>
+                    <Button type="submit" disabled={isPending}>
+                        {isPending ? "Création..." : "Créer"}
+                    </Button>
+                </div>
             </form>
         </Form>
     );

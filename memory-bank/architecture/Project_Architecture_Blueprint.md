@@ -80,13 +80,13 @@
 | Dimension | Détail |
 | ----------- | -------- |
 | **Routes** | 14 sections admin (~30+ pages), 9 pages publiques, 10 API Routes |
-| **DAL** | 31 modules (`lib/dal/`) + 5 helpers |
-| **Server Actions** | 11 fichiers colocalisés + 5 fichiers centralisés (`lib/actions/`) |
-| **Schemas Zod** | 15+ modules dual Server (bigint) / UI (number) |
-| **Tables DB** | 36 tables, 100% RLS, 45 fichiers de schéma déclaratif |
-| **Migrations** | 93 fichiers SQL (sept 2025 → fév 2026) |
-| **Composants UI** | 33 shadcn/ui + 12 features admin + 6 features publiques |
-| **Scripts** | 87 scripts de test/audit/maintenance |
+| **DAL** | 37 modules (`lib/dal/`) + 6 helpers + 1 fallback |
+| **Server Actions** | 11 fichiers colocalisés + 10 fichiers centralisés (`lib/actions/`) |
+| **Schemas Zod** | 23 modules dual Server (bigint) / UI (number) |
+| **Tables DB** | 36 tables, 100% RLS, 47 fichiers de schéma déclaratif |
+| **Migrations** | 103 fichiers SQL (sept 2025 → juil 2026) |
+| **Composants UI** | 33 shadcn/ui + 13 features admin + 6 features publiques |
+| **Scripts** | 98 scripts de test/audit/maintenance |
 | **Sentry** | Multi-runtime (client/server/edge/instrumentation) |
 | **Security Headers** | CSP + HSTS + X-Frame-Options + 3 autres (OWASP A05) |
 
@@ -142,8 +142,8 @@ flowchart TB
         backoffice["Zone Admin\n(admin)/ — ~30 pages CRUD"]
         api["API Routes\napp/api/ — 10 endpoints"]
         actions["Server Actions\nlib/actions/ + colocated\nMutations + revalidatePath"]
-        dal["Data Access Layer\nlib/dal/ (31 modules)\nserver-only, DALResult, cache()"]
-        schemas["Schemas Zod\nlib/schemas/ (15+ modules)\nDual Server/UI validation"]
+        dal["Data Access Layer\nlib/dal/ (37 modules)\nserver-only, DALResult, cache()"]
+        schemas["Schemas Zod\nlib/schemas/ (23 modules)\nDual Server/UI validation"]
         email["Email Service\nlib/email/ + emails/\nReact Email + Resend"]
     end
 
@@ -238,11 +238,11 @@ flowchart TB
                                 |
                                 v
 +---------------------------------------------------------------------+
-|  DATA ACCESS LAYER (lib/dal/, 31 modules + helpers/)                |
+|  DATA ACCESS LAYER (lib/dal/, 37 modules + helpers/)                |
 |  "use server" + import "server-only" + React cache()                | 
 |  requireAdmin() -> Supabase Client -> DB Query -> DALResult<T>      |
 |  NO revalidatePath   NO email imports   NO throws                   |
-|  Helpers: error.ts, format.ts, slug.ts, serialize.ts, folder.ts     |
+|  Helpers: error.ts, format.ts, slug.ts, serialize.ts, media-url.ts  |
 +---------------------------------------------------------------------+
                                 |
                                 v
@@ -351,36 +351,54 @@ components/features/public-site/{feature}/
 
 **Autres pages :** `agenda/`, `compagnie/`, `contact/`, `presse/`, `spectacles/`
 
-### 4.4 Data Access Layer (31 modules)
+### 4.4 Data Access Layer (37 modules)
 
-**Admin (14 modules) :**
+**Admin (13 modules admin-*) :**
 
 | Module | Domaine | Fonctions types |
 | -------- | --------- | ----------------- |
 | `admin-agenda.ts` | Événements | `fetchEventsAdmin`, `createEvent`, `updateEvent`, `deleteEvent` |
+| `admin-compagnie-presentation.ts` | Sections présentation | CRUD sections compagnie |
+| `admin-compagnie-values.ts` | Valeurs compagnie | CRUD valeurs |
 | `admin-home-hero.ts` | Hero Slides | `fetchAllHeroSlides`, `createHeroSlide`, `reorderHeroSlides` |
 | `admin-home-about.ts` | About sections | `fetchAboutSections`, `updateAboutSection` |
+| `admin-home-stats.ts` | Statistiques home | CRUD stats homepage |
 | `admin-lieux.ts` | Lieux | `fetchAllLieuxAdmin`, `createLieu`, `updateLieu`, `deleteLieu` |
 | `admin-partners.ts` | Partenaires | CRUD complet |
 | `admin-press-articles.ts` | Articles presse | CRUD |
 | `admin-press-contacts.ts` | Contacts presse | CRUD |
 | `admin-press-releases.ts` | Communiqués | CRUD |
+| `admin-press-select-options.ts` | Options select presse | Listes de sélection |
 | `admin-users.ts` | Utilisateurs | CRUD + invitation |
-| `audit-logs.ts` | Logs d'audit | `fetchAuditLogs`, `createAuditLog` |
-| `dashboard.ts` | Dashboard | `fetchDashboardStats` |
-| `data-retention.ts` | RGPD | `fetchRetentionPolicies`, `executeRetention` |
-| `site-config.ts` | Display Toggles | `fetchDisplayToggle`, `updateDisplayToggle` |
-| `analytics.ts` | Analytics | `fetchAnalyticsData` |
 
 **Public (13 modules) :**
 
-`agenda.ts`, `compagnie.ts`, `compagnie-presentation.ts`, `contact.ts`, `home-about.ts`, `home-hero.ts`, `home-news.ts`, `home-newsletter.ts`, `home-partners.ts`, `home-shows.ts`, `presse.ts`, `spectacles.ts`, `team.ts`
+`agenda.ts`, `compagnie.ts`, `compagnie-presentation.ts`, `home-about.ts`, `home-hero.ts`, `home-news.ts`, `home-newsletter.ts`, `home-partners.ts`, `home-shows.ts`, `newsletter-subscriber.ts`, `presse.ts`, `spectacles.ts`, `spectacle-photos.ts`
 
-**Media Library (4 modules) :**
+**Système / Feature (6 modules) :**
 
-`media.ts` (CRUD centralisé, SHA-256 dedup), `media-folders.ts` (9 folders, `getFolderIdFromPath()`), `media-tags.ts` (junction table), `media-usage.ts` (tracking 7 tables)
+| Module | Domaine | Fonctions types |
+| -------- | --------- | ----------------- |
+| `analytics.ts` | Analytics | `fetchAnalyticsData` |
+| `audit-logs.ts` | Logs d'audit | `fetchAuditLogs`, `createAuditLog` |
+| `contact.ts` | Messages contact | `createContactMessage` |
+| `dashboard.ts` | Dashboard | `fetchDashboardStats` |
+| `data-retention.ts` | RGPD | `fetchRetentionPolicies`, `executeRetention` |
+| `site-config.ts` | Display Toggles | `fetchDisplayToggle`, `updateDisplayToggle` |
 
-**DAL Helpers (`lib/dal/helpers/`, 5 fichiers) :**
+**Team (3 modules) :**
+
+`team.ts` (CRUD principal), `team-reorder.ts` (réordonnancement), `team-hard-delete.ts` (suppression définitive)
+
+**Media Library (2 modules) :**
+
+`media.ts` (CRUD centralisé, SHA-256 dedup, thumbnails), `media-usage.ts` (tracking 7 tables)
+
+> **Note :** `media-folders` et `media-tags` sont gérés via Server Actions (`lib/actions/media-folders-actions.ts`, `media-tags-actions.ts`) et non plus comme modules DAL séparés.
+
+**Fallback (1 module) :** `fallback/compagnie-presentation-fallback.ts`
+
+**DAL Helpers (`lib/dal/helpers/`, 6 fichiers) :**
 
 | Fichier | Exports |
 | -------- | -------- |
@@ -388,9 +406,10 @@ components/features/public-site/{feature}/
 | `format.ts` | Formatage dates, strings |
 | `slug.ts` | `generateUniqueSlug()` |
 | `serialize.ts` | BigInt vers number (DTO conversion) |
-| `folder.ts` | `getFolderIdFromPath()` (Storage/Folders sync) |
+| `media-url.ts` | `buildMediaPublicUrl()`, `getFolderIdFromPath()` (Storage/Folders sync) |
+| `index.ts` | Barrel exports |
 
-### 4.5 Schemas Zod (15+ modules)
+### 4.5 Schemas Zod (23 modules)
 
 Chaque feature dispose de schemas duaux :
 
@@ -398,9 +417,14 @@ Chaque feature dispose de schemas duaux :
 - **UI Schema** : `z.number().int().positive()` pour react-hook-form
 - **Transport Type** (si BigInt) : `string` pour Server Actions
 
-Modules : `admin-events.ts`, `admin-lieux.ts`, `admin-users.ts`, `agenda.ts`, `compagnie.ts`, `contact.ts`, `dashboard.ts`, `home-content.ts`, `media.ts`, `presse.ts`, `spectacles.ts`, `team.ts`, `index.ts` (barrel)
+| Catégorie | Modules |
+| ---------- | -------- |
+| **Domaine** | `team.ts`, `media.ts`, `spectacles.ts`, `contact.ts`, `compagnie.ts`, `presse.ts`, `agenda.ts` |
+| **Admin** | `admin-agenda.ts`, `admin-agenda-ui.ts`, `admin-lieux.ts`, `admin-users.ts`, `compagnie-admin.ts`, `home-content.ts` |
+| **Presse** | `press-article.ts`, `press-contact.ts`, `press-release.ts` |
+| **Config/Système** | `site-config.ts`, `analytics.ts`, `audit-logs.ts`, `dashboard.ts`, `data-retention.ts`, `newsletter.ts`, `partners.ts` |
 
-### 4.6 Hooks (`lib/hooks/`, 9 hooks)
+### 4.6 Hooks (`lib/hooks/`, 10 hooks)
 
 | Hook | Lignes | Fonction |
 | ------ | -------- | ---------- |
@@ -410,8 +434,9 @@ Modules : `admin-events.ts`, `admin-lieux.ts`, `admin-users.ts`, `agenda.ts`, `c
 | `useHeroSlidesDelete.ts` | 61 | Delete confirmation dialog |
 | `use-debounce.ts` | — | Value debouncing |
 | `use-mobile.ts` | — | Mobile viewport detection |
+| `use-prefers-reduced-motion.ts` | — | Reduced motion media query |
 | `useContactForm.ts` | — | Contact form logic |
-| `useMediaUpload.ts` | — | Media upload state |
+| `useImageValidation.ts` | — | Image upload validation |
 | `useNewsletterSubscribe.ts` | — | Newsletter inscription |
 
 ### 4.7 API Helpers (`lib/api/helpers.ts`, 136 lignes)
@@ -506,7 +531,7 @@ erDiagram
 | **Contact** | `messages_contact` |
 | **Système** | `configurations_site`, `analytics_events`, `audit_logs`, `content_versions`, `data_retention_policies`, `seo_metadata` |
 
-### 6.3 Schémas déclaratifs (45 fichiers)
+### 6.3 Schémas déclaratifs (47 fichiers)
 
 Organisés par préfixe numérique dans `supabase/schemas/` :
 
@@ -517,7 +542,7 @@ Organisés par préfixe numérique dans `supabase/schemas/` :
 | `05-09` | Contenu principal (lieux, spectacles, événements, compagnie, presse, partenaires) |
 | `10-16` | Système, relations, récurrence, analytics, versioning, SEO |
 | `20-22` | Audit logs, rétention RGPD |
-| `30-42` | Triggers, index, vues |
+| `30-42` | Triggers, index, vues (incl. spectacle_photos, spectacle_gallery) |
 | `50-63` | Contraintes, RLS policies, fonctions spécialisées |
 
 ### 6.4 Vues PostgreSQL
@@ -1245,6 +1270,7 @@ supabase db diff -f <name>         # Generer migration
 
 | Version | Date | Changements majeurs |
 | --------- | ------ | --------------------- |
+| 5.0 | 2026-07-24 | Mise à jour données : 37 DAL modules (+6 helpers, +1 fallback), 23 schemas Zod, 10 hooks, 103 migrations, 98 scripts, 47 fichiers schéma SQL, 10 Server Actions centralisés, 13 domaines admin, catégorisation DAL (admin/public/système/team/media), media-folders/tags migrés vers Actions |
 | 4.0 | 2026-02-07 | Réécriture complète : C4 Mermaid diagrams, 17 sections template, Sentry multi-runtime, 87 scripts, security headers, 31 DAL modules, ADR complets, Next.js 16.1.5 |
 | 3.1 | 2026-01-26 | BigInt Pattern Edition |
 | 2.9 | 2026-01-07 | Admin Views Security Hardening (TASK037) |

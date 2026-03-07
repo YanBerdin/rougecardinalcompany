@@ -3,42 +3,43 @@
 import { Upload, Library, Link2, ImageIcon, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useImageFieldContext } from "./ImageFieldContext";
 
-interface ImageSourceActionsProps {
-    imageUrl: string | undefined;
-    isValidating: boolean;
+interface ImageFieldSourceActionsProps {
     showUpload?: boolean;
     showMediaLibrary?: boolean;
     showExternalUrl?: boolean;
-    onUploadClick: () => void;
-    onLibraryClick: () => void;
-    onUrlChange: (url: string) => void;
-    onClearUrl: () => void;
 }
 
-export function ImageSourceActions({
-    imageUrl,
-    isValidating,
+export function ImageFieldSourceActions({
     showUpload = false,
     showMediaLibrary = true,
     showExternalUrl = true,
-    onUploadClick,
-    onLibraryClick,
-    onUrlChange,
-    onClearUrl,
-}: ImageSourceActionsProps) {
+}: ImageFieldSourceActionsProps) {
+    const { state, actions } = useImageFieldContext();
+    const { imageUrl, isValidating } = state;
+    const { setIsUploadOpen, setIsMediaPickerOpen, handleUrlChange, handleClearUrl } = actions;
+
     return (
         <div className="space-y-3">
             {/* Action buttons row */}
             <div className="flex flex-wrap gap-2">
                 {showUpload && (
-                    <Button type="button" variant="outline" onClick={onUploadClick}>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setIsUploadOpen(true)}
+                    >
                         <Upload className="h-4 w-4 mr-2" />
                         Téléverser
                     </Button>
                 )}
                 {showMediaLibrary && (
-                    <Button type="button" variant="secondary" onClick={onLibraryClick}>
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={() => setIsMediaPickerOpen(true)}
+                    >
                         <Library className="h-4 w-4 mr-2" />
                         Médiathèque
                     </Button>
@@ -60,7 +61,7 @@ export function ImageSourceActions({
                                 placeholder="https://example.com/image.jpg"
                                 className="pl-9 w-full"
                                 value={imageUrl ?? ""}
-                                onChange={(e) => onUrlChange(e.target.value)}
+                                onChange={(e) => handleUrlChange(e.target.value)}
                             />
                         </div>
                         <div className="flex gap-2 shrink-0">
@@ -69,16 +70,21 @@ export function ImageSourceActions({
                                     type="button"
                                     variant="outline"
                                     size="icon"
-                                    onClick={onClearUrl}
+                                    onClick={handleClearUrl}
                                     title="Effacer l'URL"
+                                    aria-label="Effacer l'URL de l'image"
                                     className="shrink-0"
                                 >
                                     <X />
                                 </Button>
                             )}
                             {isValidating && (
-                                <div className="flex items-center gap-2 px-3 text-sm text-muted-foreground">
-                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                <div
+                                    className="flex items-center gap-2 px-3 text-sm text-muted-foreground"
+                                    aria-live="polite"
+                                    aria-label="Vérification de l'image en cours"
+                                >
+                                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
                                     <span className="hidden sm:inline">Vérification...</span>
                                 </div>
                             )}

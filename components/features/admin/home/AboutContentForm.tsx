@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { ImageFieldGroup } from "@/components/features/admin/media";
+import { ImageField } from "@/components/features/admin/media";
 import { AboutContentFormSchema, type AboutContentFormValues, type AboutContentDTO } from "@/lib/schemas/home-content";
 import { updateAboutContentAction } from "@/app/(admin)/admin/home/about/home-about-actions";
 
@@ -174,8 +174,8 @@ export function AboutContentForm({ content }: AboutContentFormProps) {
                                     )}
                                 />
 
-                                {/* Image section - Using ImageFieldGroup */}
-                                <ImageFieldGroup
+                                {/* Image section */}
+                                <ImageField.Provider
                                     form={form}
                                     imageUrlField="image_url"
                                     imageMediaIdField="image_media_id"
@@ -183,7 +183,11 @@ export function AboutContentForm({ content }: AboutContentFormProps) {
                                     label="Image de la section"
                                     showUpload={true}
                                     uploadFolder="home-about"
-                                />
+                                >
+                                    <ImageField.SourceActions />
+                                    <ImageField.Preview />
+                                    <ImageField.AltText />
+                                </ImageField.Provider>
 
                                 <div className="flex justify-end gap-2">
                                     <Button

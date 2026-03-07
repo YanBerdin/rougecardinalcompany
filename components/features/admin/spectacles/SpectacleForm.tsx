@@ -83,17 +83,12 @@ export default function SpectacleForm({
   // Show progressive validation warning when public=true
   useEffect(() => {
     if (isPublic) {
-      const genre = form.getValues("genre");
-      const premiere = form.getValues("premiere");
-      const shortDesc = form.getValues("short_description");
-      const description = form.getValues("description");
-
       const isIncomplete =
         currentStatus === "draft" ||
-        !genre ||
-        !premiere ||
-        !shortDesc ||
-        !description ||
+        !watchedGenre ||
+        !watchedPremiere ||
+        !watchedShortDesc ||
+        !watchedDesc ||
         !imageUrl ||
         isImageValidated !== true;
 

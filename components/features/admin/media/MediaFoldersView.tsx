@@ -17,6 +17,16 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import type { MediaFolderDTO } from "@/lib/schemas/media";
 import { deleteMediaFolderAction } from "@/lib/actions/media-folders-actions";
 import { MediaFolderFormDialog } from "./MediaFolderFormDialog";
@@ -157,19 +167,19 @@ export function MediaFoldersView({ initialFolders }: MediaFoldersViewProps) {
                                 {/* Footer: Actions */}
                                 <div className="flex items-center justify-end gap-2 pt-2 border-t mt-2">
                                     <Button
-                                        variant="ghost"
+                                        variant="secondary"
                                         size="sm"
                                         onClick={() => handleEdit(folder)}
-                                        className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 h-10 min-w-[56px] px-3"
+                                        className="h-10 min-w-[56px] px-3"
                                         aria-label={`Éditer ${folder.name}`}
                                     >
                                         <Edit className="h-5 w-5 mr-2" /> Éditer
                                     </Button>
                                     <Button
-                                        variant="ghost"
+                                        variant="destructive"
                                         size="sm"
                                         onClick={() => requestDelete(folder)}
-                                        className="hover:text-red-700 hover:bg-red-50 h-10 min-w-[56px] px-3"
+                                        className="bg-card h-10 min-w-[56px] px-3"
                                         aria-label={`Supprimer ${folder.name}`}
                                     >
                                         <Trash2 className="h-5 w-5 mr-2" /> Supprimer
@@ -184,7 +194,7 @@ export function MediaFoldersView({ initialFolders }: MediaFoldersViewProps) {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="w-[25%]">Nom</TableHead>
+                                    <TableHead className="w-[25%] pl-2">Nom</TableHead>
                                     <TableHead className="hidden md:table-cell w-[35%]">Description</TableHead>
                                     <TableHead className="w-[20%]">Parent</TableHead>
                                     <TableHead className="text-right w-[20%]">Actions</TableHead>
@@ -203,21 +213,21 @@ export function MediaFoldersView({ initialFolders }: MediaFoldersViewProps) {
                                         <TableCell className="text-right">
                                             <div className="flex items-center justify-end gap-2">
                                                 <Button
-                                                    variant="ghost"
+                                                    variant="outline"
                                                     size="icon"
                                                     onClick={() => handleEdit(folder)}
                                                     title="Modifier"
-                                                    className="h-8 w-8 sm:h-9 sm:w-9 hover:bg-amber-100 hover:text-amber-700"
+                                                    className="h-8 w-8 sm:h-9 sm:w-9 bg-card"
                                                     aria-label={`Éditer ${folder.name}`}
                                                 >
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
                                                 <Button
-                                                    variant="ghost"
+                                                    variant="destructive"
                                                     size="icon"
                                                     onClick={() => requestDelete(folder)}
                                                     title="Supprimer"
-                                                    className="h-8 w-8 sm:h-9 sm:w-9 hover:bg-red-100 hover:text-red-700"
+                                                    className="h-8 w-8 sm:h-9 sm:w-9 bg-card"
                                                     aria-label={`Supprimer ${folder.name}`}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
@@ -241,6 +251,28 @@ export function MediaFoldersView({ initialFolders }: MediaFoldersViewProps) {
                 isSubmitting={isSubmitting}
                 setIsSubmitting={setIsSubmitting}
             />
+
+            <AlertDialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Supprimer le dossier</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Êtes-vous sûr de vouloir supprimer le dossier{" "}
+                            <strong>&quot;{deleteCandidate?.name}&quot;</strong> ?
+                            Cette action est irréversible.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel className="bg-secondary text-secondary-foreground hover:bg-muted-foreground hover:text-muted">Annuler</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleDelete}
+                            className="bg-destructive text-destructive-foreground hover:bg-red-500/20 hover:text-destructive"
+                        >
+                            Supprimer
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

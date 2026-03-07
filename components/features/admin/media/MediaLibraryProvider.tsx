@@ -1,20 +1,33 @@
+/**
+ * @file MediaLibraryProvider
+ * @description Client provider that owns all MediaLibrary state and actions.
+ * Logic migrated from useMediaLibraryState.ts (hook deleted after this migration).
+ */
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import type { MediaItemExtendedDTO, MediaFolderDTO } from "@/lib/schemas/media";
-import type { MediaSelectResult } from "../types";
+import {
+    MediaLibraryContext,
+    type MediaLibraryContextValue,
+} from "./MediaLibraryContext";
+import type { MediaItemExtendedDTO, MediaTagDTO, MediaFolderDTO } from "@/lib/schemas/media";
+import type { MediaSelectResult } from "./types";
 
-interface MediaLibraryStateProps {
+interface MediaLibraryProviderProps {
     initialMedia: MediaItemExtendedDTO[];
+    availableTags: MediaTagDTO[];
     availableFolders: MediaFolderDTO[];
+    children: React.ReactNode;
 }
 
-export function useMediaLibraryState({
+export function MediaLibraryProvider({
     initialMedia,
+    availableTags,
     availableFolders,
-}: MediaLibraryStateProps) {
+    children,
+}: MediaLibraryProviderProps) {
     const router = useRouter();
     const [media, setMedia] = useState(initialMedia);
     const [searchQuery, setSearchQuery] = useState("");
@@ -103,32 +116,66 @@ export function useMediaLibraryState({
         return availableFolders[0]?.slug ?? "uploads";
     }, [availableFolders]);
 
-    return {
-        // State
-        media,
-        searchQuery,
-        setSearchQuery,
-        selectedFolder,
-        setSelectedFolder,
-        selectedTag,
-        setSelectedTag,
-        selectedMedia,
-        setSelectedMedia,
-        selectedIds,
-        selectionMode,
-        isUploadOpen,
-        setIsUploadOpen,
-        uploadFolder,
-        setUploadFolder,
-        // Computed
-        filteredMedia,
-        // Handlers
-        handleUploadSuccess,
-        handleCardClick,
-        toggleSelectionMode,
-        clearSelection,
-        handleBulkSuccess,
-        handleDetailUpdate,
-        getUploadFolderDefault,
-    };
+    const contextValue = useMemo<MediaLibraryContextValue>(
+        () => ({
+            state: {
+                media,
+                searchQuery,
+                selectedFolder,
+                selectedTag,
+                selectedMedia,
+                selectedIds,
+                selectionMode,
+                isUploadOpen,
+                uploadFolder,
+                filteredMedia,
+            },
+            actions: {
+                setSearchQuery,
+                setSelectedFolder,
+                setSelectedTag,
+                setSelectedMedia,
+                setIsUploadOpen,
+                setUploadFolder,
+                handleUploadSuccess,
+                handleCardClick,
+                toggleSelectionMode,
+                clearSelection,
+                handleBulkSuccess,
+                handleDetailUpdate,
+                getUploadFolderDefault,
+            },
+            meta: {
+                availableTags,
+                availableFolders,
+            },
+        }),
+        [
+            media,
+            searchQuery,
+            selectedFolder,
+            selectedTag,
+            selectedMedia,
+            selectedIds,
+            selectionMode,
+            isUploadOpen,
+            uploadFolder,
+            filteredMedia,
+            handleUploadSuccess,
+            handleCardClick,
+            toggleSelectionMode,
+            clearSelection,
+            handleBulkSuccess,
+            handleDetailUpdate,
+            getUploadFolderDefault,
+            availableTags,
+            availableFolders,
+        ]
+    );
+
+    return (
+        <MediaLibraryContext value={contextValue}>
+            {children}
+        </MediaLibraryContext>
+    );
 }

@@ -20,45 +20,38 @@ import { MediaDetailsPanel } from "./MediaDetailsPanel";
 import { MediaBulkActions } from "./MediaBulkActions";
 import { MediaCard } from "./MediaCard";
 import { MediaUploadDialog } from "./MediaUploadDialog";
-import { useMediaLibraryState } from "./hooks/useMediaLibraryState";
-import type { MediaItemExtendedDTO, MediaTagDTO, MediaFolderDTO } from "@/lib/schemas/media";
+import { useMediaLibraryContext } from "./MediaLibraryContext";
 
-interface MediaLibraryViewProps {
-    initialMedia: MediaItemExtendedDTO[];
-    availableTags: MediaTagDTO[];
-    availableFolders: MediaFolderDTO[];
-}
-
-export function MediaLibraryView({
-    initialMedia,
-    availableTags,
-    availableFolders,
-}: MediaLibraryViewProps) {
-    const router = useRouter(); // Used for back navigation only
+export function MediaLibraryView() {
+    const router = useRouter(); // back navigation only
+    const { state, actions, meta } = useMediaLibraryContext();
     const {
         media,
         searchQuery,
-        setSearchQuery,
         selectedFolder,
-        setSelectedFolder,
         selectedTag,
-        setSelectedTag,
         selectedMedia,
-        setSelectedMedia,
         selectedIds,
         selectionMode,
         isUploadOpen,
-        setIsUploadOpen,
         uploadFolder,
-        setUploadFolder,
         filteredMedia,
+    } = state;
+    const {
+        setSearchQuery,
+        setSelectedFolder,
+        setSelectedTag,
+        setSelectedMedia,
+        setIsUploadOpen,
+        setUploadFolder,
         handleUploadSuccess,
         handleCardClick,
         toggleSelectionMode,
         clearSelection,
         handleBulkSuccess,
         handleDetailUpdate,
-    } = useMediaLibraryState({ initialMedia, availableTags, availableFolders });
+    } = actions;
+    const { availableFolders, availableTags } = meta;
 
     return (
         <div className="space-y-6">

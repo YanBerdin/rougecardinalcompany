@@ -13,29 +13,17 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import type { MediaItemExtendedDTO } from "@/lib/schemas/media";
+import { useMediaDetailsContext } from "../MediaDetailsContext";
 
-interface MediaDetailActionsProps {
-    media: MediaItemExtendedDTO;
-    onDelete: () => Promise<void>;
-    onRegenerate: () => Promise<void>;
-    isDeleting: boolean;
-    isUpdating: boolean;
-    isRegenerating: boolean;
-}
-
-export function MediaDetailActions({
-    media,
-    onDelete,
-    onRegenerate,
-    isDeleting,
-    isUpdating,
-    isRegenerating,
-}: MediaDetailActionsProps) {
+export function MediaDetailActions() {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const { state, actions, meta } = useMediaDetailsContext();
+    const { isDeleting, isUpdating, isRegenerating } = state;
+    const { handleDelete, handleRegenerateThumbnail } = actions;
+    const { media } = meta;
 
     const handleDeleteConfirm = async () => {
-        await onDelete();
+        await handleDelete();
         setShowDeleteDialog(false);
     };
 
@@ -48,7 +36,7 @@ export function MediaDetailActions({
                 <Button
                     variant="outline"
                     className="w-full"
-                    onClick={onRegenerate}
+                    onClick={handleRegenerateThumbnail}
                     disabled={isUpdating || isDeleting || isRegenerating}
                 >
                     <RefreshCw className={`mr-2 h-4 w-4 ${isRegenerating ? "animate-spin" : ""}`} />

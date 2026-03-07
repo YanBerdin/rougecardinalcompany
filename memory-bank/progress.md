@@ -1,5 +1,76 @@
 # Progress
 
+## BUGFIX — DAL press select options + RLS display_toggle visibility (2026-03-07)
+
+**Context** : Deux bugfixes indépendants commités sur la branche TASK075.
+
+**DAL admin-press-select-options.ts** :
+
+| # | Problème | Était | Corrigé en |
+| --- | --- | --- | --- |
+| 1 | Colonne select spectacles | `"id, titre"` | `"id, title"` |
+| 2 | Filtre spectacles | `.eq("active", true)` | `.neq("status", "archived")` |
+| 3 | Ordre spectacles | `.order("titre")` | `.order("title")` |
+| 4 | Map spectacles | `item.titre` | `item.title` |
+| 5 | Colonne select événements | `"id, titre"` | `"id, date_debut, spectacles(title)"` |
+| 6 | Filtre événements | `.eq("active", true)` | `.neq("status", "cancelled")` |
+| 7 | Ordre événements | `.order("titre")` | `.order("date_debut")` |
+| 8 | Label événements | plain titre | `"Spectacle — date"` via join |
+| 9 | Cast TypeScript | `as { title: string } \| null` | `as unknown as { title: string } \| null` |
+
+**RLS display_toggle visibility** :
+
+- **Root cause** : policy SELECT `configurations_site` n'autorisait que `key LIKE 'public:%'` → display toggles (préfixe `display_toggle_*`) filtrés à 100% pour anon
+- **Impact** : sections hero/about/spectacles/partners/newsletter invisibles sur pages publiques (masqué par fallback `{ enabled: true }` dans DAL)
+- **Fix** : `OR key LIKE 'display_toggle_%'` ajouté à la policy + GRANT SELECT ajouté pour anon/authenticated
+- **Migrations** : `20260304000000` (GRANT) + `20260304010000` (RLS policy)
+- **Vérification** : `SET ROLE anon` → 10/10 display toggles visibles
+
+Commits : `a307ae3` (DAL fix, 3 fichiers) + `16e545d` (RLS fix, 7 fichiers). Branch `refactor/task075-media-admin-composition-patterns`.
+
+---
+
+## TASK075 — Refactoring Media Admin : React Composition Patterns (2026-03-05)
+
+**Context** : Audit + refactoring complet de `components/features/admin/media/` contre les instructions React Composition Patterns. Score initial 2/8 règles conformes (Boolean Prop Proliferation, pas de Compound Components, pas de Generic Context Interfaces, pas de Lift State into Providers). 2 bugs critiques découverts en phase 1 (dialogs de confirmation non affichés). 4 phases implémentées, 36 fichiers, +1542/-636 lignes.
+
+**Violations corrigées** :
+
+| # | Règle | Violation initiale | Correction |
+| --- | --- | --- | --- |
+| 1 | No Boolean Prop Proliferation | `ImageField` passait 4 booleans + ref + prop drilling multi-niveaux | Compound API `{ Provider, SourceActions, Preview, AltText }` |
+| 2 | Compound Components | Aucun compound component dans tout le module | `ImageField` + `MediaLibraryProvider` + `MediaDetailsProvider` |
+| 3 | Generic Context Interfaces | Pas de contexte dans le module | Interfaces typées `{ state, actions, meta }` créées |
+| 4 | Lift State into Providers | État éparpillé, prop drilling profond | State + logique dans 2 Providers dédiés |
+| BUG-A | Fonctionnel | `MediaFoldersView` — bouton "Supprimer" sans `<AlertDialog>` en JSX | `AlertDialog` complet avec `AlertDialogAction destructive` ajouté |
+| BUG-B | Fonctionnel | `MediaTagsView` — même bug `<AlertDialog>` manquant | Idem |
+| BUG-C | Paramètre fantôme | `availableTags` passé mais jamais utilisé dans `useMediaLibraryState` | Supprimé du hook + Container + View |
+| BUG-D | `useEffect` deps | `useEffect` avec deps manquantes dans `ImageFieldGroup.tsx` | Corrigé (puis fichier supprimé en Phase 4) |
+
+**Fichiers livrés** :
+
+| Fichier | Action | Notes |
+| --- | --- | --- |
+| `media/MediaLibraryContext.tsx` | Créé | Interface `{ state, actions, meta }` |
+| `media/MediaLibraryProvider.tsx` | Créé | Contient toute la logique de `useMediaLibraryState` |
+| `media/MediaDetailsContext.tsx` | Créé | Interface typed pour le panneau de détails |
+| `media/MediaDetailsProvider.tsx` | Créé | State + actions du panneau détails |
+| `media/image-field/ImageFieldContext.tsx` | Créé | Context compound component |
+| `media/image-field/ImageFieldProvider.tsx` | Créé | Provider compound |
+| `media/image-field/ImageFieldAltText.tsx` | Créé | Renommé depuis `ImageAltTextField` |
+| `media/image-field/ImageFieldPreview.tsx` | Créé | Renommé depuis `ImagePreviewSection` |
+| `media/image-field/ImageFieldSourceActions.tsx` | Créé | Renommé depuis `ImageSourceActions` |
+| `media/image-field/index.ts` | Créé | Barrel `ImageField + sous-composants` |
+| `media/ImageField.tsx` | Créé | API compound `{ Provider, SourceActions, Preview, AltText }` |
+| `media/ImageFieldGroup.tsx` | **Supprimé** | Remplacé par compound component |
+| `MediaFoldersView.tsx` + `MediaTagsView.tsx` + `MediaLibraryContainer.tsx` + `MediaLibraryView.tsx` + `MediaDetailsPanel.tsx` + `details/MediaEditForm.tsx` + `details/MediaFileMeta.tsx` + `details/MediaPreviewSection.tsx` + `details/MediaUsageSection.tsx` + 10 consommateurs ImageField | Modifiés | Migration contexts + compound API |
+
+**10 consommateurs migrés** : `HeroSlideForm`, `AboutContentForm`, `PresentationFormFields`, `PartnerForm`, `TeamMemberForm`, `ArticleEditForm`, `ArticleNewForm`, `PressReleaseEditForm`, `PressReleaseNewForm`, `SpectacleFormImageSection`.
+
+**Branch** : `refactor/task075-media-admin-composition-patterns`, commit `55f21ce`, 36 fichiers, +1542/-636L, pushé sur origin. Build ✅ Lint ✅ tsc ✅.
+
+---
+
 ## TASK074 — Audit Feature public-site/spectacles (2026-03-04)
 
 **Context** : Audit `components/features/public-site/spectacles` contre toutes les instructions projet. 16 violations corrigées sur 4 niveaux de sévérité + pipeline `ticket_url` depuis `evenements` (hors scope). Documentation audit et plan mis à jour en v1.1 avec divergences annotées.

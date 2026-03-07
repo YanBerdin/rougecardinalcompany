@@ -17,9 +17,9 @@ export const fetchSpectaclesForSelect = cache(
         const supabase = await createClient();
         const { data, error } = await supabase
             .from("spectacles")
-            .select("id, titre")
-            .eq("active", true)
-            .order("titre", { ascending: true });
+            .select("id, title")
+            .neq("status", "archived")
+            .order("title", { ascending: true });
 
         if (error) {
             return dalError(`[ERR_SELECT_OPT_001] ${error.message}`);
@@ -27,7 +27,7 @@ export const fetchSpectaclesForSelect = cache(
 
         const options: SelectOptionDTO[] = (data ?? []).map((item) => ({
             id: Number(item.id),
-            titre: item.titre,
+            titre: item.title,
         }));
 
         return dalSuccess(options);
@@ -44,18 +44,24 @@ export const fetchEvenementsForSelect = cache(
         const supabase = await createClient();
         const { data, error } = await supabase
             .from("evenements")
-            .select("id, titre")
-            .eq("active", true)
-            .order("titre", { ascending: true });
+            .select("id, date_debut, spectacles(title)")
+            .neq("status", "cancelled")
+            .order("date_debut", { ascending: false });
 
         if (error) {
             return dalError(`[ERR_SELECT_OPT_002] ${error.message}`);
         }
 
-        const options: SelectOptionDTO[] = (data ?? []).map((item) => ({
-            id: Number(item.id),
-            titre: item.titre,
-        }));
+        const options: SelectOptionDTO[] = (data ?? []).map((item) => {
+            const spectacleTitle =
+                (item.spectacles as unknown as { title: string } | null)?.title ?? "Événement";
+            const date = new Date(item.date_debut).toLocaleDateString("fr-FR", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+            });
+            return { id: Number(item.id), titre: `${spectacleTitle} — ${date}` };
+        });
 
         return dalSuccess(options);
     }

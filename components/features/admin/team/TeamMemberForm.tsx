@@ -19,7 +19,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { ImageFieldGroup } from "@/components/features/admin/media";
+import { ImageField } from "@/components/features/admin/media";
 
 export function TeamMemberForm({
   member,
@@ -115,16 +115,18 @@ export function TeamMemberForm({
             )}
           />
 
-          {/* Photo section - Using ImageFieldGroup */}
-          <ImageFieldGroup
+          {/* Photo section */}
+          <ImageField.Provider
             form={form}
             imageUrlField="image_url"
             imageMediaIdField="photo_media_id"
             label="Photo du membre"
-            showAltText={false}
             showUpload={true}
             uploadFolder="team"
-          />
+          >
+            <ImageField.SourceActions />
+            <ImageField.Preview />
+          </ImageField.Provider>
 
           <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-2 pt-4">
             <Button

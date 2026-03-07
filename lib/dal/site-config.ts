@@ -27,8 +27,24 @@ export const fetchDisplayToggle = cache(
       .maybeSingle();
 
     if (error) {
-      console.error("[DAL] fetchDisplayToggle error:", error);
-      return { success: false, error: `[ERR_CONFIG_001] ${error.message}` };
+      const { code, message, details, hint } = error;
+      console.error("[DAL] fetchDisplayToggle error:", { code, message, details, hint });
+
+      // defense-in-depth: les display_toggle_ keys sont activées par défaut en cas d'erreur DB
+      if (key.startsWith("display_toggle_")) {
+        return {
+          success: true,
+          data: {
+            key,
+            value: { enabled: true, max_items: null },
+            description: "default: enabled (error fallback)",
+            category: "home_display",
+            updated_at: null,
+            updated_by: null,
+          } as unknown as DisplayToggleDTO,
+        };
+      }
+      return { success: false, error: `[ERR_CONFIG_001] ${message ?? details ?? code ?? "Erreur inconnue"}` };
     }
 
     // if the toggle is missing (data == null) and it's a display toggle,
@@ -69,8 +85,9 @@ export const fetchDisplayTogglesByCategory = cache(
       .order("key", { ascending: true });
 
     if (error) {
-      console.error("[DAL] fetchDisplayTogglesByCategory error:", error);
-      return { success: false, error: `[ERR_CONFIG_002] ${error.message}` };
+      const { code, message, details, hint } = error;
+      console.error("[DAL] fetchDisplayTogglesByCategory error:", { code, message, details, hint });
+      return { success: false, error: `[ERR_CONFIG_002] ${message ?? details ?? code ?? "Erreur inconnue"}` };
     }
 
     return { success: true, data: data ?? [] };
@@ -107,8 +124,9 @@ export async function updateDisplayToggle(
     .single();
 
   if (error) {
-    console.error("[DAL] updateDisplayToggle error:", error);
-    return { success: false, error: `[ERR_CONFIG_003] ${error.message}` };
+    const { code, message, details, hint } = error;
+    console.error("[DAL] updateDisplayToggle error:", { code, message, details, hint });
+    return { success: false, error: `[ERR_CONFIG_003] ${message ?? details ?? code ?? "Erreur inconnue"}` };
   }
 
   return { success: true, data };

@@ -257,15 +257,19 @@ end;$$ language plpgsql;
 alter table public.configurations_site enable row level security;
 
 -- Tout le monde peut voir les configurations publiques (selon convention de nommage)
+-- Les display toggles contrôlent la visibilité des sections publiques et doivent être
+-- lisibles par tous (anon + authenticated) pour que les pages publiques fonctionnent.
 drop policy if exists "Public site configurations are viewable by everyone" on public.configurations_site;
 create policy "Public site configurations are viewable by everyone"
 on public.configurations_site
 for select
 to anon, authenticated
 using ( 
-  -- Seules les configs dont la clé commence par 'public:' sont visibles pour tous
+  -- Configs publiques (convention de nommage 'public:')
   key like 'public:%'
-  -- Ou si l'utilisateur est admin, il peut voir toutes les configs
+  -- Display toggles (contrôlent la visibilité des sections publiques)
+  or key like 'display_toggle_%'
+  -- Admins voient toutes les configs
   or (select public.is_admin())
 );
 
@@ -291,6 +295,11 @@ on public.configurations_site
 for delete
 to authenticated
 using ( (select public.is_admin()) );
+
+-- Grants table-level access: anon et authenticated ont besoin de SELECT pour que
+-- PostgREST autorise l'accès. Le filtrage par ligne est géré par les RLS ci-dessus.
+grant select on public.configurations_site to anon, authenticated;
+grant insert, update, delete on public.configurations_site to authenticated;
 
 -- ---- LOGS AUDIT ----
 alter table public.logs_audit enable row level security;

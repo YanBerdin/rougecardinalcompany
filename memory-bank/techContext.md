@@ -1,6 +1,6 @@
 # Tech Context
 
-**Last Updated**: 2026-01-26
+**Last Updated**: 2026-03-07
 
 Versions et dépendances clés observées dans le dépôt:
 
@@ -26,6 +26,15 @@ Structure principale:
 
 | Date | Changement | Impact |
 | ------ | ------------ | -------- |
+| 2026-03-07 | BUGFIX RLS display_toggle visibility | Policy SELECT configurations_site corrigée, GRANT ajouté, 2 migrations |
+| 2026-03-07 | BUGFIX DAL press select options | 8 corrections colonnes/filtres/ordre, join spectacles(title) |
+| 2026-03-05 | TASK075 Media Admin Composition Patterns | 4 phases refactoring, 36 fichiers, Compound Components pattern |
+| 2026-03-04 | TASK074 Audit public/spectacles | Composition patterns, extraction composants, a11y |
+| 2026-03-03 | TASK072 Audit public/home | 13 corrections, extraction composants, server-only |
+| 2026-03-03 | TASK071 Audit public/contact | Clean Code, 300L max, extraction composants |
+| 2026-03-03 | TASK070 Admin Compagnie CRUD | Nouveau CRUD complet + Compound Components |
+| 2026-03-02 | Public Compagnie + Agenda Audit | Composition refactoring, DAL cache(), a11y |
+| 2026-03-01 | Admin Spectacles + Team Audit | Remediation Clean Code + SOLID DAL |
 | 2026-01-26 | Admin Agenda Management (TASK055) | Phase 1 Events + Phase 2 Lieux CRUD, BigInt serialization fix pattern |
 | 2026-01-18 | Data Retention Automation (TASK053) | First Edge Function, RGPD compliance, 5 tables configured |
 | 2026-01-17 | Analytics Dashboard (TASK031) | Admin metrics, Sentry integration, CSV/JSON export |

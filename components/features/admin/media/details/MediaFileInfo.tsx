@@ -1,12 +1,13 @@
+"use client";
+
 import { Eye } from "lucide-react";
 import { formatFileSize } from "@/lib/utils/format";
-import type { MediaItemExtendedDTO } from "@/lib/schemas/media";
+import { useMediaDetailsContext } from "../MediaDetailsContext";
 
-interface MediaFileInfoProps {
-    media: MediaItemExtendedDTO;
-}
+export function MediaFileInfo() {
+    const { meta } = useMediaDetailsContext();
+    const { media } = meta;
 
-export function MediaFileInfo({ media }: MediaFileInfoProps) {
     const fileSize = media.size_bytes != null
         ? formatFileSize(media.size_bytes)
         : "N/A";

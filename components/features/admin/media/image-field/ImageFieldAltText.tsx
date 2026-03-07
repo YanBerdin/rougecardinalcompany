@@ -1,6 +1,5 @@
 "use client";
 
-import { UseFormReturn, FieldValues, Path } from "react-hook-form";
 import {
     FormControl,
     FormDescription,
@@ -10,22 +9,16 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useImageFieldContext } from "./ImageFieldContext";
 
 const IMAGE_ALT_MAX_LENGTH = 125;
 
-interface ImageAltTextFieldProps<TForm extends FieldValues> {
-    form: UseFormReturn<TForm>;
-    altTextField: Path<TForm>;
-    altTextLabel?: string;
-    required?: boolean;
-}
+export function ImageFieldAltText() {
+    const { meta } = useImageFieldContext();
+    const { form, altTextField, altTextLabel, required } = meta;
 
-export function ImageAltTextField<TForm extends FieldValues>({
-    form,
-    altTextField,
-    altTextLabel = "Alt Text (Accessibilité)",
-    required = false,
-}: ImageAltTextFieldProps<TForm>) {
+    if (!altTextField) return null;
+
     return (
         <FormField
             control={form.control}
@@ -34,7 +27,8 @@ export function ImageAltTextField<TForm extends FieldValues>({
                 <FormItem>
                     <FormLabel>
                         {altTextLabel}{" "}
-                        {required && <span className="text-destructive">*</span>}
+                        {required && <span className="text-destructive" aria-hidden="true">*</span>}
+                        {required && <span className="sr-only">(requis)</span>}
                     </FormLabel>
                     <FormControl>
                         <Input
@@ -42,9 +36,11 @@ export function ImageAltTextField<TForm extends FieldValues>({
                             value={(field.value as string) ?? ""}
                             maxLength={IMAGE_ALT_MAX_LENGTH}
                             placeholder="Décrivez l'image pour l'accessibilité"
+                            aria-required={required}
+                            aria-describedby={`alt-counter-${altTextField}`}
                         />
                     </FormControl>
-                    <FormDescription>
+                    <FormDescription id={`alt-counter-${altTextField}`}>
                         {((field.value as string) ?? "").length}/{IMAGE_ALT_MAX_LENGTH} caractères
                     </FormDescription>
                     <FormMessage />
