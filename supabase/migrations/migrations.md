@@ -4,6 +4,58 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-03-04 - BUGFIX: RLS display toggles invisibles pour anon/authenticated
+
+#### fix(db) — Correction policy RLS SELECT `configurations_site` pour display_toggle_*
+
+**Migration**: `20260304010000_fix_rls_display_toggles_visibility.sql`
+**Commit**: à renseigner
+
+**Problème**:
+La policy RLS SELECT sur `configurations_site` n'autorisait que les clés `public:%` en lecture publique. Les display toggles (préfixe `display_toggle_*`) étaient filtrés par RLS, rendant invisibles les sections hero, about, spectacles, partners, newsletter, etc. sur les pages publiques.
+
+**Cause Root**:
+La condition `key like 'public:%'` ne couvrait pas les clés `display_toggle_*`. Les GRANT table-level étaient également manquants (corrigés par la migration compagne ci-dessous).
+
+**Correction**:
+
+```sql
+-- ❌ AVANT (seules les clés public:* visibles)
+using ( key like 'public:%' or (select public.is_admin()) )
+
+-- ✅ APRÈS (display toggles + public configs visibles)
+using (
+  key like 'public:%'
+  or key like 'display_toggle_%'
+  or (select public.is_admin())
+)
+```
+
+**Schéma déclaratif synchronisé**: ✅ `supabase/schemas/10_tables_system.sql`
+**Application**: ✅ Appliquée via `pnpm dlx supabase db push --linked` le 2026-03-04
+
+---
+
+#### fix(db) — Ajout GRANT SELECT/DML manquants sur `configurations_site`
+
+**Migration**: `20260304000000_fix_configurations_site_grants.sql`
+**Commit**: à renseigner
+
+**Problème**:
+Les GRANT table-level manquaient sur `configurations_site`, causant des erreurs PostgREST "permission denied" pour anon/authenticated avant même l'évaluation des policies RLS.
+
+**Correction**:
+
+```sql
+grant select on public.configurations_site to anon, authenticated;
+grant insert, update, delete on public.configurations_site to authenticated;
+```
+
+**Schéma déclaratif synchronisé**: ✅ `supabase/schemas/10_tables_system.sql`
+**Application**: ✅ Appliquée via `pnpm dlx supabase db push --linked` le 2026-03-04
+
+---
+
 ### 2026-02-27 - BUGFIX: RLS INSERT policy analytics_events (entity_type NULL + page_view)
 
 #### fix(db) — Correction policy RLS INSERT `analytics_events` granulaire anon/authenticated
