@@ -20,6 +20,7 @@ import { deleteHomeStatAction } from "@/lib/actions/home-stats-actions";
 import { StatForm } from "./StatForm";
 import type { HomeStatsViewProps } from "./types";
 import type { HomeStatDTO } from "@/lib/schemas/home-content";
+import { Card } from "@/components/ui/card";
 
 type StatItem = Omit<HomeStatDTO, "id"> & { id: string };
 
@@ -68,7 +69,7 @@ export function StatsView({ initialStats }: HomeStatsViewProps) {
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">
+                <p className="text-md lg:text-lg text-muted-foreground">
                     {stats.length} statistique{stats.length !== 1 ? "s" : ""}
                 </p>
                 <Button onClick={handleCreate} size="sm">
@@ -86,7 +87,7 @@ export function StatsView({ initialStats }: HomeStatsViewProps) {
                     {stats.map((stat) => (
                         <li
                             key={stat.id}
-                            className="flex items-start justify-between gap-4 rounded-lg border p-4"
+                            className="flex items-start justify-between gap-4 rounded-lg border p-4 bg-card shadow-md hover:shadow-lg hover:bg-card/40 transition-[box-shadow,transform]"
                         >
                             <div className="min-w-0 flex-1">
                                 <div className="flex items-center gap-2 flex-wrap">
@@ -101,18 +102,20 @@ export function StatsView({ initialStats }: HomeStatsViewProps) {
                                 <Button
                                     variant="outline"
                                     size="sm"
+                                    title="Modifier"
                                     onClick={() => handleEdit(stat)}
                                     aria-label={`Modifier la statistique ${stat.label}`}
                                 >
                                     <Pencil className="h-4 w-4" aria-hidden="true" />
                                 </Button>
                                 <Button
-                                    variant="outline"
+                                    variant="destructive"
                                     size="sm"
+                                    title="Supprimer"
                                     onClick={() => setDeletingId(stat.id)}
                                     aria-label={`Supprimer la statistique ${stat.label}`}
                                 >
-                                    <Trash2 className="h-4 w-4 text-destructive" aria-hidden="true" />
+                                    <Trash2 className="h-4 w-4" aria-hidden="true" />
                                 </Button>
                             </div>
                         </li>
