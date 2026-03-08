@@ -143,11 +143,12 @@ export function PressReleaseNewForm({ spectacles = [], evenements = [] }: { spec
                             <Label htmlFor="title">Titre *</Label>
                             <Input
                                 id="title"
+                                aria-describedby={form.formState.errors.title ? "title-error" : undefined}
                                 {...form.register("title")}
                                 disabled={isPending}
                             />
                             {form.formState.errors.title && (
-                                <p className="text-red-600 text-sm mt-1">
+                                <p id="title-error" role="alert" className="text-red-600 text-sm mt-1">
                                     {form.formState.errors.title.message}
                                 </p>
                             )}

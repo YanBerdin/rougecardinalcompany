@@ -159,11 +159,12 @@ export default function AppSidebar() {
           {/* SearchBar */}
           <SidebarMenuItem className="group-data-[collapsible=icon]:hidden">
             <div className="relative px-2">
-              <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
               <Input
                 placeholder="Rechercher..."
                 className="h-8 pl-8"
                 type="search"
+                aria-label="Rechercher dans la navigation"
               />
             </div>
           </SidebarMenuItem>
@@ -183,7 +184,7 @@ export default function AppSidebar() {
                   <SidebarMenuItem key={item.href} title={item.title}>
                     <SidebarMenuButton asChild isActive={isActive}>
                       <Link href={item.href}>
-                        <item.icon />
+                        <item.icon aria-hidden="true" />
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
@@ -206,7 +207,7 @@ export default function AppSidebar() {
                   <SidebarMenuItem key={item.href} title={item.title}>
                     <SidebarMenuButton asChild isActive={isActive}>
                       <Link href={item.href}>
-                        <item.icon />
+                        <item.icon aria-hidden="true" />
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
@@ -229,7 +230,7 @@ export default function AppSidebar() {
                   <SidebarMenuItem key={item.href} title={item.title}>
                     <SidebarMenuButton asChild isActive={isActive}>
                       <Link href={item.href}>
-                        <item.icon />
+                        <item.icon aria-hidden="true" />
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
@@ -250,7 +251,7 @@ export default function AppSidebar() {
                   <SidebarMenuItem key={item.href} title={item.title}>
                     <SidebarMenuButton asChild isActive={isActive}>
                       <Link href={item.href}>
-                        <item.icon />
+                        <item.icon aria-hidden="true" />
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>

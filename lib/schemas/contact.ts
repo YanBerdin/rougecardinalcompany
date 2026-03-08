@@ -24,15 +24,15 @@ export type ContactReason = z.infer<typeof ContactReasonEnum>;
  * Uses firstName/lastName split format
  */
 export const ContactMessageSchema = z.object({
-    firstName: z.string().trim().min(1).max(100),
-    lastName: z.string().trim().min(1).max(100),
-    email: z.string().email().toLowerCase(),
-    phone: z.string().trim().max(40).optional().nullable(),
+    firstName: z.string().trim().min(1, "Le prénom est requis").max(100, "Le prénom est trop long"),
+    lastName: z.string().trim().min(1, "Le nom est requis").max(100, "Le nom est trop long"),
+    email: z.string().email("L'adresse email est invalide").toLowerCase(),
+    phone: z.string().trim().max(40, "Le numéro est trop long (40 caractères max)").optional().nullable(),
     reason: ContactReasonEnum.default("autre"),
-    message: z.string().trim().min(1).max(5000),
+    message: z.string().trim().min(1, "Le message est requis").max(5000, "Le message est trop long (5000 caractères maximum)"),
     consent: z
         .boolean()
-        .refine((v) => v === true, { message: "Consent required" }),
+        .refine((v) => v === true, { message: "Vous devez accepter les conditions pour envoyer votre message." }),
 });
 
 export type ContactMessageInput = z.infer<typeof ContactMessageSchema>;

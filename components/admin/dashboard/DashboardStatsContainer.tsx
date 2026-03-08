@@ -14,7 +14,7 @@ export async function DashboardStatsContainer() {
 
   if (!result.success) {
     return (
-      <div className="text-destructive text-sm">
+      <div className="text-destructive text-sm" role="alert">
         Erreur lors du chargement des statistiques
       </div>
     );
@@ -28,31 +28,31 @@ export async function DashboardStatsContainer() {
         <StatsCard
           title="Membres de l'équipe"
           value={stats.teamCount}
-          icon={<Users className="h-4 w-4" aria-hidden />}
+          icon={<Users className="h-4 w-4" aria-hidden="true" />}
           href="/admin/team"
         />
         <StatsCard
           title="Spectacles"
           value={stats.showsCount}
-          icon={<FileText className="h-4 w-4" aria-hidden />}
+          icon={<FileText className="h-4 w-4" aria-hidden="true" />}
           href="/admin/spectacles"
         />
         <StatsCard
           title="Événements"
           value={stats.eventsCount}
-          icon={<Calendar className="h-4 w-4" aria-hidden />}
+          icon={<Calendar className="h-4 w-4" aria-hidden="true" />}
           href="/admin/agenda"
         />
         <StatsCard
           title="Médias"
           value={stats.mediaCount}
-          icon={<ImageIcon className="h-4 w-4" aria-hidden />}
+          icon={<ImageIcon className="h-4 w-4" aria-hidden="true" />}
           href="/admin/media"
         />
         <StatsCard
           title="Partenaires"
           value={stats.partnersCount}
-          icon={<Handshake className="h-4 w-4" aria-hidden />}
+          icon={<Handshake className="h-4 w-4" aria-hidden="true" />}
           href="/admin/partners"
         />
       </div>

@@ -204,9 +204,9 @@ export function MediaUploadDialog({
 
                     {/* Progress indicator for hash computation */}
                     {phase === "hashing" && (
-                        <div className="space-y-2">
+                        <div className="space-y-2" aria-live="polite" aria-atomic="true">
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Info className="h-4 w-4" />
+                                <Info className="h-4 w-4" aria-hidden="true" />
                                 <span>Vérification du fichier... {hashProgress}%</span>
                             </div>
                             <Progress value={hashProgress} className="h-2" />
@@ -215,9 +215,9 @@ export function MediaUploadDialog({
 
                     {/* Upload indicator */}
                     {phase === "uploading" && (
-                        <div className="space-y-2">
+                        <div className="space-y-2" aria-live="polite" aria-atomic="true">
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Loader2 className="h-4 w-4 animate-spin" />
+                                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
                                 <span>Téléversement en cours... {uploadProgress}%</span>
                             </div>
                             <Progress value={uploadProgress} className="h-2" />

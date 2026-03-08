@@ -67,7 +67,7 @@ function SortableSlide({ slide, index, onEdit, onDelete }: SortableSlideProps) {
                         aria-label="Glisser pour réordonner"
                         title="Glisser pour réordonner"
                     >
-                        <GripVertical className="h-10 w-5 text-muted-foreground" />
+                        <GripVertical className="h-10 w-5 text-muted-foreground" aria-hidden="true" />
                     </div>
                     <span className="max-sm:text-xs text-sm md:text-md lg:text-lg font-medium text-muted-foreground hover:brightness-125" title="Ordre d'affichage">{index + 1}</span>
                 </div>
@@ -82,7 +82,7 @@ function SortableSlide({ slide, index, onEdit, onDelete }: SortableSlideProps) {
                             size="icon"
                             onClick={() => onDelete(slide.id)}
                             title="Supprimer le slide"
-                            aria-label="Supprimer le slide"
+                            aria-label={`Supprimer le slide : ${slide.title}`}
                             className="h-9 w-9 shrink-0 hover:bg-red-100"
                         >
                             <Trash2 className="h-4 w-4" />
@@ -91,7 +91,7 @@ function SortableSlide({ slide, index, onEdit, onDelete }: SortableSlideProps) {
                             variant="outline"
                             onClick={() => onEdit(slide)}
                             title="Modifier le slide"
-                            aria-label="Modifier le slide"
+                            aria-label={`Modifier le slide : ${slide.title}`}
                             className="flex-1 texte-sm md:text-md h-9 gap-2"
                         >
                             <Pencil className="h-4 w-4 ml-2" /> Modifier

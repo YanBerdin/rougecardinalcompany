@@ -32,12 +32,12 @@ export default function CardsDashboard() {
                                 <CardDescription className="text-muted-foreground">{it.description}</CardDescription>
                             )}
                         </div>
-                        <div className="text-muted-foreground">{it.icon}</div>
+                        <div className="text-muted-foreground" aria-hidden="true">{it.icon}</div>
                     </CardHeader>
                     <CardContent>
                         <div className="flex justify-end">
                             <Button asChild variant="secondary">
-                                <Link href={it.href}>Accéder</Link>
+                                <Link href={it.href} aria-label={`Accéder à ${it.title}`}>Accéder</Link>
                             </Button>
                         </div>
                     </CardContent>

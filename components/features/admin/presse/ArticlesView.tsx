@@ -130,7 +130,7 @@ export function ArticlesView({ initialArticles }: ArticlesViewProps) {
                     variant="ghost"
                     size="sm"
                     title="Modifier"
-                    aria-label="Modifier l'article"
+                    aria-label={`Modifier l'article : ${article.title}`}
                   >
                     <Pencil className="h-4 w-4" />
                   </Button>
@@ -140,7 +140,7 @@ export function ArticlesView({ initialArticles }: ArticlesViewProps) {
                   size="icon"
                   onClick={() => requestDelete(article.id)}
                   title="Supprimer"
-                  aria-label="Supprimer l'article"
+                  aria-label={`Supprimer l'article : ${article.title}`}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -186,7 +186,7 @@ export function ArticlesView({ initialArticles }: ArticlesViewProps) {
                   </a>
                 )}
                 <Link href={`/admin/presse/articles/${article.id}/edit`}>
-                  <Button variant="ghost" size="icon" title="Modifier" aria-label="Modifier l'article">
+                  <Button variant="ghost" size="icon" title="Modifier" aria-label={`Modifier l'article : ${article.title}`}>
                     <Pencil className="h-4 w-4" />
                   </Button>
                 </Link>
@@ -195,7 +195,7 @@ export function ArticlesView({ initialArticles }: ArticlesViewProps) {
                   size="icon"
                   onClick={() => requestDelete(article.id)}
                   title="Supprimer"
-                  aria-label="Supprimer l'article"
+                  aria-label={`Supprimer l'article : ${article.title}`}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

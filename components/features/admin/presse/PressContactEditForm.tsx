@@ -74,11 +74,12 @@ export function PressContactEditForm({ contact }: PressContactEditFormProps) {
                             <Label htmlFor="prenom">Prénom *</Label>
                             <Input
                                 id="prenom"
+                                aria-describedby={form.formState.errors.prenom ? "prenom-error" : undefined}
                                 {...form.register("prenom")}
                                 disabled={isPending}
                             />
                             {form.formState.errors.prenom && (
-                                <p className="text-red-600 text-sm mt-1">
+                                <p id="prenom-error" role="alert" className="text-red-600 text-sm mt-1">
                                     {form.formState.errors.prenom.message}
                                 </p>
                             )}
@@ -88,11 +89,12 @@ export function PressContactEditForm({ contact }: PressContactEditFormProps) {
                             <Label htmlFor="nom">Nom *</Label>
                             <Input
                                 id="nom"
+                                aria-describedby={form.formState.errors.nom ? "nom-error" : undefined}
                                 {...form.register("nom")}
                                 disabled={isPending}
                             />
                             {form.formState.errors.nom && (
-                                <p className="text-red-600 text-sm mt-1">
+                                <p id="nom-error" role="alert" className="text-red-600 text-sm mt-1">
                                     {form.formState.errors.nom.message}
                                 </p>
                             )}
@@ -104,11 +106,12 @@ export function PressContactEditForm({ contact }: PressContactEditFormProps) {
                         <Input
                             id="email"
                             type="email"
+                            aria-describedby={form.formState.errors.email ? "email-error" : undefined}
                             {...form.register("email")}
                             disabled={isPending}
                         />
                         {form.formState.errors.email && (
-                            <p className="text-red-600 text-sm mt-1">
+                            <p id="email-error" role="alert" className="text-red-600 text-sm mt-1">
                                 {form.formState.errors.email.message}
                             </p>
                         )}
