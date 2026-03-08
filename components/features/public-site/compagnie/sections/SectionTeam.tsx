@@ -16,13 +16,13 @@ export function SectionTeam({ section, team = [] }: SectionRendererProps): React
                     {team.map((member, index) => (
                         <div key={index} className="flex flex-col items-center text-center animate-fade-in-up group w-full sm:w-[calc(50%-1rem)] md:w-[calc(33.333%-1.5rem)] lg:w-[calc(25%-1.5rem)] xl:w-[calc(19%-1.5rem)]" style={{ animationDelay: `${index * ANIMATION_DELAY_STEP}s` }}>
                             <div className="relative mb-6">
-                                <div className="w-32 h-32 rounded-full ring-4 ring-amber-500/20 group-hover:ring-primary transition-all duration-500 p-1.5 overflow-hidden flex items-center justify-center">
+                                <div className="w-32 h-32 rounded-full ring-4 ring-gold group-hover:ring-primary transition-all duration-500 p-1.5 overflow-hidden flex items-center justify-center">
                                         <Image src={member.image} alt={member.name} width={128} height={128} className="w-full h-full rounded-full object-cover" />
                                 </div>
                             </div>
                             <div className="space-y-1">
                                 <h3 className="text-xl font-bold tracking-tight">{member.name}</h3>
-                                {member.role && <p className="text-primary text-sm font-semibold uppercase tracking-widest">{member.role}</p>}
+                                {member.role && <p className="text-gold text-sm font-semibold uppercase tracking-widest">{member.role}</p>}
                                 {member.description && <p className="text-muted-foreground text-sm leading-relaxed max-w-[200px] mt-3 mx-auto">{member.description}</p>}
                             </div>
                         </div>
