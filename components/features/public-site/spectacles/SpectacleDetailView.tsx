@@ -158,7 +158,12 @@ export function SpectacleDetailView({
                         {/* Synopsis Column */}
                         <div className="md:col-span-3 space-y-6">
                             {/* CTA Principaux : Réserver + Agenda + Retour */}
-                            <SpectacleCTABar title={spectacle.title} ticketUrl={ticketUrl} />
+                            <SpectacleCTABar
+                                title={spectacle.title}
+                                ticketUrl={ticketUrl}
+                                                                   agendaLabel="Voir les dates"
+                                    backLabel="Tous les spectacles"
+                            />
                             <h1 id="spectacle-title" className="text-2xl md:text-3xl lg:text-4xl font-bold font-sans mb-6 animate-fade-in-up">
                                 {spectacle.title}
                             </h1>

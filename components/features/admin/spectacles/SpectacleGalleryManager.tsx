@@ -110,10 +110,15 @@ export function SpectacleGalleryManager({
             setIsPending(true);
 
             try {
+                const nextOrdre =
+                    photos.length === 0
+                        ? 0
+                        : Math.max(...photos.map((p) => p.ordre)) + 1;
+
                 const actionResult = await addGalleryPhotoAction({
                     spectacle_id: spectacleId,
                     media_id: result.id,
-                    ordre: photos.length,
+                    ordre: nextOrdre,
                     type: "gallery" as const,
                 });
 
