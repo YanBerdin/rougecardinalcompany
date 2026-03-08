@@ -1,8 +1,24 @@
 # Active Context
 
-**Current Focus (2026-03-07)**: TASK075 branch — 2 hotfixes supplémentaires : (1) DAL `admin-press-select-options.ts` aligné sur le vrai schéma DB (colonnes `title`/`status`/`date_debut` au lieu de `titre`/`active`), join spectacles pour label événements "Spectacle — date" ; (2) Fix GRANT + RLS `configurations_site` — display toggles invisibles pour anon (policy n'autorisait que `public:%`, corrigé avec `display_toggle_%`). 2 migrations hotfix appliquées en remote. Branch `refactor/task075-media-admin-composition-patterns`, commits `a307ae3` + `16e545d`.
+**Current Focus (2026-03-08)**: TASK037B — Audit accessibilité modules admin complété. 21 violations WCAG 2.2 corrigées (3 Critiques, 8 Majeurs, 10 Mineurs) : skip-link + `<main id="main-content">`, suppression breadcrumb factice, `aria-label` sur 4 champs recherche, tailles boutons ≥ 44px (`button.tsx`), `role="alert"` sur 5 conteneurs erreur, AlertDialog pour `window.confirm()` (LieuxView), `DialogDescription` (HeroSlideForm), `aria-describedby` + `role="alert"` formulaires Presse, `aria-label` contextuels CardsDashboard, `aria-hidden="true"` systématique icônes, `aria-live` états dynamiques. TASK037A (site public) validé complété via TASK072/TASK074. Branche `feat/task037b-a11y-admin-fixes`.
 
-**Last Major Updates**: ✅ BUGFIX RLS display_toggle visibility (2026-03-07) + BUGFIX DAL press select options (2026-03-07) + TASK075 Media Admin Composition Patterns (2026-03-05) + TASK074 Audit public/spectacles (2026-03-04) + BUGFIX-HOME-NEWS (2026-03-03) + TASK072 Audit public/home (2026-03-03) + TASK071 Audit public/contact (2026-03-03) + TASK070 Admin Compagnie CRUD (2026-03-03)
+**Last Major Updates**: ✅ TASK037B A11Y Admin complet (2026-03-08) + ✅ TASK037A A11Y Public (2026-03-08, via TASK072/TASK074) + BUGFIX RLS display_toggle visibility (2026-03-07) + BUGFIX DAL press select options (2026-03-07) + TASK075 Media Admin Composition Patterns (2026-03-05) + TASK074 Audit public/spectacles (2026-03-04) + BUGFIX-HOME-NEWS (2026-03-03) + TASK072 Audit public/home (2026-03-03)
+
+---
+
+## ✅ TASK037B — Audit Accessibilité Modules Admin (2026-03-08)
+
+### Summary
+
+21 violations WCAG 2.2 Level AA/AAA corrigées dans `components/admin/`, `components/features/admin/` et `app/(admin)/layout.tsx`.
+
+**3 Critiques** : C1 skip-link + `<main>` sémantique, C2 breadcrumb placeholder supprimé, C3 `aria-label` manquants sur 4 champs de recherche.
+
+**8 Majeurs** : M1 tailles boutons ≥ 44px (tous variants, `button.tsx`), M2 `aria-label` SidebarTrigger, M3 `role="alert"` sur 5 conteneurs erreur, M4 AlertDialog pour `window.confirm()`, M5 `aria-label="Menu utilisateur"` DropdownMenuTrigger, M6 `DialogDescription` HeroSlideForm, M7 `aria-describedby` + `role="alert"` formulaires Presse (3 fichiers), M8 `aria-label` contextuels boutons "Accéder".
+
+**10 Mineurs** (m1–m10) : `aria-hidden="true"` systématique icônes Lucide, normalisation shorthand, StatsCard Link label, badge sr-only "Membre inactif", `aria-label` contextuels boutons CRUD (4 views), animation translate sur `<span>` enfant (MediaCard), traduction FR erreur, `aria-live="assertive"` chargement AdminAuthRow, `aria-live="polite"` progression upload (MediaUploadDialog), `aria-label` `<header>` layout.
+
+TASK037A (site public) validé complété : C1 ShowCard overlay → TASK072, C2 emojis ContactPresseSection → module presse, autres violations → TASK074.
 
 ---
 

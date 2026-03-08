@@ -132,7 +132,7 @@ export function PressReleasesView({ initialReleases }: PressReleasesViewProps) {
                                         variant="ghost"
                                         size="icon"
                                         title="Prévisualiser"
-                                        aria-label="Prévisualiser le communiqué"
+                                        aria-label={`Prévisualiser le communiqué : ${release.title}`}
                                     >
                                         <Eye className="h-4 w-4" />
                                     </Button>
@@ -154,7 +154,7 @@ export function PressReleasesView({ initialReleases }: PressReleasesViewProps) {
                                         variant="ghost"
                                         size="icon"
                                         title="Modifier"
-                                        aria-label="Modifier le communiqué"
+                                        aria-label={`Modifier le communiqué : ${release.title}`}
                                     >
                                         <Pencil className="h-4 w-4" />
                                     </Button>
@@ -164,7 +164,7 @@ export function PressReleasesView({ initialReleases }: PressReleasesViewProps) {
                                     size="icon"
                                     onClick={() => requestDelete(release.id)}
                                     title="Supprimer"
-                                    aria-label="Supprimer le communiqué"
+                                    aria-label={`Supprimer le communiqué : ${release.title}`}
                                 >
                                     <Trash2 className="h-4 w-4" />
                                 </Button>
@@ -201,12 +201,12 @@ export function PressReleasesView({ initialReleases }: PressReleasesViewProps) {
 
                             <div className="flex gap-2">
                                 <Link href={`/admin/presse/communiques/${release.id}/preview`}>
-                                    <Button variant="ghost" size="icon" title="Prévisualiser" aria-label="Prévisualiser le communiqué">
+                                    <Button variant="ghost" size="icon" title="Prévisualiser" aria-label={`Prévisualiser le communiqué : ${release.title}`}>
                                         <Eye className="h-4 w-4" />
                                     </Button>
                                 </Link>
                                 <Link href={`/admin/presse/communiques/${release.id}/edit`}>
-                                    <Button variant="ghost" size="icon" title="Modifier" aria-label="Modifier le communiqué">
+                                    <Button variant="ghost" size="icon" title="Modifier" aria-label={`Modifier le communiqué : ${release.title}`}>
                                         <Pencil className="h-4 w-4" />
                                     </Button>
                                 </Link>
@@ -224,7 +224,7 @@ export function PressReleasesView({ initialReleases }: PressReleasesViewProps) {
                                     size="icon"
                                     onClick={() => requestDelete(release.id)}
                                     title="Supprimer"
-                                    aria-label="Supprimer le communiqué"
+                                    aria-label={`Supprimer le communiqué : ${release.title}`}
                                 >
                                     <Trash2 className="h-4 w-4" />
                                 </Button>

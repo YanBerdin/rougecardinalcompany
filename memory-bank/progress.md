@@ -1,5 +1,39 @@
 # Progress
 
+## TASK037B — Audit Accessibilité Modules Admin (2026-03-08)
+
+**Context** : Audit statique WCAG 2.2 Level AA/AAA de tous les composants admin. 21 violations corrigées (3 Critiques, 8 Majeurs, 10 Mineurs). TASK037A (site public) validé complété en parallèle via les corrections préalables de TASK072/TASK074.
+
+| Code | Sévérité | Violation | Fichier(s) |
+| ---- | -------- | --------- | ---------- |
+| C1 | 🔴 Critique | Pas de skip-link ni `<main id="main-content">` dans le layout admin | `app/(admin)/layout.tsx` |
+| C2 | 🔴 Critique | Breadcrumb placeholder "Building Your Application" factice | `app/(admin)/layout.tsx` |
+| C3 | 🔴 Critique | 4 champs de recherche sans `aria-label` (systémique) | AdminSidebar, MediaLibraryView, AuditLogFilters, MediaLibraryPicker |
+| M1 | 🟠 Majeur | Boutons < 44px (systémique, tous variants) | `components/ui/button.tsx` |
+| M2 | 🟠 Majeur | `SidebarTrigger` sans nom accessible | `app/(admin)/layout.tsx` |
+| M3 | 🟠 Majeur | 5 conteneurs d'erreur sans `role="alert"` | UsersContainer, DashboardStatsContainer, PressContactsContainer, PressReleasesContainer, ArticlesContainer |
+| M4 | 🟠 Majeur | `window.confirm()` non accessible — remplacé par AlertDialog | `LieuxView.tsx` |
+| M5 | 🟠 Majeur | DropdownMenu profil utilisateur sans `aria-label` | `AdminAuthRow.tsx` |
+| M6 | 🟠 Majeur | Dialog `HeroSlideForm` sans `DialogDescription` | `HeroSlideForm.tsx` |
+| M7 | 🟠 Majeur | Erreurs formulaires Presse sans `aria-describedby` + `role="alert"` | PressContactForm, PressReleaseForm, ArticleForm |
+| M8 | 🟠 Majeur | Boutons "Accéder" sans destination dans CardsDashboard | `CardsDashboard.tsx` |
+| m1 | 🟡 Mineur | Icônes Lucide React sans `aria-hidden="true"` (~10 fichiers) | AdminSidebar, StatsCard, TeamMemberCard, LieuxView, AdminAuthRow, etc. |
+| m2 | 🟡 Mineur | `aria-hidden` shorthand invalide → `aria-hidden="true"` | `DashboardStatsContainer.tsx` |
+| m3 | 🟡 Mineur | `<Link>` StatsCard sans `aria-label` contextuel | `StatsCard.tsx` |
+| m4 | 🟡 Mineur | Indicateur "inactif" couleur seule — badge `sr-only` ajouté | `TeamMemberCard.tsx` |
+| m5 | 🟡 Mineur | Boutons "Modifier/Supprimer" sans nom de l'entité | HeroSlidesView, PressReleasesView, PressContactsView, ArticlesView |
+| m6 | 🟡 Mineur | Animation `translate` sur élément interactif → déplacée sur `<span>` enfant | `MediaCard.tsx` |
+| m7 | 🟡 Mineur | Message d'erreur en anglais (auth) | `UsersManagementContainer.tsx` |
+| m8 | 🟡 Mineur | État de chargement auth sans `aria-live="assertive"` | `AdminAuthRow.tsx` |
+| m9 | 🟡 Mineur | Progression upload sans `aria-live="polite"` | `MediaUploadDialog.tsx` |
+| m10 | 🟡 Mineur | `<header>` layout sans `aria-label` | `app/(admin)/layout.tsx` |
+
+**TASK037A (site public)** validé complété : ShowCard overlay inaccessible (C1) → `group-focus-within:opacity-100` dans TASK072 ; emojis ContactPresseSection (C2) → `role="img"` + `aria-label` ; carousel a11y, focus management → TASK072 ; liens HTML valides, emojis génériques → TASK074.
+
+**Branche** : `feat/task037b-a11y-admin-fixes`. Build ✅ Lint ✅.
+
+---
+
 ## BUGFIX — DAL press select options + RLS display_toggle visibility (2026-03-07)
 
 **Context** : Deux bugfixes indépendants commités sur la branche TASK075.

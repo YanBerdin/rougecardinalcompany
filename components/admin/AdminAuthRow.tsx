@@ -68,10 +68,12 @@ export default function AdminAuthRow() {
 
   if (loading) {
     return (
-      <SidebarMenuButton disabled>
-        <User className="size-4" />
-        <span>Loading...</span>
-      </SidebarMenuButton>
+      <div aria-live="assertive" aria-atomic="true">
+        <SidebarMenuButton disabled>
+          <User className="size-4" aria-hidden="true" />
+          <span>Chargement...</span>
+        </SidebarMenuButton>
+      </div>
     );
   }
 
@@ -89,8 +91,8 @@ export default function AdminAuthRow() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <SidebarMenuButton>
-          <User className="size-4" />
+        <SidebarMenuButton aria-label="Menu utilisateur">
+          <User className="size-4" aria-hidden="true" />
           <div className="flex flex-col gap-0.5 text-left text-xs group-data-[collapsible=icon]:hidden">
             <span className="font-medium truncate">{user.email}</span>
             <span className="text-muted-foreground capitalize">{user.role}</span>
@@ -108,7 +110,7 @@ export default function AdminAuthRow() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>
-          <LogOut className="mr-2 size-4" />
+          <LogOut className="mr-2 size-4" aria-hidden="true" />
           Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>

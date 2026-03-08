@@ -6,8 +6,8 @@ export async function UsersManagementContainer() {
 
   if (!result.success) {
     return (
-      <div className="text-center text-destructive py-8">
-        Error loading users: {result.error}
+      <div className="text-center text-destructive py-8" role="alert">
+        Erreur lors du chargement des utilisateurs : {result.error}
       </div>
     );
   }

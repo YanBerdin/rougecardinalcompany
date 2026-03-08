@@ -6,8 +6,8 @@ export async function ArticlesContainer() {
 
     if (!result.success) {
         return (
-            <div className="text-red-600">
-                Erreur lors du chargement : {result.error}
+            <div className="text-red-600" role="alert">
+                Erreur lors du chargement : {result.error}
             </div>
         );
     }

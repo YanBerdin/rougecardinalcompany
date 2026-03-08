@@ -20,7 +20,10 @@ export function TeamMemberCard({
       className={`shadow-sm ${member.active ? "" : "ring-2 ring-yellow-300 bg-yellow-50/40"}`}
     >
       <CardHeader>
-        <CardTitle>{member.name}</CardTitle>
+        <CardTitle>
+          {member.name}
+          {!member.active && <span className="sr-only"> (Membre inactif)</span>}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex items-center gap-4">

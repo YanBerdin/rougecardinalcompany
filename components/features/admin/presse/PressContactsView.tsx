@@ -158,7 +158,7 @@ export function PressContactsView({ initialContacts }: PressContactsViewProps) {
                   variant="ghost"
                   size="icon"
                   title="Modifier"
-                  aria-label="Modifier le contact"
+                  aria-label={`Modifier le contact : ${contact.prenom} ${contact.nom}`}
                 >
                   <Pencil className="h-4 w-4 mr-1" />
                 </Button>
@@ -168,7 +168,7 @@ export function PressContactsView({ initialContacts }: PressContactsViewProps) {
                 size="icon"
                 onClick={() => requestDelete(contact.id)}
                 title="Supprimer"
-                aria-label="Supprimer le contact"
+                aria-label={`Supprimer le contact : ${contact.prenom} ${contact.nom}`}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -231,7 +231,7 @@ export function PressContactsView({ initialContacts }: PressContactsViewProps) {
                   aria-label={contact.actif ? "Désactiver le contact" : "Activer le contact"}
                 />
                 <Link href={`/admin/presse/contacts/${contact.id}/edit`}>
-                  <Button variant="ghost" size="icon" title="Modifier" aria-label="Modifier le contact">
+                  <Button variant="ghost" size="icon" title="Modifier" aria-label={`Modifier le contact : ${contact.prenom} ${contact.nom}`}>
                     <Pencil className="h-4 w-4" />
                   </Button>
                 </Link>
@@ -240,7 +240,7 @@ export function PressContactsView({ initialContacts }: PressContactsViewProps) {
                   size="icon"
                   onClick={() => requestDelete(contact.id)}
                   title="Supprimer"
-                  aria-label="Supprimer le contact"
+                  aria-label={`Supprimer le contact : ${contact.prenom} ${contact.nom}`}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

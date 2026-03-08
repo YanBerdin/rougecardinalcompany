@@ -129,7 +129,7 @@ export function AuditLogFilters({
             <div className="flex gap-2 sm:col-span-2 md:col-span-3 lg:col-span-3">
                 <Input
                     placeholder="Rechercher (record_id, table)..."
-                    title="Rechercher dans les logs"
+                    aria-label="Rechercher dans les logs d'audit"
                     value={localSearch}
                     onChange={(e) => setLocalSearch(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleApplySearch()}

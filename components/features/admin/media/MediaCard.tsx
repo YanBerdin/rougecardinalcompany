@@ -66,8 +66,8 @@ export function MediaCard({
       ref={cardRef}
       className={cn(
         "group relative overflow-hidden rounded-lg border bg-card cursor-pointer",
-        "transition-all duration-200 ease-in-out",
-        "hover:shadow-lg hover:-translate-y-1",
+          "transition-shadow duration-200 ease-in-out",
+          "hover:shadow-lg",
         "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
         selectionMode && "hover:border-primary",
         isSelected && "ring-2 ring-primary border-primary"
@@ -79,13 +79,15 @@ export function MediaCard({
       aria-label={`${isSelected ? "Désélectionner" : "Sélectionner"} ${media.filename}`}
       aria-pressed={isSelected}
     >
-      <MediaCardThumbnail
-        media={media}
-        isVisible={isVisible}
-        isSelected={isSelected}
-        selectionMode={selectionMode}
-      />
-      <MediaCardFooter media={media} />
+      <span className="block transition-transform duration-200 ease-in-out group-hover:-translate-y-1">
+        <MediaCardThumbnail
+          media={media}
+          isVisible={isVisible}
+          isSelected={isSelected}
+          selectionMode={selectionMode}
+        />
+        <MediaCardFooter media={media} />
+      </span>
     </div>
   );
 }

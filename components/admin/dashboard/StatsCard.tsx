@@ -15,7 +15,7 @@ interface StatsCardProps {
 
 export function StatsCard({ title, value, icon, href }: StatsCardProps) {
   return (
-    <Link href={href}>
+    <Link href={href} aria-label={`Voir les statistiques : ${title}`}>
       <Card className="hover:bg-accent transition-colors cursor-pointer">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">{title}</CardTitle>

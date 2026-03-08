@@ -3,6 +3,7 @@
 import {
     Dialog,
     DialogContent,
+    DialogDescription,
     DialogHeader,
     DialogTitle,
     DialogFooter,
@@ -89,6 +90,9 @@ export function HeroSlideForm({ open, onClose, onSuccess, slide }: HeroSlideForm
             <DialogContent className="w-[calc(100vw-2rem)] sm:w-full sm:max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-lg">
                 <DialogHeader>
                     <DialogTitle className="text-lg sm:text-xl">{dialogTitle}</DialogTitle>
+                    <DialogDescription className="sr-only">
+                        Formulaire de création ou modification d&apos;un hero slide
+                    </DialogDescription>
                 </DialogHeader>
 
                 <Form {...form}>
