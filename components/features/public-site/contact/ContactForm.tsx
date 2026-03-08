@@ -224,6 +224,7 @@ export function ContactForm({ onSuccess }: ContactFormProps): React.JSX.Element 
           <Button
             type="submit"
             className="w-full"
+            disabled={isLoading || !formData.consent}
             aria-busy={isLoading}
           >
             {isLoading ? (
