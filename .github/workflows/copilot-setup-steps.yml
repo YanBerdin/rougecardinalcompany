@@ -37,3 +37,6 @@ jobs:
     # Customize this step as needed
     - name: Build application
       run: pnpm build
+      env:
+        # Skip T3 Env validation in CI (no real secrets needed for build check)
+        SKIP_ENV_VALIDATION: "1"
