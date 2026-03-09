@@ -11,7 +11,6 @@
         "build/**": true,
         "next-env.d.ts": true,
         "**/doc-perso/**": true,
-        // "**/doc/**": true
     },
     "workbench.colorCustomizations": {
         "editorBracketHighlight.foreground1": "#fac928",
@@ -48,8 +47,4 @@
             ]
         }
     },
-    "markdown.validate.ignoredLinks": [
-        "lib/dal/analytics.ts",
-        "components/features/admin/team/TeamManagementContainer.tsx"
-    ]
 }

@@ -399,6 +399,7 @@ pnpm eslint e2e/
 ```
 
 `e2e/tsconfig.json` minimal :
+
 ```json
 {
   "compilerOptions": {
