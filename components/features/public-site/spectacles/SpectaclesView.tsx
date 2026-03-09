@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SpectaclesViewProps } from "./types";
 import type { CurrentShow, ArchivedShow } from "@/lib/schemas/spectacles";
+import { FALLBACK_SPECTACLE_IMAGE } from "./constants";
 
 const MAX_INITIAL_ARCHIVED_SHOWS = 6;
 
@@ -57,7 +58,7 @@ export function SpectaclesView({
                 <div className="relative aspect-[3/4] overflow-hidden rounded-lg shadow-md">
                   <Link href={getSpectacleUrl(show)} className="block absolute inset-0 z-0">
                     <Image
-                      src={show.image || "/opengraph-image.png"}
+                      src={show.image || FALLBACK_SPECTACLE_IMAGE}
                       alt={`Affiche du spectacle ${show.title}`}
                       fill
                       className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -139,7 +140,7 @@ export function SpectaclesView({
                 <Link href={getSpectacleUrl(show)} className="block">
                   <div className="relative aspect-[2/3] overflow-hidden rounded-lg shadow-md">
                     <Image
-                      src={show.image || "/opengraph-image.png"}
+                      src={show.image || FALLBACK_SPECTACLE_IMAGE}
                       alt={`Affiche du spectacle ${show.title}`}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-105"

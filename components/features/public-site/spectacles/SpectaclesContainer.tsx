@@ -1,5 +1,6 @@
 import { SpectaclesView } from "./SpectaclesView";
 import { fetchAllSpectacles, fetchTicketUrlsForSpectacles } from "@/lib/dal/spectacles";
+import { FALLBACK_SPECTACLE_IMAGE } from "./constants";
 
 const MAX_CURRENT_SHOWS = 6;
 
@@ -24,7 +25,7 @@ export async function SpectaclesContainer() {
         s.duration_minutes != null ? `${s.duration_minutes} min` : "—",
       cast: s.casting ?? 0,
       premiere: s.premiere ?? "",
-      image: s.image_url ?? "/opengraph-image.png",
+      image: s.image_url ?? FALLBACK_SPECTACLE_IMAGE,
       status: s.status ?? "—",
       awards: s.awards ?? [],
       ticketUrl: ticketUrls.get(s.id) ?? null,
@@ -40,7 +41,7 @@ export async function SpectaclesContainer() {
       description: s.short_description ?? "",
       genre: s.genre ?? "—",
       premiere: s.premiere ?? undefined,
-      image: s.image_url ?? "/opengraph-image.png",
+      image: s.image_url ?? FALLBACK_SPECTACLE_IMAGE,
       awards: s.awards ?? [],
     }));
 

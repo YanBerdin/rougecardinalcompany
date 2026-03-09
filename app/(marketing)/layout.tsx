@@ -23,9 +23,16 @@ export default function MarketingLayout({
 }) {
   return (
     <div className="min-h-screen flex flex-col marketing-content">
+      {/* Skip link — WCAG 2.4.1 : contourner la navigation répétée */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-background focus:text-foreground focus:ring-2 focus:ring-ring"
+      >
+        Aller au contenu principal
+      </a>
       <PageViewTracker />
       <Header />
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         {children}
       </main>
       <Footer />

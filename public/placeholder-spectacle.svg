@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" role="img" aria-label="Image du spectacle non disponible">
+  <title>Image du spectacle non disponible</title>
+
+  <!-- Fond sombre -->
+  <rect width="300" height="400" fill="#1a1a2e"/>
+
+  <!-- Rideau gauche -->
+  <path d="M0 0 C30 60 20 130 35 200 C20 270 30 340 0 400 L0 0 Z" fill="#6b1f2a" opacity="0.85"/>
+  <!-- Plis rideau gauche -->
+  <path d="M10 0 C25 70 15 140 28 200 C15 260 22 330 8 400" fill="none" stroke="#8b2535" stroke-width="1.5" opacity="0.5"/>
+  <path d="M22 0 C32 65 25 135 36 200 C26 265 30 330 20 400" fill="none" stroke="#8b2535" stroke-width="1" opacity="0.4"/>
+
+  <!-- Rideau droit -->
+  <path d="M300 0 C270 60 280 130 265 200 C280 270 270 340 300 400 L300 0 Z" fill="#6b1f2a" opacity="0.85"/>
+  <!-- Plis rideau droit -->
+  <path d="M290 0 C275 70 285 140 272 200 C285 260 278 330 292 400" fill="none" stroke="#8b2535" stroke-width="1.5" opacity="0.5"/>
+  <path d="M278 0 C268 65 275 135 264 200 C274 265 270 330 280 400" fill="none" stroke="#8b2535" stroke-width="1" opacity="0.4"/>
+
+  <!-- Scène — plancher -->
+  <rect x="35" y="310" width="230" height="10" rx="2" fill="#2d1f12" opacity="0.9"/>
+  <!-- Rebord scène -->
+  <rect x="30" y="318" width="240" height="6" rx="1" fill="#3d2a18" opacity="0.7"/>
+
+  <!-- Silhouette acteur central -->
+  <!-- Corps -->
+  <ellipse cx="150" cy="250" rx="22" ry="38" fill="#0d0d1a" opacity="0.7"/>
+  <!-- Tête -->
+  <circle cx="150" cy="198" r="16" fill="#0d0d1a" opacity="0.7"/>
+  <!-- Bras gauche levé -->
+  <line x1="128" y1="228" x2="108" y2="196" stroke="#0d0d1a" stroke-width="8" stroke-linecap="round" opacity="0.7"/>
+  <!-- Bras droit baissé -->
+  <line x1="172" y1="232" x2="190" y2="268" stroke="#0d0d1a" stroke-width="8" stroke-linecap="round" opacity="0.7"/>
+
+  <!-- Éclairage scénique (halo) -->
+  <ellipse cx="150" cy="280" rx="80" ry="30" fill="#f5c518" opacity="0.07"/>
+  <ellipse cx="150" cy="240" rx="55" ry="80" fill="#f5c518" opacity="0.04"/>
+
+  <!-- Rampe de lumières (en haut) -->
+  <rect x="40" y="14" width="220" height="8" rx="3" fill="#2a2a3a"/>
+  <circle cx="70" cy="18" r="5" fill="#f5c518" opacity="0.6"/>
+  <circle cx="100" cy="18" r="5" fill="#f5c518" opacity="0.6"/>
+  <circle cx="130" cy="18" r="5" fill="#f5c518" opacity="0.6"/>
+  <circle cx="160" cy="18" r="5" fill="#f5c518" opacity="0.6"/>
+  <circle cx="190" cy="18" r="5" fill="#f5c518" opacity="0.6"/>
+  <circle cx="220" cy="18" r="5" fill="#f5c518" opacity="0.6"/>
+
+  <!-- Texte indicatif -->
+  <text x="150" y="368" font-family="Georgia, serif" font-size="11" fill="#9a9ab0" text-anchor="middle" opacity="0.7">
+    Image non disponible
+  </text>
+</svg>
