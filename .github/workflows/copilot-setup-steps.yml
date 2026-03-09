@@ -38,5 +38,12 @@ jobs:
     - name: Build application
       run: pnpm build
       env:
-        # Skip T3 Env validation in CI (no real secrets needed for build check)
+        # Skip T3 Env validation + provide dummy values so SDK constructors don't throw
         SKIP_ENV_VALIDATION: "1"
+        NEXT_PUBLIC_SITE_URL: "https://placeholder.example.com"
+        NEXT_PUBLIC_SUPABASE_URL: "https://placeholder.supabase.co"
+        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY: "placeholder_anon_key"
+        SUPABASE_SECRET_KEY: "placeholder_secret_key"
+        RESEND_API_KEY: "re_placeholder_key"
+        EMAIL_FROM: "noreply@placeholder.example.com"
+        EMAIL_CONTACT: "contact@placeholder.example.com"
