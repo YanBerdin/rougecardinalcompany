@@ -323,42 +323,21 @@ comment on table public.logs_audit is
 Direct user INSERT blocked to prevent log falsification. 
 14 tables use trg_audit trigger for automatic logging.';
 
--- Seuls les super-admins peuvent modifier/supprimer les logs (rare)
+-- Only admins can modify audit logs (exceptional maintenance only)
+-- Note: UPDATE/DELETE on audit logs should be extremely rare and audited separately
 drop policy if exists "Super admins can update audit logs" on public.logs_audit;
-create policy "Super admins can update audit logs"
+drop policy if exists "Admins can update audit logs" on public.logs_audit;
+create policy "Admins can update audit logs"
 on public.logs_audit
 for update
 to authenticated
-using ( 
-  (select public.is_admin()) 
-  and exists (
-    select 1 
-    from public.profiles as p 
-    where p.user_id = (select auth.uid()) 
-      and p.role = 'super_admin'
-  )
-)
-with check ( 
-  (select public.is_admin()) 
-  and exists (
-    select 1 
-    from public.profiles as p 
-    where p.user_id = (select auth.uid()) 
-      and p.role = 'super_admin'
-  )
-);
+using ( (select public.is_admin()) )
+with check ( (select public.is_admin()) );
 
 drop policy if exists "Super admins can delete audit logs" on public.logs_audit;
-create policy "Super admins can delete audit logs"
+drop policy if exists "Admins can delete audit logs" on public.logs_audit;
+create policy "Admins can delete audit logs"
 on public.logs_audit
 for delete
 to authenticated
-using ( 
-  (select public.is_admin()) 
-  and exists (
-    select 1 
-    from public.profiles as p 
-    where p.user_id = (select auth.uid()) 
-      and p.role = 'super_admin'
-  )
-);
+using ( (select public.is_admin()) );

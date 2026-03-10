@@ -37,7 +37,7 @@ import { ROLE_LABELS } from "./types";
 
 const roleDescriptions = {
   user: "Accès en lecture seule au contenu public",
-  editor: "Peut créer et modifier du contenu",
+  editor: "Accès en lecture seule (permissions éditoriales à venir)",
   admin: "Accès complet à l'administration",
 } as const;
 

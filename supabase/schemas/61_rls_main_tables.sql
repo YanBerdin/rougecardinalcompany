@@ -60,14 +60,7 @@ create policy "Admins can create spectacles"
 on public.spectacles
 for insert
 to authenticated
-with check (
-  exists (
-    select 1
-    from public.profiles
-    where user_id = (select auth.uid())
-    and role = 'admin'
-  )
-);
+with check ( (select public.is_admin()) );
 
 drop policy if exists "Owners or admins can update spectacles" on public.spectacles;
 create policy "Owners or admins can update spectacles"
@@ -75,22 +68,12 @@ on public.spectacles
 for update
 to authenticated
 using (
-  (created_by = (select auth.uid()))
-  or exists (
-    select 1
-    from public.profiles
-    where user_id = (select auth.uid())
-    and role = 'admin'
-  )
+  created_by = (select auth.uid())
+  or (select public.is_admin())
 )
 with check (
-  (created_by = (select auth.uid()))
-  or exists (
-    select 1
-    from public.profiles
-    where user_id = (select auth.uid())
-    and role = 'admin'
-  )
+  created_by = (select auth.uid())
+  or (select public.is_admin())
 );
 
 drop policy if exists "Owners or admins can delete spectacles" on public.spectacles;
@@ -99,13 +82,8 @@ on public.spectacles
 for delete
 to authenticated
 using (
-  (created_by = (select auth.uid()))
-  or exists (
-    select 1
-    from public.profiles
-    where user_id = (select auth.uid())
-    and role = 'admin'
-  )
+  created_by = (select auth.uid())
+  or (select public.is_admin())
 );
 
 -- ---- EVENEMENTS ----
