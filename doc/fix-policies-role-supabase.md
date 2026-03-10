@@ -49,7 +49,7 @@ La section « Analytics, audit, rétention » de l'audit mentionnait correctemen
 ### Les 4 bugs sont correctement corrigés dans le code
 
 | Bug | Fichier | Statut | Conformité instructions |
-|-----|---------|--------|------------------------|
+| ----- | --------- | -------- | ------------------------ |
 | **P0** — RESTRICTIVE articles_presse | 08_table_articles_presse.sql | Corrigé | 9/10 |
 | **P1-a** — `super_admin` logs_audit | 10_tables_system.sql | Corrigé | 10/10 |
 | **P1-b** — Inline subquery spectacles | 61_rls_main_tables.sql | Corrigé | 9/10 |
@@ -89,7 +89,7 @@ MIG-007  comment on table présent                   ✅ articles_presse + logs_
 **5 tables combinent les rôles** dans une même SELECT policy :
 
 | Table | Ligne | Policy |
-|-------|-------|--------|
+| ------- | ------- | -------- |
 | `medias` | 61_rls_main_tables.sql | `to anon, authenticated` |
 | `spectacles` | 61_rls_main_tables.sql | `to anon, authenticated` |
 | `evenements` | 61_rls_main_tables.sql | `to anon, authenticated` |
@@ -102,7 +102,7 @@ MIG-007  comment on table présent                   ✅ articles_presse + logs_
 - `media_folders` : 61_rls_main_tables.sql — idem
 
 **Impact performance** : Dans les policies `spectacles` et `partners`, `(select public.is_admin())` est évalué inutilement pour `anon` (toujours `false`). Séparer les policies permettrait à PostgreSQL de sauter cette évaluation, conformément à la recommandation Supabase :
-> *"This prevents the policy from running for any anon users, since the execution stops at the to authenticated step."*
+> **"This prevents the policy from running for any anon users, since the execution stops at the to authenticated step."**
 
 **Exemple de correction** pour `spectacles` :
 
@@ -144,7 +144,7 @@ Le fichier 08_table_articles_presse.sql contient deux NOTE indiquant que `GRANT 
 ### Actions recommandées
 
 | Priorité | Action | Fichier | Effort |
-|----------|--------|---------|--------|
+| ---------- | -------- | --------- | -------- |
 | P1 | Séparer `to anon, authenticated` en policies distinctes (5 tables) | 61_rls_main_tables.sql + 08_table_articles_presse.sql | 20 min |
 | P2 | Vérifier que les grants par défaut couvrent la vue `articles_presse_public` | Schema ou migration | 5 min |
 
