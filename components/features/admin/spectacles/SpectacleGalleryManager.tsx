@@ -134,7 +134,7 @@ export function SpectacleGalleryManager({
                 setIsPending(false);
             }
         },
-        [spectacleId, photos.length, fetchPhotos],
+        [spectacleId, photos, fetchPhotos],
     );
 
     // ---------- Delete photo ----------
