@@ -101,7 +101,7 @@ DO UPDATE SET
 
 **Résultat attendu** :
 
-```
+```bash
 INSERT 0 1
 -- ou --
 UPDATE 1
@@ -129,7 +129,7 @@ WHERE user_id = '4ea792b9-4cd9-4363-98aa-641fad96ee16';
 **Résultat attendu** :
 
 | id | user_id | display_name | role | created_at | updated_at |
-|----|---------|--------------|------|------------|------------|
+| ---- | --------- | -------------- | ------ | ------------ | ------------ |
 | 123 | 4ea792b9... | Prénom Nom | admin | 2025-11-16 10:30:00 | 2025-11-16 10:30:00 |
 
 ---
@@ -184,7 +184,7 @@ pnpm exec tsx scripts/verify-admin-status.ts
 
 **Résultat attendu** :
 
-```
+```bash
 ✅ Utilisateur authentifié: utilisateur@example.com
 📝 UUID: 4ea792b9-4cd9-4363-98aa-641fad96ee16
 🔐 Résultat is_admin(): ✅ TRUE (Admin)
