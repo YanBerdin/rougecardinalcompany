@@ -4,6 +4,93 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-03-10 - BUGFIX: 4 violations RLS (RESTRICTIVE, super_admin mort, subquery inline, InviteUserForm)
+
+#### fix(rls) — P0: Policy AS RESTRICTIVE bloquant les articles de presse pour les authenticated non-admins
+
+**Migration**: `20260310120000_fix_rls_policy_bugs.sql`
+**Schéma déclaratif synchronisé**: ✅ `supabase/schemas/08_table_articles_presse.sql`
+
+**Problème**:
+La policy `"Admins can view all press articles"` (SELECT) sur `articles_presse` était déclarée `AS RESTRICTIVE`. En PostgreSQL, une policy RESTRICTIVE fonctionne en AND avec toutes les autres policies — elle doit donc être satisfaite pour tout accès. Résultat : les utilisateurs `authenticated` non-admin ne pouvaient pas lire les articles publiés, car la policy RESTRICTIVE échouait pour eux, neutralisant la policy publique.
+
+**Correction**:
+
+```sql
+-- ❌ AVANT
+create policy "Admins can view all press articles" on public.articles_presse
+AS RESTRICTIVE for select to authenticated using ( (select public.is_admin()) );
+
+-- ✅ APRÈS (PERMISSIVE — OR avec la policy anon, pas AND)
+create policy "Admins can view all press articles" on public.articles_presse
+for select to authenticated using ( (select public.is_admin()) );
+```
+
+**Application**: ✅ Appliquée via `pnpm dlx supabase db push --linked` le 2026-03-10
+
+---
+
+#### fix(rls) — P1-a: Policies "super_admin" mortes sur logs_audit (rôle inexistant)
+
+**Migration**: `20260310120000_fix_rls_policy_bugs.sql`
+**Schéma déclaratif synchronisé**: ✅ `supabase/schemas/10_tables_system.sql`
+
+**Problème**:
+Deux policies sur `logs_audit` utilisaient `role = 'super_admin'` pour filtrer les droits UPDATE/DELETE. Or, la contrainte `profiles_role_check` n'autorise que `user`, `editor`, `admin` — `super_admin` ne peut jamais exister. Ces policies étaient donc en pratique des règles mortes, laissant un accès non contrôlé.
+
+**Correction**:
+
+```sql
+-- ❌ AVANT — rôle impossible
+create policy "Super admins can update/delete audit logs"
+  on public.logs_audit for update/delete to authenticated
+  using ( (select auth.jwt()) ->> 'role' = 'super_admin' );
+
+-- ✅ APRÈS — is_admin() correspondant au modèle réel
+create policy "Admins can update audit logs" on public.logs_audit
+  for update to authenticated using ( (select public.is_admin()) )
+  with check ( (select public.is_admin()) );
+create policy "Admins can delete audit logs" on public.logs_audit
+  for delete to authenticated using ( (select public.is_admin()) );
+```
+
+**Application**: ✅ Appliquée via `pnpm dlx supabase db push --linked` le 2026-03-10
+
+---
+
+#### fix(rls) — P1-b: Inconsistance is_admin() dans les policies spectacles (subquery inline)
+
+**Migration**: `20260310120000_fix_rls_policy_bugs.sql`
+**Schéma déclaratif synchronisé**: ✅ `supabase/schemas/61_rls_main_tables.sql`
+
+**Problème**:
+Les policies INSERT/UPDATE/DELETE sur `spectacles` utilisaient un subquery inline `exists(select 1 from public.profiles where id = (select auth.uid()) and role = 'admin')` au lieu de la fonction centralisée `(select public.is_admin())`. Inconsistance avec le reste du projet + performance non optimisée.
+
+**Correction**:
+
+```sql
+-- ❌ AVANT — subquery inline dupliqué
+using ( exists(select 1 from public.profiles where id = (select auth.uid()) and role = 'admin') )
+
+-- ✅ APRÈS — fonction centralisée
+using ( (select public.is_admin()) )
+with check ( (select public.is_admin()) )
+-- et pour INSERT/UPDATE auteur :
+with check ( (select auth.uid()) = auteur_id or (select public.is_admin()) )
+```
+
+**Application**: ✅ Appliquée via `pnpm dlx supabase db push --linked` le 2026-03-10
+
+---
+
+#### fix(ui) — P2: Description rôle "editor" trompeuse dans InviteUserForm (hors migration)
+
+**Fichier**: `components/features/admin/users/InviteUserForm.tsx`
+**Problème**: La description affichée pour le rôle `editor` indiquait des permissions éditoriales inexistantes en base (la contrainte RLS reconnaît uniquement `role = 'admin'` via `is_admin()`).
+**Correction**: Description mise à jour → `"Accès en lecture seule (permissions éditoriales à venir)"`.
+
+---
+
 ### 2026-03-04 - BUGFIX: RLS display toggles invisibles pour anon/authenticated
 
 #### fix(db) — Correction policy RLS SELECT `configurations_site` pour display_toggle_*

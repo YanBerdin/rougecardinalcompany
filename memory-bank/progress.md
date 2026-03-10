@@ -1,5 +1,18 @@
 # Progress
 
+## BUGFIX — 4 violations RLS policy (2026-03-10)
+
+**Migration** : `20260310120000_fix_rls_policy_bugs.sql` · **Commit** : `8a42a4f` · **Déployé** : ✅ cloud
+
+| Code | Sévérité | Violation | Fichier(s) corrigé(s) |
+| ---- | -------- | --------- | --------------------- |
+| P0 | 🔴 Critique | Policy `AS RESTRICTIVE` sur `articles_presse` bloquait tous les `authenticated` non-admin | `08_table_articles_presse.sql` |
+| P1-a | 🟠 Majeur | Policies `super_admin` mortes (rôle inexistant) sur `logs_audit` UPDATE + DELETE | `10_tables_system.sql` |
+| P1-b | 🟠 Majeur | Subquery inline `exists(... role = 'admin')` au lieu de `(select public.is_admin())` dans `spectacles` | `61_rls_main_tables.sql` |
+| P2 | 🟡 Mineur | Description rôle `editor` trompeuse dans `InviteUserForm.tsx` | `InviteUserForm.tsx` |
+
+---
+
 ## TASK037B — Audit Accessibilité Modules Admin (2026-03-08)
 
 **Context** : Audit statique WCAG 2.2 Level AA/AAA de tous les composants admin. 21 violations corrigées (3 Critiques, 8 Majeurs, 10 Mineurs). TASK037A (site public) validé complété en parallèle via les corrections préalables de TASK072/TASK074.

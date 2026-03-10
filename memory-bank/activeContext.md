@@ -1,8 +1,26 @@
 # Active Context
 
-**Current Focus (2026-03-08)**: TASK037B — Audit accessibilité modules admin complété. 21 violations WCAG 2.2 corrigées (3 Critiques, 8 Majeurs, 10 Mineurs) : skip-link + `<main id="main-content">`, suppression breadcrumb factice, `aria-label` sur 4 champs recherche, tailles boutons ≥ 44px (`button.tsx`), `role="alert"` sur 5 conteneurs erreur, AlertDialog pour `window.confirm()` (LieuxView), `DialogDescription` (HeroSlideForm), `aria-describedby` + `role="alert"` formulaires Presse, `aria-label` contextuels CardsDashboard, `aria-hidden="true"` systématique icônes, `aria-live` états dynamiques. TASK037A (site public) validé complété via TASK072/TASK074. Branche `feat/task037b-a11y-admin-fixes`.
+**Current Focus (2026-03-10)**: BUGFIX 4 violations RLS (P0/P1-a/P1-b/P2) commitées et déployées via `20260310120000_fix_rls_policy_bugs.sql`. Contexte précédent — TASK037B: Audit accessibilité modules admin complété. 21 violations WCAG 2.2 corrigées (3 Critiques, 8 Majeurs, 10 Mineurs) : skip-link + `<main id="main-content">`, suppression breadcrumb factice, `aria-label` sur 4 champs recherche, tailles boutons ≥ 44px (`button.tsx`), `role="alert"` sur 5 conteneurs erreur, AlertDialog pour `window.confirm()` (LieuxView), `DialogDescription` (HeroSlideForm), `aria-describedby` + `role="alert"` formulaires Presse, `aria-label` contextuels CardsDashboard, `aria-hidden="true"` systématique icônes, `aria-live` états dynamiques. TASK037A (site public) validé complété via TASK072/TASK074. Branche `feat/task037b-a11y-admin-fixes`.
 
-**Last Major Updates**: ✅ TASK037B A11Y Admin complet (2026-03-08) + ✅ TASK037A A11Y Public (2026-03-08, via TASK072/TASK074) + BUGFIX RLS display_toggle visibility (2026-03-07) + BUGFIX DAL press select options (2026-03-07) + TASK075 Media Admin Composition Patterns (2026-03-05) + TASK074 Audit public/spectacles (2026-03-04) + BUGFIX-HOME-NEWS (2026-03-03) + TASK072 Audit public/home (2026-03-03)
+**Last Major Updates**: ✅ BUGFIX 4 RLS policy bugs (P0-RESTRICTIVE/P1a-super_admin/P1b-subquery/P2-UI) commité+déployé (2026-03-10) + ✅ TASK037B A11Y Admin complet (2026-03-08) + ✅ TASK037A A11Y Public (2026-03-08, via TASK072/TASK074) + BUGFIX RLS display_toggle visibility (2026-03-07) + BUGFIX DAL press select options (2026-03-07) + TASK075 Media Admin Composition Patterns (2026-03-05) + TASK074 Audit public/spectacles (2026-03-04) + BUGFIX-HOME-NEWS (2026-03-03) + TASK072 Audit public/home (2026-03-03)
+
+---
+
+## BUGFIX — 4 violations RLS policy (2026-03-10)
+
+### Summary
+
+Migration `20260310120000_fix_rls_policy_bugs.sql` commitée (`8a42a4f`) et déployée via `pnpm dlx supabase db push --linked`.
+
+**P0**: Policy `AS RESTRICTIVE` sur `articles_presse` bloquait tous les utilisateurs `authenticated` non-admin — aucun article de presse lisible. Retrait du `AS RESTRICTIVE`, policy repassée en PERMISSIVE implicite.
+
+**P1-a**: Policies `super_admin` sur `logs_audit` (UPDATE + DELETE) référençaient un rôle inexistant — la contrainte `profiles_role_check` n'autorise que `user | editor | admin`. Remplacées par `(select public.is_admin())`.
+
+**P1-b**: Policies `spectacles` (INSERT/UPDATE/DELETE) utilisaient `exists(select 1 from public.profiles where id = auth.uid() and role = 'admin')` au lieu du helper `(select public.is_admin())`. Inconsistance avec le reste du projet, sous-performance. Remplacées par le pattern standard.
+
+**P2**: Description rôle `editor` dans `InviteUserForm.tsx` laissait croire à des permissions d'édition inexistantes en DB → `"Accès en lecture seule (permissions éditoriales à venir)"`.
+
+Schémas déclaratifs synchronisés : `08_table_articles_presse.sql`, `10_tables_system.sql`, `61_rls_main_tables.sql`.
 
 ---
 
