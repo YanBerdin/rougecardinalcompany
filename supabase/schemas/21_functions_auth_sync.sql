@@ -36,6 +36,15 @@ begin
     raise exception 'User ID cannot be null';
   end if;
 
+  -- Skip profile creation for admin-managed users: the admin code (createUserProfileWithRole)
+  -- will INSERT the profile with the authenticated client so audit_trigger captures
+  -- the real admin user instead of "Système".
+  -- We check _admin_managed flag in metadata because invited_at may not be set
+  -- at INSERT time by generateLink.
+  if (new.raw_user_meta_data->>'_admin_managed') = 'true' then
+    return new;
+  end if;
+
   -- Construction sécurisée du display_name
   profile_display_name := coalesce(
     new.raw_user_meta_data->>'display_name',

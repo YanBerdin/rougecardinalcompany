@@ -4,6 +4,55 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-03-12 - FIX: Attribution audit "Système" pour les utilisateurs créés par admin
+
+3 migrations déployées pour corriger l'attribution "Système" dans les logs d'audit lors de la création d'utilisateurs par un admin.
+
+#### fix(trigger) — Correct fix : flag `_admin_managed` dans `handle_new_user()`
+
+**Migration** : `20260312140000_fix_handle_new_user_admin_managed_flag.sql`
+**Schéma déclaratif synchronisé** : ✅ `supabase/schemas/21_functions_auth_sync.sql`
+
+**Problème** : Le trigger `handle_new_user()` (SECURITY DEFINER) s'exécute avec `auth.uid() = NULL` → le trigger d'audit ne capturait pas l'UUID de l'admin, affichant "Système" dans les logs.
+
+**Mécanisme** : `generateLink` embed `_admin_managed: "true"` dans `raw_user_meta_data` → le trigger détecte le flag et retourne `NEW` sans INSERT → `createUserProfileWithRole(supabase, ...)` fait l'INSERT avec le client authentifié → le `audit_trigger` capture le vrai UUID admin.
+
+```sql
+-- Vérification dans handle_new_user()
+if (new.raw_user_meta_data->>'_admin_managed') = 'true' then
+  return new;
+end if;
+```
+
+#### fix(trigger) — Tentative 1 : vérification `invited_at` dans `handle_new_user()` ⚠️ supersédée
+
+**Migration** : `20260312130000_skip_profile_trigger_for_invited_users.sql`
+**Statut** : ⚠️ Supersédée par `20260312140000`
+
+**Pourquoi échoue** : `generateLink` via Supabase Admin SDK alimente `invited_at = NULL` au moment de l'INSERT dans `auth.users`. La valeur est définie ultérieurement (lors de l'acceptation de l'invitation), donc le flag `invited_at IS NOT NULL` n'est pas disponible au moment du trigger.
+
+#### fix(rls) — Policy DELETE profiles manquante pour les admins
+
+**Migration** : `20260312120000_fix_profiles_delete_rls_for_admins.sql`
+**Schéma déclaratif synchronisé** : ✅ `supabase/schemas/60_rls_profiles.sql`
+
+**Problème** : Pour capturer l'UUID admin dans l'audit lors d'une suppression, le DAL effectue d'abord la suppression du profil avec le client authentifié. Mais la policy RLS DELETE ne l'autorisait que pour `user_id = auth.uid()` → erreur 403 pour l'admin.
+
+**Correction** :
+```sql
+create policy "Admins can delete any profile" on public.profiles
+for delete
+to authenticated
+using (
+  (select auth.uid()) = user_id
+  or (select public.is_admin()) = true
+);
+```
+
+**Application** : ✅ Appliquées via `pnpm dlx supabase db push --linked` le 2026-03-12
+
+---
+
 ### 2026-03-11 - FEAT: Permissions hiérarchiques rôle éditeur (user < editor < admin)
 
 3 migrations déployées en cloud pour implémenter les permissions granulaires du rôle éditeur.

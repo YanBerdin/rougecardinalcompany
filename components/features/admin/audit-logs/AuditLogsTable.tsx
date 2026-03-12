@@ -36,6 +36,15 @@ import { fr } from "date-fns/locale";
 export type AuditLogSortField = "created_at" | "action" | "table_name";
 export type AuditLogSortState = SortState<AuditLogSortField>;
 
+function getAuditUserLabel(
+    userEmail: string | null | undefined,
+    ipAddress: string | null | undefined
+): string {
+    if (userEmail) return userEmail;
+    if (ipAddress) return "Anonyme";
+    return "Système";
+}
+
 const ACTION_STYLES = {
     INSERT: "bg-green-500/10 text-green-600 border-green-500/20 hover:bg-green-500/20",
     UPDATE: "bg-blue-500/10 text-blue-600 border-blue-500/20 hover:bg-blue-500/20",
@@ -106,7 +115,7 @@ export function AuditLogsTable({
                             <div className="flex items-center gap-2">
                                 <User className="h-4 w-4 flex-shrink-0" />
                                 <span className="truncate">
-                                    {log.user_email ?? "Système"}
+                                    {getAuditUserLabel(log.user_email, log.ip_address)}
                                 </span>
                             </div>
                             <div className="flex items-center gap-2">
@@ -196,7 +205,7 @@ export function AuditLogsTable({
                                     })}
                                 </TableCell>
                                 <TableCell className="font-medium">
-                                    {log.user_email ?? <span className="text-muted-foreground">Système</span>}
+                                    {log.user_email ?? <span className="text-muted-foreground">{getAuditUserLabel(log.user_email, log.ip_address)}</span>}
                                 </TableCell>
                                 <TableCell>
                                     <Badge variant="outline" className={ACTION_STYLES[log.action]}>

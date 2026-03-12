@@ -102,9 +102,9 @@ function mapUsersWithProfiles(
       invited_at: user.invited_at ?? null,
       profile: profile
         ? {
-            role: profile.role ?? "user",
-            display_name: profile.display_name,
-          }
+          role: profile.role ?? "user",
+          display_name: profile.display_name,
+        }
         : null,
     };
   });
@@ -233,7 +233,23 @@ export async function deleteUser(userId: string): Promise<DALResult<null>> {
     };
   }
 
+  const supabase = await createClient();
   const adminClient = await createAdminClient();
+
+  // Delete profile first with authenticated client so audit_trigger captures the real admin user.
+  // The cascade trigger (handle_user_deletion) will then find no profile to delete — harmless no-op.
+  const { error: profileError } = await supabase
+    .from("profiles")
+    .delete()
+    .eq("user_id", userId);
+
+  if (profileError) {
+    console.error("[DAL] Failed to delete profile:", profileError);
+    return {
+      success: false,
+      error: `Failed to delete profile: ${profileError.message}`,
+    };
+  }
 
   const { error } = await adminClient.auth.admin.deleteUser(userId);
 
@@ -322,6 +338,7 @@ async function generateUserInviteLinkWithUrl(
         data: {
           role: role,
           display_name: displayName,
+          _admin_managed: "true",
         },
       },
     });
@@ -382,12 +399,12 @@ async function waitForAuthUserCreation(
 }
 
 async function createUserProfileWithRole(
-  adminClient: SupabaseClient,
+  supabase: SupabaseClient,
   userId: string,
   role: string,
   displayName: string
 ): Promise<DALResult<null>> {
-  const { error: profileError } = await adminClient
+  const { error: profileError } = await supabase
     .from("profiles")
     .upsert(
       {
@@ -482,9 +499,9 @@ export async function inviteUserWithoutEmail(
 
   const { userId } = userCreationResult.data;
 
-  // 5. Create user profile
+  // 5. Create user profile (use authenticated client so auth.uid() is set in audit trigger)
   const profileResult = await createUserProfileWithRole(
-    adminClient,
+    supabase,
     userId,
     validated.role,
     displayName
