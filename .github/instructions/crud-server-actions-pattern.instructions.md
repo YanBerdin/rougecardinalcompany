@@ -404,7 +404,7 @@ Le DAL ne fait QUE les opérations database. La revalidation est dans les Server
 "use server";
 import "server-only";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireBackofficeAccess } from "@/lib/auth/roles";
 import type { FeatureInput, FeatureDTO } from "@/lib/schemas/[feature]";
 
 // ❌ NE PAS importer revalidatePath ici
@@ -419,7 +419,7 @@ export interface DALResult<T = unknown> {
 export async function createFeature(
   input: FeatureInput
 ): Promise<DALResult<FeatureDTO>> {
-  await requireAdmin();
+  await requireBackofficeAccess();
   
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -549,7 +549,7 @@ Pour chaque nouveau CRUD, vérifier :
 ### DAL (`lib/dal/`)
 
 - [ ] Directive `"use server"` + `import "server-only"`
-- [ ] `requireAdmin()` au début
+- [ ] `requireBackofficeAccess()` ou `requireAdminOnly()` au début
 - [ ] **PAS** de `revalidatePath()`
 - [ ] Return type `DALResult<T>`
 

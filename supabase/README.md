@@ -38,7 +38,7 @@ Client Supabase **admin** avec privilèges élevés (service-role).
 **⚠️ SÉCURITÉ CRITIQUE :**
 
 1. **Ne jamais exposer ce client côté client** (toujours `import "server-only"`)
-2. **Toujours vérifier l'autorisation admin** avant d'utiliser ce client
+2. **Toujours vérifier l'autorisation** avant d'utiliser ce client (admin-only pour le client admin)
 3. **Logger toutes les actions admin** pour audit
 4. **Valider toutes les entrées** avec Zod avant les opérations
 
@@ -46,10 +46,10 @@ Client Supabase **admin** avec privilèges élevés (service-role).
 
 ```typescript
 import { createAdminClient } from "@/supabase/admin";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireAdminOnly } from "@/lib/auth/roles";
 
 export async function inviteUser(email: string) {
-  await requireAdmin();
+  await requireAdminOnly();
 
   const supabase = await createAdminClient();
   const { data, error } = await supabase.auth.admin.generateLink({
@@ -144,10 +144,10 @@ Système de gestion de 2 photos paysage par spectacle intégrées dans le synops
 "use server";
 import "server-only";
 import { createAdminClient } from "@/supabase/admin";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireAdminOnly } from "@/lib/auth/roles";
 
 export async function adminOperation() {
-  await requireAdmin();
+  await requireAdminOnly();
   const supabase = await createAdminClient();
 }
 ```

@@ -135,7 +135,7 @@ La sécurité est organisée en sept couches de défense en profondeur :
 flowchart TB
   L1["1 · Réseau — Vercel Edge, DDoS/SSL"]
   L2["2 · Middleware — JWT via getClaims() ~2-5ms"]
-  L3["3 · Server Actions — requireAdmin(), Zod"]
+  L3["3 · Server Actions — requireBackofficeAccess(), Zod"]
   L4["4 · RLS PostgreSQL — 36 tables"]
   L5["5 · Fonctions DB — SECURITY DEFINER rétention"]
   L6["6 · Storage RLS — medias public · backups service_role"]

@@ -100,7 +100,7 @@ function uploadMediaImage(
 - MIME types: `image/jpeg`, `image/png`, `image/webp`, `image/avif`, `image/gif`, `image/svg+xml`, `application/pdf`
 - MIME verification: Server-side magic bytes detection (prevents MIME spoofing)
 - Filename: Sanitized — path traversal removed, special chars replaced, capped at 100 chars
-- Authentication: Requires admin role
+- Authentication: Requires backoffice access (editor or admin role)
 
 **Example**:
 
@@ -140,7 +140,7 @@ function deleteMediaImage(
 
 **Returns**: `ActionResult` with deleted media info
 
-**Authentication**: Requires admin role
+**Authentication**: Requires backoffice access (editor or admin role)
 
 **Example**:
 
@@ -423,16 +423,16 @@ export async function myAction() {
 
 ### Issue 3: "Insufficient permissions"
 
-**Cause**: Action requires admin but user is not admin
+**Cause**: Action requires backoffice access but user lacks the required role
 
-**Solution**: Check `requireAdmin()` is called in action:
+**Solution**: Check role guard is called in action:
 
 ```typescript
 "use server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireBackofficeAccess } from "@/lib/auth/roles";
 
-export async function adminOnlyAction() {
-  await requireAdmin(); // ✅ Throws if not admin
+export async function backofficeAction() {
+  await requireBackofficeAccess(); // ✅ Throws if not editor or admin
   // ... rest of logic
 }
 ```

@@ -173,7 +173,7 @@ flowchart TB
     end
 
     subgraph NextJS["Next.js Server"]
-        SA["Server Action\n(Zod validation + requireAdmin)"]
+        SA["Server Action\n(Zod validation + requireBackofficeAccess)"]
         SC["Server Component\n(async data fetching)"]
         API["API Route\n(webhooks, external)"]
     end
@@ -232,7 +232,7 @@ flowchart TB
                                 v
 +---------------------------------------------------------------------+
 |  SERVER ACTIONS (lib/actions/ + app/(admin)/admin/*/actions.ts)     |
-|  Zod validation -> requireAdmin() -> DAL call -> revalidatePath()   |
+|  Zod validation -> requireBackofficeAccess() -> DAL call -> revalidatePath()   |
 |  Returns ActionResult<T> (NO BigInt in return)                      |
 +---------------------------------------------------------------------+
                                 |
@@ -240,7 +240,7 @@ flowchart TB
 +---------------------------------------------------------------------+
 |  DATA ACCESS LAYER (lib/dal/, 37 modules + helpers/)                |
 |  "use server" + import "server-only" + React cache()                | 
-|  requireAdmin() -> Supabase Client -> DB Query -> DALResult<T>      |
+|  requireBackofficeAccess() -> Supabase Client -> DB Query -> DALResult<T>      |
 |  NO revalidatePath   NO email imports   NO throws                   |
 |  Helpers: error.ts, format.ts, slug.ts, serialize.ts, media-url.ts  |
 +---------------------------------------------------------------------+
@@ -313,7 +313,7 @@ flowchart TB
 
 ```text
 app/layout.tsx                    <- Root: HTML shell + ThemeProvider + Toaster + RootErrorBoundary
-  |-- app/(admin)/layout.tsx      <- Admin: requireAdmin() + SidebarProvider + AppSidebar + Breadcrumb
+  |-- app/(admin)/layout.tsx      <- Admin: requireBackofficePageAccess() + SidebarProvider + AppSidebar + Breadcrumb
   +-- app/(marketing)/layout.tsx  <- Public: Header + Footer + skip-link + landmarks
 ```
 
@@ -577,8 +577,10 @@ submits number             string (JSON-safe)             BigInt(validated.lieu_
 | ----------- | ------- | --------- |
 | `getClaims()` | Vérification JWT locale (middleware, Server Components) | ~2-5ms |
 | `getUser()` | Données utilisateur complètes (profil) | ~300ms |
-| `requireAdmin()` | Guard dans DAL + Server Actions | ~2-5ms |
-| `is_admin()` (SQL) | Fonction DB pour RLS policies | inline |
+| `requireBackofficeAccess()` | Guard DAL + Server Actions (editor ou admin) | ~2-5ms |
+| `requireAdminOnly()` | Guard admin-only (client admin Supabase) | ~2-5ms |
+| `has_min_role('editor')` (SQL) | Fonction DB pour RLS backoffice | inline |
+| `is_admin()` (SQL) | Fonction DB pour RLS admin-only | inline |
 | Cookies `getAll/setAll` | Pattern `@supabase/ssr` exclusif | — |
 
 **4 clients Supabase :**
@@ -786,13 +788,13 @@ const heroData = showHero
 import "server-only";
 import { cache } from "react";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireBackofficeAccess } from "@/lib/auth/roles";
 import { dalSuccess, dalError } from "@/lib/dal/helpers";
 import type { DALResult } from "@/lib/dal/helpers";
 
 export const fetchAllItems = cache(
   async (): Promise<DALResult<ItemDTO[]>> => {
-    await requireAdmin();
+    await requireBackofficeAccess();
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("items")
@@ -986,7 +988,7 @@ grant select on public.new_public_view to anon, authenticated;
 -- Vue admin
 create view public.new_admin_view
 with (security_invoker = true)
-as select * from some_table where (select public.is_admin()) = true;
+as select * from some_table where (select public.is_admin()) = true;  -- admin-only views keep is_admin()
 alter view public.new_admin_view owner to admin_views_owner;
 revoke all on public.new_admin_view from anon, authenticated;
 grant select on public.new_admin_view to service_role;
@@ -1169,7 +1171,7 @@ const mediaKitResult = showMediaKit
 ### ADR-011 : Embla Carousel Gallery (Fév 2026)
 
 **Contexte :** Affichage d'une galerie de photos par spectacle avec carousel interactif (navigation, autoplay, mobile).
-**Décision :** `embla-carousel-react` + `Autoplay` plugin, branching 0/1/2+ images, scale tween `TWEEN_FACTOR_BASE = 0.40`, keyboard scopé au conteneur. Vue SQL dédiée `spectacles_gallery_photos_public` + vue admin avec guard `is_admin()`.
+**Décision :** `embla-carousel-react` + `Autoplay` plugin, branching 0/1/2+ images, scale tween `TWEEN_FACTOR_BASE = 0.40`, keyboard scopé au conteneur. Vue SQL dédiée `spectacles_gallery_photos_public` + vue admin avec guard `is_admin()` (admin-only) / `has_min_role('editor')` pour accès backoffice.
 **Conséquences :** Carousel WCAG 2.2, performance `prefers-reduced-motion` JS-native, helper `buildMediaPublicUrl` centralisé dans `lib/dal/helpers/media-url.ts`.
 
 ---
