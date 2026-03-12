@@ -214,7 +214,7 @@ locations.push(`spectacle_photos: ${spectacleTitle}`);
 
 - [Phase 4.3 - Usage Tracking](./phase4.3-usage-tracking.md) - Guide complet
 - [Phase 4.3 - Complete Report](./phase4.3-complete-report.md) - Rapport d'implémentation
-- [TASK057 - Spectacle Landscape Photos](../../tasks/TASK057-spectacle-landscape-photos.md) - Contexte spectacles
+- [TASK057 - TASK057-spectacle-landscape-photos.md](../../../memory-bank/tasks/tasks-completed/TASK057-spectacle-landscape-photos.md) - Contexte spectacles
 
 ---
 

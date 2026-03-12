@@ -301,7 +301,7 @@ revalidatePath("/presse");        // Public cache (releases/articles only)
 - ✅ Séparation Server/UI schemas (bigint/number)
 - ✅ DALResult<T> return type systématique
 - ✅ ActionResult<T> dans toutes les Server Actions
-- ✅ Error codes standardisés ([ERR_PRESS_RELEASE_001], etc.)
+- ✅ Error codes standardisés (\[ERR_PRESS_RELEASE_001], etc.)
 
 ### TypeScript
 

@@ -309,11 +309,10 @@ Description courte *
 
 ## 🔗 References
 
-- **Documentation Index**: [docs/INDEX.md](./docs/INDEX.md)
-- **Quick Start**: [docs/QUICK_START.md](./docs/QUICK_START.md)
-- **Architecture**: [docs/IMPLEMENTATION_SUMMARY.md](./docs/IMPLEMENTATION_SUMMARY.md)
-- **API Docs**: [lib/actions/README.md](./lib/actions/README.md)
-- **Changelog**: [docs/CHANGELOG.md](./docs/CHANGELOG.md)
+- **Quick Start**: [docs/quick_start.md](./quick_start.md)
+- **Architecture**: [docs/implementation_summary.md](./implementation_summary.md)
+- **API Docs**: [lib/actions/README.md](../../../lib/actions/actions_readme.md)
+- **changelog_v15**: [docs/CHANGELOG.md](./changelog_v15.md)
 
 ---
 
