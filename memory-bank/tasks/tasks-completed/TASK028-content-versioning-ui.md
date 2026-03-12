@@ -57,6 +57,7 @@ Versioning adds complexity to storage; prefer a lightweight revision table that 
 **Chosen approach**: Database-level versioning with embedded UI metadata (not standalone diff viewer).
 
 **Rationale**:
+
 - Simpler UX: Version info visible in admin lists without extra navigation
 - Lower maintenance: No complex diff UI to maintain
 - Automatic: Triggers ensure 100% coverage without developer intervention

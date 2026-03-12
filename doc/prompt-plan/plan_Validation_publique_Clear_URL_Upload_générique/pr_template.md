@@ -139,7 +139,7 @@ After v1.5:
 ## 📊 Performance Impact
 
 | Metric | Before | After | Impact |
-|--------|--------|-------|--------|
+| -------- | -------- | ------- | -------- |
 | Bundle size | 250 KB | 253 KB | +3 KB (1.2%) |
 | Upload time (1MB) | N/A | 1.8s | New feature |
 | Validation time | N/A | 0.6s | New feature |
@@ -174,6 +174,7 @@ After v1.5:
 ## 🔄 Backward Compatibility
 
 ### Breaking Changes
+
 **None.** Full backward compatibility maintained.
 
 ### Deprecation Warnings
@@ -244,12 +245,12 @@ After v1.5:
 ## 📸 Screenshots
 
 ### Before (current state)
-```
+
 Simple form, no validation feedback
-```
 
 ### After (this PR)
-```
+
+```bash
 Red alert when public + incomplete:
 ⚠️ "Un spectacle public nécessite : statut publié/archivé, 
     genre, date de première, descriptions, et image validée."
@@ -261,7 +262,7 @@ Description courte *
 ...
 ```
 
-*(Add actual screenshots if available)*
+> **(Add actual screenshots if available)**
 
 ---
 

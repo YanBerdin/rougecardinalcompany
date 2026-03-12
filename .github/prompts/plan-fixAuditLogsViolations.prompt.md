@@ -83,7 +83,7 @@
 
 7. **Corriger `AuditLogsSkeleton.tsx` — index comme key**
    Remplacer `key={i}` par des clés sémantiquement correctes :
-   - Premier `Array.from` (5 éléments) : `key={\`skeleton-column-${i}\`}` *(colonnes, pas filtres)*
+   - Premier `Array.from` (5 éléments) : `key={\`skeleton-column-${i}\`}` _(colonnes, pas filtres)_
    - Second `Array.from` (10 éléments) : `key={\`skeleton-row-${i}\`}`
 
 ---

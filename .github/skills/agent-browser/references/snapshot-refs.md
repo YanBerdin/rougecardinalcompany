@@ -17,12 +17,14 @@ Compact element references that reduce context usage dramatically for AI agents.
 ## How Refs Work
 
 Traditional approach:
-```
+
+```bash
 Full DOM/HTML → AI parses → CSS selector → Action (~3000-5000 tokens)
 ```
 
 agent-browser approach:
-```
+
+```bash
 Compact snapshot → @refs assigned → Direct interaction (~200-400 tokens)
 ```
 
@@ -38,7 +40,7 @@ agent-browser snapshot -i
 
 ### Snapshot Output Format
 
-```
+```bash
 Page: Example Site - Home
 URL: https://example.com
 

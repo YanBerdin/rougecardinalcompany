@@ -21,6 +21,7 @@ Ce guide **complète** (ne remplace pas) les instructions suivantes :
 - ✅ `.github/instructions/next-backend.instructions.md` — Server Actions, API Routes
 
 **Ordre de priorité en cas de conflit :**
+
 1. Ce guide DAL (règles spécifiques)
 2. Clean Code (règles générales)
 3. TypeScript (typage strict)
@@ -70,6 +71,7 @@ import type { Database } from "@/lib/database.types";   // Types DB
 ### 🚨 Vérification automatique
 
 **Checklist pre-commit :**
+
 - [ ] Aucun import `next/cache` dans `lib/dal/`
 - [ ] Aucun import `@/lib/email` dans `lib/dal/`
 - [ ] Aucun import `@/lib/sms` dans `lib/dal/`
@@ -142,6 +144,7 @@ export async function logInvitationAudit(userId: string) { /* ... */ }
 ### Règle de décomposition
 
 **Si une fonction DAL contient :**
+
 - Plus de 30 lignes → Splitter en helpers
 - Plus de 3 opérations DB → Créer des fonctions atomiques
 - Du code métier (calculs, transformations) → Extraire dans `lib/utils/`
@@ -274,6 +277,7 @@ export async function inviteUserAction(input: unknown): Promise<ActionResult> {
 ### Principe Clean Code
 
 **Chaque fonction DAL doit :**
+
 - Tenir en 1 écran (≤ 30 lignes)
 - Avoir 1 seule responsabilité
 - Être testable unitairement
@@ -567,6 +571,7 @@ export async function createUser(input: UserInput): Promise<DALResult> {
 ```
 
 **Règles :**
+
 - Entity en UPPERCASE (`USER`, `HERO`, `SPECTACLE`)
 - Numéro à 3 chiffres (`001`, `002`, etc.)
 - Message en anglais pour les logs
@@ -728,30 +733,35 @@ export async function createSpectacleAction(input: unknown) {
 ### Pour chaque fichier DAL (`lib/dal/*.ts`)
 
 #### Structure
+
 - [ ] Directive `"use server"` en première ligne
 - [ ] Import `"server-only"` en deuxième ligne
 - [ ] Fichier < 300 lignes (sinon splitter par entité)
 - [ ] 1 fichier = 1 table/entité
 
 #### Imports
+
 - [ ] Pas d'import `next/cache`
 - [ ] Pas d'import `@/lib/email`
 - [ ] Pas d'import `@/lib/sms`
 - [ ] Pas d'import `@/lib/analytics`
 
 #### Fonctions
+
 - [ ] Toutes les fonctions < 30 lignes
 - [ ] 1 responsabilité par fonction
 - [ ] Validation Zod systématique
 - [ ] Return type `DALResult<T>` cohérent
 
 #### Sécurité
+
 - [ ] `requireBackofficeAccess()` ou `requireAdminOnly()` au début
 - [ ] Error codes tracés `[ERR_XXX_NNN]`
 - [ ] Pas de secrets hardcodés
 - [ ] Pas de `console.log()` avec données sensibles
 
 #### Dépendances
+
 - [ ] Pas de `revalidatePath()` dans le DAL
 - [ ] Pas d'appels email/SMS dans le DAL
 - [ ] Pas de logique métier complexe (extraire dans `lib/utils/`)
@@ -773,6 +783,7 @@ export async function createSpectacleAction(input: unknown) {
 ### Exemples de scores
 
 **Fichier conforme (24/25 - 96%) :**
+
 ```typescript
 // lib/dal/admin-home-hero.ts
 "use server";
@@ -795,6 +806,7 @@ export async function fetchAllHeroSlides(): Promise<HeroSlideDTO[]> {
 ```
 
 **Fichier non-conforme (11/25 - 44%) :**
+
 ```typescript
 // lib/dal/admin-users.ts (AVANT refactoring)
 export async function inviteUser(input: InviteUserInput) {
@@ -1455,5 +1467,5 @@ validateAllDal();
 ---
 
 **Maintenu par :** Équipe Backend Rouge-Cardinal  
-**Contact :** tech@rouge-cardinal.fr  
+**Contact :** <tech@rouge-cardinal.fr>  
 **Dernière révision :** 28 novembre 2025

@@ -81,6 +81,7 @@ Importer `useImageValidation()`, supprimer les états/handler dupliqués, passer
 1. Ajouter import : `import { useImageValidation } from "@/lib/hooks/useImageValidation";`
 
 2. Remplacer les 4 lignes de states (lignes 57-60) par :
+
 ```typescript
 const {
   isValidating,

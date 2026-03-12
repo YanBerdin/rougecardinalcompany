@@ -18,14 +18,17 @@
 ### 2a — Supprimer les types locaux dupliqués
 
 Les interfaces `PressRelease`, `MediaArticle`, `MediaKitItemDTO`, `MediaMetadata`, `SupabaseMediaRow`, `CommuniquePresseRow`, `ArticlePresseRow` (lignes 8–72) sont soit déjà dans `lib/schemas/presse.ts`, soit des types internes rawDB. Remplacer par :
+
 ```ts
 import type { PressRelease, MediaArticle, MediaKitItem } from "@/lib/schemas/presse";
 ```
+
 Les types `SupabaseMediaRow`, `CommuniquePresseRow`, `ArticlePresseRow` restent comme types internes inline (non exportés) car ils représentent la row brute DB.
 
 ### 2b — Utiliser `dalSuccess` / `dalError`
 
 Ajouter dans les imports :
+
 ```ts
 import { dalSuccess, dalError, getErrorMessage } from "@/lib/dal/helpers";
 ```
@@ -35,17 +38,21 @@ Remplacer dans les 3 fonctions tous les `return { success: true, data: ... }` pa
 ### 2c — Utiliser `buildMediaPublicUrl` dans `mapMediaKitRow`
 
 Ajouter l'import :
+
 ```ts
 import { buildMediaPublicUrl } from "@/lib/dal/helpers";
 ```
 
 Dans `mapMediaKitRow`, remplacer :
+
 ```ts
 const fileUrl = externalUrl
   ? String(externalUrl)
   : `/storage/v1/object/public/${row.storage_path}`;
 ```
+
 par :
+
 ```ts
 const fileUrl = externalUrl
   ? String(externalUrl)
@@ -65,6 +72,7 @@ const fileUrl = externalUrl
 **Fichier touché** : `PresseServerGate.tsx`
 
 En tête du fichier (avant la fonction), ajouter :
+
 ```ts
 const DEFAULT_MAX_PRESS_RELEASES = 12;
 ```
@@ -78,6 +86,7 @@ Remplacer les deux occurrences de `12` par `DEFAULT_MAX_PRESS_RELEASES`.
 **Fichier touché** : `app/(marketing)/presse/page.tsx`
 
 Ajouter :
+
 ```ts
 export const dynamic = "force-dynamic";
 
@@ -118,6 +127,7 @@ Dans le `<ul>`, remplacer les `<li>• Votre nom...` par des `<li>` purs (sans `
 ### 6b — `aria-label` sur les boutons "Lire l'article" (dans `RevueDePresse.tsx`)
 
 Remplacer :
+
 ```tsx
 <Button variant="secondary" asChild>
   <Link href={article.source_url} target="_blank" rel="noopener noreferrer">
@@ -126,7 +136,9 @@ Remplacer :
   </Link>
 </Button>
 ```
+
 par :
+
 ```tsx
 <Button variant="secondary" asChild>
   <Link

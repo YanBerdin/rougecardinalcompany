@@ -52,11 +52,13 @@ components/features/admin/spectacles/
 **Status**: ✅ Terminé - 2 février 2026
 
 **Fichiers créés**:
+
 - `components/features/admin/spectacles/SpectacleFormFields.tsx` (154 lignes)
 - `components/features/admin/spectacles/SpectacleFormMetadata.tsx` (281 lignes)
 - `components/features/admin/spectacles/SpectacleFormImageSection.tsx` (47 lignes)
 
 **Fichier principal refactorisé**:
+
 - `components/features/admin/spectacles/SpectacleForm.tsx` : 578 lignes → 233 lignes ✅
 
 **Résultat**: Clean Code compliance respectée (tous fichiers < 300 lignes)
@@ -110,6 +112,7 @@ paragraph_3: z.string().optional(),
 ```
 
 **Ajustements TypeScript**:
+
 - ❌ Retrait de `.transform()` sur champs `genre`, `duration_minutes`, `casting`
 - ✅ Utilisation de `z.union([z.number(), z.string()]).optional()` pour champs numériques
 - ✅ Transformation déplacée dans pipeline `cleanSpectacleFormData`
@@ -225,6 +228,7 @@ pnpm dlx supabase db push --linked
 **Fichier généré**: `supabase/migrations/YYYYMMDDHHmmss_add_spectacle_paragraphs.sql` (via diff)
 
 **Modifications dans le schéma déclaratif**:
+
 ```sql
 -- Ajouter après la ligne "description text,"
   paragraph_2 text,
@@ -232,6 +236,7 @@ pnpm dlx supabase db push --linked
 ```
 
 **Commentaires à ajouter**:
+
 ```sql
 comment on column public.spectacles.paragraph_2 is 
 'Paragraphe supplémentaire 1 - Contenu narratif additionnel affiché après Photo 1 dans SpectacleDetailView';
@@ -241,6 +246,7 @@ comment on column public.spectacles.paragraph_3 is
 ```
 
 **Structure finale colonnes contenu**:
+
 ```sql
   description text,          -- Paragraphe principal (first-letter stylisé)
   paragraph_2 text,          -- Après Photo 1 (optionnel)
@@ -249,6 +255,7 @@ comment on column public.spectacles.paragraph_3 is
 ```
 
 **Pas de contraintes supplémentaires**:
+
 - ❌ Pas de `CHECK` constraint (pas de limite caractères)
 - ❌ Pas de `NOT NULL` (champs optionnels)
 - ❌ Pas d'index (champs texte rarement filtrés)
@@ -340,6 +347,7 @@ let query = supabase
 ```
 
 **❌ NE PAS modifier `fetchAllSpectacles`**:
+
 - Optimisation: les colonnes texte lourdes ne sont pas nécessaires pour les listes
 - Le select actuel reste inchangé (pas de `paragraph_2`, `paragraph_3`)
 
@@ -423,6 +431,7 @@ const form = useForm({
 **Fichier**: `components/features/public-site/spectacles/SpectacleDetailView.tsx`
 
 **Flow visuel actuel** (TASK057):
+
 ```yaml
 short_description (italic)
   ↓
@@ -436,6 +445,7 @@ CTAs
 ```
 
 **Flow visuel cible** (TASK061):
+
 ```yaml
 short_description (italic)
   ↓
@@ -496,22 +506,26 @@ CTAs
 ## Points d'attention
 
 ### TypeScript
+
 - ✅ Types dérivés automatiquement via `z.infer<>` (pas de modification manuelle)
 - ✅ `SpectacleDb` inclura `paragraph_2` et `paragraph_3` après modification schéma
 - ✅ Props `SpectacleDetailViewProps` inchangés (utilise `SpectacleDb`)
 
 ### Performance
+
 - ✅ Pas de fetch supplémentaire (champs ajoutés aux queries existantes)
 - ✅ `fetchAllSpectacles` non modifié (optimisation listes)
 - ✅ Rendu conditionnel (`{spectacle.paragraph_2 && ...}`) évite DOM inutile
 
 ### UX Admin
+
 - ✅ Champs visuellement groupés (après `description`)
 - ✅ Placeholder explicite sur le placement dans la vue publique
 - ✅ FormDescription confirme caractère optionnel
 - ✅ Pas de validation bloquante pour publication
 
 ### Fallback
+
 - ✅ Graceful si `paragraph_2`/`paragraph_3` null/undefined
 - ✅ Layout préservé (Photo 1 → Desc → P2 → Photo 2 → P3)
 - ✅ Pas de crash si champs absents (migration non appliquée)
@@ -523,6 +537,7 @@ CTAs
 **NE PAS créer cette migration manuellement** — le workflow declarative schema la génère pour vous.
 
 **Migration forward** (ce que `supabase db diff` générera automatiquement) :
+
 ```sql
 -- Ajout colonnes (safe - nullable par défaut)
 ALTER TABLE public.spectacles ADD COLUMN IF NOT EXISTS paragraph_2 text;
@@ -536,6 +551,7 @@ COMMENT ON COLUMN public.spectacles.paragraph_3 IS
 ```
 
 **Rollback** (en cas de problème):
+
 ```sql
 -- Suppression colonnes (attention: perte de données)
 ALTER TABLE public.spectacles DROP COLUMN IF EXISTS paragraph_2;
@@ -636,4 +652,5 @@ Créer fichier TASK avec structure standard et mettre à jour progression.
 ✅ **Migration complète**: Local + Cloud  
 ✅ **Sécurité**: Toutes les vues ont security_invoker (pas de régression RLS)  
 ✅ **Validation**: Colonnes présentes dans `public.spectacles`
+
 ```

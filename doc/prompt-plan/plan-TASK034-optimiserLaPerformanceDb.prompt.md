@@ -25,6 +25,7 @@
 | ⏳ **Benchmarks** | Pending | EXPLAIN ANALYZE à exécuter post-déploiement |
 
 **Documentation**:
+
 - Implémentation: `doc/PERFORMANCE_OPTIMIZATION_2026-01-07.md`
 - Tests sécurité: 13/13 vues + 13/13 RLS WITH CHECK
 
@@ -222,6 +223,7 @@ using (
 ### 3.2 Tables à traiter similairement
 
 **Même pattern pour**:
+
 - `categories` (2 SELECT policies)
 - `partners` (2 SELECT policies)
 - `communiques_presse` (2 SELECT policies)
@@ -283,7 +285,8 @@ drop index if exists idx_seo_redirects_active;
 -- drop index if exists idx_contacts_partial_reason;
 ```
 
-**Action**: 
+**Action**:
+
 1. Exécuter validation pg_stat_user_indexes
 2. Confirmer idx_scan=0 pour chaque candidat
 3. Supprimer de `supabase/schemas/40_indexes.sql`
@@ -418,6 +421,7 @@ where sc.category_id = 1;
 **Créer**: `doc/PERFORMANCE_OPTIMIZATION_2026-01-07.md`
 
 Contenu:
+
 - Screenshots EXPLAIN ANALYZE avant/après
 - Métriques Supabase Dashboard (latence p50/p95)
 - Liste complète des changements
@@ -512,11 +516,13 @@ Contenu:
 **Recommandation**: Utiliser `create index concurrently` pour les 24 index FK
 
 Avantages:
+
 - Pas de lock exclusif sur la table
 - Application reste disponible pendant création
 - Durée création: ~30s par index (estimation)
 
 Inconvénient:
+
 - Échec possible si transaction concurrente conflictuelle
 - Nécessite 2 passes sur la table (plus lent)
 
@@ -527,6 +533,7 @@ Inconvénient:
 **Attention**: La fusion de policies permissives ne doit PAS affecter les policies restrictives existantes.
 
 Vérifier:
+
 - Aucune policy `as restrictive` sur les tables modifiées
 - Logique OR préserve exactement le même comportement
 - Tests avec users anon + authenticated + admin
@@ -551,6 +558,7 @@ supabase db reset
 ### 4. Monitoring continu
 
 Après déploiement, surveiller:
+
 - Latence p50/p95/p99 sur queries spectacles, medias, categories
 - Taux de cache hit sur nouveaux index
 - CPU/Memory usage DB (ne doit pas augmenter)
@@ -559,6 +567,7 @@ Après déploiement, surveiller:
 ### 5. Optimisations futures
 
 **Non inclus dans ce plan** (épics séparés):
+
 - Partitioning tables analytics (si >1M rows)
 - Materialized views pour agrégations complexes
 - Query caching côté application (React Query)

@@ -11,6 +11,7 @@
 ## ✅ Statut d'implémentation (Phase 6 - Jan 22, 2026)
 
 ### Database
+
 - ✅ `articles_presse` : Colonnes `image_url` et `og_image_media_id` ajoutées
 - ✅ `communiques_presse` : Colonne `image_media_id` ajoutée
 - ✅ Index `idx_communiques_presse_image_media_id` créé
@@ -18,6 +19,7 @@
 - ✅ Schémas déclaratifs mis à jour : `08_table_articles_presse.sql`, `08b_communiques_presse.sql`, `41_views_communiques.sql`
 
 ### Forms
+
 - ✅ `ArticleNewForm.tsx` : FormProvider + ImageFieldGroup ajoutés
 - ✅ `ArticleEditForm.tsx` : FormProvider + ImageFieldGroup ajoutés
 - ✅ `PressReleaseNewForm.tsx` : FormProvider + ImageFieldGroup ajoutés
@@ -25,19 +27,23 @@
 - ✅ `lib/utils/press-utils.ts` : Utilitaires de nettoyage form data (cleanPressReleaseFormData, cleanArticleFormData)
 
 ### Schemas Zod
+
 - ✅ `lib/schemas/press-release.ts` : `image_media_id` ajouté (bigint server / number UI)
 - ✅ `lib/schemas/press-article.ts` : `image_url` + `og_image_media_id` ajoutés
 
 ### DAL
+
 - ✅ `lib/dal/admin-press-releases.ts` : Champ `image_media_id` ajouté aux queries/mutations
 - ✅ `lib/dal/admin-press-articles.ts` : Champs `image_url` + `og_image_media_id` ajoutés
 
 ### Security
+
 - ✅ `communiques_presse_dashboard()` : SECURITY DEFINER + check explicite `is_admin()`
 - ✅ Non-admins reçoivent `permission denied` au lieu d'un array vide
 - ✅ 8/8 tests de sécurité passent (`pnpm test:views:auth:local`)
 
 ### Migrations
+
 - ✅ `20260121231253_add_press_media_library_integration.sql`
 - ✅ `20260122000000_fix_communiques_presse_dashboard_security.sql`
 
@@ -52,12 +58,14 @@
 ### Database Schema
 
 **Articles (`articles_presse`)** :
+
 - ✅ `og_image_media_id bigint references medias(id)` — Existe déjà (SEO metadata)
 - ✅ Index FK existant : `idx_articles_presse_og_image_media_id`
 - ❌ Pas de `image_url` pour fallback externe
 - ❌ Pas exposé dans schemas/forms actuels
 
 **Communiqués (`communiques_presse`)** :
+
 - ✅ `image_url text` — URL externe uniquement
 - ❌ Pas de `image_media_id` pour Media Library
 - ❌ Pas d'index FK (colonne à créer)
@@ -65,6 +73,7 @@
 ### Forms actuels
 
 **4 formulaires** utilisent `Input` basique pour images :
+
 1. `PressReleaseNewForm.tsx` — `image_url` (URL externe)
 2. `PressReleaseEditForm.tsx` — `image_url` (URL externe)
 3. `ArticleNewForm.tsx` — Pas de champ image du tout
@@ -73,6 +82,7 @@
 ### Schemas Zod actuels (post-corrections Jan 21, 2026)
 
 **PressRelease** (`lib/schemas/press-release.ts`) :
+
 ```typescript
 // Server — AVEC transformations empty string → null
 slug: z.string().max(255).optional().nullable().transform(val => val === "" ? null : val)
@@ -84,6 +94,7 @@ image_url: z.string().url("URL invalide").optional().or(z.literal(""))
 ```
 
 **Article** (`lib/schemas/press-article.ts`) :
+
 ```typescript
 // Server — AVEC transformations empty string → null
 slug: z.string().max(255).optional().nullable().transform(val => val === "" ? null : val)
@@ -475,12 +486,14 @@ async function onSubmit(data: FormValues) {
 ```
 
 **Application aux formulaires presse** :
+
 - ✅ `PressReleaseNewForm` : Appliquer validation si `public = true`
 - ✅ `PressReleaseEditForm` : Appliquer validation si `public = true`
 - ⚠️ `ArticleNewForm` : Pas de champ `public`, validation optionnelle
 - ⚠️ `ArticleEditForm` : Pas de champ `public`, validation optionnelle
 
 **Bénéfices** :
+
 - Prévient la publication d'éléments sans image
 - Feedback immédiat sur la validité de l'URL
 - Cohérence UX avec spectacles
@@ -526,15 +539,18 @@ useEffect(() => {
 **Application aux formulaires presse** :
 
 **PressRelease (a un champ `public`)** :
+
 - ✅ Surveiller `public`, `title`, `description`, `date_publication`, `image_url/image_media_id`
 - ✅ Afficher warning si `public=true` mais champs manquants
 - ✅ Message : "Le communiqué sera sauvegardé mais non visible publiquement"
 
 **Article (pas de champ `public`)** :
+
 - ❌ Pattern non applicable (pas de publication publique)
 - ✅ Possible : Warning si `image_url` + `og_image_media_id` vides (SEO)
 
 **Bénéfices** :
+
 - Guidance utilisateur en temps réel
 - Évite frustration (sauvegarde réussit mais élément invisible)
 - Transparence sur l'état de publication
@@ -564,6 +580,7 @@ const [isImageValidated, setIsImageValidated] = useState<boolean | null>(null);
 ```
 
 **Modifications nécessaires dans `ImageFieldGroup`** :
+
 - Ajouter prop optionnelle : `onImageValidated?: (isValid: boolean | null) => void`
 - Appeler callback après validation URL externe
 - Appeler callback après upload réussi (toujours `true`)
@@ -588,6 +605,7 @@ async function onSubmit(data: FormValues) {
 ```
 
 **Fonction `cleanSpectacleFormData`** (à créer similaire pour presse) :
+
 ```typescript
 // lib/utils/press-release-form-utils.ts
 export function cleanPressReleaseFormData(
@@ -604,12 +622,14 @@ export function cleanPressReleaseFormData(
 ```
 
 **Application** :
+
 - ✅ `PressReleaseNewForm` : Nettoyer avant `createPressReleaseAction`
 - ✅ `PressReleaseEditForm` : Nettoyer avant `updatePressReleaseAction`
 - ✅ `ArticleNewForm` : Nettoyer `og_image_media_id` (number → bigint)
 - ✅ `ArticleEditForm` : Nettoyer `og_image_media_id` (number → bigint)
 
 **Bénéfices** :
+
 - Type safety entre form (number) et action (bigint)
 - Centralisation logique de transformation
 - Évite duplication code de conversion
@@ -659,6 +679,7 @@ export function getArticleSuccessMessage(isEditing: boolean, title: string) {
 ```
 
 **Bénéfices** :
+
 - Messages personnalisés avec titre de l'élément
 - Cohérence UX (toast success similaire aux spectacles)
 - Feedback clair à l'utilisateur
@@ -1277,6 +1298,7 @@ Les 4 formulaires de presse réutilisent les patterns éprouvés de `SpectacleFo
 | **ArticleEditForm** | ✅ Optionnel (SEO) | ❌ N/A (pas de `public`) | ✅ Callback validation | ✅ Clean data | ✅ Message contextualisé |
 
 **Bénéfices de la réutilisation** :
+
 - ✅ **Cohérence UX** — Expérience utilisateur identique entre spectacles et presse
 - ✅ **Validation robuste** — Tri-state (`null`/`true`/`false`) + contrôles critiques
 - ✅ **Feedback temps réel** — Warnings progressifs sur champs manquants
@@ -1310,6 +1332,7 @@ values ('Presse', 'presse', 'Communiqués, articles et kit média', 6);
 **Usage dans forms** : `uploadFolder="presse"` pour les 4 formulaires.
 
 **Organisation suggérée** (via tags) :
+
 - Tag `communique` pour images de communiqués
 - Tag `article` pour images d'articles
 - Tag `kit-media` pour logos, photos officielles
@@ -1321,6 +1344,7 @@ values ('Presse', 'presse', 'Communiqués, articles et kit média', 6);
 ### Phase 1 : Database Schema (CRITIQUE)
 
 1. **Mettre à jour schema déclaratif** :
+
 ```bash
    # Éditer supabase/schemas/17_presse.sql
    # Ajouter colonne image_media_id + index
@@ -1330,6 +1354,7 @@ values ('Presse', 'presse', 'Communiqués, articles et kit média', 6);
    ```
 
 2. **Générer migration** :
+
 ```bash
    pnpm dlx supabase stop
    pnpm dlx supabase db diff -f add_press_image_media_id
@@ -1341,6 +1366,7 @@ values ('Presse', 'presse', 'Communiqués, articles et kit média', 6);
    - Optionnel : `ALTER TABLE articles_presse ADD COLUMN image_url`
 
 4. **Appliquer migration** :
+
 ```bash
    pnpm dlx supabase start  # Local
    pnpm dlx supabase db push  # Production (après tests)
@@ -1449,6 +1475,7 @@ values ('Presse', 'presse', 'Communiqués, articles et kit média', 6);
 ```
 
 **Clarification** :
+
 - `image_media_id` (communiqués) = Image affichée sur site + kit média
 - `og_image_media_id` (articles) = Image SEO pour partage social (Twitter, Facebook, etc.)
 
@@ -1485,6 +1512,7 @@ values ('Presse', 'presse', 'Communiqués, articles et kit média', 6);
 ## Checklist de migration
 
 ### Database
+
 - [ ] Ajouter `image_media_id` à `communiques_presse` (schema déclaratif)
 - [ ] Ajouter `image_url` à `articles_presse` (optionnel, schema déclaratif)
 - [ ] Créer index `idx_communiques_presse_image_media_id`
@@ -1493,11 +1521,13 @@ values ('Presse', 'presse', 'Communiqués, articles et kit média', 6);
 - [ ] Vérifier FK constraints (`ON DELETE SET NULL`)
 
 ### Schemas Zod
+
 - [ ] `press-release.ts` : Ajouter `image_media_id` (Server + UI + DTO)
 - [ ] `press-article.ts` : Ajouter `image_url` + exposer `og_image_media_id` (Server + UI + DTO)
 - [ ] Tester compilation TypeScript (`pnpm tsc --noEmit`)
 
 ### DAL
+
 - [ ] `admin-press-releases.ts` : SELECT avec `image_media_id`
 - [ ] `admin-press-releases.ts` : Conversion bigint → string dans mapping
 - [ ] `admin-press-releases.ts` : Gérer `image_media_id` dans create/update
@@ -1506,6 +1536,7 @@ values ('Presse', 'presse', 'Communiqués, articles et kit média', 6);
 - [ ] `admin-press-articles.ts` : Gérer les 2 champs dans create/update
 
 ### Utilitaires (NOUVEAU)
+
 - [ ] Créer `lib/utils/press-utils.ts` avec :
   - [ ] `cleanPressReleaseFormData()` — Conversion number → bigint
   - [ ] `cleanArticleFormData()` — Conversion number → bigint
@@ -1513,12 +1544,14 @@ values ('Presse', 'presse', 'Communiqués, articles et kit média', 6);
   - [ ] `getArticleSuccessMessage()` — Messages contextualisés
 
 ### ImageFieldGroup Enhancement
+
 - [ ] Ajouter prop optionnelle `onImageValidated?: (isValid: boolean | null) => void`
 - [ ] Callback après validation URL externe (success/error)
 - [ ] Callback après upload réussi (toujours `true`)
 - [ ] Callback si URL vidée (`null`)
 
 ### Forms
+
 - [ ] `PressReleaseNewForm.tsx` :
   - [ ] Remplacer Input par `ImageFieldGroup`
   - [ ] Ajouter état `isImageValidated`
@@ -1550,6 +1583,7 @@ values ('Presse', 'presse', 'Communiqués, articles et kit média', 6);
   - [ ] Utiliser `getArticleSuccessMessage()`
 
 ### Tests
+
 - [ ] Tester uploads via Media Library (4 formulaires)
 - [ ] Tester URLs externes (4 formulaires)
 - [ ] Tester preview images (4 formulaires)
@@ -1558,6 +1592,7 @@ values ('Presse', 'presse', 'Communiqués, articles et kit média', 6);
 - [ ] Tester conversion bigint (create/update articles + communiqués)
 
 ### Documentation
+
 - [ ] Mettre à jour `TASK024-press-management-summary.md`
 - [ ] Mettre à jour `migrations.md`
 - [ ] Ajouter entrée dans `memory-bank/tasks/TASK024-press-management.md`
@@ -1569,6 +1604,7 @@ values ('Presse', 'presse', 'Communiqués, articles et kit média', 6);
 Si problèmes après déploiement :
 
 1. **Rollback migration** :
+
    ```sql
    -- Supprimer colonne communiques_presse
    ALTER TABLE public.communiques_presse DROP COLUMN IF EXISTS image_media_id;

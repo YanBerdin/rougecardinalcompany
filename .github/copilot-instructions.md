@@ -131,7 +131,6 @@ const { data: { user } } = await supabase.auth.getUser();
   - créer une migration `revoke select on <view> from authenticated;` si nécessaire.
 - lors d'un push de migration, si vous rencontrez un mismatch d'historique, réparez l'historique distant et exécutez `supabase db pull` avant de re-pusher les fichiers locaux.
 
-
 **Pattern**: Validation + Auth + DAL + Revalidation
 
 ```typescript
@@ -279,11 +278,13 @@ export async function createTeamMember(
 **Architecture**: Complete media management system with Storage/Folders synchronization.
 
 **Database Tables**:
+
 - `media` — Main media records with metadata
 - `media_tags` — Tag management (junction table)
 - `media_folders` — 9 base folders hierarchy
 
 **DAL Modules**:
+
 ```bash
 lib/dal/
   media.ts           # CRUD for media records
@@ -293,6 +294,7 @@ lib/dal/
 ```
 
 **Storage/Folders Sync Pattern**:
+
 ```typescript
 // lib/dal/helpers/folder.ts
 export async function getFolderIdFromPath(
@@ -310,6 +312,7 @@ export async function getFolderIdFromPath(
 ```
 
 **9 Base Folders** (auto-assigned via `folder_id`):
+
 | Folder | Description |
 | ------ | ----------- |
 | spectacles | Spectacle visuals |
@@ -323,6 +326,7 @@ export async function getFolderIdFromPath(
 | misc | Miscellaneous |
 
 **Thumbnail Generation** (Sharp):
+
 ```typescript
 // Thumbnails: 300x300 JPEG, stored in media.thumbnail_url
 import sharp from 'sharp';
@@ -337,6 +341,7 @@ const thumbnail = await sharp(buffer)
 **Architecture**: Server-side validation pipeline with magic bytes verification, filename sanitization, and 7-format support.
 
 **Supported Formats** (7):
+
 | Format | MIME Type | Magic Bytes |
 | ------ | --------- | ----------- |
 | JPEG | image/jpeg | `FF D8 FF` |
@@ -348,6 +353,7 @@ const thumbnail = await sharp(buffer)
 | PDF | application/pdf | `25 50 44 46` |
 
 **Validation Pipeline**:
+
 ```typescript
 // lib/utils/mime-verify.ts
 export async function verifyFileMime(file: File): Promise<AllowedUploadMimeType | null>
@@ -359,11 +365,13 @@ export async function verifyFileMime(file: File): Promise<AllowedUploadMimeType 
 ```
 
 **Key Files**:
+
 - `lib/utils/mime-verify.ts` — Magic bytes verification (64 octets, 7 formats)
 - `lib/schemas/media.ts` — `AllowedUploadMimeType`, `ALLOWED_UPLOAD_MIME_TYPES`, `isAllowedUploadMimeType()`
 - `lib/dal/media.ts` — `sanitizeFilename()` (path traversal + special chars + 100 chars max)
 
 **Critical Rules**:
+
 - ✅ NEVER trust `file.type` (client-controlled) — always verify magic bytes server-side
 - ✅ ALWAYS sanitize filenames before storage (prevent path traversal)
 - ✅ Max 10MB aligned with Supabase Storage bucket configuration
@@ -387,6 +395,7 @@ export async function verifyFileMime(file: File): Promise<AllowedUploadMimeType 
 ```
 
 **Critical Rules**:
+
 - ✅ **UI Schema**: `z.number().int().positive()` for form IDs
 - ✅ **Transport**: `string` IDs in Server Actions (avoid BigInt serialization error)
 - ✅ **Server Schema**: `z.coerce.bigint()` for database IDs
@@ -401,17 +410,20 @@ export async function verifyFileMime(file: File): Promise<AllowedUploadMimeType 
 **Configuration**: 4 runtime configs (`sentry.client.config.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`, `instrumentation.ts`)
 
 **Error Boundary Hierarchy**:
+
 1. **Root** (`app/global-error.tsx`) — Catches unhandled app-level errors
 2. **Page** (`app/error.tsx`) — Catches route-level errors
 3. **Component** (`components/error-boundaries/`) — Reusable granular boundaries
 
 **Alert Levels**:
+
 | Alert | Condition | Response Time |
 | ----- | --------- | ------------- |
 | P0 | >10 errors/min | 15 min |
 | P1 | >50 errors/hour | 1 hour |
 
 **Key Rules**:
+
 - ✅ Sentry DSN configured via T3 Env (never hardcoded)
 - ✅ Supabase integration with span deduplication
 - ✅ Source maps upload via `next.config.ts`
@@ -437,6 +449,7 @@ export const fetchTeamMembers = cache(async (): Promise<DALResult<TeamMemberDTO[
 ```
 
 **Critical Rules**:
+
 - ✅ Wrap ALL DAL read functions with `cache()` for request-level deduplication
 - ✅ Multiple Server Components calling the same DAL function → single DB query
 - ✅ `cache()` scope is per-request (automatically invalidated between requests)
@@ -446,6 +459,7 @@ export const fetchTeamMembers = cache(async (): Promise<DALResult<TeamMemberDTO[
 **Architecture**: Centralized configuration system for controlling visibility of UI sections across public pages.
 
 **Database Table**: `public.configurations_site`
+
 ```sql
 create table public.configurations_site (
   id bigint generated always as identity primary key,
@@ -459,6 +473,7 @@ create table public.configurations_site (
 ```
 
 **RLS Policies**:
+
 - Public: Read-only access to all toggles
 - Admin: Full CRUD access via `is_admin()` check
 
@@ -472,6 +487,7 @@ create table public.configurations_site (
 | `presse_display` | media_kit, presse_articles | Media Kit + Press Releases sections (2 toggles) |
 
 **DAL Pattern** (`lib/dal/site-config.ts`):
+
 ```typescript
 export async function fetchDisplayToggle(
   key: string
@@ -495,6 +511,7 @@ export async function fetchDisplayToggle(
 ```
 
 **Server Component Usage**:
+
 ```typescript
 // components/features/public-site/presse/PresseServerGate.tsx
 const mediaKitToggle = await fetchDisplayToggle("display_toggle_media_kit");
@@ -514,6 +531,7 @@ const [pressReleasesResult, mediaKitResult] = await Promise.all([
 ```
 
 **View Component Conditional Rendering**:
+
 ```typescript
 // components/features/public-site/presse/PresseView.tsx
 {pressReleases.length > 0 && (
@@ -532,12 +550,14 @@ const [pressReleasesResult, mediaKitResult] = await Promise.all([
 ```
 
 **Admin Management**:
+
 - Route: `/admin/site-config`
 - UI: Toggle switches with Server Actions
 - Real-time updates: `revalidatePath()` after mutations
 - Organized by section: Home, Presse, Agenda, Contact
 
 **Utility Scripts** (Presse toggles):
+
 ```bash
 # Check toggle status
 pnpm exec tsx scripts/check-presse-toggles.ts
@@ -550,11 +570,13 @@ pnpm exec tsx scripts/toggle-presse.ts enable-press-releases
 ```
 
 **Key Migrations**:
+
 1. `20260101160100_seed_display_toggles.sql` — Initial 9 toggles
 2. `20260101170000_cleanup_and_add_epic_toggles.sql` — Epic alignment
 3. `20260101220000_fix_presse_toggles.sql` — Split Media Kit + Press Releases (Phase 11)
 
 **Critical Rules**:
+
 - ✅ Toggles control BOTH data fetching AND rendering
 - ✅ Default to `enabled: true` when toggle not found
 - ✅ Hide entire sections (including titles) when disabled
@@ -1114,6 +1136,7 @@ const url = process.env.NEXT_PUBLIC_SUPABASE_URL; // Dangerous!
 ```
 
 **Benefits**:
+
 - Runtime validation with Zod schemas
 - Type safety for all environment variables
 - Clear distinction between client/server variables
@@ -1525,6 +1548,7 @@ Complete implementation of TASK030 across 11 phases:
    - Server Actions with immediate revalidation
 
 **Commits**:
+
 - `b27059f` - feat(presse): separate Media Kit and Press Releases toggles + hide disabled sections
 
 **Audit Conformité Admin Features (February 2026)**:
@@ -1537,6 +1561,7 @@ Série de refactorings audit qualité sur les features admin, alignés sur les p
 4. **TASK064** Admin Partners — 18 étapes, 16 violations + 3 post-fix (branche `fix/admin-partners-audit-violations`, commit `3fd1bf7`)
 
 **Pattern commun** :
+
 - `mapToXxxDTO()` extraction dans DAL + `buildMediaPublicUrl` (T3 Env)
 - `dalSuccess`/`dalError` + codes erreur `[ERR_XXX_NNN]`
 - `.parseAsync()` Zod (async superRefine)
@@ -1556,6 +1581,7 @@ The project was upgraded from Next.js 15.4.5 to 16.1.5 with the following key ch
 5. **Security fixes**: CVE-2025-57822 (SSRF), CVE-2025-64718 (js-yaml) resolved
 
 **Pages requiring dynamic export** (Supabase SSR cookies):
+
 - `app/(marketing)/page.tsx`
 - `app/(marketing)/agenda/page.tsx`
 - `app/(marketing)/presse/page.tsx`

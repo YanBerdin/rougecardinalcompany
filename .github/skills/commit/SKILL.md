@@ -10,6 +10,7 @@ Follow these conventions when creating commits for projects.
 ## When to Use This Skill
 
 Use this skill when:
+
 - Committing code changes
 - Writing commit messages
 - Formatting git history

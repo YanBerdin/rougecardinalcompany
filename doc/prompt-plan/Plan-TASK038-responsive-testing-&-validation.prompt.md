@@ -260,6 +260,7 @@ export type DeviceSize = keyof typeof DEVICE_MATRIX[DeviceCategory];
 - [ ] Configure `playwright.config.ts` avec device matrix
 - [ ] Créer fixtures (devices, auth, test-data)
 - [ ] Helpers responsive:
+
   ```typescript
   // tests/helpers/responsive-helpers.ts
   export async function checkResponsive(page, options) {
@@ -687,6 +688,7 @@ jobs:
 
 - `.github/workflows/playwright.yml` ✅
 - `package.json` scripts:
+
   ```json
   {
     "test:e2e": "playwright test",
@@ -720,22 +722,26 @@ export default {
 ### 5.2 Patterns Obligatoires
 
 **Tables:**
+
 ```tsx
 <div className="overflow-x-auto -mx-3 sm:-mx-4 md:-mx-6">
   <table className="min-w-full">
 ```
 
 **Grids:**
+
 ```tsx
 <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
 ```
 
 **Padding:**
+
 ```tsx
 <div className="p-3 sm:p-4 md:p-6">
 ```
 
 **Buttons:**
+
 ```tsx
 <Button className="w-full sm:w-auto min-h-[44px]">
 ```

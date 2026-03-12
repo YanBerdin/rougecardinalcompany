@@ -81,6 +81,7 @@ components/features/admin/[feature]/
 ### Règle Clean Code : Max 300 lignes par fichier
 
 Si un formulaire dépasse 300 lignes, le splitter en sous-composants :
+
 - `FormFields.tsx` — Champs texte (title, description, etc.)
 - `FormImageSection.tsx` — Sélection d'image avec MediaLibraryPicker
 - `FormCtaFields.tsx` — Champs CTA (label, url)
@@ -562,6 +563,7 @@ Pour chaque nouveau CRUD, vérifier :
 - [ ] `handleEdit` utilise données locales (pas fetch)
 
 ### Client Component Form
+
 - [ ] `useState(false)` pour isPending
 - [ ] Appel direct `createAction()` ou `updateAction()`
 - [ ] `onSuccess()` callback pour refresh parent
@@ -571,11 +573,13 @@ Pour chaque nouveau CRUD, vérifier :
 - [ ] Fichier < 300 lignes (sinon splitter en sous-composants)
 
 ### Schémas Zod (`lib/schemas/`)
+
 - [ ] Schéma Server avec `z.coerce.bigint()` pour IDs
 - [ ] Schéma UI avec `z.number().int().positive()` pour IDs
 - [ ] Types exportés : `FeatureInput`, `FeatureFormValues`, `FeatureDTO`
 
 ### Nettoyage
+
 - [ ] Supprimer les API Routes obsolètes après migration
 
 ---

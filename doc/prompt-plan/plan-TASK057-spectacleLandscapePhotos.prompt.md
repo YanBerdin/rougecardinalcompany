@@ -43,6 +43,7 @@ pnpm dlx supabase db push --linked
 **Exemple**: `20260201140000_add_landscape_photos_to_spectacles.sql`
 
 **Documentation requise**:
+
 - `supabase/README.md`: Ajouter entrée dans "Mises à jour récentes (janvier 2026)" avec date, migration, changements clés
 - `supabase/migrations/migrations.md`: Nouvelle ligne avec timestamp, description, statut, notes
 
@@ -52,13 +53,15 @@ pnpm dlx supabase db push --linked
 **Fichier généré**: `supabase/migrations/YYYYMMDDHHmmss_add_landscape_photos_to_spectacles.sql` (via diff)
 
 **Modifications**:
-- Ajouter colonne `type` (text default `'gallery'`) dans `spectacles_medias` 
+
+- Ajouter colonne `type` (text default `'gallery'`) dans `spectacles_medias`
 - Modifier constraint UNIQUE: `(spectacle_id, type, ordre)` au lieu de `(spectacle_id, media_id)` pour permettre plusieurs photos mais contrôler par type+ordre
 - Ajouter `CHECK (type IN ('poster', 'landscape', 'gallery'))`
 - Ajouter `CHECK (CASE WHEN type = 'landscape' THEN ordre IN (0, 1) ELSE true END)` pour limiter landscape à 2 photos
 - Créer index `CREATE INDEX idx_spectacles_medias_type_ordre ON spectacles_medias(spectacle_id, type, ordre)`
 
 **Vue publique** (`supabase/schemas/41_views_spectacle_photos.sql`):
+
 ```sql
 -- Vue publique pour photos paysage des spectacles publics
 -- SECURITY INVOKER: nécessite GRANT sur tables de base
@@ -81,6 +84,7 @@ COMMENT ON VIEW public.spectacles_landscape_photos_public IS
 ```
 
 **Vue admin** (`supabase/schemas/41_views_spectacle_photos.sql`):
+
 ```sql
 -- Vue admin pour gestion photos paysage (toutes, avec métadonnées)
 -- SECURITY INVOKER: accès limité par RLS sur tables de base
@@ -138,6 +142,7 @@ grant select on public.spectacles to anon, authenticated;
 **Exports**:
 
 **READ Operations** (wrapped avec `cache()`, return direct):
+
 ```typescript
 export const fetchSpectacleLandscapePhotos = cache(
   async (spectacleId: number): Promise<SpectaclePhotoDTO[]> => {
@@ -155,6 +160,7 @@ export const fetchSpectacleLandscapePhotosAdmin = cache(
 ```
 
 **MUTATIONS** (return `DALResult<T>`):
+
 ```typescript
 export async function addSpectaclePhoto(
   spectacleId: number,
@@ -177,6 +183,7 @@ export async function deleteSpectaclePhoto(
 ```
 
 **Pattern DAL SOLID** (aligné sur `spectacles.ts`):
+
 - ✅ **READ**: `cache()` de "react" (PAS de next/cache), return `Promise<T[]>` ou `Promise<T | null>`, graceful `[]`/`null` on error
 - ✅ **MUTATIONS**: `requireAdmin()`, return `DALResult<T>` avec status codes
 - ✅ Single Responsibility: 1 fichier = gestion photos spectacles uniquement
@@ -186,6 +193,7 @@ export async function deleteSpectaclePhoto(
 - ❌ Imports INTERDITS: `next/cache` (revalidatePath/revalidateTag), `@/lib/email/*`, `@/lib/sms/*`
 
 **Helpers recommandés** (si fonctions > 30 lignes):
+
 ```typescript
 // @internal helpers
 async function validatePhotoConstraints(
@@ -208,6 +216,7 @@ async function performPhotoInsert(
 **Fichier**: `lib/schemas/spectacles.ts`
 
 **Ajouts**:
+
 ```typescript
 // DTO Schema (retourné par DAL)
 export const SpectaclePhotoDTOSchema = z.object({
@@ -243,6 +252,7 @@ export type PhotoFormValues = z.infer<typeof PhotoFormSchema>;
 **Fichier**: `app/(admin)/admin/spectacles/actions.ts` (ajouter aux actions existantes)
 
 **Actions** (avec try/catch OBLIGATOIRE):
+
 ```typescript
 "use server";
 
@@ -325,11 +335,13 @@ export async function deletePhotoAction(
 **Pattern**: GET endpoint pour éviter la sérialisation BigInt dans Server Components
 
 **Raison d'être**:
+
 - Server Actions ne peuvent pas retourner `bigint` (erreur "Cannot serialize BigInt")
 - SpectaclePhotoManager est un Client Component qui doit fetch les photos
 - API Route convertit `bigint` → `string` pour JSON serialization
 
 **Structure**:
+
 ```typescript
 export async function GET(
   request: NextRequest,
@@ -359,6 +371,7 @@ export async function GET(
 ```
 
 **Conversion Types**:
+
 ```typescript
 // Type retourné par API (string IDs)
 export type SerializedSpectaclePhoto = Omit<SpectaclePhotoDTO, 'spectacle_id' | 'media_id'> & {
@@ -374,6 +387,7 @@ export type SerializedSpectaclePhoto = Omit<SpectaclePhotoDTO, 'spectacle_id' | 
 **Pattern**: Client Component avec **client-side fetch via API Route** (évite BigInt serialization)
 
 **Structure**:
+
 - Client Component (`"use client"`)
 - Props: `spectacleId: number`
 - État: `photos: SerializedSpectaclePhoto[]`, `isPending`, `isLoading`, `selectedSlot` (0 ou 1)
@@ -388,6 +402,7 @@ export type SerializedSpectaclePhoto = Omit<SpectaclePhotoDTO, 'spectacle_id' | 
 - **Refresh**: Appel API après add/delete pour re-fetch état actuel
 
 **Pattern BigInt**:
+
 ```typescript
 'use client';
 
@@ -424,6 +439,7 @@ export function SpectaclePhotoManager({ spectacleId }: Props) {
 **Position**: Après `<ImageFieldGroup>` (ligne ~470), avant checkbox `public`
 
 **Code**:
+
 ```tsx
 {/* Photos paysage (2 max) */}
 {spectacleId ? (
@@ -448,6 +464,7 @@ export function SpectaclePhotoManager({ spectacleId }: Props) {
 **Fichier**: `app/(marketing)/spectacles/[slug]/page.tsx`
 
 **Modifications**:
+
 ```typescript
 export default async function SpectacleDetailPage({ params }: SpectacleDetailPageProps) {
   const { slug } = await params;
@@ -472,6 +489,7 @@ export default async function SpectacleDetailPage({ params }: SpectacleDetailPag
 **Modifications**:
 
 1. **Interface props**:
+
 ```typescript
 interface SpectacleDetailViewProps {
   spectacle: SpectacleDb;
@@ -480,6 +498,7 @@ interface SpectacleDetailViewProps {
 ```
 
 2. **Composant inline `LandscapePhotoCard`** (avant return):
+
 ```typescript
 import { env } from "@/lib/env";
 
@@ -510,6 +529,7 @@ function LandscapePhotoCard({ photo }: { photo: SpectaclePhotoDTO }) {
 ```
 
 **Alternative** : Créer `lib/utils/media-url.ts` (fonction utilitaire exportée réutilisable) :
+
 ```typescript
 import { env } from "@/lib/env";
 
@@ -526,6 +546,7 @@ export function getMediaPublicUrl(storagePath: string): string {
 ```
 
 3. **Insertion Photo 1** (ligne ~127, après `short_description`):
+
 ```tsx
 {spectacle.short_description && (
   <p className="text-xl md:text-2xl italic leading-relaxed opacity-90 animate-fade-in max-w-3xl mx-auto"
@@ -545,6 +566,7 @@ export function getMediaPublicUrl(storagePath: string): string {
 ```
 
 4. **Insertion Photo 2** (ligne ~136, après `description`, avant CTA):
+
 ```tsx
 <div className="prose prose-lg max-w-none text-foreground/90 leading-relaxed">
   <p className="text-lg whitespace-pre-line first-letter:text-7xl ...">
@@ -566,6 +588,7 @@ export function getMediaPublicUrl(storagePath: string): string {
 ## Points d'attention
 
 ### Performance
+
 - ✅ `loading="lazy"` pour les 2 photos (below-fold probable)
 - ✅ Fetch séquentiel optimisé (besoin de `spectacle.id` avant fetch photos)
 - ✅ React `cache()` sur `fetchSpectacleLandscapePhotos` (DAL) pour deduplication
@@ -573,12 +596,14 @@ export function getMediaPublicUrl(storagePath: string): string {
 - ✅ Vue publique pré-filtrée (pas de filtrage côté app)
 
 ### Sécurité
+
 - ✅ `requireAdmin()` dans toutes les fonctions admin du DAL
 - ✅ RLS sur `spectacles_medias` (policies existantes)
 - ✅ Validation Zod stricte (ordre 0-1, type='landscape')
 - ✅ CHECK constraints DB pour double protection
 
 ### UX Admin
+
 - ✅ Toast notifications (succès/erreur)
 - ✅ Preview images avec alt text affiché
 - ✅ Double choix (bibliothèque + upload direct)
@@ -586,6 +611,7 @@ export function getMediaPublicUrl(storagePath: string): string {
 - ✅ Disabled state pendant `isPending`
 
 ### Fallback
+
 - ✅ Graceful si `landscapePhotos` undefined/empty (pas d'affichage)
 - ✅ Pas de crash si erreur DAL (return `[]` par défaut)
 - ✅ Alt text fallback: `"Photo du spectacle"`
@@ -593,6 +619,7 @@ export function getMediaPublicUrl(storagePath: string): string {
 ## Migration & Rollback
 
 **Migration forward** (ordre important pour éviter erreurs sur données existantes):
+
 ```sql
 -- 1. Ajouter colonne type avec default (safe pour données existantes)
 ALTER TABLE public.spectacles_medias 
@@ -630,6 +657,7 @@ COMMENT ON COLUMN public.spectacles_medias.type IS
 ```
 
 **Rollback** (en cas de problème):
+
 ```sql
 -- Supprimer dans l'ordre inverse
 DROP INDEX IF EXISTS idx_spectacles_medias_type_ordre;
@@ -707,9 +735,10 @@ Ajouter nouvelles entrées:
 mettre à jour l'état de progression dans la section "Implementation Steps" au fur et à mesure de l'avancement des étapes.
 
 ### `.github/prompts/plan-TASK057-spectacleLandscapePhotos.prompt.md`
+
 mettre à jour l'état de progression de ce plan détaillé en fonction des modifications apportées au code une fois l'implémentation accomplie.
 
-### mettre à jour l'état de progression dans :
+### mettre à jour l'état de progression dans
 
 - _index.md
 - _preview_backoffice_tasks.md
@@ -722,11 +751,13 @@ mettre à jour l'état de progression de ce plan détaillé en fonction des modi
 **Problème**: Server Actions retournaient des objets avec `bigint`, non sérialisables en JSON.
 
 **Tentatives de fix**:
+
 - Tentative 1: Conversion `.map()` des IDs → Échoue (duplicate key violation)
 - Tentative 2: Refactor `swapPhotoOrder` SQL avec valeur temporaire → Échoue (CHECK constraint violation)
 - Tentative 3: Modification CHECK constraint → Jugé trop risqué
 
-**Solution finale**: 
+**Solution finale**:
+
 - ❌ Suppression complète de la fonctionnalité swap
 - ✅ Application du pattern TASK055 BigInt sur add/delete actions:
   - Validation Zod avec `z.number().int().positive()` (UI)
@@ -734,9 +765,11 @@ mettre à jour l'état de progression de ce plan détaillé en fonction des modi
   - Pas de sérialisation BigInt dans retours Server Actions
 
 **Migrations**:
+
 - `20260202004924_drop_swap_spectacle_photo_order.sql` (suppression fonction SQL)
 
 **Code supprimé**:
+
 - `swapPhotoOrder()` dans DAL
 - `swapPhotosAction()` dans Server Actions
 - Bouton "Inverser" dans SpectaclePhotoManager UI
@@ -752,6 +785,7 @@ mettre à jour l'état de progression de ce plan détaillé en fonction des modi
 **Détection**: Supabase Advisors (4 ERROR advisories).
 
 **Solution**:
+
 - Migration `20260202010000_fix_views_security_invoker.sql`
 - Ajout explicite `with (security_invoker = true)` aux 4 vues:
   - `articles_presse_public`
@@ -760,6 +794,7 @@ mettre à jour l'état de progression de ce plan détaillé en fonction des modi
   - `spectacles_landscape_photos_admin`
 
 **Validation**:
+
 - ✅ Supabase Advisors: 4 ERROR → 0 ERROR
 - ✅ Tests RLS: 6/6 tests passent (`scripts/test-views-security-invoker.ts`)
 - ✅ Schémas déclaratifs déjà corrects (pas de modification nécessaire)
@@ -775,11 +810,13 @@ mettre à jour l'état de progression de ce plan détaillé en fonction des modi
 **Cause**: Le plan TASK057 n'incluait pas l'intégration avec le système de tracking d'usage (`lib/dal/media-usage.ts`) implémenté dans TASK029 Phase 4.3.
 
 **Solution**:
+
 - Modification de `lib/dal/media-usage.ts` pour vérifier la table `spectacles_medias`
 - Ajout de la requête avec jointure `spectacles!inner()` pour filtrer les spectacles actifs
 - Location ajoutée: `"spectacle_photos"` dans `checkMediaUsagePublic()` et `bulkCheckMediaUsagePublic()`
 
 **Code ajouté**:
+
 ```typescript
 // Check spectacles_medias (photos paysage - active spectacles only)
 const { data: spectaclePhotos } = await supabase
@@ -795,6 +832,7 @@ if (spectaclePhotos && spectaclePhotos.length > 0) {
 ```
 
 **Fichiers modifiés**:
+
 - `lib/dal/media-usage.ts` (+35 lignes)
 
 **Bonus fix**: Ajout d'un bouton "Générer thumbnail" dans `MediaDetailsPanel.tsx` + Server Action `regenerateThumbnailAction` pour régénérer les thumbnails des médias existants.

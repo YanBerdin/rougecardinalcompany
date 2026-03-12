@@ -419,5 +419,3 @@ performAuthenticatedInsert error: {
 **Task Owner** : YanBerdin  
 **Last Updated** : 16 novembre 2025, 17:30 UTC  
 **Status** : ✅ COMPLETED
-
-[TASK021]: #task021---admin-backoffice-spectacles-crud

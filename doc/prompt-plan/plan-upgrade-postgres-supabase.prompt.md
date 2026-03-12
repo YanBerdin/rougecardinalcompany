@@ -65,6 +65,7 @@ pnpm db:pull
 | Extensions vérifiées | ✅ pgcrypto installé |
 
 **Notes** :
+
 - Code de sortie 1 = "No schema changes found" (comportement normal quand synchronisé)
 - 3 fichiers ignorés (ne respectent pas le pattern `<timestamp>_name.sql`) : `ROUND_7B_ANALYSIS.md`, `migrations.md`, `sync_existing_profiles.sql`
 

@@ -41,28 +41,34 @@ Ce plan corrige les violations identifiées : refactoring AboutContentForm vers 
 **Vérification** : `pnpm exec tsc --noEmit` → ✅ Aucune erreur TypeScript
 
 ### Fichiers créés
+
 - `lib/actions/home-about-actions.ts` — Server Action pour About content
 - `components/features/admin/home/HeroSlideFormFields.tsx` (143 lignes)
 - `components/features/admin/home/HeroSlideImageSection.tsx` (85 lignes)
 
 ### Fichiers modifiés
+
 - `lib/dal/admin-home-about.ts` — Supprimé revalidatePath (déplacé dans Server Actions)
 - `lib/schemas/home-content.ts` — Ajout HeroSlideFormSchema + AboutContentFormSchema (UI)
 - `components/features/admin/home/AboutContentForm.tsx` — Migration fetch → Server Action
 - `components/features/admin/home/HeroSlideForm.tsx` — Refactoré (316 → 200 lignes), utilise sous-composants
 
 ### Fichiers supprimés
+
 - `app/api/admin/home/about/route.ts`
 - `app/api/admin/home/about/[id]/route.ts`
 
 ## Analysis Results
 
 ### API Route Usage Check
+
 - `/api/admin/home/about/${id}` — Utilisé UNIQUEMENT par `AboutContentForm.tsx` ligne 63
 - Après migration vers Server Actions → **Peut être supprimé**
 
 ### Type Casting Issue
+
 Le problème vient de la différence entre :
+
 - **Schéma Zod** : `image_media_id: z.coerce.bigint()` (pour la BDD)
 - **Formulaire UI** : `image_media_id?: number` (pour éviter les problèmes de sérialisation JSON)
 

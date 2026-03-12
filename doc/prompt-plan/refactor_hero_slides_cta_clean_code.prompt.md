@@ -28,6 +28,7 @@
 ---
 
 ## 🎯 Objectifs (Original)
+
 Rendre le code conforme aux instructions `.github/instructions/1-clean-code.instructions.md`
 
 ---
@@ -67,7 +68,7 @@ export const DRAG_CONFIG = {
 
 ## 📦 2. Décomposer `HeroSlideForm.tsx` (130 lignes → Max 30)
 
-### Structure cible:
+### Structure cible
 
 ```bash
 components/features/admin/home/
@@ -184,7 +185,7 @@ const CTA_CONFIG = {
 
 ## 📦 4. Décomposer `HeroSlidesView.tsx` (180 lignes → Max 30)
 
-### Structure cible:
+### Structure cible
 
 ```bash
 components/features/admin/home/
@@ -328,20 +329,23 @@ export const HeroSlideInputSchema = z.object({
 
 ## 📦 6. Supprimer TOUS les Commentaires
 
-### Avant:
+### Avant
+
 ```typescript
 // ❌ Commentaires interdits
 // Réinitialiser le formulaire quand le dialog s'ouvre
 useEffect(() => { ... }, [open, slide, form]);
 ```
 
-### Après:
+### Après
+
 ```typescript
 // ✅ Nom de fonction explicite
 useHeroSlideFormSync(open, slide, form);
 ```
 
 ### Règle: Si un commentaire est nécessaire, c'est que le code n'est pas assez clair
+
 - Renommer les fonctions/variables
 - Extraire des fonctions avec des noms explicites
 - Utiliser des constantes nommées
@@ -350,12 +354,14 @@ useHeroSlideFormSync(open, slide, form);
 
 ## 📦 7. Validation des Fichiers (Max 300 lignes)
 
-### État actuel:
+### État actuel
+
 - `HeroSlideForm.tsx`: 130 lignes ❌
 - `HeroSlidesView.tsx`: 180 lignes ❌
 - `home-content.ts`: 400+ lignes ❌
 
-### Après refactoring:
+### Après refactoring
+
 - Tous les fichiers < 100 lignes ✅
 - Responsabilité unique par fichier ✅
 

@@ -36,11 +36,13 @@
 #### 1. Corriger `admin-users.ts` (12/25 → 22/25)
 
 **Violations :**
+
 - ❌ `import { revalidatePath }` (lignes 7, 209, 236, 476)
 - ❌ `import("@/lib/email/actions")` (ligne 418)
 - ❌ Fonctions > 30 lignes : `inviteUser`, `updateUserStatus`
 
 **Actions :**
+
 - [ ] Supprimer l'import `revalidatePath` du fichier
 - [ ] Supprimer les appels `revalidatePath()` dans `inviteUser()`, `updateUserStatus()`, `deleteUser()`
 - [ ] Extraire l'envoi d'email dans `lib/actions/admin-users-actions.ts` (Pattern Warning)
@@ -54,11 +56,13 @@
 #### 2. Corriger `team.ts` (14/25 → 22/25)
 
 **Violations :**
+
 - ❌ Pas de directive `"use server"` (seulement `import "server-only"`)
 - ❌ `revalidatePath()` dans `reorderTeamMembers()` (ligne 319)
 - ❌ Fonctions > 30 lignes : `createMember`, `updateMember`, `reorderTeamMembers`
 
 **Actions :**
+
 - [ ] Ajouter `"use server"` en première ligne
 - [ ] Supprimer `revalidatePath()` de `reorderTeamMembers()`
 - [ ] Créer `lib/actions/team-actions.ts` avec `reorderTeamAction()`, `createMemberAction()`, `updateMemberAction()`
@@ -72,11 +76,13 @@
 #### 3. Corriger `spectacles.ts` (15/25 → 22/25)
 
 **Violations :**
+
 - ❌ `revalidatePath()` utilisé 4 fois (lignes 376, 462, 463, 554)
 - ❌ Fonctions > 30 lignes : `createSpectacle`, `updateSpectacle`, `duplicateSpectacle`
 - ⚠️ Error codes inconsistants
 
 **Actions :**
+
 - [ ] Supprimer tous les appels `revalidatePath()` du fichier
 - [ ] Créer `lib/actions/spectacles-actions.ts` avec CRUD Actions
 - [ ] Splitter `createSpectacle()`, `updateSpectacle()` en helpers
@@ -89,12 +95,14 @@
 #### 4. Corriger `agenda.ts` (16/25 → 22/25)
 
 **Violations :**
+
 - ❌ Pas de directive `"use server"`
 - ❌ Retourne `Event[]` au lieu de `DALResult<Event[]>`
 - ❌ Pas de validation Zod
 - ❌ `fetchEventsWithFilters()` ~55 lignes
 
 **Actions :**
+
 - [ ] Ajouter `"use server"` en première ligne
 - [ ] Définir `DALResult<T>` interface
 - [ ] Refactorer toutes les fonctions pour retourner `DALResult<T>`
@@ -170,6 +178,7 @@ export async function fetchData(): Promise<DALResult<Data[]>> {
 ### 1. Ordre d'exécution recommandé
 
 **Priorité 1 (bloquant CI potentielle) :**
+
 1. `admin-users.ts` — Import email critique
 2. `team.ts` — Directive manquante
 3. `spectacles.ts` — revalidatePath critique
@@ -191,6 +200,7 @@ export async function fetchData(): Promise<DALResult<Data[]>> {
 ### 3. Script de validation automatique
 
 Créer `scripts/validate-dal-solid.ts` pour vérifier :
+
 - [ ] Aucun import `next/cache` dans `lib/dal/`
 - [ ] Aucun import `@/lib/email` dans `lib/dal/`
 - [ ] Directive `"use server"` présente
@@ -259,22 +269,26 @@ Créer `scripts/validate-dal-solid.ts` pour vérifier :
 ### Phase 1 : Fichiers Critiques - TERMINÉE
 
 #### 1. ✅ `team.ts` - CORRIGÉ
+
 - [x] Directive `"use server"` ajoutée
 - [x] `revalidatePath()` supprimé (commentaire conservé)
 - [x] Interface `DALResult<T>` utilisée partout
 - [x] Error codes `[ERR_TEAM_NNN]` ajoutés
 
 #### 2. ✅ `spectacles.ts` - CORRIGÉ
+
 - [x] `revalidatePath()` supprimé
 - [x] Interface `DALResult<T>` utilisée
 - [x] Error codes uniformisés
 
 #### 3. ✅ `agenda.ts` - CORRIGÉ
+
 - [x] Directive `"use server"` ajoutée
 - [x] Interface `DALResult<T>` utilisée
 - [x] Schéma Zod `EventFilterSchema` créé dans `lib/schemas/agenda.ts`
 
 #### 4. ⚠️ `admin-users.ts` - PARTIELLEMENT CORRIGÉ
+
 - [x] `revalidatePath()` supprimé
 - [x] Directive `"use server"` présente
 - [ ] ❌ **Import email reste** (ligne 466) - Nécessite Server Action wrapper
@@ -316,6 +330,7 @@ Créer `scripts/validate-dal-solid.ts` pour vérifier :
 **Problème** : `import("@/lib/email/actions")` ligne 466 viole la règle SOLID
 
 **Solution proposée** :
+
 1. Créer `lib/actions/admin-users-actions.ts`
 2. Déplacer la logique d'envoi d'email dans une Server Action wrapper
 3. Le DAL retourne seulement `{ userId, invitationUrl }`
@@ -434,6 +449,7 @@ export async function inviteUserAction(input: InviteUserInput) {
 ### Phase 2 : DALResult Uniformisation - ✅ TERMINÉE (17/17)
 
 Tous les fichiers DAL utilisent maintenant :
+
 - Interface `DALResult<T>` depuis `lib/dal/helpers/error.ts`
 - Error codes `[ERR_ENTITY_NNN]` uniformisés
 - Directive `"use server"` + `import "server-only"`
@@ -441,6 +457,7 @@ Tous les fichiers DAL utilisent maintenant :
 ### Phase 3 : Schémas Zod Centralisés - ✅ TERMINÉE
 
 11 fichiers de schémas dans `lib/schemas/` :
+
 - `admin-users.ts` - UpdateUserRoleSchema, InviteUserSchema
 - `agenda.ts` - EventSchema, EventFilterSchema
 - `compagnie.ts` - ValueSchema, TeamMemberSchema
@@ -487,4 +504,3 @@ Tous les fichiers DAL utilisent maintenant :
 2. **Nouveau schéma** : Ajouter dans `lib/schemas/` + export dans `index.ts`
 3. **Props de composants** : Colocaliser dans `components/features/.../types.ts`
 4. **Mutations avec email/cache** : Toujours dans Server Actions, jamais dans DAL
-

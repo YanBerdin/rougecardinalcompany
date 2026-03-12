@@ -17,6 +17,7 @@
 ## ⚠️ Notes importantes (Contexte actuel)
 
 > **✅ Implémentation complète (2026-01-18) :**
+>
 > - ✅ `data_retention_config` — Table de configuration centralisée (5 tables configurées)
 > - ✅ `data_retention_audit` — Table d'historique des purges
 > - ✅ `cleanup_expired_data(text)` — Fonction générique de purge
@@ -27,6 +28,7 @@
 > - ✅ **pg_cron job configuré** — Daily 2:00 AM UTC (Job ID: 1)
 >
 > **4 Migrations appliquées :**
+>
 > - `20260117234007_task053_data_retention.sql` — Tables + fonctions + vues
 > - `20260118004644_seed_data_retention_config.sql` — Configuration initiale
 > - `20260118010000_restore_insert_policies_dropped_by_task053.sql` — Fix INSERT policies
@@ -442,6 +444,7 @@ Deno.serve(async (req: Request) => {
 ```
 
 **Configuration cron** (via Supabase Dashboard):
+
 ```
 0 2 * * * # Tous les jours à 2h00 UTC
 ```
@@ -670,6 +673,7 @@ Les données personnelles sont conservées **uniquement pour la durée nécessai
 ## ✅ Checklist de déploiement
 
 ### Phase 1: Préparation (Local)
+
 - [ ] Créer `supabase/schemas/21_data_retention_tables.sql` (config + audit)
 - [ ] Créer `supabase/schemas/22_data_retention_functions.sql` (fonctions purge)
 - [ ] Créer `supabase/schemas/41_views_retention.sql` (monitoring)
@@ -681,6 +685,7 @@ Les données personnelles sont conservées **uniquement pour la durée nécessai
 > **Note**: `logs_audit.expires_at` et `cleanup_expired_audit_logs()` existent déjà — ne pas recréer
 
 ### Phase 2: Tests (Staging)
+
 - [ ] Créer script `test-data-retention.ts`
 - [ ] Insérer données de test expirées
 - [ ] Exécuter purge manuelle via RPC
@@ -688,6 +693,7 @@ Les données personnelles sont conservées **uniquement pour la durée nécessai
 - [ ] Valider health check (`check_retention_health()`)
 
 ### Phase 3: Edge Function (Production)
+
 - [ ] Créer répertoire `supabase/functions/scheduled-cleanup/`
 - [ ] Créer `supabase/functions/scheduled-cleanup/index.ts`
 - [ ] Créer `supabase/functions/scheduled-cleanup/deno.json` (config Deno)
@@ -699,12 +705,14 @@ Les données personnelles sont conservées **uniquement pour la durée nécessai
 > **Note**: Première Edge Function du projet — créer la structure complète
 
 ### Phase 4: Monitoring (Production)
+
 - [ ] Ajouter dashboard admin avec vue `data_retention_monitoring`
 - [ ] Configurer alertes email si `health_status != 'ok'`
 - [ ] Documenter runbook pour incidents
 - [ ] Former équipe admin sur monitoring
 
 ### Phase 5: Documentation
+
 - [ ] Créer `RGPD_DATA_RETENTION_POLICY.md`
 - [ ] Mettre à jour politique de confidentialité site
 - [ ] Documenter procédure droit à l'oubli
@@ -715,21 +723,25 @@ Les données personnelles sont conservées **uniquement pour la durée nécessai
 ## 🚨 Points d'attention
 
 ### Sécurité
+
 - ⚠️ **SECURITY DEFINER obligatoire** pour bypass RLS lors des purges
 - ⚠️ **Validation stricte** des noms de table (whitelist via config)
 - ⚠️ **Secret token** pour protéger Edge Function cron
 
 ### Performance
+
 - ⚠️ **Index requis** sur colonnes de date (déjà présents)
 - ⚠️ **Batch size** pour grandes tables (chunking si >100k rows)
 - ⚠️ **Vacuum recommandé** après purges importantes
 
 ### RGPD
+
 - ⚠️ **Suppression définitive** (pas de restauration possible)
 - ⚠️ **Logs de purge** conservés 1 an pour preuve conformité
 - ⚠️ **Droit à l'oubli** doit contourner les rétentions (fonction dédiée)
 
 ### Rollback
+
 - ✅ **Backups automatiques** Supabase (PITR 7 jours)
 - ✅ **Désactivation rapide** via `enabled = false` dans config
 - ✅ **Pas de migration destructrice** (DDL uniquement)
@@ -751,12 +763,14 @@ Les données personnelles sont conservées **uniquement pour la durée nécessai
 ## 🔄 Évolutions futures
 
 ### Phase 2 (optionnelle)
+
 - Archivage S3/cold storage avant suppression définitive
 - Purge incrémentale (chunking) pour très grandes tables
 - Alertes Slack/Discord pour incidents
 - Métriques Grafana/Prometheus
 
 ### Phase 3 (si nécessaire)
+
 - Anonymisation au lieu de suppression (analytics)
 - Export automatique avant purge (compliance)
 - Retention différenciée par tenant/client

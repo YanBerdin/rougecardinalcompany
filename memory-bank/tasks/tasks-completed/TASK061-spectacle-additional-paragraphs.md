@@ -11,8 +11,8 @@
 
 ### Sous-tâches
 
-| ID  | Description | Statut | Mis à jour | Notes |
-|-----|-------------|--------|------------|-------|
+| ID | Description | Statut | Mis à jour | Notes |
+| ----- | ------------- | -------- | ------------ | ------- |
 | 0.1 | Refactoring SpectacleForm.tsx (<300 lignes) | ✅ Complété | 2026-02-02 | 578 → 233 lignes |
 | 0.2 | Création SpectacleFormFields.tsx | ✅ Complété | 2026-02-02 | 154 lignes |
 | 0.3 | Création SpectacleFormMetadata.tsx | ✅ Complété | 2026-02-02 | 281 lignes |
@@ -33,7 +33,7 @@
 
 ### 2026-02-02 - Implémentation complète TASK061
 
-**PHASE 0 - Refactoring SpectacleForm (Clean Code Compliance)**
+> **PHASE 0 - Refactoring SpectacleForm (Clean Code Compliance)**
 
 - ❌ **Problème initial**: SpectacleForm.tsx = 578 lignes (limite max: 300 lignes selon Clean Code)
 - ✅ **Solution**: Split en 3 sous-composants
@@ -43,7 +43,7 @@
   - `SpectacleFormImageSection.tsx`: 47 lignes (image picker)
 - ✅ **Validation**: TypeScript 0 erreurs, tous fichiers < 300 lignes
 
-**PHASE 1 - Backend complet**
+> **PHASE 1 - Backend complet**
 
 - ✅ **Schema déclaratif modifié** (`supabase/schemas/06_table_spectacles.sql`):
   - Ajout `paragraph_2 text` après description
@@ -72,7 +72,7 @@
   - Rendu conditionnel (`{spectacle.paragraph_2 && ...}`)
   - Repositionnement Photo 2 entre paragraph_2 et paragraph_3
 
-**PHASE 2 - Migration Database**
+> **PHASE 2 - Migration Database**
 
 - ✅ **Workflow exécuté**:
   1. `supabase stop` — Arrêt DB locale
@@ -94,21 +94,25 @@
 ## Décisions Techniques
 
 ### Pattern Données
+
 - **Choix**: 2 colonnes séparées (`paragraph_2`, `paragraph_3`) vs array JSONB
 - **Justification**: Simplicité, aligné pattern existant `home_about_content` (intro1/intro2)
 - **Alternative rejetée**: Array JSONB (complexité inutile pour 2 champs fixes)
 
 ### Validation
+
 - **Choix**: Champs optionnels, sans limite caractères
 - **Justification**: Contenu enrichi facultatif, pas bloquant pour publication
 - **Alignement**: Pattern identique à `description` actuel
 
 ### Ordre Implémentation
+
 - **Choix**: Database → Backend → Frontend
 - **Justification**: Évite erreurs TypeScript (types générés depuis DB)
 - **Prérequis Clean Code**: Refactoring SpectacleForm AVANT ajout nouveaux champs
 
 ### Security_Invoker Bug
+
 - **Problème**: `supabase db diff` génère vues sans `with (security_invoker = true)`
 - **Solution**: Correction manuelle dans migration avant application
 - **Impact**: Évite régression RLS (views auraient court-circuité les policies)
@@ -117,18 +121,21 @@
 ## Impact Produit
 
 ### Utilisateurs Admins
+
 - ✅ **Interface enrichie**: 2 nouveaux champs texte pour contenu additionnel
 - ✅ **UX claire**: Placeholders explicites ("affiché après Photo 1/2")
 - ✅ **Validation flexible**: Aucune limite caractères, champs optionnels
 - ✅ **Clean Code respecté**: Formulaire splitté, fichiers maintenables
 
 ### Visiteurs Site Public
+
 - ✅ **Lecture enrichie**: Contenu spectacle plus narratif
 - ✅ **Flow visuel optimisé**: Alternance texte/images (Desc → Photo1 → P2 → Photo2 → P3)
 - ✅ **Performance**: Pas de fetch supplémentaire (colonnes dans queries existantes)
 - ✅ **Graceful degradation**: Rendu conditionnel si champs vides
 
 ### Équipe Dev
+
 - ✅ **Maintenance facilitée**: SpectacleForm < 300 lignes (Clean Code compliance)
 - ✅ **Sécurité**: Migration corrigée proactivement (security_invoker)
 - ✅ **Documentation**: Plan détaillé, TASK memory-bank créé
@@ -137,26 +144,32 @@
 ## Fichiers Modifiés
 
 ### Database (Declarative Schema)
+
 - `supabase/schemas/06_table_spectacles.sql` (+6 lignes: 2 colonnes, 2 commentaires)
 
 ### Backend (Schemas & DAL)
+
 - `lib/schemas/spectacles.ts` (+4 lignes: SpectacleDbSchema, CreateSpectacleSchema)
 - `lib/forms/spectacle-form-helpers.ts` (+2 lignes: spectacleFormSchema)
 - `lib/dal/spectacles.ts` (+4 lignes: select étendus fetchById, fetchBySlug)
 
 ### Frontend (Admin)
+
 - `components/features/admin/spectacles/SpectacleForm.tsx` (refactoring 578 → 233 lignes)
 - `components/features/admin/spectacles/SpectacleFormFields.tsx` (nouveau: 154 lignes, +2 FormField)
 - `components/features/admin/spectacles/SpectacleFormMetadata.tsx` (nouveau: 281 lignes)
 - `components/features/admin/spectacles/SpectacleFormImageSection.tsx` (nouveau: 47 lignes)
 
 ### Frontend (Public)
+
 - `components/features/public-site/spectacles/SpectacleDetailView.tsx` (+30 lignes: 2 sections conditionnelles, repositionnement Photo 2)
 
 ### Migration
+
 - `supabase/migrations/20260202200333_add_spectacle_paragraphs.sql` (nouveau: 113 lignes)
 
 ### Documentation
+
 - `.github/prompts/plan-TASK061-spectacleAdditionalParagraphs.prompt.md` (mis à jour: PHASE 0, 1, 2 complétées)
 - `memory-bank/tasks/TASK061-spectacle-additional-paragraphs.md` (nouveau: ce fichier)
 
@@ -174,16 +187,19 @@
 ## Tests Effectués
 
 ### Validation Database
+
 - ✅ Migration appliquée locale: `SELECT column_name FROM information_schema.columns WHERE table_name = 'spectacles' AND column_name LIKE 'paragraph%'` → 2 rows
 - ✅ Migration appliquée cloud: `supabase db push --linked` → Success
 - ✅ Security_invoker vues: 4/4 vues avec `security_invoker = true` (via pg_class.reloptions)
 
 ### Validation Backend
+
 - ✅ TypeScript compilation: `pnpm build` (0 erreurs attendu)
 - ✅ Schemas Zod: Types générés correctement depuis DB
 - ✅ DAL queries: Select étendu avec paragraph_2, paragraph_3
 
 ### Validation Frontend
+
 - ✅ SpectacleForm refactoring: 578 → 233 lignes (Clean Code compliance)
 - ✅ Sous-composants créés: SpectacleFormFields (154), SpectacleFormMetadata (281), SpectacleFormImageSection (47)
 - ⏳ Tests manuels Admin: Création/édition spectacle avec paragraph_2/paragraph_3 (à effectuer)

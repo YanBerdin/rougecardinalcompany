@@ -547,6 +547,7 @@ Lors de l'édition d'un spectacle existant par un éditeur, un ajout de photo re
 **Cause racine** : La migration de sécurité `20260220130000_fix_spectacle_admin_views_security.sql` avait ajouté `AND (select public.is_admin()) = true` dans les vues `spectacles_landscape_photos_admin` et `spectacles_gallery_photos_admin`. Or, un éditeur n'est pas admin au sens de `is_admin()` → les vues retournaient 0 lignes pour les éditeurs → le formulaire affichait 0 photos (d'où le Bug #3) → le DAL `addSpectaclePhoto` lisait le nombre réel de photos en base (2 photos existantes) et bloquait l'insertion avec `[ERR_PHOTO_001]` (limite dépassée).
 
 **Chaîne causale** :
+
 1. `spectacles_landscape_photos_admin` et `spectacles_gallery_photos_admin` → filtre `is_admin()` → 0 lignes retournées pour un éditeur
 2. `SpectaclePhotoManager` reçoit 0 photos → affiche "aucune photo" (Bug #3)
 3. L'éditeur clique "Ajouter une photo" → `addSpectaclePhoto` requête la vraie table (pas la vue) → 2 photos existent → `[ERR_PHOTO_001]` : limite dépassée

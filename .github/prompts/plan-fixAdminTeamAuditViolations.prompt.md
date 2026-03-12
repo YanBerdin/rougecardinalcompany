@@ -58,6 +58,7 @@ Remplacement du helper `isValidTeamMemberId()` par un schéma Zod `TeamMemberIdS
 ### Étape 5 — Factoriser le check auth des pages dans un helper (Violations §3.12 + faille sécurité `user_metadata`)
 
 Créer une fonction `requireAdminPageAccess()` dans [lib/auth/is-admin.ts](lib/auth/is-admin.ts) qui :
+
 1. Appelle `getClaims()`
 2. Vérifie `app_metadata.role === "admin"` **en priorité** (comme le fait déjà `isAdmin()`)
 3. Fallback `user_metadata.role` (comme maintenant)
@@ -70,6 +71,7 @@ Remplacer le check inline dupliqué dans les 3 pages — [page.tsx](app/(admin)/
 ### Étape 6 — Renommer les state variables confuses (Violation §3.1)
 
 Dans [TeamManagementContainer.tsx](components/features/admin/team/TeamManagementContainer.tsx), renommer :
+
 - `deleteCandidate` / `setDeactivateTeamMember` → `deactivateCandidate` / `setDeactivateCandidate`
 - `openDeleteDialog` / `setOpenDeactivateDialog` → `isDeactivateDialogOpen` / `setIsDeactivateDialogOpen`
 - `showInactive` / `setShowInactiveTeamMember` → `showInactive` / `setShowInactive`

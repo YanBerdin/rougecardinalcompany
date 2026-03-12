@@ -49,6 +49,7 @@ Combinaison stable et suffisamment unique pour une liste d'actions récentes.
 ### 4a — Fusionner `handleExportCSV` et `handleExportJSON`
 
 Fonction privée `handleExport(format: 'csv' | 'json')` extraite :
+
 - Appelle `exportAnalyticsCSV` (CSV, via Server Action — nécessite `csv-stringify` Node.js)
 - Génère le JSON **entièrement côté client** depuis l'état React existant (voir 4c)
 - Factorisation du code de download DOM, des `toast` et du `catch`
@@ -130,9 +131,11 @@ Ajout de `aria-hidden="true"` sur chaque icône Lucide décorative :
 1. **`Tooltip` supprimé** de l'import recharts (non utilisé — `ChartTooltip` de shadcn le remplace).
 2. **`<ChartContainer>` encapsulé** dans `<div role="img" aria-label="Graphique des pages vues par période">` — WCAG 2.2 AA pour les graphiques non-textuels.
 3. **🆕 Branche "état vide" supprimée** : le bloc
+
    ```tsx
    if (data.data.length === 0) { return <p>Aucune donnée disponible</p>; }
    ```
+
    a été retiré — le graphique vide est géré par Recharts nativement (axes sans données) ; la duplication avec `isLoading` introduisait un état intermédiaire non prévu par le type `PageviewsChartProps`.
 
 **Statut** : ✅ Implémenté

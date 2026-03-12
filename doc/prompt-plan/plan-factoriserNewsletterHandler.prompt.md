@@ -89,5 +89,4 @@ Extraire la logique d'inscription newsletter dans un module serveur réutilisabl
 2. **Schema location**: `NewsletterSubscriptionSchema` actuellement dans `contact.ts` — déplacer vers fichier dédié ?
 3. **Hook client**: `useNewsletterSubscribe.ts` peut évoluer vers Server Action si souhaité (progressive enhancement).
 
-
 End of plan.

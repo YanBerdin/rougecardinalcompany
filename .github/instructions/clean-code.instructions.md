@@ -25,6 +25,7 @@ description: APPLY Clean Code principles WHENEVER writing code
 - One responsibility per file
 
 ## Functions
+
 - No flag parameters
 
 ## Errors

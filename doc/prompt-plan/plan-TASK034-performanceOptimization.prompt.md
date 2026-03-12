@@ -26,6 +26,7 @@ Optimiser les performances DB/frontend : suppression délais artificiels, SELECT
 Retirer `await delay()` / `sleep()` dans `components/features/` et `app/` — gain 5-8s latence.
 
 **Fichiers cibles** (grep `delay|sleep` marqués `TODO`):
+
 - `components/features/public-site/home/*Container.tsx`
 - `components/features/public-site/agenda/AgendaContainer.tsx`
 - `components/features/public-site/spectacles/SpectaclesContainer.tsx`
@@ -36,6 +37,7 @@ Retirer `await delay()` / `sleep()` dans `components/features/` et `app/` — ga
 ### 2. Optimiser SELECT * → colonnes explicites dans 6 DAL publics
 
 **Fichiers**:
+
 - `lib/dal/spectacles.ts`
 - `lib/dal/home.ts`
 - `lib/dal/press.ts`
@@ -44,6 +46,7 @@ Retirer `await delay()` / `sleep()` dans `components/features/` et `app/` — ga
 - `lib/dal/site-config.ts`
 
 **Pattern**:
+
 ```typescript
 // ❌ Avant
 .select('*')
@@ -57,12 +60,14 @@ Retirer `await delay()` / `sleep()` dans `components/features/` et `app/` — ga
 ⚠️ **CRITICAL**: NE PAS créer `createAnonClient()` - violerait les règles Supabase auth (cookies pattern).
 
 **Pages à migrer vers ISR** (`revalidate = 60`):
+
 - `app/(marketing)/page.tsx`
 - `app/(marketing)/spectacles/page.tsx`
 - `app/(marketing)/compagnie/page.tsx`
 - `app/(marketing)/presse/page.tsx`
 
 **Pattern migration**:
+
 ```typescript
 // ❌ Avant
 export const dynamic = 'force-dynamic';
@@ -81,6 +86,7 @@ export const revalidate = 60; // ISR 60 secondes
 **Action**: Convertir en index partiel pour optimiser les pages publiques uniquement
 
 **Migration**: `supabase/migrations/20260116XXXXXX_optimize_spectacles_slug_index.sql`
+
 ```sql
 -- Supprimer l'index existant (non partiel)
 drop index if exists public.idx_spectacles_slug;
@@ -92,6 +98,7 @@ create index idx_spectacles_slug_published
 ```
 
 **Schéma déclaratif**: `supabase/schemas/06_table_spectacles.sql`
+
 - Modifier la ligne 50 pour utiliser l'index partiel
 
 ### 5. Ajouter streaming Presse avec Suspense boundaries
@@ -99,11 +106,13 @@ create index idx_spectacles_slug_published
 **Fichier**: `components/features/public-site/presse/PresseServerGate.tsx`
 
 Wrapper chaque section avec `<Suspense>` + skeletons dédiés:
+
 - Media Kit section
 - Press Releases section
 - Articles section
 
 **Pattern**:
+
 ```tsx
 <Suspense fallback={<MediaKitSkeleton />}>
   <MediaKitSection />
@@ -116,11 +125,13 @@ Wrapper chaque section avec `<Suspense>` + skeletons dédiés:
 ### 6. Installer bundle analyzer
 
 **Commande**:
+
 ```bash
 pnpm add -D @next/bundle-analyzer cross-env
 ```
 
 **Config `next.config.ts`**:
+
 ```typescript
 import bundleAnalyzer from '@next/bundle-analyzer';
 
@@ -132,11 +143,13 @@ export default withBundleAnalyzer(nextConfig);
 ```
 
 **Script `package.json`**:
+
 ```json
 "analyze": "cross-env ANALYZE=true next build"
 ```
 
 **Modules à lazy-load après analyse**:
+
 - `@dnd-kit/core`, `@dnd-kit/sortable` (admin only)
 - Heavy admin components
 
@@ -147,6 +160,7 @@ export default withBundleAnalyzer(nextConfig);
 **Solution**: Wrapper les DAL functions avec `unstable_cache()` de Next.js
 
 **Pattern**:
+
 ```typescript
 // lib/dal/spectacles.ts
 import { unstable_cache } from 'next/cache';
@@ -169,6 +183,7 @@ export const fetchPublishedSpectacles = unstable_cache(
 ```
 
 **Server Actions**:
+
 ```typescript
 // lib/actions/spectacles-actions.ts
 import { revalidateTag } from 'next/cache';
@@ -185,6 +200,7 @@ export async function updateSpectacleAction(id: string, input: unknown) {
 ```
 
 **Tags à créer**:
+
 - `spectacles`, `hero`, `team`, `press`, `partners`, `compagnie`
 
 ### 8. Stratégie de cache DAL (React cache() + unstable_cache())
@@ -194,6 +210,7 @@ export async function updateSpectacleAction(id: string, input: unknown) {
 **Deux approches selon le besoin**:
 
 #### Approche A: Déduplication intra-request (React cache)
+
 Pour fonctions appelées plusieurs fois dans le même request (composants voisins).
 
 ```typescript
@@ -212,6 +229,7 @@ export const fetchActiveTeamMembers = cache(async () => {
 **Avantages**: Simple, déduplication automatique par request, pas de TTL à gérer.
 
 #### Approche B: Cache inter-request avec tags (unstable_cache)
+
 Pour données publiques réutilisées entre requests, avec invalidation granulaire.
 
 ```typescript
@@ -249,18 +267,21 @@ export const fetchPublishedSpectacles = unstable_cache(
 ## Phase 8 Status: ✅ COMPLETE (2026-01-16)
 
 **React cache() wrapper implementation completed:**
+
 - 12 DAL files modified
 - 21 read functions wrapped with cache()
 - TypeScript compilation: ✅ Clean
 - Test script created: `scripts/test-all-dal-functions.ts`
 
 **Files wrapped:**
+
 - site-config.ts (2), compagnie.ts (2), home-about.ts (2)
 - home-shows.ts (1), home-news.ts (1), home-partners.ts (1)
 - home-hero.ts (1), spectacles.ts (4), presse.ts (3)
 - agenda.ts (2), team.ts (2), compagnie-presentation.ts (1)
 
 **Benefits:**
+
 - Intra-request deduplication for frequently called DAL functions
 - Compatible with cookies() (unlike unstable_cache)
 - Combined with ISR (revalidate=60) for cross-request caching
@@ -286,12 +307,15 @@ export const fetchPublishedSpectacles = unstable_cache(
 ## Fichiers Clés à Créer/Modifier
 
 ### Nouveaux fichiers
+
 - `supabase/migrations/20260116XXXXXX_optimize_spectacles_slug_index.sql`
 
 ### Fichiers à NE PAS créer
+
 - ❌ `supabase/anon.ts` — Viole les règles Supabase auth (cookies pattern)
 
 ### Fichiers à modifier
+
 - `supabase/schemas/06_table_spectacles.sql` — Index slug partiel (ligne 50)
 - `next.config.ts` — Bundle analyzer config
 - `package.json` — Script `"analyze"`
@@ -307,16 +331,19 @@ export const fetchPublishedSpectacles = unstable_cache(
 ## Validation
 
 ### Tests de performance
+
 1. Mesurer TTFB avant/après sur pages clés (Lighthouse)
 2. Vérifier cache headers avec `curl -I`
 3. Valider ISR avec `x-nextjs-cache: HIT`
 
 ### Tests fonctionnels
+
 1. Vérifier que les pages publiques affichent les bonnes données
 2. Tester invalidation après mutation admin
 3. Valider que les pages admin fonctionnent toujours (cookies requis)
 
 ### Métriques cibles
+
 - TTFB homepage: < 200ms (vs ~800ms actuellement)
 - LCP: < 2.5s
 - Bundle size reduction: 10-20%

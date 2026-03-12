@@ -65,6 +65,7 @@
 **Fichier** : `SpectaclesView.tsx` — 2 occurrences (grille current shows ~ligne 66, grille archives ~ligne 157)
 
 **Action** : Remplacer les `<div style={{ backgroundImage }}` par `<Image fill>` de `next/image` avec :
+
 - `alt={`Affiche du spectacle ${show.title}`}`
 - `sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"`
 - `className="object-cover"` sur l'Image
@@ -77,6 +78,7 @@
 ### Étape 2.2 — Supprimer fichier mort `hooks.ts` (violation 3.4) ✅
 
 **Fichiers** :
+
 1. **Supprimer** `components/features/public-site/spectacles/hooks.ts` (129 lignes, 100% commenté)
 2. **Modifier** `components/features/public-site/spectacles/index.ts` — supprimer la ligne commentée `// export * from './hooks';`
 
@@ -89,6 +91,7 @@
 **Fichier** : `SpectacleDetailView.tsx`
 
 **Action** :
+
 1. Supprimer la fonction inline `getMediaPublicUrl` (lignes 36-38)
 2. Supprimer l'import `import { env } from "@/lib/env"` si devenu inutile
 3. Ajouter `import { buildMediaPublicUrl } from "@/lib/dal/helpers"`
@@ -103,16 +106,19 @@
 **Fichier** : `SpectacleDetailView.tsx` (lignes 69-82)
 
 **Problème de format** : Les helpers inline et centralisés diffèrent :
+
 | Inline | Centralisé | Différence |
 |--------|-----------|------------|
 | `formatDate` → "15 octobre" (sans année) | `formatSpectacleDetailDate` → "15 octobre 2024" (avec année) | Année en plus |
 | `formatDuration` → "1h 30min" (lisible) | `formatSpectacleDuration` → "90 min" (compact) | Format différent |
 
 **Action** : Créer 2 nouvelles variantes dans `lib/tables/spectacle-table-helpers.tsx` :
+
 1. `formatSpectaclePremiereShort(dateString)` → "15 octobre" (sans année, pour la page publique)
 2. `formatDurationHumanReadable(minutes)` → "1h 30min" (pour la page publique)
 
 Puis :
+
 1. Supprimer les fonctions inline `formatDate` et `formatDuration` de `SpectacleDetailView.tsx`
 2. Importer les nouvelles variantes depuis `@/lib/tables/spectacle-table-helpers`
 
@@ -123,6 +129,7 @@ Puis :
 **Fichier** : `SpectacleDetailView.tsx` (2 blocs CTA dupliqués ~lignes 236-260 et ~314-350)
 
 **Action planifiée** :
+
 1. Créer `components/features/public-site/spectacles/SpectacleCTABar.tsx`
 2. Props : `{ title: string; agendaLabel?: string; backLabel?: string }`
 3. Contient les 3 boutons : Réserver, Agenda, Retour (avec `aria-label` dynamiques)
@@ -185,6 +192,7 @@ Puis :
 **Pré-requis confirmé** : `created_at` et `updated_at` ne sont PAS consommés dans `SpectaclesView.tsx` (grep : 0 résultat).
 
 **Action** :
+
 1. Supprimer `created_at` et `updated_at` du mapping dans `SpectaclesContainer.tsx`
 2. Supprimer `created_at`, `updated_at`, `public`, `created_by` de `CurrentShowSchema` dans `lib/schemas/spectacles.ts` (tous inutilisés)
 
@@ -209,6 +217,7 @@ Puis :
 ### Étape 3.1 — Supprimer prop `loading` redondante (violation 3.10) ✅
 
 **Fichiers** :
+
 1. `components/features/public-site/spectacles/types.ts` — supprimer `loading?: boolean` de `SpectaclesViewProps`
 2. `SpectaclesView.tsx` — supprimer le bloc `if (loading) return <SpectaclesSkeleton />;` (lignes 31-33)
 3. `SpectaclesContainer.tsx` — supprimer `loading={false}` du JSX (ligne 82)
@@ -274,6 +283,7 @@ Ou mieux, utiliser le nouveau helper `formatSpectaclePremiereShort` créé à l'
 **Source** : `SpectacleCarousel.tsx` (lignes 370-391)
 
 **Action** :
+
 1. Créer `lib/hooks/use-prefers-reduced-motion.ts` avec le hook extrait
 2. Mettre à jour `SpectacleCarousel.tsx` pour importer depuis `@/lib/hooks/use-prefers-reduced-motion`
 3. Supprimer la définition locale du hook
@@ -285,6 +295,7 @@ Ou mieux, utiliser le nouveau helper `formatSpectaclePremiereShort` créé à l'
 **Source** : `SpectacleDetailView.tsx` (lignes 43-58)
 
 **Action** :
+
 1. Créer `components/features/public-site/spectacles/LandscapePhotoCard.tsx`
 2. Déplacer le composant avec ses types/props
 3. Importer dans `SpectacleDetailView.tsx`
@@ -302,6 +313,7 @@ Ou mieux, utiliser le nouveau helper `formatSpectaclePremiereShort` créé à l'
 Le script existant (206 lignes) teste `fetchAllSpectacles`, `fetchSpectacleById`, `fetchSpectacleBySlug`.
 
 **Ajouts** :
+
 - Test que `fetchSpectacleBySlug` ne produit pas de `console.log` (vérifier output)
 - Test que le résultat parsé par le schéma Zod est valide après suppression des champs `created_at`/`updated_at`/`public`/`created_by`
 
@@ -310,6 +322,7 @@ Le script existant (206 lignes) teste `fetchAllSpectacles`, `fetchSpectacleById`
 ### 5.2 — Créer `scripts/test-spectacles-schemas.ts` ❌
 
 **Tests** :
+
 - `CurrentShowSchema.parse()` avec données valides → success
 - `CurrentShowSchema.parse()` sans `created_at` → success (champ supprimé)
 - `ArchivedShowSchema.parse()` avec données valides → success
@@ -322,6 +335,7 @@ Le script existant (206 lignes) teste `fetchAllSpectacles`, `fetchSpectacleById`
 **Pré-requis** : Créer `playwright.config.ts` si absent (base sur `http://localhost:3000`).
 
 **Tests Playwright** :
+
 1. **Page listing** (`/spectacles`) :
    - Chargement sans erreur (status 200)
    - Présence d'au moins 1 spectacle dans le DOM
