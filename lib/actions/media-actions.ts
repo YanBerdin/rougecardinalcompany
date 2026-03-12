@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { env } from "@/lib/env"
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireMinRole } from "@/lib/auth/roles";
 import { uploadMedia, deleteMedia, findMediaByHash, getMediaPublicUrl } from "@/lib/dal/media";
 import { recordRequest } from "@/lib/utils/rate-limit";
 import { verifyFileMime } from "@/lib/utils/mime-verify";
@@ -109,7 +109,7 @@ export async function uploadMediaImage(
 ): Promise<MediaUploadResult> {
   try {
     // 0. Auth check
-    await requireAdmin();
+    await requireMinRole("editor");
 
     // 1. Validation
     const validation = await validateFile(formData);
@@ -354,7 +354,7 @@ export async function updateMediaMetadataAction(
   input: MediaMetadataUpdateInput
 ): Promise<MediaMetadataUpdateResult> {
   try {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
 
@@ -444,7 +444,7 @@ export async function regenerateThumbnailAction(
 ): Promise<RegenerateThumbnailResult> {
   try {
     // 1. Authorization check
-    await requireAdmin();
+    await requireMinRole("editor");
 
     // 2. Validate mediaId
     const mediaIdNum = Number(mediaId);

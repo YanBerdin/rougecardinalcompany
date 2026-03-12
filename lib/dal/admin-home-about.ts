@@ -3,7 +3,7 @@ import "server-only";
 import { createClient } from "@/supabase/server";
 import type { AboutContentInput, AboutContentDTO } from "@/lib/schemas/home-content";
 import { AboutContentInputSchema } from "@/lib/schemas/home-content";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireAdminOnly } from "@/lib/auth/roles";
 import { type DALResult } from "@/lib/dal/helpers";
 
 // =============================================================================
@@ -18,7 +18,7 @@ export async function fetchActiveAboutContent(): Promise<
   DALResult<AboutContentDTO | null>
 > {
   try {
-    await requireAdmin();
+    await requireAdminOnly();
 
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -62,7 +62,7 @@ export async function updateAboutContent(
   input: AboutContentInput
 ): Promise<DALResult<AboutContentDTO>> {
   try {
-    await requireAdmin();
+    await requireAdminOnly();
 
     const validated = await AboutContentInputSchema.parseAsync(input);
 

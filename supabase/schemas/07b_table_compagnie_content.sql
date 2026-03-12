@@ -54,25 +54,25 @@ create policy "Compagnie values are viewable by everyone"
   to anon, authenticated
   using ( true );
 
--- Gestion admin (politiques granulaires)
+-- Gestion editor+ (politiques granulaires)
 drop policy if exists "Admins can insert compagnie values" on public.compagnie_values;
-create policy "Admins can insert compagnie values"
+create policy "Editors+ can insert compagnie values"
   on public.compagnie_values for insert
   to authenticated
-  with check ( (select public.is_admin()) );
+  with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can update compagnie values" on public.compagnie_values;
-create policy "Admins can update compagnie values"
+create policy "Editors+ can update compagnie values"
   on public.compagnie_values for update
   to authenticated
-  using ( (select public.is_admin()) )
-  with check ( (select public.is_admin()) );
+  using ( (select public.has_min_role('editor')) )
+  with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can delete compagnie values" on public.compagnie_values;
-create policy "Admins can delete compagnie values"
+create policy "Editors+ can delete compagnie values"
   on public.compagnie_values for delete
   to authenticated
-  using ( (select public.is_admin()) );
+  using ( (select public.has_min_role('editor')) );
 
 -- STATS
  drop policy if exists "Compagnie stats are viewable by everyone" on public.compagnie_stats;
@@ -81,23 +81,23 @@ create policy "Compagnie stats are viewable by everyone"
   to anon, authenticated
   using ( true );
 
--- Gestion admin (politiques granulaires)
+-- Gestion editor+ (politiques granulaires)
 drop policy if exists "Admins can insert compagnie stats" on public.compagnie_stats;
-create policy "Admins can insert compagnie stats"
+create policy "Editors+ can insert compagnie stats"
   on public.compagnie_stats for insert
   to authenticated
-  with check ( (select public.is_admin()) );
+  with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can update compagnie stats" on public.compagnie_stats;
-create policy "Admins can update compagnie stats"
+create policy "Editors+ can update compagnie stats"
   on public.compagnie_stats for update
   to authenticated
-  using ( (select public.is_admin()) )
-  with check ( (select public.is_admin()) );
+  using ( (select public.has_min_role('editor')) )
+  with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can delete compagnie stats" on public.compagnie_stats;
-create policy "Admins can delete compagnie stats"
+create policy "Editors+ can delete compagnie stats"
   on public.compagnie_stats for delete
   to authenticated
-  using ( (select public.is_admin()) );
+  using ( (select public.has_min_role('editor')) );
 

@@ -34,112 +34,146 @@ import {
 } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
 import AdminAuthRow from "@/components/admin/AdminAuthRow";
+import { isRoleAtLeast } from "@/lib/auth/role-helpers";
+import type { AppRole } from "@/lib/auth/role-helpers";
 
-const generalItems = [
+interface SidebarItem {
+  title: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  minRole: AppRole;
+}
+
+const generalItems: SidebarItem[] = [
   {
     title: "Tableau de bord",
     href: "/admin",
     icon: LayoutDashboard,
+    minRole: "editor",
   },
   {
     title: "Équipe",
     href: "/admin/team",
     icon: Users,
+    minRole: "admin",
   },
   {
     title: "Utilisateurs",
     href: "/admin/users",
     icon: UserCog,
+    minRole: "admin",
   },
 ];
 
-const contentItems = [
+const contentItems: SidebarItem[] = [
   {
     title: "Spectacles",
     href: "/admin/spectacles",
     icon: FileText,
+    minRole: "editor",
   },
   {
     title: "Agenda",
     href: "/admin/agenda",
     icon: Calendar,
+    minRole: "editor",
   },
   {
     title: "Lieux",
     href: "/admin/lieux",
     icon: MapPin,
+    minRole: "editor",
   },
   {
     title: "Presse",
     href: "/admin/presse",
     icon: FileText,
+    minRole: "editor",
   },
   {
     title: "Compagnie",
     href: "/admin/compagnie",
     icon: Building2,
+    minRole: "editor",
   },
   {
     title: "Médiathèque",
     href: "/admin/media",
     icon: ImageIcon,
+    minRole: "editor",
   },
 ];
 
-const homepageItems = [
+const homepageItems: SidebarItem[] = [
   {
     title: "Accueil - Slides",
     href: "/admin/home/hero",
     icon: ImageIcon,
+    minRole: "admin",
   },
   {
     title: "Accueil - La compagnie",
     href: "/admin/home/about",
     icon: FileText,
+    minRole: "admin",
   },
   {
     title: "Partenaires",
     href: "/admin/partners",
     icon: Handshake,
+    minRole: "admin",
   },
 ];
 
-const otherItems = [
+const otherItems: SidebarItem[] = [
   {
     title: "Analytics",
     href: "/admin/analytics",
     icon: BarChart3,
+    minRole: "admin",
   },
   {
     title: "Affichage Sections",
     href: "/admin/site-config",
     icon: ToggleLeft,
+    minRole: "admin",
   },
   {
     title: "Audit Logs",
     href: "/admin/audit-logs",
     icon: ScrollText,
+    minRole: "admin",
   },
   {
     title: "Paramètres",
     href: "/admin/settings",
     icon: Settings,
+    minRole: "admin",
   },
   {
     title: "Debug Auth",
     href: "/admin/debug-auth",
     icon: Bug,
+    minRole: "admin",
   },
   {
     title: "Retour au site publique",
     href: "/",
     icon: Home,
+    minRole: "editor",
   },
 ];
 
+interface AppSidebarProps {
+  userRole: AppRole;
+}
+
 // https://ui.shadcn.com/docs/components/sidebar
-export default function AppSidebar() {
+export default function AppSidebar({ userRole }: AppSidebarProps) {
   const pathname = usePathname();
+
+  const filterByRole = (items: SidebarItem[]) =>
+    items.filter((item) => isRoleAtLeast(userRole, item.minRole));
 
   return (
     <Sidebar collapsible="icon">
@@ -176,7 +210,7 @@ export default function AppSidebar() {
           <SidebarGroupLabel>Général</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {generalItems.map((item) => {
+              {filterByRole(generalItems).map((item) => {
                 const isActive =
                   pathname === item.href ||
                   (item.href !== "/admin" && pathname.startsWith(item.href));
@@ -199,7 +233,7 @@ export default function AppSidebar() {
           <SidebarGroupLabel>Pages</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {contentItems.map((item) => {
+              {filterByRole(contentItems).map((item) => {
                 const isActive =
                   pathname === item.href ||
                   (item.href !== "/admin" && pathname.startsWith(item.href));
@@ -218,11 +252,12 @@ export default function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        {filterByRole(homepageItems).length > 0 && (
         <SidebarGroup>
           <SidebarGroupLabel>Accueil</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {homepageItems.map((item) => {
+              {filterByRole(homepageItems).map((item) => {
                 const isActive =
                   pathname === item.href ||
                   (item.href !== "/admin" && pathname.startsWith(item.href));
@@ -240,12 +275,13 @@ export default function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        )}
 
         <SidebarGroup>
           <SidebarGroupLabel>Autres</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {otherItems.map((item) => {
+              {filterByRole(otherItems).map((item) => {
                 const isActive = pathname === item.href;
                 return (
                   <SidebarMenuItem key={item.href} title={item.title}>

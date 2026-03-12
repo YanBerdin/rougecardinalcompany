@@ -77,37 +77,37 @@ alter table public.communiques_presse enable row level security;
 drop policy if exists "Public press releases are viewable by everyone" on public.communiques_presse;
 drop policy if exists "Admins can view all press releases" on public.communiques_presse;
 
-create policy "View press releases (public OR admin all)"
+create policy "View press releases (public OR editor+ all)"
 on public.communiques_presse
 for select
 to anon, authenticated
 using (
   public = true
-  or (select public.is_admin())
+  or (select public.has_min_role('editor'))
 );
 
--- Seuls les admins peuvent gérer les communiqués
+-- Seuls les editors+ peuvent gérer les communiqués
 drop policy if exists "Admins can create press releases" on public.communiques_presse;
-create policy "Admins can create press releases"
+create policy "Editors+ can create press releases"
 on public.communiques_presse
 for insert
 to authenticated
-with check ( (select public.is_admin()) );
+with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can update press releases" on public.communiques_presse;
-create policy "Admins can update press releases"
+create policy "Editors+ can update press releases"
 on public.communiques_presse
 for update
 to authenticated
-using ( (select public.is_admin()) )
-with check ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) )
+with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can delete press releases" on public.communiques_presse;
-create policy "Admins can delete press releases"
+create policy "Editors+ can delete press releases"
 on public.communiques_presse
 for delete
 to authenticated
-using ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) );
 
 -- ---- CONTACTS PRESSE ----
 alter table public.contacts_presse enable row level security;

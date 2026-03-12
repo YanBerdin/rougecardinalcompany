@@ -3,7 +3,7 @@ import "server-only";
 
 import { cache } from "react";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireAdminOnly } from "@/lib/auth/roles";
 import {
     type DALResult,
     dalSuccess,
@@ -110,7 +110,7 @@ function buildPartnerUpdatePayload(
  */
 export const fetchAllPartnersAdmin = cache(
     async (): Promise<DALResult<PartnerDTO[]>> => {
-        await requireAdmin();
+        await requireAdminOnly();
 
         const supabase = await createClient();
         const { data, error } = await supabase
@@ -133,7 +133,7 @@ export const fetchAllPartnersAdmin = cache(
  */
 export const fetchPartnerById = cache(
     async (id: bigint): Promise<DALResult<PartnerDTO | null>> => {
-        await requireAdmin();
+        await requireAdminOnly();
 
         const supabase = await createClient();
         const { data, error } = await supabase
@@ -159,7 +159,7 @@ export const fetchPartnerById = cache(
 export async function createPartner(
     input: PartnerInput
 ): Promise<DALResult<PartnerDTO>> {
-    await requireAdmin();
+    await requireAdminOnly();
     await PartnerInputSchema.parseAsync(input);
 
     const supabase = await createClient();
@@ -193,7 +193,7 @@ export async function updatePartner(
     id: bigint,
     input: Partial<PartnerInput>
 ): Promise<DALResult<PartnerDTO>> {
-    await requireAdmin();
+    await requireAdminOnly();
     await PartnerInputSchema.partial().parseAsync(input);
 
     const supabase = await createClient();
@@ -215,7 +215,7 @@ export async function updatePartner(
  * Delete partner
  */
 export async function deletePartner(id: bigint): Promise<DALResult<void>> {
-    await requireAdmin();
+    await requireAdminOnly();
 
     const supabase = await createClient();
     const { error } = await supabase
@@ -236,7 +236,7 @@ export async function deletePartner(id: bigint): Promise<DALResult<void>> {
 export async function reorderPartners(
     input: ReorderPartnersInput
 ): Promise<DALResult<void>> {
-    await requireAdmin();
+    await requireAdminOnly();
 
     const supabase = await createClient();
 

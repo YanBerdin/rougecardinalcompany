@@ -3,7 +3,7 @@ import "server-only";
 import { createClient } from "@/supabase/server";
 import { createAdminClient } from "@/supabase/admin";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireAdminOnly } from "@/lib/auth/roles";
 import { env } from "@/lib/env";
 import {
   UpdateUserRoleSchema,
@@ -116,7 +116,7 @@ function mapUsersWithProfiles(
  */
 export async function listAllUsers(): Promise<DALResult<UserWithProfile[]>> {
   try {
-    await requireAdmin();
+    await requireAdminOnly();
 
     const supabase = await createClient();
     const adminClient = await createAdminClient();
@@ -179,7 +179,7 @@ async function findUserByEmail(
 export async function updateUserRole(
   input: UpdateUserRoleInput
 ): Promise<DALResult<null>> {
-  await requireAdmin();
+  await requireAdminOnly();
 
   const validated = UpdateUserRoleSchema.parse(input);
   const supabase = await createClient();
@@ -222,7 +222,7 @@ export async function updateUserRole(
 }
 
 export async function deleteUser(userId: string): Promise<DALResult<null>> {
-  await requireAdmin();
+  await requireAdminOnly();
 
   const UUID_REGEX =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -440,7 +440,7 @@ async function logInvitationAuditRecord(
 export async function inviteUserWithoutEmail(
   input: InviteUserInput
 ): Promise<DALResult<{ userId: string; invitationUrl: string }>> {
-  await requireAdmin();
+  await requireAdminOnly();
 
   const validated = InviteUserSchema.parse(input);
   const supabase = await createClient();

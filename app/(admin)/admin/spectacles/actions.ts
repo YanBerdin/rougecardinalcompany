@@ -2,7 +2,7 @@
 
 import "server-only";
 import { revalidatePath } from "next/cache";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireMinRole } from "@/lib/auth/roles";
 import {
     createSpectacle,
     updateSpectacle,
@@ -43,7 +43,7 @@ export async function createSpectacleAction(
     input: CreateSpectacleInput
 ): Promise<ActionResult<SpectacleDb>> {
     try {
-        await requireAdmin();
+        await requireMinRole("editor");
         const result = await createSpectacle(input);
 
         if (!result.success) {
@@ -78,7 +78,7 @@ export async function updateSpectacleAction(
     input: UpdateSpectacleInput
 ): Promise<ActionResult<SpectacleDb>> {
     try {
-        await requireAdmin();
+        await requireMinRole("editor");
         const result = await updateSpectacle(input);
 
         if (!result.success) {
@@ -112,7 +112,7 @@ export async function deleteSpectacleAction(
     id: number
 ): Promise<ActionResult<null>> {
     try {
-        await requireAdmin();
+        await requireMinRole("editor");
         const result = await deleteSpectacle(id);
 
         if (!result.success) {

@@ -1,11 +1,14 @@
 // Auth / env UI is rendered in the admin layout to keep it unique across admin pages
 
 import { Suspense } from "react";
+import { getCurrentUserRole } from "@/lib/auth/roles";
 import { DashboardStatsContainer } from "@/components/admin/dashboard/DashboardStatsContainer";
 import { StatsCardsSkeleton } from "@/components/skeletons/StatsCardsSkeleton";
 import CardsDashboard from "@/components/admin/CardsDashboard";
 
-export default function AdminDashboard() {
+export default async function AdminDashboard() {
+  const userRole = await getCurrentUserRole();
+
   return (
     <div className="space-y-8">
       <div>
@@ -17,10 +20,10 @@ export default function AdminDashboard() {
 
       {/* Stats cards: suspend only the stats container so header and actions render immediately */}
       <Suspense fallback={<StatsCardsSkeleton />}>
-        <DashboardStatsContainer />
+        <DashboardStatsContainer userRole={userRole} />
       </Suspense>
 
-      <CardsDashboard />
+      <CardsDashboard userRole={userRole} />
     </div>
   );
 }

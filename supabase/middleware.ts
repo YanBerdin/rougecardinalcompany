@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { env } from "@/lib/env";
+import { normalizeRole, isRoleAtLeast } from "@/lib/auth/role-helpers";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -127,7 +128,7 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Protect admin routes: require authenticated user with role 'admin'
+  // Protect admin routes: require authenticated user with at least 'editor' role
   // also protect API admin endpoints under /api/admin
   // Protect UI admin routes (redirect to login) and API admin routes (return 403 JSON)
   const isAdminPath = request.nextUrl.pathname.startsWith("/admin");
@@ -135,12 +136,15 @@ export async function updateSession(request: NextRequest) {
 
   if (isAdminPath || isApiAdminPath) {
     try {
-      // user may be undefined; rely on the helper shape from claims
-      const isAdminCandidate =
-        Boolean(user) &&
-        String(user?.user_metadata?.role ?? "").toLowerCase() === "admin";
+      // Resolve effective role from app_metadata (secure) then user_metadata (fallback)
+      const appRole = normalizeRole(user?.app_metadata?.role);
+      const userMetaRole = normalizeRole(user?.user_metadata?.role);
+      const effectiveRole = isRoleAtLeast(appRole, userMetaRole) ? appRole : userMetaRole;
 
-      if (!isAdminCandidate) {
+      const hasBackofficeAccess =
+        Boolean(user) && isRoleAtLeast(effectiveRole, "editor");
+
+      if (!hasBackofficeAccess) {
         if (isApiAdminPath) {
           // For API endpoints, return 403 JSON so clients can handle programmatically
           return NextResponse.json({ error: "Forbidden" }, { status: 403 });

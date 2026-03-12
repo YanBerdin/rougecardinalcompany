@@ -1,6 +1,7 @@
 import { AboutContentContainer } from "@/components/features/admin/home/AboutContentContainer";
 import { StatsContainer } from "@/components/features/admin/home/StatsContainer";
 import { Separator } from "@/components/ui/separator";
+import { requireAdminPageAccess } from "@/lib/auth/roles";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -10,7 +11,9 @@ export const metadata = {
     description: "Manage about section content",
 };
 
-export default function AboutContentPage() {
+export default async function AboutContentPage() {
+    await requireAdminPageAccess();
+
     return (
         <div className="container mx-auto py-8 space-y-8">
             <AboutContentContainer />

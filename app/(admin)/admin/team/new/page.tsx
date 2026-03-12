@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { requireAdminPageAccess } from "@/lib/auth/is-admin";
+import { requireAdminPageAccess } from "@/lib/auth/roles";
 import { Button } from "@/components/ui/button";
 import {
     Card,

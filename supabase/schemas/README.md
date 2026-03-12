@@ -21,13 +21,27 @@ where (select public.is_admin()) = true;
 ```
 
 - n'accordez jamais `grant select to authenticated` sur des vues admin ; préférez des politiques RLS et des gardes dans la vue.
+- pour les **tables éditoriales** (spectacles, événements, presse, médias, compagnie, hero, about, partenaires…), utilisez `public.has_min_role('editor')` au lieu de `public.is_admin()` dans les policies RLS d'écriture. Cela permet aux éditeurs de modifier le contenu sans accès admin complet :
+
+```sql
+-- Pattern hiérarchique : user(0) < editor(1) < admin(2)
+create policy "Editors+ can update spectacles" on public.spectacles
+for update
+to authenticated
+using ( (select public.has_min_role('editor')) )
+with check ( (select public.has_min_role('editor')) );
+```
 
 Migrations de sécurité récentes
 
+- `supabase/migrations/20260311120000_editor_role_rls_policies.sql` — feat : ~60 ALTER POLICY sur tables éditoriales migrent `is_admin()` vers `has_min_role('editor')` (spectacles, événements, presse, médias, compagnie, hero, about, partenaires, lieux, tags, catégories, SEO, versioning). Déclaratifs synchronisés : `61_rls_main_tables.sql`, `62_rls_advanced_tables.sql`. Appliquée le 2026-03-11.
+- `supabase/migrations/20260311030511_editor_storage_policies.sql` — feat : policies stockage bucket `medias` migrées de `is_admin()` vers `has_min_role('editor')` pour INSERT/UPDATE/DELETE. Déclaratif : `70_storage_policies.sql` (nouveau). Appliquée le 2026-03-11.
+- `supabase/migrations/20260311030000_create_has_min_role_function.sql` — feat : création fonction `public.has_min_role(required_role text)` retournant boolean, hiérarchie `user(0) < editor(1) < admin(2)`, SECURITY INVOKER, `set search_path = ''`, immutable. Prérequis cloud pour les policies éditeur. Déclaratif : `02b_functions_core.sql`. Appliquée le 2026-03-11.
 - `supabase/migrations/20260310120000_fix_rls_policy_bugs.sql` — bugfix : (P0) retrait `AS RESTRICTIVE` sur policy SELECT admin `articles_presse` (bloquait les authenticated non-admins), (P1-a) policies `super_admin` impossibles remplacées par `is_admin()` sur `logs_audit`, (P1-b) subqueries inline `exists(...)` remplacées par `(select public.is_admin())` dans les policies `spectacles`, (P2) description rôle `editor` mise à jour dans `InviteUserForm.tsx`. Déclaratifs synchronisés : `08_table_articles_presse.sql`, `10_tables_system.sql`, `61_rls_main_tables.sql`. Appliquée le 2026-03-10.
 - `supabase/migrations/20260304010000_fix_rls_display_toggles_visibility.sql` — hotfix : correction policy RLS SELECT `configurations_site` pour autoriser les clés `display_toggle_*` en lecture publique (anon + authenticated). Les sections hero/about/spectacles/partners/newsletter étaient invisibles car RLS filtrait les display toggles. Déclaratif : `10_tables_system.sql`. Appliquée le 2026-03-04.
 - `supabase/migrations/20260304000000_fix_configurations_site_grants.sql` — hotfix : ajout GRANT SELECT (anon, authenticated) et GRANT INSERT/UPDATE/DELETE (authenticated) manquants sur `configurations_site`. Déclaratif : `10_tables_system.sql`. Appliquée le 2026-03-04.
 - `supabase/migrations/20260227210418_fix_analytics_events_insert_policy.sql` — hotfix : correction policy RLS INSERT `analytics_events` : ajout `'page_view'` dans les event_types autorisés + `entity_type IS NULL` permis explicitement. Deux policies granulaires anon/authenticated remplacent l'ancienne policy combinée. Déclaratif : `62_rls_advanced_tables.sql` (NOTE ajoutée). Appliquée le 2026-02-27.
+- `supabase/migrations/20260311190551_fix_spectacle_photo_views_editor_access.sql` — bugfix : remplacement du garde `is_admin()` par `has_min_role('editor')` dans les vues `spectacles_landscape_photos_admin` et `spectacles_gallery_photos_admin`. Les éditeurs ne pouvaient plus voir les photos paysage/galerie en backoffice (formulaire vide → `[ERR_PHOTO_001]`). Déclaratifs synchronisés : `41_views_spectacle_photos.sql`, `42_views_spectacle_gallery.sql`. Appliquée le 2026-03-11.
 - `supabase/migrations/20260220130000_fix_spectacle_admin_views_security.sql` — hotfix : ajout garde `is_admin()` sur `spectacles_landscape_photos_admin` (`41_views_spectacle_photos.sql`) et `spectacles_gallery_photos_admin` (`42_views_spectacle_gallery.sql`) + REVOKE anon (pattern TASK037). Appliquée le 2026-02-20.
 - `supabase/migrations/20260103120000_fix_communiques_presse_dashboard_admin_access.sql` — hotfix : recréation de la vue admin avec garde `is_admin()`.
 - `supabase/migrations/20260103123000_revoke_authenticated_on_communiques_dashboard.sql` — révocation du SELECT au rôle `authenticated` sur la vue admin.
@@ -75,7 +89,7 @@ Ce dossier contient le schéma déclaratif de la base de données selon les inst
 ```bash
 supabase/schemas/
 ├── 01_extensions.sql              # Extensions PostgreSQL (pgcrypto, pg_trgm)
-├── 02b_functions_core.sql         # Fonctions cœur précoces (is_admin, helpers, immutable…)
+├── 02b_functions_core.sql         # Fonctions cœur précoces (is_admin, has_min_role, helpers, immutable…)
 ├── 02c_storage_buckets.sql        # Buckets Supabase Storage (medias, backups) + RLS policies
 ├── 02_table_profiles.sql          # Table des profils + RLS
 ├── 03_table_medias.sql            # Table des médias + RLS
@@ -117,10 +131,31 @@ supabase/schemas/
 ├── 62_rls_advanced_tables.sql     # Politiques RLS tables avancées
 ├── 63_reorder_team_members.sql    # Fonction réordonnancement équipe
 ├── 63b_reorder_hero_slides.sql    # Fonction réordonnancement hero slides
+├── 70_storage_policies.sql        # Policies stockage bucket medias (has_min_role)
 └── README.md                      # Cette documentation
 ```
 
 **Note RLS**: les nouvelles tables co‑localisent leurs politiques (dans le même fichier que la table). Des fichiers RLS globaux (60–62) restent en place pour les tables historiques; convergence vers un modèle 100% co‑localisé en cours.
+
+---
+
+## 🆕 Mises à jour récentes (mars 2026)
+
+- **FEAT: Permissions hiérarchiques rôle éditeur — user < editor < admin (11 mars 2026)** : Implémentation complète de la hiérarchie de rôles permettant aux éditeurs de gérer le contenu éditorial sans accès admin complet.
+  - **Fonction SQL** : `public.has_min_role(required_role text)` — SECURITY INVOKER, immutable, `set search_path = ''`. Hiérarchie : `user(0) < editor(1) < admin(2)`. Lecture rôle depuis JWT claims (`app_metadata.role` → `user_metadata.role` → fallback `'user'`).
+  - **~60 policies RLS migrées** : Toutes les policies d'écriture (INSERT/UPDATE/DELETE) sur les tables éditoriales passent de `is_admin()` à `has_min_role('editor')`. Tables : spectacles, événements, presse, médias, compagnie, hero, about, partenaires, lieux, tags, catégories, SEO, versioning.
+  - **Storage bucket `medias`** : Policies INSERT/UPDATE/DELETE migrées vers `has_min_role('editor')`.
+  - **Middleware Next.js** (`supabase/middleware.ts`) : Corrigé pour accepter les éditeurs (remplacement `role === 'admin'` par `isRoleAtLeast(role, 'editor')` via `lib/auth/role-helpers.ts`).
+  - **Schémas déclaratifs modifiés** :
+    - `02b_functions_core.sql` : Ajout `has_min_role()` function
+    - `61_rls_main_tables.sql` : Migration policies tables principales
+    - `62_rls_advanced_tables.sql` : Migration policies tables avancées
+    - `70_storage_policies.sql` (nouveau) : Policies stockage avec `has_min_role`
+  - **Migrations** :
+    - `20260311030000_create_has_min_role_function.sql` — prérequis cloud
+    - `20260311030511_editor_storage_policies.sql` — storage bucket medias
+    - `20260311120000_editor_role_rls_policies.sql` — ~60 ALTER POLICY
+  - **Validation** : Build Next.js OK, 3 migrations cloud appliquées, accès éditeur testé et fonctionnel.
 
 ---
 

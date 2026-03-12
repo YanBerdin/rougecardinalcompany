@@ -1,4 +1,4 @@
-import { withAdminAuth, ApiResponse, HttpStatus, parseNumericId } from "@/lib/api/helpers";
+import { withBackofficeAuth, ApiResponse, HttpStatus, parseNumericId } from "@/lib/api/helpers";
 import { fetchSpectacleGalleryPhotosAdmin } from "@/lib/dal/spectacle-photos";
 import type { GalleryPhotoTransport, GalleryPhotoDTO } from "@/lib/schemas/spectacles";
 
@@ -14,7 +14,7 @@ export async function GET(
     _request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    return withAdminAuth(async () => {
+    return withBackofficeAuth(async () => {
         try {
             const { id } = await params;
 

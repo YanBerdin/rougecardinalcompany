@@ -3,7 +3,7 @@ import "server-only";
 
 import { cache } from "react";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireMinRole } from "@/lib/auth/roles";
 import {
     type DALResult,
     dalSuccess,
@@ -112,7 +112,7 @@ async function getNextPosition(
  */
 export const fetchAllPresentationSectionsAdmin = cache(
     async (): Promise<DALResult<PresentationSectionDTO[]>> => {
-        await requireAdmin();
+        await requireMinRole("editor");
 
         const supabase = await createClient();
         const { data, error } = await supabase
@@ -136,7 +136,7 @@ export const fetchAllPresentationSectionsAdmin = cache(
 export async function createPresentationSection(
     input: PresentationSectionInput
 ): Promise<DALResult<PresentationSectionDTO>> {
-    await requireAdmin();
+    await requireMinRole("editor");
     await PresentationSectionInputSchema.parseAsync(input);
 
     const supabase = await createClient();
@@ -176,7 +176,7 @@ export async function updatePresentationSection(
     id: bigint,
     input: Partial<PresentationSectionInput>
 ): Promise<DALResult<PresentationSectionDTO>> {
-    await requireAdmin();
+    await requireMinRole("editor");
     await PresentationSectionInputSchema.partial().parseAsync(input);
 
     const supabase = await createClient();
@@ -213,7 +213,7 @@ export async function updatePresentationSection(
  * Delete presentation section
  */
 export async function deletePresentationSection(id: bigint): Promise<DALResult<void>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
     const { error } = await supabase

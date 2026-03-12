@@ -1,4 +1,5 @@
 import { PartnersContainer } from "@/components/features/admin/partners/PartnersContainer";
+import { requireAdminPageAccess } from "@/lib/auth/roles";
 
 export const metadata = {
     title: "Partners Management | Admin",
@@ -7,6 +8,8 @@ export const metadata = {
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default function PartnersPage() {
+export default async function PartnersPage() {
+    await requireAdminPageAccess();
+
     return <PartnersContainer />;
 }

@@ -2,7 +2,7 @@
 import "server-only";
 import { cache } from "react";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireAdminOnly } from "@/lib/auth/roles";
 import type { Database } from "@/lib/database.types";
 import { TeamMemberDbSchema } from "@/lib/schemas/team";
 import { z } from "zod";
@@ -143,7 +143,7 @@ export async function upsertTeamMember(
   payload: Partial<TeamRow>
 ): Promise<DALResult<TeamRow>> {
   try {
-    await requireAdmin();
+    await requireAdminOnly();
 
     const validated = await UpsertTeamMemberSchema.safeParseAsync(payload as unknown);
     if (!validated.success) {
@@ -215,7 +215,7 @@ export async function setTeamMemberActive(
   active: boolean
 ): Promise<DALResult<{ id: number; active: boolean }>> {
   try {
-    await requireAdmin();
+    await requireAdminOnly();
 
     const idCheck = z.number().int().positive().safeParse(id);
     if (!idCheck.success) {

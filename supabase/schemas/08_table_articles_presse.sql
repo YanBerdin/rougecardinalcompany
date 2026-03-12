@@ -63,37 +63,37 @@ for select
 to anon, authenticated
 using ( published_at is not null );
 
--- Admins can read all articles (including drafts)
--- PERMISSIVE: Combined with public policy via OR logic, so admins see everything
--- and non-admin authenticated users still see only published articles
+-- Editors+ can read all articles (including drafts)
+-- PERMISSIVE: Combined with public policy via OR logic, so editors+ see everything
+-- and non-editor authenticated users still see only published articles
 drop policy if exists "Admins can view all press articles" on public.articles_presse;
-create policy "Admins can view all press articles"
+create policy "Editors+ can view all press articles"
 on public.articles_presse
 for select
 to authenticated
-using ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) );
 
--- Only admins can create articles
+-- Only editors+ can create articles
 drop policy if exists "Admins can create press articles" on public.articles_presse;
-create policy "Admins can create press articles"
+create policy "Editors+ can create press articles"
 on public.articles_presse
 for insert
 to authenticated
-with check ( (select public.is_admin()) );
+with check ( (select public.has_min_role('editor')) );
 
--- Only admins can update articles
+-- Only editors+ can update articles
 drop policy if exists "Admins can update press articles" on public.articles_presse;
-create policy "Admins can update press articles"
+create policy "Editors+ can update press articles"
 on public.articles_presse
 for update
 to authenticated
-using ( (select public.is_admin()) )
-with check ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) )
+with check ( (select public.has_min_role('editor')) );
 
--- Only admins can delete articles
+-- Only editors+ can delete articles
 drop policy if exists "Admins can delete press articles" on public.articles_presse;
-create policy "Admins can delete press articles"
+create policy "Editors+ can delete press articles"
 on public.articles_presse
 for delete
 to authenticated
-using ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) );

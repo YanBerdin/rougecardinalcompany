@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireAdminOnly, requireBackofficeAccess } from "@/lib/auth/roles";
 
 /**
  * HTTP status codes as constants
@@ -94,7 +94,22 @@ export async function withAdminAuth<T>(
   handler: () => Promise<T>
 ): Promise<T | NextResponse> {
   try {
-    await requireAdmin();
+    await requireAdminOnly();
+    return await handler();
+  } catch (error: unknown) {
+    console.error("[API] Auth error:", error);
+    return ApiResponse.error("Forbidden", HttpStatus.FORBIDDEN);
+  }
+}
+
+/**
+ * Wrapper for protected routes requiring backoffice access (editor+)
+ */
+export async function withBackofficeAuth<T>(
+  handler: () => Promise<T>
+): Promise<T | NextResponse> {
+  try {
+    await requireBackofficeAccess();
     return await handler();
   } catch (error: unknown) {
     console.error("[API] Auth error:", error);

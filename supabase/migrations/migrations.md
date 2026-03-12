@@ -4,6 +4,78 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-03-11 - FEAT: Permissions hiérarchiques rôle éditeur (user < editor < admin)
+
+3 migrations déployées en cloud pour implémenter les permissions granulaires du rôle éditeur.
+
+#### feat(db) — Fonction SQL `has_min_role(required_role text)`
+
+**Migration** : `20260311030000_create_has_min_role_function.sql`
+**Schéma déclaratif synchronisé** : ✅ `supabase/schemas/02b_functions_core.sql`
+
+**Contexte** :
+Prérequis pour le déploiement cloud. Le schéma déclaratif local créait déjà `has_min_role()`, mais le cloud n'avait pas cette fonction. Les migrations RLS/Storage (ci-dessous) dépendant de cette fonction, une migration dédiée a été créée en amont.
+
+**Détails** :
+
+```sql
+-- Fonction hiérarchique : user(0) < editor(1) < admin(2)
+create or replace function public.has_min_role(required_role text)
+returns boolean
+language plpgsql
+security invoker
+set search_path = ''
+stable
+as $$
+declare
+  user_role text;
+  role_level int;
+  required_level int;
+begin
+  user_role := coalesce(
+    ((select auth.jwt()) -> 'app_metadata' ->> 'role'),
+    'user'
+  );
+  -- ... mapping vers niveaux numériques et comparaison
+  return role_level >= required_level;
+end;
+$$;
+```
+
+#### feat(db) — Politiques stockage bucket `medias` pour éditeur
+
+**Migration** : `20260311030511_editor_storage_policies.sql`
+**Schéma déclaratif synchronisé** : ✅ `supabase/schemas/70_storage_policies.sql` (nouveau fichier)
+
+**Contexte** :
+Remplacement des policies `storage.objects` du bucket `medias` avec `has_min_role('editor')` au lieu de `is_admin()`, permettant aux éditeurs d'uploader, modifier et supprimer des fichiers médias.
+
+**Correction** :
+
+```sql
+-- ❌ AVANT
+using ( (select public.is_admin()) )
+
+-- ✅ APRÈS
+using ( (select public.has_min_role('editor')) )
+```
+
+#### feat(db) — Politiques RLS éditoriales migrées vers `has_min_role('editor')`
+
+**Migration** : `20260311120000_editor_role_rls_policies.sql`
+**Schéma déclaratif synchronisé** : ✅ `supabase/schemas/61_rls_main_tables.sql`, `supabase/schemas/62_rls_advanced_tables.sql`
+
+**Contexte** :
+~60 `ALTER POLICY` pour migrer les tables éditoriales (spectacles, événements, médias, hero slides, etc.) de `is_admin()` vers `has_min_role('editor')`, tout en conservant `is_admin()` sur les tables admin-only (membres_equipe, audit_logs, configurations_site, etc.).
+
+**Tables migrées** : `spectacles`, `evenements`, `spectacle_versions`, `media`, `media_tags`, `media_folders`, `hero_slides`, `partenaires`, `communiques_presse`, `articles_presse`, `photos_spectacle`, `saisons`
+
+**Tables restées admin-only** : `membres_equipe`, `audit_logs`, `configurations_site`, `contacts_presse`, `newsletter_subscribers`, `compagnie_presentation_sections`
+
+**Application** : ✅ Appliquées via `pnpm dlx supabase db push --linked` le 2026-03-11
+
+---
+
 ### 2026-03-10 - BUGFIX: 4 violations RLS (RESTRICTIVE, super_admin mort, subquery inline, InviteUserForm)
 
 #### fix(rls) — P0: Policy AS RESTRICTIVE bloquant les articles de presse pour les authenticated non-admins

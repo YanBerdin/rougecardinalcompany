@@ -3,7 +3,7 @@ import "server-only";
 
 import { cache } from "react";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireAdminOnly } from "@/lib/auth/roles";
 import { dalSuccess, dalError, type DALResult } from "@/lib/dal/helpers";
 import {
     type PressContactDTO,
@@ -15,7 +15,7 @@ import {
  */
 export const fetchAllPressContacts = cache(
     async (): Promise<DALResult<PressContactDTO[]>> => {
-    await requireAdmin();
+    await requireAdminOnly();
 
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -74,7 +74,7 @@ export const fetchAllPressContacts = cache(
  */
 export const fetchPressContactById = cache(
     async (id: bigint): Promise<DALResult<PressContactDTO | null>> => {
-    await requireAdmin();
+    await requireAdminOnly();
 
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -138,7 +138,7 @@ export const fetchPressContactById = cache(
 export async function createPressContact(
     input: PressContactInput
 ): Promise<DALResult<PressContactDTO>> {
-    await requireAdmin();
+    await requireAdminOnly();
 
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -181,7 +181,7 @@ export async function updatePressContact(
     id: bigint,
     input: Partial<PressContactInput>
 ): Promise<DALResult<PressContactDTO>> {
-    await requireAdmin();
+    await requireAdminOnly();
 
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -221,7 +221,7 @@ export async function updatePressContact(
 export async function deletePressContact(
     id: bigint
 ): Promise<DALResult<null>> {
-    await requireAdmin();
+    await requireAdminOnly();
 
     const supabase = await createClient();
     const { error } = await supabase
@@ -243,7 +243,7 @@ export async function togglePressContactActive(
     id: bigint,
     actif: boolean
 ): Promise<DALResult<PressContactDTO>> {
-    await requireAdmin();
+    await requireAdminOnly();
 
     const supabase = await createClient();
     const { data, error } = await supabase

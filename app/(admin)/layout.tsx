@@ -1,5 +1,4 @@
-import { requireAdmin } from "@/lib/auth/is-admin";
-import { redirect } from "next/navigation";
+import { requireBackofficeAccess, getCurrentUserRole } from "@/lib/auth/roles";
 import type { Metadata } from "next";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/admin/AdminSidebar";
@@ -23,16 +22,13 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  try {
-    await requireAdmin();
-  } catch {
-    redirect("/auth/login");
-  }
+  await requireBackofficeAccess();
+  const userRole = await getCurrentUserRole();
 
   return (
     <SidebarProvider>
       <BfcacheHandler />
-      <AppSidebar />
+      <AppSidebar userRole={userRole} />
       <SidebarInset>
         {/* C1 — Skip link : permet aux utilisateurs clavier/lecteur d'écran de contourner la navigation */}
         <a

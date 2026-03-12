@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireMinRole } from "@/lib/auth/roles";
 import { ArrowLeft, Pencil } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,7 @@ const KIND_LABELS: Record<string, string> = {
 };
 
 export default async function PresentationViewPage() {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const result = await fetchAllPresentationSectionsAdmin();
     if (!result.success) notFound();

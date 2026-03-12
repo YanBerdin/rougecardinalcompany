@@ -6,8 +6,11 @@ import { createClient } from "@/supabase/server";
 import { createAdminClient } from "@/supabase/admin";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { requireAdminPageAccess } from "@/lib/auth/roles";
 
 export default async function AdminDebugAuthPage() {
+  await requireAdminPageAccess();
+
   const cookieStore = await cookies();
   const allCookies = cookieStore.getAll();
 

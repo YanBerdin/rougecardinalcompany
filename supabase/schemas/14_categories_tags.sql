@@ -151,32 +151,32 @@ using (
   exists (
     select 1 from public.communiques_presse cp
     where cp.id = communique_id
-    and (cp.public = true or (select public.is_admin()))
+    and (cp.public = true or (select public.has_min_role('editor')))
   )
 );
 
--- Gestion admin (politiques granulaires)
+-- Gestion editor+ (politiques granulaires)
 drop policy if exists "Admins can insert press release categories" on public.communiques_categories;
-create policy "Admins can insert press release categories"
+create policy "Editors+ can insert press release categories"
 on public.communiques_categories
 for insert
 to authenticated
-with check ( (select public.is_admin()) );
+with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can update press release categories" on public.communiques_categories;
-create policy "Admins can update press release categories"
+create policy "Editors+ can update press release categories"
 on public.communiques_categories
 for update
 to authenticated
-using ( (select public.is_admin()) )
-with check ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) )
+with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can delete press release categories" on public.communiques_categories;
-create policy "Admins can delete press release categories"
+create policy "Editors+ can delete press release categories"
 on public.communiques_categories
 for delete
 to authenticated
-using ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) );
 
 alter table public.communiques_tags enable row level security;
 
@@ -189,32 +189,32 @@ using (
   exists (
     select 1 from public.communiques_presse cp
     where cp.id = communique_id
-    and (cp.public = true or (select public.is_admin()))
+    and (cp.public = true or (select public.has_min_role('editor')))
   )
 );
 
--- Gestion admin (politiques granulaires)
+-- Gestion editor+ (politiques granulaires)
 drop policy if exists "Admins can insert press release tags" on public.communiques_tags;
-create policy "Admins can insert press release tags"
+create policy "Editors+ can insert press release tags"
 on public.communiques_tags
 for insert
 to authenticated
-with check ( (select public.is_admin()) );
+with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can update press release tags" on public.communiques_tags;
-create policy "Admins can update press release tags"
+create policy "Editors+ can update press release tags"
 on public.communiques_tags
 for update
 to authenticated
-using ( (select public.is_admin()) )
-with check ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) )
+with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can delete press release tags" on public.communiques_tags;
-create policy "Admins can delete press release tags"
+create policy "Editors+ can delete press release tags"
 on public.communiques_tags
 for delete
 to authenticated
-using ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) );
 
 -- Vue pour naviguer dans les catégories avec hiérarchie
 -- SECURITY: Explicitly set SECURITY INVOKER to run with querying user's privileges

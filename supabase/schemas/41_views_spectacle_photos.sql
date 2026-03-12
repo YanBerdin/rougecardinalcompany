@@ -26,10 +26,10 @@ comment on view public.spectacles_landscape_photos_public is
 
 -- ===== VUE ADMIN =====
 
--- Vue admin pour gestion photos paysage (toutes, avec métadonnées)
--- SECURITY INVOKER + garde is_admin() — pattern TASK037 admin views hardening
--- Accès uniquement aux administrateurs : la condition WHERE est évaluée avec les
--- permissions du requêteur (SECURITY INVOKER). REVOKE sur anon ci-dessous.
+-- Vue backoffice pour gestion photos paysage (toutes, avec métadonnées)
+-- SECURITY INVOKER + garde has_min_role('editor') — éditeurs et admins autorisés
+-- Les éditeurs ont accès légitime à la gestion des photos dans le backoffice.
+-- REVOKE sur anon ci-dessous maintient la sécurité pour les non-authentifiés.
 drop view if exists public.spectacles_landscape_photos_admin cascade;
 create or replace view public.spectacles_landscape_photos_admin
 with (security_invoker=on) as
@@ -45,11 +45,11 @@ select
 from public.spectacles_medias sm
 inner join public.medias m on sm.media_id = m.id
 where sm.type = 'landscape'
-  and (select public.is_admin()) = true
+  and (select public.has_min_role('editor')) = true
 order by sm.spectacle_id, sm.ordre asc;
 
 comment on view public.spectacles_landscape_photos_admin is
-  'Vue admin pour gestion photos paysage spectacles (inclut métadonnées media) — accès is_admin() uniquement';
+  'Vue backoffice pour gestion photos paysage spectacles (inclut métadonnées media) — accès éditeur et admin via has_min_role(''editor'')';
 
 -- ===== GRANT STATEMENTS =====
 
@@ -61,7 +61,7 @@ grant select on public.spectacles to anon, authenticated;
 
 -- Vue publique : lecture ouverte
 grant select on public.spectacles_landscape_photos_public to anon, authenticated;
--- Vue admin : accès restreint (is_admin() guard dans SQL — defense-in-depth)
+-- Vue admin : accès authenticated uniquement (has_min_role guard dans SQL — defense-in-depth)
 grant select on public.spectacles_landscape_photos_admin to authenticated;
--- Bloquer l'accès direct anon (jamais admin)
+-- Bloquer l'accès direct anon (jamais backoffice)
 revoke select on public.spectacles_landscape_photos_admin from anon;

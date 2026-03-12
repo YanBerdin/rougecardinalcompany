@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { withAdminAuth, ApiResponse, HttpStatus } from "@/lib/api/helpers";
+import { withBackofficeAuth, ApiResponse, HttpStatus } from "@/lib/api/helpers";
 import { createClient } from "@/supabase/server";
 import { env } from "@/lib/env";
 import type { MediaSearchItem } from "@/lib/schemas/media";
@@ -34,7 +34,7 @@ function buildPublicUrl(storagePath: string): string {
  * Server Actions are better suited for mutations, not paginated queries.
  */
 export async function GET(request: NextRequest) {
-    return withAdminAuth(async () => {
+    return withBackofficeAuth(async () => {
         try {
             const searchParams = request.nextUrl.searchParams;
             const query = searchParams.get("q") || "";

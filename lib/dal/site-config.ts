@@ -2,7 +2,7 @@
 import "server-only";
 import { cache } from "react";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireAdminOnly } from "@/lib/auth/roles";
 import type { DisplayToggleDTO } from "@/lib/schemas/site-config";
 import type { DALResult } from "./helpers";
 
@@ -28,7 +28,7 @@ export const fetchDisplayToggle = cache(
 
     if (error) {
       const { code, message, details, hint } = error;
-      console.error("[DAL] fetchDisplayToggle error:", { code, message, details, hint });
+      console.error("[DAL] fetchDisplayToggle error:", { key, code, message, details, hint });
 
       // defense-in-depth: les display_toggle_ keys sont activées par défaut en cas d'erreur DB
       if (key.startsWith("display_toggle_")) {
@@ -86,7 +86,7 @@ export const fetchDisplayTogglesByCategory = cache(
 
     if (error) {
       const { code, message, details, hint } = error;
-      console.error("[DAL] fetchDisplayTogglesByCategory error:", { code, message, details, hint });
+      console.error("[DAL] fetchDisplayTogglesByCategory error:", { category, code, message, details, hint });
       return { success: false, error: `[ERR_CONFIG_002] ${message ?? details ?? code ?? "Erreur inconnue"}` };
     }
 
@@ -105,7 +105,7 @@ export async function updateDisplayToggle(
   key: string,
   value: { enabled: boolean; max_items?: number }
 ): Promise<DALResult<DisplayToggleDTO>> {
-  await requireAdmin();
+  await requireAdminOnly();
 
   const supabase = await createClient();
   const {
