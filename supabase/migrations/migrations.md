@@ -39,6 +39,7 @@ end if;
 **Problème** : Pour capturer l'UUID admin dans l'audit lors d'une suppression, le DAL effectue d'abord la suppression du profil avec le client authentifié. Mais la policy RLS DELETE ne l'autorisait que pour `user_id = auth.uid()` → erreur 403 pour l'admin.
 
 **Correction** :
+
 ```sql
 create policy "Admins can delete any profile" on public.profiles
 for delete
@@ -2027,6 +2028,20 @@ pnpm add next@16.0.7
 - `20251126001251_add_alt_text_to_home_hero_slides.sql` — **A11Y + CRUD : Hero Slides enhancements**
 
 ---
+
+## Migrations récentes (mars 2026)
+
+- `20260313120000_extend_audit_and_updated_at_triggers.sql` — **TASK076 : Couverture triggers audit étendue à 9 tables**
+  - 🎯 **Objectif** : Ajouter `trg_audit` et `trg_update_updated_at` aux tables créées sans ces triggers
+  - **Tables ajoutées** :
+    - 🔴 `user_invitations` — sécurité critique (invited_by + role assigné), audit seulement (pas d'updated_at)
+    - 🔴 `pending_invitations` — file d'attente retry emails, transitions d'état
+    - 🟠 `home_hero_slides`, `compagnie_presentation_sections`, `compagnie_values`, `compagnie_stats` — cohérence avec home_about_content déjà audité
+    - 🟡 `categories`, `tags` — taxonomy structure tout le contenu audité
+    - 🟡 `media_folders` — structure médiathèque
+  - **Pattern** : `drop trigger if exists` + `create trigger` (idempotent)
+  - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/30_triggers.sql` (mis à jour simultanément)
+  - 📝 **Conservation** : Migration manuelle nécessaire (hotfix workflow) — schéma est la source de vérité
 
 ## Migrations récentes (février 2026)
 

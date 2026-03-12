@@ -24,10 +24,16 @@ DECLARE
 BEGIN
   FOR tbl IN SELECT unnest(array[
     'public.profiles', 'public.medias', 'public.membres_equipe', 'public.lieux',
-    'public.spectacles', 'public.evenements', 'public.articles_presse', 
+    'public.spectacles', 'public.evenements', 'public.articles_presse',
     'public.partners', 'public.abonnes_newsletter', 'public.messages_contact', 'public.configurations_site',
     'public.communiques_presse', 'public.contacts_presse', 'public.home_about_content',
-    'public.data_retention_config'  -- Added for TASK053
+    'public.data_retention_config',
+    -- Ajout TASK076: couverture étendue (contenu public + sécurité invitations + taxonomie)
+    'public.pending_invitations',
+    'public.home_hero_slides',
+    'public.compagnie_presentation_sections', 'public.compagnie_values', 'public.compagnie_stats',
+    'public.categories', 'public.tags',
+    'public.media_folders'
   ])
   LOOP
     EXECUTE format('drop trigger if exists trg_update_updated_at on %s;', tbl);
@@ -44,9 +50,16 @@ DO $$
 DECLARE
   audit_tables text[] := array[
     'public.profiles', 'public.medias', 'public.membres_equipe', 'public.lieux',
-    'public.spectacles', 'public.evenements', 'public.articles_presse', 
+    'public.spectacles', 'public.evenements', 'public.articles_presse',
     'public.partners', 'public.abonnes_newsletter', 'public.messages_contact', 'public.configurations_site',
-    'public.communiques_presse', 'public.contacts_presse', 'public.home_about_content'
+    'public.communiques_presse', 'public.contacts_presse', 'public.home_about_content',
+    -- Ajout TASK076: sécurité invitations (CRITIQUE), contenu public, taxonomie
+    'public.user_invitations',
+    'public.pending_invitations',
+    'public.home_hero_slides',
+    'public.compagnie_presentation_sections', 'public.compagnie_values', 'public.compagnie_stats',
+    'public.categories', 'public.tags',
+    'public.media_folders'
   ];
   tbl text;
 BEGIN

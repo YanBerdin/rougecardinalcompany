@@ -2,6 +2,7 @@
 import "server-only";
 
 import { createClient } from "@/supabase/server";
+import { createAdminClient } from "@/supabase/admin";
 import {
     AuditLogDTOSchema,
     AuditLogFilterSchema,
@@ -110,6 +111,7 @@ export async function fetchAuditTableNames(): Promise<DALResult<string[]>> {
 export async function fetchDistinctAuditUsers(): Promise<DALResult<AuditUserOption[]>> {
     try {
         const supabase = await createClient();
+        const adminClient = await createAdminClient();
 
         // Get distinct user_ids from audit logs, then join with auth.users
         const { data, error } = await supabase
@@ -131,8 +133,8 @@ export async function fetchDistinctAuditUsers(): Promise<DALResult<AuditUserOpti
             return { success: true, data: [] };
         }
 
-        // Fetch user emails from auth.users
-        const { data: users, error: usersError } = await supabase.auth.admin.listUsers();
+        // Fetch user emails from auth.users (requires service role key)
+        const { data: users, error: usersError } = await adminClient.auth.admin.listUsers();
 
         if (usersError) {
             return {
