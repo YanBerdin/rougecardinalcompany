@@ -294,7 +294,7 @@ Les DAL admin-only (`admin-press-contacts.ts` : 7 occurrences, `team.ts`, `audit
 **Fichiers** : 9 fichiers DAL ci-dessus
 **Dépend de** : Phase 1 (besoin de `requireMinRole`)
 **Parallélisable avec** : Phase 8
-**Vérification** : Tests scripts existants (`pnpm test:partners` ne doit pas régresser). Créer un script `scripts/test-editor-access.ts`.
+**Vérification** : Tests scripts existants (`pnpm test:partners` ne doit pas régresser). Créer un script `scripts/test-editor-access-local.ts`.
 
 ---
 
@@ -416,7 +416,7 @@ Après déploiement cloud, un utilisateur éditeur recevait une redirection 307 
 
 ## Vérification globale
 
-1. **Script test éditeur** : Créer `scripts/test-editor-access.ts` qui :
+1. **Script test éditeur** : Créer `scripts/test-editor-access-local.ts` qui :
    - Crée un client Supabase avec un token éditeur
    - Vérifie accès SELECT/INSERT/UPDATE/DELETE sur `spectacles` → ✅
    - Vérifie accès SELECT/INSERT/UPDATE/DELETE sur `evenements` → ✅
@@ -450,7 +450,8 @@ Après déploiement cloud, un utilisateur éditeur recevait une redirection 307 
 - `supabase/migrations/20260311030000_create_has_min_role_function.sql` — prérequis cloud `has_min_role()` (Phase 14)
 - `supabase/migrations/20260311030511_editor_storage_policies.sql` — migration stockage (Phase 8)
 - `supabase/migrations/20260311120000_editor_role_rls_policies.sql` — migration RLS ~60 ALTER POLICY (Phase 10)
-- `scripts/test-editor-access.ts` — script de test
+- `scripts/test-editor-access-local.ts` — script de test
+- `scripts/test-editor-access-remote.ts` — script de test
 
 ### À MODIFIER
 

@@ -21,6 +21,7 @@ import {
     type MediaFolderInput,
     type MediaFolderDTO,
 } from "@/lib/schemas/media";
+import { requireMinRole } from "@/lib/auth/roles";
 
 export type MediaFolderActionResult =
     | { success: true; data: MediaFolderDTO }
@@ -35,6 +36,8 @@ export type MediaFoldersListResult =
  */
 export async function listMediaFoldersAction(): Promise<MediaFoldersListResult> {
     try {
+        await requireMinRole("editor");
+
         const result = await listMediaFolders();
 
         if (!result.success) {
@@ -58,6 +61,8 @@ export async function getMediaFolderByIdAction(
     id: number
 ): Promise<MediaFolderActionResult> {
     try {
+        await requireMinRole("editor");
+
         const result = await getMediaFolderById(BigInt(id));
 
         if (!result.success) {
@@ -85,6 +90,8 @@ export async function createMediaFolderAction(
     input: unknown
 ): Promise<MediaFolderActionResult> {
     try {
+        await requireMinRole("editor");
+
         // Validation with Zod
         const validated: MediaFolderInput = MediaFolderInputSchema.parse(input);
 
@@ -124,6 +131,8 @@ export async function updateMediaFolderAction(
     input: unknown
 ): Promise<MediaFolderActionResult> {
     try {
+        await requireMinRole("editor");
+
         // Validation with Zod (partial)
         const validated = MediaFolderInputSchema.partial().parse(input);
 
@@ -159,6 +168,8 @@ export async function deleteMediaFolderAction(
     id: number
 ): Promise<{ success: true } | { success: false; error: string }> {
     try {
+        await requireMinRole("editor");
+
         const result = await deleteMediaFolder(BigInt(id));
 
         if (!result.success) {
@@ -183,6 +194,8 @@ export async function deleteMediaFolderAction(
 export async function deleteMediaFolderWithRedirectAction(
     id: number
 ): Promise<void> {
+    await requireMinRole("editor");
+
     const result = await deleteMediaFolderAction(id);
 
     if (!result.success) {

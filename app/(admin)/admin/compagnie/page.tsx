@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { requireMinRole } from "@/lib/auth/roles";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ValuesContainer } from "@/components/features/admin/compagnie/ValuesContainer";
 import { PresentationContainer } from "@/components/features/admin/compagnie/PresentationContainer";
@@ -13,7 +14,9 @@ export const metadata = {
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default function CompagniePage() {
+export default async function CompagniePage() {
+    await requireMinRole("editor");
+
     return (
         <div className="space-y-6">
             <div>

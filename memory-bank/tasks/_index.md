@@ -29,6 +29,8 @@
 
 ## Terminé
 
+- `TASK076` Editor Role Permissions — 15-phase migration complete (2026-03-11). Auth model: `user < editor < admin`. New `has_min_role()` SQL, `roles.ts` TS guards, all DAL/actions/pages/sidebar/middleware migrated. `is-admin.ts` deprecated. Test script created.
+
 - `AUDIT-TRIGGER-FIX` Audit Trigger Bugfix (tg_op + auth.uid()) - Completed on 2026-02-11 (Two critical bugs fixed: tg_op case sensitivity causing record_id/new_values NULL + auth.uid() type mismatch causing user_id NULL; Migration 20260211005525 applied local + cloud via MCP; User validated: email now displays instead of "Système")
 - `TASK057` Spectacle Landscape Photos Integration - Completed on 2026-02-01 (2 photos paysage par spectacle, BigInt fix TASK055 pattern, migrations cloud via MCP, DAL + Server Actions + API route, Admin UI avec MediaLibraryPicker, Public display dans SpectacleDetailView)
 - `RLS-FIX-NEWSLETTER` Newsletter infinite recursion hotfix - Completed on 2026-01-06

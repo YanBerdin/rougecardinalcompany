@@ -1,8 +1,48 @@
 # Active Context
 
-**Current Focus (2026-03-10)**: BUGFIX 4 violations RLS (P0/P1-a/P1-b/P2) commitées et déployées via `20260310120000_fix_rls_policy_bugs.sql`. Contexte précédent — TASK037B: Audit accessibilité modules admin complété. 21 violations WCAG 2.2 corrigées (3 Critiques, 8 Majeurs, 10 Mineurs) : skip-link + `<main id="main-content">`, suppression breadcrumb factice, `aria-label` sur 4 champs recherche, tailles boutons ≥ 44px (`button.tsx`), `role="alert"` sur 5 conteneurs erreur, AlertDialog pour `window.confirm()` (LieuxView), `DialogDescription` (HeroSlideForm), `aria-describedby` + `role="alert"` formulaires Presse, `aria-label` contextuels CardsDashboard, `aria-hidden="true"` systématique icônes, `aria-live` états dynamiques. TASK037A (site public) validé complété via TASK072/TASK074. Branche `feat/task037b-a11y-admin-fixes`.
+**Current Focus (2026-03-11)**: Editor Role Permissions migration COMPLETE — 15-phase plan fully implemented. Auth model migrated from binary `admin/non-admin` to hierarchical `user < editor < admin`. New SQL function `has_min_role()`, new TS guards in `lib/auth/roles.ts` (`requireMinRole`, `requireBackofficeAccess`, `requireAdminOnly`), all 31+ DAL modules + 12 action files + 8 editorial pages + sidebar + middleware migrated. Legacy `lib/auth/is-admin.ts` fully deprecated (zero imports). Test script `scripts/test-editor-access.ts` created. Contexte précédent — BUGFIX 4 violations RLS (P0/P1-a/P1-b/P2) commitées et déployées.
 
-**Last Major Updates**: ✅ BUGFIX 4 RLS policy bugs (P0-RESTRICTIVE/P1a-super_admin/P1b-subquery/P2-UI) commité+déployé (2026-03-10) + ✅ TASK037B A11Y Admin complet (2026-03-08) + ✅ TASK037A A11Y Public (2026-03-08, via TASK072/TASK074) + BUGFIX RLS display_toggle visibility (2026-03-07) + BUGFIX DAL press select options (2026-03-07) + TASK075 Media Admin Composition Patterns (2026-03-05) + TASK074 Audit public/spectacles (2026-03-04) + BUGFIX-HOME-NEWS (2026-03-03) + TASK072 Audit public/home (2026-03-03)
+**Last Major Updates**: ✅ Editor Role Permissions — 15 phases complete (2026-03-11) + ✅ BUGFIX 4 RLS policy bugs (P0-RESTRICTIVE/P1a-super_admin/P1b-subquery/P2-UI) commité+déployé (2026-03-10) + ✅ TASK037B A11Y Admin complet (2026-03-08) + ✅ TASK037A A11Y Public (2026-03-08, via TASK072/TASK074) + BUGFIX RLS display_toggle visibility (2026-03-07) + BUGFIX DAL press select options (2026-03-07) + TASK075 Media Admin Composition Patterns (2026-03-05) + TASK074 Audit public/spectacles (2026-03-04) + BUGFIX-HOME-NEWS (2026-03-03) + TASK072 Audit public/home (2026-03-03)
+
+---
+
+## ✅ Editor Role Permissions — Full Migration (2026-03-11)
+
+### Summary
+
+15-phase migration from binary admin/non-admin auth model to hierarchical `user (0) < editor (1) < admin (2)` role system. Complete implementation covering SQL functions, RLS policies, TypeScript auth guards, DAL modules, Server Actions, admin pages, sidebar navigation, and middleware.
+
+**New SQL function**: `has_min_role(required_role text)` in `supabase/schemas/09_functions.sql` — replaces `is_admin()` for role-based access.
+
+**New TS module**: `lib/auth/roles.ts` — `requireMinRole()`, `requireBackofficeAccess()` (editor+), `requireAdminOnly()` (admin only), `requireBackofficePageAccess()`, `requireAdminPageAccess()`, `getCurrentUserRole()`, `isRoleAtLeast()`.
+
+**Helper module**: `lib/auth/role-helpers.ts` — `ROLE_HIERARCHY`, `UserRole` type, `isRoleAtLeast()`.
+
+**Deprecated**: `lib/auth/is-admin.ts` — zero imports across codebase, module-level @deprecated JSDoc with replacement mapping. Safe to delete.
+
+### Phases completed
+
+| Phase | Description | Key changes |
+| ----- | ----------- | ----------- |
+| 1 | Auth guard module | `roles.ts` + `role-helpers.ts` created |
+| 2 | Admin layout | Uses `requireBackofficeAccess()` |
+| 3 | AdminSidebar | Role-filtered with `minRole` per item |
+| 4 | SetupAccountForm | Editor→`/admin`, user→`/` redirect |
+| 5 | Dashboard | Conditional rendering by role |
+| 6 | Admin-only pages | 9 pages have `requireAdminPageAccess()` |
+| 7 | SQL function | `has_min_role()` + migration |
+| 8 | RLS policies | Editorial tables use `has_min_role('editor')` |
+| 9 | DAL modules | All editorial DAL use `requireMinRole("editor")` |
+| 10 | Server Actions | 12 files, ~43 functions guarded |
+| 11 | Storage policies | Migrated to role-based |
+| 12 | Editorial pages | 8 pages have explicit guards |
+| 13 | Deprecation | `is-admin.ts` fully deprecated |
+| 14 | Cloud migration | Prerequisite seed created |
+| 15 | Middleware | Uses `isRoleAtLeast()` |
+
+**Test script**: `scripts/test-editor-access.ts` — tests 6 editorial tables (CRUD allowed) + 3 admin-only tables (blocked).
+
+**Plan reference**: `.github/prompts/plan-fix-editorRolePermissions.prompt.md`
 
 ---
 

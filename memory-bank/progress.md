@@ -1,5 +1,39 @@
 # Progress
 
+## Editor Role Permissions — Full Migration (2026-03-11)
+
+**Context** : Migration complète du modèle d'auth binaire (`admin`/`non-admin`) vers un modèle hiérarchique à 3 niveaux (`user < editor < admin`). 15 phases implémentées couvrant SQL, RLS, TypeScript guards, DAL, Server Actions, pages admin, sidebar, et middleware.
+
+**Plan** : `.github/prompts/plan-fix-editorRolePermissions.prompt.md`
+
+| Phase | Description | Fichiers clés |
+| ----- | ----------- | ------------- |
+| 1 | Module auth guards TS | `lib/auth/roles.ts`, `lib/auth/role-helpers.ts` |
+| 2 | Layout admin | `app/(admin)/layout.tsx` |
+| 3 | Sidebar filtré par rôle | `components/admin/AdminSidebar.tsx` |
+| 4 | Redirect setup account | `components/auth/SetupAccountForm.tsx` |
+| 5 | Dashboard conditionnel | `app/(admin)/admin/page.tsx` |
+| 6 | Pages admin-only | 9 pages (`team`, `users`, `site-config`, etc.) |
+| 7 | Fonction SQL `has_min_role()` | `supabase/schemas/09_functions.sql`, migration |
+| 8 | Politiques RLS éditeur | `supabase/schemas/61_rls_main_tables.sql`, migration |
+| 9 | DAL modules | Tous les DAL éditoriaux → `requireMinRole("editor")` |
+| 10 | Server Actions (12 fichiers, ~43 fonctions) | `app/(admin)/admin/*/actions.ts`, `lib/actions/*.ts` |
+| 11 | Storage policies | Migration policies storage |
+| 12 | Pages éditoriales | 8 pages avec guards explicites |
+| 13 | Dépréciation legacy | `lib/auth/is-admin.ts` — @deprecated, 0 imports |
+| 14 | Migration cloud | Seed prérequis créé |
+| 15 | Middleware | `proxy.ts` → `isRoleAtLeast()` |
+
+**Script de test** : `scripts/test-editor-access.ts` — 6 tables éditoriales (CRUD autorisé) + 3 tables admin-only (bloqué).
+
+**Tables éditoriales (editor+)** : `spectacles`, `evenements`, `media`, `lieux`, `articles_presse`, `communiques_presse`
+
+**Tables admin-only** : `membres_equipe`, `contacts_presse`, `configurations_site`
+
+**Modules dépréciés** : `lib/auth/is-admin.ts` (zero imports, safe to delete)
+
+---
+
 ## BUGFIX — 4 violations RLS policy (2026-03-10)
 
 **Migration** : `20260310120000_fix_rls_policy_bugs.sql` · **Commit** : `8a42a4f` · **Déployé** : ✅ cloud

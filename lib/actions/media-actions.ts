@@ -247,6 +247,8 @@ export async function deleteMediaImage(
   mediaId: number
 ): Promise<MediaUploadResult> {
   try {
+    await requireMinRole("editor");
+
     // 1. Call DAL
     const result = await deleteMedia(mediaId);
 
@@ -294,6 +296,8 @@ export type MediaItemsListResult =
  */
 export async function listMediaItemsAction(): Promise<MediaItemsListResult> {
   try {
+    await requireMinRole("editor");
+
     const result = await listMediaItems();
 
     if (!result.success) {

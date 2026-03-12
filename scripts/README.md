@@ -2003,6 +2003,37 @@ main().catch(console.error);
 
 ---
 
-**Dernière mise à jour** : 3 janvier 2026  
+## Tests Editor Role — TASK076
+
+Scripts de validation RLS pour le rôle `editor` (modèle `user < editor < admin`).
+
+### `test-editor-access-local.ts`
+
+| Champ | Valeur |
+| --- | --- |
+| **Description** | Teste le CRUD editor contre Supabase **local** |
+| **Commande** | `pnpm test:editor:local` |
+| **Prérequis** | Supabase local démarré (`supabase start`) |
+| **Variables** | `SUPABASE_LOCAL_URL`, `SUPABASE_LOCAL_PUBLISHABLE_KEY`, `SUPABASE_LOCAL_SERVICE_KEY` (`.env.local`) |
+
+### `test-editor-access-remote.ts`
+
+| Champ | Valeur |
+| --- | --- |
+| **Description** | Teste le CRUD editor contre Supabase **Cloud** |
+| **Commande** | `pnpm test:editor:remote` |
+| **Prérequis** | Credentials cloud dans `.env.local` |
+| **Variables** | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY`, `SUPABASE_SECRET_KEY` |
+
+### Tables testées
+
+| Catégorie | Tables | Ops | Attendu |
+| --- | --- | --- | --- |
+| **Éditoriales** | `spectacles`, `evenements`, `media`, `lieux`, `articles_presse`, `communiques_presse` | select, insert, update, delete | ✅ Autorisé |
+| **Admin-only** | `membres_equipe`, `contacts_presse`, `configurations_site` | select/insert | ❌ Bloqué |
+
+---
+
+**Dernière mise à jour** : 11 mars 2026  
 **Mainteneur** : YanBerdin  
 **Contact** : yandevformation@gmail.com

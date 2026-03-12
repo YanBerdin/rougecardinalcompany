@@ -5,12 +5,15 @@ import { z } from "zod";
 import { createLieu, updateLieu, deleteLieu } from "@/lib/dal/admin-lieux";
 import { LieuInputSchema, toClientDTO, type LieuClientDTO } from "@/lib/schemas/admin-lieux";
 import type { ActionResult } from "@/lib/actions/types";
+import { requireMinRole } from "@/lib/auth/roles";
 
 /**
  * CREATE Lieu
  */
 export async function createLieuAction(input: unknown): Promise<ActionResult<LieuClientDTO>> {
     try {
+        await requireMinRole("editor");
+
         // 1. Validation Zod
         const validated = LieuInputSchema.parse(input);
 
@@ -49,6 +52,8 @@ export async function updateLieuAction(
     input: unknown
 ): Promise<ActionResult<LieuClientDTO>> {
     try {
+        await requireMinRole("editor");
+
         const validated = LieuInputSchema.partial().parse(input);
         const result = await updateLieu(BigInt(id), validated);
 
@@ -80,6 +85,8 @@ export async function updateLieuAction(
  */
 export async function deleteLieuAction(id: string): Promise<ActionResult<null>> {
     try {
+        await requireMinRole("editor");
+
         const result = await deleteLieu(BigInt(id));
 
         if (!result.success) {

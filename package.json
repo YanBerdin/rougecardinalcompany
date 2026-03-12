@@ -83,7 +83,9 @@
     "admin:inspect-user": "tsx scripts/inspect-user.ts",
     "admin:set-role": "tsx scripts/set-admin-role.ts",
     "test:profile-insertion": "node scripts/test-profile-insertion.js",
-    "diagnose:admin-views": "node scripts/diagnose-admin-views.js"
+    "diagnose:admin-views": "node scripts/diagnose-admin-views.js",
+    "test:editor:local": "tsx scripts/test-editor-access-local.ts",
+    "test:editor:remote": "tsx scripts/test-editor-access-remote.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

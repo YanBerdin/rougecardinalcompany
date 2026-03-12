@@ -15,6 +15,7 @@ import {
     publishPressRelease,
     unpublishPressRelease,
 } from "@/lib/dal/admin-press-releases";
+import { requireMinRole } from "@/lib/auth/roles";
 
 // =============================================================================
 // PRESS RELEASES ACTIONS
@@ -27,6 +28,8 @@ export async function createPressReleaseAction(
     input: unknown
 ): Promise<ActionResult> {
     try {
+        await requireMinRole("editor");
+
         const validated: PressReleaseInput = await PressReleaseInputSchema.parseAsync(input);
         const result = await createPressRelease(validated);
 
@@ -54,6 +57,8 @@ export async function updatePressReleaseAction(
     input: unknown
 ): Promise<ActionResult> {
     try {
+        await requireMinRole("editor");
+
         const validated = await PressReleaseInputSchema.partial().parseAsync(input);
         const result = await updatePressRelease(BigInt(id), validated);
 
@@ -80,6 +85,8 @@ export async function deletePressReleaseAction(
     id: string
 ): Promise<ActionResult> {
     try {
+        await requireMinRole("editor");
+
         const result = await deletePressRelease(BigInt(id));
 
         if (!result.success) {
@@ -105,6 +112,8 @@ export async function publishPressReleaseAction(
     id: string
 ): Promise<ActionResult> {
     try {
+        await requireMinRole("editor");
+
         const validated = PublishPressReleaseSchema.parse({
             id: BigInt(id),
             public: true,
@@ -134,6 +143,8 @@ export async function unpublishPressReleaseAction(
     id: string
 ): Promise<ActionResult> {
     try {
+        await requireMinRole("editor");
+
         const validated = PublishPressReleaseSchema.parse({
             id: BigInt(id),
             public: false,

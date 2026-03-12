@@ -1,3 +1,4 @@
+import { requireMinRole } from "@/lib/auth/roles";
 import { EventsContainer } from "@/components/features/admin/agenda/EventsContainer";
 
 export const metadata = {
@@ -8,6 +9,8 @@ export const metadata = {
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default function AgendaPage() {
+export default async function AgendaPage() {
+    await requireMinRole("editor");
+
     return <EventsContainer />;
 }
