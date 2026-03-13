@@ -1,8 +1,30 @@
 # Active Context
 
-**Current Focus (2026-03-11)**: Editor Role Permissions migration COMPLETE — 15-phase plan fully implemented. Auth model migrated from binary `admin/non-admin` to hierarchical `user < editor < admin`. New SQL function `has_min_role()`, new TS guards in `lib/auth/roles.ts` (`requireMinRole`, `requireBackofficeAccess`, `requireAdminOnly`), all 31+ DAL modules + 12 action files + 8 editorial pages + sidebar + middleware migrated. Legacy `lib/auth/is-admin.ts` fully deprecated (zero imports). Test script `scripts/test-editor-access.ts` created. Contexte précédent — BUGFIX 4 violations RLS (P0/P1-a/P1-b/P2) commitées et déployées.
+**Current Focus (2026-03-13)**: TASK076 finalisation — Extension triggers `trg_audit` + `trg_update_updated_at` sur 9 tables manquantes (migration `20260313120000`) + mise à jour documentation (`supabase/migrations/migrations.md`, `supabase/schemas/README.md`). Work précédent : Editor Role Permissions (2026-03-11) migration COMPLETE — 15-phase plan fully implemented. Auth model migrated from binary `admin/non-admin` to hierarchical `user < editor < admin`.
 
-**Last Major Updates**: ✅ Editor Role Permissions — 15 phases complete (2026-03-11) + ✅ BUGFIX 4 RLS policy bugs (P0-RESTRICTIVE/P1a-super_admin/P1b-subquery/P2-UI) commité+déployé (2026-03-10) + ✅ TASK037B A11Y Admin complet (2026-03-08) + ✅ TASK037A A11Y Public (2026-03-08, via TASK072/TASK074) + BUGFIX RLS display_toggle visibility (2026-03-07) + BUGFIX DAL press select options (2026-03-07) + TASK075 Media Admin Composition Patterns (2026-03-05) + TASK074 Audit public/spectacles (2026-03-04) + BUGFIX-HOME-NEWS (2026-03-03) + TASK072 Audit public/home (2026-03-03)
+**Last Major Updates**: ✅ TASK076 trigger extension (2026-03-13) — 9 tables couvertes, docs mises à jour + ✅ Editor Role Permissions — 15 phases complete (2026-03-11) + ✅ BUGFIX 4 RLS policy bugs (P0-RESTRICTIVE/P1a-super_admin/P1b-subquery/P2-UI) commité+déployé (2026-03-10) + ✅ TASK037B A11Y Admin complet (2026-03-08) + ✅ TASK037A A11Y Public (2026-03-08, via TASK072/TASK074) + BUGFIX RLS display_toggle visibility (2026-03-07) + BUGFIX DAL press select options (2026-03-07) + TASK075 Media Admin Composition Patterns (2026-03-05) + TASK074 Audit public/spectacles (2026-03-04) + BUGFIX-HOME-NEWS (2026-03-03) + TASK072 Audit public/home (2026-03-03)
+
+---
+
+## ✅ TASK076 — Extension Triggers Audit et Updated_at (2026-03-13)
+
+### Summary
+
+Migration de complément au périmètre audit + updated_at : 9 tables qui n'avaient pas encore les triggers `trg_audit` et `trg_update_updated_at` ont été couvertes en 3 niveaux de priorité. La migration est idempotente (`DROP TRIGGER IF EXISTS` avant chaque `CREATE`). Les schémas déclaratifs (`30_triggers.sql`) et la documentation (`migrations.md`, `schemas/README.md`) ont été synchronisés simultanément.
+
+**Tables couvertes** :
+- 🔴 CRITIQUE : `user_invitations`, `pending_invitations` (traçabilité sécurité / RH)
+- 🟠 HAUTE : `home_hero_slides`, `compagnie_presentation_sections`, `compagnie_values`, `compagnie_stats` (contenu public)
+- 🟡 MOYENNE : `categories`, `tags`, `media_folders` (taxonomie / médiathèque)
+
+**Cas particulier** : `user_invitations` n'a pas de colonne `updated_at` → seul `trg_audit` appliqué.
+
+**Exclusions délibérées** : `content_versions` (traçabilité native), tables de jonction sans `updated_at`, `analytics_events` / `logs_audit` (haut volume / risque récursion).
+
+**Migration** : `20260313120000_extend_audit_and_updated_at_triggers.sql`
+**Schema** : `supabase/schemas/30_triggers.sql` ✅ synchronisé
+**Documentation** : `supabase/migrations/migrations.md` ✅ + `supabase/schemas/README.md` ✅
+**Application** : `pnpm dlx supabase db push --linked` — 2026-03-13
 
 ---
 

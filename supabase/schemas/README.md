@@ -144,6 +144,16 @@ supabase/schemas/
 
 ## 🆕 Mises à jour récentes (mars 2026)
 
+- **FEAT: Extension triggers audit et updated_at — TASK076 (13 mars 2026)** : Extension de la couverture des triggers `trg_audit` et `trg_update_updated_at` à 9 tables supplémentaires non encore couvertes.
+  - **Tables couvertes (3 priorités)** :
+    - 🔴 CRITIQUE : `user_invitations`, `pending_invitations` (sécurité / traçabilité RH)
+    - 🟠 HAUTE : `home_hero_slides`, `compagnie_presentation_sections`, `compagnie_values`, `compagnie_stats` (contenu public)
+    - 🟡 MOYENNE : `categories`, `tags`, `media_folders` (taxonomie / organisation médiathèque)
+  - **Détail** : `user_invitations` n'a pas de colonne `updated_at` → seul `trg_audit` appliqué. Les 8 autres tables reçoivent `trg_audit` + `trg_update_updated_at`. Exclusions délibérées : `content_versions` (traçabilité native), tables de jonction, `analytics_events` / `logs_audit` (haut volume / récursion).
+  - **Schéma déclaratif mis à jour** : `30_triggers.sql` — source de vérité synchronisée simultanément.
+  - **Migration** : `20260313120000_extend_audit_and_updated_at_triggers.sql` — idempotente (`DROP TRIGGER IF EXISTS` avant chaque `CREATE`).
+  - **Application** : ✅ `pnpm dlx supabase db push --linked` le 2026-03-13.
+
 - **FEAT: Permissions hiérarchiques rôle éditeur — user < editor < admin (11 mars 2026)** : Implémentation complète de la hiérarchie de rôles permettant aux éditeurs de gérer le contenu éditorial sans accès admin complet.
   - **Fonction SQL** : `public.has_min_role(required_role text)` — SECURITY INVOKER, immutable, `set search_path = ''`. Hiérarchie : `user(0) < editor(1) < admin(2)`. Lecture rôle depuis JWT claims (`app_metadata.role` → `user_metadata.role` → fallback `'user'`).
   - **~60 policies RLS migrées** : Toutes les policies d'écriture (INSERT/UPDATE/DELETE) sur les tables éditoriales passent de `is_admin()` à `has_min_role('editor')`. Tables : spectacles, événements, presse, médias, compagnie, hero, about, partenaires, lieux, tags, catégories, SEO, versioning.

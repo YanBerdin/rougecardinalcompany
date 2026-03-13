@@ -4,6 +4,34 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-03-13 - FEAT: Extension triggers audit et updated_at — TASK076
+
+1 migration déployée pour étendre la couverture des triggers `trg_audit` et `trg_update_updated_at` à 9 tables supplémentaires précédemment non couvertes.
+
+#### feat(trigger) — Extension `trg_audit` + `trg_update_updated_at` à 9 tables
+
+**Migration** : `20260313120000_extend_audit_and_updated_at_triggers.sql`
+**Schéma déclaratif synchronisé** : ✅ `supabase/schemas/30_triggers.sql`
+
+**Tables couvertes (3 tiers de priorité)** :
+
+| Priorité | Tables |
+| ---------- | -------- |
+| 🔴 CRITIQUE — sécurité | `public.user_invitations`, `public.pending_invitations` |
+| 🟠 HAUTE — contenu public | `public.home_hero_slides`, `public.compagnie_presentation_sections`, `public.compagnie_values`, `public.compagnie_stats` |
+| 🟡 MOYENNE — taxonomie | `public.categories`, `public.tags`, `public.media_folders` |
+
+**Notes techniques** :
+
+- `public.user_invitations` n'a pas de colonne `updated_at` → seul `trg_audit` appliqué
+- Les 8 autres tables reçoivent les deux triggers (`trg_audit` + `trg_update_updated_at`)
+- Migration idempotente via `DROP TRIGGER IF EXISTS` avant chaque `CREATE`
+- Exclusions délibérées : `content_versions` (traçabilité native), tables de liaison, `analytics_events` et `logs_audit` (haut volume / récursion)
+
+**Application** : ✅ Appliquée via `pnpm dlx supabase db push --linked` le 2026-03-13
+
+---
+
 ### 2026-03-12 - FIX: Attribution audit "Système" pour les utilisateurs créés par admin
 
 3 migrations déployées pour corriger l'attribution "Système" dans les logs d'audit lors de la création d'utilisateurs par un admin.

@@ -2,7 +2,7 @@
 
 **Status:** Completed
 **Added:** 2026-03-11
-**Updated:** 2026-03-11
+**Updated:** 2026-03-13
 
 ## Original Request
 
@@ -64,6 +64,13 @@ Implement a three-tier auth model (`user < editor < admin`) for the Rouge Cardin
 
 ## Progress Log
 
+### 2026-03-13
+
+- Migration de complément `20260313120000_extend_audit_and_updated_at_triggers.sql` appliquée : 9 tables ajoutées aux périmètres `trg_audit` + `trg_update_updated_at`.
+- Schéma déclaratif `30_triggers.sql` synchronisé simultanément.
+- Documentation mise à jour : `supabase/migrations/migrations.md` + `supabase/schemas/README.md`.
+- Exclusions conservées : `content_versions`, tables de jonction, `analytics_events`, `logs_audit`.
+
 ### 2026-03-11
 
 - All 15 phases completed in a single session.
@@ -84,3 +91,24 @@ Implement a three-tier auth model (`user < editor < admin`) for the Rouge Cardin
 | `lib/auth/is-admin.ts` | Deprecated re-export wrapper |
 | `scripts/test-editor-access-local.ts` | Local RLS test (9 tables, 4 ops) |
 | `scripts/test-editor-access-remote.ts` | Remote/Cloud RLS test |
+| `supabase/migrations/20260313120000_extend_audit_and_updated_at_triggers.sql` | Extension triggers trg_audit + trg_update_updated_at (9 tables) |
+| `supabase/schemas/30_triggers.sql` | Schéma déclaratif triggers — synchronisé |
+
+## Complément — Extension triggers (2026-03-13)
+
+### Contexte
+
+Après la migration principale (15 phases), audit de couverture des triggers : 9 tables n'avaient ni `trg_audit` ni `trg_update_updated_at`. Migration de complément créée et appliquée sous le même TASK076.
+
+### Tables couvertes
+
+| Priorité | Tables | Triggers |
+| -------- | ------ | -------- |
+| 🔴 CRITIQUE | `user_invitations`, `pending_invitations` | `trg_audit` (+ `trg_update_updated_at` pour `pending_invitations`) |
+| 🟠 HAUTE | `home_hero_slides`, `compagnie_presentation_sections`, `compagnie_values`, `compagnie_stats` | `trg_audit` + `trg_update_updated_at` |
+| 🟡 MOYENNE | `categories`, `tags`, `media_folders` | `trg_audit` + `trg_update_updated_at` |
+
+### Documentation mise à jour
+
+- `supabase/migrations/migrations.md` ✅
+- `supabase/schemas/README.md` ✅
