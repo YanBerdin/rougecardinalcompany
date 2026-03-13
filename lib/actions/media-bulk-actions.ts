@@ -3,7 +3,7 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireMinRole } from "@/lib/auth/roles";
 import { BulkDeleteSchema, BulkMoveSchema, BulkTagSchema } from "@/lib/schemas/media";
 
 /**
@@ -12,7 +12,7 @@ import { BulkDeleteSchema, BulkMoveSchema, BulkTagSchema } from "@/lib/schemas/m
  * @module lib/actions/media-bulk-actions
  * 
  * SECURITY:
- * - requireAdmin() check on all operations
+ * - requireMinRole("admin") check on all operations
  * - Zod validation with max 50 items limit
  * - revalidatePath() after success
  */
@@ -33,7 +33,7 @@ export async function bulkDeleteMediaAction(
     mediaIds: number[]
 ): Promise<BulkActionResult> {
     try {
-        await requireAdmin();
+        await requireMinRole("editor");
 
         // Validation with max limit
         const validated = BulkDeleteSchema.parse({ media_ids: mediaIds });
@@ -92,7 +92,7 @@ export async function bulkMoveMediaAction(
     folderId: number | null
 ): Promise<BulkActionResult> {
     try {
-        await requireAdmin();
+        await requireMinRole("editor");
 
         // Validation
         const validated = BulkMoveSchema.parse({
@@ -142,7 +142,7 @@ export async function bulkTagMediaAction(
     tagIds: number[]
 ): Promise<BulkActionResult> {
     try {
-        await requireAdmin();
+        await requireMinRole("editor");
 
         // Validation
         const validated = BulkTagSchema.parse({
@@ -196,7 +196,7 @@ export async function bulkUntagMediaAction(
     tagIds: number[]
 ): Promise<BulkActionResult> {
     try {
-        await requireAdmin();
+        await requireMinRole("editor");
 
         // Validation (reuse BulkTagSchema)
         const validated = BulkTagSchema.parse({

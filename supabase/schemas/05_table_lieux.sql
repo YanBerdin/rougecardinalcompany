@@ -31,24 +31,24 @@ to anon, authenticated
 using ( true );
 
 -- Seuls les admins peuvent gérer les lieux
-drop policy if exists "Admins can create lieux" on public.lieux;
-create policy "Admins can create lieux"
+drop policy if exists "Editors+ can create lieux" on public.lieux;
+create policy "Editors+ can create lieux"
 on public.lieux
 for insert
 to authenticated
-with check ( (select public.is_admin()) );
+with check ( (select public.has_min_role('editor')) );
 
-drop policy if exists "Admins can update lieux" on public.lieux;
-create policy "Admins can update lieux"
+drop policy if exists "Editors+ can update lieux" on public.lieux;
+create policy "Editors+ can update lieux"
 on public.lieux
 for update
 to authenticated
-using ( (select public.is_admin()) )
-with check ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) )
+with check ( (select public.has_min_role('editor')) );
 
-drop policy if exists "Admins can delete lieux" on public.lieux;
-create policy "Admins can delete lieux"
+drop policy if exists "Editors+ can delete lieux" on public.lieux;
+create policy "Editors+ can delete lieux"
 on public.lieux
 for delete
 to authenticated
-using ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) );

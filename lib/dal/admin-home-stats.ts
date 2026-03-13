@@ -3,7 +3,7 @@ import "server-only";
 
 import { cache } from "react";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireAdminOnly } from "@/lib/auth/roles";
 import {
     type DALResult,
     dalSuccess,
@@ -69,7 +69,7 @@ async function getNextPosition(
  */
 export const fetchHomeStats = cache(
     async (): Promise<DALResult<HomeStatDTO[]>> => {
-        await requireAdmin();
+        await requireAdminOnly();
 
         const supabase = await createClient();
         const { data, error } = await supabase
@@ -93,7 +93,7 @@ export const fetchHomeStats = cache(
 export async function createHomeStat(
     input: HomeStatInput
 ): Promise<DALResult<HomeStatDTO>> {
-    await requireAdmin();
+    await requireAdminOnly();
     await HomeStatInputSchema.parseAsync(input);
 
     const supabase = await createClient();
@@ -126,7 +126,7 @@ export async function updateHomeStat(
     id: bigint,
     input: Partial<HomeStatInput>
 ): Promise<DALResult<HomeStatDTO>> {
-    await requireAdmin();
+    await requireAdminOnly();
     await HomeStatInputSchema.partial().parseAsync(input);
 
     const supabase = await createClient();
@@ -153,7 +153,7 @@ export async function updateHomeStat(
  * Delete home stat
  */
 export async function deleteHomeStat(id: bigint): Promise<DALResult<void>> {
-    await requireAdmin();
+    await requireAdminOnly();
 
     const supabase = await createClient();
     const { error } = await supabase
@@ -174,7 +174,7 @@ export async function deleteHomeStat(id: bigint): Promise<DALResult<void>> {
 export async function reorderHomeStats(
     input: ReorderHomeStatsInput
 ): Promise<DALResult<void>> {
-    await requireAdmin();
+    await requireAdminOnly();
 
     const supabase = await createClient();
 

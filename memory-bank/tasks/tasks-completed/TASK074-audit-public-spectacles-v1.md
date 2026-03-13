@@ -324,6 +324,7 @@ Le plan prévoyait de remplacer les `<Button asChild>` par des `<span>` stylés 
 ```
 
 Cette approche :
+
 - ✅ Élimine le nesting `<a>` dans `<a>` (WCAG 4.1.1)
 - ✅ Offre 2 actions distinctes et explicites
 - ✅ Intègre les liens de billetterie externe (`target="_blank"`)

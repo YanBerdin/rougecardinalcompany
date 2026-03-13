@@ -9,6 +9,7 @@ L'audit sécurité passe de **35%** à **100%** avec les 4 sous-tâches restante
 Créer `scripts/audit-secrets-management.ts` pour grep patterns dangereux (`apikey=`, `password=` hardcodés), valider `lib/env.ts` (T3 Env complet), confirmer `.gitignore` exclut `.env*`.
 
 **Corrections appliquées** :
+
 - ✅ Exclure fichiers template (`.env.example`, `.env.*.template`)
 - ✅ Accepter `.env*.local` comme équivalent à `.env.local`
 - ✅ Créer `scripts/test-env-validation.ts` pour tester T3 Env avec chargement automatique de `.env.local` via dotenv

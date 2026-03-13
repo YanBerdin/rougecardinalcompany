@@ -12,6 +12,7 @@ import {
     updateArticle,
     deleteArticle,
 } from "@/lib/dal/admin-press-articles";
+import { requireMinRole } from "@/lib/auth/roles";
 
 // =============================================================================
 // PRESS ARTICLES ACTIONS
@@ -24,6 +25,8 @@ export async function createArticleAction(
     input: unknown
 ): Promise<ActionResult> {
     try {
+        await requireMinRole("editor");
+
         const validated: ArticleInput = await ArticleInputSchema.parseAsync(input);
         const result = await createArticle(validated);
 
@@ -51,6 +54,8 @@ export async function updateArticleAction(
     input: unknown
 ): Promise<ActionResult> {
     try {
+        await requireMinRole("editor");
+
         const validated = await ArticleInputSchema.partial().parseAsync(input);
         const result = await updateArticle(BigInt(id), validated);
 
@@ -75,6 +80,8 @@ export async function updateArticleAction(
  */
 export async function deleteArticleAction(id: string): Promise<ActionResult> {
     try {
+        await requireMinRole("editor");
+
         const result = await deleteArticle(BigInt(id));
 
         if (!result.success) {

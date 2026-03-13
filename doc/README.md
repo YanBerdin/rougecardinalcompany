@@ -140,7 +140,7 @@ La médiathèque suit une organisation par dossiers reflétant les buckets Stora
 
 ## Security Architecture
 
-La sécurité est organisée en sept couches de défense en profondeur : réseau, middleware, server actions, RLS, fonctions DB, stockage, audit/monitoring. Les contrôles incluent DDoS/SSL via Vercel Edge, Next.js middleware avec getClaims() pour vérification JWT (2–5 ms), rate limiting LRU, guards requireAdmin(), Zod validation, RLS sur 36 tables avec politiques publiques/admin/restrictives, SECURITY DEFINER pour fonctions de rétention, Storage RLS (medias public read, backups service_role only), et audit triggers immuables sur 14 tables avec Sentry pour alertes P0/P1.
+La sécurité est organisée en sept couches de défense en profondeur : réseau, middleware, server actions, RLS, fonctions DB, stockage, audit/monitoring. Les contrôles incluent DDoS/SSL via Vercel Edge, Next.js middleware avec getClaims() pour vérification JWT (2–5 ms), rate limiting LRU, guards requireBackofficeAccess() / requireAdminOnly(), Zod validation, RLS sur 36 tables avec politiques publiques/editor/admin/restrictives, SECURITY DEFINER pour fonctions de rétention, Storage RLS (medias public read, backups service_role only), et audit triggers immuables sur 14 tables avec Sentry pour alertes P0/P1.
 
 ```mermaid
 flowchart TB
@@ -173,7 +173,7 @@ Le schéma est géré de manière déclarative via fichiers SQL numérotés dans
 
 - 02_table_profiles.sql … 10_tables_system.sql (définitions + RLS)
 
-- 02b_functions_core.sql (fonctions core comme is_admin())
+- 02b_functions_core.sql (fonctions core comme is_admin(), has_min_role())
 
 - 02c_storage_buckets.sql (buckets Storage)
 

@@ -2,7 +2,7 @@
 import "server-only";
 import { cache } from "react";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireMinRole } from "@/lib/auth/roles";
 import type { DALResult } from "@/lib/dal/helpers";
 import { dalSuccess, dalError } from "@/lib/dal/helpers";
 import type { LieuInput, LieuDTO } from "@/lib/schemas/admin-lieux";
@@ -12,7 +12,7 @@ import type { LieuInput, LieuDTO } from "@/lib/schemas/admin-lieux";
  * @returns DALResult with array of LieuDTO
  */
 export const fetchAllLieuxAdmin = cache(async (): Promise<DALResult<LieuDTO[]>> => {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -35,7 +35,7 @@ export const fetchAllLieuxAdmin = cache(async (): Promise<DALResult<LieuDTO[]>> 
  */
 export const fetchLieuByIdAdmin = cache(
     async (id: bigint): Promise<DALResult<LieuDTO | null>> => {
-        await requireAdmin();
+        await requireMinRole("editor");
 
         const supabase = await createClient();
         const { data, error } = await supabase
@@ -62,7 +62,7 @@ export const fetchLieuByIdAdmin = cache(
  * @returns DALResult with created LieuDTO
  */
 export async function createLieu(input: LieuInput): Promise<DALResult<LieuDTO>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -89,7 +89,7 @@ export async function updateLieu(
     id: bigint,
     input: Partial<LieuInput>
 ): Promise<DALResult<LieuDTO>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -113,7 +113,7 @@ export async function updateLieu(
  * @returns DALResult with null on success
  */
 export async function deleteLieu(id: bigint): Promise<DALResult<null>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
     const { error } = await supabase.from("lieux").delete().eq("id", String(id));

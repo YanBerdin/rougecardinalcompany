@@ -3,7 +3,7 @@
 // Upload should succeed even if thumbnail generation fails
 
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireMinRole } from "@/lib/auth/roles";
 import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
 import { z } from "zod";
@@ -20,7 +20,7 @@ const THUMBNAIL_SUFFIX = "_thumb.jpg";
 export async function POST(request: NextRequest) {
   try {
     // 1. Authentication check
-    await requireAdmin();
+    await requireMinRole("editor");
 
     // 2. Validate request
     const body = await request.json();

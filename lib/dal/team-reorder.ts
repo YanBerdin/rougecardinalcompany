@@ -2,7 +2,7 @@
 import "server-only";
 import { z } from "zod";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireAdminOnly } from "@/lib/auth/roles";
 import { type DALResult, dalSuccess, dalError, getErrorMessage } from "@/lib/dal/helpers";
 
 const ReorderItemSchema = z.object({
@@ -32,7 +32,7 @@ export async function reorderTeamMembers(
     updates: { id: number; ordre: number }[]
 ): Promise<DALResult<null>> {
     try {
-        await requireAdmin();
+        await requireAdminOnly();
 
         const validated = ReorderSchema.safeParse(updates as unknown);
         if (!validated.success) {

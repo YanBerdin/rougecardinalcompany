@@ -6,6 +6,7 @@
 > **Implémenté le** : 3 mars 2026 — 7 étapes complétées (2 sous-étapes optionnelles SKIPPED)  
 > **Bilan** : 22 fichiers modifiés, 6 supprimés, 14 créés — net -178 insertions, -1161 suppressions  
 > **Corrections apportées à l'audit** :  
+>
 > - `HeroView` fait ~192 lignes (non ~135)  
 > - `NewsletterViewProps` a 8 props (non 7)  
 > - `newsletter/hooks.ts` est **actif** (ré-export) → seulement **5** hooks.ts morts (non 6)  
@@ -227,6 +228,7 @@ useEffect(() => {
 ```
 
 Si `prefers-reduced-motion: reduce` :
+
 - Désactiver l'auto-play au démarrage
 - Supprimer les transitions CSS (`transition-transform`)
 - Supprimer `animate-pulse` sur le swipe indicator

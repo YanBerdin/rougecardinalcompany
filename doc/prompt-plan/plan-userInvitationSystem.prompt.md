@@ -45,11 +45,13 @@ tenir un journal d'audit des actions admin et protéger le flux par rate-limitin
 **Problème résolu :** Profil orphelin restait en base si l'email échouait après création user + profil.
 
 **Fix appliqué :**
+
 - Rollback complet : suppression profil AVANT suppression user (respect FK constraints)
 - Logs détaillés pour debugging rollback
 - Gestion erreurs rollback avec alertes monitoring
 
 **Code implémenté :**
+
 ```typescript
 // Dans lib/dal/admin-users.ts - bloc catch email
 try {
@@ -73,11 +75,13 @@ try {
 **Problème résolu :** Emails personnels en clair dans les logs applicatifs (violation RGPD).
 
 **Fix appliqué :**
+
 - Helper `sanitizeEmailForLogs()` pour masquer emails (y***@gmail.com)
 - Remplacement de tous `console.log(email)` par `console.log(userId)`
 - Audit complet des logs sensibles
 
 **Code implémenté :**
+
 ```typescript
 function sanitizeEmailForLogs(email: string): string {
   const [localPart, domain] = email.split('@');
@@ -92,6 +96,7 @@ function sanitizeEmailForLogs(email: string): string {
 **Problème résolu :** Tests ne vérifiaient pas les styles inline critiques pour emails.
 
 **Fix appliqué :**
+
 - 4 assertions supplémentaires dans `__tests__/emails/invitation-email.test.tsx`
 - Vérification styles inline CTA (backgroundColor, padding)
 - Vérification wrapper Tailwind unique
@@ -103,6 +108,7 @@ function sanitizeEmailForLogs(email: string): string {
 **Problème résolu :** Warnings insuffisants pour `EMAIL_DEV_REDIRECT` en production.
 
 **Fix appliqué :**
+
 - Section CRITICAL WARNING dans `.env.example`
 - Checklist déploiement avec vérifications obligatoires
 - Documentation technique `doc/dev-email-redirect.md`
@@ -117,16 +123,18 @@ Points restants / recommandations :
 - 🧪 Ajouter un test unitaire d'affichage HTML pour `InvitationEmail` (assert non-empty HTML/text) et l'intégrer dans CI.
 - 🔎 Optionnel : ajouter un index sur `profiles(user_id)` si des upserts massifs sont anticipés.
 
-
 ## Phases (priorisées)
 
 Phase 0 — Préparations (prérequis)
+
 - Créer `supabase/admin.ts` : wrapper `createServerClient` / `@supabase/ssr` utilisant
   `cookies` pattern `getAll`/`setAll` et capable d'utiliser `SUPABASE_SERVICE_ROLE_KEY`.
 - Ajouter `README` court indiquant la nécessité du `service_role` et variables d'env.
 
 Phase 1 — Schéma & migrations
+
 - Migration `supabase/migrations/YYYYMMDDHHmmss_create_user_invitations.sql` :
+
   ```sql
   /*
    * Migration: Create user_invitations table
@@ -188,11 +196,13 @@ Phase 1 — Schéma & migrations
   to authenticated
   using (public.is_admin());
   ```
+
 - Migration `supabase/migrations/YYYYMMDDHHmmss_create_pending_invitations.sql` :
   - table `pending_invitations` pour file d'attente retry, metadata, attempts, last_error
   - trigger / function pour auto-updates de timestamp
 
 Phase 2 — DAL & logique atomique
+
 - `lib/dal/admin-users.ts` ("use server") :
   - `inviteUser(input: unknown)`: parse Zod, requireAdmin(), create user via admin client,
     create explicit profile row, insert into `user_invitations`, push to `pending_invitations`
@@ -200,20 +210,24 @@ Phase 2 — DAL & logique atomique
   - exposer `processPendingInvitations(batchSize)` pour worker
 
 Phase 3 — Envoi d'email
+
 - `emails/invitation-email.tsx` : template React Email (compatible avec resend)
 - `lib/email/sendInvitationEmail.ts` : wrapper send + error handling
 - En cas d'échec, écrire l'erreur dans `pending_invitations` et créer des métriques/logs
 
 Phase 4 — UI Admin
+
 - Route page admin `/admin/users` (Server Component) + Client component `InviteUserForm` (`'use client'`)
 - Formulaire utilise `useActionState(inviteUserAction)` — action serveur appelle DAL
 
 Phase 5 — Fiabilité & sécurité
+
 - Rate limiting: middleware ou guard côté Server Action (ip + admin quota)
 - Retry worker: script `scripts/process_pending_invitations.ts` (cron / supabase scheduled)
 - Audit: table `admin_actions` + écriture d'un log à chaque action admin clé
 
 Phase 6 — Tests & CI
+
 - Unit tests pour DAL (mock supabase client) et email wrapper
 - Script d'intégration `scripts/test-invitation-flow.ts` (simulateur)
 - Ajouter checks CI: `pnpm dlx supabase db diff` validation, tsc, lint, tests
@@ -277,11 +291,13 @@ node scripts/process_pending_invitations.js
 ### Problématique Actuelle
 
 Après un reset database, créer un admin nécessite :
+
 1. Création compte via interface signup
 2. Exécution manuelle SQL dans Supabase Dashboard
 3. Logout/login pour rafraîchir JWT
 
 **Solution proposée** : Interface admin complète avec :
+
 - Liste utilisateurs avec rôles
 - Modification rôles en temps réel
 - Système d'invitation par email avec rôle pré-défini
@@ -391,6 +407,7 @@ export function createAdminClient() {
 ```
 
 **Checklist** :
+
 - [ ] Créer `supabase/admin.ts`
 - [ ] Vérifier présence `SUPABASE_SECRET_KEY`
 - [ ] Configurer client sans persistance de session
@@ -501,6 +518,7 @@ interface DALResult<T = null> {
 ```
 
 **Checklist** :
+
 - [ ] Créer fichier `lib/dal/admin-users.ts`
 - [ ] Importer dépendances (Supabase, Zod, revalidatePath)
 - [ ] Définir interfaces TypeScript
@@ -565,6 +583,7 @@ export async function listAllUsers(): Promise<UserWithProfile[]> {
 ```
 
 **Checklist** :
+
 - [ ] Implémenter fonction avec JSDoc complète
 - [ ] Appeler `requireAdmin()` pour protection
 - [ ] Utiliser `supabase.auth.admin.listUsers()`
@@ -641,6 +660,7 @@ export async function updateUserRole(
 ```
 
 **Checklist** :
+
 - [ ] Implémenter avec validation Zod
 - [ ] Double mise à jour (auth.users + profiles)
 - [ ] Gestion erreurs séparée pour chaque étape
@@ -696,6 +716,7 @@ export async function deleteUser(userId: string): Promise<DALResult> {
 ```
 
 **Checklist** :
+
 - [ ] Implémenter avec validation UUID
 - [ ] Utiliser `supabase.auth.admin.deleteUser()`
 - [ ] Documenter cascade automatique (profiles)
@@ -707,12 +728,14 @@ export async function deleteUser(userId: string): Promise<DALResult> {
 **Question** : Quel type utiliser pour `generateLink()` ?
 
 #### Option 1 : `type: 'invite'`
+
 - ✅ **Avantages** : L'utilisateur est automatiquement connecté après clic
 - ✅ **UX Simple** : Pas besoin de saisir email/password pour la première connexion
 - ✅ **Email pré-confirmé** : Le fait de recevoir l'invitation confirme l'email
 - ❌ **Inconvénient** : L'utilisateur n'a pas encore défini son mot de passe
 
 #### Option 2 : `type: 'recovery'`
+
 - ✅ **Avantages** : Force l'utilisateur à définir un mot de passe
 - ✅ **Sécurité** : Mot de passe obligatoire dès la première connexion
 - ❌ **UX Plus Complexe** : Étape supplémentaire pour l'utilisateur
@@ -720,6 +743,7 @@ export async function deleteUser(userId: string): Promise<DALResult> {
 #### ✅ **Décision Recommandée : `type: 'invite'`**
 
 **Justification** :
+
 1. L'email est **implicitement confirmé** par la réception de l'invitation
 2. L'utilisateur peut définir son mot de passe **après** la connexion automatique
 3. UX plus fluide : clic → connexion → setup compte
@@ -889,6 +913,7 @@ export async function inviteUser(
 ```
 
 **Checklist** :
+
 - [ ] Implémenter fonction avec validation Zod
 - [ ] Vérifier email unique avant invitation
 - [ ] Utiliser `supabase.auth.admin.inviteUserByEmail()`
@@ -1003,6 +1028,7 @@ export default function InvitationEmail({
 ```
 
 **Checklist** :
+
 - [ ] Créer fichier `emails/invitation-email.tsx`
 - [ ] Utiliser `EmailLayout` existant
 - [ ] Design bouton CTA visible
@@ -1040,6 +1066,7 @@ export async function sendInvitationEmail(params: {
 ```
 
 **Checklist** :
+
 - [ ] Ajouter fonction dans `lib/email/actions.ts`
 - [ ] Importer template `InvitationEmail`
 - [ ] Subject clair et informatif
@@ -1096,6 +1123,7 @@ export default function AdminUsersPage() {
 ```
 
 **Checklist** :
+
 - [ ] Créer fichier page
 - [ ] Ajouter metadata SEO
 - [ ] Header avec titre + description
@@ -1123,6 +1151,7 @@ export async function UsersManagementContainer() {
 ```
 
 **Checklist** :
+
 - [ ] Créer container async
 - [ ] Appeler DAL `listAllUsers()`
 - [ ] Passer data au View
@@ -1371,6 +1400,7 @@ export function UsersManagementView({ users }: Props) {
 ```
 
 **Checklist** :
+
 - [ ] Créer composant client
 - [ ] Utiliser shadcn/ui Table
 - [ ] Select pour rôle avec handleChange
@@ -1447,6 +1477,7 @@ export function UsersManagementSkeleton() {
 ```
 
 **Checklist** :
+
 - [ ] Créer skeleton component
 - [ ] 5 lignes de skeleton par défaut
 - [ ] Largeurs réalistes pour chaque colonne
@@ -1499,6 +1530,7 @@ export default function InviteUserPage() {
 ```
 
 **Checklist** :
+
 - [ ] Créer page invite
 - [ ] Bouton retour liste users
 - [ ] Header explicatif
@@ -1732,6 +1764,7 @@ export function InviteUserForm() {
 ```
 
 **Checklist** :
+
 - [ ] Créer formulaire avec react-hook-form
 - [ ] Validation Zod via zodResolver
 - [ ] 3 champs : email, role, displayName
@@ -1806,6 +1839,7 @@ export default async function SetupAccountPage() {
 ```
 
 **Checklist** :
+
 - [ ] Créer page `setup-account`
 - [ ] Vérifier authentification user
 - [ ] Intégrer `SetupAccountForm`
@@ -1948,6 +1982,7 @@ export function SetupAccountForm({ email, userRole }: SetupAccountFormProps) {
 ```
 
 **Checklist** :
+
 - [ ] Créer composant `SetupAccountForm`
 - [ ] Validation Zod (min 8 chars, match confirmation)
 - [ ] Appel `supabase.auth.updateUser`
@@ -1987,6 +2022,7 @@ const navItems = [
 ```
 
 **Checklist** :
+
 - [ ] Importer icône `UserCog`
 - [ ] Ajouter item dans groupe "Général"
 - [ ] URL `/admin/users`
@@ -2000,6 +2036,7 @@ const navItems = [
 **Fichier** : `supabase/schemas/60_rls_profiles.sql` (déjà en place)
 
 Les policies existantes permettent déjà :
+
 - ✅ Lecture publique des profils
 - ✅ Update par propriétaire ou admin
 - ✅ Delete par propriétaire
@@ -2022,6 +2059,7 @@ WITH CHECK ( (SELECT auth.uid()) = user_id OR (SELECT public.is_admin()) );
 ```
 
 **Checklist** :
+
 - [ ] Vérifier policies existantes dans schemas
 - [ ] Tester que admin peut modifier tous profils
 - [ ] Tester que user ne peut modifier que son profil
@@ -2046,12 +2084,14 @@ EMAIL_CONTACT=contact@votre-domaine.fr
 ```
 
 **⚠️ CRITIQUE** : `SUPABASE_SECRET_KEY` est OBLIGATOIRE pour :
+
 - `supabase.auth.admin.listUsers()`
 - `supabase.auth.admin.updateUserById()`
 - `supabase.auth.admin.deleteUser()`
 - `supabase.auth.admin.inviteUserByEmail()`
 
 **Checklist** :
+
 - [ ] Vérifier présence `SUPABASE_SECRET_KEY`
 - [ ] Vérifier URL site correcte
 - [ ] Vérifier clés Resend pour emails
@@ -2187,6 +2227,7 @@ testInvitation();
 ```
 
 **Checklist** :
+
 - [ ] Créer script de test
 - [ ] Test invitation via Admin API
 - [ ] Test création profile
@@ -2194,6 +2235,7 @@ testInvitation();
 - [ ] Cleanup automatique
 
 **Commande** :
+
 ```bash
 pnpm exec tsx scripts/test-user-invitation.ts
 ```
@@ -2201,6 +2243,7 @@ pnpm exec tsx scripts/test-user-invitation.ts
 ### 8.2 Tests Manuels Interface
 
 **Checklist Tests UI** :
+
 - [ ] Accéder `/admin/users` en tant qu'admin
 - [ ] Liste s'affiche avec users existants
 - [ ] Cliquer "Inviter un utilisateur"
@@ -2331,6 +2374,7 @@ pnpm dlx supabase db dump --table profiles
 - Email : `emails/invitation-email.tsx`
 
 **Checklist** :
+
 - [ ] Créer fichier procédure complète
 
 ---
@@ -2338,7 +2382,9 @@ pnpm dlx supabase db dump --table profiles
 ## 🔍 Notes importantes (sécurité mot de passe)
 
 > [!CAUTION]
+>
 > - **Transmission à Supabase** : Supabase attend le mot de passe **en clair** (via HTTPS) pour le hacher correctement. Ne jamais hacher le mot de passe avant l'envoi à l'API Supabase.
+>
 - **Bonnes pratiques Frontend** :
   - Utiliser HTTPS (obligatoire).
   - Ne pas stocker le mot de passe dans le state React (utiliser `FormData` ou `react-hook-form`).
@@ -2378,6 +2424,7 @@ pnpm dlx supabase db dump --table profiles
 #### 1. ✅ Création Profil Explicite (IMPLÉMENTÉ)
 
 La fonction `inviteUser()` a été corrigée :
+
 - Ajout de `.from('profiles').insert()` après `generateLink`
 - Rollback complet via `deleteUser(userId)` si échec profil
 - Ne plus compter sur le trigger `handle_new_user()`
@@ -2385,6 +2432,7 @@ La fonction `inviteUser()` a été corrigée :
 #### 2. ✅ Gestion Erreur Email (STRATÉGIE FAIL-FAST)
 
 Pattern adopté pour production :
+
 ```typescript
 try {
   await sendInvitationEmail({...});
@@ -2397,6 +2445,7 @@ try {
 #### 3. ✅ Rate Limiting (IMPLÉMENTÉ)
 
 Migration SQL ajoutée :
+
 ```sql
 CREATE TABLE user_invitations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -2412,6 +2461,7 @@ CREATE INDEX idx_user_invitations_invited_by ON user_invitations(invited_by, cre
 ```
 
 Check dans DAL :
+
 ```typescript
 const { count } = await supabase
   .from('user_invitations')
@@ -2427,6 +2477,7 @@ if (count && count >= 10) {
 #### 4. ✅ Validation Domaines Email (IMPLÉMENTÉ)
 
 Schema Zod enrichi :
+
 ```typescript
 const InviteUserSchema = z.object({
   email: z.string()
@@ -2460,6 +2511,7 @@ const InviteUserSchema = z.object({
 #### 5. ✅ Tests Unitaires (AJOUTÉS)
 
 Fichier `tests/dal/admin-users.test.ts` créé avec :
+
 - Test validation email (format, domaines jetables, typos)
 - Test rate limiting (10 invitations/jour)
 - Test rollback complet (profil, email)
@@ -2487,6 +2539,7 @@ Fichier `tests/dal/admin-users.test.ts` créé avec :
 ### 🎯 Status : Production-Ready
 
 Ce système peut être déployé en production avec **confiance maximale** :
+
 - ✅ **Sécurité renforcée** : Rollback atomique + logs RGPD-compliant
 - ✅ **Fiabilité garantie** : Aucun état orphelin possible
 - ✅ **Tests complets** : Assertions inline styles + scénarios d'erreur
@@ -2508,6 +2561,7 @@ Ce système peut être déployé en production avec **confiance maximale** :
 **Effort d'implémentation** : 1 journée (6-8 heures) pour développeur expérimenté
 
 **Phases prioritaires** :
+
 1. Phase 0 : `supabase/admin.ts` (30 min)
 2. Phase 1 : Migrations SQL (30 min)
 3. Phase 2 : DAL `admin-users.ts` (2h)
@@ -2542,4 +2596,4 @@ Ce système peut être déployé en production avec **confiance maximale** :
 
 ---
 
-*Fin du plan*
+_Fin du plan_

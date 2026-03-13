@@ -3,7 +3,7 @@ import "server-only";
 import { createClient } from "@/supabase/server";
 import { createAdminClient } from "@/supabase/admin";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireAdminOnly } from "@/lib/auth/roles";
 import { env } from "@/lib/env";
 import {
   UpdateUserRoleSchema,
@@ -102,9 +102,9 @@ function mapUsersWithProfiles(
       invited_at: user.invited_at ?? null,
       profile: profile
         ? {
-            role: profile.role ?? "user",
-            display_name: profile.display_name,
-          }
+          role: profile.role ?? "user",
+          display_name: profile.display_name,
+        }
         : null,
     };
   });
@@ -116,7 +116,7 @@ function mapUsersWithProfiles(
  */
 export async function listAllUsers(): Promise<DALResult<UserWithProfile[]>> {
   try {
-    await requireAdmin();
+    await requireAdminOnly();
 
     const supabase = await createClient();
     const adminClient = await createAdminClient();
@@ -179,7 +179,7 @@ async function findUserByEmail(
 export async function updateUserRole(
   input: UpdateUserRoleInput
 ): Promise<DALResult<null>> {
-  await requireAdmin();
+  await requireAdminOnly();
 
   const validated = UpdateUserRoleSchema.parse(input);
   const supabase = await createClient();
@@ -222,7 +222,7 @@ export async function updateUserRole(
 }
 
 export async function deleteUser(userId: string): Promise<DALResult<null>> {
-  await requireAdmin();
+  await requireAdminOnly();
 
   const UUID_REGEX =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -233,7 +233,23 @@ export async function deleteUser(userId: string): Promise<DALResult<null>> {
     };
   }
 
+  const supabase = await createClient();
   const adminClient = await createAdminClient();
+
+  // Delete profile first with authenticated client so audit_trigger captures the real admin user.
+  // The cascade trigger (handle_user_deletion) will then find no profile to delete — harmless no-op.
+  const { error: profileError } = await supabase
+    .from("profiles")
+    .delete()
+    .eq("user_id", userId);
+
+  if (profileError) {
+    console.error("[DAL] Failed to delete profile:", profileError);
+    return {
+      success: false,
+      error: `Failed to delete profile: ${profileError.message}`,
+    };
+  }
 
   const { error } = await adminClient.auth.admin.deleteUser(userId);
 
@@ -322,6 +338,7 @@ async function generateUserInviteLinkWithUrl(
         data: {
           role: role,
           display_name: displayName,
+          _admin_managed: "true",
         },
       },
     });
@@ -382,12 +399,12 @@ async function waitForAuthUserCreation(
 }
 
 async function createUserProfileWithRole(
-  adminClient: SupabaseClient,
+  supabase: SupabaseClient,
   userId: string,
   role: string,
   displayName: string
 ): Promise<DALResult<null>> {
-  const { error: profileError } = await adminClient
+  const { error: profileError } = await supabase
     .from("profiles")
     .upsert(
       {
@@ -440,7 +457,7 @@ async function logInvitationAuditRecord(
 export async function inviteUserWithoutEmail(
   input: InviteUserInput
 ): Promise<DALResult<{ userId: string; invitationUrl: string }>> {
-  await requireAdmin();
+  await requireAdminOnly();
 
   const validated = InviteUserSchema.parse(input);
   const supabase = await createClient();
@@ -482,9 +499,9 @@ export async function inviteUserWithoutEmail(
 
   const { userId } = userCreationResult.data;
 
-  // 5. Create user profile
+  // 5. Create user profile (use authenticated client so auth.uid() is set in audit trigger)
   const profileResult = await createUserProfileWithRole(
-    adminClient,
+    supabase,
     userId,
     validated.role,
     displayName

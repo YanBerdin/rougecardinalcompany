@@ -3,7 +3,7 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireMinRole } from "@/lib/auth/roles";
 import {
     addSpectaclePhoto,
     deleteSpectaclePhoto,
@@ -41,7 +41,7 @@ export async function addPhotoAction(
     input: unknown
 ): Promise<import("./actions").ActionResult> {
     try {
-        await requireAdmin();
+        await requireMinRole("editor");
         // ✅ TASK055 Pattern: Validate with number schema (not bigint)
         const validated = AddPhotoInputSchema.parse(input);
 
@@ -92,7 +92,7 @@ export async function deletePhotoAction(
     mediaId: string
 ): Promise<import("./actions").ActionResult> {
     try {
-        await requireAdmin();
+        await requireMinRole("editor");
         // ✅ TASK055 Pattern: Pass strings directly, DAL converts to BigInt
         const result = await deleteSpectaclePhoto(
             spectacleId,
@@ -132,7 +132,7 @@ export async function addGalleryPhotoAction(
     input: unknown
 ): Promise<import("./actions").ActionResult> {
     try {
-        await requireAdmin();
+        await requireMinRole("editor");
         const validated = AddGalleryPhotoInputSchema.parse(input);
 
         const result = await addSpectacleGalleryPhoto(
@@ -178,7 +178,7 @@ export async function deleteGalleryPhotoAction(
     mediaId: string
 ): Promise<import("./actions").ActionResult> {
     try {
-        await requireAdmin(); // defense-in-depth: vérifier auth au niveau action ET DAL
+        await requireMinRole("editor"); // defense-in-depth: vérifier auth au niveau action ET DAL
         const result = await deleteSpectacleGalleryPhoto(
             spectacleId,
             mediaId
@@ -215,7 +215,7 @@ export async function reorderGalleryPhotosAction(
     orderedMediaIds: string[]
 ): Promise<import("./actions").ActionResult> {
     try {
-        await requireAdmin(); // defense-in-depth: vérifier auth au niveau action ET DAL
+        await requireMinRole("editor"); // defense-in-depth: vérifier auth au niveau action ET DAL
         const result = await reorderSpectacleGalleryPhotos(
             BigInt(spectacleId),
             orderedMediaIds.map((id) => BigInt(id))

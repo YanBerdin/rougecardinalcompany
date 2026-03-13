@@ -38,6 +38,7 @@ Le pattern `SECTION_RENDERERS` est **nouveau** dans le projet (aucune implément
    Chaque composant reçoit en props `{ section: PresentationSection }` + les données spécifiques (`values`, `team`) si nécessaire. Chaque fichier doit être **< 30 lignes**.
 
 10. **Créer** le `SECTION_RENDERERS` map dans `CompagnieView.tsx` refactoré :
+
     ```typescript
     const SECTION_RENDERERS: Record<string, ComponentType<SectionProps>> = {
       hero: SectionHero,
@@ -48,6 +49,7 @@ Le pattern `SECTION_RENDERERS` est **nouveau** dans le projet (aucune implément
       mission: SectionMission,
     };
     ```
+
     Le `.map()` devient : récupérer le renderer via `SECTION_RENDERERS[section.kind]`, rendre `null` si inconnu. `CompagnieView.tsx` devrait passer sous **50 lignes** (map, renderers import, wrapper div).
 
 ### Phase 4 — Corrections accessibilité WCAG 2.2 AA

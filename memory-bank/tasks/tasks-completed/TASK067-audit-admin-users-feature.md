@@ -153,6 +153,7 @@ L'audit suit le même pattern que TASK063/064/065/066 : lecture de chaque fichie
 **Classification** : violations mineures uniquement. Ces scripts sont des utilitaires de debug/setup one-shot, non du code de production. Les hardcoded IDs sont des TODOs explicites. Les violations TypeScript strict (`catch` sans `: unknown`) sont corrigeables mais non bloquantes pour des scripts CLI.
 
 **Recommandations** (non bloquantes) :
+
 1. Migrer `delete-test-user.js` vers CLI arg au lieu de hardcoded ID
 2. Harmoniser `set-admin-role.ts` : supprimer le double import dotenv
 3. Supprimer `import 'dotenv/config'` redondant dans `inspect-user.ts`

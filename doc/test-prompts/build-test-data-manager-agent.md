@@ -52,7 +52,7 @@ graph TD
 ### 1.2 Identifier les données stables vs dynamiques
 
 | Catégorie | Tables | Stratégie seed |
-|---|---|---|
+| --- | --- | --- |
 | **Référentiel stable** | `lieux`, `site_config`, `partners` | Seed fixe, partagé |
 | **Contenu métier** | `spectacles`, `team_members`, `press_releases` | Seed minimal (3–5 entrées) |
 | **Données relationnelles** | `agenda_events`, `spectacle_gallery` | Générées après les parents |
@@ -201,9 +201,10 @@ DELETE FROM public.agenda_events WHERE is_test_data = true;
 DELETE FROM public.spectacles WHERE is_test_data = true;
 -- Suivre INSERT_ORDER en reverse pour respecter les FK
 ```
-```
 
+```md
 #### `.github/agents/references/fixture-patterns.md`
+```
 
 ```markdown
 # Patterns de Fixtures Playwright
@@ -311,6 +312,7 @@ export class AdminSpectaclesPage {
   }
 }
 ```
+
 ```
 
 #### `.github/agents/references/isolation-strategies.md`
@@ -394,11 +396,12 @@ export async function cleanAllTestData(db: SupabaseClient) {
 ## Stratégie recommandée par environnement
 
 | Environnement | Stratégie | Raison |
-|---|---|---|
+| --- | --- | --- |
 | Local dev | C (cleanup ciblé) | Rapide, simple |
 | CI (chaque commit) | C + reset état initial | Rapide, pas de coût |
 | CI (PR review) | B (branching) | Isolation garantie |
 | Staging | B (branching) | Données réelles protégées |
+
 ```
 
 ---
@@ -469,6 +472,7 @@ tests/
 - [ ] Cleanup en `afterEach` ou `afterAll` selon le scope
 - [ ] Types générés depuis Supabase (`generate_typescript_types`)
 - [ ] RLS toujours actif (pas de bypass RLS en test fonctionnel)
+
 ```
 
 ---
@@ -480,11 +484,13 @@ tests/
 Invoquer l'agent Supabase Expert avec ce prompt :
 
 ```
+
 Génère une migration pour ajouter la colonne is_test_data boolean default false
 sur les tables suivantes : spectacles, team_members, agenda_events, lieux,
 partners, press_releases, hero_slides, home_stats.
 Respecte le format YYYYMMDDHHmmss_add_test_data_flag.sql.
 Ajoute un index partiel pour le nettoyage rapide sur chaque table.
+
 ```
 
 **Résultat attendu** :
@@ -655,7 +661,7 @@ export default defineConfig({
 
 ## Checklist de validation finale
 
-### L'agent est prêt quand :
+### L'agent est prêt quand
 
 - [ ] `.github/agents/test-data-manager.agent.md` créé et validé
 - [ ] `.github/agents/references/` contient les 3 fichiers de référence

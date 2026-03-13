@@ -241,6 +241,9 @@ Remplacer `(select public.is_admin())` par `(select public.has_min_role('editor'
 | `media_folders` | 3 |
 | `categories` | 3 |
 | `tags` | 3 |
+| `table_compagnie_content` | ? |
+| `evenements_recurrence` | ? |
+| `categories_tags` | ? |
 
 **Tables qui RESTENT `is_admin()`** :
 
@@ -291,7 +294,7 @@ Les DAL admin-only (`admin-press-contacts.ts` : 7 occurrences, `team.ts`, `audit
 **Fichiers** : 9 fichiers DAL ci-dessus
 **Dépend de** : Phase 1 (besoin de `requireMinRole`)
 **Parallélisable avec** : Phase 8
-**Vérification** : Tests scripts existants (`pnpm test:partners` ne doit pas régresser). Créer un script `scripts/test-editor-access.ts`.
+**Vérification** : Tests scripts existants (`pnpm test:partners` ne doit pas régresser). Créer un script `scripts/test-editor-access-local.ts`.
 
 ---
 
@@ -327,7 +330,7 @@ Remplacer `requireAdmin()` par `requireMinRole('editor')` dans les Actions édit
 
 ### Phase 11 : Politique stockage
 
-Modifier la politique d'écriture du bucket `medias` dans `supabase/schemas/70_storage_policies.sql` :
+Modifier la politique d'écriture du bucket `medias` dans `supabase/schemas/02c_storage_buckets.sql` :
 
 - Remplacer `(select public.is_admin())` par `(select public.has_min_role('editor'))` pour INSERT/UPDATE/DELETE sur `storage.objects` WHERE `bucket_id = 'medias'`
 
@@ -335,7 +338,7 @@ Le bucket `backups` reste `service_role` only (aucun changement).
 
 **Fichiers** :
 
-- `supabase/schemas/70_storage_policies.sql` — modifier politiques bucket medias
+- `supabase/schemas/02c_storage_buckets.sql` — modifier politiques bucket medias
 - `supabase/migrations/YYYYMMDDHHMMSS_editor_storage_policies.sql` — CRÉER migration
 
 **Dépend de** : Phase 7
@@ -381,9 +384,39 @@ Une fois toutes les migrations terminées :
 
 ---
 
+### Phase 14 (hors plan) : Migration prérequis cloud — fonction `has_min_role()`
+
+Lors du premier `supabase db push --linked`, les migrations Phase 8 et 10 échouaient car la fonction `has_min_role()` n'existait pas encore en cloud (elle était créée via le schéma déclaratif en local, mais le cloud ne l'avait pas). Une migration prérequis dédiée a été créée pour résoudre cette dépendance.
+
+**Fichiers** :
+
+- `supabase/migrations/20260311030000_create_has_min_role_function.sql` (créé) — crée la fonction `has_min_role(required_role text)` en cloud avant les migrations RLS/Storage qui en dépendent.
+
+**Dépend de** : Phase 7 (fonction `has_min_role()` dans le schéma déclaratif)
+**Vérification** : `pnpm dlx supabase db push --linked` applique les 3 migrations dans l'ordre sans erreur.
+
+---
+
+### Phase 15 (hors plan) : Correction middleware backoffice — redirect 307 éditeur
+
+Après déploiement cloud, un utilisateur éditeur recevait une redirection 307 systématique sur `/admin`. Le middleware Supabase (`supabase/middleware.ts`) contenait un check `role === "admin"` en dur, bloquant tous les rôles non-admin même s'ils avaient un accès backoffice légitime.
+
+**Cause racine** : `supabase/middleware.ts` comparait `role === "admin"` au lieu d'utiliser la hiérarchie de rôles.
+
+**Correction** : Import de `normalizeRole()` et `isRoleAtLeast()` depuis `lib/auth/role-helpers.ts`. Le middleware prend le max entre `app_metadata.role` et `user_metadata.role` via `normalizeRole()`, puis vérifie `isRoleAtLeast(effectiveRole, "editor")`.
+
+**Fichiers** :
+
+- `supabase/middleware.ts` (modifié) — remplacement du check `role === "admin"` par `isRoleAtLeast(effectiveRole, "editor")`
+
+**Dépend de** : Phase 1 (`role-helpers.ts`)
+**Vérification** : Un éditeur accède à `/admin` sans redirection 307. Un simple `user` est toujours redirigé.
+
+---
+
 ## Vérification globale
 
-1. **Script test éditeur** : Créer `scripts/test-editor-access.ts` qui :
+1. **Script test éditeur** : Créer `scripts/test-editor-access-local.ts` qui :
    - Crée un client Supabase avec un token éditeur
    - Vérifie accès SELECT/INSERT/UPDATE/DELETE sur `spectacles` → ✅
    - Vérifie accès SELECT/INSERT/UPDATE/DELETE sur `evenements` → ✅
@@ -413,17 +446,20 @@ Une fois toutes les migrations terminées :
 ### À CRÉER
 
 - `lib/auth/roles.ts` — hiérarchie de rôles TS, `requireMinRole()`, `requireBackofficeAccess()`, `requireAdminOnly()`
-- `supabase/migrations/YYYYMMDDHHMMSS_editor_role_sql_function.sql` — fonction `has_min_role()`
-- `supabase/migrations/YYYYMMDDHHMMSS_editor_role_rls_policies.sql` — migration RLS (~60 ALTER POLICY)
-- `supabase/migrations/YYYYMMDDHHMMSS_editor_storage_policies.sql` — migration stockage
-- `scripts/test-editor-access.ts` — script de test
+- `lib/auth/role-helpers.ts` — module pur partagé (`normalizeRole()`, `isRoleAtLeast()`, `ROLE_HIERARCHY`)
+- `supabase/migrations/20260311030000_create_has_min_role_function.sql` — prérequis cloud `has_min_role()` (Phase 14)
+- `supabase/migrations/20260311030511_editor_storage_policies.sql` — migration stockage (Phase 8)
+- `supabase/migrations/20260311120000_editor_role_rls_policies.sql` — migration RLS ~60 ALTER POLICY (Phase 10)
+- `scripts/test-editor-access-local.ts` — script de test
+- `scripts/test-editor-access-remote.ts` — script de test
 
 ### À MODIFIER
 
 - `supabase/schemas/02b_functions_core.sql` — ajouter `has_min_role()` (source déclarative)
 - `supabase/schemas/61_rls_main_tables.sql` — migrer politiques éditoriales (source déclarative)
 - `supabase/schemas/62_rls_advanced_tables.sql` — migrer politiques éditoriales (source déclarative)
-- `supabase/schemas/70_storage_policies.sql` — migrer politique bucket medias (source déclarative)
+- `supabase/schemas/02c_storage_buckets.sql` — migrer politique bucket medias (source déclarative)
+- `supabase/middleware.ts` — remplacement check `role === "admin"` par `isRoleAtLeast(effectiveRole, "editor")` (Phase 15)
 - `app/(admin)/layout.tsx` — `requireAdmin()` → `requireBackofficeAccess()`
 - `components/admin/AdminSidebar.tsx` — ajout filtrage par rôle
 - `components/auth/SetupAccountForm.tsx` — fix redirection éditeur
@@ -434,4 +470,100 @@ Une fois toutes les migrations terminées :
 - ~8 fichiers Server Actions — ~11 migrations + ~15-20 ajouts de gardes
 - `lib/auth/is-admin.ts` — déprécier `requireAdmin()`
 
-### Total estimé : ~35 fichiers modifiés/créés
+---
+
+### Bug #1 (hors plan) : Onglet "Contacts Presse" — accès éditeur bloqué
+
+Après déploiement, l'onglet "Contacts" de la page `/admin/presse` retournait une erreur 403 pour les éditeurs. La route API du CRUD contacts presse utilisait `withAdminAuth` (admin-only) au lieu de `withBackofficeAuth` (editor+admin).
+
+**Cause racine** : La route API contacts presse avait conservé le guard `withAdminAuth` alors que les contacts presse sont en lecture pour les éditeurs dans le cadre de leur travail éditorial.
+
+**Correction** : Remplacement de `withAdminAuth` par `withBackofficeAuth` sur la route API concernée.
+
+**Fichiers** :
+
+- Route API contacts presse (modifiée) — `withAdminAuth` → `withBackofficeAuth`
+
+**Dépend de** : Phase 3 (`withBackofficeAuth`)
+**Vérification** : Un éditeur peut accéder à l'onglet "Contacts" sans erreur 403.
+
+---
+
+### Bug #2 (hors plan) : Recherche média — accès éditeur bloqué
+
+La route de recherche dans la médiathèque retournait 403 pour les éditeurs, empêchant toute sélection d'image dans les formulaires.
+
+**Cause racine** : `app/api/admin/media/search/route.ts` utilisait `withAdminAuth` au lieu de `withBackofficeAuth`. Or la médiathèque est une ressource éditoriale (les éditeurs doivent pouvoir chercher et téléverser des médias).
+
+**Correction** : Remplacement de `withAdminAuth` par `withBackofficeAuth`.
+
+**Fichiers** :
+
+- `app/api/admin/media/search/route.ts` (modifié) — `withAdminAuth` → `withBackofficeAuth`
+
+**Dépend de** : Phase 3 (`withBackofficeAuth`)
+**Vérification** : Un éditeur peut rechercher et sélectionner des médias via la `MediaLibraryPicker`.
+
+---
+
+### Bug #3 (hors plan) : Race condition `isLoading` dans `SpectaclePhotoManager`
+
+Lors de l'ouverture d'un formulaire de spectacle existant, le gestionnaire de photos affichait momentanément des slots vides (état "0 photos") alors que les photos étaient encore en cours de chargement. Ce comportement déclenchait une erreur visuelle et potentiellement des actions utilisateur incorrectes.
+
+**Cause racine** : La condition d'affichage de l'état vide ne tenait pas compte du flag `isLoading`. L'état "aucune photo" était rendu immédiatement avant que la requête de récupération des photos ne soit terminée.
+
+**Correction** : Ajout d'un guard `!isLoading` dans la condition d'affichage de l'état vide du `SpectaclePhotoManager`. Le composant attend la fin du chargement avant de décider si les slots sont réellement vides.
+
+**Fichiers** :
+
+- `SpectaclePhotoManager` (modifié) — correction de la gestion du state `isLoading` pour éviter le flash d'état vide
+
+**Dépend de** : Aucune dépendance de rôle, bug UI indépendant
+**Vérification** : L'ouverture d'un spectacle existant avec des photos affiche correctement les photos sans flash d'état vide.
+
+---
+
+### Bug #4 (hors plan) : Galerie photos spectacle — accès éditeur bloqué
+
+Les appels à la galerie de photos d'un spectacle (chargement et ajout) retournaient 403 pour les éditeurs.
+
+**Cause racine** : `app/api/admin/spectacles/[id]/gallery-photos/route.ts` utilisait `withAdminAuth` au lieu de `withBackofficeAuth`. La galerie de photos fait partie du contenu éditorial des spectacles.
+
+**Correction** : Remplacement de `withAdminAuth` par `withBackofficeAuth`.
+
+**Fichiers** :
+
+- `app/api/admin/spectacles/[id]/gallery-photos/route.ts` (modifié) — `withAdminAuth` → `withBackofficeAuth`
+
+**Dépend de** : Phase 3 (`withBackofficeAuth`)
+**Vérification** : Un éditeur peut charger et gérer la galerie de photos d'un spectacle.
+
+---
+
+### Bug #5 (hors plan) : `[ERR_PHOTO_001]` à l'édition de spectacle par un éditeur
+
+Lors de l'édition d'un spectacle existant par un éditeur, un ajout de photo retournait `[ERR_PHOTO_001]` même si le spectacle semblait n'avoir aucune photo dans le formulaire.
+
+**Cause racine** : La migration de sécurité `20260220130000_fix_spectacle_admin_views_security.sql` avait ajouté `AND (select public.is_admin()) = true` dans les vues `spectacles_landscape_photos_admin` et `spectacles_gallery_photos_admin`. Or, un éditeur n'est pas admin au sens de `is_admin()` → les vues retournaient 0 lignes pour les éditeurs → le formulaire affichait 0 photos (d'où le Bug #3) → le DAL `addSpectaclePhoto` lisait le nombre réel de photos en base (2 photos existantes) et bloquait l'insertion avec `[ERR_PHOTO_001]` (limite dépassée).
+
+**Chaîne causale** :
+
+1. `spectacles_landscape_photos_admin` et `spectacles_gallery_photos_admin` → filtre `is_admin()` → 0 lignes retournées pour un éditeur
+2. `SpectaclePhotoManager` reçoit 0 photos → affiche "aucune photo" (Bug #3)
+3. L'éditeur clique "Ajouter une photo" → `addSpectaclePhoto` requête la vraie table (pas la vue) → 2 photos existent → `[ERR_PHOTO_001]` : limite dépassée
+
+**Correction** : Migration `20260311190551_fix_spectacle_photo_views_editor_access.sql` — remplacement de `(select public.is_admin()) = true` par `(select public.has_min_role('editor')) = true` dans les deux vues. Les schémas déclaratifs correspondants ont également été mis à jour.
+
+**Fichiers** :
+
+- `supabase/migrations/20260311190551_fix_spectacle_photo_views_editor_access.sql` (créé) — `is_admin()` → `has_min_role('editor')` dans les deux vues
+- `supabase/schemas/41_views_spectacle_photos.sql` (modifié) — source déclarative vue paysage : `is_admin()` → `has_min_role('editor')`
+- `supabase/schemas/42_views_spectacle_gallery.sql` (modifié) — source déclarative vue galerie : `is_admin()` → `has_min_role('editor')`
+- `supabase/schemas/README.md` (documenté) — note sur la sécurité des vues admin spectacle
+
+**Sécurité préservée** : `SECURITY INVOKER` maintenu sur les deux vues, `REVOKE SELECT FROM anon` conservé, le DAL appelle toujours `requireMinRole('editor')` comme garde côté serveur.
+
+**Dépend de** : Phase 14 (fonction `has_min_role()` disponible en cloud), Phase 10 (RLS éditeur)
+**Vérification** : `supabase db push` → `Finished supabase db push.` Un éditeur peut voir et gérer les photos de spectacle sans `[ERR_PHOTO_001]`.
+
+### Total estimé : ~37 fichiers modifiés/créés

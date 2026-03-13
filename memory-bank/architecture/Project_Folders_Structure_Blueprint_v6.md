@@ -196,7 +196,7 @@ rougecardinalcompany/
 │   │   ├── file-hash.ts            # File integrity hashing
 │   │   └── ...
 │   │
-│   ├── auth/                       # Auth guards (is-admin.ts)
+│   ├── auth/                       # Role-based auth guards (roles.ts, role-helpers.ts)
 │   ├── email/                      # Email service (actions.ts, types.ts)
 │   ├── services/                   # External services (sentry-api.ts)
 │   ├── sentry/                     # Sentry integration (capture-error.ts)
@@ -306,7 +306,7 @@ The App Router uses **route groups** to separate admin and public layouts withou
 
 | Route Group    | Layout                         | Auth Requirement | URL prefix  |
 | -------------- | ------------------------------ | ---------------- | ----------- |
-| `(admin)/`     | AdminSidebar + auth protection | `requireAdmin()` | `/admin/*`  |
+| `(admin)/`     | AdminSidebar + auth protection | `requireBackofficePageAccess()` | `/admin/*`  |
 | `(marketing)/` | Header + Footer                | Public           | `/*`        |
 | `auth/`        | Minimal (no layout group)      | Public           | `/auth/*`   |
 | `api/`         | None (route handlers)          | Per-endpoint     | `/api/*`    |
@@ -385,7 +385,7 @@ The `lib/` directory is the application's core — it **never** contains UI comp
 | `hooks/`        | 10    | Client-side React hooks                         | No           |
 | `utils/`        | 11    | Pure utility functions                          | Mixed        |
 | `tables/`       | 5     | Table column definition helpers                 | No           |
-| `auth/`         | 1     | `is_admin()` guard                              | Yes          |
+| `auth/`         | 3     | Role-based guards (`roles.ts`, `role-helpers.ts`) | Yes          |
 | `email/`        | 2     | Email sending service                           | Yes          |
 | `services/`     | 1     | External service clients (Sentry API)           | Yes          |
 | `sentry/`       | 2     | Error capture helpers                           | Mixed        |
@@ -418,7 +418,7 @@ The `lib/` directory is the application's core — it **never** contains UI comp
 ```bash
 01_extensions.sql          → PostgreSQL extensions
 02_table_profiles.sql      → Base user tables
-02b_functions_core.sql     → Core functions (is_admin, updated_at)
+02b_functions_core.sql     → Core functions (is_admin, has_min_role, updated_at)
 02c_storage_buckets.sql    → Storage configuration
 03–09_table_*.sql          → Content tables (ordered by FK deps)
 10–15_tables_system.sql    → System tables (audit, analytics, etc.)
@@ -549,7 +549,7 @@ import "server-only";
 
 // 3. Internal library imports (path alias)
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireBackofficeAccess } from "@/lib/auth/roles";
 import { dalSuccess, dalError } from "@/lib/dal/helpers";
 
 // 4. Schema/type imports
@@ -702,7 +702,7 @@ next.config.ts
 - **getClaims()** for fast auth checks (~2-5ms), `getUser()` only when full profile needed
 - **Cookies**: ONLY `getAll`/`setAll` pattern (never `get`/`set`/`remove`)
 - **Declarative schemas** in `supabase/schemas/` — migrations auto-generated
-- **RLS on all 36 tables** — public read with conditions, admin writes via `is_admin()`
+- **RLS on all 36 tables** — public read with conditions, backoffice writes via `has_min_role('editor')`, admin-only via `is_admin()`
 
 ### 8.3 DAL/Server Action Data Flow
 
@@ -723,7 +723,7 @@ next.config.ts
 │              ▼                                             │
 │  Server Action  (app/{feature}/actions.ts)                 │
 │  ├─ Zod validation                                         │
-│  ├─ await requireAdmin()                                   │
+│  ├─ await requireBackofficeAccess()                        │
 │  ├─ await dalFunction()  ←  lib/dal/{feature}.ts           │
 │  ├─ revalidatePath()                                       │
 │  └─ return ActionResult (no BigInt!)                        │
@@ -838,7 +838,7 @@ lib/dal/{section}.ts            # Public DAL with cache()
 import "server-only";
 import { cache } from "react";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireBackofficeAccess } from "@/lib/auth/roles";
 import { dalSuccess, dalError, type DALResult } from "@/lib/dal/helpers";
 import type { FeatureDTO } from "@/lib/schemas/{feature}";
 
@@ -863,7 +863,7 @@ export const fetchFeatures = cache(
 "use server";
 import "server-only";
 import { revalidatePath } from "next/cache";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireBackofficeAccess } from "@/lib/auth/roles";
 import { FeatureInputSchema } from "@/lib/schemas/{feature}";
 import { createFeature } from "@/lib/dal/admin-{feature}";
 import type { ActionResult } from "@/lib/actions/types";
@@ -871,7 +871,7 @@ import type { ActionResult } from "@/lib/actions/types";
 export async function createFeatureAction(
   input: unknown
 ): Promise<ActionResult> {
-  await requireAdmin();
+  await requireBackofficeAccess();
   const validated = FeatureInputSchema.parse(input);
   const result = await createFeature(validated);
 
@@ -913,8 +913,8 @@ using (active = true);
 create policy "Admins can manage {feature}"
 on public.{feature} for all
 to authenticated
-using ((select public.is_admin()))
-with check ((select public.is_admin()));
+using ((select public.has_min_role('editor')))
+with check ((select public.has_min_role('editor')));
 
 -- Auto-update timestamps
 create trigger {feature}_updated_at

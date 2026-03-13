@@ -3,7 +3,7 @@
 import "server-only";
 import { cache } from "react";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireMinRole } from "@/lib/auth/roles";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
     SpectaclePhotoDTOSchema,
@@ -90,7 +90,7 @@ export const fetchSpectacleLandscapePhotos = cache(
 export const fetchSpectacleLandscapePhotosAdmin = cache(
     async (spectacleId: bigint): Promise<SpectaclePhotoDTO[]> => {
         try {
-            await requireAdmin();
+            await requireMinRole("editor");
 
             const supabase = await createClient();
 
@@ -159,7 +159,7 @@ export async function addSpectaclePhoto(
     ordre: number,
 ): Promise<DALResult<null>> {
     try {
-        await requireAdmin();
+        await requireMinRole("editor");
 
         // ✅ No BigInt needed - spectacleId and mediaId are already numbers
         const supabase = await createClient();
@@ -223,7 +223,7 @@ export async function deleteSpectaclePhoto(
     mediaId: string,
 ): Promise<DALResult<null>> {
     try {
-        await requireAdmin();
+        await requireMinRole("editor");
 
         // ✅ Parse as number (Supabase queries expect number, not BigInt)
         const spectacleIdNum = Number(spectacleId);
@@ -327,7 +327,7 @@ export const fetchSpectacleGalleryPhotos = cache(
 export const fetchSpectacleGalleryPhotosAdmin = cache(
     async (spectacleId: bigint): Promise<GalleryPhotoDTO[]> => {
         try {
-            await requireAdmin();
+            await requireMinRole("editor");
             const supabase = await createClient();
 
             const { data, error } = await supabase
@@ -390,7 +390,7 @@ export async function addSpectacleGalleryPhoto(
     ordre: number,
 ): Promise<DALResult<null>> {
     try {
-        await requireAdmin();
+        await requireMinRole("editor");
 
         const supabase = await createClient();
 
@@ -464,7 +464,7 @@ export async function deleteSpectacleGalleryPhoto(
     mediaId: string,
 ): Promise<DALResult<null>> {
     try {
-        await requireAdmin();
+        await requireMinRole("editor");
 
         const spectacleIdNum = Number(spectacleId);
         const mediaIdNum = Number(mediaId);
@@ -510,7 +510,7 @@ export async function reorderSpectacleGalleryPhotos(
     orderedMediaIds: bigint[],
 ): Promise<DALResult<null>> {
     try {
-        await requireAdmin();
+        await requireMinRole("editor");
 
         const supabase = await createClient();
         const spectacleIdNum = Number(spectacleId);

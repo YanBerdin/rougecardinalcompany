@@ -10,6 +10,7 @@ import {
 } from "@/lib/dal/admin-agenda";
 import { EventFormSchema } from "@/lib/schemas/admin-agenda-ui";
 import type { EventInput } from "@/lib/schemas/admin-agenda";
+import { requireMinRole } from "@/lib/auth/roles";
 
 // ✅ Type simplifié sans données - évite problèmes de sérialisation BigInt
 export type ActionResult =
@@ -32,6 +33,8 @@ export async function createEventAction(
     input: unknown
 ): Promise<ActionResult> {
     try {
+        await requireMinRole("editor");
+
         // 1. Validation avec schéma UI (number IDs) - Pas de BigInt ici !
         const validated = EventFormSchema.parse(input);
 
@@ -84,6 +87,8 @@ export async function updateEventAction(
     input: unknown
 ): Promise<ActionResult> {
     try {
+        await requireMinRole("editor");
+
         // 1. Validation avec schéma UI (number IDs)
         const validated = EventFormSchema.partial().parse(input);
 
@@ -154,6 +159,8 @@ export async function deleteEventAction(
     id: string
 ): Promise<ActionResult> {
     try {
+        await requireMinRole("editor");
+
         // ✅ Conversion string → bigint pour le DAL
         const result = await deleteEvent(BigInt(id));
 

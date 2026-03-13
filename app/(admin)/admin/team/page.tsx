@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { requireAdminPageAccess } from "@/lib/auth/is-admin";
+import { requireAdminPageAccess } from "@/lib/auth/roles";
 import { fetchAllTeamMembers } from "@/lib/dal/team";
 import { TeamManagementContainer } from "@/components/features/admin/team/TeamManagementContainer";
 import { TeamPageToasts } from "@/components/admin/TeamPageToasts";

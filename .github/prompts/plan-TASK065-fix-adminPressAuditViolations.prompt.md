@@ -27,6 +27,7 @@ Dans `actions.ts`, ajouter `import "server-only";` juste après `"use server";`.
 
 **Violation** : `dal-solid-principles.instructions.md` (Règle N°1), `copilot-instructions.md` (NEVER import DAL in Client Components)
 **Fichiers** :
+
 - `components/features/admin/presse/PressReleaseNewForm.tsx`
 - `components/features/admin/presse/PressReleaseEditForm.tsx`
 - `app/(admin)/admin/presse/communiques/new/page.tsx`
@@ -74,6 +75,7 @@ return (
 ```
 
 **2c.** Dans `PressReleaseNewForm.tsx` et `PressReleaseEditForm.tsx` :
+
 - Supprimer l'import DAL `import { fetchSpectaclesForSelect, fetchEvenementsForSelect } from "@/lib/dal/admin-press-releases"`
 - Supprimer le `useEffect` qui appelle ces fonctions (lignes ~82-89 dans NewForm, ~76-84 dans EditForm)
 - Supprimer les `useState` pour `spectacles` et `evenements`
@@ -136,6 +138,7 @@ Splitter en 3 fichiers (chacun < 150 lignes) :
 | `press-contacts-actions.ts` | `createPressContactAction`, `updatePressContactAction`, `deletePressContactAction`, `togglePressContactActiveAction` | ~100 |
 
 Chaque fichier aura :
+
 - `"use server";` + `import "server-only";`
 - Import du `ActionResult` **partagé** (voir étape 8)
 - Import des schémas et DAL respectifs

@@ -41,7 +41,8 @@ app/api/admin/
 
 ## 📝 Modèles d'annotation
 
-### Pour mutations (POST/PATCH/DELETE) :
+### Pour mutations (POST/PATCH/DELETE)
+
 ```typescript
 /**
  * @deprecated Prefer using [actionName]Action from
@@ -50,7 +51,8 @@ app/api/admin/
  */
 ```
 
-### Pour lectures (GET) dans pages admin :
+### Pour lectures (GET) dans pages admin
+
 ```typescript
 /**
  * @deprecated For admin UI, prefer Server Component with direct DAL call:
@@ -61,7 +63,8 @@ app/api/admin/
  */
 ```
 
-### Pour routes intentionnellement conservées :
+### Pour routes intentionnellement conservées
+
 ```typescript
 /**
  * NOTE: This API Route is intentionally kept (not migrated to Server Action)

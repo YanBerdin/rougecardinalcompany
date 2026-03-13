@@ -162,8 +162,8 @@ export function MediaFolderFormDialog({
                                 id="folder-slug"
                                 value={slug}
                                 onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))}
-                                required
-                                aria-required="true"
+                                //required
+                                aria-required="false"
                                 maxLength={100}
                                 placeholder="⚠️ Laissez vide pour génération automatique ⚠️"
                                 className="font-mono text-sm"

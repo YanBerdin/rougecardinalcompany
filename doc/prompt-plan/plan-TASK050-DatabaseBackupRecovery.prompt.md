@@ -32,6 +32,7 @@
 | **2. Weekly Backup** | `pg_dump` + Supabase Storage (TASK050) | Base complète | Disaster recovery, corruption totale |
 
 **Complémentarité** :
+
 - Le [Content Versioning](supabase/schemas/15_content_versioning.sql) permet de restaurer une version antérieure d'un spectacle/article spécifique sans toucher au reste.
 - Le Weekly Backup protège contre les scénarios catastrophiques où le versioning lui-même serait perdu (DROP TABLE, corruption base, etc.).
 

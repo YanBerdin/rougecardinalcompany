@@ -9,6 +9,7 @@ import {
 import {
     updatePresentationSection,
 } from "@/lib/dal/admin-compagnie-presentation";
+import { requireMinRole } from "@/lib/auth/roles";
 
 // =============================================================================
 // PRESENTATION SECTIONS ACTIONS
@@ -22,6 +23,8 @@ export async function updatePresentationSectionAction(
     input: unknown
 ): Promise<ActionResult> {
     try {
+        await requireMinRole("editor");
+
         const validated = await PresentationSectionInputSchema.partial().parseAsync(input);
         const result = await updatePresentationSection(BigInt(id), validated);
 

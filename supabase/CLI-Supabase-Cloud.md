@@ -136,7 +136,20 @@ pnpm dlx supabase status --linked
   2. `supabase db pull --linked`  
   3. Rejouer les migrations propres
 
-## 12. Ressources
+## 12. Migrations RBAC (Editor Role)
+
+Le système de rôles 3-tiers (`user < editor < admin`) a été implémenté via 4 migrations :
+
+| Migration | Description |
+|-----------|-------------|
+| `20260311030000_add_has_min_role_function.sql` | Fonction `has_min_role(required_role text)` |
+| `20260311030511_add_editor_storage_policies.sql` | Policies Storage pour éditeurs |
+| `20260311120000_update_rls_editor_role.sql` | RLS 26 tables → `has_min_role('editor')` |
+| `20260311190551_fix_admin_views_editor_role.sql` | Vues admin avec guard `has_min_role()` |
+
+**Fonction clé** : `has_min_role(required_role text)` remplace `is_admin()` pour les opérations backoffice. `is_admin()` reste disponible pour les vérifications admin-only.
+
+## 13. Ressources
 
 - [Supabase CLI Documentation](https://supabase.com/docs/guides/cli)
 - [Supabase Cloud Dashboard](https://app.supabase.com/)

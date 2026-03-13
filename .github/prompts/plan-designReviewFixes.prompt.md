@@ -9,9 +9,10 @@ L'audit a identifié **aucun problème majeur** mais 3 recommandations d'amélio
 **1.1** Ajouter `id="main-content"` sur le `<main>` dans `app/(marketing)/layout.tsx` (ligne 24, actuellement sans id)
 
 **1.2** Ajouter un lien "Aller au contenu principal" en premier enfant du layout, avant `<PageViewTracker />`
+
 - Réutiliser le pattern existant de `components/features/public-site/spectacles/SpectacleDetailView.tsx` lignes 27-34 (classes `sr-only focus:not-sr-only...`)
 
-**1.3** *(parallèle)* Idem dans le layout admin pour cohérence a11y
+**1.3** _(parallèle)_ Idem dans le layout admin pour cohérence a11y
 
 ## Phase 2 — Placeholder Spectacle Dédié
 
@@ -20,6 +21,7 @@ L'audit a identifié **aucun problème majeur** mais 3 recommandations d'amélio
 **2.2** Créer `components/features/public-site/spectacles/constants.ts` avec `FALLBACK_SPECTACLE_IMAGE` — identique au pattern de `components/features/public-site/compagnie/constants.ts` ligne 17
 
 **2.3** Remplacer les 3 occurrences de `"/opengraph-image.png"` par la constante dans :
+
 - `components/features/public-site/spectacles/SpectaclesContainer.tsx` (lignes 27, 42)
 - `components/features/public-site/spectacles/SpectaclesView.tsx` (lignes 60, 142)
 

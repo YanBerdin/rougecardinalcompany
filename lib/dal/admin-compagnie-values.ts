@@ -3,7 +3,7 @@ import "server-only";
 
 import { cache } from "react";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireMinRole } from "@/lib/auth/roles";
 import {
     type DALResult,
     dalSuccess,
@@ -69,7 +69,7 @@ async function getNextPosition(
  */
 export const fetchAllCompagnieValuesAdmin = cache(
     async (): Promise<DALResult<CompagnieValueDTO[]>> => {
-        await requireAdmin();
+        await requireMinRole("editor");
 
         const supabase = await createClient();
         const { data, error } = await supabase
@@ -91,7 +91,7 @@ export const fetchAllCompagnieValuesAdmin = cache(
 export async function createCompagnieValue(
     input: CompagnieValueInput
 ): Promise<DALResult<CompagnieValueDTO>> {
-    await requireAdmin();
+    await requireMinRole("editor");
     await CompagnieValueInputSchema.parseAsync(input);
 
     const supabase = await createClient();
@@ -124,7 +124,7 @@ export async function updateCompagnieValue(
     id: bigint,
     input: Partial<CompagnieValueInput>
 ): Promise<DALResult<CompagnieValueDTO>> {
-    await requireAdmin();
+    await requireMinRole("editor");
     await CompagnieValueInputSchema.partial().parseAsync(input);
 
     const supabase = await createClient();
@@ -151,7 +151,7 @@ export async function updateCompagnieValue(
  * Delete compagnie value
  */
 export async function deleteCompagnieValue(id: bigint): Promise<DALResult<void>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
     const { error } = await supabase
@@ -172,7 +172,7 @@ export async function deleteCompagnieValue(id: bigint): Promise<DALResult<void>>
 export async function reorderCompagnieValues(
     input: ReorderCompagnieValuesInput
 ): Promise<DALResult<void>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
 

@@ -3,6 +3,7 @@
 Solution complète avec **toggles indépendants** pour chaque CTA, en respectant strictement vos instructions de schéma déclaratif et de migration.
 
 **Instructions de référence** :
+
 - `.github/instructions/Declarative_Database_Schema.instructions.md`
 - `.github/instructions/Create_migration.instructions.md`
 - `supabase/reconstruction_database_plan/RECONSTRUCTION_PLAN.md`
@@ -174,6 +175,7 @@ create policy "Admins can delete home hero slides"
 > Cette section contient uniquement les instructions **DATA MIGRATION** à ajouter manuellement.
 
 **Données sources** : `supabase/migrations/20250918031500_seed_home_hero_slides.sql`
+
 - 2 slides avec `cta_label` et `cta_url` existants
 
 **Ajouter à la fin de la migration générée** :
@@ -216,6 +218,7 @@ where slug = 'creation-phare';
 ```
 
 > **Pourquoi des UPDATE explicites ?**
+>
 > - Le schéma déclaratif avec `DROP TABLE ... CASCADE` + `CREATE TABLE` recrée la table vide
 > - Le seed original (`20250918031500`) utilise les anciennes colonnes `cta_label/cta_url`
 > - Ces UPDATE restaurent les données avec les nouvelles colonnes après la recréation
@@ -225,7 +228,7 @@ where slug = 'creation-phare';
 ### 3️⃣ ~~**Seed**~~ ❌ NE PAS MODIFIER
 
 > **⚠️ IMPORTANT** : Le fichier `supabase/migrations/20250918031500_seed_home_hero_slides.sql` est une **migration déjà appliquée**.
-> 
+>
 > **Ne jamais modifier les migrations appliquées.**
 >
 > La mise à jour des données existantes est gérée dans la section 2️⃣ (migration générée) via les instructions `UPDATE`.
@@ -953,6 +956,7 @@ pnpm dlx supabase db push
 ### Documentation post-migration
 
 - [ ] Ajouter entrée dans `supabase/migrations/migrations.md` :
+
   ```markdown
   - `YYYYMMDDHHMMSS_refactor_hero_slides_cta_with_toggles.sql` — Refactoring CTA avec toggles indépendants
     - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/07d_table_home_hero.sql`

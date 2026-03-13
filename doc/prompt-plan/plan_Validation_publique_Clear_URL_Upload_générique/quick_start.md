@@ -248,7 +248,7 @@ Pour plus de détails :
 
 ---
 
-## 🎉 C'est tout !
+## 🎉 C'est tout
 
 Vous avez maintenant :
 

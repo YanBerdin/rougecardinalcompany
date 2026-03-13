@@ -38,38 +38,42 @@ using ( (select public.is_admin()) );
 -- ---- CATEGORIES ----
 alter table public.categories enable row level security;
 
--- Vue combinée: catégories actives publiques OU admin voit tout
+-- Vue combinée: catégories actives publiques OU editor+ voit tout
 drop policy if exists "Active categories are viewable by everyone" on public.categories;
 drop policy if exists "Admins can view all categories" on public.categories;
 drop policy if exists "View categories (active OR admin)" on public.categories;
-create policy "View categories (active OR admin)"
+drop policy if exists "View categories (active OR editor+)" on public.categories;
+create policy "View categories (active OR editor+)"
 on public.categories
 for select
 to anon, authenticated
-using ( is_active = true or (select public.is_admin()) );
+using ( is_active = true or (select public.has_min_role('editor')) );
 
--- Seuls les admins peuvent gérer les catégories
+-- Seuls les editors+ peuvent gérer les catégories
 drop policy if exists "Admins can create categories" on public.categories;
-create policy "Admins can create categories"
+drop policy if exists "Editors+ can create categories" on public.categories;
+create policy "Editors+ can create categories"
 on public.categories
 for insert
 to authenticated
-with check ( (select public.is_admin()) );
+with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can update categories" on public.categories;
-create policy "Admins can update categories"
+drop policy if exists "Editors+ can update categories" on public.categories;
+create policy "Editors+ can update categories"
 on public.categories
 for update
 to authenticated
-using ( (select public.is_admin()) )
-with check ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) )
+with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can delete categories" on public.categories;
-create policy "Admins can delete categories"
+drop policy if exists "Editors+ can delete categories" on public.categories;
+create policy "Editors+ can delete categories"
 on public.categories
 for delete
 to authenticated
-using ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) );
 
 -- ---- TAGS ----
 alter table public.tags enable row level security;
@@ -82,28 +86,31 @@ for select
 to anon, authenticated
 using ( true );
 
--- Seuls les admins peuvent gérer les tags
+-- Seuls les editors+ peuvent gérer les tags
 drop policy if exists "Admins can create tags" on public.tags;
-create policy "Admins can create tags"
+drop policy if exists "Editors+ can create tags" on public.tags;
+create policy "Editors+ can create tags"
 on public.tags
 for insert
 to authenticated
-with check ( (select public.is_admin()) );
+with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can update tags" on public.tags;
-create policy "Admins can update tags"
+drop policy if exists "Editors+ can update tags" on public.tags;
+create policy "Editors+ can update tags"
 on public.tags
 for update
 to authenticated
-using ( (select public.is_admin()) )
-with check ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) )
+with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can delete tags" on public.tags;
-create policy "Admins can delete tags"
+drop policy if exists "Editors+ can delete tags" on public.tags;
+create policy "Editors+ can delete tags"
 on public.tags
 for delete
 to authenticated
-using ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) );
 
 -- ---- TABLES DE RELATIONS (TAGS/CATEGORIES) ----
 -- spectacles_categories
@@ -115,28 +122,31 @@ for select
 to anon, authenticated
 using ( true );
 
--- Gestion admin (politiques granulaires)
+-- Gestion editor+ (politiques granulaires)
 drop policy if exists "Admins can insert spectacle categories" on public.spectacles_categories;
-create policy "Admins can insert spectacle categories"
+drop policy if exists "Editors+ can insert spectacle categories" on public.spectacles_categories;
+create policy "Editors+ can insert spectacle categories"
 on public.spectacles_categories
 for insert
 to authenticated
-with check ( (select public.is_admin()) );
+with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can update spectacle categories" on public.spectacles_categories;
-create policy "Admins can update spectacle categories"
+drop policy if exists "Editors+ can update spectacle categories" on public.spectacles_categories;
+create policy "Editors+ can update spectacle categories"
 on public.spectacles_categories
 for update
 to authenticated
-using ( (select public.is_admin()) )
-with check ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) )
+with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can delete spectacle categories" on public.spectacles_categories;
-create policy "Admins can delete spectacle categories"
+drop policy if exists "Editors+ can delete spectacle categories" on public.spectacles_categories;
+create policy "Editors+ can delete spectacle categories"
 on public.spectacles_categories
 for delete
 to authenticated
-using ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) );
 
 -- spectacles_tags
 alter table public.spectacles_tags enable row level security;
@@ -147,28 +157,31 @@ for select
 to anon, authenticated
 using ( true );
 
--- Gestion admin (politiques granulaires)
+-- Gestion editor+ (politiques granulaires)
 drop policy if exists "Admins can insert spectacle tags" on public.spectacles_tags;
-create policy "Admins can insert spectacle tags"
+drop policy if exists "Editors+ can insert spectacle tags" on public.spectacles_tags;
+create policy "Editors+ can insert spectacle tags"
 on public.spectacles_tags
 for insert
 to authenticated
-with check ( (select public.is_admin()) );
+with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can update spectacle tags" on public.spectacles_tags;
-create policy "Admins can update spectacle tags"
+drop policy if exists "Editors+ can update spectacle tags" on public.spectacles_tags;
+create policy "Editors+ can update spectacle tags"
 on public.spectacles_tags
 for update
 to authenticated
-using ( (select public.is_admin()) )
-with check ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) )
+with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can delete spectacle tags" on public.spectacles_tags;
-create policy "Admins can delete spectacle tags"
+drop policy if exists "Editors+ can delete spectacle tags" on public.spectacles_tags;
+create policy "Editors+ can delete spectacle tags"
 on public.spectacles_tags
 for delete
 to authenticated
-using ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) );
 
 -- articles_categories
 alter table public.articles_categories enable row level security;
@@ -179,28 +192,31 @@ for select
 to anon, authenticated
 using ( true );
 
--- Gestion admin (politiques granulaires)
+-- Gestion editor+ (politiques granulaires)
 drop policy if exists "Admins can insert article categories" on public.articles_categories;
-create policy "Admins can insert article categories"
+drop policy if exists "Editors+ can insert article categories" on public.articles_categories;
+create policy "Editors+ can insert article categories"
 on public.articles_categories
 for insert
 to authenticated
-with check ( (select public.is_admin()) );
+with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can update article categories" on public.articles_categories;
-create policy "Admins can update article categories"
+drop policy if exists "Editors+ can update article categories" on public.articles_categories;
+create policy "Editors+ can update article categories"
 on public.articles_categories
 for update
 to authenticated
-using ( (select public.is_admin()) )
-with check ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) )
+with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can delete article categories" on public.articles_categories;
-create policy "Admins can delete article categories"
+drop policy if exists "Editors+ can delete article categories" on public.articles_categories;
+create policy "Editors+ can delete article categories"
 on public.articles_categories
 for delete
 to authenticated
-using ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) );
 
 -- articles_tags
 alter table public.articles_tags enable row level security;
@@ -211,39 +227,43 @@ for select
 to anon, authenticated
 using ( true );
 
--- Gestion admin (politiques granulaires)
+-- Gestion editor+ (politiques granulaires)
 drop policy if exists "Admins can insert article tags" on public.articles_tags;
-create policy "Admins can insert article tags"
+drop policy if exists "Editors+ can insert article tags" on public.articles_tags;
+create policy "Editors+ can insert article tags"
 on public.articles_tags
 for insert
 to authenticated
-with check ( (select public.is_admin()) );
+with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can update article tags" on public.articles_tags;
-create policy "Admins can update article tags"
+drop policy if exists "Editors+ can update article tags" on public.articles_tags;
+create policy "Editors+ can update article tags"
 on public.articles_tags
 for update
 to authenticated
-using ( (select public.is_admin()) )
-with check ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) )
+with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can delete article tags" on public.articles_tags;
-create policy "Admins can delete article tags"
+drop policy if exists "Editors+ can delete article tags" on public.articles_tags;
+create policy "Editors+ can delete article tags"
 on public.articles_tags
 for delete
 to authenticated
-using ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) );
 
 -- ---- CONTENT VERSIONS ----
 alter table public.content_versions enable row level security;
 
--- Seuls les admins peuvent voir les versions de contenu
+-- Seuls les editors+ peuvent voir les versions de contenu
 drop policy if exists "Admins can view content versions" on public.content_versions;
-create policy "Admins can view content versions"
+drop policy if exists "Editors+ can view content versions" on public.content_versions;
+create policy "Editors+ can view content versions"
 on public.content_versions
 for select
 to authenticated
-using ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) );
 
 -- Les utilisateurs authentifiés peuvent créer des versions (via triggers)
 drop policy if exists "Authenticated users can create content versions" on public.content_versions;
@@ -253,21 +273,23 @@ for insert
 to authenticated
 with check ( (select auth.uid()) is not null );
 
--- Seuls les admins peuvent modifier/supprimer des versions
+-- Seuls les editors+ peuvent modifier/supprimer des versions
 drop policy if exists "Admins can update content versions" on public.content_versions;
-create policy "Admins can update content versions"
+drop policy if exists "Editors+ can update content versions" on public.content_versions;
+create policy "Editors+ can update content versions"
 on public.content_versions
 for update
 to authenticated
-using ( (select public.is_admin()) )
-with check ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) )
+with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can delete content versions" on public.content_versions;
-create policy "Admins can delete content versions"
+drop policy if exists "Editors+ can delete content versions" on public.content_versions;
+create policy "Editors+ can delete content versions"
 on public.content_versions
 for delete
 to authenticated
-using ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) );
 
 -- ---- SEO REDIRECTS ----
 alter table public.seo_redirects enable row level security;

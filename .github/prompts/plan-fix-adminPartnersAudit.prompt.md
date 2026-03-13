@@ -106,10 +106,13 @@
 ```bash
    resolver: zodResolver(PartnerFormSchema) as Resolver<PartnerFormValues>
    ```
+
    par simplement :
+
 ```bash
    resolver: zodResolver(PartnerFormSchema)
    ```
+
 2. **Supprimer** l'import `type Resolver` de `react-hook-form`
 3. **Supprimer** `.default(0)` de `display_order` et `.default(true)` de `active` dans `PartnerFormSchema` (`lib/schemas/partners.ts`) — le schéma UI doit avoir `z.number().int().min(0)` et `z.boolean()` sans `.default()`. L'alignement garantit que `PartnerFormValues` utilise des types requis (`number` et `boolean`) au lieu de types optionnels (ce qui causait le besoin du cast `Resolver<>`). Les valeurs initiales sont fournies explicitement dans `defaultValues` du formulaire (`display_order: 0`, `active: true`), donc rien ne change au runtime.
 

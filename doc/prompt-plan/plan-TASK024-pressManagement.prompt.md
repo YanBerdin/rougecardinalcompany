@@ -68,6 +68,7 @@ Implémentation d'un système complet de gestion presse pour Rouge Cardinal : CR
 | `lib/schemas/press-contact.ts` | ✅ | Server/UI/DTO schemas pour PressContact |
 
 **PressRelease schemas:**
+
 - `PressReleaseInputSchema` (Server, `bigint` pour FK)
 - `PressReleaseFormSchema` (UI, `number` pour FK)
 - `PressReleaseDTO` (return type DAL)
@@ -75,6 +76,7 @@ Implémentation d'un système complet de gestion presse pour Rouge Cardinal : CR
 - `SelectOptionDTO` (pour dropdowns spectacles/événements)
 
 **PressContact schemas:**
+
 - `PressContactInputSchema` (Server)
 - `PressContactFormSchema` (UI)
 - `PressContactDTO` (return type DAL)
@@ -91,6 +93,7 @@ Implémentation d'un système complet de gestion presse pour Rouge Cardinal : CR
 | `lib/dal/admin-press-contacts.ts` | ✅ | CRUD + toggle active |
 
 **Fonctions admin-press-releases.ts:**
+
 ```typescript
 fetchAllPressReleasesAdmin(): Promise<DALResult<PressReleaseDTO[]>>
 fetchPressReleaseById(id: bigint): Promise<DALResult<PressReleaseDTO | null>>
@@ -104,6 +107,7 @@ fetchEvenementsForSelect(): Promise<DALResult<SelectOptionDTO[]>>
 ```
 
 **Fonctions admin-press-contacts.ts:**
+
 ```typescript
 fetchAllPressContacts(): Promise<DALResult<PressContactDTO[]>>
 fetchPressContactById(id: bigint): Promise<DALResult<PressContactDTO | null>>
@@ -139,6 +143,7 @@ app/(admin)/admin/presse/
 ```
 
 **Server Actions (actions.ts):**
+
 ```typescript
 // Communiqués
 createPressReleaseAction(input: unknown): Promise<ActionResult>
@@ -182,6 +187,7 @@ components/features/admin/presse/
 ```
 
 **Patterns appliqués:**
+
 - Smart/Dumb component pattern (Container/View)
 - `useEffect` sync pour state update après `router.refresh()`
 - React Hook Form + Zod resolver avec schéma UI
@@ -194,6 +200,7 @@ components/features/admin/presse/
 **Route:** `app/(admin)/admin/presse/communiques/[id]/preview/page.tsx`
 
 **Features:**
+
 - Affichage complet du communiqué (title, description, date, image)
 - Badges status (Publié/Brouillon)
 - Badges relations (Spectacle/Événement si liés)
@@ -253,12 +260,14 @@ components/features/admin/presse/
 **Problème:** Formulaires soumettent des empty strings (`""`) mais schémas serveur attendaient `null`
 
 **Symptômes:**
+
 - Erreur création communiqué : "Too small: expected string to have >=1 characters" (slug, image_url)
 - Erreur création article : "Too small: expected string to have >=1 characters" (slug)
 
 **Solution:** Transformer empty strings → `null` dans schemas serveur
 
 **Fichiers modifiés:**
+
 - `lib/schemas/press-release.ts` — PressReleaseInputSchema
   - `slug`: retiré `.min(1)`, ajouté `.transform(val => val === "" ? null : val)`
   - `description`: ajouté `.transform(val => val === "" ? null : val)`
@@ -280,16 +289,19 @@ components/features/admin/presse/
 **Solution:** Ajout case pour `communiques_presse` dans trigger function
 
 **Fichiers modifiés:**
+
 - `supabase/schemas/16_seo_metadata.sql` (lignes 123-124) — Fonction `set_slug_if_empty()`
   - Ajouté : `elsif TG_TABLE_NAME = 'communiques_presse' and NEW.title is not null then`
   - Ajouté : `NEW.slug := public.generate_slug(NEW.title);`
 
 **Migration:**
+
 - Générée : `20260121205257_fix_communiques_slug_trigger.sql`
 - Appliquée locale : ✅ `supabase db reset`
 - Appliquée remote : ✅ `supabase db push`
 
 **Tables supportées par trigger:**
+
 - `spectacles` → utilise `NEW.title`
 - `articles_presse` → utilise `NEW.title`
 - `communiques_presse` → utilise `NEW.title` ✅ **AJOUTÉ**
@@ -299,6 +311,7 @@ components/features/admin/presse/
 ### Corrections PressContact (noms de colonnes français)
 
 **Fichiers modifiés:**
+
 - `lib/dal/admin-press-contacts.ts` — 2 SELECT queries corrigées
 - `app/(admin)/admin/presse/actions.ts` — togglePressContactActiveAction parameter
 - `components/features/admin/presse/PressContactEditForm.tsx` — defaultValues + JSX
@@ -306,6 +319,7 @@ components/features/admin/presse/
 - `components/features/admin/presse/PressContactsView.tsx` — Badge, display, Switch
 
 **Mapping corrections:**
+
 | Ancien nom | Nouveau nom |
 |------------|-------------|
 | `nom_media` | `media` |
@@ -318,14 +332,15 @@ components/features/admin/presse/
 **Fichier:** `app/(admin)/admin/presse/communiques/[id]/preview/page.tsx`
 
 **Mapping corrections:**
+
 | Ancien nom | Nouveau nom |
 |------------|-------------|
 | `release.titre` | `release.title` |
 | `release.extrait` | `release.description` |
-| `release.contenu` | *(supprimé - pas dans DTO)* |
-| `release.pdf_url` | *(supprimé - pas dans DTO)* |
-| `release.lien_externe` | *(supprimé - pas dans DTO)* |
-| `release.type` | *(remplacé par spectacle_titre/evenement_titre)* |
+| `release.contenu` | **(supprimé - pas dans DTO)** |
+| `release.pdf_url` | **(supprimé - pas dans DTO)** |
+| `release.lien_externe` | **(supprimé - pas dans DTO)** |
+| `release.type` | **(remplacé par spectacle_titre/evenement_titre)** |
 
 ---
 

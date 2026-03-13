@@ -7,6 +7,7 @@
 ## 📋 Analyse du Contexte
 
 ### État Actuel
+
 - ✅ Handlers centralisés existants:
   - `lib/actions/contact-server.ts` → `handleContactSubmission()`
   - `lib/actions/newsletter-server.ts` → `handleNewsletterSubscription()`
@@ -52,11 +53,13 @@
 **Actions**:
 
 1. **Tester rate-limiter existant**:
+
    ```bash
    pnpm exec tsx scripts/test-rate-limit.ts
    ```
 
 2. **Vérifier colonne metadata dans messages_contact**:
+
    ```sql
    -- Via Supabase Dashboard ou psql
    SELECT column_name, data_type 
@@ -65,6 +68,7 @@
    ```
 
 3. **Si colonne metadata absente, créer migration**:
+
    ```sql
    -- supabase/migrations/YYYYMMDDHHMMSS_add_metadata_to_messages_contact.sql
    ALTER TABLE public.messages_contact 
@@ -74,6 +78,7 @@
    ```
 
 4. **Vérifier handlers actuels fonctionnent**:
+
    ```bash
    # Test Contact
    curl -X POST http://localhost:3000/api/contact \
@@ -119,7 +124,8 @@ export function getClientIP(headersList: ReadonlyHeaders): string {
 }
 ```
 
-**Justification**: 
+**Justification**:
+
 - Réutilisable pour tous les endpoints publics
 - Gestion cohérente des headers proxy (Vercel/Cloudflare)
 - Fallback gracieux en développement
@@ -300,6 +306,7 @@ export async function handleNewsletterSubscription(
 ```
 
 **Points Clés**:
+
 - ✅ Rate-limiting par **email** (pas IP) - empêche spam ciblé
 - ✅ Email normalisé en lowercase pour clé unique
 - ✅ ON CONFLICT DO NOTHING existant = pas de double insertion
@@ -624,8 +631,8 @@ UPSTASH_REDIS_REST_TOKEN=...
 
 - [ ] `doc/RATE-LIMITING.md` (nouveau)
 - [ ] `doc/RATE-LIMITING-TESTING.md` (nouveau)
-- [ ] `memory-bank/tasks/TASK046-rate-limiting-handlers.md` 
-- [ ] `.github/prompts/plan-TASK046-Rate-limiting handlers contact-newsletter.prompt.md` 
+- [ ] `memory-bank/tasks/TASK046-rate-limiting-handlers.md`
+- [ ] `.github/prompts/plan-TASK046-Rate-limiting handlers contact-newsletter.prompt.md`
 (update)
 
 ---

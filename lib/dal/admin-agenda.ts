@@ -3,7 +3,7 @@ import "server-only";
 
 import { cache } from "react";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireMinRole } from "@/lib/auth/roles";
 import { dalSuccess, dalError } from "@/lib/dal/helpers/error";
 import type { DALResult } from "@/lib/dal/helpers/error";
 import type { EventInput, EventDTO, LieuDTO } from "@/lib/schemas/admin-agenda";
@@ -13,7 +13,7 @@ import type { EventInput, EventDTO, LieuDTO } from "@/lib/schemas/admin-agenda";
  */
 export const fetchAllEventsAdmin = cache(
     async (): Promise<DALResult<EventDTO[]>> => {
-        await requireAdmin();
+        await requireMinRole("editor");
         const supabase = await createClient();
 
         const { data, error } = await supabase
@@ -76,7 +76,7 @@ export const fetchAllEventsAdmin = cache(
  */
 export const fetchEventByIdAdmin = cache(
     async (id: bigint): Promise<DALResult<EventDTO | null>> => {
-        await requireAdmin();
+        await requireMinRole("editor");
         const supabase = await createClient();
 
         const { data, error } = await supabase
@@ -142,7 +142,7 @@ export const fetchEventByIdAdmin = cache(
 export async function createEvent(
     input: EventInput
 ): Promise<DALResult<EventDTO>> {
-    await requireAdmin();
+    await requireMinRole("editor");
     const supabase = await createClient();
 
     const { data, error } = await supabase
@@ -205,7 +205,7 @@ export async function updateEvent(
     id: bigint,
     input: Partial<EventInput>
 ): Promise<DALResult<EventDTO>> {
-    await requireAdmin();
+    await requireMinRole("editor");
     const supabase = await createClient();
 
     const { data, error } = await supabase
@@ -266,7 +266,7 @@ export async function updateEvent(
  * Delete event
  */
 export async function deleteEvent(id: bigint): Promise<DALResult<null>> {
-    await requireAdmin();
+    await requireMinRole("editor");
     const supabase = await createClient();
 
     const { error } = await supabase.from("evenements").delete().eq("id", id);
@@ -285,7 +285,7 @@ export async function deleteEvent(id: bigint): Promise<DALResult<null>> {
  * Retourne tous les lieux pour le select dans le formulaire événement.
  */
 export const fetchAllLieux = cache(async (): Promise<DALResult<LieuDTO[]>> => {
-    await requireAdmin();
+    await requireMinRole("editor");
     const supabase = await createClient();
 
     const { data, error } = await supabase

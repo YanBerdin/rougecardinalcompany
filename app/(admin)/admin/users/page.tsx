@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { Metadata } from "next";
 import { UsersManagementContainer } from "@/components/features/admin/users/UsersManagementContainer";
 import { UsersManagementSkeleton } from "@/components/skeletons/UsersManagementSkeleton";
+import { requireAdminPageAccess } from "@/lib/auth/roles";
 
 export const metadata: Metadata = {
   title: "Gestion des utilisateurs",
@@ -12,7 +13,9 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default function UsersPage() {
+export default async function UsersPage() {
+  await requireAdminPageAccess();
+
   return (
     <div className="flex-1 space-y-4 p-2 pt-6">
       <div className="flex items-center justify-between">

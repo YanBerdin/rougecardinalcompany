@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AnalyticsContainer } from "../../../../components/features/admin/analytics/AnalyticsContainer";
+import { requireAdminPageAccess } from "@/lib/auth/roles";
 
 export const metadata: Metadata = {
     title: "Analytics | Admin | Rouge Cardinal Company",
@@ -14,6 +15,8 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default function AnalyticsPage() {
+export default async function AnalyticsPage() {
+    await requireAdminPageAccess();
+
     return <AnalyticsContainer />;
 }

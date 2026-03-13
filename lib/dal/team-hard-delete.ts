@@ -1,7 +1,7 @@
 "use server";
 import "server-only";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireAdminOnly } from "@/lib/auth/roles";
 import { HttpStatus } from "@/lib/api/helpers";
 import { type DALResult, dalSuccess, dalError } from "@/lib/dal/helpers";
 import { fetchTeamMemberById } from "@/lib/dal/team";
@@ -17,7 +17,7 @@ export async function hardDeleteTeamMember(
     id: number
 ): Promise<DALResult<null>> {
     try {
-        await requireAdmin();
+        await requireAdminOnly();
 
         const validation = await validateTeamMemberForDeletion(id);
         if (!validation.success) return validation;

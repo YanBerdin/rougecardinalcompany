@@ -76,25 +76,25 @@ begin
 
     -- Seuls les admins peuvent gérer les récurrences
     execute 'drop policy if exists "Admins can create event recurrences" on public.events_recurrence';
-    execute 'create policy "Admins can create event recurrences"
+    execute 'create policy "Editors+ can create event recurrences"
     on public.events_recurrence
     for insert
     to authenticated
-    with check ( (select public.is_admin()) )';
+    with check ( (select public.has_min_role(''editor'')) )';
 
     execute 'drop policy if exists "Admins can update event recurrences" on public.events_recurrence';
-    execute 'create policy "Admins can update event recurrences"
+    execute 'create policy "Editors+ can update event recurrences"
     on public.events_recurrence
     for update
     to authenticated
-    using ( (select public.is_admin()) )
-    with check ( (select public.is_admin()) )';
+    using ( (select public.has_min_role(''editor'')) )
+    with check ( (select public.has_min_role(''editor'')) )';
 
     execute 'drop policy if exists "Admins can delete event recurrences" on public.events_recurrence';
-    execute 'create policy "Admins can delete event recurrences"
+    execute 'create policy "Editors+ can delete event recurrences"
     on public.events_recurrence
     for delete
     to authenticated
-    using ( (select public.is_admin()) )';
+    using ( (select public.has_min_role(''editor'')) )';
   end if;
 end $$;

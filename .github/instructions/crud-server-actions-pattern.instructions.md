@@ -81,6 +81,7 @@ components/features/admin/[feature]/
 ### Règle Clean Code : Max 300 lignes par fichier
 
 Si un formulaire dépasse 300 lignes, le splitter en sous-composants :
+
 - `FormFields.tsx` — Champs texte (title, description, etc.)
 - `FormImageSection.tsx` — Sélection d'image avec MediaLibraryPicker
 - `FormCtaFields.tsx` — Champs CTA (label, url)
@@ -404,7 +405,7 @@ Le DAL ne fait QUE les opérations database. La revalidation est dans les Server
 "use server";
 import "server-only";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireBackofficeAccess } from "@/lib/auth/roles";
 import type { FeatureInput, FeatureDTO } from "@/lib/schemas/[feature]";
 
 // ❌ NE PAS importer revalidatePath ici
@@ -419,7 +420,7 @@ export interface DALResult<T = unknown> {
 export async function createFeature(
   input: FeatureInput
 ): Promise<DALResult<FeatureDTO>> {
-  await requireAdmin();
+  await requireBackofficeAccess();
   
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -549,7 +550,7 @@ Pour chaque nouveau CRUD, vérifier :
 ### DAL (`lib/dal/`)
 
 - [ ] Directive `"use server"` + `import "server-only"`
-- [ ] `requireAdmin()` au début
+- [ ] `requireBackofficeAccess()` ou `requireAdminOnly()` au début
 - [ ] **PAS** de `revalidatePath()`
 - [ ] Return type `DALResult<T>`
 
@@ -562,6 +563,7 @@ Pour chaque nouveau CRUD, vérifier :
 - [ ] `handleEdit` utilise données locales (pas fetch)
 
 ### Client Component Form
+
 - [ ] `useState(false)` pour isPending
 - [ ] Appel direct `createAction()` ou `updateAction()`
 - [ ] `onSuccess()` callback pour refresh parent
@@ -571,11 +573,13 @@ Pour chaque nouveau CRUD, vérifier :
 - [ ] Fichier < 300 lignes (sinon splitter en sous-composants)
 
 ### Schémas Zod (`lib/schemas/`)
+
 - [ ] Schéma Server avec `z.coerce.bigint()` pour IDs
 - [ ] Schéma UI avec `z.number().int().positive()` pour IDs
 - [ ] Types exportés : `FeatureInput`, `FeatureFormValues`, `FeatureDTO`
 
 ### Nettoyage
+
 - [ ] Supprimer les API Routes obsolètes après migration
 
 ---

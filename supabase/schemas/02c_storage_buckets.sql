@@ -11,8 +11,8 @@
  * 
  * SECURITY:
  *   - Public read access (public = true)
- *   - Authenticated users can upload
- *   - Only admins can delete
+ *   - Editors and admins can upload, update, and delete
+ *   - Enforced via has_min_role('editor') in RLS policies
  * 
  * TABLES USING THIS BUCKET:
  *   - medias (storage_path column)
@@ -46,6 +46,9 @@ drop policy if exists "Public read access for medias" on storage.objects;
 drop policy if exists "Authenticated users can upload to medias" on storage.objects;
 drop policy if exists "Authenticated users can update medias" on storage.objects;
 drop policy if exists "Admins can delete medias" on storage.objects;
+drop policy if exists "Editors can upload to medias" on storage.objects;
+drop policy if exists "Editors can update medias" on storage.objects;
+drop policy if exists "Editors can delete medias" on storage.objects;
 
 -- Allow public read access
 create policy "Public read access for medias"
@@ -53,34 +56,43 @@ on storage.objects for select
 to public
 using ( bucket_id = 'medias' );
 
--- Allow authenticated users to upload
-create policy "Authenticated users can upload to medias"
+-- Allow editors and admins to upload
+create policy "Editors can upload to medias"
 on storage.objects for insert
 to authenticated
-with check ( bucket_id = 'medias' );
+with check (
+  bucket_id = 'medias'
+  and (select public.has_min_role('editor'))
+);
 
--- Allow authenticated users to update their own uploads
-create policy "Authenticated users can update medias"
+-- Allow editors and admins to update media files
+create policy "Editors can update medias"
 on storage.objects for update
 to authenticated
-using ( bucket_id = 'medias' )
-with check ( bucket_id = 'medias' );
+using (
+  bucket_id = 'medias'
+  and (select public.has_min_role('editor'))
+)
+with check (
+  bucket_id = 'medias'
+  and (select public.has_min_role('editor'))
+);
 
--- Allow admins to delete (requires is_admin() check)
-create policy "Admins can delete medias"
+-- Allow editors and admins to delete media files
+create policy "Editors can delete medias"
 on storage.objects for delete
 to authenticated
-using ( 
-  bucket_id = 'medias' 
-  and (select public.is_admin())
+using (
+  bucket_id = 'medias'
+  and (select public.has_min_role('editor'))
 );
 
 -- Note: comments on storage.objects policies not supported in declarative schema
 -- Policy descriptions:
 -- - Public read access: Anyone can view media files
--- - Upload access: Authenticated users (admin check in Server Actions)
--- - Update access: Authenticated users can update file metadata
--- - Delete access: Only admins can delete media files
+-- - Upload access: Editors and admins only (via has_min_role('editor'))
+-- - Update access: Editors and admins can update file metadata
+-- - Delete access: Editors and admins can delete media files
 
 /*
  * Bucket: backups

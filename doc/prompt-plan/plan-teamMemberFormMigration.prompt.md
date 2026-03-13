@@ -60,6 +60,7 @@ export type TeamMemberFormValues = z.infer<typeof TeamMemberFormSchema>;
 ```
 
 **Différence clé avec `CreateTeamMemberInputSchema`** :
+
 - ✅ `photo_media_id: z.number()` (UI/Form) — JSON serializable
 - ❌ `photo_media_id: z.number()` (Server) — Same for this schema, but conversion needed if DB uses bigint
 
@@ -91,9 +92,10 @@ membres_equipe: {
 | `hardDeleteTeamMemberAction` | Delete | 138 | ✅ Existe |
 | `uploadTeamMemberPhoto` | Upload | 160 | ✅ Existe |
 
-### ✅ Toutes les Server Actions nécessaires existent déjà !
+### ✅ Toutes les Server Actions nécessaires existent déjà
 
 **Pattern validation** :
+
 ```typescript
 // ✅ Correct pattern observé (ligne 113-137)
 export async function setTeamMemberActiveAction(
@@ -167,6 +169,7 @@ if (!member) {
 **Résultat** : < 300 lignes → **Pas de split nécessaire**
 
 **Sections identifiées** :
+
 1. Photo picker/preview (~50 lignes)
 2. Champs texte (name, role, description) (~40 lignes)
 3. URL externe fallback (~15 lignes)
@@ -351,6 +354,7 @@ export type TeamMemberFormValues = z.infer<typeof TeamMemberFormSchema>;
 ## ✅ MIGRATION TERMINÉE
 
 Tous les steps ont été complétés avec succès. Le CRUD Team utilise maintenant :
+
 - **Pages dédiées** : `/admin/team/new` et `/admin/team/[id]/edit`
 - **Server Actions** : `createTeamMember`, `updateTeamMember`, `setTeamMemberActiveAction`, `hardDeleteTeamMemberAction`
 - **react-hook-form + zodResolver** : Validation côté client avec `TeamMemberFormSchema`
@@ -371,17 +375,20 @@ Tous les steps ont été complétés avec succès. Le CRUD Team utilise maintena
 ## Fichiers concernés
 
 ### À créer
+
 - `app/(admin)/admin/team/new/page.tsx`
 - `app/(admin)/admin/team/new/loading.tsx` (recommandé)
 - `app/(admin)/admin/team/[id]/edit/page.tsx`
 - `app/(admin)/admin/team/[id]/edit/loading.tsx` (recommandé)
 
 ### À modifier
+
 - ~~`lib/schemas/team.ts`~~ ✅ **FAIT**
 - `components/features/admin/team/TeamMemberForm.tsx` — Refactorer avec react-hook-form
 - `components/features/admin/team/TeamManagementContainer.tsx` — Simplifier + migrer fetch vers Server Actions
 
 ### À supprimer (après migration)
+
 - `app/api/admin/team/[id]/active/route.ts`
 - `app/api/admin/team/[id]/hard-delete/route.ts`
 - `app/api/admin/team/route.ts` (si non utilisé ailleurs)

@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireMinRole } from "@/lib/auth/roles";
 import { ArrowLeft, Images } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ interface Props {
 
 export default async function EditSpectaclePage({ params }: Props) {
   const { id } = await params;
-  await requireAdmin();
+  await requireMinRole("editor");
 
   // Parse and validate ID
   const spectacleId = parseInt(id, 10);

@@ -6,12 +6,12 @@ import "server-only";
  * @module lib/dal/analytics
  *
  * Provides cached access to analytics metrics, time-series data, and error tracking.
- * All functions require admin authentication via requireAdmin() guard.
+ * All functions require admin authentication via requireAdminOnly() guard.
  */
 
 import { cache } from "react";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireAdminOnly } from "@/lib/auth/roles";
 import { dalError, dalSuccess, getErrorMessage, type DALResult } from "./helpers/error";
 import {
     autoSelectGranularity,
@@ -48,7 +48,7 @@ import { fetchSentryErrorMetrics as fetchSentryErrorMetricsService } from "@/lib
 export const fetchPageviewsTimeSeries = cache(
     async (filter: AnalyticsFilter): Promise<DALResult<PageviewsSeries>> => {
         try {
-            await requireAdmin();
+            await requireAdminOnly();
 
             const supabase = await createClient();
             const granularity = filter.granularity ?? autoSelectGranularity(filter.startDate, filter.endDate);
@@ -133,7 +133,7 @@ export const fetchPageviewsTimeSeries = cache(
 export const fetchTopPages = cache(
     async (filter: AnalyticsFilter): Promise<DALResult<TopPages>> => {
         try {
-            await requireAdmin();
+            await requireAdminOnly();
 
             const supabase = await createClient();
 
@@ -197,7 +197,7 @@ export const fetchTopPages = cache(
 export const fetchMetricsSummary = cache(
     async (filter: AnalyticsFilter): Promise<DALResult<MetricsSummary>> => {
         try {
-            await requireAdmin();
+            await requireAdminOnly();
 
             const supabase = await createClient();
 
@@ -260,7 +260,7 @@ export const fetchMetricsSummary = cache(
 export const fetchAdminActivitySummary = cache(
     async (filter: AnalyticsFilter): Promise<DALResult<AdminActivitySummary>> => {
         try {
-            await requireAdmin();
+            await requireAdminOnly();
 
             const supabase = await createClient();
 
@@ -333,7 +333,7 @@ export const fetchAdminActivitySummary = cache(
 export const fetchSentryErrorMetrics = cache(
     async (): Promise<DALResult<SentryErrorMetrics>> => {
         try {
-            await requireAdmin();
+            await requireAdminOnly();
 
             // Delegate to Sentry API service
             const result = await fetchSentryErrorMetricsService();

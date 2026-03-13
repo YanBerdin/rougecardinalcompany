@@ -3,7 +3,7 @@ import "server-only";
 
 import { cache } from "react";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireMinRole } from "@/lib/auth/roles";
 import { dalSuccess, dalError, type DALResult } from "@/lib/dal/helpers";
 import { type ArticleDTO, type ArticleInput } from "@/lib/schemas/press-article";
 
@@ -12,7 +12,7 @@ import { type ArticleDTO, type ArticleInput } from "@/lib/schemas/press-article"
  */
 export const fetchAllArticlesAdmin = cache(
     async (): Promise<DALResult<ArticleDTO[]>> => {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -67,7 +67,7 @@ export const fetchAllArticlesAdmin = cache(
  */
 export const fetchArticleById = cache(
     async (id: bigint): Promise<DALResult<ArticleDTO | null>> => {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -127,7 +127,7 @@ export const fetchArticleById = cache(
 export async function createArticle(
     input: ArticleInput
 ): Promise<DALResult<ArticleDTO>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -166,7 +166,7 @@ export async function updateArticle(
     id: bigint,
     input: Partial<ArticleInput>
 ): Promise<DALResult<ArticleDTO>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -203,7 +203,7 @@ export async function updateArticle(
  * Delete article
  */
 export async function deleteArticle(id: bigint): Promise<DALResult<null>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
     const { error } = await supabase

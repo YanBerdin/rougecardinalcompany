@@ -13,6 +13,7 @@
 Dans chaque action, ajouter `await requireAdmin()` comme première instruction du bloc `try`, **avant** l'appel DAL. L'import `requireAdmin` est déjà présent L6.
 
 Actions à modifier (6) :
+
 - `createSpectacleAction` (~L57) — ajouter `await requireAdmin();` avant `const result = await createSpectacle(input);`
 - `updateSpectacleAction` (~L91) — idem avant `await updateSpectacle(input)`
 - `deleteSpectacleAction` (~L118) — idem avant `await deleteSpectacle(id)`
@@ -40,6 +41,7 @@ Les 2 actions déjà conformes (`deleteGalleryPhotoAction` L300, `reorderGallery
 ## Étape 2 — SEC-02 : Remplacer l'auth manuelle par `requireAdmin()` dans les 4 pages
 
 **Fichiers** :
+
 - `app/(admin)/admin/spectacles/page.tsx` (~L14-17)
 - `app/(admin)/admin/spectacles/new/page.tsx` (~L12-15)
 - `app/(admin)/admin/spectacles/[id]/page.tsx` (~L29-32)
@@ -68,11 +70,14 @@ Et ajouter l'import `import { requireAdmin } from "@/lib/auth/is-admin";`. Suppr
 ## Étape 3 — NEXT-01 : Ajouter `dynamic`/`revalidate` sur les 2 pages manquantes
 
 **Fichiers** :
+
 - `app/(admin)/admin/spectacles/new/page.tsx` — ajouter avant l'export default :
+
   ```ts
   export const dynamic = "force-dynamic";
   export const revalidate = 0;
   ```
+
 - `app/(admin)/admin/spectacles/[id]/edit/page.tsx` — idem
 
 Ces pages utilisent `await createClient()` (cookies SSR) et nécessitent ces exports pour éviter des erreurs de build static en Next.js 16.
@@ -99,6 +104,7 @@ Remplacer chaque `console.error` client par un traitement via `toast.error` (dé
 ## Étape 5 — CLEAN-02a : Scinder `actions.ts` (361 lignes → 2 fichiers)
 
 Créer `app/(admin)/admin/spectacles/spectacle-photo-actions.ts` contenant :
+
 - `addPhotoAction`
 - `deletePhotoAction`
 - `addGalleryPhotoAction`
@@ -106,12 +112,14 @@ Créer `app/(admin)/admin/spectacles/spectacle-photo-actions.ts` contenant :
 - `reorderGalleryPhotosAction`
 
 Garder dans `actions.ts` :
+
 - `ActionResult<T>` type
 - `createSpectacleAction`
 - `updateSpectacleAction`
 - `deleteSpectacleAction`
 
 Mettre à jour les imports dans les composants consommateurs :
+
 - `SpectacleGalleryManager.tsx` — importer depuis `spectacle-photo-actions`
 - `SpectaclePhotoManager.tsx` — idem
 - Le type `ActionResult` peut être réexporté depuis `spectacle-photo-actions.ts` via `export type { ActionResult } from "./actions";`
@@ -135,6 +143,7 @@ Le fichier principal `SpectacleGalleryManager.tsx` devrait passer sous les 300 l
 **Fichier** : `SpectaclePhotoManager.tsx` (L136)
 
 S'inspirer du pattern existant dans `SpectacleGalleryManager.tsx` (L410-440) :
+
 - Ajouter un state `const [deleteTarget, setDeleteTarget] = useState<{ordre: number} | null>(null);`
 - Remplacer `if (!confirm(...)) return;` par `setDeleteTarget({ ordre });`
 - Ajouter un `AlertDialog` en bas du JSX avec :
@@ -164,6 +173,7 @@ Supprimer `currentStatus: string;` de l'interface `SpectacleFormMetadataProps` (
 **Fichier** : `app/(admin)/admin/spectacles/[id]/page.tsx` (L49-61)
 
 La `formatDate()` locale (L49-61) a un format `day/month-long/year` différent de `formatSpectacleDate()` (`month-short/year`). Deux options :
+
 - **Option recommandée** : Ajouter une fonction `formatSpectacleDetailDate(dateString: string | null): string` dans `lib/tables/spectacle-table-helpers.ts` avec le format `day/month-long/year`, puis l'importer dans la page. Supprimer aussi `getStatusLabel()` (L63-66) et utiliser directement `translateStatus()` déjà importé via `lib/i18n/status.ts`.
 
 ---
@@ -173,6 +183,7 @@ La `formatDate()` locale (L49-61) a un format `day/month-long/year` différent d
 Créer `components/features/admin/spectacles/types.ts` sur le modèle de `components/features/admin/partners/types.ts`.
 
 Extraire vers ce fichier les interfaces de props :
+
 - `SpectacleGalleryManagerProps` (depuis `SpectacleGalleryManager.tsx`)
 - `SortablePhotoCardProps` (depuis `SpectacleGalleryManager.tsx` / nouveau `SortableGalleryCard.tsx`)
 - `SpectaclePhotoManagerProps` (depuis `SpectaclePhotoManager.tsx`)

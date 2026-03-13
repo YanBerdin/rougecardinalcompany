@@ -105,6 +105,7 @@ const performUpload = uploadAction || ((formData: FormData) => uploadMediaImage(
 ```
 
 **Résultat** :
+
 - ✅ Appelle `uploadMediaImage()` Server Action
 - ✅ **Génère automatiquement le thumbnail** via API route
 - ✅ Colonne `thumbnail_path` remplie dans la table `medias`
@@ -128,6 +129,7 @@ const actionResult = await addPhotoAction({
 ```
 
 **Résultat** :
+
 - ✅ Ajoute la relation dans `spectacles_medias`
 - ❌ **NE génère PAS de thumbnail** (image déjà en bibliothèque)
 - ❌ Si l'image n'a pas de `thumbnail_path` → Badge "Optimized" manquant
@@ -139,6 +141,7 @@ const actionResult = await addPhotoAction({
 ### Cause 1 : Images uploadées AVANT Phase 3 (Thumbnails)
 
 **Scénario** :
+
 ```bash
 1. Utilisateur uploade 10 images via /admin/media AVANT décembre 2025
 2. À cette époque, le système de thumbnails n'existait pas
@@ -147,6 +150,7 @@ const actionResult = await addPhotoAction({
 ```
 
 **Diagnostic** :
+
 ```sql
 -- Vérifier combien de médias n'ont pas de thumbnail
 SELECT COUNT(*) AS medias_sans_thumbnail
@@ -156,12 +160,14 @@ WHERE thumbnail_path IS NULL
 ```
 
 **Solution** :
+
 - Créer un script de migration pour générer les thumbnails des images existantes
 - OU ajouter un bouton "Régénérer les thumbnails manquants" dans `/admin/media`
 
 ### Cause 2 : Sélection depuis MediaLibraryPicker
 
 **Scénario** :
+
 ```bash
 1. Utilisateur uploade une image via /admin/media (thumbnail généré)
 2. Utilisateur supprime la relation dans spectacles_medias
@@ -175,6 +181,7 @@ OU
 ```
 
 **Diagnostic** :
+
 ```sql
 -- Vérifier les médias utilisés dans spectacles_medias sans thumbnail
 SELECT 
@@ -192,6 +199,7 @@ GROUP BY m.id, m.filename, m.thumbnail_path;
 ### Cause 3 : Échec Silencieux de l'API Thumbnail
 
 **Scénario** :
+
 ```bash
 1. Utilisateur uploade via MediaUploadDialog
 2. uploadMediaImage() réussit
@@ -200,6 +208,7 @@ GROUP BY m.id, m.filename, m.thumbnail_path;
 ```
 
 **Diagnostic** :
+
 ```bash
 # Vérifier les logs serveur (console.warn)
 # Rechercher : "[uploadMediaImage] Thumbnail generation failed"
@@ -210,6 +219,7 @@ pnpm dev  # Observer la console lors d'un upload
 ```
 
 **Causes possibles d'échec** :
+
 - `NEXT_PUBLIC_SITE_URL` mal configuré
 - API route `/api/admin/media/thumbnail` inaccessible
 - Problème Sharp (dépendances natives, mémoire)
@@ -238,12 +248,14 @@ LIMIT 20;
 ```
 
 **Résultat attendu** :
+
 - Si **0 lignes** → Tous les médias ont des thumbnails ✅
 - Si **N lignes** → Ces médias n'ont pas de thumbnail ❌
 
 ### Test 2 : Upload via MediaUploadDialog
 
 **Procédure** :
+
 1. Aller dans `/admin/spectacles`
 2. Modifier un spectacle
 3. Dans SpectaclePhotoManager, cliquer sur "Upload" (pas "Bibliothèque")
@@ -251,6 +263,7 @@ LIMIT 20;
 5. Attendre la fin de l'upload
 
 **Résultat attendu** :
+
 ```bash
 Console Browser :
 ✅ "Image uploaded successfully"
@@ -267,6 +280,7 @@ UI (/admin/media) :
 ```
 
 **Si échec** :
+
 ```bash
 Console Serveur :
 ❌ "[uploadMediaImage] Thumbnail generation failed (non-critical): HTTP 500"
@@ -279,12 +293,14 @@ Console Serveur :
 ### Test 3 : Sélection depuis Bibliothèque
 
 **Procédure** :
+
 1. Vérifier qu'une image avec thumbnail existe dans `/admin/media`
 2. Dans SpectaclePhotoManager, cliquer sur "Bibliothèque"
 3. Sélectionner cette image
 4. Vérifier dans `/admin/media`
 
 **Résultat attendu** :
+
 ```bash
 ✅ Badge "Optimized" reste affiché (thumbnail existe déjà)
 ✅ Badge "Utilisé sur le site" apparaît (grâce au fix spectacles_medias)
@@ -382,6 +398,7 @@ generateMissingThumbnails();
 ```
 
 **Usage** :
+
 ```bash
 pnpm exec tsx scripts/generate-missing-thumbnails.ts
 ```
@@ -510,25 +527,30 @@ const handleSelect = async (media: MediaItemDTO) => {
 ### Phase 2 : Migration (si médias existants sans thumbnail)
 
 **Option A** : Script de migration (rapide, 1 exécution)
+
 ```bash
 pnpm exec tsx scripts/generate-missing-thumbnails.ts
 ```
 
 **Option B** : Bouton admin (permanent, utilisable à tout moment)
+
 - Implémenter `regenerateThumbnailAction()` Server Action
 - Ajouter bouton "Régénérer thumbnail" dans MediaCard
 
 **Recommandation** : **Option A + Option B**
+
 - Script pour migration initiale des ~50-100 médias existants
 - Bouton pour régénérations ponctuelles futures
 
 ### Phase 3 : Prévention Future
 
 **Option** : Améliorer MediaLibraryPicker pour génération automatique
+
 - Avantage : Transparent pour l'utilisateur
 - Inconvénient : Requête API supplémentaire lors de la sélection
 
 **Recommandation** : **NE PAS implémenter pour l'instant**
+
 - Le système actuel fonctionne bien pour les nouveaux uploads
 - La migration unique résout le problème des médias existants
 - Évite la complexité et les requêtes API inutiles
@@ -559,6 +581,7 @@ WHERE m.thumbnail_path IS NULL;
 ```
 
 **UI (/admin/media)** :
+
 - ✅ Tous les médias images affichent le badge vert "Optimized"
 - ✅ Les médias utilisés dans spectacles affichent aussi le badge "Utilisé sur le site"
 

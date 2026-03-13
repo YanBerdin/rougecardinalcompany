@@ -1,7 +1,7 @@
 "use server";
 import "server-only";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireMinRole } from "@/lib/auth/roles";
 import type { DALResult } from "@/lib/dal/helpers";
 
 /**
@@ -183,7 +183,7 @@ export async function uploadMedia(
     input: MediaUploadInput
 ): Promise<DALResult<MediaUploadData>> {
     // ✅ Defense in depth: Always check auth at DAL level
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
     const storagePath = generateStoragePath(input.folder, input.file.name);
@@ -226,7 +226,7 @@ export async function uploadMedia(
 export async function deleteMedia(
     mediaId: number
 ): Promise<DALResult<null>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
 
@@ -273,7 +273,7 @@ export async function deleteMedia(
 export async function getMediaById(
     mediaId: number
 ): Promise<DALResult<MediaRecord>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
 
@@ -302,7 +302,7 @@ export async function getMediaById(
 export async function findMediaByHash(
     fileHash: string
 ): Promise<DALResult<MediaRecord | null>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
 
@@ -352,7 +352,7 @@ export async function listMediaTags(): Promise<DALResult<Array<{
     created_at: Date;
     updated_at: Date;
 }>>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -382,7 +382,7 @@ export async function getMediaTagById(id: bigint): Promise<DALResult<{
     created_at: Date;
     updated_at: Date;
 } | null>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -418,7 +418,7 @@ export async function createMediaTag(input: {
     created_at: Date;
     updated_at: Date;
 }>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -461,7 +461,7 @@ export async function updateMediaTag(
     created_at: Date;
     updated_at: Date;
 }>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -485,7 +485,7 @@ export async function updateMediaTag(
  * Delete media tag
  */
 export async function deleteMediaTag(id: bigint): Promise<DALResult<null>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
     const { error } = await supabase
@@ -519,7 +519,7 @@ export async function listMediaFolders(): Promise<DALResult<Array<{
     created_at: Date;
     updated_at: Date;
 }>>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -549,7 +549,7 @@ export async function getMediaFolderById(id: bigint): Promise<DALResult<{
     created_at: Date;
     updated_at: Date;
 } | null>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -585,7 +585,7 @@ export async function createMediaFolder(input: {
     created_at: Date;
     updated_at: Date;
 }>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -629,7 +629,7 @@ export async function updateMediaFolder(
     created_at: Date;
     updated_at: Date;
 }>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
 
@@ -662,7 +662,7 @@ export async function updateMediaFolder(
  * Delete media folder
  */
 export async function deleteMediaFolder(id: bigint): Promise<DALResult<null>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
     const { error } = await supabase
@@ -691,7 +691,7 @@ export async function addMediaItemTags(
     mediaId: bigint,
     tagIds: bigint[]
 ): Promise<DALResult<null>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
 
@@ -721,7 +721,7 @@ export async function removeMediaItemTags(
     mediaId: bigint,
     tagIds: bigint[]
 ): Promise<DALResult<null>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
 
@@ -751,7 +751,7 @@ export async function getMediaItemTags(mediaId: bigint): Promise<DALResult<Array
     description: string | null;
     color: string | null;
 }>>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
 
@@ -819,7 +819,7 @@ export async function listMediaItems(): Promise<DALResult<Array<{
     is_used_public?: boolean;
     usage_locations?: string[];
 }>>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
 
@@ -940,7 +940,7 @@ export interface MediaStats {
 }
 
 export async function fetchMediaStats(): Promise<DALResult<MediaStats>> {
-    await requireAdmin();
+    await requireMinRole("editor");
     const supabase = await createClient();
 
     const [mediaResult, tagsResult, foldersResult] = await Promise.all([

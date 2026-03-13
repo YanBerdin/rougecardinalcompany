@@ -41,7 +41,9 @@ export function AuditLogDetailModal({ log, open, onClose }: AuditLogDetailModalP
                     <div className="grid grid-cols-2 gap-4 rounded-lg bg-muted/50 p-4 text-sm">
                         <div>
                             <span className="font-semibold text-muted-foreground">Utilisateur</span>
-                            <p className="mt-1">{log.user_email ?? "Système"}</p>
+                            <p className="mt-1">
+                                {log.user_email ?? (log.ip_address ? "Anonyme" : "Système")}
+                            </p>
                         </div>
                         <div>
                             <span className="font-semibold text-muted-foreground">Adresse IP</span>

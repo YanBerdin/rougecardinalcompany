@@ -23,7 +23,7 @@ Implémentation d'un système CRUD complet pour la gestion de la presse avec 3 m
 Les colonnes DB utilisent des noms français, corrigés dans tous les fichiers :
 
 | Code initial (erroné) | Colonne DB réelle |
-|-----------------------|-------------------|
+| ----------------------- | ------------------- |
 | `nom_media` | `media` |
 | `specialites_tags` | `specialites` |
 | `active` | `actif` |
@@ -43,9 +43,9 @@ Les colonnes DB utilisent des noms français, corrigés dans tous les fichiers :
 | ----------------------- | ---------------------- |
 | `release.titre` | `release.title` |
 | `release.extrait` | `release.description` |
-| `release.contenu` | *(supprimé - inexistant)* |
-| `release.pdf_url` | *(supprimé - inexistant)* |
-| `release.lien_externe` | *(supprimé - inexistant)* |
+| `release.contenu` | _(supprimé - inexistant)_ |
+| `release.pdf_url` | _(supprimé - inexistant)_ |
+| `release.lien_externe` | _(supprimé - inexistant)_ |
 
 **Fichier modifié** : `app/(admin)/admin/presse/communiques/[id]/preview/page.tsx`
 
@@ -237,7 +237,7 @@ export async function createPressReleaseAction(input: unknown): Promise<ActionRe
 ## 📊 Statistiques
 
 | Catégorie           | Quantité |
-|---------------------|----------|
+| ------------------- | -------- |
 | Fichiers créés      | 31       |
 | Schémas Zod         | 3        |
 | Modules DAL         | 3        |
@@ -301,7 +301,7 @@ revalidatePath("/presse");        // Public cache (releases/articles only)
 - ✅ Séparation Server/UI schemas (bigint/number)
 - ✅ DALResult<T> return type systématique
 - ✅ ActionResult<T> dans toutes les Server Actions
-- ✅ Error codes standardisés ([ERR_PRESS_RELEASE_001], etc.)
+- ✅ Error codes standardisés (\[ERR_PRESS_RELEASE_001], etc.)
 
 ### TypeScript
 

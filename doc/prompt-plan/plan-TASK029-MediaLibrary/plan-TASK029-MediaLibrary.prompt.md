@@ -8,6 +8,7 @@
 > ✅ **Phases 0-2.4 implémentées** : Foundation, Advanced Features, Rate Limiting  
 > 📋 **État actuel** : Toutes les phases prévues (0 → 4.3) ont été implémentées et vérifiées. La médiathèque est prête pour revue, tests E2E et déploiement.
 > 🔎 **Phases complétées** :
+>
 > - Phase 0 : Foundation (Duplicate SHA-256 upload)
 > - Phase 1 : Tags & Folders (organization)
 > - Phase 2 : Advanced filters & Bulk operations
@@ -24,6 +25,7 @@
 ## 🎯 Vue d'ensemble
 
 Créer un système de gestion de médias complet permettant :
+
 - Upload avec **détection de doublons (hash SHA-256)** déjà implémentée
 - Organisation par dossiers et tags
 - Métadonnées extensibles (alt text, descriptions, copyright)
@@ -790,6 +792,7 @@ doc/
 | Créer helpers de conversion `bigint → number` | 15min | `lib/dal/helpers/serialize.ts` |
 
 **Critères de succès** :
+
 - ✅ Tous les types UI utilisent `number` (pas `bigint`)
 - ✅ Schemas bulk validés avec limite sécurité
 
@@ -815,6 +818,7 @@ doc/
 | **Tests DAL + Actions + sérialisation** | 3h | `__tests__/dal/media.test.ts` |
 
 **Critères de succès** :
+
 - ✅ Tags créés/assignés via UI (MediaTagsView.tsx)
 - ✅ Filtres fonctionnels (query, tags, folders, MIME)
 - ✅ Navigation dossiers opérationnelle (MediaFoldersView.tsx)
@@ -823,6 +827,7 @@ doc/
 - ✅ Server Actions avec conversion bigint→number
 
 **Fichiers créés/modifiés** :
+
 - `lib/dal/media-tags.ts` (CRUD tags)
 - `lib/dal/media-folders.ts` (CRUD folders)
 - `lib/schemas/media.ts` (DTOs avec `number`)
@@ -849,6 +854,7 @@ doc/
 | **Tests E2E upload + filters + bulk** | 3h | `__tests__/e2e/media-library.spec.ts` |
 
 **Critères de succès** :
+
 - ✅ MediaDetailsPanel opérationnel (alt text, description, tags)
 - ✅ Sélection multiple fonctionnelle (Ctrl+Click, Select All)
 - ✅ Actions bulk opérationnelles (delete, move, tag) avec validation Zod
@@ -857,6 +863,7 @@ doc/
 - ✅ HTTP/3 proxy rollback (cleanup)
 
 **Fichiers créés/modifiés** :
+
 - `components/features/admin/media/MediaDetailsPanel.tsx` (nouveau - 280 lignes)
 - `components/features/admin/media/MediaBulkActions.tsx` (nouveau - 195 lignes)
 - `lib/actions/media-bulk-actions.ts` (nouveau - 3 actions)
@@ -866,11 +873,13 @@ doc/
 - `components/ui/scroll-area.tsx` (nouveau - shadcn/ui)
 
 **Corrections Phase 2.3** :
+
 - Fixed: `bulkDeleteMediaAction` - Removed `BigInt(id)` conversions
 - Fixed: `bulkMoveMediaAction` - Removed `BigInt()` for folder_id
 - Fixed: `updateMediaMetadataAction` - Removed invalid description field
 
 **Tests** :
+
 - ✅ Rate limiting : 5/5 tests passing (upload limit, reset, user isolation)
 - ✅ TypeScript compilation : No errors
 - ⚠️ E2E tests : À faire en Phase 4
@@ -1027,6 +1036,7 @@ export async function uploadMediaImage(
 ```
 
 **Critères de succès** :
+
 - ✅ Thumbnails générés automatiquement
 - ✅ Affichage rapide dans grid (< 1s)
 - ✅ Fallback gracieux si thumb manquant
@@ -1243,11 +1253,13 @@ export async function createMediaTagAction(input: unknown) {
 ## 📝 Checklist d'implémentation
 
 ### Phase 0 (Préparation) ✅ COMPLETE
+
 - [x] Créer DTOs avec `number` (`MediaTagDTO`, `MediaFolderDTO`, etc.)
 - [x] Créer schemas bulk avec limite max 50 (`BulkOperationSchema`)
 - [x] Validation Zod pour toutes les entrées utilisateur
 
 ### Phase 1 (P0 - Foundation) ✅ COMPLETE
+
 - [x] Migration DB tags + folders (20251223120000)
 - [x] Schemas Zod étendus (lib/schemas/media.ts)
 - [x] DAL extensions (lib/dal/media-tags.ts, media-folders.ts)
@@ -1258,6 +1270,7 @@ export async function createMediaTagAction(input: unknown) {
 - [x] Tests sérialisation (DTOs retournent `number`)
 
 ### Phase 2 (P1 - Advanced) ✅ COMPLETE
+
 - [x] MediaDetailsPanel (édition metadata, tags)
 - [x] MediaBulkActions (sélection multiple Ctrl+Click)
 - [x] Bulk operations avec validation Zod (delete, move, tag)
@@ -1269,6 +1282,7 @@ export async function createMediaTagAction(input: unknown) {
 - [x] T3 Env migration (7 fichiers conformes)
 
 ### Phase 3 (P1 - Thumbnails) ⏳ NOT STARTED
+
 - [ ] Edge Function thumbnails (Option A - Recommandée)
 - [ ] Trigger non-bloquant (Pattern Warning)
 - [ ] MediaCard avec thumbnails
@@ -1276,6 +1290,7 @@ export async function createMediaTagAction(input: unknown) {
 - [ ] Tests thumbnails + warning flow
 
 ### Phase 4 (P2 - Polish) ⏳ NOT STARTED
+
 - [ ] Animations transitions
 - [ ] Accessibility audit (ARIA, keyboard nav)
 - [ ] Usage tracking implementation
@@ -1526,6 +1541,7 @@ export async function uploadMediaImage(formData: FormData) {
 | **Total Estimé** | **13.5-17j** | - | - | 📊 26% Complete |
 
 **Observations** :
+
 - Phase 1 plus rapide grâce à architecture DAL existante
 - Phase 2.3 non planifiée (corrections BigInt + rollback HTTP/3)
 - T3 Env migration bonus (7 fichiers conformes)

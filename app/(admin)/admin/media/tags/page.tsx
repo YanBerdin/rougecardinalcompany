@@ -3,6 +3,7 @@
  * @description Admin page for managing media tags (CRUD)
  */
 import { Suspense } from "react";
+import { requireMinRole } from "@/lib/auth/roles";
 import { MediaTagsContainer } from "@/components/features/admin/media/MediaTagsContainer";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -15,7 +16,9 @@ export const metadata = {
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default function MediaTagsPage() {
+export default async function MediaTagsPage() {
+    await requireMinRole("editor");
+
     return (
         <div className="container mx-auto py-8">
             <div className="mb-8">

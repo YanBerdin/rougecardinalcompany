@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { requireAdminPageAccess } from "@/lib/auth/is-admin";
+import { requireAdminPageAccess } from "@/lib/auth/roles";
 import { fetchTeamMemberById } from "@/lib/dal/team";
 import { Button } from "@/components/ui/button";
 import {

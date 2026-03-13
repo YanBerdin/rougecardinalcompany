@@ -3,6 +3,7 @@
 ## 📋 Vue d'Ensemble
 
 ### Contexte
+
 Le projet utilise actuellement des variables d'environnement avec des accès directs `process.env.*` et une validation manuelle (`hasEnvVars`). T3 Env apportera:
 
 ✅ **Validation runtime** avec Zod  
@@ -24,6 +25,7 @@ CONTEXT7_API_KEY: z.string().optional()
 ```
 
 **Justification**:
+
 - Ne sont PAS nécessaires au runtime Next.js
 - Utilisées uniquement par MCP Supabase et GitHub Actions
 - Marquées `.optional()` pour ne pas bloquer le démarrage
@@ -39,6 +41,7 @@ supabase/
 ```
 
 **Justifications**:
+
 - ✅ **Sécurité**: Admin operations explicites et tracées
 - ✅ **Audit**: Facile d'identifier les appels privilégiés
 - ✅ **SOLID**: Une responsabilité par fichier
@@ -47,6 +50,7 @@ supabase/
 #### 3. hasEnvVars Check ✅
 
 **SUPPRIMER** de:
+
 - `supabase/middleware.ts` (lines 10-15)
 - `lib/utils.ts` (export `hasEnvVars`)
 
@@ -67,10 +71,15 @@ pnpm add @t3-oss/env-nextjs zod
 ## 🎯 Phase 2: Migration Core Files
 
 ### 2.1 lib/site-config.ts
+
 ### 2.2 lib/resend.ts
+
 ### 2.3 supabase/server.ts
+
 ### 2.4 supabase/client.ts
+
 ### 2.5 supabase/admin.ts
+
 ### 2.6 supabase/middleware.ts---
 
 ## 🎯 Phase 3: Email System Migration
@@ -109,6 +118,7 @@ export async function fetchData() {
 ```
 
 **Fichiers à migrer** (ordre de priorité):
+
 1. `lib/dal/admin-users.ts` (utilise EMAIL_DEV_REDIRECT)
 2. `lib/dal/admin-home-*.ts`
 3. Tous les autres DAL files
@@ -116,6 +126,7 @@ export async function fetchData() {
 ### Phase 5: Scripts
 
 **Fichiers à migrer**:
+
 - `scripts/create-admin-user.ts`
 - `scripts/seed-admin.ts`
 - `scripts/test-*.ts` (déjà créé le nouveau `test-env-validation.ts`)
@@ -134,6 +145,7 @@ const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
 ### Phase 6: API Routes (minimal)
 
 **Fichiers à migrer**:
+
 - `app/api/admin/media/search/route.ts`
 - `app/api/contact/route.ts`
 - `app/api/newsletter/route.ts`
@@ -152,6 +164,7 @@ export async function POST(request: NextRequest) {
 ### Phase 7: Tests & CI
 
 **Checklist finale**:
+
 1. ✅ Exécuter `pnpm tsx scripts/test-env-validation.ts`
 2. ✅ Vérifier build: `pnpm build`
 3. ✅ Vérifier TypeScript: `pnpm tsc --noEmit`
@@ -172,11 +185,13 @@ export async function POST(request: NextRequest) {
    - `docs/T3_ENV_GUIDE.md`
 
 2. **Installer dépendances**:
+
    ```bash
    pnpm add @t3-oss/env-nextjs zod
    ```
 
 3. **Tester la validation**:
+
    ```bash
    pnpm tsx scripts/test-env-validation.ts
    ```
@@ -196,6 +211,7 @@ export async function POST(request: NextRequest) {
    - Dans `supabase/middleware.ts` (retirer check lines 10-15)
 
 6. **Tester compilation**:
+
    ```bash
    pnpm tsc --noEmit
    pnpm build
@@ -215,6 +231,7 @@ export async function POST(request: NextRequest) {
 ### Validation Finale
 
 11. **Tests complets**:
+
     ```bash
     pnpm tsx scripts/test-env-validation.ts
     pnpm build
@@ -239,6 +256,7 @@ export async function POST(request: NextRequest) {
 ⏳ **Phase 7**: Tests & CI
 
 **Bénéfices attendus**:
+
 - ✅ Type-safety complète
 - ✅ Validation runtime
 - ✅ Meilleure DX (autocomplete)
@@ -246,10 +264,12 @@ export async function POST(request: NextRequest) {
 - ✅ Code plus maintenable
 
 **Risques identifiés**:
+
 - ⚠️ Breaking changes si env vars mal configurées
 - ⚠️ Nécessite tests approfondis après migration
 
 **Mitigation**:
+
 - ✅ Script de validation automatisé
 - ✅ Documentation complète
 - ✅ Migration progressive par phases

@@ -19,19 +19,19 @@ to authenticated
 with check ( (select auth.uid()) is not null );
 
 drop policy if exists "Uploaders or admins can update medias" on public.medias;
-create policy "Uploaders or admins can update medias"
+create policy "Uploaders or editors+ can update medias"
 on public.medias
 for update
 to authenticated
-using ( uploaded_by = (select auth.uid()) or (select public.is_admin()) )
-with check ( uploaded_by = (select auth.uid()) or (select public.is_admin()) );
+using ( uploaded_by = (select auth.uid()) or (select public.has_min_role('editor')) )
+with check ( uploaded_by = (select auth.uid()) or (select public.has_min_role('editor')) );
 
 drop policy if exists "Uploaders or admins can delete medias" on public.medias;
-create policy "Uploaders or admins can delete medias"
+create policy "Uploaders or editors+ can delete medias"
 on public.medias
 for delete
 to authenticated
-using ( uploaded_by = (select auth.uid()) or (select public.is_admin()) );
+using ( uploaded_by = (select auth.uid()) or (select public.has_min_role('editor')) );
 
 -- ---- SPECTACLES ----
 alter table public.spectacles enable row level security;
@@ -40,7 +40,7 @@ drop policy if exists "Public spectacles are viewable by everyone" on public.spe
 drop policy if exists "Admins can view all spectacles" on public.spectacles;
 drop policy if exists "View spectacles (public published OR admin all)" on public.spectacles;
 
-create policy "View spectacles (public published/archived OR admin all)"
+create policy "View spectacles (public published/archived OR editor+ all)"
 on public.spectacles
 for select
 to anon, authenticated
@@ -51,39 +51,39 @@ using (
     and status in ('published', 'archived')
   )
   or
-  -- Admins can see everything
-  (select public.is_admin())
+  -- Editors+ can see everything
+  (select public.has_min_role('editor'))
 );
 
 drop policy if exists "Authenticated users can create spectacles" on public.spectacles;
-create policy "Admins can create spectacles"
+create policy "Editors+ can create spectacles"
 on public.spectacles
 for insert
 to authenticated
-with check ( (select public.is_admin()) );
+with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Owners or admins can update spectacles" on public.spectacles;
-create policy "Owners or admins can update spectacles"
+create policy "Owners or editors+ can update spectacles"
 on public.spectacles
 for update
 to authenticated
 using (
   created_by = (select auth.uid())
-  or (select public.is_admin())
+  or (select public.has_min_role('editor'))
 )
 with check (
   created_by = (select auth.uid())
-  or (select public.is_admin())
+  or (select public.has_min_role('editor'))
 );
 
 drop policy if exists "Owners or admins can delete spectacles" on public.spectacles;
-create policy "Owners or admins can delete spectacles"
+create policy "Owners or editors+ can delete spectacles"
 on public.spectacles
 for delete
 to authenticated
 using (
   created_by = (select auth.uid())
-  or (select public.is_admin())
+  or (select public.has_min_role('editor'))
 );
 
 -- ---- EVENEMENTS ----
@@ -97,26 +97,26 @@ to anon, authenticated
 using ( true );
 
 drop policy if exists "Admins can create events" on public.evenements;
-create policy "Admins can create events"
+create policy "Editors+ can create events"
 on public.evenements
 for insert
 to authenticated
-with check ( (select public.is_admin()) );
+with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can update events" on public.evenements;
-create policy "Admins can update events"
+create policy "Editors+ can update events"
 on public.evenements
 for update
 to authenticated
-using ( (select public.is_admin()) )
-with check ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) )
+with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can delete events" on public.evenements;
-create policy "Admins can delete events"
+create policy "Editors+ can delete events"
 on public.evenements
 for delete
 to authenticated
-using ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) );
 
 -- ---- PARTNERS ----
 alter table public.partners enable row level security;
@@ -173,26 +173,26 @@ to authenticated
 using ( true );
 
 drop policy if exists "Admins can insert media tags" on public.media_tags;
-create policy "Admins can insert media tags"
+create policy "Editors+ can insert media tags"
 on public.media_tags
 for insert
 to authenticated
-with check ( (select public.is_admin()) );
+with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can update media tags" on public.media_tags;
-create policy "Admins can update media tags"
+create policy "Editors+ can update media tags"
 on public.media_tags
 for update
 to authenticated
-using ( (select public.is_admin()) )
-with check ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) )
+with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can delete media tags" on public.media_tags;
-create policy "Admins can delete media tags"
+create policy "Editors+ can delete media tags"
 on public.media_tags
 for delete
 to authenticated
-using ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) );
 
 -- ---- MEDIA FOLDERS ----
 alter table public.media_folders enable row level security;
@@ -212,26 +212,26 @@ to authenticated
 using ( true );
 
 drop policy if exists "Admins can insert media folders" on public.media_folders;
-create policy "Admins can insert media folders"
+create policy "Editors+ can insert media folders"
 on public.media_folders
 for insert
 to authenticated
-with check ( (select public.is_admin()) );
+with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can update media folders" on public.media_folders;
-create policy "Admins can update media folders"
+create policy "Editors+ can update media folders"
 on public.media_folders
 for update
 to authenticated
-using ( (select public.is_admin()) )
-with check ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) )
+with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can delete media folders" on public.media_folders;
-create policy "Admins can delete media folders"
+create policy "Editors+ can delete media folders"
 on public.media_folders
 for delete
 to authenticated
-using ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) );
 
 -- ---- MEDIA ITEM TAGS (Junction Table) ----
 alter table public.media_item_tags enable row level security;
@@ -251,23 +251,23 @@ to authenticated
 using ( true );
 
 drop policy if exists "Admins can insert media item tags" on public.media_item_tags;
-create policy "Admins can insert media item tags"
+create policy "Editors+ can insert media item tags"
 on public.media_item_tags
 for insert
 to authenticated
-with check ( (select public.is_admin()) );
+with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can update media item tags" on public.media_item_tags;
-create policy "Admins can update media item tags"
+create policy "Editors+ can update media item tags"
 on public.media_item_tags
 for update
 to authenticated
-using ( (select public.is_admin()) )
-with check ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) )
+with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can delete media item tags" on public.media_item_tags;
-create policy "Admins can delete media item tags"
+create policy "Editors+ can delete media item tags"
 on public.media_item_tags
 for delete
 to authenticated
-using ( (select public.is_admin()) );
+using ( (select public.has_min_role('editor')) );

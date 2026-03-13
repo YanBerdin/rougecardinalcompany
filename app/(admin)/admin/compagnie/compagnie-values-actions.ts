@@ -14,6 +14,7 @@ import {
     reorderCompagnieValues,
 } from "@/lib/dal/admin-compagnie-values";
 import { generateSlug } from "@/lib/dal/helpers";
+import { requireMinRole } from "@/lib/auth/roles";
 
 // =============================================================================
 // COMPAGNIE VALUES ACTIONS
@@ -26,6 +27,8 @@ export async function createCompagnieValueAction(
     input: unknown
 ): Promise<ActionResult> {
     try {
+        await requireMinRole("editor");
+
         const raw = input as Record<string, unknown>;
         const validated = await CompagnieValueInputSchema.parseAsync({
             ...raw,
@@ -58,6 +61,8 @@ export async function updateCompagnieValueAction(
     input: unknown
 ): Promise<ActionResult> {
     try {
+        await requireMinRole("editor");
+
         const validated = await CompagnieValueInputSchema.partial().parseAsync(input);
         const result = await updateCompagnieValue(BigInt(id), validated);
 
@@ -84,6 +89,8 @@ export async function deleteCompagnieValueAction(
     id: string
 ): Promise<ActionResult> {
     try {
+        await requireMinRole("editor");
+
         const result = await deleteCompagnieValue(BigInt(id));
 
         if (!result.success) {
@@ -109,6 +116,8 @@ export async function reorderCompagnieValuesAction(
     input: unknown
 ): Promise<ActionResult> {
     try {
+        await requireMinRole("editor");
+
         const validated = await ReorderCompagnieValuesSchema.parseAsync(input);
         const result = await reorderCompagnieValues(validated);
 

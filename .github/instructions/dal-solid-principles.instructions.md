@@ -21,6 +21,7 @@ Ce guide **complète** (ne remplace pas) les instructions suivantes :
 - ✅ `.github/instructions/next-backend.instructions.md` — Server Actions, API Routes
 
 **Ordre de priorité en cas de conflit :**
+
 1. Ce guide DAL (règles spécifiques)
 2. Clean Code (règles générales)
 3. TypeScript (typage strict)
@@ -62,7 +63,7 @@ import { logAnalytics } from "@/lib/analytics";         // Violation SRP
 import "server-only";                                   // OBLIGATOIRE
 import { createClient } from "@/supabase/server";       // Client DB
 import { createAdminClient } from "@/supabase/admin";   // Client admin
-import { requireAdmin } from "@/lib/auth/is-admin";     // Auth guard
+import { requireBackofficeAccess } from "@/lib/auth/roles"; // Auth guard (editor+)
 import { z } from "zod";                                // Validation
 import type { Database } from "@/lib/database.types";   // Types DB
 ```
@@ -70,6 +71,7 @@ import type { Database } from "@/lib/database.types";   // Types DB
 ### 🚨 Vérification automatique
 
 **Checklist pre-commit :**
+
 - [ ] Aucun import `next/cache` dans `lib/dal/`
 - [ ] Aucun import `@/lib/email` dans `lib/dal/`
 - [ ] Aucun import `@/lib/sms` dans `lib/dal/`
@@ -88,7 +90,7 @@ import type { Database } from "@/lib/database.types";   // Types DB
 ```typescript
 // ❌ VIOLATION SRP : 10 responsabilités dans 1 fonction
 export async function inviteUser(input: InviteUserInput) {
-  await requireAdmin();                              // 1. Auth ✅
+  await requireBackofficeAccess();                   // 1. Auth ✅
   const validated = InviteUserSchema.parse(input);   // 2. Validation ✅
   await checkInvitationRateLimit(...);               // 3. Rate limiting ❌
   await verifyUserDoesNotExist(...);                 // 4. User check ❌
@@ -108,7 +110,7 @@ export async function inviteUser(input: InviteUserInput) {
 export async function createUserProfile(
   input: UserProfileInput
 ): Promise<DALResult<UserProfile>> {
-  await requireAdmin();
+  await requireBackofficeAccess();
   const validated = UserProfileSchema.parse(input);
   
   const supabase = await createClient();
@@ -142,6 +144,7 @@ export async function logInvitationAudit(userId: string) { /* ... */ }
 ### Règle de décomposition
 
 **Si une fonction DAL contient :**
+
 - Plus de 30 lignes → Splitter en helpers
 - Plus de 3 opérations DB → Créer des fonctions atomiques
 - Du code métier (calculs, transformations) → Extraire dans `lib/utils/`
@@ -179,7 +182,7 @@ export async function inviteUser(input: InviteUserInput): Promise<DALResult> {
 export async function createUserProfile(
   input: UserProfileInput
 ): Promise<DALResult<{ userId: string }>> {
-  await requireAdmin();
+  await requireBackofficeAccess();
   const validated = UserProfileSchema.parse(input);
   
   const supabase = await createClient();
@@ -274,6 +277,7 @@ export async function inviteUserAction(input: unknown): Promise<ActionResult> {
 ### Principe Clean Code
 
 **Chaque fonction DAL doit :**
+
 - Tenir en 1 écran (≤ 30 lignes)
 - Avoir 1 seule responsabilité
 - Être testable unitairement
@@ -283,7 +287,7 @@ export async function inviteUserAction(input: unknown): Promise<ActionResult> {
 ```typescript
 // ❌ VIOLATION SRP + Clean Code
 export async function inviteUser(input: InviteUserInput): Promise<DALResult> {
-  await requireAdmin();
+  await requireBackofficeAccess();
   const validated = InviteUserSchema.parse(input);
   
   // Rate limiting check (10 lignes)
@@ -431,7 +435,7 @@ async function logInvitationAudit(userId: string, email: string): Promise<void> 
 export async function inviteUser(
   input: InviteUserInput
 ): Promise<DALResult<{ userId: string }>> {
-  await requireAdmin();
+  await requireBackofficeAccess();
   const validated = InviteUserSchema.parse(input);
   
   // 1. Rate limiting
@@ -567,6 +571,7 @@ export async function createUser(input: UserInput): Promise<DALResult> {
 ```
 
 **Règles :**
+
 - Entity en UPPERCASE (`USER`, `HERO`, `SPECTACLE`)
 - Numéro à 3 chiffres (`001`, `002`, etc.)
 - Message en anglais pour les logs
@@ -596,7 +601,7 @@ export type UserInput = z.infer<typeof UserInputSchema>;
 
 // Fonction DAL avec validation
 export async function createUser(input: UserInput): Promise<DALResult<User>> {
-  await requireAdmin();
+  await requireBackofficeAccess();
   
   // ✅ Validation Zod (throws si invalide)
   const validated = UserInputSchema.parse(input);
@@ -627,7 +632,7 @@ export async function updateUser(
   input: unknown // ❌ Pas typé à l'entrée
 ): Promise<DALResult<User>> {
   try {
-    await requireAdmin();
+    await requireBackofficeAccess();
     
     // ✅ Validation avec safeParse
     const validated = UserInputSchema.partial().safeParse(input);
@@ -728,30 +733,35 @@ export async function createSpectacleAction(input: unknown) {
 ### Pour chaque fichier DAL (`lib/dal/*.ts`)
 
 #### Structure
+
 - [ ] Directive `"use server"` en première ligne
 - [ ] Import `"server-only"` en deuxième ligne
 - [ ] Fichier < 300 lignes (sinon splitter par entité)
 - [ ] 1 fichier = 1 table/entité
 
 #### Imports
+
 - [ ] Pas d'import `next/cache`
 - [ ] Pas d'import `@/lib/email`
 - [ ] Pas d'import `@/lib/sms`
 - [ ] Pas d'import `@/lib/analytics`
 
 #### Fonctions
+
 - [ ] Toutes les fonctions < 30 lignes
 - [ ] 1 responsabilité par fonction
 - [ ] Validation Zod systématique
 - [ ] Return type `DALResult<T>` cohérent
 
 #### Sécurité
-- [ ] `requireAdmin()` ou `requireAuth()` au début
+
+- [ ] `requireBackofficeAccess()` ou `requireAdminOnly()` au début
 - [ ] Error codes tracés `[ERR_XXX_NNN]`
 - [ ] Pas de secrets hardcodés
 - [ ] Pas de `console.log()` avec données sensibles
 
 #### Dépendances
+
 - [ ] Pas de `revalidatePath()` dans le DAL
 - [ ] Pas d'appels email/SMS dans le DAL
 - [ ] Pas de logique métier complexe (extraire dans `lib/utils/`)
@@ -773,15 +783,16 @@ export async function createSpectacleAction(input: unknown) {
 ### Exemples de scores
 
 **Fichier conforme (24/25 - 96%) :**
+
 ```typescript
 // lib/dal/admin-home-hero.ts
 "use server";
 import "server-only";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireBackofficeAccess } from "@/lib/auth/roles";
 
 export async function fetchAllHeroSlides(): Promise<HeroSlideDTO[]> {
-  await requireAdmin();
+  await requireBackofficeAccess();
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("home_hero_slides")
@@ -795,10 +806,11 @@ export async function fetchAllHeroSlides(): Promise<HeroSlideDTO[]> {
 ```
 
 **Fichier non-conforme (11/25 - 44%) :**
+
 ```typescript
 // lib/dal/admin-users.ts (AVANT refactoring)
 export async function inviteUser(input: InviteUserInput) {
-  await requireAdmin();                              // S: ✅
+  await requireBackofficeAccess();                   // S: ✅
   const validated = InviteUserSchema.parse(input);   // O: ✅
   await checkRateLimit(...);                         // S: ❌ (rate limiting)
   await verifyUserExists(...);                       // S: ❌ (validation métier)
@@ -955,7 +967,7 @@ export async function fetchCompagnieValues(
 "use server";
 import "server-only";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireBackofficeAccess } from "@/lib/auth/roles";
 import type { HeroSlideInput, HeroSlideDTO } from "@/lib/schemas/home-content";
 import { HeroSlideInputSchema } from "@/lib/schemas/home-content";
 
@@ -974,7 +986,7 @@ export async function createHeroSlide(
   input: HeroSlideInput
 ): Promise<DALResult<HeroSlideDTO>> {
   try {
-    await requireAdmin();
+    await requireBackofficeAccess();
     
     // Validation Zod
     const validated = HeroSlideInputSchema.parse(input);
@@ -1455,5 +1467,5 @@ validateAllDal();
 ---
 
 **Maintenu par :** Équipe Backend Rouge-Cardinal  
-**Contact :** tech@rouge-cardinal.fr  
+**Contact :** <tech@rouge-cardinal.fr>  
 **Dernière révision :** 28 novembre 2025

@@ -5,6 +5,7 @@
 **Fichier cible**: `lib/dal/admin-users.ts`
 
 **Standards à respecter**:
+
 - ✅ Max 30 lignes par fonction
 - ✅ Codes d'erreur [ERR_XXX] pour le traçage
 - ✅ Noms de fonctions descriptifs
@@ -131,7 +132,8 @@ async function verifyUserDoesNotExist(
 
 **Responsabilité**: Générer le lien d'invitation via Supabase Admin API
 
-**Codes d'erreur**: 
+**Codes d'erreur**:
+
 - `[ERR_INVITE_003]` - Email déjà enregistré (détecté par generateLink)
 - `[ERR_INVITE_004]` - Échec de génération du lien
 
@@ -371,6 +373,7 @@ async function logInvitationAuditRecord(
 ### sanitizeEmailForLogs() - Suppression du commentaire
 
 **Avant**:
+
 ```typescript
 // Helper pour logs RGPD-compliant
 function sanitizeEmailForLogs(email: string): string {
@@ -379,6 +382,7 @@ function sanitizeEmailForLogs(email: string): string {
 ```
 
 **Après**:
+
 ```typescript
 function sanitizeEmailForLogs(email: string): string {
   const [local, domain] = email.split('@');
@@ -395,23 +399,27 @@ function sanitizeEmailForLogs(email: string): string {
 ## Avantages du Refactoring
 
 ### ✅ Conformité Standards Clean Code
+
 - Fonction principale: 28 lignes (< 30)
 - Chaque helper: < 30 lignes
 - Zéro commentaires (code auto-documenté)
 - Codes d'erreur systématiques pour le traçage
 
 ### ✅ Maintenabilité
+
 - Chaque fonction a une responsabilité unique
 - Noms de fonctions descriptifs (self-documenting)
 - Logique de rollback isolée et réutilisable
 - Tests unitaires simplifiés (une fonction = un test)
 
 ### ✅ Debugging
+
 - Codes d'erreur [ERR_XXX] pour traçage rapide
 - Logs structurés avec contexte clair
 - Stack traces plus précises (fonctions nommées)
 
 ### ✅ Réutilisabilité
+
 - Helpers peuvent être utilisés ailleurs
 - Logique métier découplée de l'orchestration
 - Validation, retry, rollback réutilisables
@@ -512,18 +520,21 @@ next dev --turbopack
 ## Notes Techniques
 
 ### Dépendances Externes Maintenues
+
 - `@supabase/supabase-js` (createClient, admin API)
 - `zod` (validation InviteUserSchema)
 - `next/cache` (revalidatePath)
 - `@/lib/email/actions` (sendInvitationEmail)
 
 ### Types TypeScript Utilisés
+
 - `SupabaseClient` (from @supabase/supabase-js)
 - `InviteUserInput` (local type)
 - `DALResult<T>` (local type)
 - `InviteUserSchema` (zod schema)
 
 ### Environnement Variables Requises
+
 - `NEXT_PUBLIC_SITE_URL` (pour redirect URL)
 
 ---

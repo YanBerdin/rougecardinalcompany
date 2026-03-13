@@ -3,7 +3,7 @@ import "server-only";
 
 import { cache } from "react";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireMinRole } from "@/lib/auth/roles";
 import { dalSuccess, dalError, type DALResult } from "@/lib/dal/helpers";
 import {
     type PressReleaseDTO,
@@ -69,7 +69,7 @@ function mapToPressReleaseDTO(release: RawPressReleaseRow): PressReleaseDTO {
  */
 export const fetchAllPressReleasesAdmin = cache(
     async (): Promise<DALResult<PressReleaseDTO[]>> => {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -112,7 +112,7 @@ export const fetchAllPressReleasesAdmin = cache(
  */
 export const fetchPressReleaseById = cache(
     async (id: bigint): Promise<DALResult<PressReleaseDTO | null>> => {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -161,7 +161,7 @@ export const fetchPressReleaseById = cache(
 export async function createPressRelease(
     input: PressReleaseInput
 ): Promise<DALResult<PressReleaseDTO>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -202,7 +202,7 @@ export async function updatePressRelease(
     id: bigint,
     input: Partial<PressReleaseInput>
 ): Promise<DALResult<PressReleaseDTO>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -240,7 +240,7 @@ export async function updatePressRelease(
 export async function deletePressRelease(
     id: bigint
 ): Promise<DALResult<null>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
     const { error } = await supabase
@@ -261,7 +261,7 @@ export async function deletePressRelease(
 export async function publishPressRelease(
     id: bigint
 ): Promise<DALResult<PressReleaseDTO>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -288,7 +288,7 @@ export async function publishPressRelease(
 export async function unpublishPressRelease(
     id: bigint
 ): Promise<DALResult<PressReleaseDTO>> {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const supabase = await createClient();
     const { data, error } = await supabase

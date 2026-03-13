@@ -14,6 +14,7 @@ import {
     deletePressContact,
     togglePressContactActive,
 } from "@/lib/dal/admin-press-contacts";
+import { requireAdminOnly } from "@/lib/auth/roles";
 
 // =============================================================================
 // PRESS CONTACTS ACTIONS
@@ -26,6 +27,8 @@ export async function createPressContactAction(
     input: unknown
 ): Promise<ActionResult> {
     try {
+        await requireAdminOnly();
+
         const validated: PressContactInput = await PressContactInputSchema.parseAsync(input);
         const result = await createPressContact(validated);
 
@@ -52,6 +55,8 @@ export async function updatePressContactAction(
     input: unknown
 ): Promise<ActionResult> {
     try {
+        await requireAdminOnly();
+
         const validated = await PressContactInputSchema.partial().parseAsync(input);
         const result = await updatePressContact(BigInt(id), validated);
 
@@ -77,6 +82,8 @@ export async function deletePressContactAction(
     id: string
 ): Promise<ActionResult> {
     try {
+        await requireAdminOnly();
+
         const result = await deletePressContact(BigInt(id));
 
         if (!result.success) {
@@ -102,6 +109,8 @@ export async function togglePressContactActiveAction(
     actif: boolean
 ): Promise<ActionResult> {
     try {
+        await requireAdminOnly();
+
         const validated = await TogglePressContactActiveSchema.parseAsync({
             id: BigInt(id),
             actif,

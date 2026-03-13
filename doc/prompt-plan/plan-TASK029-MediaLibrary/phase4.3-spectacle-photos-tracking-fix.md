@@ -17,6 +17,7 @@ Les images uploadées via `SpectacleFormImageSection` et affichées dans `Specta
 La table `spectacles_medias` (qui stocke les photos paysage des spectacles) **n'était pas vérifiée** par le système de tracking d'usage (`lib/dal/media-usage.ts`).
 
 **Tables vérifiées AVANT le fix** :
+
 - ✅ `spectacles.og_image_media_id` (image OG pour SEO)
 - ❌ `spectacles_medias.media_id` (photos paysage affichées dans SpectacleDetailView)
 
@@ -100,6 +101,7 @@ spectaclePhotos.data?.forEach((row) => {
 ### Locations d'usage
 
 L'indicateur affichera maintenant :
+
 - `"spectacle_photos"` pour les photos paysage uploadées via `SpectaclePhotoManager`
 - `"spectacles"` pour les images OG (SEO) des spectacles
 
@@ -110,11 +112,13 @@ L'indicateur affichera maintenant :
 ### Test 1 : Badge "Utilisé sur le site"
 
 **Scénario** :
+
 1. Créer un spectacle actif
 2. Via `SpectaclePhotoManager`, ajouter 2 photos paysage (soit depuis la bibliothèque, soit par upload)
 3. Aller dans `/admin/media`
 
 **Résultat attendu** :
+
 ```tsx
 ✅ Les 2 photos doivent avoir le badge "Utilisé sur le site" (Eye icon vert émeraude)
 ✅ Au survol, le tooltip doit afficher "spectacle_photos"
@@ -123,10 +127,12 @@ L'indicateur affichera maintenant :
 ### Test 2 : Avertissement de suppression
 
 **Scénario** :
+
 1. Sélectionner les 2 photos utilisées dans le spectacle
 2. Cliquer sur "Supprimer" dans la barre d'actions
 
 **Résultat attendu** :
+
 ```bash
 ✅ AlertDialog affiche un warning box ambre
 ✅ Message : "2 médias sont utilisés sur le site public"
@@ -136,10 +142,12 @@ L'indicateur affichera maintenant :
 ### Test 3 : Spectacle inactif
 
 **Scénario** :
+
 1. Désactiver le spectacle (mettre `active = false`)
 2. Rafraîchir `/admin/media`
 
 **Résultat attendu** :
+
 ```bash
 ✅ Le badge "Utilisé sur le site" doit DISPARAÎTRE
 ✅ Les photos ne sont plus marquées comme utilisées (car spectacle inactif)
@@ -148,11 +156,13 @@ L'indicateur affichera maintenant :
 ### Test 4 : Performance (bulk checking)
 
 **Scénario** :
+
 1. Créer 5 spectacles actifs avec 2 photos chacun (10 photos au total)
 2. Bibliothèque contenant 50+ médias
 3. Mesurer le temps de chargement de `/admin/media`
 
 **Résultat attendu** :
+
 ```bash
 ✅ Chargement < 2 secondes
 ✅ Une seule requête pour spectacles_medias (bulk, pas N+1)
@@ -164,7 +174,7 @@ L'indicateur affichera maintenant :
 ## 📝 Fichiers Modifiés
 
 | Fichier | Lignes modifiées | Changements |
-|---------|------------------|-------------|
+| --------- | ------------------ | ------------- |
 | **lib/dal/media-usage.ts** | +35 | Ajout vérification `spectacles_medias` |
 
 ---
@@ -172,6 +182,7 @@ L'indicateur affichera maintenant :
 ## 🔄 Migration / Rétrocompatibilité
 
 **Aucune migration nécessaire** :
+
 - Le code est rétrocompatible
 - Les médias existants seront automatiquement vérifiés au prochain chargement de `/admin/media`
 - Pas de changement de schéma de base de données
@@ -193,6 +204,7 @@ locations.push(`spectacle_photos: ${spectacleTitle}`);
 ```
 
 **Requis** :
+
 - Modifier la requête pour inclure `spectacles(titre)`
 - Mettre à jour le tooltip dans `MediaCard.tsx`
 
@@ -202,7 +214,7 @@ locations.push(`spectacle_photos: ${spectacleTitle}`);
 
 - [Phase 4.3 - Usage Tracking](./phase4.3-usage-tracking.md) - Guide complet
 - [Phase 4.3 - Complete Report](./phase4.3-complete-report.md) - Rapport d'implémentation
-- [TASK057 - Spectacle Landscape Photos](../../tasks/TASK057-spectacle-landscape-photos.md) - Contexte spectacles
+- [TASK057 - TASK057-spectacle-landscape-photos.md](../../../memory-bank/tasks/tasks-completed/TASK057-spectacle-landscape-photos.md) - Contexte spectacles
 
 ---
 

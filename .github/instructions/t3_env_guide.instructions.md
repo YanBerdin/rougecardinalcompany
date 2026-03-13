@@ -242,7 +242,7 @@ if (!supabaseUrl || !secretKey) {
 
 ## 📖 References
 
-- T3 Env Documentation: https://env.t3.gg
+- T3 Env Documentation: <https://env.t3.gg>
 - Project Implementation: `lib/env.ts`
 - Test Script: `scripts/test-env-validation.ts`
 - Memory Bank: `memory-bank/systemPatterns.md` (T3 Env section)

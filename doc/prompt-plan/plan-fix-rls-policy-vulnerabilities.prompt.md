@@ -59,11 +59,13 @@ with check (
 ```
 
 **Avantages** :
+
 - ✅ Bloque emails vides/malformés
 - ✅ Simple à implémenter
 - ✅ Pas de changement côté application
 
 **Limites** :
+
 - ⚠️ N'empêche pas les inscriptions en masse
 - ⚠️ Pas de vérification domaine (jetable emails)
 
@@ -74,6 +76,7 @@ with check (
 **Prérequis** : Rate limiting déjà implémenté dans `lib/actions/newsletter-server.ts` (TASK046) ✅
 
 **Double validation (défense en profondeur)** :
+
 1. **Couche Application** : Zod schema `NewsletterSubscriptionSchema` + rate limiting `recordRequest()`
 2. **Couche RLS** : Policy avec regex email + anti-duplicate
 
@@ -116,6 +119,7 @@ const validation = NewsletterSubscriptionSchema.safeParse(input);
 ```
 
 **Avantages** :
+
 - ✅ Validation email stricte (double : Zod + RLS)
 - ✅ Protection double-inscription en base
 - ✅ Rate limiting côté app (3 req/h/email)
@@ -148,11 +152,13 @@ with check (
 ```
 
 **Avantages** :
+
 - ✅ Zéro spam (emails non vérifiés supprimés)
 - ✅ Conformité RGPD maximale (opt-in confirmé)
 - ✅ Protection impersonation
 
 **Limites** :
+
 - ⚠️ Complexité implémentation (email service + token)
 - ⚠️ Friction utilisateur (étape supplémentaire)
 
@@ -208,6 +214,7 @@ with check (
 ```
 
 **Avantages** :
+
 - ✅ Bloque events invalides (types inconnus)
 - ✅ Protection pollution données
 - ✅ Limite fenêtre temporelle (évite backfill abusif)
@@ -221,6 +228,7 @@ with check (
 #### Politique Actuelle (Vérifiée 2026-01-06)
 
 **Fichiers** :
+
 - `supabase/schemas/20_audit_logs_retention.sql` - Table et policies
 - `supabase/schemas/21_audit_trigger.sql` - Fonction trigger
 
@@ -242,6 +250,7 @@ set search_path = ''
 ```
 
 **Grants existants** (migration `20251027022000`) :
+
 - `GRANT INSERT on logs_audit to authenticated` — Nécessaire car trigger = INVOKER
 
 #### Risques Identifiés
@@ -369,18 +378,21 @@ update public.spectacles set titre = titre where id = 1;
 ```
 
 **14 Tables avec trigger `trg_audit`** (toutes continueront à fonctionner) :
+
 - `profiles`, `medias`, `membres_equipe`, `lieux`, `spectacles`
 - `evenements`, `articles_presse`, `partners`, `abonnes_newsletter`
 - `messages_contact`, `configurations_site`, `communiques_presse`
 - `contacts_presse`, `home_about_content`
 
 **Avantages** :
+
 - ✅ Zéro risque falsification (INSERT direct impossible)
 - ✅ Conformité audit trail (seuls les triggers système écrivent)
 - ✅ Pas de changement application (triggers existants fonctionnent)
 - ✅ Header SECURITY DEFINER documenté selon best practices
 
 **Fichiers à modifier** :
+
 - `supabase/schemas/21_audit_trigger.sql` — Changer INVOKER → DEFINER
 - `supabase/schemas/20_audit_logs_retention.sql` — Supprimer policy INSERT permissive
 
@@ -413,6 +425,7 @@ with check (true);  -- ❌ AUCUNE VALIDATION
 **Prérequis** : Rate limiting déjà implémenté dans `lib/actions/contact-server.ts` (TASK046) ✅
 
 **Double validation (défense en profondeur)** :
+
 1. **Couche Application** : Zod schema `ContactEmailSchema` + rate limiting `recordRequest()` (5 req/15min/IP)
 2. **Couche RLS** : Policy avec validation RGPD + champs requis
 
@@ -471,6 +484,7 @@ const dalResult = await createContactMessage({
 ```
 
 **Avantages** :
+
 - ✅ Validation stricte des champs (double : Zod + RLS)
 - ✅ Protection consentement RGPD
 - ✅ Rate limiting IP (5 req/15min)
@@ -1029,7 +1043,8 @@ insert into public.analytics_events (
 ### Risque 1 : Breaking Changes
 
 **Scénario** : Application envoie emails non-validés  
-**Mitigation** : 
+**Mitigation** :
+
 - ✅ Validation côté app déjà en place (Zod schemas)
 - ✅ Migration safe (uniquement durcit RLS)
 
@@ -1037,6 +1052,7 @@ insert into public.analytics_events (
 
 **Scénario** : Regex email bloque domaines légitimes  
 **Mitigation** :
+
 - ✅ Regex standard RFC 5322 simplifiée
 - ✅ Tests avec domaines courants (.com, .fr, .org)
 - ✅ Fallback : désactiver temporairement policy si bug production
@@ -1045,6 +1061,7 @@ insert into public.analytics_events (
 
 **Scénario** : Policy `not exists` lente sur table volumineuse  
 **Mitigation** :
+
 - ✅ Index unique sur `email` (déjà existant)
 - ✅ Contrainte `UNIQUE` bloquera duplicates avant RLS
 
@@ -1055,11 +1072,13 @@ insert into public.analytics_events (
 ### Migration Recommandée
 
 **Appliquer immédiatement** :
+
 - ✅ Newsletter : Validation email regex + anti-duplicate (défense en profondeur)
 - ✅ Contact : Validation RGPD + champs requis (défense en profondeur)
 - ✅ Audit Logs : Convertir `audit_trigger()` INVOKER → DEFINER + révoquer INSERT users
 
 **Reporter** :
+
 - 📋 Analytics rate limiting (monitoring d'abord)
 - 📋 Newsletter verification token (Phase 2)
 
@@ -1098,6 +1117,7 @@ insert into public.analytics_events (
 ### 📋 Fichiers indexés (17 fichiers)
 
 **Nouveaux fichiers (A)** :
+
 | Fichier | Description |
 |---------|-------------|
 | plan-fix-rls-policy-vulnerabilities.prompt.md | Plan de résolution complet |
@@ -1113,6 +1133,7 @@ insert into public.analytics_events (
 | `supabase/migrations/20260106200000_fix_drop...sql` | Migration correctif (drop old policies) |
 
 **Fichiers modifiés (M)** :
+
 | Fichier | Modification |
 |---------|--------------|
 | `memory-bank/tasks/tasks-completed/TASK037-...md` | Fix typo `consent_rgpd` → `consent` |
@@ -1127,14 +1148,15 @@ insert into public.analytics_events (
 Dernière commande (debug-rls-errors.ts) — Tous les tests passent :
 
 ```bash
-Test	Résultat	Code
-Contact sans consent	✅ Bloqué	42501 RLS violation
-Analytics type invalide	✅ Bloqué	42501 RLS violation
-Contact valide	✅ Accepté	201 Created
+Test Résultat Code
+Contact sans consent ✅ Bloqué 42501 RLS violation
+Analytics type invalide ✅ Bloqué 42501 RLS violation
+Contact valide ✅ Accepté 201 Created
 Les policies RLS fonctionnent correctement ! 🎉
 ```
 
 ### ✅ Statut
+
 - **TypeScript** : Aucune erreur
 - **Lint SQL** : Syntaxe validée
 - **Tests** : 13/13 pass (local + cloud)

@@ -620,6 +620,7 @@ CREATE TABLE BlogPosts (  -- majuscules, camelCase
   Title VARCHAR(255)      -- majuscules, varchar au lieu de text
 );
 ```
+
 - Colonnes : **snake_case au singulier** (`author_id`, `created_at`)
 - PK : `id bigint generated always as identity primary key`
 - FK : `singular_table_id` (ex: `user_id`, `post_id`)
@@ -921,6 +922,7 @@ const key = env.RESEND_API_KEY;  // Type: string (validé)
 ```
 
 **Avantages T3 Env :**
+
 - ✅ Validation Zod au démarrage
 - ✅ Autocomplétion TypeScript
 - ✅ Séparation client/server claire
@@ -984,6 +986,7 @@ cookies: {
 ### ⚠️ Violations Majeures (X)
 
 #### MIG-003 Table sans RLS
+
 **Fichier** : `supabase/migrations/20260109_create_posts.sql`
 **Règle** : `.github/instructions/Create_migration.instructions.md`
 
@@ -997,6 +1000,7 @@ alter table public.posts enable row level security;
 ### 💡 Optimisations Recommandées (X)
 
 #### RLS-PERF auth.uid() non wrappé
+
 **Fichier** : `supabase/schemas/90_rls.sql`
 **Gain** : Meilleure performance RLS
 
@@ -1080,11 +1084,13 @@ const { data: { user } } = await supabase.auth.getUser()
 ```
 
 **Quand utiliser getClaims() :**
+
 - Middleware (chaque requête)
 - Server Components (simple auth check)
 - API Routes (validation token)
 
 **Quand utiliser getUser() :**
+
 - Besoin données utilisateur complètes
 - Affichage profil utilisateur
 - Après vérification avec getClaims()

@@ -2,7 +2,7 @@
 import "server-only";
 
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireAdminOnly } from "@/lib/auth/roles";
 import type { DALResult } from "@/lib/dal/helpers";
 import type {
     RetentionConfigDTO,
@@ -25,7 +25,7 @@ import type {
 export async function fetchRetentionConfigs(): Promise<
     DALResult<RetentionConfigDTO[]>
 > {
-    await requireAdmin();
+    await requireAdminOnly();
     const supabase = await createClient();
 
     const { data, error } = await supabase
@@ -48,7 +48,7 @@ export async function fetchRetentionConfigs(): Promise<
 export async function fetchRetentionConfig(
     tableName: string
 ): Promise<DALResult<RetentionConfigDTO | null>> {
-    await requireAdmin();
+    await requireAdminOnly();
     const supabase = await createClient();
 
     const { data, error } = await supabase
@@ -81,7 +81,7 @@ export async function fetchRetentionAuditLogs(
     limit = 50,
     offset = 0
 ): Promise<DALResult<RetentionAuditDTO[]>> {
-    await requireAdmin();
+    await requireAdminOnly();
     const supabase = await createClient();
 
     const { data, error } = await supabase
@@ -107,7 +107,7 @@ export async function fetchRetentionAuditLogsByTable(
     tableName: string,
     limit = 20
 ): Promise<DALResult<RetentionAuditDTO[]>> {
-    await requireAdmin();
+    await requireAdminOnly();
     const supabase = await createClient();
 
     const { data, error } = await supabase
@@ -135,7 +135,7 @@ export async function fetchRetentionAuditLogsByTable(
 export async function fetchRetentionMonitoring(): Promise<
     DALResult<RetentionMonitoringDTO[]>
 > {
-    await requireAdmin();
+    await requireAdminOnly();
     const supabase = await createClient();
 
     const { data, error } = await supabase
@@ -156,7 +156,7 @@ export async function fetchRetentionMonitoring(): Promise<
 export async function fetchRetentionHealth(): Promise<
     DALResult<RetentionHealthDTO[]>
 > {
-    await requireAdmin();
+    await requireAdminOnly();
     const supabase = await createClient();
 
     const { data, error } = await supabase.rpc("check_retention_health");
@@ -180,7 +180,7 @@ export async function fetchRetentionHealth(): Promise<
 export async function createRetentionConfig(
     input: RetentionConfigFormValues
 ): Promise<DALResult<RetentionConfigDTO>> {
-    await requireAdmin();
+    await requireAdminOnly();
     const supabase = await createClient();
 
     const { data, error } = await supabase
@@ -212,7 +212,7 @@ export async function updateRetentionConfig(
     tableName: string,
     input: UpdateRetentionConfigInput
 ): Promise<DALResult<RetentionConfigDTO>> {
-    await requireAdmin();
+    await requireAdminOnly();
     const supabase = await createClient();
 
     const updateData: Record<string, unknown> = {};
@@ -263,7 +263,7 @@ export async function toggleRetentionConfig(
 export async function triggerManualCleanup(
     tableName: string
 ): Promise<DALResult<CleanupResultDTO>> {
-    await requireAdmin();
+    await requireAdminOnly();
     const supabase = await createClient();
 
     const { data, error } = await supabase.rpc("cleanup_expired_data", {
@@ -288,7 +288,7 @@ export async function triggerManualCleanup(
 export async function triggerNewsletterCleanup(): Promise<
     DALResult<CleanupResultDTO>
 > {
-    await requireAdmin();
+    await requireAdminOnly();
     const supabase = await createClient();
 
     const { data, error } = await supabase.rpc("cleanup_unsubscribed_newsletter");
@@ -314,7 +314,7 @@ export async function triggerNewsletterCleanup(): Promise<
 export async function triggerContactMessagesCleanup(): Promise<
     DALResult<CleanupResultDTO>
 > {
-    await requireAdmin();
+    await requireAdminOnly();
     const supabase = await createClient();
 
     const { data, error } = await supabase.rpc("cleanup_old_contact_messages");
@@ -340,7 +340,7 @@ export async function triggerContactMessagesCleanup(): Promise<
 export async function triggerAllCleanups(): Promise<
     DALResult<CleanupResultDTO[]>
 > {
-    await requireAdmin();
+    await requireAdminOnly();
 
     const configsResult = await fetchRetentionConfigs();
     if (!configsResult.success) {

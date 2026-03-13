@@ -467,6 +467,7 @@ Après extraction des FormDialogs (étapes 2-3), les deux Views passent sous 300
 ## Mise à jour du barrel `index.ts`
 
 Après toutes les étapes, mettre à jour [index.ts](../../components/features/admin/media/index.ts) pour exporter les nouveaux composants publics :
+
 - `TagActionBadge`
 - `MediaFolderFormDialog`
 - `MediaTagFormDialog`
@@ -524,11 +525,13 @@ components/features/admin/media/
 ## Vérification
 
 ### Automatisée
+
 - `pnpm lint` — aucune régression ESLint
 - `pnpm build` — build production réussie
 - Vérifier : `find components/features/admin/media -name "*.tsx" -o -name "*.ts" | xargs wc -l | sort -rn` — aucun fichier > 300 lignes
 
 ### Manuelle
+
 - **Upload** : téléverser une image, vérifier toast succès + apparition dans la grille
 - **Bulk actions** : sélectionner 3+ médias, tester tag/untag/move/delete via badges et selects
 - **Details panel** : cliquer une image, modifier alt_text, changer dossier, ajouter/retirer tags, sauvegarder

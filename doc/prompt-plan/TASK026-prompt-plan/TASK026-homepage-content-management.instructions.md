@@ -29,11 +29,13 @@ Build complete admin interface for managing homepage content with three main sec
 ## Design & Component Guidelines
 
 **Component Installation**: Use shadcn MCP as documented in `.github/instructions/shadcn-mcp.instructions.md`
+
 - Browse components using natural language with Copilot
 - Install shadcn/ui components directly into `components/ui/`
 - Example: "Add a badge component from shadcn registry"
 
 **Frontend Design**: Follow `.github/instructions/rouge-cardinal-frontend-skill.instructions.md`
+
 - Apply distinctive theatrical design aesthetic (Dramatic Minimalism, Editorial Sophistication, etc.)
 - Use Cardinal red (`#ad0000`) as signature accent color
 - Maintain brand consistency with serif display typography + clean sans-serif UI
@@ -93,11 +95,13 @@ scripts/test-home-hero-api.ts                           # API integration tests
 **Tasks**:
 
 1. **Install dependencies** (if not present):
+
    ```bash
    pnpm add @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
    ```
 
 2. **Stop local database** before schema changes:
+
    ```bash
    pnpm dlx supabase stop
    ```
@@ -106,6 +110,7 @@ scripts/test-home-hero-api.ts                           # API integration tests
    - Clone pattern from `63_reorder_team_members.sql`
    - Function signature: `public.reorder_hero_slides(order_data jsonb) RETURNS void`
    - Add `SECURITY DEFINER` with rationale header:
+
      ```sql
      /*
       * Security Model: SECURITY DEFINER
@@ -128,6 +133,7 @@ scripts/test-home-hero-api.ts                           # API integration tests
       *   - Tested concurrent calls: advisory lock prevents conflicts
       */
      ```
+
    - Set `search_path = ''` for security
    - Use advisory lock: `pg_advisory_xact_lock(hashtext('reorder_hero_slides'))`
    - Validate `is_admin()` at function start
@@ -135,6 +141,7 @@ scripts/test-home-hero-api.ts                           # API integration tests
 
 4. **Add database constraints**:
    - `featured` boolean column to `communiques_presse`:
+
      ```sql
      ALTER TABLE public.communiques_presse 
      ADD COLUMN IF NOT EXISTS featured boolean NOT NULL DEFAULT false;
@@ -142,7 +149,9 @@ scripts/test-home-hero-api.ts                           # API integration tests
      COMMENT ON COLUMN public.communiques_presse.featured IS 
      'Flag indicating if press release is featured on homepage';
      ```
+
    - CHECK constraint `home_hero_slides_max_active`:
+
      ```sql
      CREATE OR REPLACE FUNCTION public.check_max_hero_slides()
      RETURNS trigger
@@ -165,13 +174,17 @@ scripts/test-home-hero-api.ts                           # API integration tests
      FOR EACH ROW
      EXECUTE FUNCTION public.check_max_hero_slides();
      ```
+
    - CHECK constraint `home_hero_slides_image_required`:
+
      ```sql
      ALTER TABLE public.home_hero_slides
      ADD CONSTRAINT home_hero_slides_image_required 
      CHECK (image_media_id IS NOT NULL OR image_url IS NOT NULL);
      ```
+
    - `alt_text` column to `home_hero_slides`:
+
      ```sql
      ALTER TABLE public.home_hero_slides 
      ADD COLUMN IF NOT EXISTS alt_text text NOT NULL DEFAULT '',
@@ -180,7 +193,9 @@ scripts/test-home-hero-api.ts                           # API integration tests
      COMMENT ON COLUMN public.home_hero_slides.alt_text IS 
      'Alt text for hero slide image (accessibility, max 125 chars)';
      ```
+
    - Update `home_about_content` constraints:
+
      ```sql
      ALTER TABLE public.home_about_content
      ADD CONSTRAINT home_about_title_length CHECK (char_length(title) <= 80),
@@ -197,17 +212,20 @@ scripts/test-home-hero-api.ts                           # API integration tests
      ```
 
 5. **Generate migration**:
+
    ```bash
    pnpm dlx supabase db diff -f add_homepage_content_constraints
    ```
 
 6. **Test migration locally**:
+
    ```bash
    pnpm dlx supabase db push
    ```
 
 7. **Rollback migration** (in case of failure):
    - Create `supabase/migrations/YYYYMMDDHHMMSS_rollback_homepage_constraints.sql`:
+
      ```sql
      -- Rollback script (use only if migration fails)
      DROP TRIGGER IF EXISTS enforce_max_hero_slides ON public.home_hero_slides;
@@ -226,6 +244,7 @@ scripts/test-home-hero-api.ts                           # API integration tests
      ```
 
 **Validation Checkpoints**:
+
 - [ ] Dependencies installed
 - [ ] Migration file generated with proper naming
 - [ ] `reorder_hero_slides()` function created with SECURITY DEFINER rationale header
@@ -328,6 +347,7 @@ export interface AboutContentDTO {
 ```
 
 **Validation Checkpoints**:
+
 - [ ] All Zod schemas created with proper constraints
 - [ ] Refinements enforce business rules (image required, CTA pairing)
 - [ ] TypeScript types exported for use in DAL/API
@@ -404,6 +424,7 @@ export async function validateImageUrl(
 ```
 
 **Usage Example**:
+
 ```typescript
 const validation = await validateImageUrl("https://example.com/image.jpg");
 if (!validation.valid) {
@@ -412,6 +433,7 @@ if (!validation.valid) {
 ```
 
 **Validation Checkpoints**:
+
 - [ ] Helper function created with type guards
 - [ ] HEAD request checks HTTP 200 and MIME type
 - [ ] Timeout set to prevent hanging requests (5s)
@@ -634,6 +656,7 @@ export async function reorderHeroSlides(order: ReorderInput): Promise<DALResult<
 ```
 
 **Error Codes Reference**:
+
 - `[ERR_HERO_001]`: Failed to fetch all hero slides
 - `[ERR_HERO_002]`: Failed to fetch hero slide by ID
 - `[ERR_HERO_003]`: Failed to create hero slide
@@ -642,6 +665,7 @@ export async function reorderHeroSlides(order: ReorderInput): Promise<DALResult<
 - `[ERR_HERO_006]`: Failed to reorder hero slides
 
 **Validation Checkpoints**:
+
 - [ ] All functions marked `"use server"` with `import "server-only"`
 - [ ] Admin auth checked via `requireAdmin()` at start of each function
 - [ ] Zod validation on all inputs
@@ -742,10 +766,12 @@ export async function updateAboutContent(
 ```
 
 **Error Codes Reference**:
+
 - `[ERR_ABOUT_001]`: Failed to fetch about content
 - `[ERR_ABOUT_002]`: Failed to update about content
 
 **Validation Checkpoints**:
+
 - [ ] Server-only directives present
 - [ ] Admin auth enforced
 - [ ] Zod validation on input
@@ -957,6 +983,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
 ```
 
 **Validation Checkpoints**:
+
 - [ ] All routes wrapped with `withAdminAuth()`
 - [ ] Proper HTTP status codes using `HttpStatus` constants
 - [ ] Zod validation with error handling
@@ -1045,6 +1072,7 @@ export const PATCH = withAdminAuth(
 ```
 
 **Validation Checkpoints**:
+
 - [ ] Routes wrapped with `withAdminAuth()`
 - [ ] Proper HTTP status codes
 - [ ] Zod validation with error handling
@@ -1169,6 +1197,7 @@ export function AboutContentSkeleton() {
 ```
 
 **Validation Checkpoints**:
+
 - [ ] Skeletons match actual component layouts
 - [ ] Proper spacing and sizing
 - [ ] shadcn/ui Skeleton component used
@@ -1180,7 +1209,8 @@ export function AboutContentSkeleton() {
 
 **Goal**: Create complete admin interface for hero slides management
 
-**Design Guidelines**: 
+**Design Guidelines**:
+
 - Use shadcn/ui components installed via MCP for consistency
 - Apply `rouge-cardinal-frontend-skill.instructions.md` for production-grade design
 - Implement theatrical-inspired layouts with Cardinal red accents
@@ -1794,6 +1824,7 @@ export default function HeroSlidesPage() {
 ```
 
 **Validation Checkpoints**:
+
 - [ ] Server Container uses Suspense with skeleton
 - [ ] Client View implements DnD Kit correctly
 - [ ] Drag handle has proper ARIA labels
@@ -1812,6 +1843,7 @@ export default function HeroSlidesPage() {
 **Goal**: Create single-record editor for about content
 
 **Design Guidelines**:
+
 - Use shadcn/ui components installed via MCP for consistency
 - Apply `rouge-cardinal-frontend-skill.instructions.md` for production-grade design
 - Implement sophisticated form layouts reflecting brand identity
@@ -2127,6 +2159,7 @@ export default function AboutContentPage() {
 ```
 
 **Validation Checkpoints**:
+
 - [ ] Server Container uses Suspense
 - [ ] Form uses React Hook Form + Zod
 - [ ] Character counters for all text fields
@@ -2165,6 +2198,7 @@ export default function AboutContentPage() {
 ```
 
 **Validation Checkpoints**:
+
 - [ ] Menu items added under "Homepage" section
 - [ ] Proper icons imported (Home, Image, FileText)
 - [ ] URLs match route structure
@@ -2262,6 +2296,7 @@ export class HeroSlidesErrorBoundary extends Component<Props, State> {
 ```
 
 **Validation Checkpoints**:
+
 - [ ] Debounce hook created for reorder operations
 - [ ] Error boundary catches runtime errors
 - [ ] User-friendly error messages
@@ -2417,6 +2452,7 @@ runTests();
 #### Manual Testing Checklist
 
 **Hero Slides**:
+
 - [ ] Create new slide with all fields
 - [ ] Create slide with only required fields
 - [ ] Upload image from media library
@@ -2429,6 +2465,7 @@ runTests();
 - [ ] Verify revalidation after mutations
 
 **About Section**:
+
 - [ ] Edit all text fields
 - [ ] Test character counters
 - [ ] Upload section image
@@ -2436,6 +2473,7 @@ runTests();
 - [ ] Verify revalidation
 
 **Browser Testing**:
+
 - [ ] Chrome (desktop)
 - [ ] Firefox (desktop)
 - [ ] Safari (desktop)
@@ -2445,6 +2483,7 @@ runTests();
 - [ ] Screen reader compatibility
 
 **Validation Checkpoints**:
+
 - [ ] Test script created and executable
 - [ ] Manual testing checklist completed
 - [ ] Cross-browser testing performed
@@ -2459,6 +2498,7 @@ runTests();
 #### Planned Features
 
 **Audit Logging**:
+
 ```typescript
 // Future: Track all homepage content changes
 interface AuditLog {
@@ -2474,6 +2514,7 @@ interface AuditLog {
 ```
 
 **Content Versioning**:
+
 ```typescript
 // Future: Version history for rollback capability
 interface ContentVersion {
@@ -2488,6 +2529,7 @@ interface ContentVersion {
 ```
 
 **Advanced Features**:
+
 - [ ] Scheduled publishing (publish_at, unpublish_at)
 - [ ] A/B testing for hero slides (split traffic)
 - [ ] Analytics integration (click tracking, view counts)
@@ -2500,6 +2542,7 @@ interface ContentVersion {
 - [ ] Bulk operations (delete multiple, reorder with drag-select)
 
 **Performance Optimizations**:
+
 - [ ] Implement optimistic UI updates
 - [ ] Add infinite scroll for large slide lists
 - [ ] Cache frequently accessed content
@@ -2507,12 +2550,14 @@ interface ContentVersion {
 - [ ] Add request deduplication
 
 **Mobile Responsive Improvements**:
+
 - [ ] Touch-friendly drag handles
 - [ ] Swipe gestures for reorder
 - [ ] Mobile-optimized form layouts
 - [ ] Progressive image loading
 
 **Validation Checkpoints**:
+
 - [ ] Future features documented
 - [ ] Technical feasibility assessed
 - [ ] Priority assigned to each feature

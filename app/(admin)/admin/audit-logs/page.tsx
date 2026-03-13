@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { AuditLogsContainer } from "@/components/features/admin/audit-logs/AuditLogsContainer";
 import { AuditLogsSkeleton } from "@/components/features/admin/audit-logs/AuditLogsSkeleton";
+import { requireAdminPageAccess } from "@/lib/auth/roles";
 
 export const metadata = {
     title: "Audit Logs | Admin",
@@ -15,6 +16,8 @@ interface AuditLogsPageProps {
 }
 
 export default async function AuditLogsPage({ searchParams }: AuditLogsPageProps) {
+    await requireAdminPageAccess();
+
     const params = await searchParams;
     
     return (

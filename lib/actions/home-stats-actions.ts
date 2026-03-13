@@ -13,6 +13,7 @@ import {
     deleteHomeStat,
     reorderHomeStats,
 } from "@/lib/dal/admin-home-stats";
+import { requireMinRole } from "@/lib/auth/roles";
 
 // =============================================================================
 // HOME STATS ACTIONS
@@ -25,6 +26,8 @@ export async function createHomeStatAction(
     input: unknown
 ): Promise<ActionResult> {
     try {
+        await requireMinRole("editor");
+
         const validated = await HomeStatInputSchema.parseAsync(input);
         const result = await createHomeStat(validated);
 
@@ -52,6 +55,8 @@ export async function updateHomeStatAction(
     input: unknown
 ): Promise<ActionResult> {
     try {
+        await requireMinRole("editor");
+
         const validated = await HomeStatInputSchema.partial().parseAsync(input);
         const result = await updateHomeStat(BigInt(id), validated);
 
@@ -78,6 +83,8 @@ export async function deleteHomeStatAction(
     id: string
 ): Promise<ActionResult> {
     try {
+        await requireMinRole("editor");
+
         const result = await deleteHomeStat(BigInt(id));
 
         if (!result.success) {
@@ -103,6 +110,8 @@ export async function reorderHomeStatsAction(
     input: unknown
 ): Promise<ActionResult> {
     try {
+        await requireMinRole("editor");
+
         const validated = await ReorderHomeStatsSchema.parseAsync(input);
         const result = await reorderHomeStats(validated);
 

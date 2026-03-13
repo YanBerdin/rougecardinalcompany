@@ -43,34 +43,34 @@ alter table public.compagnie_presentation_sections enable row level security;
 drop policy if exists "Active presentation sections are viewable by everyone" on public.compagnie_presentation_sections;
 drop policy if exists "Admins can view all presentation sections" on public.compagnie_presentation_sections;
 
-create policy "View presentation sections (public active OR admin all)"
+create policy "View presentation sections (public active OR editor+ all)"
   on public.compagnie_presentation_sections for select
   to anon, authenticated
   using (
     active = true
-    or (select public.is_admin())
+    or (select public.has_min_role('editor'))
   );
 
--- Écriture réservée admin
--- Gestion admin (politiques granulaires)
+-- Écriture réservée editor+
+-- Gestion editor+ (politiques granulaires)
 drop policy if exists "Admins can insert compagnie presentation sections" on public.compagnie_presentation_sections;
-create policy "Admins can insert compagnie presentation sections"
+create policy "Editors+ can insert compagnie presentation sections"
   on public.compagnie_presentation_sections for insert
   to authenticated
-  with check ( (select public.is_admin()) );
+  with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can update compagnie presentation sections" on public.compagnie_presentation_sections;
-create policy "Admins can update compagnie presentation sections"
+create policy "Editors+ can update compagnie presentation sections"
   on public.compagnie_presentation_sections for update
   to authenticated
-  using ( (select public.is_admin()) )
-  with check ( (select public.is_admin()) );
+  using ( (select public.has_min_role('editor')) )
+  with check ( (select public.has_min_role('editor')) );
 
 drop policy if exists "Admins can delete compagnie presentation sections" on public.compagnie_presentation_sections;
-create policy "Admins can delete compagnie presentation sections"
+create policy "Editors+ can delete compagnie presentation sections"
   on public.compagnie_presentation_sections for delete
   to authenticated
-  using ( (select public.is_admin()) );
+  using ( (select public.has_min_role('editor')) );
 
 -- Vue admin déplacée dans 41_views_admin_content_versions.sql (dépend de content_versions)
 

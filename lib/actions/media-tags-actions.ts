@@ -21,6 +21,7 @@ import {
     type MediaTagInput,
     type MediaTagDTO,
 } from "@/lib/schemas/media";
+import { requireMinRole } from "@/lib/auth/roles";
 
 export type MediaTagActionResult =
     | { success: true; data: MediaTagDTO }
@@ -35,6 +36,8 @@ export type MediaTagsListResult =
  */
 export async function listMediaTagsAction(): Promise<MediaTagsListResult> {
     try {
+        await requireMinRole("editor");
+
         const result = await listMediaTags();
 
         if (!result.success) {
@@ -58,6 +61,8 @@ export async function getMediaTagByIdAction(
     id: number
 ): Promise<MediaTagActionResult> {
     try {
+        await requireMinRole("editor");
+
         const result = await getMediaTagById(BigInt(id));
 
         if (!result.success) {
@@ -85,6 +90,8 @@ export async function createMediaTagAction(
     input: unknown
 ): Promise<MediaTagActionResult> {
     try {
+        await requireMinRole("editor");
+
         // Validation with Zod
         const validated: MediaTagInput = MediaTagInputSchema.parse(input);
 
@@ -124,6 +131,8 @@ export async function updateMediaTagAction(
     input: unknown
 ): Promise<MediaTagActionResult> {
     try {
+        await requireMinRole("editor");
+
         // Validation with Zod (partial)
         const validated = MediaTagInputSchema.partial().parse(input);
 
@@ -158,6 +167,8 @@ export async function deleteMediaTagAction(
     id: number
 ): Promise<{ success: true } | { success: false; error: string }> {
     try {
+        await requireMinRole("editor");
+
         const result = await deleteMediaTag(BigInt(id));
 
         if (!result.success) {
@@ -182,6 +193,8 @@ export async function deleteMediaTagAction(
 export async function deleteMediaTagWithRedirectAction(
     id: number
 ): Promise<void> {
+    await requireMinRole("editor");
+
     const result = await deleteMediaTagAction(id);
 
     if (!result.success) {

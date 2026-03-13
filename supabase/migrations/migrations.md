@@ -4,6 +4,194 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-03-13 - FIX: Couverture audit complète des tables tags / junction tables
+
+2 migrations déployées pour couvrir `media_tags` et les 4 tables de jonction tags manquantes dans le trigger `trg_audit`.
+
+#### fix(audit) — `trg_audit` sur `media_tags`
+
+**Migration** : `20260313010000_add_audit_trigger_to_media_tags.sql`
+**Schéma déclaratif synchronisé** : ✅ `supabase/schemas/30_triggers.sql`
+
+**Problème** : La table `media_tags` (tags spécifiques aux médias : slug, couleur, description) était absente de l'array `audit_tables`. Les opérations d'un éditeur sur ces tags n'apparaissaient donc pas dans `logs_audit`.
+
+**Fix** : Ajout de `trg_audit` (AFTER INSERT OR UPDATE OR DELETE) sur `public.media_tags` + synchronisation du schéma déclaratif.
+
+#### fix(audit) — `trg_audit` sur les 4 tables de jonction tags
+
+**Migration** : `20260313020000_add_audit_trigger_to_junction_tag_tables.sql`
+**Schéma déclaratif synchronisé** : ✅ `supabase/schemas/30_triggers.sql`
+
+**Tables couvertes** :
+
+| Table | Colonnes | Trigger existant avant |
+| ----- | -------- | ---------------------- |
+| `public.articles_tags` | `article_id`, `tag_id` | `trg_articles_tags_usage_count` |
+| `public.communiques_tags` | `communique_id`, `tag_id` | `trg_communiques_tags_usage_count` |
+| `public.media_item_tags` | `media_id`, `tag_id`, `created_at` | — |
+| `public.spectacles_tags` | `spectacle_id`, `tag_id` | `trg_spectacles_tags_usage_count` |
+
+**Exclusion** : `popular_tags` est une **VIEW** — les triggers ne peuvent pas être attachés à une vue.
+
+**Notes techniques** :
+
+- Migration idempotente via `DROP TRIGGER IF EXISTS` avant chaque `CREATE`
+- Les triggers `usage_count` existants ne sont pas affectés
+- Seul `trg_audit` est ajouté (pas de `updated_at` — ces tables de jonction n'ont pas de colonne `updated_at`)
+- Application : ✅ Appliquée via `mcp_supabase_apply_migration` le 2026-03-13
+
+---
+
+### 2026-03-13 - FEAT: Extension triggers audit et updated_at — TASK076
+
+1 migration déployée pour étendre la couverture des triggers `trg_audit` et `trg_update_updated_at` à 9 tables supplémentaires précédemment non couvertes.
+
+#### feat(trigger) — Extension `trg_audit` + `trg_update_updated_at` à 9 tables
+
+**Migration** : `20260313120000_extend_audit_and_updated_at_triggers.sql`
+**Schéma déclaratif synchronisé** : ✅ `supabase/schemas/30_triggers.sql`
+
+**Tables couvertes (3 tiers de priorité)** :
+
+| Priorité | Tables |
+| ---------- | -------- |
+| 🔴 CRITIQUE — sécurité | `public.user_invitations`, `public.pending_invitations` |
+| 🟠 HAUTE — contenu public | `public.home_hero_slides`, `public.compagnie_presentation_sections`, `public.compagnie_values`, `public.compagnie_stats` |
+| 🟡 MOYENNE — taxonomie | `public.categories`, `public.tags`, `public.media_folders` |
+
+**Notes techniques** :
+
+- `public.user_invitations` n'a pas de colonne `updated_at` → seul `trg_audit` appliqué
+- Les 8 autres tables reçoivent les deux triggers (`trg_audit` + `trg_update_updated_at`)
+- Migration idempotente via `DROP TRIGGER IF EXISTS` avant chaque `CREATE`
+- Exclusions délibérées : `content_versions` (traçabilité native), tables de liaison, `analytics_events` et `logs_audit` (haut volume / récursion)
+
+**Application** : ✅ Appliquée via `pnpm dlx supabase db push --linked` le 2026-03-13
+
+---
+
+### 2026-03-12 - FIX: Attribution audit "Système" pour les utilisateurs créés par admin
+
+3 migrations déployées pour corriger l'attribution "Système" dans les logs d'audit lors de la création d'utilisateurs par un admin.
+
+#### fix(trigger) — Correct fix : flag `_admin_managed` dans `handle_new_user()`
+
+**Migration** : `20260312140000_fix_handle_new_user_admin_managed_flag.sql`
+**Schéma déclaratif synchronisé** : ✅ `supabase/schemas/21_functions_auth_sync.sql`
+
+**Problème** : Le trigger `handle_new_user()` (SECURITY DEFINER) s'exécute avec `auth.uid() = NULL` → le trigger d'audit ne capturait pas l'UUID de l'admin, affichant "Système" dans les logs.
+
+**Mécanisme** : `generateLink` embed `_admin_managed: "true"` dans `raw_user_meta_data` → le trigger détecte le flag et retourne `NEW` sans INSERT → `createUserProfileWithRole(supabase, ...)` fait l'INSERT avec le client authentifié → le `audit_trigger` capture le vrai UUID admin.
+
+```sql
+-- Vérification dans handle_new_user()
+if (new.raw_user_meta_data->>'_admin_managed') = 'true' then
+  return new;
+end if;
+```
+
+#### fix(trigger) — Tentative 1 : vérification `invited_at` dans `handle_new_user()` ⚠️ supersédée
+
+**Migration** : `20260312130000_skip_profile_trigger_for_invited_users.sql`
+**Statut** : ⚠️ Supersédée par `20260312140000`
+
+**Pourquoi échoue** : `generateLink` via Supabase Admin SDK alimente `invited_at = NULL` au moment de l'INSERT dans `auth.users`. La valeur est définie ultérieurement (lors de l'acceptation de l'invitation), donc le flag `invited_at IS NOT NULL` n'est pas disponible au moment du trigger.
+
+#### fix(rls) — Policy DELETE profiles manquante pour les admins
+
+**Migration** : `20260312120000_fix_profiles_delete_rls_for_admins.sql`
+**Schéma déclaratif synchronisé** : ✅ `supabase/schemas/60_rls_profiles.sql`
+
+**Problème** : Pour capturer l'UUID admin dans l'audit lors d'une suppression, le DAL effectue d'abord la suppression du profil avec le client authentifié. Mais la policy RLS DELETE ne l'autorisait que pour `user_id = auth.uid()` → erreur 403 pour l'admin.
+
+**Correction** :
+
+```sql
+create policy "Admins can delete any profile" on public.profiles
+for delete
+to authenticated
+using (
+  (select auth.uid()) = user_id
+  or (select public.is_admin()) = true
+);
+```
+
+**Application** : ✅ Appliquées via `pnpm dlx supabase db push --linked` le 2026-03-12
+
+---
+
+### 2026-03-11 - FEAT: Permissions hiérarchiques rôle éditeur (user < editor < admin)
+
+3 migrations déployées en cloud pour implémenter les permissions granulaires du rôle éditeur.
+
+#### feat(db) — Fonction SQL `has_min_role(required_role text)`
+
+**Migration** : `20260311030000_create_has_min_role_function.sql`
+**Schéma déclaratif synchronisé** : ✅ `supabase/schemas/02b_functions_core.sql`
+
+**Contexte** :
+Prérequis pour le déploiement cloud. Le schéma déclaratif local créait déjà `has_min_role()`, mais le cloud n'avait pas cette fonction. Les migrations RLS/Storage (ci-dessous) dépendant de cette fonction, une migration dédiée a été créée en amont.
+
+**Détails** :
+
+```sql
+-- Fonction hiérarchique : user(0) < editor(1) < admin(2)
+create or replace function public.has_min_role(required_role text)
+returns boolean
+language plpgsql
+security invoker
+set search_path = ''
+stable
+as $$
+declare
+  user_role text;
+  role_level int;
+  required_level int;
+begin
+  user_role := coalesce(
+    ((select auth.jwt()) -> 'app_metadata' ->> 'role'),
+    'user'
+  );
+  -- ... mapping vers niveaux numériques et comparaison
+  return role_level >= required_level;
+end;
+$$;
+```
+
+#### feat(db) — Politiques stockage bucket `medias` pour éditeur
+
+**Migration** : `20260311030511_editor_storage_policies.sql`
+**Schéma déclaratif synchronisé** : ✅ `supabase/schemas/70_storage_policies.sql` (nouveau fichier)
+
+**Contexte** :
+Remplacement des policies `storage.objects` du bucket `medias` avec `has_min_role('editor')` au lieu de `is_admin()`, permettant aux éditeurs d'uploader, modifier et supprimer des fichiers médias.
+
+**Correction** :
+
+```sql
+-- ❌ AVANT
+using ( (select public.is_admin()) )
+
+-- ✅ APRÈS
+using ( (select public.has_min_role('editor')) )
+```
+
+#### feat(db) — Politiques RLS éditoriales migrées vers `has_min_role('editor')`
+
+**Migration** : `20260311120000_editor_role_rls_policies.sql`
+**Schéma déclaratif synchronisé** : ✅ `supabase/schemas/61_rls_main_tables.sql`, `supabase/schemas/62_rls_advanced_tables.sql`
+
+**Contexte** :
+~60 `ALTER POLICY` pour migrer les tables éditoriales (spectacles, événements, médias, hero slides, etc.) de `is_admin()` vers `has_min_role('editor')`, tout en conservant `is_admin()` sur les tables admin-only (membres_equipe, audit_logs, configurations_site, etc.).
+
+**Tables migrées** : `spectacles`, `evenements`, `spectacle_versions`, `media`, `media_tags`, `media_folders`, `hero_slides`, `partenaires`, `communiques_presse`, `articles_presse`, `photos_spectacle`, `saisons`
+
+**Tables restées admin-only** : `membres_equipe`, `audit_logs`, `configurations_site`, `contacts_presse`, `newsletter_subscribers`, `compagnie_presentation_sections`
+
+**Application** : ✅ Appliquées via `pnpm dlx supabase db push --linked` le 2026-03-11
+
+---
+
 ### 2026-03-10 - BUGFIX: 4 violations RLS (RESTRICTIVE, super_admin mort, subquery inline, InviteUserForm)
 
 #### fix(rls) — P0: Policy AS RESTRICTIVE bloquant les articles de presse pour les authenticated non-admins
@@ -1906,6 +2094,20 @@ pnpm add next@16.0.7
 - `20251126001251_add_alt_text_to_home_hero_slides.sql` — **A11Y + CRUD : Hero Slides enhancements**
 
 ---
+
+## Migrations récentes (mars 2026)
+
+- `20260313120000_extend_audit_and_updated_at_triggers.sql` — **TASK076 : Couverture triggers audit étendue à 9 tables**
+  - 🎯 **Objectif** : Ajouter `trg_audit` et `trg_update_updated_at` aux tables créées sans ces triggers
+  - **Tables ajoutées** :
+    - 🔴 `user_invitations` — sécurité critique (invited_by + role assigné), audit seulement (pas d'updated_at)
+    - 🔴 `pending_invitations` — file d'attente retry emails, transitions d'état
+    - 🟠 `home_hero_slides`, `compagnie_presentation_sections`, `compagnie_values`, `compagnie_stats` — cohérence avec home_about_content déjà audité
+    - 🟡 `categories`, `tags` — taxonomy structure tout le contenu audité
+    - 🟡 `media_folders` — structure médiathèque
+  - **Pattern** : `drop trigger if exists` + `create trigger` (idempotent)
+  - ✅ **Intégré au schéma déclaratif** : `supabase/schemas/30_triggers.sql` (mis à jour simultanément)
+  - 📝 **Conservation** : Migration manuelle nécessaire (hotfix workflow) — schéma est la source de vérité
 
 ## Migrations récentes (février 2026)
 

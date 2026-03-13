@@ -4,7 +4,7 @@ import { createClient } from "@/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { HeroSlideInput, HeroSlideDTO, ReorderInput } from "@/lib/schemas/home-content";
 import { HeroSlideInputSchema, ReorderInputSchema } from "@/lib/schemas/home-content";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireAdminOnly } from "@/lib/auth/roles";
 import { type DALResult, generateSlug } from "@/lib/dal/helpers";
 
 // =============================================================================
@@ -85,7 +85,7 @@ async function generateUniqueSlugExcluding(
  */
 export async function fetchAllHeroSlides(): Promise<DALResult<HeroSlideDTO[]>> {
     try {
-        await requireAdmin();
+        await requireAdminOnly();
 
         const supabase = await createClient();
         const { data, error } = await supabase
@@ -121,7 +121,7 @@ export async function fetchHeroSlideById(
     id: number
 ): Promise<DALResult<HeroSlideDTO | null>> {
     try {
-        await requireAdmin();
+        await requireAdminOnly();
 
         const supabase = await createClient();
         const { data, error } = await supabase
@@ -161,7 +161,7 @@ export async function createHeroSlide(
     input: HeroSlideInput
 ): Promise<DALResult<HeroSlideDTO>> {
     try {
-        await requireAdmin();
+        await requireAdminOnly();
 
         const validated = await HeroSlideInputSchema.parseAsync(input);
 
@@ -210,7 +210,7 @@ export async function updateHeroSlide(
     input: Partial<HeroSlideInput>
 ): Promise<DALResult<HeroSlideDTO>> {
     try {
-        await requireAdmin();
+        await requireAdminOnly();
 
         const validated = await HeroSlideInputSchema.partial().parseAsync(input);
 
@@ -288,7 +288,7 @@ export async function updateHeroSlide(
  */
 export async function deleteHeroSlide(id: number): Promise<DALResult<null>> {
     try {
-        await requireAdmin();
+        await requireAdminOnly();
 
         const supabase = await createClient();
 
@@ -325,7 +325,7 @@ export async function reorderHeroSlides(
     order: ReorderInput
 ): Promise<DALResult<null>> {
     try {
-        await requireAdmin();
+        await requireAdminOnly();
 
         const validated = ReorderInputSchema.parse(order);
 

@@ -59,6 +59,7 @@ export {
 ### Fichiers consommateurs
 
 1. ✅ **`lib/actions/newsletter-server.ts`** (ligne 4) — Seul import direct
+
    ```typescript
    import { NewsletterSubscriptionSchema } from "@/lib/schemas/contact";
    ```
@@ -68,7 +69,7 @@ export {
    - **Aucune modification requise**
 
 3. ✅ **`app/actions/newsletter.actions.ts`** — Pas d'import direct
-   - Utilise `handleNewsletterSubscription()` 
+   - Utilise `handleNewsletterSubscription()`
    - **Aucune modification requise**
 
 ---
@@ -98,6 +99,7 @@ export type NewsletterSubscription = z.infer<
 ```
 
 **Checklist :**
+
 - [ ] Créer `lib/schemas/newsletter.ts`
 - [ ] Copier schéma exact depuis `contact.ts` (avec `.default()`)
 - [ ] Vérifier formatage (ESLint/Prettier)
@@ -143,6 +145,7 @@ export {
 ```
 
 **Checklist :**
+
 - [ ] Retirer `NewsletterSubscriptionSchema` et `type NewsletterSubscription` de l'export `./contact`
 - [ ] Ajouter nouvel export depuis `./newsletter`
 - [ ] Maintenir l'ordre alphabétique (Newsletter avant Presse)
@@ -170,6 +173,7 @@ import { NewsletterSubscriptionSchema } from "@/lib/schemas/newsletter";
 ```
 
 **Checklist :**
+
 - [ ] Mettre à jour import dans `newsletter-server.ts`
 - [ ] Vérifier `api/newsletter/route.ts` (pas de changement attendu)
 
@@ -197,6 +201,7 @@ export type NewsletterSubscription = z.infer<
 ```
 
 **Checklist :**
+
 - [ ] Supprimer le bloc NEWSLETTER SUBSCRIPTION SCHEMA (lignes 65-77)
 - [ ] Vérifier que le fichier reste valide (ContactMessageSchema, ContactEmailSchema restent)
 
@@ -218,6 +223,7 @@ pnpm build
 ```
 
 **Checklist :**
+
 - [ ] `tsc --noEmit` → 0 erreurs
 - [ ] `pnpm lint` → 0 erreurs
 - [ ] `pnpm build` → Succès
@@ -240,6 +246,7 @@ curl -X POST http://localhost:3000/api/newsletter \
 ```
 
 **Résultat attendu :**
+
 ```json
 {"status":"subscribed"}
 ```
@@ -288,6 +295,7 @@ pnpm exec tsx scripts/test-newsletter-recursion-fix-direct.ts
 ```
 
 **Checklist Tests :**
+
 - [ ] Schema validation fonctionne (email valide/invalide)
 - [ ] Defaults appliqués correctement (`consent: true`, `source: "website"`)
 - [ ] API `/api/newsletter` répond correctement
@@ -449,6 +457,7 @@ git commit -m "refactor(schemas): remove newsletter schema from contact.ts
 ## 🎯 Résultat attendu
 
 **Avant :**
+
 ```bash
 lib/schemas/
 ├── contact.ts (ContactMessage + Newsletter ❌)
@@ -458,6 +467,7 @@ lib/schemas/
 ```
 
 **Après :**
+
 ```bash
 lib/schemas/
 ├── contact.ts (ContactMessage uniquement ✅)

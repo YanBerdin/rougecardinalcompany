@@ -14,6 +14,7 @@ Créer un composant générique qui encapsule `MediaLibraryPicker` + `validateIm
 | `AboutContentForm.tsx` | ✅ Oui | ❌ Non | ✅ Oui |
 
 **Problèmes identifiés** :
+
 - `SpectacleForm` : vulnérabilité SSRF potentielle (URL directe sans validation complète)
 - `TeamMemberForm` : aucune validation SSRF
 - Duplication de code entre les 4 formulaires

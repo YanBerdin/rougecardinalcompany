@@ -3,6 +3,7 @@
 ## Objectif
 
 Aligner TASK030 Display Toggles avec l'Epic 14.7-back-office.md :
+
 - Supprimer les toggles compagnie (non présents dans l'Epic)
 - Ajouter les toggles Epic manquants (À la Une, Partenaires, Newsletter ×3)
 - Implémenter le formulaire newsletter inline sur Agenda
@@ -17,6 +18,7 @@ Aligner TASK030 Display Toggles avec l'Epic 14.7-back-office.md :
 **Erreur identifiée** : Le plan initial mentionnait 3 toggles compagnie à supprimer, mais ces clés **n'ont jamais été créées** par le seed initial `20260101160100_seed_display_toggles.sql`.
 
 **Clés supposées à SUPPRIMER (❌ ERREUR - n'ont jamais existé)** :
+
 | Key | Status |
 |-----|--------|
 | ~~`display_toggle_compagnie_values`~~ | ❌ Jamais créé |
@@ -26,6 +28,7 @@ Aligner TASK030 Display Toggles avec l'Epic 14.7-back-office.md :
 **Impact** : La migration cleanup `20260101170000` contenait des DELETE pour ces clés inexistantes (0 rows affected, aucun impact fonctionnel).
 
 **Corrections appliquées** :
+
 1. Migration `20260101180000_fix_cleanup_display_toggles_no_compagnie.sql` (documentation + verification)
 2. Fix UI admin (1er janvier 2026) : Ajout des sections Agenda et Contact manquantes dans l'interface Display Toggles
    - `types.ts` : Props `agendaToggles` + `contactToggles`
@@ -33,6 +36,7 @@ Aligner TASK030 Display Toggles avec l'Epic 14.7-back-office.md :
    - `DisplayTogglesView.tsx` : Ajout des sections "Page Agenda" et "Page Contact"
 
 ### Toggles existants à CONSERVER (4)
+
 | Key | Section |
 |-----|---------|
 | `display_toggle_home_hero` | Hero homepage |
@@ -45,10 +49,12 @@ Aligner TASK030 Display Toggles avec l'Epic 14.7-back-office.md :
 **Contexte** : Confusion initiale sur la fonction du toggle `display_toggle_presse_articles`.
 
 **Problème identifié** :
+
 - Le toggle `display_toggle_presse_articles` contrôlait la section **Kit Média**, pas les articles/communiqués
 - Besoin d'un toggle séparé pour la section **Communiqués de Presse**
 
 **Solution appliquée** :
+
 1. Migration `20260101220000_fix_presse_toggles.sql` : Transformation des clés legacy
    - `public:presse:media_kit_enabled` → `display_toggle_media_kit` (contrôle Kit Média)
    - `public:presse:communiques_enabled` → `display_toggle_presse_articles` (contrôle Communiqués)
@@ -58,12 +64,14 @@ Aligner TASK030 Display Toggles avec l'Epic 14.7-back-office.md :
    - `scripts/toggle-presse.ts` — Activation/désactivation rapide pour tests
 
 **Toggles Presse finaux** (2 au lieu de 1) :
+
 | Key | Description | Category |
 |-----|-------------|----------|
 | `display_toggle_media_kit` | Afficher la section Kit Média | `presse_display` |
 | `display_toggle_presse_articles` | Afficher la section Communiqués de Presse | `presse_display` |
 
 ### Toggles à CRÉER (5)
+
 | Key | Description | Category |
 |-----|-------------|----------|
 | `display_toggle_home_a_la_une` | À la Une (actualités presse) | `home_display` |
@@ -103,6 +111,7 @@ on conflict (key) do nothing;
 ```
 
 **Commandes** :
+
 ```bash
 # Appliquer localement
 pnpm dlx supabase db reset
@@ -124,6 +133,7 @@ pnpm dlx supabase db push
 **Fichier** : `components/features/public-site/home/news/NewsContainer.tsx`
 
 **Modification** : Ligne 11
+
 ```diff
 - const toggleResult = await fetchDisplayToggle("public:home:news");
 + const toggleResult = await fetchDisplayToggle("display_toggle_home_a_la_une");
@@ -150,6 +160,7 @@ pnpm dlx supabase db push
 ### Phase 6 : Implémenter Agenda Newsletter Inline
 
 #### 6.1 AgendaContainer.tsx
+
 **Ajouter** : Fetch du toggle `display_toggle_agenda_newsletter`
 
 ```typescript
@@ -161,6 +172,7 @@ const showNewsletterSection = newsletterToggleResult.success &&
 **Passer** : `showNewsletterSection` à AgendaClientContainer
 
 #### 6.2 AgendaClientContainer.tsx
+
 **Ajouter** : Hook `useNewsletterSubscribe({ source: "agenda" })`
 
 ```typescript
@@ -174,6 +186,7 @@ const {
 **Passer** : Props newsletter à AgendaView
 
 #### 6.3 AgendaView.tsx
+
 **Remplacer** : Section CTA "Ne Manquez Rien" (lignes 205-226)
 
 ```tsx
@@ -203,6 +216,7 @@ const {
 ### Phase 7 : Implémenter Contact Newsletter Toggle
 
 #### 7.1 ContactServerGate.tsx
+
 **Ajouter** : Fetch du toggle `display_toggle_contact_newsletter`
 
 ```typescript
@@ -214,6 +228,7 @@ const showNewsletter = newsletterToggleResult.success &&
 **Passer** : `showNewsletter` prop à ContactPageView
 
 #### 7.2 ContactPageView.tsx
+
 **Ajouter** : Prop interface
 
 ```typescript
@@ -240,6 +255,7 @@ interface ContactPageViewProps {
 **Fichier** : `supabase/migrations/20260101160100_seed_display_toggles.sql`
 
 **Actions** :
+
 1. Supprimer les INSERT compagnie (lignes 93-107)
 2. Supprimer les commentaires compagnie (lignes 23-25)
 3. Ajouter les 5 nouveaux toggles Epic
@@ -251,9 +267,11 @@ interface ContactPageViewProps {
 Les anciennes clés `public:compagnie:*` sont référencées dans 2 fichiers à nettoyer :
 
 #### 9.1 site-config-actions.ts
+
 **Fichier** : `lib/actions/site-config-actions.ts`
 
 **Action** : Supprimer les entrées compagnie du pathMap (lignes 51-52)
+
 ```diff
   const pathMap: Record<string, string[]> = {
       "public:home:newsletter": ["/"],
@@ -267,9 +285,11 @@ Les anciennes clés `public:compagnie:*` sont référencées dans 2 fichiers à 
 ```
 
 #### 9.2 ToggleCard.tsx
+
 **Fichier** : `components/features/admin/site-config/ToggleCard.tsx`
 
 **Action** : Supprimer les entrées compagnie du names map (lignes 48-49)
+
 ```diff
   const names: Record<string, string> = {
       "public:home:newsletter": "Newsletter",
@@ -288,10 +308,11 @@ Les anciennes clés `public:compagnie:*` sont référencées dans 2 fichiers à 
 
 **Fichier** : `.github/prompts/plan-TASK030:-Display Toggles/plan-TASK030:-Display Toggles.prompt.md`
 
-**Action** : Ce fichier contient l'ancien plan avec les clés `public:compagnie:*`. 
+**Action** : Ce fichier contient l'ancien plan avec les clés `public:compagnie:*`.
 Options :
+
 1. **Supprimer** le dossier entier (si obsolète)
-2. **Archiver** vers `doc/deprecated/` 
+2. **Archiver** vers `doc/deprecated/`
 3. **Conserver** comme historique (ajouter un avertissement en haut)
 
 **Recommandation** : Supprimer le dossier car le nouveau plan `plan-task030DisplayTogglesEpicAlignment.prompt.md` le remplace.
@@ -307,9 +328,11 @@ rm -rf .github/prompts/plan-TASK030:-Display\ Toggles/
 **Contexte** : Le toggle `display_toggle_presse_articles` initial contrôlait en réalité la section Kit Média, pas les communiqués de presse. Cette confusion nécessitait un refactoring pour séparer les deux fonctionnalités.
 
 #### 11.1 Migration fix_presse_toggles
+
 **Fichier** : `supabase/migrations/20260101220000_fix_presse_toggles.sql`
 
 **Action** : Transformer les clés legacy en nouveaux toggles
+
 ```sql
 -- Transform public:presse:media_kit_enabled → display_toggle_media_kit
 update public.configurations_site
@@ -331,14 +354,17 @@ where key = 'public:presse:communiques_enabled';
 ```
 
 **Commande** :
+
 ```bash
 pnpm dlx supabase db push --linked
 ```
 
 #### 11.2 PresseServerGate.tsx
+
 **Fichier** : `components/features/public-site/presse/PresseServerGate.tsx`
 
 **Action** : Utiliser les 2 toggles indépendants
+
 ```typescript
 const [mediaKitToggleResult, pressReleasesToggleResult] = await Promise.all([
   fetchDisplayToggle("display_toggle_media_kit"),
@@ -359,9 +385,11 @@ const [pressReleasesResult, mediaKitResult] = await Promise.all([
 ```
 
 #### 11.3 PresseView.tsx
+
 **Fichier** : `components/features/public-site/presse/PresseView.tsx`
 
 **Action** : Masquer complètement les sections désactivées (y compris titres)
+
 ```tsx
 {/* Communiqués de Presse */}
 {pressReleases.length > 0 && (
@@ -381,11 +409,14 @@ const [pressReleasesResult, mediaKitResult] = await Promise.all([
 ```
 
 #### 11.4 Scripts utilitaires
+
 **Créer** :
+
 1. `scripts/check-presse-toggles.ts` — Vérifier l'état des toggles presse
 2. `scripts/toggle-presse.ts` — Activer/désactiver rapidement pour tests
 
 **Commandes disponibles** :
+
 ```bash
 # Vérifier l'état
 pnpm exec tsx scripts/check-presse-toggles.ts
@@ -474,18 +505,21 @@ pnpm exec tsx scripts/toggle-presse.ts enable-all
 ### Résumé d'implémentation
 
 **Infrastructure (Phases 1-2)** :
+
 - ✅ 5 migrations créées et appliquées (dont 1 fix presse 1er janvier)
 - ✅ 10 display toggles en base de données (9 initiaux + 1 media_kit)
 - ✅ RLS policies configurées (public read, admin write)
 - ✅ Indexes créés pour performance
 
 **Admin UI (Fix UI)** :
+
 - ✅ Route /admin/site-config créée
 - ✅ 5 sections affichées correctement (Home, Compagnie, Presse, Agenda, Contact)
 - ✅ Toggle switches avec Server Actions + revalidation
 - ✅ Fix sections Agenda et Contact manquantes
 
 **Public Site (Phases 3-7)** :
+
 - ✅ NewsContainer utilise display_toggle_home_a_la_une
 - ✅ PartnersContainer utilise display_toggle_home_partners
 - ✅ NewsletterContainer utilise display_toggle_home_newsletter
@@ -493,11 +527,13 @@ pnpm exec tsx scripts/toggle-presse.ts enable-all
 - ✅ ContactContainer avec newsletter card + toggle
 
 **Public Site Presse (Phase 11 - 1er janvier)** :
+
 - ✅ PresseServerGate utilise 2 toggles indépendants (media_kit + presse_articles)
 - ✅ PresseView masque complètement les sections désactivées (titres inclus)
 - ✅ Scripts utilitaires pour tests (check + toggle)
 
 **Cleanup (Phases 8-10)** :
+
 - ✅ Aucune référence public:compagnie:* dans le code
 - ✅ Seed migration correcte (pas d'INSERT compagnie)
 - ✅ Ancien plan supprimé
@@ -505,14 +541,16 @@ pnpm exec tsx scripts/toggle-presse.ts enable-all
 ### État final validé
 
 **Base de données** : 10 display toggles
+
 - 6× home_display (hero, about, spectacles, a_la_une, partners, newsletter)
 - 1× agenda_display (newsletter)
 - 1× contact_display (newsletter)
 - 2× presse_display (media_kit, presse_articles)
 
 **Commits** :
+
 - `b4d92f4` - 35 fichiers modifiés (+1378/-1283 lignes) - TASK030 phases 1-10
-- *(à venir)* - Phase 11 fix presse toggles + masquage sections
+- _(à venir)_ - Phase 11 fix presse toggles + masquage sections
 
 **Documentation** : supabase/schemas/README.md + plan-task030DisplayTogglesEpicAlignment.prompt.md
 

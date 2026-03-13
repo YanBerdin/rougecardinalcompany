@@ -63,6 +63,7 @@ export async function cleanTable(
 ```
 
 Ajouter dans `.env.e2e` :
+
 ```bash
 SUPABASE_SERVICE_ROLE_KEY=your_local_service_role_key
 ```
@@ -74,6 +75,7 @@ SUPABASE_SERVICE_ROLE_KEY=your_local_service_role_key
 ### Patron de base
 
 Chaque factory suit le même contrat :
+
 - `build(overrides?)` → objet en mémoire (pas d'insertion)
 - `create(overrides?)` → insère en base et retourne l'entité créée
 - `createMany(count, overrides?)` → insère N entités

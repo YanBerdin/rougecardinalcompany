@@ -11,6 +11,7 @@ Créer l'interface CRUD admin pour la gestion des événements avec DAL dédié,
 **Cause** : React Server Actions serialisent leur contexte d'exécution. Créer des `BigInt` dans les Server Actions (même temporairement) provoque une erreur de sérialisation.
 
 **Solution finale** :
+
 1. ✅ `ActionResult` simplifié : Ne retourne JAMAIS de data (seulement `{success: true/false}`)
 2. ✅ Validation avec `EventFormSchema` (number IDs) au lieu de `EventInputSchema` (bigint IDs)
 3. ✅ Type `EventDataTransport` pour IDs en string (pas BigInt) avant passage au DAL
@@ -18,6 +19,7 @@ Créer l'interface CRUD admin pour la gestion des événements avec DAL dédié,
 5. ✅ `router.refresh()` côté client pour récupérer les données mises à jour (évite retour de data)
 
 **Pattern flux de données** :
+
 ```bash
 Form (number IDs) → Action (valide + convertit string IDs) → DAL (convertit BigInt en interne) → router.refresh()
 ```
@@ -31,6 +33,7 @@ Voir commit détaillé : `.git-commit-bigint-fix.md`
 **Fichier** : `lib/dal/admin-agenda.ts`
 
 **Directives obligatoires** :
+
 ```typescript
 "use server";
 import "server-only";
@@ -81,9 +84,11 @@ export const fetchAllLieux = cache(async (): Promise<DALResult<LieuDTO[]>> => {
 ```
 
 **Réutilisation existante** :
+
 - `fetchAllSpectacles()` de `lib/dal/spectacles.ts` pour le select spectacles
 
 **Pattern SOLID** :
+
 - ✅ Directive `"use server"` + `import "server-only"`
 - ✅ Retour `DALResult<T>` avec `dalSuccess()` / `dalError()` de `lib/dal/helpers/`
 - ✅ `requireAdmin()` au début de chaque fonction
@@ -167,6 +172,7 @@ export type LieuDTO = {
 ```
 
 **Différences Server vs UI** :
+
 - IDs : `bigint` (server) vs `number` (UI) — évite erreur sérialisation JSON
 - Time : `HH:MM:SS` (server) vs `HH:MM` (UI) — compatible `<input type="time">`
 - Validation messages : Uniquement dans schéma UI pour affichage utilisateur
@@ -347,6 +353,7 @@ export async function deleteEventAction(id: string): Promise<ActionResult> {
 ```
 
 **Règles CRUD Pattern** :
+
 - ✅ Directive `"use server"` + `import "server-only"`
 - ✅ Validation Zod AVANT appel DAL
 - ✅ `revalidatePath()` sur `/admin/agenda` ET `/agenda` (public)
@@ -491,6 +498,7 @@ export default function AgendaLoading() {
 ```
 
 **Pattern Pages Dédiées** :
+
 - ✅ `/new` : Page séparée pour création (UX claire)
 - ✅ `/[id]/edit` : Page séparée pour édition (URL shareable)
 - ✅ Fetching parallèle avec `Promise.all()`
@@ -1170,6 +1178,7 @@ export type { EventDTO, LieuDTO, EventFormValues, SpectacleDTO };
 ```
 
 **Règles Clean Code respectées** :
+
 - ✅ EventForm < 300 lignes (splittage en EventFormFields)
 - ✅ Pattern Smart/Dumb : Container (server) → View (client)
 - ✅ `useEffect()` pour sync état/props (re-render immédiat)
@@ -1187,6 +1196,7 @@ export type { EventDTO, LieuDTO, EventFormValues, SpectacleDTO };
 ## Acceptance Criteria (Phase 1)
 
 ### Fonctionnel
+
 - [ ] Liste des événements dans `/admin/agenda` avec tri par date
 - [ ] Création d'un événement avec validation complète
 - [ ] Édition d'un événement existant (page dédiée `/[id]/edit`)
@@ -1197,6 +1207,7 @@ export type { EventDTO, LieuDTO, EventFormValues, SpectacleDTO };
 - [ ] Navigation sidebar corrigée (`/admin/agenda`)
 
 ### Technique
+
 - [ ] DAL avec directive `"use server"` + `import "server-only"`
 - [ ] Retour `DALResult<T>` cohérent sur toutes les fonctions
 - [ ] Server Actions avec `revalidatePath()` (pas dans DAL)
@@ -1211,6 +1222,7 @@ export type { EventDTO, LieuDTO, EventFormValues, SpectacleDTO };
 - [ ] Error codes tracés `[ERR_AGENDA_XXX]`
 
 ### Tests manuels
+
 - [ ] Création événement → apparaît dans liste
 - [ ] Édition événement → modifications sauvegardées
 - [ ] Suppression événement → disparaît de la liste
@@ -1224,15 +1236,18 @@ export type { EventDTO, LieuDTO, EventFormValues, SpectacleDTO };
 ## Notes
 
 ### Lieux (Phase 2)
+
 En Phase 1, le select lieux utilise les données existantes (lecture seule). Si aucun lieu n'existe en BDD, afficher un message "Aucun lieu disponible". Le CRUD Lieux complet sera implémenté en Phase 2.
 
 ### Dépendances existantes
+
 - Tables `evenements`, `lieux_evenements`, `spectacles` ✅
 - RLS policies admin (`is_admin()`) ✅
 - Media Library pour images ✅
 - Pattern CRUD Server Actions documenté ✅
 
 ### Fichiers de référence
+
 - **DAL pattern** : `lib/dal/spectacles.ts` (structure SOLID)
 - **Actions pattern** : `app/(admin)/admin/spectacles/actions.ts` (revalidatePath)
 - **Form pattern** : `components/features/admin/spectacles/SpectacleForm.tsx` (< 300 lignes)

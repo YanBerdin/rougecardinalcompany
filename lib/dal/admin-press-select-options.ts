@@ -3,7 +3,7 @@ import "server-only";
 
 import { cache } from "react";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireAdminOnly } from "@/lib/auth/roles";
 import { dalSuccess, dalError, type DALResult } from "@/lib/dal/helpers";
 import { type SelectOptionDTO } from "@/lib/schemas/press-release";
 
@@ -12,7 +12,7 @@ import { type SelectOptionDTO } from "@/lib/schemas/press-release";
  */
 export const fetchSpectaclesForSelect = cache(
     async (): Promise<DALResult<SelectOptionDTO[]>> => {
-        await requireAdmin();
+        await requireAdminOnly();
 
         const supabase = await createClient();
         const { data, error } = await supabase
@@ -39,7 +39,7 @@ export const fetchSpectaclesForSelect = cache(
  */
 export const fetchEvenementsForSelect = cache(
     async (): Promise<DALResult<SelectOptionDTO[]>> => {
-        await requireAdmin();
+        await requireAdminOnly();
 
         const supabase = await createClient();
         const { data, error } = await supabase

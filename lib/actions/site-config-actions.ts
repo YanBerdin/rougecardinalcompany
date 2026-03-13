@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { updateDisplayToggle } from "@/lib/dal/site-config";
 import { DisplayToggleFormSchema } from "@/lib/schemas/site-config";
 import type { ActionResult } from "./types";
+import { requireAdminOnly } from "@/lib/auth/roles";
 
 /**
  * Update display toggle action
@@ -13,6 +14,8 @@ export async function updateDisplayToggleAction(
     input: unknown
 ): Promise<ActionResult<{ key: string }>> {
     try {
+        await requireAdminOnly();
+
         // 1. Validation UI schema
         const validated = DisplayToggleFormSchema.parse(input);
 

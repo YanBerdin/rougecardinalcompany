@@ -1,3 +1,14 @@
+/**
+ * @deprecated — This entire module is deprecated and has ZERO imports.
+ * All auth guards now live in `@/lib/auth/roles` (hierarchical role model).
+ *
+ * Replacement mapping:
+ *  - isAdmin()                → getCurrentUserRole() + isRoleAtLeast()
+ *  - requireAdmin()           → requireAdminOnly()
+ *  - requireAdminPageAccess() → requireAdminPageAccess() from roles.ts
+ *
+ * Safe to delete once confirmed no external consumers exist.
+ */
 "use server";
 import "server-only";
 import { redirect } from "next/navigation";
@@ -5,6 +16,7 @@ import { createClient } from "@/supabase/server";
 
 /**
  * Return true if current session user is admin.
+ * @deprecated Use `getCurrentUserRole()` + `isRoleAtLeast()` from `@/lib/auth/roles` instead.
  */
 export async function isAdmin(): Promise<boolean> {
   const supabase = await createClient();
@@ -41,6 +53,7 @@ export async function isAdmin(): Promise<boolean> {
 
 /**
  * Require admin, throw if not.
+ * @deprecated Use `requireAdminOnly()` from `@/lib/auth/roles` instead.
  */
 export async function requireAdmin(): Promise<void> {
   const ok = await isAdmin();
@@ -54,6 +67,7 @@ export async function requireAdmin(): Promise<void> {
  * then falls back to `user_metadata.role` for backward compatibility.
  * Redirects to /auth/login if not authenticated or not admin.
  *
+ * @deprecated Use `requireAdminPageAccess()` from `@/lib/auth/roles` instead.
  * @example
  * await requireAdminPageAccess();
  */

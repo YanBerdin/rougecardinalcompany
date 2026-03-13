@@ -13,6 +13,7 @@
 Créer une interface admin complète pour consulter, filtrer et exporter les logs d'audit système. La table `logs_audit` existe déjà avec 14 triggers actifs sur les tables critiques.
 
 **Implementation Notes:**
+
 - All 6 phases completed successfully
 - Migration deployed to cloud and verified
 - CSV export fixed with pagination (respects 100-row limit per request)
@@ -54,6 +55,7 @@ Database Layer
 ```
 
 **Key Implementation Details:**
+
 - URL-based filter state (searchParams) for SSR compatibility
 - Skeleton loader with 800ms initial delay + 500ms on refresh
 - CSV export uses batched requests (100 rows/page) to respect Zod validation
@@ -73,6 +75,7 @@ pnpm dlx shadcn@latest add calendar pagination popover
 ```
 
 **Notes:**
+
 - All dependencies installed successfully
 - Pre-existing calendar CSS syntax error fixed (`--spacing(8)` → `2rem`)
 - Popover added to dependencies list (required for DateRangePicker)
@@ -1333,27 +1336,32 @@ import { ScrollText } from "lucide-react";
 ## ✅ Implementation Checklist
 
 ### Phase 0 - Prérequis
+
 - [ ] Installer `csv-stringify` et `react18-json-view`
 - [ ] Installer composants shadcn `calendar` et `pagination`
 - [ ] Créer `components/ui/date-range-picker.tsx`
 
 ### Phase 1 - Database
+
 - [ ] Créer schéma déclaratif `supabase/schemas/20_audit_logs_retention.sql`
 - [ ] Créer RPC `supabase/schemas/42_rpc_audit_logs.sql`
 - [ ] Générer migration (`pnpm dlx supabase db diff -f audit_logs_retention`)
 - [ ] Appliquer (`pnpm dlx supabase start`)
 
 ### Phase 2 - Backend
+
 - [ ] Créer `lib/schemas/audit-logs.ts`
 - [ ] Créer `lib/dal/audit-logs.ts`
 - [ ] Créer `app/(admin)/admin/audit-logs/actions.ts`
 
 ### Phase 3 - Frontend
+
 - [ ] Créer page `app/(admin)/admin/audit-logs/page.tsx` + `loading.tsx`
 - [ ] Créer tous les composants dans `components/features/admin/audit-logs/`
 - [ ] Ajouter lien dans sidebar
 
 ### Phase 4 - Testing
+
 - [ ] Test filtres (action, table, dates, search)
 - [ ] Test pagination
 - [ ] Test export CSV
@@ -1361,10 +1369,12 @@ import { ScrollText } from "lucide-react";
 - [ ] Test RLS (non-admin ne peut pas accéder)
 
 ### Phase 5 - Cleanup Automation (Optional)
+
 - [ ] Créer Edge Function pour cleanup
 - [ ] Configurer GitHub Actions cron job
 
 ### Phase 6 - Clean Code Compliance
+
 - [ ] Vérifier longueur fonctions (≤ 30 lignes)
   - `get_audit_logs_with_email()` → Splitter en CTE helpers si >30 lignes
   - `AuditLogsView` → Splitter en sous-composants si >300 lignes

@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireMinRole } from "@/lib/auth/roles";
 import { fetchAllSpectacles } from "@/lib/dal/spectacles";
 import SpectaclesManagementContainer from "@/components/features/admin/spectacles/SpectaclesManagementContainer";
 
@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function AdminSpectaclesPage() {
-  await requireAdmin();
+  await requireMinRole("editor");
 
   // Fetch all spectacles (including private)
   const spectacles = await fetchAllSpectacles(true);

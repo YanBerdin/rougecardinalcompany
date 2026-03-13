@@ -46,12 +46,14 @@ pnpm exec tsx scripts/check-views-security.ts
 ## Contexte Original
 
 **Problème identifié** : Le script `check-views-security.ts` révèle que 4 vues admin exposent des données à `anon` :
+
 - `communiques_presse_dashboard` (1 row)
 - `membres_equipe_admin` (1 row)
 - `compagnie_presentation_sections_admin` (1 row)
 - `partners_admin` (1 row)
 
 **Cause racine** : Les vues utilisent `SECURITY INVOKER` correctement, mais les tables de base ont des politiques RLS trop permissives :
+
 - `membres_equipe` : `using (true)` → anon voit TOUT
 - `compagnie_presentation_sections` : `using (true)` → anon voit TOUT
 - `partners` : `using (is_active = true)` → ✅ déjà correct
@@ -217,6 +219,7 @@ COMMIT;
 **Localisation** : lignes 25-32
 
 **Avant** :
+
 ```sql
 drop policy if exists "Membres equipe are viewable by everyone" on public.membres_equipe;
 create policy "Membres equipe are viewable by everyone"
@@ -227,6 +230,7 @@ using ( true );
 ```
 
 **Après** :
+
 ```sql
 -- Public users see only active members
 drop policy if exists "Active team members are viewable by everyone" on public.membres_equipe;
@@ -250,6 +254,7 @@ using ( (select public.is_admin()) );
 **Localisation** : lignes 41-48
 
 **Avant** :
+
 ```sql
 drop policy if exists "Compagnie presentation sections are viewable by everyone" on public.compagnie_presentation_sections;
 create policy "Compagnie presentation sections are viewable by everyone"
@@ -259,6 +264,7 @@ create policy "Compagnie presentation sections are viewable by everyone"
 ```
 
 **Après** :
+
 ```sql
 -- Public users see only active sections
 drop policy if exists "Active presentation sections are viewable by everyone" on public.compagnie_presentation_sections;
@@ -334,6 +340,7 @@ for (const table of ADMIN_BASE_TABLES_WITH_ACTIVE_FILTER) {
 ### ✅ Vérification SECURITY INVOKER
 
 Toutes les 11 vues publiques utilisent désormais `SECURITY INVOKER` :
+
 - `communiques_presse_dashboard` ✅
 - `communiques_presse_public` ✅
 - `articles_presse_public` ✅
@@ -418,10 +425,12 @@ Au cours de l'implémentation, une **deuxième migration** a été nécessaire :
 **Fichier** : `20251231020000_enforce_security_invoker_all_views_final.sql`
 
 **Problème découvert** :
+
 - Migration snapshot `20250918000002_apply_declarative_schema_complete.sql` recréait les vues SANS `security_invoker`
 - Annulait les définitions du schéma déclaratif
 
 **Solution** :
+
 ```sql
 -- Utilise ALTER VIEW pour forcer SECURITY INVOKER sur toutes les vues
 DO $$
@@ -443,6 +452,7 @@ END $$;
 ### Migrations Obsolètes Supprimées
 
 Les migrations suivantes ont été **supprimées** et marquées `reverted` sur le cloud :
+
 - ❌ `20251231000000_fix_communiques_presse_public_security_invoker.sql`
 - ❌ `20251022120000_fix_articles_presse_public_security_invoker.sql`
 - ❌ `20251022160000_fix_all_views_security_invoker.sql`

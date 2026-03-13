@@ -4,7 +4,7 @@
 
 ## Contexte
 
-Le test `scripts/test-views-security-authenticated.ts` échoue car la vue `communiques_presse_dashboard` retourne un tableau vide `[]` au lieu d'une erreur `permission denied`. 
+Le test `scripts/test-views-security-authenticated.ts` échoue car la vue `communiques_presse_dashboard` retourne un tableau vide `[]` au lieu d'une erreur `permission denied`.
 
 **Cause racine** : Les DEFAULT PRIVILEGES de Supabase accordent automatiquement `ALL` aux rôles `anon`/`authenticated` lors de la création de vues dans le schéma `public`. Les vues admin sont donc accessibles (mais filtrées par `is_admin()` dans la définition de la vue).
 
@@ -41,6 +41,7 @@ postgres (superuser)
 **Fichier** : `supabase/migrations/20260105120000_admin_views_security_hardening.sql` (~80 lignes)
 
 **Contenu** :
+
 - `DO $$ ... IF NOT EXISTS` pour création rôle `admin_views_owner`
 - `REVOKE ALL` sur les 7 vues admin pour `anon`, `authenticated`
 - `ALTER VIEW ... OWNER TO admin_views_owner` (7 vues)
@@ -54,11 +55,13 @@ Exécuter le SQL sur le projet `yvtrlvmbofklefxcxrzv` via `mcp_supabase_execute_
 ### 3. Mettre à jour 5 schémas déclaratifs
 
 Ajouter après chaque `CREATE VIEW *_admin` :
+
 - `ALTER VIEW ... OWNER TO admin_views_owner;`
 - `REVOKE ALL ON ... FROM anon, authenticated;`
 - `GRANT SELECT ON ... TO service_role;`
 
 **Fichiers concernés** :
+
 - `supabase/schemas/41_views_communiques.sql` (1 vue)
 - `supabase/schemas/41_views_admin_content_versions.sql` (4 vues)
 - `supabase/schemas/10_tables_system.sql` (1 vue)

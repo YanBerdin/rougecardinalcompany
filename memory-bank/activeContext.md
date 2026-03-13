@@ -1,8 +1,94 @@
 # Active Context
 
-**Current Focus (2026-03-10)**: BUGFIX 4 violations RLS (P0/P1-a/P1-b/P2) commitées et déployées via `20260310120000_fix_rls_policy_bugs.sql`. Contexte précédent — TASK037B: Audit accessibilité modules admin complété. 21 violations WCAG 2.2 corrigées (3 Critiques, 8 Majeurs, 10 Mineurs) : skip-link + `<main id="main-content">`, suppression breadcrumb factice, `aria-label` sur 4 champs recherche, tailles boutons ≥ 44px (`button.tsx`), `role="alert"` sur 5 conteneurs erreur, AlertDialog pour `window.confirm()` (LieuxView), `DialogDescription` (HeroSlideForm), `aria-describedby` + `role="alert"` formulaires Presse, `aria-label` contextuels CardsDashboard, `aria-hidden="true"` systématique icônes, `aria-live` états dynamiques. TASK037A (site public) validé complété via TASK072/TASK074. Branche `feat/task037b-a11y-admin-fixes`.
+**Current Focus (2026-03-13)**: TASK076 finalisation + BUGFIX audit coverage tags — Couverture `trg_audit` étendue à `media_tags` (migration `20260313010000`) et aux 4 tables de jonction tags (migration `20260313020000`). Précédemment : TASK076 triggers extension 9 tables (`20260313120000`). Auth model migré vers hiérarchique `user < editor < admin` (2026-03-11).
 
-**Last Major Updates**: ✅ BUGFIX 4 RLS policy bugs (P0-RESTRICTIVE/P1a-super_admin/P1b-subquery/P2-UI) commité+déployé (2026-03-10) + ✅ TASK037B A11Y Admin complet (2026-03-08) + ✅ TASK037A A11Y Public (2026-03-08, via TASK072/TASK074) + BUGFIX RLS display_toggle visibility (2026-03-07) + BUGFIX DAL press select options (2026-03-07) + TASK075 Media Admin Composition Patterns (2026-03-05) + TASK074 Audit public/spectacles (2026-03-04) + BUGFIX-HOME-NEWS (2026-03-03) + TASK072 Audit public/home (2026-03-03)
+**Last Major Updates**: ✅ BUGFIX audit tags — `media_tags` + 4 junction tables couvertes (2026-03-13) + ✅ TASK076 trigger extension (2026-03-13) — 9 tables couvertes, docs mises à jour + ✅ Editor Role Permissions — 15 phases complete (2026-03-11) + ✅ BUGFIX 4 RLS policy bugs (P0-RESTRICTIVE/P1a-super_admin/P1b-subquery/P2-UI) commité+déployé (2026-03-10) + ✅ TASK037B A11Y Admin complet (2026-03-08) + ✅ TASK037A A11Y Public (2026-03-08, via TASK072/TASK074) + BUGFIX RLS display_toggle visibility (2026-03-07) + BUGFIX DAL press select options (2026-03-07) + TASK075 Media Admin Composition Patterns (2026-03-05) + TASK074 Audit public/spectacles (2026-03-04) + BUGFIX-HOME-NEWS (2026-03-03) + TASK072 Audit public/home (2026-03-03)
+
+---
+
+## ✅ BUGFIX — Couverture audit complète des tables tags (2026-03-13)
+
+### Summary
+
+Deux migrations de correctif pour s'assurer que toutes les tables liées aux tags sont couvertes par `trg_audit`.
+
+**`20260313010000_add_audit_trigger_to_media_tags.sql`** — `media_tags` était absente de l'array `audit_tables` dans `30_triggers.sql` (jamais incluse lors de TASK076). Les opérations d'un éditeur sur les tags médias (ajout de tag → journal vide) n'étaient donc pas tracées.
+
+**`20260313020000_add_audit_trigger_to_junction_tag_tables.sql`** — Suite logique : 4 tables de jonction tags également non couvertes. `popular_tags` est une VIEW — exclue. Les triggers `usage_count` existants sur `articles_tags`, `communiques_tags`, `spectacles_tags` ne sont pas affectés.
+
+| Table | `trg_audit` ajouté | Triggers préexistants |
+| ----- | --------- | --------------------- |
+| `media_tags` | ✅ | `media_tags_updated_at_trigger` |
+| `articles_tags` | ✅ | `trg_articles_tags_usage_count` |
+| `communiques_tags` | ✅ | `trg_communiques_tags_usage_count` |
+| `media_item_tags` | ✅ | — |
+| `spectacles_tags` | ✅ | `trg_spectacles_tags_usage_count` |
+
+**Schéma** : `supabase/schemas/30_triggers.sql` ✅ synchronisé
+**Documentation** : `supabase/migrations/migrations.md` ✅ + `supabase/schemas/README.md` ✅
+
+---
+
+## ✅ TASK076 — Extension Triggers Audit et Updated_at (2026-03-13)
+
+### Summary
+
+Migration de complément au périmètre audit + updated_at : 9 tables qui n'avaient pas encore les triggers `trg_audit` et `trg_update_updated_at` ont été couvertes en 3 niveaux de priorité. La migration est idempotente (`DROP TRIGGER IF EXISTS` avant chaque `CREATE`). Les schémas déclaratifs (`30_triggers.sql`) et la documentation (`migrations.md`, `schemas/README.md`) ont été synchronisés simultanément.
+
+**Tables couvertes** :
+
+- 🔴 CRITIQUE : `user_invitations`, `pending_invitations` (traçabilité sécurité / RH)
+- 🟠 HAUTE : `home_hero_slides`, `compagnie_presentation_sections`, `compagnie_values`, `compagnie_stats` (contenu public)
+- 🟡 MOYENNE : `categories`, `tags`, `media_folders` (taxonomie / médiathèque)
+
+**Cas particulier** : `user_invitations` n'a pas de colonne `updated_at` → seul `trg_audit` appliqué.
+
+**Exclusions délibérées** : `content_versions` (traçabilité native), tables de jonction sans `updated_at`, `analytics_events` / `logs_audit` (haut volume / risque récursion).
+
+**Migration** : `20260313120000_extend_audit_and_updated_at_triggers.sql`
+**Schema** : `supabase/schemas/30_triggers.sql` ✅ synchronisé
+**Documentation** : `supabase/migrations/migrations.md` ✅ + `supabase/schemas/README.md` ✅
+**Application** : `pnpm dlx supabase db push --linked` — 2026-03-13
+
+---
+
+## ✅ Editor Role Permissions — Full Migration (2026-03-11)
+
+### Summary
+
+15-phase migration from binary admin/non-admin auth model to hierarchical `user (0) < editor (1) < admin (2)` role system. Complete implementation covering SQL functions, RLS policies, TypeScript auth guards, DAL modules, Server Actions, admin pages, sidebar navigation, and middleware.
+
+**New SQL function**: `has_min_role(required_role text)` in `supabase/schemas/09_functions.sql` — replaces `is_admin()` for role-based access.
+
+**New TS module**: `lib/auth/roles.ts` — `requireMinRole()`, `requireBackofficeAccess()` (editor+), `requireAdminOnly()` (admin only), `requireBackofficePageAccess()`, `requireAdminPageAccess()`, `getCurrentUserRole()`, `isRoleAtLeast()`.
+
+**Helper module**: `lib/auth/role-helpers.ts` — `ROLE_HIERARCHY`, `UserRole` type, `isRoleAtLeast()`.
+
+**Deprecated**: `lib/auth/is-admin.ts` — zero imports across codebase, module-level @deprecated JSDoc with replacement mapping. Safe to delete.
+
+### Phases completed
+
+| Phase | Description | Key changes |
+| ----- | ----------- | ----------- |
+| 1 | Auth guard module | `roles.ts` + `role-helpers.ts` created |
+| 2 | Admin layout | Uses `requireBackofficeAccess()` |
+| 3 | AdminSidebar | Role-filtered with `minRole` per item |
+| 4 | SetupAccountForm | Editor→`/admin`, user→`/` redirect |
+| 5 | Dashboard | Conditional rendering by role |
+| 6 | Admin-only pages | 9 pages have `requireAdminPageAccess()` |
+| 7 | SQL function | `has_min_role()` + migration |
+| 8 | RLS policies | Editorial tables use `has_min_role('editor')` |
+| 9 | DAL modules | All editorial DAL use `requireMinRole("editor")` |
+| 10 | Server Actions | 12 files, ~43 functions guarded |
+| 11 | Storage policies | Migrated to role-based |
+| 12 | Editorial pages | 8 pages have explicit guards |
+| 13 | Deprecation | `is-admin.ts` fully deprecated |
+| 14 | Cloud migration | Prerequisite seed created |
+| 15 | Middleware | Uses `isRoleAtLeast()` |
+
+**Test script**: `scripts/test-editor-access.ts` — tests 6 editorial tables (CRUD allowed) + 3 admin-only tables (blocked).
+
+**Plan reference**: `.github/prompts/plan-TASK076-fix-editorRolePermissions.prompt.md`
 
 ---
 

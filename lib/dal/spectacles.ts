@@ -3,7 +3,7 @@
 import "server-only";
 import { cache } from "react";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireMinRole } from "@/lib/auth/roles";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import {
@@ -525,7 +525,7 @@ export async function createSpectacle(
   input: CreateSpectacleInput
 ): Promise<DALResult<SpectacleDb>> {
   try {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const validationResult = await validateCreateInput(input);
     if (!validationResult.success) return validationResult;
@@ -660,7 +660,7 @@ export async function updateSpectacle(
   input: UpdateSpectacleInput
 ): Promise<DALResult<SpectacleDb>> {
   try {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     const validationResult = await validateUpdateInput(input);
     if (!validationResult.success) return validationResult;
@@ -714,7 +714,7 @@ export async function updateSpectacle(
  */
 export async function deleteSpectacle(id: number): Promise<DALResult<null>> {
   try {
-    await requireAdmin();
+    await requireMinRole("editor");
 
     // Check if spectacle exists
     const existing = await fetchSpectacleById(id);

@@ -7,6 +7,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
 import { createClient } from "@/supabase/client";
+import { isRoleAtLeast } from "@/lib/auth/role-helpers";
+import type { AppRole } from "@/lib/auth/role-helpers";
 import {
     Form,
     FormControl,
@@ -31,7 +33,7 @@ type SetupAccountValues = z.infer<typeof SetupAccountSchema>;
 
 interface SetupAccountFormProps {
     email: string;
-    userRole: string;
+    userRole: AppRole;
 }
 
 export function SetupAccountForm({ email, userRole }: SetupAccountFormProps) {
@@ -64,9 +66,7 @@ export function SetupAccountForm({ email, userRole }: SetupAccountFormProps) {
             toast.success("Compte configuré avec succès !");
 
             // Redirection basée sur le rôle
-            const redirectPath = userRole === 'admin' || userRole === 'editor'
-                ? '/admin'
-                : '/';
+const redirectPath = isRoleAtLeast(userRole, 'editor') ? '/admin' : '/';
 
             router.push(redirectPath);
             router.refresh();

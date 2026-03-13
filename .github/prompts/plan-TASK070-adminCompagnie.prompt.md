@@ -58,6 +58,7 @@ comment on column public.compagnie_presentation_sections.alt_text
 Mettre à jour le schéma déclaratif correspondant dans [supabase/schemas/07c_table_compagnie_presentation.sql](supabase/schemas/07c_table_compagnie_presentation.sql) pour y ajouter la colonne `alt_text text` en fin de table.
 
 **Fichiers impactés** :
+
 - `supabase/migrations/YYYYMMDDHHmmss_add_alt_text_to_compagnie_presentation.sql` (nouveau)
 - `supabase/schemas/07c_table_compagnie_presentation.sql` (ajout colonne)
 
@@ -73,6 +74,7 @@ Modifier [lib/schemas/compagnie-admin.ts](lib/schemas/compagnie-admin.ts) :
 4. **Ajouter** `alt_text` au type `PresentationSectionDTO`.
 
 **Fichiers impactés** :
+
 - [lib/schemas/compagnie-admin.ts](lib/schemas/compagnie-admin.ts) (modification)
 
 ---
@@ -86,6 +88,7 @@ Modifier [lib/dal/admin-compagnie.ts](lib/dal/admin-compagnie.ts) :
 3. **Ajouter** `alt_text` dans les `insert()` / `update()` des mutations Presentation.
 
 **Fichiers impactés** :
+
 - [lib/dal/admin-compagnie.ts](lib/dal/admin-compagnie.ts) (modification)
 
 ---
@@ -101,6 +104,7 @@ Modifier [lib/actions/compagnie-admin-actions.ts](lib/actions/compagnie-admin-ac
 - Vérifier que les actions Presentation passent bien `alt_text` au DAL.
 
 **Fichiers impactés** :
+
 - Actions Compagnie existantes (vérification uniquement)
 
 ---
@@ -114,6 +118,7 @@ Modifier [app/(admin)/admin/compagnie/page.tsx](app/(admin)/admin/compagnie/page
 3. **Supprimer** l'import de `StatsContainer` (ou composant Stats équivalent).
 
 **Fichiers impactés** :
+
 - [app/(admin)/admin/compagnie/page.tsx](app/(admin)/admin/compagnie/page.tsx) (modification)
 
 ---
@@ -147,6 +152,7 @@ Modifier [components/features/admin/compagnie/PresentationFormFields.tsx](compon
 4. Importer `ImageFieldGroup` depuis `@/components/features/admin/media/ImageFieldGroup`.
 
 **Fichiers impactés** :
+
 - [components/features/admin/compagnie/PresentationForm.tsx](components/features/admin/compagnie/PresentationForm.tsx) (suppression kind/slug visibles)
 - [components/features/admin/compagnie/PresentationFormFields.tsx](components/features/admin/compagnie/PresentationFormFields.tsx) (SHOW_IMAGE_URL + ImageFieldGroup)
 
@@ -164,6 +170,7 @@ Modifier [lib/schemas/home-content.ts](lib/schemas/home-content.ts) :
 4. **Exporter** les 3 (`HomeStatInputSchema`, `HomeStatFormSchema`, `HomeStatDTO`).
 
 **Fichiers impactés** :
+
 - [lib/schemas/home-content.ts](lib/schemas/home-content.ts) (ajout)
 
 ---
@@ -184,6 +191,7 @@ Créer [lib/dal/admin-home-stats.ts](lib/dal/admin-home-stats.ts) :
 5. **Table DB** : `compagnie_stats` (nom inchangé en base).
 
 **Fichiers impactés** :
+
 - [lib/dal/admin-home-stats.ts](lib/dal/admin-home-stats.ts) (nouveau)
 
 ---
@@ -203,6 +211,7 @@ Créer [lib/actions/home-stats-actions.ts](lib/actions/home-stats-actions.ts) :
 5. **Revalidation paths** : `/admin/home/about` + `/` (homepage consomme les stats).
 
 **Fichiers impactés** :
+
 - [lib/actions/home-stats-actions.ts](lib/actions/home-stats-actions.ts) (nouveau)
 
 ---
@@ -225,6 +234,7 @@ Déplacer les composants Stats de `components/features/admin/compagnie/` vers `c
 4. Si un fichier `types.ts` existe dans le dossier compagnie pour les Stats, le migrer aussi.
 
 **Fichiers impactés** :
+
 - `components/features/admin/compagnie/StatsContainer.tsx` → supprimé
 - `components/features/admin/compagnie/StatsView.tsx` → supprimé
 - `components/features/admin/compagnie/StatForm.tsx` → supprimé
@@ -265,6 +275,7 @@ Modifier [app/(admin)/admin/home/about/page.tsx](app/(admin)/admin/home/about/pa
 ```
 
 **Fichiers impactés** :
+
 - [app/(admin)/admin/home/about/page.tsx](app/(admin)/admin/home/about/page.tsx) (modification)
 
 ---
@@ -331,6 +342,7 @@ Commande : `pnpm exec tsx scripts/test-home-stats.ts`
 ## Vérification — Checklist globale
 
 ### Partie A (Compagnie)
+
 - [x] Migration `alt_text` appliquée (`20260302184850`)
 - [x] Schéma déclaratif mis à jour (`07c_table_compagnie_presentation.sql`)
 - [x] Schemas Presentation incluent `alt_text`
@@ -349,6 +361,7 @@ Commande : `pnpm exec tsx scripts/test-home-stats.ts`
 - [x] **BONUS** : 2 sous-pages lecture seule (presentation/ + valeurs/)
 
 ### Partie B (Stats → Home)
+
 - [x] Schemas `HomeStat*` dans `home-content.ts` (+ `ReorderHomeStatsSchema`)
 - [x] DAL `admin-home-stats.ts` créé avec 5 fonctions + `cache()`
 - [x] Actions `home-stats-actions.ts` créé avec 4 actions (CRUD + reorder)
@@ -360,6 +373,7 @@ Commande : `pnpm exec tsx scripts/test-home-stats.ts`
 - [x] **BONUS** : Reorder Home Stats (schema + DAL + action)
 
 ### Partie C (Nettoyage)
+
 - [x] `compagnie-stats-actions.ts` supprimé (N/A — jamais créé, Stats construites directement dans home-stats-actions.ts)
 - [x] Aucun import orphelin (vérifié à la compilation)
 - [x] Sidebar vérifiée (Compagnie + Accueil - La compagnie) + 3 renommages labels

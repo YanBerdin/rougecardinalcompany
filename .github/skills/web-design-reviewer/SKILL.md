@@ -179,6 +179,7 @@ Identify source files from problematic elements:
    - Explore related files with `semantic_search`
 
 3. **File Pattern Filtering**
+
    ```
    Style files: src/**/*.css, styles/**/*
    Components: src/components/**/*

@@ -282,7 +282,8 @@ lib/
 ├── services/
 │   └── email.ts                      # Email, SMS, external APIs
 ├── auth/
-│   └── is-admin.ts                   # Authorization guards
+│   └── roles.ts                     # Authorization guards (role-based)
+│   └── role-helpers.ts               # Pure role functions (client+server)
 └── utils/
     └── [helpers].ts                  # Pure utility functions
 
@@ -338,7 +339,7 @@ import { logAnalytics } from "@/lib/analytics"; // Violates SRP
 import "server-only"; // MANDATORY
 import { createClient } from "@/supabase/server"; // DB client
 import { createAdminClient } from "@/supabase/admin"; // Admin client
-import { requireAdmin } from "@/lib/auth/is-admin"; // Auth guard
+import { requireBackofficeAccess } from "@/lib/auth/roles"; // Auth guard (editor+)
 import { z } from "zod"; // Validation
 import type { Database } from "@/lib/database.types"; // Types
 ```
@@ -419,7 +420,7 @@ export async function createUserAction(input: unknown): Promise<ActionResult> {
 import "server-only"; // MANDATORY - prevents client-side execution
 
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireBackofficeAccess } from "@/lib/auth/roles";
 import { z } from "zod";
 import type { DALResult } from "./types";
 
@@ -452,7 +453,7 @@ export async function createUser(
 ): Promise<DALResult<UserDTO>> {
   try {
     // 1. Authorization
-    await requireAdmin();
+    await requireBackofficeAccess();
 
     // 2. Validation
     const validated = UserInputSchema.parse(input);
@@ -493,7 +494,7 @@ export async function updateUser(
   input: Partial<UserInput>,
 ): Promise<DALResult<UserDTO>> {
   try {
-    await requireAdmin();
+    await requireBackofficeAccess();
 
     // Validate partial update
     const validated = UserInputSchema.partial().parse(input);
@@ -529,7 +530,7 @@ export async function updateUser(
  */
 export async function deleteUser(id: bigint): Promise<DALResult<null>> {
   try {
-    await requireAdmin();
+    await requireBackofficeAccess();
 
     const supabase = await createClient();
     const { error } = await supabase.from("users").delete().eq("id", id);
@@ -557,7 +558,7 @@ export async function deleteUser(id: bigint): Promise<DALResult<null>> {
  */
 export async function fetchUserById(id: bigint): Promise<DALResult<UserDTO>> {
   try {
-    await requireAdmin();
+    await requireBackofficeAccess();
 
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -1573,13 +1574,13 @@ touch components/features/admin/feature/Form.tsx
 "use server";
 import "server-only";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireBackofficeAccess } from "@/lib/auth/roles";
 import type { DALResult } from "./types";
 
 export async function createFeature(
   input: FeatureInput,
 ): Promise<DALResult<Feature>> {
-  await requireAdmin();
+  await requireBackofficeAccess();
   const validated = FeatureSchema.parse(input);
 
   const supabase = await createClient();

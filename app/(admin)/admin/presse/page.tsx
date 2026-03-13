@@ -4,6 +4,8 @@ import { PressReleasesContainer } from "@/components/features/admin/presse/Press
 import { ArticlesContainer } from "@/components/features/admin/presse/ArticlesContainer";
 import { PressContactsContainer } from "@/components/features/admin/presse/PressContactsContainer";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getCurrentUserRole, requireMinRole } from "@/lib/auth/roles";
+import { isRoleAtLeast } from "@/lib/auth/role-helpers";
 
 export const metadata = {
     title: "Gestion Presse | Admin",
@@ -14,22 +16,31 @@ export const metadata = {
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export default function PressePage() {
+export default async function PressePage() {
+    await requireMinRole("editor");
+
+    const role = await getCurrentUserRole();
+    const isAdmin = isRoleAtLeast(role, "admin");
+
     return (
         <div className="container mx-auto py-8">
             <h1 className="text-3xl md:text-4xl font-bold mb-6">Gestion Presse</h1>
 
             <Tabs defaultValue="releases" className="w-full">
-                <TabsList className="flex flex-col sm:grid sm:grid-cols-3 w-full h-auto gap-1 sm:gap-0">
+                <TabsList
+                    className={`flex flex-col sm:grid w-full h-auto gap-1 sm:gap-0 ${isAdmin ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}
+                >
                     <TabsTrigger value="releases" className="hover:text-popover-foreground hover:bg-card w-full justify-center text-sm py-2.5">
                         Communiqués
                     </TabsTrigger>
                     <TabsTrigger value="articles" className="hover:text-popover-foreground hover:bg-card w-full justify-center text-sm py-2.5">
                         Articles
                     </TabsTrigger>
-                    <TabsTrigger value="contacts" className="hover:text-popover-foreground hover:bg-card w-full justify-center text-sm py-2.5">
-                        Contacts
-                    </TabsTrigger>
+                    {isAdmin && (
+                        <TabsTrigger value="contacts" className="hover:text-popover-foreground hover:bg-card w-full justify-center text-sm py-2.5">
+                            Contacts
+                        </TabsTrigger>
+                    )}
                 </TabsList>
 
                 <TabsContent value="releases" className="mt-6">
@@ -44,11 +55,13 @@ export default function PressePage() {
                     </Suspense>
                 </TabsContent>
 
-                <TabsContent value="contacts" className="mt-6">
-                    <Suspense fallback={<LoadingSkeleton />}>
-                        <PressContactsContainer />
-                    </Suspense>
-                </TabsContent>
+                {isAdmin && (
+                    <TabsContent value="contacts" className="mt-6">
+                        <Suspense fallback={<LoadingSkeleton />}>
+                            <PressContactsContainer />
+                        </Suspense>
+                    </TabsContent>
+                )}
             </Tabs>
         </div>
     );

@@ -45,6 +45,7 @@ export function SpectaclePhotoManager({
         { ordre: 1, photo: null },
     ]);
     const [isPending, setIsPending] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
     const [showLibrary, setShowLibrary] = useState(false);
     const [showUpload, setShowUpload] = useState(false);
@@ -69,6 +70,8 @@ export function SpectaclePhotoManager({
             setPhotos(slots);
         } catch (error) {
             toast.error('Erreur lors du chargement des photos');
+        } finally {
+            setIsLoading(false);
         }
     }, [spectacleId]);
 
@@ -216,7 +219,7 @@ export function SpectaclePhotoManager({
                                     variant="secondary"
                                     size="sm"
                                     onClick={() => handleSelectFromLibrary(slot.ordre)}
-                                    disabled={isPending || slot.photo !== null}
+                                    disabled={isPending || isLoading || slot.photo !== null}
                                     className="flex-1"
                                 >
                                     <ImagePlus className="h-4 w-4 mr-2" />
@@ -227,7 +230,7 @@ export function SpectaclePhotoManager({
                                     variant="outline"
                                     size="sm"
                                     onClick={() => handleUpload(slot.ordre)}
-                                    disabled={isPending || slot.photo !== null}
+                                    disabled={isPending || isLoading || slot.photo !== null}
                                     className="flex-1"
                                 >
                                     <Upload className="h-4 w-4 mr-2" />
