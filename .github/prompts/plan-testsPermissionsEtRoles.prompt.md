@@ -2,14 +2,14 @@
 
 ## TL;DR
 
-Suite à l'implémentation du modèle hiérarchique `user < editor < admin` (TASK076), créer un plan de tests structuré couvrant les 4 niveaux recommandés dans `specs/README.md`. Livrable en 2 volets : un nouveau fichier dédié `specs/tests-permissions-et-rôles.md` (plan principal) + un patch minimal dans `specs/PLAN_DE_TEST_COMPLET.md` (comptes de test, sections auth/sécurité).
+Suite à l'implémentation du modèle hiérarchique `user < editor < admin` (TASK076), créer un plan de tests structuré couvrant 4 niveaux de tests (unit auth/helpers, DAL intégration, RLS SQL, E2E). Livrable : un fichier dédié `specs/tests-permissions-et-rôles.md` (~120 cas de test). Le patch dans `specs/PLAN_DE_TEST_COMPLET.md` (comptes de test, sections auth/sécurité) a déjà été appliqué (Phase B terminée).
 
 ---
 
 ## Contexte
 
 - Le plan de test existant (`PLAN_DE_TEST_COMPLET.md` v1.0, juillet 2025) a été écrit AVANT TASK076 : tous les scénarios admin supposent un seul rôle `admin`, pas de rôle `editor`.
-- `specs/README.md` recommande 4 catégories de tests : unit auth/helpers, DAL intégration, RLS SQL, E2E.
+- Le plan est structuré en 4 catégories de tests : unit auth/helpers, DAL intégration, RLS SQL, E2E.
 - Des scripts de test RLS existent déjà (`scripts/test-editor-access-local.ts`, `scripts/test-editor-access-remote.ts`) mais couvrent uniquement le RLS SQL pour `editor`.
 - Aucun test unitaire pour `role-helpers.ts` ni `roles.ts` n'existe.
 - Aucun test E2E Playwright n'existe (infrastructure documentée mais non implémentée).
@@ -45,30 +45,32 @@ Suite à l'implémentation du modèle hiérarchique `user < editor < admin` (TAS
 - Parcours E2E editor : login → dashboard → sidebar filtrée → CRUD spectacle → page admin-only bloquée
 - Parcours E2E admin : login → dashboard complet → sidebar complète → accès toutes pages
 - Parcours E2E user : login → redirection/blocage backoffice
-- Tests sidebar : items visibles par rôle (editor voit 11 items, admin voit 20+)
+- Tests sidebar : items visibles par rôle (editor voit 8 items, admin voit 18 items)
 - Tests middleware : redirection silencieuse sur pages non autorisées
 
-### Phase B — Patch `specs/PLAN_DE_TEST_COMPLET.md`
+### Phase B — Patch `specs/PLAN_DE_TEST_COMPLET.md` ✅ TERMINÉE
 
-**6. Section 2 (Prérequis)** — **parallel avec step 7**
-- Ajouter comptes editor et user dans le tableau des comptes de test
-- Ajouter note : "Voir `specs/tests-permissions-et-rôles.md` pour le plan détaillé permissions"
+> **Déjà appliqué.** Les modifications ci-dessous sont déjà présentes dans le fichier.
 
-**7. Section 6.4 (Protection des routes)** — **parallel avec step 6**
-- Remplacer AUTH-PROTECT-004 (vague) par 4 cas explicites : editor accès OK au dashboard, editor bloqué sur /admin/team, user bloqué sur /admin, user bloqué sur /admin/spectacles
+**6. Section 2 (Prérequis)** — ✅ Fait
+- Comptes editor et user ajoutés dans le tableau des comptes de test
+- Note ajoutée : "Voir `specs/tests-permissions-et-rôles.md` pour le plan détaillé permissions"
 
-**8. Section 21.4 (Sécurité)** — **depends on 6**
-- Ajouter CROSS-SEC-006 à CROSS-SEC-010 : tests RLS pour editor, tests middleware role, test API admin refusée pour editor sur routes admin-only
+**7. Section 6.4 (Protection des routes)** — ✅ Fait
+- AUTH-PROTECT-004 à 007 ajoutés : editor accès OK au dashboard, editor bloqué sur /admin/team, user bloqué sur /admin, user bloqué sur /admin/spectacles
+
+**8. Section 21.4 (Sécurité)** — ✅ Fait
+- CROSS-SEC-006 à CROSS-SEC-010 ajoutés : tests RLS pour editor, tests middleware role, test API admin refusée pour editor sur routes admin-only
 
 ---
 
 ## Relevant files
 
-### À créer
-- `specs/tests-permissions-et-rôles.md` — Nouveau plan de tests dédié (4 sections, ~120 cas de test)
+### À générer
+- `specs/tests-permissions-et-rôles.md` — Plan de tests dédié (4 sections, ~120 cas de test)
 
-### À modifier
-- `specs/PLAN_DE_TEST_COMPLET.md` — Patch sections 2, 6.4, 21.4 (ajout comptes + ~10 cas)
+### Déjà modifié ✅
+- `specs/PLAN_DE_TEST_COMPLET.md` — Sections 2, 6.4, 21.4 déjà patchées (comptes + ~10 cas)
 
 ### Référence (implémentation à tester)
 - `lib/auth/role-helpers.ts` — Fonctions pures : `normalizeRole()`, `isRoleAtLeast()`, type `AppRole`, `ROLE_HIERARCHY`
@@ -87,7 +89,7 @@ Suite à l'implémentation du modèle hiérarchique `user < editor < admin` (TAS
 1. Vérifier que chaque table de `acl-permissions-role.md` est couverte par au moins un cas de test dans le plan
 2. Vérifier que les 4 rôles (anon, user, editor, admin) ont des cas explicites
 3. Vérifier la cohérence des IDs de test (préfixe ROLE-UNIT-**, ROLE-DAL-**, ROLE-RLS-**, ROLE-E2E-**)
-4. Vérifier que les sections patchées dans PLAN_DE_TEST_COMPLET.md référencent le nouveau fichier
+4. Vérifier que les sections déjà patchées dans PLAN_DE_TEST_COMPLET.md référencent le nouveau fichier
 5. Relecture croisée entre la matrice ACL et les résultats attendus de chaque cas
 
 ---

@@ -67,9 +67,14 @@ export default defineConfig({
 ### Variables d'environnement `.env.e2e`
 
 ```bash
-# Auth admin pour les tests E2E
+# Auth — 3 rôles hiérarchiques (user < editor < admin)
+# Chaque compte doit avoir app_metadata.role défini dans Supabase
 E2E_ADMIN_EMAIL=admin@rougecardinalcompany.fr
 E2E_ADMIN_PASSWORD=your_test_password
+E2E_EDITOR_EMAIL=editor@rougecardinalcompany.fr
+E2E_EDITOR_PASSWORD=your_test_password
+E2E_USER_EMAIL=user@rougecardinalcompany.fr
+E2E_USER_PASSWORD=your_test_password
 
 # URL de test (optionnel, sinon localhost:3000 par défaut)
 PLAYWRIGHT_BASE_URL=http://localhost:3000
@@ -78,6 +83,8 @@ PLAYWRIGHT_BASE_URL=http://localhost:3000
 NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=your_local_anon_key
 ```
+
+> **Provisionnement des comptes** : les comptes de test doivent avoir `app_metadata: { role: "admin" | "editor" | "user" }` défini via le Dashboard Supabase ou le service_role client. Voir `scripts/test-editor-access-local.ts` pour un exemple de provisionnement automatique.
 
 ### Scripts `package.json`
 
@@ -123,25 +130,59 @@ pnpm test:e2e:debug
 
 ### Fixture d'authentification (`e2e/fixtures/auth.fixture.ts`)
 
-Utilise les credentials Supabase stockés dans `.env.e2e`. L'état d'authentification est sauvegardé dans `.auth/admin.json` pour être réutilisé entre les tests.
+Utilise les credentials Supabase stockés dans `.env.e2e`. L'état d'authentification est sauvegardé dans `.auth/{role}.json` pour être réutilisé entre les tests.
+
+Le projet utilise un modèle hiérarchique à 3 rôles : `user < editor < admin` (cf. TASK076). La fixture expose un `Page` pré-authentifié par rôle.
 
 ```ts
 import { test as base, type Page } from '@playwright/test';
 
-async function loginAsAdmin(page: Page) {
+type AppRole = 'admin' | 'editor' | 'user';
+
+async function loginWithRole(page: Page, role: AppRole) {
+  const emailKey = `E2E_${role.toUpperCase()}_EMAIL`;
+  const passwordKey = `E2E_${role.toUpperCase()}_PASSWORD`;
+
   await page.goto('/auth/login');
-  await page.getByLabel('Email').fill(process.env.E2E_ADMIN_EMAIL!);
-  await page.getByLabel('Password').fill(process.env.E2E_ADMIN_PASSWORD!);
+  await page.getByLabel('Email').fill(process.env[emailKey]!);
+  await page.getByLabel('Password').fill(process.env[passwordKey]!);
   await page.getByRole('button', { name: 'Login' }).click();
-  await page.waitForURL('/admin');
+
+  // Admin et editor sont redirigés vers /admin (sidebar filtrée pour editor)
+  // User est redirigé vers / (backoffice interdit)
+  if (role === 'user') {
+    await page.waitForURL('/');
+  } else {
+    await page.waitForURL('/admin');
+  }
 }
 
-export const authTest = base.extend<{ adminPage: Page }>({
+// Fixture admin — accès complet au backoffice
+export const adminTest = base.extend<{ adminPage: Page }>({
   adminPage: async ({ page }, use) => {
-    await loginAsAdmin(page);
+    await loginWithRole(page, 'admin');
     await use(page);
   },
 });
+
+// Fixture editor — accès éditorial uniquement (spectacles, événements, média, etc.)
+export const editorTest = base.extend<{ editorPage: Page }>({
+  editorPage: async ({ page }, use) => {
+    await loginWithRole(page, 'editor');
+    await use(page);
+  },
+});
+
+// Fixture user — authentifié mais sans accès backoffice
+export const userTest = base.extend<{ userPage: Page }>({
+  userPage: async ({ page }, use) => {
+    await loginWithRole(page, 'user');
+    await use(page);
+  },
+});
+
+// Alias rétrocompatible
+export const authTest = adminTest;
 
 export { expect } from '@playwright/test';
 ```
@@ -236,18 +277,25 @@ export class ContactPage {
 
 ### Fixtures de feature (`e2e/tests/[feature]/[feature].fixtures.ts`)
 
-Compose les Page Objects dans les fixtures. Étend `authTest` pour les zones admin, `base` pour les pages publiques.
+Compose les Page Objects dans les fixtures. Choisir la fixture de base selon le rôle requis :
+
+| Contexte | Fixture de base | Page fournie |
+| -------- | --------------- | ------------ |
+| Pages admin-only (team, config, contacts presse) | `adminTest` | `adminPage` |
+| Pages éditoriales (spectacles, événements, média, lieux, presse) | `editorTest` | `editorPage` |
+| Tests de blocage backoffice par rôle insuffisant | `userTest` | `userPage` |
+| Pages publiques (contact, spectacles publics, agenda) | `base` (Playwright) | `page` |
 
 ```ts
-// e2e/tests/admin/team/team.fixtures.ts
-import { authTest, expect } from '../../../fixtures/auth.fixture';
+// e2e/tests/admin/team/team.fixtures.ts — Admin-only feature
+import { adminTest, expect } from '../../../fixtures/auth.fixture';
 import { TeamPage } from '../../../pages/admin/team.page';
 
 type TeamFixtures = {
   teamPage: TeamPage;
 };
 
-export const test = authTest.extend<TeamFixtures>({
+export const test = adminTest.extend<TeamFixtures>({
   teamPage: async ({ adminPage }, use) => {
     const teamPage = new TeamPage(adminPage);
     await use(teamPage);
@@ -258,7 +306,26 @@ export { expect };
 ```
 
 ```ts
-// e2e/tests/public/contact/contact.fixtures.ts
+// e2e/tests/admin/spectacles/spectacles.fixtures.ts — Editorial feature (editor OK)
+import { editorTest, expect } from '../../../fixtures/auth.fixture';
+import { SpectaclesPage } from '../../../pages/admin/spectacles.page';
+
+type SpectaclesFixtures = {
+  spectaclesPage: SpectaclesPage;
+};
+
+export const test = editorTest.extend<SpectaclesFixtures>({
+  spectaclesPage: async ({ editorPage }, use) => {
+    const spectaclesPage = new SpectaclesPage(editorPage);
+    await use(spectaclesPage);
+  },
+});
+
+export { expect };
+```
+
+```ts
+// e2e/tests/public/contact/contact.fixtures.ts — Public page (no auth)
 import { test as base, expect } from '@playwright/test';
 import { ContactPage } from '../../../pages/public/contact.page';
 
@@ -341,14 +408,19 @@ e2e/tests/
 │   ├── newsletter/
 │   ├── spectacles/
 │   └── agenda/
-└── admin/
-    ├── auth.setup.ts        # Setup auth (state stocké dans .auth/)
-    ├── team/
-    ├── lieux/
-    ├── spectacles/
-    ├── presse/
-    └── media/
+├── admin/                   # Tests fonctionnels backoffice
+│   ├── auth.setup.ts        # Setup auth multi-rôles (state stocké dans .auth/)
+│   ├── team/                # admin-only → adminTest
+│   ├── lieux/               # editorial → editorTest
+│   ├── spectacles/          # editorial → editorTest
+│   ├── presse/              # editorial → editorTest
+│   └── media/               # editorial → editorTest
+└── permissions/             # Tests d'accès par rôle (TASK076)
+    ├── permissions.fixtures.ts
+    └── permissions.spec.ts  # Editor blocked on admin-only, User blocked on backoffice
 ```
+
+> **`permissions/`** : dossier dédié aux tests de contrôle d'accès multi-rôles. Vérifie la sidebar filtrée, le blocage de pages admin-only pour editor, et la redirection complète pour user. Voir `specs/tests-permissions-et-rôles.md` pour le plan de cas détaillé.
 
 ---
 
@@ -358,7 +430,11 @@ e2e/tests/
 - **Sélecteurs accessibilité-first** — `getByRole()` avant tout (shadcn/Radix expose nativement les rôles)
 - **Un fichier fixture par feature** — compose les Page Objects dedans
 - **Importer les types depuis `@/lib/schemas/`** — ex: `import type { ContactMessage } from '@/lib/schemas/contact'`
-- **Tests admin** → étendre `authTest`, **tests publics** → étendre `base`
+- **Choisir la fixture selon le rôle requis** :
+  - Pages admin-only (team, contacts presse, config) → étendre `adminTest`
+  - Pages éditoriales (spectacles, événements, média, lieux, presse) → étendre `editorTest`
+  - Tests de blocage/redirection → étendre `userTest`
+  - Pages publiques → étendre `base`
 - **Jamais tester la logique métier** — tester le comportement visible (ce que l'utilisateur voit/fait)
 - **Données de test isolées** — utiliser la base Supabase locale (ne pas polluer la prod)
 
@@ -377,6 +453,14 @@ await expect(page.getByText('Membre créé')).toBeVisible();
 await teamPage.goto(); // re-fetch via Server Component
 await teamPage.expectMemberVisible('Marie Martin');
 ```
+
+### Modèle de rôles hiérarchique (TASK076)
+
+Le projet utilise 3 rôles hiérarchiques : `user (0) < editor (1) < admin (2)`.
+
+- **Sidebar filtrée** : chaque item du sidebar admin a un `minRole`. L'editor ne voit que les items éditoriaux (~11 items), l'admin voit tout (~20+ items). Utiliser `filterByRole()` côté TypeScript (`lib/auth/role-helpers.ts`).
+- **Pages protégées** : le middleware (`proxy.ts`) résout le rôle depuis `app_metadata.role` du JWT (fallback `user_metadata.role`). Un editor accédant à `/admin/team` est redirigé vers `/admin`. Un user accédant à `/admin` est redirigé vers `/`.
+- **RLS** : les tables éditoriales utilisent `has_min_role('editor')`, les tables admin-only utilisent `is_admin()`. Les tests E2E ne testent pas directement le RLS (voir scripts `test-editor-access-local.ts`), mais vérifient les effets visibles (données absentes, erreurs).
 
 ### Display Toggles (TASK030)
 
