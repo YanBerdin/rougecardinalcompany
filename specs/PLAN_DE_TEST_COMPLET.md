@@ -54,9 +54,13 @@ Ce plan de test couvre l'intégralité du site web de la Compagnie Rouge Cardina
 
 ### Comptes de test
 
-| Rôle | Email | Mot de passe |
-| ------ | ------- | ------------- |
-| Admin | `<ADMIN_TEST_EMAIL>` | `<ADMIN_TEST_PASSWORD>` |
+| Rôle | Email | Mot de passe | `app_metadata.role` |
+| ------ | ------- | ------------- | -------------------- |
+| Admin | `<ADMIN_TEST_EMAIL>` | `<ADMIN_TEST_PASSWORD>` | `admin` |
+| Editor | `<EDITOR_TEST_EMAIL>` | `<EDITOR_TEST_PASSWORD>` | `editor` |
+| User | `<USER_TEST_EMAIL>` | `<USER_TEST_PASSWORD>` | `user` |
+
+> **Plan détaillé permissions** : voir [`specs/tests-permissions-et-rôles.md`](tests-permissions-et-rôles.md) pour les ~120 cas de test couvrant les 4 rôles (anon, user, editor, admin) aux niveaux unitaire, DAL, RLS SQL et E2E.
 
 ### État initial attendu
 
@@ -204,7 +208,10 @@ Ce plan de test couvre l'intégralité du site web de la Compagnie Rouge Cardina
 | AUTH-PROTECT-001 | Accès admin sans session | Aucune session | 1. Naviguer directement vers `/admin` | Redirection vers `/auth/login` | P0 |
 | AUTH-PROTECT-002 | Accès admin/team sans session | Aucune session | 1. Naviguer vers `/admin/team` | Redirection vers `/auth/login` | P0 |
 | AUTH-PROTECT-003 | Déconnexion | Connecté comme admin | 1. Cliquer sur le bouton de déconnexion dans le sidebar/header | Session détruite, redirection vers la page publique ou login | P0 |
-| AUTH-PROTECT-004 | Accès admin avec session non-admin | Connecté avec un compte non-admin (si applicable) | 1. Naviguer vers `/admin` | Accès refusé ou contenu limité | P1 |
+| AUTH-PROTECT-004 | Accès backoffice éditorial — Editor | Connecté editor | 1. Naviguer vers `/admin` | Dashboard affiché, sidebar filtrée (items éditoriaux uniquement) | P0 |
+| AUTH-PROTECT-005 | Accès page admin-only — Editor bloqué | Connecté editor | 1. Naviguer vers `/admin/team` | Redirection vers `/admin` (page non autorisée pour editor) | P0 |
+| AUTH-PROTECT-006 | Accès backoffice — User bloqué | Connecté user | 1. Naviguer vers `/admin` | Redirection vers `/` (rôle insuffisant pour le backoffice) | P0 |
+| AUTH-PROTECT-007 | Accès page éditoriale — User bloqué | Connecté user | 1. Naviguer vers `/admin/spectacles` | Redirection vers `/` (rôle insuffisant) | P1 |
 
 ---
 
@@ -455,6 +462,13 @@ Ce plan de test couvre l'intégralité du site web de la Compagnie Rouge Cardina
 | CROSS-SEC-003 | RLS — Membres équipe inactifs | Aucune session | 1. Requêter la table `membres_equipe` | Seuls les membres actifs sont retournés | P0 |
 | CROSS-SEC-004 | XSS — Injection dans champs admin | Connecté admin | 1. Créer un spectacle avec titre `<img src=x onerror=alert(1)>` 2. Vérifier l'affichage public | Le HTML est échappé, pas d'exécution de script | P0 |
 | CROSS-SEC-005 | CSRF — Server Actions | Connecté admin | 1. Vérifier que les mutations passent par Server Actions (POST) | Les actions sont protégées par l'architecture Server Actions de Next.js | P1 |
+| CROSS-SEC-006 | RLS — Editor CRUD tables éditoriales | Connecté editor | 1. INSERT/UPDATE/DELETE sur `spectacles`, `evenements`, `media` | Opérations autorisées par RLS (`has_min_role('editor')`) | P0 |
+| CROSS-SEC-007 | RLS — Editor bloqué tables admin-only | Connecté editor | 1. INSERT/UPDATE sur `membres_equipe`, `contacts_presse`, `configurations_site` | Opérations refusées par RLS (`is_admin()`) | P0 |
+| CROSS-SEC-008 | RLS — User bloqué écriture | Connecté user | 1. INSERT/UPDATE/DELETE sur n'importe quelle table éditoriale ou admin | Toutes les mutations refusées par RLS | P0 |
+| CROSS-SEC-009 | Middleware — Résolution rôle JWT | Connecté editor | 1. Vérifier que le middleware lit `app_metadata.role` du JWT 2. Naviguer dans le backoffice | Le rôle est correctement résolu, accès accordé aux routes éditoriales | P1 |
+| CROSS-SEC-010 | Middleware — Fallback `user_metadata` | Connecté avec rôle dans `user_metadata` uniquement | 1. Naviguer vers `/admin` | Le middleware utilise le fallback et résout le rôle correctement | P2 |
+
+> **Couverture complète** : voir [`specs/tests-permissions-et-rôles.md`](tests-permissions-et-rôles.md) pour les tests permissions détaillés (unit, DAL, RLS SQL, E2E).
 
 ### 21.5 — Performance
 
