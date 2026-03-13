@@ -60,7 +60,10 @@ DECLARE
     'public.compagnie_presentation_sections', 'public.compagnie_values', 'public.compagnie_stats',
     'public.categories', 'public.tags',
     'public.media_folders',
-    'public.media_tags'
+    'public.media_tags',
+    -- Junction tag tables
+    'public.articles_tags', 'public.communiques_tags',
+    'public.media_item_tags', 'public.spectacles_tags'
   ];
   tbl text;
 BEGIN

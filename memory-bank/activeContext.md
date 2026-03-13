@@ -13,6 +13,7 @@
 Migration de complément au périmètre audit + updated_at : 9 tables qui n'avaient pas encore les triggers `trg_audit` et `trg_update_updated_at` ont été couvertes en 3 niveaux de priorité. La migration est idempotente (`DROP TRIGGER IF EXISTS` avant chaque `CREATE`). Les schémas déclaratifs (`30_triggers.sql`) et la documentation (`migrations.md`, `schemas/README.md`) ont été synchronisés simultanément.
 
 **Tables couvertes** :
+
 - 🔴 CRITIQUE : `user_invitations`, `pending_invitations` (traçabilité sécurité / RH)
 - 🟠 HAUTE : `home_hero_slides`, `compagnie_presentation_sections`, `compagnie_values`, `compagnie_stats` (contenu public)
 - 🟡 MOYENNE : `categories`, `tags`, `media_folders` (taxonomie / médiathèque)
