@@ -88,7 +88,7 @@ Migration de complément au périmètre audit + updated_at : 9 tables qui n'avai
 
 **Test script**: `scripts/test-editor-access.ts` — tests 6 editorial tables (CRUD allowed) + 3 admin-only tables (blocked).
 
-**Plan reference**: `.github/prompts/plan-fix-editorRolePermissions.prompt.md`
+**Plan reference**: `.github/prompts/plan-TASK076-fix-editorRolePermissions.prompt.md`
 
 ---
 

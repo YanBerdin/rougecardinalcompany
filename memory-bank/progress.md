@@ -4,7 +4,7 @@
 
 **Context** : Migration complète du modèle d'auth binaire (`admin`/`non-admin`) vers un modèle hiérarchique à 3 niveaux (`user < editor < admin`). 15 phases implémentées couvrant SQL, RLS, TypeScript guards, DAL, Server Actions, pages admin, sidebar, et middleware.
 
-**Plan** : `.github/prompts/plan-fix-editorRolePermissions.prompt.md`
+**Plan** : `.github/prompts/plan-TASK076-fix-editorRolePermissions.prompt.md`
 
 | Phase | Description | Fichiers clés |
 | ----- | ----------- | ------------- |
