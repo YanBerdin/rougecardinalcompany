@@ -34,6 +34,8 @@ with check ( (select public.has_min_role('editor')) );
 
 Migrations de sécurité récentes
 
+- `supabase/migrations/20260313020000_add_audit_trigger_to_junction_tag_tables.sql` — fix : ajout `trg_audit` (AFTER INSERT OR UPDATE OR DELETE) sur les 4 tables de jonction tags : `articles_tags`, `communiques_tags`, `media_item_tags`, `spectacles_tags`. Compatibles avec les triggers `usage_count` existants. `popular_tags` exclue (VIEW). Déclaratif synchronisé : `30_triggers.sql`. Appliquée le 2026-03-13.
+- `supabase/migrations/20260313010000_add_audit_trigger_to_media_tags.sql` — fix : `media_tags` absente de l'array `audit_tables` → opérations éditeur non tracées dans `logs_audit`. Ajout de `trg_audit` (AFTER INSERT OR UPDATE OR DELETE). Déclaratif synchronisé : `30_triggers.sql`. Appliquée le 2026-03-13.
 - `supabase/migrations/20260312140000_fix_handle_new_user_admin_managed_flag.sql` — fix : `handle_new_user()` retourne `NEW` sans INSERT quand `raw_user_meta_data->>'_admin_managed' = 'true'` → `createUserProfileWithRole()` avec client authentifié capture le vrai UUID admin dans l'audit. Déclaratif synchronisé : `21_functions_auth_sync.sql`. Appliquée le 2026-03-12.
 - `supabase/migrations/20260312130000_skip_profile_trigger_for_invited_users.sql` — fix (supersédé) : tentative via `invited_at IS NOT NULL` — abandonnée car `generateLink` fixe `invited_at = NULL` à l'INSERT time. Remplacée par `20260312140000`. Appliquée le 2026-03-12.
 - `supabase/migrations/20260312120000_fix_profiles_delete_rls_for_admins.sql` — fix : policy RLS DELETE `profiles` étendue avec `OR (select public.is_admin()) = true` pour permettre la suppression pré-audit avec client authentifié. Déclaratif : `60_rls_profiles.sql`. Appliquée le 2026-03-12.

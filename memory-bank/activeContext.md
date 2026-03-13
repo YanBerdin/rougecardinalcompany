@@ -1,8 +1,31 @@
 # Active Context
 
-**Current Focus (2026-03-13)**: TASK076 finalisation — Extension triggers `trg_audit` + `trg_update_updated_at` sur 9 tables manquantes (migration `20260313120000`) + mise à jour documentation (`supabase/migrations/migrations.md`, `supabase/schemas/README.md`). Work précédent : Editor Role Permissions (2026-03-11) migration COMPLETE — 15-phase plan fully implemented. Auth model migrated from binary `admin/non-admin` to hierarchical `user < editor < admin`.
+**Current Focus (2026-03-13)**: TASK076 finalisation + BUGFIX audit coverage tags — Couverture `trg_audit` étendue à `media_tags` (migration `20260313010000`) et aux 4 tables de jonction tags (migration `20260313020000`). Précédemment : TASK076 triggers extension 9 tables (`20260313120000`). Auth model migré vers hiérarchique `user < editor < admin` (2026-03-11).
 
-**Last Major Updates**: ✅ TASK076 trigger extension (2026-03-13) — 9 tables couvertes, docs mises à jour + ✅ Editor Role Permissions — 15 phases complete (2026-03-11) + ✅ BUGFIX 4 RLS policy bugs (P0-RESTRICTIVE/P1a-super_admin/P1b-subquery/P2-UI) commité+déployé (2026-03-10) + ✅ TASK037B A11Y Admin complet (2026-03-08) + ✅ TASK037A A11Y Public (2026-03-08, via TASK072/TASK074) + BUGFIX RLS display_toggle visibility (2026-03-07) + BUGFIX DAL press select options (2026-03-07) + TASK075 Media Admin Composition Patterns (2026-03-05) + TASK074 Audit public/spectacles (2026-03-04) + BUGFIX-HOME-NEWS (2026-03-03) + TASK072 Audit public/home (2026-03-03)
+**Last Major Updates**: ✅ BUGFIX audit tags — `media_tags` + 4 junction tables couvertes (2026-03-13) + ✅ TASK076 trigger extension (2026-03-13) — 9 tables couvertes, docs mises à jour + ✅ Editor Role Permissions — 15 phases complete (2026-03-11) + ✅ BUGFIX 4 RLS policy bugs (P0-RESTRICTIVE/P1a-super_admin/P1b-subquery/P2-UI) commité+déployé (2026-03-10) + ✅ TASK037B A11Y Admin complet (2026-03-08) + ✅ TASK037A A11Y Public (2026-03-08, via TASK072/TASK074) + BUGFIX RLS display_toggle visibility (2026-03-07) + BUGFIX DAL press select options (2026-03-07) + TASK075 Media Admin Composition Patterns (2026-03-05) + TASK074 Audit public/spectacles (2026-03-04) + BUGFIX-HOME-NEWS (2026-03-03) + TASK072 Audit public/home (2026-03-03)
+
+---
+
+## ✅ BUGFIX — Couverture audit complète des tables tags (2026-03-13)
+
+### Summary
+
+Deux migrations de correctif pour s'assurer que toutes les tables liées aux tags sont couvertes par `trg_audit`.
+
+**`20260313010000_add_audit_trigger_to_media_tags.sql`** — `media_tags` était absente de l'array `audit_tables` dans `30_triggers.sql` (jamais incluse lors de TASK076). Les opérations d'un éditeur sur les tags médias (ajout de tag → journal vide) n'étaient donc pas tracées.
+
+**`20260313020000_add_audit_trigger_to_junction_tag_tables.sql`** — Suite logique : 4 tables de jonction tags également non couvertes. `popular_tags` est une VIEW — exclue. Les triggers `usage_count` existants sur `articles_tags`, `communiques_tags`, `spectacles_tags` ne sont pas affectés.
+
+| Table | `trg_audit` ajouté | Triggers préexistants |
+| ----- | --------- | --------------------- |
+| `media_tags` | ✅ | `media_tags_updated_at_trigger` |
+| `articles_tags` | ✅ | `trg_articles_tags_usage_count` |
+| `communiques_tags` | ✅ | `trg_communiques_tags_usage_count` |
+| `media_item_tags` | ✅ | — |
+| `spectacles_tags` | ✅ | `trg_spectacles_tags_usage_count` |
+
+**Schéma** : `supabase/schemas/30_triggers.sql` ✅ synchronisé
+**Documentation** : `supabase/migrations/migrations.md` ✅ + `supabase/schemas/README.md` ✅
 
 ---
 

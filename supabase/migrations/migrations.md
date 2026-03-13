@@ -4,6 +4,44 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-03-13 - FIX: Couverture audit complète des tables tags / junction tables
+
+2 migrations déployées pour couvrir `media_tags` et les 4 tables de jonction tags manquantes dans le trigger `trg_audit`.
+
+#### fix(audit) — `trg_audit` sur `media_tags`
+
+**Migration** : `20260313010000_add_audit_trigger_to_media_tags.sql`
+**Schéma déclaratif synchronisé** : ✅ `supabase/schemas/30_triggers.sql`
+
+**Problème** : La table `media_tags` (tags spécifiques aux médias : slug, couleur, description) était absente de l'array `audit_tables`. Les opérations d'un éditeur sur ces tags n'apparaissaient donc pas dans `logs_audit`.
+
+**Fix** : Ajout de `trg_audit` (AFTER INSERT OR UPDATE OR DELETE) sur `public.media_tags` + synchronisation du schéma déclaratif.
+
+#### fix(audit) — `trg_audit` sur les 4 tables de jonction tags
+
+**Migration** : `20260313020000_add_audit_trigger_to_junction_tag_tables.sql`
+**Schéma déclaratif synchronisé** : ✅ `supabase/schemas/30_triggers.sql`
+
+**Tables couvertes** :
+
+| Table | Colonnes | Trigger existant avant |
+| ----- | -------- | ---------------------- |
+| `public.articles_tags` | `article_id`, `tag_id` | `trg_articles_tags_usage_count` |
+| `public.communiques_tags` | `communique_id`, `tag_id` | `trg_communiques_tags_usage_count` |
+| `public.media_item_tags` | `media_id`, `tag_id`, `created_at` | — |
+| `public.spectacles_tags` | `spectacle_id`, `tag_id` | `trg_spectacles_tags_usage_count` |
+
+**Exclusion** : `popular_tags` est une **VIEW** — les triggers ne peuvent pas être attachés à une vue.
+
+**Notes techniques** :
+
+- Migration idempotente via `DROP TRIGGER IF EXISTS` avant chaque `CREATE`
+- Les triggers `usage_count` existants ne sont pas affectés
+- Seul `trg_audit` est ajouté (pas de `updated_at` — ces tables de jonction n'ont pas de colonne `updated_at`)
+- Application : ✅ Appliquée via `mcp_supabase_apply_migration` le 2026-03-13
+
+---
+
 ### 2026-03-13 - FEAT: Extension triggers audit et updated_at — TASK076
 
 1 migration déployée pour étendre la couverture des triggers `trg_audit` et `trg_update_updated_at` à 9 tables supplémentaires précédemment non couvertes.
