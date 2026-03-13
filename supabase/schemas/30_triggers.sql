@@ -59,7 +59,8 @@ DECLARE
     'public.home_hero_slides',
     'public.compagnie_presentation_sections', 'public.compagnie_values', 'public.compagnie_stats',
     'public.categories', 'public.tags',
-    'public.media_folders'
+    'public.media_folders',
+    'public.media_tags'
   ];
   tbl text;
 BEGIN
