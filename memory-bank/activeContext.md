@@ -1,8 +1,39 @@
 # Active Context
 
-**Current Focus (2026-03-13)**: TASK076 finalisation + BUGFIX audit coverage tags — Couverture `trg_audit` étendue à `media_tags` (migration `20260313010000`) et aux 4 tables de jonction tags (migration `20260313020000`). Précédemment : TASK076 triggers extension 9 tables (`20260313120000`). Auth model migré vers hiérarchique `user < editor < admin` (2026-03-11).
+**Current Focus (2026-03-14)**: TASK078 — Implémentation des 239 tests permissions/rôles (branche mergée dans master). TASK077 — Audit RLS MIG-005 en attente d'implémentation (13 tables identifiées). Fix sécurité `flatted` CVE corrigé (override `>=3.4.0`, pnpm audit clean).
 
-**Last Major Updates**: ✅ BUGFIX audit tags — `media_tags` + 4 junction tables couvertes (2026-03-13) + ✅ TASK076 trigger extension (2026-03-13) — 9 tables couvertes, docs mises à jour + ✅ Editor Role Permissions — 15 phases complete (2026-03-11) + ✅ BUGFIX 4 RLS policy bugs (P0-RESTRICTIVE/P1a-super_admin/P1b-subquery/P2-UI) commité+déployé (2026-03-10) + ✅ TASK037B A11Y Admin complet (2026-03-08) + ✅ TASK037A A11Y Public (2026-03-08, via TASK072/TASK074) + BUGFIX RLS display_toggle visibility (2026-03-07) + BUGFIX DAL press select options (2026-03-07) + TASK075 Media Admin Composition Patterns (2026-03-05) + TASK074 Audit public/spectacles (2026-03-04) + BUGFIX-HOME-NEWS (2026-03-03) + TASK072 Audit public/home (2026-03-03)
+**Last Major Updates**: ✅ TASK078 branche `test/task078-implement-permissions-tests` mergée + pushée (2026-03-14) + ✅ FIX SEC flatted `3.3.3` → `3.4.1` GHSA-25h7-pfq9-p65f (2026-03-14) + ✅ BUGFIX audit tags — `media_tags` + 4 junction tables couvertes (2026-03-13) + ✅ TASK076 trigger extension (2026-03-13) — 9 tables couvertes, docs mises à jour + ✅ Editor Role Permissions — 15 phases complete (2026-03-11) + ✅ BUGFIX 4 RLS policy bugs (P0-RESTRICTIVE/P1a-super_admin/P1b-subquery/P2-UI) commité+déployé (2026-03-10) + ✅ TASK037B A11Y Admin complet (2026-03-08) + ✅ TASK037A A11Y Public (2026-03-08, via TASK072/TASK074)
+
+---
+
+## ✅ FIX SÉCURITÉ — flatted DoS (2026-03-14)
+
+**CVE** : GHSA-25h7-pfq9-p65f — unbounded recursion DoS dans `flatted.parse()` revive phase.
+
+| Package | Avant | Après | Chemin |
+| ------- | ----- | ----- | ------ |
+| `flatted` | `3.3.3` | `3.4.1` | `eslint > file-entry-cache > flat-cache > flatted` |
+
+**Fix** : Override `"flatted": ">=3.4.0"` ajouté dans `pnpm.overrides` de `package.json`.
+**Commit** : `fix(security): force flatted >=3.4.0 via pnpm override (GHSA-25h7-pfq9-p65f)`
+**Résultat** : `pnpm audit` → `No known vulnerabilities found` ✅
+
+---
+
+## ✅ TASK078 — Merge branche tests permissions (2026-03-14)
+
+**Branche** : `test/task078-implement-permissions-tests` → `master`
+
+**Contenu mergé** :
+
+- `.env.e2e.example` — template pour les variables E2E (secrets exclus du git)
+- `memory-bank/tasks/TASK077-fix-declarative-schema-Violation.md` — audit RLS étendu à 13 tables
+- `memory-bank/tasks/TASK078-implement-permissions-tests.md` — plan 239 cas de test
+- `specs/tests-permissions-et-rôles.md` — plan de test complet (UNIT=42, DAL=80, RLS=92, E2E=25)
+- `specs/PLAN_DE_TEST_COMPLET.md` — mis à jour
+- `memory-bank/tasks/_index.md` — mis à jour
+
+**État TASK078** : En cours — plan finalisé, implémentation à démarrer.
 
 ---
 

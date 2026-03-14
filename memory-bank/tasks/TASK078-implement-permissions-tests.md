@@ -1,4 +1,4 @@
-# [TASK078] — Implémentation des tests permissions et rôles
+# \[TASK078] — Implémentation des tests permissions et rôles
 
 **Status:** Pending
 **Added:** 2026-03-14

@@ -13,7 +13,8 @@
 ## En Cours
 
 - `TASK038` Responsive Testing & Validation - Plan reviewed, Phase 0 (instrumentation) pending
-- `TASK078` Implémentation tests permissions et rôles — 239 cas (UNIT=42, DAL=80, RLS=92, E2E=25) pour prouver le modèle `user < editor < admin`. Plan : `specs/tests-permissions-et-rôles.md`. Branch : `test/task078-implement-permissions-tests`.
+- `TASK077` Fix Violation MIG-005 — Séparer les 13 políticas RLS `to anon, authenticated` en políticas distinctes. Audit complet révisé le 2026-03-14 (P1 : 3 tables avec fonctions coûteuses, P2 : 10 tables `using ( true )`). Implémentation pendante.
+- `TASK078` Implémentation tests permissions et rôles — 239 cas (UNIT=42, DAL=80, RLS=92, E2E=25) pour prouver le modèle `user < editor < admin`. Plan finalisé : `specs/tests-permissions-et-rôles.md`. Branche mergée dans master (2026-03-14). Implémentation à démarrer.
 
 ## En Attente
 

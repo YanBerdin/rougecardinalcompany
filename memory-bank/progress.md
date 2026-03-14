@@ -1,5 +1,17 @@
 # Progress
 
+## FIX Sécurité — flatted DoS GHSA-25h7-pfq9-p65f (2026-03-14)
+
+`flatted 3.3.3` → `3.4.1` via override `pnpm.overrides` dans `package.json`. Chemin : `eslint > file-entry-cache > flat-cache > flatted`. Commit : `fix(security): force flatted >=3.4.0 via pnpm override`. `pnpm audit` : `No known vulnerabilities found` ✅.
+
+---
+
+## TASK078 — Plan tests permissions/rôles mergé (2026-03-14)
+
+**Branche** `test/task078-implement-permissions-tests` mergée dans `master`. Contenu : plan 239 cas (`specs/tests-permissions-et-rôles.md`), TASK078 memory bank, `.env.e2e.example`. Implémentation des tests à démarrer.
+
+---
+
 ## Editor Role Permissions — Full Migration (2026-03-11)
 
 **Context** : Migration complète du modèle d'auth binaire (`admin`/`non-admin`) vers un modèle hiérarchique à 3 niveaux (`user < editor < admin`). 15 phases implémentées couvrant SQL, RLS, TypeScript guards, DAL, Server Actions, pages admin, sidebar, et middleware.
