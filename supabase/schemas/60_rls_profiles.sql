@@ -5,10 +5,18 @@ alter table public.profiles enable row level security;
 
 -- Lecture publique des profils
 drop policy if exists "Profiles are viewable by everyone" on public.profiles;
-create policy "Profiles are viewable by everyone"
+drop policy if exists "Anon can view profiles" on public.profiles;
+create policy "Anon can view profiles"
 on public.profiles
 for select
-to anon, authenticated
+to anon
+using ( true );
+
+drop policy if exists "Authenticated can view profiles" on public.profiles;
+create policy "Authenticated can view profiles"
+on public.profiles
+for select
+to authenticated
 using ( true );
 
 -- Insertion : utilisateurs peuvent créer leur propre profil OU admins peuvent créer n'importe quel profil

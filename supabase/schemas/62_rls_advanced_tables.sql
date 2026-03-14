@@ -38,15 +38,26 @@ using ( (select public.is_admin()) );
 -- ---- CATEGORIES ----
 alter table public.categories enable row level security;
 
--- Vue combinée: catégories actives publiques OU editor+ voit tout
+-- Vue séparée: catégories actives publiques OU editor+ voit tout
 drop policy if exists "Active categories are viewable by everyone" on public.categories;
 drop policy if exists "Admins can view all categories" on public.categories;
 drop policy if exists "View categories (active OR admin)" on public.categories;
 drop policy if exists "View categories (active OR editor+)" on public.categories;
-create policy "View categories (active OR editor+)"
+drop policy if exists "Anon can view active categories" on public.categories;
+drop policy if exists "Authenticated can view categories" on public.categories;
+
+-- anon: seulement catégories actives (has_min_role non évalué pour anon)
+create policy "Anon can view active categories"
 on public.categories
 for select
-to anon, authenticated
+to anon
+using ( is_active = true );
+
+-- authenticated: catégories actives OU editors+ voient tout
+create policy "Authenticated can view categories"
+on public.categories
+for select
+to authenticated
 using ( is_active = true or (select public.has_min_role('editor')) );
 
 -- Seuls les editors+ peuvent gérer les catégories
@@ -80,10 +91,18 @@ alter table public.tags enable row level security;
 
 -- Tout le monde peut voir les tags
 drop policy if exists "Tags are viewable by everyone" on public.tags;
-create policy "Tags are viewable by everyone"
+drop policy if exists "Anon can view tags" on public.tags;
+create policy "Anon can view tags"
 on public.tags
 for select
-to anon, authenticated
+to anon
+using ( true );
+
+drop policy if exists "Authenticated can view tags" on public.tags;
+create policy "Authenticated can view tags"
+on public.tags
+for select
+to authenticated
 using ( true );
 
 -- Seuls les editors+ peuvent gérer les tags
@@ -116,10 +135,18 @@ using ( (select public.has_min_role('editor')) );
 -- spectacles_categories
 alter table public.spectacles_categories enable row level security;
 drop policy if exists "Spectacle category relations are viewable by everyone" on public.spectacles_categories;
-create policy "Spectacle category relations are viewable by everyone"
+drop policy if exists "Anon can view spectacle category relations" on public.spectacles_categories;
+create policy "Anon can view spectacle category relations"
 on public.spectacles_categories
 for select
-to anon, authenticated
+to anon
+using ( true );
+
+drop policy if exists "Authenticated can view spectacle category relations" on public.spectacles_categories;
+create policy "Authenticated can view spectacle category relations"
+on public.spectacles_categories
+for select
+to authenticated
 using ( true );
 
 -- Gestion editor+ (politiques granulaires)
@@ -151,10 +178,18 @@ using ( (select public.has_min_role('editor')) );
 -- spectacles_tags
 alter table public.spectacles_tags enable row level security;
 drop policy if exists "Spectacle tag relations are viewable by everyone" on public.spectacles_tags;
-create policy "Spectacle tag relations are viewable by everyone"
+drop policy if exists "Anon can view spectacle tag relations" on public.spectacles_tags;
+create policy "Anon can view spectacle tag relations"
 on public.spectacles_tags
 for select
-to anon, authenticated
+to anon
+using ( true );
+
+drop policy if exists "Authenticated can view spectacle tag relations" on public.spectacles_tags;
+create policy "Authenticated can view spectacle tag relations"
+on public.spectacles_tags
+for select
+to authenticated
 using ( true );
 
 -- Gestion editor+ (politiques granulaires)
@@ -186,10 +221,18 @@ using ( (select public.has_min_role('editor')) );
 -- articles_categories
 alter table public.articles_categories enable row level security;
 drop policy if exists "Article category relations are viewable by everyone" on public.articles_categories;
-create policy "Article category relations are viewable by everyone"
+drop policy if exists "Anon can view article category relations" on public.articles_categories;
+create policy "Anon can view article category relations"
 on public.articles_categories
 for select
-to anon, authenticated
+to anon
+using ( true );
+
+drop policy if exists "Authenticated can view article category relations" on public.articles_categories;
+create policy "Authenticated can view article category relations"
+on public.articles_categories
+for select
+to authenticated
 using ( true );
 
 -- Gestion editor+ (politiques granulaires)
@@ -221,10 +264,18 @@ using ( (select public.has_min_role('editor')) );
 -- articles_tags
 alter table public.articles_tags enable row level security;
 drop policy if exists "Article tag relations are viewable by everyone" on public.articles_tags;
-create policy "Article tag relations are viewable by everyone"
+drop policy if exists "Anon can view article tag relations" on public.articles_tags;
+create policy "Anon can view article tag relations"
 on public.articles_tags
 for select
-to anon, authenticated
+to anon
+using ( true );
+
+drop policy if exists "Authenticated can view article tag relations" on public.articles_tags;
+create policy "Authenticated can view article tag relations"
+on public.articles_tags
+for select
+to authenticated
 using ( true );
 
 -- Gestion editor+ (politiques granulaires)
@@ -330,10 +381,18 @@ alter table public.sitemap_entries enable row level security;
 
 -- Tout le monde peut voir les entrées du sitemap
 drop policy if exists "Sitemap entries are viewable by everyone" on public.sitemap_entries;
-create policy "Sitemap entries are viewable by everyone"
+drop policy if exists "Anon can view sitemap entries" on public.sitemap_entries;
+create policy "Anon can view sitemap entries"
 on public.sitemap_entries
 for select
-to anon, authenticated
+to anon
+using ( is_indexed = true );
+
+drop policy if exists "Authenticated can view sitemap entries" on public.sitemap_entries;
+create policy "Authenticated can view sitemap entries"
+on public.sitemap_entries
+for select
+to authenticated
 using ( is_indexed = true );
 
 -- Seuls les admins peuvent gérer le sitemap

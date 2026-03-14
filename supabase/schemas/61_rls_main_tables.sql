@@ -5,10 +5,18 @@
 alter table public.medias enable row level security;
 
 drop policy if exists "Medias are viewable by everyone" on public.medias;
-create policy "Medias are viewable by everyone"
+drop policy if exists "Anon can view medias" on public.medias;
+create policy "Anon can view medias"
 on public.medias
 for select
-to anon, authenticated
+to anon
+using ( true );
+
+drop policy if exists "Authenticated can view medias" on public.medias;
+create policy "Authenticated can view medias"
+on public.medias
+for select
+to authenticated
 using ( true );
 
 drop policy if exists "Authenticated users can insert medias" on public.medias;
@@ -39,11 +47,25 @@ alter table public.spectacles enable row level security;
 drop policy if exists "Public spectacles are viewable by everyone" on public.spectacles;
 drop policy if exists "Admins can view all spectacles" on public.spectacles;
 drop policy if exists "View spectacles (public published OR admin all)" on public.spectacles;
+drop policy if exists "View spectacles (public published/archived OR editor+ all)" on public.spectacles;
+drop policy if exists "Anon can view public spectacles" on public.spectacles;
+drop policy if exists "Authenticated can view spectacles" on public.spectacles;
 
-create policy "View spectacles (public published/archived OR editor+ all)"
+-- anon: seulement spectacles publics publiés/archivés (has_min_role non évalué pour anon)
+create policy "Anon can view public spectacles"
 on public.spectacles
 for select
-to anon, authenticated
+to anon
+using (
+  public = true
+  and status in ('published', 'archived')
+);
+
+-- authenticated: spectacles publics publiés/archivés OU editors+ voient tout
+create policy "Authenticated can view spectacles"
+on public.spectacles
+for select
+to authenticated
 using (
   (
     -- Public spectacles: published OR archived (for "Nos Créations Passées")
@@ -90,10 +112,18 @@ using (
 alter table public.evenements enable row level security;
 
 drop policy if exists "Events are viewable by everyone" on public.evenements;
-create policy "Events are viewable by everyone"
+drop policy if exists "Anon can view events" on public.evenements;
+create policy "Anon can view events"
 on public.evenements
 for select
-to anon, authenticated
+to anon
+using ( true );
+
+drop policy if exists "Authenticated can view events" on public.evenements;
+create policy "Authenticated can view events"
+on public.evenements
+for select
+to authenticated
 using ( true );
 
 drop policy if exists "Admins can create events" on public.evenements;
@@ -123,11 +153,22 @@ alter table public.partners enable row level security;
 
 drop policy if exists "Public partners are viewable by anyone" on public.partners;
 drop policy if exists "Admins can view all partners" on public.partners;
+drop policy if exists "View partners (active public OR admin all)" on public.partners;
+drop policy if exists "Anon can view active partners" on public.partners;
+drop policy if exists "Authenticated can view partners" on public.partners;
 
-create policy "View partners (active public OR admin all)"
+-- anon: seulement partenaires actifs (is_admin() non évalué pour anon)
+create policy "Anon can view active partners"
 on public.partners
 for select
-to anon, authenticated
+to anon
+using ( is_active = true );
+
+-- authenticated: partenaires actifs OU admins voient tout
+create policy "Authenticated can view partners"
+on public.partners
+for select
+to authenticated
 using (
   is_active = true
   or (select public.is_admin())

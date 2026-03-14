@@ -1,8 +1,8 @@
 # TASK077 : Fix Violation MIG-005 : `to anon, authenticated` combiné (Majeure)
 
-**Status:** Pending
+**Status:** Completed
 **Added:** 2026-03-09
-**Updated:** 2026-03-14
+**Updated:** 2026-03-15
 
 ## Original Request
 
@@ -112,16 +112,54 @@ Le fichier `08_table_articles_presse.sql` contient deux NOTE indiquant que `GRAN
 | P2 | Séparer policies `to anon, authenticated` conformité seule (10 tables) | 60_rls_profiles.sql + 61_rls_main_tables.sql + 62_rls_advanced_tables.sql + 08_table_articles_presse.sql | 25 min |
 | P3 | Vérifier que les grants par défaut couvrent la vue `articles_presse_public` | Schema ou migration | 5 min |
 
+## Migration
+
+**Fichier** : `supabase/migrations/20260315001500_fix_rls_separate_anon_authenticated_batch1.sql`
+**Approche** : Migration manuelle (pas `supabase db diff` — celui-ci générait des changements parasites dangereux : drops analytics_events INSERT, rebuilds de views, recreate de fonctions)
+**Contenu** : 13 DROP + 26 CREATE policies (13 tables × 2 rôles) + 1 conditional DROP/CREATE pour spectacles INSERT (rename TASK076)
+**Testé** : `supabase db reset` — aucune erreur, toutes policies vérifiées via pg_policies
+
+## Suite
+
+Les violations restantes (~21 policies dans 17 tables, 10 fichiers schema) sont suivies dans **TASK079**.
+
 ## Progress Log
+
+### 2026-03-15
+
+- Migration manuelle créée et testée avec succès (db reset)
+- Vérification pg_policies : 13 tables conformes — 0 policy combinée `{anon,authenticated}`
+- TASK079 créée pour les 21 violations restantes dans 17 tables
+- Marquée Completed
+
+### 2026-03-14
+
+- Audit grep complet révèle ~20 violations additionnelles dans d'autres fichiers schema
+- 4 fichiers schema modifiés et vérifiés (60, 61, 62, 08)
 
 ### 2026-03-09
 
 - Création initiale de la task avec 5 tables identifiées
 
-### 2026-03-14
+### 2026-03-14 bis
 
 - Re-audit complet des fichiers schema (60, 61, 62, 08)
 - Correction : `spectacles` utilise `has_min_role('editor')` et non `is_admin()` — exemple mis à jour
 - Ajout de 8 tables manquantes dans l'audit initial (total : 13 tables)
 - Ajout de `categories` (62_rls_advanced_tables.sql) en P1 (impact perf, fn évaluée pour anon)
 - Séparation P1 (impact perf : 3 tables) vs P2 (conformité seule : 10 tables)
+
+### 2026-03-14 (implémentation)
+
+- **P1 (impact perf)** — `spectacles`, `partners`, `categories` : policies séparées avec logique différente pour `anon` vs `authenticated`
+  - `spectacles` : `anon` n'évalue plus `has_min_role('editor')` — voit seulement `published/archived`
+  - `partners` : `anon` n'évalue plus `is_admin()` — voit seulement `is_active = true`
+  - `categories` : `anon` n'évalue plus `has_min_role('editor')` — voit seulement `is_active = true`
+- **P2 (conformité)** — 10 tables divisées en policies `to anon` + `to authenticated` distinctes :
+  - `medias`, `evenements` (61_rls_main_tables.sql)
+  - `profiles` (60_rls_profiles.sql)
+  - `tags`, `spectacles_categories`, `spectacles_tags`, `articles_categories`, `articles_tags`, `sitemap_entries` (62_rls_advanced_tables.sql)
+  - `articles_presse` (08_table_articles_presse.sql)
+- **P3** — Vue `articles_presse_public` (SECURITY INVOKER) : policies RLS séparées couvrent déjà `anon` et `authenticated`, aucun GRANT supplémentaire requis
+- Fichiers modifiés : `60_rls_profiles.sql`, `61_rls_main_tables.sql`, `62_rls_advanced_tables.sql`, `08_table_articles_presse.sql`
+- Prochaine étape : générer migration via `supabase db diff -f fix_rls_separate_anon_authenticated`

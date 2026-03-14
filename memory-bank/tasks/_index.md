@@ -13,11 +13,11 @@
 ## En Cours
 
 - `TASK038` Responsive Testing & Validation - Plan reviewed, Phase 0 (instrumentation) pending
-- `TASK077` Fix Violation MIG-005 — Séparer les 13 políticas RLS `to anon, authenticated` en políticas distinctes. Audit complet révisé le 2026-03-14 (P1 : 3 tables avec fonctions coûteuses, P2 : 10 tables `using ( true )`). Implémentation pendante.
 - `TASK078` Implémentation tests permissions et rôles — 239 cas (UNIT=42, DAL=80, RLS=92, E2E=25) pour prouver le modèle `user < editor < admin`. Plan finalisé : `specs/tests-permissions-et-rôles.md`. Branche mergée dans master (2026-03-14). Implémentation à démarrer.
 
 ## En Attente
 
+- `TASK079` Fix RLS Remaining Combined Policies (Batch 2) — 21 policies `to anon, authenticated` dans 17 tables (10 fichiers schema). Suite de TASK077. Inclut correction duplicates TASK076 (communiques_presse, compagnie_presentation_sections).
 - `TASK005` Optimisation SEO et meta-tags dynamiques
 - `TASK007` Tests automatisés et monitoring
 - `TASK008` Configuration des redirections vers billetterie externe
@@ -30,8 +30,6 @@
 - `TASK056` Remplacer les données de seed par des fichiers valides - Low Priority (4 images manquantes dans Storage, thumbnails échouées)
 
 ## Terminé
-
-- `TASK076` Editor Role Permissions + Trigger Extension — migration complète (15 phases 2026-03-11 + extension triggers 9 tables 2026-03-13). Auth model: `user < editor < admin`. New `has_min_role()` SQL, `roles.ts` TS guards, all DAL/actions/pages/sidebar/middleware migrated. `is-admin.ts` deprecated. Migration `20260313120000` : triggers `trg_audit`/`trg_update_updated_at` sur 9 tables manquantes.
 
 - `AUDIT-TRIGGER-FIX` Audit Trigger Bugfix (tg_op + auth.uid()) - Completed on 2026-02-11 (Two critical bugs fixed: tg_op case sensitivity causing record_id/new_values NULL + auth.uid() type mismatch causing user_id NULL; Migration 20260211005525 applied local + cloud via MCP; User validated: email now displays instead of "Système")
 - `TASK057` Spectacle Landscape Photos Integration - Completed on 2026-02-01 (2 photos paysage par spectacle, BigInt fix TASK055 pattern, migrations cloud via MCP, DAL + Server Actions + API route, Admin UI avec MediaLibraryPicker, Public display dans SpectacleDetailView)
@@ -114,3 +112,5 @@
 - `BUGFIX-RLS-DISPLAY-TOGGLES` RLS display_toggle visibility fix — Completed on 2026-03-07 (Policy SELECT configurations_site corrigée : ajout `key like 'display_toggle_%'` + GRANT SELECT anon/authenticated, 2 migrations 20260304000000+20260304010000, schéma déclaratif synchronisé, commit 16e545d)
 - `TASK037A` Audit Accessibilité Site Public - ✅ Completed on 2026-03-08 (2C+6M+11M — ShowCard overlay focus-within, emojis ContactPresseSection role=img, carousel WCAG, focus management, liens HTML valides ; fixes intégrés dans TASK072/TASK074)
 - `TASK037B` Audit Accessibilité Modules Admin - ✅ Completed on 2026-03-08 (3C+8M+10M tous corrigés — skip-link + main#main-content, breadcrumb factice, aria-label 4 champs recherche, tailles boutons 44px, role=alert ×5, AlertDialog, DialogDescription, aria-describedby forms Presse, aria-labels contextuels CRUD+Dashboard, aria-hidden icônes, aria-live loading+upload ; branche feat/task037b-a11y-admin-fixes)
+- `TASK076` Editor Role Permissions + Trigger Extension — migration complète (15 phases 2026-03-11 + extension triggers 9 tables 2026-03-13). Auth model: `user < editor < admin`. New `has_min_role()` SQL, `roles.ts` TS guards, all DAL/actions/pages/sidebar/middleware migrated. `is-admin.ts` deprecated. Migration `20260313120000` : triggers `trg_audit`/`trg_update_updated_at` sur 9 tables manquantes.
+- `TASK077` Fix Violation MIG-005 (Batch 1 — 13 tables) — Séparation des 13 policies RLS `to anon, authenticated` en policies distinctes par rôle. 4 fichiers schema modifiés (60, 61, 62, 08). Migration manuelle `20260315001500` (13 drops + 26 creates + 1 rename). Testée db reset. TASK079 créée pour les 21 violations restantes.

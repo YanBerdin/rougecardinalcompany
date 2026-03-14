@@ -57,10 +57,18 @@ comment on view public.articles_presse_public is
 
 -- Public can read only published articles
 drop policy if exists "Public press articles are viewable by everyone" on public.articles_presse;
-create policy "Public press articles are viewable by everyone"
+drop policy if exists "Anon can view published press articles" on public.articles_presse;
+create policy "Anon can view published press articles"
 on public.articles_presse
 for select
-to anon, authenticated
+to anon
+using ( published_at is not null );
+
+drop policy if exists "Authenticated can view published press articles" on public.articles_presse;
+create policy "Authenticated can view published press articles"
+on public.articles_presse
+for select
+to authenticated
 using ( published_at is not null );
 
 -- Editors+ can read all articles (including drafts)
