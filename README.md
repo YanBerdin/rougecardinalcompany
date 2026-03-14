@@ -15,11 +15,12 @@ Rouge Cardinal Company est une application web pour une compagnie de théâtre c
 - automatiser la rétention RGPD
 - gérer une médiathèque complète avec déduplication SHA‑256, tags, dossiers et suivi d’usage.
 
-**Le système sert trois groupes d’utilisateurs :**
+**Le système sert quatre groupes d'utilisateurs :**
 
 - visiteurs anonymes
 - utilisateurs authentifiés
-- administrateurs, avec contrôle d’accès via Row Level Security (RLS) et une architecture de défense en profondeur sur sept couches.
+- éditeurs — accès éditorial complet (spectacles, événements, médias, lieux, presse)
+- administrateurs — contrôle d'accès complet via Row Level Security (RLS) et une architecture de défense en profondeur sur sept couches.
 
 ---
 
@@ -49,11 +50,12 @@ Rouge Cardinal Company est une application web full-stack conçue pour :
 - Gérer une médiathèque complète avec déduplication SHA-256, tags, dossiers et suivi d'usage
 - Automatiser la rétention RGPD
 
-**Trois groupes d'utilisateurs :**
+**Quatre groupes d'utilisateurs :**
 
 - Visiteurs anonymes
 - Utilisateurs authentifiés
-- Administrateurs — contrôle d'accès via Row Level Security (RLS) et architecture de défense en profondeur sur sept couches
+- Éditeurs — CRUD éditorial complet (`editor`), bloqués sur les zones admin-only
+- Administrateurs — accès total, Row Level Security (RLS) et architecture de défense en profondeur sur sept couches
 
 ---
 
@@ -121,9 +123,9 @@ flowchart TB
 
 - 14 sections admin (~30 pages), 9 pages publiques, 10 API Routes
 - 31 modules DAL + 5 helpers
-- 36 tables PostgreSQL, 100% RLS, 45 fichiers de schéma déclaratif
-- 93 migrations SQL (sept. 2025 → fév. 2026)
-- 87 scripts de test/audit/maintenance
+- 36 tables PostgreSQL, 100% RLS, 46 fichiers de schéma déclaratif
+- 115 migrations SQL (sept. 2025 → mars 2026)
+- 92 scripts de test/audit/maintenance
 
 ---
 
@@ -134,15 +136,17 @@ La sécurité est organisée en sept couches de défense en profondeur :
 ```mermaid
 flowchart TB
   L1["1 · Réseau — Vercel Edge, DDoS/SSL"]
-  L2["2 · Middleware — JWT via getClaims() ~2-5ms"]
-  L3["3 · Server Actions — requireBackofficeAccess(), Zod"]
-  L4["4 · RLS PostgreSQL — 36 tables"]
+  L2["2 · Middleware — JWT via getClaims() ~2-5ms · isRoleAtLeast()"]
+  L3["3 · Server Actions — requireBackofficeAccess() / requireAdminOnly(), Zod"]
+  L4["4 · RLS PostgreSQL — 36 tables · has_min_role()"]
   L5["5 · Fonctions DB — SECURITY DEFINER rétention"]
   L6["6 · Storage RLS — medias public · backups service_role"]
   L7["7 · Audit & Monitoring — triggers immuables · Sentry P0/P1"]
 
   L1 --> L2 --> L3 --> L4 --> L5 --> L6 --> L7
 ```
+
+**Modèle d'autorisation hiérarchique :** `user (0) < editor (1) < admin (2)` — fonction SQL `has_min_role()` + guards TypeScript (`lib/auth/roles.ts`).
 
 **Principes appliqués :** zero trust · least privilege · defense in depth · auditabilité · fail-secure
 
@@ -259,18 +263,22 @@ pnpm dlx supabase functions deploy <function-name>
 | Fonctionnalité | Statut |
 | --- | --- |
 | Site public (home, spectacles, presse, compagnie, agenda, contact) | ✅ Complet |
-| RLS sur 36 tables | ✅ Complet |
+| RLS sur 36 tables (100% couverture) | ✅ Complet |
 | Dashboard admin (équipe, médias, partenaires, presse, config) | ✅ Complet |
+| Modèle d'autorisation hiérarchique (`user < editor < admin`) | ✅ Complet |
 | Intégration email (Resend + React Email) | ✅ Complet |
 | Versioning contenu (9 types d'entités) | ✅ Complet |
 | Médiathèque (SHA-256, tags, dossiers, thumbnails) | ✅ Complet |
+| Accessibilité WCAG 2.2 Level AA (site public + admin) | ✅ Complet |
+| Composition patterns (Context/Compound Components) | ✅ Complet |
+| Couverture audit/triggers complète (36 tables) | ✅ Complet |
 | Rétention RGPD automatisée (Edge Function) | ✅ Complet |
 | Monitoring Sentry multi-runtime | ✅ Complet |
 | Backups automatiques (GitHub Actions hebdomadaire) | ✅ Complet |
 | Tests E2E Playwright | 🔄 En cours (Phase 0) |
 | Déploiement production | 🔄 En cours |
 
-**Phase actuelle :** Infrastructure et site public finalisés. Extension des capacités admin en cours.
+**Phase actuelle :** Infrastructure, site public et back-office finalisés. Modèle de rôles hiérarchique déployé. Tests E2E en cours.
 
 ---
 
