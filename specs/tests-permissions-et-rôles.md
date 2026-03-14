@@ -187,6 +187,11 @@
 | ROLE-DAL-046 | Editor bloqué CRUD spectacles_membres_equipe | `spectacles_membres_equipe` | INSERT | Refusé (RLS) | P1 |
 | ROLE-DAL-047 | Editor bloqué select logs_audit | `logs_audit` | SELECT | Aucune ligne retournée | P1 |
 | ROLE-DAL-048 | Editor bloqué select content_versions | `content_versions` | SELECT | Aucune ligne retournée | P2 |
+| ROLE-DAL-069 | Editor bloqué update profiles (autre user) | `profiles` | UPDATE | Refusé (RLS — pas self, pas admin) | P1 |
+| ROLE-DAL-070 | Editor bloqué insert pending_invitations | `pending_invitations` | INSERT | Refusé (RLS) | P1 |
+| ROLE-DAL-071 | Editor bloqué CRUD sitemap_entries | `sitemap_entries` | INSERT | Refusé (RLS — admin only) | P2 |
+| ROLE-DAL-072 | Editor bloqué CRUD data_retention_config | `data_retention_config` | INSERT/UPDATE | Refusé (RLS — admin only) | P2 |
+| ROLE-DAL-073 | Editor bloqué select data_retention_audit | `data_retention_audit` | SELECT | Aucune ligne retournée | P2 |
 
 ### 3.3 — Admin : accès complet (vérification)
 
@@ -202,6 +207,11 @@
 | ROLE-DAL-056 | Admin CRUD home_about_content | `home_about_content` | CRUD | Succès complet | P1 |
 | ROLE-DAL-057 | Admin select logs_audit | `logs_audit` | SELECT | Lignes retournées | P1 |
 | ROLE-DAL-058 | Admin select content_versions | `content_versions` | SELECT | Lignes retournées | P2 |
+| ROLE-DAL-074 | Admin CRUD profiles (autre user) | `profiles` | UPDATE | Succès | P1 |
+| ROLE-DAL-075 | Admin CRUD pending_invitations | `pending_invitations` | CRUD | Succès complet | P1 |
+| ROLE-DAL-076 | Admin CRUD sitemap_entries | `sitemap_entries` | CRUD | Succès complet | P2 |
+| ROLE-DAL-077 | Admin CRUD data_retention_config | `data_retention_config` | CRUD | Succès complet | P2 |
+| ROLE-DAL-078 | Admin select data_retention_audit | `data_retention_audit` | SELECT | Lignes retournées | P2 |
 
 ### 3.4 — User : aucun accès écriture (bloqué)
 
@@ -217,6 +227,8 @@
 | ROLE-DAL-066 | User bloqué insert partners | `partners` | INSERT | Refusé (RLS) | P0 |
 | ROLE-DAL-067 | User bloqué insert configurations_site | `configurations_site` | INSERT | Refusé (RLS) | P1 |
 | ROLE-DAL-068 | User select spectacles publics seuls | `spectacles` | SELECT | Uniquement public=true + published/archived | P0 |
+| ROLE-DAL-079 | User self-update profile | `profiles` | UPDATE | Succès (propre profil uniquement) | P1 |
+| ROLE-DAL-080 | User bloqué update profiles (autre user) | `profiles` | UPDATE | Refusé (RLS — pas admin) | P1 |
 
 ---
 
@@ -303,6 +315,17 @@
 | ROLE-RLS-056 | Admin select content_versions | `content_versions` | SELECT | Lignes retournées | P2 |
 | ROLE-RLS-057 | Admin CRUD user_invitations | `user_invitations` | CRUD | Succès complet | P1 |
 | ROLE-RLS-058 | Admin CRUD seo_redirects | `seo_redirects` | CRUD | Succès complet | P2 |
+| ROLE-RLS-067 | Admin CRUD pending_invitations | `pending_invitations` | CRUD | Succès complet | P1 |
+| ROLE-RLS-068 | Admin CRUD sitemap_entries | `sitemap_entries` | CRUD | Succès complet | P2 |
+| ROLE-RLS-069 | Admin CRUD data_retention_config | `data_retention_config` | CRUD | Succès complet | P2 |
+| ROLE-RLS-070 | Admin select data_retention_audit | `data_retention_audit` | SELECT | Lignes retournées | P2 |
+| ROLE-RLS-071 | Admin update profiles (autre user) | `profiles` | UPDATE | Succès | P1 |
+| ROLE-RLS-072 | Editor bloqué update profiles (autre user) | `profiles` | UPDATE | Refusé (RLS) | P1 |
+| ROLE-RLS-073 | User self-update profile | `profiles` | UPDATE | Succès (propre profil) | P1 |
+| ROLE-RLS-074 | User bloqué update profiles (autre user) | `profiles` | UPDATE | Refusé (RLS) | P1 |
+| ROLE-RLS-075 | Editor bloqué insert pending_invitations | `pending_invitations` | INSERT | Refusé (RLS) | P1 |
+| ROLE-RLS-076 | Editor bloqué CRUD sitemap_entries | `sitemap_entries` | INSERT | Refusé (RLS) | P2 |
+| ROLE-RLS-077 | Anon select profiles | `profiles` | SELECT | Oui (lecture publique) | P1 |
 
 ### 4.5 — Fonctions SQL `has_min_role()` et `is_admin()`
 
@@ -316,6 +339,35 @@
 | ROLE-RLS-064 | editor → is_admin() | `is_admin()` | editor | `false` | P0 |
 | ROLE-RLS-065 | user → is_admin() | `is_admin()` | user | `false` | P0 |
 | ROLE-RLS-066 | rôle invalide → has_min_role() | `has_min_role('superadmin')` | admin | `false` (rôle invalide) | P2 |
+
+### 4.6 — Storage buckets
+
+| ID | Scénario | Bucket | Opération | Rôle | Résultat attendu | Priorité |
+| --- | --- | --- | --- | --- | --- | --- |
+| ROLE-RLS-078 | Anon lecture fichier medias | `medias` | SELECT (download) | anon | Autorisé (lecture publique) | P0 |
+| ROLE-RLS-079 | Editor upload fichier medias | `medias` | INSERT (upload) | editor | Autorisé | P0 |
+| ROLE-RLS-080 | Editor update fichier medias | `medias` | UPDATE | editor | Autorisé | P1 |
+| ROLE-RLS-081 | Editor delete fichier medias | `medias` | DELETE | editor | Refusé (admin only) | P0 |
+| ROLE-RLS-082 | Admin delete fichier medias | `medias` | DELETE | admin | Autorisé | P0 |
+| ROLE-RLS-083 | User upload fichier medias | `medias` | INSERT (upload) | user | Refusé (editor+ requis) | P1 |
+| ROLE-RLS-084 | Anon accès bucket backups | `backups` | SELECT | anon | Refusé (service_role only) | P1 |
+| ROLE-RLS-085 | Admin accès bucket backups | `backups` | SELECT | admin | Refusé (service_role only) | P2 |
+
+### 4.7 — Vues `service_role` (hors scope client)
+
+> Les vues suivantes sont accessibles uniquement via `service_role` (DAL côté serveur).
+> Elles ne sont **pas testables via le client Supabase** (anon/authenticated).
+> Vérifier que l'accès direct est refusé pour tous les rôles client.
+
+| ID | Scénario | Vue | Rôle | Résultat attendu | Priorité |
+| --- | --- | --- | --- | --- | --- |
+| ROLE-RLS-086 | Anon select analytics_summary | `analytics_summary` | anon | Aucune ligne | P1 |
+| ROLE-RLS-087 | Authenticated select analytics_summary | `analytics_summary` | authenticated | Aucune ligne | P1 |
+| ROLE-RLS-088 | Anon select membres_equipe_admin | `membres_equipe_admin` | anon | Aucune ligne | P1 |
+| ROLE-RLS-089 | Anon select messages_contact_admin | `messages_contact_admin` | anon | Aucune ligne | P2 |
+| ROLE-RLS-090 | Anon select content_versions_detailed | `content_versions_detailed` | anon | Aucune ligne | P2 |
+| ROLE-RLS-091 | Anon select partners_admin | `partners_admin` | anon | Aucune ligne | P2 |
+| ROLE-RLS-092 | Anon select data_retention_monitoring | `data_retention_monitoring` | anon | Aucune ligne | P2 |
 
 ---
 
@@ -382,10 +434,10 @@
 | Préfixe | Catégorie | Nombre de cas |
 | --- | --- | --- |
 | `ROLE-UNIT-` | Tests unitaires auth/helpers | 42 |
-| `ROLE-DAL-` | Tests intégration DAL | 68 |
-| `ROLE-RLS-` | Tests RLS SQL / scripts | 66 |
+| `ROLE-DAL-` | Tests intégration DAL | 80 |
+| `ROLE-RLS-` | Tests RLS SQL / scripts | 92 |
 | `ROLE-E2E-` | Tests E2E Playwright | 25 |
-| **Total** | | **201** |
+| **Total** | | **239** |
 
 ### Priorités
 
@@ -399,9 +451,9 @@
 
 | Priorité | Nombre de cas |
 | --- | --- |
-| P0 | ~95 |
-| P1 | ~75 |
-| P2 | ~31 |
+| P0 | ~100 |
+| P1 | ~95 |
+| P2 | ~44 |
 
 ### Lien avec le plan de test principal
 
