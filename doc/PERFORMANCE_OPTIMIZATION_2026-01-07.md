@@ -41,10 +41,12 @@ using ( is_active = true or (select public.is_admin()) );
 
 ## Prochaines étapes (à exécuter en production)
 
-1. Exécuter `scripts/check_unused_indexes.sql` sur la base cible pour lister les index avec `idx_scan = 0`.
-2. Valider chaque index candidat (usage business, historique, requêtes occasionnelles) avant suppression.
-3. Mettre à jour `supabase/schemas/40_indexes.sql` en retirant les index validés pour suppression.
-4. Générer migration déclarative :
+1. ✅ **FAIT (2026-03-14)** — `scripts/check_unused_indexes.sql` exécuté via MCP Supabase sur le cloud.
+   **Résultat** : 88 index avec `idx_scan = 0` détectés (statistiques représentatives : >60 jours depuis déploiement).
+   Index les plus volumineux : `idx_spectacles_title_trgm` (48 kB), `idx_analytics_events_type` (48 kB), `idx_evenements_type_array` (24 kB).
+2. ⏳ Valider chaque index candidat (usage business, historique, requêtes occasionnelles) avant suppression.
+3. ⏳ Mettre à jour `supabase/schemas/40_indexes.sql` en retirant les index validés pour suppression.
+4. ⏳ Générer migration déclarative :
 
 ```bash
 pnpm dlx supabase stop

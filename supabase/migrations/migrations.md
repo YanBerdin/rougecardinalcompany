@@ -1467,10 +1467,16 @@ using (
 **Fichier**: `scripts/check_unused_indexes.sql`
 
 ```sql
-select schemaname, tablename, indexname, idx_scan
+select
+  schemaname,
+  relname as tablename,
+  indexrelname as indexname,
+  idx_scan,
+  pg_size_pretty(pg_relation_size(indexrelid)) as index_size
 from pg_stat_user_indexes
-where schemaname = 'public' and idx_scan = 0
-order by tablename, indexname;
+where schemaname = 'public'
+  and idx_scan = 0
+order by pg_relation_size(indexrelid) desc;
 ```
 
 **Usage**: Exécuter sur production après 7-14 jours pour statistiques représentatives, puis DROP les index confirmés inutilisés.

@@ -403,14 +403,16 @@ node scripts/diagnose-admin-views.js
 **Utilisation**:
 
 ```bash
-# Sur le cloud Supabase
-pnpm dlx supabase db remote shell --linked
-# Puis dans psql:
-\i scripts/check_unused_indexes.sql
+# Option 1 : via psql (nécessite postgresql-client)
+# sudo apt install postgresql-client
+source .env && psql "$TEST_DB_URL" -f scripts/check_unused_indexes.sql
 
-# Ou en une commande:
-psql "<PRODUCTION_DB_URL>" -f scripts/check_unused_indexes.sql
+# Option 2 : via MCP Supabase (recommandé, pas de dépendance réseau)
+# Exécuter le contenu du script via l'outil MCP execute_sql
 ```
+
+**Note**: `supabase db remote shell` a été supprimé du CLI Supabase. Utiliser `psql` directement.
+**Note**: La connexion directe (port 5432) nécessite le support IPv6. Si IPv6 indisponible, utiliser le connection pooler (port 6543) avec `SUPABASE_DB_URL`.
 
 **Output Attendu**:
 

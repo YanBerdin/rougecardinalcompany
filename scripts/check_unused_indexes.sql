@@ -4,11 +4,10 @@
 
 select
   schemaname,
-  tablename,
-  indexname,
+  relname as tablename,
+  indexrelname as indexname,
   idx_scan,
-  pg_size_pretty(pg_relation_size(indexrelid)) as index_size,
-  pg_size_pretty(pg_relation_size(indexrelid) - pg_relation_size(indexrelid)) as delta
+  pg_size_pretty(pg_relation_size(indexrelid)) as index_size
 from pg_stat_user_indexes
 where schemaname = 'public'
   and idx_scan = 0
