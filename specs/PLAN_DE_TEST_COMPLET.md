@@ -60,7 +60,7 @@ Ce plan de test couvre l'intégralité du site web de la Compagnie Rouge Cardina
 | Editor | `<EDITOR_TEST_EMAIL>` | `<EDITOR_TEST_PASSWORD>` | `editor` |
 | User | `<USER_TEST_EMAIL>` | `<USER_TEST_PASSWORD>` | `user` |
 
-> **Plan détaillé permissions** : voir [`specs/tests-permissions-et-rôles.md`](tests-permissions-et-rôles.md) pour les ~120 cas de test couvrant les 4 rôles (anon, user, editor, admin) aux niveaux unitaire, DAL, RLS SQL et E2E.
+> **Plan détaillé permissions** : voir [`specs/tests-permissions-et-rôles.md`](tests-permissions-et-rôles.md) pour les ~240 cas de test couvrant les 4 rôles (anon, user, editor, admin) aux niveaux unitaire, DAL, RLS SQL et E2E.
 
 ### État initial attendu
 

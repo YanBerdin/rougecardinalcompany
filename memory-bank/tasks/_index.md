@@ -13,6 +13,7 @@
 ## En Cours
 
 - `TASK038` Responsive Testing & Validation - Plan reviewed, Phase 0 (instrumentation) pending
+- `TASK078` Implémentation tests permissions et rôles — 239 cas (UNIT=42, DAL=80, RLS=92, E2E=25) pour prouver le modèle `user < editor < admin`. Plan : `specs/tests-permissions-et-rôles.md`. Branch : `test/task078-implement-permissions-tests`.
 
 ## En Attente
 
