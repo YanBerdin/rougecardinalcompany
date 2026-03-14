@@ -364,7 +364,7 @@ node scripts/check-existing-profile.js
 
 ### diagnose-admin-views.js (JavaScript)
 
-**Description**: Diagnostic complet des vues admin incluant `is_admin()`, RLS policies, et permissions.
+**Description**: Diagnostic rapide des accès admin : profil, fonction RPC `communiques_presse_dashboard`, et vue `analytics_summary`.
 
 **Utilisation**:
 
@@ -374,25 +374,23 @@ pnpm diagnose:admin-views
 node scripts/diagnose-admin-views.js
 ```
 
-**Tests couverts (6 vérifications)**:
+**Tests couverts (3 vérifications)**:
 
 | Test | Description |
 | ------ | ------------- |
-| Test 1 | Vérification profil avec service role |
-| Test 2 | Test `is_admin()` avec service role |
-| Test 3 | Test vues admin avec service role |
-| Test 4 | Vérification policies RLS |
-| Test 5 | Vérification définition `is_admin()` |
-| Test 6 | Résumé et recommandations |
+| Test 1 | Profil admin en base (`role = 'admin'`) |
+| Test 2 | Présence de la fonction RPC `communiques_presse_dashboard` |
+| Test 3 | Accessibilité de la vue `analytics_summary` |
 
 **Avantages**:
 
-- ✅ Diagnostic exhaustif en une commande
-- ✅ Affiche les définitions SQL des fonctions
-- ✅ Recommandations automatiques en cas d'erreur
-- ✅ Teste avec service_role ET anon (comparaison)
+- ✅ Diagnostic en une commande
+- ✅ Distingue absence de fonction (PGRST202) vs refus de permission (attendu)
+- ✅ Résultat binaire clair : "Tout est opérationnel" ou liste des problèmes
 
-**Note**: Nécessite `SUPABASE_SECRET_KEY` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY`.
+**Note** : `communiques_presse_dashboard` est une **FUNCTION SECURITY DEFINER** (RPC), pas une vue. Elle refuse l'accès sans JWT admin — comportement attendu avec `service_role` seul.
+
+**Note** : Nécessite uniquement `NEXT_PUBLIC_SUPABASE_URL` et `SUPABASE_SECRET_KEY`.
 
 ---
 
