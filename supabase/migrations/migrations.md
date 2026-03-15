@@ -4,7 +4,65 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
-### 2026-03-13 - FIX: Couverture audit complète des tables tags / junction tables
+### 2026-03-15 - FIX: Conformité RLS MIG-005 — Séparation policies anon/authenticated (TASK077 + TASK079)
+
+2 migrations pour séparer toutes les policies RLS combinant `to anon, authenticated` en policies granulaires par rôle, conformément à la règle MIG-005 du projet.
+
+#### fix(rls) — TASK077 Batch 1 : 13 tables
+
+**Migration** : `20260315001500_fix_rls_separate_anon_authenticated_batch1.sql`
+**Schémas déclaratifs synchronisés** : ✅ `06_table_spectacles.sql`, `07_table_evenements.sql`, `08_table_articles_presse.sql`, `08b_communiques_presse.sql`, `09_table_partners.sql`, `10_tables_system.sql`, `13_analytics_events.sql`, `14_categories_tags.sql`, `61_rls_main_tables.sql`
+
+**Problème** : Les policies SELECT publiques utilisaient `to anon, authenticated` au lieu de créer 2 policies séparées (1 par rôle). Violation de la règle MIG-005 : « RLS Policies should be granular: one policy per operation per supabase role ».
+
+**Fix** : Chaque policy combinée est remplacée par 2 policies distinctes :
+
+```sql
+-- ❌ AVANT (combinée)
+create policy "X viewable by everyone" on public.table
+for select to anon, authenticated using ( ... );
+
+-- ✅ APRÈS (séparées)
+create policy "Anon can view X" on public.table
+for select to anon using ( ... );
+create policy "Authenticated can view X" on public.table
+for select to authenticated using ( ... );
+```
+
+**Commit** : `35016b0`
+
+#### fix(rls) — TASK079 Batch 2 : 17 tables, 21 violations
+
+**Migration** : `20260315000238_fix_rls_separate_anon_authenticated_batch2.sql`
+**Schémas déclaratifs synchronisés** : ✅ `02_table_profiles.sql`, `03_table_medias.sql`, `05_table_lieux.sql`, `07b_table_compagnie_content.sql`, `07c_table_compagnie_presentation.sql`, `07d_table_home_hero.sql`, `07e_table_home_about.sql`, `10_tables_system.sql`, `12_evenements_recurrence.sql`, `15_content_versioning.sql`, `16_seo_metadata.sql`
+
+**Détails** :
+
+- 21 policies combinées `to anon, authenticated` remplacées par 42 policies séparées
+- Nettoyage de 2 policies dupliquées TASK076 sur `categories` et `tags`
+- Gestion conditionnelle de `events_recurrence` (table optionnelle, bloc `DO $$`)
+
+**Tables couvertes** :
+
+| Fichier schema | Tables |
+| -------------- | ------ |
+| `02_table_profiles.sql` | `profiles` |
+| `03_table_medias.sql` | `media` |
+| `05_table_lieux.sql` | `lieux` |
+| `07b_table_compagnie_content.sql` | `compagnie_values`, `compagnie_stats` |
+| `07c_table_compagnie_presentation.sql` | `compagnie_presentation_sections` |
+| `07d_table_home_hero.sql` | `home_hero_slides` |
+| `07e_table_home_about.sql` | `home_about` |
+| `10_tables_system.sql` | `configurations_site`, `messages_contact` |
+| `12_evenements_recurrence.sql` | `events_recurrence` |
+| `15_content_versioning.sql` | `content_versions` |
+| `16_seo_metadata.sql` | `seo_metadata`, `seo_redirections` |
+
+**Résultat** : 0 violation `{anon,authenticated}` restante. Distribution : 40 anon + 162 authenticated.
+**Commit** : `723c0eb`
+**Application** : ✅ Appliqué sur remote le 2026-03-15 (après `migration repair` pour réaligner timestamps TASK076)
+
+--- 2026-03-13 - FIX: Couverture audit complète des tables tags / junction tables
 
 2 migrations déployées pour couvrir `media_tags` et les 4 tables de jonction tags manquantes dans le trigger `trg_audit`.
 

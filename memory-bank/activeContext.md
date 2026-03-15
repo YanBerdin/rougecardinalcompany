@@ -1,8 +1,29 @@
 # Active Context
 
-**Current Focus (2026-03-14)**: TASK078 — Implémentation des 239 tests permissions/rôles (branche mergée dans master). TASK077 — Audit RLS MIG-005 en attente d'implémentation (13 tables identifiées). Fix sécurité `flatted` CVE corrigé (override `>=3.4.0`, pnpm audit clean).
+**Current Focus (2026-03-15)**: TASK078 — Implémentation des 239 tests permissions/rôles (plan finalisé, implémentation à démarrer). Toutes les policies RLS sont conformes MIG-005 (0 violation combined `anon,authenticated` restante).
 
-**Last Major Updates**: ✅ TASK078 branche `test/task078-implement-permissions-tests` mergée + pushée (2026-03-14) + ✅ FIX SEC flatted `3.3.3` → `3.4.1` GHSA-25h7-pfq9-p65f (2026-03-14) + ✅ BUGFIX audit tags — `media_tags` + 4 junction tables couvertes (2026-03-13) + ✅ TASK076 trigger extension (2026-03-13) — 9 tables couvertes, docs mises à jour + ✅ Editor Role Permissions — 15 phases complete (2026-03-11) + ✅ BUGFIX 4 RLS policy bugs (P0-RESTRICTIVE/P1a-super_admin/P1b-subquery/P2-UI) commité+déployé (2026-03-10) + ✅ TASK037B A11Y Admin complet (2026-03-08) + ✅ TASK037A A11Y Public (2026-03-08, via TASK072/TASK074)
+**Last Major Updates**: ✅ TASK077 — Séparation policies RLS combinées batch 1 (13 tables, commit `35016b0`) (2026-03-15) + ✅ TASK079 — Séparation policies RLS combinées batch 2 (17 tables, 11 schemas, commit `723c0eb`) (2026-03-15) + ✅ TASK078 branche mergée + pushée (2026-03-14) + ✅ FIX SEC flatted `3.3.3` → `3.4.1` GHSA-25h7-pfq9-p65f (2026-03-14) + ✅ BUGFIX audit tags — `media_tags` + 4 junction tables couvertes (2026-03-13) + ✅ TASK076 trigger extension (2026-03-13) — 9 tables couvertes + ✅ Editor Role Permissions — 15 phases complete (2026-03-11) + ✅ BUGFIX 4 RLS policy bugs (P0-RESTRICTIVE/P1a-super_admin/P1b-subquery/P2-UI) commité+déployé (2026-03-10)
+
+---
+
+## ✅ TASK077 + TASK079 — Conformité RLS MIG-005 : Séparation anon/authenticated (2026-03-15)
+
+**Contexte** : L'audit MIG-005 a détecté des policies RLS combinant `to anon, authenticated` au lieu de créer des policies séparées par rôle. TASK077 a traité le batch 1 (13 tables), TASK079 le batch 2 (21 violations restantes sur 17 tables, 11 fichiers schema).
+
+**Résultat** : 0 violation `{anon,authenticated}` restante. Distribution finale : **40 policies anon + 162 policies authenticated**.
+
+### TASK077 — Batch 1 (13 tables)
+
+**Commit** : `35016b0` — `fix(rls): TASK077 — separate anon/authenticated policies for 13 tables`
+**Migration** : `20260315001500_fix_rls_separate_anon_authenticated_batch1.sql`
+**Schemas modifiés** : `06_table_spectacles.sql`, `07_table_evenements.sql`, `08_table_articles_presse.sql`, `08b_communiques_presse.sql`, `09_table_partners.sql`, `10_tables_system.sql`, `13_analytics_events.sql`, `14_categories_tags.sql`, `61_rls_main_tables.sql`
+
+### TASK079 — Batch 2 (17 tables, 21 violations)
+
+**Commit** : `723c0eb` — `fix(rls): TASK079 — separate anon/authenticated policies for remaining 21 violations`
+**Migration** : `20260315000238_fix_rls_separate_anon_authenticated_batch2.sql`
+**Schemas modifiés** : `02_table_profiles.sql`, `03_table_medias.sql`, `05_table_lieux.sql`, `07b_table_compagnie_content.sql`, `07c_table_compagnie_presentation.sql`, `07d_table_home_hero.sql`, `07e_table_home_about.sql`, `10_tables_system.sql`, `12_evenements_recurrence.sql`, `15_content_versioning.sql`, `16_seo_metadata.sql`
+**Nettoyage inclus** : Suppression de 2 policies dupliquées TASK076 (`categories` + `tags`) + gestion conditionnelle `events_recurrence` (table optionnelle)
 
 ---
 

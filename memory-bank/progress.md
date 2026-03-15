@@ -1,5 +1,31 @@
 # Progress
 
+## TASK077 + TASK079 — Conformité RLS MIG-005 : Séparation anon/authenticated (2026-03-15)
+
+**Contexte** : Audit MIG-005 — les policies RLS combinant `to anon, authenticated` violent la règle « one policy per operation per supabase role ». 2 batches de corrections appliquées.
+
+### TASK077 — Batch 1 (13 tables)
+
+**Commit** : `35016b0` — `fix(rls): TASK077 — separate anon/authenticated policies for 13 tables`
+**Migration** : `20260315001500_fix_rls_separate_anon_authenticated_batch1.sql`
+**Schemas modifiés** : `06_table_spectacles.sql`, `07_table_evenements.sql`, `08_table_articles_presse.sql`, `08b_communiques_presse.sql`, `09_table_partners.sql`, `10_tables_system.sql`, `13_analytics_events.sql`, `14_categories_tags.sql`, `61_rls_main_tables.sql`
+
+### TASK079 — Batch 2 (17 tables, 21 violations)
+
+**Commit** : `723c0eb` — `fix(rls): TASK079 — separate anon/authenticated policies for remaining 21 violations`
+**Migration** : `20260315000238_fix_rls_separate_anon_authenticated_batch2.sql`
+**Schemas modifiés** : `02_table_profiles.sql`, `03_table_medias.sql`, `05_table_lieux.sql`, `07b_table_compagnie_content.sql`, `07c_table_compagnie_presentation.sql`, `07d_table_home_hero.sql`, `07e_table_home_about.sql`, `10_tables_system.sql`, `12_evenements_recurrence.sql`, `15_content_versioning.sql`, `16_seo_metadata.sql`
+**Nettoyage inclus** : Suppression 2 policies dupliquées TASK076 + gestion conditionnelle `events_recurrence`
+
+### Résultat final
+
+- **0 violation** `{anon,authenticated}` restante (vérifié via `pg_policies`)
+- **Distribution** : 40 policies anon + 162 policies authenticated
+- **`supabase db reset`** : ✅ Passé sans erreur
+- **Schémas déclaratifs** : 20 fichiers modifiés (11 TASK079 + 9 TASK077)
+
+---
+
 ## FIX Sécurité — flatted DoS GHSA-25h7-pfq9-p65f (2026-03-14)
 
 `flatted 3.3.3` → `3.4.1` via override `pnpm.overrides` dans `package.json`. Chemin : `eslint > file-entry-cache > flat-cache > flatted`. Commit : `fix(security): force flatted >=3.4.0 via pnpm override`. `pnpm audit` : `No known vulnerabilities found` ✅.

@@ -146,6 +146,16 @@ supabase/schemas/
 
 ## 🆕 Mises à jour récentes (mars 2026)
 
+- **FIX: Conformité RLS MIG-005 — Séparation policies anon/authenticated — TASK077 + TASK079 (15 mars 2026)** : Toutes les policies RLS combinant `to anon, authenticated` ont été remplacées par des policies granulaires séparées (1 par rôle Supabase), conformément à la règle MIG-005.
+  - **TASK077 (batch 1)** : 13 tables corrigées dans 9 fichiers schema.
+    - Schemas : `06_table_spectacles.sql`, `07_table_evenements.sql`, `08_table_articles_presse.sql`, `08b_communiques_presse.sql`, `09_table_partners.sql`, `10_tables_system.sql`, `13_analytics_events.sql`, `14_categories_tags.sql`, `61_rls_main_tables.sql`
+    - Migration : `20260315001500_fix_rls_separate_anon_authenticated_batch1.sql`
+  - **TASK079 (batch 2)** : 17 tables, 21 violations corrigées dans 11 fichiers schema.
+    - Schemas : `02_table_profiles.sql`, `03_table_medias.sql`, `05_table_lieux.sql`, `07b_table_compagnie_content.sql`, `07c_table_compagnie_presentation.sql`, `07d_table_home_hero.sql`, `07e_table_home_about.sql`, `10_tables_system.sql`, `12_evenements_recurrence.sql`, `15_content_versioning.sql`, `16_seo_metadata.sql`
+    - Migration : `20260315000238_fix_rls_separate_anon_authenticated_batch2.sql`
+    - Nettoyage inclus : 2 policies dupliquées TASK076 (`categories` + `tags`) + gestion conditionnelle `events_recurrence`
+  - **Résultat** : 0 violation `{anon,authenticated}` restante. Distribution : 40 anon + 162 authenticated.
+
 - **FEAT: Extension triggers audit et updated_at — TASK076 (13 mars 2026)** : Extension de la couverture des triggers `trg_audit` et `trg_update_updated_at` à 9 tables supplémentaires non encore couvertes.
   - **Tables couvertes (3 priorités)** :
     - 🔴 CRITIQUE : `user_invitations`, `pending_invitations` (sécurité / traçabilité RH)
