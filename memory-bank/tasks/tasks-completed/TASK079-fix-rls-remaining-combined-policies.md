@@ -1,6 +1,6 @@
 # TASK079 : Fix Remaining RLS Policies `to anon, authenticated` — Batch 2
 
-**Status:** En Attente
+**Status:** Completed
 **Added:** 2026-03-15
 **Updated:** 2026-03-15
 **Depends on:** TASK077 (Completed — batch 1, 13 tables, migration `20260315001500`)
@@ -179,20 +179,20 @@ using ( ... );
 
 ## Progress Tracking
 
-**Overall Status:** Not Started — 0%
+**Overall Status:** Completed — 100%
 
 ### Subtasks
 
 | ID | Description | Status | Updated | Notes |
 | ---- | ------------- | -------- | --------- | ------- |
-| 1 | Modifier schemas 10_tables_system.sql | Not Started | 2026-03-15 | 5 policies (3 tables) |
-| 2 | Modifier schemas 11_tables_relations.sql | Not Started | 2026-03-15 | 4 policies (4 tables) |
-| 3 | Modifier schemas 14_categories_tags.sql | Not Started | 2026-03-15 | 2 policies |
-| 4 | Modifier schemas 07b/07c/07d/07e | Not Started | 2026-03-15 | 5 policies (5 tables) |
-| 5 | Modifier schemas 04/05/08b/12 | Not Started | 2026-03-15 | 4 policies (4 tables) |
-| 6 | Corriger duplicates TASK076 | Not Started | 2026-03-15 | 2 policies à drop |
-| 7 | Écrire migration manuelle | Not Started | 2026-03-15 | ~17 tables |
-| 8 | Tester db reset + vérifier pg_policies | Not Started | 2026-03-15 | |
+| 1 | Modifier schemas 10_tables_system.sql | Complete | 2026-03-15 | 5 policies (3 tables) |
+| 2 | Modifier schemas 11_tables_relations.sql | Complete | 2026-03-15 | 4 policies (4 tables) |
+| 3 | Modifier schemas 14_categories_tags.sql | Complete | 2026-03-15 | 2 policies |
+| 4 | Modifier schemas 07b/07c/07d/07e | Complete | 2026-03-15 | 5 policies (5 tables) |
+| 5 | Modifier schemas 04/05/08b/12 | Complete | 2026-03-15 | 4 policies (4 tables) |
+| 6 | Corriger duplicates TASK076 | Complete | 2026-03-15 | 2 policies droppées dans schemas + migration |
+| 7 | Écrire migration manuelle | Complete | 2026-03-15 | `20260315000238_fix_rls_separate_anon_authenticated_batch2.sql` |
+| 8 | Tester db reset + vérifier pg_policies | Complete | 2026-03-15 | 0 rows combinées, 40 anon + 162 authenticated |
 
 ## Progress Log
 
@@ -202,3 +202,19 @@ using ( ... );
 - Inventaire complet : 21 policies dans 17 tables (10 fichiers schema)
 - Détection de 2 duplicates TASK076 (communiques_presse + compagnie_presentation_sections)
 - Leçon TASK077 : préférer migration manuelle au `supabase db diff`
+
+### 2026-03-15 (exécution)
+
+- Modifié 11 fichiers schema (20 replacements en 3 batches, tous réussis)
+- Vérifié grep : zéro `to anon, authenticated` restant dans CREATE POLICY (seuls les GRANT restent)
+- Migration manuelle écrite : `20260315000238_fix_rls_separate_anon_authenticated_batch2.sql`
+  - 21 vieilles policies DROP + 42 nouvelles CREATE (2 par violation)
+  - Cleanup TASK076 duplicates inclus
+  - DO $$ block conditionnel pour events_recurrence
+- `supabase db reset` : succès, aucune erreur
+- Vérification pg_policies : `SELECT ... WHERE roles::text LIKE '%{anon,authenticated}%'` → **0 rows**
+- Distribution finale : 40 policies anon + 162 policies authenticated
+- Design decisions :
+  - Policies simples (using true) : identiques pour anon et authenticated
+  - Policies complexes : anon reçoit la version simplifiée (sans fonctions de rôle qui retournent toujours false pour anon)
+  - Exception : abonnes_newsletter DELETE garde `is_admin()` pour anon (parité comportementale)

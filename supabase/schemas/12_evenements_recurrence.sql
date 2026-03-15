@@ -68,10 +68,19 @@ begin
 
     -- Tout le monde peut voir les récurrences des événements publics
     execute 'drop policy if exists "Event recurrences are viewable by everyone" on public.events_recurrence';
-    execute 'create policy "Event recurrences are viewable by everyone"
+    execute 'drop policy if exists "Anon can view event recurrences" on public.events_recurrence';
+    execute 'drop policy if exists "Authenticated can view event recurrences" on public.events_recurrence';
+
+    execute 'create policy "Anon can view event recurrences"
     on public.events_recurrence
     for select
-    to anon, authenticated
+    to anon
+    using ( true )';
+
+    execute 'create policy "Authenticated can view event recurrences"
+    on public.events_recurrence
+    for select
+    to authenticated
     using ( true )';
 
     -- Seuls les admins peuvent gérer les récurrences

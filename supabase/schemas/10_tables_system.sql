@@ -133,27 +133,51 @@ alter table public.abonnes_newsletter enable row level security;
 drop policy if exists "Admins can view newsletter subscribers" on public.abonnes_newsletter;
 drop policy if exists "Admins can view full newsletter subscriber details" on public.abonnes_newsletter;
 drop policy if exists "Anyone can check email existence for duplicates" on public.abonnes_newsletter;
-create policy "Anyone can check email existence for duplicates"
+drop policy if exists "Anon can check newsletter email existence" on public.abonnes_newsletter;
+drop policy if exists "Authenticated can check newsletter email existence" on public.abonnes_newsletter;
+
+create policy "Anon can check newsletter email existence"
 on public.abonnes_newsletter
 for select
-to anon, authenticated
+to anon
 using (true);
 
-comment on policy "Anyone can check email existence for duplicates" on public.abonnes_newsletter is
+create policy "Authenticated can check newsletter email existence"
+on public.abonnes_newsletter
+for select
+to authenticated
+using (true);
+
+comment on policy "Anon can check newsletter email existence" on public.abonnes_newsletter is
+  'SELECT enabled for duplicate email checking. Admin-only data access enforced by application DAL layer.';
+comment on policy "Authenticated can check newsletter email existence" on public.abonnes_newsletter is
   'SELECT enabled for duplicate email checking. Admin-only data access enforced by application DAL layer.';
 
 -- INSERT: Email format validation only (duplicate prevention by UNIQUE constraint)
 -- NOT EXISTS subquery was removed to fix infinite recursion in policy evaluation
 drop policy if exists "Validated newsletter subscription" on public.abonnes_newsletter;
-create policy "Validated newsletter subscription"
+drop policy if exists "Anon can subscribe to newsletter" on public.abonnes_newsletter;
+drop policy if exists "Authenticated can subscribe to newsletter" on public.abonnes_newsletter;
+
+create policy "Anon can subscribe to newsletter"
 on public.abonnes_newsletter
 for insert
-to anon, authenticated
+to anon
 with check (
   email ~* '^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$'
 );
 
-comment on policy "Validated newsletter subscription" on public.abonnes_newsletter is
+create policy "Authenticated can subscribe to newsletter"
+on public.abonnes_newsletter
+for insert
+to authenticated
+with check (
+  email ~* '^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$'
+);
+
+comment on policy "Anon can subscribe to newsletter" on public.abonnes_newsletter is
+  'INSERT validation: email regex only. Duplicate prevention by UNIQUE constraint. Rate limiting (3 req/h) enforced by application layer (TASK046).';
+comment on policy "Authenticated can subscribe to newsletter" on public.abonnes_newsletter is
   'INSERT validation: email regex only. Duplicate prevention by UNIQUE constraint. Rate limiting (3 req/h) enforced by application layer (TASK046).';
 
 -- Seuls les admins peuvent modifier les abonnements
@@ -167,14 +191,23 @@ with check ( (select public.is_admin()) );
 
 -- Les abonnés peuvent se désabonner ou les admins peuvent supprimer
 drop policy if exists "Subscribers can unsubscribe or admins can delete" on public.abonnes_newsletter;
-create policy "Subscribers can unsubscribe or admins can delete"
+drop policy if exists "Anon can unsubscribe from newsletter" on public.abonnes_newsletter;
+drop policy if exists "Admins can delete newsletter subscriptions" on public.abonnes_newsletter;
+
+create policy "Anon can unsubscribe from newsletter"
 on public.abonnes_newsletter
 for delete
-to anon, authenticated
+to anon
 using ( 
-  -- Les admins peuvent tout supprimer
   (select public.is_admin()) 
-  -- Ou l'utilisateur peut se désabonner via email (à implementer côté app)
+);
+
+create policy "Admins can delete newsletter subscriptions"
+on public.abonnes_newsletter
+for delete
+to authenticated
+using ( 
+  (select public.is_admin()) 
 );
 
 -- ---- MESSAGES CONTACT ----
@@ -193,10 +226,36 @@ using ( (select public.is_admin()) );
 -- Historique : créée par 20260106190617, droppée accidentellement par 20260201135511,
 --              restaurée par hotfix 20260228231707. Désormais gérée dans ce schéma déclaratif.
 drop policy if exists "Validated contact submission" on public.messages_contact;
-create policy "Validated contact submission"
+drop policy if exists "Anon can submit contact form" on public.messages_contact;
+drop policy if exists "Authenticated can submit contact form" on public.messages_contact;
+
+create policy "Anon can submit contact form"
 on public.messages_contact
 for insert
-to anon, authenticated
+to anon
+with check (
+  -- Champs requis non vides
+  firstname is not null and firstname <> ''
+  and lastname is not null and lastname <> ''
+  and email is not null and email <> ''
+  and reason is not null
+  and message is not null and message <> ''
+  and consent = true  -- RGPD obligatoire
+
+  -- Validation format email
+  and email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
+
+  -- Téléphone optionnel mais validé si présent
+  and (phone is null or phone ~* '^\+?[0-9\s\-\(\)]{10,}$')
+
+  -- Limites longueur message (anti-abus)
+  and length(message) between 10 and 5000
+);
+
+create policy "Authenticated can submit contact form"
+on public.messages_contact
+for insert
+to authenticated
 with check (
   -- Champs requis non vides
   firstname is not null and firstname <> ''
@@ -260,16 +319,25 @@ alter table public.configurations_site enable row level security;
 -- Les display toggles contrôlent la visibilité des sections publiques et doivent être
 -- lisibles par tous (anon + authenticated) pour que les pages publiques fonctionnent.
 drop policy if exists "Public site configurations are viewable by everyone" on public.configurations_site;
-create policy "Public site configurations are viewable by everyone"
+drop policy if exists "Anon can view public site configurations" on public.configurations_site;
+drop policy if exists "Authenticated can view site configurations" on public.configurations_site;
+
+create policy "Anon can view public site configurations"
 on public.configurations_site
 for select
-to anon, authenticated
+to anon
 using ( 
-  -- Configs publiques (convention de nommage 'public:')
   key like 'public:%'
-  -- Display toggles (contrôlent la visibilité des sections publiques)
   or key like 'display_toggle_%'
-  -- Admins voient toutes les configs
+);
+
+create policy "Authenticated can view site configurations"
+on public.configurations_site
+for select
+to authenticated
+using ( 
+  key like 'public:%'
+  or key like 'display_toggle_%'
   or (select public.is_admin())
 );
 

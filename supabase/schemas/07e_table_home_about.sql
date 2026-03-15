@@ -32,10 +32,18 @@ create index if not exists idx_home_about_content_active_order on public.home_ab
 alter table public.home_about_content enable row level security;
 
 -- Lecture publique
- drop policy if exists "Home about content is viewable by everyone" on public.home_about_content;
-create policy "Home about content is viewable by everyone"
+drop policy if exists "Home about content is viewable by everyone" on public.home_about_content;
+drop policy if exists "Anon can view home about content" on public.home_about_content;
+drop policy if exists "Authenticated can view home about content" on public.home_about_content;
+
+create policy "Anon can view home about content"
   on public.home_about_content for select
-  to anon, authenticated
+  to anon
+  using ( true );
+
+create policy "Authenticated can view home about content"
+  on public.home_about_content for select
+  to authenticated
   using ( true );
 
 -- Écriture réservée admin (politiques granulaires)

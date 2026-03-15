@@ -24,10 +24,19 @@ alter table public.lieux enable row level security;
 
 -- Tout le monde peut voir les lieux
 drop policy if exists "Lieux are viewable by everyone" on public.lieux;
-create policy "Lieux are viewable by everyone"
+drop policy if exists "Anon can view lieux" on public.lieux;
+drop policy if exists "Authenticated can view lieux" on public.lieux;
+
+create policy "Anon can view lieux"
 on public.lieux
 for select
-to anon, authenticated
+to anon
+using ( true );
+
+create policy "Authenticated can view lieux"
+on public.lieux
+for select
+to authenticated
 using ( true );
 
 -- Seuls les admins peuvent gérer les lieux

@@ -42,10 +42,18 @@ alter table public.compagnie_presentation_sections enable row level security;
 -- Policies: public active sections OR admins can view all
 drop policy if exists "Active presentation sections are viewable by everyone" on public.compagnie_presentation_sections;
 drop policy if exists "Admins can view all presentation sections" on public.compagnie_presentation_sections;
+drop policy if exists "View presentation sections (public active OR editor+ all)" on public.compagnie_presentation_sections;
+drop policy if exists "Anon can view active presentation sections" on public.compagnie_presentation_sections;
+drop policy if exists "Authenticated can view presentation sections" on public.compagnie_presentation_sections;
 
-create policy "View presentation sections (public active OR editor+ all)"
+create policy "Anon can view active presentation sections"
   on public.compagnie_presentation_sections for select
-  to anon, authenticated
+  to anon
+  using ( active = true );
+
+create policy "Authenticated can view presentation sections"
+  on public.compagnie_presentation_sections for select
+  to authenticated
   using (
     active = true
     or (select public.has_min_role('editor'))

@@ -56,10 +56,19 @@ comment on column public.communiques_medias.ordre is 'Ordre d''affichage : -1 = 
 alter table public.spectacles_membres_equipe enable row level security;
 
 drop policy if exists "Spectacle member relations are viewable by everyone" on public.spectacles_membres_equipe;
-create policy "Spectacle member relations are viewable by everyone"
+drop policy if exists "Anon can view spectacle member relations" on public.spectacles_membres_equipe;
+drop policy if exists "Authenticated can view spectacle member relations" on public.spectacles_membres_equipe;
+
+create policy "Anon can view spectacle member relations"
 on public.spectacles_membres_equipe
 for select
-to anon, authenticated
+to anon
+using ( true );
+
+create policy "Authenticated can view spectacle member relations"
+on public.spectacles_membres_equipe
+for select
+to authenticated
 using ( true );
 
 -- Gestion editor+ (politiques granulaires)
@@ -89,10 +98,19 @@ using ( (select public.has_min_role('editor')) );
 alter table public.spectacles_medias enable row level security;
 
 drop policy if exists "Spectacle media relations are viewable by everyone" on public.spectacles_medias;
-create policy "Spectacle media relations are viewable by everyone"
+drop policy if exists "Anon can view spectacle media relations" on public.spectacles_medias;
+drop policy if exists "Authenticated can view spectacle media relations" on public.spectacles_medias;
+
+create policy "Anon can view spectacle media relations"
 on public.spectacles_medias
 for select
-to anon, authenticated
+to anon
+using ( true );
+
+create policy "Authenticated can view spectacle media relations"
+on public.spectacles_medias
+for select
+to authenticated
 using ( true );
 
 -- Gestion editor+ (politiques granulaires)
@@ -122,10 +140,19 @@ using ( (select public.has_min_role('editor')) );
 alter table public.articles_medias enable row level security;
 
 drop policy if exists "Article media relations are viewable by everyone" on public.articles_medias;
-create policy "Article media relations are viewable by everyone"
+drop policy if exists "Anon can view article media relations" on public.articles_medias;
+drop policy if exists "Authenticated can view article media relations" on public.articles_medias;
+
+create policy "Anon can view article media relations"
 on public.articles_medias
 for select
-to anon, authenticated
+to anon
+using ( true );
+
+create policy "Authenticated can view article media relations"
+on public.articles_medias
+for select
+to authenticated
 using ( true );
 
 -- Gestion editor+ (politiques granulaires)
@@ -155,10 +182,26 @@ using ( (select public.has_min_role('editor')) );
 alter table public.communiques_medias enable row level security;
 
 drop policy if exists "Press release media relations follow parent visibility" on public.communiques_medias;
-create policy "Press release media relations follow parent visibility"
+drop policy if exists "Anon can view press release media relations" on public.communiques_medias;
+drop policy if exists "Authenticated can view press release media relations" on public.communiques_medias;
+
+create policy "Anon can view press release media relations"
 on public.communiques_medias
 for select
-to anon, authenticated
+to anon
+using ( 
+  exists (
+    select 1 
+    from public.communiques_presse as cp 
+    where cp.id = communique_id 
+      and cp.public = true
+  )
+);
+
+create policy "Authenticated can view press release media relations"
+on public.communiques_medias
+for select
+to authenticated
 using ( 
   exists (
     select 1 

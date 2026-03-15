@@ -88,10 +88,21 @@ alter table public.home_hero_slides enable row level security;
 drop policy if exists "Home hero slides are viewable by everyone" on public.home_hero_slides;
 drop policy if exists "Admins can view all home hero slides" on public.home_hero_slides;
 drop policy if exists "View home hero slides (public active OR admin all)" on public.home_hero_slides;
+drop policy if exists "Anon can view active home hero slides" on public.home_hero_slides;
+drop policy if exists "Authenticated can view home hero slides" on public.home_hero_slides;
 
-create policy "View home hero slides (public active OR admin all)"
+create policy "Anon can view active home hero slides"
   on public.home_hero_slides for select
-  to anon, authenticated
+  to anon
+  using (
+    active = true
+    and (starts_at is null or starts_at <= now())
+    and (ends_at is null or ends_at >= now())
+  );
+
+create policy "Authenticated can view home hero slides"
+  on public.home_hero_slides for select
+  to authenticated
   using (
     (
       active = true
@@ -100,9 +111,6 @@ create policy "View home hero slides (public active OR admin all)"
     )
     or (select public.is_admin())
   );
-
--- NOTE: "Admins can view all home hero slides" policy REMOVED (redundant)
--- The combined policy above already handles admin access via the OR clause
 
 -- Gestion admin (politiques granulaires)
 drop policy if exists "Admins can insert home hero slides" on public.home_hero_slides;

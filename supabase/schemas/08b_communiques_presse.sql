@@ -76,11 +76,20 @@ alter table public.communiques_presse enable row level security;
 -- Combined policy: public press releases OR admins
 drop policy if exists "Public press releases are viewable by everyone" on public.communiques_presse;
 drop policy if exists "Admins can view all press releases" on public.communiques_presse;
+drop policy if exists "View press releases (public OR editor+ all)" on public.communiques_presse;
+drop policy if exists "Anon can view public press releases" on public.communiques_presse;
+drop policy if exists "Authenticated can view press releases" on public.communiques_presse;
 
-create policy "View press releases (public OR editor+ all)"
+create policy "Anon can view public press releases"
 on public.communiques_presse
 for select
-to anon, authenticated
+to anon
+using ( public = true );
+
+create policy "Authenticated can view press releases"
+on public.communiques_presse
+for select
+to authenticated
 using (
   public = true
   or (select public.has_min_role('editor'))

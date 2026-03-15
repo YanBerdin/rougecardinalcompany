@@ -7,6 +7,7 @@
 - `TASK003` Create CI gate for REVOKE detection
 - `TASK004` Add README for allowlist
 - `TASK005` Add runtime allowlist entries
+- `TASK079` Fix RLS Remaining Combined Policies (Batch 2) — 21 policies séparées en 42, migration `20260315000238`, 0 violations restantes
 
 # Index des Tâches
 
@@ -17,7 +18,6 @@
 
 ## En Attente
 
-- `TASK079` Fix RLS Remaining Combined Policies (Batch 2) — 21 policies `to anon, authenticated` dans 17 tables (10 fichiers schema). Suite de TASK077. Inclut correction duplicates TASK076 (communiques_presse, compagnie_presentation_sections).
 - `TASK005` Optimisation SEO et meta-tags dynamiques
 - `TASK007` Tests automatisés et monitoring
 - `TASK008` Configuration des redirections vers billetterie externe

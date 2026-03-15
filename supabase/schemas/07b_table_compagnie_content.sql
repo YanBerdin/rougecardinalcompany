@@ -48,10 +48,18 @@ alter table public.compagnie_stats enable row level security;
 
 -- Politiques: lecture publique, écriture admin
 -- VALUES
- drop policy if exists "Compagnie values are viewable by everyone" on public.compagnie_values;
-create policy "Compagnie values are viewable by everyone"
+drop policy if exists "Compagnie values are viewable by everyone" on public.compagnie_values;
+drop policy if exists "Anon can view compagnie values" on public.compagnie_values;
+drop policy if exists "Authenticated can view compagnie values" on public.compagnie_values;
+
+create policy "Anon can view compagnie values"
   on public.compagnie_values for select
-  to anon, authenticated
+  to anon
+  using ( true );
+
+create policy "Authenticated can view compagnie values"
+  on public.compagnie_values for select
+  to authenticated
   using ( true );
 
 -- Gestion editor+ (politiques granulaires)
@@ -75,10 +83,18 @@ create policy "Editors+ can delete compagnie values"
   using ( (select public.has_min_role('editor')) );
 
 -- STATS
- drop policy if exists "Compagnie stats are viewable by everyone" on public.compagnie_stats;
-create policy "Compagnie stats are viewable by everyone"
+drop policy if exists "Compagnie stats are viewable by everyone" on public.compagnie_stats;
+drop policy if exists "Anon can view compagnie stats" on public.compagnie_stats;
+drop policy if exists "Authenticated can view compagnie stats" on public.compagnie_stats;
+
+create policy "Anon can view compagnie stats"
   on public.compagnie_stats for select
-  to anon, authenticated
+  to anon
+  using ( true );
+
+create policy "Authenticated can view compagnie stats"
+  on public.compagnie_stats for select
+  to authenticated
   using ( true );
 
 -- Gestion editor+ (politiques granulaires)

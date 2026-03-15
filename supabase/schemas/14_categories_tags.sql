@@ -143,10 +143,25 @@ create trigger trg_articles_tags_usage_count
 alter table public.communiques_categories enable row level security;
 
 drop policy if exists "Press release categories follow parent visibility" on public.communiques_categories;
-create policy "Press release categories follow parent visibility"
+drop policy if exists "Anon can view press release categories" on public.communiques_categories;
+drop policy if exists "Authenticated can view press release categories" on public.communiques_categories;
+
+create policy "Anon can view press release categories"
 on public.communiques_categories
 for select
-to anon, authenticated
+to anon
+using (
+  exists (
+    select 1 from public.communiques_presse cp
+    where cp.id = communique_id
+    and cp.public = true
+  )
+);
+
+create policy "Authenticated can view press release categories"
+on public.communiques_categories
+for select
+to authenticated
 using (
   exists (
     select 1 from public.communiques_presse cp
@@ -181,10 +196,25 @@ using ( (select public.has_min_role('editor')) );
 alter table public.communiques_tags enable row level security;
 
 drop policy if exists "Press release tags follow parent visibility" on public.communiques_tags;
-create policy "Press release tags follow parent visibility"
+drop policy if exists "Anon can view press release tags" on public.communiques_tags;
+drop policy if exists "Authenticated can view press release tags" on public.communiques_tags;
+
+create policy "Anon can view press release tags"
 on public.communiques_tags
 for select
-to anon, authenticated
+to anon
+using (
+  exists (
+    select 1 from public.communiques_presse cp
+    where cp.id = communique_id
+    and cp.public = true
+  )
+);
+
+create policy "Authenticated can view press release tags"
+on public.communiques_tags
+for select
+to authenticated
 using (
   exists (
     select 1 from public.communiques_presse cp

@@ -25,10 +25,19 @@ alter table public.membres_equipe enable row level security;
 
 -- Combined policy: public active OR admin all
 drop policy if exists "View team members (public active OR admin all)" on public.membres_equipe;
-create policy "View team members (public active OR admin all)"
+drop policy if exists "Anon can view active team members" on public.membres_equipe;
+drop policy if exists "Authenticated can view team members" on public.membres_equipe;
+
+create policy "Anon can view active team members"
 on public.membres_equipe
 for select
-to anon, authenticated
+to anon
+using ( active = true );
+
+create policy "Authenticated can view team members"
+on public.membres_equipe
+for select
+to authenticated
 using (
   active = true
   or (select public.is_admin())
