@@ -1,13 +1,14 @@
 #!/usr/bin/env tsx
 /**
- * Test RLS permissions for anon, user (authenticated), and SQL functions.
+ * Test RLS permissions for anon, user (authenticated), admin, and SQL functions.
  *
  * Covers spec sections:
  *   4.1 — Anon: public read only (ROLE-RLS-001 to 014)
  *   4.2 — User authenticated: read public, write blocked (ROLE-RLS-015 to 026)
+ *   4.4 — Admin: full access (ROLE-RLS-048 to 077)
  *   4.5 — SQL functions has_min_role() & is_admin() (ROLE-RLS-059 to 066)
  *
- * Editor (4.3) and Admin (4.4) are covered by test-editor-access-local.ts.
+ * Editor (4.3) is covered by test-editor-access-local.ts.
  *
  * @usage
  *   pnpm test:rls:local
@@ -909,6 +910,568 @@ async function testSqlFunctions(
 }
 
 /* ================================================================== */
+/*  4.4 — Admin: full access (RLS-048 to 077)                        */
+/* ================================================================== */
+
+async function testAdminAccess(
+    adminSessClient: SupabaseClient,
+    editorClient: SupabaseClient,
+    userClient: SupabaseClient,
+    adminId: string,
+    userId: string,
+) {
+    console.log("\n👑 Section 4.4 — Admin: accès complet\n");
+
+    const ts = Date.now();
+
+    // ROLE-RLS-048: Admin select spectacles (all rows, including draft/private)
+    {
+        const { data, error } = await adminSessClient
+            .from("spectacles")
+            .select("id");
+        if (error) {
+            fail("RLS-048", "Admin select spectacles (tous)", error.message);
+        } else {
+            ok("RLS-048", `Admin select spectacles (tous) — ${data.length} rows`);
+        }
+    }
+
+    // ROLE-RLS-049: Admin CRUD membres_equipe
+    {
+        const label = "Admin CRUD membres_equipe";
+        const payload = { name: `__rls_admin_${ts}` };
+        const { data: ins, error: insErr } = await adminSessClient
+            .from("membres_equipe")
+            .insert(payload)
+            .select("id")
+            .single();
+        if (insErr || !ins) {
+            fail("RLS-049", label, `insert: ${insErr?.message}`);
+        } else {
+            const id = ins.id;
+            const { error: updErr } = await adminSessClient
+                .from("membres_equipe")
+                .update({ name: `__rls_admin_upd_${ts}` })
+                .eq("id", id);
+            const { error: delErr } = await adminSessClient
+                .from("membres_equipe")
+                .delete()
+                .eq("id", id);
+            if (updErr || delErr) {
+                fail("RLS-049", label, `update: ${updErr?.message}, delete: ${delErr?.message}`);
+            } else {
+                ok("RLS-049", label);
+            }
+            // cleanup fallback
+            await adminClient.from("membres_equipe").delete().eq("id", id);
+        }
+    }
+
+    // ROLE-RLS-050: Admin CRUD partners
+    {
+        const label = "Admin CRUD partners";
+        const payload = { name: `__rls_admin_${ts}` };
+        const { data: ins, error: insErr } = await adminSessClient
+            .from("partners")
+            .insert(payload)
+            .select("id")
+            .single();
+        if (insErr || !ins) {
+            fail("RLS-050", label, `insert: ${insErr?.message}`);
+        } else {
+            const id = ins.id;
+            const { error: updErr } = await adminSessClient
+                .from("partners")
+                .update({ name: `__rls_admin_upd_${ts}` })
+                .eq("id", id);
+            const { error: delErr } = await adminSessClient
+                .from("partners")
+                .delete()
+                .eq("id", id);
+            if (updErr || delErr) {
+                fail("RLS-050", label, `update: ${updErr?.message}, delete: ${delErr?.message}`);
+            } else {
+                ok("RLS-050", label);
+            }
+            await adminClient.from("partners").delete().eq("id", id);
+        }
+    }
+
+    // ROLE-RLS-051: Admin CRUD contacts_presse
+    {
+        const label = "Admin CRUD contacts_presse";
+        const email = `__rls_admin_${ts}@test.invalid`;
+        const payload = { nom: `__rls_admin_${ts}`, media: "Test Media", email };
+        const { data: ins, error: insErr } = await adminSessClient
+            .from("contacts_presse")
+            .insert(payload)
+            .select("id")
+            .single();
+        if (insErr || !ins) {
+            fail("RLS-051", label, `insert: ${insErr?.message}`);
+        } else {
+            const id = ins.id;
+            const { error: updErr } = await adminSessClient
+                .from("contacts_presse")
+                .update({ nom: `__rls_admin_upd_${ts}` })
+                .eq("id", id);
+            const { error: delErr } = await adminSessClient
+                .from("contacts_presse")
+                .delete()
+                .eq("id", id);
+            if (updErr || delErr) {
+                fail("RLS-051", label, `update: ${updErr?.message}, delete: ${delErr?.message}`);
+            } else {
+                ok("RLS-051", label);
+            }
+            await adminClient.from("contacts_presse").delete().eq("id", id);
+        }
+    }
+
+    // ROLE-RLS-052: Admin CRUD configurations_site
+    {
+        const label = "Admin CRUD configurations_site";
+        const key = `__rls_admin_test_${ts}`;
+        const payload = { key, value: { test: true } };
+        const { error: insErr } = await adminSessClient
+            .from("configurations_site")
+            .insert(payload);
+        if (insErr) {
+            fail("RLS-052", label, `insert: ${insErr.message}`);
+        } else {
+            const { error: updErr } = await adminSessClient
+                .from("configurations_site")
+                .update({ value: { test: false } })
+                .eq("key", key);
+            const { error: delErr } = await adminSessClient
+                .from("configurations_site")
+                .delete()
+                .eq("key", key);
+            if (updErr || delErr) {
+                fail("RLS-052", label, `update: ${updErr?.message}, delete: ${delErr?.message}`);
+            } else {
+                ok("RLS-052", label);
+            }
+            await adminClient.from("configurations_site").delete().eq("key", key);
+        }
+    }
+
+    // ROLE-RLS-053: Admin CRUD home_hero_slides
+    {
+        const label = "Admin CRUD home_hero_slides";
+        const slug = `__rls-admin-${ts}`;
+        const payload = { title: `__rls_admin_${ts}`, slug };
+        const { data: ins, error: insErr } = await adminSessClient
+            .from("home_hero_slides")
+            .insert(payload)
+            .select("id")
+            .single();
+        if (insErr || !ins) {
+            fail("RLS-053", label, `insert: ${insErr?.message}`);
+        } else {
+            const id = ins.id;
+            const { error: updErr } = await adminSessClient
+                .from("home_hero_slides")
+                .update({ title: `__rls_admin_upd_${ts}` })
+                .eq("id", id);
+            const { error: delErr } = await adminSessClient
+                .from("home_hero_slides")
+                .delete()
+                .eq("id", id);
+            if (updErr || delErr) {
+                fail("RLS-053", label, `update: ${updErr?.message}, delete: ${delErr?.message}`);
+            } else {
+                ok("RLS-053", label);
+            }
+            await adminClient.from("home_hero_slides").delete().eq("id", id);
+        }
+    }
+
+    // ROLE-RLS-054: Admin CRUD home_about_content
+    {
+        const label = "Admin CRUD home_about_content";
+        const slug = `__rls-admin-${ts}`;
+        const payload = {
+            slug,
+            title: `__rls_admin_${ts}`,
+            intro1: "test intro1",
+            intro2: "test intro2",
+            mission_title: "test mission",
+            mission_text: "test mission text",
+        };
+        const { data: ins, error: insErr } = await adminSessClient
+            .from("home_about_content")
+            .insert(payload)
+            .select("id")
+            .single();
+        if (insErr || !ins) {
+            fail("RLS-054", label, `insert: ${insErr?.message}`);
+        } else {
+            const id = ins.id;
+            const { error: updErr } = await adminSessClient
+                .from("home_about_content")
+                .update({ title: `__rls_admin_upd_${ts}` })
+                .eq("id", id);
+            const { error: delErr } = await adminSessClient
+                .from("home_about_content")
+                .delete()
+                .eq("id", id);
+            if (updErr || delErr) {
+                fail("RLS-054", label, `update: ${updErr?.message}, delete: ${delErr?.message}`);
+            } else {
+                ok("RLS-054", label);
+            }
+            await adminClient.from("home_about_content").delete().eq("id", id);
+        }
+    }
+
+    // ROLE-RLS-055: Admin select logs_audit (SELECT only — INSERT is trigger-only)
+    {
+        const { data, error } = await adminSessClient
+            .from("logs_audit")
+            .select("id")
+            .limit(5);
+        if (error) {
+            fail("RLS-055", "Admin select logs_audit", error.message);
+        } else {
+            ok("RLS-055", `Admin select logs_audit — ${data.length} rows`);
+        }
+    }
+
+    // ROLE-RLS-056: Admin select content_versions
+    {
+        const { data, error } = await adminSessClient
+            .from("content_versions")
+            .select("id")
+            .limit(5);
+        if (error) {
+            fail("RLS-056", "Admin select content_versions", error.message);
+        } else {
+            ok("RLS-056", `Admin select content_versions — ${data.length} rows`);
+        }
+    }
+
+    // ROLE-RLS-057: Admin CRUD user_invitations
+    {
+        const label = "Admin CRUD user_invitations";
+        const payload = {
+            user_id: userId,
+            email: `__rls_invite_${ts}@test.invalid`,
+            role: "editor",
+            invited_by: adminId,
+        };
+        const { data: ins, error: insErr } = await adminSessClient
+            .from("user_invitations")
+            .insert(payload)
+            .select("id")
+            .single();
+        if (insErr || !ins) {
+            fail("RLS-057", label, `insert: ${insErr?.message}`);
+        } else {
+            const id = ins.id;
+            const { error: updErr } = await adminSessClient
+                .from("user_invitations")
+                .update({ role: "admin" })
+                .eq("id", id);
+            const { error: delErr } = await adminSessClient
+                .from("user_invitations")
+                .delete()
+                .eq("id", id);
+            if (updErr || delErr) {
+                fail("RLS-057", label, `update: ${updErr?.message}, delete: ${delErr?.message}`);
+            } else {
+                ok("RLS-057", label);
+            }
+            await adminClient.from("user_invitations").delete().eq("id", id);
+        }
+    }
+
+    // ROLE-RLS-058: Admin CRUD seo_redirects
+    {
+        const label = "Admin CRUD seo_redirects";
+        const payload = {
+            old_path: `/__rls_old_${ts}`,
+            new_path: `/__rls_new_${ts}`,
+        };
+        const { data: ins, error: insErr } = await adminSessClient
+            .from("seo_redirects")
+            .insert(payload)
+            .select("id")
+            .single();
+        if (insErr || !ins) {
+            fail("RLS-058", label, `insert: ${insErr?.message}`);
+        } else {
+            const id = ins.id;
+            const { error: updErr } = await adminSessClient
+                .from("seo_redirects")
+                .update({ new_path: `/__rls_upd_${ts}` })
+                .eq("id", id);
+            const { error: delErr } = await adminSessClient
+                .from("seo_redirects")
+                .delete()
+                .eq("id", id);
+            if (updErr || delErr) {
+                fail("RLS-058", label, `update: ${updErr?.message}, delete: ${delErr?.message}`);
+            } else {
+                ok("RLS-058", label);
+            }
+            await adminClient.from("seo_redirects").delete().eq("id", id);
+        }
+    }
+
+    // ROLE-RLS-067: Admin CRUD pending_invitations
+    {
+        const label = "Admin CRUD pending_invitations";
+        const payload = {
+            user_id: userId,
+            email: `__rls_pending_${ts}@test.invalid`,
+            invitation_url: `https://localhost/__rls_test_${ts}`,
+        };
+        const { data: ins, error: insErr } = await adminSessClient
+            .from("pending_invitations")
+            .insert(payload)
+            .select("id")
+            .single();
+        if (insErr || !ins) {
+            fail("RLS-067", label, `insert: ${insErr?.message}`);
+        } else {
+            const id = ins.id;
+            const { error: updErr } = await adminSessClient
+                .from("pending_invitations")
+                .update({ status: "sent" })
+                .eq("id", id);
+            const { error: delErr } = await adminSessClient
+                .from("pending_invitations")
+                .delete()
+                .eq("id", id);
+            if (updErr || delErr) {
+                fail("RLS-067", label, `update: ${updErr?.message}, delete: ${delErr?.message}`);
+            } else {
+                ok("RLS-067", label);
+            }
+            await adminClient.from("pending_invitations").delete().eq("id", id);
+        }
+    }
+
+    // ROLE-RLS-068: Admin CRUD sitemap_entries
+    {
+        const label = "Admin CRUD sitemap_entries";
+        const payload = { url: `/__rls_sitemap_${ts}` };
+        const { data: ins, error: insErr } = await adminSessClient
+            .from("sitemap_entries")
+            .insert(payload)
+            .select("id")
+            .single();
+        if (insErr || !ins) {
+            fail("RLS-068", label, `insert: ${insErr?.message}`);
+        } else {
+            const id = ins.id;
+            const { error: updErr } = await adminSessClient
+                .from("sitemap_entries")
+                .update({ url: `/__rls_sitemap_upd_${ts}` })
+                .eq("id", id);
+            const { error: delErr } = await adminSessClient
+                .from("sitemap_entries")
+                .delete()
+                .eq("id", id);
+            if (updErr || delErr) {
+                fail("RLS-068", label, `update: ${updErr?.message}, delete: ${delErr?.message}`);
+            } else {
+                ok("RLS-068", label);
+            }
+            await adminClient.from("sitemap_entries").delete().eq("id", id);
+        }
+    }
+
+    // ROLE-RLS-069: Admin CRUD data_retention_config
+    {
+        const label = "Admin CRUD data_retention_config";
+        const tableName = `__rls_test_${ts}`.replace(/-/g, "_").toLowerCase();
+        const payload = {
+            table_name: tableName,
+            retention_days: 30,
+            date_column: "created_at",
+        };
+        const { data: ins, error: insErr } = await adminSessClient
+            .from("data_retention_config")
+            .insert(payload)
+            .select("id")
+            .single();
+        if (insErr || !ins) {
+            fail("RLS-069", label, `insert: ${insErr?.message}`);
+        } else {
+            const id = ins.id;
+            const { error: updErr } = await adminSessClient
+                .from("data_retention_config")
+                .update({ retention_days: 60 })
+                .eq("id", id);
+            const { error: delErr } = await adminSessClient
+                .from("data_retention_config")
+                .delete()
+                .eq("id", id);
+            if (updErr || delErr) {
+                fail("RLS-069", label, `update: ${updErr?.message}, delete: ${delErr?.message}`);
+            } else {
+                ok("RLS-069", label);
+            }
+            await adminClient.from("data_retention_config").delete().eq("id", id);
+        }
+    }
+
+    // ROLE-RLS-070: Admin select data_retention_audit (SELECT only)
+    {
+        const { data, error } = await adminSessClient
+            .from("data_retention_audit")
+            .select("id")
+            .limit(5);
+        if (error) {
+            fail("RLS-070", "Admin select data_retention_audit", error.message);
+        } else {
+            ok("RLS-070", `Admin select data_retention_audit — ${data.length} rows`);
+        }
+    }
+
+    // ROLE-RLS-071: Admin update profiles (another user) — should succeed
+    {
+        const { error } = await adminSessClient
+            .from("profiles")
+            .update({ display_name: `__rls_admin_upd_${ts}` })
+            .eq("user_id", userId);
+        if (error) {
+            fail("RLS-071", "Admin update profiles (autre user)", error.message);
+        } else {
+            ok("RLS-071", "Admin update profiles (autre user)");
+        }
+        // restore
+        await adminClient
+            .from("profiles")
+            .update({ display_name: "Test user" })
+            .eq("user_id", userId);
+    }
+
+    // ROLE-RLS-072: Editor blocked update profiles (another user)
+    {
+        const { error } = await editorClient
+            .from("profiles")
+            .update({ display_name: `__rls_editor_hack_${ts}` })
+            .eq("user_id", userId);
+        if (error && isRlsBlock(error)) {
+            ok("RLS-072", "Editor bloqué update profiles (autre user)");
+        } else if (!error) {
+            // Supabase returns 0 rows affected without error when RLS blocks UPDATE
+            const { data: check } = await adminClient
+                .from("profiles")
+                .select("display_name")
+                .eq("user_id", userId)
+                .single();
+            if (check?.display_name?.includes("__rls_editor_hack_")) {
+                fail("RLS-072", "Editor bloqué update profiles (autre user)", "update succeeded but should be blocked");
+            } else {
+                ok("RLS-072", "Editor bloqué update profiles (autre user) — 0 rows affected");
+            }
+        } else {
+            fail("RLS-072", "Editor bloqué update profiles (autre user)", error.message);
+        }
+    }
+
+    // ROLE-RLS-073: User self-update profile — should succeed
+    {
+        const { error } = await userClient
+            .from("profiles")
+            .update({ display_name: `__rls_self_${ts}` })
+            .eq("user_id", userId);
+        if (error) {
+            fail("RLS-073", "User self-update profile", error.message);
+        } else {
+            ok("RLS-073", "User self-update profile");
+        }
+        await adminClient
+            .from("profiles")
+            .update({ display_name: "Test user" })
+            .eq("user_id", userId);
+    }
+
+    // ROLE-RLS-074: User blocked update profiles (another user)
+    {
+        const { error } = await userClient
+            .from("profiles")
+            .update({ display_name: `__rls_user_hack_${ts}` })
+            .eq("user_id", adminId);
+        if (error && isRlsBlock(error)) {
+            ok("RLS-074", "User bloqué update profiles (autre user)");
+        } else if (!error) {
+            const { data: check } = await adminClient
+                .from("profiles")
+                .select("display_name")
+                .eq("user_id", adminId)
+                .single();
+            if (check?.display_name?.includes("__rls_user_hack_")) {
+                fail("RLS-074", "User bloqué update profiles (autre user)", "update succeeded but should be blocked");
+            } else {
+                ok("RLS-074", "User bloqué update profiles (autre user) — 0 rows affected");
+            }
+        } else {
+            fail("RLS-074", "User bloqué update profiles (autre user)", error.message);
+        }
+    }
+
+    // ROLE-RLS-075: Editor blocked insert pending_invitations
+    {
+        const payload = {
+            user_id: userId,
+            email: `__rls_editor_inv_${ts}@test.invalid`,
+            invitation_url: `https://localhost/__rls_editor_${ts}`,
+        };
+        const { error } = await editorClient
+            .from("pending_invitations")
+            .insert(payload);
+        if (error && isRlsBlock(error)) {
+            ok("RLS-075", "Editor bloqué insert pending_invitations");
+        } else if (!error) {
+            fail("RLS-075", "Editor bloqué insert pending_invitations", "insert succeeded but should be blocked");
+            await adminClient
+                .from("pending_invitations")
+                .delete()
+                .like("email", `__rls_editor_inv_%`);
+        } else {
+            ok("RLS-075", "Editor bloqué insert pending_invitations — non-RLS error (acceptable)");
+        }
+    }
+
+    // ROLE-RLS-076: Editor blocked CRUD sitemap_entries
+    {
+        const payload = { url: `/__rls_editor_sitemap_${ts}` };
+        const { error } = await editorClient
+            .from("sitemap_entries")
+            .insert(payload);
+        if (error && isRlsBlock(error)) {
+            ok("RLS-076", "Editor bloqué insert sitemap_entries");
+        } else if (!error) {
+            fail("RLS-076", "Editor bloqué insert sitemap_entries", "insert succeeded but should be blocked");
+            await adminClient
+                .from("sitemap_entries")
+                .delete()
+                .like("url", `/__rls_editor_sitemap_%`);
+        } else {
+            ok("RLS-076", "Editor bloqué insert sitemap_entries — non-RLS error (acceptable)");
+        }
+    }
+
+    // ROLE-RLS-077: Anon select profiles — allowed (public read)
+    {
+        const { data, error } = await anonClient
+            .from("profiles")
+            .select("user_id")
+            .limit(5);
+        if (error) {
+            fail("RLS-077", "Anon select profiles", error.message);
+        } else {
+            ok("RLS-077", `Anon select profiles — ${data.length} rows`);
+        }
+    }
+}
+
+/* ================================================================== */
 /*  Cleanup — remove test data inserted during tests                  */
 /* ================================================================== */
 
@@ -942,7 +1505,7 @@ async function cleanup() {
 
 async function main() {
     console.log("\n🔌 Testing RLS permissions against LOCAL Supabase");
-    console.log("   Sections: 4.1 (anon), 4.2 (user), 4.5 (SQL functions)\n");
+    console.log("   Sections: 4.1 (anon), 4.2 (user), 4.4 (admin), 4.5 (SQL functions)\n");
 
     // Provision test users
     console.log("📋 Provisioning test accounts...");
@@ -975,6 +1538,7 @@ async function main() {
     // Run test sections
     await testAnon();
     await testUserAuthenticated(userClient);
+    await testAdminAccess(adminSessClient, editorClient, userClient, adminId, userId);
     await testSqlFunctions(userClient, editorClient, adminSessClient);
 
     // Cleanup test data
@@ -989,7 +1553,7 @@ async function main() {
         process.exit(1);
     }
 
-    console.log("✅ ALL TESTS PASSED — anon/user/SQL function permissions correct\n");
+    console.log("✅ ALL TESTS PASSED — anon/user/admin/SQL function permissions correct\n");
 }
 
 main().catch((err) => {

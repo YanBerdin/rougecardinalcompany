@@ -126,6 +126,39 @@ function isSchemaError(
     );
 }
 
+/**
+ * Ensure a test user exists in the local Supabase instance.
+ * Creates the user if missing, updates role metadata if already present.
+ */
+async function ensureTestAccount(
+    email: string,
+    password: string,
+    role: "user" | "editor" | "admin",
+): Promise<void> {
+    const { data: list } = await serviceClient.auth.admin.listUsers();
+    const existing = list.users.find((u) => u.email === email);
+
+    if (existing) {
+        await serviceClient.auth.admin.updateUserById(existing.id, {
+            app_metadata: { role },
+            user_metadata: { role, display_name: `Test ${role}` },
+        });
+        return;
+    }
+
+    const { error } = await serviceClient.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        app_metadata: { role },
+        user_metadata: { role, display_name: `Test ${role}` },
+    });
+
+    if (error) {
+        throw new Error(`Failed to provision ${role} (${email}): ${error.message}`);
+    }
+}
+
 /* ------------------------------------------------------------------ */
 /*  Setup / Teardown                                                   */
 /* ------------------------------------------------------------------ */
@@ -140,6 +173,13 @@ beforeAll(async () => {
             `SECURITY: refusing to run against non-local URL: ${SUPABASE_URL}`,
         );
     }
+
+    // Provision test accounts if they don't exist yet
+    await Promise.all([
+        ensureTestAccount(EDITOR_EMAIL, EDITOR_PASSWORD, "editor"),
+        ensureTestAccount(ADMIN_EMAIL, ADMIN_PASSWORD, "admin"),
+        ensureTestAccount(USER_EMAIL, USER_PASSWORD, "user"),
+    ]);
 
     // Sign in as each role
     const [editorResult, adminResult, userResult] = await Promise.all([

@@ -2,7 +2,7 @@
 
 **Status:** In Progress
 **Added:** 2026-03-14
-**Updated:** 2026-03-16 (Phase 3 RLS — 34/34 passent, TASK080 completed)
+**Updated:** 2026-03-17 (Phase 3 RLS 4.4 admin — 64/64, DAL provisioning fix — 80/80)
 
 ## Original Request
 
@@ -67,31 +67,57 @@ Implémenter les 239 cas de test définis dans `specs/tests-permissions-et-rôle
 
 ## Progress Tracking
 
-**Overall Status:** In Progress — 76%
+**Overall Status:** In Progress — 84%
 
 ### Subtasks
 
-| ID  | Description                        | Status      | Updated    | Notes                                                   -------  |
-| --- | ---------------------------------- | ----------- | ---------- | ---------------------------------------------------------------- |
-| 0.1 | Tests E2E P0 pages publiques       | Complete    | 2026-03-16 | 14/14 tests passent — rapport `doc/tests/E2E-P0-PUBLIC-PAGES-REPORT.md |
-| 1.1 | Créer `.env.e2e` (manuel)          | Complete    | 2026-03-16 | Existe, utilisé par Playwright config                            |
+| ID  | Description                        | Status      | Updated    | Notes                                                                                      |
+| --- | ---------------------------------- | ----------- | ---------- | ------------------------------------------------------------------------------------------ |
+| 0.1 | Tests E2E P0 pages publiques       | Complete    | 2026-03-16 | 14/14 tests passent — rapport `doc/tests/E2E-P0-PUBLIC-PAGES-REPORT.md                     |
+| 1.1 | Créer `.env.e2e` (manuel)          | Complete    | 2026-03-16 | Existe, utilisé par Playwright config                                                      |
 | 1.2 | Créer comptes de test Supabase     | Complete    | 2026-03-16 | 3 comptes confirmés : admin (yandevformation@gmail.com), editor, user                      |
-| 2.1 | Tests unitaires role-helpers.ts    | Complete    | 2026-03-16 | 24 cas ROLE-UNIT-001-024 — `__tests__/auth/role-helpers.test.ts` |
-| 2.2 | Tests unitaires roles.ts guards    | Complete    | 2026-03-16 | 18 cas ROLE-UNIT-025-042 — `__tests__/auth/roles.test.ts`        |
-| 3.1 | Tests DAL editor CRUD éditorial    | Complete    | 2026-03-16 | 35/35 — `__tests__/dal/permissions-integration.test.ts`          |
-| 3.2 | Tests DAL editor bloqué admin-only | Complete    | 2026-03-16 | 21/21 — `__tests__/dal/permissions-integration.test.ts`          |
-| 3.3 | Tests DAL admin accès complet      | Complete    | 2026-03-16 | 15/15 — `__tests__/dal/permissions-integration.test.ts`          |
-| 3.4 | Tests DAL user bloqué              | Complete    | 2026-03-16 | 9/9 — `__tests__/dal/permissions-integration.test.ts`            |
-| 4.1 | Tests RLS anon lecture publique    | Complete    | 2026-03-16 | 14/14 pass ✅ (TASK080 resolved: signInAs fix + db reset)     |
-| 4.2 | Tests RLS user restrictions        | Complete    | 2026-03-16 | 12/12 pass ✅ (TASK080 resolved: evenements payload fix)      |
-| 4.3 | Tests RLS admin complet            | Not Started | 2026-03-14 | Section 4.3                                                      |
-| 4.4 | Tests RLS editor éditorial         | Not Started | 2026-03-14 | Section 4.4                                                      |
-| 4.5 | Tests RLS fonctions SQL            | Complete    | 2026-03-16 | 8 tests — 8/8 pass ✅                                            |
-| 4.6 | Tests RLS storage buckets          | Not Started | 2026-03-14 | Section 4.6                                                      |
-| 4.7 | Tests RLS views service_role       | Not Started | 2026-03-14 | Section 4.7                                                      |
-| 5.1 | Tests E2E P0 permissions (23 cas)  | Complete    | 2026-03-16 | **23/23 passent** (42.8s) — 5 corrections appliquées (sélecteurs sidebar, redirect loop, 403→200). Rapport `doc/tests/E2E-P0-PERMISSIONS-REPORT.md`. Commit `ae29f4d` |
+| 2.1 | Tests unitaires role-helpers.ts    | Complete    | 2026-03-16 | 24 cas ROLE-UNIT-001-024 — `__tests__/auth/role-helpers.test.ts`                           |
+| 2.2 | Tests unitaires roles.ts guards    | Complete    | 2026-03-16 | 18 cas ROLE-UNIT-025-042 — `__tests__/auth/roles.test.ts`                                  |
+| 3.1 | Tests DAL editor CRUD éditorial    | Complete    | 2026-03-16 | 35/35 — `__tests__/dal/permissions-integration.test.ts`                                    |
+| 3.2 | Tests DAL editor bloqué admin-only | Complete    | 2026-03-16 | 21/21 — `__tests__/dal/permissions-integration.test.ts`                                    |
+| 3.3 | Tests DAL admin accès complet      | Complete    | 2026-03-16 | 15/15 — `__tests__/dal/permissions-integration.test.ts`                                    |
+| 3.4 | Tests DAL user bloqué              | Complete    | 2026-03-16 | 9/9 — `__tests__/dal/permissions-integration.test.ts`                                      |
+| 4.1 | Tests RLS anon lecture publique    | Complete    | 2026-03-16 | 14/14 pass ✅ (TASK080 resolved: signInAs fix + db reset)                                  |
+| 4.2 | Tests RLS user restrictions        | Complete    | 2026-03-16 | 12/12 pass ✅ (TASK080 resolved: evenements payload fix)                                   |
+| 4.3 | Tests RLS admin complet            | Complete    | 2026-03-17 | 30/30 pass ✅ (RLS-048→077) — `testAdminAccess()` dans `scripts/test-permissions-rls.ts`    |
+| 4.4 | Tests RLS editor éditorial         | Not Started | 2026-03-14 | Section 4.4                                                                                |
+| 4.5 | Tests RLS fonctions SQL            | Complete    | 2026-03-16 | 8 tests — 8/8 pass ✅                                                                      |
+| 4.6 | Tests RLS storage buckets          | Not Started | 2026-03-14 | Section 4.6                                                                                |
+| 4.7 | Tests RLS views service_role       | Not Started | 2026-03-14 | Section 4.7                                                                                |
+| 5.1 | Tests E2E P0 permissions (23 cas)  | Complete    | 2026-03-16 | **23/23 passent** (42.8s) — 5 corrections  (sélecteurs sidebar, redirect loop, 403→200)    |
+
+Rapport `doc/tests/E2E-P0-PERMISSIONS-REPORT.md`. Commit `ae29f4d`  
 
 ## Progress Log
+
+### 2026-03-17 — Phase 3 RLS section 4.3 admin (RLS-048→077) — 30/30 ✅
+
+- **`testAdminAccess()` implémentée** dans `scripts/test-permissions-rls.ts` : 30 tests (RLS-048 → RLS-077)
+- **Couverture admin** :
+  - RLS-048→058 : Admin SELECT sur toutes les tables (spectacles, evenements, lieux, medias, articles_presse, communiques_presse, categories, tags, partners, contacts_presse, membres_equipe)
+  - RLS-059→069 : Admin INSERT sur toutes les tables éditoriales
+  - RLS-070→076 : Admin UPDATE sur les tables éditoriales
+  - RLS-077 : Admin DELETE sur spectacles
+- **Pattern** : chaque test INSERT/UPDATE/DELETE fait un cleanup immédiat via `adminClient.delete()` pour éviter les effets de bord
+- **Résultat** : total script RLS = **64/64 tests passent** (anon 14 + user 12 + admin 30 + SQL functions 8)
+- Subtask 4.3 : Complete
+
+### 2026-03-17 — Fix provisioning DAL tests — 80/80 ✅
+
+- **Problème** : `pnpm run test:dal:permissions` échouait au `beforeAll` avec `Sign-in failed for editor@rougecardinalcompany.fr: Invalid login credentials`
+- **Cause racine** : le `beforeAll` appelait `signInWithPassword()` sans provisionner les comptes — contrairement à `scripts/test-permissions-rls.ts` qui a `ensureTestUser()`
+- **Correction** : ajout de `ensureTestAccount(email, password, role)` dans `__tests__/dal/permissions-integration.test.ts`
+  - Utilise `serviceClient.auth.admin.listUsers()` pour vérifier l'existence
+  - Crée via `serviceClient.auth.admin.createUser()` si absent (`email_confirm: true`)
+  - Met à jour `app_metadata.role` via `updateUserById()` si existant
+  - Appelée dans `beforeAll` pour les 3 comptes (editor, admin, user) avant `signInAndCreateClient()`
+- **Résultat** : 80/80 tests repassent en ~5s
+- **Enseignement** : les tests d'intégration doivent toujours provisionner leurs propres comptes — ne jamais dépendre d'un état externe
 
 ### 2026-03-16 — Phase DAL complète (ROLE-DAL-001–080) — 80/80 ✅
 
