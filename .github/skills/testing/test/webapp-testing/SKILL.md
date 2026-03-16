@@ -18,12 +18,25 @@ Use this skill when you need to:
 - Inspect browser console logs
 - Validate form submissions and user flows
 - Check responsive design across viewports
+- Insérer des données de test typées via les factories Supabase
+- Tester les accès par rôle (admin/editor/user/anon)
 
 ## Prerequisites
 
 - Node.js installed on the system
 - A locally running web application (or accessible URL)
 - Playwright will be installed automatically if not present
+
+## Gestion des données de test
+
+Voir [E2E_Seed_Strategy_RCC](../../../../../e2e-tests/E2E_Seed_Strategy_RCC.md)
+pour les factories typées, fixtures de seed et stratégie de cleanup.
+
+## Authentification multi-rôles (TASK076)
+
+Voir [E2E_Auth_Setup_RCC](../../../../../e2e-tests/E2E_Auth_Setup_RCC.md)
+pour les 3 setups (admin/editor/user), la configuration playwright.config.ts
+et la fixture auth.fixture.ts.
 
 ## Core Capabilities
 
@@ -128,4 +141,6 @@ try {
 
 ## References
 
-[E2E_Tests_QuickReference_RCC](../../../../../e2e-tests/E2E_Tests_QuickReference_RCC.md)
+- [E2E_Tests_QuickReference_RCC](../../../../../e2e-tests/E2E_Tests_QuickReference_RCC.md)
+- [E2E_Seed_Strategy_RCC](../../../../../e2e-tests/E2E_Seed_Strategy_RCC.md)
+- [E2E_Auth_Setup_RCC](../../../../../e2e-tests/E2E_Auth_Setup_RCC.md)
