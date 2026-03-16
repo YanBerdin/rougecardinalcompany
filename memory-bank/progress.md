@@ -1,5 +1,27 @@
 # Progress
 
+## TASK080 — 5 échecs RLS policies à investiguer (2026-03-16)
+
+Script `scripts/test-permissions-rls.ts` — **29/34 pass, 5 fail**. Rapport : `doc/tests/RLS-POLICY-FAILURES-REPORT.md`.
+
+| ID | Table | Op/Rôle | Sévérité | Cause probable |
+| ---- | ------- | ---------------- | ---------- | ---------------- |
+| RLS-001 | `spectacles` | SELECT anon | Moyenne | DB locale non reset |
+| RLS-009 | `configurations_site` | SELECT anon | Haute | DB locale non reset |
+| RLS-010 | `spectacles`, `membres_equipe`, `partners` | INSERT anon | **Critique** | GRANTs ou RLS désactivé |
+| RLS-011 | `logs_audit` | SELECT anon | **Critique** | GRANTs ou RLS désactivé |
+| RLS-019 | `evenements` | INSERT user | Haute | Ordre éval PG ou DB non reset |
+
+**Action prioritaire** : `supabase db reset` → retest.
+
+---
+
+## TASK078 — Phase 3 RLS script (2026-03-16)
+
+Script `scripts/test-permissions-rls.ts` créé couvrant 34 cas (sections 4.1, 4.2, 4.5). npm script `test:rls:local`. 2 bugs script corrigés (dotenv-cli, table `medias`). 29/34 passent → 5 échecs réels → TASK080 créée.
+
+---
+
 ## TASK078 — E2E P0 Permissions (2026-03-16)
 
 **23/23 tests Playwright passent** (100 %) en 42.8 s.

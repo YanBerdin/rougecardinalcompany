@@ -85,7 +85,8 @@
     "test:profile-insertion": "node scripts/test-profile-insertion.js",
     "diagnose:admin-views": "node scripts/diagnose-admin-views.js",
     "test:editor:local": "tsx scripts/test-editor-access-local.ts",
-    "test:editor:remote": "tsx scripts/test-editor-access-remote.ts"
+    "test:editor:remote": "tsx scripts/test-editor-access-remote.ts",
+    "test:rls:local": "tsx scripts/test-permissions-rls.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

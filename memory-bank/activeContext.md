@@ -1,8 +1,36 @@
 # Active Context
 
-**Current Focus (2026-03-16)**: TASK078 — Phase E2E terminée : 14/14 pages publiques ✅ + 23/23 permissions ✅. Prochaine étape : Phase 1 tests unitaires (`__tests__/auth/`) + Phase 2 tests DAL.
+**Current Focus (2026-03-16)**: TASK080 — Investigation des 5 échecs RLS détectés par `scripts/test-permissions-rls.ts` (29/34 pass). Hypothèse : DB locale non réinitialisée post-TASK077/TASK079. Action prioritaire : `supabase db reset` + retest.
 
-**Last Major Updates**: ✅ TASK078 — E2E P0 permissions 23/23 passent, rapport généré (2026-03-16) + ✅ TASK078 — E2E P0 pages publiques 14/14 passent, rapport généré (2026-03-16) + ✅ TASK077 — Séparation policies RLS combinées batch 1 (13 tables, commit `35016b0`) (2026-03-15) + ✅ TASK079 — Séparation policies RLS combinées batch 2 (17 tables, 11 schemas, commit `723c0eb`) (2026-03-15) + ✅ TASK078 branche mergée + pushée (2026-03-14) + ✅ FIX SEC flatted `3.3.3` → `3.4.1` GHSA-25h7-pfq9-p65f (2026-03-14) + ✅ BUGFIX audit tags — `media_tags` + 4 junction tables couvertes (2026-03-13) + ✅ TASK076 trigger extension (2026-03-13) — 9 tables couvertes + ✅ Editor Role Permissions — 15 phases complete (2026-03-11)
+**Last Major Updates**: ✅ TASK078 Phase 3 RLS script créé (29/34 pass, 5 échecs → TASK080) (2026-03-16) + ✅ TASK078 — E2E P0 permissions 23/23 passent, rapport généré (2026-03-16) + ✅ TASK078 — E2E P0 pages publiques 14/14 passent, rapport généré (2026-03-16) + ✅ TASK077 — Séparation policies RLS combinées batch 1 (13 tables, commit `35016b0`) (2026-03-15) + ✅ TASK079 — Séparation policies RLS combinées batch 2 (17 tables, 11 schemas, commit `723c0eb`) (2026-03-15)
+
+---
+
+## TASK080 — 5 échecs RLS à investiguer (2026-03-16)
+
+### Résumé
+
+Le script `test-permissions-rls.ts` couvre les sections 4.1 (anon), 4.2 (user) et 4.5 (fonctions SQL). Sur 34 cas, 5 échouent :
+
+| ID | Table | Opération/Rôle | Sévérité |
+| ---- | ------- | ---------------- | ---------- |
+| RLS-001 | `spectacles` | SELECT anon | Moyenne |
+| RLS-009 | `configurations_site` | SELECT anon | Haute |
+| RLS-010 | `spectacles`, `membres_equipe`, `partners` | INSERT anon | **Critique** |
+| RLS-011 | `logs_audit` | SELECT anon | **Critique** |
+| RLS-019 | `evenements` | INSERT user | Haute |
+
+### Hypothèse principale
+
+Les schémas déclaratifs sont **corrects**. Les 4 premiers échecs sont probablement causés par une DB locale non réinitialisée après les migrations TASK077/TASK079. RLS-019 pourrait être un problème d'ordre d'évaluation PostgreSQL (contraintes NOT NULL avant WITH CHECK).
+
+### Prochaine action
+
+`supabase db reset` → `pnpm test:rls:local` → documenter résultats dans TASK080.
+
+### Rapport
+
+`doc/tests/RLS-POLICY-FAILURES-REPORT.md`
 
 ---
 

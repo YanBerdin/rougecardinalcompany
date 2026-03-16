@@ -2,7 +2,7 @@
 
 **Status:** In Progress
 **Added:** 2026-03-14
-**Updated:** 2026-03-16 (tests unitaires Phase 1)
+**Updated:** 2026-03-16 (Phase 3 RLS — script créé, 29/34 passent)
 
 ## Original Request
 
@@ -67,7 +67,7 @@ Implémenter les 239 cas de test définis dans `specs/tests-permissions-et-rôle
 
 ## Progress Tracking
 
-**Overall Status:** In Progress — 35%
+**Overall Status:** In Progress — 45%
 
 ### Subtasks
 
@@ -82,16 +82,26 @@ Implémenter les 239 cas de test définis dans `specs/tests-permissions-et-rôle
 | 3.2 | Tests DAL editor bloqué admin-only | Not Started | 2026-03-14 | 21 cas (section 3.2)                                             |
 | 3.3 | Tests DAL admin accès complet      | Not Started | 2026-03-14 | 15 cas (section 3.3)                                             |
 | 3.4 | Tests DAL user bloqué              | Not Started | 2026-03-14 | 12 cas (section 3.4)                                             |
-| 4.1 | Tests RLS anon lecture publique    | Not Started | 2026-03-14 | Section 4.1                                                      |
-| 4.2 | Tests RLS editor éditorial         | Not Started | 2026-03-14 | Section 4.2                                                      |
+| 4.1 | Tests RLS anon lecture publique    | Complete    | 2026-03-16 | 14 tests — 12 pass, 2 fail (RLS-001, RLS-009). Voir TASK080  |
+| 4.2 | Tests RLS user restrictions        | Complete    | 2026-03-16 | 12 tests — 11 pass, 1 fail (RLS-019). Voir TASK080           |
 | 4.3 | Tests RLS admin complet            | Not Started | 2026-03-14 | Section 4.3                                                      |
-| 4.4 | Tests RLS user restrictions        | Not Started | 2026-03-14 | Section 4.4                                                      |
-| 4.5 | Tests RLS fonctions SQL            | Not Started | 2026-03-14 | Section 4.5                                                      |
+| 4.4 | Tests RLS editor éditorial         | Not Started | 2026-03-14 | Section 4.4                                                      |
+| 4.5 | Tests RLS fonctions SQL            | Complete    | 2026-03-16 | 8 tests — 8/8 pass ✅                                            |
 | 4.6 | Tests RLS storage buckets          | Not Started | 2026-03-14 | Section 4.6                                                      |
 | 4.7 | Tests RLS views service_role       | Not Started | 2026-03-14 | Section 4.7                                                      |
 | 5.1 | Tests E2E P0 permissions (23 cas)  | Complete    | 2026-03-16 | **23/23 passent** (42.8s) — 5 corrections appliquées (sélecteurs sidebar, redirect loop, 403→200). Rapport `doc/tests/E2E-P0-PERMISSIONS-REPORT.md`. Commit `ae29f4d` |
 
 ## Progress Log
+
+### 2026-03-16 — Phase 3 RLS script (sections 4.1, 4.2, 4.5) — 29/34
+
+- **Script `scripts/test-permissions-rls.ts` créé** : 34 tests couvrant anon (14), user (12), fonctions SQL (8)
+- **npm script** : `"test:rls:local": "tsx scripts/test-permissions-rls.ts"` dans `package.json`
+- **Résultat** : 29/34 passent, **5 échecs RLS réels** identifiés
+- **Bugs script corrigés** : dotenv-cli → inline dotenv loading, table `media` → `medias`
+- **5 échecs** documentés dans `doc/tests/RLS-POLICY-FAILURES-REPORT.md`
+- **TASK080 créée** pour investiguer et corriger les 5 échecs
+- Subtasks 4.1 (anon, 12/14 pass), 4.2 (user, 11/12 pass), 4.5 (SQL functions, 8/8 pass) : Complete
 
 ### 2026-03-16 — Tests unitaires Phase 1 (ROLE-UNIT-001-042) — 42/42 ✅
 

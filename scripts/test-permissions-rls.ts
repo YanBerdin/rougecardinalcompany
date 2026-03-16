@@ -1,0 +1,997 @@
+#!/usr/bin/env tsx
+/**
+ * Test RLS permissions for anon, user (authenticated), and SQL functions.
+ *
+ * Covers spec sections:
+ *   4.1 — Anon: public read only (ROLE-RLS-001 to 014)
+ *   4.2 — User authenticated: read public, write blocked (ROLE-RLS-015 to 026)
+ *   4.5 — SQL functions has_min_role() & is_admin() (ROLE-RLS-059 to 066)
+ *
+ * Editor (4.3) and Admin (4.4) are covered by test-editor-access-local.ts.
+ *
+ * @usage
+ *   pnpm test:rls:local
+ *
+ * @requires
+ * - Local Supabase running: `pnpm dlx supabase start`
+ * - .env.e2e with NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY,
+ *   SUPABASE_SERVICE_ROLE_KEY
+ */
+import { config } from "dotenv";
+import { resolve } from "path";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+
+config({ path: resolve(process.cwd(), ".env.e2e") });
+
+/* ------------------------------------------------------------------ */
+/*  Environment                                                        */
+/* ------------------------------------------------------------------ */
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY;
+const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+const missing: string[] = [];
+if (!SUPABASE_URL) missing.push("NEXT_PUBLIC_SUPABASE_URL");
+if (!PUBLISHABLE_KEY) missing.push("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY");
+if (!SERVICE_KEY) missing.push("SUPABASE_SERVICE_ROLE_KEY");
+
+if (missing.length > 0) {
+    console.error(
+        `❌ Missing env vars: ${missing.join(", ")}\n` +
+        `   Ensure .env.e2e exists at project root.`,
+    );
+    process.exit(1);
+}
+
+function validateLocalOnly(url: string): void {
+    if (!url.includes("127.0.0.1") && !url.includes("localhost")) {
+        console.error(
+            `🔴 SECURITY: refusing to run against non-local URL: ${url}`,
+        );
+        process.exit(1);
+    }
+}
+
+validateLocalOnly(SUPABASE_URL!);
+
+const adminClient = createClient(SUPABASE_URL!, SERVICE_KEY!);
+const anonClient = createClient(SUPABASE_URL!, PUBLISHABLE_KEY!);
+
+/* ------------------------------------------------------------------ */
+/*  Test accounts                                                      */
+/* ------------------------------------------------------------------ */
+
+const USER_EMAIL = "test-user-rls@rougecardinal.test";
+const USER_PASSWORD = "UserRlsTest2026!";
+const EDITOR_EMAIL = "test-editor-rls@rougecardinal.test";
+const EDITOR_PASSWORD = "EditorRlsTest2026!";
+const ADMIN_EMAIL = "test-admin-rls@rougecardinal.test";
+const ADMIN_PASSWORD = "AdminRlsTest2026!";
+
+/* ------------------------------------------------------------------ */
+/*  Counters & helpers                                                 */
+/* ------------------------------------------------------------------ */
+
+let passed = 0;
+let failed = 0;
+
+function ok(id: string, label: string) {
+    passed++;
+    console.log(`   ✅ [${id}] ${label}`);
+}
+
+function fail(id: string, label: string, detail?: string) {
+    failed++;
+    console.error(`   ❌ [${id}] ${label}${detail ? ` — ${detail}` : ""}`);
+}
+
+function isRlsBlock(error: { message: string; code?: string } | null): boolean {
+    if (!error) return false;
+    return (
+        error.message.includes("row-level security") ||
+        error.message.includes("permission denied") ||
+        error.code === "42501" ||
+        error.message.includes("new row violates row-level security")
+    );
+}
+
+/* ------------------------------------------------------------------ */
+/*  User provisioning                                                  */
+/* ------------------------------------------------------------------ */
+
+interface TestAccount {
+    role: "user" | "editor" | "admin";
+    email: string;
+    password: string;
+}
+
+async function ensureTestUser(account: TestAccount): Promise<string> {
+    const { role, email, password } = account;
+    const { data: list } = await adminClient.auth.admin.listUsers();
+    const existing = list.users.find((u) => u.email === email);
+
+    if (existing) {
+        await adminClient.auth.admin.updateUserById(existing.id, {
+            app_metadata: { role },
+            user_metadata: { role, display_name: `Test ${role}` },
+        });
+        await adminClient
+            .from("profiles")
+            .update({ role })
+            .eq("user_id", existing.id);
+        return existing.id;
+    }
+
+    const { data, error } = await adminClient.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        app_metadata: { role },
+        user_metadata: { role, display_name: `Test ${role}` },
+    });
+
+    if (error) {
+        console.error(`❌ Failed to create ${role} user:`, error.message);
+        process.exit(1);
+    }
+
+    await adminClient
+        .from("profiles")
+        .update({ role })
+        .eq("user_id", data.user.id);
+    return data.user.id;
+}
+
+async function signInAs(
+    email: string,
+    password: string,
+): Promise<SupabaseClient> {
+    const { data, error } = await anonClient.auth.signInWithPassword({
+        email,
+        password,
+    });
+    if (error || !data.session?.access_token) {
+        console.error(`❌ Sign-in failed for ${email}:`, error?.message);
+        process.exit(1);
+    }
+    return createClient(SUPABASE_URL!, PUBLISHABLE_KEY!, {
+        global: {
+            headers: { Authorization: `Bearer ${data.session.access_token}` },
+        },
+    });
+}
+
+/* ================================================================== */
+/*  4.1 — ANON tests (ROLE-RLS-001 to 014)                           */
+/* ================================================================== */
+
+async function testAnon() {
+    console.log("\n👤 Section 4.1 — Anon: public read only\n");
+
+    // ROLE-RLS-001: spectacles — only public=true AND status in published/archived
+    {
+        const { data, error } = await anonClient
+            .from("spectacles")
+            .select("id, public, status")
+            .limit(100);
+        if (error) {
+            fail("RLS-001", "Anon select spectacles", error.message);
+        } else {
+            const forbidden = (data ?? []).filter(
+                (r) =>
+                    r.public !== true ||
+                    !["published", "archived"].includes(r.status),
+            );
+            if (forbidden.length > 0) {
+                fail(
+                    "RLS-001",
+                    "Anon select spectacles",
+                    `${forbidden.length} rows with non-public or draft status returned`,
+                );
+            } else {
+                ok("RLS-001", "Anon select spectacles — only public+published/archived");
+            }
+        }
+    }
+
+    // ROLE-RLS-002: evenements — public read
+    {
+        const { error } = await anonClient
+            .from("evenements")
+            .select("id")
+            .limit(1);
+        if (error) {
+            fail("RLS-002", "Anon select evenements", error.message);
+        } else {
+            ok("RLS-002", "Anon select evenements — public read");
+        }
+    }
+
+    // ROLE-RLS-003: membres_equipe — only active=true
+    {
+        const { data, error } = await anonClient
+            .from("membres_equipe")
+            .select("id, active")
+            .limit(100);
+        if (error) {
+            fail("RLS-003", "Anon select membres_equipe", error.message);
+        } else {
+            const inactive = (data ?? []).filter((r) => r.active !== true);
+            if (inactive.length > 0) {
+                fail(
+                    "RLS-003",
+                    "Anon select membres_equipe",
+                    `${inactive.length} inactive rows returned`,
+                );
+            } else {
+                ok("RLS-003", "Anon select membres_equipe — only active");
+            }
+        }
+    }
+
+    // ROLE-RLS-004: partners — only is_active=true
+    {
+        const { data, error } = await anonClient
+            .from("partners")
+            .select("id, is_active")
+            .limit(100);
+        if (error) {
+            fail("RLS-004", "Anon select partners", error.message);
+        } else {
+            const inactive = (data ?? []).filter((r) => r.is_active !== true);
+            if (inactive.length > 0) {
+                fail(
+                    "RLS-004",
+                    "Anon select partners",
+                    `${inactive.length} inactive rows returned`,
+                );
+            } else {
+                ok("RLS-004", "Anon select partners — only is_active");
+            }
+        }
+    }
+
+    // ROLE-RLS-005: articles_presse — only published_at IS NOT NULL
+    {
+        const { data, error } = await anonClient
+            .from("articles_presse")
+            .select("id, published_at")
+            .limit(100);
+        if (error) {
+            fail("RLS-005", "Anon select articles_presse", error.message);
+        } else {
+            const unpublished = (data ?? []).filter(
+                (r) => r.published_at === null,
+            );
+            if (unpublished.length > 0) {
+                fail(
+                    "RLS-005",
+                    "Anon select articles_presse",
+                    `${unpublished.length} unpublished rows returned`,
+                );
+            } else {
+                ok("RLS-005", "Anon select articles_presse — only published");
+            }
+        }
+    }
+
+    // ROLE-RLS-006: communiques_presse — only public=true
+    {
+        const { data, error } = await anonClient
+            .from("communiques_presse")
+            .select("id, public")
+            .limit(100);
+        if (error) {
+            fail("RLS-006", "Anon select communiques_presse", error.message);
+        } else {
+            const nonPublic = (data ?? []).filter((r) => r.public !== true);
+            if (nonPublic.length > 0) {
+                fail(
+                    "RLS-006",
+                    "Anon select communiques_presse",
+                    `${nonPublic.length} non-public rows returned`,
+                );
+            } else {
+                ok("RLS-006", "Anon select communiques_presse — only public");
+            }
+        }
+    }
+
+    // ROLE-RLS-007: contacts_presse — no rows for anon
+    {
+        const { data, error } = await anonClient
+            .from("contacts_presse")
+            .select("id")
+            .limit(1);
+        if (error) {
+            // RLS error or permission denied is acceptable
+            ok("RLS-007", "Anon select contacts_presse — blocked (error)");
+        } else if ((data ?? []).length === 0) {
+            ok("RLS-007", "Anon select contacts_presse — 0 rows");
+        } else {
+            fail(
+                "RLS-007",
+                "Anon select contacts_presse",
+                "SECURITY: rows returned for anon",
+            );
+        }
+    }
+
+    // ROLE-RLS-008: medias — public read
+    {
+        const { error } = await anonClient
+            .from("medias")
+            .select("id")
+            .limit(1);
+        if (error) {
+            fail("RLS-008", "Anon select medias", error.message);
+        } else {
+            ok("RLS-008", "Anon select medias — public read");
+        }
+    }
+
+    // ROLE-RLS-009: configurations_site — partial (display_toggle_%)
+    {
+        const { data, error } = await anonClient
+            .from("configurations_site")
+            .select("key")
+            .limit(100);
+        if (error) {
+            fail("RLS-009", "Anon select configurations_site", error.message);
+        } else {
+            const forbidden = (data ?? []).filter(
+                (r) =>
+                    !String(r.key).startsWith("public:") &&
+                    !String(r.key).startsWith("display_toggle_"),
+            );
+            if (forbidden.length > 0) {
+                fail(
+                    "RLS-009",
+                    "Anon select configurations_site",
+                    `${forbidden.length} non-public keys returned: ${forbidden.map((r) => r.key).join(", ")}`,
+                );
+            } else {
+                ok(
+                    "RLS-009",
+                    "Anon select configurations_site — only public/display_toggle",
+                );
+            }
+        }
+    }
+
+    // ROLE-RLS-010: Anon insert blocked on editorial tables
+    {
+        const tablesToBlock = [
+            { table: "spectacles", payload: { title: "__rls_test__" } },
+            { table: "evenements", payload: { title: "__rls_test__" } },
+            { table: "membres_equipe", payload: { name: "__rls_test__" } },
+            { table: "partners", payload: { name: "__rls_test__" } },
+        ];
+        let allBlocked = true;
+        const details: string[] = [];
+        for (const { table, payload } of tablesToBlock) {
+            const { error } = await anonClient.from(table).insert(payload);
+            if (!error) {
+                allBlocked = false;
+                details.push(`${table} INSERT allowed`);
+            }
+        }
+        if (allBlocked) {
+            ok("RLS-010", "Anon insert blocked on editorial tables");
+        } else {
+            fail(
+                "RLS-010",
+                "Anon insert blocked",
+                `SECURITY: ${details.join(", ")}`,
+            );
+        }
+    }
+
+    // ROLE-RLS-011: logs_audit — no rows for anon
+    {
+        const { data, error } = await anonClient
+            .from("logs_audit")
+            .select("id")
+            .limit(1);
+        if (error) {
+            ok("RLS-011", "Anon select logs_audit — blocked (error)");
+        } else if ((data ?? []).length === 0) {
+            ok("RLS-011", "Anon select logs_audit — 0 rows");
+        } else {
+            fail(
+                "RLS-011",
+                "Anon select logs_audit",
+                "SECURITY: rows returned",
+            );
+        }
+    }
+
+    // ROLE-RLS-012: user_invitations — no rows for anon
+    {
+        const { data, error } = await anonClient
+            .from("user_invitations")
+            .select("id")
+            .limit(1);
+        if (error) {
+            ok("RLS-012", "Anon select user_invitations — blocked (error)");
+        } else if ((data ?? []).length === 0) {
+            ok("RLS-012", "Anon select user_invitations — 0 rows");
+        } else {
+            fail(
+                "RLS-012",
+                "Anon select user_invitations",
+                "SECURITY: rows returned",
+            );
+        }
+    }
+
+    // ROLE-RLS-013: categories — only is_active=true
+    {
+        const { data, error } = await anonClient
+            .from("categories")
+            .select("id, is_active")
+            .limit(100);
+        if (error) {
+            fail("RLS-013", "Anon select categories", error.message);
+        } else {
+            const inactive = (data ?? []).filter((r) => r.is_active !== true);
+            if (inactive.length > 0) {
+                fail(
+                    "RLS-013",
+                    "Anon select categories",
+                    `${inactive.length} inactive rows returned`,
+                );
+            } else {
+                ok("RLS-013", "Anon select categories — only is_active");
+            }
+        }
+    }
+
+    // ROLE-RLS-014: tags — public read
+    {
+        const { error } = await anonClient.from("tags").select("id").limit(1);
+        if (error) {
+            fail("RLS-014", "Anon select tags", error.message);
+        } else {
+            ok("RLS-014", "Anon select tags — public read");
+        }
+    }
+}
+
+/* ================================================================== */
+/*  4.2 — User authenticated tests (ROLE-RLS-015 to 026)             */
+/* ================================================================== */
+
+async function testUserAuthenticated(userClient: SupabaseClient) {
+    console.log(
+        "\n🔐 Section 4.2 — User authenticated: read public, write blocked\n",
+    );
+
+    // ROLE-RLS-015: User select spectacles — same as anon
+    {
+        const { data, error } = await userClient
+            .from("spectacles")
+            .select("id, public, status")
+            .limit(100);
+        if (error) {
+            fail("RLS-015", "User select spectacles", error.message);
+        } else {
+            const forbidden = (data ?? []).filter(
+                (r) =>
+                    r.public !== true ||
+                    !["published", "archived"].includes(r.status),
+            );
+            if (forbidden.length > 0) {
+                fail(
+                    "RLS-015",
+                    "User select spectacles",
+                    `${forbidden.length} non-public rows returned`,
+                );
+            } else {
+                ok("RLS-015", "User select spectacles — only public+published/archived");
+            }
+        }
+    }
+
+    // ROLE-RLS-016: User insert spectacles — blocked
+    {
+        const { error } = await userClient
+            .from("spectacles")
+            .insert({ title: "__rls_test__" });
+        if (isRlsBlock(error)) {
+            ok("RLS-016", "User insert spectacles — blocked by RLS");
+        } else if (error) {
+            // Schema error means RLS allowed it through
+            if (
+                error.message.includes("column") ||
+                error.message.includes("null value") ||
+                error.message.includes("violates")
+            ) {
+                fail(
+                    "RLS-016",
+                    "User insert spectacles",
+                    "SECURITY: RLS should have blocked before schema error",
+                );
+            } else {
+                ok("RLS-016", "User insert spectacles — blocked");
+            }
+        } else {
+            fail(
+                "RLS-016",
+                "User insert spectacles",
+                "SECURITY: insert allowed for user role",
+            );
+        }
+    }
+
+    // ROLE-RLS-017: User update spectacles — blocked
+    {
+        const { error } = await userClient
+            .from("spectacles")
+            .update({ title: "__rls_test__" })
+            .eq("id", -1);
+        if (isRlsBlock(error)) {
+            ok("RLS-017", "User update spectacles — blocked by RLS");
+        } else if (!error) {
+            ok("RLS-017", "User update spectacles — 0 visible rows (filtered)");
+        } else {
+            fail("RLS-017", "User update spectacles", error.message);
+        }
+    }
+
+    // ROLE-RLS-018: User delete spectacles — blocked
+    {
+        const { error } = await userClient
+            .from("spectacles")
+            .delete()
+            .eq("id", -1);
+        if (isRlsBlock(error)) {
+            ok("RLS-018", "User delete spectacles — blocked by RLS");
+        } else if (!error) {
+            ok("RLS-018", "User delete spectacles — 0 visible rows (filtered)");
+        } else {
+            fail("RLS-018", "User delete spectacles", error.message);
+        }
+    }
+
+    // ROLE-RLS-019: User insert evenements — blocked
+    {
+        const { error } = await userClient
+            .from("evenements")
+            .insert({ title: "__rls_test__" });
+        if (isRlsBlock(error)) {
+            ok("RLS-019", "User insert evenements — blocked by RLS");
+        } else if (
+            error &&
+            (error.message.includes("column") ||
+                error.message.includes("null value") ||
+                error.message.includes("violates"))
+        ) {
+            fail(
+                "RLS-019",
+                "User insert evenements",
+                "SECURITY: RLS should have blocked before schema error",
+            );
+        } else if (!error) {
+            fail(
+                "RLS-019",
+                "User insert evenements",
+                "SECURITY: insert allowed for user role",
+            );
+        } else {
+            ok("RLS-019", "User insert evenements — blocked");
+        }
+    }
+
+    // ROLE-RLS-020: User insert membres_equipe — blocked (is_admin)
+    {
+        const { error } = await userClient
+            .from("membres_equipe")
+            .insert({ name: "__rls_test__" });
+        if (isRlsBlock(error)) {
+            ok("RLS-020", "User insert membres_equipe — blocked by RLS");
+        } else if (!error) {
+            fail(
+                "RLS-020",
+                "User insert membres_equipe",
+                "SECURITY: insert allowed for user role",
+            );
+        } else {
+            ok("RLS-020", "User insert membres_equipe — blocked");
+        }
+    }
+
+    // ROLE-RLS-021: User insert partners — blocked
+    {
+        const { error } = await userClient
+            .from("partners")
+            .insert({ name: "__rls_test__" });
+        if (isRlsBlock(error)) {
+            ok("RLS-021", "User insert partners — blocked by RLS");
+        } else if (!error) {
+            fail(
+                "RLS-021",
+                "User insert partners",
+                "SECURITY: insert allowed for user role",
+            );
+        } else {
+            ok("RLS-021", "User insert partners — blocked");
+        }
+    }
+
+    // ROLE-RLS-022: User insert contacts_presse — blocked
+    {
+        const { error } = await userClient.from("contacts_presse").insert({
+            nom: "__rls_test__",
+            media: "__rls_test__",
+            email: `__rls_test_${Date.now()}@test.invalid`,
+        });
+        if (isRlsBlock(error)) {
+            ok("RLS-022", "User insert contacts_presse — blocked by RLS");
+        } else if (!error) {
+            fail(
+                "RLS-022",
+                "User insert contacts_presse",
+                "SECURITY: insert allowed for user role",
+            );
+        } else {
+            ok("RLS-022", "User insert contacts_presse — blocked");
+        }
+    }
+
+    // ROLE-RLS-023: User select logs_audit — no rows
+    {
+        const { data, error } = await userClient
+            .from("logs_audit")
+            .select("id")
+            .limit(1);
+        if (error) {
+            ok("RLS-023", "User select logs_audit — blocked (error)");
+        } else if ((data ?? []).length === 0) {
+            ok("RLS-023", "User select logs_audit — 0 rows");
+        } else {
+            fail(
+                "RLS-023",
+                "User select logs_audit",
+                "SECURITY: rows returned for user role",
+            );
+        }
+    }
+
+    // ROLE-RLS-024: User insert analytics_events — allowed (public insert)
+    {
+        const { error } = await userClient.from("analytics_events").insert({
+            event_type: "page_view",
+            event_data: { test: true },
+            page_url: "/test",
+        });
+        if (error && isRlsBlock(error)) {
+            fail(
+                "RLS-024",
+                "User insert analytics_events",
+                "blocked but should be allowed",
+            );
+        } else if (error) {
+            // Schema/constraint errors are acceptable — RLS allowed the attempt
+            ok(
+                "RLS-024",
+                "User insert analytics_events — allowed (schema error, not RLS)",
+            );
+        } else {
+            ok("RLS-024", "User insert analytics_events — allowed");
+        }
+    }
+
+    // ROLE-RLS-025: User insert messages_contact — allowed
+    {
+        const { error } = await userClient.from("messages_contact").insert({
+            nom: "__rls_test__",
+            email: "__rls_test@test.invalid",
+            message: "__rls_test__",
+        });
+        if (error && isRlsBlock(error)) {
+            fail(
+                "RLS-025",
+                "User insert messages_contact",
+                "blocked but should be allowed",
+            );
+        } else if (error) {
+            ok(
+                "RLS-025",
+                "User insert messages_contact — allowed (schema error, not RLS)",
+            );
+        } else {
+            ok("RLS-025", "User insert messages_contact — allowed");
+        }
+    }
+
+    // ROLE-RLS-026: User insert abonnes_newsletter — allowed
+    {
+        const testEmail = `__rls_test_${Date.now()}@test.invalid`;
+        const { error } = await userClient
+            .from("abonnes_newsletter")
+            .insert({ email: testEmail });
+        if (error && isRlsBlock(error)) {
+            fail(
+                "RLS-026",
+                "User insert abonnes_newsletter",
+                "blocked but should be allowed",
+            );
+        } else if (error) {
+            ok(
+                "RLS-026",
+                "User insert abonnes_newsletter — allowed (schema error, not RLS)",
+            );
+        } else {
+            ok("RLS-026", "User insert abonnes_newsletter — allowed");
+        }
+    }
+}
+
+/* ================================================================== */
+/*  4.5 — SQL functions has_min_role() & is_admin() (RLS-059 to 066) */
+/* ================================================================== */
+
+async function callRpc(
+    client: SupabaseClient,
+    fn: string,
+    args?: Record<string, unknown>,
+): Promise<unknown> {
+    const { data, error } = await client.rpc(fn, args);
+    if (error) throw new Error(`RPC ${fn} failed: ${error.message}`);
+    return data;
+}
+
+async function testSqlFunctions(
+    userClient: SupabaseClient,
+    editorClient: SupabaseClient,
+    adminSessClient: SupabaseClient,
+) {
+    console.log(
+        "\n🧮 Section 4.5 — SQL functions has_min_role() & is_admin()\n",
+    );
+
+    // ROLE-RLS-059: admin → has_min_role('editor') → true
+    {
+        try {
+            const result = await callRpc(adminSessClient, "has_min_role", {
+                required_role: "editor",
+            });
+            if (result === true) {
+                ok("RLS-059", "admin → has_min_role('editor') = true");
+            } else {
+                fail(
+                    "RLS-059",
+                    "admin → has_min_role('editor')",
+                    `expected true, got ${result}`,
+                );
+            }
+        } catch (e) {
+            fail("RLS-059", "admin → has_min_role('editor')", String(e));
+        }
+    }
+
+    // ROLE-RLS-060: editor → has_min_role('editor') → true
+    {
+        try {
+            const result = await callRpc(editorClient, "has_min_role", {
+                required_role: "editor",
+            });
+            if (result === true) {
+                ok("RLS-060", "editor → has_min_role('editor') = true");
+            } else {
+                fail(
+                    "RLS-060",
+                    "editor → has_min_role('editor')",
+                    `expected true, got ${result}`,
+                );
+            }
+        } catch (e) {
+            fail("RLS-060", "editor → has_min_role('editor')", String(e));
+        }
+    }
+
+    // ROLE-RLS-061: user → has_min_role('editor') → false
+    {
+        try {
+            const result = await callRpc(userClient, "has_min_role", {
+                required_role: "editor",
+            });
+            if (result === false) {
+                ok("RLS-061", "user → has_min_role('editor') = false");
+            } else {
+                fail(
+                    "RLS-061",
+                    "user → has_min_role('editor')",
+                    `expected false, got ${result}`,
+                );
+            }
+        } catch (e) {
+            fail("RLS-061", "user → has_min_role('editor')", String(e));
+        }
+    }
+
+    // ROLE-RLS-062: user → has_min_role('user') → true
+    {
+        try {
+            const result = await callRpc(userClient, "has_min_role", {
+                required_role: "user",
+            });
+            if (result === true) {
+                ok("RLS-062", "user → has_min_role('user') = true");
+            } else {
+                fail(
+                    "RLS-062",
+                    "user → has_min_role('user')",
+                    `expected true, got ${result}`,
+                );
+            }
+        } catch (e) {
+            fail("RLS-062", "user → has_min_role('user')", String(e));
+        }
+    }
+
+    // ROLE-RLS-063: admin → is_admin() → true
+    {
+        try {
+            const result = await callRpc(adminSessClient, "is_admin");
+            if (result === true) {
+                ok("RLS-063", "admin → is_admin() = true");
+            } else {
+                fail(
+                    "RLS-063",
+                    "admin → is_admin()",
+                    `expected true, got ${result}`,
+                );
+            }
+        } catch (e) {
+            fail("RLS-063", "admin → is_admin()", String(e));
+        }
+    }
+
+    // ROLE-RLS-064: editor → is_admin() → false
+    {
+        try {
+            const result = await callRpc(editorClient, "is_admin");
+            if (result === false) {
+                ok("RLS-064", "editor → is_admin() = false");
+            } else {
+                fail(
+                    "RLS-064",
+                    "editor → is_admin()",
+                    `expected false, got ${result}`,
+                );
+            }
+        } catch (e) {
+            fail("RLS-064", "editor → is_admin()", String(e));
+        }
+    }
+
+    // ROLE-RLS-065: user → is_admin() → false
+    {
+        try {
+            const result = await callRpc(userClient, "is_admin");
+            if (result === false) {
+                ok("RLS-065", "user → is_admin() = false");
+            } else {
+                fail(
+                    "RLS-065",
+                    "user → is_admin()",
+                    `expected false, got ${result}`,
+                );
+            }
+        } catch (e) {
+            fail("RLS-065", "user → is_admin()", String(e));
+        }
+    }
+
+    // ROLE-RLS-066: admin → has_min_role('superadmin') → false (invalid role)
+    {
+        try {
+            const result = await callRpc(adminSessClient, "has_min_role", {
+                required_role: "superadmin",
+            });
+            if (result === false) {
+                ok("RLS-066", "admin → has_min_role('superadmin') = false (invalid)");
+            } else {
+                fail(
+                    "RLS-066",
+                    "admin → has_min_role('superadmin')",
+                    `expected false, got ${result}`,
+                );
+            }
+        } catch (e) {
+            fail("RLS-066", "admin → has_min_role('superadmin')", String(e));
+        }
+    }
+}
+
+/* ================================================================== */
+/*  Cleanup — remove test data inserted during tests                  */
+/* ================================================================== */
+
+async function cleanup() {
+    console.log("\n🧹 Cleanup test data...\n");
+
+    // Remove analytics_events test rows
+    await adminClient
+        .from("analytics_events")
+        .delete()
+        .eq("page_url", "/test");
+
+    // Remove messages_contact test rows
+    await adminClient
+        .from("messages_contact")
+        .delete()
+        .eq("nom", "__rls_test__");
+
+    // Remove abonnes_newsletter test rows
+    await adminClient
+        .from("abonnes_newsletter")
+        .delete()
+        .like("email", "__rls_test_%");
+
+    console.log("   Done.");
+}
+
+/* ================================================================== */
+/*  Main                                                               */
+/* ================================================================== */
+
+async function main() {
+    console.log("\n🔌 Testing RLS permissions against LOCAL Supabase");
+    console.log("   Sections: 4.1 (anon), 4.2 (user), 4.5 (SQL functions)\n");
+
+    // Provision test users
+    console.log("📋 Provisioning test accounts...");
+    const userId = await ensureTestUser({
+        role: "user",
+        email: USER_EMAIL,
+        password: USER_PASSWORD,
+    });
+    console.log(`   user  → ${userId.slice(0, 8)}...`);
+
+    const editorId = await ensureTestUser({
+        role: "editor",
+        email: EDITOR_EMAIL,
+        password: EDITOR_PASSWORD,
+    });
+    console.log(`   editor → ${editorId.slice(0, 8)}...`);
+
+    const adminId = await ensureTestUser({
+        role: "admin",
+        email: ADMIN_EMAIL,
+        password: ADMIN_PASSWORD,
+    });
+    console.log(`   admin  → ${adminId.slice(0, 8)}...`);
+
+    // Sign in
+    const userClient = await signInAs(USER_EMAIL, USER_PASSWORD);
+    const editorClient = await signInAs(EDITOR_EMAIL, EDITOR_PASSWORD);
+    const adminSessClient = await signInAs(ADMIN_EMAIL, ADMIN_PASSWORD);
+
+    // Run test sections
+    await testAnon();
+    await testUserAuthenticated(userClient);
+    await testSqlFunctions(userClient, editorClient, adminSessClient);
+
+    // Cleanup test data
+    await cleanup();
+
+    // Summary
+    console.log("\n" + "=".repeat(50));
+    console.log(`\n📊 Results: ${passed} passed, ${failed} failed\n`);
+
+    if (failed > 0) {
+        console.error("❌ SOME TESTS FAILED — review RLS policies");
+        process.exit(1);
+    }
+
+    console.log("✅ ALL TESTS PASSED — anon/user/SQL function permissions correct\n");
+}
+
+main().catch((err) => {
+    console.error("Fatal error:", err);
+    process.exit(1);
+});
