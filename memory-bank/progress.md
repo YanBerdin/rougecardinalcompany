@@ -1,5 +1,24 @@
 # Progress
 
+## TASK078 — E2E P0 Pages Publiques (2026-03-16)
+
+**14/14 tests Playwright passent** (100 %) en 1 min 42 s.
+
+| Page | Tests | Statut |
+| ---- | ----- | ------ |
+| Accueil (`/`) | PUB-HOME-001, PUB-HOME-009 | ✅ |
+| Spectacles (`/spectacles`) | PUB-SPEC-001, PUB-SPEC-002 | ✅ |
+| Compagnie (`/compagnie`) | PUB-COMP-001 | ✅ |
+| Agenda (`/agenda`) | PUB-AGENDA-001 | ✅ |
+| Presse (`/presse`) | PUB-PRESSE-001 | ✅ |
+| Contact (`/contact`) | PUB-CONTACT-001, CONTACT-002..004, CONTACT-001, NEWS-001..002 | ✅ |
+
+**Infrastructure** : `playwright.config.ts` (ESM, 1 worker, timeout 90 s) + 6 POM + 6 fixtures + 6 specs (597 lignes total).
+**Rapport** : `doc/E2E-P0-PUBLIC-PAGES-REPORT.md`.
+**Commit** : `0ac079b`.
+
+---
+
 ## TASK077 + TASK079 — Conformité RLS MIG-005 : Séparation anon/authenticated (2026-03-15)
 
 **Contexte** : Audit MIG-005 — les policies RLS combinant `to anon, authenticated` violent la règle « one policy per operation per supabase role ». 2 batches de corrections appliquées.

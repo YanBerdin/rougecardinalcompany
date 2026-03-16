@@ -1,6 +1,6 @@
 # System Patterns
 
-**Last Updated**: 2026-03-06
+**Last Updated**: 2026-03-16
 
 ## Database Infrastructure
 
@@ -35,6 +35,7 @@
 - **RLS display_toggle Pattern (Mar 2026)**: Les clés `display_toggle_*` dans `configurations_site` doivent être lisibles par anon+authenticated. La policy SELECT doit inclure `key like 'display_toggle_%'` en plus de `key like 'public:%'`. GRANT SELECT requis. Le fallback `{ enabled: true }` dans le DAL ne doit pas masquer un bug RLS.
 - **Migrations**: `supabase/migrations/` est la source de vérité pour les modifications appliquées en base; `supabase/schemas/` sert de documentation/declarative reference.
 - **Tests & CI**: vérifier explicitement que les roles `anon` et `authenticated` peuvent accéder aux DTO nécessaires (tests d'intégration DAL).
+- **E2E Page Object Model Pattern (Mar 2026)**: Classe par page dans `e2e/pages/public/`, méthodes `goto()`, `expect*()` encapsulant les sélecteurs. Fixtures Playwright injectent le POM dans chaque spec. Tests `serial` + emails `Date.now()` pour rate limiter. Config ESM (`playwright.config.ts`, `fileURLToPath`), 1 worker, timeout 90 s, retries 2.
 
 **Conventions importantes**:
 

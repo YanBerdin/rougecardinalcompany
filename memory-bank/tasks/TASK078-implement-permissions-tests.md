@@ -70,25 +70,25 @@ Implémenter les 239 cas de test définis dans `specs/tests-permissions-et-rôle
 
 ### Subtasks
 
-| ID  | Description                        | Status      | Updated    | Notes                                                     |
-| --- | ---------------------------------- | ----------- | ---------- | --------------------------------------------------------- |
-| 0.1 | Tests E2E P0 pages publiques       | Complete    | 2026-03-16 | 14/14 tests passent — rapport `doc/E2E-P0-PUBLIC-PAGES-REPORT.md` |
-| 1.1 | Créer `.env.e2e` (manuel)          | Complete    | 2026-03-16 | Existe, utilisé par Playwright config                      |
-| 1.2 | Créer comptes de test Supabase     | Not Started | 2026-03-14 | admin/editor/user                                         |
-| 2.1 | Tests unitaires role-helpers.ts    | Not Started | 2026-03-14 | 11 cas normalizeRole + 9 isRoleAtLeast + 4 ROLE_HIERARCHY |
-| 2.2 | Tests unitaires roles.ts guards    | Not Started | 2026-03-14 | 18 cas getCurrentUserRole + requireMinRole + wrappers     |
-| 3.1 | Tests DAL editor CRUD éditorial    | Not Started | 2026-03-14 | 32 cas (section 3.1)                                      |
-| 3.2 | Tests DAL editor bloqué admin-only | Not Started | 2026-03-14 | 21 cas (section 3.2)                                      |
-| 3.3 | Tests DAL admin accès complet      | Not Started | 2026-03-14 | 15 cas (section 3.3)                                      |
-| 3.4 | Tests DAL user bloqué              | Not Started | 2026-03-14 | 12 cas (section 3.4)                                      |
-| 4.1 | Tests RLS anon lecture publique    | Not Started | 2026-03-14 | Section 4.1                                               |
-| 4.2 | Tests RLS editor éditorial         | Not Started | 2026-03-14 | Section 4.2                                               |
-| 4.3 | Tests RLS admin complet            | Not Started | 2026-03-14 | Section 4.3                                               |
-| 4.4 | Tests RLS user restrictions        | Not Started | 2026-03-14 | Section 4.4                                               |
-| 4.5 | Tests RLS fonctions SQL            | Not Started | 2026-03-14 | Section 4.5                                               |
-| 4.6 | Tests RLS storage buckets          | Not Started | 2026-03-14 | Section 4.6                                               |
-| 4.7 | Tests RLS views service_role       | Not Started | 2026-03-14 | Section 4.7                                               |
-| 5.1 | Tests E2E navigation/sidebar       | Not Started | 2026-03-14 | Section 5                                                 |
+| ID  | Description                        | Status      | Updated    | Notes                                                   -------  |
+| --- | ---------------------------------- | ----------- | ---------- | ---------------------------------------------------------------- |
+| 0.1 | Tests E2E P0 pages publiques       | Complete    | 2026-03-16 | 14/14 tests passent — rapport `doc/E2E-P0-PUBLIC-PAGES-REPORT.md |
+| 1.1 | Créer `.env.e2e` (manuel)          | Complete    | 2026-03-16 | Existe, utilisé par Playwright config                            |
+| 1.2 | Créer comptes de test Supabase     | Not Started | 2026-03-14 | admin/editor/user                                                |
+| 2.1 | Tests unitaires role-helpers.ts    | Not Started | 2026-03-14 | 11 cas normalizeRole + 9 isRoleAtLeast + 4 ROLE_HIERARCHY        |
+| 2.2 | Tests unitaires roles.ts guards    | Not Started | 2026-03-14 | 18 cas getCurrentUserRole + requireMinRole + wrappers            |
+| 3.1 | Tests DAL editor CRUD éditorial    | Not Started | 2026-03-14 | 32 cas (section 3.1)                                             |
+| 3.2 | Tests DAL editor bloqué admin-only | Not Started | 2026-03-14 | 21 cas (section 3.2)                                             |
+| 3.3 | Tests DAL admin accès complet      | Not Started | 2026-03-14 | 15 cas (section 3.3)                                             |
+| 3.4 | Tests DAL user bloqué              | Not Started | 2026-03-14 | 12 cas (section 3.4)                                             |
+| 4.1 | Tests RLS anon lecture publique    | Not Started | 2026-03-14 | Section 4.1                                                      |
+| 4.2 | Tests RLS editor éditorial         | Not Started | 2026-03-14 | Section 4.2                                                      |
+| 4.3 | Tests RLS admin complet            | Not Started | 2026-03-14 | Section 4.3                                                      |
+| 4.4 | Tests RLS user restrictions        | Not Started | 2026-03-14 | Section 4.4                                                      |
+| 4.5 | Tests RLS fonctions SQL            | Not Started | 2026-03-14 | Section 4.5                                                      |
+| 4.6 | Tests RLS storage buckets          | Not Started | 2026-03-14 | Section 4.6                                                      |
+| 4.7 | Tests RLS views service_role       | Not Started | 2026-03-14 | Section 4.7                                                      |
+| 5.1 | Tests E2E navigation/sidebar       | Not Started | 2026-03-14 | Section 5                                                        |
 
 ## Progress Log
 

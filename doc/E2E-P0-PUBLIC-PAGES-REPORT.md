@@ -82,7 +82,7 @@
 
 ### 3.1 Structure des fichiers (644 lignes total)
 
-```
+```bash
 playwright.config.ts                              41 lignes
 e2e/
 ├── pages/public/                                 — 6 Page Objects (302 lignes)
@@ -118,21 +118,21 @@ e2e/
 | Pattern           | Description                                                                                 |
 | ----------------- | ------------------------------------------------------------------------------------------- |
 | Page Object Model | Chaque page a une classe dédiée encapsulant locators et assertions                          |
-| Fixtures          | Extension de `test` via `base.extend<T>()` — injection automatique du Page Object              |
-| Serial mode       | Tests contact exécutés séquentiellement (contraintes rate limiter)                         |
+| Fixtures          | Extension de `test` via `base.extend<T>()` — injection automatique du Page Object           |
+| Serial mode       | Tests contact exécutés séquentiellement (contraintes rate limiter)                          |
 | Unique emails     | `e2e-${Date.now()}@example.com` pour éviter la déduplication newsletter                     |
 | Navigation bypass | `page.goto(href)` au lieu de `click()` pour contourner les overlays CSS (spectacles)        |
 
 ### 3.3 Configuration Playwright
 
-| Paramètre          | Valeur          | Justification                                              |
-| ------------------- | --------------- | ---------------------------------------------------------- |
-| `timeout`           | 90 000 ms       | Compilation Turbopack Server Action à froid (~25-35 s)     |
-| `navigationTimeout` | 45 000 ms       | Pages lourdes + bande passante limitée                     |
-| `workers`           | 1               | Évite crash mémoire (460 MB RAM libre)                     |
-| `retries`           | 0 (local), 2 (CI) | Pas de retry en local pour détecter les vrais problèmes |
-| `reporter`          | html + list     | Rapport HTML archivable + sortie console lisible           |
-| `trace`             | on-first-retry  | Traces uniquement quand pertinent                          |
+| Paramètre          | Valeur           | Justification                                              |
+| ------------------ | ---------------- | ---------------------------------------------------------- |
+| `timeout`          | 90 000 ms        | Compilation Turbopack Server Action à froid (~25-35 s)     |
+| `navigationTimeout`| 45 000 ms        | Pages lourdes + bande passante limitée                     |
+| `workers`          | 1                | Évite crash mémoire (460 MB RAM libre)                     |
+| `retries`          | 0 (local), 2 (CI)| Pas de retry en local pour détecter les vrais problèmes    |
+| `reporter`         | html + list      | Rapport HTML archivable + sortie console lisible           |
+| `trace`            | on-first-retry   | Traces uniquement quand pertinent                          |
 
 ---
 

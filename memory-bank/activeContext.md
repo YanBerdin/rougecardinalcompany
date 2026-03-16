@@ -1,8 +1,40 @@
 # Active Context
 
-**Current Focus (2026-03-15)**: TASK078 — Implémentation des 239 tests permissions/rôles (plan finalisé, implémentation à démarrer). Toutes les policies RLS sont conformes MIG-005 (0 violation combined `anon,authenticated` restante).
+**Current Focus (2026-03-16)**: TASK078 — Suite E2E P0 pages publiques terminée (14/14 ✅). Prochaine étape : Phase 1 tests unitaires (`__tests__/auth/`) + Phase 2 tests DAL.
 
-**Last Major Updates**: ✅ TASK077 — Séparation policies RLS combinées batch 1 (13 tables, commit `35016b0`) (2026-03-15) + ✅ TASK079 — Séparation policies RLS combinées batch 2 (17 tables, 11 schemas, commit `723c0eb`) (2026-03-15) + ✅ TASK078 branche mergée + pushée (2026-03-14) + ✅ FIX SEC flatted `3.3.3` → `3.4.1` GHSA-25h7-pfq9-p65f (2026-03-14) + ✅ BUGFIX audit tags — `media_tags` + 4 junction tables couvertes (2026-03-13) + ✅ TASK076 trigger extension (2026-03-13) — 9 tables couvertes + ✅ Editor Role Permissions — 15 phases complete (2026-03-11) + ✅ BUGFIX 4 RLS policy bugs (P0-RESTRICTIVE/P1a-super_admin/P1b-subquery/P2-UI) commité+déployé (2026-03-10)
+**Last Major Updates**: ✅ TASK078 — E2E P0 pages publiques 14/14 passent, rapport généré (2026-03-16) + ✅ TASK077 — Séparation policies RLS combinées batch 1 (13 tables, commit `35016b0`) (2026-03-15) + ✅ TASK079 — Séparation policies RLS combinées batch 2 (17 tables, 11 schemas, commit `723c0eb`) (2026-03-15) + ✅ TASK078 branche mergée + pushée (2026-03-14) + ✅ FIX SEC flatted `3.3.3` → `3.4.1` GHSA-25h7-pfq9-p65f (2026-03-14) + ✅ BUGFIX audit tags — `media_tags` + 4 junction tables couvertes (2026-03-13) + ✅ TASK076 trigger extension (2026-03-13) — 9 tables couvertes + ✅ Editor Role Permissions — 15 phases complete (2026-03-11)
+
+---
+
+## ✅ TASK078 — E2E P0 Pages Publiques (2026-03-16)
+
+### Résumé
+
+Suite E2E Playwright couvrant les 14 scénarios P0 critiques des 6 pages publiques : Home, Spectacles, Compagnie, Agenda, Presse, Contact.
+
+**Résultat** : **14/14 tests passent** (100 %) en 1 min 42 s sur Chromium.
+
+### Infrastructure mise en place
+
+| Fichier | Lignes | Rôle |
+| ------- | ------ | ---- |
+| `playwright.config.ts` | 41 | ESM, 1 worker, timeout 90 s, retries 2, webServer |
+| `e2e/pages/public/*.ts` | 302 | 6 Page Objects (POM pattern) |
+| `e2e/tests/public/**/*.ts` | 254 | 6 fixtures + 6 specs |
+
+### Contraintes documentées
+
+- **Rate limiter in-memory** : Contact 5 req/15 min, Newsletter 3 req/heure — tests `contact` en mode `serial` avec emails uniques (`Date.now()`).
+- **Turbopack cold start** : Premier accès par page = 25-35 s (compilation lazy). Tests suivants : 1-3 s.
+- **1 worker obligatoire** (`workers: 1`) : Rate limiters partagés + RAM contrainte (16 Go).
+
+### Rapport
+
+`doc/E2E-P0-PUBLIC-PAGES-REPORT.md` — Rapport complet (215 lignes) avec résultats, architecture, contraintes, protocole d'exécution.
+
+### Commit
+
+`0ac079b` — `test(e2e): add P0 public pages Playwright tests — 14/14 passing` (24 files, 2458 insertions)
 
 ---
 

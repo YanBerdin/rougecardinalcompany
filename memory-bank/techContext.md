@@ -1,11 +1,11 @@
 # Tech Context
 
-**Last Updated**: 2026-03-07
+**Last Updated**: 2026-03-16
 
 Versions et dépendances clés observées dans le dépôt:
 
 - Node.js: ^20 (devDeps)
-- Next.js: **16.0.10** (security update 2025-12-13)
+- Next.js: **16.1.5** (App Router, Turbopack default)
 - TypeScript: ^5
 - Tailwind CSS: ^3.4.x
 - Supabase: client/server integration via `@supabase/ssr` and `@supabase/supabase-js` patterns
@@ -14,6 +14,7 @@ Versions et dépendances clés observées dans le dépôt:
 - **Sharp**: Image processing for thumbnails (300x300 JPEG)
 - **Zod**: **4.1.12** (runtime validation)
 - **Deno**: Edge Functions runtime (first function: `scheduled-cleanup`, added 2026-01-18)
+- **Playwright**: **1.57.0** (E2E tests, ESM config, Chromium, 1 worker, added 2026-03-16)
 
 Structure principale:
 
@@ -26,6 +27,7 @@ Structure principale:
 
 | Date | Changement | Impact |
 | ------ | ------------ | -------- |
+| 2026-03-16 | Playwright 1.57.0 E2E P0 suite | 14/14 tests public pages passing, POM + fixtures |
 | 2026-03-07 | BUGFIX RLS display_toggle visibility | Policy SELECT configurations_site corrigée, GRANT ajouté, 2 migrations |
 | 2026-03-07 | BUGFIX DAL press select options | 8 corrections colonnes/filtres/ordre, join spectacles(title) |
 | 2026-03-05 | TASK075 Media Admin Composition Patterns | 4 phases refactoring, 36 fichiers, Compound Components pattern |
