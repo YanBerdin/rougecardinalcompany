@@ -25,10 +25,33 @@ export default defineConfig({
     },
 
     projects: [
+        // --- Auth setup (run first) ---
+        {
+            name: 'setup-admin',
+            testMatch: 'auth/admin.setup.ts',
+        },
+        {
+            name: 'setup-editor',
+            testMatch: 'auth/editor.setup.ts',
+        },
+        {
+            name: 'setup-user',
+            testMatch: 'auth/user.setup.ts',
+        },
+
+        // --- Public tests (no auth required) ---
         {
             name: 'chromium-public',
             use: { ...devices['Desktop Chrome'] },
             testMatch: 'public/**/*.spec.ts',
+        },
+
+        // --- Permissions tests (depend on auth setup) ---
+        {
+            name: 'permissions',
+            use: { ...devices['Desktop Chrome'] },
+            testMatch: 'permissions/**/*.spec.ts',
+            dependencies: ['setup-admin', 'setup-editor', 'setup-user'],
         },
     ],
 

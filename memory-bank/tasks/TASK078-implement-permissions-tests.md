@@ -2,7 +2,7 @@
 
 **Status:** In Progress
 **Added:** 2026-03-14
-**Updated:** 2026-03-16
+**Updated:** 2026-03-16 (E2E P0 permissions)
 
 ## Original Request
 
@@ -60,13 +60,14 @@ Implémenter les 239 cas de test définis dans `specs/tests-permissions-et-rôle
 
 ### Phase 4 — Tests E2E Playwright (ROLE-E2E-001 → 025)
 
-- Dossier : `e2e-tests/permissions/`
+- Dossier : `e2e/tests/permissions/`
 - Nécessite `.env.e2e` + auth setup
-- 25 cas : navigation admin, sidebar filtrage, redirections, formulaires
+- 23 cas P0 implémentés : navigation admin, sidebar filtrage, redirections, API admin
+- **EXCLUSION** : ROLE-E2E-004 et 005 (CRUD spectacle/événement) ne sont pas dans ces tests car ils relèvent de tests fonctionnels, pas de tests de permissions — ils seront couverts par la suite de tests CRUD/DAL
 
 ## Progress Tracking
 
-**Overall Status:** In Progress — 5%
+**Overall Status:** In Progress — 10%
 
 ### Subtasks
 
@@ -88,11 +89,21 @@ Implémenter les 239 cas de test définis dans `specs/tests-permissions-et-rôle
 | 4.5 | Tests RLS fonctions SQL            | Not Started | 2026-03-14 | Section 4.5                                                      |
 | 4.6 | Tests RLS storage buckets          | Not Started | 2026-03-14 | Section 4.6                                                      |
 | 4.7 | Tests RLS views service_role       | Not Started | 2026-03-14 | Section 4.7                                                      |
-| 5.1 | Tests E2E navigation/sidebar       | Not Started | 2026-03-14 | Section 5                                                        |
+| 5.1 | Tests E2E P0 permissions (23 cas)  | In Progress | 2026-03-16 | ROLE-E2E-001-013, 016-024 — auth setups + fixtures + spec créés. ROLE-E2E-004/005 exclus (fonctionnel, pas permissions) |
 
 ## Progress Log
 
-### 2026-03-16
+### 2026-03-16 — E2E P0 Permissions
+
+- **Tests E2E P0 permissions : 23 cas créés (ROLE-E2E-001→013, 016→024)**
+- Auth setup files créés : `e2e/tests/auth/admin.setup.ts`, `editor.setup.ts`, `user.setup.ts`
+- Fixtures créées : `e2e/tests/permissions/permissions.fixtures.ts` (4 fixtures : adminPage, editorPage, userPage, anonPage)
+- Spec créée : `e2e/tests/permissions/permissions.spec.ts` (5 describe blocks, 23 tests)
+- `playwright.config.ts` mis à jour : 3 projets setup + projet `permissions` avec `dependencies`
+- **Exclusion documentée** : ROLE-E2E-004 (CRUD spectacle) et 005 (CRUD événement) exclus car fonctionnels, pas liés aux permissions — à couvrir dans la suite de tests CRUD/DAL
+- Subtask 5.1 mise à jour : In Progress
+
+### 2026-03-16 — E2E P0 pages publiques
 
 - **Tests E2E P0 pages publiques terminés : 14/14 passent**
 - Infrastructure Playwright : `playwright.config.ts` (ESM, 1 worker, timeout 90 s)
