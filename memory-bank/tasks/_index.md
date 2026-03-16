@@ -14,7 +14,7 @@
 ## En Cours
 
 - `TASK038` Responsive Testing & Validation - Plan reviewed, Phase 0 (instrumentation) pending
-- `TASK078` Implémentation tests permissions et rôles — 239 cas (UNIT=42, DAL=80, RLS=92, E2E=25). **E2E P0 pages publiques : 14/14 ✅** (2026-03-16). Phases UNIT/DAL/RLS/E2E permissions à démarrer.
+- `TASK078` Implémentation tests permissions et rôles — 239 cas (UNIT=42, DAL=80, RLS=92, E2E=25). **E2E P0 pages publiques : 14/14 ✅** + **E2E P0 permissions : 23/23 ✅** (2026-03-16). Phases UNIT/DAL/RLS à démarrer.
 
 ## En Attente
 

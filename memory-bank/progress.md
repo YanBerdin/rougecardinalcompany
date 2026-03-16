@@ -1,5 +1,23 @@
 # Progress
 
+## TASK078 — E2E P0 Permissions (2026-03-16)
+
+**23/23 tests Playwright passent** (100 %) en 42.8 s.
+
+| Bloc | IDs | Description | Résultat |
+| ---- | --- | ----------- | -------- |
+| Parcours Editor | 001-003, 006-010 | Login, sidebar 8 items, pages bloquées | ✅ 8/8 |
+| Parcours Admin | 011-013 | Login, sidebar 18 items, pages admin-only | ✅ 3/3 |
+| Parcours User bloqué | 016-018 | Redirection `/auth/login` | ✅ 3/3 |
+| Parcours Anon bloqué | 019-020 | Redirection sans session | ✅ 2/2 |
+| API Admin par rôle | 021-024 | `/api/admin/media/search` : 200 admin/editor, 403 user/anon | ✅ 4/4 |
+
+**Infrastructure** : 3 projets setup (`admin/editor/user`) + projet `permissions` avec `dependencies` dans `playwright.config.ts`.  
+**Rapport** : `doc/E2E-P0-PERMISSIONS-REPORT.md`.  
+**Commit** : `ae29f4d`.
+
+---
+
 ## TASK078 — E2E P0 Pages Publiques (2026-03-16)
 
 **14/14 tests Playwright passent** (100 %) en 1 min 42 s.

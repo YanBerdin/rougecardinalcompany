@@ -1,8 +1,44 @@
 # Active Context
 
-**Current Focus (2026-03-16)**: TASK078 — Suite E2E P0 pages publiques terminée (14/14 ✅). Prochaine étape : Phase 1 tests unitaires (`__tests__/auth/`) + Phase 2 tests DAL.
+**Current Focus (2026-03-16)**: TASK078 — Phase E2E terminée : 14/14 pages publiques ✅ + 23/23 permissions ✅. Prochaine étape : Phase 1 tests unitaires (`__tests__/auth/`) + Phase 2 tests DAL.
 
-**Last Major Updates**: ✅ TASK078 — E2E P0 pages publiques 14/14 passent, rapport généré (2026-03-16) + ✅ TASK077 — Séparation policies RLS combinées batch 1 (13 tables, commit `35016b0`) (2026-03-15) + ✅ TASK079 — Séparation policies RLS combinées batch 2 (17 tables, 11 schemas, commit `723c0eb`) (2026-03-15) + ✅ TASK078 branche mergée + pushée (2026-03-14) + ✅ FIX SEC flatted `3.3.3` → `3.4.1` GHSA-25h7-pfq9-p65f (2026-03-14) + ✅ BUGFIX audit tags — `media_tags` + 4 junction tables couvertes (2026-03-13) + ✅ TASK076 trigger extension (2026-03-13) — 9 tables couvertes + ✅ Editor Role Permissions — 15 phases complete (2026-03-11)
+**Last Major Updates**: ✅ TASK078 — E2E P0 permissions 23/23 passent, rapport généré (2026-03-16) + ✅ TASK078 — E2E P0 pages publiques 14/14 passent, rapport généré (2026-03-16) + ✅ TASK077 — Séparation policies RLS combinées batch 1 (13 tables, commit `35016b0`) (2026-03-15) + ✅ TASK079 — Séparation policies RLS combinées batch 2 (17 tables, 11 schemas, commit `723c0eb`) (2026-03-15) + ✅ TASK078 branche mergée + pushée (2026-03-14) + ✅ FIX SEC flatted `3.3.3` → `3.4.1` GHSA-25h7-pfq9-p65f (2026-03-14) + ✅ BUGFIX audit tags — `media_tags` + 4 junction tables couvertes (2026-03-13) + ✅ TASK076 trigger extension (2026-03-13) — 9 tables couvertes + ✅ Editor Role Permissions — 15 phases complete (2026-03-11)
+
+---
+
+## ✅ TASK078 — E2E P0 Permissions (2026-03-16)
+
+### Résumé
+
+Suite E2E Playwright couvrant les 23 scénarios P0 de permissions : navigation admin, sidebar filtrée par rôle, redirections, et API admin.
+
+**Résultat** : **23/23 tests passent** (100 %) en 42.8 s sur Chromium.
+
+### Tests couverts
+
+| Bloc | IDs | Description | Résultat |
+| ---- | --- | ----------- | -------- |
+| 5.1 — Parcours Editor | 001-003, 006-010 | Login, sidebar filtrée, pages admin bloquées | ✅ 8/8 |
+| 5.2 — Parcours Admin | 011-013 | Login, sidebar complète, accès pages admin-only | ✅ 3/3 |
+| 5.3 — Parcours User bloqué | 016-018 | Redirection vers `/auth/login` | ✅ 3/3 |
+| 5.4 — Parcours Anon bloqué | 019-020 | Redirection sans session | ✅ 2/2 |
+| 5.5 — API Admin | 021-024 | Accès `/api/admin/media/search` par rôle | ✅ 4/4 |
+
+### Problèmes résolus
+
+1. **ESM `__dirname`** : `fileURLToPath(import.meta.url)` dans 4 fichiers setup/fixtures
+2. **Redirect loop `user`** : middleware bloque `/admin` → `waitForTimeout(3000) + goto('/')`
+3. **Sidebar sélecteurs** : `getByRole('link')` → `getByRole('listitem')` (liens icon-only)
+4. **Comptage menu items** : scope `[data-sidebar="content"] [data-sidebar="menu-item"]`
+5. **ROLE-E2E-021** : editor autorisé sur `/api/admin/media/search` (requireMinRole="editor") → 200 correct
+
+### Commits
+
+- `ae29f4d` — `fix(e2e): correct auth setup and sidebar selectors for permissions tests`
+
+### Rapport
+
+`doc/E2E-P0-PERMISSIONS-REPORT.md` — Rapport complet avec matrice permissions, problèmes résolus, infrastructure.
 
 ---
 
