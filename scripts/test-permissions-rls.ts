@@ -147,7 +147,8 @@ async function signInAs(
     email: string,
     password: string,
 ): Promise<SupabaseClient> {
-    const { data, error } = await anonClient.auth.signInWithPassword({
+    const tempClient = createClient(SUPABASE_URL!, PUBLISHABLE_KEY!);
+    const { data, error } = await tempClient.auth.signInWithPassword({
         email,
         password,
     });
@@ -364,7 +365,7 @@ async function testAnon() {
     {
         const tablesToBlock = [
             { table: "spectacles", payload: { title: "__rls_test__" } },
-            { table: "evenements", payload: { title: "__rls_test__" } },
+            { table: "evenements", payload: { spectacle_id: 999999, date_debut: "2099-01-01T00:00:00" } },
             { table: "membres_equipe", payload: { name: "__rls_test__" } },
             { table: "partners", payload: { name: "__rls_test__" } },
         ];
@@ -559,7 +560,7 @@ async function testUserAuthenticated(userClient: SupabaseClient) {
     {
         const { error } = await userClient
             .from("evenements")
-            .insert({ title: "__rls_test__" });
+            .insert({ spectacle_id: 999999, date_debut: "2099-01-01T00:00:00" });
         if (isRlsBlock(error)) {
             ok("RLS-019", "User insert evenements — blocked by RLS");
         } else if (

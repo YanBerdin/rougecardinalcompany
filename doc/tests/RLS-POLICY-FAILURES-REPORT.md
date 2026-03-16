@@ -3,14 +3,29 @@
 **Date** : 2026-03-16  
 **Script** : `scripts/test-permissions-rls.ts`  
 **Environnement** : Supabase local (`localhost:54321`)  
-**Résultat global** : **29/34 passent — 5 échecs**  
-**Tâche de correction** : TASK080
+**Résultat initial** : 29/34 passent — 5 échecs  
+**Résultat final** : **34/34 passent — 0 échec** ✅  
+**Tâche de correction** : TASK080 (Completed)
 
 ---
 
-## Résumé exécutif
+## Résolution — 2026-03-16
 
-Le script `test-permissions-rls.ts` couvre les sections 4.1 (anon, 14 tests), 4.2 (user authenticated, 12 tests) et 4.5 (fonctions SQL, 8 tests) du plan de test `specs/tests-permissions-et-rôles.md`. Sur 34 cas, **5 échecs réels** ont été identifiés, tous liés à des politiques RLS manquantes ou non appliquées sur la base locale.
+> **Tous les 5 échecs ont été résolus.** Aucune modification de policies RLS ou de schéma n'a été nécessaire — les 28 policies étaient correctes. Les problèmes étaient 100% dans le script de test.
+
+| Échec | Cause racine | Fix appliqué |
+| ------- | ------------- | ------------- |
+| RLS-001 | DB locale non réinitialisée après TASK077/079 | `supabase db reset` |
+| RLS-009 | `signInAs()` mutait `anonClient` (session admin) | `tempClient` séparé pour sign-in |
+| RLS-010 | Idem RLS-009 | Idem |
+| RLS-011 | Idem RLS-009 | Idem |
+| RLS-019 | Payload `{ title }` → colonne inexistante sur `evenements` | `{ spectacle_id, date_debut }` |
+
+---
+
+## Résumé exécutif (état initial)
+
+Le script `test-permissions-rls.ts` couvre les sections 4.1 (anon, 14 tests), 4.2 (user authenticated, 12 tests) et 4.5 (fonctions SQL, 8 tests) du plan de test `specs/tests-permissions-et-rôles.md`. Sur 34 cas, **5 échecs** avaient été identifiés initialement, tous liés à des bugs dans le script de test (pas dans les policies RLS).
 
 ---
 
@@ -148,16 +163,23 @@ with check ( (select public.has_min_role('editor')) );
 
 ---
 
-## Hypothèse principale
+## Analyse post-mortem
 
-Les 4 premiers échecs (RLS-001, 009, 010, 011) partagent une cause racine probable : **la DB locale n'a pas été réinitialisée** après les migrations TASK077/TASK079 qui ont séparé les politiques combinées `anon/authenticated`. L'action prioritaire est :
+### Cause 1 — DB locale stale (RLS-001)
 
-```bash
-supabase db reset
-pnpm test:rls:local
-```
+La DB locale n'avait pas été réinitialisée après les migrations TASK077/TASK079. Un `supabase db reset` a résolu RLS-001 (anciennes policies combinées `anon, authenticated` remplacées par policies séparées).
 
-Si les 4 premiers échecs disparaissent, seul RLS-019 nécessite une investigation spécifique (ordre d'évaluation PostgreSQL).
+### Cause 2 — Bug `signInAs()` mutant le client anon (RLS-009, 010, 011)
+
+La fonction `signInAs()` appelait `anonClient.auth.signInWithPassword()`, ce qui **mutait l'état interne** du client anon partagé. Après 3 sign-ins (user → editor → admin), `anonClient` avait une session admin. Les tests "anon" s'exécutaient donc en tant qu'admin → toutes les opérations réussissaient.
+
+**Fix** : `signInAs()` crée désormais un `tempClient = createClient(...)` séparé pour le sign-in, sans toucher au client anon.
+
+### Cause 3 — Colonne inexistante dans payload (RLS-019)
+
+Le payload `{ title: "__rls_test__" }` pour `evenements` utilisait une colonne inexistante. PostgREST retournait PGRST204, qui matchait `error.message.includes("column")` → le test interprétait une erreur schema comme un bypass de sécurité.
+
+**Fix** : Payload corrigé avec les colonnes réelles : `{ spectacle_id: 999999, date_debut: "2099-01-01T00:00:00" }`.
 
 ---
 
@@ -177,9 +199,7 @@ Si les 4 premiers échecs disparaissent, seul RLS-019 nécessite une investigati
 
 ## Prochaines étapes
 
-1. **Exécuter `supabase db reset`** et relancer `pnpm test:rls:local`
-2. **Documenter les résultats** post-reset dans TASK080
-3. **Corriger les échecs persistants** :
-   - Révoquer les GRANTs excessifs si trouvés
-   - Ajuster le test RLS-019 si l'ordre d'évaluation PostgreSQL est confirmé
-4. **Étendre le script** aux sections 4.3 (admin), 4.4 (user restrictions complètes), 4.6 (storage), 4.7 (views)
+1. ~~Exécuter `supabase db reset`~~ ✅ Fait
+2. ~~Documenter les résultats post-reset~~ ✅ TASK080 Completed
+3. ~~Corriger les échecs persistants~~ ✅ 3 fixes appliqués dans `scripts/test-permissions-rls.ts`
+4. **Étendre le script** aux sections 4.3 (admin), 4.4 (editor éditorial), 4.6 (storage), 4.7 (views)

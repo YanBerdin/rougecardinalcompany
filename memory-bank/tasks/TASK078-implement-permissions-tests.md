@@ -2,7 +2,7 @@
 
 **Status:** In Progress
 **Added:** 2026-03-14
-**Updated:** 2026-03-16 (Phase 3 RLS — script créé, 29/34 passent)
+**Updated:** 2026-03-16 (Phase 3 RLS — 34/34 passent, TASK080 completed)
 
 ## Original Request
 
@@ -67,7 +67,7 @@ Implémenter les 239 cas de test définis dans `specs/tests-permissions-et-rôle
 
 ## Progress Tracking
 
-**Overall Status:** In Progress — 65%
+**Overall Status:** In Progress — 76%
 
 ### Subtasks
 
@@ -82,8 +82,8 @@ Implémenter les 239 cas de test définis dans `specs/tests-permissions-et-rôle
 | 3.2 | Tests DAL editor bloqué admin-only | Complete    | 2026-03-16 | 21/21 — `__tests__/dal/permissions-integration.test.ts`          |
 | 3.3 | Tests DAL admin accès complet      | Complete    | 2026-03-16 | 15/15 — `__tests__/dal/permissions-integration.test.ts`          |
 | 3.4 | Tests DAL user bloqué              | Complete    | 2026-03-16 | 9/9 — `__tests__/dal/permissions-integration.test.ts`            |
-| 4.1 | Tests RLS anon lecture publique    | Complete    | 2026-03-16 | 14 tests — 12 pass, 2 fail (RLS-001, RLS-009). Voir TASK080  |
-| 4.2 | Tests RLS user restrictions        | Complete    | 2026-03-16 | 12 tests — 11 pass, 1 fail (RLS-019). Voir TASK080           |
+| 4.1 | Tests RLS anon lecture publique    | Complete    | 2026-03-16 | 14/14 pass ✅ (TASK080 resolved: signInAs fix + db reset)     |
+| 4.2 | Tests RLS user restrictions        | Complete    | 2026-03-16 | 12/12 pass ✅ (TASK080 resolved: evenements payload fix)      |
 | 4.3 | Tests RLS admin complet            | Not Started | 2026-03-14 | Section 4.3                                                      |
 | 4.4 | Tests RLS editor éditorial         | Not Started | 2026-03-14 | Section 4.4                                                      |
 | 4.5 | Tests RLS fonctions SQL            | Complete    | 2026-03-16 | 8 tests — 8/8 pass ✅                                            |
@@ -109,15 +109,23 @@ Implémenter les 239 cas de test définis dans `specs/tests-permissions-et-rôle
 - Rapport : `doc/tests/DAL-PERMISSIONS-INTEGRATION-REPORT.md`
 - Subtasks 3.1, 3.2, 3.3, 3.4 : Complete
 
-### 2026-03-16 — Phase 3 RLS script (sections 4.1, 4.2, 4.5) — 29/34
+### 2026-03-16 — TASK080 resolved — RLS 34/34 ✅
+
+- **TASK080 Completed** : les 5 échecs RLS étaient des bugs dans le script de test, pas dans les policies
+- **Causes racines** : (1) `signInAs()` mutait `anonClient` → fix `tempClient` séparé, (2) payload `evenements` avec colonne inexistante `title` → fix `spectacle_id + date_debut`, (3) DB stale → `supabase db reset`
+- **3 corrections** dans `scripts/test-permissions-rls.ts` — **34/34 tests passent**
+- Rapport mis à jour : `doc/tests/RLS-POLICY-FAILURES-REPORT.md`
+- Subtasks 4.1 (14/14 pass), 4.2 (12/12 pass) : mises à jour
+
+### 2026-03-16 — Phase 3 RLS script (sections 4.1, 4.2, 4.5) — 29/34 initial
 
 - **Script `scripts/test-permissions-rls.ts` créé** : 34 tests couvrant anon (14), user (12), fonctions SQL (8)
 - **npm script** : `"test:rls:local": "tsx scripts/test-permissions-rls.ts"` dans `package.json`
-- **Résultat** : 29/34 passent, **5 échecs RLS réels** identifiés
+- **Résultat initial** : 29/34 passent, 5 échecs identifiés
 - **Bugs script corrigés** : dotenv-cli → inline dotenv loading, table `media` → `medias`
 - **5 échecs** documentés dans `doc/tests/RLS-POLICY-FAILURES-REPORT.md`
 - **TASK080 créée** pour investiguer et corriger les 5 échecs
-- Subtasks 4.1 (anon, 12/14 pass), 4.2 (user, 11/12 pass), 4.5 (SQL functions, 8/8 pass) : Complete
+- Subtasks 4.1 (anon), 4.2 (user), 4.5 (SQL functions, 8/8 pass) : Complete
 
 ### 2026-03-16 — Tests unitaires Phase 1 (ROLE-UNIT-001-042) — 42/42 ✅
 

@@ -1,6 +1,6 @@
 # \[TASK080] — Investigation et correction des 5 échecs RLS policies
 
-**Status:** Pending  
+**Status:** Completed  
 **Added:** 2026-03-16  
 **Updated:** 2026-03-16
 
@@ -47,20 +47,20 @@ Le script `scripts/test-permissions-rls.ts` (TASK078 Phase 3) révèle 5 échecs
 
 ## Progress Tracking
 
-**Overall Status:** Not Started — 0%
+**Overall Status:** Completed — 100%
 
 ### Subtasks
 
 | ID  | Description                                         | Status      | Updated    | Notes |
 | --- | --------------------------------------------------- | ----------- | ---------- | ----- |
-| 1.1 | Exécuter `supabase db reset`                        | Not Started | 2026-03-16 |       |
-| 1.2 | Relancer tests post-reset                           | Not Started | 2026-03-16 |       |
-| 1.3 | Documenter résultats post-reset                     | Not Started | 2026-03-16 |       |
-| 2.1 | Inspecter `pg_policies` tables en échec             | Not Started | 2026-03-16 |       |
-| 2.2 | Vérifier GRANTs anon sur tables critiques           | Not Started | 2026-03-16 |       |
-| 3.1 | Corriger schémas / révoquer GRANTs si nécessaire    | Not Started | 2026-03-16 |       |
-| 3.2 | Ajuster test RLS-019 si problème d'évaluation PG    | Not Started | 2026-03-16 |       |
-| 4.1 | Validation finale 34/34                             | Not Started | 2026-03-16 |       |
+| 1.1 | Exécuter `supabase db reset`                        | Complete    | 2026-03-16 | RLS-001 corrigé |
+| 1.2 | Relancer tests post-reset                           | Complete    | 2026-03-16 | 30/34 |
+| 1.3 | Documenter résultats post-reset                     | Complete    | 2026-03-16 |       |
+| 2.1 | Inspecter `pg_policies` tables en échec             | Complete    | 2026-03-16 | 28 policies correctes |
+| 2.2 | Vérifier GRANTs anon sur tables critiques           | Complete    | 2026-03-16 | ALL normal (Supabase), RLS = gatekeeper |
+| 3.1 | Fix signInAs() session mutation bug                 | Complete    | 2026-03-16 | Cause racine RLS-009/010/011 |
+| 3.2 | Fix evenements payload (colonne title inexistante)  | Complete    | 2026-03-16 | Cause racine RLS-019 |
+| 4.1 | Validation finale 34/34                             | Complete    | 2026-03-16 | ✅ 34/34 |
 
 ## Les 5 échecs à investiguer
 
@@ -80,3 +80,26 @@ Le script `scripts/test-permissions-rls.ts` (TASK078 Phase 3) révèle 5 échecs
 - 29/34 tests passent, 5 échecs réels identifiés
 - Rapport détaillé : `doc/tests/RLS-POLICY-FAILURES-REPORT.md`
 - Hypothèse principale : DB locale non réinitialisée après migrations TASK077/TASK079
+
+### 2026-03-16 — Résolution complète
+
+**Phase 1 — db reset** : `supabase db reset` a corrigé RLS-001 (anciennes policies combinées remplacées). Score → 30/34.
+
+**Phase 2 — Investigation** :
+
+- `pg_policies` : 28 policies correctement configurées sur les 6 tables
+- GRANTs : ALL privileges pour anon = comportement normal Supabase (RLS est le contrôle d'accès)
+- Tests directs curl + Node.js client frais : RLS fonctionne parfaitement → le problème est dans le script de test
+
+**Causes racines identifiées** :
+
+1. **RLS-009/010/011** : Bug dans `signInAs()` — la fonction appelait `anonClient.auth.signInWithPassword()` qui **mutait l'état interne** du client anon. Après 3 sign-ins (user → editor → admin), `anonClient` avait une session admin. Les tests "anon" s'exécutaient donc en tant qu'admin.
+2. **RLS-019** : Le payload `{ title: "__rls_test__" }` pour `evenements` utilisait une **colonne inexistante** (`title`). PostgREST retournait PGRST204 (schema cache error), qui matchait le pattern `error.message.includes("column")` → faux négatif.
+
+**Phase 3 — Corrections** dans `scripts/test-permissions-rls.ts` :
+
+1. `signInAs()` utilise désormais un `tempClient` séparé pour `signInWithPassword()` au lieu de `anonClient`
+2. Payloads `evenements` corrigés : `{ spectacle_id: 999999, date_debut: "2099-01-01T00:00:00" }` (colonnes valides)
+3. Correction appliquée aux deux tests RLS-010 et RLS-019
+
+**Phase 4 — Validation** : ✅ **34/34 tests passent** — 0 échec.
