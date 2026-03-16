@@ -1,8 +1,8 @@
 # \[TASK078] — Implémentation des tests permissions et rôles
 
-**Status:** Pending
+**Status:** In Progress
 **Added:** 2026-03-14
-**Updated:** 2026-03-14
+**Updated:** 2026-03-16
 
 ## Original Request
 
@@ -66,13 +66,14 @@ Implémenter les 239 cas de test définis dans `specs/tests-permissions-et-rôle
 
 ## Progress Tracking
 
-**Overall Status:** Not Started — 0%
+**Overall Status:** In Progress — 5%
 
 ### Subtasks
 
 | ID  | Description                        | Status      | Updated    | Notes                                                     |
 | --- | ---------------------------------- | ----------- | ---------- | --------------------------------------------------------- |
-| 1.1 | Créer `.env.e2e` (manuel)          | Not Started | 2026-03-14 | Prérequis — secrets locaux                                |
+| 0.1 | Tests E2E P0 pages publiques       | Complete    | 2026-03-16 | 14/14 tests passent — rapport `doc/E2E-P0-PUBLIC-PAGES-REPORT.md` |
+| 1.1 | Créer `.env.e2e` (manuel)          | Complete    | 2026-03-16 | Existe, utilisé par Playwright config                      |
 | 1.2 | Créer comptes de test Supabase     | Not Started | 2026-03-14 | admin/editor/user                                         |
 | 2.1 | Tests unitaires role-helpers.ts    | Not Started | 2026-03-14 | 11 cas normalizeRole + 9 isRoleAtLeast + 4 ROLE_HIERARCHY |
 | 2.2 | Tests unitaires roles.ts guards    | Not Started | 2026-03-14 | 18 cas getCurrentUserRole + requireMinRole + wrappers     |
@@ -90,6 +91,19 @@ Implémenter les 239 cas de test définis dans `specs/tests-permissions-et-rôle
 | 5.1 | Tests E2E navigation/sidebar       | Not Started | 2026-03-14 | Section 5                                                 |
 
 ## Progress Log
+
+### 2026-03-16
+
+- **Tests E2E P0 pages publiques terminés : 14/14 passent**
+- Infrastructure Playwright : `playwright.config.ts` (ESM, 1 worker, timeout 90 s)
+- 6 Page Objects créés dans `e2e/pages/public/` (302 lignes)
+- 6 fixtures + 6 specs dans `e2e/tests/public/` (254 lignes)
+- Couverture : 6 pages (accueil, spectacles, compagnie, agenda, presse, contact)
+- Types de tests : chargement page, navigation, validation formulaire, soumission réussie, newsletter
+- Contraintes documentées : rate limiter en mémoire, compilation Turbopack à froid (25-35 s), mémoire limitée
+- Rapport complet : `doc/E2E-P0-PUBLIC-PAGES-REPORT.md`
+- Subtask 0.1 (E2E P0 pages publiques) marquée Complete
+- Subtask 1.1 (`.env.e2e`) marquée Complete (fichier existe et fonctionne)
 
 ### 2026-03-14
 
