@@ -34,7 +34,7 @@ Implémentation et passage complet des **23 tests E2E P0** de permissions (ROLE-
 ## Fichiers créés / modifiés
 
 | Fichier | Action | Description |
-|---------|--------|-------------|
+| --------- | -------- | ------------- |
 | `e2e/tests/auth/admin.setup.ts` | Créé + corrigé | Auth setup admin (ESM fix, `fileURLToPath`) |
 | `e2e/tests/auth/editor.setup.ts` | Créé + corrigé | Auth setup editor (ESM fix) |
 | `e2e/tests/auth/user.setup.ts` | Créé + corrigé | Auth setup user (ESM fix + redirect loop fix) |
@@ -51,6 +51,7 @@ Implémentation et passage complet des **23 tests E2E P0** de permissions (ROLE-
 **Problème :** Les 4 fichiers (`admin.setup.ts`, `editor.setup.ts`, `user.setup.ts`, `permissions.fixtures.ts`) utilisaient `__dirname` qui n'est pas disponible dans les modules ES.
 
 **Solution :**
+
 ```ts
 import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -63,13 +64,15 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 **Problème :** Le setup `user.setup.ts` attendait `waitForURL('**/')` après login. Or le formulaire de login redirige vers `/admin` pour **tous** les rôles, et le middleware bloque le rôle `user` sur `/admin` → redirect vers `/auth/login` → boucle infinie (timeout 30s).
 
 **Diagnostic :**
-```
+
+```yaml
 Login form → router.push("/admin")
 Middleware → requireMinRole("editor") ← user(0) < editor(1) → redirect /auth/login
 → boucle
 ```
 
 **Solution :**
+
 ```ts
 // Attendre que les cookies auth soient posés (3s) puis naviguer sur une page accessible
 await page.waitForTimeout(3_000);
@@ -84,6 +87,7 @@ await expect(page.locator('body')).toBeVisible();
 **Problème :** `sidebar.getByRole('link', { name: 'Tableau de bord' })` échouait. Dans l'arbre d'accessibilité Playwright, les `<Link>` de la sidebar ne contiennent qu'une icône (`img`) — le `<span>` avec le titre est masqué en mode collapsed.
 
 **Arbre d'accessibilité réel :**
+
 ```yaml
 - listitem "Tableau de bord":       # ← accessible name via title attribute
   - link [cursor=pointer]:
@@ -99,6 +103,7 @@ await expect(page.locator('body')).toBeVisible();
 **Problème :** `[data-sidebar="menu-item"]` retournait 11 au lieu de 8 (editor) et 21 au lieu de 18 (admin). Les éléments `data-sidebar="menu-item"` du header (logo RC) et du footer (bouton Authentification) étaient inclus dans le décompte.
 
 **Solution :** Limiter le sélecteur à la zone de contenu :
+
 ```ts
 const menuItems = sidebar.locator('[data-sidebar="content"] [data-sidebar="menu-item"]');
 ```
@@ -122,10 +127,10 @@ const menuItems = sidebar.locator('[data-sidebar="content"] [data-sidebar="menu-
 
 ## Infrastructure d'authentification
 
-### Comptes de test (Supabase REMOTE)
+### Comptes de test (Supabase local)
 
 | Rôle | Email | `app_metadata.role` |
-|------|-------|---------------------|
+| ------ | ------- | --------------------- |
 | admin | `yandevformation@gmail.com` | `admin` |
 | editor | `editor@rougecardinalcompany.fr` | `editor` |
 | user | `user@rougecardinalcompany.fr` | `user` |
@@ -136,7 +141,7 @@ Chaque setup sauvegarde l'état d'authentification dans `.auth/{role}.json`. Ces
 
 ### Hiérarchie des projets Playwright
 
-```
+```yaml
 setup-admin ──┐
 setup-editor ─┤── permissions
 setup-user ───┘
@@ -147,7 +152,7 @@ setup-user ───┘
 ## Matrice des permissions vérifiées
 
 | Ressource | admin | editor | user | anon |
-|-----------|-------|--------|------|------|
+| ----------- | ------- | -------- | ------ | ------ |
 | `/admin` (dashboard) | ✅ accès | ✅ accès | ❌ → `/auth/login` | ❌ → `/auth/login` |
 | `/admin/spectacles` | ✅ | ✅ | ❌ | ❌ |
 | `/admin/team` | ✅ | ❌ → `/auth/login` | ❌ | ❌ |
@@ -166,7 +171,7 @@ setup-user ───┘
 Les phases restantes de TASK078 :
 
 | Phase | Cas | Statut |
-|-------|-----|--------|
+| ------- | ----- | -------- |
 | Phase 1 — Tests unitaires (ROLE-UNIT-*) | 42 cas | Non démarré |
 | Phase 2 — Tests DAL intégration (ROLE-DAL-*) | 80 cas | Non démarré |
 | Phase 3 — Tests RLS SQL (ROLE-RLS-*) | 92 cas | Non démarré |

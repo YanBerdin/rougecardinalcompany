@@ -38,7 +38,7 @@ Suite E2E Playwright couvrant les 23 scénarios P0 de permissions : navigation a
 
 ### Rapport
 
-`doc/E2E-P0-PERMISSIONS-REPORT.md` — Rapport complet avec matrice permissions, problèmes résolus, infrastructure.
+`doc/tests/E2E-P0-PERMISSIONS-REPORT.md` — Rapport complet avec matrice permissions, problèmes résolus, infrastructure.
 
 ---
 
@@ -66,7 +66,7 @@ Suite E2E Playwright couvrant les 14 scénarios P0 critiques des 6 pages publiqu
 
 ### Rapport
 
-`doc/E2E-P0-PUBLIC-PAGES-REPORT.md` — Rapport complet (215 lignes) avec résultats, architecture, contraintes, protocole d'exécution.
+`doc/tests/E2E-P0-PUBLIC-PAGES-REPORT.md` — Rapport complet (215 lignes) avec résultats, architecture, contraintes, protocole d'exécution.
 
 ### Commit
 

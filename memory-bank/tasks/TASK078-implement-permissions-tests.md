@@ -73,7 +73,7 @@ Implémenter les 239 cas de test définis dans `specs/tests-permissions-et-rôle
 
 | ID  | Description                        | Status      | Updated    | Notes                                                   -------  |
 | --- | ---------------------------------- | ----------- | ---------- | ---------------------------------------------------------------- |
-| 0.1 | Tests E2E P0 pages publiques       | Complete    | 2026-03-16 | 14/14 tests passent — rapport `doc/E2E-P0-PUBLIC-PAGES-REPORT.md |
+| 0.1 | Tests E2E P0 pages publiques       | Complete    | 2026-03-16 | 14/14 tests passent — rapport `doc/tests/E2E-P0-PUBLIC-PAGES-REPORT.md |
 | 1.1 | Créer `.env.e2e` (manuel)          | Complete    | 2026-03-16 | Existe, utilisé par Playwright config                            |
 | 1.2 | Créer comptes de test Supabase     | Complete    | 2026-03-16 | 3 comptes confirmés : admin (yandevformation@gmail.com), editor, user                      |
 | 2.1 | Tests unitaires role-helpers.ts    | Not Started | 2026-03-14 | 11 cas normalizeRole + 9 isRoleAtLeast + 4 ROLE_HIERARCHY        |
@@ -89,7 +89,7 @@ Implémenter les 239 cas de test définis dans `specs/tests-permissions-et-rôle
 | 4.5 | Tests RLS fonctions SQL            | Not Started | 2026-03-14 | Section 4.5                                                      |
 | 4.6 | Tests RLS storage buckets          | Not Started | 2026-03-14 | Section 4.6                                                      |
 | 4.7 | Tests RLS views service_role       | Not Started | 2026-03-14 | Section 4.7                                                      |
-| 5.1 | Tests E2E P0 permissions (23 cas)  | Complete    | 2026-03-16 | **23/23 passent** (42.8s) — 5 corrections appliquées (sélecteurs sidebar, redirect loop, 403→200). Rapport `doc/E2E-P0-PERMISSIONS-REPORT.md`. Commit `ae29f4d` |
+| 5.1 | Tests E2E P0 permissions (23 cas)  | Complete    | 2026-03-16 | **23/23 passent** (42.8s) — 5 corrections appliquées (sélecteurs sidebar, redirect loop, 403→200). Rapport `doc/tests/E2E-P0-PERMISSIONS-REPORT.md`. Commit `ae29f4d` |
 
 ## Progress Log
 
@@ -102,7 +102,7 @@ Implémenter les 239 cas de test définis dans `specs/tests-permissions-et-rôle
   3. **Sidebar liens sans nom** : `getByRole('link', {name})` → `getByRole('listitem', {name})` (icônes seules)
   4. **Comptage menu items** : `[data-sidebar="menu-item"]` inclut header/footer → scoper à `[data-sidebar="content"] [data-sidebar="menu-item"]`
   5. **ROLE-E2E-021** : editor attendu 403 mais `/api/admin/media/search` autorise `requireMinRole("editor")` → attendre 200
-- Rapport complet : `doc/E2E-P0-PERMISSIONS-REPORT.md`
+- Rapport complet : `doc/tests/E2E-P0-PERMISSIONS-REPORT.md`
 - Subtask 1.2 : comptes Supabase remote confirmés (3 comptes actifs)
 - Subtask 5.1 : Complete
 
@@ -125,7 +125,7 @@ Implémenter les 239 cas de test définis dans `specs/tests-permissions-et-rôle
 - Couverture : 6 pages (accueil, spectacles, compagnie, agenda, presse, contact)
 - Types de tests : chargement page, navigation, validation formulaire, soumission réussie, newsletter
 - Contraintes documentées : rate limiter en mémoire, compilation Turbopack à froid (25-35 s), mémoire limitée
-- Rapport complet : `doc/E2E-P0-PUBLIC-PAGES-REPORT.md`
+- Rapport complet : `doc/tests/E2E-P0-PUBLIC-PAGES-REPORT.md`
 - Subtask 0.1 (E2E P0 pages publiques) marquée Complete
 - Subtask 1.1 (`.env.e2e`) marquée Complete (fichier existe et fonctionne)
 

@@ -13,7 +13,7 @@
 | API Admin par rôle | 021-024 | `/api/admin/media/search` : 200 admin/editor, 403 user/anon | ✅ 4/4 |
 
 **Infrastructure** : 3 projets setup (`admin/editor/user`) + projet `permissions` avec `dependencies` dans `playwright.config.ts`.  
-**Rapport** : `doc/E2E-P0-PERMISSIONS-REPORT.md`.  
+**Rapport** : `doc/tests/E2E-P0-PERMISSIONS-REPORT.md`.  
 **Commit** : `ae29f4d`.
 
 ---
@@ -32,7 +32,7 @@
 | Contact (`/contact`) | PUB-CONTACT-001, CONTACT-002..004, CONTACT-001, NEWS-001..002 | ✅ |
 
 **Infrastructure** : `playwright.config.ts` (ESM, 1 worker, timeout 90 s) + 6 POM + 6 fixtures + 6 specs (597 lignes total).
-**Rapport** : `doc/E2E-P0-PUBLIC-PAGES-REPORT.md`.
+**Rapport** : `doc/tests/E2E-P0-PUBLIC-PAGES-REPORT.md`.
 **Commit** : `0ac079b`.
 
 ---
