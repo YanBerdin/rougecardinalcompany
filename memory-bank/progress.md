@@ -1,5 +1,21 @@
 # Progress
 
+## TASK078 — Phase DAL complète (2026-03-16)
+
+**80/80 tests ROLE-DAL-001–080 passent** (3.87 s) — `pnpm test:dal:permissions`.
+
+| Section | IDs | Description | Résultat |
+| ------- | --- | ----------- | -------- |
+| 3.1 — Editor CRUD éditorial | 001–035 | Editor peut écrire sur tables éditoriales | ✅ 35/35 |
+| 3.2 — Editor bloqué admin-only | 036–056 | Editor bloqué sur tables admin-only | ✅ 21/21 |
+| 3.3 — Admin accès complet | 057–071 | Admin peut écrire partout | ✅ 15/15 |
+| 3.4 — User bloqué writes | 072–080 | User bloqué sur toute table protégée | ✅ 9/9 |
+
+**Cause racine résolue** : Les comptes de test avaient tous `role: "user"` dans `profiles`. Fix : provisionnement via `service_role` dans `beforeAll`.
+**Rapport** : `doc/tests/DAL-PERMISSIONS-INTEGRATION-REPORT.md`.
+
+---
+
 ## TASK080 — 5 échecs RLS policies à investiguer (2026-03-16)
 
 Script `scripts/test-permissions-rls.ts` — **29/34 pass, 5 fail**. Rapport : `doc/tests/RLS-POLICY-FAILURES-REPORT.md`.

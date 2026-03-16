@@ -2,7 +2,32 @@
 
 **Current Focus (2026-03-16)**: TASK080 — Investigation des 5 échecs RLS détectés par `scripts/test-permissions-rls.ts` (29/34 pass). Hypothèse : DB locale non réinitialisée post-TASK077/TASK079. Action prioritaire : `supabase db reset` + retest.
 
-**Last Major Updates**: ✅ TASK078 Phase 3 RLS script créé (29/34 pass, 5 échecs → TASK080) (2026-03-16) + ✅ TASK078 — E2E P0 permissions 23/23 passent, rapport généré (2026-03-16) + ✅ TASK078 — E2E P0 pages publiques 14/14 passent, rapport généré (2026-03-16) + ✅ TASK077 — Séparation policies RLS combinées batch 1 (13 tables, commit `35016b0`) (2026-03-15) + ✅ TASK079 — Séparation policies RLS combinées batch 2 (17 tables, 11 schemas, commit `723c0eb`) (2026-03-15)
+**Last Major Updates**: ✅ TASK078 Phase DAL — **80/80 tests DAL passent** (`__tests__/dal/permissions-integration.test.ts`), rapport `doc/tests/DAL-PERMISSIONS-INTEGRATION-REPORT.md` (2026-03-16) + ✅ TASK078 Phase 3 RLS script créé (29/34 pass, 5 échecs → TASK080) (2026-03-16) + ✅ TASK078 — E2E P0 permissions 23/23 passent (2026-03-16) + ✅ TASK078 — E2E P0 pages publiques 14/14 passent (2026-03-16) + ✅ TASK077 — Séparation policies RLS batch 1 (2026-03-15) + ✅ TASK079 — Séparation policies RLS batch 2 (2026-03-15)
+
+---
+
+## ✅ TASK078 — Phase DAL complète (2026-03-16)
+
+### Résultat
+
+**80/80 tests ROLE-DAL-001–080 passent** (3.87 s) — `pnpm test:dal:permissions`
+
+### Sections couvertes
+
+| Section | IDs | Description | Résultat |
+| ------- | --- | ----------- | -------- |
+| 3.1 — Editor CRUD éditorial | 001–035 | Editor peut écrire sur tables éditoriales | ✅ 35/35 |
+| 3.2 — Editor bloqué admin-only | 036–056 | Editor bloqué sur tables admin-only | ✅ 21/21 |
+| 3.3 — Admin accès complet | 057–071 | Admin peut écrire partout | ✅ 15/15 |
+| 3.4 — User bloqué writes | 072–080 | User bloqué sur toute table protégée | ✅ 9/9 |
+
+### Enseignement clé
+
+Quand RLS utilise `profiles.role` (pas JWT claims), les tests d'intégration **DOIVENT provisionner les rôles via `service_role` dans `beforeAll`**. Sans cela, tous les utilisateurs ont le rôle `user` par défaut et les tests editor/admin échouent avec `42501`.
+
+### Rapport
+
+`doc/tests/DAL-PERMISSIONS-INTEGRATION-REPORT.md`
 
 ---
 

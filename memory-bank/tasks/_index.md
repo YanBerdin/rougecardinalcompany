@@ -14,7 +14,7 @@
 ## En Cours
 
 - `TASK038` Responsive Testing & Validation - Plan reviewed, Phase 0 (instrumentation) pending
-- `TASK078` Implémentation tests permissions et rôles — 239 cas (UNIT=42, DAL=80, RLS=92, E2E=25). **E2E P0 pages publiques : 14/14 ✅** + **E2E P0 permissions : 23/23 ✅** + **UNIT : 42/42 ✅** + **RLS script : 29/34 (5 échecs → TASK080)** (2026-03-16). Phases DAL à démarrer.
+- `TASK078` Implémentation tests permissions et rôles — 239 cas (UNIT=42, DAL=80, RLS=92, E2E=25). **E2E P0 pages publiques : 14/14 ✅** + **E2E P0 permissions : 23/23 ✅** + **UNIT : 42/42 ✅** + **DAL : 80/80 ✅** + **RLS script : 29/34 (5 échecs → TASK080)** (2026-03-16). Phases RLS editor/admin/storage/views + E2E avancés restants.
 - `TASK080` Investigation et correction des 5 échecs RLS policies — spectacles, configurations_site, logs_audit, evenements, membres_equipe, partners. Hypothèse : DB locale non réinitialisée post-TASK077/TASK079.
 
 ## En Attente

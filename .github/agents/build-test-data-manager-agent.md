@@ -8,7 +8,7 @@
 
 ## Vue d'ensemble du pipeline
 
-```
+```yaml
 Phase 1 — Schéma          Phase 2 — Seed             Phase 3 — Fixtures          Phase 4 — Intégration
 ──────────────────         ──────────────────          ──────────────────          ──────────────────
 Analyser les tables   →    Générer les données   →     Créer les helpers    →      Câbler Playwright
@@ -23,7 +23,7 @@ Analyser les tables   →    Générer les données   →     Créer les helpers
 
 Invoquer l'agent **Supabase Expert** avec ce prompt :
 
-```
+```yaml
 Analyse le schéma complet du projet. Pour chaque table, liste :
 - Nom de la table et son schéma
 - Colonnes (type, nullable, default, FK)
@@ -202,8 +202,6 @@ DELETE FROM public.spectacles WHERE is_test_data = true;
 -- Suivre INSERT_ORDER en reverse pour respecter les FK
 ```
 
-```
-
 #### `.github/agents/references/fixture-patterns.md`
 
 ```markdown
@@ -313,8 +311,6 @@ export class AdminSpectaclesPage {
 }
 ```
 
-```
-
 #### `.github/agents/references/isolation-strategies.md`
 
 ```markdown
@@ -402,15 +398,13 @@ export async function cleanAllTestData(db: SupabaseClient) {
 | CI (PR review) | B (branching) | Isolation garantie |
 | Staging | B (branching) | Données réelles protégées |
 
-```
-
 ---
 
 ## Phase 3 — Créer le skill complémentaire
 
 ### 3.1 Créer `.github/skills/test-data/SKILL.md`
 
-```markdown
+```yaml
 ---
 name: test-data
 description: >
@@ -448,7 +442,7 @@ cat .env.test.local | grep -E "TEST_|SUPABASE"
 
 ## Structure de fichiers à générer
 
-```
+```yaml
 tests/
 ├── fixtures/
 │   ├── index.ts              ← export du test étendu avec fixtures
@@ -473,8 +467,6 @@ tests/
 - [ ] Types générés depuis Supabase (`generate_typescript_types`)
 - [ ] RLS toujours actif (pas de bypass RLS en test fonctionnel)
 
-```
-
 ---
 
 ## Phase 4 — Migrations Supabase pour supporter les seeds
@@ -483,8 +475,7 @@ tests/
 
 Invoquer l'agent Supabase Expert avec ce prompt :
 
-```
-
+```yaml
 Génère une migration pour ajouter la colonne is_test_data boolean default false
 sur les tables suivantes : spectacles, team_members, agenda_events, lieux,
 partners, press_releases, hero_slides, home_stats.
@@ -679,7 +670,7 @@ export default defineConfig({
 
 ## Ordre d'exécution recommandé
 
-```
+```yaml
 Étape 1 (30min)  →  Invoquer supabase.agent → analyser schéma + générer migration is_test_data
 Étape 2 (20min)  →  Créer test-data-manager.agent.md + les 3 fichiers references/
 Étape 3 (20min)  →  Créer tests/fixtures/ (index, seed-helpers, cleanup, schema-map)

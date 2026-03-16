@@ -67,7 +67,7 @@ Implémenter les 239 cas de test définis dans `specs/tests-permissions-et-rôle
 
 ## Progress Tracking
 
-**Overall Status:** In Progress — 45%
+**Overall Status:** In Progress — 65%
 
 ### Subtasks
 
@@ -78,10 +78,10 @@ Implémenter les 239 cas de test définis dans `specs/tests-permissions-et-rôle
 | 1.2 | Créer comptes de test Supabase     | Complete    | 2026-03-16 | 3 comptes confirmés : admin (yandevformation@gmail.com), editor, user                      |
 | 2.1 | Tests unitaires role-helpers.ts    | Complete    | 2026-03-16 | 24 cas ROLE-UNIT-001-024 — `__tests__/auth/role-helpers.test.ts` |
 | 2.2 | Tests unitaires roles.ts guards    | Complete    | 2026-03-16 | 18 cas ROLE-UNIT-025-042 — `__tests__/auth/roles.test.ts`        |
-| 3.1 | Tests DAL editor CRUD éditorial    | Not Started | 2026-03-14 | 32 cas (section 3.1)                                             |
-| 3.2 | Tests DAL editor bloqué admin-only | Not Started | 2026-03-14 | 21 cas (section 3.2)                                             |
-| 3.3 | Tests DAL admin accès complet      | Not Started | 2026-03-14 | 15 cas (section 3.3)                                             |
-| 3.4 | Tests DAL user bloqué              | Not Started | 2026-03-14 | 12 cas (section 3.4)                                             |
+| 3.1 | Tests DAL editor CRUD éditorial    | Complete    | 2026-03-16 | 35/35 — `__tests__/dal/permissions-integration.test.ts`          |
+| 3.2 | Tests DAL editor bloqué admin-only | Complete    | 2026-03-16 | 21/21 — `__tests__/dal/permissions-integration.test.ts`          |
+| 3.3 | Tests DAL admin accès complet      | Complete    | 2026-03-16 | 15/15 — `__tests__/dal/permissions-integration.test.ts`          |
+| 3.4 | Tests DAL user bloqué              | Complete    | 2026-03-16 | 9/9 — `__tests__/dal/permissions-integration.test.ts`            |
 | 4.1 | Tests RLS anon lecture publique    | Complete    | 2026-03-16 | 14 tests — 12 pass, 2 fail (RLS-001, RLS-009). Voir TASK080  |
 | 4.2 | Tests RLS user restrictions        | Complete    | 2026-03-16 | 12 tests — 11 pass, 1 fail (RLS-019). Voir TASK080           |
 | 4.3 | Tests RLS admin complet            | Not Started | 2026-03-14 | Section 4.3                                                      |
@@ -92,6 +92,22 @@ Implémenter les 239 cas de test définis dans `specs/tests-permissions-et-rôle
 | 5.1 | Tests E2E P0 permissions (23 cas)  | Complete    | 2026-03-16 | **23/23 passent** (42.8s) — 5 corrections appliquées (sélecteurs sidebar, redirect loop, 403→200). Rapport `doc/tests/E2E-P0-PERMISSIONS-REPORT.md`. Commit `ae29f4d` |
 
 ## Progress Log
+
+### 2026-03-16 — Phase DAL complète (ROLE-DAL-001–080) — 80/80 ✅
+
+- **`__tests__/dal/permissions-integration.test.ts` créé** : 80 cas ROLE-DAL-001 à 080 couvrant sections 3.1–3.4
+- **npm script** : `"test:dal:permissions": "vitest run __tests__/dal/permissions-integration.test.ts"` dans `package.json`
+- **Cause racine résolue** : Les 3 comptes de test avaient `role: "user"` dans `public.profiles` → provisionnement via `service_role` dans `beforeAll`
+- **5 corrections appliquées** :
+  1. Provisionnement rôles (`beforeAll`) : `serviceClient.update({ role: "editor/admin/user" })` → résout 31 échecs
+  2. ROLE-DAL-025 : `kind: "text"` → `kind: "custom"` (contrainte CHECK: `hero|history|quote|values|team|mission|custom`)
+  3. ROLE-DAL-046 : editor IS autorisé sur `spectacles_membres_equipe` (policy `has_min_role('editor')`) → test corrigé
+  4. ROLE-DAL-048 : editor CAN lire `content_versions` (policy SELECT `has_min_role('editor')`) → assertion corrigée
+  5. ROLE-DAL-077 : `table_name` timestamp → `"test_retention_table"` (contrainte `'^[a-z_]+$'`)
+- **Résultat final** : **80/80 tests passent** (3.87 s)
+- **Enseignement clé** : Quand RLS utilise `profiles.role` (pas JWT claims), les tests DOIVENT provisionner les rôles via `service_role` dans `beforeAll`
+- Rapport : `doc/tests/DAL-PERMISSIONS-INTEGRATION-REPORT.md`
+- Subtasks 3.1, 3.2, 3.3, 3.4 : Complete
 
 ### 2026-03-16 — Phase 3 RLS script (sections 4.1, 4.2, 4.5) — 29/34
 
