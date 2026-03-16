@@ -2,7 +2,7 @@
 
 **Status:** In Progress
 **Added:** 2026-03-14
-**Updated:** 2026-03-16 (E2E P0 permissions)
+**Updated:** 2026-03-16 (tests unitaires Phase 1)
 
 ## Original Request
 
@@ -67,7 +67,7 @@ Implémenter les 239 cas de test définis dans `specs/tests-permissions-et-rôle
 
 ## Progress Tracking
 
-**Overall Status:** In Progress — 20%
+**Overall Status:** In Progress — 35%
 
 ### Subtasks
 
@@ -76,8 +76,8 @@ Implémenter les 239 cas de test définis dans `specs/tests-permissions-et-rôle
 | 0.1 | Tests E2E P0 pages publiques       | Complete    | 2026-03-16 | 14/14 tests passent — rapport `doc/tests/E2E-P0-PUBLIC-PAGES-REPORT.md |
 | 1.1 | Créer `.env.e2e` (manuel)          | Complete    | 2026-03-16 | Existe, utilisé par Playwright config                            |
 | 1.2 | Créer comptes de test Supabase     | Complete    | 2026-03-16 | 3 comptes confirmés : admin (yandevformation@gmail.com), editor, user                      |
-| 2.1 | Tests unitaires role-helpers.ts    | Not Started | 2026-03-14 | 11 cas normalizeRole + 9 isRoleAtLeast + 4 ROLE_HIERARCHY        |
-| 2.2 | Tests unitaires roles.ts guards    | Not Started | 2026-03-14 | 18 cas getCurrentUserRole + requireMinRole + wrappers            |
+| 2.1 | Tests unitaires role-helpers.ts    | Complete    | 2026-03-16 | 24 cas ROLE-UNIT-001-024 — `__tests__/auth/role-helpers.test.ts` |
+| 2.2 | Tests unitaires roles.ts guards    | Complete    | 2026-03-16 | 18 cas ROLE-UNIT-025-042 — `__tests__/auth/roles.test.ts`        |
 | 3.1 | Tests DAL editor CRUD éditorial    | Not Started | 2026-03-14 | 32 cas (section 3.1)                                             |
 | 3.2 | Tests DAL editor bloqué admin-only | Not Started | 2026-03-14 | 21 cas (section 3.2)                                             |
 | 3.3 | Tests DAL admin accès complet      | Not Started | 2026-03-14 | 15 cas (section 3.3)                                             |
@@ -92,6 +92,16 @@ Implémenter les 239 cas de test définis dans `specs/tests-permissions-et-rôle
 | 5.1 | Tests E2E P0 permissions (23 cas)  | Complete    | 2026-03-16 | **23/23 passent** (42.8s) — 5 corrections appliquées (sélecteurs sidebar, redirect loop, 403→200). Rapport `doc/tests/E2E-P0-PERMISSIONS-REPORT.md`. Commit `ae29f4d` |
 
 ## Progress Log
+
+### 2026-03-16 — Tests unitaires Phase 1 (ROLE-UNIT-001-042) — 42/42 ✅
+
+- **42/42 tests unitaires passent** — `npx vitest run __tests__/auth/` — 583ms
+- **Vitest 4.1.0** installé comme devDependency (`pnpm add -D vitest`)
+- **`vitest.config.ts`** créé à la racine (alias `@/`, env `node`, glob `__tests__/**/*.test.ts`)
+- **`__tests__/auth/role-helpers.test.ts`** : 24 tests (normalizeRole × 11, isRoleAtLeast × 9, ROLE_HIERARCHY × 4)
+- **`__tests__/auth/roles.test.ts`** : 18 tests avec mocking complet (`server-only`, `next/navigation`, `@/supabase/server`)
+- Rapport : `doc/tests/UNIT-P0-ROLE-HELPERS-ROLES-REPORT.md`
+- Subtasks 2.1 et 2.2 : Complete
 
 ### 2026-03-16 — E2E P0 Permissions (session 2) — 23/23 ✅
 
