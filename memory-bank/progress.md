@@ -1,5 +1,31 @@
 # Progress
 
+## TASK082B — Sécurité : upgrade Next.js 16.1.5 → 16.1.7 (2026-03-17)
+
+✅ **COMPLET** — 5 CVEs patchés via upgrade Next.js. `pnpm audit` → `No known vulnerabilities found`. PR #33 ouvert sur `master`.
+
+| CVE | Sévérité | Description |
+| --- | -------- | ----------- |
+| GHSA-mq59-m269-xvcx | Moderate | CSRF bypass via null origin (Server Actions) |
+| GHSA-ggv3-7p47-pfv8 | Moderate | HTTP request smuggling dans rewrites |
+| GHSA-3x4c-7xq6-9pq8 | Moderate | next/image unbounded disk cache growth (DoS) |
+| GHSA-h27x-g6w4-24gq | Moderate | DoS via unbounded postponed resume buffering |
+| GHSA-jcc7-9wpm-mj36 | Low | CSRF bypass null origin (HMR WebSocket dev) |
+
+- **Branche** : `fix/security-upgrade-nextjs-16.1.7`
+- **Commit** : `5abf71f` — `fix(security): upgrade next 16.1.5 → 16.1.7 (5 CVEs: CSRF, smuggling, DoS)`
+- **PR** : #33 — https://github.com/YanBerdin/rougecardinalcompany/pull/33
+- **Méthode de découverte** : `pnpm audit` (token GitHub expiré, Dependabot API inaccessible)
+
+### Fichiers Modifiés
+
+```bash
+package.json       # next: "16.1.5" → "16.1.7"
+pnpm-lock.yaml     # lockfile mis à jour (92 insertions, 90 suppressions)
+```
+
+---
+
 ## TASK078 — Phase DAL complète (2026-03-16)
 
 **80/80 tests ROLE-DAL-001–080 passent** (3.87 s) — `pnpm test:dal:permissions`.
