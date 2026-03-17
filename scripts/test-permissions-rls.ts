@@ -1,14 +1,13 @@
 #!/usr/bin/env tsx
 /**
- * Test RLS permissions for anon, user (authenticated), admin, and SQL functions.
+ * Test RLS permissions for anon, user (authenticated), editor, admin, and SQL functions.
  *
  * Covers spec sections:
  *   4.1 — Anon: public read only (ROLE-RLS-001 to 014)
  *   4.2 — User authenticated: read public, write blocked (ROLE-RLS-015 to 026)
+ *   4.3 — Editor: CRUD éditorial (ROLE-RLS-027 to 047)
  *   4.4 — Admin: full access (ROLE-RLS-048 to 077)
  *   4.5 — SQL functions has_min_role() & is_admin() (ROLE-RLS-059 to 066)
- *
- * Editor (4.3) is covered by test-editor-access-local.ts.
  *
  * @usage
  *   pnpm test:rls:local
@@ -1286,7 +1285,7 @@ async function testAdminAccess(
     // ROLE-RLS-069: Admin CRUD data_retention_config
     {
         const label = "Admin CRUD data_retention_config";
-        const tableName = `__rls_test_${ts}`.replace(/-/g, "_").toLowerCase();
+        const tableName = "__rls_test_retention";
         const payload = {
             table_name: tableName,
             retention_days: 30,
@@ -1472,6 +1471,577 @@ async function testAdminAccess(
 }
 
 /* ================================================================== */
+/*  4.3 — Editor: CRUD éditorial (ROLE-RLS-027 to 047)               */
+/* ================================================================== */
+
+async function testEditorAccess(
+    editorClient: SupabaseClient,
+    adminId: string,
+    editorId: string,
+    userId: string,
+) {
+    console.log(
+        "\n✏️  Section 4.3 — Editor: CRUD éditorial (has_min_role('editor'))\n",
+    );
+
+    const ts = Date.now();
+
+    // ROLE-RLS-027: Editor select spectacles (all, including drafts/private)
+    {
+        const { data, error } = await editorClient
+            .from("spectacles")
+            .select("id");
+        if (error) {
+            fail("RLS-027", "Editor select spectacles (tous)", error.message);
+        } else {
+            ok("RLS-027", `Editor select spectacles (tous) — ${data.length} rows`);
+        }
+    }
+
+    // ROLE-RLS-028: Editor insert spectacle
+    {
+        const label = "Editor insert spectacle";
+        const { data: ins, error } = await editorClient
+            .from("spectacles")
+            .insert({ title: `__rls_editor_${ts}` })
+            .select("id")
+            .single();
+        if (error) {
+            fail("RLS-028", label, error.message);
+        } else {
+            ok("RLS-028", label);
+            if (ins) await adminClient.from("spectacles").delete().eq("id", ins.id);
+        }
+    }
+
+    // ROLE-RLS-029: Editor update spectacle
+    {
+        const label = "Editor update spectacle";
+        // Create via adminClient then update via editorClient
+        const { data: tmp } = await adminClient
+            .from("spectacles")
+            .insert({ title: `__rls_editor_upd_seed_${ts}` })
+            .select("id")
+            .single();
+        if (!tmp) {
+            fail("RLS-029", label, "seed insert failed");
+        } else {
+            const { error } = await editorClient
+                .from("spectacles")
+                .update({ title: `__rls_editor_upd_${ts}` })
+                .eq("id", tmp.id);
+            if (error) {
+                fail("RLS-029", label, error.message);
+            } else {
+                ok("RLS-029", label);
+            }
+            await adminClient.from("spectacles").delete().eq("id", tmp.id);
+        }
+    }
+
+    // ROLE-RLS-030: Editor delete spectacle
+    {
+        const label = "Editor delete spectacle";
+        const { data: tmp } = await adminClient
+            .from("spectacles")
+            .insert({ title: `__rls_editor_del_seed_${ts}` })
+            .select("id")
+            .single();
+        if (!tmp) {
+            fail("RLS-030", label, "seed insert failed");
+        } else {
+            const { error } = await editorClient
+                .from("spectacles")
+                .delete()
+                .eq("id", tmp.id);
+            if (error) {
+                fail("RLS-030", label, error.message);
+            } else {
+                ok("RLS-030", label);
+            }
+            await adminClient.from("spectacles").delete().eq("id", tmp.id);
+        }
+    }
+
+    // ROLE-RLS-031: Editor CRUD evenements
+    {
+        const label = "Editor CRUD evenements";
+        // Need a spectacle for FK
+        const { data: sp } = await adminClient
+            .from("spectacles")
+            .insert({ title: `__rls_editor_ev_sp_${ts}` })
+            .select("id")
+            .single();
+        if (!sp) {
+            fail("RLS-031", label, "spectacle seed failed");
+        } else {
+            const { data: ins, error: insErr } = await editorClient
+                .from("evenements")
+                .insert({ spectacle_id: sp.id, date_debut: "2099-01-01T00:00:00" })
+                .select("id")
+                .single();
+            if (insErr || !ins) {
+                fail("RLS-031", label, `insert: ${insErr?.message}`);
+            } else {
+                const { error: updErr } = await editorClient
+                    .from("evenements")
+                    .update({ date_debut: "2099-02-01T00:00:00" })
+                    .eq("id", ins.id);
+                const { error: delErr } = await editorClient
+                    .from("evenements")
+                    .delete()
+                    .eq("id", ins.id);
+                if (updErr || delErr) {
+                    fail("RLS-031", label, `update: ${updErr?.message}, delete: ${delErr?.message}`);
+                } else {
+                    ok("RLS-031", label);
+                }
+                await adminClient.from("evenements").delete().eq("id", ins.id);
+            }
+            await adminClient.from("spectacles").delete().eq("id", sp.id);
+        }
+    }
+
+    // ROLE-RLS-032: Editor CRUD lieux
+    {
+        const label = "Editor CRUD lieux";
+        const { data: ins, error: insErr } = await editorClient
+            .from("lieux")
+            .insert({ nom: `__rls_editor_${ts}` })
+            .select("id")
+            .single();
+        if (insErr || !ins) {
+            fail("RLS-032", label, `insert: ${insErr?.message}`);
+        } else {
+            const { error: updErr } = await editorClient
+                .from("lieux")
+                .update({ nom: `__rls_editor_upd_${ts}` })
+                .eq("id", ins.id);
+            const { error: delErr } = await editorClient
+                .from("lieux")
+                .delete()
+                .eq("id", ins.id);
+            if (updErr || delErr) {
+                fail("RLS-032", label, `update: ${updErr?.message}, delete: ${delErr?.message}`);
+            } else {
+                ok("RLS-032", label);
+            }
+            await adminClient.from("lieux").delete().eq("id", ins.id);
+        }
+    }
+
+    // ROLE-RLS-033: Editor CRUD medias
+    {
+        const label = "Editor CRUD medias";
+        const { data: ins, error: insErr } = await editorClient
+            .from("medias")
+            .insert({ storage_path: `__rls_editor_${ts}.jpg` })
+            .select("id")
+            .single();
+        if (insErr || !ins) {
+            fail("RLS-033", label, `insert: ${insErr?.message}`);
+        } else {
+            const { error: updErr } = await editorClient
+                .from("medias")
+                .update({ storage_path: `__rls_editor_upd_${ts}.jpg` })
+                .eq("id", ins.id);
+            const { error: delErr } = await editorClient
+                .from("medias")
+                .delete()
+                .eq("id", ins.id);
+            if (updErr || delErr) {
+                fail("RLS-033", label, `update: ${updErr?.message}, delete: ${delErr?.message}`);
+            } else {
+                ok("RLS-033", label);
+            }
+            await adminClient.from("medias").delete().eq("id", ins.id);
+        }
+    }
+
+    // ROLE-RLS-034: Editor CRUD media_tags
+    {
+        const label = "Editor CRUD media_tags";
+        const slug = `__rls-editor-mt-${ts}`;
+        const { data: ins, error: insErr } = await editorClient
+            .from("media_tags")
+            .insert({ name: `__rls_editor_mt_${ts}`, slug })
+            .select("id")
+            .single();
+        if (insErr || !ins) {
+            fail("RLS-034", label, `insert: ${insErr?.message}`);
+        } else {
+            const { error: updErr } = await editorClient
+                .from("media_tags")
+                .update({ name: `__rls_editor_mt_upd_${ts}` })
+                .eq("id", ins.id);
+            const { error: delErr } = await editorClient
+                .from("media_tags")
+                .delete()
+                .eq("id", ins.id);
+            if (updErr || delErr) {
+                fail("RLS-034", label, `update: ${updErr?.message}, delete: ${delErr?.message}`);
+            } else {
+                ok("RLS-034", label);
+            }
+            await adminClient.from("media_tags").delete().eq("id", ins.id);
+        }
+    }
+
+    // ROLE-RLS-035: Editor CRUD media_folders
+    {
+        const label = "Editor CRUD media_folders";
+        const slug = `__rls-editor-mf-${ts}`;
+        const { data: ins, error: insErr } = await editorClient
+            .from("media_folders")
+            .insert({ name: `__rls_editor_mf_${ts}`, slug })
+            .select("id")
+            .single();
+        if (insErr || !ins) {
+            fail("RLS-035", label, `insert: ${insErr?.message}`);
+        } else {
+            const { error: updErr } = await editorClient
+                .from("media_folders")
+                .update({ name: `__rls_editor_mf_upd_${ts}` })
+                .eq("id", ins.id);
+            const { error: delErr } = await editorClient
+                .from("media_folders")
+                .delete()
+                .eq("id", ins.id);
+            if (updErr || delErr) {
+                fail("RLS-035", label, `update: ${updErr?.message}, delete: ${delErr?.message}`);
+            } else {
+                ok("RLS-035", label);
+            }
+            await adminClient.from("media_folders").delete().eq("id", ins.id);
+        }
+    }
+
+    // ROLE-RLS-036: Editor CRUD media_item_tags
+    {
+        const label = "Editor CRUD media_item_tags";
+        // Need a media and a media_tag for FK
+        const { data: med } = await adminClient
+            .from("medias")
+            .insert({ storage_path: `__rls_editor_mit_med_${ts}.jpg` })
+            .select("id")
+            .single();
+        const { data: tag } = await adminClient
+            .from("media_tags")
+            .insert({ name: `__rls_editor_mit_tag_${ts}`, slug: `__rls-editor-mit-tag-${ts}` })
+            .select("id")
+            .single();
+        if (!med || !tag) {
+            fail("RLS-036", label, "seed media/tag failed");
+        } else {
+            const { error: insErr } = await editorClient
+                .from("media_item_tags")
+                .insert({ media_id: med.id, tag_id: tag.id });
+            if (insErr) {
+                fail("RLS-036", label, `insert: ${insErr.message}`);
+            } else {
+                const { error: delErr } = await editorClient
+                    .from("media_item_tags")
+                    .delete()
+                    .eq("media_id", med.id)
+                    .eq("tag_id", tag.id);
+                if (delErr) {
+                    fail("RLS-036", label, `delete: ${delErr.message}`);
+                } else {
+                    ok("RLS-036", label);
+                }
+                await adminClient.from("media_item_tags").delete().eq("media_id", med.id).eq("tag_id", tag.id);
+            }
+        }
+        // cleanup seeds
+        if (med) await adminClient.from("medias").delete().eq("id", med.id);
+        if (tag) await adminClient.from("media_tags").delete().eq("id", tag.id);
+    }
+
+    // ROLE-RLS-037: Editor CRUD articles_presse
+    {
+        const label = "Editor CRUD articles_presse";
+        const { data: ins, error: insErr } = await editorClient
+            .from("articles_presse")
+            .insert({ title: `__rls_editor_ap_${ts}` })
+            .select("id")
+            .single();
+        if (insErr || !ins) {
+            fail("RLS-037", label, `insert: ${insErr?.message}`);
+        } else {
+            const { error: updErr } = await editorClient
+                .from("articles_presse")
+                .update({ title: `__rls_editor_ap_upd_${ts}` })
+                .eq("id", ins.id);
+            const { error: delErr } = await editorClient
+                .from("articles_presse")
+                .delete()
+                .eq("id", ins.id);
+            if (updErr || delErr) {
+                fail("RLS-037", label, `update: ${updErr?.message}, delete: ${delErr?.message}`);
+            } else {
+                ok("RLS-037", label);
+            }
+            await adminClient.from("articles_presse").delete().eq("id", ins.id);
+        }
+    }
+
+    // ROLE-RLS-038: Editor CRUD communiques_presse
+    {
+        const label = "Editor CRUD communiques_presse";
+        const { data: ins, error: insErr } = await editorClient
+            .from("communiques_presse")
+            .insert({ title: `__rls_editor_cp_${ts}`, date_publication: "2099-01-01" })
+            .select("id")
+            .single();
+        if (insErr || !ins) {
+            fail("RLS-038", label, `insert: ${insErr?.message}`);
+        } else {
+            const { error: updErr } = await editorClient
+                .from("communiques_presse")
+                .update({ title: `__rls_editor_cp_upd_${ts}` })
+                .eq("id", ins.id);
+            const { error: delErr } = await editorClient
+                .from("communiques_presse")
+                .delete()
+                .eq("id", ins.id);
+            if (updErr || delErr) {
+                fail("RLS-038", label, `update: ${updErr?.message}, delete: ${delErr?.message}`);
+            } else {
+                ok("RLS-038", label);
+            }
+            await adminClient.from("communiques_presse").delete().eq("id", ins.id);
+        }
+    }
+
+    // ── BLOQUÉ ──────────────────────────────────────────────────────
+
+    // ROLE-RLS-039: Editor bloqué insert membres_equipe
+    {
+        const label = "Editor bloqué insert membres_equipe";
+        const { error } = await editorClient
+            .from("membres_equipe")
+            .insert({ name: `__rls_editor_me_${ts}` });
+        if (isRlsBlock(error)) {
+            ok("RLS-039", label);
+        } else if (!error) {
+            fail("RLS-039", label, "SECURITY: insert succeeded");
+            await adminClient.from("membres_equipe").delete().like("name", `__rls_editor_me_%`);
+        } else {
+            ok("RLS-039", `${label} — non-RLS error (acceptable)`);
+        }
+    }
+
+    // ROLE-RLS-040: Editor bloqué insert partners
+    {
+        const label = "Editor bloqué insert partners";
+        const { error } = await editorClient
+            .from("partners")
+            .insert({ name: `__rls_editor_pa_${ts}` });
+        if (isRlsBlock(error)) {
+            ok("RLS-040", label);
+        } else if (!error) {
+            fail("RLS-040", label, "SECURITY: insert succeeded");
+            await adminClient.from("partners").delete().like("name", `__rls_editor_pa_%`);
+        } else {
+            ok("RLS-040", `${label} — non-RLS error (acceptable)`);
+        }
+    }
+
+    // ROLE-RLS-041: Editor bloqué insert contacts_presse
+    {
+        const label = "Editor bloqué insert contacts_presse";
+        const { error } = await editorClient.from("contacts_presse").insert({
+            nom: `__rls_editor_cp_${ts}`,
+            media: "Test Media",
+            email: `__rls_editor_cp_${ts}@test.invalid`,
+        });
+        if (isRlsBlock(error)) {
+            ok("RLS-041", label);
+        } else if (!error) {
+            fail("RLS-041", label, "SECURITY: insert succeeded");
+            await adminClient.from("contacts_presse").delete().like("nom", `__rls_editor_cp_%`);
+        } else {
+            ok("RLS-041", `${label} — non-RLS error (acceptable)`);
+        }
+    }
+
+    // ROLE-RLS-042: Editor bloqué insert configurations_site
+    {
+        const label = "Editor bloqué insert configurations_site";
+        const key = `__rls_editor_cs_${ts}`;
+        const { error } = await editorClient
+            .from("configurations_site")
+            .insert({ key, value: { test: true } });
+        if (isRlsBlock(error)) {
+            ok("RLS-042", label);
+        } else if (!error) {
+            fail("RLS-042", label, "SECURITY: insert succeeded");
+            await adminClient.from("configurations_site").delete().eq("key", key);
+        } else {
+            ok("RLS-042", `${label} — non-RLS error (acceptable)`);
+        }
+    }
+
+    // ROLE-RLS-043: Editor bloqué insert home_hero_slides
+    {
+        const label = "Editor bloqué insert home_hero_slides";
+        const { error } = await editorClient
+            .from("home_hero_slides")
+            .insert({ slug: `__rls-editor-hhs-${ts}`, title: `__rls_editor_hhs_${ts}` });
+        if (isRlsBlock(error)) {
+            ok("RLS-043", label);
+        } else if (!error) {
+            fail("RLS-043", label, "SECURITY: insert succeeded");
+            await adminClient.from("home_hero_slides").delete().like("slug", `__rls-editor-hhs-%`);
+        } else {
+            ok("RLS-043", `${label} — non-RLS error (acceptable)`);
+        }
+    }
+
+    // ROLE-RLS-044: Editor bloqué insert home_about_content
+    {
+        const label = "Editor bloqué insert home_about_content";
+        const { error } = await editorClient.from("home_about_content").insert({
+            slug: `__rls-editor-hac-${ts}`,
+            title: `__rls_editor_hac_${ts}`,
+            intro1: "test",
+            intro2: "test",
+            mission_title: "test",
+            mission_text: "test",
+        });
+        if (isRlsBlock(error)) {
+            ok("RLS-044", label);
+        } else if (!error) {
+            fail("RLS-044", label, "SECURITY: insert succeeded");
+            await adminClient.from("home_about_content").delete().like("slug", `__rls-editor-hac-%`);
+        } else {
+            ok("RLS-044", `${label} — non-RLS error (acceptable)`);
+        }
+    }
+
+    // ROLE-RLS-045: Editor CRUD spectacles_membres_equipe (has_min_role('editor'))
+    {
+        const label = "Editor CRUD spectacles_membres_equipe";
+        // Need a spectacle and a membre for FK
+        const { data: sp } = await adminClient
+            .from("spectacles")
+            .insert({ title: `__rls_editor_sme_sp_${ts}` })
+            .select("id")
+            .single();
+        const { data: me } = await adminClient
+            .from("membres_equipe")
+            .insert({ name: `__rls_editor_sme_me_${ts}` })
+            .select("id")
+            .single();
+        if (!sp || !me) {
+            fail("RLS-045", label, "seed spectacle/membre failed");
+        } else {
+            const { error: insErr } = await editorClient
+                .from("spectacles_membres_equipe")
+                .insert({ spectacle_id: sp.id, membre_id: me.id });
+            if (insErr) {
+                fail("RLS-045", label, `insert: ${insErr.message}`);
+            } else {
+                const { error: delErr } = await editorClient
+                    .from("spectacles_membres_equipe")
+                    .delete()
+                    .eq("spectacle_id", sp.id)
+                    .eq("membre_id", me.id);
+                if (delErr) {
+                    fail("RLS-045", label, `delete: ${delErr.message}`);
+                } else {
+                    ok("RLS-045", label);
+                }
+            }
+        }
+        if (me) await adminClient.from("membres_equipe").delete().eq("id", me.id);
+        if (sp) await adminClient.from("spectacles").delete().eq("id", sp.id);
+    }
+
+    // ROLE-RLS-046: Editor select logs_audit — 0 rows
+    {
+        const { data, error } = await editorClient
+            .from("logs_audit")
+            .select("id")
+            .limit(1);
+        if (error) {
+            ok("RLS-046", "Editor select logs_audit — blocked (error)");
+        } else if ((data ?? []).length === 0) {
+            ok("RLS-046", "Editor select logs_audit — 0 rows");
+        } else {
+            fail(
+                "RLS-046",
+                "Editor select logs_audit",
+                "SECURITY: rows returned for editor role",
+            );
+        }
+    }
+
+    // ROLE-RLS-047: Editor select content_versions — has_min_role('editor')
+    {
+        const { data, error } = await editorClient
+            .from("content_versions")
+            .select("id")
+            .limit(1);
+        if (error) {
+            fail("RLS-047", "Editor select content_versions", `select error: ${error.message}`);
+        } else {
+            ok("RLS-047", `Editor select content_versions — ${(data ?? []).length} rows`);
+        }
+    }
+
+    // ── BONUS: Editor bloqué insert user_invitations ────────────────
+
+    {
+        const label = "Editor bloqué insert user_invitations";
+        const { error } = await editorClient.from("user_invitations").insert({
+            user_id: userId,
+            email: `__rls_editor_ui_${ts}@test.invalid`,
+            role: "user",
+            invited_by: editorId,
+        });
+        if (isRlsBlock(error)) {
+            ok("RLS-045b", label);
+        } else if (!error) {
+            fail("RLS-045b", label, "SECURITY: insert succeeded");
+            await adminClient.from("user_invitations").delete().like("email", `__rls_editor_ui_%`);
+        } else {
+            ok("RLS-045b", `${label} — non-RLS error (acceptable)`);
+        }
+    }
+
+    // ── BONUS: Editor bloqué update profiles (autre user) ───────────
+
+    {
+        const label = "Editor bloqué update profiles (autre user)";
+        const { error } = await editorClient
+            .from("profiles")
+            .update({ display_name: `__rls_editor_hack_${ts}` })
+            .eq("user_id", userId);
+        if (error && isRlsBlock(error)) {
+            ok("RLS-045c", label);
+        } else if (!error) {
+            const { data: check } = await adminClient
+                .from("profiles")
+                .select("display_name")
+                .eq("user_id", userId)
+                .single();
+            if (check?.display_name?.includes("__rls_editor_hack_")) {
+                fail("RLS-045c", label, "update succeeded but should be blocked");
+                await adminClient
+                    .from("profiles")
+                    .update({ display_name: "Test user" })
+                    .eq("user_id", userId);
+            } else {
+                ok("RLS-045c", `${label} — 0 rows affected`);
+            }
+        } else {
+            fail("RLS-045c", label, error.message);
+        }
+    }
+}
+
+/* ================================================================== */
 /*  Cleanup — remove test data inserted during tests                  */
 /* ================================================================== */
 
@@ -1505,7 +2075,7 @@ async function cleanup() {
 
 async function main() {
     console.log("\n🔌 Testing RLS permissions against LOCAL Supabase");
-    console.log("   Sections: 4.1 (anon), 4.2 (user), 4.4 (admin), 4.5 (SQL functions)\n");
+    console.log("   Sections: 4.1 (anon), 4.2 (user), 4.3 (editor), 4.4 (admin), 4.5 (SQL functions)\n");
 
     // Provision test users
     console.log("📋 Provisioning test accounts...");
@@ -1538,6 +2108,7 @@ async function main() {
     // Run test sections
     await testAnon();
     await testUserAuthenticated(userClient);
+    await testEditorAccess(editorClient, adminId, editorId, userId);
     await testAdminAccess(adminSessClient, editorClient, userClient, adminId, userId);
     await testSqlFunctions(userClient, editorClient, adminSessClient);
 
@@ -1553,7 +2124,7 @@ async function main() {
         process.exit(1);
     }
 
-    console.log("✅ ALL TESTS PASSED — anon/user/admin/SQL function permissions correct\n");
+    console.log("✅ ALL TESTS PASSED — anon/user/editor/admin/SQL function permissions correct\n");
 }
 
 main().catch((err) => {
