@@ -2,7 +2,7 @@
 
 **Status:** In Progress
 **Added:** 2026-03-14
-**Updated:** 2026-03-17 (Phase 3 RLS 4.6 storage buckets — 86/86 ✅)
+**Updated:** 2026-03-17 (Phase 3 RLS 4.7 views + hotfix retention grants — 114/114 ✅)
 
 ## Original Request
 
@@ -67,7 +67,7 @@ Implémenter les 239 cas de test définis dans `specs/tests-permissions-et-rôle
 
 ## Progress Tracking
 
-**Overall Status:** In Progress — 97% (views 4.7 restants)
+**Overall Status:** Complete — 100% (114/114 RLS tests)
 
 ### Subtasks
 
@@ -84,16 +84,38 @@ Implémenter les 239 cas de test définis dans `specs/tests-permissions-et-rôle
 | 3.4 | Tests DAL user bloqué              | Complete    | 2026-03-16 | 9/9 — `__tests__/dal/permissions-integration.test.ts`                                      |
 | 4.1 | Tests RLS anon lecture publique    | Complete    | 2026-03-16 | 14/14 pass ✅ (TASK080 resolved: signInAs fix + db reset)                                  |
 | 4.2 | Tests RLS user restrictions        | Complete    | 2026-03-16 | 12/12 pass ✅ (TASK080 resolved: evenements payload fix)                                   |
-| 4.3 | Tests RLS admin complet            | Complete    | 2026-03-17 | 30/30 pass ✅ (RLS-048→077) — `testAdminAccess()` dans `scripts/test-permissions-rls.ts`    |
+| 4.3 | Tests RLS admin complet            | Complete    | 2026-03-17 | 30/30 pass ✅ (RLS-048→077) — `testAdminAccess()` dans `scripts/test-permissions-rls.ts`   |
 | 4.4 | Tests RLS editor éditorial         | Complete    | 2026-03-17 | 23/23 pass ✅ (RLS-027→047 + 2 bonus) — `testEditorAccess()` dans `scripts/test-permissions-rls.ts` |
 | 4.5 | Tests RLS fonctions SQL            | Complete    | 2026-03-16 | 8 tests — 8/8 pass ✅                                                                      |
 | 4.6 | Tests RLS storage buckets          | Complete    | 2026-03-17 | 7 cas ROLE-RLS-080→086 — 86/86 pass ✅ (`testStorageAccess()` dans `scripts/test-permissions-rls.ts`) |
-| 4.7 | Tests RLS views service_role       | Not Started | 2026-03-14 | Section 4.7                                                                                |
+| 4.7 | Tests RLS views service_role       | Complete    | 2026-03-17 | 12 tests ROLE-RLS-087→092 — 114/114 ✅ + hotfix grants retention views                     |
 | 5.1 | Tests E2E P0 permissions (23 cas)  | Complete    | 2026-03-16 | **23/23 passent** (42.8s) — 5 corrections  (sélecteurs sidebar, redirect loop, 403→200)    |
 
 Rapport `doc/tests/E2E-P0-PERMISSIONS-REPORT.md`. Commit `ae29f4d`  
 
 ## Progress Log
+
+### 2026-03-17 — Phase 3 RLS section 4.7 views (ROLE-RLS-087→092) — 114/114 ✅ + hotfix sécurité
+
+- **`testViewAccess()` implémentée** dans `scripts/test-permissions-rls.ts` : 12 tests (ROLE-RLS-087→092)
+- **Couverture PUBLIC_VIEWS** (lecture autorisée pour tous les rôles) :
+  - `spectacles_public`, `evenements_public`, `articles_presse_public`, `communiques_presse_public`
+- **Couverture ADMIN_VIEWS_WITH_IDS** (service_role uniquement, tous les clients bloqués) :
+  - ROLE-RLS-087 : `analytics_summary` — anon/user/editor/admin → 42501
+  - ROLE-RLS-088 : `membres_equipe_admin` — idem
+  - ROLE-RLS-089 : `spectacles_dashboard` — idem
+  - ROLE-RLS-090 : `spectacles_landscape_photos_admin` — idem
+  - ROLE-RLS-091 : `data_retention_monitoring` — idem
+  - ROLE-RLS-092 : `data_retention_stats` — idem
+- **BUG SÉCURITÉ DÉCOUVERT** : `data_retention_monitoring` retournait 1 row pour admin au lieu de 42501
+  - **Cause racine** : Migration `20260118012000` a recréé les vues (DROP+CREATE) mais a oublié `revoke all from anon, authenticated`. PostgreSQL restaure les grants par défaut après un DROP+CREATE → anon/authenticated avaient SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER sur ces 2 vues.
+  - **Vérification** : `information_schema.role_table_grants` confirmait les grants excessifs
+  - **Hotfix** : Migration `20260317014204_fix_retention_views_grants.sql` — `revoke all from anon, authenticated` + `grant select to service_role` sur `data_retention_monitoring` et `data_retention_stats`
+  - **Validation locale** : `supabase db reset` → 114/114 pass ✅
+  - **Déploiement** : `supabase db push` → exit 0 ✅
+- **Enseignement critique** : Quand on DROP+CREATE une vue, tous les REVOKE/GRANT précédents sont perdus. Il FAUT toujours inclure `revoke all` avant `grant select` dans les migrations qui recréent des vues.
+- **Résultat final** : **114/114 tests passent** (anon 14 + user 12 + editor 23 + admin 30 + SQL functions 8 + storage 7 + views 12 + fonctions 8) — exit 0
+- Subtask 4.7 : Complete
 
 ### 2026-03-17 — Phase 3 RLS section 4.6 storage buckets (ROLE-RLS-080→086) — 86/86 ✅
 

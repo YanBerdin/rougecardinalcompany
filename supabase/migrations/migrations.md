@@ -4,6 +4,42 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-03-17 - SECURITY FIX: Grants excessifs sur vues data retention (TASK078)
+
+**Migration** : `20260317014204_fix_retention_views_grants.sql`
+**Schéma déclaratif** : ✅ `supabase/schemas/41_views_retention.sql` (déjà correct — le bug était dans la migration appliquée)
+
+**Sévérité** : 🔴 **CRITICAL** — anon et authenticated avaient des grants complets (SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER) sur 2 vues service_role-only.
+
+**Problème** :
+La migration `20260118012000_fix_security_definer_views_and_merge_policies.sql` a converti `data_retention_monitoring` et `data_retention_stats` de SECURITY DEFINER vers SECURITY INVOKER via DROP + CREATE. Cependant, le `revoke all from anon, authenticated` a été **omis**. En PostgreSQL, quand une vue est supprimée puis recréée, tous les grants précédents sont perdus et les grants par défaut sont appliqués — résultant en des permissions excessives pour anon et authenticated.
+
+**Détection** : Découvert par les tests RLS section 4.7 (TASK078) : `data_retention_monitoring` retournait 1 row pour le rôle `admin` au lieu d'une erreur `42501`.
+
+**Vérification** : `information_schema.role_table_grants` confirmait que `anon` et `authenticated` avaient des grants complets.
+
+**Fix** :
+
+```sql
+-- Révoquer les grants excessifs
+revoke all on public.data_retention_monitoring from anon, authenticated;
+revoke all on public.data_retention_stats from anon, authenticated;
+
+-- Restaurer l'accès service_role uniquement
+grant select on public.data_retention_monitoring to service_role;
+grant select on public.data_retention_stats to service_role;
+```
+
+**Enseignement** : Lorsqu'une migration DROP + CREATE une vue, il FAUT toujours inclure `revoke all from anon, authenticated` avant le `grant select to service_role`. Le schéma déclaratif (`41_views_retention.sql`) était déjà correct mais le diff ne capture pas les grants (caveat connu de migra).
+
+**Validation** :
+
+- ✅ Migration appliquée localement : `supabase db reset` → `information_schema.role_table_grants` confirmé
+- ✅ Tests RLS 114/114 pass (dont 12 tests views section 4.7)
+- ✅ Migration appliquée cloud : `supabase db push` → exit 0
+
+---
+
 ### 2026-03-15 - FIX: Conformité RLS MIG-005 — Séparation policies anon/authenticated (TASK077 + TASK079)
 
 2 migrations pour séparer toutes les policies RLS combinant `to anon, authenticated` en policies granulaires par rôle, conformément à la règle MIG-005 du projet.
@@ -2923,7 +2959,7 @@ pnpm dlx supabase status --linked
 - Toujours tester en local avant d'appliquer en production
 - **Les migrations de données (DML)** ne sont pas capturées par `supabase db diff` et doivent être gérées séparément
 - **Kit média** : Stratégie hybride (URLs externes dans metadata pour démo, migration vers Storage à terme)
-- **Total** : 16 fichiers de migration SQL (1 DDL principale + 1 fix trigger + 1 DDL table + 12 DML + 1 manuelle)
+- **Total** : 17 fichiers de migration SQL (1 DDL principale + 1 fix trigger + 1 DDL table + 12 DML + 1 manuelle + 1 hotfix grants)
 
 ## Voir aussi
 

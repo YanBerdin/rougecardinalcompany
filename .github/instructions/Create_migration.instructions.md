@@ -47,3 +47,40 @@ Write Postgres-compatible SQL code for Supabase migration files that:
   - Include comments explaining the rationale and intended behavior of each security policy
 
 The generated SQL code should be production-ready, well-documented, and aligned with Supabase's best practices.
+
+## View Recreation: Mandatory REVOKE/GRANT Pattern
+
+When a migration uses `DROP VIEW` + `CREATE VIEW` (or `CREATE OR REPLACE VIEW`), PostgreSQL **resets all grants** to their defaults. Any previous `REVOKE` statements are lost. This has caused real security bugs in production (see `20260317014204_fix_retention_views_grants.sql`).
+
+**Rule**: Every migration that recreates a view MUST explicitly include `REVOKE ALL` followed by the intended `GRANT` statements, even if those grants were set in a previous migration or in the declarative schema.
+
+```sql
+-- ✅ CORRECT: Always include revoke + grant when recreating a view
+drop view if exists public.my_admin_view;
+
+create view public.my_admin_view
+with (security_invoker = true)
+as select ...;
+
+-- MANDATORY after DROP+CREATE: reset grants explicitly
+revoke all on public.my_admin_view from anon, authenticated;
+grant select on public.my_admin_view to service_role;
+```
+
+```sql
+-- ❌ WRONG: Missing revoke after recreating a view
+drop view if exists public.my_admin_view;
+
+create view public.my_admin_view
+with (security_invoker = true)
+as select ...;
+
+-- Only granting without revoking first — anon/authenticated may still have
+-- default SELECT access inherited from the new view creation
+grant select on public.my_admin_view to service_role;
+```
+
+**Why this matters**:
+- `migra` (Supabase diff tool) does NOT capture grant changes — this is a known caveat
+- The declarative schema in `supabase/schemas/` may contain the correct `revoke all`, but it won't be applied unless a new diff is generated
+- After `DROP VIEW` + `CREATE VIEW`, PostgreSQL grants default privileges to `public` role, which includes `anon` and `authenticated` in Supabase

@@ -9,6 +9,7 @@
  *   4.4 — Admin: full access (ROLE-RLS-048 to 077)
  *   4.5 — SQL functions has_min_role() & is_admin() (ROLE-RLS-059 to 066)
  *   4.6 — Storage buckets: medias & backups (ROLE-RLS-080 to 086)
+ *   4.7 — Views: public vs admin (ROLE-RLS-087 to 092)
  *
  * @usage
  *   pnpm test:rls:local
@@ -2223,6 +2224,78 @@ async function testStorageAccess(
 }
 
 /* ================================================================== */
+/*  4.7 — Views: public vs admin (ROLE-RLS-087 to 092)               */
+/* ================================================================== */
+
+const PUBLIC_VIEWS = [
+    "articles_presse_public",
+    "communiques_presse_public",
+    "popular_tags",
+    "categories_hierarchy",
+] as const;
+
+const ADMIN_VIEWS_WITH_IDS = [
+    { view: "analytics_summary", id: "ROLE-RLS-087" },
+    { view: "membres_equipe_admin", id: "ROLE-RLS-088" },
+    { view: "messages_contact_admin", id: "ROLE-RLS-089" },
+    { view: "content_versions_detailed", id: "ROLE-RLS-090" },
+    { view: "partners_admin", id: "ROLE-RLS-091" },
+    { view: "data_retention_monitoring", id: "ROLE-RLS-092" },
+] as const;
+
+async function testViewAccess(
+    userClient: SupabaseClient,
+    editorClient: SupabaseClient,
+    adminSessClient: SupabaseClient,
+): Promise<void> {
+    console.log(
+        "\n👁️  Section 4.7 — Views: public vs admin\n",
+    );
+
+    // Public views — must be accessible to anon
+    for (const view of PUBLIC_VIEWS) {
+        const { error } = await anonClient
+            .from(view)
+            .select("*")
+            .limit(1);
+
+        if (error) {
+            fail(`VIEW-PUB`, `Anon select ${view} — expected accessible`, error.message);
+        } else {
+            ok(`VIEW-PUB`, `Anon select ${view} — accessible`);
+        }
+    }
+
+    // Admin views — service_role only (spec 4.7)
+    // ALL client roles (anon, user, editor, admin) must be denied
+    const allClients: Array<{ label: string; client: SupabaseClient }> = [
+        { label: "anon", client: anonClient },
+        { label: "user", client: userClient },
+        { label: "editor", client: editorClient },
+        { label: "admin", client: adminSessClient },
+    ];
+
+    for (const { view, id } of ADMIN_VIEWS_WITH_IDS) {
+        for (const { label, client } of allClients) {
+            const { data, error } = await client
+                .from(view)
+                .select("*")
+                .limit(1);
+
+            if (error?.code === "42501") {
+                ok(id, `${label} select ${view} — denied (42501)`);
+            } else if (error) {
+                ok(id, `${label} select ${view} — denied (${error.code})`);
+            } else if (!data || data.length === 0) {
+                ok(id, `${label} select ${view} — empty (RLS enforced)`);
+            } else {
+                fail(id, `${label} select ${view} — DATA EXPOSED (${data.length} rows)`);
+            }
+        }
+    }
+}
+
+/* ================================================================== */
 /*  Cleanup — remove test data inserted during tests                  */
 /* ================================================================== */
 
@@ -2259,7 +2332,7 @@ async function cleanup() {
 
 async function main() {
     console.log("\n🔌 Testing RLS permissions against LOCAL Supabase");
-    console.log("   Sections: 4.1 (anon), 4.2 (user), 4.3 (editor), 4.4 (admin), 4.5 (SQL functions), 4.6 (storage)\n");
+    console.log("   Sections: 4.1 (anon), 4.2 (user), 4.3 (editor), 4.4 (admin), 4.5 (SQL functions), 4.6 (storage), 4.7 (views)\n");
 
     // Provision test users
     console.log("📋 Provisioning test accounts...");
@@ -2296,6 +2369,7 @@ async function main() {
     await testAdminAccess(adminSessClient, editorClient, userClient, adminId, userId);
     await testSqlFunctions(userClient, editorClient, adminSessClient);
     await testStorageAccess(userClient, editorClient, adminSessClient);
+    await testViewAccess(userClient, editorClient, adminSessClient);
 
     // Cleanup test data
     await cleanup();
