@@ -22,6 +22,7 @@ tools:
 - execute/awaitTerminal
 - execute/killTerminal
 - execute/createAndRunTask
+- execute/runTests
 - execute/runNotebookCell
 - execute/testFailure
 - execute/runInTerminal
@@ -59,6 +60,7 @@ tools:
 - chrome-devtools/get_network_request
 - chrome-devtools/handle_dialog
 - chrome-devtools/hover
+- chrome-devtools/lighthouse_audit
 - chrome-devtools/list_console_messages
 - chrome-devtools/list_network_requests
 - chrome-devtools/list_pages
@@ -70,8 +72,10 @@ tools:
 - chrome-devtools/press_key
 - chrome-devtools/resize_page
 - chrome-devtools/select_page
+- chrome-devtools/take_memory_snapshot
 - chrome-devtools/take_screenshot
 - chrome-devtools/take_snapshot
+- chrome-devtools/type_text
 - chrome-devtools/upload_file
 - chrome-devtools/wait_for
 - context7/query-docs

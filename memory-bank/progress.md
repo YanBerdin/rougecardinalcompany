@@ -1,5 +1,80 @@
 # Progress
 
+## TASK078 — Phase DAL complète (2026-03-16)
+
+**80/80 tests ROLE-DAL-001–080 passent** (3.87 s) — `pnpm test:dal:permissions`.
+
+| Section | IDs | Description | Résultat |
+| ------- | --- | ----------- | -------- |
+| 3.1 — Editor CRUD éditorial | 001–035 | Editor peut écrire sur tables éditoriales | ✅ 35/35 |
+| 3.2 — Editor bloqué admin-only | 036–056 | Editor bloqué sur tables admin-only | ✅ 21/21 |
+| 3.3 — Admin accès complet | 057–071 | Admin peut écrire partout | ✅ 15/15 |
+| 3.4 — User bloqué writes | 072–080 | User bloqué sur toute table protégée | ✅ 9/9 |
+
+**Cause racine résolue** : Les comptes de test avaient tous `role: "user"` dans `profiles`. Fix : provisionnement via `service_role` dans `beforeAll`.
+**Rapport** : `doc/tests/DAL-PERMISSIONS-INTEGRATION-REPORT.md`.
+
+---
+
+## TASK080 — 5 échecs RLS policies à investiguer (2026-03-16)
+
+Script `scripts/test-permissions-rls.ts` — **29/34 pass, 5 fail**. Rapport : `doc/tests/RLS-POLICY-FAILURES-REPORT.md`.
+
+| ID | Table | Op/Rôle | Sévérité | Cause probable |
+| ---- | ------- | ---------------- | ---------- | ---------------- |
+| RLS-001 | `spectacles` | SELECT anon | Moyenne | DB locale non reset |
+| RLS-009 | `configurations_site` | SELECT anon | Haute | DB locale non reset |
+| RLS-010 | `spectacles`, `membres_equipe`, `partners` | INSERT anon | **Critique** | GRANTs ou RLS désactivé |
+| RLS-011 | `logs_audit` | SELECT anon | **Critique** | GRANTs ou RLS désactivé |
+| RLS-019 | `evenements` | INSERT user | Haute | Ordre éval PG ou DB non reset |
+
+**Action prioritaire** : `supabase db reset` → retest.
+
+---
+
+## TASK078 — Phase 3 RLS script (2026-03-16)
+
+Script `scripts/test-permissions-rls.ts` créé couvrant 34 cas (sections 4.1, 4.2, 4.5). npm script `test:rls:local`. 2 bugs script corrigés (dotenv-cli, table `medias`). 29/34 passent → 5 échecs réels → TASK080 créée.
+
+---
+
+## TASK078 — E2E P0 Permissions (2026-03-16)
+
+**23/23 tests Playwright passent** (100 %) en 42.8 s.
+
+| Bloc | IDs | Description | Résultat |
+| ---- | --- | ----------- | -------- |
+| Parcours Editor | 001-003, 006-010 | Login, sidebar 8 items, pages bloquées | ✅ 8/8 |
+| Parcours Admin | 011-013 | Login, sidebar 18 items, pages admin-only | ✅ 3/3 |
+| Parcours User bloqué | 016-018 | Redirection `/auth/login` | ✅ 3/3 |
+| Parcours Anon bloqué | 019-020 | Redirection sans session | ✅ 2/2 |
+| API Admin par rôle | 021-024 | `/api/admin/media/search` : 200 admin/editor, 403 user/anon | ✅ 4/4 |
+
+**Infrastructure** : 3 projets setup (`admin/editor/user`) + projet `permissions` avec `dependencies` dans `playwright.config.ts`.  
+**Rapport** : `doc/tests/E2E-P0-PERMISSIONS-REPORT.md`.  
+**Commit** : `ae29f4d`.
+
+---
+
+## TASK078 — E2E P0 Pages Publiques (2026-03-16)
+
+**14/14 tests Playwright passent** (100 %) en 1 min 42 s.
+
+| Page | Tests | Statut |
+| ---- | ----- | ------ |
+| Accueil (`/`) | PUB-HOME-001, PUB-HOME-009 | ✅ |
+| Spectacles (`/spectacles`) | PUB-SPEC-001, PUB-SPEC-002 | ✅ |
+| Compagnie (`/compagnie`) | PUB-COMP-001 | ✅ |
+| Agenda (`/agenda`) | PUB-AGENDA-001 | ✅ |
+| Presse (`/presse`) | PUB-PRESSE-001 | ✅ |
+| Contact (`/contact`) | PUB-CONTACT-001, CONTACT-002..004, CONTACT-001, NEWS-001..002 | ✅ |
+
+**Infrastructure** : `playwright.config.ts` (ESM, 1 worker, timeout 90 s) + 6 POM + 6 fixtures + 6 specs (597 lignes total).
+**Rapport** : `doc/tests/E2E-P0-PUBLIC-PAGES-REPORT.md`.
+**Commit** : `0ac079b`.
+
+---
+
 ## TASK077 + TASK079 — Conformité RLS MIG-005 : Séparation anon/authenticated (2026-03-15)
 
 **Contexte** : Audit MIG-005 — les policies RLS combinant `to anon, authenticated` violent la règle « one policy per operation per supabase role ». 2 batches de corrections appliquées.

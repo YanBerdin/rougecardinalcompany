@@ -1,8 +1,129 @@
 # Active Context
 
-**Current Focus (2026-03-15)**: TASK078 — Implémentation des 239 tests permissions/rôles (plan finalisé, implémentation à démarrer). Toutes les policies RLS sont conformes MIG-005 (0 violation combined `anon,authenticated` restante).
+**Current Focus (2026-03-16)**: TASK080 — Investigation des 5 échecs RLS détectés par `scripts/test-permissions-rls.ts` (29/34 pass). Hypothèse : DB locale non réinitialisée post-TASK077/TASK079. Action prioritaire : `supabase db reset` + retest.
 
-**Last Major Updates**: ✅ TASK077 — Séparation policies RLS combinées batch 1 (13 tables, commit `35016b0`) (2026-03-15) + ✅ TASK079 — Séparation policies RLS combinées batch 2 (17 tables, 11 schemas, commit `723c0eb`) (2026-03-15) + ✅ TASK078 branche mergée + pushée (2026-03-14) + ✅ FIX SEC flatted `3.3.3` → `3.4.1` GHSA-25h7-pfq9-p65f (2026-03-14) + ✅ BUGFIX audit tags — `media_tags` + 4 junction tables couvertes (2026-03-13) + ✅ TASK076 trigger extension (2026-03-13) — 9 tables couvertes + ✅ Editor Role Permissions — 15 phases complete (2026-03-11) + ✅ BUGFIX 4 RLS policy bugs (P0-RESTRICTIVE/P1a-super_admin/P1b-subquery/P2-UI) commité+déployé (2026-03-10)
+**Last Major Updates**: ✅ TASK078 Phase DAL — **80/80 tests DAL passent** (`__tests__/dal/permissions-integration.test.ts`), rapport `doc/tests/DAL-PERMISSIONS-INTEGRATION-REPORT.md` (2026-03-16) + ✅ TASK078 Phase 3 RLS script créé (29/34 pass, 5 échecs → TASK080) (2026-03-16) + ✅ TASK078 — E2E P0 permissions 23/23 passent (2026-03-16) + ✅ TASK078 — E2E P0 pages publiques 14/14 passent (2026-03-16) + ✅ TASK077 — Séparation policies RLS batch 1 (2026-03-15) + ✅ TASK079 — Séparation policies RLS batch 2 (2026-03-15)
+
+---
+
+## ✅ TASK078 — Phase DAL complète (2026-03-16)
+
+### Résultat
+
+**80/80 tests ROLE-DAL-001–080 passent** (3.87 s) — `pnpm test:dal:permissions`
+
+### Sections couvertes
+
+| Section | IDs | Description | Résultat |
+| ------- | --- | ----------- | -------- |
+| 3.1 — Editor CRUD éditorial | 001–035 | Editor peut écrire sur tables éditoriales | ✅ 35/35 |
+| 3.2 — Editor bloqué admin-only | 036–056 | Editor bloqué sur tables admin-only | ✅ 21/21 |
+| 3.3 — Admin accès complet | 057–071 | Admin peut écrire partout | ✅ 15/15 |
+| 3.4 — User bloqué writes | 072–080 | User bloqué sur toute table protégée | ✅ 9/9 |
+
+### Enseignement clé
+
+Quand RLS utilise `profiles.role` (pas JWT claims), les tests d'intégration **DOIVENT provisionner les rôles via `service_role` dans `beforeAll`**. Sans cela, tous les utilisateurs ont le rôle `user` par défaut et les tests editor/admin échouent avec `42501`.
+
+### Rapport
+
+`doc/tests/DAL-PERMISSIONS-INTEGRATION-REPORT.md`
+
+---
+
+## TASK080 — 5 échecs RLS à investiguer (2026-03-16)
+
+### Résumé
+
+Le script `test-permissions-rls.ts` couvre les sections 4.1 (anon), 4.2 (user) et 4.5 (fonctions SQL). Sur 34 cas, 5 échouent :
+
+| ID | Table | Opération/Rôle | Sévérité |
+| ---- | ------- | ---------------- | ---------- |
+| RLS-001 | `spectacles` | SELECT anon | Moyenne |
+| RLS-009 | `configurations_site` | SELECT anon | Haute |
+| RLS-010 | `spectacles`, `membres_equipe`, `partners` | INSERT anon | **Critique** |
+| RLS-011 | `logs_audit` | SELECT anon | **Critique** |
+| RLS-019 | `evenements` | INSERT user | Haute |
+
+### Hypothèse principale
+
+Les schémas déclaratifs sont **corrects**. Les 4 premiers échecs sont probablement causés par une DB locale non réinitialisée après les migrations TASK077/TASK079. RLS-019 pourrait être un problème d'ordre d'évaluation PostgreSQL (contraintes NOT NULL avant WITH CHECK).
+
+### Prochaine action
+
+`supabase db reset` → `pnpm test:rls:local` → documenter résultats dans TASK080.
+
+### Rapport
+
+`doc/tests/RLS-POLICY-FAILURES-REPORT.md`
+
+---
+
+## ✅ TASK078 — E2E P0 Permissions (2026-03-16)
+
+### Résumé
+
+Suite E2E Playwright couvrant les 23 scénarios P0 de permissions : navigation admin, sidebar filtrée par rôle, redirections, et API admin.
+
+**Résultat** : **23/23 tests passent** (100 %) en 42.8 s sur Chromium.
+
+### Tests couverts
+
+| Bloc | IDs | Description | Résultat |
+| ---- | --- | ----------- | -------- |
+| 5.1 — Parcours Editor | 001-003, 006-010 | Login, sidebar filtrée, pages admin bloquées | ✅ 8/8 |
+| 5.2 — Parcours Admin | 011-013 | Login, sidebar complète, accès pages admin-only | ✅ 3/3 |
+| 5.3 — Parcours User bloqué | 016-018 | Redirection vers `/auth/login` | ✅ 3/3 |
+| 5.4 — Parcours Anon bloqué | 019-020 | Redirection sans session | ✅ 2/2 |
+| 5.5 — API Admin | 021-024 | Accès `/api/admin/media/search` par rôle | ✅ 4/4 |
+
+### Problèmes résolus
+
+1. **ESM `__dirname`** : `fileURLToPath(import.meta.url)` dans 4 fichiers setup/fixtures
+2. **Redirect loop `user`** : middleware bloque `/admin` → `waitForTimeout(3000) + goto('/')`
+3. **Sidebar sélecteurs** : `getByRole('link')` → `getByRole('listitem')` (liens icon-only)
+4. **Comptage menu items** : scope `[data-sidebar="content"] [data-sidebar="menu-item"]`
+5. **ROLE-E2E-021** : editor autorisé sur `/api/admin/media/search` (requireMinRole="editor") → 200 correct
+
+### Commits
+
+- `ae29f4d` — `fix(e2e): correct auth setup and sidebar selectors for permissions tests`
+
+### Rapport
+
+`doc/tests/E2E-P0-PERMISSIONS-REPORT.md` — Rapport complet avec matrice permissions, problèmes résolus, infrastructure.
+
+---
+
+## ✅ TASK078 — E2E P0 Pages Publiques (2026-03-16)
+
+### Résumé
+
+Suite E2E Playwright couvrant les 14 scénarios P0 critiques des 6 pages publiques : Home, Spectacles, Compagnie, Agenda, Presse, Contact.
+
+**Résultat** : **14/14 tests passent** (100 %) en 1 min 42 s sur Chromium.
+
+### Infrastructure mise en place
+
+| Fichier | Lignes | Rôle |
+| ------- | ------ | ---- |
+| `playwright.config.ts` | 41 | ESM, 1 worker, timeout 90 s, retries 2, webServer |
+| `e2e/pages/public/*.ts` | 302 | 6 Page Objects (POM pattern) |
+| `e2e/tests/public/**/*.ts` | 254 | 6 fixtures + 6 specs |
+
+### Contraintes documentées
+
+- **Rate limiter in-memory** : Contact 5 req/15 min, Newsletter 3 req/heure — tests `contact` en mode `serial` avec emails uniques (`Date.now()`).
+- **Turbopack cold start** : Premier accès par page = 25-35 s (compilation lazy). Tests suivants : 1-3 s.
+- **1 worker obligatoire** (`workers: 1`) : Rate limiters partagés + RAM contrainte (16 Go).
+
+### Rapport
+
+`doc/tests/E2E-P0-PUBLIC-PAGES-REPORT.md` — Rapport complet (215 lignes) avec résultats, architecture, contraintes, protocole d'exécution.
+
+### Commit
+
+`0ac079b` — `test(e2e): add P0 public pages Playwright tests — 14/14 passing` (24 files, 2458 insertions)
 
 ---
 
