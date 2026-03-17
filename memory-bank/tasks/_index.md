@@ -116,3 +116,131 @@
 - `TASK037B` Audit Accessibilité Modules Admin - ✅ Completed on 2026-03-08 (3C+8M+10M tous corrigés — skip-link + main#main-content, breadcrumb factice, aria-label 4 champs recherche, tailles boutons 44px, role=alert ×5, AlertDialog, DialogDescription, aria-describedby forms Presse, aria-labels contextuels CRUD+Dashboard, aria-hidden icônes, aria-live loading+upload ; branche feat/task037b-a11y-admin-fixes)
 - `TASK076` Editor Role Permissions + Trigger Extension — migration complète (15 phases 2026-03-11 + extension triggers 9 tables 2026-03-13). Auth model: `user < editor < admin`. New `has_min_role()` SQL, `roles.ts` TS guards, all DAL/actions/pages/sidebar/middleware migrated. `is-admin.ts` deprecated. Migration `20260313120000` : triggers `trg_audit`/`trg_update_updated_at` sur 9 tables manquantes.
 - `TASK077` Fix Violation MIG-005 (Batch 1 — 13 tables) — Séparation des 13 policies RLS `to anon, authenticated` en policies distinctes par rôle. 4 fichiers schema modifiés (60, 61, 62, 08). Migration manuelle `20260315001500` (13 drops + 26 creates + 1 rename). Testée db reset. TASK079 créée pour les 21 violations restantes.
+
+---
+
+## Archives — `tasks-completed/`
+
+Fichiers de détail archivés dans le dossier `memory-bank/tasks/tasks-completed/`.
+
+### Divers / Résolutions ponctuelles
+
+- [RESOLVED_db_reconstruction_2025-11-18.md](tasks-completed/RESOLVED_db_reconstruction_2025-11-18.md) — Reconstruction BDD locale 2025-11-18
+- [_archived_TASK025-communications-dashboard.md](tasks-completed/_archived_TASK025-communications-dashboard.md) — Dashboard communications (abandonné)
+
+### TASK007 – Memory Bank
+
+- [TASK007-update-memory-bank.md](tasks-completed/TASK007-update-memory-bank.md)
+
+### TASK011–TASK014 – Intégrations initiales
+
+- [TASK011-integration-home-hero-slides.md](tasks-completed/TASK011-integration-home-hero-slides.md)
+- [TASK012-integration-ui-compagnie-stats.md](tasks-completed/TASK012-integration-ui-compagnie-stats.md)
+- [TASK013-seeds-nouvelles-tables.md](tasks-completed/TASK013-seeds-nouvelles-tables.md)
+- [TASK014-backoffice-toggles-centralises.md](tasks-completed/TASK014-backoffice-toggles-centralises.md)
+
+### TASK019–TASK021 – Spectacles & premiers CRUDs
+
+- [TASK019-fix-spectacles-archives.md](tasks-completed/TASK019-fix-spectacles-archives.md)
+- [TASK020-alignement-ui-presse.md](tasks-completed/TASK020-alignement-ui-presse.md)
+- [TASK021-admin-backoffice-spectacles.md](tasks-completed/TASK021-admin-backoffice-spectacles.md)
+- [TASK021-admin-spectacles-crud.md](tasks-completed/TASK021-admin-spectacles-crud.md)
+- [TASK021-content-management-crud.md](tasks-completed/TASK021-content-management-crud.md)
+- [TASK021-documentation-docker.md](tasks-completed/TASK021-documentation-docker.md)
+- [TASK021B-documentation-supabase-cli.md](tasks-completed/TASK021B-documentation-supabase-cli.md)
+- [TASK021C-auth-cleanup-and-optimization.md](tasks-completed/TASK021C-auth-cleanup-and-optimization.md)
+
+### TASK022–TASK024 – Team, Partenaires & Presse
+
+- [TASK022-team-management.md](tasks-completed/TASK022-team-management.md)
+- [TASK022-implementation-summary.md](tasks-completed/TASK022-implementation-summary.md)
+- [TASK022-REVIEW.md](tasks-completed/TASK022-REVIEW.md)
+- [TASK023-partners-management.md](tasks-completed/TASK023-partners-management.md)
+- [TASK024-press-management.md](tasks-completed/TASK024-press-management.md)
+- [TASK024-press-management-summary.md](tasks-completed/TASK024-press-management-summary.md)
+- [TASK024B-admin-email-scripts.md](tasks-completed/TASK024B-admin-email-scripts.md)
+
+### TASK025–TASK028 – Sécurité & Conformité DB
+
+- [TASK025-rls-security-performance-fixes.md](tasks-completed/TASK025-rls-security-performance-fixes.md)
+- [TASK025B-security-audit-campaign.md](tasks-completed/TASK025B-security-audit-campaign.md)
+- [TASK026-homepage-content-management.md](tasks-completed/TASK026-homepage-content-management.md)
+- [TASK026-COMPLIANCE-FIXES.md](tasks-completed/TASK026-COMPLIANCE-FIXES.md)
+- [TASK026-FINAL-STATUS.md](tasks-completed/TASK026-FINAL-STATUS.md)
+- [TASK026B-db-functions-compliance.md](tasks-completed/TASK026B-db-functions-compliance.md)
+- [TASK026B-cloud-fix-procedure.md](tasks-completed/TASK026B-cloud-fix-procedure.md)
+- [TASK027-company-content-management.md](tasks-completed/TASK027-company-content-management.md)
+- [TASK027B-security-definer-rationale.md](tasks-completed/TASK027B-security-definer-rationale.md)
+- [TASK028-content-versioning-ui.md](tasks-completed/TASK028-content-versioning-ui.md)
+- [TASK028B-cleanup-obsolete-scripts.md](tasks-completed/TASK028B-cleanup-obsolete-scripts.md)
+
+### TASK029–TASK034 – Médiathèque, Toggles, Analytics, Invitations
+
+- [TASK029-media-library.md](tasks-completed/TASK029-media-library.md)
+- [TASK030-display-toggles.md](tasks-completed/TASK030-display-toggles.md)
+- [TASK031-analytics-dashboard.md](tasks-completed/TASK031-analytics-dashboard.md)
+- [TASK032-user-role-management.md](tasks-completed/TASK032-user-role-management.md)
+- [TASK032-user-role-management-FINAL.md](tasks-completed/TASK032-user-role-management-FINAL.md)
+- [TASK033-audit-logs-viewer.md](tasks-completed/TASK033-audit-logs-viewer.md)
+- [TASK033-AUDIT-LOGS-IMPLEMENTATION-SUMMARY.md](tasks-completed/TASK033-AUDIT-LOGS-IMPLEMENTATION-SUMMARY.md)
+- [TASK034-performance-optimization.md](tasks-completed/TASK034-performance-optimization.md)
+
+### TASK036–TASK037 – Audit Sécurité & Accessibilité
+
+- [TASK036-security-audit.md](tasks-completed/TASK036-security-audit.md)
+- [TASK036-OWASP-AUDIT-RESULTS.md](tasks-completed/TASK036-OWASP-AUDIT-RESULTS.md)
+- [TASK036-SECURITY-AUDIT-SUMMARY.md](tasks-completed/TASK036-SECURITY-AUDIT-SUMMARY.md)
+- [TASK036-PRODUCTION-READINESS-CHECKLIST.md](tasks-completed/TASK036-PRODUCTION-READINESS-CHECKLIST.md)
+- [TASK037-admin-views-security-hardening.md](tasks-completed/TASK037-admin-views-security-hardening.md)
+- [TASK037-ADMIN-VIEWS-SECURITY-HARDENING-SUMMARY.md](tasks-completed/TASK037-ADMIN-VIEWS-SECURITY-HARDENING-SUMMARY.md)
+- [TASK037-accessibility-compliance.md](tasks-completed/TASK037-accessibility-compliance.md)
+- [TASK037A-AUDIT-A11Y-PUBLIC-SITE.md](tasks-completed/TASK037A-AUDIT-A11Y-PUBLIC-SITE.md)
+- [TASK037B-AUDIT-A11Y-ADMIN.md](tasks-completed/TASK037B-AUDIT-A11Y-ADMIN.md)
+
+### TASK046–TASK053 – Rate Limiting, T3 Env, DB Backup, Rétention
+
+- [TASK046-rate-limiting-handlers.md](tasks-completed/TASK046-rate-limiting-handlers.md)
+- [TASK046-RATE-LIMITING.md](tasks-completed/TASK046-RATE-LIMITING.md)
+- [TASK046-RATE-LIMITING-TESTING.md](tasks-completed/TASK046-RATE-LIMITING-TESTING.md)
+- [TASK047-newsletter-schema-extraction.md](tasks-completed/TASK047-newsletter-schema-extraction.md)
+- [TASK048-t3-env-implementation.md](tasks-completed/TASK048-t3-env-implementation.md)
+- [TASK049-database-security-rls-security-invoker.md](tasks-completed/TASK049-database-security-rls-security-invoker.md)
+- [TASK050-database-backup-recovery.md](tasks-completed/TASK050-database-backup-recovery.md)
+- [TASK050_RUNBOOK_PITR_restore.md](tasks-completed/TASK050_RUNBOOK_PITR_restore.md)
+- [TASK051-error-monitoring-alerting.md](tasks-completed/TASK051-error-monitoring-alerting.md)
+- [TASK053-data-retention-automation.md](tasks-completed/TASK053-data-retention-automation.md)
+
+### TASK055–TASK062 – Agenda, Photos Spectacles, Sécurité Upload
+
+- [TASK055-admin-agenda-management.md](tasks-completed/TASK055-admin-agenda-management.md)
+- [TASK055-bigint-fix.md](tasks-completed/TASK055-bigint-fix.md)
+- [TASK057-spectacle-landscape-photos.md](tasks-completed/TASK057-spectacle-landscape-photos.md)
+- [TASK061-spectacle-additional-paragraphs.md](tasks-completed/TASK061-spectacle-additional-paragraphs.md)
+- [TASK062-upload-security-hardening.md](tasks-completed/TASK062-upload-security-hardening.md)
+
+### TASK063–TASK075 – Audits de conformité & Composition Patterns
+
+- [TASK063-media-admin-audit-violations.md](tasks-completed/TASK063-media-admin-audit-violations.md)
+- [TASK064-admin-partners-audit-fix.md](tasks-completed/TASK064-admin-partners-audit-fix.md)
+- [TASK065-admin-press-audit-violations.md](tasks-completed/TASK065-admin-press-audit-violations.md)
+- [TASK066-audit-admin-team-violations.md](tasks-completed/TASK066-audit-admin-team-violations.md)
+- [TASK067-audit-admin-users-feature.md](tasks-completed/TASK067-audit-admin-users-feature.md)
+- [TASK068-audit-public-agenda-composition.md](tasks-completed/TASK068-audit-public-agenda-composition.md)
+- [TASK069-audit-public-compagnie.md](tasks-completed/TASK069-audit-public-compagnie.md)
+- [TASK070-adminCompagnie.md](tasks-completed/TASK070-adminCompagnie.md)
+- [TASK071-audit-public-contact.md](tasks-completed/TASK071-audit-public-contact.md)
+- [TASK072-audit-home-public-site.md](tasks-completed/TASK072-audit-home-public-site.md)
+- [TASK073-audit-public-presse.md](tasks-completed/TASK073-audit-public-presse.md)
+- [TASK074-audit-public-spectacles.md](tasks-completed/TASK074-audit-public-spectacles.md)
+- [TASK074-audit-public-spectacles-v1.md](tasks-completed/TASK074-audit-public-spectacles-v1.md)
+- [TASK075-audit-admin-media.md](tasks-completed/TASK075-audit-admin-media.md)
+
+### TASK076–TASK082 – Rôles Éditeur, RLS, Tests Permissions
+
+- [TASK076-editor-role-permissions.md](tasks-completed/TASK076-editor-role-permissions.md)
+- [TASK077-fix-declarative-schema-Violation.md](tasks-completed/TASK077-fix-declarative-schema-Violation.md)
+- [TASK078-implement-permissions-tests.md](tasks-completed/TASK078-implement-permissions-tests.md)
+- [TASK079-fix-rls-remaining-combined-policies.md](tasks-completed/TASK079-fix-rls-remaining-combined-policies.md)
+- [TASK080-fix-rls-policy-failures.md](tasks-completed/TASK080-fix-rls-policy-failures.md)
+- [TASK081-e2e-authentication.md](tasks-completed/TASK081-e2e-authentication.md)
+- [TASK082B-security-nextjs-upgrade.md](tasks-completed/TASK082B-security-nextjs-upgrade.md)
