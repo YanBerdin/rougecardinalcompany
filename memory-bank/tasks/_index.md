@@ -14,8 +14,6 @@
 ## En Cours
 
 - `TASK038` Responsive Testing & Validation - Plan reviewed, Phase 0 (instrumentation) pending
-- `TASK078` Implémentation tests permissions et rôles — 239 cas (UNIT=42, DAL=80, RLS=92, E2E=25). **E2E P0 pages publiques : 14/14 ✅** + **E2E P0 permissions : 23/23 ✅** + **UNIT : 42/42 ✅** + **DAL : 80/80 ✅** + **RLS script : 29/34 (5 échecs → TASK080)** (2026-03-16). Phases RLS editor/admin/storage/views + E2E avancés restants.
-- `TASK080` Investigation et correction des 5 échecs RLS policies — spectacles, configurations_site, logs_audit, evenements, membres_equipe, partners. Hypothèse : DB locale non réinitialisée post-TASK077/TASK079.
 
 ## En Attente
 
@@ -32,6 +30,8 @@
 
 ## Terminé
 
+- `TASK078` Implémentation tests permissions et rôles — 239 cas — **UNIT : 42/42 ✅ + DAL : 80/80 ✅ + RLS : 114/114 ✅ + E2E : 23/23 ✅** — Completed 2026-03-17
+- `TASK080` Fix 5 échecs RLS policies — résolus dans TASK078 (signInAs fix + db reset) — Completed 2026-03-16
 - `TASK082B` Upgrade Next.js 16.1.5→16.1.7 (5 CVEs patchés) — Completed 2026-03-17 (PR #33, commit 5abf71f)
 - `AUDIT-TRIGGER-FIX` Audit Trigger Bugfix (tg_op + auth.uid()) - Completed on 2026-02-11 (Two critical bugs fixed: tg_op case sensitivity causing record_id/new_values NULL + auth.uid() type mismatch causing user_id NULL; Migration 20260211005525 applied local + cloud via MCP; User validated: email now displays instead of "Système")
 - `TASK057` Spectacle Landscape Photos Integration - Completed on 2026-02-01 (2 photos paysage par spectacle, BigInt fix TASK055 pattern, migrations cloud via MCP, DAL + Server Actions + API route, Admin UI avec MediaLibraryPicker, Public display dans SpectacleDetailView)
