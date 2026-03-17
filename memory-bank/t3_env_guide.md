@@ -232,11 +232,12 @@ if (!supabaseUrl || !secretKey) {
 
 ### Résumé par contexte
 
-| Contexte | Méthode |
-| ---------- | -------- |
-| `app/`, `lib/`, `components/` | `import { env } from '@/lib/env'` (T3 Env) |
-| `scripts/*.ts` | `import 'dotenv/config'` + `process.env.*` |
-| `supabase/functions/` | `Deno.env.get()` |
+| Contexte | Méthode | Raison |
+| ---------- | -------- | ------ |
+| `app/`, `lib/`, `components/` | `import { env } from '@/lib/env'` (T3 Env) | Contexte Next.js runtime |
+| `scripts/*.ts` | `import 'dotenv/config'` + `process.env.*` | Hors runtime Next.js (tsx direct) |
+| `next.config.ts` | `process.env.*` | S'exécute **avant** le runtime Next.js — importer T3 Env forcerait la validation de toutes les variables serveur même en contexte E2E/CI où certaines sont absentes |
+| `supabase/functions/` | `Deno.env.get()` | Runtime Deno |
 
 ---
 

@@ -1,6 +1,14 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
+// next.config.ts s'exécute avant le runtime Next.js : process.env est utilisé directement
+// (exception documentée dans memory-bank/t3_env_guide.md — même règle que scripts/*.ts).
+// Importer T3 Env ici forcerait la validation de toutes les variables serveur,
+// y compris celles absentes en contexte E2E ou CI (RESEND_API_KEY, etc.).
+const supabaseUrl =
+  process.env.NEXT_PUBLIC_SUPABASE_URL ??
+  "https://yvtrlvmbofklefxcxrzv.supabase.co";
+
 // https://nextjs.org/docs/messages/next-image-unconfigured-host
 // https://nextjs.org/docs/app/api-reference/components/image#remotepatterns
 const nextConfig: NextConfig = {
@@ -78,7 +86,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: https:",
               "font-src 'self' data: https://fonts.gstatic.com",
-              "connect-src 'self' https://yvtrlvmbofklefxcxrzv.supabase.co https://*.ingest.de.sentry.io",
+              `connect-src 'self' ${supabaseUrl} https://*.ingest.de.sentry.io`,
               "frame-ancestors 'none'",
             ].join("; "),
           },

@@ -39,6 +39,13 @@ export default defineConfig({
             testMatch: 'auth/user.setup.ts',
         },
 
+        // --- Auth tests (no storageState, tests login/signup/forgot flows) ---
+        {
+            name: 'chromium-auth',
+            use: { ...devices['Desktop Chrome'] },
+            testMatch: 'auth/**/*.spec.ts',
+        },
+
         // --- Public tests (no auth required) ---
         {
             name: 'chromium-public',
