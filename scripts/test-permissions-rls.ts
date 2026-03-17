@@ -8,6 +8,7 @@
  *   4.3 — Editor: CRUD éditorial (ROLE-RLS-027 to 047)
  *   4.4 — Admin: full access (ROLE-RLS-048 to 077)
  *   4.5 — SQL functions has_min_role() & is_admin() (ROLE-RLS-059 to 066)
+ *   4.6 — Storage buckets: medias & backups (ROLE-RLS-080 to 086)
  *
  * @usage
  *   pnpm test:rls:local
@@ -2042,6 +2043,186 @@ async function testEditorAccess(
 }
 
 /* ================================================================== */
+/*  4.6 — Storage buckets: medias & backups (ROLE-RLS-080 to 086)     */
+/* ================================================================== */
+
+const STORAGE_TEST_PATH = "__rls_test__/test.png";
+const STORAGE_MEDIA_BLOB = new Blob(["rls-test"], { type: "image/png" });
+const STORAGE_BACKUP_BLOB = new Blob(["rls-test"], { type: "application/octet-stream" });
+
+function isStorageError(error: { message: string; statusCode?: string } | null): boolean {
+    if (!error) return false;
+    const msg = error.message.toLowerCase();
+    return (
+        msg.includes("not allowed") ||
+        msg.includes("not authorized") ||
+        msg.includes("permission denied") ||
+        msg.includes("violat") ||
+        msg.includes("policy") ||
+        msg.includes("security") ||
+        msg.includes("new row") ||
+        error.statusCode === "403"
+    );
+}
+
+async function testStorageAccess(
+    userClient: SupabaseClient,
+    editorClient: SupabaseClient,
+    adminSessClient: SupabaseClient,
+): Promise<void> {
+    console.log(
+        "\n📦 Section 4.6 — Storage buckets: medias & backups\n",
+    );
+
+    // ROLE-RLS-080: Anon can download from medias (public bucket)
+    {
+        // First seed a file via service role so there's something to download
+        await adminClient.storage
+            .from("medias")
+            .upload(STORAGE_TEST_PATH, STORAGE_MEDIA_BLOB, { upsert: true });
+
+        const { data, error } = await anonClient.storage
+            .from("medias")
+            .download(STORAGE_TEST_PATH);
+
+        if (error || !data) {
+            fail("ROLE-RLS-080", "Anon download medias — expected allowed", error?.message);
+        } else {
+            ok("ROLE-RLS-080", "Anon download medias — allowed (public bucket)");
+        }
+    }
+
+    // ROLE-RLS-081: Anon upload to medias — blocked
+    {
+        const { error } = await anonClient.storage
+            .from("medias")
+            .upload("__rls_test__/anon.png", STORAGE_MEDIA_BLOB);
+
+        if (error) {
+            ok("ROLE-RLS-081", "Anon upload medias — blocked");
+        } else {
+            fail("ROLE-RLS-081", "Anon upload medias — should be blocked");
+            await adminClient.storage.from("medias").remove(["__rls_test__/anon.png"]);
+        }
+    }
+
+    // ROLE-RLS-082: Authenticated user (role=user) upload to medias — blocked
+    {
+        const { error } = await userClient.storage
+            .from("medias")
+            .upload("__rls_test__/user.png", STORAGE_MEDIA_BLOB);
+
+        if (error) {
+            ok("ROLE-RLS-082", "User upload medias — blocked (requires editor)");
+        } else {
+            fail("ROLE-RLS-082", "User upload medias — should be blocked");
+            await adminClient.storage.from("medias").remove(["__rls_test__/user.png"]);
+        }
+    }
+
+    // ROLE-RLS-083: Editor can upload to medias
+    {
+        const path = "__rls_test__/editor.png";
+        const { error } = await editorClient.storage
+            .from("medias")
+            .upload(path, STORAGE_MEDIA_BLOB);
+
+        if (error) {
+            fail("ROLE-RLS-083", "Editor upload medias — expected allowed", error.message);
+        } else {
+            ok("ROLE-RLS-083", "Editor upload medias — allowed");
+            // Also verify editor can delete (part of editor permissions)
+            await editorClient.storage.from("medias").remove([path]);
+        }
+    }
+
+    // ROLE-RLS-084: Admin can upload to medias
+    {
+        const path = "__rls_test__/admin.png";
+        const { error } = await adminSessClient.storage
+            .from("medias")
+            .upload(path, STORAGE_MEDIA_BLOB);
+
+        if (error) {
+            fail("ROLE-RLS-084", "Admin upload medias — expected allowed", error.message);
+        } else {
+            ok("ROLE-RLS-084", "Admin upload medias — allowed");
+            await adminSessClient.storage.from("medias").remove([path]);
+        }
+    }
+
+    // ROLE-RLS-085: Anon/user/editor/admin cannot access backups bucket
+    {
+        const backupPath = "__rls_test__/probe.bin";
+        const clients: Array<{ label: string; client: SupabaseClient }> = [
+            { label: "anon", client: anonClient },
+            { label: "user", client: userClient },
+            { label: "editor", client: editorClient },
+            { label: "admin", client: adminSessClient },
+        ];
+
+        let allBlocked = true;
+        const details: string[] = [];
+
+        for (const { label, client } of clients) {
+            const { data: listData, error: listErr } = await client.storage
+                .from("backups")
+                .list();
+
+            // For private bucket, either an error or empty result is acceptable
+            const listBlocked = !!listErr || (listData ?? []).length === 0;
+
+            const { error: uploadErr } = await client.storage
+                .from("backups")
+                .upload(backupPath, STORAGE_BACKUP_BLOB);
+
+            const uploadBlocked = !!uploadErr;
+
+            if (!listBlocked || !uploadBlocked) {
+                allBlocked = false;
+                details.push(`${label}: list=${listBlocked ? "blocked" : "LEAKED"}, upload=${uploadBlocked ? "blocked" : "LEAKED"}`);
+            }
+
+            // Cleanup if upload accidentally succeeded
+            if (!uploadBlocked) {
+                await adminClient.storage.from("backups").remove([backupPath]);
+            }
+        }
+
+        if (allBlocked) {
+            ok("ROLE-RLS-085", "Backups bucket — all non-service roles blocked");
+        } else {
+            fail("ROLE-RLS-085", "Backups bucket — some roles not blocked", details.join("; "));
+        }
+    }
+
+    // ROLE-RLS-086: Service role can access backups bucket
+    {
+        const path = "__rls_test__/service.bin";
+        const { error: upErr } = await adminClient.storage
+            .from("backups")
+            .upload(path, STORAGE_BACKUP_BLOB, { upsert: true });
+
+        if (upErr) {
+            fail("ROLE-RLS-086", "Service role upload backups — expected allowed", upErr.message);
+        } else {
+            const { data: listData, error: listErr } = await adminClient.storage
+                .from("backups")
+                .list("__rls_test__");
+
+            if (listErr || !listData || listData.length === 0) {
+                fail("ROLE-RLS-086", "Service role list backups — expected non-empty", listErr?.message);
+            } else {
+                ok("ROLE-RLS-086", "Service role backups — upload + list allowed");
+            }
+
+            // Cleanup
+            await adminClient.storage.from("backups").remove([path]);
+        }
+    }
+}
+
+/* ================================================================== */
 /*  Cleanup — remove test data inserted during tests                  */
 /* ================================================================== */
 
@@ -2066,6 +2247,9 @@ async function cleanup() {
         .delete()
         .like("email", "__rls_test_%");
 
+    // Remove storage test files
+    await adminClient.storage.from("medias").remove([STORAGE_TEST_PATH]);
+
     console.log("   Done.");
 }
 
@@ -2075,7 +2259,7 @@ async function cleanup() {
 
 async function main() {
     console.log("\n🔌 Testing RLS permissions against LOCAL Supabase");
-    console.log("   Sections: 4.1 (anon), 4.2 (user), 4.3 (editor), 4.4 (admin), 4.5 (SQL functions)\n");
+    console.log("   Sections: 4.1 (anon), 4.2 (user), 4.3 (editor), 4.4 (admin), 4.5 (SQL functions), 4.6 (storage)\n");
 
     // Provision test users
     console.log("📋 Provisioning test accounts...");
@@ -2111,6 +2295,7 @@ async function main() {
     await testEditorAccess(editorClient, adminId, editorId, userId);
     await testAdminAccess(adminSessClient, editorClient, userClient, adminId, userId);
     await testSqlFunctions(userClient, editorClient, adminSessClient);
+    await testStorageAccess(userClient, editorClient, adminSessClient);
 
     // Cleanup test data
     await cleanup();

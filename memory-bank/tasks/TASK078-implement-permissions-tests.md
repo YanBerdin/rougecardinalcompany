@@ -2,7 +2,7 @@
 
 **Status:** In Progress
 **Added:** 2026-03-14
-**Updated:** 2026-03-17 (Phase 3 RLS 4.4 editor — 79/79 ✅, corrections 4 tests)
+**Updated:** 2026-03-17 (Phase 3 RLS 4.6 storage buckets — 86/86 ✅)
 
 ## Original Request
 
@@ -67,7 +67,7 @@ Implémenter les 239 cas de test définis dans `specs/tests-permissions-et-rôle
 
 ## Progress Tracking
 
-**Overall Status:** In Progress — 95% (storage buckets 4.6 + views 4.7 restants)
+**Overall Status:** In Progress — 97% (views 4.7 restants)
 
 ### Subtasks
 
@@ -87,13 +87,30 @@ Implémenter les 239 cas de test définis dans `specs/tests-permissions-et-rôle
 | 4.3 | Tests RLS admin complet            | Complete    | 2026-03-17 | 30/30 pass ✅ (RLS-048→077) — `testAdminAccess()` dans `scripts/test-permissions-rls.ts`    |
 | 4.4 | Tests RLS editor éditorial         | Complete    | 2026-03-17 | 23/23 pass ✅ (RLS-027→047 + 2 bonus) — `testEditorAccess()` dans `scripts/test-permissions-rls.ts` |
 | 4.5 | Tests RLS fonctions SQL            | Complete    | 2026-03-16 | 8 tests — 8/8 pass ✅                                                                      |
-| 4.6 | Tests RLS storage buckets          | Not Started | 2026-03-14 | Section 4.6                                                                                |
+| 4.6 | Tests RLS storage buckets          | Complete    | 2026-03-17 | 7 cas ROLE-RLS-080→086 — 86/86 pass ✅ (`testStorageAccess()` dans `scripts/test-permissions-rls.ts`) |
 | 4.7 | Tests RLS views service_role       | Not Started | 2026-03-14 | Section 4.7                                                                                |
 | 5.1 | Tests E2E P0 permissions (23 cas)  | Complete    | 2026-03-16 | **23/23 passent** (42.8s) — 5 corrections  (sélecteurs sidebar, redirect loop, 403→200)    |
 
 Rapport `doc/tests/E2E-P0-PERMISSIONS-REPORT.md`. Commit `ae29f4d`  
 
 ## Progress Log
+
+### 2026-03-17 — Phase 3 RLS section 4.6 storage buckets (ROLE-RLS-080→086) — 86/86 ✅
+
+- **`testStorageAccess()` implémentée** dans `scripts/test-permissions-rls.ts` : 7 tests (ROLE-RLS-080→086)
+- **Couverture buckets** :
+  - ROLE-RLS-080 : Anon download bucket `medias` → autorisé (public bucket)
+  - ROLE-RLS-081 : Anon upload `medias` → bloqué
+  - ROLE-RLS-082 : User upload `medias` → bloqué (`has_min_role('editor')` requis)
+  - ROLE-RLS-083 : Editor upload `medias` → autorisé
+  - ROLE-RLS-084 : Admin upload `medias` → autorisé
+  - ROLE-RLS-085 : Bucket `backups` — anon/user/editor/admin list+upload → tous bloqués (service_role only)
+  - ROLE-RLS-086 : Service role upload+list `backups` → autorisé
+- **Correction MIME types** (second run) : le premier run utilisait `text/plain` → 4 échecs car les buckets ont des `allowed_mime_types` restrictifs. Corrigé en `image/png` (medias) et `application/octet-stream` (backups).
+- **Schéma de référence** : `supabase/schemas/02c_storage_buckets.sql`
+- **Pattern** : seed via `adminClient` (service_role) avant download anon, cleanup `__rls_test__/` en fin de script
+- **Résultat final** : **86/86 tests passent** — exit 0
+- Subtask 4.6 : Complete
 
 ### 2026-03-17 — Phase 3 RLS section 4.4 editor (RLS-027→047) — 79/79 ✅
 
