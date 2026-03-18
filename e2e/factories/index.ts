@@ -10,3 +10,4 @@ export { EvenementFactory, type EvenementWithDeps } from './evenements.factory';
 export { MembreEquipeFactory } from './membres-equipe.factory';
 export { PartnerFactory } from './partners.factory';
 export { HeroSlideFactory } from './home-hero-slides.factory';
+export { PressReleaseFactory } from './presse.factory';

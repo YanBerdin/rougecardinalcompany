@@ -14,6 +14,7 @@
 ## En Cours
 
 - `TASK038` Responsive Testing & Validation - Plan reviewed, Phase 0 (instrumentation) pending
+- `TASK082` E2E Admin CRUD Éditorial — **42/51 passent, 0 échouent, 9 fixme** — Completed 2026-03-18 (Rapport: `doc/tests/E2E-ADMIN-CRUD-EDITORIAL-TASK082-REPORT.md`)
 
 ## En Attente
 

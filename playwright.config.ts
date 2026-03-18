@@ -53,6 +53,17 @@ export default defineConfig({
             testMatch: 'public/**/*.spec.ts',
         },
 
+        // --- Editor CRUD tests (depend on editor auth setup) ---
+        {
+            name: 'editor',
+            use: {
+                ...devices['Desktop Chrome'],
+                storageState: path.join(__dirname, 'e2e/.auth/editor.json'),
+            },
+            testMatch: 'editor/**/*.spec.ts',
+            dependencies: ['setup-editor'],
+        },
+
         // --- Permissions tests (depend on auth setup) ---
         {
             name: 'permissions',

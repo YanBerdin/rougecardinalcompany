@@ -46,7 +46,8 @@ export const EvenementFactory = {
         const seq = nextId();
         return {
             date_debut: futureDate(seq),
-            status: 'planifie',
+            start_time: '20:00:00',
+            status: 'scheduled',
             ...overrides,
         };
     },
