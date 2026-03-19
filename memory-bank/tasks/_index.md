@@ -35,6 +35,7 @@
 - `TASK082` E2E Admin CRUD Éditorial — **51/51 passent ✅** — Completed 2026-03-20 (5 sessions, Rapports: `doc/tests/E2E-ADMIN-CRUD-EDITORIAL-TASK082-REPORT.md`, `doc/tests/audit-e2e-skipped-tests-TASK082.md`)
 - `TASK078` Implémentation tests permissions et rôles — 239 cas — **UNIT : 42/42 ✅ + DAL : 80/80 ✅ + RLS : 114/114 ✅ + E2E : 23/23 ✅** — Completed 2026-03-17
 - `TASK080` Fix 5 échecs RLS policies — résolus dans TASK078 (signInAs fix + db reset) — Completed 2026-03-16
+- `TASK082C` Patch sécurité flatted 3.4.1→3.4.2 (Prototype Pollution CVE, Dependabot #38) — Completed 2026-03-19 (commit ce7ec9b, [fichier](tasks-completed/TASK082C-security-flatted-prototype-pollution.md))
 - `TASK082B` Upgrade Next.js 16.1.5→16.1.7 (5 CVEs patchés) — Completed 2026-03-17 (PR #33, commit 5abf71f)
 - `AUDIT-TRIGGER-FIX` Audit Trigger Bugfix (tg_op + auth.uid()) - Completed on 2026-02-11 (Two critical bugs fixed: tg_op case sensitivity causing record_id/new_values NULL + auth.uid() type mismatch causing user_id NULL; Migration 20260211005525 applied local + cloud via MCP; User validated: email now displays instead of "Système")
 - `TASK057` Spectacle Landscape Photos Integration - Completed on 2026-02-01 (2 photos paysage par spectacle, BigInt fix TASK055 pattern, migrations cloud via MCP, DAL + Server Actions + API route, Admin UI avec MediaLibraryPicker, Public display dans SpectacleDetailView)
@@ -247,3 +248,4 @@ Fichiers de détail archivés dans le dossier `memory-bank/tasks/tasks-completed
 - [TASK080-fix-rls-policy-failures.md](tasks-completed/TASK080-fix-rls-policy-failures.md)
 - [TASK081-e2e-authentication.md](tasks-completed/TASK081-e2e-authentication.md)
 - [TASK082B-security-nextjs-upgrade.md](tasks-completed/TASK082B-security-nextjs-upgrade.md)
+- [TASK082C-security-flatted-prototype-pollution.md](tasks-completed/TASK082C-security-flatted-prototype-pollution.md)

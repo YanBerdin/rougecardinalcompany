@@ -1,8 +1,8 @@
 # Active Context
 
-**Current Focus (2026-03-20)**: Documentation post-TASK082. Tous les tests E2E passent. Prochaine tâche à déterminer.
+**Current Focus (2026-03-19)**: Sécurité dépendances. flatted Prototype Pollution patchée. Prochaine tâche à déterminer.
 
-**Last Major Updates**: ✅ TASK082 — **51/51 tests E2E Admin CRUD Éditorial passent** (5 sessions de débogage, bug le plus dur : `next/image` hostname localhost rejeté) (2026-03-20) + ✅ TASK082B — Patch sécurité Next.js 16.1.5 → 16.1.7 (5 CVEs, PR #33) (2026-03-17) + ✅ TASK078 Phase DAL — **80/80 tests DAL passent** (2026-03-16) + ✅ TASK078 — E2E P0 permissions 23/23 passent (2026-03-16) + ✅ TASK078 — E2E P0 pages publiques 14/14 passent (2026-03-16) + ✅ TASK077 + TASK079 — Séparation policies RLS batches 1+2 (2026-03-15)
+**Last Major Updates**: ✅ TASK082C — Patch sécurité flatted 3.4.1 → 3.4.2 (Prototype Pollution CVE, Dependabot #38) (2026-03-19) + ✅ TASK082 — **51/51 tests E2E Admin CRUD Éditorial passent** (5 sessions de débogage, bug le plus dur : `next/image` hostname localhost rejeté) (2026-03-20) + ✅ TASK082B — Patch sécurité Next.js 16.1.5 → 16.1.7 (5 CVEs, PR #33) (2026-03-17) + ✅ TASK078 Phase DAL — **80/80 tests DAL passent** (2026-03-16) + ✅ TASK078 — E2E P0 permissions 23/23 passent (2026-03-16) + ✅ TASK077 + TASK079 — Séparation policies RLS batches 1+2 (2026-03-15)
 
 ---
 
@@ -6253,8 +6253,8 @@ app/
   - c9a9ee7 : API /active refactoring
   - 6a2c7d8 : Route groups migration
 
----
-
-**Dernière mise à jour** : 2025-11-27  
+**Mise à jour** : 2025-11-27  
 **Responsable** : YanBerdin  
 **Statut** : Clean Code Conformity complété, Blueprints v4 mis à jour, documentation synchronisée
+
+---

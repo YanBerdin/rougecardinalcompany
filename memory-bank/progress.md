@@ -1,5 +1,17 @@
 # Progress
 
+## TASK082C — Sécurité : flatted 3.4.1 → 3.4.2 (Prototype Pollution) (2026-03-19)
+
+✅ **COMPLET** — Dependabot alert #38 : Prototype Pollution via `parse()` dans `flatted < 3.4.2`.
+
+- **Vulnérabilité** : `parse()` accède à `input["__proto__"]` sans valider l'index → fuite de `Array.prototype` → pollution du prototype global
+- **Chaînes transitives** : `eslint 9.39.3 → flatted 3.4.1` et `eslint-config-next 16.1.6 → flatted 3.4.1`
+- **Correction** : pnpm override `"flatted": ">=3.4.0"` → `">=3.4.2"` dans `package.json`
+- **Commit** : `ce7ec9b` — `fix(deps): upgrade flatted to >=3.4.2 to fix prototype pollution (CVE)`
+- **Vérification** : `grep "flatted" pnpm-lock.yaml` → `flatted@3.4.2` ✅
+
+---
+
 ## TASK082 — E2E Admin CRUD Éditorial : 51/51 passent (2026-03-20)
 
 ✅ **COMPLET** — 51 tests Playwright couvrant 6 sections admin (Spectacles, Agenda, Lieux, Presse, Compagnie, Médiathèque). Résolus en **5 sessions de débogage** (~6h total).
