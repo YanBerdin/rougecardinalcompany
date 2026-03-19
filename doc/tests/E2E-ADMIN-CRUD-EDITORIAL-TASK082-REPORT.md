@@ -191,6 +191,7 @@ des 6 sections éditoriales du backoffice admin (rôle `editor`) — définis da
 **Diagnostic** : 5 sessions de débogage ont été nécessaires. Les hypothèses initiales (RLS, JWT expiré, crash serveur Promise.all) étaient toutes fausses. La vraie cause a été identifiée via un test debug Playwright qui a capturé le message d'erreur client-side de `next/image`.
 
 **Solution** : Ajout de 2 entrées dans `next.config.ts` `images.remotePatterns` :
+
 - `{ protocol: "http", hostname: "localhost", port: "54321", pathname: "/storage/v1/object/public/**" }`
 - `{ protocol: "http", hostname: "127.0.0.1", port: "54321", pathname: "/storage/v1/object/public/**" }`
 

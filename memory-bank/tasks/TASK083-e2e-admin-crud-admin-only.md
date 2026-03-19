@@ -1,4 +1,4 @@
-# [TASK083] — E2E Admin CRUD — Admin-only (rôle admin)
+# `\[TASK083] — E2E Admin CRUD — Admin-only (rôle admin)
 
 **Status:** Pending
 **Added:** 2026-03-17
@@ -32,7 +32,7 @@ définis dans `specs/PLAN_DE_TEST_COMPLET.md` sections 7, 8, 15, 16, 17, 18, 19.
 | 18 — Site Config / Toggles | ADM-CONFIG-001→013 | 13 | P0/P1 |
 | 19 — Audit Logs | ADM-AUDIT-001→011 | 11 | P0/P1 |
 
-**Total : ~55 cas P0/P1**
+> **Total : ~55 cas P0/P1**
 
 ### Cas prioritaires P0
 
@@ -151,17 +151,17 @@ TASK082 (51/51 tests editor) a révélé des pièges directement applicables à 
 
 ### Subtasks
 
-| ID  | Description                              | Status      | Updated    | Notes |
-| --- | ---------------------------------------- | ----------- | ---------- | ----- |
-| 1.1 | Page Objects admin-only (7)              | Not Started | 2026-03-17 |       |
-| 1.2 | Factory `HomeAboutStatFactory` si besoin | Not Started | 2026-03-17 |       |
-| 2.1 | Tests dashboard (ADM-DASH-*)             | Not Started | 2026-03-17 | Court, prioritaire |
-| 2.2 | Tests équipe (ADM-TEAM-*)                | Not Started | 2026-03-17 | Serial mode |
-| 2.3 | Tests hero slides (ADM-HERO-*)           | Not Started | 2026-03-17 | DnD en dernier |
-| 2.4 | Tests about/chiffres (ADM-ABOUT-*)       | Not Started | 2026-03-17 |       |
-| 2.5 | Tests partenaires (ADM-PART-*)           | Not Started | 2026-03-17 | DnD en dernier |
+| ID  | Description                              | Status      | Updated    | Notes                       |
+| --- | ---------------------------------------- | ----------- | ---------- | --------------------------- |
+| 1.1 | Page Objects admin-only (7)              | Not Started | 2026-03-17 |                             |
+| 1.2 | Factory `HomeAboutStatFactory` si besoin | Not Started | 2026-03-17 |                             |
+| 2.1 | Tests dashboard (ADM-DASH-*)             | Not Started | 2026-03-17 | Court, prioritaire          |
+| 2.2 | Tests équipe (ADM-TEAM-*)                | Not Started | 2026-03-17 | Serial mode                 |
+| 2.3 | Tests hero slides (ADM-HERO-*)           | Not Started | 2026-03-17 | DnD en dernier              |
+| 2.4 | Tests about/chiffres (ADM-ABOUT-*)       | Not Started | 2026-03-17 |                             |
+| 2.5 | Tests partenaires (ADM-PART-*)           | Not Started | 2026-03-17 | DnD en dernier              |
 | 2.6 | Tests site config/toggles (ADM-CONFIG-*) | Not Started | 2026-03-17 | Impact public = 2 contextes |
-| 2.7 | Tests audit logs (ADM-AUDIT-*)           | Not Started | 2026-03-17 | Délai log après action |
+| 2.7 | Tests audit logs (ADM-AUDIT-*)           | Not Started | 2026-03-17 | Délai log après action      |
 
 ## Références
 
