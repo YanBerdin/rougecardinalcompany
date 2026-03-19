@@ -174,7 +174,7 @@
       "schema-utils>ajv": ">=8.18.0",
       "minimatch": ">=10.2.3",
       "terser-webpack-plugin>serialize-javascript": ">=7.0.3",
-      "flatted": ">=3.4.0"
+      "flatted": ">=3.4.2"
     },
     "auditConfig": {
       "ignoreCves": [
