@@ -1,8 +1,8 @@
 # \[TASK082] — E2E Admin CRUD — Éditorial (rôle editor)
 
-**Status:** Completed
+**Status:** In Progress
 **Added:** 2026-03-17
-**Updated:** 2026-03-18
+**Updated:** 2026-03-19
 
 ## Original Request
 
@@ -107,26 +107,28 @@ Les factories existantes (`SpectacleFactory`, `LieuFactory`, `EvenementFactory`,
 
 **Overall Status:** Completed — 100%
 
-### Résultat final
+### Résultat courant
 
-> **42 passent, 0 échouent, 9 skippés (`test.fixme`) — stable sur 2 runs consécutifs**
+> **44 passent, 7 échouent, 0 skippés** (9 `test.fixme` retirés — session 3/4 en cours)
 
 ### Subtasks
 
-| ID  | Description                          | Status      | Updated    | Notes                                              |
-| --- | ------------------------------------ | ----------- | ---------- | -------------------------------------------------- |
-| 1.1 | Page Objects admin editorial (6)     | Complete    | 2026-03-18 | 699 lignes, 6 fichiers                             |
+| ID  | Description                          | Status      | Updated    | Notes                                                |
+| --- | ------------------------------------ | ----------- | ---------- | ---------------------------------------------------- |
+| 1.1 | Page Objects admin editorial (6)     | Complete    | 2026-03-18 | 699 lignes, 6 fichiers                               |
 | 1.2 | Factories manquantes si nécessaire   | Complete    | 2026-03-18 | presse.factory.ts créée, evenements.factory.ts fixée |
-| 2.1 | Tests spectacles (ADM-SPEC-*)        | Complete    | 2026-03-18 | 10/10 passent                                      |
-| 2.2 | Tests agenda (ADM-AGENDA-*)          | Complete    | 2026-03-18 | 6/6 passent                                        |
-| 2.3 | Tests lieux (ADM-LIEU-*)             | Complete    | 2026-03-18 | 7/7 passent                                        |
-| 2.4 | Tests presse (ADM-PRESSE-*)          | Complete    | 2026-03-18 | 8/10 passent, 2 fixme (auth admin requise)         |
-| 2.5 | Tests compagnie (ADM-COMP-*)         | Complete    | 2026-03-18 | 6/6 passent                                        |
-| 2.6 | Tests médiathèque (ADM-MEDIA-*)      | Complete    | 2026-03-18 | 4/11 passent, 7 fixme (RLS + crash serveur)        |
-| 3.1 | Healing round 1 (page objects)       | Complete    | 2026-03-17 | Sélecteurs, URLs, boutons corrigés                 |
-| 3.2 | Healing round 2 (datetime, strict)   | Complete    | 2026-03-17 | datetime-local, .first(), presse fixme             |
-| 3.3 | Healing round 3 (agenda+spec+lieux)  | Complete    | 2026-03-18 | 6 bugs corrigés (genre, h3, count, status, FK, cache) |
-| 3.4 | Healing round 4 (media fixme)        | Complete    | 2026-03-18 | 7 tests fixme (RLS/crash applicatif)               |
+| 2.1 | Tests spectacles (ADM-SPEC-*)        | Complete    | 2026-03-18 | 10/10 passent                                        |
+| 2.2 | Tests agenda (ADM-AGENDA-*)          | Complete    | 2026-03-18 | 6/6 passent                                          |
+| 2.3 | Tests lieux (ADM-LIEU-*)             | Complete    | 2026-03-18 | 7/7 passent                                          |
+| 2.4 | Tests presse (ADM-PRESSE-*)          | In Progress | 2026-03-19 | 8/10 passent — ADM-PRESSE-002/003 encore en échec    |
+| 2.5 | Tests compagnie (ADM-COMP-*)         | Complete    | 2026-03-18 | 6/6 passent                                          |
+| 2.6 | Tests médiathèque (ADM-MEDIA-*)      | In Progress | 2026-03-19 | 6/11 passent — 5 en échec (JWT expiration)           |
+| 3.1 | Healing round 1 (page objects)       | Complete    | 2026-03-17 | Sélecteurs, URLs, boutons corrigés                   |
+| 3.2 | Healing round 2 (datetime, strict)   | Complete    | 2026-03-17 | datetime-local, .first(), presse fixme               |
+| 3.3 | Healing round 3 (agenda+spec+lieux)  | Complete    | 2026-03-18 | 6 bugs corrigés (genre, h3, count, status, FK, cache)|
+| 3.4 | Healing round 4 (media fixme)        | Complete    | 2026-03-18 | 7 tests fixme (RLS/crash applicatif)                 |
+| 3.5 | Session 3 — retrait fixme + auth fix | Complete    | 2026-03-19 | DAL bug, test-image.png, exact:true, editor.json local|
+| 3.6 | Session 4 — debug JWT expiration     | In Progress | 2026-03-19 | JWT TTL 1h, Next.js CPU stuck, redémarrage en cours  |
 
 ## Progress Log
 
@@ -141,8 +143,31 @@ Les factories existantes (`SpectacleFactory`, `LieuFactory`, `EvenementFactory`,
 
 - Healing round 3 : correction 6 bugs (genre exact match, h3 caché, count() timing, status factory, FK ON DELETE SET NULL, cache-bust navigation)
 - Healing round 4 : 7 tests media marqués fixme (violations RLS has_min_role('editor') + crash serveur MediaLibraryContainer)
-- Résultat final : **42 passent, 0 échouent, 9 skippés** — confirmé stable
+- Résultat stable : **42 passent, 0 échouent, 9 skippés**
 - Rapport rédigé : `doc/tests/E2E-ADMIN-CRUD-EDITORIAL-TASK082-REPORT.md`
+
+### 2026-03-19 (Session 3)
+
+- Retiré les 9 `test.fixme` (audit confirmant que l'audit initial était correct côté code)
+- Corrigé bug DAL `lib/dal/admin-press-select-options.ts` (valeur select manquante → test presse réparé)
+- Créé `e2e/fixtures/assets/test-image.png` (PNG 10×10 px valide pour upload media)
+- Appliqué `exact: true` dans `presse.page.ts > clickCreateCommunique()` (strict mode fix)
+- Découvert que `editor.json` pointait vers Supabase **cloud** (pas local) → session invalide localement
+- Régénéré `editor.json` avec session Supabase **locale** (login 2026-03-19T00:48 UTC)
+- Résultat : **44 passent, 7 échouent, 0 skippés**
+- Tests encore en échec : ADM-PRESSE-002/003, ADM-MEDIA-005/006/007/009/011
+
+### 2026-03-19 (Session 4)
+
+- Décodé le JWT dans `editor.json` → contient bien `app_metadata.role = "editor"` ✓
+- **Découverte clé** : JWT access_token expiré (TTL 1h — émis 00:48, expiré 01:48 UTC)
+- Confirmé que `getClaims()` = vérification JWT **locale sans auto-refresh** → retourne null si expiré
+- Chaîne de défaillance identifiée : `getClaims() null` → `getCurrentUserRole() → 'user'` → `requireMinRole('editor') throw` → Next.js error boundary → « Une erreur est survenue »
+- Vérifié : aucun `custom_access_token_hook` configuré dans Supabase (pas de `config.toml`)
+- Incident : `next-server` (PID 11974) bloqué à **180% CPU** / 2 GB RAM depuis 37+ min
+- Système en état critique : 6.7 GB / 7.6 GB RAM utilisés, 2 GB swap
+- Tué les processus Next.js, supprimé `.next/dev/lock`
+- **En cours** : redémarrage Next.js + régénération `editor.json` + relance des tests
 
 ## Découvertes techniques clés
 
@@ -150,17 +175,18 @@ Les factories existantes (`SpectacleFactory`, `LieuFactory`, `EvenementFactory`,
 2. **Playwright `getByRole({ name })` match par substring** — toujours utiliser `{ exact: true }` pour un match exact
 3. **`locator.count()` ne wait pas** — utiliser `expect().toBeVisible()` avant d'appeler `count()`
 4. **Status agenda : schéma Zod UI n'accepte que les valeurs anglaises** (`scheduled|cancelled|completed`), pas les françaises de la BDD
-5. **RLS `has_min_role('editor')` sur media_tags/folders** : policies migrées mais violations en pratique — à investiguer
-6. **Router Cache Next.js en dev** : bypasser avec `?_t=timestamp` entre navigations de test
+5. **Router Cache Next.js en dev** : bypasser avec `?_t=timestamp` entre navigations de test
+6. **`getClaims()` = vérification JWT locale, TTL 1h, sans auto-refresh** — si l'access_token est expiré, retourne null → `requireMinRole` throw → error boundary. Le middleware ne rafraîchit PAS automatiquement le token côté page.
+7. **`editor.json` session locale vs cloud** : le setup Playwright peut récupérer un état de session cloud si la variable `SUPABASE_URL` pointe vers le cloud — toujours vérifier que l'URL est `http://localhost:54321`
+8. **Next.js Turbopack peut se bloquer en boucle de compilation** (180% CPU, serveur non répondant) — surveiller l'utilisation CPU et redémarrer si nécessaire
 
-## Tests skippés — Actions requises
+## Tests en échec — Actions requises
 
-| Tests | Cause | Action | Priorité |
-| ----- | ----- | ------ | -------- |
-| ADM-PRESSE-002, 003 | DAL requiert admin, pas editor | Projet Playwright `admin` ou ajuster permissions | P1 |
-| ADM-MEDIA-005 | RLS Storage bloque upload editor | Vérifier policies Storage bucket | P1 |
-| ADM-MEDIA-006 | Crash serveur MediaLibraryContainer | Debug Promise.all server actions | P0 |
-| ADM-MEDIA-007→011 | RLS media_tags/folders violations | Vérifier migration RLS appliquée | P1 |
+| Tests | Symptôme | Cause réelle | Action | Priorité |
+| ----- | --------- | ------------ | ------ | -------- |
+| ADM-MEDIA-005/006/007/009/011 | « Une erreur est survenue » | JWT access_token expiré (TTL 1h) | Régénérer `editor.json` avant chaque run | P0 |
+| ADM-PRESSE-002 | Timeout `locator.fill` 90s | Form dialog ne répond pas | Investiguer dialog (screenshot, trace) | P1 |
+| ADM-PRESSE-003 | Cascade/ERR_CONNECTION_REFUSED | Dépend de ADM-PRESSE-002 | Régler ADM-PRESSE-002 en premier | P1 |
 
 ## Références
 

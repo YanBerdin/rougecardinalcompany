@@ -33,7 +33,7 @@ export class AdminPressePage {
     }
 
     async clickCreateCommunique(): Promise<void> {
-        await this.page.getByRole('link', { name: 'Nouveau communiqué' }).click();
+        await this.page.getByRole('link', { name: 'Nouveau communiqué', exact: true }).click();
         await this.page.waitForURL('**/admin/presse/communiques/new');
     }
 

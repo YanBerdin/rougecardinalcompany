@@ -23,8 +23,7 @@ test.describe('Gestion de la Presse', () => {
         // Note: Contacts tab is admin-only, editor should not see it
     });
 
-    // ADM-PRESSE-002: Create page calls requireAdminOnly() in DAL — editor role cannot access
-    test.fixme('ADM-PRESSE-002 — Créer un communiqué de presse', async ({
+    test('ADM-PRESSE-002 — Créer un communiqué de presse', async ({
         pressePage,
         page,
     }) => {
@@ -50,8 +49,7 @@ test.describe('Gestion de la Presse', () => {
         );
     });
 
-    // ADM-PRESSE-003: Edit page calls requireAdminOnly() in DAL — editor role cannot access
-    test.fixme('ADM-PRESSE-003 — Modifier un communiqué', async ({
+    test('ADM-PRESSE-003 — Modifier un communiqué', async ({
         pressePage,
         page,
     }) => {

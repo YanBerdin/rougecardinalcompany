@@ -57,8 +57,7 @@ test.describe('Médiathèque — Hub', () => {
 test.describe('Médiathèque — Bibliothèque', () => {
     // --- P0 ---
 
-    // RLS policy blocks editor from uploading to Supabase Storage
-    test.fixme('ADM-MEDIA-005 — Upload une image valide', async ({
+    test('ADM-MEDIA-005 — Upload une image valide', async ({
         mediaLibrary,
     }) => {
         // 1. Navigate to library (done by fixture)
@@ -77,8 +76,7 @@ test.describe('Médiathèque — Bibliothèque', () => {
         await mediaLibrary.expectUploadToast();
     });
 
-    // Media library page crashes server-side (Promise.all of 3 server actions fails intermittently)
-    test.fixme('ADM-MEDIA-006 — Recherche dans la bibliothèque', async ({
+    test('ADM-MEDIA-006 — Recherche dans la bibliothèque', async ({
         mediaLibrary,
     }) => {
         // 1. Verify the search input is visible
@@ -97,8 +95,7 @@ test.describe('Médiathèque — Bibliothèque', () => {
 test.describe('Médiathèque — Tags', () => {
     // --- P0 ---
 
-    // RLS policy blocks editor from inserting into media_tags
-    test.fixme('ADM-MEDIA-007 — Créer un tag', async ({ mediaTags }) => {
+    test('ADM-MEDIA-007 — Créer un tag', async ({ mediaTags }) => {
         // 1. Navigate to tags (done by fixture)
         await mediaTags.expectLoaded();
 
@@ -118,8 +115,7 @@ test.describe('Médiathèque — Tags', () => {
         await mediaTags.expectTagVisible('[TEST] MonTag');
     });
 
-    // RLS policy blocks editor from creating/deleting media_tags
-    test.fixme('ADM-MEDIA-008 — Supprimer un tag', async ({
+    test('ADM-MEDIA-008 — Supprimer un tag', async ({
         mediaTags,
         page,
     }) => {
@@ -145,8 +141,7 @@ test.describe('Médiathèque — Tags', () => {
 test.describe('Médiathèque — Dossiers', () => {
     // --- P0 ---
 
-    // RLS policy blocks editor from inserting into media_folders
-    test.fixme('ADM-MEDIA-009 — Créer un dossier', async ({ mediaFolders }) => {
+    test('ADM-MEDIA-009 — Créer un dossier', async ({ mediaFolders }) => {
         // 1. Navigate to folders (done by fixture)
         await mediaFolders.expectLoaded();
 
@@ -166,8 +161,7 @@ test.describe('Médiathèque — Dossiers', () => {
         await mediaFolders.expectFolderVisible('[TEST] MonDossier');
     });
 
-    // RLS policy blocks editor from creating/deleting media_folders
-    test.fixme('ADM-MEDIA-010 — Supprimer un dossier', async ({
+    test('ADM-MEDIA-010 — Supprimer un dossier', async ({
         mediaFolders,
         page,
     }) => {
@@ -191,8 +185,7 @@ test.describe('Médiathèque — Dossiers', () => {
 
     // --- P1 ---
 
-    // RLS policy blocks editor from creating/modifying media_folders
-    test.fixme('ADM-MEDIA-011 — Modifier un dossier', async ({
+    test('ADM-MEDIA-011 — Modifier un dossier', async ({
         mediaFolders,
     }) => {
         // 1. Create a folder
