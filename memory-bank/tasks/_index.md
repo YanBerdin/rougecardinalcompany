@@ -14,7 +14,6 @@
 ## En Cours
 
 - `TASK038` Responsive Testing & Validation - Plan reviewed, Phase 0 (instrumentation) pending
-- `TASK082` E2E Admin CRUD Éditorial — **42/51 passent, 0 échouent, 9 fixme** — Completed 2026-03-18 (Rapport: `doc/tests/E2E-ADMIN-CRUD-EDITORIAL-TASK082-REPORT.md`)
 
 ## En Attente
 
@@ -31,6 +30,7 @@
 
 ## Terminé
 
+- `TASK082` E2E Admin CRUD Éditorial — **51/51 passent ✅** — Completed 2026-03-20 (5 sessions, Rapports: `doc/tests/E2E-ADMIN-CRUD-EDITORIAL-TASK082-REPORT.md`, `doc/tests/audit-e2e-skipped-tests-TASK082.md`)
 - `TASK078` Implémentation tests permissions et rôles — 239 cas — **UNIT : 42/42 ✅ + DAL : 80/80 ✅ + RLS : 114/114 ✅ + E2E : 23/23 ✅** — Completed 2026-03-17
 - `TASK080` Fix 5 échecs RLS policies — résolus dans TASK078 (signInAs fix + db reset) — Completed 2026-03-16
 - `TASK082B` Upgrade Next.js 16.1.5→16.1.7 (5 CVEs patchés) — Completed 2026-03-17 (PR #33, commit 5abf71f)

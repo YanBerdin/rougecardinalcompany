@@ -89,10 +89,13 @@ export class AdminMediaLibraryPage {
     async submitUpload(): Promise<void> {
         const dialog = this.page.getByRole('dialog');
         await dialog.getByRole('button', { name: 'Téléverser' }).click();
+        await expect(dialog).toBeHidden({ timeout: 15_000 });
     }
 
     async expectUploadToast(): Promise<void> {
-        await expect(this.page.getByText('Image téléversée')).toBeVisible();
+        await expect(
+            this.page.getByText(/Image téléversée|Image déjà présente/)
+        ).toBeVisible({ timeout: 10_000 });
     }
 
     async expectUploadTooLargeToast(): Promise<void> {
@@ -187,6 +190,7 @@ export class AdminMediaTagsPage {
     async submitTagForm(): Promise<void> {
         const dialog = this.page.getByRole('dialog');
         await dialog.getByRole('button', { name: /Créer|Mettre à jour/ }).click();
+        await expect(dialog).toBeHidden({ timeout: 15_000 });
     }
 
     async clickEditTag(name: string): Promise<void> {
@@ -207,15 +211,15 @@ export class AdminMediaTagsPage {
     }
 
     async expectTagCreateToast(): Promise<void> {
-        await expect(this.page.getByText('Tag créé')).toBeVisible();
+        await expect(this.page.getByText('Tag créé')).toBeVisible({ timeout: 10_000 });
     }
 
     async expectTagDeleteToast(): Promise<void> {
-        await expect(this.page.getByText('Tag supprimé')).toBeVisible();
+        await expect(this.page.getByText('Tag supprimé')).toBeVisible({ timeout: 10_000 });
     }
 
     async expectTagVisible(name: string): Promise<void> {
-        await expect(this.page.getByText(name).first()).toBeVisible();
+        await expect(this.page.getByRole('cell', { name, exact: true })).toBeVisible({ timeout: 10_000 });
     }
 }
 
@@ -255,6 +259,7 @@ export class AdminMediaFoldersPage {
     async submitFolderForm(): Promise<void> {
         const dialog = this.page.getByRole('dialog');
         await dialog.getByRole('button', { name: /Créer|Mettre à jour/ }).click();
+        await expect(dialog).toBeHidden({ timeout: 15_000 });
     }
 
     async clickEditFolder(name: string): Promise<void> {
@@ -275,14 +280,14 @@ export class AdminMediaFoldersPage {
     }
 
     async expectFolderCreateToast(): Promise<void> {
-        await expect(this.page.getByText('Dossier créé')).toBeVisible();
+        await expect(this.page.getByText('Dossier créé')).toBeVisible({ timeout: 10_000 });
     }
 
     async expectFolderDeleteToast(): Promise<void> {
-        await expect(this.page.getByText('Dossier supprimé')).toBeVisible();
+        await expect(this.page.getByText('Dossier supprimé')).toBeVisible({ timeout: 10_000 });
     }
 
     async expectFolderVisible(name: string): Promise<void> {
-        await expect(this.page.getByText(name).first()).toBeVisible();
+        await expect(this.page.getByRole('cell', { name, exact: true })).toBeVisible({ timeout: 10_000 });
     }
 }

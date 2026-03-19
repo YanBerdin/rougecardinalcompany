@@ -1,8 +1,8 @@
 # Active Context
 
-**Current Focus (2026-03-17)**: TASK080 — Investigation des 5 échecs RLS détectés par `scripts/test-permissions-rls.ts` (29/34 pass). Hypothèse : DB locale non réinitialisée post-TASK077/TASK079. Action prioritaire : `supabase db reset` + retest.
+**Current Focus (2026-03-20)**: Documentation post-TASK082. Tous les tests E2E passent. Prochaine tâche à déterminer.
 
-**Last Major Updates**: ✅ TASK082B — Patch sécurité Next.js 16.1.5 → 16.1.7 (5 CVEs, PR #33, branche `fix/security-upgrade-nextjs-16.1.7`) (2026-03-17) + ✅ TASK078 Phase DAL — **80/80 tests DAL passent** (`__tests__/dal/permissions-integration.test.ts`), rapport `doc/tests/DAL-PERMISSIONS-INTEGRATION-REPORT.md` (2026-03-16) + ✅ TASK078 Phase 3 RLS script créé (29/34 pass, 5 échecs → TASK080) (2026-03-16) + ✅ TASK078 — E2E P0 permissions 23/23 passent (2026-03-16) + ✅ TASK078 — E2E P0 pages publiques 14/14 passent (2026-03-16) + ✅ TASK077 — Séparation policies RLS batch 1 (2026-03-15) + ✅ TASK079 — Séparation policies RLS batch 2 (2026-03-15)
+**Last Major Updates**: ✅ TASK082 — **51/51 tests E2E Admin CRUD Éditorial passent** (5 sessions de débogage, bug le plus dur : `next/image` hostname localhost rejeté) (2026-03-20) + ✅ TASK082B — Patch sécurité Next.js 16.1.5 → 16.1.7 (5 CVEs, PR #33) (2026-03-17) + ✅ TASK078 Phase DAL — **80/80 tests DAL passent** (2026-03-16) + ✅ TASK078 — E2E P0 permissions 23/23 passent (2026-03-16) + ✅ TASK078 — E2E P0 pages publiques 14/14 passent (2026-03-16) + ✅ TASK077 + TASK079 — Séparation policies RLS batches 1+2 (2026-03-15)
 
 ---
 

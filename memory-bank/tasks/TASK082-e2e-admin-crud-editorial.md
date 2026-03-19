@@ -1,8 +1,8 @@
 # \[TASK082] — E2E Admin CRUD — Éditorial (rôle editor)
 
-**Status:** In Progress
+**Status:** Completed
 **Added:** 2026-03-17
-**Updated:** 2026-03-19
+**Updated:** 2026-03-20
 
 ## Original Request
 
@@ -107,9 +107,9 @@ Les factories existantes (`SpectacleFactory`, `LieuFactory`, `EvenementFactory`,
 
 **Overall Status:** Completed — 100%
 
-### Résultat courant
+### Résultat final
 
-> **44 passent, 7 échouent, 0 skippés** (9 `test.fixme` retirés — session 3/4 en cours)
+> **51 passent, 0 échouent, 0 skippés** — Suite complète E2E editor fonctionnelle
 
 ### Subtasks
 
@@ -120,15 +120,16 @@ Les factories existantes (`SpectacleFactory`, `LieuFactory`, `EvenementFactory`,
 | 2.1 | Tests spectacles (ADM-SPEC-*)        | Complete    | 2026-03-18 | 10/10 passent                                        |
 | 2.2 | Tests agenda (ADM-AGENDA-*)          | Complete    | 2026-03-18 | 6/6 passent                                          |
 | 2.3 | Tests lieux (ADM-LIEU-*)             | Complete    | 2026-03-18 | 7/7 passent                                          |
-| 2.4 | Tests presse (ADM-PRESSE-*)          | In Progress | 2026-03-19 | 8/10 passent — ADM-PRESSE-002/003 encore en échec    |
+| 2.4 | Tests presse (ADM-PRESSE-*)          | Complete    | 2026-03-20 | 10/10 passent                                        |
 | 2.5 | Tests compagnie (ADM-COMP-*)         | Complete    | 2026-03-18 | 6/6 passent                                          |
-| 2.6 | Tests médiathèque (ADM-MEDIA-*)      | In Progress | 2026-03-19 | 6/11 passent — 5 en échec (JWT expiration)           |
+| 2.6 | Tests médiathèque (ADM-MEDIA-*)      | Complete    | 2026-03-20 | 11/11 passent                                        |
 | 3.1 | Healing round 1 (page objects)       | Complete    | 2026-03-17 | Sélecteurs, URLs, boutons corrigés                   |
 | 3.2 | Healing round 2 (datetime, strict)   | Complete    | 2026-03-17 | datetime-local, .first(), presse fixme               |
 | 3.3 | Healing round 3 (agenda+spec+lieux)  | Complete    | 2026-03-18 | 6 bugs corrigés (genre, h3, count, status, FK, cache)|
 | 3.4 | Healing round 4 (media fixme)        | Complete    | 2026-03-18 | 7 tests fixme (RLS/crash applicatif)                 |
 | 3.5 | Session 3 — retrait fixme + auth fix | Complete    | 2026-03-19 | DAL bug, test-image.png, exact:true, editor.json local|
-| 3.6 | Session 4 — debug JWT expiration     | In Progress | 2026-03-19 | JWT TTL 1h, Next.js CPU stuck, redémarrage en cours  |
+| 3.6 | Session 4 — debug JWT expiration     | Complete    | 2026-03-19 | JWT TTL 1h, Next.js CPU stuck, redémarré             |
+| 3.7 | Session 5 — fix final 7 tests        | Complete    | 2026-03-20 | next/image localhost, toast timing, locators, cleanup |
 
 ## Progress Log
 
@@ -169,6 +170,18 @@ Les factories existantes (`SpectacleFactory`, `LieuFactory`, `EvenementFactory`,
 - Tué les processus Next.js, supprimé `.next/dev/lock`
 - **En cours** : redémarrage Next.js + régénération `editor.json` + relance des tests
 
+### 2026-03-20 (Session 5 — Fix final)
+
+- Ajouté `localhost:54321` et `127.0.0.1:54321` à `next.config.ts` `images.remotePatterns` → corrige le crash client-side `next/image` quand Supabase local sert les images
+- Créé `e2e/factories/media.factory.ts` avec `MediaTagFactory.cleanup()` et `MediaFolderFactory.cleanup()` (suppression `[TEST]%`)
+- Ajouté `afterEach` cleanup dans `media.spec.ts` pour tags et dossiers
+- Corrigé `media.page.ts` : dialog wait + timeout 10s sur toasts, `getByRole('cell')` au lieu de `getByText().first()` pour dual rendering mobile/desktop
+- Corrigé `presse.page.ts` : label `Description` (pas `Contenu`), regex submit `Mettre à jour`, `waitForURL('**/edit')`, timeouts 10s
+- Corrigé `presse.spec.ts` : `content:` → `description:` dans les données de test
+- Corrigé `media.page.ts` `expectUploadToast()` : accept `/Image téléversée|Image déjà présente/` (gestion doublon)
+- Supprimé fichier debug temporaire `e2e/tests/editor/debug-library.spec.ts`
+- **Résultat final : 51 passent, 0 échouent, 0 skippés** — TASK082 terminée
+
 ## Découvertes techniques clés
 
 1. **FK `evenements.lieu_id`** : `ON DELETE SET NULL` (pas RESTRICT) — la suppression d'un lieu réussit silencieusement
@@ -179,14 +192,13 @@ Les factories existantes (`SpectacleFactory`, `LieuFactory`, `EvenementFactory`,
 6. **`getClaims()` = vérification JWT locale, TTL 1h, sans auto-refresh** — si l'access_token est expiré, retourne null → `requireMinRole` throw → error boundary. Le middleware ne rafraîchit PAS automatiquement le token côté page.
 7. **`editor.json` session locale vs cloud** : le setup Playwright peut récupérer un état de session cloud si la variable `SUPABASE_URL` pointe vers le cloud — toujours vérifier que l'URL est `http://localhost:54321`
 8. **Next.js Turbopack peut se bloquer en boucle de compilation** (180% CPU, serveur non répondant) — surveiller l'utilisation CPU et redémarrer si nécessaire
+9. **`next/image` rejette les hostnames non configurés** : en dev local avec Supabase (`localhost:54321`), les URL de storage ne sont pas dans `remotePatterns` par défaut → crash client-side attrapé par ErrorBoundary. Ajouter `localhost` dans `next.config.ts`.
+10. **Dual rendering mobile/desktop** : certains composants admin rendent un layout mobile (`sm:hidden`) ET desktop (`hidden sm:block`). En Playwright (viewport desktop), `getByText().first()` sélectionne l'élément mobile caché. Utiliser `getByRole('cell', { name, exact: true })` pour cibler le tableau desktop.
+11. **Upload doublon = toast différent** : `MediaUploadDialog` détecte les images en doublon (hash) et affiche "Image déjà présente" au lieu de "Image téléversée" → les assertions de toast doivent gérer les deux cas.
 
-## Tests en échec — Actions requises
+## Tests en échec — Tous résolus
 
-| Tests | Symptôme | Cause réelle | Action | Priorité |
-| ----- | --------- | ------------ | ------ | -------- |
-| ADM-MEDIA-005/006/007/009/011 | « Une erreur est survenue » | JWT access_token expiré (TTL 1h) | Régénérer `editor.json` avant chaque run | P0 |
-| ADM-PRESSE-002 | Timeout `locator.fill` 90s | Form dialog ne répond pas | Investiguer dialog (screenshot, trace) | P1 |
-| ADM-PRESSE-003 | Cascade/ERR_CONNECTION_REFUSED | Dépend de ADM-PRESSE-002 | Régler ADM-PRESSE-002 en premier | P1 |
+Tous les 51 tests passent. Aucun test en échec.
 
 ## Références
 

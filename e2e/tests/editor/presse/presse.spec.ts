@@ -36,7 +36,7 @@ test.describe('Gestion de la Presse', () => {
         // 3. Fill form
         await pressePage.fillCommuniqueForm({
             title: '[TEST] Communiqué Nouveau Spectacle',
-            content: 'La compagnie est heureuse d\'annoncer un nouveau spectacle.',
+            description: 'La compagnie est heureuse d\'annoncer un nouveau spectacle.',
         });
 
         // 4. Submit

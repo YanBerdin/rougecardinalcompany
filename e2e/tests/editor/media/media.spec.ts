@@ -2,6 +2,7 @@
 // seed: none (tags/folders created inline, uploads use test asset)
 
 import { test, expect } from './media.fixtures';
+import { MediaTagFactory, MediaFolderFactory } from '@/e2e/factories';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -95,6 +96,10 @@ test.describe('Médiathèque — Bibliothèque', () => {
 test.describe('Médiathèque — Tags', () => {
     // --- P0 ---
 
+    test.afterEach(async () => {
+        await MediaTagFactory.cleanup();
+    });
+
     test('ADM-MEDIA-007 — Créer un tag', async ({ mediaTags }) => {
         // 1. Navigate to tags (done by fixture)
         await mediaTags.expectLoaded();
@@ -140,6 +145,10 @@ test.describe('Médiathèque — Tags', () => {
 
 test.describe('Médiathèque — Dossiers', () => {
     // --- P0 ---
+
+    test.afterEach(async () => {
+        await MediaFolderFactory.cleanup();
+    });
 
     test('ADM-MEDIA-009 — Créer un dossier', async ({ mediaFolders }) => {
         // 1. Navigate to folders (done by fixture)

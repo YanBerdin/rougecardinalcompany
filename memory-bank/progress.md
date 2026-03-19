@@ -1,5 +1,32 @@
 # Progress
 
+## TASK082 — E2E Admin CRUD Éditorial : 51/51 passent (2026-03-20)
+
+✅ **COMPLET** — 51 tests Playwright couvrant 6 sections admin (Spectacles, Agenda, Lieux, Presse, Compagnie, Médiathèque). Résolus en **5 sessions de débogage** (~6h total).
+
+| Section | Tests | Résultat |
+| ------- | ----- | -------- |
+| Spectacles | 9 | ✅ 9/9 |
+| Agenda | 7 | ✅ 7/7 |
+| Lieux | 5 | ✅ 5/5 |
+| Presse | 10 | ✅ 10/10 |
+| Compagnie | 9 | ✅ 9/9 |
+| Médiathèque | 11 | ✅ 11/11 |
+
+### Bugs majeurs résolus
+
+1. **`next/image` hostname localhost** (session 5, le plus dur) : `next.config.ts` `images.remotePatterns` ne listait pas `localhost:54321` → Error Boundary sur la page library. 4 fausses hypothèses explorées avant de trouver.
+2. **Presse POM labels** (session 4) : `"Contenu"` → `"Description"`, regex submit, `waitForURL`, field name.
+3. **Media factory cleanup** (session 4) : Données `[TEST]` s'accumulaient → locators ambigus. Fix : `MediaTagFactory.cleanup()` + `afterEach`.
+4. **Upload toast doublon** (session 5) : SHA-256 hash détection → toast différent. Fix : regex assertion.
+
+### Rapports
+
+- `doc/tests/E2E-ADMIN-CRUD-EDITORIAL-TASK082-REPORT.md`
+- `doc/tests/audit-e2e-skipped-tests-TASK082.md`
+
+---
+
 ## TASK082B — Sécurité : upgrade Next.js 16.1.5 → 16.1.7 (2026-03-17)
 
 ✅ **COMPLET** — 5 CVEs patchés via upgrade Next.js. `pnpm audit` → `No known vulnerabilities found`. PR #33 ouvert sur `master`.

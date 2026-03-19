@@ -39,16 +39,16 @@ export class AdminPressePage {
 
     async fillCommuniqueForm(data: {
         title: string;
-        content?: string;
+        description?: string;
     }): Promise<void> {
         await this.page.getByLabel(/Titre/i).fill(data.title);
-        if (data.content) {
-            await this.page.getByLabel(/Contenu|Corps/i).fill(data.content);
+        if (data.description) {
+            await this.page.getByLabel(/Description/i).fill(data.description);
         }
     }
 
     async submitForm(): Promise<void> {
-        await this.page.getByRole('button', { name: /Créer|Sauvegarder|Enregistrer|Publier/ }).click();
+        await this.page.getByRole('button', { name: /Créer|Mettre à jour|Sauvegarder|Enregistrer|Publier/ }).click();
     }
 
     async clickCommuniqueAction(
@@ -62,8 +62,11 @@ export class AdminPressePage {
             'Modifier': `Modifier le communiqué : ${title}`,
             'Supprimer': `Supprimer le communiqué : ${title}`,
         };
-        // Publier/Dépublier buttons share the same aria-label across all cards
-        await this.page.getByRole('button', { name: ariaLabelMap[action] }).first().click();
+        const button = this.page.getByRole('button', { name: ariaLabelMap[action] }).first();
+        await button.click();
+        if (action === 'Modifier') {
+            await this.page.waitForURL('**/edit');
+        }
     }
 
     async confirmDelete(): Promise<void> {
@@ -72,18 +75,18 @@ export class AdminPressePage {
     }
 
     async expectDeleteToast(): Promise<void> {
-        await expect(this.page.getByText('Communiqué supprimé')).toBeVisible();
+        await expect(this.page.getByText('Communiqué supprimé')).toBeVisible({ timeout: 10_000 });
     }
 
     async expectPublishToast(): Promise<void> {
-        await expect(this.page.getByText('Communiqué publié')).toBeVisible();
+        await expect(this.page.getByText('Communiqué publié')).toBeVisible({ timeout: 10_000 });
     }
 
     async expectUnpublishToast(): Promise<void> {
-        await expect(this.page.getByText('Communiqué dépublié')).toBeVisible();
+        await expect(this.page.getByText('Communiqué dépublié')).toBeVisible({ timeout: 10_000 });
     }
 
     async expectCommuniqueVisible(title: string): Promise<void> {
-        await expect(this.page.getByText(title).first()).toBeVisible();
+        await expect(this.page.getByText(title).first()).toBeVisible({ timeout: 10_000 });
     }
 }

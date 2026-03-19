@@ -1,25 +1,32 @@
 # Audit E2E — Tests Skippés TASK082
 
-**Date** : 2026-03-18 (mis à jour 2026-03-19)  
+**Date** : 2026-03-18 (mis à jour 2026-03-20)  
 **Scope** : 9 tests `test.fixme()` dans les suites editor (Presse + Médiathèque)  
-**Score global** : **3 faux positifs / 9 skips** — tous les `test.fixme` ont été retirés
+**Score global** : **9/9 tests débloqués et passent ✅** — résolus en 5 sessions de débogage
 
 ---
 
 ## Résumé exécutif
 
-| Catégorie | Tests | Diagnostic initial | Résultat post-retrait |
+| Catégorie | Tests | Diagnostic initial | Résultat final (2026-03-20) |
 | ----------- | ------- | ------------ | -------------- |
-| Presse — Communiqués | ADM-PRESSE-002, 003 | Faux positif | ❌ **Encore en échec** — form fill timeout |
-| Médiathèque — RLS | ADM-MEDIA-005, 007, 009, 011 | Faux positif | ❌ **Encore en échec** — erreur boundary Next.js |
-| Médiathèque — Crash | ADM-MEDIA-006 | Faux positif | ❌ **Encore en échec** — même symptôme |
+| Presse — Communiqués | ADM-PRESSE-002, 003 | Faux positif (commentaire skip erroné) | ✅ **Passent** — fix labels POM + field name |
+| Médiathèque — Library | ADM-MEDIA-005, 006 | Faux positif (RLS/crash) | ✅ **Passent** — fix `next/image` localhost hostname |
+| Médiathèque — Tags/Folders | ADM-MEDIA-007→011 | Faux positif (RLS) | ✅ **Passent** — fix factory cleanup + locators |
 
 **Verdict initial (2026-03-18)** : Les 9 tests ont été skippés sur la base d'hypothèses incorrectes. Le code applicatif (Server Actions, DAL, RLS policies, Storage policies) autorise le rôle `editor` pour toutes les opérations testées. Tous les `test.fixme()` devraient être retirés et les tests relancés.
 
-**Verdict mis à jour (2026-03-19)** : Après retrait des 9 `test.fixme` et 3 sessions de débogage, **7 tests restent en échec**. Les analysees ont permis d'identifier deux causes réelles distinctes :
+**Verdict mis à jour (2026-03-19)** : Après retrait des 9 `test.fixme` et 3 sessions de débogage, **7 tests restent en échec**. Les analyses ont permis d'identifier deux causes réelles distinctes :
 
 1. **ADM-MEDIA-*** : Expiration du JWT access_token (`getClaims()` retourne null → `requireMinRole` throw → error boundary)
 2. **ADM-PRESSE-002/003** : Timeout sur le remplissage du formulaire (dialog ne s'ouvre pas dans le délai imparti)
+
+**Verdict final (2026-03-20) : ✅ TOUS LES 51 TESTS PASSENT** — Les 7 derniers échecs ont été résolus en sessions 4 et 5 :
+
+1. **ADM-PRESSE-002/003** : Fix labels POM (`"Description"` au lieu de `"Contenu"`), regex submit, `waitForURL`, field name `description`
+2. **ADM-MEDIA-007→011** : Création `MediaTagFactory.cleanup()` + `MediaFolderFactory.cleanup()`, `afterEach` cleanup, locators `getByRole('cell')`
+3. **ADM-MEDIA-005/006** : La cause réelle n'était ni RLS, ni JWT, ni crash serveur — c'était `next/image` qui rejetait le hostname `localhost`. Fix : ajout localhost/127.0.0.1 dans `next.config.ts` `images.remotePatterns`
+4. **ADM-MEDIA-005 (toast)** : Doublon détecté par hash SHA-256 → toast "Image déjà présente" au lieu de "Image téléversée". Fix : regex dans `expectUploadToast()`
 
 ---
 
@@ -31,7 +38,7 @@
 
 ### Motif de skip déclaré
 
-```
+```yaml
 // ADM-PRESSE-002: Create page calls requireAdminOnly() in DAL — editor role cannot access
 // ADM-PRESSE-003: Edit page calls requireAdminOnly() in DAL — editor role cannot access
 ```
@@ -68,7 +75,7 @@ Retirer `test.fixme` sur ADM-PRESSE-002 et ADM-PRESSE-003 et relancer la suite.
 
 ### Motif de skip déclaré
 
-```
+```yaml
 // RLS policy blocks editor from uploading to Supabase Storage
 // RLS policy blocks editor from inserting into media_tags
 // RLS policy blocks editor from creating/deleting media_tags
@@ -143,7 +150,7 @@ Retirer `test.fixme` sur ADM-MEDIA-005, 007, 008, 009, 010, 011 et relancer.
 
 ### Motif de skip déclaré
 
-```
+```bash
 // Media library page crashes server-side (Promise.all of 3 server actions fails intermittently)
 ```
 
@@ -230,7 +237,7 @@ Retirer `test.fixme` sur ADM-MEDIA-006 et relancer. Si un crash apparaît, exami
 
 Extrait pertinent de `supabase migration list --local` (2026-03-18) :
 
-```
+```bash
  Local          | Remote         | Time (UTC)
 ---------------- | ---------------- | ---------------------
  20260311030000 | 20260311030000 | 2026-03-11 03:00:00   ← prerequis has_min_role()
@@ -309,12 +316,80 @@ Lors de la session 4, le processus `next-server` (PID 11974) a été trouvé :
 
 Le processus a été tué et le lock file `.next/dev/lock` supprimé. Le serveur doit être redémarré avant toute nouvelle session de tests.
 
-### 7.6 Plan d'action restant
+### 7.6 Résolution finale — Sessions 4 et 5 (2026-03-19/20)
 
-| # | Priorité | Action | Statut |
-| --- | --- | --- | --- |
-| 1 | P0 | Redémarrer proprement Next.js dev server | ⏳ En cours |
-| 2 | P0 | Régénérer `editor.json` (re-login local Supabase) | ⏳ En attente |
-| 3 | P0 | Relancer ADM-MEDIA-005→011 pour confirmer fix JWT | ⏳ En attente |
-| 4 | P1 | Investiguer ADM-PRESSE-002 (dialog form fill) | ⏳ En attente |
-| 5 | P2 | Ajouter `setup-editor` en dépendance Playwright (session fraîche à chaque run) | ⏳ Non commencé |
+Tous les 7 tests restants ont été résolus. Voici la chronologie complète du débogage :
+
+#### Session 4 (2026-03-19) — ADM-PRESSE + ADM-MEDIA tags/folders
+
+**ADM-PRESSE-002/003** : Les labels du Page Object étaient incorrects ("Contenu" → "Description"), le sélecteur submit était trop restrictif (texte exact → regex), et le test d'édition utilisait `content` au lieu de `description`. Après correction dans `presse.page.ts` et `presse.spec.ts`, les 2 tests passent.
+
+**ADM-MEDIA-007→011** : Le problème n'était pas lié aux RLS (les policies étaient correctes depuis TASK077). Les vrais problèmes :
+
+1. **Pas de cleanup factory** : les données `[TEST]` s'accumulaient entre les runs, causant des locators ambigus
+2. **Locators imprécis** : `getByText(name)` résolvait vers des éléments cachés au lieu de cellules de tableau
+3. **Timeouts dialog** : les assertions post-dialog étaient trop rapides
+
+Fix : Création `MediaTagFactory.cleanup()` + `MediaFolderFactory.cleanup()`, `afterEach` dans le spec, `getByRole('cell', { name })`, timeouts 10s sur les toasts.
+
+Résultat session 4 : **50/51 passent, 1 échec** (ADM-MEDIA-005 — page library crash)
+
+#### Session 5 (2026-03-20) — Le bug `next/image` localhost (le plus difficile à trouver)
+
+**Le problème** : La page `/admin/media/library` affichait l'Error Boundary « Une erreur est survenue ». En 4 sessions précédentes, 4 hypothèses ont été explorées (toutes fausses) :
+
+| Hypothèse | Session | Résultat |
+| --------- | ------- | -------- |
+| RLS policies bloquent l'editor | 2 | ❌ Faux — policies correctes post-migration |
+| JWT access_token expiré | 3 | ❌ Faux — session régénérée, même erreur |
+| Crash serveur Promise.all MediaLibraryContainer | 3 | ❌ Faux — try/catch absorbe les erreurs |
+| CSP `img-src 'self' data: https:` bloque localhost | 5 | ❌ Faux — `next/image` utilise proxy same-origin |
+
+**La découverte** : Un test debug Playwright a capturé le HTML de la page d'erreur. L'analyse des logs Next.js a révélé le vrai message :
+
+```
+Error: Invalid src prop (http://localhost:54321/storage/v1/object/public/medias/...) on next/image,
+hostname "localhost" is not configured under images in your next.config.js
+```
+
+**Pourquoi c'était si dur à trouver** :
+
+- L'erreur est **côté client** (pas serveur), masquée par l'Error Boundary
+- La page se charge partiellement (le heading "Médiathèque" est visible), puis crash quand les images tentent de se rendre
+- Le composant `MediaLibraryView` utilise `next/image` pour les thumbnails Supabase Storage
+- En production, le hostname est `yvtrlvmbofklefxcxrzv.supabase.co` (déjà configuré), mais en dev local c'est `localhost:54321`
+- La configuration `next/image` est une cause rarement suspectée quand on pense à des problèmes de permissions
+
+**Fix** : 2 lignes dans `next.config.ts` `images.remotePatterns` :
+
+```ts
+{ protocol: "http", hostname: "localhost", port: "54321", pathname: "/storage/v1/object/public/**" },
+{ protocol: "http", hostname: "127.0.0.1", port: "54321", pathname: "/storage/v1/object/public/**" },
+```
+
+**Bonus** : ADM-MEDIA-005 échouait ensuite car `MediaUploadDialog` détecte les doublons par hash SHA-256. Quand `test-image.png` existe déjà, le toast est "Image déjà présente" au lieu de "Image téléversée". Fix : regex `/Image téléversée|Image déjà présente/` dans `expectUploadToast()`.
+
+> **Résultat final session 5 : 51/51 passent ✅**
+
+### 7.7 Récapitulatif des 5 sessions de débogage
+
+| Session | Date | Tests fixés | Problème résolu | Durée |
+| ------- | ---- | ----------- | ---------------- | ----- |
+| 1 | 2026-03-18 | 0 | Audit initial : retrait des 9 `test.fixme` | ~30 min |
+| 2 | 2026-03-19 | 2 | ADM-PRESSE-002/003 partiellement, session JWT régénérée | ~1h |
+| 3 | 2026-03-19 | 0 | Investigation JWT, crash Next.js 180% CPU, kill serveur | ~1h30 |
+| 4 | 2026-03-19 | 7 | ADM-PRESSE-002/003 (labels), ADM-MEDIA-007→011 (factory cleanup) | ~2h |
+| 5 | 2026-03-20 | 2 | ADM-MEDIA-005/006 (`next/image` localhost) + toast doublon | ~1h |
+| **Total** | | **9/9 résolus** | | **~6h** |
+
+### 7.8 Fichiers modifiés durant la résolution
+
+| Fichier | Modification | Session |
+| ------- | ------------ | ------- |
+| `next.config.ts` | +2 entrées `images.remotePatterns` (localhost:54321) | 5 |
+| `e2e/pages/admin/presse.page.ts` | Labels, regex submit, `waitForURL`, timeouts | 4 |
+| `e2e/tests/editor/presse/presse.spec.ts` | `content` → `description` | 4 |
+| `e2e/pages/admin/media.page.ts` | `getByRole('cell')`, dialog waits, toast regex | 4–5 |
+| `e2e/tests/editor/media/media.spec.ts` | `afterEach` cleanup, retrait `test.fixme` | 4 |
+| `e2e/factories/media.factory.ts` | `MediaTagFactory.cleanup()`, `MediaFolderFactory.cleanup()` | 4 |
+| `e2e/factories/index.ts` | Export media factories | 4 |
