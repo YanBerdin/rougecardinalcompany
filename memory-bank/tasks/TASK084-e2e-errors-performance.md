@@ -2,7 +2,7 @@
 
 **Status:** Pending
 **Added:** 2026-03-17
-**Updated:** 2026-03-17
+**Updated:** 2026-03-19
 
 ## Original Request
 
@@ -15,6 +15,21 @@ définis dans `specs/PLAN_DE_TEST_COMPLET.md` sections 21.5 et 21.6.
 - Tests de performance : CROSS-PERF-001 peut être automatisé avec `page.evaluate(() => performance.now())`
   mais reste plus pertinent avec Lighthouse en CI
 - Priorité basse — implémenter après TASK081, 082, 083, 038
+
+### Statut des dépendances (mis à jour 2026-03-19)
+
+| Tâche | Statut | Notes |
+| --- | --- | --- |
+| TASK081 (Auth E2E) | ✅ Completed (2026-03-17) | 14/14 tests |
+| TASK082 (Editor CRUD E2E) | ✅ Completed (2026-03-20) | 51/51 tests |
+| TASK083 (Admin CRUD E2E) | ⏳ Pending | Bloquant — projet `admin` Playwright manquant |
+| TASK038 (Responsive) | 🔄 In Progress | Phase 0 pending |
+
+### Prérequis Playwright
+
+> **⚠️** : Aucun projet `cross` n'existe dans `playwright.config.ts`.
+> Les tests `cross/**/*.spec.ts` ne seront pas matchés. Ajouter un bloc projet
+> (sans storageState, ou avec storageState adapté selon le test).
 
 ## Périmètre
 

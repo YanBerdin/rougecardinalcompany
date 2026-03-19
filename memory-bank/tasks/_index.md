@@ -17,6 +17,8 @@
 
 ## En Attente
 
+- `TASK083` E2E Admin CRUD Admin-only (rôle admin) — ~55 cas P0/P1, dépend de TASK082 (✅ Completed), bloqué par: projet `admin` manquant dans playwright.config.ts
+- `TASK084` E2E Transversaux Erreurs & Performance — ~6 cas, dépend de TASK083 (Pending) + TASK038 (In Progress)
 - `TASK005` Optimisation SEO et meta-tags dynamiques
 - `TASK007` Tests automatisés et monitoring
 - `TASK008` Configuration des redirections vers billetterie externe

@@ -2,7 +2,7 @@
 
 **Status:** Pending
 **Added:** 2026-03-17
-**Updated:** 2026-03-17
+**Updated:** 2026-03-19
 
 ## Original Request
 
@@ -87,7 +87,20 @@ e2e/
 
 ### Projet Playwright
 
-Utiliser `chromium-admin` (storageState admin) — déjà configuré dans `playwright.config.ts`.
+> **⚠️ BLOQUANT** : Le projet `admin` avec `storageState` n'existe PAS encore dans `playwright.config.ts`.
+> Seuls `editor` et `permissions` ont un storageState. Il faut ajouter :
+>
+> ```ts
+> {
+>     name: 'admin',
+>     use: {
+>         ...devices['Desktop Chrome'],
+>         storageState: path.join(__dirname, 'e2e/.auth/admin.json'),
+>     },
+>     testMatch: 'admin/**/*.spec.ts',
+>     dependencies: ['setup-admin'],
+> },
+> ```
 
 ### Nouvelles factories nécessaires
 
@@ -117,6 +130,20 @@ Les autres factories admin-only existent déjà (`MembreEquipeFactory`, `Partner
 **ADM-TEAM-004** (désactiver) vs **ADM-TEAM-006** (réactiver) :
 
 - Ces tests doivent être en mode `serial` pour ne pas se marcher dessus
+
+## Lessons Learned from TASK082 (2026-03-20)
+
+TASK082 (51/51 tests editor) a révélé des pièges directement applicables à TASK083 :
+
+| Leçon | Impact TASK083 | Action |
+| --- | --- | --- |
+| JWT expiration (1h TTL) | Sessions admin longues → `getClaims()` retourne null → error boundary | Relancer `setup-admin` ou augmenter TTL |
+| `next/image` localhost | Déjà corrigé dans `next.config.ts` `images.remotePatterns` | Aucune |
+| Factory cleanup obligatoire | Données orphelines cassent les tests suivants | Ajouter `afterEach` cleanup dans toutes les fixtures |
+| Labels POM ≠ UI → timeout | POM codé avec mauvais labels → dialog ne s'ouvre pas | Vérifier labels réels dans l'app avant de coder les Page Objects |
+| `test.fixme()` sur hypothèse fausse | 9 tests skippés à tort sur TASK082 (RLS/DAL OK en réalité) | Ne jamais skipper sans vérifier DAL/RLS/Actions |
+| Toast regex flexible | Toast "Image déjà présente" au lieu de "Image téléversée" | Utiliser regex pour les toasts de confirmation |
+| Projet Playwright `admin` manquant | `testMatch: 'admin/**/*.spec.ts'` ne sera pas exécuté | **Créer le bloc projet en premier** |
 
 ## Progress Tracking
 
