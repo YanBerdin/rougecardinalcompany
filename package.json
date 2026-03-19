@@ -88,7 +88,8 @@
     "test:editor:remote": "tsx scripts/test-editor-access-remote.ts",
     "test:rls:local": "tsx scripts/test-permissions-rls.ts",
     "test:dal:permissions": "vitest run __tests__/dal/permissions-integration.test.ts",
-    "e2e:auth": "npx playwright test --project=chromium-auth --reporter=list"
+    "e2e:auth": "npx playwright test --project=chromium-auth --reporter=list",
+    "e2e:editor": "npx playwright test --project=editor --reporter=list"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
