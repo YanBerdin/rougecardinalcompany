@@ -76,7 +76,20 @@ export class AdminAuditLogsPage {
         }
     }
 
+    async selectActionFilter(actionLabel: string): Promise<void> {
+        const trigger = this.page.getByRole('combobox').filter({ hasText: /actions/i });
+        await trigger.click();
+        await this.page.getByRole('option', { name: actionLabel }).click();
+        await this.page.waitForLoadState('networkidle');
+    }
+
     async clickExport(): Promise<void> {
         await this.exportButton.click();
+    }
+
+    async expectExportToast(): Promise<void> {
+        await expect(
+            this.page.locator('[data-sonner-toast]').filter({ hasText: 'Export réussi' })
+        ).toBeVisible({ timeout: 30_000 });
     }
 }

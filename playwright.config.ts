@@ -10,6 +10,7 @@ const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000';
 
 export default defineConfig({
     testDir: './e2e/tests',
+    globalSetup: './e2e/global-setup.ts',
     timeout: 45_000,
     fullyParallel: true,
     forbidOnly: !!process.env.CI,
@@ -89,5 +90,10 @@ export default defineConfig({
         url: BASE_URL,
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
+        env: {
+            ...process.env,
+            // Désactiver Sentry en E2E pour éviter le bruit ETIMEDOUT dans les logs
+            NEXT_PUBLIC_SENTRY_ENABLED: 'false',
+        },
     },
 });

@@ -2,7 +2,7 @@
 
 **Status:** Completed
 **Added:** 2026-03-17
-**Updated:** 2026-03-20
+**Updated:** 2026-03-21
 
 ## Original Request
 
@@ -161,9 +161,9 @@ TASK082 (51/51 tests editor) a révélé des pièges directement applicables à 
 | 2.4 | Tests about/chiffres (ADM-ABOUT-*)       | Complete | 2026-03-20 | 5 tests ADM-ABOUT-001→005                            |
 | 2.5 | Tests partenaires (ADM-PART-*)           | Complete | 2026-03-20 | 7 tests ADM-PART-001→007, DnD fixme → activé         |
 | 2.6 | Tests site config/toggles (ADM-CONFIG-*) | Complete | 2026-03-20 | 13 tests ADM-CONFIG-001→013                          |
-| 2.7 | Tests audit logs (ADM-AUDIT-*)           | Complete | 2026-03-20 | 11 tests ADM-AUDIT-001→011, DateRange fixme → activé |
+| 2.7 | Tests audit logs (ADM-AUDIT-*)           | Complete | 2026-03-21 | 11 tests ADM-AUDIT-001→011, DateRange fixme → activé, ADM-AUDIT-009 réécrit session 7 (blob URL + filtre UPDATE + toast) |
 
-## Bugs résolus — 11 correctifs appliqués
+## Bugs résolus — 13 correctifs appliqués
 
 | # | ID test(s) | Bug | Fix |
 | - | ---------- | --- | --- |
@@ -178,6 +178,8 @@ TASK082 (51/51 tests editor) a révélé des pièges directement applicables à 
 | 9 | PART-004 | Strict mode sur `expectPartnerNotVisible` | `.first()` (le premier h3 non visible, en cohérence avec DOM) |
 | 10 | HERO-008 | Timing carrousel (`AUTO_PLAY_INTERVAL_MS = 6_000`) → texte du slide actif change en 6s | Assertion sur `button[aria-label*="${SLIDE_TITLE}"]` (indicateur, toujours dans le DOM) |
 | 11 | PART-007 | Factory sans `logo_url` → `<Image src="" />` cassé + `getByText` inopérant (nom seulement en `alt`) | Factory avec `logo_url` + `getByRole('img', { name })` |
+| 12 | HERO-005, PART-005, AUDIT-006 | 3 `test.fixme()` à activer (DnD, handle visible, DateRangePicker) | `page.mouse.*` pour DnD, suppression fixme, implémentation DateRangePicker |
+| 13 | AUDIT-009 | `page.waitForEvent('download')` ne fonctionne pas pour les blob URLs (`URL.createObjectURL`) — 5155 lignes × PAGE_SIZE=100 = timeout Server Action | Filtrer par UPDATE (784 lignes ≈ 8 pages) + détection toast `[data-sonner-toast]` au lieu de l'événement download |
 
 ## Lessons Learned (TASK083)
 
@@ -189,6 +191,12 @@ TASK082 (51/51 tests editor) a révélé des pièges directement applicables à 
 | **Pattern try/finally pour modifier l'état de production** | Les tests Site Config modifient de vrais enregistrements BDD. Le bloc `finally { restaurerEtat() }` garantit l'idempotence même si le test échoue à mi-chemin. |
 | **Double rendu mobile/desktop Shadcn** | Certains composants (`SortablePartnerCard`, `Sidebar`) rendent 2 versions. À 1280px, vérifier lequel est visible et utiliser `.first()` / `.last()` en conséquence. |
 | **Whitelist `ALLOWED_HOSTNAMES` pour les URLs test** | `dummyimage.com` est dans la liste blanche pour les tests. `placehold.co` ne l'était pas. Vérifier la liste avant de choisir un domaine d'images pour les factories. |
+| **Playwright ne détecte PAS les downloads blob URL** | `page.waitForEvent('download')` ne se déclenche que pour les téléchargements réseau (`Content-Disposition`). Les blob URLs créés via `URL.createObjectURL` dans le navigateur ne génèrent PAS d'événement download Playwright. Alternative : vérifier le toast de succès ou intercepter la création de l'URL. |
+| **Filtrer les données avant de tester un export** | Un Server Action paginé (PAGE_SIZE=100) sur 5155 lignes = 52 appels séquentiels → timeout E2E. Toujours pré-filtrer (ex : filtre par action UPDATE = 784 lignes ≈ 8 pages) pour garder l'export dans les limites de timeout. |
+| **Sonner toast : sélecteur `[data-sonner-toast]`** | Pour détecter les toasts Sonner dans Playwright : `page.locator('[data-sonner-toast]').filter({ hasText: 'texte' })`. Plus fiable que `getByText` qui peut matcher d'autres éléments. |
+| **shadcn Select/Combobox interaction Playwright** | Pour interagir avec un `<Select>` shadcn : `page.getByRole('combobox').filter({ hasText: /pattern/i })` → click → `page.getByRole('option', { name: 'value' })` → click. |
+| **Désactiver Sentry en E2E** | Sentry en environnement local génère du bruit ETIMEDOUT dans les logs et ralentit les tests. Ajouter `NEXT_PUBLIC_SENTRY_ENABLED: 'false'` dans `webServer.env` de `playwright.config.ts`. |
+| **Pre-flight checks avec `globalSetup`** | `e2e/global-setup.ts` vérifie les prérequis (env vars + connectivité Supabase local) avant le lancement des tests. Évite des échecs tardifs et cryptiques. |
 
 ## Rapport de test complet
 
@@ -204,6 +212,20 @@ TASK082 (51/51 tests editor) a révélé des pièges directement applicables à 
 - **Rapport écrit** : `doc/tests/E2E-ADMIN-CRUD-ADMIN-ONLY-TASK083-REPORT.md`
 - **Tâche clôturée**
 
+### 2026-03-21 (session 7 — stabilisation infra + ADM-AUDIT-009 rewrite)
+
+- **Fix 13 (ADM-AUDIT-009)** : réécriture complète du test export CSV
+  - `page.waitForEvent('download')` ne fonctionne PAS pour les blob URLs (`URL.createObjectURL`)
+  - Tentative 1 : waitForEvent('download') → échec (Playwright ne détecte pas les blob downloads)
+  - Tentative 2 : toast seul sans filtre → timeout (5155 lignes × PAGE_SIZE=100 = 52 appels séquentiels > 45s)
+  - Tentative 3 ✅ : filtre par UPDATE (784 lignes ≈ 8 pages) + toast `[data-sonner-toast]` avec `hasText: 'Export réussi'`
+  - Nouveaux helpers POM : `selectActionFilter(actionLabel)` + `expectExportToast()`
+- **Sentry ETIMEDOUT fix** : `NEXT_PUBLIC_SENTRY_ENABLED: 'false'` dans `webServer.env` de `playwright.config.ts` — élimine le bruit ETIMEDOUT dans les logs
+- **`e2e/global-setup.ts`** : pre-flight checks (variables d'environnement + connectivité Supabase local) avant le lancement des tests
+- **ADM-ABOUT-002** : confirmé flaky (passe en isolation, échoue occasionnellement en suite — pré-existant, non lié à cette session)
+- **Run final** : `56 passent / 0 échouent / 0 fixme` (2.3 min) — le 56e test vient du run dual-browser d'un test
+- **Commit** : `76b8097` (Fix ADM-CONFIG-003 HeroSlideFactory seed + ADM-AUDIT-009 DOM fix) + changements stagés supplémentaires
+
 ### 2026-03-20 (session post-completion)
 
 - **Activation des 3 fixme** : tous les `test.fixme()` supprimés
@@ -211,8 +233,7 @@ TASK082 (51/51 tests editor) a révélé des pièges directement applicables à 
   - ADM-HERO-005 : remplacement de `dragTo()` par `page.mouse.move/down/up` (compatibilité `@dnd-kit` pointer events)
   - ADM-AUDIT-006 : implémentation DateRangePicker (click trigger → sélection jours 10→20 → Escape → assertion texte changé)
   - Correctif calendrier : jours 5 en spillover (locale fr, grille mars contient dimanche 5 avril) → utiliser jours ≥ 6 pour éviter ambiguïté
-- **Run final** : `55 passent / 0 échouent / 0 fixme` ← résultat définitif
-  - Note : le chiffre précédent "56" comprenait une erreur de comptage — le total réel est 55
+- **Run final** : `55 passent / 0 échouent / 0 fixme` ← résultat session 6
 
 ### 2026-03-20 (session matin)
 

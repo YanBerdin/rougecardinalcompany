@@ -1,5 +1,36 @@
 # Progress
 
+## TASK083 — E2E Admin CRUD Admin-only : 56/56 passent (2026-03-21)
+
+✅ **COMPLET** — 56 tests Playwright (0 fixme) couvrant 7 sections admin-only (Dashboard, Équipe, Hero Slides, About/Chiffres clés, Partenaires, Site Config, Audit Logs). Résolus en **7 sessions de débogage** (5 sessions initiales + 1 session post-completion fixmes + 1 session stabilisation infra).
+
+| Section | Tests | Résultat |
+| ------- | ----- | -------- |
+| Dashboard | 3 | ✅ 3/3 |
+| Équipe | 8 | ✅ 8/8 |
+| Hero Slides | 8 | ✅ 8/8 |
+| About / Chiffres clés | 5 | ✅ 5/5 |
+| Partenaires | 7 | ✅ 7/7 |
+| Site Config / Toggles | 13 | ✅ 13/13 |
+| Audit Logs | 11 | ✅ 11/11 |
+
+### Bugs majeurs résolus (Fix 1–13)
+
+1. **Clés toggle `public:*` → `display_toggle_*`** : triple désynchronisation BDD/code/tests (12 tests CONFIG).
+2. **`@dnd-kit` + `page.mouse.*`** (Fix 10) : `dragTo()` incompatible avec pointer events de `@dnd-kit`.
+3. **DateRangePicker** (Fix 11) : click trigger → jours 10→20 (spillover locale=fr évité) → Escape → assertion.
+4. **Carrousel timing** : assertion sur `button[aria-label*="titre"]` (toujours dans le DOM) au lieu du texte visible.
+5. **Double rendu mobile/desktop** : `h3` scopé (`.last()` / `.first()`) selon les assertions.
+6. **ADM-AUDIT-009 blob URL** (Fix 13) : `page.waitForEvent('download')` inopérant sur blob URLs créés via `URL.createObjectURL`. Solution : filtre par UPDATE (784 lignes vs 5155) + toast `[data-sonner-toast]`.
+7. **Sentry ETIMEDOUT** : `NEXT_PUBLIC_SENTRY_ENABLED: 'false'` dans `webServer.env` de `playwright.config.ts`.
+8. **Pre-flight checks** : `e2e/global-setup.ts` vérifie env vars + connectivité Supabase avant les tests.
+
+### Rapport
+
+`doc/tests/E2E-ADMIN-CRUD-ADMIN-ONLY-TASK083-REPORT.md`
+
+---
+
 ## TASK082C — Sécurité : flatted 3.4.1 → 3.4.2 (Prototype Pollution) (2026-03-19)
 
 ✅ **COMPLET** — Dependabot alert #38 : Prototype Pollution via `parse()` dans `flatted < 3.4.2`.

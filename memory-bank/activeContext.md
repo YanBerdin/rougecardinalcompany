@@ -1,8 +1,8 @@
 # Active Context
 
-**Current Focus (2026-03-19)**: Sécurité dépendances. flatted Prototype Pollution patchée. Prochaine tâche à déterminer.
+**Current Focus (2026-03-21)**: TASK083 stabilisé — 56/56 tests E2E admin-only passent (0 fixme, 7 sessions). Infrastructure E2E renforcée (Sentry désactivé, global-setup pre-flight checks). Prochaine tâche à déterminer.
 
-**Last Major Updates**: ✅ TASK082C — Patch sécurité flatted 3.4.1 → 3.4.2 (Prototype Pollution CVE, Dependabot #38) (2026-03-19) + ✅ TASK082 — **51/51 tests E2E Admin CRUD Éditorial passent** (5 sessions de débogage, bug le plus dur : `next/image` hostname localhost rejeté) (2026-03-20) + ✅ TASK082B — Patch sécurité Next.js 16.1.5 → 16.1.7 (5 CVEs, PR #33) (2026-03-17) + ✅ TASK078 Phase DAL — **80/80 tests DAL passent** (2026-03-16) + ✅ TASK078 — E2E P0 permissions 23/23 passent (2026-03-16) + ✅ TASK077 + TASK079 — Séparation policies RLS batches 1+2 (2026-03-15)
+**Last Major Updates**: ✅ TASK083 session 7 — **56/56 tests E2E Admin CRUD Admin-only passent** (ADM-AUDIT-009 réécrit Fix 13 : blob URL → filtre UPDATE + toast, Sentry ETIMEDOUT fix, `e2e/global-setup.ts` pre-flight checks) (2026-03-21) + ✅ TASK083 session 6 — 55/55 (3 fixmes activés — PART-005, HERO-005, AUDIT-006) (2026-03-20) + ✅ TASK082C — Patch sécurité flatted 3.4.1 → 3.4.2 (Prototype Pollution CVE, Dependabot #38) (2026-03-19) + ✅ TASK082 — **51/51 tests E2E Admin CRUD Éditorial passent** (5 sessions de débogage) (2026-03-20) + ✅ TASK082B — Patch sécurité Next.js 16.1.5 → 16.1.7 (5 CVEs, PR #33) (2026-03-17) + ✅ TASK078 Phase DAL — **80/80 tests DAL passent** (2026-03-16) + ✅ TASK078 — E2E P0 permissions 23/23 passent (2026-03-16) + ✅ TASK077 + TASK079 — Séparation policies RLS batches 1+2 (2026-03-15)
 
 ---
 
