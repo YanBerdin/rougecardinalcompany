@@ -83,8 +83,10 @@ export function AuditLogsView({
                 const link = document.createElement("a");
                 link.href = url;
                 link.download = `audit-logs-${new Date().toISOString().slice(0, 10)}.csv`;
+                document.body.appendChild(link);
                 link.click();
-                URL.revokeObjectURL(url);
+                document.body.removeChild(link);
+                setTimeout(() => URL.revokeObjectURL(url), 100);
                 toast.success("Export réussi");
             } else {
                 toast.error(result.error);

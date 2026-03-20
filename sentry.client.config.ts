@@ -10,6 +10,7 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
 Sentry.init({
   dsn: "https://c15837983554fbbd57b4de964d3deb46@o4510703440822272.ingest.de.sentry.io/4510703730425936",
+  enabled: process.env.NEXT_PUBLIC_SENTRY_ENABLED !== 'false',
 
   integrations: [
     // Supabase integration for tracing database calls

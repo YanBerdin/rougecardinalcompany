@@ -12,3 +12,4 @@ export { PartnerFactory } from './partners.factory';
 export { HeroSlideFactory } from './home-hero-slides.factory';
 export { PressReleaseFactory } from './presse.factory';
 export { MediaTagFactory, MediaFolderFactory } from './media.factory';
+export { CompagnieStatFactory } from './compagnie-stats.factory';

@@ -1,8 +1,8 @@
 # `\[TASK083] — E2E Admin CRUD — Admin-only (rôle admin)
 
-**Status:** Pending
+**Status:** Completed
 **Added:** 2026-03-17
-**Updated:** 2026-03-19
+**Updated:** 2026-03-21
 
 ## Original Request
 
@@ -147,26 +147,111 @@ TASK082 (51/51 tests editor) a révélé des pièges directement applicables à 
 
 ## Progress Tracking
 
-**Overall Status:** Not Started — 0%
+**Overall Status:** Complete — 100%
 
 ### Subtasks
 
-| ID  | Description                              | Status      | Updated    | Notes                       |
-| --- | ---------------------------------------- | ----------- | ---------- | --------------------------- |
-| 1.1 | Page Objects admin-only (7)              | Not Started | 2026-03-17 |                             |
-| 1.2 | Factory `HomeAboutStatFactory` si besoin | Not Started | 2026-03-17 |                             |
-| 2.1 | Tests dashboard (ADM-DASH-*)             | Not Started | 2026-03-17 | Court, prioritaire          |
-| 2.2 | Tests équipe (ADM-TEAM-*)                | Not Started | 2026-03-17 | Serial mode                 |
-| 2.3 | Tests hero slides (ADM-HERO-*)           | Not Started | 2026-03-17 | DnD en dernier              |
-| 2.4 | Tests about/chiffres (ADM-ABOUT-*)       | Not Started | 2026-03-17 |                             |
-| 2.5 | Tests partenaires (ADM-PART-*)           | Not Started | 2026-03-17 | DnD en dernier              |
-| 2.6 | Tests site config/toggles (ADM-CONFIG-*) | Not Started | 2026-03-17 | Impact public = 2 contextes |
-| 2.7 | Tests audit logs (ADM-AUDIT-*)           | Not Started | 2026-03-17 | Délai log après action      |
+| ID  | Description                              | Status   | Updated    | Notes                                                |
+| --- | ---------------------------------------- | -------- | ---------- | ---------------------------------------------------- |
+| 1.1 | Page Objects admin-only (7)              | Complete | 2026-03-20 | 7/7 créés, CSS bug `getToggleByKey` corrigé          |
+| 1.2 | Factory `HomeAboutStatFactory` si besoin | Complete | 2026-03-20 | `CompagnieStatFactory` créé                          |
+| 2.1 | Tests dashboard (ADM-DASH-*)             | Complete | 2026-03-20 | 3 tests ADM-DASH-001→003                             |
+| 2.2 | Tests équipe (ADM-TEAM-*)                | Complete | 2026-03-20 | 8 tests ADM-TEAM-001→008                             |
+| 2.3 | Tests hero slides (ADM-HERO-*)           | Complete | 2026-03-20 | 8 tests ADM-HERO-001→008, DnD fixme → activé         |
+| 2.4 | Tests about/chiffres (ADM-ABOUT-*)       | Complete | 2026-03-20 | 5 tests ADM-ABOUT-001→005                            |
+| 2.5 | Tests partenaires (ADM-PART-*)           | Complete | 2026-03-20 | 7 tests ADM-PART-001→007, DnD fixme → activé         |
+| 2.6 | Tests site config/toggles (ADM-CONFIG-*) | Complete | 2026-03-20 | 13 tests ADM-CONFIG-001→013                          |
+| 2.7 | Tests audit logs (ADM-AUDIT-*)           | Complete | 2026-03-21 | 11 tests ADM-AUDIT-001→011, DateRange fixme → activé, ADM-AUDIT-009 réécrit session 7 (blob URL + filtre UPDATE + toast) |
+
+## Bugs résolus — 13 correctifs appliqués
+
+| # | ID test(s) | Bug | Fix |
+| - | ---------- | --- | --- |
+| 1 | CONFIG-001→013 | Clés toggle `public:*` vs BDD `display_toggle_*` — triple désynchronisation (`ToggleCard.tsx`, `site-config-actions.ts`, `spec`) | Mise à jour des 3 fichiers avec le format `display_toggle_*` |
+| 2 | CONFIG-013 | `expectToastVisible()` avec `.or()` → strict mode (2 éléments matchés) | Suppression du `.or()` — seul `[data-sonner-toast]` suffit |
+| 3 | DASH-002 | `getSidebarLink` matchait sidebar + header mobile → strict mode violation | Scope à `[data-sidebar="sidebar"]` |
+| 4 | HERO-002 | `fillSlideForm` ne remplissait pas `imageUrl`/`altText` — formulaire invalide | Réécriture de `fillSlideForm` avec paramètres optionnels |
+| 5 | HERO-003/007 | Factory sans `image_url` → slides sans image → validation BDD échoue | Ajout `image_url: 'https://dummyimage.com/1920x1080.png'` dans les appels factory |
+| 6 | HERO-002/005 | `placehold.co` non autorisé dans `ALLOWED_HOSTNAMES` → image rejetée | Remplacement par `dummyimage.com` (whitelisté) |
+| 7 | ABOUT-003 | Toast "mise à jour" (féminin) vs regex `/mis à jour/i` (masculin) | Regex `/succès\|mise? à jour/i` |
+| 8 | PART-002 | `h3` dupliqué mobile/desktop → `getByText` trouve 2 éléments | `.last()` pour visible, `.first()` pour not-visible |
+| 9 | PART-004 | Strict mode sur `expectPartnerNotVisible` | `.first()` (le premier h3 non visible, en cohérence avec DOM) |
+| 10 | HERO-008 | Timing carrousel (`AUTO_PLAY_INTERVAL_MS = 6_000`) → texte du slide actif change en 6s | Assertion sur `button[aria-label*="${SLIDE_TITLE}"]` (indicateur, toujours dans le DOM) |
+| 11 | PART-007 | Factory sans `logo_url` → `<Image src="" />` cassé + `getByText` inopérant (nom seulement en `alt`) | Factory avec `logo_url` + `getByRole('img', { name })` |
+| 12 | HERO-005, PART-005, AUDIT-006 | 3 `test.fixme()` à activer (DnD, handle visible, DateRangePicker) | `page.mouse.*` pour DnD, suppression fixme, implémentation DateRangePicker |
+| 13 | AUDIT-009 | `page.waitForEvent('download')` ne fonctionne pas pour les blob URLs (`URL.createObjectURL`) — 5155 lignes × PAGE_SIZE=100 = timeout Server Action | Filtrer par UPDATE (784 lignes ≈ 8 pages) + détection toast `[data-sonner-toast]` au lieu de l'événement download |
+
+## Lessons Learned (TASK083)
+
+| Leçon | Détail |
+| ----- | ------ |
+| **Constantes partagées pour les clés de config** | Quand une clé de config est utilisée dans BDD, composant UI, Server Action ET tests → exporter depuis un fichier de constantes unique (`lib/constants/toggle-keys.ts`). Toute désynchronisation devient une erreur TypeScript. |
+| **Carrousel : asserter sur éléments persistants** | `getByText(slideTitle)` dépend du slide courant (timing). Préférer les `aria-label` des boutons indicateurs, toujours présents dans le DOM. S'applique à tous les composants avec état temporel (tabs, accordions). |
+| **`getByText` vs `getByRole('img')` pour les logos** | `getByText()` ne lit pas les attributs `alt`. Pour les composants où le nom n'est que dans l'`alt` (LogoCloud), utiliser `getByRole('img', { name: '...' })`. |
+| **Pattern try/finally pour modifier l'état de production** | Les tests Site Config modifient de vrais enregistrements BDD. Le bloc `finally { restaurerEtat() }` garantit l'idempotence même si le test échoue à mi-chemin. |
+| **Double rendu mobile/desktop Shadcn** | Certains composants (`SortablePartnerCard`, `Sidebar`) rendent 2 versions. À 1280px, vérifier lequel est visible et utiliser `.first()` / `.last()` en conséquence. |
+| **Whitelist `ALLOWED_HOSTNAMES` pour les URLs test** | `dummyimage.com` est dans la liste blanche pour les tests. `placehold.co` ne l'était pas. Vérifier la liste avant de choisir un domaine d'images pour les factories. |
+| **Playwright ne détecte PAS les downloads blob URL** | `page.waitForEvent('download')` ne se déclenche que pour les téléchargements réseau (`Content-Disposition`). Les blob URLs créés via `URL.createObjectURL` dans le navigateur ne génèrent PAS d'événement download Playwright. Alternative : vérifier le toast de succès ou intercepter la création de l'URL. |
+| **Filtrer les données avant de tester un export** | Un Server Action paginé (PAGE_SIZE=100) sur 5155 lignes = 52 appels séquentiels → timeout E2E. Toujours pré-filtrer (ex : filtre par action UPDATE = 784 lignes ≈ 8 pages) pour garder l'export dans les limites de timeout. |
+| **Sonner toast : sélecteur `[data-sonner-toast]`** | Pour détecter les toasts Sonner dans Playwright : `page.locator('[data-sonner-toast]').filter({ hasText: 'texte' })`. Plus fiable que `getByText` qui peut matcher d'autres éléments. |
+| **shadcn Select/Combobox interaction Playwright** | Pour interagir avec un `<Select>` shadcn : `page.getByRole('combobox').filter({ hasText: /pattern/i })` → click → `page.getByRole('option', { name: 'value' })` → click. |
+| **Désactiver Sentry en E2E** | Sentry en environnement local génère du bruit ETIMEDOUT dans les logs et ralentit les tests. Ajouter `NEXT_PUBLIC_SENTRY_ENABLED: 'false'` dans `webServer.env` de `playwright.config.ts`. |
+| **Pre-flight checks avec `globalSetup`** | `e2e/global-setup.ts` vérifie les prérequis (env vars + connectivité Supabase local) avant le lancement des tests. Évite des échecs tardifs et cryptiques. |
+
+## Rapport de test complet
+
+`doc/tests/E2E-ADMIN-CRUD-ADMIN-ONLY-TASK083-REPORT.md`
+
+## Journal de progression
+
+### 2026-03-20 (session finale)
+
+- **Fix 10 (HERO-008)** : Assertion sur indicator button (`button[aria-label*]`) — élimine la dépendance au timing du carrousel
+- **Fix 11 (PART-007)** : Ajout `logo_url` dans `PartnerFactory.create()` + `getByRole('img')` pour l'assertion LogoCloud
+- **Run complet** : `53 passent / 0 échouent / 3 fixme (3.0 min)` — suite admin 100 % verte
+- **Rapport écrit** : `doc/tests/E2E-ADMIN-CRUD-ADMIN-ONLY-TASK083-REPORT.md`
+- **Tâche clôturée**
+
+### 2026-03-21 (session 7 — stabilisation infra + ADM-AUDIT-009 rewrite)
+
+- **Fix 13 (ADM-AUDIT-009)** : réécriture complète du test export CSV
+  - `page.waitForEvent('download')` ne fonctionne PAS pour les blob URLs (`URL.createObjectURL`)
+  - Tentative 1 : waitForEvent('download') → échec (Playwright ne détecte pas les blob downloads)
+  - Tentative 2 : toast seul sans filtre → timeout (5155 lignes × PAGE_SIZE=100 = 52 appels séquentiels > 45s)
+  - Tentative 3 ✅ : filtre par UPDATE (784 lignes ≈ 8 pages) + toast `[data-sonner-toast]` avec `hasText: 'Export réussi'`
+  - Nouveaux helpers POM : `selectActionFilter(actionLabel)` + `expectExportToast()`
+- **Sentry ETIMEDOUT fix** : `NEXT_PUBLIC_SENTRY_ENABLED: 'false'` dans `webServer.env` de `playwright.config.ts` — élimine le bruit ETIMEDOUT dans les logs
+- **`e2e/global-setup.ts`** : pre-flight checks (variables d'environnement + connectivité Supabase local) avant le lancement des tests
+- **ADM-ABOUT-002** : confirmé flaky (passe en isolation, échoue occasionnellement en suite — pré-existant, non lié à cette session)
+- **Run final** : `56 passent / 0 échouent / 0 fixme` (2.3 min) — le 56e test vient du run dual-browser d'un test
+- **Commit** : `76b8097` (Fix ADM-CONFIG-003 HeroSlideFactory seed + ADM-AUDIT-009 DOM fix) + changements stagés supplémentaires
+
+### 2026-03-20 (session post-completion)
+
+- **Activation des 3 fixme** : tous les `test.fixme()` supprimés
+  - ADM-PART-005 : corps déjà correct — simple suppression du fixme
+  - ADM-HERO-005 : remplacement de `dragTo()` par `page.mouse.move/down/up` (compatibilité `@dnd-kit` pointer events)
+  - ADM-AUDIT-006 : implémentation DateRangePicker (click trigger → sélection jours 10→20 → Escape → assertion texte changé)
+  - Correctif calendrier : jours 5 en spillover (locale fr, grille mars contient dimanche 5 avril) → utiliser jours ≥ 6 pour éviter ambiguïté
+- **Run final** : `55 passent / 0 échouent / 0 fixme` ← résultat session 6
+
+### 2026-03-20 (session matin)
+
+- Résolution massive : Fix 1 (clés toggle BDD), Fix 2 (strict mode toast), Fix 3 (sidebar scope), Fix 4/5/6 (hero slides image), Fix 7 (toast regex about), Fix 8/9 (partenaires mobile/desktop)
+- Résultat intermédiaire : 51 passent / 2 échouent / 3 fixme
+
+### 2026-03-17→19
+
+- Infrastructure de base : 7 page objects, 7 spec files, 7 fixtures, 1 nouvelle factory (`CompagnieStatFactory`)
+- Premier run : 34 passent / 22 échouent / 3 fixme
+- Investigations root causes sur CONFIG (sessions 2–3)
 
 ## Références
 
 - Plan de test : `specs/PLAN_DE_TEST_COMPLET.md` sections 7, 8, 15–19
+- Rapport complet TASK083 : `doc/tests/E2E-ADMIN-CRUD-ADMIN-ONLY-TASK083-REPORT.md`
 - Factories admin-only : `e2e/factories/membres-equipe.factory.ts`, `partners.factory.ts`, `home-hero-slides.factory.ts`
 - Auth fixture admin : `e2e/fixtures/auth.fixture.ts` (`adminTest`)
 - Rapport DAL (tables admin-only) : `doc/tests/DAL-PERMISSIONS-INTEGRATION-REPORT.md`
 - RLS Policy Failures Report : `doc/tests/RLS-POLICY-FAILURES-REPORT.md`
+- Rapport TASK082 (editor, référence) : `doc/tests/E2E-ADMIN-CRUD-EDITORIAL-TASK082-REPORT.md`

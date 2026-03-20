@@ -5,16 +5,16 @@ import { Loader2 } from "lucide-react";
 import type { ToggleCardProps } from "./types";
 
 const SECTION_NAMES: Record<string, string> = {
-    "public:home:newsletter": "Newsletter",
-    "public:home:partners": "Partenaires",
-    "public:home:spectacles": "Spectacles à la une",
-    "public:home:news": "Actualités",
-    "public:home:hero": "Hero Banner",
-    "public:home:about": "À propos",
-    "public:presse:media_kit": "Kit Média",
-    "public:presse:presse_articles": "Communiqués de Presse",
-    "public:agenda:newsletter": "Newsletter Agenda",
-    "public:contact:newsletter": "Newsletter Contact",
+    "display_toggle_home_newsletter": "Newsletter",
+    "display_toggle_home_partners": "Partenaires",
+    "display_toggle_home_spectacles": "Spectacles à la une",
+    "display_toggle_home_a_la_une": "Actualités",
+    "display_toggle_home_hero": "Hero Banner",
+    "display_toggle_home_about": "À propos",
+    "display_toggle_media_kit": "Kit Média",
+    "display_toggle_presse_articles": "Communiqués de Presse",
+    "display_toggle_agenda_newsletter": "Newsletter Agenda",
+    "display_toggle_contact_newsletter": "Newsletter Contact",
 };
 
 function getSectionName(key: string): string {

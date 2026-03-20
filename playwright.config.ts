@@ -10,7 +10,8 @@ const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000';
 
 export default defineConfig({
     testDir: './e2e/tests',
-    timeout: 90_000,
+    globalSetup: './e2e/global-setup.ts',
+    timeout: 45_000,
     fullyParallel: true,
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 2 : 0,
@@ -21,7 +22,7 @@ export default defineConfig({
         baseURL: BASE_URL,
         trace: 'on-first-retry',
         screenshot: 'only-on-failure',
-        navigationTimeout: 45_000,
+        navigationTimeout: 20_000,
     },
 
     projects: [
@@ -64,6 +65,17 @@ export default defineConfig({
             dependencies: ['setup-editor'],
         },
 
+        // --- Admin CRUD tests (depend on admin auth setup) ---
+        {
+            name: 'admin',
+            use: {
+                ...devices['Desktop Chrome'],
+                storageState: path.join(__dirname, 'e2e/.auth/admin.json'),
+            },
+            testMatch: 'admin/**/*.spec.ts',
+            dependencies: ['setup-admin'],
+        },
+
         // --- Permissions tests (depend on auth setup) ---
         {
             name: 'permissions',
@@ -78,5 +90,10 @@ export default defineConfig({
         url: BASE_URL,
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
+        env: {
+            ...process.env,
+            // Désactiver Sentry en E2E pour éviter le bruit ETIMEDOUT dans les logs
+            NEXT_PUBLIC_SENTRY_ENABLED: 'false',
+        },
     },
 });
