@@ -49,16 +49,16 @@ function getPathsForToggle(key: string): string[] {
     const ADMIN_PATH = "/admin/site-config";
 
     const pathMap: Record<string, string[]> = {
-        "public:home:hero": ["/", ADMIN_PATH],
-        "public:home:about": ["/", ADMIN_PATH],
-        "public:home:newsletter": ["/", ADMIN_PATH],
-        "public:home:partners": ["/", ADMIN_PATH],
-        "public:home:spectacles": ["/", ADMIN_PATH],
-        "public:home:news": ["/", ADMIN_PATH],
-        "public:presse:media_kit": ["/presse", ADMIN_PATH],
-        "public:presse:presse_articles": ["/presse", ADMIN_PATH],
-        "public:agenda:newsletter": ["/agenda", ADMIN_PATH],
-        "public:contact:newsletter": ["/contact", ADMIN_PATH],
+        "display_toggle_home_hero": ["/", ADMIN_PATH],
+        "display_toggle_home_about": ["/", ADMIN_PATH],
+        "display_toggle_home_newsletter": ["/", ADMIN_PATH],
+        "display_toggle_home_partners": ["/", ADMIN_PATH],
+        "display_toggle_home_spectacles": ["/", ADMIN_PATH],
+        "display_toggle_home_a_la_une": ["/", ADMIN_PATH],
+        "display_toggle_media_kit": ["/presse", ADMIN_PATH],
+        "display_toggle_presse_articles": ["/presse", ADMIN_PATH],
+        "display_toggle_agenda_newsletter": ["/agenda", ADMIN_PATH],
+        "display_toggle_contact_newsletter": ["/contact", ADMIN_PATH],
     };
 
     return pathMap[key] ?? [ADMIN_PATH];

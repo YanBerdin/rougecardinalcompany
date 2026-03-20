@@ -254,7 +254,7 @@ export const HomeStatInputSchema = z.object({
     label: z.string().min(1, "Le label est requis").max(80),
     value: z.string().min(1, "La valeur est requise").max(20),
     icon: z.string().nullable().optional(),
-    position: z.coerce.bigint(),
+    position: z.coerce.bigint().optional(),
     active: z.boolean().default(true),
 });
 export type HomeStatInput = z.infer<typeof HomeStatInputSchema>;
