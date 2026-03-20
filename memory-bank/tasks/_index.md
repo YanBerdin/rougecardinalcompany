@@ -13,7 +13,7 @@
 
 ## En Cours
 
-- `TASK038` Responsive Testing & Validation - Plan reviewed, Phase 0 (instrumentation) pending
+- `TASK038` Responsive Testing & Accessibilité (rescoped) — ~15 cas responsive/a11y/thème, Pending
 
 ## En Attente
 

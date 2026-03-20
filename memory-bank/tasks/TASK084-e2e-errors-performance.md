@@ -1,8 +1,9 @@
-# [TASK084] — E2E Transversaux — Erreurs & Performance
+# \[TASK084] — E2E Transversaux — Erreurs & Performance
 
 **Status:** Pending
+
 **Added:** 2026-03-17
-**Updated:** 2026-03-19
+**Updated:** 2026-03-20
 
 ## Original Request
 
@@ -22,7 +23,7 @@ définis dans `specs/PLAN_DE_TEST_COMPLET.md` sections 21.5 et 21.6.
 | --- | --- | --- |
 | TASK081 (Auth E2E) | ✅ Completed (2026-03-17) | 14/14 tests |
 | TASK082 (Editor CRUD E2E) | ✅ Completed (2026-03-20) | 51/51 tests |
-| TASK083 (Admin CRUD E2E) | ⏳ Pending | Bloquant — projet `admin` Playwright manquant |
+| TASK083 (Admin CRUD E2E) | ✅ Completed (2026-03-20) | 56/56 tests |
 | TASK038 (Responsive) | 🔄 In Progress | Phase 0 pending |
 
 ### Prérequis Playwright
@@ -40,17 +41,17 @@ définis dans `specs/PLAN_DE_TEST_COMPLET.md` sections 21.5 et 21.6.
 | 21.5 — Performance | CROSS-PERF-001→003 | 3 | P1/P2 |
 | 21.6 — Gestion d'erreurs | CROSS-ERR-001→003 | 3 | P0/P1 |
 
-**Total : ~6 cas**
+#### **Total : ~6 cas**
 
 ### Cas détaillés
 
-**Gestion d'erreurs (P0/P1)**
+#### **Gestion d'erreurs (P0/P1)**
 
 - CROSS-ERR-001 : Page 404 — naviguer vers `/page-inexistante` → page 404 avec navigation
 - CROSS-ERR-002 : Erreur serveur — Supabase indisponible → error boundary, pas de page blanche
 - CROSS-ERR-003 : Toast erreur admin — simuler échec mutation → toast d'erreur
 
-**Performance (P1/P2)**
+#### **Performance (P1/P2)**
 
 - CROSS-PERF-001 : Accueil charge < 3 secondes
 - CROSS-PERF-002 : Dashboard admin charge < 3 secondes
@@ -60,7 +61,7 @@ définis dans `specs/PLAN_DE_TEST_COMPLET.md` sections 21.5 et 21.6.
 
 ### Approche technique
 
-**CROSS-ERR-001** (Page 404) :
+#### **CROSS-ERR-001** (Page 404)
 
 ```typescript
 await page.goto('/url-qui-nexiste-pas');
@@ -68,7 +69,7 @@ await expect(page).toHaveURL(/\/url-qui-nexiste-pas/);
 await expect(page.getByText(/404|page introuvable/i)).toBeVisible();
 ```
 
-**CROSS-ERR-002** (Erreur réseau) :
+#### **CROSS-ERR-002** (Erreur réseau)
 
 ```typescript
 // Bloquer les requêtes Supabase
@@ -78,12 +79,12 @@ await page.goto('/');
 await expect(page.locator('body')).not.toBeEmpty();
 ```
 
-**CROSS-ERR-003** (Toast erreur) :
+#### **CROSS-ERR-003** (Toast erreur)
 
 - Simuler une action admin qui échoue (ex: conflit de clé unique)
 - Vérifier `role="alert"` avec message d'erreur
 
-**CROSS-PERF-001/002** :
+#### **CROSS-PERF-001/002**
 
 ```typescript
 const start = Date.now();
@@ -93,7 +94,8 @@ const duration = Date.now() - start;
 expect(duration).toBeLessThan(3000);
 ```
 
-**Note** : Les tests de performance sont sensibles à l'environnement (machine locale vs CI).
+#### **Note** : Les tests de performance sont sensibles à l'environnement (machine locale vs CI)
+
 Considérer de les marquer comme `test.skip` en CI ou d'augmenter le seuil.
 
 ### Structure des fichiers
@@ -111,13 +113,13 @@ e2e/tests/
 
 ## Progress Tracking
 
-**Overall Status:** Not Started — 0%
+> **Overall Status:** Not Started — 0%
 
 ### Subtasks
 
-| ID  | Description                                | Status      | Updated    | Notes |
-| --- | ------------------------------------------ | ----------- | ---------- | ----- |
-| 1.1 | Tests gestion erreurs (CROSS-ERR-001→003)  | Not Started | 2026-03-17 | P0/P1 |
+| ID  | Description                                | Status      | Updated    | Notes            |
+| --- | ------------------------------------------ | ----------- | ---------- | ---------------- |
+| 1.1 | Tests gestion erreurs (CROSS-ERR-001→003)  | Not Started | 2026-03-17 | P0/P1            |
 | 1.2 | Tests performance (CROSS-PERF-001→003)     | Not Started | 2026-03-17 | Optionnel/manuel |
 
 ## Références
