@@ -90,7 +90,10 @@
     "test:dal:permissions": "vitest run __tests__/dal/permissions-integration.test.ts",
     "e2e:auth": "npx playwright test --project=chromium-auth --reporter=list",
     "e2e:editor": "npx playwright test --project=editor --reporter=list",
-    "e2e:admin": "npx playwright test --project=admin --reporter=list"
+    "e2e:admin": "npx playwright test --project=admin --reporter=list",
+    "e2e:cross": "npx playwright test --project=cross-public --project=cross-admin --reporter=list",
+    "e2e:cross:public": "npx playwright test --project=cross-public --reporter=list",
+    "e2e:cross:admin": "npx playwright test --project=cross-admin --reporter=list"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -144,6 +147,7 @@
     "zod": "^4.1.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.1",
     "@eslint/markdown": "^7.4.0",
     "@playwright/test": "^1.57.0",
     "@types/node": "^20",

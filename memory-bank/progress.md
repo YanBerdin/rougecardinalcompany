@@ -1,5 +1,35 @@
 # Progress
 
+## TASK038 — E2E Cross-Cutting (Responsive + A11Y + Thème) : 16/16 passent (2026-03-21)
+
+✅ **COMPLET** — 16 tests Playwright couvrant responsive (5), accessibilité (7) et thème dark/light (3) + 1 bonus admin. Créés en 2025-06-09, stabilisés en **3 sessions de débogage** (7 bugs corrigés + 3 intermittents résolus).
+
+| Suite | Tests | Résultat |
+| ----- | ----- | -------- |
+| Responsive public | 5 | ✅ 5/5 |
+| Accessibilité | 7 | ✅ 7/7 |
+| Thème dark/light | 3 | ✅ 3/3 |
+| Bonus A11Y-006 (admin) | 1 | ✅ 1/1 |
+
+### Bugs majeurs résolus (7 + 3 intermittents)
+
+1. **Label `E-mail` vs `Email`** (A11Y-003) : trait d'union causait une non-concordance avec axe-core → renommage label formulaire.
+2. **Lien ambigu 'La Compagnie'** (RESP-001) : header + footer présents simultanément → `.first()`.
+3. **Sélecteur sidebar** (RESP-003) : `#sidebar-nav` inexistant → `[data-sidebar="sidebar"]` (Radix UI).
+4. **Sidebar mobile overlay** (RESP-003) : `data-state` null en mode Sheet → détection combinée `[role="dialog"]` visible.
+5. **`getByRole('main')` ambigu** (RESP-005, THEME-003) : deux rôles `main` → `locator('#main-content')`.
+6. **`body.scrollWidth` faux positif** (RESP-005) : inclut la largeur sidebar → vérification conditionnelle.
+7. **`--muted-foreground` ratio insuffisant** (A11Y-004) : 45% WCAG 4.2:1 → 36.0784% (#5C5C5C, ratio 6.17:1 WCAG AA).
+8. **Intermittent RESP-001** : `domcontentloaded` trop précoce → `networkidle` + `expect().toPass({ timeout: 5_000 })`.
+9. **Intermittent RESP-003** : `waitForTimeout(400)` fragile → `expect().toPass({ timeout: 5_000 })`.
+10. **Intermittent A11Y-004** : CSS vars non résolues quand axe-core analyse → `expect().toPass({ timeout: 10_000 })`.
+
+### Rapport
+
+`doc/tests/E2E-CROSS-CUTTING-TASK038-REPORT.md`
+
+---
+
 ## TASK083 — E2E Admin CRUD Admin-only : 56/56 passent (2026-03-21)
 
 ✅ **COMPLET** — 56 tests Playwright (0 fixme) couvrant 7 sections admin-only (Dashboard, Équipe, Hero Slides, About/Chiffres clés, Partenaires, Site Config, Audit Logs). Résolus en **7 sessions de débogage** (5 sessions initiales + 1 session post-completion fixmes + 1 session stabilisation infra).
