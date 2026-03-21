@@ -36,6 +36,12 @@
 - **Migrations**: `supabase/migrations/` est la source de vérité pour les modifications appliquées en base; `supabase/schemas/` sert de documentation/declarative reference.
 - **Tests & CI**: vérifier explicitement que les roles `anon` et `authenticated` peuvent accéder aux DTO nécessaires (tests d'intégration DAL).
 - **E2E Page Object Model Pattern (Mar 2026)**: Classe par page dans `e2e/pages/public/`, méthodes `goto()`, `expect*()` encapsulant les sélecteurs. Fixtures Playwright injectent le POM dans chaque spec. Tests `serial` + emails `Date.now()` pour rate limiter. Config ESM (`playwright.config.ts`, `fileURLToPath`), 1 worker, timeout 90 s, retries 2.
+- **E2E Stability Patterns — CSS/UI Timing (Mar 2026)** :
+  - **P1 `networkidle`** : Utiliser `{ waitUntil: 'networkidle' }` dans `page.goto()` pour attendre la fin des requêtes réseau avant d'analyser le layout (évite assertions sur layout incomplet post-hydratation).
+  - **P2 `toPass()` UI** : Encapsuler les assertions sur des états UI asynchrones (sidebar ouverte/fermée, breakpoints css) dans `expect(async () => { ... }).toPass({ timeout: 5_000 })` au lieu de `waitForTimeout()`.
+  - **P3 `toPass()` axe-core** : Pour les checks accessibilité (`AxeBuilder.analyze()`), encapsuler dans `expect().toPass({ timeout: 10_000 })` car les CSS custom properties peuvent ne pas être résolues immédiament.
+  - **P4 Sidebar dual-mode** : En mobile (viewport < 768px), la sidebar Radix UI passe en mode `Sheet` (overlay `[role="dialog"]`) — la détection doit combiner `data-state` ET présence du dialog pour éviter `null`.
+  - **P5 Scroll conditionnel** : `body.scrollWidth` inclut la largeur de la sidebar fixe. Vérifier `overflow-x-auto` avant d'affirmer absence de scroll horizontal (faux positif sinon).
 
 **Conventions importantes**:
 

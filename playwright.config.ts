@@ -83,6 +83,30 @@ export default defineConfig({
             testMatch: 'permissions/**/*.spec.ts',
             dependencies: ['setup-admin', 'setup-editor', 'setup-user'],
         },
+
+        // --- Cross-cutting tests: responsive (public), accessibility, theme (public) ---
+        {
+            name: 'cross-public',
+            use: { ...devices['Desktop Chrome'] },
+            testMatch: [
+                'cross/responsive/responsive-public.spec.ts',
+                'cross/accessibility/accessibility.spec.ts',
+                'cross/theme/theme-public.spec.ts',
+            ],
+        },
+        // --- Cross-cutting tests requiring admin auth: admin responsive + theme ---
+        {
+            name: 'cross-admin',
+            use: {
+                ...devices['Desktop Chrome'],
+                storageState: path.join(__dirname, 'e2e/.auth/admin.json'),
+            },
+            testMatch: [
+                'cross/responsive/responsive-admin.spec.ts',
+                'cross/theme/theme-admin.spec.ts',
+            ],
+            dependencies: ['setup-admin'],
+        },
     ],
 
     webServer: {

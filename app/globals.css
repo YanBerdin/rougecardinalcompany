@@ -18,7 +18,7 @@
     --secondary: 0 0% 83.1373%; /* #D4D4D4 */
     --secondary-foreground: 0 0% 10.9804%; /* #1C1C1C */
     --muted: 0 0% 92.1569%; /* #EBEBEB */
-    --muted-foreground: 0 0% 41.9608%; /* #6B6B6B */
+    --muted-foreground: 0 0% 36.0784%; /* bef test  0 0% 41.9608% - #5C5C5C — ratio ≥ 4.5:1 sur bg-muted (#ebebeb) et --background (#faf4e9) */
     --accent: 0 0% 83.1373%; /* #D4D4D4 */
     --accent-foreground: 0 0% 10.9804%; /* #1C1C1C */
     --destructive: 2.7 100% 60.8%; /* #ff4037 */ /* vs hsl(2.7,100%,60.7843%) */
