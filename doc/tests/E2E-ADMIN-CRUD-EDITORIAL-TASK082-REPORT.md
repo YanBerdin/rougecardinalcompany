@@ -1,6 +1,6 @@
 # Rapport E2E — Tests CRUD Admin Éditorial (rôle editor)
 
-**Date :** 2026-03-18 (mis à jour 2026-03-20)  
+**Date :** 2026-03-18 (mis à jour 2026-03-21)  
 **Tâche :** TASK082 — E2E Admin CRUD Éditorial  
 **Projet Playwright :** `editor` (Chromium, Desktop 1280×720)  
 **Fichiers de tests :** `e2e/tests/editor/**/*.spec.ts`

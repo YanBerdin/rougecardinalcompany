@@ -161,7 +161,7 @@ TASK082 (51/51 tests editor) a révélé des pièges directement applicables à 
 | 2.4 | Tests about/chiffres (ADM-ABOUT-*)       | Complete | 2026-03-20 | 5 tests ADM-ABOUT-001→005                            |
 | 2.5 | Tests partenaires (ADM-PART-*)           | Complete | 2026-03-20 | 7 tests ADM-PART-001→007, DnD fixme → activé         |
 | 2.6 | Tests site config/toggles (ADM-CONFIG-*) | Complete | 2026-03-20 | 13 tests ADM-CONFIG-001→013                          |
-| 2.7 | Tests audit logs (ADM-AUDIT-*)           | Complete | 2026-03-21 | 11 tests ADM-AUDIT-001→011, DateRange fixme → activé, ADM-AUDIT-009 réécrit session 7 (blob URL + filtre UPDATE + toast) |
+| 2.7 | Tests audit logs (ADM-AUDIT-*)           | Complete | 2026-03-21 | 11 tests ADM-AUDIT-001→011, DateRange fixme → activé, ADM-AUDIT-009 réécrit session 7 (blob URL + filtre UPDATE + toast). ADM-AUDIT-010/011 stabilisés via SQL 3-CTEs + `retries: 1` + `timeout: 15_000` — commit `a0c9c94` |
 
 ## Bugs résolus — 13 correctifs appliqués
 
@@ -180,6 +180,8 @@ TASK082 (51/51 tests editor) a révélé des pièges directement applicables à 
 | 11 | PART-007 | Factory sans `logo_url` → `<Image src="" />` cassé + `getByText` inopérant (nom seulement en `alt`) | Factory avec `logo_url` + `getByRole('img', { name })` |
 | 12 | HERO-005, PART-005, AUDIT-006 | 3 `test.fixme()` à activer (DnD, handle visible, DateRangePicker) | `page.mouse.*` pour DnD, suppression fixme, implémentation DateRangePicker |
 | 13 | AUDIT-009 | `page.waitForEvent('download')` ne fonctionne pas pour les blob URLs (`URL.createObjectURL`) — 5155 lignes × PAGE_SIZE=100 = timeout Server Action | Filtrer par UPDATE (784 lignes ≈ 8 pages) + détection toast `[data-sonner-toast]` au lieu de l'événement download |
+| 14 | AUDIT-010 | `[ERR_AUDIT_001] canceling statement due to statement timeout` — rôle `authenticated` `statement_timeout=8s` dépassé sur ~7 696 lignes × JOIN `auth.users` avant pagination | Migration `20260318000000` : index `idx_logs_audit_created_at` + SQL 3-CTEs (total_count sans JOIN, page_logs LIMIT avant JOIN, final JOIN ≤50 lignes) + plafond `p_limit ≤ 200` + `retries: 1` + `{ timeout: 15_000 }` sur assertion |
+| 15 | AUDIT-011 | Test flaky — double navigation vers les logs → locator timeout sur 1ère visite | `{ timeout: 15_000 }` sur `toBeVisible()` + `test.describe` avec `retries: 1` |
 
 ## Lessons Learned (TASK083)
 
@@ -203,6 +205,18 @@ TASK082 (51/51 tests editor) a révélé des pièges directement applicables à 
 `doc/tests/E2E-ADMIN-CRUD-ADMIN-ONLY-TASK083-REPORT.md`
 
 ## Journal de progression
+
+### 2026-03-21 (session 8 — ADM-AUDIT-010/011 stabilisation infra)
+
+- **Cause root ADM-AUDIT-010** : le rôle `authenticated` a un `statement_timeout=8s`. L'implémentation précédente matérialisait ~7 696 lignes × JOIN `auth.users` avant pagination → dépassement systématique sous charge.
+- **Fix SQL** : migration `20260318000000_optimize_audit_logs_rpc.sql` — index `idx_logs_audit_created_at` + 3 CTEs indépendants (total_count sans JOIN, page_logs LIMIT avant JOIN, JOINal sur ≤50 lignes) + plafond `p_limit ≤ 200`.
+- **Fix test ADM-AUDIT-010** : `test.describe` avec `retries: 1` + `{ timeout: 15_000 }` sur l'assertion de ligne.
+- **Fix test ADM-AUDIT-011** : `{ timeout: 15_000 }` sur `toBeVisible()` après double navigation.
+- **Corrections audit SECURITY DEFINER** : header Validation + Grant Policy complétés dans migration ET schéma déclaratif, commentaire une ligne synchronisé, plafond `p_limit > 200` ajouté dans les deux fichiers.
+- **Run final** : `56/56 passent (2.6 min)`, 0 flaky — suite admin 100 % stable.
+- **Commit** : `a0c9c94` — 6 fichiers, 307 insertions (`fix(e2e): resolve ADM-AUDIT-010 and ADM-AUDIT-011 intermittent failures`)
+- **Scéma déclaratif synchronisé** : `supabase/schemas/42_rpc_audit_logs.sql`
+- **Migration appliquée localement** : `psql ... -f supabase/migrations/20260318000000_optimize_audit_logs_rpc.sql` → exit 0
 
 ### 2026-03-20 (session finale)
 

@@ -4,6 +4,29 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-03-18 - PERF FIX: Optimisation RPC get_audit_logs_with_email (ADM-AUDIT-010)
+
+**Migration** : `20260318000000_optimize_audit_logs_rpc.sql`  
+**Schéma déclaratif** : ✅ `supabase/schemas/42_rpc_audit_logs.sql`
+
+**Contexte** : Détecté par le test E2E ADM-AUDIT-010 qui échouait de manière intermittente avec `[ERR_AUDIT_001] canceling statement due to statement timeout`. Le rôle `authenticated` a un `statement_timeout=8s`. L'implémentation précédente matérialisait ~7 696 lignes × JOIN `auth.users` avant pagination → dépassement systématique sous charge.
+
+**Fix** :
+
+1. Index `idx_logs_audit_created_at` sur `logs_audit(created_at desc)` (ORDER BY + nettoyage rétention).
+2. Réécriture de la fonction `get_audit_logs_with_email` avec 3 CTEs indépendants :
+   - `total_count` : COUNT(*) sur `logs_audit` seul (pas de JOIN `auth.users`).
+   - `page_logs` : SELECT avec LIMIT/OFFSET AVANT le JOIN (≤50 lignes matérialisées).
+   - SELECT final : JOIN `auth.users` uniquement sur les ≤50 lignes de la page.
+3. Plafonnement de `p_limit` à 200 pour empêcher de contourner l'optimisation CTE.
+
+**Validation** :
+
+- ✅ Appliquée localement : `psql ... -f supabase/migrations/20260318000000_optimize_audit_logs_rpc.sql` → exit 0
+- ✅ 56/56 tests E2E admin passent (2.6 min), 0 flaky — commit `a0c9c94`
+
+---
+
 ### 2026-03-17 - SECURITY FIX: Grants excessifs sur vues data retention (TASK078)
 
 **Migration** : `20260317014204_fix_retention_views_grants.sql`
