@@ -24,6 +24,7 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 - ✅ Appliquée localement : `psql ... -f supabase/migrations/20260318000000_optimize_audit_logs_rpc.sql` → exit 0
 - ✅ 56/56 tests E2E admin passent (2.6 min), 0 flaky — commit `a0c9c94`
+- ✅ Appliquée cloud : `supabase db push` → exit 0 (2026-03-21)
 
 ---
 
