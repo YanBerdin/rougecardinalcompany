@@ -222,6 +222,7 @@ await expect(table.getByRole('cell', { name: title }).first()).toBeVisible({ tim
 
 **Commit de référence** : `f19f2d1` (`fix(e2e): stabilise editor suite — presse + spectacles POM fixes`)
 **Fichiers modifiés** :
+
 - `e2e/pages/admin/presse.page.ts`
 - `e2e/pages/admin/spectacles.page.ts`
 - `e2e/tests/editor/presse/presse.spec.ts`

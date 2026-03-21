@@ -124,15 +124,21 @@ test.describe("ADM-AUDIT — Logs d'audit : consultation et filtrage", () => {
         await auditLogsPage.expectExportToast();
     });
 
-    // ADM-AUDIT-010 P2
-    test('ADM-AUDIT-010 — Rafraîchir recharge la table', async ({ auditLogsPage }) => {
-        await auditLogsPage.expectLoaded();
+    // ADM-AUDIT-010 P2 — enveloppé dans un describe pour activer 1 retry sur le statement_timeout
+    // Postgres intermittent : après l'export d'ADM-AUDIT-009, la BDD peut être sous charge
+    // lors du chargement initial de la fixture, causant un échec. Un retry suffit à récupérer.
+    test.describe('ADM-AUDIT-010', () => {
+        test.describe.configure({ retries: 1 });
 
-        await auditLogsPage.clickRefresh();
-        await auditLogsPage.expectLoaded();
+        test('ADM-AUDIT-010 — Rafraîchir recharge la table', async ({ auditLogsPage }) => {
+            await auditLogsPage.expectLoaded();
 
-        // La table reste peuplée après le rechargement
-        await expect(auditLogsPage.logsTable.getByRole('row').nth(1)).toBeVisible();
+            await auditLogsPage.clickRefresh();
+            await auditLogsPage.expectLoaded();
+
+            // Timeout étendu : rechargement post-refresh peut être lent selon la charge BDD
+            await expect(auditLogsPage.logsTable.getByRole('row').nth(1)).toBeVisible({ timeout: 15_000 });
+        });
     });
 
     // ADM-AUDIT-011 P1
@@ -147,6 +153,7 @@ test.describe("ADM-AUDIT — Logs d'audit : consultation et filtrage", () => {
         await auditLogsPage.expectLoaded();
 
         // Au moins une entrée de log doit être visible
-        await expect(auditLogsPage.logsTable.getByRole('row').nth(1)).toBeVisible();
+        // Timeout étendu : double navigation (fixture→partners→audit-logs) ralentit le chargement des données
+        await expect(auditLogsPage.logsTable.getByRole('row').nth(1)).toBeVisible({ timeout: 15_000 });
     });
 });

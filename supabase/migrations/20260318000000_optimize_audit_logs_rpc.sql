@@ -1,12 +1,29 @@
--- Index supporting ORDER BY created_at DESC and retention cleanup queries.
+-- Migration: optimize get_audit_logs_with_email performance
+--
+-- Problem: the authenticated role has statement_timeout=8s. The previous
+-- implementation used a single CTE (filtered_logs) that joined ALL rows of
+-- logs_audit with auth.users before applying LIMIT, forcing the planner to
+-- materialise ~7k rows × auth.users JOIN for both the COUNT and the page data.
+-- This exceeded the 8s timeout under normal load.
+--
+-- Fix:
+--   1. Add an index on logs_audit(created_at DESC) to support the ORDER BY
+--      and allow index-only scans when filters are selective.
+--   2. Rewrite the function with two independent CTEs:
+--      - total_count: COUNT(*) only from logs_audit (no auth.users JOIN).
+--      - page_logs:  SELECT with LIMIT/OFFSET first, before the JOIN.
+--      The JOIN with auth.users is then applied only to the ≤50 page rows.
+
+-- ── 1. Index on created_at ───────────────────────────────────────────────────
+
 create index if not exists idx_logs_audit_created_at
   on public.logs_audit using btree (created_at desc);
 
 comment on index public.idx_logs_audit_created_at is
   'Supports ORDER BY created_at DESC in get_audit_logs_with_email and retention cleanup.';
 
--- RPC function to fetch paginated audit logs with user email.
--- SECURITY DEFINER is required to access auth.users (system table).
+-- ── 2. Optimised RPC ─────────────────────────────────────────────────────────
+
 /*
  * Security Model: SECURITY DEFINER
  *

@@ -30,6 +30,14 @@ export class AdminAuditLogsPage {
     async expectLoaded(): Promise<void> {
         await this.page.waitForLoadState('networkidle');
         await expect(this.heading).toBeVisible({ timeout: 10_000 });
+        // Fail fast if the page is in error state (e.g. Postgres statement_timeout).
+        // Without this check, tests wait the full 45s test timeout for buttons that
+        // are never rendered, delaying the retry that would recover the situation.
+        await expect(
+            this.page.getByRole('alert').filter({ hasText: /ERR_AUDIT/ }),
+        ).not.toBeVisible({ timeout: 3_000 });
+        // Confirm the table toolbar is rendered (table loaded successfully).
+        await expect(this.refreshButton).toBeVisible({ timeout: 10_000 });
     }
 
     async clickRefresh(): Promise<void> {

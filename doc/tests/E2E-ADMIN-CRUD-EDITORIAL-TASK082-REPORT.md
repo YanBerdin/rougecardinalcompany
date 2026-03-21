@@ -270,7 +270,6 @@ Tous les 9 tests initialement marqués `test.fixme` ont été débloqués et pas
 
 11. **Le cleanup `afterEach` dans les tests factory est crucial** — sans nettoyage des données entre les runs, les tests échouent de manière non-déterministe (doublons, locators ambigus, comptages incorrects).
 
-
 ## Pièges connus — Patterns à éviter dans les futurs tests cross
 
 Bugs découverts et corrigés dans la suite `editor` (2026-03-21), valables pour toute nouvelle spec.
