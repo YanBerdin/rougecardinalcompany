@@ -55,6 +55,13 @@ export class AdminPressePage {
         title: string,
         action: 'Prévisualiser' | 'Publier' | 'Dépublier' | 'Modifier' | 'Supprimer',
     ): Promise<void> {
+        // 'Modifier' and 'Prévisualiser' are rendered as <Link><Button> in the UI.
+        // The DOM is <a href="..."><button aria-label="..."> — invalid HTML nesting.
+        // Clicking the inner <button> does not propagate to the <a> and navigation never fires.
+        // Use getByRole('link') instead: the link's accessible name is inherited from
+        // the button's aria-label via subtree computation.
+        const linkActions = new Set<string>(['Modifier', 'Prévisualiser']);
+
         const ariaLabelMap: Record<string, string> = {
             'Prévisualiser': `Prévisualiser le communiqué : ${title}`,
             'Publier': 'Publier le communiqué',
@@ -62,10 +69,18 @@ export class AdminPressePage {
             'Modifier': `Modifier le communiqué : ${title}`,
             'Supprimer': `Supprimer le communiqué : ${title}`,
         };
-        const button = this.page.getByRole('button', { name: ariaLabelMap[action] }).first();
-        await button.click();
+
+        const element = linkActions.has(action)
+            ? this.page.getByRole('link', { name: ariaLabelMap[action] }).first()
+            : this.page.getByRole('button', { name: ariaLabelMap[action] }).first();
+
+        await element.click();
+
         if (action === 'Modifier') {
             await this.page.waitForURL('**/edit');
+        }
+        if (action === 'Prévisualiser') {
+            await this.page.waitForURL('**/preview');
         }
     }
 
@@ -87,6 +102,8 @@ export class AdminPressePage {
     }
 
     async expectCommuniqueVisible(title: string): Promise<void> {
-        await expect(this.page.getByText(title).first()).toBeVisible({ timeout: 10_000 });
+        // getByRole('heading') excludes display:none elements (sm:hidden mobile view),
+        // so this finds only the visible desktop heading.
+        await expect(this.page.getByRole('heading', { name: title })).toBeVisible({ timeout: 10_000 });
     }
 }

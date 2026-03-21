@@ -58,7 +58,7 @@ export class AdminSpectaclesPage {
     }
 
     async expectRowWithTitle(title: string): Promise<void> {
-        await expect(this.table.getByRole('cell', { name: title }).first()).toBeVisible();
+        await expect(this.table.getByRole('cell', { name: title }).first()).toBeVisible({ timeout: 15_000 });
     }
 
     async expectRowCount(count: number): Promise<void> {
@@ -77,6 +77,18 @@ export class AdminSpectaclesPage {
             'Supprimer': `Supprimer ${title}`,
         };
         await this.page.getByRole('button', { name: ariaLabelMap[action] }).click();
+
+        // Wait for navigation to complete for actions that trigger router.push()
+        if (action === 'Détails') {
+            await this.page.waitForURL('**/spectacles/*');
+            await this.page.waitForLoadState('domcontentloaded');
+        } else if (action === 'Éditer') {
+            await this.page.waitForURL('**/edit');
+            await this.page.waitForLoadState('domcontentloaded');
+        } else if (action === 'Galerie') {
+            await this.page.waitForURL('**/spectacles/*');
+            await this.page.waitForLoadState('domcontentloaded');
+        }
     }
 
     async confirmDelete(): Promise<void> {

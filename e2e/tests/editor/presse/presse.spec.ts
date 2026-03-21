@@ -43,7 +43,7 @@ test.describe('Gestion de la Presse', () => {
         await pressePage.submitForm();
 
         // 5. Verify redirect back to communiqués list or toast
-        await page.waitForURL('**/admin/presse**');
+        await page.waitForURL('**/admin/presse');
         await pressePage.expectCommuniqueVisible(
             '[TEST] Communiqué Nouveau Spectacle',
         );
