@@ -13,11 +13,10 @@
 
 ## En Cours
 
-- `TASK038` Responsive Testing & Accessibilité (rescoped) — ~15 cas responsive/a11y/thème, Pending
+**_(aucune tâche en cours)_**
 
 ## En Attente
 
-- `TASK084` E2E Transversaux Erreurs & Performance — ~6 cas, dépend de TASK083 (✅ Completed) + TASK038 (In Progress)
 - `TASK005` Optimisation SEO et meta-tags dynamiques
 - `TASK007` Tests automatisés et monitoring
 - `TASK008` Configuration des redirections vers billetterie externe
@@ -31,6 +30,8 @@
 
 ## Terminé
 
+- `TASK084` E2E Transversaux Erreurs & Performance — **7/7 passent ✅** — Completed 2026-03-22 (CROSS-ERR-001→003, CROSS-PERF-001→003, Server Actions abort pattern, warmup dev mode, Rapport: `doc/tests/E2E-ERRORS-PERFORMANCE-TASK084-REPORT.md`)
+- `TASK038` Responsive Testing & Accessibilité — **16/16 passent ✅** — Completed 2026-03-21 (responsive 5 + a11y 7 + thème 3 + bonus 1, 7 bugs corrigés, Rapport: `doc/tests/E2E-CROSS-CUTTING-TASK038-REPORT.md`)
 - `TASK083` E2E Admin CRUD Admin-only — **56/56 passent ✅ (0 fixme)** — Completed 2026-03-21 (7 sessions, 13 correctifs, Rapport: `doc/tests/E2E-ADMIN-CRUD-ADMIN-ONLY-TASK083-REPORT.md`)
 - `TASK082` E2E Admin CRUD Éditorial — **51/51 passent ✅** — Completed 2026-03-20 (5 sessions, Rapports: `doc/tests/E2E-ADMIN-CRUD-EDITORIAL-TASK082-REPORT.md`, `doc/tests/audit-e2e-skipped-tests-TASK082.md`)
 - `TASK078` Implémentation tests permissions et rôles — 239 cas — **UNIT : 42/42 ✅ + DAL : 80/80 ✅ + RLS : 114/114 ✅ + E2E : 23/23 ✅** — Completed 2026-03-17

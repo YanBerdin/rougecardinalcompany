@@ -93,7 +93,9 @@
     "e2e:admin": "npx playwright test --project=admin --reporter=list",
     "e2e:cross": "npx playwright test --project=cross-public --project=cross-admin --reporter=list",
     "e2e:cross:public": "npx playwright test --project=cross-public --reporter=list",
-    "e2e:cross:admin": "npx playwright test --project=cross-admin --reporter=list"
+    "e2e:cross:admin": "npx playwright test --project=cross-admin --reporter=list",
+    "e2e:cross:errors": "npx playwright test --project=cross-public --project=cross-admin --grep \"CROSS-ERR\" --reporter=list",
+    "e2e:cross:perf": "npx playwright test --project=cross-public --project=cross-admin --grep \"CROSS-PERF\" --reporter=list"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

@@ -81,11 +81,45 @@ async function checkEnvVars(): Promise<void> {
     }
 }
 
+const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000';
+
+/**
+ * Warmup Next.js dev mode by triggering compilation of key pages.
+ * Uses fetch() to request pages — this triggers server-side compilation
+ * so subsequent test navigations find pages already compiled and cached.
+ */
+async function warmupNextjsServer(): Promise<void> {
+    const WARMUP_TIMEOUT_MS = 60_000;
+    const pagesToWarm = ['/', '/auth/login'];
+
+    console.log('🔥 Warmup Next.js dev mode — compilation des pages...');
+
+    for (const pagePath of pagesToWarm) {
+        const start = Date.now();
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), WARMUP_TIMEOUT_MS);
+
+        try {
+            const res = await fetch(`${BASE_URL}${pagePath}`, {
+                signal: controller.signal,
+            }).finally(() => clearTimeout(timer));
+            console.log(`   ✓ ${pagePath} (${res.status}, ${Date.now() - start}ms)`);
+        } catch (err: unknown) {
+            clearTimeout(timer);
+            const msg = err instanceof Error ? err.message : String(err);
+            console.warn(`   ⚠️  ${pagePath} — warmup échoué après ${Date.now() - start}ms : ${msg}`);
+        }
+    }
+
+    console.log('✅ Warmup terminé\n');
+}
+
 export default async function globalSetup(): Promise<void> {
     console.log('\n🔍 Playwright Global Setup — vérification des prérequis...\n');
 
     await checkEnvVars();
     await checkSupabaseLocal();
+    await warmupNextjsServer();
 
     console.log('✅ Prérequis OK — démarrage des tests\n');
 }
