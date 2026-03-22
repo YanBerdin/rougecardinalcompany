@@ -13,9 +13,10 @@ test.describe('Performance — Public', () => {
         await page.waitForLoadState('networkidle');
 
         // 1. Mesurer le temps de chargement réel (second load, après compilation)
+        // Note: ne pas attendre networkidle — les connexions HMR/SSE du mode dev
+        // ne s'éteignent jamais, ce qui fausserait la mesure (peut atteindre 15s+).
         const start = Date.now();
         await page.goto('/', { waitUntil: 'domcontentloaded' });
-        await page.waitForLoadState('networkidle');
         const elapsed = Date.now() - start;
 
         // 2. Vérifier que la page est effectivement chargée

@@ -13,7 +13,7 @@ export function NewsView({ news }: NewsViewProps) {
     <section className="py-24 bg-background" aria-labelledby="news-heading">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 id="news-heading" className="text-3xl md:text-4xl lg:text-5xl font-semibold font-sans mb-4">
+          <h2 id="news-heading" className="text-3xl md:text-4xl lg:text-5xl font-bold font-sans mb-4">
             À la Une
           </h2>
           <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
