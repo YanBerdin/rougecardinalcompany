@@ -1,9 +1,9 @@
 # \[TASK084] — E2E Transversaux — Erreurs & Performance
 
-**Status:** Pending
+**Status:** Completed
 
 **Added:** 2026-03-17
-**Updated:** 2026-03-21
+**Updated:** 2026-03-22
 
 ## Original Request
 
@@ -104,23 +104,28 @@ Considérer de les marquer comme `test.skip` en CI ou d'augmenter le seuil.
 e2e/tests/
 └── cross/
     ├── errors/
-    │   ├── errors.fixtures.ts
-    │   └── errors.spec.ts
+    │   ├── errors-public.fixtures.ts
+    │   ├── errors-public.spec.ts
+    │   ├── errors-admin.fixtures.ts
+    │   └── errors-admin.spec.ts
     └── performance/
-        ├── performance.fixtures.ts
-        └── performance.spec.ts
+        ├── performance-public.fixtures.ts
+        ├── performance-public.spec.ts
+        ├── performance-admin.fixtures.ts
+        └── performance-admin.spec.ts
 ```
 
 ## Progress Tracking
 
-> **Overall Status:** Not Started — 0%
+> **Overall Status:** Completed — 100%
 
 ### Subtasks
 
-| ID  | Description                                | Status      | Updated    | Notes            |
-| --- | ------------------------------------------ | ----------- | ---------- | ---------------- |
-| 1.1 | Tests gestion erreurs (CROSS-ERR-001→003)  | Not Started | 2026-03-17 | P0/P1            |
-| 1.2 | Tests performance (CROSS-PERF-001→003)     | Not Started | 2026-03-17 | Optionnel/manuel |
+| ID  | Description                                | Status    | Updated    | Notes                        |
+| --- | ------------------------------------------ | --------- | ---------- | ---------------------------- |
+| 1.1 | Tests gestion erreurs (CROSS-ERR-001→003)  | Complete  | 2026-03-22 | 3/3 tests passing            |
+| 1.2 | Tests performance (CROSS-PERF-001→003)     | Complete  | 2026-03-22 | 3/3 tests passing (seuil 8s) |
+| 1.3 | Fix CROSS-RESP-005 — admin mobile overflow | Complete  | 2026-03-22 | `app/(admin)/layout.tsx` min-w-0 |
 
 ## Pièges connus — Patterns à éviter dans les futurs tests cross
 
@@ -230,6 +235,34 @@ await expect(table.getByRole('cell', { name: title }).first()).toBeVisible({ tim
 ---
 
 ## Progress Log
+
+### 2026-03-22 (fix post-complétion — CROSS-RESP-005 admin mobile overflow)
+
+- `pnpm run e2e:cross` → `CROSS-RESP-005` échoue : `Expected: <= 376 / Received: 424`
+- **Cause** : `<main id="main-content">` est un `flex-1` child dans `SidebarInset`. La propriété CSS par défaut `min-width: auto` sur les enfants flexbox permet au container de s'étendre à la largeur minimale de son contenu (424 px) même avec un viewport de 375 px. Sans `overflow-x: hidden`, cette largeur se propage à `document.body.scrollWidth`.
+- **Fix** : ajout de `min-w-0 overflow-x-hidden` sur `<main id="main-content">` dans `app/(admin)/layout.tsx`. S'applique à toutes les pages admin (layout partagé).
+- **Résultat** : 4/4 tests `responsive-admin.spec.ts` passent — 22/22 `e2e:cross` passent — aucune régression.
+
+### 2026-03-22 (post-complétion — incident navigateur)
+
+- `pnpm run e2e:cross:perf` échoue avec exit code 1 après mise à jour Playwright (build v1200)
+- **Cause** : binaires Chromium headless shell non téléchargés suite à la mise à jour
+- **Fix** : `pnpm exec playwright install chromium`
+- Tests de retour au vert : 4/4 PASSED (41.0s)
+- **Règle à retenir** : après toute mise à jour Playwright, exécuter `pnpm exec playwright install`
+
+### 2026-03-22 (complétion initiale)
+
+- Implémentation complète des 6 cas de test (7 tests au total) :
+  - **CROSS-ERR-001** : Page 404 → naviguer vers `/page-inexistante-e2e-test`, vérifie HTTP 404, heading "404"
+  - **CROSS-ERR-002** : Error boundary → intercepte Supabase REST/Auth avec `route.abort('connectionrefused')`, vérifie error boundary ou contenu présent
+  - **CROSS-ERR-003** : Toast erreur mutation admin → navigue vers `/admin/team/new`, remplit formulaire, intercepte POSTs avec `route.abort('failed')`, vérifie toast visible via `[data-sonner-toast]`
+  - **CROSS-PERF-001** : Chargement accueil < 8s (warmup + mesure, seuil élargi pour dev mode)
+  - **CROSS-PERF-002** : Chargement admin dashboard < 8s (idem)
+  - **CROSS-PERF-003** : Navigation fluide sans flash blanc (vérifie contenu et bgColor entre pages)
+- **Apprentissage clé** : Les Server Actions utilisent le protocole RSC ; `route.fulfill(status: 500)` ne produit PAS d'erreur valide RSC → utiliser `route.abort('failed')` qui déclenche une exception fetch côté client, attrapée par le try/catch du composant
+- **Apprentissage clé** : En dev mode Next.js, le premier chargement d'une page compile à la demande (5-8s). Le warmup (charger 2 fois, mesurer la 2ème) est nécessaire pour des tests fiables
+- Résultat final : **7/7 PASSED** (33.2s)
 
 ### 2026-03-21
 

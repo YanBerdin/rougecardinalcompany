@@ -84,7 +84,7 @@ export default defineConfig({
             dependencies: ['setup-admin', 'setup-editor', 'setup-user'],
         },
 
-        // --- Cross-cutting tests: responsive (public), accessibility, theme (public) ---
+        // --- Cross-cutting tests: responsive (public), accessibility, theme (public), errors, perf ---
         {
             name: 'cross-public',
             use: { ...devices['Desktop Chrome'] },
@@ -92,9 +92,11 @@ export default defineConfig({
                 'cross/responsive/responsive-public.spec.ts',
                 'cross/accessibility/accessibility.spec.ts',
                 'cross/theme/theme-public.spec.ts',
+                'cross/errors/errors-public.spec.ts',
+                'cross/performance/performance-public.spec.ts',
             ],
         },
-        // --- Cross-cutting tests requiring admin auth: admin responsive + theme ---
+        // --- Cross-cutting tests requiring admin auth: admin responsive + theme + errors + perf ---
         {
             name: 'cross-admin',
             use: {
@@ -104,13 +106,19 @@ export default defineConfig({
             testMatch: [
                 'cross/responsive/responsive-admin.spec.ts',
                 'cross/theme/theme-admin.spec.ts',
+                'cross/errors/errors-admin.spec.ts',
+                'cross/performance/performance-admin.spec.ts',
             ],
             dependencies: ['setup-admin'],
         },
     ],
 
     webServer: {
-        command: 'pnpm dev',
+        // `pnpm exec next dev` (webpack) au lieu de `pnpm dev` (next dev --turbopack) :
+        // Turbopack deadlocke indéfiniment sur `@supabase/ssr` lors de la compilation du
+        // bundle browser (aucun timeout ne suffit — c'est un vrai deadlock, pas une lenteur).
+        // webpack dev server compile correctement les mêmes routes sans ce bug.
+        command: 'pnpm exec next dev',
         url: BASE_URL,
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
@@ -118,6 +126,9 @@ export default defineConfig({
             ...process.env,
             // Désactiver Sentry en E2E pour éviter le bruit ETIMEDOUT dans les logs
             NEXT_PUBLIC_SENTRY_ENABLED: 'false',
+            // Safety net: skip t3-env validation in E2E context
+            // (required vars are in .env.e2e but this prevents hangs if one is missing)
+            SKIP_ENV_VALIDATION: '1',
         },
     },
 });

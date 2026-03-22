@@ -1,5 +1,27 @@
 # Progress
 
+## TASK084 — E2E Transversaux Erreurs & Performance : 7/7 passent (2026-03-22)
+
+✅ **COMPLET** — 7 tests Playwright couvrant gestion d'erreurs (3) et performance (3, comptée en 4 cas plan → 3 specs en deux fichiers) répartis sur les projets `cross-public` et `cross-admin`.
+
+| Suite | Tests | Résultat |
+| ----- | ----- | -------- |
+| Erreurs public (ERR-001, ERR-002) | 2 | ✅ 2/2 |
+| Erreurs admin (ERR-003) | 1 | ✅ 1/1 |
+| Performance public (PERF-001, PERF-003) | 2 | ✅ 2/2 |
+| Performance admin (PERF-002) | 1 | ✅ 1/1 |
+
+### Apprentissages clés (2 patterns critiques)
+
+1. **Server Actions ≠ `route.fulfill(500)`** : Les Server Actions utilisent le protocole RSC (multipart). Fournir un code 500 HTTP brut via `route.fulfill()` ne produit pas d'erreur RSC valide — le composant ne passe jamais dans le catch. Solution : `route.abort('failed')` qui génère une exception fetch côté client, attrapée par le try/catch du composant (`TeamMemberFormWrapper`).
+2. **Warmup obligatoire en dev mode Next.js** : La compilation à la demande (on-demand) produit des 1ers chargements de 5-8 s. Charger la page deux fois et mesurer la seconde garantit un test stable. Seuil élargi à 8 000 ms pour l'environnement local.
+
+### Rapport
+
+`doc/tests/E2E-ERRORS-PERFORMANCE-TASK084-REPORT.md`
+
+---
+
 ## TASK038 — E2E Cross-Cutting (Responsive + A11Y + Thème) : 16/16 passent (2026-03-21)
 
 ✅ **COMPLET** — 16 tests Playwright couvrant responsive (5), accessibilité (7) et thème dark/light (3) + 1 bonus admin. Créés en 2025-06-09, stabilisés en **3 sessions de débogage** (7 bugs corrigés + 3 intermittents résolus).

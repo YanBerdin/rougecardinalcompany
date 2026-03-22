@@ -49,7 +49,7 @@ export default async function AdminLayout({
           </div>
         </header>
         {/* C1 — landmark <main> avec id pour le skip-link */}
-        <main id="main-content" className="flex flex-1 flex-col gap-6 max-sm:p-2 p-4">
+        <main id="main-content" className="flex flex-1 flex-col gap-6 max-sm:p-2 p-4 min-w-0 overflow-x-hidden">
           {children}
         </main>
       </SidebarInset>

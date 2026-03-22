@@ -63,7 +63,7 @@ export default function Footer() {
 
           {/* Navigation */}
           <div>
-            <h3 className="font-semibold mb-4 text-secondary-foreground">Navigation</h3>
+            <h3 className="font-semibold font-sans mb-4 text-secondary-foreground">Navigation</h3>
             <ul className="space-y-2">
               <li>
                 <Link
@@ -110,7 +110,7 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h3 className="font-semibold mb-4 text-secondary-foreground">Contact</h3>
+            <h3 className="font-semibold font-sans mb-4 text-secondary-foreground">Contact</h3>
             <ul className="space-y-3">
               <li className="flex items-center space-x-2 text-muted-foreground">
                 <Mail className="h-4 w-4 text-primary" />

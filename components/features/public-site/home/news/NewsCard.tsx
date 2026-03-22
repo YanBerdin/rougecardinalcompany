@@ -70,7 +70,7 @@ export function NewsCard({ item, index }: NewsCardProps) {
           </time>
         </div>
 
-        <h3 className="text-xl font-semibold mb-3 hover:text-primary transition-colors card-title">
+        <h3 className="text-xl font-semibold font-sans mb-3 hover:text-primary transition-colors card-title">
           <Link href={articleHref} {...externalProps}>
             {item.title}
             {isExternal && (
