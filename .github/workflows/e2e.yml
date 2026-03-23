@@ -25,6 +25,12 @@ on:
     branches: [main, master, develop]
   workflow_dispatch:
 
+# Minimal permissions following principle of least privilege
+permissions:
+  contents: read   # checkout
+  checks: write    # Playwright github reporter (PR annotations)
+  actions: write   # cache write + artifact upload
+
 # Cancel in-progress runs for the same branch/PR
 concurrency:
   group: e2e-${{ github.ref }}
