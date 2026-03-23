@@ -1,5 +1,22 @@
 # Progress
 
+## TASK086 — Pipeline CI/CD E2E : CI vert en 10m 31s (2026-03-23)
+
+✅ **COMPLET** — Workflow GitHub Actions `.github/workflows/e2e.yml` créé et validé. Pipeline complet : Supabase local (clés dynamiques via `jq`) + comptes de test idempotents + Next.js build + Playwright chromium → **CI vert** confirmé après 4 itérations de débogage.
+
+| Composant | Statut |
+| --------- | ------ |
+| `.github/workflows/e2e.yml` (12 étapes, permissions, concurrence) | ✅ Créé et fonctionnel |
+| `scripts/ci-create-test-accounts.ts` (idempotent, upsert) | ✅ Créé |
+| `doc/ci/GITHUB_SECRETS.md` | ✅ Documenté |
+| Premier run CI | ✅ Vert — 10m 31s |
+
+### Leçon critique
+
+**GitHub Actions `ubuntu-latest` ≠ root** : utilisateur `runner` (HOME=`/home/runner`). Toujours utiliser `~` (tilde POSIX), jamais `/root` dans les commandes `run:`. Fix final : `rm -rf ~/.cache/ms-playwright` sans override `HOME`.
+
+---
+
 ## TASK085 — E2E Admin Analytics : 3/3 passent (2026-03-23)
 
 ✅ **COMPLET** — 3 tests Playwright couvrant la page Admin Analytics (section 20 du plan de test). Ferme le dernier gap de couverture admin — la suite E2E couvre désormais **100 % des sections du plan**.

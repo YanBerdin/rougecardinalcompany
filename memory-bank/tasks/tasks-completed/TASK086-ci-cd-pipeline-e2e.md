@@ -1,6 +1,6 @@
 # \[TASK086] — CI/CD Pipeline E2E
 
-**Status:** In Progress
+**Status:** Completed
 **Added:** 2026-03-23
 **Updated:** 2026-03-23
 **Priorité:** P0 — bloquant pour la mise en production
@@ -329,3 +329,198 @@ Promise.all(accounts.map(upsertAccount))
 - Auth setup : `e2e/tests/auth/admin.setup.ts`
 - Env exemple : `.env.e2e.example`
 - Rapport TASK083 : `doc/tests/E2E-ADMIN-CRUD-ADMIN-ONLY-TASK083-REPORT.md`
+
+---
+
+## Critères d'acceptance — Résultats finaux
+
+- [x] `.github/workflows/e2e.yml` créé avec syntaxe valide — **12 étapes, `permissions` block, `concurrency` cancel-in-progress**
+- [x] `scripts/ci-create-test-accounts.ts` créé et idempotent (upsert)
+- [x] `doc/ci/GITHUB_SECRETS.md` créé avec liste complète des secrets
+- [x] Premier run CI vert — **"succeeded 5 minutes ago in 10m 31s"** (commit `2401f42`)
+- [x] Rapport HTML uploadé comme artifact `playwright-report-${{ github.run_id }}`
+- [x] Durée totale job : **10m 31s** (< 30 min)
+
+---
+
+## Progress Tracking
+
+**Overall Status:** Completed — 100 %
+
+### Subtasks
+
+| ID | Description | Status | Updated | Notes |
+| --- | ----------- | ------ | ------- | ----- |
+| 86.1 | Créer `.github/workflows/e2e.yml` initial | Complete | 2026-03-23 | Commit initial avec déclencheurs, permissions, 12 étapes |
+| 86.2 | Créer `scripts/ci-create-test-accounts.ts` | Complete | 2026-03-23 | Upsert idempotent avec service_role_key |
+| 86.3 | Créer `doc/ci/GITHUB_SECRETS.md` | Complete | 2026-03-23 | Documentation complète des secrets requis |
+| 86.4 | Configurer GitHub Secrets dans le dépôt | Complete | 2026-03-23 | 7 secrets E2E + Supabase configurés |
+| 86.5 | Fix : supprimer steps cache Playwright | Complete | 2026-03-23 | Commit `0e249d8` — install propre sans cache |
+| 86.6 | Fix : nettoyer cache avant install | Complete | 2026-03-23 | Commit `8318e70` — `rm -rf ~/.cache/ms-playwright` |
+| 86.7 | Fix : corriger chemin /root (erreur) | Complete | 2026-03-23 | Commit `2bd14bd` — tentative /root, causait permission denied |
+| 86.8 | Fix : revenir à ~ + supprimer HOME=/root | Complete | 2026-03-23 | Commit `2401f42` — **FINAL FIX, CI vert** |
+| 86.9 | Ajouter `master` aux déclencheurs | Complete | 2026-03-23 | Session antérieure — push sur `main, master, develop` |
+| 86.10 | Ajouter CodeQL permissions block | Complete | 2026-03-23 | Session antérieure — `missing-workflow-permissions` alert |
+
+---
+
+## Progress Log
+
+### 2026-03-23 — Création initiale du pipeline
+
+> **Session 1 — Mise en place complète**
+
+- Créé `.github/workflows/e2e.yml` avec 12 étapes complètes :
+  - Checkout → pnpm setup → Node.js 22 → `pnpm install` → Playwright install → Supabase start → clés dynamiques via `jq` → création comptes de test → génération `.env.e2e` → build Next.js → tests E2E → upload rapport → stop Supabase
+- Créé `scripts/ci-create-test-accounts.ts` : script idempotent upsert via `@supabase/supabase-js` admin API
+- Créé `doc/ci/GITHUB_SECRETS.md` avec la documentation complète des secrets
+- Configuré les GitHub Secrets dans le dépôt distant (7 secrets E2E + clés Supabase récupérées dynamiquement)
+- Ajouté `master` aux déclencheurs (le dépôt utilise `master` comme branche par défaut)
+- Ajouté le `permissions` block (`contents: read`, `checks: write`, `actions: write`) pour corriger l'alerte CodeQL `missing-workflow-permissions`
+- Premier run échoue avec : `Executable doesn't exist at /root/.cache/ms-playwright/chromium_headless_shell-1200/...`
+
+> **Session 2 — Débogage Playwright cache (4 itérations)**
+
+**Itération 1 — Commit `0e249d8` :**
+
+- Cause : Les 3 étapes de cache existantes (Get PW version + `actions/cache@v4` + install conditionnel) créaient une incohérence de cache
+- Fix : Suppression des 3 étapes de cache, remplacement par un install propre et incondititionnel : `pnpm exec playwright install chromium --with-deps`
+- Résultat : Échec persistant — même erreur sur `/root/.cache`
+
+**Itération 2 — Commit `8318e70` :**
+
+- Cause suspectée : cache résiduel d'un run précédent corrompu
+- Fix : `rm -rf ~/.cache/ms-playwright` avant l'install
+- Résultat : Nouveau type d'erreur — `rm: cannot remove '/root/.cache/ms-playwright': Permission denied`
+
+**Itération 3 — Commit `2bd14bd` (erreur de raisonnement) :**
+
+- Hypothèse incorrecte : le runner utilise `root` comme utilisateur → chemin absolu `/root/.cache`
+- Fix appliqué (à tort) : `rm -rf /root/.cache/ms-playwright` + `HOME=/root pnpm exec playwright install`
+- Résultat : `Permission denied` sur `/root` → l'utilisateur du runner n'est **pas** root
+
+**Itération 4 — Commit `2401f42` — FIX FINAL :**
+
+- Insight clé : GitHub Actions `ubuntu-latest` tourne comme utilisateur `runner` avec `HOME=/home/runner`. `/root` est inaccessible (appartient à root).
+- Fix double :
+  1. Revenir à `rm -rf ~/.cache/ms-playwright` (tilde résolu correctement par le runner)
+  2. Supprimer `HOME: /root` de l'env de l'étape "Run E2E tests" (causait une dissonance entre le répertoire d'install et de lookup)
+- Résultat : **CI vert — "succeeded 5 minutes ago in 10m 31s"** ✅
+
+---
+
+## Rapport Détaillé — Analyse Technique
+
+### Architecture finale du workflow (`.github/workflows/e2e.yml`)
+
+```
+Déclencheurs : push/PR sur main, master, develop + workflow_dispatch
+Permissions  : least-privilege (contents:read, checks:write, actions:write)
+Concurrence  : annulation du run précédent (e2e-${{ github.ref }})
+Runner       : ubuntu-latest
+Timeout      : 30 minutes
+Runtime réel : ~10m 31s
+```
+
+| Étape | Action | Durée estimée |
+| ----- | ------ | ------------- |
+| 1. Checkout | `actions/checkout@v4` avec `fetch-depth: 1` | ~5s |
+| 2. pnpm setup | `pnpm/action-setup@v4` v9 | ~5s |
+| 3. Node.js 22 | `actions/setup-node@v4` avec cache pnpm | ~10s |
+| 4. `pnpm install` | `--frozen-lockfile` | ~30s |
+| 5. Playwright install | `rm -rf ~/.cache/ms-playwright` + install chromium | ~30s |
+| 6. Supabase start | `pnpm dlx supabase start` | ~120s |
+| 7. Clés Supabase | `supabase status --output json \| jq` | ~5s |
+| 8. Comptes de test | `npx tsx scripts/ci-create-test-accounts.ts` | ~10s |
+| 9. `.env.e2e` | `cat > heredoc` | ~1s |
+| 10. Build Next.js | `pnpm build` + SKIP_ENV_VALIDATION | ~180s |
+| 11. E2E tests | `pnpm exec playwright test --reporter=html,github` | ~120s |
+| 12. Upload rapport | `actions/upload-artifact@v4` | ~10s |
+| 13. Stop Supabase | `pnpm dlx supabase stop --no-backup` | ~10s |
+
+### Leçon critique : utilisateur GitHub Actions runner
+
+**GitHub Actions `ubuntu-latest` ≠ root**
+
+- Utilisateur : `runner`
+- `HOME` résolu : `/home/runner`
+- `/root` : inaccessible (permission denied)
+- `~` (tilde POSIX) : toujours correct dans les `run:` shells
+
+**Pattern sûr pour Playwright :**
+
+```yaml
+- name: Clean Playwright cache and reinstall
+  run: |
+    rm -rf ~/.cache/ms-playwright       # ← tilde correct
+    pnpm exec playwright install chromium --with-deps
+```
+
+**Anti-patterns à éviter :**
+
+```yaml
+# ❌ Chemin absolu /root — permission denied
+rm -rf /root/.cache/ms-playwright
+
+# ❌ Override HOME — dissonance install vs lookup
+env:
+  HOME: /root
+```
+
+### Stratégie clés Supabase : dynamique vs. statique
+
+Les clés Supabase locales (anon key, service_role key) **varient selon l'instance** et sont générées à chaque `supabase start`. La solution retenue est **dynamique** :
+
+```yaml
+- name: Extract Supabase local keys
+  id: supabase-keys
+  run: |
+    echo "anon_key=$(pnpm dlx supabase status --output json | jq -r '.ANON_KEY // .API["anon key"]')" >> "$GITHUB_OUTPUT"
+    echo "service_role_key=$(pnpm dlx supabase status --output json | jq -r '.SERVICE_ROLE_KEY // .API["service_role key"]')" >> "$GITHUB_OUTPUT"
+```
+
+Références dans les étapes suivantes : `${{ steps.supabase-keys.outputs.anon_key }}`
+
+Avantage : aucun secret GitHub statique à maintenir pour les clés locales. Seuls les secrets E2E (emails/passwords de comptes de test) sont stockés dans GitHub Secrets.
+
+### Script `ci-create-test-accounts.ts` — Pattern idempotent
+
+```typescript
+async function upsertAccount(account: TestAccount): Promise<void> {
+  const { data: list } = await admin.auth.admin.listUsers();
+  const existing = list.users.find((u) => u.email === account.email);
+
+  if (existing) {
+    await admin.auth.admin.updateUserById(existing.id, {
+      app_metadata: { role: account.role },
+    });
+  } else {
+    await admin.auth.admin.createUser({
+      email: account.email,
+      password: account.password,
+      email_confirm: true,           // ← pas de vérification email requise
+      app_metadata: { role: account.role },
+    });
+  }
+}
+```
+
+Idempotence garantie : peut être exécuté plusieurs fois sans créer de doublons.
+
+### Sécurité du workflow
+
+- **Permissions minimales** (`contents: read` uniquement pour checkout) — conforme OWASP + CodeQL
+- **Annulation concurrente** (`concurrency: cancel-in-progress: true`) — évite les runs parasites
+- **Secrets E2E jamais en clair** — uniquement via `${{ secrets.XXX }}`
+- **`.env.e2e` généré en runtime** — n'existe jamais dans le dépôt git
+- **Rapport artifact 30 jours** — rétention limitée
+
+---
+
+## État final des fichiers créés
+
+| Fichier | Statut | Commits |
+| ------- | ------ | ------- |
+| `.github/workflows/e2e.yml` | ✅ Créé et fonctionnel | Session initiale + 4 corrections (`0e249d8`, `8318e70`, `2bd14bd`, `2401f42`) |
+| `scripts/ci-create-test-accounts.ts` | ✅ Créé | Session initiale |
+| `doc/ci/GITHUB_SECRETS.md` | ✅ Créé | Session initiale |

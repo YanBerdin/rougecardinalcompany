@@ -2,6 +2,7 @@
 
 ## Completed
 
+- `TASK086` Pipeline CI/CD E2E GitHub Actions — **CI vert en 10m 31s ✅** (2026-03-23) — `e2e.yml` 12 étapes, Supabase dynamique via `jq`, comptes idempotents, fix tilde vs /root — Rapport: `memory-bank/tasks/TASK086-ci-cd-pipeline-e2e.md`
 - `TASK001` Commit & annotate revoke migrations
 - `TASK002` Adapt CI audit to allow known restored GRANTs
 - `TASK003` Create CI gate for REVOKE detection
