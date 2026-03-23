@@ -74,10 +74,12 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       # -----------------------------------------------------------------------
-      # 5. Install Playwright browsers (no cache — prevents stale binary issues)
+      # 5. Install Playwright browsers (clean install — prevents stale binary issues)
       # -----------------------------------------------------------------------
-      - name: Install Playwright browsers and dependencies
-        run: pnpm exec playwright install chromium --with-deps
+      - name: Clean Playwright cache and reinstall
+        run: |
+          rm -rf ~/.cache/ms-playwright
+          pnpm exec playwright install chromium --with-deps
 
       # -----------------------------------------------------------------------
       # 6. Start Supabase local
