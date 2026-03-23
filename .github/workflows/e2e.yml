@@ -81,13 +81,8 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.pw-version.outputs.version }}
 
-      - name: Install Playwright browsers
-        if: steps.pw-cache.outputs.cache-hit != 'true'
+      - name: Install Playwright browsers and dependencies
         run: pnpm exec playwright install chromium --with-deps
-
-      - name: Install Playwright system deps (cache hit)
-        if: steps.pw-cache.outputs.cache-hit == 'true'
-        run: pnpm exec playwright install-deps chromium
 
       # -----------------------------------------------------------------------
       # 6. Start Supabase local
