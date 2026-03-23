@@ -3,7 +3,7 @@
 **Date** : 2026-03-21  
 **Auteur** : GitHub Copilot  
 **Commande** : `pnpm run e2e:cross`  
-**Résultat final** : ✅ **16/16 tests passent** — 3 runs consécutifs validés (37.6 s, 37.3 s, 35.0 s)
+**Résultat final** : ✅ **15/15 tests passent** — 3 runs consécutifs validés (37.6 s, 37.3 s, 35.0 s)
 
 ---
 
@@ -168,7 +168,7 @@ Le layout Next.js/Tailwind peut effectuer des ajustements post-hydratation. Le `
 | ----- | ----- |
 | `await page.waitForTimeout(400)` | `expect().toPass({ timeout: 5_000 })` |
 
-En suite complète (16 tests séquentiels), le CPU est plus chargé. 400 ms n'était pas suffisant pour l'animation d'ouverture de la sidebar.
+En suite complète (15 tests séquentiels), le CPU est plus chargé. 400 ms n'était pas suffisant pour l'animation d'ouverture de la sidebar.
 
 ### CROSS-A11Y-004 — CSS custom properties non résolues au moment d'axe
 

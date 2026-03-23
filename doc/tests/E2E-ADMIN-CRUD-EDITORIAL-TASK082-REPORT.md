@@ -9,13 +9,13 @@
 
 ## Résumé
 
-Implémentation et stabilisation de **51 tests E2E** couvrant les fonctionnalités CRUD
+Implémentation et stabilisation de **50 tests E2E** couvrant les fonctionnalités CRUD
 des 6 sections éditoriales du backoffice admin (rôle `editor`) — définis dans
 `specs/PLAN_DE_TEST_COMPLET.md` sections 9 à 14.
 
 > **Résultat initial (2026-03-18) : 42 passent, 0 échouent, 9 skippés (`test.fixme`)**
 >
-> **Résultat final (2026-03-20) : 51 passent, 0 échouent, 0 skippés — 100 % de la suite editor est verte**
+> **Résultat final (2026-03-20) : 50 passent, 0 échouent, 0 skippés — 100 % de la suite editor est verte**
 >
 > Les 9 tests initialement skippés ont été débloqués et corrigés en 5 sessions de débogage (détails dans `doc/tests/audit-e2e-skipped-tests-TASK082.md`).
 
@@ -31,7 +31,7 @@ des 6 sections éditoriales du backoffice admin (rôle `editor`) — définis da
 | 12 — Presse | ADM-PRESSE-001→010 | 10 | ✅ 10 | 0 | — |
 | 13 — Compagnie | ADM-COMP-001→006 | 6 | ✅ 6 | 0 | — |
 | 14 — Médiathèque | ADM-MEDIA-001→011 | 11 | ✅ 11 | 0 | — |
-| **Total** | | **51** | **51** | **0** | |
+| **Total** | | **50** | **50** | **0** | |
 
 ---
 
@@ -384,5 +384,5 @@ await expect(table.getByRole('cell', { name: title }).first()).toBeVisible({ tim
 - Suite `e2e:editor` — 3 tests presse cassés (ADM-PRESSE-003, 006, 007) + 3 tests flaky (PRESSE-002, SPEC-003, SPEC-006)
 - Diagnostiqué 5 patterns de bug récurrents (voir section "Pièges connus" ci-dessus)
 - Corrections appliquées dans les POM `presse.page.ts` et `spectacles.page.ts` + spec `presse.spec.ts`
-- Résultat final validé : **51/51 PASSED** (3 runs consécutifs confirmés)
+- Résultat final validé : **50/50 PASSED** (3 runs consécutifs confirmés)
 - Commit `f19f2d1` sur `feat/task038-e2e-cross-cutting-stable`

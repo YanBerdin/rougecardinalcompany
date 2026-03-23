@@ -17,7 +17,7 @@ Implémentation et stabilisation de **55 tests E2E** (tous actifs, 0 fixme) couv
 >
 > **Résultat post-completion : 55 passent, 0 échouent, 0 fixme — tous les fixmes activés (Fix 12)**
 >
-> **Résultat session 7 : 56 passent, 0 échouent, 0 fixme — ADM-AUDIT-009 réécrit (Fix 13) + infra stabilisée (Sentry + global-setup)**
+> **Résultat session 7 : 55 passent, 0 échouent, 0 fixme — ADM-AUDIT-009 réécrit (Fix 13) + infra stabilisée (Sentry + global-setup)**
 >
 > Les 22 échecs initiaux ont été résolus en 13 correctifs itératifs répartis sur 7 sessions de débogage. Les 3 fixmes ont ensuite été activés en session post-completion (Fix 12). Le test ADM-AUDIT-009 a été réécrit en session 7 (Fix 13) pour contourner une limitation Playwright sur les blob URLs. Détails dans la section « Bugs corrigés ».
 
@@ -446,7 +446,7 @@ test('ADM-AUDIT-009 — Export CSV', async ({ auditLogsPage }) => {
 | Session 4 | 2026-03-20 (matin) | 35 pass / 19 fail | 51/56 passent | Fix 1, 2, 3, 4, 5, 6, 7, 8 (healing massif) |
 | Session 5 | 2026-03-20 (fin) | 51 pass / 2 fail | **53/55 passent** | Fix 9, 10 (HERO-008 + PART-007) |
 | Session 6 (post-completion) | 2026-03-20+ | 53 pass / 0 fail / 3 fixme | **55/55 passent** | Fix 12 : activation des 3 fixmes (PART-005, HERO-005, AUDIT-006) |
-| Session 7 (stabilisation infra) | 2026-03-21 | 55 pass / 0 fail | **56/56 passent** | Fix 13 : ADM-AUDIT-009 réécrit (blob URL + filtre UPDATE + toast) + Sentry ETIMEDOUT fix + global-setup.ts |
+| Session 7 (stabilisation infra) | 2026-03-21 | 55 pass / 0 fail | **55/55 passent** | Fix 13 : ADM-AUDIT-009 réécrit (blob URL + filtre UPDATE + toast) + Sentry ETIMEDOUT fix + global-setup.ts |
 
 ---
 
@@ -509,15 +509,15 @@ Sentry en local génère du bruit ETIMEDOUT (tentatives de connexion aux serveur
 ## Couverture finale
 
 ```bash
-Suite admin : 56 passent / 0 fixme / 0 échouent  (TASK083 — session 7)
-Suite editor : 51 passent / 0 fixme / 0 échouent  (TASK082)
+Suite admin : 59 passent / 0 fixme / 0 échouent  (TASK083 55 + TASK085 3 analytics + 1 setup-admin)
+Suite editor : 50 passent / 0 fixme / 0 échouent  (TASK082)
 Suite auth :   22 passent / 0 fixme / 0 échouent  (TASK081)
 Suite public : 18 passent / 0 fixme / 0 échouent  (TASK080)
-─────────────────────────────────────────────────────────
-Total E2E  : 147 passent / 0 fixme / 0 échouent
+─────────────────────────────────────────────────────
+Total E2E  : 149 passent / 0 fixme / 0 échouent
 ```
 
-> Note : le 56ème test admin vient du run dual-browser d'un test de la suite. ADM-ABOUT-002 est confirmé flaky (passe en isolation, échoue occasionnellement en suite complète — pré-existant, non lié aux correctifs TASK083).
+> ADM-ABOUT-002 est confirmé flaky (passe en isolation, échoue occasionnellement en suite complète — pré-existant, non lié aux correctifs TASK083).
 
 ---
 

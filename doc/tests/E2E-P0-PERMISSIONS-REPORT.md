@@ -9,9 +9,9 @@
 
 ## Résumé
 
-Implémentation et passage complet des **23 tests E2E P0** de permissions (ROLE-E2E-001→013, 016→024) qui prouvent que le modèle de rôles `user(0) < editor(1) < admin(2)` est correctement appliqué au niveau navigation Playwright.
+Implémentation et passage complet des **20 tests E2E P0** de permissions (ROLE-E2E-001→013, 016→024) qui prouvent que le modèle de rôles `user(0) < editor(1) < admin(2)` est correctement appliqué au niveau navigation Playwright.
 
-> **Résultat final : 23/23 tests passent (42.8s)**
+> **Résultat final : 20/20 tests passent (42.8s)**
 
 ---
 
@@ -39,7 +39,7 @@ Implémentation et passage complet des **23 tests E2E P0** de permissions (ROLE-
 | `e2e/tests/auth/editor.setup.ts` | Créé + corrigé | Auth setup editor (ESM fix) |
 | `e2e/tests/auth/user.setup.ts` | Créé + corrigé | Auth setup user (ESM fix + redirect loop fix) |
 | `e2e/tests/permissions/permissions.fixtures.ts` | Créé + corrigé | 4 fixtures : adminPage, editorPage, userPage, anonPage (ESM fix) |
-| `e2e/tests/permissions/permissions.spec.ts` | Créé + corrigé | 23 tests, 5 describe blocks |
+| `e2e/tests/permissions/permissions.spec.ts` | Créé + corrigé | 20 tests, 5 describe blocks |
 | `playwright.config.ts` | Modifié | 3 projets setup + projet `permissions` avec `dependencies` |
 
 ---
@@ -175,4 +175,4 @@ Les phases restantes de TASK078 :
 | Phase 1 — Tests unitaires (ROLE-UNIT-*) | 42 cas | Non démarré |
 | Phase 2 — Tests DAL intégration (ROLE-DAL-*) | 80 cas | Non démarré |
 | Phase 3 — Tests RLS SQL (ROLE-RLS-*) | 92 cas | Non démarré |
-| Phase 4 — Tests E2E P0 permissions | 23 cas | **✅ Terminé** |
+| Phase 4 — Tests E2E P0 permissions | 20 cas | **✅ Terminé** |

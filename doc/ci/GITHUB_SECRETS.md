@@ -18,9 +18,8 @@
 
 ## Secrets générés automatiquement
 
-Les clés Supabase locales (`anon key`, `service_role key`) sont **extraites
-automatiquement** de `supabase status` dans le workflow. Il n'est pas nécessaire
-de les configurer manuellement comme secrets GitHub.
+Les clés Supabase locales (`anon key`, `service_role key`) sont **extraites automatiquement** de `supabase status` dans le workflow.
+Il n'est pas nécessaire de les configurer manuellement comme secrets GitHub.
 
 ## Secrets optionnels
 
