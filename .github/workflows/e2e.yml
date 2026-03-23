@@ -1,0 +1,186 @@
+# =============================================================================
+# E2E Tests — GitHub Actions Workflow
+#
+# Runs the full Playwright E2E suite against a local Supabase instance.
+#
+# Required GitHub Secrets:
+#   SUPABASE_SERVICE_ROLE_KEY   — local Supabase service_role key
+#   E2E_ADMIN_EMAIL             — admin test account email
+#   E2E_ADMIN_PASSWORD          — admin test account password
+#   E2E_EDITOR_EMAIL            — editor test account email
+#   E2E_EDITOR_PASSWORD         — editor test account password
+#   E2E_USER_EMAIL              — user test account email
+#   E2E_USER_PASSWORD           — user test account password
+#
+# Optional GitHub Secrets:
+#   SENTRY_AUTH_TOKEN           — skipped if absent
+# =============================================================================
+
+name: E2E Tests
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+  workflow_dispatch:
+
+# Cancel in-progress runs for the same branch/PR
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      # -----------------------------------------------------------------------
+      # 1. Checkout
+      # -----------------------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      # -----------------------------------------------------------------------
+      # 2. Setup pnpm
+      # -----------------------------------------------------------------------
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      # -----------------------------------------------------------------------
+      # 3. Setup Node.js with pnpm cache
+      # -----------------------------------------------------------------------
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # -----------------------------------------------------------------------
+      # 4. Install dependencies
+      # -----------------------------------------------------------------------
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # -----------------------------------------------------------------------
+      # 5. Cache Playwright browsers
+      # -----------------------------------------------------------------------
+      - name: Get Playwright version
+        id: pw-version
+        run: echo "version=$(pnpm exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: pw-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw-version.outputs.version }}
+
+      - name: Install Playwright browsers
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install chromium --with-deps
+
+      - name: Install Playwright system deps (cache hit)
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
+
+      # -----------------------------------------------------------------------
+      # 6. Start Supabase local
+      # -----------------------------------------------------------------------
+      - name: Start Supabase local
+        run: |
+          pnpm dlx supabase start
+
+      - name: Extract Supabase local keys
+        id: supabase-keys
+        run: |
+          echo "anon_key=$(pnpm dlx supabase status --output json | jq -r '.ANON_KEY // .API["anon key"]')" >> "$GITHUB_OUTPUT"
+          echo "service_role_key=$(pnpm dlx supabase status --output json | jq -r '.SERVICE_ROLE_KEY // .API["service_role key"]')" >> "$GITHUB_OUTPUT"
+
+      # -----------------------------------------------------------------------
+      # 7. Create E2E test accounts
+      # -----------------------------------------------------------------------
+      - name: Create E2E test accounts
+        run: npx tsx scripts/ci-create-test-accounts.ts
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          SUPABASE_SERVICE_ROLE_KEY: ${{ steps.supabase-keys.outputs.service_role_key }}
+          E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+          E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+          E2E_EDITOR_EMAIL: ${{ secrets.E2E_EDITOR_EMAIL }}
+          E2E_EDITOR_PASSWORD: ${{ secrets.E2E_EDITOR_PASSWORD }}
+          E2E_USER_EMAIL: ${{ secrets.E2E_USER_EMAIL }}
+          E2E_USER_PASSWORD: ${{ secrets.E2E_USER_PASSWORD }}
+
+      # -----------------------------------------------------------------------
+      # 8. Generate .env.e2e
+      # -----------------------------------------------------------------------
+      - name: Generate .env.e2e
+        run: |
+          cat > .env.e2e << 'ENVEOF'
+          NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=${{ steps.supabase-keys.outputs.anon_key }}
+          SUPABASE_SERVICE_ROLE_KEY=${{ steps.supabase-keys.outputs.service_role_key }}
+          SUPABASE_SECRET_KEY=${{ steps.supabase-keys.outputs.service_role_key }}
+          E2E_ADMIN_EMAIL=${{ secrets.E2E_ADMIN_EMAIL }}
+          E2E_ADMIN_PASSWORD=${{ secrets.E2E_ADMIN_PASSWORD }}
+          E2E_EDITOR_EMAIL=${{ secrets.E2E_EDITOR_EMAIL }}
+          E2E_EDITOR_PASSWORD=${{ secrets.E2E_EDITOR_PASSWORD }}
+          E2E_USER_EMAIL=${{ secrets.E2E_USER_EMAIL }}
+          E2E_USER_PASSWORD=${{ secrets.E2E_USER_PASSWORD }}
+          PLAYWRIGHT_BASE_URL=http://localhost:3000
+          NEXT_PUBLIC_SITE_URL=http://localhost:3000
+          RESEND_API_KEY=re_test_ci_not_a_real_key
+          EMAIL_FROM=noreply@ci.test
+          EMAIL_CONTACT=contact@ci.test
+          NEXT_PUBLIC_SENTRY_ENABLED=false
+          ENVEOF
+
+      # -----------------------------------------------------------------------
+      # 9. Build Next.js
+      # -----------------------------------------------------------------------
+      - name: Build Next.js
+        run: pnpm build
+        env:
+          SKIP_ENV_VALIDATION: "1"
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY: ${{ steps.supabase-keys.outputs.anon_key }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ steps.supabase-keys.outputs.service_role_key }}
+          SUPABASE_SECRET_KEY: ${{ steps.supabase-keys.outputs.service_role_key }}
+          NEXT_PUBLIC_SITE_URL: http://localhost:3000
+          RESEND_API_KEY: re_test_ci_not_a_real_key
+          EMAIL_FROM: noreply@ci.test
+          EMAIL_CONTACT: contact@ci.test
+          NEXT_PUBLIC_SENTRY_ENABLED: "false"
+
+      # -----------------------------------------------------------------------
+      # 10. Run E2E tests
+      # -----------------------------------------------------------------------
+      - name: Run E2E tests
+        run: pnpm exec playwright test --reporter=html,github
+        env:
+          CI: "true"
+          HOME: /root
+
+      # -----------------------------------------------------------------------
+      # 11. Upload report (always, even on failure)
+      # -----------------------------------------------------------------------
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report-${{ github.run_id }}
+          path: playwright-report/
+          retention-days: 30
+
+      # -----------------------------------------------------------------------
+      # 12. Stop Supabase
+      # -----------------------------------------------------------------------
+      - name: Stop Supabase
+        if: always()
+        run: pnpm dlx supabase stop --no-backup

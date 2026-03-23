@@ -1,7 +1,8 @@
 # \[TASK086] — CI/CD Pipeline E2E
 
-**Status:** Pending
+**Status:** In Progress
 **Added:** 2026-03-23
+**Updated:** 2026-03-23
 **Priorité:** P0 — bloquant pour la mise en production
 
 ---
@@ -25,7 +26,7 @@ sur chaque PR et push sur `main`.
 
 ## Prompt
 
-```
+```yaml
 Tu es en mode Playwright Tester. Crée le workflow GitHub Actions CI/CD pour
 exécuter la suite E2E Playwright du projet Rouge Cardinal Company.
 
