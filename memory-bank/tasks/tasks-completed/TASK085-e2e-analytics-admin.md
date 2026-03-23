@@ -1,7 +1,8 @@
 # \[TASK085] — E2E Admin — Analytics (rôle admin)
 
-**Status:** Pending
+**Status:** Completed
 **Added:** 2026-03-23
+**Completed:** 2026-03-23
 **Priorité:** P0 — ferme le dernier gap de couverture admin
 
 ---

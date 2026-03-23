@@ -91,6 +91,7 @@
     "e2e:auth": "npx playwright test --project=chromium-auth --reporter=list",
     "e2e:editor": "npx playwright test --project=editor --reporter=list",
     "e2e:admin": "npx playwright test --project=admin --reporter=list",
+    "e2e:analytics": "npx playwright test --project=admin --grep \"ADM-ANALYTICS\" --reporter=list",
     "e2e:cross": "npx playwright test --project=cross-public --project=cross-admin --reporter=list",
     "e2e:cross:public": "npx playwright test --project=cross-public --reporter=list",
     "e2e:cross:admin": "npx playwright test --project=cross-admin --reporter=list",

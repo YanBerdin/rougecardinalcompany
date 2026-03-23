@@ -30,6 +30,7 @@
 
 ## Terminé
 
+- `TASK085` E2E Admin — Analytics (rôle admin) — **3/3 passent ✅** — Completed 2026-03-23 (ADM-ANALYTICS-001→003, strict mode fix (#main-content), Rapport: `doc/tests/E2E-ADMIN-ANALYTICS-TASK085-REPORT.md`)
 - `TASK084` E2E Transversaux Erreurs & Performance — **7/7 passent ✅** — Completed 2026-03-22 (CROSS-ERR-001→003, CROSS-PERF-001→003, Server Actions abort pattern, warmup dev mode, Rapport: `doc/tests/E2E-ERRORS-PERFORMANCE-TASK084-REPORT.md`)
 - `TASK038` Responsive Testing & Accessibilité — **16/16 passent ✅** — Completed 2026-03-21 (responsive 5 + a11y 7 + thème 3 + bonus 1, 7 bugs corrigés, Rapport: `doc/tests/E2E-CROSS-CUTTING-TASK038-REPORT.md`)
 - `TASK083` E2E Admin CRUD Admin-only — **56/56 passent ✅ (0 fixme)** — Completed 2026-03-21 (7 sessions, 13 correctifs, Rapport: `doc/tests/E2E-ADMIN-CRUD-ADMIN-ONLY-TASK083-REPORT.md`)

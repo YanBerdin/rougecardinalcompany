@@ -16,3 +16,4 @@ export {
     AdminMediaTagsPage,
     AdminMediaFoldersPage,
 } from './media.page';
+export { AdminAnalyticsPage } from './analytics.page';
