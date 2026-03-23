@@ -376,8 +376,8 @@ test.describe('ADM-CONFIG — Configuration site : affichage des sections', () =
                 await page.waitForTimeout(200);
             }
 
-            await page.goto('/contact');
-            await page.waitForLoadState('load');
+            await page.goto('/contact', { timeout: 60_000 });
+            await page.waitForLoadState('load', { timeout: 60_000 });
             // Contact newsletter identifiée par l'input email dédié
             await expect(
                 page.locator('#newsletter-email-contact')

@@ -55,8 +55,8 @@ test.describe('Gestion des Spectacles', () => {
             title: '[TEST] Original Titre',
         });
 
-        // 2. Reload to see seeded data
-        await page.reload();
+        // 2. Navigate to see seeded data
+        await spectaclesPage.goto();
         await spectaclesPage.expectLoaded();
 
         // 3. Click "Éditer" on the seeded spectacle
@@ -84,8 +84,8 @@ test.describe('Gestion des Spectacles', () => {
             title: '[TEST] Spectacle À Supprimer',
         });
 
-        // 2. Reload to see seeded data
-        await page.reload();
+        // 2. Navigate to see seeded data
+        await spectaclesPage.goto();
         await spectaclesPage.expectLoaded();
 
         // 3. Click "Supprimer" on the spectacle row
@@ -117,8 +117,8 @@ test.describe('Gestion des Spectacles', () => {
         // 1. Seed multiple spectacles
         await SpectacleFactory.createMany(3);
 
-        // 2. Reload
-        await page.reload();
+        // 2. Navigate to refresh list
+        await spectaclesPage.goto();
         await spectaclesPage.expectLoaded();
 
         // 3. Click "Titre" column header to sort ascending
@@ -140,8 +140,8 @@ test.describe('Gestion des Spectacles', () => {
             title: '[TEST] Spectacle Preview',
         });
 
-        // 2. Reload
-        await page.reload();
+        // 2. Navigate to refresh list
+        await spectaclesPage.goto();
         await spectaclesPage.expectLoaded();
 
         // 3. Click "Détails" on the spectacle
@@ -163,8 +163,8 @@ test.describe('Gestion des Spectacles', () => {
             title: '[TEST] Spectacle Galerie',
         });
 
-        // 2. Reload
-        await page.reload();
+        // 2. Navigate to refresh list
+        await spectaclesPage.goto();
         await spectaclesPage.expectLoaded();
 
         // 3. Click "Galerie" on the spectacle
@@ -204,8 +204,8 @@ test.describe('Gestion des Spectacles', () => {
             public: false,
         });
 
-        // 2. Reload
-        await page.reload();
+        // 2. Navigate to refresh list
+        await spectaclesPage.goto();
         await spectaclesPage.expectLoaded();
 
         // 3. Edit the spectacle to make it published
@@ -237,8 +237,8 @@ test.describe('Gestion des Spectacles', () => {
         // 1. Seed 16 spectacles
         await SpectacleFactory.createMany(16);
 
-        // 2. Reload
-        await page.reload();
+        // 2. Navigate to refresh list
+        await spectaclesPage.goto();
         await spectaclesPage.expectLoaded();
 
         // 3. Verify at least 16 seeded rows are displayed (no pagination — all shown)

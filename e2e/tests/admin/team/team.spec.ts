@@ -92,7 +92,7 @@ test.describe('Gestion de l\'Équipe', () => {
     });
 
     test.describe.serial('Désactiver puis Réactiver', () => {
-        test('ADM-TEAM-006 — Réactiver un membre', async ({ teamPage }) => {
+        test('ADM-TEAM-006 — Réactiver un membre', async ({ teamPage, page }) => {
             // Setup : créer un membre inactif
             const member = await MembreEquipeFactory.create({
                 name: MEMBER_NAME,
@@ -108,6 +108,10 @@ test.describe('Gestion de l\'Équipe', () => {
             // 2. Cliquer "Réactiver" sur le membre inactif
             await teamPage.clickMemberAction(member.name, 'Réactiver');
             await teamPage.confirmDialog('Réactiver');
+
+            // Attendre la confirmation de la Server Action avant de naviguer
+            // (le onClick ne await pas handleReactivateTeamMember — race condition)
+            await expect(page.getByText(/réactivé/i).first()).toBeVisible({ timeout: 5_000 });
 
             // 3. Le membre redevient actif
             await teamPage.goto();
