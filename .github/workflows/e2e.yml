@@ -27,9 +27,9 @@ on:
 
 # Minimal permissions following principle of least privilege
 permissions:
-  contents: read   # checkout
-  checks: write    # Playwright github reporter (PR annotations)
-  actions: write   # cache write + artifact upload
+  contents: read # checkout
+  checks: write # Playwright github reporter (PR annotations)
+  actions: write # cache write + artifact upload
 
 # Cancel in-progress runs for the same branch/PR
 concurrency:
@@ -74,19 +74,8 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       # -----------------------------------------------------------------------
-      # 5. Cache Playwright browsers
+      # 5. Install Playwright browsers (no cache — prevents stale binary issues)
       # -----------------------------------------------------------------------
-      - name: Get Playwright version
-        id: pw-version
-        run: echo "version=$(pnpm exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
-
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        id: pw-cache
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.pw-version.outputs.version }}
-
       - name: Install Playwright browsers and dependencies
         run: pnpm exec playwright install chromium --with-deps
 
