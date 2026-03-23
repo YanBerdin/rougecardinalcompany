@@ -124,7 +124,7 @@ export function SpectaclesView({
       <section className="py-20 bg-chart-7/60" aria-labelledby="spectacles-archives-heading">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 id="spectacles-archives-heading" className="text-3xl md:text-4xl font-sans lg:text-5xl font-semibold mb-4">Nos Créations Passées</h2>
+            <h2 id="spectacles-archives-heading" className="text-3xl md:text-4xl font-sans lg:text-5xl font-bold mb-4">Nos Créations Passées</h2>
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
               15 ans de créations théâtrales qui ont marqué notre parcours
             </p>

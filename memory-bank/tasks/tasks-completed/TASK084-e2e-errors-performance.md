@@ -121,10 +121,10 @@ e2e/tests/
 
 ### Subtasks
 
-| ID  | Description                                | Status    | Updated    | Notes                        |
-| --- | ------------------------------------------ | --------- | ---------- | ---------------------------- |
-| 1.1 | Tests gestion erreurs (CROSS-ERR-001→003)  | Complete  | 2026-03-22 | 3/3 tests passing            |
-| 1.2 | Tests performance (CROSS-PERF-001→003)     | Complete  | 2026-03-22 | 3/3 tests passing (seuil 8s) |
+| ID  | Description                                | Status    | Updated    | Notes                            |
+| --- | ------------------------------------------ | --------- | ---------- | -------------------------------- |
+| 1.1 | Tests gestion erreurs (CROSS-ERR-001→003)  | Complete  | 2026-03-22 | 3/3 tests passing                |
+| 1.2 | Tests performance (CROSS-PERF-001→003)     | Complete  | 2026-03-22 | 3/3 tests passing (seuil 8s)     |
 | 1.3 | Fix CROSS-RESP-005 — admin mobile overflow | Complete  | 2026-03-22 | `app/(admin)/layout.tsx` min-w-0 |
 
 ## Pièges connus — Patterns à éviter dans les futurs tests cross

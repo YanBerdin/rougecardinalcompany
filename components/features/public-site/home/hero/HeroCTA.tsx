@@ -32,9 +32,9 @@ export function HeroCTA({ slide }: HeroCTAProps) {
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           {slide.ctaPrimaryEnabled && slide.ctaPrimaryLabel && (
-            <Button variant="default" size="lg" asChild>
+            <Button variant="default" size="lg" className="w-64 justify-center" asChild>
               <Link href={slide.ctaPrimaryUrl ?? "/spectacles"}>
-                <ArrowRight className="h-5 w-5" aria-hidden="true" />
+                <ArrowRight className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {slide.ctaPrimaryLabel}
               </Link>
             </Button>
@@ -44,11 +44,11 @@ export function HeroCTA({ slide }: HeroCTAProps) {
             <Button
               variant="outline"
               size="lg"
-              className="bg-white/30 border-white/50 text-chart-6 backdrop-blur-md hover:bg-chart-6 hover:text-black transition-colors duration-300 shadow-lg"
+              className="w-64 justify-center bg-white/30 border-white/50 text-chart-6 backdrop-blur-md hover:bg-chart-6 hover:text-black transition-colors duration-300 shadow-lg"
               asChild
             >
               <Link href={slide.ctaSecondaryUrl ?? "/agenda"}>
-                <Play className="h-5 w-5" aria-hidden="true" />
+                <Play className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {slide.ctaSecondaryLabel}
               </Link>
             </Button>
