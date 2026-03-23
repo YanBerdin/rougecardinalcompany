@@ -78,8 +78,8 @@ jobs:
       # -----------------------------------------------------------------------
       - name: Clean Playwright cache and reinstall
         run: |
-          rm -rf /root/.cache/ms-playwright
-          HOME=/root pnpm exec playwright install chromium --with-deps
+          rm -rf ~/.cache/ms-playwright
+          pnpm exec playwright install chromium --with-deps
 
       # -----------------------------------------------------------------------
       # 6. Start Supabase local
@@ -157,7 +157,6 @@ jobs:
         run: pnpm exec playwright test --reporter=html,github
         env:
           CI: "true"
-          HOME: /root
 
       # -----------------------------------------------------------------------
       # 11. Upload report (always, even on failure)
