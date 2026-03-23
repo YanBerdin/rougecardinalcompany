@@ -1,5 +1,24 @@
 # Progress
 
+## TASK085 — E2E Admin Analytics : 3/3 passent (2026-03-23)
+
+✅ **COMPLET** — 3 tests Playwright couvrant la page Admin Analytics (section 20 du plan de test). Ferme le dernier gap de couverture admin — la suite E2E couvre désormais **100 % des sections du plan**.
+
+| Suite | Tests | Résultat |
+| ----- | ----- | -------- |
+| Analytics (ADM-ANALYTICS-001, 002, 003) | 3 | ✅ 3/3 |
+
+### Apprentissages clés
+
+1. **`#main-content` obligatoire en admin** : Le layout admin (Radix UI `SidebarInset`) génère 2 éléments `<main>` → strict mode Playwright interdit `locator('main')`. Toujours utiliser `locator('#main-content')` ou `getByRole('main')` scoped. Pattern déjà documenté dans TASK038, confirmé ici.
+2. **Assertions flexibles pour contenu variable** : `expectContentVisible()` utilise une cascade canvas → svg.recharts-surface → stat → fallback non-vide. Évite les faux négatifs sur base locale vide.
+
+### Rapport
+
+`doc/tests/E2E-ADMIN-ANALYTICS-TASK085-REPORT.md`
+
+---
+
 ## TASK084 — E2E Transversaux Erreurs & Performance : 7/7 passent (2026-03-22)
 
 ✅ **COMPLET** — 7 tests Playwright couvrant gestion d'erreurs (3) et performance (3, comptée en 4 cas plan → 3 specs en deux fichiers) répartis sur les projets `cross-public` et `cross-admin`.
