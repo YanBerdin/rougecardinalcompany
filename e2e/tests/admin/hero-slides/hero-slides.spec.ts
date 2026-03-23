@@ -165,9 +165,9 @@ test.describe('Hero Slides', () => {
         await page.goto('/');
         await page.waitForLoadState('load');
 
-        // 2. Le slide existe dans le carrousel (indicateur toujours visible)
+        // 2. Le slide existe dans le carrousel (titre affiché en heading)
         await expect(
-            page.locator(`button[aria-label*="${SLIDE_TITLE}"]`).first()
+            page.getByRole('heading', { name: SLIDE_TITLE, exact: false }).first()
         ).toBeVisible({ timeout: 10_000 });
     });
 });
