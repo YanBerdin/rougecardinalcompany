@@ -2,6 +2,7 @@
 
 ## Completed
 
+- `TASK087` Compression images Sharp côté serveur — **IMPLÉMENTÉE ✅** (2026-03-24) — `lib/utils/image-compress.ts` créé, pipeline `uploadMediaImage()` mis à jour, `MediaUploadInput` File|Blob, 11/11 tests unitaires, fix TypeScript Uint8Array.from, script npm `test:unit:image-compress`
 - `TASK086` Pipeline CI/CD E2E GitHub Actions — **CI vert en 10m 31s ✅** (2026-03-23) — `e2e.yml` 12 étapes, Supabase dynamique via `jq`, comptes idempotents, fix tilde vs /root — Rapport: `memory-bank/tasks/TASK086-ci-cd-pipeline-e2e.md`
 - `TASK001` Commit & annotate revoke migrations
 - `TASK002` Adapt CI audit to allow known restored GRANTs
@@ -15,6 +16,8 @@
 ## En Cours
 
 **_(aucune tâche en cours)_**
+
+_(TASK087 complété — branche `feat/image-compression`, voir `progress.md`)_
 
 ## En Attente
 
