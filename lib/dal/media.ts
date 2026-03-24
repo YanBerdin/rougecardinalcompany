@@ -14,7 +14,8 @@ import type { DALResult } from "@/lib/dal/helpers";
 // =============================================================================
 
 export interface MediaUploadInput {
-    file: File;
+    file: File | Blob;
+    filename: string; // Required: Blob doesn't have .name unlike File
     folder: string;
     uploadedBy: string | undefined;
     fileHash?: string;
@@ -71,7 +72,7 @@ function generateStoragePath(folder: string, filename: string): string {
 async function uploadToStorage(
     supabase: Awaited<ReturnType<typeof createClient>>,
     storagePath: string,
-    file: File
+    file: File | Blob
 ): Promise<DALResult<null>> {
     const { error } = await supabase.storage
         .from(BUCKET_NAME)
@@ -137,7 +138,7 @@ async function createMediaRecord(
         .from("medias")
         .insert({
             storage_path: storagePath,
-            filename: sanitizeFilename(input.file.name),
+            filename: sanitizeFilename(input.filename),
             mime: input.file.type,
             size_bytes: input.file.size,
             file_hash: input.fileHash,
@@ -186,7 +187,7 @@ export async function uploadMedia(
     await requireMinRole("editor");
 
     const supabase = await createClient();
-    const storagePath = generateStoragePath(input.folder, input.file.name);
+    const storagePath = generateStoragePath(input.folder, input.filename);
 
     // 1. Upload to Storage
     const uploadResult = await uploadToStorage(supabase, storagePath, input.file);

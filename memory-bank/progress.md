@@ -1,5 +1,30 @@
 # Progress
 
+## TASK087 — Compression d'images Sharp côté serveur (2026-03-24)
+
+✅ **COMPLET** — Pipeline d'upload media enrichi avec une étape de compression Sharp entre validation et DAL. Les images raster (JPEG/PNG/WebP/AVIF) sont optimisées avant stockage sur Supabase Storage.
+
+| Composant | Statut |
+| --------- | ------ |
+| `lib/utils/image-compress.ts` — utilitaire Sharp (constantes, types, `compressImage()`) | ✅ Créé |
+| `lib/actions/media-actions.ts` — compression injectée dans `uploadMediaImage()` | ✅ Modifié |
+| `lib/dal/media.ts` — `MediaUploadInput.file: File \| Blob` + `filename: string` | ✅ Modifié |
+| `__tests__/utils/image-compress.test.ts` — 11 tests unitaires Vitest | ✅ Créé (11/11) |
+| `package.json` — script `test:unit:image-compress` | ✅ Ajouté |
+
+### Fix TypeScript critique
+
+`Buffer<ArrayBufferLike>` non assignable à `BlobPart` en strict mode. Solution : `Uint8Array.from(buffer)` dans la Server Action et les tests.
+
+### Comportement
+
+- JPEG/PNG/WebP/AVIF → compressés `quality: 85`, redimensionnés si > 2400px
+- GIF/SVG/PDF → passés sans modification (`wasCompressed: false`)
+- Safety guard → si compression > original, garde l'original
+- Log `[Media] Compressed: X → Y (Z% reduction)` pour monitoring
+
+---
+
 ## TASK086 — Pipeline CI/CD E2E : CI vert en 10m 31s (2026-03-23)
 
 ✅ **COMPLET** — Workflow GitHub Actions `.github/workflows/e2e.yml` créé et validé. Pipeline complet : Supabase local (clés dynamiques via `jq`) + comptes de test idempotents + Next.js build + Playwright chromium → **CI vert** confirmé après 4 itérations de débogage.

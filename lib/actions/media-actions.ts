@@ -9,6 +9,7 @@ import { requireMinRole } from "@/lib/auth/roles";
 import { uploadMedia, deleteMedia, findMediaByHash, getMediaPublicUrl } from "@/lib/dal/media";
 import { recordRequest } from "@/lib/utils/rate-limit";
 import { verifyFileMime } from "@/lib/utils/mime-verify";
+import { compressImage } from "@/lib/utils/image-compress";
 import type { MediaUploadResult } from "./types";
 
 /**
@@ -117,10 +118,16 @@ export async function uploadMediaImage(
       return { success: false, error: validation.error };
     }
 
-    // 2. Get current user
+    // 2. Server-side image compression (raster formats only)
+    const compressed = await compressImage(validation.file);
+    const fileToUpload: File | Blob = compressed.wasCompressed
+      ? new Blob([Uint8Array.from(compressed.buffer)], { type: compressed.mimeType })
+      : validation.file;
+
+    // 3. Get current user
     const uploadedBy = await getCurrentUserId();
 
-    // 3. Rate limiting: 10 uploads per minute per user
+    // 4. Rate limiting: 10 uploads per minute per user
     const rateLimitKey = `upload:${uploadedBy}`;
     const rateLimitResult = recordRequest(
       rateLimitKey,
@@ -139,7 +146,7 @@ export async function uploadMediaImage(
       };
     }
 
-    // 4. Check for duplicate (if hash provided)
+    // 5. Check for duplicate (if hash provided)
     const fileHash = formData.get("fileHash");
 
     if (fileHash && typeof fileHash === "string") {
@@ -160,9 +167,10 @@ export async function uploadMediaImage(
       }
     }
 
-    // 5. Call DAL (no duplicate found)
+    // 6. Call DAL (no duplicate found)
     const result = await uploadMedia({
-      file: validation.file,
+      file: fileToUpload,
+      filename: validation.file.name,
       folder,
       uploadedBy,
       fileHash: typeof fileHash === "string" ? fileHash : undefined,
@@ -172,7 +180,7 @@ export async function uploadMediaImage(
       return { success: false, error: result.error };
     }
 
-    // 6. ⚠️ PATTERN WARNING: Non-blocking thumbnail generation
+    // 7. ⚠️ PATTERN WARNING: Non-blocking thumbnail generation
     // Upload succeeds even if thumbnail generation fails
     let thumbnailWarning: string | undefined;
 
@@ -216,7 +224,7 @@ export async function uploadMediaImage(
         "Image uploaded but thumbnail generation failed. Thumbnail will be created on next upload.";
     }
 
-    // 7. ✅ Revalidation (UNIQUEMENT dans Server Action)
+    // 8. ✅ Revalidation (UNIQUEMENT dans Server Action)
     revalidatePath("/admin/medias");
     revalidatePath("/admin/team");
     revalidatePath("/admin/spectacles");
