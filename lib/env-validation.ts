@@ -59,9 +59,16 @@ export function validateEnvironment(
         console.warn(message);
     }
 
-    // Check 1b: Production must never use a known staging/dev project
+    // Check 1b: Production must never use a known staging/dev project.
+    // Exception: when VERCEL_IS_STAGING_ACCOUNT="true" the operator explicitly
+    // acknowledges this Vercel project is a staging account that intentionally
+    // uses a non-production Supabase ref (master branch → VERCEL_ENV="production"
+    // on the staging Vercel account).
+    // → Set VERCEL_IS_STAGING_ACCOUNT=true in the staging Vercel project settings.
+    const isExplicitlyStaging = envVars.VERCEL_IS_STAGING_ACCOUNT === "true";
     if (
         vercelEnv === "production" &&
+        !isExplicitlyStaging &&
         NON_PRODUCTION_REFS.includes(
             urlRef as (typeof NON_PRODUCTION_REFS)[number],
         )
@@ -72,7 +79,9 @@ export function validateEnvironment(
                 `VERCEL_ENV: ${vercelEnv}`,
                 `PROJECT_REF: ${urlRef}`,
                 "This ref is in NON_PRODUCTION_REFS blocklist.",
-                "→ Check Vercel environment variables for this deployment scope.",
+                "→ If this is a staging Vercel account, set VERCEL_IS_STAGING_ACCOUNT=true",
+                "  in your Vercel project environment variables (all environments).",
+                "→ Otherwise, check Vercel environment variables for this deployment scope.",
             ].join("\n"),
         );
     }

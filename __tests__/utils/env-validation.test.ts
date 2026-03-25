@@ -152,6 +152,33 @@ describe("validateEnvironment", () => {
                 ),
             ).not.toThrow();
         });
+
+        it("allows staging ref on a staging Vercel account (VERCEL_IS_STAGING_ACCOUNT=true)", () => {
+            // Master branch on a staging Vercel account sets VERCEL_ENV="production".
+            // The operator must set VERCEL_IS_STAGING_ACCOUNT=true to opt-out of this check.
+            expect(() =>
+                validateEnvironment(
+                    makeValidEnv({
+                        VERCEL_IS_STAGING_ACCOUNT: "true",
+                        NEXT_PUBLIC_SUPABASE_URL: `https://${STAGING_REF}.supabase.co`,
+                        SUPABASE_PROJECT_REF: STAGING_REF,
+                    }),
+                ),
+            ).not.toThrow();
+        });
+
+        it("still throws on real production even with wrong VERCEL_IS_STAGING_ACCOUNT value", () => {
+            // Guard must NOT be disabled by any value other than the exact string "true"
+            expect(() =>
+                validateEnvironment(
+                    makeValidEnv({
+                        VERCEL_IS_STAGING_ACCOUNT: "1",
+                        NEXT_PUBLIC_SUPABASE_URL: `https://${STAGING_REF}.supabase.co`,
+                        SUPABASE_PROJECT_REF: STAGING_REF,
+                    }),
+                ),
+            ).toThrow("Non-production Supabase project used in production");
+        });
     });
 
     // -----------------------------------------------------------------------
