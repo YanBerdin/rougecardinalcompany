@@ -2,7 +2,7 @@
 
 ## Completed
 
-- `ENV-VALIDATION` Validation d'environnement runtime — **22 tests ✅** (2026-03-25) — `lib/env-validation.ts` extrait de instrumentation.ts, DI pattern, 4 checks (ref mismatch, blocklist, clé anon, clé secrète), 75/75 régression totale
+- `ENV-VALIDATION` Validation d'environnement runtime + CI — **22 tests ✅ + workflow CI ✅** (2026-03-25) — `lib/env-validation.ts` extrait, DI pattern, 4 checks, 75/75 régression, rapport `doc/ENV-VALIDATION-REPORT.md`, workflow `unit-tests.yml` ajouté
 - `TASK087` Compression images Sharp côté serveur — **IMPLÉMENTÉE ✅** (2026-03-24) — `lib/utils/image-compress.ts` créé, pipeline `uploadMediaImage()` mis à jour, `MediaUploadInput` File|Blob, 11/11 tests unitaires, fix TypeScript Uint8Array.from, script npm `test:unit:image-compress`
 - `TASK086` Pipeline CI/CD E2E GitHub Actions — **CI vert en 10m 31s ✅** (2026-03-23) — `e2e.yml` 12 étapes, Supabase dynamique via `jq`, comptes idempotents, fix tilde vs /root — Rapport: `memory-bank/tasks/TASK086-ci-cd-pipeline-e2e.md`
 - `TASK001` Commit & annotate revoke migrations

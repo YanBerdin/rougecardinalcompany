@@ -1,8 +1,8 @@
 # Progress
 
-## Validation d'environnement runtime (2026-03-25)
+## Validation d'environnement runtime + CI (2026-03-25)
 
-✅ **COMPLET** — Module `lib/env-validation.ts` extrait de `instrumentation.ts` avec injection de dépendances. Valide la cohérence des variables Supabase (ref mismatch, blocklist staging, format clés). 22 tests unitaires, 75/75 régression totale.
+✅ **COMPLET** — Module `lib/env-validation.ts` extrait de `instrumentation.ts` avec injection de dépendances. Valide la cohérence des variables Supabase (ref mismatch, blocklist staging, format clés). 22 tests unitaires, 75/75 régression totale. Rapport `doc/ENV-VALIDATION-REPORT.md` créé. Workflow CI `.github/workflows/unit-tests.yml` ajouté — exécute `pnpm vitest run` sur push/PR (comble le gap : aucun workflow ne lançait les tests unitaires).
 
 | Composant | Statut |
 | --------- | ------ |

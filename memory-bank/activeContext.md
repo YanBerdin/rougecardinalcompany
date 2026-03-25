@@ -1,6 +1,6 @@
 # Active Context
 
-**Current Focus (2026-03-25)**: **Validation d'environnement runtime** — Module `lib/env-validation.ts` extrait de `instrumentation.ts` avec injection de dépendances pour testabilité. 22 tests unitaires couvrent tous les chemins (ref mismatch, blocklist staging, format clés anon/secret). `instrumentation.ts` simplifié de ~108 à 38 lignes. 75/75 tests total (0 régressions). Proposition `NON_PRODUCTION_REFS` en env var rejetée (guard-rail ne doit pas dépendre du mécanisme surveillé). Messages d'erreur améliorés (format structuré multi-lignes actionnable).
+**Current Focus (2026-03-25)**: **Validation d'environnement runtime + CI Unit Tests** — Module `lib/env-validation.ts` extrait de `instrumentation.ts` avec DI. 22 tests unitaires. Rapport détaillé `doc/ENV-VALIDATION-REPORT.md`. Workflow CI `unit-tests.yml` créé — Vitest tourne sur push/PR (pnpm 9, Node 22, permissions minimales). Comble le gap CI : 75 unit tests exécutés en CI sur chaque changement.
 
 **Previous Focus (2026-03-24)**: TASK087 complété — **Compression d'images Sharp côté serveur opérationnelle**. Utilitaire `lib/utils/image-compress.ts` créé, injecté dans le pipeline `uploadMediaImage()` (Server Action), DAL mis à jour (`File | Blob` + `filename`), 11/11 tests unitaires passent. Commit sur branche `feat/image-compression`.
 
