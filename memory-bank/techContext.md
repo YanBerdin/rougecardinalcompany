@@ -1,6 +1,6 @@
 # Tech Context
 
-**Last Updated**: 2026-03-16
+**Last Updated**: 2026-03-25
 
 Versions et dépendances clés observées dans le dépôt:
 
@@ -27,6 +27,7 @@ Structure principale:
 
 | Date | Changement | Impact |
 | ------ | ------------ | -------- |
+| 2026-03-25 | Runtime env validation (`lib/env-validation.ts`) | Module extrait, 22 tests, 4 checks cohérence Supabase |
 | 2026-03-16 | Playwright 1.57.0 E2E P0 suite | 14/14 tests public pages passing, POM + fixtures |
 | 2026-03-07 | BUGFIX RLS display_toggle visibility | Policy SELECT configurations_site corrigée, GRANT ajouté, 2 migrations |
 | 2026-03-07 | BUGFIX DAL press select options | 8 corrections colonnes/filtres/ordre, join spectacles(title) |

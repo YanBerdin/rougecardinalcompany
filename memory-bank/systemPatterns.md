@@ -50,6 +50,8 @@
 3. Les scripts d'audit doivent être alignés avec le modèle de sécurité (ne pas considérer un GRANT comme "exposé" quand il est requis pour RLS).
 4. **Variables d'environnement** : Accès UNIQUEMENT via `import { env } from '@/lib/env'`, JAMAIS `process.env.*` directement.
 
+- **Runtime Environment Validation Pattern (Mar 2026)**: Module `lib/env-validation.ts` complète T3 Env (validation statique Zod) avec des vérifications runtime de cohérence inter-variables. Injection de dépendances (`envVars = process.env`) pour testabilité sans mock. 4 checks : URL ref vs PROJECT_REF, NON_PRODUCTION_REFS blocklist, format clé anon, format clé secrète. Appelé dans `instrumentation.ts register()`. Blocklist hardcodée (pas en env var) — un guard-rail ne doit pas dépendre du mécanisme qu'il surveille.
+
 ## Compound Components Composition Pattern (Mar 2026)
 
 **Pattern** pour les features complexes (publiques ET admin) nécessitant un état partagé entre plusieurs composants enfants, sans prop drilling.

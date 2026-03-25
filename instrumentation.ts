@@ -2,9 +2,12 @@
 // Next.js instrumentation hook for Sentry initialization
 // https://nextjs.org/docs/app/building-your-application/optimizing/instrumentation
 
+import { validateEnvironment } from "./lib/env-validation";
+
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
     await import("./sentry.server.config");
+    validateEnvironment();
   }
 
   if (process.env.NEXT_RUNTIME === "edge") {

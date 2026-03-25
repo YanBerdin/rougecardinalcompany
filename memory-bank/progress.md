@@ -1,5 +1,23 @@
 # Progress
 
+## Validation d'environnement runtime (2026-03-25)
+
+✅ **COMPLET** — Module `lib/env-validation.ts` extrait de `instrumentation.ts` avec injection de dépendances. Valide la cohérence des variables Supabase (ref mismatch, blocklist staging, format clés). 22 tests unitaires, 75/75 régression totale.
+
+| Composant | Statut |
+| --------- | ------ |
+| `lib/env-validation.ts` — module testable (hasValidPrefix, validateEnvironment, NON_PRODUCTION_REFS) | ✅ Créé |
+| `instrumentation.ts` — simplifié (import + appel, 108→38 lignes) | ✅ Modifié |
+| `__tests__/utils/env-validation.test.ts` — 22 tests unitaires Vitest | ✅ Créé (22/22) |
+
+### Décision architecturale
+
+- **Extraction module + DI** : `validateEnvironment(envVars = process.env)` pour testabilité sans mock fragile
+- **NON_PRODUCTION_REFS hardcodé** : proposition env var rejetée (guard-rail ≠ mechanism surveillé)
+- **Type `EnvLike`** : `Record<string, string | undefined>` pour contourner incompatibilité `ProcessEnv`
+
+---
+
 ## TASK087 — Compression d'images Sharp côté serveur (2026-03-24)
 
 ✅ **COMPLET** — Pipeline d'upload media enrichi avec une étape de compression Sharp entre validation et DAL. Les images raster (JPEG/PNG/WebP/AVIF) sont optimisées avant stockage sur Supabase Storage.

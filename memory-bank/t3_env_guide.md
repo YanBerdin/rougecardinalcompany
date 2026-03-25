@@ -237,6 +237,7 @@ if (!supabaseUrl || !secretKey) {
 | `app/`, `lib/`, `components/` | `import { env } from '@/lib/env'` (T3 Env) | Contexte Next.js runtime |
 | `scripts/*.ts` | `import 'dotenv/config'` + `process.env.*` | Hors runtime Next.js (tsx direct) |
 | `next.config.ts` | `process.env.*` | S'exécute **avant** le runtime Next.js — importer T3 Env forcerait la validation de toutes les variables serveur même en contexte E2E/CI où certaines sont absentes |
+| `instrumentation.ts` | `process.env.*` via `lib/env-validation.ts` | Exception : validation runtime inter-variables (ref match, blocklist, format clés). Utilise `process.env` directement car s'exécute avant T3 Env et valide la cohérence, pas la présence. Module extrait avec DI pour testabilité (22 tests). |
 | `supabase/functions/` | `Deno.env.get()` | Runtime Deno |
 
 ---
@@ -245,6 +246,8 @@ if (!supabaseUrl || !secretKey) {
 
 - T3 Env Documentation: https://env.t3.gg
 - Project Implementation: `lib/env.ts`
+- Runtime Validation Module: `lib/env-validation.ts` (complète T3 Env avec checks de cohérence)
+- Runtime Validation Tests: `__tests__/utils/env-validation.test.ts` (22 tests)
 - Test Script: `scripts/test-env-validation.ts`
 - Memory Bank: `memory-bank/systemPatterns.md` (T3 Env section)
 - Scripts Convention: `scripts/README.md`

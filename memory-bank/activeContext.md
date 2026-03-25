@@ -1,10 +1,43 @@
 # Active Context
 
-**Current Focus (2026-03-24)**: TASK087 complété — **Compression d'images Sharp côté serveur opérationnelle**. Utilitaire `lib/utils/image-compress.ts` créé, injecté dans le pipeline `uploadMediaImage()` (Server Action), DAL mis à jour (`File | Blob` + `filename`), 11/11 tests unitaires passent, script `test:unit:image-compress` ajouté à `package.json`. Fix TypeScript : `Uint8Array.from(buffer)` pour compatibilité `BlobPart`. Documentation : `plan-imageCompression.prompt.md` + `scripts/README.md` mis à jour avec rapport d'implémentation. Commit sur branche `feat/image-compression`.
+**Current Focus (2026-03-25)**: **Validation d'environnement runtime** — Module `lib/env-validation.ts` extrait de `instrumentation.ts` avec injection de dépendances pour testabilité. 22 tests unitaires couvrent tous les chemins (ref mismatch, blocklist staging, format clés anon/secret). `instrumentation.ts` simplifié de ~108 à 38 lignes. 75/75 tests total (0 régressions). Proposition `NON_PRODUCTION_REFS` en env var rejetée (guard-rail ne doit pas dépendre du mécanisme surveillé). Messages d'erreur améliorés (format structuré multi-lignes actionnable).
 
-**Previous Focus (2026-03-23)**: TASK086 complété — **Pipeline CI/CD E2E opérationnel**. Workflow GitHub Actions `.github/workflows/e2e.yml` créé et vert après 4 itérations de débogage Playwright cache. Leçon critique : GitHub Actions runner `ubuntu-latest` tourne comme `runner` (HOME=/home/runner), PAS comme `root` — utiliser `~` (tilde POSIX) dans les commandes shell, jamais `/root`. CI run : "succeeded in 10m 31s". Tous les critères d'acceptance de TASK086 sont satisfaits. Rapport : `memory-bank/tasks/TASK086-ci-cd-pipeline-e2e.md`.
+**Previous Focus (2026-03-24)**: TASK087 complété — **Compression d'images Sharp côté serveur opérationnelle**. Utilitaire `lib/utils/image-compress.ts` créé, injecté dans le pipeline `uploadMediaImage()` (Server Action), DAL mis à jour (`File | Blob` + `filename`), 11/11 tests unitaires passent. Commit sur branche `feat/image-compression`.
 
-**Last Major Updates**: ✅ TASK087 — **Compression images Sharp** (`lib/utils/image-compress.ts`, pipeline uploadMedia, 11/11 tests, script npm `test:unit:image-compress`) (2026-03-24) + ✅ TASK086 — **Pipeline CI/CD E2E vert** (`e2e.yml` 12 étapes, Supabase local dynamique via `jq`, comptes de test idempotents, CI vert en 10m 31s — fix tilde vs /root) (2026-03-23) + ✅ TASK085 — **3/3 tests E2E Admin Analytics passent** (ADM-ANALYTICS-001→003, strict mode fix #main-content) (2026-03-23) + ✅ TASK084 — **7/7 tests E2E erreurs & performance passent** (CROSS-ERR-001→003, CROSS-PERF-001→003 — Server Actions RSC abort pattern, warmup dev mode) (2026-03-22) + ✅ TASK038 — **16/16 tests E2E cross-cutting passent** (responsive, A11Y, thème — 7 bugs + 3 intermittents résolus, pattern `toPass` CSS-var-timing) (2026-03-21) + ✅ TASK083 session 7 — **56/56 tests E2E Admin CRUD Admin-only passent** (ADM-AUDIT-009 réécrit Fix 13 : blob URL → filtre UPDATE + toast, Sentry ETIMEDOUT fix, `e2e/global-setup.ts` pre-flight checks) (2026-03-21) + ✅ TASK083 session 6 — 55/55 (3 fixmes activés — PART-005, HERO-005, AUDIT-006) (2026-03-20) + ✅ TASK082C — Patch sécurité flatted 3.4.1 → 3.4.2 (Prototype Pollution CVE, Dependabot #38) (2026-03-19) + ✅ TASK082 — **51/51 tests E2E Admin CRUD Éditorial passent** (5 sessions de débogage) (2026-03-20) + ✅ TASK082B — Patch sécurité Next.js 16.1.5 → 16.1.7 (5 CVEs, PR #33) (2026-03-17) + ✅ TASK078 Phase DAL — **80/80 tests DAL passent** (2026-03-16) + ✅ TASK078 — E2E P0 permissions 23/23 passent (2026-03-16)
+**Last Major Updates**: ✅ **Validation env runtime** (`lib/env-validation.ts`, 22 tests, module extraction DI, 75/75 tests) (2026-03-25) + ✅ TASK087 — **Compression images Sharp** (`lib/utils/image-compress.ts`, pipeline uploadMedia, 11/11 tests, script npm `test:unit:image-compress`) (2026-03-24) + ✅ TASK086 — **Pipeline CI/CD E2E vert** (`e2e.yml` 12 étapes, CI vert en 10m 31s) (2026-03-23) + ✅ TASK085 — **3/3 tests E2E Admin Analytics passent** (2026-03-23) + ✅ TASK084 — **7/7 tests E2E erreurs & performance passent** (2026-03-22) + ✅ TASK038 — **16/16 tests E2E cross-cutting passent** (2026-03-21) + ✅ TASK083 — **56/56 tests E2E Admin CRUD Admin-only passent** (2026-03-21) + ✅ TASK082 — **51/51 tests E2E Admin CRUD Éditorial passent** (2026-03-20) + ✅ TASK082C — Patch sécurité flatted 3.4.2 (2026-03-19) + ✅ TASK082B — Patch sécurité Next.js 16.1.7 (2026-03-17) + ✅ TASK078 — **80/80 DAL + 23/23 E2E P0 permissions** (2026-03-16)
+
+---
+
+## Validation d'environnement runtime (2026-03-25)
+
+### Résumé
+
+Module `lib/env-validation.ts` extrait de `instrumentation.ts` pour valider la cohérence des variables Supabase en production. Complète T3 Env (validation Zod statique) avec des vérifications runtime inter-variables.
+
+### Fichiers créés/modifiés
+
+| Fichier | Action | Lignes |
+| ------- | ------ | ------ |
+| `lib/env-validation.ts` | CRÉÉ | 90 |
+| `instrumentation.ts` | SIMPLIFIÉ | 108 → 38 |
+| `__tests__/utils/env-validation.test.ts` | CRÉÉ | ~260 |
+
+### 4 vérifications
+
+| Check | Description | Prod | Preview |
+| ----- | ----------- | ---- | ------- |
+| 1a | URL ref vs `SUPABASE_PROJECT_REF` | throw | warn |
+| 1b | Ref dans `NON_PRODUCTION_REFS` blocklist | throw | pass |
+| 2 | Format clé anon (`sb_publishable_` / `eyJ`) | throw | throw |
+| 3 | Format clé secrète (`sb_secret_` / `eyJ`) | throw | throw |
+
+### Décisions
+
+- **DI pattern** : `validateEnvironment(envVars = process.env)` — testable sans mock global
+- **`NON_PRODUCTION_REFS` hardcodé** : rejet de la proposition env var (fallback `[]` désactive silencieusement, guard-rail ne doit pas dépendre de ce qu'il surveille)
+- **`type EnvLike = Record<string, string | undefined>`** : contourne l'incompatibilité `ProcessEnv` TypeScript
+
+### Tests : 22/22 + 75/75 régression
 
 ---
 

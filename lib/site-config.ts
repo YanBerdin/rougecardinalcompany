@@ -12,15 +12,15 @@ export const SITE_CONFIG = {
     CONTACT: env.EMAIL_CONTACT,
   },
   SERVER: {
-    PROD_URL: "https://rougecardinalcompany.fr",
+    PROD_URL: "https://compagnie-rouge-cardinal.fr",
     DEV_URL: env.NEXT_PUBLIC_SITE_URL,
   },
   MAKER: {
-    NAME: "Rouge Cardinal Company",
+    NAME: " Compagnie Rouge Cardinal",
     ADDRESS: "Adresse de votre compagnie",
   },
   AUTH: {
-    REDIRECT_TO_DASHBOARD: "/protected",
+    REDIRECT_TO_DASHBOARD: "/admin/dashboard",
     REDIRECT_TO_LOGIN: "/auth/login",
   },
 } as const;
