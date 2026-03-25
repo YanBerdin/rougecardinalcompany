@@ -18,6 +18,12 @@ import type { Database } from "@/lib/database.types";
 
 dotenv.config({ path: path.resolve(__dirname, "../../.env.e2e") });
 
+/**
+ * Guard: skip this entire suite in CI (no local Supabase / .env.e2e).
+ * Run locally with: RUN_DAL_INTEGRATION_TESTS=1 pnpm vitest run __tests__/dal/permissions-integration.test.ts
+ */
+const shouldRun = process.env.RUN_DAL_INTEGRATION_TESTS === "1";
+
 /* ------------------------------------------------------------------ */
 /*  Environment                                                        */
 /* ------------------------------------------------------------------ */
@@ -35,18 +41,22 @@ const USER_EMAIL = process.env.E2E_USER_EMAIL!;
 const USER_PASSWORD = process.env.E2E_USER_PASSWORD!;
 
 /* ------------------------------------------------------------------ */
-/*  Clients                                                            */
+/*  Clients (created only when integration tests are enabled)         */
 /* ------------------------------------------------------------------ */
 
 type SB = SupabaseClient<Database>;
 
-const serviceClient: SB = createClient<Database>(SUPABASE_URL, SERVICE_KEY, {
-    auth: { autoRefreshToken: false, persistSession: false },
-});
+const serviceClient: SB = shouldRun
+    ? createClient<Database>(SUPABASE_URL, SERVICE_KEY, {
+        auth: { autoRefreshToken: false, persistSession: false },
+    })
+    : ({} as SB);
 
-const anonClient: SB = createClient<Database>(SUPABASE_URL, PUBLISHABLE_KEY, {
-    auth: { autoRefreshToken: false, persistSession: false },
-});
+const anonClient: SB = shouldRun
+    ? createClient<Database>(SUPABASE_URL, PUBLISHABLE_KEY, {
+        auth: { autoRefreshToken: false, persistSession: false },
+    })
+    : ({} as SB);
 
 let editorClient: SB;
 let adminClient: SB;
@@ -164,6 +174,8 @@ async function ensureTestAccount(
 /* ------------------------------------------------------------------ */
 
 beforeAll(async () => {
+    if (!shouldRun) return;
+
     // Validate local-only
     if (
         !SUPABASE_URL.includes("localhost") &&
@@ -315,6 +327,8 @@ beforeAll(async () => {
 }, 30_000);
 
 afterAll(async () => {
+    if (!shouldRun) return;
+
     // Cleanup seed data in reverse dependency order
     const ids = {
         contacts_presse: seedContactPresseId,
@@ -344,7 +358,7 @@ afterAll(async () => {
 /*  ROLE-DAL-001 to ROLE-DAL-032                                       */
 /* ================================================================== */
 
-describe("3.1 — Editor CRUD éditorial (autorisé)", () => {
+describe.skipIf(!shouldRun)("3.1 — Editor CRUD éditorial (autorisé)", () => {
     // ---- spectacles (ROLE-DAL-001 to 004) ----------------------------
 
     it("ROLE-DAL-001 — Editor select spectacles (all rows incl. drafts)", async () => {
@@ -914,7 +928,7 @@ describe("3.1 — Editor CRUD éditorial (autorisé)", () => {
 /*  ROLE-DAL-033 to ROLE-DAL-048 + 069–073                             */
 /* ================================================================== */
 
-describe("3.2 — Editor bloqué admin-only", () => {
+describe.skipIf(!shouldRun)("3.2 — Editor bloqué admin-only", () => {
     // ---- membres_equipe (ROLE-DAL-033 to 035) -------------------------
 
     it("ROLE-DAL-033 — Editor bloqué insert membres_equipe", async () => {
@@ -1211,7 +1225,7 @@ describe("3.2 — Editor bloqué admin-only", () => {
 /*  ROLE-DAL-049 to ROLE-DAL-058 + 074–078                             */
 /* ================================================================== */
 
-describe("3.3 — Admin accès complet", () => {
+describe.skipIf(!shouldRun)("3.3 — Admin accès complet", () => {
     // ---- spectacles (ROLE-DAL-049) ------------------------------------
 
     it("ROLE-DAL-049 — Admin CRUD spectacles", async () => {
@@ -1529,7 +1543,7 @@ describe("3.3 — Admin accès complet", () => {
 /*  ROLE-DAL-059 to ROLE-DAL-068 + 079–080                             */
 /* ================================================================== */
 
-describe("3.4 — User bloqué (aucun accès écriture)", () => {
+describe.skipIf(!shouldRun)("3.4 — User bloqué (aucun accès écriture)", () => {
     // ---- spectacles (ROLE-DAL-059 to 061) -----------------------------
 
     it("ROLE-DAL-059 — User bloqué insert spectacles", async () => {
