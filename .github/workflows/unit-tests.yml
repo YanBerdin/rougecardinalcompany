@@ -1,0 +1,67 @@
+# =============================================================================
+# Unit Tests — GitHub Actions Workflow
+#
+# Runs the Vitest unit test suite on push and pull requests.
+# No secrets required — unit tests run without external services.
+# =============================================================================
+
+name: Unit Tests
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+  workflow_dispatch:
+
+# Minimal permissions following principle of least privilege
+permissions:
+  contents: read
+
+# Cancel in-progress runs for the same branch/PR
+concurrency:
+  group: unit-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      # -----------------------------------------------------------------------
+      # 1. Checkout
+      # -----------------------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      # -----------------------------------------------------------------------
+      # 2. Setup pnpm
+      # -----------------------------------------------------------------------
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      # -----------------------------------------------------------------------
+      # 3. Setup Node.js with pnpm cache
+      # -----------------------------------------------------------------------
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # -----------------------------------------------------------------------
+      # 4. Install dependencies
+      # -----------------------------------------------------------------------
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # -----------------------------------------------------------------------
+      # 5. Run unit tests
+      # -----------------------------------------------------------------------
+      - name: Run Vitest unit tests
+        run: pnpm vitest run --reporter=verbose
