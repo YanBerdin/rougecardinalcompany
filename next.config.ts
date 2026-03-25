@@ -9,6 +9,22 @@ const supabaseUrl =
   process.env.NEXT_PUBLIC_SUPABASE_URL ??
   "https://yvtrlvmbofklefxcxrzv.supabase.co";
 
+// Vercel injecte automatiquement VERCEL="1" sur TOUS ses déploiements,
+// quel que soit le compte (staging, production, preview).
+// VERCEL_ENV ("production"|"preview"|"development") n'est pas suffisant ici :
+// un déploiement master sur un compte Vercel "staging" reçoit VERCEL_ENV="production",
+// et le widget Vercel Live est injecté sur tous les comptes Vercel.
+const isVercelDeployment = process.env.VERCEL === "1";
+
+// Domaines Vercel Live nécessaires pour le widget de feedback/commentaires
+// https://vercel.com/docs/workflow-collaboration/comments/specialized-usage#using-a-content-security-policy
+const vercelLiveDomains = isVercelDeployment
+  ? [
+      "https://vercel.live",
+      "https://vercel.com",
+    ]
+  : [];
+
 // https://nextjs.org/docs/messages/next-image-unconfigured-host
 // https://nextjs.org/docs/app/api-reference/components/image#remotepatterns
 const nextConfig: NextConfig = {
@@ -90,15 +106,33 @@ const nextConfig: NextConfig = {
         source: "/:path*",
         headers: [
           // Content Security Policy - Prevents XSS and code injection
+          // Vercel injecte son widget de feedback/commentaires (vercel.live) sur tous les déploiements.
+          // On autorise ces domaines sur tous les déploiements Vercel (isVercelDeployment).
           {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // TODO: Remove unsafe-* in production
+              // TODO: Remove unsafe-* when nonce-based CSP is implemented
+              [
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+                ...vercelLiveDomains,
+              ].join(" "),
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: https:",
               "font-src 'self' data: https://fonts.gstatic.com",
-              `connect-src 'self' ${supabaseUrl} https://*.ingest.de.sentry.io`,
+              [
+                `connect-src 'self' ${supabaseUrl} https://*.ingest.de.sentry.io`,
+                ...(isVercelDeployment
+                  ? [
+                      "https://vercel.live",
+                      "https://vercel.com",
+                      "wss://ws-us3.pusher.com",
+                    ]
+                  : []),
+              ].join(" "),
+              ...(isVercelDeployment
+                ? ["frame-src https://vercel.live https://vercel.com"]
+                : []),
               "frame-ancestors 'none'",
             ].join("; "),
           },
