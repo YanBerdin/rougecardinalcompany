@@ -66,7 +66,7 @@ export function PartnersView({ partners, isLoading }: PartnersViewProps) {
     const showTwoRows = partners.length >= 6;
 
     return (
-        <section className="relative z-10 overflow-hidden py-12 md:py-8 lg:py-12">
+        <section className="relative z-10 overflow-hidden py-2 sm:py-8 md:py-8 lg:py-12">
             <LogoCloud
                 partners={partners}
                 title="Nos Partenaires"
