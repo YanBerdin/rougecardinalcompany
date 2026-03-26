@@ -116,17 +116,17 @@ export function MediaLibraryPicker({
 
     return (
         <Dialog open={open} onOpenChange={(val) => !val && handleClose()}>
-            <DialogContent className="sm:max-w-[700px] max-h-[80vh]">
-                <DialogHeader>
+            <DialogContent className="sm:max-w-[700px] max-h-[90svh] flex flex-col overflow-hidden">
+                <DialogHeader className="flex-shrink-0">
                     <DialogTitle>Médiathèque</DialogTitle>
                     <DialogDescription>
                         Recherchez et sélectionnez une image existante
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-4">
+                <div className="flex flex-col flex-1 gap-4 overflow-hidden min-h-0">
                     {/* Search input */}
-                    <div className="relative">
+                    <div className="relative flex-shrink-0">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
                         <Input
                             placeholder="Rechercher par nom ou description..."
@@ -138,7 +138,7 @@ export function MediaLibraryPicker({
                     </div>
 
                     {/* Results grid */}
-                    <div className="min-h-[300px] max-h-[400px] overflow-y-auto">
+                    <div className="flex-1 overflow-y-auto min-h-0">
                         {loading ? (
                             <div className="flex items-center justify-center h-[300px]">
                                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -197,7 +197,7 @@ export function MediaLibraryPicker({
 
                     {/* Pagination */}
                     {pagination && pagination.totalPages > 1 && (
-                        <div className="flex items-center justify-center gap-2">
+                        <div className="flex items-center justify-center gap-2 flex-shrink-0">
                             <Button
                                 variant="outline"
                                 size="sm"
@@ -221,7 +221,7 @@ export function MediaLibraryPicker({
                     )}
 
                     {/* Actions */}
-                    <div className="flex gap-2 justify-end border-t pt-4">
+                    <div className="flex gap-2 justify-end border-t pt-4 flex-shrink-0">
                         <Button variant="outline" onClick={handleClose}>
                             Annuler
                         </Button>
