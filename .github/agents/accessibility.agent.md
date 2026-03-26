@@ -7,7 +7,6 @@ tools:
 - vscode/getProjectSetupInfo
 - vscode/installExtension
 - vscode/newWorkspace
-- vscode/openSimpleBrowser
 - vscode/runCommand
 - vscode/askQuestions
 - vscode/vscodeAPI

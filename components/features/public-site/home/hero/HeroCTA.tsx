@@ -20,10 +20,10 @@ export function HeroCTA({ slide }: HeroCTAProps) {
       </p>
 
       <div className="animate-fade-in-up">
-        <h1 className="text-chart-6 text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-bold mb-2 sm:mb-4 lg:mb-6">
+        <h1 className="text-chart-6 text-3xl sm:text-5xl md:text-7xl font-bold mb-2 sm:mb-4 lg:mb-6">
           {slide.title}
         </h1>
-        <h2 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl italic font-bold mb-2 sm:mb-4 text-gold-gradient">
+        <h2 className="text-3xl sm:text-5xl md:text-7xl italic font-bold mb-2 sm:mb-4 text-gold-gradient">
           {slide.subtitle}
         </h2>
         <p className="text-sm sm:text-lg mb-3 sm:mb-6 text-chart-6 max-w-2xl mx-auto">

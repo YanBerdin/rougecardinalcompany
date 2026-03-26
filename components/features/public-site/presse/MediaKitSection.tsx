@@ -51,6 +51,8 @@ export function MediaKitSection({ mediaKit }: MediaKitSectionProps) {
                     <Link
                       href={item.fileUrl}
                       download
+                      target="_blank"
+                      rel="noopener noreferrer"
                       aria-label={`Télécharger ${item.type} - ${item.description} (${item.fileSize})`}
                     >
                       <Download className="mr-2 h-4 w-4" aria-hidden="true" />

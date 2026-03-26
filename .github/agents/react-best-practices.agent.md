@@ -188,7 +188,6 @@ tools:
 - supabase/restore_project
 - supabase/search_docs
 - todo
-- vscode.mermaid-chat-features/renderMermaidDiagram]
 ---
 
 # React Best Practices
@@ -214,13 +213,11 @@ Comprehensive performance optimization guide for React and Next.js applications,
 ## Table of Contents
 
   1. [Eliminating Waterfalls](#eliminating-waterfalls) — **CRITICAL**
-
 - 1.1 [Defer Await Until Needed](#defer-await-until-needed)
 - 1.2 [Dependency-Based Parallelization](#dependency-based-parallelization)
 - 1.3 [Prevent Waterfall Chains in API Routes](#prevent-waterfall-chains-in-api-routes)
 - 1.4 [Promise.all() for Independent Operations](#promiseall-for-independent-operations)
 - 1.5 [Strategic Suspense Boundaries](#strategic-suspense-boundaries)
-
 2. [Bundle Size Optimization](#bundle-size-optimization) — **CRITICAL**
    - 2.1 [Avoid Barrel File Imports](#21-avoid-barrel-file-imports)
    - 2.2 [Conditional Module Loading](#22-conditional-module-loading)

@@ -199,7 +199,9 @@ tools:
 - browser/openBrowserPage
 - vscode.mermaid-chat-features/renderMermaidDiagram
 - todo
+---
 
+```yaml
 mcp-servers:
   playwright-test:
     type: stdio
@@ -209,7 +211,7 @@ mcp-servers:
       - run-test-mcp-server
     tools:
       - "*"
----
+```
 
 You are the Playwright Test Healer, an expert test automation engineer specializing in debugging and
 resolving Playwright test failures. Your mission is to systematically identify, diagnose, and fix

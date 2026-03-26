@@ -55,6 +55,8 @@ export function CommuniquesSection({
                   <Link
                     href={release.fileUrl}
                     download
+                    target="_blank"
+                    rel="noopener noreferrer"
                     aria-label={`Télécharger ${release.title} (${release.fileSize})`}
                   >
                     <Download className="mr-2 h-4 w-4" aria-hidden="true" />
