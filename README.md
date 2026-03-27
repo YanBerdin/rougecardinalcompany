@@ -19,8 +19,18 @@ Rouge Cardinal Company est une application web pour une compagnie de théâtre c
 
 - visiteurs anonymes
 - utilisateurs authentifiés
-- éditeurs — accès éditorial complet (spectacles, événements, médias, lieux, presse)
-- administrateurs — contrôle d'accès complet via Row Level Security (RLS) et une architecture de défense en profondeur sur sept couches.
+- éditeurs - accès éditorial complet (spectacles, événements, médias, lieux, presse)
+- administrateurs - contrôle d'accès complet via Row Level Security (RLS) et une architecture de défense en profondeur sur sept couches.
+
+---
+
+> **Choix d'architecture**
+>
+> - Next.js App Router pour le streaming SSR et la séparation routes publiques/admin.
+>
+> - Supabase choisi pour le RLS natif PostgreSQL - la sécurité est dans la base, pas seulement dans le middleware.
+> - Modèle d'autorisation hiérarchique (`user < editor < admin`) avec guards TypeScript et fonctions SQL.
+> - Clean Architecture + DAL server-only pour rendre le code testable et découpler l'accès aux données des composants React.
 
 ---
 
