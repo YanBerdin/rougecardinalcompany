@@ -769,7 +769,7 @@
 
 .logo-text {
   font-weight: 700;
-  font-size: 1.25rem;
+  font-size: 1rem;
   line-height: 1.2;
   letter-spacing: -0.025em;
   /* Stabilisation du texte */
@@ -822,11 +822,11 @@
 */
 @media (max-width: 640px) {
   .logo-image {
-    height: 2rem;
-    width: 2rem;
+    height: 1.5rem;
+    width: 1.5rem;
   }
   .logo-text {
-    font-size: 1.125rem;
+    font-size: 1rem;
   }
 }
 

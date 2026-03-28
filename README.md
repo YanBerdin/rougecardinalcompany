@@ -99,7 +99,7 @@ L'application suit le pattern App Router de Next.js avec une séparation stricte
 La couche intermédiaire applique les principes de Clean Architecture avec une Data Access Layer (DAL) serveur-only interfaçant exclusivement Supabase (PostgreSQL, Auth, Storage).
 
 ```mermaid
-flowchart TB
+flowchart LR
   subgraph L1["Présentation"]
     PUBP["Pages publiques\n(marketing)/"]
     ADMP["Pages admin\n(admin)/"]
@@ -112,7 +112,7 @@ flowchart TB
   end
 
   subgraph L3["Data Access"]
-    DAL["lib/dal/ — 31 modules\nserver-only · DALResult<T> · cache()"]
+    DAL["lib/dal/ — 37 modules\nserver-only · DALResult<T> · cache()"]
     SCHEMA["lib/schemas/*\nZod validation"]
   end
 
@@ -132,10 +132,10 @@ flowchart TB
 **Chiffres clés :**
 
 - 14 sections admin (~30 pages), 9 pages publiques, 10 API Routes
-- 31 modules DAL + 5 helpers
-- 36 tables PostgreSQL, 100% RLS, 46 fichiers de schéma déclaratif
+- 37 modules DAL + 6 helpers
+- 36 tables PostgreSQL, 100% RLS, 47 fichiers de schéma déclaratif
 - 115 migrations SQL (sept. 2025 → mars 2026)
-- 92 scripts de test/audit/maintenance
+- 98 scripts de test/audit/maintenance
 
 ---
 

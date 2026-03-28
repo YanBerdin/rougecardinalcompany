@@ -18,14 +18,14 @@ function LogoCard({ partner, linkable, index }: LogoCardProps) {
             alt={partner.name}
             width={partner.width || 150}
             height={partner.height || 55}
-            className="w-auto h-10 md:h-12 lg:h-14 object-contain rounded-sm"
+            className="w-auto h-7 sm:h-9 md:h-10 lg:h-12 object-contain"
             loading="lazy"
         />
     );
 
-    //px-2 py-2 mx-0 md:px-2 md:py-4 md:mx-3 min-w-[100px] lg:min-w-[120px] h-14 xl:h-16
+    // Hauteur du conteneur = hauteur du logo, pas de padding vertical
     const cardClasses =
-        "flex items-center justify-center px-0 py-0 mx-0 md:mx-3 bg-card/40 backdrop-blur-sm min-w-[50px] lg:min-w-[60px] h-12 xl:h-14 hover:bg-card transition-all duration-500 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative group rounded-md";
+        "flex items-center justify-center px-0 mx-0 md:mx-3 bg-card/40 backdrop-blur-sm min-w-[50px] lg:min-w-[60px] h-7 sm:h-9 md:h-10 lg:h-12 hover:bg-card transition-all duration-500 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative group rounded overflow-hidden rounded";
 
     if (linkable && partner.website) {
         return (
@@ -77,7 +77,7 @@ export function LogoCloud({
     const shouldScroll = partners.length >= 6;
 
     return (
-        <section className={`py-4  overflow-hidden relative ${className}`}>
+        <section className={`py-2 md:py-4 overflow-hidden relative ${className}`}>
 
             {/*<div className="max-w-7xl mx-auto px-6 text-center mb-16 md:mb-24 relative">
                 <div className="flex flex-col items-center gap-4 mb-2">
@@ -93,9 +93,9 @@ export function LogoCloud({
                 )}
             </div>
 */}
-            <div className="max-w-7xl mx-auto px-6 text-center mb-4">
+            <div className=" mx-auto px-4 text-center mb-4">
 
-                <p className="text-xs lg:text-sm xl:text-md text-chart-6/70 max-w-2xl mx-auto">
+                <p className="text-xs lg:text-sm xl:text-md text-chart-6/70 mx-auto">
                     Nos soutiens et partenaires institutionnels nous accompagnent.
                 </p>
             </div>
