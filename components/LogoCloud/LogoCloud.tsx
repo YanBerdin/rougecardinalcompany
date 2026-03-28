@@ -77,7 +77,7 @@ export function LogoCloud({
     const shouldScroll = partners.length >= 6;
 
     return (
-        <section className={`py-2 md:py-4 overflow-hidden relative ${className}`}>
+        <section className={`py-2  overflow-hidden relative ${className}`}>
 
             {/*<div className="max-w-7xl mx-auto px-6 text-center mb-16 md:mb-24 relative">
                 <div className="flex flex-col items-center gap-4 mb-2">

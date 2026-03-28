@@ -20,7 +20,7 @@ function SkeletonRow() {
 
 export function PartnersSkeleton() {
     return (
-        <section className="relative overflow-hidden bg-background py-16 md:py-20 lg:py-24">
+        <section className="relative overflow-hidden bg-black py-16 md:py-20 lg:py-24">
             {/* En-tête skeleton */}
             <div className="max-w-7xl mx-auto px-6 text-center mb-12 md:mb-16">
                 <div className="inline-flex h-6 w-32 bg-muted/30 animate-pulse rounded-full mb-6" />
