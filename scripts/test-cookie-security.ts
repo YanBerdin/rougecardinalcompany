@@ -18,6 +18,7 @@
  */
 
 import { execSync } from 'child_process';
+import { readFileSync } from 'fs';
 
 interface CookieTest {
   name: string;
@@ -203,7 +204,7 @@ const errors: string[] = [];
 
 // Check supabase/server.ts uses @supabase/ssr
 try {
-  const serverConfig = execSync('cat supabase/server.ts', { encoding: 'utf-8' });
+  const serverConfig = readFileSync('supabase/server.ts', 'utf-8');
 
   if (serverConfig.includes('createServerClient')) {
     details.push('   ✓ Uses createServerClient (@supabase/ssr)');
