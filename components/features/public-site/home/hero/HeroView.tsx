@@ -31,7 +31,7 @@ export function HeroView({
       aria-label="Diaporama des spectacles à l'affiche"
       tabIndex={0}
       onKeyDown={onKeyDown}
-      className="relative h-svh flex items-center justify-center overflow-hidden select-none outline-none focus-visible:ring-2 focus-visible:ring-gold/60 pb-36 sm:pb-44"
+      className="relative h-svh flex items-center justify-center overflow-hidden select-none outline-none focus-visible:ring-2 focus-visible:ring-gold/60 pb-36 sm:pb-44 md:pb-44"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}

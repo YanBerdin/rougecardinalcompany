@@ -12,10 +12,10 @@ interface HeroCTAProps {
 
 export function HeroCTA({ slide }: HeroCTAProps) {
   return (
-    <div className="relative z-10 text-center text-chart-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-32">
+    <div className="relative z-10 text-center text-chart-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-44 md:mt-52">
       <div className="w-24 h-px bg-gold mx-auto mb-4 sm:mb-8" aria-hidden="true" />
 
-      <p className="text-xs sm:text-lg md:text-2xl tracking-[0.15em] sm:tracking-[0.25em] uppercase text-gold mb-2 sm:mb-4 lg:mb-6">
+      <p className="text-xs sm:text-sm md:text-2xl tracking-[0.15em] sm:tracking-[0.25em] uppercase text-gold mb-2 sm:mb-4 lg:mb-6">
         {CURRENT_SEASON_LABEL}
       </p>
 
@@ -26,13 +26,13 @@ export function HeroCTA({ slide }: HeroCTAProps) {
         <h2 className="text-4xl md:text-7xl italic font-bold mb-2 sm:mb-4 text-gold-gradient">
           {slide.subtitle}
         </h2>
-        <p className="text-sm sm:text-lg mb-3 sm:mb-6 text-chart-6 max-w-2xl mx-auto">
+        <p className="text-sm md:text-lg mb-6 text-chart-6 max-w-2xl mx-auto">
           {slide.description}
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
           {slide.ctaPrimaryEnabled && slide.ctaPrimaryLabel && (
-            <Button variant="default" size="lg" className="w-64 justify-center" asChild>
+            <Button variant="default" size="lg" className="max-sm:text-sm max-w-[280px] w-64 justify-center" asChild>
               <Link href={slide.ctaPrimaryUrl ?? "/spectacles"}>
                 <ArrowRight className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {slide.ctaPrimaryLabel}
@@ -44,7 +44,7 @@ export function HeroCTA({ slide }: HeroCTAProps) {
             <Button
               variant="outline"
               size="lg"
-              className="w-64 justify-center bg-white/30 border-white/50 text-chart-6 backdrop-blur-md hover:bg-chart-6 hover:text-black transition-colors duration-300 shadow-lg"
+              className="max-sm:text-sm max-w-[280px] w-64 justify-center bg-white/30 border-white/50 text-chart-6 backdrop-blur-md hover:bg-chart-6 hover:text-black transition-colors duration-300 shadow-lg"
               asChild
             >
               <Link href={slide.ctaSecondaryUrl ?? "/agenda"}>
