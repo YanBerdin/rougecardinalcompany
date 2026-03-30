@@ -23,7 +23,6 @@ export default defineConfig({
         trace: 'on-first-retry',
         screenshot: 'only-on-failure',
         navigationTimeout: 20_000,
-        reducedMotion: 'reduce', // Skip curtain animation for faster, more stable tests
     },
 
     projects: [
