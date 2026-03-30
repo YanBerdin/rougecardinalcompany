@@ -31,7 +31,7 @@ export class HomePage {
     }
 
     async goto(): Promise<void> {
-        await this.page.goto('/', { waitUntil: 'domcontentloaded' });
+        await this.page.goto('/', { waitUntil: 'networkidle' });
     }
 
     async expectLoaded(): Promise<void> {

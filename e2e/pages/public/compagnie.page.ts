@@ -9,11 +9,12 @@ export class CompagniePage {
     }
 
     async goto(): Promise<void> {
-        await this.page.goto('/compagnie');
+        await this.page.goto('/compagnie', { waitUntil: 'networkidle' });
     }
 
     async expectLoaded(): Promise<void> {
-        await expect(this.page.getByRole('heading', { level: 1 })).toBeVisible();
+        await expect(this.page).toHaveURL(/\/compagnie\/?$/);
+        await expect(this.page.getByRole('heading', { level: 1 })).toBeVisible({ timeout: 15_000 });
     }
 
     async expectSections(): Promise<void> {

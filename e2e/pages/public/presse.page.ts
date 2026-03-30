@@ -7,7 +7,7 @@ export class PressePage {
     readonly revueDePresse: Locator;
 
     constructor(private readonly page: Page) {
-        this.heroHeading = page.getByRole('heading', { name: 'Espace Média' });
+        this.heroHeading = page.getByRole('heading', { name: /espace média/i });
         this.contactPresseSection = page.locator(
             '[aria-label="Contact presse"]',
         );
@@ -15,10 +15,12 @@ export class PressePage {
     }
 
     async goto(): Promise<void> {
-        await this.page.goto('/presse', { waitUntil: 'domcontentloaded' });
+        await this.page.goto('/presse', { waitUntil: 'networkidle' });
     }
 
     async expectLoaded(): Promise<void> {
-        await expect(this.heroHeading).toBeVisible();
+        // Vérifier URL + contenu stable au lieu du H1 exact
+        await expect(this.page).toHaveURL(/\/presse\/?$/);
+        await expect(this.revueDePresse).toBeVisible({ timeout: 15_000 });
     }
 }

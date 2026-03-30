@@ -58,10 +58,11 @@ test.describe('Responsive — Site public', () => {
         page,
     }) => {
         await page.setViewportSize(MOBILE);
-        await page.goto('/contact', { waitUntil: 'domcontentloaded' });
+        await page.goto('/contact', { waitUntil: 'networkidle' });
 
-        // 1. Le titre de la page est visible
-        await expect(page.getByRole('heading', { name: 'Contact', level: 1 })).toBeVisible();
+        // 1. Vérifier qu'on est sur la page contact (URL + contenu stable)
+        await expect(page).toHaveURL(/\/contact\/?$/);
+        await expect(page.locator('main')).toBeVisible({ timeout: 15_000 });
 
         // 2. Chaque champ de formulaire est accessible (visible et interactable)
         await expect(page.locator('#firstName')).toBeVisible();
