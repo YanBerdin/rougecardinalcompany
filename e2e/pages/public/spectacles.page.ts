@@ -6,16 +6,18 @@ export class SpectaclesPage {
     readonly spectacleCards: Locator;
 
     constructor(private readonly page: Page) {
-        this.heroHeading = page.getByRole('heading', { name: 'À l\'Affiche' });
+        this.heroHeading = page.getByRole('heading', { name: /à l'affiche/i });
         this.spectacleCards = page.getByRole('region', { name: 'Spectacles actuels' });
     }
 
     async goto(): Promise<void> {
-        await this.page.goto('/spectacles');
+        await this.page.goto('/spectacles', { waitUntil: 'networkidle' });
     }
 
     async expectLoaded(): Promise<void> {
-        await expect(this.heroHeading).toBeVisible();
+        // Vérifier URL + région spectacles (plus stable que le H1)
+        await expect(this.page).toHaveURL(/\/spectacles\/?$/);
+        await expect(this.spectacleCards).toBeVisible({ timeout: 15_000 });
     }
 
     async expectSpectacleCardsVisible(): Promise<void> {

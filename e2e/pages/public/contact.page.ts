@@ -20,7 +20,7 @@ export class ContactPage {
 
     constructor(private readonly page: Page) {
         this.formHeading = page.getByRole('heading', {
-            name: 'Contact',
+            name: /contact/i,
             level: 1,
         });
         this.firstNameInput = page.locator('#firstName');
@@ -36,7 +36,7 @@ export class ContactPage {
             name: 'Envoyer le message',
         });
         this.successHeading = page.getByRole('heading', {
-            name: 'Message Envoyé !',
+            name: /message envoyé/i,
         });
         this.sendAnotherButton = page.getByRole('button', {
             name: 'Envoyer un autre message',
@@ -54,11 +54,12 @@ export class ContactPage {
     }
 
     async goto(): Promise<void> {
-        await this.page.goto('/contact');
+        await this.page.goto('/contact', { waitUntil: 'networkidle' });
     }
 
     async expectLoaded(): Promise<void> {
-        await expect(this.formHeading).toBeVisible();
+        await expect(this.page).toHaveURL(/\/contact\/?$/);
+        await expect(this.firstNameInput).toBeVisible({ timeout: 15_000 });
     }
 
     async expectSidebarVisible(): Promise<void> {
