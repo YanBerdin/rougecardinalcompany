@@ -1,5 +1,7 @@
 # Rouge Cardinal - Site web
 
+![alt text](<doc/Capture d’écran_1-4-2026_233758_rougecardinal.yanberdin.com.jpeg>)
+
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/YanBerdin/rougecardinalcompany)
 
 Plateforme web officielle de la compagnie de théâtre Rouge Cardinal : vitrine publique, médiathèque, espace presse et back-office d'administration.
