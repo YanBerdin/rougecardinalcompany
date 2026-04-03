@@ -12,4 +12,4 @@ export const MIN_SWIPE_DISTANCE_PX = 50;
  * Option C (décision TASK072) : constante mise à jour manuellement chaque saison.
  * Si un pilotage dynamique s'avère nécessaire, migrer vers configurations_site.
  */
-export const CURRENT_SEASON_LABEL = "saison 2025 – 2026";
+export const CURRENT_SEASON_LABEL = "saison 2026";
