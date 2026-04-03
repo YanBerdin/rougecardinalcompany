@@ -77,7 +77,7 @@ export function LogoCloud({
     const shouldScroll = partners.length >= 6;
 
     return (
-        <section className={`py-2  overflow-hidden relative ${className}`}>
+        <section className={`pb-2 overflow-hidden relative ${className}`}>
 
             {/*<div className="max-w-7xl mx-auto px-6 text-center mb-16 md:mb-24 relative">
                 <div className="flex flex-col items-center gap-4 mb-2">
@@ -95,7 +95,7 @@ export function LogoCloud({
 */}
             <div className=" mx-auto px-4 text-center mb-4">
 
-                <p className="text-xs lg:text-sm xl:text-md text-chart-6/70 mx-auto">
+                <p className="hidden sm:block text-xs lg:text-sm xl:text-md text-chart-6/70 mx-auto">
                     Nos soutiens et partenaires institutionnels nous accompagnent.
                 </p>
             </div>
