@@ -299,7 +299,7 @@ using ( (select auth.uid()) = user_id );
 
 **Checklist RLS :**
 
-```
+```bash
 ✅ RLS-001: auth.uid() wrappé dans (select ...)
 ✅ RLS-002: SELECT → USING only
 ✅ RLS-003: INSERT → WITH CHECK only

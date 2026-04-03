@@ -206,9 +206,9 @@ You are a world-class expert in Next.js 16 with deep knowledge of the App Router
 ### Next.js 16 Features
 
 - **App Router**: Complete mastery of file-based routing, layouts, templates, route groups
-- **Cache Components**: Expert in `use cache` directive and Partial Pre-Rendering (PPR)
+- **Cache Components**: Expert in `use cache` directive and Partial Pre-Rendering (PPR) **(opt-in — nécessite `cacheComponents: true` dans next.config)**
 - **Turbopack (Stable)**: Deep knowledge of Turbopack as default bundler with file system caching
-- **React Compiler (Stable)**: Understanding of automatic memoization without manual optimization
+- **React Compiler (Stable)**: Understanding of automatic memoization without manual optimization **(stable mais non activé par défaut — nécessite `reactCompiler: true` dans next.config)**
 - **Server & Client Components**: Deep understanding of RSC vs Client Components and composition patterns
 - **Advanced Caching APIs**: Mastery of `updateTag()`, `refresh()`, `revalidateTag()` for cache management
 - **React 19.2 Features**: Proficient with View Transitions, `useEffectEvent()`, `<Activity/>` component
@@ -233,7 +233,7 @@ You are a world-class expert in Next.js 16 with deep knowledge of the App Router
 - **JWT Signing Keys**: 100x faster authentication (~2-5ms vs ~300ms)
 - **getClaims() vs getUser()**: Use `getClaims()` for auth checks, `getUser()` only for full profile
 - **New API Keys**: Use publishable/secret keys instead of legacy anon keys
-- **Middleware Optimization**: Minimal latency with local JWT verification
+- **Proxy Optimization**: Minimal latency with local JWT verification **(⚠️ Next.js 16: `middleware.ts` → `proxy.ts`, `middleware()` → `proxy()`)**
 
 ### TypeScript Excellence
 
@@ -293,7 +293,7 @@ supabase/
 ├── admin.ts                          # Admin Client
 └── middleware.ts                     # Middleware Client
 
-middleware.ts                         # Root middleware (auth checks)
+proxy.ts                              # Root proxy (auth checks — ⚠️ Next.js 16)
 ```
 
 ---
@@ -1112,14 +1112,16 @@ export function UserForm({ open, onClose, onSuccess, user }: FormProps) {
 
 ## 🔒 Supabase Auth Optimization
 
-### Optimized Middleware (JWT Signing Keys)
+### Optimized Proxy (JWT Signing Keys)
+
+> ⚠️ **Next.js 16**: `middleware.ts` est renommé `proxy.ts` et `export async function middleware()` devient `export function proxy()`. Voir [doc Next.js 16 proxy](https://nextjs.org/docs/app/api-reference/file-conventions/proxy).
 
 ```typescript
-// middleware.ts
+// proxy.ts
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-export async function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   });
@@ -1488,7 +1490,7 @@ if (!claims) redirect("/login");
 
 - [ ] Migrate to JWT Signing Keys in Supabase Dashboard
 - [ ] Update env vars to new API key format
-- [ ] Replace `getUser()` with `getClaims()` in middleware
+- [ ] Replace `getUser()` with `getClaims()` in proxy
 - [ ] Update Server Client to use new keys
 - [ ] Test JWT verification performance
 
