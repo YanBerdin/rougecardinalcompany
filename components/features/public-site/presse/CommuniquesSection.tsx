@@ -18,9 +18,9 @@ export function CommuniquesSection({
   if (pressReleases.length === 0) return null;
 
   return (
-    <section aria-label="Communiqués de presse" className="py-24">
+    <section aria-label="Communiqués de presse" className="max-sm:py-12 py-24">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <div className="text-center max-sm:mb-8 mb-16">
           <h2 className="text-3xl md:text-3xl lg:text-4xl font-bold font-sans mb-4">
             Communiqués de Presse
           </h2>

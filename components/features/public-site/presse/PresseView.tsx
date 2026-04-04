@@ -17,7 +17,7 @@ export function PresseView({
   mediaKit,
 }: PresseViewProps) {
   return (
-    <div className="pt-16">
+    <div className="pt-12 md:pt-16">
       <HeroSection />
       <ContactPresseSection />
       <RevueDePresse mediaArticles={mediaArticles} />

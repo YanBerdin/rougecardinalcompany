@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export function ContactPresseSection() {
   return (
-    <section aria-label="Contact presse" className="pt-24 bg-chart-7">
+    <section aria-label="Contact presse" className="max-sm:pt-12 pt-24 bg-chart-7">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <Card>
           <CardContent className="p-6">

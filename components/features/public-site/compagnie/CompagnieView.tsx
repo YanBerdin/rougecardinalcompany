@@ -31,7 +31,7 @@ export function CompagnieView({
   }
 
   return (
-    <div className="pt-16">
+    <div className=" max-sm:pt-12 pt-16">
       {sections.map((section) => {
         const Renderer = SECTION_RENDERERS[section.kind];
         if (!Renderer) return null;

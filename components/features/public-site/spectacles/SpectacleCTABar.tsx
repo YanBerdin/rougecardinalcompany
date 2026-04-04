@@ -56,7 +56,7 @@ export function SpectacleCTABar({
             <Button
                 variant="outline"
                 size="lg"
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto max-sm:hidden"
                 asChild
             >
                 <Link

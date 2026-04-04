@@ -5,7 +5,7 @@ import { ANIMATION_BASE_DELAY } from "../constants";
 export function SectionHero({ section }: SectionRendererProps): ReactElement {
     const headingId = `heading-${section.kind}`;
     return (
-        <section id={section.kind} aria-labelledby={headingId} className="py-16 hero-gradient">
+        <section id={section.kind} aria-labelledby={headingId} className="max-sm:py-10 py-16 hero-gradient">
             <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 {section.title && (
                     <h1 id={headingId} className="text-4xl md:text-5xl lg:text-6xl text-white font-bold mb-6 animate-fade-in-up">

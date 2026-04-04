@@ -139,7 +139,7 @@ function SidebarProvider({
             } as React.CSSProperties
           }
           className={cn(
-            "group/sidebar-wrapper has-data-[variant=inset]:bg-chart-6 flex min-h-svh w-full",
+            "group/sidebar-wrapper has-data-[variant=inset]:bg-chart-6 flex min-h-dvh w-full",
             className
           )}
           {...props}
@@ -241,7 +241,7 @@ function Sidebar({
       <div
         data-slot="sidebar-container"
         className={cn(
-          "fixed inset-y-0 z-10 hidden h-svh transition-[left,right,width] duration-200 ease-linear md:flex",
+          "fixed inset-y-0 z-10 hidden h-dvh transition-[left,right,width] duration-200 ease-linear md:flex",
           side === "left"
             ? "left-0 group-data-[collapsible=offcanvas]:-left-[16rem]"
             : "right-0 group-data-[collapsible=offcanvas]:-right-[16rem]",
