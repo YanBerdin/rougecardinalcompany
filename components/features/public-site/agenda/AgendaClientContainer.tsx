@@ -20,9 +20,9 @@ export default function AgendaClientContainer({
 }: AgendaClientContainerProps): React.JSX.Element {
   return (
     <AgendaProvider events={events} eventTypes={eventTypes}>
-      <div className="pt-16">
+      <div className="max-sm:pt-12 pt-16">
         <AgendaHero />
-        <section className="py-16 bg-chart-7">
+        <section className="max-sm:py-12 py-16 bg-chart-7">
           <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
             <AgendaFilters />
             <AgendaEventList />

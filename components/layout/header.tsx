@@ -84,7 +84,7 @@ export default function Header() {
       }
       observer.disconnect();
       if (mql.removeEventListener) mql.removeEventListener("change", mqlListener);
-      else mql.removeListener(mqlListener);
+      else mql.removeListener(mqlListener); //todo deprecated but still widely supported
     };
   }, []);
 
@@ -98,7 +98,7 @@ export default function Header() {
       )}
     >
       <nav className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-nowrap justify-between items-center h-16 gap-4">
+        <div className="flex flex-nowrap justify-between items-center max-sm:h-12 md:h-16 gap-4">
           {/* Logo */}
           <Link href="/" className="logo-container flex-shrink-0">
             <Image
@@ -161,7 +161,7 @@ export default function Header() {
         {/* Mobile Navigation */}
         {isOpen && (
           <div className="md:hidden animate-fade-in px-4">
-            <div className="px-2 pt-4 pb-3 space-y-2 liquid-glass-mobile rounded-2xl mt-4 border">
+            <div className="px-2 p-4 pb-3 space-y-2 liquid-glass-mobile rounded-2xl my-12 border">
               {navigation.map((item, index) => (
                 <Link
                   key={navigation[index].name}

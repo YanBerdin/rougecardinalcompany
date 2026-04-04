@@ -69,7 +69,7 @@ When making fixes, gather the following information:
 
 Attempt automatic detection from files in the workspace:
 
-```
+```bash
 Detection targets:
 ├── package.json     → Framework and dependencies
 ├── tsconfig.json    → TypeScript usage

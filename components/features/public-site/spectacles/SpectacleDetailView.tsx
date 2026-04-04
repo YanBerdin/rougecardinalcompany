@@ -52,10 +52,35 @@ export function SpectacleDetailView({
                 Aller au contenu principal
             </Link>
 
+            {/* Mobile CTA — sticky sous le header, visible uniquement sur mobile */}
+            {/*            <div
+                className="sm:hidden sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-3"
+                aria-label="Actions principales"
+            >
+                <div className="flex gap-3">
+                    <Button variant="default" size="sm" className="flex-1 shadow-md" asChild>
+                        <Link
+                            href={ticketUrl ?? "/contact?subject=reservation"}
+                            aria-label={`Réserver des places pour ${spectacle.title}`}
+                            {...(ticketUrl ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                        >
+                            <Ticket className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                            Réserver
+                        </Link>
+                    </Button>
+                    <Button variant="secondary" size="sm" className="flex-1" asChild>
+                        <Link href="/agenda" aria-label="Consulter l'agenda des représentations">
+                            <Calendar className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                            Voir les dates
+                        </Link>
+                    </Button>
+                </div>
+            </div>
+*/}
             {/* Informations Pratiques - Horizontal Bar */}
-            <section className="py-8 lg:py-12 bg-card flex justify-between" aria-label="Informations pratiques">
-                <div className="max-w-7xl mx-auto max-sm:px-6 px-4">
-                    <div className="grid max-sm:grid-cols-2 grid-cols-3 md:grid-cols-4 lg:grid-cols-5 max-lg:gap-6">
+            <section className="py-4 lg:py-12 bg-card flex justify-between" aria-label="Informations pratiques">
+                <div className="max-w-7xl mx-auto px-4">
+                    <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 lg:gap-6">
                         {/* Genre */}
                         <div className="flex items-center gap-3">
                             <Star className="h-4 w-4 flex-shrink-0 text-primary" aria-hidden="true" />
@@ -68,7 +93,7 @@ export function SpectacleDetailView({
                         </div>
 
                         {/* Comédiens */}
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 max-sm:hidden">
                             <Users className="h-4 w-4 flex-shrink-0 text-primary" aria-hidden="true" />
                             <div className="flex-1">
                                 <p className="ml-1 text-xs uppercase tracking-wide font-medium">Comédiens</p>
@@ -90,7 +115,7 @@ export function SpectacleDetailView({
                         </div>
 
                         {/* Première */}
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 max-sm:hidden">
                             <Calendar className="h-4 w-4 flex-shrink-0 text-primary" aria-hidden="true" />
                             <div className="flex-1">
                                 <p className="ml-1 text-xs uppercase tracking-wide font-medium">Première</p>
@@ -161,8 +186,8 @@ export function SpectacleDetailView({
                             <SpectacleCTABar
                                 title={spectacle.title}
                                 ticketUrl={ticketUrl}
-                                                                   agendaLabel="Voir les dates"
-                                    backLabel="Tous les spectacles"
+                                agendaLabel="Voir les dates"
+                                backLabel="Tous les spectacles"
                             />
                             <h1 id="spectacle-title" className="text-2xl md:text-3xl lg:text-4xl font-bold font-sans mb-6 animate-fade-in-up">
                                 {spectacle.title}
@@ -209,16 +234,6 @@ export function SpectacleDetailView({
                                     </p>
                                 </div>
                             )}
-
-                            {/* Call to Actions */}
-                            <div className="pt-4 md:pt-6">
-                                <SpectacleCTABar
-                                    title={spectacle.title}
-                                    ticketUrl={ticketUrl}
-                                    agendaLabel="Voir les dates"
-                                    backLabel="Tous les spectacles"
-                                />
-                            </div>
 
                             {/* Awards Widget */}
                             {hasAwards && (
@@ -268,6 +283,15 @@ export function SpectacleDetailView({
                                 />
                             </div>
                         )}
+                    </div>
+                    {/* Call to Actions */}
+                    <div className="pt-4 md:pt-6 max-w-7xl flex justify-center">
+                        <SpectacleCTABar
+                            title={spectacle.title}
+                            ticketUrl={ticketUrl}
+                            agendaLabel="Voir les dates"
+                            backLabel="Tous les spectacles"
+                        />
                     </div>
                 </div>
 
