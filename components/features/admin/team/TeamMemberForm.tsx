@@ -124,7 +124,7 @@ export function TeamMemberForm({
             showUpload={true}
             uploadFolder="team"
           >
-            <ImageField.SourceActions />
+            <ImageField.SourceActions showUpload={true} />
             <ImageField.Preview />
           </ImageField.Provider>
 

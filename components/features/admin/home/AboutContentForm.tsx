@@ -184,7 +184,7 @@ export function AboutContentForm({ content }: AboutContentFormProps) {
                                     showUpload={true}
                                     uploadFolder="home-about"
                                 >
-                                    <ImageField.SourceActions />
+                                    <ImageField.SourceActions showUpload={true} />
                                     <ImageField.Preview />
                                     <ImageField.AltText />
                                 </ImageField.Provider>

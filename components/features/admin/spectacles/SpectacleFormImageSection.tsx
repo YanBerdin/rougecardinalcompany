@@ -32,7 +32,7 @@ export function SpectacleFormImageSection({
                 }
                 onValidationChange={onValidationChange}
             >
-                <ImageField.SourceActions />
+                <ImageField.SourceActions showUpload={true} />
                 <ImageField.Preview />
             </ImageField.Provider>
 

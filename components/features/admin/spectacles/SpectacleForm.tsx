@@ -10,10 +10,6 @@ import {
   createSpectacleAction,
   updateSpectacleAction,
 } from "@/app/(admin)/admin/spectacles/actions";
-import type {
-  CreateSpectacleInput,
-  UpdateSpectacleInput,
-} from "@/lib/schemas/spectacles";
 import {
   spectacleFormSchema,
   type SpectacleFormValues,
