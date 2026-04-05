@@ -195,7 +195,7 @@ export function PressReleaseNewForm({ spectacles = [], evenements = [] }: { spec
                             description="Image principale affichée dans le kit média (recommandé : 1200x630px)"
                             onValidationChange={(isValid) => setIsImageValidated(isValid)}
                         >
-                            <ImageField.SourceActions />
+                            <ImageField.SourceActions showUpload={true} />
                             <ImageField.Preview />
                         </ImageField.Provider>
                     </CardContent>

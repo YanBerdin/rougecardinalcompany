@@ -1,10 +1,10 @@
 # Active Context
 
-**Current Focus (2026-03-25)**: **Validation d'environnement runtime + CI Unit Tests** — Module `lib/env-validation.ts` extrait de `instrumentation.ts` avec DI. 22 tests unitaires. Rapport détaillé `doc/ENV-VALIDATION-REPORT.md`. Workflow CI `unit-tests.yml` créé — Vitest tourne sur push/PR (pnpm 9, Node 22, permissions minimales). Comble le gap CI : 75 unit tests exécutés en CI sur chaque changement.
+**Current Focus (2026-04-06)**: **Bouton Téléverser activé sur 9 formulaires admin** — `showUpload={true}` ajouté à `ImageField.SourceActions` dans AbouContentForm, HeroSlideForm, TeamMemberForm, SpectacleFormImageSection, PressReleaseEditForm, PressReleaseNewForm, PartnerForm, ArticleNewForm, ArticleEditForm. Bug racine : `showUpload` non propagé via context entre Provider et SourceActions — les deux composants ont leur prop indépendante. Aussi : "Upload" → "Téléverser" dans MediaLibraryView (cohérence i18n), imports morts nettoyés dans SpectacleForm.
 
-**Previous Focus (2026-03-24)**: TASK087 complété — **Compression d'images Sharp côté serveur opérationnelle**. Utilitaire `lib/utils/image-compress.ts` créé, injecté dans le pipeline `uploadMediaImage()` (Server Action), DAL mis à jour (`File | Blob` + `filename`), 11/11 tests unitaires passent. Commit sur branche `feat/image-compression`.
+**Previous Focus (2026-03-25)**: **Validation d'environnement runtime + CI Unit Tests** — Module `lib/env-validation.ts` extrait de `instrumentation.ts` avec DI. 22 tests unitaires. Rapport détaillé `doc/ENV-VALIDATION-REPORT.md`. Workflow CI `unit-tests.yml` créé — Vitest tourne sur push/PR (pnpm 9, Node 22, permissions minimales). Comble le gap CI : 75 unit tests exécutés en CI sur chaque changement.
 
-**Last Major Updates**: ✅ **Validation env runtime** (`lib/env-validation.ts`, 22 tests, module extraction DI, 75/75 tests) (2026-03-25) + ✅ TASK087 — **Compression images Sharp** (`lib/utils/image-compress.ts`, pipeline uploadMedia, 11/11 tests, script npm `test:unit:image-compress`) (2026-03-24) + ✅ TASK086 — **Pipeline CI/CD E2E vert** (`e2e.yml` 12 étapes, CI vert en 10m 31s) (2026-03-23) + ✅ TASK085 — **3/3 tests E2E Admin Analytics passent** (2026-03-23) + ✅ TASK084 — **7/7 tests E2E erreurs & performance passent** (2026-03-22) + ✅ TASK038 — **16/16 tests E2E cross-cutting passent** (2026-03-21) + ✅ TASK083 — **56/56 tests E2E Admin CRUD Admin-only passent** (2026-03-21) + ✅ TASK082 — **51/51 tests E2E Admin CRUD Éditorial passent** (2026-03-20) + ✅ TASK082C — Patch sécurité flatted 3.4.2 (2026-03-19) + ✅ TASK082B — Patch sécurité Next.js 16.1.7 (2026-03-17) + ✅ TASK078 — **80/80 DAL + 23/23 E2E P0 permissions** (2026-03-16)
+**Last Major Updates**: ✅ **Bouton Téléverser — 9 formulaires** (showUpload SourceActions, 0 erreurs TS) (2026-04-06) + ✅ **Validation env runtime** (`lib/env-validation.ts`, 22 tests, module extraction DI, 75/75 tests) (2026-03-25) + ✅ TASK087 — **Compression images Sharp** (`lib/utils/image-compress.ts`, pipeline uploadMedia, 11/11 tests, script npm `test:unit:image-compress`) (2026-03-24) + ✅ TASK086 — **Pipeline CI/CD E2E vert** (`e2e.yml` 12 étapes, CI vert en 10m 31s) (2026-03-23) + ✅ TASK085 — **3/3 tests E2E Admin Analytics passent** (2026-03-23) + ✅ TASK084 — **7/7 tests E2E erreurs & performance passent** (2026-03-22) + ✅ TASK038 — **16/16 tests E2E cross-cutting passent** (2026-03-21) + ✅ TASK083 — **56/56 tests E2E Admin CRUD Admin-only passent** (2026-03-21) + ✅ TASK082 — **51/51 tests E2E Admin CRUD Éditorial passent** (2026-03-20) + ✅ TASK082C — Patch sécurité flatted 3.4.2 (2026-03-19) + ✅ TASK082B — Patch sécurité Next.js 16.1.7 (2026-03-17) + ✅ TASK078 — **80/80 DAL + 23/23 E2E P0 permissions** (2026-03-16)
 
 ---
 
@@ -4429,7 +4429,7 @@ medias/
 #### Commits créés
 
 - `feat(forms): enable image upload in AboutContent, HeroSlide, and TeamMember forms`
-  - 3 files changed: AboutContentForm, HeroSlideForm, TeamMemberForm
+  - 3 files changed: AboutContentForm, HeroSlideForm, TeamMemberForm,
   - TypeScript compilation: 0 errors
   - Implements: `.github/prompts/plan-mediaUpload-form.md`
 

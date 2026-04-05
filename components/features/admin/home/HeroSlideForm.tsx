@@ -109,7 +109,7 @@ export function HeroSlideForm({ open, onClose, onSuccess, slide }: HeroSlideForm
                             showUpload={true}
                             uploadFolder="home-hero"
                         >
-                            <ImageField.SourceActions />
+                            <ImageField.SourceActions showUpload={true} />
                             <ImageField.Preview />
                             <ImageField.AltText />
                         </ImageField.Provider>

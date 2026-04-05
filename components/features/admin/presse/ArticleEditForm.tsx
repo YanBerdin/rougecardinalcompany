@@ -197,10 +197,11 @@ export function ArticleEditForm({ article }: ArticleEditFormProps) {
                         imageUrlField="image_url"
                         imageMediaIdField="og_image_media_id"
                         label="Image de l'article (Open Graph)"
+                        showUpload={true}
                         uploadFolder="presse"
                         onValidationChange={(isValid) => setIsImageValidated(isValid)}
                     >
-                        <ImageField.SourceActions />
+                        <ImageField.SourceActions showUpload={true} />
                         <ImageField.Preview />
                         <ImageField.AltText />
                     </ImageField.Provider>

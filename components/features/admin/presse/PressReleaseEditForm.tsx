@@ -181,7 +181,7 @@ export function PressReleaseEditForm({ release, spectacles = [], evenements = []
                         showUpload={true}
                         onValidationChange={(isValid) => setIsImageValidated(isValid)}
                     >
-                        <ImageField.SourceActions />
+                        <ImageField.SourceActions showUpload={true} />
                         <ImageField.Preview />
                     </ImageField.Provider>
                 </CardContent>

@@ -137,7 +137,7 @@ export function PartnerForm({ partner }: PartnerFormProps) {
                             showUpload={true}
                             uploadFolder="partners"
                         >
-                            <ImageField.SourceActions showExternalUrl={false} />
+                            <ImageField.SourceActions showUpload={true} showExternalUrl={false} />
                             <ImageField.Preview />
                         </ImageField.Provider>
 

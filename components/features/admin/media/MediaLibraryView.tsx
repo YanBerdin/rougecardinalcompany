@@ -119,7 +119,7 @@ export function MediaLibraryView() {
                         aria-label="Téléverser de nouveaux médias"
                     >
                         <Upload className="mr-1.5 h-4 w-4" />
-                        Upload
+                        Téléverser
                     </Button>
                 </div>
             </div>
