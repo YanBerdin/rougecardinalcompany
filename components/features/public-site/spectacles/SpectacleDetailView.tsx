@@ -41,7 +41,7 @@ export function SpectacleDetailView({
 
     return (
         <main
-            className="bg-background text-foreground font-sans selection:bg-primary selection:text-primary-foreground pt-16"
+            className="bg-background text-foreground font-sans selection:bg-primary selection:text-primary-foreground max-sm:pt-12 pt-16"
             aria-label={`Détails du spectacle ${spectacle.title}`}
         >
             {/* Skip to content link for keyboard navigation */}
@@ -78,7 +78,7 @@ export function SpectacleDetailView({
             </div>
 */}
             {/* Informations Pratiques - Horizontal Bar */}
-            <section className="py-4 lg:py-12 bg-card flex justify-between" aria-label="Informations pratiques">
+            <section className="max-sm:hidden py-4 lg:py-12 bg-card flex justify-between" aria-label="Informations pratiques">
                 <div className="max-w-7xl mx-auto px-4">
                     <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 lg:gap-6">
                         {/* Genre */}
@@ -152,6 +152,17 @@ export function SpectacleDetailView({
                 aria-labelledby="synopsis"
             >
                 <div className="max-w-7xl mx-auto px-4 xl:px-0 ">
+                    {/* CTA Principaux - Mobile uniquement (avant l'affiche) */}
+                    <div className="md:hidden py-4">
+                        <SpectacleCTABar
+                            title={spectacle.title}
+                            ticketUrl={ticketUrl}
+                            agendaLabel="Voir les dates"
+                            backLabel="Tous les spectacles"
+                            wrapperClassName="w-full"
+                        />
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-5 gap-8 md:gap-12 lg:gap-16">
 
                         {/* Affiche Column */}
@@ -180,15 +191,54 @@ export function SpectacleDetailView({
                             </div>
                         </div>
 
+                        {/* Informations Pratiques - Mobile uniquement (après l'affiche) */}
+                        <div className="md:hidden py-4 border-y border-border" aria-label="Informations pratiques">
+                            <div className="grid grid-cols-3 gap-4">
+                                <div className="flex items-center gap-2">
+                                    <Star className="h-4 w-4 flex-shrink-0 text-primary" aria-hidden="true" />
+                                    <div className="flex-1">
+                                        <p className="text-xs uppercase tracking-wide font-medium">Genre</p>
+                                        <Badge variant="outline" className="mt-1 text-xs shadow-lg">
+                                            {spectacle.genre}
+                                        </Badge>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Clock className="h-4 w-4 flex-shrink-0 text-primary" aria-hidden="true" />
+                                    <div className="flex-1">
+                                        <p className="text-xs uppercase tracking-wide font-medium">Durée</p>
+                                        <Badge variant="outline" className="mt-1 text-xs font-semibold shadow-lg">
+                                            {formatDurationHumanReadable(spectacle.duration_minutes)}
+                                        </Badge>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <MapPin className="h-4 w-4 flex-shrink-0 text-primary" aria-hidden="true" />
+                                    <div className="flex-1">
+                                        <p className="text-xs uppercase tracking-wide font-medium">Lieu</p>
+                                        <Badge variant="outline" className="mt-1 text-xs font-semibold shadow-lg">
+                                            {venue ? (
+                                                <>{venue.nom}{venue.ville && ` - ${venue.ville}`}</>
+                                            ) : (
+                                                "À venir"
+                                            )}
+                                        </Badge>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         {/* Synopsis Column */}
                         <div className="md:col-span-3 space-y-6">
-                            {/* CTA Principaux : Réserver + Agenda + Retour */}
-                            <SpectacleCTABar
-                                title={spectacle.title}
-                                ticketUrl={ticketUrl}
-                                agendaLabel="Voir les dates"
-                                backLabel="Tous les spectacles"
-                            />
+                            {/* CTA Principaux : Réserver + Agenda + Retour (desktop uniquement) */}
+                            <div className="hidden md:block">
+                                <SpectacleCTABar
+                                    title={spectacle.title}
+                                    ticketUrl={ticketUrl}
+                                    agendaLabel="Voir les dates"
+                                    backLabel="Tous les spectacles"
+                                />
+                            </div>
                             <h1 id="spectacle-title" className="text-2xl md:text-3xl lg:text-4xl font-bold font-sans mb-6 animate-fade-in-up">
                                 {spectacle.title}
                             </h1>
@@ -285,12 +335,13 @@ export function SpectacleDetailView({
                         )}
                     </div>
                     {/* Call to Actions */}
-                    <div className="pt-4 md:pt-6 max-w-7xl flex justify-center">
+                    <div className="pt-4 md:pt-6 flex justify-center">
                         <SpectacleCTABar
                             title={spectacle.title}
                             ticketUrl={ticketUrl}
                             agendaLabel="Voir les dates"
                             backLabel="Tous les spectacles"
+                            wrapperClassName="w-full sm:w-auto"
                         />
                     </div>
                 </div>

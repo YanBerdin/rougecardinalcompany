@@ -29,7 +29,7 @@ export function SpectaclesView({
   const hasMoreArchivedShows = archivedShows.length > MAX_INITIAL_ARCHIVED_SHOWS;
 
   return (
-    <div className="pt-16">
+    <div className="max-sm:pt-12 pt-16">
       {/* Hero Section */}
       <section className="py-8 lg:py-12 hero-gradient" aria-labelledby="spectacles-hero-heading">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -37,7 +37,7 @@ export function SpectaclesView({
             À l&apos;Affiche
           </h1>
           <p
-            className="text-lg md:text-xl lg:text-2xl text-white/90 opacity-90 animate-fade-in"
+            className="text-base md:text-xl lg:text-2xl text-white/90 opacity-90 animate-fade-in"
             style={{ animationDelay: "0.2s" }}
           >
             Nos créations actuellement en représentation
@@ -46,7 +46,7 @@ export function SpectaclesView({
       </section>
 
       {/* Spectacles Actuels lg:w-[calc(33.333%-1.33rem)] */}
-      <section className="py-16 bg-chart-7" aria-label="Spectacles actuels">
+      <section className="max-sm:py-12 py-16 bg-chart-7" aria-label="Spectacles actuels">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap justify-center gap-16">
             {currentShows.map((show, index) => (
