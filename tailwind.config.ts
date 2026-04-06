@@ -94,10 +94,6 @@ export default {
           light: "hsl(var(--gold-light))",
           dark: "hsl(var(--gold-dark))",
         },
-        curtain: {
-          DEFAULT: "hsl(var(--curtain))",
-          deep: "hsl(var(--curtain-deep))",
-        },
       },
       borderRadius: {
         xl: "calc(var(--radius) + 4px)",
@@ -111,15 +107,7 @@ export default {
         "gradient-ecru": "linear-gradient(135deg, #F2EDE4 0%, #FAF7F0 100%)",
         "gradient-hero": "linear-gradient(180deg, #A60303 0%, #F2EDE4 100%)",
       },
-      keyframes: {
-        spotlight: {
-          "0%, 100%": { opacity: "0.3", transform: "scale(1)" },
-          "50%": { opacity: "0.6", transform: "scale(1.15)" },
-        },
-      },
-      animation: {
-        spotlight: "spotlight 3s ease-in-out infinite",
-      },
+
     },
   },
   plugins: [animate, touchHitboxPlugin],

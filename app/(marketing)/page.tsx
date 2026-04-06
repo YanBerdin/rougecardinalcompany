@@ -16,35 +16,31 @@ import { NewsSkeleton } from "@/components/skeletons/news-skeleton";
 import { AboutSkeleton } from "@/components/skeletons/about-skeleton";
 import { ShowsSkeleton } from "@/components/skeletons/shows-skeleton";
 import { NewsletterSkeleton } from "@/components/skeletons/newsletter-skeleton";
-import { PartnersSkeleton } from "@/components/skeletons/partners-skeleton";
 
 export default function Home() {
   return (
     <main className="space-y-0">
-        {/* Hero + Partners en overlay au bas du hero */}
-        <div className="relative">
-          <Suspense fallback={<HeroSkeleton />}>
-            <HeroContainer />
-          </Suspense>
+      {/* Hero + Partners en overlay au bas du hero */}
+      <div className="relative">
+        <Suspense fallback={<HeroSkeleton />}>
+          <HeroContainer />
           <div className="absolute bottom-0 left-0 right-0 z-10">
-            {/* PartnersSkeleton désactivé : provoque un grand écran blanc cassé en light mode */}
-            <Suspense fallback={<PartnersSkeleton />}>
-              <PartnersContainer />
-            </Suspense>
+            <PartnersContainer />
           </div>
-        </div>
-        <Suspense fallback={<ShowsSkeleton />}>
-          <ShowsContainer />
         </Suspense>
-        <Suspense fallback={<NewsSkeleton />}>
-          <NewsContainer />
-        </Suspense>
-        <Suspense fallback={<NewsletterSkeleton />}>
-          <NewsletterContainer />
-        </Suspense>
-        <Suspense fallback={<AboutSkeleton />}>
-          <AboutContainer />
-        </Suspense>
+      </div>
+      <Suspense fallback={<ShowsSkeleton />}>
+        <ShowsContainer />
+      </Suspense>
+      <Suspense fallback={<NewsSkeleton />}>
+        <NewsContainer />
+      </Suspense>
+      <Suspense fallback={<NewsletterSkeleton />}>
+        <NewsletterContainer />
+      </Suspense>
+      <Suspense fallback={<AboutSkeleton />}>
+        <AboutContainer />
+      </Suspense>
     </main>
   );
 }

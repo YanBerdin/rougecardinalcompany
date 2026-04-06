@@ -1,5 +1,20 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
+function SkeletonRow() {
+  return (
+    <div className="flex overflow-hidden gap-4 px-4 justify-center">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div
+          key={i}
+          className="flex-shrink-0 flex items-center justify-center rounded-xl bg-white/10 border border-white/20 animate-pulse"
+          style={{ minWidth: "120px", height: "48px" }}
+        >
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function HeroSkeleton() {
   return (
     <section className="relative h-screen flex items-center justify-center overflow-hidden bg-chart-7">
@@ -36,15 +51,20 @@ export function HeroSkeleton() {
       <Skeleton className="absolute left-4 top-1/2 transform -translate-y-1/2 w-12 h-12 rounded-full bg-white/20" />
       <Skeleton className="absolute right-4 top-1/2 transform -translate-y-1/2 w-12 h-12 rounded-full bg-white/20" />
 
-      {/* Indicators skeleton */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-3">
-        <Skeleton className="w-3 h-3 rounded-full bg-white/30" />
-        <Skeleton className="w-3 h-3 rounded-full bg-white/20" />
-      </div>
-
       {/* Progress bar skeleton */}
       <div className="absolute bottom-0 left-0 right-0 h-1">
         <Skeleton className="h-full w-full bg-white/20" />
+      </div>
+
+      {/* Partners overlay skeleton */}
+      <div
+        className="absolute bottom-0 left-0 right-0 z-10 py-3"
+        style={{
+          maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
+          WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
+        }}
+      >
+        <SkeletonRow />
       </div>
     </section>
   );
