@@ -1,6 +1,28 @@
 # Progress
 
-## Validation d'environnement runtime + CI (2026-03-25)
+## Nettoyage UI — suppression CurtainLoader (2026-04-07)
+
+✅ **COMPLET** — Animation d'intro "rideau de théâtre" supprimée. Nettoyage complet des artefacts associés.
+
+| Composant | Statut |
+| --------- | ------ |
+| `components/CurtainLoader.tsx` + `CurtainWrapper.tsx` | ✅ Supprimés |
+| `motion@12.38.0` | ✅ Désinstallé |
+| `tailwind.config.ts` — tokens `curtain`, keyframe `spotlight` | ✅ Retirés |
+| `app/globals.css` — vars `--curtain`, `--curtain-deep`, `.bg-curtain-gradient` | ✅ Retirées |
+| `app/(marketing)/layout.tsx` — CurtainWrapper retiré | ✅ Modifié |
+| `app/(marketing)/page.tsx` — Hero+Partners dans un seul Suspense | ✅ Modifié |
+| `components/skeletons/hero-skeleton.tsx` — SkeletonRow partenaires ajouté | ✅ Modifié |
+| `types/css.d.ts` | ✅ Créé (fix TS import CSS) |
+
+### Décision
+
+- `gold` conservé — utilisé activement dans HeroCTA, SectionTeam, SectionQuote
+- Un seul `<Suspense fallback={<HeroSkeleton />}>` pour Hero+Partners évite deux skeletons séquentiels
+
+---
+
+
 
 ✅ **COMPLET** — Module `lib/env-validation.ts` extrait de `instrumentation.ts` avec injection de dépendances. Valide la cohérence des variables Supabase (ref mismatch, blocklist staging, format clés). 22 tests unitaires, 75/75 régression totale. Rapport `doc/ENV-VALIDATION-REPORT.md` créé. Workflow CI `.github/workflows/unit-tests.yml` ajouté — exécute `pnpm vitest run` sur push/PR (comble le gap : aucun workflow ne lançait les tests unitaires).
 

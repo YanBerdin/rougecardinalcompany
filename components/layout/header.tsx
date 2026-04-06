@@ -27,7 +27,7 @@ interface HeaderProps {
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isLight, setIsLight] = useState(true);
+  const [isLight, setIsLight] = useState(false);
   const pathname = usePathname();
 
   // Helper pour la couleur du texte du header (logo + navigation)
@@ -84,7 +84,7 @@ export default function Header() {
       }
       observer.disconnect();
       if (mql.removeEventListener) mql.removeEventListener("change", mqlListener);
-      else mql.removeListener(mqlListener); //todo deprecated but still widely supported
+      else mql.removeListener(mqlListener); //todo deprecated but still widely supported ?
     };
   }, []);
 

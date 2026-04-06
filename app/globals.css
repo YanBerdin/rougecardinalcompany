@@ -39,9 +39,6 @@
     --gold-light: 43 80% 68%; /* rgb(239, 202, 108) */
     --gold-dark: 43 65% 38%; /* rgb(160, 124, 34) */
 
-    --curtain: 0 60% 28%; /* rgb(114, 29, 29) */
-    --curtain-deep: 0 55% 18%; /* rgb(71, 21, 21) */
-
     --sidebar: 41.0526 65.5172% 94.3137%; /* #faf4e7 */
     --sidebar-foreground: 0 0% 10.9804%; /* #1C1C1C */
     --sidebar-primary: 0 78% 36%; /* #ad0000 */
@@ -120,9 +117,6 @@
     --gold: 43 72% 52%; /* rgb(221, 171, 44) */
     --gold-light: 43 80% 68%; /* rgb(239, 202, 108) */
     --gold-dark: 43 65% 38%; /* rgb(160, 124, 34) */
-
-    --curtain: 0 60% 20%; /* rgb(82, 20, 20) */
-    --curtain-deep: 0 55% 12%; /* rgb(47, 14, 14) */
 
     --sidebar: 0 0% 10.9804%; /* #1C1C1C */
     --sidebar-foreground: 41.0526 65.5172% 94.3137%; /* #faf4e7 */
@@ -895,15 +889,6 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-  }
-
-  .bg-curtain-gradient {
-    background: linear-gradient(
-      180deg,
-      hsl(var(--curtain-deep)) 0%,
-      hsl(var(--curtain)) 50%,
-      hsl(var(--curtain-deep)) 100%
-    );
   }
 
   .shadow-gold {
