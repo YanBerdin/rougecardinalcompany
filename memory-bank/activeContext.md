@@ -1,6 +1,8 @@
 # Active Context
 
-**Current Focus (2026-04-06)**: **Bouton Téléverser activé sur 9 formulaires admin** — `showUpload={true}` ajouté à `ImageField.SourceActions` dans AbouContentForm, HeroSlideForm, TeamMemberForm, SpectacleFormImageSection, PressReleaseEditForm, PressReleaseNewForm, PartnerForm, ArticleNewForm, ArticleEditForm. Bug racine : `showUpload` non propagé via context entre Provider et SourceActions — les deux composants ont leur prop indépendante. Aussi : "Upload" → "Téléverser" dans MediaLibraryView (cohérence i18n), imports morts nettoyés dans SpectacleForm.
+**Current Focus (2026-04-07)**: **Nettoyage UI — suppression CurtainLoader/CurtainWrapper** — `motion` désinstallé, tokens Tailwind `curtain` + animation `spotlight` retirés. Unification Suspense Hero+Partners (un seul skeleton). `HeroSkeleton` enrichi avec `SkeletonRow` partenaires. `types/css.d.ts` créé pour corriger TS side-effect import CSS.
+
+**Previous Focus (2026-04-06)**: **Bouton Téléverser activé sur 9 formulaires admin** — `showUpload={true}` ajouté à `ImageField.SourceActions` dans AbouContentForm, HeroSlideForm, TeamMemberForm, SpectacleFormImageSection, PressReleaseEditForm, PressReleaseNewForm, PartnerForm, ArticleNewForm, ArticleEditForm. Bug racine : `showUpload` non propagé via context entre Provider et SourceActions — les deux composants ont leur prop indépendante. Aussi : "Upload" → "Téléverser" dans MediaLibraryView (cohérence i18n), imports morts nettoyés dans SpectacleForm.
 
 **Previous Focus (2026-03-25)**: **Validation d'environnement runtime + CI Unit Tests** — Module `lib/env-validation.ts` extrait de `instrumentation.ts` avec DI. 22 tests unitaires. Rapport détaillé `doc/ENV-VALIDATION-REPORT.md`. Workflow CI `unit-tests.yml` créé — Vitest tourne sur push/PR (pnpm 9, Node 22, permissions minimales). Comble le gap CI : 75 unit tests exécutés en CI sur chaque changement.
 
