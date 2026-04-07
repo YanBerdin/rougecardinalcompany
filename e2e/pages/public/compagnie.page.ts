@@ -30,4 +30,32 @@ export class CompagniePage {
             }
         }
     }
+
+    /**
+     * Click the "Voir le profil de …" button on a team member card.
+     * Only available when the member has a non-null description.
+     */
+    async openMemberModal(memberName: string): Promise<void> {
+        await this.page
+            .getByRole('button', { name: `Voir le profil de ${memberName}` })
+            .click();
+    }
+
+    /**
+     * Assert that the member modal is open and displays the expected content.
+     */
+    async expectMemberModalVisible(name: string, bio: string): Promise<void> {
+        const dialog = this.page.getByRole('dialog');
+        await expect(dialog).toBeVisible({ timeout: 5_000 });
+        await expect(dialog.getByRole('heading', { name })).toBeVisible();
+        await expect(dialog.getByText(bio, { exact: false })).toBeVisible();
+    }
+
+    /**
+     * Close the currently open member modal via the Escape key.
+     */
+    async closeMemberModal(): Promise<void> {
+        await this.page.keyboard.press('Escape');
+        await expect(this.page.getByRole('dialog')).not.toBeVisible({ timeout: 3_000 });
+    }
 }

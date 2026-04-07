@@ -1,5 +1,26 @@
 # Progress
 
+## Modale biographie membre équipe — SectionTeam (2026-04-07)
+
+✅ **COMPLET** — La description longue d'un membre est accessible via une Dialog théâtrale (deux panneaux) sans altérer le design de la grille.
+
+| Composant | Statut |
+| --------- | ------ |
+| `components/features/public-site/compagnie/sections/TeamMemberCard.tsx` | ✅ Créé (Client Component, Dialog shadcn) |
+| `components/features/public-site/compagnie/sections/SectionTeam.tsx` | ✅ Refactorisé (délègue à `TeamMemberCard`) |
+| `e2e/pages/public/compagnie.page.ts` — méthodes modale | ✅ Ajoutées |
+| `e2e/tests/public/compagnie/compagnie.spec.ts` — `PUB-COMP-002` | ✅ Ajouté |
+
+### Décisions
+
+- **Déclencheur conditionnel** : bouton photo + lien "En savoir plus →" n'apparaissent que si `member.description` est non-null
+- **Dialog shadcn** (Radix Portal) : accès clavier, focus trap, fermeture `Escape` — accessibilité native
+- **Deux panneaux** : identité sur fond sombre (`bg-foreground`) / biographie scrollable sur fond beige (`bg-background`) — cohérent avec la charte rouge cardinal
+- **`whitespace-pre-wrap`** : préserve les sauts de ligne de la biographie
+- **Test `PUB-COMP-002`** : pattern factory (`MembreEquipeFactory.create`) + cleanup `afterEach` identique aux tests admin
+
+---
+
 ## Nettoyage UI — suppression CurtainLoader (2026-04-07)
 
 ✅ **COMPLET** — Animation d'intro "rideau de théâtre" supprimée. Nettoyage complet des artefacts associés.
@@ -21,8 +42,6 @@
 - Un seul `<Suspense fallback={<HeroSkeleton />}>` pour Hero+Partners évite deux skeletons séquentiels
 
 ---
-
-
 
 ✅ **COMPLET** — Module `lib/env-validation.ts` extrait de `instrumentation.ts` avec injection de dépendances. Valide la cohérence des variables Supabase (ref mismatch, blocklist staging, format clés). 22 tests unitaires, 75/75 régression totale. Rapport `doc/ENV-VALIDATION-REPORT.md` créé. Workflow CI `.github/workflows/unit-tests.yml` ajouté — exécute `pnpm vitest run` sur push/PR (comble le gap : aucun workflow ne lançait les tests unitaires).
 
