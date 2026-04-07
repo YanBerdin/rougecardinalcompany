@@ -1,5 +1,5 @@
 import type { PresentationSection } from "@/lib/dal/compagnie-presentation";
-
+// TODO: ajouter un script de seed pour remplir la table `compagnie_presentation_sections` avec ces données de fallback, et supprimer ce fichier une fois que la table est correctement alimentée en production.
 /**
  * Static fallback data for compagnie presentation sections.
  *
