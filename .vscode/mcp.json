@@ -67,6 +67,13 @@
         "mcp-remote@latest",
         "https://mcp.sentry.dev/mcp"
       ]
+    },
+    "stitch": {
+      "type": "http",
+      "url": "https://stitch.googleapis.com/mcp",
+      "headers": {
+        "X-Goog-Api-Key": "${env:GOOGLE_API_KEY:}"
+      }
     }
   }
 }
