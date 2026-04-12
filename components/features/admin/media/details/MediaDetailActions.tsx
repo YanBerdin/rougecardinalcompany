@@ -34,7 +34,7 @@ export function MediaDetailActions() {
         <>
             {isImage && needsThumbnail && (
                 <Button
-                    variant="outline"
+                    variant="secondary"
                     className="w-full"
                     onClick={handleRegenerateThumbnail}
                     disabled={isUpdating || isDeleting || isRegenerating}

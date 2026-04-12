@@ -9,12 +9,13 @@ export function MediaPreview() {
     const { media } = meta;
 
     return (
-        <div className="aspect-video rounded-md overflow-hidden bg-muted relative">
+        <div className="h-40 sm:aspect-video sm:h-auto rounded-md overflow-hidden bg-muted relative">
             {publicUrl ? (
                 <Image
                     src={publicUrl}
                     alt={media.alt_text ?? media.filename ?? "Media preview"}
                     fill
+                    loading="eager"
                     className="object-contain"
                 />
             ) : (

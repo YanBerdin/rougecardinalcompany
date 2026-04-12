@@ -112,7 +112,7 @@ export function MediaCardThumbnail({
                                         ? "opacity-100 group-hover:scale-105"
                                         : "opacity-0"
                                 )}
-                                loading="lazy"
+                                loading="eager"
                                 onLoad={() => setImageLoaded(true)}
                                 onError={() => {
                                     setImageError(true);

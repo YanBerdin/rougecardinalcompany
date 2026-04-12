@@ -47,6 +47,7 @@ export function ImageFieldPreview() {
                                 className="h-full w-full object-cover"
                                 width={450}
                                 height={300}
+                                loading="eager"
                                 onError={handleImageError}
                             />
                         ) : validationError ? (

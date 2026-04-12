@@ -126,7 +126,7 @@ export function SpectaclesView({
           <div className="text-center mb-16">
             <h2 id="spectacles-archives-heading" className="text-3xl md:text-4xl font-sans lg:text-5xl font-bold mb-4">Nos Créations Passées</h2>
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-              15 ans de créations théâtrales qui ont marqué notre parcours
+              Les créations qui ont marqué notre parcours
             </p>
           </div>
 
