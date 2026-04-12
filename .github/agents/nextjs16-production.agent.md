@@ -1535,6 +1535,7 @@ if (!claims) redirect("/login");
 
 ### Internal Guides
 
+- `.github/instructions/AGENT.md` - Next.js Docs Index
 - `.github/instructions/nextjs.instructions.md` - Next.js 16 best practices
 - `.github/instructions/dal-solid-principles.instructions.md` - DAL SOLID rules
 - `.github/instructions/crud-server-actions-pattern.instructions.md` - CRUD patterns

@@ -1,5 +1,18 @@
 # Progress
 
+## Dépendances sécurisées, migration recharts 3.x, documentation et memory-bank synchronisé (2026-04-07)
+
+✅ **COMPLET** — Toutes les vulnérabilités de dépendances (Vite, lodash via recharts, Next.js) ont été corrigées. Migration vers recharts 3.8.1 (suppression de lodash) validée, code compatible sans modification grâce à la centralisation des wrappers chart. Audit de sécurité (`pnpm audit`) passé à 0 vulnérabilité. Documentation de la migration ajoutée dans `/memories/repo/dependency-migrations.md`. Commit effectué. Le memory-bank a été relu et synchronisé : toutes les tâches, contextes actifs et historiques de migration sont à jour dans `progress.md`, `activeContext.md` et `tasks/_index.md`. Aucun travail en cours, tâche clôturée.
+
+### Détails
+
+- `pnpm update vite next recharts` → Vite 8.0.8, Next.js sécurisé, recharts 3.8.1
+- Audit code : seuls `PageviewsChart.tsx` et `ui/chart.tsx` utilisent recharts, wrappers compatibles 3.x
+- `pnpm audit` : 0 vulnérabilité
+- Documentation : `/memories/repo/dependency-migrations.md` créée
+- Commit : migration + documentation
+- Memory-bank : tous les fichiers relus, synchronisés, aucune tâche en attente
+
 ## Modale biographie membre équipe — SectionTeam (2026-04-07)
 
 ✅ **COMPLET** — La description longue d'un membre est accessible via une Dialog théâtrale (deux panneaux) sans altérer le design de la grille.
@@ -5093,8 +5106,6 @@ Cette vérification a été réalisée via l'API Supabase MCP et confirme que le
 - Ajouter tests d'intégration CI pour valider l'accès DAL (anon/authenticated) après migrations.
 - Formaliser la procédure d'ajout à l'allowlist (template PR, approbation DB/infra).
 - Revue: décider si `schemas/` reste en parallèle avec `migrations/` ou si on harmonise.
-
-# Suivi de Progression
 
 ## État Général du Projet
 
