@@ -1,5 +1,19 @@
 # Progress
 
+## Fix TypeScript recharts 3.x — `components/ui/chart.tsx` (2026-04-12)
+
+✅ **COMPLET** — Erreur de build TypeScript corrigée suite à la migration recharts 3.x. Dans recharts 3, `payload`, `active`, `label`, etc. sont déplacés dans `PropertiesReadFromContext` et exclus des props publics de `<Tooltip>`. `React.ComponentProps<typeof Tooltip>` ne les expose plus. Correction : remplacement par un type explicite `ChartTooltipPayloadItem` déclarant directement toutes les props nécessaires (`active`, `payload`, `label`, `labelFormatter`, `formatter`, `labelClassName`, etc.). Accès `item.payload?.fill` sécurisé avec opérateur optionnel (`?.`).
+
+### Détails
+
+- Fichier : `components/ui/chart.tsx`
+- Erreur : `Property 'payload' does not exist on type Omit<Props<...>, PropertiesReadFromContext>...`
+- Fix : type `ChartTooltipPayloadItem` explicite + suppression du spread `React.ComponentProps<typeof Tooltip>`
+- Fix complémentaire : `item.payload?.fill` (payload optionnel)
+- Build TypeScript : ✅ 0 erreur
+
+---
+
 ## Dépendances sécurisées, migration recharts 3.x, documentation et memory-bank synchronisé (2026-04-07)
 
 ✅ **COMPLET** — Toutes les vulnérabilités de dépendances (Vite, lodash via recharts, Next.js) ont été corrigées. Migration vers recharts 3.8.1 (suppression de lodash) validée, code compatible sans modification grâce à la centralisation des wrappers chart. Audit de sécurité (`pnpm audit`) passé à 0 vulnérabilité. Documentation de la migration ajoutée dans `/memories/repo/dependency-migrations.md`. Commit effectué. Le memory-bank a été relu et synchronisé : toutes les tâches, contextes actifs et historiques de migration sont à jour dans `progress.md`, `activeContext.md` et `tasks/_index.md`. Aucun travail en cours, tâche clôturée.

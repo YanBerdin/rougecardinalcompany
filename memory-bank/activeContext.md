@@ -1,7 +1,7 @@
 
 # Contexte actif
 
-2026-04-07 : ✅ Toutes les dépendances sont à jour, migration recharts 3.x terminée, audit sécurité validé, documentation migration et memory-bank synchronisés. Aucune tâche en cours, tout est à jour.
+2026-04-12 : ✅ Fix build TypeScript recharts 3.x — `components/ui/chart.tsx` : type `ChartTooltipPayloadItem` explicite, suppression du spread `React.ComponentProps<typeof Tooltip>` incompatible recharts 3. Build vert, 0 erreur TS. Memory-bank et commit à jour.
 
 ## Validation d'environnement runtime (2026-03-25)
 
