@@ -1,7 +1,9 @@
 
 # Contexte actif
 
-2026-04-12 : ✅ Fix build TypeScript recharts 3.x — `components/ui/chart.tsx` : type `ChartTooltipPayloadItem` explicite, suppression du spread `React.ComponentProps<typeof Tooltip>` incompatible recharts 3. Build vert, 0 erreur TS. Memory-bank et commit à jour.
+2026-04-13 : ✅ Sécurité dépendances + fix CI lockfile — patches CVE Next.js 16.2.3 et vite 8.0.8, suppression du `pnpm.overrides.vite` redondant qui causait un mismatch `--frozen-lockfile` en CI. `pnpm audit` : 0 vulnérabilité. Merge develop → master effectué. Aucun travail en cours.
+
+2026-04-12 : ✅ Fix build TypeScript recharts 3.x — `components/ui/chart.tsx` : type `ChartTooltipPayloadItem` et `ChartLegendPayloadItem` explicites, suppression des spreads `React.ComponentProps<typeof Tooltip/Legend>` incompatibles recharts 3. Build vert, 0 erreur TS.
 
 ## Validation d'environnement runtime (2026-03-25)
 

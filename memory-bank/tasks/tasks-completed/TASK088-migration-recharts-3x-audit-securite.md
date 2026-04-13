@@ -36,3 +36,24 @@
 - Documentation migration et audit centralisée
 - Memory-bank synchronisé, aucune tâche en cours
 - Tâche clôturée le 2026-04-07
+
+---
+
+## Suites post-clôture
+
+### 2026-04-12 — Erreurs TypeScript build (recharts 3.x breaking change)
+
+Recharts 3 déplace `payload`, `active`, `label`, etc. dans `PropertiesReadFromContext`, les excluant des props publiques de `<Tooltip>` et `<Legend>`. `React.ComponentProps<typeof Tooltip/Legend>` ne les expose plus.
+
+**Fixes dans `components/ui/chart.tsx` :**
+
+- `ChartTooltipContent` : ajout type explicite `ChartTooltipPayloadItem`, suppression du spread `React.ComponentProps<typeof Tooltip>`, optional chaining `item.payload?.fill` — commit `fb919b2`
+- `ChartLegendContent` : remplacement de `Pick<LegendProps, "payload" | "verticalAlign">` par type explicite `ChartLegendPayloadItem` — commit `376025b`
+
+### 2026-04-13 — Nouveaux CVE + fix CI `--frozen-lockfile`
+
+- **Next.js CVE** (>= 16.0.0-beta.0 < 16.2.3) : `pnpm add next@16.2.3` — commit `0ccafad`
+- **vite CVE path traversal** (<= 8.0.4, transitif via vitest) : `vite@^8.0.8` ajouté en devDependency — commit `0ccafad`
+- **CI `--frozen-lockfile`** : `pnpm.overrides.vite: ">=8.0.5"` conflictait avec la devDependency `"^8.0.8"` → `ERR_PNPM_OUTDATED_LOCKFILE`; override supprimé, lockfile régénéré — commit `f07b33b`
+- `pnpm audit` : 0 vulnérabilité ✅
+- Merge develop → master ✅
