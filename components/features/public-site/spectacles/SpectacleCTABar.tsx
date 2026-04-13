@@ -26,23 +26,26 @@ export function SpectacleCTABar({
 }: SpectacleCTABarProps): React.ReactNode {
     return (
         <div className={`flex flex-col sm:flex-row flex-wrap gap-3 ${wrapperClassName}`}>
-            <Button
-                variant="default"
-                size="lg"
-                className="shadow-lg hover:shadow-xl transition-all touch-action-manipulation w-full sm:w-auto"
-                asChild
-            >
-                <Link
-                    href={ticketUrl ?? "/contact?subject=reservation"}
-                    aria-label={`Réserver mes billets des places pour ${title}`}
-                    {...(ticketUrl ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+            {ticketUrl && (
+                <Button
+                    variant="default"
+                    size="lg"
+                    className="shadow-lg hover:shadow-xl transition-all touch-action-manipulation w-full sm:w-auto"
+                    asChild
                 >
-                    <Ticket className="mr-2 h-4 w-4" aria-hidden="true" /> Réserver mes billets
-                </Link>
-            </Button>
+                    <Link
+                        href={ticketUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Réserver mes billets des places pour ${title} (s'ouvre dans un nouvel onglet)`}
+                    >
+                        <Ticket className="mr-2 h-4 w-4" aria-hidden="true" /> Réserver mes billets
+                    </Link>
+                </Button>
+            )}
 
             <Button
-                variant="secondary"
+                variant={ticketUrl ? "secondary" : "default"}
                 size="lg"
                 className="w-full sm:w-auto"
                 asChild

@@ -1,5 +1,29 @@
 # Progress
 
+## Sécurité CVE + fix CI lockfile — Next.js 16.2.3, vite 8.0.8 (2026-04-13)
+
+✅ **COMPLET** — Deux CVE patchés et mismatch `--frozen-lockfile` CI résolu.
+
+### CVE Next.js (GHSA-xxxx, >= 16.0.0-beta.0 < 16.2.3)
+
+- `pnpm add next@16.2.3` — transition depuis 16.1.7
+- Commit : `0ccafad`
+
+### CVE vite path traversal (GHSA-xxxx, <= 8.0.4, transitif via vitest)
+
+- `vite@^8.0.8` ajouté en `devDependencies` explicite
+- `pnpm.overrides.vite` initialement ajouté (`">=8.0.5"`) puis **supprimé** : spécifier conflictait avec la devDependency `"^8.0.8"` → `ERR_PNPM_OUTDATED_LOCKFILE` en CI
+- Commit : `0ccafad` (patch) + `f07b33b` (suppression override)
+
+### Fix CI `--frozen-lockfile`
+
+- Cause racine : `pnpm.overrides.vite: ">=8.0.5"` ≠ specifier lockfile `"^8.0.8"`
+- Fix : suppression de l'override (devDep explicite suffit), `pnpm install` → lockfile régénéré
+- Vérification : `pnpm install --frozen-lockfile` ✅, `pnpm audit` ✅ 0 vulnérabilité
+- Commit : `f07b33b`
+
+---
+
 ## Fix TypeScript recharts 3.x — `components/ui/chart.tsx` (2026-04-12)
 
 ✅ **COMPLET** — Erreur de build TypeScript corrigée suite à la migration recharts 3.x. Dans recharts 3, `payload`, `active`, `label`, etc. sont déplacés dans `PropertiesReadFromContext` et exclus des props publics de `<Tooltip>`. `React.ComponentProps<typeof Tooltip>` ne les expose plus. Correction : remplacement par un type explicite `ChartTooltipPayloadItem` déclarant directement toutes les props nécessaires (`active`, `payload`, `label`, `labelFormatter`, `formatter`, `labelClassName`, etc.). Accès `item.payload?.fill` sécurisé avec opérateur optionnel (`?.`).
