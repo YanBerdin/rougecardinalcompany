@@ -33,15 +33,18 @@ export function ShowCard({ show, index }: ShowCardProps) {
         {/* group-focus-within:pointer-events-auto enables click when keyboard-focused */}
         <div className="absolute inset-0 z-10 bg-black/60 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto">
           <div className="flex flex-col gap-3 px-6 w-full">
-            <Link
-              href={show.ticketUrl ?? spectacleUrl}
-              {...(show.ticketUrl ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-              aria-label={`Réserver des billets pour ${show.title}${show.ticketUrl ? " (s'ouvre dans un nouvel onglet)" : ""}`}
-              className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground w-full hover:bg-chart-6 hover:text-black transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-1 focus-visible:outline-none"
-            >
-              <Ticket className="h-4 w-4" aria-hidden="true" />
-              Réserver mes billets
-            </Link>
+            {show.ticketUrl && (
+              <Link
+                href={show.ticketUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Réserver des billets pour ${show.title} (s'ouvre dans un nouvel onglet)`}
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground w-full hover:bg-chart-6 hover:text-black transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-1 focus-visible:outline-none"
+              >
+                <Ticket className="h-4 w-4" aria-hidden="true" />
+                Réserver mes billets
+              </Link>
+            )}
             <Link
               href={spectacleUrl}
               aria-label={`Voir les détails de ${show.title}`}
