@@ -6,7 +6,9 @@ applyTo: "**"
 
 ## Project Overview
 
-A **theater company website** built with **Next.js 16 + TypeScript + Supabase + Tailwind/shadcn/ui**.
+A **theater company website** built with **Next.js 16.2.3 + TypeScript + Supabase (PostgreSQL 17.6.1) + Tailwind/shadcn/ui + Recharts 3.8.1**.
+
+> **Last Updated**: 2026-04-16
 
 **Key Architecture**: Multi-layout routes with `(admin)` and `(marketing)` zones, server-first with optimized Supabase auth, comprehensive RLS security, feature-based organization, T3 Env for type-safe environment variables, and complete Media Library with Storage/Folders sync.
 
@@ -159,6 +161,13 @@ export async function createTeamMember(input: unknown) {
 }
 ```
 
+**Auth Guard Functions** (`lib/auth/guards.ts`):
+
+- `isAdmin()` → returns `boolean` (for conditional logic)
+- `requireAdmin()` → throws error if not admin (for Server Actions / DAL)
+- `requireAdminPageAccess()` → calls `redirect('/auth/login')` if not admin (for Server Components / pages)
+- `requireMinRole("editor")` → throws if the user's role is below the required level (for multi-tier RBAC)
+
 ## Essential Workflows
 
 ### Development Commands
@@ -268,10 +277,13 @@ export async function createTeamMember(
 **Critical Rules**:
 
 - ✅ DAL returns `DALResult<T>` — NEVER throws
+- ✅ Use `dalSuccess(data)` / `dalError(message)` factories from `lib/dal/helpers/error.ts`
+- ✅ Error codes follow `[ERR_<ENTITY>_<NNN>]` pattern (e.g., `[ERR_MEDIA_001]`)
 - ✅ `revalidatePath()` in Server Actions ONLY — NEVER in DAL
 - ✅ Email imports in email service ONLY — NEVER in DAL
 - ✅ Props colocated with components in `types.ts`
 - ✅ Server Actions colocated at `app/(admin)/admin/<feature>/actions.ts`
+- ✅ Wrap ALL DAL read functions with React `cache()` for request-level deduplication
 
 ### Media Library Pattern (TASK029 - Complete)
 
@@ -582,6 +594,8 @@ pnpm exec tsx scripts/toggle-presse.ts enable-press-releases
 - ✅ Hide entire sections (including titles) when disabled
 - ✅ Use conditional Promise.all to avoid fetching disabled data
 - ✅ Separate toggles for independent features (Media Kit ≠ Press Releases)
+- ✅ Use `withDisplayToggle(key, Component)` RSC helper (`lib/utils/with-display-toggle.tsx`) to skip fetch+render when disabled
+- ✅ RLS ensures `anon` and `authenticated` can read configurations, only admin can mutate
 
 ### Schemas Pattern (Server vs UI)
 
@@ -604,9 +618,203 @@ export type TeamMemberInput = z.infer<typeof TeamMemberInputSchema>;
 export type TeamMemberFormValues = z.infer<typeof TeamMemberFormSchema>;
 ```
 
+### T3 Env Pattern (Type-Safe Environment Variables)
+
+**Architecture**: All env access via `@t3-oss/env-nextjs` in `lib/env.ts`. **NEVER use `process.env` directly.**
+
+```typescript
+// lib/env.ts — createEnv({ server: {}, client: {}, shared: {} })
+import { env } from '@/lib/env';
+const url = env.NEXT_PUBLIC_SUPABASE_URL; // ✅ Type-safe, validated at build
+```
+
+**Key Rules**:
+
+- ✅ Server vars: `SUPABASE_SECRET_KEY`, `RESEND_API_KEY`, `SENTRY_AUTH_TOKEN`
+- ✅ Client vars: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY`
+- ✅ `emptyStringAsUndefined: true` — empty strings treated as missing
+- ✅ `skipValidation` for Docker/CI builds (`SKIP_ENV_VALIDATION=1`)
+- ✅ `buildMediaPublicUrl()` uses `env.NEXT_PUBLIC_SUPABASE_URL` (never hardcoded)
+- **Reference**: `.github/instructions/t3_env_guide.instructions.md`
+
+### Runtime Environment Validation (`lib/env-validation.ts`)
+
+**Architecture**: Production safety checks extracted from `instrumentation.ts` for testability. Runs at startup on Vercel to detect environment mismatches before they silently corrupt data.
+
+**4 Checks performed**:
+1. **URL ref match** — Supabase URL project ref matches `SUPABASE_PROJECT_REF`
+2. **Non-production ref in production** — Throws if a staging/dev Supabase project is used in `VERCEL_ENV=production`
+3. **Anon key prefix** — Must start with `eyJ` or `sb_publishable_`
+4. **Secret key prefix** — Must start with `eyJ` or `sb_secret_`
+
+**DI Pattern**: Accepts `EnvLike = Record<string, string | undefined>` (defaults to `process.env`) — enables unit testing without real env.
+
+**Key Rules**:
+
+- ✅ Set `VERCEL_IS_STAGING_ACCOUNT=true` on staging Vercel projects that intentionally use a non-prod Supabase ref
+- ✅ In local dev (no `VERCEL_ENV`), validation is skipped with a `console.warn`
+- ✅ Tests for this module live in `__tests__/utils/env-validation.test.ts`
+
+### Compound Components Pattern (React 19)
+
+**Architecture**: Smart/Dumb split with `{ state, actions, meta }` Context pattern + React 19 `use()`.
+
+```typescript
+// Pattern: FeatureContext = { state, actions, meta }
+const ctx = use(FeatureContext); // React 19 — no useContext needed
+const { state: { items }, actions: { handleDelete }, meta: { isPending } } = ctx;
+```
+
+**6 Implementations**: HeroSlide, TeamMember, Partners, MediaLibrary, AuditLogs, SiteConfig.
+
+**Key Rules**:
+
+- ✅ Props interfaces colocated in `types.ts` per feature folder
+- ✅ Context split into `state` (data), `actions` (handlers), `meta` (loading/pagination)
+- ✅ Container (Smart) fetches data → View (Client) manages local state + useEffect sync
+
+### E2E Page Object Model (POM) & Stability Patterns
+
+**Architecture**: POM classes in `e2e/pages/public/`, fixtures in `e2e/fixtures/`.
+
+**5 Stability Patterns (P1–P5)**:
+
+1. **P1**: `data-testid` attributes for selectors (no CSS/text selectors)
+2. **P2**: `waitForLoadState('networkidle')` before assertions
+3. **P3**: Retry assertions with `expect(...).toBeVisible({ timeout: 10_000 })`
+4. **P4**: Test isolation — each test creates/deletes its own data
+5. **P5**: Screenshot comparison with `toHaveScreenshot({ maxDiffPixelRatio: 0.01 })`
+
+**Key Files**: `e2e/pages/public/HomePage.ts`, `e2e/fixtures/test-fixtures.ts`
+**Reference**: `.github/instructions/playwright-tests.instructions.md`
+
+### ImageField Compound Component
+
+**Architecture**: Compound component in `components/features/admin/shared/image-field/`.
+
+```typescript
+<ImageField.Provider value={{ mediaId, onMediaChange }}>
+  <ImageField.SourceActions />   {/* Upload / Media Library picker */}
+  <ImageField.Preview />          {/* Current image thumbnail */}
+  <ImageField.AltText />          {/* Alt text input */}
+</ImageField.Provider>
+```
+
+**10 Consumers**: HeroSlide, TeamMember, Spectacle, Partner, PressRelease, MediaKit, About, Compagnie, Gallery, Contact.
+
+### Sharp Image Compression
+
+**Architecture**: Server-side thumbnail generation via Sharp at upload time.
+
+```typescript
+// lib/utils/image-compress.ts + /api/admin/media/thumbnail
+import sharp from 'sharp';
+const thumbnail = await sharp(buffer)
+  .resize(300, 300, { fit: 'cover' })
+  .jpeg({ quality: 80 })
+  .toBuffer();
+// Stored in media.thumbnail_url
+```
+
+**Key Rules**:
+
+- ✅ Thumbnails: 300×300 JPEG quality 80, generated on upload
+- ✅ Original files preserved at full resolution in Supabase Storage
+- ✅ `thumbnail_url` column in `media` table for fast list rendering
+
+### Handler Factorization Pattern
+
+**Architecture**: Shared handlers in `lib/actions/*-server.ts` reused by both API Routes and Server Actions.
+
+```typescript
+// lib/actions/team-server.ts — shared handler
+export async function handleCreateTeamMember(input: unknown) {
+  await requireAdmin();
+  const validated = TeamMemberSchema.parse(input);
+  return await createTeamMemberDAL(validated);
+}
+
+// Server Action calls handler + revalidatePath
+// API Route calls handler + returns NextResponse.json
+```
+
+**Benefit**: Single validation/auth/business logic, dual transport (Action + Route).
+
+### SECTION_RENDERERS Map-Based Dispatch Pattern (Mar 2026)
+
+**Architecture**: `Record<string, ComponentType>` dispatch map to eliminate `switch`/`if-else` chains for DB-driven section rendering. First usage: `components/features/public-site/compagnie/`.
+
+**When to use**: Sections driven dynamically by a `kind` field from the database (not manually composed by developers). Prefer over Compound Components pattern for DB-driven lists.
+
+```typescript
+// components/features/public-site/compagnie/CompagnieView.tsx
+const SECTION_RENDERERS: Record<string, ComponentType<SectionRendererProps>> = {
+  histoire: HistoireSection,
+  valeurs: ValeursSection,
+  equipe: EquipeSection,
+  // ... other section kinds
+};
+
+export function CompagnieView({ sections }: Props) {
+  return sections.map((section) => {
+    const Renderer = SECTION_RENDERERS[section.kind];
+    if (!Renderer) return null; // Unknown kind — fail silently
+    return <Renderer key={section.id} section={section} />;
+  });
+}
+```
+
+**Key Rules**:
+
+- ✅ Each section component lives in `sections/` subfolder (23–33 lines max each)
+- ✅ `CompagnieView.tsx` < 50 lines after extraction
+- ✅ Unknown `kind` returns `null` (Open/Closed Principle — add kinds without touching map consumers)
+- ✅ Prefer over sub-folder Container/View hierarchy when sections are DB-piloted via `.map()`
+
+### LogoCloud Marquee Pattern
+
+**Architecture**: CSS-only infinite horizontal scroll in `components/LogoCloud/`, supported by `LogoCloudModel/` for the 3D variant.
+
+**Key Rules**:
+
+- ✅ CSS-only animation via `.logo-cloud-track` / `.logo-cloud-track-reverse` Tailwind classes
+- ✅ Logos duplicated in DOM to create seamless loop (no JS scroll)
+- ✅ `prefers-reduced-motion`: animation disabled via CSS media query
+- ✅ `speed` prop accepts `"slow"` | `"normal"` | `"fast"`
+- ✅ Gradient fade masks applied via `before:`/`after:` Tailwind pseudo-elements
+- ✅ Use `usePrefersReducedMotion()` hook for JS-controlled animations (carousels, etc.)
+- **Reference**: `components/LogoCloud/README.md`
+
+### Recharts 3.x Pattern
+
+**Architecture**: Charts via shadcn/ui `ChartContainer` wrapper over Recharts 3.8.1.
+
+```typescript
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
+
+const chartConfig: ChartConfig = { pageviews: { label: "Vues", color: "hsl(var(--chart-1))" } };
+
+<ChartContainer config={chartConfig} className="h-80">
+  <LineChart data={data}>
+    <ChartTooltip content={<ChartTooltipContent />} />
+  </LineChart>
+</ChartContainer>
+```
+
+**Key Rules**:
+
+- ✅ Always use `ChartConfig` type from `components/ui/chart.tsx`
+- ✅ Wrap in `ChartContainer` (not raw `ResponsiveContainer`) for consistent theming
+- ✅ Recharts 3.x ships its own types — no `@types/recharts` needed
+- ✅ Use CSS variables (`hsl(var(--chart-N))`) for colors, not hardcoded hex
+
 ### Security Rules (36/36 tables have RLS)
 
 - ALL tables use Row Level Security
+- **`anon` role**: Read-only on published/active public data; NO access to admin tables/views
+- **`authenticated` role**: Same as anon + broader reads; admin mutations gated by `is_admin()` check in RLS
+- **`service_role`**: Bypasses RLS — used only in server-side scripts and Edge Functions
 - Public tables: `published_at IS NOT NULL` OR `active = true` (read-only)
 - Admin tables: `(select public.is_admin())` for all operations
 - SECURITY INVOKER views require GRANT permissions on base tables
@@ -1518,7 +1726,7 @@ memory-bank/
 **Security Implementations**:
 
 - `doc/ADMIN-VIEWS-SECURITY-HARDENING-SUMMARY.md` - Admin views isolation pattern (TASK037, Jan 2026)
-- `memory-bank/tasks/TASK037-admin-views-security-hardening.md` - Security hardening task details
+- `memory-bank/tasks/tasks-completed/TASK037-admin-views-security-hardening.md` - Security hardening task details
 - `.github/prompts/plan-adminViewsSecurityHardening.prompt.md` - Implementation plan
 
 **Migration Guides**:
@@ -1598,3 +1806,35 @@ The project was upgraded from Next.js 15.4.5 to 16.1.5 with the following key ch
 - Responsive design with shadcn/ui components
 
 When in doubt, always examine existing patterns in the codebase and prioritize security, type safety, and maintainability.
+
+---
+
+## Referenced Conventions
+
+The `.github/instructions/` directory is the **authoritative source** for all coding conventions. The sections above summarize patterns; the files below contain the complete rules.
+
+| Topic | File |
+| ----- | ---- |
+| TypeScript strict patterns | `2-typescript.instructions.md` |
+| Clean Code principles | `clean-code.instructions.md` |
+| CRUD Server Actions pattern | `crud-server-actions-pattern.instructions.md` |
+| DAL SOLID principles | `dal-solid-principles.instructions.md` |
+| Next.js best practices (App Router) | `nextjs.instructions.md` |
+| Next.js backend (headers, cookies) | `nextjs15-backend-with-supabase.instructions.md` |
+| Next.js Server Actions / API Routes | `next-backend.instructions.md` |
+| Supabase Auth (JWT, getClaims) | `nextjs-supabase-auth-2025.instructions.md` ✅ CANONICAL |
+| T3 Env type-safe environment vars | `t3_env_guide.instructions.md` |
+| Postgres migrations | `Create_migration.instructions.md` |
+| Declarative schema management | `Declarative_Database_Schema.instructions.md` |
+| RLS policies | `Create-RLS-policies.instructions.md` |
+| Database functions | `Database_Create_functions.instructions.md` |
+| SQL style guide | `Postgres_SQL_Style_Guide.instructions.md` |
+| Accessibility (WCAG 2.2) | `a11y.instructions.md` |
+| Touch target sizes | `touch_hitbox.instructions.md` + `wcag_target_size.instructions.md` |
+| Security & OWASP Top 10 | `security-and-owasp.instructions.md` |
+| Playwright E2E tests | `playwright-tests.instructions.md` |
+| Conventional commits | `conventional-commit.instructions.md` |
+| GitHub Actions CI/CD | `github-actions-ci-cd-best-practices.instructions.md` |
+| Edge Functions (Deno) | `edge-functions.instructions.md` |
+| shadcn/ui MCP | `shadcn-mcp.instructions.md` |
+| Memory Bank management | `memory-bank.instructions.md` |
