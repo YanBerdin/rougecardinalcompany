@@ -145,6 +145,16 @@ supabase/schemas/
 
 ---
 
+## 🆕 Mises à jour récentes (avril 2026)
+
+- **FIX: Contrainte `evenements_status_check` — ajout de `'completed'` (17 avril 2026)** : La contrainte CHECK sur `evenements.status` ne contenait que `'complet'` (valeur française legacy) mais pas `'completed'` (valeur anglaise utilisée par le code TypeScript/Zod). Tout changement de statut vers « terminé » déclenchait `[ERR_AGENDA_004] new row for relation "evenements" violates check constraint`.
+  - **Root cause** : Divergence enum — le schéma Zod (`lib/schemas/agenda.ts`) et le DAL (`lib/dal/admin-agenda.ts`) utilisent `'completed'`, mais la DB n'acceptait pas cette valeur.
+  - **Migration hotfix** : `20260417120000_fix_evenements_status_check_add_completed.sql` — recréation idempotente de la contrainte avec `'completed'` ajouté à la liste complète.
+  - **Schéma déclaratif synchronisé** : `50_constraints.sql` — source de vérité mise à jour.
+  - **Application** : ✅ `pnpm dlx supabase db push` → exit 0 (2026-04-17).
+
+---
+
 ## 🆕 Mises à jour récentes (mars 2026)
 
 - **FIX: Conformité RLS MIG-005 — Séparation policies anon/authenticated — TASK077 + TASK079 (15 mars 2026)** : Toutes les policies RLS combinant `to anon, authenticated` ont été remplacées par des policies granulaires séparées (1 par rôle Supabase), conformément à la règle MIG-005.

@@ -4,6 +4,35 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-04-17 - BUG FIX: Contrainte `evenements_status_check` — ajout de `'completed'`
+
+**Migration** : `20260417120000_fix_evenements_status_check_add_completed.sql`  
+**Schéma déclaratif** : ✅ `supabase/schemas/50_constraints.sql`
+
+**Contexte** : Erreur `[ERR_AGENDA_004] new row for relation "evenements" violates check constraint "evenements_status_check"` déclenchée lors du passage d'un événement au statut « terminé » depuis `/admin/agenda/<id>/edit`.
+
+**Root cause** : La contrainte CHECK contenait `'complet'` (valeur française legacy) mais pas `'completed'` (valeur anglaise utilisée par le schéma Zod et le DAL TypeScript). Divergence enum DB ↔ application.
+
+**Fix** :
+
+```sql
+-- Recréation idempotente de la contrainte
+alter table public.evenements drop constraint evenements_status_check;
+alter table public.evenements add constraint evenements_status_check
+  check (status in (
+    'planifie','confirme','complet','annule','reporte',
+    'scheduled','confirmed','sold_out','cancelled','postponed','completed'
+  ));
+```
+
+**Validation** :
+
+- ✅ Appliquée localement (migration idempotente via bloc `DO $$`)
+- ✅ Appliquée cloud : `pnpm dlx supabase db push` → exit 0 (2026-04-17)
+- ✅ Schéma déclaratif `50_constraints.sql` synchronisé
+
+---
+
 ### 2026-03-18 - PERF FIX: Optimisation RPC get_audit_logs_with_email (ADM-AUDIT-010)
 
 **Migration** : `20260318000000_optimize_audit_logs_rpc.sql`  

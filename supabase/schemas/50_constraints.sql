@@ -32,7 +32,7 @@ begin
   end if;
   
   execute 'alter table public.evenements alter column status set default ''planifie''';
-  execute 'alter table public.evenements add constraint evenements_status_check check (status in (''planifie'',''confirme'',''complet'',''annule'',''reporte'',''scheduled'',''confirmed'',''sold_out'',''cancelled'',''postponed''))';
+  execute 'alter table public.evenements add constraint evenements_status_check check (status in (''planifie'',''confirme'',''complet'',''annule'',''reporte'',''scheduled'',''confirmed'',''sold_out'',''cancelled'',''postponed'',''completed''))';
 exception when others then
   raise notice 'Could not add evenements_status_check: %', sqlerrm;
 end;

@@ -166,6 +166,31 @@ flowchart TB
 > `script-src` contient encore `'unsafe-inline'` et `'unsafe-eval'`
 > TODO pour la production : migrer vers nonces ou hashes.
 
+### Audit Log — traçabilité immuable (couche 7)
+
+L'audit log est un système de traçabilité automatique qui enregistre toutes les opérations de modification (INSERT, UPDATE, DELETE) sur les tables critiques de l'application.
+
+**Utilité :**
+
+| Besoin | Ce qu'il résout |
+| --- | --- |
+| Sécurité | Qui a modifié quoi, depuis quelle IP, avec quel navigateur |
+| RGPD | Preuve des actions sur données personnelles (newsletter, contacts) |
+| Débogage | Historique complet avec `old_values`/`new_values` en JSONB |
+| Audit interne | Contrôle des actions des administrateurs et éditeurs |
+| Détection d'anomalies | Identifier des patterns suspects ou accès non autorisés |
+
+**Fonctionnement en 4 couches :**
+
+1. **Trigger PostgreSQL** (`audit_trigger()`, `SECURITY DEFINER`) — déclenché automatiquement `AFTER INSERT OR UPDATE OR DELETE` sur 27 tables. Capture `user_id`, `action`, `table_name`, `record_id`, `old_values`/`new_values` (JSONB), `ip_address`, `user_agent`.
+2. **Intégrité du log** — `INSERT` direct dans `logs_audit` bloqué par RLS (aucune policy INSERT utilisateur). Seul le trigger `SECURITY DEFINER` peut écrire → impossibilité de falsifier les logs.
+3. **RPC PostgreSQL** (`get_audit_logs_with_email`) — résout les emails depuis `auth.users` (inaccessible directement). Gère filtres, pagination et recherche côté DB.
+4. **Rétention RGPD** — colonne `expires_at` (90 jours) + fonction `cleanup_expired_audit_logs()` planifiable via GitHub Actions.
+
+**27 tables trackées**, rétention automatique à 90 jours (RGPD)
+
+**Interface admin (`/admin/audit-logs`) :** filtres multiples (action, table, utilisateur, plage de dates, recherche libre), pagination, modal détails JSON, export CSV jusqu'à 10 000 entrées.
+
 ---
 
 ## Installation
