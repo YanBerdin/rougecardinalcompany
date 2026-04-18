@@ -12,7 +12,6 @@ export const EventInputSchema = z.object({
     ticket_url: z.string().url().nullable().optional(),
     capacity: z.number().int().positive().nullable().optional(),
     price_cents: z.number().int().nonnegative().nullable().optional(),
-    genres: z.array(z.string()).optional().default([]),
 });
 export type EventInput = z.infer<typeof EventInputSchema>;
 

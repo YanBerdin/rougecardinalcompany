@@ -9,7 +9,7 @@ export const revalidate = 60;
 export const metadata: Metadata = {
   title: "Spectacles | Rouge-Cardinal",
   description:
-    "Découvrez tous les spectacles de la compagnie Rouge-Cardinal, créations actuelles et archives.",
+    "Découvrez tous les évènements de la compagnie Rouge-Cardinal, créations actuelles et archives.",
 };
 
 export default function SpectaclesPage() {

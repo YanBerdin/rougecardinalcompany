@@ -1,5 +1,39 @@
 # Progress
 
+## Sync `evenements.genres` via triggers PostgreSQL (2026-04-18)
+
+✅ **COMPLET** — `evenements.genres` (text[]) est désormais entièrement géré par la DB via 2 triggers ; le formulaire admin ne peut plus le modifier.
+
+### Architecture
+
+- **Source de vérité** : `spectacles.genre` (text, singulier, inchangé)
+- **Colonne cible** : `evenements.genres` (text[]) — read-only pour le code applicatif
+
+### Triggers créés
+
+| Trigger | Table | Moment | Fonction | Sécurité |
+| ------- | ----- | ------ | -------- | -------- |
+| `trg_sync_evenement_genres` | `evenements` | BEFORE INSERT/UPDATE OF spectacle_id | `sync_evenement_genres_from_spectacle()` | SECURITY INVOKER |
+| `trg_sync_evenements_on_spectacle_genre_update` | `spectacles` | AFTER UPDATE OF genre | `sync_evenements_genres_on_spectacle_update()` | SECURITY DEFINER (bulk update) |
+
+### Migrations
+
+- `20260418182912_drop_genres_constraint.sql` — Drop `check_valid_event_types`
+- `20260418200000_sync_evenement_genres_trigger.sql` — 2 fonctions + 2 triggers + backfill
+
+### Fichiers code modifiés
+
+- `lib/schemas/admin-agenda-ui.ts` — `genres` retiré de `EventFormSchema`
+- `lib/schemas/admin-agenda.ts` — `genres` retiré de `EventInputSchema` + `EventFormSchema` ; `EventDTO.genres` conservé (lecture seule)
+- `app/(admin)/admin/agenda/actions.ts` — `genres` retiré de `createEventAction` et `updateEventAction`
+- `components/features/admin/agenda/EventForm.tsx` — `genres` retiré des `defaultValues`
+
+### Décision SECURITY DEFINER
+
+La fonction `sync_evenements_genres_on_spectacle_update()` utilise `SECURITY DEFINER` pour pouvoir mettre à jour en masse toutes les lignes `evenements` liées à un spectacle, contournant RLS (RLS interdirait la mise à jour des événements d'autres utilisateurs). Header sécurité complet inclus dans la migration.
+
+---
+
 ## Rename `evenements.type_array` → `genres` — stack complet (2026-04-18)
 
 ✅ **COMPLET** — Renommage de la colonne `evenements.type_array` en `genres` sur l'ensemble du stack. Migration idempotente appliquée localement et sur le Cloud. 22 fichiers modifiés, 0 erreur TypeScript.

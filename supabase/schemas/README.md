@@ -147,6 +147,16 @@ supabase/schemas/
 
 ## 🆕 Mises à jour récentes (avril 2026)
 
+- **FEAT: Triggers sync `evenements.genres` depuis `spectacles.genre` (18 avril 2026)** : `evenements.genres` (text[]) n'est plus saisi manuellement dans le formulaire événement. Deux triggers PostgreSQL assurent la synchronisation automatique depuis `spectacles.genre` (text, source de vérité) :
+  - `trg_sync_evenement_genres` — BEFORE INSERT OR UPDATE OF `spectacle_id` sur `evenements` → fonction `sync_evenement_genres_from_spectacle()` (SECURITY INVOKER)
+  - `trg_sync_evenements_on_spectacle_genre_update` — AFTER UPDATE OF `genre` sur `spectacles` → propage le changement à tous les événements liés (SECURITY DEFINER)
+  - Un backfill initialise tous les événements existants au moment de l'application.
+  - **Impact applicatif** : `genres` retiré de `EventFormSchema`, `EventInputSchema`, `createEventAction`, `updateEventAction`, `EventForm.tsx`. `EventDTO.genres` et `EventClientDTO.genres` conservés (lecture seule).
+  - **Migration** : `20260418200000_sync_evenement_genres_trigger.sql`. Déclaratif synchronisé : `07_table_evenements.sql`, `30_triggers.sql`. Appliquée le 2026-04-18.
+
+- **REFACTOR: Suppression contrainte `check_valid_event_types` (18 avril 2026)** : La contrainte CHECK limitant les valeurs de `evenements.genres` à une liste figée a été supprimée. Elle est devenue obsolète maintenant que `genres` est auto-géré par trigger depuis `spectacles.genre` (valeur libre text).
+  - **Migration** : `20260418182912_drop_genres_constraint.sql`. Déclaratif synchronisé : `50_constraints.sql`. Appliquée le 2026-04-18.
+
 - **FIX: Contrainte `evenements_status_check` — ajout de `'completed'` (17 avril 2026)** : La contrainte CHECK sur `evenements.status` ne contenait que `'complet'` (valeur française legacy) mais pas `'completed'` (valeur anglaise utilisée par le code TypeScript/Zod). Tout changement de statut vers « terminé » déclenchait `[ERR_AGENDA_004] new row for relation "evenements" violates check constraint`.
   - **Root cause** : Divergence enum — le schéma Zod (`lib/schemas/agenda.ts`) et le DAL (`lib/dal/admin-agenda.ts`) utilisent `'completed'`, mais la DB n'acceptait pas cette valeur.
   - **Migration hotfix** : `20260417120000_fix_evenements_status_check_add_completed.sql` — recréation idempotente de la contrainte avec `'completed'` ajouté à la liste complète.

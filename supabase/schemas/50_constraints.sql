@@ -68,19 +68,10 @@ alter table public.evenements
 add constraint check_start_end_time_order 
 check (start_time is null or end_time is null or start_time <= end_time);
 
--- Contrainte pour valider les types d'événements
-alter table public.evenements 
-drop constraint if exists check_valid_event_types;
-alter table public.evenements 
-add constraint check_valid_event_types 
-check (
-  genres is null
-  or genres <@ ARRAY[
-    'spectacle', 'première', 'premiere', 'atelier', 'workshop',
-    'rencontre', 'conference', 'masterclass', 'répétition', 'repetition',
-    'audition', 'casting', 'formation', 'residency', 'résidence'
-  ]::text[]
-);
+-- Genres: contrainte DB supprimée — genres libres validés côté application
+-- Zod : z.array(z.string().min(1).max(50)).max(10)
+alter table public.evenements
+  drop constraint if exists check_valid_event_types;
 
 comment on constraint check_ticket_url_format on public.evenements is 'URL de billetterie doit être au format http/https';
 comment on constraint check_image_url_format on public.evenements is 'URL d''image doit être au format http/https';

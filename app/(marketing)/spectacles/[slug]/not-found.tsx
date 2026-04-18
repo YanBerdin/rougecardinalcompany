@@ -21,7 +21,7 @@ export default function SpectacleNotFound() {
                     <Button asChild size="lg" variant="default">
                         <Link href="/spectacles">
                             <ArrowLeft className="mr-2 h-4 w-4" />
-                            Voir tous les spectacles
+                            Voir tous les évènements
                         </Link>
                     </Button>
                     <Button asChild size="lg" variant="outline">

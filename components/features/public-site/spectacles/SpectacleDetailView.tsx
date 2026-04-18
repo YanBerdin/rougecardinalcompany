@@ -187,7 +187,7 @@ export function SpectacleDetailView({
                                 title={spectacle.title}
                                 ticketUrl={ticketUrl}
                                 agendaLabel="Voir les dates"
-                                backLabel="Tous les spectacles"
+                                backLabel="Tous les évènements"
                             />
                             <h1 id="spectacle-title" className="text-2xl md:text-3xl lg:text-4xl font-bold font-sans mb-6 animate-fade-in-up">
                                 {spectacle.title}
@@ -290,7 +290,7 @@ export function SpectacleDetailView({
                             title={spectacle.title}
                             ticketUrl={ticketUrl}
                             agendaLabel="Voir les dates"
-                            backLabel="Tous les spectacles"
+                            backLabel="Tous les évènements"
                         />
                     </div>
                 </div>
