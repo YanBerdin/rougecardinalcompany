@@ -157,29 +157,36 @@ export const fetchEventTypes = cache(
         };
       }
 
-      // Extract unique event categories from genres and artistic genres from spectacles
-      const typeSet = new Set<string>();
-      const genreSet = new Set<string>();
+      // Normalize all genre values to lowercase and deduplicate by that key.
+      // This merges e.g. "spectacle" (from evenements.genres) and "Spectacle"
+      // (from spectacles.genre) into one option, preventing duplicate labels.
+      const seenLower = new Set<string>();
       for (const row of data ?? []) {
         for (const t of row.genres ?? []) {
-          typeSet.add(t);
+          seenLower.add(t.toLowerCase());
         }
         const genre = (row.spectacles as { genre?: string | null } | null)?.genre;
-        if (genre) genreSet.add(genre);
+        if (genre) seenLower.add(genre.toLowerCase());
       }
 
-      const allValues = [...Array.from(typeSet), ...Array.from(genreSet)];
       const baseTypes =
-        allValues.length > 0
-          ? allValues
-          : ["Spectacle", "Première", "Rencontre", "Atelier"];
+        seenLower.size > 0
+          ? Array.from(seenLower)
+          : ["théâtre", "photographie", "atelier"];
+
+      const capitalizeFirst = (str: string): string =>
+        str.charAt(0).toUpperCase() + str.slice(1);
 
       const options: EventTypeOption[] = [
         { value: "all", label: "Tous les événements" },
-        ...baseTypes.map((v) => ({
-          value: v,
-          label: v + (v.endsWith("s") ? "" : "s"),
-        })),
+        ...baseTypes.map((v) => {
+          // v is already lowercase; capitalize only for display
+          const capitalized = capitalizeFirst(v);
+          return {
+            value: v, // lowercase key — matches case-insensitive filter logic
+            label: capitalized + (capitalized.endsWith("s") ? "" : "s"),
+          };
+        }),
       ];
 
       return { success: true, data: options };

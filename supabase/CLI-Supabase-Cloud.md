@@ -141,7 +141,7 @@ pnpm dlx supabase status --linked
 Le système de rôles 3-tiers (`user < editor < admin`) a été implémenté via 4 migrations :
 
 | Migration | Description |
-|-----------|-------------|
+| ----------- | ------------- |
 | `20260311030000_add_has_min_role_function.sql` | Fonction `has_min_role(required_role text)` |
 | `20260311030511_add_editor_storage_policies.sql` | Policies Storage pour éditeurs |
 | `20260311120000_update_rls_editor_role.sql` | RLS 26 tables → `has_min_role('editor')` |

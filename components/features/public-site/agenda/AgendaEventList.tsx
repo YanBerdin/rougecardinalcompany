@@ -29,6 +29,10 @@ import type { Event } from "@/lib/schemas/agenda";
 
 const ANIMATION_DELAY_STEP = 0.05;
 
+function capitalizeFirst(str: string): string {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 const BADGE_VARIANT_MAP: Record<string, "default" | "destructive" | "secondary" | "outline"> = {
     Spectacle: "default",
     "Première": "destructive",
@@ -167,7 +171,11 @@ function AgendaEventCard({ event, animationDelay }: {
                             <div className="flex items-start justify-between mb-4">
                                 <EventCardTitle event={event} />
                                 <Badge variant="outline" className="text-md h-6 p-4">
-                                    {event.genre ?? (event.genres.length > 0 ? event.genres.join(", ") : "Spectacle")}
+                                    {event.genre
+                                        ? capitalizeFirst(event.genre)
+                                        : event.genres.length > 0
+                                            ? event.genres.map(capitalizeFirst).join(", ")
+                                            : "Spectacle"}
                                 </Badge>
                             </div>
                             <EventCardMeta event={event} />
