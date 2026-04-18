@@ -17,10 +17,10 @@ set client_min_messages = warning;
 -- =====================================
 with data(slug, date_debut, date_fin, start_time, end_time, capacity, price_cents, status, ticket_url, image_url, type_array) as (
   values
-    ('romeo-et-juliette', timestamptz '2025-12-01 19:30:00+00', timestamptz '2025-12-01 21:30:00+00', time '19:30', time '21:30', 350, 2800, 'scheduled', 'https://tickets.example.com/rj-2025-12-01', 'https://images.pexels.com/photos/167636/pexels-photo-167636.jpeg', array['Spectacle']::text[]),
-    ('romeo-et-juliette', timestamptz '2025-12-02 20:30:00+00', timestamptz '2025-12-02 22:30:00+00', time '20:30', time '22:30', 350, 2800, 'scheduled', 'https://tickets.example.com/rj-2025-12-02', 'https://images.pexels.com/photos/167636/pexels-photo-167636.jpeg', array['Spectacle']::text[]),
-  ('la-tempete',        timestamptz '2026-03-01 20:00:00+00', timestamptz '2026-03-01 21:50:00+00', time '20:00', time '21:50', 500, 3200, 'scheduled', 'https://tickets.example.com/tempete-2026-03-01', 'https://images.pexels.com/photos/158163/clouds-cloudporn-weather-lookup-158163.jpeg', array['Spectacle']::text[]),
-    ('le-misanthrope',    timestamptz '2025-10-05 19:00:00+00', timestamptz '2025-10-05 20:45:00+00', time '19:00', time '20:45', 280, 2400, 'scheduled', 'https://tickets.example.com/misanthrope-2025-10-05', 'https://images.pexels.com/photos/167092/pexels-photo-167092.jpeg', array['Spectacle']::text[])
+    ('romeo-et-juliette', timestamptz '2025-12-01 19:30:00+00', timestamptz '2025-12-01 21:30:00+00', time '19:30', time '21:30', 350, 2800, 'scheduled', 'https://tickets.example.com/rj-2025-12-01', 'https://images.pexels.com/photos/167636/pexels-photo-167636.jpeg', array['spectacle']::text[]),
+    ('romeo-et-juliette', timestamptz '2025-12-02 20:30:00+00', timestamptz '2025-12-02 22:30:00+00', time '20:30', time '22:30', 350, 2800, 'scheduled', 'https://tickets.example.com/rj-2025-12-02', 'https://images.pexels.com/photos/167636/pexels-photo-167636.jpeg', array['spectacle']::text[]),
+  ('la-tempete',        timestamptz '2026-03-01 20:00:00+00', timestamptz '2026-03-01 21:50:00+00', time '20:00', time '21:50', 500, 3200, 'scheduled', 'https://tickets.example.com/tempete-2026-03-01', 'https://images.pexels.com/photos/158163/clouds-cloudporn-weather-lookup-158163.jpeg', array['spectacle']::text[]),
+    ('le-misanthrope',    timestamptz '2025-10-05 19:00:00+00', timestamptz '2025-10-05 20:45:00+00', time '19:00', time '20:45', 280, 2400, 'scheduled', 'https://tickets.example.com/misanthrope-2025-10-05', 'https://images.pexels.com/photos/167092/pexels-photo-167092.jpeg', array['spectacle']::text[])
 ), s as (
   select sp.id as spectacle_id, d.*
   from data d
