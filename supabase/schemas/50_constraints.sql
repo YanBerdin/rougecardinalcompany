@@ -32,7 +32,7 @@ begin
   end if;
   
   execute 'alter table public.evenements alter column status set default ''planifie''';
-  execute 'alter table public.evenements add constraint evenements_status_check check (status in (''planifie'',''confirme'',''complet'',''annule'',''reporte'',''scheduled'',''confirmed'',''sold_out'',''cancelled'',''postponed''))';
+  execute 'alter table public.evenements add constraint evenements_status_check check (status in (''planifie'',''confirme'',''complet'',''annule'',''reporte'',''scheduled'',''confirmed'',''sold_out'',''cancelled'',''postponed'',''completed''))';
 exception when others then
   raise notice 'Could not add evenements_status_check: %', sqlerrm;
 end;
@@ -74,8 +74,8 @@ drop constraint if exists check_valid_event_types;
 alter table public.evenements 
 add constraint check_valid_event_types 
 check (
-  type_array is null
-  or type_array <@ ARRAY[
+  genres is null
+  or genres <@ ARRAY[
     'spectacle', 'première', 'premiere', 'atelier', 'workshop',
     'rencontre', 'conference', 'masterclass', 'répétition', 'repetition',
     'audition', 'casting', 'formation', 'residency', 'résidence'

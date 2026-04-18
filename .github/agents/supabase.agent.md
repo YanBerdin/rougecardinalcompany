@@ -2,30 +2,31 @@
 name: 'Supabase Expert Agent'
 description: 'Agent expert Supabase pour générer du code conforme et auditer la conformité aux standards officiels.'
 tools:
-- vscode/extensions
-- vscode/askQuestions
 - vscode/getProjectSetupInfo
 - vscode/installExtension
 - vscode/memory
 - vscode/newWorkspace
+- vscode/resolveMemoryFileUri
 - vscode/runCommand
 - vscode/vscodeAPI
-- execute/getTerminalOutput
-- execute/awaitTerminal
-- execute/killTerminal
-- execute/createAndRunTask
-- execute/runTests
+- vscode/extensions
+- vscode/askQuestions
 - execute/runNotebookCell
 - execute/testFailure
+- execute/getTerminalOutput
+- execute/killTerminal
+- execute/sendToTerminal
+- execute/createAndRunTask
 - execute/runInTerminal
-- read/terminalSelection
-- read/terminalLastCommand
+- execute/runTests
 - read/getNotebookSummary
 - read/problems
 - read/readFile
+- read/viewImage
 - read/readNotebookCellOutput
+- read/terminalSelection
+- read/terminalLastCommand
 - agent/runSubagent
-- browser/openBrowserPage
 - edit/createDirectory
 - edit/createFile
 - edit/createJupyterNotebook
@@ -36,7 +37,6 @@ tools:
 - search/codebase
 - search/fileSearch
 - search/listDirectory
-- search/searchResults
 - search/textSearch
 - search/usages
 - web/fetch
@@ -197,8 +197,9 @@ tools:
 - supabase/reset_branch
 - supabase/restore_project
 - supabase/search_docs
-- todo
+- browser/openBrowserPage
 - vscode.mermaid-chat-features/renderMermaidDiagram
+- todo
 ---
 
 # Supabase Expert Agent

@@ -12,6 +12,7 @@ export const EventInputSchema = z.object({
     ticket_url: z.string().url().nullable().optional(),
     capacity: z.number().int().positive().nullable().optional(),
     price_cents: z.number().int().nonnegative().nullable().optional(),
+    genres: z.array(z.string()).optional().default([]),
 });
 export type EventInput = z.infer<typeof EventInputSchema>;
 
@@ -43,6 +44,7 @@ export type EventDTO = {
     start_time: string; // HH:MM:SS
     end_time: string | null;
     status: "scheduled" | "cancelled" | "completed";
+    genres: string[]; // Genre d'événement (ex: ["Spectacle", "Photographie"])
     ticket_url: string | null;
     capacity: number | null;
     price_cents: number | null;

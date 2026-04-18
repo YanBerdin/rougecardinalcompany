@@ -1,31 +1,33 @@
 ---
 name: 'Next.js 16 Production Expert'
 description: 'Expert Next.js 16 developer with DAL SOLID principles, Server Actions patterns, Supabase Auth optimization, and production-ready TypeScript patterns'
-model: Claude Sonnet 4.6 (copilot)
+model: Claude Opus 4.6 (copilot)
 tools:
-- vscode/extensions
-- vscode/askQuestions
 - vscode/getProjectSetupInfo
 - vscode/installExtension
 - vscode/memory
 - vscode/newWorkspace
+- vscode/resolveMemoryFileUri
 - vscode/runCommand
 - vscode/vscodeAPI
-- execute/getTerminalOutput
-- execute/awaitTerminal
-- execute/killTerminal
-- execute/createAndRunTask
+- vscode/extensions
+- vscode/askQuestions
 - execute/runNotebookCell
 - execute/testFailure
+- execute/getTerminalOutput
+- execute/killTerminal
+- execute/sendToTerminal
+- execute/createAndRunTask
 - execute/runInTerminal
-- read/terminalSelection
-- read/terminalLastCommand
+- execute/runTests
 - read/getNotebookSummary
 - read/problems
 - read/readFile
+- read/viewImage
 - read/readNotebookCellOutput
+- read/terminalSelection
+- read/terminalLastCommand
 - agent/runSubagent
-- browser/openBrowserPage
 - edit/createDirectory
 - edit/createFile
 - edit/createJupyterNotebook
@@ -36,7 +38,6 @@ tools:
 - search/codebase
 - search/fileSearch
 - search/listDirectory
-- search/searchResults
 - search/textSearch
 - search/usages
 - web/fetch
@@ -52,6 +53,7 @@ tools:
 - chrome-devtools/get_network_request
 - chrome-devtools/handle_dialog
 - chrome-devtools/hover
+- chrome-devtools/lighthouse_audit
 - chrome-devtools/list_console_messages
 - chrome-devtools/list_network_requests
 - chrome-devtools/list_pages
@@ -63,8 +65,10 @@ tools:
 - chrome-devtools/press_key
 - chrome-devtools/resize_page
 - chrome-devtools/select_page
+- chrome-devtools/take_memory_snapshot
 - chrome-devtools/take_screenshot
 - chrome-devtools/take_snapshot
+- chrome-devtools/type_text
 - chrome-devtools/upload_file
 - chrome-devtools/wait_for
 - context7/query-docs
@@ -79,10 +83,12 @@ tools:
 - github/create_branch
 - github/create_or_update_file
 - github/create_pull_request
+- github/create_pull_request_with_copilot
 - github/create_repository
 - github/delete_file
 - github/fork_repository
 - github/get_commit
+- github/get_copilot_job_status
 - github/get_file_contents
 - github/get_label
 - github/get_latest_release
@@ -105,6 +111,7 @@ tools:
 - github/pull_request_review_write
 - github/push_files
 - github/request_copilot_review
+- github/run_secret_scanning
 - github/search_code
 - github/search_issues
 - github/search_pull_requests
@@ -162,6 +169,18 @@ tools:
 - shadcn/list_items_in_registries
 - shadcn/search_items_in_registries
 - shadcn/view_items_in_registries
+- stitch/apply_design_system
+- stitch/create_design_system
+- stitch/create_project
+- stitch/edit_screens
+- stitch/generate_screen_from_text
+- stitch/generate_variants
+- stitch/get_project
+- stitch/get_screen
+- stitch/list_design_systems
+- stitch/list_projects
+- stitch/list_screens
+- stitch/update_design_system
 - supabase/apply_migration
 - supabase/confirm_cost
 - supabase/create_branch
@@ -191,8 +210,22 @@ tools:
 - supabase/reset_branch
 - supabase/restore_project
 - supabase/search_docs
-- todo
+- pencil/batch_design
+- pencil/batch_get
+- pencil/export_nodes
+- pencil/find_empty_space_on_canvas
+- pencil/get_editor_state
+- pencil/get_guidelines
+- pencil/get_screenshot
+- pencil/get_variables
+- pencil/open_document
+- pencil/replace_all_matching_properties
+- pencil/search_all_unique_properties
+- pencil/set_variables
+- pencil/snapshot_layout
+- browser/openBrowserPage
 - vscode.mermaid-chat-features/renderMermaidDiagram
+- todo
 ---
 
 # Expert Next.js 16 Developer (Production Edition)

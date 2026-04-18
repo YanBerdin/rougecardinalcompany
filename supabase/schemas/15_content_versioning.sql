@@ -577,7 +577,7 @@ begin
       image_url = version_record.content_snapshot->>'image_url',
       start_time = (version_record.content_snapshot->>'start_time')::time,
       end_time = (version_record.content_snapshot->>'end_time')::time,
-      type_array = array(select jsonb_array_elements_text(version_record.content_snapshot->'type_array')),
+      genres = array(select jsonb_array_elements_text(version_record.content_snapshot->'genres')),
       metadata = version_record.content_snapshot->'metadata',
       recurrence_rule = version_record.content_snapshot->>'recurrence_rule',
       recurrence_end_date = (version_record.content_snapshot->>'recurrence_end_date')::timestamptz,

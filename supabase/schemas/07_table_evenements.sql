@@ -19,7 +19,7 @@ create table public.evenements (
   image_url text, -- URL d'image pour l'événement spécifique
   start_time time, -- Heure de début (complément à date_debut)
   end_time time, -- Heure de fin (complément à date_fin ou durée)
-  type_array text[] default '{}', -- Tableau des types d'événements (spectacle, atelier, rencontre, etc.)
+  genres text[] default '{}', -- Tableau des types d'événements (spectacle, atelier, rencontre, etc.)
   
   created_at timestamptz default now() not null,
   updated_at timestamptz default now() not null
@@ -33,4 +33,4 @@ comment on column public.evenements.ticket_url is 'URL vers la billetterie exter
 comment on column public.evenements.image_url is 'URL d''image spécifique à cet événement (complément aux médias du spectacle)';
 comment on column public.evenements.start_time is 'Heure de début précise (complément à date_debut pour horaires)';
 comment on column public.evenements.end_time is 'Heure de fin précise (complément à date_fin ou calcul de durée)';
-comment on column public.evenements.type_array is 'Tableau des types d''événements : spectacle, première, atelier, rencontre, etc.';
+comment on column public.evenements.genres is 'Tableau des types d''événements : spectacle, première, atelier, rencontre, etc.';

@@ -127,7 +127,10 @@ export function AgendaProvider({
 
     const filteredEvents = useMemo(() => {
         if (filterType === "all") return events;
-        return events.filter((e) => e.type === filterType);
+        return events.filter((e) =>
+            e.genres.includes(filterType) ||
+            e.genre === filterType
+        );
     }, [events, filterType]);
 
     const contextValue = useMemo<AgendaContextValue>(

@@ -32,6 +32,7 @@ export async function EventsContainer() {
         ticket_url: e.ticket_url,
         capacity: e.capacity,
         price_cents: e.price_cents,
+        genres: e.genres,
         created_at: e.created_at,
         updated_at: e.updated_at,
     }));

@@ -62,3 +62,42 @@ Your primary directive is to ensure all code you generate, review, or refactor i
 
 - **Be Explicit About Security:** When you suggest a piece of code that mitigates a security risk, explicitly state what you are protecting against (e.g., "Using a parameterized query here to prevent SQL injection.").
 - **Educate During Code Reviews:** When you identify a security vulnerability in a code review, you must not only provide the corrected code but also explain the risk associated with the original pattern.
+
+
+## Security Code Review Checklist
+
+### Authentication & Authorization
+- [ ] All user inputs are validated
+- [ ] Authorization checks are in place
+- [ ] Least privilege principle is followed
+- [ ] No hardcoded credentials
+
+### Input Validation
+- [ ] All inputs validated for type and length
+- [ ] Injection attacks prevented
+- [ ] Path traversal attacks prevented
+- [ ] Command injection attacks prevented
+
+### Data Protection
+- [ ] Sensitive data encrypted at rest
+- [ ] Encrypted in transit (HTTPS)
+- [ ] No data logging of sensitive info
+- [ ] Proper data retention policies
+
+### Error Handling
+- [ ] Errors logged securely
+- [ ] No sensitive info in error messages
+- [ ] Graceful failure modes
+- [ ] User-friendly error messages
+
+### Dependencies
+- [ ] All dependencies reviewed
+- [ ] No known vulnerabilities
+- [ ] Pinned versions used
+- [ ] Supply chain verified
+
+### Security Testing
+- [ ] Unit tests for security paths
+- [ ] Integration tests complete
+- [ ] Security scanning passed
+- [ ] Manual testing performed

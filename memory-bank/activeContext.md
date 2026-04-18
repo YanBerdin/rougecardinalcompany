@@ -1,6 +1,8 @@
 
 # Contexte actif
 
+2026-04-18 : ✅ Rename `evenements.type_array` → `genres` (stack complet) — Migration `20260418120000` appliquée localement + Cloud (NOTICEs confirmés). 22 fichiers modifiés : schémas SQL déclaratifs, Zod schemas, types TS, DAL, Server Actions, composants public/admin. `spectacles.genre` (table distincte) intentionnellement non modifié. `db diff` inutilisable pour ce projet (shadow DB cassé : seed `20250918101020` viole contrainte lowercase-only). Commit `3be1acf`, branche `develop`. Aucun travail en cours.
+
 2026-04-13 : ✅ Sécurité dépendances + fix CI lockfile — patches CVE Next.js 16.2.3 et vite 8.0.8, suppression du `pnpm.overrides.vite` redondant qui causait un mismatch `--frozen-lockfile` en CI. `pnpm audit` : 0 vulnérabilité. Merge develop → master effectué. Aucun travail en cours.
 
 2026-04-12 : ✅ Fix build TypeScript recharts 3.x — `components/ui/chart.tsx` : type `ChartTooltipPayloadItem` et `ChartLegendPayloadItem` explicites, suppression des spreads `React.ComponentProps<typeof Tooltip/Legend>` incompatibles recharts 3. Build vert, 0 erreur TS.

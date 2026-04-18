@@ -895,7 +895,7 @@ export type Database = {
           start_time: string | null
           status: string | null
           ticket_url: string | null
-          type_array: string[] | null
+          genres: string[] | null
           updated_at: string
         }
         Insert: {
@@ -916,7 +916,7 @@ export type Database = {
           start_time?: string | null
           status?: string | null
           ticket_url?: string | null
-          type_array?: string[] | null
+          genres?: string[] | null
           updated_at?: string
         }
         Update: {
@@ -937,7 +937,7 @@ export type Database = {
           start_time?: string | null
           status?: string | null
           ticket_url?: string | null
-          type_array?: string[] | null
+          genres?: string[] | null
           updated_at?: string
         }
         Relationships: [
