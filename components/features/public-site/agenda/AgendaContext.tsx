@@ -127,10 +127,13 @@ export function AgendaProvider({
 
     const filteredEvents = useMemo(() => {
         if (filterType === "all") return events;
-        return events.filter((e) =>
-            e.genres.includes(filterType) ||
-            e.genre === filterType
-        );
+        return events.filter((e) => {
+            // Prioritise the linked spectacle's artistic genre when available.
+            // Using OR across both fields caused events to match multiple filters
+            // (e.g. genres=["spectacle"] AND genre="Théâtre" → appeared under both).
+            if (e.genre) return e.genre.toLowerCase() === filterType;
+            return e.genres.some((g) => g.toLowerCase() === filterType);
+        });
     }, [events, filterType]);
 
     const contextValue = useMemo<AgendaContextValue>(
