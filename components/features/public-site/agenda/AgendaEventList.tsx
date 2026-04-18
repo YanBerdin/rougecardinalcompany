@@ -39,9 +39,9 @@ const BADGE_VARIANT_MAP: Record<string, "default" | "destructive" | "secondary" 
 // Internal Sub-Components (not exported)
 // ============================================================================
 
-function EventCardImage({ image, type, title }: {
+function EventCardImage({ image, types, title }: {
     readonly image: string;
-    readonly type: string;
+    readonly types: string[];
     readonly title: string;
 }): React.JSX.Element {
     return (
@@ -54,10 +54,12 @@ function EventCardImage({ image, type, title }: {
                 sizes="(max-width: 768px) 100vw, 25vw"
             />
             <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black/60 to-transparent" />
-            <div className="absolute top-2 left-2">
-                <Badge variant={BADGE_VARIANT_MAP[type] ?? "outline"}>
-                    {type}
-                </Badge>
+            <div className="absolute top-2 left-2 flex flex-col gap-1">
+                {types.map((type) => (
+                    <Badge key={type} variant={BADGE_VARIANT_MAP[type] ?? "outline"}>
+                        {type}
+                    </Badge>
+                ))}
             </div>
         </div>
     );
@@ -112,7 +114,8 @@ function EventCardMeta({ event }: { readonly event: Event }): React.JSX.Element 
 
 function EventCardActions({ event }: { readonly event: Event }): React.JSX.Element {
     const { actions } = useAgendaContext();
-    const ticketLabel = event.type === "Atelier" ? "M'inscrire" : "Réserver mes billets";
+    const types = event.genres.length > 0 ? event.genres : ["Spectacle"];
+    const ticketLabel = types.includes("Atelier") ? "M'inscrire" : "Réserver mes billets";
 
     return (
         <div className="flex flex-col justify-center space-y-3">
@@ -151,14 +154,20 @@ function AgendaEventCard({ event, animationDelay }: {
             style={{ animationDelay: `${animationDelay}s` }}
         >
             <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5">
-                <EventCardImage image={event.image} type={event.type} title={event.title} />
+                <EventCardImage
+                    image={event.image}
+                    types={[
+                        ...(event.genre && !event.genres.includes(event.genre) ? [event.genre] : []),
+                    ]}
+                    title={event.title}
+                />
                 <CardContent className="md:col-span-3 lg:col-span-4 p-6 bg-card">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
                         <div className="lg:col-span-2">
                             <div className="flex items-start justify-between mb-4">
                                 <EventCardTitle event={event} />
                                 <Badge variant="outline" className="text-md h-6 p-4">
-                                    {event.type}
+                                    {event.genre ?? (event.genres.length > 0 ? event.genres.join(", ") : "Spectacle")}
                                 </Badge>
                             </div>
                             <EventCardMeta event={event} />

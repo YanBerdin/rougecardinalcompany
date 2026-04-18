@@ -74,8 +74,8 @@ drop constraint if exists check_valid_event_types;
 alter table public.evenements 
 add constraint check_valid_event_types 
 check (
-  type_array is null
-  or type_array <@ ARRAY[
+  genres is null
+  or genres <@ ARRAY[
     'spectacle', 'première', 'premiere', 'atelier', 'workshop',
     'rencontre', 'conference', 'masterclass', 'répétition', 'repetition',
     'audition', 'casting', 'formation', 'residency', 'résidence'

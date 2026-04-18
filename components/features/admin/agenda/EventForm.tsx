@@ -48,6 +48,7 @@ export function EventForm({ event, spectacles, lieux }: EventFormProps) {
             ticket_url: event.ticket_url ?? undefined,
             capacity: event.capacity ?? undefined,
             price_cents: event.price_cents ?? undefined,
+            genres: event.genres ?? [],
         }
         : {
             spectacle_id: 0,
@@ -60,6 +61,7 @@ export function EventForm({ event, spectacles, lieux }: EventFormProps) {
             ticket_url: undefined,
             capacity: undefined,
             price_cents: undefined,
+            genres: [],
         };
 
     const form = useForm<EventFormValues>({

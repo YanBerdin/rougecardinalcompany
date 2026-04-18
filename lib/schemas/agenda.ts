@@ -21,7 +21,8 @@ export const EventSchema = z.object({
     time: z.string(), // HH:mm format
     venue: z.string(),
     address: z.string(),
-    type: z.string(),
+    genres: z.array(z.string()).default([]),
+    genre: z.string().nullable().optional(),
     status: z.string(),
     ticketUrl: z.string().nullable(),
     image: z.string(),

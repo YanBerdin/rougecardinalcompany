@@ -55,6 +55,7 @@ export default async function EditEventPage({ params }: EditEventPageProps) {
     ticket_url: eventResult.data.ticket_url,
     capacity: eventResult.data.capacity,
     price_cents: eventResult.data.price_cents,
+    genres: eventResult.data.genres,
     created_at: eventResult.data.created_at,
     updated_at: eventResult.data.updated_at,
   };

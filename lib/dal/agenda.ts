@@ -25,8 +25,8 @@ type SupabaseEventRow = {
   status?: string | null;
   ticket_url?: string | null;
   image_url?: string | null;
-  type_array?: string[] | null;
-  spectacles?: { title?: string | null; slug?: string | null; image_url?: string | null } | null;
+  genres?: string[] | null;
+  spectacles?: { title?: string | null; slug?: string | null; image_url?: string | null; genre?: string | null } | null;
   lieux?: {
     nom?: string | null;
     adresse?: string | null;
@@ -63,7 +63,8 @@ function mapRowToEventDTO(row: SupabaseEventRow): AgendaEvent {
     time: formatTime(dateDebut, row.start_time),
     venue: row.lieux?.nom ?? "Lieu à venir",
     address: buildAddress(row.lieux),
-    type: row.type_array?.[0] ?? "Spectacle",
+    genres: row.genres ?? [],
+    genre: row.spectacles?.genre ?? null,
     status: row.status ?? "programmé",
     ticketUrl: row.ticket_url ?? null,
     image:
@@ -98,8 +99,8 @@ export const fetchUpcomingEvents = cache(
       const { data, error } = await supabase
         .from("evenements")
         .select(
-          `id, date_debut, date_fin, start_time, status, ticket_url, image_url, type_array,
-         spectacles (title, slug, image_url),
+          `id, date_debut, date_fin, start_time, status, ticket_url, image_url, genres,
+         spectacles (title, slug, image_url, genre),
          lieux (nom, adresse, ville, code_postal)`
         )
         // Afficher les événements dont la date de fin est >= aujourd'hui,
@@ -145,8 +146,7 @@ export const fetchEventTypes = cache(
 
       const { data, error } = await supabase
         .from("evenements")
-        .select("type_array")
-        .not("type_array", "is", null)
+        .select("genres, spectacles (genre)")
         .limit(200);
 
       if (error) {
@@ -157,18 +157,21 @@ export const fetchEventTypes = cache(
         };
       }
 
-      // Extract unique types from arrays
+      // Extract unique event categories from genres and artistic genres from spectacles
       const typeSet = new Set<string>();
+      const genreSet = new Set<string>();
       for (const row of data ?? []) {
-        for (const t of row.type_array ?? []) {
+        for (const t of row.genres ?? []) {
           typeSet.add(t);
         }
+        const genre = (row.spectacles as { genre?: string | null } | null)?.genre;
+        if (genre) genreSet.add(genre);
       }
 
-      const values = Array.from(typeSet);
+      const allValues = [...Array.from(typeSet), ...Array.from(genreSet)];
       const baseTypes =
-        values.length > 0
-          ? values
+        allValues.length > 0
+          ? allValues
           : ["Spectacle", "Première", "Rencontre", "Atelier"];
 
       const options: EventTypeOption[] = [

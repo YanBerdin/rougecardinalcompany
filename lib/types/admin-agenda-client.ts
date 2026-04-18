@@ -20,6 +20,7 @@ export type EventClientDTO = {
     ticket_url: string | null;
     capacity: number | null;
     price_cents: number | null;
+    genres: string[];
     created_at: string;
     updated_at: string;
 };

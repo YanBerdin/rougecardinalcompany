@@ -17,10 +17,10 @@ set client_min_messages = warning;
 -- =====================================
 with data(slug, date_debut, date_fin, start_time, end_time, capacity, price_cents, status, ticket_url, image_url, type_array) as (
   values
-    ('romeo-et-juliette', timestamptz '2025-12-01 19:30:00+00', timestamptz '2025-12-01 21:30:00+00', time '19:30', time '21:30', 350, 2800, 'scheduled', 'https://tickets.example.com/rj-2025-12-01', 'https://images.pexels.com/photos/167636/pexels-photo-167636.jpeg', array['spectacle','premiere']::text[]),
-    ('romeo-et-juliette', timestamptz '2025-12-02 20:30:00+00', timestamptz '2025-12-02 22:30:00+00', time '20:30', time '22:30', 350, 2800, 'scheduled', 'https://tickets.example.com/rj-2025-12-02', 'https://images.pexels.com/photos/167636/pexels-photo-167636.jpeg', array['spectacle']::text[]),
-  ('la-tempete',        timestamptz '2026-03-01 20:00:00+00', timestamptz '2026-03-01 21:50:00+00', time '20:00', time '21:50', 500, 3200, 'scheduled', 'https://tickets.example.com/tempete-2026-03-01', 'https://images.pexels.com/photos/158163/clouds-cloudporn-weather-lookup-158163.jpeg', array['spectacle']::text[]),
-    ('le-misanthrope',    timestamptz '2025-10-05 19:00:00+00', timestamptz '2025-10-05 20:45:00+00', time '19:00', time '20:45', 280, 2400, 'scheduled', 'https://tickets.example.com/misanthrope-2025-10-05', 'https://images.pexels.com/photos/167092/pexels-photo-167092.jpeg', array['spectacle']::text[])
+    ('romeo-et-juliette', timestamptz '2025-12-01 19:30:00+00', timestamptz '2025-12-01 21:30:00+00', time '19:30', time '21:30', 350, 2800, 'scheduled', 'https://tickets.example.com/rj-2025-12-01', 'https://images.pexels.com/photos/167636/pexels-photo-167636.jpeg', array['Spectacle']::text[]),
+    ('romeo-et-juliette', timestamptz '2025-12-02 20:30:00+00', timestamptz '2025-12-02 22:30:00+00', time '20:30', time '22:30', 350, 2800, 'scheduled', 'https://tickets.example.com/rj-2025-12-02', 'https://images.pexels.com/photos/167636/pexels-photo-167636.jpeg', array['Spectacle']::text[]),
+  ('la-tempete',        timestamptz '2026-03-01 20:00:00+00', timestamptz '2026-03-01 21:50:00+00', time '20:00', time '21:50', 500, 3200, 'scheduled', 'https://tickets.example.com/tempete-2026-03-01', 'https://images.pexels.com/photos/158163/clouds-cloudporn-weather-lookup-158163.jpeg', array['Spectacle']::text[]),
+    ('le-misanthrope',    timestamptz '2025-10-05 19:00:00+00', timestamptz '2025-10-05 20:45:00+00', time '19:00', time '20:45', 280, 2400, 'scheduled', 'https://tickets.example.com/misanthrope-2025-10-05', 'https://images.pexels.com/photos/167092/pexels-photo-167092.jpeg', array['Spectacle']::text[])
 ), s as (
   select sp.id as spectacle_id, d.*
   from data d
@@ -64,7 +64,7 @@ using (
     ('communique-misanthrope-2025', 'Communiqué — Le Misanthrope', 'Annonce de reprise et calendrier des dates.', date '2025-09-10', 'https://images.pexels.com/photos/167092/pexels-photo-167092.jpeg', 15, true),
     -- news
     ('bilan-saison-2025', 'Bilan de saison 2025', 'Retour sur les temps forts et chiffres clés.', date '2025-12-31', 'https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg', 40, true),
-    ('partenariat-nouveau-2025', 'Nouveau partenariat 2025', 'Signature d’un partenariat stratégique pour la prochaine saison.', date '2025-11-20', 'https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg', 35, true)
+    ('partenariat-nouveau-2025', 'Nouveau partenariat 2025', 'Signature d''un partenariat stratégique pour la prochaine saison.', date '2025-11-20', 'https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg', 35, true)
 ) as s(slug, title, description, date_publication, image_url, ordre_affichage, public)
 on t.slug = s.slug
 when matched then update set
@@ -91,9 +91,9 @@ when not matched then insert (
 merge into public.articles_presse as a
 using (
   values
-    ('critique-romeo-juliette-telerama', 'Réinvention ardente de Roméo et Juliette', 'Télérama', 'https://www.telerama.fr/sortir/critique-romeo-juliette', 'critique', 'Camille Martin', 'Un spectacle incandescent porté par une troupe vibrante.', 'Une lecture contemporaine qui assume ses audaces, sans trahir l’émotion originelle.', timestamptz '2025-12-02 08:00:00+00'),
-    ('la-tempete-lemonde-chronique', 'La Tempête, entre sortilèges et douceur', 'Le Monde', 'https://www.lemonde.fr/culture/article/2026/03/02/la-tempete', 'chronique', 'Hugo Bernard', 'Une proposition visuelle puissante, servie par une direction d’acteurs précise.', 'Le plateau devient carte des vents, les corps dessinent l’orage.', timestamptz '2026-03-02 07:30:00+00'),
-    ('misanthrope-liberation-entretien', 'Entretien: la franchise de Molière aujourd’hui', 'Libération', 'https://www.liberation.fr/culture/theatre/misanthrope', 'entretien', 'Julie Rey', 'Un dialogue sur la misanthropie contemporaine et ses ambiguïtés.', 'Entre satire et tendresse, la mise à nu des relations.', timestamptz '2025-10-06 10:15:00+00')
+    ('critique-romeo-juliette-telerama', 'Réinvention ardente de Roméo et Juliette', 'Télérama', 'https://www.telerama.fr/sortir/critique-romeo-juliette', 'critique', 'Camille Martin', 'Un spectacle incandescent porté par une troupe vibrante.', 'Une lecture contemporaine qui assume ses audaces, sans trahir l''émotion originelle.', timestamptz '2025-12-02 08:00:00+00'),
+    ('la-tempete-lemonde-chronique', 'La Tempête, entre sortilèges et douceur', 'Le Monde', 'https://www.lemonde.fr/culture/article/2026/03/02/la-tempete', 'chronique', 'Hugo Bernard', 'Une proposition visuelle puissante, servie par une direction d''acteurs précise.', 'Le plateau devient carte des vents, les corps dessinent l''orage.', timestamptz '2026-03-02 07:30:00+00'),
+    ('misanthrope-liberation-entretien', 'Entretien: la franchise de Molière aujourd''hui', 'Libération', 'https://www.liberation.fr/culture/theatre/misanthrope', 'entretien', 'Julie Rey', 'Un dialogue sur la misanthropie contemporaine et ses ambiguïtés.', 'Entre satire et tendresse, la mise à nu des relations.', timestamptz '2025-10-06 10:15:00+00')
 ) as s(slug, title, source_publication, source_url, type, author, chapo, excerpt, published_at)
 on a.slug = s.slug
 when matched then update set

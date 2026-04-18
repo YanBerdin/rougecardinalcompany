@@ -4,6 +4,55 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-04-18 - REFACTOR: Renommage `type_array` → `genres` sur `public.evenements`
+
+**Migration** : `20260418120000_rename_evenements_type_array_to_genres.sql`  
+**Schéma déclaratif** : ✅ `supabase/schemas/07_table_evenements.sql`, `supabase/schemas/40_indexes.sql`, `supabase/schemas/50_constraints.sql`
+
+**Contexte** : Les colonnes `type_array` et `genres` étaient redondantes — elles représentaient le même concept (tableau des types d'événements). La colonne `type_array` (nom technique hérité) a été renommée `genres` (nom métier, cohérent avec la couche applicative TypeScript/Zod/DAL).
+
+**Changements** :
+
+```sql
+-- 1. Renommage de la colonne
+alter table public.evenements rename column type_array to genres;
+
+-- 2. Renommage de l'index GIN
+alter index public.idx_evenements_type_array rename to idx_evenements_genres;
+
+-- 3. Mise à jour de la contrainte check_valid_event_types
+alter table public.evenements drop constraint if exists check_valid_event_types;
+alter table public.evenements add constraint check_valid_event_types
+  check (genres is null or genres <@ array['spectacle', 'première', 'premiere', 'atelier',
+    'workshop', 'rencontre', 'conference', 'masterclass', 'répétition', 'repetition',
+    'audition', 'casting', 'formation', 'residency', 'résidence']::text[]);
+```
+
+**Note** : Migration créée manuellement (`db diff` bypassé) — le shadow DB ne peut pas se construire à cause d'un conflit pré-existant entre la migration seed `20250918101020_seed_events_press_articles.sql` (insère `{Spectacle}`) et la contrainte `check_valid_event_types` (valeurs lowercase uniquement). Ce conflit est antérieur à ce refactoring.
+
+**Fichiers applicatifs mis à jour** (19 fichiers) :
+
+- `lib/schemas/agenda.ts`, `lib/schemas/admin-agenda.ts`, `lib/schemas/admin-agenda-ui.ts`
+- `lib/types/admin-agenda-client.ts`
+- `lib/dal/agenda.ts`, `lib/dal/admin-agenda.ts`
+- `lib/database.types.ts`
+- `app/(admin)/admin/agenda/actions.ts`
+- `app/(admin)/admin/agenda/[id]/edit/page.tsx`, `app/(admin)/admin/agenda/[id]/page.tsx`
+- `components/features/public-site/agenda/AgendaEventList.tsx`, `AgendaContext.tsx`
+- `components/features/admin/agenda/EventsContainer.tsx`, `EventForm.tsx`
+- `lib/tables/event-table-helpers.ts`
+- `supabase/schemas/07_table_evenements.sql`, `40_indexes.sql`, `50_constraints.sql`, `15_content_versioning.sql`
+
+**Validation** :
+
+- ✅ `npx tsc --noEmit` → 0 erreurs
+- ✅ 0 occurrence de `type_array` dans le code actif (grep vérifié)
+- ✅ Appliquée localement : `pnpm dlx supabase start`
+- ✅ Appliquée cloud : `pnpm dlx supabase db push` (2026-04-18)
+- ✅ `spectacles.genre` (colonne singulière, table différente) — **non modifiée**
+
+---
+
 ### 2026-04-17 - BUG FIX: Contrainte `evenements_status_check` — ajout de `'completed'`
 
 **Migration** : `20260417120000_fix_evenements_status_check_add_completed.sql`  

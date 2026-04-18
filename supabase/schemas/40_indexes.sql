@@ -18,7 +18,7 @@ create index if not exists idx_evenements_recurrence_end_date on public.evenemen
 
 -- Index pour nouveaux champs événements
 create index if not exists idx_evenements_start_time on public.evenements (start_time);
-create index if not exists idx_evenements_type_array on public.evenements using gin (type_array);
+create index if not exists idx_evenements_genres on public.evenements using gin (genres);
 create index if not exists idx_evenements_spectacle_date on public.evenements (spectacle_id, date_debut);
 create index if not exists idx_evenements_date_time on public.evenements (date_debut, start_time) where start_time is not null;
 
