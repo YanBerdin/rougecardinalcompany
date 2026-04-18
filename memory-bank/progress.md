@@ -1,5 +1,42 @@
 # Progress
 
+## Rename `evenements.type_array` → `genres` — stack complet (2026-04-18)
+
+✅ **COMPLET** — Renommage de la colonne `evenements.type_array` en `genres` sur l'ensemble du stack. Migration idempotente appliquée localement et sur le Cloud. 22 fichiers modifiés, 0 erreur TypeScript.
+
+### Périmètre
+
+| Couche | Fichiers modifiés |
+| ------ | ----------------- |
+| Schémas SQL | `07_table_evenements.sql`, `40_indexes.sql`, `50_constraints.sql`, `15_content_versioning.sql` |
+| Zod schemas | `lib/schemas/agenda.ts`, `admin-agenda-ui.ts`, `admin-agenda.ts` |
+| Types TS | `lib/types/admin-agenda-client.ts`, `lib/database.types.ts` |
+| DAL | `lib/dal/agenda.ts`, `lib/dal/admin-agenda.ts` |
+| Server Actions | `app/(admin)/admin/agenda/actions.ts` |
+| Pages admin | `[id]/edit/page.tsx`, `[id]/page.tsx` |
+| Composants public | `AgendaEventList.tsx`, `AgendaContext.tsx` |
+| Composants admin | `EventsContainer.tsx`, `EventForm.tsx` |
+| Helpers | `lib/tables/event-table-helpers.ts` |
+
+### Migration
+
+- Fichier : `supabase/migrations/20260418120000_rename_evenements_type_array_to_genres.sql`
+- Méthode : DO blocks idempotents (pas de `db diff` — shadow DB cassé)
+- `supabase db push --local` : ✅ exit 0, NOTICEs confirmés
+- `supabase db push` (Cloud) : ✅ exit 0, NOTICEs confirmés
+
+### Décisions
+
+- `spectacles.genre` (colonne singulière, table distincte) — intentionnellement **non modifié**
+- `db diff` inutilisable : seed `20250918101020` insère `'Spectacle'` (majuscule) en violation de la contrainte lowercase-only appliquée par `20250918000002`
+- `supabase/migrations/migrations.md` : entrée 2026-04-18 ajoutée
+
+### Commit
+
+- `3be1acf` — 22 fichiers changés, branche `develop`
+
+---
+
 ## Sécurité CVE + fix CI lockfile — Next.js 16.2.3, vite 8.0.8 (2026-04-13)
 
 ✅ **COMPLET** — Deux CVE patchés et mismatch `--frozen-lockfile` CI résolu.
