@@ -4,6 +4,64 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-04-18 - FEAT: Triggers de synchronisation `evenements.genres` depuis `spectacles.genre`
+
+**Migration** : `20260418200000_sync_evenement_genres_trigger.sql`  
+**Schéma déclaratif** : ✅ `supabase/schemas/07_table_evenements.sql`, `supabase/schemas/30_triggers.sql`
+
+**Contexte** : La colonne `evenements.genres` (text[]) ne doit plus être saisie manuellement dans le formulaire événement. Elle est désormais **dérivée automatiquement** de `spectacles.genre` (text, source de vérité) via deux triggers PostgreSQL. L'architecture est : un événement hérite du genre du spectacle auquel il est lié.
+
+**Triggers créés** :
+
+1. `trg_sync_evenement_genres` — BEFORE INSERT OR UPDATE OF `spectacle_id` sur `evenements`  
+   → Remplit `new.genres` automatiquement depuis `spectacles.genre` au moment de l'insertion ou du changement de spectacle lié.  
+   → Fonction : `public.sync_evenement_genres_from_spectacle()` (SECURITY INVOKER)
+
+2. `trg_sync_evenements_on_spectacle_genre_update` — AFTER UPDATE OF `genre` sur `spectacles`  
+   → Propage le changement de genre à **tous les événements liés** quand `spectacles.genre` change.  
+   → Fonction : `public.sync_evenements_genres_on_spectacle_update()` (SECURITY DEFINER — nécessite bypass RLS pour UPDATE en masse)
+
+**Backfill** : Un UPDATE de masse initialise `genres` sur tous les événements existants dont la valeur diverge de `spectacles.genre`.
+
+**Impact applicatif** :
+
+- `genres` retiré de `EventFormSchema` / `EventInputSchema` / `EventFormValues`
+- `genres` retiré des defaultValues du formulaire `EventForm.tsx`
+- `genres` retiré de `createEventAction` / `updateEventAction`
+- `EventDTO.genres: string[]` **conservé** (lecture seule, affichage)
+- `EventClientDTO.genres: string[]` **conservé** (lecture seule, affichage)
+
+**Validation** :
+
+- ✅ NOTICEs attendues (`trg_sync_evenement_genres does not exist, skipping`) — triggers créés pour la première fois
+- ✅ Appliquée localement : `pnpm dlx supabase start`
+- ✅ Appliquée cloud : `pnpm dlx supabase db push` (2026-04-18)
+- ✅ Backfill exécuté automatiquement à l'application
+
+---
+
+### 2026-04-18 - REFACTOR: Suppression contrainte `check_valid_event_types` sur `evenements`
+
+**Migration** : `20260418182912_drop_genres_constraint.sql`  
+**Schéma déclaratif** : ✅ `supabase/schemas/50_constraints.sql`
+
+**Contexte** : La contrainte `check_valid_event_types` limitait les valeurs autorisées dans `evenements.genres` à une liste figée de types d'événements (atelier, conférence, etc.). Désormais que `genres` est auto-géré par trigger depuis `spectacles.genre` (valeur libre text), cette contrainte est devenue obsolète et bloquante.
+
+**Changement** :
+
+```sql
+alter table public.evenements drop constraint if exists check_valid_event_types;
+```
+
+**Note** : La contrainte `evenements_status_check` (valeurs de statut) est **non modifiée**.
+
+**Validation** :
+
+- ✅ Appliquée localement : `pnpm dlx supabase start`
+- ✅ Appliquée cloud : `pnpm dlx supabase db push` (2026-04-18)
+
+---
+
 ### 2026-04-18 - REFACTOR: Renommage `type_array` → `genres` sur `public.evenements`
 
 **Migration** : `20260418120000_rename_evenements_type_array_to_genres.sql`  

@@ -71,9 +71,8 @@ alter table public.evenements
   check (
     genres is null
     or genres <@ array[
-      'spectacle', 'première', 'premiere', 'atelier', 'workshop',
-      'rencontre', 'conference', 'masterclass', 'répétition', 'repetition',
-      'audition', 'casting', 'formation', 'residency', 'résidence'
+      'spectacle', 'atelier', 'photographie'
+      'rencontre', 'conference'
     ]::text[]
   );
 
@@ -84,4 +83,4 @@ comment on constraint check_valid_event_types on public.evenements
 -- 4. Update column comment
 -- =========================================================
 comment on column public.evenements.genres
-  is 'Tableau des types d''événements : spectacle, première, atelier, rencontre, etc.';
+  is 'Tableau des types d''événements : theatre, photographie, atelier, rencontre, etc.';

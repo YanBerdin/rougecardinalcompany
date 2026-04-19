@@ -33,10 +33,10 @@ function capitalizeFirst(str: string): string {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-const BADGE_VARIANT_MAP: Record<string, "default" | "destructive" | "secondary" | "outline"> = {
-    Spectacle: "default",
-    "Première": "destructive",
-    Rencontre: "secondary",
+const BADGE_VARIANT_MAP: Record<string, "default" | "destructive" | "secondary" | "outline" | "gold"> = {
+    Théâtre: "default",
+    Rencontre: "destructive",
+    Photographie: "gold",
 };
 
 // ============================================================================
@@ -60,7 +60,7 @@ function EventCardImage({ image, types, title }: {
             <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black/60 to-transparent" />
             <div className="absolute top-2 left-2 flex flex-col gap-1">
                 {types.map((type) => (
-                    <Badge key={type} variant={BADGE_VARIANT_MAP[type] ?? "outline"}>
+                    <Badge key={type} variant={BADGE_VARIANT_MAP[type] ?? "secondary"}>
                         {type}
                     </Badge>
                 ))}
@@ -160,9 +160,7 @@ function AgendaEventCard({ event, animationDelay }: {
             <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5">
                 <EventCardImage
                     image={event.image}
-                    types={[
-                        ...(event.genre && !event.genres.includes(event.genre) ? [event.genre] : []),
-                    ]}
+                    types={event.genres}
                     title={event.title}
                 />
                 <CardContent className="md:col-span-3 lg:col-span-4 p-6 bg-card">

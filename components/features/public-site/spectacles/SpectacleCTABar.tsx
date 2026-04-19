@@ -64,7 +64,7 @@ export function SpectacleCTABar({
             >
                 <Link
                     href="/spectacles"
-                    aria-label="Retourner à la page listant tous les spectacles"
+                    aria-label="Retourner à la page listant tous les évènements"
                 >
                     <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
                     {backLabel}
