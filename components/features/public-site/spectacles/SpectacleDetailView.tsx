@@ -156,18 +156,19 @@ export function SpectacleDetailView({
 
                         {/* Affiche Column */}
                         <div className="md:col-span-2 p-4 md:p-2 lg:p-0">
-                            <div className="group aspect-[2/3] rounded-lg overflow-hidden shadow-2xl border-4 border-white/80 dark:border-gray-800/80 transition-all hover:shadow-[0_25px_70px_rgba(173,0,0,0.4)] sticky top-20">
+                            <div className="group rounded-lg overflow-hidden shadow-2xl border-4 border-white/80 dark:border-gray-800/80 transition-all hover:shadow-[0_25px_70px_rgba(173,0,0,0.4)] sticky top-20">
                                 {spectacle.image_url ? (
                                     <Image
                                         src={spectacle.image_url}
                                         alt={`Affiche du spectacle ${spectacle.title}`}
-                                        fill
-                                        className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                                        width={600}
+                                        height={900}
+                                        className="w-full h-auto transition-transform duration-700 group-hover:scale-105"
                                         priority
                                         sizes="(max-width: 600px) 80vw, 30vw"
                                     />
                                 ) : (
-                                    <div className="absolute inset-0 hero-gradient flex items-center justify-center">
+                                    <div className="aspect-[2/3] hero-gradient flex items-center justify-center">
                                         <div className="text-center p-4">
                                             <Play className="h-12 w-12 mx-auto mb-2 text-primary-foreground/50" aria-hidden="true" />
                                             <p className="text-primary-foreground/80 font-medium text-sm">
@@ -176,7 +177,6 @@ export function SpectacleDetailView({
                                         </div>
                                     </div>
                                 )}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                             </div>
                         </div>
 

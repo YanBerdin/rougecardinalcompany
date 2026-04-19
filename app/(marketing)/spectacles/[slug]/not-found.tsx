@@ -9,10 +9,10 @@ export default function SpectacleNotFound() {
                 <div className="mb-8">
                     <Theater className="h-24 w-24 text-primary mx-auto mb-6" />
                     <h1 className="text-4xl md:text-6xl font-bold mb-4">
-                        Spectacle introuvable
+                        Evènement introuvable
                     </h1>
                     <p className="text-xl text-muted-foreground mb-8">
-                        Désolé, le spectacle que vous recherchez n&apos;existe pas ou
+                        Désolé, l&lsquo;évènement que vous recherchez n&apos;existe pas ou
                         n&apos;est plus disponible.
                     </p>
                 </div>

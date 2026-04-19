@@ -9,6 +9,7 @@ import {
 } from "@/lib/schemas/agenda";
 import {
   type DALResult,
+  buildMediaPublicUrl,
   formatTime,
   toISODateString,
 } from "@/lib/dal/helpers";
@@ -26,7 +27,18 @@ type SupabaseEventRow = {
   ticket_url?: string | null;
   image_url?: string | null;
   genres?: string[] | null;
-  spectacles?: { title?: string | null; slug?: string | null; image_url?: string | null; genre?: string | null } | null;
+  spectacles?: {
+    title?: string | null;
+    slug?: string | null;
+    image_url?: string | null;
+    genre?: string | null;
+    status?: string | null;
+    public?: boolean | null;
+    spectacles_medias?: Array<{
+      type?: string | null;
+      medias?: { storage_path?: string | null } | null;
+    }> | null;
+  } | null;
   lieux?: {
     nom?: string | null;
     adresse?: string | null;
@@ -67,10 +79,19 @@ function mapRowToEventDTO(row: SupabaseEventRow): AgendaEvent {
     genre: row.spectacles?.genre ?? null,
     status: row.status ?? "programmé",
     ticketUrl: row.ticket_url ?? null,
-    image:
-      row.image_url ||
-      row.spectacles?.image_url ||
-      "/opengraph-image.png",
+    image: (() => {
+      const poster = row.spectacles?.spectacles_medias?.find(
+        (sm) => sm.type === "poster"
+      );
+      if (poster?.medias?.storage_path) {
+        return (
+          buildMediaPublicUrl(poster.medias.storage_path) ??
+          row.spectacles?.image_url ??
+          "/logo-florian.png"
+        );
+      }
+      return row.spectacles?.image_url ?? "/logo-florian.png";
+    })(),
   };
 
   // Validate with Zod schema
@@ -100,9 +121,10 @@ export const fetchUpcomingEvents = cache(
         .from("evenements")
         .select(
           `id, date_debut, date_fin, start_time, status, ticket_url, image_url, genres,
-         spectacles (title, slug, image_url, genre),
+         spectacles (title, slug, image_url, genre, status, public, spectacles_medias (type, medias (storage_path))),
          lieux (nom, adresse, ville, code_postal)`
         )
+        .neq("status", "archived")
         // Afficher les événements dont la date de fin est >= aujourd'hui,
         // ou dont la date de début est >= aujourd'hui si date_fin est null.
         .or(`date_fin.gte.${today},and(date_fin.is.null,date_debut.gte.${today})`)
@@ -117,9 +139,12 @@ export const fetchUpcomingEvents = cache(
         };
       }
 
-      const events = (data ?? []).map((row) =>
-        mapRowToEventDTO(row as SupabaseEventRow)
-      );
+      const events = (data ?? [])
+        .filter(
+          (row) =>
+            (row as SupabaseEventRow).spectacles?.public !== false
+        )
+        .map((row) => mapRowToEventDTO(row as SupabaseEventRow));
 
       return { success: true, data: events };
     } catch (err: unknown) {
@@ -147,6 +172,7 @@ export const fetchEventTypes = cache(
       const { data, error } = await supabase
         .from("evenements")
         .select("genres, spectacles (genre)")
+        .neq("status", "archived")
         .limit(200);
 
       if (error) {
