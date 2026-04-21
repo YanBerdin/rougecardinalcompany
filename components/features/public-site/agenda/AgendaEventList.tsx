@@ -13,9 +13,9 @@ import {
     Calendar,
     MapPin,
     Clock,
-    ExternalLink,
     Download,
     Info,
+    Ticket,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -33,38 +33,36 @@ function capitalizeFirst(str: string): string {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+function extractPostalCity(address: string): string {
+    const match = address.match(/(\d{5})\s+(.+)/);
+    if (!match) return address.toUpperCase();
+    return `${match[1]} ${match[2].toUpperCase()}`;
+}
+
+// Map specialized badge variants to emphasize the "gold" theater aesthetic
 const BADGE_VARIANT_MAP: Record<string, "default" | "destructive" | "secondary" | "outline" | "gold"> = {
     Théâtre: "default",
     Rencontre: "destructive",
-    Photographie: "gold",
+    Photographie: "secondary",
 };
 
 // ============================================================================
 // Internal Sub-Components (not exported)
 // ============================================================================
 
-function EventCardImage({ image, types, title }: {
+function EventCardImage({ image, title }: {
     readonly image: string;
-    readonly types: string[];
     readonly title: string;
 }): React.JSX.Element {
     return (
-        <div className="relative h-32 md:h-full w-full">
+        <div className="relative overflow-hidden flex-shrink-0 rounded-xl shadow-xl shadow-black/50 dark:shadow-black/70 bg-zinc-950 w-28 sm:w-32 md:w-40 lg:w-40 aspect-[2/3]">
             <Image
                 src={image}
                 alt={`Visuel de ${title}`}
-                className="object-cover"
+                className="object-cover transition-all duration-700 ease-out group-hover:scale-[1.02] group-hover:brightness-105"
                 fill
-                sizes="(max-width: 768px) 100vw, 25vw"
+                sizes="(max-width: 640px) 112px, (max-width: 768px) 128px, (max-width: 1024px) 160px, 160px"
             />
-            <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black/60 to-transparent" />
-            <div className="absolute top-2 left-2 flex flex-col gap-1">
-                {types.map((type) => (
-                    <Badge key={type} variant={BADGE_VARIANT_MAP[type] ?? "secondary"}>
-                        {type}
-                    </Badge>
-                ))}
-            </div>
         </div>
     );
 }
@@ -72,19 +70,21 @@ function EventCardImage({ image, types, title }: {
 function EventCardTitle({ event }: { readonly event: Event }): React.JSX.Element {
     if (event.spectacleSlug) {
         return (
-            <Link
-                href={`/spectacles/${event.spectacleSlug}`}
-                className="text-xl font-bold hover:text-primary transition-colors card-title group"
-            >
-                {event.title}
-                <ExternalLink
-                    className="inline-block ml-2 h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity"
-                    aria-hidden="true"
-                />
-            </Link>
+            <h2 className="group/title">
+                <Link
+                    href={`/spectacles/${event.spectacleSlug}`}
+                    className="inline-flex items-start gap-2 text-2xl md:text-3xl xl:text-4xl font-bold leading-tight transition-all duration-300"
+                >
+                    <span className="text-gold-gradient relative pb-0.5 after:content-[''] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-primary after:transition-[width] after:duration-300 after:ease-out group-hover/title:after:w-full">{event.title}</span>
+                </Link>
+            </h2>
         );
     }
-    return <h2 className="text-xl font-bold card-title">{event.title}</h2>;
+    return (
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold leading-tight transition-all duration-300">
+            <span className="text-gold-gradient inline-block relative pb-0.5 after:content-[''] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-primary after:transition-[width] after:duration-300 after:ease-out hover:after:w-full">{event.title}</span>
+        </h2>
+    );
 }
 
 function EventCardMeta({ event }: { readonly event: Event }): React.JSX.Element {
@@ -96,20 +96,26 @@ function EventCardMeta({ event }: { readonly event: Event }): React.JSX.Element 
     });
 
     return (
-        <div className="space-y-3 card-meta">
-            <div className="flex items-center">
-                <Calendar className="h-4 w-4 mr-3 text-primary" aria-hidden="true" />
-                <span className="font-medium">{formattedDate}</span>
+        <div className="space-y-4 text-foreground">
+            <div className="flex items-center group/meta">
+                <div className="p-2 rounded-full bg-gold/10 mr-4 transition-colors group-hover/meta:bg-gold/20">
+                    <Calendar className="h-4 w-4 text-gold" aria-hidden="true" />
+                </div>
+                <span className="text-xs md:text-base font-medium tracking-wide text-foreground">{capitalizeFirst(formattedDate)}</span>
             </div>
-            <div className="flex items-center">
-                <Clock className="h-4 w-4 mr-3 text-primary" aria-hidden="true" />
-                <span>{event.time}</span>
+            <div className="flex items-center group/meta">
+                <div className="p-2 rounded-full bg-gold/10 mr-4 transition-colors group-hover/meta:bg-gold/20">
+                    <Clock className="h-4 w-4 text-gold" aria-hidden="true" />
+                </div>
+                <span className="text-xs md:text-base tracking-wide text-foreground">{event.time}</span>
             </div>
-            <div className="flex items-start">
-                <MapPin className="h-4 w-4 mr-3 text-primary mt-0.5" aria-hidden="true" />
+            <div className="flex items-start group/meta">
+                <div className="p-2 rounded-full bg-gold/10 mr-4 transition-colors group-hover/meta:bg-gold/20">
+                    <MapPin className="h-4 w-4 text-gold" aria-hidden="true" />
+                </div>
                 <div>
-                    <div className="font-medium">{event.venue}</div>
-                    <div className="text-sm">{event.address}</div>
+                    <div className="text-xs md:text-base font-medium text-foreground">{event.venue}</div>
+                    <div className="text-xs md:text-sm opacity-70">{extractPostalCity(event.address)}</div>
                 </div>
             </div>
         </div>
@@ -122,28 +128,37 @@ function EventCardActions({ event }: { readonly event: Event }): React.JSX.Eleme
     const ticketLabel = types.includes("Atelier") ? "M'inscrire" : "Réserver mes billets";
 
     return (
-        <div className="flex flex-col justify-center space-y-3">
-            {event.ticketUrl && (
-                <Button variant="default" asChild>
-                    <Link href={event.ticketUrl} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="h-4 w-4" aria-hidden="true" />
+        <div className="flex flex-col gap-3">
+            {/* CTA principal — pleine largeur, poids visuel maximal */}
+            {event.ticketUrl ? (
+                <Button variant="default" size="default" className="w-full" asChild>
+                    <Link href={event.ticketUrl} target="_blank" rel="noopener noreferrer" aria-label={`${ticketLabel} — ${event.title}`}>
+                        <Ticket className="mr-2 h-4 w-4" aria-hidden="true" />
                         {ticketLabel}
                     </Link>
                 </Button>
+            ) : (
+                <div className="h-9" aria-hidden="true" />
             )}
-            <Button
-                variant="secondary"
-                onClick={() => actions.downloadCalendarFile(event)}
-            >
-                <Download className="mr-2 h-4 w-4" aria-hidden="true" />
-                Ajouter au calendrier
-            </Button>
-            <Button variant="outline" asChild>
-                <Link href={`/agenda/${event.id}`}>
-                    <Info className="mr-2 h-4 w-4" aria-hidden="true" />
-                    Détails de l&apos;événement
-                </Link>
-            </Button>
+            {/* Actions secondaires — grille 2 colonnes compacte */}
+            <div className="grid grid-cols-2 gap-2">
+                <Button
+                    variant="secondary"
+                    size="sm"
+                    className="w-full"
+                    aria-label={`Ajouter ${event.title} au calendrier`}
+                    onClick={() => actions.downloadCalendarFile(event)}
+                >
+                    <Download className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
+                    Calendrier
+                </Button>
+                <Button variant="outline" size="sm" className="w-full" asChild>
+                    <Link href={`/agenda/${event.id}`} aria-label={`Infos pratiques — ${event.title}`}>
+                        <Info className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
+                        Infos pratiques
+                    </Link>
+                </Button>
+            </div>
         </div>
     );
 }
@@ -153,36 +168,38 @@ function AgendaEventCard({ event, animationDelay }: {
     readonly animationDelay: number;
 }): React.JSX.Element {
     return (
-        <Card
-            className="card-hover animate-fade-in-up overflow-hidden"
-            style={{ animationDelay: `${animationDelay}s` }}
+        <div
+            className="group relative motion-safe:animate-fade-in-up motion-safe:transition-all motion-safe:duration-500 motion-safe:hover:-translate-y-1 h-full"
+            style={{ animationDelay: `${animationDelay}s`, animationFillMode: "both" }}
         >
-            <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5">
-                <EventCardImage
-                    image={event.image}
-                    types={event.genres}
-                    title={event.title}
-                />
-                <CardContent className="md:col-span-3 lg:col-span-4 p-6 bg-card">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
-                        <div className="lg:col-span-2">
-                            <div className="flex items-start justify-between mb-4">
-                                <EventCardTitle event={event} />
-                                <Badge variant="outline" className="text-md h-6 p-4">
-                                    {event.genre
-                                        ? capitalizeFirst(event.genre)
-                                        : event.genres.length > 0
-                                            ? event.genres.map(capitalizeFirst).join(", ")
-                                            : "Spectacle"}
-                                </Badge>
-                            </div>
+            <Card className="rounded-2xl bg-background  dark:bg-zinc-800/40 backdrop-blur-xl border border-white/30 dark:border-white/10 shadow-xl group-hover:border-primary/30 group-hover:shadow-[0_25px_70px_rgba(173,0,0,0.4)] motion-safe:transition-all motion-safe:duration-500 h-full">
+                <CardContent className="p-4 md:p-5 lg:p-6 flex flex-col gap-6 h-full">
+                    {/* Badges */}
+                    <div className="flex flex-wrap gap-2">
+                        {event.genres.map((type) => (
+                            <Badge key={type} variant={BADGE_VARIANT_MAP[type] ?? "secondary"}>
+                                {type}
+                            </Badge>
+                        ))}
+                    </div>
+                    {/* Titre */}
+                    <EventCardTitle event={event} />
+                    {/* Affiche + Méta côte à côte */}
+                    <div className="flex flex-row gap-4 md:gap-6 items-start">
+                        <div className="flex-1">
                             <EventCardMeta event={event} />
                         </div>
+                        <EventCardImage
+                            image={event.image}
+                            title={event.title}
+                        />
+                    </div>
+                    <div className="mt-auto">
                         <EventCardActions event={event} />
                     </div>
                 </CardContent>
-            </div>
-        </Card>
+            </Card>
+        </div>
     );
 }
 
@@ -195,24 +212,31 @@ export function AgendaEventList(): React.JSX.Element {
 
     if (state.filteredEvents.length === 0) {
         return (
-            <div className="text-center py-12" role="status">
-                <p className="text-muted-foreground text-lg">
-                    Aucun événement trouvé pour ce filtre.
+            <div className="text-center py-20 px-6 rounded-2xl border border-white/5 bg-white/[0.02] backdrop-blur-sm" role="status">
+                <p className="text-gold text-xl font-light tracking-wide">
+                    Aucun événement ne correspond à votre recherche.
+                </p>
+                <p className="text-chart-6 mt-2 text-sm">
+                    Essayez de modifier vos filtres ou de revenir plus tard.
                 </p>
             </div>
         );
     }
 
+    const isOddCount = state.filteredEvents.length % 2 !== 0;
     return (
-        <ul role="list" className="space-y-6 list-none">
-            {state.filteredEvents.map((event, index) => (
-                <li key={event.id}>
-                    <AgendaEventCard
-                        event={event}
-                        animationDelay={index * ANIMATION_DELAY_STEP}
-                    />
-                </li>
-            ))}
+        <ul role="list" className="grid grid-cols-1 lg:grid-cols-2 gap-8 xl:gap-10 list-none perspective-1000">
+            {state.filteredEvents.map((event, index) => {
+                const isLastAlone = isOddCount && index === state.filteredEvents.length - 1;
+                return (
+                    <li key={event.id} className={`transform-gpu h-full${isLastAlone ? " lg:col-span-2 lg:w-1/2 lg:mx-auto" : ""}`}>
+                        <AgendaEventCard
+                            event={event}
+                            animationDelay={index * ANIMATION_DELAY_STEP}
+                        />
+                    </li>
+                );
+            })}
         </ul>
     );
 }

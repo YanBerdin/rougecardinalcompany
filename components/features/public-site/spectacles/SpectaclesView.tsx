@@ -33,15 +33,15 @@ export function SpectaclesView({
       {/* Hero Section */}
       <section className="py-8 lg:py-12 hero-gradient" aria-labelledby="spectacles-hero-heading">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 id="spectacles-hero-heading" className="text-white text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in-up">
+          <h1 id="spectacles-hero-heading" className="text-white text-4xl md:text-5xl lg:text-6xl font-bold animate-fade-in-up"> {/** mb-6  */}
             À l&apos;Affiche
           </h1>
-          <p
-            className="text-base md:text-xl lg:text-2xl text-white/90 opacity-90 animate-fade-in"
+          {/*<p
+            className="text-lg md:text-xl lg:text-2xl text-white/90 opacity-90 animate-fade-in"
             style={{ animationDelay: "0.2s" }}
           >
             Nos créations actuellement en représentation
-          </p>
+          </p>*/}
         </div>
       </section>
 

@@ -34,6 +34,7 @@
     --chart-5: 0 0% 83.1373%; /* #D4D4D4 */
     --chart-6: 0 0% 97%; /* #f7f7f7 vs 0 0% 100% #FFFFFF  */
     --chart-7: 0 0% 97%; /* #0a0a0a */
+    /* hover:border-[#c41e1e4d] navlink active #hover:bg-[#e31e1e59] */ 
 
     --gold: 43 72% 52%; /* rgb(221, 171, 44) */
     --gold-light: 43 80% 68%; /* rgb(239, 202, 108) */

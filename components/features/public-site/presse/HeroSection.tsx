@@ -5,7 +5,7 @@ export function HeroSection() {
   return (
     <section aria-label="Espace Média" className="max-sm:py-8 py-16 hero-gradient">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h1 className="max-sm:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in-up text-white">
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in-up text-white">
           Espace Média
         </h1>
         <p
