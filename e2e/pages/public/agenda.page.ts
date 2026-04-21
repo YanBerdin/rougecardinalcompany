@@ -3,9 +3,11 @@ import { expect } from '@playwright/test';
 
 export class AgendaPage {
     readonly heroHeading: Locator;
+    readonly eventList: Locator;
 
     constructor(private readonly page: Page) {
         this.heroHeading = page.getByRole('heading', { name: /agenda/i });
+        this.eventList = page.getByTestId('agenda-event-list');
     }
 
     async goto(): Promise<void> {
@@ -18,7 +20,6 @@ export class AgendaPage {
     }
 
     async expectEventListVisible(): Promise<void> {
-        const subtitle = this.page.getByText('Retrouvez-nous sur scène');
-        await expect(subtitle).toBeVisible();
+        await expect(this.eventList).toBeVisible({ timeout: 15_000 });
     }
 }

@@ -22,7 +22,7 @@ export default function AgendaClientContainer({
     <AgendaProvider events={events} eventTypes={eventTypes}>
       <div className="max-sm:pt-12 pt-16">
         <AgendaHero />
-        <section className="max-sm:py-6 md:py-8 bg-chart-7">
+        <section className="max-sm:py-6 md:py-8 bg-chart-7" data-testid="agenda-event-list">
           <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
             <AgendaFilters />
             <AgendaEventList />
