@@ -28,7 +28,7 @@ export function ContactPageView({
 
   return (
     <div className="max-sm:pt-12 pt-16">
-      <section className="max-sm:py-10 py-16 hero-gradient">
+      <section className="max-sm:py-8 py-16 hero-gradient">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-5xl lg:text-6xl text-white font-bold mb-6 animate-fade-in-up">
             Contact

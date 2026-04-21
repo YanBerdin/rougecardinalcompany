@@ -22,7 +22,7 @@ export default function AgendaClientContainer({
     <AgendaProvider events={events} eventTypes={eventTypes}>
       <div className="max-sm:pt-12 pt-16">
         <AgendaHero />
-        <section className="max-sm:py-12 py-16 bg-chart-7">
+        <section className="max-sm:py-6 md:py-8 bg-chart-7">
           <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
             <AgendaFilters />
             <AgendaEventList />
@@ -30,7 +30,7 @@ export default function AgendaClientContainer({
         </section>
         <div className="w-full h-16 bg-chart-7" aria-hidden="true" />
         {showNewsletterSection && <AgendaNewsletter />}
-        <div className="w-full h-32 bg-chart-7" aria-hidden="true" />
+        <div className="w-full h-24 bg-chart-7" aria-hidden="true" />
       </div>
     </AgendaProvider>
   );
