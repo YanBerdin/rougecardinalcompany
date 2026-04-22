@@ -1,5 +1,28 @@
 # Progress
 
+## Section fondateur — Florian Chaillot (2026-04-22)
+
+✅ **COMPLET** — `SectionFounder` composant statique créé pour la page `/compagnie`, présentant le metteur en scène & fondateur Florian Chaillot.
+
+### Fichiers créés/modifiés
+
+| Fichier | Action |
+| ------- | ------ |
+| `components/features/public-site/compagnie/sections/SectionFounder.tsx` | CRÉÉ |
+| `components/features/public-site/compagnie/sections/index.ts` | MODIFIÉ (export ajouté) |
+| `components/features/public-site/compagnie/CompagnieView.tsx` | MODIFIÉ (import + `<SectionFounder />`) |
+
+### Architecture
+
+- **Composant statique** : pas de props — bio, portrait et jalons hardcodés en constantes
+- **Décision d'implémentation** : le kind `"founder"` n'est pas dans l'enum Zod `PresentationSection` ; insertion directe dans `CompagnieView.tsx` **en dehors** du `sections.map()` pour éviter toute migration DB
+- **Portrait** : `next/image` sur `/public/logo-florian.png`
+- **Design** : `bg-[#1C1C1C]`, grain texture overlay, `grid-cols-1 lg:grid-cols-[400px_1fr]`, accent `text-[#ad0000]`, titrage `[font-family:var(--font-playfair)]`
+- **Jalons** : 2022 L'Avare · 2023 Gala Opéra Lorraine · 2024 Grand Meaulnes · 2025 Exposition photo
+- **Accessibilité** : `aria-labelledby="heading-founder"`, alt descriptif portrait, `aria-hidden` grain
+
+---
+
 ## Section équipe sur la Home Page (2026-04-22)
 
 ✅ **COMPLET** — `HomeTeamContainer` ajouté entre `NewsletterContainer` et `AboutContainer` sur la page d'accueil.
