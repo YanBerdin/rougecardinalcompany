@@ -10,12 +10,14 @@ import {
   ShowsContainer,
   NewsletterContainer,
   PartnersContainer,
+  HomeTeamContainer,
 } from "@/components/features/public-site/home";
 import { HeroSkeleton } from "@/components/skeletons/hero-skeleton";
 import { NewsSkeleton } from "@/components/skeletons/news-skeleton";
 import { AboutSkeleton } from "@/components/skeletons/about-skeleton";
 import { ShowsSkeleton } from "@/components/skeletons/shows-skeleton";
 import { NewsletterSkeleton } from "@/components/skeletons/newsletter-skeleton";
+import { HomeTeamSkeleton } from "@/components/skeletons/home-team-skeleton";
 
 export default function Home() {
   return (
@@ -37,6 +39,9 @@ export default function Home() {
       </Suspense>
       <Suspense fallback={<NewsletterSkeleton />}>
         <NewsletterContainer />
+      </Suspense>
+      <Suspense fallback={<HomeTeamSkeleton />}>
+        <HomeTeamContainer />
       </Suspense>
       <Suspense fallback={<AboutSkeleton />}>
         <AboutContainer />
