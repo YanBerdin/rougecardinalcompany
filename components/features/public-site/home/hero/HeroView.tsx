@@ -26,6 +26,7 @@ export function HeroView({
 
   return (
     <section
+      data-testid="home-hero"
       role="region"
       aria-roledescription="carousel"
       aria-label="Diaporama des spectacles à l'affiche"

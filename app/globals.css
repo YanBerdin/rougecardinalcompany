@@ -882,6 +882,9 @@
 
 @layer utilities {
   .text-gold-gradient {
+    /* AA-compliant fallback so axe-core can resolve the text color (≥4.5:1 on dark bg).
+       -webkit-text-fill-color: transparent overrides `color` visually, keeping the gradient. */
+    color: hsl(var(--gold-text));
     background: linear-gradient(
       135deg,
       hsl(var(--gold-dark)) 0%,
