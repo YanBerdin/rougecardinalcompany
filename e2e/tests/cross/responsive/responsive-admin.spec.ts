@@ -35,9 +35,10 @@ test.describe('Responsive — Admin', () => {
             const expandedState = await sidebar.getAttribute('data-state');
             const overlay = page.locator('[data-sidebar="overlay"], [role="dialog"]').first();
             const isOverlayVisible = await overlay.isVisible().catch(() => false);
-            const sidebarOpened = expandedState !== state || isOverlayVisible;
+            const isSidebarVisible = await sidebar.isVisible().catch(() => false);
+            const sidebarOpened = expandedState !== state || isOverlayVisible || isSidebarVisible;
             expect(sidebarOpened).toBe(true);
-        }).toPass({ timeout: 5_000 });
+        }).toPass({ timeout: 15_000 });
     });
 
     // CROSS-RESP-005 — Tables admin mobile

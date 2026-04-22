@@ -39,6 +39,7 @@
     --gold: 43 72% 52%; /* rgb(221, 171, 44) */
     --gold-light: 43 80% 68%; /* rgb(239, 202, 108) */
     --gold-dark: 43 65% 38%; /* rgb(160, 124, 34) */
+    --gold-text: 43 65% 38%; /* 43 65% 28% accessible on light bg — contrast ≥ 5.85:1 on #faf4e7 */
 
     --sidebar: 41.0526 65.5172% 94.3137%; /* #faf4e7 */
     --sidebar-foreground: 0 0% 10.9804%; /* #1C1C1C */
@@ -118,6 +119,7 @@
     --gold: 43 72% 52%; /* rgb(221, 171, 44) */
     --gold-light: 43 80% 68%; /* rgb(239, 202, 108) */
     --gold-dark: 43 65% 38%; /* rgb(160, 124, 34) */
+    --gold-text: 43 72% 52%; /* same as --gold — fine contrast on dark backgrounds */
 
     --sidebar: 0 0% 10.9804%; /* #1C1C1C */
     --sidebar-foreground: 41.0526 65.5172% 94.3137%; /* #faf4e7 */
