@@ -13,7 +13,7 @@ import { supabaseAdmin } from '@/e2e/helpers/db';
 const PUBLIC_SECTIONS = {
     'display_toggle_home_hero': {
         page: '/',
-        selector: 'section[aria-label="Diaporama des spectacles à l\'affiche"]',
+        selector: '[data-testid="home-hero"]',
     },
     'display_toggle_home_spectacles': {
         page: '/',
