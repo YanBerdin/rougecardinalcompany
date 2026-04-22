@@ -1,6 +1,8 @@
 
 # Contexte actif
 
+2026-04-22 : ✅ Section équipe sur la Home Page — `HomeTeamContainer` (Server Component) ajouté entre `NewsletterContainer` et `AboutContainer` dans `app/(marketing)/page.tsx`. Réutilise `TeamMemberCard` de `/compagnie`. Display toggle `display_toggle_home_team` : activé par défaut si absent en DB. Limite 8 membres. Skeleton `HomeTeamSkeleton` pour Suspense. 7 fichiers créés/modifiés. Aucun travail en cours.
+
 2026-04-18 : ✅ Sync `evenements.genres` via triggers depuis `spectacles.genre` — Migrations `20260418182912` (drop constraint `check_valid_event_types`) et `20260418200000` (2 triggers PostgreSQL) appliquées localement + Cloud. `genres` retiré des formulaires admin (4 fichiers) : colonne désormais gérée entièrement par la DB. `migrations.md` et `supabase/schemas/README.md` mis à jour. Aucun travail en cours.
 
 2026-04-18 : ✅ Rename `evenements.type_array` → `genres` (stack complet) — Migration `20260418120000` appliquée localement + Cloud (NOTICEs confirmés). 22 fichiers modifiés : schémas SQL déclaratifs, Zod schemas, types TS, DAL, Server Actions, composants public/admin. `spectacles.genre` (table distincte) intentionnellement non modifié. `db diff` inutilisable pour ce projet (shadow DB cassé : seed `20250918101020` viole contrainte lowercase-only). Commit `3be1acf`, branche `develop`. Aucun travail en cours.

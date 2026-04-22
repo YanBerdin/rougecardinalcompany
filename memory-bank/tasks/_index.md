@@ -19,9 +19,10 @@
 
 **_(aucune tâche en cours)_**
 
-_(TASK087 complété — branche `feat/image-compression`, voir `progress.md`)_
+## Terminé (récent)
 
-## En Attente
+- `HOME-TEAM` Section équipe sur Home Page — **COMPLÈTE ✅ 2026-04-22** — `HomeTeamContainer` entre Newsletter et About, 7 fichiers, `TeamMemberCard` réutilisé, display toggle default-enabled
+- `TASK088` Migration recharts 3.x
 
 - `TASK005` Optimisation SEO et meta-tags dynamiques
 - `TASK007` Tests automatisés et monitoring

@@ -1,5 +1,31 @@
 # Progress
 
+## Section équipe sur la Home Page (2026-04-22)
+
+✅ **COMPLET** — `HomeTeamContainer` ajouté entre `NewsletterContainer` et `AboutContainer` sur la page d'accueil.
+
+### Fichiers créés/modifiés
+
+| Fichier | Action |
+| ------- | ------ |
+| `components/features/public-site/home/team/types.ts` | CRÉÉ |
+| `components/features/public-site/home/team/HomeTeamView.tsx` | CRÉÉ |
+| `components/features/public-site/home/team/HomeTeamContainer.tsx` | CRÉÉ |
+| `components/features/public-site/home/team/index.ts` | CRÉÉ |
+| `components/skeletons/home-team-skeleton.tsx` | CRÉÉ |
+| `components/features/public-site/home/index.ts` | MODIFIÉ |
+| `app/(marketing)/page.tsx` | MODIFIÉ |
+
+### Architecture
+
+- **Container** : `HomeTeamContainer` (Server Component) — toggle + DAL + mapping
+- **View** : `HomeTeamView` — `TeamMemberCard` réutilisé depuis `/compagnie`
+- **Toggle** : `display_toggle_home_team` — activé par défaut (absent en DB)
+- **Limite** : 8 membres (`HOME_TEAM_LIMIT = 8`)
+- **Skeleton** : `HomeTeamSkeleton` pour le Suspense boundary
+
+---
+
 ## Sync `evenements.genres` via triggers PostgreSQL (2026-04-18)
 
 ✅ **COMPLET** — `evenements.genres` (text[]) est désormais entièrement géré par la DB via 2 triggers ; le formulaire admin ne peut plus le modifier.
