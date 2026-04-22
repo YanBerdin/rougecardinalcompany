@@ -8,6 +8,7 @@ import {
   SectionValues,
   SectionTeam,
   SectionMission,
+  SectionFounder,
   type SectionRendererProps,
 } from "./sections";
 
@@ -44,6 +45,7 @@ export function CompagnieView({
           />
         );
       })}
+      <SectionFounder />
     </div>
   );
 } 

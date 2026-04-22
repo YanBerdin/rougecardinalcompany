@@ -1,6 +1,8 @@
 
 # Contexte actif
 
+2026-04-22 : ✅ Section fondateur (compagnie) — `SectionFounder` composant statique créé pour présenter Florian Chaillot (metteur en scène & fondateur). Portrait `/public/logo-florian.png`, 4 paragraphes bio verbatim, 4 jalons (2022–2025). Design théâtral `bg-[#1C1C1C]`, grain texture, grille `grid-cols-1 lg:grid-cols-[400px_1fr]`. Inséré directement dans `CompagnieView.tsx` en dehors du `sections.map()` (le kind `"founder"` n'est pas dans l'enum Zod `PresentationSection`). 3 fichiers créés/modifiés. Aucun travail en cours.
+
 2026-04-22 : ✅ Section équipe sur la Home Page — `HomeTeamContainer` (Server Component) ajouté entre `NewsletterContainer` et `AboutContainer` dans `app/(marketing)/page.tsx`. Réutilise `TeamMemberCard` de `/compagnie`. Display toggle `display_toggle_home_team` : activé par défaut si absent en DB. Limite 8 membres. Skeleton `HomeTeamSkeleton` pour Suspense. 7 fichiers créés/modifiés. Aucun travail en cours.
 
 2026-04-18 : ✅ Sync `evenements.genres` via triggers depuis `spectacles.genre` — Migrations `20260418182912` (drop constraint `check_valid_event_types`) et `20260418200000` (2 triggers PostgreSQL) appliquées localement + Cloud. `genres` retiré des formulaires admin (4 fichiers) : colonne désormais gérée entièrement par la DB. `migrations.md` et `supabase/schemas/README.md` mis à jour. Aucun travail en cours.
