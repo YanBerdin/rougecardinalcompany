@@ -63,7 +63,7 @@ export function TeamMemberCard({ member, index }: TeamMemberCardProps): ReactEle
                 <div className="space-y-1">
                     <h3 className="text-xl font-bold tracking-tight">{member.name}</h3>
                     {member.role && (
-                        <p className="text-gold text-sm font-semibold uppercase tracking-widest">
+                        <p className="text-gold-text text-sm font-semibold uppercase tracking-widest">
                             {member.role}
                         </p>
                     )}
@@ -104,7 +104,7 @@ export function TeamMemberCard({ member, index }: TeamMemberCardProps): ReactEle
                                         {member.name}
                                     </DialogTitle>
                                     {member.role && (
-                                        <p className="text-gold text-xs font-semibold uppercase tracking-widest mt-2">
+                                        <p className="text-gold-text text-xs font-semibold uppercase tracking-widest mt-2">
                                             {member.role}
                                         </p>
                                     )}
