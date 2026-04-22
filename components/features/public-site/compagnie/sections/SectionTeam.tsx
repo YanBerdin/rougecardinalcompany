@@ -5,7 +5,7 @@ import { TeamMemberCard } from "./TeamMemberCard";
 export function SectionTeam({ section, team = [] }: SectionRendererProps): ReactElement {
     const headingId = `heading-${section.kind}`;
     return (
-        <section id={section.kind} aria-labelledby={headingId} className="max-sm:py-12 py-24 bg-chart-7">
+        <section id={section.kind} aria-labelledby={headingId} className="max-sm:py-12 py-24 bg-background">
             <div className="max-w-screen-xl mx-auto px-4 sm:px-4 lg:px-4">
                 <div className="text-center max-sm:mb-8 mb-16">
                     {section.title && <h2 id={headingId} className="text-3xl md:text-4xl lg:text-5xl font-bold font-sans mb-4">{section.title}</h2>}

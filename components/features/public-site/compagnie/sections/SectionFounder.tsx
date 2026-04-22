@@ -26,7 +26,7 @@ export function SectionFounder(): ReactElement {
         <section
             id="founder"
             aria-labelledby="heading-founder"
-            className="py-24 max-sm:py-12 bg-background overflow-hidden relative"
+            className="py-24 max-sm:py-12 bg-chart-7 overflow-hidden relative"
         >
             <div
                 className="absolute inset-0 opacity-5 pointer-events-none mix-blend-overlay"
@@ -89,7 +89,7 @@ function FounderMilestones(): ReactElement {
         >
             {MILESTONES.map(({ year, label }) => (
                 <li key={year} className="flex items-center gap-3">
-                    <span className="text-gold font-bold text-sm tabular-nums w-10 shrink-0">
+                    <span className="text-gold-text font-bold text-sm tabular-nums w-10 shrink-0">
                         {year}
                     </span>
                     <span className="w-px h-4 bg-white/20 shrink-0" aria-hidden="true" />
@@ -104,7 +104,7 @@ function FounderBio(): ReactElement {
     return (
         <div className="flex flex-col gap-6">
             <header>
-                <p className="text-gold text-sm font-semibold tracking-[0.2em] uppercase mb-3">
+                <p className="text-gold-text text-sm font-semibold tracking-[0.2em] uppercase mb-3">
                     Direction artistique
                 </p>
                 <h2
@@ -116,7 +116,7 @@ function FounderBio(): ReactElement {
                 <p className="text-muted-foreground mt-2 font-light text-xs md:text-base">{FOUNDER_ROLE}</p>
             </header>
             <div className="flex items-center gap-3" aria-hidden="true">
-                <span className="h-px w-12 bg-gold" />
+                <span className="h-px w-12 bg-gold-text" />
                 <span className="h-px flex-1 bg-white/10" />
             </div>
             <div className="space-y-5">
