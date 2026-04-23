@@ -45,7 +45,7 @@ export default function CardsDashboard({ userRole }: CardsDashboardProps) {
                     </CardHeader>
                     <CardContent>
                         <div className="flex justify-end">
-                            <Button asChild variant="secondary">
+                            <Button asChild variant="default">
                                 <Link href={it.href} aria-label={`Accéder à ${it.title}`}>Accéder</Link>
                             </Button>
                         </div>

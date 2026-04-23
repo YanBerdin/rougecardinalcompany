@@ -163,6 +163,55 @@ export const fetchTicketUrlsForSpectacles = cache(
 );
 
 /**
+ * Fetches the event date range (first → last date_debut) for multiple spectacles
+ *
+ * Returns a Map of spectacle ID → { start, end } where start = min(date_debut)
+ * and end = max(date_debut) across all events for that spectacle.
+ *
+ * @param spectacleIds - Array of spectacle IDs
+ * @returns Map of spectacle ID → date range (only includes spectacles with events)
+ */
+export const fetchEventDateRangesForSpectacles = cache(
+  async (spectacleIds: number[]): Promise<Map<number, { start: string; end: string }>> => {
+    const result = new Map<number, { start: string; end: string }>();
+
+    if (spectacleIds.length === 0) return result;
+
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from("evenements")
+        .select("spectacle_id, date_debut, date_fin")
+        .in("spectacle_id", spectacleIds)
+        .order("date_debut", { ascending: true });
+
+      if (error) {
+        console.error("fetchEventDateRangesForSpectacles error:", error);
+        return result;
+      }
+
+      for (const row of data ?? []) {
+        if (row.spectacle_id == null || !row.date_debut) continue;
+        // Use date_fin as the end candidate when available, otherwise date_debut
+        const endCandidate: string = row.date_fin ?? row.date_debut;
+        const existing = result.get(row.spectacle_id);
+        if (!existing) {
+          result.set(row.spectacle_id, { start: row.date_debut, end: endCandidate });
+        } else {
+          if (row.date_debut < existing.start) existing.start = row.date_debut;
+          if (endCandidate > existing.end) existing.end = endCandidate;
+        }
+      }
+
+      return result;
+    } catch (err) {
+      console.error("fetchEventDateRangesForSpectacles exception:", err);
+      return result;
+    }
+  }
+);
+
+/**
  * Fetches all spectacles from the database
  *
  * Wrapped with React cache() for intra-request deduplication.

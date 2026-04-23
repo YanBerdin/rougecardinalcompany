@@ -111,9 +111,11 @@ export function SpectaclesView({
                   <h3 className="text-xl font-bold font-sans text-foreground line-clamp-2">
                     {show.title}
                   </h3>
-                  {show.premiere && (
+                  {show.dateRange && (
                     <p className="text-md text-foreground font-semibold mt-1">
-                      Première : {new Date(show.premiere).toLocaleDateString("fr-FR")}
+                      {show.dateRange.start === show.dateRange.end
+                        ? `Le ${new Date(show.dateRange.start).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit" })}`
+                        : `Du ${new Date(show.dateRange.start).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit" })} au ${new Date(show.dateRange.end).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit" })}`}
                     </p>
                   )}
                 </div>

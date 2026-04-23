@@ -1,5 +1,5 @@
 import { SpectaclesView } from "./SpectaclesView";
-import { fetchAllSpectacles, fetchTicketUrlsForSpectacles } from "@/lib/dal/spectacles";
+import { fetchAllSpectacles, fetchTicketUrlsForSpectacles, fetchEventDateRangesForSpectacles } from "@/lib/dal/spectacles";
 import { FALLBACK_SPECTACLE_IMAGE } from "./constants";
 
 const MAX_CURRENT_SHOWS = 6;
@@ -13,7 +13,10 @@ export async function SpectaclesContainer() {
 
   // Batch-fetch ticket URLs for current shows (avoids N+1)
   const currentIds = currentFiltered.map((s) => s.id);
-  const ticketUrls = await fetchTicketUrlsForSpectacles(currentIds);
+  const [ticketUrls, dateRanges] = await Promise.all([
+    fetchTicketUrlsForSpectacles(currentIds),
+    fetchEventDateRangesForSpectacles(currentIds),
+  ]);
 
   const currentShows = currentFiltered.map((s) => ({
       id: s.id,
@@ -24,7 +27,7 @@ export async function SpectaclesContainer() {
       duration_minutes:
         s.duration_minutes != null ? `${s.duration_minutes} min` : "—",
       cast: s.casting ?? 0,
-      premiere: s.premiere ?? "",
+      dateRange: dateRanges.get(s.id) ?? null,
       image: s.image_url ?? FALLBACK_SPECTACLE_IMAGE,
       status: s.status ?? "—",
       awards: s.awards ?? [],
