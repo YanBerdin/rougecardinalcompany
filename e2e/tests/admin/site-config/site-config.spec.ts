@@ -133,10 +133,14 @@ test.describe('ADM-CONFIG — Configuration site : affichage des sections', () =
             await siteConfigPage.clickToggle(key);
             await siteConfigPage.expectToastVisible('Configuration mise à jour');
 
-            // Vérifier que la section hero est visible sur la page publique
-            // waitUntil:'networkidle' garantit que Next.js a servi la page avec le cache invalidé
-            await page.goto('/', { waitUntil: 'networkidle' });
-            await expect(page.locator(PUBLIC_SECTIONS[key].selector)).toBeVisible({ timeout: 30_000 });
+            // Forcer une navigation fraîche pour contourner le cache HTTP et attendre
+            // la propagation de la revalidation Next.js avant d'asserter le DOM.
+            await page.context().clearCookies();
+            await page.goto('/', { waitUntil: 'domcontentloaded' });
+            await page.waitForLoadState('networkidle');
+            const hero = page.locator(PUBLIC_SECTIONS[key].selector);
+            await expect(hero).toHaveCount(1, { timeout: 30_000 });
+            await expect(hero).toBeVisible({ timeout: 30_000 });
         } finally {
             // Restaurer l'état initial du toggle
             await siteConfigPage.goto();

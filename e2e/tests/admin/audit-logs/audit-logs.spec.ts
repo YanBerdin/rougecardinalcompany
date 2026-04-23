@@ -24,14 +24,18 @@ test.describe("ADM-AUDIT — Logs d'audit : consultation et filtrage", () => {
         await auditLogsPage.expectLoaded();
 
         // Ouvrir le Select Action (premier combobox de la grille de filtres)
-        await page.getByRole('combobox').nth(0).click();
-        await expect(page.getByRole('option', { name: 'INSERT' })).toBeVisible();
+        const actionCombo = page.getByRole('combobox').first();
+        await actionCombo.click();
 
-        // Sélectionner INSERT
-        await page.getByRole('option', { name: 'INSERT' }).click();
+        // Attendre que le dropdown (portal Radix) soit visible avant de chercher les options
+        const listbox = page.getByRole('listbox');
+        await expect(listbox).toBeVisible({ timeout: 10_000 });
 
-        // Le trigger du Select doit refléter le choix (toContainText retrie automatiquement)
-        await expect(page.getByRole('combobox').nth(0)).toContainText('INSERT');
+        // Sélectionner INSERT dans la liste déroulante
+        await listbox.getByRole('option', { name: 'INSERT' }).click();
+
+        // Le trigger du Select doit refléter le choix
+        await expect(actionCombo).toContainText('INSERT');
     });
 
     // ADM-AUDIT-004 P1
@@ -40,7 +44,11 @@ test.describe("ADM-AUDIT — Logs d'audit : consultation et filtrage", () => {
 
         // Ouvrir le Select Table (deuxième combobox)
         await page.getByRole('combobox').nth(1).click();
-        await expect(page.getByRole('option', { name: 'Toutes les tables' })).toBeVisible();
+
+        // Attendre que le dropdown (portal Radix) soit visible avant de chercher les options
+        const tableListbox = page.getByRole('listbox');
+        await expect(tableListbox).toBeVisible({ timeout: 10_000 });
+        await expect(tableListbox.getByRole('option', { name: 'Toutes les tables' })).toBeVisible();
 
         // Fermer sans sélectionner
         await page.keyboard.press('Escape');
