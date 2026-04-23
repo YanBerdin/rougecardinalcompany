@@ -8,6 +8,10 @@
  * Usage: npx tsx scripts/ci-create-test-accounts.ts
  */
 import { createClient } from '@supabase/supabase-js';
+import { config as loadDotenv } from 'dotenv';
+
+loadDotenv({ path: '.env.test.local' });
+loadDotenv({ path: '.env.e2e' });
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;

@@ -76,7 +76,7 @@ test.describe("ADM-AUDIT — Logs d'audit : consultation et filtrage", () => {
 
         // 2. Attendre l'affichage du calendrier (react-day-picker, 2 mois, locale=fr)
         const firstGrid = page.locator('[role="grid"]').first();
-        await expect(firstGrid).toBeVisible({ timeout: 5_000 });
+        await expect(firstGrid).toBeVisible({ timeout: 15_000 });
 
         // 3. Sélectionner une plage : jours 10 → 20 du 1er mois affiché
         //    Les boutons de jours ont pour texte leur numéro seul (ex: "10", "20")

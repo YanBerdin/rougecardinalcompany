@@ -133,10 +133,9 @@ test.describe('ADM-CONFIG — Configuration site : affichage des sections', () =
             await siteConfigPage.clickToggle(key);
             await siteConfigPage.expectToastVisible('Configuration mise à jour');
 
-            // Forcer une navigation fraîche pour contourner le cache HTTP et attendre
-            // la propagation de la revalidation Next.js avant d'asserter le DOM.
-            await page.context().clearCookies();
-            await page.goto('/', { waitUntil: 'domcontentloaded' });
+            // Forcer une navigation fraîche sans perdre la session (ne pas clear cookies)
+            // Cache-bust via query param.
+            await page.goto(`/?_t=${Date.now()}`, { waitUntil: 'domcontentloaded' });
             await page.waitForLoadState('networkidle');
             const hero = page.locator(PUBLIC_SECTIONS[key].selector);
             await expect(hero).toHaveCount(1, { timeout: 30_000 });
