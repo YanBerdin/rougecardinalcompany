@@ -6,15 +6,9 @@
  * Pattern : sauvegarde l'état initial, modifie, vérifie, restaure
  */
 import { test, expect } from './site-config.fixtures';
-import { HeroSlideFactory } from '@/e2e/factories';
-import { supabaseAdmin } from '@/e2e/helpers/db';
 
 // Sélecteurs DOM stable pour les sections publiques
 const PUBLIC_SECTIONS = {
-    'display_toggle_home_hero': {
-        page: '/',
-        selector: '[data-testid="home-hero"]',
-    },
     'display_toggle_home_spectacles': {
         page: '/',
         selector: 'section[aria-labelledby="shows-heading"]',
@@ -54,7 +48,7 @@ test.describe('ADM-CONFIG — Configuration site : affichage des sections', () =
         const homeGroup = siteConfigPage.getSectionLocator("Page d'Accueil");
         await expect(homeGroup).toBeVisible();
         const homeToggles = homeGroup.locator('[role="switch"]');
-        await expect(homeToggles).toHaveCount(6);
+        await expect(homeToggles).toHaveCount(5);
 
         // Groupe 2 : Page Presse (2 toggles)
         const presseGroup = siteConfigPage.getSectionLocator('Page Presse');
@@ -73,92 +67,6 @@ test.describe('ADM-CONFIG — Configuration site : affichage des sections', () =
         await expect(contactGroup).toBeVisible();
         const contactToggles = contactGroup.locator('[role="switch"]');
         await expect(contactToggles).toHaveCount(1);
-    });
-
-    test('ADM-CONFIG-002 — Désactiver le toggle Hero Banner → section absente sur /', async ({ page, siteConfigPage }) => {
-        await siteConfigPage.expectLoaded();
-        const key = 'display_toggle_home_hero';
-
-        // Sauvegarder l'état initial
-        const wasEnabled = await siteConfigPage.isToggleEnabled(key);
-
-        try {
-            // S'assurer que le toggle est activé avant de désactiver
-            if (!wasEnabled) {
-                await siteConfigPage.clickToggle(key);
-                await siteConfigPage.expectToastVisible('Configuration mise à jour');
-                await page.waitForTimeout(200);
-            }
-
-            // Désactiver le toggle Hero Banner
-            await siteConfigPage.clickToggle(key);
-            await siteConfigPage.expectToastVisible('Configuration mise à jour');
-            await page.waitForTimeout(200);
-
-            // Vérifier que la section hero est absente sur la page publique
-            await page.goto('/');
-            await page.waitForLoadState('load');
-            await expect(page.locator(PUBLIC_SECTIONS[key].selector)).not.toBeVisible();
-        } finally {
-            // Restaurer l'état initial
-            await siteConfigPage.goto();
-            await siteConfigPage.expectLoaded();
-            const currentState = await siteConfigPage.isToggleEnabled(key);
-            if (currentState !== wasEnabled) {
-                await siteConfigPage.clickToggle(key);
-                await siteConfigPage.expectToastVisible('Configuration mise à jour');
-            }
-        }
-    });
-
-    test('ADM-CONFIG-003 — Réactiver le toggle Hero Banner → section réapparaît sur /', async ({ page, siteConfigPage }) => {
-        await siteConfigPage.expectLoaded();
-        const key = 'display_toggle_home_hero';
-
-        // Seed: ensure at least one active slide exists so HeroView renders
-        // (HeroView returns null when slides array is empty, regardless of toggle state)
-        const seededSlide = await HeroSlideFactory.create({ active: true, position: 0 });
-
-        // S'assurer que le toggle est désactivé pour tester la réactivation
-        const wasEnabled = await siteConfigPage.isToggleEnabled(key);
-
-        try {
-            if (wasEnabled) {
-                await siteConfigPage.clickToggle(key);
-                await siteConfigPage.expectToastVisible('Configuration mise à jour');
-                await page.waitForTimeout(200);
-            }
-
-            // Réactiver le toggle
-            await siteConfigPage.clickToggle(key);
-            await siteConfigPage.expectToastVisible('Configuration mise à jour');
-
-            //? ❌Laisser le temps à l'action serveur de compléter (revalidatePath + DB commit)
-            // Identique au waitForTimeout(200) utilisé après le step "disable".
-            //?❌await page.waitForTimeout(300);
-
-            // Forcer une navigation fraîche sans perdre la session (ne pas clear cookies)
-            //? ❌force-dynamic garantit un rendu serveur frais sans cache ISR.
-            // Cache-bust via query param.
-            await page.goto(`/?_t=${Date.now()}`, { waitUntil: 'domcontentloaded' });
-            //? ❌Vérifier qu'on est bien sur la page publique (pas de redirect admin)
-            //? ❌await expect(page).toHaveURL(/\/$|\/\?/, { timeout: 10_000 });
-            await page.waitForLoadState('networkidle');
-            const hero = page.locator(PUBLIC_SECTIONS[key].selector);
-            await expect(hero).toHaveCount(1, { timeout: 30_000 }); //?❌15_000
-            await expect(hero).toBeVisible({ timeout: 30_000 }); //?❌15_000
-        } finally {
-            // Restaurer l'état initial du toggle
-            await siteConfigPage.goto();
-            await siteConfigPage.expectLoaded();
-            const currentState = await siteConfigPage.isToggleEnabled(key);
-            if (currentState !== wasEnabled) {
-                await siteConfigPage.clickToggle(key);
-                await siteConfigPage.expectToastVisible('Configuration mise à jour');
-            }
-            // Supprimer le slide de test
-            await supabaseAdmin.from('home_hero_slides').delete().eq('id', seededSlide.id);
-        }
     });
 
     test('ADM-CONFIG-004 — Toggle Spectacles à la une → masque/affiche section sur /', async ({ page, siteConfigPage }) => {

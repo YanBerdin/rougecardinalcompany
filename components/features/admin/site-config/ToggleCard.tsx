@@ -9,7 +9,6 @@ const SECTION_NAMES: Record<string, string> = {
     "display_toggle_home_partners": "Partenaires",
     "display_toggle_home_spectacles": "Spectacles à la une",
     "display_toggle_home_a_la_une": "Actualités",
-    "display_toggle_home_hero": "Hero Banner",
     "display_toggle_home_about": "À propos",
     "display_toggle_media_kit": "Kit Média",
     "display_toggle_presse_articles": "Communiqués de Presse",

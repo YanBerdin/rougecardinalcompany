@@ -13,7 +13,7 @@ import type { DALResult } from "./helpers";
  * If called multiple times with the same key in the same request,
  * the database query runs only once.
  *
- * @param key - Config key (e.g., "display_toggle_home_hero")
+ * @param key - Config key (e.g., "display_toggle_home_about")
  * @returns Display toggle configuration
  */
 export const fetchDisplayToggle = cache(

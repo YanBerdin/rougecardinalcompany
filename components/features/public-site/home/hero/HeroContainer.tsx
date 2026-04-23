@@ -1,14 +1,8 @@
 import { fetchActiveHomeHeroSlides } from "@/lib/dal/home-hero";
-import { fetchDisplayToggle } from "@/lib/dal/site-config";
 import { HeroClient } from "./HeroClient";
 import { HeroSlide } from "./types";
 
 export async function HeroContainer() {
-  const toggleResult = await fetchDisplayToggle("display_toggle_home_hero");
-  if (!toggleResult.success || !toggleResult.data?.value?.enabled) {
-    return null;
-  }
-
   const result = await fetchActiveHomeHeroSlides();
   const records = result.success ? result.data : [];
 

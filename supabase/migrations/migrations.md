@@ -4,6 +4,33 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-04-23 - FIX: Suppression du toggle erroné `display_toggle_home_hero`
+
+**Migration** : `20260101190000_remove_display_toggle_home_hero.sql`  
+**Schéma déclaratif** : ✅ `supabase/schemas/15_seed_display_toggles.sql` (inchangé — hero n'y était pas)
+
+**Contexte** : `display_toggle_home_hero` a été ajouté par erreur dans le système de display toggles admin. Ce toggle permettait de masquer le Hero Banner depuis l'interface admin, alors que la visibilité du hero doit être conditionnée uniquement par la présence de slides actifs. Migration purement DML : 1 DELETE sur `public.configurations_site`.
+
+**Changements applicatifs associés** :
+
+- `ToggleCard.tsx` : suppression entrée hero dans `SECTION_NAMES`
+- `site-config-actions.ts` : suppression entrée hero dans `pathMap`
+- `HeroContainer.tsx` : suppression de la gate toggle (`fetchDisplayToggle`) — hero toujours visible si slides actifs
+- `scripts/check-display-toggles.ts` : 9 toggles attendus (était 10)
+- `e2e/tests/admin/site-config/site-config.spec.ts` : ADM-CONFIG-001 → 5 toggles home, tests ADM-CONFIG-002 et ADM-CONFIG-003 supprimés
+
+**État DB après migration** : 9 display toggles (5 home + 2 presse + 1 agenda + 1 contact)
+
+**Validation** :
+
+- ✅ MIG-002 conforme : SQL entièrement en minuscules
+- ✅ Idempotente : 0 rows affected si clé déjà absente
+- ✅ Appliquée localement : `pnpm dlx supabase db push`
+- ✅ Appliquée cloud : `pnpm dlx supabase db push --include-all` (2026-04-23)
+  - Note : `--include-all` requis car timestamp Jan 2026 antérieur à la dernière migration remote (Avr 2026)
+
+---
+
 ### 2026-04-18 - FEAT: Triggers de synchronisation `evenements.genres` depuis `spectacles.genre`
 
 **Migration** : `20260418200000_sync_evenement_genres_trigger.sql`  
