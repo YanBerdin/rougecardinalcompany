@@ -470,7 +470,15 @@ export default function TestConnectionPage() {
 
             <TabsContent value="spectacles">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {spectacles.map((spectacle) => (
+                {spectacles.map((spectacle) => {
+                  const spectacleYear =
+                    "dateRange" in spectacle && spectacle.dateRange?.start
+                      ? new Date(spectacle.dateRange.start).getFullYear()
+                      : "premiere" in spectacle && spectacle.premiere
+                        ? new Date(spectacle.premiere).getFullYear()
+                        : "-";
+
+                  return (
                   <Card key={spectacle.id}>
                     <CardHeader>
                       <CardTitle>{spectacle.title}</CardTitle>
@@ -492,9 +500,7 @@ export default function TestConnectionPage() {
                         </div>
                         <div>
                           <span className="font-medium">Année:</span>{" "}
-                          {spectacle.premiere
-                            ? new Date(spectacle.premiere).getFullYear()
-                            : "-"}
+                          {spectacleYear}
                         </div>
                         <p className="text-sm text-muted-foreground mt-2">
                           {spectacle.description || ""}
@@ -502,7 +508,8 @@ export default function TestConnectionPage() {
                       </div>
                     </CardContent>
                   </Card>
-                ))}
+                );
+                })}
               </div>
             </TabsContent>
 
