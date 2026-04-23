@@ -1,7 +1,12 @@
 import { Suspense } from "react";
 
-// ✅ ISR: Cache pour 60 secondes avec revalidation automatique
-export const revalidate = 60;
+//? ❌ ISR: Cache pour 60 secondes avec revalidation automatique
+//? ❌export const revalidate = 60;
+
+// ✅ force-dynamic: page utilise cookies() via createClient() (Supabase SSR)
+// ISR (revalidate=60) était incompatible avec Supabase SSR cookies en Next.js 16
+// et causait des race conditions sur les caches ISR lors des toggles.
+export const dynamic = "force-dynamic";
 
 import {
   HeroContainer,

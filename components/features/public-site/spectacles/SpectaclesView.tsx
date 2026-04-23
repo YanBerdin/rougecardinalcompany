@@ -31,9 +31,9 @@ export function SpectaclesView({
   return (
     <div className="max-sm:pt-12 pt-16">
       {/* Hero Section */}
-      <section className="py-8 lg:py-12 hero-gradient" aria-labelledby="spectacles-hero-heading">
+      <section className="py-8 lg:py-10 hero-gradient" aria-labelledby="spectacles-hero-heading">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 id="spectacles-hero-heading" className="text-white text-4xl md:text-5xl lg:text-6xl font-bold animate-fade-in-up"> {/** mb-6  */}
+          <h1 id="spectacles-hero-heading" className="text-white text-3xl md:text-4xl lg:text-5xl font-bold animate-fade-in-up"> {/** mb-6  */}
             À l&apos;Affiche
           </h1>
           {/*<p

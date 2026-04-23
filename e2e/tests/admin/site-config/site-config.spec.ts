@@ -133,13 +133,20 @@ test.describe('ADM-CONFIG — Configuration site : affichage des sections', () =
             await siteConfigPage.clickToggle(key);
             await siteConfigPage.expectToastVisible('Configuration mise à jour');
 
+            //? ❌Laisser le temps à l'action serveur de compléter (revalidatePath + DB commit)
+            // Identique au waitForTimeout(200) utilisé après le step "disable".
+            //?❌await page.waitForTimeout(300);
+
             // Forcer une navigation fraîche sans perdre la session (ne pas clear cookies)
+            //? ❌force-dynamic garantit un rendu serveur frais sans cache ISR.
             // Cache-bust via query param.
             await page.goto(`/?_t=${Date.now()}`, { waitUntil: 'domcontentloaded' });
+            //? ❌Vérifier qu'on est bien sur la page publique (pas de redirect admin)
+            //? ❌await expect(page).toHaveURL(/\/$|\/\?/, { timeout: 10_000 });
             await page.waitForLoadState('networkidle');
             const hero = page.locator(PUBLIC_SECTIONS[key].selector);
-            await expect(hero).toHaveCount(1, { timeout: 30_000 });
-            await expect(hero).toBeVisible({ timeout: 30_000 });
+            await expect(hero).toHaveCount(1, { timeout: 30_000 }); //?❌15_000
+            await expect(hero).toBeVisible({ timeout: 30_000 }); //?❌15_000
         } finally {
             // Restaurer l'état initial du toggle
             await siteConfigPage.goto();
