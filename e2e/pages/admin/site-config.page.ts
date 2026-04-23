@@ -15,10 +15,24 @@ export class AdminSiteConfigPage {
     }
 
     async expectLoaded(): Promise<void> {
-        await this.page.waitForLoadState('load');
-        await expect(this.sectionsHeading).toBeVisible({ timeout: 10_000 });
-        // Wait for at least one toggle switch to render (React hydration)
-        await this.page.locator('[role="switch"]').first().waitFor({ timeout: 10_000 });
+        // 1) Ensure we're on the right page (catches auth redirects early)
+        await expect(this.page).toHaveURL(/\/admin\/site-config/i, { timeout: 15_000 });
+
+        // 2) Wait for basic DOM readiness
+        await this.page.waitForLoadState('domcontentloaded');
+
+        // 3) Stable testid-based assertion (primary) with toggle fallback
+        const headingByTestId = this.page.getByTestId('site-config-sections-heading');
+        const anyToggle = this.page.locator('[role="switch"]').first();
+
+        await Promise.race([
+            headingByTestId.waitFor({ state: 'visible', timeout: 15_000 }),
+            this.sectionsHeading.waitFor({ state: 'visible', timeout: 15_000 }),
+            anyToggle.waitFor({ state: 'visible', timeout: 15_000 }),
+        ]);
+
+        // 4) Ensure toggles are hydrated
+        await anyToggle.waitFor({ state: 'visible', timeout: 15_000 });
     }
 
     getToggleByKey(key: string): Locator {

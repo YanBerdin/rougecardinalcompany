@@ -72,7 +72,10 @@ export function DisplayTogglesView({
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-2xl font-bold tracking-tight">
+                <h2
+                    className="text-2xl font-bold tracking-tight"
+                    data-testid="site-config-sections-heading"
+                >
                     Affichage des Sections
                 </h2>
                 <p className="text-muted-foreground">
