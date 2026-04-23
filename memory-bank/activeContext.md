@@ -1,6 +1,8 @@
 
 # Contexte actif
 
+2026-04-23 : ✅ Suppression display_toggle_home_hero — Toggle erroné retiré de toutes les couches : migration `20260101190000_remove_display_toggle_home_hero.sql` (DELETE sur `configurations_site`, appliquée localement + Cloud via `--include-all`), `HeroContainer.tsx` sans gate toggle (hero toujours visible si slides actifs), `ToggleCard.tsx` / `site-config-actions.ts` nettoyés, `check-display-toggles.ts` → 9 attendus, `site-config.spec.ts` → ADM-CONFIG-001 (5 toggles home), ADM-CONFIG-002/003 supprimés. TASK089 créé. Aucun travail en cours.
+
 2026-04-22 : ✅ Section fondateur (compagnie) — `SectionFounder` composant statique créé pour présenter Florian Chaillot (metteur en scène & fondateur). Portrait `/public/logo-florian.png`, 4 paragraphes bio verbatim, 4 jalons (2022–2025). Design théâtral `bg-[#1C1C1C]`, grain texture, grille `grid-cols-1 lg:grid-cols-[400px_1fr]`. Inséré directement dans `CompagnieView.tsx` en dehors du `sections.map()` (le kind `"founder"` n'est pas dans l'enum Zod `PresentationSection`). 3 fichiers créés/modifiés. Aucun travail en cours.
 
 2026-04-22 : ✅ Section équipe sur la Home Page — `HomeTeamContainer` (Server Component) ajouté entre `NewsletterContainer` et `AboutContainer` dans `app/(marketing)/page.tsx`. Réutilise `TeamMemberCard` de `/compagnie`. Display toggle `display_toggle_home_team` : activé par défaut si absent en DB. Limite 8 membres. Skeleton `HomeTeamSkeleton` pour Suspense. 7 fichiers créés/modifiés. Aucun travail en cours.

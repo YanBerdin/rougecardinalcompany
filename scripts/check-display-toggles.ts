@@ -10,7 +10,6 @@ interface ExpectedToggle {
 }
 
 const EXPECTED_TOGGLES: ExpectedToggle[] = [
-    { key: 'display_toggle_home_hero', description: 'Hero', category: 'home_display' },
     { key: 'display_toggle_home_about', description: 'À propos', category: 'home_display' },
     { key: 'display_toggle_home_spectacles', description: 'Prochains Spectacles', category: 'home_display' },
     { key: 'display_toggle_home_a_la_une', description: 'À la Une (actualités)', category: 'home_display' },
@@ -41,7 +40,7 @@ async function checkDisplayToggles() {
     let allPresent = true;
     let allValid = true;
 
-    console.log('📋 Toggles attendus (10 au total):\n');
+    console.log('📋 Toggles attendus (9 au total):\n');
 
     const categoryLabels: Record<string, string> = {
         'home_display': '🏠 Homepage',

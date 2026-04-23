@@ -147,6 +147,13 @@ supabase/schemas/
 
 ## 🆕 Mises à jour récentes (avril 2026)
 
+- **FIX: Suppression de `display_toggle_home_hero` (23 avril 2026)** : Toggle erroné supprimé de la base de données et de toutes les couches applicatives.
+  - **Migration** : `20260101190000_remove_display_toggle_home_hero.sql` (DELETE 1 row sur `configurations_site`)
+  - **Contexte** : Ce toggle permettait de masquer le Hero Banner depuis l'interface admin, ce qui ne correspond pas au comportement attendu. Le hero doit être toujours visible si des slides actifs existent.
+  - **État DB** : 9 display toggles (5 home: about, spectacles, a_la_une, partners, newsletter • 2 presse • 1 agenda • 1 contact)
+  - **Impact applicatif** : `HeroContainer.tsx` sans gate toggle, `ToggleCard.tsx` / `site-config-actions.ts` nettoyés, groupe Home admin passe de 6 à 5 toggles
+  - **Tests E2E** : ADM-CONFIG-001 mis à jour (5 toggles home), ADM-CONFIG-002 et ADM-CONFIG-003 supprimés
+
 - **FEAT: Triggers sync `evenements.genres` depuis `spectacles.genre` (18 avril 2026)** : `evenements.genres` (text[]) n'est plus saisi manuellement dans le formulaire événement. Deux triggers PostgreSQL assurent la synchronisation automatique depuis `spectacles.genre` (text, source de vérité) :
   - `trg_sync_evenement_genres` — BEFORE INSERT OR UPDATE OF `spectacle_id` sur `evenements` → fonction `sync_evenement_genres_from_spectacle()` (SECURITY INVOKER)
   - `trg_sync_evenements_on_spectacle_genre_update` — AFTER UPDATE OF `genre` sur `spectacles` → propage le changement à tous les événements liés (SECURITY DEFINER)

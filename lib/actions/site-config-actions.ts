@@ -49,7 +49,6 @@ function getPathsForToggle(key: string): string[] {
     const ADMIN_PATH = "/admin/site-config";
 
     const pathMap: Record<string, string[]> = {
-        "display_toggle_home_hero": ["/", ADMIN_PATH],
         "display_toggle_home_about": ["/", ADMIN_PATH],
         "display_toggle_home_newsletter": ["/", ADMIN_PATH],
         "display_toggle_home_partners": ["/", ADMIN_PATH],
