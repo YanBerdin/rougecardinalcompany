@@ -122,7 +122,7 @@ export const CurrentShowSchema = z.object({
   genre: z.string(),
   duration_minutes: z.string(),
   cast: z.number(),
-  premiere: z.string(),
+  dateRange: z.object({ start: z.string(), end: z.string() }).nullable(),
   image: z.string(),
   status: z.string(),
   awards: z.array(z.string()),

@@ -9,7 +9,7 @@ interface SpectacleCTABarProps {
     title: string;
     ticketUrl?: string | null;
     agendaLabel?: string;
-    backLabel?: string;
+    // backLabel?: string;
     wrapperClassName?: string;
 }
 
@@ -21,7 +21,7 @@ export function SpectacleCTABar({
     title,
     ticketUrl,
     agendaLabel = "Agenda",
-    backLabel = "Retour",
+    // backLabel = "Retour",
     wrapperClassName = "",
 }: SpectacleCTABarProps): React.ReactNode {
     return (
@@ -46,7 +46,7 @@ export function SpectacleCTABar({
 
             <Button
                 variant={ticketUrl ? "secondary" : "default"}
-                size="lg"
+                size="default"
                 className="w-full sm:w-auto"
                 asChild
             >
@@ -55,7 +55,7 @@ export function SpectacleCTABar({
                     {agendaLabel}
                 </Link>
             </Button>
-
+            {/*
             <Button
                 variant="outline"
                 size="lg"
@@ -67,9 +67,10 @@ export function SpectacleCTABar({
                     aria-label="Retourner à la page listant tous les évènements"
                 >
                     <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
-                    {backLabel}
+                     {backLabel} 
                 </Link>
             </Button>
+            */}
         </div>
     );
 }

@@ -15,6 +15,8 @@ const badgeVariants = cva(
         destructive:
           "border-transparent font-semibold whitespace-nowrap bg-destructive text-destructive-foreground shadow hover:bg-destructive/80",
         outline: "text-foreground font-semibold whitespace-nowrap bg-background hover:bg-muted hover:text-foreground border border-muted",
+        outlineGold:
+          "bg-background font-semibold whitespace-nowrap border border-gold shadow-md hover:shadow-sm text-foreground",
         gold: "border-transparent font-semibold whitespace-nowrap bg-yellow-600 text-white/80 shadow hover:bg-yellow-800",
       },
     },
