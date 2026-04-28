@@ -87,7 +87,7 @@ export function AuditLogsTable({
                 {logs.map((log) => (
                     <div
                         key={log.id}
-                        className="bg-card rounded-lg border shadow-sm p-4 space-y-4 cursor-pointer hover:border-primary/50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                        className="bg-card rounded-lg border shadow-sm p-4 space-y-4 cursor-pointer hover:border-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                         role="button"
                         tabIndex={0}
                         onClick={() => onRowClick(log)}

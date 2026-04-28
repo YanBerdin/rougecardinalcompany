@@ -34,7 +34,7 @@ const CTA_CONFIGS: Record<CtaType, CtaConfig> = {
         urlFieldName: "cta_primary_url",
         toggleTitle: "CTA Principal",
         toggleDescription: "Bouton principal (style plein)",
-        borderColorClass: "border-primary/30",
+        borderColorClass: "border-primary",
         labelPlaceholder: "Voir la programmation",
         urlPlaceholder: "/spectacles ou https://...",
     },

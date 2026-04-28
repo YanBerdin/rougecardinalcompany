@@ -172,7 +172,7 @@ function AgendaEventCard({ event, animationDelay }: {
             className="group relative motion-safe:animate-fade-in-up motion-safe:transition-all motion-safe:duration-500 motion-safe:hover:-translate-y-1 h-full"
             style={{ animationDelay: `${animationDelay}s`, animationFillMode: "both" }}
         >
-            <Card className="rounded-2xl bg-background  dark:bg-zinc-800/40 backdrop-blur-xl border border-white/30 dark:border-white/10 shadow-xl group-hover:border-primary/30 group-hover:shadow-[0_25px_70px_rgba(173,0,0,0.4)] motion-safe:transition-all motion-safe:duration-500 h-full">
+            <Card className="rounded-2xl bg-card dark:bg-zinc-800/40 backdrop-blur-xl border border-white/30 dark:border-white/10 shadow-xl group-hover:border-primary group-hover:shadow-[0_25px_70px_rgba(173,0,0,0.4)] motion-safe:transition-all motion-safe:duration-500 h-full">
                 <CardContent className="p-4 md:p-5 lg:p-6 flex flex-col gap-6 h-full">
                     {/* Badges */}
                     <div className="flex flex-wrap gap-2">

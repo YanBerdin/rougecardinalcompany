@@ -99,7 +99,7 @@ export function AuditLogsView({
     };
 
     return (
-        <Card className="p-3 sm:p-1 md:p-6">
+        <Card className="p-3 sm:p-1 md:p-6 bg-background">
             <div className="mb-3 sm:mb-4 space-y-3">
                 <AuditLogFilters
                     filters={filters}

@@ -86,7 +86,7 @@ export function SpectacleDetailView({
 */}
             {/* Content Section */}
             <section
-                className="pt-2 md:pt-8 pb-16 md:pb-24 bg-card"
+                className="pt-2 md:pt-8 pb-16 md:pb-24 bg-background"
                 aria-labelledby="synopsis"
             >
                 <div className="max-w-7xl mx-auto px-4 xl:px-0 ">

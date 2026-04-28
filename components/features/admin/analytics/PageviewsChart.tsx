@@ -34,7 +34,7 @@ export function PageviewsChart({ data, isLoading }: PageviewsChartProps) {
     const chartConfig = {
         vues: {
             label: "Vues",
-            color: "hsl(var(--chart-1))",
+            color: "hsl(var(--gold-dark))",
         },
         visiteurs: {
             label: "Visiteurs",

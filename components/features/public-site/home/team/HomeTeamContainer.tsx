@@ -21,7 +21,11 @@ export async function HomeTeamContainer() {
 
     const membersResult = await fetchTeamMembers(HOME_TEAM_LIMIT);
 
-    if (!membersResult.success || membersResult.data.length === 0) {
+    if (!membersResult.success) {
+        console.error("Failed to fetch team members:", membersResult.error);
+        return null;
+    }
+    if (membersResult.data.length === 0) {
         return null;
     }
 

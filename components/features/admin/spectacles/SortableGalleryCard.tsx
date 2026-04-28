@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { buildMediaPublicUrl } from "@/lib/dal/helpers/media-url";
-import type { GalleryPhotoTransport } from "@/lib/schemas/spectacles";
 
 // ============================================================================
 // Types
@@ -54,7 +53,7 @@ export function SortableGalleryCard({
             className={
                 isDragging
                     ? "shadow-lg ring-2 ring-primary/20"
-                    : "hover:border-primary/50 transition-colors"
+                    : "hover:border-primary/20 transition-colors"
             }
         >
             <CardContent className="p-3 space-y-2">
