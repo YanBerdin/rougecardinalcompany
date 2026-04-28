@@ -55,7 +55,7 @@ function SortableSlide({ slide, index, onEdit, onDelete }: SortableSlideProps) {
     };
 
     return (
-        <Card ref={setNodeRef} style={dragStyle} className={isDragging ? "shadow-lg ring-2 ring-primary/20" : "hover:border-primary/50 transition-colors min-w-[250px]"}>
+        <Card ref={setNodeRef} style={dragStyle} className={isDragging ? "shadow-lg ring-2 ring-primary" : "hover:border-primary transition-colors min-w-[250px]"}>
             <CardHeader className="flex flex-row items-start gap-3 p-4 h-full space-y-0">
                 <div className="flex flex-col items-center gap-3 shrink-0 pt-1">
                     <div

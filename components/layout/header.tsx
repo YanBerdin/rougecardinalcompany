@@ -32,9 +32,9 @@ export default function Header() {
 
   // Helper pour la couleur du texte du header (logo + navigation)
   const headerTextColor = useMemo(() => {
-    if (isScrolled) return "text-foreground font-bold";
-    if (pathname === "/" && isLight) return "text-sidebar-primary-foreground font-bold";
-    return "text-foreground font-bold";
+    if (isScrolled) return "text-muted-foreground font-semibold";
+    if (pathname === "/" && isLight) return "text-white/70";
+    return "text-muted-foreground font-text-muted-foreground";
   }, [isScrolled, pathname, isLight]);
 
   useEffect(() => {

@@ -42,7 +42,7 @@ export function ContactPageView({
         </div>
       </section>
 
-      <div className="max-sm:py-12 py-24 bg-chart-7/50">
+      <div className="max-sm:py-12 py-24 bg-background">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             <div className="lg:col-span-2">

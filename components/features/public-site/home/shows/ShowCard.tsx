@@ -73,7 +73,7 @@ export function ShowCard({ show, index }: ShowCardProps) {
               </Badge>
             ))}
             {show.dates.length > 3 && (
-              <Badge className="bg-primary/80 text-primary-foreground">
+              <Badge className="bg-primary/50 text-primary-foreground">
                 +{show.dates.length - 3} dates
               </Badge>
             )}

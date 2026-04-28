@@ -96,7 +96,7 @@ export default async function PresentationViewPage() {
 
                             {/* Quote */}
                             {section.quote_text && (
-                                <blockquote className="border-l-4 border-primary/30 pl-4 italic text-muted-foreground">
+                                <blockquote className="border-l-4 border-primary pl-4 italic text-muted-foreground">
                                     <p>« {section.quote_text} »</p>
                                     {section.quote_author && (
                                         <footer className="mt-1 text-xs not-italic">
