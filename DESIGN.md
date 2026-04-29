@@ -8,28 +8,28 @@ colors:
   card-foreground: "#1c1c1c"
   popover: "#efece7"
   popover-foreground: "#1c1c1c"
-  primary: "#9e1b1b"
-  primary-foreground: "#faf4e7"
-  secondary: "#ddab2c"
+  primary: "#8e1111"
+  primary-foreground: "#f5f3f0"
+  secondary: "#d4d4d4"
   secondary-foreground: "#1c1c1c"
   muted: "#ebebeb"
-  muted-foreground: "hsl(0 0% 36.0784%)"
+  muted-foreground: "#5c5c5c"
   accent: "#d4d4d4"
   accent-foreground: "#1c1c1c"
   destructive: "#ff4037"
   border: "#d4d4d4"
   border-primary: "#e84133"
-  ring: "#9e1b1b"
-  gold: "rgb(221, 171, 44)"
-  gold-light: "rgb(239, 202, 108)"
-  gold-dark: "rgb(160, 124, 34)"
-  gold-text: "hsl(43 65% 28%)"
-  sidebar: "#faf4e7"
+  ring: "#a31414"
+  gold: "#ddab2c"
+  gold-light: "#efca6c"
+  gold-dark: "#a07c22"
+  gold-text: "#765c19"
+  sidebar: "#f5f3f0"
   sidebar-foreground: "#1c1c1c"
-  sidebar-primary: "#9e1b1b"
+  sidebar-primary: "#8e1111"
   sidebar-primary-foreground: "#f7f7f7"
   sidebar-accent: "#d4d4d4"
-  sidebar-accent-foreground: "hsl(0 0% 33.9%)"
+  sidebar-accent-foreground: "#565656"
   dark-background: "#1c1c1c"
   dark-foreground: "#faf4e7"
   dark-card: "#2a2a2a"
@@ -117,13 +117,13 @@ The palette is warm-neutral first, with cardinal red and gold accents as identit
 
 ### Primary
 
-- Cardinal Red (`#9e1b1b`): Main action color (`--primary`), ring color (`--ring`), sidebar primary roles.
-- Strong Red (`#ad0000`): Sidebar primary variant in light mode.
+- Cardinal Red (`#8e1111`): Main action color (`--primary`), sidebar primary roles (`--sidebar-primary`, light).
+- Ring Red (`#a31414`): Focus ring and chart-1 accent (`--ring`, `--chart-1`).
 
 ### Secondary
 
-- Neutral Gray (`#ddab2c`): Secondary and accent surface roles, border baseline.
-- Soft Gray (`#ebebeb`): Muted surfaces and low-emphasis containers.
+- Neutral Gray (`#d4d4d4`): Secondary and accent surface roles, border baseline (`--secondary`, `--accent`, `--border`).
+- Soft Gray (`#ebebeb`): Muted surfaces and low-emphasis containers (`--muted`).
 
 ### Tertiary
 
