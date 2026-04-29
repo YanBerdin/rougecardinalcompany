@@ -27,6 +27,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // predictably (os.tmpdir() varies across platforms).
 const LIVE_PID_FILE = path.join(process.cwd(), '.impeccable-live.json');
 const DEFAULT_POLL_TIMEOUT = 600_000;   // 10 min — agent re-polls on timeout anyway
+const MIN_POLL_TIMEOUT = 1_000;         // 1s minimum to avoid pathological values
+const MAX_POLL_TIMEOUT = 600_000;       // cap user-controlled poll timeout at 10 min
 const SSE_HEARTBEAT_INTERVAL = 30_000;  // keepalive ping every 30s
 
 // ---------------------------------------------------------------------------
@@ -476,7 +478,10 @@ function handlePollGet(req, res, url) {
     res.end(JSON.stringify({ error: 'Unauthorized' }));
     return;
   }
-  const timeout = parseInt(url.searchParams.get('timeout') || DEFAULT_POLL_TIMEOUT, 10);
+  const rawTimeout = parseInt(url.searchParams.get('timeout') ?? '', 10);
+  const timeout = Number.isFinite(rawTimeout)
+    ? Math.min(MAX_POLL_TIMEOUT, Math.max(MIN_POLL_TIMEOUT, rawTimeout))
+    : DEFAULT_POLL_TIMEOUT;
   if (state.pendingEvents.length > 0) {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(state.pendingEvents.shift()));
