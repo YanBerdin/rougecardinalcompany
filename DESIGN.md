@@ -127,13 +127,13 @@ The palette is warm-neutral first, with cardinal red and gold accents as identit
 
 ### Tertiary
 
-- Gold (`rgb(221, 171, 44)`): Premium accent family (`--gold`, `--gold-light`, `--gold-dark`, `--gold-text`) used for highlight styles and gradient text utility.
+- Gold (`#ddab2c`): Premium accent family (`--gold`, `--gold-light`, `--gold-dark`, `--gold-text`) used for highlight styles and gradient text utility.
 
 ### Neutral
 
-- Warm Paper (`#faf4e7`): Global background and primary foreground contrast pair.
+- Warm Paper (`#f5f3f0`): Global background and primary foreground contrast pair.
 - Ink (`#1c1c1c`): Main text and dark base.
-- Card Light (`#f7f7f7`): Card/popover surfaces in light mode.
+- Card Light (`#efece7`): Card/popover surfaces in light mode.
 - Dark Card (`#2a2a2a`), Dark Secondary (`#424242`), Dark Muted (`#292929`): dark mode depth ladder.
 - Destructive (`#ff4037`): destructive actions and invalid/error signaling.
 
