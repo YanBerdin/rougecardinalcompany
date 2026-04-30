@@ -6,6 +6,12 @@
       "sourceType": "github",
       "computedHash": "1c40cac8fc7b0f3e4187881b256525ffc6b19fa4859f5f7847c9a87448ccf56a"
     },
+    "huashu-design": {
+      "source": "pcornelissen/huashu-design-en",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "6d8903628bc2888b2d7ab9fb122f6f2ead5d10fd8ccd9764b7cdd218a0e3edeb"
+    },
     "impeccable": {
       "source": "pbakaus/impeccable",
       "sourceType": "github",
