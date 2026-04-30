@@ -121,7 +121,7 @@ export default function Header() {
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  "nav-link-glass text-xs sm:text-sm md:text-md px-2 lg:px-3 py-1 font-medium whitespace-nowrap transition-all duration-300 relative z-10",
+                  "nav-link-glass text-xs sm:text-sm md:text-md px-2 lg:px-3 py-1 inline-flex items-center font-medium whitespace-nowrap transition-all duration-300 relative z-10",
                   pathname === item.href ? "text-primary active" : headerTextColor
                 )}
               >
@@ -143,9 +143,10 @@ export default function Header() {
             <Button
               variant="ghost"
               size="sm"
+              aria-label={isOpen ? "Fermer le menu" : "Ouvrir le menu"}
               onClick={() => setIsOpen(!isOpen)}
               className={cn(
-                "nav-link-glass ripple-effect hover:text-accent",
+                "nav-link-glass ripple-effect hover:text-accent min-h-11 min-w-11",
                 headerTextColor
               )}
             >

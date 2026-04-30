@@ -109,7 +109,7 @@ function FounderBio(): ReactElement {
                 </p>
                 <h2
                     id="heading-founder"
-                    className="text-4xl md:text-5xl lg:text-6xl font-bold text-card-foreground leading-tight [font-family:var(--font-playfair)]"
+                    className="text-3xl md:text-4xl lg:text-5xl font-bold text-card-foreground leading-tight [font-family:var(--font-playfair)]"
                 >
                     {FOUNDER_NAME}
                 </h2>
@@ -123,7 +123,7 @@ function FounderBio(): ReactElement {
                 {FOUNDER_BIO.map((paragraph, index) => (
                     <p
                         key={index}
-                        className="text-card-secondary text-sm md:text-base lg:text-lg leading-relaxed"
+                        className="text-card-secondary text-sm md:text-base leading-relaxed"
                     >
                         {paragraph}
                     </p>

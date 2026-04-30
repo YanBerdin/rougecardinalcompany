@@ -18,8 +18,8 @@ export function MediaKitSection({ mediaKit }: MediaKitSectionProps) {
     <section aria-label="Kit Média" className="max-sm:py-12 py-24 bg-chart-7">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-sm:mb-8 mb-16">
-          <h2 className="text-3xl lg:text-4xl font-bold font-sans mb-4">Kit Média</h2>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">Kit Média</h2>
+          <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
             Ressources haute qualité pour vos publications
           </p>
         </div>
@@ -40,7 +40,7 @@ export function MediaKitSection({ mediaKit }: MediaKitSectionProps) {
                       aria-hidden="true"
                     />
                   </div>
-                  <h3 className="text-xl font-semibold mb-3">{item.type}</h3>
+                  <h3 className="text-xl font-semibold font-sans mb-3">{item.type}</h3>
                   <p className="text-muted-foreground mb-4">
                     {item.description}
                   </p>

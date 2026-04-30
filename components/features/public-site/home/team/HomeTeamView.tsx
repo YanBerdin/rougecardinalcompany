@@ -9,21 +9,21 @@ export function HomeTeamView({ members }: HomeTeamViewProps): ReactElement {
         <section
             id="equipe"
             aria-labelledby={SECTION_HEADING_ID}
-            className="max-sm:py-12 py-24 bg-chart-background"
+            className="max-sm:py-12 py-24 bg-background"
         >
             <div className="max-w-screen-xl mx-auto px-4 sm:px-4 lg:px-4">
                 <div className="text-center max-sm:mb-8 mb-16">
                     <h2
                         id={SECTION_HEADING_ID}
-                        className="text-3xl md:text-4xl lg:text-5xl font-bold font-sans mb-4"
+                        className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4"
                     >
                         Notre équipe
                     </h2>
-                    <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+                    <p className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto">
                         Les artistes et collaborateurs qui donnent vie à Rouge Cardinal
                     </p>
                 </div>
-                <div className="flex flex-wrap justify-center gap-x-8 gap-y-16">
+                <div className="flex flex-wrap justify-center gap-x-8 gap-y-8">
                     {members.map((member, index) => (
                         <TeamMemberCard key={index} member={member} index={index} />
                     ))}
