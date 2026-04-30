@@ -109,7 +109,7 @@ function FounderBio(): ReactElement {
                 </p>
                 <h2
                     id="heading-founder"
-                    className="text-3xl md:text-4xl lg:text-5xl font-bold text-card-foreground leading-tight [font-family:var(--font-playfair)]"
+                    className="text-3xl md:text-4xl lg:text-5xl font-semibold text-card-foreground leading-tight"
                 >
                     {FOUNDER_NAME}
                 </h2>

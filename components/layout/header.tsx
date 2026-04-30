@@ -18,6 +18,8 @@ const navigation = [
   { name: "Presse", href: "/presse" },
   { name: "Contact", href: "/contact" },
 ];
+
+//TODO: Increase nav link touch target: min-h-11 (44px, WCAG 2.5.5)
 /*
 interface HeaderProps {
   authContent: ReactNode;
