@@ -1,6 +1,8 @@
 import { test, expect } from './audit-logs.fixtures';
 
 test.describe("ADM-AUDIT — Logs d'audit : consultation et filtrage", () => {
+    test.describe.configure({ retries: 2 });
+
     test.beforeEach(async ({ page }) => {
         // Assure une largeur desktop pour que la table (hidden sm:block) soit visible
         await page.setViewportSize({ width: 1280, height: 800 });

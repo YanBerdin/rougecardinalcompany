@@ -34,6 +34,7 @@ with check ( (select public.has_min_role('editor')) );
 
 Migrations de sécurité récentes
 
+- `supabase/migrations/20260501203935_add_audit_logs_filter_indexes.sql` — perf/fix : 3 index btree créés sur `public.logs_audit` (`idx_logs_audit_action`, `idx_logs_audit_table_name`, `idx_logs_audit_user_id`) pour résoudre les `statement_timeout` des 11 tests E2E ADM-AUDIT-001 à ADM-AUDIT-011. Utilise `CREATE INDEX IF NOT EXISTS`. Déclaratif synchronisé : `42_rpc_audit_logs.sql`. Appliquée le 2026-05-01 (local + cloud).
 - `supabase/migrations/20260502140000_revoke_get_audit_logs_from_authenticated.sql` — fix lint-0029 : révocation EXECUTE sur `get_audit_logs_with_email(bigint, bigint, text, text)` des rôles `authenticated` et `anon`. DAL migré vers `createAdminClient()` (service_role). `is_admin()` retiré de la fonction (`auth.uid() = null` via service_role). Déclaratif synchronisé : `42_rpc_audit_logs.sql`. Appliquée le 2026-05-02.
 - `supabase/migrations/20260502120200_drop_remaining_unused_indexes.sql` — fix lint-0005 : suppression de ~18 index inutilisés sur plusieurs tables. Utilise `DROP INDEX IF EXISTS`. Appliquée le 2026-05-02.
 - `supabase/migrations/20260502120100_add_communiques_fk_indexes.sql` — fix lint-0001 : 6 index btree créés sur les FK non indexées des tables `communiques_*` (`communiques_categories`, `communiques_presse`, `communiques_tags`). Utilise `CREATE INDEX IF NOT EXISTS`. Appliquée le 2026-05-02.
