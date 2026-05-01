@@ -26,7 +26,7 @@ create or replace function public.is_admin()
 returns boolean
 language sql
 stable
-security definer
+security invoker
 set search_path = ''
 as $$
   select exists (
@@ -37,7 +37,7 @@ as $$
 $$;
 
 comment on function public.is_admin() is 
-'Helper function: Checks if current user has admin role. Uses SECURITY DEFINER to access auth.uid() and profiles table reliably across different security contexts. Marked STABLE since auth.uid() remains constant during transaction.';
+'Helper function: Checks if current user has admin role. Uses SECURITY INVOKER (auth.uid() works in invoker context; profiles SELECT RLS is using true so no circular dep). Marked STABLE since auth.uid() remains constant during transaction.';
 
 -- Fonction helper pour vérifier un rôle minimum dans la hiérarchie user < editor < admin
 /*
@@ -69,7 +69,7 @@ create or replace function public.has_min_role(required_role text)
 returns boolean
 language sql
 stable
-security definer
+security invoker
 set search_path = ''
 as $$
   select coalesce(
@@ -95,7 +95,7 @@ as $$
 $$;
 
 comment on function public.has_min_role(text) is 
-'Helper function: Checks if current user has at least the specified role in the hierarchy user(0) < editor(1) < admin(2). Invalid required_role returns false. Uses SECURITY DEFINER like is_admin() for reliable RLS policy usage.';
+'Helper function: Checks if current user has at least the specified role in the hierarchy user(0) < editor(1) < admin(2). Invalid required_role returns false. Uses SECURITY INVOKER (same reasoning as is_admin()).';
 
 -- Fonction pour mise à jour automatique updated_at
 create or replace function public.update_updated_at_column()
@@ -260,7 +260,7 @@ comment on function public.to_tsvector_french(text) is
 create or replace function public.get_current_timestamp()
 returns timestamptz
 language plpgsql
-security definer
+security invoker
 set search_path = ''
 as $$
 begin
@@ -269,7 +269,7 @@ end;
 $$;
 
 comment on function public.get_current_timestamp() is 
-'Function to test Supabase connection. Uses SECURITY DEFINER to ensure it always works regardless of user permissions. Used for health checks and connectivity testing from client applications.';
+'Function to test Supabase connection. Uses SECURITY INVOKER (only calls now(), no elevated access needed). Used for health checks and connectivity testing from client applications.';
 
 -- Grant execute permission to anonymous users
 grant execute on function public.get_current_timestamp() to anon;
