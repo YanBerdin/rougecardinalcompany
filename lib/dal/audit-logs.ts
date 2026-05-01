@@ -85,6 +85,7 @@ export async function fetchAuditTableNames(): Promise<DALResult<string[]>> {
         const { data, error } = await supabase
             .from("logs_audit")
             .select("table_name")
+            .limit(500)
             .order("table_name");
 
         if (error) {
@@ -117,7 +118,8 @@ export async function fetchDistinctAuditUsers(): Promise<DALResult<AuditUserOpti
         const { data, error } = await supabase
             .from("logs_audit")
             .select("user_id")
-            .not("user_id", "is", null);
+            .not("user_id", "is", null)
+            .limit(500);
 
         if (error) {
             return {

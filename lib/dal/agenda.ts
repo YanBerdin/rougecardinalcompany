@@ -140,10 +140,16 @@ export const fetchUpcomingEvents = cache(
       }
 
       const events = (data ?? [])
-        .filter(
-          (row) =>
-            (row as SupabaseEventRow).spectacles?.public !== false
-        )
+        .filter((row) => {
+          const spectacle = (row as SupabaseEventRow).spectacles;
+          // Exclude events where spectacle is null (RLS hides private spectacles
+          // via LEFT JOIN — null?.public !== false would incorrectly pass),
+          // not public, or still in draft status.
+          return (
+            spectacle?.public === true &&
+            spectacle.status !== "draft"
+          );
+        })
         .map((row) => mapRowToEventDTO(row as SupabaseEventRow));
 
       return { success: true, data: events };

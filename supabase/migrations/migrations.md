@@ -4,6 +4,31 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-05-01 - PERF/FIX: Add B-tree indexes on logs_audit filter columns (fix 11 ADM-AUDIT E2E tests)
+
+**Migration** : `20260501203935_add_audit_logs_filter_indexes.sql`
+
+**Schéma déclaratif** : ✅ `supabase/schemas/42_rpc_audit_logs.sql`
+
+**Contexte** : Les 11 tests E2E ADM-AUDIT-001 à ADM-AUDIT-011 échouaient sous charge CI à cause de `statement_timeout` sur des requêtes de filtrage (`fetchAuditTableNames`, `fetchDistinctAuditUsers`) sans index sur la table `logs_audit` (~5 155 lignes).
+
+**Changements** :
+
+- 3 index btree créés : `idx_logs_audit_action`, `idx_logs_audit_table_name`, `idx_logs_audit_user_id` sur `public.logs_audit`.
+- `lib/dal/audit-logs.ts` — `.limit(500)` ajouté sur `fetchAuditTableNames()` et `fetchDistinctAuditUsers()`.
+- `e2e/pages/admin/audit-logs.page.ts` — pattern reload-retry dans `expectLoaded()`.
+- `e2e/tests/admin/audit-logs/audit-logs.spec.ts` — `test.describe.configure({ retries: 2 })`.
+
+**Validation** :
+
+- ✅ Idempotent : `CREATE INDEX IF NOT EXISTS` utilisé
+- ✅ SQL entièrement en minuscules
+- ✅ Appliquée en local via `supabase migration up --local --include-all` (2026-05-01)
+- ✅ Appliquée cloud via `supabase db push --linked` (2026-05-01)
+- ✅ Schéma déclaratif synchronisé : `42_rpc_audit_logs.sql`
+
+---
+
 ### 2026-05-02 - SECURITY: Fix 35 alertes Supabase Security Advisor (SECURITY DEFINER + FK indexes + unused indexes)
 
 **Migrations** :
