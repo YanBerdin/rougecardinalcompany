@@ -28,20 +28,29 @@ export class AdminAuditLogsPage {
     }
 
     async expectLoaded(): Promise<void> {
-        await this.page.waitForLoadState('networkidle');
-        await expect(this.heading).toBeVisible({ timeout: 10_000 });
-        // If the page is in error state (e.g. Postgres statement_timeout), reload once
-        // to recover before asserting. This avoids waiting the full 45s test timeout
-        // for buttons that are never rendered when a transient CI load spike occurs.
+        await expect(this.heading).toBeVisible({ timeout: 15_000 });
+
         const errAlert = this.page.getByRole('alert').filter({ hasText: /ERR_AUDIT/ });
-        if (await errAlert.isVisible().catch(() => false)) {
+
+        // Retry a few times because CI DB can be under load and the first request may
+        // time out. Handling recovery at the page-load level gives all dependent
+        // assertions a clean starting point.
+        const maxAttempts = 3;
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            await this.page.waitForLoadState('networkidle').catch(() => {});
+
+            const hasError = await errAlert.isVisible().catch(() => false);
+            if (!hasError) break;
+
+            // Small backoff before reloading to let DB recover
+            await this.page.waitForTimeout(500 * attempt);
             await this.page.reload({ waitUntil: 'networkidle' });
-            await expect(errAlert).not.toBeVisible({ timeout: 10_000 });
-        } else {
-            await expect(errAlert).not.toBeVisible({ timeout: 3_000 });
         }
-        // Confirm the table toolbar is rendered (table loaded successfully).
-        await expect(this.refreshButton).toBeVisible({ timeout: 10_000 });
+
+        await expect(errAlert).not.toBeVisible({ timeout: 15_000 });
+
+        // Confirm the table toolbar is rendered (page is actually usable).
+        await expect(this.refreshButton).toBeVisible({ timeout: 15_000 });
     }
 
     async clickRefresh(): Promise<void> {

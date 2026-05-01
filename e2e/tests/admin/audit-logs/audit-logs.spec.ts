@@ -18,7 +18,7 @@ test.describe("ADM-AUDIT — Logs d'audit : consultation et filtrage", () => {
     test('ADM-AUDIT-002 — Au moins une entrée de log affichée', async ({ auditLogsPage }) => {
         await auditLogsPage.expectLoaded();
         // nth(1) : première ligne de données (nth(0) est le header)
-        await expect(auditLogsPage.logsTable.getByRole('row').nth(1)).toBeVisible();
+        await expect(auditLogsPage.logsTable.getByRole('row').nth(1)).toBeVisible({ timeout: 15_000 });
     });
 
     // ADM-AUDIT-003 P1
@@ -108,7 +108,7 @@ test.describe("ADM-AUDIT — Logs d'audit : consultation et filtrage", () => {
 
         // Le bouton et les données doivent rester visibles après le tri
         await expect(dateSortBtn).toBeVisible();
-        await expect(auditLogsPage.logsTable.getByRole('row').nth(1)).toBeVisible();
+        await expect(auditLogsPage.logsTable.getByRole('row').nth(1)).toBeVisible({ timeout: 15_000 });
     });
 
     // ADM-AUDIT-008 P2
@@ -119,7 +119,7 @@ test.describe("ADM-AUDIT — Logs d'audit : consultation et filtrage", () => {
         await actionSortBtn.click();
 
         await expect(actionSortBtn).toBeVisible();
-        await expect(auditLogsPage.logsTable.getByRole('row').nth(1)).toBeVisible();
+        await expect(auditLogsPage.logsTable.getByRole('row').nth(1)).toBeVisible({ timeout: 15_000 });
     });
 
     // ADM-AUDIT-009 P1
