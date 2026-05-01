@@ -73,7 +73,7 @@ function FounderPortrait(): ReactElement {
             <div
                 className="absolute inset-x-0 bottom-0 h-1/4 pointer-events-none"
                 style={{
-                    background: "linear-gradient(to bottom, transparent, #1C1C1C)",
+                    background: "linear-gradient(to bottom, transparent, hsl(var(--background)))",
                 }}
                 aria-hidden="true"
             />

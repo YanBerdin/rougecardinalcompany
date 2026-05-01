@@ -10,7 +10,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import type { TeamMember } from "@/lib/schemas/compagnie";
-import { ANIMATION_DELAY_STEP } from "../constants";
+import { ANIMATION_DELAY_STEP, FALLBACK_MEMBER_IMAGE } from "../constants";
 
 interface TeamMemberCardProps {
     member: TeamMember;
@@ -34,12 +34,12 @@ export function TeamMemberCard({ member, index }: TeamMemberCardProps): ReactEle
                         onClick={() => setOpen(true)}
                         aria-haspopup="dialog"
                         aria-label={`Voir le profil de ${member.name}`}
-                        className="relative mb-6 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                        className="relative mb-6 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2"
                     >
-                        <div className="w-32 h-32 rounded-full ring-4 ring-gold group-hover:ring-primary transition-all duration-500 p-1.5 overflow-hidden flex items-center justify-center">
+                        <div className="w-32 h-32 rounded-full ring-4 ring-gold group-hover:ring-sidebar-ring transition-all duration-500 p-1.5 overflow-hidden flex items-center justify-center">
                             <Image
-                                src={member.image}
-                                alt={member.name}
+                                src={member.image ?? FALLBACK_MEMBER_IMAGE}
+                                alt={`${member.name}, ${member.role ?? "membre de l'équipe"}`}
                                 width={128}
                                 height={128}
                                 className="w-full h-full rounded-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -50,8 +50,8 @@ export function TeamMemberCard({ member, index }: TeamMemberCardProps): ReactEle
                     <div className="relative mb-6">
                         <div className="w-32 h-32 rounded-full ring-4 ring-gold p-1.5 overflow-hidden flex items-center justify-center">
                             <Image
-                                src={member.image}
-                                alt={member.name}
+                                src={member.image ?? FALLBACK_MEMBER_IMAGE}
+                                alt={`${member.name}, ${member.role ?? "membre de l'équipe"}`}
                                 width={128}
                                 height={128}
                                 className="w-full h-full rounded-full object-cover"
@@ -72,7 +72,7 @@ export function TeamMemberCard({ member, index }: TeamMemberCardProps): ReactEle
                             type="button"
                             onClick={() => setOpen(true)}
                             aria-haspopup="dialog"
-                            className="text-primary text-xs font-semibold uppercase tracking-widest hover:underline underline-offset-4 mt-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm transition-opacity duration-200 opacity-80 hover:opacity-100"
+                            className="text-sidebar-ring text-xs font-semibold uppercase tracking-widest hover:underline underline-offset-4 mt-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring rounded-sm transition-opacity duration-200 opacity-80 hover:opacity-100"
                         >
                             En savoir plus →
                         </button>
@@ -114,7 +114,7 @@ export function TeamMemberCard({ member, index }: TeamMemberCardProps): ReactEle
                             {/* Panneau droit : biographie */}
                             <div className="flex-1 p-8 overflow-y-auto max-h-[75vh] sm:max-h-[60vh] bg-background">
                                 {/* Accent cardinal */}
-                                <div className="w-10 h-0.5 bg-primary mb-5" aria-hidden="true" />
+                                <div className="w-10 h-0.5 bg-sidebar-ring mb-5" aria-hidden="true" />
                                 <DialogDescription
                                     id="member-bio"
                                     className="text-foreground text-sm leading-relaxed whitespace-pre-wrap not-italic"

@@ -81,12 +81,6 @@ URL = https://example-saas.com
 5. [P2] Motion purpose pass — 1 hour
 ```
 
----
-
-## Pair with Claude Design
-
-After the audit, drop the Punch List back into Claude Design:
-
 ```yaml
 Take this audit punch list. Regenerate the hero section, footer,
 and spacing tokens. Keep existing brand colors. Export new

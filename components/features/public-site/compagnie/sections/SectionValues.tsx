@@ -11,7 +11,7 @@ export function SectionValues({ section, values = [] }: SectionRendererProps): R
             <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center max-sm:mb-8 mb-16">
                     {section.title && <h2 id={headingId} className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">{section.title}</h2>}
-                    {section.subtitle && <p className="text-md md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto">{section.subtitle}</p>}
+                    {section.subtitle && <p className="text-base md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto">{section.subtitle}</p>}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {values.map((value, index) => (
