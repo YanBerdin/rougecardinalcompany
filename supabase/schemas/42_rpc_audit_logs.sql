@@ -13,25 +13,32 @@ comment on index public.idx_logs_audit_created_at is
  * Rationale:
  *   1. Needs to join auth.users (system table not accessible via RLS).
  *   2. Returns user email for audit trail display.
- *   3. Protected by is_admin() check at function start.
+ *   3. Called exclusively through createAdminClient() (service_role) in the
+ *      server-side DAL, so no EXECUTE grant to authenticated is needed.
  *
  * Risks Evaluated:
- *   - Authorization: Explicit is_admin() check (defense-in-depth).
+ *   - Authorization: Enforced by requireAdminPageAccess() / requireAdmin() in
+ *     the Server Component and Server Action layers before the DAL is reached.
+ *     No is_admin() check inside the function because auth.uid() returns NULL
+ *     when invoked through the service_role client, making any such check fail.
  *   - Input validation: All params have safe types; search uses ILIKE (no
  *     injection risk because the value is passed as a bind parameter, never
  *     concatenated into dynamic SQL).
  *   - Privilege escalation: Read-only — no INSERT/UPDATE/DELETE.
  *   - Performance: COUNT and page data are separated into independent CTEs so
- *     the expensive auth.users JOIN only touches the ≤50 page rows and the
- *     authenticated role 8s statement_timeout is respected.
+ *     the expensive auth.users JOIN only touches the ≤50 page rows.
  *
  * Validation:
  *   - Function is read-only (no DML statements).
  *   - Tested with EXPLAIN ANALYZE: COUNT CTE uses index scan, JOIN touches ≤50 rows.
+ *   - REVOKE EXECUTE from authenticated/anon applied in migration
+ *     20260502140000_revoke_get_audit_logs_from_authenticated.
  *
  * Grant Policy:
- *   - EXECUTE granted to authenticated only (admin check enforced inside function).
- *   - service_role not granted explicitly (has bypass).
+ *   - NO explicit EXECUTE grant to authenticated or anon.
+ *   - Callable only by service_role (bypasses PostgreSQL grants) via
+ *     createAdminClient() in lib/dal/audit-logs.ts.
+ *   - Admin access enforced by requireAdminPageAccess() in the page.
  */
 create or replace function public.get_audit_logs_with_email(
   p_action     text        default null,
@@ -65,11 +72,6 @@ as $$
 declare
   v_offset integer;
 begin
-  -- Authorization check (defense-in-depth)
-  if not (select public.is_admin()) then
-    raise exception 'Permission denied: admin role required';
-  end if;
-
   -- Enforce maximum page size to prevent bypassing CTE optimization
   if p_limit > 200 then
     p_limit := 200;
@@ -147,9 +149,11 @@ begin
 end;
 $$;
 
-grant execute on function public.get_audit_logs_with_email to authenticated;
+-- No EXECUTE grant to authenticated/anon: function is called via service_role
+-- client (createAdminClient) from the server-side DAL only.
 
 comment on function public.get_audit_logs_with_email is
-  'Fetch paginated audit logs with user email from auth.users. Admin-only via '
-  'is_admin() check. Optimised: COUNT runs without the auth.users JOIN; '
+  'Fetch paginated audit logs with user email from auth.users. Admin-only: '
+  'called exclusively via service_role through createAdminClient() in the DAL. '
+  'Optimised: COUNT runs without the auth.users JOIN; '
   'the JOIN only touches the ≤50 rows of the current page.';

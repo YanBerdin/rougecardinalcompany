@@ -94,7 +94,7 @@ begin
   ) using ids;
 
 end;
-$$ language plpgsql security definer set search_path = '';
+$$ language plpgsql security invoker set search_path = '';
 
 -- grant execute to authenticated so only authenticated users (admin UI / server) can execute the rpc
 grant execute on function public.reorder_team_members(jsonb) to authenticated;

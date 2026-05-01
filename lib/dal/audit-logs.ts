@@ -32,7 +32,7 @@ export async function fetchAuditLogs(
     filters: AuditLogFilter
 ): Promise<DALResult<{ logs: AuditLogDTO[]; totalCount: number }>> {
     try {
-        const supabase = await createClient();
+        const supabase = await createAdminClient();
         const validatedFilters = AuditLogFilterSchema.parse(filters);
 
         const { data, error } = await supabase.rpc("get_audit_logs_with_email", {

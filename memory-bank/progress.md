@@ -1,5 +1,48 @@
 # Progress
 
+## Fix 35 Supabase Security Advisor alerts (2026-05-02)
+
+✅ **COMPLET** — 35 alertes Supabase Security Advisor résolues en une session.
+
+### Migrations appliquées
+
+| Migration | Type | Alertes résolues |
+| --------- | ---- | ---------------- |
+| `20260502120000` | SECURITY DEFINER cleanup | lint-0028, lint-0029 (TIER 1+2) |
+| `20260502120100` | FK indexes | lint-0001 (6 indexes communiques) |
+| `20260502120200` | Drop unused indexes | lint-0005 (~18 indexes) |
+| `20260502140000` | REVOKE audit logs | lint-0029 (`get_audit_logs_with_email`) |
+
+### Stratégie TIER 1/2
+
+- **TIER 1** : 5 fonctions converties SECURITY INVOKER (`is_admin`, `has_min_role`, `get_current_timestamp`, `reorder_hero_slides`, `reorder_team_members`)
+- **TIER 2** : `REVOKE FROM PUBLIC` sur 10 fonctions SECURITY DEFINER restantes
+- **Leçon** : `REVOKE FROM anon/authenticated` insuffisant — l'héritage PUBLIC reste actif
+
+### Cas `get_audit_logs_with_email`
+
+- Fonction SECURITY DEFINER — appelée uniquement via `createAdminClient()` (service_role)
+- `is_admin()` retiré (inutile car `auth.uid() = null` via service_role)
+- `lib/dal/audit-logs.ts` migré vers `createAdminClient()`
+- EXECUTE révoqué de `authenticated` + `anon`
+
+### Action manuelle restante
+
+`auth_leaked_password_protection` → Dashboard Supabase → Auth → Settings → activer "Leaked password protection"
+
+### Fichiers modifiés
+
+| Fichier | Action |
+| ------- | ------ |
+| `supabase/migrations/20260502120000_*.sql` | CRÉÉ + appliqué (cloud + local) |
+| `supabase/migrations/20260502120100_*.sql` | CRÉÉ + appliqué (cloud + local) |
+| `supabase/migrations/20260502120200_*.sql` | CRÉÉ + appliqué (cloud + local) |
+| `supabase/migrations/20260502140000_*.sql` | CRÉÉ + appliqué (cloud + local) |
+| `supabase/schemas/42_rpc_audit_logs.sql` | MODIFIÉ (header DEFINER + service_role doc) |
+| `lib/dal/audit-logs.ts` | MODIFIÉ (createAdminClient) |
+
+---
+
 ## Section fondateur — Florian Chaillot (2026-04-22)
 
 ✅ **COMPLET** — `SectionFounder` composant statique créé pour la page `/compagnie`, présentant le metteur en scène & fondateur Florian Chaillot.

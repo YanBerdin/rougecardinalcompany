@@ -4,6 +4,47 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-05-02 - SECURITY: Fix 35 alertes Supabase Security Advisor (SECURITY DEFINER + FK indexes + unused indexes)
+
+**Migrations** :
+
+- `20260502120000_revoke_anon_all_security_definer_functions.sql`
+- `20260502120100_add_communiques_fk_indexes.sql`
+- `20260502120200_drop_remaining_unused_indexes.sql`
+- `20260502140000_revoke_get_audit_logs_from_authenticated.sql`
+
+**Schéma déclaratif** : ✅ `supabase/schemas/42_rpc_audit_logs.sql` (rationale SECURITY DEFINER complet, GRANT révoqué de authenticated/anon)
+
+**Contexte** : 35 alertes Supabase Security Advisor résolues lors d'une session dédiée. Catégories traitées :
+
+- **lint-0028/0029** : fonctions SECURITY DEFINER accessibles par `anon`/`authenticated` → TIER 1 : conversion en SECURITY INVOKER (5 fonctions) + TIER 2 : REVOKE FROM PUBLIC sur 10 fonctions restantes.
+- **lint-0001** : FKs non indexées sur tables `communiques_*` → 6 index btree créés.
+- **lint-0005** : ~18 index inutilisés supprimés.
+- Action manuelle restante : `auth_leaked_password_protection` (Dashboard Supabase → Auth → Settings).
+
+**Changements** :
+
+- TIER 1 : `is_admin()`, `has_min_role()`, `get_current_timestamp()`, `reorder_hero_slides()`, `reorder_team_members()` → convertis en **SECURITY INVOKER** (n'avaient jamais eu besoin de DEFINER).
+- TIER 2 : `REVOKE FROM PUBLIC` sur 10 fonctions SECURITY DEFINER restantes (triggers, cleanup/cron, vues admin, `get_audit_logs_with_email`).
+- `get_audit_logs_with_email(...)` : REVOKE EXECUTE de `authenticated` et `anon` ; accès exclusivement via `createAdminClient()` (service_role) dans `lib/dal/audit-logs.ts`. La fonction ne contient plus de vérification `is_admin()` car `auth.uid()` est `null` avec le service_role.
+
+**Leçon critique** : `REVOKE FROM anon/authenticated` ne supprime **pas** l'EXECUTE hérité de `PUBLIC`. Seul `REVOKE FROM PUBLIC` règle le problème (lint-0028/0029).
+
+**DAL mis à jour** : `lib/dal/audit-logs.ts` — `fetchAuditLogs` utilise désormais `createAdminClient()`.
+
+**Validation** :
+
+- ✅ MIG-001 conforme : filenames au format `YYYYMMDDHHmmss_description.sql`
+- ✅ MIG-002 conforme : SQL entièrement en minuscules
+- ✅ Idempotent : `IF EXISTS` / `IF NOT EXISTS` utilisés partout
+- ✅ Headers de migration documentés (purpose, objets affectés)
+- ✅ Aucune nouvelle table → RLS non requis
+- ✅ Appliquées cloud via `pnpm dlx supabase db push` (2026-05-02)
+- ✅ Appliquées en local via `pnpm dlx supabase migration up --local` (2026-05-01)
+- ✅ Schéma déclaratif synchronisé : `42_rpc_audit_logs.sql` mis à jour
+
+---
+
 ### 2026-04-23 - FIX: Suppression du toggle erroné `display_toggle_home_hero`
 
 **Migration** : `20260101190000_remove_display_toggle_home_hero.sql`  

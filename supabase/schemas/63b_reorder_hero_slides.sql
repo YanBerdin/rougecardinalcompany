@@ -21,7 +21,7 @@
 create or replace function public.reorder_hero_slides(order_data jsonb)
 returns void
 language plpgsql
-security definer
+security invoker
 set search_path = ''
 as $$
 begin

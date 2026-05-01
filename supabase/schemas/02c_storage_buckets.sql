@@ -10,7 +10,8 @@
  *   Referenced by multiple tables via storage_path column.
  * 
  * SECURITY:
- *   - Public read access (public = true)
+ *   - No SELECT policy: bucket listing disabled (lint=0025 fix)
+ *   - Direct CDN object URLs remain publicly accessible via Supabase Storage CDN
  *   - Editors and admins can upload, update, and delete
  *   - Enforced via has_min_role('editor') in RLS policies
  * 
@@ -43,6 +44,7 @@ on conflict (id) do update set
 
 -- Drop existing policies if any (for clean re-generation)
 drop policy if exists "Public read access for medias" on storage.objects;
+drop policy if exists "Authenticated read access for medias" on storage.objects;
 drop policy if exists "Authenticated users can upload to medias" on storage.objects;
 drop policy if exists "Authenticated users can update medias" on storage.objects;
 drop policy if exists "Admins can delete medias" on storage.objects;
@@ -50,11 +52,9 @@ drop policy if exists "Editors can upload to medias" on storage.objects;
 drop policy if exists "Editors can update medias" on storage.objects;
 drop policy if exists "Editors can delete medias" on storage.objects;
 
--- Allow public read access
-create policy "Public read access for medias"
-on storage.objects for select
-to public
-using ( bucket_id = 'medias' );
+-- NOTE: No SELECT policy — bucket 'medias' is public=true, CDN URLs work without RLS.
+-- Removing SELECT policy fixes lint=0025 (public_bucket_allows_listing) Supabase advisor alert.
+-- Authenticated users can still access files via CDN URLs; they just can't enumerate the bucket.
 
 -- Allow editors and admins to upload
 create policy "Editors can upload to medias"

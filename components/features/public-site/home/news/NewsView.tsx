@@ -10,7 +10,7 @@ export function NewsView({ news }: NewsViewProps) {
   }
 
   return (
-    <section className="py-20 bg-background" aria-labelledby="news-heading">
+    <section className="py-20 bg-chart-7" aria-labelledby="news-heading">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 id="news-heading" className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
