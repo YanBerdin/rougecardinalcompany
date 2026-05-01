@@ -38,12 +38,12 @@ function NewsletterHeading(): React.JSX.Element {
 
 function SubscribedConfirmation(): React.JSX.Element {
     return (
-        <div className="animate-fade-in text-center lg:text-left">
+        <div className="motion-safe:animate-fade-in text-center lg:text-left">
             <CheckCircle
                 className="h-16 w-16 text-white mx-auto lg:mx-0 mb-6"
                 aria-hidden="true"
             />
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-sans text-white mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold font-sans text-white mb-4">
                 Merci pour votre inscription !
             </h2>
             <p className="text-base md:text-lg text-white/90">
@@ -56,7 +56,7 @@ function SubscribedConfirmation(): React.JSX.Element {
 function AgendaSubscribeSection(): React.JSX.Element {
     const { errorMessage } = useNewsletterContext();
     return (
-        <div className="animate-fade-in-up">
+        <div className="motion-safe:animate-fade-in-up">
             {errorMessage && (
                 <p className="text-red-200 text-sm mb-4" role="alert">
                     {errorMessage}

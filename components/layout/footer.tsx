@@ -117,15 +117,15 @@ export default function Footer() {
             <h3 className="font-semibold font-sans mb-4 text-secondary-foreground">Contact</h3>
             <ul className="space-y-3">
               <li className="flex items-center space-x-2 text-muted-foreground">
-                <Mail className="h-4 w-4 text-primary" />
+                <Mail className="h-4 w-4 text-primary" aria-hidden="true" />
                 <span>contact@rouge-cardinal.fr</span>
               </li>
               <li className="flex items-center space-x-2 text-muted-foreground">
-                <Phone className="h-4 w-4 text-primary" />
+                <Phone className="h-4 w-4 text-primary" aria-hidden="true" />
                 <span>+33 1 23 45 67 89</span>
               </li>
               <li className="flex items-start space-x-2 text-muted-foreground">
-                <MapPin className="h-4 w-4 mt-1 text-primary" />
+                <MapPin className="h-4 w-4 mt-1 text-primary" aria-hidden="true" />
                 <span>75011 Paris, France</span>
               </li>
             </ul>

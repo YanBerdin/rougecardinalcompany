@@ -21,9 +21,9 @@ export function AgendaFilters(): React.JSX.Element {
 
     return (
         <div className="flex items-center space-x-4 pb-8">
-            <Filter className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
+            <Filter className="h-5 w-5 text-muted-foreground bg-card" aria-hidden="true" />
             <div>
-                <label htmlFor="event-type-filter" className="sr-only">
+                <label htmlFor="event-type-filter" className="text-sm text-muted-foreground font-medium">
                     Filtrer par type d&apos;événement
                 </label>
                 <Select
