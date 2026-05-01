@@ -20,19 +20,19 @@ export function HeroCTA({ slide }: HeroCTAProps) {
       </p>
 
       <div className="animate-fade-in-up">
-        <h1 className=" text-gold-gradient text-4xl md:text-6xl font-bold mb-2 sm:mb-4 lg:mb-6">
+        <h1 className=" text-gold-gradient text-4xl md:text-6xl lg:text-7xl font-bold">
           {slide.title}
         </h1>
-        <h2 className="text-4xl text-chart-6 md:text-6xl font-bold mb-2 sm:mb-4">
+        <h2 className="text-3xl text-chart-6/90 md:text-6xl lg:text-7xl font-bold">
           {slide.subtitle}
         </h2>
-        <p className="text-sm md:text-base mb-6 text-chart-6/70 max-w-2xl mx-auto">
+        <p className="text-xs md:text-base my-6 text-chart-6/70 max-w-2xl mx-auto">
           {slide.description}
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
           {slide.ctaPrimaryEnabled && slide.ctaPrimaryLabel && (
-            <Button variant="default" size="lg" className="max-sm:text-xs max-w-[280px] w-52 justify-center" asChild>
+            <Button variant="default" size="default" className="max-sm:text-xs max-w-[280px] w-52 justify-center" asChild>
               <Link href={slide.ctaPrimaryUrl ?? "/spectacles"}>
                 <View className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {slide.ctaPrimaryLabel}
@@ -43,8 +43,8 @@ export function HeroCTA({ slide }: HeroCTAProps) {
           {slide.ctaSecondaryEnabled && slide.ctaSecondaryLabel && (
             <Button
               variant="outline"
-              size="lg"
-              className="max-sm:text-xs max-w-[280px] w-52 justify-center bg-white/30 border-white/50 text-chart-6 backdrop-blur-md hover:bg-white/70 hover:text-primary transition-colors duration-300 shadow-lg"
+              size="default"
+              className="max-sm:text-xs max-w-[280px] w-52 justify-center bg-white/30 border-white/50 text-chart-6 backdrop-blur-md hover:bg-white/90 hover:text-primary transition-colors duration-300 shadow-lg"
               asChild
             >
               <Link href={slide.ctaSecondaryUrl ?? "/agenda"}>

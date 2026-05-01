@@ -5,17 +5,17 @@ import type { SectionRendererProps } from "./types";
 export function SectionHistory({ section }: SectionRendererProps): ReactElement {
     const headingId = `heading-${section.kind}`;
     return (
-        <section id={section.kind} aria-labelledby={headingId} className="max-sm:py-12 py-24 bg-chart-7/60">
+        <section id={section.kind} aria-labelledby={headingId} className="max-sm:py-12 py-16 bg-chart-7/60">
             <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
                     <div className="animate-fade-in-up">
                         {section.title && (
-                            <h2 id={headingId} className="text-3xl md:text-4xl lg:text-5xl font-bold font-sans mb-6">
+                            <h2 id={headingId} className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-6">
                                 {section.title}
                             </h2>
                         )}
                         {section.content?.map((p: string, i: number) => (
-                            <p key={i} className={`text-md md:text-lg xl:text-xl text-muted-foreground ${i < (section.content?.length ?? 0) - 1 ? "mb-4" : ""} leading-relaxed`}>
+                            <p key={i} className={`text-base lg:text-lg text-muted-foreground ${i < (section.content?.length ?? 0) - 1 ? "mb-4" : ""} leading-relaxed`}>
                                 {p}
                             </p>
                         ))}

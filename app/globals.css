@@ -799,8 +799,8 @@
   ); /* rgba(196, 30, 58, 0.04) subtle warm tint, not white */
 
   /* Use the design token for consistent blur intensity */
-  -webkit-backdrop-filter: blur(var(--blur-3xl));
-  backdrop-filter: blur(var(--blur-3xl));
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
 
   /* gentle elevation to separate from content */
   box-shadow: var(--shadow-lg);

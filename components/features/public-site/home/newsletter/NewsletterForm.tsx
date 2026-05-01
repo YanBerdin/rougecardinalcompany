@@ -31,13 +31,13 @@ export function NewsletterForm() {
                     autoComplete="email"
                     value={email}
                     onChange={handleEmailChange}
-                    className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/70 focus:bg-white/20 focus:border-white transition-all duration-200"
+                    className="pl-10 bg-white/10 border-white/40 text-base text-white placeholder:text-white/70 focus:bg-white/20 focus:border-white transition-all duration-200"
                 />
             </div>
             <Button
                 type="submit"
                 variant="outline"
-                size="lg"
+                size="default"
                 disabled={isLoading}
                 className="touch-hitbox bg-chart-6 border-white/30 hover:text-white hover:backdrop-blur-md hover:bg-white/30 text-red-800 transition-all duration-200 shadow-lg whitespace-nowrap disabled:opacity-50"
             >

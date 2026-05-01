@@ -11,10 +11,10 @@ export function AccreditationSection() {
       className="max-sm:py-12 py-24 hero-gradient"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="text-3xl lg:text-4xl font-semibold font-sans mb-6 text-white animate-fade-in-up">
+        <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-6 text-white/90 animate-fade-in-up">
           Demande d&apos;Accréditation
         </h2>
-        <p className="text-base md:text-xl lg:text-2xl text-white/80 mb-8">
+        <p className="text-base md:text-lg lg:text-xl text-white/70 mb-8">
           Journalistes et critiques, demandez votre accréditation pour nos
           spectacles
         </p>
@@ -34,8 +34,8 @@ export function AccreditationSection() {
         </div>
         <Button
           variant="outline"
-          size="lg"
-          className="bg-white/30 border-white/50 text-white backdrop-blur-md hover:bg-sidebar-primary-foreground hover:text-primary transition-all duration-300 shadow-lg border"
+          size="default"
+          className="bg-white/30 border-white/50 text-white backdrop-blur-md hover:bg-white/90 hover:text-primary transition-all duration-300 shadow-lg border"
           asChild
         >
           <Link href="/contact" aria-label="Faire une demande d'accréditation presse">

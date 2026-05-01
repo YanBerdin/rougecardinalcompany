@@ -25,7 +25,7 @@ function LogoCard({ partner, linkable, index }: LogoCardProps) {
 
     // Hauteur du conteneur = hauteur du logo, pas de padding vertical
     const cardClasses =
-        "flex items-center justify-center px-0 mx-0 md:mx-3 bg-card/40 backdrop-blur-sm min-w-[50px] lg:min-w-[60px] h-7 sm:h-9 md:h-10 lg:h-12 hover:bg-card transition-all duration-500 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative group rounded overflow-hidden rounded";
+        "flex items-center justify-center px-0 mx-0 md:mx-3 bg-card/40 backdrop-blur-sm min-w-[50px] lg:min-w-[60px] h-7 sm:h-9 md:h-10 lg:h-12 hover:bg-card transition-all duration-500 grayscale opacity-65 hover:grayscale-0 hover:opacity-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative group rounded overflow-hidden rounded";
 
     if (linkable && partner.website) {
         return (
@@ -99,6 +99,19 @@ export function LogoCloud({
                     Nos soutiens et partenaires institutionnels nous accompagnent.
                 </p>
             </div>
+            {shouldScroll && (
+                <div className="flex justify-end px-6 mb-2">
+                    <button
+                        type="button"
+                        onClick={() => setIsPaused((prev) => !prev)}
+                        aria-pressed={isPaused}
+                        aria-label={isPaused ? "Reprendre l'animation des partenaires" : "Mettre en pause l'animation des partenaires"}
+                        className="text-xs text-chart-6/60 hover:text-chart-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 transition-colors px-3 py-1.5 rounded border border-white/10 hover:border-white/30"
+                    >
+                        {isPaused ? "▶ Reprendre" : "⏸ Pause"}
+                    </button>
+                </div>
+            )}
             {shouldScroll ? (
                 /* Mode défilement : pour 6+ logos */
                 <div

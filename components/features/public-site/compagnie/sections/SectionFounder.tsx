@@ -73,7 +73,7 @@ function FounderPortrait(): ReactElement {
             <div
                 className="absolute inset-x-0 bottom-0 h-1/4 pointer-events-none"
                 style={{
-                    background: "linear-gradient(to bottom, transparent, #1C1C1C)",
+                    background: "linear-gradient(to bottom, transparent, hsl(var(--background)))",
                 }}
                 aria-hidden="true"
             />
@@ -109,7 +109,7 @@ function FounderBio(): ReactElement {
                 </p>
                 <h2
                     id="heading-founder"
-                    className="text-4xl md:text-5xl lg:text-6xl font-bold text-card-foreground leading-tight [font-family:var(--font-playfair)]"
+                    className="text-3xl md:text-4xl lg:text-5xl font-semibold text-card-foreground leading-tight"
                 >
                     {FOUNDER_NAME}
                 </h2>
@@ -123,7 +123,7 @@ function FounderBio(): ReactElement {
                 {FOUNDER_BIO.map((paragraph, index) => (
                     <p
                         key={index}
-                        className="text-card-secondary text-sm md:text-base lg:text-lg leading-relaxed"
+                        className="text-card-secondary text-sm md:text-base leading-relaxed"
                     >
                         {paragraph}
                     </p>

@@ -27,34 +27,38 @@ export default function Footer() {
               />
               <span className="logo-text whitespace-nowrap text-secondary-foreground">Rouge Cardinal</span>
             </Link>
-            <p className="text-muted-foreground mb-4 max-w-md">
+            <p className="text-base text-muted-foreground mb-4 max-w-md">
               Compagnie de théâtre passionnée par les arts de la scène, nous
               créons et produisons des spectacles qui touchent et interrogent
               notre époque.
             </p>
             <div className="flex space-x-4">
-              <Button variant="ghost" size="sm" asChild>
+              <Button variant="ghost" size="sm" asChild className="min-h-11 min-w-11">
                 <Link
-                  href="#"
+                  href="https://www.facebook.com/"
                   aria-label="Facebook"
                   className="hover:text-primary"
                   title="Facebook"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
                   <Facebook className="h-5 w-5" />
                 </Link>
               </Button>
-              <Button variant="ghost" size="sm" asChild>
+              <Button variant="ghost" size="sm" asChild className="min-h-11 min-w-11">
                 <Link
-                  href="#"
+                  href="https://www.instagram.com/"
                   aria-label="Instagram"
                   className="hover:text-primary"
                   title="Instagram"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
                   <Instagram className="h-5 w-5" />
                 </Link>
               </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="#" aria-label="Twitter" className="hover:text-primary" title="Twitter">
+              <Button variant="ghost" size="sm" asChild className="min-h-11 min-w-11">
+                <Link href="https://twitter.com/" aria-label="Twitter" className="hover:text-primary" title="Twitter" target="_blank" rel="noopener noreferrer">
                   <Twitter className="h-5 w-5" />
                 </Link>
               </Button>
@@ -113,15 +117,15 @@ export default function Footer() {
             <h3 className="font-semibold font-sans mb-4 text-secondary-foreground">Contact</h3>
             <ul className="space-y-3">
               <li className="flex items-center space-x-2 text-muted-foreground">
-                <Mail className="h-4 w-4 text-primary" />
+                <Mail className="h-4 w-4 text-primary" aria-hidden="true" />
                 <span>contact@rouge-cardinal.fr</span>
               </li>
               <li className="flex items-center space-x-2 text-muted-foreground">
-                <Phone className="h-4 w-4 text-primary" />
+                <Phone className="h-4 w-4 text-primary" aria-hidden="true" />
                 <span>+33 1 23 45 67 89</span>
               </li>
               <li className="flex items-start space-x-2 text-muted-foreground">
-                <MapPin className="h-4 w-4 mt-1 text-primary" />
+                <MapPin className="h-4 w-4 mt-1 text-primary" aria-hidden="true" />
                 <span>75011 Paris, France</span>
               </li>
             </ul>

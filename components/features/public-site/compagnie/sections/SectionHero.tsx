@@ -13,7 +13,7 @@ export function SectionHero({ section }: SectionRendererProps): ReactElement {
                     </h1>
                 )}
                 {section.subtitle && (
-                    <p className="max-sm:text-md text-lg md:text-xl text-white/80 opacity-90 animate-fade-in" style={{ animationDelay: ANIMATION_BASE_DELAY }}>
+                    <p className="max-sm:text-base md:text-lg lg:text-xl text-white/80 opacity-90 animate-fade-in" style={{ animationDelay: `${ANIMATION_BASE_DELAY}s` }}>
                         {section.subtitle}
                     </p>
                 )}

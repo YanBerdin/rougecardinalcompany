@@ -21,10 +21,10 @@ export function CommuniquesSection({
     <section aria-label="Communiqués de presse" className="max-sm:py-12 py-24">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-sm:mb-8 mb-16">
-          <h2 className="text-3xl md:text-3xl lg:text-4xl font-bold font-sans mb-4">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">
             Communiqués de Presse
           </h2>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
             Les dernières actualités officielles de la compagnie
           </p>
         </div>

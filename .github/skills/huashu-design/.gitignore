@@ -1,0 +1,25 @@
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Video render temp (artifacts of render-video.js)
+.video-tmp-*/
+**/.video-tmp-*/
+
+# Personal asset index (real personal data, only the .example.json template is kept)
+assets/personal-asset-index.json
+
+# Node / editor / OS
+node_modules/
+*.swp
+.idea/
+.vscode/
+Thumbs.db
+
+# Verification artifacts (screenshots, ad-hoc test scripts)
+demos/_frames_*.png
+demos/_verify.js
+demos/_verify.mjs
+
+# Sync pipeline (maintainer-only)
+tools/sync-upstream/.upstream-clone/

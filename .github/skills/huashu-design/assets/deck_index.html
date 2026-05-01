@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Deck · Multi-file Slide Index</title>
+<!--
+  deck_index.html — assembler for a multi-file slide deck
+
+  Designed for the "one HTML file per slide" architecture. Compared with the
+  single-file deck_stage.js:
+  · Each slide has its own scope (CSS/JS isolated); a bug on one slide
+    doesn't affect the others
+  · Each slide can be opened directly in a browser to verify; no JS goTo()
+    dependency
+  · Multiple agents can work on different slides in parallel, with zero
+    merge conflicts
+  · Best for ≥15-slide lectures, courses, or long decks
+
+  Usage:
+    1. Copy this file to the deck root and rename it index.html
+    2. Create a slides/ subdirectory next to it for the per-slide HTML files
+    3. Edit the MANIFEST array below, listing filenames and human-readable
+       labels in order
+    4. Each slide HTML should be 1920x1080 and bring its own background and
+       fonts; do not rely on outer CSS
+
+  Shared resources (if you need them):
+    · shared/tokens.css  — cross-slide CSS variables (palettes, font sizes)
+    · shared/chrome.html — reusable header/footer snippets
+    · Each slide HTML <link>s them in itself
+
+  Keyboard: arrow keys / Space / PgUp / PgDown / Home / End / 1-9 jump / P print
+-->
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- EDIT THIS — list every slide in order                    -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<script>
+  window.DECK_MANIFEST = [
+    { file: "slides/01-cover.html",       label: "Cover" },
+    { file: "slides/02-quote.html",       label: "Opening Quote" },
+    { file: "slides/03-intro.html",       label: "Self-intro" },
+    // Add more entries below. `file` is a path relative to this file; `label` is shown in the counter.
+  ];
+
+  // Fixed canvas dimensions. Each slide HTML should be designed at this size.
+  window.DECK_WIDTH = 1920;
+  window.DECK_HEIGHT = 1080;
+</script>
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    background: #0a0a0a;
+    overflow: hidden;
+    font-family: -apple-system, "PingFang SC", sans-serif;
+  }
+  #stage {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform-origin: top left;
+    will-change: transform;
+    background: #fff;
+    box-shadow: 0 10px 60px rgba(0,0,0,0.4);
+    /* size set by JS from DECK_WIDTH/HEIGHT */
+  }
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+    background: #fff;
+  }
+  .counter {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0,0,0,0.65);
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    font-variant-numeric: tabular-nums;
+    z-index: 100;
+    user-select: none;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+  .counter:hover { opacity: 1; }
+  .counter .label { color: rgba(255,255,255,0.7); margin-left: 8px; }
+  .nav-zone {
+    position: fixed;
+    top: 0; bottom: 0;
+    width: 15%;
+    cursor: pointer;
+    z-index: 50;
+  }
+  .nav-zone.left  { left: 0; }
+  .nav-zone.right { right: 0; }
+  .nav-hint {
+    position: absolute;
+    top: 50%; transform: translateY(-50%);
+    width: 44px; height: 44px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .nav-zone.left  .nav-hint { left: 20px; }
+  .nav-zone.right .nav-hint { right: 20px; }
+  .nav-zone:hover .nav-hint { opacity: 1; }
+
+  /* Print: one slide per page, no navigation UI */
+  @media print {
+    @page { size: 1920px 1080px; margin: 0; }
+    html, body { background: #fff; overflow: visible; height: auto; }
+    #stage { position: static; transform: none !important; box-shadow: none; }
+    .counter, .nav-zone { display: none !important; }
+    /* In print mode we render all slides sequentially — see JS */
+    .print-stack { display: block; }
+    .print-stack iframe {
+      width: 1920px;
+      height: 1080px;
+      page-break-after: always;
+      display: block;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <iframe id="frame" src="about:blank"></iframe>
+</div>
+
+<div class="nav-zone left"  id="navL"><div class="nav-hint">‹</div></div>
+<div class="nav-zone right" id="navR"><div class="nav-hint">›</div></div>
+<div class="counter" id="counter">1 / 1</div>
+
+<!-- Print-only stack: populated on beforeprint, stripped on afterprint -->
+<div class="print-stack" id="printStack" style="display:none;"></div>
+
+<script>
+(function () {
+  const W = window.DECK_WIDTH || 1920;
+  const H = window.DECK_HEIGHT || 1080;
+  const deck = window.DECK_MANIFEST || [];
+  const stage = document.getElementById('stage');
+  const frame = document.getElementById('frame');
+  const counter = document.getElementById('counter');
+  const printStack = document.getElementById('printStack');
+  const storageKey = 'deck-index-' + location.pathname;
+  let current = 0;
+
+  stage.style.width  = W + 'px';
+  stage.style.height = H + 'px';
+
+  function fit() {
+    const s = Math.min(window.innerWidth / W, window.innerHeight / H);
+    const x = (window.innerWidth  - W * s) / 2;
+    const y = (window.innerHeight - H * s) / 2;
+    stage.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+    stage.style.top = '0';
+    stage.style.left = '0';
+  }
+
+  function show(idx) {
+    if (idx < 0 || idx >= deck.length) return;
+    current = idx;
+    frame.src = deck[idx].file;
+    counter.innerHTML = `${idx + 1} / ${deck.length} <span class="label">${deck[idx].label || ''}</span>`;
+    try { localStorage.setItem(storageKey, String(idx)); } catch (_) {}
+    if (location.hash !== '#' + (idx + 1)) {
+      history.replaceState(null, '', '#' + (idx + 1));
+    }
+  }
+
+  function next() { show(Math.min(current + 1, deck.length - 1)); }
+  function prev() { show(Math.max(current - 1, 0)); }
+
+  // Keyboard
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    switch (e.key) {
+      case 'ArrowRight': case ' ': case 'PageDown': e.preventDefault(); next(); break;
+      case 'ArrowLeft':  case 'PageUp':              e.preventDefault(); prev(); break;
+      case 'Home':                                    e.preventDefault(); show(0); break;
+      case 'End':                                     e.preventDefault(); show(deck.length - 1); break;
+      case 'p': case 'P':                             window.print(); break;
+      default:
+        if (e.key >= '1' && e.key <= '9') {
+          const i = parseInt(e.key, 10) - 1;
+          if (i < deck.length) { e.preventDefault(); show(i); }
+        }
+    }
+  });
+
+  document.getElementById('navL').addEventListener('click', prev);
+  document.getElementById('navR').addEventListener('click', next);
+  window.addEventListener('resize', fit);
+  window.addEventListener('hashchange', () => {
+    const m = location.hash.match(/^#(\d+)$/);
+    if (m) show(parseInt(m[1], 10) - 1);
+  });
+
+  // Initial: hash > localStorage > 0
+  const hashMatch = location.hash.match(/^#(\d+)$/);
+  if (hashMatch) current = Math.min(parseInt(hashMatch[1], 10) - 1, deck.length - 1);
+  else try {
+    const v = parseInt(localStorage.getItem(storageKey), 10);
+    if (!isNaN(v) && v >= 0 && v < deck.length) current = v;
+  } catch (_) {}
+  fit();
+  show(current);
+
+  // Print: build a stack of all iframes so browser prints every slide
+  window.addEventListener('beforeprint', () => {
+    printStack.innerHTML = '';
+    deck.forEach(item => {
+      const f = document.createElement('iframe');
+      f.src = item.file;
+      printStack.appendChild(f);
+    });
+    printStack.style.display = 'block';
+    document.getElementById('stage').style.display = 'none';
+  });
+  window.addEventListener('afterprint', () => {
+    printStack.innerHTML = '';
+    printStack.style.display = 'none';
+    document.getElementById('stage').style.display = '';
+  });
+})();
+</script>
+
+</body>
+</html>

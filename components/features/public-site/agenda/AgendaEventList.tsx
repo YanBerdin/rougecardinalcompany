@@ -50,9 +50,10 @@ const BADGE_VARIANT_MAP: Record<string, "default" | "destructive" | "secondary" 
 // Internal Sub-Components (not exported)
 // ============================================================================
 
-function EventCardImage({ image, title }: {
+function EventCardImage({ image, title, isFirst }: {
     readonly image: string;
     readonly title: string;
+    readonly isFirst?: boolean;
 }): React.JSX.Element {
     return (
         <div className="relative overflow-hidden flex-shrink-0 rounded-xl shadow-xl shadow-black/50 dark:shadow-black/70 bg-zinc-950 w-28 sm:w-32 md:w-40 lg:w-40 aspect-[2/3]">
@@ -61,6 +62,7 @@ function EventCardImage({ image, title }: {
                 alt={`Visuel de ${title}`}
                 className="object-cover transition-all duration-700 ease-out group-hover:scale-[1.02] group-hover:brightness-105"
                 fill
+                priority={isFirst}
                 sizes="(max-width: 640px) 112px, (max-width: 768px) 128px, (max-width: 1024px) 160px, 160px"
             />
         </div>
@@ -144,7 +146,7 @@ function EventCardActions({ event }: { readonly event: Event }): React.JSX.Eleme
             <div className="grid grid-cols-2 gap-2">
                 <Button
                     variant="secondary"
-                    size="sm"
+                    size="default"
                     className="w-full"
                     aria-label={`Ajouter ${event.title} au calendrier`}
                     onClick={() => actions.downloadCalendarFile(event)}
@@ -152,10 +154,10 @@ function EventCardActions({ event }: { readonly event: Event }): React.JSX.Eleme
                     <Download className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
                     Calendrier
                 </Button>
-                <Button variant="outline" size="sm" className="w-full" asChild>
-                    <Link href={`/agenda/${event.id}`} aria-label={`Infos pratiques — ${event.title}`}>
+                <Button variant="outline" size="default" className="w-full" asChild>
+                    <Link href={`/agenda/${event.id}`} aria-label={`Voir les détails — ${event.title}`}>
                         <Info className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
-                        Infos pratiques
+                        Voir les détails
                     </Link>
                 </Button>
             </div>
@@ -172,7 +174,7 @@ function AgendaEventCard({ event, animationDelay }: {
             className="group relative motion-safe:animate-fade-in-up motion-safe:transition-all motion-safe:duration-500 motion-safe:hover:-translate-y-1 h-full"
             style={{ animationDelay: `${animationDelay}s`, animationFillMode: "both" }}
         >
-            <Card className="rounded-2xl bg-card dark:bg-zinc-800/40 backdrop-blur-xl border border-white/30 dark:border-white/10 shadow-xl group-hover:border-primary group-hover:shadow-[0_25px_70px_rgba(173,0,0,0.4)] motion-safe:transition-all motion-safe:duration-500 h-full">
+            <Card className="rounded-2xl bg-card dark:bg-zinc-800/40 backdrop-blur-xl border border-white/30 dark:border-white/10 shadow-xl group-hover:border-primary group-hover:shadow-[0_15px_40px_rgba(173,0,0,0.25)] motion-safe:transition-all motion-safe:duration-500 h-full">
                 <CardContent className="p-4 md:p-5 lg:p-6 flex flex-col gap-6 h-full">
                     {/* Badges */}
                     <div className="flex flex-wrap gap-2">
@@ -192,6 +194,7 @@ function AgendaEventCard({ event, animationDelay }: {
                         <EventCardImage
                             image={event.image}
                             title={event.title}
+                            isFirst={animationDelay === 0}
                         />
                     </div>
                     <div className="mt-auto">

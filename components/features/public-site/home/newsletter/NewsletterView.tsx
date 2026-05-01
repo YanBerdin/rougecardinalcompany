@@ -30,16 +30,16 @@ export function NewsletterView({
   }
 
   return (
-    <section className="py-24 hero-gradient" aria-labelledby="newsletter-heading">
+    <section className="py-16 hero-gradient" aria-labelledby="newsletter-heading">
       <div className="max-w-7xl mx-auto grid grid-cols-1 gap-x-8 lg:gap-y-6 lg:grid-cols-[3fr_2fr] max-sm:px-4">
         <div className="flex gap-6 mx-auto">
           <div className="flex flex-col items-center lg:items-start">
             <p className="text-md md:text-lg lg:text-xl text-white/80">
               Dernier acte : Newsletter
             </p>
-            <h3 id="newsletter-heading" className="text-3xl md:text-4xl lg:text-5xl font-semibold font-sans text-white leading-tight">
+            <h2 id="newsletter-heading" className="text-3xl md:text-4xl lg:text-5xl font-semibold text-white leading-tight">
               Restez dans les coulisses
-            </h3>
+            </h2>
             <div className="h-px w-24 xl:w-72 bg-white/40 my-6" aria-hidden="true" />
           </div>
         </div>
