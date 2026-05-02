@@ -1,12 +1,14 @@
 # TASK090 Founder Content Admin
 
-Objectif : rendre la section fondateur administrable depuis le dashboard existant, en l’intégrant au pipeline des sections compagnie déjà en place.
+**Status:** Completed ✅ 2026-05-02
+
+**Objectif** : rendre la section fondateur administrable depuis le dashboard existant, en l'intégrant au pipeline des sections compagnie déjà en place.
 
 TASK préparée:
 
 1. ID proposé: TASK090
 2. Nom: Adminiser SectionFounder compagnie
-3. Statut initial: Pending
+3. Statut initial: Pending → **Completed**
 4. Décisions verrouillées:
 
 - Modèle: nouveau kind founder dans la table sections existante
@@ -90,3 +92,32 @@ Exclus:
 
 - nouvelle page admin séparée hors /admin/compagnie
 - refonte visuelle majeure de la section
+
+---
+
+## Résultat final (2026-05-02)
+
+### Migration appliquée
+
+- `supabase/migrations/20260502150000_task090_founder_section.sql`
+  - Étend la contrainte CHECK : `kind IN ('hero','history','quote','values','team','mission','founder','custom')`
+  - Ajoute colonne `milestones jsonb null`
+  - Insère la row seed `founder` avec les données hardcodées précédentes (ON CONFLICT DO NOTHING)
+
+### Schéma déclaratif synchronisé
+
+- `supabase/schemas/07c_table_compagnie_presentation.sql` : CHECK étendu + colonne `milestones`
+
+### Fichiers source modifiés (3)
+
+| Fichier | Changement |
+|---------|------------|
+| `components/features/admin/compagnie/PresentationFormFields.tsx` | `SHOW_CONTENT` inclut `"founder"` → champ bio visible |
+| `components/features/admin/compagnie/PresentationForm.tsx` | Import `FormMessage` inutilisé supprimé |
+| `components/features/public-site/compagnie/sections/SectionFounder.tsx` | `bio={section?.content ?? FOUNDER_BIO}` — fallback sur constante locale |
+
+### Non-régression
+
+- Aucune erreur TypeScript (`pnpm exec tsc --noEmit` ✅)
+- `pnpm lint` ✅
+- Sections existantes (hero, history, quote, values, team, mission, custom) non impactées

@@ -37,6 +37,7 @@ interface RawPresentationRow {
     image_url: string | null;
     image_media_id: unknown;
     alt_text: string | null;
+    milestones: unknown;
     position: number;
     active: boolean;
     created_at: string;
@@ -58,6 +59,7 @@ const SECTION_SELECT_FIELDS = `
   image_url,
   image_media_id,
   alt_text,
+  milestones,
   position,
   active,
   created_at,
@@ -86,6 +88,9 @@ function mapToPresentationSectionDTO(raw: RawPresentationRow): PresentationSecti
         image_url: buildMediaPublicUrl(storagePath) ?? raw.image_url ?? null,
         image_media_id: raw.image_media_id ? Number(raw.image_media_id) : null,
         alt_text: raw.alt_text,
+        milestones: Array.isArray(raw.milestones)
+            ? (raw.milestones as Array<{ year: string; label: string }>)
+            : null,
         position: raw.position,
         active: raw.active,
         created_at: raw.created_at,
@@ -156,6 +161,7 @@ export async function createPresentationSection(
             image_url: input.image_url || null,
             image_media_id: input.image_media_id ? Number(input.image_media_id) : null,
             alt_text: input.alt_text ?? null,
+            milestones: input.milestones ?? null,
             position: input.position ?? nextPosition,
             active: input.active ?? true,
         })
@@ -195,6 +201,7 @@ export async function updatePresentationSection(
                 image_media_id: input.image_media_id ? Number(input.image_media_id) : null,
             }),
             ...(input.alt_text !== undefined && { alt_text: input.alt_text ?? null }),
+            ...(input.milestones !== undefined && { milestones: input.milestones ?? null }),
             ...(input.position !== undefined && { position: input.position }),
             ...(input.active !== undefined && { active: input.active }),
         })

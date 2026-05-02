@@ -145,7 +145,7 @@ export function ValuesView({ initialValues }: ValuesViewProps) {
                 onSuccess={handleFormSuccess}
                 item={editingItem}
             />
-
+            {/*TODO: Confirmation de suppression */}
             <AlertDialog open={!!deletingId} onOpenChange={(open) => { if (!open) setDeletingId(null); }}>
                 <AlertDialogContent>
                     <AlertDialogHeader>

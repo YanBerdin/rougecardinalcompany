@@ -19,6 +19,7 @@ const SECTION_RENDERERS: Record<string, ComponentType<SectionRendererProps>> = {
   values: SectionValues,
   team: SectionTeam,
   mission: SectionMission,
+  founder: SectionFounder,
 };
 
 export function CompagnieView({
@@ -45,7 +46,7 @@ export function CompagnieView({
           />
         );
       })}
-      <SectionFounder />
+
     </div>
   );
 } 

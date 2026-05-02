@@ -10,7 +10,7 @@ export function ShowsView({ shows }: ShowsViewProps) {
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 id="shows-heading" className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-            Prochains Événements
+            A l&apos;affiche
           </h2>
           <p className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto">
             Découvrez notre programmation et réservez vos places

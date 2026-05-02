@@ -16,6 +16,7 @@ const PresentationSectionSchema = z.object({
     "values",
     "team",
     "mission",
+    "founder",
     "custom",
   ]),
   title: z.string().optional(),
@@ -25,6 +26,9 @@ const PresentationSectionSchema = z.object({
   quote: z
     .object({ text: z.string(), author: z.string().optional() })
     .optional(),
+  milestones: z
+    .array(z.object({ year: z.string(), label: z.string() }))
+    .optional(),
 });
 
 export type PresentationSection = z.infer<typeof PresentationSectionSchema>;
@@ -32,7 +36,7 @@ export type PresentationSection = z.infer<typeof PresentationSectionSchema>;
 type SectionRecord = {
   id: number;
   slug: string;
-  kind: "hero" | "history" | "quote" | "values" | "team" | "mission" | "custom";
+  kind: "hero" | "history" | "quote" | "values" | "team" | "mission" | "founder" | "custom";
   title: string | null;
   subtitle: string | null;
   content: string[] | null;
@@ -40,6 +44,7 @@ type SectionRecord = {
   quote_author: string | null;
   image_url: string | null;
   image_media_id: number | null;
+  milestones: Array<{ year: string; label: string }> | null;
   position: number;
   active: boolean;
 };
@@ -56,7 +61,12 @@ function mapRecordToSection(r: SectionRecord): PresentationSection {
     subtitle: r.subtitle ?? undefined,
     content: r.content ?? undefined,
     image: r.image_url ?? undefined,
+    milestones: r.milestones ?? undefined,
   } satisfies Partial<PresentationSection> as PresentationSection;
+
+  if (r.kind === "founder") {
+    return PresentationSectionSchema.parse(base);
+  }
 
   if (r.kind === "quote") {
     return PresentationSectionSchema.parse({
@@ -90,7 +100,7 @@ export const fetchCompagniePresentationSections = cache(
       const supabase = await createClient();
       const { data, error } = await supabase
         .from("compagnie_presentation_sections")
-        .select("id, slug, kind, title, subtitle, content, quote_text, quote_author, image_url, image_media_id, position, active")
+        .select("id, slug, kind, title, subtitle, content, quote_text, quote_author, image_url, image_media_id, milestones, position, active")
         .eq("active", true)
         .order("position", { ascending: true });
 

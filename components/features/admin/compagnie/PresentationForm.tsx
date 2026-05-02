@@ -17,7 +17,6 @@ import {
     FormField,
     FormItem,
     FormLabel,
-    FormMessage,
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -40,6 +39,7 @@ const KIND_LABELS: Record<SectionKind, string> = {
     values: "Valeurs",
     team: "Équipe",
     mission: "Mission",
+    founder: "Fondateur",
     custom: "Personnalisé",
 };
 
@@ -58,6 +58,7 @@ function buildDefaultValues(
             image_url: item.image_url ?? "",
             image_media_id: item.image_media_id ?? null,
             alt_text: item.alt_text ?? "",
+            milestones: (item.milestones as { year: string; label: string }[] | null | undefined) ?? [],
             position: item.position,
             active: item.active,
         };
@@ -73,6 +74,7 @@ function buildDefaultValues(
         image_url: "",
         image_media_id: null,
         alt_text: "",
+        milestones: [],
         active: true,
     };
 }
