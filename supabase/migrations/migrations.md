@@ -4,6 +4,29 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-05-02 - FEAT: TASK090 — section "founder" éditable (kind enum + milestones jsonb + seed)
+
+**Migration** : `20260502150000_task090_founder_section.sql`
+
+**Schéma déclaratif** : ✅ `supabase/schemas/07c_table_compagnie_presentation.sql`
+
+**Contexte** : Rendre la section fondateur de `/compagnie` éditable depuis l'admin. Le contenu, jusqu'ici hardcodé dans `SectionFounder.tsx`, est désormais persistant en base.
+
+**Changements** :
+
+- `compagnie_presentation_sections.kind` — CHECK étendu avec la valeur `'founder'`.
+- Nouvelle colonne `compagnie_presentation_sections.milestones jsonb` — stocke les jalons biographiques `[{year, label}]`.
+- Seed idempotent (slug='founder') avec bio en 4 paragraphes + 4 jalons + portrait.
+
+**Validation** :
+
+- ✅ DDL idempotent (`drop constraint if exists`, `add column if not exists`)
+- ✅ Seed idempotent (`on conflict (slug) do nothing`)
+- ✅ SQL entièrement en minuscules, apostrophes échappées (`''`)
+- ✅ Schéma déclaratif synchronisé
+
+---
+
 ### 2026-05-01 - PERF/FIX: Add B-tree indexes on logs_audit filter columns (fix 11 ADM-AUDIT E2E tests)
 
 **Migration** : `20260501203935_add_audit_logs_filter_indexes.sql`

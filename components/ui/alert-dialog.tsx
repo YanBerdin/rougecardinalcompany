@@ -120,7 +120,7 @@ const AlertDialogAction = ({
   <AlertDialogPrimitive.Action
     ref={ref}
     className={cn(
-      buttonVariants({ variant: "outline" }),
+      buttonVariants({ variant: "destructive" }),
       "mt-2 sm:mt-0",
       className
     )}

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { ReactElement } from "react";
+import type { SectionRendererProps } from "./types";
 
 const FOUNDER_NAME = "Florian Chaillot";
 const FOUNDER_ROLE = "Metteur en scène & Fondateur";
@@ -21,7 +22,7 @@ const MILESTONES: readonly Milestone[] = [
     { year: "2025", label: "Exposition photo - Paris" },
 ];
 
-export function SectionFounder(): ReactElement {
+export function SectionFounder({ section }: SectionRendererProps): ReactElement {
     return (
         <section
             id="founder"
@@ -36,14 +37,21 @@ export function SectionFounder(): ReactElement {
                 <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-12 xl:gap-20 items-start">
                     {/* Portrait + milestones — colonne gauche, masquée sur mobile */}
                     <div className="hidden lg:flex flex-col items-start gap-6">
-                        <FounderPortrait />
-                        <FounderMilestones />
+                        <FounderPortrait
+                            imageSrc={section?.image ?? FOUNDER_IMAGE_SRC}
+                            name={section?.title ?? FOUNDER_NAME}
+                        />
+                        <FounderMilestones milestones={section?.milestones ?? MILESTONES} />
                     </div>
                     {/* Bio + milestones mobile */}
                     <div className="flex flex-col gap-6">
-                        <FounderBio />
+                        <FounderBio
+                            name={section?.title ?? FOUNDER_NAME}
+                            role={section?.subtitle ?? FOUNDER_ROLE}
+                            bio={section?.content ?? FOUNDER_BIO}
+                        />
                         <div className="lg:hidden">
-                            <FounderMilestones />
+                            <FounderMilestones milestones={section?.milestones ?? MILESTONES} />
                         </div>
                     </div>
                 </div>
@@ -52,12 +60,12 @@ export function SectionFounder(): ReactElement {
     );
 }
 
-function FounderPortrait(): ReactElement {
+function FounderPortrait({ imageSrc, name }: { imageSrc: string; name: string }): ReactElement {
     return (
         <div className="relative w-[280px] sm:w-[320px] aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl mt-6">
             <Image
-                src={FOUNDER_IMAGE_SRC}
-                alt={`Portrait de ${FOUNDER_NAME}, fondateur de la Compagnie Rouge Cardinal`}
+                src={imageSrc}
+                alt={`Portrait de ${name}, fondateur de la Compagnie Rouge Cardinal`}
                 fill
                 className="object-cover object-top brightness-[0.85] contrast-[1.1]"
                 sizes="(max-width: 640px) 280px, (max-width: 1024px) 320px, 400px"
@@ -81,13 +89,13 @@ function FounderPortrait(): ReactElement {
     );
 }
 
-function FounderMilestones(): ReactElement {
+function FounderMilestones({ milestones }: { milestones: readonly { year: string; label: string }[] }): ReactElement {
     return (
         <ul
             className="flex flex-col gap-2 w-full max-w-[320px] lg:max-w-none"
             aria-label="Dates clés"
         >
-            {MILESTONES.map(({ year, label }) => (
+            {milestones.map(({ year, label }) => (
                 <li key={year} className="flex items-center gap-3">
                     <span className="text-gold-text font-bold text-sm tabular-nums w-10 shrink-0">
                         {year}
@@ -100,7 +108,7 @@ function FounderMilestones(): ReactElement {
     );
 }
 
-function FounderBio(): ReactElement {
+function FounderBio({ name, role, bio }: { name: string; role: string; bio: readonly string[] }): ReactElement {
     return (
         <div className="flex flex-col gap-6">
             <header>
@@ -111,16 +119,16 @@ function FounderBio(): ReactElement {
                     id="heading-founder"
                     className="text-3xl md:text-4xl lg:text-5xl font-semibold text-card-foreground leading-tight"
                 >
-                    {FOUNDER_NAME}
+                    {name}
                 </h2>
-                <p className="text-muted-foreground mt-2 font-light text-xs md:text-base">{FOUNDER_ROLE}</p>
+                <p className="text-muted-foreground mt-2 font-light text-xs md:text-base">{role}</p>
             </header>
             <div className="flex items-center gap-3" aria-hidden="true">
                 <span className="h-px w-12 bg-gold-text" />
                 <span className="h-px flex-1 bg-white/10" />
             </div>
             <div className="space-y-5">
-                {FOUNDER_BIO.map((paragraph, index) => (
+                {bio.map((paragraph, index) => (
                     <p
                         key={index}
                         className="text-card-secondary text-sm md:text-base leading-relaxed"

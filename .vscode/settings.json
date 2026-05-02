@@ -47,4 +47,6 @@
             ]
         }
     },
+    "workbench.editor.dragToOpenWindow": false,
+    "files.autoSave": "afterDelay",
 }

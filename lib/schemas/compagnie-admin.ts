@@ -10,10 +10,20 @@ export const SECTION_KINDS = [
     "values",
     "team",
     "mission",
+    "founder",
     "custom",
 ] as const;
 
 export type SectionKind = (typeof SECTION_KINDS)[number];
+
+// ─── Milestone ────────────────────────────────────────────────────────────────
+
+export const MilestoneSchema = z.object({
+    year: z.string().min(1).max(10),
+    label: z.string().min(1).max(120),
+});
+
+export type Milestone = z.infer<typeof MilestoneSchema>;
 
 // =============================================================================
 // COMPAGNIE VALUES
@@ -93,6 +103,7 @@ export const PresentationSectionInputSchema = z.object({
         .or(z.literal("")),
     image_media_id: z.coerce.bigint().optional().nullable(),
     alt_text: z.string().optional().nullable(),
+    milestones: z.array(MilestoneSchema).max(20).optional().nullable(),
     position: z.number().int().min(0).optional(),
     active: z.boolean().optional(),
 });
@@ -113,6 +124,7 @@ export const PresentationSectionFormSchema = z.object({
     image_url: z.string().url().optional().or(z.literal("")),
     image_media_id: z.number().int().positive().optional().nullable(),
     alt_text: z.string().optional().or(z.literal("")),
+    milestones: z.array(MilestoneSchema).max(20).optional(),
     position: z.number().int().min(0).optional(),
     active: z.boolean(),
 });
@@ -134,6 +146,7 @@ export interface PresentationSectionDTO {
     image_url: string | null;
     image_media_id: number | null;
     alt_text: string | null;
+    milestones: Array<{ year: string; label: string }> | null;
     position: number;
     active: boolean;
     created_at: string;

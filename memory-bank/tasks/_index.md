@@ -21,6 +21,7 @@
 
 ## Terminé (récent)
 
+- `TASK090` SectionFounder administrable (kind='founder') — **COMPLÈTE ✅ 2026-05-02** — migration `20260502150000`, colonne `milestones jsonb`, CHECK étendu, seed row, 3 fichiers source, fallback FOUNDER_BIO — voir `memory-bank/tasks/TASK090-founderContentAdminDashboard.md`
 - `TASK089` Suppression display_toggle_home_hero — **COMPLÈTE ✅ 2026-04-23** — migration `20260101190000`, 6 fichiers source, HeroContainer sans gate toggle, ADM-CONFIG-001 → 5 toggles home, ADM-CONFIG-002/003 supprimés — voir `memory-bank/tasks/tasks-completed/TASK089-remove-display-toggle-home-hero.md`
 - `HOME-TEAM` Section équipe sur Home Page — **COMPLÈTE ✅ 2026-04-22** — `HomeTeamContainer` entre Newsletter et About, 7 fichiers, `TeamMemberCard` réutilisé, display toggle default-enabled
 - `TASK088` Migration recharts 3.x

@@ -80,11 +80,12 @@ export function ContentArrayField({
                     </div>
                     <Button
                         type="button"
-                        variant="ghost"
+                        variant="destructive"
                         size="sm"
                         onClick={() => handleRemove(index)}
                         aria-label={`Supprimer le paragraphe ${index + 1}`}
                         className="mt-1 shrink-0"
+                        title="Supprimer"
                     >
                         <X className="h-4 w-4" aria-hidden="true" />
                     </Button>

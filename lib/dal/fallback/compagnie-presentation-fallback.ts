@@ -56,4 +56,18 @@ export const compagniePresentationFallback: PresentationSection[] = [
       "Notre engagement va au-delà de la simple représentation : nous menons des actions culturelles en milieu scolaire, participons à des festivals, et soutenons la création contemporaine par des résidences d'artistes et des collaborations avec de jeunes talents.",
     ],
   },
+  {
+    id: "founder",
+    kind: "founder",
+    title: "Florian Chaillot",
+    subtitle: "Metteur en scène & Fondateur",
+    image:
+      "https://yvtrlvmbofklefxcxrzv.supabase.co/storage/v1/object/public/medias/team/1776350784063-IMG_3043---retouch-.jpg",
+    milestones: [
+      { year: "2022", label: "L'Avare - Comédie-Française" },
+      { year: "2023", label: "Gala de l'Opéra de Lorraine" },
+      { year: "2024", label: "Le Grand Meaulnes - scène" },
+      { year: "2025", label: "Exposition photo - Paris" },
+    ],
+  },
 ];

@@ -59,7 +59,7 @@ export function ImageFieldSourceActions({
                             <Input
                                 type="url"
                                 placeholder="https://example.com/image.jpg"
-                                className="pl-9 w-full"
+                                className="bg-input pl-9 w-full"
                                 value={imageUrl ?? ""}
                                 onChange={(e) => handleUrlChange(e.target.value)}
                             />
@@ -68,7 +68,7 @@ export function ImageFieldSourceActions({
                             {imageUrl && (
                                 <Button
                                     type="button"
-                                    variant="outline"
+                                    variant="destructive"
                                     size="icon"
                                     onClick={handleClearUrl}
                                     title="Effacer l'URL"

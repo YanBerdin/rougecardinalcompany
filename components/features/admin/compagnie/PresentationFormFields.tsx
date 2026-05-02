@@ -11,15 +11,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ContentArrayField } from "./ContentArrayField";
+import { MilestonesArrayField } from "./MilestonesArrayField";
 import { ImageField } from "@/components/features/admin/media";
 import type { PresentationSectionFormValues } from "@/lib/schemas/compagnie-admin";
 
-const SHOW_TITLE = ["hero", "history", "values", "team", "mission", "custom"];
-const SHOW_SUBTITLE = ["hero", "values", "team", "custom"];
-const SHOW_CONTENT = ["history", "mission", "custom"];
+const SHOW_TITLE = ["hero", "history", "values", "team", "mission", "founder", "custom"];
+const SHOW_SUBTITLE = ["hero", "values", "team", "founder", "custom"];
+const SHOW_CONTENT = ["history", "mission", "founder", "custom"];
 const SHOW_QUOTE = ["quote", "custom"];
 const SHOW_QUOTE_AUTHOR = ["quote", "custom"];
-const SHOW_IMAGE_URL = ["history", "custom"];
+const SHOW_IMAGE_URL = ["history", "founder", "custom"];
+const SHOW_MILESTONES = ["founder"];
 
 export function PresentationFormFields() {
     const form = useFormContext<PresentationSectionFormValues>();
@@ -136,6 +138,10 @@ export function PresentationFormFields() {
                     <ImageField.Preview />
                     <ImageField.AltText />
                 </ImageField.Provider>
+            )}
+
+            {SHOW_MILESTONES.includes(kind) && (
+                <MilestonesArrayField control={form.control} />
             )}
         </div>
     );
