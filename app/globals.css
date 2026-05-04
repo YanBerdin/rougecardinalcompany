@@ -35,13 +35,13 @@
     --ring: 0 78% 36%; /* #9e1b1b */
 
     --chart-1: 0 78% 36%; /* #ad0000 */
-    --chart-2: 0 84.739% 51.1765%; /* #ec1919 */
+    --chart-2: 0 78% 36%; /* #ad0000 */
     --chart-3: 0 100% 71.5686%; /* #ff6e6e */
     --chart-4: 0 0% 10.9804%; /* #1C1C1C */
     --chart-5: 0 0% 83.1373%; /* #D4D4D4 */
     --chart-6: 0 0% 97%; /* #f7f7f7 vs 0 0% 100% #FFFFFF  */
     --chart-7: 0 0% 97%; /* #0a0a0a */
-    /* hover:border-[#c41e1e4d] navlink active #hover:bg-[#e31e1e59] */ 
+    /* hover:border-[#c41e1e4d] navlink active #hover:bg-[#e31e1e59] */
 
     --gold: 43 72% 52%; /* rgb(221, 171, 44) */
     --gold-light: 43 80% 68%; /* rgb(239, 202, 108) */
@@ -123,7 +123,7 @@
     --ring: 0 78% 36%; /* #9e1b1b */
 
     --chart-1: 4.64, 79.74%, 55.49%; /* #e84133 */
-    --chart-2: 0 84.739% 51.1765%; /* #ec1919 */
+    --chart-2: 357,92.4%,46.7%; /* #e50914 */
     --chart-3: 0 100% 71%; /* #ff6e6e */
     --chart-4: 0 0% 10.9804%; /* #1C1C1C */
     --chart-5: 0 0% 25.8824%; /* #424242 */
@@ -786,6 +786,12 @@
   /* Stabilisation du texte */
   transform: none !important;
   animation: none !important;
+  color: #ad0000;
+
+}
+
+.logo-text:hover {
+  color: #e50914;
 }
 
 /* Light mode: Navbar glass blur when scrolled */

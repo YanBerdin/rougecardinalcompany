@@ -61,12 +61,12 @@ alter table public.evenements
 add constraint check_image_url_format 
 check (image_url is null or image_url ~* '^https?://.*$');
 
--- Contrainte pour s'assurer que start_time <= end_time quand les deux sont définis
-alter table public.evenements 
+-- Note: La contrainte check_start_end_time_order a été supprimée (migration 20260503120000)
+-- Raison: start_time > end_time est valide pour les spectacles qui se terminent après minuit
+-- (ex: début 20h30, fin 00h30 le lendemain). L'ordre chronologique est déjà garanti
+-- par date_debut (timestamptz) et date_fin (timestamptz).
+alter table public.evenements
 drop constraint if exists check_start_end_time_order;
-alter table public.evenements 
-add constraint check_start_end_time_order 
-check (start_time is null or end_time is null or start_time <= end_time);
 
 -- Genres: contrainte DB supprimée — genres libres validés côté application
 -- Zod : z.array(z.string().min(1).max(50)).max(10)
@@ -75,8 +75,7 @@ alter table public.evenements
 
 comment on constraint check_ticket_url_format on public.evenements is 'URL de billetterie doit être au format http/https';
 comment on constraint check_image_url_format on public.evenements is 'URL d''image doit être au format http/https';
-comment on constraint check_start_end_time_order on public.evenements is 'L''heure de début doit être antérieure à l''heure de fin';
-comment on constraint check_valid_event_types on public.evenements is 'Types d''événements limités à une liste prédéfinie';
+-- Note: check_start_end_time_order supprimé (spectacles pouvant dépasser minuit)
 
 -- ===== CONTRAINTES POUR MEMBRES EQUIPE =====
 

@@ -4,6 +4,28 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-05-03 - FIX: Drop constraint `check_start_end_time_order` sur `evenements`
+
+**Migration** : `20260503120000_drop_start_end_time_order_constraint.sql`
+
+**Schéma déclaratif** : ✅ `supabase/schemas/50_constraints.sql`
+
+**Contexte** : La contrainte `check_start_end_time_order` (`start_time <= end_time`) bloquait la création d'événements qui traversent minuit (ex. 22h00–01h00). Les colonnes `date_debut`/`date_fin` (timestamptz) assurent déjà l'ordre chronologique ; la contrainte sur les champs `time` est donc redondante et incorrecte pour ce cas d'usage.
+
+**Changements** :
+
+- `evenements` — suppression de la contrainte `check_start_end_time_order` via `DROP CONSTRAINT IF EXISTS`.
+
+**Validation** :
+
+- ✅ DDL idempotent (`drop constraint if exists`)
+- ✅ SQL entièrement en minuscules
+- ✅ Schéma déclaratif synchronisé (`50_constraints.sql`)
+- ✅ Appliquée en local via `supabase migration up --local --include-all` (2026-05-03)
+- ✅ Appliquée cloud via `supabase db push` (2026-05-03)
+
+---
+
 ### 2026-05-02 - FEAT: TASK090 — section "founder" éditable (kind enum + milestones jsonb + seed)
 
 **Migration** : `20260502150000_task090_founder_section.sql`

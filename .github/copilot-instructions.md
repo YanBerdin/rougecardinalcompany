@@ -793,7 +793,7 @@ export function CompagnieView({ sections }: Props) {
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
 
-const chartConfig: ChartConfig = { pageviews: { label: "Vues", color: "hsl(var(--chart-1))" } };
+const chartConfig: ChartConfig = { pageviews: { label: "Vues", color: "hsl(var(--chart-2))" } };
 
 <ChartContainer config={chartConfig} className="h-80">
   <LineChart data={data}>

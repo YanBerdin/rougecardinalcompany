@@ -44,7 +44,7 @@ export function HeroCTA({ slide }: HeroCTAProps) {
             <Button
               variant="outline"
               size="default"
-              className="max-sm:text-xs max-w-[280px] w-52 justify-center bg-white/30 border-white/50 text-chart-6 backdrop-blur-md hover:bg-white/90 hover:text-primary transition-colors duration-300 shadow-lg"
+              className="max-sm:text-xs max-w-[280px] w-52 justify-center bg-white/30 border-white/50 text-chart-6 backdrop-blur-md hover:bg-white/90 hover:text-chart-2 transition-colors duration-300 shadow-lg"
               asChild
             >
               <Link href={slide.ctaSecondaryUrl ?? "/agenda"}>

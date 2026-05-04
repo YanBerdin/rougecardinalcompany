@@ -72,7 +72,7 @@ export function TeamMemberCard({ member, index }: TeamMemberCardProps): ReactEle
                             type="button"
                             onClick={() => setOpen(true)}
                             aria-haspopup="dialog"
-                            className="text-sidebar-ring text-xs font-semibold uppercase tracking-widest hover:underline underline-offset-4 mt-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring rounded-sm transition-opacity duration-200 opacity-80 hover:opacity-100"
+                            className="text-chart-2 text-xs font-semibold uppercase tracking-widest hover:underline underline-offset-4 mt-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring rounded-sm transition-opacity duration-200"
                         >
                             En savoir plus →
                         </button>
