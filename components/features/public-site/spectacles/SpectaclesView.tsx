@@ -31,9 +31,9 @@ export function SpectaclesView({
   return (
     <div className="pt-16">
       {/* Hero Section */}
-      <section className="py-8 lg:py-10 hero-gradient" aria-labelledby="spectacles-hero-heading">
+      <section className="py-8 lg:py-12 hero-gradient" aria-labelledby="spectacles-hero-heading">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 id="spectacles-hero-heading" className="text-white text-3xl md:text-4xl lg:text-5xl font-bold animate-fade-in-up"> {/** mb-6  */}
+          <h1 id="spectacles-hero-heading" className="text-white/90 text-3xl md:text-4xl lg:text-5xl font-bold animate-fade-in-up"> {/** mb-6  */}
             À l&apos;Affiche
           </h1>
           {/*<p
@@ -46,13 +46,13 @@ export function SpectaclesView({
       </section>
 
       {/* Spectacles Actuels lg:w-[calc(33.333%-1.33rem)] */}
-      <section className="py-16 bg-chart-7" aria-label="Spectacles actuels">
+      <section className="py-24 bg-background" aria-label="Spectacles actuels">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap justify-center gap-16">
             {currentShows.map((show, index) => (
               <Card
                 key={show.id}
-                className={`card-hover animate-fade-in-up overflow-hidden w-full md:w-[calc(50%-1rem)]  max-w-md group border-0 shadow-none bg-transparent hover:bg-card`}
+                className={`card-hover animate-fade-in-up overflow-hidden w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] xl:w-[calc(25%-1.125rem)] max-w-xs  group border-0 shadow-none bg-transparent hover:bg-card hover:border hover:border-primary hover:shadow-[0_15px_40px_rgba(173,0,0,0.25)]`}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div className="relative aspect-[3/4] overflow-hidden rounded-lg shadow-md">
@@ -126,20 +126,28 @@ export function SpectaclesView({
       </section>
 
       {/* Archives */}
-      <section className="py-20 bg-chart-7/60" aria-labelledby="spectacles-archives-heading">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 id="spectacles-archives-heading" className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">Nos Créations Passées</h2>
-            <p className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto">
-              Les créations qui ont marqué notre parcours
-            </p>
-          </div>
+      <section className="py-20 bg-background" aria-labelledby="spectacles-archives-heading">
 
+        <section className="py-8 lg:py-12 hero-gradient" aria-labelledby="spectacles-archives-heading">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 id="spectacles-archives-heading" className="text-white/90 text-3xl md:text-4xl lg:text-5xl font-bold animate-fade-in-up"> {/** mb-6  */}
+              Nos Créations Passées
+            </h2>
+            {/*<p
+           // className="text-lg md:text-xl lg:text-2xl text-white/90 opacity-90 animate-fade-in"
+           // style={{ animationDelay: "0.2s" }}
+          >
+            Nos Créations Passées
+          </p>*/}
+          </div>
+        </section>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
           <div className="flex flex-wrap justify-center gap-16">
             {displayedArchivedShows.map((show, index) => (
               <Card
                 key={show.id}
-                className={`card-hover animate-fade-in-up overflow-hidden w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] xl:w-[calc(25%-1.125rem)] max-w-xs group border-0 shadow-none bg-transparent`}
+                className={`card-hover animate-fade-in-up overflow-hidden w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] xl:w-[calc(25%-1.125rem)] max-w-xs group border-0 shadow-none bg-transparent hover:bg-card`}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <Link href={getSpectacleUrl(show)} className="block">

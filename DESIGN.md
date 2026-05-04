@@ -118,7 +118,7 @@ The palette is warm-neutral first, with cardinal red and gold accents as identit
 ### Primary
 
 - Cardinal Red (`#8e1111`): Main action color (`--primary`), sidebar primary roles (`--sidebar-primary`, light).
-- Ring Red (`#a31414`): Focus ring and chart-1 accent (`--ring`, `--chart-1`).
+- Ring Red (`#a31414`): Focus ring and chart-2 accent (`--ring`, `--chart-2`).
 
 ### Secondary
 

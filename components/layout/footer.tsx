@@ -37,7 +37,7 @@ export default function Footer() {
                 <Link
                   href="https://www.facebook.com/"
                   aria-label="Facebook"
-                  className="hover:text-primary"
+                  className="hover:text-chart-2"
                   title="Facebook"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -49,7 +49,7 @@ export default function Footer() {
                 <Link
                   href="https://www.instagram.com/"
                   aria-label="Instagram"
-                  className="hover:text-primary"
+                  className="hover:text-chart-2"
                   title="Instagram"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -58,7 +58,7 @@ export default function Footer() {
                 </Link>
               </Button>
               <Button variant="ghost" size="sm" asChild className="min-h-11 min-w-11">
-                <Link href="https://twitter.com/" aria-label="Twitter" className="hover:text-primary" title="Twitter" target="_blank" rel="noopener noreferrer">
+                <Link href="https://twitter.com/" aria-label="Twitter" className="hover:text-chart-2" title="Twitter" target="_blank" rel="noopener noreferrer">
                   <Twitter className="h-5 w-5" />
                 </Link>
               </Button>
@@ -72,7 +72,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/compagnie"
-                  className="text-muted-foreground hover:text-primary transition-colors"
+                  className="text-muted-foreground hover:text-chart-2 transition-colors"
                 >
                   La Compagnie
                 </Link>
@@ -80,7 +80,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/spectacles"
-                  className="text-muted-foreground hover:text-primary transition-colors"
+                  className="text-muted-foreground hover:text-chart-2 transition-colors"
                 >
                   Spectacles
                 </Link>
@@ -88,7 +88,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/agenda"
-                  className="text-muted-foreground hover:text-primary transition-colors"
+                  className="text-muted-foreground hover:text-chart-2 transition-colors"
                 >
                   Agenda
                 </Link>
@@ -96,7 +96,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/presse"
-                  className="text-muted-foreground hover:text-primary transition-colors"
+                  className="text-muted-foreground hover:text-chart-2 transition-colors"
                 >
                   Presse
                 </Link>
@@ -104,7 +104,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/contact"
-                  className="text-muted-foreground hover:text-primary transition-colors"
+                  className="text-muted-foreground hover:text-chart-2 transition-colors"
                 >
                   Contact
                 </Link>
@@ -117,15 +117,27 @@ export default function Footer() {
             <h3 className="font-semibold font-sans mb-4 text-secondary-foreground">Contact</h3>
             <ul className="space-y-3">
               <li className="flex items-center space-x-2 text-muted-foreground">
-                <Mail className="h-4 w-4 text-primary" aria-hidden="true" />
-                <span>contact@rouge-cardinal.fr</span>
+                <Mail className="h-4 w-4 text-chart-2" aria-hidden="true" />
+                <Link
+                  href="mailto:contact@rouge-cardinal.fr"
+                  className="text-muted-foreground hover:text-chart-2"
+                  aria-label="Envoyer un email à contact@rouge-cardinal.fr"
+                >
+                  <span>contact@rouge-cardinal.fr</span>
+                </Link>
               </li>
               <li className="flex items-center space-x-2 text-muted-foreground">
-                <Phone className="h-4 w-4 text-primary" aria-hidden="true" />
-                <span>+33 1 23 45 67 89</span>
+                <Phone className="h-4 w-4 text-chart-2" aria-hidden="true" />
+                <Link
+                  href="tel:+33123456789"
+                  className="text-muted-foreground hover:text-chart-2"
+                  aria-label="Appeler le +33 1 23 45 67 89"
+                >
+                  <span>+33 1 23 45 67 89</span>
+                </Link>
               </li>
               <li className="flex items-start space-x-2 text-muted-foreground">
-                <MapPin className="h-4 w-4 mt-1 text-primary" aria-hidden="true" />
+                <MapPin className="h-4 w-4 mt-1 text-chart-2" aria-hidden="true" />
                 <span>75011 Paris, France</span>
               </li>
             </ul>
@@ -141,19 +153,19 @@ export default function Footer() {
             <div className="flex space-x-6 text-sm">
               <Link
                 href="/mentions-legales"
-                className="text-muted-foreground hover:text-primary transition-colors"
+                className="text-muted-foreground hover:text-chart-2 transition-colors"
               >
                 Mentions légales
               </Link>
               <Link
                 href="/politique-confidentialite"
-                className="text-muted-foreground hover:text-primary transition-colors"
+                className="text-muted-foreground hover:text-chart-2 transition-colors"
               >
                 Politique de confidentialité
               </Link>
               <Link
                 href="/cookies"
-                className="text-muted-foreground hover:text-primary transition-colors"
+                className="text-muted-foreground hover:text-chart-2 transition-colors"
               >
                 Cookies
               </Link>
