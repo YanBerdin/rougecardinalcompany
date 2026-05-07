@@ -6,10 +6,10 @@ interface AgendaFixtures {
 }
 
 export const test = base.extend<AgendaFixtures>({
-    agendaPage: async ({ page }, use) => {
+    agendaPage: async ({ page }, register) => {
         const agendaPage = new AgendaPage(page);
         await agendaPage.goto();
-        await use(agendaPage);
+        await register(agendaPage);
     },
 });
 

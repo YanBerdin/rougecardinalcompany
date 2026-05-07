@@ -10,11 +10,21 @@
 import {
     createContext,
     use,
+    useCallback,
     useMemo,
     useState,
     type ReactNode,
 } from "react";
+import {
+    addDays,
+    addMonths,
+    addWeeks,
+    subDays,
+    subMonths,
+    subWeeks,
+} from "date-fns";
 import type { Event, EventType } from "@/lib/schemas/agenda";
+import type { AgendaView } from "@/lib/schemas/agenda";
 
 // ============================================================================
 // Constants
@@ -31,11 +41,21 @@ interface AgendaState {
     readonly filteredEvents: Event[];
     readonly eventTypes: EventType[];
     readonly filterType: string;
+    readonly view: AgendaView;
+    readonly calendarDate: Date;
+    readonly calendarEvents: Event[];
+    readonly selectedDate: Date | null;
 }
 
 interface AgendaActions {
     readonly setFilterType: (type: string) => void;
     readonly downloadCalendarFile: (event: Event) => void;
+    readonly setView: (view: AgendaView) => void;
+    readonly setCalendarDate: (date: Date) => void;
+    readonly setSelectedDate: (date: Date | null) => void;
+    readonly navigatePrev: () => void;
+    readonly navigateNext: () => void;
+    readonly navigateToday: () => void;
 }
 
 interface AgendaContextValue {
@@ -115,33 +135,73 @@ function downloadCalendarFile(event: Event): void {
 interface AgendaProviderProps {
     readonly events: Event[];
     readonly eventTypes: EventType[];
+    readonly calendarEvents: Event[];
     readonly children: ReactNode;
 }
 
 export function AgendaProvider({
     events,
     eventTypes,
+    calendarEvents,
     children,
 }: AgendaProviderProps): React.JSX.Element {
     const [filterType, setFilterType] = useState<string>("all");
+    const [view, setView] = useState<AgendaView>("list");
+    const [calendarDate, setCalendarDate] = useState<Date>(() => new Date());
+    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
+    const navigatePrev = useCallback(() => {
+        setCalendarDate((prev) => {
+            if (view === "month") return subMonths(prev, 1);
+            if (view === "week") return subWeeks(prev, 1);
+            return subDays(prev, 1);
+        });
+    }, [view]);
+
+    const navigateNext = useCallback(() => {
+        setCalendarDate((prev) => {
+            if (view === "month") return addMonths(prev, 1);
+            if (view === "week") return addWeeks(prev, 1);
+            return addDays(prev, 1);
+        });
+    }, [view]);
+
+    const navigateToday = useCallback(() => {
+        setCalendarDate(new Date());
+    }, []);
 
     const filteredEvents = useMemo(() => {
         if (filterType === "all") return events;
-        return events.filter((e) => {
-            // Prioritise the linked spectacle's artistic genre when available.
-            // Using OR across both fields caused events to match multiple filters
-            // (e.g. genres=["spectacle"] AND genre="Théâtre" → appeared under both).
-            if (e.genre) return e.genre.toLowerCase() === filterType;
-            return e.genres.some((g) => g.toLowerCase() === filterType);
-        });
+        return events.filter(
+            (e) =>
+                (e.genre != null && e.genre.toLowerCase() === filterType) ||
+                e.genres.some((g) => g.toLowerCase() === filterType)
+        );
     }, [events, filterType]);
 
     const contextValue = useMemo<AgendaContextValue>(
         () => ({
-            state: { filteredEvents, eventTypes, filterType },
-            actions: { setFilterType, downloadCalendarFile },
+            state: {
+                filteredEvents,
+                eventTypes,
+                filterType,
+                view,
+                calendarDate,
+                calendarEvents,
+                selectedDate,
+            },
+            actions: {
+                setFilterType,
+                downloadCalendarFile,
+                setView,
+                setCalendarDate,
+                setSelectedDate,
+                navigatePrev,
+                navigateNext,
+                navigateToday,
+            },
         }),
-        [filteredEvents, eventTypes, filterType],
+        [filteredEvents, eventTypes, filterType, view, calendarDate, calendarEvents, selectedDate, navigatePrev, navigateNext, navigateToday],
     );
 
     return (

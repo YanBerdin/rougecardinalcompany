@@ -26,7 +26,7 @@ interface SpectacleDetailViewProps {
     galleryPhotos?: GalleryPhotoDTO[];
     venue?: { nom: string; ville: string | null } | null;
     ticketUrl?: string | null;
-    dateRange?: { start: string; end: string } | null;
+    dateRanges?: Array<{ start: string; end: string }>;
 }
 
 export function SpectacleDetailView({
@@ -35,15 +35,15 @@ export function SpectacleDetailView({
     galleryPhotos = [],
     venue = null,
     ticketUrl = null,
-    dateRange = null,
+    dateRanges = [],
 }: SpectacleDetailViewProps): React.ReactNode {
     const awards = spectacle.awards || [];
     const hasAwards = awards.length > 0;
-    const formattedDateRange = dateRange
-        ? dateRange.start === dateRange.end
-            ? `Le ${new Date(dateRange.start).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit" })}`
-            : `${new Date(dateRange.start).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit" })} → ${new Date(dateRange.end).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit" })}`
-        : "À venir";
+    const formattedRanges = dateRanges.map((range) =>
+        range.start === range.end
+            ? `Le ${new Date(range.start).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit" })}`
+            : `${new Date(range.start).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit" })} → ${new Date(range.end).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit" })}`
+    );
     const formattedVenue = venue ? `${venue.nom}${venue.ville ? ` - ${venue.ville}` : ""}` : "À venir";
 
     return (
@@ -59,31 +59,6 @@ export function SpectacleDetailView({
                 Aller au contenu principal
             </Link>
 
-            {/* Mobile CTA — sticky sous le header, visible uniquement sur mobile */}
-            {/*            <div
-                className="sm:hidden sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-3"
-                aria-label="Actions principales"
-            >
-                <div className="flex gap-3">
-                    <Button variant="default" size="sm" className="flex-1 shadow-md" asChild>
-                        <Link
-                            href={ticketUrl ?? "/contact?subject=reservation"}
-                            aria-label={`Réserver des places pour ${spectacle.title}`}
-                            {...(ticketUrl ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                        >
-                            <Ticket className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                            Réserver
-                        </Link>
-                    </Button>
-                    <Button variant="secondary" size="sm" className="flex-1" asChild>
-                        <Link href="/agenda" aria-label="Consulter l'agenda des représentations">
-                            <Calendar className="mr-1.5 h-4 w-4" aria-hidden="true" />
-                            Voir les dates
-                        </Link>
-                    </Button>
-                </div>
-            </div>
-*/}
             {/* Content Section */}
             <section
                 className="pt-2 md:pt-8 pb-16 md:pb-24 bg-background"
@@ -92,46 +67,48 @@ export function SpectacleDetailView({
                 <div className="max-w-7xl mx-auto px-4 xl:px-0 ">
                     <div className="grid grid-cols-1 md:grid-cols-5 gap-8 md:gap-12 lg:gap-16">
 
-                        {/* Affiche Column */}
-                        <div className="md:col-span-2 p-4 md:p-2 lg:p-0">
-                            <div className="group rounded-lg overflow-hidden shadow-2xl border-4 border-white/80 dark:border-gray-800/80 transition-all hover:shadow-[0_25px_70px_rgba(173,0,0,0.4)] sticky top-20 w-full max-w-[260px] sm:max-w-[320px] md:max-w-[360px] lg:max-w-[400px] mx-auto">
-                                {spectacle.image_url ? (
-                                    <Image
-                                        src={spectacle.image_url}
-                                        alt={`Affiche du spectacle ${spectacle.title}`}
-                                        width={600}
-                                        height={900}
-                                        className="w-full h-auto transition-transform duration-700 group-hover:scale-105"
-                                        priority
-                                        sizes="(max-width: 600px) 80vw, 30vw"
-                                    />
-                                ) : (
-                                    <div className="aspect-[2/3] hero-gradient flex items-center justify-center">
-                                        <div className="text-center p-4">
-                                            <Play className="h-12 w-12 mx-auto mb-2 text-primary-foreground/50" aria-hidden="true" />
-                                            <p className="text-primary-foreground/80 font-medium text-sm">
-                                                Affiche à venir
-                                            </p>
+                        {/* Affiche Column — masquée sur mobile (version mobile insérée après les badges) */}
+                        <div className="md:col-span-2 p-4 md:p-2 lg:p-0 hidden md:block">
+                            <div className="sticky top-20 w-full max-w-[260px] sm:max-w-[320px] md:max-w-[360px] lg:max-w-[400px] mx-auto flex flex-col gap-4">
+                                <div className="group rounded-lg overflow-hidden shadow-2xl border-4 border-white/80 dark:border-gray-800/80 transition-all hover:shadow-[0_25px_70px_rgba(173,0,0,0.4)]">
+                                    {spectacle.image_url ? (
+                                        <Image
+                                            src={spectacle.image_url}
+                                            alt={`Affiche du spectacle ${spectacle.title}`}
+                                            width={600}
+                                            height={900}
+                                            className="w-full h-auto transition-transform duration-700 group-hover:scale-105"
+                                            priority
+                                            sizes="(max-width: 600px) 80vw, 30vw"
+                                        />
+                                    ) : (
+                                        <div className="aspect-[2/3] hero-gradient flex items-center justify-center">
+                                            <div className="text-center p-4">
+                                                <Play className="h-12 w-12 mx-auto mb-2 text-primary-foreground/50" aria-hidden="true" />
+                                                <p className="text-primary-foreground/80 font-medium text-sm">
+                                                    Affiche à venir
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
+                                </div>
+                                {/* CTA Principaux sous l'affiche */}
+                                <SpectacleCTABar
+                                    title={spectacle.title}
+                                    ticketUrl={ticketUrl}
+                                    agendaLabel="Voir l'agenda"
+                                />
                             </div>
                         </div>
 
                         {/* Synopsis Column */}
-                        <div className="md:col-span-3 space-y-6">
-                            {/* CTA Principaux : Réserver + Agenda (+ Retour) */}
-                            <SpectacleCTABar
-                                title={spectacle.title}
-                                ticketUrl={ticketUrl}
-                                agendaLabel="Voir les dates"
-                            /> {/* backLabel="Tous les évènements" */}
-                            <h1 id="spectacle-title" className="text-2xl md:text-3xl lg:text-4xl font-bold font-sans mb-6 animate-fade-in-up">
+                        <div className="md:col-span-3 space-y-4">
+                            <h1 id="spectacle-title" className="text-2xl md:text-3xl lg:text-4xl font-bold font-sans mb-2 animate-fade-in-up">
                                 {spectacle.title}
                             </h1>
                             {spectacle.short_description && (
                                 <p
-                                    className="max-sm:text-lg text-xl md:text-2xl italic leading-relaxed opacity-90 animate-fade-in max-w-3xl mx-auto"
+                                    className="text-base md:text-2xl italic leading-relaxed opacity-90 animate-fade-in max-w-3xl mx-auto"
                                     style={{ animationDelay: "0.2s" }}
                                 >
                                     {spectacle.short_description}
@@ -139,14 +116,50 @@ export function SpectacleDetailView({
                             )}
 
                             <div className="flex flex-wrap items-center gap-3" aria-label="Période et lieu">
-                                <Badge variant="outlineGold" className="text-xs sm:text-sm font-semibold shadow-lg">
-                                    <Calendar className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
-                                    {formattedDateRange}
-                                </Badge>
-                                <Badge variant="outlineGold" className="text-xs sm:text-sm font-semibold shadow-lg">
-                                    <MapPin className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
+                                {formattedRanges.length > 0 ? formattedRanges.map((label, i) => (
+                                    <Badge key={i} variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold shadow-lg">
+                                        <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                        {label}
+                                    </Badge>
+                                )) : (
+                                    <Badge variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold shadow-lg">
+                                        <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                        À venir
+                                    </Badge>
+                                )}
+                                <Badge variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold shadow-lg">
+                                    <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                                     {formattedVenue}
                                 </Badge>
+                            </div>
+
+                            {/* Mobile : affiche + CTA, visible seulement sur mobile, après les badges */}
+                            <div className="md:hidden w-full max-w-[280px] mx-auto flex flex-col gap-4">
+                                <div className="group rounded-lg overflow-hidden shadow-2xl border-4 border-white/80 dark:border-gray-800/80 transition-all hover:shadow-[0_25px_70px_rgba(173,0,0,0.4)]">
+                                    {spectacle.image_url ? (
+                                        <Image
+                                            src={spectacle.image_url}
+                                            alt={`Affiche du spectacle ${spectacle.title}`}
+                                            width={600}
+                                            height={900}
+                                            className="w-full h-auto transition-transform duration-700 group-hover:scale-105"
+                                            priority
+                                            sizes="80vw"
+                                        />
+                                    ) : (
+                                        <div className="aspect-[2/3] hero-gradient flex items-center justify-center">
+                                            <div className="text-center p-4">
+                                                <Play className="h-12 w-12 mx-auto mb-2 text-primary-foreground/50" aria-hidden="true" />
+                                                <p className="text-primary-foreground/80 font-medium text-sm">Affiche à venir</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                <SpectacleCTABar
+                                    title={spectacle.title}
+                                    ticketUrl={ticketUrl}
+                                    agendaLabel="Voir l'agenda"
+                                />
                             </div>
 
                             {/* Photo 1 - after short_description */}
@@ -243,12 +256,12 @@ export function SpectacleDetailView({
                             </div>
                         )}
                     </div>
-                    {/* Call to Actions */}
-                    <div className="pt-4 md:pt-6 max-w-7xl flex justify-center">
+                    {/* Call to Actions — visible uniquement sur md+ (redondant sur mobile) */}
+                    <div className="pt-4 md:pt-6 max-w-7xl hidden md:flex justify-center">
                         <SpectacleCTABar
                             title={spectacle.title}
                             ticketUrl={ticketUrl}
-                            agendaLabel="Voir les dates"
+                            agendaLabel="Voir l'agenda"
                         />
                         {/* backLabel="Tous les évènements" */}
                     </div>

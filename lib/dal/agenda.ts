@@ -79,6 +79,7 @@ function mapRowToEventDTO(row: SupabaseEventRow): AgendaEvent {
     genre: row.spectacles?.genre ?? null,
     status: row.status ?? "programmé",
     ticketUrl: row.ticket_url ?? null,
+    endDate: row.date_fin ? toISODateString(new Date(row.date_fin)) : undefined,
     image: (() => {
       const poster = row.spectacles?.spectacles_medias?.find(
         (sm) => sm.type === "poster"
@@ -227,6 +228,67 @@ export const fetchEventTypes = cache(
       return {
         success: false,
         error: `[ERR_AGENDA_004] ${err instanceof Error ? err.message : "Unknown error"}`,
+      };
+    }
+  }
+);
+
+/**
+ * Fetch events for calendar view (window: -6 months to +12 months)
+ *
+ * Unlike fetchUpcomingEvents, this returns past events too (no >= now filter).
+ * Used exclusively by the calendar views (month/week/day).
+ * Wrapped with React cache() for intra-request deduplication.
+ *
+ * @returns DALResult with array of AgendaEvent
+ */
+export const fetchEventsForCalendar = cache(
+  async (): Promise<DALResult<AgendaEvent[]>> => {
+    try {
+      const supabase = await createClient();
+
+      const now = new Date();
+      const from = new Date(now);
+      from.setMonth(from.getMonth() - 6);
+      const to = new Date(now);
+      to.setMonth(to.getMonth() + 12);
+
+      const { data, error } = await supabase
+        .from("evenements")
+        .select(
+          `id, date_debut, date_fin, start_time, status, ticket_url, image_url, genres,
+         spectacles (title, slug, image_url, genre, status, public, spectacles_medias (type, medias (storage_path))),
+         lieux (nom, adresse, ville, code_postal)`
+        )
+        .neq("status", "archived")
+        .gte("date_debut", from.toISOString())
+        .lte("date_debut", to.toISOString())
+        .order("date_debut", { ascending: true });
+
+      if (error) {
+        console.error("[DAL] fetchEventsForCalendar error:", error);
+        return {
+          success: false,
+          error: `[ERR_AGENDA_005] Failed to fetch calendar events: ${error.message}`,
+        };
+      }
+
+      const events = (data ?? [])
+        .filter((row) => {
+          const spectacle = (row as SupabaseEventRow).spectacles;
+          return (
+            spectacle?.public === true &&
+            spectacle.status !== "draft"
+          );
+        })
+        .map((row) => mapRowToEventDTO(row as SupabaseEventRow));
+
+      return { success: true, data: events };
+    } catch (err: unknown) {
+      console.error("[DAL] fetchEventsForCalendar exception:", err);
+      return {
+        success: false,
+        error: `[ERR_AGENDA_006] ${err instanceof Error ? err.message : "Unknown error"}`,
       };
     }
   }
