@@ -6,10 +6,10 @@ interface PresseFixtures {
 }
 
 export const test = base.extend<PresseFixtures>({
-    pressePage: async ({ page }, use) => {
+    pressePage: async ({ page }, register) => {
         const pressePage = new PressePage(page);
         await pressePage.goto();
-        await use(pressePage);
+        await register(pressePage);
     },
 });
 

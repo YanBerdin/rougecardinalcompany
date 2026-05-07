@@ -163,17 +163,20 @@ export const fetchTicketUrlsForSpectacles = cache(
 );
 
 /**
- * Fetches the event date range (first → last date_debut) for multiple spectacles
+ * Fetches all event date ranges for multiple spectacles
  *
- * Returns a Map of spectacle ID → { start, end } where start = min(date_debut)
- * and end = max(date_debut) across all events for that spectacle.
+ * Returns a Map of spectacle ID → array of { start, end } ranges, one entry
+ * per event row (sorted ascending by date_debut). Each range uses date_fin
+ * when available, otherwise falls back to date_debut.
  *
  * @param spectacleIds - Array of spectacle IDs
- * @returns Map of spectacle ID → date range (only includes spectacles with events)
+ * @returns Map of spectacle ID → array of date ranges (only includes spectacles with events)
  */
 export const fetchEventDateRangesForSpectacles = cache(
-  async (spectacleIds: number[]): Promise<Map<number, { start: string; end: string }>> => {
-    const result = new Map<number, { start: string; end: string }>();
+  async (
+    spectacleIds: number[]
+  ): Promise<Map<number, Array<{ start: string; end: string }>>> => {
+    const result = new Map<number, Array<{ start: string; end: string }>>();
 
     if (spectacleIds.length === 0) return result;
 
@@ -192,14 +195,13 @@ export const fetchEventDateRangesForSpectacles = cache(
 
       for (const row of data ?? []) {
         if (row.spectacle_id == null || !row.date_debut) continue;
-        // Use date_fin as the end candidate when available, otherwise date_debut
         const endCandidate: string = row.date_fin ?? row.date_debut;
+        const range = { start: row.date_debut, end: endCandidate };
         const existing = result.get(row.spectacle_id);
-        if (!existing) {
-          result.set(row.spectacle_id, { start: row.date_debut, end: endCandidate });
+        if (existing) {
+          existing.push(range);
         } else {
-          if (row.date_debut < existing.start) existing.start = row.date_debut;
-          if (endCandidate > existing.end) existing.end = endCandidate;
+          result.set(row.spectacle_id, [range]);
         }
       }
 

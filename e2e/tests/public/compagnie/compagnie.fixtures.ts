@@ -6,10 +6,10 @@ interface CompagnieFixtures {
 }
 
 export const test = base.extend<CompagnieFixtures>({
-    compagniePage: async ({ page }, use) => {
+    compagniePage: async ({ page }, register) => {
         const compagniePage = new CompagniePage(page);
         await compagniePage.goto();
-        await use(compagniePage);
+        await register(compagniePage);
     },
 });
 

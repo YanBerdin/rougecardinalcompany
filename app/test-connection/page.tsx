@@ -472,8 +472,8 @@ export default function TestConnectionPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {spectacles.map((spectacle) => {
                   const spectacleYear =
-                    "dateRange" in spectacle && spectacle.dateRange?.start
-                      ? new Date(spectacle.dateRange.start).getFullYear()
+                    "dateRanges" in spectacle && spectacle.dateRanges?.[0]?.start
+                      ? new Date(spectacle.dateRanges[0].start).getFullYear()
                       : "premiere" in spectacle && spectacle.premiere
                         ? new Date(spectacle.premiere).getFullYear()
                         : "-";

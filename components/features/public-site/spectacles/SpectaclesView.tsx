@@ -111,13 +111,17 @@ export function SpectaclesView({
                   <h3 className="text-xl font-bold font-sans text-foreground line-clamp-2">
                     {show.title}
                   </h3>
-                  {show.dateRange && (
-                    <p className="text-md text-foreground font-semibold mt-1">
-                      {show.dateRange.start === show.dateRange.end
-                        ? `Le ${new Date(show.dateRange.start).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit" })}`
-                        : `Du ${new Date(show.dateRange.start).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit" })} au ${new Date(show.dateRange.end).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit" })}`}
-                    </p>
-                  )}
+                  {show.dateRanges && show.dateRanges.length > 0 ? (
+                    <div className="mt-1 space-y-0.5">
+                      {show.dateRanges.map((r, i) => (
+                        <p key={i} className="text-md text-foreground font-semibold">
+                          {r.start === r.end
+                            ? `Le ${new Date(r.start).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit" })}`
+                            : `Du ${new Date(r.start).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit" })} au ${new Date(r.end).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit" })}`}
+                        </p>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
               </Card>
             ))}

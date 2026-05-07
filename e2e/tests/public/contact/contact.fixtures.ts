@@ -6,10 +6,10 @@ interface ContactFixtures {
 }
 
 export const test = base.extend<ContactFixtures>({
-    contactPage: async ({ page }, use) => {
+    contactPage: async ({ page }, register) => {
         const contactPage = new ContactPage(page);
         await contactPage.goto();
-        await use(contactPage);
+        await register(contactPage);
     },
 });
 

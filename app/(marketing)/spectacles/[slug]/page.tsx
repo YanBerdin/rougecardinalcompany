@@ -67,7 +67,7 @@ export default async function SpectacleDetailPage({
             galleryPhotos={galleryPhotos}
             venue={venue}
             ticketUrl={ticketUrl}
-            dateRange={dateRangesMap.get(spectacle.id) ?? null}
+            dateRanges={dateRangesMap.get(spectacle.id) ?? []}
         />
     );
 }

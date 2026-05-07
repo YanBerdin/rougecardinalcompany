@@ -167,7 +167,7 @@
     const [playing, setPlaying] = useState(true);
     const [scale, setScale] = useState(1);
     const rafRef = useRef(null);
-    const startTimeRef = useRef(performance.now());
+    const startTimeRef = useRef(0);
     const canvasRef = useRef(null);
 
     // Recording mode: render-video.js injects window.__recording = true before goto.

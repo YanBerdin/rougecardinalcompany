@@ -2,46 +2,45 @@
 
 /**
  * @file AgendaFilters
- * @description Filter section compound component.
+ * @description Vertical filter tabs for event types.
  * Reads eventTypes and filterType from AgendaContext.
  */
 
 import { Filter } from "lucide-react";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import { useAgendaContext } from "./AgendaContext";
 
 export function AgendaFilters(): React.JSX.Element {
     const { state, actions } = useAgendaContext();
 
     return (
-        <div className="flex items-center space-x-4 pb-8">
-            <Filter className="h-5 w-5 text-muted-foreground bg-card" aria-hidden="true" />
-            <div>
-                <label htmlFor="event-type-filter" className="text-sm text-muted-foreground font-medium">
-                    Filtrer par type d&apos;événement
-                </label>
-                <Select
-                    value={state.filterType}
-                    onValueChange={actions.setFilterType}
-                >
-                    <SelectTrigger id="event-type-filter" className="w-64 bg-card" aria-label="Filtrer par type d'événement">
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {state.eventTypes.map((type) => (
-                            <SelectItem key={type.value} value={type.value}>
-                                {type.label}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+        <div role="group" aria-label="Filtrer par type d'événement">
+            <div className="flex items-center gap-2 mb-3 px-1">
+                <Filter className="w-4 h-4 text-gold" aria-hidden="true" />
+                <span className="font-semibold text-base">Filtres</span>
             </div>
+            <ul className="flex flex-col gap-1">
+                {state.eventTypes.map((type) => {
+                    const isActive = state.filterType === type.value;
+                    return (
+                        <li key={type.value}>
+                            <button
+                                type="button"
+                                onClick={() => actions.setFilterType(type.value)}
+                                aria-pressed={isActive}
+                                className={cn(
+                                    "w-full text-left px-3 py-2 rounded-sm text-sm font-medium transition-colors",
+                                    isActive
+                                        ? "bg-gold/10 text-gold-text border border-gold/30"
+                                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                                )}
+                            >
+                                {type.label}
+                            </button>
+                        </li>
+                    );
+                })}
+            </ul>
         </div>
     );
 }

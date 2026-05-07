@@ -18,6 +18,7 @@ export const EventSchema = z.object({
     title: z.string(),
     spectacleSlug: z.string().nullable(),
     date: z.string(), // ISO date string yyyy-mm-dd
+    endDate: z.string().optional(), // ISO date string yyyy-mm-dd (end of multi-day event)
     time: z.string(), // HH:mm format
     venue: z.string(),
     address: z.string(),
@@ -42,6 +43,11 @@ export const EventTypeSchema = z.object({
 
 export type Event = z.infer<typeof EventSchema>;
 export type EventType = z.infer<typeof EventTypeSchema>;
+
+/**
+ * Calendar view mode
+ */
+export type AgendaView = "list" | "month" | "week" | "day";
 
 // =============================================================================
 // FILTER SCHEMAS (for DAL query parameters)

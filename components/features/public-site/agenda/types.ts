@@ -26,5 +26,6 @@ import type { Event, EventType } from "@/lib/schemas/agenda";
 export interface AgendaClientContainerProps {
   readonly events: Event[];
   readonly eventTypes: EventType[];
+  readonly calendarEvents: Event[];
   readonly showNewsletterSection?: boolean;
 }

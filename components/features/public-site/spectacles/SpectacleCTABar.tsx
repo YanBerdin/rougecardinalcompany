@@ -25,12 +25,12 @@ export function SpectacleCTABar({
     wrapperClassName = "",
 }: SpectacleCTABarProps): React.ReactNode {
     return (
-        <div className={`flex flex-col sm:flex-row flex-wrap gap-3 ${wrapperClassName}`}>
+        <div className={`flex flex-row flex-wrap gap-3 ${wrapperClassName}`}>
             {ticketUrl && (
                 <Button
                     variant="default"
-                    size="lg"
-                    className="shadow-lg hover:shadow-xl transition-all touch-action-manipulation w-full sm:w-auto"
+                    size="default"
+                    className="shadow-lg hover:shadow-xl transition-all touch-action-manipulation flex-1"
                     asChild
                 >
                     <Link
@@ -47,7 +47,7 @@ export function SpectacleCTABar({
             <Button
                 variant={ticketUrl ? "secondary" : "default"}
                 size="default"
-                className="w-full sm:w-auto"
+                className="w-full flex-1"
                 asChild
             >
                 <Link href="/agenda" aria-label="Consulter l'agenda des représentations">

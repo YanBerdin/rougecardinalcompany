@@ -27,7 +27,7 @@ export async function SpectaclesContainer() {
       duration_minutes:
         s.duration_minutes != null ? `${s.duration_minutes} min` : "—",
       cast: s.casting ?? 0,
-      dateRange: dateRanges.get(s.id) ?? null,
+      dateRanges: dateRanges.get(s.id) ?? [],
       image: s.image_url ?? FALLBACK_SPECTACLE_IMAGE,
       status: s.status ?? "—",
       awards: s.awards ?? [],

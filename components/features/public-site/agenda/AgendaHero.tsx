@@ -6,19 +6,19 @@
 
 export function AgendaHero(): React.JSX.Element {
     return (
-        <section className="py-6 md:py-12 hero-gradient" aria-labelledby="agenda-heading">
+        <section className="py-6 md:py-6 hero-gradient" aria-labelledby="agenda-heading">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 <h1
                     id="agenda-heading"
-                    className="text-3xl md:text-4xl lg:text-5xl text-white font-bold motion-safe:animate-fade-in-up mb-4"
+                    className="text-2xl md:text-3xl lg:text-4xl text-chart-6 font-bold motion-safe:animate-fade-in-up mb-4"
                 >
-                    Agenda
+                    Mes événements à venir
                 </h1>
                 <p
-                    className="text-base md:text-lg text-white/80 opacity-90 motion-safe:animate-fade-in"
+                    className="text-xs md:text-base text-white/80 motion-safe:animate-fade-in"
                     style={{ animationDelay: "0.2s" }}
                 >
-                    Retrouvez-nous sur scène
+                    Retrouvez ici toutes les dates de nos prochains spectacles et événements.
                 </p>
             </div>
         </section>
