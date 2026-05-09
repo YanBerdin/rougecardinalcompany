@@ -59,11 +59,10 @@ function buildAddress(lieu?: SupabaseEventRow["lieux"]): string {
   const { adresse, code_postal, ville } = lieu;
   const cityPart = [code_postal, ville].filter(Boolean).join(" ");
   if (!adresse) return cityPart;
-  const adresseLower = adresse.toLowerCase();
-  const alreadyHasCity =
-    (code_postal && adresse.includes(code_postal)) ||
-    (ville && adresseLower.includes(ville.toLowerCase()));
-  if (alreadyHasCity) return adresse;
+  // Only skip appending cityPart if the postal code is already embedded in adresse.
+  // If ville is present in adresse but code_postal is not, we still need to append it.
+  const alreadyHasPostal = Boolean(code_postal && adresse.includes(code_postal));
+  if (alreadyHasPostal) return adresse;
   return [adresse, cityPart].filter(Boolean).join(", ");
 }
 
