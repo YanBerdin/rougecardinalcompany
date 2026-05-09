@@ -1,8 +1,30 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Play, Ticket } from "lucide-react";
+import { Play, Ticket, Calendar } from "lucide-react";
+import { format, parseISO } from "date-fns";
+import { fr } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
 import { Show } from "./types";
+
+type BadgeVariant = "default" | "destructive" | "secondary" | "outline" | "gold";
+
+const BADGE_VARIANT_MAP: Record<string, BadgeVariant> = {
+  theatre: "default",
+  rencontre: "destructive",
+  photographie: "gold",
+  "exposition photo": "gold",
+  exposition: "gold",
+  photo: "gold",
+};
+
+function getBadgeVariant(type: string): BadgeVariant {
+  const normalized = type
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+  return BADGE_VARIANT_MAP[normalized] ?? "secondary";
+}
 
 interface ShowCardProps {
   show: Show;
@@ -11,10 +33,27 @@ interface ShowCardProps {
 
 export function ShowCard({ show, index }: ShowCardProps) {
   const spectacleUrl = `/spectacles/${show.slug}`;
+  const sortedDates = show.dates ? [...show.dates].sort() : [];
+  const formatShort = (d: string) => {
+    try {
+      return format(parseISO(d.replace(" ", "T")), "dd/MM/yy", { locale: fr });
+    } catch {
+      return null;
+    }
+  };
+  const firstFormatted = sortedDates.length > 0 ? formatShort(sortedDates[0]) : null;
+  const lastFormatted =
+    sortedDates.length > 0 ? formatShort(sortedDates[sortedDates.length - 1]) : null;
+  const datePeriodLabel =
+    !firstFormatted || !lastFormatted
+      ? null
+      : firstFormatted === lastFormatted
+        ? `Le ${firstFormatted}`
+        : `${firstFormatted} → ${lastFormatted}`;
 
   return (
     <div
-      className="card-hover animate-fade-in-up overflow-hidden w-full md:w-[calc(50%-1rem)] max-w-md group"
+      className="card-hover hover:bg-card animate-fade-in-up overflow-hidden w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] group"
       style={{ animationDelay: `${index * 0.1}s` }}
     >
       <div className="relative aspect-[3/4] overflow-hidden rounded-lg shadow-md">
@@ -23,7 +62,7 @@ export function ShowCard({ show, index }: ShowCardProps) {
             src={show.image}
             alt={show.image ? `Affiche du spectacle ${show.title}` : `Image par défaut – affiche non disponible pour ${show.title}`}
             fill
-            sizes="(max-width: 768px) 100vw, 50vw"
+            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
           />
         </Link>
@@ -60,35 +99,20 @@ export function ShowCard({ show, index }: ShowCardProps) {
       {/* Badges */}
       <div className="flex flex-wrap gap-2 justify-center pt-4">
         {show.genre && (
-          <Badge className="bg-primary text-primary-foreground">{show.genre}</Badge>
+          <Badge variant={getBadgeVariant(show.genre)}>{show.genre}</Badge>
         )}
-        {show.dates && show.dates.length > 0 ? (
-          <>
-            {show.dates.slice(0, 3).map((date, i) => (
-              <Badge key={i} className="bg-primary text-primary-foreground">
-                {new Date(date).toLocaleDateString("fr-FR", {
-                  day: "numeric",
-                  month: "short",
-                })}
-              </Badge>
-            ))}
-            {show.dates.length > 3 && (
-              <Badge className="bg-primary/50 text-primary-foreground">
-                +{show.dates.length - 3} dates
-              </Badge>
-            )}
-          </>
-        ) : (
-          <Badge className="bg-muted text-muted-foreground">Dates à venir</Badge>
-        )}
+        <Badge variant="outlineGold" className="inline-flex items-center gap-1.5">
+          <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+          {datePeriodLabel ?? "Dates à venir"}
+        </Badge>
       </div>
 
       {/* Titre */}
       <div className="py-2 text-center">
-        <h3 className="text-xl font-bold text-foreground line-clamp-2">
+        <h3 className="text-xl font-bold text-foreground line-clamp-2 px-1">
           <Link href={spectacleUrl}>{show.title}</Link>
         </h3>
-        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+        <p className="text-sm text-muted-foreground mt-1 line-clamp-2 px-2">
           {show.short_description}
         </p>
       </div>

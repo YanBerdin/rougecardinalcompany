@@ -9,15 +9,15 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          "border-transparent font-semibold whitespace-nowrap bg-primary text-primary-foreground shadow hover:bg-chart-2 transition-colors",
+          "border-transparent font-semibold whitespace-nowrap bg-primary text-primary-foreground shadow-md hover:shadow-sm hover:bg-chart-2 transition-colors",
         secondary:
-          "border-transparent font-semibold whitespace-nowrap bg-secondary text-secondary-foreground hover:bg-muted-foreground/30",
+          "border-transparent font-semibold whitespace-nowrap bg-secondary text-secondary-foreground hover:bg-muted-foreground/30 shadow-md hover:shadow-sm transition-colors",
         destructive:
-          "border-transparent font-semibold whitespace-nowrap bg-destructive text-destructive-foreground shadow hover:bg-destructive/80",
-        outline: "text-foreground font-semibold whitespace-nowrap bg-background hover:bg-muted hover:text-foreground border border-muted",
+          "border-transparent font-semibold whitespace-nowrap bg-destructive text-destructive-foreground shadow-md hover:shadow-sm hover:bg-destructive/80 transition-colors",
+        outline: "text-foreground font-semibold whitespace-nowrap bg-background hover:bg-muted hover:text-foreground border border-muted shadow-md hover:shadow-sm transition-colors",
         outlineGold:
-          "bg-background font-semibold whitespace-nowrap border border-gold shadow-md hover:shadow-sm text-foreground",
-        gold: "bg-gold-dark border-transparent font-semibold whitespace-nowrap text-white shadow hover:bg-gold transition-colors",
+          "bg-background font-semibold whitespace-nowrap border border-gold hover:bg-card shadow-md hover:shadow-sm text-foreground",
+        gold: "bg-gold-dark border-transparent font-semibold whitespace-nowrap text-white shadow-md hover:shadow-sm hover:bg-gold transition-colors",
       },
     },
     defaultVariants: {

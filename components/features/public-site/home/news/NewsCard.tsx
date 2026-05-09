@@ -88,7 +88,7 @@ export function NewsCard({ item, index }: NewsCardProps) {
       </CardContent>
 
       <CardFooter className="mt-auto">
-        <Button variant="secondary" size="lg" asChild>
+        <Button variant="outline-primary" size="lg" asChild>
           <Link href={articleHref} {...externalProps}>
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
             Lire l&apos;article

@@ -17,7 +17,7 @@ export function ShowsView({ shows }: ShowsViewProps) {
           </p>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-16 mb-12">
+        <div className="flex flex-wrap justify-center gap-6 mb-12">
           {shows.map((show, index) => (
             <ShowCard key={show.id} show={show} index={index} />
           ))}
