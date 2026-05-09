@@ -75,6 +75,8 @@ export async function fetchAuditLogs(
     }
 }
 
+const DEFAULT_FILTER_SCAN_LIMIT = 100;
+
 /**
  * Get distinct table names from audit logs (for filter dropdown)
  */
@@ -85,8 +87,8 @@ export async function fetchAuditTableNames(): Promise<DALResult<string[]>> {
         const { data, error } = await supabase
             .from("logs_audit")
             .select("table_name")
-            .limit(500)
-            .order("table_name");
+            .order("created_at", { ascending: false })
+            .limit(DEFAULT_FILTER_SCAN_LIMIT);
 
         if (error) {
             return {
@@ -118,8 +120,9 @@ export async function fetchDistinctAuditUsers(): Promise<DALResult<AuditUserOpti
         const { data, error } = await supabase
             .from("logs_audit")
             .select("user_id")
+            .order("created_at", { ascending: false })
             .not("user_id", "is", null)
-            .limit(500);
+            .limit(DEFAULT_FILTER_SCAN_LIMIT);
 
         if (error) {
             return {

@@ -31,27 +31,33 @@ export class AdminAuditLogsPage {
         await expect(this.heading).toBeVisible({ timeout: 15_000 });
 
         const errAlert = this.page.getByRole('alert').filter({ hasText: /ERR_AUDIT/ });
+        const emptyState = this.page.getByText(/aucun log|aucun résultat/i);
+        const firstDataRow = this.logsTable.getByRole('row').nth(1);
 
         // Retry up to 5 times — CI DB can be under load and the first request may
         // time out. Prefer the in-page refresh button when the toolbar is already
         // rendered so we avoid a full navigation round-trip.
         const maxAttempts = 5;
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-            await this.page.waitForLoadState('networkidle').catch(() => {});
+            await this.page.waitForLoadState('networkidle').catch(() => { });
 
             const toolbarVisible = await this.refreshButton.isVisible().catch(() => false);
             const hasError = await errAlert.isVisible().catch(() => false);
+            const hasRow = await firstDataRow.isVisible().catch(() => false);
+            const hasEmptyState = await emptyState.isVisible().catch(() => false);
+            const tableVisible = await this.logsTable.isVisible().catch(() => false);
 
-            // Page is usable: toolbar rendered and no blocking error banner
-            if (toolbarVisible && !hasError) {
+            // Page is usable: toolbar rendered, no blocking error, and data resolved
+            // (at least one row, or empty-state message, or table frame is visible)
+            if (toolbarVisible && !hasError && (hasRow || hasEmptyState || tableVisible)) {
                 return;
             }
 
             // Prefer in-page refresh when toolbar is already present (faster recovery)
             if (toolbarVisible) {
-                await this.refreshButton.click().catch(() => {});
+                await this.refreshButton.click().catch(() => { });
             } else {
-                await this.page.reload({ waitUntil: 'domcontentloaded' }).catch(() => {});
+                await this.page.reload({ waitUntil: 'domcontentloaded' }).catch(() => { });
             }
 
             // Exponential-ish backoff: 1 s, 2 s, 3 s … to let DB recover
