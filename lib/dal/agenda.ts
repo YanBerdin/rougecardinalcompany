@@ -57,14 +57,17 @@ type SupabaseEventRow = {
 function buildAddress(lieu?: SupabaseEventRow["lieux"]): string {
   if (!lieu) return "";
   const { adresse, code_postal, ville } = lieu;
-  const cityPart = [code_postal, ville].filter(Boolean).join(" ");
-  if (!adresse) return cityPart;
-  const adresseLower = adresse.toLowerCase();
-  const alreadyHasCity =
-    (code_postal && adresse.includes(code_postal)) ||
-    (ville && adresseLower.includes(ville.toLowerCase()));
-  if (alreadyHasCity) return adresse;
-  return [adresse, cityPart].filter(Boolean).join(", ");
+  // Trim raw DB values to handle leading/trailing whitespace in data (e.g. ville = " Paris")
+  const trimmedPostal = code_postal?.trim();
+  const trimmedVille = ville?.trim();
+  const trimmedAdresse = adresse?.trim();
+  const cityPart = [trimmedPostal, trimmedVille].filter(Boolean).join(" ");
+  if (!trimmedAdresse) return cityPart;
+  // Only skip appending cityPart if the postal code is already embedded in adresse.
+  // If ville is present in adresse but code_postal is not, we still need to append it.
+  const alreadyHasPostal = Boolean(trimmedPostal && trimmedAdresse.includes(trimmedPostal));
+  if (alreadyHasPostal) return trimmedAdresse;
+  return [trimmedAdresse, cityPart].filter(Boolean).join(", ");
 }
 
 /**

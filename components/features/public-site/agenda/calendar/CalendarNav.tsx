@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { addMonths, subMonths, format } from "date-fns";
+import { addMonths, format, subMonths } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useAgendaContext } from "../AgendaContext";
@@ -9,7 +9,7 @@ import { useAgendaContext } from "../AgendaContext";
 export function CalendarNav(): React.JSX.Element {
     const { state, actions } = useAgendaContext();
     const { calendarDate } = state;
-    const { setCalendarDate, navigateToday, setSelectedDate } = actions;
+    const { navigateToday, setSelectedDate, setCalendarDate } = actions;
 
     const dateLabel = format(calendarDate, "MMMM yyyy", { locale: fr });
 
