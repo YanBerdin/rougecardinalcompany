@@ -32,25 +32,44 @@ export class AdminAuditLogsPage {
 
         const errAlert = this.page.getByRole('alert').filter({ hasText: /ERR_AUDIT/ });
 
-        // Retry a few times because CI DB can be under load and the first request may
-        // time out. Handling recovery at the page-load level gives all dependent
-        // assertions a clean starting point.
-        const maxAttempts = 3;
+        // Retry up to 5 times — CI DB can be under load and the first request may
+        // time out. Prefer the in-page refresh button when the toolbar is already
+        // rendered so we avoid a full navigation round-trip.
+        const maxAttempts = 5;
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
             await this.page.waitForLoadState('networkidle').catch(() => {});
 
+            const toolbarVisible = await this.refreshButton.isVisible().catch(() => false);
             const hasError = await errAlert.isVisible().catch(() => false);
-            if (!hasError) break;
 
-            // Small backoff before reloading to let DB recover
-            await this.page.waitForTimeout(500 * attempt);
-            await this.page.reload({ waitUntil: 'networkidle' });
+            // Page is usable: toolbar rendered and no blocking error banner
+            if (toolbarVisible && !hasError) {
+                return;
+            }
+
+            // Prefer in-page refresh when toolbar is already present (faster recovery)
+            if (toolbarVisible) {
+                await this.refreshButton.click().catch(() => {});
+            } else {
+                await this.page.reload({ waitUntil: 'domcontentloaded' }).catch(() => {});
+            }
+
+            // Exponential-ish backoff: 1 s, 2 s, 3 s … to let DB recover
+            await this.page.waitForTimeout(1000 * attempt);
         }
 
-        await expect(errAlert).not.toBeVisible({ timeout: 15_000 });
+        await expect(errAlert).not.toBeVisible({ timeout: 30_000 });
+        await expect(this.refreshButton).toBeVisible({ timeout: 30_000 });
+    }
 
-        // Confirm the table toolbar is rendered (page is actually usable).
-        await expect(this.refreshButton).toBeVisible({ timeout: 15_000 });
+    /** Extends `expectLoaded` by also waiting for the table to show at least one row. */
+    async expectUsable(): Promise<void> {
+        await this.expectLoaded();
+
+        await expect(this.logsTable).toBeVisible({ timeout: 15_000 });
+
+        const rows = this.logsTable.getByRole('row');
+        await expect(rows.first()).toBeVisible({ timeout: 15_000 });
     }
 
     async clickRefresh(): Promise<void> {

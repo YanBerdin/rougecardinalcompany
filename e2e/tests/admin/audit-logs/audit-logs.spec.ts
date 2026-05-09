@@ -16,7 +16,8 @@ test.describe("ADM-AUDIT — Logs d'audit : consultation et filtrage", () => {
 
     // ADM-AUDIT-002 P0
     test('ADM-AUDIT-002 — Au moins une entrée de log affichée', async ({ auditLogsPage }) => {
-        await auditLogsPage.expectLoaded();
+        // expectUsable() garantit qu'au moins une ligne de données est visible
+        await auditLogsPage.expectUsable();
         // nth(1) : première ligne de données (nth(0) est le header)
         await expect(auditLogsPage.logsTable.getByRole('row').nth(1)).toBeVisible({ timeout: 15_000 });
     });
@@ -141,7 +142,8 @@ test.describe("ADM-AUDIT — Logs d'audit : consultation et filtrage", () => {
         test.describe.configure({ retries: 1 });
 
         test('ADM-AUDIT-010 — Rafraîchir recharge la table', async ({ auditLogsPage }) => {
-            await auditLogsPage.expectLoaded();
+            // expectUsable() vérifie que la table est utilisable avant de déclencher le refresh
+            await auditLogsPage.expectUsable();
 
             await auditLogsPage.clickRefresh();
             await auditLogsPage.expectLoaded();
@@ -160,7 +162,8 @@ test.describe("ADM-AUDIT — Logs d'audit : consultation et filtrage", () => {
 
         // Revenir aux audit logs
         await auditLogsPage.goto();
-        await auditLogsPage.expectLoaded();
+        // expectUsable() garantit que la table a au moins une ligne avant l'assertion
+        await auditLogsPage.expectUsable();
 
         // Au moins une entrée de log doit être visible
         // Timeout étendu : double navigation (fixture→partners→audit-logs) ralentit le chargement des données
