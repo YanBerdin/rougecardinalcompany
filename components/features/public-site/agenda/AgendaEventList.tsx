@@ -28,7 +28,7 @@ const ANIMATION_DELAY_STEP = 0.05;
 
 function extractPostalCity(address: string): string {
     const match = address.match(/(\d{5})\s+([^,]+)/);
-    if (!match) return address.toUpperCase();
+    if (!match) return "";
     return `${match[1]} ${match[2].trim().toUpperCase()}`;
 }
 
@@ -128,8 +128,10 @@ function buildVenueLabel(venue: string, address: string): string {
     const city = extractPostalCity(address);
     if (!city) return venue;
     const cityName = city.replace(/^\d{5}\s+/, "").trim().toLowerCase();
-    const venueLower = venue.toLowerCase();
-    if (cityName && venueLower.includes(cityName)) return venue;
+    const venueLower = venue.toLowerCase().trim();
+    // Only suppress city if venue name explicitly ends with the city name
+    // (e.g. "Théâtre de Lyon" → avoids "75017 PARIS" for "Centre Paris anim' La Jonquière")
+    if (cityName && venueLower.endsWith(cityName)) return venue;
     return `${venue}, ${city}`;
 }
 
