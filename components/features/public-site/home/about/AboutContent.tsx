@@ -23,9 +23,9 @@ export function AboutContent({ stats, content }: AboutProps) {
                     {stats.map((stat, index) => (
                         <div key={index} className="text-center">
                             <div className="inline-flex items-center justify-center w-12 h-12 bg-primary/10 rounded-lg mb-3">
-                                <stat.icon className="h-6 w-6 text-primary" aria-hidden="true" />
+                                <stat.icon className="h-6 w-6 text-chart-2" aria-hidden="true" />
                             </div>
-                            <div className="text-2xl font-semibold text-primary mb-1">{stat.value}</div>
+                            <div className="text-2xl font-semibold text-chart-2 mb-1">{stat.value}</div>
                             <div className="text-sm text-muted-foreground">{stat.label}</div>
                         </div>
                     ))}

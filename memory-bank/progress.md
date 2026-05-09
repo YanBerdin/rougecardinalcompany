@@ -1,5 +1,25 @@
 # Progress
 
+## Clickable venue → Google Maps + duplicate city fix (2026)
+
+✅ **COMPLET** — Lien Google Maps cliquable sur les pages `/agenda` et `/spectacles/[slug]` + correction affichage doublon ville (TASK092).
+
+### Livrables
+
+- `lib/utils/google-maps.ts` (helper `buildGoogleMapsUrl`, stratégie text-first → Place card riche, fallback lat/lng)
+- `__tests__/utils/google-maps.test.ts` (7 tests Vitest, tous PASS)
+- `lib/dal/spectacles.ts` (enrichissement `SpectacleNextVenue` : adresse, code_postal, latitude, longitude)
+- `lib/dal/agenda.ts` (`buildAddress` corrige doublon ville — TASK092)
+- `components/features/public-site/spectacles/SpectacleDetailView.tsx` (Badge MapPin → `<a target="_blank" rel="noopener noreferrer">`)
+- `components/features/public-site/agenda/AgendaEventList.tsx` (helper `buildVenueLabel` + lien Maps + `extractPostalCity` regex anti-doublon)
+
+### Vérification
+
+- `pnpm vitest run __tests__/utils/google-maps.test.ts` → 7/7 PASS (502ms)
+- `pnpm lint` → clean
+
+---
+
 ## Fix 35 Supabase Security Advisor alerts (2026-05-02)
 
 ✅ **COMPLET** — 35 alertes Supabase Security Advisor résolues en une session.

@@ -19,12 +19,20 @@ import type { SpectacleDb, SpectaclePhotoDTO, GalleryPhotoDTO } from "@/lib/sche
 import { SpectacleCarousel } from "./SpectacleCarousel";
 import { SpectacleCTABar } from "./SpectacleCTABar";
 import { LandscapePhotoCard } from "./LandscapePhotoCard";
+import { buildGoogleMapsUrl } from "@/lib/utils/google-maps";
 
 interface SpectacleDetailViewProps {
     spectacle: SpectacleDb;
     landscapePhotos?: SpectaclePhotoDTO[];
     galleryPhotos?: GalleryPhotoDTO[];
-    venue?: { nom: string; ville: string | null } | null;
+    venue?: {
+        nom: string;
+        ville: string | null;
+        adresse?: string | null;
+        code_postal?: string | null;
+        latitude?: number | null;
+        longitude?: number | null;
+    } | null;
     ticketUrl?: string | null;
     dateRanges?: Array<{ start: string; end: string }>;
 }
@@ -45,6 +53,15 @@ export function SpectacleDetailView({
             : `${new Date(range.start).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit" })} → ${new Date(range.end).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit" })}`
     );
     const formattedVenue = venue ? `${venue.nom}${venue.ville ? ` - ${venue.ville}` : ""}` : "À venir";
+    const venueMapsUrl = venue
+        ? buildGoogleMapsUrl({
+            name: venue.nom,
+            address: venue.adresse ?? null,
+            city: [venue.code_postal, venue.ville].filter(Boolean).join(" ") || null,
+            latitude: venue.latitude ?? null,
+            longitude: venue.longitude ?? null,
+        })
+        : null;
 
     return (
         <main
@@ -129,7 +146,20 @@ export function SpectacleDetailView({
                                 )}
                                 <Badge variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold shadow-lg">
                                     <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                                    {formattedVenue}
+                                    {venueMapsUrl ? (
+                                        <a
+                                            href={venueMapsUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            aria-label={`Voir ${formattedVenue} sur Google Maps (nouvel onglet)`}
+                                            className="hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+                                            title={`Voir sur Google Maps`}
+                                        >
+                                            {formattedVenue}
+                                        </a>
+                                    ) : (
+                                        formattedVenue
+                                    )}
                                 </Badge>
                             </div>
 
