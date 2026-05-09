@@ -84,7 +84,7 @@ export function NewsCard({ item, index }: NewsCardProps) {
             )}
           </Link>
         </h3>
-        <p className="leading-relaxed card-text">{item.short_description}</p>
+        <p className="leading-relaxed card-text text-sm">{item.short_description}</p>
       </CardContent>
 
       <CardFooter className="mt-auto">

@@ -39,17 +39,17 @@ export function RevueDePresse({ mediaArticles }: RevueDePresseSectionProps) {
                       <Badge
                         variant={
                           article.type === "Critique"
-                            ? "default"
+                            ? "gold"
                             : article.type === "Interview"
                               ? "secondary"
                               : article.type === "Portrait"
                                 ? "outline"
-                                : "destructive"
+                                : "default"
                         }
                       >
                         {article.type}
                       </Badge>
-                      <span className="text-sm text-primary font-medium">
+                      <span className="text-sm text-chart-2 font-medium">
                         {article.source_publication}
                       </span>
                       <span className="text-sm text-muted-foreground">
@@ -81,7 +81,7 @@ export function RevueDePresse({ mediaArticles }: RevueDePresseSectionProps) {
                   </div>
 
                   <div className="flex items-center justify-center lg:justify-end">
-                    <Button variant="secondary" asChild>
+                    <Button variant="default" asChild>
                       <Link
                         href={article.source_url}
                         target="_blank"

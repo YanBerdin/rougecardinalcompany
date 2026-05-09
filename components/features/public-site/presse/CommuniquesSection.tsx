@@ -38,7 +38,7 @@ export function CommuniquesSection({
             >
               <CardHeader>
                 <div className="flex items-center justify-between mb-2">
-                  <Badge variant="outline">
+                  <Badge variant="gold">
                     {new Date(release.date).toLocaleDateString("fr-FR")}
                   </Badge>
                   <span className="text-sm text-muted-foreground">
@@ -60,7 +60,7 @@ export function CommuniquesSection({
                     aria-label={`Télécharger ${release.title} (${release.fileSize})`}
                   >
                     <Download className="mr-2 h-4 w-4" aria-hidden="true" />
-                    Télécharger le PDF
+                    Télécharger
                   </Link>
                 </Button>
               </CardContent>
