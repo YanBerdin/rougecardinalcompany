@@ -58,6 +58,12 @@ function buildAddress(lieu?: SupabaseEventRow["lieux"]): string {
   if (!lieu) return "";
   const { adresse, code_postal, ville } = lieu;
   const cityPart = [code_postal, ville].filter(Boolean).join(" ");
+  if (!adresse) return cityPart;
+  const adresseLower = adresse.toLowerCase();
+  const alreadyHasCity =
+    (code_postal && adresse.includes(code_postal)) ||
+    (ville && adresseLower.includes(ville.toLowerCase()));
+  if (alreadyHasCity) return adresse;
   return [adresse, cityPart].filter(Boolean).join(", ");
 }
 

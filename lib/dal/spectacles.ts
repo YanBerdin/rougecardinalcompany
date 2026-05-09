@@ -41,13 +41,22 @@ import {
  *   console.log(`Next show at: ${venue.nom}, ${venue.ville}`);
  * }
  */
+export type SpectacleNextVenue = {
+  nom: string;
+  ville: string | null;
+  adresse: string | null;
+  code_postal: string | null;
+  latitude: number | null;
+  longitude: number | null;
+};
+
 export const fetchSpectacleNextVenue = cache(
-  async (spectacleId: number): Promise<{ nom: string; ville: string | null } | null> => {
+  async (spectacleId: number): Promise<SpectacleNextVenue | null> => {
     try {
       const supabase = await createClient();
       const { data, error } = await supabase
         .from("evenements")
-        .select("lieux(nom, ville)")
+        .select("lieux(nom, ville, adresse, code_postal, latitude, longitude)")
         .eq("spectacle_id", spectacleId)
         .not("lieux", "is", null)
         .gte("date_debut", new Date().toISOString())
@@ -71,6 +80,10 @@ export const fetchSpectacleNextVenue = cache(
       return {
         nom: lieu.nom,
         ville: lieu.ville ?? null,
+        adresse: lieu.adresse ?? null,
+        code_postal: lieu.code_postal ?? null,
+        latitude: typeof lieu.latitude === "number" ? lieu.latitude : null,
+        longitude: typeof lieu.longitude === "number" ? lieu.longitude : null,
       };
     } catch (err) {
       console.error("fetchSpectacleNextVenue exception:", err);

@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAgendaContext } from "./AgendaContext";
 import { formatEventPeriod } from "./formatPeriod";
 import type { Event } from "@/lib/schemas/agenda";
+import { buildGoogleMapsUrl } from "@/lib/utils/google-maps";
 
 // ============================================================================
 // Constants
@@ -26,9 +27,9 @@ import type { Event } from "@/lib/schemas/agenda";
 const ANIMATION_DELAY_STEP = 0.05;
 
 function extractPostalCity(address: string): string {
-    const match = address.match(/(\d{5})\s+(.+)/);
+    const match = address.match(/(\d{5})\s+([^,]+)/);
     if (!match) return address.toUpperCase();
-    return `${match[1]} ${match[2].toUpperCase()}`;
+    return `${match[1]} ${match[2].trim().toUpperCase()}`;
 }
 
 type BadgeVariant = "default" | "destructive" | "secondary" | "outline" | "gold";
@@ -123,8 +124,18 @@ function EventCardTitle({ event }: { readonly event: Event }): React.JSX.Element
 }
 
 /** Méta compacte sur une ligne : heure · lieu · ville */
+function buildVenueLabel(venue: string, address: string): string {
+    const city = extractPostalCity(address);
+    if (!city) return venue;
+    const cityName = city.replace(/^\d{5}\s+/, "").trim().toLowerCase();
+    const venueLower = venue.toLowerCase();
+    if (cityName && venueLower.includes(cityName)) return venue;
+    return `${venue}, ${city}`;
+}
+
 function EventCardMetaInline({ event }: { readonly event: Event }): React.JSX.Element {
-    const city = extractPostalCity(event.address);
+    const mapsUrl = buildGoogleMapsUrl({ name: event.venue, address: event.address });
+    const venueLabel = buildVenueLabel(event.venue, event.address);
     return (
         <div
             className="flex flex-col items-start gap-x-3 gap-y-2 text-xs md:text-sm text-muted-foreground"
@@ -134,13 +145,25 @@ function EventCardMetaInline({ event }: { readonly event: Event }): React.JSX.El
                 <Calendar className="h-3 w-3 text-gold shrink-0" aria-hidden="true" />
                 {formatEventPeriod(event)}
             </span>
-           
-            <span className="flex items-center gap-1">
-                <MapPin className="h-3 w-3 text-gold shrink-0" aria-hidden="true" />
-                {event.venue}
-            </span>
-           
-            <span>{city}</span>
+
+            {mapsUrl ? (
+                <a
+                    href={mapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Voir ${venueLabel} sur Google Maps (nouvel onglet)`}
+                    title="Voir sur Google Maps"
+                    className="flex items-center gap-1 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+                >
+                    <MapPin className="h-3 w-3 text-gold shrink-0" aria-hidden="true" />
+                    <span>{venueLabel}</span>
+                </a>
+            ) : (
+                <span className="flex items-center gap-1">
+                    <MapPin className="h-3 w-3 text-gold shrink-0" aria-hidden="true" />
+                    {venueLabel}
+                </span>
+            )}
         </div>
     );
 }
@@ -351,15 +374,15 @@ export function AgendaEventList(): React.JSX.Element {
 
     const eventsToShow = state.selectedDate
         ? state.filteredEvents.filter((ev) => {
-              try {
-                  const target = startOfDay(state.selectedDate!);
-                  const start = startOfDay(parseISO(ev.date));
-                  const end = ev.endDate ? startOfDay(parseISO(ev.endDate)) : start;
-                  return isWithinInterval(target, { start, end });
-              } catch {
-                  return false;
-              }
-          })
+            try {
+                const target = startOfDay(state.selectedDate!);
+                const start = startOfDay(parseISO(ev.date));
+                const end = ev.endDate ? startOfDay(parseISO(ev.endDate)) : start;
+                return isWithinInterval(target, { start, end });
+            } catch {
+                return false;
+            }
+        })
         : state.filteredEvents;
 
     const selectedDateLabel = state.selectedDate

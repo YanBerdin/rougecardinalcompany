@@ -21,6 +21,7 @@
 
 ## Terminé (récent)
 
+- `TASK092` Fix duplication ville agenda public — **COMPLÈTE ✅ 2026-05-08** — `buildAddress` DAL skip city si déjà dans `adresse`, `extractPostalCity` regex non-gourmande `([^,]+)`, validation curl OK — voir `memory-bank/tasks/tasks-completed/TASK092-fix-duplicate-city-agenda.md`
 - `TASK091` Refactoring calendrier agenda + fix violations ESLint — **COMPLÈTE ✅ 2026-05-07** — CalendarNav useCallback, CalendarMonth/Week headers extraits, AgendaEventList/Card sous-composants, fix animations.jsx + 4 fixtures e2e (`register`), `pnpm lint` = 0 erreurs — voir `memory-bank/tasks/TASK091-agenda-calendar-violations-fixes.md`
 - `TASK090` SectionFounder administrable (kind='founder') — **COMPLÈTE ✅ 2026-05-02** — migration `20260502150000`, colonne `milestones jsonb`, CHECK étendu, seed row, 3 fichiers source, fallback FOUNDER_BIO — voir `memory-bank/tasks/TASK090-founderContentAdminDashboard.md`
 - `TASK089` Suppression display_toggle_home_hero — **COMPLÈTE ✅ 2026-04-23** — migration `20260101190000`, 6 fichiers source, HeroContainer sans gate toggle, ADM-CONFIG-001 → 5 toggles home, ADM-CONFIG-002/003 supprimés — voir `memory-bank/tasks/tasks-completed/TASK089-remove-display-toggle-home-hero.md`
