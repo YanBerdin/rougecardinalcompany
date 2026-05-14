@@ -9,7 +9,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, Calendar, Download, Info, Ticket, X } from "lucide-react";
+import { MapPin, Calendar, Download, Ticket, X } from "lucide-react"; //  Info
 import { isWithinInterval, parseISO, startOfDay, format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
@@ -20,9 +20,9 @@ import { formatEventPeriod } from "./formatPeriod";
 import type { Event } from "@/lib/schemas/agenda";
 import { buildGoogleMapsUrl } from "@/lib/utils/google-maps";
 
-// ============================================================================
+// =========================================================================
 // Constants
-// ============================================================================
+// =========================================================================
 
 const ANIMATION_DELAY_STEP = 0.05;
 
@@ -174,7 +174,7 @@ function EventCardMetaInline({ event }: { readonly event: Event }): React.JSX.El
 function EventCardActions({ event, compact = false }: { readonly event: Event; readonly compact?: boolean }): React.JSX.Element {
     const { actions } = useAgendaContext();
     const types = event.genres.length > 0 ? event.genres : ["Spectacle"];
-    const ticketLabel = types.includes("Atelier") ? "M'inscrire" : "Réserver mes billets";
+    const ticketLabel = types.includes("Atelier") ? "M'inscrire" : "Je réserve mes billets";
     const size = compact ? "sm" : "default";
     const placeholderClass = compact ? "h-0" : "h-9";
 
@@ -205,12 +205,15 @@ function EventCardActions({ event, compact = false }: { readonly event: Event; r
                 <Download className="mr-2 h-4 w-4" aria-hidden="true" />
                 Ajouter au calendrier
             </Button>
+
+            {/*            
             <Button variant="outline" size={size} className="w-full" asChild>
                 <Link href={`/agenda/${event.id}`} aria-label={`Informations pratiques — ${event.title}`}>
                     <Info className="mr-2 h-4 w-4" aria-hidden="true" />
                     Infos pratiques
                 </Link>
             </Button>
+            */}
         </div>
     );
 }

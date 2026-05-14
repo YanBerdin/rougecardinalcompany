@@ -4,70 +4,19 @@
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/YanBerdin/rougecardinalcompany)
 
-Plateforme web officielle de la compagnie de théâtre Rouge Cardinal : vitrine publique, médiathèque, espace presse et back-office d'administration.
-
-Rouge Cardinal Company est une application web pour une compagnie de théâtre conçue pour :
-
-- présenter l’identité, l’équipe, les productions et partenaires
-- gérer et afficher spectacles, événements et calendriers avec réordonnancement drag-and-drop
-- fournir un espace presse professionnel
-- gérer abonnements newsletter et formulaires de contact avec limitation de débit
-- offrir une interface d’administration sécurisée avec versioning automatique
-- suivre les événements analytiques et la santé via Sentry
-- automatiser la rétention RGPD
-- gérer une médiathèque complète avec déduplication SHA‑256, tags, dossiers et suivi d’usage.
-
-**Le système sert quatre groupes d'utilisateurs :**
-
-- visiteurs anonymes
-- utilisateurs authentifiés
-- éditeurs - accès éditorial complet (spectacles, événements, médias, lieux, presse)
-- administrateurs - contrôle d'accès complet via Row Level Security (RLS) et une architecture de défense en profondeur sur sept couches.
-
----
-
-> **Choix d'architecture**
->
-> - Next.js App Router pour le streaming SSR et la séparation routes publiques/admin.
->
-> - Supabase choisi pour le RLS natif PostgreSQL - la sécurité est dans la base, pas seulement dans le middleware.
-> - Modèle d'autorisation hiérarchique (`user < editor < admin`) avec guards TypeScript et fonctions SQL.
-> - Clean Architecture + DAL server-only pour rendre le code testable et découpler l'accès aux données des composants React.
+Plateforme web officielle de la compagnie de théâtre Rouge Cardinal : vitrine publique, médiathèque, espace presse et CMS sur mesure conçu pour permettre à l'équipe non technique de gérer le contenu du site en autonomie.
 
 ---
 
 ## Table des matières
 
-1. [Présentation](#présentation)
-2. [Stack technique](#stack-technique)
-3. [Architecture](#architecture)
-4. [Sécurité](#sécurité)
-5. [Installation](#installation)
-6. [Commandes utiles](#commandes-utiles)
-7. [Déploiement et migrations](#déploiement-et-migrations)
-8. [État du projet](#état-du-projet)
-
----
-
-## Présentation
-
-Rouge Cardinal Company est une application web full-stack conçue pour :
-
-- Présenter l'identité, l'équipe, les productions et partenaires de la compagnie
-- Gérer et afficher spectacles, événements et calendriers avec réordonnancement drag-and-drop
-- Fournir un espace presse professionnel (communiqués, articles, kit média)
-- Gérer les abonnements newsletter et les formulaires de contact avec limitation de débit
-- Offrir une interface d'administration sécurisée avec versioning automatique du contenu
-- Suivre les événements analytiques et la santé applicative via Sentry
-- Gérer une médiathèque complète avec déduplication SHA-256, tags, dossiers et suivi d'usage
-- Automatiser la rétention RGPD
-
-**Quatre groupes d'utilisateurs :**
-
-- Visiteurs anonymes
-- Utilisateurs authentifiés
-- Éditeurs — CRUD éditorial complet (`editor`), bloqués sur les zones admin-only
-- Administrateurs — accès total, Row Level Security (RLS) et architecture de défense en profondeur sur sept couches
+1. [Stack technique](#stack-technique)
+2. [Architecture](#architecture)
+3. [Sécurité](#sécurité)
+4. [Installation](#installation)
+5. [Commandes utiles](#commandes-utiles)
+6. [Déploiement et migrations](#déploiement-et-migrations)
+7. [État du projet](#état-du-projet)
 
 ---
 
@@ -312,6 +261,9 @@ pnpm dlx supabase functions deploy <function-name>
 | Rétention RGPD automatisée (Edge Function) | ✅ Complet |
 | Monitoring Sentry multi-runtime | ✅ Complet |
 | Backups automatiques (GitHub Actions hebdomadaire) | ✅ Complet |
+| CI/CD (GitHub Actions : tests, lint, déploiement) | ✅ Complet |
+| Audit trail inviolable en base de données, avec traçabilité des actions administratives, sur 27 tables critiques | ✅ Complet |
+| Optimisation de l’authentification JWT réduisant le temps de validation de ~300 ms à 2–5 ms grâce à `getClaims()` de Supabase Auth, améliorant significativement les performances globales de l'application | ✅ Complet |
 | Tests E2E Playwright | 🔄 En cours (Phase 0) |
 | Déploiement production | 🔄 En cours |
 

@@ -42,7 +42,7 @@ export function NewsletterForm() {
                 className="touch-hitbox bg-chart-6 border-white/30 hover:text-white hover:backdrop-blur-md hover:bg-white/30 text-red-800 transition-all duration-200 shadow-lg whitespace-nowrap disabled:opacity-50"
             >
                 <span className="inline-flex items-center hover:scale-95 active:scale-100 disabled:hover:scale-90 transition-transform">
-                    {isLoading ? "Inscription..." : "S'inscrire"}
+                    {isLoading ? "Inscription..." : "Je la veux !"}
                 </span>
             </Button>
         </form>

@@ -37,9 +37,9 @@ export function SpectacleCTABar({
                         href={ticketUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        aria-label={`Réserver mes billets des places pour ${title} (s'ouvre dans un nouvel onglet)`}
+                        aria-label={`Je réserve mes billets pour ${title} (s'ouvre dans un nouvel onglet)`}
                     >
-                        <Ticket className="mr-2 h-4 w-4" aria-hidden="true" /> Réserver mes billets
+                        <Ticket className="mr-2 h-4 w-4" aria-hidden="true" /> Je réserve mes billets
                     </Link>
                 </Button>
             )}

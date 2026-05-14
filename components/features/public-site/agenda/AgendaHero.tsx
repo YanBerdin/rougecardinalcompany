@@ -12,13 +12,13 @@ export function AgendaHero(): React.JSX.Element {
                     id="agenda-heading"
                     className="text-2xl md:text-3xl lg:text-4xl text-chart-6 font-bold motion-safe:animate-fade-in-up mb-4"
                 >
-                    Nos événements à venir
+                    Mes événements à venir
                 </h1>
                 <p
                     className="text-xs md:text-base text-white/80 motion-safe:animate-fade-in"
                     style={{ animationDelay: "0.2s" }}
                 >
-                    Retrouvez ici toutes les dates de nos prochains spectacles et événements.
+                    Retrouvez ici toutes les dates des prochains spectacles et événements.
                 </p>
             </div>
         </section>

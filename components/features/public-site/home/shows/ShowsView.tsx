@@ -13,7 +13,7 @@ export function ShowsView({ shows }: ShowsViewProps) {
             A l&apos;affiche
           </h2>
           <p className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto">
-            Découvrez notre programmation et réservez vos places
+            Découvrez la programmation et réservez vos places
           </p>
         </div>
 
@@ -27,7 +27,7 @@ export function ShowsView({ shows }: ShowsViewProps) {
           <Button variant="default" size="lg" asChild>
             <Link href="/agenda">
               <ArrowRight className="h-5 w-5" aria-hidden="true" />
-              Voir tout l&apos;agenda
+              Voir l&apos;agenda
             </Link>
           </Button>
         </div>

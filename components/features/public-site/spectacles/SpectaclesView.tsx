@@ -79,7 +79,7 @@ export function SpectaclesView({
                           className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-chart-6 hover:text-black transition-colors w-full focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-1 focus-visible:outline-none"
                         >
                           <Ticket className="h-4 w-4" aria-hidden="true" />
-                          Réserver mes billets
+                          Je réserve mes billets
                         </Link>
                       )}
                       <Link
@@ -216,7 +216,7 @@ export function SpectaclesView({
                 <ArrowRight
                   className={`h-5 w-5 transition-transform ${showAllArchived ? "rotate-180" : ""}`}
                 />
-                {showAllArchived ? "Voir moins" : "Voir toutes nos créations"}
+                {showAllArchived ? "Voir moins" : "Voir nos créations"}
 
               </Button>
             )}

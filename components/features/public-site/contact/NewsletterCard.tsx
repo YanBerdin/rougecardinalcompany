@@ -71,7 +71,7 @@ export function NewsletterCard(): React.JSX.Element {
             aria-busy={isLoading}
           >
             <Send className="h-4 w-4 mr-2" aria-hidden="true" />
-            {isLoading ? "Inscription…" : "S'inscrire"}
+            {isLoading ? "Inscription…" : "Je la veux !"}
           </Button>
         </form>
       </CardContent>
