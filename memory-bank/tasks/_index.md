@@ -21,6 +21,7 @@
 
 ## Terminé (récent)
 
+- `TASK093` Auto-save brouillon communiqués de presse — **COMPLÈTE ✅ 2026-05-15** — auto-save New+Edit, blocage strict sur article publié, `createPressReleaseAction` renvoie `{ id: string }`, fix bug description sans titre + fix type update (`title?`) — voir `memory-bank/tasks/tasks-completed/TASK093-press-release-autosave-draft.md`
 - `TASK092` Fix duplication ville agenda public — **COMPLÈTE ✅ 2026-05-08** — `buildAddress` DAL skip city si déjà dans `adresse`, `extractPostalCity` regex non-gourmande `([^,]+)`, validation curl OK — voir `memory-bank/tasks/tasks-completed/TASK092-fix-duplicate-city-agenda.md`
 - `TASK091` Refactoring calendrier agenda + fix violations ESLint — **COMPLÈTE ✅ 2026-05-07** — CalendarNav useCallback, CalendarMonth/Week headers extraits, AgendaEventList/Card sous-composants, fix animations.jsx + 4 fixtures e2e (`register`), `pnpm lint` = 0 erreurs — voir `memory-bank/tasks/TASK091-agenda-calendar-violations-fixes.md`
 - `TASK090` SectionFounder administrable (kind='founder') — **COMPLÈTE ✅ 2026-05-02** — migration `20260502150000`, colonne `milestones jsonb`, CHECK étendu, seed row, 3 fichiers source, fallback FOUNDER_BIO — voir `memory-bank/tasks/TASK090-founderContentAdminDashboard.md`

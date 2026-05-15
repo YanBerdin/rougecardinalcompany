@@ -1,36 +1,71 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Form } from "@/components/ui/form";
 import { AlertCircle } from "lucide-react";
+import { AutoSaveIndicator } from "@/components/features/admin/presse/AutoSaveIndicator";
+import { PressReleaseFormFields } from "@/components/features/admin/presse/PressReleaseFormFields";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { ImageField } from "@/components/features/admin/media";
-import { createPressReleaseAction } from "@/app/(admin)/admin/presse/press-releases-actions";
+    createPressReleaseAction,
+    updatePressReleaseAction,
+} from "@/app/(admin)/admin/presse/press-releases-actions";
+import {
+    usePressReleaseAutosave,
+    type PressReleaseAutoSavePayload,
+    type PressReleaseAutoSaveUpdatePayload,
+} from "@/lib/hooks/use-press-release-autosave";
 import { PressReleaseFormSchema, type PressReleaseFormValues } from "@/lib/schemas/press-release";
 import { cleanPressReleaseFormData, getPressReleaseSuccessMessage } from "@/lib/utils/press-utils";
 import type { SelectOptionDTO } from "@/lib/schemas/press-release";
 
-export function PressReleaseNewForm({ spectacles = [], evenements = [] }: { spectacles?: SelectOptionDTO[]; evenements?: SelectOptionDTO[] }) {
+interface PressReleaseNewFormProps {
+    spectacles?: SelectOptionDTO[];
+    evenements?: SelectOptionDTO[];
+}
+
+const AUTO_SAVE_TRIGGER_FIELDS: Array<keyof PressReleaseFormValues> = ["title", "description"];
+
+function hasUnvalidatedExternalImage(
+    data: PressReleaseFormValues,
+    isImageValidated: boolean | null
+): boolean {
+    return Boolean(data.image_url && data.image_url !== "" && isImageValidated !== true);
+}
+
+function requiresImageForPublicRelease(data: PressReleaseFormValues): boolean {
+    return Boolean(data.public && !data.image_url && !data.image_media_id);
+}
+
+function getSubmitButtonLabel(
+    isPending: boolean,
+    isPublic: boolean,
+    hasSavedDraft: boolean
+): string {
+    if (isPending) {
+        return hasSavedDraft ? "Enregistrement..." : "Création...";
+    }
+
+    if (!hasSavedDraft) {
+        return isPublic ? "Créer et publier" : "Créer";
+    }
+
+    return isPublic ? "Publier" : "Enregistrer le brouillon";
+}
+
+export function PressReleaseNewForm({
+    spectacles = [],
+    evenements = [],
+}: PressReleaseNewFormProps) {
     const router = useRouter();
     const [isPending, setIsPending] = useState(false);
     const [isImageValidated, setIsImageValidated] = useState<boolean | null>(null);
+    const [savedDraftId, setSavedDraftId] = useState<string | null>(null);
 
     const form = useForm<PressReleaseFormValues>({
         resolver: zodResolver(PressReleaseFormSchema),
@@ -54,6 +89,57 @@ export function PressReleaseNewForm({ spectacles = [], evenements = [] }: { spec
     const watchedDescription = form.watch("description");
     const watchedDatePublication = form.watch("date_publication");
     const [showPublicWarning, setShowPublicWarning] = useState(false);
+    const hasSavedDraft = Boolean(savedDraftId);
+
+    const handleAutoCreate = useCallback(async (payload: PressReleaseAutoSavePayload) => {
+        const result = await createPressReleaseAction(payload);
+        if (result.success) {
+            setSavedDraftId(result.data.id);
+        }
+        return result;
+    }, []);
+
+    const handleAutoUpdate = useCallback(
+        async (id: string, payload: PressReleaseAutoSaveUpdatePayload) => {
+            return updatePressReleaseAction(id, payload);
+        },
+        []
+    );
+
+    const autoSave = usePressReleaseAutosave({
+        form,
+        enabled: !isPending,
+        initialDraftId: savedDraftId,
+        triggerFields: AUTO_SAVE_TRIGGER_FIELDS,
+        debounceMs: 2000,
+        intervalMs: 30000,
+        onCreate: handleAutoCreate,
+        onUpdate: handleAutoUpdate,
+        buildDraftPayload: cleanPressReleaseFormData,
+    });
+
+    useEffect(() => {
+        if (!autoSave.draftId || autoSave.draftId === savedDraftId) {
+            return;
+        }
+        setSavedDraftId(autoSave.draftId);
+    }, [autoSave.draftId, savedDraftId]);
+
+    useEffect(() => {
+        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+            if (!autoSave.isSaving) {
+                return;
+            }
+
+            event.preventDefault();
+            event.returnValue = "";
+        };
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+    }, [autoSave.isSaving]);
 
     useEffect(() => {
         if (isPublic) {
@@ -80,18 +166,14 @@ export function PressReleaseNewForm({ spectacles = [], evenements = [] }: { spec
     ]);
 
     const onSubmit = async (data: PressReleaseFormValues) => {
-        // Validation critique : image doit être validée si URL externe fournie
-        if (data.image_url && data.image_url !== "") {
-            if (isImageValidated !== true) {
-                toast.error("Image non validée", {
-                    description: "Veuillez vérifier que l'URL de l'image est accessible.",
-                });
-                return;
-            }
+        if (hasUnvalidatedExternalImage(data, isImageValidated)) {
+            toast.error("Image non validée", {
+                description: "Veuillez vérifier que l'URL de l'image est accessible.",
+            });
+            return;
         }
 
-        // Validation critique : publication publique nécessite une image
-        if (data.public && !data.image_url && !data.image_media_id) {
+        if (requiresImageForPublicRelease(data)) {
             toast.error("Image requise", {
                 description: "Un communiqué visible publiquement doit avoir une image.",
             });
@@ -102,14 +184,20 @@ export function PressReleaseNewForm({ spectacles = [], evenements = [] }: { spec
 
         try {
             const cleanData = cleanPressReleaseFormData(data);
-            const result = await createPressReleaseAction(cleanData);
+            const result = savedDraftId
+                ? await updatePressReleaseAction(savedDraftId, cleanData)
+                : await createPressReleaseAction(cleanData);
 
             if (!result.success) {
                 throw new Error(result.error);
             }
 
-            toast.success("Communiqué créé", getPressReleaseSuccessMessage(false, data.title));
+            toast.success(
+                savedDraftId ? "Communiqué mis à jour" : "Communiqué créé",
+                getPressReleaseSuccessMessage(Boolean(savedDraftId), data.title)
+            );
             form.reset();
+            setSavedDraftId(null);
             router.push("/admin/presse");
             router.refresh();
         } catch (error) {
@@ -134,146 +222,34 @@ export function PressReleaseNewForm({ spectacles = [], evenements = [] }: { spec
                     </Alert>
                 )}
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Informations générales</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div>
-                            <Label htmlFor="title">Titre *</Label>
-                            <Input
-                                id="title"
-                                aria-describedby={form.formState.errors.title ? "title-error" : undefined}
-                                {...form.register("title")}
-                                disabled={isPending}
-                            />
-                            {form.formState.errors.title && (
-                                <p id="title-error" role="alert" className="text-red-600 text-sm mt-1">
-                                    {form.formState.errors.title.message}
-                                </p>
-                            )}
-                        </div>
+                <AutoSaveIndicator
+                    status={autoSave.status}
+                    lastSavedAt={autoSave.lastSavedAt}
+                    errorMessage={autoSave.errorMessage}
+                />
 
-                        <div>
-                            <Label htmlFor="slug">Slug</Label>
-                            <Input
-                                id="slug"
-                                {...form.register("slug")}
-                                disabled={isPending}
-                                placeholder="⚠️ Laissez vide pour génération automatique⚠️"
-                            />
-                        </div>
-
-                        <div>
-                            <Label htmlFor="description">Description</Label>
-                            <Textarea
-                                id="description"
-                                {...form.register("description")}
-                                disabled={isPending}
-                                rows={6}
-                            />
-                        </div>
-
-                        <div>
-                            <Label htmlFor="date_publication">Date de publication *</Label>
-                            <Input
-                                id="date_publication"
-                                type="date"
-                                {...form.register("date_publication")}
-                                disabled={isPending}
-                            />
-                        </div>
-
-                        {/* Image avec ImageField */}
-                        <ImageField.Provider
-                            form={form}
-                            imageUrlField="image_url"
-                            imageMediaIdField="image_media_id"
-                            label="Image du communiqué"
-                            showUpload={true}
-                            uploadFolder="presse"
-                            description="Image principale affichée dans le kit média (recommandé : 1200x630px)"
-                            onValidationChange={(isValid) => setIsImageValidated(isValid)}
-                        >
-                            <ImageField.SourceActions showUpload={true} />
-                            <ImageField.Preview />
-                        </ImageField.Provider>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Liaisons contextuelles</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div>
-                            <Label htmlFor="spectacle_id">Spectacle associé</Label>
-                            <Select
-                                onValueChange={(value) => form.setValue("spectacle_id", value ? Number(value) : undefined)}
-                                disabled={isPending}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Sélectionner un spectacle (optionnel)" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {spectacles.map((s) => (
-                                        <SelectItem key={s.id} value={String(s.id)}>
-                                            {s.titre}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <div>
-                            <Label htmlFor="evenement_id">Événement associé</Label>
-                            <Select
-                                onValueChange={(value) => form.setValue("evenement_id", value ? Number(value) : undefined)}
-                                disabled={isPending}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Sélectionner un événement (optionnel)" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {evenements.map((e) => (
-                                        <SelectItem key={e.id} value={String(e.id)}>
-                                            {e.titre}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Publication</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex items-center space-x-2">
-                            <Switch
-                                id="public"
-                                checked={form.watch("public")}
-                                onCheckedChange={(checked) => form.setValue("public", checked)}
-                                disabled={isPending}
-                            />
-                            <Label htmlFor="public">Publier immédiatement</Label>
-                        </div>
-                    </CardContent>
-                </Card>
+                <PressReleaseFormFields
+                    form={form}
+                    isPending={isPending}
+                    spectacles={spectacles}
+                    evenements={evenements}
+                    publishLabel="Publier immédiatement"
+                    imageLabel="Image du communiqué"
+                    imageDescription="Image principale affichée dans le kit média (recommandé : 1200x630px)"
+                    onImageValidationChange={setIsImageValidated}
+                />
 
                 <div className="flex gap-2 justify-end">
                     <Button
                         type="button"
                         variant="outline"
                         onClick={() => router.back()}
-                        disabled={isPending}
+                        disabled={isPending || autoSave.isSaving}
                     >
                         Annuler
                     </Button>
-                    <Button type="submit" disabled={isPending}>
-                        {isPending ? "Création..." : "Créer"}
+                    <Button type="submit" disabled={isPending || autoSave.isSaving}>
+                        {getSubmitButtonLabel(isPending, isPublic, hasSavedDraft)}
                     </Button>
                 </div>
             </form>
