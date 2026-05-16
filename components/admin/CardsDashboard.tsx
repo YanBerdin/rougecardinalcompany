@@ -21,7 +21,7 @@ const items: CardItem[] = [
     { title: "Médiatèque", description: "Gérer images et vidéos", href: "/admin/media", icon: <ImageIcon className="h-5 w-5" />, minRole: "editor" },
     { title: "Utilisateurs", description: "Comptes et permissions", href: "/admin/users", icon: <Users className="h-5 w-5" />, minRole: "admin" },
     { title: "Affichage des Sections", description: "Configuration du site", href: "/admin/site-config", icon: <Settings className="h-5 w-5" />, minRole: "admin" },
-     { title: "À propos de la compagnie", description: "Informations sur la compagnie", href: "/admin/about", icon: <Settings className="h-5 w-5" />, minRole: "editor" },
+     { title: "À propos de la compagnie", description: "Informations sur la compagnie", href: "/admin/compagnie", icon: <Settings className="h-5 w-5" />, minRole: "editor" },
 ];
 
 interface CardsDashboardProps {

@@ -201,10 +201,10 @@ export function SpectaclesView({
           <div className="text-center mt-12">
             <p className="text-muted-foreground mb-6">
               {showAllArchived
-                ? `${archivedShows.length} créations depuis 2008`
+                ? `${archivedShows.length} créations`
                 : hasMoreArchivedShows
-                  ? `${displayedArchivedShows.length} créations affichées sur ${archivedShows.length} au total depuis 2008`
-                  : `${archivedShows.length} créations depuis 2008`}
+                  ? `${displayedArchivedShows.length} créations affichées sur ${archivedShows.length} au total`
+                  : `${archivedShows.length} créations`}
             </p>
             {hasMoreArchivedShows && (
               <Button

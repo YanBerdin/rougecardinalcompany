@@ -1,5 +1,33 @@
 # Progress
 
+## Auto-save brouillon communiqués de presse (TASK093) (2026-05-15)
+
+✅ **COMPLET (implémentation)** — Auto-save type Google Docs livré sur les formulaires presse création + édition, avec protection stricte des articles publiés.
+
+### Livrables
+
+- `app/(admin)/admin/presse/press-releases-actions.ts`
+  - `createPressReleaseAction` renvoie `ActionResult<{ id: string }>` (`bigint -> string`).
+- `lib/hooks/use-press-release-autosave.ts`
+  - Hook complet (`idle|dirty|saving|saved|error`), debounce 2s, heartbeat 30s, queue de sauvegarde concurrente.
+  - Correctif bug métier : description autosavée même si le titre est vide.
+  - Correctif typage : `PressReleaseAutoSaveUpdatePayload` avec `title?: string` pour update partiel.
+  - Create : placeholder `(Sans titre)` si nécessaire ; Update : omission de `title` vide ; `public: false` forcé.
+- `components/features/admin/presse/AutoSaveIndicator.tsx`
+  - Composant d'état auto-save accessible (`role="status"`, `aria-live="polite"`).
+- `components/features/admin/presse/PressReleaseNewForm.tsx`
+  - `savedDraftId`, auto-create puis auto-update, submit final create/update, `beforeunload` pendant save.
+  - Libellé bouton contextuel (Créer / Enregistrer le brouillon / Publier).
+- `components/features/admin/presse/PressReleaseEditForm.tsx`
+  - Auto-save désactivé si `release.public`, bannière de sauvegarde manuelle, indicateur masqué.
+
+### Vérification
+
+- Validation TypeScript des fichiers modifiés : aucune erreur.
+- Les scénarios QA manuels complets restent à rejouer si une validation fonctionnelle formelle est requise.
+
+---
+
 ## Clickable venue → Google Maps + duplicate city fix (2026)
 
 ✅ **COMPLET** — Lien Google Maps cliquable sur les pages `/agenda` et `/spectacles/[slug]` + correction affichage doublon ville (TASK092).
