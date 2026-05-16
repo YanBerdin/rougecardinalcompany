@@ -14,14 +14,15 @@ interface CardItem {
 }
 
 const items: CardItem[] = [
-    { title: "Gérer l'équipe", description: "Membres, rôles et profils", href: "/admin/team", icon: <Users className="h-5 w-5" />, minRole: "admin" },
     { title: "Spectacles", description: "Créer et modifier les spectacles", href: "/admin/spectacles", icon: <FileText className="h-5 w-5" />, minRole: "editor" },
+    { title: "Lieux", description: "Gérer les lieux", href: "/admin/lieux", icon: <Users className="h-5 w-5" />, minRole: "admin" },
     { title: "Agenda", description: "Calendrier et billetterie", href: "/admin/agenda", icon: <Calendar className="h-5 w-5" />, minRole: "editor" },
     { title: "Presse", description: "Communiqués, articles et contacts", href: "/admin/presse", icon: <Newspaper className="h-5 w-5" />, minRole: "editor" },
     { title: "Médiatèque", description: "Gérer images et vidéos", href: "/admin/media", icon: <ImageIcon className="h-5 w-5" />, minRole: "editor" },
-    { title: "Utilisateurs", description: "Comptes et permissions", href: "/admin/users", icon: <Users className="h-5 w-5" />, minRole: "admin" },
+    { title: "À propos de la compagnie", description: "Informations sur la compagnie", href: "/admin/compagnie", icon: <Settings className="h-5 w-5" />, minRole: "editor" },
     { title: "Affichage des Sections", description: "Configuration du site", href: "/admin/site-config", icon: <Settings className="h-5 w-5" />, minRole: "admin" },
-     { title: "À propos de la compagnie", description: "Informations sur la compagnie", href: "/admin/compagnie", icon: <Settings className="h-5 w-5" />, minRole: "editor" },
+    { title: "Gérer l'équipe", description: "Membres, rôles et profils", href: "/admin/team", icon: <Users className="h-5 w-5" />, minRole: "admin" },
+    { title: "Utilisateurs", description: "Comptes et permissions", href: "/admin/users", icon: <Users className="h-5 w-5" />, minRole: "admin" },
 ];
 
 interface CardsDashboardProps {
