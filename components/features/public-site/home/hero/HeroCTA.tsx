@@ -4,7 +4,6 @@ import Link from "next/link";
 import { View, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HeroSlide } from "./types";
-import { CURRENT_SEASON_LABEL } from "./constants";
 
 interface HeroCTAProps {
   slide: HeroSlide;
@@ -13,11 +12,6 @@ interface HeroCTAProps {
 export function HeroCTA({ slide }: HeroCTAProps) {
   return (
     <div className="relative z-10 text-center text-chart-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-28 md:mt-52">
-      <div className="hidden sm:block w-24 h-px bg-gold mx-auto mb-4 md:mb-8" aria-hidden="true" />
-
-      <p className="text-xs md:text-sm tracking-[0.15em] sm:tracking-[0.25em] uppercase font-serif text-gold mb-2 lg:mb-6">
-        {CURRENT_SEASON_LABEL}
-      </p>
 
       <div className="animate-fade-in-up">
         <h1 className=" text-gold-gradient text-2xl md:text-6xl lg:text-7xl font-bold">

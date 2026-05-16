@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Form } from "@/components/ui/form";
 import { AlertTriangle } from "lucide-react";
-import { AutoSaveIndicator } from "@/components/features/admin/presse/AutoSaveIndicator";
+import { AutoSaveIndicator } from "@/components/features/admin/shared/AutoSaveIndicator";
 import { PressReleaseFormFields } from "@/components/features/admin/presse/PressReleaseFormFields";
 import { cleanPressReleaseFormData, getPressReleaseSuccessMessage } from "@/lib/utils/press-utils";
 import {

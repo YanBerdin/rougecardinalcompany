@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, type Path } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import { ImageField } from "@/components/features/admin/media";
+import { AutoSaveIndicator } from "@/components/features/admin/shared/AutoSaveIndicator";
 import { cleanArticleFormData, getArticleSuccessMessage } from "@/lib/utils/press-utils";
 import {
     Select,
@@ -20,8 +21,23 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { updateArticleAction } from "@/app/(admin)/admin/presse/press-articles-actions";
+import {
+    createArticleAction,
+    updateArticleAction,
+} from "@/app/(admin)/admin/presse/press-articles-actions";
 import { ArticleFormSchema, type ArticleFormValues, type ArticleDTO } from "@/lib/schemas/press-article";
+import { useFormAutosave } from "@/lib/hooks/use-form-autosave";
+
+const AUTO_SAVE_TRIGGER_FIELDS: Array<Path<ArticleFormValues>> = [
+    "title",
+    "chapo",
+    "excerpt",
+    "author",
+    "source_publication",
+];
+
+type ArticleAutoSavePayload = ReturnType<typeof cleanArticleFormData>;
+type ArticleAutoSaveUpdatePayload = Partial<ArticleAutoSavePayload>;
 
 interface ArticleEditFormProps {
     article: ArticleDTO;
@@ -52,6 +68,47 @@ export function ArticleEditForm({ article }: ArticleEditFormProps) {
     const [isImageValidated, setIsImageValidated] = useState<boolean | null>(
         article.image_url || article.og_image_media_id ? true : null
     );
+
+    const handleAutoCreate = useCallback(async (payload: ArticleAutoSavePayload) => {
+        const result = await createArticleAction(payload);
+        return result;
+    }, []);
+
+    const handleAutoUpdate = useCallback(
+        async (id: string, payload: ArticleAutoSaveUpdatePayload) => {
+            return updateArticleAction(id, payload);
+        },
+        []
+    );
+
+    const autoSave = useFormAutosave<
+        ArticleFormValues,
+        ArticleAutoSavePayload,
+        ArticleAutoSaveUpdatePayload
+    >({
+        form,
+        enabled: !isPending,
+        initialDraftId: String(article.id),
+        triggerFields: AUTO_SAVE_TRIGGER_FIELDS,
+        onCreate: handleAutoCreate,
+        onUpdate: handleAutoUpdate,
+        buildDraftPayload: cleanArticleFormData,
+    });
+
+    useEffect(() => {
+        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+            if (!autoSave.isSaving) {
+                return;
+            }
+            event.preventDefault();
+            event.returnValue = "";
+        };
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+    }, [autoSave.isSaving]);
 
     const onSubmit = async (data: ArticleFormValues) => {
         // Pattern 1: Image validation gate (if image provided)
@@ -85,6 +142,11 @@ export function ArticleEditForm({ article }: ArticleEditFormProps) {
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <AutoSaveIndicator
+                    status={autoSave.status}
+                    lastSavedAt={autoSave.lastSavedAt}
+                    errorMessage={autoSave.errorMessage}
+                />
                 <Card>
                 <CardHeader>
                     <CardTitle>Informations de l&apos;article</CardTitle>
@@ -213,11 +275,11 @@ export function ArticleEditForm({ article }: ArticleEditFormProps) {
                     type="button"
                     variant="outline"
                     onClick={() => router.back()}
-                    disabled={isPending}
+                    disabled={isPending || autoSave.isSaving}
                 >
                     Annuler
                 </Button>
-                <Button type="submit" disabled={isPending}>
+                <Button type="submit" disabled={isPending || autoSave.isSaving}>
                     {isPending ? "Mise à jour..." : "Mettre à jour"}
                 </Button>
             </div>

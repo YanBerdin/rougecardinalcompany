@@ -252,7 +252,7 @@ export function PressReleasesView({ initialReleases }: PressReleasesViewProps) {
                             Annuler
                         </Button>
                         <Button
-                            variant="outline-destructive"
+                            variant="destructive"
                             onClick={() => deleteCandidate && handleDelete(deleteCandidate)}
                             title="Confirmer la suppression du communiqué"
                         >

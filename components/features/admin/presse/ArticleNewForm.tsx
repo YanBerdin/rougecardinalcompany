@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, type Path } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import { ImageField } from "@/components/features/admin/media";
+import { AutoSaveIndicator } from "@/components/features/admin/shared/AutoSaveIndicator";
 import { cleanArticleFormData, getArticleSuccessMessage } from "@/lib/utils/press-utils";
 import {
     Select,
@@ -20,12 +21,29 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { createArticleAction } from "@/app/(admin)/admin/presse/press-articles-actions";
+import {
+    createArticleAction,
+    updateArticleAction,
+} from "@/app/(admin)/admin/presse/press-articles-actions";
 import { ArticleFormSchema, type ArticleFormValues } from "@/lib/schemas/press-article";
+import { useFormAutosave } from "@/lib/hooks/use-form-autosave";
+
+const AUTO_SAVE_TRIGGER_FIELDS: Array<Path<ArticleFormValues>> = [
+    "title",
+    "chapo",
+    "excerpt",
+    "author",
+    "source_publication",
+];
+const DRAFT_TITLE_FALLBACK = "(Sans titre)";
+
+type ArticleAutoSavePayload = ReturnType<typeof cleanArticleFormData>;
+type ArticleAutoSaveUpdatePayload = Partial<ArticleAutoSavePayload>;
 
 export function ArticleNewForm() {
     const router = useRouter();
     const [isPending, setIsPending] = useState(false);
+    const [savedDraftId, setSavedDraftId] = useState<string | null>(null);
 
     const form = useForm<ArticleFormValues>({
         resolver: zodResolver(ArticleFormSchema),
@@ -47,6 +65,76 @@ export function ArticleNewForm() {
     // Pattern 1: Image validation state (optional for articles)
     const [isImageValidated, setIsImageValidated] = useState<boolean | null>(null);
 
+    const handleAutoCreate = useCallback(async (payload: ArticleAutoSavePayload) => {
+        const result = await createArticleAction(payload);
+        if (result.success) {
+            setSavedDraftId(result.data.id);
+        }
+        return result;
+    }, []);
+
+    const handleAutoUpdate = useCallback(
+        async (id: string, payload: ArticleAutoSaveUpdatePayload) => {
+            return updateArticleAction(id, payload);
+        },
+        []
+    );
+
+    const transformCreatePayload = useCallback(
+        (payload: ArticleAutoSavePayload): ArticleAutoSavePayload => ({
+            ...payload,
+            title: payload.title?.trim() ? payload.title : DRAFT_TITLE_FALLBACK,
+        }),
+        []
+    );
+
+    const transformUpdatePayload = useCallback(
+        (payload: ArticleAutoSavePayload): ArticleAutoSaveUpdatePayload => {
+            const { title, ...rest } = payload;
+            const trimmedTitle = title?.trim();
+            return trimmedTitle ? { ...rest, title } : rest;
+        },
+        []
+    );
+
+    const autoSave = useFormAutosave<
+        ArticleFormValues,
+        ArticleAutoSavePayload,
+        ArticleAutoSaveUpdatePayload
+    >({
+        form,
+        enabled: !isPending,
+        initialDraftId: savedDraftId,
+        triggerFields: AUTO_SAVE_TRIGGER_FIELDS,
+        onCreate: handleAutoCreate,
+        onUpdate: handleAutoUpdate,
+        buildDraftPayload: cleanArticleFormData,
+        transformCreatePayload,
+        transformUpdatePayload,
+    });
+
+    useEffect(() => {
+        if (!autoSave.draftId || autoSave.draftId === savedDraftId) {
+            return;
+        }
+        setSavedDraftId(autoSave.draftId);
+    }, [autoSave.draftId, savedDraftId]);
+
+    useEffect(() => {
+        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+            if (!autoSave.isSaving) {
+                return;
+            }
+            event.preventDefault();
+            event.returnValue = "";
+        };
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+    }, [autoSave.isSaving]);
+
     const onSubmit = async (data: ArticleFormValues) => {
         // Pattern 1: Image validation gate (if image provided)
         if (isImageValidated !== true && (data.image_url || data.og_image_media_id)) {
@@ -59,15 +147,18 @@ export function ArticleNewForm() {
         try {
             // Pattern 4: Clean form data (number → bigint conversions)
             const cleanedData = cleanArticleFormData(data);
-            const result = await createArticleAction(cleanedData);
+            const result = savedDraftId
+                ? await updateArticleAction(savedDraftId, cleanedData)
+                : await createArticleAction(cleanedData);
 
             if (!result.success) {
                 throw new Error(result.error);
             }
 
             // Pattern 5: Contextualized success message
-            const successMessage = getArticleSuccessMessage(false, data.title);
-            toast.success("Article créé", successMessage);
+            const successMessage = getArticleSuccessMessage(Boolean(savedDraftId), data.title);
+            toast.success(savedDraftId ? "Article mis à jour" : "Article créé", successMessage);
+            setSavedDraftId(null);
             router.push("/admin/presse");
             router.refresh();
         } catch (error) {
@@ -80,6 +171,11 @@ export function ArticleNewForm() {
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <AutoSaveIndicator
+                    status={autoSave.status}
+                    lastSavedAt={autoSave.lastSavedAt}
+                    errorMessage={autoSave.errorMessage}
+                />
                 <Card>
                 <CardHeader>
                     <CardTitle>Informations de l&apos;article</CardTitle>
@@ -207,12 +303,18 @@ export function ArticleNewForm() {
                     type="button"
                     variant="outline"
                     onClick={() => router.back()}
-                    disabled={isPending}
+                    disabled={isPending || autoSave.isSaving}
                 >
                     Annuler
                 </Button>
-                <Button type="submit" disabled={isPending}>
-                    {isPending ? "Création..." : "Créer"}
+                <Button type="submit" disabled={isPending || autoSave.isSaving}>
+                    {isPending
+                        ? savedDraftId
+                            ? "Enregistrement..."
+                            : "Création..."
+                        : savedDraftId
+                            ? "Enregistrer"
+                            : "Créer"}
                 </Button>
             </div>
             </form>

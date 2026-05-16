@@ -1,11 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import type { ActionResult } from "@/lib/actions/types";
+import {
+    useFormAutosave,
+    type FormAutoSaveStatus,
+    type UseFormAutosaveReturn,
+} from "@/lib/hooks/use-form-autosave";
 import type { PressReleaseFormValues } from "@/lib/schemas/press-release";
 
-export type PressReleaseAutoSaveStatus = "idle" | "dirty" | "saving" | "saved" | "error";
+/**
+ * Backwards-compatible alias for the generic auto-save status type.
+ *
+ * @deprecated Import `FormAutoSaveStatus` from `@/lib/hooks/use-form-autosave` instead.
+ */
+export type PressReleaseAutoSaveStatus = FormAutoSaveStatus;
 
 export interface PressReleaseAutoSavePayload {
     title: string;
@@ -36,221 +46,63 @@ interface UsePressReleaseAutosaveOptions {
     buildDraftPayload: (values: PressReleaseFormValues) => PressReleaseAutoSavePayload;
 }
 
-interface UsePressReleaseAutosaveReturn {
-    status: PressReleaseAutoSaveStatus;
-    lastSavedAt: Date | null;
-    errorMessage: string | null;
-    draftId: string | null;
-    isSaving: boolean;
-}
+type UsePressReleaseAutosaveReturn = UseFormAutosaveReturn;
 
+const DRAFT_TITLE_FALLBACK = "(Sans titre)";
+
+/**
+ * Press-release-specific wrapper around `useFormAutosave`.
+ *
+ * Adds two domain-specific transforms:
+ * - Create: ensures the required `title` is non-empty (falls back to `(Sans titre)`)
+ *   and forces `public: false` so auto-saved drafts never go live.
+ * - Update: omits an empty `title` so the partial update preserves the existing
+ *   DB value, and forces `public: false`.
+ */
 export function usePressReleaseAutosave({
     form,
     enabled,
     initialDraftId = null,
     triggerFields,
-    debounceMs = 2000,
-    intervalMs = 30000,
+    debounceMs,
+    intervalMs,
     onCreate,
     onUpdate,
     buildDraftPayload,
 }: UsePressReleaseAutosaveOptions): UsePressReleaseAutosaveReturn {
-    const [status, setStatus] = useState<PressReleaseAutoSaveStatus>("idle");
-    const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [draftId, setDraftId] = useState<string | null>(initialDraftId);
+    const transformCreatePayload = useCallback(
+        (payload: PressReleaseAutoSavePayload): PressReleaseAutoSavePayload => ({
+            ...payload,
+            title: payload.title?.trim() || DRAFT_TITLE_FALLBACK,
+            public: false,
+        }),
+        []
+    );
 
-    const draftIdRef = useRef<string | null>(initialDraftId);
-    const statusRef = useRef<PressReleaseAutoSaveStatus>("idle");
-    const triggerFieldsRef = useRef<Array<keyof PressReleaseFormValues>>(triggerFields);
-    const isMountedRef = useRef(true);
-    const isSavingRef = useRef(false);
-    const hasQueuedSaveRef = useRef(false);
-    const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const heartbeatTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-    const updateStatus = useCallback((nextStatus: PressReleaseAutoSaveStatus) => {
-        statusRef.current = nextStatus;
-        if (isMountedRef.current) {
-            setStatus(nextStatus);
-        }
-    }, []);
-
-    const clearDebounceTimer = useCallback(() => {
-        if (!debounceTimerRef.current) return;
-        clearTimeout(debounceTimerRef.current);
-        debounceTimerRef.current = null;
-    }, []);
-
-    const clearHeartbeatTimer = useCallback(() => {
-        if (!heartbeatTimerRef.current) return;
-        clearInterval(heartbeatTimerRef.current);
-        heartbeatTimerRef.current = null;
-    }, []);
-
-    const hasDraftContent = useCallback(
-        (values: PressReleaseFormValues): boolean => {
-            return triggerFieldsRef.current.some((fieldName) => {
-                const fieldValue = values[fieldName];
-                if (typeof fieldValue === "string") {
-                    return fieldValue.trim().length > 0;
-                }
-                return fieldValue !== null && fieldValue !== undefined;
-            });
+    const transformUpdatePayload = useCallback(
+        (payload: PressReleaseAutoSavePayload): PressReleaseAutoSaveUpdatePayload => {
+            const { title, ...rest } = payload;
+            const titleUpdate = title?.trim() ? { title } : {};
+            return { ...rest, ...titleUpdate, public: false };
         },
         []
     );
 
-    const saveDraft = useCallback(async () => {
-        if (!enabled) return;
-
-        const values = form.getValues();
-        if (!hasDraftContent(values)) {
-            setErrorMessage(null);
-            updateStatus("idle");
-            return;
-        }
-
-        if (isSavingRef.current) {
-            hasQueuedSaveRef.current = true;
-            return;
-        }
-
-        isSavingRef.current = true;
-        setErrorMessage(null);
-        updateStatus("saving");
-
-        try {
-            const basePayload = buildDraftPayload(values);
-            const currentDraftId = draftIdRef.current;
-
-            if (!currentDraftId) {
-                // Create: title required by schema — use placeholder if empty
-                const createPayload = {
-                    ...basePayload,
-                    title: basePayload.title?.trim() || "(Sans titre)",
-                    public: false,
-                };
-                const createResult = await onCreate(createPayload);
-                if (!createResult.success) {
-                    throw new Error(createResult.error);
-                }
-
-                const createdDraftId = createResult.data.id;
-                draftIdRef.current = createdDraftId;
-                if (isMountedRef.current) {
-                    setDraftId(createdDraftId);
-                }
-            } else {
-                // Update: partial schema — omit title if empty to preserve existing DB value
-                const { title, ...restPayload } = basePayload;
-                const titleUpdate = title?.trim() ? { title } : {};
-                const updatePayload = { ...restPayload, ...titleUpdate, public: false };
-                const updateResult = await onUpdate(currentDraftId, updatePayload);
-                if (!updateResult.success) {
-                    throw new Error(updateResult.error);
-                }
-            }
-
-            if (isMountedRef.current) {
-                setLastSavedAt(new Date());
-                setErrorMessage(null);
-            }
-            updateStatus("saved");
-        } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : "Erreur de sauvegarde";
-            if (isMountedRef.current) {
-                setErrorMessage(message);
-            }
-            updateStatus("error");
-        } finally {
-            isSavingRef.current = false;
-
-            if (hasQueuedSaveRef.current) {
-                hasQueuedSaveRef.current = false;
-                void saveDraft();
-            }
-        }
-    }, [buildDraftPayload, enabled, form, hasDraftContent, onCreate, onUpdate, updateStatus]);
-
-    const queueDebouncedSave = useCallback(() => {
-        if (!enabled) return;
-
-        if (statusRef.current !== "saving") {
-            updateStatus("dirty");
-        }
-
-        clearDebounceTimer();
-        debounceTimerRef.current = setTimeout(() => {
-            void saveDraft();
-        }, debounceMs);
-    }, [clearDebounceTimer, debounceMs, enabled, saveDraft, updateStatus]);
-
-    useEffect(() => {
-        triggerFieldsRef.current = triggerFields;
-    }, [triggerFields]);
-
-    useEffect(() => {
-        draftIdRef.current = initialDraftId;
-        setDraftId(initialDraftId);
-    }, [initialDraftId]);
-
-    useEffect(() => {
-        isMountedRef.current = true;
-        return () => {
-            isMountedRef.current = false;
-        };
-    }, []);
-
-    useEffect(() => {
-        if (!enabled) {
-            clearDebounceTimer();
-            clearHeartbeatTimer();
-            setErrorMessage(null);
-            updateStatus("idle");
-            return;
-        }
-
-        const subscription = form.watch((_value, { name }) => {
-            if (!name) return;
-            if (!triggerFieldsRef.current.includes(name as keyof PressReleaseFormValues)) {
-                return;
-            }
-
-            queueDebouncedSave();
-        });
-
-        return () => {
-            subscription.unsubscribe();
-        };
-    }, [clearDebounceTimer, clearHeartbeatTimer, enabled, form, queueDebouncedSave, updateStatus]);
-
-    useEffect(() => {
-        if (!enabled) return;
-
-        heartbeatTimerRef.current = setInterval(() => {
-            if (statusRef.current === "dirty" || statusRef.current === "error") {
-                void saveDraft();
-            }
-        }, intervalMs);
-
-        return () => {
-            clearHeartbeatTimer();
-        };
-    }, [clearHeartbeatTimer, enabled, intervalMs, saveDraft]);
-
-    useEffect(() => {
-        return () => {
-            clearDebounceTimer();
-            clearHeartbeatTimer();
-        };
-    }, [clearDebounceTimer, clearHeartbeatTimer]);
-
-    return {
-        status,
-        lastSavedAt,
-        errorMessage,
-        draftId,
-        isSaving: status === "saving",
-    };
+    return useFormAutosave<
+        PressReleaseFormValues,
+        PressReleaseAutoSavePayload,
+        PressReleaseAutoSaveUpdatePayload
+    >({
+        form,
+        enabled,
+        initialDraftId,
+        triggerFields,
+        debounceMs,
+        intervalMs,
+        onCreate,
+        onUpdate,
+        buildDraftPayload,
+        transformCreatePayload,
+        transformUpdatePayload,
+    });
 }

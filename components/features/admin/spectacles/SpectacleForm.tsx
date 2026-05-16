@@ -1,9 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm, useWatch, type Path } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -22,7 +22,21 @@ import { SpectacleFormImageSection } from "./SpectacleFormImageSection";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AutoSaveIndicator } from "@/components/features/admin/shared/AutoSaveIndicator";
+import { useFormAutosave } from "@/lib/hooks/use-form-autosave";
 import type { SpectacleFormProps } from "./types";
+
+const AUTO_SAVE_TRIGGER_FIELDS: Array<Path<SpectacleFormValues>> = [
+  "title",
+  "short_description",
+  "description",
+  "genre",
+];
+
+const DRAFT_TITLE_FALLBACK = "(Sans titre)";
+
+type SpectacleAutoSavePayload = ReturnType<typeof cleanSpectacleFormData>;
+type SpectacleAutoSaveUpdatePayload = Partial<SpectacleAutoSavePayload>;
 
 export default function SpectacleForm({
   defaultValues,
@@ -32,6 +46,9 @@ export default function SpectacleForm({
 }: SpectacleFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [savedDraftId, setSavedDraftId] = useState<string | null>(
+    spectacleId ? String(spectacleId) : null
+  );
 
   // Image validation state (null = untested, true = valid, false = invalid)
   const [isImageValidated, setIsImageValidated] = useState<boolean | null>(
@@ -103,6 +120,92 @@ export default function SpectacleForm({
     watchedDesc,
   ]);
 
+  const handleAutoCreate = useCallback(
+    async (payload: SpectacleAutoSavePayload) => {
+      const result = await createSpectacleAction(payload);
+      if (!result.success) {
+        return result;
+      }
+      const createdId = result.data?.id;
+      if (createdId === undefined || createdId === null) {
+        return { success: false as const, error: "Spectacle ID missing in response" };
+      }
+      return { success: true as const, data: { id: String(createdId) } };
+    },
+    []
+  );
+
+  const handleAutoUpdate = useCallback(
+    async (id: string, payload: SpectacleAutoSaveUpdatePayload) => {
+      const result = await updateSpectacleAction({
+        ...payload,
+        id: Number(id),
+      });
+      return result.success ? { success: true as const } : result;
+    },
+    []
+  );
+
+  const transformCreatePayload = useCallback(
+    (payload: SpectacleAutoSavePayload): SpectacleAutoSavePayload => {
+      const title = typeof payload.title === "string" ? payload.title.trim() : "";
+      if (title.length === 0) {
+        return { ...payload, title: DRAFT_TITLE_FALLBACK };
+      }
+      return payload;
+    },
+    []
+  );
+
+  const transformUpdatePayload = useCallback(
+    (payload: SpectacleAutoSaveUpdatePayload): SpectacleAutoSaveUpdatePayload => {
+      const trimmedTitle =
+        typeof payload.title === "string" ? payload.title.trim() : undefined;
+      if (trimmedTitle === undefined || trimmedTitle.length > 0) {
+        return payload;
+      }
+      const { title: _omitted, ...rest } = payload;
+      return rest;
+    },
+    []
+  );
+
+  const autoSave = useFormAutosave<
+    SpectacleFormValues,
+    SpectacleAutoSavePayload,
+    SpectacleAutoSaveUpdatePayload
+  >({
+    form,
+    enabled: !isSubmitting,
+    initialDraftId: savedDraftId,
+    triggerFields: AUTO_SAVE_TRIGGER_FIELDS,
+    onCreate: handleAutoCreate,
+    onUpdate: handleAutoUpdate,
+    buildDraftPayload: cleanSpectacleFormData,
+    transformCreatePayload,
+    transformUpdatePayload,
+  });
+
+  useEffect(() => {
+    if (autoSave.draftId && autoSave.draftId !== savedDraftId) {
+      setSavedDraftId(autoSave.draftId);
+    }
+  }, [autoSave.draftId, savedDraftId]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!autoSave.isSaving) {
+        return;
+      }
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [autoSave.isSaving]);
+
   async function onSubmit(data: SpectacleFormValues) {
     // CRITICAL: Image URL validation (if provided, must be validated)
     if (data.image_url && data.image_url !== "") {
@@ -129,11 +232,11 @@ export default function SpectacleForm({
     try {
       const cleanData = cleanSpectacleFormData(data);
 
-      const result = spectacleId
+      const result = savedDraftId
         ? await updateSpectacleAction({
-            id: spectacleId,
-            ...cleanData,
-          })
+          id: Number(savedDraftId),
+          ...cleanData,
+        })
         : await createSpectacleAction(cleanData);
 
       if (!result.success) {
@@ -142,13 +245,14 @@ export default function SpectacleForm({
       }
 
       toast.success(
-        isEditing ? "Spectacle mis à jour" : "Spectacle créé",
+        isEditing || savedDraftId ? "Spectacle mis à jour" : "Spectacle créé",
         {
-          description: `« ${data.title} » a été ${
-            isEditing ? "mis à jour" : "créé"
-          } avec succès.`,
+          description: `« ${data.title} » a été ${isEditing || savedDraftId ? "mis à jour" : "créé"
+            } avec succès.`,
         }
       );
+
+      setSavedDraftId(null);
 
       if (onSuccess) {
         onSuccess();
@@ -171,6 +275,12 @@ export default function SpectacleForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <AutoSaveIndicator
+          status={autoSave.status}
+          lastSavedAt={autoSave.lastSavedAt}
+          errorMessage={autoSave.errorMessage}
+        />
+
         {/* Progressive validation warning */}
         {showPublicWarning && (
           <Alert className="destructive">
@@ -207,13 +317,13 @@ export default function SpectacleForm({
             type="button"
             variant="secondary"
             onClick={() => router.back()}
-            disabled={isSubmitting}
+            disabled={isSubmitting || autoSave.isSaving}
           >
             Annuler
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
+          <Button type="submit" disabled={isSubmitting || autoSave.isSaving}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isEditing ? "Mettre à jour" : "Créer le spectacle"}
+            {isEditing || savedDraftId ? "Mettre à jour" : "Créer le spectacle"}
           </Button>
         </div>
       </form>
