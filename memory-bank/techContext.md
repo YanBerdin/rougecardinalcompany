@@ -1,11 +1,11 @@
 # Tech Context
 
-**Last Updated**: 2026-03-25
+**Last Updated**: 2026-05-16
 
 Versions et dépendances clés observées dans le dépôt:
 
 - Node.js: ^20 (devDeps)
-- Next.js: **16.1.5** (App Router, Turbopack default)
+- Next.js: **16.2.6** (App Router, Turbopack default)
 - TypeScript: ^5
 - Tailwind CSS: ^3.4.x
 - Supabase: client/server integration via `@supabase/ssr` and `@supabase/supabase-js` patterns
@@ -27,6 +27,8 @@ Structure principale:
 
 | Date | Changement | Impact |
 | ------ | ------------ | -------- |
+| 2026-05-16 | Audit Dependabot — 3 patches sécurité | Next.js 16.2.6 + `postcss >=8.5.10` + `fast-uri >=3.1.2`, `pnpm audit` = 0 CVE |
+| 2026-04-13 | Audit Dependabot — CVE Next.js 16.2.3 + vite 8.0.8 | `pnpm.overrides` nettoyé, CI lockfile fix |
 | 2026-03-25 | Runtime env validation (`lib/env-validation.ts`) | Module extrait, 22 tests, 4 checks cohérence Supabase |
 | 2026-03-16 | Playwright 1.57.0 E2E P0 suite | 14/14 tests public pages passing, POM + fixtures |
 | 2026-03-07 | BUGFIX RLS display_toggle visibility | Policy SELECT configurations_site corrigée, GRANT ajouté, 2 migrations |

@@ -21,6 +21,7 @@
 
 ## Terminé (récent)
 
+- `SEC-2026-05-16` Audit Dependabot (3 CVEs) — **COMPLET ✅ 2026-05-16** — Next.js 16.2.5→16.2.6 (c5238b5) + `postcss >=8.5.10` (fb71427) + `fast-uri >=3.1.2` (b808a3c). `pnpm audit` = 0 vulnérabilité
 - `TASK094` Auto-save générique articles de presse + spectacles — **COMPLÈTE ✅ 2026-05-15** — `useFormAutosave` générique (291L), `AutoSaveIndicator` → `admin/shared/`, `usePressReleaseAutosave` wrapper léger, articles branchés + bannière publié, spectacles branchés force `public:false`+`status:draft` + bannière — voir `memory-bank/tasks/tasks-completed/TASK094-generic-autosave-articles-spectacles.md`
 - `TASK093` Auto-save brouillon communiqués de presse — **COMPLÈTE ✅ 2026-05-15** — auto-save New+Edit, blocage strict sur article publié, `createPressReleaseAction` renvoie `{ id: string }`, fix bug description sans titre + fix type update (`title?`) — voir `memory-bank/tasks/tasks-completed/TASK093-press-release-autosave-draft.md`
 - `TASK092` Fix duplication ville agenda public — **COMPLÈTE ✅ 2026-05-08** — `buildAddress` DAL skip city si déjà dans `adresse`, `extractPostalCity` regex non-gourmande `([^,]+)`, validation curl OK — voir `memory-bank/tasks/tasks-completed/TASK092-fix-duplicate-city-agenda.md`
