@@ -19,6 +19,7 @@ import {
   Handshake,
   MapPin,
   Building2,
+  LayoutTemplate,
 } from "lucide-react";
 import {
   Sidebar,
@@ -58,7 +59,7 @@ const generalItems: SidebarItem[] = [
     minRole: "admin",
   },
   {
-    title: "Utilisateurs",
+    title: "Administrateurs",
     href: "/admin/users",
     icon: UserCog,
     minRole: "admin",
@@ -136,6 +137,12 @@ const otherItems: SidebarItem[] = [
     title: "Affichage Sections",
     href: "/admin/site-config",
     icon: ToggleLeft,
+    minRole: "admin",
+  },
+  {
+    title: "Footer - Pied de page",
+    href: "/admin/footer",
+    icon: LayoutTemplate,
     minRole: "admin",
   },
   {
