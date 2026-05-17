@@ -4,6 +4,62 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-05-17 (bis) - HOTFIX: retrait du check `is_admin()` interne dans `get_audit_logs_with_email`
+
+**Migration** : `20260517130000_remove_is_admin_check_from_audit_logs_rpc.sql`
+
+**Schéma déclaratif** : ✅ déjà aligné dans `supabase/schemas/42_rpc_audit_logs.sql`
+
+**Contexte** : Malgré le hotfix `20260517120000` (GRANT EXECUTE à `service_role`) et la réécriture de `supabase/admin.ts`, la page `/admin/audit-logs` retournait encore `[ERR_AUDIT_001] Permission denied: admin role required`. Cause racine : la fonction cloud contenait toujours le garde interne :
+
+```sql
+if not (select public.is_admin()) then
+  raise exception 'Permission denied: admin role required';
+end if;
+```
+
+La migration `20260502140000` annonçait dans son en-tête avoir retiré ce check, mais n'exécutait que des `REVOKE` — la fonction n'a jamais été recréée. Or le DAL appelle désormais la fonction via `createAdminClient()` (service_role) → `auth.uid() = NULL` → `is_admin() = false` → exception systématique.
+
+**Changements** :
+
+- `public.get_audit_logs_with_email(text, text, uuid, timestamptz, timestamptz, text, integer, integer)` recréée sans le `if not is_admin() ...`.
+- Re-assertion défensive : `GRANT EXECUTE … TO service_role` + `REVOKE … FROM authenticated, anon, public`.
+- Autorisation toujours enforced en amont par `requireAdminPageAccess()` / `requireAdmin()` dans la Server Action / page admin.
+
+**Validation** :
+
+- ✅ Migration idempotente (`create or replace function`)
+- ✅ SQL en minuscules
+- ✅ Vérification post-apply : `position('is_admin' in pg_get_functiondef(...)) = 0`
+- ✅ Appliquée local (`supabase migration up`) + cloud (MCP `apply_migration`) le 2026-05-17
+
+---
+
+### 2026-05-17 - HOTFIX: GRANT EXECUTE sur `get_audit_logs_with_email` pour `service_role`
+
+**Migration** : `20260517120000_grant_audit_logs_to_service_role.sql`
+
+**Schéma déclaratif** : ✅ `supabase/schemas/42_rpc_audit_logs.sql`
+
+**Contexte** : Après le REVOKE de `20260502140000` (retrait EXECUTE pour `authenticated`/`anon`), la page `/admin/audit-logs` retournait `[ERR_AUDIT_001] permission denied for function get_audit_logs_with_email`. Double cause racine :
+
+1. **`service_role` n'est pas superuser Postgres** dans Supabase — un GRANT EXECUTE explicite est requis après tout REVOKE générique. La docs Supabase laisse penser que `service_role` "bypasses RLS" mais cela ne s'applique pas aux droits Postgres natifs (table/function privileges).
+2. **`createAdminClient` utilisait `@supabase/ssr` + cookies()** — `createServerClient` injecte toujours le JWT user via cookies, donc PostgREST résolvait le rôle DB comme `authenticated` malgré la `SUPABASE_SECRET_KEY` passée en argument. La SECRET key seule ne suffit pas si un JWT user est présent.
+
+**Changements** :
+
+- `public.get_audit_logs_with_email(text, text, uuid, timestamptz, timestamptz, text, integer, integer)` — `GRANT EXECUTE … TO service_role`.
+- `supabase/admin.ts` réécrit : remplace `createServerClient` (`@supabase/ssr`) par `createClient` (`@supabase/supabase-js`) sans cookies forwarding → vrai client `service_role`.
+
+**Validation** :
+
+- ✅ DDL idempotent
+- ✅ Script `scripts/test-audit-logs-cloud.ts` passe (récupère N logs depuis Cloud)
+- ✅ Page `/admin/audit-logs` fonctionne en local + cloud
+- ✅ Appliquée local (`supabase migration up`) + cloud (MCP `apply_migration`) le 2026-05-17
+
+---
+
 ### 2026-05-03 - FIX: Drop constraint `check_start_end_time_order` sur `evenements`
 
 **Migration** : `20260503120000_drop_start_end_time_order_constraint.sql`

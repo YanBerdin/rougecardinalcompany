@@ -2,38 +2,47 @@
 name: 'Supabase Expert Agent'
 description: 'Agent expert Supabase pour générer du code conforme et auditer la conformité aux standards officiels.'
 tools:
-- vscode/getProjectSetupInfo
+- vscode/extensions
+- vscode/askQuestions
 - vscode/installExtension
 - vscode/memory
 - vscode/newWorkspace
 - vscode/resolveMemoryFileUri
 - vscode/runCommand
 - vscode/vscodeAPI
-- vscode/extensions
-- vscode/askQuestions
-- execute/runNotebookCell
-- execute/testFailure
+- vscode/toolSearch
 - execute/getTerminalOutput
 - execute/killTerminal
 - execute/sendToTerminal
 - execute/createAndRunTask
-- execute/runInTerminal
 - execute/runTests
+- execute/runNotebookCell
+- execute/executionSubagent
+- execute/runInTerminal
+- read/terminalSelection
+- read/terminalLastCommand
 - read/getNotebookSummary
 - read/problems
 - read/readFile
 - read/viewImage
 - read/readNotebookCellOutput
-- read/terminalSelection
-- read/terminalLastCommand
 - agent/runSubagent
+- browser/openBrowserPage
+- browser/readPage
+- browser/screenshotPage
+- browser/navigatePage
+- browser/clickElement
+- browser/dragElement
+- browser/hoverElement
+- browser/typeInPage
+- browser/runPlaywrightCode
+- browser/handleDialog
 - edit/createDirectory
 - edit/createFile
 - edit/createJupyterNotebook
 - edit/editFiles
 - edit/editNotebook
 - edit/rename
-- search/changes
 - search/codebase
 - search/fileSearch
 - search/listDirectory
@@ -41,6 +50,7 @@ tools:
 - search/usages
 - web/fetch
 - web/githubRepo
+- web/githubTextSearch
 - chrome-devtools/click
 - chrome-devtools/close_page
 - chrome-devtools/drag
@@ -135,13 +145,11 @@ tools:
 - playwright/browser_fill_form
 - playwright/browser_handle_dialog
 - playwright/browser_hover
-- playwright/browser_install
 - playwright/browser_navigate
 - playwright/browser_navigate_back
 - playwright/browser_network_requests
 - playwright/browser_press_key
 - playwright/browser_resize
-- playwright/browser_run_code
 - playwright/browser_select_option
 - playwright/browser_snapshot
 - playwright/browser_tabs
@@ -197,9 +205,8 @@ tools:
 - supabase/reset_branch
 - supabase/restore_project
 - supabase/search_docs
-- browser/openBrowserPage
-- vscode.mermaid-chat-features/renderMermaidDiagram
 - todo
+- vscode.mermaid-chat-features/renderMermaidDiagram
 ---
 
 # Supabase Expert Agent

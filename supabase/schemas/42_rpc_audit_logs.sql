@@ -35,7 +35,9 @@ comment on index public.idx_logs_audit_user_id is
  *   1. Needs to join auth.users (system table not accessible via RLS).
  *   2. Returns user email for audit trail display.
  *   3. Called exclusively through createAdminClient() (service_role) in the
- *      server-side DAL, so no EXECUTE grant to authenticated is needed.
+ *      server-side DAL. EXECUTE is granted to service_role only — NOT to
+ *      authenticated or anon. Note: service_role is NOT a PostgreSQL superuser
+ *      in Supabase, so an explicit GRANT is required even for it.
  *
  * Risks Evaluated:
  *   - Authorization: Enforced by requireAdminPageAccess() / requireAdmin() in
@@ -56,9 +58,9 @@ comment on index public.idx_logs_audit_user_id is
  *     20260502140000_revoke_get_audit_logs_from_authenticated.
  *
  * Grant Policy:
- *   - NO explicit EXECUTE grant to authenticated or anon.
- *   - Callable only by service_role (bypasses PostgreSQL grants) via
- *     createAdminClient() in lib/dal/audit-logs.ts.
+ *   - EXECUTE granted to service_role only.
+ *   - NO EXECUTE grant to authenticated or anon.
+ *   - Callable only via createAdminClient() in lib/dal/audit-logs.ts.
  *   - Admin access enforced by requireAdminPageAccess() in the page.
  */
 create or replace function public.get_audit_logs_with_email(
@@ -170,8 +172,21 @@ begin
 end;
 $$;
 
--- No EXECUTE grant to authenticated/anon: function is called via service_role
--- client (createAdminClient) from the server-side DAL only.
+-- EXECUTE granted to service_role only. NOT granted to authenticated/anon:
+-- function is called via service_role client (createAdminClient) from the
+-- server-side DAL only. The explicit grant is required because service_role
+-- is NOT a PostgreSQL superuser in Supabase — it needs an EXECUTE grant just
+-- like any other role.
+grant execute on function public.get_audit_logs_with_email(
+  text,
+  text,
+  uuid,
+  timestamp with time zone,
+  timestamp with time zone,
+  text,
+  integer,
+  integer
+) to service_role;
 
 comment on function public.get_audit_logs_with_email is
   'Fetch paginated audit logs with user email from auth.users. Admin-only: '
