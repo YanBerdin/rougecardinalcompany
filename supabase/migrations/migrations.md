@@ -4,13 +4,13 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
-### 2026-05-17 - TAS095: seed de la configuration footer administrable
+### 2026-05-17 - TASK095: seed de la configuration footer administrable
 
 **Migration** : `20260517212052_seed_footer_config.sql`
 
 **Schéma déclaratif** : ⚠️ DML pur — pas de changement de schéma. La table `public.configurations_site` et ses policies RLS (`key like 'public:%'` lisible par anon/authenticated, écriture admin) existent déjà.
 
-**Contexte** : Implémentation de TAS095 "Footer Administrable". Le footer public passe d'un rendu hardcodé à un fetch DAL depuis une ligne unique de `configurations_site` avec la clé `public:footer:content`. La migration insère cette ligne avec les valeurs par défaut (alignées sur l'ancien rendu hardcodé) pour éviter toute régression visible à la mise en production.
+**Contexte** : Implémentation de TASK095 "Footer Administrable". Le footer public passe d'un rendu hardcodé à un fetch DAL depuis une ligne unique de `configurations_site` avec la clé `public:footer:content`. La migration insère cette ligne avec les valeurs par défaut (alignées sur l'ancien rendu hardcodé) pour éviter toute régression visible à la mise en production.
 
 **Changements** :
 

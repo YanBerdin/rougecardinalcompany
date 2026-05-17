@@ -1,6 +1,6 @@
 /**
  * @file Footer Config Schema Tests
- * @see .github/prompts/plan-TAS095-footerAdmin.prompt.md (Step 9)
+ * @see .github/prompts/plan-TASK095-footerAdmin.prompt.md (Step 9)
  */
 
 import { describe, it, expect } from "vitest";

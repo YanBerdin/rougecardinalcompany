@@ -1,4 +1,4 @@
-# `TAS095` - Footer Administrable
+# `TASK095` - Footer Administrable
 
 **Status:** Completed ✅  
 **Added:** 2026-05-17  
@@ -18,7 +18,7 @@ Rendre le footer public éditable depuis le back-office : description, contact (
 
 ## Implementation Plan
 
-12 étapes séquentielles selon `.github/prompts/plan-TAS095-footerAdmin.prompt.md`.
+12 étapes séquentielles selon `.github/prompts/plan-TASK095-footerAdmin.prompt.md`.
 
 ## Progress Tracking
 

@@ -80,7 +80,7 @@ Objectif: rendre éditables depuis l’admin les contenus actuellement hardcodé
 
 11. Documentation Memory Bank
    - Mettre à jour `memory-bank/activeContext.md` avec le pattern « Footer admin via `configurations_site` ».
-   - Créer/mettre à jour la task `memory-bank/tasks/TAS095-footer-admin.md` avec subtasks et progress log (cf. `memory-bank.instructions.md`).
+   - Créer/mettre à jour la task `memory-bank/tasks/TASK095-footer-admin.md` avec subtasks et progress log (cf. `memory-bank.instructions.md`).
    - Mettre à jour `memory-bank/tasks/_index.md`.
 
 12. Vérification sécurité finale
@@ -107,7 +107,7 @@ Objectif: rendre éditables depuis l’admin les contenus actuellement hardcodé
 - `supabase/schemas/README.md` — documentation des schémas.
 - `supabase/schemas/10_tables_system.sql` — référence RLS existante; normalement pas à modifier.
 - `memory-bank/activeContext.md` — documenter le nouveau pattern.
-- `memory-bank/tasks/TAS095-footer-admin.md` — nouvelle task.
+- `memory-bank/tasks/TASK095-footer-admin.md` — nouvelle task.
 - `memory-bank/tasks/_index.md` — référencer la task.
 
 **Verification**

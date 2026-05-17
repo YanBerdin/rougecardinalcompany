@@ -5,7 +5,7 @@
  *   `public:footer:content`.
  * @module lib/schemas/footer-config
  *
- * @see .github/prompts/plan-TAS095-footerAdmin.prompt.md
+ * @see .github/prompts/plan-TASK095-footerAdmin.prompt.md
  */
 
 import { z } from "zod";
