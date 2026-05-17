@@ -89,10 +89,10 @@ using (
 
 -- Note: comments on storage.objects policies not supported in declarative schema
 -- Policy descriptions:
--- - Public read access: Anyone can view media files
--- - Upload access: Editors and admins only (via has_min_role('editor'))
--- - Update access: Editors and admins can update file metadata
--- - Delete access: Editors and admins can delete media files
+-- - Select/list access: intentionally absent for medias; public urls serve known paths only
+-- - Upload access: editors and admins only (via has_min_role('editor'))
+-- - Update access: editors and admins can update file metadata
+-- - Delete access: editors and admins can delete media files
 
 /*
  * Bucket: backups

@@ -4,6 +4,27 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-05-17 - SECURITY: suppression des policies SELECT Storage sur le bucket public `medias`
+
+**Migration** : `20260517222715_drop_medias_storage_select_policies.sql`
+
+**Schéma déclaratif** : ✅ déjà aligné dans `supabase/schemas/02c_storage_buckets.sql` (`drop policy if exists` des policies de lecture et aucune policy `for select` sur `bucket_id = 'medias'`).
+
+**Contexte** : Le bucket Storage `medias` est public (`storage.buckets.public = true`). Les URLs publiques connues restent servies par Supabase Storage, mais une policy `select` sur `storage.objects` permet aussi aux clients d’énumérer les objets via `supabase.storage.from('medias').list()`. La migration `20260501120100_fix_storage_bucket_listing.sql` supprimait l’accès `public`, mais recréait une policy `authenticated` encore trop large pour le listing du bucket.
+
+**Changements** :
+
+- `drop policy if exists "Public read access for medias" on storage.objects` — couvre l’ancienne policy publique.
+- `drop policy if exists "Authenticated read access for medias" on storage.objects` — retire la policy de listing authentifiée résiduelle.
+- Aucune nouvelle policy `select` sur `storage.objects` pour `bucket_id = 'medias'`.
+
+**Validation attendue** :
+
+- Les URLs du type `/storage/v1/object/public/medias/<path>` restent accessibles.
+- Les appels client `supabase.storage.from('medias').list()` ne bénéficient plus d’une policy large sur le bucket public.
+
+---
+
 ### 2026-05-17 - TASK095: seed de la configuration footer administrable
 
 **Migration** : `20260517212052_seed_footer_config.sql`
