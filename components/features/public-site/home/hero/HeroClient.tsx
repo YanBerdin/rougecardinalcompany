@@ -107,8 +107,10 @@ export function HeroClient({ initialSlides }: { initialSlides: HeroSlide[] }) {
       isDragging.current = true;
       if ("touches" in e) {
         touchStartX.current = e.touches[0].clientX;
+        touchEndX.current = e.touches[0].clientX;
       } else {
         touchStartX.current = e.clientX;
+        touchEndX.current = e.clientX;
         e.preventDefault();
       }
     },
