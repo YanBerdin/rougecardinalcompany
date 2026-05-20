@@ -6,9 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
-import { createClient } from "@/supabase/client";
-import { isRoleAtLeast } from "@/lib/auth/role-helpers";
-import type { AppRole } from "@/lib/auth/role-helpers";
+import { setupAccountAction } from "@/lib/actions/auth-setup-actions";
+import { PasswordWithConfirmationSchema } from "@/lib/schemas/auth";
 import {
     Form,
     FormControl,
@@ -21,25 +20,17 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 
-const SetupAccountSchema = z.object({
-    password: z.string().min(8, "Le mot de passe doit contenir au moins 8 caractères"),
-    confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-    message: "Les mots de passe ne correspondent pas",
-    path: ["confirmPassword"],
-});
+const SetupAccountSchema = PasswordWithConfirmationSchema;
 
 type SetupAccountValues = z.infer<typeof SetupAccountSchema>;
 
 interface SetupAccountFormProps {
     email: string;
-    userRole: AppRole;
 }
 
-export function SetupAccountForm({ email, userRole }: SetupAccountFormProps) {
+export function SetupAccountForm({ email }: SetupAccountFormProps) {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
-    const supabase = createClient();
 
     const form = useForm<SetupAccountValues>({
         resolver: zodResolver(SetupAccountSchema),
@@ -53,24 +44,16 @@ export function SetupAccountForm({ email, userRole }: SetupAccountFormProps) {
         setIsLoading(true);
 
         try {
-            // Mise à jour du mot de passe
-            const { error } = await supabase.auth.updateUser({
-                password: data.password
-            });
+            const result = await setupAccountAction(data);
 
-            if (error) {
-                toast.error(error.message);
+            if (!result.success) {
+                toast.error(result.error);
                 return;
             }
 
             toast.success("Compte configuré avec succès !");
-
-            // Redirection basée sur le rôle
-const redirectPath = isRoleAtLeast(userRole, 'editor') ? '/admin' : '/';
-
-            router.push(redirectPath);
+            router.push(result.data.redirectPath);
             router.refresh();
-
         } catch (error) {
             console.error("Setup failed:", error);
             toast.error("Une erreur est survenue");

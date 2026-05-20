@@ -104,10 +104,30 @@ describe("getCurrentUserRole", () => {
         expect(role).toBe("admin");
     });
 
-    it("ROLE-UNIT-027 — fallback user_metadata", async () => {
+    it("ROLE-UNIT-027 — user_metadata.role est IGNORÉ (anti-escalation)", async () => {
+        // TASK096 Phase 5 — user_metadata est modifiable côté client via
+        // supabase.auth.updateUser({ data: { role } }). Il ne doit JAMAIS être
+        // utilisé comme source de rôle. Seul app_metadata (signé serveur) compte.
         mockGetClaims.mockResolvedValue(claimsWithUserMetaOnly("editor"));
         const role = await getCurrentUserRole();
-        expect(role).toBe("editor");
+        expect(role).toBe("user");
+    });
+
+    it("ROLE-UNIT-027b — app_metadata.role prévaut sur user_metadata.role", async () => {
+        // Scénario d'attaque : utilisateur 'user' tente d'écraser son rôle via
+        // updateUser({ data: { role: 'admin' } }). app_metadata reste 'user',
+        // donc getCurrentUserRole() doit retourner 'user'.
+        mockGetClaims.mockResolvedValue({
+            data: {
+                claims: {
+                    app_metadata: { role: "user" },
+                    user_metadata: { role: "admin" },
+                },
+            },
+            error: null,
+        });
+        const role = await getCurrentUserRole();
+        expect(role).toBe("user");
     });
 
     it("ROLE-UNIT-028 — aucun rôle défini → user", async () => {

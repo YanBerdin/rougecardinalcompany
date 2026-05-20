@@ -4,6 +4,33 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-05-20 - FIX: synchronisation du rôle dans `auth.users.raw_app_meta_data` au signup
+
+**Migration** : `20260520134210_sync_role_to_app_metadata.sql`
+
+**Schéma déclaratif** : ✅ déjà aligné dans `supabase/schemas/05_profiles_auto_sync.sql` et `supabase/schemas/21_handle_new_user_skip_admin_managed.sql` (les deux versions de `public.handle_new_user()` incluent maintenant la synchronisation du rôle).
+
+**Statut** : ✅ appliquée en local (`supabase migration up --local`). ⏸ pas encore poussée sur Supabase Cloud.
+
+**Contexte** : `handle_new_user()` créait correctement `public.profiles` avec le bon rôle (résolu depuis `raw_app_meta_data` puis `raw_user_meta_data`, fallback `'user'`), mais ne propageait pas ce rôle dans `auth.users.raw_app_meta_data`. Conséquence : le JWT lu côté app via `getClaims()` ne contenait pas la clé `role`, et `requireBackofficeAccess()` rejetait silencieusement tout compte créé via signup standard (par opposition aux comptes Admin API où l'application définit explicitement `app_metadata.role`).
+
+**Changements** :
+
+- Recréation de `public.handle_new_user()` avec header `SECURITY DEFINER` complet + `UPDATE auth.users` conditionnel (`IS DISTINCT FROM`) qui injecte `role` dans `raw_app_meta_data` après l'insertion du profil. INSERT et UPDATE encapsulés dans `BEGIN/EXCEPTION` (RAISE WARNING) pour ne pas bloquer la création du compte si le profil ou la sync échouent.
+- Backfill DML : pour chaque profil existant, copie `public.profiles.role` → `auth.users.raw_app_meta_data->'role'` si manquant ou incohérent (idempotent grâce à `IS DISTINCT FROM` + filtre rôle whitelisté).
+- Préservation du skip `_admin_managed` (les créations via Admin API ne sont pas re-traitées).
+- `comment on function public.handle_new_user()` mis à jour pour refléter la nouvelle responsabilité.
+
+**Note historique** : une migration doublon `20260520135826_sync_role_to_app_metadata_on_signup.sql` avait été créée par erreur puis appliquée en local. Elle a été supprimée (fichier + `migration repair --status reverted --local`) car identique à `20260520134210` (CREATE OR REPLACE + backfill idempotent — aucun impact DB).
+
+**Validation attendue (après push cloud)** :
+
+- Un nouveau signup standard se retrouve avec `app_metadata.role` cohérent dans son JWT au refresh suivant.
+- Les utilisateurs `editor`/`admin` existants ne sont pas dégradés (le backfill aligne app_metadata sur le profil).
+- `getClaims()` retourne `role` non-null pour tous les comptes après la migration.
+
+---
+
 ### 2026-05-17 - SECURITY: suppression des policies SELECT Storage sur le bucket public `medias`
 
 **Migration** : `20260517222715_drop_medias_storage_select_policies.sql`

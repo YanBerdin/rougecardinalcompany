@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { createClient } from "@/supabase/client";
+import { PasswordSchema } from "@/lib/schemas/auth";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -29,6 +30,15 @@ export function UpdatePasswordForm({
     const supabase = createClient();
     setIsLoading(true);
     setError(null);
+
+    const passwordValidation = PasswordSchema.safeParse(password);
+    if (!passwordValidation.success) {
+      setError(
+        passwordValidation.error.issues.map((issue) => issue.message).join(" "),
+      );
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const { error } = await supabase.auth.updateUser({ password });

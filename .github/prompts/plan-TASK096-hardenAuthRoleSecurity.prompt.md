@@ -2,9 +2,50 @@
 
 Migration du rôle de `user_metadata` (modifiable par l'utilisateur — faille d'élévation de privilège) vers `app_metadata` (server-only), durcissement de la politique de mot de passe et migration du flow setup-account côté Server Action avec audit + correction du `userRole` codé en dur.
 
-**Invariant critique à préserver** (cf. [doc/troubleshooting-admin-auth.md](doc/troubleshooting-admin-auth.md)) :
+**Invariant critique à préserver** (cf. [doc/troubleshooting-admin-auth.md](../../doc/troubleshooting-admin-auth.md)) :
 
 > Pour tout utilisateur : `auth.users.raw_app_meta_data->>'role'` **DOIT** être égal à `public.profiles.role`. Sinon : `is_admin()` SQL renvoie `false` → RLS `42501` → redirection `/auth/login` malgré un JWT admin valide.
+
+## 📊 État d'avancement (2026-05-20)
+
+### ✅ Phase 1 — Migration role → app_metadata (TERMINÉE côté écritures)
+
+- ✅ **Step 3 (triggers SQL)** : `handle_new_user()` réécrit dans [supabase/schemas/21_functions_auth_sync.sql](supabase/schemas/21_functions_auth_sync.sql) (+ miroir dans [supabase/schemas/05_profiles_auto_sync.sql](supabase/schemas/05_profiles_auto_sync.sql)) : lit `role` depuis `raw_app_meta_data` en priorité (fallback `raw_user_meta_data` conservé temporairement, à retirer en step 5), et synchronise `auth.users.raw_app_meta_data.role` après insert profil (garde `IS DISTINCT FROM` pour éviter recursion trigger). `handle_user_update()` aligné de la même manière. Migration consolidée [supabase/migrations/20260520134210_sync_role_to_app_metadata.sql](supabase/migrations/20260520134210_sync_role_to_app_metadata.sql) avec backfill UPDATE idempotent — **appliquée local + cloud le 2026-05-20**. Invariant SQL Cloud vérifié post-push : **0 violation**.
+- ✅ **Step 1 (backfill)** : embarqué dans la migration ci-dessus (idempotent). 0 violation post-push cloud.
+- ✅ **Step 2 (DAL admin-users.ts)** : `generateUserInviteLinkWithUrl` et `updateUserRole` n'écrivent plus `role` dans `user_metadata`. `app_metadata.role` posé via `updateUserById` post-création. `_admin_managed` conservé en `user_metadata` (flag opérationnel).
+- ✅ **Step 4 (guards applicatifs)** : [lib/auth/roles.ts](lib/auth/roles.ts) lit uniquement `claims.app_metadata.role` via `readRoleFromMeta()`. Plus de fallback `user_metadata.role`.
+- ✅ **Step 6 (scripts)** : `scripts/create-admin-user.ts` + `create-admin-user-local.ts` + `ci-create-test-accounts.ts` + `test-views-security-authenticated{,-cloud}.ts` + `test-editor-access-{local,remote}.ts` + `test-permissions-rls.ts` nettoyés (2026-05-20). Plus aucune écriture `user_metadata.role` dans le repo.
+- ✅ **UI** : `components/admin/AdminAuthRow.tsx` + `components/auth-button.tsx` lisent `app_metadata.role` uniquement, avec commentaires anti-escalation. Path `getUser()` fallback supprimé dans `auth-button.tsx`.
+- ⏸ **Step 5 (cleanup fallback SQL)** : à différer post-validation production (Phase 5).
+
+### ✅ Phase 2 — Politique mot de passe — TERMINÉE (2026-05-20)
+
+- ✅ **Step 7** : config Supabase Dashboard appliquée — `Minimum length = 12`, `Lowercase + Uppercase + Digits + Symbols`, `Email OTP expiration = 1800s`. ⚠ **Leaked password protection (HIBP)** indisponible : projet sur plan Free (réservé Pro+). À réactiver lors d'un upgrade Pro.
+- ✅ **Step 8** : créé [lib/schemas/auth.ts](lib/schemas/auth.ts) avec `PasswordSchema` (min 12 + 4 classes via `superRefine`) et `PasswordWithConfirmationSchema`. Intégré dans :
+  - [components/auth/SetupAccountForm.tsx](components/auth/SetupAccountForm.tsx) — resolver `zodResolver(PasswordWithConfirmationSchema)`.
+  - [components/sign-up-form.tsx](components/sign-up-form.tsx) — guard `PasswordSchema.safeParse()` pré-submit.
+  - [components/update-password-form.tsx](components/update-password-form.tsx) — guard `PasswordSchema.safeParse()` pré-submit.
+  - `login-form.tsx` + `forgot-password-form.tsx` : exclus (pas de création de mot de passe).
+
+### ✅ Phase 3 — Server Action setupAccount — TERMINÉE
+
+- ✅ **Step 9** : `lib/actions/auth-setup-actions.ts::setupAccountAction` créée (validation Zod, `getClaims()`, redirection serveur depuis `app_metadata.role`).
+- ✅ **Step 10** : `SetupAccountForm.tsx` refactorisé — appel direct de la Server Action, prop `userRole` supprimée, plus de client Supabase côté browser pour la mutation.
+- ✅ **Step 11 (bundled)** : `app/(marketing)/auth/setup-account/page.tsx` — attribut `userRole="user"` supprimé.
+- ℹ️ Audit logging dans l'action : hors scope (table `public.logs_audit` alimentée par triggers SQL uniquement, `auth.users` non tracké, pas de helper applicatif). À traiter en tâche dédiée si besoin.
+
+### ✅ Phase 4 — Cleanup logs & prop userRole — TERMINÉE
+
+- ✅ **Step 11** : bundlé avec Step 10 (cf. Phase 3).
+- ✅ **Step 12** : 7 `console.log` debug retirés de `app/(marketing)/auth/setup-account/page.tsx`. 1 `console.error` conservé (Sentry-friendly) avec emoji retiré et message clarifié. Autres fichiers du flux auth (`login-form`, `sign-up-form`, `forgot-password-form`, `update-password-form`, `logout-button`, `app/auth/**`, `lib/actions/auth-setup-actions.ts`) déjà propres. 1 `console.error` legitime conservé dans `components/auth/SetupAccountForm.tsx` (catch block).
+
+### ✅ Phase 5 — Tests, invariant CI & cleanup — TERMINÉE (2026-05-20)
+
+- ✅ **Step 5 (cleanup fallback SQL)** : fallback `raw_user_meta_data->>'role'` retiré de `handle_new_user()` et `handle_user_update()` dans [supabase/schemas/21_functions_auth_sync.sql](supabase/schemas/21_functions_auth_sync.sql). Migration consolidée déployée. Source unique = `raw_app_meta_data->>'role'`.
+- ✅ **Step 13 (tests unitaires)** : `__tests__/schemas/auth.test.ts` + `__tests__/auth/roles.test.ts` — **29 tests verts**. Valide `PasswordSchema` (min 12 + 4 classes) et invariant `getCurrentUserRole` ignore `user_metadata.role` (claim forgé `user_metadata.role='admin'` + `app_metadata.role='user'` → résultat `'user'`).
+- ✅ **Step 14 (E2E invite→setup)** : `e2e/tests/auth/invite-setup/invite-setup.spec.ts` — **4 tests verts (26.1s)** : INVITE-SETUP-001..004. Helper `e2e/helpers/auth-invite.ts` génère l'invite via `generateLink({type:'invite'})`, force `app_metadata.role` via `updateUserById`, intercepte le redirect `/verify?token=...` (fetch manual) pour reconstruire l'URL `/auth/setup-account#<fragment>` exploitable par Playwright.
+- ✅ **Step 15 (non-régression escalade)** : `e2e/tests/auth/role-escalation/role-escalation.spec.ts::ROLE-ESC-001` — **vert (15.7s)**. Prouve qu'un editor authentifié appelant `supabase.auth.updateUser({data:{role:'admin'}})` ne devient PAS admin : `app_metadata.role==='editor'`, `user_metadata.role==='admin'` (cosmétique, ignoré), `profiles.role==='editor'`.
+- ✅ **Step 16 (invariant CI)** : [scripts/check-role-invariant.ts](scripts/check-role-invariant.ts) — script `tsx` avec `pg.Client` qui vérifie `auth.users.raw_app_meta_data->>'role'` ∈ {user, editor, admin}. Utilise `INVARIANT_DB_URL` (variable dédiée pour éviter collision avec `SUPABASE_DB_URL` projet). Validé local : exit 0, "✅ Invariant respecté". Intégré CI via [.github/workflows/check-role-invariant.yml](.github/workflows/check-role-invariant.yml) — cron quotidien 07:00 UTC + workflow_dispatch. Secret requis : `INVARIANT_DB_URL`.
 
 **Steps**
 
@@ -15,9 +56,9 @@ Migration du rôle de `user_metadata` (modifiable par l'utilisateur — faille d
    - `generateUserInviteLinkWithUrl()` (~L324) : retirer **uniquement** `role` du champ `options.data` (ne plus écrire `role` en `user_metadata`). **GARDER `_admin_managed: 'true'` dans `options.data`** — c'est un flag opérationnel non sensible, indispensable pour que le trigger `handle_new_user` skip la création auto du profil (cf. risque détecté). Après invitation, appeler `adminClient.auth.admin.updateUserById(userId, { app_metadata: { role, admin_managed: true } })`. **Conserver l'appel explicite à `createUserProfileWithRole(userId, role)`** pour garantir que `profiles.role` reflète le `app_metadata.role` (l'unique_violation reste géré gracieusement par le trigger si la course est inversée).
    - `updateUserRole()` (~L191-L192) : supprimer la ligne `user_metadata: { role: validated.role }`, ne garder que `app_metadata: { role: validated.role }`. Le trigger `handle_user_update` (mis à jour en step 3) propagera vers `profiles.role`. *Dépend de 1.*
 3. **Mettre à jour les triggers SQL** dans [supabase/schemas/21_functions_auth_sync.sql](supabase/schemas/21_functions_auth_sync.sql) :
-   - `handle_new_user()` : lire **`role`** depuis `raw_app_meta_data->>'role'` (avec fallback temporaire `raw_user_meta_data->>'role'` à supprimer en phase 5). **NE PAS migrer `_admin_managed`** : continuer à lire `new.raw_user_meta_data->>'_admin_managed'` car ce flag est défini par `generateLink({options:{data:...}})` qui écrit dans `user_metadata` au moment du INSERT (l'`app_metadata` n'est pas écrivable via `generateLink`).
-   - `handle_user_update()` : lire `role` depuis `raw_app_meta_data->>'role'` (whitelist inchangée `user|editor|admin`). **Ajouter une condition de fire sur changement de `raw_app_meta_data`** : la guard `if old.raw_user_meta_data is not distinct from new.raw_user_meta_data and old.email is not distinct from new.email then return new;` doit être étendue avec `and old.raw_app_meta_data is not distinct from new.raw_app_meta_data` pour que la fonction se déclenche bien sur les updates `app_metadata`. `display_name` continue d'être lu depuis `raw_user_meta_data` (info utilisateur légitime).
-   - Générer la migration via le workflow déclaratif Supabase (`supabase stop` puis `supabase db diff -f harden_role_metadata`). *Parallèle à 2.*
+   - `handle_new_user()` : ✅ **FAIT** (2026-05-20, migration `20260520134210`, déployé local + cloud). Lit `role` depuis `raw_app_meta_data` en priorité, fallback `raw_user_meta_data` à retirer en step 5. `_admin_managed` reste lu depuis `raw_user_meta_data` (volontaire). Sync `auth.users.raw_app_meta_data.role` post-insert avec guard `IS DISTINCT FROM`.
+   - `handle_user_update()` : ⏸ **À FAIRE**. Lire `role` depuis `raw_app_meta_data->>'role'` (whitelist inchangée `user|editor|admin`). **Étendre la guard d'entrée** : `if old.raw_user_meta_data is not distinct from new.raw_user_meta_data and old.email is not distinct from new.email then return new;` → ajouter `and old.raw_app_meta_data is not distinct from new.raw_app_meta_data`. `display_name` continue d'être lu depuis `raw_user_meta_data`.
+   - Générer la migration via le workflow déclaratif Supabase (`supabase stop` puis `supabase db diff -f harden_handle_user_update`). *Parallèle à 2.*
 4. **Retirer le fallback `user_metadata.role`** des guards applicatifs :
    - [lib/auth/roles.ts](lib/auth/roles.ts) : dans `getCurrentUserRole`, `requireBackofficePageAccess`, `requireAdminPageAccess`, supprimer la lecture de `user_metadata.role` (ne lire que `app_metadata.role`).
    - [lib/auth/is-admin.ts](lib/auth/is-admin.ts) : marquer le fichier comme supprimable (déjà `@deprecated` avec zéro imports) — confirmer avec un `grep_search` global, puis supprimer. *Dépend de 1, 2 et 3.*

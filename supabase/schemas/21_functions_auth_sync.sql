@@ -56,10 +56,13 @@ begin
     'Utilisateur'
   );
 
-  -- Validation et assignation du rôle
+  -- Validation et assignation du rôle.
+  -- Source unique : raw_app_meta_data->>'role' (server-only, signé dans le JWT).
+  -- raw_user_meta_data->>'role' est ignoré (modifiable par l'utilisateur côté client → risque
+  -- d'élévation de privilège). Si app_metadata.role est absent ou invalide → 'user'.
   profile_role := case 
-    when new.raw_user_meta_data->>'role' in ('user', 'editor', 'admin') 
-    then new.raw_user_meta_data->>'role'
+    when new.raw_app_meta_data->>'role' in ('user', 'editor', 'admin') 
+      then new.raw_app_meta_data->>'role'
     else 'user'
   end;
 
@@ -73,6 +76,21 @@ begin
     when others then
       raise warning 'Failed to create profile for user %: %', new.id, sqlerrm;
   end;
+
+  -- Synchronise le rôle dans auth.users.raw_app_meta_data pour qu'il soit
+  -- embarqué dans le JWT (utilisé par getClaims() côté app). Garde-fou
+  -- `is distinct from` pour éviter un UPDATE inutile (qui déclencherait
+  -- on_auth_user_updated -> handle_user_update).
+  if (new.raw_app_meta_data->>'role') is distinct from profile_role then
+    begin
+      update auth.users
+      set raw_app_meta_data = coalesce(raw_app_meta_data, '{}'::jsonb)
+        || jsonb_build_object('role', profile_role)
+      where id = new.id;
+    exception when others then
+      raise warning 'Failed to sync app_metadata.role for user %: %', new.id, sqlerrm;
+    end;
+  end if;
 
   return new;
 end;
@@ -139,21 +157,30 @@ Essential for data consistency and security during user account deletion.';
 -- Fonction pour mettre à jour le profil lors de la mise à jour d'un utilisateur
 /*
  * Security Model: SECURITY DEFINER
- * 
+ *
  * Rationale:
- *   1. Accesses auth.users.raw_user_meta_data (restricted by default)
+ *   1. Accesses auth.users.raw_app_meta_data / raw_user_meta_data (restricted by default)
  *   2. Must update profiles regardless of user RLS permissions
  *   3. Ensures metadata synchronization works for all user roles
  *   4. Executes in trigger context where standard user permissions may be insufficient
- * 
+ *
+ * Source of truth for `role`:
+ *   Le rôle est lu UNIQUEMENT depuis raw_app_meta_data->>'role' (server-side only,
+ *   non modifiable par le client). raw_user_meta_data->>'role' n'est plus pris en
+ *   compte (l'utilisateur ne peut pas s'auto-promouvoir via updateUser côté client).
+ *   Si app_metadata.role est absent ou invalide, le rôle existant du profil est
+ *   conservé (fallback non-destructif).
+ *
  * Risks Evaluated:
  *   - Input validation: Checks for relevant metadata changes before processing (performance optimization)
  *   - Role validation: Validates role against whitelist ('user', 'editor', 'admin')
+ *   - Privilege escalation: Ignore raw_user_meta_data->>'role' (defense-in-depth)
  *   - Error handling: Logs warnings for missing profiles without blocking the operation
- * 
+ *
  * Validation:
- *   - Tested with user metadata update flow (display_name, role changes)
+ *   - Tested with user metadata update flow (display_name, role changes via Admin API)
  *   - Only processes relevant changes (skips if no metadata/email changed)
+ *   - Tested that client-side updateUser({data:{role:'admin'}}) does NOT escalate role
  */
 create or replace function public.handle_user_update()
 returns trigger
@@ -165,33 +192,36 @@ declare
   new_display_name text;
   new_role text;
 begin
-  -- Vérification des changements pertinents
-  if old.raw_user_meta_data is not distinct from new.raw_user_meta_data 
+  -- Vérification des changements pertinents : display_name vit dans user_metadata,
+  -- role vit dans app_metadata. On doit donc surveiller les deux + l'email.
+  if old.raw_user_meta_data is not distinct from new.raw_user_meta_data
+     and old.raw_app_meta_data is not distinct from new.raw_app_meta_data
      and old.email is not distinct from new.email then
     return new;
   end if;
 
-  -- Construction du nouveau display_name
+  -- Construction du nouveau display_name (toujours dans user_metadata)
   new_display_name := coalesce(
     new.raw_user_meta_data->>'display_name',
-    concat_ws(' ', 
-      new.raw_user_meta_data->>'first_name', 
+    concat_ws(' ',
+      new.raw_user_meta_data->>'first_name',
       new.raw_user_meta_data->>'last_name'
     ),
     new.email,
     'Utilisateur'
   );
 
-  -- Validation du nouveau rôle
-  new_role := case 
-    when new.raw_user_meta_data->>'role' in ('user', 'editor', 'admin') 
-    then new.raw_user_meta_data->>'role'
+  -- Validation du nouveau rôle (source unique : app_metadata).
+  -- Si app_metadata.role absent/invalide, on préserve le rôle existant du profil.
+  new_role := case
+    when new.raw_app_meta_data->>'role' in ('user', 'editor', 'admin')
+    then new.raw_app_meta_data->>'role'
     else coalesce((select role from public.profiles where user_id = new.id), 'user')
   end;
 
   begin
     update public.profiles
-    set 
+    set
       display_name = new_display_name,
       role = new_role,
       updated_at = now()
@@ -204,15 +234,16 @@ begin
   exception when others then
     raise warning 'Failed to update profile for user %: %', new.id, sqlerrm;
   end;
-  
+
   return new;
 end;
 $$;
 
-comment on function public.handle_user_update() is 
+comment on function public.handle_user_update() is
 'Trigger function: Updates profile when user metadata changes. Uses SECURITY DEFINER because:
-1. Accesses auth.users.raw_user_meta_data (restricted by default)
+1. Accesses auth.users.raw_app_meta_data / raw_user_meta_data (restricted by default)
 2. Must update profiles regardless of user RLS permissions
 3. Ensures metadata synchronization works for all user roles
 4. Executes in trigger context where standard user permissions may be insufficient
+Role source of truth: raw_app_meta_data->>"role" only (server-side, anti-escalation).
 Only processes relevant metadata changes for performance optimization.';

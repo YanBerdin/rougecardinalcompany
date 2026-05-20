@@ -64,9 +64,11 @@ async function ensureEditorUser(): Promise<string> {
     const existing = list?.users.find((u) => u.email === TEST_EMAIL);
 
     if (existing) {
+        // Security: role MUST be set only in app_metadata (signed JWT, server-only).
+        // user_metadata may carry profile data (display_name) but never authorization.
         await adminClient.auth.admin.updateUserById(existing.id, {
             app_metadata: { role: "editor" },
-            user_metadata: { role: "editor", display_name: "Test Editor" },
+            user_metadata: { display_name: "Test Editor" },
         });
         // Sync profiles.role (is_admin/has_min_role check this column)
         await adminClient
@@ -77,12 +79,13 @@ async function ensureEditorUser(): Promise<string> {
         return existing.id;
     }
 
+    // Security: role MUST be set only in app_metadata (signed JWT, server-only).
     const { data, error } = await adminClient.auth.admin.createUser({
         email: TEST_EMAIL,
         password: TEST_PASSWORD,
         email_confirm: true,
         app_metadata: { role: "editor" },
-        user_metadata: { role: "editor", display_name: "Test Editor" },
+        user_metadata: { display_name: "Test Editor" },
     });
 
     if (error) {

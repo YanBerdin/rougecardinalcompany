@@ -19,8 +19,6 @@ export default function SetupAccountPage() {
             // Check if we have tokens in the URL hash (from Supabase redirect)
             const hash = window.location.hash;
             if (hash && hash.includes('access_token')) {
-                console.log("🔍 Processing invitation tokens from URL hash...");
-
                 // Extract tokens from hash
                 const params = new URLSearchParams(hash.substring(1)); // Remove the '#'
                 const accessToken = params.get('access_token');
@@ -28,8 +26,6 @@ export default function SetupAccountPage() {
                 const tokenType = params.get('type');
 
                 if (accessToken && refreshToken && tokenType === 'invite') {
-                    console.log("✅ Found invitation tokens, setting session...");
-
                     // Set the session with the tokens
                     const { data, error } = await supabase.auth.setSession({
                         access_token: accessToken,
@@ -37,31 +33,26 @@ export default function SetupAccountPage() {
                     });
 
                     if (error) {
-                        console.error("❌ Failed to set session:", error);
+                        console.error("Failed to set invitation session:", error);
                         setError("Erreur lors de l'établissement de la session");
                         setIsLoading(false);
                         return;
                     }
 
-                    console.log("✅ Session established successfully");
                     setUser(data.user);
 
                     // Clean up the URL (remove hash)
                     window.history.replaceState(null, '', window.location.pathname);
                 } else {
-                    console.log("❌ Invalid or missing tokens in hash");
                     setError("Lien d'invitation invalide");
                 }
             } else {
                 // Check if user is already authenticated
-                console.log("🔍 Checking existing authentication...");
                 const { data: { user }, error } = await supabase.auth.getUser();
 
                 if (error || !user) {
-                    console.log("❌ No authentication found");
                     setError("Veuillez utiliser le lien d'invitation reçu par email");
                 } else {
-                    console.log("✅ User already authenticated:", user.email);
                     setUser(user);
                 }
             }
@@ -124,7 +115,7 @@ export default function SetupAccountPage() {
                     </p>
                 </div>
 
-                <SetupAccountForm email={user.email || ""} userRole="user" />
+                <SetupAccountForm email={user.email || ""} />
             </div>
         </div>
     );

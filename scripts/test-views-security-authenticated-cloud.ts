@@ -7,7 +7,7 @@
 import 'dotenv/config';
 
 import { createClient } from '@supabase/supabase-js';
-import { env } from '../lib/env';
+import { env } from '../lib/env.js';
 
 const url = env.NEXT_PUBLIC_SUPABASE_URL;
 const anonKey = env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY;
@@ -18,11 +18,13 @@ const anonClient = createClient(url, anonKey);
 
 async function ensureTestUser(email: string, password: string) {
     try {
+        // Security: role MUST be set only in app_metadata (signed JWT, server-only).
+        // user_metadata may carry profile data (display_name) but never authorization.
         const { data, error } = await adminClient.auth.admin.createUser({
             email,
             password,
             email_confirm: true,
-            user_metadata: { role: 'user', display_name: 'Test User' },
+            user_metadata: { display_name: 'Test User' },
             app_metadata: { role: 'user' },
         });
 

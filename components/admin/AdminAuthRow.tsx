@@ -32,7 +32,9 @@ export default function AdminAuthRow() {
         if (data?.user) {
           setUser({
             email: data.user.email,
-            role: (data.user.user_metadata?.role as string) ?? "user",
+            // Role is read ONLY from app_metadata (signed in JWT, server-only).
+            //! user_metadata is user-modifiable and MUST NOT be used for authorization.
+            role: (data.user.app_metadata?.role as string) ?? "user",
           });
         }
       } catch {
@@ -50,7 +52,8 @@ export default function AdminAuthRow() {
       if (session?.user) {
         setUser({
           email: session.user.email,
-          role: (session.user.user_metadata?.role as string) ?? "user",
+          // Role is read ONLY from app_metadata (signed in JWT, server-only).
+          role: (session.user.app_metadata?.role as string) ?? "user",
         });
       } else {
         setUser(null);

@@ -5,6 +5,12 @@ import { createClient } from "@/supabase/server";
 import { normalizeRole, isRoleAtLeast } from "./role-helpers";
 import type { AppRole } from "./role-helpers";
 
+function readRoleFromMeta(obj: unknown): string {
+    if (!obj || typeof obj !== "object") return "";
+    const val = (obj as Record<string, unknown>)["role"];
+    return typeof val === "string" ? val : "";
+}
+
 export async function getCurrentUserRole(): Promise<AppRole> {
     const supabase = await createClient();
     try {
@@ -13,19 +19,9 @@ export async function getCurrentUserRole(): Promise<AppRole> {
         const claims = (data as ClaimsShape)?.claims ?? {};
         const meta = claims as Record<string, unknown>;
 
-        const readRole = (obj: unknown): string => {
-            if (!obj || typeof obj !== "object") return "";
-            const val = (obj as Record<string, unknown>)["role"];
-            return typeof val === "string" ? val : "";
-        };
-
-        // app_metadata is the secure source (user cannot modify)
-        const appRole = readRole(meta["app_metadata"]);
-        if (appRole) return normalizeRole(appRole);
-
-        // Fallback to user_metadata for backward compatibility
-        const userRole = readRole(meta["user_metadata"]);
-        return normalizeRole(userRole);
+        // app_metadata is the ONLY trusted source (server-only, signed in JWT).
+        // user_metadata is user-modifiable and MUST NOT be used for authorization.
+        return normalizeRole(readRoleFromMeta(meta["app_metadata"]));
     } catch (err) {
         console.error("[roles] getCurrentUserRole failed:", err);
         return "user";
@@ -58,19 +54,9 @@ export async function requireBackofficePageAccess(): Promise<void> {
     }
 
     const claims = data.claims as Record<string, unknown>;
+    const appRole = normalizeRole(readRoleFromMeta(claims["app_metadata"]));
 
-    const readRole = (obj: unknown): string => {
-        if (!obj || typeof obj !== "object") return "";
-        const val = (obj as Record<string, unknown>)["role"];
-        return typeof val === "string" ? val : "";
-    };
-
-    const appRole = normalizeRole(readRole(claims["app_metadata"]));
-    const userRole = normalizeRole(readRole(claims["user_metadata"]));
-
-    const effectiveRole = isRoleAtLeast(appRole, userRole) ? appRole : userRole;
-
-    if (!isRoleAtLeast(effectiveRole, "editor")) {
+    if (!isRoleAtLeast(appRole, "editor")) {
         redirect("/auth/login");
     }
 }
@@ -84,19 +70,9 @@ export async function requireAdminPageAccess(): Promise<void> {
     }
 
     const claims = data.claims as Record<string, unknown>;
+    const appRole = normalizeRole(readRoleFromMeta(claims["app_metadata"]));
 
-    const readRole = (obj: unknown): string => {
-        if (!obj || typeof obj !== "object") return "";
-        const val = (obj as Record<string, unknown>)["role"];
-        return typeof val === "string" ? val : "";
-    };
-
-    const appRole = normalizeRole(readRole(claims["app_metadata"]));
-    const userRole = normalizeRole(readRole(claims["user_metadata"]));
-
-    const effectiveRole = isRoleAtLeast(appRole, userRole) ? appRole : userRole;
-
-    if (!isRoleAtLeast(effectiveRole, "admin")) {
+    if (!isRoleAtLeast(appRole, "admin")) {
         redirect("/auth/login");
     }
 }

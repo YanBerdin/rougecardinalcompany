@@ -185,11 +185,13 @@ export async function updateUserRole(
   const supabase = await createClient();
   const adminClient = await createAdminClient();
 
+  // Source de vérité pour le rôle : app_metadata uniquement (server-side only).
+  // Ne plus écrire user_metadata.role : prévient l'auto-escalation client et
+  // évite la double source de vérité (cf. TASK096 Phase 1 Step 2).
   const { error: authError } = await adminClient.auth.admin.updateUserById(
     validated.userId,
     {
       app_metadata: { role: validated.role },
-      user_metadata: { role: validated.role },
     }
   );
 
@@ -329,6 +331,11 @@ async function generateUserInviteLinkWithUrl(
 ): Promise<DALResult<{ invitationUrl: string }>> {
   const redirectUrl = `${env.NEXT_PUBLIC_SITE_URL}/auth/setup-account`;
 
+  // Le rôle N'EST PLUS injecté dans `data` (qui alimente user_metadata).
+  // Source de vérité : app_metadata, posé via syncInvitedUserAppMetadataRole
+  // après création du profil (cf. TASK096 Phase 1 Step 2).
+  // `role` reste passé en argument car le profil l'utilise pour son INSERT.
+  void role;
   const { data: linkData, error: linkError } =
     await adminClient.auth.admin.generateLink({
       type: "invite",
@@ -336,7 +343,6 @@ async function generateUserInviteLinkWithUrl(
       options: {
         redirectTo: redirectUrl,
         data: {
-          role: role,
           display_name: displayName,
           _admin_managed: "true",
         },
@@ -429,6 +435,33 @@ async function createUserProfileWithRole(
   return { success: true, data: null };
 }
 
+/**
+ * Pose `app_metadata.role` sur un utilisateur invité après création de son profil.
+ * Utilise le service_role : déclenche `handle_user_update` qui maintient l'invariant
+ * auth.users.app_metadata.role === profiles.role.
+ *
+ * Cf. TASK096 Phase 1 Step 2 : source de vérité unique pour le rôle.
+ */
+async function syncInvitedUserAppMetadataRole(
+  adminClient: SupabaseClient,
+  userId: string,
+  role: string
+): Promise<DALResult<null>> {
+  const { error } = await adminClient.auth.admin.updateUserById(userId, {
+    app_metadata: { role },
+  });
+
+  if (error) {
+    console.error("[DAL] Failed to sync app_metadata.role for invited user:", error);
+    return {
+      success: false,
+      error: `[ERR_INVITE_007] Failed to set app_metadata.role for user ${userId}: ${error.message}`,
+    };
+  }
+
+  return { success: true, data: null };
+}
+
 async function logInvitationAuditRecord(
   supabase: SupabaseClient,
   currentAdminId: string | null,
@@ -510,7 +543,19 @@ export async function inviteUserWithoutEmail(
     return profileResult;
   }
 
-  // 6. Log audit record
+  // 6. Pose app_metadata.role (source unique de vérité, embarquée dans le JWT).
+  //    Le profil existe déjà (étape 5), donc handle_user_update synchronisera
+  //    profiles.role sans warning "No profile found".
+  const appMetaResult = await syncInvitedUserAppMetadataRole(
+    adminClient,
+    userId,
+    validated.role
+  );
+  if (!appMetaResult.success) {
+    return appMetaResult;
+  }
+
+  // 7. Log audit record
   await logInvitationAuditRecord(supabase, currentAdminId, userId, validated.email, validated.role);
 
   console.log(`[DAL] User created successfully: userId=${userId} role=${validated.role}`);

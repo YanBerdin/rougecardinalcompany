@@ -114,9 +114,11 @@ async function ensureTestUser(account: TestAccount): Promise<string> {
     const existing = list.users.find((u) => u.email === email);
 
     if (existing) {
+        // Security: role MUST be set only in app_metadata (signed JWT, server-only).
+        // user_metadata may carry profile data (display_name) but never authorization.
         await adminClient.auth.admin.updateUserById(existing.id, {
             app_metadata: { role },
-            user_metadata: { role, display_name: `Test ${role}` },
+            user_metadata: { display_name: `Test ${role}` },
         });
         await adminClient
             .from("profiles")
@@ -125,12 +127,13 @@ async function ensureTestUser(account: TestAccount): Promise<string> {
         return existing.id;
     }
 
+    // Security: role MUST be set only in app_metadata (signed JWT, server-only).
     const { data, error } = await adminClient.auth.admin.createUser({
         email,
         password,
         email_confirm: true,
         app_metadata: { role },
-        user_metadata: { role, display_name: `Test ${role}` },
+        user_metadata: { display_name: `Test ${role}` },
     });
 
     if (error) {

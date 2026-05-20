@@ -1,5 +1,43 @@
 # Progress
 
+## Durcissement sécurité auth — app_metadata + PasswordSchema + setupAccountAction (TASK096) (2026-05-20)
+
+✅ **COMPLET** — Migration complète du rôle de `user_metadata` (modifiable par l'utilisateur) vers `app_metadata` (server-only). Élimine le vecteur d'élévation de privilège.
+
+### Livrables
+
+- **3 migrations Supabase** :
+  - `20260520134210_sync_role_to_app_metadata.sql` — backfill rôles existants + refactoring trigger `handle_new_user`
+  - `20260520153000_refactor_handle_user_update_app_metadata.sql` — `handle_user_update` lit et écrit `app_metadata.role`
+  - `20260520160650_remove_user_metadata_role_fallback.sql` — suppression des fallbacks temporaires vers `user_metadata`
+- **`lib/schemas/auth.ts`** (NOUVEAU) — `PasswordSchema` (min 12 caractères + 4 classes : lower/upper/digit/symbol), `PasswordWithConfirmationSchema`
+- **`lib/actions/auth-setup-actions.ts`** (NOUVEAU) — `setupAccountAction` Server Action (`"use server"` + `"server-only"`, validation Zod, `getClaims()`, `supabase.auth.updateUser({ password })`, redirect)
+- **`lib/auth/roles.ts`** — `readRoleFromMeta()` lit exclusivement `app_metadata.role`, fallback `user_metadata` supprimé
+- **`lib/dal/admin-users.ts`** — `generateUserInviteLinkWithUrl()` et `updateUserRole()` écrivent uniquement `app_metadata`
+- **`lib/auth/is-admin.ts`** (SUPPRIMÉ) — était `@deprecated`, 0 imports
+- **9 scripts** nettoyés (migrations `user_metadata` → `app_metadata`)
+- **`components/auth/SetupAccountForm.tsx`** — appel direct `setupAccountAction`, prop `userRole` supprimée
+- **`app/(marketing)/auth/setup-account/page.tsx`** — `userRole="user"` supprimé, 7 `console.log` debug retirés
+- **`__tests__/schemas/auth.test.ts`** — 20 tests PasswordSchema (classes, longueur, confirmation)
+- **`__tests__/auth/roles.test.ts`** — 9 tests `readRoleFromMeta()` (app_metadata only)
+- **`e2e/tests/auth/invite-setup/invite-setup.spec.ts`** — INVITE-SETUP-001→004 (26.1s ✅)
+- **`e2e/tests/auth/role-escalation/role-escalation.spec.ts`** — ROLE-ESC-001 (15.7s ✅)
+- **`.github/workflows/check-role-invariant.yml`** — cron 07:00 UTC + `workflow_dispatch`, vérifie invariant `app_metadata.role = profiles.role`
+
+### Notes
+
+- **HIBP** (have-i-been-pwned check) : indisponible sur plan Free Supabase — à activer lors d'upgrade Pro
+- **Secret CI** : `INVARIANT_DB_URL` doit être configuré dans GitHub Actions secrets pour que le workflow `check-role-invariant.yml` fonctionne
+
+### Vérification
+
+- `pnpm vitest run __tests__/schemas/auth.test.ts __tests__/auth/roles.test.ts` → 29/29 PASS
+- E2E invite-setup (4 tests) + role-escalation (1 test) → tous verts
+- `pnpm lint` → clean
+- `pnpm build` → ✅
+
+---
+
 ## Auto-save brouillon communiqués de presse (TASK093) (2026-05-15)
 
 ✅ **COMPLET (implémentation)** — Auto-save type Google Docs livré sur les formulaires presse création + édition, avec protection stricte des articles publiés.
