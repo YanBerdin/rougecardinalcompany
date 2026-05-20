@@ -307,7 +307,7 @@ async function verifyUserDoesNotExist(
   const existingUser = await findUserByEmail(adminClient, email);
 
   if (existingUser) {
-    console.log(`[inviteUser] User ${email} already exists`);
+    // console.log(`[inviteUser] User ${email} already exists`);
     return {
       success: false,
       error: `[ERR_INVITE_002] Un utilisateur avec l'adresse ${email} existe déjà dans le système.`
