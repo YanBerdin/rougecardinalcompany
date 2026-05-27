@@ -54,3 +54,6 @@ supabase/.temp
 .playwright-mcp/
 # next-agents-md
 .next-docs/
+
+# Vidéos sources brutes (trop lourdes pour git, régénérables via my-hero-video/)
+public/hero-theatre-loop.mp4
