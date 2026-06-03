@@ -12,7 +12,7 @@ export function AgendaHero(): React.JSX.Element {
                     id="agenda-heading"
                     className="text-2xl md:text-3xl lg:text-4xl text-chart-6 font-bold motion-safe:animate-fade-in-up mb-4"
                 >
-                    Mes événements à venir
+                    Evénements à venir
                 </h1>
                 <p
                     className="text-xs md:text-base text-white/80 motion-safe:animate-fade-in"

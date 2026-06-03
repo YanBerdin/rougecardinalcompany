@@ -4,6 +4,29 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-06-03 - TASK097: ajout colonne `video_url` sur `home_hero_slides`
+
+**Migration** : `20260603120000_add_video_url_to_home_hero_slides.sql`
+
+**Schéma déclaratif** : ✅ aligné dans `supabase/schemas/07d_table_home_hero.sql` (colonne `video_url text` ajoutée à la définition de la table).
+
+**Statut** : ✅ appliquée en local. ⏸ pas encore poussée sur Supabase Cloud.
+
+**Contexte** : Les slides hero ne supportaient que des images de fond. TASK097 ajoute un fond vidéo optionnel : si `video_url` est renseigné, il remplace l'image en mode lecture. Le champ accepte un chemin relatif (`/hero-theatre-loop.mp4`) ou une URL absolue (`https://...`).
+
+**Changements** :
+
+- `ALTER TABLE public.home_hero_slides ADD COLUMN IF NOT EXISTS video_url text` — nullable, aucune contrainte CHECK (URL libre).
+- `COMMENT ON COLUMN` explicatif ajouté.
+- **Propagation stack complète** (9 fichiers) : schéma déclaratif, Zod (`HeroSlideInputSchema` + `HeroSlideFormSchema` + `HeroSlideDTO`, refine croisé image/vidéo), DAL (`SupabaseHeroRow` + `HomeHeroSlideRecord` + `rowToDTO`), `HeroContainer.tsx` (prop `video`), hooks admin (`useHeroSlideForm` + `useHeroSlideFormSync`), champ formulaire (`VideoUrlField`), badge preview admin.
+
+**Validation attendue (après push cloud)** :
+
+- Un slide sans `video_url` continue de s'afficher normalement avec son image.
+- Un slide avec `video_url` renseigné affiche le badge « Vidéo » dans la preview admin et transmet l'URL au composant héro public.
+
+---
+
 ### 2026-05-20 - FIX: synchronisation du rôle dans `auth.users.raw_app_meta_data` au signup
 
 **Migration** : `20260520134210_sync_role_to_app_metadata.sql`

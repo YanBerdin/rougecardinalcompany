@@ -18,6 +18,7 @@ export type HomeHeroSlideRecord = {
   cta_secondary_enabled: boolean;
   cta_secondary_label: string | null;
   cta_secondary_url: string | null;
+  video_url: string | null;
   position: number;
 };
 
@@ -34,6 +35,7 @@ type SupabaseHeroRow = {
   cta_secondary_enabled?: boolean | null;
   cta_secondary_label?: string | null;
   cta_secondary_url?: string | null;
+  video_url?: string | null;
   position?: number | null;
   active?: boolean | null;
   starts_at?: string | null;
@@ -68,6 +70,7 @@ function filterActiveSlides(
       cta_secondary_enabled: row.cta_secondary_enabled ?? false,
       cta_secondary_label: row.cta_secondary_label ?? null,
       cta_secondary_url: row.cta_secondary_url ?? null,
+      video_url: row.video_url ?? null,
       position: row.position ?? 0,
     }));
 }
@@ -90,7 +93,7 @@ export const fetchActiveHomeHeroSlides = cache(
       const { data, error } = await supabase
         .from("home_hero_slides")
         .select(
-          "title, subtitle, description, image_url, cta_primary_enabled, cta_primary_label, cta_primary_url, cta_secondary_enabled, cta_secondary_label, cta_secondary_url, position, active, starts_at, ends_at"
+          "title, subtitle, description, image_url, cta_primary_enabled, cta_primary_label, cta_primary_url, cta_secondary_enabled, cta_secondary_label, cta_secondary_url, video_url, position, active, starts_at, ends_at"
         )
         .order("position", { ascending: true });
 

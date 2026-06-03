@@ -24,7 +24,18 @@ export function HeroSlideBackground({
             index === currentSlide ? "opacity-100" : "opacity-0"
           }`}
         >
-          {slide.image && (
+          {slide.video ? (
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              aria-hidden="true"
+              className="absolute inset-0 w-full h-full object-cover blur-[1px]"
+            >
+              <source src={slide.video} type="video/mp4" />
+            </video>
+          ) : slide.image ? (
             <Image
               src={slide.image}
               alt=""
@@ -36,7 +47,7 @@ export function HeroSlideBackground({
               loading={index === 0 ? "eager" : "lazy"}
               style={{ backgroundColor: 'black' }}
             />
-          )}
+          ) : null}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.55),rgba(0,0,0,0.85))]" />
         </div>
       ))}

@@ -17,6 +17,7 @@ export async function HeroContainer() {
     ctaSecondaryEnabled: r.cta_secondary_enabled,
     ctaSecondaryLabel: r.cta_secondary_label ?? undefined,
     ctaSecondaryUrl: r.cta_secondary_url ?? undefined,
+    video: r.video_url ?? undefined,
   }));
 
   return <HeroClient initialSlides={slides} />;

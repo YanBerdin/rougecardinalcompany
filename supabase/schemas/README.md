@@ -154,6 +154,16 @@ supabase/schemas/
 
 ---
 
+## 🆕 Mises à jour récentes (juin 2026)
+
+- **FEAT: Ajout colonne `video_url` sur `home_hero_slides` — TASK097 (3 juin 2026)** : Fond vidéo optionnel pour les slides hero. Si `video_url` est renseigné, il remplace l'image de fond en mode lecture.
+  - **Migration** : `20260603120000_add_video_url_to_home_hero_slides.sql` (`ALTER TABLE … ADD COLUMN IF NOT EXISTS video_url text`)
+  - **Schéma déclaratif** : `07d_table_home_hero.sql` mis à jour — colonne `video_url text` ajoutée
+  - **Propagation stack** : `lib/schemas/home-content.ts` (Zod `HeroSlideInputSchema` + `HeroSlideFormSchema` + `HeroSlideDTO`, refine croisé image/vidéo) · `lib/dal/home-hero.ts` (types + select + mapping) · `HeroContainer.tsx` (prop `video`) · `useHeroSlideForm` + `useHeroSlideFormSync` (valeurs par défaut et mapping) · `HeroSlideFormFields.tsx` (composant `VideoUrlField`) · `HeroSlidePreview.tsx` (badge conditionnel « Vidéo »)
+  - **Format accepté** : chemin relatif (`/hero-theatre-loop.mp4`) ou URL absolue (`https://...`)
+
+---
+
 ## 🆕 Mises à jour récentes (avril 2026)
 
 - **FIX: Suppression de `display_toggle_home_hero` (23 avril 2026)** : Toggle erroné supprimé de la base de données et de toutes les couches applicatives.

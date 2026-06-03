@@ -1,5 +1,22 @@
 # Progress
 
+## Hero Slide Video Background — colonne video_url + propagation stack complète (TASK097) (2026-06-03)
+
+✅ **COMPLET** — `video_url text nullable` ajouté à `home_hero_slides` et propagé sur 9 fichiers (DB, Zod, DAL, HeroContainer, admin hooks, form field, preview badge).
+
+### Livrables
+
+- **Migration** : `supabase/migrations/20260603120000_add_video_url_to_home_hero_slides.sql`
+- **Schéma déclaratif** : `supabase/schemas/07d_table_home_hero.sql` mis à jour
+- **Zod** : `lib/schemas/home-hero.ts` — `video_url` dans `HeroSlideInputSchema` + `HeroSlideFormSchema` + `HeroSlideDTO`, refine croisé image/vidéo
+- **DAL public** : `lib/dal/home-hero.ts` — types étendus + champ mappé
+- **HeroContainer** : `app/(marketing)/_containers/HeroContainer.tsx` — `video` propagé
+- **Admin hooks** : `lib/hooks/useHeroSlideForm.ts` + `useHeroSlideFormSync.ts` — valeurs par défaut et mapping
+- **Form fields** : `components/features/admin/heroSlides/HeroSlideFormFields.tsx` — composant `VideoUrlField`
+- **Preview** : `components/features/admin/heroSlides/HeroSlidePreview.tsx` — badge conditionnel `<Vidéo>`
+
+---
+
 ## Durcissement sécurité auth — app_metadata + PasswordSchema + setupAccountAction (TASK096) (2026-05-20)
 
 ✅ **COMPLET** — Migration complète du rôle de `user_metadata` (modifiable par l'utilisateur) vers `app_metadata` (server-only). Élimine le vecteur d'élévation de privilège.
