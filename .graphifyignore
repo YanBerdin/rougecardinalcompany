@@ -1,0 +1,48 @@
+# .graphifyignore — Fichiers exclus du graphe sémantique
+# Syntaxe identique à .gitignore
+# NOTE: ce fichier remplace .gitignore pour graphify — les patterns importants de
+#       .gitignore sont répliqués ici pour éviter que node_modules etc. soient scannés.
+
+# ── Non-code : documentation, config AI, mémoire projet ──────────────────────
+.github/
+doc/
+doc-perso/
+memory-bank/
+playwright-report/
+swark-output/
+test-results/
+e2e-tests/
+
+# ── Dépendances & build (jamais du code métier) ───────────────────────────────
+node_modules/
+.next/
+/out/
+/build
+/coverage
+
+supabase/.branches/
+supabase/.temp/
+supabase/reconstruction_database_plan/
+supabase/migrations/archived/
+
+# ── Graphify lui-même ─────────────────────────────────────────────────────────
+.graphify-venv/
+graphify-out/
+graphify-run.log
+graphify-label.log
+
+# ── Divers ───────────────────────────────────────────────────────────────────
+.DS_Store
+*.pem
+.env*.local
+.env
+.env.e2e
+.env.sentry-build-plugin
+
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+.playwright-mcp/
+.next-docs/
+.claude/
+supabase/.temp

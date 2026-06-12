@@ -45,6 +45,13 @@ next-env.d.ts
 # log files
 /doc-perso/
 
+# graphify / local dev
+.graphify-venv/
+graphify-out/
+graphify-run.log
+.claude/
+CLAUDE.md
+
 # supabase
 supabase\.temp
 supabase/.temp
