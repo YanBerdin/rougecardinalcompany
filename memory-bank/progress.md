@@ -1,5 +1,31 @@
 # Progress
 
+## Graphify — Cartographie sémantique du codebase (2026-06-12)
+
+✅ **COMPLET** — Graphe sémantique installé, extrait, labellisé et visualisable.
+
+### Livrables
+
+- **`.graphify-venv/`** : venv Python avec `graphifyy[gemini]` 0.8.37 (ignoré par git)
+- **`graphify-out/graph.json`** : 4 229 nœuds, 9 337 arêtes, 438 communautés
+- **`graphify-out/GRAPH_REPORT.md`** : rapport lisible, 233 communautés nommées (205 thin omises)
+- **`graphify-out/graph.html`** : visualisation interactive 3,8 Mo
+- **`.graphifyignore`** : exclut `.github/`, `doc/`, `memory-bank/` (−21 % de nœuds parasites)
+- **`.github/copilot-instructions.md`** : graphify ajouté comme source de vérité avec commandes
+- **`memory-bank/procedures/graphify-codebase-graph.md`** : procédure complète d'installation, usage, mise à jour
+
+### Commandes clés
+
+```bash
+source .graphify-venv/bin/activate
+export GOOGLE_API_KEY=$(grep GOOGLE_API_KEY .env.local | cut -d= -f2)
+python -m graphify query "..."          # requête sémantique
+python -m graphify affected "fichier"   # impact d'un changement
+python -m graphify update .             # mise à jour sans LLM
+```
+
+---
+
 ## Hero Slide Video Background — colonne video_url + propagation stack complète (TASK097) (2026-06-03)
 
 ✅ **COMPLET** — `video_url text nullable` ajouté à `home_hero_slides` et propagé sur 9 fichiers (DB, Zod, DAL, HeroContainer, admin hooks, form field, preview badge).

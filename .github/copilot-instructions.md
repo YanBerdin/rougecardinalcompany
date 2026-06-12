@@ -31,6 +31,7 @@ Lire les documents pertinents avant d'intervenir :
 - `supabase/README.md` : pour les règles de backup et restauration de la base de données.
 - `supabase/schemas/README.md` : pour les changements de schéma, RLS ou fonctions.
 - `supabase/migrations/migrations.md` : pour les migrations SQL déclaratives et DML manuelles.
+- `graphify-out/GRAPH_REPORT.md` : carte sémantique du codebase (438 communautés nommées). Consulter avant toute refactorisation, pour identifier les dépendances ou trouver où vit une fonctionnalité. Commandes utiles : `python -m graphify query "..."`, `python -m graphify affected "fichier"`, `python -m graphify path "A" "B"` (activer le venv `.graphify-venv/` au préalable).
 
 Ne recopier aucun contenu long de ces fichiers dans `copilot-instructions.md`. Mettre à jour le memory-bank quand une décision durable ou un nouveau pattern est découvert.
 
