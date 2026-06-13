@@ -21,6 +21,8 @@
 
 ## Terminé (récent)
 
+- `TASK098` Pages légales + Conformité RGPD/Cookies — 3 pages statiques créées, IP analytics anonymisée, bandeau cookie informatif — **COMPLÈTE ✅ 2026-06-13** — voir `memory-bank/tasks/TASK098-legal-pages-cmp-rgpd.md`
+
 - `TASK097` Hero Slide Video Background — `video_url text nullable` ajouté à `home_hero_slides`, propagation DB→Zod→DAL public→HeroContainer→hooks admin→form fields→preview badge — **COMPLÈTE ✅ 2026-06-03** — voir `memory-bank/tasks/tasks-completed/TASK097-heroSlideVideoBackground.md`
 - `TASK096` Durcissement sécurité auth (app_metadata + PasswordSchema + setupAccountAction) — **COMPLÈTE ✅ 2026-05-20** — Migration rôle user_metadata→app_metadata (3 migrations SQL), `lib/schemas/auth.ts` PasswordSchema (min 12 + 4 classes), `lib/actions/auth-setup-actions.ts` Server Action, 9 scripts nettoyés, `is-admin.ts` supprimé, 29 tests unitaires + 5 E2E verts, CI cron `check-role-invariant.yml`. **Action requise** : secret `INVARIANT_DB_URL` dans GitHub Actions — voir `memory-bank/tasks/tasks-completed/TASK096-hardenAuthRoleSecurity.md`
 - `TASK095` Footer administrable — **COMPLÈTE ✅ 2026-05-17** — Description + contact (email/téléphone/adresse) + réseaux sociaux (Facebook/Instagram/Twitter) éditables depuis `/admin/footer`. Source de vérité : ligne unique `public.configurations_site` clé `public:footer:content` (jsonb). 10 fichiers créés, 2 modifiés. 13 tests Vitest verts, `pnpm lint` ✅, `pnpm build` 15.7s ✅. RLS vérifiées (anon SELECT `public:%`, UPDATE gardée `is_admin()`). Voir `memory-bank/tasks/tasks-completed/TASK095-footer-admin.md`

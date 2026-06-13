@@ -10,17 +10,18 @@ tools:
 - vscode/resolveMemoryFileUri
 - vscode/runCommand
 - vscode/vscodeAPI
-- vscode/toolSearch
 - execute/getTerminalOutput
 - execute/killTerminal
 - execute/sendToTerminal
+- execute/runTask
 - execute/createAndRunTask
 - execute/runTests
+- execute/testFailure
 - execute/runNotebookCell
-- execute/executionSubagent
 - execute/runInTerminal
 - read/terminalSelection
 - read/terminalLastCommand
+- read/getTaskOutput
 - read/getNotebookSummary
 - read/problems
 - read/readFile
@@ -74,7 +75,7 @@ tools:
 - chrome-devtools/press_key
 - chrome-devtools/resize_page
 - chrome-devtools/select_page
-- chrome-devtools/take_memory_snapshot
+- chrome-devtools/take_heapsnapshot
 - chrome-devtools/take_screenshot
 - chrome-devtools/take_snapshot
 - chrome-devtools/type_text
@@ -114,6 +115,7 @@ tools:
 - github/list_issues
 - github/list_pull_requests
 - github/list_releases
+- github/list_repository_collaborators
 - github/list_tags
 - github/merge_pull_request
 - github/pull_request_read
@@ -122,6 +124,7 @@ tools:
 - github/request_copilot_review
 - github/run_secret_scanning
 - github/search_code
+- github/search_commits
 - github/search_issues
 - github/search_pull_requests
 - github/search_repositories
@@ -136,26 +139,6 @@ tools:
 - next-devtools/nextjs_docs
 - next-devtools/nextjs_index
 - next-devtools/upgrade_nextjs_16
-- playwright/browser_click
-- playwright/browser_close
-- playwright/browser_console_messages
-- playwright/browser_drag
-- playwright/browser_evaluate
-- playwright/browser_file_upload
-- playwright/browser_fill_form
-- playwright/browser_handle_dialog
-- playwright/browser_hover
-- playwright/browser_navigate
-- playwright/browser_navigate_back
-- playwright/browser_network_requests
-- playwright/browser_press_key
-- playwright/browser_resize
-- playwright/browser_select_option
-- playwright/browser_snapshot
-- playwright/browser_tabs
-- playwright/browser_take_screenshot
-- playwright/browser_type
-- playwright/browser_wait_for
 - sentry/analyze_issue_with_seer
 - sentry/find_organizations
 - sentry/find_projects
@@ -176,6 +159,18 @@ tools:
 - shadcn/list_items_in_registries
 - shadcn/search_items_in_registries
 - shadcn/view_items_in_registries
+- stitch/apply_design_system
+- stitch/create_design_system
+- stitch/create_project
+- stitch/edit_screens
+- stitch/generate_screen_from_text
+- stitch/generate_variants
+- stitch/get_project
+- stitch/get_screen
+- stitch/list_design_systems
+- stitch/list_projects
+- stitch/list_screens
+- stitch/update_design_system
 - supabase/apply_migration
 - supabase/confirm_cost
 - supabase/create_branch
@@ -206,7 +201,6 @@ tools:
 - supabase/restore_project
 - supabase/search_docs
 - todo
-- vscode.mermaid-chat-features/renderMermaidDiagram
 ---
 
 # Supabase Expert Agent

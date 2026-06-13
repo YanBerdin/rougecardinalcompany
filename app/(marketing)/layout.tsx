@@ -1,6 +1,7 @@
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer";
 import { PageViewTracker } from "@/components/features/analytics/PageViewTracker";
+import { CookieBanner } from "@/components/features/analytics/CookieBanner";
 import type { Metadata } from "next";
 // Import globals.css pour Tailwind
 import "../globals.css";
@@ -36,6 +37,7 @@ export default function MarketingLayout({
         {children}
       </main>
       <Footer />
+      <CookieBanner />
     </div>
   );
 }

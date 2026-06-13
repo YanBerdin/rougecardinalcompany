@@ -20,6 +20,8 @@ Les règles détaillées vivent dans les sources spécialisées : `.github/instr
 
 Lire les documents pertinents avant d'intervenir :
 
+- `graphify-out/GRAPH_REPORT.md` : carte sémantique du codebase (438 communautés nommées). Consulter avant toute refactorisation, pour identifier les dépendances ou trouver où vit une fonctionnalité. Commandes utiles : `python -m graphify query "..."`, `python -m graphify affected "fichier"`, `python -m graphify path "A" "B"` (activer le venv `.graphify-venv/` au préalable).
+
 - `memory-bank/projectbrief.md` : objectif produit et contraintes générales.
 - `memory-bank/activeContext.md` : état courant du projet et derniers changements.
 - `memory-bank/systemPatterns.md` : patterns architecturaux applicables.
@@ -27,11 +29,11 @@ Lire les documents pertinents avant d'intervenir :
 - `memory-bank/progress.md` et `memory-bank/tasks/_index.md` : historique et tâches récentes.
 - `memory-bank/architecture/Project_Architecture_Blueprint.md` : architecture complète si la tâche touche plusieurs couches.
 - `memory-bank/architecture/Project_Folders_Structure_Blueprint_v6.md` : organisation des dossiers si un nouvel emplacement est nécessaire.
+
 - `supabase/CLI-Supabase-Cloud.md` et `supabase/CLI-Supabase-Local.md` : pour tout ce qui touche à Supabase, local ou cloud.
 - `supabase/README.md` : pour les règles de backup et restauration de la base de données.
 - `supabase/schemas/README.md` : pour les changements de schéma, RLS ou fonctions.
 - `supabase/migrations/migrations.md` : pour les migrations SQL déclaratives et DML manuelles.
-- `graphify-out/GRAPH_REPORT.md` : carte sémantique du codebase (438 communautés nommées). Consulter avant toute refactorisation, pour identifier les dépendances ou trouver où vit une fonctionnalité. Commandes utiles : `python -m graphify query "..."`, `python -m graphify affected "fichier"`, `python -m graphify path "A" "B"` (activer le venv `.graphify-venv/` au préalable).
 
 Ne recopier aucun contenu long de ces fichiers dans `copilot-instructions.md`. Mettre à jour le memory-bank quand une décision durable ou un nouveau pattern est découvert.
 

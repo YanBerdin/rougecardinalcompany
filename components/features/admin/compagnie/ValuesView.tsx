@@ -76,7 +76,7 @@ export function ValuesView({ initialValues }: ValuesViewProps) {
                     <Link href="/admin/compagnie/valeurs">
                         <Button variant="outline" size="sm" className="gap-1">
                             <Eye className="h-4 w-4" aria-hidden="true" />
-                            <span className="hidden sm:inline">Visualiser</span>
+                            <span className="hidden sm:inline">Résumé</span>
                         </Button>
                     </Link>
                     <Button onClick={handleCreate} size="sm" className="gap-1">
