@@ -57,7 +57,7 @@ export default function PolitiqueConfidentialitePage() {
                             Université Sorbonne-Nouvelle, 04 avenue Saint Mandé, 75012, Paris
                             <br />
                             Contact RGPD :{" "}
-                            <Link href="mailto:cie.rougecardinal@gmail.com">
+                            <Link href="mailto:cie.rougecardinal@gmail.com" className="!text-gold-text hover:!text-gold-light transition-colors">
                                 cie.rougecardinal@gmail.com
                             </Link>
                         </p>
@@ -78,8 +78,8 @@ export default function PolitiqueConfidentialitePage() {
                             </p>
                             <p>
                                 <strong>Base légale :</strong> intérêt légitime (
-                                <code>art. 6.1.f RGPD</code>) - exemption CNIL délibération{" "}
-                                <code>2020-091</code> (mesure d&apos;audience strictement
+                                <code className="!text-gold px-1.5 py-0.5 rounded text-xs font-mono">art. 6.1.f RGPD</code>) - exemption CNIL délibération{" "}
+                                <code className="!text-gold px-1.5 py-0.5 rounded text-xs font-mono">2020-091</code> (mesure d&apos;audience strictement
                                 interne avec IP anonymisée et aucun croisement avec un tiers).
                             </p>
                             <p>
@@ -97,7 +97,7 @@ export default function PolitiqueConfidentialitePage() {
                             </p>
                             <p>
                                 <strong>Base légale :</strong> exécution d&apos;un contrat ou
-                                mesures précontractuelles (<code>art. 6.1.b RGPD</code>).
+                                mesures précontractuelles (<code className="!text-gold px-1.5 py-0.5 rounded text-xs font-mono">art. 6.1.b RGPD</code>).
                             </p>
                             <p>
                                 <strong>Durée de conservation :</strong> 1 an à compter de la
@@ -115,7 +115,7 @@ export default function PolitiqueConfidentialitePage() {
                             </p>
                             <p>
                                 <strong>Base légale :</strong> consentement (
-                                <code>art. 6.1.a RGPD</code>).
+                                <code className="!text-gold px-1.5 py-0.5 rounded text-xs font-mono">art. 6.1.a RGPD</code>).
                             </p>
                             <p>
                                 <strong>Durée de conservation :</strong> jusqu&apos;au retrait
@@ -131,7 +131,7 @@ export default function PolitiqueConfidentialitePage() {
                             </p>
                             <p>
                                 <strong>Base légale :</strong> intérêt légitime (
-                                <code>art. 6.1.f RGPD</code>) - exemption CNIL délibération 2019-002.
+                                <code className="!text-gold px-1.5 py-0.5 rounded text-xs font-mono">art. 6.1.f RGPD</code>) - exemption CNIL délibération 2019-002.
                             </p>
                             <p>
                                 <strong>Durée de conservation :</strong> 90 jours.
@@ -164,7 +164,7 @@ export default function PolitiqueConfidentialitePage() {
                     <section>
                         <SectionHeading>5. Vos droits</SectionHeading>
                         <p>
-                            Conformément au <code>RGPD</code>, vous disposez des droits
+                            Conformément au <code className="!text-gold px-1.5 py-0.5 rounded text-xs font-mono">RGPD</code>, vous disposez des droits
                             suivants sur vos données personnelles :
                         </p>
                         <ul className="mt-4">
@@ -195,7 +195,7 @@ export default function PolitiqueConfidentialitePage() {
                         </ul>
                         <p className="mt-4">
                             Pour exercer ces droits, contactez-nous à{" "}
-                            <Link href="mailto:cie.rougecardinal@gmail.com">
+                            <Link href="mailto:cie.rougecardinal@gmail.com" className="!text-gold-text hover:!text-gold-light transition-colors">
                                 cie.rougecardinal@gmail.com
                             </Link>
                             . Vous pouvez également introduire une réclamation auprès de la
@@ -204,6 +204,7 @@ export default function PolitiqueConfidentialitePage() {
                                 href="https://www.cnil.fr"
                                 target="_blank"
                                 rel="noopener noreferrer"
+                                className="!text-chart-2 hover:!text-primary transition-colors"
                             >
                                 www.cnil.fr
                             </Link>
@@ -216,7 +217,7 @@ export default function PolitiqueConfidentialitePage() {
                         <p>
                             Pour plus d&apos;informations sur les cookies utilisés par ce
                             site, consultez notre{" "}
-                            <a href="/cookies">politique cookies</a>.
+                            <Link href="/cookies" className="!text-chart-2 hover:!text-primary transition-colors">politique cookies</Link>.
                         </p>
                     </section>
 

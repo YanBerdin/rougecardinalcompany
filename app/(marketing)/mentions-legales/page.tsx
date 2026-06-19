@@ -44,7 +44,7 @@ export default function MentionsLegalesPage() {
               <li>
                 <strong>Contact :</strong>{" "}
                 <Link
-                  className="text-foreground hover:text-chart-2"
+                  className="!text-gold-text hover:!text-gold-light transition-colors"
                   href="mailto:cierougecardinal@gmail.com">
                   cierougecardinal@gmail.com
                 </Link>
@@ -80,11 +80,11 @@ export default function MentionsLegalesPage() {
               Conformément au Règlement Général sur la Protection des Données (RGPD)
               et à la loi Informatique et Libertés, vous disposez de droits sur vos
               données personnelles. Pour les exercer, consultez notre{" "}
-              <Link href="/politique-confidentialite" className="text-foreground hover:text-chart-2">
+              <Link href="/politique-confidentialite" className="!text-chart-2 hover:!text-primary">
                 politique de confidentialité
               </Link>
               {" "}ou contactez-nous à{" "}
-              <Link href="mailto:cie.rougecardinal@gmail.com">
+              <Link href="mailto:cie.rougecardinal@gmail.com" className="!text-gold-text hover:!text-gold-light transition-colors">
                 cie.rougecardinal@gmail.com
               </Link>
               .
@@ -98,7 +98,7 @@ export default function MentionsLegalesPage() {
               fonctionnement et une mesure d&apos;audience interne anonymisée. Aucun
               traceur tiers (Google Analytics, publicité) n&apos;est utilisé. Pour en
               savoir plus, consultez notre{" "}
-              <Link href="/cookies">politique cookies</Link>.
+              <Link href="/cookies" className="!text-chart-2 hover:!text-primary">politique cookies</Link>.
             </p>
           </section>
 

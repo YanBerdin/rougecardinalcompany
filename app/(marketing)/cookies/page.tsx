@@ -3,6 +3,7 @@ import {
     LEGAL_CONTENT_STYLES,
     SectionHeading,
 } from "@/components/features/public-site/legal/legal-components";
+import Link from "next/link";
 
 export const metadata: Metadata = {
     title: "Politique cookies",
@@ -46,7 +47,7 @@ export default function CookiesPage() {
                         <div className="overflow-x-auto rounded-lg border border-border/50 mt-4">
                             <table className="w-full text-sm border-collapse">
                                 <thead>
-                                    <tr className="bg-primary/5 border-b border-border">
+                                    <tr className="border-b border-border">
                                         <th className="text-left px-4 py-3 font-semibold text-foreground">Nom</th>
                                         <th className="text-left px-4 py-3 font-semibold text-foreground">Stockage</th>
                                         <th className="text-left px-4 py-3 font-semibold text-foreground">Finalité</th>
@@ -56,7 +57,7 @@ export default function CookiesPage() {
                                 <tbody className="divide-y divide-border/50">
                                     <tr className="hover:bg-muted/40 transition-colors">
                                         <td className="px-4 py-3 align-top">
-                                            <code className="bg-primary/10 text-primary px-1.5 py-0.5 rounded text-xs font-mono">rc_session_id</code>
+                                            <code className="!text-gold px-1.5 py-0.5 rounded text-xs font-mono">rc_session_id</code>
                                         </td>
                                         <td className="px-4 py-3 align-top text-foreground/70 text-xs">sessionStorage</td>
                                         <td className="px-4 py-3 align-top text-foreground/80 leading-relaxed">
@@ -67,7 +68,7 @@ export default function CookiesPage() {
                                     </tr>
                                     <tr className="hover:bg-muted/40 transition-colors">
                                         <td className="px-4 py-3 align-top">
-                                            <code className="bg-primary/10 text-primary px-1.5 py-0.5 rounded text-xs font-mono">next-theme</code>
+                                            <code className="!text-gold px-1.5 py-0.5 rounded text-xs font-mono">next-theme</code>
                                         </td>
                                         <td className="px-4 py-3 align-top text-foreground/70 text-xs">localStorage</td>
                                         <td className="px-4 py-3 align-top text-foreground/80 leading-relaxed">
@@ -78,7 +79,7 @@ export default function CookiesPage() {
                                     </tr>
                                     <tr className="hover:bg-muted/40 transition-colors">
                                         <td className="px-4 py-3 align-top">
-                                            <code className="bg-primary/10 text-primary px-1.5 py-0.5 rounded text-xs font-mono">rc_cookie_notice_seen</code>
+                                            <code className="!text-gold px-1.5 py-0.5 rounded text-xs font-mono">rc_cookie_notice_seen</code>
                                         </td>
                                         <td className="px-4 py-3 align-top text-foreground/70 text-xs">localStorage</td>
                                         <td className="px-4 py-3 align-top text-foreground/80 leading-relaxed">
@@ -106,12 +107,12 @@ export default function CookiesPage() {
                     <hr className="border-border/40" />
 
                     <section>
-                        <SectionHeading>Analytics interne — exemption CNIL</SectionHeading>
+                        <SectionHeading>Analytics interne - exemption CNIL</SectionHeading>
                         <p>
                             La mesure d&apos;audience utilisant{" "}
-                            <code>rc_session_id</code> bénéficie de l&apos;exemption de
+                            <code className="!text-gold px-1.5 py-0.5 rounded text-xs font-mono">rc_session_id</code> bénéficie de l&apos;exemption de
                             consentement prévue par la délibération CNIL{" "}
-                            <code>2020-091</code>, sous réserve que :
+                            <code className="!text-gold px-1.5 py-0.5 rounded text-xs font-mono">2020-091</code>, sous réserve que :
                         </p>
                         <ul className="mt-4">
                             <li>
@@ -122,7 +123,7 @@ export default function CookiesPage() {
                             </li>
                             <li>
                                 L&apos;identifiant de session est <strong>volatile</strong>{" "}
-                                (sessionStorage — supprimé à la fermeture de l&apos;onglet).
+                                (sessionStorage - supprimé à la fermeture de l&apos;onglet).
                             </li>
                             <li>
                                 Les données ne sont{" "}
@@ -167,9 +168,9 @@ export default function CookiesPage() {
                         </ul>
                         <p className="mt-4">
                             Pour toute question relative aux cookies :{" "}
-                            <a href="mailto:cie.rougecardinal@gmail.com">
+                            <Link href="mailto:cie.rougecardinal@gmail.com" className="!text-gold hover:!text-gold-dark transition-colors">
                                 cie.rougecardinal@gmail.com
-                            </a>
+                            </Link>
                             .
                         </p>
                     </section>

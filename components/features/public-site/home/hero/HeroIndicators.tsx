@@ -15,6 +15,8 @@ export function HeroIndicators({
   onPauseAutoPlay,
   onGoToSlide,
 }: HeroIndicatorsProps) {
+  if (slides.length <= 1) return null;
+
   return (
     <>
       {/* Annonce live pour lecteurs d'écran */}

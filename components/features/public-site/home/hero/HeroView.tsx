@@ -42,13 +42,15 @@ export function HeroView({
       onMouseLeave={onTouchEnd}
     >
       <HeroSlideBackground slides={slides} currentSlide={currentSlide} />
-      <HeroNavigation
-        isAutoPlaying={isAutoPlaying}
-        onPrevSlide={onPrevSlide}
-        onNextSlide={onNextSlide}
-        onPauseAutoPlay={onPauseAutoPlay}
-        onToggleAutoPlay={onToggleAutoPlay}
-      />
+      {slides.length > 1 && (
+        <HeroNavigation
+          isAutoPlaying={isAutoPlaying}
+          onPrevSlide={onPrevSlide}
+          onNextSlide={onNextSlide}
+          onPauseAutoPlay={onPauseAutoPlay}
+          onToggleAutoPlay={onToggleAutoPlay}
+        />
+      )}
       <HeroCTA slide={slides[currentSlide]} />
       <HeroProgressBar isAutoPlaying={isAutoPlaying} />
     </section>
