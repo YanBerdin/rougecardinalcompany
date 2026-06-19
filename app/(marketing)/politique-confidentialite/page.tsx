@@ -4,6 +4,7 @@ import {
     LEGAL_CONTENT_STYLES,
     SectionHeading,
 } from "@/components/features/public-site/legal/legal-components";
+import Link from "next/link";
 
 export const metadata: Metadata = {
     title: "Politique de confidentialité",
@@ -42,7 +43,7 @@ export default function PolitiqueConfidentialitePage() {
 
             <article className="max-w-5xl mx-auto px-4 sm:px-6 py-12 md:py-16">
                 <p className="text-foreground/75 leading-relaxed mb-12 text-base md:text-lg pl-5 border-l-4 border-primary">
-                    Rouge Cardinal Company s&apos;engage à protéger vos données personnelles
+                    Rouge Cardinal s&apos;engage à protéger vos données personnelles
                     conformément au Règlement Général sur la Protection des Données (RGPD —
                     Règlement UE 2016/679) et à la loi Informatique et Libertés.
                 </p>
@@ -51,14 +52,14 @@ export default function PolitiqueConfidentialitePage() {
                     <section>
                         <SectionHeading>1. Responsable du traitement</SectionHeading>
                         <p>
-                            <strong>Rouge Cardinal Company</strong>
+                            <strong>Rouge Cardinal</strong>
                             <br />
-                            [À REMPLIR : adresse complète]
+                            Université Sorbonne-Nouvelle, 04 avenue Saint Mandé, 75012, Paris
                             <br />
                             Contact RGPD :{" "}
-                            <a href="mailto:privacy@rougecardinalcompany.fr">
-                                privacy@rougecardinalcompany.fr
-                            </a>
+                            <Link href="mailto:cie.rougecardinal@gmail.com">
+                                cie.rougecardinal@gmail.com
+                            </Link>
                         </p>
                     </section>
 
@@ -77,7 +78,7 @@ export default function PolitiqueConfidentialitePage() {
                             </p>
                             <p>
                                 <strong>Base légale :</strong> intérêt légitime (
-                                <code>art. 6.1.f RGPD</code>) — exemption CNIL délibération{" "}
+                                <code>art. 6.1.f RGPD</code>) - exemption CNIL délibération{" "}
                                 <code>2020-091</code> (mesure d&apos;audience strictement
                                 interne avec IP anonymisée et aucun croisement avec un tiers).
                             </p>
@@ -130,7 +131,7 @@ export default function PolitiqueConfidentialitePage() {
                             </p>
                             <p>
                                 <strong>Base légale :</strong> intérêt légitime (
-                                <code>art. 6.1.f RGPD</code>).
+                                <code>art. 6.1.f RGPD</code>) - exemption CNIL délibération 2019-002.
                             </p>
                             <p>
                                 <strong>Durée de conservation :</strong> 90 jours.
@@ -141,8 +142,8 @@ export default function PolitiqueConfidentialitePage() {
                     <section>
                         <SectionHeading>3. Destinataires des données</SectionHeading>
                         <p>
-                            Vos données sont traitées par Rouge Cardinal Company et son
-                            hébergeur [À REMPLIR : nom hébergeur]. Aucune donnée n&apos;est
+                            Vos données sont traitées par <strong>Rouge Cardinal</strong> et son
+                            hébergeur : <strong>Vercel Inc.</strong>. Aucune donnée n&apos;est
                             transmise à des prestataires d&apos;analytics tiers (pas de Google
                             Analytics, Hotjar, Meta Pixel ni outil similaire).
                         </p>
@@ -168,44 +169,44 @@ export default function PolitiqueConfidentialitePage() {
                         </p>
                         <ul className="mt-4">
                             <li>
-                                <strong>Droit d&apos;accès</strong> — obtenir une copie des
+                                <strong>Droit d&apos;accès</strong> - obtenir une copie des
                                 données vous concernant.
                             </li>
                             <li>
-                                <strong>Droit de rectification</strong> — corriger des données
+                                <strong>Droit de rectification</strong> - corriger des données
                                 inexactes.
                             </li>
                             <li>
-                                <strong>Droit à l&apos;effacement</strong> — demander la
+                                <strong>Droit à l&apos;effacement</strong> - demander la
                                 suppression de vos données.
                             </li>
                             <li>
-                                <strong>Droit à la limitation</strong> — restreindre certains
+                                <strong>Droit à la limitation</strong> - restreindre certains
                                 traitements.
                             </li>
                             <li>
-                                <strong>Droit d&apos;opposition</strong> — vous opposer aux
+                                <strong>Droit d&apos;opposition</strong> - vous opposer aux
                                 traitements fondés sur notre intérêt légitime.
                             </li>
                             <li>
-                                <strong>Droit à la portabilité</strong> — recevoir vos données
+                                <strong>Droit à la portabilité</strong> - recevoir vos données
                                 dans un format structuré.
                             </li>
                         </ul>
                         <p className="mt-4">
                             Pour exercer ces droits, contactez-nous à{" "}
-                            <a href="mailto:privacy@rougecardinalcompany.fr">
-                                privacy@rougecardinalcompany.fr
-                            </a>
+                            <Link href="mailto:cie.rougecardinal@gmail.com">
+                                cie.rougecardinal@gmail.com
+                            </Link>
                             . Vous pouvez également introduire une réclamation auprès de la
                             CNIL :{" "}
-                            <a
+                            <Link
                                 href="https://www.cnil.fr"
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
                                 www.cnil.fr
-                            </a>
+                            </Link>
                             .
                         </p>
                     </section>

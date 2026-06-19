@@ -3,7 +3,7 @@ import { env } from "./env";
 
 export const SITE_CONFIG = {
   SEO: {
-    TITLE: "Rouge Cardinal Company",
+    TITLE: "Rouge Cardinal",
     DESCRIPTION: "Compagnie de théâtre professionnelle",
     ICON: "/favicon.ico",
   },
@@ -16,7 +16,7 @@ export const SITE_CONFIG = {
     DEV_URL: env.NEXT_PUBLIC_SITE_URL,
   },
   MAKER: {
-    NAME: " Compagnie Rouge Cardinal",
+    NAME: "Rouge Cardinal",
     ADDRESS: "Adresse de votre compagnie",
   },
   AUTH: {

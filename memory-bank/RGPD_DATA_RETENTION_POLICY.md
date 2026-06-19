@@ -203,7 +203,7 @@ Ce document définit les politiques de rétention des données personnelles et s
 **Suppression immédiate sur demande:**
 
 - Les personnes peuvent demander la suppression de leurs données **avant** la fin de la période de rétention
-- Contact: **privacy@rougecardinalcompany.fr**
+- Contact: **cie.rougecardinal@gmail.com**
 - Délai de traitement: **30 jours maximum** (Art. 12.3 RGPD)
 
 **Procédure:**
@@ -225,7 +225,7 @@ Ce document définit les politiques de rétention des données personnelles et s
 
 **Correction des données inexactes:**
 
-- Contact: privacy@rougecardinalcompany.fr
+- Contact: cie.rougecardinal@gmail.com
 - Interface admin pour modification si besoin
 
 ---
@@ -299,7 +299,7 @@ Ce document définit les politiques de rétention des données personnelles et s
 ## ✉️ Contact
 
 **Délégué à la Protection des Données (DPO):**  
-Email: privacy@rougecardinalcompany.fr
+Email: cie.rougecardinal@gmail.com
 
 **Support technique:**  
 Email: tech@rougecardinalcompany.fr

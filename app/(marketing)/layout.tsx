@@ -8,8 +8,8 @@ import "../globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Rouge Cardinal Company",
-    template: "%s | Rouge Cardinal Company"
+    default: "Compagnie Rouge Cardinal",
+    template: "%s | Compagnie Rouge Cardinal"
   },
   description: "Compagnie de théâtre professionnelle",
   icons: {

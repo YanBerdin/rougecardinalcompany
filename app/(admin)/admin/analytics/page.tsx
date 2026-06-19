@@ -3,7 +3,7 @@ import { AnalyticsContainer } from "../../../../components/features/admin/analyt
 import { requireAdminPageAccess } from "@/lib/auth/roles";
 
 export const metadata: Metadata = {
-    title: "Analytics | Admin | Rouge Cardinal Company",
+    title: "Analytics | Admin | Rouge Cardinal",
     description: "Tableau de bord analytique avec métriques de trafic et visualisations temps-série",
 };
 

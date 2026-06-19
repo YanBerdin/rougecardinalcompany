@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Playfair } from "next/font/google";
+import { Geist, Bodoni_Moda } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 import { RootErrorBoundary } from "@/components/error-boundaries";
@@ -22,10 +22,11 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-const playfair = Playfair({
-  variable: "--font-playfair",
+const bodoniModa = Bodoni_Moda({
+  variable: "--font-bodoni-moda",
   display: "swap",
   subsets: ["latin"],
+  style: ["normal", "italic"],
 });
 
 export default function RootLayout({
@@ -34,7 +35,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" suppressHydrationWarning data-scroll-behavior="smooth" className={`${playfair.variable}`}>
+    <html lang="fr" suppressHydrationWarning data-scroll-behavior="smooth" className={`${bodoniModa.variable}`}>
       <body
         className={`${geistSans.className} antialiased`}
         suppressHydrationWarning

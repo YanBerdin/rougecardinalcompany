@@ -15,11 +15,11 @@ export function HomeTeamView({ members }: HomeTeamViewProps): ReactElement {
                 <div className="text-center max-sm:mb-8 mb-16">
                     <h2
                         id={SECTION_HEADING_ID}
-                        className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4"
+                        className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight"
                     >
                         Notre équipe
                     </h2>
-                    <p className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto">
+                    <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
                         Les artistes et collaborateurs qui donnent vie à Rouge Cardinal
                     </p>
                 </div>

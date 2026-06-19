@@ -6,14 +6,16 @@ import { ShowCard } from "./ShowCard";
 
 export function ShowsView({ shows }: ShowsViewProps) {
   return (
-    <section className="py-20 bg-background" aria-labelledby="shows-heading">
+    <section className="py-24 bg-background" aria-labelledby="shows-heading">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 id="shows-heading" className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-            A l&apos;affiche
-          </h2>
-          <p className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto">
-            Découvrez la programmation et réservez vos places
+        <div className="text-center mb-14 gap-4">
+          <div>
+            <h2 id="shows-heading" className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4">
+              À l&apos;affiche
+            </h2>
+          </div>
+          <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
+            Découvrez la programmation
           </p>
         </div>
 

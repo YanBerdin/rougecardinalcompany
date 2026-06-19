@@ -14,13 +14,13 @@ export function HeroCTA({ slide }: HeroCTAProps) {
     <div className="relative z-10 text-center text-chart-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-28 md:mt-52">
 
       <div className="animate-fade-in-up">
-        <h1 className=" text-gold-gradient text-2xl md:text-6xl lg:text-7xl font-bold">
+        <h1 className="text-gold-gradient text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-none tracking-tight">
           {slide.title}
         </h1>
-        <h2 className="text-2xl text-chart-6/90 md:text-6xl lg:text-7xl font-bold">
+        <h2 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl text-chart-6/90 font-bold leading-tight mt-1">
           {slide.subtitle}
         </h2>
-        <p className="text-xs md:text-base my-6 text-chart-6/70 max-w-2xl mx-auto">
+        <p className="text-sm sm:text-base md:text-lg my-6 text-chart-6/80 max-w-2xl mx-auto leading-relaxed">
           {slide.description}
         </p>
 

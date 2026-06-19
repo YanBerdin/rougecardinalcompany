@@ -184,7 +184,7 @@
     @apply border-border;
   }
 
-  /* Apply Playfair font to h1/h2/h3/h4 in marketing layout only.
+  /* Apply Bodoni Moda font to h1/h2/h3/h4 in marketing layout only.
      Use className="font-sans", "font-geist", "font-mono" or "font-serif" to opt out.
      Uses [class~=] (whole-word match) to avoid false positives with font-weight
      classes like font-bold, font-semibold, font-medium, etc. */
@@ -204,7 +204,7 @@
     h4:not([class~="font-sans"]):not([class~="font-geist"]):not(
       [class~="font-mono"]
     ):not([class~="font-serif"]) {
-    font-family: var(--font-playfair), serif;
+    font-family: var(--font-bodoni-moda), serif;
   }
 }
 

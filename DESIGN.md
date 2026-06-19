@@ -38,7 +38,7 @@ colors:
   dark-muted-foreground: "#a3a3a3"
 typography:
   display:
-    fontFamily: "var(--font-playfair), serif"
+    fontFamily: "var(--font-bodoni-moda), serif"
     fontWeight: 700
     lineHeight: 1.1
   body:
@@ -95,7 +95,7 @@ Creative North Star: "Editorial theater warmth with controlled dramatic contrast
 
 The current UI system combines warm paper-like surfaces with cardinal red accents and near-black text, then mirrors that language in dark mode through charcoal surfaces and preserved red accents. The visual tone is cultural and premium, with restrained density in the base UI and more expressive treatment in hero/header utilities.
 
-Heading typography in marketing pages defaults to Playfair while body and interface text use Geist, creating a clear editorial vs functional split. The system avoids pure black and pure white in core semantic tokens and uses warm-tinted neutrals as primary surface anchors.
+Heading typography in marketing pages defaults to Bodoni-Moda while body and interface text use Geist, creating a clear editorial vs functional split. The system avoids pure black and pure white in core semantic tokens and uses warm-tinted neutrals as primary surface anchors.
 
 Key Characteristics:
 
@@ -149,7 +149,7 @@ Source files:
 
 ## Typography
 
-Display Font: Playfair (`var(--font-playfair), serif`)
+Display Font: Bodoni Moda (`var(--font-bodoni-moda), serif`)
 Body Font: Geist Sans (`var(--font-geist-sans), sans-serif`)
 Label/Mono Font: Geist Sans for labels, Geist Mono available globally via root font vars.
 
@@ -157,14 +157,14 @@ Character: Editorial hierarchy for marketing content, pragmatic sans-serif for i
 
 ### Hierarchy
 
-- Display: Marketing `h1/h2/h3/h4` default to Playfair inside `.marketing-content` unless explicitly opted out.
+- Display: Marketing `h1/h2/h3/h4` default to Bodoni Moda inside `.marketing-content` unless explicitly opted out.
 - Headline/Title: UI components typically use semibold weights (`font-semibold`) with compact leading (`leading-none`, `tracking-tight` in cards).
 - Body: Geist Sans with default body rendering plus global letter spacing `var(--tracking-normal)`.
 - Label: Button/input labels rely on compact UI sizing (`text-sm`, `font-medium` to `font-semibold`) for control clarity.
 
 Named rules:
 
-- The Marketing Serif Rule. Marketing headings inherit Playfair by default; explicit utility classes opt out.
+- The Marketing Serif Rule. Marketing headings inherit Bodoni Moda by default; explicit utility classes opt out.
 - The UI Sans Rule. Inputs, buttons, and operational text remain in Geist Sans.
 
 Source files:
@@ -234,7 +234,7 @@ Source files:
 Do:
 
 - Use semantic tokens via Tailwind mappings (`hsl(var(--token))`) instead of raw colors in component code.
-- Keep marketing headings in Playfair unless an explicit font utility changes the family.
+- Keep marketing headings in Bodoni Moda unless an explicit font utility changes the family.
 - Reuse shared shadows/blur tokens for depth and glass effects.
 - Respect reduced motion: animation classes are disabled under `prefers-reduced-motion`.
 

@@ -7,7 +7,7 @@ import {
 export const metadata: Metadata = {
     title: "Politique cookies",
     description:
-        "Politique cookies de Rouge Cardinal Company — liste et gestion des cookies déposés sur ce site.",
+        "Politique cookies de Rouge Cardinal - liste et gestion des cookies déposés sur ce site.",
     robots: { index: true, follow: false },
 };
 
@@ -167,8 +167,8 @@ export default function CookiesPage() {
                         </ul>
                         <p className="mt-4">
                             Pour toute question relative aux cookies :{" "}
-                            <a href="mailto:privacy@rougecardinalcompany.fr">
-                                privacy@rougecardinalcompany.fr
+                            <a href="mailto:cie.rougecardinal@gmail.com">
+                                cie.rougecardinal@gmail.com
                             </a>
                             .
                         </p>

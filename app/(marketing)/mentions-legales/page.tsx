@@ -3,11 +3,12 @@ import {
   LEGAL_CONTENT_STYLES,
   SectionHeading,
 } from "@/components/features/public-site/legal/legal-components";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Mentions légales",
   description:
-    "Mentions légales de la compagnie de théâtre Rouge Cardinal Company.",
+    "Mentions légales de la compagnie de théâtre Rouge Cardinal.",
   robots: { index: true, follow: false },
 };
 
@@ -27,27 +28,26 @@ export default function MentionsLegalesPage() {
           <section>
             <SectionHeading>Éditeur du site</SectionHeading>
             <p>
-              Le site <strong>rougecardinalcompany.fr</strong> est édité par{" "}
-              <strong>Rouge Cardinal Company</strong>, [À REMPLIR : forme juridique]
-              au capital de [À REMPLIR : montant] euros, immatriculée au Registre
-              du Commerce et des Sociétés de [À REMPLIR : ville] sous le numéro{" "}
-              <strong>[À REMPLIR : numéro RCS]</strong>.
+              Le site <strong>compagnie-rouge-cardinal.fr</strong> est édité par{" "}
+              <strong>Rouge Cardinal</strong>, association loi 1901.
             </p>
             <ul className="mt-4">
               <li>
-                <strong>Siège social :</strong> [À REMPLIR : adresse complète]
+                <strong>Siège social :</strong> Université Sorbonne-Nouvelle, 04 avenue Saint Mandé, 75012, Paris
               </li>
               <li>
-                <strong>SIRET :</strong> [À REMPLIR : numéro SIRET]
+                <strong>SIRET :</strong> 93927552500011
               </li>
               <li>
-                <strong>Directeur de la publication :</strong> [À REMPLIR : Prénom Nom]
+                <strong>Directeur de la publication :</strong> Florian Chaillot
               </li>
               <li>
                 <strong>Contact :</strong>{" "}
-                <a href="mailto:contact@rougecardinalcompany.fr">
-                  contact@rougecardinalcompany.fr
-                </a>
+                <Link
+                  className="text-foreground hover:text-chart-2"
+                  href="mailto:cierougecardinal@gmail.com">
+                  cierougecardinal@gmail.com
+                </Link>
               </li>
             </ul>
           </section>
@@ -56,8 +56,8 @@ export default function MentionsLegalesPage() {
             <SectionHeading>Hébergeur</SectionHeading>
             <p>
               Ce site est hébergé par{" "}
-              <strong>[À REMPLIR : nom de l&apos;hébergeur]</strong>, dont le siège
-              social est situé au [À REMPLIR : adresse complète hébergeur].
+              <strong>Vercel Inc</strong>, dont le siège
+              social est situé au  440 N Barranca Ave PMB 4133, Covina, CA 91723.
             </p>
           </section>
 
@@ -68,7 +68,7 @@ export default function MentionsLegalesPage() {
               logos, illustrations) est protégé par le droit d&apos;auteur et la
               propriété intellectuelle. Toute reproduction, représentation ou
               diffusion, totale ou partielle, sans autorisation écrite préalable de
-              Rouge Cardinal Company est strictement interdite.
+              Rouge Cardinal est strictement interdite.
             </p>
           </section>
 
@@ -80,11 +80,13 @@ export default function MentionsLegalesPage() {
               Conformément au Règlement Général sur la Protection des Données (RGPD)
               et à la loi Informatique et Libertés, vous disposez de droits sur vos
               données personnelles. Pour les exercer, consultez notre{" "}
-              <a href="/politique-confidentialite">politique de confidentialité</a>
+              <Link href="/politique-confidentialite" className="text-foreground hover:text-chart-2">
+                politique de confidentialité
+              </Link>
               {" "}ou contactez-nous à{" "}
-              <a href="mailto:privacy@rougecardinalcompany.fr">
-                privacy@rougecardinalcompany.fr
-              </a>
+              <Link href="mailto:cie.rougecardinal@gmail.com">
+                cie.rougecardinal@gmail.com
+              </Link>
               .
             </p>
           </section>
@@ -96,7 +98,7 @@ export default function MentionsLegalesPage() {
               fonctionnement et une mesure d&apos;audience interne anonymisée. Aucun
               traceur tiers (Google Analytics, publicité) n&apos;est utilisé. Pour en
               savoir plus, consultez notre{" "}
-              <a href="/cookies">politique cookies</a>.
+              <Link href="/cookies">politique cookies</Link>.
             </p>
           </section>
 
@@ -105,8 +107,7 @@ export default function MentionsLegalesPage() {
           <section>
             <SectionHeading>Liens hypertextes</SectionHeading>
             <p>
-              Ce site peut contenir des liens vers des sites tiers. Rouge Cardinal
-              Company n&apos;exerce aucun contrôle sur ces sites et décline toute
+              Ce site peut contenir des liens vers des sites tiers. Rouge Cardinal n&apos;exerce aucun contrôle sur ces sites et décline toute
               responsabilité quant à leur contenu ou leur politique de
               confidentialité.
             </p>

@@ -108,11 +108,11 @@ export function ShowCard({ show, index }: ShowCardProps) {
       </div>
 
       {/* Titre */}
-      <div className="py-2 text-center">
-        <h3 className="text-xl font-bold text-foreground line-clamp-2 px-1">
+      <div className="py-3 text-center">
+        <h3 className="text-2xl font-bold text-foreground line-clamp-2 px-1 leading-tight">
           <Link href={spectacleUrl}>{show.title}</Link>
         </h3>
-        <p className="text-sm text-muted-foreground mt-1 line-clamp-2 px-2">
+        <p className="text-sm text-muted-foreground mt-1.5 line-clamp-2 px-2">
           {show.short_description}
         </p>
       </div>

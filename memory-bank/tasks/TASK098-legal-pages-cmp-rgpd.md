@@ -33,7 +33,7 @@
 | Fichier | Action | Détail |
 | --- | --- | --- |
 | `app/(marketing)/mentions-legales/page.tsx` | Créer | Server Component statique, métadonnées SEO, contenu tiré de `doc/mentions-cookies-rgpd.md`, placeholders `[À REMPLIR]` |
-| `app/(marketing)/politique-confidentialite/page.tsx` | Créer | Données collectées (IP anonymisée, user-agent, session sessionStorage, formulaires), bases légales, durées rétention (90j analytics, 1 an contact, 90j newsletter), droits RGPD, `privacy@rougecardinalcompany.fr` |
+| `app/(marketing)/politique-confidentialite/page.tsx` | Créer | Données collectées (IP anonymisée, user-agent, session sessionStorage, formulaires), bases légales, durées rétention (90j analytics, 1 an contact, 90j newsletter), droits RGPD, `cie.rougecardinal@gmail.com` |
 | `app/(marketing)/cookies/page.tsx` | Créer | Liste `rc_session_id` (sessionStorage), `next-theme` (localStorage), catégories essentiels/analytics, exemption CNIL mentionnée |
 | `components/features/analytics/CookieBanner.tsx` | Créer | Client Component, `role="dialog"`, `aria-label`, bouton « Compris », `localStorage.setItem("rc_cookie_notice_seen", "true")`, se masque si déjà vu, WCAG 2.2 AA |
 | `app/(marketing)/layout.tsx` | Modifier | Ajouter `<CookieBanner />` après `<Footer />` |
