@@ -6,7 +6,7 @@ import { ShowCard } from "./ShowCard";
 
 export function ShowsView({ shows }: ShowsViewProps) {
   return (
-    <section className="py-24 bg-background" aria-labelledby="shows-heading">
+    <section className="py-24 bg-background h-svh" aria-labelledby="shows-heading">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-14 gap-4">
           <div>

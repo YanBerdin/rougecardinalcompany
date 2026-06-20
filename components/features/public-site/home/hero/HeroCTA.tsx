@@ -11,8 +11,8 @@ interface HeroCTAProps {
 
 export function HeroCTA({ slide }: HeroCTAProps) {
   return (
-    <div className="absolute inset-x-0 bottom-36 sm:bottom-44 z-10 text-center text-chart-6 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto animate-fade-in-up">
+    <div className="relative z-10 text-center text-chart-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-28 md:mt-52">
+      <div className="animate-fade-in-up">
         <h1 className="text-gold-gradient text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-none tracking-tight">
           {slide.title}
         </h1>
