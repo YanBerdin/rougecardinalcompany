@@ -30,7 +30,7 @@ export function HeroSlideBackground({
               muted
               playsInline
               aria-hidden="true"
-              className="absolute inset-0 w-full h-lvh object-cover blur-[1px]"
+              className="absolute inset-0 w-full h-full object-cover blur-[1px]"
             >
               <source src={slide.video} type="video/mp4" />
             </video>
