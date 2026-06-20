@@ -30,7 +30,7 @@ export function HeroSlideBackground({
               muted
               playsInline
               aria-hidden="true"
-              className="absolute inset-0 w-full h-full object-cover blur-[1px]"
+              className="absolute inset-0 w-full h-lvh object-cover blur-[1px]"
             >
               <source src={slide.video} type="video/mp4" />
             </video>
@@ -40,7 +40,7 @@ export function HeroSlideBackground({
               alt=""
               fill
               sizes="100vw"
-              className="object-cover blur-[1px] bg-black"
+              className="object-cover h-lvh blur-[1px] bg-black"
               priority={index === 0}
               fetchPriority={index === 0 ? "high" : "auto"}
               loading={index === 0 ? "eager" : "lazy"}
