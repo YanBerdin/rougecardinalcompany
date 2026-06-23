@@ -143,18 +143,20 @@ export default async function Footer() {
                   <span>{contact.email}</span>
                 </Link>
               </li>
-              <li className="flex items-center space-x-2 text-muted-foreground">
-                <Phone className="h-4 w-4 text-chart-2" aria-hidden="true" />
-                <Link
-                  href={`tel:${contact.phone.replace(/\s+/g, "")}`}
-                  className="text-muted-foreground hover:text-chart-2"
-                  aria-label={`Appeler le ${contact.phone}`}
-                >
-                  <span>{contact.phone}</span>
-                </Link>
-              </li>
+              {contact.phone && (
+                <li className="flex items-center space-x-2 text-muted-foreground">
+                  <Phone className="h-4 w-4 text-chart-2" aria-hidden="true" />
+                  <Link
+                    href={`tel:${contact.phone.replace(/\s+/g, "")}`}
+                    className="text-muted-foreground hover:text-chart-2"
+                    aria-label={`Appeler le ${contact.phone}`}
+                  >
+                    <span>{contact.phone}</span>
+                  </Link>
+                </li>
+              )}
               <li className="flex items-start space-x-2 text-muted-foreground">
-                <MapPin className="h-4 w-4 mt-1 text-chart-2" aria-hidden="true" />
+                <MapPin className="h-4 w-4 shrink-0 text-chart-2" aria-hidden="true" />
                 <span>{contact.address}</span>
               </li>
             </ul>

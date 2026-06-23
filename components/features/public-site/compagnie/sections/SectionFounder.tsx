@@ -27,7 +27,7 @@ export function SectionFounder({ section }: SectionRendererProps): ReactElement 
         <section
             id="founder"
             aria-labelledby="heading-founder"
-            className="py-24 max-sm:py-12 bg-chart-7 overflow-hidden relative"
+            className="py-32 max-sm:py-12 bg-chart-7 overflow-hidden relative"
         >
             <div
                 className="absolute inset-0 opacity-5 pointer-events-none mix-blend-overlay"

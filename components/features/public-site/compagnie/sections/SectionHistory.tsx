@@ -5,9 +5,9 @@ import type { SectionRendererProps } from "./types";
 export function SectionHistory({ section }: SectionRendererProps): ReactElement {
     const headingId = `heading-${section.kind}`;
     return (
-        <section id={section.kind} aria-labelledby={headingId} className="max-sm:py-12 py-16 bg-chart-7/60">
+        <section id={section.kind} aria-labelledby={headingId} className="py-1 lg:py-16 bg-chart-7">
             <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center my-16">
                     <div className="animate-fade-in-up">
                         {section.title && (
                             <h2 id={headingId} className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-6">

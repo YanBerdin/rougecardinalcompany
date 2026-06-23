@@ -2,8 +2,6 @@ import {
   Mail,
   Phone,
   MapPin,
-  Users,
-  Calendar,
 } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -60,39 +58,6 @@ export function ContactInfoSidebar({
                 <br />
                 75011 Paris, France
               </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Contacts Spécialisés</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-start space-x-3">
-            <Users className="h-5 w-5 text-chart-2 mt-1" aria-hidden="true" />
-            <div>
-              <p className="font-medium">Presse &amp; Médias</p>
-              <Link
-                href="mailto:presse@rouge-cardinal.fr"
-                className="text-muted-foreground hover:text-chart-2 text-sm"
-              >
-                presse@rouge-cardinal.fr
-              </Link>
-            </div>
-          </div>
-
-          <div className="flex items-start space-x-3">
-            <Calendar className="h-5 w-5 text-chart-2 mt-1" aria-hidden="true" />
-            <div>
-              <p className="font-medium">Billetterie</p>
-              <Link
-                href="mailto:billetterie@rouge-cardinal.fr"
-                className="text-muted-foreground hover:text-chart-2 text-sm"
-              >
-                billetterie@rouge-cardinal.fr
-              </Link>
             </div>
           </div>
         </CardContent>

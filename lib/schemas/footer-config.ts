@@ -31,7 +31,7 @@ const DESCRIPTION_MAX = 500;
 
 const ContactSchema = z.object({
     email: z.string().email("Email invalide"),
-    phone: z.string().min(1, "Téléphone requis"),
+    phone: z.string().trim().optional().or(z.literal("")),
     address: z.string().min(1, "Adresse requise"),
 });
 

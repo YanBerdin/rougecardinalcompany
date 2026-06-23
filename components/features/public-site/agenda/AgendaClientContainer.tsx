@@ -19,7 +19,7 @@ export default function AgendaClientContainer({
     <AgendaProvider events={events} eventTypes={eventTypes} calendarEvents={calendarEvents}>
       <div className="max-sm:pt-12 pt-16">
         <AgendaHero />
-        <section className="py-8 md:py-12 bg-background" data-testid="agenda-event-list">
+        <section className="py-8 md:py-12 bg-chart-7" data-testid="agenda-event-list">
           <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-[300px_1fr] gap-10 items-start">
 
@@ -45,9 +45,9 @@ export default function AgendaClientContainer({
             </div>
           </div>
         </section>
-        <div className="w-full h-16 bg-background" aria-hidden="true" />
+        <div className="w-full h-16 bg-chart-7" aria-hidden="true" />
         {showNewsletterSection && <AgendaNewsletter />}
-        <div className="w-full h-24 bg-background" aria-hidden="true" />
+        <div className="w-full h-24 bg-chart-7" aria-hidden="true" />
       </div>
     </AgendaProvider>
   );

@@ -9,7 +9,7 @@ export function HomeTeamView({ members }: HomeTeamViewProps): ReactElement {
         <section
             id="equipe"
             aria-labelledby={SECTION_HEADING_ID}
-            className="max-sm:py-12 py-24 bg-background"
+            className="max-sm:py-12 py-24 lg:py-32 bg-background"
         >
             <div className="max-w-screen-xl mx-auto px-4 sm:px-4 lg:px-4">
                 <div className="text-center max-sm:mb-8 mb-16">

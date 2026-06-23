@@ -31,9 +31,9 @@ export function SpectaclesView({
   return (
     <div className="max-sm:pt-12 pt-16">
       {/* Hero Section */}
-      <section className="py-8 lg:py-12 hero-gradient" aria-labelledby="spectacles-hero-heading">
+      <section className="py-6 md:py-12 lg:py-16 hero-gradient" aria-labelledby="spectacles-hero-heading">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 id="spectacles-hero-heading" className="text-white/90 text-3xl md:text-4xl lg:text-5xl font-bold animate-fade-in-up"> {/** mb-6  */}
+          <h1 id="spectacles-hero-heading" className="text-white/90 text-4xl md:text-5xl lg:text-6xl font-bold animate-fade-in-up"> {/** mb-6  */}
             À l&apos;Affiche
           </h1>
           {/*<p
@@ -130,23 +130,24 @@ export function SpectaclesView({
       </section>
 
       {/* Archives */}
-      <section className="py-20 bg-background" aria-labelledby="spectacles-archives-heading">
+      <section className="pb-20 bg-chart-7" aria-labelledby="spectacles-archives-heading">
 
-        <section className="py-8 lg:py-12 hero-gradient" aria-labelledby="spectacles-archives-heading">
+        <section className="py-8 lg:py-16 hero-gradient" aria-labelledby="spectacles-archives-heading">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 id="spectacles-archives-heading" className="text-white/90 text-3xl md:text-4xl lg:text-5xl font-bold animate-fade-in-up"> {/** mb-6  */}
               Nos Créations Passées
             </h2>
-            {/*<p
+          {/*<p
            // className="text-lg md:text-xl lg:text-2xl text-white/90 opacity-90 animate-fade-in"
            // style={{ animationDelay: "0.2s" }}
           >
             Nos Créations Passées
-          </p>*/}
+          </p>
+          */}
           </div>
         </section>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 py-12">
           <div className="flex flex-wrap justify-center gap-16">
             {displayedArchivedShows.map((show, index) => (
               <Card

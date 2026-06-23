@@ -121,7 +121,7 @@ export function FooterConfigForm({ initialConfig }: FooterConfigFormProps) {
                     </div>
 
                     <div>
-                        <Label htmlFor="contact-phone">Téléphone *</Label>
+                        <Label htmlFor="contact-phone">Téléphone</Label>
                         <Input
                             id="contact-phone"
                             type="tel"
@@ -131,6 +131,9 @@ export function FooterConfigForm({ initialConfig }: FooterConfigFormProps) {
                             {...form.register("contact.phone")}
                             disabled={isPending}
                         />
+                        <p className="text-xs text-muted-foreground mt-1">
+                            Laissez vide pour masquer le numéro dans le footer.
+                        </p>
                         {form.formState.errors.contact?.phone && (
                             <p
                                 id="contact-phone-error"
