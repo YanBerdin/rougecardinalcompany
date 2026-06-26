@@ -6,7 +6,7 @@
 
 export function AgendaHero(): React.JSX.Element {
     return (
-        <section className="py-6 md:py-12 lg:py-16 hero-gradient" aria-labelledby="agenda-heading">
+        <section className="py-8 md:py-16 hero-gradient" aria-labelledby="agenda-heading">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 <h1
                     id="agenda-heading"

@@ -45,8 +45,8 @@ export default function MentionsLegalesPage() {
                 <strong>Contact :</strong>{" "}
                 <Link
                   className="!text-gold-text hover:!text-gold-light transition-colors"
-                  href="mailto:cierougecardinal@gmail.com">
-                  cierougecardinal@gmail.com
+                  href="mailto:cie.rougecardinal@gmail.com">
+                  cie.rougecardinal@gmail.com
                 </Link>
               </li>
             </ul>

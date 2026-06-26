@@ -3,7 +3,7 @@
  */
 export function HeroSection() {
   return (
-    <section aria-label="Espace Média" className="py-6 md:py-12 lg:py-16 hero-gradient">
+    <section aria-label="Espace Média" className="py-8 md:py-16 hero-gradient">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold animate-fade-in-up text-white">
           Espace Média

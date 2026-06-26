@@ -1,8 +1,6 @@
 # Rouge Cardinal - Site web
 
-![alt text](<doc/Capture d’écran_1-4-2026_233758_rougecardinal.yanberdin.com.jpeg>)
-
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/YanBerdin/rougecardinalcompany)
+![alt text](<public/home-page.png>)
 
 Plateforme web officielle de la compagnie de théâtre Rouge Cardinal : vitrine publique, médiathèque, espace presse et CMS sur mesure conçu pour permettre à l'équipe non technique de gérer le contenu du site en autonomie.
 
@@ -296,3 +294,5 @@ pnpm dlx supabase functions deploy <function-name>
   - `scripts/`
   - `scripts/README.md`
   - `doc/Email-Resend/TESTING_RESEND.md`
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/YanBerdin/rougecardinalcompany)

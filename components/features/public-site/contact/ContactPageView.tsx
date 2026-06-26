@@ -28,15 +28,15 @@ export function ContactPageView({
 
   return (
     <div className="max-sm:pt-12 pt-16">
-      <section className="py-6 md:py-12 lg:py-16 hero-gradient">
+      <section className="py-8 md:py-16 hero-gradient">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-5xl lg:text-6xl text-white font-bold animate-fade-in-up">
-            Contact
+            En aparté
           </h1>
         </div>
       </section>
 
-      <div className="max-sm:py-12 py-16 lg:py-32 bg-chart-7">
+      <div className="max-sm:py-16 py-24 bg-chart-7">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             <div className="lg:col-span-2">

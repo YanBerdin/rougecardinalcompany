@@ -15,7 +15,7 @@ export function MediaKitSection({ mediaKit }: MediaKitSectionProps) {
   if (mediaKit.length === 0) return null;
 
   return (
-    <section aria-label="Kit Média" className="max-sm:py-12 py-24 lg:py-32 bg-chart-7">
+    <section aria-label="Kit Média" className="py-24 lg:py-32 bg-chart-7">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-sm:mb-8 mb-16">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">Kit Média</h2>

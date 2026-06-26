@@ -19,7 +19,7 @@ export default async function Footer() {
 
   return (
     <footer className="bg-background border-t">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Logo et Description */}
           <div className="col-span-1 lg:col-span-2">
@@ -38,44 +38,41 @@ export default async function Footer() {
             </p>
             <div className="flex space-x-4">
               {socialLinks.facebook && (
-                <Button variant="ghost" size="sm" asChild className="min-h-11 min-w-11">
+                <Button variant="ghost" size="icon" asChild className="min-h-11 min-w-11">
                   <Link
                     href={socialLinks.facebook}
                     aria-label="Facebook"
                     className="hover:text-chart-2"
-                    title="Facebook"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <Facebook className="h-5 w-5" />
+                    <Facebook className="size-6" />
                   </Link>
                 </Button>
               )}
               {socialLinks.instagram && (
-                <Button variant="ghost" size="sm" asChild className="min-h-11 min-w-11">
+                <Button variant="ghost" size="icon" asChild className="min-h-11 min-w-11">
                   <Link
                     href={socialLinks.instagram}
                     aria-label="Instagram"
                     className="hover:text-chart-2"
-                    title="Instagram"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <Instagram className="h-5 w-5" />
+                    <Instagram className="size-6" />
                   </Link>
                 </Button>
               )}
               {socialLinks.twitter && (
-                <Button variant="ghost" size="sm" asChild className="min-h-11 min-w-11">
+                <Button variant="ghost" size="icon" asChild className="min-h-11 min-w-11">
                   <Link
                     href={socialLinks.twitter}
                     aria-label="Twitter"
                     className="hover:text-chart-2"
-                    title="Twitter"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <Twitter className="h-5 w-5" />
+                    <Twitter className="size-6" />
                   </Link>
                 </Button>
               )}
