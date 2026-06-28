@@ -25,9 +25,9 @@ export function HeroCTA({ slide }: HeroCTAProps) {
 
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
           {slide.ctaPrimaryEnabled && slide.ctaPrimaryLabel && (
-            <Button variant="default" size="xl" className="max-sm:text-sm text-base max-w-[280px] w-54 justify-center" asChild>
+            <Button variant="default" size="lg" className="max-sm:text-sm text-base max-w-[280px] w-54 justify-center" asChild>
               <Link href={slide.ctaPrimaryUrl ?? "/spectacles"}>
-                <View className="h-9 w-9 shrink-0" aria-hidden="true" />
+                <View className="size-6 shrink-0" aria-hidden="true" />
                 {slide.ctaPrimaryLabel}
               </Link>
             </Button>
@@ -41,7 +41,7 @@ export function HeroCTA({ slide }: HeroCTAProps) {
               asChild
             >
               <Link href={slide.ctaSecondaryUrl ?? "/agenda"}>
-                <Play className="h-5 w-5 shrink-0" aria-hidden="true" />
+                <Play className="size-6 shrink-0" aria-hidden="true" />
                 {slide.ctaSecondaryLabel}
               </Link>
             </Button>

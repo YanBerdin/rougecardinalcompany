@@ -1,20 +1,20 @@
 /**
- * @file HeroSection — Bandeau héroïque de la page Espace Média
+ * @file HeroSection — Bandeau héroïque de la page Presse et médias
  */
 export function HeroSection() {
   return (
-    <section aria-label="Espace Média" className="py-8 md:py-16 hero-gradient">
+    <section aria-label="Presse et médias" className="py-8 md:py-16 hero-gradient">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold animate-fade-in-up text-white">
-          Espace Média
+          La presse en parle
         </h1>
-        {/*        <p
-          className="max-sm:text-base md:text-xl lg:text-2xl opacity-90 animate-fade-in text-white/80"
+        {/*<p
+          className="mt-6 max-sm:text-base lg:text-xl opacity-90 animate-fade-in text-white/80"
           style={{ animationDelay: "0.2s" }}
         >
-          Ressources et actualités pour les médias
-        </p>
-        */}
+          Contact, revue de presse et ressources pour les médias
+        </p>*/}
+
       </div>
     </section>
   );

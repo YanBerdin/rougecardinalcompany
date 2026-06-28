@@ -27,7 +27,7 @@ export function CalendarDay(): React.JSX.Element {
 
             {dayEvents.length === 0 ? (
                 <div className="flex flex-col items-center gap-3 py-12 text-muted-foreground">
-                    <CalendarDays className="w-10 h-10 opacity-40" aria-hidden="true" />
+                    <CalendarDays className="size-10 opacity-40" aria-hidden="true" />
                     <p>Aucun événement ce jour.</p>
                 </div>
             ) : (

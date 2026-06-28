@@ -52,7 +52,7 @@ export function PresentationView({ initialSections }: PresentationViewProps) {
                 </p>
                 <Link href="/admin/compagnie/presentation">
                     <Button variant="outline" size="sm" className="gap-1">
-                        <Eye className="h-4 w-4" aria-hidden="true" />
+                        <Eye className="size-4" aria-hidden="true" />
                         <span className="hidden sm:inline">Résumé</span>
                     </Button>
                 </Link>
@@ -100,7 +100,7 @@ export function PresentationView({ initialSections }: PresentationViewProps) {
                                 aria-label={`Modifier la section ${section.title ?? section.kind}`}
                                 className="max-sm:h-10 max-sm:self-stretch"
                             >
-                                <Pencil className="h-4 w-4" aria-hidden="true" />
+                                <Pencil className="size-4" aria-hidden="true" />
                                 <span className="sm:hidden">Modifier</span>
                             </Button>
                         </li>

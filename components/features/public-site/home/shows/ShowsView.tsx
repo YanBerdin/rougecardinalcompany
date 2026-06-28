@@ -28,7 +28,7 @@ export function ShowsView({ shows }: ShowsViewProps) {
         <div className="text-center">
           <Button variant="default" size="lg" asChild>
             <Link href="/agenda">
-              <ArrowRight className="h-5 w-5" aria-hidden="true" />
+              <ArrowRight className="size-5" aria-hidden="true" />
               Voir l&apos;agenda
             </Link>
           </Button>

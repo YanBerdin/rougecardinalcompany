@@ -213,7 +213,7 @@ export function PressReleaseNewForm({
                 {/* Warning progressif */}
                 {showPublicWarning && (
                     <Alert className="border-yellow-500 bg-yellow-50 text-yellow-900 dark:bg-yellow-900/10 dark:text-yellow-500">
-                        <AlertCircle className="h-4 w-4" />
+                        <AlertCircle className="size-4" />
                         <AlertTitle>Publication incomplète</AlertTitle>
                         <AlertDescription>
                             Certains champs requis sont manquants pour la publication publique.

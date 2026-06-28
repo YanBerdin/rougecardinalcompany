@@ -27,7 +27,7 @@ export default function AgendaClientContainer({
               <aside className="space-y-5">
                 <div className="rounded-sm border border-border bg-card p-4">
                   <div className="flex items-center gap-2 mb-3 px-1">
-                    <CalendarIcon className="w-4 h-4 text-gold" aria-hidden="true" />
+                    <CalendarIcon className="size-4 text-gold" aria-hidden="true" />
                     <h2 className="font-semibold text-base">Calendrier</h2>
                   </div>
                   <CalendarView />

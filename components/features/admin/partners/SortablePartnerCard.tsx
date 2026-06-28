@@ -44,7 +44,7 @@ export function SortablePartnerCard({
                         className="cursor-grab touch-none active:cursor-grabbing p-2 -m-2"
                         aria-label="Glisser pour réorganiser"
                     >
-                        <GripVertical className="h-6 w-6 text-muted-foreground" />
+                        <GripVertical className="size-6 text-muted-foreground" />
                     </button>
 
                     {partner.logo_url ? (
@@ -85,7 +85,7 @@ export function SortablePartnerCard({
                         rel="noopener noreferrer"
                         className="text-sm text-muted-foreground hover:text-chart-3 flex items-center gap-1"
                     >
-                        <ExternalLink className="h-4 w-4 flex-shrink-0" />
+                        <ExternalLink className="size-4 flex-shrink-0" />
                         <span className="truncate">{partner.website_url}</span>
                     </a>
                 )}
@@ -99,7 +99,7 @@ export function SortablePartnerCard({
                         className="h-10 min-w-[56px] px-3"
                         aria-label={`Modifier ${partner.name}`}
                     >
-                        <Pencil className="h-5 w-5 mr-2" /> Modifier
+                        <Pencil className="size-5 mr-2" /> Modifier
                     </Button>
                     <Button
                         variant="ghost-destructive"
@@ -108,7 +108,7 @@ export function SortablePartnerCard({
                         className="h-10 min-w-[56px] px-3"
                         aria-label={`Supprimer ${partner.name}`}
                     >
-                        <Trash2 className="h-5 w-5 mr-2" /> Supprimer
+                        <Trash2 className="size-5 mr-2" /> Supprimer
                     </Button>
                 </div>
             </CardContent>
@@ -124,7 +124,7 @@ export function SortablePartnerCard({
                     className="cursor-grab touch-none active:cursor-grabbing"
                     aria-label="Glisser pour réorganiser"
                 >
-                    <GripVertical className="h-5 w-5 text-muted-foreground" />
+                    <GripVertical className="size-5 text-muted-foreground" />
                 </button>
 
                 {partner.logo_url ? (
@@ -160,7 +160,7 @@ export function SortablePartnerCard({
                             className="text-sm text-muted-foreground hover:text-chart-3 flex items-center gap-1 truncate"
                         >
                             <span className="truncate">{partner.website_url}</span>
-                            <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                            <ExternalLink className="size-3 flex-shrink-0" />
                         </a>
                     )}
                 </div>
@@ -171,20 +171,20 @@ export function SortablePartnerCard({
                         size="icon"
                         onClick={() => onEdit(partner)}
                         title="Éditer"
-                        className="h-8 w-8 sm:h-9 sm:w-9"
+                        className="size-8 sm:size-9"
                         aria-label={`Modifier ${partner.name}`}
                     >
-                        <Pencil className="h-4 w-4" />
+                        <Pencil className="size-4" />
                     </Button>
                     <Button
                         variant="ghost-destructive"
                         size="icon"
                         onClick={() => onDelete(partner.id)}
                         title="Supprimer"
-                        className="h-8 w-8 sm:h-9 sm:w-9"
+                        className="size-8 sm:size-9"
                         aria-label={`Supprimer ${partner.name}`}
                     >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="size-4" />
                     </Button>
                 </div>
             </CardContent>

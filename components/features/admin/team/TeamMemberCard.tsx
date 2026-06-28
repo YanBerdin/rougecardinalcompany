@@ -47,7 +47,7 @@ export function TeamMemberCard({
               title="Supprimer"
               className="w-full sm:w-auto justify-center"
             >
-              <Trash2 className="h-4 w-4 sm:mr-0" />
+              <Trash2 className="size-4 sm:mr-0" />
               <span className="sm:hidden ml-2">Supprimer</span>
             </Button>
           )}

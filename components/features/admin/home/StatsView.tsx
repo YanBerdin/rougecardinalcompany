@@ -73,7 +73,7 @@ export function StatsView({ initialStats }: HomeStatsViewProps) {
                     {stats.length} statistique{stats.length !== 1 ? "s" : ""}
                 </p>
                 <Button onClick={handleCreate} size="sm">
-                    <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
+                    <Plus className="mr-2 size-4" aria-hidden="true" />
                     Ajouter une statistique
                 </Button>
             </div>
@@ -106,7 +106,7 @@ export function StatsView({ initialStats }: HomeStatsViewProps) {
                                     onClick={() => handleEdit(stat)}
                                     aria-label={`Modifier la statistique ${stat.label}`}
                                 >
-                                    <Pencil className="h-4 w-4" aria-hidden="true" />
+                                    <Pencil className="size-4" aria-hidden="true" />
                                 </Button>
                                 <Button
                                     variant="destructive"
@@ -115,7 +115,7 @@ export function StatsView({ initialStats }: HomeStatsViewProps) {
                                     onClick={() => setDeletingId(stat.id)}
                                     aria-label={`Supprimer la statistique ${stat.label}`}
                                 >
-                                    <Trash2 className="h-4 w-4" aria-hidden="true" />
+                                    <Trash2 className="size-4" aria-hidden="true" />
                                 </Button>
                             </div>
                         </li>

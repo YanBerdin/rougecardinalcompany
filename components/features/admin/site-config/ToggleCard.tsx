@@ -43,7 +43,7 @@ export function ToggleCard({ toggle, onToggle, isUpdating }: ToggleCardProps): R
 
             <div className="flex items-center gap-2">
                 {isUpdating && (
-                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                    <Loader2 className="size-4 animate-spin" aria-hidden="true" />
                 )}
                 <Switch
                     id={toggle.key}

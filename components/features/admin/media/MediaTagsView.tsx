@@ -104,7 +104,7 @@ export function MediaTagsView({ initialTags }: MediaTagsViewProps) {
                     onClick={() => router.push("/admin/media")}
                     className="gap-2"
                 >
-                    <ArrowLeft className="h-4 w-4" />
+                    <ArrowLeft className="size-4" />
                     Retour
                 </Button>
             </div>
@@ -113,14 +113,14 @@ export function MediaTagsView({ initialTags }: MediaTagsViewProps) {
                     {tags.length} tag{tags.length !== 1 ? "s" : ""}
                 </p>
                 <Button onClick={handleCreate}>
-                    <Plus className="mr-2 h-4 w-4" />
+                    <Plus className="mr-2 size-4" />
                     Créer un tag
                 </Button>
             </div>
 
             {tags.length === 0 ? (
                 <div className="text-center py-12 border rounded-lg">
-                    <Tag className="mx-auto h-12 w-12 text-muted-foreground" />
+                    <Tag className="mx-auto size-12 text-muted-foreground" />
                     <p className="mt-4 text-lg font-medium">Aucun tag</p>
                     <p className="text-sm text-muted-foreground">
                         Créez votre premier tag pour organiser vos médias
@@ -174,7 +174,7 @@ export function MediaTagsView({ initialTags }: MediaTagsViewProps) {
                                         className="h-10 min-w-[56px] px-3"
                                         aria-label={`Éditer ${tag.name}`}
                                     >
-                                        <Edit className="h-5 w-5 mr-2" /> Éditer
+                                        <Edit className="size-5 mr-2" /> Éditer
                                     </Button>
                                     <Button
                                         variant="destructive"
@@ -183,7 +183,7 @@ export function MediaTagsView({ initialTags }: MediaTagsViewProps) {
                                         className="bg-card h-10 min-w-[56px] px-3"
                                         aria-label={`Supprimer ${tag.name}`}
                                     >
-                                        <Trash2 className="h-5 w-5 mr-2" /> Supprimer
+                                        <Trash2 className="size-5 mr-2" /> Supprimer
                                     </Button>
                                 </div>
                             </div>
@@ -230,20 +230,20 @@ export function MediaTagsView({ initialTags }: MediaTagsViewProps) {
                                                     size="icon"
                                                     onClick={() => handleEdit(tag)}
                                                     title="Modifier"
-                                                    className="bg-card h-8 w-8 sm:h-9 sm:w-9"
+                                                    className="bg-card size-8 sm:size-9"
                                                     aria-label={`Éditer ${tag.name}`}
                                                 >
-                                                    <Edit className="h-4 w-4" />
+                                                    <Edit className="size-4" />
                                                 </Button>
                                                 <Button
                                                     variant="destructive"
                                                     size="icon"
                                                     onClick={() => requestDelete(tag)}
                                                     title="Supprimer"
-                                                    className="bg-card h-8 w-8 sm:h-9 sm:w-9"
+                                                    className="bg-card size-8 sm:size-9"
                                                     aria-label={`Supprimer ${tag.name}`}
                                                 >
-                                                    <Trash2 className="h-4 w-4" />
+                                                    <Trash2 className="size-4" />
                                                 </Button>
                                             </div>
                                         </TableCell>

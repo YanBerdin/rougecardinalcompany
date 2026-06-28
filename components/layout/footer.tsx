@@ -19,7 +19,7 @@ export default async function Footer() {
 
   return (
     <footer className="bg-background border-t">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8">
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Logo et Description */}
           <div className="col-span-1 lg:col-span-2">
@@ -131,7 +131,7 @@ export default async function Footer() {
             <h3 className="font-semibold font-sans mb-4 text-secondary-foreground">Contact</h3>
             <ul className="space-y-3">
               <li className="flex items-center space-x-2 text-muted-foreground">
-                <Mail className="h-4 w-4 text-chart-2" aria-hidden="true" />
+                <Mail className="size-4 text-chart-2" aria-hidden="true" />
                 <Link
                   href={`mailto:${contact.email}`}
                   className="text-muted-foreground hover:text-chart-2"
@@ -142,7 +142,7 @@ export default async function Footer() {
               </li>
               {contact.phone && (
                 <li className="flex items-center space-x-2 text-muted-foreground">
-                  <Phone className="h-4 w-4 text-chart-2" aria-hidden="true" />
+                  <Phone className="size-4 text-chart-2" aria-hidden="true" />
                   <Link
                     href={`tel:${contact.phone.replace(/\s+/g, "")}`}
                     className="text-muted-foreground hover:text-chart-2"
@@ -153,7 +153,7 @@ export default async function Footer() {
                 </li>
               )}
               <li className="flex items-start space-x-2 text-muted-foreground">
-                <MapPin className="h-4 w-4 shrink-0 text-chart-2" aria-hidden="true" />
+                <MapPin className="size-4 shrink-0 text-chart-2" aria-hidden="true" />
                 <span>{contact.address}</span>
               </li>
             </ul>

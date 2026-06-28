@@ -284,7 +284,7 @@ export default function SpectacleForm({
         {/* Progressive validation warning */}
         {showPublicWarning && (
           <Alert className="destructive">
-            <AlertCircle className="h-4 w-4" />
+            <AlertCircle className="size-4" />
             <AlertDescription>
               Un spectacle public nécessite : statut publié/archivé, genre, date
               de première, descriptions courte et complète, et une image
@@ -322,7 +322,7 @@ export default function SpectacleForm({
             Annuler
           </Button>
           <Button type="submit" disabled={isSubmitting || autoSave.isSaving}>
-            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
             {isEditing || savedDraftId ? "Mettre à jour" : "Créer le spectacle"}
           </Button>
         </div>

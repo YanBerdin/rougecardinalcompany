@@ -41,7 +41,7 @@ export function AutoSaveIndicator({
                 role="status"
                 aria-live="polite"
             >
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
                 <span>Enregistrement automatique en cours...</span>
             </div>
         );
@@ -55,7 +55,7 @@ export function AutoSaveIndicator({
                 role="status"
                 aria-live="polite"
             >
-                <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+                <CheckCircle2 className="size-4" aria-hidden="true" />
                 <span>
                     {formatted ? `Enregistré à ${formatted}` : "Brouillon enregistré"}
                 </span>
@@ -70,7 +70,7 @@ export function AutoSaveIndicator({
                 role="status"
                 aria-live="polite"
             >
-                <AlertCircle className="h-4 w-4" aria-hidden="true" />
+                <AlertCircle className="size-4" aria-hidden="true" />
                 <span>{errorMessage ?? "Erreur de sauvegarde automatique"}</span>
             </div>
         );
@@ -83,7 +83,7 @@ export function AutoSaveIndicator({
                 role="status"
                 aria-live="polite"
             >
-                <Clock3 className="h-4 w-4" aria-hidden="true" />
+                <Clock3 className="size-4" aria-hidden="true" />
                 <span>Modifications en attente de sauvegarde...</span>
             </div>
         );
@@ -95,7 +95,7 @@ export function AutoSaveIndicator({
             role="status"
             aria-live="polite"
         >
-            <Clock3 className="h-4 w-4" aria-hidden="true" />
+            <Clock3 className="size-4" aria-hidden="true" />
             <span>Auto-save inactif tant qu&apos;aucun brouillon n&apos;est saisi</span>
         </div>
     );

@@ -38,7 +38,7 @@ export function ImageFieldPreview() {
                                 role="status"
                                 aria-label="Validation de l'image en cours"
                             >
-                                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
+                                <Loader2 className="size-6 animate-spin text-muted-foreground" aria-hidden="true" />
                             </div>
                         ) : validationSuccess ? (
                             <Image
@@ -52,12 +52,12 @@ export function ImageFieldPreview() {
                             />
                         ) : validationError ? (
                             <div className="h-full w-full flex flex-col items-center justify-center gap-1 p-2">
-                                <XCircle className="h-6 w-6 text-destructive" aria-hidden="true" />
+                                <XCircle className="size-6 text-destructive" aria-hidden="true" />
                                 <span className="text-xs text-center text-destructive">Non autorisée</span>
                             </div>
                         ) : (
                             <div className="h-full w-full flex flex-col items-center justify-center gap-1 p-2">
-                                <AlertCircle className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
+                                <AlertCircle className="size-6 text-muted-foreground" aria-hidden="true" />
                                 <span className="text-xs text-center text-muted-foreground">En attente</span>
                             </div>
                         )}
@@ -75,13 +75,13 @@ export function ImageFieldPreview() {
             <div aria-live="polite" aria-atomic="true">
                 {validationError && (
                     <p className="text-sm text-destructive flex items-center gap-1" role="alert">
-                        <XCircle className="h-4 w-4" aria-hidden="true" />
+                        <XCircle className="size-4" aria-hidden="true" />
                         {validationError}
                     </p>
                 )}
                 {validationSuccess && (
                     <p className="text-sm text-green-600 flex items-center gap-1">
-                        <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+                        <CheckCircle2 className="size-4" aria-hidden="true" />
                         Image valide : {validationSuccess}
                     </p>
                 )}

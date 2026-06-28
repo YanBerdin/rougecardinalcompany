@@ -111,7 +111,7 @@ export function TeamManagementContainer({ initialMembers }: TeamManagementContai
         variant="default"
         asChild>
           <Link href="/admin/team/new">
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="mr-2 size-4" />
             Ajouter un membre
           </Link>
         </Button>

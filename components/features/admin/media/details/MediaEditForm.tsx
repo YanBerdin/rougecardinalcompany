@@ -146,7 +146,7 @@ export function MediaEditForm() {
                 className="w-full"
                 disabled={isUpdating || isDeleting}
             >
-                <Save className="mr-2 h-4 w-4" />
+                <Save className="mr-2 size-4" />
                 {isUpdating ? "Mise à jour..." : "Enregistrer"}
             </Button>
         </form>

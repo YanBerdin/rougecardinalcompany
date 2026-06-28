@@ -85,7 +85,7 @@ function SortableSlide({ slide, index, onEdit, onDelete }: SortableSlideProps) {
                             aria-label={`Supprimer le slide : ${slide.title}`}
                             className="h-9 w-9 shrink-0 hover:bg-red-100"
                         >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="size-4" />
                         </Button>
                         <Button
                             variant="outline"
@@ -94,7 +94,7 @@ function SortableSlide({ slide, index, onEdit, onDelete }: SortableSlideProps) {
                             aria-label={`Modifier le slide : ${slide.title}`}
                             className="flex-1 texte-sm md:text-md h-9 gap-2"
                         >
-                            <Pencil className="h-4 w-4 ml-2" /> Modifier
+                            <Pencil className="size-4 ml-2" /> Modifier
                         </Button>
 
                     </div>
@@ -224,7 +224,7 @@ function HeroSlidesHeader({ canAddMore, isDisabled, onAddSlide }: HeroSlidesHead
                 disabled={!canAddMore || isDisabled}
                 className="w-full sm:w-auto h-10 sm:h-9"
             >
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="size-4 mr-2" />
                 <span className="text-sm sm:text-base">{buttonLabel}</span>
             </Button>
         </div>

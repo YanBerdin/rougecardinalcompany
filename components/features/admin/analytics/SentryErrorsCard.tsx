@@ -17,7 +17,7 @@ export function SentryErrorsCard({ metrics, isLoading }: SentryErrorsCardProps) 
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                        <AlertTriangle className="h-5 w-5" aria-hidden="true" />
+                        <AlertTriangle className="size-5" aria-hidden="true" />
                         Erreurs Production (Sentry)
                     </CardTitle>
                     <CardDescription>Chargement...</CardDescription>
@@ -32,7 +32,7 @@ export function SentryErrorsCard({ metrics, isLoading }: SentryErrorsCardProps) 
         <Card className={hasErrors ? "border-orange-500" : undefined}>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                    <AlertTriangle className={cn("h-5 w-5", hasErrors ? "text-orange-500" : "text-green-500")} aria-hidden="true" />
+                    <AlertTriangle className={cn("size-5", hasErrors ? "text-orange-500" : "text-green-500")} aria-hidden="true" />
                     Erreurs Production (Sentry)
                 </CardTitle>
                 <CardDescription>
@@ -44,7 +44,7 @@ export function SentryErrorsCard({ metrics, isLoading }: SentryErrorsCardProps) 
                     {/* P0 Critical */}
                     <div className="flex flex-col gap-2">
                         <div className="flex items-center gap-2">
-                            <AlertCircle className="h-4 w-4 text-red-500" aria-hidden="true" />
+                            <AlertCircle className="size-4 text-red-500" aria-hidden="true" />
                             <span className="text-sm font-medium">P0 Critique</span>
                         </div>
                         <div className="text-2xl font-bold">{metrics.p0Critical}</div>
@@ -58,7 +58,7 @@ export function SentryErrorsCard({ metrics, isLoading }: SentryErrorsCardProps) 
                     {/* P1 High */}
                     <div className="flex flex-col gap-2">
                         <div className="flex items-center gap-2">
-                            <AlertTriangle className="h-4 w-4 text-orange-500" aria-hidden="true" />
+                            <AlertTriangle className="size-4 text-orange-500" aria-hidden="true" />
                             <span className="text-sm font-medium">P1 Élevé</span>
                         </div>
                         <div className="text-2xl font-bold">{metrics.p1High}</div>
@@ -72,7 +72,7 @@ export function SentryErrorsCard({ metrics, isLoading }: SentryErrorsCardProps) 
                     {/* P2 Medium */}
                     <div className="flex flex-col gap-2">
                         <div className="flex items-center gap-2">
-                            <Info className="h-4 w-4 text-yellow-500" aria-hidden="true" />
+                            <Info className="size-4 text-yellow-500" aria-hidden="true" />
                             <span className="text-sm font-medium">P2 Moyen</span>
                         </div>
                         <div className="text-2xl font-bold">{metrics.p2Medium}</div>

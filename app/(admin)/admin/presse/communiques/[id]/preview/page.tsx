@@ -34,7 +34,7 @@ export default async function PressReleasePreviewPage({ params }: PageProps) {
             <div className="flex items-center gap-4 mb-6">
                 <Link href="/admin/presse">
                     <Button variant="ghost" size="icon">
-                        <ArrowLeft className="h-5 w-5" />
+                        <ArrowLeft className="size-5" />
                     </Button>
                 </Link>
                 <div className="flex-1">
@@ -66,7 +66,7 @@ export default async function PressReleasePreviewPage({ params }: PageProps) {
                 <CardHeader>
                     <CardTitle className="text-2xl">{release.title}</CardTitle>
                     <div className="flex items-center gap-2 text-muted-foreground">
-                        <Calendar className="h-4 w-4" />
+                        <Calendar className="size-4" />
                         <span>{formatDateFr(release.date_publication)}</span>
                     </div>
                 </CardHeader>
@@ -93,7 +93,7 @@ export default async function PressReleasePreviewPage({ params }: PageProps) {
                     {/* Slug info */}
                     {release.slug && (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <ExternalLink className="h-4 w-4" />
+                            <ExternalLink className="size-4" />
                             <span>Slug: {release.slug}</span>
                         </div>
                     )}

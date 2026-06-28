@@ -75,12 +75,12 @@ export function ValuesView({ initialValues }: ValuesViewProps) {
                 <div className="flex items-center gap-2">
                     <Link href="/admin/compagnie/valeurs">
                         <Button variant="outline" size="sm" className="gap-1">
-                            <Eye className="h-4 w-4" aria-hidden="true" />
+                            <Eye className="size-4" aria-hidden="true" />
                             <span className="hidden sm:inline">Résumé</span>
                         </Button>
                     </Link>
                     <Button onClick={handleCreate} size="sm" className="gap-1">
-                        <Plus className="h-4 w-4" aria-hidden="true" />
+                        <Plus className="size-4" aria-hidden="true" />
                         Ajouter
                     </Button>
                 </div>
@@ -119,7 +119,7 @@ export function ValuesView({ initialValues }: ValuesViewProps) {
                                     aria-label={`Modifier la valeur ${value.title}`}
                                     className="max-sm:h-10 max-sm:flex-1"
                                 >
-                                    <Pencil className="h-4 w-4" aria-hidden="true" />
+                                    <Pencil className="size-4" aria-hidden="true" />
                                     <span className="sm:hidden">Modifier</span>
                                 </Button>
                                 <Button
@@ -130,7 +130,7 @@ export function ValuesView({ initialValues }: ValuesViewProps) {
                                     aria-label={`Supprimer la valeur ${value.title}`}
                                     className="max-sm:h-10 max-sm:flex-1"
                                 >
-                                    <Trash2 className="h-4 w-4" aria-hidden="true" />
+                                    <Trash2 className="size-4" aria-hidden="true" />
                                     <span className="sm:hidden">Supprimer</span>
                                 </Button>
                             </div>

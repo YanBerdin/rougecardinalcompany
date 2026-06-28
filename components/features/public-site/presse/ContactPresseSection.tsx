@@ -6,21 +6,21 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export function ContactPresseSection() {
   return (
-    <section aria-label="Contact presse" className="py-16 bg-chart-7">
+    <section aria-label="Contact presse" className="pt-12 pb-16 lg:pt-16 lg:pb-24 bg-chart-7">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <Card>
           <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <h2 className="text-lg font-semibold font-sans mb-3">
+                <h3 className="text-xl font-semibold font-sans mb-3">
                   Contact Presse
-                </h2>
+                </h3>
                 <div className="space-y-2 text-muted-foreground">
                   <p>
                     <strong>Marie Dubois</strong> - Directrice artistique
                   </p>
                   <p className="flex items-center gap-2">
-                    <Mail className="inline h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                    <Mail className="inline size-4 flex-shrink-0" aria-hidden="true" />
                     <a
                       href="mailto:presse@rouge-cardinal.fr"
                       className="hover:text-primary underline-offset-4 hover:underline"
@@ -29,7 +29,7 @@ export function ContactPresseSection() {
                     </a>
                   </p>
                   <p className="flex items-center gap-2">
-                    <Phone className="inline h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                    <Phone className="inline size-4 flex-shrink-0" aria-hidden="true" />
                     <a
                       href="tel:+33612345678"
                       className="hover:text-primary underline-offset-4 hover:underline"
@@ -40,9 +40,9 @@ export function ContactPresseSection() {
                 </div>
               </div>
               <div>
-                <h2 className="text-lg font-semibold font-sans mb-3">
+                <h3 className="text-xl font-semibold font-sans mb-3">
                   Informations pratiques
-                </h2>
+                </h3>
                 <div className="space-y-2 text-muted-foreground">
                   <p>Délai de réponse : 24-48h</p>
                   <p>Accréditations disponibles</p>

@@ -23,7 +23,7 @@ export function NewsletterCard(): React.JSX.Element {
       <Card className="border-green-200 bg-green-50 dark:bg-green-950/20">
         <CardContent className="pt-6">
           <div className="flex items-center space-x-2 text-green-700" role="status">
-            <CheckCircle className="h-5 w-5" aria-hidden="true" />
+            <CheckCircle className="size-5" aria-hidden="true" />
             <p className="font-medium">Merci pour votre inscription !</p>
           </div>
         </CardContent>
@@ -70,7 +70,7 @@ export function NewsletterCard(): React.JSX.Element {
             disabled={isLoading}
             aria-busy={isLoading}
           >
-            <Send className="h-4 w-4 mr-2" aria-hidden="true" />
+            <Send className="size-4 mr-2" aria-hidden="true" />
             {isLoading ? "Inscription…" : "Je la veux !"}
           </Button>
         </form>

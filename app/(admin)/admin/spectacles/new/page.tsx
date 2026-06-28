@@ -19,7 +19,7 @@ export default async function NewSpectaclePage() {
       <div className="flex items-center gap-4">
         <Link href="/admin/spectacles">
           <Button variant="ghost" size="icon">
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="size-4" />
           </Button>
         </Link>
         <div>

@@ -14,7 +14,7 @@ export default function EditTeamMemberLoading() {
         <div className="space-y-6">
             <div className="flex items-center gap-4">
                 <Button variant="outline" size="icon" disabled>
-                    <ArrowLeft className="h-4 w-4" />
+                    <ArrowLeft className="size-4" />
                     <span className="sr-only">Retour à la liste</span>
                 </Button>
                 <div>

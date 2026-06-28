@@ -82,7 +82,7 @@ export function PressReleasesView({ initialReleases }: PressReleasesViewProps) {
                 </p>
                 <Link href="/admin/presse/communiques/new">
                     <Button className="w-full sm:w-auto">
-                        <Plus className="h-4 w-4 mr-2" />
+                        <Plus className="size-4 mr-2" />
                         <span className="hidden sm:inline">Nouveau communiqué</span>
                         <span className="sm:hidden">Nouveau</span>
                     </Button>
@@ -134,7 +134,7 @@ export function PressReleasesView({ initialReleases }: PressReleasesViewProps) {
                                         title="Prévisualiser"
                                         aria-label={`Prévisualiser le communiqué : ${release.title}`}
                                     >
-                                        <Eye className="h-4 w-4" />
+                                        <Eye className="size-4" />
                                     </Button>
                                 </Link>
                                 <Button
@@ -144,7 +144,7 @@ export function PressReleasesView({ initialReleases }: PressReleasesViewProps) {
                                     title={release.public ? "Dépublier" : "Publier"}
                                     aria-label={release.public ? "Dépublier le communiqué" : "Publier le communiqué"}
                                 >
-                                    <Send className="h-4 w-4 mr-1" />
+                                    <Send className="size-4 mr-1" />
                                     {release.public ? "Dépublier" : "Publier"}
                                 </Button>
                             </div>
@@ -156,7 +156,7 @@ export function PressReleasesView({ initialReleases }: PressReleasesViewProps) {
                                         title="Modifier"
                                         aria-label={`Modifier le communiqué : ${release.title}`}
                                     >
-                                        <Pencil className="h-4 w-4" />
+                                        <Pencil className="size-4" />
                                     </Button>
                                 </Link>
                                 <Button
@@ -166,7 +166,7 @@ export function PressReleasesView({ initialReleases }: PressReleasesViewProps) {
                                     title="Supprimer"
                                     aria-label={`Supprimer le communiqué : ${release.title}`}
                                 >
-                                    <Trash2 className="h-4 w-4" />
+                                    <Trash2 className="size-4" />
                                 </Button>
                             </div>
                         </div>
@@ -202,12 +202,12 @@ export function PressReleasesView({ initialReleases }: PressReleasesViewProps) {
                             <div className="flex gap-2">
                                 <Link href={`/admin/presse/communiques/${release.id}/preview`}>
                                     <Button variant="ghost" size="icon" title="Prévisualiser" aria-label={`Prévisualiser le communiqué : ${release.title}`}>
-                                        <Eye className="h-4 w-4" />
+                                        <Eye className="size-4" />
                                     </Button>
                                 </Link>
                                 <Link href={`/admin/presse/communiques/${release.id}/edit`}>
                                     <Button variant="ghost" size="icon" title="Modifier" aria-label={`Modifier le communiqué : ${release.title}`}>
-                                        <Pencil className="h-4 w-4" />
+                                        <Pencil className="size-4" />
                                     </Button>
                                 </Link>
                                 <Button
@@ -217,7 +217,7 @@ export function PressReleasesView({ initialReleases }: PressReleasesViewProps) {
                                     title={release.public ? "Dépublier" : "Publier"}
                                     aria-label={release.public ? "Dépublier le communiqué" : "Publier le communiqué"}
                                 >
-                                    <Send className="h-4 w-4" />
+                                    <Send className="size-4" />
                                 </Button>
                                 <Button
                                     variant="ghost-destructive"
@@ -226,7 +226,7 @@ export function PressReleasesView({ initialReleases }: PressReleasesViewProps) {
                                     title="Supprimer"
                                     aria-label={`Supprimer le communiqué : ${release.title}`}
                                 >
-                                    <Trash2 className="h-4 w-4" />
+                                    <Trash2 className="size-4" />
                                 </Button>
                             </div>
                         </CardContent>

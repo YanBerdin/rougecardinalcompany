@@ -63,15 +63,15 @@ export default function SpectaclesTable({
             {/* Body: Meta data */}
             <div className="grid grid-cols-2 gap-y-2 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
-                <Tag className="h-4 w-4" />
+                <Tag className="size-4" />
                 <span>{spectacle.genre || "—"}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
+                <Clock className="size-4" />
                 <span>{formatSpectacleDuration(spectacle.duration_minutes)}</span>
               </div>
               <div className="flex items-center gap-2 col-span-2">
-                <Calendar className="h-4 w-4" />
+                <Calendar className="size-4" />
                 <span>Première le {formatSpectacleDate(spectacle.premiere)}</span>
               </div>
             </div>
@@ -85,7 +85,7 @@ export default function SpectaclesTable({
                 className="h-10 w-full px-3"
                 aria-label={`Voir ${spectacle.title}`}
               >
-                <Eye className="h-5 w-5 mr-2" /> Détails
+                <Eye className="size-5 mr-2" /> Détails
               </Button>
               <Button
                 variant="outline"
@@ -94,7 +94,7 @@ export default function SpectaclesTable({
                 className="h-10 w-full px-3"
                 aria-label={`Gérer la galerie de ${spectacle.title}`}
               >
-                <Images className="h-5 w-5 mr-2" /> Galerie
+                <Images className="size-5 mr-2" /> Galerie
               </Button>
               <Button
                 variant="secondary"
@@ -103,7 +103,7 @@ export default function SpectaclesTable({
                 className="h-10 w-full px-3"
                 aria-label={`Éditer ${spectacle.title}`}
               >
-                <Pencil className="h-5 w-5 mr-2" /> Éditer
+                <Pencil className="size-5 mr-2" /> Éditer
               </Button>
               <Button
                 variant="destructive"
@@ -112,7 +112,7 @@ export default function SpectaclesTable({
                 className="h-10 w-full px-3"
                 aria-label={`Supprimer ${spectacle.title}`}
               >
-                <Trash2 className="h-5 w-5 mr-2" /> Supprimer
+                <Trash2 className="size-5 mr-2" /> Supprimer
               </Button>
             </div>
           </div>
@@ -216,40 +216,40 @@ export default function SpectaclesTable({
                       size="icon"
                       onClick={() => onView(spectacle.id)}
                       title="Voir le détail"
-                      className="h-8 w-8 sm:h-9 sm:w-9"
+                      className="size-8 sm:size-9"
                       aria-label={`Voir ${spectacle.title}`}
                     >
-                      <Eye className="h-4 w-4" />
+                      <Eye className="size-4" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => onGallery(spectacle.id)}
                       title="Gérer la galerie"
-                      className="h-8 w-8 sm:h-9 sm:w-9"
+                      className="size-8 sm:size-9"
                       aria-label={`Gérer la galerie de ${spectacle.title}`}
                     >
-                      <Images className="h-4 w-4" />
+                      <Images className="size-4" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => onEdit(spectacle.id)}
                       title="Modifier"
-                      className="h-8 w-8 sm:h-9 sm:w-9"
+                      className="size-8 sm:size-9"
                       aria-label={`Éditer ${spectacle.title}`}
                     >
-                      <Pencil className="h-4 w-4" />
+                      <Pencil className="size-4" />
                     </Button>
                     <Button
                       variant="ghost-destructive"
                       size="icon"
                       onClick={() => onDelete(spectacle.id)}
                       title="Supprimer"
-                      className="h-8 w-8 sm:h-9 sm:w-9"
+                      className="size-8 sm:size-9"
                       aria-label={`Supprimer ${spectacle.title}`}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="size-4" />
                     </Button>
                   </div>
                 </TableCell>

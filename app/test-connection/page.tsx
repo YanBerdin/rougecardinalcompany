@@ -299,12 +299,12 @@ export default function TestConnectionPage() {
           <Button onClick={testConnection} disabled={isLoading}>
             {isLoading ? (
               <>
-                <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> Test en
+                <RefreshCw className="mr-2 size-4 animate-spin" /> Test en
                 cours...
               </>
             ) : (
               <>
-                <RefreshCw className="mr-2 h-4 w-4" /> Tester à nouveau
+                <RefreshCw className="mr-2 size-4" /> Tester à nouveau
               </>
             )}
           </Button>
@@ -312,7 +312,7 @@ export default function TestConnectionPage() {
 
         {connectionStatus === "loading" && (
           <Alert className="mb-8">
-            <RefreshCw className="h-4 w-4 animate-spin" />
+            <RefreshCw className="size-4 animate-spin" />
             <AlertTitle>Test de connexion en cours</AlertTitle>
             <AlertDescription>
               Veuillez patienter pendant que nous testons la connexion à
@@ -323,7 +323,7 @@ export default function TestConnectionPage() {
 
         {connectionStatus === "success" && (
           <Alert className="mb-8 bg-green-50 border-green-200">
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
+            <CheckCircle2 className="size-4 text-green-600" />
             <AlertTitle className="text-green-600">
               Connexion réussie
             </AlertTitle>
@@ -342,7 +342,7 @@ export default function TestConnectionPage() {
 
         {connectionStatus === "tables-missing" && (
           <Alert className="mb-8 bg-amber-50 border-amber-200">
-            <Database className="h-4 w-4 text-amber-600" />
+            <Database className="size-4 text-amber-600" />
             <AlertTitle className="text-amber-600">
               Tables manquantes
             </AlertTitle>
@@ -402,7 +402,7 @@ export default function TestConnectionPage() {
 
         {connectionStatus === "error" && (
           <Alert className="mb-8 bg-amber-400 border-red-200">
-            <XCircle className="h-4 w-4 text-red-600" />
+            <XCircle className="size-4 text-red-600" />
             <AlertTitle className="font-medium text-red-600">
               Erreur de connexion
             </AlertTitle>

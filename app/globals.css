@@ -123,7 +123,7 @@
     --ring: 0 78% 36%; /* #9e1b1b */
 
     --chart-1: 4.64, 79.74%, 55.49%; /* #e84133 */
-    --chart-2: 357,92.4%,46.7%; /* #e50914 */
+    --chart-2: 357, 92.4%, 46.7%; /* #e50914 */
     --chart-3: 0 100% 71%; /* #ff6e6e */
     --chart-4: 0 0% 10.9804%; /* #1C1C1C */
     --chart-5: 0 0% 25.8824%; /* #424242 */
@@ -222,6 +222,15 @@
 
   .card-hover {
     @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+    will-change: transform, box-shadow;
+    transform: translateZ(0);
+  }
+
+  /* Reduce hover motion on mobile/reduced motion preference */
+  @media (max-width: 768px) {
+    .card-hover {
+      @apply hover:-translate-y-0.5 duration-200;
+    }
   }
   /* Liquid Glass Effect */
   .liquid-glass {
@@ -671,10 +680,23 @@
 
 .animate-fade-in-up {
   animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
 }
 
 .animate-fade-in {
   animation: fade-in 1.2s ease-out forwards;
+  will-change: opacity;
+}
+
+/* Mobile optimization: reduce animation duration for better perceived performance */
+@media (max-width: 768px) {
+  .animate-fade-in-up {
+    animation: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.9s ease-out forwards;
+  }
 }
 
 .animate-shimmer {
@@ -787,7 +809,6 @@
   transform: none !important;
   animation: none !important;
   color: #ad0000;
-
 }
 
 .logo-text:hover {

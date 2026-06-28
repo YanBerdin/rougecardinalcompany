@@ -39,7 +39,7 @@ export function SpectacleCTABar({
                         rel="noopener noreferrer"
                         aria-label={`Je réserve mes billets pour ${title} (s'ouvre dans un nouvel onglet)`}
                     >
-                        <Ticket className="mr-2 h-4 w-4" aria-hidden="true" /> Je réserve mes billets
+                        <Ticket className="mr-2 size-4" aria-hidden="true" /> Je réserve mes billets
                     </Link>
                 </Button>
             )}
@@ -51,7 +51,7 @@ export function SpectacleCTABar({
                 asChild
             >
                 <Link href="/agenda" aria-label="Consulter l'agenda des représentations">
-                    <Calendar className="mr-2 h-4 w-4" aria-hidden="true" />
+                    <Calendar className="mr-2 size-4" aria-hidden="true" />
                     {agendaLabel}
                 </Link>
             </Button>
@@ -66,7 +66,7 @@ export function SpectacleCTABar({
                     href="/spectacles"
                     aria-label="Retourner à la page listant tous les évènements"
                 >
-                    <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
+                    <ArrowLeft className="mr-2 size-4" aria-hidden="true" />
                      {backLabel} 
                 </Link>
             </Button>

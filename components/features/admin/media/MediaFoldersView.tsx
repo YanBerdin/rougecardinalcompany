@@ -111,7 +111,7 @@ export function MediaFoldersView({ initialFolders }: MediaFoldersViewProps) {
                     onClick={() => router.push("/admin/media")}
                     className="gap-2"
                 >
-                    <ArrowLeft className="h-4 w-4" />
+                    <ArrowLeft className="size-4" />
                     Retour
                 </Button>
             </div>
@@ -120,14 +120,15 @@ export function MediaFoldersView({ initialFolders }: MediaFoldersViewProps) {
                     {folders.length} dossier{folders.length !== 1 ? "s" : ""}
                 </p>
                 <Button onClick={handleCreate}>
-                    <Plus className="mr-2 h-4 w-4" />
+                    <Plus className="mr-2 size-4" />
                     Créer un dossier
                 </Button>
             </div>
 
             {folders.length === 0 ? (
                 <div className="text-center py-12 border rounded-lg">
-                    <Folder className="mx-auto h-12 w-12 text-muted-foreground" />
+
+                    <Folder className="mx-auto size-12 text-muted-foreground" />
                     <p className="mt-4 text-lg font-medium">Aucun dossier</p>
                     <p className="text-sm text-muted-foreground">
                         Créez votre premier dossier pour organiser vos médias
@@ -173,7 +174,7 @@ export function MediaFoldersView({ initialFolders }: MediaFoldersViewProps) {
                                         className="h-10 min-w-[56px] px-3"
                                         aria-label={`Éditer ${folder.name}`}
                                     >
-                                        <Edit className="h-5 w-5 mr-2" /> Éditer
+                                        <Edit className="size-5 mr-2" /> Éditer
                                     </Button>
                                     <Button
                                         variant="destructive"
@@ -182,7 +183,7 @@ export function MediaFoldersView({ initialFolders }: MediaFoldersViewProps) {
                                         className="bg-card h-10 min-w-[56px] px-3"
                                         aria-label={`Supprimer ${folder.name}`}
                                     >
-                                        <Trash2 className="h-5 w-5 mr-2" /> Supprimer
+                                        <Trash2 className="size-5 mr-2" /> Supprimer
                                     </Button>
                                 </div>
                             </div>
@@ -217,20 +218,20 @@ export function MediaFoldersView({ initialFolders }: MediaFoldersViewProps) {
                                                     size="icon"
                                                     onClick={() => handleEdit(folder)}
                                                     title="Modifier"
-                                                    className="h-8 w-8 sm:h-9 sm:w-9 bg-card"
+                                                    className="size-8 sm:size-9 bg-card"
                                                     aria-label={`Éditer ${folder.name}`}
                                                 >
-                                                    <Edit className="h-4 w-4" />
+                                                    <Edit className="size-4" />
                                                 </Button>
                                                 <Button
                                                     variant="destructive"
                                                     size="icon"
                                                     onClick={() => requestDelete(folder)}
                                                     title="Supprimer"
-                                                    className="h-8 w-8 sm:h-9 sm:w-9 bg-card"
+                                                    className="size-8 sm:size-9 bg-card"
                                                     aria-label={`Supprimer ${folder.name}`}
                                                 >
-                                                    <Trash2 className="h-4 w-4" />
+                                                    <Trash2 className="size-4" />
                                                 </Button>
                                             </div>
                                         </TableCell>

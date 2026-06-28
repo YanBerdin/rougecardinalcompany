@@ -144,7 +144,7 @@ function EventCardMetaInline({ event }: { readonly event: Event }): React.JSX.El
             aria-label="Informations pratiques"
         >
             <span className="flex items-center gap-1">
-                <Calendar className="h-3 w-3 text-gold shrink-0" aria-hidden="true" />
+                <Calendar className="size-3 text-gold shrink-0" aria-hidden="true" />
                 {formatEventPeriod(event)}
             </span>
 
@@ -157,12 +157,12 @@ function EventCardMetaInline({ event }: { readonly event: Event }): React.JSX.El
                     title="Voir sur Google Maps"
                     className="flex items-center gap-1 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
                 >
-                    <MapPin className="h-3 w-3 text-gold shrink-0" aria-hidden="true" />
+                    <MapPin className="size-3 text-gold shrink-0" aria-hidden="true" />
                     <span>{venueLabel}</span>
                 </a>
             ) : (
                 <span className="flex items-center gap-1">
-                    <MapPin className="h-3 w-3 text-gold shrink-0" aria-hidden="true" />
+                    <MapPin className="size-3 text-gold shrink-0" aria-hidden="true" />
                     {venueLabel}
                 </span>
             )}
@@ -188,7 +188,7 @@ function EventCardActions({ event, compact = false }: { readonly event: Event; r
                         rel="noopener noreferrer"
                         aria-label={`${ticketLabel} — ${event.title}`}
                     >
-                        <Ticket className="mr-2 h-4 w-4" aria-hidden="true" />
+                        <Ticket className="mr-2 size-4" aria-hidden="true" />
                         {ticketLabel}
                     </Link>
                 </Button>
@@ -202,14 +202,14 @@ function EventCardActions({ event, compact = false }: { readonly event: Event; r
                 aria-label={`Ajouter ${event.title} au calendrier`}
                 onClick={() => actions.downloadCalendarFile(event)}
             >
-                <Download className="mr-2 h-4 w-4" aria-hidden="true" />
+                <Download className="mr-2 size-4" aria-hidden="true" />
                 Ajouter au calendrier
             </Button>
 
             {/*            
             <Button variant="outline" size={size} className="w-full" asChild>
                 <Link href={`/agenda/${event.id}`} aria-label={`Informations pratiques — ${event.title}`}>
-                    <Info className="mr-2 h-4 w-4" aria-hidden="true" />
+                    <Info className="mr-2 size-4" aria-hidden="true" />
                     Infos pratiques
                 </Link>
             </Button>
@@ -338,7 +338,7 @@ function SelectedDateBanner({ label, onClear }: {
                 aria-label="Effacer le filtre par date"
                 className="p-0.5 rounded hover:bg-primary/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-                <X className="w-3.5 h-3.5" aria-hidden="true" />
+                <X className="size-3.5" aria-hidden="true" />
             </button>
         </div>
     );

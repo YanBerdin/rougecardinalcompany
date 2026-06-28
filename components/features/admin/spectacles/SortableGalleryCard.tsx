@@ -68,7 +68,7 @@ export function SortableGalleryCard({
                             aria-label="Glisser pour réordonner"
                             title="Glisser pour réordonner"
                         >
-                            <GripVertical className="h-5 w-5 text-muted-foreground" />
+                            <GripVertical className="size-5 text-muted-foreground" />
                         </div>
                         <Badge variant="secondary">#{photo.ordre + 1}</Badge>
                     </div>
@@ -80,9 +80,9 @@ export function SortableGalleryCard({
                         aria-label={`Supprimer photo ${photo.ordre + 1}`}
                         onClick={() => onDelete(photo)}
                         disabled={isPending}
-                        className="h-8 w-8"
+                        className="size-8"
                     >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="size-4" />
                     </Button>
                 </div>
 

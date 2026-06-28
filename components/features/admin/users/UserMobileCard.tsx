@@ -110,7 +110,7 @@ export function UserMobileCard({
                     className="text-red-600 hover:text-red-700 hover:bg-red-100 h-10 min-w-[56px] px-3"
                     aria-label={`Supprimer ${user.email}`}
                 >
-                    <Trash2 className="h-5 w-5 mr-2" />
+                    <Trash2 className="size-5 mr-2" />
                     Supprimer
                 </Button>
             </div>

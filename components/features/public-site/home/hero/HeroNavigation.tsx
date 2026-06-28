@@ -28,7 +28,7 @@ export function HeroNavigation({
         className="hidden xl:block absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-black/30 hover:bg-black/50 text-chart-6 p-3 rounded-full transition-all duration-200 backdrop-blur-md"
         aria-label="Diapositive précédente"
       >
-        <ArrowRight className="h-6 w-6 rotate-180" aria-hidden="true" />
+        <ArrowRight className="size-6 rotate-180" aria-hidden="true" />
       </button>
 
       {/* Flèche suivante — masquée sur mobile (navigation par swipe) */}
@@ -40,7 +40,7 @@ export function HeroNavigation({
         className="hidden xl:block absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-black/30 hover:bg-black/50 text-chart-6 p-3 rounded-full transition-all duration-200 backdrop-blur-sm"
         aria-label="Diapositive suivante"
       >
-        <ArrowRight className="h-6 w-6" aria-hidden="true" />
+        <ArrowRight className="size-6" aria-hidden="true" />
       </button>
 
       {/* Bouton pause/lecture — discret, bas droite, au-dessus de la barre de progression */}

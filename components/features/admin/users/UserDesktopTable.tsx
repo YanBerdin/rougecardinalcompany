@@ -162,10 +162,10 @@ export function UserDesktopTable({
                                     size="icon"
                                     onClick={() => onDelete(user.id, user.email)}
                                     disabled={loadingId === user.id}
-                                    className="h-8 w-8 sm:h-9 sm:w-9 hover:bg-red-100 hover:text-red-700"
+                                    className="size-8 sm:size-9 hover:bg-red-100 hover:text-red-700"
                                     aria-label={`Supprimer ${user.email}`}
                                 >
-                                    <Trash2 className="h-4 w-4" aria-hidden="true" />
+                                    <Trash2 className="size-4" aria-hidden="true" />
                                 </Button>
                             </TableCell>
                         </TableRow>

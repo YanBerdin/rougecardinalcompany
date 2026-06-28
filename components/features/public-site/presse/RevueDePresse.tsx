@@ -1,6 +1,3 @@
-/**
- * @file RevueDePresse — Articles de médias sur Rouge-Cardinal (revue de presse)
- */
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,17 +11,18 @@ interface RevueDePresseSectionProps {
 
 export function RevueDePresse({ mediaArticles }: RevueDePresseSectionProps) {
   return (
-    <section aria-label="Revue de presse" className="max-sm:py-16 py-24 lg:py-32 bg-chart-7">
+    <section aria-label="Revue de presse" className="pt-1 md:pb-24 lg:pb-32 bg-chart-7">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-sm:mb-8 mb-16">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">
-            Revue de Presse
+           {/*
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4 animate-fade-in-up">
+            La presse en parle
           </h2>
-          <p className="max-sm:text-base text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+         
+          <p className="max-sm:text-base text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: "0.1s" }}>
             Ce que les médias disent de Rouge-Cardinal
-          </p>
+          </p>*/}
         </div>
-
         <div className="space-y-6">
           {mediaArticles.map((article, index) => (
             <Card
@@ -89,7 +87,7 @@ export function RevueDePresse({ mediaArticles }: RevueDePresseSectionProps) {
                         aria-label={`Lire l'article : ${article.title} (s'ouvre dans un nouvel onglet)`}
                       >
                         <ExternalLink
-                          className="mr-2 h-4 w-4"
+                          className="mr-2 size-4"
                           aria-hidden="true"
                         />
                         Lire l&apos;article

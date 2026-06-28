@@ -142,7 +142,7 @@ export function AuditLogFilters({
                     title="Appliquer la recherche"
                     disabled={isLoading}
                 >
-                    <Search className="h-4 w-4" />
+                    <Search className="size-4" />
                 </Button>
                 <Button
                     onClick={handleReset}

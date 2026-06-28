@@ -229,7 +229,7 @@ export function SpectacleGalleryManager({
                         onClick={() => { lastDialogRef.current = "library"; setShowLibrary(true); }}
                         disabled={isPending}
                     >
-                        <ImagePlus className="h-4 w-4 mr-2" />
+                        <ImagePlus className="size-4 mr-2" />
                         Médiathèque
                     </Button>
                     <Button
@@ -239,7 +239,7 @@ export function SpectacleGalleryManager({
                         onClick={() => { lastDialogRef.current = "upload"; setShowUpload(true); }}
                         disabled={isPending}
                     >
-                        <Upload className="h-4 w-4 mr-2" />
+                        <Upload className="size-4 mr-2" />
                         Téléverser
                     </Button>
                 </div>
@@ -248,7 +248,7 @@ export function SpectacleGalleryManager({
             {photos.length === 0 ? (
                 <Card>
                     <CardContent className="py-12 text-center text-muted-foreground">
-                        <ImagePlus className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                        <ImagePlus className="size-12 mx-auto mb-3 opacity-50" />
                         <p>Aucune photo dans la galerie</p>
                         <p className="text-sm mt-1">
                             Ajoutez des photos pour créer un carousel sur la page publique.
@@ -261,7 +261,7 @@ export function SpectacleGalleryManager({
                             onClick={() => { lastDialogRef.current = "library"; setShowLibrary(true); }}
                             disabled={isPending}
                         >
-                            <Plus className="h-4 w-4 mr-2" />
+                            <Plus className="size-4 mr-2" />
                             Ajouter une photo
                         </Button>
                     </CardContent>
@@ -358,7 +358,7 @@ export function SpectacleGalleryManager({
                                 else if (lastDialogRef.current === "upload") setShowUpload(true);
                             }}
                         >
-                            <Plus className="h-4 w-4 mr-2" />
+                            <Plus className="size-4 mr-2" />
                             Ajouter une autre
                         </Button>
                     </DialogFooter>

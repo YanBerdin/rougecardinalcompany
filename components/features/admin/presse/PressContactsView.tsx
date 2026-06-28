@@ -83,7 +83,7 @@ export function PressContactsView({ initialContacts }: PressContactsViewProps) {
         </p>
         <Link href="/admin/presse/contacts/new">
           <Button className="w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="size-4 mr-2" />
             <span className="hidden sm:inline">Nouveau contact</span>
             <span className="sm:hidden">Nouveau</span>
           </Button>
@@ -126,7 +126,7 @@ export function PressContactsView({ initialContacts }: PressContactsViewProps) {
                 href={`mailto:${contact.email}`}
                 className="text-sm text-muted-foreground flex items-center gap-2 hover:underline"
               >
-                <Mail className="h-4 w-4" />
+                <Mail className="size-4" />
                 <span className="truncate">{contact.email}</span>
               </a>
               {contact.telephone && (
@@ -134,7 +134,7 @@ export function PressContactsView({ initialContacts }: PressContactsViewProps) {
                   href={`tel:${contact.telephone}`}
                   className="text-sm text-muted-foreground flex items-center gap-2 hover:underline"
                 >
-                  <Phone className="h-4 w-4" />
+                  <Phone className="size-4" />
                   {contact.telephone}
                 </a>
               )}
@@ -160,7 +160,7 @@ export function PressContactsView({ initialContacts }: PressContactsViewProps) {
                   title="Modifier"
                   aria-label={`Modifier le contact : ${contact.prenom} ${contact.nom}`}
                 >
-                  <Pencil className="h-4 w-4 mr-1" />
+                  <Pencil className="size-4 mr-1" />
                 </Button>
               </Link>
               <Button
@@ -170,7 +170,7 @@ export function PressContactsView({ initialContacts }: PressContactsViewProps) {
                 title="Supprimer"
                 aria-label={`Supprimer le contact : ${contact.prenom} ${contact.nom}`}
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="size-4" />
               </Button>
             </div>
           </div>
@@ -200,7 +200,7 @@ export function PressContactsView({ initialContacts }: PressContactsViewProps) {
                     href={`mailto:${contact.email}`}
                     className="text-xs text-muted-foreground flex items-center gap-1 hover:underline"
                   >
-                    <Mail className="h-3 w-3" />
+                    <Mail className="size-3" />
                     {contact.email}
                   </a>
                   {contact.telephone && (
@@ -208,7 +208,7 @@ export function PressContactsView({ initialContacts }: PressContactsViewProps) {
                       href={`tel:${contact.telephone}`}
                       className="text-xs text-muted-foreground flex items-center gap-1 hover:underline"
                     >
-                      <Phone className="h-3 w-3" />
+                      <Phone className="size-3" />
                       {contact.telephone}
                     </a>
                   )}
@@ -232,7 +232,7 @@ export function PressContactsView({ initialContacts }: PressContactsViewProps) {
                 />
                 <Link href={`/admin/presse/contacts/${contact.id}/edit`}>
                   <Button variant="ghost" size="icon" title="Modifier" aria-label={`Modifier le contact : ${contact.prenom} ${contact.nom}`}>
-                    <Pencil className="h-4 w-4" />
+                    <Pencil className="size-4" />
                   </Button>
                 </Link>
                 <Button
@@ -242,7 +242,7 @@ export function PressContactsView({ initialContacts }: PressContactsViewProps) {
                   title="Supprimer"
                   aria-label={`Supprimer le contact : ${contact.prenom} ${contact.nom}`}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="size-4" />
                 </Button>
               </div>
             </CardContent>

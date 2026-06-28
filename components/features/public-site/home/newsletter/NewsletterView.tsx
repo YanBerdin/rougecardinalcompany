@@ -10,7 +10,7 @@ export { NewsletterForm } from "./NewsletterForm";
 function SubscriptionSuccess() {
   return (
     <div className="animate-fade-in text-center lg:text-left">
-      <CheckCircle className="h-16 w-16 text-white mx-auto lg:mx-0 mb-6" aria-hidden="true" />
+      <CheckCircle className="size-16 text-white mx-auto lg:mx-0 mb-6" aria-hidden="true" />
       <h2 className="text-3xl font-semibold font-sans text-white mb-4">Merci pour votre inscription !</h2>
       <p className="text-xl text-white/90">
         Vous recevrez bientôt nos actualités et nos invitations privilégiées.

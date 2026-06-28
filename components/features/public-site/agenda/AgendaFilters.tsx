@@ -16,7 +16,7 @@ export function AgendaFilters(): React.JSX.Element {
     return (
         <div role="group" aria-label="Filtrer par type d'événement">
             <div className="flex items-center gap-2 mb-3 px-1">
-                <Filter className="w-4 h-4 text-gold" aria-hidden="true" />
+                <Filter className="size-4 text-gold" aria-hidden="true" />
                 <span className="font-semibold text-base">Filtres</span>
             </div>
             <ul className="flex flex-col gap-1">

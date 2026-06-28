@@ -81,7 +81,7 @@ export function LieuxView({ initialLieux }: LieuxViewProps) {
                 <div className="flex items-center justify-between mb-6 lg:mb-12">
                     <h1 className="text-3xl md:text-4xl font-bold">Lieux</h1>
                     <Button onClick={() => router.push("/admin/lieux/new")}>
-                        <Plus className="mr-2 h-4 w-4" />
+                        <Plus className="mr-2 size-4" />
                         Nouveau Lieu
                     </Button>
                 </div>

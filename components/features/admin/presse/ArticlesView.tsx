@@ -64,7 +64,7 @@ export function ArticlesView({ initialArticles }: ArticlesViewProps) {
         </p>
         <Link href="/admin/presse/articles/new">
           <Button className="w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="size-4 mr-2" />
             <span className="hidden sm:inline">Nouvel article</span>
             <span className="sm:hidden">Nouveau</span>
           </Button>
@@ -117,7 +117,7 @@ export function ArticlesView({ initialArticles }: ArticlesViewProps) {
                     title="Voir l'article source"
                     aria-label="Voir l'article source"
                   >
-                    <ExternalLink className="h-4 w-4 mr-1" />
+                    <ExternalLink className="size-4 mr-1" />
                     Source
                   </Button>
                 </a>
@@ -132,7 +132,7 @@ export function ArticlesView({ initialArticles }: ArticlesViewProps) {
                     title="Modifier"
                     aria-label={`Modifier l'article : ${article.title}`}
                   >
-                    <Pencil className="h-4 w-4" />
+                    <Pencil className="size-4" />
                   </Button>
                 </Link>
                 <Button
@@ -142,7 +142,7 @@ export function ArticlesView({ initialArticles }: ArticlesViewProps) {
                   title="Supprimer"
                   aria-label={`Supprimer l'article : ${article.title}`}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="size-4" />
                 </Button>
               </div>
             </div>
@@ -181,13 +181,13 @@ export function ArticlesView({ initialArticles }: ArticlesViewProps) {
                 {article.source_url && (
                   <a href={article.source_url} target="_blank" rel="noopener noreferrer">
                     <Button variant="ghost" size="icon" title="Voir l'article source" aria-label="Voir l'article source">
-                      <ExternalLink className="h-4 w-4" />
+                      <ExternalLink className="size-4" />
                     </Button>
                   </a>
                 )}
                 <Link href={`/admin/presse/articles/${article.id}/edit`}>
                   <Button variant="ghost" size="icon" title="Modifier" aria-label={`Modifier l'article : ${article.title}`}>
-                    <Pencil className="h-4 w-4" />
+                    <Pencil className="size-4" />
                   </Button>
                 </Link>
                 <Button
@@ -197,7 +197,7 @@ export function ArticlesView({ initialArticles }: ArticlesViewProps) {
                   title="Supprimer"
                   aria-label={`Supprimer l'article : ${article.title}`}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="size-4" />
                 </Button>
               </div>
             </CardContent>

@@ -135,17 +135,17 @@ export function SpectacleDetailView({
                             <div className="flex flex-wrap items-center gap-3" aria-label="Période et lieu">
                                 {formattedRanges.length > 0 ? formattedRanges.map((label, i) => (
                                     <Badge key={i} variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold shadow-lg">
-                                        <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                        <Calendar className="size-3.5 shrink-0" aria-hidden="true" />
                                         {label}
                                     </Badge>
                                 )) : (
                                     <Badge variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold shadow-lg">
-                                        <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                        <Calendar className="size-3.5 shrink-0" aria-hidden="true" />
                                         À venir
                                     </Badge>
                                 )}
                                 <Badge variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold shadow-lg">
-                                    <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                    <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
                                     {venueMapsUrl ? (
                                         <a
                                             href={venueMapsUrl}
@@ -228,11 +228,11 @@ export function SpectacleDetailView({
 
                             <div className="flex flex-wrap items-center gap-3" aria-label="Durée et genre">
                                 <Badge variant="outlineGold" className="text-xs sm:text-sm font-semibold shadow-lg">
-                                    <Clock className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
+                                    <Clock className="mr-1.5 size-3.5" aria-hidden="true" />
                                     {formatDurationHumanReadable(spectacle.duration_minutes)}
                                 </Badge>
                                 <Badge variant="outlineGold" className="text-xs sm:text-sm font-semibold shadow-lg">
-                                    <Star className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
+                                    <Star className="mr-1.5 size-3.5" aria-hidden="true" />
                                     {spectacle.genre}
                                 </Badge>
                             </div>
@@ -246,7 +246,7 @@ export function SpectacleDetailView({
                                         </div>
                                         <h3 className="text-xl font-bold mb-6 flex items-center gap-3 relative z-10">
                                             <div className="p-2 bg-yellow-500/20 rounded-xl">
-                                                <Award className="text-yellow-600 dark:text-yellow-400 h-6 w-6" aria-hidden="true" />
+                                                <Award className="text-yellow-600 dark:text-yellow-400 size-6" aria-hidden="true" />
                                             </div>
                                             Palmarès
                                         </h3>
@@ -257,7 +257,7 @@ export function SpectacleDetailView({
                                                     className="flex gap-3 text-md font-medium border-b border-yellow-200/30 dark:border-yellow-800/30 pb-3 last:border-0 transition-colors hover:text-primary"
                                                 >
                                                     <Star
-                                                        className="h-5 w-5 text-yellow-500 dark:text-yellow-400 shrink-0 mt-0.5"
+                                                        className="size-5 text-yellow-500 dark:text-yellow-400 shrink-0 mt-0.5"
                                                         fill="currentColor"
                                                     />
                                                     <span>{award}</span>

@@ -9,8 +9,8 @@ interface UserStatusBadgeProps {
 export function UserStatusBadge({ user }: UserStatusBadgeProps) {
     if (user.email_confirmed_at) {
         return (
-            <Badge variant="default" className="gap-1">
-                <CheckCircle className="h-3 w-3" aria-hidden="true" />
+            <Badge variant="default" className="gap-2">
+                <CheckCircle className="size-3" aria-hidden="true" />
                 Vérifié
             </Badge>
         );
@@ -18,16 +18,16 @@ export function UserStatusBadge({ user }: UserStatusBadgeProps) {
 
     if (user.invited_at) {
         return (
-            <Badge variant="secondary" className="gap-1">
-                <Clock className="h-3 w-3" aria-hidden="true" />
+            <Badge variant="secondary" className="gap-2">
+                <Clock className="size-3" aria-hidden="true" />
                 Invité
             </Badge>
         );
     }
 
     return (
-        <Badge variant="outline" className="gap-1">
-            <XCircle className="h-3 w-3" aria-hidden="true" />
+        <Badge variant="outline" className="gap-2">
+            <XCircle className="size-3" aria-hidden="true" />
             Non vérifié
         </Badge>
     );

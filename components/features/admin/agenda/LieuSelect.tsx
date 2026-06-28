@@ -60,7 +60,7 @@ export function LieuSelect({ lieux }: LieuSelectProps) {
                                     {field.value
                                         ? lieux.find((l) => Number(l.id) === field.value)?.nom
                                         : "Sélectionner un lieu (optionnel)"}
-                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                    <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
                                 </Button>
                             </FormControl>
                         </PopoverTrigger>
@@ -79,7 +79,7 @@ export function LieuSelect({ lieux }: LieuSelectProps) {
                                         >
                                             <Check
                                                 className={cn(
-                                                    "mr-2 h-4 w-4",
+                                                    "mr-2 size-4",
                                                     Number(lieu.id) === field.value
                                                         ? "opacity-100"
                                                         : "opacity-0"

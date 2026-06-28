@@ -60,7 +60,7 @@ export function NewsCard({ item, index }: NewsCardProps) {
 
       <CardContent className="p-6 flex flex-col flex-1">
         <div className="flex items-center card-date text-sm mb-3">
-          <Calendar className="h-4 w-4 mr-2" aria-hidden="true" />
+          <Calendar className="size-4 mr-2" aria-hidden="true" />
           <time dateTime={item.date}>
             {new Date(item.date).toLocaleDateString("fr-FR", {
               year: "numeric",
@@ -75,7 +75,7 @@ export function NewsCard({ item, index }: NewsCardProps) {
             {item.title}
             {isExternal && (
               <ExternalLink
-                className="inline-block h-3.5 w-3.5 ml-1.5 align-baseline"
+                className="inline-block size-3.5 ml-1.5 align-baseline"
                 aria-hidden="true"
               />
             )}
@@ -90,7 +90,7 @@ export function NewsCard({ item, index }: NewsCardProps) {
       <CardFooter className="mt-auto">
         <Button variant="outline-primary" size="lg" asChild>
           <Link href={articleHref} {...externalProps}>
-            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            <ArrowRight className="size-4" aria-hidden="true" />
             Lire l&apos;article
             {isExternal && (
               <span className="sr-only"> (s&apos;ouvre dans un nouvel onglet)</span>

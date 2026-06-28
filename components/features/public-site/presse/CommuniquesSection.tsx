@@ -22,11 +22,13 @@ export function CommuniquesSection({
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-sm:mb-8 mb-16">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">
-            Communiqués de Presse
+            Communiqués de presse
           </h2>
+          {/*
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
             Les dernières actualités officielles de la compagnie
           </p>
+          */}
         </div>
 
         <div className="flex flex-wrap justify-center gap-8">
@@ -59,7 +61,7 @@ export function CommuniquesSection({
                     rel="noopener noreferrer"
                     aria-label={`Télécharger ${release.title} (${release.fileSize})`}
                   >
-                    <Download className="mr-2 h-4 w-4" aria-hidden="true" />
+                    <Download className="mr-2 size-4" aria-hidden="true" />
                     Télécharger
                   </Link>
                 </Button>

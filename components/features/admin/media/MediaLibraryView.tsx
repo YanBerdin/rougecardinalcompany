@@ -63,7 +63,7 @@ export function MediaLibraryView() {
                     onClick={() => router.push("/admin/media")}
                     className="gap-2"
                 >
-                    <ArrowLeft className="h-4 w-4" />
+                    <ArrowLeft className="size-4" />
                     Retour
                 </Button>
             </div>
@@ -118,7 +118,7 @@ export function MediaLibraryView() {
                         className="h-9 px-4 text-sm font-medium"
                         aria-label="Téléverser de nouveaux médias"
                     >
-                        <Upload className="mr-1.5 h-4 w-4" />
+                        <Upload className="mr-1.5 size-4" />
                         Téléverser
                     </Button>
                 </div>
@@ -127,7 +127,7 @@ export function MediaLibraryView() {
             {/* Filters */}
             <div className="grid gap-4 md:grid-cols-3">
                 <div className="relative">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+                    <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
                     <Input
                         placeholder="Rechercher..."
                         value={searchQuery}
@@ -139,7 +139,7 @@ export function MediaLibraryView() {
 
                 <Select value={selectedFolder} onValueChange={setSelectedFolder}>
                     <SelectTrigger>
-                        <Filter className="mr-2 h-4 w-4" />
+                        <Filter className="mr-2 size-4" />
                         <SelectValue placeholder="Tous les dossiers" />
                     </SelectTrigger>
                     <SelectContent>
@@ -155,7 +155,7 @@ export function MediaLibraryView() {
 
                 <Select value={selectedTag} onValueChange={setSelectedTag}>
                     <SelectTrigger>
-                        <Filter className="mr-2 h-4 w-4" />
+                        <Filter className="mr-2 size-4" />
                         <SelectValue placeholder="Tous les tags" />
                     </SelectTrigger>
                     <SelectContent>
@@ -164,7 +164,7 @@ export function MediaLibraryView() {
                             <SelectItem key={tag.id} value={String(tag.id)}>
                                 <div className="flex items-center gap-2">
                                     <div
-                                        className="h-3 w-3 rounded-full"
+                                        className="size-3 rounded-full"
                                         style={{ backgroundColor: tag.color ?? undefined }}
                                     />
                                     {tag.name}

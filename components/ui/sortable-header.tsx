@@ -30,13 +30,13 @@ export function SortableHeader<T extends string>({
 
     const getSortIcon = () => {
         if (!isActive) {
-            return <ArrowUpDown className="ml-2 h-4 w-4" />;
+            return <ArrowUpDown className="ml-2 size-4" />;
         }
 
         return direction === "asc" ? (
-            <ArrowUp className="ml-2 h-4 w-4" />
+            <ArrowUp className="ml-2 size-4" />
         ) : (
-            <ArrowDown className="ml-2 h-4 w-4" />
+            <ArrowDown className="ml-2 size-4" />
         );
     };
 

@@ -36,7 +36,7 @@ export function MediaCardThumbnail({
                 <div className="absolute top-2 right-2 z-10">
                     <div
                         className={cn(
-                            "h-6 w-6 rounded-full border-2 flex items-center justify-center",
+                            "size-6 rounded-full border-2 flex items-center justify-center",
                             "transition-all duration-150 ease-in-out",
                             isSelected && "scale-110",
                             isSelected
@@ -69,7 +69,7 @@ export function MediaCardThumbnail({
                 <div className="absolute top-2 left-2 z-10">
                     <span className="inline-flex items-center gap-1 rounded-full bg-green-500/80 px-2 py-0.5 text-xs text-white backdrop-blur-sm">
                         <svg
-                            className="h-3 w-3"
+                            className="size-3"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"

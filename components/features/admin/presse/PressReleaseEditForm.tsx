@@ -138,7 +138,7 @@ export function PressReleaseEditForm({ release, spectacles = [], evenements = []
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 {release.public && (
                     <Alert className="border-blue-500 bg-blue-50 text-blue-900 dark:bg-blue-900/10 dark:text-blue-300">
-                        <AlertTriangle className="h-4 w-4" />
+                        <AlertTriangle className="size-4" />
                         <AlertDescription>
                             Article publié - sauvegarde manuelle requise.
                         </AlertDescription>
@@ -156,7 +156,7 @@ export function PressReleaseEditForm({ release, spectacles = [], evenements = []
                 {/* Pattern 2: Progressive validation warning */}
                 {showPublicWarning && (
                     <Alert className="border-yellow-500 bg-yellow-50 text-yellow-900 dark:bg-yellow-900/10 dark:text-yellow-500">
-                        <AlertTriangle className="h-4 w-4" />
+                        <AlertTriangle className="size-4" />
                         <AlertDescription>
                             Les communiqués publics nécessitent une image.
                         </AlertDescription>

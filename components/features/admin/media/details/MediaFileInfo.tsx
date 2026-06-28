@@ -32,7 +32,7 @@ export function MediaFileInfo() {
             {media.is_used_public && (
                 <div className="rounded-md bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 p-3">
                     <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300 font-medium">
-                        <Eye className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                        <Eye className="size-4 flex-shrink-0" aria-hidden="true" />
                         <span className="text-sm">Utilisé sur le site public</span>
                     </div>
                     {media.usage_locations && media.usage_locations.length > 0 && (

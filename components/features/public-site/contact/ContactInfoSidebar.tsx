@@ -22,7 +22,7 @@ export function ContactInfoSidebar({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-start space-x-3">
-            <Mail className="h-5 w-5 text-chart-2 mt-1" aria-hidden="true" />
+            <Mail className="size-5 text-chart-2 mt-1" aria-hidden="true" />
             <div>
               <p className="font-medium">Email</p>
               <Link
@@ -36,7 +36,7 @@ export function ContactInfoSidebar({
           </div>
 
           <div className="flex items-start space-x-3">
-            <Phone className="h-5 w-5 text-chart-2 mt-1" aria-hidden="true" />
+            <Phone className="size-5 text-chart-2 mt-1" aria-hidden="true" />
             <div>
               <p className="font-medium">Téléphone</p>
               <Link
@@ -50,7 +50,7 @@ export function ContactInfoSidebar({
           </div>
 
           <div className="flex items-start space-x-3">
-            <MapPin className="h-5 w-5 text-chart-2 mt-1" aria-hidden="true" />
+            <MapPin className="size-5 text-chart-2 mt-1" aria-hidden="true" />
             <div>
               <p className="font-medium">Adresse</p>
               <p className="text-muted-foreground">

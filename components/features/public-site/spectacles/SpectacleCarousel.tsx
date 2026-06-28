@@ -322,7 +322,7 @@ function MultiImageCarousel({
                         aria-label="Image précédente"
                         className={NAV_BUTTON_CLASS}
                     >
-                        <ChevronLeft className="h-5 w-5" />
+                        <ChevronLeft className="size-5" />
                     </button>
                     <button
                         type="button"
@@ -330,7 +330,7 @@ function MultiImageCarousel({
                         aria-label="Image suivante"
                         className={NAV_BUTTON_CLASS}
                     >
-                        <ChevronRight className="h-5 w-5" />
+                        <ChevronRight className="size-5" />
                     </button>
                 </div>
 

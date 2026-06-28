@@ -88,7 +88,7 @@ function DefaultErrorFallback({ error, onReset }: DefaultErrorFallbackProps) {
       <Card className="max-w-md w-full">
         <CardHeader>
           <div className="flex items-center gap-2">
-            <AlertCircle className="h-5 w-5 text-destructive" />
+            <AlertCircle className="size-5 text-destructive" />
             <CardTitle>Une erreur est survenue</CardTitle>
           </div>
           <CardDescription>
@@ -102,7 +102,7 @@ function DefaultErrorFallback({ error, onReset }: DefaultErrorFallbackProps) {
             </p>
           </div>
           <Button onClick={onReset} className="w-full" variant="outline">
-            <RefreshCw className="mr-2 h-4 w-4" />
+            <RefreshCw className="mr-2 size-4" />
             Réessayer
           </Button>
         </CardContent>

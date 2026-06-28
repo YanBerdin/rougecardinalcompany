@@ -135,7 +135,7 @@ export function MediaFolderFormDialog({
 
                     <div className="space-y-4 py-4">
                         <Alert className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/20">
-                            <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                            <AlertCircle className="size-4 text-amber-600 dark:text-amber-400" />
                             <AlertDescription className="text-amber-800 dark:text-amber-200 text-sm">
                                 Le <strong>slug</strong> doit correspondre à un dossier existant dans Storage
                                 (<code className="bg-amber-100 dark:bg-amber-900/40 px-1 rounded">medias/{"{slug}"}/</code>).

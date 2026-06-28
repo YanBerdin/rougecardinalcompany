@@ -30,7 +30,7 @@ export function ImageFieldSourceActions({
                         variant="outline"
                         onClick={() => setIsUploadOpen(true)}
                     >
-                        <Upload className="h-4 w-4 mr-2" />
+                        <Upload className="size-4 mr-2" />
                         Téléverser
                     </Button>
                 )}
@@ -40,7 +40,7 @@ export function ImageFieldSourceActions({
                         variant="secondary"
                         onClick={() => setIsMediaPickerOpen(true)}
                     >
-                        <Library className="h-4 w-4 mr-2" />
+                        <Library className="size-4 mr-2" />
                         Médiathèque
                     </Button>
                 )}
@@ -50,12 +50,12 @@ export function ImageFieldSourceActions({
             {showExternalUrl && (
                 <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Link2 className="h-4 w-4 shrink-0" />
+                        <Link2 className="size-4 shrink-0" />
                         <span>Ou saisir une URL externe</span>
                     </div>
                     <div className="flex flex-col-2 sm:flex-row gap-2">
                         <div className="relative flex-1 min-w-0">
-                            <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                             <Input
                                 type="url"
                                 placeholder="https://example.com/image.jpg"
@@ -75,7 +75,7 @@ export function ImageFieldSourceActions({
                                     aria-label="Effacer l'URL de l'image"
                                     className="shrink-0"
                                 >
-                                    <X />
+                                    <X className="size-6" />
                                 </Button>
                             )}
                             {isValidating && (
@@ -84,7 +84,7 @@ export function ImageFieldSourceActions({
                                     aria-live="polite"
                                     aria-label="Vérification de l'image en cours"
                                 >
-                                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                                    <Loader2 className="size-4 animate-spin" aria-hidden="true" />
                                     <span className="hidden sm:inline">Vérification...</span>
                                 </div>
                             )}

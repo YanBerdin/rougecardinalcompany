@@ -64,17 +64,17 @@ export function EventsTable({ events, onView, onEdit, onDelete, sortState, onSor
                         {/* Body: Meta data */}
                         <div className="grid grid-cols-2 gap-y-2 text-sm text-muted-foreground">
                             <div className="flex items-center gap-2 col-span-2">
-                                <Calendar className="h-4 w-4" />
+                                <Calendar className="size-4" />
                                 <span>
                                     {new Date(event.date_debut).toLocaleDateString("fr-FR")}
                                 </span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <Clock className="h-4 w-4" />
+                                <Clock className="size-4" />
                                 <span>{event.start_time.slice(0, 5)}</span>
                             </div>
                             <div className="flex items-center gap-2 col-span-2">
-                                <MapPin className="h-4 w-4" />
+                                <MapPin className="size-4" />
                                 <span>
                                     {event.lieu_nom ?? "-"}
                                     {event.lieu_ville && ` · ${event.lieu_ville}`}
@@ -91,7 +91,7 @@ export function EventsTable({ events, onView, onEdit, onDelete, sortState, onSor
                                 className="h-10 min-w-[56px] px-3"
                                 aria-label={`Voir ${event.spectacle_titre}`}
                             >
-                                <Eye className="h-5 w-5 mr-2" /> Voir
+                                <Eye className="size-5 mr-2" /> Voir
                             </Button>
                             <Button
                                 variant="secondary"
@@ -100,7 +100,7 @@ export function EventsTable({ events, onView, onEdit, onDelete, sortState, onSor
                                 className="h-10 min-w-[56px] px-3"
                                 aria-label={`Modifier ${event.spectacle_titre}`}
                             >
-                                <Pencil className="h-5 w-5 mr-2" /> Modifier
+                                <Pencil className="size-5 mr-2" /> Modifier
                             </Button>
                             <Button
                                 variant="destructive"
@@ -109,7 +109,7 @@ export function EventsTable({ events, onView, onEdit, onDelete, sortState, onSor
                                 className="h-10 min-w-[56px] px-3"
                                 aria-label={`Supprimer ${event.spectacle_titre}`}
                             >
-                                <Trash2 className="h-5 w-5 mr-2" /> Supprimer
+                                <Trash2 className="size-5 mr-2" /> Supprimer
                             </Button>
                         </div>
                     </div>
@@ -188,30 +188,30 @@ export function EventsTable({ events, onView, onEdit, onDelete, sortState, onSor
                                             size="icon"
                                             onClick={() => onView(event.id)}
                                             title="Voir"
-                                            className="h-8 w-8 sm:h-9 sm:w-9"
+                                            className="size-8 sm:size-9"
                                             aria-label={`Voir ${event.spectacle_titre}`}
                                         >
-                                            <Eye className="h-4 w-4" />
+                                            <Eye className="size-4" />
                                         </Button>
                                         <Button
                                             variant="ghost"
                                             size="icon"
                                             onClick={() => onEdit(event.id)}
                                             title="Modifier"
-                                            className="h-8 w-8 sm:h-9 sm:w-9"
+                                            className="size-8 sm:size-9"
                                             aria-label={`Modifier ${event.spectacle_titre}`}
                                         >
-                                            <Pencil className="h-4 w-4" />
+                                            <Pencil className="size-4" />
                                         </Button>
                                         <Button
                                             variant="ghost-destructive"
                                             size="icon"
                                             onClick={() => onDelete(event.id)}
                                             title="Supprimer"
-                                            className="h-8 w-8 sm:h-9 sm:w-9"
+                                            className="size-8 sm:size-9"
                                             aria-label={`Supprimer ${event.spectacle_titre}`}
                                         >
-                                            <Trash2 className="h-4 w-4" />
+                                            <Trash2 className="size-4" />
                                         </Button>
                                     </div>
                                 </TableCell>

@@ -18,7 +18,7 @@ export function SectionValues({ section, values = [] }: SectionRendererProps): R
                         <Card key={index} className="text-center card-hover animate-fade-in-up" style={{ animationDelay: `${index * ANIMATION_DELAY_STEP}s` }}>
                             <CardContent className="p-6">
                                 <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-lg mb-4">
-                                    <Star className="h-8 w-8 text-primary" aria-hidden="true" />
+                                    <Star className="size-8 text-primary" aria-hidden="true" />
                                 </div>
                                 <h3 className="text-2xl font-semibold font-sans mb-3">{value.title}</h3>
                                 <p className="text-muted-foreground">{value.description}</p>

@@ -14,7 +14,7 @@ export default function NewTeamMemberLoading() {
         <div className="space-y-6">
             <div className="flex items-center gap-4">
                 <Button variant="ghost" size="icon" disabled>
-                    <ArrowLeft className="h-4 w-4" />
+                    <ArrowLeft className="size-4" />
                 </Button>
                 <div>
                     <h1 className="text-3xl font-bold">Nouveau membre</h1>
