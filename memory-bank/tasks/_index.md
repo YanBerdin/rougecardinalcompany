@@ -21,6 +21,8 @@
 
 ## Terminé (récent)
 
+- `TASK100` ContactInfoSidebar dynamique (coordonnées DB) — **COMPLÈTE ✅ 2026-06-30** — `fetchFooterConfig()` + `fetchDisplayToggle()` en `Promise.all` dans `ContactServerGate`, sidebar assemblé côté serveur comme `React.ReactNode`, `ContactInfoSidebar` branché sur `FooterConfigDTO["contact"]` + `children`, `ContactPageView` découplé de `FooterConfigDTO`, phone conditionnel, labels admin renommés `"Pied de page & Coordonnées"` — voir `memory-bank/tasks/tasks-completed/TASK100-contactInfoSidebarDynamique.md`
+
 - `TASK098` Pages légales + Conformité RGPD/Cookies — 3 pages statiques créées, IP analytics anonymisée, bandeau cookie informatif — **COMPLÈTE ✅ 2026-06-13** — voir `memory-bank/tasks/TASK098-legal-pages-cmp-rgpd.md`
 
 - `TASK097` Hero Slide Video Background — `video_url text nullable` ajouté à `home_hero_slides`, propagation DB→Zod→DAL public→HeroContainer→hooks admin→form fields→preview badge — **COMPLÈTE ✅ 2026-06-03** — voir `memory-bank/tasks/tasks-completed/TASK097-heroSlideVideoBackground.md`
@@ -171,7 +173,6 @@ Fichiers de détail archivés dans le dossier `memory-bank/tasks/tasks-completed
 - [TASK021-admin-backoffice-spectacles.md](tasks-completed/TASK021-admin-backoffice-spectacles.md)
 - [TASK021-admin-spectacles-crud.md](tasks-completed/TASK021-admin-spectacles-crud.md)
 - [TASK021-content-management-crud.md](tasks-completed/TASK021-content-management-crud.md)
-- [TASK021-documentation-docker.md](tasks-completed/TASK021-documentation-docker.md)
 - [TASK021B-documentation-supabase-cli.md](tasks-completed/TASK021B-documentation-supabase-cli.md)
 - [TASK021C-auth-cleanup-and-optimization.md](tasks-completed/TASK021C-auth-cleanup-and-optimization.md)
 

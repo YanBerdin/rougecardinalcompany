@@ -21,7 +21,7 @@ const items: CardItem[] = [
     { title: "Médiatèque", description: "Gérer images et vidéos", href: "/admin/media", icon: <ImageIcon className="size-5" />, minRole: "editor" },
     { title: "À propos de la compagnie", description: "Informations sur la compagnie", href: "/admin/compagnie", icon: <Settings className="size-5" />, minRole: "editor" },
     { title: "Affichage des Sections", description: "Configuration du site", href: "/admin/site-config", icon: <Settings className="size-5" />, minRole: "admin" },
-    { title: "Footer - Pied de page", description: "Modifier le contenu du pied de page", href: "/admin/footer", icon: <Users className="size-5" />, minRole: "admin" },
+    { title: "Pied de page & Coordonnées", description: "Modifier le pied de page et les coordonnées de la compagnie", href: "/admin/footer", icon: <Users className="size-5" />, minRole: "admin" },
     { title: "Gérer l'équipe", description: "Membres, rôles et profils", href: "/admin/team", icon: <Users className="size-5" />, minRole: "admin" },
 ];
 

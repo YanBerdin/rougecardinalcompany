@@ -1,5 +1,18 @@
 # Progress
 
+## ContactInfoSidebar dynamique — coordonnées DB (TASK100) (2026-06-30)
+
+✅ **COMPLET** — Les coordonnées sur `/contact` sont désormais dynamiques, lues depuis `public.configurations_site` via `fetchFooterConfig()`.
+
+### Livrables
+
+- **`ContactInfoSidebar.tsx`** : refactoré — `contactInfo: FooterConfigDTO["contact"]` + `children?: React.ReactNode`, phone conditionnel, adresse sans `<br />` forcé
+- **`ContactServerGate.tsx`** : `Promise.all([fetchDisplayToggle, fetchFooterConfig])` + assemblage sidebar côté serveur
+- **`ContactPageView.tsx`** : `sidebar: React.ReactNode` — découplé de `FooterConfigDTO`
+- **`AdminSidebar.tsx`** + **`CardsDashboard.tsx`** : labels renommés `"Pied de page & Coordonnées"`
+
+---
+
 ## Graphify — Cartographie sémantique du codebase (2026-06-12)
 
 ✅ **COMPLET** — Graphe sémantique installé, extrait, labellisé et visualisable.

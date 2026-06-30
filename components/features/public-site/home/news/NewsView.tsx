@@ -15,11 +15,11 @@ export function NewsView({ news }: NewsViewProps) {
         <div className="text-center mb-14 gap-4">
           <div>
             <h2 id="news-heading" className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4">
-              La presse en parle
+              La presse parle de nous
             </h2>
           </div>
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
-            Suivez l&apos;actualité de la compagnie Rouge-Cardinal
+            Suivez les actualités de la compagnie Rouge-Cardinal
           </p>
         </div>
 
@@ -33,7 +33,7 @@ export function NewsView({ news }: NewsViewProps) {
           <Button variant="default" size="default" asChild className="cta-blur-button">
             <Link href="/presse">
               <ArrowRight className="size-5" aria-hidden="true" />
-              Lire les actualités
+              Voir toute l&apos;actualité
             </Link>
           </Button>
         </div>
