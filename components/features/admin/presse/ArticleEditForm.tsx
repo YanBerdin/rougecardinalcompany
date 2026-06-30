@@ -245,11 +245,11 @@ export function ArticleEditForm({ article }: ArticleEditFormProps) {
 
                     <div>
                         <Label htmlFor="excerpt">Extrait</Label>
-                        <Input
+                        <Textarea
                             id="excerpt"
-                            type="text"
                             {...form.register("excerpt")}
                             disabled={isPending}
+                            rows={4}
                         />
                     </div>
 

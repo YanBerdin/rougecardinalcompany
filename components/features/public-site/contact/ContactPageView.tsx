@@ -3,14 +3,13 @@
 import { useState, useCallback } from "react";
 import { ContactForm } from "./ContactForm";
 import { ContactSuccessView } from "./ContactSuccessView";
-import { ContactInfoSidebar } from "./ContactInfoSidebar";
 
 interface ContactPageViewProps {
-  showNewsletter?: boolean;
+  sidebar: React.ReactNode;
 }
 
 export function ContactPageView({
-  showNewsletter = true,
+  sidebar,
 }: ContactPageViewProps): React.JSX.Element {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -42,7 +41,7 @@ export function ContactPageView({
             <div className="lg:col-span-2">
               <ContactForm onSuccess={handleSuccess} />
             </div>
-            <ContactInfoSidebar showNewsletter={showNewsletter} />
+            {sidebar}
           </div>
         </div>
       </div>

@@ -5,14 +5,16 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { NewsletterCard } from "./NewsletterCard";
+import type { FooterConfigDTO } from "@/lib/schemas/footer-config";
 
 interface ContactInfoSidebarProps {
-  showNewsletter: boolean;
+  contactInfo: FooterConfigDTO["contact"];
+  children?: React.ReactNode;
 }
 
 export function ContactInfoSidebar({
-  showNewsletter,
+  contactInfo,
+  children,
 }: ContactInfoSidebarProps): React.JSX.Element {
   return (
     <div className="space-y-8">
@@ -26,44 +28,42 @@ export function ContactInfoSidebar({
             <div>
               <p className="font-medium">Email</p>
               <Link
-                href="mailto:contact@rouge-cardinal.fr"
+                href={`mailto:${contactInfo.email}`}
                 className="text-muted-foreground hover:text-chart-2"
-                aria-label="Envoyer un email à contact@rouge-cardinal.fr"
+                aria-label={`Envoyer un email à ${contactInfo.email}`}
               >
-                contact@rouge-cardinal.fr
+                {contactInfo.email}
               </Link>
             </div>
           </div>
 
-          <div className="flex items-start space-x-3">
-            <Phone className="size-5 text-chart-2 mt-1" aria-hidden="true" />
-            <div>
-              <p className="font-medium">Téléphone</p>
-              <Link
-                href="tel:+33123456789"
-                className="text-muted-foreground hover:text-chart-2"
-                aria-label="Appeler le +33 1 23 45 67 89"
-              >
-                +33 1 23 45 67 89
-              </Link>
+          {contactInfo.phone && (
+            <div className="flex items-start space-x-3">
+              <Phone className="size-5 text-chart-2 mt-1" aria-hidden="true" />
+              <div>
+                <p className="font-medium">Téléphone</p>
+                <Link
+                  href={`tel:${contactInfo.phone}`}
+                  className="text-muted-foreground hover:text-chart-2"
+                  aria-label={`Appeler le ${contactInfo.phone}`}
+                >
+                  {contactInfo.phone}
+                </Link>
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="flex items-start space-x-3">
-            <MapPin className="size-5 text-chart-2 mt-1" aria-hidden="true" />
+            <MapPin className="size-5 shrink-0 text-chart-2 mt-1" aria-hidden="true" />
             <div>
               <p className="font-medium">Adresse</p>
-              <p className="text-muted-foreground">
-                12 Rue de la République
-                <br />
-                75011 Paris, France
-              </p>
+              <p className="text-muted-foreground">{contactInfo.address}</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {showNewsletter && <NewsletterCard />}
+      {children}
     </div>
   );
 }

@@ -177,146 +177,146 @@ export function ArticleNewForm() {
                     errorMessage={autoSave.errorMessage}
                 />
                 <Card>
-                <CardHeader>
-                    <CardTitle>Informations de l&apos;article</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div>
-                        <Label htmlFor="title">Titre *</Label>
-                        <Input
-                            id="title"
-                            {...form.register("title")}
-                            disabled={isPending}
-                        />
-                        {form.formState.errors.title && (
-                            <p className="text-red-600 text-sm mt-1">
-                                {form.formState.errors.title.message}
-                            </p>
-                        )}
-                    </div>
+                    <CardHeader>
+                        <CardTitle>Informations de l&apos;article</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div>
+                            <Label htmlFor="title">Titre *</Label>
+                            <Input
+                                id="title"
+                                {...form.register("title")}
+                                disabled={isPending}
+                            />
+                            {form.formState.errors.title && (
+                                <p className="text-red-600 text-sm mt-1">
+                                    {form.formState.errors.title.message}
+                                </p>
+                            )}
+                        </div>
 
-                    <div>
-                        <Label htmlFor="slug">Slug</Label>
-                        <Input
-                            id="slug"
-                            {...form.register("slug")}
-                            disabled={isPending}
-                            placeholder="⚠️ Laissez vide pour génération automatique ⚠️"
-                        />
-                    </div>
+                        <div>
+                            <Label htmlFor="slug">Slug</Label>
+                            <Input
+                                id="slug"
+                                {...form.register("slug")}
+                                disabled={isPending}
+                                placeholder="⚠️ Laissez vide pour génération automatique ⚠️"
+                            />
+                        </div>
 
-                    <div>
-                        <Label htmlFor="type">Type *</Label>
-                        <Select
-                            defaultValue="Article"
-                            onValueChange={(value) => form.setValue("type", value as "Article" | "Critique" | "Interview" | "Portrait")}
-                            disabled={isPending}
+                        <div>
+                            <Label htmlFor="type">Type *</Label>
+                            <Select
+                                defaultValue="Article"
+                                onValueChange={(value) => form.setValue("type", value as "Article" | "Critique" | "Interview" | "Portrait")}
+                                disabled={isPending}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Article">Article</SelectItem>
+                                    <SelectItem value="Critique">Critique</SelectItem>
+                                    <SelectItem value="Interview">Interview</SelectItem>
+                                    <SelectItem value="Portrait">Portrait</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div>
+                            <Label htmlFor="source_publication">Nom du média *</Label>
+                            <Input
+                                id="source_publication"
+                                {...form.register("source_publication")}
+                                disabled={isPending}
+                            />
+                        </div>
+
+                        <div>
+                            <Label htmlFor="author">Auteur</Label>
+                            <Input
+                                id="author"
+                                {...form.register("author")}
+                                disabled={isPending}
+                            />
+                        </div>
+
+                        <div>
+                            <Label htmlFor="published_at">Date de publication *</Label>
+                            <Input
+                                id="published_at"
+                                type="date"
+                                {...form.register("published_at")}
+                            />
+                        </div>
+
+                        <div>
+                            <Label htmlFor="source_url">URL source *</Label>
+                            <Input
+                                id="source_url"
+                                type="url"
+                                {...form.register("source_url")}
+                                disabled={isPending}
+                            />
+                        </div>
+
+                        <div>
+                            <Label htmlFor="chapo">Chapô</Label>
+                            <Textarea
+                                id="chapo"
+                                {...form.register("chapo")}
+                                disabled={isPending}
+                                rows={4}
+                            />
+                        </div>
+
+                        <div>
+                            <Label htmlFor="excerpt">Extrait</Label>
+                            <Textarea
+                                id="excerpt"
+                                {...form.register("excerpt")}
+                                disabled={isPending}
+                                rows={4}
+                            />
+                        </div>
+
+                        {/* Pattern 3: ImageField for Open Graph image */}
+                        <ImageField.Provider
+                            form={form}
+                            imageUrlField="image_url"
+                            imageMediaIdField="og_image_media_id"
+                            label="Image de l'article (Open Graph)"
+                            showUpload={true}
+                            uploadFolder="presse"
+                            onValidationChange={(isValid) => setIsImageValidated(isValid)}
                         >
-                            <SelectTrigger>
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="Article">Article</SelectItem>
-                                <SelectItem value="Critique">Critique</SelectItem>
-                                <SelectItem value="Interview">Interview</SelectItem>
-                                <SelectItem value="Portrait">Portrait</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
+                            <ImageField.SourceActions showUpload={true} />
+                            <ImageField.Preview />
+                            <ImageField.AltText />
+                        </ImageField.Provider>
+                    </CardContent>
+                </Card>
 
-                    <div>
-                        <Label htmlFor="source_publication">Nom du média *</Label>
-                        <Input
-                            id="source_publication"
-                            {...form.register("source_publication")}
-                            disabled={isPending}
-                        />
-                    </div>
-
-                    <div>
-                        <Label htmlFor="author">Auteur</Label>
-                        <Input
-                            id="author"
-                            {...form.register("author")}
-                            disabled={isPending}
-                        />
-                    </div>
-
-                    <div>
-                        <Label htmlFor="published_at">Date de publication *</Label>
-                        <Input
-                            id="published_at"
-                            type="date"
-                            {...form.register("published_at")}
-                        />
-                    </div>
-
-                    <div>
-                        <Label htmlFor="source_url">URL source *</Label>
-                        <Input
-                            id="source_url"
-                            type="url"
-                            {...form.register("source_url")}
-                            disabled={isPending}
-                        />
-                    </div>
-
-                    <div>
-                        <Label htmlFor="chapo">Chapô</Label>
-                        <Textarea
-                            id="chapo"
-                            {...form.register("chapo")}
-                            disabled={isPending}
-                            rows={4}
-                        />
-                    </div>
-
-                    <div>
-                        <Label htmlFor="excerpt">Extrait</Label>
-                        <Input
-                            id="excerpt"
-                            type="text"
-                            {...form.register("excerpt")}
-                            disabled={isPending}
-                        />
-                    </div>
-
-                    {/* Pattern 3: ImageField for Open Graph image */}
-                    <ImageField.Provider
-                        form={form}
-                        imageUrlField="image_url"
-                        imageMediaIdField="og_image_media_id"
-                        label="Image de l'article (Open Graph)"
-                        showUpload={true}
-                        uploadFolder="presse"
-                        onValidationChange={(isValid) => setIsImageValidated(isValid)}
+                <div className="flex gap-2 justify-end">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => router.back()}
+                        disabled={isPending || autoSave.isSaving}
                     >
-                        <ImageField.SourceActions showUpload={true} />
-                        <ImageField.Preview />
-                        <ImageField.AltText />
-                    </ImageField.Provider>
-                </CardContent>
-            </Card>
-
-            <div className="flex gap-2 justify-end">
-                <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => router.back()}
-                    disabled={isPending || autoSave.isSaving}
-                >
-                    Annuler
-                </Button>
-                <Button type="submit" disabled={isPending || autoSave.isSaving}>
-                    {isPending
-                        ? savedDraftId
-                            ? "Enregistrement..."
-                            : "Création..."
-                        : savedDraftId
-                            ? "Enregistrer"
-                            : "Créer"}
-                </Button>
-            </div>
+                        Annuler
+                    </Button>
+                    <Button type="submit" disabled={isPending || autoSave.isSaving}>
+                        {isPending
+                            ? savedDraftId
+                                ? "Enregistrement..."
+                                : "Création..."
+                            : savedDraftId
+                                ? "Enregistrer"
+                                : "Créer"}
+                    </Button>
+                </div>
             </form>
         </Form>
     );

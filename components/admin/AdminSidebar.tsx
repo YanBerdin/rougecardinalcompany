@@ -140,7 +140,7 @@ const otherItems: SidebarItem[] = [
     minRole: "admin",
   },
   {
-    title: "Footer - Pied de page",
+    title: "Pied de page & Coordonnées",
     href: "/admin/footer",
     icon: LayoutTemplate,
     minRole: "admin",

@@ -78,7 +78,7 @@ export function ShowCard({ show, index }: ShowCardProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`Réserver des billets pour ${show.title} (s'ouvre dans un nouvel onglet)`}
-                className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground w-full hover:bg-chart-6 hover:text-black transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-1 focus-visible:outline-none"
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground w-full hover:bg-chart-2 transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-1 focus-visible:outline-none"
               >
                 <Ticket className="size-4" aria-hidden="true" />
                 Je réserve mes billets
