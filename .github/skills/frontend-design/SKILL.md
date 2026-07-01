@@ -113,18 +113,36 @@ Body/UI: Geist Sans (already configured)
 
 ### Color Palette & Usage
 
-**Primary Palette** (from globals.css):
+## Colors
 
-```css
---primary: #ad0000          /* Cardinal Red - CTAs, accents */
---background: #faf4e7       /* Warm Beige - light mode */
---foreground: #1C1C1C       /* Deep Black - text */
---border-primary: #e84133   /* Accent borders */
+The palette is warm-neutral first, with cardinal red and gold accents as identity carriers.
 
-/* Dark Mode */
---background (dark): #1C1C1C
---foreground (dark): #faf4e7
-```
+### Primary
+
+- Cardinal Red (`#8e1111`): Main action color (`--primary`), sidebar primary roles (`--sidebar-primary`, light).
+- Ring Red (`#a31414`): Focus ring and chart-2 accent (`--ring`, `--chart-2`).
+
+### Secondary
+
+- Neutral Gray (`#d4d4d4`): Secondary and accent surface roles, border baseline (`--secondary`, `--accent`, `--border`).
+- Soft Gray (`#ebebeb`): Muted surfaces and low-emphasis containers (`--muted`).
+
+### Tertiary
+
+- Gold (`#ddab2c`): Premium accent family (`--gold`, `--gold-light`, `--gold-dark`, `--gold-text`) used for highlight styles and gradient text utility.
+
+### Neutral
+
+- Warm Paper (`#f5f3f0`): Global background and primary foreground contrast pair.
+- Ink (`#1c1c1c`): Main text and dark base.
+- Card Light (`#efece7`): Card/popover surfaces in light mode.
+- Dark Card (`#2a2a2a`), Dark Secondary (`#424242`), Dark Muted (`#292929`): dark mode depth ladder.
+- Destructive (`#ff4037`): destructive actions and invalid/error signaling.
+
+Source files:
+
+- app/globals.css
+- tailwind.config.ts
 
 **Color Application Rules**:
 

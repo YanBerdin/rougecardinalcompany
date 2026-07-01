@@ -53,6 +53,7 @@ type ArticlePresseRow = Pick<
   | "source_publication"
   | "source_url"
   | "published_at"
+  | "image_url"
 >;
 
 // =============================================================================
@@ -104,6 +105,7 @@ function mapToMediaArticleDTO(row: ArticlePresseRow): MediaArticle {
     source_publication: String(row.source_publication ?? ""),
     source_url: String(row.source_url ?? ""),
     published_at: String(row.published_at ?? ""),
+    image_url: row.image_url ?? null,
   };
 }
 
@@ -185,10 +187,11 @@ export const fetchMediaArticles = cache(
       const supabase = await createClient();
 
       let query = supabase
-        .from("articles_presse_public")
+        .from("articles_presse")
         .select(
-          "id, title, author, type, chapo, excerpt, source_publication, source_url, published_at"
+          "id, title, author, type, chapo, excerpt, source_publication, source_url, published_at, image_url"
         )
+        .not("published_at", "is", null)
         .order("published_at", { ascending: false, nullsFirst: false });
 
       if (typeof limit === "number") {

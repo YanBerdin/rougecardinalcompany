@@ -18,7 +18,8 @@ export function PresseView({
 }: PresseViewProps) {
   return (
     <div className="pt-12 md:pt-16">
-      <HeroSection />
+     
+      {/*  <HeroSection /> */}
       {/* <ContactPresseSection /> */}
       <RevueDePresse mediaArticles={mediaArticles} />
       <AccreditationSection />
