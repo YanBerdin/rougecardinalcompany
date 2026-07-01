@@ -8,7 +8,7 @@ export function SectionTeam({ section, team = [] }: SectionRendererProps): React
         <section id={section.kind} aria-labelledby={headingId} className="py-24 lg:py-32 bg-background">
             <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center max-sm:mb-8 mb-16">
-                    {section.title && <h2 id={headingId} className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">{section.title}</h2>}
+                    {section.title && <h2 id={headingId} className="text-3xl md:text-4xl lg:text-6xl italic leading-none tracking-tight mb-4">{section.title}</h2>}
                     {section.subtitle && <p className="text-base md:text-lg lg:text-lg text-muted-foreground max-w-2xl mx-auto">{section.subtitle}</p>}
                 </div>
                 <div className="flex flex-wrap justify-center gap-x-8 gap-y-16">

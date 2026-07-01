@@ -21,7 +21,7 @@ export function CommuniquesSection({
     <section aria-label="Communiqués de presse" className="py-24 lg:py-32">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-sm:mb-8 mb-16">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">
+          <h2 className="text-3xl md:text-4xl lg:text-6xl font-semibold italic leading-none tracking-tight mb-4">
             Communiqués de presse
           </h2>
           {/*

@@ -8,7 +8,7 @@ export function SectionHero({ section }: SectionRendererProps): ReactElement {
         <section id={section.kind} aria-labelledby={headingId} className="py-8 md:py-12 lg:py-16 hero-gradient">
             <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 {section.title && (
-                    <h1 id={headingId} className="text-4xl md:text-5xl lg:text-6xl text-white font-bold animate-fade-in-up">
+                    <h1 id={headingId} className="text-4xl md:text-5xl lg:text-7xl text-white font-semibold animate-fade-in-up">
                         {section.title}
                     </h1>
                 )}

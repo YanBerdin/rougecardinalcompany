@@ -33,7 +33,7 @@ export function SpectaclesView({
       {/* Hero Section */}
       <section className="py-8 md:py-16 hero-gradient" aria-labelledby="spectacles-hero-heading">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 id="spectacles-hero-heading" className="text-white/90 text-4xl md:text-5xl lg:text-6xl font-bold animate-fade-in-up"> {/** mb-6  */}
+          <h1 id="spectacles-hero-heading" className="text-white/90 text-4xl md:text-5xl lg:text-7xl font-semibold leading-none tracking-tight animate-fade-in-up"> {/** mb-6  */}
             À l&apos;affiche
           </h1>
           {/*<p
@@ -46,7 +46,7 @@ export function SpectaclesView({
       </section>
 
       {/* Spectacles Actuels lg:w-[calc(33.333%-1.33rem)] */}
-      <section className="py-24 lg:pt-24 lg:pb-32 bg-background" aria-label="Spectacles actuels">
+      <section className="py-24 lg:py-32 bg-background" aria-label="Spectacles actuels">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap justify-center gap-16">
             {currentShows.map((show, index) => (
@@ -134,7 +134,7 @@ export function SpectaclesView({
 
         <section className="py-8 md:py-16 hero-gradient" aria-labelledby="spectacles-archives-heading">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 id="spectacles-archives-heading" className="text-white/90 text-3xl md:text-4xl lg:text-5xl font-bold animate-fade-in-up"> {/** mb-6  */}
+            <h2 id="spectacles-archives-heading" className="text-white/90 text-3xl md:text-4xl lg:text-6xl font-semibold animate-fade-in-up"> {/** mb-6  */}
               Nos créations passées
             </h2>
           {/*<p
