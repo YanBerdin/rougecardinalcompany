@@ -79,7 +79,6 @@ export function NewsView({ news }: NewsViewProps) {
             <Link href="/presse">
               <ArrowRight className="size-5" aria-hidden="true" />
               Voir toute l&apos;actualité
-              <ArrowRight className="size-5" aria-hidden="true" />
             </Link>
           </Button>
         </div>
