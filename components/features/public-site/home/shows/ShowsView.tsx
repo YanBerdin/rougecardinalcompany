@@ -10,7 +10,7 @@ export function ShowsView({ shows }: ShowsViewProps) {
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-14 gap-4">
           <div>
-            <h2 id="shows-heading" className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4">
+            <h2 id="shows-heading" className="text-5xl italic md:text-6xl lg:text-7xl font-semibold leading-none tracking-tight mb-4">
               À l&apos;affiche
             </h2>
           </div>

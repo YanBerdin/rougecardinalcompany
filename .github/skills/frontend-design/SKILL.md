@@ -143,7 +143,7 @@ Source files:
 
 - app/globals.css
 - tailwind.config.ts
-
+ dans    
 **Color Application Rules**:
 
 - **Cardinal Red**: Primary CTAs, hover states, active links, dramatic accents

@@ -15,7 +15,7 @@ export function HomeTeamView({ members }: HomeTeamViewProps): ReactElement {
                 <div className="text-center max-sm:mb-8 mb-16">
                     <h2
                         id={SECTION_HEADING_ID}
-                        className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight"
+                        className="text-5xl md:text-6xl lg:text-7xl italic font-semibold mb-4 leading-none tracking-tight"
                     >
                         Notre équipe
                     </h2>

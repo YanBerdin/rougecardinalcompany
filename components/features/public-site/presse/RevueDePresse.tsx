@@ -25,7 +25,7 @@ export function RevueDePresse({ mediaArticles }: RevueDePresseSectionProps) {
   return (
     <section
       aria-label="Revue de presse"
-      className="relative overflow-hidden bg-background py-12 text-foreground md:py-28 lg:pt-12 pb-32"
+      className="relative overflow-hidden bg-background py-12 text-foreground md:py-28 lg:pt-24 pb-32"
     >
       <div className="relative mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
         {/* Ex-libris / manchette */}
@@ -127,17 +127,17 @@ export function RevueDePresse({ mediaArticles }: RevueDePresseSectionProps) {
           {featured.excerpt && (
             <div className="lg:col-span-5">
               <div className="border-t-4 border-primary pt-6">
-                <p className="font-serif text-2xl italic leading-snug text-foreground/90 sm:text-3xl">
+                <p className="font-serif text-2xl italic leading-snug text-foreground/90">
                   <span
                     aria-hidden="true"
-                    className="mr-0.5 font-serif text-3xl not-italic text-primary/40 sm:text-4xl"
+                    className="mr-0.5 font-serif text-3xl not-italic text-primary sm:text-4xl"
                   >
                     «
                   </span>
                   {featured.excerpt}
                   <span
                     aria-hidden="true"
-                    className="ml-0.5 font-serif text-3xl not-italic text-primary/40 sm:text-4xl"
+                    className="ml-0.5 font-serif text-3xl not-italic text-primary sm:text-4xl"
                   >
                     »
                   </span>
@@ -153,7 +153,7 @@ export function RevueDePresse({ mediaArticles }: RevueDePresseSectionProps) {
         {/* En bref */}
         {briefs.length > 0 && (
           <div>
-            <div className="mb-10 flex items-center gap-4">
+            <div className="pt-16 mb-10 flex items-center gap-4">
               <h3 className="whitespace-nowrap font-sans text-base font-bold uppercase tracking-[0.3em] text-foreground">
                 En bref
               </h3>

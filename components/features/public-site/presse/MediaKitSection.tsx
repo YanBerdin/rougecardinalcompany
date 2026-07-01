@@ -18,7 +18,7 @@ export function MediaKitSection({ mediaKit }: MediaKitSectionProps) {
     <section aria-label="Kit Média" className="py-24 lg:py-32 bg-chart-7">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-sm:mb-8 mb-16">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">Kit média</h2>
+          <h2 className="text-3xl md:text-4xl lg:text-6xl font-semibold italic leading-none tracking-tight mb-4">Kit média</h2>
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
             Ressources pour vos publications
           </p>
