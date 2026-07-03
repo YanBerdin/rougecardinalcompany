@@ -42,7 +42,7 @@ export const fetchFeaturedArticles = cache(
           "id, title, chapo, excerpt, source_url, source_publication, published_at, image_url"
         )
         .not("published_at", "is", null)
-        .order("published_at", { ascending: false })
+        .order("display_order", { ascending: true })
         .limit(limit);
 
       if (error) {

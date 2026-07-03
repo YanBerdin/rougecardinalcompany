@@ -4,9 +4,16 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
+import {
+  DndContext,
+  closestCenter,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -16,8 +23,10 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, ExternalLink } from "lucide-react";
+import { Plus, GripVertical } from "lucide-react";
 import { deleteArticleAction } from "@/app/(admin)/admin/presse/press-articles-actions";
+import { useArticlesDnd } from "@/lib/hooks/useArticlesDnd";
+import { SortableArticleCard } from "./SortableArticleCard";
 import type { ArticlesViewProps } from "./types";
 
 export function ArticlesView({ initialArticles }: ArticlesViewProps) {
@@ -29,6 +38,12 @@ export function ArticlesView({ initialArticles }: ArticlesViewProps) {
   useEffect(() => {
     setArticles(initialArticles);
   }, [initialArticles]);
+
+  const { sensors, handleDragEnd } = useArticlesDnd({
+    articles,
+    setArticles,
+    initialArticles,
+  });
 
   const requestDelete = useCallback((id: string) => {
     setDeleteCandidate(id);
@@ -71,139 +86,51 @@ export function ArticlesView({ initialArticles }: ArticlesViewProps) {
         </Link>
       </div>
 
-      {/* 
-        MOBILE VIEW (Cards) 
-        Visible only on small screens (< 640px)
-      */}
-      <div className="grid grid-cols-1 gap-4 sm:hidden">
-        {articles.map((article) => (
-          <div
-            key={article.id}
-            className="bg-card rounded-lg border shadow-sm p-4 space-y-3 hover:bg-card/60 transition-colors"
+      {articles.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <p className="text-muted-foreground">Aucun article de presse</p>
+            <Link href="/admin/presse/articles/new">
+              <Button variant="outline" className="mt-4">
+                <Plus className="size-4 mr-2" />
+                Ajouter le premier article
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-2">
+            <GripVertical className="size-4 inline-block" />
+            Glissez-déposez pour réorganiser l&apos;ordre d&apos;affichage
+          </p>
+          <DndContext
+            id="articles-dnd-context"
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
           >
-            {/* Header: Title and Type */}
-            <div className="flex justify-between items-start gap-2">
-              <h3 className="font-semibold text-base leading-tight text-foreground line-clamp-2 flex-1">
-                {article.title}
-              </h3>
-              {article.type && (
-                <Badge variant="outline" className="flex-shrink-0">
-                  {article.type}
-                </Badge>
-              )}
-            </div>
-
-            {/* Body: Author and Source */}
-            <div className="space-y-1">
-              {article.author && (
-                <p className="text-sm text-muted-foreground">
-                  Par {article.author}
-                </p>
-              )}
-              {article.source_publication && (
-                <p className="text-xs text-muted-foreground">
-                  Source: {article.source_publication}
-                </p>
-              )}
-            </div>
-
-            {/* Footer: Actions */}
-            <div className="flex items-center justify-between pt-3 border-t gap-2">
-              {article.source_url ? (
-                <a href={article.source_url} target="_blank" rel="noopener noreferrer">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    title="Voir l'article source"
-                    aria-label="Voir l'article source"
-                  >
-                    <ExternalLink className="size-4 mr-1" />
-                    Source
-                  </Button>
-                </a>
-              ) : (
-                <div />
-              )}
-              <div className="flex gap-1">
-                <Link href={`/admin/presse/articles/${article.id}/edit`}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    title="Modifier"
-                    aria-label={`Modifier l'article : ${article.title}`}
-                  >
-                    <Pencil className="size-4" />
-                  </Button>
-                </Link>
-                <Button
-                  variant="ghost-destructive"
-                  size="icon"
-                  onClick={() => requestDelete(article.id)}
-                  title="Supprimer"
-                  aria-label={`Supprimer l'article : ${article.title}`}
-                >
-                  <Trash2 className="size-4" />
-                </Button>
+            <SortableContext
+              items={articles.map((a) => a.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div
+                role="list"
+                aria-label="Liste des articles de presse"
+                className="space-y-3"
+              >
+                {articles.map((article) => (
+                  <SortableArticleCard
+                    key={article.id}
+                    article={article}
+                    onDelete={requestDelete}
+                  />
+                ))}
               </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* 
-        DESKTOP VIEW (Cards) 
-        Visible only on larger screens (>= 640px)
-      */}
-      <div className="hidden sm:block space-y-4">
-        {articles.map((article) => (
-          <Card key={article.id} className="hover:bg-card/60  transition-colors">
-            <CardContent className="flex items-center justify-between p-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold truncate">{article.title}</h3>
-                  {article.type && (
-                    <Badge variant="outline">{article.type}</Badge>
-                  )}
-                </div>
-                {article.author && (
-                  <p className="text-sm text-muted-foreground">
-                    Par {article.author}
-                  </p>
-                )}
-                {article.source_publication && (
-                  <p className="text-xs text-muted-foreground">
-                    Source: {article.source_publication}
-                  </p>
-                )}
-              </div>
-
-              <div className="flex gap-2">
-                {article.source_url && (
-                  <a href={article.source_url} target="_blank" rel="noopener noreferrer">
-                    <Button variant="ghost" size="icon" title="Voir l'article source" aria-label="Voir l'article source">
-                      <ExternalLink className="size-4" />
-                    </Button>
-                  </a>
-                )}
-                <Link href={`/admin/presse/articles/${article.id}/edit`}>
-                  <Button variant="ghost" size="icon" title="Modifier" aria-label={`Modifier l'article : ${article.title}`}>
-                    <Pencil className="size-4" />
-                  </Button>
-                </Link>
-                <Button
-                  variant="ghost-destructive"
-                  size="icon"
-                  onClick={() => requestDelete(article.id)}
-                  title="Supprimer"
-                  aria-label={`Supprimer l'article : ${article.title}`}
-                >
-                  <Trash2 className="size-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+            </SortableContext>
+          </DndContext>
+        </div>
+      )}
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>

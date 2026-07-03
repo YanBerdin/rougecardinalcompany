@@ -154,6 +154,15 @@ supabase/schemas/
 
 ---
 
+## 🆕 Mises à jour récentes (juillet 2026)
+
+- **FEAT: Ajout colonne `display_order` sur `articles_presse` — TASK101 (3 juillet 2026)** : Support du drag & drop pour réordonner les articles de presse dans l'admin. Le nouvel ordre pilote AUSSI le tri public (`/presse` + widget "À la une" homepage).
+  - **Migrations** : `20260703120000_add_display_order_to_articles_presse.sql` (DDL — colonne + index) et `20260703120001_backfill_display_order_articles_presse.sql` (DML — backfill idempotent basé sur `published_at desc nulls last, id desc`)
+  - **Schéma déclaratif** : `08_table_articles_presse.sql` (colonne `display_order integer not null default 0` en fin de table + commentaire) et `40_indexes.sql` (index `idx_articles_presse_display_order`)
+  - **Statut** : migrations créées, pas encore appliquées (local/cloud) — à appliquer dès qu'un environnement Docker/Supabase CLI est disponible
+
+---
+
 ## 🆕 Mises à jour récentes (juin 2026)
 
 - **FEAT: Ajout colonne `video_url` sur `home_hero_slides` — TASK097 (3 juin 2026)** : Fond vidéo optionnel pour les slides hero. Si `video_url` est renseigné, il remplace l'image de fond en mode lecture.

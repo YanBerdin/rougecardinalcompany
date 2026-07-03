@@ -34,6 +34,11 @@ export interface ArticlesViewProps {
     }>;
 }
 
+export interface SortableArticleCardProps {
+    article: ArticlesViewProps["initialArticles"][number];
+    onDelete: (id: string) => void;
+}
+
 export interface ArticleFormProps {
     article?: ArticleDTO | null;
 }

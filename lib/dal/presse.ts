@@ -192,7 +192,7 @@ export const fetchMediaArticles = cache(
           "id, title, author, type, chapo, excerpt, source_publication, source_url, published_at, image_url"
         )
         .not("published_at", "is", null)
-        .order("published_at", { ascending: false, nullsFirst: false });
+        .order("display_order", { ascending: true });
 
       if (typeof limit === "number") {
         query = query.limit(limit);

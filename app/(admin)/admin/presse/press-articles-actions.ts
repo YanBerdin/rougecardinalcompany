@@ -5,12 +5,15 @@ import { revalidatePath } from "next/cache";
 import { type ActionResult } from "@/lib/actions/types";
 import {
     ArticleInputSchema,
+    ReorderArticlesSchema,
     type ArticleInput,
+    type ReorderArticlesInput,
 } from "@/lib/schemas/press-article";
 import {
     createArticle,
     updateArticle,
     deleteArticle,
+    reorderArticles,
 } from "@/lib/dal/admin-press-articles";
 import { requireMinRole } from "@/lib/auth/roles";
 
@@ -90,6 +93,33 @@ export async function deleteArticleAction(id: string): Promise<ActionResult> {
 
         revalidatePath("/admin/presse");
         revalidatePath("/presse");
+
+        return { success: true };
+    } catch (error: unknown) {
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : "Unknown error",
+        };
+    }
+}
+
+/**
+ * REORDER articles action (drag-and-drop)
+ */
+export async function reorderArticlesAction(
+    input: unknown
+): Promise<ActionResult> {
+    try {
+        const validated: ReorderArticlesInput = ReorderArticlesSchema.parse(input);
+        const result = await reorderArticles(validated);
+
+        if (!result.success) {
+            return { success: false, error: result.error ?? "Reorder failed" };
+        }
+
+        revalidatePath("/admin/presse");
+        revalidatePath("/presse");
+        revalidatePath("/"); // Homepage "À la une" widget
 
         return { success: true };
     } catch (error: unknown) {

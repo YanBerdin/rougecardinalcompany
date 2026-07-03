@@ -17,10 +17,12 @@ create table public.articles_presse (
   og_image_media_id bigint references public.medias(id) on delete set null, -- Image SEO/Open Graph via Media Library
   created_at timestamptz default now() not null,
   updated_at timestamptz default now() not null,
-  search_vector tsvector
+  search_vector tsvector,
+  display_order integer not null default 0
 );
 
 comment on table public.articles_presse is 'press articles referencing shows or company news';
+comment on column public.articles_presse.display_order is 'manual display order for admin drag-and-drop reordering; also drives public sort order on /presse and the homepage "À la une" widget';
 
 alter table public.articles_presse enable row level security;
 

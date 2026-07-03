@@ -10,6 +10,7 @@ create index if not exists idx_articles_published_at on public.articles_presse (
 create index if not exists idx_articles_published_at_public 
 	on public.articles_presse (published_at desc)
 	where published_at is not null;
+create index if not exists idx_articles_presse_display_order on public.articles_presse (display_order);
 
 -- Index date pour événements
 create index if not exists idx_evenements_date_debut on public.evenements (date_debut);

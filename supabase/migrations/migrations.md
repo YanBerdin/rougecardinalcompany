@@ -4,6 +4,33 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-07-03 - TASK101: ajout colonne `display_order` sur `articles_presse` (drag & drop admin)
+
+**Migrations** :
+
+- `20260703120000_add_display_order_to_articles_presse.sql` (DDL — colonne + index)
+- `20260703120001_backfill_display_order_articles_presse.sql` (DML — backfill)
+
+**Schéma déclaratif** : ✅ aligné dans `supabase/schemas/08_table_articles_presse.sql` (colonne `display_order integer not null default 0` ajoutée en fin de définition de table + commentaire) et `supabase/schemas/40_indexes.sql` (index `idx_articles_presse_display_order`).
+
+**Statut** : ⏸ créées localement, pas encore appliquées (environnement local sans Docker/Supabase CLI disponible dans cette session). À appliquer via `pnpm dlx supabase db reset` (local) puis `pnpm dlx supabase db push` (cloud).
+
+**Contexte** : TASK101 introduit le drag & drop pour réordonner les articles de presse dans l'admin. La table `articles_presse` n'avait pas de colonne d'ordre manuel (contrairement à `partners.display_order`) ; le tri reposait uniquement sur `published_at`. Le nouvel ordre `display_order` pilote désormais AUSSI le tri public (`/presse` + widget "À la une" de la homepage), pas seulement l'admin.
+
+**Changements** :
+
+- `ALTER TABLE public.articles_presse ADD COLUMN IF NOT EXISTS display_order integer not null default 0` — colonne ajoutée en fin de table (après `search_vector`), pas de valeur saisissable dans le formulaire (géré automatiquement par le DAL à la création, cf. Phase 3 du plan).
+- `COMMENT ON COLUMN` explicatif ajouté.
+- `CREATE INDEX IF NOT EXISTS idx_articles_presse_display_order ON public.articles_presse (display_order)` — optimise le tri `ORDER BY display_order`.
+- Backfill DML idempotent (`UPDATE ... FROM (SELECT ... ROW_NUMBER() OVER (ORDER BY published_at DESC NULLS LAST, id DESC))`) : initialise `display_order` selon l'ordre chronologique actuel (published_at desc, id desc en tie-break), pour ne pas changer l'ordre affiché au premier chargement après migration.
+
+**Validation attendue (après application)** :
+
+- `select id, title, display_order from public.articles_presse order by display_order` reflète l'ordre chronologique initial (published_at desc).
+- Pas de régression sur `/presse` ni sur le widget "À la une" homepage tant que la Phase 3 (DAL) n'est pas déployée (le tri reste sur `published_at` jusqu'à la bascule du DAL).
+
+---
+
 ### 2026-06-03 - TASK097: ajout colonne `video_url` sur `home_hero_slides`
 
 **Migration** : `20260603120000_add_video_url_to_home_hero_slides.sql`

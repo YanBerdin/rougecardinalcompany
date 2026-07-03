@@ -55,6 +55,7 @@ export type ArticleDTO = {
     published_at: string | null;
     image_url: string | null;
     og_image_media_id: number | null;
+    display_order: number;
     created_at: string;
     updated_at: string;
     // Relations
@@ -65,3 +66,17 @@ export type ArticleDTO = {
         order_index: number;
     }>;
 };
+
+/**
+ * Reorder Schema - Array of article IDs with new display order
+ */
+export const ReorderArticlesSchema = z.object({
+    articles: z.array(
+        z.object({
+            id: z.coerce.bigint(),
+            display_order: z.number().int().min(0),
+        })
+    ),
+});
+
+export type ReorderArticlesInput = z.infer<typeof ReorderArticlesSchema>;
