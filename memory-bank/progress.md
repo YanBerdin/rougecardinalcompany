@@ -1,5 +1,52 @@
 # Progress
 
+## Drag-and-Drop Réorganisation Articles de Presse (TASK101) (2026-07-03)
+
+✅ **COMPLET** — Implémentation complète du système drag-and-drop pour réorganiser les articles de presse dans l'admin, avec reflux de l'ordre vers les pages publiques.
+
+### Livrables
+
+- **Phase 4 : Server Action** (`press-articles-actions.ts`) — `reorderArticlesAction` avec validation Zod, DAL call, revalidation multi-routes
+- **Phase 5 : Hook Custom** (`lib/hooks/useArticlesDnd.ts`) — Sensors (PointerSensor 8px + KeyboardSensor), handleDragEnd avec optimistic update + toast
+- **Phase 6 : Composant Sortable** (`SortableArticleCard.tsx`) — Single component (pas de duplication mobile/desktop), responsive, accessible
+- **Phase 7 : Intégration DnD** (`ArticlesView.tsx`) — DndContext + closestCenter + verticalListSortingStrategy + single render loop
+- **Phase 8 : Migrations** :
+  - **DDL** `20260703120000_add_display_order_to_articles_presse.sql` : Colonne `display_order`, index créé
+  - **DML** `20260703120001_backfill_display_order_articles_presse.sql` : Hydrate avec `row_number()` sur `published_at DESC`
+- **Sort Order Changes** :
+  - `lib/dal/presse.ts` : `.order("display_order", {ascending:true})`
+  - `lib/dal/home-news.ts` : `.order("display_order", {ascending:true})`
+  - Impact : 3 contextes (admin interface, page `/presse`, widget homepage "À la une")
+
+### Files
+
+| Fichier | Action | Notes |
+| --------- | -------- | ------- |
+| `components/features/admin/presse/SortableArticleCard.tsx` | Created | Sortable card, responsive, accessible |
+| `lib/hooks/useArticlesDnd.ts` | Created | Custom DnD hook, optimistic update, sensors |
+| `.github/prompts/plan-TASK101-articlesPresseDragDrop.prompt.md` | Created | Implementation plan 8 phases |
+| `app/(admin)/admin/presse/press-articles-actions.ts` | Modified | Added `reorderArticlesAction` |
+| `components/features/admin/presse/ArticlesView.tsx` | Modified | Complete DnD integration |
+| `lib/dal/admin-press-articles.ts` | Modified | Added `reorderArticles` batch update |
+| `lib/schemas/press-article.ts` | Modified | Added `ReorderArticlesSchema` + `display_order` |
+| `lib/dal/presse.ts` | Modified | Sort order: `display_order ASC` |
+| `lib/dal/home-news.ts` | Modified | Sort order: `display_order ASC` |
+| `supabase/schemas/08_table_articles_presse.sql` | Modified | Display order column definition |
+| `supabase/schemas/40_indexes.sql` | Modified | Display order index |
+| `supabase/migrations/20260703120000_add_display_order_to_articles_presse.sql` | Created | DDL migration, applied ✅ |
+| `supabase/migrations/20260703120001_backfill_display_order_articles_presse.sql` | Created | DML backfill, applied ✅ |
+
+### Validation
+
+- ✅ TypeScript: `pnpm tsc --noEmit` = Zero errors
+- ✅ ESLint: `pnpm lint` = Clean
+- ✅ Migrations: Applied locally + remote (yvtrlvmbofklefxcxrzv)
+- ✅ Git: 17 files staged, Conventional commit `3f9caba`
+- ✅ Pattern conformity: Matches `reorderPartners` + `useHeroSlidesDnd`
+- ✅ BigInt serialization: UI `number` → transport `string` → DAL `bigint` ✅
+
+---
+
 ## ContactInfoSidebar dynamique — coordonnées DB (TASK100) (2026-06-30)
 
 ✅ **COMPLET** — Les coordonnées sur `/contact` sont désormais dynamiques, lues depuis `public.configurations_site` via `fetchFooterConfig()`.

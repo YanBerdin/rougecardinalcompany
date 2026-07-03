@@ -2,6 +2,8 @@
 
 ## Completed
 
+- `TASK101` Drag-and-drop réorganisation articles de presse — **COMPLÈTE ✅ 2026-07-03** — 8 phases : DB + DAL + Zod + Server Action + hook custom + composant sortable + intégration DnD + migrations applicables. Colonne `display_order`, backfill `row_number()`, sort public `/presse` et homepage widget. DndContext + `@dnd-kit/sortable` + PointerSensor (8px) + KeyboardSensor. Commit `3f9caba`. Voir `memory-bank/tasks/TASK101-articlesPresseDragDrop.md`
+
 - `TASK088` Migration recharts 3.x, audit sécurité dépendances, documentation, memory-bank — **Clôturée ✅ 2026-04-07** — voir `memory-bank/tasks/TASK088-migration-recharts-3x-audit-securite.md`
 - `ENV-VALIDATION` Validation d'environnement runtime + CI — **22 tests ✅ + workflow CI ✅** (2026-03-25) — `lib/env-validation.ts` extrait, DI pattern, 4 checks, 75/75 régression, rapport `doc/ENV-VALIDATION-REPORT.md`, workflow `unit-tests.yml` ajouté
 - `TASK087` Compression images Sharp côté serveur — **IMPLÉMENTÉE ✅** (2026-03-24) — `lib/utils/image-compress.ts` créé, pipeline `uploadMediaImage()` mis à jour, `MediaUploadInput` File|Blob, 11/11 tests unitaires, fix TypeScript Uint8Array.from, script npm `test:unit:image-compress`
