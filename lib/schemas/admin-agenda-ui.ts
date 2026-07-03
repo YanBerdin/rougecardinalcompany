@@ -15,7 +15,16 @@ export const EventFormSchema = z.object({
     lieu_id: z.number().int().positive().nullable().optional(),
     date_fin: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/).nullable().optional(),
     end_time: z.string().regex(/^\d{2}:\d{2}$/).nullable().optional(),
-    ticket_url: z.string().url().nullable().optional(),
+    // Accepte une URL valide, une chaîne vide (champ vidé par l'utilisateur) ou null/undefined.
+    // Validation : une valeur non-vide DOIT être une URL valide.
+    ticket_url: z
+        .string()
+        .nullable()
+        .optional()
+        .refine(
+            (val) => !val || z.string().url().safeParse(val).success,
+            "Invalid URL"
+        ),
     capacity: z.number().int().positive().nullable().optional(),
     price_cents: z.number().int().nonnegative().nullable().optional(),
 });

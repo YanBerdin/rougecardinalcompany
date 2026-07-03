@@ -71,11 +71,17 @@ export function EventForm({ event, spectacles, lieux }: EventFormProps) {
         setIsPending(true);
 
         try {
-            // ✅ Envoyer les données brutes au format UI
+            // ✅ Normaliser les chaînes vides en null avant envoi
+            const normalizedData = {
+                ...data,
+                ticket_url: data.ticket_url === "" ? null : data.ticket_url,
+            };
+
+            // ✅ Envoyer les données normalisées au format UI
             // La Server Action convertira vers le format serveur
             const result = isEditMode && eventIdForAction !== null
-                ? await updateEventAction(String(eventIdForAction), data)
-                : await createEventAction(data);
+                ? await updateEventAction(String(eventIdForAction), normalizedData)
+                : await createEventAction(normalizedData);
 
             if (!result.success) {
                 throw new Error(result.error);
