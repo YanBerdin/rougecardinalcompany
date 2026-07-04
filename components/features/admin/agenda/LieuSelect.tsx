@@ -26,6 +26,7 @@ import {
 import { useFormContext } from "react-hook-form";
 import type { EventFormValues } from "@/lib/schemas/admin-agenda-ui";
 import type { LieuClientDTO } from "@/lib/types/admin-agenda-client";
+import Link from "next/link";
 
 interface LieuSelectProps {
     lieux: LieuClientDTO[];
@@ -42,7 +43,7 @@ export function LieuSelect({ lieux }: LieuSelectProps) {
                     <FormLabel>Lieu</FormLabel>
                     {lieux.length === 0 && (
                         <FormDescription>
-                            Aucun lieu disponible. Créez des lieux dans la section <a href="/admin/lieux" className="underline">Lieux</a>.
+                            Aucun lieu disponible. Créez des lieux dans la section <Link href="/admin/lieux" className="underline">Lieux</Link>.
                         </FormDescription>
                     )}
                     <Popover>

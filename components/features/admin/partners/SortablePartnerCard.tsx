@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash2, GripVertical, ExternalLink } from "lucide-react";
 import type { SortablePartnerCardProps } from "./types";
+import Link from "next/link";
 
 export function SortablePartnerCard({
     partner,
@@ -79,7 +80,7 @@ export function SortablePartnerCard({
 
                 {/* Body: Website URL */}
                 {partner.website_url && (
-                    <a
+                    <Link
                         href={partner.website_url}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -87,7 +88,7 @@ export function SortablePartnerCard({
                     >
                         <ExternalLink className="size-4 flex-shrink-0" />
                         <span className="truncate">{partner.website_url}</span>
-                    </a>
+                    </Link>
                 )}
 
                 {/* Footer: Actions */}
@@ -153,7 +154,7 @@ export function SortablePartnerCard({
                         )}
                     </div>
                     {partner.website_url && (
-                        <a
+                        <Link
                             href={partner.website_url}
                             target="_blank"
                             rel="noopener noreferrer"
@@ -161,7 +162,7 @@ export function SortablePartnerCard({
                         >
                             <span className="truncate">{partner.website_url}</span>
                             <ExternalLink className="size-3 flex-shrink-0" />
-                        </a>
+                        </Link>
                     )}
                 </div>
 

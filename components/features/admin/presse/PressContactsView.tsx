@@ -122,21 +122,21 @@ export function PressContactsView({ initialContacts }: PressContactsViewProps) {
 
             {/* Body: Contact info */}
             <div className="space-y-2">
-              <a
+              <Link
                 href={`mailto:${contact.email}`}
                 className="text-sm text-muted-foreground flex items-center gap-2 hover:underline"
               >
                 <Mail className="size-4" />
                 <span className="truncate">{contact.email}</span>
-              </a>
+              </Link>
               {contact.telephone && (
-                <a
+                <Link
                   href={`tel:${contact.telephone}`}
                   className="text-sm text-muted-foreground flex items-center gap-2 hover:underline"
                 >
                   <Phone className="size-4" />
                   {contact.telephone}
-                </a>
+                </Link>
               )}
             </div>
 
@@ -196,21 +196,21 @@ export function PressContactsView({ initialContacts }: PressContactsViewProps) {
                   {contact.fonction} - {contact.media}
                 </p>
                 <div className="flex gap-4 mt-1">
-                  <a
+                  <Link
                     href={`mailto:${contact.email}`}
                     className="text-xs text-muted-foreground flex items-center gap-1 hover:underline"
                   >
                     <Mail className="size-3" />
                     {contact.email}
-                  </a>
+                  </Link>
                   {contact.telephone && (
-                    <a
+                    <Link
                       href={`tel:${contact.telephone}`}
                       className="text-xs text-muted-foreground flex items-center gap-1 hover:underline"
                     >
                       <Phone className="size-3" />
                       {contact.telephone}
-                    </a>
+                    </Link>
                   )}
                 </div>
                 {contact.specialites && contact.specialites.length > 0 && (

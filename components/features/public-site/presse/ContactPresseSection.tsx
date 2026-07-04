@@ -3,6 +3,7 @@
  */
 import { Mail, Phone } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import Link from "next/link";
 
 export function ContactPresseSection() {
   return (
@@ -21,21 +22,21 @@ export function ContactPresseSection() {
                   </p>
                   <p className="flex items-center gap-2">
                     <Mail className="inline size-4 flex-shrink-0" aria-hidden="true" />
-                    <a
+                    <Link
                       href="mailto:presse@rouge-cardinal.fr"
                       className="hover:text-primary underline-offset-4 hover:underline"
                     >
                       presse@rouge-cardinal.fr
-                    </a>
+                    </Link>
                   </p>
                   <p className="flex items-center gap-2">
                     <Phone className="inline size-4 flex-shrink-0" aria-hidden="true" />
-                    <a
+                    <Link
                       href="tel:+33612345678"
                       className="hover:text-primary underline-offset-4 hover:underline"
                     >
                       +33 6 12 34 56 78
-                    </a>
+                    </Link>
                   </p>
                 </div>
               </div>

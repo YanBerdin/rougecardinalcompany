@@ -5,6 +5,7 @@ import AppSidebar from "@/components/admin/AdminSidebar";
 import { BfcacheHandler } from "@/components/admin/BfcacheHandler";
 import { Separator } from "@/components/ui/separator";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: {
@@ -31,12 +32,12 @@ export default async function AdminLayout({
       <AppSidebar userRole={userRole} />
       <SidebarInset>
         {/* C1 — Skip link : permet aux utilisateurs clavier/lecteur d'écran de contourner la navigation */}
-        <a
+        <Link
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-background focus:text-foreground focus:ring-2 focus:ring-ring"
         >
           Aller au contenu principal
-        </a>
+        </Link>
         {/* m10 — aria-label pour distinguer ce header dans la page */}
         <header aria-label="Navigation administration" className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           {/* M2 — aria-label explicite sur le bouton hamburger */}

@@ -4,6 +4,7 @@ import { PageViewTracker } from "@/components/features/analytics/PageViewTracker
 import type { Metadata } from "next";
 // Import globals.css pour Tailwind
 import "../globals.css";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: {
@@ -24,12 +25,12 @@ export default function MarketingLayout({
   return (
     <div className="min-h-screen flex flex-col marketing-content">
       {/* Skip link — WCAG 2.4.1 : contourner la navigation répétée */}
-      <a
+      <Link
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-background focus:text-foreground focus:ring-2 focus:ring-ring"
       >
         Aller au contenu principal
-      </a>
+      </Link>
       <PageViewTracker />
       <Header />
       <main id="main-content" className="flex-1">

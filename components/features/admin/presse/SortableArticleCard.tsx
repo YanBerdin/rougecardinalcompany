@@ -72,12 +72,12 @@ export function SortableArticleCard({
 
                 <div className="flex items-center justify-between pt-2 border-t gap-2">
                     {article.source_url ? (
-                        <a href={article.source_url} target="_blank" rel="noopener noreferrer">
+                        <Link href={article.source_url} target="_blank" rel="noopener noreferrer">
                             <Button variant="secondary" size="sm" aria-label="Voir l'article source">
                                 <ExternalLink className="size-4 mr-1" />
                                 Source
                             </Button>
-                        </a>
+                        </Link>
                     ) : (
                         <div />
                     )}
@@ -138,7 +138,7 @@ export function SortableArticleCard({
 
                 <div className="flex items-center gap-2">
                     {article.source_url && (
-                        <a href={article.source_url} target="_blank" rel="noopener noreferrer">
+                        <Link href={article.source_url} target="_blank" rel="noopener noreferrer">
                             <Button
                                 variant="ghost"
                                 size="icon"
@@ -146,7 +146,7 @@ export function SortableArticleCard({
                             >
                                 <ExternalLink className="size-4" />
                             </Button>
-                        </a>
+                        </Link>
                     )}
                     <Link href={`/admin/presse/articles/${article.id}/edit`}>
                         <Button
