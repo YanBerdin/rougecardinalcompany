@@ -25,6 +25,9 @@ type SupabaseEventRow = {
   start_time?: string | null;
   status?: string | null;
   ticket_url?: string | null;
+  capacity?: number | null;
+  price_cents?: number | null;
+  price_reduced_cents?: number | null;
   image_url?: string | null;
   genres?: string[] | null;
   spectacles?: {
@@ -88,6 +91,9 @@ function mapRowToEventDTO(row: SupabaseEventRow): AgendaEvent {
     genre: row.spectacles?.genre ?? null,
     status: row.status ?? "programmé",
     ticketUrl: row.ticket_url ?? null,
+    priceCents: row.price_cents ?? null,
+    priceReducedCents: row.price_reduced_cents ?? null,
+    capacity: row.capacity ?? null,
     endDate: row.date_fin ? toISODateString(new Date(row.date_fin)) : undefined,
     image: (() => {
       const poster = row.spectacles?.spectacles_medias?.find(
@@ -130,7 +136,7 @@ export const fetchUpcomingEvents = cache(
       const { data, error } = await supabase
         .from("evenements")
         .select(
-          `id, date_debut, date_fin, start_time, status, ticket_url, image_url, genres,
+          `id, date_debut, date_fin, start_time, status, ticket_url, capacity, price_cents, price_reduced_cents, image_url, genres,
          spectacles (title, slug, image_url, genre, status, public, spectacles_medias (type, medias (storage_path))),
          lieux (nom, adresse, ville, code_postal)`
         )
@@ -265,7 +271,7 @@ export const fetchEventsForCalendar = cache(
       const { data, error } = await supabase
         .from("evenements")
         .select(
-          `id, date_debut, date_fin, start_time, status, ticket_url, image_url, genres,
+          `id, date_debut, date_fin, start_time, status, ticket_url, capacity, price_cents, price_reduced_cents, image_url, genres,
          spectacles (title, slug, image_url, genre, status, public, spectacles_medias (type, medias (storage_path))),
          lieux (nom, adresse, ville, code_postal)`
         )

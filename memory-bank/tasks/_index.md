@@ -2,6 +2,8 @@
 
 ## Completed
 
+- `TASK102` Tarif réduit (`price_reduced_cents`) + affichage public prix & capacité — **COMPLÈTE ✅ 2026-07-04** — Colonne `price_reduced_cents` indépendante de `price_cents` propagée dans toute la chaîne admin (schémas, DAL, Server Actions, formulaire, détail) + affichage public sur `/agenda` et `/spectacles/[slug]` (prix + capacité). Migration manuelle chirurgicale (diff CLI trop bruité). `restore_content_version` mis à jour. Poussée sur Supabase Cloud (`pnpm db:push`). Voir `memory-bank/tasks/TASK102-reducedPriceAndPublicCapacity.md`
+
 - `TASK101` Drag-and-drop réorganisation articles de presse — **COMPLÈTE ✅ 2026-07-03** — 8 phases : DB + DAL + Zod + Server Action + hook custom + composant sortable + intégration DnD + migrations applicables. Colonne `display_order`, backfill `row_number()`, sort public `/presse` et homepage widget. DndContext + `@dnd-kit/sortable` + PointerSensor (8px) + KeyboardSensor. Commit `3f9caba`. Voir `memory-bank/tasks/TASK101-articlesPresseDragDrop.md`
 
 - `TASK088` Migration recharts 3.x, audit sécurité dépendances, documentation, memory-bank — **Clôturée ✅ 2026-04-07** — voir `memory-bank/tasks/TASK088-migration-recharts-3x-audit-securite.md`

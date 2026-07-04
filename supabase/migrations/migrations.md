@@ -4,6 +4,28 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-07-04 - TASK102: ajout `price_reduced_cents` sur `evenements` + affichage public prix/capacité
+
+**Migration** : `20260704130737_add_price_reduced_cents_evenements.sql` (DDL — colonne + fonction)
+
+**Schéma déclaratif** : ✅ aligné dans `supabase/schemas/07_table_evenements.sql` (colonne `price_reduced_cents integer null` ajoutée après `price_cents` + commentaire) et `supabase/schemas/15_content_versioning.sql` (`restore_content_version`, bloc `entity_type = 'evenement'`, restaure désormais `price_reduced_cents`).
+
+**Statut** : ✅ appliquée en local (`supabase db reset`) et poussée sur Supabase Cloud (`pnpm db:push`).
+
+**Contexte** : TASK102 introduit un tarif réduit indépendant du plein tarif (`price_cents`), propagé dans toute la chaîne admin (DAL, Server Actions, formulaire, détail) et exposé publiquement (prix + capacité) sur `/agenda` et `/spectacles/[slug]`, où aucune information tarifaire n'était affichée auparavant.
+
+**Changements** :
+
+- `ALTER TABLE public.evenements ADD COLUMN IF NOT EXISTS price_reduced_cents integer null` — aucune contrainte avec `price_cents` (champs indépendants).
+- `COMMENT ON COLUMN` explicatif ajouté.
+- `CREATE OR REPLACE FUNCTION public.restore_content_version(...)` — recréée avec le bloc `evenement` mis à jour pour restaurer `price_reduced_cents` depuis le snapshot JSON.
+
+**Note migration manuelle** : `supabase db diff` génère un diff très bruyant (des centaines de lignes de `revoke`/`grant` et de `drop`/`create` de vues, triggers et fonctions sans rapport avec ce changement — drift pré-existant entre l'historique des migrations et `supabase/schemas/`, non introduit par cette tâche). Migration écrite manuellement (chirurgicale, cohérente avec le style des migrations précédentes) plutôt que d'appliquer le diff brut généré par le CLI.
+
+**Validation** : `supabase db reset` applique la migration sans erreur ; un second `db diff` ne détecte plus aucune référence à `price_reduced_cents` (colonne + fonction alignées avec le schéma déclaratif). `pnpm tsc --noEmit`, `pnpm eslint` (fichiers modifiés) et `pnpm build` passent sans erreur.
+
+---
+
 ### 2026-07-03 - TASK101: ajout colonne `display_order` sur `articles_presse` (drag & drop admin)
 
 **Migrations** :

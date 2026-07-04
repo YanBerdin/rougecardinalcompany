@@ -27,6 +27,7 @@ export const EventFormSchema = z.object({
         ),
     capacity: z.number().int().positive().nullable().optional(),
     price_cents: z.number().int().nonnegative().nullable().optional(),
+    price_reduced_cents: z.number().int().nonnegative().nullable().optional(),
 });
 
 export type EventFormValues = z.infer<typeof EventFormSchema>;
