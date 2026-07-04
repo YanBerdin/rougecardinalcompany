@@ -10,6 +10,8 @@ import {
     Play,
     Star,
     MapPin,
+    Tag,
+    Users,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +36,24 @@ interface SpectacleDetailViewProps {
         longitude?: number | null;
     } | null;
     ticketUrl?: string | null;
+    ticketInfo?: {
+        priceCents: number | null;
+        priceReducedCents: number | null;
+        capacity: number | null;
+    } | null;
     dateRanges?: Array<{ start: string; end: string }>;
+}
+
+function formatPrice(priceCents: number | null): string | null {
+    if (priceCents === null) return null;
+    if (priceCents === 0) return "Gratuit";
+
+    return new Intl.NumberFormat("fr-FR", {
+        style: "currency",
+        currency: "EUR",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+    }).format(priceCents / 100);
 }
 
 export function SpectacleDetailView({
@@ -43,6 +62,7 @@ export function SpectacleDetailView({
     galleryPhotos = [],
     venue = null,
     ticketUrl = null,
+    ticketInfo = null,
     dateRanges = [],
 }: SpectacleDetailViewProps): React.ReactNode {
     const awards = spectacle.awards || [];
@@ -53,6 +73,8 @@ export function SpectacleDetailView({
             : `${new Date(range.start).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit" })} → ${new Date(range.end).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit" })}`
     );
     const formattedVenue = venue ? `${venue.nom}${venue.ville ? ` - ${venue.ville}` : ""}` : "À venir";
+    const formattedFullPrice = formatPrice(ticketInfo?.priceCents ?? null);
+    const formattedReducedPrice = formatPrice(ticketInfo?.priceReducedCents ?? null);
     const venueMapsUrl = venue
         ? buildGoogleMapsUrl({
             name: venue.nom,
@@ -147,7 +169,7 @@ export function SpectacleDetailView({
                                 <Badge variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold shadow-lg">
                                     <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
                                     {venueMapsUrl ? (
-                                        <a
+                                        <Link
                                             href={venueMapsUrl}
                                             target="_blank"
                                             rel="noopener noreferrer"
@@ -156,11 +178,29 @@ export function SpectacleDetailView({
                                             title={`Voir sur Google Maps`}
                                         >
                                             {formattedVenue}
-                                        </a>
+                                        </Link>
                                     ) : (
                                         formattedVenue
                                     )}
                                 </Badge>
+                                {formattedFullPrice && (
+                                    <Badge variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold shadow-lg">
+                                        <Tag className="size-3.5 shrink-0" aria-hidden="true" />
+                                        {formattedFullPrice}
+                                    </Badge>
+                                )}
+                                {formattedReducedPrice && (
+                                    <Badge variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold shadow-lg">
+                                        <Tag className="size-3.5 shrink-0" aria-hidden="true" />
+                                        Tarif réduit {formattedReducedPrice}
+                                    </Badge>
+                                )}
+                                {ticketInfo?.capacity !== null && ticketInfo?.capacity !== undefined && (
+                                    <Badge variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold shadow-lg">
+                                        <Users className="size-3.5 shrink-0" aria-hidden="true" />
+                                        {ticketInfo.capacity} places
+                                    </Badge>
+                                )}
                             </div>
 
                             {/* Mobile : affiche + CTA, visible seulement sur mobile, après les badges */}

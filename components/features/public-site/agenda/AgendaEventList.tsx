@@ -9,7 +9,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, Calendar, Download, Ticket, X } from "lucide-react"; //  Info
+import { MapPin, Calendar, Download, Tag, Ticket, Users, X } from "lucide-react"; //  Info
 import { isWithinInterval, parseISO, startOfDay, format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
@@ -50,6 +50,33 @@ function getBadgeVariant(type: string): BadgeVariant {
         .replace(/[\u0300-\u036f]/g, "")
         .trim();
     return BADGE_VARIANT_MAP[normalized] ?? "secondary";
+}
+
+function formatPrice(priceCents: number | null): string | null {
+    if (priceCents === null) return null;
+    if (priceCents === 0) return "Gratuit";
+
+    return new Intl.NumberFormat("fr-FR", {
+        style: "currency",
+        currency: "EUR",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+    }).format(priceCents / 100);
+}
+
+function buildPricingSummary(event: Event): string | null {
+    const parts: string[] = [];
+    const fullPrice = formatPrice(event.priceCents);
+    const reducedPrice = formatPrice(event.priceReducedCents);
+
+    if (fullPrice) {
+        parts.push(`${fullPrice}`);
+    }
+    if (reducedPrice) {
+        parts.push(`Tarif réduit ${reducedPrice}`);
+    }
+
+    return parts.length > 0 ? parts.join(" · ") : null;
 }
 
 // ============================================================================
@@ -138,6 +165,7 @@ function buildVenueLabel(venue: string, address: string): string {
 function EventCardMetaInline({ event }: { readonly event: Event }): React.JSX.Element {
     const mapsUrl = buildGoogleMapsUrl({ name: event.venue, address: event.address });
     const venueLabel = buildVenueLabel(event.venue, event.address);
+    const pricingSummary = buildPricingSummary(event);
     return (
         <div
             className="flex flex-col items-start gap-x-3 gap-y-2 text-xs md:text-sm text-muted-foreground"
@@ -149,7 +177,7 @@ function EventCardMetaInline({ event }: { readonly event: Event }): React.JSX.El
             </span>
 
             {mapsUrl ? (
-                <a
+                <Link
                     href={mapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -159,12 +187,29 @@ function EventCardMetaInline({ event }: { readonly event: Event }): React.JSX.El
                 >
                     <MapPin className="size-3 text-gold shrink-0" aria-hidden="true" />
                     <span>{venueLabel}</span>
-                </a>
+                </Link>
             ) : (
                 <span className="flex items-center gap-1">
                     <MapPin className="size-3 text-gold shrink-0" aria-hidden="true" />
                     {venueLabel}
                 </span>
+            )}
+
+            {(pricingSummary || event.capacity !== null) && (
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                    {pricingSummary && (
+                        <span className="flex items-center gap-1">
+                            <Tag className="size-3 text-gold shrink-0" aria-hidden="true" />
+                            {pricingSummary}
+                        </span>
+                    )}
+                    {event.capacity !== null && (
+                        <span className="flex items-center gap-1">
+                            <Users className="size-3 text-gold shrink-0" aria-hidden="true" />
+                            {event.capacity} places
+                        </span>
+                    )}
+                </div>
             )}
         </div>
     );

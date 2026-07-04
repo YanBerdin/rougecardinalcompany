@@ -572,6 +572,7 @@ begin
       date_fin = (version_record.content_snapshot->>'date_fin')::timestamptz,
       capacity = (version_record.content_snapshot->>'capacity')::integer,
       price_cents = (version_record.content_snapshot->>'price_cents')::integer,
+      price_reduced_cents = (version_record.content_snapshot->>'price_reduced_cents')::integer,
       status = version_record.content_snapshot->>'status',
       ticket_url = version_record.content_snapshot->>'ticket_url',
       image_url = version_record.content_snapshot->>'image_url',

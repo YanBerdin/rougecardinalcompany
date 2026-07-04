@@ -139,6 +139,7 @@ async function runTests() {
       ticket_url: 'https://example.com/tickets',
       capacity: 100,
       price_cents: 1500,
+      price_reduced_cents: 1000,
     };
     
     const { data, error } = await supabase

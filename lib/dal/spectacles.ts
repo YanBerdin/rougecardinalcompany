@@ -50,6 +50,12 @@ export type SpectacleNextVenue = {
   longitude: number | null;
 };
 
+export type SpectacleTicketInfo = {
+  priceCents: number | null;
+  priceReducedCents: number | null;
+  capacity: number | null;
+};
+
 export const fetchSpectacleNextVenue = cache(
   async (spectacleId: number): Promise<SpectacleNextVenue | null> => {
     try {
@@ -125,6 +131,43 @@ export const fetchSpectacleTicketUrl = cache(
       return data.ticket_url ?? null;
     } catch (err) {
       console.error("fetchSpectacleTicketUrl exception:", err);
+      return null;
+    }
+  }
+);
+
+/**
+ * Fetches pricing and capacity information from the next upcoming event of a spectacle.
+ *
+ * Returns the closest future event regardless of ticket URL presence.
+ */
+export const fetchSpectacleTicketInfo = cache(
+  async (spectacleId: number): Promise<SpectacleTicketInfo | null> => {
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from("evenements")
+        .select("price_cents, price_reduced_cents, capacity")
+        .eq("spectacle_id", spectacleId)
+        .gte("date_debut", new Date().toISOString())
+        .order("date_debut", { ascending: true })
+        .limit(1)
+        .single();
+
+      if (error) {
+        if (error.code !== "PGRST116") {
+          console.error("fetchSpectacleTicketInfo error:", error);
+        }
+        return null;
+      }
+
+      return {
+        priceCents: data.price_cents ?? null,
+        priceReducedCents: data.price_reduced_cents ?? null,
+        capacity: data.capacity ?? null,
+      };
+    } catch (err) {
+      console.error("fetchSpectacleTicketInfo exception:", err);
       return null;
     }
   }

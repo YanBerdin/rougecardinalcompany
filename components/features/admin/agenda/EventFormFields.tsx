@@ -91,7 +91,7 @@ export function EventFormFields() {
                 name="status"
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Statut</FormLabel>
+                        <FormLabel>Statut (Info Admin Only)</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                                 <SelectTrigger>
@@ -114,7 +114,7 @@ export function EventFormFields() {
                 name="ticket_url"
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>URL Billetterie</FormLabel>
+                        <FormLabel>URL Billetterie (affiche bouton réservation)</FormLabel>
                         <FormControl>
                             <Input
                                 type="url"
@@ -128,7 +128,7 @@ export function EventFormFields() {
                 )}
             />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <FormField
                     control={form.control}
                     name="capacity"
@@ -158,7 +158,7 @@ export function EventFormFields() {
                     name="price_cents"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Prix (€)</FormLabel>
+                            <FormLabel>Plein tarif (€)</FormLabel>
                             <FormControl>
                                 <Input
                                     type="number"
@@ -169,6 +169,33 @@ export function EventFormFields() {
                                     // Conversion centimes → euros pour affichage
                                     value={field.value !== null && field.value !== undefined ? (field.value / 100).toFixed(2) : ""}
                                     // Conversion euros → centimes pour stockage
+                                    onChange={(e) => {
+                                        const euros = parseFloat(e.target.value);
+                                        field.onChange(
+                                            !isNaN(euros) && e.target.value ? Math.round(euros * 100) : null
+                                        );
+                                    }}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <FormField
+                    control={form.control}
+                    name="price_reduced_cents"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Tarif réduit (€)</FormLabel>
+                            <FormControl>
+                                <Input
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    {...field}
+                                    value={field.value !== null && field.value !== undefined ? (field.value / 100).toFixed(2) : ""}
                                     onChange={(e) => {
                                         const euros = parseFloat(e.target.value);
                                         field.onChange(

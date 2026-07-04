@@ -889,6 +889,7 @@ export type Database = {
           metadata: Json | null
           parent_event_id: number | null
           price_cents: number | null
+          price_reduced_cents: number | null
           recurrence_end_date: string | null
           recurrence_rule: string | null
           spectacle_id: number
@@ -910,6 +911,7 @@ export type Database = {
           metadata?: Json | null
           parent_event_id?: number | null
           price_cents?: number | null
+          price_reduced_cents?: number | null
           recurrence_end_date?: string | null
           recurrence_rule?: string | null
           spectacle_id: number
@@ -931,6 +933,7 @@ export type Database = {
           metadata?: Json | null
           parent_event_id?: number | null
           price_cents?: number | null
+          price_reduced_cents?: number | null
           recurrence_end_date?: string | null
           recurrence_rule?: string | null
           spectacle_id?: number

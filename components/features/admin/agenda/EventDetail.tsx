@@ -100,7 +100,8 @@ export function EventDetail({ event }: EventDetailProps) {
   const formattedDateFin = event.date_fin ? formatDate(event.date_fin) : null;
   const formattedStartTime = formatTime(event.start_time);
   const formattedEndTime = formatTime(event.end_time);
-  const formattedPrice = formatPrice(event.price_cents);
+  const formattedFullPrice = formatPrice(event.price_cents);
+  const formattedReducedPrice = formatPrice(event.price_reduced_cents);
 
   const metaDateCreated = new Date(event.created_at).toLocaleString("fr-FR");
   const metaDateUpdated = new Date(event.updated_at).toLocaleString("fr-FR");
@@ -204,11 +205,18 @@ export function EventDetail({ event }: EventDetailProps) {
 
         {/* Billetterie */}
         <Section title="Billetterie">
-          {formattedPrice !== null && (
+          {formattedFullPrice !== null && (
             <InfoRow
               icon={<Ticket className="size-4" />}
-              label="Tarif"
-              value={formattedPrice}
+              label="Plein tarif"
+              value={formattedFullPrice}
+            />
+          )}
+          {formattedReducedPrice !== null && (
+            <InfoRow
+              icon={<Tag className="size-4" />}
+              label="Tarif réduit"
+              value={formattedReducedPrice}
             />
           )}
           {event.capacity !== null && (
@@ -223,18 +231,18 @@ export function EventDetail({ event }: EventDetailProps) {
               icon={<ExternalLink className="size-4" />}
               label="Lien billetterie"
               value={
-                <a
+                <Link
                   href={event.ticket_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline underline-offset-2 hover:text-primary break-all"
                 >
                   {event.ticket_url}
-                </a>
+                </Link>
               }
             />
           )}
-          {formattedPrice === null && event.capacity === null && !event.ticket_url && (
+          {formattedFullPrice === null && formattedReducedPrice === null && event.capacity === null && !event.ticket_url && (
             <p className="text-sm text-muted-foreground italic">
               Aucune information de billetterie.
             </p>
