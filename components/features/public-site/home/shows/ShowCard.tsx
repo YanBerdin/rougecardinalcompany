@@ -87,7 +87,7 @@ export function ShowCard({ show, index }: ShowCardProps) {
             <Link
               href={spectacleUrl}
               aria-label={`Voir les détails de ${show.title}`}
-              className="inline-flex items-center justify-center gap-2 rounded-md bg-white/40 border border-white/50 px-4 py-2 text-sm font-medium text-chart-6 w-full hover:bg-chart-6 hover:text-black transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-1 focus-visible:outline-none"
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-white/40 border border-white/50 px-4 py-2 text-sm font-medium text-chart-6 w-full hover:bg-chart-6 hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-1 focus-visible:outline-none"
             >
               <Play className="size-5" aria-hidden="true" />
               Détails

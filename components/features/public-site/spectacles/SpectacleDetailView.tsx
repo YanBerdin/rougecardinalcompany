@@ -156,17 +156,17 @@ export function SpectacleDetailView({
 
                             <div className="flex flex-wrap items-center gap-3" aria-label="Période et lieu">
                                 {formattedRanges.length > 0 ? formattedRanges.map((label, i) => (
-                                    <Badge key={i} variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold shadow-lg">
+                                    <Badge key={i} variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
                                         <Calendar className="size-3.5 shrink-0" aria-hidden="true" />
                                         {label}
                                     </Badge>
                                 )) : (
-                                    <Badge variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold shadow-lg">
+                                    <Badge variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
                                         <Calendar className="size-3.5 shrink-0" aria-hidden="true" />
                                         À venir
                                     </Badge>
                                 )}
-                                <Badge variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold shadow-lg">
+                                <Badge variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
                                     <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
                                     {venueMapsUrl ? (
                                         <Link
@@ -183,20 +183,30 @@ export function SpectacleDetailView({
                                         formattedVenue
                                     )}
                                 </Badge>
+
+                                <Badge variant="outlineGold" className="text-xs sm:text-sm font-semibold">
+                                    <Clock className="mr-1.5 size-3.5" aria-hidden="true" />
+                                    {formatDurationHumanReadable(spectacle.duration_minutes)}
+                                </Badge>
+                                <Badge variant="outlineGold" className="text-xs sm:text-sm font-semibold">
+                                    <Star className="mr-1.5 size-3.5" aria-hidden="true" />
+                                    {spectacle.genre}
+                                </Badge>
+
                                 {formattedFullPrice && (
-                                    <Badge variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold shadow-lg">
+                                    <Badge variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
                                         <Tag className="size-3.5 shrink-0" aria-hidden="true" />
                                         {formattedFullPrice}
                                     </Badge>
                                 )}
                                 {formattedReducedPrice && (
-                                    <Badge variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold shadow-lg">
+                                    <Badge variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
                                         <Tag className="size-3.5 shrink-0" aria-hidden="true" />
                                         Tarif réduit {formattedReducedPrice}
                                     </Badge>
                                 )}
                                 {ticketInfo?.capacity !== null && ticketInfo?.capacity !== undefined && (
-                                    <Badge variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold shadow-lg">
+                                    <Badge variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
                                         <Users className="size-3.5 shrink-0" aria-hidden="true" />
                                         {ticketInfo.capacity} places
                                     </Badge>
@@ -265,17 +275,6 @@ export function SpectacleDetailView({
                                     </p>
                                 </div>
                             )}
-
-                            <div className="flex flex-wrap items-center gap-3" aria-label="Durée et genre">
-                                <Badge variant="outlineGold" className="text-xs sm:text-sm font-semibold shadow-lg">
-                                    <Clock className="mr-1.5 size-3.5" aria-hidden="true" />
-                                    {formatDurationHumanReadable(spectacle.duration_minutes)}
-                                </Badge>
-                                <Badge variant="outlineGold" className="text-xs sm:text-sm font-semibold shadow-lg">
-                                    <Star className="mr-1.5 size-3.5" aria-hidden="true" />
-                                    {spectacle.genre}
-                                </Badge>
-                            </div>
 
                             {/* Awards Widget */}
                             {hasAwards && (

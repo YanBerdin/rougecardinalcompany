@@ -802,17 +802,17 @@
 
 .logo-text {
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 1.2rem;
   line-height: 1.2;
   letter-spacing: -0.025em;
   /* Stabilisation du texte */
   transform: none !important;
   animation: none !important;
-  color: #ad0000;
+  color: #e50914;
 }
 
 .logo-text:hover {
-  color: #e50914;
+  color: #ad0000;
 }
 
 /* Light mode: Navbar glass blur when scrolled */
@@ -860,11 +860,11 @@
 */
 @media (max-width: 640px) {
   .logo-image {
-    height: 1.5rem;
-    width: 1.5rem;
+    height: 1.8rem;
+    width: 1.8rem;
   }
   .logo-text {
-    font-size: 0.8rem;
+    font-size: 1rem;
   }
 }
 

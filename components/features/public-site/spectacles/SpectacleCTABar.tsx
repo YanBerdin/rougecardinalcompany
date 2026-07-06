@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { Ticket, Calendar, ArrowLeft } from "lucide-react";
+import { Ticket, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface SpectacleCTABarProps {
@@ -29,8 +29,8 @@ export function SpectacleCTABar({
             {ticketUrl && (
                 <Button
                     variant="default"
-                    size="default"
-                    className="shadow-lg hover:shadow-xl transition-all touch-action-manipulation flex-1"
+                    size="lg"
+                    className="touch-action-manipulation flex-1"
                     asChild
                 >
                     <Link
@@ -46,7 +46,7 @@ export function SpectacleCTABar({
 
             <Button
                 variant={ticketUrl ? "secondary" : "default"}
-                size="default"
+                size="lg"
                 className="w-full flex-1"
                 asChild
             >
@@ -66,7 +66,7 @@ export function SpectacleCTABar({
                     href="/spectacles"
                     aria-label="Retourner à la page listant tous les évènements"
                 >
-                    <ArrowLeft className="mr-2 size-4" aria-hidden="true" />
+                    <ArrowLeft className="mr-2 size-5" aria-hidden="true" />
                      {backLabel} 
                 </Link>
             </Button>
