@@ -25,9 +25,12 @@ export function HeroCTA({ slide }: HeroCTAProps) {
 
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
           {slide.ctaPrimaryEnabled && slide.ctaPrimaryLabel && (
-            <Button variant="default" size="lg" className="max-sm:text-sm text-base max-w-[280px] w-54 justify-center" asChild>
+            <Button
+              variant="default"
+              size="lg"
+              className="max-sm:text-sm text-base max-w-[280px] w-54 justify-center" asChild>
               <Link href={slide.ctaPrimaryUrl ?? "/spectacles"}>
-                <View className="size-6 shrink-0" aria-hidden="true" />
+                <View className="size-5 shrink-0" aria-hidden="true" />
                 {slide.ctaPrimaryLabel}
               </Link>
             </Button>
@@ -37,11 +40,11 @@ export function HeroCTA({ slide }: HeroCTAProps) {
             <Button
               variant="outline"
               size="lg"
-              className="max-sm:text-sm text-base max-w-[280px] w-54 justify-center bg-white/30 border-white/50 text-chart-6 backdrop-blur-md hover:bg-white/90 hover:text-chart-2 transition-colors duration-300 shadow-lg"
+              className="max-sm:text-sm text-base max-w-[280px] w-54 justify-center bg-white/30 border-white/50 text-chart-6 backdrop-blur-md hover:bg-white/90 hover:text-chart-2 transition-colors duration-300"
               asChild
             >
               <Link href={slide.ctaSecondaryUrl ?? "/agenda"}>
-                <Play className="size-6 shrink-0" aria-hidden="true" />
+                <Play className="size-5 shrink-0" aria-hidden="true" />
                 {slide.ctaSecondaryLabel}
               </Link>
             </Button>
