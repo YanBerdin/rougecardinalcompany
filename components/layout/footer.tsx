@@ -31,7 +31,7 @@ export default async function Footer() {
                 height={32}
                 className="h-8 w-auto object-contain rounded-md mb-2"
               />
-              <span className="logo-text whitespace-nowrap text-secondary-foreground">Rouge Cardinal</span>
+              <span className="logo-text text-primary hover:text-chart-2 whitespace-nowrap">Rouge Cardinal</span>
             </Link>
             <p className="text-base text-muted-foreground mb-4 max-w-md">
               {description}

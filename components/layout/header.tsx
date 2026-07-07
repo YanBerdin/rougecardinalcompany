@@ -111,9 +111,9 @@ export default function Header() {
               className="logo-image"
               priority
             />
-            <span className={cn("logo-text whitespace-nowrap", headerTextColor)}>
+             {/*<span className={cn("logo-text whitespace-nowrap", headerTextColor)}>
               Rouge Cardinal
-            </span>
+            </span>*/}
           </Link>
 
           {/* Navigation Desktop */}

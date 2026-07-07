@@ -50,11 +50,13 @@ export function HeroNavigation({
         aria-label={isAutoPlaying ? "Mettre en pause le diaporama" : "Reprendre le diaporama"}
         aria-pressed={!isAutoPlaying}
       >
-        {isAutoPlaying ? (
-          <Pause className="h-3.5 w-3.5" aria-hidden="true" />
-        ) : (
-          <Play className="h-3.5 w-3.5" aria-hidden="true" />
-        )}
+        <span className="flex items-center justify-center p-1.5 rounded-full bg-black/20 hover:bg-black/40 text-chart-6/60 hover:text-chart-6 backdrop-blur-sm transition-colors duration-200">
+          {isAutoPlaying ? (
+            <Pause className="h-3.5 w-3.5" aria-hidden="true" />
+          ) : (
+            <Play className="h-3.5 w-3.5" aria-hidden="true" />
+          )}
+        </span>
       </button>
     </>
   );

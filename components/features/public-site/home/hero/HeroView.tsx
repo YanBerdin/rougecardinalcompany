@@ -4,6 +4,7 @@ import { HeroProps } from "./types";
 import { HeroSlideBackground } from "./HeroSlideBackground";
 import { HeroCTA } from "./HeroCTA";
 import { HeroNavigation } from "./HeroNavigation";
+import { HeroIndicators } from "./HeroIndicators";
 import { HeroProgressBar } from "./HeroProgressBar";
 
 export function HeroView({
@@ -52,6 +53,12 @@ export function HeroView({
         />
       )}
       <HeroCTA slide={slides[currentSlide]} />
+      <HeroIndicators
+        slides={slides}
+        currentSlide={currentSlide}
+        onPauseAutoPlay={onPauseAutoPlay}
+        onGoToSlide={onGoToSlide}
+      />
       <HeroProgressBar isAutoPlaying={isAutoPlaying} />
     </section>
   );

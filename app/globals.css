@@ -16,7 +16,7 @@
     --popover: 40 20% 92%; /* #efece7 vs 0 0% 100% #FFFFFF */
     --popover-foreground: 0 0% 10.9804%; /* #1C1C1C */
 
-    --primary: 0, 79%, 31%; /*   #9e1b1b */
+    --primary: 0 78% 36%; /*   #ad0000 */
     --primary-foreground: 40 20% 95%; /* #f5f3f0*/ /* #faf4e7 */
     --secondary: 0 0% 83.1373%; /* #D4D4D4 */
     --secondary-foreground: 0 0% 10.9804%; /* #1C1C1C */
@@ -32,7 +32,7 @@
     --border-primary: 4.64, 79.74%, 55.49%; /* #e84133 */
 
     --input: 0 0% 83.1373%; /* #D4D4D4 */
-    --ring: 0 78% 36%; /* #9e1b1b */
+    --ring: 0 78% 36%;  /*   #ad0000 */
 
     --chart-1: 0 78% 36%; /* #ad0000 */
     --chart-2: 0 89% 52%; /* #e84848 */ /* Plus clair que chart-1 */
@@ -101,7 +101,7 @@
     --popover: 0 0% 16.4706%; /* #2A2A2A */
     --popover-foreground: 41.0526 65.5172% 94.3137%; /* #faf4e7 */
 
-    --primary: 0 79% 31%; /* #8f1111     #9e1b1b */
+    --primary: 0 78% 36%; /*   #ad0000 */ /* #8f1111     #9e1b1b */
     --primary-foreground: 41.0526 65.5172% 94.3137%; /* #faf4e7 */
 
     --secondary: 0 0% 25.8824%; /* #424242 */
@@ -120,7 +120,7 @@
     --border-primary: 4.64, 79.74%, 55.49%; /* #e84133 */
 
     --input: 0 0% 25.8824%; /* #424242 */
-    --ring: 0 78% 36%; /* #9e1b1b */
+    --ring: 0 78% 36%;  /*   #ad0000 */
 
     --chart-1: 4.64, 79.74%, 55.49%; /* #e84133 */
     --chart-2: 357, 92.4%, 46.7%; /* #e50914 */
@@ -137,7 +137,7 @@
 
     --sidebar: 0 0% 10.9804%; /* #1C1C1C */
     --sidebar-foreground: 41.0526 65.5172% 94.3137%; /* #faf4e7 */
-    --sidebar-primary: 0 78% 36%; /* #9e1b1b */
+    --sidebar-primary: 0 78% 36%;  /*   #ad0000 */
     --sidebar-primary-foreground: 41.0526 65.5172% 94.3137%; /* #faf4e7 */
     --sidebar-accent: 0 0% 25.8824%; /* #424242 */
     --sidebar-accent-foreground: 41.0526 65.5172% 94.3137%; /* #faf4e7 */
@@ -808,11 +808,13 @@
   /* Stabilisation du texte */
   transform: none !important;
   animation: none !important;
-  color: #e50914;
+   /*   color: #e50914; */
+
 }
 
 .logo-text:hover {
-  color: #ad0000;
+   /*  color: #ad0000; */
+ 
 }
 
 /* Light mode: Navbar glass blur when scrolled */

@@ -7,7 +7,7 @@ export function CompagnieSkeleton() {
       <section className="py-20 hero-gradient">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="h-16 bg-white/20 animate-pulse rounded mb-6 max-w-2xl mx-auto" />
-          <div className="h-8 bg-white/20 animate-pulse rounded max-w-xl mx-auto" />
+          {/* <div className="h-8 bg-white/20 animate-pulse rounded max-w-xl mx-auto" /> */}
         </div>
       </section>
 
@@ -34,7 +34,6 @@ export function CompagnieSkeleton() {
 
           <div className="bg-muted/30 rounded-2xl p-8 mb-16">
             <div className="flex items-start space-x-4">
-              <div className="h-8 w-8 bg-primary animate-pulse rounded-full flex-shrink-0 mt-1" />
               <div className="space-y-4 w-full">
                 <div className="h-5 bg-muted animate-pulse rounded w-full" />
                 <div className="h-5 bg-muted animate-pulse rounded w-4/5" />
