@@ -168,7 +168,7 @@ export function SpectaclesView({
                     {/* Hover overlay with button */}
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                       <div className="flex flex-col gap-3 px-6 w-full">
-                        <span className="inline-flex items-center justify-center gap-2 rounded-md bg-white/40 border border-white/50 px-4 py-2 text-sm font-medium text-chart-6 w-full hover:bg-chart-6 hover:text-black transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-1 focus-visible:outline-none">
+                        <span className="inline-flex items-center justify-center gap-2 rounded-md bg-white/40 border border-white/50 px-4 py-2 text-sm font-medium text-chart-6 w-full hover:bg-chart-6 hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-1 focus-visible:outline-none">
                           <Play className="size-5" aria-hidden="true" />
                           Détails
                         </span>

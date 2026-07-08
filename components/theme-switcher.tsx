@@ -37,7 +37,7 @@ const ThemeSwitcher = ({ iconClassName = "text-sidebar-foreground" }: ThemeSwitc
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size={"sm"} title="Theme">
+        <Button variant="ghost" size={"icon"} title="Theme">
           {theme === "light" ? (
             <Sun
               key="light"
