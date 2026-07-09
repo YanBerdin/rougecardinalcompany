@@ -25,7 +25,7 @@ export function NewsView({ news }: NewsViewProps) {
           <div className="mb-4 flex flex-col gap-4 sm:gap-5 justify-center">
             <h2
               id="news-heading"
-              className="text-5xl italic font-semibold leading-none tracking-tight sm:text-5xl md:text-6xl lg:text-7xl mx-auto"
+              className="text-5xl italic font-semibold leading-none tracking-tight sm:text-5xl md:text-6xl lg:text-7xl mx-auto text-center"
             >
               La presse en parle
             </h2>
