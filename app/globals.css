@@ -313,19 +313,29 @@
     box-shadow: var(--shadow-lg);
   }
 
-  /* Liquid Glass Mobile Menu */
+  /* Liquid Glass Mobile Menu - opaque enough to stay readable over busy hero imagery */
   .liquid-glass-mobile {
-    background: rgba(255, 255, 255, 0.08) !important;
+    /* background: rgba(255, 255, 255, 0.08) !important;*/
+    background: hsl(var(--popover) / 0.98) !important;
     -webkit-backdrop-filter: blur(var(--blur-lg));
     backdrop-filter: blur(var(--blur-lg));
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    /*
+        border: 1px solid rgba(255, 255, 255, 0.25);
     box-shadow: var(--shadow-md);
+    */
+    border-color: hsl(var(--border) / 0.6);
+    box-shadow: var(--shadow-xl);
   }
 
   .dark .liquid-glass-mobile {
+    /*
     background: rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.15);
     box-shadow: var(--shadow-md);
+    */
+    background: hsl(var(--popover) / 0.98) !important;
+    border-color: hsl(var(--border) / 0.5);
+    box-shadow: var(--shadow-xl);
   }
 
   .nav-link-glass {
@@ -799,23 +809,21 @@
     filter 0.3s ease,
     box-shadow 0.3s ease;
 }
-
+/*
 .logo-text {
   font-weight: 700;
   font-size: 1.2rem;
   line-height: 1.2;
   letter-spacing: -0.025em;
+*/
   /* Stabilisation du texte */
+/*
   transform: none !important;
   animation: none !important;
    /*   color: #e50914; */
-
+/*
 }
-
-.logo-text:hover {
-   /*  color: #ad0000; */
- 
-}
+*/
 
 /* Light mode: Navbar glass blur when scrolled */
 .header-scrolled {
@@ -865,9 +873,11 @@
     height: 1.8rem;
     width: 1.8rem;
   }
+/*
   .logo-text {
     font-size: 1rem;
   }
+*/
 }
 
 /* Phase 4.1 - Accessibility: Respect user motion preferences */
