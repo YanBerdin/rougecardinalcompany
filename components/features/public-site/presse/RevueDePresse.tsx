@@ -31,7 +31,7 @@ export function RevueDePresse({ mediaArticles }: RevueDePresseSectionProps) {
         {/* Ex-libris / manchette */}
         <header className="mb-14 text-center md:mb-20">
           <p className="mb-4 font-sans text-xs font-semibold uppercase tracking-[0.4em] text-gold-text md:text-sm">
-            Dossier de presse · Édition spéciale
+            Revue de presse · Édition spéciale
           </p>
 
           <div className="mb-4 flex items-center gap-4 sm:gap-8">
@@ -168,7 +168,7 @@ export function RevueDePresse({ mediaArticles }: RevueDePresseSectionProps) {
                   style={{ animationDelay: `${index * 0.05}s` }}
                 >
                   <p className="mb-2 font-sans text-xs font-semibold uppercase tracking-[0.15em] text-gold-text sm:text-xs">
-                    N°{String(index + 2).padStart(2, "0")} · {article.type}
+                    {article.type}
                   </p>
 
                   <h4 className="mb-2 text-3xl font-semibold leading-snug">
@@ -176,7 +176,6 @@ export function RevueDePresse({ mediaArticles }: RevueDePresseSectionProps) {
                   </h4>
 
                   <p className="mb-2 font-sans text-xs uppercase tracking-wide text-muted-foreground">
-                    {article.source_publication} ·{" "}
                     {formatGazetteDate(article.published_at)}
                   </p>
 
