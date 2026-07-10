@@ -26,7 +26,7 @@ export function NewsCard({ item, index }: NewsCardProps) {
   const externalProps = isExternal
     ? { target: "_blank" as const, rel: "noopener noreferrer" }
     : {};
-  const badgeLabel = item.source_publication || item.category;
+  const badgeLabel = item.source_publication || item.type;
 
   return (
     <Card

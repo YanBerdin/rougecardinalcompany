@@ -29,7 +29,7 @@ export function NewsView({ news }: NewsViewProps) {
             >
               La presse en parle
             </h2>
-            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto text-center">
               Suivez les actualités de la compagnie
             </p>
           </div>
@@ -47,7 +47,7 @@ export function NewsView({ news }: NewsViewProps) {
                 style={{ animationDelay: `${index * 0.05}s` }}
               >
                 <p className="mb-2 font-sans text-xs font-semibold uppercase tracking-[0.15em] text-gold-text sm:text-xs">
-                  N°{String(index + 1).padStart(2, "0")} · {item.category}
+                  {item.type}
                 </p>
 
                 <h4 className="mb-2 text-3xl font-semibold leading-snug">{item.title}</h4>

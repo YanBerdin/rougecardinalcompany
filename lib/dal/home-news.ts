@@ -8,6 +8,7 @@ import { type DALResult } from "@/lib/dal/helpers";
 export type FeaturedArticleRecord = {
   id: number;
   title: string;
+  type: string;
   chapo: string | null;
   excerpt: string | null;
   source_url: string | null;
@@ -39,7 +40,7 @@ export const fetchFeaturedArticles = cache(
       const { data, error } = await supabase
         .from("articles_presse")
         .select(
-          "id, title, chapo, excerpt, source_url, source_publication, published_at, image_url"
+          "id, title, type, chapo, excerpt, source_url, source_publication, published_at, image_url"
         )
         .not("published_at", "is", null)
         .order("display_order", { ascending: true })

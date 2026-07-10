@@ -24,7 +24,7 @@ export async function NewsContainer() {
     image: r.image_url ?? "",
     source_url: r.source_url ?? "",
     source_publication: r.source_publication ?? "",
-    category: "Presse",
+    type: r.type,
   }));
 
   if (news.length === 0) {

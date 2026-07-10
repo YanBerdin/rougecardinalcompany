@@ -6,7 +6,7 @@ export interface NewsItem {
   image: string;
   source_url: string;
   source_publication: string;
-  category: string;
+  type: string;
 }
 
 export interface NewsViewProps {
