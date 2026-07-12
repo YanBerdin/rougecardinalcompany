@@ -1,6 +1,6 @@
 # Rouge Cardinal - Site web
 
-![Home page](<public/Capture d’écran_8-7-2026.jpeg>)
+![Home page](<public/home-page-desktop.jpeg>)
 
 Plateforme web officielle de la compagnie de théâtre Rouge Cardinal : vitrine publique, médiathèque, espace presse et CMS sur mesure conçu pour permettre à l'équipe non technique de gérer le contenu du site en autonomie.
 
