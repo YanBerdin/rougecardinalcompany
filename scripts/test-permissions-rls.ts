@@ -1223,40 +1223,6 @@ async function testAdminAccess(
         }
     }
 
-    // ROLE-RLS-067: Admin CRUD pending_invitations
-    {
-        const label = "Admin CRUD pending_invitations";
-        const payload = {
-            user_id: userId,
-            email: `__rls_pending_${ts}@test.invalid`,
-            invitation_url: `https://localhost/__rls_test_${ts}`,
-        };
-        const { data: ins, error: insErr } = await adminSessClient
-            .from("pending_invitations")
-            .insert(payload)
-            .select("id")
-            .single();
-        if (insErr || !ins) {
-            fail("RLS-067", label, `insert: ${insErr?.message}`);
-        } else {
-            const id = ins.id;
-            const { error: updErr } = await adminSessClient
-                .from("pending_invitations")
-                .update({ status: "sent" })
-                .eq("id", id);
-            const { error: delErr } = await adminSessClient
-                .from("pending_invitations")
-                .delete()
-                .eq("id", id);
-            if (updErr || delErr) {
-                fail("RLS-067", label, `update: ${updErr?.message}, delete: ${delErr?.message}`);
-            } else {
-                ok("RLS-067", label);
-            }
-            await adminClient.from("pending_invitations").delete().eq("id", id);
-        }
-    }
-
     // ROLE-RLS-068: Admin CRUD sitemap_entries
     {
         const label = "Admin CRUD sitemap_entries";
@@ -1416,29 +1382,6 @@ async function testAdminAccess(
             }
         } else {
             fail("RLS-074", "User bloqué update profiles (autre user)", error.message);
-        }
-    }
-
-    // ROLE-RLS-075: Editor blocked insert pending_invitations
-    {
-        const payload = {
-            user_id: userId,
-            email: `__rls_editor_inv_${ts}@test.invalid`,
-            invitation_url: `https://localhost/__rls_editor_${ts}`,
-        };
-        const { error } = await editorClient
-            .from("pending_invitations")
-            .insert(payload);
-        if (error && isRlsBlock(error)) {
-            ok("RLS-075", "Editor bloqué insert pending_invitations");
-        } else if (!error) {
-            fail("RLS-075", "Editor bloqué insert pending_invitations", "insert succeeded but should be blocked");
-            await adminClient
-                .from("pending_invitations")
-                .delete()
-                .like("email", `__rls_editor_inv_%`);
-        } else {
-            ok("RLS-075", "Editor bloqué insert pending_invitations — non-RLS error (acceptable)");
         }
     }
 
@@ -1922,45 +1865,6 @@ async function testEditorAccess(
         } else {
             ok("RLS-044", `${label} — non-RLS error (acceptable)`);
         }
-    }
-
-    // ROLE-RLS-045: Editor CRUD spectacles_membres_equipe (has_min_role('editor'))
-    {
-        const label = "Editor CRUD spectacles_membres_equipe";
-        // Need a spectacle and a membre for FK
-        const { data: sp } = await adminClient
-            .from("spectacles")
-            .insert({ title: `__rls_editor_sme_sp_${ts}` })
-            .select("id")
-            .single();
-        const { data: me } = await adminClient
-            .from("membres_equipe")
-            .insert({ name: `__rls_editor_sme_me_${ts}` })
-            .select("id")
-            .single();
-        if (!sp || !me) {
-            fail("RLS-045", label, "seed spectacle/membre failed");
-        } else {
-            const { error: insErr } = await editorClient
-                .from("spectacles_membres_equipe")
-                .insert({ spectacle_id: sp.id, membre_id: me.id });
-            if (insErr) {
-                fail("RLS-045", label, `insert: ${insErr.message}`);
-            } else {
-                const { error: delErr } = await editorClient
-                    .from("spectacles_membres_equipe")
-                    .delete()
-                    .eq("spectacle_id", sp.id)
-                    .eq("membre_id", me.id);
-                if (delErr) {
-                    fail("RLS-045", label, `delete: ${delErr.message}`);
-                } else {
-                    ok("RLS-045", label);
-                }
-            }
-        }
-        if (me) await adminClient.from("membres_equipe").delete().eq("id", me.id);
-        if (sp) await adminClient.from("spectacles").delete().eq("id", sp.id);
     }
 
     // ROLE-RLS-046: Editor select logs_audit — 0 rows

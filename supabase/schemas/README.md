@@ -91,7 +91,7 @@ Ce dossier contient le schéma déclaratif de la base de données selon les inst
 
 | Instruction | Statut | Détail |
 | ------------- | -------- | -------- |
-| **RLS Policies** | ✅ 100% | 36/36 tables protégées (25 principales + 11 liaison) |
+| **RLS Policies** | ✅ 100% | 29/29 tables protégées (24 principales + 5 liaison) |
 | **Functions** | ✅ 100% | SECURITY INVOKER, search_path défini |
 | **SQL Style** | ✅ 100% | Lowercase, snake_case, commentaires |
 | **Schema Structure** | ✅ 100% | Ordre lexicographique respecté |
@@ -526,22 +526,19 @@ Pour rappel, la migration générée est `supabase/migrations/20250918000002_app
 | **compagnie_presentation_sections** | Publique | Admin uniquement | Sections modulaires page présentation |
 | **home_hero_slides** | Publique (fenêtre active) | Admin uniquement | Slides hero page d'accueil |
 
-### Tables de Liaison avec Protection RLS (11/11) ✅
+### Tables de Liaison avec Protection RLS (5/5) ✅
 
 | Table | Lecture | Écriture | Particularités |
 | ------------- | -------- | -------- | ---------------- |
-| **spectacles_membres_equipe** | Publique | Admin uniquement | Casting des spectacles |
 | **spectacles_medias** | Publique | Admin uniquement | Médias des spectacles |
-| **articles_medias** | Publique | Admin uniquement | Médias des articles |
 | **communiques_medias** | Publique | Admin uniquement | Médias des communiqués |
 | **communiques_categories** | Publique | Admin uniquement | Catégories des communiqués |
 | **communiques_tags** | Publique | Admin uniquement | Tags des communiqués |
-| **spectacles_categories** | Publique | Admin uniquement | Catégories des spectacles |
-| **spectacles_tags** | Publique | Admin uniquement | Tags des spectacles |
-| **articles_categories** | Publique | Admin uniquement | Catégories des articles |
-| **articles_tags** | Publique | Admin uniquement | Tags des articles |
+| **media_item_tags** | Publique | Admin uniquement | Tags des médias (médiathèque) |
 
-**Total :** 36 tables protégées par RLS (25 principales + 11 liaison)
+> **Note (14 juil. 2026)** : 6 tables de liaison jamais exploitées ont été supprimées via `20260713120000_drop_unused_leaf_tables.sql` : `spectacles_membres_equipe`, `articles_medias`, `spectacles_categories`, `spectacles_tags`, `articles_categories`, `articles_tags`.
+
+**Total :** 29 tables protégées par RLS (24 principales + 5 liaison)
 
 ### Optimisations Performance ⚡
 
@@ -660,9 +657,9 @@ supabase migration new update_existing_data
 
 | Métrique | Valeur | Statut |
 | ------------- | -------- | -------- |
-| **Tables avec RLS** | 36/36 (100%) | ✅ |
-| **Tables principales** | 25/25 (100%) | ✅ |
-| **Tables de liaison** | 11/11 (100%) | ✅ |
+| **Tables avec RLS** | 29/29 (100%) | ✅ |
+| **Tables principales** | 24/24 (100%) | ✅ |
+| **Tables de liaison** | 5/5 (100%) | ✅ |
 | **Politiques Optimisées** | 70+ (100%) | ✅ |
 | **Index RLS** | 10 stratégiques | ✅ |
 | **Fonctions Sécurisées** | 8/8 (100%) | ✅ |

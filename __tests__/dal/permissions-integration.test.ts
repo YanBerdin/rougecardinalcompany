@@ -695,48 +695,6 @@ describe.skipIf(!shouldRun)("3.1 — Editor CRUD éditorial (autorisé)", () => 
         expect(dErr).toBeNull();
     });
 
-    // ---- spectacles_categories (ROLE-DAL-021) -------------------------
-
-    it("ROLE-DAL-021 — Editor CRUD spectacles_categories", async () => {
-        const { error: iErr } = await editorClient
-            .from("spectacles_categories")
-            .insert({
-                spectacle_id: seedSpectacleId,
-                category_id: seedCategoryId,
-            });
-        expect(iErr).toBeNull();
-
-        const { error: sErr } = await editorClient
-            .from("spectacles_categories")
-            .select("*")
-            .eq("spectacle_id", seedSpectacleId)
-            .eq("category_id", seedCategoryId);
-        expect(sErr).toBeNull();
-
-        const { error: dErr } = await editorClient
-            .from("spectacles_categories")
-            .delete()
-            .eq("spectacle_id", seedSpectacleId)
-            .eq("category_id", seedCategoryId);
-        expect(dErr).toBeNull();
-    });
-
-    // ---- spectacles_tags (ROLE-DAL-022) -------------------------------
-
-    it("ROLE-DAL-022 — Editor CRUD spectacles_tags", async () => {
-        const { error: iErr } = await editorClient
-            .from("spectacles_tags")
-            .insert({ spectacle_id: seedSpectacleId, tag_id: seedTagId });
-        expect(iErr).toBeNull();
-
-        const { error: dErr } = await editorClient
-            .from("spectacles_tags")
-            .delete()
-            .eq("spectacle_id", seedSpectacleId)
-            .eq("tag_id", seedTagId);
-        expect(dErr).toBeNull();
-    });
-
     // ---- compagnie_values (ROLE-DAL-023) ------------------------------
 
     it("ROLE-DAL-023 — Editor CRUD compagnie_values", async () => {
@@ -823,22 +781,6 @@ describe.skipIf(!shouldRun)("3.1 — Editor CRUD éditorial (autorisé)", () => 
         expect(dErr).toBeNull();
     });
 
-    // ---- articles_medias (ROLE-DAL-027) -------------------------------
-
-    it("ROLE-DAL-027 — Editor CRUD articles_medias", async () => {
-        const { error: iErr } = await editorClient
-            .from("articles_medias")
-            .insert({ article_id: seedArticleId, media_id: seedMediaId });
-        expect(iErr).toBeNull();
-
-        const { error: dErr } = await editorClient
-            .from("articles_medias")
-            .delete()
-            .eq("article_id", seedArticleId)
-            .eq("media_id", seedMediaId);
-        expect(dErr).toBeNull();
-    });
-
     // ---- communiques_medias (ROLE-DAL-028) ----------------------------
 
     it("ROLE-DAL-028 — Editor CRUD communiques_medias", async () => {
@@ -852,38 +794,6 @@ describe.skipIf(!shouldRun)("3.1 — Editor CRUD éditorial (autorisé)", () => 
             .delete()
             .eq("communique_id", seedCommuniqueId)
             .eq("media_id", seedMediaId);
-        expect(dErr).toBeNull();
-    });
-
-    // ---- articles_categories (ROLE-DAL-029) ---------------------------
-
-    it("ROLE-DAL-029 — Editor CRUD articles_categories", async () => {
-        const { error: iErr } = await editorClient
-            .from("articles_categories")
-            .insert({ article_id: seedArticleId, category_id: seedCategoryId });
-        expect(iErr).toBeNull();
-
-        const { error: dErr } = await editorClient
-            .from("articles_categories")
-            .delete()
-            .eq("article_id", seedArticleId)
-            .eq("category_id", seedCategoryId);
-        expect(dErr).toBeNull();
-    });
-
-    // ---- articles_tags (ROLE-DAL-030) ---------------------------------
-
-    it("ROLE-DAL-030 — Editor CRUD articles_tags", async () => {
-        const { error: iErr } = await editorClient
-            .from("articles_tags")
-            .insert({ article_id: seedArticleId, tag_id: seedTagId });
-        expect(iErr).toBeNull();
-
-        const { error: dErr } = await editorClient
-            .from("articles_tags")
-            .delete()
-            .eq("article_id", seedArticleId)
-            .eq("tag_id", seedTagId);
         expect(dErr).toBeNull();
     });
 
@@ -1107,26 +1017,6 @@ describe.skipIf(!shouldRun)("3.2 — Editor bloqué admin-only", () => {
         expect(isRlsBlock(error)).toBe(true);
     });
 
-    // ---- spectacles_membres_equipe (ROLE-DAL-046) ---------------------
-
-    it("ROLE-DAL-046 — Editor autorisé insert/delete spectacles_membres_equipe", async () => {
-        // spectacles_membres_equipe uses has_min_role('editor') — editors are allowed
-        const { error: iErr } = await editorClient
-            .from("spectacles_membres_equipe")
-            .insert({
-                spectacle_id: seedSpectacleId,
-                membre_id: seedMembreId,
-            });
-        expect(iErr).toBeNull();
-
-        const { error: dErr } = await editorClient
-            .from("spectacles_membres_equipe")
-            .delete()
-            .eq("spectacle_id", seedSpectacleId)
-            .eq("membre_id", seedMembreId);
-        expect(dErr).toBeNull();
-    });
-
     // ---- logs_audit (ROLE-DAL-047) ------------------------------------
 
     it("ROLE-DAL-047 — Editor bloqué select logs_audit (0 rows)", async () => {
@@ -1165,21 +1055,6 @@ describe.skipIf(!shouldRun)("3.2 — Editor bloqué admin-only", () => {
             .eq("user_id", adminUserId)
             .single();
         expect(data?.display_name).not.toBe("hacked");
-    });
-
-    // ---- pending_invitations (ROLE-DAL-070) ---------------------------
-
-    it("ROLE-DAL-070 — Editor bloqué insert pending_invitations", async () => {
-        const { error } = await editorClient
-            .from("pending_invitations")
-            .insert({
-                email: `hack-${Date.now()}@test.invalid`,
-                invitation_url: "https://hack.test",
-                user_id: editorUserId,
-            })
-            .select()
-            .single();
-        expect(isRlsBlock(error)).toBe(true);
     });
 
     // ---- sitemap_entries (ROLE-DAL-071) -------------------------------
@@ -1459,27 +1334,6 @@ describe.skipIf(!shouldRun)("3.3 — Admin accès complet", () => {
             .eq("user_id", userUserId)
             .single();
         expect(data?.bio).toBe(marker);
-    });
-
-    // ---- pending_invitations (ROLE-DAL-075) ---------------------------
-
-    it("ROLE-DAL-075 — Admin CRUD pending_invitations", async () => {
-        const { data, error: iErr } = await adminClient
-            .from("pending_invitations")
-            .insert({
-                email: `admin-pi-${Date.now()}@test.invalid`,
-                invitation_url: "https://admin.test/invite",
-                user_id: adminUserId,
-            })
-            .select("id")
-            .single();
-        expect(iErr).toBeNull();
-
-        const { error: dErr } = await adminClient
-            .from("pending_invitations")
-            .delete()
-            .eq("id", data!.id);
-        expect(dErr).toBeNull();
     });
 
     // ---- sitemap_entries (ROLE-DAL-076) -------------------------------

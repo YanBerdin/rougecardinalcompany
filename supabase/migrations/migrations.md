@@ -4,6 +4,48 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-07-14 - CLEANUP: suppression de 7 tables de liaison jamais exploitées
+
+**Migration** : `20260713120000_drop_unused_leaf_tables.sql` (DDL destructif — `drop table ... cascade`)
+
+**Schéma déclaratif** : ✅ synchronisé dans 6 fichiers : `10b_tables_user_management.sql` (section `pending_invitations` retirée), `11_tables_relations.sql` (tables + RLS `spectacles_membres_equipe`, `articles_medias`), `14_categories_tags.sql` (4 jonctions taxonomie spectacles/articles + 2 triggers `usage_count`), `30_triggers.sql` (retrait des arrays audit/updated_at), `40_indexes.sql` (6 index orphelins), `62_rls_advanced_tables.sql` (blocs RLS taxonomie).
+
+**Statut** : ✅ appliquée en local (`supabase db reset`, 2026-07-14). ⏸ pas encore poussée sur Supabase Cloud (`pnpm dlx supabase db push --linked`).
+
+**Contexte** : Audit du fichier `doc-perso/Mai-2026/00-unused-tables.md` listant des tables vides suspectées inutilisées. Vérification croisée avec le code runtime (`lib/`, `app/`, `components/`) + interrogation de la base cloud via MCP Supabase (`yvtrlvmbofklefxcxrzv`) pour confirmer : type d'objet (table vs vue), nombre de lignes réel, FK entrantes, vues dépendantes.
+
+**Tables supprimées (7, toutes vérifiées à 0 ligne, sans FK entrante ni vue dépendante)** :
+
+- `spectacles_membres_equipe` — casting spectacle/membre, scaffold jamais câblé (`spectacles.casting` text utilisé à la place)
+- `articles_medias` — jonction articles↔médias jamais alimentée
+- `spectacles_categories`, `spectacles_tags` — feature catégories/tags spectacles jamais activée côté UI admin
+- `articles_categories`, `articles_tags` — idem pour les articles
+- `pending_invitations` — file d'attente retry emails, remplacée en pratique par `user_invitations`
+
+**Tables NON supprimées (périmètre initial réduit après vérification)** :
+
+- `seo_redirects`, `sitemap_entries` — **conservées intentionnellement** pour un branchement SEO futur (décision utilisateur), malgré 0 usage runtime actuel. Restaurées dans le schéma déclaratif après un premier retrait par erreur.
+- `categories` (9 lignes), `tags` (15 lignes), `communiques_categories` (4 lignes), `communiques_tags`, `communiques_medias` — **non vides ou couplées à la vue `communiques_presse_public`** (`LEFT JOIN` sur `communiques_medias`) : le sous-système taxonomie communiqués reste un ensemble cohérent avec données, hors scope de ce nettoyage.
+- `media_item_tags` (2 lignes) — utilisée activement par le code (`lib/dal/media.ts`, `lib/actions/media-actions.ts`).
+
+**Écarts corrigés vs. l'audit initial** : la note `doc-perso/Mai-2026/00-unused-tables.md` classait à tort `categories`, `tags`, `communiques_categories`, `communiques_tags`, `media_item_tags` comme vides — la vérification cloud (MCP `execute_sql`) a révélé des données réelles ou des dépendances de vue, évitant une suppression destructive incorrecte.
+
+**Fichiers de test mis à jour** (retrait des scénarios ciblant les 7 tables supprimées, tests `sitemap_entries`/`seo_redirects` conservés) :
+
+- `__tests__/dal/permissions-integration.test.ts` — retrait de 7 blocs (`ROLE-DAL-021`, `022`, `027`, `029`, `030`, `046`, `070`, `075`)
+- `scripts/test-permissions-rls.ts` — retrait de 3 blocs (`ROLE-RLS-045`, `067`, `075`)
+
+**Documentation synchronisée** : `supabase/schemas/README.md` (compteurs `36→29` tables protégées RLS, `25→24` principales, `11→5` liaison) + `memory-bank/activeContext.md`.
+
+**Validation** :
+
+- ✅ `supabase db reset` local (2026-07-14) : migration appliquée sans erreur (NOTICEs "policy ... does not exist, skipping" attendus — premières exécutions des `drop policy if exists`)
+- ✅ `pnpm dlx supabase gen types typescript --linked > lib/database.types.ts` régénéré (exit 0)
+- ✅ Aucune erreur TypeScript sur les 2 fichiers de test modifiés
+- ⏸ Push cloud (`pnpm dlx supabase db push --linked`) à faire séparément
+
+---
+
 ### 2026-07-04 - TASK102: ajout `price_reduced_cents` sur `evenements` + affichage public prix/capacité
 
 **Migration** : `20260704130737_add_price_reduced_cents_evenements.sql` (DDL — colonne + fonction)

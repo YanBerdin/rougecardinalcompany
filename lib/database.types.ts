@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.1"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       abonnes_newsletter: {
@@ -114,89 +89,13 @@ export type Database = {
         }
         Relationships: []
       }
-      articles_categories: {
-        Row: {
-          article_id: number
-          category_id: number
-        }
-        Insert: {
-          article_id: number
-          category_id: number
-        }
-        Update: {
-          article_id?: number
-          category_id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "articles_categories_article_id_fkey"
-            columns: ["article_id"]
-            isOneToOne: false
-            referencedRelation: "articles_presse"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "articles_categories_article_id_fkey"
-            columns: ["article_id"]
-            isOneToOne: false
-            referencedRelation: "articles_presse_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "articles_categories_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      articles_medias: {
-        Row: {
-          article_id: number
-          media_id: number
-          ordre: number | null
-        }
-        Insert: {
-          article_id: number
-          media_id: number
-          ordre?: number | null
-        }
-        Update: {
-          article_id?: number
-          media_id?: number
-          ordre?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "articles_medias_article_id_fkey"
-            columns: ["article_id"]
-            isOneToOne: false
-            referencedRelation: "articles_presse"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "articles_medias_article_id_fkey"
-            columns: ["article_id"]
-            isOneToOne: false
-            referencedRelation: "articles_presse_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "articles_medias_media_id_fkey"
-            columns: ["media_id"]
-            isOneToOne: false
-            referencedRelation: "medias"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       articles_presse: {
         Row: {
           author: string | null
           canonical_url: string | null
           chapo: string | null
           created_at: string
+          display_order: number
           excerpt: string | null
           id: number
           image_url: string | null
@@ -219,6 +118,7 @@ export type Database = {
           canonical_url?: string | null
           chapo?: string | null
           created_at?: string
+          display_order?: number
           excerpt?: string | null
           id?: never
           image_url?: string | null
@@ -241,6 +141,7 @@ export type Database = {
           canonical_url?: string | null
           chapo?: string | null
           created_at?: string
+          display_order?: number
           excerpt?: string | null
           id?: never
           image_url?: string | null
@@ -264,50 +165,6 @@ export type Database = {
             columns: ["og_image_media_id"]
             isOneToOne: false
             referencedRelation: "medias"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      articles_tags: {
-        Row: {
-          article_id: number
-          tag_id: number
-        }
-        Insert: {
-          article_id: number
-          tag_id: number
-        }
-        Update: {
-          article_id?: number
-          tag_id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "articles_tags_article_id_fkey"
-            columns: ["article_id"]
-            isOneToOne: false
-            referencedRelation: "articles_presse"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "articles_tags_article_id_fkey"
-            columns: ["article_id"]
-            isOneToOne: false
-            referencedRelation: "articles_presse_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "articles_tags_tag_id_fkey"
-            columns: ["tag_id"]
-            isOneToOne: false
-            referencedRelation: "popular_tags"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "articles_tags_tag_id_fkey"
-            columns: ["tag_id"]
-            isOneToOne: false
-            referencedRelation: "tags"
             referencedColumns: ["id"]
           },
         ]
@@ -565,12 +422,14 @@ export type Database = {
       compagnie_presentation_sections: {
         Row: {
           active: boolean
+          alt_text: string | null
           content: string[] | null
           created_at: string
           id: number
           image_media_id: number | null
           image_url: string | null
           kind: string
+          milestones: Json | null
           position: number
           quote_author: string | null
           quote_text: string | null
@@ -581,12 +440,14 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          alt_text?: string | null
           content?: string[] | null
           created_at?: string
           id?: never
           image_media_id?: number | null
           image_url?: string | null
           kind: string
+          milestones?: Json | null
           position?: number
           quote_author?: string | null
           quote_text?: string | null
@@ -597,12 +458,14 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          alt_text?: string | null
           content?: string[] | null
           created_at?: string
           id?: never
           image_media_id?: number | null
           image_url?: string | null
           kind?: string
+          milestones?: Json | null
           position?: number
           quote_author?: string | null
           quote_text?: string | null
@@ -883,6 +746,7 @@ export type Database = {
           date_debut: string
           date_fin: string | null
           end_time: string | null
+          genres: string[] | null
           id: number
           image_url: string | null
           lieu_id: number | null
@@ -896,7 +760,6 @@ export type Database = {
           start_time: string | null
           status: string | null
           ticket_url: string | null
-          genres: string[] | null
           updated_at: string
         }
         Insert: {
@@ -905,6 +768,7 @@ export type Database = {
           date_debut: string
           date_fin?: string | null
           end_time?: string | null
+          genres?: string[] | null
           id?: never
           image_url?: string | null
           lieu_id?: number | null
@@ -918,7 +782,6 @@ export type Database = {
           start_time?: string | null
           status?: string | null
           ticket_url?: string | null
-          genres?: string[] | null
           updated_at?: string
         }
         Update: {
@@ -927,6 +790,7 @@ export type Database = {
           date_debut?: string
           date_fin?: string | null
           end_time?: string | null
+          genres?: string[] | null
           id?: never
           image_url?: string | null
           lieu_id?: number | null
@@ -940,7 +804,6 @@ export type Database = {
           start_time?: string | null
           status?: string | null
           ticket_url?: string | null
-          genres?: string[] | null
           updated_at?: string
         }
         Relationships: [
@@ -1048,6 +911,7 @@ export type Database = {
           subtitle: string | null
           title: string
           updated_at: string
+          video_url: string | null
         }
         Insert: {
           active?: boolean
@@ -1070,6 +934,7 @@ export type Database = {
           subtitle?: string | null
           title: string
           updated_at?: string
+          video_url?: string | null
         }
         Update: {
           active?: boolean
@@ -1092,6 +957,7 @@ export type Database = {
           subtitle?: string | null
           title?: string
           updated_at?: string
+          video_url?: string | null
         }
         Relationships: [
           {
@@ -1509,51 +1375,6 @@ export type Database = {
           },
         ]
       }
-      pending_invitations: {
-        Row: {
-          attempts: number | null
-          created_at: string | null
-          email: string
-          id: string
-          invitation_url: string
-          last_error: string | null
-          max_attempts: number | null
-          metadata: Json | null
-          next_retry_at: string | null
-          status: string | null
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          attempts?: number | null
-          created_at?: string | null
-          email: string
-          id?: string
-          invitation_url: string
-          last_error?: string | null
-          max_attempts?: number | null
-          metadata?: Json | null
-          next_retry_at?: string | null
-          status?: string | null
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          attempts?: number | null
-          created_at?: string | null
-          email?: string
-          id?: string
-          invitation_url?: string
-          last_error?: string | null
-          max_attempts?: number | null
-          metadata?: Json | null
-          next_retry_at?: string | null
-          status?: string | null
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           avatar_media_id: number | null
@@ -1760,36 +1581,6 @@ export type Database = {
           },
         ]
       }
-      spectacles_categories: {
-        Row: {
-          category_id: number
-          spectacle_id: number
-        }
-        Insert: {
-          category_id: number
-          spectacle_id: number
-        }
-        Update: {
-          category_id?: number
-          spectacle_id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "spectacles_categories_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "spectacles_categories_spectacle_id_fkey"
-            columns: ["spectacle_id"]
-            isOneToOne: false
-            referencedRelation: "spectacles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       spectacles_medias: {
         Row: {
           media_id: number
@@ -1822,83 +1613,6 @@ export type Database = {
             columns: ["spectacle_id"]
             isOneToOne: false
             referencedRelation: "spectacles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      spectacles_membres_equipe: {
-        Row: {
-          membre_id: number
-          role: string | null
-          spectacle_id: number
-        }
-        Insert: {
-          membre_id: number
-          role?: string | null
-          spectacle_id: number
-        }
-        Update: {
-          membre_id?: number
-          role?: string | null
-          spectacle_id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "spectacles_membres_equipe_membre_id_fkey"
-            columns: ["membre_id"]
-            isOneToOne: false
-            referencedRelation: "membres_equipe"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "spectacles_membres_equipe_membre_id_fkey"
-            columns: ["membre_id"]
-            isOneToOne: false
-            referencedRelation: "membres_equipe_admin"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "spectacles_membres_equipe_spectacle_id_fkey"
-            columns: ["spectacle_id"]
-            isOneToOne: false
-            referencedRelation: "spectacles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      spectacles_tags: {
-        Row: {
-          spectacle_id: number
-          tag_id: number
-        }
-        Insert: {
-          spectacle_id: number
-          tag_id: number
-        }
-        Update: {
-          spectacle_id?: number
-          tag_id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "spectacles_tags_spectacle_id_fkey"
-            columns: ["spectacle_id"]
-            isOneToOne: false
-            referencedRelation: "spectacles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "spectacles_tags_tag_id_fkey"
-            columns: ["tag_id"]
-            isOneToOne: false
-            referencedRelation: "popular_tags"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "spectacles_tags_tag_id_fkey"
-            columns: ["tag_id"]
-            isOneToOne: false
-            referencedRelation: "tags"
             referencedColumns: ["id"]
           },
         ]
@@ -2217,7 +1931,7 @@ export type Database = {
       }
       messages_contact_admin: {
         Row: {
-          age: unknown
+          age: string | null
           consent: boolean | null
           consent_at: string | null
           contact_presse_email: string | null
@@ -2234,7 +1948,7 @@ export type Database = {
           phone: string | null
           processed: boolean | null
           processed_at: string | null
-          processing_latency: unknown
+          processing_latency: string | null
           reason: string | null
           spam_score: number | null
           status: string | null
@@ -2302,6 +2016,59 @@ export type Database = {
           usage_count?: number | null
         }
         Relationships: []
+      }
+      spectacles_gallery_photos_admin: {
+        Row: {
+          alt_text: string | null
+          created_at: string | null
+          media_id: number | null
+          mime: string | null
+          ordre: number | null
+          spectacle_id: number | null
+          storage_path: string | null
+          type: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spectacles_medias_media_id_fkey"
+            columns: ["media_id"]
+            isOneToOne: false
+            referencedRelation: "medias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spectacles_medias_spectacle_id_fkey"
+            columns: ["spectacle_id"]
+            isOneToOne: false
+            referencedRelation: "spectacles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spectacles_gallery_photos_public: {
+        Row: {
+          alt_text: string | null
+          media_id: number | null
+          ordre: number | null
+          spectacle_id: number | null
+          storage_path: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spectacles_medias_media_id_fkey"
+            columns: ["media_id"]
+            isOneToOne: false
+            referencedRelation: "medias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spectacles_medias_spectacle_id_fkey"
+            columns: ["spectacle_id"]
+            isOneToOne: false
+            referencedRelation: "spectacles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       spectacles_landscape_photos_admin: {
         Row: {
@@ -2436,6 +2203,7 @@ export type Database = {
         }[]
       }
       get_current_timestamp: { Args: never; Returns: string }
+      has_min_role: { Args: { required_role: string }; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
       reorder_hero_slides: { Args: { order_data: Json }; Returns: undefined }
       reorder_team_members: { Args: { items: Json }; Returns: undefined }
@@ -2581,9 +2349,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {},
   },
