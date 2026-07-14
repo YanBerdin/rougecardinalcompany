@@ -16,10 +16,9 @@ const FOUNDER_BIO: readonly string[] = [
 type Milestone = { readonly year: string; readonly label: string };
 
 const MILESTONES: readonly Milestone[] = [
-    { year: "2022", label: "L'Avare - Comédie-Française" },
-    { year: "2023", label: "Gala de l'Opéra de Lorraine" },
-    { year: "2024", label: "Le Grand Meaulnes - scène" },
-    { year: "2025", label: "Exposition photo - Paris" },
+    { year: "2023", label: "Sacontala - Calidasa" },
+    { year: "2025", label: "Nouveaux Mondes - Exposition photo" },
+    { year: "2026", label: "La Farce de Maître Pathelin - Anonyme" },
 ];
 
 export function SectionFounder({ section }: SectionRendererProps): ReactElement {
