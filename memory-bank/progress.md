@@ -1,5 +1,39 @@
 # Progress
 
+## Fix GRANT DELETE manquant sur public.profiles (2026-07-15)
+
+✅ **COMPLET** — Correction d'un bug bloquant la suppression d'un utilisateur depuis `/admin/users` : `permission denied for table profiles`.
+
+### Root cause
+
+- La policy RLS `DELETE` sur `public.profiles` (self OU `is_admin()`) existait bien dans `60_rls_profiles.sql`.
+- Mais le `GRANT DELETE` table-level pour `authenticated` avait été oublié par `20251027020000_restore_basic_grants_for_rls.sql` (seuls `SELECT, INSERT, UPDATE` avaient été restaurés).
+- Sans ce GRANT, PostgreSQL bloque l'opération avant même l'évaluation de la RLS — un compte supprimé de `profiles` mais pas de `auth.users` reste visible (« fantôme ») dans le dashboard admin, car `listAllUsers()` liste depuis `auth.users`.
+
+### Fix
+
+| Fichier | Action |
+| --- | --- |
+| `supabase/migrations/20260715130000_grant_delete_profiles_to_authenticated.sql` | Créé — `grant delete on table public.profiles to authenticated` + vérification |
+| `supabase/schemas/02_table_profiles.sql` | Modifié — GRANTs documentés (déclaratif, non capturés par `db diff`) |
+| `supabase/migrations/migrations.md` | Modifié — entrée changelog 2026-07-15 |
+| `lib/dal/admin-users.ts` | Modifié — `deleteUser()` résilient : un échec de suppression du profil n'empêche plus la suppression de `auth.users` (évite les comptes fantômes) |
+
+### Rôles autorisés à supprimer un utilisateur
+
+Seuls les **admins** — double barrière (défense en profondeur), aucun `editor`/`user` n'y a accès :
+
+1. Page `/admin/users` protégée par `requireAdminPageAccess()`
+2. `deleteUser()` (DAL) protégé par `requireAdminOnly()` — bloque avant même la RLS
+3. Policy RLS `DELETE` : autorise seulement le self-delete ou `is_admin()`
+
+### Validation
+
+- ✅ `supabase db push` appliqué sur le projet Supabase Cloud client (`hjmwctzqljfszuwkaadd`)
+- ✅ Profil fantôme `florian.chaillot@outlook.fr` supprimé avec succès depuis `/admin/users`
+
+---
+
 ## Drag-and-Drop Réorganisation Articles de Presse (TASK101) (2026-07-03)
 
 ✅ **COMPLET** — Implémentation complète du système drag-and-drop pour réorganiser les articles de presse dans l'admin, avec reflux de l'ordre vers les pages publiques.

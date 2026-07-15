@@ -240,17 +240,21 @@ export async function deleteUser(userId: string): Promise<DALResult<null>> {
 
   // Delete profile first with authenticated client so audit_trigger captures the real admin user.
   // The cascade trigger (handle_user_deletion) will then find no profile to delete — harmless no-op.
+  //
+  // Non-blocking: if this fails (missing GRANT, already-deleted profile, etc.) we still proceed to
+  // delete the auth.users record below. Otherwise a profile-less "ghost" account would remain
+  // visible forever in the admin dashboard (listAllUsers() sources from auth.users, not profiles),
+  // which is worse than losing the audit_trigger's precise admin attribution for this one row.
   const { error: profileError } = await supabase
     .from("profiles")
     .delete()
     .eq("user_id", userId);
 
   if (profileError) {
-    console.error("[DAL] Failed to delete profile:", profileError);
-    return {
-      success: false,
-      error: `Failed to delete profile: ${profileError.message}`,
-    };
+    console.warn(
+      `[DAL] Failed to delete profile for ${userId} (continuing to delete auth user):`,
+      profileError
+    );
   }
 
   const { error } = await adminClient.auth.admin.deleteUser(userId);

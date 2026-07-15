@@ -4,6 +4,20 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-07-15 - FIX: GRANT DELETE manquant sur public.profiles pour authenticated
+
+**Migration** : `20260715130000_grant_delete_profiles_to_authenticated.sql` (GRANT uniquement, aucun changement de policy)
+
+**Schéma déclaratif** : ✅ synchronisé — `02_table_profiles.sql` documente désormais les GRANTs (SELECT/INSERT/UPDATE/DELETE) sous la définition de table, avec référence à cette migration.
+
+**Contexte** : Signalement utilisateur — un compte (`florian.chaillot@outlook.fr`), enregistré par erreur, n'apparaissait plus dans `public.profiles` mais restait visible dans le dashboard admin avec le statut « Vérifié » (la liste admin est construite depuis `auth.users` via `listAllUsers()`, pas depuis `profiles`). Tentative de suppression → `Failed to delete profile: permission denied for table profiles`.
+
+**Root cause** : `supabase/schemas/60_rls_profiles.sql` définit bien une policy RLS `DELETE` ("Users can delete their own profile OR admins can delete any profile"), mais aucun `GRANT DELETE` table-level n'existe sur `public.profiles` pour le rôle `authenticated`. `20251027020000_restore_basic_grants_for_rls.sql` n'avait restauré que `SELECT, INSERT, UPDATE` après la campagne de sécurité ayant révoqué tous les privilèges par défaut — `DELETE` a été oublié. Sans ce GRANT, PostgreSQL bloque l'opération avant même d'évaluer la policy RLS, quel que soit le contenu de la policy.
+
+**Fix applicatif complémentaire** : `lib/dal/admin-users.ts:deleteUser()` rendu résilient — un échec de suppression du profil (permission, ligne déjà absente, etc.) n'empêche plus la suppression de `auth.users`, pour éviter qu'un compte fantôme (sans profil) reste indéfiniment visible dans le dashboard admin.
+
+**Statut** : ⏸ à appliquer (`supabase db push` / `apply_migration` selon l'environnement cible — le rapport utilisateur concerne un nouveau projet Supabase Cloud).
+
 ### 2026-07-15 - SECURITY: revoke résiduel EXECUTE sur audit_trigger() pour authenticated
 
 **Migration** : `20260715120000_revoke_audit_trigger_execute_from_authenticated.sql` (revoke uniquement, aucun changement de logique)
