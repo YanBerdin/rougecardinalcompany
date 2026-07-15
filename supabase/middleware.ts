@@ -120,7 +120,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // keep backwards-compatible, user metadata quick log (debug only)
-  console.debug("USER_metadata:", user?.user_metadata?.role); //TODO: remove
+  //! console.debug("USER_metadata:", user?.user_metadata?.role);
   if (request.nextUrl.pathname.startsWith("/protected") && !user) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone();

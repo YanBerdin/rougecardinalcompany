@@ -64,3 +64,6 @@ supabase/.temp
 
 # Vidéos sources brutes (trop lourdes pour git, régénérables via my-hero-video/)
 public/hero-theatre-loop.mp4
+
+# VSCode settings
+.vscode/mcp.json
