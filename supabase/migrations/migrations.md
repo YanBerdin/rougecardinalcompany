@@ -4,6 +4,22 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-07-15 - SECURITY: revoke résiduel EXECUTE sur audit_trigger() pour authenticated
+
+**Migration** : `20260715120000_revoke_audit_trigger_execute_from_authenticated.sql` (revoke uniquement, aucun changement de logique)
+
+**Schéma déclaratif** : ✅ synchronisé — header sécurité de `public.audit_trigger()` mis à jour dans `02b_functions_core.sql` (section "Grant Policy" ajoutée).
+
+**Contexte** : Alerte de l'advisor Supabase (projet client) : "Signed-In Users Can Execute SECURITY DEFINER Function" sur `public.audit_trigger()`, appelable via `/rest/v1/rpc/audit_trigger` par le rôle `authenticated`. Root cause : `20251027022500_grant_execute_all_trigger_functions.sql` avait accordé `grant execute ... to authenticated` en partant d'une hypothèse fausse (les triggers PostgreSQL n'ont besoin d'aucun grant EXECUTE pour se déclencher — l'appel est interne à l'exécuteur, indépendant des ACL de la fonction). `20260502120000_revoke_anon_all_security_definer_functions.sql` avait ensuite fait `revoke ... from public`, mais cela ne supprime pas un grant explicite déjà accordé à `authenticated` (seul le grant hérité de `PUBLIC` est retiré). D'où la persistance de l'alerte.
+
+**Risque réel** : nul en pratique — `audit_trigger()` retourne le pseudo-type `trigger`, que PostgreSQL refuse d'invoquer directement (`trigger functions can only be called as triggers`). Le fix reste nécessaire pour la conformité de l'advisor et la défense en profondeur (aucune fonction trigger-only ne devrait rester exposée via l'API REST).
+
+**Statut** : ✅ appliquée sur le projet Supabase client (`hjmwctzqljfszuwkaadd`, distinct du staging `yvtrlvmbofklefxcxrzv` habituellement lié à ce repo) via `apply_migration` (MCP Supabase). Version enregistrée réalignée de `20260715172902` (timestamp auto-généré par l'outil) vers `20260715120000` (nom du fichier local) par `UPDATE supabase_migrations.schema_migrations` pour préserver la cohérence de l'historique. Vérifié : `get_advisors(type=security)` ne remonte plus ce finding. ⏸ pas encore appliquée sur staging (`pnpm db:push` à faire si souhaité).
+
+**Finding connexe non corrigé** : `public.cleanup_expired_audit_logs()` présente le même profil (grant `authenticated` résiduel sur une fonction `SECURITY DEFINER`, sans check `is_admin()` interne). Planifié dans `memory-bank/tasks/TASK103-cleanupExpiredAuditLogsGrant.md`.
+
+**Constat annexe** : "Leaked Password Protection" (2ᵉ finding advisor security) n'est **pas disponible** sur le compte Supabase du client (plan Free) — nécessite un plan payant pour être activé. Aucune action possible côté SQL/migration.
+
 ### 2026-07-14 - CLEANUP: suppression de 7 tables de liaison jamais exploitées
 
 **Migration** : `20260713120000_drop_unused_leaf_tables.sql` (DDL destructif — `drop table ... cascade`)

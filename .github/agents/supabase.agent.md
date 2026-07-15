@@ -19,6 +19,7 @@ tools:
 - 'stitch/*'
 - 'supabase/*'
 - browser
+- 'supabase-rcc-client/*'
 - todo
 ---
 

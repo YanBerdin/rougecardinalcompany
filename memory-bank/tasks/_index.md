@@ -21,7 +21,7 @@
 
 ## En Cours
 
-**_(aucune tâche en cours)_**
+- `TASK103` Retirer le grant `authenticated` résiduel sur `cleanup_expired_audit_logs()` — **PLANIFIÉE 📋 2026-07-15** — Finding connexe identifié lors du fix de l'alerte advisor `audit_trigger()` sur le projet Supabase client. Fonction `SECURITY DEFINER` sans check `is_admin()` interne, appelable via `/rest/v1/rpc/cleanup_expired_audit_logs` par tout `authenticated`. Voir `memory-bank/tasks/TASK103-cleanupExpiredAuditLogsGrant.md`
 
 ## Terminé (récent)
 

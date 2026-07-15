@@ -136,6 +136,16 @@ comment on function public.update_updated_at_column() is
  *   - Tested: Direct function call blocked by lack of trigger context
  *   - Tested: Users cannot INSERT directly into logs_audit after revoke
  *   - Tested: tg_op UPPERCASE comparisons produce correct record_id and new_values
+ *
+ * Grant Policy:
+ *   - No EXECUTE granted to anon or authenticated. Trigger functions do not
+ *     need an EXECUTE grant to fire — Postgres invokes them internally as
+ *     part of the DML statement, independent of the caller's function ACLs.
+ *   - FIX 20260715: revoked a residual explicit `grant ... to authenticated`
+ *     left over from 20251027022500_grant_execute_all_trigger_functions.sql,
+ *     which had not been undone by the later `revoke ... from public` pass
+ *     (revoking from PUBLIC does not remove an explicit per-role grant).
+ *     See 20260715120000_revoke_audit_trigger_execute_from_authenticated.sql.
  */
 create or replace function public.audit_trigger()
 returns trigger
