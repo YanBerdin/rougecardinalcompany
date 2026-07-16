@@ -4,7 +4,7 @@ import { createClient } from "@/supabase/server";
 import { createAdminClient } from "@/supabase/admin";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireAdminOnly } from "@/lib/auth/roles";
-import { env } from "@/lib/env";
+import { WEBSITE_URL } from "@/lib/site-config";
 import {
   UpdateUserRoleSchema,
   InviteUserSchema,
@@ -333,7 +333,8 @@ async function generateUserInviteLinkWithUrl(
   role: string,
   displayName: string
 ): Promise<DALResult<{ invitationUrl: string }>> {
-  const redirectUrl = `${env.NEXT_PUBLIC_SITE_URL}/auth/setup-account`;
+  //?  const redirectUrl = `${env.NEXT_PUBLIC_SITE_URL}/auth/setup-account`;
+  const redirectUrl = `${WEBSITE_URL}/auth/setup-account`;
 
   // Le rôle N'EST PLUS injecté dans `data` (qui alimente user_metadata).
   // Source de vérité : app_metadata, posé via syncInvitedUserAppMetadataRole

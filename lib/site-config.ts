@@ -17,7 +17,7 @@ export const SITE_CONFIG = {
   },
   MAKER: {
     NAME: "Rouge Cardinal",
-    ADDRESS: "Adresse de votre compagnie",
+    ADDRESS: "Université Sorbonne-Nouvelle - 8 Avenue de Saint-Mandé 75012 Paris",
   },
   AUTH: {
     REDIRECT_TO_DASHBOARD: "/admin/dashboard",
