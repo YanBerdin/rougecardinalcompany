@@ -1,5 +1,32 @@
 # Progress
 
+## Fix DYNAMIC_SERVER_USAGE avalée sur /spectacles (2026-07-16)
+
+✅ **COMPLET** — Correction d'une fausse erreur de build Vercel sur la route ISR `/spectacles` (`revalidate = 60`).
+
+### Root cause
+
+- `fetchAllSpectacles()` (et les autres fonctions de lecture publiques de `lib/dal/spectacles.ts` / `lib/dal/spectacle-photos.ts`) utilisent `createClient()` (`supabase/server.ts`), qui appelle `cookies()`.
+- Lors de la tentative de rendu statique au build d'une page ISR, Next.js lève en interne une erreur de contrôle de flux `DYNAMIC_SERVER_USAGE` quand `cookies()` est utilisée.
+- Le `catch` générique de ces fonctions avalait cette erreur spéciale au lieu de la laisser remonter : log `console.error` bruyant + retour `[]`/`null`, empêchant Next.js de marquer correctement la route comme dynamique.
+
+### Fix
+
+| Fichier | Action |
+| --- | --- |
+| `lib/dal/helpers/error.ts` | Créé `isDynamicServerError(err)` — détecte `err.digest === "DYNAMIC_SERVER_USAGE"` |
+| `lib/dal/helpers/index.ts` | Export du nouveau helper |
+| `lib/dal/spectacles.ts` | `if (isDynamicServerError(err)) throw err;` ajouté dans 9 fonctions de lecture (`fetchAllSpectacles`, `fetchSpectacleById`, `fetchSpectacleBySlug`, `fetchSpectacleNextVenue`, `fetchSpectacleTicketUrl`, `fetchSpectacleTicketInfo`, `fetchTicketUrlsForSpectacles`, `fetchEventDateRangesForSpectacles`, `fetchDistinctGenres`) |
+| `lib/dal/spectacle-photos.ts` | Idem pour `fetchSpectacleLandscapePhotos`, `fetchSpectacleGalleryPhotos` |
+
+Conforme à la recommandation officielle Next.js : https://nextjs.org/docs/messages/dynamic-server-error — ne jamais avaler cette erreur, toujours la relancer.
+
+### Validation
+
+- ✅ `pnpm tsc --noEmit` — 0 erreur sur les fichiers modifiés
+
+---
+
 ## Fix GRANT DELETE manquant sur public.profiles (2026-07-15)
 
 ✅ **COMPLET** — Correction d'un bug bloquant la suppression d'un utilisateur depuis `/admin/users` : `permission denied for table profiles`.

@@ -9,6 +9,7 @@ export {
     type DALError,
     type DALResult,
     getErrorMessage,
+    isDynamicServerError,
     dalSuccess,
     dalError,
 } from "./error";

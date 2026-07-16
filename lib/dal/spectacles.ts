@@ -20,6 +20,7 @@ import {
   type DALResult,
   getErrorMessage,
   generateSlug,
+  isDynamicServerError,
 } from "@/lib/dal/helpers";
 
 // ============================================================================
@@ -92,6 +93,7 @@ export const fetchSpectacleNextVenue = cache(
         longitude: typeof lieu.longitude === "number" ? lieu.longitude : null,
       };
     } catch (err) {
+      if (isDynamicServerError(err)) throw err;
       console.error("fetchSpectacleNextVenue exception:", err);
       return null;
     }
@@ -130,6 +132,7 @@ export const fetchSpectacleTicketUrl = cache(
 
       return data.ticket_url ?? null;
     } catch (err) {
+      if (isDynamicServerError(err)) throw err;
       console.error("fetchSpectacleTicketUrl exception:", err);
       return null;
     }
@@ -167,6 +170,7 @@ export const fetchSpectacleTicketInfo = cache(
         capacity: data.capacity ?? null,
       };
     } catch (err) {
+      if (isDynamicServerError(err)) throw err;
       console.error("fetchSpectacleTicketInfo exception:", err);
       return null;
     }
@@ -212,6 +216,7 @@ export const fetchTicketUrlsForSpectacles = cache(
 
       return result;
     } catch (err) {
+      if (isDynamicServerError(err)) throw err;
       console.error("fetchTicketUrlsForSpectacles exception:", err);
       return result;
     }
@@ -263,6 +268,7 @@ export const fetchEventDateRangesForSpectacles = cache(
 
       return result;
     } catch (err) {
+      if (isDynamicServerError(err)) throw err;
       console.error("fetchEventDateRangesForSpectacles exception:", err);
       return result;
     }
@@ -322,6 +328,7 @@ export const fetchAllSpectacles = cache(
 
       return validRows;
     } catch (err) {
+      if (isDynamicServerError(err)) throw err;
       console.error("fetchAllSpectacles exception:", err);
       return [];
     }
@@ -376,6 +383,7 @@ export const fetchSpectacleById = cache(
 
       return parsed.data;
     } catch (err) {
+      if (isDynamicServerError(err)) throw err;
       console.error("fetchSpectacleById exception:", err);
       return null;
     }
@@ -437,6 +445,7 @@ export const fetchSpectacleBySlug = cache(
 
       return parsed.data;
     } catch (err) {
+      if (isDynamicServerError(err)) throw err;
       console.error("fetchSpectacleBySlug exception:", err);
       return null;
     }
@@ -479,6 +488,7 @@ export const fetchDistinctGenres = cache(async (): Promise<string[]> => {
 
     return uniqueGenres.sort((a, b) => a.localeCompare(b, "fr"));
   } catch (error) {
+    if (isDynamicServerError(error)) throw error;
     console.error("[DAL] fetchDistinctGenres exception:", error);
     return [];
   }
