@@ -328,6 +328,8 @@ export const fetchAllSpectacles = cache(
 
       return validRows;
     } catch (err) {
+      console.log("digest:", (err as any)?.digest); {/*TODO: Remove this debug log after confirming the error handling works*/ }
+      console.log("isDynamicServerError:", isDynamicServerError(err)); {/*TODO: Remove this debug log after confirming the error handling works*/ }
       if (isDynamicServerError(err)) throw err;
       console.error("fetchAllSpectacles exception:", err);
       return [];

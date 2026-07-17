@@ -9,7 +9,7 @@ export function AboutContent({ stats, content }: AboutProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Colonne texte */}
             <div className="animate-fade-in-up">
-                <h2 id="about-heading" className="text-5xl md:text-6xl lg:text-7xl italic font-semibold leading-none tracking-tight mb-6">
+                <h2 id="about-heading" className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl italic font-semibold leading-none tracking-tight mb-6">
                     {content.title}
                 </h2>
                 <p className="text-lg text-muted-foreground mb-6 leading-relaxed">

@@ -404,13 +404,13 @@ function EventListEmptyState({ selectedDate, onClear }: {
             <div className="text-center py-20 px-6 rounded-2xl border border-white/5 bg-white/[0.02] backdrop-blur-sm" role="status">
                 {selectedDate ? (
                     <>
-                        <p className="text-gold text-xl font-light tracking-wide">Aucun événement ce jour.</p>
+                        <p className="text-gold-text text-xl font-light tracking-wide">Aucun événement ce jour.</p>
                         <p className="text-chart-6 mt-2 text-sm">Sélectionnez un autre jour ou supprimez le filtre.</p>
                     </>
                 ) : (
                     <>
-                        <p className="text-gold text-xl font-light tracking-wide">Aucun événement ne correspond à votre recherche.</p>
-                        <p className="text-chart-6 mt-2 text-sm">Essayez de modifier vos filtres ou de revenir plus tard.</p>
+                        <p className="text-gold-text text-xl font-light tracking-wide">Aucun événement ne correspond à votre recherche.</p>
+                        <p className="text-gold-text mt-2 text-sm">Essayez de modifier vos filtres ou de revenir plus tard.</p>
                     </>
                 )}
             </div>

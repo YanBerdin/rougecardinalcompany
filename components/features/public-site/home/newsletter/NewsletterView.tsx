@@ -37,7 +37,7 @@ export function NewsletterView({
             <p className="text-md md:text-lg lg:text-xl text-white/80">
               Dernier acte : Newsletter
             </p>
-            <h2 id="newsletter-heading" className="text-3xl md:text-4xl lg:text-6xl font-semibold text-white leading-tight">
+            <h2 id="newsletter-heading" className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight">
               Restez dans les coulisses
             </h2>
             <div className="h-px w-24 xl:w-72 bg-white/40 my-6" aria-hidden="true" />

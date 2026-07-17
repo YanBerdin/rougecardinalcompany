@@ -25,7 +25,7 @@ export function NewsView({ news }: NewsViewProps) {
           <div className="mb-4 flex flex-col gap-4 sm:gap-5 justify-center">
             <h2
               id="news-heading"
-              className="text-5xl italic font-semibold leading-none tracking-tight sm:text-5xl md:text-6xl lg:text-7xl mx-auto text-center"
+              className="text-4xl italic font-semibold leading-none tracking-tight sm:text-5xl md:text-6xl lg:text-7xl mx-auto text-center"
             >
               La presse en parle
             </h2>
@@ -50,7 +50,7 @@ export function NewsView({ news }: NewsViewProps) {
                   {item.type}
                 </p>
 
-                <h4 className="mb-2 text-3xl font-semibold leading-snug">{item.title}</h4>
+                <h4 className="mb-2 text-3xl sm:text-5xl font-semibold leading-snug">{item.title}</h4>
 
                 <p className="mb-2 font-sans text-xs uppercase tracking-wide text-muted-foreground">
                   {item.source_publication} · {formatGazetteDate(item.date)}
