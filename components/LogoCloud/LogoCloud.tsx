@@ -96,7 +96,7 @@ export function LogoCloud({
             <div className=" mx-auto px-4 text-center mb-4">
 
                 <p className="hidden sm:block text-xs lg:text-sm xl:text-md text-chart-6/70 mx-auto">
-                    Nos soutiens et partenaires institutionnels nous accompagnent.
+                    Nos partenaires nous accompagnent.
                 </p>
             </div>
             {shouldScroll && (

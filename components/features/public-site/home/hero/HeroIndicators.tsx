@@ -28,7 +28,7 @@ export function HeroIndicators({
       <div
         role="group"
         aria-label="Sélectionner une diapositive"
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex space-x-3 z-20"
+        className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex space-x-3 z-20"
       >
         {slides.map((slide, index) => (
           <button
