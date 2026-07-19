@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 // This is a Client Component ("use client"). Importing @/lib/env (t3-env) or
 // @/lib/site-config (which imports @/lib/env and reads server-only vars like
@@ -95,12 +96,12 @@ export default function AcceptInvitationPage() {
                     <div className="bg-destructive/10 border border-destructive/20 rounded-md p-4">
                         <p className="text-destructive">{error}</p>
                     </div>
-                    <button
+                    <Button
                         onClick={() => router.push("/")}
                         className="text-primary hover:text-primary/80 transition-colors"
                     >
                         Retour à l&apos;accueil
-                    </button>
+                    </Button>
                 </div>
             </div>
         );
@@ -112,20 +113,19 @@ export default function AcceptInvitationPage() {
                 <h1 className="text-3xl md:text-4xl font-extrabold text-foreground">
                     Activer votre compte
                 </h1>
-                <p className="text-muted-foreground">
+                <p className="text-base text-muted-foreground">
                     Vous avez été invité(e) à rejoindre {SITE_TITLE}. Pour
                     protéger votre lien d&apos;invitation contre une utilisation
                     automatique par les filtres de sécurité de votre messagerie,
                     veuillez cliquer sur le bouton ci-dessous pour continuer.
                 </p>
-                <button
-                    type="button"
+                <Button
                     onClick={handleActivate}
                     disabled={!targetUrl}
-                    className="inline-flex items-center justify-center h-11 px-6 rounded-md bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50"
+                    className="inline-flex items-center justify-center h-11 px-6 rounded-md bg-primary text-gold-text font-semibold hover:bg-chart-2 transition-colors disabled:opacity-50"
                 >
                     Continuer vers l&apos;activation
-                </button>
+                </Button>
             </div>
         </div>
     );
