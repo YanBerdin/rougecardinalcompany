@@ -2,8 +2,16 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { env } from "@/lib/env";
-import { SITE_CONFIG, WEBSITE_URL } from "@/lib/site-config";
+
+// This is a Client Component ("use client"). Importing @/lib/env (t3-env) or
+// @/lib/site-config (which imports @/lib/env and reads server-only vars like
+// EMAIL_FROM) pulls server-side env validation into the client bundle and
+// throws "Attempted to access a server-side environment variable on the
+// client" at runtime. Same documented exception as supabase/client.ts:
+// NEXT_PUBLIC_* vars are embedded at build time, so read them via process.env
+// directly, and use window.location.origin as the site URL (this code only
+// runs client-side, after the `typeof window` guard).
+const SITE_TITLE = "Rouge Cardinal";
 
 interface ParsedInvitation {
     error: string | null;
@@ -18,7 +26,9 @@ interface ParsedInvitation {
 function isSafeInvitationUrl(rawUrl: string): boolean {
     try {
         const target = new URL(rawUrl);
-        const supabaseHost = new URL(env.NEXT_PUBLIC_SUPABASE_URL).host;
+        const supabaseHost = new URL(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!
+        ).host;
 
         if (target.protocol !== "https:" || target.host !== supabaseHost) {
             return false;
@@ -28,7 +38,9 @@ function isSafeInvitationUrl(rawUrl: string): boolean {
         }
 
         const redirectTo = target.searchParams.get("redirect_to");
-        return Boolean(redirectTo && redirectTo.startsWith(WEBSITE_URL));
+        return Boolean(
+            redirectTo && redirectTo.startsWith(window.location.origin)
+        );
     } catch {
         return false;
     }
@@ -101,7 +113,7 @@ export default function AcceptInvitationPage() {
                     Activer votre compte
                 </h1>
                 <p className="text-muted-foreground">
-                    Vous avez été invité(e) à rejoindre {SITE_CONFIG.SEO.TITLE}. Pour
+                    Vous avez été invité(e) à rejoindre {SITE_TITLE}. Pour
                     protéger votre lien d&apos;invitation contre une utilisation
                     automatique par les filtres de sécurité de votre messagerie,
                     veuillez cliquer sur le bouton ci-dessous pour continuer.
