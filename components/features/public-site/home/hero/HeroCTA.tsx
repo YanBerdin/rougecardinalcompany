@@ -22,7 +22,7 @@ export function HeroCTA({ slide }: HeroCTAProps) {
           {slide.subtitle}
         </h2>
 
-        <p className="text-sm sm:text-base md:text-lg my-6 text-chart-6/80 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-sm sm:text-base md:text-lg my-2 sm:my-6 text-chart-6/80 max-w-2xl mx-auto leading-relaxed">
           {slide.description}
         </p>
 
