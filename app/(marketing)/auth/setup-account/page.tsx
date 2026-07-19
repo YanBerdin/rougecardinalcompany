@@ -18,6 +18,30 @@ export default function SetupAccountPage() {
 
             // Check if we have tokens in the URL hash (from Supabase redirect)
             const hash = window.location.hash;
+
+            // Supabase redirects with an error hash when the OTP invite token is
+            // invalid, already consumed, or expired
+            // (e.g. #error=access_denied&error_code=otp_expired). Detect it first
+            // so we can show an actionable message instead of the generic one.
+            if (hash && hash.includes('error')) {
+                const errorParams = new URLSearchParams(hash.substring(1));
+                const errorCode = errorParams.get('error_code');
+
+                if (errorCode === 'otp_expired') {
+                    setError(
+                        "Votre lien d'invitation a expiré ou a déjà été utilisé. " +
+                        "Veuillez demander une nouvelle invitation à un administrateur."
+                    );
+                } else {
+                    setError(
+                        "Ce lien d'invitation n'est plus valide. " +
+                        "Veuillez demander une nouvelle invitation à un administrateur."
+                    );
+                }
+                setIsLoading(false);
+                return;
+            }
+
             if (hash && hash.includes('access_token')) {
                 // Extract tokens from hash
                 const params = new URLSearchParams(hash.substring(1)); // Remove the '#'

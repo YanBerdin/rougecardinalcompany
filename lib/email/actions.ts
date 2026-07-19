@@ -2,7 +2,7 @@
 
 import "server-only";
 import { resend } from "@/lib/resend";
-import { SITE_CONFIG } from "@/lib/site-config";
+import { SITE_CONFIG, WEBSITE_URL } from "@/lib/site-config";
 import { env } from "@/lib/env";
 import NewsletterConfirmation from "@/emails/newsletter-confirmation";
 import ContactMessageNotification from "@/emails/contact-message-notification";
@@ -17,7 +17,7 @@ function buildEmailParams(
   params: ResendParamsTypeWithConditionalFrom
 ): Parameters<typeof resend.emails.send>[0] {
   const isDevelopment = env.NODE_ENV === "development";
-  
+
   return {
     from: params[0].from ?? SITE_CONFIG.EMAIL.FROM,
     to: params[0].to,
@@ -99,6 +99,18 @@ export async function sendInvitationEmail(params: {
     `[Email] ${devRedirectEnabled ? `DEV MODE - Redirecting from ${params.email} to ${recipientEmail}` : `Sending to ${recipientEmail}`}`
   );
 
+  // Wrap the raw Supabase invite link (single-use OTP token) behind our own
+  // confirmation page. Corporate mail gateways and antivirus scanners often
+  // prefetch/visit links found in emails to scan them for phishing, which
+  // silently consumes the one-time token before the real recipient clicks it
+  // (symptom: "otp_expired" / "access_denied" within minutes of sending).
+  // Requiring an explicit client-side button click before navigating to the
+  // real Supabase link prevents automated scanners (which only issue GET
+  // requests, no JS execution) from burning the token.
+  const confirmationUrl = `${WEBSITE_URL}/auth/accept-invitation?url=${encodeURIComponent(
+    params.invitationUrl
+  )}`;
+
   await sendEmail({
     to: recipientEmail,
     subject: `Invitation à rejoindre ${SITE_CONFIG.SEO.TITLE}`,
@@ -106,7 +118,7 @@ export async function sendInvitationEmail(params: {
       email: params.email, // Garde l'email original dans le template
       role: params.role,
       displayName: params.displayName,
-      invitationUrl: params.invitationUrl,
+      invitationUrl: confirmationUrl,
     }),
   });
 }
