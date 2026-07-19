@@ -197,18 +197,6 @@ export default function AppSidebar({ userRole }: AppSidebarProps) {
               </div>
             </div>
           </SidebarMenuItem>
-          {/* SearchBar */}
-          <SidebarMenuItem className="group-data-[collapsible=icon]:hidden">
-            <div className="relative px-2">
-              <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
-              <Input
-                placeholder="Rechercher..."
-                className="h-8 pl-8"
-                type="search"
-                aria-label="Rechercher dans la navigation"
-              />
-            </div>
-          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
 
@@ -260,28 +248,28 @@ export default function AppSidebar({ userRole }: AppSidebarProps) {
         </SidebarGroup>
 
         {filterByRole(homepageItems).length > 0 && (
-        <SidebarGroup>
-          <SidebarGroupLabel>Accueil</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {filterByRole(homepageItems).map((item) => {
-                const isActive =
-                  pathname === item.href ||
-                  (item.href !== "/admin" && pathname.startsWith(item.href));
-                return (
-                  <SidebarMenuItem key={item.href} title={item.title}>
-                    <SidebarMenuButton asChild isActive={isActive}>
-                      <Link href={item.href}>
-                        <item.icon aria-hidden="true" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+          <SidebarGroup>
+            <SidebarGroupLabel>Accueil</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {filterByRole(homepageItems).map((item) => {
+                  const isActive =
+                    pathname === item.href ||
+                    (item.href !== "/admin" && pathname.startsWith(item.href));
+                  return (
+                    <SidebarMenuItem key={item.href} title={item.title}>
+                      <SidebarMenuButton asChild isActive={isActive}>
+                        <Link href={item.href}>
+                          <item.icon aria-hidden="true" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
         )}
 
         <SidebarGroup>
