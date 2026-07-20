@@ -9,6 +9,11 @@ const supabaseUrl =
   process.env.NEXT_PUBLIC_SUPABASE_URL ??
   "https://yvtrlvmbofklefxcxrzv.supabase.co";
 
+// Hostname dérivé dynamiquement de NEXT_PUBLIC_SUPABASE_URL pour next/image.
+// Évite qu'un changement de projet Supabase (dev → prod) casse silencieusement
+// l'affichage des images (l'ancien hostname codé en dur restait seul whitelisté).
+const supabaseStorageHostname = new URL(supabaseUrl).hostname;
+
 // Vercel injecte automatiquement VERCEL="1" sur TOUS ses déploiements,
 // quel que soit le compte (staging, production, preview).
 // VERCEL_ENV ("production"|"preview"|"development") n'est pas suffisant ici :
@@ -73,7 +78,19 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: supabaseStorageHostname,
+        port: "",
+        pathname: "/storage/v1/object/public/**",
+      },
+      {
+        protocol: "https",
         hostname: "yvtrlvmbofklefxcxrzv.supabase.co",
+        port: "",
+        pathname: "/storage/v1/object/public/**",
+      },
+      {
+        protocol: "https",
+        hostname: "hjmwctzqljfszuwkaadd.supabase.co",
         port: "",
         pathname: "/storage/v1/object/public/**",
       },

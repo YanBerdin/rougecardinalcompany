@@ -4,6 +4,33 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-07-20 - FIX: GRANTs manquants sur media_tags/media_folders/media_item_tags + alignement is_admin/has_min_role sur app_metadata.role
+
+**Migration** : `20260720140000_fix_media_tags_grants_and_role_functions.sql` (GRANTs + recréation de deux fonctions helper)
+
+**Schéma déclaratif** : ✅ synchronisé — `02b_functions_core.sql` (`is_admin()` et `has_min_role(text)`), `04_table_media_tags_folders.sql` (section GRANTS).
+
+**Contexte** : Deux problèmes de permissions remontés en production (page Bibliothèque Médias et génération de thumbnails).
+
+1. **Bibliothèque Médias** : `Erreur tags: Failed to list media tags: permission denied for table media_tags`. Les tables `media_tags`, `media_folders` et `media_item_tags` avaient des RLS policies mais **aucun GRANT table-level** pour le rôle `authenticated`. PostgreSQL bloque donc l'accès avant d'évaluer les policies.
+
+2. **Thumbnails** : `new row violates row-level security policy` lors de l'upload du thumbnail dans Supabase Storage. La policy Storage INSERT du bucket `medias` exige `has_min_role('editor')`. Cette fonction lisait `public.profiles.role`, alors que l'autorisation applicative (`lib/auth/roles.ts`) considère `auth.users.raw_app_meta_data->>'role'` (signé dans le JWT) comme source de vérité. Quand les deux divergent — typiquement après une invitation admin où le profil est absent ou son rôle non synchronisé — l'API route laisse passer la requête (elle lit `app_metadata.role`) mais Storage la refuse.
+
+**Root cause commune** : désalignement entre la source de vérité JWT (`app_metadata.role`) et les fonctions DB qui restaient sur `profiles.role`.
+
+**Changements** :
+
+- GRANT `SELECT` + `INSERT/UPDATE/DELETE` sur `public.media_tags`, `public.media_folders`, `public.media_item_tags` au rôle `authenticated` (pas de GRANT `anon`, conformément à `20260501120000_fix_anon_grants_sensitive_tables.sql`).
+- Réécriture de `public.is_admin()` : lit d'abord `auth.jwt()->'app_metadata'->>'role'`, avec fallback sur `public.profiles.role` pour les tokens legacy.
+- Réécriture de `public.has_min_role(text)` : même logique JWT-first + fallback profiles.
+
+**Validation attendue** :
+
+- Page `/admin/media/library` : `listMediaTagsAction()` / `listMediaFoldersAction()` doivent fonctionner pour les éditeurs/admins authentifiés.
+- Upload/génération de thumbnail : Storage policy `Editors can upload to medias` doit désormais évaluer le rôle depuis le JWT et autoriser les admins/éditeurs.
+
+**Statut** : ⏸ à appliquer (`supabase db push` / `apply_migration` selon l'environnement cible).
+
 ### 2026-07-15 - FIX: GRANT DELETE manquant sur public.profiles pour authenticated
 
 **Migration** : `20260715130000_grant_delete_profiles_to_authenticated.sql` (GRANT uniquement, aucun changement de policy)

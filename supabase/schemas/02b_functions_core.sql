@@ -29,15 +29,14 @@ stable
 security invoker
 set search_path = ''
 as $$
-  select exists (
-    select 1 from public.profiles p
-    where p.user_id = auth.uid()
-      and p.role = 'admin'
-  );
+  select coalesce(
+    auth.jwt()->'app_metadata'->>'role',
+    (select p.role from public.profiles p where p.user_id = auth.uid())
+  ) = 'admin';
 $$;
 
-comment on function public.is_admin() is 
-'Helper function: Checks if current user has admin role. Uses SECURITY INVOKER (auth.uid() works in invoker context; profiles SELECT RLS is using true so no circular dep). Marked STABLE since auth.uid() remains constant during transaction.';
+comment on function public.is_admin() is
+'Helper function: Checks if current user has admin role. Role is read from the signed JWT app_metadata first (source of truth), with a fallback to public.profiles.role for legacy tokens. Marked STABLE since JWT claims remain constant during transaction.';
 
 -- Fonction helper pour vérifier un rôle minimum dans la hiérarchie user < editor < admin
 /*
@@ -72,30 +71,26 @@ stable
 security invoker
 set search_path = ''
 as $$
-  select coalesce(
-    (
-      select
-        case p.role
-          when 'admin' then 2
-          when 'editor' then 1
-          else 0
-        end
-        >=
-        case required_role
-          when 'admin' then 2
-          when 'editor' then 1
-          when 'user' then 0
-          else 3
-        end
-      from public.profiles p
-      where p.user_id = auth.uid()
-    ),
-    false
-  );
+  select (
+    case coalesce(
+      auth.jwt()->'app_metadata'->>'role',
+      (select p.role from public.profiles p where p.user_id = auth.uid())
+    )
+      when 'admin' then 2
+      when 'editor' then 1
+      else 0
+    end
+  ) >=
+  case required_role
+    when 'admin' then 2
+    when 'editor' then 1
+    when 'user' then 0
+    else 3
+  end;
 $$;
 
-comment on function public.has_min_role(text) is 
-'Helper function: Checks if current user has at least the specified role in the hierarchy user(0) < editor(1) < admin(2). Invalid required_role returns false. Uses SECURITY INVOKER (same reasoning as is_admin()).';
+comment on function public.has_min_role(text) is
+'Helper function: Checks if current user has at least the specified role in the hierarchy user(0) < editor(1) < admin(2). Role is read from the signed JWT app_metadata first (source of truth), with a fallback to public.profiles.role for legacy tokens. Invalid required_role returns false. Marked STABLE since JWT claims remain constant during transaction.';
 
 -- Fonction pour mise à jour automatique updated_at
 create or replace function public.update_updated_at_column()

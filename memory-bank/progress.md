@@ -1,5 +1,33 @@
 # Progress
 
+## Fix bouton "Continuer vers l'activation" désactivé en permanence sur /auth/accept-invitation (2026-07-20)
+
+✅ **COMPLET** — Le bouton d'activation restait grisé indéfiniment même avec un lien d'invitation valide.
+
+### Root cause
+
+- `app/(marketing)/auth/accept-invitation/page.tsx` passait `parseInvitationFromLocation` comme **initialiseur paresseux de `useState`** (`useState(parseInvitationFromLocation)`).
+- Cet initialiseur s'exécute pendant le rendu **serveur** (SSR), où `window` est `undefined` → il retournait `{ error: null, targetUrl: null }`.
+- À l'hydratation côté **client**, React réutilise l'état déjà calculé côté serveur et **ne ré-exécute pas** l'initialiseur — `targetUrl` restait donc `null` pour toujours, et `disabled={!targetUrl}` gardait le bouton désactivé en permanence, indépendamment de la validité du lien.
+
+### Fix
+
+| Fichier | Action |
+| --- | --- |
+| `app/(marketing)/auth/accept-invitation/page.tsx` | La lecture de `window.location.search` déplacée dans un `useEffect` (`setInvitation(parseInvitationFromLocation())`) déclenché après le montage client ; état initial `{ error: null, targetUrl: null }` |
+| idem | `eslint-disable-next-line react-hooks/set-state-in-effect` ajouté avec commentaire — pattern correct pour synchroniser une valeur client-only (API navigateur) après hydratation |
+
+### Validation
+
+- ✅ `get_errors` — 0 erreur/warning après correction
+- Logique anti-open-redirect (`isSafeInvitationUrl` : host Supabase + `/auth/v1/verify` + `redirect_to`) inchangée
+
+### Note
+
+Ce fix est indépendant et complémentaire du fix du double-décodage d'URL du même jour (voir entrée ci-dessous, 2026-07-20).
+
+---
+
 ## Fix DYNAMIC_SERVER_USAGE avalée sur /spectacles (2026-07-16)
 
 ✅ **COMPLET** — Correction d'une fausse erreur de build Vercel sur la route ISR `/spectacles` (`revalidate = 60`).
