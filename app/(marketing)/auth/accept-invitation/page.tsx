@@ -14,6 +14,13 @@ import { Button } from "@/components/ui/button";
 // runs client-side, after the `typeof window` guard).
 const SITE_TITLE = "Rouge Cardinal";
 
+// Hardcoded production origin (not imported from lib/site-config to avoid
+// pulling server-only env validation into this Client Component's bundle,
+// see comment above). Used as a fallback alongside window.location.origin so
+// that the redirect_to check does not depend on incidental host variations
+// (e.g. www vs apex domain, or a proxy rewriting the Host header).
+const PRODUCTION_ORIGIN = "https://compagnie-rouge-cardinal.fr";
+
 interface ParsedInvitation {
     error: string | null;
     targetUrl: string | null;
@@ -40,7 +47,9 @@ function isSafeInvitationUrl(rawUrl: string): boolean {
 
         const redirectTo = target.searchParams.get("redirect_to");
         return Boolean(
-            redirectTo && redirectTo.startsWith(window.location.origin)
+            redirectTo &&
+            (redirectTo.startsWith(window.location.origin) ||
+                redirectTo.startsWith(PRODUCTION_ORIGIN))
         );
     } catch {
         return false;
@@ -50,22 +59,21 @@ function isSafeInvitationUrl(rawUrl: string): boolean {
 /**
  * Reads and validates the invitation URL from the current location.
  * Runs once (lazy useState initializer) — no effect, no cascading renders.
+ *
+ * Note: `URLSearchParams.get()` already percent-decodes the value once, so
+ * `decodeURIComponent` must NOT be called again here — the invitation link
+ * is only percent-encoded a single time (see `encodeURIComponent` in
+ * `lib/email/actions.ts::sendInvitationEmail`). A redundant second decode
+ * previously risked throwing on legitimate tokens and was removed.
  */
 function parseInvitationFromLocation(): ParsedInvitation {
     if (typeof window === "undefined") {
         return { error: null, targetUrl: null };
     }
 
-    const encoded = new URLSearchParams(window.location.search).get("url");
-    if (!encoded) {
+    const decoded = new URLSearchParams(window.location.search).get("url");
+    if (!decoded) {
         return { error: "Lien d'invitation invalide ou incomplet.", targetUrl: null };
-    }
-
-    let decoded: string;
-    try {
-        decoded = decodeURIComponent(encoded);
-    } catch {
-        return { error: "Lien d'invitation invalide.", targetUrl: null };
     }
 
     if (!isSafeInvitationUrl(decoded)) {
