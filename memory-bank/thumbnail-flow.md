@@ -19,7 +19,7 @@ flowchart TD
     end
 
     subgraph Thumbnail["🖼️ Thumbnail Generation"]
-        G -->|Yes| H[POST /api/admin/media/thumbnail]
+        G -->|Yes| H["generateMediaThumbnail() — direct function call, NO fetch"]
         H --> I[Download original from Storage]
         I --> J[Sharp: Resize 300x300]
         J --> K[Sharp: JPEG quality 80%]
@@ -41,6 +41,8 @@ flowchart TD
     style N fill:#ffcdd2
 ```
 
+> ⚠️ **Historique (corrigé le 2026-07-20)** : ce flux appelait auparavant l'API route via un `fetch(${env.NEXT_PUBLIC_SITE_URL}/api/admin/media/thumbnail)` interne avec forward manuel des cookies. Ce pattern causait `fetch failed` en staging et `HTTP 500` en production (dépendance fragile à `NEXT_PUBLIC_SITE_URL` + cookies). La logique a été extraite dans `lib/dal/media-thumbnail.ts::generateMediaThumbnail()`, appelée **directement** (function call) par les Server Actions. La route API est conservée uniquement comme thin wrapper pour d'éventuels appels externes — elle n'est plus utilisée en interne. Voir `/memories/repo/site-url-config.md` pour la règle générale (ne jamais self-fetch une route API interne depuis un Server Component/Action).
+
 ## Composants impliqués
 
 ### 1. Client Component - MediaLibraryPicker
@@ -49,30 +51,26 @@ flowchart TD
 
 Déclenche l'upload via le Server Action `uploadMediaImage`.
 
-### 2. Server Action - uploadMediaImage
+### 2. Server Action - uploadMediaImage / regenerateThumbnailAction
 
-**Fichier** : [lib/actions/media-actions.ts](../../lib/actions/media-actions.ts#L120-L200)
+**Fichier** : [lib/actions/media-actions.ts](../../lib/actions/media-actions.ts)
+
+Appel **direct** (function call, pas de `fetch`) à la fonction DAL partagée après un upload réussi (non-bloquant) ou depuis le bouton "Générer thumbnail" :
 
 ```typescript
-// Ligne 164-184 : Appel API thumbnail (non-bloquant)
 try {
-  const response = await fetch(`${env.NEXT_PUBLIC_SITE_URL}/api/admin/media/thumbnail`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      mediaId: parseInt(result.data.mediaId, 10),
-      storagePath: result.data.storagePath,
-    }),
+  const thumbResult = await generateMediaThumbnail({
+    mediaId: Number(result.data.mediaId),
+    storagePath: result.data.storagePath,
   });
 
-  if (!response.ok) {
-    throw new Error(`Thumbnail API returned ${response.status}`);
+  if (!thumbResult.success) {
+    throw new Error(thumbResult.error);
   }
 
-  const thumbResult = await response.json();
-  console.log("[Media] Thumbnail generated:", thumbResult.thumbnailPath);
-} catch (thumbError) {
-  console.warn("[Media] Thumbnail generation failed (non-blocking):", thumbError);
+  console.log("[uploadMediaImage] Thumbnail generated:", thumbResult.data.thumbPath);
+} catch (thumbnailError) {
+  console.warn("[uploadMediaImage] Thumbnail generation failed (non-critical):", thumbnailError);
 }
 ```
 
@@ -84,25 +82,30 @@ try {
 - Création enregistrement dans table `medias`
 - Retourne `mediaId` et `storagePath`
 
-### 4. API Route - Thumbnail Generation
+### 4. DAL - generateMediaThumbnail (logique partagée)
 
-**Fichier** : [app/api/admin/media/thumbnail/route.ts](../../app/api/admin/media/thumbnail/route.ts)
+**Fichier** : [lib/dal/media-thumbnail.ts](../../lib/dal/media-thumbnail.ts)
 
 ```typescript
 // Paramètres Sharp
-const THUMBNAIL_WIDTH = 300;
-const THUMBNAIL_HEIGHT = 300;
+const THUMBNAIL_SIZE = 300;
 const THUMBNAIL_QUALITY = 80;
-const THUMBNAIL_FORMAT = 'jpeg';
+const THUMBNAIL_SUFFIX = "_thumb.jpg";
 ```
 
-**Étapes** :
+**Étapes** (fonction `generateMediaThumbnail({ mediaId, storagePath })`, retourne `DALResult<{ thumbPath }>`) :
 
-1. Validation Zod : `mediaId` (number), `storagePath` (string)
+1. `requireMinRole("editor")`
 2. Download original depuis Storage
 3. Traitement Sharp : resize 300x300, cover, JPEG 80%
 4. Upload thumbnail : `{storagePath}_thumb.jpg`
 5. Update DB : `thumbnail_path`
+
+### 5. API Route - Thin wrapper (compat externe uniquement)
+
+**Fichier** : [app/api/admin/media/thumbnail/route.ts](../../app/api/admin/media/thumbnail/route.ts)
+
+Valide le body (Zod) puis délègue à `generateMediaThumbnail()`. **N'est plus appelée en interne** par les Server Actions — conservée uniquement pour d'éventuels appels externes (API publique/webhook).
 
 ### 5. Database Schema
 
@@ -193,3 +196,4 @@ Le système utilise un **pattern non-bloquant** pour la génération de thumbnai
 - [Thumbnail Debug & Fix](./THUMBNAIL-GENERATION-DEBUG-AND-FIX.md)
 - [Scripts README](../../scripts/Thumbnails/README-thumbnails.md)
 - [Sharp Documentation](https://sharp.pixelplumbing.com/)
+- Fix self-fetch interne (2026-07-20) : `/memories/repo/site-url-config.md`

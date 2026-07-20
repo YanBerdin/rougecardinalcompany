@@ -2,11 +2,10 @@
 
 import "server-only";
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
-import { env } from "@/lib/env"
 import { createClient } from "@/supabase/server";
 import { requireMinRole } from "@/lib/auth/roles";
 import { uploadMedia, deleteMedia, findMediaByHash, getMediaPublicUrl } from "@/lib/dal/media";
+import { generateMediaThumbnail } from "@/lib/dal/media-thumbnail";
 import { recordRequest } from "@/lib/utils/rate-limit";
 import { verifyFileMime } from "@/lib/utils/mime-verify";
 import { compressImage } from "@/lib/utils/image-compress";
@@ -185,36 +184,16 @@ export async function uploadMediaImage(
     let thumbnailWarning: string | undefined;
 
     try {
-      // Get cookies for auth forwarding to API route
-      const cookieStore = await cookies();
-      const cookieHeader = cookieStore
-        .getAll()
-        .map((c) => `${c.name}=${c.value}`)
-        .join("; ");
+      const thumbResult = await generateMediaThumbnail({
+        mediaId: Number(result.data.mediaId),
+        storagePath: result.data.storagePath,
+      });
 
-      const response = await fetch(
-        `${env.NEXT_PUBLIC_SITE_URL}/api/admin/media/thumbnail`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Cookie: cookieHeader,
-          },
-          body: JSON.stringify({
-            mediaId: Number(result.data.mediaId),
-            storagePath: result.data.storagePath,
-          }),
-        }
-      );
-
-      // ✅ CRITICAL: Verify HTTP status
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      if (!thumbResult.success) {
+        throw new Error(thumbResult.error);
       }
 
-      const responseData = await response.json();
-      console.log("[uploadMediaImage] Thumbnail generated:", responseData.thumbPath);
+      console.log("[uploadMediaImage] Thumbnail generated:", thumbResult.data.thumbPath);
     } catch (thumbnailError) {
       console.warn(
         "[uploadMediaImage] Thumbnail generation failed (non-critical):",
@@ -495,64 +474,36 @@ export async function regenerateThumbnailAction(
       };
     }
 
-    // 5. Call thumbnail API route (forward cookies for auth)
-    const cookieStore = await cookies();
-    const cookieHeader = cookieStore
-      .getAll()
-      .map((c) => `${c.name}=${c.value}`)
-      .join("; ");
+    // 5. Generate thumbnail (direct DAL call, no internal HTTP fetch)
+    const thumbResult = await generateMediaThumbnail({
+      mediaId: Number(media.id),
+      storagePath: media.storage_path,
+    });
 
-    const response = await fetch(
-      `${env.NEXT_PUBLIC_SITE_URL}/api/admin/media/thumbnail`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Cookie: cookieHeader,
-        },
-        body: JSON.stringify({
-          mediaId: Number(media.id),
-          storagePath: media.storage_path,
-        }),
-      }
-    );
-
-    // 6. Verify HTTP status
-    if (!response.ok) {
-      const errorText = await response.text();
+    if (!thumbResult.success) {
       console.error(
-        `[regenerateThumbnailAction] API Error (HTTP ${response.status}):`,
-        errorText
+        `[regenerateThumbnailAction] Generation failed for media ${media.id}:`,
+        thumbResult.error
       );
       return {
         success: false,
-        error: `Erreur serveur: HTTP ${response.status}`,
-      };
-    }
-
-    // 7. Parse response
-    const responseData = await response.json();
-
-    if (!responseData.success || !responseData.thumbPath) {
-      return {
-        success: false,
-        error: responseData.error || "Erreur lors de la génération du thumbnail",
+        error: thumbResult.error,
       };
     }
 
     console.log(
       `[regenerateThumbnailAction] Thumbnail generated for media ${media.id}:`,
-      responseData.thumbPath
+      thumbResult.data.thumbPath
     );
 
-    // 8. Revalidate admin media pages
+    // 6. Revalidate admin media pages
     revalidatePath("/admin/media");
     revalidatePath("/admin/media/library");
 
     return {
       success: true,
       data: {
-        thumbPath: responseData.thumbPath,
+        thumbPath: thumbResult.data.thumbPath,
       },
     };
   } catch (error) {
