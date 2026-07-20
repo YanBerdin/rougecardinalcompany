@@ -1011,7 +1011,7 @@ export default function InvitationEmail({
       
       <EmailSection>
         <Text style={{ fontSize: '14px', color: '#6b7280', marginTop: '32px' }}>
-          <strong>Note :</strong> Ce lien d&apos;invitation est valide pendant 24 heures. 
+          <strong>Note :</strong> Ce lien d&apos;invitation est valide pendant 1 heure.
           Si vous n&apos;avez pas demandé cette invitation, vous pouvez ignorer cet email.
         </Text>
       </EmailSection>

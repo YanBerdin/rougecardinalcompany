@@ -40,7 +40,7 @@ export default function InvitationEmail({
           <strong>{roleLabel}</strong>.
         </EmailText>
         <EmailText>
-          Pour activer votre compte et définir votre mot de passe, cliquez sur
+          Pour activer votre compte (lien valable 1 heure) et définir votre mot de passe, cliquez sur
           le bouton ci-dessous :
         </EmailText>
       </EmailSection>
@@ -63,6 +63,13 @@ export default function InvitationEmail({
       </EmailSection>
 
       <EmailSection>
+        <Text className="text-sm text-gray-500">
+          ⚠️ Ce lien est valide pendant 1 heure. Après expiration, vous
+          devrez demander une nouvelle invitation ⚠️.
+        </Text>
+      </EmailSection>
+
+      <EmailSection>
         <Text className="text-sm text-gray-600">
           Si le bouton ne fonctionne pas, copiez et collez ce lien dans votre
           navigateur :
@@ -76,13 +83,6 @@ export default function InvitationEmail({
         <Text className="text-sm text-gray-500">
           Votre adresse email : <strong>{email}</strong>
         </Text>
-        <Text className="text-sm text-gray-500">
-          ⚠️ Ce lien est valide pendant 1 heure. Après expiration, vous
-          devrez demander une nouvelle invitation.
-        </Text>
-      </EmailSection>
-
-      <EmailSection>
         <Text className="text-sm text-gray-500">
           Si vous n&apos;avez pas demandé cette invitation, vous pouvez ignorer
           cet email en toute sécurité.

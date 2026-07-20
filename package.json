@@ -173,28 +173,31 @@
     "tailwindcss-animate": "^1.0.7",
     "tsx": "^4.7.0",
     "typescript": "^5",
-    "vite": "^8.0.8",
+    "vite": "^8.0.16",
     "vitest": "^4.1.0"
   },
   "pnpm": {
     "overrides": {
       "@isaacs/brace-expansion": ">=5.0.1",
-      "brace-expansion": ">=5.0.6",
+      "brace-expansion": ">=5.0.7",
       "glob": ">=10.5.0",
-      "js-yaml": ">=4.1.1",
+      "js-yaml": ">=4.3.0",
       "lodash": ">=4.17.23",
       "@types/react": "19.2.7",
       "@types/react-dom": "19.2.3",
-      "markdownlint-cli2>markdown-it": ">=14.1.1",
+      "markdownlint-cli2>markdown-it": ">=14.2.0",
       "schema-utils>ajv": ">=8.18.0",
       "minimatch": ">=10.2.3",
       "terser-webpack-plugin>serialize-javascript": ">=7.0.3",
       "flatted": ">=3.4.2",
+      "linkify-it": ">=5.0.1",
       "picomatch": ">=4.0.4",
       "postcss": ">=8.5.10",
       "fast-uri": ">=3.1.2",
-      "ws": ">=8.20.1"
-        ,"@opentelemetry/core": ">=2.8.0"
+      "ws": ">=8.21.0",
+      "@babel/core": ">=7.29.6",
+      "uuid": ">=11.1.1",
+      "@opentelemetry/core": ">=2.8.0"
     },
     "auditConfig": {
       "ignoreCves": [
