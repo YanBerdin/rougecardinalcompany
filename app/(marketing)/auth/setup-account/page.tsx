@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/supabase/client";
 import { SetupAccountForm } from "@/components/auth/SetupAccountForm";
 import type { User } from "@supabase/supabase-js";
+import { Button } from "@/components/ui/button";
 
 export default function SetupAccountPage() {
     const router = useRouter();
@@ -105,12 +106,12 @@ export default function SetupAccountPage() {
                     <div className="bg-destructive/10 border border-destructive/20 rounded-md p-4">
                         <p className="text-destructive">{error}</p>
                     </div>
-                    <button
+                    <Button
                         onClick={() => router.push("/")}
                         className="mt-4 text-primary hover:text-primary/80 transition-colors"
                     >
                         Retour à l&apos;accueil
-                    </button>
+                    </Button>
                 </div>
             </div>
         );

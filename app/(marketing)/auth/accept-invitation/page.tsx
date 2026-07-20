@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
@@ -58,7 +58,12 @@ function isSafeInvitationUrl(rawUrl: string): boolean {
 
 /**
  * Reads and validates the invitation URL from the current location.
- * Runs once (lazy useState initializer) — no effect, no cascading renders.
+ * Must run client-side only: it reads `window.location`. It is invoked from a
+ * `useEffect` (after mount) rather than a lazy `useState` initializer, because
+ * the lazy initializer would execute during SSR (where `window` is undefined,
+ * yielding `targetUrl: null`) and React would then reuse that server-computed
+ * value on hydration WITHOUT re-running it — leaving the activation button
+ * permanently disabled.
  *
  * Note: `URLSearchParams.get()` already percent-decodes the value once, so
  * `decodeURIComponent` must NOT be called again here — the invitation link
@@ -67,10 +72,6 @@ function isSafeInvitationUrl(rawUrl: string): boolean {
  * previously risked throwing on legitimate tokens and was removed.
  */
 function parseInvitationFromLocation(): ParsedInvitation {
-    if (typeof window === "undefined") {
-        return { error: null, targetUrl: null };
-    }
-
     const decoded = new URLSearchParams(window.location.search).get("url");
     if (!decoded) {
         return { error: "Lien d'invitation invalide ou incomplet.", targetUrl: null };
@@ -85,11 +86,21 @@ function parseInvitationFromLocation(): ParsedInvitation {
 
 export default function AcceptInvitationPage() {
     const router = useRouter();
-    // Lazy initializer runs once on first client render — avoids the
-    // setState-in-effect cascading-render warning.
-    const [{ error, targetUrl }] = useState<ParsedInvitation>(
-        parseInvitationFromLocation
-    );
+    // Parsing happens in an effect (client-only) rather than a lazy useState
+    // initializer to avoid the SSR-computed null state sticking after
+    // hydration and keeping the button disabled forever.
+    const [{ error, targetUrl }, setInvitation] = useState<ParsedInvitation>({
+        error: null,
+        targetUrl: null,
+    });
+
+    useEffect(() => {
+        // Reading window.location is a browser-only side effect that must run
+        // once after mount; setting state here is the intended pattern for
+        // syncing a client-only value into React after hydration.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setInvitation(parseInvitationFromLocation());
+    }, []);
 
     const handleActivate = () => {
         if (targetUrl) {
@@ -121,7 +132,7 @@ export default function AcceptInvitationPage() {
                 <h1 className="text-3xl md:text-4xl font-extrabold text-foreground">
                     Activer votre compte
                 </h1>
-                <p className="text-base text-muted-foreground">
+                <p className="text-base text-gold-text">
                     Vous avez été invité(e) à rejoindre {SITE_TITLE}. Pour
                     protéger votre lien d&apos;invitation contre une utilisation
                     automatique par les filtres de sécurité de votre messagerie,
@@ -130,7 +141,7 @@ export default function AcceptInvitationPage() {
                 <Button
                     onClick={handleActivate}
                     disabled={!targetUrl}
-                    className="inline-flex items-center justify-center h-11 px-6 rounded-md bg-primary text-gold-text font-semibold hover:bg-chart-2 transition-colors disabled:opacity-50"
+                    className="inline-flex items-center justify-center h-11 px-6 rounded-md bg-primary text-primary-foreground font-semibold hover:bg-chart-2 transition-colors disabled:opacity-50"
                 >
                     Continuer vers l&apos;activation
                 </Button>
