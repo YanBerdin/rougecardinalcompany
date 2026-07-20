@@ -65,7 +65,7 @@ export function SetupAccountForm({ email }: SetupAccountFormProps) {
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <div className="text-sm font-medium text-muted-foreground mb-4">
+                <div className="text-base font-medium text-gold-text mb-4">
                     Compte : {email}
                 </div>
 
