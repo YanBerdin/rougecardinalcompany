@@ -104,11 +104,12 @@ export default function SetupAccountPage() {
             <div className="min-h-screen flex items-center justify-center bg-background">
                 <div className="max-w-md w-full text-center mx-8">
                     <div className="bg-destructive/10 border border-destructive/20 rounded-md p-4">
-                        <p className="text-destructive">{error}</p>
+                        <p className="text-md text-destructive font-semibold">{error}</p>
                     </div>
                     <Button
+                        variant="default"
                         onClick={() => router.push("/")}
-                        className="mt-4 text-primary hover:text-primary/80 transition-colors"
+                        className="mt-4"
                     >
                         Retour à l&apos;accueil
                     </Button>
