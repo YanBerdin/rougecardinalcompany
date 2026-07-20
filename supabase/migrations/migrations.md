@@ -4,6 +4,20 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-07-20 - FIX: autoriser le SELECT Storage editor+ requis par l'upsert des thumbnails
+
+**Migration** : `20260720150000_allow_editors_select_medias_for_storage_upsert.sql`
+
+**Schéma déclaratif** : ✅ synchronisé — `02c_storage_buckets.sql` contient désormais la policy SELECT `"Editors can read medias"`.
+
+**Contexte** : Après correction du type MIME des thumbnails, leur upload échouait encore avec `new row violates row-level security policy`. Les policies INSERT, UPDATE et DELETE du bucket `medias` étaient présentes et `has_min_role('editor')` lisait correctement le rôle JWT, mais aucune policy SELECT n'existait afin d'empêcher le listing du bucket.
+
+**Root cause** : Supabase Storage exige `SELECT` et `UPDATE` en plus de `INSERT` pour `upload(..., { upsert: true })`. La génération de thumbnail utilise volontairement `upsert: true` afin de permettre la régénération au même chemin ; sans SELECT, Storage rejette l'overwrite avant même que la policy UPDATE suffise.
+
+**Fix** : ajout d'une policy SELECT limitée à `bucket_id = 'medias'` et `(select public.has_min_role('editor'))`. Les rôles `anon` et les utilisateurs authentifiés ordinaires restent incapables d'énumérer le bucket ; seuls les éditeurs/admins, qui possèdent déjà les droits d'écriture, obtiennent la lecture nécessaire à l'upsert. Les URLs CDN publiques connues restent inchangées.
+
+**Statut** : ✅ appliquée sur staging (`yvtrlvmbofklefxcxrzv`) et production (`hjmwctzqljfszuwkaadd`). Les versions MCP ont été réalignées sur `20260720150000` pour correspondre au fichier local.
+
 ### 2026-07-20 - FIX: GRANTs manquants sur media_tags/media_folders/media_item_tags + alignement is_admin/has_min_role sur app_metadata.role
 
 **Migration** : `20260720140000_fix_media_tags_grants_and_role_functions.sql` (GRANTs + recréation de deux fonctions helper)

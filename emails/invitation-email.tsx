@@ -77,7 +77,7 @@ export default function InvitationEmail({
           Votre adresse email : <strong>{email}</strong>
         </Text>
         <Text className="text-sm text-gray-500">
-          ⚠️ Ce lien est valide pendant 24 heures. Après expiration, vous
+          ⚠️ Ce lien est valide pendant 1 heure. Après expiration, vous
           devrez demander une nouvelle invitation.
         </Text>
       </EmailSection>

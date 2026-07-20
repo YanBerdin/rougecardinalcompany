@@ -10,7 +10,7 @@
  *   Referenced by multiple tables via storage_path column.
  * 
  * SECURITY:
- *   - No SELECT policy: bucket listing disabled (lint=0025 fix)
+ *   - SELECT restricted to editors/admins (required by Storage upsert)
  *   - Direct CDN object URLs remain publicly accessible via Supabase Storage CDN
  *   - Editors and admins can upload, update, and delete
  *   - Enforced via has_min_role('editor') in RLS policies
@@ -48,13 +48,21 @@ drop policy if exists "Authenticated read access for medias" on storage.objects;
 drop policy if exists "Authenticated users can upload to medias" on storage.objects;
 drop policy if exists "Authenticated users can update medias" on storage.objects;
 drop policy if exists "Admins can delete medias" on storage.objects;
+drop policy if exists "Editors can read medias" on storage.objects;
 drop policy if exists "Editors can upload to medias" on storage.objects;
 drop policy if exists "Editors can update medias" on storage.objects;
 drop policy if exists "Editors can delete medias" on storage.objects;
 
--- NOTE: No SELECT policy — bucket 'medias' is public=true, CDN URLs work without RLS.
--- Removing SELECT policy fixes lint=0025 (public_bucket_allows_listing) Supabase advisor alert.
--- Authenticated users can still access files via CDN URLs; they just can't enumerate the bucket.
+-- Storage upsert requires SELECT in addition to INSERT and UPDATE.
+-- Restricting SELECT to editors+ prevents anon and regular authenticated users
+-- from enumerating the bucket while allowing thumbnail regeneration.
+create policy "Editors can read medias"
+on storage.objects for select
+to authenticated
+using (
+  bucket_id = 'medias'
+  and (select public.has_min_role('editor'))
+);
 
 -- Allow editors and admins to upload
 create policy "Editors can upload to medias"
@@ -89,7 +97,7 @@ using (
 
 -- Note: comments on storage.objects policies not supported in declarative schema
 -- Policy descriptions:
--- - Select/list access: intentionally absent for medias; public urls serve known paths only
+-- - Select/list access: editors and admins only; public urls still serve known paths
 -- - Upload access: editors and admins only (via has_min_role('editor'))
 -- - Update access: editors and admins can update file metadata
 -- - Delete access: editors and admins can delete media files
