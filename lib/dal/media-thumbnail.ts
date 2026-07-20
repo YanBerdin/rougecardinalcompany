@@ -70,9 +70,20 @@ export async function generateMediaThumbnail(
 
     const thumbPath = storagePath.replace(/\.(jpg|jpeg|png|webp)$/i, THUMBNAIL_SUFFIX);
 
+    // NOTE: Storage-js in a Node.js (Server Action) runtime does not reliably
+    // forward the `contentType` option when given a raw Node Buffer — the
+    // upload request ends up without a proper image mime type and Supabase
+    // Storage rejects it with 400 "invalid_mime_type" (bucket restricts
+    // allowed_mime_types). Wrapping the bytes in a Blob with an explicit
+    // `type` (same pattern as the original-file upload in media-actions.ts)
+    // makes the mime type explicit on the request body itself.
+    const thumbnailBlob = new Blob([Uint8Array.from(thumbnailBuffer)], {
+        type: "image/jpeg",
+    });
+
     const { error: uploadError } = await supabase.storage
         .from(BUCKET_NAME)
-        .upload(thumbPath, thumbnailBuffer, {
+        .upload(thumbPath, thumbnailBlob, {
             contentType: "image/jpeg",
             cacheControl: "31536000", // 1 year
             upsert: true, // Allow regeneration
@@ -80,7 +91,7 @@ export async function generateMediaThumbnail(
 
     if (uploadError) {
         console.error("[generateMediaThumbnail] Upload failed:", uploadError);
-        return dalError("Failed to upload thumbnail");
+        return dalError(`Failed to upload thumbnail: ${getErrorMessage(uploadError)}`);
     }
 
     const { error: updateError } = await supabase

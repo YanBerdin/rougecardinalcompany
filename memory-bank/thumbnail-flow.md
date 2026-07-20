@@ -42,6 +42,8 @@ flowchart TD
 ```
 
 > ⚠️ **Historique (corrigé le 2026-07-20)** : ce flux appelait auparavant l'API route via un `fetch(${env.NEXT_PUBLIC_SITE_URL}/api/admin/media/thumbnail)` interne avec forward manuel des cookies. Ce pattern causait `fetch failed` en staging et `HTTP 500` en production (dépendance fragile à `NEXT_PUBLIC_SITE_URL` + cookies). La logique a été extraite dans `lib/dal/media-thumbnail.ts::generateMediaThumbnail()`, appelée **directement** (function call) par les Server Actions. La route API est conservée uniquement comme thin wrapper pour d'éventuels appels externes — elle n'est plus utilisée en interne. Voir `/memories/repo/site-url-config.md` pour la règle générale (ne jamais self-fetch une route API interne depuis un Server Component/Action).
+>
+> ⚠️ **Bug n°2 (corrigé le 2026-07-20, même jour)** : une fois le self-fetch supprimé, l'upload Storage échouait encore avec `400 invalid_mime_type` (zéro thumbnail n'avait jamais été généré, bug préexistant). Cause : passage d'un `Buffer` Node **brut** (sortie `sharp().toBuffer()`) à `.upload()` au lieu d'un `Blob` avec `type` explicite — `@supabase/storage-js` ne propage pas fiablement `contentType` pour un Buffer nu côté Node.js. Fix : wrapper `new Blob([Uint8Array.from(thumbnailBuffer)], { type: "image/jpeg" })` avant l'upload, même pattern que l'upload du fichier original.
 
 ## Composants impliqués
 
