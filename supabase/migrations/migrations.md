@@ -4,6 +4,20 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-07-22 - FIX: restaurer les GRANTs de lecture de la vue publique des photos paysage
+
+**Migration** : `20260722145006_grant_public_spectacle_landscape_photos_view.sql`
+
+**Schéma déclaratif** : déjà conforme — `41_views_spectacle_photos.sql` contient les GRANTs `SELECT` sur `public.spectacles_landscape_photos_public` pour `anon` et `authenticated`.
+
+**Contexte** : les photos paysage des pages publiques `/spectacles/[slug]` ne s'affichaient pas sur le site du client, alors que les associations `spectacles_medias`, les objets du bucket `medias` et les policies RLS étaient corrects.
+
+**Root cause** : les privilèges table-level `SELECT` sur la vue avaient disparu en production. La requête anonyme PostgREST échouait avec `42501 permission denied for view spectacles_landscape_photos_public`. Le DAL masque volontairement les erreurs de lecture publiques en retournant un tableau vide, ce qui empêchait silencieusement le rendu de `LandscapePhotoCard`.
+
+**Fix** : restauration des GRANTs `SELECT` distincts pour `anon` et `authenticated`. Aucun changement de données, de table, de vue ou de policy RLS.
+
+**Statut** : ✅ appliquée sur le projet Supabase client (`hjmwctzqljfszuwkaadd`) via `apply_migration`. Validation : la requête anonyme renvoie les 4 photos paysage attendues et le rendu de `/spectacles/la-farce-de-maitre-pathelin` référence de nouveau l'image.
+
 ### 2026-07-20 - FIX: autoriser le SELECT Storage editor+ requis par l'upsert des thumbnails
 
 **Migration** : `20260720150000_allow_editors_select_medias_for_storage_upsert.sql`
