@@ -4,7 +4,7 @@ import type { SectionRendererProps } from "./types";
 export function SectionMission({ section }: SectionRendererProps): ReactElement {
     const headingId = `heading-${section.kind}`;
     return (
-        <section id={section.kind} aria-labelledby={headingId} className="max-sm:py-12 py-20 hero-gradient">
+        <section id={section.kind} aria-labelledby={headingId} className="py-16 xl:py-24 hero-gradient">
             <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 {section.title && (
                     <h2 id={headingId} className="text-4xl md:text-5xl lg:text-6xl italic font-semibold leading-none tracking-tight mb-6 text-white/90">

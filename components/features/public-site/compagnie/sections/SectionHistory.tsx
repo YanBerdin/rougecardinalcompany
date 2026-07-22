@@ -5,7 +5,7 @@ import type { SectionRendererProps } from "./types";
 export function SectionHistory({ section }: SectionRendererProps): ReactElement {
     const headingId = `heading-${section.kind}`;
     return (
-        <section id={section.kind} aria-labelledby={headingId} className="pt-16 pb-24 lg:py-32 bg-chart-7">
+        <section id={section.kind} aria-labelledby={headingId} className="py-24 xl:py-32 bg-chart-7">
             <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                     <div className="animate-fade-in-up">

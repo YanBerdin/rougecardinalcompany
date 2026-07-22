@@ -46,7 +46,7 @@ export function SpectaclesView({
       </section>
 
       {/* Spectacles Actuels lg:w-[calc(33.333%-1.33rem)] */}
-      <section className="py-24 lg:py-32 bg-background" aria-label="Spectacles actuels">
+      <section className="max-sm:py-16 py-24 xl:py-32 bg-background" aria-label="Spectacles actuels">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap justify-center gap-16">
             {currentShows.map((show, index) => (
@@ -137,7 +137,7 @@ export function SpectaclesView({
             <h2 id="spectacles-archives-heading" className="text-white/90 text-3xl md:text-4xl lg:text-6xl font-semibold animate-fade-in-up"> {/** mb-6  */}
               Nos créations passées
             </h2>
-          {/*<p
+            {/*<p
            // className="text-lg md:text-xl lg:text-2xl text-white/90 opacity-90 animate-fade-in"
            // style={{ animationDelay: "0.2s" }}
           >
@@ -147,7 +147,7 @@ export function SpectaclesView({
           </div>
         </section>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 max-sm:py-16 py-24 xl:py-32">
           <div className="flex flex-wrap justify-center gap-16">
             {displayedArchivedShows.map((show, index) => (
               <Card

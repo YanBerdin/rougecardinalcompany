@@ -5,7 +5,7 @@ import type { SectionRendererProps } from "./types";
 export function SectionQuote({ section }: SectionRendererProps): ReactElement | null {
     if (!section.quote) return null;
     return (
-        <section id={section.kind} aria-label="Citation de la compagnie" className="py-24 max-sm:py-12 bg-chart-7">
+        <section id={section.kind} aria-label="Citation de la compagnie" className="pb-24 xl:pb-32 bg-chart-7">
             <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="bg-card rounded-2xl p-8">
                     <div className="flex items-start gap-3 sm:gap-4">

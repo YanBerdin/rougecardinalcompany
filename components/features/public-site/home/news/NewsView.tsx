@@ -18,7 +18,7 @@ export function NewsView({ news }: NewsViewProps) {
   return (
     <section
       aria-labelledby="news-heading"
-      className="relative overflow-hidden bg-chart-7 pt-12 pb-24 text-foreground md:pt-16 md:pb-32"
+      className="relative overflow-hidden bg-chart-7 py-24 xl:py-32 text-foreground md:pt-16 md:pb-32"
     >
       <div className="relative mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
         <header className="">
