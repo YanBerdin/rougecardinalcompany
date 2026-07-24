@@ -62,9 +62,13 @@ export function MediaEditForm() {
                 <Label htmlFor="folder">Dossier</Label>
                 <Select
                     value={form.watch("folder_id")?.toString() ?? "none"}
-                    onValueChange={(value) =>
-                        form.setValue("folder_id", value === "none" ? null : Number(value))
-                    }
+                    onValueChange={(value) => {
+                        form.setValue(
+                            "folder_id",
+                            value === "none" ? null : Number(value),
+                            { shouldDirty: true, shouldTouch: true }
+                        );
+                    }}
                 >
                     <SelectTrigger id="folder">
                         <SelectValue placeholder="Uploads génériques" />
