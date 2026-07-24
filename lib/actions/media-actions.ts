@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/supabase/server";
 import { requireMinRole } from "@/lib/auth/roles";
 import { uploadMedia, deleteMedia, findMediaByHash, getMediaPublicUrl } from "@/lib/dal/media";
+import { moveMediaItemsToFolder } from "@/lib/dal/media-move";
 import { generateMediaThumbnail } from "@/lib/dal/media-thumbnail";
 import { recordRequest } from "@/lib/utils/rate-limit";
 import { verifyFileMime } from "@/lib/utils/mime-verify";
@@ -349,13 +350,11 @@ export async function updateMediaMetadataAction(
 
     const supabase = await createClient();
 
-    // Update media table
-    // Note: Supabase client handles number → bigint conversion automatically
+    // Update metadata independently from the physical Storage move.
     const { error: updateError } = await supabase
       .from("medias")
       .update({
         alt_text: input.alt_text,
-        folder_id: input.folder_id ?? null,
         updated_at: new Date().toISOString(),
       })
       .eq("id", mediaId);
@@ -386,6 +385,14 @@ export async function updateMediaMetadataAction(
         if (tagsError) {
           throw new Error(tagsError.message);
         }
+      }
+    }
+
+    if (input.folder_id !== undefined) {
+      const moveResult = await moveMediaItemsToFolder([mediaId], input.folder_id);
+
+      if (!moveResult.success) {
+        throw new Error(moveResult.error);
       }
     }
 
