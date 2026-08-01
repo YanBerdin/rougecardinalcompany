@@ -23,6 +23,8 @@
 
 ## En Cours
 
+- `TASK105` Créer le profil admin manquant en production — **PLANIFIÉE 📋 2026-08-01** — Aucun `public.profiles` avec `role='admin'` sur le projet production `hjmwctzqljfszuwkaadd` (`diagnose:admin-views` → `Profil admin introuvable`), alors que staging est sain. Écart de données révélé après la restauration des GRANTs `service_role`, qui masquait le diagnostic derrière un `permission denied for table profiles`. Voir `memory-bank/tasks/TASK105-production-admin-profile.md`
+
 - `TASK103` Retirer le grant `authenticated` résiduel sur `cleanup_expired_audit_logs()` — **PLANIFIÉE 📋 2026-07-15** — Finding connexe identifié lors du fix de l'alerte advisor `audit_trigger()` sur le projet Supabase client. Fonction `SECURITY DEFINER` sans check `is_admin()` interne, appelable via `/rest/v1/rpc/cleanup_expired_audit_logs` par tout `authenticated`. Voir `memory-bank/tasks/TASK103-cleanupExpiredAuditLogsGrant.md`
 
 ## Terminé (récent)

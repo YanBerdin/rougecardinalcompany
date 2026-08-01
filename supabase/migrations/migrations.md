@@ -4,6 +4,39 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-08-01 - FIX: restauration des GRANTs de base de `service_role` sur le schéma `public`
+
+**Migration** : `20260801134257_restore_service_role_baseline_grants.sql`
+
+**Schéma déclaratif** : nouveau fichier `70_grants_baseline.sql`.
+
+**Contexte** : `/admin/media/library` renvoyait une erreur 500 en production. Les logs Postgres remontaient `permission denied` sur `profiles`, `partners`, `analytics_events`, `membres_equipe_admin`, etc. Toute la surface serveur reposant sur `createAdminClient()` (`SUPABASE_SECRET_KEY`) était hors service.
+
+**Root cause** : sur le projet de production (`hjmwctzqljfszuwkaadd`), `service_role` ne disposait que de `Dxtm` sur les 53 relations du schéma `public` — les privilèges `arwd` (INSERT/SELECT/UPDATE/DELETE) manquaient, ainsi que l'accès aux 28 séquences. `service_role` contourne la RLS mais reste soumis aux GRANTs. Le staging (`yvtrlvmbofklefxcxrzv`) était sain (53/53). Comme `supabase db diff` ne capture pas les GRANTs, la dérive n'était pas détectable par les outils habituels.
+
+**Fix** : `grant all privileges on all tables/sequences in schema public to service_role`, plus `alter default privileges` pour que les objets créés ultérieurement héritent du même socle. Ajout de `grant select, insert, update, delete on public.user_invitations to authenticated`, dont les policies RLS admin étaient inatteignables faute de GRANT sur la table.
+
+**Périmètre** : aucun privilège ajouté pour `anon`. Les écarts où la production est plus restrictive que le staging (`contacts_presse`, `seo_redirects`, `data_retention_recent_audit` non lisibles par `anon`) ont été délibérément conservés.
+
+**Statut** : ✅ appliquée sur production et staging (même version enregistrée). Validation : 53/53 relations et 28/28 séquences accessibles à `service_role`, `diagnose:admin-views` et `test:dal` (13/13) au vert sur les deux projets.
+
+### 2026-08-01 - FIX: GRANTs des vues presse publiques + cast `timestamptz`→`date` dans `communiques_presse_dashboard`
+
+**Migration** : `20260801131043_restore_press_public_view_grants_and_fix_dashboard_cast.sql`
+
+**Schéma déclaratif** : mis à jour — `08_table_articles_presse.sql` et `41_views_communiques.sql` contiennent désormais les blocs `revoke all` + `grant select` ainsi que le cast `e.date_debut::date`.
+
+**Contexte** : les lectures anonymes de l'espace presse échouaient avec `42501 permission denied for view articles_presse_public` / `communiques_presse_public`, et le RPC admin `communiques_presse_dashboard()` renvoyait `42804 structure of query does not match function result type`.
+
+**Root cause** :
+
+1. La migration générée `20260202200333_add_spectacle_paragraphs.sql` effectue un `DROP VIEW` + `CREATE VIEW` sur les deux vues sans réémettre de GRANT. PostgreSQL réinitialise l'ACL au `DROP`, laissant `anon`/`authenticated` avec `Dxtm` (sans `r`). `supabase db diff` (migra) ne capture pas les GRANTs, donc la régression est passée inaperçue.
+2. `communiques_presse_dashboard()` déclare `evenement_date date` mais sélectionne `evenements.date_debut`, de type `timestamp with time zone`. plpgsql n'applique pas de cast implicite sur `RETURN QUERY`.
+
+**Fix** : `revoke all` + `grant select` explicites pour `anon`, `authenticated`, `service_role` sur les deux vues (toutes deux `security_invoker = true`, le filtrage des lignes reste assuré par les policies RLS), et `e.date_debut::date` dans le corps de la fonction. Signature de la fonction et types TypeScript inchangés.
+
+**Statut** : ✅ appliquée sur production (`hjmwctzqljfszuwkaadd`) et staging (`yvtrlvmbofklefxcxrzv`), avec la même version enregistrée dans `schema_migrations`. Validation : `has_table_privilege('anon', …, 'SELECT')` renvoie `true` pour les deux vues sur les deux projets.
+
 ### 2026-07-22 - FIX: restaurer les GRANTs de lecture de la vue publique des photos paysage
 
 **Migration** : `20260722145006_grant_public_spectacle_landscape_photos_view.sql`

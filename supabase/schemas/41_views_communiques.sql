@@ -66,6 +66,11 @@ order by cp.ordre_affichage asc, cp.date_publication desc;
 comment on view public.communiques_presse_public is 
 'Vue publique optimisée pour l''espace presse professionnel avec URLs de téléchargement, images et catégories. Exclut les communiqués sans PDF principal. SECURITY INVOKER: Runs with querying user privileges (not definer).';
 
+-- GRANTs are not captured by `supabase db diff`; any migration that recreates
+-- this view MUST repeat these statements (DROP VIEW resets the ACL).
+revoke all on public.communiques_presse_public from anon, authenticated;
+grant select on public.communiques_presse_public to anon, authenticated, service_role;
+
 -- Vue dashboard admin
 -- SECURITY: Changed from VIEW to FUNCTION with SECURITY DEFINER and explicit admin check
 -- Reason: View with WHERE is_admin() returns empty array instead of permission denied
@@ -118,7 +123,8 @@ begin
     cp.image_url,
     im.filename as image_filename,
     s.title as spectacle_titre,
-    e.date_debut as evenement_date,
+    -- evenements.date_debut is timestamptz; the declared return type is date
+    e.date_debut::date as evenement_date,
     p.display_name as createur,
     cp.created_at,
     cp.updated_at,
