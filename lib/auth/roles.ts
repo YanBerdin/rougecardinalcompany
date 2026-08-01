@@ -21,7 +21,14 @@ export async function getCurrentUserRole(): Promise<AppRole> {
 
         // app_metadata is the ONLY trusted source (server-only, signed in JWT).
         // user_metadata is user-modifiable and MUST NOT be used for authorization.
-        return normalizeRole(readRoleFromMeta(meta["app_metadata"]));
+        const claimsRole = normalizeRole(readRoleFromMeta(meta["app_metadata"]));
+        if (claimsRole !== "user") return claimsRole;
+
+        // A role changed in Auth may not be present in an already-issued JWT.
+        // Refresh the trusted role from Auth without consulting user_metadata.
+        const { data: userData, error: userError } = await supabase.auth.getUser();
+        if (userError) return "user";
+        return normalizeRole(userData.user?.app_metadata?.role);
     } catch (err) {
         console.error("[roles] getCurrentUserRole failed:", err);
         return "user";
