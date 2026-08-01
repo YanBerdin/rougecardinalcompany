@@ -1,5 +1,24 @@
 # Progress
 
+## CodeQL #30 — Validation stricte de `redirect_to` (2026-08-01)
+
+✅ **COMPLÈTE** — L'alerte `js/incomplete-url-substring-sanitization` sur `app/(marketing)/auth/accept-invitation/page.tsx` est corrigée.
+
+### Cause
+
+La validation anti-open-redirect comparait `redirect_to` avec `startsWith`. Un hôte arbitraire commençant par l'origine autorisée, par exemple `https://compagnie-rouge-cardinal.fr.evil.test`, pouvait donc être accepté.
+
+### Correction
+
+`redirect_to` est désormais parsé avec `new URL(redirectTo)`, puis son `origin` est comparé exactement à la whitelist via `allowedOrigins.includes(redirectTarget.origin)`. Les origines autorisées sont l'origine courante du site et `https://compagnie-rouge-cardinal.fr`.
+
+### Validation
+
+- ✅ `get_errors` : aucune erreur.
+- ✅ `pnpm type-check` : réussi.
+- ✅ `pnpm vitest run __tests__/utils/validate-invitation-url.test.ts` : 5/5 tests réussis.
+- ✅ `git diff --check` : réussi.
+
 ## TASK104 — Remédiation alertes Dependabot (2026-08-01)
 
 ✅ **COMPLÈTE** — Les 14 vulnérabilités Dependabot initiales (9 HIGH, 5 MODERATE) sont corrigées.

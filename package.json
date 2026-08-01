@@ -89,6 +89,7 @@
     "test:rls:local": "tsx scripts/test-permissions-rls.ts",
     "test:dal:permissions": "vitest run __tests__/dal/permissions-integration.test.ts",
     "test:unit:image-compress": "vitest run __tests__/utils/image-compress.test.ts",
+    "test:unit:invitation-url": "vitest run __tests__/utils/validate-invitation-url.test.ts",
     "e2e:auth": "npx playwright test --project=chromium-auth --reporter=list",
     "e2e:editor": "npx playwright test --project=editor --reporter=list",
     "e2e:admin": "npx playwright test --project=admin --reporter=list",

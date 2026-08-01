@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { isSafeInvitationUrl } from "@/lib/utils/validate-invitation-url";
 
 // This is a Client Component ("use client"). Importing @/lib/env (t3-env) or
 // @/lib/site-config (which imports @/lib/env and reads server-only vars like
@@ -14,46 +15,9 @@ import { Button } from "@/components/ui/button";
 // runs client-side, after the `typeof window` guard).
 const SITE_TITLE = "Rouge Cardinal";
 
-// Hardcoded production origin (not imported from lib/site-config to avoid
-// pulling server-only env validation into this Client Component's bundle,
-// see comment above). Used as a fallback alongside window.location.origin so
-// that the redirect_to check does not depend on incidental host variations
-// (e.g. www vs apex domain, or a proxy rewriting the Host header).
-const PRODUCTION_ORIGIN = "https://compagnie-rouge-cardinal.fr";
-
 interface ParsedInvitation {
     error: string | null;
     targetUrl: string | null;
-}
-
-/**
- * Validates that the decoded URL is a genuine Supabase invite verification
- * link pointing back to this site, preventing this page from being abused
- * as an open redirect.
- */
-function isSafeInvitationUrl(rawUrl: string): boolean {
-    try {
-        const target = new URL(rawUrl);
-        const supabaseHost = new URL(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!
-        ).host;
-
-        if (target.protocol !== "https:" || target.host !== supabaseHost) {
-            return false;
-        }
-        if (!target.pathname.startsWith("/auth/v1/verify")) {
-            return false;
-        }
-
-        const redirectTo = target.searchParams.get("redirect_to");
-        return Boolean(
-            redirectTo &&
-            (redirectTo.startsWith(window.location.origin) ||
-                redirectTo.startsWith(PRODUCTION_ORIGIN))
-        );
-    } catch {
-        return false;
-    }
 }
 
 /**
@@ -77,7 +41,13 @@ function parseInvitationFromLocation(): ParsedInvitation {
         return { error: "Lien d'invitation invalide ou incomplet.", targetUrl: null };
     }
 
-    if (!isSafeInvitationUrl(decoded)) {
+    if (
+        !isSafeInvitationUrl(
+            decoded,
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            window.location.origin,
+        )
+    ) {
         return { error: "Lien d'invitation invalide ou non reconnu.", targetUrl: null };
     }
 
