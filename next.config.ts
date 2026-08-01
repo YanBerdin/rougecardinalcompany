@@ -52,11 +52,17 @@ const nextConfig: NextConfig = {
   // (ex: /admin/media/library, /api/admin/media/thumbnail).
   // Le module ".node" lui-même est tracé correctement (require() réussit),
   // seule la lib partagée manque : on la force explicitement ici.
-  // Nécessite le hoisting pnpm de "@img/sharp-*" configuré dans .npmrc.
+  //
+  // IMPORTANT : on cible les fichiers PHYSIQUES dans le store pnpm
+  // (node_modules/.pnpm/...), PAS node_modules/@img/sharp-* hoisté.
+  // pnpm hoiste via des symlinks, et le packager de fonctions serverless de
+  // Vercel rejette tout répertoire symlinké ("invalid deployment package [...]
+  // files in symlinked directories"). Le glob avec version "@*" reste stable
+  // tant que la version majeure de sharp ne change pas (voir pnpm-lock.yaml).
   outputFileTracingIncludes: {
     "/**": [
-      "./node_modules/@img/sharp-libvips-linux-x64/**",
-      "./node_modules/@img/sharp-linux-x64/**",
+      "./node_modules/.pnpm/@img+sharp-libvips-linux-x64@*/node_modules/@img/sharp-libvips-linux-x64/**",
+      "./node_modules/.pnpm/@img+sharp-linux-x64@*/node_modules/@img/sharp-linux-x64/**",
     ],
   },
   images: {
