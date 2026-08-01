@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { requireMinRole } from "@/lib/auth/roles";
+import { requireBackofficePageAccess } from "@/lib/auth/roles";
 import { ArrowLeft, Pencil } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,7 @@ interface Props {
 }
 
 export default async function SpectacleDetailPage({ params }: Props) {
-  await requireMinRole("editor");
+  await requireBackofficePageAccess();
 
   // Parse and validate ID
   const { id } = await params;

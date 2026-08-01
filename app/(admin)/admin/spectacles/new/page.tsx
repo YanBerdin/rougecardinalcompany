@@ -1,4 +1,4 @@
-import { requireMinRole } from "@/lib/auth/roles";
+import { requireBackofficePageAccess } from "@/lib/auth/roles";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function NewSpectaclePage() {
-  await requireMinRole("editor");
+  await requireBackofficePageAccess();
 
   // Load existing genres for the form
   const existingGenres = await fetchDistinctGenres();

@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { requireMinRole } from "@/lib/auth/roles";
+import { requireBackofficePageAccess } from "@/lib/auth/roles";
 import { ArrowLeft, Pencil } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function ValuesViewPage() {
-    await requireMinRole("editor");
+    await requireBackofficePageAccess();
 
     const result = await fetchAllCompagnieValuesAdmin();
     if (!result.success) notFound();

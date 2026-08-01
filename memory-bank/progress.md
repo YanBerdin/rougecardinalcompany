@@ -1,5 +1,26 @@
 # Progress
 
+## Fix 500 sur pages editor+ — requireMinRole() mal utilisé comme garde de page (2026-08-01)
+
+✅ **COMPLÈTE** — `GET /admin/media/library` renvoyait `500 Internal Server Error` en production.
+
+**Root cause** : `requireMinRole(role)` (`lib/auth/roles.ts`) lève une `Error` brute (pas de `redirect()`) si le rôle est insuffisant. Utilisée directement comme garde de page dans 14 fichiers `page.tsx`, toute défaillance transitoire de `getClaims()` (ex. `401` observé sur `GET /rest/v1/configurations_site` dans les logs Supabase — symptomatique d'un JWT/session ponctuellement invalide côté navigateur) devient une exception non catchée pendant le rendu du Server Component → 500 au lieu d'une redirection propre vers `/auth/login`. Les pages admin-only (`requireAdminPageAccess()`) n'étaient pas affectées car cette fonction fait déjà un `redirect()` sur échec.
+
+**Correction** : remplacement de `requireMinRole("editor")` par `requireBackofficePageAccess()` (déjà existant, redirect-based) dans les 14 `page.tsx` concernés :
+
+- `app/(admin)/admin/agenda/page.tsx`
+- `app/(admin)/admin/compagnie/page.tsx`, `presentation/page.tsx`, `valeurs/page.tsx`
+- `app/(admin)/admin/lieux/page.tsx`
+- `app/(admin)/admin/media/page.tsx`, `folders/page.tsx`, `library/page.tsx`, `tags/page.tsx`
+- `app/(admin)/admin/presse/page.tsx`
+- `app/(admin)/admin/spectacles/page.tsx`, `new/page.tsx`, `[id]/page.tsx`, `[id]/edit/page.tsx`
+
+`requireMinRole`/`requireAdminOnly` restent corrects dans la couche DAL (`lib/dal/*.ts`) où throw est le comportement attendu (catché par la Server Action appelante).
+
+**Validation** : `get_errors` — 0 erreur sur les 14 fichiers modifiés.
+
+**Limite** : ce fix ne corrige pas la cause du `401` initial (session/JWT ponctuellement invalide côté navigateur) mais empêche ce type d'incident transitoire de faire planter la page en 500 ; l'utilisateur est désormais redirigé vers `/auth/login`.
+
 ## Fix images cassées après déplacement de média — sync des URLs dénormalisées (2026-08-01)
 
 ✅ **COMPLÈTE** — Les images de `spectacles#18` et `articles_presse#5` renvoyaient `400` via `/_next/image`.

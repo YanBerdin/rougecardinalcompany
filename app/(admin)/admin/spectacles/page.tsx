@@ -1,4 +1,4 @@
-import { requireMinRole } from "@/lib/auth/roles";
+import { requireBackofficePageAccess } from "@/lib/auth/roles";
 import { fetchAllSpectacles } from "@/lib/dal/spectacles";
 import SpectaclesManagementContainer from "@/components/features/admin/spectacles/SpectaclesManagementContainer";
 
@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function AdminSpectaclesPage() {
-  await requireMinRole("editor");
+  await requireBackofficePageAccess();
 
   // Fetch all spectacles (including private)
   const spectacles = await fetchAllSpectacles(true);

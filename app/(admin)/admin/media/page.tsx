@@ -13,7 +13,7 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { requireMinRole } from "@/lib/auth/roles";
+import { requireBackofficePageAccess } from "@/lib/auth/roles";
 import { fetchMediaStats } from "@/lib/dal/media";
 
 export const metadata = {
@@ -26,7 +26,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function MediaLibraryPage() {
-    await requireMinRole("editor");
+    await requireBackofficePageAccess();
     return (
         <div className="container mx-auto py-8">
             <div className="mb-8">
