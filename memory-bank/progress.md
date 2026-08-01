@@ -1,5 +1,21 @@
 # Progress
 
+## Fix images cassées après déplacement de média — sync des URLs dénormalisées (2026-08-01)
+
+✅ **COMPLÈTE** — Les images de `spectacles#18` et `articles_presse#5` renvoyaient `400` via `/_next/image`.
+
+**Root cause** : `moveMediaItemsToFolder` (`lib/dal/media-move.ts`) déplace l'objet Storage et met à jour `medias.storage_path`, mais ne réécrit pas les URLs publiques absolues dénormalisées dans les tables consommatrices. Après le déplacement de `uploads/` vers `photos/` du 2026-07-24, ces URLs pointaient vers un objet inexistant ; Supabase Storage répondait `NoSuchKey` et `next/image` traduisait cet échec amont en `400`.
+
+**Corrections** :
+
+- Nouveau DAL `lib/dal/media-url-sync.ts` — `syncMediaReferenceUrls(previousStoragePath, nextStoragePath)` réécrit les 6 colonnes qui stockent une URL absolue : `articles_presse.image_url`, `compagnie_presentation_sections.image_url`, `home_about_content.image_url`, `home_hero_slides.image_url`, `membres_equipe.image_url`, `spectacles.image_url`.
+- `lib/dal/media-move.ts` — appel après la mise à jour de `medias` (original + vignette) dans `moveSingleMedia()`, et en sens inverse dans `restoreSingleMedia()` pour le rollback compensatoire.
+- Données production (`hjmwctzqljfszuwkaadd`) : les 2 `image_url` repointées vers `photos/1784562445305-Affiche-expo-photo---Nouveaux-Mondes.png`.
+
+**Reste à traiter** : 2 URLs mortes pointant vers l'ancien projet `yvtrlvmbofklefxcxrzv` — `compagnie_presentation_sections#7` (remplaçable par le média 55) et `home_hero_slides#1` (ré-upload requis). Le 500 sur `/admin/media/library` reste à investiguer séparément.
+
+**Validation** : `pnpm exec tsc --noEmit` sans erreur ; URL corrigée vérifiée en `200`.
+
 ## CodeQL #30 — Validation stricte de `redirect_to` (2026-08-01)
 
 ✅ **COMPLÈTE** — L'alerte `js/incomplete-url-substring-sanitization` sur `app/(marketing)/auth/accept-invitation/page.tsx` est corrigée.

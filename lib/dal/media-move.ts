@@ -4,6 +4,7 @@ import "server-only";
 import { createClient } from "@/supabase/server";
 import { requireMinRole } from "@/lib/auth/roles";
 import { dalError, dalSuccess, type DALResult } from "@/lib/dal/helpers";
+import { syncMediaReferenceUrls } from "@/lib/dal/media-url-sync";
 
 const BUCKET_NAME = "medias";
 const ROOT_FOLDER_SLUG = "uploads";
@@ -125,6 +126,12 @@ async function moveSingleMedia(
         return dalError(`Failed to update media record: ${error.message}`);
     }
 
+    await syncMediaReferenceUrls(media.storage_path, storagePath);
+
+    if (media.thumbnail_path && thumbnailPath) {
+        await syncMediaReferenceUrls(media.thumbnail_path, thumbnailPath);
+    }
+
     return dalSuccess(null);
 }
 
@@ -140,9 +147,11 @@ async function restoreSingleMedia(
 
     if (media.thumbnail_path && thumbnailPath) {
         await moveStorageObject(supabase, thumbnailPath, media.thumbnail_path);
+        await syncMediaReferenceUrls(thumbnailPath, media.thumbnail_path);
     }
 
     await moveStorageObject(supabase, storagePath, media.storage_path);
+    await syncMediaReferenceUrls(storagePath, media.storage_path);
     await supabase.from("medias").update({
         folder_id: media.folder_id,
         storage_path: media.storage_path,
