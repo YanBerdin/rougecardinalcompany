@@ -38,6 +38,9 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "6mb", // 5MB fichiers + overhead formData
     },
   },
+  // Empêche le bundling de sharp (binaire natif) : sans ça, Vercel échoue à charger
+  // le module "sharp-<hash>" en runtime (linux-x64) → erreurs sur les thumbnails.
+  serverExternalPackages: ["sharp"],
   images: {
     remotePatterns: [
       {

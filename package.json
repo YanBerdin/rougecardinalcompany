@@ -205,6 +205,11 @@
       "ignoreCves": [
         "CVE-2025-69873"
       ]
-    }
+    },
+    "onlyBuiltDependencies": [
+      "@sentry/cli",
+      "esbuild",
+      "unrs-resolver"
+    ]
   }
 }
