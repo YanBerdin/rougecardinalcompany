@@ -1,5 +1,29 @@
 # Progress
 
+## TASK104 — Remédiation alertes Dependabot (2026-08-01)
+
+✅ **COMPLÈTE** — Les 14 vulnérabilités Dependabot initiales (9 HIGH, 5 MODERATE) sont corrigées.
+
+### Corrections
+
+- `next` mis à jour vers `16.2.11`.
+- `sharp` mis à jour vers `^0.35.0`, avec override transitif `>=0.35.0`.
+- `postcss` mis à jour vers `^8.5.18`, avec override `>=8.5.18`.
+- Overrides PNPM renforcés pour `brace-expansion >=5.0.8`, `fast-uri >=3.1.4` et `js-yaml >=5.2.2`.
+- Lockfile régénéré : Sharp `0.35.3`, PostCSS `8.5.25`.
+- `lib/utils/image-compress.ts` adapté aux types Sharp 0.35 via `ReturnType<typeof sharp>`.
+
+### Validation
+
+- ✅ `pnpm audit --prod` et `pnpm audit` : 0 vulnérabilité.
+- ✅ `pnpm install --frozen-lockfile`.
+- ✅ `pnpm type-check`.
+- ✅ `pnpm vitest run __tests__/utils/image-compress.test.ts` : 11/11.
+- ✅ `git diff --check`.
+- ⚠️ `pnpm lint` reste bloqué par `e2e/tests/auth/invite-setup/invite-setup.fixtures.ts`, fixture indépendante qui appelle `use` dans `setupAccountPage`.
+
+Voir `memory-bank/tasks/TASK104-dependabot-dependency-remediation.md`.
+
 ## Fix bouton "Continuer vers l'activation" désactivé en permanence sur /auth/accept-invitation (2026-07-20)
 
 ✅ **COMPLET** — Le bouton d'activation restait grisé indéfiniment même avec un lien d'invitation valide.

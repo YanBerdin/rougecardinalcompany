@@ -2,6 +2,8 @@
 
 ## Completed
 
+- `TASK104` Remédiation des alertes Dependabot — **COMPLÈTE ✅ 2026-08-01** — 14 vulnérabilités corrigées : Next.js `16.2.11`, Sharp `0.35.3`, PostCSS `8.5.25`, overrides PNPM transitifs, adaptation du typage Sharp. `pnpm audit` = 0 vulnérabilité, type-check et tests Sharp verts. Lint global bloqué par une fixture E2E indépendante. Voir `memory-bank/tasks/TASK104-dependabot-dependency-remediation.md`
+
 - `TASK102` Tarif réduit (`price_reduced_cents`) + affichage public prix & capacité — **COMPLÈTE ✅ 2026-07-04** — Colonne `price_reduced_cents` indépendante de `price_cents` propagée dans toute la chaîne admin (schémas, DAL, Server Actions, formulaire, détail) + affichage public sur `/agenda` et `/spectacles/[slug]` (prix + capacité). Migration manuelle chirurgicale (diff CLI trop bruité). `restore_content_version` mis à jour. Poussée sur Supabase Cloud (`pnpm db:push`). Voir `memory-bank/tasks/TASK102-reducedPriceAndPublicCapacity.md`
 
 - `TASK101` Drag-and-drop réorganisation articles de presse — **COMPLÈTE ✅ 2026-07-03** — 8 phases : DB + DAL + Zod + Server Action + hook custom + composant sortable + intégration DnD + migrations applicables. Colonne `display_order`, backfill `row_number()`, sort public `/presse` et homepage widget. DndContext + `@dnd-kit/sortable` + PointerSensor (8px) + KeyboardSensor. Commit `3f9caba`. Voir `memory-bank/tasks/TASK101-articlesPresseDragDrop.md`

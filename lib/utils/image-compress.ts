@@ -44,7 +44,10 @@ function buildSkipResult(originalBuffer: Buffer, mimeType: string): CompressedIm
     };
 }
 
-function applyFormat(pipeline: sharp.Sharp, mimeType: CompressibleMime): sharp.Sharp {
+function applyFormat(
+    pipeline: ReturnType<typeof sharp>,
+    mimeType: CompressibleMime
+): ReturnType<typeof sharp> {
     switch (mimeType) {
         case "image/jpeg":
             return pipeline.jpeg({ quality: IMAGE_QUALITY, mozjpeg: true });

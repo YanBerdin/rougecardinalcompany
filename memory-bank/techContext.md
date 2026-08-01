@@ -5,13 +5,13 @@
 Versions et dépendances clés observées dans le dépôt:
 
 - Node.js: ^20 (devDeps)
-- Next.js: **16.2.6** (App Router, Turbopack default)
+- Next.js: **16.2.11** (App Router, Turbopack default, correctifs Dependabot du 2026-08-01)
 - TypeScript: ^5
 - Tailwind CSS: ^3.4.x
 - Supabase: client/server integration via `@supabase/ssr` and `@supabase/supabase-js` patterns
 - **@t3-oss/env-nextjs**: **0.13.10** (type-safe env validation, added 2025-12-20)
 - **@sentry/nextjs**: **8.47.0** (error monitoring & alerting, added 2026-01-13)
-- **Sharp**: Image processing for thumbnails (300x300 JPEG)
+- **Sharp**: **0.35.3** — traitement d'images pour thumbnails (JPEG 300x300)
 - **Zod**: **4.1.12** (runtime validation)
 - **Deno**: Edge Functions runtime (first function: `scheduled-cleanup`, added 2026-01-18)
 - **Playwright**: **1.57.0** (E2E tests, ESM config, Chromium, 1 worker, added 2026-03-16)
@@ -27,6 +27,7 @@ Structure principale:
 
 | Date | Changement | Impact |
 | ------ | ------------ | -------- |
+| 2026-08-01 | Remédiation de 14 alertes Dependabot | Next.js 16.2.11, Sharp 0.35.3, PostCSS 8.5.25, overrides transitifs ; `pnpm audit` = 0 vulnérabilité |
 | 2026-05-16 | Audit Dependabot — 3 patches sécurité | Next.js 16.2.6 + `postcss >=8.5.10` + `fast-uri >=3.1.2`, `pnpm audit` = 0 CVE |
 | 2026-04-13 | Audit Dependabot — CVE Next.js 16.2.3 + vite 8.0.8 | `pnpm.overrides` nettoyé, CI lockfile fix |
 | 2026-03-25 | Runtime env validation (`lib/env-validation.ts`) | Module extrait, 22 tests, 4 checks cohérence Supabase |
