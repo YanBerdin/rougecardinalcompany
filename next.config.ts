@@ -41,6 +41,24 @@ const nextConfig: NextConfig = {
   // Empêche le bundling de sharp (binaire natif) : sans ça, Vercel échoue à charger
   // le module "sharp-<hash>" en runtime (linux-x64) → erreurs sur les thumbnails.
   serverExternalPackages: ["sharp"],
+  // Bug connu Next.js 16.2.x + sharp >=0.35 (non corrigé au 2026, voir
+  // https://github.com/vercel/next.js/issues/96064) : le traceur de fichiers
+  // (@vercel/nft, vendorisé dans next) ne détecte plus qu'il doit inclure
+  // libvips-cpp.so dans le bundle serverless, car sharp@0.35 a déplacé son
+  // point d'entrée de "lib/index.js" vers "dist/index.cjs" (le cas spécial de
+  // nft cible encore l'ancien chemin). Résultat en production/staging :
+  // "Could not load the 'sharp' module using the linux-x64 runtime"
+  // (ERR_DLOPEN_FAILED) sur toutes les routes qui appellent sharp
+  // (ex: /admin/media/library, /api/admin/media/thumbnail).
+  // Le module ".node" lui-même est tracé correctement (require() réussit),
+  // seule la lib partagée manque : on la force explicitement ici.
+  // Nécessite le hoisting pnpm de "@img/sharp-*" configuré dans .npmrc.
+  outputFileTracingIncludes: {
+    "/**": [
+      "./node_modules/@img/sharp-libvips-linux-x64/**",
+      "./node_modules/@img/sharp-linux-x64/**",
+    ],
+  },
   images: {
     remotePatterns: [
       {
