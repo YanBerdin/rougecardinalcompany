@@ -2,7 +2,7 @@
 
 ## Completed
 
-- `TASK104` Remédiation des alertes Dependabot — **COMPLÈTE ✅ 2026-08-01** — 14 vulnérabilités corrigées : Next.js `16.2.11`, Sharp `0.35.3`, PostCSS `8.5.25`, overrides PNPM transitifs, adaptation du typage Sharp. `pnpm audit` = 0 vulnérabilité, type-check et tests Sharp verts. Lint global bloqué par une fixture E2E indépendante. Voir `memory-bank/tasks/TASK104-dependabot-dependency-remediation.md`
+- `TASK104` Remédiation Dependabot + incident runtime Sharp/Vercel — **COMPLÈTE ✅ 2026-08-01** — 14 vulnérabilités corrigées, puis résolution du 500 `/admin/media/library` après Sharp `0.35.3` : externalisation, tracing physique `libvips-cpp.so`, suppression du hoisting pnpm refusé par Vercel. Déploiement Vercel et accès production validés. Voir `memory-bank/tasks/tasks-completed/TASK104-dependabot-dependency-remediation.md`
 
 - `TASK102` Tarif réduit (`price_reduced_cents`) + affichage public prix & capacité — **COMPLÈTE ✅ 2026-07-04** — Colonne `price_reduced_cents` indépendante de `price_cents` propagée dans toute la chaîne admin (schémas, DAL, Server Actions, formulaire, détail) + affichage public sur `/agenda` et `/spectacles/[slug]` (prix + capacité). Migration manuelle chirurgicale (diff CLI trop bruité). `restore_content_version` mis à jour. Poussée sur Supabase Cloud (`pnpm db:push`). Voir `memory-bank/tasks/TASK102-reducedPriceAndPublicCapacity.md`
 
@@ -22,6 +22,8 @@
 # Index des Tâches
 
 ## En Cours
+
+- `TASK200` Migrer vers le correctif officiel Sharp / nft de Next.js — **PLANIFIÉE 📋 2026-08-02** — Remplacer le workaround `outputFileTracingIncludes` de TASK104 uniquement après une release stable corrigée, avec validation du tracing `.nft.json`, du packaging Vercel, des cold starts et de `/admin/media/library`. Voir `memory-bank/tasks/TASK200-migration-correctif-upstream-sharp-nft.md`
 
 - `TASK105` Créer le profil admin manquant en production — **PLANIFIÉE 📋 2026-08-01** — Aucun `public.profiles` avec `role='admin'` sur le projet production `hjmwctzqljfszuwkaadd` (`diagnose:admin-views` → `Profil admin introuvable`), alors que staging est sain. Écart de données révélé après la restauration des GRANTs `service_role`, qui masquait le diagnostic derrière un `permission denied for table profiles`. Voir `memory-bank/tasks/TASK105-production-admin-profile.md`
 

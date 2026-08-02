@@ -1,5 +1,11 @@
 # Progress
 
+## TASK104 — Résolution complète du 500 Sharp et déploiement Vercel (2026-08-01)
+
+✅ **COMPLÈTE EN PRODUCTION** — Sharp `0.35.3` a révélé une incompatibilité de tracing avec Next.js `16.2.x`/`@vercel/nft` : `libvips-cpp.so` manquait dans le bundle serverless alors que le build réussissait. Le premier correctif (`6576f6d`) a externalisé Sharp et ajouté le tracing. Le hoisting intermédiaire de `@img/sharp-*` a ensuite créé des symlinks pnpm rejetés par Vercel.
+
+Le correctif final (`81d538f`) garde le layout pnpm isolé, externalise Sharp et trace directement les paquets physiques sous `node_modules/.pnpm/`. Build, type-check, tests image 11/11, inspection `.nft.json`, déploiement Vercel et accès à `/admin/media/library` sans erreur 500 sont validés.
+
 ## Fix 500 sur pages editor+ — requireMinRole() mal utilisé comme garde de page (2026-08-01)
 
 ✅ **COMPLÈTE** — `GET /admin/media/library` renvoyait `500 Internal Server Error` en production.

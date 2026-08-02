@@ -31,6 +31,38 @@ L'audit initial signalait 14 vulnérabilités, dont 9 HIGH et 5 MODERATE. Après
 - ✅ `git diff --check`.
 - ⚠️ `pnpm lint` reste bloqué par une fixture E2E indépendante : `e2e/tests/auth/invite-setup/invite-setup.fixtures.ts`, appel de `use` dans `setupAccountPage` contraire à `react-hooks/rules-of-hooks`. Ce problème est hors périmètre et n'est pas inclus dans ce commit.
 
+## Incident de production `/admin/media/library`
+
+La mise à jour de Sharp a exposé un problème de runtime et de packaging sur Vercel après le passage à Sharp `0.35.3`.
+
+### Symptômes et cause
+
+- Le build Next.js réussissait, mais `/admin/media/library` retournait `500` lorsque le chemin de génération des miniatures touchait Sharp.
+- Sentry signalait `Failed to load external module sharp-<hash>: Could not load the "sharp" module using the linux-x64 runtime`, puis une variante `Cannot find module 'sharp-<hash>'`.
+- Sharp `0.35.x` a déplacé son point d'entrée de `lib/index.js` vers `dist/index.cjs`. Le cas spécial du traceur `@vercel/nft`, vendorisé par Next.js `16.2.x`, ciblait encore l'ancien chemin.
+- Le module natif `.node` était tracé, mais la bibliothèque partagée `libvips-cpp.so` ne l'était pas toujours. Le build/local pouvait donc réussir alors que la fonction serverless Linux échouait au runtime.
+- Le message npm `Error: canceled` était secondaire : il provenait de l'annulation d'une commande d'inspection, pas de la cause racine.
+
+### Deux phases de correction
+
+Le premier correctif (`6576f6d`) a externalisé Sharp et ajouté un traçage explicite. Une tentative intermédiaire de hoisting `@img/sharp-*` via `public-hoist-pattern[]=@img/sharp*` a fourni un chemin local stable, mais pnpm a créé des symlinks dans `node_modules/@img`. Vercel a ensuite rejeté le package final avec `invalid deployment package ... files in symlinked directories`.
+
+Le correctif final (`81d538f`) conserve le layout pnpm isolé :
+
+1. `serverExternalPackages: ["sharp"]` laisse Node charger Sharp nativement dans la fonction serverless.
+2. `outputFileTracingIncludes` cible directement les fichiers physiques de `node_modules/.pnpm/` pour `@img/sharp-libvips-linux-x64` et `@img/sharp-linux-x64`.
+3. `.npmrc` ne hoiste plus `@img/sharp-*`, car le packager Vercel refuse les répertoires symlinkés.
+4. Le glob `@*` suit la version pnpm résolue sans réintroduire de chemin racine symlinké.
+
+### Validation finale et leçons
+
+- Build, type-check et 11/11 tests `image-compress` réussis.
+- Inspection du `.nft.json` : `libvips-cpp.so.8.18.3` présent dans la trace.
+- Déploiement Vercel réussi après `81d538f`.
+- Accès production à `/admin/media/library` confirmé sans erreur 500.
+
+Pour un incident similaire, distinguer le build de l'étape `Deploying outputs...`, inspecter le `.nft.json` généré et vérifier les chemins physiques sous `node_modules/.pnpm/`. Une dépendance native de sécurité doit être validée jusqu'au package serverless et au runtime de production, pas seulement par un build local.
+
 ## Fichiers concernés
 
 - `package.json`
@@ -40,4 +72,4 @@ L'audit initial signalait 14 vulnérabilités, dont 9 HIGH et 5 MODERATE. Après
 
 ## Clôture
 
-La remédiation est complète et prête à être livrée. Le commit associé est créé après vérification finale du diff.
+La remédiation et le correctif de runtime sont complets. Le commit associé est `81d538f`, le déploiement Vercel est réussi et `/admin/media/library` fonctionne en production.
