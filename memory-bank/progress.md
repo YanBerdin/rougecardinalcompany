@@ -1,5 +1,19 @@
 # Progress
 
+## TASK106 - CodeQL #28 XSS client-side invitation (2026-08-03)
+
+✅ **CORRECTIF LOCAL COMPLET** - L'alerte `js/xss` signalait l'affectation de
+la valeur `url` de la query dans `window.location.href` sur la page
+`/auth/accept-invitation`. La validation cliente existante reste utilisée pour
+l'UX, mais ne sert plus de barrière de sécurité unique. La navigation est
+maintenant un formulaire POST vers `continueInvitationAction()` ; cette Server
+Action revalide la destination Supabase et l'origine de `redirect_to`, puis
+seule appelle `redirect()`. Une valeur modifiée côté client ou invalide est
+renvoyée vers la page intermédiaire. Tests du validateur : 5/5 ; type-check,
+diagnostics et diff check réussis. La réanalyse CodeQL après push doit confirmer
+la fermeture de l'alerte. Détails :
+`memory-bank/tasks/tasks-completed/TASK106-codeql-client-side-xss-invitation.md`.
+
 ## TASK104 — Résolution complète du 500 Sharp et déploiement Vercel (2026-08-01)
 
 ✅ **COMPLÈTE EN PRODUCTION** — Sharp `0.35.3` a révélé une incompatibilité de tracing avec Next.js `16.2.x`/`@vercel/nft` : `libvips-cpp.so` manquait dans le bundle serverless alors que le build réussissait. Le premier correctif (`6576f6d`) a externalisé Sharp et ajouté le tracing. Le hoisting intermédiaire de `@img/sharp-*` a ensuite créé des symlinks pnpm rejetés par Vercel.

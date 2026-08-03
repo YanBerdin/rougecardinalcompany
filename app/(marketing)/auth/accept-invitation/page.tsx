@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { isSafeInvitationUrl } from "@/lib/utils/validate-invitation-url";
+import { continueInvitationAction } from "./actions";
 
 // This is a Client Component ("use client"). Importing @/lib/env (t3-env) or
 // @/lib/site-config (which imports @/lib/env and reads server-only vars like
@@ -72,12 +73,6 @@ export default function AcceptInvitationPage() {
         setInvitation(parseInvitationFromLocation());
     }, []);
 
-    const handleActivate = () => {
-        if (targetUrl) {
-            window.location.href = targetUrl;
-        }
-    };
-
     if (error) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4">
@@ -108,13 +103,16 @@ export default function AcceptInvitationPage() {
                     automatique par les filtres de sécurité de votre messagerie,
                     veuillez cliquer sur le bouton ci-dessous pour continuer.
                 </p>
-                <Button
-                    onClick={handleActivate}
-                    disabled={!targetUrl}
-                    className="inline-flex items-center justify-center h-11 px-6 rounded-md bg-primary text-primary-foreground font-semibold hover:bg-chart-2 transition-colors disabled:opacity-50"
-                >
-                    Continuer vers l&apos;activation
-                </Button>
+                <form action={continueInvitationAction}>
+                    <input name="invitationUrl" type="hidden" value={targetUrl ?? ""} />
+                    <Button
+                        type="submit"
+                        disabled={!targetUrl}
+                        className="inline-flex items-center justify-center h-11 px-6 rounded-md bg-primary text-primary-foreground font-semibold hover:bg-chart-2 transition-colors disabled:opacity-50"
+                    >
+                        Continuer vers l&apos;activation
+                    </Button>
+                </form>
             </div>
         </div>
     );

@@ -2,6 +2,8 @@
 
 ## Completed
 
+- `TASK106` Remédiation CodeQL #28 XSS client-side invitation — **CORRECTIF LOCAL COMPLET ✅ 2026-08-03** — suppression de `window.location.href` alimenté par query string ; formulaire POST vers une Server Action qui revalide l'URL Supabase et `redirect_to` avant `redirect()`. Tests URL 5/5, type-check, diagnostics et diff check verts. Réanalyse CodeQL attendue après push sur `master`. Voir `memory-bank/tasks/tasks-completed/TASK106-codeql-client-side-xss-invitation.md`
+
 - `TASK104` Remédiation Dependabot + incident runtime Sharp/Vercel — **COMPLÈTE ✅ 2026-08-01** — 14 vulnérabilités corrigées, puis résolution du 500 `/admin/media/library` après Sharp `0.35.3` : externalisation, tracing physique `libvips-cpp.so`, suppression du hoisting pnpm refusé par Vercel. Déploiement Vercel et accès production validés. Voir `memory-bank/tasks/tasks-completed/TASK104-dependabot-dependency-remediation.md`
 
 - `TASK102` Tarif réduit (`price_reduced_cents`) + affichage public prix & capacité — **COMPLÈTE ✅ 2026-07-04** — Colonne `price_reduced_cents` indépendante de `price_cents` propagée dans toute la chaîne admin (schémas, DAL, Server Actions, formulaire, détail) + affichage public sur `/agenda` et `/spectacles/[slug]` (prix + capacité). Migration manuelle chirurgicale (diff CLI trop bruité). `restore_content_version` mis à jour. Poussée sur Supabase Cloud (`pnpm db:push`). Voir `memory-bank/tasks/TASK102-reducedPriceAndPublicCapacity.md`
