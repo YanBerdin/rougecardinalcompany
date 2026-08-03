@@ -27,7 +27,7 @@ Find and explain:
 ### Step 3: Explain with Context
 
 For each concept found:
-```
+```yml
 **Concept Name**
 - What it is: [plain language]
 - Why used here: [design rationale]
