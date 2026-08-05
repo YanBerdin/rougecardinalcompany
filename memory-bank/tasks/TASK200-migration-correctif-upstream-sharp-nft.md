@@ -1,8 +1,8 @@
 # TASK200 - Migrer vers le correctif officiel Sharp / nft de Next.js
 
-**Statut:** Planifiée  
+**Statut:** En cours
 **Ajoutée:** 2026-08-02  
-**Mise à jour:** 2026-08-02  
+**Mise à jour:** 2026-08-05
 **Priorité:** Moyenne  
 **Dépend de:** TASK104
 
@@ -174,8 +174,8 @@ En cas d'échec du build, du packaging ou du runtime :
 
 | ID | Description | Statut | Notes |
 | --- | --- | --- | --- |
-| 1.1 | Identifier une release stable contenant le correctif nft/Next.js | À faire | Ne pas se baser uniquement sur une version canary |
-| 1.2 | Tester la mise à jour avec le workaround actuel | À faire | Preview Vercel obligatoire |
+| 1.1 | Identifier une release stable contenant le correctif nft/Next.js | Complétée | Next.js 16.3.0 annonce #94845 et embarque @vercel/nft 1.10.2 |
+| 1.2 | Tester la mise à jour avec le workaround actuel | En cours | Next.js 16.3.0 installé ; type-check, tests image 11/11, build et manifests NFT locaux validés ; preview Vercel restante |
 | 1.3 | Retirer le tracing manuel par étapes | À faire | Un changement de configuration à la fois |
 | 1.4 | Valider Sharp après cold start en production | À faire | Vérifier Sentry et les logs Vercel |
 | 1.5 | Mettre à jour le Memory Bank et clôturer | À faire | Référencer la release upstream |
@@ -187,3 +187,13 @@ En cas d'échec du build, du packaging ou du runtime :
 - Tâche planifiée à la suite de TASK104 et de l'analyse de Next.js issue #96064.
 - Le workaround de production est conservé comme référence de rollback.
 - Aucun retrait de configuration n'est autorisé avant une release stable corrigée et une validation Vercel réelle.
+
+### 2026-08-05
+
+- Mise à jour de `next` et `eslint-config-next` vers `16.3.0`, avec Sharp `0.35.3` inchangé.
+- Workaround `serverExternalPackages` et `outputFileTracingIncludes` conservé pour cette première validation.
+- `pnpm type-check` réussi.
+- `pnpm test:unit:image-compress` réussi : 11/11 tests.
+- `pnpm build` réussi avec Next.js 16.3.0 ; avertissement CSS `@custom-variant` préexistant/non bloquant.
+- Les manifests `.nft.json` de `/admin/media/library` et `/api/admin/media/thumbnail` contiennent `libvips-cpp.so.8.18.3`, `sharp-linux-x64-0.35.3.node` et `sharp/dist/index.cjs`.
+- La validation Vercel, le retrait progressif du workaround et les tests cold start restent à faire.

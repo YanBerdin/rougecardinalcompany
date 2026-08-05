@@ -27,7 +27,7 @@
 
 - `TASK107` Corriger la 404 de `/sitemap.xml` — **PLANIFIÉE 📋 2026-08-04** — `robots.ts` référence un sitemap, mais aucune Metadata Route `app/sitemap.ts` ni fichier statique `app/sitemap.xml` n'existe. Créer la route, définir le périmètre des URLs publiques, valider le XML localement puis en production et actualiser Search Console. Voir `memory-bank/tasks/TASK107-sitemap-404.md`
 
-- `TASK200` Migrer vers le correctif officiel Sharp / nft de Next.js — **PLANIFIÉE 📋 2026-08-02** — Remplacer le workaround `outputFileTracingIncludes` de TASK104 uniquement après une release stable corrigée, avec validation du tracing `.nft.json`, du packaging Vercel, des cold starts et de `/admin/media/library`. Voir `memory-bank/tasks/TASK200-migration-correctif-upstream-sharp-nft.md`
+- `TASK200` Migrer vers le correctif officiel Sharp / nft de Next.js — **EN COURS 🔄 2026-08-05** — Next.js 16.3.0 installé avec le workaround conservé ; type-check, tests image, build et manifests `.nft.json` locaux validés. Preview Vercel, retrait progressif du workaround et validation cold start restantes. Voir `memory-bank/tasks/TASK200-migration-correctif-upstream-sharp-nft.md`
 
 - `TASK105` Créer le profil admin manquant en production — **PLANIFIÉE 📋 2026-08-01** — Aucun `public.profiles` avec `role='admin'` sur le projet production `hjmwctzqljfszuwkaadd` (`diagnose:admin-views` → `Profil admin introuvable`), alors que staging est sain. Écart de données révélé après la restauration des GRANTs `service_role`, qui masquait le diagnostic derrière un `permission denied for table profiles`. Voir `memory-bank/tasks/TASK105-production-admin-profile.md`
 

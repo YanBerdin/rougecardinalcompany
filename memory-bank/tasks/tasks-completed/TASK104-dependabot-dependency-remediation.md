@@ -2,7 +2,7 @@
 
 **Statut:** Complétée  
 **Ajoutée:** 2026-08-01  
-**Mise à jour:** 2026-08-01
+**Mise à jour:** 2026-08-05
 
 ## Demande originale
 
@@ -72,4 +72,4 @@ Pour un incident similaire, distinguer le build de l'étape `Deploying outputs..
 
 ## Clôture
 
-La remédiation et le correctif de runtime sont complets. Le commit associé est `81d538f`, le déploiement Vercel est réussi et `/admin/media/library` fonctionne en production.
+La remédiation et le correctif de runtime sont complets pour la baseline Next.js `16.2.11`. Le commit associé est `81d538f`, le déploiement Vercel est réussi et `/admin/media/library` fonctionne en production. TASK200 migre séparément vers Next.js `16.3.0` et ne retire pas encore ce workaround : la configuration de TASK104 reste le rollback de référence jusqu'à la validation Vercel et cold start de TASK200.

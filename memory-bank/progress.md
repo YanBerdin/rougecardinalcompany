@@ -1,5 +1,13 @@
 # Progress
 
+## TASK200 — Migration vers le correctif upstream Sharp/nft (2026-08-05)
+
+🔄 **EN COURS** — `next` et `eslint-config-next` sont passés à `16.3.0`, avec Sharp `0.35.3` inchangé. Le correctif upstream `#94845` est identifié et la copie embarquée de `@vercel/nft` est `1.10.2`. Le workaround TASK104 reste actif pendant la phase de validation.
+
+Validations locales réussies : `pnpm install --frozen-lockfile`, `pnpm type-check`, `pnpm test:unit:image-compress` (11/11), `pnpm build`, inspection des manifests `.nft.json` (`libvips-cpp.so.8.18.3`, `sharp-linux-x64-0.35.3.node` et `sharp/dist/index.cjs` présents) et `git diff --check`.
+
+Restent à faire : preview et packaging Vercel, test runtime Sharp après cold start, tests upload/thumbnail/régénération, puis retrait isolé de `outputFileTracingIncludes` et éventuellement de `serverExternalPackages`. TASK200 ne doit pas être clôturée avant ces validations et deux déploiements consécutifs. Détail : `memory-bank/tasks/TASK200-migration-correctif-upstream-sharp-nft.md`.
+
 ## TASK106 - CodeQL #28 XSS client-side invitation (2026-08-03)
 
 ✅ **CORRECTIF LOCAL COMPLET** - L'alerte `js/xss` signalait l'affectation de
