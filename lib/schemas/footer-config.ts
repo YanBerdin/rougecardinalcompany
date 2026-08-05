@@ -24,6 +24,7 @@ export const FOOTER_CONFIG_KEY = "public:footer:content" as const;
  * Maximum description length (UI + DB safety).
  */
 const DESCRIPTION_MAX = 500;
+const PHONE_NUMBER_PATTERN = /^\+?[0-9\s\-()]{10,}$/;
 
 // =============================================================================
 // SUB-SCHEMAS
@@ -31,7 +32,13 @@ const DESCRIPTION_MAX = 500;
 
 const ContactSchema = z.object({
     email: z.string().email("Email invalide"),
-    phone: z.string().trim().optional().or(z.literal("")),
+    phone: z
+        .string()
+        .trim()
+        .max(40, "Le numéro est trop long (40 caractères max)")
+        .regex(PHONE_NUMBER_PATTERN, "Le numéro de téléphone est invalide")
+        .optional()
+        .or(z.literal("")),
     address: z.string().min(1, "Adresse requise"),
 });
 
