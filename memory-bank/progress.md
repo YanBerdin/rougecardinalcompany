@@ -10,7 +10,7 @@
 
 Validations locales réussies : `pnpm install --frozen-lockfile`, `pnpm type-check`, `pnpm test:unit:image-compress` (11/11), compilation `pnpm build` jusqu'à `Compiled successfully` sans warning de parsing CSS, inspection des manifests `.nft.json` (`libvips-cpp.so.8.18.3`, `sharp-linux-x64-0.35.3.node` et `sharp/dist/index.cjs` présents) et `git diff --check`. Le hook post-compilation Sentry peut prolonger la fin de la commande ; les avertissements Browserslist sont non bloquants.
 
-Restent à faire : preview et packaging Vercel, test runtime Sharp après cold start, tests upload/thumbnail/régénération, puis retrait isolé de `outputFileTracingIncludes` et éventuellement de `serverExternalPackages`. TASK200 ne doit pas être clôturée avant ces validations et deux déploiements consécutifs. Détail : `memory-bank/tasks/TASK200-migration-correctif-upstream-sharp-nft.md`.
+✅ Preview de production Vercel déployée avec succès. Restent à faire : test runtime Sharp après cold start, tests upload/thumbnail/régénération, puis retrait isolé de `outputFileTracingIncludes` et éventuellement de `serverExternalPackages`. TASK200 reste ouverte jusqu'à ces validations et deux déploiements consécutifs. Détail : `memory-bank/tasks/TASK200-migration-correctif-upstream-sharp-nft.md`.
 
 ## TASK106 - CodeQL #28 XSS client-side invitation (2026-08-03)
 
