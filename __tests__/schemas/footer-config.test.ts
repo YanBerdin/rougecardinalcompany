@@ -59,10 +59,10 @@ describe("footer-config schemas", () => {
             expect(result.success).toBe(false);
         });
 
-        it("rejects an empty phone", () => {
+        it("rejects an invalid phone", () => {
             const result = FooterConfigInputSchema.safeParse({
                 ...FOOTER_DEFAULTS,
-                contact: { ...FOOTER_DEFAULTS.contact, phone: "" },
+                contact: { ...FOOTER_DEFAULTS.contact, phone: "not-an-phone" },
             });
             expect(result.success).toBe(false);
         });
