@@ -1,6 +1,5 @@
 @tailwind base;
 /* ---break---*/
-@custom-variant dark (&:is(.dark *));
 @tailwind components;
 @tailwind utilities;
 

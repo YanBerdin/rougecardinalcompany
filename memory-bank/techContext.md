@@ -28,6 +28,7 @@ Structure principale:
 
 | Date | Changement | Impact |
 | ------ | ------------ | -------- |
+| 2026-08-05 | Correction du parsing CSS Turbopack | Suppression de la directive Tailwind v4 `@custom-variant` incompatible avec Tailwind CSS 3.4/PostCSS v3 ; `darkMode: ["class"]` reste actif |
 | 2026-08-05 | Migration TASK200 vers le correctif upstream Sharp/nft | Next.js et eslint-config-next 16.3.0, Sharp 0.35.3, `@vercel/nft` embarqué 1.10.2 ; workaround conservé en attente de validation Vercel |
 | 2026-08-01 | Remédiation de 14 alertes Dependabot | Next.js 16.2.11, Sharp 0.35.3, PostCSS 8.5.25, overrides transitifs ; `pnpm audit` = 0 vulnérabilité |
 | 2026-08-01 | Correctif runtime Sharp et packaging Vercel | `serverExternalPackages`, tracing physique `libvips-cpp.so`, suppression du hoisting pnpm ; déploiement production validé |

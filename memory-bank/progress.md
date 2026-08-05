@@ -1,10 +1,14 @@
 # Progress
 
+## Correctif CSS de la preview (2026-08-05)
+
+✅ Le warning Turbopack sur `@custom-variant` a été supprimé de `app/globals.css`. Cette directive appartient à Tailwind v4 alors que le projet utilise Tailwind CSS 3.4 avec PostCSS v3 ; `darkMode: ["class"]` dans `tailwind.config.ts` couvre déjà le besoin. La compilation atteint `Compiled successfully`, `get_errors` est sans erreur CSS et `git diff --check` réussit. Les avertissements Browserslist restent indépendants.
+
 ## TASK200 — Migration vers le correctif upstream Sharp/nft (2026-08-05)
 
 🔄 **EN COURS** — `next` et `eslint-config-next` sont passés à `16.3.0`, avec Sharp `0.35.3` inchangé. Le correctif upstream `#94845` est identifié et la copie embarquée de `@vercel/nft` est `1.10.2`. Le workaround TASK104 reste actif pendant la phase de validation.
 
-Validations locales réussies : `pnpm install --frozen-lockfile`, `pnpm type-check`, `pnpm test:unit:image-compress` (11/11), `pnpm build`, inspection des manifests `.nft.json` (`libvips-cpp.so.8.18.3`, `sharp-linux-x64-0.35.3.node` et `sharp/dist/index.cjs` présents) et `git diff --check`.
+Validations locales réussies : `pnpm install --frozen-lockfile`, `pnpm type-check`, `pnpm test:unit:image-compress` (11/11), compilation `pnpm build` jusqu'à `Compiled successfully` sans warning de parsing CSS, inspection des manifests `.nft.json` (`libvips-cpp.so.8.18.3`, `sharp-linux-x64-0.35.3.node` et `sharp/dist/index.cjs` présents) et `git diff --check`. Le hook post-compilation Sentry peut prolonger la fin de la commande ; les avertissements Browserslist sont non bloquants.
 
 Restent à faire : preview et packaging Vercel, test runtime Sharp après cold start, tests upload/thumbnail/régénération, puis retrait isolé de `outputFileTracingIncludes` et éventuellement de `serverExternalPackages`. TASK200 ne doit pas être clôturée avant ces validations et deux déploiements consécutifs. Détail : `memory-bank/tasks/TASK200-migration-correctif-upstream-sharp-nft.md`.
 

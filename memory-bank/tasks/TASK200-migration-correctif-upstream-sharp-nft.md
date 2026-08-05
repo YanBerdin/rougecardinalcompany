@@ -194,6 +194,6 @@ En cas d'échec du build, du packaging ou du runtime :
 - Workaround `serverExternalPackages` et `outputFileTracingIncludes` conservé pour cette première validation.
 - `pnpm type-check` réussi.
 - `pnpm test:unit:image-compress` réussi : 11/11 tests.
-- `pnpm build` réussi avec Next.js 16.3.0 ; avertissement CSS `@custom-variant` préexistant/non bloquant.
+- `pnpm build` compilé avec Next.js 16.3.0 sans warning de parsing CSS après suppression de `@custom-variant` dans `app/globals.css`, incompatible avec Tailwind CSS 3.4/PostCSS v3. Les avertissements `baseline-browser-mapping` et Browserslist restent non bloquants.
 - Les manifests `.nft.json` de `/admin/media/library` et `/api/admin/media/thumbnail` contiennent `libvips-cpp.so.8.18.3`, `sharp-linux-x64-0.35.3.node` et `sharp/dist/index.cjs`.
 - La validation Vercel, le retrait progressif du workaround et les tests cold start restent à faire.
