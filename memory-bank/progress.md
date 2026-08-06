@@ -1,5 +1,18 @@
 # Progress
 
+## TASK107 — Correction de la 404 `/sitemap.xml` (2026-08-06)
+
+🔄 **CORRECTIF LOCAL VALIDÉ** — La cause racine était l'absence de route alors
+que `app/robots.ts` référençait déjà `/sitemap.xml`. `app/sitemap.ts` génère
+désormais un sitemap statique avec 9 URLs publiques canoniques basées sur
+`WEBSITE_URL`; les routes privées, techniques et protégées sont exclues.
+
+Validations : `pnpm type-check`, `pnpm build`, puis `next start` avec `GET
+/sitemap.xml` en `200 OK`, `Content-Type: application/xml`, `<urlset>` présent,
+9 URLs du domaine officiel et aucune URL privée. `robots.txt` conserve le lien
+vers le sitemap. Déploiement et vérification production restent nécessaires ;
+`sitemap_entries` est laissé pour une phase SEO ultérieure.
+
 ## Correctif CSS de la preview (2026-08-05)
 
 ✅ Le warning Turbopack sur `@custom-variant` a été supprimé de `app/globals.css`. Cette directive appartient à Tailwind v4 alors que le projet utilise Tailwind CSS 3.4 avec PostCSS v3 ; `darkMode: ["class"]` dans `tailwind.config.ts` couvre déjà le besoin. La compilation atteint `Compiled successfully`, `get_errors` est sans erreur CSS et `git diff --check` réussit. Les avertissements Browserslist restent indépendants.

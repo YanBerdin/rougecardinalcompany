@@ -1,6 +1,8 @@
 
 # Contexte actif
 
+2026-08-06 : 🔄 TASK107 — correction locale de la 404 `/sitemap.xml`. `app/sitemap.ts` fournit désormais une Metadata Route statique basée sur `WEBSITE_URL`, avec 9 URLs publiques canoniques et sans dépendance Supabase. `pnpm type-check` et `pnpm build` réussissent ; `next start` répond `200 OK` avec `application/xml`, un `<urlset>` valide et aucune URL privée. `robots.txt` conserve la référence correcte. Reste à déployer puis vérifier l'URL en production ; l'intégration de `sitemap_entries` est volontairement différée.
+
 2026-08-05 : ✅ Preview de production Vercel validée après la migration Next.js 16.3.0 et le correctif CSS Turbopack. La validation couvre le déploiement avec le workaround Sharp conservé ; restent le test runtime après cold start, les parcours upload/thumbnail/régénération et le retrait progressif du tracing manuel. Le document local `doc-perso/deploy-production/seedAdmin-prod.md` a été nettoyé car il contenait un mot de passe en clair ; ce secret doit être considéré comme compromis et remplacé côté Supabase/Vercel.
 
 2026-08-05 : ✅ Correction du warning Turbopack de la preview de production. `app/globals.css` contenait `@custom-variant dark (&:is(.dark *));`, directive Tailwind CSS v4 incompatible avec le pipeline Tailwind CSS 3.4/PostCSS v3 du projet. La directive a été supprimée ; `darkMode: ["class"]` dans `tailwind.config.ts` reste la configuration active des variantes `dark:`. Le build atteint `Compiled successfully` sans warning de parsing CSS et `get_errors` ne remonte aucune erreur CSS. Les avertissements `baseline-browser-mapping` et Browserslist restent indépendants et non bloquants.

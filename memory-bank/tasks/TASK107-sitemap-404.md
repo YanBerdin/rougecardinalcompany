@@ -1,6 +1,6 @@
 # TASK107 - Corriger la 404 de `/sitemap.xml`
 
-**Status:** Pending  
+**Status:** In Progress
 **Added:** 2026-08-04  
 **Updated:** 2026-08-04
 
@@ -14,19 +14,19 @@ dans le Memory Bank.
 
 La production répond actuellement `404` sur :
 
-```text
+```yml
 https://compagnie-rouge-cardinal.fr/sitemap.xml
 ```
 
 La route suivante fonctionne :
 
-```text
+```yml
 https://compagnie-rouge-cardinal.fr/robots.txt
 ```
 
 Cependant, `robots.txt` déclare le sitemap suivant :
 
-```text
+```yml
 https://compagnie-rouge-cardinal.fr/sitemap.xml
 ```
 
@@ -160,16 +160,16 @@ complémentaire : elle ne doit pas retarder le rétablissement d'un XML valide.
 
 ## Progress Tracking
 
-**Overall Status:** Not Started - 0%
+**Overall Status:** In Progress - 75%
 
 ### Subtasks
 
 | ID | Description | Status | Updated | Notes |
 | --- | -------------------------------------------------------- | ----------- | ---------- | -------------------------------------- |
-| 1.1 | Créer la Metadata Route `app/sitemap.ts` | Not Started | 2026-08-04 | Cause racine confirmée |
-| 1.2 | Définir le périmètre des routes publiques | Not Started | 2026-08-04 | Exclure admin, API, auth et debug |
+| 1.1 | Créer la Metadata Route `app/sitemap.ts` | Complete | 2026-08-06 | Route statique basée sur `WEBSITE_URL` |
+| 1.2 | Définir le périmètre des routes publiques | Complete | 2026-08-06 | 9 routes publiques confirmées, routes privées exclues |
 | 1.3 | Évaluer l'intégration de `sitemap_entries` | Not Started | 2026-08-04 | Vérifier schéma, RLS et URLs |
-| 1.4 | Valider type-check, build et réponse XML locale | Not Started | 2026-08-04 | |
+| 1.4 | Valider type-check, build et réponse XML locale | Complete | 2026-08-06 | Type-check, build et test HTTP local réussis |
 | 1.5 | Déployer et vérifier `/sitemap.xml` en production | Not Started | 2026-08-04 | Puis soumettre à Search Console |
 
 ## Progress Log
@@ -181,5 +181,15 @@ complémentaire : elle ne doit pas retarder le rétablissement d'un XML valide.
 - Aucun fichier `app/sitemap.*` ou `app/sitemap.xml` n'est présent.
 - Le proxy, le middleware et la configuration `WEBSITE_URL` ont été écartés
   comme causes de la 404.
-- Prochaine action : implémenter la Metadata Route, puis valider localement et
-  en production.
+- `app/sitemap.ts` a été créé comme Metadata Route statique avec neuf URLs
+  publiques canoniques et sans accès Supabase.
+- `pnpm type-check` a réussi.
+- `pnpm build` a réussi ; Next.js liste `○ /sitemap.xml` comme route statique.
+  Le hook Sentry `runAfterProductionCompile` a simplement duré environ 3 min 30.
+- Le serveur `next start` local répond `200 OK` sur `/sitemap.xml` avec
+  `Content-Type: application/xml`, un élément `<urlset>` et neuf URLs du domaine
+  officiel, sans route privée.
+- `robots.txt` local continue de référencer
+  `https://compagnie-rouge-cardinal.fr/sitemap.xml`.
+- Restent le déploiement production, la vérification HTTP production et la
+  décision ultérieure d'intégrer ou non `sitemap_entries`.

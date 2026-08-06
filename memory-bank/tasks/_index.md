@@ -25,7 +25,7 @@
 
 ## En Cours
 
-- `TASK107` Corriger la 404 de `/sitemap.xml` — **PLANIFIÉE 📋 2026-08-04** — `robots.ts` référence un sitemap, mais aucune Metadata Route `app/sitemap.ts` ni fichier statique `app/sitemap.xml` n'existe. Créer la route, définir le périmètre des URLs publiques, valider le XML localement puis en production et actualiser Search Console. Voir `memory-bank/tasks/TASK107-sitemap-404.md`
+- `TASK107` Corriger la 404 de `/sitemap.xml` — **EN COURS 🔄 2026-08-06** — Metadata Route statique `app/sitemap.ts` créée avec 9 URLs publiques canoniques. Type-check, build et vérification HTTP locale réussis (`200`, `application/xml`, `<urlset>`). Déploiement et vérification production restent à faire. Voir `memory-bank/tasks/TASK107-sitemap-404.md`
 
 - `TASK200` Migrer vers le correctif officiel Sharp / nft de Next.js — **EN COURS 🔄 2026-08-05** — Next.js 16.3.0 installé avec le workaround conservé ; type-check, tests image, build et manifests `.nft.json` locaux validés. Preview Vercel, retrait progressif du workaround et validation cold start restantes. Voir `memory-bank/tasks/TASK200-migration-correctif-upstream-sharp-nft.md`
 
