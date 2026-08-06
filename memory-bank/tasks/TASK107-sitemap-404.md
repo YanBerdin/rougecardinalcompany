@@ -160,7 +160,7 @@ complémentaire : elle ne doit pas retarder le rétablissement d'un XML valide.
 
 ## Progress Tracking
 
-**Overall Status:** In Progress - 75%
+**Overall Status:** In Progress - 90%
 
 ### Subtasks
 
@@ -170,7 +170,7 @@ complémentaire : elle ne doit pas retarder le rétablissement d'un XML valide.
 | 1.2 | Définir le périmètre des routes publiques | Complete | 2026-08-06 | 9 routes publiques confirmées, routes privées exclues |
 | 1.3 | Évaluer l'intégration de `sitemap_entries` | Not Started | 2026-08-04 | Vérifier schéma, RLS et URLs |
 | 1.4 | Valider type-check, build et réponse XML locale | Complete | 2026-08-06 | Type-check, build et test HTTP local réussis |
-| 1.5 | Déployer et vérifier `/sitemap.xml` en production | Not Started | 2026-08-04 | Puis soumettre à Search Console |
+| 1.5 | Déployer et vérifier `/sitemap.xml` en production | Complete | 2026-08-06 | Production : 200, XML valide, Googlebot accepté |
 
 ## Progress Log
 
@@ -191,5 +191,13 @@ complémentaire : elle ne doit pas retarder le rétablissement d'un XML valide.
   officiel, sans route privée.
 - `robots.txt` local continue de référencer
   `https://compagnie-rouge-cardinal.fr/sitemap.xml`.
-- Restent le déploiement production, la vérification HTTP production et la
-  décision ultérieure d'intégrer ou non `sitemap_entries`.
+- Vérification production le 2026-08-06 : `GET /sitemap.xml` répond `200 OK`,
+  sans redirection, avec `Content-Type: application/xml` et un XML validé par
+  `xmllint`.
+- Les identités `Googlebot` et `Google-InspectionTool` reçoivent également
+  `200 OK` et `application/xml`.
+- Les neuf URLs déclarées répondent toutes `200 OK` en production.
+- Search Console signale encore « Impossible de lire le sitemap » ; ce statut
+  est désormais à rafraîchir via une nouvelle soumission dans la propriété
+  exacte `https://compagnie-rouge-cardinal.fr/`. L'intégration de
+  `sitemap_entries` reste une phase SEO ultérieure.

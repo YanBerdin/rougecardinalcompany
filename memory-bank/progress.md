@@ -1,5 +1,19 @@
 # Progress
 
+## TASK107 — Vérification production du sitemap (2026-08-06)
+
+✅ **ENDPOINT PRODUCTION VALIDÉ** — `https://compagnie-rouge-cardinal.fr/sitemap.xml`
+répond `200 OK`, sans redirection, avec `Content-Type: application/xml`.
+`xmllint` valide le document; Googlebot et `Google-InspectionTool` reçoivent la
+même réponse; les 9 URLs listées répondent toutes `200`. `robots.txt` pointe
+vers l’URL exacte.
+
+Search Console affiche encore « Impossible de lire le sitemap », mais ce
+résultat n’est pas reproductible via HTTP et ne provient pas d’un blocage
+Googlebot visible. Relancer la soumission dans la propriété URL exacte
+`https://compagnie-rouge-cardinal.fr/`, puis attendre le nouveau crawl. Ne pas
+modifier le `Content-Type` ou ajouter une dépendance DB sans erreur concrète.
+
 ## TASK107 — Correction de la 404 `/sitemap.xml` (2026-08-06)
 
 🔄 **CORRECTIF LOCAL VALIDÉ** — La cause racine était l'absence de route alors
