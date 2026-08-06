@@ -61,12 +61,12 @@ export async function checkMediaUsagePublic(
             locations.push("team_members");
         }
 
-        // Check spectacles (active only)
+        // Check spectacles (public only)
         const { data: spectacles } = await supabase
             .from("spectacles")
             .select("id")
             .eq("og_image_media_id", mediaId)
-            .eq("active", true)
+            .eq("public", true)
             .limit(1);
 
         if (spectacles && spectacles.length > 0) {
@@ -186,7 +186,7 @@ export async function bulkCheckMediaUsagePublic(
                     .from("spectacles")
                     .select("og_image_media_id")
                     .in("og_image_media_id", numericIds)
-                    .eq("active", true),
+                    .eq("public", true),
 
                 supabase
                     .from("spectacles_medias")

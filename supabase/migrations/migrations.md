@@ -39,7 +39,7 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ### 2026-07-22 - FIX: restaurer les GRANTs de lecture de la vue publique des photos paysage
 
-**Migration** : `20260722145006_grant_public_spectacle_landscape_photos_view.sql`
+**Migration** : `20260722145109_grant_public_spectacle_landscape_photos_view.sql`
 
 **Schéma déclaratif** : déjà conforme — `41_views_spectacle_photos.sql` contient les GRANTs `SELECT` sur `public.spectacles_landscape_photos_public` pour `anon` et `authenticated`.
 

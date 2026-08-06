@@ -38,7 +38,7 @@ Compléter la documentation Supabase CLI avec workflow déclaratif détaillé, c
 ### Subtasks
 
 | ID | Description | Status | Updated | Notes |
-|----|-------------|--------|---------|-------|
+| ---- | ------------- | -------- | --------- | ------- |
 | 1.1 | Notes détaillées sur supabase start --debug | Complete | 01-10-2025 | Blockquote avec détails |
 | 1.2 | Documentation db reset complète | Complete | 01-10-2025 | Effet, flags, seed |
 | 1.3 | Workflow déclaratif step-by-step | Complete | 01-10-2025 | stop → diff → push |
