@@ -13,9 +13,6 @@ export const metadata: Metadata = {
     template: "%s | Admin - Rouge Cardinal",
   },
   description: "Espace d'administration de la compagnie Rouge Cardinal",
-  icons: {
-    icon: "/favicon.ico",
-  },
 };
 
 export default async function AdminLayout({

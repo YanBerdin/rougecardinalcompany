@@ -12,9 +12,6 @@ export const metadata: Metadata = {
     template: "%s | Compagnie Rouge Cardinal"
   },
   description: "Compagnie de théâtre professionnelle",
-  icons: {
-    icon: "/favicon.ico",
-  },
 };
 
 export default function MarketingLayout({
