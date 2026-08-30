@@ -247,16 +247,34 @@ Outils et commandes utiles:
 ### Configuration Supabase
 
 ```typescript
-// supabase/server.ts (extrait)
-import { cookies } from 'next/headers';
-import { createServerClient } from '@supabase/ssr';
+// supabase/server.ts
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { env } from "@/lib/env";
 
 export async function createClient() {
   const cookieStore = await cookies();
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,
-    { cookies: { get: cookieStore.get, set: cookieStore.set, remove: cookieStore.delete } }
+    env.NEXT_PUBLIC_SUPABASE_URL,
+    env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY,
+    {
+      cookies: {
+        // ✅ Pattern getAll/setAll UNIQUEMENT (jamais get/set/remove)
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            );
+          } catch {
+            // Appelé depuis un Server Component : ignoré si le middleware
+            // (proxy.ts) rafraîchit les sessions.
+          }
+        },
+      },
+    }
   );
 }
 ```
@@ -266,12 +284,10 @@ export async function createClient() {
 ```typescript
 // lib/resend.ts
 import { Resend } from "resend";
+import { env } from "@/lib/env";
 
-if (!process.env.RESEND_API_KEY) {
-  throw new Error("RESEND_API_KEY is not defined");
-}
-
-export const resend = new Resend(process.env.RESEND_API_KEY);
+// ✅ T3 Env : validation Zod au démarrage (fail fast si RESEND_API_KEY manquant)
+export const resend = new Resend(env.RESEND_API_KEY);
 ```
 
 ### Variables d'Environnement

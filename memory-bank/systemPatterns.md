@@ -1,6 +1,6 @@
 # System Patterns
 
-**Last Updated**: 2026-03-16
+**Last Updated**: 2026-08-22
 
 ## Database Infrastructure
 
@@ -27,12 +27,16 @@
 - **Embla Carousel Pattern (Feb 2026)**: Carousel galerie spectacle avec branching 0/1/2+, scale tween, autoplay, WCAG (44px targets, `prefers-reduced-motion`).
 - **`buildMediaPublicUrl` Helper Pattern (Feb 2026)**: Helper sync centralisé dans `lib/dal/helpers/media-url.ts` pour construire les URLs publiques Supabase Storage (T3 Env, évite les doublons).
 - **Compound Components Composition Pattern (Mar 2026)**: Pattern `{ state, actions, meta }` Context Provider + compound sub-components. Utilisé dans 6 features : agenda (public), media library (admin), media details (admin), ImageField (admin), newsletter (public), compagnie (public). React 19 `use()` dans les sous-composants.
-- **`requireAdmin()` / `requireAdminPageAccess()` Auth Guard Pattern (Mar 2026)**: Guards standards pour Server Actions (`requireAdmin()` throws) et pages admin (`requireAdminPageAccess()` redirects). Définis dans `lib/auth/is-admin.ts`.
+- **Role-Based Auth Guard Pattern (TASK076, Mar 2026 ; durci TASK096, Mai 2026)**: Hiérarchie `user < editor < admin`. Guards dans `lib/auth/roles.ts` (+ `role-helpers.ts`) : `requireMinRole()` (throw), `requireBackofficeAccess()` (editor+), `requireAdminOnly()` (admin), `requireBackofficePageAccess()` / `requireAdminPageAccess()` (redirect `/auth/login`). Rôle lu depuis `app_metadata` du JWT signé via `getClaims()` (jamais `user_metadata`). `lib/auth/is-admin.ts` supprimé (TASK096).
 - **`dalSuccess()` / `dalError()` Factory Pattern (Mar 2026)**: Fonctions factory type-safe pour `DALResult<T>`, avec `HttpStatusCode` optionnel. Remplacent les littéraux `{ success: true, data }` dans 20+ DAL.
 - **`withDisplayToggle` RSC Helper (Mar 2026)**: Async RSC helper qui skip rendu + fetch si toggle DB désactivé. `lib/utils/with-display-toggle.tsx`.
 - **`SECTION_RENDERERS` Map Pattern (Mar 2026)**: `Record<string, ComponentType>` pour dispatch de sections par `kind`, élimine switch/if-else. Premier usage : `public-site/compagnie`.
 - **Sécurité**: combinaison GRANT (table-level) + RLS (policies) requise — ne pas considérer RLS comme substitut au GRANT.
 - **RLS display_toggle Pattern (Mar 2026)**: Les clés `display_toggle_*` dans `configurations_site` doivent être lisibles par anon+authenticated. La policy SELECT doit inclure `key like 'display_toggle_%'` en plus de `key like 'public:%'`. GRANT SELECT requis. Le fallback `{ enabled: true }` dans le DAL ne doit pas masquer un bug RLS.
+- **Editor Role Hierarchy Pattern (TASK076, Mar 2026)**: Policies RLS d'écriture des tables éditoriales migrées de `is_admin()` vers `has_min_role('editor')` (~60 policies, migration `20260311120000`). Depuis la migration `20260502120000`, `is_admin()` et `has_min_role()` sont `SECURITY INVOKER` et lisent `auth.jwt()->'app_metadata'->>'role'` en priorité (fallback `profiles.role`).
+- **Profile/Auth Role Sync Pattern (TASK096, Mai 2026)**: `app_metadata.role` est la source de vérité signée ; des triggers synchronisent `profiles.role` ↔ `auth.users.app_metadata.role` (`05_profiles_auto_sync.sql`, `21_functions_auth_sync.sql`). CI cron `check-role-invariant.yml` vérifie l'invariant. `PasswordSchema` (min 12 chars, 4 classes) dans `lib/schemas/auth.ts` ; `setupAccountAction` dans `lib/actions/auth-setup-actions.ts`.
+- **Sharp Vercel Tracing Workaround (TASK104, Août 2026)**: `next.config.ts` externalise Sharp (`serverExternalPackages: ["sharp"]`) et force le tracing physique de `libvips-cpp.so` via `outputFileTracingIncludes` depuis `node_modules/.pnpm/`. Ne PAS hoister `@img/sharp-*` : Vercel rejette les packages serverless contenant les répertoires symlinkés pnpm. Retrait du workaround suivi par TASK200 (Next.js 16.3.0 embarque le correctif upstream nft, validation cold start Vercel en cours).
+- **DnD Reorder Pattern (TASK101, Jul 2026)**: Réorganisation drag-and-drop avec `@dnd-kit/sortable` + PointerSensor (8px) + KeyboardSensor. Colonne `display_order` avec backfill `row_number()`, Server Action de reorder, tri public synchronisé (ex. articles de presse).
 - **Migrations**: `supabase/migrations/` est la source de vérité pour les modifications appliquées en base; `supabase/schemas/` sert de documentation/declarative reference.
 - **Tests & CI**: vérifier explicitement que les roles `anon` et `authenticated` peuvent accéder aux DTO nécessaires (tests d'intégration DAL).
 - **E2E Page Object Model Pattern (Mar 2026)**: Classe par page dans `e2e/pages/public/`, méthodes `goto()`, `expect*()` encapsulant les sélecteurs. Fixtures Playwright injectent le POM dans chaque spec. Tests `serial` + emails `Date.now()` pour rate limiter. Config ESM (`playwright.config.ts`, `fileURLToPath`), 1 worker, timeout 90 s, retries 2.
@@ -612,11 +616,13 @@ revoke select on public.spectacles_gallery_photos_admin from anon;
 import { env } from "@/lib/env";
 
 /**
- * Construit l'URL publique d'un fichier Supabase Storage.
- * Sync (4/5 usages dans le projet sont sync).
+ * Construit l'URL publique d'un fichier du bucket `medias` (Supabase Storage).
+ * Sync, null-safe, supprime les slashes initiaux du path.
  */
-export function buildMediaPublicUrl(storagePath: string): string {
-  return `${env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/media/${storagePath}`;
+export function buildMediaPublicUrl(storagePath: string | null): string | null {
+  if (!storagePath) return null;
+  const cleanPath = storagePath.replace(/^\/+/, "");
+  return `${env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/medias/${cleanPath}`;
 }
 ```
 
@@ -1395,29 +1401,29 @@ const handleKeyDown = (e: React.KeyboardEvent) => {
 #### Rate Limiting Pattern
 
 ```typescript
-// lib/utils/rate-limit.ts
-import { LRUCache } from "lru-cache";
+// lib/utils/rate-limit.ts — store Map en mémoire, sliding window
+// ⚠️ Non distribué entre instances Vercel — à remplacer/compléter avant montée en charge
 
-const ratelimit = new LRUCache({
-  max: 500,
-  ttl: 60000, // 1 minute
-});
+export function checkRateLimit(
+  key: string,        // identifiant unique (user_id, IP)
+  maxRequests: number,
+  windowMs: number
+): { allowed: boolean; remaining: number; resetAt: Date }
 
-export function checkRateLimit(identifier: string, limit: number = 10): boolean {
-  const tokenCount = (ratelimit.get(identifier) as number) || 0;
-  if (tokenCount >= limit) return false;
-  ratelimit.set(identifier, tokenCount + 1);
-  return true;
+// Variante atomique check + enregistrement
+export function recordRequest(
+  key: string,
+  maxRequests: number,
+  windowMs: number
+): { success: boolean; remaining: number; resetAt: Date }
+
+// Usage dans Server Action (lib/actions/media-actions.ts)
+const rateLimitResult = recordRequest(`upload:${userId}`, 10, 60 * 1000);
+if (!rateLimitResult.success) {
+  return { success: false, error: "Trop d'uploads, réessayez plus tard" };
 }
 
-// Usage dans API Route
-const ip = request.headers.get("x-forwarded-for") || "anonymous";
-if (!checkRateLimit(ip, 10)) {
-  return NextResponse.json(
-    { error: "Rate limit exceeded" },
-    { status: 429 }
-  );
-}
+// Testing : resetRateLimit(key) + cleanupExpiredEntries(windowMs) périodique (5 min)
 ```
 
 #### Conformité Patterns Projet (updated Mar 2026)
@@ -1430,7 +1436,7 @@ if (!checkRateLimit(ip, 10)) {
 - ✅ **Declarative Schema** — Migrations générées via `supabase db diff`
 - ✅ **RLS Granular** — 15 policies (3 tables × 5: select anon/auth, insert/update/delete admin)
 - ✅ **Composition Patterns** — Context Providers + compound sub-components (MediaLibrary, MediaDetails, ImageField)
-- ✅ **requireAdmin()** — Auth guard dans toutes les Server Actions et pages admin
+- ✅ **Role guards** — `requireBackofficeAccess()` / `requireAdminOnly()` dans les Server Actions et pages admin
 - ✅ **AlertDialog** — Confirmations destructives via shadcn AlertDialog (pas window.confirm)
 
 #### Métriques
@@ -1474,21 +1480,10 @@ export function dalError(error: string, status?: HttpStatusCode): DALError {
   return { success: false, error, ...(status && { status }) };
 }
 
-// Safe error extraction
-export function getErrorMessage(err: unknown): string {
-  if (err instanceof Error) return err.message;
-  return String(err);
-}
+// Safe error extraction (gère Error, objets { message }, strings)
+export function getErrorMessage(err: unknown): string { ... }
 
-// Legacy helper (still exported for backward compat)
-export function toDALResult<T>(
-  data: T | null,
-  error: Error | null
-): DALResult<T> {
-  if (error) return dalError(error.message);
-  if (data === null) return dalError("No data returned");
-  return dalSuccess(data);
-}
+// ⚠️ toDALResult() a été supprimé — utiliser exclusivement dalSuccess()/dalError()
 ```
 
 **Usage** :
@@ -1512,10 +1507,11 @@ return { success: true, data };
 
 ```bash
 lib/dal/helpers/
-├── error.ts      # DALResult<T>, dalSuccess(), dalError(), getErrorMessage(), toDALResult()
-├── format.ts     # formatDate(), formatDateFr()
+├── error.ts      # DALResult<T>, dalSuccess(), dalError(), getErrorMessage()
+├── format.ts     # formatTime(), toISODateString(), bytesToHuman(), formatDateFr()
 ├── slug.ts       # generateSlug()
 ├── media-url.ts  # buildMediaPublicUrl() (sync, T3 Env)
+├── serialize.ts  # BigInt serialization helpers
 └── index.ts      # Barrel exports
 ```
 
@@ -2034,7 +2030,7 @@ components/features/admin/media/
 - ✅ `types.ts` colocalisé à côté des composants
 - ✅ `AlertDialog` pour confirmations destructives (jamais `window.confirm()`)
 - ✅ Dead code purgé (hooks.ts commentés supprimés)
-- ✅ `requireAdmin()` dans toutes les Server Actions admin
+- ✅ Guards de rôle (`requireBackofficeAccess()` / `requireAdminOnly()`) dans toutes les Server Actions admin
 
 ### Handler Factorization Pattern (Dec 2025)
 
@@ -2195,26 +2191,25 @@ export function isAllowedUploadMimeType(mime: string): mime is AllowedUploadMime
 // lib/actions/media-actions.ts
 "use server";
 import "server-only";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireMinRole } from "@/lib/auth/roles";
 import { verifyFileMime } from "@/lib/utils/mime-verify";
-import type { ActionResult } from "./types";
+import { compressImage } from "@/lib/utils/image-compress";
+import { recordRequest } from "@/lib/utils/rate-limit";
+import type { MediaUploadResult } from "./types";
 
 export async function uploadMediaImage(
   formData: FormData,
-  folder: string = "team"
-): Promise<ActionResult<{ url: string; mediaId: bigint }>> {
-  await requireAdmin();
-  
-  // 1. Size check (avant lecture bytes)
-  if (file.size > MAX_FILE_SIZE) return { success: false, error: "..." };
-  
-  // 2. Magic bytes verification
-  const detectedMime = await verifyFileMime(file);
-  if (!detectedMime) return { success: false, error: "Format non reconnu" };
-  
-  // 3. Upload to Supabase Storage (avec sanitizeFilename appliqué dans DAL)
-  // 4. Insert metadata in medias table (filename sanitisé)
-  // 5. Return URL + ID
+  folder: string = "medias"  // bucket par défaut
+): Promise<MediaUploadResult> {
+  // 0. Auth : editor ou admin requis
+  await requireMinRole("editor");
+
+  // 1. Size check 10MB (avant lecture bytes)
+  // 2. Magic bytes verification (verifyFileMime — résiste au spoofing file.type)
+  // 3. Compression Sharp côté serveur (compressImage, raster only — TASK087)
+  // 4. Rate limiting : 10 uploads/min par user (recordRequest)
+  // 5. Déduplication SHA-256 (findMediaByHash → isDuplicate)
+  // 6. Upload Storage + insert medias (sanitizeFilename appliqué dans le DAL)
 }
 ```
 
@@ -2235,15 +2230,17 @@ const result = await uploadMediaImage(formData, "press");
 
 ```typescript
 // lib/actions/types.ts
-export type ActionResult<T = unknown> =
+export type ActionResult<T = void> =
   | { success: true; data: T; warning?: string }
   | { success: false; error: string; status?: number };
 
 export function isActionSuccess<T>(
   result: ActionResult<T>
-): result is { success: true; data: T } {
-  return result.success === true;
-}
+): result is { success: true; data: T } { ... }
+
+export function isActionError<T>(
+  result: ActionResult<T>
+): result is { success: false; error: string } { ... }
 ```
 
 ### Bfcache Handler Pattern (Dec 2025)
@@ -2317,45 +2314,54 @@ export default function AdminLayout({ children }) {
 
 ---
 
-### `requireAdmin()` Auth Guard Pattern (Mar 2026)
+### Role-Based Auth Guard Pattern (TASK076, Mar 2026 — durci TASK096, Mai 2026)
 
-**Pattern** : Guards d'autorisation admin standards, définis dans `lib/auth/is-admin.ts`.
+**Pattern** : Guards d'autorisation basés sur la hiérarchie `user < editor < admin`, définis dans [lib/auth/roles.ts](../lib/auth/roles.ts) (+ `role-helpers.ts`). `lib/auth/is-admin.ts` a été supprimé (TASK096) — ne plus l'utiliser.
 
-#### Trois variantes
+#### Lecture du rôle (source de vérité)
 
-```typescript
-// lib/auth/is-admin.ts
+`getCurrentUserRole()` :
 
-// 1. Boolean check (pour logique conditionnelle)
-export async function isAdmin(): Promise<boolean>
+1. `getClaims()` (~2-5ms) : rôle lu depuis `app_metadata` du JWT signé.
+2. **Fallback** `getUser()` : un rôle changé côté Auth peut manquer dans un JWT déjà émis → refresh depuis Auth (toujours `app_metadata`).
 
-// 2. Throw guard (pour Server Actions / DAL)
-export async function requireAdmin(): Promise<void>
-// → throws "Unauthorized: admin required" si non-admin
+> [!CAUTION]
+> `user_metadata` est modifiable par l'utilisateur et ne doit JAMAIS servir à l'autorisation. Seul `app_metadata` (server-only, signé dans le JWT) est fiable.
 
-// 3. Redirect guard (pour pages admin Server Component)
-export async function requireAdminPageAccess(): Promise<void>
-// → redirect("/auth/login") si non-admin
-```
+#### Guards disponibles
+
+| Guard | Comportement | Usage |
+| ----- | ------------ | ----- |
+| `requireMinRole(role)` | throw si rôle insuffisant | Server Actions / DAL granulaire |
+| `requireBackofficeAccess()` | throw si < editor | Server Actions / DAL éditorial |
+| `requireAdminOnly()` | throw si < admin | Server Actions / DAL admin-only |
+| `requireBackofficePageAccess()` | redirect `/auth/login` si < editor | Pages admin (Server Components) |
+| `requireAdminPageAccess()` | redirect `/auth/login` si < admin | Pages admin-only |
 
 #### Usage
 
 ```typescript
-// Server Action
-export async function deleteFeatureAction(id: string): Promise<ActionResult> {
-  await requireAdmin(); // throws if not admin
+// Server Action (contenu éditorial)
+export async function updateFeatureAction(id: string): Promise<ActionResult> {
+  await requireBackofficeAccess(); // editor ou admin
   // ...
 }
 
-// Admin page Server Component
+// Server Action (admin-only)
+export async function deleteUserAction(id: string): Promise<ActionResult> {
+  await requireAdminOnly();
+  // ...
+}
+
+// Page admin Server Component
 export default async function AdminTeamPage() {
-  await requireAdminPageAccess(); // redirects if not admin
+  await requireBackofficePageAccess(); // redirect si < editor
   const result = await fetchTeamMembers();
   // ...
 }
 ```
 
-**Adopté par** : AUDIT-SPECTACLES et toutes les tâches d'audit admin suivantes. Remplace les patterns `withAdminAuth()` wrapper et les vérifications inline.
+**Côté SQL** : même hiérarchie via `public.has_min_role('editor')` / `public.is_admin()` dans les policies RLS — toutes deux `SECURITY INVOKER` + `STABLE` + `set search_path = ''` (voir `supabase/schemas/02b_functions_core.sql`).
 
 ---
 
@@ -2483,7 +2489,7 @@ Re-exporté via `lib/dal/helpers/index.ts`.
 
 | Standard | Description | Enforcement |
 | -------- | ----------- | ----------- |
-| **requireAdmin()** | Auth guard dans toutes les Server Actions admin | `lib/auth/is-admin.ts` |
+| **Role guards** | `requireBackofficeAccess()` / `requireAdminOnly()` dans les Server Actions admin | `lib/auth/roles.ts` |
 | **force-dynamic / revalidate** | ISR (`revalidate = 60`) ou `force-dynamic`, jamais les deux | Pages publiques / admin |
 | **console.log suppression** | Zéro `console.log` en production, `console.error` conservés | DAL + components |
 | **types.ts colocalisé** | Props interfaces dans `types.ts` à côté des composants | `components/features/*/types.ts` |
@@ -2556,20 +2562,26 @@ BEGIN
 END;
 $$;
 
--- ⚠️ EXCEPTION PATTERN: SECURITY DEFINER avec rationale documentée
--- SECURITY DEFINER rationale: requires elevated privileges for [specific reason]
--- Reviewed per ISSUE #27
+-- ✅ PATTERN ACTUEL (TASK096 + migration 20260502120000): is_admin() en SECURITY INVOKER
+-- Rôle lu depuis app_metadata du JWT signé (source de vérité), fallback profiles.role
 CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS boolean
-LANGUAGE plpgsql
-SECURITY DEFINER  -- Runs with creator (postgres) privileges
+LANGUAGE sql
+STABLE
+SECURITY INVOKER
 SET search_path = ''
 AS $$
-BEGIN
-  -- Must run as postgres to access auth.jwt() and user_metadata
-  RETURN (auth.jwt() ->> 'user_metadata' ->> 'role') = 'admin';
-END;
+  SELECT coalesce(
+    auth.jwt()->'app_metadata'->>'role',
+    (SELECT p.role FROM public.profiles p WHERE p.user_id = auth.uid())
+  ) = 'admin';
 $$;
+
+-- Hiérarchie user < editor < admin (TASK076) : même structure pour has_min_role(text)
+-- voir supabase/schemas/02b_functions_core.sql
+
+-- ⚠️ EXCEPTION PATTERN: SECURITY DEFINER uniquement avec header de rationale documentée
+-- (template obligatoire : .github/instructions/Database_Create_functions.instructions.md)
 ```
 
 #### Admin Authorization Pattern
@@ -2592,32 +2604,28 @@ CREATE TABLE public.profiles (
   constraint profiles_userid_unique unique (user_id)
 );
 
--- 2. is_admin() function (SECURITY DEFINER)
+-- 2. is_admin() / has_min_role() (SECURITY INVOKER — TASK096, migration 20260502120000)
+-- Source de vérité : app_metadata du JWT signé (fallback profiles.role)
 CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS boolean
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = ''
+LANGUAGE sql
 STABLE
+SECURITY INVOKER
+SET search_path = ''
 AS $$
-DECLARE
-  user_role text;
-BEGIN
-  SELECT role 
-  INTO user_role 
-  FROM public.profiles 
-  WHERE user_id = auth.uid();
-  
-  RETURN user_role = 'admin';
-END;
+  SELECT coalesce(
+    auth.jwt()->'app_metadata'->>'role',
+    (SELECT p.role FROM public.profiles p WHERE p.user_id = auth.uid())
+  ) = 'admin';
 $$;
 
--- 3. RLS policy using is_admin()
-CREATE POLICY "Authenticated users can create spectacles"
+-- 3. RLS policies : has_min_role('editor') pour les tables éditoriales (TASK076),
+--    is_admin() réservé aux opérations admin-only
+CREATE POLICY "Editors can create spectacles"
 ON public.spectacles
 FOR INSERT
 TO authenticated
-WITH CHECK ( (SELECT public.is_admin()) = true );
+WITH CHECK ( (SELECT public.has_min_role('editor')) );
 
 -- 4. Admin profile registration (manual)
 INSERT INTO public.profiles (user_id, role, display_name)
@@ -2731,7 +2739,7 @@ error.tsx[param] / // Gestion d'erreur // Route dynamique
 app/
   layout.tsx                    // Root: HTML shell + ThemeProvider
   (admin)/                      // Route group: admin zone
-    layout.tsx                  // Admin layout: AppSidebar + requireAdmin()
+    layout.tsx                  // Admin layout: AppSidebar + requireBackofficeAccess()
     admin/
       team/page.tsx             // URL: /admin/team
       debug-auth/page.tsx       // URL: /admin/debug-auth
@@ -2775,12 +2783,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 ```typescript
 // app/(admin)/layout.tsx - Protected with sidebar
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireBackofficeAccess, getCurrentUserRole } from "@/lib/auth/roles";
 import { AppSidebar } from "@/components/admin/AdminSidebar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  await requireAdmin(); // Auth guard
+  await requireBackofficeAccess(); // Auth guard (throw if < editor)
   
   return (
     <SidebarProvider>
@@ -2818,7 +2826,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
 **Middleware Matching avec Route Groups** :
 
 ```typescript
-// middleware.ts
+// proxy.ts (Next.js 16 — ex middleware.ts, renommé lors de TASK042)
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
@@ -2918,9 +2926,12 @@ import { revalidatePath } from "next/cache";
 import { createFeature, updateFeature } from "@/lib/dal/feature";
 import { FeatureInputSchema } from "@/lib/schemas/feature";
 
-export type ActionResult<T = unknown> = 
-  | { success: true; data?: T } 
-  | { success: false; error: string };
+export type ActionResult<T = unknown> =
+  | { success: true; data?: T; warning?: string }
+  | { success: false; error: string; status?: number };
+
+// Note : la définition canonique (lib/actions/types.ts) utilise T = void par défaut
+// et expose les type guards isActionSuccess() / isActionError().
 
 export async function createFeatureAction(input: unknown): Promise<ActionResult> {
   try {
@@ -2954,7 +2965,7 @@ export async function createFeatureAction(input: unknown): Promise<ActionResult>
 "use server";
 import "server-only";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireAdminOnly } from "@/lib/auth/roles";
 import type { FeatureInput, FeatureDTO } from "@/lib/schemas/feature";
 
 // ❌ NE PAS importer revalidatePath ici
@@ -2969,7 +2980,7 @@ export interface DALResult<T = unknown> {
 export async function createFeature(
   input: FeatureInput
 ): Promise<DALResult<FeatureDTO>> {
-  await requireAdmin();
+  await requireAdminOnly();
   
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -3174,8 +3185,7 @@ export async function fetchFeaturedPressReleases(limit = 3) {
 // lib/dal/team.ts
 import "server-only";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
-import { revalidatePath } from "next/cache";
+import { requireAdminOnly } from "@/lib/auth/roles";
 
 type DalResponse<T = null> = {
   success: boolean;
@@ -3195,7 +3205,7 @@ type DalResponse<T = null> = {
  */
 export async function hardDeleteTeamMember(id: number): Promise<DalResponse> {
   try {
-    await requireAdmin();
+    await requireAdminOnly();
 
     // Helper 1: Validation
     const validationResult = await validateTeamMemberForDeletion(id);
@@ -3205,7 +3215,7 @@ export async function hardDeleteTeamMember(id: number): Promise<DalResponse> {
     const deletionResult = await performTeamMemberDeletion(id);
     if (!deletionResult.success) return deletionResult;
 
-    revalidatePath("/admin/team");
+    // revalidatePath() reste dans la Server Action appelante — jamais dans le DAL
     return { success: true };
   } catch (error: unknown) {
     // Helper 3: Error handling
@@ -4505,7 +4515,7 @@ pnpm run test:resend    # Run all tests
 import "server-only";
 import { z } from "zod";
 import { createClient } from "@/supabase/server";
-import { requireAdmin } from "@/lib/auth/is-admin";
+import { requireAdminOnly } from "@/lib/auth/roles";
 
 const InviteUserSchema = z.object({
   email: z.string().email(),
@@ -4518,7 +4528,7 @@ export async function inviteUser(input: unknown) {
   const validated = InviteUserSchema.parse(input);
   
   // Admin authorization
-  await requireAdmin();
+  await requireAdminOnly();
   
   // Rate limiting (5 invites/hour per admin)
   await checkRateLimit();
@@ -4848,6 +4858,8 @@ Admin UI → Server Action → DAL Validation → Database Insert → Email Serv
 
 **Introduced**: 22 novembre 2025 - Critical fix for invitation system 404 error
 
+> **Mise à jour TASK106 (Août 2026)** : la page intermédiaire `/auth/accept-invitation` revalide l'URL Supabase et le paramètre `redirect_to` via une Server Action (`lib/utils/validate-invitation-url.ts`) avant `redirect()` — remédiation CodeQL #28 (client-side XSS / open redirect). La page `setup-account` détecte d'abord les erreurs de hash Supabase (`otp_expired`, `access_denied`) pour afficher un message actionnable. Le type d'événement est `invite` (pas `signup`).
+
 **Problem**: Users clicking invitation email links were getting 404 errors on `/auth/setup-account` because Supabase invitation tokens are passed in the URL hash (`#access_token=...`) instead of query parameters, but server-side middleware couldn't access hash-based tokens.
 
 **Root Cause**:
@@ -4870,7 +4882,7 @@ import { SetupAccountForm } from "@/components/auth/SetupAccountForm";
 export default function SetupAccountPage() {
   const [isProcessing, setIsProcessing] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [invitationData, setInvitationData] = useState<InvitationData | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
   const supabase = createClient();
 
@@ -4883,7 +4895,7 @@ export default function SetupAccountPage() {
         const refreshToken = hashParams.get("refresh_token");
         const type = hashParams.get("type");
 
-        if (!accessToken || type !== "signup") {
+        if (!accessToken || type !== "invite") {
           setError("Invalid or expired invitation link");
           setIsProcessing(false);
           return;
@@ -4899,21 +4911,10 @@ export default function SetupAccountPage() {
           throw sessionError || new Error("Failed to establish session");
         }
 
-        // Fetch invitation details from database
-        const { data: invitation } = await supabase
-          .from("user_invitations")
-          .select("*")
-          .eq("invite_token", hashParams.get("invite_token"))
-          .single();
-
-        if (!invitation) {
-          throw new Error("Invitation not found");
-        }
-
         // Clear URL hash for security
         window.history.replaceState(null, "", window.location.pathname);
 
-        setInvitationData(invitation);
+        setUser(data.user);
         setIsProcessing(false);
       } catch (err) {
         console.error("[SetupAccount] Token processing failed:", err);
@@ -4933,11 +4934,9 @@ export default function SetupAccountPage() {
     return <ErrorDisplay error={error} />;
   }
 
-  if (!invitationData) {
-    return <InvalidInvitation />;
-  }
-
-  return <SetupAccountForm invitation={invitationData} />;
+  // La session est établie côté client ; le formulaire de définition du mot de passe
+  // appelle setupAccountAction (lib/actions/auth-setup-actions.ts) avec PasswordSchema
+  return <SetupAccountForm />;
 }
 ```
 
@@ -4999,7 +4998,7 @@ WHERE invite_token IS NULL;
 
 ```typescript
 // lib/email/actions.ts
-const inviteLink = `${process.env.NEXT_PUBLIC_SITE_URL}/auth/setup-account#access_token=${accessToken}&refresh_token=${refreshToken}&type=signup&invite_token=${inviteToken}`;
+const inviteLink = `${env.NEXT_PUBLIC_SITE_URL}/auth/setup-account#access_token=${accessToken}&refresh_token=${refreshToken}&type=invite`;
 ```
 
 #### Testing Pattern
@@ -5011,7 +5010,7 @@ async function testInvitationFlow() {
   const invitation = await createTestInvitation();
   
   // 2. Simulate email click (construct URL with hash)
-  const inviteUrl = `${BASE_URL}/auth/setup-account#access_token=${invitation.accessToken}&type=signup`;
+  const inviteUrl = `${BASE_URL}/auth/setup-account#access_token=${invitation.accessToken}&type=invite`;
   
   // 3. Test page load and token processing
   const pageResponse = await fetch(inviteUrl);

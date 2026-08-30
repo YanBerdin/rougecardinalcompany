@@ -41,10 +41,10 @@ const PUBLIC_SECTIONS = {
 
 test.describe('ADM-CONFIG — Configuration site : affichage des sections', () => {
 
-    test('ADM-CONFIG-001 — 10 toggles affichés en 4 groupes de sections', async ({ siteConfigPage }) => {
+    test('ADM-CONFIG-001 — 9 toggles affichés en 4 groupes de sections', async ({ siteConfigPage }) => {
         await siteConfigPage.expectLoaded();
 
-        // Groupe 1 : Page d'Accueil (6 toggles)
+        // Groupe 1 : Page d'Accueil (5 toggles)
         const homeGroup = siteConfigPage.getSectionLocator("Page d'Accueil");
         await expect(homeGroup).toBeVisible();
         const homeToggles = homeGroup.locator('[role="switch"]');

@@ -1,9 +1,10 @@
 # Matrice de permissions
 
-> **État au 2026-03-13** — Après implémentation complète de TASK076 (Editor Role Permissions).
+> **État au 2026-08-22** — Après implémentation complète de TASK076 (Editor Role Permissions) + TASK095 (Footer admin) + TASK096 (hardening auth app_metadata).
 > Le modèle d'autorisation est désormais hiérarchique : `user (0) < editor (1) < admin (2)`.
 > La fonction SQL `has_min_role(required_role)` remplace `is_admin()` pour les tables éditoriales.
 > Les gardes TypeScript sont dans `lib/auth/roles.ts` (`requireMinRole`, `requireBackofficeAccess`, `requireAdminOnly`).
+> Source de vérité du rôle : `app_metadata` du JWT signé (jamais `user_metadata`).
 
 ## Hiérarchie des rôles
 
@@ -28,6 +29,7 @@
 | `/admin/compagnie/presentation` | Éditorial | `editor` | Oui | Oui |
 | `/admin/compagnie/valeurs` | Éditorial | `editor` | Oui | Oui |
 | `/admin/debug-auth` | Sécurité/debug | `admin` | Non | Oui |
+| `/admin/footer` | Configuration / éditorial | `admin` | Non | Oui |
 | `/admin/home/about` | Homepage structurante | `admin` | Non | Oui |
 | `/admin/home/hero` | Homepage structurante | `admin` | Non | Oui |
 | `/admin/lieux` | Éditorial | `editor` | Oui | Oui |
@@ -64,7 +66,7 @@
 | Rôle minimum | Domaines | Routes concernées |
 | --- | --- | --- |
 | `editor` | Éditorial | `/admin`, `/admin/spectacles/**`, `/admin/agenda/**`, `/admin/compagnie/**`, `/admin/lieux/**`, `/admin/presse` (articles + communiqués), `/admin/media/**` |
-| `admin` | Sensible, institutionnel, configuration | `/admin/analytics`, `/admin/audit-logs`, `/admin/site-config`, `/admin/debug-auth`, `/admin/users/**`, `/admin/home/**`, `/admin/partners/**`, `/admin/team/**`, `/admin/presse/contacts/**` |
+| `admin` | Sensible, institutionnel, configuration | `/admin/analytics`, `/admin/audit-logs`, `/admin/site-config`, `/admin/debug-auth`, `/admin/footer`, `/admin/users/**`, `/admin/home/**`, `/admin/partners/**`, `/admin/team/**`, `/admin/presse/contacts/**` |
 
 ## Matrice tables, vues et buckets
 
@@ -73,7 +75,7 @@
 | `profiles` | table | Oui | self-service + admin | `admin` (hors self-service) |
 | `user_invitations` | table | Non | admin only | `admin` |
 | `pending_invitations` | table | Non | admin only | `admin` |
-| `media` | table | Oui | editor/admin | `editor` |
+| `medias` | table | Oui | editor/admin | `editor` |
 | `media_tags` | table | Oui | editor/admin | `editor` |
 | `media_folders` | table | Oui | editor/admin | `editor` |
 | `media_item_tags` | table | Oui | editor/admin | `editor` |

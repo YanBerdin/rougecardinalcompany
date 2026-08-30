@@ -3,20 +3,24 @@
 
 -- Fonction helper pour vérifier les droits admin
 /*
- * Security Model: SECURITY DEFINER
- * 
+ * Security Model: SECURITY INVOKER
+ *
  * Rationale:
- *   1. Needs access to auth.uid() which requires authentication context
- *   2. Must read profiles table reliably across different security contexts
- *   3. Used by RLS policies and other functions for authorization checks
- *   4. Marked STABLE since auth.uid() remains constant during transaction
- * 
+ *   1. Le rôle est lu depuis app_metadata du JWT signé (source de vérité, non
+ *      modifiable par l'utilisateur) via auth.jwt() — aucun privilège élevé requis
+ *   2. SECURITY INVOKER supprime tout risque d'escalade : la fonction ne peut rien
+ *      lire que l'appelant ne puisse déjà lire
+ *   3. Le fallback public.profiles.role (tokens legacy sans app_metadata) reste soumis
+ *      au RLS de profiles ; la policy self-select couvre l'utilisateur courant
+ *   4. Marked STABLE since JWT claims remain constant during transaction
+ *
  * Risks Evaluated:
  *   - Read-only operation (SELECT only, no mutations)
  *   - No user input parameters (zero injection risk)
  *   - Simple boolean return value
  *   - Used extensively in RLS policies (must be reliable and secure)
- * 
+ *   - search_path forcé à '' + objets pleinement qualifiés
+ *
  * Validation:
  *   - Tested with admin and non-admin users
  *   - Used in multiple RLS policies across the schema
@@ -40,14 +44,14 @@ comment on function public.is_admin() is
 
 -- Fonction helper pour vérifier un rôle minimum dans la hiérarchie user < editor < admin
 /*
- * Security Model: SECURITY DEFINER
- * 
+ * Security Model: SECURITY INVOKER
+ *
  * Rationale:
- *   1. Needs access to auth.uid() which requires authentication context
- *   2. Must read profiles table reliably across different security contexts
- *   3. Used by RLS policies for hierarchical role authorization checks
- *   4. Marked STABLE since auth.uid() and profiles.role remain constant during transaction
- * 
+ *   1. Le rôle est lu depuis app_metadata du JWT signé (source de vérité) via auth.jwt()
+ *   2. SECURITY INVOKER supprime tout risque d'escalade de privilèges
+ *   3. Le fallback public.profiles.role (tokens legacy) reste soumis au RLS de profiles
+ *   4. Marked STABLE since JWT claims remain constant during transaction
+ *
  * Risks Evaluated:
  *   - Read-only operation (SELECT only, no mutations)
  *   - Input parameter validated against fixed enum (no injection risk)
@@ -244,11 +248,11 @@ comment on function public.to_tsvector_french(text) is
 
 -- Fonction de test de connexion Supabase
 /*
- * Security Model: SECURITY DEFINER
+ * Security Model: SECURITY INVOKER
  * 
  * Rationale:
  *   1. Used for health checks and connectivity testing from client applications
- *   2. Must work regardless of user permissions (including anon users)
+ *   2. Only calls now() — no table access, donc aucun privilège élevé nécessaire
  *   3. Provides reliable system-level timestamp for monitoring
  *   4. No security risk as it only returns current server time
  * 

@@ -1,9 +1,10 @@
 /*
- * Security Model: SECURITY DEFINER
+ * Security Model: SECURITY INVOKER
  * 
  * Rationale:
  *   1. Atomic reordering operation requires UPDATE on multiple rows
- *   2. Must bypass RLS to update all positions in single transaction
+ *   2. S'exécute avec les droits de l'appelant : les policies RLS de
+ *      home_hero_slides s'appliquent, aucun contournement possible
  *   3. Admin-only operation (explicit is_admin() check enforced)
  *   4. Prevents race conditions with advisory lock
  * 
