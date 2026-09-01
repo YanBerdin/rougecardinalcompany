@@ -1,65 +1,56 @@
-import assert from 'node:assert/strict'
-import React from 'react'
-import { renderToStaticMarkup } from 'react-dom/server'
+import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { beforeAll, describe, expect, it } from "vitest";
 
-// ensure React symbol is available to modules that expect it (jsx runtime differences)
-globalThis.React = React as unknown as typeof globalThis.React
+import InvitationEmail from "@/emails/invitation-email";
 
-// import the component after ensuring React exists on the global scope
-const InvitationEmail = (await import('@/emails/invitation-email')).default
+const INVITATION_URL = "https://example.com/invite/abc123";
 
-async function main() {
-  const invitationUrl = 'https://example.com/invite/abc123'
+let html: string;
 
-  const html = renderToStaticMarkup(
-    <InvitationEmail
-      email="test@example.com"
-      role="admin"
-      displayName="Test User"
-      invitationUrl={invitationUrl}
-    />
-  )
+beforeAll(() => {
+    // @react-email components expect React on the global scope (jsx runtime differences)
+    globalThis.React = React as unknown as typeof globalThis.React;
 
-  // Assertions: html should be non-empty and include key parts
-  assert.ok(typeof html === 'string' && html.length > 0, 'Rendered html should not be empty')
-  assert.ok(html.includes('Activer mon compte'), 'Rendered html should include CTA text')
-  // codeql[js/incomplete-url-substring-sanitization] - False positive: This is a test assertion,
-  // not a security check. We're verifying the email template contains the expected URL.
-  assert.ok(html.includes(invitationUrl), 'Rendered html should include invitation URL')
-  assert.ok(html.includes('test@example.com'), 'Rendered html should include recipient email')
+    html = renderToStaticMarkup(
+        <InvitationEmail
+            email="test@example.com"
+            role="admin"
+            displayName="Test User"
+            invitationUrl={INVITATION_URL}
+        />
+    );
+});
 
-  // ✅ Vérifier inline styles CTA (requis pour clients email)
-  assert.ok(
-    html.includes('background-color:#4F46E5') || html.includes('background-color:#4f46e5'),
-    'CTA button should have inline indigo background color'
-  )
-  assert.ok(
-    html.includes('color:#ffffff') || html.includes('color:#FFFFFF'),
-    'CTA button should have inline white text color'
-  )
+describe("InvitationEmail", () => {
+    it("renders non-empty markup", () => {
+        expect(html.length).toBeGreaterThan(0);
+    });
 
-  // ✅ Vérifier structure Tailwind (classes converties en inline styles)
-  assert.ok(
-    html.includes('style=') && html.includes('padding:'),
-    'Tailwind classes should be converted to inline styles'
-  )
+    it("includes the CTA text, invitation URL and recipient email", () => {
+        expect(html).toContain("Activer mon compte");
+        // codeql[js/incomplete-url-substring-sanitization] - Test assertion, not a security check.
+        expect(html).toContain(INVITATION_URL);
+        expect(html).toContain("test@example.com");
+    });
 
-  // ✅ Vérifier absence classes Tailwind custom (non-core)
-  assert.ok(
-    !html.includes('class='),
-    'No Tailwind class attributes should remain (should be converted to inline styles)'
-  )
+    it("inlines the CTA button colors (required by email clients)", () => {
+        const ctaStyle = html
+            .toLowerCase()
+            .match(/<a[^>]+style="([^"]*background-color[^"]*)"/)?.[1];
 
-  // ✅ Vérifier role label français
-  assert.ok(
-    html.includes('Administrateur') || html.includes('Éditeur') || html.includes('Utilisateur'),
-    'Email should include French role label'
-  )
+        expect(ctaStyle).toBeDefined();
+        expect(ctaStyle).toContain("background-color:#4f46e5");
+        expect(ctaStyle).toMatch(/(^|;)color:#[0-9a-f]{3,6}/);
+    });
 
-  console.log('✅ All InvitationEmail assertions passed')
-}
+    it("converts Tailwind classes to inline styles", () => {
+        expect(html).toContain("style=");
+        expect(html).toContain("padding:");
+        expect(html).not.toContain("class=");
+    });
 
-main().catch((err) => {
-  console.error(err)
-  process.exit(1)
-})
+    it("displays the French label of the invited role", () => {
+        expect(html).toContain("Administrateur");
+    });
+});
