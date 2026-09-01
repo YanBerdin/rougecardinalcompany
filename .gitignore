@@ -59,10 +59,18 @@ supabase/.temp
 # Sentry Config File
 .env.sentry-build-plugin
 .playwright-mcp/
+
+# Playwright artifacts
+/playwright-report/
+/test-results/
+/blob-report/
+
+# Playwright storageState — contient les JWT de session des comptes de test
+/e2e/.auth/
 # next-agents-md
 .next-docs/
 
-# Vidéos sources brutes (trop lourdes pour git, régénérables via my-hero-video/)
+# Vidéos sources brutes (trop lourdes pour git)
 public/hero-theatre-loop.mp4
 
 # VSCode settings
