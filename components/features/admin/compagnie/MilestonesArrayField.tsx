@@ -47,7 +47,7 @@ export function MilestonesArrayField({ control }: MilestonesArrayFieldProps): Re
                         onClick={() => remove(index)}
                         aria-label={`Supprimer le jalon ${index + 1}`}
                     >
-                        <X className="h-4 w-4" />
+                        <X className="size-4" />
                     </Button>
                 </div>
             ))}
@@ -58,7 +58,7 @@ export function MilestonesArrayField({ control }: MilestonesArrayFieldProps): Re
                     size="sm"
                     onClick={handleAdd}
                 >
-                    <Plus className="h-4 w-4 mr-1" />
+                    <Plus className="size-4 mr-1" />
                     Ajouter un jalon
                 </Button>
             )}

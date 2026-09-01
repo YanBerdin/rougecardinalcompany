@@ -118,6 +118,22 @@ for each row
 execute function public.update_media_folders_updated_at();
 
 -- =============================================================================
+-- GRANTS
+-- =============================================================================
+-- Authenticated users (backoffice) need full CRUD on media taxonomy and
+-- folder structure. Anon is intentionally not granted (library structure is
+-- internal). RLS policies enforce the editor/admin mutations filters.
+
+grant select on public.media_tags to authenticated;
+grant insert, update, delete on public.media_tags to authenticated;
+
+grant select on public.media_folders to authenticated;
+grant insert, update, delete on public.media_folders to authenticated;
+
+grant select on public.media_item_tags to authenticated;
+grant insert, update, delete on public.media_item_tags to authenticated;
+
+-- =============================================================================
 -- FOREIGN KEY: medias.folder_id → media_folders.id
 -- Added here because media_folders must exist first (ordering: 03 → 04)
 -- =============================================================================

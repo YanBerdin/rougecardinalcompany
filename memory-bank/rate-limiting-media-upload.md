@@ -4,7 +4,15 @@
 
 Système de rate limiting pour limiter les uploads média à **10 fichiers par minute par utilisateur**.
 
-**Objectif** : Prévenir l'abus et protéger les ressources serveur (Supabase Storage).
+**Objectif** : Prévenir l'abus et protéger les ressources serveur (Supabase Storage, CPU Sharp).
+
+**Modèle de menace (2026-08-22)** : le backoffice n'est accessible qu'à l'admin authentifié (via `requireMinRole("editor")`), sans sign-up public. Le rate limiting upload protège donc principalement contre :
+
+- un compte admin compromis qui uploaderait en masse ;
+- une erreur humaine ou un bug UI (double-clic, boucle de retry client) déclenchant des uploads Sharp + Storage en rafale ;
+- les coûts associés (CPU Sharp, écritures Storage, inserts DB).
+
+Ce n'est **pas** une défense anti-attaque externe : cette surface est déjà fermée par l'authentification + les guards de rôle.
 
 ---
 
@@ -23,11 +31,17 @@ const rateLimitStore = new Map<string, RateLimitEntry>();
 
 - ❌ Ne persiste pas entre redémarrages serveur
 - ❌ Ne fonctionne pas en multi-instance (load balancing)
-- ✅ Parfait pour dev/test
+- ✅ Parfait pour dev/test **et suffisant pour la production actuelle** (1 admin, uploads peu fréquents)
 
-### Migration production (recommandée)
+### Migration production (dépriorisée — 2026-08-22)
 
-**Redis** : Distributed rate limiting pour production multi-instance.
+> ⚠️ **Décision** : la migration vers un store distribué est **dépriorisée**. Le backoffice n'est utilisé que par l'admin (éventuellement un second utilisateur à terme), les uploads sont peu fréquents, et le risque multi-instance Vercel est négligeable à cette échelle. L'implémentation in-memory actuelle est suffisante.
+>
+> **Réévaluer uniquement si** : l'équipe backoffice s'agrandit significativement, le trafic d'uploads augmente fortement, ou plusieurs instances serverless servent simultanément des uploads fréquents.
+>
+> **Note complémentaire** : le rate limiting applicatif reste pertinent sur les formulaires **publics** (contact/newsletter, 5 req/15 min) accessibles aux anonymes. Les endpoints d'authentification (`/auth/v1/*` : login, invitation, reset) sont déjà rate-limités par Supabase Auth (GoTrue) — pas de sign-up visiteur, donc surface réduite.
+
+Si la migration devient nécessaire un jour, la voie recommandée reste **Redis** (distributed rate limiting multi-instance) :
 
 ```typescript
 // Exemple avec ioredis
@@ -50,7 +64,7 @@ export async function checkRateLimit(key: string, max: number, windowMs: number)
 
 **Alternatives** :
 
-- **Upstash Redis** : Serverless Redis (Vercel compatible)
+- **Upstash Redis** : Serverless Redis (Vercel compatible) — option préférée le cas échéant
 - **Vercel KV** : Edge-compatible key-value store
 - **Rate Limiter Middleware** : `@upstash/ratelimit`, `rate-limiter-flexible`
 

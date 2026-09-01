@@ -10,7 +10,7 @@ export { NewsletterForm } from "./NewsletterForm";
 function SubscriptionSuccess() {
   return (
     <div className="animate-fade-in text-center lg:text-left">
-      <CheckCircle className="h-16 w-16 text-white mx-auto lg:mx-0 mb-6" aria-hidden="true" />
+      <CheckCircle className="size-16 text-white mx-auto lg:mx-0 mb-6" aria-hidden="true" />
       <h2 className="text-3xl font-semibold font-sans text-white mb-4">Merci pour votre inscription !</h2>
       <p className="text-xl text-white/90">
         Vous recevrez bientôt nos actualités et nos invitations privilégiées.
@@ -37,7 +37,7 @@ export function NewsletterView({
             <p className="text-md md:text-lg lg:text-xl text-white/80">
               Dernier acte : Newsletter
             </p>
-            <h2 id="newsletter-heading" className="text-3xl md:text-4xl lg:text-5xl font-semibold text-white leading-tight">
+            <h2 id="newsletter-heading" className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight">
               Restez dans les coulisses
             </h2>
             <div className="h-px w-24 xl:w-72 bg-white/40 my-6" aria-hidden="true" />

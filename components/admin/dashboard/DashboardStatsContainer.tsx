@@ -35,11 +35,11 @@ export async function DashboardStatsContainer({ userRole }: DashboardStatsContai
     href: string;
     minRole: AppRole;
   }> = [
-      { title: "Membres de l'équipe", value: stats.teamCount, icon: <Users className="h-4 w-4" aria-hidden="true" />, href: "/admin/team", minRole: "admin" },
-      { title: "Spectacles", value: stats.showsCount, icon: <FileText className="h-4 w-4" aria-hidden="true" />, href: "/admin/spectacles", minRole: "editor" },
-      { title: "Événements", value: stats.eventsCount, icon: <Calendar className="h-4 w-4" aria-hidden="true" />, href: "/admin/agenda", minRole: "editor" },
-      { title: "Médias", value: stats.mediaCount, icon: <ImageIcon className="h-4 w-4" aria-hidden="true" />, href: "/admin/media", minRole: "editor" },
-      { title: "Partenaires", value: stats.partnersCount, icon: <Handshake className="h-4 w-4" aria-hidden="true" />, href: "/admin/partners", minRole: "admin" },
+      { title: "Membres de l'équipe", value: stats.teamCount, icon: <Users className="size-4" aria-hidden="true" />, href: "/admin/team", minRole: "admin" },
+      { title: "Spectacles", value: stats.showsCount, icon: <FileText className="size-4" aria-hidden="true" />, href: "/admin/spectacles", minRole: "editor" },
+      { title: "Événements", value: stats.eventsCount, icon: <Calendar className="size-4" aria-hidden="true" />, href: "/admin/agenda", minRole: "editor" },
+      { title: "Médias", value: stats.mediaCount, icon: <ImageIcon className="size-4" aria-hidden="true" />, href: "/admin/media", minRole: "editor" },
+      { title: "Partenaires", value: stats.partnersCount, icon: <Handshake className="size-4" aria-hidden="true" />, href: "/admin/partners", minRole: "admin" },
     ];
 
   const visibleStats = allStats.filter(s => isRoleAtLeast(userRole, s.minRole));

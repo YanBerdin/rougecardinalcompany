@@ -230,7 +230,7 @@ export function ContactForm({ onSuccess }: ContactFormProps): React.JSX.Element 
             {isLoading ? (
               <>
                 <div
-                  className="w-4 h-4 border-2 border-border border-t-transparent rounded-full animate-spin mr-2"
+                  className="size-4 border-2 border-border border-t-transparent rounded-full animate-spin mr-2"
                   role="img"
                   aria-label="Chargement en cours"
                 />
@@ -238,7 +238,7 @@ export function ContactForm({ onSuccess }: ContactFormProps): React.JSX.Element 
               </>
             ) : (
               <>
-                <Send className="mr-2 h-4 w-4" aria-hidden="true" />
+                <Send className="mr-2 size-4" aria-hidden="true" />
                 Envoyer le message
               </>
             )}

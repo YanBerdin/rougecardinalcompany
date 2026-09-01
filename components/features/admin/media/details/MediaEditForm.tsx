@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Controller } from "react-hook-form";
 import { Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,24 +61,43 @@ export function MediaEditForm() {
             {/* Folder */}
             <div className="space-y-2">
                 <Label htmlFor="folder">Dossier</Label>
-                <Select
-                    value={form.watch("folder_id")?.toString() ?? "none"}
-                    onValueChange={(value) =>
-                        form.setValue("folder_id", value === "none" ? null : Number(value))
-                    }
-                >
-                    <SelectTrigger id="folder">
-                        <SelectValue placeholder="Uploads génériques" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="none">Uploads génériques</SelectItem>
-                        {folders.map((folder) => (
-                            <SelectItem key={folder.id} value={folder.id.toString()}>
-                                {folder.name}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                <Controller
+                    control={form.control}
+                    name="folder_id"
+                    render={({ field }) => {
+                        const selectValue =
+                            field.value === null || field.value === undefined
+                                ? "none"
+                                : String(field.value);
+                        return (
+                            <Select
+                                value={selectValue}
+                                onValueChange={(value) => {
+                                    field.onChange(
+                                        value === "none" ? null : Number(value)
+                                    );
+                                }}
+                            >
+                                <SelectTrigger id="folder">
+                                    <SelectValue placeholder="Uploads génériques" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="none">
+                                        Uploads génériques
+                                    </SelectItem>
+                                    {folders.map((folder) => (
+                                        <SelectItem
+                                            key={folder.id}
+                                            value={folder.id.toString()}
+                                        >
+                                            {folder.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        );
+                    }}
+                />
             </div>
 
             {/* Tags */}
@@ -146,7 +166,7 @@ export function MediaEditForm() {
                 className="w-full"
                 disabled={isUpdating || isDeleting}
             >
-                <Save className="mr-2 h-4 w-4" />
+                <Save className="mr-2 size-4" />
                 {isUpdating ? "Mise à jour..." : "Enregistrer"}
             </Button>
         </form>

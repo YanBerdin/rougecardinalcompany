@@ -13,7 +13,7 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { requireMinRole } from "@/lib/auth/roles";
+import { requireBackofficePageAccess } from "@/lib/auth/roles";
 import { fetchMediaStats } from "@/lib/dal/media";
 
 export const metadata = {
@@ -26,7 +26,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function MediaLibraryPage() {
-    await requireMinRole("editor");
+    await requireBackofficePageAccess();
     return (
         <div className="container mx-auto py-8">
             <div className="mb-8">
@@ -41,7 +41,7 @@ export default async function MediaLibraryPage() {
                     <Card className="hover:bg-accent transition-colors cursor-pointer">
                         <CardHeader>
                             <div className="flex items-center gap-2">
-                                <Images className="h-6 w-6 text-primary" />
+                                <Images className="size-6 text-primary" />
                                 <CardTitle>Bibliothèque</CardTitle>
                             </div>
                             <CardDescription>
@@ -60,7 +60,7 @@ export default async function MediaLibraryPage() {
                     <Card className="hover:bg-accent transition-colors cursor-pointer">
                         <CardHeader>
                             <div className="flex items-center gap-2">
-                                <Tag className="h-6 w-6 text-primary" />
+                                <Tag className="size-6 text-primary" />
                                 <CardTitle>Tags</CardTitle>
                             </div>
                             <CardDescription>
@@ -79,7 +79,7 @@ export default async function MediaLibraryPage() {
                     <Card className="hover:bg-accent transition-colors cursor-pointer">
                         <CardHeader>
                             <div className="flex items-center gap-2">
-                                <Folder className="h-6 w-6 text-primary" />
+                                <Folder className="size-6 text-primary" />
                                 <CardTitle>Dossiers</CardTitle>
                             </div>
                             <CardDescription>

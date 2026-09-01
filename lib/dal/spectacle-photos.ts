@@ -7,13 +7,13 @@ import { requireMinRole } from "@/lib/auth/roles";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
     SpectaclePhotoDTOSchema,
-    AddPhotoInputSchema,
+    //AddPhotoInputSchema,
     GalleryPhotoDTOSchema,
     type SpectaclePhotoDTO,
-    type AddPhotoInput,
+    //type AddPhotoInput,
     type GalleryPhotoDTO,
 } from "@/lib/schemas/spectacles";
-import { type DALResult, getErrorMessage } from "@/lib/dal/helpers";
+import { type DALResult, getErrorMessage, isDynamicServerError } from "@/lib/dal/helpers";
 import { HttpStatus } from "@/lib/api/helpers";
 
 // ============================================================================
@@ -69,6 +69,7 @@ export const fetchSpectacleLandscapePhotos = cache(
 
             return validPhotos;
         } catch (error) {
+            if (isDynamicServerError(error)) throw error;
             console.error("[DAL] fetchSpectacleLandscapePhotos exception:", error);
             return [];
         }
@@ -307,6 +308,7 @@ export const fetchSpectacleGalleryPhotos = cache(
 
             return validPhotos;
         } catch (error) {
+            if (isDynamicServerError(error)) throw error;
             console.error(
                 "[DAL] fetchSpectacleGalleryPhotos exception:",
                 error,
@@ -416,8 +418,8 @@ export async function addSpectacleGalleryPhoto(
                 existing.type === "poster"
                     ? "affiche"
                     : existing.type === "landscape"
-                      ? "photo paysage"
-                      : "photo galerie";
+                        ? "photo paysage"
+                        : "photo galerie";
             return {
                 success: false,
                 error: `[ERR_GALLERY_001] Cette image est déjà utilisée comme ${typeLabel} pour ce spectacle.`,

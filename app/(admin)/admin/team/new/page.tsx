@@ -28,7 +28,7 @@ export default async function NewTeamMemberPage() {
             <div className="flex items-center gap-4">
                 <Button variant="ghost" size="icon" asChild>
                     <Link href="/admin/team">
-                        <ArrowLeft className="h-4 w-4" />
+                        <ArrowLeft className="size-4" />
                         <span className="sr-only">Retour à la liste</span>
                     </Link>
                 </Button>

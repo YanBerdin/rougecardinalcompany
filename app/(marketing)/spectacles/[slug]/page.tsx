@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { fetchSpectacleBySlug, fetchSpectacleNextVenue, fetchSpectacleTicketUrl, fetchEventDateRangesForSpectacles } from "@/lib/dal/spectacles";
+import { fetchSpectacleBySlug, fetchSpectacleNextVenue, fetchSpectacleTicketInfo, fetchSpectacleTicketUrl, fetchEventDateRangesForSpectacles } from "@/lib/dal/spectacles";
 import { fetchSpectacleLandscapePhotos, fetchSpectacleGalleryPhotos } from "@/lib/dal/spectacle-photos";
 import { SpectacleDetailView } from "@/components/features/public-site/spectacles/SpectacleDetailView";
 
@@ -52,11 +52,12 @@ export default async function SpectacleDetailPage({
     }
 
     // Fetch landscape photos, gallery photos, venue, ticket URL and date range in parallel
-    const [landscapePhotos, galleryPhotos, venue, ticketUrl, dateRangesMap] = await Promise.all([
+    const [landscapePhotos, galleryPhotos, venue, ticketUrl, ticketInfo, dateRangesMap] = await Promise.all([
         fetchSpectacleLandscapePhotos(BigInt(spectacle.id)),
         fetchSpectacleGalleryPhotos(BigInt(spectacle.id)),
         fetchSpectacleNextVenue(spectacle.id),
         fetchSpectacleTicketUrl(spectacle.id),
+        fetchSpectacleTicketInfo(spectacle.id),
         fetchEventDateRangesForSpectacles([spectacle.id]),
     ]);
 
@@ -67,6 +68,7 @@ export default async function SpectacleDetailPage({
             galleryPhotos={galleryPhotos}
             venue={venue}
             ticketUrl={ticketUrl}
+            ticketInfo={ticketInfo}
             dateRanges={dateRangesMap.get(spectacle.id) ?? []}
         />
     );

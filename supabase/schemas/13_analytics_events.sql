@@ -24,7 +24,7 @@ comment on column public.analytics_events.session_id is 'Identifiant de session 
 comment on column public.analytics_events.pathname is 'Chemin de la page visitée';
 comment on column public.analytics_events.search_query is 'Terme de recherche si applicable';
 comment on column public.analytics_events.metadata is 'Données supplémentaires au format JSON';
-comment on column public.analytics_events.ip_address is 'Adresse IP (anonymisée)';
+comment on column public.analytics_events.ip_address is 'Adresse IP anonymisée — 2 derniers octets IPv4 supprimés (ex. 192.168.0.0), préfixe /64 conservé pour IPv6. Conforme délibération CNIL 2020-091.';
 comment on column public.analytics_events.user_agent is 'User-Agent du navigateur';
 
 -- Index pour performance des requêtes analytiques
@@ -70,6 +70,19 @@ begin
   -- Extraire IP et User-Agent des headers
   v_ip_address := headers_json->'x-forwarded-for'->>0;
   v_user_agent := headers_json->>'user-agent';
+
+  -- Anonymiser l'adresse IP (délibération CNIL 2020-091)
+  -- IPv4 : supprimer les 2 derniers octets (ex. 192.168.1.23 → 192.168.0.0)
+  -- IPv6 : conserver uniquement le préfixe /64 (8 premiers groupes de 4 hex)
+  if v_ip_address is not null then
+    if v_ip_address like '%.%.%.%' then
+      -- IPv4 : remplacer les 2 derniers octets par 0.0
+      v_ip_address := regexp_replace(v_ip_address, '\d+\.\d+$', '0.0');
+    elsif v_ip_address like '%:%' then
+      -- IPv6 : garder uniquement le préfixe /64 (les 4 premiers groupes)
+      v_ip_address := regexp_replace(v_ip_address, '(([0-9a-fA-F]{0,4}:){4}).*', '\1::/64');
+    end if;
+  end if;
   
   -- Insérer l'événement
   insert into public.analytics_events (

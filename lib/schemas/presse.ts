@@ -46,6 +46,7 @@ export const MediaArticleSchema = z.object({
   source_publication: z.string(),
   source_url: z.string(),
   published_at: z.string(),
+  image_url: z.string().nullable(), // Image externe illustrant l'article (optionnelle)
 });
 
 /**

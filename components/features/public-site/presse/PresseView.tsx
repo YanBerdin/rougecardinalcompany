@@ -1,7 +1,7 @@
 "use client";
 import { PresseViewProps } from "./types";
 import { HeroSection } from "./HeroSection";
-import { ContactPresseSection } from "./ContactPresseSection";
+//import { ContactPresseSection } from "./ContactPresseSection";
 import { RevueDePresse } from "./RevueDePresse";
 import { CommuniquesSection } from "./CommuniquesSection";
 import { AccreditationSection } from "./AccreditationSection";
@@ -18,11 +18,14 @@ export function PresseView({
 }: PresseViewProps) {
   return (
     <div className="pt-12 md:pt-16">
-      <HeroSection />
-      <ContactPresseSection />
+     
+      {/*  <HeroSection /> */}
+      {/* <ContactPresseSection /> */}
       <RevueDePresse mediaArticles={mediaArticles} />
-      <CommuniquesSection pressReleases={pressReleases} />
       <AccreditationSection />
+
+      <CommuniquesSection pressReleases={pressReleases} />
+
       <MediaKitSection mediaKit={mediaKit} />
     </div>
   );

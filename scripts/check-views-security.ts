@@ -8,7 +8,8 @@
  * - Validate RLS enforcement through SECURITY INVOKER
  * 
  * Usage:
- *   DOTENV_CONFIG_PATH=.env.local pnpm exec tsx scripts/check-views-security.ts
+ *   pnpm run check:views                          # staging (défaut)
+ *   SUPABASE_ENV=production pnpm run check:views  # production
  * 
  * Requirements:
  *   - Complete .env.local file (T3 Env validates all variables)
@@ -17,8 +18,8 @@
  *       indirectly by checking view accessibility per role.
  */
 
-// CRITICAL: Load .env.local BEFORE any other imports (tsx doesn't auto-load like Next.js)
-import 'dotenv/config';
+// CRITICAL: must run before `../lib/env`, which validates process.env at import time
+import { describeTarget } from './lib/load-supabase-env.js';
 
 import { createClient } from '@supabase/supabase-js';
 import { env } from '../lib/env';
@@ -146,6 +147,7 @@ async function testBaseTableActiveFilter(tableName: string): Promise<TestResult>
 
 async function checkViewsSecurity() {
     console.log('🔍 Checking Views Security Configuration\n');
+    console.log(`🎯 Cible: ${describeTarget()}\n`);
     console.log('='.repeat(50) + '\n');
 
     const results: TestResult[] = [];

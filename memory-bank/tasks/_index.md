@@ -2,6 +2,14 @@
 
 ## Completed
 
+- `TASK106` Remédiation CodeQL #28 XSS client-side invitation — **CORRECTIF LOCAL COMPLET ✅ 2026-08-03** — suppression de `window.location.href` alimenté par query string ; formulaire POST vers une Server Action qui revalide l'URL Supabase et `redirect_to` avant `redirect()`. Tests URL 5/5, type-check, diagnostics et diff check verts. Réanalyse CodeQL attendue après push sur `master`. Voir `memory-bank/tasks/tasks-completed/TASK106-codeql-client-side-xss-invitation.md`
+
+- `TASK104` Remédiation Dependabot + incident runtime Sharp/Vercel — **COMPLÈTE ✅ 2026-08-01** — 14 vulnérabilités corrigées, puis résolution du 500 `/admin/media/library` après Sharp `0.35.3` : externalisation, tracing physique `libvips-cpp.so`, suppression du hoisting pnpm refusé par Vercel. Déploiement Vercel et accès production validés. Voir `memory-bank/tasks/tasks-completed/TASK104-dependabot-dependency-remediation.md`
+
+- `TASK102` Tarif réduit (`price_reduced_cents`) + affichage public prix & capacité — **COMPLÈTE ✅ 2026-07-04** — Colonne `price_reduced_cents` indépendante de `price_cents` propagée dans toute la chaîne admin (schémas, DAL, Server Actions, formulaire, détail) + affichage public sur `/agenda` et `/spectacles/[slug]` (prix + capacité). Migration manuelle chirurgicale (diff CLI trop bruité). `restore_content_version` mis à jour. Poussée sur Supabase Cloud (`pnpm db:push`). Voir `memory-bank/tasks/TASK102-reducedPriceAndPublicCapacity.md`
+
+- `TASK101` Drag-and-drop réorganisation articles de presse — **COMPLÈTE ✅ 2026-07-03** — 8 phases : DB + DAL + Zod + Server Action + hook custom + composant sortable + intégration DnD + migrations applicables. Colonne `display_order`, backfill `row_number()`, sort public `/presse` et homepage widget. DndContext + `@dnd-kit/sortable` + PointerSensor (8px) + KeyboardSensor. Commit `3f9caba`. Voir `memory-bank/tasks/TASK101-articlesPresseDragDrop.md`
+
 - `TASK088` Migration recharts 3.x, audit sécurité dépendances, documentation, memory-bank — **Clôturée ✅ 2026-04-07** — voir `memory-bank/tasks/TASK088-migration-recharts-3x-audit-securite.md`
 - `ENV-VALIDATION` Validation d'environnement runtime + CI — **22 tests ✅ + workflow CI ✅** (2026-03-25) — `lib/env-validation.ts` extrait, DI pattern, 4 checks, 75/75 régression, rapport `doc/ENV-VALIDATION-REPORT.md`, workflow `unit-tests.yml` ajouté
 - `TASK087` Compression images Sharp côté serveur — **IMPLÉMENTÉE ✅** (2026-03-24) — `lib/utils/image-compress.ts` créé, pipeline `uploadMediaImage()` mis à jour, `MediaUploadInput` File|Blob, 11/11 tests unitaires, fix TypeScript Uint8Array.from, script npm `test:unit:image-compress`
@@ -17,10 +25,28 @@
 
 ## En Cours
 
-**_(aucune tâche en cours)_**
+- `TASK201` Stratégie de tests : audit, implémentation, validation — **EN COURS 🔄 2026-09-01** — Réorganisation `__tests__/` (unit/integration), 6 nouveaux tests unitaires, 9 tests audit/triggers, scripts npm harmonisés (`test:unit`, `test:integration`, `test:e2e`, `test:coverage`), CI `unit-tests.yml`+`e2e.yml` mise à jour, secret `e2e/.auth/editor.json` retiré du suivi Git. Vérifié en exécution réelle : `test:unit` 159/159, `test:integration` 81/81, E2E `public`/`auth`/`permissions` 100%. Reste : protection de branche `main` (GitHub, action manuelle), validation `admin`/`cross-*` (bloqués localement par OOM, à faire en CI), premier run réel sur GitHub Actions. Voir `memory-bank/tasks/TASK201-strategie-tests-audit-implementation.md`
+
+- `TASK107` Corriger la 404 de `/sitemap.xml` — **EN COURS 🔄 2026-08-06** — Metadata Route statique `app/sitemap.ts` créée avec 9 URLs publiques canoniques. Type-check, build et vérifications locale/production réussis (`200`, `application/xml`, XML valide, Googlebot accepté, 9 URLs cibles en `200`). Search Console doit encore rafraîchir son statut après nouvelle soumission. Voir `memory-bank/tasks/TASK107-sitemap-404.md`
+
+- `TASK200` Migrer vers le correctif officiel Sharp / nft de Next.js — **EN COURS 🔄 2026-08-05** — Next.js 16.3.0 installé avec le workaround conservé ; type-check, tests image, build et manifests `.nft.json` locaux validés. Preview Vercel, retrait progressif du workaround et validation cold start restantes. Voir `memory-bank/tasks/TASK200-migration-correctif-upstream-sharp-nft.md`
+
+- `TASK105` Créer le profil admin manquant en production — **PLANIFIÉE 📋 2026-08-01** — Aucun `public.profiles` avec `role='admin'` sur le projet production `hjmwctzqljfszuwkaadd` (`diagnose:admin-views` → `Profil admin introuvable`), alors que staging est sain. Écart de données révélé après la restauration des GRANTs `service_role`, qui masquait le diagnostic derrière un `permission denied for table profiles`. Voir `memory-bank/tasks/TASK105-production-admin-profile.md`
+
+- `TASK103` Retirer le grant `authenticated` résiduel sur `cleanup_expired_audit_logs()` — **PLANIFIÉE 📋 2026-07-15** — Finding connexe identifié lors du fix de l'alerte advisor `audit_trigger()` sur le projet Supabase client. Fonction `SECURITY DEFINER` sans check `is_admin()` interne, appelable via `/rest/v1/rpc/cleanup_expired_audit_logs` par tout `authenticated`. Voir `memory-bank/tasks/TASK103-cleanupExpiredAuditLogsGrant.md`
 
 ## Terminé (récent)
 
+- `TASK100` ContactInfoSidebar dynamique (coordonnées DB) — **COMPLÈTE ✅ 2026-06-30** — `fetchFooterConfig()` + `fetchDisplayToggle()` en `Promise.all` dans `ContactServerGate`, sidebar assemblé côté serveur comme `React.ReactNode`, `ContactInfoSidebar` branché sur `FooterConfigDTO["contact"]` + `children`, `ContactPageView` découplé de `FooterConfigDTO`, phone conditionnel, labels admin renommés `"Pied de page & Coordonnées"` — voir `memory-bank/tasks/tasks-completed/TASK100-contactInfoSidebarDynamique.md`
+
+- `TASK098` Pages légales + Conformité RGPD/Cookies — 3 pages statiques créées, IP analytics anonymisée, bandeau cookie informatif — **COMPLÈTE ✅ 2026-06-13** — voir `memory-bank/tasks/TASK098-legal-pages-cmp-rgpd.md`
+
+- `TASK097` Hero Slide Video Background — `video_url text nullable` ajouté à `home_hero_slides`, propagation DB→Zod→DAL public→HeroContainer→hooks admin→form fields→preview badge — **COMPLÈTE ✅ 2026-06-03** — voir `memory-bank/tasks/tasks-completed/TASK097-heroSlideVideoBackground.md`
+- `TASK096` Durcissement sécurité auth (app_metadata + PasswordSchema + setupAccountAction) — **COMPLÈTE ✅ 2026-05-20** — Migration rôle user_metadata→app_metadata (3 migrations SQL), `lib/schemas/auth.ts` PasswordSchema (min 12 + 4 classes), `lib/actions/auth-setup-actions.ts` Server Action, 9 scripts nettoyés, `is-admin.ts` supprimé, 29 tests unitaires + 5 E2E verts, CI cron `check-role-invariant.yml`. **Action requise** : secret `INVARIANT_DB_URL` dans GitHub Actions — voir `memory-bank/tasks/tasks-completed/TASK096-hardenAuthRoleSecurity.md`
+- `TASK095` Footer administrable — **COMPLÈTE ✅ 2026-05-17** — Description + contact (email/téléphone/adresse) + réseaux sociaux (Facebook/Instagram/Twitter) éditables depuis `/admin/footer`. Source de vérité : ligne unique `public.configurations_site` clé `public:footer:content` (jsonb). 10 fichiers créés, 2 modifiés. 13 tests Vitest verts, `pnpm lint` ✅, `pnpm build` 15.7s ✅. RLS vérifiées (anon SELECT `public:%`, UPDATE gardée `is_admin()`). Voir `memory-bank/tasks/tasks-completed/TASK095-footer-admin.md`
+- `SEC-2026-05-16` Audit Dependabot (3 CVEs) — **COMPLET ✅ 2026-05-16** — Next.js 16.2.5→16.2.6 (c5238b5) + `postcss >=8.5.10` (fb71427) + `fast-uri >=3.1.2` (b808a3c). `pnpm audit` = 0 vulnérabilité
+- `TASK094` Auto-save générique articles de presse + spectacles — **COMPLÈTE ✅ 2026-05-15** — `useFormAutosave` générique (291L), `AutoSaveIndicator` → `admin/shared/`, `usePressReleaseAutosave` wrapper léger, articles branchés + bannière publié, spectacles branchés force `public:false`+`status:draft` + bannière — voir `memory-bank/tasks/tasks-completed/TASK094-generic-autosave-articles-spectacles.md`
+- `TASK093` Auto-save brouillon communiqués de presse — **COMPLÈTE ✅ 2026-05-15** — auto-save New+Edit, blocage strict sur article publié, `createPressReleaseAction` renvoie `{ id: string }`, fix bug description sans titre + fix type update (`title?`) — voir `memory-bank/tasks/tasks-completed/TASK093-press-release-autosave-draft.md`
 - `TASK092` Fix duplication ville agenda public — **COMPLÈTE ✅ 2026-05-08** — `buildAddress` DAL skip city si déjà dans `adresse`, `extractPostalCity` regex non-gourmande `([^,]+)`, validation curl OK — voir `memory-bank/tasks/tasks-completed/TASK092-fix-duplicate-city-agenda.md`
 - `TASK091` Refactoring calendrier agenda + fix violations ESLint — **COMPLÈTE ✅ 2026-05-07** — CalendarNav useCallback, CalendarMonth/Week headers extraits, AgendaEventList/Card sous-composants, fix animations.jsx + 4 fixtures e2e (`register`), `pnpm lint` = 0 erreurs — voir `memory-bank/tasks/TASK091-agenda-calendar-violations-fixes.md`
 - `TASK090` SectionFounder administrable (kind='founder') — **COMPLÈTE ✅ 2026-05-02** — migration `20260502150000`, colonne `milestones jsonb`, CHECK étendu, seed row, 3 fichiers source, fallback FOUNDER_BIO — voir `memory-bank/tasks/TASK090-founderContentAdminDashboard.md`
@@ -163,7 +189,6 @@ Fichiers de détail archivés dans le dossier `memory-bank/tasks/tasks-completed
 - [TASK021-admin-backoffice-spectacles.md](tasks-completed/TASK021-admin-backoffice-spectacles.md)
 - [TASK021-admin-spectacles-crud.md](tasks-completed/TASK021-admin-spectacles-crud.md)
 - [TASK021-content-management-crud.md](tasks-completed/TASK021-content-management-crud.md)
-- [TASK021-documentation-docker.md](tasks-completed/TASK021-documentation-docker.md)
 - [TASK021B-documentation-supabase-cli.md](tasks-completed/TASK021B-documentation-supabase-cli.md)
 - [TASK021C-auth-cleanup-and-optimization.md](tasks-completed/TASK021C-auth-cleanup-and-optimization.md)
 

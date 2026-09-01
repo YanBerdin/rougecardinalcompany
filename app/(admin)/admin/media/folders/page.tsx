@@ -3,7 +3,7 @@
  * @description Admin page for managing media folders (CRUD)
  */
 import { Suspense } from "react";
-import { requireMinRole } from "@/lib/auth/roles";
+import { requireBackofficePageAccess } from "@/lib/auth/roles";
 import { MediaFoldersContainer } from "@/components/features/admin/media/MediaFoldersContainer";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -17,7 +17,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function MediaFoldersPage() {
-    await requireMinRole("editor");
+    await requireBackofficePageAccess();
 
     return (
         <div className="container mx-auto py-8">

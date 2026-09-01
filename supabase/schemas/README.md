@@ -34,6 +34,9 @@ with check ( (select public.has_min_role('editor')) );
 
 Migrations de sécurité récentes
 
+- `supabase/migrations/20260715120000_revoke_audit_trigger_execute_from_authenticated.sql` — fix advisor "Signed-In Users Can Execute SECURITY DEFINER Function" : `public.audit_trigger()` avait un grant `EXECUTE` résiduel accordé explicitement à `authenticated` par `20251027022500_grant_execute_all_trigger_functions.sql` (hypothèse fausse : les triggers Postgres n'ont besoin d'aucun grant pour se déclencher). `20260502120000` avait fait `revoke ... from public` mais cela ne retire pas un grant explicite déjà accordé à un rôle nommé. Risque réel nul (`audit_trigger()` retourne `trigger`, invocation directe déjà bloquée par Postgres), fix appliqué en défense en profondeur. Déclaratif synchronisé : `02b_functions_core.sql` (section "Grant Policy" du header sécurité). Appliquée le 2026-07-15 sur le projet Supabase client (`hjmwct....`) via MCP `apply_migration` (version distante réalignée sur le nom du fichier local). Finding connexe non traité : `public.cleanup_expired_audit_logs()` a le même profil — voir `memory-bank/tasks/TASK103-cleanupExpiredAuditLogsGrant.md`.
+- `supabase/migrations/20260517130000_remove_is_admin_check_from_audit_logs_rpc.sql` — hotfix : recréation de `public.get_audit_logs_with_email(...)` sans le garde interne `if not (select public.is_admin()) then raise exception ...`. La migration `20260502140000` annonçait avoir retiré ce check mais n'exécutait que des `REVOKE` — la fonction cloud contenait toujours le garde, ce qui faisait échouer chaque appel via `createAdminClient()` (service_role) avec `ERR_AUDIT_001 "Permission denied: admin role required"` (`auth.uid() = null` → `is_admin() = false`). Autorisation toujours enforced en amont via `requireAdminPageAccess()` / `requireAdmin()`. Re-assertion défensive `GRANT EXECUTE → service_role` + `REVOKE FROM authenticated, anon, public`. Déclaratif déjà aligné : `42_rpc_audit_logs.sql`. Appliquée le 2026-05-17 (local + cloud).
+- `supabase/migrations/20260517120000_grant_audit_logs_to_service_role.sql` — hotfix : ajout `GRANT EXECUTE ON FUNCTION public.get_audit_logs_with_email(...) TO service_role`. Suite à la migration `20260502140000` (REVOKE depuis authenticated/anon), la page `/admin/audit-logs` retournait `ERR_AUDIT_001 "permission denied for function"`. Cause racine double : (1) `service_role` n'est PAS superuser Postgres dans Supabase → GRANT EXECUTE explicite requis ; (2) l'ancien `createAdminClient` utilisait `@supabase/ssr` + cookies → PostgREST résolvait comme `authenticated` malgré la SECRET key. `supabase/admin.ts` réécrit pour utiliser `createClient` plain de `@supabase/supabase-js` (pas de cookies forwarding). Déclaratif synchronisé : `42_rpc_audit_logs.sql`. Appliquée le 2026-05-17 (local + cloud).
 - `supabase/migrations/20260503120000_drop_start_end_time_order_constraint.sql` — fix : suppression de la contrainte `check_start_end_time_order` (`start_time <= end_time`) sur `evenements` pour autoriser les spectacles traversant minuit. Les colonnes `date_debut`/`date_fin` (timestamptz) assurent déjà l'ordre. Déclaratif synchronisé : `50_constraints.sql`. Appliquée le 2026-05-03 (local + cloud).
 - `supabase/migrations/20260501203935_add_audit_logs_filter_indexes.sql` — perf/fix : 3 index btree créés sur `public.logs_audit` (`idx_logs_audit_action`, `idx_logs_audit_table_name`, `idx_logs_audit_user_id`) pour résoudre les `statement_timeout` des 11 tests E2E ADM-AUDIT-001 à ADM-AUDIT-011. Utilise `CREATE INDEX IF NOT EXISTS`. Déclaratif synchronisé : `42_rpc_audit_logs.sql`. Appliquée le 2026-05-01 (local + cloud).
 - `supabase/migrations/20260502140000_revoke_get_audit_logs_from_authenticated.sql` — fix lint-0029 : révocation EXECUTE sur `get_audit_logs_with_email(bigint, bigint, text, text)` des rôles `authenticated` et `anon`. DAL migré vers `createAdminClient()` (service_role). `is_admin()` retiré de la fonction (`auth.uid() = null` via service_role). Déclaratif synchronisé : `42_rpc_audit_logs.sql`. Appliquée le 2026-05-02.
@@ -89,7 +92,7 @@ Ce dossier contient le schéma déclaratif de la base de données selon les inst
 
 | Instruction | Statut | Détail |
 | ------------- | -------- | -------- |
-| **RLS Policies** | ✅ 100% | 36/36 tables protégées (25 principales + 11 liaison) |
+| **RLS Policies** | ✅ 100% | 29/29 tables protégées (24 principales + 5 liaison) |
 | **Functions** | ✅ 100% | SECURITY INVOKER, search_path défini |
 | **SQL Style** | ✅ 100% | Lowercase, snake_case, commentaires |
 | **Schema Structure** | ✅ 100% | Ordre lexicographique respecté |
@@ -149,6 +152,25 @@ supabase/schemas/
 ```
 
 **Note RLS**: les nouvelles tables co‑localisent leurs politiques (dans le même fichier que la table). Des fichiers RLS globaux (60–62) restent en place pour les tables historiques; convergence vers un modèle 100% co‑localisé en cours.
+
+---
+
+## 🆕 Mises à jour récentes (juillet 2026)
+
+- **FEAT: Ajout colonne `display_order` sur `articles_presse` — TASK101 (3 juillet 2026)** : Support du drag & drop pour réordonner les articles de presse dans l'admin. Le nouvel ordre pilote AUSSI le tri public (`/presse` + widget "À la une" homepage).
+  - **Migrations** : `20260703120000_add_display_order_to_articles_presse.sql` (DDL — colonne + index) et `20260703120001_backfill_display_order_articles_presse.sql` (DML — backfill idempotent basé sur `published_at desc nulls last, id desc`)
+  - **Schéma déclaratif** : `08_table_articles_presse.sql` (colonne `display_order integer not null default 0` en fin de table + commentaire) et `40_indexes.sql` (index `idx_articles_presse_display_order`)
+  - **Statut** : migrations créées, pas encore appliquées (local/cloud) — à appliquer dès qu'un environnement Docker/Supabase CLI est disponible
+
+---
+
+## 🆕 Mises à jour récentes (juin 2026)
+
+- **FEAT: Ajout colonne `video_url` sur `home_hero_slides` — TASK097 (3 juin 2026)** : Fond vidéo optionnel pour les slides hero. Si `video_url` est renseigné, il remplace l'image de fond en mode lecture.
+  - **Migration** : `20260603120000_add_video_url_to_home_hero_slides.sql` (`ALTER TABLE … ADD COLUMN IF NOT EXISTS video_url text`)
+  - **Schéma déclaratif** : `07d_table_home_hero.sql` mis à jour — colonne `video_url text` ajoutée
+  - **Propagation stack** : `lib/schemas/home-content.ts` (Zod `HeroSlideInputSchema` + `HeroSlideFormSchema` + `HeroSlideDTO`, refine croisé image/vidéo) · `lib/dal/home-hero.ts` (types + select + mapping) · `HeroContainer.tsx` (prop `video`) · `useHeroSlideForm` + `useHeroSlideFormSync` (valeurs par défaut et mapping) · `HeroSlideFormFields.tsx` (composant `VideoUrlField`) · `HeroSlidePreview.tsx` (badge conditionnel « Vidéo »)
+  - **Format accepté** : chemin relatif (`/hero-theatre-loop.mp4`) ou URL absolue (`https://...`)
 
 ---
 
@@ -505,22 +527,19 @@ Pour rappel, la migration générée est `supabase/migrations/20250918000002_app
 | **compagnie_presentation_sections** | Publique | Admin uniquement | Sections modulaires page présentation |
 | **home_hero_slides** | Publique (fenêtre active) | Admin uniquement | Slides hero page d'accueil |
 
-### Tables de Liaison avec Protection RLS (11/11) ✅
+### Tables de Liaison avec Protection RLS (5/5) ✅
 
 | Table | Lecture | Écriture | Particularités |
 | ------------- | -------- | -------- | ---------------- |
-| **spectacles_membres_equipe** | Publique | Admin uniquement | Casting des spectacles |
 | **spectacles_medias** | Publique | Admin uniquement | Médias des spectacles |
-| **articles_medias** | Publique | Admin uniquement | Médias des articles |
 | **communiques_medias** | Publique | Admin uniquement | Médias des communiqués |
 | **communiques_categories** | Publique | Admin uniquement | Catégories des communiqués |
 | **communiques_tags** | Publique | Admin uniquement | Tags des communiqués |
-| **spectacles_categories** | Publique | Admin uniquement | Catégories des spectacles |
-| **spectacles_tags** | Publique | Admin uniquement | Tags des spectacles |
-| **articles_categories** | Publique | Admin uniquement | Catégories des articles |
-| **articles_tags** | Publique | Admin uniquement | Tags des articles |
+| **media_item_tags** | Publique | Admin uniquement | Tags des médias (médiathèque) |
 
-**Total :** 36 tables protégées par RLS (25 principales + 11 liaison)
+> **Note (14 juil. 2026)** : 6 tables de liaison jamais exploitées ont été supprimées via `20260713120000_drop_unused_leaf_tables.sql` : `spectacles_membres_equipe`, `articles_medias`, `spectacles_categories`, `spectacles_tags`, `articles_categories`, `articles_tags`.
+
+**Total :** 29 tables protégées par RLS (24 principales + 5 liaison)
 
 ### Optimisations Performance ⚡
 
@@ -639,9 +658,9 @@ supabase migration new update_existing_data
 
 | Métrique | Valeur | Statut |
 | ------------- | -------- | -------- |
-| **Tables avec RLS** | 36/36 (100%) | ✅ |
-| **Tables principales** | 25/25 (100%) | ✅ |
-| **Tables de liaison** | 11/11 (100%) | ✅ |
+| **Tables avec RLS** | 29/29 (100%) | ✅ |
+| **Tables principales** | 24/24 (100%) | ✅ |
+| **Tables de liaison** | 5/5 (100%) | ✅ |
 | **Politiques Optimisées** | 70+ (100%) | ✅ |
 | **Index RLS** | 10 stratégiques | ✅ |
 | **Fonctions Sécurisées** | 8/8 (100%) | ✅ |

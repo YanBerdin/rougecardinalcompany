@@ -64,38 +64,6 @@ create table public.communiques_tags (
   primary key (communique_id, tag_id)
 );
 
--- Relations many-to-many : spectacles <-> categories
-drop table if exists public.spectacles_categories cascade;
-create table public.spectacles_categories (
-  spectacle_id bigint not null references public.spectacles(id) on delete cascade,
-  category_id bigint not null references public.categories(id) on delete cascade,
-  primary key (spectacle_id, category_id)
-);
-
--- Relations many-to-many : spectacles <-> tags
-drop table if exists public.spectacles_tags cascade;
-create table public.spectacles_tags (
-  spectacle_id bigint not null references public.spectacles(id) on delete cascade,
-  tag_id bigint not null references public.tags(id) on delete cascade,
-  primary key (spectacle_id, tag_id)
-);
-
--- Relations many-to-many : articles <-> categories
-drop table if exists public.articles_categories cascade;
-create table public.articles_categories (
-  article_id bigint not null references public.articles_presse(id) on delete cascade,
-  category_id bigint not null references public.categories(id) on delete cascade,
-  primary key (article_id, category_id)
-);
-
--- Relations many-to-many : articles <-> tags
-drop table if exists public.articles_tags cascade;
-create table public.articles_tags (
-  article_id bigint not null references public.articles_presse(id) on delete cascade,
-  tag_id bigint not null references public.tags(id) on delete cascade,
-  primary key (article_id, tag_id)
-);
-
 -- Fonction pour maintenir le compteur d'usage des tags
 create or replace function public.update_tag_usage_count()
 returns trigger
@@ -127,17 +95,6 @@ begin
   return null; -- trigger AFTER ne retourne rien
 end;
 $$;
-
--- Triggers pour maintenir usage_count automatiquement
-drop trigger if exists trg_spectacles_tags_usage_count on public.spectacles_tags;
-create trigger trg_spectacles_tags_usage_count
-  after insert or delete on public.spectacles_tags
-  for each row execute function public.update_tag_usage_count();
-
-drop trigger if exists trg_articles_tags_usage_count on public.articles_tags;
-create trigger trg_articles_tags_usage_count
-  after insert or delete on public.articles_tags
-  for each row execute function public.update_tag_usage_count();
 
 -- RLS policies for communiqués relations
 alter table public.communiques_categories enable row level security;

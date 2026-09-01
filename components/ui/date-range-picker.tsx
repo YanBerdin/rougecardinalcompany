@@ -34,7 +34,7 @@ export function DateRangePicker({ from, to, onSelect, className }: DateRangePick
                                 : "text-muted-foreground"
                         )}
                     >
-                        <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                        <CalendarIcon className="size-3.5 shrink-0 text-muted-foreground" />
                         <span className="flex-1 truncate">
                             {from ? (
                                 to ? (
@@ -69,7 +69,7 @@ export function DateRangePicker({ from, to, onSelect, className }: DateRangePick
                                     }
                                 }}
                             >
-                                <X className="h-3 w-3" aria-hidden />
+                                <X className="size-3" aria-hidden />
                             </span>
                         )}
                     </Button>

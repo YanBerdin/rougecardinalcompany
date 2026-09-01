@@ -15,12 +15,12 @@ export function MediaKitSection({ mediaKit }: MediaKitSectionProps) {
   if (mediaKit.length === 0) return null;
 
   return (
-    <section aria-label="Kit Média" className="max-sm:py-12 py-24 bg-chart-7">
+    <section aria-label="Kit Média" className="py-24 lg:py-32 bg-chart-7">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-sm:mb-8 mb-16">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">Kit Média</h2>
+          <h2 className="text-3xl md:text-4xl lg:text-6xl font-semibold italic leading-none tracking-tight mb-4">Kit média</h2>
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
-            Ressources haute qualité pour vos publications
+            Ressources pour vos publications
           </p>
         </div>
 
@@ -36,7 +36,7 @@ export function MediaKitSection({ mediaKit }: MediaKitSectionProps) {
                 <CardContent className="p-6 flex flex-col flex-1">
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-lg mb-4 mx-auto">
                     <Icon
-                      className="h-8 w-8 text-primary"
+                      className="size-8 text-primary"
                       aria-hidden="true"
                     />
                   </div>
@@ -55,7 +55,7 @@ export function MediaKitSection({ mediaKit }: MediaKitSectionProps) {
                       rel="noopener noreferrer"
                       aria-label={`Télécharger ${item.type} - ${item.description} (${item.fileSize})`}
                     >
-                      <Download className="mr-2 h-4 w-4" aria-hidden="true" />
+                      <Download className="mr-2 size-4" aria-hidden="true" />
                       Télécharger
                     </Link>
                   </Button>

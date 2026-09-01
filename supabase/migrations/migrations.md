@@ -4,6 +4,356 @@ Ce dossier contient les migrations spécifiques (DML/DDL ponctuelles) exécutée
 
 ## 📋 Dernières Migrations
 
+### 2026-08-01 - FIX: restauration des GRANTs de base de `service_role` sur le schéma `public`
+
+**Migration** : `20260801134257_restore_service_role_baseline_grants.sql`
+
+**Schéma déclaratif** : nouveau fichier `70_grants_baseline.sql`.
+
+**Contexte** : `/admin/media/library` renvoyait une erreur 500 en production. Les logs Postgres remontaient `permission denied` sur `profiles`, `partners`, `analytics_events`, `membres_equipe_admin`, etc. Toute la surface serveur reposant sur `createAdminClient()` (`SUPABASE_SECRET_KEY`) était hors service.
+
+**Root cause** : sur le projet de production (`hjmwctzqljfszuwkaadd`), `service_role` ne disposait que de `Dxtm` sur les 53 relations du schéma `public` — les privilèges `arwd` (INSERT/SELECT/UPDATE/DELETE) manquaient, ainsi que l'accès aux 28 séquences. `service_role` contourne la RLS mais reste soumis aux GRANTs. Le staging (`yvtrlvmbofklefxcxrzv`) était sain (53/53). Comme `supabase db diff` ne capture pas les GRANTs, la dérive n'était pas détectable par les outils habituels.
+
+**Fix** : `grant all privileges on all tables/sequences in schema public to service_role`, plus `alter default privileges` pour que les objets créés ultérieurement héritent du même socle. Ajout de `grant select, insert, update, delete on public.user_invitations to authenticated`, dont les policies RLS admin étaient inatteignables faute de GRANT sur la table.
+
+**Périmètre** : aucun privilège ajouté pour `anon`. Les écarts où la production est plus restrictive que le staging (`contacts_presse`, `seo_redirects`, `data_retention_recent_audit` non lisibles par `anon`) ont été délibérément conservés.
+
+**Statut** : ✅ appliquée sur production et staging (même version enregistrée). Validation : 53/53 relations et 28/28 séquences accessibles à `service_role`, `diagnose:admin-views` et `test:dal` (13/13) au vert sur les deux projets.
+
+### 2026-08-01 - FIX: GRANTs des vues presse publiques + cast `timestamptz`→`date` dans `communiques_presse_dashboard`
+
+**Migration** : `20260801131043_restore_press_public_view_grants_and_fix_dashboard_cast.sql`
+
+**Schéma déclaratif** : mis à jour — `08_table_articles_presse.sql` et `41_views_communiques.sql` contiennent désormais les blocs `revoke all` + `grant select` ainsi que le cast `e.date_debut::date`.
+
+**Contexte** : les lectures anonymes de l'espace presse échouaient avec `42501 permission denied for view articles_presse_public` / `communiques_presse_public`, et le RPC admin `communiques_presse_dashboard()` renvoyait `42804 structure of query does not match function result type`.
+
+**Root cause** :
+
+1. La migration générée `20260202200333_add_spectacle_paragraphs.sql` effectue un `DROP VIEW` + `CREATE VIEW` sur les deux vues sans réémettre de GRANT. PostgreSQL réinitialise l'ACL au `DROP`, laissant `anon`/`authenticated` avec `Dxtm` (sans `r`). `supabase db diff` (migra) ne capture pas les GRANTs, donc la régression est passée inaperçue.
+2. `communiques_presse_dashboard()` déclare `evenement_date date` mais sélectionne `evenements.date_debut`, de type `timestamp with time zone`. plpgsql n'applique pas de cast implicite sur `RETURN QUERY`.
+
+**Fix** : `revoke all` + `grant select` explicites pour `anon`, `authenticated`, `service_role` sur les deux vues (toutes deux `security_invoker = true`, le filtrage des lignes reste assuré par les policies RLS), et `e.date_debut::date` dans le corps de la fonction. Signature de la fonction et types TypeScript inchangés.
+
+**Statut** : ✅ appliquée sur production (`hjmwctzqljfszuwkaadd`) et staging (`yvtrlvmbofklefxcxrzv`), avec la même version enregistrée dans `schema_migrations`. Validation : `has_table_privilege('anon', …, 'SELECT')` renvoie `true` pour les deux vues sur les deux projets.
+
+### 2026-07-22 - FIX: restaurer les GRANTs de lecture de la vue publique des photos paysage
+
+**Migration** : `20260722145109_grant_public_spectacle_landscape_photos_view.sql`
+
+**Schéma déclaratif** : déjà conforme — `41_views_spectacle_photos.sql` contient les GRANTs `SELECT` sur `public.spectacles_landscape_photos_public` pour `anon` et `authenticated`.
+
+**Contexte** : les photos paysage des pages publiques `/spectacles/[slug]` ne s'affichaient pas sur le site du client, alors que les associations `spectacles_medias`, les objets du bucket `medias` et les policies RLS étaient corrects.
+
+**Root cause** : les privilèges table-level `SELECT` sur la vue avaient disparu en production. La requête anonyme PostgREST échouait avec `42501 permission denied for view spectacles_landscape_photos_public`. Le DAL masque volontairement les erreurs de lecture publiques en retournant un tableau vide, ce qui empêchait silencieusement le rendu de `LandscapePhotoCard`.
+
+**Fix** : restauration des GRANTs `SELECT` distincts pour `anon` et `authenticated`. Aucun changement de données, de table, de vue ou de policy RLS.
+
+**Statut** : ✅ appliquée sur le projet Supabase client (`hjmwctzqljfszuwkaadd`) via `apply_migration`. Validation : la requête anonyme renvoie les 4 photos paysage attendues et le rendu de `/spectacles/la-farce-de-maitre-pathelin` référence de nouveau l'image.
+
+### 2026-07-20 - FIX: autoriser le SELECT Storage editor+ requis par l'upsert des thumbnails
+
+**Migration** : `20260720150000_allow_editors_select_medias_for_storage_upsert.sql`
+
+**Schéma déclaratif** : ✅ synchronisé — `02c_storage_buckets.sql` contient désormais la policy SELECT `"Editors can read medias"`.
+
+**Contexte** : Après correction du type MIME des thumbnails, leur upload échouait encore avec `new row violates row-level security policy`. Les policies INSERT, UPDATE et DELETE du bucket `medias` étaient présentes et `has_min_role('editor')` lisait correctement le rôle JWT, mais aucune policy SELECT n'existait afin d'empêcher le listing du bucket.
+
+**Root cause** : Supabase Storage exige `SELECT` et `UPDATE` en plus de `INSERT` pour `upload(..., { upsert: true })`. La génération de thumbnail utilise volontairement `upsert: true` afin de permettre la régénération au même chemin ; sans SELECT, Storage rejette l'overwrite avant même que la policy UPDATE suffise.
+
+**Fix** : ajout d'une policy SELECT limitée à `bucket_id = 'medias'` et `(select public.has_min_role('editor'))`. Les rôles `anon` et les utilisateurs authentifiés ordinaires restent incapables d'énumérer le bucket ; seuls les éditeurs/admins, qui possèdent déjà les droits d'écriture, obtiennent la lecture nécessaire à l'upsert. Les URLs CDN publiques connues restent inchangées.
+
+**Statut** : ✅ appliquée sur staging (`yvtrlvmbofklefxcxrzv`) et production (`hjmwctzqljfszuwkaadd`). Les versions MCP ont été réalignées sur `20260720150000` pour correspondre au fichier local.
+
+### 2026-07-20 - FIX: GRANTs manquants sur media_tags/media_folders/media_item_tags + alignement is_admin/has_min_role sur app_metadata.role
+
+**Migration** : `20260720140000_fix_media_tags_grants_and_role_functions.sql` (GRANTs + recréation de deux fonctions helper)
+
+**Schéma déclaratif** : ✅ synchronisé — `02b_functions_core.sql` (`is_admin()` et `has_min_role(text)`), `04_table_media_tags_folders.sql` (section GRANTS).
+
+**Contexte** : Deux problèmes de permissions remontés en production (page Bibliothèque Médias et génération de thumbnails).
+
+1. **Bibliothèque Médias** : `Erreur tags: Failed to list media tags: permission denied for table media_tags`. Les tables `media_tags`, `media_folders` et `media_item_tags` avaient des RLS policies mais **aucun GRANT table-level** pour le rôle `authenticated`. PostgreSQL bloque donc l'accès avant d'évaluer les policies.
+
+2. **Thumbnails** : `new row violates row-level security policy` lors de l'upload du thumbnail dans Supabase Storage. La policy Storage INSERT du bucket `medias` exige `has_min_role('editor')`. Cette fonction lisait `public.profiles.role`, alors que l'autorisation applicative (`lib/auth/roles.ts`) considère `auth.users.raw_app_meta_data->>'role'` (signé dans le JWT) comme source de vérité. Quand les deux divergent — typiquement après une invitation admin où le profil est absent ou son rôle non synchronisé — l'API route laisse passer la requête (elle lit `app_metadata.role`) mais Storage la refuse.
+
+**Root cause commune** : désalignement entre la source de vérité JWT (`app_metadata.role`) et les fonctions DB qui restaient sur `profiles.role`.
+
+**Changements** :
+
+- GRANT `SELECT` + `INSERT/UPDATE/DELETE` sur `public.media_tags`, `public.media_folders`, `public.media_item_tags` au rôle `authenticated` (pas de GRANT `anon`, conformément à `20260501120000_fix_anon_grants_sensitive_tables.sql`).
+- Réécriture de `public.is_admin()` : lit d'abord `auth.jwt()->'app_metadata'->>'role'`, avec fallback sur `public.profiles.role` pour les tokens legacy.
+- Réécriture de `public.has_min_role(text)` : même logique JWT-first + fallback profiles.
+
+**Validation attendue** :
+
+- Page `/admin/media/library` : `listMediaTagsAction()` / `listMediaFoldersAction()` doivent fonctionner pour les éditeurs/admins authentifiés.
+- Upload/génération de thumbnail : Storage policy `Editors can upload to medias` doit désormais évaluer le rôle depuis le JWT et autoriser les admins/éditeurs.
+
+**Statut** : ⏸ à appliquer (`supabase db push` / `apply_migration` selon l'environnement cible).
+
+### 2026-07-15 - FIX: GRANT DELETE manquant sur public.profiles pour authenticated
+
+**Migration** : `20260715130000_grant_delete_profiles_to_authenticated.sql` (GRANT uniquement, aucun changement de policy)
+
+**Schéma déclaratif** : ✅ synchronisé — `02_table_profiles.sql` documente désormais les GRANTs (SELECT/INSERT/UPDATE/DELETE) sous la définition de table, avec référence à cette migration.
+
+**Contexte** : Signalement utilisateur — un compte (`florian.chaillot@outlook.fr`), enregistré par erreur, n'apparaissait plus dans `public.profiles` mais restait visible dans le dashboard admin avec le statut « Vérifié » (la liste admin est construite depuis `auth.users` via `listAllUsers()`, pas depuis `profiles`). Tentative de suppression → `Failed to delete profile: permission denied for table profiles`.
+
+**Root cause** : `supabase/schemas/60_rls_profiles.sql` définit bien une policy RLS `DELETE` ("Users can delete their own profile OR admins can delete any profile"), mais aucun `GRANT DELETE` table-level n'existe sur `public.profiles` pour le rôle `authenticated`. `20251027020000_restore_basic_grants_for_rls.sql` n'avait restauré que `SELECT, INSERT, UPDATE` après la campagne de sécurité ayant révoqué tous les privilèges par défaut — `DELETE` a été oublié. Sans ce GRANT, PostgreSQL bloque l'opération avant même d'évaluer la policy RLS, quel que soit le contenu de la policy.
+
+**Fix applicatif complémentaire** : `lib/dal/admin-users.ts:deleteUser()` rendu résilient — un échec de suppression du profil (permission, ligne déjà absente, etc.) n'empêche plus la suppression de `auth.users`, pour éviter qu'un compte fantôme (sans profil) reste indéfiniment visible dans le dashboard admin.
+
+**Statut** : ⏸ à appliquer (`supabase db push` / `apply_migration` selon l'environnement cible — le rapport utilisateur concerne un nouveau projet Supabase Cloud).
+
+### 2026-07-15 - SECURITY: revoke résiduel EXECUTE sur audit_trigger() pour authenticated
+
+**Migration** : `20260715120000_revoke_audit_trigger_execute_from_authenticated.sql` (revoke uniquement, aucun changement de logique)
+
+**Schéma déclaratif** : ✅ synchronisé — header sécurité de `public.audit_trigger()` mis à jour dans `02b_functions_core.sql` (section "Grant Policy" ajoutée).
+
+**Contexte** : Alerte de l'advisor Supabase (projet client) : "Signed-In Users Can Execute SECURITY DEFINER Function" sur `public.audit_trigger()`, appelable via `/rest/v1/rpc/audit_trigger` par le rôle `authenticated`. Root cause : `20251027022500_grant_execute_all_trigger_functions.sql` avait accordé `grant execute ... to authenticated` en partant d'une hypothèse fausse (les triggers PostgreSQL n'ont besoin d'aucun grant EXECUTE pour se déclencher — l'appel est interne à l'exécuteur, indépendant des ACL de la fonction). `20260502120000_revoke_anon_all_security_definer_functions.sql` avait ensuite fait `revoke ... from public`, mais cela ne supprime pas un grant explicite déjà accordé à `authenticated` (seul le grant hérité de `PUBLIC` est retiré). D'où la persistance de l'alerte.
+
+**Risque réel** : nul en pratique — `audit_trigger()` retourne le pseudo-type `trigger`, que PostgreSQL refuse d'invoquer directement (`trigger functions can only be called as triggers`). Le fix reste nécessaire pour la conformité de l'advisor et la défense en profondeur (aucune fonction trigger-only ne devrait rester exposée via l'API REST).
+
+**Statut** : ✅ appliquée sur le projet Supabase client (`hjmwctzqljfszuwkaadd`, distinct du staging `yvtrlvmbofklefxcxrzv` habituellement lié à ce repo) via `apply_migration` (MCP Supabase). Version enregistrée réalignée de `20260715172902` (timestamp auto-généré par l'outil) vers `20260715120000` (nom du fichier local) par `UPDATE supabase_migrations.schema_migrations` pour préserver la cohérence de l'historique. Vérifié : `get_advisors(type=security)` ne remonte plus ce finding. ⏸ pas encore appliquée sur staging (`pnpm db:push` à faire si souhaité).
+
+**Finding connexe non corrigé** : `public.cleanup_expired_audit_logs()` présente le même profil (grant `authenticated` résiduel sur une fonction `SECURITY DEFINER`, sans check `is_admin()` interne). Planifié dans `memory-bank/tasks/TASK103-cleanupExpiredAuditLogsGrant.md`.
+
+**Constat annexe** : "Leaked Password Protection" (2ᵉ finding advisor security) n'est **pas disponible** sur le compte Supabase du client (plan Free) — nécessite un plan payant pour être activé. Aucune action possible côté SQL/migration.
+
+### 2026-07-14 - CLEANUP: suppression de 7 tables de liaison jamais exploitées
+
+**Migration** : `20260713120000_drop_unused_leaf_tables.sql` (DDL destructif — `drop table ... cascade`)
+
+**Schéma déclaratif** : ✅ synchronisé dans 6 fichiers : `10b_tables_user_management.sql` (section `pending_invitations` retirée), `11_tables_relations.sql` (tables + RLS `spectacles_membres_equipe`, `articles_medias`), `14_categories_tags.sql` (4 jonctions taxonomie spectacles/articles + 2 triggers `usage_count`), `30_triggers.sql` (retrait des arrays audit/updated_at), `40_indexes.sql` (6 index orphelins), `62_rls_advanced_tables.sql` (blocs RLS taxonomie).
+
+**Statut** : ✅ appliquée en local (`supabase db reset`, 2026-07-14). ⏸ pas encore poussée sur Supabase Cloud (`pnpm dlx supabase db push --linked`).
+
+**Contexte** : Audit du fichier `doc-perso/Mai-2026/00-unused-tables.md` listant des tables vides suspectées inutilisées. Vérification croisée avec le code runtime (`lib/`, `app/`, `components/`) + interrogation de la base cloud via MCP Supabase (`yvtrlvmbofklefxcxrzv`) pour confirmer : type d'objet (table vs vue), nombre de lignes réel, FK entrantes, vues dépendantes.
+
+**Tables supprimées (7, toutes vérifiées à 0 ligne, sans FK entrante ni vue dépendante)** :
+
+- `spectacles_membres_equipe` — casting spectacle/membre, scaffold jamais câblé (`spectacles.casting` text utilisé à la place)
+- `articles_medias` — jonction articles↔médias jamais alimentée
+- `spectacles_categories`, `spectacles_tags` — feature catégories/tags spectacles jamais activée côté UI admin
+- `articles_categories`, `articles_tags` — idem pour les articles
+- `pending_invitations` — file d'attente retry emails, remplacée en pratique par `user_invitations`
+
+**Tables NON supprimées (périmètre initial réduit après vérification)** :
+
+- `seo_redirects`, `sitemap_entries` — **conservées intentionnellement** pour un branchement SEO futur (décision utilisateur), malgré 0 usage runtime actuel. Restaurées dans le schéma déclaratif après un premier retrait par erreur.
+- `categories` (9 lignes), `tags` (15 lignes), `communiques_categories` (4 lignes), `communiques_tags`, `communiques_medias` — **non vides ou couplées à la vue `communiques_presse_public`** (`LEFT JOIN` sur `communiques_medias`) : le sous-système taxonomie communiqués reste un ensemble cohérent avec données, hors scope de ce nettoyage.
+- `media_item_tags` (2 lignes) — utilisée activement par le code (`lib/dal/media.ts`, `lib/actions/media-actions.ts`).
+
+**Écarts corrigés vs. l'audit initial** : la note `doc-perso/Mai-2026/00-unused-tables.md` classait à tort `categories`, `tags`, `communiques_categories`, `communiques_tags`, `media_item_tags` comme vides — la vérification cloud (MCP `execute_sql`) a révélé des données réelles ou des dépendances de vue, évitant une suppression destructive incorrecte.
+
+**Fichiers de test mis à jour** (retrait des scénarios ciblant les 7 tables supprimées, tests `sitemap_entries`/`seo_redirects` conservés) :
+
+- `__tests__/dal/permissions-integration.test.ts` — retrait de 7 blocs (`ROLE-DAL-021`, `022`, `027`, `029`, `030`, `046`, `070`, `075`)
+- `scripts/test-permissions-rls.ts` — retrait de 3 blocs (`ROLE-RLS-045`, `067`, `075`)
+
+**Documentation synchronisée** : `supabase/schemas/README.md` (compteurs `36→29` tables protégées RLS, `25→24` principales, `11→5` liaison) + `memory-bank/activeContext.md`.
+
+**Validation** :
+
+- ✅ `supabase db reset` local (2026-07-14) : migration appliquée sans erreur (NOTICEs "policy ... does not exist, skipping" attendus — premières exécutions des `drop policy if exists`)
+- ✅ `pnpm dlx supabase gen types typescript --linked > lib/database.types.ts` régénéré (exit 0)
+- ✅ Aucune erreur TypeScript sur les 2 fichiers de test modifiés
+- ⏸ Push cloud (`pnpm dlx supabase db push --linked`) à faire séparément
+
+---
+
+### 2026-07-04 - TASK102: ajout `price_reduced_cents` sur `evenements` + affichage public prix/capacité
+
+**Migration** : `20260704130737_add_price_reduced_cents_evenements.sql` (DDL — colonne + fonction)
+
+**Schéma déclaratif** : ✅ aligné dans `supabase/schemas/07_table_evenements.sql` (colonne `price_reduced_cents integer null` ajoutée après `price_cents` + commentaire) et `supabase/schemas/15_content_versioning.sql` (`restore_content_version`, bloc `entity_type = 'evenement'`, restaure désormais `price_reduced_cents`).
+
+**Statut** : ✅ appliquée en local (`supabase db reset`) et poussée sur Supabase Cloud (`pnpm db:push`).
+
+**Contexte** : TASK102 introduit un tarif réduit indépendant du plein tarif (`price_cents`), propagé dans toute la chaîne admin (DAL, Server Actions, formulaire, détail) et exposé publiquement (prix + capacité) sur `/agenda` et `/spectacles/[slug]`, où aucune information tarifaire n'était affichée auparavant.
+
+**Changements** :
+
+- `ALTER TABLE public.evenements ADD COLUMN IF NOT EXISTS price_reduced_cents integer null` — aucune contrainte avec `price_cents` (champs indépendants).
+- `COMMENT ON COLUMN` explicatif ajouté.
+- `CREATE OR REPLACE FUNCTION public.restore_content_version(...)` — recréée avec le bloc `evenement` mis à jour pour restaurer `price_reduced_cents` depuis le snapshot JSON.
+
+**Note migration manuelle** : `supabase db diff` génère un diff très bruyant (des centaines de lignes de `revoke`/`grant` et de `drop`/`create` de vues, triggers et fonctions sans rapport avec ce changement — drift pré-existant entre l'historique des migrations et `supabase/schemas/`, non introduit par cette tâche). Migration écrite manuellement (chirurgicale, cohérente avec le style des migrations précédentes) plutôt que d'appliquer le diff brut généré par le CLI.
+
+**Validation** : `supabase db reset` applique la migration sans erreur ; un second `db diff` ne détecte plus aucune référence à `price_reduced_cents` (colonne + fonction alignées avec le schéma déclaratif). `pnpm tsc --noEmit`, `pnpm eslint` (fichiers modifiés) et `pnpm build` passent sans erreur.
+
+---
+
+### 2026-07-03 - TASK101: ajout colonne `display_order` sur `articles_presse` (drag & drop admin)
+
+**Migrations** :
+
+- `20260703120000_add_display_order_to_articles_presse.sql` (DDL — colonne + index)
+- `20260703120001_backfill_display_order_articles_presse.sql` (DML — backfill)
+
+**Schéma déclaratif** : ✅ aligné dans `supabase/schemas/08_table_articles_presse.sql` (colonne `display_order integer not null default 0` ajoutée en fin de définition de table + commentaire) et `supabase/schemas/40_indexes.sql` (index `idx_articles_presse_display_order`).
+
+**Statut** : ⏸ créées localement, pas encore appliquées (environnement local sans Docker/Supabase CLI disponible dans cette session). À appliquer via `pnpm dlx supabase db reset` (local) puis `pnpm dlx supabase db push` (cloud).
+
+**Contexte** : TASK101 introduit le drag & drop pour réordonner les articles de presse dans l'admin. La table `articles_presse` n'avait pas de colonne d'ordre manuel (contrairement à `partners.display_order`) ; le tri reposait uniquement sur `published_at`. Le nouvel ordre `display_order` pilote désormais AUSSI le tri public (`/presse` + widget "À la une" de la homepage), pas seulement l'admin.
+
+**Changements** :
+
+- `ALTER TABLE public.articles_presse ADD COLUMN IF NOT EXISTS display_order integer not null default 0` — colonne ajoutée en fin de table (après `search_vector`), pas de valeur saisissable dans le formulaire (géré automatiquement par le DAL à la création, cf. Phase 3 du plan).
+- `COMMENT ON COLUMN` explicatif ajouté.
+- `CREATE INDEX IF NOT EXISTS idx_articles_presse_display_order ON public.articles_presse (display_order)` — optimise le tri `ORDER BY display_order`.
+- Backfill DML idempotent (`UPDATE ... FROM (SELECT ... ROW_NUMBER() OVER (ORDER BY published_at DESC NULLS LAST, id DESC))`) : initialise `display_order` selon l'ordre chronologique actuel (published_at desc, id desc en tie-break), pour ne pas changer l'ordre affiché au premier chargement après migration.
+
+**Validation attendue (après application)** :
+
+- `select id, title, display_order from public.articles_presse order by display_order` reflète l'ordre chronologique initial (published_at desc).
+- Pas de régression sur `/presse` ni sur le widget "À la une" homepage tant que la Phase 3 (DAL) n'est pas déployée (le tri reste sur `published_at` jusqu'à la bascule du DAL).
+
+---
+
+### 2026-06-03 - TASK097: ajout colonne `video_url` sur `home_hero_slides`
+
+**Migration** : `20260603120000_add_video_url_to_home_hero_slides.sql`
+
+**Schéma déclaratif** : ✅ aligné dans `supabase/schemas/07d_table_home_hero.sql` (colonne `video_url text` ajoutée à la définition de la table).
+
+**Statut** : ✅ appliquée en local. ⏸ pas encore poussée sur Supabase Cloud.
+
+**Contexte** : Les slides hero ne supportaient que des images de fond. TASK097 ajoute un fond vidéo optionnel : si `video_url` est renseigné, il remplace l'image en mode lecture. Le champ accepte un chemin relatif (`/hero-theatre-loop.mp4`) ou une URL absolue (`https://...`).
+
+**Changements** :
+
+- `ALTER TABLE public.home_hero_slides ADD COLUMN IF NOT EXISTS video_url text` — nullable, aucune contrainte CHECK (URL libre).
+- `COMMENT ON COLUMN` explicatif ajouté.
+- **Propagation stack complète** (9 fichiers) : schéma déclaratif, Zod (`HeroSlideInputSchema` + `HeroSlideFormSchema` + `HeroSlideDTO`, refine croisé image/vidéo), DAL (`SupabaseHeroRow` + `HomeHeroSlideRecord` + `rowToDTO`), `HeroContainer.tsx` (prop `video`), hooks admin (`useHeroSlideForm` + `useHeroSlideFormSync`), champ formulaire (`VideoUrlField`), badge preview admin.
+
+**Validation attendue (après push cloud)** :
+
+- Un slide sans `video_url` continue de s'afficher normalement avec son image.
+- Un slide avec `video_url` renseigné affiche le badge « Vidéo » dans la preview admin et transmet l'URL au composant héro public.
+
+---
+
+### 2026-05-20 - FIX: synchronisation du rôle dans `auth.users.raw_app_meta_data` au signup
+
+**Migration** : `20260520134210_sync_role_to_app_metadata.sql`
+
+**Schéma déclaratif** : ✅ déjà aligné dans `supabase/schemas/05_profiles_auto_sync.sql` et `supabase/schemas/21_handle_new_user_skip_admin_managed.sql` (les deux versions de `public.handle_new_user()` incluent maintenant la synchronisation du rôle).
+
+**Statut** : ✅ appliquée en local (`supabase migration up --local`). ⏸ pas encore poussée sur Supabase Cloud.
+
+**Contexte** : `handle_new_user()` créait correctement `public.profiles` avec le bon rôle (résolu depuis `raw_app_meta_data` puis `raw_user_meta_data`, fallback `'user'`), mais ne propageait pas ce rôle dans `auth.users.raw_app_meta_data`. Conséquence : le JWT lu côté app via `getClaims()` ne contenait pas la clé `role`, et `requireBackofficeAccess()` rejetait silencieusement tout compte créé via signup standard (par opposition aux comptes Admin API où l'application définit explicitement `app_metadata.role`).
+
+**Changements** :
+
+- Recréation de `public.handle_new_user()` avec header `SECURITY DEFINER` complet + `UPDATE auth.users` conditionnel (`IS DISTINCT FROM`) qui injecte `role` dans `raw_app_meta_data` après l'insertion du profil. INSERT et UPDATE encapsulés dans `BEGIN/EXCEPTION` (RAISE WARNING) pour ne pas bloquer la création du compte si le profil ou la sync échouent.
+- Backfill DML : pour chaque profil existant, copie `public.profiles.role` → `auth.users.raw_app_meta_data->'role'` si manquant ou incohérent (idempotent grâce à `IS DISTINCT FROM` + filtre rôle whitelisté).
+- Préservation du skip `_admin_managed` (les créations via Admin API ne sont pas re-traitées).
+- `comment on function public.handle_new_user()` mis à jour pour refléter la nouvelle responsabilité.
+
+**Note historique** : une migration doublon `20260520135826_sync_role_to_app_metadata_on_signup.sql` avait été créée par erreur puis appliquée en local. Elle a été supprimée (fichier + `migration repair --status reverted --local`) car identique à `20260520134210` (CREATE OR REPLACE + backfill idempotent — aucun impact DB).
+
+**Validation attendue (après push cloud)** :
+
+- Un nouveau signup standard se retrouve avec `app_metadata.role` cohérent dans son JWT au refresh suivant.
+- Les utilisateurs `editor`/`admin` existants ne sont pas dégradés (le backfill aligne app_metadata sur le profil).
+- `getClaims()` retourne `role` non-null pour tous les comptes après la migration.
+
+---
+
+### 2026-05-17 - SECURITY: suppression des policies SELECT Storage sur le bucket public `medias`
+
+**Migration** : `20260517222715_drop_medias_storage_select_policies.sql`
+
+**Schéma déclaratif** : ✅ déjà aligné dans `supabase/schemas/02c_storage_buckets.sql` (`drop policy if exists` des policies de lecture et aucune policy `for select` sur `bucket_id = 'medias'`).
+
+**Contexte** : Le bucket Storage `medias` est public (`storage.buckets.public = true`). Les URLs publiques connues restent servies par Supabase Storage, mais une policy `select` sur `storage.objects` permet aussi aux clients d’énumérer les objets via `supabase.storage.from('medias').list()`. La migration `20260501120100_fix_storage_bucket_listing.sql` supprimait l’accès `public`, mais recréait une policy `authenticated` encore trop large pour le listing du bucket.
+
+**Changements** :
+
+- `drop policy if exists "Public read access for medias" on storage.objects` — couvre l’ancienne policy publique.
+- `drop policy if exists "Authenticated read access for medias" on storage.objects` — retire la policy de listing authentifiée résiduelle.
+- Aucune nouvelle policy `select` sur `storage.objects` pour `bucket_id = 'medias'`.
+
+**Validation attendue** :
+
+- Les URLs du type `/storage/v1/object/public/medias/<path>` restent accessibles.
+- Les appels client `supabase.storage.from('medias').list()` ne bénéficient plus d’une policy large sur le bucket public.
+
+---
+
+### 2026-05-17 - TASK095: seed de la configuration footer administrable
+
+**Migration** : `20260517212052_seed_footer_config.sql`
+
+**Schéma déclaratif** : ⚠️ DML pur — pas de changement de schéma. La table `public.configurations_site` et ses policies RLS (`key like 'public:%'` lisible par anon/authenticated, écriture admin) existent déjà.
+
+**Contexte** : Implémentation de TASK095 "Footer Administrable". Le footer public passe d'un rendu hardcodé à un fetch DAL depuis une ligne unique de `configurations_site` avec la clé `public:footer:content`. La migration insère cette ligne avec les valeurs par défaut (alignées sur l'ancien rendu hardcodé) pour éviter toute régression visible à la mise en production.
+
+**Changements** :
+
+- `insert ... on conflict (key) do nothing` — idempotent
+- `category = 'footer_content'` pour regroupement dans l'admin
+- Payload JSONB structuré : `{ description, contact: { email, phone, address }, socialLinks: { facebook, instagram, twitter } }`
+
+### 2026-05-17 (bis) - HOTFIX: retrait du check `is_admin()` interne dans `get_audit_logs_with_email`
+
+**Migration** : `20260517130000_remove_is_admin_check_from_audit_logs_rpc.sql`
+
+**Schéma déclaratif** : ✅ déjà aligné dans `supabase/schemas/42_rpc_audit_logs.sql`
+
+**Contexte** : Malgré le hotfix `20260517120000` (GRANT EXECUTE à `service_role`) et la réécriture de `supabase/admin.ts`, la page `/admin/audit-logs` retournait encore `[ERR_AUDIT_001] Permission denied: admin role required`. Cause racine : la fonction cloud contenait toujours le garde interne :
+
+```sql
+if not (select public.is_admin()) then
+  raise exception 'Permission denied: admin role required';
+end if;
+```
+
+La migration `20260502140000` annonçait dans son en-tête avoir retiré ce check, mais n'exécutait que des `REVOKE` — la fonction n'a jamais été recréée. Or le DAL appelle désormais la fonction via `createAdminClient()` (service_role) → `auth.uid() = NULL` → `is_admin() = false` → exception systématique.
+
+**Changements** :
+
+- `public.get_audit_logs_with_email(text, text, uuid, timestamptz, timestamptz, text, integer, integer)` recréée sans le `if not is_admin() ...`.
+- Re-assertion défensive : `GRANT EXECUTE … TO service_role` + `REVOKE … FROM authenticated, anon, public`.
+- Autorisation toujours enforced en amont par `requireAdminPageAccess()` / `requireAdmin()` dans la Server Action / page admin.
+
+**Validation** :
+
+- ✅ Migration idempotente (`create or replace function`)
+- ✅ SQL en minuscules
+- ✅ Vérification post-apply : `position('is_admin' in pg_get_functiondef(...)) = 0`
+- ✅ Appliquée local (`supabase migration up`) + cloud (MCP `apply_migration`) le 2026-05-17
+
+---
+
+### 2026-05-17 - HOTFIX: GRANT EXECUTE sur `get_audit_logs_with_email` pour `service_role`
+
+**Migration** : `20260517120000_grant_audit_logs_to_service_role.sql`
+
+**Schéma déclaratif** : ✅ `supabase/schemas/42_rpc_audit_logs.sql`
+
+**Contexte** : Après le REVOKE de `20260502140000` (retrait EXECUTE pour `authenticated`/`anon`), la page `/admin/audit-logs` retournait `[ERR_AUDIT_001] permission denied for function get_audit_logs_with_email`. Double cause racine :
+
+1. **`service_role` n'est pas superuser Postgres** dans Supabase — un GRANT EXECUTE explicite est requis après tout REVOKE générique. La docs Supabase laisse penser que `service_role` "bypasses RLS" mais cela ne s'applique pas aux droits Postgres natifs (table/function privileges).
+2. **`createAdminClient` utilisait `@supabase/ssr` + cookies()** — `createServerClient` injecte toujours le JWT user via cookies, donc PostgREST résolvait le rôle DB comme `authenticated` malgré la `SUPABASE_SECRET_KEY` passée en argument. La SECRET key seule ne suffit pas si un JWT user est présent.
+
+**Changements** :
+
+- `public.get_audit_logs_with_email(text, text, uuid, timestamptz, timestamptz, text, integer, integer)` — `GRANT EXECUTE … TO service_role`.
+- `supabase/admin.ts` réécrit : remplace `createServerClient` (`@supabase/ssr`) par `createClient` (`@supabase/supabase-js`) sans cookies forwarding → vrai client `service_role`.
+
+**Validation** :
+
+- ✅ DDL idempotent
+- ✅ Script `scripts/test-audit-logs-cloud.ts` passe (récupère N logs depuis Cloud)
+- ✅ Page `/admin/audit-logs` fonctionne en local + cloud
+- ✅ Appliquée local (`supabase migration up`) + cloud (MCP `apply_migration`) le 2026-05-17
+
+---
+
 ### 2026-05-03 - FIX: Drop constraint `check_start_end_time_order` sur `evenements`
 
 **Migration** : `20260503120000_drop_start_end_time_order_constraint.sql`

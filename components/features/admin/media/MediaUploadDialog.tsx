@@ -121,7 +121,7 @@ export function MediaUploadDialog({
                 if (result.data.isDuplicate) {
                     toast.info("Image déjà présente", {
                         description: "Cette image existe déjà dans la médiathèque. Elle a été réutilisée.",
-                        icon: <CheckCircle2 className="h-4 w-4 text-blue-500" />,
+                        icon: <CheckCircle2 className="size-4 text-blue-500" />,
                         duration: 5000,
                     });
                 } else {
@@ -206,7 +206,7 @@ export function MediaUploadDialog({
                     {phase === "hashing" && (
                         <div className="space-y-2" aria-live="polite" aria-atomic="true">
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Info className="h-4 w-4" aria-hidden="true" />
+                                <Info className="size-4" aria-hidden="true" />
                                 <span>Vérification du fichier... {hashProgress}%</span>
                             </div>
                             <Progress value={hashProgress} className="h-2" />
@@ -217,7 +217,7 @@ export function MediaUploadDialog({
                     {phase === "uploading" && (
                         <div className="space-y-2" aria-live="polite" aria-atomic="true">
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
                                 <span>Téléversement en cours... {uploadProgress}%</span>
                             </div>
                             <Progress value={uploadProgress} className="h-2" />
@@ -239,17 +239,17 @@ export function MediaUploadDialog({
                         >
                             {phase === "hashing" ? (
                                 <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    <Loader2 className="mr-2 size-4 animate-spin" />
                                     Vérification...
                                 </>
                             ) : phase === "uploading" ? (
                                 <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    <Loader2 className="mr-2 size-4 animate-spin" />
                                     Téléversement...
                                 </>
                             ) : (
                                 <>
-                                    <Upload className="mr-2 h-4 w-4" />
+                                    <Upload className="mr-2 size-4" />
                                     Téléverser
                                 </>
                             )}

@@ -30,8 +30,8 @@
 import 'dotenv/config';
 
 import { createClient } from '@supabase/supabase-js';
-import { env } from '../lib/env';
-import { getLocalCredentials, validateLocalOnly } from './utils/supabase-local-credentials';
+import { env } from '../lib/env.js';
+import { getLocalCredentials, validateLocalOnly } from './utils/supabase-local-credentials.js';
 
 const isRemote = process.env.REMOTE === '1';
 
@@ -62,11 +62,13 @@ const anonClient = createClient(url, anonKey);
 
 async function ensureTestUser(email: string, password: string) {
     try {
+        // Security: role MUST be set only in app_metadata (signed JWT, server-only).
+        // user_metadata may carry profile data (display_name) but never authorization.
         const { data, error } = await adminClient.auth.admin.createUser({
             email,
             password,
             email_confirm: true,
-            user_metadata: { role: 'user', display_name: 'Test User' },
+            user_metadata: { display_name: 'Test User' },
             app_metadata: { role: 'user' },
         });
 

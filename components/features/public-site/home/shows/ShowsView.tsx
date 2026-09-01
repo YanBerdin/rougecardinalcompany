@@ -6,18 +6,20 @@ import { ShowCard } from "./ShowCard";
 
 export function ShowsView({ shows }: ShowsViewProps) {
   return (
-    <section className="py-20 bg-background" aria-labelledby="shows-heading">
+    <section className="py-24 lg:py-32 bg-background" aria-labelledby="shows-heading">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 id="shows-heading" className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-            A l&apos;affiche
-          </h2>
-          <p className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto">
-            Découvrez notre programmation et réservez vos places
+        <div className="text-center mb-14 gap-4">
+          <div>
+            <h2 id="shows-heading" className="text-4xl sm:text-5xl italic md:text-6xl lg:text-7xl font-semibold leading-none tracking-tight mb-4">
+              À l&apos;affiche
+            </h2>
+          </div>
+          <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
+            Découvrez la programmation
           </p>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-16 mb-12">
+        <div className="flex flex-wrap justify-center gap-6 mb-12">
           {shows.map((show, index) => (
             <ShowCard key={show.id} show={show} index={index} />
           ))}
@@ -26,8 +28,8 @@ export function ShowsView({ shows }: ShowsViewProps) {
         <div className="text-center">
           <Button variant="default" size="lg" asChild>
             <Link href="/agenda">
-              <ArrowRight className="h-5 w-5" aria-hidden="true" />
-              Voir tout l&apos;agenda
+              <ArrowRight className="size-5" aria-hidden="true" />
+              Voir l&apos;agenda
             </Link>
           </Button>
         </div>

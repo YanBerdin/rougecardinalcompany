@@ -20,7 +20,7 @@ export async function AuditLogsContainer({ searchParams }: AuditLogsContainerPro
     if (!logsResult.success) {
         return (
             <Alert>
-                <AlertCircle className="h-4 w-4" />
+                <AlertCircle className="size-4" />
                 <AlertTitle>Erreur</AlertTitle>
                 <AlertDescription>{logsResult.error}</AlertDescription>
             </Alert>

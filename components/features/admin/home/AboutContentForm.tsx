@@ -79,7 +79,7 @@ export function AboutContentForm({ content }: AboutContentFormProps) {
         <>
             <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                    <h2 className="text-3xl md:text-4xl font-bold">Section - A propos - Page d&apos;accueil</h2>
+                    <h2 className="text-3xl md:text-4xl font-bold">Section - À propos - Page d&apos;accueil</h2>
                 </div>
 
                 <Card>

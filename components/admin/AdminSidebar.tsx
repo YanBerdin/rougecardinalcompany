@@ -19,6 +19,7 @@ import {
   Handshake,
   MapPin,
   Building2,
+  LayoutTemplate,
 } from "lucide-react";
 import {
   Sidebar,
@@ -58,7 +59,7 @@ const generalItems: SidebarItem[] = [
     minRole: "admin",
   },
   {
-    title: "Utilisateurs",
+    title: "Administrateurs",
     href: "/admin/users",
     icon: UserCog,
     minRole: "admin",
@@ -139,6 +140,12 @@ const otherItems: SidebarItem[] = [
     minRole: "admin",
   },
   {
+    title: "Pied de page & Coordonnées",
+    href: "/admin/footer",
+    icon: LayoutTemplate,
+    minRole: "admin",
+  },
+  {
     title: "Audit Logs",
     href: "/admin/audit-logs",
     icon: ScrollText,
@@ -188,18 +195,6 @@ export default function AppSidebar({ userRole }: AppSidebarProps) {
                 <span className="text-sm font-semibold">Rouge Cardinal</span>
                 <span className="text-xs text-muted-foreground">Admin</span>
               </div>
-            </div>
-          </SidebarMenuItem>
-          {/* SearchBar */}
-          <SidebarMenuItem className="group-data-[collapsible=icon]:hidden">
-            <div className="relative px-2">
-              <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
-              <Input
-                placeholder="Rechercher..."
-                className="h-8 pl-8"
-                type="search"
-                aria-label="Rechercher dans la navigation"
-              />
             </div>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -253,28 +248,28 @@ export default function AppSidebar({ userRole }: AppSidebarProps) {
         </SidebarGroup>
 
         {filterByRole(homepageItems).length > 0 && (
-        <SidebarGroup>
-          <SidebarGroupLabel>Accueil</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {filterByRole(homepageItems).map((item) => {
-                const isActive =
-                  pathname === item.href ||
-                  (item.href !== "/admin" && pathname.startsWith(item.href));
-                return (
-                  <SidebarMenuItem key={item.href} title={item.title}>
-                    <SidebarMenuButton asChild isActive={isActive}>
-                      <Link href={item.href}>
-                        <item.icon aria-hidden="true" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+          <SidebarGroup>
+            <SidebarGroupLabel>Accueil</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {filterByRole(homepageItems).map((item) => {
+                  const isActive =
+                    pathname === item.href ||
+                    (item.href !== "/admin" && pathname.startsWith(item.href));
+                  return (
+                    <SidebarMenuItem key={item.href} title={item.title}>
+                      <SidebarMenuButton asChild isActive={isActive}>
+                        <Link href={item.href}>
+                          <item.icon aria-hidden="true" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
         )}
 
         <SidebarGroup>

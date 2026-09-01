@@ -52,6 +52,7 @@ export async function createEventAction(
             ticket_url: validated.ticket_url ?? null,
             capacity: validated.capacity ?? null,
             price_cents: validated.price_cents ?? null,
+            price_reduced_cents: validated.price_reduced_cents ?? null,
         };
 
         // 3. Appel DAL (qui convertira string → bigint)
@@ -124,6 +125,9 @@ export async function updateEventAction(
         }
         if (validated.price_cents !== undefined) {
             eventData.price_cents = validated.price_cents ?? null;
+        }
+        if (validated.price_reduced_cents !== undefined) {
+            eventData.price_reduced_cents = validated.price_reduced_cents ?? null;
         }
 
         // 3. Appel DAL avec ID converti en bigint

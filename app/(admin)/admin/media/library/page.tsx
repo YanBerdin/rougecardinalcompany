@@ -3,7 +3,7 @@
  * @description Main media management page with upload, filters, and grid view
  */
 import { Suspense } from "react";
-import { requireMinRole } from "@/lib/auth/roles";
+import { requireBackofficePageAccess } from "@/lib/auth/roles";
 import { MediaLibraryContainer } from "@/components/features/admin/media/MediaLibraryContainer";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -17,7 +17,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function MediaLibraryPage() {
-    await requireMinRole("editor");
+    await requireBackofficePageAccess();
 
     return (
         <div className="container mx-auto py-8">

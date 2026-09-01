@@ -64,11 +64,12 @@ async function createAdminUser() {
             console.log('\n🔄 Updating existing user to admin...');
 
             // Mettre à jour l'utilisateur existant
+            // Security: role MUST be set only in app_metadata (signed JWT, server-only).
+            // user_metadata is user-modifiable and MUST NOT carry authorization data.
             const { error: updateError } = await supabase.auth.admin.updateUserById(
                 existingUser.id,
                 {
                     app_metadata: { role: 'admin' },
-                    user_metadata: { role: 'admin' },
                     email_confirm: true,
                 }
             );
@@ -112,12 +113,12 @@ async function createAdminUser() {
 
         // 2. Créer le nouvel utilisateur
         console.log('📝 Step 1: Creating new user...');
+        // Security: role MUST be set only in app_metadata (signed JWT, server-only).
         const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
             email,
             password,
             email_confirm: true, // Auto-confirm l'email
             app_metadata: { role: 'admin' },
-            user_metadata: { role: 'admin' },
         });
 
         if (createError) throw createError;

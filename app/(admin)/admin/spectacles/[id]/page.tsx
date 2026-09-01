@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { requireMinRole } from "@/lib/auth/roles";
+import { requireBackofficePageAccess } from "@/lib/auth/roles";
 import { ArrowLeft, Pencil } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,7 @@ interface Props {
 }
 
 export default async function SpectacleDetailPage({ params }: Props) {
-  await requireMinRole("editor");
+  await requireBackofficePageAccess();
 
   // Parse and validate ID
   const { id } = await params;
@@ -52,13 +52,13 @@ export default async function SpectacleDetailPage({ params }: Props) {
         <div className="flex items-center gap-2 shrink-0">
           <Link href="/admin/spectacles">
             <Button variant="outline" size="default" className="gap-2" title="Retour">
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="size-4" />
               Retour
             </Button>
           </Link>
           <Link href={`/admin/spectacles/${spectacle.id}/edit`}>
             <Button variant="default" size="default" className="gap-2" title="Éditer">
-              <Pencil className="h-4 w-4" />
+              <Pencil className="size-4" />
               Éditer
             </Button>
           </Link>

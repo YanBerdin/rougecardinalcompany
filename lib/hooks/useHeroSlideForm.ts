@@ -29,6 +29,7 @@ const DEFAULT_FORM_VALUES: HeroSlideFormValues = {
     cta_secondary_enabled: HERO_SLIDE_DEFAULTS.CTA_SECONDARY_ENABLED,
     cta_secondary_label: "",
     cta_secondary_url: "",
+    video_url: "",
     active: HERO_SLIDE_DEFAULTS.ACTIVE,
     position: undefined,
 };

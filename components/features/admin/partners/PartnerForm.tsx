@@ -172,11 +172,11 @@ export function PartnerForm({ partner }: PartnerFormProps) {
                         disabled={isPending}
                         onClick={() => router.push("/admin/partners")}
                     >
-                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        <ArrowLeft className="mr-2 size-4" />
                         Retour
                     </Button>
                     <Button type="submit" disabled={isPending}>
-                        <Save className="mr-2 h-4 w-4" />
+                        <Save className="mr-2 size-4" />
                         {isPending ? "Enregistrement..." : partner ? "Mettre à jour" : "Créer"}
                     </Button>
                 </div>

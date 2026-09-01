@@ -34,6 +34,7 @@ type SupabaseShowRow = {
 type SupabaseEventRow = {
   spectacle_id: number;
   date_debut: string;
+  date_fin: string | null;
 };
 
 // =============================================================================
@@ -46,6 +47,9 @@ function buildEventsByShowMap(events: SupabaseEventRow[]): Map<number, string[]>
   events.forEach((event) => {
     const existing = eventsByShow.get(event.spectacle_id) ?? [];
     existing.push(event.date_debut);
+    if (event.date_fin) {
+      existing.push(event.date_fin);
+    }
     eventsByShow.set(event.spectacle_id, existing);
   });
 
@@ -108,7 +112,7 @@ export const fetchFeaturedShows = cache(
 
       const { data: events, error: eventsError } = await supabase
         .from("evenements")
-        .select("spectacle_id, date_debut")
+        .select("spectacle_id, date_debut, date_fin")
         .in("spectacle_id", ids)
         .order("date_debut", { ascending: true });
 

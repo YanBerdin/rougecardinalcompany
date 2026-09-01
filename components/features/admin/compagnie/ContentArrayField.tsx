@@ -87,7 +87,7 @@ export function ContentArrayField({
                         className="mt-1 shrink-0"
                         title="Supprimer"
                     >
-                        <X className="h-4 w-4" aria-hidden="true" />
+                        <X className="size-4" aria-hidden="true" />
                     </Button>
                 </div>
             ))}
@@ -99,7 +99,7 @@ export function ContentArrayField({
                 disabled={value.length >= MAX_ITEMS}
                 ref={addButtonRef}
             >
-                <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
+                <Plus className="mr-2 size-4" aria-hidden="true" />
                 Ajouter un paragraphe
             </Button>
         </fieldset>

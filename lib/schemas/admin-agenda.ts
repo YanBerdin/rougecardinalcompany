@@ -12,6 +12,7 @@ export const EventInputSchema = z.object({
     ticket_url: z.string().url().nullable().optional(),
     capacity: z.number().int().positive().nullable().optional(),
     price_cents: z.number().int().nonnegative().nullable().optional(),
+    price_reduced_cents: z.number().int().nonnegative().nullable().optional(),
 });
 export type EventInput = z.infer<typeof EventInputSchema>;
 
@@ -27,6 +28,7 @@ export const EventFormSchema = z.object({
     ticket_url: z.string().url().nullable().optional(),
     capacity: z.number().int().positive().nullable().optional(),
     price_cents: z.number().int().nonnegative().nullable().optional(),
+    price_reduced_cents: z.number().int().nonnegative().nullable().optional(),
 });
 export type EventFormValues = z.infer<typeof EventFormSchema>;
 
@@ -47,6 +49,7 @@ export type EventDTO = {
     ticket_url: string | null;
     capacity: number | null;
     price_cents: number | null;
+    price_reduced_cents: number | null;
     created_at: string;
     updated_at: string;
 };

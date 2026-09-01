@@ -10,6 +10,7 @@ create table public.evenements (
   date_fin timestamptz null,
   capacity integer,
   price_cents integer null,
+  price_reduced_cents integer null,
   status text default 'scheduled',
   metadata jsonb default '{}'::jsonb,
   recurrence_rule text,
@@ -34,3 +35,4 @@ comment on column public.evenements.image_url is 'URL d''image spécifique à ce
 comment on column public.evenements.start_time is 'Heure de début précise (complément à date_debut pour horaires)';
 comment on column public.evenements.end_time is 'Heure de fin précise (complément à date_fin ou calcul de durée)';
 comment on column public.evenements.genres is 'Tableau des types d''événements : spectacle, première, atelier, rencontre, etc.';
+comment on column public.evenements.price_reduced_cents is 'Tarif réduit en centimes, indépendant du plein tarif';

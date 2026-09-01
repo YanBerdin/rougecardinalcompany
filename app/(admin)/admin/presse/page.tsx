@@ -4,7 +4,7 @@ import { PressReleasesContainer } from "@/components/features/admin/presse/Press
 import { ArticlesContainer } from "@/components/features/admin/presse/ArticlesContainer";
 import { PressContactsContainer } from "@/components/features/admin/presse/PressContactsContainer";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getCurrentUserRole, requireMinRole } from "@/lib/auth/roles";
+import { getCurrentUserRole, requireBackofficePageAccess } from "@/lib/auth/roles";
 import { isRoleAtLeast } from "@/lib/auth/role-helpers";
 
 export const metadata = {
@@ -17,7 +17,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function PressePage() {
-    await requireMinRole("editor");
+    await requireBackofficePageAccess();
 
     const role = await getCurrentUserRole();
     const isAdmin = isRoleAtLeast(role, "admin");

@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { requireMinRole } from "@/lib/auth/roles";
+import { requireBackofficePageAccess } from "@/lib/auth/roles";
 import { ArrowLeft, Pencil } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function ValuesViewPage() {
-    await requireMinRole("editor");
+    await requireBackofficePageAccess();
 
     const result = await fetchAllCompagnieValuesAdmin();
     if (!result.success) notFound();
@@ -37,13 +37,13 @@ export default async function ValuesViewPage() {
                 <div className="flex w-full items-center gap-2 max-sm:flex-col sm:w-auto sm:shrink-0">
                     <Link href="/admin/compagnie" className="w-full sm:w-auto">
                         <Button variant="outline" size="default" className="w-full gap-2 sm:w-auto">
-                            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                            <ArrowLeft className="size-4" aria-hidden="true" />
                             Retour
                         </Button>
                     </Link>
                     <Link href="/admin/compagnie" className="w-full sm:w-auto">
                         <Button variant="default" size="default" className="w-full gap-2 sm:w-auto">
-                            <Pencil className="h-4 w-4" aria-hidden="true" />
+                            <Pencil className="size-4" aria-hidden="true" />
                             Modifier
                         </Button>
                     </Link>

@@ -4,6 +4,7 @@ import { HeroProps } from "./types";
 import { HeroSlideBackground } from "./HeroSlideBackground";
 import { HeroCTA } from "./HeroCTA";
 import { HeroNavigation } from "./HeroNavigation";
+import { HeroIndicators } from "./HeroIndicators";
 import { HeroProgressBar } from "./HeroProgressBar";
 
 export function HeroView({
@@ -32,7 +33,7 @@ export function HeroView({
       aria-label="Diaporama des spectacles à l'affiche"
       tabIndex={0}
       onKeyDown={onKeyDown}
-      className="relative h-dvh flex items-center justify-center overflow-hidden select-none outline-none focus-visible:ring-2 focus-visible:ring-gold/60 pb-36 sm:pb-44 md:pb-44"
+      className="relative h-svh flex items-center justify-center pb-36 sm:pb-44 overflow-hidden select-none outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
@@ -42,14 +43,22 @@ export function HeroView({
       onMouseLeave={onTouchEnd}
     >
       <HeroSlideBackground slides={slides} currentSlide={currentSlide} />
-      <HeroNavigation
-        isAutoPlaying={isAutoPlaying}
-        onPrevSlide={onPrevSlide}
-        onNextSlide={onNextSlide}
-        onPauseAutoPlay={onPauseAutoPlay}
-        onToggleAutoPlay={onToggleAutoPlay}
-      />
+      {slides.length > 1 && (
+        <HeroNavigation
+          isAutoPlaying={isAutoPlaying}
+          onPrevSlide={onPrevSlide}
+          onNextSlide={onNextSlide}
+          onPauseAutoPlay={onPauseAutoPlay}
+          onToggleAutoPlay={onToggleAutoPlay}
+        />
+      )}
       <HeroCTA slide={slides[currentSlide]} />
+      <HeroIndicators
+        slides={slides}
+        currentSlide={currentSlide}
+        onPauseAutoPlay={onPauseAutoPlay}
+        onGoToSlide={onGoToSlide}
+      />
       <HeroProgressBar isAutoPlaying={isAutoPlaying} />
     </section>
   );

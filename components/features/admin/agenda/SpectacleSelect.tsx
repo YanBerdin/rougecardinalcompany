@@ -55,7 +55,7 @@ export function SpectacleSelect({ spectacles }: SpectacleSelectProps) {
                                         ? spectacles.find((s) => Number(s.id) === field.value)
                                             ?.title
                                         : "Sélectionner un spectacle"}
-                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                    <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
                                 </Button>
                             </FormControl>
                         </PopoverTrigger>
@@ -74,7 +74,7 @@ export function SpectacleSelect({ spectacles }: SpectacleSelectProps) {
                                         >
                                             <Check
                                                 className={cn(
-                                                    "mr-2 h-4 w-4",
+                                                    "mr-2 size-4",
                                                     Number(spectacle.id) === field.value
                                                         ? "opacity-100"
                                                         : "opacity-0"

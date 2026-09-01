@@ -12,6 +12,7 @@ create table public.home_hero_slides (
   image_url text, -- fallback externe
   image_media_id bigint null references public.medias(id) on delete set null, -- media prioritaire
   alt_text text not null default '', -- texte alternatif pour l'accessibilité (max 125 caractères)
+  video_url text, -- URL vidéo de fond (chemin relatif /video.mp4 ou URL absolue, optionnel)
   
   -- CTA Primaire (bouton principal - style plein)
   cta_primary_enabled boolean not null default false,
@@ -35,6 +36,7 @@ comment on table public.home_hero_slides is 'Slides hero page d''accueil (carous
 comment on column public.home_hero_slides.slug is 'Identifiant stable pour ciblage et tracking.';
 comment on column public.home_hero_slides.image_media_id is 'Référence media interne (prioritaire sur image_url).';
 comment on column public.home_hero_slides.alt_text is 'Texte alternatif pour l''image (accessibilité, max 125 caractères).';
+comment on column public.home_hero_slides.video_url is 'URL vidéo de fond optionnelle. Si renseignée, remplace l''image. Accepte chemin relatif (/hero-theatre-loop.mp4) ou URL absolue (https://...).';
 comment on column public.home_hero_slides.cta_primary_enabled is 'Activer/désactiver le CTA primaire (bouton plein).';
 comment on column public.home_hero_slides.cta_primary_label is 'Label du bouton CTA primaire (max 50 caractères).';
 comment on column public.home_hero_slides.cta_primary_url is 'URL du bouton CTA primaire (relative ou absolue).';

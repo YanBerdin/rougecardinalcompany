@@ -60,3 +60,33 @@ export function dalSuccess<T>(data: T): DALSuccess<T> {
 export function dalError(error: string, status?: HttpStatusCode): DALError {
     return status ? { success: false, error, status } : { success: false, error };
 }
+
+/**
+ * Detect Next.js internal "Dynamic server usage" control-flow error
+ * (thrown when `cookies()`/`headers()` are used while Next attempts to
+ * statically render a route, e.g. during `revalidate`-based ISR builds).
+ *
+ * This error must NEVER be swallowed: catch blocks in DAL functions must
+ * rethrow it so Next.js can correctly mark the route as dynamic instead of
+ * silently caching an empty/fallback result at build time.
+ *
+ * @see https://nextjs.org/docs/messages/dynamic-server-error
+ *
+ * @example
+ * try {
+ *   const supabase = await createClient();
+ *   // ...
+ * } catch (err) {
+ *   if (isDynamicServerError(err)) throw err;
+ *   console.error("fetchThing exception:", err);
+ *   return null;
+ * }
+ */
+export function isDynamicServerError(err: unknown): boolean {
+    return (
+        typeof err === "object" &&
+        err !== null &&
+        "digest" in err &&
+        (err as { digest?: unknown }).digest === "DYNAMIC_SERVER_USAGE"
+    );
+}

@@ -10,6 +10,8 @@ import {
     Play,
     Star,
     MapPin,
+    Tag,
+    Users,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +36,24 @@ interface SpectacleDetailViewProps {
         longitude?: number | null;
     } | null;
     ticketUrl?: string | null;
+    ticketInfo?: {
+        priceCents: number | null;
+        priceReducedCents: number | null;
+        capacity: number | null;
+    } | null;
     dateRanges?: Array<{ start: string; end: string }>;
+}
+
+function formatPrice(priceCents: number | null): string | null {
+    if (priceCents === null) return null;
+    if (priceCents === 0) return "Gratuit";
+
+    return new Intl.NumberFormat("fr-FR", {
+        style: "currency",
+        currency: "EUR",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+    }).format(priceCents / 100);
 }
 
 export function SpectacleDetailView({
@@ -43,6 +62,7 @@ export function SpectacleDetailView({
     galleryPhotos = [],
     venue = null,
     ticketUrl = null,
+    ticketInfo = null,
     dateRanges = [],
 }: SpectacleDetailViewProps): React.ReactNode {
     const awards = spectacle.awards || [];
@@ -53,6 +73,8 @@ export function SpectacleDetailView({
             : `${new Date(range.start).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit" })} → ${new Date(range.end).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit" })}`
     );
     const formattedVenue = venue ? `${venue.nom}${venue.ville ? ` - ${venue.ville}` : ""}` : "À venir";
+    const formattedFullPrice = formatPrice(ticketInfo?.priceCents ?? null);
+    const formattedReducedPrice = formatPrice(ticketInfo?.priceReducedCents ?? null);
     const venueMapsUrl = venue
         ? buildGoogleMapsUrl({
             name: venue.nom,
@@ -134,20 +156,20 @@ export function SpectacleDetailView({
 
                             <div className="flex flex-wrap items-center gap-3" aria-label="Période et lieu">
                                 {formattedRanges.length > 0 ? formattedRanges.map((label, i) => (
-                                    <Badge key={i} variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold shadow-lg">
-                                        <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                    <Badge key={i} variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
+                                        <Calendar className="size-3.5 shrink-0" aria-hidden="true" />
                                         {label}
                                     </Badge>
                                 )) : (
-                                    <Badge variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold shadow-lg">
-                                        <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                    <Badge variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
+                                        <Calendar className="size-3.5 shrink-0" aria-hidden="true" />
                                         À venir
                                     </Badge>
                                 )}
-                                <Badge variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold shadow-lg">
-                                    <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                <Badge variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
+                                    <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
                                     {venueMapsUrl ? (
-                                        <a
+                                        <Link
                                             href={venueMapsUrl}
                                             target="_blank"
                                             rel="noopener noreferrer"
@@ -156,11 +178,39 @@ export function SpectacleDetailView({
                                             title={`Voir sur Google Maps`}
                                         >
                                             {formattedVenue}
-                                        </a>
+                                        </Link>
                                     ) : (
                                         formattedVenue
                                     )}
                                 </Badge>
+
+                                <Badge variant="outlineGold" className="text-xs sm:text-sm font-semibold">
+                                    <Clock className="mr-1.5 size-3.5" aria-hidden="true" />
+                                    {formatDurationHumanReadable(spectacle.duration_minutes)}
+                                </Badge>
+                                <Badge variant="outlineGold" className="text-xs sm:text-sm font-semibold">
+                                    <Star className="mr-1.5 size-3.5" aria-hidden="true" />
+                                    {spectacle.genre}
+                                </Badge>
+
+                                {formattedFullPrice && (
+                                    <Badge variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
+                                        <Tag className="size-3.5 shrink-0" aria-hidden="true" />
+                                        {formattedFullPrice}
+                                    </Badge>
+                                )}
+                                {formattedReducedPrice && (
+                                    <Badge variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
+                                        <Tag className="size-3.5 shrink-0" aria-hidden="true" />
+                                        Tarif réduit {formattedReducedPrice}
+                                    </Badge>
+                                )}
+                                {ticketInfo?.capacity !== null && ticketInfo?.capacity !== undefined && (
+                                    <Badge variant="outlineGold" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
+                                        <Users className="size-3.5 shrink-0" aria-hidden="true" />
+                                        {ticketInfo.capacity} places
+                                    </Badge>
+                                )}
                             </div>
 
                             {/* Mobile : affiche + CTA, visible seulement sur mobile, après les badges */}
@@ -226,17 +276,6 @@ export function SpectacleDetailView({
                                 </div>
                             )}
 
-                            <div className="flex flex-wrap items-center gap-3" aria-label="Durée et genre">
-                                <Badge variant="outlineGold" className="text-xs sm:text-sm font-semibold shadow-lg">
-                                    <Clock className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
-                                    {formatDurationHumanReadable(spectacle.duration_minutes)}
-                                </Badge>
-                                <Badge variant="outlineGold" className="text-xs sm:text-sm font-semibold shadow-lg">
-                                    <Star className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
-                                    {spectacle.genre}
-                                </Badge>
-                            </div>
-
                             {/* Awards Widget */}
                             {hasAwards && (
                                 <Card className="backdrop-blur-lg bg-gradient-to-br from-yellow-50/90 to-orange-50/90 dark:from-yellow-950/30 dark:to-orange-950/30 border-2 border-yellow-200/50 dark:border-yellow-800/50 relative overflow-hidden group">
@@ -246,7 +285,7 @@ export function SpectacleDetailView({
                                         </div>
                                         <h3 className="text-xl font-bold mb-6 flex items-center gap-3 relative z-10">
                                             <div className="p-2 bg-yellow-500/20 rounded-xl">
-                                                <Award className="text-yellow-600 dark:text-yellow-400 h-6 w-6" aria-hidden="true" />
+                                                <Award className="text-yellow-600 dark:text-yellow-400 size-6" aria-hidden="true" />
                                             </div>
                                             Palmarès
                                         </h3>
@@ -257,7 +296,7 @@ export function SpectacleDetailView({
                                                     className="flex gap-3 text-md font-medium border-b border-yellow-200/30 dark:border-yellow-800/30 pb-3 last:border-0 transition-colors hover:text-primary"
                                                 >
                                                     <Star
-                                                        className="h-5 w-5 text-yellow-500 dark:text-yellow-400 shrink-0 mt-0.5"
+                                                        className="size-5 text-yellow-500 dark:text-yellow-400 shrink-0 mt-0.5"
                                                         fill="currentColor"
                                                     />
                                                     <span>{award}</span>

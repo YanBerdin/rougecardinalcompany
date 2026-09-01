@@ -9,6 +9,11 @@ const supabaseUrl =
   process.env.NEXT_PUBLIC_SUPABASE_URL ??
   "https://yvtrlvmbofklefxcxrzv.supabase.co";
 
+// Hostname dérivé dynamiquement de NEXT_PUBLIC_SUPABASE_URL pour next/image.
+// Évite qu'un changement de projet Supabase (dev → prod) casse silencieusement
+// l'affichage des images (l'ancien hostname codé en dur restait seul whitelisté).
+const supabaseStorageHostname = new URL(supabaseUrl).hostname;
+
 // Vercel injecte automatiquement VERCEL="1" sur TOUS ses déploiements,
 // quel que soit le compte (staging, production, preview).
 // VERCEL_ENV ("production"|"preview"|"development") n'est pas suffisant ici :
@@ -32,6 +37,33 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "6mb", // 5MB fichiers + overhead formData
     },
+  },
+  // Empêche le bundling de sharp (binaire natif) : sans ça, Vercel échoue à charger
+  // le module "sharp-<hash>" en runtime (linux-x64) → erreurs sur les thumbnails.
+  serverExternalPackages: ["sharp"],
+  // Bug connu Next.js 16.2.x + sharp >=0.35 (non corrigé au 2026, voir
+  // https://github.com/vercel/next.js/issues/96064) : le traceur de fichiers
+  // (@vercel/nft, vendorisé dans next) ne détecte plus qu'il doit inclure
+  // libvips-cpp.so dans le bundle serverless, car sharp@0.35 a déplacé son
+  // point d'entrée de "lib/index.js" vers "dist/index.cjs" (le cas spécial de
+  // nft cible encore l'ancien chemin). Résultat en production/staging :
+  // "Could not load the 'sharp' module using the linux-x64 runtime"
+  // (ERR_DLOPEN_FAILED) sur toutes les routes qui appellent sharp
+  // (ex: /admin/media/library, /api/admin/media/thumbnail).
+  // Le module ".node" lui-même est tracé correctement (require() réussit),
+  // seule la lib partagée manque : on la force explicitement ici.
+  //
+  // IMPORTANT : on cible les fichiers PHYSIQUES dans le store pnpm
+  // (node_modules/.pnpm/...), PAS node_modules/@img/sharp-* hoisté.
+  // pnpm hoiste via des symlinks, et le packager de fonctions serverless de
+  // Vercel rejette tout répertoire symlinké ("invalid deployment package [...]
+  // files in symlinked directories"). Le glob avec version "@*" reste stable
+  // tant que la version majeure de sharp ne change pas (voir pnpm-lock.yaml).
+  outputFileTracingIncludes: {
+    "/**": [
+      "./node_modules/.pnpm/@img+sharp-libvips-linux-x64@*/node_modules/@img/sharp-libvips-linux-x64/**",
+      "./node_modules/.pnpm/@img+sharp-linux-x64@*/node_modules/@img/sharp-linux-x64/**",
+    ],
   },
   images: {
     remotePatterns: [
@@ -73,7 +105,19 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: supabaseStorageHostname,
+        port: "",
+        pathname: "/storage/v1/object/public/**",
+      },
+      {
+        protocol: "https",
         hostname: "yvtrlvmbofklefxcxrzv.supabase.co",
+        port: "",
+        pathname: "/storage/v1/object/public/**",
+      },
+      {
+        protocol: "https",
+        hostname: "hjmwctzqljfszuwkaadd.supabase.co",
         port: "",
         pathname: "/storage/v1/object/public/**",
       },

@@ -38,7 +38,9 @@ AS $$
  *   - Exécuté automatiquement lors de INSERT dans auth.users
  */
 BEGIN
-  -- Insérer le profil avec le rôle depuis user_metadata ou 'user' par défaut
+  -- Insérer le profil avec le rôle issu UNIQUEMENT de raw_app_meta_data (server-only).
+  -- raw_user_meta_data->>'role' est ignoré (modifiable par l'utilisateur via
+  -- supabase.auth.updateUser({ data: { role: 'admin' } }) → risque d'élévation).
   INSERT INTO public.profiles (user_id, display_name, role)
   VALUES (
     new.id,
@@ -50,12 +52,36 @@ BEGIN
     CASE 
       WHEN new.raw_app_meta_data->>'role' IN ('user', 'editor', 'admin') 
         THEN new.raw_app_meta_data->>'role'
-      WHEN new.raw_user_meta_data->>'role' IN ('user', 'editor', 'admin')
-        THEN new.raw_user_meta_data->>'role'
       ELSE 'user'
     END
   )
   ON CONFLICT (user_id) DO NOTHING;
+
+  -- Synchronise le rôle dans auth.users.raw_app_meta_data pour qu'il soit
+  -- embarqué dans le JWT (lu par getClaims() côté app). Garde-fou
+  -- `IS DISTINCT FROM` pour éviter un UPDATE inutile.
+  IF (new.raw_app_meta_data->>'role') IS DISTINCT FROM (
+    CASE 
+      WHEN new.raw_app_meta_data->>'role' IN ('user', 'editor', 'admin') 
+        THEN new.raw_app_meta_data->>'role'
+      ELSE 'user'
+    END
+  ) THEN
+    BEGIN
+      UPDATE auth.users
+      SET raw_app_meta_data = COALESCE(raw_app_meta_data, '{}'::jsonb)
+        || jsonb_build_object('role',
+          CASE 
+            WHEN new.raw_app_meta_data->>'role' IN ('user', 'editor', 'admin') 
+              THEN new.raw_app_meta_data->>'role'
+            ELSE 'user'
+          END
+        )
+      WHERE id = new.id;
+    EXCEPTION WHEN OTHERS THEN
+      RAISE WARNING 'Failed to sync app_metadata.role for user %: %', new.id, sqlerrm;
+    END;
+  END IF;
 
   RETURN new;
 END;

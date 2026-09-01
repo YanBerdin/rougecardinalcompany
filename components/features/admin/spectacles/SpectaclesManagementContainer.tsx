@@ -112,7 +112,7 @@ export default function SpectaclesManagementContainer({
           {spectacles.length} spectacle{spectacles.length > 1 ? "s" : ""}
         </div>
         <Button onClick={handleCreate} className="w-full sm:w-auto">
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="size-4 mr-2" />
           <span className="hidden sm:inline">Nouveau spectacle</span>
           <span className="sm:hidden">Nouveau</span>
         </Button>

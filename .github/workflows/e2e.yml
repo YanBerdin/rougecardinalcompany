@@ -1,7 +1,10 @@
 # =============================================================================
-# E2E Tests — GitHub Actions Workflow
+# Integration & E2E Tests — GitHub Actions Workflow
 #
-# Runs the full Playwright E2E suite against a local Supabase instance.
+# Runs the Vitest integration suite (RLS policies, audit triggers) and the full
+# Playwright E2E suite against a local Supabase instance.
+#
+# Lint / type-check / unit tests run separately in unit-tests.yml (every push).
 #
 # Required GitHub Secrets:
 #   SUPABASE_SERVICE_ROLE_KEY   — local Supabase service_role key
@@ -39,7 +42,7 @@ concurrency:
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
 
     steps:
       # -----------------------------------------------------------------------
@@ -74,12 +77,26 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       # -----------------------------------------------------------------------
-      # 5. Install Playwright browsers (clean install — prevents stale binary issues)
+      # 5. Install Playwright browsers (cached — keyed on Playwright version)
       # -----------------------------------------------------------------------
-      - name: Clean Playwright cache and reinstall
-        run: |
-          rm -rf ~/.cache/ms-playwright
-          pnpm exec playwright install chromium --with-deps
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(pnpm exec playwright --version | sed 's/Version //')" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ steps.playwright-version.outputs.version }}-chromium
+
+      - name: Install Playwright browsers (cache miss)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install chromium --with-deps
+
+      - name: Install Playwright OS dependencies (cache hit)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
 
       # -----------------------------------------------------------------------
       # 6. Start Supabase local
@@ -134,21 +151,12 @@ jobs:
           ENVEOF
 
       # -----------------------------------------------------------------------
-      # 9. Build Next.js
+      # 9. Run integration tests (RLS, audit triggers) against local Supabase
       # -----------------------------------------------------------------------
-      - name: Build Next.js
-        run: pnpm build
+      - name: Run integration tests
+        run: pnpm test:integration
         env:
-          SKIP_ENV_VALIDATION: "1"
-          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
-          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY: ${{ steps.supabase-keys.outputs.anon_key }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ steps.supabase-keys.outputs.service_role_key }}
-          SUPABASE_SECRET_KEY: ${{ steps.supabase-keys.outputs.service_role_key }}
-          NEXT_PUBLIC_SITE_URL: http://localhost:3000
-          RESEND_API_KEY: re_test_ci_not_a_real_key
-          EMAIL_FROM: noreply@ci.test
-          EMAIL_CONTACT: contact@ci.test
-          NEXT_PUBLIC_SENTRY_ENABLED: "false"
+          CI: "true"
 
       # -----------------------------------------------------------------------
       # 10. Run E2E tests

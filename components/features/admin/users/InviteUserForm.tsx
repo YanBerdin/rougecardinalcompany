@@ -90,7 +90,7 @@ export function InviteUserForm() {
         <CardTitle className="text-xl sm:text-2xl">Nouvelle invitation</CardTitle>
         <CardDescription className="text-sm sm:text-base">
           Invitez un nouvel utilisateur à rejoindre la plateforme. Un email
-          avec un lien d&apos;invitation lui sera envoyé.
+          avec un lien d&apos;invitation (valable 1 heure) lui sera envoyé.
         </CardDescription>
       </CardHeader>
       <CardContent className="px-4 sm:px-6 pb-6">
@@ -197,7 +197,7 @@ export function InviteUserForm() {
                 className="w-full sm:w-auto h-11 sm:h-10 text-base sm:text-sm"
               >
                 {isSubmitting && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 size-4 animate-spin" />
                 )}
                 Envoyer l&apos;invitation
               </Button>

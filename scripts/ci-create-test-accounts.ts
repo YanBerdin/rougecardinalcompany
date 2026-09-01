@@ -64,10 +64,11 @@ async function upsertAccount(account: TestAccount): Promise<void> {
   const existing = listData.users.find((u) => u.email === account.email);
 
   if (existing) {
+    // Security: role MUST be set only in app_metadata (signed JWT, server-only).
+    // user_metadata is user-modifiable and MUST NOT carry authorization data.
     const { error } = await supabase.auth.admin.updateUserById(existing.id, {
       password: account.password,
       app_metadata: { role: account.role },
-      user_metadata: { role: account.role },
     });
 
     if (error) {
@@ -76,12 +77,12 @@ async function upsertAccount(account: TestAccount): Promise<void> {
 
     console.log(`✅ Updated: ${account.email} (role=${account.role})`);
   } else {
+    // Security: role MUST be set only in app_metadata (signed JWT, server-only).
     const { error } = await supabase.auth.admin.createUser({
       email: account.email,
       password: account.password,
       email_confirm: true,
       app_metadata: { role: account.role },
-      user_metadata: { role: account.role },
     });
 
     if (error) {

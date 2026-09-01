@@ -6,14 +6,12 @@
  * Pour les tests admin (mutations), utiliser: test-dal-admin-users.ts
  * 
  * Usage:
- *   pnpm exec tsx scripts/test-all-dal-functions.ts
+ *   pnpm run test:dal                          # staging (défaut)
+ *   SUPABASE_ENV=production pnpm run test:dal  # production
  */
 
-import * as dotenv from "dotenv";
-import { resolve } from "path";
+import { describeTarget } from "./lib/load-supabase-env.js";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
-
-dotenv.config({ path: resolve(process.cwd(), ".env.local") });
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY;
@@ -28,6 +26,7 @@ if (!supabaseUrl || !publishableKey) {
 async function main() {
   console.log("═══════════════════════════════════════════════════════════");
   console.log("🧪 Test des fonctions DAL - Lecture publique (anon)");
+  console.log(`🎯 Cible: ${describeTarget()}`);
   console.log("═══════════════════════════════════════════════════════════\n");
 
   const client = createSupabaseClient(supabaseUrl!, publishableKey!);
@@ -108,11 +107,15 @@ async function main() {
     },
     {
       name: "fetchAnalyticsSummary90d (admin view)",
+      // admin-only resource: the anon key must be denied
+      expectDenied: true,
       query: () =>
         client.from("analytics_summary_90d").select("*").limit(3),
     },
     {
       name: "fetchPageviewsTimeSeries",
+      // admin-only resource: the anon key must be denied
+      expectDenied: true,
       query: () =>
         client
           .from("analytics_events")
@@ -126,8 +129,22 @@ async function main() {
   let failed = 0;
 
   for (const test of tests) {
+    const expectDenied = "expectDenied" in test && test.expectDenied === true;
+
     try {
       const { data, error } = await test.query();
+
+      if (expectDenied) {
+        if (error) {
+          console.log(`\u2705 ${test.name} - acc\u00e8s refus\u00e9 comme attendu (code: ${error.code})`);
+          passed++;
+        } else {
+          console.log(`\u274c ${test.name}`);
+          console.log("   Acc\u00e8s anon accord\u00e9 alors qu'il devait \u00eatre refus\u00e9");
+          failed++;
+        }
+        continue;
+      }
 
       if (error) {
         console.log(`❌ ${test.name}`);
@@ -152,7 +169,7 @@ async function main() {
     console.log("   pnpm exec tsx scripts/test-dal-admin-users.ts");
   } else {
     console.log(
-      `\n⚠️  ${failed} test(s) en échec. Vérifier les logs ci-dessus. ✅ Test now passes: 11/12 (only expected admin view failure)`
+      `\n⚠️  ${failed} test(s) en échec. Vérifier les logs ci-dessus.`
     );
     process.exit(1);
   }

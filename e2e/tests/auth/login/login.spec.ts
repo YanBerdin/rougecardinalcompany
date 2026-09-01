@@ -62,16 +62,11 @@ test.describe('Connexion (Login)', () => {
         expect(isEmailValid).toBe(false);
     });
 
-    // AUTH-LOGIN-005 : Lien Sign up → /auth/sign-up
-    test('AUTH-LOGIN-005 — Lien Sign up redirige vers /auth/sign-up', async ({
+    // AUTH-LOGIN-005 : Pas d'inscription publique depuis la connexion (modèle sur invitation)
+    test("AUTH-LOGIN-005 — La page de connexion n'expose pas d'inscription publique", async ({
         loginPage,
     }) => {
-        // 1. Cliquer sur le lien "Sign up"
-        await loginPage.signUpLink.click();
-
-        // 2. Vérifier la navigation vers /auth/sign-up
-        await loginPage.page.waitForURL('**/auth/sign-up**');
-        expect(loginPage.page.url()).toContain('/auth/sign-up');
+        await expect(loginPage.signUpLink).toHaveCount(0);
     });
 
     // AUTH-LOGIN-006 : Lien Forgot your password → /auth/forgot-password

@@ -26,7 +26,7 @@ export default function Error({ error, reset }: ErrorProps) {
     return (
         <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
             <div className="max-w-md text-center">
-                <AlertTriangle className="mx-auto mb-4 h-16 w-16 text-amber-500" />
+                <AlertTriangle className="mx-auto mb-4 size-16 text-amber-500" />
                 <h1 className="mb-2 text-5xl font-bold">Une erreur est survenue</h1>
                 <p className="mb-6 text-muted-foreground">
                     Nous sommes désolés, quelque chose s&apos;est mal passé. Veuillez
@@ -34,12 +34,12 @@ export default function Error({ error, reset }: ErrorProps) {
                 </p>
                 <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
                     <Button onClick={reset} variant="default">
-                        <RefreshCw className="mr-2 h-4 w-4" />
+                        <RefreshCw className="mr-2 size-4" />
                         Réessayer
                     </Button>
                     <Button variant="secondary" asChild>
                         <Link href="/">
-                            <Home className="mr-2 h-4 w-4" />
+                            <Home className="mr-2 size-4" />
                             Accueil
                         </Link>
                     </Button>

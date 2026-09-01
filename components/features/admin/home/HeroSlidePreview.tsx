@@ -24,11 +24,14 @@ export function HeroSlidePreview({ slide }: HeroSlidePreviewProps) {
             <div className="space-y-2">
                 <div className="flex items-start justify-between gap-2">
                     <h3 className="font-semibold text-base leading-tight line-clamp-2">{slide.title}</h3>
-                    {slide.active ? (
-                        <Badge variant="default" className="shrink-0">Active</Badge>
-                    ) : (
-                        <Badge variant="secondary" className="shrink-0">Inactive</Badge>
-                    )}
+                    <div className="flex items-center gap-1 shrink-0">
+                        {slide.video_url && <Badge variant="secondary">Vidéo</Badge>}
+                        {slide.active ? (
+                            <Badge variant="default">Active</Badge>
+                        ) : (
+                            <Badge variant="secondary">Inactive</Badge>
+                        )}
+                    </div>
                 </div>
 
                 {slide.subtitle && (

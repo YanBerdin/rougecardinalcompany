@@ -15,19 +15,20 @@
 --   select public.reorder_team_members('[{"id":12,"ordre":1},{"id":45,"ordre":2}]'::jsonb);
 
 /*
- * Security Model: SECURITY DEFINER
+ * Security Model: SECURITY INVOKER
  * 
  * Rationale:
  *   1. Allows controlled atomic updates to membres_equipe.ordre column
- *   2. Bypasses RLS to perform batch updates efficiently
+ *   2. S'exécute avec les droits de l'appelant : les policies RLS de membres_equipe
+ *      s'appliquent normalement, donc aucun contournement possible
  *   3. Uses advisory locking to prevent concurrent reordering conflicts
- *   4. Must work regardless of individual row-level permissions
+ *   4. Le contrôle is_admin() interne fournit une défense en profondeur
  * 
  * Risks Evaluated:
  *   - Authorization: Explicit is_admin() check enforces admin-only access (defense-in-depth)
  *   - Input validation: Validates JSON array structure, checks for duplicate IDs/ordre values
  *   - Concurrency: Advisory lock (hashtext('reorder_team_members')) prevents race conditions
- *   - SQL injection: Uses parameterized queries with format() and $1 placeholder
+ *   - SQL injection: le SQL dynamique n'interpole que des valeurs castées en int
  *   - Data integrity: Atomic transaction ensures all-or-nothing updates
  * 
  * Validation:

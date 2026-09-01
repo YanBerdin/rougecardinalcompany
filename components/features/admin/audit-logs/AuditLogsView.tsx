@@ -116,7 +116,7 @@ export function AuditLogsView({
                         disabled={isPending}
                         className="flex-1 sm:flex-none min-w-[120px]"
                     >
-                        <RefreshCw className={`mr-2 h-4 w-4 ${isPending ? "animate-spin" : ""}`} />
+                        <RefreshCw className={`mr-2 size-4 ${isPending ? "animate-spin" : ""}`} />
                         <span className="hidden sm:inline">Rafraîchir</span>
                         <span className="sm:hidden">Refresh</span>
                     </Button>
@@ -127,7 +127,7 @@ export function AuditLogsView({
                         disabled={isExporting}
                         className="flex-1 sm:flex-none min-w-[120px]"
                     >
-                        <Download className="mr-2 h-4 w-4" />
+                        <Download className="mr-2 size-4" />
                         {isExporting ? "Export..." : "Export CSV"}
                     </Button>
                 </div>

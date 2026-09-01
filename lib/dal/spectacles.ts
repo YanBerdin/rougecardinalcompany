@@ -20,6 +20,7 @@ import {
   type DALResult,
   getErrorMessage,
   generateSlug,
+  isDynamicServerError,
 } from "@/lib/dal/helpers";
 
 // ============================================================================
@@ -48,6 +49,12 @@ export type SpectacleNextVenue = {
   code_postal: string | null;
   latitude: number | null;
   longitude: number | null;
+};
+
+export type SpectacleTicketInfo = {
+  priceCents: number | null;
+  priceReducedCents: number | null;
+  capacity: number | null;
 };
 
 export const fetchSpectacleNextVenue = cache(
@@ -86,6 +93,7 @@ export const fetchSpectacleNextVenue = cache(
         longitude: typeof lieu.longitude === "number" ? lieu.longitude : null,
       };
     } catch (err) {
+      if (isDynamicServerError(err)) throw err;
       console.error("fetchSpectacleNextVenue exception:", err);
       return null;
     }
@@ -124,7 +132,46 @@ export const fetchSpectacleTicketUrl = cache(
 
       return data.ticket_url ?? null;
     } catch (err) {
+      if (isDynamicServerError(err)) throw err;
       console.error("fetchSpectacleTicketUrl exception:", err);
+      return null;
+    }
+  }
+);
+
+/**
+ * Fetches pricing and capacity information from the next upcoming event of a spectacle.
+ *
+ * Returns the closest future event regardless of ticket URL presence.
+ */
+export const fetchSpectacleTicketInfo = cache(
+  async (spectacleId: number): Promise<SpectacleTicketInfo | null> => {
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from("evenements")
+        .select("price_cents, price_reduced_cents, capacity")
+        .eq("spectacle_id", spectacleId)
+        .gte("date_debut", new Date().toISOString())
+        .order("date_debut", { ascending: true })
+        .limit(1)
+        .single();
+
+      if (error) {
+        if (error.code !== "PGRST116") {
+          console.error("fetchSpectacleTicketInfo error:", error);
+        }
+        return null;
+      }
+
+      return {
+        priceCents: data.price_cents ?? null,
+        priceReducedCents: data.price_reduced_cents ?? null,
+        capacity: data.capacity ?? null,
+      };
+    } catch (err) {
+      if (isDynamicServerError(err)) throw err;
+      console.error("fetchSpectacleTicketInfo exception:", err);
       return null;
     }
   }
@@ -169,6 +216,7 @@ export const fetchTicketUrlsForSpectacles = cache(
 
       return result;
     } catch (err) {
+      if (isDynamicServerError(err)) throw err;
       console.error("fetchTicketUrlsForSpectacles exception:", err);
       return result;
     }
@@ -220,6 +268,7 @@ export const fetchEventDateRangesForSpectacles = cache(
 
       return result;
     } catch (err) {
+      if (isDynamicServerError(err)) throw err;
       console.error("fetchEventDateRangesForSpectacles exception:", err);
       return result;
     }
@@ -279,6 +328,7 @@ export const fetchAllSpectacles = cache(
 
       return validRows;
     } catch (err) {
+      if (isDynamicServerError(err)) throw err;
       console.error("fetchAllSpectacles exception:", err);
       return [];
     }
@@ -333,6 +383,7 @@ export const fetchSpectacleById = cache(
 
       return parsed.data;
     } catch (err) {
+      if (isDynamicServerError(err)) throw err;
       console.error("fetchSpectacleById exception:", err);
       return null;
     }
@@ -394,6 +445,7 @@ export const fetchSpectacleBySlug = cache(
 
       return parsed.data;
     } catch (err) {
+      if (isDynamicServerError(err)) throw err;
       console.error("fetchSpectacleBySlug exception:", err);
       return null;
     }
@@ -436,6 +488,7 @@ export const fetchDistinctGenres = cache(async (): Promise<string[]> => {
 
     return uniqueGenres.sort((a, b) => a.localeCompare(b, "fr"));
   } catch (error) {
+    if (isDynamicServerError(error)) throw error;
     console.error("[DAL] fetchDistinctGenres exception:", error);
     return [];
   }

@@ -173,7 +173,7 @@ export function MediaBulkActions({
                                 className="h-9 w-9 text-foreground hover:bg-muted hover:text-foreground focus:ring-2 focus:ring-primary focus:ring-offset-2 shrink-0"
                                 aria-label="Annuler la sélection"
                             >
-                                <X className="h-4 w-4" />
+                                <X className="size-4" />
                                 <span className="sr-only">Annuler la sélection</span>
                             </Button>
                         </div>
@@ -181,7 +181,7 @@ export function MediaBulkActions({
                         {/* Source folders info */}
                         {sourceFolders.length > 0 && (
                             <div className="sm:flex items-center gap-1.5 text-xs text-muted-foreground shrink-0">
-                                <Folder className="h-3 w-3 shrink-0" aria-hidden="true" />
+                                <Folder className="size-3 shrink-0" aria-hidden="true" />
                                 <span className="truncate max-w-[120px]" title={sourceFolders.join(", ")}>
                                     {sourceFolders.length === 1
                                         ? sourceFolders[0]
@@ -220,7 +220,7 @@ export function MediaBulkActions({
                                 className="h-9 px-3 text-sm font-medium whitespace-nowrap shrink-0"
                                 aria-label={`Déplacer ${count} média${count > 1 ? 's' : ''} vers le dossier sélectionné`}
                             >
-                                <FolderOpen className="h-4 w-4 sm:mr-1.5" />
+                                <FolderOpen className="size-4 sm:mr-1.5" />
                                 <span className="hidden sm:inline">Déplacer</span>
                             </Button>
                         </div>
@@ -235,7 +235,7 @@ export function MediaBulkActions({
                             aria-label={`Supprimer ${count} média${count > 1 ? 's' : ''} sélectionné${count > 1 ? 's' : ''}`}
                             title={`Supprimer ${count} média${count > 1 ? 's' : ''} sélectionné${count > 1 ? 's' : ''}`}
                         >
-                            <Trash2 className="h-4 w-4 sm:mr-1.5" />
+                            <Trash2 className="size-4 sm:mr-1.5" />
                             <span className="hidden sm:inline">Supprimer</span>
                         </Button>
                     </div>

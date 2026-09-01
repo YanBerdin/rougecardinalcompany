@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { requireMinRole } from "@/lib/auth/roles";
+import { requireBackofficePageAccess } from "@/lib/auth/roles";
 import { ArrowLeft, Images } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ interface Props {
 
 export default async function EditSpectaclePage({ params }: Props) {
   const { id } = await params;
-  await requireMinRole("editor");
+  await requireBackofficePageAccess();
 
   // Parse and validate ID
   const spectacleId = parseInt(id, 10);
@@ -64,13 +64,13 @@ export default async function EditSpectaclePage({ params }: Props) {
           <Link href={`/admin/spectacles/${spectacle.id}#gallery`}>
             <Button variant="default" size="default"
               title="Gérer la galerie de photos du spectacle">
-              <Images className="h-4 w-4" />
+              <Images className="size-4" />
               Galerie
             </Button>
           </Link>
           <Link href={`/admin/spectacles/${spectacle.id}`}>
             <Button variant="outline" size="default">
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="size-4" />
               Retour
             </Button>
           </Link>

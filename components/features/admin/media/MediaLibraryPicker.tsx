@@ -127,7 +127,7 @@ export function MediaLibraryPicker({
                 <div className="flex flex-col flex-1 gap-4 overflow-hidden min-h-0">
                     {/* Search input */}
                     <div className="relative flex-shrink-0">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" aria-hidden="true" />
                         <Input
                             placeholder="Rechercher par nom ou description..."
                             value={query}
@@ -141,11 +141,11 @@ export function MediaLibraryPicker({
                     <div className="flex-1 overflow-y-auto min-h-0">
                         {loading ? (
                             <div className="flex items-center justify-center h-[300px]">
-                                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                                <Loader2 className="size-8 animate-spin text-muted-foreground" />
                             </div>
                         ) : items.length === 0 ? (
                             <div className="flex flex-col items-center justify-center h-[300px] text-muted-foreground">
-                                <ImageIcon className="h-12 w-12 mb-2" />
+                                <ImageIcon className="size-12 mb-2" />
                                 <p>Aucune image trouvée</p>
                                 {query && (
                                     <p className="text-sm">
@@ -180,7 +180,7 @@ export function MediaLibraryPicker({
                                         {selectedItem?.id === item.id && (
                                             <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
                                                 <div className="bg-primary text-primary-foreground rounded-full p-1">
-                                                    <Check className="h-4 w-4" />
+                                                    <Check className="size-4" />
                                                 </div>
                                             </div>
                                         )}

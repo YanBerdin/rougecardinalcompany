@@ -55,7 +55,7 @@ export function MediaCardFooter({ media }: MediaCardFooterProps) {
                     className="flex items-center gap-1.5 text-sm text-muted-foreground"
                     title={media.folder?.name ?? "Uploads génériques"}
                 >
-                    <Folder className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
+                    <Folder className="size-5 flex-shrink-0" aria-hidden="true" />
                     <span className="truncate">
                         {media.folder?.name ?? "Uploads génériques"}
                     </span>
@@ -66,7 +66,7 @@ export function MediaCardFooter({ media }: MediaCardFooterProps) {
                         className="flex items-center gap-1.5 text-md font-bold text-emerald-600 dark:text-emerald-400 justify-end"
                         title={`Utilisé dans: ${media.usage_locations?.join(", ") ?? ""}`}
                     >
-                        <Eye className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
+                        <Eye className="size-5 flex-shrink-0" aria-hidden="true" />
                         <span className="truncate">Utilisé sur le site</span>
                     </div>
                 )}

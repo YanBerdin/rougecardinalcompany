@@ -16,10 +16,9 @@ const FOUNDER_BIO: readonly string[] = [
 type Milestone = { readonly year: string; readonly label: string };
 
 const MILESTONES: readonly Milestone[] = [
-    { year: "2022", label: "L'Avare - Comédie-Française" },
-    { year: "2023", label: "Gala de l'Opéra de Lorraine" },
-    { year: "2024", label: "Le Grand Meaulnes - scène" },
-    { year: "2025", label: "Exposition photo - Paris" },
+    { year: "2023", label: "Sacontala - Calidasa" },
+    { year: "2025", label: "Nouveaux Mondes - Exposition photo" },
+    { year: "2026", label: "La Farce de Maître Pathelin - Anonyme" },
 ];
 
 export function SectionFounder({ section }: SectionRendererProps): ReactElement {
@@ -27,7 +26,7 @@ export function SectionFounder({ section }: SectionRendererProps): ReactElement 
         <section
             id="founder"
             aria-labelledby="heading-founder"
-            className="py-24 max-sm:py-12 bg-chart-7 overflow-hidden relative"
+            className="py-24 xl:py-32 bg-chart-7 overflow-hidden relative"
         >
             <div
                 className="absolute inset-0 opacity-5 pointer-events-none mix-blend-overlay"

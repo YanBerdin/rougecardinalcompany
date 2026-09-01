@@ -13,13 +13,13 @@ import type { PresentationSectionDTO } from "@/lib/schemas/compagnie-admin";
 type SectionItem = Omit<PresentationSectionDTO, "id"> & { id: string };
 
 const KIND_LABELS: Record<string, string> = {
-    hero: "Héro",
-    history: "Histoire",
+    hero: "Titre Page",
+    history: "Historique",
     quote: "Citation",
+    mission: "Mission",
     values: "Valeurs",
     team: "Équipe",
-    mission: "Mission",
-    custom: "Personnalisé",
+    custom: "Fondateur",
 };
 
 export function PresentationView({ initialSections }: PresentationViewProps) {
@@ -52,8 +52,8 @@ export function PresentationView({ initialSections }: PresentationViewProps) {
                 </p>
                 <Link href="/admin/compagnie/presentation">
                     <Button variant="outline" size="sm" className="gap-1">
-                        <Eye className="h-4 w-4" aria-hidden="true" />
-                        <span className="hidden sm:inline">Visualiser</span>
+                        <Eye className="size-4" aria-hidden="true" />
+                        <span className="hidden sm:inline">Résumé</span>
                     </Button>
                 </Link>
             </div>
@@ -100,7 +100,7 @@ export function PresentationView({ initialSections }: PresentationViewProps) {
                                 aria-label={`Modifier la section ${section.title ?? section.kind}`}
                                 className="max-sm:h-10 max-sm:self-stretch"
                             >
-                                <Pencil className="h-4 w-4" aria-hidden="true" />
+                                <Pencil className="size-4" aria-hidden="true" />
                                 <span className="sm:hidden">Modifier</span>
                             </Button>
                         </li>

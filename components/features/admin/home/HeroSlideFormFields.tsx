@@ -28,6 +28,7 @@ export function HeroSlideFormFields({ form }: HeroSlideFormFieldsProps) {
             <TitleField form={form} />
             <SubtitleField form={form} characterCount={subtitleValue.length} />
             <DescriptionField form={form} characterCount={descriptionValue.length} />
+            <VideoUrlField form={form} />
         </>
     );
 }
@@ -106,6 +107,32 @@ function DescriptionField({ form, characterCount }: FieldWithCountProps) {
                     </FormControl>
                     <FormDescription className="text-xs sm:text-sm">
                         {characterCount}/{HERO_SLIDE_LIMITS.DESCRIPTION_MAX_LENGTH} caractères
+                    </FormDescription>
+                    <FormMessage />
+                </FormItem>
+            )}
+        />
+    );
+}
+
+function VideoUrlField({ form }: HeroSlideFormFieldsProps) {
+    return (
+        <FormField
+            control={form.control}
+            name="video_url"
+            render={({ field }) => (
+                <FormItem>
+                    <FormLabel className="text-sm sm:text-base">URL vidéo (optionnel)</FormLabel>
+                    <FormControl>
+                        <Input
+                            {...field}
+                            type="text"
+                            placeholder="https://... ou /video.mp4"
+                            className="h-10 sm:h-11 text-base"
+                        />
+                    </FormControl>
+                    <FormDescription className="text-xs sm:text-sm">
+                        Chemin relatif (/video.mp4) ou URL absolue (https://...)
                     </FormDescription>
                     <FormMessage />
                 </FormItem>

@@ -42,14 +42,9 @@ export function HeroSkeleton() {
           {/* Buttons skeleton */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
             <Skeleton className="h-12 w-48 bg-white/15" />
-            <Skeleton className="h-12 w-56 bg-white/10" />
           </div>
         </div>
       </div>
-
-      {/* Navigation arrows skeleton */}
-      <Skeleton className="absolute left-4 top-1/2 transform -translate-y-1/2 w-12 h-12 rounded-full bg-white/20" />
-      <Skeleton className="absolute right-4 top-1/2 transform -translate-y-1/2 w-12 h-12 rounded-full bg-white/20" />
 
       {/* Progress bar skeleton */}
       <div className="absolute bottom-0 left-0 right-0 h-1">

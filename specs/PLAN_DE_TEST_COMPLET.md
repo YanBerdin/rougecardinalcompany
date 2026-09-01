@@ -377,9 +377,9 @@ Ce plan de test couvre l'intégralité du site web de la Compagnie Rouge Cardina
 
 | ID | Scénario | Préconditions | Étapes | Résultat attendu | Priorité |
 | ---- | ---------- | --------------- | -------- | ------------------- | ---------- |
-| ADM-CONFIG-001 | Liste des toggles | Connecté admin | 1. Naviguer vers `/admin/site-config` | 10 toggles organisés en 4 groupes : Page d'Accueil (6), Page Presse (2), Page Agenda (1), Page Contact (1) | P0 |
-| ADM-CONFIG-002 | Désactiver un toggle | Toggle `home_hero` activé | 1. Désactiver le toggle `home_hero` 2. Naviguer vers `/` | La section hero n'apparaît plus sur la page d'accueil | P0 |
-| ADM-CONFIG-003 | Réactiver un toggle | Toggle `home_hero` désactivé | 1. Réactiver le toggle 2. Naviguer vers `/` | La section hero réapparaît | P0 |
+| ADM-CONFIG-001 | Liste des toggles | Connecté admin | 1. Naviguer vers `/admin/site-config` | 9 toggles organisés en 4 groupes : Page d'Accueil (5), Page Presse (2), Page Agenda (1), Page Contact (1) | P0 |
+| ~~ADM-CONFIG-002~~ | _Supprimé (TASK089)_ — le toggle `home_hero` n'existe plus | — | — | — | — |
+| ~~ADM-CONFIG-003~~ | _Supprimé (TASK089)_ — le toggle `home_hero` n'existe plus | — | — | — | — |
 | ADM-CONFIG-004 | Toggle Page d'Accueil — À la une | Toggle `home_a_la_une` | 1. Désactiver 2. Vérifier `/` 3. Réactiver 4. Vérifier `/` | La section "À la une" est masquée/affichée selon le toggle | P1 |
 | ADM-CONFIG-005 | Toggle Page d'Accueil — About | Toggle `home_about` | 1. Désactiver 2. Vérifier `/` | La section chiffres clés est masquée | P1 |
 | ADM-CONFIG-006 | Toggle Page d'Accueil — Partenaires | Toggle `home_partners` | 1. Désactiver 2. Vérifier `/` | La section partenaires est masquée | P1 |

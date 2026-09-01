@@ -17,10 +17,12 @@ create table public.articles_presse (
   og_image_media_id bigint references public.medias(id) on delete set null, -- Image SEO/Open Graph via Media Library
   created_at timestamptz default now() not null,
   updated_at timestamptz default now() not null,
-  search_vector tsvector
+  search_vector tsvector,
+  display_order integer not null default 0
 );
 
 comment on table public.articles_presse is 'press articles referencing shows or company news';
+comment on column public.articles_presse.display_order is 'manual display order for admin drag-and-drop reordering; also drives public sort order on /presse and the homepage "À la une" widget';
 
 alter table public.articles_presse enable row level security;
 
@@ -51,9 +53,10 @@ where published_at is not null;
 comment on view public.articles_presse_public is 
 'Public view of published press articles - bypasses RLS issues with JWT signing keys. SECURITY INVOKER: Runs with querying user privileges (not definer). Used by anon/authenticated users to access published articles without triggering RLS policy evaluation delays.';
 
--- NOTE: Public grant removed. To allow authenticated users to read the
--- view, add an explicit GRANT to the 'authenticated' role in a controlled
--- migration after reviewing security implications.
+-- GRANTs are not captured by `supabase db diff`; any migration that recreates
+-- this view MUST repeat these statements (DROP VIEW resets the ACL).
+revoke all on public.articles_presse_public from anon, authenticated;
+grant select on public.articles_presse_public to anon, authenticated, service_role;
 
 -- Public can read only published articles
 drop policy if exists "Public press articles are viewable by everyone" on public.articles_presse;

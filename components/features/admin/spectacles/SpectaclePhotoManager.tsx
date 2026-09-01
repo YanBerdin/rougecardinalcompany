@@ -189,7 +189,7 @@ export function SpectaclePhotoManager({
                                         disabled={isPending}
                                         className=""
                                     >
-                                        <Trash2 className="h-4 w-4" />
+                                        <Trash2 className="size-4" />
                                     </Button>
                                 )}
                             </div>
@@ -207,7 +207,7 @@ export function SpectaclePhotoManager({
                             ) : (
                                 <div className="aspect-video rounded-lg border-2 border-dashed border-muted-foreground/25 flex items-center justify-center bg-muted/50">
                                     <div className="text-center text-muted-foreground">
-                                        <ImagePlus className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                                        <ImagePlus className="size-12 mx-auto mb-2 opacity-50" />
                                         <p className="text-sm">Aucune photo</p>
                                     </div>
                                 </div>
@@ -222,7 +222,7 @@ export function SpectaclePhotoManager({
                                     disabled={isPending || isLoading || slot.photo !== null}
                                     className="flex-1"
                                 >
-                                    <ImagePlus className="h-4 w-4 mr-2" />
+                                    <ImagePlus className="size-4 mr-2" />
                                     Médiathèque
                                 </Button>
                                 <Button
@@ -233,7 +233,7 @@ export function SpectaclePhotoManager({
                                     disabled={isPending || isLoading || slot.photo !== null}
                                     className="flex-1"
                                 >
-                                    <Upload className="h-4 w-4 mr-2" />
+                                    <Upload className="size-4 mr-2" />
                                     Téléverser
                                 </Button>
                             </div>

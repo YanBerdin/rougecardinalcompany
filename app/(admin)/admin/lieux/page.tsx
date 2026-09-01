@@ -1,4 +1,4 @@
-import { requireMinRole } from "@/lib/auth/roles";
+import { requireBackofficePageAccess } from "@/lib/auth/roles";
 import { LieuxContainer } from "@/components/features/admin/lieux/LieuxContainer";
 import type { Metadata } from "next";
 
@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function LieuxPage() {
-    await requireMinRole("editor");
+    await requireBackofficePageAccess();
 
     return <LieuxContainer />;
 }

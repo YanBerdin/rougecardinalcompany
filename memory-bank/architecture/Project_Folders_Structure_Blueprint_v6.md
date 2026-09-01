@@ -1,9 +1,11 @@
 # Project Folders Structure Blueprint
 
-> **Version:** 6.0  
-> **Date:** 2026-07-11  
-> **Repository:** Rouge Cardinal Company  
-> **Total source files:** ~1 281 (.ts, .tsx, .js, .sql, .css, .md)
+> **Version:** 6.1
+> **Date:** 2026-08-20
+> **Repository:** Rouge Cardinal Company
+> **Total source files:** ~1 690 (.ts, .tsx, .js, .sql, .css, .md — hors node_modules, .next, doc-perso)
+>
+> **Changelog v6.1 (2026-08-20)** : Next.js 16.1.5 → 16.3.0 (correctif upstream Sharp/nft, TASK200) · correction TailwindCSS 4 → 3.4 (erreur v6.0) · nouvelle section admin `footer` (TASK095) · pages légales statiques `mentions-legales` / `politique-confidentialite` / `cookies` (TASK098) · Metadata Routes `sitemap.ts` / `robots.ts` / `manifest.ts` + icônes PWA (TASK107) · Server Actions racine renommées `*.actions.ts` · nouveaux modules DAL (`media-url-sync`, `media-move`, `footer-config`, `team-hard-delete`, `team-reorder`) · `lib/api/` + `lib/env-validation.ts` · `lib/auth/is-admin.ts` supprimé (TASK096) · 10 workflows CI/CD · graphe sémantique `graphify-out/` · workaround Sharp `outputFileTracingIncludes` (TASK104)
 
 ---
 
@@ -14,11 +16,14 @@
 | Property              | Value                                                       |
 | --------------------- | ----------------------------------------------------------- |
 | **Project Type**      | Full-stack Web Application                                  |
-| **Framework**         | Next.js 16.1.5 (App Router, Turbopack)                      |
+| **Framework**         | Next.js 16.3.0 (App Router, Turbopack)                      |
 | **UI Framework**      | React 19.2.0                                                |
 | **Language**          | TypeScript (strict mode, ES2017 target, bundler resolution) |
 | **Backend/Database**  | Supabase (PostgreSQL, Auth, Storage, Edge Functions)        |
-| **Styling**           | TailwindCSS 4 + shadcn/ui + Radix UI                        |
+| **Styling**           | TailwindCSS 3.4 + shadcn/ui + Radix UI                      |
+| **Validation**        | Zod 4 (schémas Server + UI)                                 |
+| **Tests**             | Vitest 4 (unit) + Playwright 1.57 (E2E)                     |
+| **Images**            | Sharp 0.35 (compression + thumbnails, server-externalized)  |
 | **Package Manager**   | pnpm (ESM "type": "module")                                 |
 | **Monorepo**          | No — Single application                                     |
 | **Microservices**     | No — Server-first monolith with Supabase backend            |
@@ -44,11 +49,15 @@
 
 ```bash
 rougecardinalcompany/
-├── app/                            # Next.js App Router — routing, layouts, pages
+├── app/                            # Next.js App Router — routing, layouts, pages (125 fichiers)
 │   ├── layout.tsx                  # Root layout: HTML shell + ThemeProvider
 │   ├── globals.css                 # Global TailwindCSS styles
 │   ├── error.tsx                   # Page-level error boundary
 │   ├── global-error.tsx            # Root-level error boundary (Sentry)
+│   ├── sitemap.ts                  # Metadata Route: sitemap XML statique, 9 URLs publiques (TASK107)
+│   ├── robots.ts                   # Metadata Route: robots.txt → /sitemap.xml
+│   ├── manifest.ts                 # Metadata Route: PWA manifest
+│   ├── favicon.ico / icon1.png / icon2.png / apple-icon.png / twitter-image.png  # Icônes PWA & OG
 │   │
 │   ├── (admin)/                    # Route group — admin zone (protected)
 │   │   ├── layout.tsx              # Admin layout: AppSidebar + auth guard
@@ -58,6 +67,7 @@ rougecardinalcompany/
 │   │       ├── audit-logs/         # System audit trail
 │   │       ├── compagnie/          # Company info (presentation, valeurs)
 │   │       ├── debug-auth/         # Auth/RLS diagnostic tools
+│   │       ├── footer/             # Footer & coordonnées admin (TASK095)
 │   │       ├── home/               # Homepage admin (about, hero)
 │   │       ├── lieux/              # CRUD: venues
 │   │       ├── media/              # Media library (library, folders, tags)
@@ -76,12 +86,16 @@ rougecardinalcompany/
 │   │   ├── contact/                # Contact form
 │   │   ├── presse/                 # Press / media kit
 │   │   ├── spectacles/             # Shows listing + [slug] detail
-│   │   └── auth/setup-account/     # Account setup flow
+│   │   ├── mentions-legales/       # Pages légales statiques (TASK098, RGPD)
+│   │   ├── politique-confidentialite/
+│   │   ├── cookies/
+│   │   ├── protected/              # Page protégée (démo auth)
+│   │   └── auth/                   # accept-invitation/ + setup-account/
 │   │
-│   ├── actions/                    # Root-level server actions
-│   │   ├── analytics.ts            # Analytics tracking
-│   │   ├── contact.ts              # Contact form submission
-│   │   └── newsletter.ts           # Newsletter subscription
+│   ├── actions/                    # Root-level server actions (public, suffixe .actions.ts)
+│   │   ├── analytics.actions.ts    # Analytics tracking
+│   │   ├── contact.actions.ts      # Contact form submission
+│   │   └── newsletter.actions.ts   # Newsletter subscription
 │   │
 │   ├── api/                        # API Route Handlers
 │   │   ├── admin/media/            # Media search + thumbnail generation
@@ -96,41 +110,47 @@ rougecardinalcompany/
 │       ├── confirm/                # Email confirmation
 │       ├── login/                  # Login page
 │       ├── sign-up/                # Registration
+│       ├── sign-up-success/        # Post-registration confirmation
 │       ├── forgot-password/        # Password reset request
-│       └── update-password/        # Password update
+│       ├── update-password/        # Password update
+│       └── error/                  # Auth error page
 │
-├── components/                     # React component library (326 files)
-│   ├── features/                   # Feature-scoped components (237 files)
+├── components/                     # React component library (352 fichiers)
+│   ├── features/                   # Feature-scoped components (262 fichiers)
 │   │   ├── admin/                  # Admin feature components
 │   │   │   ├── agenda/             # Event management UI
 │   │   │   ├── analytics/          # Charts, stats, tracking
 │   │   │   ├── audit-logs/         # Audit log viewer
 │   │   │   ├── compagnie/          # Company editor
+│   │   │   ├── footer/             # Footer & coordonnées editor
 │   │   │   ├── home/               # Homepage admin (hero, about)
 │   │   │   ├── lieux/              # Venue CRUD UI
-│   │   │   ├── media/              # Media library UI (30+ files)
+│   │   │   ├── media/              # Media library UI (30+ fichiers)
 │   │   │   ├── partners/           # Partners CRUD UI
 │   │   │   ├── presse/             # Press management UI
+│   │   │   ├── shared/             # Composants admin partagés (AutoSaveIndicator)
 │   │   │   ├── site-config/        # Display toggles UI
 │   │   │   ├── spectacles/         # Show CRUD UI
 │   │   │   ├── team/               # Team CRUD UI
 │   │   │   └── users/              # User management UI
 │   │   ├── public-site/            # Public-facing feature components
 │   │   │   ├── agenda/             # Public events list
-│   │   │   ├── compagnie/          # Company sections
+│   │   │   ├── compagnie/          # Company sections (+ SectionFounder statique)
 │   │   │   ├── contact/            # Contact form components
+│   │   │   ├── legal/              # Pages légales (mentions, confidentialité, cookies)
 │   │   │   ├── home/               # Homepage sections
 │   │   │   │   ├── about/          # About section
 │   │   │   │   ├── hero/           # Hero carousel
 │   │   │   │   ├── news/           # News section
 │   │   │   │   ├── newsletter/     # Newsletter form
 │   │   │   │   ├── partners/       # Partners logos
-│   │   │   │   └── shows/          # Shows preview
+│   │   │   │   ├── shows/          # Shows preview
+│   │   │   │   └── team/           # Team section (HomeTeamContainer)
 │   │   │   ├── presse/             # Press landing components
 │   │   │   └── spectacles/         # Show details
 │   │   └── analytics/              # PageViewTracker
 │   │
-│   ├── ui/                         # shadcn/ui primitives (33 files)
+│   ├── ui/                         # shadcn/ui primitives (33 fichiers)
 │   │   ├── button.tsx              # Alert-dialog, avatar, badge, ...
 │   │   └── ...                     # Calendar, card, dialog, ...
 │   │
@@ -147,18 +167,18 @@ rougecardinalcompany/
 │   │
 │   ├── layout/                     # Shared layout components
 │   │   ├── header.tsx              # Public site header
-│   │   └── footer.tsx              # Public site footer
+│   │   └── footer.tsx              # Public site footer (config DB via configurations_site)
 │   │
-│   ├── skeletons/                  # Loading state placeholders (20 files)
+│   ├── skeletons/                  # Loading state placeholders (21 fichiers)
 │   │
 │   ├── auth/                       # Auth-specific components
 │   ├── LogoCloud/                  # Logo cloud display
 │   └── LogoCloudModel/             # Logo data model
 │
-├── lib/                            # Core application library (122 files)
-│   ├── dal/                        # Data Access Layer (44 files, server-only)
+├── lib/                            # Core application library (138 fichiers)
+│   ├── dal/                        # Data Access Layer (48 fichiers, server-only)
 │   │   ├── helpers/                # Centralized DAL utilities
-│   │   │   ├── error.ts            # DALResult<T> type + dalSuccess/dalError
+│   │   │   ├── error.ts            # DALResult<T> + dalSuccess/dalError + isDynamicServerError
 │   │   │   ├── format.ts           # Formatting helpers
 │   │   │   ├── media-url.ts        # buildMediaPublicUrl (T3 Env)
 │   │   │   ├── serialize.ts        # BigInt serialization
@@ -166,63 +186,74 @@ rougecardinalcompany/
 │   │   │   └── index.ts            # Barrel exports
 │   │   ├── fallback/               # Fallback data providers
 │   │   ├── admin-*.ts              # Admin-scoped DAL modules (17+)
-│   │   ├── home-*.ts               # Homepage sections DAL (5)
-│   │   ├── team.ts                 # Team management DAL
+│   │   ├── home-*.ts               # Homepage sections DAL (6)
+│   │   ├── media-*.ts              # Media DAL (move, thumbnail, url-sync, usage)
+│   │   ├── footer-config.ts        # Footer & coordonnées DAL
+│   │   ├── team.ts / team-reorder.ts / team-hard-delete.ts
 │   │   ├── spectacles.ts           # Public shows DAL
-│   │   ├── media.ts                # Media library DAL
-│   │   └── ...                     # 37 total DAL modules
+│   │   └── ...                     # 48 modules DAL au total
 │   │
-│   ├── schemas/                    # Zod validation schemas (24 files)
-│   │   ├── team.ts                 # Server (bigint) + UI (number) schemas
-│   │   ├── media.ts                # MIME types, upload validation
-│   │   └── ...                     # One per domain feature
+│   ├── schemas/                    # Zod validation schemas (26 fichiers)
+│   │   ├── auth.ts                 # PasswordSchema (TASK096)
+│   │   ├── footer-config.ts        # Footer config schemas
+│   │   └── ...                     # Un fichier par domaine (Server + UI variants)
 │   │
-│   ├── actions/                    # Server action helpers (11 files)
-│   │   ├── media-actions.ts        # Media CRUD + upload pipeline
+│   ├── actions/                    # Server action helpers (13 fichiers)
+│   │   ├── auth-setup-actions.ts   # setupAccountAction (TASK096)
+│   │   ├── footer-config-actions.ts
+│   │   ├── media-actions.ts        # Media CRUD + upload pipeline (compression Sharp)
 │   │   ├── media-bulk-actions.ts   # Bulk operations
 │   │   ├── site-config-actions.ts  # Display toggle mutations
 │   │   ├── types.ts                # ActionResult type
 │   │   └── ...
 │   │
-│   ├── hooks/                      # Client-side React hooks (10 files)
+│   ├── api/                        # Helpers API partagés (helpers.ts)
+│   │
+│   ├── hooks/                      # Client-side React hooks (13 fichiers)
 │   │   ├── use-debounce.ts         # Input debouncing
-│   │   ├── use-mobile.ts           # Mobile detection
-│   │   ├── use-newsletter-subscribe.ts
+│   │   ├── use-form-autosave.ts    # Auto-save générique type Google Docs
+│   │   ├── use-press-release-autosave.ts
+│   │   ├── use-prefers-reduced-motion.ts
+│   │   ├── useArticlesDnd.ts       # DnD articles de presse
 │   │   └── ...
 │   │
-│   ├── utils/                      # Utility functions (11 files)
+│   ├── utils/                      # Utility functions (14 fichiers)
 │   │   ├── mime-verify.ts          # Magic bytes file validation
+│   │   ├── image-compress.ts       # Compression Sharp (TASK087)
+│   │   ├── google-maps.ts          # buildGoogleMapsUrl
+│   │   ├── validate-invitation-url.ts  # Anti open-redirect (CodeQL #30)
+│   │   ├── with-display-toggle.tsx # RSC helper pour display toggles
 │   │   ├── rate-limit.ts           # API rate limiting
-│   │   ├── file-hash.ts            # File integrity hashing
 │   │   └── ...
 │   │
-│   ├── auth/                       # Role-based auth guards (roles.ts, role-helpers.ts)
+│   ├── auth/                       # Role guards (roles.ts, role-helpers.ts — is-admin.ts supprimé)
 │   ├── email/                      # Email service (actions.ts, types.ts)
 │   ├── services/                   # External services (sentry-api.ts)
 │   ├── sentry/                     # Sentry integration (capture-error.ts)
-│   ├── tables/                     # Table column helpers (5 files)
+│   ├── tables/                     # Table column helpers (5 fichiers)
 │   ├── forms/                      # Form helpers
-│   ├── i18n/                       # Internationalization helpers
+│   ├── i18n/                       # Status label translations
 │   ├── constants/                  # App constants
 │   ├── plugins/                    # TailwindCSS plugins
 │   ├── types/                      # Shared TypeScript types
 │   │
 │   ├── env.ts                      # T3 Env configuration (type-safe env)
+│   ├── env-validation.ts           # Validation runtime des variables Supabase (instrumentation)
 │   ├── database.types.ts           # Supabase auto-generated types
 │   ├── utils.ts                    # cn() utility for class merging
 │   ├── resend.ts                   # Resend client instantiation
 │   └── site-config.ts              # Site configuration helpers
 │
 ├── supabase/                       # Supabase infrastructure
-│   ├── schemas/                    # Declarative SQL schemas (47 files)
+│   ├── schemas/                    # Declarative SQL schemas (48 fichiers, 01→70 + README)
 │   │   ├── 01_extensions.sql       # PostGIS, pg_cron, etc.
 │   │   ├── 02_table_profiles.sql   # User profiles
-│   │   ├── 02b_functions_core.sql  # Core functions (is_admin, updated_at)
+│   │   ├── 02b_functions_core.sql  # Core functions (is_admin, has_min_role, updated_at)
 │   │   ├── 03_table_medias.sql     # Media library
 │   │   ├── ...                     # Ordered by dependency (01→63)
-│   │   └── 63b_reorder_*.sql       # Latest schema additions
+│   │   └── 70_grants_baseline.sql  # Baseline GRANTs (non capturés par db diff)
 │   │
-│   ├── migrations/                 # Auto-generated + hotfix migrations (111 files)
+│   ├── migrations/                 # Auto-generated + hotfix migrations (165 fichiers)
 │   │   └── archived/               # Archived old migrations
 │   │
 │   ├── functions/                  # Supabase Edge Functions
@@ -237,13 +268,13 @@ rougecardinalcompany/
 │   ├── middleware.ts               # Middleware Supabase client factory
 │   └── admin.ts                    # Service-role Supabase client
 │
-├── emails/                         # React Email templates (5 files)
+├── emails/                         # React Email templates (5 fichiers)
 │   ├── contact-message-notification.tsx
 │   ├── invitation-email.tsx
 │   ├── newsletter-confirmation.tsx
 │   └── utils/                      # Email utility helpers
 │
-├── scripts/                        # Maintenance & testing scripts (107 files)
+├── scripts/                        # Maintenance & testing scripts (117 fichiers)
 │   ├── lib/                        # Script shared libs (env.ts)
 │   ├── utils/                      # Script utilities (supabase-local-credentials.ts)
 │   ├── Archived-tests/             # Archived test scripts
@@ -252,20 +283,36 @@ rougecardinalcompany/
 │   ├── test-*.ts                   # Testing scripts (10+)
 │   └── ...                         # Backup, deployment, admin scripts
 │
-├── __tests__/                      # Unit/integration tests
-│   └── emails/                     # Email template tests
+├── e2e/                            # Playwright E2E suite (112 fichiers)
+│   ├── factories/                  # Test data factories (10 fichiers)
+│   ├── fixtures/                   # Fixtures + assets
+│   ├── pages/                      # Page Object Models (admin/ auth/ public/)
+│   ├── helpers/                    # Test helpers
+│   ├── tests/                      # Specs (admin/ auth/ cross/ editor/ permissions/ public/)
+│   └── global-setup.ts             # Pre-flight checks (env vars + Supabase + warmup)
 │
-├── e2e-tests/                      # End-to-end test specs
+├── __tests__/                      # Unit/integration tests Vitest
+│   ├── auth/                       # roles.test.ts (readRoleFromMeta)
+│   ├── dal/                        # permissions-integration.test.ts
+│   ├── emails/                     # Email template tests
+│   ├── schemas/                    # auth.test.ts (PasswordSchema)
+│   └── utils/                      # image-compress, env-validation, google-maps, ...
 │
 ├── .github/                        # GitHub configuration
-│   ├── workflows/                  # CI/CD pipelines (6 workflows)
+│   ├── workflows/                  # CI/CD pipelines (10 workflows)
 │   │   ├── deploy.yml              # Production deployment
+│   │   ├── e2e.yml                 # Pipeline E2E (Supabase local + Playwright)
+│   │   ├── unit-tests.yml          # Vitest sur push/PR
+│   │   ├── check-role-invariant.yml # Invariant app_metadata.role = profiles.role (cron)
 │   │   ├── backup-database.yml     # DB backup automation
+│   │   ├── invitation-email-test.yml
+│   │   ├── reorder-sql-tests.yml
+│   │   ├── copilot-setup-steps.yml
 │   │   ├── detect-revoke-warn.yml  # Security monitoring
-│   │   └── ...
-│   ├── instructions/               # AI coding instructions (20+ files)
+│   │   └── monitor-detect-revoke.yml
+│   ├── instructions/               # AI coding instructions (27 fichiers)
 │   ├── prompts/                    # Reusable prompt templates
-│   ├── skills/                     # Agent skills (6 skills)
+│   ├── skills/                     # Agent skills
 │   └── copilot-instructions.md     # Main Copilot config
 │
 ├── memory-bank/                    # Project knowledge base
@@ -275,16 +322,13 @@ rougecardinalcompany/
 │   ├── changes/                    # Change logs
 │   └── procedures/                 # Operational procedures
 │
+├── graphify-out/                   # Graphe sémantique du codebase (graph.json, GRAPH_REPORT.md, graph.html)
 ├── doc/                            # Developer documentation
-│   ├── prompt-plan/                # Implementation plans
-│   ├── sentry/                     # Sentry setup guides
-│   └── ...                         # Troubleshooting, guides
-│
 ├── public/                         # Static assets (images, fonts, etc.)
 │
 ├── proxy.ts                        # Next.js 16 middleware (renamed from middleware.ts)
-├── instrumentation.ts              # Sentry instrumentation hook
-├── next.config.ts                  # Next.js configuration
+├── instrumentation.ts              # Sentry instrumentation + env validation hook
+├── next.config.ts                  # Next.js + Sentry + Sharp tracing configuration
 ├── tailwind.config.ts              # TailwindCSS configuration
 ├── tsconfig.json                   # TypeScript configuration
 ├── eslint.config.mjs               # ESLint flat config
@@ -300,13 +344,13 @@ rougecardinalcompany/
 
 ## 3. Key Directory Analysis
 
-### 3.1 `app/` — Routing Layer (114 files)
+### 3.1 `app/` — Routing Layer (125 files)
 
 The App Router uses **route groups** to separate admin and public layouts without affecting URLs.
 
 | Route Group    | Layout                         | Auth Requirement | URL prefix  |
 | -------------- | ------------------------------ | ---------------- | ----------- |
-| `(admin)/`     | AdminSidebar + auth protection | `requireBackofficePageAccess()` | `/admin/*`  |
+| `(admin)/`     | AdminSidebar + auth protection | `requireBackofficePageAccess()`| `/admin/*` |
 | `(marketing)/` | Header + Footer                | Public           | `/*`        |
 | `auth/`        | Minimal (no layout group)      | Public           | `/auth/*`   |
 | `api/`         | None (route handlers)          | Per-endpoint     | `/api/*`    |
@@ -337,15 +381,23 @@ app/(marketing)/{feature}/
 └── metadata.ts             # Optional SEO metadata
 ```
 
-### 3.2 `components/` — UI Component Library (326 files)
+**Cas particuliers (marketing)** :
+
+- Pages légales statiques : `mentions-legales/`, `politique-confidentialite/`, `cookies/` (TASK098)
+- `auth/accept-invitation/` : page intermédiaire d'invitation (validation anti open-redirect via Server Action, TASK106)
+- `auth/setup-account/` : définition du mot de passe après invitation
+
+**Metadata Routes (racine `app/`)** : `sitemap.ts` (9 URLs publiques canoniques), `robots.ts`, `manifest.ts` + icônes fichiers-conventions (`favicon.ico`, `icon1.png`, `icon2.png`, `apple-icon.png`, `twitter-image.png`).
+
+### 3.2 `components/` — UI Component Library (352 files)
 
 Organized in three tiers:
 
 | Tier              | Path                         | Count | Description                              |
 | ----------------- | ---------------------------- | ----- | ---------------------------------------- |
 | **UI Primitives** | `components/ui/`             | 33    | shadcn/ui components (button, dialog...) |
-| **Features**      | `components/features/`       | 237   | Domain-specific components               |
-| **Shared**        | `components/{admin,layout}/` | ~56   | Cross-feature shared components          |
+| **Features**      | `components/features/`       | 262   | Domain-specific components               |
+| **Shared**        | `components/{admin,layout}/` | ~57   | Cross-feature shared components          |
 
 **Feature Component Pattern** (per admin feature):
 
@@ -373,19 +425,20 @@ components/features/public-site/home/{section}/
 └── index.ts                           # Barrel export
 ```
 
-### 3.3 `lib/` — Core Library (122 files)
+### 3.3 `lib/` — Core Library (138 files)
 
 The `lib/` directory is the application's core — it **never** contains UI components.
 
-| Subdirectory    | Files | Role                                           | Server-only? |
-| --------------- | ----- | ---------------------------------------------- | ------------ |
-| `dal/`          | 44    | Database access — all Supabase queries          | Yes          |
-| `schemas/`      | 24    | Zod schemas (Server + UI variants)              | No           |
-| `actions/`      | 11    | Server Action helpers + shared action utilities | Yes          |
-| `hooks/`        | 10    | Client-side React hooks                         | No           |
-| `utils/`        | 11    | Pure utility functions                          | Mixed        |
+| Subdirectory    | Files | Role                                            | Server-only? |
+| --------------- | ----- | ----------------------------------------------- | ------------ |
+| `dal/`          | 48    | Database access — all Supabase queries          | Yes          |
+| `schemas/`      | 26    | Zod schemas (Server + UI variants)              | No           |
+| `actions/`      | 13    | Server Action helpers + shared action utilities | Yes          |
+| `hooks/`        | 13    | Client-side React hooks                         | No           |
+| `utils/`        | 14    | Pure utility functions                          | Mixed        |
 | `tables/`       | 5     | Table column definition helpers                 | No           |
-| `auth/`         | 3     | Role-based guards (`roles.ts`, `role-helpers.ts`) | Yes          |
+| `auth/`         | 2     | Role-based guards (`roles.ts`, `role-helpers.ts`) — `is-admin.ts` supprimé | Yes          |
+| `api/`          | 1     | Helpers partagés pour Route Handlers            | Yes          |
 | `email/`        | 2     | Email sending service                           | Yes          |
 | `services/`     | 1     | External service clients (Sentry API)           | Yes          |
 | `sentry/`       | 2     | Error capture helpers                           | Mixed        |
@@ -405,8 +458,8 @@ The `lib/` directory is the application's core — it **never** contains UI comp
 
 | Subdirectory                    | Files | Role                                       |
 | ------------------------------- | ----- | ------------------------------------------ |
-| `schemas/`                      | 47    | Declarative SQL — source of truth          |
-| `migrations/`                   | 111   | Generated + hotfix migrations              |
+| `schemas/`                      | 48    | Declarative SQL — source of truth          |
+| `migrations/`                   | 165   | Generated + hotfix migrations              |
 | `functions/`                    | —     | Supabase Edge Functions                    |
 | `tests/`                        | —     | SQL tests                                  |
 | `scripts/`                      | —     | Database scripts                           |
@@ -423,9 +476,10 @@ The `lib/` directory is the application's core — it **never** contains UI comp
 03–09_table_*.sql          → Content tables (ordered by FK deps)
 10–15_tables_system.sql    → System tables (audit, analytics, etc.)
 20+_*.sql                  → Views, indexes, constraints, triggers
+70_grants_baseline.sql     → Baseline GRANTs (non capturés par db diff)
 ```
 
-### 3.5 `scripts/` — Utilities & Maintenance (107 files)
+### 3.5 `scripts/` — Utilities & Maintenance (117 files)
 
 Scripts follow a verb-noun naming pattern:
 
@@ -450,7 +504,7 @@ Run via: `pnpm exec tsx scripts/{script-name}.ts`
 | ----------------------------------------- | ----------------------------------------------------- |
 | New page/route                            | `app/(admin)/admin/{feature}/` or `app/(marketing)/`  |
 | Server Action (admin mutation)            | `app/(admin)/admin/{feature}/actions.ts`              |
-| Server Action (public)                    | `app/actions/{feature}.ts`                            |
+| Server Action (public)                    | `app/actions/{feature}.actions.ts`                    |
 | API endpoint (external/webhook)           | `app/api/{feature}/route.ts`                          |
 | Feature UI component                      | `components/features/{admin\|public-site}/{feature}/` |
 | Shared UI primitive                       | `components/ui/` (via shadcn CLI)                     |
@@ -477,7 +531,7 @@ Run via: `pnpm exec tsx scripts/{script-name}.ts`
 
 ### 4.2 Colocated vs Centralized
 
-| Strategy         | What                          | Where                                       |
+| Strategy         | What                          | Where                                        |
 | ---------------- | ----------------------------- | -------------------------------------------- |
 | **Colocated**    | Server Actions (admin CRUD)   | `app/(admin)/admin/{feature}/actions.ts`     |
 | **Colocated**    | Feature types + props         | `components/features/{feature}/types.ts`     |
@@ -498,7 +552,7 @@ Run via: `pnpm exec tsx scripts/{script-name}.ts`
 
 | Context                   | Convention         | Examples                                       |
 | ------------------------- | ------------------ | ---------------------------------------------- |
-| React components          | `PascalCase.tsx`   | `TeamMemberCard.tsx`, `HeroContainer.tsx`       |
+| React components          | `PascalCase.tsx`   | `TeamMemberCard.tsx`, `HeroContainer.tsx`      |
 | React hooks               | `use-kebab.ts`     | `use-debounce.ts`, `use-mobile.ts`             |
 | DAL modules               | `kebab-case.ts`    | `admin-partners.ts`, `home-hero.ts`            |
 | Schemas                   | `kebab-case.ts`    | `press-article.ts`, `admin-agenda-ui.ts`       |
@@ -622,7 +676,11 @@ pnpm dlx supabase db diff -f {name}         # Generate migration
 pnpm dlx supabase db push                   # Push to remote
 
 # Testing
-pnpm exec tsx scripts/test-admin-access.ts  # Security validation
+pnpm type-check                              # TypeScript strict check
+pnpm vitest run __tests__/...                # Unit tests ciblés (image-compress, invitation-url, ...)
+pnpm test:dal:permissions                    # DAL permissions integration (Vitest)
+pnpm exec playwright test --project=admin    # E2E par projet (admin, editor, public, cross-*)
+pnpm exec tsx scripts/test-admin-access.ts   # Security validation
 pnpm test:partners                           # Partners DAL tests (6)
 pnpm test:audit-logs:dal                     # Audit logs DAL tests
 pnpm test:resend                             # Email integration test
@@ -652,9 +710,14 @@ pnpm exec tsx scripts/{script}.ts            # Run any utility script
 ```bash
 next.config.ts
 ├── Sentry integration (withSentryConfig wrapper)
-├── serverExternalPackages: ["sharp"]
+├── serverExternalPackages: ["sharp"] (binaire natif, jamais bundlé)
+├── outputFileTracingIncludes: workaround Sharp 0.35 / @vercel/nft
+│   (force le tracing physique de libvips-cpp.so dans node_modules/.pnpm/ —
+│    retrait prévu via TASK200 une fois le correctif upstream validé en prod)
 ├── Server Actions body size: 6 MB
-├── Image remotePatterns: supabase storage, unsplash
+├── Image remotePatterns: hostname Supabase dérivé dynamiquement de
+│   NEXT_PUBLIC_SUPABASE_URL + localhost:54321 + unsplash/pexels/...
+├── Security headers (CSP avec domaines Vercel Live conditionnels)
 ├── Source maps upload to Sentry
 └── Turbopack (default in dev)
 ```
@@ -691,6 +754,7 @@ next.config.ts
 
 - **Route Groups** separate admin/public layouts: `(admin)/`, `(marketing)/`
 - **Middleware** renamed to `proxy.ts` (Next.js 16 convention)
+- **Metadata Routes** à la racine : `sitemap.ts`, `robots.ts`, `manifest.ts` (statiques, sans dépendance DB)
 - **`force-dynamic` export** required on pages using Supabase SSR cookies
 - **Server Actions** with `"use server"` directive (lowercase, always)
 - **`useActionState`** (React 19) for form handling, not `startTransition`
@@ -748,7 +812,7 @@ Server Component checks toggle → conditional data fetch + conditional render
 Admin UI at /admin/site-config → Server Action → revalidatePath()
 ```
 
-10 toggles across 4 categories: `home_display` (6), `presse_display` (2), `agenda_display` (1), `contact_display` (1).
+9 toggles across 4 categories: `home_display` (5, hero toggle supprimé en TASK089), `presse_display` (2), `agenda_display` (1), `contact_display` (1).
 
 ---
 
@@ -951,12 +1015,12 @@ execute function public.update_updated_at();
 | ---------------------------------------------------- | --------------------------------------------------- |
 | Importing DAL in Client Components                   | DAL is server-only — use Server Actions as bridge   |
 | `revalidatePath()` in DAL modules                    | Only in Server Actions                              |
-| `process.env` direct access                          | Use `env` from `lib/env.ts` (T3 Env)               |
+| `process.env` direct access                          | Use `env` from `lib/env.ts` (T3 Env)                |
 | Returning BigInt in ActionResult                     | Return `{ success: true }` only, refresh via router |
 | `getUser()` for simple auth checks                   | Use `getClaims()` (~2-5ms vs ~300ms)                |
 | Cookie `get`/`set`/`remove` methods                  | Only `getAll`/`setAll`                              |
 | `revalidatePath()` inside API Routes                 | Use Server Actions for mutations                    |
-| `next/dynamic` with `{ ssr: false }` in Server Components | Use direct Client Component imports             |
+| `next/dynamic` with `{ ssr: false }` in Server Components | Use direct Client Component imports            |
 | `any` type in TypeScript                             | Use `unknown` + Zod validation                      |
 | Editing `supabase/migrations/` directly              | Edit `supabase/schemas/` and generate via diff      |
 
@@ -976,20 +1040,21 @@ execute function public.update_updated_at();
 
 | Directory                      | Files | Description                          |
 | ------------------------------ | ----- | ------------------------------------ |
-| `app/`                         | 114   | Routes, layouts, pages, actions, API |
-| `components/`                  | 326   | UI components (all tiers)            |
-| `components/features/`         | 237   | Feature-scoped components            |
+| `app/`                         | 125   | Routes, layouts, pages, actions, API |
+| `components/`                  | 352   | UI components (all tiers)            |
+| `components/features/`         | 262   | Feature-scoped components            |
 | `components/ui/`               | 33    | shadcn/ui primitives                 |
-| `components/skeletons/`        | 20    | Loading placeholders                 |
-| `lib/`                         | 122   | Core library modules                 |
-| `lib/dal/`                     | 44    | Data Access Layer                    |
-| `lib/schemas/`                 | 24    | Zod validation schemas               |
-| `lib/actions/`                 | 11    | Server action utilities              |
-| `lib/hooks/`                   | 10    | Client React hooks                   |
-| `lib/utils/`                   | 11    | Utility functions                    |
-| `supabase/schemas/`            | 47    | Declarative SQL schemas              |
-| `supabase/migrations/`         | 111   | Database migrations                  |
-| `scripts/`                     | 107   | Maintenance & testing scripts        |
+| `components/skeletons/`        | 21    | Loading placeholders                 |
+| `lib/`                         | 138   | Core library modules                 |
+| `lib/dal/`                     | 48    | Data Access Layer                    |
+| `lib/schemas/`                 | 26    | Zod validation schemas               |
+| `lib/actions/`                 | 13    | Server action utilities              |
+| `lib/hooks/`                   | 13    | Client React hooks                   |
+| `lib/utils/`                   | 14    | Utility functions                    |
+| `supabase/schemas/`            | 48    | Declarative SQL schemas              |
+| `supabase/migrations/`         | 165   | Database migrations                  |
+| `scripts/`                     | 117   | Maintenance & testing scripts        |
+| `e2e/`                         | 112   | Playwright E2E (POM,factories, specs)|
 | `emails/`                      | 5     | Email templates                      |
-| `.github/workflows/`           | 6     | CI/CD pipelines                      |
-| **Total source files**         | **~1 281** |                                  |
+| `.github/workflows/`           | 10    | CI/CD pipelines                      |
+| **Total source files**         | ~1 690|                                      |

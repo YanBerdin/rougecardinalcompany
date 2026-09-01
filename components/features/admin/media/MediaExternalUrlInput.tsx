@@ -12,13 +12,13 @@ type ValidationStatus = "idle" | "validating" | "valid" | "invalid";
 function StatusIcon({ status }: { status: ValidationStatus }) {
     switch (status) {
         case "validating":
-            return <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />;
+            return <Loader2 className="size-4 animate-spin text-muted-foreground" />;
         case "valid":
-            return <CheckCircle className="h-4 w-4 text-green-500" />;
+            return <CheckCircle className="size-4 text-green-500" />;
         case "invalid":
-            return <AlertCircle className="h-4 w-4 text-destructive" />;
+            return <AlertCircle className="size-4 text-destructive" />;
         default:
-            return <ExternalLink className="h-4 w-4 text-muted-foreground" />;
+            return <ExternalLink className="size-4 text-muted-foreground" />;
     }
 }
 

@@ -17,21 +17,22 @@ const EDITOR_SIDEBAR_ITEMS = [
     'Retour au site publique',
 ] as const;
 
-/** Sidebar items visible only to admin role (10 additional items) */
+/** Sidebar items visible only to admin role (11 additional items) */
 const ADMIN_ONLY_SIDEBAR_ITEMS = [
     'Équipe',
-    'Utilisateurs',
+    'Administrateurs',
     'Accueil - Slides',
     'Accueil - La compagnie',
     'Partenaires',
     'Analytics',
     'Affichage Sections',
+    'Pied de page & Coordonnées',
     'Audit Logs',
     'Paramètres',
     'Debug Auth',
 ] as const;
 
-const TOTAL_ADMIN_SIDEBAR_ITEMS = EDITOR_SIDEBAR_ITEMS.length + ADMIN_ONLY_SIDEBAR_ITEMS.length; // 18
+const TOTAL_ADMIN_SIDEBAR_ITEMS = EDITOR_SIDEBAR_ITEMS.length + ADMIN_ONLY_SIDEBAR_ITEMS.length;
 
 const ADMIN_ONLY_PAGES = [
     '/admin/team',
@@ -153,8 +154,8 @@ test.describe('Parcours Admin — Permissions', () => {
         await expect(page.getByRole('heading', { name: /tableau de bord/i })).toBeVisible();
     });
 
-    // ROLE-E2E-012: Admin sidebar shows all 18 items
-    test('ROLE-E2E-012 — Admin sidebar complète (18 items)', async ({ adminPage: page }) => {
+    // ROLE-E2E-012: Admin sidebar shows every item
+    test('ROLE-E2E-012 — Admin sidebar complète (19 items)', async ({ adminPage: page }) => {
         // 1. Navigate to admin dashboard
         await page.goto('/admin');
         await expect(page).toHaveURL(/\/admin/);

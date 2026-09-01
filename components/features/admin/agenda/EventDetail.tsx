@@ -100,7 +100,8 @@ export function EventDetail({ event }: EventDetailProps) {
   const formattedDateFin = event.date_fin ? formatDate(event.date_fin) : null;
   const formattedStartTime = formatTime(event.start_time);
   const formattedEndTime = formatTime(event.end_time);
-  const formattedPrice = formatPrice(event.price_cents);
+  const formattedFullPrice = formatPrice(event.price_cents);
+  const formattedReducedPrice = formatPrice(event.price_reduced_cents);
 
   const metaDateCreated = new Date(event.created_at).toLocaleString("fr-FR");
   const metaDateUpdated = new Date(event.updated_at).toLocaleString("fr-FR");
@@ -112,7 +113,7 @@ export function EventDetail({ event }: EventDetailProps) {
         <div className="space-y-8">
           <Button variant="ghost" size="sm" asChild className="-ml-2">
             <Link href="/admin/agenda">
-              <ArrowLeft className="h-4 w-4 mr-1" />
+              <ArrowLeft className="size-4 mr-1" />
               Retour à la liste
             </Link>
           </Button>
@@ -126,7 +127,7 @@ export function EventDetail({ event }: EventDetailProps) {
 
         <Button asChild className="shrink-0">
           <Link href={`/admin/agenda/${event.id}/edit`}>
-            <Pencil className="h-4 w-4 mr-2" />
+            <Pencil className="size-4 mr-2" />
             Modifier
           </Link>
         </Button>
@@ -140,7 +141,7 @@ export function EventDetail({ event }: EventDetailProps) {
         {/* Dates & Horaires */}
         <Section title="Dates & Horaires">
           <InfoRow
-            icon={<Calendar className="h-4 w-4" />}
+            icon={<Calendar className="size-4" />}
             label="Date de début"
             value={
               <>
@@ -155,7 +156,7 @@ export function EventDetail({ event }: EventDetailProps) {
           />
           {(formattedDateFin || formattedEndTime) && (
             <InfoRow
-              icon={<CalendarX className="h-4 w-4" />}
+              icon={<CalendarX className="size-4" />}
               label="Date de fin"
               value={
                 <>
@@ -173,7 +174,7 @@ export function EventDetail({ event }: EventDetailProps) {
           )}
           {!formattedDateFin && formattedEndTime && (
             <InfoRow
-              icon={<Clock className="h-4 w-4" />}
+              icon={<Clock className="size-4" />}
               label="Heure de fin"
               value={formattedEndTime}
             />
@@ -183,7 +184,7 @@ export function EventDetail({ event }: EventDetailProps) {
         {/* Lieu */}
         <Section title="Lieu">
           <InfoRow
-            icon={<MapPin className="h-4 w-4" />}
+            icon={<MapPin className="size-4" />}
             label="Salle"
             value={
               event.lieu_nom ? (
@@ -204,37 +205,44 @@ export function EventDetail({ event }: EventDetailProps) {
 
         {/* Billetterie */}
         <Section title="Billetterie">
-          {formattedPrice !== null && (
+          {formattedFullPrice !== null && (
             <InfoRow
-              icon={<Ticket className="h-4 w-4" />}
-              label="Tarif"
-              value={formattedPrice}
+              icon={<Ticket className="size-4" />}
+              label="Plein tarif"
+              value={formattedFullPrice}
+            />
+          )}
+          {formattedReducedPrice !== null && (
+            <InfoRow
+              icon={<Tag className="size-4" />}
+              label="Tarif réduit"
+              value={formattedReducedPrice}
             />
           )}
           {event.capacity !== null && (
             <InfoRow
-              icon={<Users className="h-4 w-4" />}
+              icon={<Users className="size-4" />}
               label="Capacité"
               value={`${event.capacity} places`}
             />
           )}
           {event.ticket_url && (
             <InfoRow
-              icon={<ExternalLink className="h-4 w-4" />}
+              icon={<ExternalLink className="size-4" />}
               label="Lien billetterie"
               value={
-                <a
+                <Link
                   href={event.ticket_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline underline-offset-2 hover:text-primary break-all"
                 >
                   {event.ticket_url}
-                </a>
+                </Link>
               }
             />
           )}
-          {formattedPrice === null && event.capacity === null && !event.ticket_url && (
+          {formattedFullPrice === null && formattedReducedPrice === null && event.capacity === null && !event.ticket_url && (
             <p className="text-sm text-muted-foreground italic">
               Aucune information de billetterie.
             </p>
@@ -244,7 +252,7 @@ export function EventDetail({ event }: EventDetailProps) {
         {/* Métadonnées */}
         <Section title="Métadonnées">
           <InfoRow
-            icon={<Tag className="h-4 w-4" />}
+            icon={<Tag className="size-4" />}
             label="Identifiant"
             value={
               <Badge variant="outline" className="font-mono text-xs">
@@ -253,12 +261,12 @@ export function EventDetail({ event }: EventDetailProps) {
             }
           />
           <InfoRow
-            icon={<Clock className="h-4 w-4" />}
+            icon={<Clock className="size-4" />}
             label="Créé le"
             value={metaDateCreated}
           />
           <InfoRow
-            icon={<Clock className="h-4 w-4" />}
+            icon={<Clock className="size-4" />}
             label="Modifié le"
             value={metaDateUpdated}
           />

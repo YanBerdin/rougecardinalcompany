@@ -3,14 +3,13 @@
 import { useState, useCallback } from "react";
 import { ContactForm } from "./ContactForm";
 import { ContactSuccessView } from "./ContactSuccessView";
-import { ContactInfoSidebar } from "./ContactInfoSidebar";
 
 interface ContactPageViewProps {
-  showNewsletter?: boolean;
+  sidebar: React.ReactNode;
 }
 
 export function ContactPageView({
-  showNewsletter = true,
+  sidebar,
 }: ContactPageViewProps): React.JSX.Element {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -28,27 +27,21 @@ export function ContactPageView({
 
   return (
     <div className="max-sm:pt-12 pt-16">
-      <section className="max-sm:py-8 py-16 hero-gradient">
+      <section className="py-8 md:py-16 hero-gradient">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl text-white font-bold mb-6 animate-fade-in-up">
-            Contact
+          <h1 className="text-4xl md:text-5xl lg:text-7xl text-white font-semibold leading-none tracking-tight animate-fade-in-up">
+            En aparté
           </h1>
-          <p
-            className="text-md md:text-2xl text-white/80 opacity-90 animate-fade-in"
-            style={{ animationDelay: "0.2s" }}
-          >
-            Échangeons autour de nos projets
-          </p>
         </div>
       </section>
 
-      <div className="max-sm:py-12 py-24 bg-background">
+      <div className="max-sm:py-16 py-24 bg-chart-7">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             <div className="lg:col-span-2">
               <ContactForm onSuccess={handleSuccess} />
             </div>
-            <ContactInfoSidebar showNewsletter={showNewsletter} />
+            {sidebar}
           </div>
         </div>
       </div>

@@ -8,12 +8,24 @@
  *
  * Note : is_admin() retourne toujours false avec service_role car auth.uid() = null
  * sans JWT utilisateur — ce n'est pas un bug.
+ *
+ * Usage :
+ *   pnpm run diagnose:admin-views                          # staging (défaut)
+ *   SUPABASE_ENV=production pnpm run diagnose:admin-views  # production
  */
 import dotenv from "dotenv";
 import { createClient } from "@supabase/supabase-js";
 
-dotenv.config({ path: ".env.local" });
-dotenv.config();
+const SUPABASE_ENV = process.env.SUPABASE_ENV ?? "staging";
+const ENV_FILES = { staging: ".env.local", production: ".env" };
+
+if (!(SUPABASE_ENV in ENV_FILES)) {
+  throw new Error(
+    `SUPABASE_ENV invalide: "${SUPABASE_ENV}". Valeurs attendues: staging | production`,
+  );
+}
+
+dotenv.config({ path: ENV_FILES[SUPABASE_ENV], override: true });
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SECRET_KEY;
@@ -32,6 +44,9 @@ const adminClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
 
 async function diagnoseAdminViews() {
   console.log("🔍 Diagnostic admin Supabase\n");
+  console.log(
+    `🎯 Cible: ${SUPABASE_ENV} (${ENV_FILES[SUPABASE_ENV]}, projet ${process.env.SUPABASE_PROJECT_REF ?? "?"})\n`,
+  );
   console.log("=".repeat(60));
 
   // 1. Profil admin

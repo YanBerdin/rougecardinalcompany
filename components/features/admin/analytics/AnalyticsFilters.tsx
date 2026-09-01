@@ -49,7 +49,7 @@ export function AnalyticsFilters({
                             className={cn("w-full sm:w-[200px] justify-start text-left font-normal")}
                             disabled={isLoading}
                         >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            <CalendarIcon className="mr-2 size-4" />
                             {format(localStartDate, "dd/MM/yyyy", { locale: fr })}
                         </Button>
                     </PopoverTrigger>
@@ -72,7 +72,7 @@ export function AnalyticsFilters({
                             className={cn("w-full sm:w-[200px] justify-start text-left font-normal")}
                             disabled={isLoading}
                         >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            <CalendarIcon className="mr-2 size-4" />
                             {format(localEndDate, "dd/MM/yyyy", { locale: fr })}
                         </Button>
                     </PopoverTrigger>

@@ -9,17 +9,17 @@ export function HomeTeamView({ members }: HomeTeamViewProps): ReactElement {
         <section
             id="equipe"
             aria-labelledby={SECTION_HEADING_ID}
-            className="max-sm:py-12 py-24 bg-background"
+            className="py-24 xl:py-32 bg-background"
         >
             <div className="max-w-screen-xl mx-auto px-4 sm:px-4 lg:px-4">
                 <div className="text-center max-sm:mb-8 mb-16">
                     <h2
                         id={SECTION_HEADING_ID}
-                        className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4"
+                        className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl italic font-semibold mb-4 leading-none tracking-tight"
                     >
                         Notre équipe
                     </h2>
-                    <p className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto">
+                    <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
                         Les artistes et collaborateurs qui donnent vie à Rouge Cardinal
                     </p>
                 </div>

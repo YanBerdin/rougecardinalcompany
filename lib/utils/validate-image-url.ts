@@ -17,6 +17,7 @@ function isAllowedMimeType(mime: string): mime is AllowedMimeType {
     return ALLOWED_MIME_TYPES.includes(mime as AllowedMimeType);
 }
 
+//TODO: Add your Supabase project hostname to the allowlist if you want to allow images from your Supabase Storage bucket.
 /**
  * Allowed hostnames for image URLs (exact match).
  * These are server-controlled constants, not derived from user input.
@@ -148,7 +149,7 @@ export async function validateImageUrl(
         if (!allowedProtocols.includes(parsedUrl.protocol)) {
             return {
                 valid: false,
-                error: `Invalid protocol: ${parsedUrl.protocol}. Only HTTPS allowed.`,
+                error: `Protocole non autorisé: ${parsedUrl.protocol}. Seul HTTPS est autorisé.`,
             };
         }
 
@@ -157,7 +158,7 @@ export async function validateImageUrl(
         if (!canonicalHostname) {
             return {
                 valid: false,
-                error: `Hostname not allowed: ${parsedUrl.hostname}. Only Supabase Storage URLs are permitted.`,
+                error: `Domaine non autorisé: ${parsedUrl.hostname}. Seules les URL de stockage de la liste blanche sont autorisées.`,
             };
         }
 

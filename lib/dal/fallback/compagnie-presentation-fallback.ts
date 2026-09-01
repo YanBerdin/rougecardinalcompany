@@ -18,9 +18,9 @@ export const compagniePresentationFallback: PresentationSection[] = [
     kind: "history",
     title: "Notre Histoire",
     content: [
-      "Fondée en 2008 par un collectif de jeunes diplômés des grandes écoles théâtrales françaises, la compagnie Rouge-Cardinal est née d'une envie commune : créer un théâtre qui parle à notre époque tout en puisant dans la richesse du patrimoine dramatique.",
-      'Le nom "Rouge-Cardinal" évoque à la fois la passion qui nous anime et la noblesse de notre art. Comme le cardinal, oiseau au plumage éclatant, nous cherchons à apporter couleur et vie sur scène.',
-      "Depuis nos débuts, nous avons créé plus de 50 spectacles, tourné dans toute la France et à l'étranger, et remporté plusieurs prix prestigieux pour nos créations originales.",
+      "Fondée en 2024 par un collectif de jeunes acteurs, la compagnie Rouge-Cardinal est née d'une envie commune : créer des pièces de théâtre qui parlent à notre époque tout en puisant dans la richesse du patrimoine dramatique.",
+      "Le nom 'Rouge-Cardinal' évoque à la fois la passion qui nous anime et le rouge profond qui colore les sièges et les rideaux des théâtres.",
+      "Depuis nos débuts, nous avons créé deux spectacles à Paris et en région parisienne, et nous avons participé à plusieurs festivals de théâtre. La Compagnie a également porté le projet d'exposition photo 'Nouveaux Mondes' de Florian Chaillot présenté dans plusieurs lieux d'exposition à Paris.",
     ],
     image:
       "https://images.pexels.com/photos/3184421/pexels-photo-3184421.jpeg?auto=compress&cs=tinysrgb&w=800",
@@ -53,21 +53,19 @@ export const compagniePresentationFallback: PresentationSection[] = [
     title: "Notre Mission",
     content: [
       "Créer des spectacles qui émeuvent, questionnent et rassemblent les publics autour de l'art vivant. Nous nous attachons à rendre le théâtre accessible à tous, en développant des projets artistiques de qualité qui résonnent avec les enjeux de notre société.",
-      "Notre engagement va au-delà de la simple représentation : nous menons des actions culturelles en milieu scolaire, participons à des festivals, et soutenons la création contemporaine par des résidences d'artistes et des collaborations avec de jeunes talents.",
     ],
   },
   {
     id: "founder",
     kind: "founder",
     title: "Florian Chaillot",
-    subtitle: "Metteur en scène & Fondateur",
+    subtitle: "Directeur artistique & Metteur en scène",
     image:
       "https://yvtrlvmbofklefxcxrzv.supabase.co/storage/v1/object/public/medias/team/1776350784063-IMG_3043---retouch-.jpg",
     milestones: [
-      { year: "2022", label: "L'Avare - Comédie-Française" },
-      { year: "2023", label: "Gala de l'Opéra de Lorraine" },
-      { year: "2024", label: "Le Grand Meaulnes - scène" },
-      { year: "2025", label: "Exposition photo - Paris" },
+      { year: "2023", label: "Sacontala - Calidasa" },
+      { year: "2025", label: "Nouveaux Mondes - Exposition photo" },
+      { year: "2026", label: "La Farce de Maître Pathelin - Anonyme" },
     ],
   },
 ];

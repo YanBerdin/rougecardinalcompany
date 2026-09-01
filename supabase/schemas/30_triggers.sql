@@ -29,7 +29,6 @@ BEGIN
     'public.communiques_presse', 'public.contacts_presse', 'public.home_about_content',
     'public.data_retention_config',
     -- Ajout TASK076: couverture étendue (contenu public + sécurité invitations + taxonomie)
-    'public.pending_invitations',
     'public.home_hero_slides',
     'public.compagnie_presentation_sections', 'public.compagnie_values', 'public.compagnie_stats',
     'public.categories', 'public.tags',
@@ -55,15 +54,14 @@ DECLARE
     'public.communiques_presse', 'public.contacts_presse', 'public.home_about_content',
     -- Ajout TASK076: sécurité invitations (CRITIQUE), contenu public, taxonomie
     'public.user_invitations',
-    'public.pending_invitations',
     'public.home_hero_slides',
     'public.compagnie_presentation_sections', 'public.compagnie_values', 'public.compagnie_stats',
     'public.categories', 'public.tags',
     'public.media_folders',
     'public.media_tags',
     -- Junction tag tables
-    'public.articles_tags', 'public.communiques_tags',
-    'public.media_item_tags', 'public.spectacles_tags'
+    'public.communiques_tags',
+    'public.media_item_tags'
   ];
   tbl text;
 BEGIN

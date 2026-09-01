@@ -88,33 +88,19 @@ pnpm exec tsx scripts/create-admin-user-local.ts
 
 ## 🧪 Tests Unitaires (Vitest)
 
-Ces commandes exécutent les tests unitaires Vitest (hors contexte Next.js). Contrairement aux scripts TSX, ils utilisent Vitest directement.
+Les tests Vitest ne sont pas des scripts TSX : ils sont exécutés par le runner Vitest, en dehors du contexte Next.js.
 
-### test:unit:image-compress ✅ LOCAL
+| Commande | Portée |
+| -------- | ------ |
+| `pnpm test:unit` | Tous les tests unitaires (`__tests__/**`, hors `__tests__/integration/`) |
+| `pnpm test:integration` | Tests d'intégration RLS / audit — nécessite Supabase local + `.env.e2e` |
+| `pnpm test:coverage` | Tests unitaires + rapport de couverture |
+| `pnpm test:e2e` | Suite Playwright complète |
 
-**Description** : Tests unitaires de l'utilitaire de compression d'images Sharp (`lib/utils/image-compress.ts`). Vérifie la compression JPEG/PNG/WebP/AVIF, le bypass GIF/SVG/PDF, le redimensionnement et le safety guard.
+Pour cibler un seul fichier : `pnpm vitest run __tests__/utils/image-compress.test.ts`.
 
-**Commande** :
-
-```bash
-pnpm test:unit:image-compress
-```
-
-**Tests couverts (11/11)** :
-
-| Test | Comportement attendu |
-| ---- | ------------------- |
-| GIF, SVG, PDF | `wasCompressed: false` — format non compressible, original inchangé |
-| JPEG, PNG, WebP, AVIF | `wasCompressed: true` — taille réduite |
-| Dimension > 2400px | Redimensionnement proportionnel (`fit: "inside"`) |
-| Safety guard | Si compression > original, retourne l'original |
-| Constantes exportées | `IMAGE_QUALITY = 85`, `MAX_IMAGE_DIMENSION = 2400`, `COMPRESSIBLE_MIMES` |
-
-**Fichier de test** : `__tests__/utils/image-compress.test.ts`
-
-**Runner** : Vitest (`node` environment) — `vitest run __tests__/utils/image-compress.test.ts`
-
-> **Note** : Ce test n'est pas intégré dans les workflows CI (`e2e.yml`, `deploy.yml`). Exécution locale uniquement.
+**Exécution en CI** : `pnpm test:unit` tourne sur tous les push (workflow `unit-tests.yml`).
+`pnpm test:integration` et `pnpm test:e2e` tournent sur les Pull Requests (workflow `e2e.yml`).
 
 ---
 

@@ -59,7 +59,7 @@ export class ComponentErrorBoundary extends Component<Props, State> {
                     )}
                 >
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <AlertCircle className="h-4 w-4" />
+                        <AlertCircle className="size-4" />
                         <span>
                             {this.props.showError && this.state.error
                                 ? this.state.error.message

@@ -26,7 +26,7 @@ import { requireMinRole } from "@/lib/auth/roles";
  */
 export async function createPressReleaseAction(
     input: unknown
-): Promise<ActionResult> {
+): Promise<ActionResult<{ id: string }>> {
     try {
         await requireMinRole("editor");
 
@@ -40,7 +40,10 @@ export async function createPressReleaseAction(
         revalidatePath("/admin/presse");
         revalidatePath("/presse");
 
-        return { success: true };
+        return {
+            success: true,
+            data: { id: String(result.data.id) },
+        };
     } catch (error: unknown) {
         return {
             success: false,

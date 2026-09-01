@@ -5,6 +5,7 @@ import { fr } from "date-fns/locale";
 import { CalendarDays } from "lucide-react";
 import { useAgendaContext } from "../AgendaContext";
 import { formatEventPeriod } from "../formatPeriod";
+import Link from "next/link";
 
 export function CalendarDay(): React.JSX.Element {
     const { state } = useAgendaContext();
@@ -27,7 +28,7 @@ export function CalendarDay(): React.JSX.Element {
 
             {dayEvents.length === 0 ? (
                 <div className="flex flex-col items-center gap-3 py-12 text-muted-foreground">
-                    <CalendarDays className="w-10 h-10 opacity-40" aria-hidden="true" />
+                    <CalendarDays className="size-10 opacity-40" aria-hidden="true" />
                     <p>Aucun événement ce jour.</p>
                 </div>
             ) : (
@@ -45,7 +46,7 @@ export function CalendarDay(): React.JSX.Element {
                                 <p className="text-sm text-muted-foreground truncate">{ev.venue}</p>
                             </div>
                             {ev.ticketUrl && (
-                                <a
+                                <Link
                                     href={ev.ticketUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
@@ -53,7 +54,7 @@ export function CalendarDay(): React.JSX.Element {
                                     aria-label={`Billetterie pour ${ev.title}`}
                                 >
                                     Billetterie
-                                </a>
+                                </Link>
                             )}
                         </li>
                     ))}

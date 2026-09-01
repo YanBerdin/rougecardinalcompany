@@ -20,6 +20,7 @@ function mapSlideToFormValues(slide: HeroSlideDTO): HeroSlideFormValues {
         cta_secondary_enabled: slide.cta_secondary_enabled,
         cta_secondary_label: slide.cta_secondary_label ?? "",
         cta_secondary_url: slide.cta_secondary_url ?? "",
+        video_url: slide.video_url ?? "",
         active: slide.active,
         position: slide.position,
     };

@@ -190,28 +190,28 @@ export function AnalyticsDashboard({
                     title="Total Vues"
                     value={metrics.totalViews.toLocaleString()}
                     description="Nombre total de pages vues"
-                    icon={<Eye className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
+                    icon={<Eye className="size-5 text-muted-foreground" aria-hidden="true" />}
                 />
 
                 <MetricCard
                     title="Visiteurs Uniques"
                     value={metrics.uniqueVisitors.toLocaleString()}
                     description="Visiteurs distincts"
-                    icon={<Users className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
+                    icon={<Users className="size-5 text-muted-foreground" aria-hidden="true" />}
                 />
 
                 <MetricCard
                     title="Sessions"
                     value={metrics.totalSessions.toLocaleString()}
                     description="Nombre de sessions"
-                    icon={<Activity className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
+                    icon={<Activity className="size-5 text-muted-foreground" aria-hidden="true" />}
                 />
 
                 <MetricCard
                     title="Événement Principal"
                     value={metrics.topEventType ?? "N/A"}
                     description="Type d'événement le plus fréquent"
-                    icon={<BarChart3 className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
+                    icon={<BarChart3 className="size-5 text-muted-foreground" aria-hidden="true" />}
                 />
             </div>
 

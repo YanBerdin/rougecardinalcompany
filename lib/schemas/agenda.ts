@@ -26,6 +26,9 @@ export const EventSchema = z.object({
     genre: z.string().nullable().optional(),
     status: z.string(),
     ticketUrl: z.string().nullable(),
+    priceCents: z.number().nullable(),
+    priceReducedCents: z.number().nullable(),
+    capacity: z.number().nullable(),
     image: z.string(),
 });
 

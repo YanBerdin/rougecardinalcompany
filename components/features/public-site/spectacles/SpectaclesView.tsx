@@ -29,16 +29,16 @@ export function SpectaclesView({
   const hasMoreArchivedShows = archivedShows.length > MAX_INITIAL_ARCHIVED_SHOWS;
 
   return (
-    <div className="pt-16">
+    <div className="max-sm:pt-12 pt-16">
       {/* Hero Section */}
-      <section className="py-8 lg:py-12 hero-gradient" aria-labelledby="spectacles-hero-heading">
+      <section className="py-8 md:py-16 hero-gradient" aria-labelledby="spectacles-hero-heading">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 id="spectacles-hero-heading" className="text-white/90 text-3xl md:text-4xl lg:text-5xl font-bold animate-fade-in-up"> {/** mb-6  */}
-            À l&apos;Affiche
+          <h1 id="spectacles-hero-heading" className="text-white/90 text-4xl md:text-5xl lg:text-7xl font-semibold leading-none tracking-tight animate-fade-in-up"> {/** mb-6  */}
+            À l&apos;affiche
           </h1>
           {/*<p
-           // className="text-lg md:text-xl lg:text-2xl text-white/90 opacity-90 animate-fade-in"
-           // style={{ animationDelay: "0.2s" }}
+            className="text-lg md:text-xl lg:text-2xl text-white/90 opacity-90 animate-fade-in"
+            style={{ animationDelay: "0.2s" }}
           >
             Nos créations actuellement en représentation
           </p>*/}
@@ -46,7 +46,7 @@ export function SpectaclesView({
       </section>
 
       {/* Spectacles Actuels lg:w-[calc(33.333%-1.33rem)] */}
-      <section className="py-24 bg-background" aria-label="Spectacles actuels">
+      <section className="max-sm:py-16 py-24 xl:py-32 bg-background" aria-label="Spectacles actuels">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap justify-center gap-16">
             {currentShows.map((show, index) => (
@@ -76,18 +76,18 @@ export function SpectaclesView({
                           target="_blank"
                           rel="noopener noreferrer"
                           aria-label={`Réserver des billets pour ${show.title} (s'ouvre dans un nouvel onglet)`}
-                          className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-chart-6 hover:text-black transition-colors w-full focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-1 focus-visible:outline-none"
+                          className="inline-flex items-center justify-center gap-2 rounded-md bg-primary border border-primary hover:border-chart-2 px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-chart-2 hover:text-white shadow-md hover:shadow-sm transition-colors duration-300 w-full focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-1 focus-visible:outline-none"
                         >
-                          <Ticket className="h-4 w-4" aria-hidden="true" />
-                          Réserver mes billets
+                          <Ticket className="size-5" aria-hidden="true" />
+                          Je réserve mes billets
                         </Link>
                       )}
                       <Link
                         href={getSpectacleUrl(show)}
                         aria-label={`Voir les détails de ${show.title}`}
-                        className="inline-flex items-center justify-center gap-2 rounded-md bg-white/40 border border-white/50 px-4 py-2 text-sm font-medium text-chart-6 w-full hover:bg-chart-6 hover:text-black transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-1 focus-visible:outline-none"
+                        className="inline-flex items-center justify-center gap-2 rounded-md bg-white/40 border border-white/50 px-4 py-2 text-sm font-medium text-chart-6 w-full hover:bg-chart-6 hover:text-primary transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-1 focus-visible:outline-none"
                       >
-                        <Play className="h-5 w-5" aria-hidden="true" />
+                        <Play className="size-5" aria-hidden="true" />
                         Détails
                       </Link>
                     </div>
@@ -130,23 +130,24 @@ export function SpectaclesView({
       </section>
 
       {/* Archives */}
-      <section className="py-20 bg-background" aria-labelledby="spectacles-archives-heading">
+      <section className="pb-20 bg-chart-7" aria-labelledby="spectacles-archives-heading">
 
-        <section className="py-8 lg:py-12 hero-gradient" aria-labelledby="spectacles-archives-heading">
+        <section className="py-8 md:py-16 hero-gradient" aria-labelledby="spectacles-archives-heading">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 id="spectacles-archives-heading" className="text-white/90 text-3xl md:text-4xl lg:text-5xl font-bold animate-fade-in-up"> {/** mb-6  */}
-              Nos Créations Passées
+            <h2 id="spectacles-archives-heading" className="text-white/90 text-3xl md:text-4xl lg:text-6xl font-semibold animate-fade-in-up"> {/** mb-6  */}
+              Nos créations passées
             </h2>
             {/*<p
            // className="text-lg md:text-xl lg:text-2xl text-white/90 opacity-90 animate-fade-in"
            // style={{ animationDelay: "0.2s" }}
           >
             Nos Créations Passées
-          </p>*/}
+          </p>
+          */}
           </div>
         </section>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 max-sm:py-16 py-24 xl:py-32">
           <div className="flex flex-wrap justify-center gap-16">
             {displayedArchivedShows.map((show, index) => (
               <Card
@@ -167,8 +168,8 @@ export function SpectaclesView({
                     {/* Hover overlay with button */}
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                       <div className="flex flex-col gap-3 px-6 w-full">
-                        <span className="inline-flex items-center justify-center gap-2 rounded-md bg-white/40 border border-white/50 px-4 py-2 text-sm font-medium text-chart-6 w-full hover:bg-chart-6 hover:text-black transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-1 focus-visible:outline-none">
-                          <Play className="h-5 w-5" aria-hidden="true" />
+                        <span className="inline-flex items-center justify-center gap-2 rounded-md bg-white/40 border border-white/50 px-4 py-2 text-sm font-medium text-chart-6 w-full hover:bg-chart-6 hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-1 focus-visible:outline-none">
+                          <Play className="size-5" aria-hidden="true" />
                           Détails
                         </span>
                       </div>
@@ -201,10 +202,10 @@ export function SpectaclesView({
           <div className="text-center mt-12">
             <p className="text-muted-foreground mb-6">
               {showAllArchived
-                ? `${archivedShows.length} créations depuis 2008`
+                ? `${archivedShows.length} création${archivedShows.length > 1 ? "s" : ""}`
                 : hasMoreArchivedShows
-                  ? `${displayedArchivedShows.length} créations affichées sur ${archivedShows.length} au total depuis 2008`
-                  : `${archivedShows.length} créations depuis 2008`}
+                  ? `${displayedArchivedShows.length} création${displayedArchivedShows.length > 1 ? "s" : ""} affichée${displayedArchivedShows.length > 1 ? "s" : ""} sur ${archivedShows.length} au total`
+                  : `${archivedShows.length} création${archivedShows.length > 1 ? "s" : ""}`}
             </p>
             {hasMoreArchivedShows && (
               <Button
@@ -214,9 +215,9 @@ export function SpectaclesView({
                 onClick={() => setShowAllArchived(!showAllArchived)}
               >
                 <ArrowRight
-                  className={`h-5 w-5 transition-transform ${showAllArchived ? "rotate-180" : ""}`}
+                  className={`size-5 transition-transform ${showAllArchived ? "rotate-180" : ""}`}
                 />
-                {showAllArchived ? "Voir moins" : "Voir toutes nos créations"}
+                {showAllArchived ? "Voir moins" : "Voir nos créations"}
 
               </Button>
             )}

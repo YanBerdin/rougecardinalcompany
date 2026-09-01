@@ -120,7 +120,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // keep backwards-compatible, user metadata quick log (debug only)
-  console.debug("USER_metadata:", user?.user_metadata?.role); //TODO: remove
+  //! console.debug("USER_metadata:", user?.user_metadata?.role);
   if (request.nextUrl.pathname.startsWith("/protected") && !user) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone();
@@ -136,10 +136,13 @@ export async function updateSession(request: NextRequest) {
 
   if (isAdminPath || isApiAdminPath) {
     try {
-      // Resolve effective role from app_metadata (secure) then user_metadata (fallback)
-      const appRole = normalizeRole(user?.app_metadata?.role);
-      const userMetaRole = normalizeRole(user?.user_metadata?.role);
-      const effectiveRole = isRoleAtLeast(appRole, userMetaRole) ? appRole : userMetaRole;
+      // app_metadata is the only trusted authorization source.
+      let effectiveRole = normalizeRole(user?.app_metadata?.role);
+      if (user && effectiveRole === "user") {
+        // A role change may not be present in an already-issued JWT.
+        const { data: currentUser } = await supabase.auth.getUser();
+        effectiveRole = normalizeRole(currentUser.user?.app_metadata?.role);
+      }
 
       const hasBackofficeAccess =
         Boolean(user) && isRoleAtLeast(effectiveRole, "editor");

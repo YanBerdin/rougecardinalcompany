@@ -11,7 +11,7 @@ export function AccreditationSection() {
       className="py-16 hero-gradient"
     >
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-white/90 animate-fade-in-up">
+        <h2 className="text-3xl md:text-4xl lg:text-6xl font-semibold leading-none tracking-tight mb-6 text-white/90 animate-fade-in-up">
           Vous êtes journaliste ?
         </h2>
         <p className="text-base lg:text-lg text-white/70 mb-8">

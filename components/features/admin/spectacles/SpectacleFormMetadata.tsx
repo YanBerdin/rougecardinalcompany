@@ -128,7 +128,7 @@ export function SpectacleFormMetadata({
                                                 className="w-full justify-between"
                                             >
                                                 {field.value || "Sélectionner un genre..."}
-                                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent className="w-full min-w-[200px] p-0">
@@ -141,7 +141,7 @@ export function SpectacleFormMetadata({
                                                     }}
                                                 >
                                                     <Check
-                                                        className={`mr-2 h-4 w-4 ${field.value === genre
+                                                        className={`mr-2 size-4 ${field.value === genre
                                                             ? "opacity-100"
                                                             : "opacity-0"
                                                             }`}
@@ -157,7 +157,7 @@ export function SpectacleFormMetadata({
                                                 }}
                                                 className="border-t"
                                             >
-                                                <Plus className="mr-2 h-4 w-4" />
+                                                <Plus className="mr-2 size-4" />
                                                 Créer un nouveau genre
                                             </DropdownMenuItem>
                                         </DropdownMenuContent>

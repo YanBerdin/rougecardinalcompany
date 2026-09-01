@@ -55,7 +55,7 @@ export function LieuxTable({ lieux, onEdit, onDelete, sortState, onSort }: Lieux
                         {/* Body: Meta data */}
                         <div className="grid grid-cols-2 gap-y-2 text-sm text-muted-foreground">
                             <div className="flex items-center gap-2 col-span-2">
-                                <Building className="h-4 w-4" />
+                                <Building className="size-4" />
                                 <span>
                                     {lieu.ville ?? "-"}
                                     {lieu.code_postal && ` (${lieu.code_postal})`}
@@ -63,13 +63,13 @@ export function LieuxTable({ lieux, onEdit, onDelete, sortState, onSort }: Lieux
                             </div>
                             {lieu.adresse && (
                                 <div className="flex items-center gap-2 col-span-2">
-                                    <MapPin className="h-4 w-4" />
+                                    <MapPin className="size-4" />
                                     <span className="truncate">{lieu.adresse}</span>
                                 </div>
                             )}
                             {lieu.capacite && (
                                 <div className="flex items-center gap-2">
-                                    <Users className="h-4 w-4" />
+                                    <Users className="size-4" />
                                     <span>{lieu.capacite} pers.</span>
                                 </div>
                             )}
@@ -84,7 +84,7 @@ export function LieuxTable({ lieux, onEdit, onDelete, sortState, onSort }: Lieux
                                 className="h-10 min-w-[56px] px-3"
                                 aria-label={`Modifier ${lieu.nom}`}
                             >
-                                <Pencil className="h-5 w-5 mr-2" /> Modifier
+                                <Pencil className="size-5 mr-2" /> Modifier
                             </Button>
                             <Button
                                 variant="ghost-destructive"
@@ -93,7 +93,7 @@ export function LieuxTable({ lieux, onEdit, onDelete, sortState, onSort }: Lieux
                                 className="h-10 min-w-[56px] px-3"
                                 aria-label={`Supprimer ${lieu.nom}`}
                             >
-                                <Trash2 className="h-5 w-5 mr-2" /> Supprimer
+                                <Trash2 className="size-5 mr-2" /> Supprimer
                             </Button>
                         </div>
                     </div>
@@ -161,20 +161,20 @@ export function LieuxTable({ lieux, onEdit, onDelete, sortState, onSort }: Lieux
                                             size="icon"
                                             onClick={() => onEdit(lieu.id)}
                                             title="Modifier"
-                                            className="h-8 w-8 sm:h-9 sm:w-9"
+                                            className="size-8 sm:size-9"
                                             aria-label={`Modifier ${lieu.nom}`}
                                         >
-                                            <Pencil className="h-4 w-4" />
+                                            <Pencil className="size-4" />
                                         </Button>
                                         <Button
                                             variant="ghost-destructive"
                                             size="icon"
                                             onClick={() => onDelete(lieu.id)}
                                             title="Supprimer"
-                                            className="h-8 w-8 sm:h-9 sm:w-9"
+                                            className="size-8 sm:size-9"
                                             aria-label={`Supprimer ${lieu.nom}`}
                                         >
-                                            <Trash2 className="h-4 w-4" />
+                                            <Trash2 className="size-4" />
                                         </Button>
                                     </div>
                                 </TableCell>

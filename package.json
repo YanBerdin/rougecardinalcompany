@@ -12,6 +12,12 @@
     "lint:md:fix": "markdownlint-cli2 --fix \"**/*.md\" \"#node_modules\" \"!doc-perso/**\"",
     "lint:all": "pnpm lint && pnpm lint:md",
     "type-check": "tsc --noEmit",
+    "test": "pnpm test:unit",
+    "test:unit": "vitest run --project unit",
+    "test:unit:watch": "vitest --project unit",
+    "test:integration": "RUN_DAL_INTEGRATION_TESTS=1 vitest run --project integration",
+    "test:e2e": "playwright test",
+    "test:coverage": "vitest run --project unit --coverage",
     "check:audit-secrets": "tsx scripts/audit-secrets-management.ts",
     "db:reset": "pnpm dlx supabase db reset --yes && ./scripts/post-reset.sh",
     "db:push": "./scripts/supabase-env.sh db push --linked",
@@ -87,8 +93,6 @@
     "test:editor:local": "tsx scripts/test-editor-access-local.ts",
     "test:editor:remote": "tsx scripts/test-editor-access-remote.ts",
     "test:rls:local": "tsx scripts/test-permissions-rls.ts",
-    "test:dal:permissions": "vitest run __tests__/dal/permissions-integration.test.ts",
-    "test:unit:image-compress": "vitest run __tests__/utils/image-compress.test.ts",
     "e2e:auth": "npx playwright test --project=chromium-auth --reporter=list",
     "e2e:editor": "npx playwright test --project=editor --reporter=list",
     "e2e:admin": "npx playwright test --project=admin --reporter=list",
@@ -137,7 +141,7 @@
     "embla-carousel-autoplay": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
     "lucide-react": "^0.511.0",
-    "next": "16.2.3",
+    "next": "16.3.0",
     "next-themes": "^0.4.6",
     "react": "19.2.0",
     "react-day-picker": "^9.13.0",
@@ -147,7 +151,7 @@
     "recharts": "3.8.1",
     "resend": "^6.1.2",
     "server-only": "^0.0.1",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.0",
     "zod": "^4.1.0"
@@ -160,42 +164,56 @@
     "@types/pg": "^8.20.0",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
+    "@vitest/coverage-v8": "^4.1.11",
     "autoprefixer": "^10.4.20",
     "embla-carousel": "^8.6.0",
     "eslint": "^9.39.3",
-    "eslint-config-next": "16.1.6",
+    "eslint-config-next": "16.3.0",
     "markdownlint-cli2": "^0.18.1",
     "node-fetch": "^3.3.2",
     "pg": "^8.20.0",
-    "postcss": "^8",
+    "postcss": "^8.5.18",
     "prettier": "^3.6.2",
     "tailwindcss": "^3.4.1",
     "tailwindcss-animate": "^1.0.7",
     "tsx": "^4.7.0",
     "typescript": "^5",
-    "vite": "^8.0.8",
-    "vitest": "^4.1.0"
+    "vite": "^8.0.16",
+    "vitest": "^4.1.11"
   },
   "pnpm": {
     "overrides": {
       "@isaacs/brace-expansion": ">=5.0.1",
-      "brace-expansion": ">=5.0.5",
+      "brace-expansion": ">=5.0.8",
       "glob": ">=10.5.0",
-      "js-yaml": ">=4.1.1",
+      "js-yaml": ">=5.2.2",
       "lodash": ">=4.17.23",
       "@types/react": "19.2.7",
       "@types/react-dom": "19.2.3",
-      "markdownlint-cli2>markdown-it": ">=14.1.1",
+      "markdownlint-cli2>markdown-it": ">=14.2.0",
       "schema-utils>ajv": ">=8.18.0",
+      "sharp": ">=0.35.0",
       "minimatch": ">=10.2.3",
       "terser-webpack-plugin>serialize-javascript": ">=7.0.3",
       "flatted": ">=3.4.2",
-      "picomatch": ">=4.0.4"
+      "linkify-it": ">=5.0.1",
+      "picomatch": ">=4.0.4",
+      "postcss": ">=8.5.18",
+      "fast-uri": ">=3.1.4",
+      "ws": ">=8.21.0",
+      "@babel/core": ">=7.29.6",
+      "uuid": ">=11.1.1",
+      "@opentelemetry/core": ">=2.8.0"
     },
     "auditConfig": {
       "ignoreCves": [
         "CVE-2025-69873"
       ]
-    }
+    },
+    "onlyBuiltDependencies": [
+      "@sentry/cli",
+      "esbuild",
+      "unrs-resolver"
+    ]
   }
 }

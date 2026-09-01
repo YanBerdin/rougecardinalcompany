@@ -13,7 +13,7 @@
  */
 import 'dotenv/config';
 import { createClient } from '@supabase/supabase-js';
-import { env } from '../lib/env';
+import { env } from '../lib/env.js';
 
 // Configuration pour la base de données locale
 const supabaseUrl = 'http://127.0.0.1:54322';

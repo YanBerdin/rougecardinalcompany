@@ -100,7 +100,7 @@ export function AuditLogsTable({
                                 {log.action}
                             </Badge>
                             <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                <Clock className="h-4 w-4" />
+                                <Clock className="size-4" />
                                 <span>
                                     {formatDistanceToNow(new Date(log.created_at), {
                                         addSuffix: true,
@@ -113,24 +113,24 @@ export function AuditLogsTable({
                         {/* Body: Meta data */}
                         <div className="grid grid-cols-1 gap-y-2 text-sm text-muted-foreground">
                             <div className="flex items-center gap-2">
-                                <User className="h-4 w-4 flex-shrink-0" />
+                                <User className="size-4 flex-shrink-0" />
                                 <span className="truncate">
                                     {getAuditUserLabel(log.user_email, log.ip_address)}
                                 </span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <Database className="h-4 w-4 flex-shrink-0" />
+                                <Database className="size-4 flex-shrink-0" />
                                 <span className="font-mono">{log.table_name}</span>
                             </div>
                             {log.record_id && (
                                 <div className="flex items-center gap-2">
-                                    <Hash className="h-4 w-4 flex-shrink-0" />
+                                    <Hash className="size-4 flex-shrink-0" />
                                     <span className="font-mono truncate">{log.record_id}</span>
                                 </div>
                             )}
                             {log.ip_address && (
                                 <div className="flex items-center gap-2">
-                                    <Globe className="h-4 w-4 flex-shrink-0" />
+                                    <Globe className="size-4 flex-shrink-0" />
                                     <span>{log.ip_address}</span>
                                 </div>
                             )}
@@ -144,7 +144,7 @@ export function AuditLogsTable({
                                 className="h-10 px-3"
                                 aria-label="Voir les détails"
                             >
-                                <Eye className="h-5 w-5 mr-2" /> Détails
+                                <Eye className="size-5 mr-2" /> Détails
                             </Button>
                         </div>
                     </div>

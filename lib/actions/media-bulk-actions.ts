@@ -4,6 +4,7 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/supabase/server";
 import { requireMinRole } from "@/lib/auth/roles";
+import { moveMediaItemsToFolder } from "@/lib/dal/media-move";
 import { BulkDeleteSchema, BulkMoveSchema, BulkTagSchema } from "@/lib/schemas/media";
 
 /**
@@ -100,20 +101,13 @@ export async function bulkMoveMediaAction(
             folder_id: folderId,
         });
 
-        const supabase = await createClient();
+        const moveResult = await moveMediaItemsToFolder(
+            validated.media_ids,
+            validated.folder_id
+        );
 
-        // Update folder_id for all selected media
-        // Note: Supabase client handles number → bigint conversion automatically
-        const { error: updateError } = await supabase
-            .from("medias")
-            .update({
-                folder_id: validated.folder_id,
-                updated_at: new Date().toISOString(),
-            })
-            .in("id", validated.media_ids);
-
-        if (updateError) {
-            throw new Error(updateError.message);
+        if (!moveResult.success) {
+            throw new Error(moveResult.error);
         }
 
         revalidatePath("/admin/media");

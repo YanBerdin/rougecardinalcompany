@@ -26,7 +26,7 @@ export function NewsCard({ item, index }: NewsCardProps) {
   const externalProps = isExternal
     ? { target: "_blank" as const, rel: "noopener noreferrer" }
     : {};
-  const badgeLabel = item.source_publication || item.category;
+  const badgeLabel = item.source_publication || item.type;
 
   return (
     <Card
@@ -60,7 +60,7 @@ export function NewsCard({ item, index }: NewsCardProps) {
 
       <CardContent className="p-6 flex flex-col flex-1">
         <div className="flex items-center card-date text-sm mb-3">
-          <Calendar className="h-4 w-4 mr-2" aria-hidden="true" />
+          <Calendar className="size-4 mr-2" aria-hidden="true" />
           <time dateTime={item.date}>
             {new Date(item.date).toLocaleDateString("fr-FR", {
               year: "numeric",
@@ -70,12 +70,12 @@ export function NewsCard({ item, index }: NewsCardProps) {
           </time>
         </div>
 
-        <h3 className="text-xl font-semibold font-sans mb-3 hover:text-primary transition-colors card-title">
+        <h3 className="text-xl font-semibold font-sans mb-3 hover:text-chart-2 transition-colors card-title">
           <Link href={articleHref} {...externalProps}>
             {item.title}
             {isExternal && (
               <ExternalLink
-                className="inline-block h-3.5 w-3.5 ml-1.5 align-baseline"
+                className="inline-block size-3.5 ml-1.5 align-baseline"
                 aria-hidden="true"
               />
             )}
@@ -88,9 +88,9 @@ export function NewsCard({ item, index }: NewsCardProps) {
       </CardContent>
 
       <CardFooter className="mt-auto">
-        <Button variant="secondary" size="lg" asChild>
+        <Button variant="outline-primary" size="lg" asChild>
           <Link href={articleHref} {...externalProps}>
-            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            <ArrowRight className="size-4" aria-hidden="true" />
             Lire l&apos;article
             {isExternal && (
               <span className="sr-only"> (s&apos;ouvre dans un nouvel onglet)</span>

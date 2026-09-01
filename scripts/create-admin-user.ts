@@ -5,7 +5,7 @@
  */
 import 'dotenv/config';
 import { createClient } from '@supabase/supabase-js';
-import { env } from '../lib/env';
+import { env } from '../lib/env.js';
 
 const SUPABASE_URL = env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_KEY = env.SUPABASE_SECRET_KEY;
@@ -27,27 +27,28 @@ async function createAdminUser() {
     // 1. Vérifier si l'utilisateur existe déjà
     console.log('📝 Step 1: Checking if user exists...');
     const { data: { users }, error: listError } = await supabase.auth.admin.listUsers();
-    
+
     if (listError) throw listError;
-    
+
     const existingUser = users.find(u => u.email === email);
-    
+
     if (existingUser) {
       console.log(`⚠️  User ${email} already exists with ID: ${existingUser.id}`);
       console.log('\n🔄 Updating existing user to admin...');
-      
-      // Mettre à jour l'utilisateur existant
+
+      // Mettre à jour l'utilisateur existant.
+      // Le rôle vit uniquement dans app_metadata (server-only, signé dans le JWT).
+      // Ne JAMAIS écrire `role` dans user_metadata (modifiable côté client → élévation de privilège).
       const { error: updateError } = await supabase.auth.admin.updateUserById(
         existingUser.id,
         {
           app_metadata: { role: 'admin' },
-          user_metadata: { role: 'admin' },
           email_confirm: true,
         }
       );
 
       if (updateError) throw updateError;
-      
+
       console.log('✅ User updated to admin');
 
       // Créer/mettre à jour le profil
@@ -63,9 +64,9 @@ async function createAdminUser() {
         });
 
       if (profileError) throw profileError;
-      
+
       console.log('✅ Profile created/updated');
-      
+
       // Vérifier
       const { data: profile } = await supabase
         .from('profiles')
@@ -78,18 +79,19 @@ async function createAdminUser() {
       console.log(`   👤 User ID: ${existingUser.id}`);
       console.log(`   🔐 Profile role: ${profile?.role || 'MISSING!'}`);
       console.log(`   📝 Display name: ${profile?.display_name || 'MISSING!'}`);
-      
+
       return;
     }
 
     // 2. Créer le nouvel utilisateur
     console.log('📝 Step 1: Creating new user...');
+    // Le rôle vit uniquement dans app_metadata (server-only, signé dans le JWT).
+    // Ne JAMAIS écrire `role` dans user_metadata (modifiable côté client → élévation de privilège).
     const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
       email,
       password,
       email_confirm: true, // Auto-confirm l'email
       app_metadata: { role: 'admin' },
-      user_metadata: { role: 'admin' },
     });
 
     if (createError) throw createError;
@@ -115,7 +117,7 @@ async function createAdminUser() {
 
     // 4. Vérifier que tout est OK
     console.log('\n📝 Step 3: Verifying...');
-    
+
     const { data: profile, error: verifyError } = await supabase
       .from('profiles')
       .select('user_id, role, display_name')

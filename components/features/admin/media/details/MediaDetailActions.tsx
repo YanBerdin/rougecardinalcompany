@@ -39,7 +39,7 @@ export function MediaDetailActions() {
                     onClick={handleRegenerateThumbnail}
                     disabled={isUpdating || isDeleting || isRegenerating}
                 >
-                    <RefreshCw className={`mr-2 h-4 w-4 ${isRegenerating ? "animate-spin" : ""}`} />
+                    <RefreshCw className={`mr-2 size-4 ${isRegenerating ? "animate-spin" : ""}`} />
                     {isRegenerating ? "Génération..." : "Générer thumbnail"}
                 </Button>
             )}
@@ -50,7 +50,7 @@ export function MediaDetailActions() {
                 onClick={() => setShowDeleteDialog(true)}
                 disabled={isUpdating || isDeleting}
             >
-                <Trash2 className="mr-2 h-4 w-4" />
+                <Trash2 className="mr-2 size-4" />
                 Supprimer le média
             </Button>
 

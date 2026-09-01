@@ -3,6 +3,7 @@ export interface HeroSlide {
   subtitle?: string;
   description?: string;
   image: string;
+  video?: string;
   
   // CTA Primaire (bouton principal)
   ctaPrimaryEnabled: boolean;

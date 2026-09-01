@@ -9,7 +9,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, Calendar, Download, Info, Ticket, X } from "lucide-react";
+import { MapPin, Calendar, Download, Tag, Ticket, Users, X } from "lucide-react"; //  Info
 import { isWithinInterval, parseISO, startOfDay, format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
@@ -20,9 +20,9 @@ import { formatEventPeriod } from "./formatPeriod";
 import type { Event } from "@/lib/schemas/agenda";
 import { buildGoogleMapsUrl } from "@/lib/utils/google-maps";
 
-// ============================================================================
+// =========================================================================
 // Constants
-// ============================================================================
+// =========================================================================
 
 const ANIMATION_DELAY_STEP = 0.05;
 
@@ -50,6 +50,33 @@ function getBadgeVariant(type: string): BadgeVariant {
         .replace(/[\u0300-\u036f]/g, "")
         .trim();
     return BADGE_VARIANT_MAP[normalized] ?? "secondary";
+}
+
+function formatPrice(priceCents: number | null): string | null {
+    if (priceCents === null) return null;
+    if (priceCents === 0) return "Gratuit";
+
+    return new Intl.NumberFormat("fr-FR", {
+        style: "currency",
+        currency: "EUR",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+    }).format(priceCents / 100);
+}
+
+function buildPricingSummary(event: Event): string | null {
+    const parts: string[] = [];
+    const fullPrice = formatPrice(event.priceCents);
+    const reducedPrice = formatPrice(event.priceReducedCents);
+
+    if (fullPrice) {
+        parts.push(`${fullPrice}`);
+    }
+    if (reducedPrice) {
+        parts.push(`Tarif réduit ${reducedPrice}`);
+    }
+
+    return parts.length > 0 ? parts.join(" · ") : null;
 }
 
 // ============================================================================
@@ -138,18 +165,19 @@ function buildVenueLabel(venue: string, address: string): string {
 function EventCardMetaInline({ event }: { readonly event: Event }): React.JSX.Element {
     const mapsUrl = buildGoogleMapsUrl({ name: event.venue, address: event.address });
     const venueLabel = buildVenueLabel(event.venue, event.address);
+    const pricingSummary = buildPricingSummary(event);
     return (
         <div
             className="flex flex-col items-start gap-x-3 gap-y-2 text-xs md:text-sm text-muted-foreground"
             aria-label="Informations pratiques"
         >
             <span className="flex items-center gap-1">
-                <Calendar className="h-3 w-3 text-gold shrink-0" aria-hidden="true" />
+                <Calendar className="size-3 text-gold shrink-0" aria-hidden="true" />
                 {formatEventPeriod(event)}
             </span>
 
             {mapsUrl ? (
-                <a
+                <Link
                     href={mapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -157,14 +185,31 @@ function EventCardMetaInline({ event }: { readonly event: Event }): React.JSX.El
                     title="Voir sur Google Maps"
                     className="flex items-center gap-1 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
                 >
-                    <MapPin className="h-3 w-3 text-gold shrink-0" aria-hidden="true" />
+                    <MapPin className="size-3 text-gold shrink-0" aria-hidden="true" />
                     <span>{venueLabel}</span>
-                </a>
+                </Link>
             ) : (
                 <span className="flex items-center gap-1">
-                    <MapPin className="h-3 w-3 text-gold shrink-0" aria-hidden="true" />
+                    <MapPin className="size-3 text-gold shrink-0" aria-hidden="true" />
                     {venueLabel}
                 </span>
+            )}
+
+            {(pricingSummary || event.capacity !== null) && (
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                    {pricingSummary && (
+                        <span className="flex items-center gap-1">
+                            <Tag className="size-3 text-gold shrink-0" aria-hidden="true" />
+                            {pricingSummary}
+                        </span>
+                    )}
+                    {event.capacity !== null && (
+                        <span className="flex items-center gap-1">
+                            <Users className="size-3 text-gold shrink-0" aria-hidden="true" />
+                            {event.capacity} places
+                        </span>
+                    )}
+                </div>
             )}
         </div>
     );
@@ -174,7 +219,7 @@ function EventCardMetaInline({ event }: { readonly event: Event }): React.JSX.El
 function EventCardActions({ event, compact = false }: { readonly event: Event; readonly compact?: boolean }): React.JSX.Element {
     const { actions } = useAgendaContext();
     const types = event.genres.length > 0 ? event.genres : ["Spectacle"];
-    const ticketLabel = types.includes("Atelier") ? "M'inscrire" : "Réserver mes billets";
+    const ticketLabel = types.includes("Atelier") ? "M'inscrire" : "Je réserve mes billets";
     const size = compact ? "sm" : "default";
     const placeholderClass = compact ? "h-0" : "h-9";
 
@@ -188,7 +233,7 @@ function EventCardActions({ event, compact = false }: { readonly event: Event; r
                         rel="noopener noreferrer"
                         aria-label={`${ticketLabel} — ${event.title}`}
                     >
-                        <Ticket className="mr-2 h-4 w-4" aria-hidden="true" />
+                        <Ticket className="mr-2 size-4" aria-hidden="true" />
                         {ticketLabel}
                     </Link>
                 </Button>
@@ -202,15 +247,18 @@ function EventCardActions({ event, compact = false }: { readonly event: Event; r
                 aria-label={`Ajouter ${event.title} au calendrier`}
                 onClick={() => actions.downloadCalendarFile(event)}
             >
-                <Download className="mr-2 h-4 w-4" aria-hidden="true" />
+                <Download className="mr-2 size-4" aria-hidden="true" />
                 Ajouter au calendrier
             </Button>
+
+            {/*            
             <Button variant="outline" size={size} className="w-full" asChild>
                 <Link href={`/agenda/${event.id}`} aria-label={`Informations pratiques — ${event.title}`}>
-                    <Info className="mr-2 h-4 w-4" aria-hidden="true" />
+                    <Info className="mr-2 size-4" aria-hidden="true" />
                     Infos pratiques
                 </Link>
             </Button>
+            */}
         </div>
     );
 }
@@ -335,7 +383,7 @@ function SelectedDateBanner({ label, onClear }: {
                 aria-label="Effacer le filtre par date"
                 className="p-0.5 rounded hover:bg-primary/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-                <X className="w-3.5 h-3.5" aria-hidden="true" />
+                <X className="size-3.5" aria-hidden="true" />
             </button>
         </div>
     );
@@ -356,13 +404,13 @@ function EventListEmptyState({ selectedDate, onClear }: {
             <div className="text-center py-20 px-6 rounded-2xl border border-white/5 bg-white/[0.02] backdrop-blur-sm" role="status">
                 {selectedDate ? (
                     <>
-                        <p className="text-gold text-xl font-light tracking-wide">Aucun événement ce jour.</p>
+                        <p className="text-gold-text text-xl font-light tracking-wide">Aucun événement ce jour.</p>
                         <p className="text-chart-6 mt-2 text-sm">Sélectionnez un autre jour ou supprimez le filtre.</p>
                     </>
                 ) : (
                     <>
-                        <p className="text-gold text-xl font-light tracking-wide">Aucun événement ne correspond à votre recherche.</p>
-                        <p className="text-chart-6 mt-2 text-sm">Essayez de modifier vos filtres ou de revenir plus tard.</p>
+                        <p className="text-gold-text text-xl font-light tracking-wide">Aucun événement ne correspond à votre recherche.</p>
+                        <p className="text-gold-text mt-2 text-sm">Essayez de modifier vos filtres ou de revenir plus tard.</p>
                     </>
                 )}
             </div>

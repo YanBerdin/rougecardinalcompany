@@ -132,14 +132,14 @@ export function UsersManagementView({ users }: UsersManagementViewProps) {
             {users.length} administrateur{users.length > 1 ? "s" : ""} au total
           </p>
           <Button size="sm" onClick={() => router.push("/admin/users/invite")}>
-            <UserPlus className="mr-2 h-4 w-4" aria-hidden="true" />
+            <UserPlus className="mr-2 size-4" aria-hidden="true" />
             Inviter un administrateur
           </Button>
         </div>
 
         {users.length === 0 ? (
           <div className="py-6 text-center text-muted-foreground border rounded-lg">
-            <Mail className="mx-auto h-12 w-12 mb-4 opacity-50" aria-hidden="true" />
+            <Mail className="mx-auto size-12 mb-4 opacity-50" aria-hidden="true" />
             <p className="text-lg font-medium">Aucun administrateur trouvé</p>
             <p className="text-sm mt-2">
               Invitez votre premier administrateur pour commencer

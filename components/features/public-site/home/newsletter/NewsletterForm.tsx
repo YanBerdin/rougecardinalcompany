@@ -19,7 +19,7 @@ export function NewsletterForm() {
             </label>
             <div className="relative flex-1">
                 <Mail
-                    className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/50 pointer-events-none"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 size-5 text-white/50 pointer-events-none"
                     aria-hidden="true"
                 />
                 <Input
@@ -42,7 +42,7 @@ export function NewsletterForm() {
                 className="touch-hitbox bg-chart-6 border-white/30 hover:text-white hover:backdrop-blur-md hover:bg-white/30 text-red-800 transition-all duration-200 shadow-lg whitespace-nowrap disabled:opacity-50"
             >
                 <span className="inline-flex items-center hover:scale-95 active:scale-100 disabled:hover:scale-90 transition-transform">
-                    {isLoading ? "Inscription..." : "S'inscrire"}
+                    {isLoading ? "Inscription..." : "Je la veux !"}
                 </span>
             </Button>
         </form>

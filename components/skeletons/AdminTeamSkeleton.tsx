@@ -12,7 +12,7 @@ export function AdminTeamSkeleton() {
                 <div className="h-8 w-1/4 bg-transparent" />
                 <div className="flex items-center gap-2">
                     <div className="h-4 w-32 bg-muted rounded" />
-                    <div className="h-6 w-6 bg-muted rounded-full" />
+                    <div className="size-6 bg-muted rounded-full" />
                 </div>
             </div>
 

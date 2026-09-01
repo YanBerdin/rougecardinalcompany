@@ -51,7 +51,7 @@ export default async function EditTeamMemberPage({
             <div className="flex items-center gap-4">
                 <Button variant="outline" size="lg" asChild>
                     <Link href="/admin/team">
-                        <ArrowLeft className="h-4 w-4" />
+                        <ArrowLeft className="size-4" />
                         <span className="sr-only">Retour à la liste</span>
                     </Link>
                 </Button>

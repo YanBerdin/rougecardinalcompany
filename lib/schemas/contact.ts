@@ -15,6 +15,10 @@ export const ContactReasonEnum = z.enum([
 
 export type ContactReason = z.infer<typeof ContactReasonEnum>;
 
+const PHONE_NUMBER_PATTERN = /^\+?[0-9\s\-()]{10,}$/;
+const MINIMUM_CONTACT_MESSAGE_LENGTH = 10;
+const MAXIMUM_CONTACT_MESSAGE_LENGTH = 5000;
+
 // =============================================================================
 // CONTACT MESSAGE SCHEMA (DAL/Database)
 // =============================================================================
@@ -27,9 +31,17 @@ export const ContactMessageSchema = z.object({
     firstName: z.string().trim().min(1, "Le prénom est requis").max(100, "Le prénom est trop long"),
     lastName: z.string().trim().min(1, "Le nom est requis").max(100, "Le nom est trop long"),
     email: z.string().email("L'adresse email est invalide").toLowerCase(),
-    phone: z.string().trim().max(40, "Le numéro est trop long (40 caractères max)").optional().nullable(),
+    phone: z.string()
+        .trim()
+        .max(40, "Le numéro est trop long (40 caractères max)")
+        .regex(PHONE_NUMBER_PATTERN, "Le numéro de téléphone est invalide")
+        .optional()
+        .nullable(),
     reason: ContactReasonEnum.default("autre"),
-    message: z.string().trim().min(1, "Le message est requis").max(5000, "Le message est trop long (5000 caractères maximum)"),
+    message: z.string()
+        .trim()
+        .min(MINIMUM_CONTACT_MESSAGE_LENGTH, "Le message doit contenir au moins 10 caractères")
+        .max(MAXIMUM_CONTACT_MESSAGE_LENGTH, "Le message est trop long (5000 caractères maximum)"),
     consent: z
         .boolean()
         .refine((v) => v === true, { message: "Vous devez accepter les conditions pour envoyer votre message." }),

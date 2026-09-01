@@ -15,6 +15,8 @@ export function HeroIndicators({
   onPauseAutoPlay,
   onGoToSlide,
 }: HeroIndicatorsProps) {
+  if (slides.length <= 1) return null;
+
   return (
     <>
       {/* Annonce live pour lecteurs d'écran */}
@@ -22,11 +24,11 @@ export function HeroIndicators({
         {`Diapositive ${currentSlide + 1} sur ${slides.length} : ${slides[currentSlide]?.title ?? ""}`}
       </div>
 
-      {/* Points de navigation */}
+      {/* Points de navigation — masqués sur mobile (navigation par swipe), visibles à partir de la tablette */}
       <div
         role="group"
         aria-label="Sélectionner une diapositive"
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex space-x-3 z-20"
+        className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 hidden sm:flex space-x-3 z-20"
       >
         {slides.map((slide, index) => (
           <button

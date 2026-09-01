@@ -14,7 +14,7 @@ export default async function AdminDashboard() {
       <div>
         <h1 className="text-3xl md:text-4xl font-bold">Tableau de bord</h1>
         <p className="text-muted-foreground mt-2">
-          Gérez le contenu et la configuration de votre site
+          Gérez le contenu et la configuration du site
         </p>
       </div>
 

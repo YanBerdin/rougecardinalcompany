@@ -59,7 +59,7 @@ class PageErrorBoundaryClass extends Component<InternalProps, State> {
 
             return (
                 <div className="flex min-h-[400px] flex-col items-center justify-center p-8">
-                    <AlertTriangle className="mb-4 h-12 w-12 text-amber-500" />
+                    <AlertTriangle className="mb-4 size-12 text-amber-500" />
                     <h2 className="mb-2 text-xl font-semibold">
                         Impossible de charger cette page
                     </h2>
@@ -67,7 +67,7 @@ class PageErrorBoundaryClass extends Component<InternalProps, State> {
                         Une erreur s&apos;est produite lors du chargement de cette section.
                     </p>
                     <Button onClick={this.handleRetry} variant="outline">
-                        <RefreshCw className="mr-2 h-4 w-4" />
+                        <RefreshCw className="mr-2 size-4" />
                         Réessayer
                     </Button>
                 </div>

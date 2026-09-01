@@ -40,7 +40,7 @@ function SubscribedConfirmation(): React.JSX.Element {
     return (
         <div className="motion-safe:animate-fade-in text-center lg:text-left">
             <CheckCircle
-                className="h-16 w-16 text-white mx-auto lg:mx-0 mb-6"
+                className="size-16 text-white mx-auto lg:mx-0 mb-6"
                 aria-hidden="true"
             />
             <h2 className="text-3xl md:text-4xl font-bold font-sans text-white mb-4">

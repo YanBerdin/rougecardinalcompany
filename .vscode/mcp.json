@@ -36,6 +36,10 @@
         "Content-Type": "application/json"
       }
     },
+    "supabase-rcc-client": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=hjmwctzqljfszuwkaadd&features=docs%2Caccount%2Cdatabase%2Cdebugging%2Cdevelopment%2Cfunctions%2Cbranching",
+    },
     "shadcn": {
       "command": "npx",
       "args": [
@@ -57,7 +61,7 @@
         "gemini-design-mcp@latest"
       ],
       "env": {
-        "API_KEY": "gd_Hwk6h28XyOje4HpIQuq14On91w_18GOe"
+        "API_KEY": "${env:GEMINI_DESIGN_KEY}"
       }
     },
     "Sentry": {

@@ -82,10 +82,16 @@ export const HeroSlideInputSchema = z.object({
         return val;
     }, relativeOrAbsoluteUrl.optional()),
 
+    video_url: relativeOrAbsoluteUrl.optional().or(z.literal("")),
+
     active: z.boolean().optional(),
     position: z.number().int().min(0, "Position must be non-negative").optional(),
 }).refine(
-    (data) => data.image_media_id !== undefined || (typeof data.image_url === 'string' && data.image_url.trim().length > 0),
+    (data) => {
+        const hasVideo = typeof data.video_url === 'string' && data.video_url.trim().length > 0;
+        const hasImage = data.image_media_id !== undefined || (typeof data.image_url === 'string' && data.image_url.trim().length > 0);
+        return hasVideo || hasImage;
+    },
     { message: "An image is required (media ID or URL)", path: ["image_url"] }
 ).refine(
     // CTA Primaire: si activé, label ET url requis
@@ -154,6 +160,8 @@ export interface HeroSlideDTO {
     cta_secondary_label: string | null;
     cta_secondary_url: string | null;
 
+    video_url: string | null;
+
     active: boolean;
     position: number;
     created_at: string;
@@ -201,10 +209,16 @@ export const HeroSlideFormSchema = z.object({
     cta_secondary_label: z.string().max(50, "CTA secondary label max 50 characters").optional().or(z.literal("")),
     cta_secondary_url: relativeOrAbsoluteUrl.optional().or(z.literal("")),
 
+    video_url: relativeOrAbsoluteUrl.optional().or(z.literal("")),
+
     active: z.boolean().optional(),
     position: z.number().int().min(0, "Position must be non-negative").optional(),
 }).refine(
-    (data) => data.image_media_id !== undefined || (typeof data.image_url === 'string' && data.image_url.trim().length > 0),
+    (data) => {
+        const hasVideo = typeof data.video_url === 'string' && data.video_url.trim().length > 0;
+        const hasImage = data.image_media_id !== undefined || (typeof data.image_url === 'string' && data.image_url.trim().length > 0);
+        return hasVideo || hasImage;
+    },
     { message: "An image is required (media ID or URL)", path: ["image_url"] }
 ).refine(
     // CTA Primaire: si activé, label ET url requis

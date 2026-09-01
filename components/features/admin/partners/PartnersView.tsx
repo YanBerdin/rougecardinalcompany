@@ -140,7 +140,7 @@ export function PartnersView({ initialPartners }: PartnersViewProps) {
                 </div>
                 <Button asChild className="w-full sm:w-auto">
                     <Link href="/admin/partners/new">
-                        <Plus className="mr-2 h-4 w-4" />
+                        <Plus className="mr-2 size-4" />
                         Nouveau partenaire
                     </Link>
                 </Button>
@@ -152,7 +152,7 @@ export function PartnersView({ initialPartners }: PartnersViewProps) {
                         <p className="text-muted-foreground">Aucun partenaire</p>
                         <Button asChild variant="outline" className="mt-4">
                             <Link href="/admin/partners/new">
-                                <Plus className="mr-2 h-4 w-4" />
+                                <Plus className="mr-2 size-4" />
                                 Ajouter le premier partenaire
                             </Link>
                         </Button>
@@ -161,7 +161,7 @@ export function PartnersView({ initialPartners }: PartnersViewProps) {
             ) : (
                 <div className="space-y-3 sm:space-y-2">
                     <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-2">
-                        <GripVertical className="h-4 w-4 inline-block" />
+                        <GripVertical className="size-4 inline-block" />
                         Glissez-déposez pour réorganiser l&apos;ordre d&apos;affichage
                     </p>
                     <DndContext
