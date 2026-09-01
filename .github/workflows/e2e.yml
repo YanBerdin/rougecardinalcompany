@@ -1,7 +1,10 @@
 # =============================================================================
-# E2E Tests — GitHub Actions Workflow
+# Integration & E2E Tests — GitHub Actions Workflow
 #
-# Runs the full Playwright E2E suite against a local Supabase instance.
+# Runs the Vitest integration suite (RLS policies, audit triggers) and the full
+# Playwright E2E suite against a local Supabase instance.
+#
+# Lint / type-check / unit tests run separately in unit-tests.yml (every push).
 #
 # Required GitHub Secrets:
 #   SUPABASE_SERVICE_ROLE_KEY   — local Supabase service_role key
@@ -148,7 +151,15 @@ jobs:
           ENVEOF
 
       # -----------------------------------------------------------------------
-      # 9. Run E2E tests
+      # 9. Run integration tests (RLS, audit triggers) against local Supabase
+      # -----------------------------------------------------------------------
+      - name: Run integration tests
+        run: pnpm test:integration
+        env:
+          CI: "true"
+
+      # -----------------------------------------------------------------------
+      # 10. Run E2E tests
       # -----------------------------------------------------------------------
       - name: Run E2E tests
         run: pnpm exec playwright test --reporter=html,github
@@ -156,7 +167,7 @@ jobs:
           CI: "true"
 
       # -----------------------------------------------------------------------
-      # 10. Upload report (always, even on failure)
+      # 11. Upload report (always, even on failure)
       # -----------------------------------------------------------------------
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
@@ -167,7 +178,7 @@ jobs:
           retention-days: 30
 
       # -----------------------------------------------------------------------
-      # 11. Stop Supabase
+      # 12. Stop Supabase
       # -----------------------------------------------------------------------
       - name: Stop Supabase
         if: always()
