@@ -1,5 +1,5 @@
 /**
- * DAL Permissions Integration Tests
+ * RLS Permissions Integration Tests
  *
  * Tests RLS policies via Supabase client per role (anon, user, editor, admin).
  * Covers spec sections 3.1–3.4 from specs/tests-permissions-et-rôles.md
@@ -8,55 +8,30 @@
  * @requires .env.e2e with E2E_EDITOR_EMAIL, E2E_ADMIN_EMAIL, E2E_USER_EMAIL, etc.
  *
  * @usage
- *   pnpm test:dal:permissions
+ *   pnpm test:integration
  */
-import path from "node:path";
-import dotenv from "dotenv";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@/lib/database.types";
 
-dotenv.config({ path: path.resolve(__dirname, "../../.env.e2e") });
+import {
+    assertLocalSupabase,
+    createAnonClient,
+    createServiceClient,
+    ensureTestAccount,
+    isRlsBlock,
+    isSchemaError,
+    shouldRunIntegrationTests as shouldRun,
+    signInAndCreateClient,
+    syncProfileRole,
+    TEST_ACCOUNTS,
+    type SB,
+} from "./helpers/supabase";
 
-/**
- * Guard: skip this entire suite in CI (no local Supabase / .env.e2e).
- * Run locally with: RUN_DAL_INTEGRATION_TESTS=1 pnpm vitest run __tests__/dal/permissions-integration.test.ts
- */
-const shouldRun = process.env.RUN_DAL_INTEGRATION_TESTS === "1";
+const { email: EDITOR_EMAIL, password: EDITOR_PASSWORD } = TEST_ACCOUNTS.editor;
+const { email: ADMIN_EMAIL, password: ADMIN_PASSWORD } = TEST_ACCOUNTS.admin;
+const { email: USER_EMAIL, password: USER_PASSWORD } = TEST_ACCOUNTS.user;
 
-/* ------------------------------------------------------------------ */
-/*  Environment                                                        */
-/* ------------------------------------------------------------------ */
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const PUBLISHABLE_KEY =
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!;
-const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-const EDITOR_EMAIL = process.env.E2E_EDITOR_EMAIL!;
-const EDITOR_PASSWORD = process.env.E2E_EDITOR_PASSWORD!;
-const ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL!;
-const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD!;
-const USER_EMAIL = process.env.E2E_USER_EMAIL!;
-const USER_PASSWORD = process.env.E2E_USER_PASSWORD!;
-
-/* ------------------------------------------------------------------ */
-/*  Clients (created only when integration tests are enabled)         */
-/* ------------------------------------------------------------------ */
-
-type SB = SupabaseClient<Database>;
-
-const serviceClient: SB = shouldRun
-    ? createClient<Database>(SUPABASE_URL, SERVICE_KEY, {
-        auth: { autoRefreshToken: false, persistSession: false },
-    })
-    : ({} as SB);
-
-const anonClient: SB = shouldRun
-    ? createClient<Database>(SUPABASE_URL, PUBLISHABLE_KEY, {
-        auth: { autoRefreshToken: false, persistSession: false },
-    })
-    : ({} as SB);
+const serviceClient: SB = createServiceClient();
+const anonClient: SB = createAnonClient();
 
 let editorClient: SB;
 let adminClient: SB;
@@ -87,110 +62,19 @@ let seedContactPresseId: number;
 const TS = () => `__rls_test_${Date.now()}`;
 
 /* ------------------------------------------------------------------ */
-/*  Helpers                                                            */
-/* ------------------------------------------------------------------ */
-
-async function signInAndCreateClient(
-    email: string,
-    password: string,
-): Promise<{ client: SB; userId: string }> {
-    const tmpClient = createClient<Database>(SUPABASE_URL, PUBLISHABLE_KEY, {
-        auth: { autoRefreshToken: false, persistSession: false },
-    });
-    const { data, error } = await tmpClient.auth.signInWithPassword({
-        email,
-        password,
-    });
-    if (error || !data.session) {
-        throw new Error(`Sign-in failed for ${email}: ${error?.message}`);
-    }
-    const client = createClient<Database>(SUPABASE_URL, PUBLISHABLE_KEY, {
-        global: {
-            headers: { Authorization: `Bearer ${data.session.access_token}` },
-        },
-        auth: { autoRefreshToken: false, persistSession: false },
-    });
-    return { client, userId: data.user.id };
-}
-
-function isRlsBlock(err: { message: string; code?: string } | null): boolean {
-    if (!err) return false;
-    return (
-        err.message.includes("row-level security") ||
-        err.message.includes("permission denied") ||
-        err.code === "42501" ||
-        err.message.includes("new row violates row-level security")
-    );
-}
-
-function isSchemaError(
-    err: { message: string; code?: string } | null,
-): boolean {
-    if (!err) return false;
-    return (
-        err.message.includes("column") ||
-        err.message.includes("null value") ||
-        err.message.includes("violates") ||
-        err.message.includes("duplicate key") ||
-        err.message.includes("foreign key")
-    );
-}
-
-/**
- * Ensure a test user exists in the local Supabase instance.
- * Creates the user if missing, updates role metadata if already present.
- */
-async function ensureTestAccount(
-    email: string,
-    password: string,
-    role: "user" | "editor" | "admin",
-): Promise<void> {
-    const { data: list } = await serviceClient.auth.admin.listUsers();
-    const existing = list.users.find((u) => u.email === email);
-
-    if (existing) {
-        await serviceClient.auth.admin.updateUserById(existing.id, {
-            app_metadata: { role },
-            user_metadata: { role, display_name: `Test ${role}` },
-        });
-        return;
-    }
-
-    const { error } = await serviceClient.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-        app_metadata: { role },
-        user_metadata: { role, display_name: `Test ${role}` },
-    });
-
-    if (error) {
-        throw new Error(`Failed to provision ${role} (${email}): ${error.message}`);
-    }
-}
-
-/* ------------------------------------------------------------------ */
 /*  Setup / Teardown                                                   */
 /* ------------------------------------------------------------------ */
 
 beforeAll(async () => {
     if (!shouldRun) return;
 
-    // Validate local-only
-    if (
-        !SUPABASE_URL.includes("localhost") &&
-        !SUPABASE_URL.includes("127.0.0.1")
-    ) {
-        throw new Error(
-            `SECURITY: refusing to run against non-local URL: ${SUPABASE_URL}`,
-        );
-    }
+    assertLocalSupabase();
 
     // Provision test accounts if they don't exist yet
     await Promise.all([
-        ensureTestAccount(EDITOR_EMAIL, EDITOR_PASSWORD, "editor"),
-        ensureTestAccount(ADMIN_EMAIL, ADMIN_PASSWORD, "admin"),
-        ensureTestAccount(USER_EMAIL, USER_PASSWORD, "user"),
+        ensureTestAccount(serviceClient, EDITOR_EMAIL, EDITOR_PASSWORD, "editor"),
+        ensureTestAccount(serviceClient, ADMIN_EMAIL, ADMIN_PASSWORD, "admin"),
+        ensureTestAccount(serviceClient, USER_EMAIL, USER_PASSWORD, "user"),
     ]);
 
     // Sign in as each role
@@ -208,18 +92,9 @@ beforeAll(async () => {
     userUserId = userResult.userId;
 
     // Ensure correct roles in profiles table (service_role bypasses RLS)
-    await serviceClient
-        .from("profiles")
-        .update({ role: "editor" })
-        .eq("user_id", editorUserId);
-    await serviceClient
-        .from("profiles")
-        .update({ role: "admin" })
-        .eq("user_id", adminUserId);
-    await serviceClient
-        .from("profiles")
-        .update({ role: "user" })
-        .eq("user_id", userUserId);
+    await syncProfileRole(serviceClient, editorUserId, "editor");
+    await syncProfileRole(serviceClient, adminUserId, "admin");
+    await syncProfileRole(serviceClient, userUserId, "user");
 
     // Seed reference data via service_role for FK dependencies
     const { data: sp } = await serviceClient
