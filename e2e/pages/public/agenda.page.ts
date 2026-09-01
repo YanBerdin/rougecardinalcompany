@@ -6,7 +6,10 @@ export class AgendaPage {
     readonly eventList: Locator;
 
     constructor(private readonly page: Page) {
-        this.heroHeading = page.getByRole('heading', { name: /agenda/i });
+        this.heroHeading = page.getByRole('heading', {
+            name: /[ée]v[ée]nements/i,
+            level: 1,
+        });
         this.eventList = page.getByTestId('agenda-event-list');
     }
 

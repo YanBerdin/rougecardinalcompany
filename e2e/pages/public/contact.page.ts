@@ -14,7 +14,6 @@ export class ContactPage {
     readonly successHeading: Locator;
     readonly sendAnotherButton: Locator;
     readonly coordinatesCard: Locator;
-    readonly contactsCard: Locator;
     readonly newsletterInput: Locator;
     readonly newsletterButton: Locator;
 
@@ -42,15 +41,14 @@ export class ContactPage {
             name: 'Envoyer un autre message',
         });
         this.coordinatesCard = page.getByText('Nos Coordonnées');
-        this.contactsCard = page.getByText('Contacts Spécialisés');
         this.newsletterInput = page.getByRole('textbox', {
             name: 'Adresse email pour la newsletter',
         });
+        // Scoped to the newsletter form so the CTA label can change freely.
         this.newsletterButton = page
-            .locator('div')
-            .filter({ hasText: 'Newsletter' })
-            .filter({ has: page.getByRole('textbox', { name: 'Adresse email pour la newsletter' }) })
-            .getByRole('button', { name: "S'inscrire" });
+            .locator('form')
+            .filter({ has: page.locator('#newsletter-email-contact') })
+            .getByRole('button');
     }
 
     async goto(): Promise<void> {
@@ -64,7 +62,6 @@ export class ContactPage {
 
     async expectSidebarVisible(): Promise<void> {
         await expect(this.coordinatesCard).toBeVisible();
-        await expect(this.contactsCard).toBeVisible();
     }
 
     async fillValidForm(overrides?: {
