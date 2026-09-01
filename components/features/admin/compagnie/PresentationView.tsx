@@ -19,6 +19,7 @@ const KIND_LABELS: Record<string, string> = {
     mission: "Mission",
     values: "Valeurs",
     team: "Équipe",
+    founder: "Fondateur",
     custom: "Fondateur",
 };
 

@@ -151,7 +151,10 @@ test.describe('Gestion Agenda', () => {
         // 3. Verify the event appears on public agenda
         await page.goto('/agenda');
         await expect(
-            page.getByText('[TEST] Spectacle Public Agenda'),
+            page
+                .getByRole('main')
+                .getByRole('link', { name: '[TEST] Spectacle Public Agenda' })
+                .first(),
         ).toBeVisible();
     });
 
