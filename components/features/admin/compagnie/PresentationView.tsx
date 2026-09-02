@@ -8,11 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PresentationForm } from "./PresentationForm";
 import type { PresentationViewProps } from "./types";
-import type { PresentationSectionDTO } from "@/lib/schemas/compagnie-admin";
+import type {
+    PresentationSectionDTO,
+    SectionKind,
+} from "@/lib/schemas/compagnie-admin";
 
 type SectionItem = Omit<PresentationSectionDTO, "id"> & { id: string };
 
-const KIND_LABELS: Record<string, string> = {
+const KIND_LABELS: Record<SectionKind, string> = {
     hero: "Titre Page",
     history: "Historique",
     quote: "Citation",
@@ -20,7 +23,7 @@ const KIND_LABELS: Record<string, string> = {
     values: "Valeurs",
     team: "Équipe",
     founder: "Fondateur",
-    custom: "Fondateur",
+    custom: "Personnalisé",
 };
 
 export function PresentationView({ initialSections }: PresentationViewProps) {
