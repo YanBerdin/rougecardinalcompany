@@ -1,7 +1,7 @@
 # Tests Permissions et Rôles (TASK076)
 
-> **Version** : 1.0
-> **Date** : Mars 2026
+> **Version** : 1.1
+> **Date** : 2 septembre 2026
 > **Contexte** : Modèle hiérarchique `user (0) < editor (1) < admin (2)` implémenté dans TASK076
 > **Source de vérité** : [`memory-bank/acl-permissions-role.md`](../memory-bank/acl-permissions-role.md)
 
@@ -33,6 +33,14 @@
 
 - `scripts/test-editor-access-local.ts` — Tests RLS pour rôle `editor` (Supabase local)
 - `scripts/test-editor-access-remote.ts` — Tests RLS pour rôle `editor` (Supabase distant)
+
+### Suites automatisées actuelles
+
+| Couche | Commande | Résultat vérifié |
+| --- | --- | --- |
+| Unitaires | `pnpm test:unit` | 159/159 |
+| Intégration RLS et audit | `pnpm test:integration` | 81/81 |
+| E2E permissions | `pnpm exec playwright test --project=permissions` | 23/23, dont 3 setups d'authentification |
 
 ### Fichiers d'implémentation testés
 
@@ -94,7 +102,7 @@
 | --- | --- | --- | --- | --- |
 | ROLE-UNIT-025 | Rôle depuis app_metadata | JWT `app_metadata.role = "editor"` | `"editor"` | P0 |
 | ROLE-UNIT-026 | Rôle depuis app_metadata admin | JWT `app_metadata.role = "admin"` | `"admin"` | P0 |
-| ROLE-UNIT-027 | Fallback user_metadata | JWT `app_metadata.role` absent, `user_metadata.role = "editor"` | `"editor"` | P1 |
+| ROLE-UNIT-027 | `user_metadata` ignoré | JWT `app_metadata.role` absent, `user_metadata.role = "editor"` | `"user"` (fallback sûr) | P0 |
 | ROLE-UNIT-028 | Aucun rôle défini | JWT sans `role` dans les metadata | `"user"` (fallback) | P0 |
 | ROLE-UNIT-029 | Erreur getClaims | `getClaims()` throw | `"user"` (fallback, pas de crash) | P1 |
 
@@ -373,7 +381,9 @@
 
 ## 5. Tests E2E
 
-> **Infrastructure Playwright non encore en place.** Ces cas sont documentés pour implémentation future.
+> **Infrastructure active.** Le projet Playwright `permissions` valide 20 cas
+> fonctionnels directs et 3 tests de setup. Les cas CRUD spécialisés sont couverts par les projets
+> `editor` et `admin` plutôt que dupliqués dans cette suite.
 
 ### 5.1 — Parcours Editor
 
@@ -381,7 +391,7 @@
 | --- | --- | --- | --- | --- | --- |
 | ROLE-E2E-001 | Editor login → dashboard | Compte editor | 1. Login avec credentials editor 2. Attendre redirection | Dashboard affiché, titre "Tableau de bord" | P0 |
 | ROLE-E2E-002 | Editor sidebar filtrée | Connecté editor | 1. Vérifier items sidebar visibles | 8 items visibles : Tableau de bord, Spectacles, Agenda, Lieux, Presse, Compagnie, Médiathèque, Retour au site | P0 |
-| ROLE-E2E-003 | Editor sidebar — items admin masqués | Connecté editor | 1. Vérifier items sidebar | Équipe, Utilisateurs, Accueil-Slides, Accueil-Compagnie, Partenaires, Analytics, Affichage Sections, Audit Logs, Paramètres, Debug Auth NON visibles | P0 |
+| ROLE-E2E-003 | Editor sidebar — items admin masqués | Connecté editor | 1. Vérifier items sidebar | Équipe, Administrateurs, Accueil - Slides, Accueil - La compagnie, Partenaires, Analytics, Affichage Sections, Pied de page & Coordonnées, Audit Logs, Paramètres et Debug Auth ne sont pas visibles | P0 |
 | ROLE-E2E-004 | Editor CRUD spectacle | Connecté editor | 1. Naviguer `/admin/spectacles` 2. Créer un spectacle 3. Modifier 4. Supprimer | CRUD complet fonctionne | P0 |
 | ROLE-E2E-005 | Editor CRUD événement | Connecté editor | 1. Naviguer `/admin/agenda` 2. Créer un événement 3. Modifier 4. Supprimer | CRUD complet fonctionne | P1 |
 | ROLE-E2E-006 | Editor page admin-only bloquée | Connecté editor | 1. Naviguer directement vers `/admin/team` | Redirection vers `/admin` ou `/auth/login` | P0 |
@@ -395,7 +405,7 @@
 | ID | Scénario | Préconditions | Étapes | Résultat attendu | Priorité |
 | --- | --- | --- | --- | --- | --- |
 | ROLE-E2E-011 | Admin login → dashboard complet | Compte admin | 1. Login avec credentials admin 2. Attendre redirection | Dashboard complet affiché | P0 |
-| ROLE-E2E-012 | Admin sidebar complète | Connecté admin | 1. Vérifier items sidebar visibles | 18 items visibles (toutes les sections) | P0 |
+| ROLE-E2E-012 | Admin sidebar complète | Connecté admin | 1. Vérifier items sidebar visibles | 19 items visibles (toutes les sections) | P0 |
 | ROLE-E2E-013 | Admin accès toutes pages | Connecté admin | 1. Naviguer séquentiellement : `/admin/team`, `/admin/users`, `/admin/analytics`, `/admin/site-config`, `/admin/audit-logs` | Toutes les pages s'affichent | P0 |
 | ROLE-E2E-014 | Admin CRUD membres_equipe | Connecté admin | 1. Naviguer `/admin/team` 2. Créer/modifier/supprimer | CRUD complet fonctionne | P1 |
 | ROLE-E2E-015 | Admin CRUD partners | Connecté admin | 1. Naviguer `/admin/partners` 2. Créer/modifier/supprimer | CRUD complet fonctionne | P1 |
@@ -419,11 +429,11 @@
 
 | ID | Scénario | Préconditions | Étapes | Résultat attendu | Priorité |
 | --- | --- | --- | --- | --- | --- |
-| ROLE-E2E-021 | API admin — Editor bloqué | Connecté editor | 1. `fetch('/api/admin/...')` avec session editor | Réponse 403 JSON `{ error: "Forbidden" }` | P0 |
+| ROLE-E2E-021 | API backoffice — Editor autorisé | Connecté editor | 1. `fetch('/api/admin/media/search')` avec session editor | Réponse 200, car la route requiert le rôle minimal `editor` | P0 |
 | ROLE-E2E-022 | API admin — User bloqué | Connecté user | 1. `fetch('/api/admin/...')` avec session user | Réponse 403 JSON `{ error: "Forbidden" }` | P0 |
 | ROLE-E2E-023 | API admin — Anon bloqué | Aucune session | 1. `fetch('/api/admin/...')` sans cookie | Réponse 403 JSON `{ error: "Forbidden" }` | P0 |
 | ROLE-E2E-024 | API admin — Admin autorisé | Connecté admin | 1. `fetch('/api/admin/...')` avec session admin | Réponse 200 | P0 |
-| ROLE-E2E-025 | Middleware fallback user_metadata | JWT `user_metadata.role = "editor"`, pas de `app_metadata.role` | 1. Naviguer vers `/admin` | Accès accordé (fallback user_metadata) | P2 |
+| ROLE-E2E-025 | Élévation via `user_metadata` refusée | JWT `user_metadata.role = "editor"`, pas de `app_metadata.role` | 1. Naviguer vers `/admin` | Accès refusé ; `user_metadata` n'est jamais une source d'autorisation | P0 |
 
 ---
 
@@ -436,8 +446,14 @@
 | `ROLE-UNIT-` | Tests unitaires auth/helpers | 42 |
 | `ROLE-DAL-` | Tests intégration DAL | 80 |
 | `ROLE-RLS-` | Tests RLS SQL / scripts | 92 |
-| `ROLE-E2E-` | Tests E2E Playwright | 25 |
+| `ROLE-E2E-` | Scénarios E2E documentés | 25 |
 | **Total** | | **239** |
+
+Les 25 scénarios E2E restent la cible documentaire. Le projet `permissions`
+en exécute directement 20 : quatre CRUD editor/admin sont délégués aux suites
+fonctionnelles correspondantes et le scénario d'élévation via `user_metadata`
+reste à automatiser explicitement. Les trois tests de setup portent le total
+rapporté par Playwright à 23 tests réussis.
 
 ### Priorités
 

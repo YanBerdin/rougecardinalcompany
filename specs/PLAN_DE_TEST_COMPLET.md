@@ -1,7 +1,7 @@
 # Plan de Test Complet — Rouge Cardinal Company
 
-> **Version** : 1.0  
-> **Date** : Juillet 2025  
+> **Version** : 1.1
+> **Date** : 2 septembre 2026
 > **Application** : Site web de la Compagnie Rouge Cardinal  
 > **Stack** : Next.js 16 + Supabase + shadcn/ui + Tailwind CSS  
 > **URL de test** : `http://localhost:3000`  
@@ -40,6 +40,12 @@
 
 Ce plan de test couvre l'intégralité du site web de la Compagnie Rouge Cardinal, un site vitrine avec une interface d'administration complète. Il est organisé par zone fonctionnelle et inclut des scénarios de parcours normal (happy path), des cas limites, et des tests de validation d'erreurs.
 
+Les scénarios décrivent la cible fonctionnelle. Leur automatisation vit sous
+`e2e/tests/` avec des Page Objects sous `e2e/pages/`. Au 2 septembre 2026,
+les projets Playwright `chromium-public`, `chromium-auth` et `permissions` sont
+validés localement. Les projets `editor`, `admin`, `cross-public` et
+`cross-admin` doivent encore être confirmés intégralement en CI.
+
 **Zones fonctionnelles identifiées :**
 
 | Zone | Pages | Type |
@@ -71,10 +77,9 @@ Ce plan de test couvre l'intégralité du site web de la Compagnie Rouge Cardina
 
 ### Navigateurs cibles
 
-- Chrome (dernière version)
-- Firefox (dernière version)
-- Safari (dernière version)
-- Mobile Chrome / Safari (responsive)
+- Chromium Desktop est automatisé dans la configuration Playwright actuelle.
+- Chrome, Firefox, Safari et Mobile Chrome/Safari restent des cibles de recette manuelle.
+- L'ajout de projets Playwright Firefox et WebKit reste nécessaire pour automatiser la matrice multi-navigateurs.
 
 ---
 
@@ -180,7 +185,7 @@ Ce plan de test couvre l'intégralité du site web de la Compagnie Rouge Cardina
 | AUTH-LOGIN-002 | Connexion échouée — Mauvais mot de passe | Aucune session | 1. Naviguer vers `/auth/login` 2. Saisir email admin 3. Saisir "MauvaisPassword123" 4. Cliquer "Login" | Message d'erreur affiché, pas de redirection | P0 |
 | AUTH-LOGIN-003 | Connexion échouée — Email inexistant | Aucune session | 1. Naviguer vers `/auth/login` 2. Saisir "inconnu@test.com" 3. Saisir un mot de passe 4. Cliquer "Login" | Message d'erreur affiché | P0 |
 | AUTH-LOGIN-004 | Connexion échouée — Champs vides | Page login | 1. Cliquer "Login" sans remplir les champs | Validation empêche la soumission | P1 |
-| AUTH-LOGIN-005 | Lien vers inscription | Page login | 1. Cliquer "Sign up" | Redirection vers `/auth/sign-up` | P2 |
+| AUTH-LOGIN-005 | Absence d'inscription publique | Page login | 1. Vérifier les actions proposées | Aucun lien d'inscription publique n'est affiché ; la création de compte passe par invitation | P1 |
 | AUTH-LOGIN-006 | Lien "Forgot your password?" | Page login | 1. Cliquer "Forgot your password?" | Redirection vers `/auth/forgot-password` | P2 |
 | AUTH-LOGIN-007 | Persistance de session | Connecté comme admin | 1. Fermer l'onglet 2. Rouvrir le site 3. Naviguer vers `/admin` | La session est toujours active, accès direct au dashboard | P1 |
 
@@ -189,7 +194,7 @@ Ce plan de test couvre l'intégralité du site web de la Compagnie Rouge Cardina
 | ID | Scénario | Préconditions | Étapes | Résultat attendu | Priorité |
 | ---- | ---------- | --------------- | -------- | ------------------- | ---------- |
 | AUTH-SIGNUP-001 | Page inscription — Champs affichés | Aucune session | 1. Naviguer vers `/auth/sign-up` | 3 champs affichés : Email, Password, Repeat Password, bouton "Sign up" | P0 |
-| AUTH-SIGNUP-002 | Mots de passe non concordants | Page sign-up | 1. Saisir email valide 2. Saisir password "Test1234!" 3. Saisir repeat: "AutreMotDePasse" 4. Cliquer "Sign up" | Erreur indiquant que les mots de passe ne concordent pas | P0 |
+| AUTH-SIGNUP-002 | Mots de passe non concordants | Page sign-up | 1. Saisir un email valide 2. Saisir un mot de passe conforme 3. Saisir une confirmation différente 4. Cliquer "Sign up" | Erreur indiquant que les mots de passe ne concordent pas | P0 |
 | AUTH-SIGNUP-003 | Mot de passe trop court | Page sign-up | 1. Saisir email valide 2. Saisir password "abc" 3. Même repeat 4. Soumettre | Erreur de validation sur la longueur du mot de passe | P1 |
 | AUTH-SIGNUP-004 | Lien vers connexion | Page sign-up | 1. Cliquer "Login" | Redirection vers `/auth/login` | P2 |
 
@@ -220,7 +225,7 @@ Ce plan de test couvre l'intégralité du site web de la Compagnie Rouge Cardina
 | ID | Scénario | Préconditions | Étapes | Résultat attendu | Priorité |
 | ---- | ---------- | --------------- | -------- | ------------------- | ---------- |
 | ADM-DASH-001 | Chargement du dashboard | Connecté admin | 1. Naviguer vers `/admin` | Le tableau de bord s'affiche avec statistiques (cartes récapitulatives) | P0 |
-| ADM-DASH-002 | Navigation sidebar | Dashboard affiché | 1. Vérifier tous les liens du sidebar | Tous les liens de la sidebar fonctionnent : Général (Tableau de bord, Équipe, Utilisateurs), Pages (Spectacles, Agenda, Lieux, Presse, Compagnie, Médiathèque), Accueil (Slides, La compagnie, Partenaires), Autres (Analytics, Affichage Sections, Audit Logs, Paramètres, Debug Auth) | P0 |
+| ADM-DASH-002 | Navigation sidebar | Dashboard affiché | 1. Vérifier tous les liens du sidebar | Les 19 liens fonctionnent : Général (Tableau de bord, Équipe, Administrateurs), Pages (Spectacles, Agenda, Lieux, Presse, Compagnie, Médiathèque), Accueil (Slides, La compagnie, Partenaires), Autres (Analytics, Affichage Sections, Pied de page & Coordonnées, Audit Logs, Paramètres, Debug Auth, Retour au site publique) | P0 |
 | ADM-DASH-003 | Lien "Retour au site publique" | Sidebar | 1. Cliquer sur "Retour au site publique" | Redirection vers `/` (page publique) | P1 |
 
 ---
@@ -306,7 +311,7 @@ Ce plan de test couvre l'intégralité du site web de la Compagnie Rouge Cardina
 | ID | Scénario | Préconditions | Étapes | Résultat attendu | Priorité |
 | ---- | ---------- | --------------- | -------- | ------------------- | ---------- |
 | ADM-COMP-001 | Chargement avec 2 onglets | Connecté admin | 1. Naviguer vers `/admin/compagnie` | 2 onglets : Présentation, Valeurs | P0 |
-| ADM-COMP-002 | 6 sections de présentation | Onglet Présentation | 1. Vérifier les sections affichées | 6 sections : Héro, Histoire, Citation, Mission, Valeurs, Équipe — chacune avec type, titre, statut Actif | P0 |
+| ADM-COMP-002 | 7 sections de présentation | Onglet Présentation | 1. Vérifier les sections affichées | 7 sections, dont Héro, Histoire, Citation, Mission, Valeurs, Fondatrice et Équipe, sont affichées avec leur type, titre et statut | P0 |
 | ADM-COMP-003 | Modifier une section | Onglet Présentation | 1. Cliquer "Modifier" sur la section "Histoire" 2. Modifier le contenu 3. Sauvegarder | Le contenu est mis à jour | P0 |
 | ADM-COMP-004 | Activer/Désactiver une section | Onglet Présentation | 1. Désactiver la section "Citation" 2. Naviguer vers `/compagnie` | La section Citation n'apparaît plus sur la page publique | P1 |
 | ADM-COMP-005 | Lien "Visualiser" | Onglet Présentation | 1. Cliquer "Visualiser" | Redirection vers la prévisualisation de la présentation | P2 |
@@ -466,7 +471,7 @@ Ce plan de test couvre l'intégralité du site web de la Compagnie Rouge Cardina
 | CROSS-SEC-007 | RLS — Editor bloqué tables admin-only | Connecté editor | 1. INSERT/UPDATE sur `membres_equipe`, `contacts_presse`, `configurations_site` | Opérations refusées par RLS (`is_admin()`) | P0 |
 | CROSS-SEC-008 | RLS — User bloqué écriture | Connecté user | 1. INSERT/UPDATE/DELETE sur n'importe quelle table éditoriale ou admin | Toutes les mutations refusées par RLS | P0 |
 | CROSS-SEC-009 | Middleware — Résolution rôle JWT | Connecté editor | 1. Vérifier que le middleware lit `app_metadata.role` du JWT 2. Naviguer dans le backoffice | Le rôle est correctement résolu, accès accordé aux routes éditoriales | P1 |
-| CROSS-SEC-010 | Middleware — Fallback `user_metadata` | Connecté avec rôle dans `user_metadata` uniquement | 1. Naviguer vers `/admin` | Le middleware utilise le fallback et résout le rôle correctement | P2 |
+| CROSS-SEC-010 | Autorisation — `user_metadata` non fiable | Connecté avec rôle élevé dans `user_metadata` uniquement | 1. Naviguer vers `/admin` | Le rôle élevé est ignoré ; seul `app_metadata.role` signé peut autoriser le backoffice | P0 |
 
 > **Couverture complète** : voir [`specs/tests-permissions-et-rôles.md`](tests-permissions-et-rôles.md) pour les tests permissions détaillés (unit, DAL, RLS SQL, E2E).
 

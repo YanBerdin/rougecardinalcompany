@@ -2,7 +2,7 @@
 
 **Status:** In Progress
 **Added:** 2026-09-01
-**Updated:** 2026-09-01
+**Updated:** 2026-09-02
 
 ## Original Request
 
@@ -164,6 +164,7 @@ point de crash est reproductible sur `ADM-SPEC-007 — Galerie photos`
 | 1.8 | CI : intégration des tests d'intégration dans e2e.yml | Complete | 2026-09-01 | Non testé sur GitHub |
 | 1.9 | Retrait secret `e2e/.auth/editor.json` du suivi Git | Complete | 2026-09-01 | `git rm --cached` + `.gitignore` |
 | 1.10 | Correction dérives E2E découvertes en exécutant les projets | Complete | 2026-09-01 | 6 corrections, voir tableau |
+| 1.11 | Synchronisation de `README.md` et des plans sous `specs/` | Complete | 2026-09-02 | Versions, commandes, résultats, rôles et couverture E2E actualisés |
 | 2.1 | **Protection de `main` sur GitHub** | Not Started | 2026-09-01 | Checks requis à activer à distance — voir section dédiée |
 | 2.2 | **Valider projet E2E `admin` en CI ou machine dédiée** | Not Started | 2026-09-01 | Bloqué localement par OOM |
 | 2.3 | **Valider projets E2E `cross-public` / `cross-admin` en CI ou machine dédiée** | Not Started | 2026-09-01 | Bloqué localement par OOM |
@@ -191,6 +192,21 @@ point de crash est reproductible sur `ADM-SPEC-007 — Galerie photos`
   `/e2e/.auth/` au `.gitignore`.
 - `pnpm db:reset` exécuté par l'utilisateur pour restaurer une base locale
   propre après les interruptions de run.
+
+### 2026-09-02
+
+- Audité et actualisé `README.md`, `specs/README.md`,
+  `specs/PLAN_DE_TEST_COMPLET.md` et
+  `specs/tests-permissions-et-rôles.md` contre l'implémentation et les
+  résultats réellement vérifiés.
+- Corrigé les versions de dépendances, l'onboarding des tests, le modèle
+  d'invitation, les 19 items admin, les 7 sections de présentation et la
+  règle de sécurité qui interdit toute autorisation via `user_metadata`.
+- Distingué les 20 cas fonctionnels directs du projet Playwright
+  `permissions` de ses 3 tests de setup, soit 23/23 tests rapportés.
+- Validation : diagnostics VS Code sans erreur et `git diff --check` propre.
+  `markdownlint-cli2` reste inexécutable sous Node 25.6.1 à cause de
+  l'import ESM de l'override `js-yaml` ; la CI principale utilise Node 22.
 
 ## Prochaines étapes (4 tâches restantes)
 

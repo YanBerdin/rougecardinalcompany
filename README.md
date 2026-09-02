@@ -24,19 +24,20 @@ Plateforme web officielle de la compagnie de théâtre Rouge Cardinal : vitrine 
 
 | Couche | Technologie | Version |
 | -------- | ------------- | --------- |
-| **Framework** | Next.js (App Router, Turbopack) | 16.1.5 |
+| **Framework** | Next.js (App Router, Turbopack) | 16.3.0 |
 | **Runtime** | React + React DOM | 19.2.0 |
 | **Langage** | TypeScript (strict mode) | 5.x |
 | **UI** | Tailwind CSS + shadcn/ui (Radix) | 3.4.1 |
 | **Base de données** | Supabase PostgreSQL | 17.6.1.063 |
 | **Auth** | Supabase Auth — `getClaims()` ~2-5ms | @supabase/ssr |
-| **Validation** | Zod | 4.1.0 |
-| **Email** | React Email + Resend SDK | v4 |
+| **Validation** | Zod | 4.1.12 |
+| **Email** | React Email + Resend SDK | 6.1.2 |
 | **Formulaires** | react-hook-form + @hookform/resolvers | 7.65.0 |
-| **Monitoring** | Sentry (client + server + edge) | @sentry/nextjs 10 |
+| **Monitoring** | Sentry (client + server + edge) | 10.40.0 |
 | **Env** | T3 Env (@t3-oss/env-nextjs) | 0.13.10 |
-| **Images** | Sharp (thumbnails 300×300 JPEG) | 0.34.5 |
+| **Images** | Sharp (thumbnails 300×300 JPEG) | 0.35.3 |
 | **DnD** | @dnd-kit/core + @dnd-kit/sortable | — |
+| **Tests** | Vitest + Playwright | 4.1.11 + 1.57.0 |
 | **Package manager** | pnpm | 9+ |
 
 **Extensions PostgreSQL actives :** `pgcrypto`, `pg_trgm`, `unaccent`, `citext`
@@ -57,18 +58,18 @@ flowchart LR
   end
 
   subgraph L2["Application"]
-    MIDDLE["Middleware\nAuth + Rate limiting"]
+    MIDDLE["Proxy Next.js\nAuth + Rate limiting"]
     SA["Server Actions\nlib/actions/*"]
     APIR["API Routes\napp/api/*"]
   end
 
   subgraph L3["Data Access"]
-    DAL["lib/dal/ — 37 modules\nserver-only · DALResult<T> · cache()"]
+    DAL["lib/dal/\nserver-only · DALResult<T> · cache()"]
     SCHEMA["lib/schemas/*\nZod validation"]
   end
 
   subgraph L4["Infrastructure"]
-    PG["Supabase PostgreSQL\n36 tables · RLS 100%"]
+    PG["Supabase PostgreSQL\nRLS sur toutes les tables applicatives"]
     STORAGE["Supabase Storage\nbucket medias + backups"]
     AUTH["Supabase Auth\nJWT via GoTrue"]
   end
@@ -80,13 +81,12 @@ flowchart LR
   DAL --> PG & STORAGE & AUTH
 ```
 
-**Chiffres clés :**
+**Surfaces principales :**
 
-- 14 sections admin (~30 pages), 9 pages publiques, 10 API Routes
-- 37 modules DAL + 6 helpers
-- 36 tables PostgreSQL, 100% RLS, 47 fichiers de schéma déclaratif
-- 115 migrations SQL (sept. 2025 → mars 2026)
-- 98 scripts de test/audit/maintenance
+- Site public, backoffice hiérarchisé et routes d'authentification
+- DAL serveur, Server Actions et Route Handlers spécialisés
+- Schéma Supabase déclaratif, migrations versionnées et RLS
+- Tests Vitest unitaires et d'intégration, plus suites E2E Playwright
 
 ---
 
@@ -99,7 +99,7 @@ flowchart TB
   L1["1 · Réseau — Vercel Edge, DDoS/SSL"]
   L2["2 · Middleware — JWT via getClaims() ~2-5ms · isRoleAtLeast()"]
   L3["3 · Server Actions — requireBackofficeAccess() / requireAdminOnly(), Zod"]
-  L4["4 · RLS PostgreSQL — 36 tables · has_min_role()"]
+  L4["4 · RLS PostgreSQL — tables applicatives · has_min_role()"]
   L5["5 · Fonctions DB — SECURITY DEFINER rétention"]
   L6["6 · Storage RLS — medias public · backups service_role"]
   L7["7 · Audit & Monitoring — triggers immuables · Sentry P0/P1"]
@@ -133,12 +133,12 @@ L'audit log est un système de traçabilité automatique qui enregistre toutes l
 
 **Fonctionnement en 4 couches :**
 
-1. **Trigger PostgreSQL** (`audit_trigger()`, `SECURITY DEFINER`) — déclenché automatiquement `AFTER INSERT OR UPDATE OR DELETE` sur 27 tables. Capture `user_id`, `action`, `table_name`, `record_id`, `old_values`/`new_values` (JSONB), `ip_address`, `user_agent`.
+1. **Trigger PostgreSQL** (`audit_trigger()`, `SECURITY DEFINER`) — déclenché automatiquement `AFTER INSERT OR UPDATE OR DELETE` sur les tables critiques. Capture `user_id`, `action`, `table_name`, `record_id`, `old_values`/`new_values` (JSONB), `ip_address`, `user_agent`.
 2. **Intégrité du log** — `INSERT` direct dans `logs_audit` bloqué par RLS (aucune policy INSERT utilisateur). Seul le trigger `SECURITY DEFINER` peut écrire → impossibilité de falsifier les logs.
 3. **RPC PostgreSQL** (`get_audit_logs_with_email`) — résout les emails depuis `auth.users` (inaccessible directement). Gère filtres, pagination et recherche côté DB.
 4. **Rétention RGPD** — colonne `expires_at` (90 jours) + fonction `cleanup_expired_audit_logs()` planifiable via GitHub Actions.
 
-**27 tables trackées**, rétention automatique à 90 jours (RGPD)
+Les tables critiques sont suivies avec une rétention automatique à 90 jours (RGPD).
 
 **Interface admin (`/admin/audit-logs`) :** filtres multiples (action, table, utilisateur, plage de dates, recherche libre), pagination, modal détails JSON, export CSV jusqu'à 10 000 entrées.
 
@@ -148,8 +148,8 @@ L'audit log est un système de traçabilité automatique qui enregistre toutes l
 
 ### Prérequis
 
-- Node.js 20+
-- pnpm 8+
+- Node.js 22 LTS
+- pnpm 9+
 - Supabase CLI (pour les migrations locales)
 - Un projet Supabase configuré
 
@@ -168,8 +168,10 @@ cp .env.example .env.local
 # 3. Valider les variables d'environnement (T3 Env)
 pnpm exec tsx scripts/test-env-validation.ts
 
-# 4. Créer l'utilisateur admin initial
-pnpm exec tsx scripts/create-admin-user.ts
+# 4. Initialiser Supabase local et l'utilisateur admin
+pnpm dlx supabase start
+pnpm db:reset
+pnpm db:init-admin
 
 # 5. Démarrer le serveur de développement
 pnpm dev
@@ -204,6 +206,13 @@ pnpm start          # Serveur production local
 # Qualité
 pnpm lint           # ESLint
 pnpm lint:md        # Markdownlint
+pnpm type-check     # TypeScript sans émission
+
+# Tests
+pnpm test:unit        # Vitest unitaire, sans dépendance externe
+pnpm test:integration # RLS et audit, Supabase local requis
+pnpm test:e2e         # Suite Playwright complète
+pnpm test:coverage    # Couverture des couches unit-testables
 
 # Scripts
 pnpm exec tsx scripts/<nom-du-script>.ts
@@ -223,9 +232,9 @@ pnpm dlx supabase db push           # Appliquer les migrations
 ### Workflow migrations (schéma déclaratif)
 
 > [!IMPORTANT]
-> Ne jamais modifier directement `supabase/migrations/`.
->
-> La source de vérité est `supabase/schemas/`.
+> Modifier d'abord `supabase/schemas/`, qui décrit l'état final attendu.
+> Les migrations manuelles sont réservées aux cas non capturés par le diff
+> (DML, certains grants, vues et changements RLS) et aux hotfixes documentés.
 
 ```bash
 # Modifier le schéma
@@ -249,7 +258,7 @@ pnpm dlx supabase functions deploy <function-name>
 | Fonctionnalité | Statut |
 | --- | --- |
 | Site public (home, spectacles, presse, compagnie, agenda, contact) | ✅ Complet |
-| RLS sur 36 tables (100% couverture) | ✅ Complet |
+| RLS sur toutes les tables applicatives | ✅ Complet |
 | Dashboard admin (équipe, médias, partenaires, presse, config) | ✅ Complet |
 | Modèle d'autorisation hiérarchique (`user < editor < admin`) | ✅ Complet |
 | Intégration email (Resend + React Email) | ✅ Complet |
@@ -257,17 +266,19 @@ pnpm dlx supabase functions deploy <function-name>
 | Médiathèque (SHA-256, tags, dossiers, thumbnails) | ✅ Complet |
 | Accessibilité WCAG 2.2 Level AA (site public + admin) | ✅ Complet |
 | Composition patterns (Context/Compound Components) | ✅ Complet |
-| Couverture audit/triggers complète (36 tables) | ✅ Complet |
+| Couverture audit/triggers des tables critiques | ✅ Complet |
 | Rétention RGPD automatisée (Edge Function) | ✅ Complet |
 | Monitoring Sentry multi-runtime | ✅ Complet |
 | Backups automatiques (GitHub Actions hebdomadaire) | ✅ Complet |
 | CI/CD (GitHub Actions : tests, lint, déploiement) | ✅ Complet |
-| Audit trail inviolable en base de données, avec traçabilité des actions administratives, sur 27 tables critiques | ✅ Complet |
+| Audit trail protégé en base avec traçabilité des actions administratives | ✅ Complet |
 | Optimisation de l’authentification JWT réduisant le temps de validation de ~300 ms à 2–5 ms grâce à `getClaims()` de Supabase Auth, améliorant significativement les performances globales de l'application | ✅ Complet |
-| Tests E2E Playwright | 🔄 En cours (Phase 0) |
+| Tests unitaires Vitest | ✅ 159/159 validés localement |
+| Tests d'intégration RLS/audit | ✅ 81/81 validés localement |
+| Tests E2E Playwright | 🔄 Public, auth et permissions validés ; admin/cross à confirmer en CI |
 | Déploiement production | 🔄 En cours |
 
-**Phase actuelle :** Infrastructure, site public et back-office finalisés. Modèle de rôles hiérarchique déployé. Tests E2E en cours.
+**Phase actuelle :** infrastructure, site public et backoffice finalisés. La stratégie de tests est en cours de validation sur GitHub Actions ; la suite E2E complète dépasse la mémoire disponible sur la machine locale et doit être confirmée en CI.
 
 ---
 
