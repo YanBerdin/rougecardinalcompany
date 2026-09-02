@@ -12,6 +12,12 @@
     "lint:md:fix": "markdownlint-cli2 --fix \"**/*.md\" \"#node_modules\" \"!doc-perso/**\"",
     "lint:all": "pnpm lint && pnpm lint:md",
     "type-check": "tsc --noEmit",
+    "test": "pnpm test:unit",
+    "test:unit": "vitest run --project unit",
+    "test:unit:watch": "vitest --project unit",
+    "test:integration": "RUN_DAL_INTEGRATION_TESTS=1 vitest run --project integration",
+    "test:e2e": "playwright test",
+    "test:coverage": "vitest run --project unit --coverage",
     "check:audit-secrets": "tsx scripts/audit-secrets-management.ts",
     "db:reset": "pnpm dlx supabase db reset --yes && ./scripts/post-reset.sh",
     "db:push": "./scripts/supabase-env.sh db push --linked",
@@ -87,9 +93,6 @@
     "test:editor:local": "tsx scripts/test-editor-access-local.ts",
     "test:editor:remote": "tsx scripts/test-editor-access-remote.ts",
     "test:rls:local": "tsx scripts/test-permissions-rls.ts",
-    "test:dal:permissions": "vitest run __tests__/dal/permissions-integration.test.ts",
-    "test:unit:image-compress": "vitest run __tests__/utils/image-compress.test.ts",
-    "test:unit:invitation-url": "vitest run __tests__/utils/validate-invitation-url.test.ts",
     "e2e:auth": "npx playwright test --project=chromium-auth --reporter=list",
     "e2e:editor": "npx playwright test --project=editor --reporter=list",
     "e2e:admin": "npx playwright test --project=admin --reporter=list",
@@ -161,6 +164,7 @@
     "@types/pg": "^8.20.0",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
+    "@vitest/coverage-v8": "^4.1.11",
     "autoprefixer": "^10.4.20",
     "embla-carousel": "^8.6.0",
     "eslint": "^9.39.3",
@@ -175,7 +179,7 @@
     "tsx": "^4.7.0",
     "typescript": "^5",
     "vite": "^8.0.16",
-    "vitest": "^4.1.0"
+    "vitest": "^4.1.11"
   },
   "pnpm": {
     "overrides": {

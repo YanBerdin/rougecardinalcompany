@@ -3,11 +3,15 @@ import { expect } from '@playwright/test';
 
 export class AdminCompagniePage {
     readonly heading: Locator;
+    readonly presentationSections: Locator;
     readonly tabPresentation: Locator;
     readonly tabValeurs: Locator;
 
     constructor(private readonly page: Page) {
         this.heading = page.getByRole('heading', { name: 'Gestion Compagnie' });
+        this.presentationSections = page.getByRole('list', {
+            name: 'Liste des sections de présentation',
+        });
         this.tabPresentation = page.getByRole('tab', { name: 'Présentation' });
         this.tabValeurs = page.getByRole('tab', { name: 'Valeurs' });
     }
@@ -30,27 +34,32 @@ export class AdminCompagniePage {
     }
 
     async expectSectionCount(count: number): Promise<void> {
-        const items = this.page.locator('[aria-label="Liste des sections de présentation"] li');
-        await expect(items).toHaveCount(count);
+        await expect(this.presentationSections.getByRole('listitem')).toHaveCount(count);
     }
 
     async expectSectionKinds(kinds: string[]): Promise<void> {
         for (const kind of kinds) {
-            await expect(this.page.getByText(kind).first()).toBeVisible();
+            await expect(
+                this.presentationSections.getByText(kind, { exact: true }),
+            ).toBeVisible();
         }
     }
 
     async expectSectionActive(kind: string): Promise<void> {
-        const section = this.page.locator('li').filter({ hasText: kind });
-        await expect(section.getByText('Actif')).toBeVisible();
+        const section = this.presentationSections
+            .getByRole('listitem')
+            .filter({ has: this.page.getByText(kind, { exact: true }) });
+        await expect(section.getByText('Actif', { exact: true })).toBeVisible();
     }
 
     async clickEditSection(kind: string): Promise<void> {
-        const section = this.page.locator('li').filter({ hasText: kind });
+        const section = this.presentationSections
+            .getByRole('listitem')
+            .filter({ has: this.page.getByText(kind, { exact: true }) });
         await section.getByRole('button', { name: /Modifier/ }).click();
     }
 
     async clickVisualiser(): Promise<void> {
-        await this.page.getByRole('link', { name: /Visualiser/ }).click();
+        await this.page.getByRole('link', { name: 'Résumé' }).click();
     }
 }

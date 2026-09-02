@@ -4,12 +4,13 @@
 import { test, expect } from './compagnie.fixtures';
 
 const SECTION_LABELS = [
-    'Héro',
-    'Histoire',
+    'Titre Page',
+    'Historique',
     'Citation',
     'Mission',
     'Valeurs',
     'Équipe',
+    'Fondateur',
 ] as const;
 
 test.describe('Gestion de la Compagnie', () => {
@@ -25,7 +26,7 @@ test.describe('Gestion de la Compagnie', () => {
         await compagniePage.expectTwoTabs();
     });
 
-    test('ADM-COMP-002 — Liste des 6 sections de présentation', async ({
+    test('ADM-COMP-002 — Liste des 7 sections de présentation', async ({
         compagniePage,
     }) => {
         // 1. Page loaded
@@ -37,8 +38,8 @@ test.describe('Gestion de la Compagnie', () => {
             'active',
         );
 
-        // 3. Verify 6 sections displayed
-        await compagniePage.expectSectionCount(6);
+        // 3. Verify 7 sections displayed
+        await compagniePage.expectSectionCount(7);
 
         // 4. Verify all section kinds are visible
         await compagniePage.expectSectionKinds([...SECTION_LABELS]);
@@ -51,8 +52,8 @@ test.describe('Gestion de la Compagnie', () => {
         // 1. Page loaded
         await compagniePage.expectLoaded();
 
-        // 2. Click "Modifier" on the Histoire section
-        await compagniePage.clickEditSection('Histoire');
+        // 2. Click "Modifier" on the Historique section
+        await compagniePage.clickEditSection('Historique');
 
         // 3. Verify a form/dialog opens (expect title or content field)
         const formDialog = page.getByRole('dialog').or(
@@ -92,8 +93,8 @@ test.describe('Gestion de la Compagnie', () => {
         await compagniePage.expectLoaded();
 
         // 2. At least one section should have the "Actif" badge
-        // Check the Héro section which is typically active
-        await compagniePage.expectSectionActive('Héro');
+        // Check the Titre Page section which is typically active
+        await compagniePage.expectSectionActive('Titre Page');
     });
 
     // --- P2 ---

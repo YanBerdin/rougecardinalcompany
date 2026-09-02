@@ -11,7 +11,7 @@ export class ForgotPasswordPage {
         this.submitButton = page.getByRole('button', {
             name: /send reset email/i,
         });
-        this.successCard = page.getByText('Check Your Email');
+        this.successCard = page.getByText('Vérifiez votre email');
         this.errorMessage = page.locator('.text-red-500');
     }
 
