@@ -1,6 +1,6 @@
 # Progression du projet
 
-**Dernière mise à jour :** 2026-08-20
+**Dernière mise à jour :** 2026-09-09
 
 Ce fichier synthétise l’état des tâches récentes. Les comptes rendus détaillés conservés avant compaction sont disponibles dans [l’archive complète](archive/progress/2026-08-20-before-compaction.md).
 
@@ -22,6 +22,7 @@ Ce fichier synthétise l’état des tâches récentes. Les comptes rendus déta
 
 ## Planifiées
 
+- **TASK108 :** durcir les en-têtes HTTP, ajouter leur validation automatisée et supprimer obligatoirement `'unsafe-inline'` dans une phase CSP stricte différée.
 - **TASK105 :** créer le profil admin manquant en production.
 - **TASK103 :** retirer le grant `authenticated` résiduel de `cleanup_expired_audit_logs()`.
 - Les détails et critères sont centralisés dans [l’index des tâches](tasks/_index.md).

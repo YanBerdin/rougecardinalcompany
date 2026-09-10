@@ -1,6 +1,6 @@
 # Contexte actif
 
-**Dernière mise à jour :** 2026-08-20
+**Dernière mise à jour :** 2026-09-09
 
 Ce fichier est un tableau de bord opérationnel. L’historique détaillé est conservé dans [l’archive complète](archive/active-context/2026-08-20-before-compaction.md).
 
@@ -22,6 +22,7 @@ Ce fichier est un tableau de bord opérationnel. L’historique détaillé est c
 
 ## Actions planifiées
 
+- **TASK108 :** établir la baseline HTTP puis durcir la CSP statique ; la suppression de `'unsafe-inline'` par nonce ou alternative stricte reste une tâche obligatoire différée. Voir [TASK108](./tasks/TASK108-securityHeadersHardening.md).
 - **TASK105 :** reprendre selon les critères indiqués dans [l’index des tâches](tasks/_index.md).
 - **TASK103 :** reprendre selon les critères indiqués dans [l’index des tâches](tasks/_index.md).
 

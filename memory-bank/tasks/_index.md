@@ -25,6 +25,8 @@
 
 ## En Cours
 
+- `TASK108` Durcissement des en-têtes HTTP et migration CSP stricte — **PLANIFIÉE 📋 2026-09-09** — Durcissement immédiat compatible avec le rendu statique (`unsafe-eval` limité au développement, directives CSP défensives, allowlist images, `X-Powered-By`, `Permissions-Policy`, cache sensible et tests HTTP), puis suppression obligatoire différée de `'unsafe-inline'` par nonce ou alternative stricte validée. Voir `memory-bank/tasks/TASK108-securityHeadersHardening.md`
+
 - `TASK201` Stratégie de tests : audit, implémentation, validation — **EN COURS 🔄 2026-09-02** — Réorganisation `__tests__/` (unit/integration), 6 nouveaux tests unitaires, 9 tests audit/triggers, scripts npm harmonisés (`test:unit`, `test:integration`, `test:e2e`, `test:coverage`), CI `unit-tests.yml`+`e2e.yml` mise à jour, secret `e2e/.auth/editor.json` retiré du suivi Git et documentation `README.md`/`specs/` synchronisée. Vérifié en exécution réelle : `test:unit` 159/159, `test:integration` 81/81, E2E `public`/`auth`/`permissions` 100%. Reste : protection de branche `main` (GitHub, action manuelle), validation `admin`/`cross-*` (bloqués localement par OOM, à faire en CI), premier run réel sur GitHub Actions. Voir `memory-bank/tasks/TASK201-strategie-tests-audit-implementation.md`
 
 - `TASK107` Corriger la 404 de `/sitemap.xml` — **EN COURS 🔄 2026-08-06** — Metadata Route statique `app/sitemap.ts` créée avec 9 URLs publiques canoniques. Type-check, build et vérifications locale/production réussis (`200`, `application/xml`, XML valide, Googlebot accepté, 9 URLs cibles en `200`). Search Console doit encore rafraîchir son statut après nouvelle soumission. Voir `memory-bank/tasks/TASK107-sitemap-404.md`
