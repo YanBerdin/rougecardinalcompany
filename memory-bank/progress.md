@@ -1,6 +1,6 @@
 # Progression du projet
 
-**Dernière mise à jour :** 2026-09-09
+**Dernière mise à jour :** 2026-09-21
 
 Ce fichier synthétise l’état des tâches récentes. Les comptes rendus détaillés conservés avant compaction sont disponibles dans [l’archive complète](archive/progress/2026-08-20-before-compaction.md).
 
@@ -9,8 +9,8 @@ Ce fichier synthétise l’état des tâches récentes. Les comptes rendus déta
 ### TASK200 — Migration Sharp / nft
 
 - **Statut :** en cours.
-- **Déjà validé :** Next.js 16.3.0, installation verrouillée, type-check, tests image 11/11, build local, manifests `.nft.json` et preview Vercel.
-- **Reste à faire :** test runtime Sharp après cold start, tests upload/thumbnail/régénération, retrait isolé du workaround de tracing, puis deux déploiements consécutifs validés.
+- **Déjà validé :** Next.js et eslint-config-next 16.3.3, Sharp 0.35.4, baseline-browser-mapping 2.11.20, installation verrouillée, audit sans vulnérabilité connue, type-check, 159 tests unitaires et compilation Next.js. Les validations antérieures des manifests `.nft.json` et de la preview Vercel restent valides avec le workaround.
+- **Reste à faire :** diagnostiquer le blocage local du hook Sentry `runAfterProductionCompile`, exécuter les E2E avec Supabase local, tester Sharp après cold start, valider upload/thumbnail/régénération, puis retirer isolément le workaround de tracing.
 - **Détails :** [TASK200](tasks/TASK200-migration-correctif-upstream-sharp-nft.md)
 
 ### TASK107 — Sitemap production
@@ -29,6 +29,7 @@ Ce fichier synthétise l’état des tâches récentes. Les comptes rendus déta
 
 ## Réalisations récentes
 
+- **SEC-2026-09-21 / TASK200 :** quatre vulnérabilités corrigées, dont deux RCE critiques Next.js ; `pnpm audit` est propre après passage à Next.js 16.3.3 et Sharp 0.35.4.
 - **TASK106 :** correction locale CodeQL XSS sur l’acceptation d’invitation ; validation URL, type-check et tests du validateur réussis.
 - **TASK104 :** résolution du 500 Sharp/Vercel et correction des vulnérabilités Dependabot ; déploiement production validé.
 - **TASK101 :** réorganisation drag-and-drop des articles de presse, migrations et tests validés.
@@ -36,6 +37,8 @@ Ce fichier synthétise l’état des tâches récentes. Les comptes rendus déta
 
 ## Blocages et actions manuelles
 
+- Le hook Sentry `runAfterProductionCompile` est resté bloqué après une compilation Next.js réussie ; le build local a été interrompu avant sa terminaison complète.
+- Les E2E de la remédiation du 2026-09-21 nécessitent le démarrage de Supabase local.
 - Search Console doit rafraîchir son état après la nouvelle soumission du sitemap.
 - Le test de protection contre les mots de passe compromis reste dépendant de l’activation de l’option Supabase Pro.
 - Le secret CI `INVARIANT_DB_URL` doit être configuré pour le workflow de vérification des rôles.
