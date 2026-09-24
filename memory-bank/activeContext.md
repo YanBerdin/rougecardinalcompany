@@ -1,6 +1,6 @@
 # Contexte actif
 
-**Dernière mise à jour :** 2026-09-09
+**Dernière mise à jour :** 2026-09-21
 
 Ce fichier est un tableau de bord opérationnel. L’historique détaillé est conservé dans [l’archive complète](archive/active-context/2026-08-20-before-compaction.md).
 
@@ -9,8 +9,9 @@ Ce fichier est un tableau de bord opérationnel. L’historique détaillé est c
 ### TASK200 — Sharp / nft
 
 - **Statut :** en cours.
-- **Objectif :** finaliser le traitement des dépendances Sharp et nft dans le build et le déploiement Vercel.
-- **Prochaine action :** reprendre les vérifications documentées dans le fichier de tâche et valider le build concerné.
+- **Objectif :** valider en production Next.js 16.3.3 et Sharp 0.35.4 après la remédiation de quatre vulnérabilités de dépendances.
+- **Déjà validé :** audit sans vulnérabilité connue, type-check, 159 tests unitaires et compilation Next.js.
+- **Prochaine action :** diagnostiquer le hook Sentry post-compilation, puis tester Sharp après cold start Vercel et valider les parcours upload, thumbnail et régénération.
 - **Référence :** [TASK200](./tasks/TASK200-migration-correctif-upstream-sharp-nft.md)
 
 ### TASK107 — Sitemap

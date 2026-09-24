@@ -2,7 +2,7 @@
 
 **Statut:** En cours
 **Ajoutée:** 2026-08-02  
-**Mise à jour:** 2026-08-05
+**Mise à jour:** 2026-09-21
 **Priorité:** Moyenne  
 **Dépend de:** TASK104
 
@@ -175,10 +175,10 @@ En cas d'échec du build, du packaging ou du runtime :
 | ID | Description | Statut | Notes |
 | --- | --- | --- | --- |
 | 1.1 | Identifier une release stable contenant le correctif nft/Next.js | Complétée | Next.js 16.3.0 annonce #94845 et embarque @vercel/nft 1.10.2 |
-| 1.2 | Tester la mise à jour avec le workaround actuel | Complétée | Next.js 16.3.0 installé ; type-check, tests image 11/11, build, manifests NFT locaux et preview Vercel de production validés |
-| 1.3 | Retirer le tracing manuel par étapes | À faire | Un changement de configuration à la fois |
+| 1.2 | Tester la mise à jour avec le workaround actuel | Complétée | Next.js 16.3.3 et Sharp 0.35.4 installés ; audit, type-check et 159 tests unitaires validés ; compilation Next.js réussie |
+| 1.3 | Retirer le tracing manuel par étapes | À faire | Workaround conservé ; valider d'abord le runtime Vercel après cold start |
 | 1.4 | Valider Sharp après cold start en production | À faire | Vérifier Sentry et les logs Vercel |
-| 1.5 | Mettre à jour le Memory Bank et clôturer | À faire | Référencer la release upstream |
+| 1.5 | Mettre à jour le Memory Bank et clôturer | En cours | Documentation synchronisée le 2026-09-21 ; clôture après validation production |
 
 ## Journal de progression
 
@@ -197,3 +197,13 @@ En cas d'échec du build, du packaging ou du runtime :
 - `pnpm build` compilé avec Next.js 16.3.0 sans warning de parsing CSS après suppression de `@custom-variant` dans `app/globals.css`, incompatible avec Tailwind CSS 3.4/PostCSS v3. Les avertissements `baseline-browser-mapping` et Browserslist restent non bloquants.
 - Les manifests `.nft.json` de `/admin/media/library` et `/api/admin/media/thumbnail` contiennent `libvips-cpp.so.8.18.3`, `sharp-linux-x64-0.35.3.node` et `sharp/dist/index.cjs`.
 - Preview de production Vercel déployée avec succès avec le workaround Sharp conservé. Cette validation couvre le déploiement, mais pas encore le runtime Sharp après cold start ni les parcours upload/thumbnail/régénération.
+
+### 2026-09-21
+
+- `pnpm audit` signalait quatre vulnérabilités : deux critiques dans Next.js `<16.3.3`, une haute dans Sharp `<0.35.4` et une modérée dans `baseline-browser-mapping <2.11.0`.
+- `next` et `eslint-config-next` ont été mis à jour vers `16.3.3`, et Sharp vers `^0.35.4`.
+- Les overrides PNPM imposent désormais `sharp >=0.35.4` et `baseline-browser-mapping >=2.11.0` ; le lockfile résout respectivement `0.35.4` et `2.11.20`.
+- `pnpm install --frozen-lockfile`, `pnpm audit`, `pnpm type-check` et les 159 tests unitaires ont réussi.
+- La compilation Next.js 16.3.3 a réussi en 20,5 secondes. Le build complet n'a pas terminé localement, car le hook Sentry `runAfterProductionCompile` est resté bloqué et a été interrompu.
+- Le lancement E2E générique s'est arrêté au global setup parce que Supabase local n'était pas démarré ; aucun test E2E n'a donc été exécuté pour cette mise à jour.
+- Le workaround `serverExternalPackages` et `outputFileTracingIncludes` reste en place jusqu'à la validation du runtime Sharp après cold start sur Vercel.
