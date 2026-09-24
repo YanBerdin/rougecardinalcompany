@@ -276,7 +276,7 @@ pnpm dlx supabase functions deploy <function-name>
 | Tests unitaires Vitest | ✅ 159/159 validés localement |
 | Tests d'intégration RLS/audit | ✅ 81/81 validés localement |
 | Tests E2E Playwright | 🔄 Public, auth et permissions validés ; admin/cross à confirmer en CI |
-| Déploiement production | 🔄 En cours |
+| Déploiement production | ✅ Complet |
 
 **Phase actuelle :** infrastructure, site public et backoffice finalisés. La stratégie de tests est en cours de validation sur GitHub Actions ; la suite E2E complète dépasse la mémoire disponible sur la machine locale et doit être confirmée en CI.
 

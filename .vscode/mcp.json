@@ -78,6 +78,13 @@
       "headers": {
         "X-Goog-Api-Key": "${env:GOOGLE_API_KEY}"
       }
+    },
+    "firecrawl-mcp": {
+      "command": "npx",
+      "args": ["-y", "firecrawl-mcp"],
+      "env": {
+        "FIRECRAWL_API_KEY": "fc-YOUR_API_KEY"
+      }
     }
   }
 }
