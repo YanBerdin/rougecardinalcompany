@@ -36,8 +36,8 @@ import { InviteUserSchema, type InviteUserInput } from "@/lib/schemas/admin-user
 import { ROLE_LABELS } from "./types";
 
 const roleDescriptions = {
-  user: "Accès en lecture seule au contenu public",
-  editor: "Accès en lecture seule (permissions éditoriales à venir)",
+  user: "Aucun accès au backoffice (consultation du site public uniquement)",
+  editor: "Gestion du contenu éditorial (spectacles, agenda, presse, médias…)",
   admin: "Accès complet à l'administration",
 } as const;
 

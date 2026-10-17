@@ -287,7 +287,7 @@ Les schémas UI utilisent `z.number().int().positive()`. Les actions transporten
 
 Les clients `supabase/server.ts`, `supabase/client.ts`, `supabase/middleware.ts` et `supabase/admin.ts` couvrent respectivement serveur, navigateur, middleware et service-role. Les cookies SSR utilisent exclusivement `getAll()` et `setAll()`.
 
-`proxy.ts` délègue à `updateSession()`. Les contrôles rapides utilisent `getClaims()` ; `getUser()` est réservé aux attributs complets et au rafraîchissement d'un rôle absent d'un JWT déjà émis (fallback dans `getCurrentUserRole()`). Les guards de `lib/auth/roles.ts` complètent middleware et layouts : `requireMinRole()`, `requireBackofficeAccess()` et `requireAdminOnly()` lèvent une erreur (DAL, Server Actions), tandis que `requireBackofficePageAccess()` et `requireAdminPageAccess()` redirigent vers `/auth/login` (pages). Le modèle de rôle est `user < editor < admin`.
+`proxy.ts` délègue à `updateSession()`. Les contrôles rapides utilisent `getClaims()` ; `getUser()` est réservé aux attributs complets et au rafraîchissement du rôle quand le claim vaut `user` (fallback dans `getCurrentUserRole()` et le middleware ; une rétrogradation n'est vue qu'à l'expiration du JWT, cf. TASK109). Les guards de `lib/auth/roles.ts` complètent middleware et layouts : `requireMinRole()`, `requireBackofficeAccess()` et `requireAdminOnly()` lèvent une erreur (DAL, Server Actions), tandis que `requireBackofficePageAccess()` et `requireAdminPageAccess()` redirigent vers `/auth/login` (pages). Le modèle de rôle est `user < editor < admin` : le backoffice exige au minimum `editor`, et `user` n'y a aucun accès (pas de rôle « lecture seule du backoffice »).
 
 ### 7.2 Validation et sécurité
 

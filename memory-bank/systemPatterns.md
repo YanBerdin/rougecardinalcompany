@@ -2323,7 +2323,9 @@ export default function AdminLayout({ children }) {
 `getCurrentUserRole()` :
 
 1. `getClaims()` (~2-5ms) : rôle lu depuis `app_metadata` du JWT signé.
-2. **Fallback** `getUser()` : un rôle changé côté Auth peut manquer dans un JWT déjà émis → refresh depuis Auth (toujours `app_metadata`).
+2. **Fallback** `getUser()` : appelé **uniquement si le claim vaut `user`**, pour voir immédiatement une promotion depuis `user` (toujours `app_metadata`). Une rétrogradation ou une promotion `editor → admin` n'est prise en compte qu'à l'expiration du JWT (fenêtre acceptée, voir TASK109 et `acl-permissions-role.md`).
+
+**Rôles** : `user` n'a aucun accès au backoffice (middleware + `requireBackofficeAccess()` dans le layout admin exigent `editor`) ; il n'existe pas de rôle « lecture seule du backoffice ». `editor` gère le contenu éditorial, `admin` a l'accès complet.
 
 > [!CAUTION]
 > `user_metadata` est modifiable par l'utilisateur et ne doit JAMAIS servir à l'autorisation. Seul `app_metadata` (server-only, signé dans le JWT) est fiable.

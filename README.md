@@ -107,7 +107,7 @@ flowchart TB
   L1 --> L2 --> L3 --> L4 --> L5 --> L6 --> L7
 ```
 
-**Modèle d'autorisation hiérarchique :** `user (0) < editor (1) < admin (2)` — fonction SQL `has_min_role()` + guards TypeScript (`lib/auth/roles.ts`).
+**Modèle d'autorisation hiérarchique :** `user (0) < editor (1) < admin (2)` — fonction SQL `has_min_role()` + guards TypeScript (`lib/auth/roles.ts`). Le backoffice exige au minimum `editor` : un compte `user` n'y a aucun accès, même en lecture. Détail : `memory-bank/acl-permissions-role.md`.
 
 **Principes appliqués :** zero trust · least privilege · defense in depth · auditabilité · fail-secure
 

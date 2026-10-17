@@ -10,9 +10,39 @@
 
 | Rôle | Niveau | Accès backoffice | Description |
 | --- | --- | --- | --- |
-| `user` | 0 | Non | Compte public, accès site uniquement |
+| `user` | 0 | Non | Aucun accès au backoffice ; lit uniquement le contenu public, comme un visiteur anonyme |
 | `editor` | 1 | Oui (éditorial) | CRUD sur contenu éditorial, bloqué sur zones admin-only |
 | `admin` | 2 | Oui (complet) | Accès total, dont configuration et données sensibles |
+
+> **Précision (2026-10-18)** : il n'existe pas de rôle « lecture seule du backoffice ». Le rôle `user` est bloqué sur `/admin` et `/api/admin` par le middleware (`isRoleAtLeast(role, "editor")`, redirection `/auth/login` ou 403) et par `requireBackofficeAccess()` dans `app/(admin)/layout.tsx`. Côté RLS, il ne lit que ce qu'un visiteur anonyme lit déjà. Un accès backoffice en lecture seule a été écarté (option non retenue : nouveau niveau de rôle, UI sans écriture, ouverture des vues admin). Les libellés d'invitation (`InviteUserForm.tsx`) ont été alignés sur ce comportement.
+>
+> Le site est exploité par un admin unique (le propriétaire) ; les rôles `editor` et `user` restent fonctionnels mais n'ont pas d'usage prévu.
+
+## Changement de rôle et révocation (TASK109, 2026-10-16)
+
+### Décisions
+
+| ID | Décision | Statut |
+| --- | --- | --- |
+| D1 | Garde-fou DAL dans `updateUserRole()` / `deleteUser()` : refus de modifier son propre rôle, de supprimer son propre compte, et de rétrograder ou supprimer le dernier admin (codes `ERR_ROLE_SELF_CHANGE`, `ERR_ROLE_SELF_DELETE`, `ERR_ROLE_LAST_ADMIN`). Fail closed si le contexte est illisible (`ERR_ROLE_CONTEXT_UNAVAILABLE`). | Planifié |
+| D2 | Fenêtre résiduelle JWT acceptée : un rôle retiré reste effectif jusqu'à l'expiration du JWT. Pas de `getUser()` systématique, `is_admin()` / `has_min_role()` inchangées, `jwt_expiry` inchangé (3600 s par défaut). | Accepté |
+| D3 | Révocation des sessions (`revoke_user_sessions`, `SECURITY DEFINER`, `service_role` uniquement) différée tant qu'aucun éditeur ni second admin n'existe. | Différé |
+| D4 | En cas de verrouillage, restauration via `memory-bank/procedures/admin-user-registration.md` (`app_metadata.role` puis `profiles.role`). | Accepté |
+
+### Comportement actuel des changements de rôle
+
+| Changement | Prise en compte |
+| --- | --- |
+| `user → editor` / `user → admin` | Immédiate (`getUser()` appelé quand le claim vaut `user`) |
+| `editor → admin` | À l'expiration du JWT ou à la reconnexion |
+| Rétrogradation ou suppression | À l'expiration du JWT (middleware, pages, Server Actions et RLS lisent le claim) |
+
+### Risques résiduels acceptés
+
+- Un éditeur ou un admin rétrogradé ou supprimé conserve son accès, PostgREST direct compris, jusqu'à l'expiration du JWT.
+- Le contrôle du dernier admin n'est pas atomique : deux admins qui se rétrogradent simultanément pourraient passer le contrôle. Risque inexistant avec un admin unique.
+- Le garde-fou ne couvre pas les modifications faites hors application (dashboard Supabase, clé `service_role`, SQL).
+- Compte admin compromis : un changement de mot de passe ne révoque pas le JWT en cours. Réponse via le dashboard Supabase (déconnexion des sessions, rotation des clés).
 
 ## Matrice pages back-office
 
