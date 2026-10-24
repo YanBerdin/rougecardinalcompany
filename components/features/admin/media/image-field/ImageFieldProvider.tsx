@@ -61,7 +61,7 @@ export function ImageFieldProvider<TForm extends FieldValues>({
 
     const imageUrl = form.watch(imageUrlField) as string | undefined;
     const altText = altTextField ? (form.watch(altTextField) as string | undefined) : undefined;
-    const imageError = form.formState.errors[imageUrlField];
+    const imageError = form.getFieldState(imageUrlField, form.formState).error;
 
     // Keep refs in sync on every render
     imageUrlRef.current = imageUrl;
@@ -183,7 +183,7 @@ export function ImageFieldProvider<TForm extends FieldValues>({
             isUploadOpen,
             validationError,
             validationSuccess,
-            imageError: imageError as any,
+            imageError,
         },
         actions: {
             handleUrlChange,
@@ -194,7 +194,8 @@ export function ImageFieldProvider<TForm extends FieldValues>({
             setIsUploadOpen,
         },
         meta: {
-            form: form as any,
+            // Context erases the form generic; restored by useImageFieldContext<TForm>.
+            form: form as unknown as UseFormReturn<FieldValues>,
             imageUrlField: imageUrlField as string,
             altTextField: altTextField as string | undefined,
             altTextLabel,

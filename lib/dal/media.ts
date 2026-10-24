@@ -796,6 +796,7 @@ export async function listMediaItems(): Promise<DALResult<Array<{
     size_bytes: number;
     alt_text: string | null;
     folder_id: bigint | null;
+    thumbnail_path: string | null;
     created_at: string | Date;
     updated_at: string | Date;
     tags: Array<{
@@ -817,8 +818,8 @@ export async function listMediaItems(): Promise<DALResult<Array<{
         updated_at: string | Date;
     } | null;
     // Phase 4.3: Usage tracking
-    is_used_public?: boolean;
-    usage_locations?: string[];
+    is_used_public: boolean;
+    usage_locations: string[];
 }>>> {
     await requireMinRole("editor");
 

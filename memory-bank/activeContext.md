@@ -1,6 +1,6 @@
 # Contexte actif
 
-**Dernière mise à jour :** 2026-09-21
+**Dernière mise à jour :** 2026-10-24
 
 Ce fichier est un tableau de bord opérationnel. L’historique détaillé est conservé dans [l’archive complète](archive/active-context/2026-08-20-before-compaction.md).
 
@@ -35,6 +35,7 @@ Ce fichier est un tableau de bord opérationnel. L’historique détaillé est c
 - Le schéma déclaratif dans `supabase/schemas/` reste la source de vérité pour les changements de base de données.
 - Les archives de contexte sont conservées séparément afin de garder ce fichier court et utile au démarrage d’une session.
 - Un événement « à venir ou en cours » se filtre par `date_fin >= now` (ou `date_debut >= now` si `date_fin` est null), pas par `date_debut` seul ; helper `upcomingOrOngoingFilter()` dans `lib/dal/spectacles.ts`.
+- Aucun `as any` : corriger le type source (ex. type de retour du DAL aligné sur le schéma Zod) ; si un générique est effacé par un contexte React, utiliser `as unknown as X` avec un commentaire d'une ligne.
 
 ## Références rapides
 

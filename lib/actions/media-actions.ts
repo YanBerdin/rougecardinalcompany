@@ -312,7 +312,7 @@ export async function listMediaItemsAction(): Promise<MediaItemsListResult> {
     }));
 
     // Convert to DTOs (bigint -> number, Date -> string)
-    const dtos = normalizedData.map((item) => toMediaItemExtendedDTO(item as any)); // TS workaround for complex nested types
+    const dtos = normalizedData.map(toMediaItemExtendedDTO);
 
     return { success: true, data: dtos };
   } catch (error) {

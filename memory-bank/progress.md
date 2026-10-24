@@ -1,6 +1,6 @@
 # Progression du projet
 
-**Dernière mise à jour :** 2026-09-21
+**Dernière mise à jour :** 2026-10-24
 
 Ce fichier synthétise l’état des tâches récentes. Les comptes rendus détaillés conservés avant compaction sont disponibles dans [l’archive complète](archive/progress/2026-08-20-before-compaction.md).
 
@@ -29,6 +29,7 @@ Ce fichier synthétise l’état des tâches récentes. Les comptes rendus déta
 
 ## Réalisations récentes
 
+- **Fix typage `as any` (2026-10-24) :** suppression des 4 `as any` du champ image admin et de la médiathèque. `ImageFieldProvider` lit l'erreur via `form.getFieldState()` ; le générique du formulaire effacé par le contexte passe par `as unknown as` documenté (`ImageFieldProvider`, `useImageFieldContext`) ; `listMediaItems()` déclare `thumbnail_path` et rend `is_used_public` / `usage_locations` obligatoires, ce qui supprime le cast dans `listMediaItemsAction()`. Type-check, lint, création de membre avec téléversement et `/admin/media/library` validés.
 - **Fix page détail spectacle :** lieu, billetterie et tarifs absents pour un événement déjà commencé ; les requêtes de `lib/dal/spectacles.ts` utilisent désormais le critère de l'agenda (`date_fin >= now`, ou `date_debut >= now` si `date_fin` est null).
 - **SEC-2026-09-21 / TASK200 :** quatre vulnérabilités corrigées, dont deux RCE critiques Next.js ; `pnpm audit` est propre après passage à Next.js 16.3.3 et Sharp 0.35.4.
 - **TASK106 :** correction locale CodeQL XSS sur l’acceptation d’invitation ; validation URL, type-check et tests du validateur réussis.

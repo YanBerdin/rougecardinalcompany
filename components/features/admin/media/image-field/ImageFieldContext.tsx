@@ -4,7 +4,7 @@ import { createContext, use } from "react";
 import type { UseFormReturn, FieldValues, Path, FieldError } from "react-hook-form";
 import type { MediaSelectResult } from "../types";
 
-type AnyForm = UseFormReturn<any>;
+type ErasedForm = UseFormReturn<FieldValues>;
 
 export type ImageFieldState = {
     imageUrl: string | undefined;
@@ -27,7 +27,7 @@ export type ImageFieldActions = {
 };
 
 export type ImageFieldMeta = {
-    form: AnyForm;
+    form: ErasedForm;
     imageUrlField: string;
     altTextField: string | undefined;
     altTextLabel: string;
@@ -45,10 +45,13 @@ export type ImageFieldContextValue = {
 
 export const ImageFieldContext = createContext<ImageFieldContextValue | null>(null);
 
-export function useImageFieldContext<TForm extends FieldValues = FieldValues>(): ImageFieldContextValue & {
+type TypedImageFieldContextValue<TForm extends FieldValues> = ImageFieldContextValue & {
     meta: ImageFieldMeta & { form: UseFormReturn<TForm>; imageUrlField: Path<TForm>; altTextField: Path<TForm> | undefined };
-} {
+};
+
+export function useImageFieldContext<TForm extends FieldValues = FieldValues>(): TypedImageFieldContextValue<TForm> {
     const ctx = use(ImageFieldContext);
     if (!ctx) throw new Error("useImageFieldContext must be used within an ImageFieldProvider");
-    return ctx as any;
+    // Context erases the form generic; ImageFieldProvider guarantees field paths belong to TForm.
+    return ctx as unknown as TypedImageFieldContextValue<TForm>;
 }
