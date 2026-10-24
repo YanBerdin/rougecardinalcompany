@@ -29,6 +29,7 @@ Ce fichier synthétise l’état des tâches récentes. Les comptes rendus déta
 
 ## Réalisations récentes
 
+- **Fix page détail spectacle :** lieu, billetterie et tarifs absents pour un événement déjà commencé ; les requêtes de `lib/dal/spectacles.ts` utilisent désormais le critère de l'agenda (`date_fin >= now`, ou `date_debut >= now` si `date_fin` est null).
 - **SEC-2026-09-21 / TASK200 :** quatre vulnérabilités corrigées, dont deux RCE critiques Next.js ; `pnpm audit` est propre après passage à Next.js 16.3.3 et Sharp 0.35.4.
 - **TASK106 :** correction locale CodeQL XSS sur l’acceptation d’invitation ; validation URL, type-check et tests du validateur réussis.
 - **TASK104 :** résolution du 500 Sharp/Vercel et correction des vulnérabilités Dependabot ; déploiement production validé.

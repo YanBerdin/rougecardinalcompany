@@ -42,6 +42,12 @@ import {
  *   console.log(`Next show at: ${venue.nom}, ${venue.ville}`);
  * }
  */
+/** Même critère que l'agenda : événements à venir ou en cours (date_fin >= maintenant). */
+function upcomingOrOngoingFilter(): string {
+  const now = new Date().toISOString();
+  return `date_fin.gte.${now},and(date_fin.is.null,date_debut.gte.${now})`;
+}
+
 export type SpectacleNextVenue = {
   nom: string;
   ville: string | null;
@@ -66,7 +72,7 @@ export const fetchSpectacleNextVenue = cache(
         .select("lieux(nom, ville, adresse, code_postal, latitude, longitude)")
         .eq("spectacle_id", spectacleId)
         .not("lieux", "is", null)
-        .gte("date_debut", new Date().toISOString())
+        .or(upcomingOrOngoingFilter())
         .order("date_debut", { ascending: true })
         .limit(1)
         .single();
@@ -118,7 +124,7 @@ export const fetchSpectacleTicketUrl = cache(
         .select("ticket_url")
         .eq("spectacle_id", spectacleId)
         .not("ticket_url", "is", null)
-        .gte("date_debut", new Date().toISOString())
+        .or(upcomingOrOngoingFilter())
         .order("date_debut", { ascending: true })
         .limit(1)
         .single();
@@ -152,7 +158,7 @@ export const fetchSpectacleTicketInfo = cache(
         .from("evenements")
         .select("price_cents, price_reduced_cents, capacity")
         .eq("spectacle_id", spectacleId)
-        .gte("date_debut", new Date().toISOString())
+        .or(upcomingOrOngoingFilter())
         .order("date_debut", { ascending: true })
         .limit(1)
         .single();
