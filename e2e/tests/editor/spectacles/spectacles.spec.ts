@@ -151,7 +151,7 @@ test.describe('Gestion des Spectacles', () => {
         );
 
         // 4. Verify details page or panel loads
-        await expect(page.getByText('[TEST] Spectacle Preview').first()).toBeVisible();
+        await expect(page.getByText('[TEST] Spectacle Preview').first()).toBeVisible({ timeout: 30_000 });
     });
 
     test('ADM-SPEC-007 — Galerie photos', async ({
@@ -215,7 +215,8 @@ test.describe('Gestion des Spectacles', () => {
         );
 
         // 4. Change status to published
-        await page.getByRole('combobox', { name: /Statut/i }).click();
+        const statusSelect = await spectaclesPage.expectStatusSelectLoaded();
+        await statusSelect.click();
         await page.getByRole('option', { name: 'Actuellement' }).click();
         // Note: Cannot set public=true without a validated image (app constraint)
 

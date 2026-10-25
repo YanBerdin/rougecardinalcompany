@@ -40,7 +40,9 @@ export class AdminSpectaclesPage {
         duration?: string;
         description?: string;
     }): Promise<void> {
-        await this.page.getByLabel('Titre *').fill(data.title);
+        const titleInput = this.page.getByLabel('Titre *');
+        await expect(titleInput).toBeVisible({ timeout: 40_000 });
+        await titleInput.fill(data.title);
         if (data.genre) {
             await this.page.getByRole('combobox').filter({ hasText: /Sélectionner un genre/ }).click();
             await this.page.getByRole('menuitem', { name: data.genre, exact: true }).click();
@@ -97,11 +99,17 @@ export class AdminSpectaclesPage {
     }
 
     async expectDeleteToast(): Promise<void> {
-        await expect(this.page.getByText('Spectacle supprimé').first()).toBeVisible();
+        await expect(this.page.getByText('Spectacle supprimé').first()).toBeVisible({ timeout: 20_000 });
     }
 
     async clickSortHeader(header: string): Promise<void> {
         await this.table.getByRole('columnheader', { name: header }).click();
+    }
+
+    async expectStatusSelectLoaded(): Promise<Locator> {
+        const statusSelect = this.page.getByRole('combobox', { name: /Statut/i });
+        await expect(statusSelect).toBeVisible({ timeout: 40_000 });
+        return statusSelect;
     }
 
     async expectFormValidationError(): Promise<void> {

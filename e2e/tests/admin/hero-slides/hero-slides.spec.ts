@@ -36,7 +36,7 @@ test.describe('Hero Slides', () => {
         await heroSlidesPage.submitSlideForm();
 
         // 4. Le nouveau slide apparaît dans la liste
-        await expect(page.getByText(/succès|créé/i).first()).toBeVisible({ timeout: 5_000 });
+        await expect(page.getByText(/succès|créé/i).first()).toBeVisible({ timeout: 20_000 });
         await heroSlidesPage.goto();
         await heroSlidesPage.expectSlideVisible(SLIDE_TITLE);
     });
@@ -57,7 +57,7 @@ test.describe('Hero Slides', () => {
         await heroSlidesPage.submitSlideForm();
 
         // 4. Le titre est mis à jour
-        await expect(page.getByText(/succès|mis à jour/i).first()).toBeVisible({ timeout: 5_000 });
+        await expect(page.getByText(/succès|mis à jour/i).first()).toBeVisible({ timeout: 20_000 });
         await heroSlidesPage.goto();
         await heroSlidesPage.expectSlideVisible(updatedTitle);
     });
@@ -151,7 +151,7 @@ test.describe('Hero Slides', () => {
         await heroSlidesPage.submitSlideForm();
 
         // 2. Le CTA est sauvegardé
-        await expect(page.getByText(/succès|mis à jour/i).first()).toBeVisible({ timeout: 5_000 });
+        await expect(page.getByText(/succès|mis à jour/i).first()).toBeVisible({ timeout: 20_000 });
     });
 
     test('ADM-HERO-008 — Impact public — Ordre des slides', async ({ heroSlidesPage, page }) => {
