@@ -124,7 +124,7 @@ function MultiImageCarousel({
 }): React.ReactNode {
     const prefersReducedMotion = usePrefersReducedMotion();
 
-    const autoplayPlugin = useRef(
+    const [autoplayPlugin] = useState(() =>
         Autoplay({
             delay: autoplayDelay,
             stopOnInteraction: true,
@@ -134,7 +134,7 @@ function MultiImageCarousel({
 
     const [emblaRef, emblaApi] = useEmblaCarousel(
         { loop: true, align: "center", skipSnaps: false },
-        [autoplayPlugin.current],
+        [autoplayPlugin],
     );
 
     const [selectedIndex, setSelectedIndex] = useState(0);
@@ -240,12 +240,12 @@ function MultiImageCarousel({
 
     useEffect(() => {
         if (prefersReducedMotion) {
-            autoplayPlugin.current.stop();
+            autoplayPlugin.stop();
             tweenNodes.current.forEach((node) => {
                 if (node) node.style.transform = "";
             });
         }
-    }, [prefersReducedMotion]);
+    }, [prefersReducedMotion, autoplayPlugin]);
 
     // ---------- Scroll helpers ----------
 

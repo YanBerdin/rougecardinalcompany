@@ -17,6 +17,12 @@ const eslintConfig = [
   },
   ...nextConfig,
   {
+    rules: {
+      // eslint-plugin-react-hooks 7.1 made this an error; the CRUD pattern syncs props to state in effects by design.
+      "react-hooks/set-state-in-effect": "warn",
+    },
+  },
+  {
     files: ["**/*.md"],
     plugins: {
       markdown,
