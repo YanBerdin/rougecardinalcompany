@@ -216,3 +216,5 @@ En cas d'échec du build, du packaging ou du runtime :
 - `pnpm audit` propre, `pnpm type-check` réussi, 159 tests unitaires réussis. E2E non relancés.
 - `pnpm build` terminé avec Next.js 16.4.3 (BUILD_ID généré) ; les `.nft.json` des routes media (`/api/admin/media/thumbnail`, `/api/admin/media/search`, pages `/admin/media/*`) contiennent `libvips-cpp.so.8.18.7` et `sharp-linux-x64-0.35.5.node`.
 - Warning peer non bloquant : `@opentelemetry/api` 1.10.0 hors plage attendue par `@opentelemetry/core` et `sdk-trace-base`.
+- CI GitHub : le lint échouait (32 erreurs) car eslint-config-next 16.4.3 tire `eslint-plugin-react-hooks` 7.1.1. `react-hooks/set-state-in-effect` passé en `warn` dans `eslint.config.mjs` (pattern CRUD props → state assumé) ; `react-hooks/refs` corrigé dans `SpectacleCarousel` (plugin Autoplay créé via `useState` paresseux). Toutes les vérifications GitHub passent ; branche mergée sur `master`.
+- Après la mise à jour de Next.js, redémarrer le serveur ESLint de VS Code (sinon `ENOENT` sur l'ancien chemin `next@16.3.3/.../babel.js`).
