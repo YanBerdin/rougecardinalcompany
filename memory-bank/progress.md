@@ -29,6 +29,8 @@ Ce fichier synthétise l’état des tâches récentes. Les comptes rendus déta
 
 ## Réalisations récentes
 
+- **FIX-2026-10-25 / régression Zod 4.6 :** la montée Zod 4.1 → 4.6.7 de SEC-2026-10-25 cassait la production (pages détail spectacle « Evènement introuvable ») et 6 E2E (ADM-SPEC-004/005/006/009, ADM-HERO-003/007). Deux changements de comportement : une clé `z.unknown()` absente est désormais rejetée (`SpectacleDbSchema.search_vector`, non sélectionnée, faisait renvoyer `null` à `fetchSpectacleById` / `fetchSpectacleBySlug`) ; `.partial()` sur un schéma raffiné lève une exception (`HeroSlideInputSchema.partial()` bloquait toute mise à jour de slide). Correctifs : `search_vector` en `.optional()`, nouveau `HeroSlideUpdateSchema` (base sans refine + `.partial()` + refines réappliqués). Seul schéma raffiné utilisé avec `.partial()` (vérifié au runtime sur les 15 schémas concernés). Type-check et 36 tests de schémas réussis ; E2E non relancés localement (Docker absent). Les hausses de timeout E2E du commit `8f24806` ont été annulées : elles ne traitaient pas la cause.
+
 - **SEC-2026-10-25 / TASK200 :** 44 avis `pnpm audit` corrigés (4 critiques : 3 RCE Next.js, contournement du middleware via le tunnel Sentry). Next.js et eslint-config-next 16.4.3, `@sentry/nextjs` 10.76.2, Sharp 0.35.5, Zod 4.6.7, Vite 8.3.5, Vitest 4.1.12 ; overrides relevés pour brace-expansion, js-yaml, markdown-it, katex, source-map-js, postcss-selector-parser et fast-uri. Audit propre, type-check et 159 tests unitaires réussis. `eslint-plugin-react-hooks` 7.1.1 (tiré par eslint-config-next 16.4.3) bloquait la CI : `set-state-in-effect` passé en `warn` (pattern CRUD de synchronisation props → state), lecture de ref pendant le rendu corrigée dans `SpectacleCarousel`. CI GitHub verte, branche `fix/deps-security-2026-10-25` mergée sur `master`.
 
 - **Fix typage `as any` (2026-10-24) :** suppression des 4 `as any` du champ image admin et de la médiathèque. `ImageFieldProvider` lit l'erreur via `form.getFieldState()` ; le générique du formulaire effacé par le contexte passe par `as unknown as` documenté (`ImageFieldProvider`, `useImageFieldContext`) ; `listMediaItems()` déclare `thumbnail_path` et rend `is_used_public` / `usage_locations` obligatoires, ce qui supprime le cast dans `listMediaItemsAction()`. Type-check, lint, création de membre avec téléversement et `/admin/media/library` validés.
@@ -42,6 +44,7 @@ Ce fichier synthétise l’état des tâches récentes. Les comptes rendus déta
 ## Blocages et actions manuelles
 
 - Le hook Sentry `runAfterProductionCompile` est resté bloqué après une compilation Next.js réussie ; le build local a été interrompu avant sa terminaison complète.
+- Après déploiement du correctif Zod 4.6 : vérifier en production une page détail spectacle et la mise à jour d'un hero slide, puis confirmer la CI E2E verte.
 - Les E2E de la remédiation du 2026-09-21 nécessitent le démarrage de Supabase local.
 - Search Console doit rafraîchir son état après la nouvelle soumission du sitemap.
 - Le test de protection contre les mots de passe compromis reste dépendant de l’activation de l’option Supabase Pro.

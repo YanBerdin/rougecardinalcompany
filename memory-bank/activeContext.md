@@ -36,6 +36,7 @@ Ce fichier est un tableau de bord opérationnel. L’historique détaillé est c
 - Les archives de contexte sont conservées séparément afin de garder ce fichier court et utile au démarrage d’une session.
 - Un événement « à venir ou en cours » se filtre par `date_fin >= now` (ou `date_debut >= now` si `date_fin` est null), pas par `date_debut` seul ; helper `upcomingOrOngoingFilter()` dans `lib/dal/spectacles.ts`.
 - Aucun `as any` : corriger le type source (ex. type de retour du DAL aligné sur le schéma Zod) ; si un générique est effacé par un contexte React, utiliser `as unknown as X` avec un commentaire d'une ligne.
+- Zod ≥ 4.6 : ne jamais appeler `.partial()` / `.pick()` / `.omit()` sur un schéma contenant `.refine()` (exception runtime) ; garder un `z.object` de base et réappliquer les refines (modèle : `HeroSlideUpdateSchema`). Toute clé `z.unknown()` / `z.any()` pouvant manquer doit être `.optional()`. Après une montée de Zod, relancer les E2E admin de mise à jour avant de merger.
 
 ## Références rapides
 
