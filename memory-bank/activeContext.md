@@ -1,6 +1,6 @@
 # Contexte actif
 
-**Dernière mise à jour :** 2026-10-24
+**Dernière mise à jour :** 2026-10-25
 
 Ce fichier est un tableau de bord opérationnel. L’historique détaillé est conservé dans [l’archive complète](archive/active-context/2026-08-20-before-compaction.md).
 
@@ -9,8 +9,8 @@ Ce fichier est un tableau de bord opérationnel. L’historique détaillé est c
 ### TASK200 — Sharp / nft
 
 - **Statut :** en cours.
-- **Objectif :** valider en production Next.js 16.3.3 et Sharp 0.35.4 après la remédiation de quatre vulnérabilités de dépendances.
-- **Déjà validé :** audit sans vulnérabilité connue, type-check, 159 tests unitaires et compilation Next.js.
+- **Objectif :** valider en production Next.js 16.4.3, Sharp 0.35.5 et `@sentry/nextjs` 10.76.2 après la remédiation du 2026-10-25 (44 avis, dont 4 critiques).
+- **Déjà validé :** audit sans vulnérabilité connue, type-check et 159 tests unitaires. Build Next.js 16.4.3 non encore relancé.
 - **Prochaine action :** diagnostiquer le hook Sentry post-compilation, puis tester Sharp après cold start Vercel et valider les parcours upload, thumbnail et régénération.
 - **Référence :** [TASK200](./tasks/TASK200-migration-correctif-upstream-sharp-nft.md)
 

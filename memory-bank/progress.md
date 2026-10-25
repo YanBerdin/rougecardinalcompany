@@ -1,6 +1,6 @@
 # Progression du projet
 
-**Dernière mise à jour :** 2026-10-24
+**Dernière mise à jour :** 2026-10-25
 
 Ce fichier synthétise l’état des tâches récentes. Les comptes rendus détaillés conservés avant compaction sont disponibles dans [l’archive complète](archive/progress/2026-08-20-before-compaction.md).
 
@@ -9,7 +9,7 @@ Ce fichier synthétise l’état des tâches récentes. Les comptes rendus déta
 ### TASK200 — Migration Sharp / nft
 
 - **Statut :** en cours.
-- **Déjà validé :** Next.js et eslint-config-next 16.3.3, Sharp 0.35.4, baseline-browser-mapping 2.11.20, installation verrouillée, audit sans vulnérabilité connue, type-check, 159 tests unitaires et compilation Next.js. Les validations antérieures des manifests `.nft.json` et de la preview Vercel restent valides avec le workaround.
+- **Déjà validé :** Next.js et eslint-config-next 16.4.3, Sharp 0.35.5, `@sentry/nextjs` 10.76.2, audit sans vulnérabilité connue, type-check et 159 tests unitaires (2026-10-25). Compilation Next.js validée en 16.3.3, à relancer en 16.4.3. Les validations antérieures des manifests `.nft.json` et de la preview Vercel restent valides avec le workaround.
 - **Reste à faire :** diagnostiquer le blocage local du hook Sentry `runAfterProductionCompile`, exécuter les E2E avec Supabase local, tester Sharp après cold start, valider upload/thumbnail/régénération, puis retirer isolément le workaround de tracing.
 - **Détails :** [TASK200](tasks/TASK200-migration-correctif-upstream-sharp-nft.md)
 
@@ -28,6 +28,8 @@ Ce fichier synthétise l’état des tâches récentes. Les comptes rendus déta
 - Les détails et critères sont centralisés dans [l’index des tâches](tasks/_index.md).
 
 ## Réalisations récentes
+
+- **SEC-2026-10-25 / TASK200 :** 44 avis `pnpm audit` corrigés (4 critiques : 3 RCE Next.js, contournement du middleware via le tunnel Sentry). Next.js et eslint-config-next 16.4.3, `@sentry/nextjs` 10.76.2, Sharp 0.35.5, Zod 4.6.7, Vite 8.3.5, Vitest 4.1.12 ; overrides relevés pour brace-expansion, js-yaml, markdown-it, katex, source-map-js, postcss-selector-parser et fast-uri. Audit propre, type-check et 159 tests unitaires réussis.
 
 - **Fix typage `as any` (2026-10-24) :** suppression des 4 `as any` du champ image admin et de la médiathèque. `ImageFieldProvider` lit l'erreur via `form.getFieldState()` ; le générique du formulaire effacé par le contexte passe par `as unknown as` documenté (`ImageFieldProvider`, `useImageFieldContext`) ; `listMediaItems()` déclare `thumbnail_path` et rend `is_used_public` / `usage_locations` obligatoires, ce qui supprime le cast dans `listMediaItemsAction()`. Type-check, lint, création de membre avec téléversement et `/admin/media/library` validés.
 - **Fix page détail spectacle :** lieu, billetterie et tarifs absents pour un événement déjà commencé ; les requêtes de `lib/dal/spectacles.ts` utilisent désormais le critère de l'agenda (`date_fin >= now`, ou `date_debut >= now` si `date_fin` est null).

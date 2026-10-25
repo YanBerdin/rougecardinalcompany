@@ -2,7 +2,7 @@
 
 **Statut:** En cours
 **Ajoutée:** 2026-08-02  
-**Mise à jour:** 2026-09-21
+**Mise à jour:** 2026-10-25
 **Priorité:** Moyenne  
 **Dépend de:** TASK104
 
@@ -175,7 +175,7 @@ En cas d'échec du build, du packaging ou du runtime :
 | ID | Description | Statut | Notes |
 | --- | --- | --- | --- |
 | 1.1 | Identifier une release stable contenant le correctif nft/Next.js | Complétée | Next.js 16.3.0 annonce #94845 et embarque @vercel/nft 1.10.2 |
-| 1.2 | Tester la mise à jour avec le workaround actuel | Complétée | Next.js 16.3.3 et Sharp 0.35.4 installés ; audit, type-check et 159 tests unitaires validés ; compilation Next.js réussie |
+| 1.2 | Tester la mise à jour avec le workaround actuel | Complétée | Next.js 16.4.3 et Sharp 0.35.5 installés (2026-10-25) ; audit, type-check et 159 tests unitaires validés ; build à relancer |
 | 1.3 | Retirer le tracing manuel par étapes | À faire | Workaround conservé ; valider d'abord le runtime Vercel après cold start |
 | 1.4 | Valider Sharp après cold start en production | À faire | Vérifier Sentry et les logs Vercel |
 | 1.5 | Mettre à jour le Memory Bank et clôturer | En cours | Documentation synchronisée le 2026-09-21 ; clôture après validation production |
@@ -207,3 +207,11 @@ En cas d'échec du build, du packaging ou du runtime :
 - La compilation Next.js 16.3.3 a réussi en 20,5 secondes. Le build complet n'a pas terminé localement, car le hook Sentry `runAfterProductionCompile` est resté bloqué et a été interrompu.
 - Le lancement E2E générique s'est arrêté au global setup parce que Supabase local n'était pas démarré ; aucun test E2E n'a donc été exécuté pour cette mise à jour.
 - Le workaround `serverExternalPackages` et `outputFileTracingIncludes` reste en place jusqu'à la validation du runtime Sharp après cold start sur Vercel.
+
+### 2026-10-25
+
+- `pnpm audit` signalait 44 avis (4 critiques, 10 hauts) : RCE Next.js (`next/og`, optimisation d'images SVG, `use cache`), contournement du middleware via le tunnel `@sentry/nextjs`, Sharp `<0.35.5`, Zod `<4.6.6`, Vite `<8.1.6` et plusieurs transitives.
+- Mises à jour : `next` et `eslint-config-next` `16.4.3`, `@sentry/nextjs` `^10.75.2` (résolu en 10.76.2, v11 majeure écartée), `sharp` `^0.35.5`, `zod` `^4.6.6`, `vite` `^8.1.6`, `vitest` et `@vitest/coverage-v8` `^4.1.12`.
+- Overrides relevés : `sharp >=0.35.5`, `brace-expansion >=5.0.12`, `js-yaml >=5.4.1`, `markdown-it >=14.3.3`, `postcss-selector-parser >=7.1.6`, `fast-uri >=4.2.3` ; ajout de `katex >=0.18.2` et `source-map-js >=1.2.2`.
+- `pnpm audit` propre, `pnpm type-check` réussi, 159 tests unitaires réussis. E2E non relancés.
+- Warning peer non bloquant : `@opentelemetry/api` 1.10.0 hors plage attendue par `@opentelemetry/core` et `sdk-trace-base`.

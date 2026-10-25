@@ -1,19 +1,19 @@
 # Tech Context
 
-**Last Updated**: 2026-09-21
+**Last Updated**: 2026-10-25
 
 Versions et dépendances clés observées dans le dépôt:
 
 - Node.js: ^20 (devDeps)
-- Next.js: **16.3.3** (App Router, Turbopack default, correctifs de sécurité du 2026-09-21 et correctif upstream Sharp/nft #94845)
+- Next.js: **16.4.3** (App Router, Turbopack default, correctifs de sécurité du 2026-10-25 et correctif upstream Sharp/nft #94845)
 - TypeScript: ^5
 - Tailwind CSS: ^3.4.x
 - Supabase: client/server integration via `@supabase/ssr` and `@supabase/supabase-js` patterns
 - **@t3-oss/env-nextjs**: **0.13.10** (type-safe env validation, added 2025-12-20)
-- **@sentry/nextjs**: **8.47.0** (error monitoring & alerting, added 2026-01-13)
-- **Sharp**: **0.35.4** — traitement d'images pour thumbnails (JPEG 300x300)
-- **Sharp/Vercel** : Sharp `0.35.4` est actuellement externalisé via `serverExternalPackages` ; ses paquets natifs sont encore inclus explicitement par `outputFileTracingIncludes` depuis `node_modules/.pnpm/`, malgré le correctif upstream livré avec Next.js `16.3.x`. Ne pas hoister `@img/sharp-*` : Vercel rejette les packages serverless contenant les répertoires symlinkés pnpm. Le retrait du workaround est suivi séparément dans TASK200 et n'est pas validé par le seul build local.
-- **Zod**: **4.1.12** (runtime validation)
+- **@sentry/nextjs**: **10.76.2** (error monitoring & alerting, added 2026-01-13 ; ≥ 10.75.2 requis pour le correctif du tunnel)
+- **Sharp**: **0.35.5** — traitement d'images pour thumbnails (JPEG 300x300)
+- **Sharp/Vercel** : Sharp `0.35.5` est actuellement externalisé via `serverExternalPackages` ; ses paquets natifs sont encore inclus explicitement par `outputFileTracingIncludes` depuis `node_modules/.pnpm/`, malgré le correctif upstream livré avec Next.js `16.3.x`. Ne pas hoister `@img/sharp-*` : Vercel rejette les packages serverless contenant les répertoires symlinkés pnpm. Le retrait du workaround est suivi séparément dans TASK200 et n'est pas validé par le seul build local.
+- **Zod**: **4.6.7** (runtime validation)
 - **Deno**: Edge Functions runtime (first function: `scheduled-cleanup`, added 2026-01-18)
 - **Playwright**: **1.57.0** (E2E tests, ESM config, Chromium, 1 worker, added 2026-03-16)
 
@@ -28,6 +28,7 @@ Structure principale:
 
 | Date | Changement | Impact |
 | ------ | ------------ | -------- |
+| 2026-10-25 | Remédiation de 44 avis `pnpm audit` (4 critiques) | Next.js et eslint-config-next 16.4.3, `@sentry/nextjs` 10.76.2, Sharp 0.35.5, Zod 4.6.7, Vite 8.3.5, Vitest 4.1.12, overrides transitifs relevés ; audit propre, type-check et 159 tests unitaires réussis ; warning peer `@opentelemetry/api` 1.10.0 non bloquant |
 | 2026-09-21 | Remédiation Dependabot Next.js, Sharp et baseline-browser-mapping | Next.js et eslint-config-next 16.3.3, Sharp 0.35.4, baseline-browser-mapping 2.11.20 ; audit propre, type-check et 159 tests unitaires réussis ; compilation réussie mais hook Sentry post-compilation bloqué localement |
 | 2026-08-05 | Correction du parsing CSS Turbopack | Suppression de la directive Tailwind v4 `@custom-variant` incompatible avec Tailwind CSS 3.4/PostCSS v3 ; `darkMode: ["class"]` reste actif |
 | 2026-08-05 | Migration TASK200 vers le correctif upstream Sharp/nft | Next.js et eslint-config-next 16.3.0, Sharp 0.35.3, `@vercel/nft` embarqué 1.10.2 ; workaround conservé en attente de validation Vercel |
@@ -98,7 +99,7 @@ Outils et commandes utiles:
 
 ### Frontend
 
-- **Framework**: Next.js **16.3.3** (App Router, Turbopack default) — remédiation sécurité du 2026-09-21, migration upstream Sharp/nft toujours en validation
+- **Framework**: Next.js **16.4.3** (App Router, Turbopack default) — remédiation sécurité du 2026-10-25, migration upstream Sharp/nft toujours en validation
 - **Langage**: TypeScript
 - **UI Framework**:
   - Tailwind CSS pour le styling
