@@ -9,7 +9,7 @@ Ce fichier synthétise l’état des tâches récentes. Les comptes rendus déta
 ### TASK200 — Migration Sharp / nft
 
 - **Statut :** en cours.
-- **Déjà validé :** Next.js et eslint-config-next 16.4.3, Sharp 0.35.5, `@sentry/nextjs` 10.76.2, audit sans vulnérabilité connue, type-check et 159 tests unitaires (2026-10-25). Compilation Next.js validée en 16.3.3, à relancer en 16.4.3. Les validations antérieures des manifests `.nft.json` et de la preview Vercel restent valides avec le workaround.
+- **Déjà validé :** Next.js et eslint-config-next 16.4.3, Sharp 0.35.5, `@sentry/nextjs` 10.76.2, audit sans vulnérabilité connue, type-check, 159 tests unitaires et build Next.js 16.4.3 avec traces Sharp 0.35.5 / libvips 8.18.7 (2026-10-25). Les validations antérieures des manifests `.nft.json` et de la preview Vercel restent valides avec le workaround.
 - **Reste à faire :** diagnostiquer le blocage local du hook Sentry `runAfterProductionCompile`, exécuter les E2E avec Supabase local, tester Sharp après cold start, valider upload/thumbnail/régénération, puis retirer isolément le workaround de tracing.
 - **Détails :** [TASK200](tasks/TASK200-migration-correctif-upstream-sharp-nft.md)
 

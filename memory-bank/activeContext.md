@@ -10,7 +10,7 @@ Ce fichier est un tableau de bord opérationnel. L’historique détaillé est c
 
 - **Statut :** en cours.
 - **Objectif :** valider en production Next.js 16.4.3, Sharp 0.35.5 et `@sentry/nextjs` 10.76.2 après la remédiation du 2026-10-25 (44 avis, dont 4 critiques).
-- **Déjà validé :** audit sans vulnérabilité connue, type-check et 159 tests unitaires. Build Next.js 16.4.3 non encore relancé.
+- **Déjà validé :** audit sans vulnérabilité connue, type-check, 159 tests unitaires et build Next.js 16.4.3 (traces `.nft.json` avec `libvips-cpp.so.8.18.7` et `sharp-linux-x64-0.35.5.node`).
 - **Prochaine action :** diagnostiquer le hook Sentry post-compilation, puis tester Sharp après cold start Vercel et valider les parcours upload, thumbnail et régénération.
 - **Référence :** [TASK200](./tasks/TASK200-migration-correctif-upstream-sharp-nft.md)
 

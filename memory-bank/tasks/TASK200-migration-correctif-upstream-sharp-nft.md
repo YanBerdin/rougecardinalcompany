@@ -175,7 +175,7 @@ En cas d'échec du build, du packaging ou du runtime :
 | ID | Description | Statut | Notes |
 | --- | --- | --- | --- |
 | 1.1 | Identifier une release stable contenant le correctif nft/Next.js | Complétée | Next.js 16.3.0 annonce #94845 et embarque @vercel/nft 1.10.2 |
-| 1.2 | Tester la mise à jour avec le workaround actuel | Complétée | Next.js 16.4.3 et Sharp 0.35.5 installés (2026-10-25) ; audit, type-check et 159 tests unitaires validés ; build à relancer |
+| 1.2 | Tester la mise à jour avec le workaround actuel | Complétée | Next.js 16.4.3 et Sharp 0.35.5 installés (2026-10-25) ; audit, type-check, 159 tests unitaires et build validés |
 | 1.3 | Retirer le tracing manuel par étapes | À faire | Workaround conservé ; valider d'abord le runtime Vercel après cold start |
 | 1.4 | Valider Sharp après cold start en production | À faire | Vérifier Sentry et les logs Vercel |
 | 1.5 | Mettre à jour le Memory Bank et clôturer | En cours | Documentation synchronisée le 2026-09-21 ; clôture après validation production |
@@ -214,4 +214,5 @@ En cas d'échec du build, du packaging ou du runtime :
 - Mises à jour : `next` et `eslint-config-next` `16.4.3`, `@sentry/nextjs` `^10.75.2` (résolu en 10.76.2, v11 majeure écartée), `sharp` `^0.35.5`, `zod` `^4.6.6`, `vite` `^8.1.6`, `vitest` et `@vitest/coverage-v8` `^4.1.12`.
 - Overrides relevés : `sharp >=0.35.5`, `brace-expansion >=5.0.12`, `js-yaml >=5.4.1`, `markdown-it >=14.3.3`, `postcss-selector-parser >=7.1.6`, `fast-uri >=4.2.3` ; ajout de `katex >=0.18.2` et `source-map-js >=1.2.2`.
 - `pnpm audit` propre, `pnpm type-check` réussi, 159 tests unitaires réussis. E2E non relancés.
+- `pnpm build` terminé avec Next.js 16.4.3 (BUILD_ID généré) ; les `.nft.json` des routes media (`/api/admin/media/thumbnail`, `/api/admin/media/search`, pages `/admin/media/*`) contiennent `libvips-cpp.so.8.18.7` et `sharp-linux-x64-0.35.5.node`.
 - Warning peer non bloquant : `@opentelemetry/api` 1.10.0 hors plage attendue par `@opentelemetry/core` et `sdk-trace-base`.
