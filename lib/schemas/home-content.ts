@@ -45,7 +45,7 @@ const optionalString = (schema: z.ZodString) =>
 // Hero Slide Input Schema (Server - uses number for JSON serialization)
 // Note: Supabase returns bigint columns as number in JavaScript
 // =============================================================================
-export const HeroSlideInputSchema = z.object({
+const heroSlideBaseSchema = z.object({
     title: z.string().min(1, "Title required").max(80, "Title max 80 characters"),
     slug: z.string().max(100, "Slug max 100 characters").optional(),
     subtitle: z.string().max(150, "Subtitle max 150 characters").optional(),
@@ -86,32 +86,39 @@ export const HeroSlideInputSchema = z.object({
 
     active: z.boolean().optional(),
     position: z.number().int().min(0, "Position must be non-negative").optional(),
-}).refine(
-    (data) => {
-        const hasVideo = typeof data.video_url === 'string' && data.video_url.trim().length > 0;
-        const hasImage = data.image_media_id !== undefined || (typeof data.image_url === 'string' && data.image_url.trim().length > 0);
-        return hasVideo || hasImage;
-    },
-    { message: "An image is required (media ID or URL)", path: ["image_url"] }
-).refine(
-    // CTA Primaire: si activé, label ET url requis
-    (data) => {
-        if (data.cta_primary_enabled) {
-            return data.cta_primary_label && data.cta_primary_url;
-        }
-        return true;
-    },
-    { message: "CTA primary label and URL required when enabled", path: ["cta_primary_label"] }
-).refine(
-    // CTA Secondaire: si activé, label ET url requis
-    (data) => {
-        if (data.cta_secondary_enabled) {
-            return data.cta_secondary_label && data.cta_secondary_url;
-        }
-        return true;
-    },
-    { message: "CTA secondary label and URL required when enabled", path: ["cta_secondary_label"] }
-);
+});
+
+type HeroSlideRefinable = Partial<z.infer<typeof heroSlideBaseSchema>>;
+
+function hasHeroSlideMedia(data: HeroSlideRefinable): boolean {
+    const hasVideo = typeof data.video_url === 'string' && data.video_url.trim().length > 0;
+    const hasImage = data.image_media_id !== undefined || (typeof data.image_url === 'string' && data.image_url.trim().length > 0);
+    return hasVideo || hasImage;
+}
+
+function hasCompletePrimaryCta(data: HeroSlideRefinable): boolean {
+    return !data.cta_primary_enabled || Boolean(data.cta_primary_label && data.cta_primary_url);
+}
+
+function hasCompleteSecondaryCta(data: HeroSlideRefinable): boolean {
+    return !data.cta_secondary_enabled || Boolean(data.cta_secondary_label && data.cta_secondary_url);
+}
+
+const MEDIA_REQUIRED_ISSUE = { message: "An image is required (media ID or URL)", path: ["image_url"] };
+const PRIMARY_CTA_ISSUE = { message: "CTA primary label and URL required when enabled", path: ["cta_primary_label"] };
+const SECONDARY_CTA_ISSUE = { message: "CTA secondary label and URL required when enabled", path: ["cta_secondary_label"] };
+
+export const HeroSlideInputSchema = heroSlideBaseSchema
+    .refine(hasHeroSlideMedia, MEDIA_REQUIRED_ISSUE)
+    .refine(hasCompletePrimaryCta, PRIMARY_CTA_ISSUE)
+    .refine(hasCompleteSecondaryCta, SECONDARY_CTA_ISSUE);
+
+// Zod >= 4.6 forbids .partial() on refined schemas: refinements are re-applied explicitly.
+export const HeroSlideUpdateSchema = heroSlideBaseSchema
+    .partial()
+    .refine(hasHeroSlideMedia, MEDIA_REQUIRED_ISSUE)
+    .refine(hasCompletePrimaryCta, PRIMARY_CTA_ISSUE)
+    .refine(hasCompleteSecondaryCta, SECONDARY_CTA_ISSUE);
 
 export type HeroSlideInput = z.infer<typeof HeroSlideInputSchema>;
 

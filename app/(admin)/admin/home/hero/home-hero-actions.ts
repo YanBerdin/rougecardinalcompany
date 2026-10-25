@@ -3,7 +3,7 @@ import "server-only";
 
 import { revalidatePath } from "next/cache";
 import type { HeroSlideInput, ReorderInput } from "@/lib/schemas/home-content";
-import { HeroSlideInputSchema, ReorderInputSchema } from "@/lib/schemas/home-content";
+import { HeroSlideInputSchema, HeroSlideUpdateSchema, ReorderInputSchema } from "@/lib/schemas/home-content";
 import {
   createHeroSlide,
   updateHeroSlide,
@@ -35,7 +35,7 @@ export async function createHeroSlideAction(input: unknown): Promise<ActionResul
 export async function updateHeroSlideAction(id: string | number, input: unknown): Promise<ActionResult> {
   try {
     const slideId = typeof id === "string" ? Number(id) : Number(id);
-    const validated: Partial<HeroSlideInput> = await HeroSlideInputSchema.partial().parseAsync(input);
+    const validated: Partial<HeroSlideInput> = await HeroSlideUpdateSchema.parseAsync(input);
 
     const result = await updateHeroSlide(slideId, validated);
 

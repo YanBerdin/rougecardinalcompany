@@ -151,7 +151,7 @@ test.describe('Gestion des Spectacles', () => {
         );
 
         // 4. Verify details page or panel loads
-        await expect(page.getByText('[TEST] Spectacle Preview').first()).toBeVisible({ timeout: 30_000 });
+        await expect(page.getByText('[TEST] Spectacle Preview').first()).toBeVisible({ timeout: 10_000 });
     });
 
     test('ADM-SPEC-007 — Galerie photos', async ({

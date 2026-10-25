@@ -41,7 +41,7 @@ export class AdminSpectaclesPage {
         description?: string;
     }): Promise<void> {
         const titleInput = this.page.getByLabel('Titre *');
-        await expect(titleInput).toBeVisible({ timeout: 40_000 });
+        await expect(titleInput).toBeVisible({ timeout: 15_000 });
         await titleInput.fill(data.title);
         if (data.genre) {
             await this.page.getByRole('combobox').filter({ hasText: /Sélectionner un genre/ }).click();
@@ -99,7 +99,7 @@ export class AdminSpectaclesPage {
     }
 
     async expectDeleteToast(): Promise<void> {
-        await expect(this.page.getByText('Spectacle supprimé').first()).toBeVisible({ timeout: 20_000 });
+        await expect(this.page.getByText('Spectacle supprimé').first()).toBeVisible({ timeout: 10_000 });
     }
 
     async clickSortHeader(header: string): Promise<void> {
@@ -108,7 +108,7 @@ export class AdminSpectaclesPage {
 
     async expectStatusSelectLoaded(): Promise<Locator> {
         const statusSelect = this.page.getByRole('combobox', { name: /Statut/i });
-        await expect(statusSelect).toBeVisible({ timeout: 40_000 });
+        await expect(statusSelect).toBeVisible({ timeout: 15_000 });
         return statusSelect;
     }
 

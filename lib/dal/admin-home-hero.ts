@@ -3,7 +3,7 @@ import "server-only";
 import { createClient } from "@/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { HeroSlideInput, HeroSlideDTO, ReorderInput } from "@/lib/schemas/home-content";
-import { HeroSlideInputSchema, ReorderInputSchema } from "@/lib/schemas/home-content";
+import { HeroSlideInputSchema, HeroSlideUpdateSchema, ReorderInputSchema } from "@/lib/schemas/home-content";
 import { requireAdminOnly } from "@/lib/auth/roles";
 import { type DALResult, generateSlug } from "@/lib/dal/helpers";
 
@@ -212,7 +212,7 @@ export async function updateHeroSlide(
     try {
         await requireAdminOnly();
 
-        const validated = await HeroSlideInputSchema.partial().parseAsync(input);
+        const validated = await HeroSlideUpdateSchema.parseAsync(input);
 
         const supabase = await createClient();
 

@@ -11,9 +11,7 @@ const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000';
 export default defineConfig({
     testDir: './e2e/tests',
     globalSetup: './e2e/global-setup.ts',
-    // CI : le serveur `next dev` compile les routes et Server Actions à la première requête
-    timeout: process.env.CI ? 90_000 : 45_000,
-    expect: { timeout: process.env.CI ? 20_000 : 5_000 },
+    timeout: 45_000,
     fullyParallel: true,
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 2 : 0,

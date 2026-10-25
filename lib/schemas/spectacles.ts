@@ -24,7 +24,7 @@ export const SpectacleDbSchema = z.object({
   created_by: z.string().uuid().nullable(),
   created_at: z.string(), // timestamptz as string
   updated_at: z.string(), // timestamptz as string
-  search_vector: z.unknown().nullable(), // tsvector (not used in TypeScript)
+  search_vector: z.unknown().optional(), // tsvector, not selected by the DAL
 });
 
 /**
