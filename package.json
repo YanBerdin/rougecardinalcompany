@@ -160,7 +160,7 @@
     "@axe-core/playwright": "^4.11.1",
     "@eslint/markdown": "^7.4.0",
     "@playwright/test": "^1.57.0",
-    "@types/node": "^20",
+    "@types/node": "^24.19.2",
     "@types/pg": "^8.20.0",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
@@ -222,5 +222,8 @@
       "esbuild",
       "unrs-resolver"
     ]
+  },
+  "engines": {
+    "node": "24.x"
   }
 }

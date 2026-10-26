@@ -4,7 +4,7 @@
 
 Versions et dépendances clés observées dans le dépôt:
 
-- Node.js: ^20 (devDeps)
+- Node.js: 24.x LTS (`.nvmrc`, `engines.node`, CI GitHub Actions) — `@types/node` ^24
 - Next.js: **16.4.3** (App Router, Turbopack default, correctifs de sécurité du 2026-10-25 et correctif upstream Sharp/nft #94845)
 - TypeScript: ^5
 - Tailwind CSS: ^3.4.x
@@ -359,7 +359,7 @@ export const config = {
 - typescript: ^5
 - eslint: latest
 - prettier: latest
-- @types/node: latest
+- @types/node: ^24 (aligné sur Node 24 LTS)
 - tsx: ^4.19.2 (TypeScript execution for scripts)
 
 ## Standards de Développement
