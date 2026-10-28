@@ -5,6 +5,7 @@
 > La fonction SQL `has_min_role(required_role)` remplace `is_admin()` pour les tables éditoriales.
 > Les gardes TypeScript sont dans `lib/auth/roles.ts` (`requireMinRole`, `requireBackofficeAccess`, `requireAdminOnly`).
 > Source de vérité du rôle : `app_metadata` du JWT signé (jamais `user_metadata`).
+> Signature des JWT : clés asymétriques **ES256** (confirmé le 2026-10-28) — `getClaims()` vérifie localement via JWKS (mis en cache), sans appel au serveur Auth.
 
 ## Hiérarchie des rôles
 

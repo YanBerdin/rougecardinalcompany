@@ -6,7 +6,7 @@
 **Architecture :** Next.js server-first, feature-based, Clean Architecture légère et DAL SOLID
 
 > **Changelog v6.0 (2026-08-20)** : réécriture complète et compaction du document. Next.js 16.3.0, guards de rôle `user < editor < admin`, `is_admin()` / `has_min_role()` en `SECURITY INVOKER` sur `app_metadata`, suppression de `lib/auth/is-admin.ts`, ajout de `lib/api/` et `lib/env-validation.ts`, suite E2E Playwright `e2e/`, métriques recalculées. Historique complet en fin de document.
-
+>
 > Ce document décrit l'architecture effectivement implémentée. Les métriques sont un instantané du dépôt et doivent être recalculées après une évolution structurelle.
 
 ## Table des matières

@@ -308,6 +308,12 @@ réduction de `jwt_expiry`.
   « lecture seule, permissions à venir » datait d'avant TASK076).
 - Précision ajoutée dans `acl-permissions-role.md`, `systemPatterns.md`,
   `README.md` et `Project_Architecture_Blueprint.md`.
+
+### 2026-10-28
+
+- Type de clés confirmé : asymétriques **ES256**. `getClaims()` vérifie le
+  JWT localement (JWKS), sans appel réseau. `jwt_expiry` non surchargé dans
+  `supabase/config.toml` (valeur par défaut).
 - Correction du constat : la promotion `editor → admin` n'est pas immédiate,
   et le problème concerne aussi les éditeurs, pas seulement les admins.
 - Absence de garde-fou contre l'auto-rétrogradation ou la suppression du
