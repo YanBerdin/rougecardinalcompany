@@ -194,7 +194,7 @@ export async function uploadMediaImage(
         throw new Error(thumbResult.error);
       }
 
-      console.log("[uploadMediaImage] Thumbnail generated:", thumbResult.data.thumbPath);
+      //? console.log("[uploadMediaImage] Thumbnail generated:", thumbResult.data.thumbPath);
     } catch (thumbnailError) {
       console.warn(
         "[uploadMediaImage] Thumbnail generation failed (non-critical):",
@@ -498,10 +498,11 @@ export async function regenerateThumbnailAction(
       };
     }
 
-    console.log(
-      `[regenerateThumbnailAction] Thumbnail generated for media ${media.id}:`,
-      thumbResult.data.thumbPath
-    );
+    //TODO
+    // console.log(
+    //   `[regenerateThumbnailAction] Thumbnail generated for media ${media.id}:`,
+    //   thumbResult.data.thumbPath
+    // );
 
     // 6. Revalidate admin media pages
     revalidatePath("/admin/media");

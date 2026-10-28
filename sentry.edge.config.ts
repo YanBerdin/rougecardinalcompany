@@ -3,6 +3,10 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from "@sentry/nextjs";
+import {
+  dropSensitiveConsoleBreadcrumb,
+  scrubSensitiveHeaders,
+} from "./lib/sentry/scrub-sensitive";
 
 Sentry.init({
   dsn: "https://c15837983554fbbd57b4de964d3deb46@o4510703440822272.ingest.de.sentry.io/4510703730425936",
@@ -19,4 +23,7 @@ Sentry.init({
 
   // Environment tag
   environment: process.env.NODE_ENV,
+
+  beforeSend: scrubSensitiveHeaders,
+  beforeBreadcrumb: dropSensitiveConsoleBreadcrumb,
 });
