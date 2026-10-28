@@ -82,6 +82,8 @@ Your primary directive is to ensure all code you generate, review, or refactor i
 - [ ] Sensitive data encrypted at rest
 - [ ] Encrypted in transit (HTTPS)
 - [ ] No data logging of sensitive info
+- [ ] No session data in logs: never log the raw `cookie` / `authorization` headers, JWTs, refresh tokens or full claims (check `console.*` of every level, not only `console.log`)
+- [ ] Sentry `beforeSend` and `beforeBreadcrumb` scrub session data (`lib/sentry/scrub-sensitive.ts`)
 - [ ] Proper data retention policies
 
 ### Error Handling

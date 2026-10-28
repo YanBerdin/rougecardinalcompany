@@ -17,6 +17,8 @@ export async function updateSession(request: NextRequest) {
   // With Fluid compute, don't put this client in a global environment
   // variable. Always create a new one on each request.
   // Debug: inspect incoming cookies to help diagnose intermittent missing claims
+  //? SECURITY: disabled 2026-10-28 — the fallback logged the first 200 chars of the raw cookie header.
+  /*
   const incomingCookies = request.cookies.getAll();
   if (!incomingCookies || incomingCookies.length === 0) {
     // Fallback: try to parse the raw Cookie header for diagnostic purposes
@@ -31,6 +33,7 @@ export async function updateSession(request: NextRequest) {
       incomingCookies.map((c) => c.name)
     );
   }
+  */
 
   const supabase = createServerClient(
     env.NEXT_PUBLIC_SUPABASE_URL,
@@ -81,6 +84,8 @@ export async function updateSession(request: NextRequest) {
   // with the Supabase client, your users may be randomly logged out.
 
   // Strict diagnostic logging: capture cookies/headers/timestamp immediately before getClaims()
+  //? SECURITY: disabled 2026-10-28 — rawCookieHeader leaked the full session (access + refresh tokens) into logs.
+  /*
   try {
     const beforeTs = new Date().toISOString();
     const beforeCookies = request.cookies.getAll().map((c) => ({
@@ -97,11 +102,14 @@ export async function updateSession(request: NextRequest) {
   } catch (err) {
     console.warn("Middleware - before getClaims logging failed:", err);
   }
+  */
 
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
   // Strict diagnostic logging: capture cookies/headers/timestamp immediately after getClaims()
+  //? SECURITY: disabled 2026-10-28 — rawCookieHeaderAfter leaked the full session; claims exposed the user e-mail.
+  /*
   try {
     const afterTs = new Date().toISOString();
     const afterCookies = request.cookies.getAll().map((c) => ({
@@ -118,6 +126,7 @@ export async function updateSession(request: NextRequest) {
   } catch (err) {
     console.warn("Middleware - after getClaims logging failed:", err);
   }
+  */
 
   // keep backwards-compatible, user metadata quick log (debug only)
   //! console.debug("USER_metadata:", user?.user_metadata?.role);

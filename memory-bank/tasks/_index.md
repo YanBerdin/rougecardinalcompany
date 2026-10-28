@@ -25,6 +25,8 @@
 
 ## En Cours
 
+- `TASK110` Fuite des jetons de session dans les logs du middleware — **EN COURS 🔄 2026-10-28** — `supabase/middleware.ts` écrivait l'en-tête `cookie` complet (access + refresh tokens) dans les logs à chaque requête. Blocs de diagnostic commentés, nettoyage Sentry serveur + edge (`lib/sentry/scrub-sensitive.ts`), règle ESLint `no-console` (bloquante sur le code d'auth), checklist OWASP complétée. Reste : invalidation des sessions admin et vérifications dans les dashboards. Voir `memory-bank/tasks/TASK110-sessionTokensLeakInLogs.md`
+
 - `TASK109` Gestion des rôles : garde-fou du dernier admin et fenêtre de révocation JWT — **PLANIFIÉE 📋 2026-10-16** — Périmètre réduit (admin unique) : garde-fou DAL contre l'auto-rétrogradation, l'auto-suppression et le retrait du dernier admin, plus la documentation. Fenêtre résiduelle JWT acceptée ; révocation de sessions différée. Voir `memory-bank/tasks/TASK109-roleRevocationLatency.md`
 
 - `TASK108` Durcissement des en-têtes HTTP et migration CSP stricte — **PLANIFIÉE 📋 2026-09-09** — Durcissement immédiat compatible avec le rendu statique (`unsafe-eval` limité au développement, directives CSP défensives, allowlist images, `X-Powered-By`, `Permissions-Policy`, cache sensible et tests HTTP), puis suppression obligatoire différée de `'unsafe-inline'` par nonce ou alternative stricte validée. Voir `memory-bank/tasks/TASK108-securityHeadersHardening.md`
