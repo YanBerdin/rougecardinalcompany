@@ -1,10 +1,17 @@
 # Progression du projet
 
-**Dernière mise à jour :** 2026-10-25
+**Dernière mise à jour :** 2026-10-28
 
 Ce fichier synthétise l’état des tâches récentes. Les comptes rendus détaillés conservés avant compaction sont disponibles dans [l’archive complète](archive/progress/2026-08-20-before-compaction.md).
 
 ## En cours
+
+### TASK110 — Jetons de session dans les logs
+
+- **Statut :** en cours.
+- **Déjà fait :** trois blocs de diagnostic du middleware commentés ; `beforeSend` + `beforeBreadcrumb` Sentry serveur et edge ; règle ESLint `no-console` ; checklist OWASP. Type-check, tests Sentry 5/5 et lint (0 erreur) réussis.
+- **Reste à faire :** invalider les sessions admin, vérifier les accès aux logs (Vercel, Sentry), supprimer définitivement les blocs commentés.
+- **Détails :** [TASK110](tasks/TASK110-sessionTokensLeakInLogs.md)
 
 ### TASK200 — Migration Sharp / nft
 
@@ -22,6 +29,7 @@ Ce fichier synthétise l’état des tâches récentes. Les comptes rendus déta
 
 ## Planifiées
 
+- **TASK109 :** garde-fou du dernier admin planifié ; libellés de rôles du formulaire d'invitation corrigés.
 - **TASK108 :** durcir les en-têtes HTTP, ajouter leur validation automatisée et supprimer obligatoirement `'unsafe-inline'` dans une phase CSP stricte différée.
 - **TASK105 :** créer le profil admin manquant en production.
 - **TASK103 :** retirer le grant `authenticated` résiduel de `cleanup_expired_audit_logs()`.
@@ -43,6 +51,7 @@ Ce fichier synthétise l’état des tâches récentes. Les comptes rendus déta
 
 ## Blocages et actions manuelles
 
+- TASK110 : changer le mot de passe admin, supprimer ses sessions Supabase, vérifier « Secure password change », les log drains et membres Vercel, la 2FA Vercel/GitHub et les breadcrumbs Sentry.
 - Le hook Sentry `runAfterProductionCompile` est resté bloqué après une compilation Next.js réussie ; le build local a été interrompu avant sa terminaison complète.
 - Après déploiement du correctif Zod 4.6 : vérifier en production une page détail spectacle et la mise à jour d'un hero slide, puis confirmer la CI E2E verte.
 - Les E2E de la remédiation du 2026-09-21 nécessitent le démarrage de Supabase local.
