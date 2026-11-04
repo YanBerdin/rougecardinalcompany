@@ -1,8 +1,16 @@
 # Progression du projet
 
-**Dernière mise à jour :** 2026-10-28
+**Dernière mise à jour :** 2026-11-04
 
 Ce fichier synthétise l’état des tâches récentes. Les comptes rendus détaillés conservés avant compaction sont disponibles dans [l’archive complète](archive/progress/2026-08-20-before-compaction.md).
+
+## Terminées récemment
+
+### TASK111 — Incident 504 production
+
+- **Statut :** terminé (2026-11-04).
+- **Fait :** diagnostic (logs Vercel, PostgREST, Postgres), `Restart project` Supabase, timeout 5 s sur `/rest/v1/` dans `supabase/server.ts`.
+- **Détails :** [TASK111](tasks/TASK111-incident-504-postgrest-pool.md)
 
 ## En cours
 

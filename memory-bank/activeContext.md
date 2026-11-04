@@ -1,8 +1,17 @@
 # Contexte actif
 
-**Dernière mise à jour :** 2026-10-28
+**Dernière mise à jour :** 2026-11-04
 
 Ce fichier est un tableau de bord opérationnel. L’historique détaillé est conservé dans [l’archive complète](archive/active-context/2026-08-20-before-compaction.md).
+
+## Incident récent
+
+### TASK111 — 504 production (pool PostgREST bloqué)
+
+- **Statut :** résolu le 2026-11-04.
+- **Cause :** PostgREST du projet prod bloqué (`PGRST003`, puis `PGRST002`), Postgres sain. Résolu par `Restart project` (dashboard Supabase).
+- **Garde-fou :** timeout 5 s sur les requêtes `/rest/v1/` dans `supabase/server.ts`.
+- **Référence :** [TASK111](./tasks/TASK111-incident-504-postgrest-pool.md)
 
 ## Priorités actuelles
 
