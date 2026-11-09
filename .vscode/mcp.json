@@ -64,7 +64,7 @@
         "API_KEY": "${env:GEMINI_DESIGN_KEY}"
       }
     },
-    "Sentry": {
+   /* "Sentry": {
       "command": "npx",
       "args": [
         "-y",
@@ -72,6 +72,7 @@
         "https://mcp.sentry.dev/mcp"
       ]
     },
+    */
     "stitch": {
       "type": "http",
       "url": "https://stitch.googleapis.com/mcp",

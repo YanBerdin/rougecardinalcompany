@@ -1,8 +1,24 @@
 # Contexte actif
 
-**Dernière mise à jour :** 2026-10-28
+**Dernière mise à jour :** 2026-11-09
 
 Ce fichier est un tableau de bord opérationnel. L’historique détaillé est conservé dans [l’archive complète](archive/active-context/2026-08-20-before-compaction.md).
+
+## Incident récent
+
+### TASK111 — 504 production (pool PostgREST bloqué)
+
+- **Statut :** résolu le 2026-11-04.
+- **Cause :** PostgREST du projet prod bloqué (`PGRST003`, puis `PGRST002`), Postgres sain. Résolu par `Restart project` (dashboard Supabase).
+- **Garde-fou :** timeout 5 s sur les requêtes `/rest/v1/` dans `supabase/server.ts`.
+- **Référence :** [TASK111](./tasks/TASK111-incident-504-postgrest-pool.md)
+
+### CI — Weekly Database Backup en échec (2026-11-09)
+
+- **Statut :** corrigé dans `.github/workflows/backup-database.yml`, à valider par un `workflow_dispatch`.
+- **Cause :** `ubuntu-latest` pointe vers Ubuntu 26.04, qui n'a pas `postgresql-client-16` (`E: Unable to locate package`).
+- **Correctif :** runner épinglé sur `ubuntu-24.04` ; actions passées en `checkout@v7`, `setup-node@v7`, `pnpm/action-setup@v6` (avertissement Node 20 déprécié).
+- **Reste à faire :** les autres workflows utilisent encore des actions `@v4` (e2e, copilot-setup-steps, invitation-email-test, detect-revoke-warn, monitor-detect-revoke, reorder-sql-tests).
 
 ## Priorités actuelles
 

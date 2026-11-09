@@ -2,6 +2,8 @@
 
 ## Completed
 
+- `TASK111` Incident 504 production (pool PostgREST bloqué) — **COMPLÈTE ✅ 2026-11-04** — `PGRST003` puis `PGRST002` côté Supabase, Postgres sain ; résolu par `Restart project`. Ajout d'un timeout 5 s sur les requêtes `/rest/v1/` dans `supabase/server.ts` pour rendre les fallbacks au lieu d'un 504. Voir `memory-bank/tasks/TASK111-incident-504-postgrest-pool.md`
+
 - `TASK106` Remédiation CodeQL #28 XSS client-side invitation — **CORRECTIF LOCAL COMPLET ✅ 2026-08-03** — suppression de `window.location.href` alimenté par query string ; formulaire POST vers une Server Action qui revalide l'URL Supabase et `redirect_to` avant `redirect()`. Tests URL 5/5, type-check, diagnostics et diff check verts. Réanalyse CodeQL attendue après push sur `master`. Voir `memory-bank/tasks/tasks-completed/TASK106-codeql-client-side-xss-invitation.md`
 
 - `TASK104` Remédiation Dependabot + incident runtime Sharp/Vercel — **COMPLÈTE ✅ 2026-08-01** — 14 vulnérabilités corrigées, puis résolution du 500 `/admin/media/library` après Sharp `0.35.3` : externalisation, tracing physique `libvips-cpp.so`, suppression du hoisting pnpm refusé par Vercel. Déploiement Vercel et accès production validés. Voir `memory-bank/tasks/tasks-completed/TASK104-dependabot-dependency-remediation.md`
